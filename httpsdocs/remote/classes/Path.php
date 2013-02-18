@@ -82,8 +82,6 @@ class Path{
 		);
 		if( (sizeof($path) <= 1) || (Path::getNodeSubtype($path[1]) != 4) || (sizeof($path) > 5))
 			$rez = $props[$path[sizeof($path)-1]];
-		//var_dump($props);
-		//var_dump($path);
 		if($props[$path[0]]['subtype'] == 2) $rez['inFavorites'] = true;
 		if($props[$path[0]]['type'] == 3){
 			$sql = 'select f_get_case_type_id($1)';

@@ -216,7 +216,6 @@ class Log{
 			if(empty($p['remind_users'])) unset($p['remind_users']); 
 			else $p['remind_users'] = implode(',', $p['remind_users']);
 		}/**/
-		//if(is_debug_host()) var_dump($p['remind_users']);
 		$i = 1;
 		$fn = array();
 		$fv = Array();
@@ -233,7 +232,6 @@ class Log{
 	
 		$sql = 'INSERT INTO actions_log ('.implode(',', $fn).') VALUES ('.implode(',', $fv).') on duplicate key UPDATE '.implode(',', $ufv);
 		mysqli_query_params($sql, $values) or die(mysqli_query_error());
-		//die($p['remind_users']);
 		if(!empty($p['remind_users'])) Log::addNotifications($p);
 
 		return last_insert_id();
@@ -247,7 +245,7 @@ class Log{
 	}
 	
 	private static function addNotifications(&$p){
-		/*var_dump($p);
+		/*$p:;
 		array(12) {
 		["action_type"]=> 21
 		["case_id"]=>2
@@ -263,20 +261,17 @@ class Log{
 		["l3"]=>'<i class=\"icon-user-m\">Виталий Цуркану</i> добавил задание \"<i class=\"task\">test3</i>\"  к делу <i class=\"case\" id=\"2\">A test case</i> для пользователей <i class=\"icon-user-m\">Виталий Цуркану</i>, <i class=\"icon-user-m\">Дмитрий Казаков</i>'
 		}
 	/**/	
-		//if(is_debug_host()) var_dump($p['remind_users']);
 		$to_user_ids = array();
 		if(!empty($p['remind_users'])){
 			if(!is_array($p['remind_users'])) $to_user_ids = explode(',', $p['remind_users']);
 			$to_user_ids = array_filter($to_user_ids, 'is_numeric');
 		}
-		//if(is_debug_host()) die(var_dump($to_user_ids));
 		if(empty($to_user_ids)) return ;
 		
 		$users_data = array();
 		$res = mysqli_query_params('select id, language_id from users where id in ('.implode(',',$to_user_ids).')') or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()) $users_data[] = $r;
 		$res->close();
-		//if(is_debug_host()) die(var_dump($users_data));
 		foreach($users_data as $u){
 			$l = 'l'.$u['language_id'];//$_SESSION['languages']['per_id'][$u['language_id']]['abreviation'];
 			if(!$l) $l = $GLOBALS['CB_LANGUAGE'];
@@ -336,7 +331,6 @@ class Log{
 			$p['task_id'] = is_numeric($p['task_id']) ? $p['task_id'] : null;
 			mysqli_query_params('INSERT INTO notifications (action_type, case_id, object_id, task_id, subtype, subject, message, time, user_id) VALUES ($1, $2, $3, $4, 0, $5, $6, CURRENT_TIMESTAMP, $7)', 
 							array($p['action_type'], $p['case_id'], $p['object_id'], $p['task_id'], $subject, $message, $u['id'])) or die(mysqli_query_error());
-			//if(is_debug_host()) die('~!!'.var_dump($message, 1));
 		}
 	}
 }

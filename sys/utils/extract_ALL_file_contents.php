@@ -1,8 +1,7 @@
 #!/usr/bin/php
 <?php
-include 'crons_init.php';
+include '../crons/crons_init.php';
 foreach($CB_cores as $core){
-	//if($core['db_name'] !='casebox_stratelit') continue;
 	mysqli_query_params('use `'.$core['db_name'].'`') or die(mysqli_query_error());
 	echo "\n\r Processing core \"".$core['db_name']."\"\n\r";
 

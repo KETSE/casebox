@@ -58,7 +58,7 @@
 						echo file_get_contents($fn);
 						$res = mysqli_query_params('update file_previews set ladate = CURRENT_TIMESTAMP where id = $1', $id) or die(mysqli_query_error());
 					}
-				}elseif(!empty($preview['html'])) echo $preview['html'];//echo '<div style="padding: 10px">'.$preview['html'].'</div>';
+				}elseif(!empty($preview['html'])) echo $preview['html'];
 			}
 			break;
 		case 6:

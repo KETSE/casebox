@@ -11,10 +11,7 @@ class System {
 		$res = mysqli_query_params('select id, '.$_SESSION['languages']['string'].', `type`, `order`, `hidden`, (select count(*) from tags where pid = t.id) `hasChildren`, iconCls from tags t where pid'.( ($nodeId > 0) ? '=$1' : ' is NULL' ).' and user_id is null  and group_id is null order by `type`, `order`, l'.UL_ID() , $nodeId) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			if($r['type'] == 1){
-				//$r['leaf'] = true;
-				//if(empty($r['iconCls'])) $r['iconCls'] = 'icon-tag-small';
 			}else{
-				//$r['leaf'] = false;
 				unset($r['iconCls']);
 				if(empty($nodeId)) $r['expanded'] = true;
 			}
@@ -181,7 +178,6 @@ class System {
 					}
 					$res2->close();
 				}else{
-					//echo '!'.$tag.'-'.$group_id.'-'.$id;
 					$sql = 'SELECT t.id `nid`, t.l'.UL_ID().', t.`type`, t.iconCls, g.recursive FROM tag_groups__tags g join tags t on g.tag_id = t.id where g.tags_group_id = 7 and template_id = $1 order by t.type, 2';
 					$res3 = mysqli_query_params($sql , $id) or die(mysqli_query_error());
 					while($r3 = $res3->fetch_assoc()){
@@ -428,11 +424,9 @@ class System {
 	
 	private function getTagTemplates($case_type_id, $tag_id){
 		$rez = array();
-		//die($case_type_id.', '.$tag_id);
 		$res = mysqli_query_params('SELECT t.id, t.l'.UL_ID().' `text`, t.type, t.iconCls, tt.order FROM templates_per_tags tt JOIN templates t ON tt.template_id = t.id WHERE case_type_id = $1 and tt.tag_id = $2', array($case_type_id, $tag_id) ) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$r['leaf'] = true;
-			//$r['iconCls'] = empty($r['iconCls']) ? 'icon-document-medium' : $r['iconCls'];
 			$rez[] = $r;
 		}
 		$res->close();

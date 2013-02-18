@@ -276,10 +276,8 @@ class UsersGroups{
 		return Array('success' => true);
 	}
 	public function changePassword($p){ //CHECKED
-		//var_dump($p);
 		/* passord could be changed by: admin, user owner, user himself */
 		if(empty($p['password']) || ($p['password'] != $p['confirmpassword'])) throw new exception(L\Wrong_input_data);
-		//echo $p['password'].$p['confirmpassword'];
 		$user_id = $this->extractId($p['id']);
 
 		/* check for old password if users changes password for himself */

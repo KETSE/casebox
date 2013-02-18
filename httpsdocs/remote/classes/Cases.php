@@ -6,7 +6,6 @@ class Cases{
 	public function getList($in){
 		/* SECURITY: get visible offices */
 		$visible_offices = Security::getVisibleOffices();
-		//var_dump($visible_offices);
 		/* end of SECURITY: get visible offices */
 		$data = Array();
 		$sql = 'SELECT c.id, c.nr, c.name title FROM cases c';

@@ -391,32 +391,6 @@ class Objects{
 		/**/
 		return Array('success' => true, 'data' => $p->ids);
 	}
-	// function getFiles($p){
-	// 	return Array('success' => true, 'data' => array());
-	// 	$object_id = (empty($p->object_id) || !is_numeric($p->object_id)) ? false : $p->object_id;
-	// 	if(($object_id == false) && !is_numeric($p->case_id)) return Array('success' => false, 'msg' => L\Wrong_id);
-	// 	if(empty($p->case_id) || !is_numeric($p->case_id)) $p->case_id = Cases::getId($object_id);
-	// 	// SECURITY: check if this objects case is opened by current user 
-	// 	if(!Security::checkIfCaseOpened($p->case_id)) throw new Exception(L\case_not_oppened);
-	// 	// end of SECURITY: check if this objects case is opened by current user 
-	// 	// SECURITY: check if current user has at least read access to this case
-	// 	if(!Security::canReadCase($p->case_id)) throw new Exception(L\Access_denied);
-	// 	// end of SECURITY: check if current user has at least read access to this case
-	// 	$sql = ($object_id !== false) ? 'select cf.id, cf.name, cf.title, cf.size, cf.pages, cf.date, cf.idate, cf.udate, cfo.is_default, (select count(*) from cases_files_objects where file_id = cfo.file_id) associates_count from cases_files cf join cases_files_objects cfo on cfo.file_id = cf.id and cfo.object_id = $1' :
-	// 		'select cf.id, cf.name, title, cf.size, cf.pages, cf.date, cf.idate, cf.udate, cfo.is_default, 1 associates_count 
-	// 		from cases_files cf join cases_files_objects_autoassoc cfo on cfo.file_id = cf.id and cfo.object_id = $1 and cfo.case_id = $2 and cfo.user_id = $3';
-	// 	$res = mysqli_query_params($sql, array($object_id, $p->case_id, $_SESSION['user']['id'])) or die(mysqli_query_error());
-	// 	$d = Array();
-	// 	while($r = $res->fetch_assoc()){
-	// 		$a = explode('.', $r['name']);
-	// 		$ext = array_pop($a);
-	// 		$r['iconCls'] = 'file-unknown file-'.$ext;
-	// 		$r['iconCls32'] = 'file-unknown32 file-'.$ext.'32';
-	// 		$d[] = $r;
-	// 	}
-	// 	$res->close();
-	// 	return Array('success' => true, 'data' => $d);
-	// }
 
 	function getViolations($object_id){
 		if(!is_numeric($object_id)) return Array('success' => false, 'msg' => L\Wrong_id);
@@ -479,7 +453,6 @@ class Objects{
 		}
 		$res->close();
 		$ids = array_keys($ids);
-		//var_dump($ids);
 		if(empty($ids)) return array('success' => true, 'data' => array());
 		/* end of select distinct case ids from the case */
 		$sql = 'SELECT DISTINCT t.id, t.`name`, t.date, t.`type`, t.subtype, o.template_id, t2.status FROM tree t '.

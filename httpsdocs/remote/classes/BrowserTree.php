@@ -5,7 +5,6 @@ class BrowserTree extends Browser{
 	public function getChildren($p){
 		$path = empty($p->path) ? '/' : $p->path;
 		$rez = array();
-		//echo $p->showFoldersContent.'!';
 		$this->showFoldersContent = isset($p->showFoldersContent) ? $p->showFoldersContent : false;
 		if($path == '/'){
 			$rez = $this->getRootChildren();
@@ -23,7 +22,7 @@ class BrowserTree extends Browser{
 				default: $rez = $this->getCasesChildren($path); break;
 			}
 		}
-		return $this->updateLabelsAndIcons($rez);
+		return $this->updateLabels($rez);
 	}
 
 	private function getRootChildren(){
@@ -99,30 +98,6 @@ class BrowserTree extends Browser{
 		return $data;
 	}
 
-	// private function getCasesOffices($access){
-	// 	$data = array();
-	// 	if( ($access == 'read') && (Security::isAdmin()) ) $sql = 'SELECT DISTINCT coa.tag_id, (SELECT l'.UL_ID().' FROM tags t WHERE t.id = coa.tag_id) '.
-	// 		'FROM cases c LEFT JOIN cases_offices_access coa ON c.id = coa.case_id ORDER BY 2 DESC';
-	// 		elseif($access == 'read')
-	// 			$sql = 'SELECT DISTINCT coa.tag_id, (SELECT l'.UL_ID().' FROM tags t WHERE t.id = coa.tag_id) FROM  '.
-	// 			'cases_rights_effective cre '.
-	// 			'JOIN cases c ON cre.case_id = c.id '.
-	// 			'LEFT JOIN cases_offices_access coa ON c.id = coa.case_id '.
-	// 			'WHERE cre.user_id = $1 AND cre.access <5 '.
-	// 			'ORDER BY 2 DESC';
-	// 		else $sql = 'SELECT DISTINCT coa.tag_id, (SELECT l'.UL_ID().' FROM tags t WHERE t.id = coa.tag_id) FROM  '.
-	// 			'cases_rights cre '.
-	// 			'JOIN cases c ON cre.case_id = c.id '.
-	// 			'LEFT JOIN cases_offices_access coa ON c.id = coa.case_id '.
-	// 			'WHERE cre.tag_id = $2 AND cre.access ='.intval($access).' '.
-	// 			'ORDER BY 2 DESC';
-	// 	$res = mysqli_query_params($sql, array($_SESSION['user']['id'], $_SESSION['user']['tag_id'])) or die(mysqli_query_error());
-	// 	while($r = $res->fetch_row()){
-	// 		$data[] = array('nid' => $r[0], 'system' => 1, 'type' => 0, 'subtype' => 1, 'name' => coalesce($r[1], L\OutOfOffice), 'iconCls' => empty($r[1]) ? 'icon-no-office' : 'icon-office');
-	// 	}
-	// 	$res->close();
-	// 	return $data;
-	// }
 	private function getCasesYears($access, $office){
 		$data = array();
 		if( ($access == 'read') && (Security::isAdmin()) ){
@@ -142,9 +117,10 @@ class BrowserTree extends Browser{
 		$res->close();
 		return $data;
 	}
+
 	private function getCasesMonths($access, $office, $year){
 		$data = array();
-		$year_param = '=$2';//empty($year) ? 'is null' : '= $2';
+		$year_param = '= $2';
 		if(Security::isAdmin() ){
 			if(!empty($office)) $sql = 'SELECT DISTINCT `month` FROM cases c WHERE c.year = $2 ORDER BY 1';
 			else $sql = 'SELECT DISTINCT c.month FROM cases c '.
@@ -186,7 +162,6 @@ class BrowserTree extends Browser{
 			$r['system'] = 0;
 			$r['type'] = 3;
 			$r['tags'] = $this->getObjectTags($r['nid'], 3);
-			//array('nid' => $r[0], 'system' => 0, 'type' => 3, 'name' =>  coalesce($r[1], L\noData), 'date' => $r[2], 'cid' => $r[3], 'tags' => $);
 			$data[] = $r; 
 		}
 		$res->close();
@@ -195,13 +170,6 @@ class BrowserTree extends Browser{
 	private function getCasesChildren($path){
 		$a = array_filter($path, 'is_numeric');
 		if(empty($a)) return array();
-		/*$case_id = null;
-		$sql = 'select id from tree where type = 3 and id in ('.implode(',', $a).')';
-		$res = mysqli_query_params($sql, array()) or die(mysqli_query_error());
-		if($r = $res->fetch_row()) $case_id = $r[0];
-		$res->close();
-		
-		if( !Security::canReadCase($case_id) ) throw new Exception(L\No_access_for_this_action);/**/
 		$id = array_pop($path);
 		$rez = array();
 
@@ -221,16 +189,13 @@ class BrowserTree extends Browser{
 	private function getObjectTags($id, $type){
 		$tags = null;
 		switch($type){
-			case 3: 
-				require_once('Cases.php');
+			case 3: require_once('Cases.php');
 				$tags = Cases::getCaseTagIds($id);
 				break;
-			case 4:
-				require_once('Objects.php');
+			case 4: require_once('Objects.php');
 				$tags = Objects::getObjectTagIds($id);
 				break;
-			case 5:
-				require_once('Cases.php');
+			case 5: require_once('Cases.php');
 				$tags = Cases::getFileTagIds($id);
 				break;
 		}
@@ -238,7 +203,7 @@ class BrowserTree extends Browser{
 		return implode(',',$tags[3]);
 	}
 
-	public function updateLabelsAndIcons(&$data){
+	public function updateLabels(&$data){
 		for ($i=0; $i < sizeof($data); $i++) {
 			$d = &$data[$i];
 			unset($d['iconCls']);
@@ -247,62 +212,29 @@ class BrowserTree extends Browser{
 			@$d['type'] = intval($d['type']);
 			@$d['subtype'] = intval($d['subtype']);
 			switch($d['type']){
-				case 0: //if(empty($d['iconCls'])) $d['iconCls'] = 'icon-folder'; //offices, year, month folders
-					break; 
-				case 1: 
-					switch ($d['subtype']) {
+				case 0: break; 
+				case 1: switch ($d['subtype']) {
 						case 1:	if( (substr($d['name'], 0, 1) == '[') && (substr($d['name'], -1, 1) == ']') )
 								$d['name'] = L(substr($d['name'], 1, strlen($d['name']) -2));
 							break;
-						case 2:	//$d['iconCls'] = 'icon-star';
-							$d['name'] = L\Favorites;
-							break;
-						case 3:	//$d['iconCls'] = 'icon-blue-folder';//My casebox
-							$d['name'] = L\MyCaseBox;
-							break;
-						case 4:	//$d['iconCls'] = 'icon-briefcase';
-							$d['name'] = L\Cases;
-							break;
-						case 5:	//$d['iconCls'] = 'icon-calendar-small';
-							$d['name'] = L\Tasks;
-							break;
-						case 6:	//$d['iconCls'] = 'icon-mail-medium';
-							$d['name'] = L\Messages;
-							break;
-						case 7:	//$d['iconCls'] = 'icon-blue-folder-stamp';
-							$d['name'] = L\PrivateArea;
-							break;
-						case 8:	//$d['iconCls'] = 'icon-folder';
-							break;
-						case 9: //$d['iconCls'] = 'icon-blue-folder';
-							break;
-						case 10: //$d['iconCls'] = 'icon-blue-folder-share';
-							$d['name'] = L\PublicFolder;
-							break;
-						default:
-							if(empty($d['iconCls'])) $d['iconCls'] = 'icon-folder'; //unset($d['iconCls']);
-							break;
+						case 2:	$d['name'] = L\Favorites; break;
+						case 3:	$d['name'] = L\MyCaseBox; break;
+						case 4:	$d['name'] = L\Cases; break;
+						case 5:	$d['name'] = L\Tasks; break;
+						case 6:	$d['name'] = L\Messages; break;
+						case 7:	$d['name'] = L\PrivateArea; break;
+						case 8:	break;
+						case 9: break;
+						case 10: $d['name'] = L\PublicFolder; break;
+						default: break;
 					}
 					break;
-				case 2: //$d['iconCls'] = 'icon-shortcut';//case
-					break;
-				case 3: //$d['iconCls'] = 'icon-briefcase';//case
-					break;
-				case 4: //case object
-					//if(empty($d['iconCls'])) $d['iconCls']= 'icon-none';
-					break;
-				case 5: //file
-					// $ext = explode('.',strip_tags($d['name']));
-					// $ext = strtolower(array_pop($ext));
-					// if(in_array($ext, array('pdf','doc', 'docx', 'rtf','ppt','txt','xls','htm', 'html','mp3', 'rm','avi','gif', 'jpg', 'png','flv'))) 
-					// 	$d['iconCls'] = 'file-'.$ext;
-					// 	else $d['iconCls'] = 'file-unknown';
-					break;
-				case 6: //$d['iconCls'] = 'icon-calendar-small';//task
-					break;
-				case 7: //$d['iconCls'] = 'icon-mail';//Message (email)
-					break;
-
+				case 2: break;
+				case 3: break;
+				case 4: break;
+				case 5: break;
+				case 6: break;
+				case 7: break;
 			}
 		}
 		return $data;

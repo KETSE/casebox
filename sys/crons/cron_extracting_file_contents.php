@@ -40,7 +40,6 @@ foreach($CB_cores as $core){
 					echo "\nExtracting meta ... \n";
 					$sr = shell_exec('java -Dfile.encoding=UTF8 -jar '.TIKA_APP.' -m "'.$filename.'"');
 					$sr = mb_convert_encoding($sr, mb_detect_encoding($sr), 'UTF-8');
-					echo "\nresult:  \n".var_dump($sr, 1);
 					preg_match('/Pages:\s+([0-9]+)/i', $sr, $matches);
 					$pages = empty($matches[1]) ? null : $matches[1];
 					echo "\npages: $pages\n";

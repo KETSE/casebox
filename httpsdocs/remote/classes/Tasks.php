@@ -74,7 +74,6 @@ class Tasks{
 		
 		$log_action_type = 25; //suppose that only notifications are changed
 		if(!isset($p['id'])) $p['id'] = null;
-		//die('!'.Security::canManageTask($p['id']).'!');
 		if( !validId($p['id']) || Security::canManageTask($p['id']) ){
 			/* update the task details only if is admin or owner of the task /**/
 
@@ -97,8 +96,6 @@ class Tasks{
 				$p['date_end'] = empty($p['date_end']) ? null : date_iso_to_mysql($p['date_end']); 
 			}else $p['date_end'] = null;
 
-			//die($p['date_start'].' - '.$p['date_end']);
-			//$p['date'] = implode('-', array_reverse(explode('.', $p['date'])));
 			if(empty($p['time'])) $p['time'] = null;//'00:00';
 			
 			/* estimating deadline status in dependance with parent tasks statuses */
@@ -606,10 +603,6 @@ class Tasks{
 			$user = UsersGroups::getUserPreferences($user_id);
 			if(empty($user['language_id'])) $user['language_id'] = 1;
 		}
-		// die('!'.L('Importance',  $user['language_id']) );
-		//var_dump($GLOBALS['TRANSLATIONS']);
-		// var_dump($user);
-		// die();
 		$sql = 'select `title`, date_start, date_end, description, status, category_id, importance, type, allday, has_deadline, cid'.
 			',f_get_tree_path(id) `path_text` '.
 			',(select l'.$user['language_id'].' from users where id = t.cid) owner_text'.
@@ -821,11 +814,8 @@ class Tasks{
 			
 			if(!empty($d['files'])){
 				$rez .= '<tr><td class="k">'.L\Files.':</td><td><ul class="task_files">';
-				foreach($d['files'] as $f){
-					$ext = explode('.', $f['name']);
-					$ext = array_pop($ext);
-					$rez .= '<li><a href="#" name="file" fid="'.$f['id'].'" onclick="App.mainViewPort.fireEvent(\'fileopen\', {id:'.$f['id'].'})" class="dib lh16 icon-padding file-unknown file-'.$ext.'">'.$f['name'].'</a></li>';
-				}
+				foreach($d['files'] as $f)
+					$rez .= '<li><a href="#" name="file" fid="'.$f['id'].'" onclick="App.mainViewPort.fireEvent(\'fileopen\', {id:'.$f['id'].'})" class="dib lh16 icon-padding file-unknown file-'.getFileExtension($f['name']).'">'.$f['name'].'</a></li>';
 				$rez .= '</ul></td></tr>';
 			}
 
@@ -892,7 +882,6 @@ class Tasks{
 			$rez['content'] = $r['description'];
 		}
 		$res->close();/**/
-		//var_dump($rez);
 		return $rez;
 	}
 }

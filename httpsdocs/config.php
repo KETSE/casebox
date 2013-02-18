@@ -67,15 +67,15 @@
 		$CB_settings = array_merge( $CB_settings, parse_ini_file(CB_CONFIG_PATH.'config.ini') );
 	}/* end of reading core settings */
 
-	//define('CB_JOD_PATH', CB_SITE_PATH.'lib/jod/lib/jodconverter-core-3.0-beta-4.jar');
+	// custom Error log per Core, use it for debug/reporting purposes
+	define('CB_ERRORLOG', $parent_dir.'logs'.DIRECTORY_SEPARATOR.'cb_'.CB_PROJ.'_log');
+
+	// UNIX: '/usr/local/sbin/unoconv'
+	define('CB_UNOCONV', '"c:\\Program Files (x86)\\LibreOffice 4.0\\program\\python.exe" c:\\opt\\unoconv\\unoconv'); 
+
 	define('CB_HTML_PURIFIER', CB_LIBX_DIR.'htmlpurifier'.DIRECTORY_SEPARATOR.'library'.DIRECTORY_SEPARATOR.'HTMLPurifier.auto.php');
-	// define('CB_PDF2SWF_PATH', file_exists('d:\\soft\\SWFTools\\') ? 'd:\\soft\\SWFTools\\' : '/usr/local/bin/');
-	define('CB_PDF2SWF_PATH', file_exists('c:\\opt\\SWFTools\\') ? 'c:\\opt\\SWFTools\\' : '/usr/local/bin/');
+	define('CB_PDF2SWF_PATH', file_exists('d:\\soft\\SWFTools\\') ? 'd:\\soft\\SWFTools\\' : '/usr/local/bin/');
 
-
-	//define('CB_FLEXPAPER_PHP_PATH', 'D:\\devel\\www\\lib\\FlexPaper\\php\\');
-
-	//define('CB_SOLR_CLIENT', file_exists('/var/lib/Apache/Solr/Service.php') ? '/var/lib/Apache/Solr/Service.php' : 'd:\devel\www\lib\SolrPhpClient\Apache\Solr\Service.php');
 	define('CB_SOLR_CLIENT', CB_LIBX_DIR.'Solr/Service.php');
 	define('CB_SOLR_HOST', coalesce(CB_get_param('solr_host'), '127.0.0.1' ) );
 	define('CB_SOLR_PORT', coalesce(CB_get_param('solr_port'), 8983 ) );
@@ -130,7 +130,6 @@
 		return $GLOBALS['USER_LANGUAGE'];
 	}
 	function UL_ID($language_abrev = false){
-		//if(is_debug_host()) var_dump($GLOBALS);
 		if(empty($language_abrev)) $language_abrev = UL();
 		if(!isset($_SESSION['languages']['per_abrev'][$language_abrev]['id'])){
 			$lang_id = null;
@@ -140,23 +139,12 @@
 			$res->close();
 			return $lang_id;
 		}
-		//if($language_abrev == false) return $_SESSION['languages']['per_abrev'][UL()]['id'];
 		return $_SESSION['languages']['per_abrev'][$language_abrev]['id'];
 	}
 	function is_debug_host(){
 		return (empty($_SERVER['SERVER_NAME']) || ($_SERVER['SERVER_NAME'] == 'casebox.vvv.md') || in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1','46.55.49.126', '93.116.243.178', '195.22.253.6', '193.226.64.181', '188.240.73.107', '109.185.172.018')));
 	}
 	function is_loged(){
-		/*if( !empty($_COOKIE['key']) && !empty($_SESSION['key']) && !empty($_SESSION['ips']) && !empty($_SESSION['user']) &&  ($_COOKIE['key'] == $_SESSION['key']) && ('|'.getIPs().'|' == $_SESSION['ips']) ){
-		
-		}elseif(is_debug_host()){
-			echo $_COOKIE['key']."\n"; //y
-			echo $_SESSION['key']."\n";
-			echo $_SESSION['user']."\n";
-			echo $_SESSION['ips']."\n";
-			echo getIPs()."\n";//y
-			var_dump($_SESSION);
-		}/**/
 		return ( !empty($_COOKIE['key']) && !empty($_SESSION['key']) && !empty($_SESSION['ips']) && !empty($_SESSION['user']) &&  ($_COOKIE['key'] == $_SESSION['key']) && ('|'.getIPs().'|' == $_SESSION['ips']) );
 	}
 	function is_windows(){

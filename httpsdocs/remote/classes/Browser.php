@@ -94,7 +94,6 @@ class Browser{
 		// check if not pasting object to itself
 		for ($i=0; $i < sizeof($p->data); $i++) {
 			if($p->pid == $p->data[$i]->id) return array('success' => false, 'msg' => L\CannotCopyObjectToItself);
-			//die( $p->data[$i]->id.'->'.$p->pid. $this->isChildOf($p->pid, $p->data[$i]->id).'!');
 			if( $this->isChildOf($p->pid, $p->data[$i]->id) ) return array('success' => false, 'msg' => L\CannotCopyObjectInsideItself);
 
 			$sql = 'select id, pid, name, `system`, `type`, subtype from tree where id = $1';
@@ -129,7 +128,6 @@ class Browser{
 					$sql = 'select t1.name, t2.name from tree t1 left join tree t2 on t2.pid = $2 and t2.name = t1.name where t1.id = $1';
 					$res = mysqli_query_params($sql, array($id, $p->pid)) or die(mysqli_query_error());
 					if($r = $res->fetch_row()) $newName = empty($r[1]) ? $r[0] : $this->getNewCopyName($p->pid, $r[0]);
-					//echo $id.','.$p->pid.'.'.$newName;
 					$res->close();
 
 					mysqli_query_params('insert into tree(pid, user_id, `system`, `type`, subtype, tag_id, name, `date`, size, is_main, cfg, cid, cdate, uid, udate)

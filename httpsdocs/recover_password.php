@@ -5,10 +5,6 @@
 		case 'forgot-password':
 			break;
 		case 'reset-password':
-			// if(is_debug_host()) {
-			// 	var_dump($_GET);
-			// 	die();
-			// }
 			$hash = '';
 			if(!empty($_GET['h'])) $hash = $_GET['h'];
 			if(!empty($_POST['h'])) $hash = $_POST['h'];

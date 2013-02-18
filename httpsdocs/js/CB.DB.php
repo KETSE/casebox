@@ -135,11 +135,7 @@ Ext.namespace('CB.DB');
 	$res->close();
 	foreach($templates as $t => $f){
 		$sf = array();
-		//echo "\nF\n";
-		//var_dump($f);
 		sort_template_rows($f, null, $sf);
-		//echo "\nSF\n";
-		//var_dump($sf);
 		echo 'CB.DB.template'.$t.' = new Ext.data.JsonStore({'.
 		'autoLoad: true'.
 		',baseParams: {template_id: '.$t.'}'.
@@ -149,7 +145,6 @@ Ext.namespace('CB.DB');
 		'});';
 	}
 	/* templates per tags */
-	//$res = mysqli_query_params('SELECT tpt.template_id, tpt.case_type_id, tpt.tag_id from templates_per_tags tpt join templates t on tpt.template_id = t.id and t.visible = 1 ORDER BY case_type_id, t.type, t.`order`') or die(mysqli_query_error());
 	$res = mysqli_query_params('SELECT id from templates where `type` in (1, 2, 3, 4, 5, 7) and visible = 1 ORDER BY case when `type` = 1 then 3 when `type` = 3 then 1 else `type` end, `order`') or die(mysqli_query_error());
 	$a = Array();
 	while($r = $res->fetch_row()) $a[] = $r;

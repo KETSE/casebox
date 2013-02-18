@@ -26,7 +26,7 @@ class BrowserView extends BrowserTree{
 			if($r = $res->fetch_row()) $d['has_childs'] = true;
 			$res->close();
 		}
-		parent::updateLabelsAndIcons($rez['data']);
+		parent::updateLabels($rez['data']);
 		return $rez;
 	}
 	public function getSummaryData($p){
@@ -84,11 +84,8 @@ class BrowserView extends BrowserTree{
 			$params = coalesce(@$p->{$k}, $default_filters[$k]);
 			if(!empty($v->path)){
 				$path = $v->path;
-				// var_dump($path);
-				// echo "=".Path::getId($path);
 				if(empty($v->showDescendants) ) $params->pid = Path::getId($path); else $params->pids = Path::getId($path);
 			}
-			//var_dump($params);
 			$sr = $search->query( $params );
 			$d = array();
 			switch($k){

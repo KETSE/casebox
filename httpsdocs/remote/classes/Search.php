@@ -267,11 +267,9 @@ class Search extends SolrClient{
 	}
 
 	private function executeQuery(){
-		//var_dump($this->params);
 		try {
 			$this->results = $this->solr->search($this->query, $this->start, $this->rows, $this->params);
 		} catch( Exception $e ) {
-			var_dump($this->params);
 			throw new Exception("An error occured: \n\n {$e->__toString()}");
 		}
 	}
@@ -299,7 +297,6 @@ class Search extends SolrClient{
 	private function processResultFacets(){
     		$rez = array();
 		$sr = &$this->results;
-		//var_dump($sr);
 		if(empty($sr->facet_counts)) return false;
 		
 		$fc = &$sr->facet_counts;
@@ -358,13 +355,11 @@ class Search extends SolrClient{
 				}
 				break;
 			case 'activeTasksPerUsers':
-				//var_dump($fc->facet_pivot);
 				if(!empty($fc->facet_pivot))
 				foreach($fc->facet_pivot->{$this->inputParams->facetPivot} as $f){
 					$row = array('id' => $f->value, 'total' => $f->count );
 					if(!empty($f->pivot)){
 						foreach($f->pivot as $st){
-							//var_dump($st);
 							if($st->value == 1) $row['total2'] = $st->count;
 						}
 					}
@@ -381,7 +376,6 @@ class Search extends SolrClient{
 		$ids = array();
 		foreach($values as $k => $v) $ids[] = $k;
 		if(empty($ids)) return false;
-		//echo '!'.;
 		switch($groups){
 			case 'all': return false;
 			case 'pids': 
@@ -425,32 +419,6 @@ class Search extends SolrClient{
 		}
 		$p->fl = 'id,name,type,subtype,status,date,sys_tags,template_id';
 		return $this->query($p);
-		
-		// if(!empty($sr['data']))
-		// foreach($sr['data'] as $d)
-		// 	@$rez['data'][] = array('id' => $d['id'], 'name' => $d['name'], 'iconCls' => $d['iconCls'], 'date' => $d['date']);
-
-		return $rez;
 	}
 
-	// public function saveQuery($p){
-	// 	mysqli_query_params('insert into saved_queries (user_id, name, params, results) values($1, $2, $3, $4)'
-	// 		,array($_SESSION['user']['id'], $p->name, json_encode($p->params), $p->results) ) or die(mysqli_query_error());
-	// 	return array('success' => true);
-	// }
-	
-	// public function getSavedQueries(){
-	// 	$rez = array('success' => true, 'data' => array());
-	// 	$res = mysqli_query_params('select id, name, results from saved_queries where user_id = $1 order by cdate', $_SESSION['user']['id'] ) or die(mysqli_query_error());
-	// 	while($r = $res->fetch_assoc()) $rez['data'][] = $r;
-	// 	return $rez;
-	// }
-
-	// public function getSavedQueryParams($id){
-	// 	$rez = json_decode('{}');
-	// 	$res = mysqli_query_params('select params from saved_queries where id = $1 and user_id = $2', array($id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
-	// 	if($r = $res->fetch_row()) $rez = json_decode($r[0]);
-	// 	$rez->queryId = $id;
-	// 	return $rez;
-	// }
 }

@@ -31,7 +31,6 @@
 			header('Location: /login.php');
 			exit(0);
 		}
-		//die('her: '.$ref.' = '.$_SERVER['SERVER_NAME'].' && '.$_COOKIE['key'].' = '.$_SESSION['key'].' && '.$_SESSION['ips'].' == |'.getIPs().'|');
 		if( ($_SERVER['SCRIPT_NAME'] != '/auth.php') && !is_loged()){
 			header('Location: /login.php');
 			exit(0);

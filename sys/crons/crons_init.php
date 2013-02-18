@@ -39,12 +39,11 @@
 	define('CB_SOLR_CORE', 'variable' ); //core will be passed to solr client as parameter to constructor
 
 	set_include_path(get_include_path() . PATH_SEPARATOR . '/var/lib'. PATH_SEPARATOR . PROJ_SITE_PATH.'remote'.DIRECTORY_SEPARATOR.'classes' );
-	//die(get_include_path());
 	$CB_cores = Array();
 	foreach (new DirectoryIterator(PROJ_CONFIGS_PATH) as $file){
 	   $name =$file->getFilename();
 	   if($name == 'sample') continue;
-	   if ( !$file->isDot() && $file->isDir() && (empty($argv[1]) || ( $argv[1] == $name ) ) ){
+	   if ( !$file->isDot() && $file->isDir() && (empty($argv[1]) || ( $argv[1] == $name ) || ( $argv[1] == 'all' ) ) ){
 	   	$config = array('timezone' => 'UTC', 'default_language' => 'en', 'personal_tags' => false, 'system_tags' => true);
 	   	$fn = PROJ_CONFIGS_PATH.$name.DIRECTORY_SEPARATOR.'system.ini';
 	   	if(file_exists($fn)) $config = array_merge($config, parse_ini_file($fn));

@@ -68,7 +68,6 @@ foreach($CB_cores as $core){
 					break;
 				case 4: //case object
 					$r = array_merge($r, Objects::getSorlData($id));
-					//echo "\n".@$r['id'].', '.$r['name'].', '.$r['case_id'].', '.$r['template_id']."\n";
 					$r['ntsc'] = 4;
 					break;
 				case 5: //file
@@ -79,7 +78,6 @@ foreach($CB_cores as $core){
 				case 7: //tasks
 					$r = array_merge($r, Tasks::getSorlData($id));
 					$r['ntsc'] = 4;
-					//var_dump($r);
 					break;
 				case 8: //Emails
 					$r = array_merge($r, Objects::getSorlData($id));
@@ -96,9 +94,6 @@ foreach($CB_cores as $core){
 
 			$r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
 			$r['sort_path'] = mb_strtolower($r['name'], 'UTF-8');
-			//echo $r['sort_path']."\n";
-			//echo $r['path']."\n";
-			//if($type == 4) var_dump($r);
 			$solr->add( $r );
 			
 			mysqli_query_params('update tree set updated = -1 where id = $1', $r['id']) or die(mysqli_query_error()); 			

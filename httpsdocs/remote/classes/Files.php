@@ -2,8 +2,7 @@
 class Files{
 	static public function extractUploadedArchive(&$file){//DONE: on archive extraction also to take directories into consideration
 		$archive = $file['name'];
-		$ext = explode('.', $archive);
-		$ext = array_pop($ext);
+		$ext = getFileExtension($archive);
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
 
 		switch($ext){
@@ -120,7 +119,6 @@ class Files{
 			case 1:
 				reset($FilesArray);
 				$f = current($FilesArray);
-				//var_dump($f);
 				$d = $this->getDuplicates($f['id']);
 				$paths = array();
 				if(sizeof($d['data']) > 0){
@@ -321,15 +319,11 @@ class Files{
 	public function storeContent(&$f, $filePath = false){
 		if($filePath == false) $filePath = CB_FILES_PATH;
 		$f['content_id'] = null;
-		//echo $f['tmp_name']."\n".$f['size'];
-		if(!file_exists($f['tmp_name']) || ($f['size'] == 0) ) return false; //die('temporary file not found or size is 0');
+		if(!file_exists($f['tmp_name']) || ($f['size'] == 0) ) return false;
 		$md5 = $this->getFileMD5($f);
 		$sql = 'select id, path from files_content where md5 = $1';
 		$res = mysqli_query_params($sql, $md5) or die(mysqli_query_error());
-		if($r = $res->fetch_row()){
-			if(file_exists($filePath.$r[1].'/'.$r[0])) $f['content_id'] = $r[0];
-			//if(is_debug_host()) echo "Content found in db";
-		}
+		if($r = $res->fetch_row()) if(file_exists($filePath.$r[1].'/'.$r[0])) $f['content_id'] = $r[0];
 		$res->close();
 
 		if(!empty($f['content_id'])){
@@ -342,8 +336,6 @@ class Files{
 		mysqli_query_params('insert into files_content (`size`, `type`, `path`, `md5`) values($1, $2, $3, $4) on duplicate key update id =last_insert_id(id), `size` = $1, `type` = $2, `path` = $3, `md5` = $4', array($f['size'], $f['type'], $storage_subpath, $md5)) or die(mysqli_query_error());
 		$f['content_id'] = last_insert_id();
 		@mkdir($filePath.$storage_subpath.'/', 0777, true);
-		//echo "renaming ".$f['tmp_name'].' -> '.$filePath.$storage_subpath.'/'.$f['content_id'];
-		//rename($f['tmp_name'], CB_FILES_PATH.$storage_subpath.'/'.$f['content_id']);
 		copy($f['tmp_name'], $filePath.$storage_subpath.'/'.$f['content_id']);
 		return true;
 	}
@@ -492,8 +484,6 @@ class Files{
 				if(file_exists($preview_filename)) Files::deletePreview($file['content_id']);
 				$cmd = 'php -f '.CB_LIB_DIR.'preview_extractor_pdf.php '.CB_PROJ.' &> /dev/null &';
 				if(is_windows()) $cmd = 'start /D "'.CB_LIB_DIR.'" php -f preview_extractor_pdf.php '.CB_PROJ;
-				//pclose(popen($cmd, "r"));
-				//echo $cmd;
 				echo shell_exec($cmd);
 				return array('processing' => true);
 				break;
@@ -551,16 +541,11 @@ class Files{
 			$rez['size'] = $r['size'];
 			$rez['versions'] = intval($r['versions']);
 			$content = $filesPath.$r['path'].DIRECTORY_SEPARATOR.$r['content_id'].'.gz';
-			//echo "$content\n";
 			if(file_exists($content)){
-				//echo "content exists\n";
 				$content =   file_get_contents($content);
-				//echo "compressed content: \n".$content;
 				$content = gzuncompress( $content );
-				//echo "uncompressed content: \n".$content;
 			}else $content = '';
-			$rez['content'] = ''.//coalesce($r['name'],'')."\n".
-			coalesce($r['title'],'')."\n".
+			$rez['content'] = coalesce($r['title'],'')."\n".
 			coalesce($r['type'],'')."\n".
 			coalesce($content, ''); 
 			
