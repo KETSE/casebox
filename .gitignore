@@ -7,3 +7,6 @@ logs/
 
 # ignore .sublime files
 *sublime*
+
+# ignore 'cores' configuration
+httpsdocs/cores/
