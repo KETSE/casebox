@@ -1,0 +1,1 @@
+php -e recreate_cores.php

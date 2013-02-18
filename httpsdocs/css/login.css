@@ -1,0 +1,111 @@
+body {
+font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+font-size: 12px;
+line-height: 20px;
+color: #333;
+background-color: #ededed;
+}
+
+
+* {
+margin: 0px;
+padding: 0px;
+border: 0px;
+outline: none;
+line-height: 1.5;
+background-color: transparent;
+vertical-align: baseline;
+}
+
+
+.main {
+min-height: 100%;
+}
+
+input:-webkit-autofill {
+background-color: #FAFFBD;
+background-image: none;
+color: black;
+}
+
+
+input[type="text"], input[type="password"], input[type="email"], textarea, select, input[type="file"] {
+width: 100% !important;
+-webkit-box-sizing: border-box;
+-moz-box-sizing: border-box;
+-ms-box-sizing: border-box;
+box-sizing: border-box;
+}
+
+input[type="text"], input[type="password"], input[type="email"], .ui-autocomplete-input, textarea, .uneditable-input {
+display: inline-block;
+padding: 4px;
+font-size: 13px;
+line-height: 18px;
+color: gray;
+border: 1px solid #CCC;
+-webkit-border-radius: 3px;
+-moz-border-radius: 3px;
+border-radius: 3px;
+}
+
+
+
+.form_login label{margin-bottom: 7px;position: relative;}
+.form_login label [class*="icon-"]{top: 10px;position: absolute;left: 16px;opacity: 0.85;-moz-opacity: 0.85;-khtml-opacity: 0.85;}
+
+.form_login {width: 304px;min-height: 330px;position: absolute;top: 40%;margin-top: -195px;left: 50%;margin-left: -222px;background-color: #f5f5f5;-moz-border-radius: 6px;-webkit-border-radius: 6px;-moz-border-radius: 6px;border: 1px solid #dbe0e3;padding: 0 70px 20px;-moz-box-shadow: 0 0 20px rgba(0,0,0,0.05);-webkit-box-shadow: 0 0 20px rgba(0,0,0,0.05);box-shadow: 0 0 20px rgba(0,0,0,0.05);}
+
+.form_login input[type="text"], .form_login input[type="password"], .form_login input[type="email"]{
+    height: 38px !important;font-size: 18px !important; 
+    
+    color: #555 !important;  /* #c3c9ce */
+    
+    -moz-box-shadow: 0 0 8px rgba(0,0,0,0.1);-webkit-box-shadow: 0 0 8px rgba(0,0,0,0.1);box-shadow: 0 0 8px rgba(0,0,0,0.1);padding-left: 43px;
+    /* line-height: 38px; */
+}
+.form_login > a {margin: 34px 0 45px 0;}
+
+
+
+.tac {
+text-align: center !important;
+}
+
+.dib {
+display: inline-block !important;
+float: none !important;
+}
+
+a {
+cursor: pointer;
+}
+
+.o_h {
+overflow: hidden;
+}
+
+
+.frame_label, .icon-info-sign {
+cursor: pointer;
+}
+.frame_label {
+font-size: 12px;
+display: inline-block;
+}
+.pull-left {
+float: left;
+}
+
+
+
+
+.btn {
+font-size: 12px !important;
+white-space: normal;
+}
+
+.tal {
+text-align: left !important;
+}
+

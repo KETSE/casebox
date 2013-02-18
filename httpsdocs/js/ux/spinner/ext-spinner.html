@@ -1,0 +1,93 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Ext Spinner Widget</title>
+<link rel="stylesheet" type="text/css" href="../ext-2.0/resources/css/ext-all.css" />
+<link rel="stylesheet" type="text/css" href="Spinner.css" />
+
+<script type="text/javascript" src="../ext-2.0/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="../ext-2.0/ext-all.js"></script>
+
+<script type="text/javascript" src="Spinner.js"></script>
+<!-- <script type="text/javascript" src="SpinnerPlugin.js"></script> -->
+<script type="text/javascript" src="SpinnerStrategy.js"></script>
+<script type="text/javascript" src="ext-spinner.js"></script>
+
+
+<style media="screen" type="text/css">
+/* global css */
+body {
+    padding:0 2em 3em;
+	font: normal 12px arial, helvetica, sans-serif;
+	color: #282828;
+}
+
+h1 {
+    margin:2.33em 0 1.5em;
+    font-size:150%;
+}
+
+fieldset {
+	padding:0.4em;
+}
+
+ul {
+    list-style-type: disc;
+}
+
+li {
+	margin-bottom: .3em;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Ext Spinner Widget for ExtJS 2.x</h1>
+
+<p>Go to <a href="http://extjs.com/forum/showthread.php?t=16352">the forum</a> for more information on its usage and support.</p>
+
+<fieldset style="margin-top:2em">
+	<legend>Example</legend>
+	<table>
+		<tr>
+			<td style="padding: 2em;">
+				<form id="frm" name="frm">
+					<fieldset>
+						<legend>Spinner applied to textfield</legend>
+						<input type="text" id="t" />
+					</fieldset>
+				</form>
+				
+				<ul>
+					<li>Click the control to spin.</li>
+					<li>Hold "Shift" for alternate spinning.</li>
+					<li>Drag the divider with your mouse to spin.</li>
+					<li>Put focus on field and press "up" or "down" to spin.</li>
+					<li>When focused press "pageUp" or "pageDown" for alternate spinning.</li>
+					<li>Hover the control and use your scrollwheel on your mouse to spin.</li>
+				</ul>
+			</td>
+			<td>
+				<div id="container"></div>		
+			</td>
+		</tr>
+	</table>
+</fieldset>
+
+<fieldset style="padding:1.5em">
+	<legend>Spinner in a Basic Form</legend>
+	<div id="form-ct" style="margin-top:1em"></div>
+</fieldset>
+
+<fieldset style="padding:1.5em">
+	<legend>Textfield plugin</legend>
+	<div id="plugin-ct"></div>
+</fieldset>
+
+</body>
+
+</html>

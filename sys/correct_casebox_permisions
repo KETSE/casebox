@@ -1,0 +1,6 @@
+#/bin/bash
+chown -R apache:apache
+chown -R apache:apache data/files
+chown -R apache:apache data/sessions
+chmod -R 644 data/files
+find casebox -type d -print0 | xargs -0 chmod 755

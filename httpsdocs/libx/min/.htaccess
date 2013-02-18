@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+RewriteEngine on
+RewriteRule ^([a-z]=.*)  index.php?$1  [L,NE]
+</IfModule>
+<IfModule mod_deflate.c>
+  SetEnvIfNoCase Request_URI \
+        \.(?:gif|jpe?g|php)$ no-gzip dont-vary
+</IfModule>
+FileETag none

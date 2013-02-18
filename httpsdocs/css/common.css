@@ -1,0 +1,108 @@
+@charset "utf-8";
+/* Common CSS Document */
+.fs10, .fs10 *{ font-size: 10px}
+.fs11, .fs11 *{ font-size: 11px !important}
+.fs12, .fs12 *{ font-size: 12px !important}
+.fs13 *{ font-size: 13px }
+.fs14 *{ font-size: 14px }
+.fs16 *{ font-size: 16px }
+.fs18 *{ font-size: 18px }
+.fs20, .fs20 *{ font-size: 20px !important}
+.fwN{ font-weight: normal }
+.fwB, .fwB *{ font-weight: bold !important }
+.fsN{ font-style: normal }
+.fsI{ font-style: italic }
+.tdN{ text-decoration: none }
+.tdU{ text-decoration: underline }
+
+.taL{ text-align: left }
+.taC{ text-align: center }
+.taJ{ text-align: justify }
+.taR{ text-align: right }
+.vaT, .vaT td{ vertical-align: top !important}
+.dIB{display: inline-block !important}
+.dn{display: none}
+
+.cW{ color: white }
+.cB{ color: black }
+.cO{ color: #D36E01 } /* dark orange*/
+.cBl, .cBl *{ color: blue !important}
+.cG, .cG *{ color: gray !important }
+.cGR, .cGR *{ color: green !important }
+.cLG{ color:#CCCCCC }
+.cR{ color: red }
+.cM, .cM *{ color: maroon !important }
+.cDB, .cDB *{ color: #356AA0 !important } /*DiggBlue*/
+.bgcLG{ background-color: #eee }
+.bgcW{ background-color: #FFF !important }
+.bgcY{ background-color: #FFFF88 !important } /*Interactive action yellow*/
+.bgcLR{ background-color: #FFCCCC !important } 
+.p2{ padding: 2px }
+.p5{ padding: 5px }
+.p10{ padding: 10px }
+.p15{ padding: 15px }
+.p20{ padding: 20px }
+.pt10{ padding-top: 10px }
+.pl10{ padding-left: 10px }
+.pb5{ padding-bottom: 5px }
+.pb10{ padding-bottom: 10px }
+.wsn, .wsn .x-grid3-cell-inner{ white-space: normal !important }
+.fl{ float: left }
+.fr{ float: right }
+.lh14{ line-height: 14px }
+.lh16{ line-height: 16px }
+.lh20{ line-height: 20px }
+.lh22{ line-height: 22px }
+.btg {border-top: 1px solid #EEE !important}
+.brg {border-right: 1px solid #EEE !important}
+.bbg {border-bottom: 1px solid #EEE !important}
+.blg {border-top: 1px solid #EEE !important}
+
+.file32{ padding-left:37px; min-height:33px; background-position: 0 50% }
+.file-attach{ background-image:url(/css/i/ext/32/document-attach.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.file-unknown32 { background-image:url(/css/i/ext/32/document.gif); background-repeat: no-repeat; min-height:33px; min-width:33px;}
+.file-7z32 { background-image:url(/css/i/ext/32/file_extension_7z.png) !important; background-repeat: no-repeat }
+.file-ace32 { background-image:url(/css/i/ext/32/file_extension_ace.png) !important; background-repeat: no-repeat }
+.file-bmp32 { background-image:url(/css/i/ext/32/file_extension_bmp.png) !important; background-repeat: no-repeat }
+.file-doc32, .file-docx32, .file-rtf32 { background-image:url(/css/i/ext/32/file_extension_doc.png) !important; background-repeat: no-repeat }
+.file-gif32 { background-image:url(/css/i/ext/32/file_extension_gif.png) !important; background-repeat: no-repeat }
+.file-gz32 { background-image:url(/css/i/ext/32/file_extension_gz.png) !important; background-repeat: no-repeat }
+.file-htm32 { background-image:url(/css/i/ext/32/file_extension_htm.png) !important; background-repeat: no-repeat }
+.file-html32 { background-image:url(/css/i/ext/32/file_extension_html.png) !important; background-repeat: no-repeat }
+.file-jpeg32 { background-image:url(/css/i/ext/32/file_extension_jpeg.png) !important; background-repeat: no-repeat }
+.file-jpg32 { background-image:url(/css/i/ext/32/file_extension_jpg.png) !important; background-repeat: no-repeat }
+.file-mp232, .file-mp332 { background-image:url(/css/i/ext/32/file_extension_mp2.png) !important; background-repeat: no-repeat }
+.file-pdf32 { background-image:url(/css/i/ext/32/file_extension_pdf.png) !important; background-repeat: no-repeat }
+.file-png32 { background-image:url(/css/i/ext/32/file_extension_png.png) !important; background-repeat: no-repeat }
+.file-pps32, .file-ppsx32 { background-image:url(/css/i/ext/32/file_extension_pps.png) !important; background-repeat: no-repeat }
+.file-rar32 { background-image:url(/css/i/ext/32/file_extension_rar.png) !important; background-repeat: no-repeat }
+.file-rtf32 { background-image:url(/css/i/ext/32/file_extension_rtf.png) !important; background-repeat: no-repeat }
+.file-tgz32 { background-image:url(/css/i/ext/32/file_extension_tgz.png) !important; background-repeat: no-repeat }
+.file-tiff32, .file-tif32 { background-image:url(/css/i/ext/32/file_extension_tif.png) !important; background-repeat: no-repeat }
+.file-txt32 { background-image:url(/css/i/ext/32/file_extension_txt.png) !important; background-repeat: no-repeat }
+.file-xls32, .file-xlsx32 { background-image:url(/css/i/ext/32/file_extension_xls.png) !important; background-repeat: no-repeat }
+.file-zip32 { background-image:url(/css/i/ext/32/file_extension_zip.png) !important; background-repeat: no-repeat }
+.file-avi32, .file-mpeg32, .file-mov32, .file-vob32, .file-mpg32, .file-mp432 { background-image:url(/css/i/ext/32/film.png) !important; background-repeat: no-repeat }
+
+.file{ padding-left: 17px !important; padding-top: 0px; background-position: 0 50% }
+a.file{min-height: 16px; display: inline-block}
+.file-grid-cell{ text-indent: 15px !important; padding-top: 0px; background-position: 0 50% }
+.file-unknown { background-image:url(/css/i/ext/document.png); background-position: 0 0%; background-repeat: no-repeat }
+.file-pdf { background-image:url(/css/i/ext/document-pdf.png) !important; background-repeat: no-repeat }
+.file-doc, .file-docx, .file-rtf { background-image:url(/css/i/ext/document-doc.png) !important; background-repeat: no-repeat }
+.file-ppt, .file-pptx { background-image:url(/css/i/ext/document-ppt.png) !important; background-repeat: no-repeat }
+.file-txt { background-image:url(/css/i/ext/document-text.png) !important; background-repeat: no-repeat }
+.file-xls, .file-xlsx { background-image:url(/css/i/ext/document-xls.png) !important; background-repeat: no-repeat }
+.file-htm, .file-html { background-image:url(/css/i/ext/document-htm.png) !important; background-repeat: no-repeat }
+.file-mp3, .file-rm { background-image:url(/css/i/ext/document-mp3.png) !important; background-repeat: no-repeat }
+.file-avi { background-image:url(/css/i/ext/document-avi.png) !important; background-repeat: no-repeat }
+.file-bmp, .file-gif, .file-jpg, .file-jpeg, .file-jp2, .file-j2k, .file-pcx, .file-png, .file-ppm, .file-tga, .file-tif, .file-tiff{ background-image:url(/css/i/ext/document-img.png) !important; background-repeat: no-repeat }
+.file-flv { background-image:url(/css/i/ext/document-flv.png) !important; background-repeat: no-repeat }
+
+.icon-none{background: none !important}
+.wsNW {white-space: nowrap}
+.icon-file-default { background-image:url(/css/i/ext/blue-document-attribute-d.png) !important; background-repeat: no-repeat }
+.click, .header-click{ cursor: hand; cursor: pointer }
+.click:hover{ color: #286bcc !important; text-decoration: underline }
+.header-click:hover{ color: #286bcc !important; text-decoration: none }
+ul.with-icons li{padding-left: 20px; white-space:nowrap}

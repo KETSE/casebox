@@ -1,3 +1,9 @@
-data/       # ignore all files in "data/" folder, don't forget to add SOLR config in data/solr/conf
-logs/       # but the folder should exist for CaseBox to run
-*sublime*   # ignore .sublime files
+# ignore all files in "data/" folder, don't forget to add SOLR config in data/solr/conf
+data/
+
+# but the folder should exist for CaseBox to run
+logs/
+
+
+# ignore .sublime files
+*sublime*
