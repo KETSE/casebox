@@ -1,3 +1,6 @@
 (a step by step guide how to run CaseBox)
 
-zip -r casebox.zip * -x data/files\* data/solr/data\*
+1. Install MySql, Apache, PHP, SOLR
+2. Alternatively install: LibreOffice, ImageMagick
+3. 
+
