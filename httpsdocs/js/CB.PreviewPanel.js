@@ -16,7 +16,6 @@ CB.PreviewPanel = Ext.extend(Ext.Panel, {
 		if(this.delayedReloadTask) this.delayedReloadTask.cancel();
 		this.newId = id
 		this.newVersionId = Ext.value(versionId, '');
-		//clog('request for loading ', this.newId + '_' + this.newVersionId);
 		if( (this.newId != this.loadedId) || (this.newVersionId != this.loadedVersionId) ) this.delayReload(300);
 	}
 	,delayReload: function(ms){
@@ -50,7 +49,7 @@ CB.PreviewPanel = Ext.extend(Ext.Panel, {
 		a = this.getEl().query('a.task');
 		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.fireEvent('taskedit', {data: {id: el.attributes.getNamedItem('nid').value}}) }, this)}, this)
 		a = this.getEl().query('a.path');
-		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.fireEvent('openpath', el.attributes.getNamedItem('path').value, this.loadedId) }, this)}, this)
+		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.openPath(el.attributes.getNamedItem('path').value, this.loadedId) }, this)}, this)
 		a = this.getEl().query('.file-unknown a');
 		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.fireEvent('fileopen', {id: el.attributes.getNamedItem('nid').value} ) }, this)}, this)
 	}
@@ -58,7 +57,6 @@ CB.PreviewPanel = Ext.extend(Ext.Panel, {
 		delete this.loadedId;
 		delete this.loadedVersionId;
 		this.update('');
-		clog(this.getEl());
 		if(this.getEl().isVisible(true)) this.body.scrollTo('top', 0);
 	}
 

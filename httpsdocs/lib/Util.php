@@ -192,6 +192,9 @@ function getLanguagesParams($post_params, &$result_params_array, &$values_string
 		$result_params_array[$k] = empty($p[$k]) ? $default_text_value: $p[$k];
 	}
 }
+function adjustTextForDisplay($text){
+	return htmlentities($text, ENT_COMPAT, 'UTF-8');
+}
 
 function getThesauriTitles($ids_string, $language_id = false){
 	if(empty($ids_string)) return '';

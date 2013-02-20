@@ -44,7 +44,6 @@ function getItemIcon(d){
 				else return 'file-unknown';
 			break;
 		case 6:
-			//clog('get task icon for "'+d.name+'", status:'+d.status)
 			if(d['status'] == 3) return 'icon-task-completed';
 			return 'icon-task';//task
 			break;

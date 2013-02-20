@@ -4,9 +4,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	layout: 'border'
    	,tbarCssClass: 'x-panel-white'
 	,hideBorders: true
-	,path: null
+	,params: { 
+		path: '/'
+		,descendants: false 
+	}
 	,folderProperties: {}
-	,showDescendants: false
 	,initComponent: function(){
 		
 		this.actions = {
@@ -229,8 +231,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			,listeners: {
 				scope: this
 				,beforeload: function(store, options) { 
-					store.baseParams.path = this.requestedPath
-					store.baseParams.showDescendants = this.showDescendants
+					Ext.apply(store.baseParams, Ext.value(this.requestedParams, this.params) )
 					options = store.baseParams;
 				}
 				,load: this.onStoreLoad
@@ -253,11 +254,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				    		m.css = 'icon-grid-column-top '+ r.get('iconCls');
 				    		m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
 				    		rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
-				    		if(r.get('has_childs')) rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />'
+				    		if( (this.hideArrows !== true) && r.get('has_childs')) rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />'
 				    		vi = getVersionsIcon(r.get('versions'));
 				    		if(!Ext.isEmpty(vi)) rez = '<span class="ver_count '+vi+'" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
 				    		return rez;
-				    	}
+				    	},scope: this
 				    	,editable: true
 				    	,editor: new Ext.form.TextField()
 				    }
@@ -307,11 +308,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 					return true;
 				}
 				,afteredit: function(e){
-					//clog(e.value, e.originalValue, (e.value == e.originalValue))
 					if(e.value == e.originalValue) return;
 					BrowserView.rename({path: e.record.get('nid'), name: e.value}, function(r, e){
 						if(r.success !== true) return;
-						//clog('firing objectupdated with params: ', {data: {id: r.data.id, pid: this.folderProperties.id} })
 						this.fireEvent('objectupdated', {data: {id: r.data.id, pid: this.folderProperties.id} }, e )
 					}, this);
 				}
@@ -544,7 +543,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				,'fileopen'
 				,'fileupload'
 				,'filedownload'
-				,'changepath'
+				,'changeparams'
 				,'viewloaded'
 				,'showdescendants'
 		);
@@ -558,7 +557,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			,'fileopen'
 			,'fileupload'
 			,'filedownload'
-			,'changepath'
+			,'changeparams'
 			,'viewloaded'
 			,'showdescendants'
 		]);
@@ -584,8 +583,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	}
 	,onCellClick: function(grid, rowIndex, colIndex, e){
 		el = e.getTarget();
-		if(el && el.classList.contains('icon-arrow3')) this.fireEvent('changepath', this.grid.store.getAt(rowIndex).get('nid'))
-		//this.onOpenClick(grid, e);
+		if(el && el.classList.contains('icon-arrow3')) this.fireEvent('changeparams', {path: this.grid.store.getAt(rowIndex).get('nid')} )
 	}
 	,onSearchQuery: function(query, e){
 		this.grid.getStore().baseParams.query = query;
@@ -595,7 +593,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		if(pids.indexOf(this.folderProperties.id) >=0 ) this.onReloadClick();
 	}
 	,onSelectionChange: function(sm) {
-		//clog('selection change', arguments);
 		id = null;
 		if(!sm.hasSelection()){
 			this.actions.open.setDisabled(true);
@@ -617,7 +614,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			this.actions.open.setDisabled(false);
 			this.actions['delete'].setDisabled(row.get('system') == 1);
 			
-			canOpenLocation = (this.showDescendants || !Ext.isEmpty(this.grid.store.baseParams.query) );
+			canOpenLocation = (this.params.descendants || !Ext.isEmpty(this.grid.store.baseParams.query) );
 			this.actions.openItemLocation.setDisabled(!canOpenLocation);
 
 			canCopy = (row.get('system') == 0);
@@ -711,7 +708,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 					,menu: [{	//[this.actions.showFoldersChilds]
 						xtype: 'menucheckitem'
 						,text: L.Descendants
-						,checked: this.showDescendants
+						,checked: this.params.descendants
 						,scope: this
 						,handler: this.onShowDescendantsClick
 					}
@@ -739,17 +736,16 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			})
 
 		}
-		this.contextMenu.items.itemAt(3).menu.items.itemAt(0).setChecked(this.showDescendants);
+		this.contextMenu.items.itemAt(3).menu.items.itemAt(0).setChecked(this.params.descendants);
 		this.updateCreateMenuItems(this.createMenuButton);
 		this.contextMenu.row = row;
 		this.contextMenu.showAt(e.getXY());
-		clog('unlock after 500ms');
 		this.grid.getSelectionModel().unlock.defer(500, this.grid.getSelectionModel());
 	}
-	,changePath: function(newPath, options){
-		if(Ext.isEmpty(newPath)) newPath = '/';
-		Ext.apply(this.grid.getStore().baseParams, Ext.value(options, {}));
-		this.requestedPath = String(newPath);
+	,setParams: function(params){
+		if(Ext.isEmpty(params.path)) params.path = '/';
+		Ext.apply(this.grid.getStore().baseParams, Ext.value(params, {}));
+		this.requestedParams = params;
 		this.grid.getBottomToolbar().changePage(1);
 	}
 	,onProxyLoad: function (proxy, o, options) {
@@ -856,8 +852,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		b.data.pid = this.folderProperties.id;
 		b.data.path = this.folderProperties.path;
 		b.data.pathtext = this.folderProperties.pathtext;
-		//clog('creating object in '+this.folderProperties.id)
-		//this.fireEvent('createobject', b, e);
 		this.fireEvent('openobject', b.data, e);
 	}
 	,onDownClick: function(key, e) {
@@ -869,12 +863,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		row = this.grid.selModel.getSelected();
 		if(!App.openObject(row.get('type'), row.get('nid'), e) ){
 			if(Ext.isEmpty(this.grid.store.baseParams.query) ){
-				path = this.path.split('/');
+				path = this.params.path.split('/');
 				path.push(row.get('nid'));
-				this.fireEvent('changepath', path.join('/'))
+				this.fireEvent('changeparams', {path: path.join('/')} )
 			}else{
-				this.fireEvent('changepath', row.get('nid'))
-				//this.changePath(row.get('nid'))
+				this.fireEvent('changeparams', {path: row.get('nid')} )
 			}
 		}
 	}
@@ -882,8 +875,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		if(this.actions.openItemLocation.isDisabled()) return;
 		if(!this.grid.selModel.hasSelection()) return;
 		row = this.grid.selModel.getSelected();
-		this.fireEvent('changepath', row.get('pid'), {showDescendants: false}, e)	
-		//this.fireEvent('showdescendants', false, e);
+		this.fireEvent('changeparams', {path: row.get('pid'), descendants: false, query:'' }, e)	
 		App.mainViewPort.locateObject(r.data.pid, r.data.nid);
 	}
 	,onCutClick: function(buttonOrKey, e) {
@@ -1010,7 +1002,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		/* TODO: also delete all visible nodes(links) that are links to the deleted node or any its child */
 	}
 	,onObjectsSaved: function(form, e){
-		//clog('objects saved', arguments, this.folderProperties.id, form.data.pid, this.justAddedFolder);
 		if(!Ext.isEmpty(form.data.id) && (this.justAddedFolder == form.data.id) ){
 			delete this.justAddedFolder;
 			return;
@@ -1018,7 +1009,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		if(this.folderProperties.id == form.data.pid) this.onReloadClick();
 	}
 	,onUploadClick: function(b, e) { this.fireEvent('fileupload', {pid: this.folderProperties.id, uploadType: b.uploadType}, e) }
-
 	,onUploadNewVersionClick: function(b, e){
 		if(!this.grid.selModel.hasSelection()) return;
 		row = this.grid.selModel.getSelected();
@@ -1045,11 +1035,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         ,onShowDescendantsClick: function(cb, e){
         	this.fireEvent('showdescendants', !cb.checked, e);
         }
-        ,setShowDescendants: function(v){
-        	v = (v === true);
-        	if(this.showDescendants == v) return;
-        	this.showDescendants = v;
-        }
+        // ,setShowDescendants: function(v){
+        // 	v = (v === true);
+        // 	if(this.showDescendants == v) return;
+        // 	this.showDescendants = v;
+        // }
         ,onTakeOwnershipClick: function(b, e){
         	Ext.Msg.confirm(L.TakeOwnership, L.TakeOwnershipConfirmation, function(b, e){
         		if(b == 'yes'){

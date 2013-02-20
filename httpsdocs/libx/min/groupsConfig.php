@@ -8,9 +8,10 @@
  * You may wish to use the Minify URI Builder app to suggest
  * changes. http://yourdomain/min/builder/
  **/
-$_SERVER['DOCUMENT_ROOT'] = realpath(dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
-//var_dump($_SERVER);
-return array(
+require_once realpath( dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..').DIRECTORY_SEPARATOR.'config.php';
+$customConfigGroups = getCustomGroupsConfig();
+
+return array_merge($customConfigGroups, array(
     'css' => array(	
 		'//css/CB.css'
 		,'//css/template_icons.css'
@@ -47,6 +48,7 @@ return array(
 		,'//js/CB.PasteFromWord.js'
 		,'//js/CB.FileUploadWindow.js'
 		
+		,'//js/plugins/CB.plugins.customInterface.js'
 		,'//js/ux/Ext.ux.TagEditor.js'
 		,'//js/ux/Ext.ux.TreeTagEditor.js'
 		,'//js/ux/Ext.ux.TagField.js'
@@ -108,4 +110,5 @@ return array(
             'minifier' => array('Minify_Packer', 'minify')
         ))
     ),//*/
+)
 );

@@ -477,7 +477,7 @@ class Files{
 			case 'js':
 			case 'json':
 			case 'php':
-				file_put_contents( $preview_filename, '<pre>'.htmlentities(file_get_contents($fn)).'<pre>' );
+				file_put_contents( $preview_filename, '<pre>'.adjustTextForDisplay(file_get_contents($fn)).'<pre>' );
 				break;
 			case 'pdf':
 				mysqli_query_params('insert into file_previews (id, `group`, status, filename, size) values($1, \'pdf\', 1, null, 0) on duplicate key update `group` = \'pdf\', status =1, filename = null, size = 0, cdate = CURRENT_TIMESTAMP', $file['content_id'] ) or die(mysqli_query_error());

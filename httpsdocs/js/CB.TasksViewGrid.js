@@ -4,9 +4,8 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 	layout: 'border'
    	,tbarCssClass: 'x-panel-white'
 	,hideBorders: true
-	,path: null
 	,folderProperties: {}
-	,showDescendants: false
+	,params: {descendants: false}
 	
 	,initComponent: function(){
 		
@@ -139,11 +138,10 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 			,listeners: {
 				scope: this
 				,beforeload: function(store, options) { 
-					store.baseParams.path = this.requestedPath
-					store.baseParams.showDescendants = this.showDescendants
+					this.params = this.requestedParams;
+					Ext.apply(store.baseParams, this.requestedParams);
 					options = store.baseParams
-					//clog('set params', options, store.baseParams)
-				}/**/
+				}
 				,load: this.onStoreLoad
 			}
 		})
@@ -238,7 +236,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 							el = this.grid.getView().getRow(this.grid.store.indexOf(s[i]));
 							if( el == target ){
 								sm.lock();
-								clog('locked');
 								return;
 							}
 						}
@@ -375,11 +372,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
                              	,this.filterButton
                         ]
 			,items: [this.grid, this.eastPanel]
-			,listeners:{
-				scope: this
-				,afterrender: this.onAfterRender
-			}
-			//,bbar: [{text: 'Button'}]
 		})
 		CB.TasksViewGrid.superclass.initComponent.apply(this, arguments);
 		
@@ -389,7 +381,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				,'taskedit'
 				,'eventcreate'
 				,'eventedit'
-				,'changepath'
+				,'changeparams'
 				,'viewloaded'
 				,'showdescendants'
 				,'changeview'
@@ -399,7 +391,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 			,'taskedit'
 			,'eventcreate'
 			,'eventedit'
-			,'changepath'
+			,'changeparams'
 			,'viewloaded'
 			,'showdescendants'
 			,'changeview'
@@ -416,16 +408,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		if(!Ext.isEmpty(this.tree))
 			this.tree.getSelectionModel().on('selectionchange', this.onTreeSelectionChange, this);
 	}
-	// ,getBubbleTarget: function(){
-	// 	if(Ext.isEmpty(this.viewContainer)){
-	// 		this.viewContainer = this.findParentByType(CB.FolderView);
-	// 		if(Ext.isEmpty(this.viewContainer)) this.viewContainer = App.mainViewPort;
-	// 	}
-	// 	return this.viewContainer;
-	// }
-	,onAfterRender: function() {
-		//if(!Ext.isEmpty(this.tree)) this.changePath('/' + this.tree.getRootNode().attributes.nid);
-	}
 	,onBeforeDestroy: function(p){
 		App.clipboard.un('pasted', this.onClipboardAction, this);
 		App.mainViewPort.un('savesuccess', this.onObjectsSaved, this);
@@ -434,20 +416,8 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		App.mainViewPort.un('eventcreated', this.onObjectsSaved, this);
 		App.mainViewPort.un('eventupdated', this.onObjectsSaved, this);
 		App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
-
-		// if(!Ext.isEmpty(this.tree))
-		// 	this.tree.getSelectionModel().un('selectionchange', this.onTreeSelectionChange, this);
-	}
-	,onSearchQuery: function(query, e){
-		this.grid.getStore().baseParams.query = query;
-        	//clog('call reload from searchQuery')
-		this.onReloadClick();
-	}
-	,onTreeSelectionChange: function(sm, node) {
-		if(node) this.changePath(node.getPath('nid'));
 	}
 	,onClipboardAction: function(pids){
-        	//clog('call reload from onClipboardAction')
 		if(pids.indexOf(this.folderProperties.id) >=0 ) this.onReloadClick();
 	}
 	,onSelectionChange: function(sm) {
@@ -466,7 +436,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 			this.actions.open.setDisabled(false);
 			this.actions['delete'].setDisabled(row.get('system') == 1);
 			
-			canOpenLocation = (this.showDescendants || !Ext.isEmpty(this.grid.store.baseParams.query) );
+			canOpenLocation = (this.params.descendants || !Ext.isEmpty(this.grid.store.baseParams.query) );
 			this.actions.openItemLocation.setDisabled(!canOpenLocation);
 
 			canCopy = (row.get('system') == 0);
@@ -514,10 +484,10 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				,{
 					text: L.View
 					,hideOnClick: false
-					,menu: [{	//[this.actions.showFoldersChilds]
+					,menu: [{
 						xtype: 'menucheckitem'
 						,text: L.Descendants
-						,checked: this.showDescendants
+						,checked: this.params.descendants
 						,scope: this
 						,handler: this.onShowDescendantsClick
 					}
@@ -529,29 +499,26 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				,this.actions.paste
 				,'-'
 				,this.actions['delete']
-				//,this.actions.reload
 				,'-'
 				,this.actions.createTask
-				//,this.actions.createEvent
 				]
 			})
 
 		}
-		this.contextMenu.items.itemAt(3).menu.items.itemAt(0).setChecked(this.showDescendants);
+		this.contextMenu.items.itemAt(3).menu.items.itemAt(0).setChecked(this.params.descendants);
 		this.contextMenu.row = row;
 		this.contextMenu.showAt(e.getXY());
-		clog('unlock after 500ms');
 		this.grid.getSelectionModel().unlock.defer(500, this.grid.getSelectionModel());
 	}
-	,changePath: function(newPath, options){
-		if(Ext.isEmpty(newPath)) newPath = '/';
-		//if(this.path == newPath) return;
-		Ext.apply(this.grid.getStore().baseParams, Ext.value(options, {}) );
-		this.requestedPath = String(newPath);
+	,setParams: function(params){
+		if(Ext.isEmpty(params.path)) params.path = '/';
+		Ext.apply(this.grid.getStore().baseParams, Ext.value(params, {}) );
+		this.requestedParams = Ext.apply({}, params, this.params);
 		this.grid.getBottomToolbar().changePage(1);
 	}
 	,onProxyLoad: function (proxy, o, options) {
-		this.path = this.store.baseParams.path;
+		if(Ext.isEmpty(this.params)) this.params = {}
+		this.params.path = this.store.baseParams.path;
 		this.fireEvent('viewloaded', proxy, o, options);
 
 		this.folderProperties = o.result.folderProperties
@@ -560,7 +527,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		this.folderProperties.type = parseInt(this.folderProperties.type);
 		this.folderProperties.subtype = parseInt(this.folderProperties.subtype);
 		this.folderProperties.pathtext = o.result.pathtext;
-//		this.actions.up.setDisabled( (o.result.pathtext == '/') || (!Ext.isEmpty(this.tree) && (this.tree.getRootNode().attributes.nid == this.folderProperties.id) ));
 		canCreate = true; //TODO: review where we can create tasks
 		this.actions.createTask.setDisabled(!canCreate); 
 		this.actions.createEvent.setDisabled(!canCreate); 
@@ -583,11 +549,11 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		row = this.grid.selModel.getSelected();
 		if(!App.openObject(row.get('type'), row.get('nid'), e) ){
 			if(Ext.isEmpty(this.grid.store.baseParams.query) ){
-				path = this.path.split('/');
+				path = this.params.path.split('/');
 				path.push(row.get('nid'));
-				this.fireEvent('changepath', path.join('/'))
+				this.fireEvent('changeparams', {path: path.join('/')} )
 			}else{
-				this.fireEvent('changepath', row.get('nid'))
+				this.fireEvent('changeparams', {path: row.get('nid')} )
 			}
 		}
 	}
@@ -596,9 +562,8 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		if(!this.grid.selModel.hasSelection()) return;
 		row = this.grid.selModel.getSelected();
 		this.fireEvent('changeview', 0, e);
-		this.fireEvent('changepath', row.get('pid'), {showDescendants: false}, e)	
-		//this.fireEvent('showdescendants', false, e);
-		App.mainViewPort.locateObject(r.data.pid, r.data.nid);
+		this.fireEvent('changeparams', {path: row.get('pid'), descendants: false}, e)	
+		//App.mainViewPort.locateObject(r.data.pid, r.data.nid);
 	}
 	,onCutClick: function(buttonOrKey, e) {
 		if(this.actions.cut.isDisabled()) return;
@@ -657,8 +622,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 	,onReloadClick: function(b, e){
 		p = Ext.value(this.grid.store.lastOptions, {});
 		p.params = this.grid.store.baseParams
-		p.params.path = this.path
-		p.params.showDescendants = this.showDescendants
+		Ext.apply(p.params, this.params);
 		this.grid.store.reload(p)
 	}
 	,onDeleteClick: function(b, e) {
@@ -695,7 +659,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		/* TODO: also delete all visible nodes(links) that are links to the deleted node or any its child */
 	}
 	,onObjectsSaved: function(form, e){
-        	//clog('call reload from onObjectsSaved')
 		if(this.folderProperties.id == form.data.pid) this.onReloadClick();
 		else if(!Ext.isEmpty(form.data.id)){
 			idx = this.grid.store.findExact('nid', parseInt(form.data.id))
@@ -720,9 +683,8 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
         }
         ,setShowDescendants: function(v){
         	v = (v === true);
-        	if(this.showDescendants == v) return;
-        	this.showDescendants = v;
-        	//this.onReloadClick();
+        	if(this.params.descendants == v) return;
+        	this.params.descendants = v;
         }
 
 })
@@ -737,7 +699,7 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
 	,initComponent: function(){
 		
 		this.view = new CB.TasksViewGrid({
-			showDescendants: true
+			params: {descendants: true}
 		})
 		Ext.apply(this,{
 			items: this.view
@@ -750,7 +712,6 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
 	}
 	,onAfterRender: function(){
 		this.view.onFiltersChange({"status":[{"mode":"OR","values":["1","2"]}],"assigned":[{"mode":"OR","values":[App.loginData.id]}]});
-		//this.view.changePath('/', {filters: {"1status":[{"mode":"OR","values":["1","2"]}],"3assigned":[{"mode":"OR","values":[App.loginData.id]}]} });
 	}
 })
 Ext.reg('CBTasksViewGridPanel', CB.TasksViewGridPanel);

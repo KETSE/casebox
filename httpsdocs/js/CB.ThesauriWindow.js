@@ -181,14 +181,6 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
 		this.selectedValues = this.data.value ? this.data.value.split(',') : [];
 		if(this.store != this.grid.store) this.grid.reconfigure(this.store, this.grid.getColumnModel());
 		if(this.store.fields.findIndex('name', this.dateColumn) >= 0){
-			// this.cm.push({
-			// 	header: L.Date
-			// 	,width: 60
-			// 	,dataIndex: this.dateColumn
-			// 	,format: App.dateFormat
-			// 	,renderer: App.customRenderers.date
-			// });
-			// clog('this.cm', this.cm)
 			this.grid.reconfigure(this.store, 
 				new Ext.grid.ColumnModel([{
 					header:' '
@@ -218,7 +210,6 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
 				}
 			])
 			);
-			//this.setWidth(500);
 		}
 		
 		

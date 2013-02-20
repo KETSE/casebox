@@ -782,9 +782,9 @@ class Tasks{
 				case 3: $d['importance_text'] = L\High; break;
 			}
 
-			$params = array( '{name}' => htmlentities($d['title'])
+			$params = array( '{name}' => adjustTextForDisplay($d['title'])
 				,'{datetime_period}' => $d['datetime_period']
-				,'{description}' => nl2br(htmlentities($d['description']))
+				,'{description}' => nl2br(adjustTextForDisplay($d['description']))
 				,'{status}' => $d['status']
 				,'{status_text}' => L('taskStatus'.$d['status'])
 				,'{importance_text}' => $d['importance_text']

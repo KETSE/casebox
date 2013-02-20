@@ -68,7 +68,7 @@ function doRpc($cdata){
 			'method'=>$method
 		);
 
-		require_once("classes/$action.php");
+		//require_once("classes/$action.php"); // it's managed by _autoload
 		$o = new $action();
 
 		$params = isset($cdata->data) && is_array($cdata->data) ? $cdata->data : array();

@@ -78,7 +78,6 @@ CB.FacetList = Ext.extend( CB.Facet, {
 			}, this)
 		}
 		this.serverValues = values;
-		clog('facetField', facetField);
 		switch(facetField){
 			case 'due':
 			case 'date':
@@ -207,10 +206,8 @@ CB.FacetList = Ext.extend( CB.Facet, {
 		return { f: this.f, mode: this.mode, values: r };
 	}
 	,uncheck: function(value){
-		clog('unchecking:', value);
 		value = String(value); //parseInt(value)
 		idx = this.store.findExact('id', value );
-		clog(idx);
 		if(idx >= 0) this.store.getAt(idx).set('active', 0);
 		else if(!Ext.isEmpty(this.serverValues) ) this.serverValues.remove(value);
 	}

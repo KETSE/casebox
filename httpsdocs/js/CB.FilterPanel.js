@@ -38,7 +38,6 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
 				this.insert(idx, facet);
 			}
 			facet.processServerData(value.items, options);
-			//clog('updating facets with ', value.items, options)
 			facet.setVisible(facet.store.getCount() > 0) ;
 			idx++;
 		}, this);
@@ -80,9 +79,7 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
 		return result;
 	}
 	,onActiveFiltersItemClick: function(idx, data, e){
-		clog(data.id, 'data.id');
 		if(data.id == -1) return this.fireEvent('change', {} );
-		clog(data.facetId, 'data.facetId');
 		i = this.find('facetId', data.facetId)[0];
 		if(i){
 			i.uncheck(data.value);

@@ -11,7 +11,7 @@ class BrowserView extends BrowserTree{
 			
 		$pid = null;
 		if(!empty($p->path)) $pid = Path::getId($p->path); elseif(!empty($p->pid)) $pid = is_numeric($p->pid) ? $p->pid : Browser::getRootFolderId();
-		if(empty($p->showDescendants)) $p->pid = $pid; else $p->pids = $pid;
+		if(empty($p->descendants)) $p->pid = $pid; else $p->pids = $pid;
 		$s = new Search();
 		$rez = array_merge($rez, $s->query($p));
 		if(!empty($rez['data']))
@@ -19,8 +19,7 @@ class BrowserView extends BrowserTree{
 			$d = &$rez['data'][$i];
 			$d['nid'] = $d['id'];
 			unset($d['id']);
-			if(!empty($d['name'])) $d['name'] = htmlentities($d['name']);
-			//if(empty($d['description'])) $d['description'] = htmlentities($d['description']);
+			if(!empty($d['name'])) $d['name'] = adjustTextForDisplay($d['name']);
 
 			$res = mysqli_query_params('select 1 from tree where pid = $1 limit 1', $d['nid']) or die(mysqli_query_error());
 			if($r = $res->fetch_row()) $d['has_childs'] = true;
@@ -84,7 +83,7 @@ class BrowserView extends BrowserTree{
 			$params = coalesce(@$p->{$k}, $default_filters[$k]);
 			if(!empty($v->path)){
 				$path = $v->path;
-				if(empty($v->showDescendants) ) $params->pid = Path::getId($path); else $params->pids = Path::getId($path);
+				if(empty($v->descendants) ) $params->pid = Path::getId($path); else $params->pids = Path::getId($path);
 			}
 			$sr = $search->query( $params );
 			$d = array();

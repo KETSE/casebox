@@ -66,12 +66,6 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 						for (var i = 0; i < obj.result.data.length; i++) {
 							obj.result.data[i].start = date_ISO_to_date(obj.result.data[i].start);
 							obj.result.data[i].end = Ext.value(date_ISO_to_date(obj.result.data[i].end), obj.result.data[i].start);
-							//obj.result.data[i].ad = (obj.result.data[i].allday == 1);
-							//clog(obj.result.data[i].start, obj.result.data[i].end)
-							//cls = Ext.value(obj.result.data[i].cls, 'cal-evt-bg-t'+obj.result.data[i]['type']);
-							/*cls = 'cal-evt-bg-t'+obj.result.data[i]['type'];
-							if(!Ext.isEmpty(obj.result.data[i].iconCls)) cls = cls + ' icon-padding '+ obj.result.data[i].iconCls;
-							obj.result.data[i].cls = cls;/**/
 						};
 					}
 				}
@@ -87,7 +81,6 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 			,listeners: {
 				scope: this
 				,beforeload: function(st, r, o){
-					// clog(r.params.start, !Ext.isDate(r.params.start))
 					// if(!Ext.isDate(r.params.start)) r.params.start = new Date()
 					//  || !Ext.isDate(r.params.end)) return false;
 					if(!this.allowedReload){
@@ -104,27 +97,9 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 						r.set('cls', cls);
 					}, this)
 					this.getLayout().activeItem.syncSize();
-					// for (var i = 0; i < recs.length; i++) {
-					// 	cls = 'cal-evt-bg-t'+recs[i].get('type');
-					// 	recs[i].set('iconCls', getItemIcon(recs[i].data) )
-					// 	if(!Ext.isEmpty(recs[i].get('iconCls'))) cls = cls + ' icon-padding '+ recs[i].get('iconCls');
-					// 	recs[i].set('cls', cls);
-					// };
-
-				}/**/
+				}
 			}
 		});
-		/*new Ext.data.JsonStore({
-			id: 'eventStore'
-			,root: 'evts'
-			,data: eventList // defined in event-list.js
-			,proxy: new Ext.data.MemoryProxy()
-			,fields: Ext.calendar.EventRecord.prototype.fields.getRange()
-			,sortInfo: {
-			    	field: 'StartDate'
-				,direction: 'ASC'
-			}
-		});/**/
 		
 		Ext.apply(this, {
 			listeners: {
@@ -152,15 +127,12 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 					// edit canceled
 				}
 				,viewchange: function(p, vw, dateInfo){
-					//clog('view changed and we are loading', arguments);
 					if(this.editWin) this.editWin.hide();
 					if(dateInfo !== null){
 						// will be null when switching to the event edit form so ignore
 						//Ext.getCmp('app-nav-picker').setValue(dateInfo.activeDate);
 						this.updateTitle(dateInfo, vw);
 						this.eventsReloadTask.delay(500)
-						//this.onReloadClick()
-						//this.eventStore.reload();
 					}
 				}
 				,dayclick: function(vw, dt, ad, el){
@@ -201,9 +173,9 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 		params.end.setMinutes(59);
 		params.end.setSeconds(59);
 		params.end.setMilliseconds(999);
-		params.filter = this.filter
+		//params.filter = this.filter
 		params.facets = 'calendar'
-		//clog(params);
+		clog('do load params', params)
 		this.eventStore.load({ params: params })
 	}
 	// The edit popup window is not part of the CalendarPanel itself -- it is a separate component.
@@ -223,7 +195,7 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 	        		App.mainViewPort.fireEvent('taskedit', {data: {type: rec.data.type, id: id} } );
 	        		//App.mainViewPort.fireEvent('eventedit', {id: id} );
 	        		break;
-	        	default: //clog('Clicked type: ' + rec.data.type);
+	        	default: 
 
 	        }
 	        /*if(!this.editWin){
@@ -452,7 +424,6 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
 	}
         ,onRangeSelect: function(c, range, callback){
         	allday = ((range.StartDate.format('H:i:s') == '00:00:00') && (range.EndDate.format('H:i:s') == '23:59:59') ) ? 1 : 0;
-        	clog('selection', arguments, 'allday', allday);
         	App.mainViewPort.fireEvent('taskcreate', { data: {
         		pid: this.folderProperties.id
         		,date_start: range.StartDate
@@ -467,7 +438,6 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
         }
         ,onDayClick: function(c, date, ad, el){
         	allday = (date.format('H:i:s') == '00:00:00') ? 1 : 0;
-        	clog('day click', arguments, 'allday', allday);
         	App.mainViewPort.fireEvent('taskcreate', { data: {
         		pid: this.folderProperties.id
         		,date_start: date
@@ -479,10 +449,8 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
         	);
         }
 	,onBeforeLoad: function(st, r, o){
-		if(Ext.isEmpty(this.requestedPath)) return false;
-		st.baseParams.path = this.requestedPath;
-		st.baseParams.showDescendants = this.showDescendants;
-		st.baseParams.query = this.query;
+		if(Ext.isEmpty(this.requestedParams)) return false;
+		Ext.apply(st.baseParams, this.requestedParams)
 	}
 	,onProxyLoaded: function(proxy, o, options){
 		this.folderProperties = o.result.folderProperties
@@ -495,11 +463,10 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
 		this.fireEvent('viewloaded', proxy, o, options)
 		this.filtersPanel.updateFacets(o.result.facets, options);
 	}
-	,changePath: function(newPath, options){
-		//clog('called calendar changePath with params', arguments)
-		if(Ext.isEmpty(newPath)) newPath = '/';
-		this.calendar.eventStore.baseParams = Ext.value(options, {});
-		this.requestedPath = String(newPath);
+	,setParams: function(params){
+		if(Ext.isEmpty(params.path)) params.path = '/';
+		//this.calendar.eventStore.baseParams = Ext.value(params, {});
+		this.requestedParams = Ext.apply({}, params, this.calendar.eventStore.baseParams);
 		this.onReloadClick();
 	}
 	,onSearchQuery: function(query, e){
@@ -538,8 +505,10 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
 		this.syncSize()
         }
 	,onFiltersChange: function(filters){
-		this.calendar.eventStore.baseParams.filters = filters;
-		this.onReloadClick();
+		this.setParams({filters: filters});
+		// clog('passed filters', filters);
+		// this.calendar.eventStore.baseParams.filters = filters;
+		// this.onReloadClick();
 	}
 
 });
@@ -560,7 +529,7 @@ CB.CalendarViewPanel = Ext.extend(Ext.Panel, {
 			items: this.view
 		})
 		CB.CalendarViewPanel.superclass.initComponent.apply(this, arguments);
-		this.view.changePath('/', {filters: {"status":[{"mode":"OR","values":["1","2"]}],"assigned":[{"mode":"OR","values":[App.loginData.id]}]} });
+		this.view.setParams({path:'/', filters: {"status":[{"mode":"OR","values":["1","2"]}],"assigned":[{"mode":"OR","values":[App.loginData.id]}]} });
 	}
 })
 Ext.reg('CBCalendarViewPanel', CB.CalendarViewPanel);

@@ -88,7 +88,6 @@
 		$mail_count = $mailbox->countMessages();
 		echo 'Mail count: '.$mail_count."\n";
 		
-		//var_dump($mailbox);
 		$delete_ids = array ();
 		$processed_ids = array ();
 		$i = 0;
@@ -100,16 +99,13 @@
 			
 			$subject = decode_subject($mail->subject);
 			$subject = str_replace('Fwd: ', '', $subject);
-			//echo $subject."\n";
 			$pid = false;
 			/* try to get target folder from subject*/
 			$path = false; //case_nr
 			if(preg_match('/(\([\s]*(.+)[\s]*\))\s*$/i', $subject, $matches)){
 				$subject = str_replace($matches[0], '', $subject);
 				$path = $matches[2];
-				//die('path found: '.$path);
 			}else{
-				//die('path not matched in path');
 				/*STORE IN /<USER_ID>/Emails folder*/
 				$pid = User::getEmailFolderId();
 				// if(empty($test_path)){
@@ -191,7 +187,6 @@
 				// 	}else $pid = $test_path;
 				// }
 			}
-			//die('pid: '.$pid);
 			/* end of locate the corresponding folder in our database */
 			
 			/* try to find user from database that corresponds to this mail */
@@ -222,7 +217,6 @@
 			/* get email date /**/ //Thu, 24 Feb 2011 22:22:10 +0300
 			$time = strtotime($mail->date);
 			$time = date('Y-m-d H:i:s', $time);
-			//echo date('d/m/Y H:s:i', $time);
 			/* end of get email date /**/ 
 			
 			/* get contents and attachments */
@@ -231,7 +225,6 @@
 			$attachments = array();
 			foreach($parts as $p)
 				if(!$p['attachment']&&!$content) $content = $p['content']; else $attachments[] = $p; //content, filename, content-type
-			//if(!empty($attachments)) var_dump($attachments);
 			/* end of get contents and attachments */
 			
 			/* creating email object in corresponding case and adding attachments if any */
@@ -247,7 +240,6 @@
 			mysqli_query_params('insert into objects_data (object_id, field_id, duplicate_id, `value`) select $1, id, 0, $2 from templates_structure where template_id = $3 and name = $4', array($object_id, $mail->from, $email_template_id, 'from') ) or die(mysqli_query_error());
 			//$is_default = 1;
 			if(!empty($attachments)){
-				//var_dump($attachments);
 				foreach($attachments as $a){
 					if(!$a['attachment']) continue;
 						$tmp_name = tempnam(sys_get_temp_dir(), 'cbEml');
@@ -331,7 +323,6 @@ function getMailContentAndAtachment($message) {
 			 charset="KOI8-R""
 			  ["Content-Transfer-Encoding"]=> string(6) "base64"
 			}*/
-			//var_dump($headers);
 			$datapart = array('content-type' => $part->getHeaderField('content-type'));
 			try{
 				$datapart['attachment'] = true;

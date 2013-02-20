@@ -10,7 +10,11 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 	,deferredRender: true
 	,locked: false
 	,history: []
-	,showDescendants: false
+	,params: {
+		descendants: false
+		//,query: ''
+		//,path: ''
+	}
 	,initComponent: function(){
 		this.actions = {
 			back: new Ext.Action({
@@ -60,7 +64,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 			listeners: {
 				scope: this
 				,select: function(id){
-					this.changePath(id);
+					this.setParams({path: id});
 				}
 			}
 		});
@@ -140,10 +144,8 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 				,this.favoritesButton
 				,{xtype: 'tbspacer', width: 5}
 				,'->'
-				// ,{xtyle: 'label', html: '<span style="color: #777">'+L.View+':&nbsp;</span>'}
 				,this.viewButton
 				,'-'
-				// ,{xtype: 'tbspacer', width: 10}
 				,this.actions.showDescendants
 				,this.searchField
 			]
@@ -157,11 +159,14 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		    	]
 		    	,listeners:{
 		    		scope: this
-		    		,changepath: this.changePath
+		    		,changeparams: this.onChangeParams //fired by an internal view
 		    		,afterrender: function(){
-		    			if(!Ext.isEmpty(this.rootId)) this.changePath(this.rootId)
+		    			if(!Ext.isEmpty(this.rootId)){
+		    				this.params.path = this.rootId;
+		    				this.onReloadClick()
+		    			}
 		    		}
-		    		,changeview: this.onChangeViewEvent
+		    		,changeview: this.onChangeViewEvent  //fired from internal views when locating an item and change the view automaticly
 		    		,viewloaded: this.onViewLoaded
 		    		,showdescendants: this.onShowDescendantsEvent
 		    		,activate: function(){
@@ -196,92 +201,107 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		})
 		
 		CB.FolderView.superclass.initComponent.apply(this, arguments);
-    	}
+	}
 	,onChangeViewEvent: function(index, e){
 		e.stopPropagation();
-		tb = this.getTopToolbar();
-		idx = tb.items.findIndex('viewIndex', index);
+		idx = this.viewButton.menu.items.findIndex('viewIndex', index);
 		if(idx >= 0){
-			tb.items.itemAt(idx).toggle(true);
-			this.getLayout().setActiveItem(index);
+			clog('index', index);
+			b = this.viewButton.menu.items.itemAt(idx);
+			l = this.getLayout();
+			if( this.items.itemAt(b.viewIndex) == l.activeItem ) return;
+			l.setActiveItem(index);
+			this.viewButton.setText(b.text)
+			this.viewButton.setIconClass(b.iconCls)
 		}
 	}
 	,onViewLoaded: function(proxy, o, options){
-		//delete this.requestPath;
-		this.path = o.result.folderProperties.path
+		this.params.path = o.result.folderProperties.path
 		this.setTitle(o.result.pathtext);
+
 		this.searchField.emptyText = L.Search + ' ' + o.result.folderProperties.name;
-		this.searchField.clear();
-		if(Ext.isEmpty(options.params.query)) this.getTopToolbar().removeClass('search-on'); else this.getTopToolbar().addClass('search-on')
+		if(Ext.isEmpty(this.params.query)) this.searchField.clear();
+		
 		this.actions.up.setDisabled( (o.result.pathtext == '/') || (this.rootId == o.result.folderProperties.id) );
 		this.favoritesButton.setActiveItem(o.result.folderProperties.id)
 	}
 	,onChangeViewClick: function(b, e){
 		l = this.getLayout();
 		if(!Ext.isDefined(b.viewIndex) || ( this.items.itemAt(b.viewIndex) == l.activeItem ) ) return;
-		this.searchField.clear();
-		l.setActiveItem(b.viewIndex);
-		this.viewButton.setText(b.text)
-		this.viewButton.setIconClass(b.iconCls)
-		ai = l.activeItem;
-		if( (ai.setShowDescendants && (ai.showDescendants !== this.showDescendants) ) || (ai.path !== this.path) ){
-			ai.setShowDescendants(this.showDescendants);
-			if(ai.changePath) ai.changePath(this.path);
-		}
+		this.onChangeViewEvent(b.viewIndex, e);
+		if(l.activeItem.setParams) l.activeItem.setParams(this.params);
 	}
 	,onBackClick: function(b, e) {
 		if(this.actions.back.isDisabled()) return;
 		this.historyIndex = (!Ext.isDefined(this.historyIndex)) ? this.history.length - 2 : this.historyIndex - 1; 
-		this.gotoPath(this.history[this.historyIndex]);
+		this.setParams(this.history[this.historyIndex]);
 		this.actions.back.setDisabled(this.historyIndex <= 0);
 		this.actions.forward.setDisabled(false);
 	}
 	,onForwardClick: function(b, e) {
 		if(this.actions.forward.isDisabled()) return;
 		this.historyIndex = this.historyIndex + 1; 
-		this.gotoPath(this.history[this.historyIndex]);
+		this.setParams(this.history[this.historyIndex]);
 		this.actions.back.setDisabled(false);
 		this.actions.forward.setDisabled(this.historyIndex >= (this.history.length -1));
 	}
 	,onLockClick: function(b, e){
 		this.locked = b.pressed;
 	}
-	,changePath: function(path, options, e){
+	,sameParams: function(params1, params2){
+		if(Ext.isEmpty(params1) && Ext.isEmpty(params2)) return true;
+		if(Ext.isEmpty(params1)) params1 = {};
+		if(Ext.isEmpty(params2)) params2 = {};
+		if( (!Ext.isEmpty(params1.path) || !Ext.isEmpty(params2.path) ) && (params1.path != params2.path) ) return false;
+		if( (!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants) ) && (params1.descendants != params2.descendants) ) return false;
+		if( (!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query) ) && (params1.query != params2.query) ) return false;
+
+	}
+	,onChangeParams: function(params, e){// fired by internal view
 		if(e && e.stopPropagation) e.stopPropagation();
-		clog('change path requested to: ', path)
 		if(this.locked) return;
 		this.spliceHistory();
-		if(options && Ext.isDefined(options.showDescendants)) this.setShowDescendants(options.showDescendants);
-		i = this.getLayout().activeItem;
-		if(i.changePath) this.gotoPath(path)
+		this.setParams(params)
 	}
-	,gotoPath: function(newPath){
-		if(Ext.isEmpty(newPath)) newPath = '/';
-		if( !Ext.isEmpty(this.requestPath) && (this.requestPath == newPath) ) return;
-		if( Ext.isEmpty(this.requestPath) && (this.path == newPath) ) {
+	,setParams: function(params){
+		if(this.locked) return;
+		if(Ext.isEmpty(params.path)) params.path = '/';
+		sameParams = this.sameParams(this.params, Ext.apply({}, params, this.params) );
+		if( Ext.isEmpty(this.requestParams) &&  sameParams) {
 			i = this.getLayout().activeItem;
 			if(i.grid) App.mainViewPort.selectGridObject(i.grid);
 			return;
 		}
-		this.searchField.clear();
 
-		this.requestPath = String(newPath);
-		if(Ext.isEmpty(this.loadPathTask)) this.loadPathTask = new Ext.util.DelayedTask(this.loadPath, this);
-		this.loadPathTask.delay(500);
+		if( sameParams ) return;
+		this.requestParams = Ext.apply({}, params, this.params);
+		if(Ext.isEmpty(this.loadParamsTask)) this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
+		this.loadParamsTask.delay(500);
 	}
-	,loadPath: function(){
-		if(this.requestPath == this.path) return;
+	,loadParams: function(){
+		if( this.sameParams(params, this.requestParams) ) return;
 		if(!Ext.isDefined(this.historyIndex)){
-			if(!Ext.isEmpty(this.requestPath)){
-				this.history.push(this.requestPath);
+			if(!Ext.isEmpty(this.requestParams)){
+				this.history.push(Ext.apply({}, this.requestParams));
 				if(this.history.length > 99) this.history.shift();
 				this.actions.back.setDisabled(this.history.length < 2);
 				this.actions.forward.setDisabled(true);
 			}
 		}
+		Ext.apply(this.params, this.requestParams);
+		this.applyParamsVisually()
 		i = this.getLayout().activeItem;
-		clog('calling views changePath function with path', this.requestPath);
-		if(i.changePath) i.changePath(this.requestPath, {query: ''})
+		if(i.setParams) i.setParams(this.params)
+	}
+	,applyParamsVisually: function(){
+		this.getTopToolbar().find('iconCls', 'icon-descendants')[0].toggle(this.params.descendants);
+		if(Ext.isEmpty(this.params.query)){
+			this.searchField.clear()
+			this.getTopToolbar().removeClass('search-on');
+		}else{
+			this.searchField.setValue(this.params.query);
+			this.getTopToolbar().addClass('search-on');
+		}
 	}
 	,onReloadClick: function(){
 		i = this.getLayout().activeItem;
@@ -294,45 +314,47 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		i.onReloadClick();
 	}
 	,spliceHistory: function() {
-		//clog('splice, history', this.history);
-		//clog('splice, historyIndex: ', this.historyIndex);
 		if(Ext.isDefined(this.historyIndex)){
 			this.history.splice(this.historyIndex + 1, this.history.length - this.historyIndex);
 			delete this.historyIndex;
 		}
 	}
 	,onUpClick: function(b, e) {
-		path = this.path.split('/');
-		path.pop();
-		path = path.join('/');
-		if(Ext.isEmpty(path)) path = '/' + Ext.value(this.rootId, '');
+		params = Ext.apply({}, this.params)
+		params.path = params.path.split('/');
+		params.path.pop();
+		params.path = params.path.join('/');
+		if(Ext.isEmpty(params.path)) params.path = '/' + Ext.value(this.rootId, '');
 		this.spliceHistory()
-		this.changePath(path);
+		this.setParams(params);
 	}
 	,onSearchQuery: function(query, e) {
-		this.lastQuery = query;
-		i = this.getLayout().activeItem;
-		if(i.onSearchQuery) i.onSearchQuery(query, e)
+		if(query == this.params.query) return;
+		params = Ext.apply({}, this.params);
+		params.query = query;
+		this.setParams(params);
+		// i = this.getLayout().activeItem;
+		// if(i.setParams) i.setParams(params, e);
 	}
 	,setShowDescendants: function(value){
-		this.showDescendants = (value == true)
-		//this.actions.showDescendants.toggle(b.pressed);
-		this.getTopToolbar().find('iconCls', 'icon-descendants')[0].toggle(this.showDescendants);
-		this.getLayout().activeItem.setShowDescendants(this.showDescendants)
+		value = (value == true);
+		if(value == this.params.descendants) return;
+		params = Ext.apply({}, this.params);
+		params.descendants = value; 
+		this.setParams(params);
 	}
 	,onShowDescendantsClick: function(b, e){
-		i = this.getLayout().activeItem;
+		if(this.locked) return b.toggle(!b.pressed);
 		this.setShowDescendants(b.pressed);
-		if(i.setShowDescendants){
-			i.setShowDescendants(b.pressed);
-			i.onReloadClick();
-		}
-
+		clog('b.pressed', b.pressed);
+		// if(i.setShowDescendants){
+		// 	i.setShowDescendants(b.pressed);
+		// 	i.onReloadClick();
+		// }
 	}
 	,onShowDescendantsEvent: function(show, e){
 		this.setShowDescendants(show);
 		this.onShowDescendantsClick({pressed: show}, e);
-	//	this.getLayout().activeItem.onReloadClick();
 	}
 });
 

@@ -339,7 +339,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		window.open('/preview/'+this.data.id+'_.html');
 	}
 	,onPathClick: function(){
-	 	App.mainViewPort.fireEvent('openpath', this.data.path, this.data.pid);
+	 	App.mainViewPort.openPath( this.data.path, this.data.pid);
 	 }
 });
 

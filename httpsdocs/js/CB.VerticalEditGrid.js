@@ -5,35 +5,15 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,root: 'gridData'
 	,cls: 'spacy-rows'
 	,initComponent: function() {
-		/*this.privacyCombo = new Ext.form.ComboBox({
-			store: new Ext.data.JsonStore({
-				autoDestroy: true
-				,autoLoad: true
-				,fields: ['id', 'name']
-				,proxy: new Ext.data.MemoryProxy([{id: 0, name: L.forAll}, {id: 1, name: L.forOffice}, {id: 2, name: L.forMe}])
-				})
-			,typeAhead: true
-			,triggerAction: 'all'
-			,lazyRender:true
-			,mode: 'local'
-			,valueField: 'id'
-			,displayField: 'name'
-			,disabled: true
-			,editable: false
-			,width: 100
-			,listeners: {scope: this, select: this.updateFieldPrivacy}
-		});/**/
 		tbar = [
 			{iconCls: 'icon-table-insert-row', name: 'duplicateField', text: L.Add, disabled: true, handler: this.onDuplicateFieldClick, scope: this}
 			,{iconCls: 'icon-table-delete-row', name: 'deleteDuplicatedField', text: L.Delete, disabled: true, handler: this.onDeleteDuplicatedFieldClick, scope: this}
-			//,'-',{xtype: 'label', text: L.visible, style:'padding-right: 5px'}, this.privacyCombo
 		]
 		if(this.toolbarItems) Ext.each(this.toolbarItems, function(i){
 				if(Ext.isDefined(i.position)) tbar.splice(i.position, 0, i);
 				else tbar.push(i);
 		});
 		
-		//fields = [{name:'id', type: 'int'}, {name: 'field_id', type: 'int'}, 'title', 'value', 'info', 'files', {name: 'pfu', type: 'int'}, {name: 'duplicate_id', type: 'int'}, {name: 'duplicate_pid', type: 'int'}, {name: 'pid', type: 'int'}, 'tag', {name: 'type', type: 'int'} , {name: 'thesauriId', type: 'int'}, {name: 'level', type: 'int'}, {name: 'visible', type: 'boolean'}, {name: 'maxInstances', type: 'int'}, 'showIn']
 		fields = ['id', {name: 'field_id', type: 'int'}, 'title', 'value', 'info', 'files', {name: 'pfu', type: 'int'}, 'duplicate_id', 'duplicate_pid', {name: 'pid', type: 'int'}, 'tag', 'type', {name: 'level', type: 'int'}, {name: 'visible', type: 'int'}, 'cfg']
 		this.fullStore = new Ext.data.JsonStore({
 			fields: fields
@@ -76,32 +56,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 						v = '<img title="'+L.duplicate+' '+idx+'" class="fr duplicate'+idx+'" src="'+Ext.BLANK_IMAGE_URL + '" / >' + v;
 					}
 				}
-
-				// if(!Ext.isEmpty(this.data)){
-				// 	if(!Ext.isEmpty(this.data.duplicateFields)){
-				// 		if((record.get('duplicate_id') != 0) 
-				// 			&& !Ext.isEmpty(this.data.duplicateFields[record.get('field_id')]) 
-				// 			&& !Ext.isEmpty(this.data.duplicateFields[record.get('field_id')][record.get('duplicate_id')])){
-				// 			i = 1;
-				// 			Ext.iterate(this.data.duplicateFields[record.get('field_id')], function(k, v, o){
-				// 				i++;
-				// 				return (k != record.get('duplicate_id'));
-				// 			}, this);
-				// 			meta.css = meta.css + ' duplicate' + i;
-				// 			v += String(i)
-				// 		}else if(!Ext.isEmpty(this.data.duplicateFields[record.get('field_id')])){
-				// 			meta.css = meta.css + ' duplicate1';
-				// 			v += ' d1';
-				// 		}else if(record.get('cfg').maxInstances > 1){
-				// 			meta.css = meta.css + ' duplicate-plus';
-				// 			v += ' ...';
-				// 		}
-				// 	}else if(record.get('cfg').maxInstances > 1 ){
-				// 		meta.css = meta.css + ' duplicate-plus';
-				// 		v += ' ...2'
-				// 	}
-				// }
-				/* end of setting icon for duplicate fields /**/
 				return v;
 			}
 		},{	header: L.Value
@@ -132,9 +86,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				case '_short_date_format': 
 					return App.customRenderers.shortDateFormatCombo(v, meta, record, row_idx, col_idx, store);
 					break;
-				/*case '_organization': 
-					return App.customRenderers.organizationCombo(v, meta, record, row_idx, col_idx, store, this);
-					break/**/
 				case '_contact': 
 					return App.customRenderers.contactCombo(v, meta, record, row_idx, col_idx, store, this);
 					break
@@ -150,13 +101,11 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				case 'popuplist': 
 					return App.customRenderers.thesauriCell(v, meta, record, row_idx, col_idx, store);
 					break;
-				case 'text': //if(!Ext.isEmpty(record.get('value'))) meta.css = 'icon-document-text-centered'; return ''; break;
+				case 'text':
 				case 'html': 
 					return App.shortenString(v, 200);
-					//if(!Ext.isEmpty(record.get('value'))) meta.css = 'icon-document-text-centered'; return ''; 
 					break;
 				case 'memo': 
-					//meta.attr = ' style="height:' + Ext.value(record.get('cfg').height, 150) + 'px"';
 					return '<pre>'+App.shortenString(v, 500)+'</pre>';
 					break;
 				default: return v;
@@ -168,11 +117,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			,dataIndex: 'info'
 			,editor: new Ext.form.TextField()
 		}
-		/*,{ header: 'duplicate_id', dataIndex: 'duplicate_id' },{ header: 'duplicate_pid', dataIndex: 'duplicate_pid' }
-		,{ header: 'id', dataIndex: 'id' }
-		,{ header: 'pid', dataIndex: 'pid' }
-		,{ header: 'level', dataIndex: 'level' }
-		,{ header: 'visible', dataIndex: 'visible' }/**/
 		];
 		
 		Ext.apply(this, {
@@ -228,7 +172,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	}
 	,isDuplicateField: function(record){
 		if(this.canDuplicateField(record)) return true;
-		//clog('here', !Ext.isEmpty(this.data.duplicateFields[record.get('field_id')]))
 		if( !Ext.isEmpty(this.data) 
 			&& !Ext.isEmpty(this.data.duplicateFields)
 			&& !Ext.isEmpty(this.data.duplicateFields[record.get('field_id')]) 
@@ -262,17 +205,8 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,isLastDuplicateField: function(record){
 		
 		idx = this.store.indexOf(record);
-		clog(this.store.getCount(), idx, this.store.getCount() == (idx+1));
 		if(this.store.getCount() == (idx+1) ) return true;
 		return (this.store.getAt(idx +1).get('field_id') != record.get('field_id') );
-		// if(	Ext.isEmpty(this.data) 
-		// 	|| Ext.isEmpty(this.data.duplicateFields) 
-		// 	|| Ext.isEmpty(this.data.duplicateFields[record.get('field_id')]) 
-		// 	|| Ext.isEmpty(this.data.duplicateFields[record.get('field_id')][record.get('duplicate_id')])
-		// ){ return true;
-		// }else{
-		// 	return (this.getDuplicateFieldIndex(record) == this.data.duplicateFields.length);
-		// }
 	}
 	,onCellClick: function(g, r, c, e){
 		if(g.getColumnModel().getDataIndex(c) == 'files') 
@@ -283,13 +217,12 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				case 'add_duplicate': this.onDuplicateFieldClick();
 					break;
 			}
-		clog(e.getTarget());
 	}
 	,updateFieldPrivacy: function(cb, r, idx){
 		rec = this.getStore().getAt(this.popupForRow);
 		if(!rec) return;
 		rec.set('pfu', Ext.isEmpty(rec.get('pfu')) ? App.loginData.id : null);
-		this.fireEvent('change'); //this.refOwner.setDirty(true);
+		this.fireEvent('change');
 		delete this.popupForRow;
 	}
 	,getFilesPopupMenu: function(){
@@ -299,12 +232,10 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				,{text: L.download, iconCls: 'icon-download', scope: this, handler: function(b){ if(Ext.isDefined(this.popupForRow)) this.fireEvent('filedownload', this.store.getAt(this.popupForRow).get('files')) } }
 				,'-'
 				,{text: L.erase, iconCls: 'icon-clear', scope: this, handler: function(b){
-						//c = this.getSelectionModel().getSelectedCell();
-						//if(Ext.isEmpty(c)) return;
 						r = this.getStore().getAt(this.popupForRow);
 						if(!r) return;
 						r.set('files', null);
-						this.fireEvent('change'); //this.refOwner.setDirty(true);
+						this.fireEvent('change');
 						delete this.popupForRow;
 					}
 				}
@@ -319,7 +250,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				,{text: L.uploadAnother, iconCls: 'icon-upload-other', scope: this, handler: function(){ this.fireEvent('fileupload', this.refOwner.data.id) } }
 				,'-'
 				,{text: L.files, iconCls: 'icon-files', hideOnClick: false, menu: []}
-				//,{text: L.allCaseFiles + ' ...', iconCls: 'icon-case-all-files', scope: this, handler: function(){ this.fireEvent('showcasefiles') }}
 			]
 			,listeners: {
 				scope: this
@@ -385,7 +315,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			items: [
 				{text: L.addDuplicateField, scope: this, handler: this.onDuplicateFieldClick }
 				,{text: L.delDuplicateField, scope: this, handler: this.onDeleteDuplicatedFieldClick }
-				//{xtype: 'menucheckitem', text: L.Confidential, scope: this, handler: this.updateFieldPrivacy}
 			]
 		});
 		this.titlePopupMenu.items.itemAt(0).setDisabled(!this.canDuplicateField(r));
@@ -425,7 +354,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,getBubbleTarget: function(){
 		if(!this.parentWindow){
 			this.parentWindow = this.findParentByType('CBGenericForm') || this.refOwner;
-			//if(Ext.isEmpty(this.parentWindow))
 		}
 		return this.parentWindow;
 	}
@@ -454,14 +382,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				,pid: r.get('pid')
 				,tag: r.get('tag')
 				,type: r.get('type')
-				,cfg: Ext.apply({}, r.get('cfg'))/*{
-					showIn: r.get('cfg').showIn
-					,edit_in: r.get('cfg').edit_in
-					,thesauriId: r.get('cfg').thesauriId
-					,maxInstances: r.get('cfg').maxInstances
-					,tags: r.get('cfg').tags
-				}/**/
-				//,cfg: r.get('cfg')
+				,cfg: Ext.apply({}, r.get('cfg'))
 				,level: r.get('level')
 				,visible: r.get('visible')
 			}
@@ -471,7 +392,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			//if there is a date set for the date field, we are parsing it to a date value
 			if( (d.type == 'date') && Ext.isString(d.value) && !Ext.isEmpty(d.value))
 				d.value = Date.parseDate(d.value.substr(0,10), 'Y-m-d');
-			//if(d.type == 'case_title') d.value = this.refOwner.getBubbleTarget().data.title;
 			/* adding record to the store */	
 			record = new this.fullStore.recordType(d, Ext.id());
 			this.fullStore.add( record );
@@ -531,7 +451,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	}
 	,onAfterEditProperty: function(e){
 		if(e.field != 'value') return;
-		//clog('afteredit');
 		sm = this.getSelectionModel();
 		s = this.getSelectionModel().getSelectedCell();
 		this.updateVisibility();
@@ -543,7 +462,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 					&& (e.record.get('duplicate_id') == record.get('duplicate_id')) 
 				) record.set('value', null);
 			}, this);
-			this.fireEvent('change'); //this.refOwner.setDirty(true);
+			this.fireEvent('change'); 
 		}
 	}
 	,getFieldValue: function(field_id, duplication_id){
@@ -560,7 +479,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				pid = record.get('pid');// //5
 				if(!Ext.isEmpty(pid)){ // //5
 					field_id = record.get('field_id');// //6
-					duplicate_id = record.get('duplicate_id'); // //ext-gen363
+					duplicate_id = record.get('duplicate_id');
 					pid_duplicate_id = Ext.value(record.get('duplicate_pid'), 0); // //0
 					if(pid_duplicate_id){ //iterating to top of the possible tree duplication
 						pri = this.fullStore.findBy(function(r){return ( (r.get('field_id') == field_id) && (r.get('duplicate_id') === pid_duplicate_id) );}, this);
@@ -578,7 +497,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 						va = [];
 						if(Ext.isDefined(record.get('cfg').dependency) && !Ext.isEmpty(record.get('cfg').dependency.pidValues)){
 							v = record.get('cfg').dependency.pidValues;
-							clog('!va', va, pr.get('value'));
 							va = Ext.isArray(v) ? v : String(v).split(',');
 						}
 						if( record.get('visible') == 1 ){
@@ -587,7 +505,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 							    || ( Ext.isDefined(record.get('cfg').dependency) && Ext.isEmpty(pr.get('value')) ) // OR if the field is dinamic and parent has no selected value
 							)
 							{
-								clog('recird considered visible, setting it to hidden')
 								record.set('visible', 0);
 								modified = true;
 							}
@@ -596,15 +513,12 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 								&& ( (record.get('cfg').thesauriId !== 'variable') ||  !Ext.isEmpty(pr.get('value'))) 
 								&& ( Ext.isDefined(record.get('cfg').dependency) ||  !Ext.isEmpty(pr.get('value'))) 
 							) { //if no pidValues specified or pidValues contains the parent selected value then show the field
-								clog('recird considered hidden, setting it to true')
 								record.set('visible', 1);
 								modified = true;
 							}
 						}
 					}else{ // if parent row is not visible then we just hide the child
 						if(record.get('visible') == 1){
-							clog('parend is hiddem and child is visible, setting it to hidden')
-								
 							record.set('visible', 0);
 							modified = true;
 						}
@@ -642,27 +556,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			); 
 	}
 	,onSelectionChange: function(sm, o){
-		/* duplication */
-		// is = sm.grid.getTopToolbar().items;
-		// b1 = is.find(function(i){return (i.name == 'duplicateField');});
-		// b2 = is.find(function(i){return (i.name == 'deleteDuplicatedField');});
-		// if(sm.hasSelection()){
-		// 	b1.setDisabled(o.record.get('cfg').maxInstances < 2);
-		// 	b2.setDisabled( (o.record.get('duplicate_id') === 0) || (Ext.isEmpty(this.data.duplicateFields[o.record.get('field_id')]) || Ext.isEmpty(this.data.duplicateFields[o.record.get('field_id')][o.record.get('duplicate_id')]) ) );
-		// }else{
-		// 	b1.setDisabled(true);
-		// 	b2.setDisabled(true);
-		// }
-		/* end of duplication */
-		/* privacy*/
-		/*if(sm.hasSelection()){
-			this.privacyCombo.setValue(o.record.get('privacy'));
-			this.privacyCombo.setDisabled(false);
-		}else{
-			this.privacyCombo.setValue(0);
-			this.privacyCombo.setDisabled(true);
-		}
-		/* end of privacy*/
 	}
 	,duplicateField: function(fieldId, duplicateId, duplicatePid){
 		// 3 26 0
@@ -758,11 +651,8 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		this.fullStore.each(function(r){
 			if(delDuplicates.indexOf(r.get('duplicate_id')) >=0) delRecords.push(r);
 			else if(delDuplicates.indexOf(r.get('duplicate_pid')) >=0){
-				//if(r.get('field_id') == fieldId){
-					r.set('duplicate_pid', duplicatePid);
-					this.data.duplicateFields[fieldId][r.get('duplicate_id')] = duplicatePid;
-				//}
-				//else delRecords.push(r);
+				r.set('duplicate_pid', duplicatePid);
+				this.data.duplicateFields[fieldId][r.get('duplicate_id')] = duplicatePid;
 			}
 		}, this);
 		this.changeMaxInstances(fieldId, duplicateId, 1);
@@ -781,14 +671,14 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		r = this.store.getAt(s[0]);
 		this.duplicateField(r.get('field_id'), null, r.get('duplicate_id'));
 		this.updateVisibility()
-		this.fireEvent('change'); //this.refOwner.setDirty(true);
+		this.fireEvent('change');
 	}
 	,onDeleteDuplicatedFieldClick: function(b){
 		s = this.getSelectionModel().getSelectedCell();
 		if(Ext.isEmpty(s)) return;
 		r = this.store.getAt(s[0]);
 		this.deleteDuplicatedField( r.get('field_id'), r.get('duplicate_id'), r.get('duplicate_pid') );
-		this.fireEvent('change'); //this.refOwner.setDirty(true);
+		this.fireEvent('change');
 	}
 })
 

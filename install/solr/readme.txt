@@ -7,6 +7,16 @@
 ==Starting on Windows==
 use 'start_jetty_win.bat' and change the paths.
 Once you get solr running, you can install it as a service, here is a guide: http://drupal.org/node/1359598
+> nssm install jetty
+
+Application: c:\Windows\System32\java.exe
+Params: -jar c:/opt/solr/example/start.jar -Dsolr.solr.home=c:/opt/solr/example/multicore -Djetty.home=c:/opt/solr/example/ -Djava.util.logging.config.file=c:/opt/solr/example/etc/logging.properties
+Name: jetty
+
+
+
+NOTICE: you should edit the file c:/opt/solr/example/etc/logging.properties and specify an Absolute path for logging:
+java.util.logging.FileHandler.pattern = c:/opt/solr/logs/solr%u.log
 
 
 ==Starting on Linux==

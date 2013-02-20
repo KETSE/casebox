@@ -13,14 +13,9 @@ class preview_extractor_office extends preview_extractor{
 		$sql = 'select c.id `content_id`, c.path, p.status, (select name from files f where f.content_id = c.id limit 1) `name` '.
 			'from file_previews p '.
 			'left join files_content c on p.id = c.id '.
-			//'left join files f on f.content_id = p.id '.
 			'where p.`status` = 1 and `group` = \'office\' order by p.cdate';
 		$res = mysqli_query_params($sql) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
-			// if(empty($r['id'])){
-			// 	$this->removeFromQueue($r['content_id']);
-			// 	continue;
-			// }
 			mysqli_query_params('update file_previews set `status` = 2 where id = $1', $r['content_id']) or die(mysqli_query_error());
 			$ext = explode('.', $r['name']);
 			$ext = array_pop($ext);
@@ -29,18 +24,9 @@ class preview_extractor_office extends preview_extractor{
 			$nfn = CB_FILES_PREVIEW_PATH.$r['content_id'].'_.'.$ext;
 			$pfn = CB_FILES_PREVIEW_PATH.$r['content_id'].'_.html';
 
-			//$cmd = "$fn, $nfn\n";
-			//echo $cmd;
 			copy($fn, $nfn);
-			//exec('java -Doffice.home="'.CB_OPENOFFICE_HOME_PATH.'" -jar "'.CB_JOD_PATH.'" '.$nfn.' -o html');
-			//putenv('HOME=/home/apache/');
 			file_put_contents($pfn, '');
-			
-			// $cmd = '/usr/local/sbin/unoconv -v -f html -o '.$pfn.' '.$nfn;
-			$cmd = CB_UNOCONV . ' -v -f html -o '.$pfn.' '.$nfn;  
-
-
-			//echo $cmd;
+			$cmd = '/usr/local/sbin/unoconv -v -f html -o '.$pfn.' '.$nfn;
 			exec($cmd);
 			unlink($nfn);
 			file_put_contents( $pfn, '<div style="padding: 5px">'.$this->purify(file_get_contents($pfn), array('URI.Base' => '/preview/', 'URI.MakeAbsolute' => true)).'</div>' );

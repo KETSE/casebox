@@ -6,6 +6,7 @@ CB.ActionsViewGrid = Ext.extend(CB.FolderViewGrid,{
 		Ext.apply(this, {
 			gridStateId: 'avg'
 		})
+		CB.ActionsViewGrid.superclass.initComponent.call(this, arguments);
 		CB.ActionsViewGrid.superclass.initComponent.apply(this, arguments);
 		this.grid.store.baseParams = {types: [4], facets: 'actions'}
 		tb =this.getTopToolbar();
@@ -22,13 +23,6 @@ CB.ActionsViewGrid = Ext.extend(CB.FolderViewGrid,{
 		this.actions.createEvent.setHidden(true);
 		this.actions.createFolder.setHidden(true);
 		this.actions.createCase.setHidden(true);
-
-		idx = tb.items.findIndex('iconCls', 'icon32-create');
-		if(idx > -1){
-			m = tb.items.itemAt(idx).menu;
-			//clog('count', m.items.getCount() );
-			
-		}
 	}
 })
 
@@ -42,7 +36,12 @@ CB.ActionsViewGridPanel = Ext.extend(Ext.Panel, {
 	,initComponent: function(){
 		
 		this.view = new CB.ActionsViewGrid({
-			showDescendants: true
+			hideArrows: true
+			,params: { descendants: true }
+			,listeners: {
+				scope: this
+				,changeparams: this.onChangeParams
+			}
 		})
 		Ext.apply(this,{
 			items: this.view
@@ -55,7 +54,9 @@ CB.ActionsViewGridPanel = Ext.extend(Ext.Panel, {
 	}
 	,onAfterRender: function(){
 		this.view.onFiltersChange();
-		//this.view.changePath('/', {filters: {"1status":[{"mode":"OR","values":["1","2"]}],"3assigned":[{"mode":"OR","values":[App.loginData.id]}]} });
+	}
+	,onChangeParams: function(params){
+		this.view.onChangeParams(params)		
 	}
 })
 Ext.reg('CBActionsViewGridPanel', CB.ActionsViewGridPanel);

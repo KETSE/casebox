@@ -450,7 +450,6 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 						,listeners:{
 							scope: this
 							,afterrender: function(c){
-								//clog('afterRender', arguments);
 								c.getEl().on('change', this.onPhotoChanged, this);
 							}
 						}
@@ -546,7 +545,6 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 		UsersGroups.getAccessData(this.data.id, this.processLoadedData, this);
 	}
 	,processLoadedData: function(response, e){
-		//clog('process loading data')
 		if(response.success === true){
 			this.data.name = Ext.value(response.data.name);
 			this.data.title = Ext.value(response.data['l'+App.loginData.language_id], response.data.name);
@@ -563,10 +561,6 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 			visible = (this.canEditUserData || (response.data.id == App.loginData.id));
 			this.getTopToolbar().items.itemAt(idx + 1).setVisible(visible); //divider for options button
 			this.getTopToolbar().items.itemAt(idx + 2).setVisible(visible); // options button
-			/*this.getTopToolbar().items.itemAt(idx + 1).setVisible(this.canEditUserData || (response.data.id == App.loginData.id)); //divider for change password button
-			this.getTopToolbar().items.itemAt(idx + 2).setVisible(this.canEditUserData || (response.data.id == App.loginData.id)); // change password button
-			this.getTopToolbar().items.itemAt(idx + 3).setVisible(this.canEditUserData); //change username divider
-			this.getTopToolbar().items.itemAt(idx + 4).setVisible(this.canEditUserData); //change username button/**/
 			this.updatePhoto(response.data.photo);
 			this.setDisabled(false);
 
@@ -582,7 +576,6 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 			return;
 		}/**/
 		this.getEl().mask(L.SavingChanges + ' ...')
-		//params = this.getForm().getFieldValues();
 		params = { offices: [] };
 		this.grid.getStore().each(function(r){params.offices.push(r.data)}, this);
 		params.id = this.data.id;
@@ -591,7 +584,6 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 	,onEditUserDataClick: function(w, idx, el, ev){
 		if(ev && (ev.getTarget().localName == "img") ) {
 			el = this.find('name', 'photo')[0].getEl();
-			//clog(el);
 			el.dom.click();
 		}else this.fireEvent('edit');
 	}
@@ -836,7 +828,6 @@ CB.ChangePasswordWindow = Ext.extend(Ext.Window, {
 								,params: this.data
 								,scope: this
 								,success: this.destroy
-								//,failure: App.formSubmitFailure
 							})
 						}
 					}

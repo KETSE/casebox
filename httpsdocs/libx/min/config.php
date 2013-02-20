@@ -65,10 +65,10 @@ $min_allowDebugFlag = true;
  * second line. The third line might work on some Apache servers.
  */
 $min_documentRoot = '';
-$min_documentRoot = substr(__FILE__, 0, -15);
+//$min_documentRoot = substr(__FILE__, 0, -15);
 //$min_documentRoot = $_SERVER['SUBDOMAIN_DOCUMENT_ROOT'];
-
-
+ $_SERVER['DOCUMENT_ROOT'] = realpath(dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
+// $min_documentRoot = $_SERVER['DOCUMENT_ROOT'];
 /**
  * Cache file locking. Set to false if filesystem is NFS. On at least one 
  * NFS system flock-ing attempts stalled PHP for 30 seconds!

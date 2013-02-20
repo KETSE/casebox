@@ -4,7 +4,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 	closable: false
 	,bodyCssClass: 'summary'
 	,autoScroll: true
-	,showDescendants: false
+	,params: { descendants:false }
 	,initComponent: function(){
 		this.dvActiveTasks = new CB.SummaryBlock({
 			name: 'activeTasks'
@@ -237,16 +237,14 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 		this.items.each( function(i){
 			if(!Ext.isEmpty(i.getParams)) this.lastParams[i.name] = i.getParams();
 		}, this)
-		clog('this.lastParams', this.lastParams);
 		BrowserView.getSummaryData(this.lastParams, this.processReload, this);
 	}
 	,processReload: function(r, e){
 		if(this.rendered) this.getEl().unmask()
 		if(r.success !== true) return;
 		
-		this.path = this.requestedPath;
+		this.params = this.requestedParams;
 		this.folderProperties = r.folderProperties
-		clog('e', e);
 		this.fireEvent('viewloaded', this, e, {params: this.lastParams});
 		
 		Ext.iterate(r.data, function(key, value, obj){
@@ -269,15 +267,12 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 	,onItemClick: function(){
 		clog(arguments)
 	}
-	,changePath: function(newPath, options){
-		clog('CP in summary', arguments);
-		if(Ext.isEmpty(newPath)) newPath = '/';
+	,setParams: function(params){
+		if(Ext.isEmpty(params.path)) params.path = '/';
 		
-		this.requestedPath = String(newPath);
-		options = Ext.value(options, {});
-		options.showDescendants = this.showDescendants;
+		this.requestedParams = Ext.apply({}, params, this.params);
 		this.items.each( function(i){
-			Ext.apply(i, {requestedPath: this.requestedPath, options: options});
+			Ext.apply(i, {requestedParams: this.requestedParams});
 		}, this)
 		this.onReloadClick();
 	}
@@ -289,14 +284,13 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
         }
         ,setShowDescendants: function(v){
         	v = (v === true);
-        	if(this.showDescendants == v) return;
-        	this.showDescendants = v;
+        	if(this.params.descendants == v) return;
+        	this.params.descendants = v;
 		this.items.each( function(i){
-			Ext.apply(i, { options: {showDescendants: this.showDescendants} });
+			Ext.apply(i, { options: this.params });
 		}, this)
         }
         ,onTasksChange: function(){
-        	clog('catch!');
         	this.dvActiveTasks.reload()
         	this.dvCompleteTasks.reload()
         }
@@ -377,8 +371,7 @@ CB.SummaryBlock = Ext.extend( Ext.Panel, {
 		this.reload()
 	}
 	,getParams: function(){
-		this.lastParams = Ext.apply({}, Ext.value(this.options, {}));
-		this.lastParams.path = this.requestedPath;
+		this.lastParams = Ext.apply({}, this.requestedParams);
 		Ext.apply(this.lastParams, this.filters[Ext.value(this.activeFilter, 0)].value);
 		this.lastParams.rows = 15;
 		return this.lastParams;

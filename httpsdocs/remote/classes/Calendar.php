@@ -19,7 +19,7 @@ class Calendar{
 		$pid = explode('/', $p->path);
 		$pid = array_pop($pid);
 		$pid = is_numeric($pid) ? $pid : Browser::getRootFolderId();
-		if(empty($p->showDescendants)) $p->pid = $pid; else $p->pids = $pid;
+		if(empty($p->descendants)) $p->pid = $pid; else $p->pids = $pid;
 		$p->dateStart = $p->start.'Z';
 		unset($p->start);
 		$p->dateEnd = substr($p->end, 0, 10).'T23:59:59.999Z';

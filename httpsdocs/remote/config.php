@@ -1,5 +1,7 @@
 <?php
-$API = array(
+$customConfigGroups = getCustomGroupsConfig();
+$API = empty($customConfigGroups[CB_PROJ.'_api']) ? array() : $customConfigGroups[CB_PROJ.'_api'];
+$API = array_merge( $API, array(
 	'Auth' => array(
 		'methods'=>array(
 			'getLoginInfo'	=>	array('len' => 0)
@@ -215,5 +217,6 @@ $API = array(
 			,'templateMoveToTag'		=> array('len' => 1)
 		)
 	)
+)
 );
 ?>

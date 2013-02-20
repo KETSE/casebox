@@ -1,11 +1,11 @@
 // JavaScript Document
 Ext.namespace('App'); 
-
 Ext.BLANK_IMAGE_URL = '/css/i/s.gif';
 
 clog = function(){if(typeof(console) != 'undefined') console.log(arguments)}
 // application main entry point
 Ext.onReady(function(){
+	App = new Ext.util.Observable();
 	Ext.state.Manager.setProvider( new Ext.state.CookieProvider({
 		expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
 	}));
@@ -158,7 +158,6 @@ function initApp(){
 			}
   		}
   		,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
-			clog('incomming v', v);
 			if(Ext.isEmpty(v)) return '';
 			
 			r = [];
@@ -171,7 +170,6 @@ function initApp(){
 				if(!cw || !cw.objectsStore) return '';
 				store = cw.objectsStore;
 			}
-			clog(v, store);
 			switch(record.data.cfg.renderer){
 				case 'listGreenIcons':
 					for(i=0; i < v.length; i++){
@@ -436,7 +434,7 @@ function initApp(){
 				//e should contain all necessary info
 				switch(e.record.get('cfg').editor){
 					case 'form': 
-						if(e && e.grid){//clog('form field in grid');
+						if(e && e.grid){
 							e.cancel = true;
 							/* prepeare data to set to popup windows */
 							store = false;
@@ -470,22 +468,18 @@ function initApp(){
 							if(w.setData) w.setData(data);
 							w.show();
 							return w;
-						}else return new CB.ObjectsTriggerField({data: objData, width: 500}); //clog('form field out of grid -> objects trigger field');
-						// if(Ext.isEmpty(e.grid)) return new Ext.form.ObjectsFormField({ownerCt: e.ownerCt, width: 500}); //when it is in top fieldset
-						// return new Ext.form.ObjectsTriggerField({});
+						}else return new CB.ObjectsTriggerField({data: objData, width: 500}); 
 						break;
 					// case 'popuplist':
-					// 	if(e && e.grid){ clog('popuplist in grid');
+					// 	if(e && e.grid){ 
 					// 		e.cancel = true;
 					// 		w = new CB.ObjectsSelectionForm({data: objData});
 					// 		w.show();
 					// 		return w;
-					// 	}else return new CB.ObjectsTriggerField({data: objData, width: 500}); //clog('popuplist out of grid -> objects trigger field');
+					// 	}else return new CB.ObjectsTriggerField({data: objData, width: 500}); 
 					// 	break;
 					default:
 						return new CB.ObjectsComboField({data: objData, width: 500});
-						// if(e && e.grid) clog('objects combo in grid');
-						// else clog('objects combo out of grid');
 						break;
 				}
 				// if(e.record.get('cfg').editor == 'form'){
@@ -718,6 +712,8 @@ function initApp(){
 		if(Ext.isPrimitive(set1)) set1 = String(set1).split(',');
 		if(Ext.isPrimitive(set2)) set2 = String(set2).split(',');
 		rez = [];
+		for (var i = 0; i < set1.length; i++) set1[i] = String(set1[i]);
+		for (var i = 0; i < set2.length; i++) set2[i] = String(set2[i]);
 		for (var i = 0; i < set1.length; i++) if( (set2.indexOf(set1[i]) >= 0) && (rez.indexOf(set1[i]) < 0 )) rez.push(set1[i]);
 		for (var i = 0; i < set2.length; i++) if( (set1.indexOf(set2[i]) >= 0) && (rez.indexOf(set2[i]) < 0 )) rez.push(set2[i]);
 		return rez;

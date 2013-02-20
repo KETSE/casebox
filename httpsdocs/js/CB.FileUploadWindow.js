@@ -134,7 +134,6 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 				,store: CB.DB.userTags
 				,api: {create: UsersGroups.addUserTag, search: UsersGroups.searchUserTags}
 			})
-		//clog(this.data);
 		Ext.apply(this, {
 			items: {
 				border: false
@@ -224,7 +223,6 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 		}
 	},onSubmitSuccess: function(form, action){
 		/*on success actions*/
-		//clog(action.result.data);
 		this.serverResponce = action.result;
 		this.fireEvent('submitsuccess', this, this.serverResponce.data);
 		this.hide();
@@ -235,11 +233,6 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 		}
 	},onSubmitFailure: function(form, action){
 		/*on failure actions*/
-		//this.fireEvent('submitsuccess', this, action.result.data);
-		//this.hide();
-		
-		//if(action.result.success == true) return this.onSubmitSuccess(form, action);
-
 		if(action.result.type == 'filesexist'){
 			this.serverResponce = action.result;
 			w = new CB.FilesConfirmationWindow({

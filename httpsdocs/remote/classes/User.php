@@ -88,7 +88,7 @@ class User{
 				,'rootVisible' => true
 			)
 		);
-		$rez['data'][] = array('title' => '<b>'.mb_strtoupper(L\Tasks,'UTF8').'</b>', 'iconCls' => 'icon-taskView', 'link' => 'CBTasksViewGridPanel', 'showDescendants' => true, 'closable' => true);
+		$rez['data'][] = array('title' => '<b>'.mb_strtoupper(L\Tasks,'UTF8').'</b>', 'iconCls' => 'icon-taskView', 'link' => 'CBTasksViewGridPanel', 'closable' => true);//, 'showDescendants' => true
 		$rez['data'][] = array('title' => '<b>'.mb_strtoupper(L\Calendar,'UTF8').'</b>', 'iconCls' => 'icon-calendarView', 'link' => 'CBCalendarViewPanel');
 		$rez['data'][] = array('title' => '<b>'.mb_strtoupper(L\Actions,'UTF8').'</b>', 'iconCls' => 'icon-actionView', 'link' => 'CBActionsViewGridPanel');
 		//$rez['data'][] = array('title' => '<b>'.mb_strtoupper(L\Projects,'UTF8').'</b>', 'iconCls' => 'icon-projectView', 'link' => 'CBProjects');

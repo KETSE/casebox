@@ -78,7 +78,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			,listeners: {
 				scope: this
 				,add: function(f, c, i){ c.enableBubble('change'); }
-				//,change: {scope: this, fn: function(){ this.setDirty(true);}}
 			}
 		})
 		this.tabPanel = new Ext.TabPanel({
@@ -206,87 +205,23 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 					
 					}
 				}
-				//,load: this.onFormLoaded it's called by parrent if fn exists
 			}
 		});
   		CB.Objects.superclass.initComponent.apply(this, arguments);
 		this.addEvents('deleteobject', 'associateObject', 'deassociateObject', 'fileupload', 'filedownload');//, 'filesdelete'
 		this.enableBubble(['deleteobject', 'fileupload', 'filedownload']);//, 'filesdelete'
 		App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
+		App.fireEvent('objectinit', this);
 	}
 	,onFormLoaded: function(r, e){
-		//clog(this.data.cid, this.data.uid,'!', this.data.cdate, this.data.udate);
 		this.data.cdate = date_ISO_to_date(this.data.cdate);
 		this.data.udate = date_ISO_to_date(this.data.udate);
-		//clog(this.data.cid, this.data.uid,'!', this.data.cdate, this.data.udate);
 	}
 	,prepareInterface: function(){
 		toolbarItems = [
 			this.actions.save
 		]
 		if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
-		// /* adding options menu */
-		// optionsItems = [];
-		// this.templateData.cfg.decisions_association = parseInt(this.templateData.cfg.decisions_association);
-		// switch(this.templateData.cfg.decisions_association){
-		// 	case 1:
-		// 	case 2:
-		// 		optionsItems.push({
-		// 			text: L.Violations
-		// 			,scope: this
-		// 			,handler: this.showDecisionsAssociationPanel
-		// 		});
-		// 		break;
-		// }
-		// this.templateData.cfg.violations_association = parseInt(this.templateData.cfg.violations_association);
-		// switch(this.templateData.cfg.violations_association){
-		// 	case 1:
-		// 	case 2:
-		// 		optionsItems.push({
-		// 			text: L.Decisions
-		// 			,scope: this
-		// 			,handler: this.showViolationsAssociationPanel
-		// 		});
-		// 		break;
-		// }
-		// this.templateData.cfg.violations_edit = parseInt(this.templateData.cfg.violations_edit);
-		// switch(this.templateData.cfg.violations_edit){
-		// 	case 1: 
-		// 	case 2:
-		// 		optionsItems.push({
-		// 			text: L.AdditionalViolations
-		// 			,scope: this
-		// 			,handler: this.showViolationsEditPanel
-		// 		});
-		// 		break;
-		// }
-		// this.templateData.cfg.complaints = parseInt(this.templateData.cfg.complaints);
-		// switch(this.templateData.cfg.complaints){
-		// 	case 1: 
-		// 	case 2: optionsItems.push({
-		// 			text: L.History //Постановления
-		// 			,scope: this
-		// 			,handler: this.showComplaintsEditPanel
-		// 		});
-		// 		break;
-		// }
-		// this.templateData.cfg.appeals = parseInt(this.templateData.cfg.appeals);
-		// switch(this.templateData.cfg.appeals){
-		// 	case 1: 
-		// 	case 2: optionsItems.push({
-		// 			text: L.Appeals
-		// 			,scope: this
-		// 			,handler: this.showAssociatedAppealsPanel
-		// 		});
-		// 		break;
-		// }
-		
-		// if(!Ext.isEmpty(optionsItems)) optionsItems.push('-');
-		// optionsItems.push({xtype: 'menucheckitem', text: L.Confidential, scope: this, handler: this.updateObjectPrivacy});
-		// if(!Ext.isEmpty(optionsItems)) toolbarItems.push('-', {
-		// 		text: L.Options
-		// 		,menu: optionsItems
-		// 	});
 		toolbarItems.push('-',{text: 'Attach', iconCls: 'icon32-attach', scale: 'large', iconAlign:'top'
                 	,menu: [
 				this.actions.upload //{text: 'Upload', iconCls: 'icon-upload'}
@@ -305,10 +240,10 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			,show_files: this.templateData.cfg.files
 			,refOwner: this
 		}, Ext.value(this.templateData.cfg.gridJsClass, 'CBVerticalEditGrid'));
-		tabPanelItems = [  ]//this.grid		
+		tabPanelItems = [  ]
 		//placing content elements
 		contentItems = [this.tabPanel];
-		if( (this.topFieldSet.items.getCount() > 0) ) //(this.templateData.cfg.main_file == 1) || 
+		if( (this.topFieldSet.items.getCount() > 0) )
 			contentItems.unshift({
 				xtype: 'panel'
 				,autoHeight: true
@@ -316,16 +251,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				,border: false
 				,layout: 'fit'
 				,padding: 0
-				//,bodyStyle: 'padding: 10px 0'
 				,items: northRegionItems
-				,listeners:{
-					//	beforerender: {scope: this, fn: function(c){ c.setHeight(Math.max(this.topFieldSet.items.getCount() * 25 - 3 + 45, 45)) }}
-				}
 		});
 		this.filesPanel = new CB.ActionFilesPanel({style: 'margin-bottom: 25px', hidden: true});
 		this.tasksPanel = new CB.ActionTasksPanel({style: 'margin-bottom: 25px', hidden: true});
 		this.propertiesPanel = new CB.ObjectsPropertiesPanel({
-			//style: 'margin-top: 25px',
 			listeners:{
 				scope: this
 				,pathclick: this.onPathClick
@@ -358,17 +288,16 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				}
 			]
 		});
-		this.mainToolBar = this.items.itemAt(0).getTopToolbar();
-		//this.optionsMenuItem = this.mainToolBar.find('text', L.Options)[0];
+		this.mainToolBar = this.items.first().getTopToolbar();
 		while(i = tabPanelItems.pop()) this.tabPanel.insert(0, i);
 		
 		this.getEl().unmask();	
 		
 		this.addEvents('taskcreate', 'taskedit');
 		this.enableBubble(['taskcreate', 'taskedit']);
-		//this.updateSpentTimeIcon();
 		this.getBubbleTarget().on('taskupdated', this.onTaskUpdate, this);
 		this.getBubbleTarget().on('tasksdeleted', this.onTaskDelete, this);
+		this.fireEvent('objectopened', this);
 	}
 	,onSaveClick: function(){
 		this.saveForm();
@@ -393,33 +322,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		if(Ext.isEmpty(this.grid) || Ext.isEmpty(this.grid.getFieldValue)) return null;
 		return this.grid.getFieldValue(field_id, duplication_id);
 	}
-	// ,updateObjectPrivacy: function(){
-	// 	//this.data.pfu = Ext.isEmpty(this.data.pfu) ? App.loginData.id : null;
-	// 	this.fireEvent('change'); //this.setDirty(true);
-	// }
-	/*,onSpentTimeClick: function(b, e){
-		stw = new CB.ObjectsSpentTime({
-			data: this.data.spentTime
-			,listeners:{ beforeclose: { scope: this, fn: function(w){ if(!w.submited) return; this.data.spentTime = w.data; this.updateSpentTimeIcon(); this.setDirty(true) } } }
-		});
-		stw.show();
-	}/**/
-	// ,updateSpentTimeIcon: function(){
-	// 	i = this.items.first().getTopToolbar().items.findIndex('name', 'spentTime');
-	// 	if(i < 0) return;
-	// 	i = this.items.first().getTopToolbar().items.itemAt(i);
-	// 	if(Ext.isDefined(this.data.spentTime )){
-	// 		t = App.customRenderers.time(this.data.spentTime);
-	// 		if(Ext.isEmpty(t)){
-	// 			i.setIconClass( 'icon-clock' );
-	// 			i.setTooltip( L.SpentTime );
-	// 		}else{
-	// 			i.setIconClass( 'icon-clock-select' );
-	// 			i.setTooltip( L.SpentTime +': ' + t);
-	// 		}
-	// 	}
-	// }
-	//,onTasksClick: function(){ this.fireEvent('tasks', this.data.id) }
 	,onDeleteClick: function(b){
 		this.fireEvent('deleteobject', this.data)
 	}
@@ -430,30 +332,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		//if(!this.caseWindow) this.caseWindow = this.findParentByType(CB.Case);
 		return App.mainViewPort;
 	}
-	/*,updateSubmenuObjectsCheckList: function(c){
-		m = c.menu;
-		m.removeAll(true);
-		cw = this.getBubbleTarget();
-		d = cw.data.objects[c.template_id];
-		Ext.each(d, function(i, idx, arr){ m.add( {
-			text: i.title
-			,object_id: i.id
-			,checked: (this.data.associatedObjects.indexOf(i.id)>=0)
-			,handler: this.toggleObject
-			,scope: this
-		} ) 
-		}, this);
-	}/**/
-	// ,toggleObject: function(c){
-	// 	if( c.checked && ( this.data.associatedObjects.indexOf( c.object_id) >= 0 ) ){
-	// 		this.data.associatedObjects.remove(c.object_id);
-	// 		this.fireEvent('deassociateObject', c.object_id)
-	// 	}
-	// 	else if( !c.checked && ( this.data.associatedObjects.indexOf( c.object_id ) < 0 ) ){
-	// 		this.data.associatedObjects.push(c.object_id);
-	// 		this.fireEvent('associateObject', c.object_id)
-	// 	}
-	// }
 	,setFormValues: function(){
 		lastActiveTabIndex = this.tabPanel.items.indexOf(this.tabPanel.activeTab);
 		if(!Ext.isDefined(this.data.associatedObjects)) this.data.associatedObjects = [];
@@ -533,8 +411,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 							,multiValued: (r.data.cfg.multiValued == true)
 							,dependency: r.data.cfg.dependency
 							,tags: r.data.cfg.tags
-							//,templates: r.data.cfg.templates
-							//,excludeIds: this.getBubbleTarget().data.id
 						}
 					}else if(r.get('type') == '_case_object'){
 						ed.params = {
@@ -553,7 +429,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 					this.topFieldSet.add(ed);
 					//ed.enableBubble('change');
 				}
-			}else if(r.get('cfg').edit_in == 'tabsheet'){
+			}else if(r.get('cfg').showIn == 'tabsheet'){
 				v = this.data.gridData.values ? this.data.gridData.values['f'+r.get('id')+'_0'] : (Ext.isDefined(r.get('cfg').value) ? {value: r.get('cfg').value} : {});
 				if(!v) v = {};
 				var cfg = {
@@ -579,20 +455,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		}, this);
 		/* end of adding top fields and fields editable in tabsheet */
 		
-/*					tag_level: 3
-					,store: CB.DB.groupedTags
-					,groupField: 'groupId'
-					,filter: ((this.data.type == 1) ? function(r){ return ((r.get('system') == 0) || (r.get('system') == 5))} : function(r){ return ((r.get('system') == 0) || (r.get('system') == 4))})
-					,value: Ext.value(this.data.tags[3], []) //?
-					,api:{search: UsersGroups.searchSysTags, searchGroup: ((this.data.type == 1) ? 5: 4)}
-					, listeners: { scope: this, change: this.onTagsChange} 
-				})
-				]
-			}
-			,{ iconCls: 'icon-tag-label', tooltip: L.UserTags 
-				,menu: [new Ext.ux.TagEditor({tag_level: 4, store: CB.DB.userTags, value: Ext.value(this.data.tags[4], []), 
-				api: {create: UsersGroups.addUserTag, search: UsersGroups.searchUserTags}, listeners: { scope: this, change: this.onTagsChange} })]
-/**/
 		/* adding tag fields to top fieldset */
 		if(this.templateData.cfg.system_tags)
 			this.topFieldSet.add({
@@ -633,17 +495,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		}else if(this.propertiesPanel && this.propertiesPanel.rendered) this.propertiesPanel.update(this.data)
 		this.grid.reload();
 		if((this.grid.store.getCount() > 0) && (this.tabPanel.items.first() != this.grid) )  this.tabPanel.insert(0, this.grid);//this.tabPanel.items.removeAt(0);
-		//this.updateMainFileDataView();
-		//if( this.data.files_count > 0 ){
-			fw = this.findByType(CB.CaseFilesWindow);
-			if( !Ext.isEmpty(fw) ) fw[0].data.object_id = this.data.id;
-			//this.showFilesPanel();
-		//}
+
+		fw = this.findByType(CB.CaseFilesWindow);
+		if( !Ext.isEmpty(fw) ) fw[0].data.object_id = this.data.id;
 		
 		if(this.topFieldSet){
-			//this.topFieldSet.resumeEvents()
 			if(this.topFieldSet.isRendered){
-				//this.topFieldSet.autoHeight = true;
 				this.topFieldSet.syncSize()
 			}
 		}
@@ -689,25 +546,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			case 3: this.showAssociatedAppealsPanel(0); break;
 		}
 		
-		/*if( isNaN(this.data.id) && (this.templateData.type_id == 158) && !Ext.isEmpty(this.data.parentObjectId)){//is new and is complaint
-			idx = CB.DB.templates.findExact('id', String(this.data.parentObjectTemplateId));
-			if(idx >= 0){
-				if(CB.DB.templates.getAt(idx).get('type_id') == 153){ // decision
-					//loading associated violations for this decision and associate them to this complaint automaticly
-					Objects.getViolations(this.data.parentObjectId, function(r, e){
-						if(r.data){
-							this.data.associatedViolations = r.data;
-							this.associatedViolationsStore.loadData(r.data, true)
-						}
-					}, this)
-				}
-			}
-		}/**/
-		//if(!isNaN(this.data.id)) this.updateTasksMenu();
-		
-		//cbConfidential = this.optionsMenuItem.menu.items.findIndex('text', L.Confidential);
-		//if(cbConfidential >=0) this.optionsMenuItem.menu.items.itemAt(cbConfidential).setChecked(this.data.pfu > 0);
-		
 		tagsItem = this.mainToolBar.find('iconCls', 'icon-tag')[0];
 		if(tagsItem) tagsItem.menu.items.first().setValue(Ext.value(this.data.tags[3], []));
 		userTagsItem = this.mainToolBar.find('iconCls', 'icon-tag-label')[0];
@@ -728,23 +566,14 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.onObjectChanged();
 	}
 	,onCreateTaskClick: function(o, e){
-		// t = this.getObjectDate();
-		// t = (t ? t.format(App.dateFormat) + ' - ' : '') + Ext.value(this.data.custom_title, this.data.title);
-		//clog('creating task with data', {pid: this.data.id, path: this.data.path, pathtext: this.data.pathtext});
 		this.fireEvent('taskcreate', { data: {pid: this.data.id, path: this.data.path+'/'+this.data.id, pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)} })
 	}
-	// ,onTaskEditClick: function(o, e){
-	// 	t = this.getObjectDate();
-	// 	t = (t ? t.format(App.dateFormat) + ' - ' : '') + Ext.value(this.data.custom_title, this.data.title);
-	// 	this.fireEvent('taskedit', { data: { id: o.data.id, object_id: this.data.id, object: Ext.value(this.data.custom_title, this.data.title)} })
-	// }
 	,onTaskUpdate: function(taskData){ // TO REVIEW
 		if(taskData.object_id != this.data.id) return;
 		i = 0;
 		while( (i < this.data.tasks.length) &&  (this.data.tasks[i].id != taskData.id) ) i++;
 		if(i < this.data.tasks.length) this.data.tasks[i] = taskData;
 		else this.data.tasks.push(taskData);
-		//this.updateTasksMenu();
 	}
 	,onTaskDelete: function(taskData){ // TO REVIEW
 		if(taskData.object_id != this.data.id) return;
@@ -753,35 +582,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		if(i < this.data.tasks.length) this.data.tasks.splice(i, 1);
 		this.updateTasksMenu();
 	}
-	// ,updateTasksMenu: function(){
-	// 	idx = this.items.itemAt(0).getTopToolbar().items.findIndex('iconCls', 'icon-calendar-task');
-	// 	if(idx >= 0){
-	// 		db = this.items.itemAt(0).getTopToolbar().items.itemAt(idx);
-	// 		db.setDisabled(false);
-	// 		//this.getBubbleTarget().updateTasksMenu(db, this.data.tasks, this.onTaskEditClick);
-	// 	}	
-	// }
-	/*,updateTasksMenu: function(button, tasksArray, handler){ //from cases.js
-		while(button.menu.items.getCount() > 2) button.menu.items.itemAt(0).destroy();
-		if( Ext.isArray(tasksArray) && !Ext.isEmpty(tasksArray) )
-			Ext.each(tasksArray, function(i){
-				text = Date.parseDate(i.deadline.substr(0,10), 'Y-m-d').format(App.dateFormat) +' - '+ i.name;
-				button.menu.insert(button.menu.items.getCount() -2, new Ext.menu.Item({text: text, iconCls: 'icon-calendar ', data:{id: i.id}, scope: this, handler: handler}) )
-			}, this);
-		ic = button.menu.items.getCount()-2;
-		button.setText( Ext.value(button.initialConfig.text, '') + ((ic>0) ? '<span class="cG">[' + ic + ']</span>' : '') );
-		button.menu.items.itemAt(ic).setVisible(ic > 0);
-	}/**/	
 	,getFormValues: function(){
 		if(!Ext.isDefined(this.data.gridData)) this.data.gridData = {};
 		this.data.gridData.values = {};
 		this.grid.readValues(); // grid will reset the this.data.gridData array to only its values, so we read other values after it will do its data read
 		/* reading values from top fieldSet */
 		if(Ext.isEmpty(this.data.tags)) this.data.tags = {};
-		/*tagsItem = this.mainToolBar.find('iconCls', 'icon-tag')[0];
-		if(tagsItem) this.data.tags[tagsItem.menu.items.first().tag_level] = tagsItem.menu.items.first().getValue();
-		userTagsItem = this.mainToolBar.find('iconCls', 'icon-tag-label')[0];
-		if(userTagsItem) this.data.tags[userTagsItem.menu.items.first().tag_level] = userTagsItem.menu.items.first().getValue();/**/
 		if(Ext.isDefined(this.topFieldSet))
 			this.topFieldSet.items.each(function(i){
 				if(( i.name == 'tags' ) || (i.name == 'user_tags' )) this.data.tags[i.tag_level] = i.getValue();
@@ -797,9 +603,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			}, this)
 
 		this.data.pfu = Ext.isEmpty(this.data.pfu) ? App.loginData.id : null;
-		//cbConfidential = this.optionsMenuItem.menu.items.findIndex('text', L.Confidential);
-		//if(cbConfidential >=0) this.data.pfu = this.optionsMenuItem.menu.items.itemAt(cbConfidential).checked ? App.loginData.id : null;
-
 		this.data.violations = [];
 		this.violationsStore.each(function(r){this.data.violations.push(r.data)}, this);
 		this.data.associatedViolations = [];
@@ -816,25 +619,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			}
 		}, this);
 	}
-	// ,showFilesPanel: function(){
-	// 	return;
-	// 	if(!Ext.isEmpty(this.filesGrid) && !this.filesGrid.isDestroyed) return false;
-	// 	insertIndex = 1;
-	// 	this.tabPanel.items.each(function(i){if(i.isTemplateField) insertIndex = this.tabPanel.items.indexOf(i) + 1; }, this)
-	// 	this.filesGrid = new CB.CaseFilesWindow({
-	// 		data: {
-	// 			case_id: this.data.case_id
-	// 			,object_id: this.data.id
-	// 		}
-	// 		,listeners: {
-	// 			scope: this
-	// 			,defaultfilechanged: this.onLoadFilesStore
-	// 		}
-	// 	});
-	// 	this.tabPanel.insert(insertIndex, {title: L.Files, layout: 'fit', items: this.filesGrid});
-	// 	this.filesGrid = this.filesGrid.grid;
-	// 	this.filesGrid.getStore().on('load', this.onLoadFilesStore, this)
-	// }
 	,getFileProperties: function(fileId){
 		// return false or file properties if possible
 		if((!this.filesGrid) || isNaN(fileId)) return false;
@@ -846,34 +630,16 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 	}
 	,onFileUploaded: function(data){ 
 		if(data.object_id != this.data.id) return; 
-		//if(this.showFilesPanel() == false) this.filesGrid.getStore().reload(); 
-		// if(data.is_main == 1){
-		// 	this.data.mainFile = data;
-		// 	this.updateMainFileDataView();
-		// }
 	}
 	,onFilesDeleted: function(fileIds){
 		st = this.grid.getStore();
 		if(st) st.each(function(r){
 			if(fileIds.indexOf(r.get('files')) >=0 ){
 				r.set('files', null);
-				this.fireEvent('change'); //this.setDirty(true);
+				this.fireEvent('change');
 			}
 		}, this)
-	}/**/
-	// ,updateMainFileDataView: function(){
-	// 	if(Ext.isEmpty(this.mainFileDataView)) return;
-	// 	data = Ext.value(this.data.mainFile, []);
-	// 	if(this.mainFileDataView.rendered) this.mainFileDataView.update(data); else this.mainFileDataView.data = data;
-	// 	//this.mainFileDataView.setVisible(!isNaN(this.data.id));
-	// }
-	// ,onLoadFilesStore: function(s, recs, o){
-	// 	data = {};
-	// 	idx = s.findExact('is_main', 1);
-	// 	if(idx >= 0){ r = s.getAt(idx); this.data.mainFile = r.data; }else delete this.data.mainFile;
-	// 	//this.updateMainFileDataView();
-	// 	if(this.grid && this.grid.isVisible()) this.grid.getView().refresh();
-	// }
+	}
 	,getIconClass: function(){
 		if(Ext.isEmpty(this.data.template_id)) return;
 		idx = CB.DB.templates.findExact('id', this.data.template_id);
@@ -944,14 +710,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
 	,onObjectChanged: function(){
 		this.actions.save.setDisabled(!this._isDirty && !isNaN(this.data.id));
-		// ci = this.mainToolBar.find('iconCls', 'icon-cancel')[0];
-		// if(ci) ci.setDisabled(!this._isDirty);
 		this.actions['delete'].setDisabled(isNaN(this.data.id))
 		this.actions.upload.setDisabled(isNaN(this.data.id))
 		this.actions.createTask.setDisabled(isNaN(this.data.id))
-
-		
-		//this.setDirty(true) 
 	}
 	,onFocusContactField: function(editor){
 		if( Ext.isDefined(editor.dependency) || Ext.isEmpty(editor.pid)) return;
@@ -962,17 +723,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		pid = fn.split('_')[0].substr(1);
 		if(Ext.isDefined(this.topFieldSet)){
 			this.templateStore.each(function(r){
-				// clog('r.get(pid)', r.get('pid'), r.get('cfg'), Ext.isDefined(r.get('cfg').dependency) ? r.get('cfg').dependency.pidValues.indexOf(parseInt(newValue)) : '-', Ext.isDefined(r.get('cfg').dependency) && (Ext.isEmpty(r.get('cfg').dependency.pidValues) || (r.get('cfg').dependency.pidValues.indexOf(parseInt(newValue)) >= 0 ) ));
 				if((r.get('cfg').showIn == 'top') && Ext.isDefined(r.get('cfg').dependency) && (r.get('pid') == pid) ){
-					clog(r.get('cfg').dependency);
 					c = this.topFieldSet.find('name', 'f'+r.get('id')+'_0');
-					//clog(c);
 					if(!Ext.isEmpty(c)){
+						clog('updating', c);
 						c = c[0]
+						clog(newValue, '||', r.get('cfg').dependency.pidValues, '&&', App.setsHaveIntersection( r.get('cfg').dependency.pidValues, newValue) )
 						c.setDisabled(Ext.isEmpty(newValue) || (!Ext.isEmpty(r.get('cfg').dependency.pidValues) && !App.setsHaveIntersection( r.get('cfg').dependency.pidValues, newValue) ) );
 						c.data.record = r;
 						c.data.pidValue = newValue;
-						clog(c.updateStore);
 						if(c.updateStore) c.updateStore(c);
 						delete c.lastQuery;
 					}
@@ -981,7 +740,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		}
 	}
 	,onPathClick: function(){
-	 	App.mainViewPort.fireEvent('openpath', this.data.path, this.data.id);
+	 	App.mainViewPort.openPath(this.data.path, this.data.id);
 	 }
 })
 

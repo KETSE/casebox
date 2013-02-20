@@ -33,13 +33,11 @@ Ext.ux.TagField = Ext.extend(Ext.Panel, {
 		})
 		Ext.ux.TagField.superclass.initComponent.apply(this, arguments);
 		this.addEvents('change');
-		//this.enableBubble('change');
 	}
 	,afterrender: function(){ 
 		this.setValue(this.value);
 	}
 	,setValue: function(v){
-		clog('setting value', v)
 		this.value = [];
 		if(!Ext.isEmpty(v)) for(i = 0; i < v.length; i++) this.value.push(parseInt(v[i])) ;
 		data = [];
@@ -50,12 +48,6 @@ Ext.ux.TagField = Ext.extend(Ext.Panel, {
 				data.push({id: r.get('id'), title: r.get('name'), iconCls: r.get('iconCls')})
 			}
 		};
-		// clog(this.store.getCount(), this.value);
-		// this.store.each(function(r){
-		// 	idx = this.value.indexOf(r.get('id'));
-		// 	if(idx >=0) data.push({id: r.get('id'), title: r.get('name'), iconCls: r.get('iconCls')})
-		// }, this)
-		// clog(data)
 		if(this.dataView.rendered) this.dataView.update(data); else this.dataView.data = data;
 	}
 	,getValue: function(){ return this.value}

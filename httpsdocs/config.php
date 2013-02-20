@@ -16,7 +16,7 @@
 	ini_set('post_max_size', '200M');
 	ini_set('max_file_uploads', '20');
 	ini_set('memory_limit', '200M');
-	
+
 	$sessionLifetime = is_debug_host() ? 0: 43200;
 	ini_set("session.gc_maxlifetime", $sessionLifetime);
 	ini_set("session.gc_divisor", "1000");
@@ -25,7 +25,7 @@
 	session_set_cookie_params($sessionLifetime, '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 
 	error_reporting(is_debug_host() ? E_ALL : 0);
-	
+
 	mb_internal_encoding("UTF-8");
 	mb_detect_order('UTF-8,UTF-7,ASCII,EUC-JP,SJIS,eucJP-win,SJIS-win,JIS,ISO-2022-JP,WINDOWS-1251,WINDOWS-1250');
 
@@ -33,7 +33,6 @@
 	# remove www, ww2 and take the next parameter as the $coreName
 	if (($a[0] == 'www') || ($a[0] == 'ww2')) array_shift($a);
 	define('CB_PROJ', $a[0]);
-	// define('CB_PROJ', ( ((sizeof($a)<3) || ($a[0] == 'ww2') || ($a[0] == 'www') || ($a[0] == 'casebox') ) ? '' : $a[0] ) );
 	define('CB_ADMIN_EMAIL', 'support@casebox.org');
 
 	$this_file_dir = dirname(__FILE__);
@@ -44,25 +43,30 @@
 	define('CB_EXT_FOLDER', '/libx/ext');
 	define('CB_SYS_PATH', $parent_dir.'sys'.DIRECTORY_SEPARATOR);
 	define('CB_DATA_PATH', $parent_dir.'data'.DIRECTORY_SEPARATOR);
-	define('CB_CONFIG_PATH', $this_file_dir.DIRECTORY_SEPARATOR.'cores'.DIRECTORY_SEPARATOR.CB_PROJ.DIRECTORY_SEPARATOR);
+	define('CB_CORES_PATH', $this_file_dir.DIRECTORY_SEPARATOR.'cores'.DIRECTORY_SEPARATOR);
+	define('CB_CONFIG_PATH', CB_CORES_PATH.CB_PROJ.DIRECTORY_SEPARATOR);
 	define('CB_CRONS_PATH', CB_SYS_PATH.'crons'.DIRECTORY_SEPARATOR);
 	define('CB_SITE_PATH', $this_file_dir.DIRECTORY_SEPARATOR);
 	define('CB_LIB_DIR', $this_file_dir.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
 	define('CB_LIBX_DIR', $this_file_dir.DIRECTORY_SEPARATOR.'libx'.DIRECTORY_SEPARATOR);
 	define('CB_JS_LOCALE_PATH', $this_file_dir.DIRECTORY_SEPARATOR.'js'.DIRECTORY_SEPARATOR.'locale');
 	define('CB_TEMPLATES_PATH', CB_SYS_PATH.'templates'.DIRECTORY_SEPARATOR);
-	define('CB_PERSONAL_TAGS', false); /* Default property for using personal tags or not in this core */
-	define('CB_SYSTEM_TAGS', true); /* Default property for using personal tags or not in this core */
 	define('CB_DEFAULT_MAX_ROWS', 50); /* Default row count limit used in grids */
-	
+
+	/* reading system config */
+	if(file_exists('config.ini')){
+		$c = parse_ini_file('config.ini');
+		if(is_array($c)) foreach ($c as $key => $value) define($key, $value);
+	}
+
 	/* reading core settings */
 	global $CB_settings;
-	$CB_settings = array('timezone' => 'UTC', 'default_language' => 'en', 'personal_tags' => false, 'system_tags' => true);
+	$CB_settings = array('timezone' => 'UTC', 'default_language' => 'en', 'personal_tags' => false, 'system_tags' => false, 'solr_host' => '127.0.0.1', 'solr_port' => 8983 );
 
 	if(file_exists(CB_CONFIG_PATH.'system.ini')){
 		$CB_settings = array_merge( $CB_settings, parse_ini_file(CB_CONFIG_PATH.'system.ini'));
 	}else die(header('location: http://www.casebox.org'));
-	
+
 	if(file_exists(CB_CONFIG_PATH.'config.ini')){
 		$CB_settings = array_merge( $CB_settings, parse_ini_file(CB_CONFIG_PATH.'config.ini') );
 	}/* end of reading core settings */
@@ -70,19 +74,15 @@
 	// custom Error log per Core, use it for debug/reporting purposes
 	define('CB_ERRORLOG', $parent_dir.'logs'.DIRECTORY_SEPARATOR.'cb_'.CB_PROJ.'_log');
 
-	// UNIX: '/usr/local/sbin/unoconv'
-	define('CB_UNOCONV', '"c:\\Program Files (x86)\\LibreOffice 4.0\\program\\python.exe" c:\\opt\\unoconv\\unoconv'); 
-
 	define('CB_HTML_PURIFIER', CB_LIBX_DIR.'htmlpurifier'.DIRECTORY_SEPARATOR.'library'.DIRECTORY_SEPARATOR.'HTMLPurifier.auto.php');
-	define('CB_PDF2SWF_PATH', file_exists('d:\\soft\\SWFTools\\') ? 'd:\\soft\\SWFTools\\' : '/usr/local/bin/');
 
 	define('CB_SOLR_CLIENT', CB_LIBX_DIR.'Solr/Service.php');
-	define('CB_SOLR_HOST', coalesce(CB_get_param('solr_host'), '127.0.0.1' ) );
-	define('CB_SOLR_PORT', coalesce(CB_get_param('solr_port'), 8983 ) );
+	define('CB_SOLR_HOST', CB_get_param('solr_host') );
+	define('CB_SOLR_PORT', CB_get_param('solr_port') );
 	define('CB_SOLR_CORE', coalesce(CB_get_param('solr_core'), '/solr/'.$CB_settings['db_name'] ) );
 	define('CB_MAX_ROWS', coalesce(CB_get_param('max_rows'), CB_DEFAULT_MAX_ROWS ) );
-	
-	
+
+
 	define('CB_SESSION_PATH', CB_DATA_PATH.'sessions'.DIRECTORY_SEPARATOR.CB_PROJ.DIRECTORY_SEPARATOR);
 
 	define('CB_PHOTOS_PATH', CB_SITE_PATH.'photos'.DIRECTORY_SEPARATOR.CB_PROJ.DIRECTORY_SEPARATOR);
@@ -108,7 +108,7 @@
 	$GLOBALS['USER_LANGUAGE'] = $GLOBALS['CB_LANGUAGE'];
 	if(!empty($_COOKIE['L']) && (strlen($_COOKIE['L']) == 2)) $GLOBALS['USER_LANGUAGE'] = strtolower($_COOKIE['L']);
 	if(!empty($_GET['l']) && (strlen($_GET['l']) == 2)) $GLOBALS['USER_LANGUAGE'] = strtolower($_GET['l']);
-	
+
 	function CB_get_param($name){
 		global $CB_settings;
 		if(empty($name)) return false;
@@ -207,7 +207,7 @@
 			if($r = $res->fetch_row()) $lstr = 'l'.$r[0];
 			$res->close();
 		}else $lstr = $_SESSION['languages']['string'];
-		
+
 		$res = mysqli_query_params('select name, '.$lstr.' from translations where `type` < 2') or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			reset($r);
@@ -247,7 +247,7 @@
 		}
 		/* end of verifying if localization JS file for current user language is up to date */
 	}
-	
+
 	function getMFVC($filename){//get Max File Version Count for an extension
 		$ext = getFileExtension($filename) || mb_strtolower( $filename);
 		$ext = trim($ext);
@@ -257,6 +257,12 @@
 		if(isset($_SESSION['mfvc'][$ext])) return $_SESSION['mfvc'][$ext];
 		if(isset($_SESSION['mfvc']['*'])) return $_SESSION['mfvc']['*'];
 		return $rez;
+	}
+
+	function getCustomGroupsConfig(){
+		$customGroupsConfig = array();
+		if(is_file(CB_CONFIG_PATH.'groupsConfig.php')) $customGroupsConfig = (require CB_CONFIG_PATH.'groupsConfig.php');
+		return $customGroupsConfig;
 	}
 
 	function __autoload($class_name) {

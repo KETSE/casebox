@@ -8,7 +8,6 @@ CB.ObjectsFieldCommonFunctions = {
 		if( Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri') ) this.store = this.getThesauriStore();
 		else{
 			//try to access object window to locate objects store
-			
 			this.objectsStore = this.getObjectsStore();
 
 			this.store = new Ext.data.DirectStore({
@@ -88,7 +87,7 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 		Ext.apply(this, CB.ObjectsFieldCommonFunctions);
 		this.store = [];
 		this.config = {}
-		if(this.data.record) this.config = Ext.value(this.data.record.get('cfg'), {});
+		if(this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
 		this.getStore();
 		mode = 'local'
 		if(this.store.proxy){
@@ -109,7 +108,6 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 				,beforeselect: function( combo, record, index){
 					if(Ext.isEmpty(this.objectsStore)) return;
 					idx = this.objectsStore.findExact('id', record.get('id'));
-					clog(record.data);
 					if(idx < 0) this.objectsStore.loadData({data: [record.data]}, true);
 				}
 			}
@@ -118,7 +116,6 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 		this._setValue = this.setValue
 		this.setValue = function(v){
 			if(!Ext.isEmpty(v)) v = parseInt(v);
-			clog(v);
 			this._setValue(v);
 			this.setRawValue(this.store.getTexts(v));
 		}
@@ -134,12 +131,10 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 		this.setValue(this.getValue());
 	}
 	,updateStore: function(){
-		clog('this', this);
 		oldStore = this.store;
 		this.getStore();
 		this.bindStore(this.store);
-		clog(this.store);
-		if(oldStore) oldStore.destroy();
+		if(oldStore && (oldStore.autoDestroy == true) ) oldStore.destroy();
 	}
 });
 
@@ -156,11 +151,10 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
 		//listeners = Ext.value(this.listeners, {});
 		//Ext.apply(listeners, {scope: this, change: this.onTagsChange});
 		this.config = {}
-		if(this.data.record) this.config = Ext.value(this.data.record.get('cfg'), {});
+		if(this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
 		
 		this.triggerIconCls = 'icon-element';
 		tpl = '<tpl for=".">{[ (xindex == 0) ? "" : "'+this.delimiter+'"]}{name}</tpl>'
-		clog('this.data.record.data.cfg.renderer', this.data.record.data.cfg.renderer)
 		switch(this.data.record.data.cfg.renderer){
 			case 'listGreenIcons': 
 					tpl = '<ul><tpl for="."><li class="icon-padding16 icon-element">{name}</li></tpl></ul>';
@@ -209,7 +203,6 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
 	,setValue: function(v){
 		this.value = [];
 		store = this.getObjectsStore();
-		clog('setting_value', v, store);
 		if(!Ext.isEmpty(v)){
 			if(!Ext.isArray(v)) v = String(v).split(',');
 			for(i = 0; i < v.length; i++) this.value.push(parseInt(v[i]));
@@ -222,11 +215,9 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
 				data.push(r.data);
 			}
 		};
-		clog('data', data)
 		if(this.dataView.rendered) this.dataView.update(data); else this.dataView.data = data;
 	}
 	,getValue: function(){ 
-		clog('twin value', this.value);
 		return this.value.join(',')}
 	,onTriggerClick: function(e){
 		if( Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri') ){
@@ -279,7 +270,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 	,initComponent: function(){
 		CB.ObjectsSelectionForm.superclass.initComponent.call(this);
 		this.config = {}
-		if(this.data.record) this.config = Ext.value(this.data.record.get('cfg'), {});
+		if(this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
 
 		Ext.apply(this, CB.ObjectsFieldCommonFunctions);
 		this.getStore();
@@ -575,7 +566,7 @@ CB.ObjectsSelectionPopupList = Ext.extend(Ext.Window, {
 	,height: 350
 	,initComponent: function(){
 		CB.ObjectsSelectionPopupList.superclass.initComponent.apply(this, arguments);
-		if(this.data && this.data.record) this.config = Ext.value(this.data.record.get('cfg'), {});
+		if(this.data && this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
 		Ext.apply(this, CB.ObjectsFieldCommonFunctions);
 		this.getStore();
 		this.cm = [{
@@ -708,9 +699,7 @@ CB.ObjectsSelectionPopupList = Ext.extend(Ext.Window, {
 	,onBeforeShowEvent: function(){
 		this.trigger.setValue('');
 		this.trigger.focus(true, 350);
-		clog('initial', this.value);
 		if(!Ext.isArray(this.value)) this.value = Ext.isEmpty(this.value) ? [] : String(this.value).split(',');
-		clog('opened with value', this.value);
 		this.doFilter();
 		this.setTitle(this.title);
 		if(this.iconCls)  this.setIconClass(this.iconCls);

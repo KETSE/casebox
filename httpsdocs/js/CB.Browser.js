@@ -26,12 +26,6 @@ CB.Browser = Ext.extend(Ext.Panel,{
 		Ext.apply(this, {
 			layout: 'border'
 			,items: [this.tree, this.view]
-			//,bbar: [{text: 'Button'}]
-			,listeners:{
-				scope: this
-				//,afterrender: this.onAfterRender
-			}
-
 		})
 		CB.Browser.superclass.initComponent.apply(this, arguments);
 	}

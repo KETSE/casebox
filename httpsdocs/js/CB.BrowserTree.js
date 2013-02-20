@@ -209,7 +209,6 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			,selModel: new Ext.tree.DefaultSelectionModel({
 				listeners: {
 					scope: this
-					//,beforeselect: function(){clog('before select')}
 					,selectionchange: this.onSelectionChange
 				}
 			})
@@ -461,7 +460,6 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 				this.fireEvent('openobject', {id: n.attributes.nid}, e);
 				break;
 			case 5:
-				//clog('fire');
 				this.fireEvent('fileopen', {id: n.attributes.nid}, e)
 				break;
 			case 6: 

@@ -7,7 +7,7 @@ Instructions:
 5. copy file structure from original core to new core if needed ( /casebox/data/files/ )
    this is needed if you clone a core with all the files
 6. instruct solr to load a new core (/opt/solr/multicore/solr.xml). 
-7. Restart jetty (service jetty restart)
-8. Run manual script (from crons/) for solr core update (ex: php -f manual_solr_update_tree.php osf)
+7. Restart jetty (service jetty restart, or net start jetty" on windows if you previously added it as a service)
+8. Run manual script (from crons/) for solr core update (ex: php -f /sys/utils/solr_reindex_core.php <core_name>)
 9. add apache alias for new host (/etc/httpd/conf.d/ssl_casebox.conf)
 10. restart apache (service httpd restart)

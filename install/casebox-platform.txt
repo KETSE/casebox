@@ -3,6 +3,7 @@ The project will be available on GitHub, it depends on other software described 
 1. Architecture   
 
 / casebox
+    - config.ini
     / sys                       (scripts, files used by CaseBox platform)
         / crons                 (data processing cron jobs)
         / templates             (email templates)
@@ -16,7 +17,7 @@ The project will be available on GitHub, it depends on other software described 
         / files   
             / [core-name]
         / sessions
-            / [core-name]       (php session objects)
+            / [core-name]       (php session objects, in the near future will be moved to DB)
 
     
     / install                   (instructions how to install CaseBox on Win/Linux and sample configs for Apache, SOLR, MySql)

@@ -35,7 +35,6 @@ CB.Favorites = Ext.extend(Ext.util.Observable, {
 				,write: function( store, action, result, res, rs ){
 					if(Ext.isEmpty(rs)) return;
 					if(!Ext.isArray(rs)) rs = [rs];
-					//clog('rs', rs);
 					Ext.each(rs, function(r){r.set('id', parseInt(r.get('id'))); r.data.id = parseInt(r.data.id); }, this)
 				}
 			}

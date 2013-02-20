@@ -202,7 +202,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		});
 		
 		Ext.apply(this, {
-			items: this.contentPanel //{xtype: 'panel', border: false, items: [ this.contentPanel/*, this.remindPanel/*, this.tabPanel/**/ ]}
+			items: this.contentPanel
 			,buttons: [
 				this.actions.edit
 				,this.actions.close
@@ -562,7 +562,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
 				break;
 		}
 		this.updateTitle()
-		clog(items)
 		this.contentPanel.add(items);
 		this.contentPanel.doLayout();
 		this.form = this.findByType('form')[0];
@@ -629,7 +628,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
 	,setValues: function(){
 		if(this.form){
 			this.form.getForm().setValues(this.data);
-			clog(this.form.find('name', 'type')[0].getValue());
 		}
 		if(!Ext.isEmpty(this.data.files))
 		for (var i = 0; i < this.data.files.length; i++) this.data.files[i].iconCls = getFileIcon(this.data.files[i].name);
@@ -694,17 +692,12 @@ CB.Tasks = Ext.extend( Ext.Window, {
 				this.datetime_start.setValue(this.data.date_start);
 				this.date_end.setValue(Ext.isEmpty(this.data.date_end) ? null : this.data.date_end )
 				this.datetime_end.setValue(Ext.isEmpty(this.data.date_end) ? null : this.data.date_end )
-				clog('values set')
 				if(this.data.allday){
-					//if(this.data.has_deadline) this.date_end.setValue(this.data.date_end);
-
 					this.datetime_start.setVisible(false);
 					this.date_start.setVisible(true);
 					this.datetime_end.setVisible(false);
 					this.date_end.setVisible(true);
 				}else{
-					//this.datetime_start.setValue(this.data.date_start);
-					//if(this.data.has_deadline) this.datetime_end.setValue(this.data.date_end);
 					
 					this.datetime_start.setVisible(true);
 					this.date_start.setVisible(false);
@@ -726,9 +719,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 	}
 	,onPreviewElementClick: function(dv, idx, el, e){
 		a = el.attributes.getNamedItem('name');
-		clog('a', a);
 		if(Ext.isEmpty(a)) return;
-		clog('el.attributes.getNamedItem("name").value', el.attributes.getNamedItem('name').value);
 		switch(el.attributes.getNamedItem('name').value){
 			case 'complete': 
 				this.onSetUserCompletedClick(el.attributes.getNamedItem('uid').value);
@@ -782,7 +773,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
 	,processSave: function(form, action){ 
 		r = action.result;
 		this.getEl().unmask()
-		clog('success', r.success);
 		if(r.success !== true) return;
 		this.status = isNaN(this.data.id) ? 'created' : 'updated';
 		Ext.apply(this.data, r.data);
@@ -977,7 +967,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 				html +=' '+r.get('name');
 			}
 		}
-		html += '</a> <span class="buttons"> ' + //<a href="#" class="lh20 icon-pencil" style="display:inline-block; width: 20px;text-decoration: none;background-repeat: no-repeat !important" title="'+L.Edit+'">&nbsp; &nbsp;</a>' + 
+		html += '</a> <span class="buttons"> ' +
 			'<a href="#" class="lh20 icon-close-light" style="display:inline-block; width: 20px;text-decoration: none;background-repeat: no-repeat !important" title="'+L.Delete+'">&nbsp; &nbsp;</a></span>';
 		return html;
 	}
@@ -1034,7 +1024,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		this.setDirty();
 	}
 	,onTypeChangeClick: function(gr, radio){
-		clog('type changed', radio.inputValue )
 		switch(radio.inputValue){
 			case 6: //task
 				f = this.find('name', 'has_deadline')[0];
@@ -1085,7 +1074,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		this.setDirty(true);
 	}
 	,setDirty: function(dirty){
-		clog('setting dirty', dirty);
 		this._dirty = (dirty !== false);
 		this.actions.create.setDisabled(!this._dirty); //enable save only when changes made
 		this.actions.save.setDisabled(!this._dirty); //enable save only when changes made
