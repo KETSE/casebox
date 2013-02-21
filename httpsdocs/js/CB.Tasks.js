@@ -1300,6 +1300,7 @@ CB.ActionTasksView = Ext.extend(Ext.DataView, {
 		this.fireEvent('taskedit', {data: {id: r.get('nid')}})
 	}
 	,onObjectsDeleted: function(ids, e){
+		if(Ext.isEmpty(this.store)) return;
 		for (var i = 0; i < ids.length; i++) {
 			idx = this.store.findExact('nid', parseInt(ids[i]));
 			if(idx >= 0 ) this.store.removeAt(idx);

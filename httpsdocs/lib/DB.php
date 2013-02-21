@@ -1,11 +1,11 @@
 <?php
-function connect2DB(){
-	$dbh = new mysqli(CB_get_param('db_host'),
-		CB_get_param('db_user'),
-		CB_get_param('db_pass'),
-		CB_get_param('db_name'),
-		(int)CB_get_param('db_port')
-	);
+function connect2DB( $p = array() ){
+	$host = empty($p['db_host']) ? CB_get_param('db_host'): $p['db_host'];
+	$user = empty($p['db_user']) ? CB_get_param('db_user'): $p['db_user'];
+	$pass = empty($p['db_pass']) ? CB_get_param('db_pass'): $p['db_pass'];
+	$db_name = empty($p['db_name']) ? CB_get_param('db_name'): $p['db_name'];
+	$port = empty($p['db_port']) ? CB_get_param('db_port'): $p['db_port'];
+	$dbh = new mysqli($host, $user, $pass, $db_name, $port);
 
 	if (mysqli_connect_errno()) {
 		throw new Exception('Unable to connect to DB: ' . mysqli_connect_error());
@@ -14,6 +14,7 @@ function connect2DB(){
 		$dbh->query("SET NAMES 'UTF8'");
 		$initSQL = CB_get_param('db_initSQL');
 		if (!empty($initSQL)) $dbh->query($initSQL);
+		if(!empty($_SESSION['dbh'])) unset($_SESSION['dbh']);
 		$_SESSION['dbh'] = $dbh;
 	}
 	return $dbh;

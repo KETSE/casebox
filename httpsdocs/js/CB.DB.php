@@ -174,10 +174,10 @@ Ext.namespace('CB.DB');
 		CB.DB.thesauri .reload({callback: function(){
 			Ext.iterate(CB.DB, function(k, st){ 
 				if(k.substr(0, 13) == 'ThesauriStore'){
-					thesauri_id = k.substr(13);
-					if(!isNaN(thesauri_id)){
+					thesauriId = k.substr(13);
+					if(!isNaN(thesauriId)){
 						st.removeAll();
-						data = CB.DB.thesauri.queryBy(function(record, id){ return (record.get('pid') == thesauri_id); });
+						data = CB.DB.thesauri.queryBy(function(record, id){ return (record.get('pid') == thesauriId); });
 						st.add(data.items);
 					}
 				}
@@ -287,10 +287,10 @@ createDirectStores = function(){
 };
 createDirectStores.defer(500);
 
-function getThesauriStore(thesauri_id){
-	storeName = 'ThesauriStore'+thesauri_id;
+function getThesauriStore(thesauriId){
+	storeName = 'ThesauriStore'+thesauriId;
 	if(!Ext.isDefined(CB.DB[storeName])){
-		data = CB.DB.thesauri.queryBy(function(record, id){ return (record.get('pid') == thesauri_id); });
+		data = CB.DB.thesauri.queryBy(function(record, id){ return (record.get('pid') == thesauriId); });
 		CB.DB[storeName] = new Ext.data.ArrayStore({
 			idIndex: 0
 			,fields: [{name:'id', type: 'int'}, {name:'pid', type: 'int'}, 'name', {name:'order', type: 'int'}, 'iconCls']

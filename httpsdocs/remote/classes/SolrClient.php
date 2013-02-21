@@ -39,13 +39,94 @@ class SolrClient{
 	}
 
 	static public function runCron(){
-		$sql = 'select last_end_time from crons where cron_id = \'solr_update_tree\'';
+		$solr = new SolrClient();
+		$solr->connect();
+		$solr->updateTree();
+		unset($solr);
+
+		// $sql = 'select last_end_time from crons where cron_id = \'solr_update_tree\'';
+		// $res = mysqli_query_params($sql) or die(mysqli_query_error());
+		// $running = false;
+		// if($r = $res->fetch_row())
+		// 	if(empty($r[0])) $running = true;
+		// $res->close();
+		// if(!$running) exec('php -f "'.CB_CRONS_PATH.'cron_solr_update_tree.php"');
+	}
+	public function updateTree($all = false){
+		$sql = 'select id, pid, f_get_tree_pids(id) `pids`, f_get_tree_path(id) `path`, name, `system`, `type`, subtype, target_id
+			,case when type = 2 then (select `type` from tree where id = t.target_id) else null end `target_type`
+			,DATE_FORMAT(`date`, \'%Y-%m-%dT%H:%i:%sZ\') `date`
+			,DATE_FORMAT(`date_end`, \'%Y-%m-%dT%H:%i:%sZ\') `date_end`
+			,cid
+			,DATE_FORMAT(cdate, \'%Y-%m-%dT%H:%i:%sZ\') `cdate`		
+			,uid
+			,DATE_FORMAT(udate, \'%Y-%m-%dT%H:%i:%sZ\') `udate`
+			,f_get_objects_case_id(id) `case_id`
+			from tree t '.($all ? '' : ' where updated = 1');
 		$res = mysqli_query_params($sql) or die(mysqli_query_error());
-		$running = false;
-		if($r = $res->fetch_row())
-			if(empty($r[0])) $running = true;
+		$k = 0;
+		if($r = $res->fetch_assoc()){
+			do{
+				$id = $r['id'];
+				$type = $r['type'];
+				if($r['type'] == 2){
+					$id = $r['target_id']; //link
+					$type = $r['target_type']; //link
+				}
+				if(!empty($r['case_id'])){
+					$cres = mysqli_query_params('select name from cases where id = $1', $r['case_id']) or die(mysqli_query_error());
+					if($cr = $cres->fetch_row()) $r['case'] = $cr[0];
+					$cres->close();
+				}
+				
+				switch($type){
+					case 1: //folder
+						$r['content'] = $r['name'];
+						$r['ntsc'] = 1;
+						break;
+					case 3: //case
+						$r = array_merge($r, Cases::getSorlData($id));
+						$r['ntsc'] = 2;
+						break;
+					case 4: //case object
+						$r = array_merge($r, Objects::getSorlData($id));
+						$r['ntsc'] = 4;
+						break;
+					case 5: //file
+						$r = array_merge($r, Files::getSorlData($id));
+						$r['ntsc'] = 4;
+						break;
+					case 6: //tasks
+					case 7: //tasks
+						$r = array_merge($r, Tasks::getSorlData($id));
+						$r['ntsc'] = 4;
+						break;
+					case 8: //Emails
+						$r = array_merge($r, Objects::getSorlData($id));
+						$r['ntsc'] = 4;
+						break;
+					case 9: //Contact
+						$r = array_merge($r, Objects::getSorlData($id));
+						$r['ntsc'] = 4;
+						break;
+				}
+				$r['system'] = intval($r['system']);
+				$r['type'] = intval($r['type']);
+				$r['subtype'] = intval($r['subtype']);
+
+				$r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
+				$r['sort_path'] = mb_strtolower($r['name'], 'UTF-8');
+				$this->add( $r );
+				
+				mysqli_query_params('update tree set updated = -1 where id = $1', $r['id']) or die(mysqli_query_error()); 			
+				
+				$k++;
+
+				if ($k % 200 == 0) $this->commit();
+			}while($r = $res->fetch_assoc());
+			$this->commit();
+		}
 		$res->close();
-		if(!$running) exec('php -f "'.CB_CRONS_PATH.'cron_solr_update_tree.php"');
 	}
 	public function deleteId($id){
 		$this->deleteByQuery('id:'.$id.' OR pids:'.$id);

@@ -100,10 +100,10 @@ function initApp(){
 			if(Ext.isEmpty(v)) return '';
 			va = v.split(',');
 			v = [];
-			thesauri_id = record.get('cfg').thesauri_id;
-			if(Ext.isEmpty(thesauri_id) && store.thesauri_ids) thesauri_id = store.thesauri_ids[record.id]
-			if(!Ext.isEmpty(thesauri_id)){
-				ts = getThesauriStore(thesauri_id);
+			thesauriId = record.get('cfg').thesauriId;
+			if(Ext.isEmpty(thesauriId) && store.thesauriIds) thesauriId = store.thesauriIds[record.id]
+			if(!Ext.isEmpty(thesauriId)){
+				ts = getThesauriStore(thesauriId);
 				ts.each(function(r){if(va.indexOf(r.get('id')) >=0 ) v.push(r.get('name')); });
 			}
 			return App.xtemplates.cell.apply(v);
@@ -217,13 +217,13 @@ function initApp(){
   		}
 		,thesauriCombo: function(v, metaData, record, rowIndex, colIndex, store) { /* custom renderer for verticalEditGrid */
 			if(Ext.isEmpty(v)) return '';
-			th = record.get('cfg').thesauri_id;
+			th = record.get('cfg').thesauriId;
 			if(th == 'variable'){
 				pri = store.findBy(function(r){return ( (r.get('field_id') == record.get('pid')) && (r.get('duplicate_id') == record.get('duplicate_id')) );}, this);
 				if(pri > -1) th = store.getAt(pri).get('value');
 			}
 			ts = getThesauriStore(th);
-			ri = ts.findExact('id', v);
+			ri = ts.findExact('id', parseInt(v));
 			if(ri < 0) return '';
 			return ts.getAt(ri).get('name')
   		}
@@ -528,7 +528,7 @@ function initApp(){
 			case 'float':  return new Ext.form.NumberField({allowDecimals: true, width: 90}); break;
 			//case 'object_author': //depricated
 			case 'combo':
-				th = e.record.get('cfg').thesauri_id;
+				th = e.record.get('cfg').thesauriId;
 				if(th == 'variable'){
 					pri = e.record.store.findBy(function(r){return ( (r.get('field_id') == e.record.get('pid')) && (r.get('duplicate_id') == e.record.get('duplicate_id')) );}, this);
 					if(pri > -1) th = e.record.store.getAt(pri).get('value');
@@ -546,7 +546,7 @@ function initApp(){
 				})
 				break;
 			case 'iconcombo':
-				th = e.record.get('cfg').thesauri_id;
+				th = e.record.get('cfg').thesauriId;
 				if(th == 'variable'){
 					pri = e.record.store.findBy(function(r){return ( (r.get('field_id') == e.record.get('pid')) && (r.get('duplicate_id') == e.record.get('duplicate_id')) );}, this);
 					if(pri > -1) th = e.record.store.getAt(pri).get('value');
@@ -610,7 +610,7 @@ function initApp(){
 				e.cancel = true;
 				w = App.getThesauriWindow({
 					title: e.record.get('title')
-					,store: getThesauriStore( e.record.get('cfg').thesauri_id )
+					,store: getThesauriStore( e.record.get('cfg').thesauriId )
 					,data: {
 						value: e.record.get('value')
 						,scope: e

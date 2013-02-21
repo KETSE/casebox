@@ -48,28 +48,20 @@ class Auth {
 				$r['locale'] = 	$_SESSION['languages']['per_id'][$r['language_id']]['locale'];
 				if(empty($r['short_date_format']))$r['short_date_format'] = $_SESSION['languages']['per_id'][$r['language_id']]['short_date_format'];
 				if(empty($r['long_date_format'])) $r['long_date_format'] = $_SESSION['languages']['per_id'][$r['language_id']]['long_date_format'];
-				$r['time_format'] = 		$_SESSION['languages']['per_id'][$r['language_id']]['time_format'];
+				$r['time_format'] = $_SESSION['languages']['per_id'][$r['language_id']]['time_format'];
 				
 				/* personal tags has priority, if set, for core then for user then for template */
 				$r['cfg'] = empty($r['cfg']) ? array() : (array)json_decode($r['cfg']);
 
 				$system_tags = CB_get_param('system_tags');
-				if($system_tags === null){
-					if(isset($r['cfg']['system_tags'])){
-						$system_tags = $r['cfg']['system_tags'];
-						$_SESSION['system_tags'] = $system_tags; //setting personal tags property in session to be accessible for template properties
-					}else $system_tags = CB_SYSTEM_TAGS;
-				}else $_SESSION['system_tags'] = ($system_tags == 1);
-				$r['cfg']['system_tags'] = ($system_tags == 1);
+				if(isset($r['cfg']['system_tags'])) $system_tags = $r['cfg']['system_tags'];
+				$_SESSION['system_tags'] = ($system_tags == 1);
+				$r['cfg']['system_tags'] = $_SESSION['system_tags'];
 
 				$personal_tags = CB_get_param('personal_tags');
-				if($personal_tags === null){
-					if(isset($r['cfg']['personal_tags'])){
-						$personal_tags = $r['cfg']['personal_tags'];
-						$_SESSION['personal_tags'] = $personal_tags; //setting personal tags property in session to be accessible for template properties
-					}else $personal_tags = CB_PERSONAL_TAGS;
-				}else $_SESSION['personal_tags'] = ($personal_tags == 1);
-				$r['cfg']['personal_tags'] = ($personal_tags == 1);
+				if(isset($r['cfg']['personal_tags'])) $personal_tags = $r['cfg']['personal_tags'];
+				$_SESSION['personal_tags'] = ($personal_tags == 1);
+				$r['cfg']['personal_tags'] = $_SESSION['personal_tags'];
 				
 				$rez['user'] = $r;
 				$_SESSION['user'] = $r;

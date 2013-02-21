@@ -507,6 +507,7 @@ CB.ActionFilesView = Ext.extend(Ext.DataView, {
 		)
 	}
 	,onObjectsDeleted: function(ids, e){
+		if(Ext.isEmpty(this.store)) return;
 		for (var i = 0; i < ids.length; i++) {
 			idx = this.store.findExact('nid', parseInt(ids[i]));
 			if(idx >= 0 ) this.store.removeAt(idx);
@@ -532,6 +533,7 @@ CB.ActionFilesPanel = Ext.extend(Ext.Panel, {
 				scope: this
 				,beforedestroy: function(){
 					App.mainViewPort.un('fileuploaded', this.onFileUploaded, this)
+					this.filesView.destroy();
 				}
 			}
 		})

@@ -58,10 +58,10 @@ class Templates{
 			if(!empty($r['cfg'])) $r['cfg'] = (array)json_decode($r['cfg']);
 			
 			if(!isset($r['cfg']['system_tags']))
-				$r['cfg']['system_tags'] =  isset($_SESSION['system_tags']) ? $_SESSION['system_tags'] : CB_SYSTEM_TAGS;
+				$r['cfg']['system_tags'] =  $_SESSION['system_tags'];
 
 			if(!isset($r['cfg']['personal_tags']))
-				$r['cfg']['personal_tags'] =  isset($_SESSION['personal_tags']) ? $_SESSION['personal_tags'] : CB_PERSONAL_TAGS;
+				$r['cfg']['personal_tags'] =  $_SESSION['personal_tags'];
 			// if(isset($_SESSION['personal_tags'])) $r['cfg']['personal_tags'] = $_SESSION['personal_tags'];
 			// elseif(!isset($r['cfg']['personal_tags'])) $r['cfg']['personal_tags'] = CB_PERSONAL_TAGS;
 			
@@ -255,7 +255,7 @@ class Templates{
 		foreach($tf as $f){
 			if(empty($f['cfg'])) $rez['body'][] = $f;
 			elseif(!empty($f['cfg']->show_on_top)) $rez['top'][] = $f;
-			elseif(@$f['cfg']->edit_in == 'tabsheet') $rez['bottom'][] = $f;
+			elseif(@$f['cfg']->showIn == 'tabsheet') $rez['bottom'][] = $f;
 			else $rez['body'][] = $f;
 		}
 		return $rez;
