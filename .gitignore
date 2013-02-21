@@ -10,3 +10,4 @@ logs/
 
 # ignore 'cores' configuration
 httpsdocs/cores/
+!httpsdocs/cores/sample/
