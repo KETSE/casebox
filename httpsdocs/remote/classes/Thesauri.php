@@ -6,7 +6,7 @@ class Thesauri{
 	}
 
 	function read($p){
-		$params = ($p && !empty($p->thesauri_id)) ? ' and pid = '.intval($p->thesauri_id) : '';
+		$params = ($p && !empty($p->thesauriId)) ? ' and pid = '.intval($p->thesauriId) : '';
 		$sql = 'SELECT t.id, t.pid, t.l'.UL_ID().' `name`, t.`order`, t.iconCls FROM tags t WHERE t.hidden IS NULL '.$params.'  ORDER BY pid, `order`, 3';
 		$data = Array();
 		$res = mysqli_query_params($sql) or die(mysqli_query_error());

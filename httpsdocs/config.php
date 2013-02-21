@@ -54,8 +54,9 @@
 	define('CB_DEFAULT_MAX_ROWS', 50); /* Default row count limit used in grids */
 
 	/* reading system config */
-	if(file_exists('config.ini')){
-		$c = parse_ini_file('config.ini');
+	$configFile = dirname(__FILE__).DIRECTORY_SEPARATOR.'config.ini';
+	if(file_exists($configFile)){
+		$c = parse_ini_file($configFile);
 		if(is_array($c)) foreach ($c as $key => $value) define($key, $value);
 	}
 

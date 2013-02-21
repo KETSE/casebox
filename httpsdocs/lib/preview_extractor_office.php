@@ -26,7 +26,7 @@ class preview_extractor_office extends preview_extractor{
 
 			copy($fn, $nfn);
 			file_put_contents($pfn, '');
-			$cmd = '/usr/local/sbin/unoconv -v -f html -o '.$pfn.' '.$nfn;
+			$cmd = CB_UNOCONV.' -v -f html -o '.$pfn.' '.$nfn;
 			exec($cmd);
 			unlink($nfn);
 			file_put_contents( $pfn, '<div style="padding: 5px">'.$this->purify(file_get_contents($pfn), array('URI.Base' => '/preview/', 'URI.MakeAbsolute' => true)).'</div>' );
