@@ -328,6 +328,8 @@ padding: 0px 2px;
 .icon-document-zipper{ background-image: url(i/ico/document-zipper.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-document-zipper{ background-image: url(i/ico/document-zipper.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-locate-right{ background-image: url(i/ico/locate.gif) right 50% no-repeat !important }
+.icon-newspaper{ background-image:url(i/ico/newspaper.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
+.icon-newspaper-exclamation{ background-image:url(i/ico/newspaper-exclamation.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
 
 .tag-item {padding: 4px 3px 4px 20px; font-size: 12px; cursor: hand; cursor: pointer}
 .tag-item-over{background-color: #ebf3fd !important}
