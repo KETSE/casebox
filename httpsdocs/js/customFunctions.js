@@ -92,3 +92,17 @@ function getStoreNames(v){
 	}, this)
 	return texts.join(',');
 }
+setsGetIntersection = function(set1, set2){
+	rez = [];
+	if(Ext.isEmpty(set1) || Ext.isEmpty(set2)) return rez;
+	if(Ext.isPrimitive(set1)) set1 = String(set1).split(',');
+	if(Ext.isPrimitive(set2)) set2 = String(set2).split(',');
+	for (var i = 0; i < set1.length; i++) set1[i] = String(set1[i]);
+	for (var i = 0; i < set2.length; i++) set2[i] = String(set2[i]);
+	for (var i = 0; i < set1.length; i++) if( (set2.indexOf(set1[i]) >= 0) && (rez.indexOf(set1[i]) < 0 )) rez.push(set1[i]);
+	for (var i = 0; i < set2.length; i++) if( (set1.indexOf(set2[i]) >= 0) && (rez.indexOf(set2[i]) < 0 )) rez.push(set2[i]);
+	return rez;
+}
+setsHaveIntersection = function(set1, set2){
+	return !Ext.isEmpty(setsGetIntersection(set1, set2));
+}

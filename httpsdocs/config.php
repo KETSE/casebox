@@ -265,8 +265,17 @@
 		if(is_file(CB_CONFIG_PATH.'groupsConfig.php')) $customGroupsConfig = (require CB_CONFIG_PATH.'groupsConfig.php');
 		return $customGroupsConfig;
 	}
+	function fireEvent($eventName, &$params){
+		$cfg = getCustomGroupsConfig();
+		if(empty($cfg['listeners'][$eventName])) return;
+		foreach ($cfg['listeners'][$eventName] as $className => $methods){
+			$class = new $className();
+			if(!is_array($methods)) $methods = array($methods);
+			foreach($methods as $method) $class->$method($params);
+			unset($class);
+		}
+	}
 
 	function __autoload($class_name) {
     		require_once $class_name . '.php';
 	}
-?>

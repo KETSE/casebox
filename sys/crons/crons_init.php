@@ -123,29 +123,28 @@
 		if(empty($language)) return (defined('L\\'.$name) ? constant('L\\'.$name) : null);
 		else{
 			if(($language[0] == 'l') && (is_numeric(@$language[1]))) $language = substr($language, 1); // case when we receive laguage as "l{id}"
-			if(is_numeric($language)) $language = $GLOBALS['languages']['per_id'][$language]['abreviation'];
+			if(is_numeric($language)) $language = $_SESSION['languages']['per_id'][$language]['abreviation'];
 			return (isset($GLOBALS['TRANSLATIONS'][$language][$name]) ? $GLOBALS['TRANSLATIONS'][$language][$name] : null);
 		}
 	}
 
 	function initLanguages(){
 		/*fetching core languages and store them in the session for any use */
-		$GLOBALS['languages'] = array('per_id' => array(), 'per_abrev' => array(), 'string' => '', 'count' => 0);
+		$_SESSION['languages'] = array('per_id' => array(), 'per_abrev' => array(), 'string' => '', 'count' => 0);
 		$sql = 'SELECT id, name, abreviation, locale, long_date_format, short_date_format, time_format FROM languages order by name';
 		$res = mysqli_query_params($sql) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
-			$GLOBALS['languages']['per_id'][$r['id']] = $r;
-			$GLOBALS['languages']['per_abrev'][$r['abreviation']] = &$GLOBALS['languages']['per_id'][$r['id']];
+			$_SESSION['languages']['per_id'][$r['id']] = $r;
+			$_SESSION['languages']['per_abrev'][$r['abreviation']] = &$_SESSION['languages']['per_id'][$r['id']];
 		}
 		$res->close();
-		$GLOBALS['languages']['count'] = sizeof($GLOBALS['languages']['per_id']);
-		$GLOBALS['languages']['string'] = 'l'.implode(',l', array_keys($GLOBALS['languages']['per_id']));
-		$_SESSION['languages'] = &$GLOBALS['languages'];
+		$_SESSION['languages']['count'] = sizeof($_SESSION['languages']['per_id']);
+		$_SESSION['languages']['string'] = 'l'.implode(',l', array_keys($_SESSION['languages']['per_id']));
 		/*end of fetching core languages and store them in the session for any use */
 	}
 	function initTranslations(){
 		if(isset($GLOBALS['TRANSLATIONS'])) return;
-		$res = mysqli_query_params('select name, '.implode(',',array_keys($GLOBALS['languages']['per_abrev'])).' from casebox.translations where `type` < 2') or die(mysqli_query_error());
+		$res = mysqli_query_params('select name, '.implode(',',array_keys($_SESSION['languages']['per_abrev'])).' from casebox.translations where `type` < 2') or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			reset($r);
 			$name = current($r);
@@ -153,13 +152,13 @@
 		}
 		$res->close();
 		/* reading specific translations of core */
-		$res = mysqli_query_params('select name, '.$GLOBALS['languages']['string'].' from translations where `type` < 2') or die(mysqli_query_error());
+		$res = mysqli_query_params('select name, '.$_SESSION['languages']['string'].' from translations where `type` < 2') or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			reset($r);
 			$name = current($r);
 			while($v = next($r)){
 				$l = substr(key($r), 1);
-				$l = $GLOBALS['languages']['per_id'][$l]['abreviation'];
+				$l = $_SESSION['languages']['per_id'][$l]['abreviation'];
 				$GLOBALS['TRANSLATIONS'][$l][$name] = $v;
 			}
 		}

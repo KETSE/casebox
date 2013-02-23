@@ -38,7 +38,7 @@
 	}
 	/* end of check if loged in correctly, comparing with the key and ips */
 	/* Minify */
-	set_include_path(get_include_path() . PATH_SEPARATOR . CB_SITE_PATH.'min/lib'. PATH_SEPARATOR . CB_SITE_PATH.'remote'.DIRECTORY_SEPARATOR.'classes'.PATH_SEPARATOR.CB_CONFIG_PATH.'php');
+	set_include_path(CB_SITE_PATH.'min/lib'. PATH_SEPARATOR . CB_SITE_PATH.'remote'.DIRECTORY_SEPARATOR.'classes'.PATH_SEPARATOR.CB_CONFIG_PATH.'php'. PATH_SEPARATOR.get_include_path());
 	require_once('libx/min/utils.php');
 	//echo get_include_path();
 	/*if we do not have a tanslation file for users language, we use global core language. If there is no translation file for global set language then we use english by default */

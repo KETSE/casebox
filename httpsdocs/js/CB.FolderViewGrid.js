@@ -226,6 +226,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				, 'case'
 				, 'content' 
 				, {name: 'has_childs', type: 'bool'}
+				,'cfg'
 			]
 			)
 			,listeners: {
@@ -785,7 +786,10 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		this.filtersPanel.updateFacets(o.result.facets, options);
 	}
 	,onStoreLoad: function(store, recs, options) {
-		Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data))}, this);
+		Ext.each(recs, function(r){ 
+			cfg = Ext.value(r.get('cfg'), {});
+			r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
+		}, this);
 		pt = this.grid.getBottomToolbar();
 		pt.setVisible(store.reader.jsonData.total > pt.pageSize);
 		App.mainViewPort.selectGridObject(this.grid);

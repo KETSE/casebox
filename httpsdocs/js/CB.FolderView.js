@@ -206,7 +206,6 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		e.stopPropagation();
 		idx = this.viewButton.menu.items.findIndex('viewIndex', index);
 		if(idx >= 0){
-			clog('index', index);
 			b = this.viewButton.menu.items.itemAt(idx);
 			l = this.getLayout();
 			if( this.items.itemAt(b.viewIndex) == l.activeItem ) return;
@@ -346,7 +345,6 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 	,onShowDescendantsClick: function(b, e){
 		if(this.locked) return b.toggle(!b.pressed);
 		this.setShowDescendants(b.pressed);
-		clog('b.pressed', b.pressed);
 		// if(i.setShowDescendants){
 		// 	i.setShowDescendants(b.pressed);
 		// 	i.onReloadClick();

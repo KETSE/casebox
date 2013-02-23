@@ -9,12 +9,12 @@ CB.ObjectsFieldCommonFunctions = {
 		else{
 			//try to access object window to locate objects store
 			this.objectsStore = this.getObjectsStore();
-
+			if(!Ext.isEmpty(this.data.pidValue)) params.pidValue = this.data.pidValue;
 			this.store = new Ext.data.DirectStore({
 				autoLoad: false //true
 				,autoDestroy: true
 				,restful: false
-				,baseParams: this.config
+				,baseParams: params
 				,proxy: new Ext.data.DirectProxy({
 					paramsAsHash: true
 					,api: { read: Browser.getObjectsForField }
@@ -41,6 +41,9 @@ CB.ObjectsFieldCommonFunctions = {
 				)
 				,listeners: {
 					scope: this
+					,beforeload: function(st, o ){
+						if(!Ext.isEmpty(this.data.pidValue)) o.params.pidValue = this.data.pidValue;
+					}
 					,load: 	function(store, recs, options) {
 						Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data))}, this);
 					}
@@ -271,41 +274,9 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 		CB.ObjectsSelectionForm.superclass.initComponent.call(this);
 		this.config = {}
 		if(this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
-
+		
 		Ext.apply(this, CB.ObjectsFieldCommonFunctions);
 		this.getStore();
-		// this.store.on('beforeload', this.onBeforeLoadStore, this);
-		// this.store.on('load', this.onStoreLoad, this);
-
-		// this.store = new Ext.data.DirectStore({
-		// 	autoLoad: false
-		// 	,autoSave: false
-		// 	,autoDestroy: true
-		// 	,restful: false
-		// 	,proxy: new  Ext.data.DirectProxy({
-		// 		paramsAsHash: true
-		// 		,api: { read: Search.searchObjects }
-		// 		,listeners:{
-		// 			scope: this
-		// 			,load: function(proxy, obj, opt){
-		// 				for (var i = 0; i < obj.result.data.length; i++) obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
-		// 			}
-		// 		}
-		// 	})
-		// 	,reader: new Ext.data.JsonReader({
-		// 		successProperty: 'success'
-		// 		,idProperty: 'id'
-		// 		,root: 'data'
-		// 		,messageProperty: 'msg'//, dateFormat: 'Y-m-d H:i:s'
-		// 	},[ {name:'id', type: 'int'}, 'name', {name: 'date', type: 'date'}, {name:'type', type: 'int'}, {name:'subtype', type: 'int'}, {name:'status', type: 'int'}, {name:'template_id', type: 'int'}, 'iconCls', 'sys_tags', 'user_tags', 'body']
-		// 	)
-		// 	//,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
-		// 	,listeners:{
-		// 		scope: this
-		// 		,beforeload: this.onBeforeLoad
-		// 		,load: this.onLoad
-		// 	}
-		// });
 
 		columns = [
 			{dataIndex: 'name', scope: this, renderer: function(v, m, r, ri, ci, s){ 
@@ -391,8 +362,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 									,triggerClass: 'x-form-search-trigger'
 									,enableKeyEvents: true
 									,scope: this
-									,onTriggerClick: function(){ 
-										this.scope.onGridReloadTask(); }
+									,onTriggerClick: function(){ this.scope.onGridReloadTask(); }
 									,listeners: {
 										scope: this
 										,specialkey: function(ed, ev){ if(ev.getKey() == ev.ENTER) this.onGridReloadTask()}
@@ -428,20 +398,23 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 		this.gridReloadTask.delay(500);
 	}
 	,processGridReload: function(){
-		searchParams = {};
-		this.store.baseParams = searchParams;
-		this.store.lastOptions = searchParams;
-		this.store.reload(searchParams);
+		this.store.baseParams = this.getSearchParams();
+		this.store.reload(this.store.baseParams);
 	}
 	,onBeforeLoad: function(store, records, options){
-		store.baseParams = this.getSearchParams();
+		// options = this.getSearchParams();
+		// store.baseParams = options
 		this.getEl().mask(L.searching);
 	}
 	,getSearchParams: function(){
 		result = Ext.apply({}, this.config);
 		result.query = this.triggerField.getValue();
-		if(!Ext.isEmpty(this.config.pidValue)) result.pidValue = this.config.pidValue;
-		if(!Ext.isEmpty(this.config.object_pid)) result.object_pid = this.config.object_pid;
+		if(!Ext.isEmpty(this.data.objectId)) result.objectId = this.data.objectId;
+		if(!Ext.isEmpty(this.data.path)) result.path = this.data.path;
+
+		//if(!Ext.isEmpty(this.data.pidValue)) result.pidValue = this.data.pidValue;
+		//if(!Ext.isEmpty(this.config.pidValue)) result.pidValue = this.config.pidValue;
+		//if(!Ext.isEmpty(this.config.object_pid)) result.object_pid = this.config.object_pid;
 		return result;
 	}
 	,onLoad: function(store, records, options){

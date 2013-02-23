@@ -175,7 +175,6 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 		params.end.setMilliseconds(999);
 		//params.filter = this.filter
 		params.facets = 'calendar'
-		clog('do load params', params)
 		this.eventStore.load({ params: params })
 	}
 	// The edit popup window is not part of the CalendarPanel itself -- it is a separate component.
@@ -506,9 +505,6 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
         }
 	,onFiltersChange: function(filters){
 		this.setParams({filters: filters});
-		// clog('passed filters', filters);
-		// this.calendar.eventStore.baseParams.filters = filters;
-		// this.onReloadClick();
 	}
 
 });

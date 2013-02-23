@@ -47,6 +47,10 @@ class Search extends SolrClient{
 		
 		$fq = array();
 		if(!empty($p->pid)) $fq[] = 'pid:'.intval($p->pid);
+		if(!empty($p->ids)){
+			if(!is_array($p->ids)) $p->ids = explode(',', $p->ids);
+			if(!empty($p->ids)) $fq[] = 'id:('.implode(' OR ', $p->ids).')';
+		} 
 		if(!empty($p->pids)){
 			if(!is_array($p->pids)) $p->pids = explode(',', $p->pids);
 			if(!empty($p->pids)) $fq[] = 'pids:('.implode(' OR ', $p->pids).')';

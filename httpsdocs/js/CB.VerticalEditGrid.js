@@ -14,7 +14,21 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				else tbar.push(i);
 		});
 		
-		fields = ['id', {name: 'field_id', type: 'int'}, 'title', 'value', 'info', 'files', {name: 'pfu', type: 'int'}, 'duplicate_id', 'duplicate_pid', {name: 'pid', type: 'int'}, 'tag', 'type', {name: 'level', type: 'int'}, {name: 'visible', type: 'int'}, 'cfg']
+		fields = ['id'
+			,{name: 'field_id', type: 'int'}
+			,'title'
+			,'value'
+			,'info'
+			,'files'
+			,{name: 'pfu', type: 'int'}
+			,'duplicate_id'
+			,'duplicate_pid'
+			,{name: 'pid', type: 'int'}
+			,'tag'
+			,'type'
+			,{name: 'level', type: 'int'}
+			,{name: 'visible', type: 'int'}
+			, 'cfg']
 		this.fullStore = new Ext.data.JsonStore({
 			fields: fields
 			,reader: new Ext.data.JsonReader({ idProperty: 'id', messageProperty: 'msg' })
@@ -117,6 +131,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			,dataIndex: 'info'
 			,editor: new Ext.form.TextField()
 		}
+		//,'field_id', 'duplicate_id', 'duplicate_pid', 'pid', 'type', 'level'
 		];
 		
 		Ext.apply(this, {
@@ -421,7 +436,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		if(Ext.isDefined(w.data)) w.data[this.root] = this.data;
 	}
 	,onBeforeEditProperty: function(e){//grid, record, field, value, row, column, cancel
-		if(e.record.get('tag') == 'H'){
+		if((e.record.get('tag') == 'H') || (e.record.get('cfg').readOnly == true) ){
 			e.cancel = true;
 			return;
 		}
@@ -429,10 +444,18 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
 		pw = this.findParentByType(CB.Objects);
 		t = e.record.get('type');
+		e.objectId = pw.data.id;
+		e.path = pw.data.path;
 		if(pw && (t == '_case_object') ) e.pidValue = pw.data.id; /* setting by default parent case id for case_objects fields, this value will be overwriten if it is dependent on another field */
 		
 		if( (Ext.isDefined(e.record.data.cfg.dependency) ) && !Ext.isEmpty(e.record.get('pid')) )/* get and set pidValue id dependent */
-			e.pidValue = Ext.isDefined(this.getBubbleTarget().getCurrentFieldValue) ? this.getBubbleTarget().getCurrentFieldValue(e.record.get('pid'), e.record.get('duplicate_id')) : this.getFieldValue(e.record.get('pid'), e.record.get('duplicate_id'));
+			if(Ext.isDefined(this.getBubbleTarget().getCurrentFieldValue)){
+				e.pidValue = this.getBubbleTarget().getCurrentFieldValue(e.record.get('pid'), e.record.get('duplicate_id')) 
+				if(Ext.isEmpty(e.pidValue)) e.pidValue = this.getBubbleTarget().getCurrentFieldValue(e.record.get('pid'), 0) 
+			}else{
+				e.pidValue = this.getFieldValue(e.record.get('pid'), e.record.get('duplicate_id'));
+				if(Ext.isEmpty(e.pidValue)) e.pidValue = this.getFieldValue(e.record.get('pid'), 0); 
+			}
 		col = e.grid.colModel.getColumnAt(e.column);
 		ed = col.getEditor();
 		if(ed) ed.destroy();
@@ -473,7 +496,8 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	,updateVisibility: function(){
 		result = false;
 		modified = true;
-		while(modified){
+		maxIterations = 100;
+		while(modified && (maxIterations > 0) ){
 			modified = false;
 			this.fullStore.each( function(record){
 				pid = record.get('pid');// //5
@@ -495,12 +519,13 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 					pr = this.fullStore.getAt(pri);
 					if(pr.get('visible') == 1){ // if parent row is visible
 						va = [];
+						v = '';
 						if(Ext.isDefined(record.get('cfg').dependency) && !Ext.isEmpty(record.get('cfg').dependency.pidValues)){
 							v = record.get('cfg').dependency.pidValues;
 							va = Ext.isArray(v) ? v : String(v).split(',');
 						}
 						if( record.get('visible') == 1 ){
-							if( ( !Ext.isEmpty(v) && ( va.indexOf( pr.get('value') ) < 0 ) ) //if not empty pidValues specified and parent value out of pidValues then hide the field
+							if( ( !Ext.isEmpty(v) && !setsHaveIntersection( va, pr.get('value') ) ) //if not empty pidValues specified and parent value out of pidValues then hide the field
 							    || ( (record.get('cfg').thesauriId == 'variable') && Ext.isEmpty(pr.get('value')) ) // OR if the field is dinamic and parent has no selected value
 							    || ( Ext.isDefined(record.get('cfg').dependency) && Ext.isEmpty(pr.get('value')) ) // OR if the field is dinamic and parent has no selected value
 							)
@@ -509,7 +534,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 								modified = true;
 							}
 						}else{ //when record is not visible
-							if( (Ext.isEmpty(v) || ( va.indexOf( pr.get('value') ) >= 0 ))
+							if( !Ext.isEmpty(pr.get('value')) && (Ext.isEmpty(v) || setsHaveIntersection( va, pr.get('value') ))
 								&& ( (record.get('cfg').thesauriId !== 'variable') ||  !Ext.isEmpty(pr.get('value'))) 
 								&& ( Ext.isDefined(record.get('cfg').dependency) ||  !Ext.isEmpty(pr.get('value'))) 
 							) { //if no pidValues specified or pidValues contains the parent selected value then show the field
@@ -526,6 +551,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				}else record.set('visible', 1);
 			}, this);
 			if(modified) result = true;
+			maxIterations--;
 		}
 		result = (result || !this.refilled);
 		if(result) this.refillGridStore();
@@ -595,15 +621,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				,pid: r.get('pid')
 				,tag: r.get('tag')
 				,type: r.get('type')
-				,cfg: {
-					thesauriId: r.get('cfg').thesauriId
-					,maxInstances: (r.get('id') == fieldId) ? pidRow.get('cfg').maxInstances : r.get('cfg').maxInstances
-					,multiValued: r.get('cfg').multiValued
-					,templates: r.get('cfg').templates
-					,tags: r.get('cfg').tags
-					,editor: r.get('cfg').editor
-					,dependency: r.get('cfg').dependency
-				}
+				,cfg: Ext.apply({}, r.get('cfg'))
 				,level: r.get('level')
 				,visible: r.get('visible')
 			}
