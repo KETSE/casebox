@@ -293,4 +293,9 @@ function getCoreHost($db_name = false){
 	return $core;
 }
 
-?>
+function toNumericArray($v){
+	if(empty($v)) return array();
+	if(!is_array($v)) $v = explode(',', $v);
+	$v = array_filter($v, 'is_numeric');
+	return $v;
+}

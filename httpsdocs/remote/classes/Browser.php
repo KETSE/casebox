@@ -16,7 +16,84 @@ class Browser{
 		// ,"templateGroups": []
 
 		//,+query - user query
-		
+		if(!empty($p->source))
+		switch($p->source){
+			case 'field':
+			if( empty($p->pidValue) || empty($p->field) ) break;
+			$ids = toNumericArray($p->pidValue);
+			if(empty($ids)) break;
+				$sql = 'SELECT od.value FROM '.
+					'objects o '.
+					'JOIN templates t ON t.id = o.`template_id` '.
+					'JOIN templates_structure ts ON t.id = ts.`template_id` AND ts.name = $1 '.
+					'JOIN objects_data od ON o.id = od.`object_id` AND od.`field_id` = ts.id '.
+					'WHERE o.`id` IN ('.implode(',',$ids).');';
+				$res = mysqli_query_params($sql, $p->field) or die(mysqli_query_error());
+				$ids = array();
+				while($r = $res->fetch_row()){
+					if(!empty($r[0])){
+						$v = explode(',', $r[0]);
+						for ($i=0; $i < sizeof($v); $i++) { 
+							if(!empty($v[$i])) $ids[$v[$i]] = 1;
+						}
+					}
+				}
+				$res->close();
+				$ids = array_keys($ids);
+				if(empty($ids)) return array('success' => true, 'data' => array() );
+				$p->ids = $ids;
+				break;
+
+		}
+		if(!empty($p->scope)){
+			switch($p->scope){
+				case 'project': /* limiting pid to project. If not in a project then to parent directory */
+					if(!empty($p->objectId) && is_numeric($p->objectId)){
+						$sql = 'select coalesce(f_get_objects_case_id($1), pid) from tree where id = $1 ';
+						$res = mysqli_query_params($sql, $p->objectId) or die(mysqli_query_error());
+						if($r = $res->fetch_row()) $p->pids = $r[0]; 
+						$res->close();
+					}elseif(!empty($p->path)){
+						$v = explode('/',$p->path);
+						$pids = 0;
+						while(!empty($v) && empty($pids)) $pids = array_pop($v);
+						if(!empty($pids)) $p->pids = $pids;
+					}
+					break;
+				case 'parent':
+					if(!empty($p->objectId) && is_numeric($p->objectId)){
+						$sql = 'select pid from tree where id = $1 ';
+						$res = mysqli_query_params($sql, $p->objectId) or die(mysqli_query_error());
+						if($r = $res->fetch_row()) $p->pids = $r[0]; 
+						$res->close();
+					}elseif(!empty($p->path)){
+						$v = explode('/',$p->path);
+						$pids = 0;
+						while(!empty($v) && empty($pids)) $pids = array_pop($v);
+						if(!empty($pids)) $p->pids = $pids;
+					}
+
+					break;
+				case 'self': 
+					if(!empty($p->objectId) && is_numeric($p->objectId)){
+						$sql = 'select id from tree where id = $1 ';
+						$res = mysqli_query_params($sql, $p->objectId) or die(mysqli_query_error());
+						if($r = $res->fetch_row()) $p->pids = $r[0]; 
+						$res->close();
+					}elseif(!empty($p->path)){
+						$v = explode('/',$p->path);
+						$pids = 0;
+						while(!empty($v) && empty($pids)) $pids = array_pop($v);
+						if(!empty($pids)) $p->pids = $pids;
+					}
+					break;
+				default: 
+					if(empty($p->descendants)) $p->pid = toNumericArray($p->scope);
+					else $p->pids = toNumericArray($p->scope);
+					break;
+			}
+		}
+
 		$p->fl = 'id,name,type,subtype,template_id,status';
 		$search = new Search();
 		return $search->query($p);

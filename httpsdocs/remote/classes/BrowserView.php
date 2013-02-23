@@ -21,8 +21,11 @@ class BrowserView extends BrowserTree{
 			unset($d['id']);
 			if(!empty($d['name'])) $d['name'] = adjustTextForDisplay($d['name']);
 
-			$res = mysqli_query_params('select 1 from tree where pid = $1 limit 1', $d['nid']) or die(mysqli_query_error());
-			if($r = $res->fetch_row()) $d['has_childs'] = true;
+			$res = mysqli_query_params('select cfg, (select 1 from tree where pid = $1 limit 1) from tree where id = $1', $d['nid']) or die(mysqli_query_error());
+			if($r = $res->fetch_row()){
+				if(!empty($r[0])) $d['cfg'] = json_decode($r[0]);
+				$d['has_childs'] = ($r[1] == 1);
+			}
 			$res->close();
 		}
 		parent::updateLabels($rez['data']);

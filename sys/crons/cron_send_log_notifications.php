@@ -49,7 +49,7 @@ foreach($CB_cores as $core){
 		$remind_users = array($r['user_id']);//explode(',', $r['remind_users']);
 		foreach($remind_users as $u){
 			if(!isset($users[$u])){
-				$res2 = mysqli_query_params('select id, sex, email, language_id, '.$GLOBALS['languages']['string'].' from users where id = $1', $u) or die(mysqli_query_error());
+				$res2 = mysqli_query_params('select id, sex, email, language_id, '.$_SESSION['languages']['string'].' from users where id = $1', $u) or die(mysqli_query_error());
 				if($r2 = $res2->fetch_assoc()) $users[$u] = $r2;
 				$res2->close();
 			}
@@ -63,7 +63,7 @@ foreach($CB_cores as $core){
 		if(empty($u['email'])) continue;
 		@$l = 'l'.$u['language_id'];
 		if(!$l) $l = $GLOBALS['CB_LANGUAGE'];
-		$lang = $GLOBALS['languages']['per_id'][$u['language_id']]['abreviation'];
+		$lang = $_SESSION['languages']['per_id'][$u['language_id']]['abreviation'];
 		if(filter_var($u['email'], FILTER_VALIDATE_EMAIL)){
 			foreach($u['mails'] as $m){
 				$message = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="'.$lang.'" xml:lang="'.$lang.'">'.

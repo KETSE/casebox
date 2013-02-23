@@ -425,8 +425,10 @@ function initApp(){
 			,record: e.record
 			,grid: e.grid
 			,pidValue: e.pidValue
-
+			,objectId: e.objectId
+			,path: e.path
 		}
+		
 		switch(type){
 			case '_auto_title':
 				return new Ext.ux.TitleField({minWidth: 100, anchor: '90%', boxMaxWidth: 800}); break;
@@ -706,20 +708,6 @@ function initApp(){
 			default: return false; break;
 		}
 		return true;
-	}
-	App.setsGetIntersection = function(set1, set2){
-		if(Ext.isEmpty(set1) || Ext.isEmpty(set2)) return false;
-		if(Ext.isPrimitive(set1)) set1 = String(set1).split(',');
-		if(Ext.isPrimitive(set2)) set2 = String(set2).split(',');
-		rez = [];
-		for (var i = 0; i < set1.length; i++) set1[i] = String(set1[i]);
-		for (var i = 0; i < set2.length; i++) set2[i] = String(set2[i]);
-		for (var i = 0; i < set1.length; i++) if( (set2.indexOf(set1[i]) >= 0) && (rez.indexOf(set1[i]) < 0 )) rez.push(set1[i]);
-		for (var i = 0; i < set2.length; i++) if( (set1.indexOf(set2[i]) >= 0) && (rez.indexOf(set2[i]) < 0 )) rez.push(set2[i]);
-		return rez;
-	}
-	App.setsHaveIntersection = function(set1, set2){
-		return !Ext.isEmpty(App.setsGetIntersection(set1, set2));
 	}
 	App.clipboard = new CB.Clipboard();
 	/* disable back button */

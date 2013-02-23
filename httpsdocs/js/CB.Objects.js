@@ -726,10 +726,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				if((r.get('cfg').showIn == 'top') && Ext.isDefined(r.get('cfg').dependency) && (r.get('pid') == pid) ){
 					c = this.topFieldSet.find('name', 'f'+r.get('id')+'_0');
 					if(!Ext.isEmpty(c)){
-						clog('updating', c);
 						c = c[0]
-						clog(newValue, '||', r.get('cfg').dependency.pidValues, '&&', App.setsHaveIntersection( r.get('cfg').dependency.pidValues, newValue) )
-						c.setDisabled(Ext.isEmpty(newValue) || (!Ext.isEmpty(r.get('cfg').dependency.pidValues) && !App.setsHaveIntersection( r.get('cfg').dependency.pidValues, newValue) ) );
+						c.setDisabled(Ext.isEmpty(newValue) || (!Ext.isEmpty(r.get('cfg').dependency.pidValues) && !setsHaveIntersection( r.get('cfg').dependency.pidValues, newValue) ) );
 						c.data.record = r;
 						c.data.pidValue = newValue;
 						if(c.updateStore) c.updateStore(c);

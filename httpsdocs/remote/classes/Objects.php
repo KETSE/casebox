@@ -93,6 +93,8 @@ class Objects{
 		$update_ids_icons = Array(); //$updated_decision_ids = Array(); //collecting ids to update their icon sets corresponding to the new values
 
 		$d = json_decode($p['data']);
+		fireEvent('beforeobjectsave', $d);
+		//var_dump($d);
 		$initial_object_id = $d->id;
 		$d->case_id = null;
 		//if(!is_numeric($d->case_id)) throw new Exception(L\Wrong_input_data);
@@ -262,7 +264,6 @@ class Objects{
 			Array(ucfirst($object_title), $object_custom_title, $object_date_start, $object_date_end, $object_author, $d->id, $this->getObjectIcon($d->id), $d->pfu, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		//if(is_debug_host()) echo $this->getObjectIcon($d->id).$d->id.'!';
 		/* end of updating object properties into the db */
-		
 		$s = '{"data":{"case_id": '.coalesce($d->case_id, 'null').', "id":'.$d->id.', "template_id": '.$template['id'].'}}';
 		$p = json_decode($s);
 		
@@ -270,7 +271,11 @@ class Objects{
 
 		$update_ids_icons = array_keys($update_ids_icons);
 		foreach($update_ids_icons as $id) mysqli_query_params('update objects set iconCls = $1 where id = $2', array($this->getObjectIcon($id), $id)) or die(mysqli_query_error());
+		
+		fireEvent('afterobjectsave', $d);
+		
 		SolrClient::runCron();
+		
 		return $this->load( $p );
 	}
 	
@@ -518,7 +523,7 @@ class Objects{
 
 	static function getSorlData($id){
 		$rez = array();
-		$lang_field = 'l'.$GLOBALS['languages']['per_abrev'][$GLOBALS['CB_LANGUAGE']]['id'];
+		$lang_field = 'l'.$_SESSION['languages']['per_abrev'][$GLOBALS['CB_LANGUAGE']]['id'];
 		$sql = 'SELECT 
 			co.id
 			,co.template_id
