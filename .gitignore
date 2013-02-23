@@ -17,4 +17,8 @@ httpsdocs/cores/
 # except sample core
 !httpsdocs/cores/sample/
 
+# exclude config.ini
+httpsdocs/config.ini
+
+#exclude notes folder
 notes
