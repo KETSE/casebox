@@ -124,16 +124,16 @@ Figure 4 illustrates how Edwin adds Johny, notice the <i>Office</i> field, it's 
 
 <tr><td><b>Tasks</b></td><td>Users may assign tasks to each other: the main lawyer of a case creates a task for the secondary lawyer for ex. CaseBox Dashboard displays all active tasks assigned or created by the user. Tasks may have deadlines. Reminders can be set to notify responsible users (users assigned to the task) about the approaching deadline.</td></tr>
 
-<tr><td><b>Phases</b></td><td>a case lifecycle may be splitted into several phases. There may be specific Action types per phase. Think of phases as if there are tags attached to a case, depending on the associated tags, the list of available actions change. Phases a tightly connected to the tagging system described below.</td></tr>
+<!-- <tr><td><b>Phases</b></td><td>a case lifecycle may be splitted into several phases. There may be specific Action types per phase. Think of phases as if there are tags attached to a case, depending on the associated tags, the list of available actions change. Phases a tightly connected to the tagging system described below.</td></tr> -->
 
 
-<tr><td><b>Activities</b></td><td><span class="label label-important">to be implemented</span> An activity is what/when and how long has been done. It's used to track laywer's time spent on a case to calculate the cost.</td></tr>
+<!-- <tr><td><b>Activities</b></td><td><span class="label label-important">to be implemented</span> An activity is what/when and how long has been done. It's used to track laywer's time spent on a case to calculate the cost.</td></tr> -->
 
-<tr><td><b>Messages</b></td><td><span class="label label-important">to be implemented</span> Users may send messages to each other.</td></tr>
+<!-- <tr><td><b>Messages</b></td><td><span class="label label-important">to be implemented</span> Users may send messages to each other.</td></tr> -->
 </tbody>
 </table>
 
-
+<!--
 <p>
 The picture below illustrates a case. Notice the action list (top-right) and custom action fields (type, who made decision) in the action preview panel (bottom-right).
 </p>
@@ -224,7 +224,7 @@ the word document is the main file, while two draft versions (1 alpha, 2 beta) a
 <br />
 
 
-
+-->
 <br />
 <h4><a name="users"></a>3.2.2. Bulk upload (zip files) & Multiple upload.</h3>
 
@@ -271,6 +271,7 @@ In the screenshots above there are two objects for the Mangouras v. Spain case: 
 <p>Figure 11. Custom fields of a case object.</p>
 </div>
 
+<!-- 
 
 <h3><a name="object-contact"></a>3.3.1. Adding applicants and perpetrators to the case</h3>
 <p>
@@ -285,6 +286,7 @@ The solution was to create a separate <a href="#contactdb">Contacts Database</a>
 
 <p>The process of creating contacts and linking them to a case is described in <a href="#contactdb-object">Section 4.2.</a></p>
 
+-->
 
 <br />
 <br />
@@ -299,8 +301,8 @@ A task has the following main properties:
 <li><b>Creator</b>: the user who created the task. (If the task has a deadline and it's missed, the creator will be charged with this. i.e. He has to supervise the Responsible Users he assignes for the task.)</li>
 <li><b>Responsible users</b>: a list of users that should complete the task. The task will be marked as completed when ALL users will accomplish it.</li>
 <li><b>Deadline</b>: the date by which the task should be completed. It's an optional field.</li>
-<li><b>Critical</b>: Is this an <b>internal</b> (non-crictical) or <b>external</b> task (critical). Internal tasks, like "scan this document" or "sign this paper" usually doesn't affect the organization, we may also call them "soft" deadlines. External tasks are imposed by courts or other mechanisms, like ECHR for ex: they send letters and require an answer to be sent by a specific date. Missing such a deadline usually has serious implications.<br>
-(the label "critical" is to be discussed, maybe a better word can be found. What is clear is that we should delimit/tag important deadlines.)</li>
+<!-- <li><b>Critical</b>: Is this an <b>internal</b> (non-crictical) or <b>external</b> task (critical). Internal tasks, like "scan this document" or "sign this paper" usually doesn't affect the organization, we may also call them "soft" deadlines. External tasks are imposed by courts or other mechanisms, like ECHR for ex: they send letters and require an answer to be sent by a specific date. Missing such a deadline usually has serious implications.<br>
+(the label "critical" is to be discussed, maybe a better word can be found. What is clear is that we should delimit/tag important deadlines.)</li> -->
 <li><b>Title</b>: what actually has to be done</li>
 <li><b>Description</b>: a more detailed definition of the task</li>
 </ul>
@@ -329,6 +331,9 @@ We don't expect it to happen, but we mention this in the documentation for the s
 
 <p>When the task is created by clicking Create button, the system will send email notifications to all responsible users about this new task that has been assigned to them.</p>
 
+<!-- 
+
+
 <h4><a name="task-advanced"></a>3.4.1. Tasks: advanced properties</h4>
 <p>
 The following task properties were classifed as advanced due to seldom use:
@@ -342,6 +347,8 @@ The following task properties were classifed as advanced due to seldom use:
 
 <div class="scr">
 <img alt="Advanced task properties" src="/i/docs/f3-4_add-task-advanced.png" class="nb" />
+
+
 <p>Figure 3.4.3. Advanced task properties.</p>
 </div>
 
@@ -437,9 +444,9 @@ Let's allow offices/users to access the case:
 <p>Figure 15. Managing access to a case.</p>
 </div>
 <br /><br />
+-->
 
-
-
+<!--
 
 <h3><a name="contactdb"></a>4. Contacts Database</h3>
 <p>
@@ -489,6 +496,8 @@ The figure below shows how to add an Applicant to the case (the dropdown menu at
 <p>Figure 4.3. Adding an Applicant to the case and editing the template.</p>
 </div>
 
+-->
+
 <br /><br />
 <h3><a name="users"></a>5. Thesaurus</h3>
 <p>
@@ -526,13 +535,22 @@ You should drag&drop those thesauri values or group of values(folders) from the 
 
 
 
+<!--
 <h3><a name="tags"></a>5. Tags <span class="label label-important">todo</span></h3>
 <p>tags & actions ...</p>
+
+-->
+
+
+
 
 
 
 <br /><br />
-<h3><a name="tmpl"></a>6. Templates <span class="label label-important">todo</span></h3>
+<h3><a name="tmpl"></a>6. Templates and Fields <span class="label label-important">todo</span></h3>
+
+<p>Template structure table definition:</p>
+
 <p>Field definition</p>
 <table class="table table-bordered table-condensed" style="width: 100%">
 <thead>
@@ -548,7 +566,7 @@ You should drag&drop those thesauri values or group of values(folders) from the 
 </tr>
 <tr>
 <td>pid</td>
-<td>parent id: the ID of the parent field.<br /> To create a subfield that appears when the parent field has a specific value, use the PID and PID_VALUES fields</td>
+<td>parent id: the ID of the parent field.<br /> Use a parent field to control the visibility and values of a child field (i.e. dependent fields)</td>
 </tr>
 
 <tr>
@@ -561,116 +579,82 @@ You should drag&drop those thesauri values or group of values(folders) from the 
 <td>it's actualy the field type: 
 <ul>
 <li><b>f</b>: normal field</li>
-<li><b>H</b>: a grouping header, but notice that it's doesn't act like a group of subfields</li>
-<li><b>b</b>: a block of fields, use a block when you whant to control a grou</li>
+<li><b>H</b>: a header to visually delimit fields</li>
+<li><b>G</b>: a group of fields, use it when you need to control the visibility of several fields at a time.</li>
 </ul>
 </td>
 </tr>
 
 <tr>
-<td>order</td>
-<td>the ordering(position) of the field</td>
-</tr>
-
-<tr>
-<td>level</td>
-<td>indentation level, mostly used in field groups to visually indent the field</td>
+<td>level <span class="label label-important">do we need this field ?</span></td>
+<td>indentation level, mostly used in field groups to visually indent the field. </td>
 </tr>
 
 <tr>
 <td>name</td>
-<td>field name, used in search queries, website templates</td>
+<td>field name, used in search queries, website templates. There are special field names like "_title": used by CB to display the node in the grid/tree</td>
+</tr>
+
+<tr>
+<td>l1 ... lN</td>
+<td>field titles in different languages. (languages are configured in `languages` table)</td>
 </tr>
 
 <tr>
 <td>type</td>
 <td>
 <ul>
-<li><b>_title</b>: only to edit the title of the object, use the '_title_auto' type for this field
-
-
-<li><b>combo</b>: a dropdown combobox, conected to a thesauri (also specify thesauri_id field)</li>
 <li><b>varchar</b>: text field</li>
 <li><b>date</b>: calendar</li>
 <li><b>time</b>: time</li>
 <li><b>int</b>: integer</li>
 <li><b>float</b>: float</li>
-<li><b>populist</b>: popup list, multiple values. (setup: single/multiple)</li>
-<li><b>_contact</b>: server side filtered combobox
-<pre>
-  "tags": [5234, 233, 62]            // search only in client DB where tag IN tags
-  "templates": [213, 82, 425]        // template IDs
-  "multiple": true                   // if "editor" == "form", the user can select several items  (rename to "multiValued")
-  "editor":"combo, form, popuplist"  // if none specified, a combo is displayed
-  "dependant": "true"                // displays values where ParentContact.id = _contact.pid
-  "multiplicity": [1..n]             // how many instances. used only in grid  (rename to "maxInstances")
-  "advanced": true, false            // false by default. Show Advanced button if true
-  "parentTagFieldIds":               // filter values where {'editor': 'combo'} only used when multiple==false
-  
-  "autoLoad": true, false   // default: true
-  "showDate": true, false   // default: true   (show a new column before title)
-  "renderer": "string, listGreenIcons, listObjIcons"  // show date at the start if showDate == true  
-</pre>		
-when we know there are not so many contacts (judges of a court for ex), then it's more convenient to use a dropdown rather than a complex window.
-       <br><br>
-First 20 contacts found are loaded from the server.
- 
-		</li>
-<li><b>_language</b>: list of languages available for the core</li>
+<li><b>combo</b>: a dropdown combobox, conected to a thesauri (also specify thesauri_id field) <span class="label label-important">obsolete: Use _objects field</span>.</li>
+
 <li><b>text</b>: plaing text editor (as a separate tabsheet)</li>
 <li><b>html</b>: WYSIWYG Editor similar to gmail (as a separate tabsheet)</li>
 <li><b>memo</b>: an inline text field with a specified height in cfg</li>
+
+<li><b>_objects:</b> a complex field type that can show thesauri or tree nodes</li>
+
 <li><b>_sex</b>: used in contact and user profiles. CaseBox then will use a different icon to represent the user.</li>
 <li><b>_short_date_format</b>: date formats available in system</li>
-<li><b>_case</b>: 
-		"editor":"form"               // if none specified, a combo is displayed
-		"tags": [5234, 233, 62]       // search only in client DB where tag IN tags
-		"multiplicity": 0/1           // if "editor" == "form", the user can select several contacts
-</li>
-<li><b>_case_object:</b><br>
-     similar to _contact, note that "dependant" == "true" implicitly (show objects of the case)
-	 // a date filter will be added, idea: restrict objects where _date_start "<,>" object.$dateField ($dateField in template config)
-</li>
 
-
-<li><b></b></li>
+<li><b>_language</b>: list of languages available for the core</li>
 </ul>
 </td>
 </tr>
 
 <tr>
+<td>order</td>
+<td>the ordering(position) of the field in the grid</td>
+</tr>
+
+
+<tr>
 <td>cfg</td>
-<td><ul>
-<li>thesauri_id: for combo fields, specify which is the thesauri to display</li>
-<li>maxInstances: [1..n] // how many instances of the field are allowed (by default 1). A multiple field will feature a small number icon on the right side and the "Add" button will be enabled when the field is selected in the grid.</li>
-<li>multiValued: [true, false]</li>
-<li>editor: [form]</li>
-<li>edit_in: [tabsheet]</li>
-<li>editor: [form]</li>
-<li>pid_values: for a child field, specify a list of comma separated thesauri_id values for the parent field. i.e. when the parent will be in pid_values, the current field will be displayed in the grid, otherwise the field is hidden. <p>
-In order to make dependable fields (for example to have two fields, Country/City),
-specify "dependant": true, this will use the 'pid' column to get the SelectedID</p></li>
-<li>tag_ids</li>
-<li>use_as_tags</li>
-<li>show_on_top: 
-by default fields are rendered in the grid. Important fields, like ActionDate, Title should be always visible and are displayed above the grid in the main Action panel.</li>
+<td>
+Field config is specific per field type, here are the options common to all field types:
+
+<ul>
+<li><b>readonly</b>: a readonly field</li>
+<li><b>maxInstances</b>: [1..n] // how many instances of the field are allowed (by default 1). 
+    A multiple field will feature a small [+] icon on the right side that can be clicked to create a new field.</li>
+<li><b>multiValued</b>: (true, false)</li>
+<li><b>editIn</b>: (grid, top, tabsheet). Specify where to render the field, in the top part, in a separate tabsheet (for a memo field) or in the grid.</li>
+<li><b>value</b>: a default value for the field</li>
+<li><b>dependancy</b>: a config object that specifies how the current field depends on the parent one (the parent is specified in `pid` column).
+               <p>In order to make dependable fields (for example to have two fields, Country/City),
+                you need to explicitly specify a `dependancy: {}` config group, even if there are no more dependancy conditions.</p>            
+</li>
 </ul></td>
 </tr>
 
 <tr>
-<td>tags_system_group</td>
-<td>?</td>
+<td>use_as_tags</td>
+<td>Value/values of the field will be copied to the `sys_tags` SOLR column, and used to build filter facets.</td>
 </tr>
 
-<tr>
-<td>visible</td>
-<td>how it is used?</td>
-</tr>
-
-<tr>
-<td>readonly</td>
-<td>the system field, like the id of the action, may be displayed in the grid but editing is not allowed</td>
-</tr>
 
 <tr>
 <td>solr_column_name</td>
@@ -686,23 +670,227 @@ by default fields are rendered in the grid. Important fields, like ActionDate, T
 </table>
 
 
-<div style="color: gray">
-<pre>
-Template types:
-[14:05:34] VvV: 0-folder, 1-case object, 2-in action, 3-out action, 4-applicant, 5-subject, 6-user, 7-client
+<h3>Field dependancy</h3>
+To make dependant fields:
+<ul>
+  <li>specify `pid`: this will tell CB which is the parent field</li>
+  <li>add `dependency` block in `cfg`:
+      <pre>"dependency": {
+    "pidValues": []   // an ary of values
+    ,"tags": []
+    ,"tagMode": (OR, AND*)  // AND is default
+}</pre>
+  </li>
+</ul>
 
 
-template_type: _contact
-{"show_on_top":"0"
-,"multiple": true     // if I can select multiple contacts
-,"dependant": true    // use the 'pid' column to get the SelectedID
-,"tags":[198]         // filter by tags associated to contacts
-,"templates": [63]    // organization, contact
-,"editor": "combo"    // a simple drodown when the list is not big
+<p>Examples:</p>
+<table class="table table-bordered table-condensed" style="width: 100%">
+<thead>
+<tr>
+<th>id</th>
+<th>pid</th>
+<th>tag</th>
+<th>name</th>
+<th>l1</th>
+<th>type</th>
+<th>order</th>
+<th>cfg</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td>10</td>
+    <td>NULL</td>
+    <td>f</td>
+    <td>country</td>
+    <td>Country</td>
+    <td>_objects</td>
+    <td>1</td>
+    <td>{"source": "thesauri", "thesauriId": "217"}</td>
+  </tr>
+  <tr>
+    <td>11</td>
+    <td>10</td>
+    <td>f</td>
+    <td>city</td>
+    <td>City</td>
+    <td>_objects</td>
+    <td>2</td>
+    <td>{"source": "thesauri", "thesauriId": "variable", "dependency": {} }</td>
+  </tr>
+</tbody>  
+</table>
 
-}
-</pre>
-</div>
+
+<h3>_objects Field type</h3>
+<p>By object we mean a thesauri item, a tree node, a case, a folder, a system user etc.</p>
+
+<table class="table table-bordered table-condensed" style="width: 100%">
+  <tbody>
+    <tr>
+      <td>source</td>
+      <td>
+        from where to get values for the editor:
+        <ul>
+        <li>thesauri: also specify `thesauriId` in cfg</li>
+        <li>tree: use the Tree</li>
+        <li>related: use related nodes of a given node. <span class="label label-important">to be implemented</span></li>
+        <li>field: used for dependent fields when the parentField has a [field] of type _objects.</li>
+        <li>custom: a custom source, also specify `url` or `fn` cfg.</li>
+      </ul>
+       </td>
+    </tr>
+    <tr>
+      <td>scope</td>
+      <td><ul>
+        <li>tree*: the whole tree</li>
+        <li>project: start fetching from the parent Project (going up folder by folder up to a Project)</li>
+        <li>parent: parent node</li>
+        <li>self: the node itself</li>
+        <li>$node_id: a specific tree node (an integer)</li>
+        <li>[$node_id_ary]: an array of tree nodes</li>
+      </ul></td>
+    </tr>
+    <tr>
+      <td>field</td>
+      <td>fieldname of the object in the parentField from which to fetch values if source=field
+        <span class="label label-important">I suggest rename to `sourceField`</span></td>
+    </tr>
+    <tr>
+      <td>descendants</td>
+      <td>load recursively all children of the node specified in `scope`</td>
+    </tr>    
+    <tr>
+      <td>autoLoad</td>
+      <td>fetches the values when the editor is shown</td>
+    </tr>
+    <tr>
+      <td>showDate</td>
+      <td>[field_name]. Specify the field name that has a date. <span class="label label-important">this should be more flexible, for ex: the ability to have several columns in form editor</span></td>
+    </tr>
+    <tr>
+      <td>editor</td>
+      <td><ul>
+        <li>combo: a dropdown list</li>
+        <li>form: a popup</li>
+      </ul></td>
+    </tr>
+    <tr>
+      <td>renderer</td>
+      <td><ul>
+        <li>string: selected values are displayed as a comma separated list</li>
+        <li>listGreenIcons: values are displayed with a green tick icon</li>
+        <li>listObjIcons: use node icons</li>
+      </ul></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<p><b>Examples:</b></p>
+<p>Assume we have list of organizations. 
+An organization can be a court, and for such organization type we need to specify a list of judges working in the court.
+Next: an organization publishes a decision. The decision will have an _objects field `court`. After selecting the court, 
+a new field should appear to select the judge working in that court that made the decision.
+</p>
+
+<p>Organization template</p>
+<table class="table table-bordered table-condensed" style="width: 100%">
+<thead>
+  <th>id</th>
+  <th>pid</th>
+  <th>tag</th>
+  <th>name</th>
+  <th>type</th>
+  <th>cfg</th>
+  <th>use_as_tags</th>
+</thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>NULL</td>
+      <td>f</td>
+      <td>org_type</td>
+      <td>_objects</td>
+      <td>{"source": "thesauri", "thesauriId": "17", "editor": "combo"}</td>
+      <td>true<br>
+          <span class="gr">the value of this field goes to SOLR</span>
+      </td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1</td>
+      <td>f</td>
+      <td>judges</td>
+      <td>_objects</td>
+      <td>
+{"source": "tree"<br>
+,"scope": [2801]   <span class="gr pl50">// the judges are stored in a folder with ID=2801</span><br>
+,"descendants": true         <span class="gr pl50">// fetch all elements of the 2801 folder and all subfolders</span><br>
+,"templates": [69]           <span class="gr pl50">// judge templateId=69 (the 2801 folder may contain objects of other types)</span><br>
+,"autoLoad": true            <span class="gr pl50">// loading the list of judges when editor is shown</span> <br>
+,"renderer": "listObjIcons"  <span class="gr pl50">// visually display a list of nodes with the icon specified in template config</span><br>
+,"maxInstances": 3           <span class="gr pl50">// how many judge rows in the grid</span><br>
+,"editor":"form"             <span class="gr pl50">// shows a form with a list of judges</span><br>
+,"dependency": {<br>
+  "pidValues": [634]         <span class="gr pl50">// it means the `judges` field will appear only if the `org_type` field has value '634'</span><br>
+}<br>
+}</pre></td>
+      <td>false</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<p>Decision template:</p>
+
+<table class="table table-bordered table-condensed" style="width: 100%">
+<thead>
+  <th>id</th>
+  <th>pid</th>
+  <th>tag</th>
+  <th>name</th>
+  <th>type</th>
+  <th>cfg</th>
+</thead>
+  <tbody>
+    <tr>
+      <td>20</td>
+      <td>NULL</td>
+      <td>f</td>
+      <td>court</td>
+      <td>_objects</td>
+      <td>{<br>
+"source": "tree"<br>
+,"editor": "combo"<br>
+,"tags": [634]  <span class="gr pl50">// shows only organizations of type `court`</span>
+}</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>1</td>
+      <td>f</td>
+      <td>judge</td>
+      <td>_objects</td>
+      <td>
+{"source": "field"<br>
+,"field": "judge"            <span class="gr pl50">// the field of the parent node from which to load items</span><br>
+,"templates": [69]           <span class="gr pl50">// selects only judges(templateId=69) from the Court.Judges field</span><br>
+,"autoLoad": true            <span class="gr pl50">// loading the list of judges when editor is shown</span> <br>
+,"renderer": "listObjIcons"  <span class="gr pl50">// visually display a list of nodes with the icon specified in template config</span><br>
+,"maxInstances": 3           <span class="gr pl50">// how many judge rows in the grid</span><br>
+,"editor":"combo"            <span class="gr pl50">// shows a drop down list of judges</span><br>
+,"dependency": {}            <span class="gr pl50">// </span><br>
+}<br>
+}</pre></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<h3>Field examples</h3> 
+thesauri_id: for combo fields, specify which is the thesauri to display</li>
 
 
 
