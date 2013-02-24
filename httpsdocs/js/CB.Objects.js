@@ -70,6 +70,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			,autoHeight: true
 			,xtype: 'fieldset'
 			,border: false
+			,labelWidth: 130
 			,bodyStyle: 'padding: 10px'
 			,cls: 'spacy-fields'
 			,autoHeight: true
@@ -239,6 +240,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			title: L.Details
 			,show_files: this.templateData.cfg.files
 			,refOwner: this
+			,autoHeight: true
 		}, Ext.value(this.templateData.cfg.gridJsClass, 'CBVerticalEditGrid'));
 		tabPanelItems = [  ]
 		//placing content elements
@@ -386,7 +388,13 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 					disabled = Ext.isEmpty(pidValue);
 				}
 
-				ed = App.getTypeEditor(r.get('type'), {ownerCt: this, record: r, pidValue: pidValue});
+				ed = App.getTypeEditor(r.get('type'), {
+					ownerCt: this
+					,record: r
+					,pidValue: pidValue
+					,objectId: this.data.id
+					,path: this.data.path
+				});
 				if(ed){
 					ed.fieldLabel = r.get('title');
 					ed.disabled = disabled;
@@ -494,7 +502,13 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			this.propertiesPanel.data = this.data;
 		}else if(this.propertiesPanel && this.propertiesPanel.rendered) this.propertiesPanel.update(this.data)
 		this.grid.reload();
-		if((this.grid.store.getCount() > 0) && (this.tabPanel.items.first() != this.grid) )  this.tabPanel.insert(0, this.grid);//this.tabPanel.items.removeAt(0);
+		if((this.grid.store.getCount() > 0) && (this.tabPanel.items.first() != this.grid) )  
+			this.tabPanel.insert(0, {
+				title: L.Details
+				,autoScroll:true
+				,layout: 'fit'
+				,items: this.grid
+			});//this.tabPanel.items.removeAt(0);
 
 		fw = this.findByType(CB.CaseFilesWindow);
 		if( !Ext.isEmpty(fw) ) fw[0].data.object_id = this.data.id;
