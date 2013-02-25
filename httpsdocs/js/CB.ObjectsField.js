@@ -173,7 +173,7 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
 
 		this.trigger = new Ext.Button({
 			iconCls: this.triggerIconCls
-			,cls:'fR '
+			,cls:'fr '
 			,style: 'margin:-1px -2px '
 			,scope: this
 			,handler: this.onTriggerClick

@@ -4,6 +4,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	border: false
 	,root: 'gridData'
 	,cls: 'spacy-rows'
+	,autoScroll: true
 	,initComponent: function() {
 		tbar = [
 			{iconCls: 'icon-table-insert-row', name: 'duplicateField', text: L.Add, disabled: true, handler: this.onDuplicateFieldClick, scope: this}
@@ -54,8 +55,10 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			,editable: false
 			,scope: this
 			,renderer : function(v, meta, record, row_idx, col_idx, store){
-				if(record.get('tag') == 'H') meta.css ='fwB';
-				else{
+				if(record.get('tag') == 'H'){
+					meta.css ='vgh';
+					if(!Ext.isEmpty(record.get('cfg').style)) meta.attr = 'style="'+record.get('cfg').style+'"'
+				}else{
 					meta.css = 'bgcLG vaT';
 					meta.attr = 'style="margin-left: '+record.get('level')+'0px"';
 				}
@@ -115,13 +118,13 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				case 'popuplist': 
 					return App.customRenderers.thesauriCell(v, meta, record, row_idx, col_idx, store);
 					break;
-				case 'text':
-				case 'html': 
-					return App.shortenString(v, 200);
-					break;
-				case 'memo': 
-					return '<pre>'+App.shortenString(v, 500)+'</pre>';
-					break;
+				// case 'text':
+				// case 'html': 
+				// 	return v;//App.shortenString(v, 200);
+				// 	break;
+				// case 'memo': 
+				// 	return v;
+				// 	break;
 				default: return v;
 				}
 			}
@@ -483,7 +486,10 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				if( ( ( record.get('cfg').thesauriId == 'variable') || ( Ext.isDefined(record.get('cfg').dependency) )  )
 					&& (e.record.get('field_id') == record.get('pid'))
 					&& (e.record.get('duplicate_id') == record.get('duplicate_id')) 
-				) record.set('value', null);
+				){
+					record.set('value', null);
+					clog('sett to null')
+				}
 			}, this);
 			this.fireEvent('change'); 
 		}

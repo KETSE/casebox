@@ -280,7 +280,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		this.data.udate = date_ISO_to_date(this.data.udate);
 		this.data.id = parseInt(this.data.id);
 		//this.data.size = App.customRenderers.filesize(this.data.size);
-		this.setIconClass(r.data.iconCls);
+		this.setIconClass(getFileIcon(r.data.name));
 		this.setTitle(r.data.name);
 		this.actions.download.setDisabled(false);
 		this.actions.upload.setDisabled(false);

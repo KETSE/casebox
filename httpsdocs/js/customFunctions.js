@@ -58,7 +58,7 @@ function getFileIcon(filename){
 	if(Ext.isEmpty(filename)) return 'file-unknown';
 	a = String(filename).split('.');
 	if(a.length <2 ) return 'file-unknown';
-	return 'file-'+ a.pop();
+	return 'file-'+ Ext.util.Format.lowercase(a.pop());
 }
 function getVersionsIcon(versionsCount){
 	if(isNaN(versionsCount)) return '';

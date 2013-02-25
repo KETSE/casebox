@@ -172,6 +172,9 @@ img.duplicate-plus {width:16px; height: 16px; background: url(i/duplication/ui-c
 	background-color: #fff !important
 }
 .tabpanel-header-nobg ul.x-tab-strip-top{ background: transparent}
+
+.vgh .x-grid3-cell-inner{ font-weight:bold; white-space: nowrap !important; overflow: visible; }
+
 /** vim: ts=4:sw=4:nu:fdc=4:nospell
 *
 * CSS file for Grid rowBody Example
@@ -292,7 +295,7 @@ padding: 0px 2px;
 .preview table.title th.file table{ border:0 }
 .preview table.title th.file td{ padding: 0;white-space: nowrap; vertical-align: top }
 .preview table.title td{ padding: 3px 10px }
-.spacy-rows .x-grid3-cell{padding: 1px 1px 2px 1px}
+.spacy-rows .x-grid3-cell{padding: 1px 0 2px 0}
 .spacy-fields .x-form-item {padding: 1px 1px 2px 1px}
 .icon-application-tree{ background-image: url(i/ico/application-tree.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag{ background-image: url(i/ico/tag.png) !important; background-position: 0 50%; background-repeat: no-repeat}

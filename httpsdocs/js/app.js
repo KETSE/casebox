@@ -99,14 +99,18 @@ function initApp(){
 		thesauriCell: function(v, metaData, record, rowIndex, colIndex, store) {
 			if(Ext.isEmpty(v)) return '';
 			va = v.split(',');
-			v = [];
+			vt = [];
 			thesauriId = record.get('cfg').thesauriId;
 			if(Ext.isEmpty(thesauriId) && store.thesauriIds) thesauriId = store.thesauriIds[record.id]
 			if(!Ext.isEmpty(thesauriId)){
 				ts = getThesauriStore(thesauriId);
-				ts.each(function(r){if(va.indexOf(r.get('id')) >=0 ) v.push(r.get('name')); });
+				//ts.each(function(r){if(va.indexOf(r.get('id')) >=0 ) vt.push(r.get('name')); });
+				for (var i = 0; i < va.length; i++) {
+					idx = ts.findExact('id', parseInt(va[i]) );
+					if(idx >=0) vt.push(ts.getAt(idx).get('name'));
+				};
 			}
-			return App.xtemplates.cell.apply(v);
+			return App.xtemplates.cell.apply(vt);
 		}
 		,relatedCell: function(v, metaData, record, rowIndex, colIndex, store) { }
 		,combo: function(v, metaData, record, rowIndex, colIndex, store) { /* custom renderer for verticalEditGrid */
@@ -130,7 +134,6 @@ function initApp(){
 			if(!cw || !cw.objectsStore) return '';
 			r = [];
 			if(!Ext.isArray(v)) v = String(v).split(',');
-			
 			switch(record.data.cfg.renderer){
 				case 'listGreenIcons':
 					for(i=0; i < v.length; i++){
@@ -462,8 +465,10 @@ function initApp(){
 							}
 							w.on('setvalue', function(data){
 								value = []
-								if(Ext.isArray(data)) Ext.each(data, function(d){ value.push( d.id ? d.id : d)}, this)
-								value = value.join(',');
+								if(Ext.isArray(data)){
+									Ext.each(data, function(d){ value.push( d.id ? d.id : d)}, this)
+									value = value.join(',');
+								}else value = data;
 								e.record.set('value', value);
 								this.grid.fireEvent('change');
 							}, e)
@@ -623,6 +628,16 @@ function initApp(){
 							this.grid.fireEvent('change'); 
 						}
 					}
+					// ,listeners: {
+					// 	scope: e 
+					// 	,setvalue: function(v, w){
+					// 		this.record.set('value', v);
+					// 		this.value = v;
+					// 		if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
+					// 		this.grid.fireEvent('change'); 
+					// 	}
+
+					// }
 				});
 				w.focusHandler = Ext.value(this.gainFocus, e.grid.gainFocus);
 				//w.on('hide', App.onHideThesauriWindow, e.grid);

@@ -295,6 +295,7 @@ function getThesauriStore(thesauriId){
 			idIndex: 0
 			,fields: [{name:'id', type: 'int'}, {name:'pid', type: 'int'}, 'name', {name:'order', type: 'int'}, 'iconCls']
 			,data:  []
+			,getNames: getStoreNames
 		});
 		CB.DB[storeName].add([new CB.DB[storeName].recordType({id: null, name: ''}, Ext.id())]);
 		CB.DB[storeName].add(data.items);/**/

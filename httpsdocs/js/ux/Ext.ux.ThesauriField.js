@@ -10,7 +10,7 @@ Ext.ux.ThesauriField = Ext.extend(Ext.Panel, {
 		Ext.apply(listeners, {scope: this, change: this.onTagsChange});
 		this.button = new Ext.Button({
 			iconCls: this.iconCls
-			,cls:'fR '
+			,cls:'fr '
 			,style: 'margin:-1px -2px '
 			,scope: this
 			,handler: this.onMenuButtonClick
