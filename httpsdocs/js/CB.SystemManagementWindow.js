@@ -1,4 +1,72 @@
 Ext.namespace('CB'); 
+// ------------------ import export Window
+CB.ImportTagsForm = Ext.extend(Ext.Window, {  
+     modal: true
+    ,autoHeight: true
+    ,width: 350
+    ,frame: true
+    ,title: L.UploadFile
+    ,bodyPadding: '10 10 0'
+    ,initComponent: function(){
+        items = [];
+        Ext.apply(this, {
+            hideBorders: true
+            ,items: {
+                xtype: 'form'  
+                ,fileUpload: true              
+                ,monitorValid: true                
+                ,items: [{
+                    xtype: 'fieldset'
+                    ,border: false
+                    ,style: 'margin:0'
+                    ,items:[{
+                        fieldLabel: L.File
+                        ,inputType: 'file'
+                        ,name: 'file'
+                        ,xtype: 'textfield'
+                    }]
+                }]
+                ,buttons: [
+                    {text: Ext.MessageBox.buttonText.ok, handler: this.doSubmit, scope: this, iconCls: 'icon-save', formBind: true}
+                    ,{text: Ext.MessageBox.buttonText.cancel, handler: this.close, scope: this, iconCls: 'icon-cancel'}
+                ]
+            }
+        });
+        CB.ImportTagsForm.superclass.initComponent.apply(this, arguments);
+    }
+    ,doSubmit: function(){
+        f = this.findByType('form')[0];        
+        if(f.getForm().isValid()){
+            f.getForm().submit({
+                url: 'exportCsv.php?dir=import'
+                ,waitMsg: ''
+                ,scope: this
+                ,success: this.onSubmitSuccess
+                ,failure: this.onSubmitFailure
+            });
+        }        
+    }
+    ,onSubmitSuccess: function(form, action){    
+        this.fireEvent('submitsuccess', this, action.result.node);
+        this.hide();
+    }
+    ,onSubmitFailure: function(form, action){
+        /**
+        * @todo ALEX::error log      
+        */
+        switch(action.result.type){
+            case 'nofile': 
+                console.log('no file specified');               
+                break;           
+            case 'wrongtype': 
+                console.log('wrong file type');               
+                break;  
+            default:              
+                console.log('general error');
+                break;
+        }
+    } 
+});
 // ------------------ add tag/folder form
 CB.TagAddForm = Ext.extend(Ext.Window, {
 	modal: true
@@ -96,6 +164,9 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 			,{iconCls: 'icon-sort-alphabet', disabled: true, handler: this.onSortClick, scope: this}
 			,{iconCls: 'icon-sort-alphabet-descending', disabled: true, handler: this.onSortDescendingClick, scope: this}
 			,'->'
+            ,{iconCls: 'icon-folder-export', disabled: true, handler: this.onExportCsvClick, scope: this}
+            ,{iconCls: 'icon-folder-export', disabled: true, handler: this.onImportCsvClick, scope: this}
+
 			,{iconCls: 'icon-reload', qtip: L.Reload, scope:this, handler: function(){this.getRootNode().reload();}}
 		];
 		
@@ -168,6 +239,9 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 			tb.items.get(8).setDisabled(node.isLast()); 
 			tb.items.get(9).setDisabled(!node.hasChildNodes() && node.loaded); 
 			tb.items.get(10).setDisabled(!node.hasChildNodes() && node.loaded); 
+            tb.items.get(12).setDisabled(false); 
+			tb.items.get(13).setDisabled(false); 
+
 		}else{
 			tb.items.get(0).setDisabled(true); 
 			tb.items.get(1).setDisabled(true); 
@@ -177,6 +251,9 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 			tb.items.get(8).setDisabled(true); 
 			tb.items.get(9).setDisabled(true); 
 			tb.items.get(10).setDisabled(true); 
+            tb.items.get(12).setDisabled(true);  
+            tb.items.get(13).setDisabled(true);  
+
 		}
 	}
 	,onAddTagClick: function(){
@@ -371,6 +448,34 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 		if(r.success !== true) return;
 		this.sourceNode.reload();
 	}
+    ,onExportCsvClick: function (b,e){
+        n = this.getSelectionModel().getSelectedNode();
+        if(!n) return;
+        this.sourceNode = n;
+        
+        try {Ext.destroy(Ext.get('downloadIframe'));}catch(e) {}
+        
+        Ext.DomHelper.append(document.body, {
+            tag: 'iframe'
+            ,id:'downloadIframe'
+            ,frameBorder: 0
+            ,width: 0
+            ,height: 0
+            ,css: 'display:none;visibility:hidden;height:0px;'
+            ,src: 'exportCsv.php?dir=export&node=' + n.id
+        });       
+    }
+    ,onImportCsvClick: function (b,e){           
+        w = new CB.ImportTagsForm();        
+        w.on('hide', function(w){ w.un('submitsuccess', this.onFileUploaded, this) }, this);
+        w.on('submitsuccess', this.onImportSuccess, this);
+        w.show();        
+    }    
+    ,onImportSuccess: function(b, e){
+        n = this.getRootNode();
+        n.reload();           
+    }
+
 })
 
 // ---------------------------------------------- Tag groups tree grid
