@@ -176,6 +176,7 @@ class Search extends SolrClient{
 					'{!ex=subtype key=0subtype}subtype'
 					,'{!ex=cid key=1cid}cid'
 					,'{!ex=sys_tags key=2sys_tags}sys_tags'
+					,'{!ex=template_id key=3template_id}template_id'
 				);
 				$this->params['facet.query'] = array(
 					//Date: Today / Yesterday / This week / This month

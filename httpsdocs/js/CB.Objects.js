@@ -74,7 +74,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			,bodyStyle: 'padding: 10px'
 			,cls: 'spacy-fields'
 			,autoHeight: true
-			,defaults:{ bubbleEvents: ['change']}
+			,defaults:{
+				minWidth: 90
+				,anchor: '95%'
+				,boxMaxWidth: 800
+				,bubbleEvents: ['change']
+			}
 			,items: []
 			,listeners: {
 				scope: this
@@ -155,17 +160,17 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				,iconCls: 'icon32-task-new'
 				,iconAlign:'top'
 				,scale: 'large'
-				,disabled: true
+				//,disabled: true
 				,scope: this
-				,handler: this.onCreateTaskClick
+				,handler: this.onCreateTaskClick.createInterceptor(this.autoSaveObjectInterceptor, this)
 			})
 			,upload: new Ext.Action({
 				tooltip: L.UploadFile
 				,iconCls: 'icon-drive-upload'
 				,text: L.Upload
-				,disabled: true
+				//,disabled: true
 				,scope: this
-				,handler: this.onUploadClick
+				,handler: this.onUploadClick.createInterceptor(this.autoSaveObjectInterceptor, this)
 			})
 		}
 		Ext.apply(this, {
@@ -183,6 +188,10 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 					if(this.loaded) return; 
 					this.getEl().mask(L.Downloading + ' ...', 'x-mask-loading'); 
 				}}
+				,activate: function(){
+					ep = this.find('region', 'center');
+					if(!Ext.isEmpty(ep)) ep[0].syncSize();
+				}
 				,change: function(c, v){ 
 					this.setDirty(true);
 					this.onObjectChanged();
@@ -190,7 +199,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 						this.updateDependentFields(c.name, v);
 					}
 				}
-				,savesuccess: this.onObjectChanged
+				,savesuccess: this.onObjectSaved
 				,beforedestroy: {scope: this, fn: function(){ 
 					this.getBubbleTarget().un('filesdeleted', this.onFilesDeleted, this); 
 					this.getBubbleTarget().un('fileuploaded', this.onFileUploaded, this);
@@ -209,10 +218,18 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			}
 		});
   		CB.Objects.superclass.initComponent.apply(this, arguments);
-		this.addEvents('deleteobject', 'associateObject', 'deassociateObject', 'fileupload', 'filedownload');//, 'filesdelete'
-		this.enableBubble(['deleteobject', 'fileupload', 'filedownload']);//, 'filesdelete'
+		this.addEvents('openobject', 'deleteobject', 'associateObject', 'deassociateObject', 'fileupload', 'filedownload');//, 'filesdelete'
+		this.enableBubble(['openobject', 'deleteobject', 'fileupload', 'filedownload']);//, 'filesdelete'
 		App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
 		App.fireEvent('objectinit', this);
+	}
+	,autoSaveObjectInterceptor: function(){
+		if(isNaN(this.data.id)){
+			this.interceptorArguments = arguments;
+			this.onSaveClick();
+			return false;
+		}
+		return true;
 	}
 	,onFormLoaded: function(r, e){
 		this.data.cdate = date_ISO_to_date(this.data.cdate);
@@ -227,10 +244,27 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 	,menu: [
 				this.actions.upload //{text: 'Upload', iconCls: 'icon-upload'}
 				,'-'
-				,{text: 'Cut from clipboard', disabled: true}
+				,{text: 'Cut to clipboard', disabled: true}
 				,{text: 'Paste from clipboard', disabled: true}
 			]
          	})
+		/* insert create menu if any templates specified */
+			if(!Ext.isEmpty(this.templateData.cfg.templates) ){
+				t = this.templateData.cfg.templates;
+				if(!Ext.isArray(t)) t = String(t).split(',');
+				//for (var i = 0; i < t.length; i++) t[i] = parseInt(t[i])
+				createButton = new Ext.Button({	
+                             		text: L.Create
+                             		,iconCls: 'icon32-create'
+                               		,iconAlign:'top'
+                               		,scale: 'large'
+                               		,menu: [ ]
+                             	})
+				getGroupedTemplates(createButton, this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this, t);
+				toolbarItems.push('-', createButton)
+			}
+
+		/**/
 		toolbarItems.push(this.actions.createTask)
 		if(!this.data.tags) this.data.tags = {};
 
@@ -255,6 +289,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				,padding: 0
 				,items: northRegionItems
 		});
+		this.childsPanel = new CB.ActionChildsPanel({style: 'margin-bottom: 25px', hidden: true});
 		this.filesPanel = new CB.ActionFilesPanel({style: 'margin-bottom: 25px', hidden: true});
 		this.tasksPanel = new CB.ActionTasksPanel({style: 'margin-bottom: 25px', hidden: true});
 		this.propertiesPanel = new CB.ObjectsPropertiesPanel({
@@ -286,7 +321,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 					,stateId: 'coEP' //case object east panel
 					,bodyStyle: 'background-color: #F4F4F4'
 					,autoScroll: true
-					,items: [this.filesPanel, this.tasksPanel, this.propertiesPanel]
+					,items: [this.childsPanel, this.filesPanel, this.tasksPanel, this.propertiesPanel]
 				}
 			]
 		});
@@ -497,6 +532,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			this.getBubbleTarget().on('filesdeleted', this.onFilesDeleted, this);
 			this.getBubbleTarget().on('fileuploaded', this.onFileUploaded, this);
 			this.prepareInterface();
+			this.childsPanel.reload();
 			this.filesPanel.reload();
 			this.tasksPanel.reload();
 			this.propertiesPanel.data = this.data;
@@ -508,6 +544,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				,autoScroll:true
 				,layout: 'fit'
 				,items: this.grid
+				,listeners: {
+					scope: this
+					,afterlayout: function(p){
+						this.grid.setWidth(p.getWidth()-17)
+					}
+				}
 			});//this.tabPanel.items.removeAt(0);
 
 		fw = this.findByType(CB.CaseFilesWindow);
@@ -578,6 +620,14 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.tabPanel.setActiveTab(lastActiveTabIndex);
 		this.setDirty(false);
 		this.onObjectChanged();
+	}
+	,onCreateObjectClick: function(b, e) {
+		data = Ext.apply({}, {
+			pid: this.data.id
+			,path: this.data.path+'/'+this.data.id
+			,pathtext: this.data.pathtext+'/'+Ext.value(this.data.custom_title, this.data.title)
+		}, b.data);
+		this.fireEvent('openobject', data, e);
 	}
 	,onCreateTaskClick: function(o, e){
 		this.fireEvent('taskcreate', { data: {pid: this.data.id, path: this.data.path+'/'+this.data.id, pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)} })
@@ -720,13 +770,23 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.tabPanel.remove(p, false);
 		return false;
 	}
-	,onUploadClick: function(b, e) { this.fireEvent('fileupload', {pid: this.data.id, uploadType: 'single'}, e) }
+	,onUploadClick: function(b, e) { 
+		this.fireEvent('fileupload', {pid: this.data.id, uploadType: 'single'}, e) 
+	}
 
+	,onObjectSaved: function(f, a){
+		if(!Ext.isEmpty(this.interceptorArguments)){
+			this.interceptorArguments[0].handler.call(this, this.interceptorArguments[0], this.interceptorArguments[1])
+			delete this.interceptorArguments;
+		}
+		App.fireEvent('objectchanged', this);
+		this.onObjectChanged();
+	}
 	,onObjectChanged: function(){
 		this.actions.save.setDisabled(!this._isDirty && !isNaN(this.data.id));
 		this.actions['delete'].setDisabled(isNaN(this.data.id))
-		this.actions.upload.setDisabled(isNaN(this.data.id))
-		this.actions.createTask.setDisabled(isNaN(this.data.id))
+		//this.actions.upload.setDisabled(isNaN(this.data.id))
+		//this.actions.createTask.setDisabled(isNaN(this.data.id))
 	}
 	,onFocusContactField: function(editor){
 		if( Ext.isDefined(editor.dependency) || Ext.isEmpty(editor.pid)) return;
@@ -802,5 +862,86 @@ CB.ObjectsPropertiesPanel = Ext.extend(Ext.Panel, {
 	}
 	,onPathClick: function(){
 	 	this.fireEvent('pathclick');
+	}
+})
+
+CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
+	border: false
+	,hideBorders: true
+	,autoHeight: true
+	,bodyStyle: 'background-color: #F4F4F4'
+	,initComponent: function(){
+		Ext.apply(this, {
+			tpl: new Ext.XTemplate(
+				'<h3 style="padding: 5px 5px 10px 5px; font-size: 14px">'+L.Actions+'</h3>'
+				,'<ul class="action-list"><tpl for=".">'
+				,'<li><a href="#" nid="{nid}" class="dIB lh16 icon-padding {iconCls}">{name}</a></li>'
+				,'</tpl></ul>'
+				,{compiled: true}
+			)
+			,data: []
+			,listeners: {
+				scope: this
+				,afterlayout: this.attachListeners 
+				,afterrender: this.attachListeners
+				,beforedestroy: function(){
+					App.mainViewPort.un('objectsdeleted', this.onObjectsChange, this)
+					App.un('objectchanged', this.onObjectsChange, this);
+				}
+			}
+		})
+		CB.ActionChildsPanel.superclass.initComponent.apply(this, arguments);
+		this._update= this.update;
+		this.update = function(data){
+			this._update(data);
+			this.attachListeners();
+		}
+
+		App.mainViewPort.on('objectsdeleted', this.onObjectsChange, this);
+		App.on('objectchanged', this.onObjectsChange, this);
+	}
+	,onObjectsChange: function(){
+		this.reload();
+	}
+	,attachListeners: function(){
+		p = this.getEl().query('a');
+		if(Ext.isEmpty(p)) return;
+		for (var i = 0; i < p.length; i++) {
+			el = Ext.get(p[i]);
+			el.un('click', this.onItemClick, this);
+			el.on('click', this.onItemClick, this);
+		};
+	}
+	,getCaseObjectId: function(){
+		p = this.findParentByType(CB.Objects);
+		if(Ext.isEmpty(p)) return;
+		id = p.data.id;
+		if(isNaN(id)) return;
+		return id;
+	}
+	,reload: function(){
+		if(this.rendered) this.update([]); else this.data = [];
+		id = this.getCaseObjectId();
+		if(Ext.isEmpty(id)) return;
+		params = {pid: id
+			,types: [4]
+			,sort: 'udate'
+			,dir: 'desc'
+		}
+		p = this.findParentByType(CB.Objects);
+		if(!Ext.isEmpty(p) && !Ext.isEmpty(p.data.cfg) && !Ext.isEmpty(p.data.cfg.templates) )  params.templates = p.data.cfg.templates;
+
+		BrowserView.getChildren(params, this.processLoad, this)
+	}
+	,processLoad: function(r, e){
+		if(r.success !== true) return;
+		for (var i = 0; i < r.data.length; i++)
+			r.data[i].iconCls = getItemIcon(r.data[i]);
+		this.update(r.data);
+		this.setVisible(r.data.length > 0);
+	}
+	,onItemClick: function(ev, el){
+		if(Ext.isEmpty(el) || Ext.isEmpty(el.attributes['nid']) || Ext.isEmpty(el.attributes['nid'].value)) return;
+		App.mainViewPort.openObject({ id: el.attributes['nid'].value }, ev);	 	
 	}
 })

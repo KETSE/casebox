@@ -6,7 +6,6 @@ CB.ActionsViewGrid = Ext.extend(CB.FolderViewGrid,{
 		Ext.apply(this, {
 			gridStateId: 'avg'
 		})
-		CB.ActionsViewGrid.superclass.initComponent.call(this, arguments);
 		CB.ActionsViewGrid.superclass.initComponent.apply(this, arguments);
 		this.grid.store.baseParams = {types: [4], facets: 'actions'}
 		tb =this.getTopToolbar();

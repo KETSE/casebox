@@ -57,7 +57,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 			,renderer : function(v, meta, record, row_idx, col_idx, store){
 				if(record.get('tag') == 'H'){
 					meta.css ='vgh';
-					if(!Ext.isEmpty(record.get('cfg').style)) meta.attr = 'style="'+record.get('cfg').style+'"'
 				}else{
 					meta.css = 'bgcLG vaT';
 					meta.attr = 'style="margin-left: '+record.get('level')+'0px"';
@@ -173,7 +172,12 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				,forceFit: true
 				,getRowClass: function( record, index, rowParams, store ){
 					rez = ''
-					if(record.get('tag') == 'H') rez = 'group-titles-colbg';
+					if(record.get('tag') == 'H'){
+						rez = 'group-titles-colbg';
+						if(!Ext.isEmpty(record.get('cfg').css)){
+							rez += ' '+record.get('cfg').css;
+						}
+					}
 					if(record.get('pfu') > 0) rez += ' bgcLR';
 					return rez;
 				}
@@ -445,10 +449,12 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		}
 		if(e.field != 'value') return;
 
-		pw = this.findParentByType(CB.Objects);
+		pw = this.findParentByType(CB.GenericForm, false); //CB.Objects & CB.TemplateEditWindow
 		t = e.record.get('type');
-		e.objectId = pw.data.id;
-		e.path = pw.data.path;
+		if(pw && !Ext.isEmpty(pw.data)){
+			e.objectId = pw.data.id;
+			e.path = pw.data.path;
+		}
 		if(pw && (t == '_case_object') ) e.pidValue = pw.data.id; /* setting by default parent case id for case_objects fields, this value will be overwriten if it is dependent on another field */
 		
 		if( (Ext.isDefined(e.record.data.cfg.dependency) ) && !Ext.isEmpty(e.record.get('pid')) )/* get and set pidValue id dependent */

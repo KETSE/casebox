@@ -109,6 +109,9 @@ CB.FacetList = Ext.extend( CB.Facet, {
 			case 'subtype':
 				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.templateTypes.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
 				break;
+			case 'template_id':
+				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.templates.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
+				break;
 			/*case 'date_end':
 				this.setTitle(L.Deadline);
 				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: L[k.substr(1)], active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 

@@ -224,7 +224,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 				}
 			}
 		})
-		CB.FolderViewSummary.superclass.initComponent.call(this, arguments);
+		CB.FolderViewSummary.superclass.initComponent.apply(this, arguments);
 		this.addEvents('viewloaded');
 		this.enableBubble(['viewloaded']);
 		App.mainViewPort.on('taskcreated', this.onTasksChange, this);

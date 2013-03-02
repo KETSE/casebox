@@ -94,27 +94,28 @@ class User{
 		//$rez['data'][] = array('title' => '<b>'.mb_strtoupper(L\Projects,'UTF8').'</b>', 'iconCls' => 'icon-projectView', 'link' => 'CBProjects');
 		return $rez;
 	}
-	public static function getPrivateFolderId($id = false){
+	public static function getPrivateFolderId($user_id = false){
 		$rez = null;
-		if($id == false) $id = $_SESSION['user']['id'];
+		if($user_id == false) $user_id = $_SESSION['user']['id'];
 		$res = mysqli_query_params('select id from tree where user_id = $1 and system = 1 and pid is null and type = 1 and subtype = 3', $_SESSION['user']['id']) or die(mysqli_query_error());
 		if($r = $res->fetch_row()) $rez = $r[0];
 		$res->close();
 		if(empty($rez)){
-			mysqli_query_params('insert into tree (user_id, `system`, `type`, `subtype`, `name`, cid, uid) values ($1, 1, 1, 3, \'[Home]\', $1, $1)', $_SESSION['user']['id']) or die(mysqli_query_error());
+			mysqli_query_params('insert into tree (user_id, `system`, `type`, `subtype`, `name`, cid, uid) values ($1, 1, 1, 3, \'[Home]\', $2, $2)', array($user_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
 			$rez = last_insert_id();
 		}
 		return $rez;
 	}
-	public static function getEmailFolderId($id = false){
+	public static function getEmailFolderId($user_id = false){
 		$rez = null;
-		if($id == false) $id = $_SESSION['user']['id'];
-		$pid = User::getPrivateFolderId($id);
+		if(empty($user_id)) $user_id = $_SESSION['user']['id'];
+		$pid = User::getPrivateFolderId($user_id);
+
 		$res = mysqli_query_params('select id from tree where user_id = $1 and system = 1 and pid =$2 and type = 1 and subtype = 6', array($_SESSION['user']['id'], $pid) ) or die(mysqli_query_error());
 		if($r = $res->fetch_row()) $rez = $r[0];
 		$res->close();
 		if(empty($rez)){
-			mysqli_query_params('insert into tree (pid, user_id, `system`, `type`, `subtype`, `name`, cid, uid) values ($1, $2, 1, 1, 6, \'[Emails]\', $2, $2)', $_SESSION['user']['id']) or die(mysqli_query_error());
+			mysqli_query_params('insert into tree (pid, user_id, `system`, `type`, `subtype`, `name`, cid, uid) values ($1, $2, 1, 1, 6, \'[Emails]\', $3, $3)', array($pid, $user_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
 			$rez = last_insert_id();
 		}
 		return $rez;

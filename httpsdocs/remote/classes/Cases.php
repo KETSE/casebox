@@ -56,7 +56,7 @@ class Cases{
 		// if(!empty($params->user_id)) //a default lawyer is set for the case
 		// 	mysqli_query_params('INSERT INTO cases_rights (case_id, tag_id, access, `from`, active) select $1, tag_id, 3, current_date, 1 from users where id = $2', array($id, $params->user_id)) or die(mysqli_query_error());
 		/* calling procedure to create system folders for this case*/
-			mysqli_query_params('call p_create_case_system_folders($1)', $id) or die(mysqli_query_error());
+			mysqli_query_params('call p_create_case_system_folders($1, null)', $id) or die(mysqli_query_error());
 		/* end of calling procedure to create system folders for this case*/
 
 		//mysqli_query_params('CALL p_estimate_case_effective_access($1)', $id) or die(mysqli_query_error());
@@ -363,12 +363,12 @@ class Cases{
 		return $rez;
 	}
 	public static function getId($object_id = false, $file_id = false, $task_id = false){
-		$case_id = false;
+		$case_id = null;
 		$sql = 'select f_get_objects_case_id($1)';
 		$res = mysqli_query_params($sql, $object_id) or die(mysqli_query_error());
 		if($r = $res->fetch_row()) $case_id = $r[0];
 		$res->close();
-		if(!$case_id) throw new Exception(L('Object_not_found'));
+		//if(!$case_id) throw new Exception(L('Object_not_found'));
 		return $case_id;	
 	}
 	public static function getName($case_id = false){

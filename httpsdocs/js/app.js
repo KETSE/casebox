@@ -360,12 +360,14 @@ function initApp(){
 		return tabIdx;
 	}
 	App.activateTab = function(tabPanel, id){
+		if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
 		tabIdx = App.findTab(tabPanel, id);
 		if(tabIdx < 0) return false;
 		tabPanel.setActiveTab(tabIdx);
 		return tabPanel.items.itemAt(tabIdx);
 	}
 	App.addTab = function(tabPanel, o){
+		if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
 		c = tabPanel.add(o);
 		o.show();
 		return c;
@@ -434,7 +436,7 @@ function initApp(){
 		
 		switch(type){
 			case '_auto_title':
-				return new Ext.ux.TitleField({minWidth: 100, anchor: '90%', boxMaxWidth: 800}); break;
+				return new Ext.ux.TitleField(); break; //{minWidth: 100, anchor: '95%', boxMaxWidth: 800}
 			case '_objects':
 				//e should contain all necessary info
 				switch(e.record.get('cfg').editor){
@@ -475,7 +477,7 @@ function initApp(){
 							if(w.setData) w.setData(data);
 							w.show();
 							return w;
-						}else return new CB.ObjectsTriggerField({data: objData, width: 500}); 
+						}else return new CB.ObjectsTriggerField({data: objData}); //, width: 500
 						break;
 					// case 'popuplist':
 					// 	if(e && e.grid){ 
@@ -486,7 +488,7 @@ function initApp(){
 					// 	}else return new CB.ObjectsTriggerField({data: objData, width: 500}); 
 					// 	break;
 					default:
-						return new CB.ObjectsComboField({data: objData, width: 500});
+						return new CB.ObjectsComboField({data: objData});//, width: 500
 						break;
 				}
 				// if(e.record.get('cfg').editor == 'form'){
@@ -499,20 +501,20 @@ function initApp(){
 				break;
 			case '_case':
 				if(e.record.get('cfg').editor == 'form'){
-					if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateCasesField({ownerCt: e.ownerCt, width: 500}); //when it is in top fieldset
+					if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateCasesField({ownerCt: e.ownerCt}); //, width: 500//when it is in top fieldset
 				}else{
 					params = Ext.apply({}, e.record.get('cfg'));
 					if(!Ext.isEmpty(e.pidValue)) params.pidValue = e.pidValue;
-					return new Ext.ux.CasesCombo({ownerCt: e.ownerCt, params: params, width: 500})
+					return new Ext.ux.CasesCombo({ownerCt: e.ownerCt, params: params})//, width: 500
 				}
 				break;
 			case '_case_object':
 				if(e.record.get('cfg').editor == 'form'){
-					if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateObjectsField({ownerCt: e.ownerCt, width: 500}); //when it is in top fieldset
+					if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateObjectsField({ownerCt: e.ownerCt}); //, width: 500//when it is in top fieldset
 				}else{
 					params = Ext.apply({}, e.record.get('cfg'));
 					if(!Ext.isEmpty(e.pidValue)) params.pidValue = e.pidValue;
-					return new Ext.ux.ObjectsCombo({ownerCt: e.ownerCt, params: params, width: 500})
+					return new Ext.ux.ObjectsCombo({ownerCt: e.ownerCt, params: params})//, width: 500
 				}
 				break;
 			case 'boolean': //depricated
@@ -655,7 +657,7 @@ function initApp(){
 				if(!Ext.isEmpty(e.grid)) w.on('hide', e.grid.gainFocus, e.grid);
 				w.show();
 				break;
-			default:  return new Ext.form.TextField({width: 500}); break;
+			default:  return new Ext.form.TextField(); break;//{width: 500}
 		}
 		return false;
 	}

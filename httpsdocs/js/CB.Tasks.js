@@ -53,7 +53,7 @@ CB.Tasks_ReminderWindow = Ext.extend(Ext.Window, {
 			}
 		})
 
-		CB.Tasks_ReminderWindow.superclass.initComponent.call(this);
+		CB.Tasks_ReminderWindow.superclass.initComponent.apply(this, arguments);
 	}
 	,onSaveClick: function(b, e){
 		if(!this.callback) return;
@@ -232,7 +232,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 			,allday: 1
 			,has_deadline: !Ext.isEmpty(this.data.date_end)
 		})
-		CB.Tasks.superclass.initComponent.call(this);
+		CB.Tasks.superclass.initComponent.apply(this, arguments);
 		this._dirty = false;
 		this.setReminds();
 	}
@@ -1090,7 +1090,7 @@ CB.TaskViewDataView = Ext.extend (Ext.DataView, {
 			tpl: CB.TaskViewTemplate
 			,itemSelector: 'a'
 		})
-		CB.TaskViewDataView.superclass.initComponent.call(this)
+		CB.TaskViewDataView.superclass.initComponent.apply(this, arguments)
 	}
 })
 Ext.reg('TaskViewDataView', CB.TaskViewDataView);
@@ -1119,7 +1119,7 @@ CB.TaskFilesPanel = Ext.extend(Ext.Panel, {
 				scope: this
 			}
 		});
-		CB.TaskFilesPanel.superclass.initComponent.call(this, arguments);
+		CB.TaskFilesPanel.superclass.initComponent.apply(this, arguments);
 	}
 	,onFileAddClick: function(){
 		this.insert(this.items.getCount() -1, this.fieldConfig );
@@ -1137,7 +1137,7 @@ CB.TaskRemindsDataView = Ext.extend (Ext.DataView, {
 			tpl: CB.TaskRemindsViewTemplate
 			,itemSelector: 'a'
 		})
-		CB.TaskRemindsDataView.superclass.initComponent.call(this)
+		CB.TaskRemindsDataView.superclass.initComponent.apply(this)
 	}
 })
 

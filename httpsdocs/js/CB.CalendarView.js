@@ -161,8 +161,7 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 				}
 			}
 		});
-		//CB.CalendarPanel.superclass.initComponent.call(this);
-		CB.Calendar.superclass.initComponent.call(this, arguments);
+		CB.Calendar.superclass.initComponent.apply(this, arguments);
 	}
 	,doReloadEventsStore: function(){
 		this.allowedReload = true;
@@ -412,7 +411,7 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
 	                       ,this.filterButton
   	        	]
 		})
-		CB.CalendarView.superclass.initComponent.call(this);
+		CB.CalendarView.superclass.initComponent.apply(this, arguments);
 		
 		App.mainViewPort.on('taskcreated', this.onReloadClick, this);
 		App.mainViewPort.on('taskupdated', this.onReloadClick, this);

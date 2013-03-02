@@ -40,7 +40,7 @@
 		if(empty($core['mail_user'])) continue; // skip core if no email is set in config
 		
 		$res = mysqli_query_params('use `'.$core['db_name'].'`');
-		if(!$res) continue;//or die(mysqli_query_error())
+		if(!$res) continue;
 		echo "\n\r Processing core \"".$core['db_name']."\"  (".$core['mail_user'].")\n\r";
 
 		$cd = prepare_cron($cron_id);
@@ -295,9 +295,13 @@
 			$mailbox->moveMessage( $mailbox->getNumberByUniqueId($uniq_id), '[Gmail]/Trash' ); // 
 		}		
 		/* end of moving read messages from inbox to All Mail folder*/
-		mysqli_query_params('update crons set last_end_time = CURRENT_TIMESTAMP, execution_info = $2 where cron_id = $1', array($cron_id, 'ok') ) or die(mysqli_query_error());
 		echo "Ok\n";
 
+	}
+
+	foreach($CB_cores as $core){
+		$res = mysqli_query_params('use `'.$core['db_name'].'`');
+		mysqli_query_params('update crons set last_end_time = CURRENT_TIMESTAMP, execution_info = $2 where cron_id = $1', array($cron_id, 'ok') ) or die(mysqli_query_error());
 	}
 
 //**********************************************************************************************************************

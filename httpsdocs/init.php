@@ -12,7 +12,7 @@
 	
 	//Starting Session
 	session_save_path(CB_SESSION_PATH);
-	session_name(CB_PROJ.( empty($_SESSION['user']['id']) ? '0': $_SESSION['user']['id']) );
+	session_name(str_replace( array('.casebox.org', '.'), '', $_SERVER['SERVER_NAME']).( empty($_SESSION['user']['id']) ? '0': $_SESSION['user']['id']) );
 	session_start();
 	
 	/* store last 10 sessions and delete older ones */

@@ -11,7 +11,7 @@ class preview_extractor{
 			$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 		}
 		require_once dirname(__FILE__).'/../config.php';
-		require_once 'DB.php';
+		require_once CB_LIB_DIR.'DB.php';
 		connect2DB();
 	}
 	function removeFromQueue($id){
@@ -24,8 +24,8 @@ class preview_extractor{
 		require_once 'HTMLPurifier.func.php';
 
 		$cs = mb_detect_encoding($html);
-		file_put_contents('html.log', $html);
-		echo 'detected encoding: '.$cs."\n";
+		//file_put_contents('html.log', $html);
+		//echo 'detected encoding: '.$cs."\n";
 		if(empty($cs)) $cs = 'UTF-8';
 		$cs = @iconv($cs, 'UTF-8', $html);
 		if(empty($cs)) $cs = $html;

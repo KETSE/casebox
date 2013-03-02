@@ -2,7 +2,7 @@ Ext.ns('CB');
 
 Ext.ux.TitleField = Ext.extend(Ext.form.TwinTriggerField, {
 	initComponent : function(){
-		Ext.ux.TitleField.superclass.initComponent.call(this);
+		Ext.ux.TitleField.superclass.initComponent.apply(this);
 		//this.on('specialkey', function(f, e){ if(e.getKey() == e.ENTER) this.onTrigger2Click(); }, this);
 		this.on('focus', function(f){ if(this.hasCustomValue) this.triggers[0].show(); else this.triggers[1].show(); }, this);
 		this.on('blur', function(f){ if(f.getEl().isVisible(true)){ this.triggers[0].hide(); this.triggers[1].hide();} }, this);

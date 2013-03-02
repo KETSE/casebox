@@ -265,6 +265,7 @@ class Browser{
 				while($r = $res->fetch_row()) $modified_pids[] = intval($r[0]);
 				$res->close();
 				mysqli_query_params('update tree set pid = $1 where id in ('.implode(',', $process_ids).')', $p->pid) or die(mysqli_query_error());
+				$this->markAllChildsAsUpdated($process_ids);
 				break;
 			case 'shortcut':
 				mysqli_query_params('insert into tree (pid, `system`, `type`, `subtype`, target_id, `name`, cid) SELECT $1, 0, 2, 0, id, `name`, $2 from tree where id in ('.implode(',', $process_ids).')', array($p->pid, $_SESSION['user']['id'])) or die(mysqli_query_error());
@@ -539,5 +540,14 @@ class Browser{
 		if($r = $res->fetch_row()) $id = $r[0];
 		$res->close();
 		return $id;
+	}
+
+	private function markAllChildsAsUpdated($ids){
+		if(!is_array($ids)) $ids = explode(',', $ids);
+		$ids = array_filter($ids, 'is_numeric');
+		if(empty($ids)) return;
+		foreach($ids as $id)
+			mysqli_query_params('call p_mark_all_childs_as_updated($1)', $id) or die(mysqli_query_error());
+		return true;
 	}
 }

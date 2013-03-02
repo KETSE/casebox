@@ -86,7 +86,7 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 	,minChars: 3
 	,data: {}
 	,initComponent: function(){
-		CB.ObjectsComboField.superclass.initComponent.call(this);
+		//CB.ObjectsComboField.superclass.initComponent.call(this);
 		Ext.apply(this, CB.ObjectsFieldCommonFunctions);
 		this.store = [];
 		this.config = {}
@@ -150,7 +150,7 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
 	,isFormField: true
 	,delimiter: '<br />'
 	,initComponent: function(){
-		CB.ObjectsTriggerField.superclass.initComponent.call(this);
+		//CB.ObjectsTriggerField.superclass.initComponent.call(this);
 		//listeners = Ext.value(this.listeners, {});
 		//Ext.apply(listeners, {scope: this, change: this.onTagsChange});
 		this.config = {}
@@ -271,7 +271,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 		multiValued: false
 	}
 	,initComponent: function(){
-		CB.ObjectsSelectionForm.superclass.initComponent.call(this);
+		//CB.ObjectsSelectionForm.superclass.initComponent.call(this);
 		this.config = {}
 		if(this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
 		
@@ -538,7 +538,7 @@ CB.ObjectsSelectionPopupList = Ext.extend(Ext.Window, {
 	,minHeight: 250
 	,height: 350
 	,initComponent: function(){
-		CB.ObjectsSelectionPopupList.superclass.initComponent.apply(this, arguments);
+		//CB.ObjectsSelectionPopupList.superclass.initComponent.call(this);
 		if(this.data && this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
 		Ext.apply(this, CB.ObjectsFieldCommonFunctions);
 		this.getStore();
@@ -645,7 +645,7 @@ CB.ObjectsSelectionPopupList = Ext.extend(Ext.Window, {
 				,{text: Ext.MessageBox.buttonText.cancel, handler: this.doClose, scope: this, tabIndex: 4}
 			]
 		});
-		CB.ObjectsSelectionPopupList.superclass.initComponent.call(this);
+		CB.ObjectsSelectionPopupList.superclass.initComponent.apply(this, arguments);
 		this.addEvents('setvalue');
 		
 		this.on('beforeshow', this.onBeforeShowEvent, this);

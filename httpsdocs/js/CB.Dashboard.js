@@ -15,7 +15,7 @@ CB.Dashboard = Ext.extend(Ext.Panel, {
 				,afterrender: this.onAfterRender
 			}
 		})
-		CB.Dashboard.superclass.initComponent.call(this, arguments);
+		CB.Dashboard.superclass.initComponent.apply(this, arguments);
 	}
 	,onAfterRender: function(){
 		this.reload();

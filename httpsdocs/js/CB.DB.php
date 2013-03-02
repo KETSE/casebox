@@ -63,9 +63,9 @@ Ext.namespace('CB.DB');
 		$data = implode("\n", $data);
 		$data = str_replace("\r\n", "\n", $data);
 		$data = explode("\n", $data);
-		for($i = 0; $i < sizeof($data); $i++) $data[$i] = array($data[$i]);
+		for($i = 0; $i < sizeof($data); $i++) $data[$i] = array($data[$i], $data[$i]);
 	}
-	echo 'CB.DB.templatesIconSet = new Ext.data.ArrayStore({ idIndex: 0,fields: ["name"], data: '. json_encode($data).'});';
+	echo 'CB.DB.templatesIconSet = new Ext.data.ArrayStore({ idIndex: 0,fields: ["id","name"], data: '. json_encode($data).'});';
 
 	/* case types */
 	$sql = 'SELECT DISTINCT t.id, t.l'.UL_ID().' `name`, t.iconCls 

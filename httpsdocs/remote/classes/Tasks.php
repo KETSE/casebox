@@ -359,6 +359,9 @@ class Tasks{
 		$res->close();
 		if( ($_SESSION['user']['id'] !== $task['cid']) && !Security::isAdmin() ) return  array('success' => false, 'msg' => L\No_access_for_this_action);
 		mysqli_query_params('update tasks set status = CASE WHEN ( (has_deadline = 0) OR ( (has_deadline = 1) AND (date_end > CURRENT_TIMESTAMP) ) ) THEN 2 ELSE 1 END where id = $1', $id) or die(mysqli_query_error());
+		/* update responsible user statuses to incomplete*/
+		mysqli_query_params('update tasks_responsible_users set status = 0 where task_id = $1', $id) or die(mysqli_query_error());
+		/* end of update responsible user statuses to incomplete*/
 		/* log and notify all users about task closing */
 		Log::add(Array('action_type' => 31, 'task_id' => $id, 'remind_users' => $task['cid'].','.$task['responsible_user_ids'], 'info' => 'title: '.$task['title']));
 		$this->updateChildTasks($id);

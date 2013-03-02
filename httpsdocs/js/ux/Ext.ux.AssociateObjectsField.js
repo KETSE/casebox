@@ -8,7 +8,7 @@ Ext.ux.AssociateObjectsField = Ext.extend(Ext.form.TriggerField, {
 		cw = this.ownerCt.findParentByType(CB.Case);
 		if(cw) this.objectsStore = cw.objectsStore;
 
-		Ext.ux.AssociateObjectsField.superclass.initComponent.call(this);
+		Ext.ux.AssociateObjectsField.superclass.initComponent.apply(this);
 		this.on('focus', function(f){ this.setHideTrigger(false) }, this);
 		this.on('blur', function(f){ if(f.getEl().isVisible(true)) this.setHideTrigger(true) }, this);
 		this.addEvents('change');

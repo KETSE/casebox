@@ -23,7 +23,7 @@ Ext.ux.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
 				}
 			}
 		})
-		Ext.ux.SearchField.superclass.initComponent.call(this);
+		Ext.ux.SearchField.superclass.initComponent.apply(this);
 	}
 	,afterRender: function() {
 		Ext.ux.SearchField.superclass.afterRender.apply(this, arguments);

@@ -34,14 +34,11 @@ function getItemIcon(d){
 		case 3: return 'icon-briefcase';//case
 			break;
 		case 4: //case object
+			if(!Ext.isEmpty(d.cfg) && !Ext.isEmpty(d.cfg.iconCls)) return d.cfg.iconCls;
 			return Ext.value( CB.DB.templates.getIcon(d['template_id']), 'icon-none' );
 			break;
 		case 5: //file
-			ext = String(d['name']).split('.');
-			ext = ext.pop().toLowerCase();
-			if([ 'pdf','doc', 'docx', 'rtf','ppt','pptx','txt','xls','xlsx','htm', 'html','mp3', 'rm','avi','bmp','gif', 'jpg','jpeg','jp2','j2k','pcx','png','ppm','tga','tif','tiff','flv'].indexOf(ext) >= 0) 
-				return 'file-'+ ext;
-				else return 'file-unknown';
+			return getFileIcon(d['name']);
 			break;
 		case 6:
 			if(d['status'] == 3) return 'icon-task-completed';
@@ -69,7 +66,7 @@ function getFileIcon32(filename){
 	if(Ext.isEmpty(filename)) return 'file-unknown32';
 	a = String(filename).split('.');
 	if(a.length <2 ) return 'file-unknown32';
-	return 'file-unknown32 file-'+ a.pop()+'32';
+	return 'file-unknown32 file-'+ Ext.util.Format.lowercase(a.pop())+'32';
 }
 
 function getStoreTitles(v){
@@ -105,4 +102,34 @@ setsGetIntersection = function(set1, set2){
 }
 setsHaveIntersection = function(set1, set2){
 	return !Ext.isEmpty(setsGetIntersection(set1, set2));
+}
+getGroupedTemplates = function(menuButton, handler, scope, templatesFilter){
+	a = []; //objects, in actions, out actions, applicants, subjects
+	CB.DB.templates_per_tags.each(function(r){ 
+		if(Ext.isEmpty(templatesFilter) || setsHaveIntersection(templatesFilter, r.get('template_id')) ){
+			idx = CB.DB.templates.findExact('id', r.get('template_id'));
+			tr = CB.DB.templates.getAt(idx);
+			a.push({
+				text: tr.get('title')
+				,iconCls: tr.get('iconCls')
+				,scope: scope
+				,handler: handler
+				,data: {
+					template_id: tr.get('id')
+					,type: tr.get('type')
+					,title: tr.get('title')
+					
+				}
+			});
+		}
+	}, this);
+	menuButton.menu.removeAll();
+	menuButton.lastGroup = null;
+	for(i = 0; i < a.length; i++){
+		if(menuButton.lastGroup != a[i].data.type){
+			if(menuButton.menu.items.getCount() > 0) menuButton.menu.add('-');
+			menuButton.lastGroup = a[i].data.type;
+		}
+		menuButton.menu.add(a[i]);
+	}
 }

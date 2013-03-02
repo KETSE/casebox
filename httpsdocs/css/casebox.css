@@ -54,7 +54,15 @@ ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}
 .caselist2 li.new {color: maroon} 
 .caselist2 li.old {color: #CCC} 
 
-
+ul.action-list {
+font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
+font-size: 11px;
+color: #333;
+list-style: none;
+margin-left: 10px;
+padding: 0;
+line-height: 20px;
+}
 .filelist {margin-top: 7px; margin-left: 5px; list-style: none outside none}
 .filelist li {padding-left: 16px; background: url(i/ico/briefcase-small.png) 0 1px no-repeat !important} 
 

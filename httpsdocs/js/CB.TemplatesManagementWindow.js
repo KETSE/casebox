@@ -100,6 +100,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 					targetTree.processDragDrop(tree, node, dd, e);
 				}
 				,beforeappend: function(t, p, n){ 
+					if(n.attributes.type > 0) n.setText(n.attributes.text + ' <span class="cG">(id: '+n.attributes.id+')</span>');
 					//n.setIconCls((n.attributes.type < 1) ? 'icon-tree-folder' : Ext.value(n.attributes.iconCls, 'icon-document-medium'));
 					//if(n.attributes.type > 0) n.attributes.iconCls = 'icon-object' + n.attributes.type;
 					if( (n.attributes.type == 2) && (n.attributes.visible != 1)) n.setText( '<i class="cG">'+n.attributes.text+'</i>');
@@ -506,55 +507,7 @@ CB.TemplateEditWindow = Ext.extend(CB.GenericForm, {
 		CB.DB.languages.each(function(r){
 			items.push({fieldLabel: L.Name+ ' ('+r.get('abreviation')+')', name: 'l'+r.get('id'), xtype: 'textfield', allowBlank: false})
 		}, this);
-		this.iconComboPlugin = new Ext.ux.plugins.IconCombo();
-		this.iconComboEditor = 
-		/*items.push(
-			{
-			xtype: 'combo'
-			,fieldLabel: L.DefaultStatusIconClass
-			,editable: false
-			,name: 'default_field'
-			,hiddenName: 'default_field'
-			,tpl: '<tpl for="."><div class="x-combo-list-item icon-padding16 {name}">{name}</div></tpl>'
-			,store: new Ext.data.ArrayStore({
-				autoLoad: true
-				,autoDestroy: true
-				,fields: ['name']
-				,data: [[''], ['icon-bullet_gray'], ['icon-bullet_green'], ['icon-bullet_red'], ['icon-bullet_yellow']]
-			})
-			,valueField: 'name'
-			,displayField: 'name'
-			,iconClsField: 'name'
-			,triggerAction: 'all'
-			,mode: 'local'
-			,plugins: [this.iconComboPlugin]
-		},{
-			xtype: 'combo'
-			,fieldLabel: L.JSGridClass
-			,editable: false
-			,name: 'gridJsClass'
-			,hiddenName: 'gridJsClass'
-			,store: new Ext.data.ArrayStore({
-				autoLoad: true
-				,autoDestroy: true
-				,fields: ['id', 'name']
-				,data: [[null, L.PropertiesEditGrid], ['CBSentencesEditGrid', L.SentencesEditGrid], ['CBDecisionsEditGrid', L.DecisionsEditGrid]]
-			})
-			,valueField: 'id'
-			,displayField: 'name'
-			,triggerAction: 'all'
-			,mode: 'local'
-		},{
-			xtype: 'numberfield'
-			,name: 'order'
-			,fieldLabel: L.Order
-		},{
-			xtype: 'checkbox'
-			,name: 'visible'
-			,inputValue: 1
-			,fieldLabel: L.Active
-		}
-		);/**/
+
 		this.visibilityOptionsStore = new Ext.data.ArrayStore({
 			autoLoad: true
 			,autoDestroy: true
@@ -679,92 +632,6 @@ CB.TemplateEditWindow = Ext.extend(CB.GenericForm, {
 					}
 					,columnWidth: 1
 				}
-				/*,{
-					xtype: 'fieldset'
-					,padding: 10
-					,defaults: {anchor: '100%', listeners:{
-							scope: this
-							,change: this.onChangeEvent
-							,check: this.onChangeEvent
-						}
-					}
-					,columnWidth: .5
-					,labelWidth: 200
-					,items: [{
-						xtype: 'checkbox'
-						,name: 'files'
-						,fieldLabel: L.Files
-						,inputValue: 1
-					},{
-						xtype: 'checkbox'
-						,name: 'main_file'
-						,fieldLabel: L.ShowMainFile
-						,inputValue: 1
-					},{
-						xtype: 'checkbox'
-						,name: 'subjects'
-						,fieldLabel: L.SubjectsAssociation
-						,inputValue: 1
-					},{
-						xtype: 'checkbox'
-						,name: 'claimers'
-						,fieldLabel: L.ClaimersAssociation
-						,inputValue: 1
-					},{	xtype: 'combo'
-						,fieldLabel: L.AddViolations
-						,editable: false
-						,name: 'violations_edit'
-						,hiddenName: 'violations_edit'
-						,store: this.visibilityOptionsStore
-						,valueField: 'id'
-						,displayField: 'name'
-						,triggerAction: 'all'
-						,mode: 'local'
-					},{	xtype: 'combo'
-						,fieldLabel: L.ViolationsAssociation
-						,editable: false
-						,name: 'violations_association'
-						,hiddenName: 'violations_association'
-						,store: this.visibilityOptionsStore
-						,valueField: 'id'
-						,displayField: 'name'
-						,triggerAction: 'all'
-						,mode: 'local'
-					},{	xtype: 'combo'
-						,fieldLabel: L.DecisionsAssociation
-						,editable: false
-						,name: 'decisions_association'
-						,hiddenName: 'decisions_association'
-						,store: this.visibilityOptionsStore
-						,valueField: 'id'
-						,displayField: 'name'
-						,triggerAction: 'all'
-						,mode: 'local'
-					},{	xtype: 'combo'
-						,fieldLabel: L.ComplaintsAssociation
-						,editable: false
-						,name: 'complaints'
-						,hiddenName: 'complaints'
-						,store: this.visibilityOptionsStore
-						,valueField: 'id'
-						,displayField: 'name'
-						,triggerAction: 'all'
-						,mode: 'local'
-					},{	xtype: 'combo'
-						,fieldLabel: L.AppealsAssociation
-						,editable: false
-						,name: 'appeals'
-						,hiddenName: 'appeals'
-						,store: this.visibilityOptionsStore
-						,valueField: 'id'
-						,displayField: 'name'
-						,triggerAction: 'all'
-						,mode: 'local'
-					}					
-					]
-					,columnWidth: .5
-				}/**/
-				
 				]
 			},{
 				xtype: 'tabpanel'
@@ -810,8 +677,6 @@ CB.TemplateEditWindow = Ext.extend(CB.GenericForm, {
 	,getFormValues: function(){
 		this.propertiesGrid.readValues();
 		this.fieldsGrid.readValues();
-		//fields = this.items.itemAt(0).find('isFormField', true);
-		//Ext.each(fields, function(f){ this.data[f.name] =f.getValue(); }, this);
 	}
 	,onChangeEvent: function(){
 		this.setDirty(true);

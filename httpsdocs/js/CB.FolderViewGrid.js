@@ -571,6 +571,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		App.mainViewPort.on('favoritetoggled', this.onObjectsSaved, this);
 		App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
 		App.mainViewPort.on('objectupdated', this.onObjectsSaved, this);
+		App.fireEvent('folderviewinit', this);
 	}
 	,onBeforeDestroy: function(p){
 		App.clipboard.un('pasted', this.onClipboardAction, this);
@@ -751,14 +752,14 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	}
 	,onProxyLoad: function (proxy, o, options) {
 		this.path = this.store.baseParams.path;
-		this.fireEvent('viewloaded', proxy, o, options);
-		this.folderProperties = o.result.folderProperties
+		this.folderProperties = Ext.apply({}, o.result.folderProperties)
 		
 		this.folderProperties.id = parseInt(this.folderProperties.id);
 		this.folderProperties.system = parseInt(this.folderProperties.system);
 		this.folderProperties.type = parseInt(this.folderProperties.type);
 		this.folderProperties.subtype = parseInt(this.folderProperties.subtype);
 		this.folderProperties.pathtext = o.result.pathtext;
+		this.fireEvent('viewloaded', proxy, o, options);
 		
 		canUpload = !this.folderProperties.inFavorites;
 		tb = this.getTopToolbar();
@@ -803,7 +804,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			if(Ext.isEmpty(cmi)) return;
 			menuButton = cmi[0];
 		}
-		this.getGroupedTemplates(menuButton, this.onCreateObjectClick, this)
+		getGroupedTemplates(menuButton, this.onCreateObjectClick, this)
 		if( menuButton.menu.items.getCount() > 0 ){
 			if(!this.actions.createTask.isHidden() || !this.actions.createEvent.isHidden() ){
 				menuButton.menu.add('-');
@@ -821,36 +822,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		}
 
 		menuButton.setDisabled(menuButton.menu.items.getCount() < 1);
-	}
-	,getGroupedTemplates: function(menu, handler, scope){
-		a = []; //objects, in actions, out actions, applicants, subjects
-		CB.DB.templates_per_tags.each(function(r){ 
-				//if(r.get('case_type_id') == this.folderProperties.case_type_id){
-					idx = CB.DB.templates.findExact('id', r.get('template_id'));
-					tr = CB.DB.templates.getAt(idx);
-					a.push({
-						text: tr.get('title')
-						,iconCls: tr.get('iconCls')
-						,scope: scope
-						,handler: handler
-						,data: {
-							template_id: tr.get('id')
-							,type: tr.get('type')
-							,title: tr.get('title')
-							
-						}
-					});
-				//}
-		}, this);
-		menu.menu.removeAll();
-		menu.lastGroup = null;
-		for(i = 0; i < a.length; i++){
-			if(menu.lastGroup != a[i].data.type){
-				if(menu.menu.items.getCount() > 0) menu.menu.add('-');
-				menu.lastGroup = a[i].data.type;
-			}
-			menu.menu.add(a[i]);
-		}
 	}
 	,onCreateObjectClick: function(b, e) {
 		b.data.pid = this.folderProperties.id;

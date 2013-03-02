@@ -14,7 +14,8 @@ class Objects{
 		$rez['template_pid'] = $template['pid'];
 		$rez['iconCls'] = $template['iconCls'];
 		$rez['type'] = $template['type'];
-		//$d->case_id = Cases::getId($d->id);
+		$d->case_id = Cases::getId($d->id);
+		//die('!'.$d->case_id);
 		// SECURITY: check if object exists in DB
 		//if(!$this->getUniqueObjectId($d->case_id, $rez['template_id'], $d->id)) throw new Exception(L\Object_not_found);
 		// end of SECURITY: check if object exists in DB
@@ -521,6 +522,15 @@ class Objects{
 		return $rez;
 	}
 
+	static function getFieldValue($object_id, $field_id, $duplicate_id = 0){
+		$rez = null;
+		$sql = 'select value from objects_data where object_id = $1 and field_id = $2 and duplicate_id = $3';
+		$res = mysqli_query_params($sql, array($object_id, $field_id, $duplicate_id)) or die(mysqli_query_error());
+		if($r = $res->fetch_row()) $rez = $r[0];
+		$res->close();
+		return $rez;
+	}
+	
 	static function getSorlData($id){
 		$rez = array();
 		$lang_field = 'l'.$_SESSION['languages']['per_abrev'][$GLOBALS['CB_LANGUAGE']]['id'];
