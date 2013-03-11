@@ -7,7 +7,6 @@ Dev.customizeObjectClass =  Ext.extend(CB.plugins.customInterface, {
 	}
 	,applyCustomization: function(){
 		this.button = new Ext.Button({text: 'Plugin button', scope: this, handler: this.onButtonClick})
-		clog(this.owner);
 		this.owner.mainToolBar.add(this.button)
 	}
 	,onButtonClick: function(b, e){

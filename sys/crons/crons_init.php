@@ -30,7 +30,7 @@
 	define('PROJ_FILES_PATH', realpath(PROJ_PRIVATE_PATH.'..').DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'files'.DIRECTORY_SEPARATOR);
 	
 	define('ZEND_PATH', PROJ_LIBX_DIR.'ZendFramework-minimal-2.0.1'.DIRECTORY_SEPARATOR.'library');
-	define('TIKA_APP', PROJ_LIBX_DIR.'tika-app-1.2.jar');
+	define('TIKA_APP', PROJ_LIBX_DIR.'tika-app-1.3.jar');
 
 	//define('CB_SOLR_CLIENT', file_exists('/var/lib/Apache/SolrPhpClient/Apache/Solr/Service.php') ? '/var/lib/Apache/SolrPhpClient/Apache/Solr/Service.php' : 'd:\devel\www\lib\SolrPhpClient\Apache\Solr\Service.php');
 	define('CB_SOLR_CLIENT', PROJ_LIBX_DIR.'Solr/Service.php');

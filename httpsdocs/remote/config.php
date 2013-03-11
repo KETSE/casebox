@@ -19,9 +19,15 @@ $API = array_merge( $API, array(
 			,'uploadNewVersion'	=> array('len' => 1, 'formHandler' => true)
 			,'delete'		=> array('len' => 1)
 			,'toggleFavorite'	=> array('len' => 1)
-			,'getPath'		=> array('len' => 1)
 			,'takeOwnership'	=> array('len' => 1)
 			,'getObjectsForField'	=> array('len' => 1)
+		)
+	)
+
+	,'Path' => array(
+		'methods' => array(
+			'getPath'		=> array('len' => 1)
+			,'getPidPath'		=> array('len' => 1)
 		)
 	)
 	
@@ -74,7 +80,7 @@ $API = array_merge( $API, array(
 			,'create'			=>	array('len'=>1)
 			,'save'			=>	array('len'=>1)
 			,'close'			=>	array('len'=>1)
-			,'read'			=>	array('len'=>1)
+			,'load'			=>	array('len'=>1)
 			,'lock'			=>	array('len'=>1)
 			,'unlock'			=>	array('len'=>1)
 			,'getTasks' 		=> 	array('len'=>2)
@@ -87,7 +93,9 @@ $API = array_merge( $API, array(
 			,'getFavorites'		=> 	array('len' => 0)
 			,'changeName'		=> 	array('len' => 1)
 			,'getAssociatedCases'	=> 	array('len' => 1)
-			,'getAssociatedObjects'=> 	array('len' => 1)
+			,'getAssociatedObjects'	=> 	array('len' => 1)
+			,'queryCaseData'	=> 	array('len' => 1)
+			,'getCasePropertiesObjectId'=> 	array('len' => 1)
 			
 		)
 	)
@@ -150,6 +158,7 @@ $API = array_merge( $API, array(
 			,'loadTemplate'	=>	array('len'=>1)
 			,'getTemplatesStructure'	=>	array('len'=>0)
 			,'saveTemplate'	=>	array('len'=>1, 'formHandler' => true)
+			,'getCaseTypeTempleId'	=>	array('len'=>1)
 		)
 	)
 	

@@ -1,11 +1,35 @@
 <?php
 class Path{
+	/* get last element di from a path or return root folder id if no int element is found */
 	public static function getId($path = ''){
 		$id = explode('/', $path);
 		$id = array_pop($id);
 		$id = is_numeric($id) ? $id : Browser::getRootFolderId();
 		return $id;
 	}
+	
+	public static function getPath($id){
+		$rez = array('success' => false);
+		if(!is_numeric($id)) return $rez;
+		$sql = 'select f_get_tree_ids_path(case when `type` = 2 then target_id else id end) from tree where id = $1';
+		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		if($r = $res->fetch_row())
+			$rez = array('success' => true, 'path' => $r[0]);
+		$res->close();
+		return $rez;
+	}
+	
+	public static function getPidPath($id){
+		$rez = array('success' => false);
+		if(!is_numeric($id)) return $rez;
+		$sql = 'select f_get_tree_ids_path(pid) from tree where id = $1';
+		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		if($r = $res->fetch_row())
+			$rez = array('success' => true, 'id' => $id, 'path' => $r[0]);
+		$res->close();
+		return $rez;
+	}
+
 	public static function getPathText($p){
 		$path = empty($p->path) ? '/' : $p->path;
 		while($path[0] == '/') $path = substr($path, 1);
@@ -58,7 +82,6 @@ class Path{
 	}
 
 	public static function getPathProperties($p){
-		//getPathProperties
 		$path = empty($p->path) ? '/' : $p->path;
 		while($path[0] == '/') $path = substr($path, 1);
 		$path = explode('/', $path);
@@ -67,32 +90,16 @@ class Path{
 			$ids = array(Browser::getRootFolderId());//return '/';
 			$path = $ids;
 		}
-		// $props = array();
 		$rez = array();
 		$lastId = array_pop($ids);
 		$sql = 'select id, name, `system`, `type`, subtype, f_get_tree_ids_path(id) `path`, f_get_objects_case_id($1) `case_id` from tree where id = $1'; //in ('.implode(',', $ids).')';
 		$res = mysqli_query_params($sql, $lastId) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez = $r;
-			// $props[$r['id']] = $r;
 		$res->close();
 
-		/* exception for virtual folders when in cases folder */
-		// $rez = array( // suppose it's a virtual folder by default
-		// 	'id' => null
-		// 	,'system' => 1
-		// 	,'type' => 0
-		// );
-		// if( (sizeof($path) <= 1) || (Path::getNodeSubtype($path[1]) != 4) || (sizeof($path) > 5))
-		// 	$rez = $props[$path[sizeof($path)-1]];
-		// if($props[$path[0]]['subtype'] == 2) $rez['inFavorites'] = true;
-		// if($props[$path[0]]['type'] == 3){
-		// 	$sql = 'select f_get_case_type_id($1)';
-		// 	$res = mysqli_query_params($sql, $props[$path[0]]['id']) or die(mysqli_query_error());
-		// 	if($r = $res->fetch_row()) $rez['case_type_id'] = $r[0];
-		// 	$res->close();
-		// }
 		return $rez;
 	}
+
 	public static function getNodeSubtype($id){
 		$rez = null;
 		$sql = 'select `subtype` from tree where id = $1';

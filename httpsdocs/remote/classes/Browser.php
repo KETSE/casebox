@@ -495,17 +495,6 @@ class Browser{
 		SolrClient::runCron();
 		return $rez;
 	}
-	public function getPath($id){
-		$rez = array('success' => false);
-		if(!is_numeric($id)) return $rez;
-		$sql = 'select f_get_tree_ids_path(case when `type` = 2 then target_id else id end) from tree where id = $1';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
-		if($r = $res->fetch_row()){
-			$rez = array('success' => true, 'path' => $r[0]);
-		}
-		$res->close();
-		return $rez;
-	}
 	public function isChildOf($id, $pid){
 		$rez = false;
 		$sql = 'SELECT f_get_tree_ids_path($1)';

@@ -5,10 +5,11 @@ function isEmptyObject(ob){
 }
 
 function date_ISO_to_date(date_string){
-   if(Ext.isEmpty(date_string)) return null;
-   d = Date.parse(date_string);
-   if(Ext.isEmpty(d)) return null;
-   return new Date(d);
+	if(Ext.isEmpty(date_string)) return null;
+	//if(date_string.substr(-14) == 'T00:00:00.000Z') date_string = date_string.substr(0, 10);
+	d = Date.parse(date_string);
+	if(Ext.isEmpty(d)) return null;
+	return new Date(d);
 }
 function getItemIcon(d){
 	switch(parseInt(d['type'])){

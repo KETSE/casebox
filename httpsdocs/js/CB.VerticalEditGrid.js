@@ -84,48 +84,9 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 				if(!Ext.isEmpty(record.get('cfg').height)) meta.attr = ' style="height:' + record.get('cfg').height + 'px"';
 
 				if(Ext.isEmpty(v)) return '';
-				switch(record.get('type')){
-				case 'date': 
-					return App.customRenderers.date(v, meta, record, row_idx, col_idx, store);
-					break;
-				case '_objects': 
-					return App.customRenderers.objectsField(v, meta, record, row_idx, col_idx, store, this);
-				case 'combo': 
-				case 'object_author': 
-					return App.customRenderers.thesauriCombo(v, meta, record, row_idx, col_idx, store);
-					break;
-				case '_language': 
-					return App.customRenderers.languageCombo(v, meta, record, row_idx, col_idx, store);
-				case '_sex': 
-					return App.customRenderers.sexCombo(v, meta, record, row_idx, col_idx, store);
-					break;
-				case '_short_date_format': 
-					return App.customRenderers.shortDateFormatCombo(v, meta, record, row_idx, col_idx, store);
-					break;
-				case '_contact': 
-					return App.customRenderers.contactCombo(v, meta, record, row_idx, col_idx, store, this);
-					break
-				case '_case': 
-					return App.customRenderers.caseCombo(v, meta, record, row_idx, col_idx, store, this);
-					break
-				case '_case_object': 
-					return App.customRenderers.objectCombo(v, meta, record, row_idx, col_idx, store, this);
-					break
-				case 'checkbox': 
-					return App.customRenderers.checkbox(v, meta, record, row_idx, col_idx, store);
-					break;
-				case 'popuplist': 
-					return App.customRenderers.thesauriCell(v, meta, record, row_idx, col_idx, store);
-					break;
-				// case 'text':
-				// case 'html': 
-				// 	return v;//App.shortenString(v, 200);
-				// 	break;
-				// case 'memo': 
-				// 	return v;
-				// 	break;
-				default: return v;
-				}
+				renderer = App.getCustomRenderer(record.get('type'));
+				if(Ext.isEmpty(renderer)) return v;
+				return renderer(v, meta, record, row_idx, col_idx, store, this);
 			}
 		},{
 			header: L.Additionally
@@ -485,20 +446,18 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		if(e.field != 'value') return;
 		sm = this.getSelectionModel();
 		s = this.getSelectionModel().getSelectedCell();
-		this.updateVisibility();
 		if(s) sm.select(s[0], s[1]);
 		if(e.value != e.originalValue){
 			this.fullStore.each( function(record){ //update dependent child field to null
 				if( ( ( record.get('cfg').thesauriId == 'variable') || ( Ext.isDefined(record.get('cfg').dependency) )  )
 					&& (e.record.get('field_id') == record.get('pid'))
 					&& (e.record.get('duplicate_id') == record.get('duplicate_id')) 
-				){
-					record.set('value', null);
-					clog('sett to null')
-				}
+					&& (record.get('cfg').readOnly !==true)
+				) record.set('value', null);
 			}, this);
 			this.fireEvent('change'); 
 		}
+		this.updateVisibility();
 	}
 	,getFieldValue: function(field_id, duplication_id){
 		result = null
@@ -546,9 +505,11 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 								modified = true;
 							}
 						}else{ //when record is not visible
-							if( !Ext.isEmpty(pr.get('value')) && (Ext.isEmpty(v) || setsHaveIntersection( va, pr.get('value') ))
+							if( (pr.get('tag') == 'G') || (
+								!Ext.isEmpty(pr.get('value')) && (Ext.isEmpty(v) || setsHaveIntersection( va, pr.get('value') ))
 								&& ( (record.get('cfg').thesauriId !== 'variable') ||  !Ext.isEmpty(pr.get('value'))) 
 								&& ( Ext.isDefined(record.get('cfg').dependency) ||  !Ext.isEmpty(pr.get('value'))) 
+							    )
 							) { //if no pidValues specified or pidValues contains the parent selected value then show the field
 								record.set('visible', 1);
 								modified = true;

@@ -539,10 +539,11 @@ background-repeat: no-repeat; */
 .trigger-locate{ background-image: url(i/ico/trigger-locate.gif) !important; background-repeat: no-repeat}
 
 .icon-refresh { background-image: url(i/ico/_refresh.png) !important}
+.icon-browse { background-image: url(i/ico/_zoom.png) !important}
+.icon-files { background-image: url(i/ico/_clip.png) !important}
+.icon-permissions { background-image: url(i/ico/_padlock.png) !important}
 
-.icon-briefcase {
-background-image: url(i/ico/briefcase.png) !important;
-}
+.icon-briefcase {background-image: url(i/ico/briefcase.png) !important; }
 
 .icon-taskNew { background-image: url(i/ico/task.png) !important}
 .icon-eventNew { background-image: url(i/ico/calendar-blue.png) !important}
@@ -821,4 +822,62 @@ table.duplicates td.k {
 margin-top: 25px;
 padding: 5px 5px 5px 5px;
 font-size: 14px;
+}
+
+/* casecard */
+
+.casecard{
+font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+font-size: 13px;
+}
+.casecard a{text-decoration: underline; color: #15C; font-weight: normal;}
+.casecard a:hover{color: #005580}
+.casecard a.i{padding-left: 20px}
+
+.casecard td{
+    vertical-align: top;
+    font-size: 13px;
+    padding: 4px;
+}
+.casecard .casetitle{
+font-size: 24px;
+line-height: 36px;
+text-rendering: optimizelegibility;
+padding-left: 10px;
+font-weight: bold;
+}
+
+.casecard .divider{
+    display: block;
+    margin: 15px -4px;
+    height: 3px;
+    background-color: #EEE;
+}
+.casecard .block-props{
+padding: 7px;
+background-color: #F9F7ED;
+border: 1px solid #DDD;
+}
+.casecard .block-props td, .casecard .block-props th{ vertical-align: top}
+.casecard .block-props th{ color: #777 }
+.casecard .block-props li{ margin-bottom: 6px; }
+
+.casecard .block-actions{
+padding: 7px;
+background-color: #D4E7ED;
+border: 1px solid #7195A3;
+}
+.casecard .block-actions ul{margin: 5px 0}
+.casecard .block-actions li{margin: 5px 0}
+.casecard .block-actions li span.info{font-size: 11px; margin-left: 20px; color: #777}
+.casecard .block-actions li span.info a {color: #777; text-decoration: none}
+.casecard .block-actions li span.info a:hover {color: #15C; text-decoration: underline}
+.casecard .block-tasks{
+}
+.casecard .block-tasks table{ border-collapse: collapse; margin: 5px 0;}
+.casecard .block-tasks th{ font-weight: bold; padding: 5px;}
+.casecard .block-tasks tr.done td{ color: #777;}
+.casecard .block-tasks tr.done a{ text-decoration: line-through; color: #777;}
+.casecard .block-tasks tr.done img{ opacity: 0.4 }
+.casecard .block-milestones{
 }

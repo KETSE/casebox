@@ -32,7 +32,7 @@ class preview_extractor_pdf extends preview_extractor{
 			//sudo -u apache swfcombine  -X 596 -Y 841 "/var/www/vhosts/casebox.org/subdomains/stratelit2/httpsdocs/lib/rfxview.swf" viewport="/var/www/vhosts/casebox.org/subdomains/stratelit2/casebox/files/casebox2_osji/preview/86220_.swf" -o "/var/www/vhosts/casebox.org/subdomains/stratelit2/casebox/files/casebox2_osji/preview/86220_.swf"
 
 			file_put_contents('/tmp/pdf.log', $log, FILE_APPEND);
-			file_put_contents( $preview_filename, '<OBJECT CLASSID="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" WIDTH="100%" CODEBASE="http://active.macromedia.com/flash5/cabs/swflash.cab#version=8,0,0,0">'.
+			file_put_contents( $preview_filename, '<OBJECT CLASSID="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" WIDTH="100%" HEIGHT="100%" CODEBASE="http://active.macromedia.com/flash5/cabs/swflash.cab#version=8,0,0,0">'.
 						'<PARAM NAME="MOVIE" VALUE="preview/'.$r['content_id'].'_.swf">'.
 						'<PARAM NAME="PLAY" VALUE="false">'.
 						'<PARAM NAME="LOOP" VALUE="false">'.

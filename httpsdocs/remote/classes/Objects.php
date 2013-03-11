@@ -531,6 +531,12 @@ class Objects{
 		return $rez;
 	}
 	
+	static function setFieldValue($object_id, $field_id, $value, $duplicate_id = 0){
+		$rez = null;
+		$sql = 'insert into objects_data (object_id, field_id, duplicate_id, `value`) values($1, $2, $3, $4) on duplicate key update `value` = $4';
+		mysqli_query_params($sql, array($object_id, $field_id, $duplicate_id, $value)) or die(mysqli_query_error());
+	}
+	
 	static function getSorlData($id){
 		$rez = array();
 		$lang_field = 'l'.$_SESSION['languages']['per_abrev'][$GLOBALS['CB_LANGUAGE']]['id'];
@@ -617,4 +623,3 @@ class Objects{
 		return $rez;
 	}
 }
-?>

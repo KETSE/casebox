@@ -152,11 +152,11 @@ class Security {
 	static function getLowerLevelUsers(){
 		$rez = Array('success' => true, 'data' => array());
 		$user_id = $_SESSION['user']['id'];
-		$sql= 'SELECT DISTINCT u.id, u.l'.UL_ID().' `name` FROM users_roles_association ura1 '.
-			'JOIN users_roles_association ura2 ON ((ura1.office_id = 0) OR (ura2.office_id = 0) OR (ura1.office_id = ura2.office_id)) AND ura2.active = 1 '. //AND ura1.role_id <= ura2.role_id
-			',users u '.
-			'WHERE ura1.active = 1 AND ura1.user_id = $1 AND ura2.user_id = u.id order by 2';
-		$sql = 'select id, l'.UL_ID().' `name` from users where deleted = 0 and enabled = 1 order by 2';
+		// $sql= 'SELECT DISTINCT u.id, u.l'.UL_ID().' `name`, concat(\'icon-user-\', coalesce(u.sex, \'\')) `iconCls` FROM users_roles_association ura1 '.
+		// 	'JOIN users_roles_association ura2 ON ((ura1.office_id = 0) OR (ura2.office_id = 0) OR (ura1.office_id = ura2.office_id)) AND ura2.active = 1 '. //AND ura1.role_id <= ura2.role_id
+		// 	',users u '.
+		// 	'WHERE ura1.active = 1 AND ura1.user_id = $1 AND ura2.user_id = u.id order by 2';
+		$sql = 'select id, l'.UL_ID().' `name`, concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls` from users where deleted = 0 and enabled = 1 order by 2';
 		$res = mysqli_query_params( $sql, $user_id) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez['data'][] = $r;
 		$res->close();

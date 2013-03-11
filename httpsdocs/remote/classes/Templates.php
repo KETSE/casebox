@@ -9,7 +9,9 @@ class Templates{
 		switch($t){
 			case 0: //user, contact and organization template + case templates folder
 		}
-		$res = mysqli_query_params('select id, l'.UL_ID().' `text`, `type`, `order`, `visible`, iconCls, (select count(*) from templates where pid = t.id) `loaded` from templates t where `type` > -100 and pid'.( ($nodeId > 0) ? '=$1' : ' is NULL' ).' order by `order`, `type`, 2' , $nodeId) or die(mysqli_query_error());
+		$res = mysqli_query_params('select id, l'.UL_ID().' `text`, `type`, `order`, `visible`, iconCls, (select count(*) '.
+			'from templates where pid = t.id) `loaded` from templates t '.
+			'where `type` > -100 and pid'.( ($nodeId > 0) ? '=$1' : ' is NULL and is_folder=1' ).' order by `order`, `type`, 2' , $nodeId) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$r['loaded'] = empty($r['loaded']);
 			if(empty($nodeId)) $r['expanded'] = true;
@@ -19,8 +21,29 @@ class Templates{
 		}
 		return $rez;
 	}
+	public static function getCaseTypeTempleId($case_type_id) {
+		$case_type_id = explode('-', $case_type_id);
+		$case_type_id = array_pop($case_type_id);
+		$case_type_id = intval($case_type_id);
+		$id = 0;
+		$sql = 'SELECT t.id FROM `templates_per_tags` tpt JOIN templates t ON tpt.`template_id` = t.id AND t.type = 4 WHERE tpt.case_type_id = $1';
+		$res = mysqli_query_params($sql, $case_type_id) or die(mysqli_query_error());
+		if($r = $res->fetch_row()){
+			$id = $r[0];
+
+		}else{
+			$name = 'Template for case type '.$case_type_id;
+			mysqli_query_params('insert into templates (`type`, name, l1, l2, l3, visible) values (4, $1, $1, $1, $1, 0)', array($name) ) or die(mysqli_query_error());
+			$id = last_insert_id();
+			mysqli_query_params('insert into templates_per_tags (template_id, case_type_id) values($1, $2) ', array($id, $case_type_id)) or die(mysqli_query_error());
+		}
+		$res->close();
+		return array('success' => true, 'id' => $id);
+	}
+	
 	public function saveElement($params){//new folder or template
 		if(!Security::canManage()) throw new Exception(L\Access_denied);
+		
 		$p = array(
 			'id' => empty($params->id) ? null: $params->id
 			,'type' => empty($params->type) ? 0: intval($params->type)
@@ -39,7 +62,7 @@ class Templates{
 		mysqli_query_params('insert into templates ('.implode(',', array_keys($p)).') values ('.$values_string.') on duplicate key update '.$on_duplicate, array_values($p)) or die(mysqli_query_error());
 		if(!is_numeric(@$params->id)) $p['id'] = last_insert_id();
 		
-		return array( 'success' => true, 'data' => array('id' => $p['id'], 'pid' => $p['pid'], 'type' => $p['type'], 'text' => $params->text, 'loaded' => true));
+		return array( 'success' => true, 'data' => array('id' => $p['id'], 'pid' => @$p['pid'], 'type' => $p['type'], 'text' => $params->text, 'loaded' => true));
 	}
 	public function deleteElement($id){
 		if(!Security::canManage()) throw new Exception(L\Access_denied);
@@ -248,27 +271,27 @@ class Templates{
 		return $rez;
 	}
 	
-	public static function getGroupedTemplateFieldsWithData($template_id, $object_id, $object_type = 'object'){
+	public static function getGroupedTemplateFieldsWithData($template_id, $object_id){
 		$rez = array();
-		$tf = Templates::getTemplateFieldsWithData($template_id, $object_id, $object_type);
+		$tf = Templates::getTemplateFieldsWithData($template_id, $object_id);
 		if(!empty($tf))
 		foreach($tf as $f){
 			if(empty($f['cfg'])) $rez['body'][] = $f;
-			elseif(!empty($f['cfg']->show_on_top)) $rez['top'][] = $f;
+			elseif(@$f['cfg']->showIn == 'top') $rez['top'][] = $f;
 			elseif(@$f['cfg']->showIn == 'tabsheet') $rez['bottom'][] = $f;
 			else $rez['body'][] = $f;
 		}
 		return $rez;
 	}
 	
-	public static function getTemplateFieldsWithData($template_id, $object_id, $object_type = 'object'){
+	public static function getTemplateFieldsWithData($template_id, $object_id){
 		//helper function for get template non empty fields for a object. Used for info/preview purposes
 		$ts = Templates::getTemplateStructure($template_id, false);
-		$data = Templates::getObjectsData($object_id, $object_type);
+		$data = Templates::getObjectsData($object_id);
 		return Templates::iterateFieldsWithData($ts, $data);
 	}
 
-	public static function getObjectsData($object_id, $object_type = 'object'){ //object, contact
+	public static function getObjectsData($object_id){ //object, contact
 		if(empty($object_id) || !is_numeric($object_id)) return;
 		$sql = 'SELECT concat(\'f\', field_id, \'_\', duplicate_id) field, id, `value`, info, files, private_for_user `pfu` FROM objects_data WHERE object_id = $1';
 		$sql2 = 'select id, pid, field_id from objects_duplicates where object_id = $1 order by id';

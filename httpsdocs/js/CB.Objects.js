@@ -274,7 +274,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			title: L.Details
 			,show_files: this.templateData.cfg.files
 			,refOwner: this
-			,autoHeight: true
+			//,autoHeight: true
 		}, Ext.value(this.templateData.cfg.gridJsClass, 'CBVerticalEditGrid'));
 		tabPanelItems = [  ]
 		//placing content elements
@@ -538,16 +538,26 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			this.propertiesPanel.data = this.data;
 		}else if(this.propertiesPanel && this.propertiesPanel.rendered) this.propertiesPanel.update(this.data)
 		this.grid.reload();
-		if((this.grid.store.getCount() > 0) && (this.tabPanel.items.first() != this.grid) )  
+		if((this.grid.store.getCount() > 0) && ( (this.tabPanel.items.getCount() == 0) || (this.tabPanel.items.first().items.first() != this.grid) ) )  
 			this.tabPanel.insert(0, {
 				title: L.Details
-				,autoScroll:true
+				//,autoScroll:true
 				,layout: 'fit'
 				,items: this.grid
+				,bodyStyle:'margin:0; padding: 0'
 				,listeners: {
 					scope: this
 					,afterlayout: function(p){
-						this.grid.setWidth(p.getWidth()-17)
+						w = p.getWidth();
+						this.grid.setWidth(w-9)
+						this.grid.getEl().setWidth(w);
+						
+						o = this.grid.getEl().query('.x-panel-body');
+						for (var i = 0; i < o.length; i++) Ext.get(o[i]).setWidth(w)
+						o = this.grid.getEl().query('.x-grid3');
+						for (var i = 0; i < o.length; i++) Ext.get(o[i]).setWidth(w)
+						o = this.grid.getEl().query('.x-grid3-scroller');
+						for (var i = 0; i < o.length; i++) Ext.get(o[i]).setWidth(w)
 					}
 				}
 			});//this.tabPanel.items.removeAt(0);

@@ -632,7 +632,7 @@ CB.FileDuplicatesView = Ext.extend(Ext.DataView, {
 	,onItemClick: function(el, index, ev){
 		r = this.store.getAt(index);
 		if(Ext.isEmpty(r)) return;
-		App.mainViewPort.locateObject(r.get('path'), r.get('id'))
+		App.locateObject(r.get('id'), r.get('path'))
 	}
 	,onObjectsDeleted: function(ids, e){
 		for (var i = 0; i < ids.length; i++) {

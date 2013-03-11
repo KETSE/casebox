@@ -5,9 +5,9 @@ CB.PreviewPanel = Ext.extend(Ext.Panel, {
 	,autoScroll: true
 	,html: ''
 	,tbarCssClass: 'x-panel-white'
-	//,bodyCssClass: 'preview'
 	,loadMask: true
 	,padding:0
+	,layout: 'fit'
 	,initComponent: function(){
 		CB.PreviewPanel.superclass.initComponent.apply(this, arguments);
 	}

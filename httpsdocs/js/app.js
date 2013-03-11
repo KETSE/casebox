@@ -166,12 +166,18 @@ function initApp(){
 			r = [];
 			store = null;
 			if(!Ext.isArray(v)) v = String(v).split(',');
-			if( Ext.isEmpty(record.get('cfg').source) || (record.get('cfg').source == 'thesauri') ){
-				store = getThesauriStore(record.get('cfg').thesauriId);
-			}else{
-				cw = grid.findParentByType(CB.Objects);
-				if(!cw || !cw.objectsStore) return '';
-				store = cw.objectsStore;
+			source = Ext.isEmpty(record.get('cfg').source) ? 'thesauri': record.get('cfg').source;
+			switch(source){
+				case 'thesauri':
+					store = getThesauriStore(record.get('cfg').thesauriId);
+					break;
+				case 'users':
+					store = App.usersStore;
+					break;
+				default:
+					cw = (grid && grid.findParentByType) ? grid.findParentByType(CB.Objects): null;
+					if(!cw || !cw.objectsStore) return '';
+					store = cw.objectsStore;
 			}
 			switch(record.data.cfg.renderer){
 				case 'listGreenIcons':
@@ -321,6 +327,44 @@ function initApp(){
 			}/**/
 		}
 	}
+	App.getCustomRenderer = function(fieldType){
+		switch(fieldType){
+			case 'date': 
+				return App.customRenderers.date;
+				break;
+			case '_objects': 
+				return App.customRenderers.objectsField;
+			case 'combo': 
+			case 'object_author': 
+				return App.customRenderers.thesauriCombo;
+				break;
+			case '_language': 
+				return App.customRenderers.languageCombo;
+			case '_sex': 
+				return App.customRenderers.sexCombo;
+				break;
+			case '_short_date_format': 
+				return App.customRenderers.shortDateFormatCombo;
+				break;
+			case '_contact': 
+				return App.customRenderers.contactCombo;
+				break
+			case '_case': 
+				return App.customRenderers.caseCombo;
+				break
+			case '_case_object': 
+				return App.customRenderers.objectCombo;
+				break
+			case 'checkbox': 
+				return App.customRenderers.checkbox;
+				break;
+			case 'popuplist': 
+				return App.customRenderers.thesauriCell;
+				break;
+			default: return null;
+		}
+	}
+
 	App.getTemplatesXTemplate = function(template_id){
 		template_id = String(template_id);
 		if(!Ext.isDefined(App.templatesXTemplate)) App.templatesXTemplate = {};
@@ -337,13 +381,16 @@ function initApp(){
 		}
 		return App.xtemplates.object;
 	}
-	App.findTab = function(tabPanel, id){
+	App.findTab = function(tabPanel, id, xtype){
 		tabIdx = -1;
 		if(Ext.isEmpty(id)) return tabIdx;
 		i= 0;
 		while((tabIdx == -1) && (i < tabPanel.items.getCount())){
 			o = tabPanel.items.get(i);
-			if(Ext.isDefined(o.data) && Ext.isDefined(o.data.id) && (o.data.id == id)) tabIdx = i;
+			if(Ext.isEmpty(xtype) || ( o.isXType && o.isXType(xtype) ) ){
+				if(Ext.isDefined(o.params) && Ext.isDefined(o.params.id) && (o.params.id == id)) tabIdx = i;
+				else if(Ext.isDefined(o.data) && Ext.isDefined(o.data.id) && (o.data.id == id)) tabIdx = i;
+			}
 			i++;
 		}
 		return tabIdx;
@@ -359,9 +406,9 @@ function initApp(){
 		}
 		return tabIdx;
 	}
-	App.activateTab = function(tabPanel, id){
+	App.activateTab = function(tabPanel, id, xtype){
 		if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
-		tabIdx = App.findTab(tabPanel, id);
+		tabIdx = App.findTab(tabPanel, id, xtype);
 		if(tabIdx < 0) return false;
 		tabPanel.setActiveTab(tabIdx);
 		return tabPanel.items.itemAt(tabIdx);
@@ -399,21 +446,29 @@ function initApp(){
 	App.openCase = function(id, options){ 
 		if(Ext.isElement(options)){
 			//click is catched from a html element
-			return App.mainViewPort.openCase({iconCls: 'icon-briefcase', data: {id: options.id}});
+			return App.mainViewPort.openCase({iconCls: 'icon-briefcase', params: {id: options.id}});
 		}
-		options = Ext.apply({iconCls: 'icon-briefcase', data: {id: id}}, options)
+		options = Ext.apply({iconCls: 'icon-briefcase', params: {id: id}}, options)
 		return App.mainViewPort.openCase(options);
 	}; // shortcut
-	App.openObject = function(o, el){ 
-		if(Ext.isElement(el)) o = el.id; //retreive id from html element
-		if(Ext.isPrimitive(o)){
-			Cases.getCaseId({object_id: o}, function(r, e){ if(r.success !== true) return; App.openCase(r.data.id, {selectActionId: o})}, this);
-		}else{
-			el = Ext.get(o); 
-			o = el.dom.attributes.getNamedItem('href').nodeValue.substr(1);
-			Ext.getCmp(el.id).findParentByType(CB.Case).openObject(o);
+
+	App.locateObject = function(object_id, path){
+		if(Ext.isEmpty(path)){
+			Path.getPidPath(object_id, function(r, e){
+				if(r.success !== true) return ;
+				App.locateObject(r.id, r.path);
+			})
+			return;
 		}
+
+		tab = App.mainTabPanel.getActiveTab();
+		if(!Ext.isEmpty(object_id)) App.locateObjectId = parseInt(object_id);
+		params = {path: path};
+		if(tab.isXType(CB.FolderView)) return tab.setParams(params);
+		App.mainTabPanel.setActiveTab(App.explorer);
+		App.explorer.setParams(params);
 	}
+
 	App.downloadFile = function(fileId, zipped, versionId){
 		if(Ext.isElement(fileId)){ //retreive id from html element
 			fileId = fileId.id;
@@ -445,11 +500,17 @@ function initApp(){
 							e.cancel = true;
 							/* prepeare data to set to popup windows */
 							store = false;
-							if( Ext.isEmpty(e.record.get('cfg').source) || (e.record.get('cfg').source == 'thesauri') ){
-								store = getThesauriStore(e.record.get('cfg').thesauriId);
-							}else{
-								cw = e.grid.findParentByType(CB.Objects);
-								if(cw && cw.objectsStore)  store = cw.objectsStore;
+							source = Ext.isEmpty(e.record.get('cfg').source) ? 'thesauri' : e.record.get('cfg').source;
+							switch(source){
+								case 'thesauri': 
+									store = getThesauriStore(e.record.get('cfg').thesauriId);
+									break;
+								case 'users': 
+									store = App.usersStore;
+									break;
+								default: 
+									cw = e.grid.findParentByType(CB.Objects);
+									if(cw && cw.objectsStore)  store = cw.objectsStore;
 							}
 							data = []
 							if(store){
@@ -461,10 +522,9 @@ function initApp(){
 								}
 							}
 
-							if( Ext.isEmpty(e.record.get('cfg').source) || (e.record.get('cfg').source == 'thesauri') ) w = new CB.ObjectsSelectionPopupList({data: objData, value: e.record.get('value')});
-							else{
-								w = new CB.ObjectsSelectionForm({data: objData, value: e.record.get('value')});
-							}
+							if( source == 'thesauri' ) w = new CB.ObjectsSelectionPopupList({data: objData, value: e.record.get('value')});
+							else w = new CB.ObjectsSelectionForm({data: objData, value: e.record.get('value')});
+
 							w.on('setvalue', function(data){
 								value = []
 								if(Ext.isArray(data)){
@@ -479,25 +539,11 @@ function initApp(){
 							return w;
 						}else return new CB.ObjectsTriggerField({data: objData}); //, width: 500
 						break;
-					// case 'popuplist':
-					// 	if(e && e.grid){ 
-					// 		e.cancel = true;
-					// 		w = new CB.ObjectsSelectionForm({data: objData});
-					// 		w.show();
-					// 		return w;
-					// 	}else return new CB.ObjectsTriggerField({data: objData, width: 500}); 
-					// 	break;
 					default:
 						return new CB.ObjectsComboField({data: objData});//, width: 500
 						break;
 				}
-				// if(e.record.get('cfg').editor == 'form'){
-					
-				// }else{
-				// 	params = Ext.apply({}, e.record.get('cfg'));
-				// 	if(!Ext.isEmpty(e.pidValue)) params.pidValue = e.pidValue;
-				// 	return new Ext.form.ObjectsField({ownerCt: e.ownerCt, params: params, width: 500})
-				// // }
+
 				break;
 			case '_case':
 				if(e.record.get('cfg').editor == 'form'){
@@ -711,6 +757,8 @@ function initApp(){
 		switch(type){
 			// case 2:  //link
 			// 	break;
+			case 3: App.openCase(id);
+				break;
 			case 4:
 			case 8:
 				App.mainViewPort.fireEvent('openobject', {id: id}, e);

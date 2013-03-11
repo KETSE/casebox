@@ -5,52 +5,61 @@
 
 CB.ObjectsFieldCommonFunctions = {
 	getStore: function(){
-		if( Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri') ) this.store = this.getThesauriStore();
-		else{
-			//try to access object window to locate objects store
-			this.objectsStore = this.getObjectsStore();
-			if(!Ext.isEmpty(this.data.pidValue)) params.pidValue = this.data.pidValue;
-			this.store = new Ext.data.DirectStore({
-				autoLoad: false //true
-				,autoDestroy: true
-				,restful: false
-				,baseParams: params
-				,proxy: new Ext.data.DirectProxy({
-					paramsAsHash: true
-					,api: { read: Browser.getObjectsForField }
-					,listeners:{
-						load: function(proxy, obj, opt){
-							for (var i = 0; i < obj.result.data.length; i++) obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+		source = Ext.isEmpty(this.config.source) ? 'thesauri': this.config.source;
+		switch(source){
+			case 'thesauri': 
+				this.store = this.getThesauriStore();
+				break;
+			case 'users':
+				this.store = App.usersStore;
+				break;
+			default:
+				//try to access object window to locate objects store
+				this.objectsStore = this.getObjectsStore();
+				
+				if(!Ext.isEmpty(this.data.pidValue)) params.pidValue = this.data.pidValue;
+				this.store = new Ext.data.DirectStore({
+					autoLoad: false //true
+					,autoDestroy: true
+					,restful: false
+					,baseParams: params
+					,proxy: new Ext.data.DirectProxy({
+						paramsAsHash: true
+						,api: { read: Browser.getObjectsForField }
+						,listeners:{
+							load: function(proxy, obj, opt){
+								for (var i = 0; i < obj.result.data.length; i++) obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+							}
 						}
-					}
-				})
-				,reader: new Ext.data.JsonReader({
-					successProperty: 'success'
-					,root: 'data'
-					,messageProperty: 'msg'
-				},[ 
-					{name: 'id', type: 'int'}
-					,'name'
-					,{name: 'date', type: 'date'}
-					,{name: 'type', type: 'int'}
-					,{name: 'subtype', type: 'int'}
-					,{name: 'template_id', type: 'int'}
-					,{name: 'status', type: 'int'}
-					, 'iconCls'
-				]
-				)
-				,listeners: {
-					scope: this
-					,beforeload: function(st, o ){
-						if(!Ext.isEmpty(this.data.pidValue)) o.params.pidValue = this.data.pidValue;
-					}
-					,load: 	function(store, recs, options) {
-						Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data))}, this);
-					}
+					})
+					,reader: new Ext.data.JsonReader({
+						successProperty: 'success'
+						,root: 'data'
+						,messageProperty: 'msg'
+					},[ 
+						{name: 'id', type: 'int'}
+						,'name'
+						,{name: 'date', type: 'date'}
+						,{name: 'type', type: 'int'}
+						,{name: 'subtype', type: 'int'}
+						,{name: 'template_id', type: 'int'}
+						,{name: 'status', type: 'int'}
+						, 'iconCls'
+					]
+					)
+					,listeners: {
+						scope: this
+						,beforeload: function(st, o ){
+							if(!Ext.isEmpty(this.data.pidValue)) o.params.pidValue = this.data.pidValue;
+						}
+						,load: 	function(store, recs, options) {
+							Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data))}, this);
+						}
 
-				}
-			})
+					}
+				})			 
 		}
+		
 		if(Ext.isEmpty(this.store)) this.store = new Ext.data.ArrayStore({ idIndex: 0, fields: [{name: 'id', type: 'int'}, 'name'], data:  [] });
 		this.store.getTexts = getStoreNames;		
 	}

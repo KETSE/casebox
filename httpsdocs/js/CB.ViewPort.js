@@ -15,7 +15,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 					,idProperty: 'id'
 					,root: 'data'
 					,messageProperty: 'msg'
-				},[ {name: 'id', type: 'int'}, 'name' ]
+				},[ {name: 'id', type: 'int'}, 'name', 'iconCls' ]
 			)
 			,getName: function(ids){
 				if(!Ext.isArray(ids)) ids = String(ids).split(',');
@@ -249,21 +249,13 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	}
 	,onChangeActiveFolder: function(sm, node){
 		if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
-		this.locateObject(node.getPath('nid'));
+		App.locateObject(null, node.getPath('nid'));
 	}
 	,onRenameTreeElement: function(tree, r, e){
 		node = tree.getSelectionModel().getSelectedNode();
 		if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
 		tab = App.mainTabPanel.getActiveTab();
 		if(tab.isXType(CB.FolderView)) tab.onReloadClick();
-	}
-	,locateObject: function(path, object_id){
-		tab = App.mainTabPanel.getActiveTab();
-		if(!Ext.isEmpty(object_id)) App.locateObjectId = parseInt(object_id);
-		params = {path: path};//, descendants: false, query: ''
-		if(tab.isXType(CB.FolderView)) return tab.setParams(params);
-		App.mainTabPanel.setActiveTab(App.explorer);
-		App.explorer.setParams(params);
 	}
 	,selectGridObject: function(g){
 		if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) return;
@@ -287,7 +279,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		if(!App.activateTab(App.mainTabPanel, 'explorer')) App.explorer = App.addTab(App.mainTabPanel, new CB.FolderView({ rootId: '/', data: {id: 'explorer' }, closable: false }) )
 	}
 	,openCaseById: function(config){
-		c = App.activateTab(App.mainTabPanel, config.data.id);
+		c = App.activateTab(App.mainTabPanel, config.params.id);
 		if(c){
 			if(!Ext.isEmpty(config.selectActionId)) c.grid.selectAction(config.selectActionId);
 			return c;
@@ -300,11 +292,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	}
 	,openCase: function(config, ev){
 		if(ev && ev.stopPropagation) ev.stopPropagation();
-		if(Ext.isEmpty(config) || Ext.isPrimitive(config) || Ext.isEmpty(config.data.id)){
+		if(Ext.isEmpty(config) || Ext.isPrimitive(config) || Ext.isEmpty(config.params.id)){
 			if(Ext.isEmpty(v)) return;
 			Cases.getCaseId({nr: v}, function(r, e){
 				if(r.success != true) return Ext.Msg.alert(L.Error, L.CaseNotFound);
-				config = {data: {id: r.data.id}};
+				config = {params: {id: r.data.id}};
 				this.openCaseById(config)
 			}, this);
 		}else return this.openCaseById(config);
@@ -315,7 +307,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			if(e.processed === true) return;
 		}
 
-		if(App.activateTab(App.mainTabPanel, data.id)) return true;
+		if(App.activateTab(App.mainTabPanel, data.id, CB.Objects)) return true;
 
 		o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');/*, hideDeleteButton: (data.template_id == 1)/**/ 
 		this.fireEvent('objectopened', o);
@@ -458,7 +450,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		App.mainViewPort.syncSize();
 	}
 	,openPath: function(path, id){
-		App.mainViewPort.locateObject(path, id);
+		App.locateObject(id, path);
 	}
 
 })

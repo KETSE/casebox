@@ -33,18 +33,6 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 						,text: L.OutgoingAction
 						,scope: this
 						,handler: this.onAddTemplateClick
-					/*},{
-						iconCls: 'icon-object4'
-						,template_type: 4
-						,text: L.Applicant
-						,scope: this
-						,handler: this.onAddTemplateClick
-					},{
-						iconCls: 'icon-object5'
-						,template_type: 5
-						,text: L.Subject
-						,scope: this
-						,handler: this.onAddTemplateClick/**/
 					},'-',{
 						iconCls: 'icon-object7'
 						,template_type: 7
@@ -101,8 +89,6 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 				}
 				,beforeappend: function(t, p, n){ 
 					if(n.attributes.type > 0) n.setText(n.attributes.text + ' <span class="cG">(id: '+n.attributes.id+')</span>');
-					//n.setIconCls((n.attributes.type < 1) ? 'icon-tree-folder' : Ext.value(n.attributes.iconCls, 'icon-document-medium'));
-					//if(n.attributes.type > 0) n.attributes.iconCls = 'icon-object' + n.attributes.type;
 					if( (n.attributes.type == 2) && (n.attributes.visible != 1)) n.setText( '<i class="cG">'+n.attributes.text+'</i>');
 				}
 				,dblClick: this.onNodeDblClick
@@ -164,11 +150,6 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 		
 		if(n.attributes.type > 0) return this.fireEvent('edittemplate', n.attributes.id);
 	}
-/*	,processAddFolder: function(r, e){
-		if(r.success !== true) return false;
-		path = '/root/o-'+r.data.office?_id+'/u-'+r.data.id;
-		this.getRootNode().reload(function(){this.selectPath(path, 'nid')}, this);
-	}/***/
 	,sortTree: function(n1, n2){ 
 		if(n1.attributes.order < n2.attributes.order) return -1;
 		if(n1.attributes.order > n2.attributes.order) return 1;
@@ -200,21 +181,6 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 		if(!sm.selectNext(n)) sm.selectPrevious(n);
 		n.remove(true);
 	}
-	/*,processDragDrop: function(tree, node, dd, e){
-		this.sourceNode = dd.dragOverData.dropNode;
-		this.targetNode = dd.dragOverData.target;
-		Templates.moveElement({id: this.sourceNode.attributes.id, pid: this.targetNode.attributes.id}, this.processMoveElement, this);
-	}
-	,processMoveElement: function(r, e){
-		if(r.success !== true) return false;
-		attr = this.sourceNode.attributes;
-		this.sourceNode.remove(true);
-		if(this.targetNode.loaded){
-			this.targetNode.expand();
-			this.targetNode.appendChild(attr);
-			this.targetNode.sort(this.sortTree);
-		}else this.targetNode.expand();
-	}/**/
 })
 
 CB.TemplatesTagGroupsTree = Ext.extend(Ext.tree.TreePanel, {
@@ -233,7 +199,6 @@ CB.TemplatesTagGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 				,listeners:{
 					scope: this
 					,beforeload: function(treeLoader, node) { treeLoader.baseParams.path = node.getPath('id'); }
-					//,load: function(o, n, r) { n.sort(this.sortTree)}
 					,loadexception: function(loader, node, response) { node.leaf = false; node.loaded = false; }
 				}
 			})
@@ -255,36 +220,6 @@ CB.TemplatesTagGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 				,{iconCls: 'icon-arrow-down-medium', disabled: true, handler: this.onMoveDownClick, scope: this}
 				,'-'
 				,{iconCls: 'icon-reload', qtip: L.Reload, scope:this, handler: function(){this.getRootNode().reload();}}
-				,'->'
-				,{
-					xtype: 'combo'
-					,editable: false
-					,name: 'filter'
-					,tpl: '<tpl for="."><div class="x-combo-list-item icon-padding16 icon-object{id}">{name}</div></tpl>'
-					,store: new Ext.data.ArrayStore({
-						autoLoad: true
-						,autoDestroy: true
-						,fields: [{name: 'id', type: 'int'}, 'name', 'iconCls']
-						,data: [[0, L.All, 'icon-funnel-small']
-							,[1, L.CaseObject, 'icon-object1']
-							,[2, L.IncomingAction,  'icon-object2']
-							,[3, L.OutgoingAction, 'icon-object3']
-							,[4, L.Applicant, 'icon-object4']
-							,[5, L.Subject, 'icon-object5']/*, [6, L.User, 'icon-object6'], [7, L.Contact, 'icon-object7']/**/]
-					})
-					,value: 0
-					,valueField: 'id'
-					,displayField: 'name'
-					,iconClsField: 'iconCls'
-					,triggerAction: 'all'
-					,mode: 'local'
-					,plugins: [new Ext.ux.plugins.IconCombo()]
-					,listeners: {
-						scope: this
-						,select: this.filterTree
-					}
-				}
-				
 			]
 			,listeners:{
 				scope: this
@@ -337,9 +272,7 @@ CB.TemplatesTagGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 						else if(n.attributes.id.substr(0,3) == 'tg-') n.attributes.isPhase = true;
 						//else if(n.attributes.id.substr(0,2) == 't-') n.attributes.isTag = true;
 					}
-					//n.setText(n.attributes.text + ' ' + n.attributes.id);
 					n.attributes.order = parseInt(n.attributes.order);
-					this.filterNode(n);
 				}
 				,dblClick: this.onNodeDblClick
 			}
@@ -428,6 +361,7 @@ CB.TemplatesTagGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n) return;
 		if(n.isLeaf() && (n.attributes.type > 0)) return this.fireEvent('edittemplate', n.attributes.id);
+		if(n.attributes.isCaseType) return this.fireEvent('editcasetemplate', n.attributes.id);
 	}
 	,sortTree: function(n1, n2){ 
 		// if(Ext.isEmpty(n1.attributes.type) && !Ext.isEmpty(n2.attributes.type)) return -1;
@@ -439,25 +373,6 @@ CB.TemplatesTagGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 		// if(n1.text < n2.text) return -1;
 		// if(n1.text > n2.text) return 1;
 		return 0;
-	}
-	,filterTree: function(){
-		this.getRootNode().cascade(this.filterNode, this);
-	}
-	,filterNode: function(n){
-		if(n.attributes.id.substr(0, 3) != 'tt-') return;
-		fc = this.getTopToolbar().find('name', 'filter')[0].getValue();
-		if( (fc == 0) || (fc == n.attributes.type) ) n.getUI().show(); else n.getUI().hide();
-		/*switch(parseInt(n.attributes.type)){
-			case 1: 
-				if(this.getTopToolbar().find('name', 'objects')[0].checked) n.getUI().show(); else n.getUI().hide();
-				break;
-			case 2: 
-				if(this.getTopToolbar().find('name', 'inActions')[0].checked) n.getUI().show(); else n.getUI().hide();
-				break;
-			case 3: 
-				if(this.getTopToolbar().find('name', 'outActions')[0].checked) n.getUI().show(); else n.getUI().hide();
-				break;
-		}/**/
 	}
 	,onMoveUpClick: function(){
 		n = this.getSelectionModel().getSelectedNode();
@@ -756,6 +671,7 @@ CB.TemplatesManagementWindow = Ext.extend(Ext.Panel, {
 			,listeners: {
 				scope: this
 				,edittemplate: this.onEditTemplate
+				,editcasetemplate: this.onEditCaseTemplate
 			}
 		});
 	
@@ -789,6 +705,12 @@ CB.TemplatesManagementWindow = Ext.extend(Ext.Panel, {
 		if(App.activateTab(this.tabPanel, id)) return;
 		w = new CB.TemplateEditWindow({data: {id: id}});
 		App.addTab(this.tabPanel, w);
+	}
+	,onEditCaseTemplate: function(id){
+		Templates.getCaseTypeTempleId(id, function(r, e){
+			if(r.success !== true) return;
+			this.onEditTemplate(r.id);
+		}, this)
 	}
 	,onUpdateTemplate: function(w, action){
 		this.TemplatesTree.getRootNode().cascade(this.updateTreeNode, this);

@@ -46,11 +46,11 @@ class Cases{
 		if(empty($params->pid)) $params->pid = Browser::getRootFolderId();
 		mysqli_query_params('insert into tree (pid, name, `type`, cid, uid) values ($1, $2, 3, $2, $2)', array($params->pid, $params->name, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		$id = last_insert_id();
-		$sql = 'insert into cases (id, nr, name, `date`, cid) values($1, $2, $3, $4, $5)';
-		mysqli_query_params($sql, Array($id, $params->nr, $params->name, function_exists('clientToMysqlDate') ? clientToMysqlDate($params->date) : $params->date, $_SESSION['user']['id'])) or die(mysqli_query_error());
+		$sql = 'insert into cases (id, nr, name, `date`, cid, type_id) values($1, $2, $3, $4, $5, $6)';
+		mysqli_query_params($sql, Array($id, $params->nr, $params->name, function_exists('clientToMysqlDate') ? clientToMysqlDate($params->date) : $params->date, $_SESSION['user']['id'], $params->case_type) ) or die(mysqli_query_error());
 
-		if(!empty($params->case_type)) //setting case type tag if set
-			mysqli_query_params('INSERT INTO cases_tags (case_id, tag_id, level) VALUES ($1, $2, 0)', array($id, $params->case_type)) or die(mysqli_query_error());
+		// if(!empty($params->case_type)) //setting case type tag if set
+		// 	mysqli_query_params('INSERT INTO cases_tags (case_id, tag_id, level) VALUES ($1, $2, 0)', array($id, $params->case_type)) or die(mysqli_query_error());
 
 		//mysqli_query_params('INSERT INTO cases_rights (case_id, tag_id, access, `from`, active) VALUES ($1, $2, 3, current_date, 1)', array($id, $params->office_id)) or die(mysqli_query_error());
 		// if(!empty($params->user_id)) //a default lawyer is set for the case
@@ -115,59 +115,106 @@ class Cases{
 		return array('success' => true, 'close_date' => $close_date );
 	}
 
-	public function read($id){
+	public function load($p){
 		$rez = Array('success' => true);
-		
-		require_once 'Browser.php';
-		$sql = 'SELECT id, nr, name `title`, office_id, cid, close_date, (select 1 from tree where pid = $3 and `type` = 2 and target_id = $1 and user_id = $2) `favorite` '.
-			',f_get_case_type_id(id) `case_type_id`'.
-			',(select l'.UL_ID().' from tags where id = c.office_id) `office`'.
-			' FROM cases c WHERE id = $1';
-		$res = mysqli_query_params($sql, array($id, $_SESSION['user']['id'], Browser::getFavoriteFolderId())) or die(mysqli_query_error());
-		if($r = $res->fetch_assoc()) $rez['data'] = $r; else throw new Exception(L('Object_not_found'));
+		if(!is_numeric($p->id)) throw new Exception(L\Wrong_input_data);
+		$rez['id'] = $p->id;
+
+		$sql = 'select id, nr, name, date, cid, cdate, uid, type_id from cases where id = $1';
+		$res = mysqli_query_params($sql, $p->id) or die(mysqli_query_error());
+		if($r = $res->fetch_assoc()) $rez['data'] = $r; 
 		$res->close();
-		/* SECURITY check */
-		if( !Security::canReadCase($id) ) throw new Exception(L\No_access_for_this_action);
-		/* end of SECURITY check */
-		$l = Security::getCaseLawyers($id);
-		$rez['data']['lawyers'] = $l['data'];
-		$rez['data']['tags'] = $this->getCaseTagIds($id);
 		
-		/* selecting case objects */
-		$sql = 'SELECT co.id, coalesce(co.custom_title, co.title) `title`, 
-			co.date_start, co.date_end, (co.date_end < now()) is_active,
-			co.template_id, co.phase_id, t.pid, t.iconCls, LENGTH(t.info_template) xtemplate_length
-			FROM objects co 
-			join templates t on co.template_id = t.id
-		WHERE co.case_id = $1 and t.type in (1, 4, 5) order by t.`order`, date_start';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
-		$o = Array();
-		while($r = $res->fetch_assoc()){
-			//$g = $r['template_id'];
-			//if($r['pid'] == 53) $g = 53; // Committee Phases
-			//if($r['pid'] == 47) $g = 47; // Authorities Phases
-			if(!empty($r['xtemplate_length'])){
-				$subres = mysqli_query_params('select field_id, `value` from objects_data where object_id = $1 and duplicate_id = 0', $r['id']) or die(mysqli_query_error());
-				while($subr = $subres->fetch_row()) $r['f'.$subr[0]] = $subr[1];
-				$subres->close();
-			}
-			unset($r['xtemplate_length']);
-			$o[] = $r;
-			//$o[$g][] = $r;
+		$rez['data']['gridData'] = Templates::getObjectsData($p->id);
+		
+		return $rez;
+	}
+
+	public function getCasePropertiesObjectId($caseId){
+		$rez = array('success' => true, 'id' => null);
+		if(!is_numeric($caseId)) return $rez;
+		$case = array();
+		$sql = 'select c.id, c.name, c.date, c.cid, c.cdate, c.uid, c.udate, o.id `object_id`, c.type_id from cases c left join objects o on c.id = o.id where c.id = $1';
+		$res = mysqli_query_params($sql, $caseId) or die(mysqli_query_error());
+		if($r = $res->fetch_assoc()) $case = $r;
+		$res->close();
+		if(empty($case)) return $rez; //case does not exist
+
+		if(!empty($case['object_id'])){
+			$rez['id'] = $case['object_id'];
+			return $rez;
 		}
-		$rez['data']['objects'] = $o;
-		/* end of selecting case objects */
-		/* get Tasks */
-		/*$sql = 'SELECT id, name, description, `date_end`, `time` FROM tasks where case_id = $1 and object_id is null and ((user_id = $2) || (cid = $2) || (privacy =0 ))  and completed = 0 order by `date`, `time`';
-		$res = mysqli_query_params($sql, Array($id, $_SESSION['user']['id'])) or die(mysqli_query_error());
-		while($r = $res->fetch_assoc()) $rez['data']['tasks'][] = $r;
-		$res->close();
-		/* end of get Tasks */
+		if(empty($case['type_id'])) return $rez; //no case type defined
 		
-		$li = Cases::getLockInfo($id);
-		if(!empty($li)) $rez['data']['already_opened_by'] = str_replace(array('{user}', '{time_ago}'), array('<span style="font-weight: bold !important">'.$li['name'].'</span>', $li['time_passed']), L\case_already_opened_message);
-		else Cases::lock($id);
-		$rez['data']['manage'] = (Security::getCaseUsersRole($id) <3);
+		/*try to get associated template for case_type and create corresponding object */
+		$tpl = Templates::getCaseTypeTempleId($case['type_id']);
+		if(!empty($tpl['id'])){
+			$sql = 'insert into objects (id, title, custom_title, template_id, date_start, cid, cdate, uid, udate) values ($1, $2, $2, $3, $4, $5, $6, $7, $8)';
+			mysqli_query_params($sql, array( $caseId, $case['name'], $tpl['id'], $case['date'], $case['cid'], $case['cdate'], $case['uid'], $case['udate'] ) ) or die(mysqli_query_error());
+			$rez['id'] = last_insert_id();
+		}
+		return $rez;
+	}
+
+	public function queryCaseData($queries){
+		$rez = array('success' => true);
+		foreach($queries as $key => $query){
+			$query->pids = $query->id;
+			switch($key){
+				case 'properties': 
+					$rez[$key] = $this->load($query);/* load general case properties */
+					
+					$r = $this->getCasePropertiesObjectId($query->id);
+					if( !empty($r['id']) ){
+						$template_id = null;
+						$properties = array();
+						$sql = 'select template_id from objects where id = $1';
+						$res = mysqli_query_params($sql, $r['id']) or die(mysqli_query_error());
+						if($r = $res->fetch_assoc()) $template_id = $r['template_id'];
+						$res->close();
+						
+						$tf = Templates::getTemplateFieldsWithData($template_id, $query->id);
+						// var_dump($tf);
+						if(!empty($tf))
+						foreach($tf as $f){
+							if($f['name'] == '_title') continue;
+							if($f['name'] == '_date_start') continue;
+							$v = Templates::getTemplateFieldValue($f);
+							if(is_array($v)) $v = implode(', ', $v);
+							$f['value'] = $v;
+							$properties[] = array(
+								'name' => $f['name']
+								,'title' => $f['title']
+								,'type' => $f['type']
+								,'cfg' => $f['cfg']
+								,'value' => $v
+							);
+						}
+						$rez[$key]['data']['properties'] = $properties;
+					}
+
+					break;
+				case 'actions':
+					$s= new Search();
+					$query->fl = 'id,pid,name,type,subtype,date,template_id,cid';
+					$query->types = array(4);
+					$query->sort = array('date desc');
+					$rez[$key] = $s->query($query);
+					unset($s);
+					break;
+				case 'tasks':
+					$s= new Search();
+					$query->fl = 'id,name,type,date,date_end,cid,user_ids';
+					$query->types = array(6,7);
+					$query->sort = array('date desc');
+					$rez[$key] = $s->query($query);
+					unset($s);
+					break;
+				case 'milestones':
+					$rez[$key] = array();
+					break;
+			}
+		}
 		return $rez;
 	}
 	

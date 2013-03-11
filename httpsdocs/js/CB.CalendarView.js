@@ -166,12 +166,14 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 	,doReloadEventsStore: function(){
 		this.allowedReload = true;
 		if(Ext.isEmpty(this.getLayout().activeItem)) return;
-		params = this.eventStore.baseParams;
+		params = Ext.apply({}, this.eventStore.baseParams);
 		Ext.apply(params, this.getLayout().activeItem.getViewBounds() )
 		params.end.setHours(23);
 		params.end.setMinutes(59);
 		params.end.setSeconds(59);
 		params.end.setMilliseconds(999);
+		params.start = params.start.toISOString()
+		params.end = params.end.toISOString()
 		//params.filter = this.filter
 		params.facets = 'calendar'
 		this.eventStore.load({ params: params })

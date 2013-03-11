@@ -741,7 +741,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 				this.destroy();
 				break;
 			case 'path': 
-				App.mainViewPort.locateObject(this.data.path, this.data.id);
+				App.locateObject(this.data.id, this.data.path);
 				this.destroy();
 				break;
 		}
