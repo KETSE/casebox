@@ -262,7 +262,7 @@ function getFileIconFile($filename){
 function getUsername($id){
 	if(!is_numeric($id)) return '';
 	$rez = '';
-	$res = mysqli_query_params('select l'.UL_ID().' from users where id = $1', $id) or die(mysqli_query_error());
+	$res = mysqli_query_params('select l'.UL_ID().' from users_groups where id = $1', $id) or die(mysqli_query_error());
 	if($r = $res->fetch_row()) $rez = $r[0];
 	$res->close();
 	return $rez;

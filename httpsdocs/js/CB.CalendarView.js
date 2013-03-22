@@ -518,12 +518,14 @@ CB.CalendarViewPanel = Ext.extend(Ext.Panel, {
 	,borders: false
 	,closable: true
 	,layout: 'fit'
+	,iconCls: 'icon-calendarView'
 	,initComponent: function(){
 		this.view = new CB.CalendarView({
 			showDescendants: true
 		})
 		Ext.apply(this,{
-			items: this.view
+			iconCls: Ext.value(this.iconCls, 'icon-calendarView')
+			,items: this.view
 		})
 		CB.CalendarViewPanel.superclass.initComponent.apply(this, arguments);
 		this.view.setParams({path:'/', filters: {"status":[{"mode":"OR","values":["1","2"]}],"assigned":[{"mode":"OR","values":[App.loginData.id]}]} });

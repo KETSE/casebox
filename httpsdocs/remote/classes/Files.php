@@ -79,7 +79,7 @@ class Files{
 			case 1: //single match: retreive match info for content (if matches with current version or to an older version)
 				$existentFileId  = $this->getFileId($pid, $rez[0]['name'], @$rez[0]['dir']);
 				$md5 = $this->getFileMD5($rez[0]);
-				$sql = 'select (select l'.UL_ID().' from users where id = f.cid) `user`, f.cdate from files f join files_content c on f.content_id = c.id and c.md5 = $2 where f.id = $1';
+				$sql = 'select (select l'.UL_ID().' from users_groups where id = f.cid) `user`, f.cdate from files f join files_content c on f.content_id = c.id and c.md5 = $2 where f.id = $1';
 				$res = mysqli_query_params($sql, array($existentFileId, $md5)) or die(mysqli_query_error());
 				if($r = $res->fetch_assoc()){
 					$agoTime = formatAgoTime($r['cdate']);
@@ -88,7 +88,7 @@ class Files{
 				}
 				$res->close();
 				if(empty($rez[0]['msg'])){
-					$sql = 'select (select l'.UL_ID().' from users where id = f.cid) `user`, f.cdate from files_versions f join files_content c on f.content_id = c.id and c.md5 = $2 where f.file_id = $1';
+					$sql = 'select (select l'.UL_ID().' from users_groups where id = f.cid) `user`, f.cdate from files_versions f join files_content c on f.content_id = c.id and c.md5 = $2 where f.file_id = $1';
 					$res = mysqli_query_params($sql, array($existentFileId, $md5)) or die(mysqli_query_error());
 					if($r = $res->fetch_assoc()){
 						$agoTime = formatAgoTime($r['cdate']);
@@ -490,7 +490,6 @@ class Files{
 			case 'tif':
 			case 'tiff':
 				$image = new Imagick($fn);
-				die('here'.$fn);
 				$image->setImageFormat('png');
 				$image->writeImage(CB_FILES_PREVIEW_PATH.$file['content_id'].'_.png');
 				file_put_contents($preview_filename, '<img src="/preview/'.$file['content_id'].'_.png" style="max-width:90%;margin: auto" />');

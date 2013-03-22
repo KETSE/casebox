@@ -199,7 +199,20 @@ $API = array_merge( $API, array(
 	)
 	,'Security' => array(
 		'methods' => array(
-			'getManagedOffices'		=> array('len' => 1)
+			'getUserGroups'		=> array('len' => 0)
+			,'createUserGroup'		=> array('len' => 1)
+			,'updateUserGroup'		=> array('len' => 1)
+			,'destroyUserGroup'		=> array('len' => 1)
+			
+			,'searchUserGroups'		=> array('len' => 1)
+			
+			,'getObjectAcl'			=> array('len' => 1)
+			,'addObjectAccess'		=> array('len' => 1)
+			,'updateObjectAccess'		=> array('len' => 1)
+			,'destroyObjectAccess'		=> array('len' => 1)
+			
+			/*old methods */
+			,'getManagedOffices'		=> array('len' => 1)
 			,'getOfficeUsers'		=> array('len' => 1)
 			,'getCaseLawyers'		=> array('len' => 1)
 			,'getCaseLowerLevelUsers'	=> array('len' => 1)

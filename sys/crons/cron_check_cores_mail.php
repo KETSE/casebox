@@ -201,7 +201,7 @@
 			}
 
 			$user_id = false;
-			$res = mysqli_query_params('select id from users where (`email` like $1) or (`email` like $2) or (`email` like $3)', array($email, '%,'.$email, $email.',%') ) or die(mysqli_query_error());
+			$res = mysqli_query_params('select id from users_groups where (`email` like $1) or (`email` like $2) or (`email` like $3)', array($email, '%,'.$email, $email.',%') ) or die(mysqli_query_error());
 			if($r = $res->fetch_row()) $user_id = $r[0];
 			$res->close();
 			if($user_id == false){

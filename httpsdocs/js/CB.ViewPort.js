@@ -4,30 +4,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	layout: 'border'
 	,hideBorders: true
 	,initComponent: function(){
-		App.usersStore =  new Ext.data.DirectStore({
-			autoLoad: true
-			,proxy: new  Ext.data.DirectProxy({
-				paramsAsHash: true
-				,directFn: Security.getLowerLevelUsers
-			})
-			,reader: new Ext.data.JsonReader({
-					successProperty: 'success'
-					,idProperty: 'id'
-					,root: 'data'
-					,messageProperty: 'msg'
-				},[ {name: 'id', type: 'int'}, 'name', 'iconCls' ]
-			)
-			,getName: function(ids){
-				if(!Ext.isArray(ids)) ids = String(ids).split(',');
-				rez = [];
-				Ext.each(ids, function(id){
-					idx = this.findExact('id', parseInt(id))
-					if(idx >=0 ) rez.push( this.getAt(idx).get('name') );
-				}, this)
-				return rez.join(', ');
-			}
-		});
-		
 		App.mainToolBar = new Ext.Toolbar({
 				region: 'north'
 				,style:'background: #fff; border: 0'
@@ -206,6 +182,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			if(CB.DB.templates.getCount() > 0){
 				App.mainViewPort.openDefaultExplorer();
 				App.mainTabPanel.setActiveTab(0)
+				//App.openUniqueTabbedWidget('CBSecurityPanel', null, { data: {id: 237} })
 			}else initFn.defer(500);
 		};
 		initFn.defer(500);
@@ -231,10 +208,27 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		App.mainAccordion.getEl().unmask();
 		activeIndex = 0;
 		if(r.success !== true) return;
-		for (var i = 0; i < r.data.length; i++) {
-			if(!Ext.isEmpty(r.data[i].link)) r.data[i].listeners = {scope: this, beforeexpand: this.onAccordionLinkClick }
-			if(r.data[i].active == true) activeIndex = i;
-			App.mainAccordion.add(r.data[i])
+		clog(r.tbarItems, 'r.tbarItems')
+		if(!Ext.isEmpty(r.tbarItems)){
+			/* inserting specified components before userMenu item */
+			userMenuItem = App.mainToolBar.find( 'name', 'userMenu')[0];
+			index = App.mainToolBar.items.indexOf(userMenuItem);
+			clog('index', index);
+			for (var i = 0; i < r.tbarItems.length; i++) {
+				if(!Ext.isEmpty(r.tbarItems[i].link)) r.tbarItems[i].listeners = {scope: this, click: this.onAccordionLinkClick }
+				App.mainToolBar.insert(index, r.tbarItems[i]);
+				clog('inserting', r.tbarItems[i])
+				index++;
+				// App.mainAccordion.add(r.items[i])
+			}
+			App.mainToolBar.syncSize()
+		}
+
+		if(!Ext.isEmpty(r.items))
+		for (var i = 0; i < r.items.length; i++) {
+			if(!Ext.isEmpty(r.items[i].link)) r.items[i].listeners = {scope: this, beforeexpand: this.onAccordionLinkClick }
+			if(r.items[i].active == true) activeIndex = i;
+			App.mainAccordion.add(r.items[i])
 		}
 		App.mainAccordion.getLayout().setActiveItem(activeIndex);
 		App.mainAccordion.doLayout()
@@ -279,7 +273,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		if(!App.activateTab(App.mainTabPanel, 'explorer')) App.explorer = App.addTab(App.mainTabPanel, new CB.FolderView({ rootId: '/', data: {id: 'explorer' }, closable: false }) )
 	}
 	,openCaseById: function(config){
-		c = App.activateTab(App.mainTabPanel, config.params.id);
+		c = App.activateTab(App.mainTabPanel, config.params.id, CB.Case);
 		if(c){
 			if(!Ext.isEmpty(config.selectActionId)) c.grid.selectAction(config.selectActionId);
 			return c;
@@ -378,7 +372,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			,responsible_user_ids: App.loginData.id
 		});		
 		if(Ext.isEmpty(p.title)) p.title = L.AddTask;
-		if(Ext.isEmpty(p.usersStore)) p.usersStore = App.usersStore;
+		if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
 		if(Ext.isEmpty(p.tasksStore)) p.tasksStore = new Ext.data.DirectStore( Ext.applyIf({
 			directFn: Tasks.getUserTasks
 			,autoDestroy: true
@@ -388,7 +382,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	}
 	,onTaskEdit: function(p, ev){//task_id, object_id, object_title, title
 		if(Ext.isEmpty(p.title)) p.title = L.EditTask;
-		if(Ext.isEmpty(p.usersStore)) p.usersStore = App.usersStore;
+		if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
 		if(Ext.isEmpty(p.tasksStore)){
 				p.tasksStore = new Ext.data.DirectStore( Ext.applyIf({
 				directFn: Tasks.getAssociableTasks
@@ -414,7 +408,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		, this);		
 	}
 	,onUsersChange: function(){
-		App.usersStore.reload();
+		CB.DB.usersStore.reload();
 	}
 	,onDeleteObject: function(data){
 		Ext.Msg.confirm(L.DeleteConfirmation, L.DeleteConfirmationMessage + ' "' + data.title+'"?', function(btn){ if(btn == 'yes')  Browser['delete'](data.id, this.onProcessObjectsDeleted, this); }, this)

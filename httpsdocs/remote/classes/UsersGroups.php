@@ -26,18 +26,18 @@ class UsersGroups{
 		if(($_SESSION['user']['id'] != $p->data->id) && !Security::canManage()) throw new Exception(L\Access_denied);
 		$user_id = $this->extractId($p->data->id);
 		$rez = Array('success' => false, 'msg' => L\Wrong_id);
-		$res = mysqli_query_params('select id, pid, name, '.$_SESSION['languages']['string'].', sex, email, enabled, '.
+		$res = mysqli_query_params('select id, cid, name, '.$_SESSION['languages']['string'].', sex, email, enabled, '.
 			'date_format(last_action_time, \''.$_SESSION['user']['short_date_format'].' %H:%i\') last_action_time, '.
 			'date_format(cdate, \''.$_SESSION['user']['short_date_format'].' %H:%i\') `cdate`, '.
-			'(select l'.UL_ID().' from users where id = u.pid) owner, '.
+			'(select l'.UL_ID().' from users_groups where id = u.cid) owner, '.
 			'(select id from templates where `type` = 6) template_id '.
-			'from users u where id = $1 ', $user_id) or die(mysqli_query_error());
+			'from users_groups u where id = $1 ', $user_id) or die(mysqli_query_error());
 		if($r = $res->fetch_assoc()) $rez = Array('success' => true, 'data' => $r);
 		$res->close();
 		if($rez['success'] == false) throw new Exception(L\Wrong_id);
 		
 		require_once 'VerticalEditGrid.php';
-		VerticalEditGrid::getData('users', $rez['data']);
+		VerticalEditGrid::getData('users_groups', $rez['data']);
 		
 		return $rez;
 	}
@@ -49,14 +49,14 @@ class UsersGroups{
 		$res = mysqli_query_params('select id, tag_id, pid, name, l'.UL_ID().', sex, photo, '.
 			'date_format(last_action_time, \''.$_SESSION['user']['short_date_format'].' %H:%i\') last_action_time, '.
 			'date_format(cdate, \''.$_SESSION['user']['short_date_format'].' %H:%i\') `cdate`, '.
-			'(select l'.UL_ID().' from users where id = u.pid) owner, '.
+			'(select l'.UL_ID().' from users_groups where id = u.pid) owner, '.
 			'(select id from templates where `type` = 6) template_id '.
-			'from users u where id = $1 ', $user_id) or die(mysqli_query_error());
+			'from users_groups u where id = $1 ', $user_id) or die(mysqli_query_error());
 		if($r = $res->fetch_assoc()) $data = $r; else throw new Exception(L\Wrong_id);
 		$res->close();
 
 		$sql = 'SELECT r.id, r.l'.UL_ID().' `office`, (ur.role_id = 2) `manager`, (ur.role_id = 3) `lawyer`, (ur.role_id = 4) `user`
-			FROM tag_groups g join tag_groups__tags_result tr on g.id = tr.tags_group_id join tags r on tr.tag_id = r.id LEFT JOIN users_roles_association ur ON ur.office_id = r.id and ur.user_id = $1
+			FROM tag_groups g join tag_groups__tags_result tr on g.id = tr.tags_group_id join tags r on tr.tag_id = r.id LEFT JOIN users_groups_association ur ON ur.office_id = r.id and ur.user_id = $1
 			WHERE g.system = 1 and r.id in (0'.implode(', ', Security::getManagedOfficeIds()).') order by r.`order`, 2';
 		$res = mysqli_query_params($sql, $user_id) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc())
@@ -85,9 +85,9 @@ class UsersGroups{
 				array_push($keep_offices, $r->id);
 			}
 			if($this->validRole($role_id))
-				mysqli_query_params('insert into users_roles_association (user_id, office_id, role_id, `active`, cid) values($1, $2, $3, 1, $4) on duplicate key update role_id = $3, active = 1, uid = $4', Array($user_id, $r->id, $role_id, $_SESSION['user']['id'])) or die(mysqli_query_error());
+				mysqli_query_params('insert into users_groups_association (user_id, office_id, role_id, `active`, cid) values($1, $2, $3, 1, $4) on duplicate key update role_id = $3, active = 1, uid = $4', Array($user_id, $r->id, $role_id, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		}
-		mysqli_query_params('delete from users_roles_association where user_id = $1 and office_id not in (0'.implode(',', $keep_offices).') and office_id in (0'.implode(',', $managed_office_ids).')', $params['id']) or die(mysqli_query_error());
+		mysqli_query_params('delete from users_groups_association where user_id = $1 and office_id not in (0'.implode(',', $keep_offices).') and office_id in (0'.implode(',', $managed_office_ids).')', $params['id']) or die(mysqli_query_error());
 		//mysqli_query_params('CALL p_estimate_user_effective_access($1)', $user_id) or die(mysqli_query_error());
 		return Array('success' => true);
 	}	
@@ -98,12 +98,12 @@ class UsersGroups{
 		
 		if(!Security::isAdmin() && !Security::isUsersOwner($data->id) && !($_SESSION['user']['id'] == $data->id)) throw new Exception(L\Access_denied);
 		require_once 'VerticalEditGrid.php';
-		VerticalEditGrid::saveData('users', $data);
+		VerticalEditGrid::saveData('users_groups', $data);
 		
 		/* if updating current logged user then checking if interface params have changed */
 		$interface_params_changed = false;
 		if($data->id == $_SESSION['user']['id']){
-			$res = mysqli_query_params('select '.$_SESSION['languages']['string'].', language_id, short_date_format, long_date_format from users u where id = $1 ', $data->id) or die(mysqli_query_error());
+			$res = mysqli_query_params('select '.$_SESSION['languages']['string'].', language_id, short_date_format, long_date_format from users_groups u where id = $1 ', $data->id) or die(mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$r['language'] = $_SESSION['languages']['per_id'][$r['language_id']]['abreviation'];
 				if(empty($r['short_date_format'])) $r['short_date_format'] = $_SESSION['languages']['per_id'][$r['language_id']]['short_date_format'];
@@ -124,11 +124,11 @@ class UsersGroups{
 	
 	private function updateUserEmails($user_id){
 		$emails = array();
-		$res = mysqli_query_params('SELECT ud.value FROM templates t  JOIN templates_structure ts ON ts.template_id = t.id AND ts.name = \'email\' JOIN users_data ud ON ts.id = ud.field_id and ud.user_id = $1 WHERE t.`type` = 6', $user_id) or die(mysqli_query_error());
+		$res = mysqli_query_params('SELECT ud.value FROM templates t  JOIN templates_structure ts ON ts.template_id = t.id AND ts.name = \'email\' JOIN users_groups_data ud ON ts.id = ud.field_id and ud.user_id = $1 WHERE t.`type` = 6', $user_id) or die(mysqli_query_error());
 		while($r = $res->fetch_row()) if(!empty($r[0])) $emails[] = $r[0];
 		$res->close();
 		$emails = empty($emails) ? null : implode(', ', $emails);
-		mysqli_query_params('update users set email = $1 where id = $2', array($emails, $user_id)) or die(mysqli_query_error());
+		mysqli_query_params('update users_groups set email = $1 where id = $2', array($emails, $user_id)) or die(mysqli_query_error());
 	}
 	
 	public function addUser($params){//added to tests //CHECKED
@@ -139,12 +139,12 @@ class UsersGroups{
 		if(empty($params->name) || empty($params->password) || (empty($params->confirm_password) || ($params->password != $params->confirm_password))) return $rez;
 		$user_id = 0;
 		/*check user existance, if user already exists but is deleted then its record wiil be used for new user */
-		$res = mysqli_query_params("select id from users where name = $1 and deleted = 0", $params->name) or die(mysqli_query_error());
+		$res = mysqli_query_params("select id from users_groups where name = $1 and deleted = 0", $params->name) or die(mysqli_query_error());
 		if($r = $res->fetch_row()) throw new Exception(L\User_exists);
 		$res->close();
 		/*end of check user existance */
 		
-		mysqli_query_params('insert into users (`name`, `pid`, `password`, language_id, cdate, uid, email) values($1, $2, MD5(CONCAT(\'aero\', $3)), $4, CURRENT_TIMESTAMP, $2, $5) '.
+		mysqli_query_params('insert into users_groups (`name`, `cid`, `password`, language_id, cdate, uid, email) values($1, $2, MD5(CONCAT(\'aero\', $3)), $4, CURRENT_TIMESTAMP, $2, $5) '.
 			'on duplicate key update id = last_insert_id(id), `name` = $1, `pid` = $2, `password` = MD5(CONCAT(\'aero\', $3))'.
 			',last_login = null, login_successful = null, login_from_ip = null, last_logout = null, last_action_time = null, enabled = 1, visible_in_reports = 1, cdate = CURRENT_TIMESTAMP, deleted = 0, language_id = $4, uid = $2, cdate = CURRENT_TIMESTAMP'
 			,array($params->name, $_SESSION['user']['id'], $params->password, $_SESSION['languages']['per_abrev'][$GLOBALS['CB_LANGUAGE']]['id'], $params->email ) ) or die(mysqli_query_error());
@@ -153,7 +153,7 @@ class UsersGroups{
 			$params->id = $user_id;
 		}
 		
-		mysqli_query_params('delete from users_data where user_id = $1',  $user_id) or die(mysqli_query_error());
+		mysqli_query_params('delete from users_groups_data where user_id = $1',  $user_id) or die(mysqli_query_error());
 		
 		$res = mysqli_query_params('select id from templates where `type` = 6') or die(mysqli_query_error());
 		if($r = $res->fetch_row()) $params->template_id = $r[0];
@@ -161,18 +161,18 @@ class UsersGroups{
 		//$params->email = '';
 		
 		require_once 'VerticalEditGrid.php';
-		VerticalEditGrid::addFormData('users', $params);
+		VerticalEditGrid::addFormData('users_groups', $params);
 		
-		$res = mysqli_query_params('select tag_id from users where id = $1', $user_id) or die(mysqli_query_error());
+		$res = mysqli_query_params('select tag_id from users_groups where id = $1', $user_id) or die(mysqli_query_error());
 		if($r = $res->fetch_row()) $rez['data']['tag_id'] = $r[0];
 		$res->close();
 		/* in case it was a deleted user we delete all old acceses */
-		mysqli_query_params('delete from users_roles_association where user_id = $1', $user_id) or die(mysqli_query_error());
+		mysqli_query_params('delete from users_groups_association where user_id = $1', $user_id) or die(mysqli_query_error());
 		mysqli_query_params('delete from cases_rights where tag_id = $1', $rez['data']['tag_id']) or die(mysqli_query_error());
 		/* end of in case it was a deleted user we delete all old acceses */
 		if( isset($params->office_id) && is_numeric($params->office_id) && ( in_array($params->office_id, Security::getManagedOfficeIds()) ) ){
 			if(!$this->validRole($params->role_id)) throw new Exception(L\Wrong_input_data);
-			mysqli_query_params('insert into users_roles_association (user_id, office_id, role_id, cid, uid) values($1, $2, $3, $4, $4) on duplicate key update role_id = $3, active = 1, uid = $4', Array($user_id, $params->office_id, $params->role_id, $_SESSION['user']['id'])) or die(mysqli_query_error());
+			mysqli_query_params('insert into users_groups_association (user_id, office_id, role_id, cid, uid) values($1, $2, $3, $4, $4) on duplicate key update role_id = $3, active = 1, uid = $4', Array($user_id, $params->office_id, $params->role_id, $_SESSION['user']['id'])) or die(mysqli_query_error());
 			$rez['data']['office_id'] = $params->office_id;
 			//mysqli_query_params('CALL p_estimate_user_effective_access($1)', $user_id) or die(mysqli_query_error());
 		}else $rez['data']['office_id'] = 0;
@@ -209,10 +209,10 @@ class UsersGroups{
 		$office_id = $this->extractId($office_id);
 		/* selecting currently associated users to this office to estimate their access after deletition */
 		$user_ids = array();
-		$res = mysqli_query_params('select user_id from users_roles_association where office_id = $1', $office_id) or die(mysqli_query_error());
+		$res = mysqli_query_params('select user_id from users_groups_association where office_id = $1', $office_id) or die(mysqli_query_error());
 		while($r = $res->fetch_row()) $user_ids[] = $r[0];
 		$res->close();
-		mysqli_query_params('delete from users_roles_association where office_id = $1', $office_id) or die(mysqli_query_error());
+		mysqli_query_params('delete from users_groups_association where office_id = $1', $office_id) or die(mysqli_query_error());
 		/* end of selecting currently associated users to this office to estimate their access after deletition */
 		mysqli_query_params('delete from t using tags t JOIN tag_groups__tags_result tr ON t.id = tr.tag_id JOIN tag_groups g ON tr.tags_group_id = g.id AND g.system = 1 where t.id = $1', $office_id) or die(mysqli_query_error());
 		//foreach($user_ids as $id) 	mysqli_query_params('CALL p_estimate_user_effective_access($1)', $id) or die(mysqli_query_error());
@@ -225,10 +225,10 @@ class UsersGroups{
 		$office_id = $this->extractId($office_id);
 		if(!in_array($office_id, Security::getManagedOfficeIds())) throw new Exception(L\No_manage_access_for_office);
 		
-		$res = mysqli_query_params('select user_id from users_roles_association where user_id = $1 and office_id = $2', Array($user_id, $office_id) ) or die(mysqli_query_error());
+		$res = mysqli_query_params('select user_id from users_groups_association where user_id = $1 and office_id = $2', Array($user_id, $office_id) ) or die(mysqli_query_error());
 		if($r = $res->fetch_row()) throw new Exception(L\UserAlreadyInOffice);
 		$res->close();
-		mysqli_query_params('insert into users_roles_association (user_id, role_id, office_id, cid) values ($1, 4, $2, $3)', Array($user_id, $office_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
+		mysqli_query_params('insert into users_groups_association (user_id, role_id, office_id, cid) values ($1, 4, $2, $3)', Array($user_id, $office_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
 		//mysqli_query_params('CALL p_estimate_user_effective_access($1)', $user_id) or die(mysqli_query_error());
 		return Array('success' => true);
 	}
@@ -238,11 +238,11 @@ class UsersGroups{
 		$user_id = $this->extractId($user_id);
 		$office_id = $this->extractId($office_id);
 		if(!in_array($office_id, Security::getManagedOfficeIds())) throw new Exception(L\No_manage_access_for_office);
-		$res = mysqli_query_params('delete from users_roles_association where user_id = $1 and office_id = $2', Array($user_id, $office_id) ) or die(mysqli_query_error());
+		$res = mysqli_query_params('delete from users_groups_association where user_id = $1 and office_id = $2', Array($user_id, $office_id) ) or die(mysqli_query_error());
 		//mysqli_query_params('CALL p_estimate_user_effective_access($1)', $user_id) or die(mysqli_query_error());
 		
 		$outOfOffice = true;
-		$res = mysqli_query_params('select office_id from users_roles_association where user_id = $1 limit 1', $user_id ) or die(mysqli_query_error()); //return if the user is associated to another office, otherwize it shoul be added to Users out of office folder
+		$res = mysqli_query_params('select office_id from users_groups_association where user_id = $1 limit 1', $user_id ) or die(mysqli_query_error()); //return if the user is associated to another office, otherwize it shoul be added to Users out of office folder
 		if($r = $res->fetch_row()) $outOfOffice = false;
 		return Array('success' => true, 'outOfOffice' => $outOfOffice);
 	}
@@ -250,7 +250,7 @@ class UsersGroups{
 	public function deleteUser($user_id){//added to tests //CHECKED
 		if(!Security::canManage()) throw new Exception(L\Access_denied);
 		$user_id = $this->extractId($user_id);
-		$res = mysqli_query_params('update users set deleted = 1, did = $2 where id = $1 and ((pid = $2) or (1 = $3))', array($user_id, $_SESSION['user']['id'], Security::getUserRole()) ) or die(mysqli_query_error());
+		$res = mysqli_query_params('update users_groups set deleted = 1, did = $2 where id = $1 and ((pid = $2) or (1 = $3))', array($user_id, $_SESSION['user']['id'], Security::getUserRole()) ) or die(mysqli_query_error());
 		return Array('success' => affected_rows() ? true : false, 'data' => array($user_id, $_SESSION['user']['id'], Security::getUserRole()));
 	}
 
@@ -261,7 +261,7 @@ class UsersGroups{
 		if(!$this->validRole($role_id)) throw new Exception(L\Wrong_input_data);
 		if(!in_array($office_id, Security::getManagedOfficeIds())) throw new Exception(L\No_manage_access_for_office);
 		if($role_id < Security::getUserRole()) throw new Exception(L\Cannot_give_higher_access);
-		$res = mysqli_query_params('update users_roles_association set role_id = $1, uid = $4 where user_id = $2 and office_id = $3', Array($role_id, $user_id, $office_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
+		$res = mysqli_query_params('update users_groups_association set role_id = $1, uid = $4 where user_id = $2 and office_id = $3', Array($role_id, $user_id, $office_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
 		//mysqli_query_params('CALL p_estimate_user_effective_access($1)', $user_id) or die(mysqli_query_error());
 		return Array('success' => true);
 	}
@@ -271,7 +271,7 @@ class UsersGroups{
 		$user_id = $this->extractId($user_id);
 		$office_id = $this->extractId($office_id);
 		if(!in_array($office_id, Security::getManagedOfficeIds())) throw new Exception(L\No_manage_access_for_office);
-		mysqli_query_params('update users_roles_association set `active` = $1, uid = $4 where user_id = $2 and office_id = $3', Array($active, $user_id, $office_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
+		mysqli_query_params('update users_groups_association set `active` = $1, uid = $4 where user_id = $2 and office_id = $3', Array($active, $user_id, $office_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
 		//mysqli_query_params('CALL p_estimate_user_effective_access($1)', $user_id) or die(mysqli_query_error());
 		return Array('success' => true);
 	}
@@ -282,7 +282,7 @@ class UsersGroups{
 
 		/* check for old password if users changes password for himself */
 		if($_SESSION['user']['id'] == $user_id){
-			$res = mysqli_query_params('select id from users where id = $1 and `password` = MD5(CONCAT(\'aero\', $2))', array($user_id, $p['currentpassword'])) or die(mysqli_query_error());
+			$res = mysqli_query_params('select id from users_groups where id = $1 and `password` = MD5(CONCAT(\'aero\', $2))', array($user_id, $p['currentpassword'])) or die(mysqli_query_error());
 			if(!$res->fetch_row()) throw new exception(L\WrongCurrentPassword);
 			$res->close();
 		}
@@ -290,7 +290,7 @@ class UsersGroups{
 
 		if(!Security::isAdmin() && !Security::isUsersOwner($user_id) && !($_SESSION['user']['id'] == $user_id)) throw new Exception(L\Access_denied);
 		
-		mysqli_query_params('update users set `password` = MD5(CONCAT(\'aero\', $2)), uid = $3 where id = $1', array($user_id, $p['password'], $_SESSION['user']['id'])) or die(mysqli_query_error());
+		mysqli_query_params('update users_groups set `password` = MD5(CONCAT(\'aero\', $2)), uid = $3 where id = $1', array($user_id, $p['password'], $_SESSION['user']['id'])) or die(mysqli_query_error());
 		return array('success' => true);
 	}
 	public function changeUsername($p){ //CHECKED
@@ -303,7 +303,7 @@ class UsersGroups{
 
 		if(!Security::isAdmin() && !Security::isUsersOwner($user_id)) throw new Exception(L\Access_denied);
 		
-		mysqli_query_params('update users set `name` = $2, uid = $3 where id = $1', array($user_id, $name, $_SESSION['user']['id'])) or die(mysqli_query_error());
+		mysqli_query_params('update users_groups set `name` = $2, uid = $3 where id = $1', array($user_id, $name, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		return array('success' => true, 'name' => $name);
 	}
 	public function getUserTags(){
@@ -347,7 +347,7 @@ class UsersGroups{
 	}
 	public static function getUserPreferences($id){
 		$rez = array();
-		$res = mysqli_query_params('select id, tag_id, name, '.$_SESSION['languages']['string'].', sex, email, language_id, short_date_format, long_date_format from users where enabled = 1 and deleted = 0 and id = $1', $id) or die(mysqli_query_error());
+		$res = mysqli_query_params('select id, tag_id, name, '.$_SESSION['languages']['string'].', sex, email, language_id, short_date_format, long_date_format from users_groups where enabled = 1 and deleted = 0 and id = $1', $id) or die(mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			$res2 = mysqli_query_params('select short_date_format, long_date_format, time_format from languages where id = $1', $r['language_id']) or die(mysqli_query_error());
 			if($r2 = $res2->fetch_assoc())
@@ -369,17 +369,18 @@ class UsersGroups{
 	}
 	private function getNodeChildren($node_kind, $node_id, $with_read_access = false, $case_id = 0){ //OK
 		$rez = array();
+		return $rez;
 		switch($node_kind){
 			case 'root':
 				$sql = $with_read_access ? ',(SELECT 1 FROM cases_rights WHERE case_id = $2 AND tag_id = o.id AND access = 1) checked ' : '';
 				//kind: 1 - user, 2 - office, 3 - no office, 4 - other offices(virtual node)
 				$sql = 'SELECT o.id, 2 `kind`, o.l'.UL_ID().' `text`, \'icon-office\' `iconCls`, 0 expanded'.
-						',(select min(role_id) from users_roles_association where user_id = $1 and ((office_id = 0) or(office_id = o.id))) `role_id` '.$sql.
-						',(select count(*) from users_roles_association ura join users u on ura.user_id = u.id and u.deleted = 0 and u.enabled = 1 where ura.office_id = o.id and ura.active = 1) `users` '.
+						',(select min(role_id) from users_groups_association where user_id = $1 and ((office_id = 0) or(office_id = o.id))) `role_id` '.$sql.
+						',(select count(*) from users_groups_association ura join users_groups u on ura.user_id = u.id and u.deleted = 0 and u.enabled = 1 where ura.office_id = o.id and ura.active = 1) `users` '.
 						'FROM tag_groups__tags_result tr join tags o on tr.tag_id = o.id '.
 						'where tr.tags_group_id = 1 '.
 						'UNION SELECT 0, 3, \''.l\Users_out_of_office.'\', \'icon-no-office\', false, 0'.($with_read_access ? ', 0' : '').
-						',(SELECT count(*) FROM users where deleted = 0 and enabled = 1 and id not in (select distinct user_id from users_roles_association where office_id <> 0 or role_id = 1)) `users` order by kind, 3';
+						',(SELECT count(*) FROM users_groups where deleted = 0 and enabled = 1 and id not in (select distinct user_id from users_groups_association where office_id <> 0 or role_id = 1)) `users` order by kind, 3';
 				$res = mysqli_query_params($sql, array($_SESSION['user']['id'], $case_id)) or die(mysqli_query_error());
 				$other_offices = array();
 				while($r = $res->fetch_assoc()){
@@ -403,11 +404,11 @@ class UsersGroups{
 				if($gid == '0') {
 					$sql = $with_read_access ? ',(SELECT 1 FROM cases_rights WHERE case_id = $2 AND user_id = u.tag_id AND access = 1) checked ' : '';
 					$sql = 	'SELECT u.id, u.tag_id, u.pid, 1 `kind`, 0 `role_id`, u.`name`, u.l'.UL_ID().', sex, \'icon-user-gray\' iconCls'.$sql.
-							' FROM users u where u.deleted = 0 and u.id not in (select distinct user_id from users_roles_association where office_id <> 0 or role_id = 1)';
+							' FROM users_groups u where u.deleted = 0 and u.id not in (select distinct user_id from users_groups_association where office_id <> 0 or role_id = 1)';
 				}else{
 					$sql = $with_read_access ? ',(SELECT 1 FROM cases_rights WHERE case_id = $2 AND tag_id = u.tag_id AND access = 1) checked ' : '';
 					$sql = 'SELECT u.id, u.tag_id, u.pid, 1 `kind`, ur.role_id, u.`name`, u.l'.UL_ID().', sex, ur.`active`'.$sql.
-						' FROM users u JOIN users_roles_association ur ON u.id = ur.user_id AND ur.office_id = $1'.
+						' FROM users_groups u JOIN users_groups_association ur ON u.id = ur.user_id AND ur.office_id = $1'.
 						' where u.deleted = 0 and role_id > 1 order by role_id, u.name';
 				}
 				$res2 = mysqli_query_params($sql, array($gid, $case_id)) or die(mysqli_query_error());

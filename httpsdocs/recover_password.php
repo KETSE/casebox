@@ -1,6 +1,7 @@
 <?php include 'init.php';
 	$action = explode('/', @$_GET['f']);
 	$action = array_shift($action);
+	$prompt_for_new_password = false;
 	switch($action){
 		case 'forgot-password':
 			break;
@@ -11,7 +12,7 @@
 			if(!empty($hash)){
 				//process hash from get and check it https://osji.casebox.org/login/reset-password/?h=a9199d0152081ca667f07fbfd684ad9a
 				$user_id = null;
-				$sql = 'select id from users where recover_hash = $1';
+				$sql = 'select id from users_groups where recover_hash = $1';
 				$res = mysqli_query_params($sql, $hash) or die(mysqli_query_error());
 				if($r = $res->fetch_row()) $user_id = $r[0];
 				$res->close();
@@ -28,7 +29,7 @@
 						break;
 					}
 
-					mysqli_query_params('update users set `password` = md5($2), recover_hash = null where recover_hash = $1', array($hash, 'aero'.$p)) or die(mysqli_query_error());
+					mysqli_query_params('update users_groups set `password` = md5($2), recover_hash = null where recover_hash = $1', array($hash, 'aero'.$p)) or die(mysqli_query_error());
 					$_SESSION['msg'] = L('PasswordChanged').'<br /> <br /><a href="/">'.L('Login').'</a>';
 					break;
 				}
@@ -53,7 +54,7 @@
 			$user_mail = null;
 			if(!empty($e)){
 				if($e = filter_var($e, FILTER_VALIDATE_EMAIL)){ 
-					$sql = 'select id, email, l'.UL_ID().' `name` from users where email like $1';
+					$sql = 'select id, email, l'.UL_ID().' `name` from users_groups where email like $1';
 					$res = mysqli_query_params($sql, "%$e%") or die(mysqli_query_error());
 					while( ($r = $res->fetch_row() ) && empty($user_id) ){
 						$mails = explode(',', $r[1]);
@@ -77,7 +78,7 @@
 				}
 			}elseif(!empty($u)){
 				$user_id = null;
-				$sql = 'select id, email, l'.UL_ID().' `name` from users where name = $1';
+				$sql = 'select id, email, l'.UL_ID().' `name` from users_groups where name = $1';
 				$res = mysqli_query_params($sql, $u) or die(mysqli_query_error());
 				if($r = $res->fetch_row()){
 					$user_id = $r[0];
@@ -106,7 +107,7 @@
 				exit(0);
 			}
 			$hash = md5($user_id.$user_mail.date(DATE_ISO8601));
-			mysqli_query_params('update users set recover_hash = $2 where id = $1', array($user_id, $hash)) or die(mysqli_query_error());
+			mysqli_query_params('update users_groups set recover_hash = $2 where id = $1', array($user_id, $hash)) or die(mysqli_query_error());
 			$href = getCoreHost().'login/reset-password/?h='.$hash;
 			$mail = file_get_contents($template);
 			$mail = str_replace(array('{name}', '{link}'), array($user_name, '<a href="'.$href.'" >'.$href.'</a>'), $mail);

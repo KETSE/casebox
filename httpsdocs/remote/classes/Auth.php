@@ -38,12 +38,13 @@ class Auth {
 			$_SESSION['languages']['string'] = 'l'.implode(',l', array_keys($_SESSION['languages']['per_id']));
 			/*end of fetching core languages and store them in the session for any use */
 			
-			$sql = 'SELECT u.id, u.tag_id, u.`language_id`, '.$_SESSION['languages']['string'].', short_date_format, long_date_format, sex, cfg FROM users u WHERE u.id = $1';
+			$sql = 'SELECT u.id, u.tag_id, u.`language_id`, '.$_SESSION['languages']['string'].', short_date_format, long_date_format, sex, cfg FROM users_groups u WHERE u.id = $1';
 			$res = mysqli_query_params($sql, $user_id) or die(mysqli_query_error());
 			if ($r = $res->fetch_assoc()) {
 				$r['admin'] = Security::isAdmin($user_id);
 				$r['manage'] = Security::canManage($user_id);
 				$r['role'] = Security::getUserRole($user_id);
+				
 				$r['language'] = $_SESSION['languages']['per_id'][$r['language_id']]['abreviation'];
 				$r['locale'] = 	$_SESSION['languages']['per_id'][$r['language_id']]['locale'];
 				if(empty($r['short_date_format']))$r['short_date_format'] = $_SESSION['languages']['per_id'][$r['language_id']]['short_date_format'];
@@ -136,7 +137,7 @@ class Auth {
 			setcookie('L', $r[1]);
 		} else return array('success' => false);
 		$res->close();
-		$res = mysqli_query_params('update users set language_id = $2 where id = $1', array($_SESSION['user']['id'], $id)) or die(mysqli_query_error());
+		$res = mysqli_query_params('update users_groups set language_id = $2 where id = $1', array($_SESSION['user']['id'], $id)) or die(mysqli_query_error());
 		return Array('success' => true);
 	}
 }

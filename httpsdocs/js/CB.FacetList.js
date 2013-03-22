@@ -100,7 +100,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
 			case 'owner':
 			case 'cid':
 				Ext.iterate(serverData, function(k, v){ 
-					title = (k == -1) ? L.Unassigned : App.usersStore.getName(k);
+					title = (k == -1) ? L.Unassigned : CB.DB.usersStore.getName(k);
 					data.push({ id: k, title: title, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
 				break;
 			case 'type':
@@ -134,7 +134,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
 				break;
 			case 'lawyer_ids':
 				this.setTitle(L.Lawyers);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: App.usersStore.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
+				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.usersStore.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
 				break;
 			case 'responsible_party_id':
 				this.setTitle(L.ResponsibleParty);

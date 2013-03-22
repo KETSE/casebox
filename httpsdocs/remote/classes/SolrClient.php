@@ -3,10 +3,13 @@
 class SolrClient{
 	var $connected = false;
 	var $solr = null;
+	var $solr_fields = 'id,pid,pids,path,name,system,type,subtype,size,date,date_end,cid,cdate,uid,udate,did,ddate,dstatus,case_id,case,template_id,user_ids,allow_user_ids,deny_user_ids,status,category_id,importance,versions,sys_tags,user_tags,metas,content,ntsc,sort_path';
 	function SolrClient($p = array() ){
 		$this->host = empty($p['host']) ? CB_SOLR_HOST : $p['host'];
 		$this->port = empty($p['port']) ? CB_SOLR_PORT : $p['port'];
 		$this->core = empty($p['core']) ? CB_SOLR_CORE : $p['core'];
+		$this->solr_fields = explode(',', $this->solr_fields);
+
 	}
 	function connect(){
 		if($this->connected) return $this->solr;
@@ -19,12 +22,10 @@ class SolrClient{
 		return $this->solr;
 	}
 	function add($d){
-		$solr_fields = 'id,pid,pids,path,name,system,type,subtype,size,date,date_end,iconCls,cid,cdate,uid,udate,case_id,case,template_id,user_ids,access_user_ids,status,category_id,importance,versions,sys_tags,user_tags,metas,content,ntsc,sort_path';
-		$solr_fields = explode(',', $solr_fields);
 		$doc = new Apache_Solr_Document();
-		foreach($d as $fn => $fv) if( in_array($fn, $solr_fields) && (!empty($fv) || ($fv === false)) ){
-			$doc->$fn = $fv;
-		}
+		foreach($d as $fn => $fv) 
+			if( in_array($fn, $this->solr_fields) && ( ($fn == 'dstatus') || !empty($fv) || ($fv === false)) )
+				$doc->$fn = $fv;
 		try {
 			$this->solr->addDocument($doc);
 		} catch (Exception $e) {
@@ -61,12 +62,17 @@ class SolrClient{
 			,DATE_FORMAT(cdate, \'%Y-%m-%dT%H:%i:%sZ\') `cdate`		
 			,uid
 			,DATE_FORMAT(udate, \'%Y-%m-%dT%H:%i:%sZ\') `udate`
+			,did
+			,DATE_FORMAT(ddate, \'%Y-%m-%dT%H:%i:%sZ\') `ddate`
+			,dstatus
 			,f_get_objects_case_id(id) `case_id`
 			from tree t '.($all ? '' : ' where updated = 1');
 		$res = mysqli_query_params($sql) or die(mysqli_query_error());
 		$k = 0;
 		if($r = $res->fetch_assoc()){
+			$security = new Security();
 			do{
+				$security->setObjectSolrAccessFields($r);
 				$id = $r['id'];
 				$type = $r['type'];
 				if($r['type'] == 2){
@@ -89,6 +95,8 @@ class SolrClient{
 						$r['ntsc'] = 2;
 						break;
 					case 4: //case object
+					case 8: //Emails
+					case 9: //Contact
 						$r = array_merge($r, Objects::getSorlData($id));
 						$r['ntsc'] = 4;
 						break;
@@ -99,14 +107,6 @@ class SolrClient{
 					case 6: //tasks
 					case 7: //tasks
 						$r = array_merge($r, Tasks::getSorlData($id));
-						$r['ntsc'] = 4;
-						break;
-					case 8: //Emails
-						$r = array_merge($r, Objects::getSorlData($id));
-						$r['ntsc'] = 4;
-						break;
-					case 9: //Contact
-						$r = array_merge($r, Objects::getSorlData($id));
 						$r['ntsc'] = 4;
 						break;
 				}
@@ -125,6 +125,7 @@ class SolrClient{
 				if ($k % 200 == 0) $this->commit();
 			}while($r = $res->fetch_assoc());
 			$this->commit();
+			unset($security);
 		}
 		$res->close();
 	}

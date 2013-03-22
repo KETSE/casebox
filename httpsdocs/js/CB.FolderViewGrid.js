@@ -232,7 +232,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			,listeners: {
 				scope: this
 				,beforeload: function(store, options) { 
-					Ext.apply(store.baseParams, Ext.value(this.requestedParams, this.params) )
+					Ext.apply(store.baseParams, Ext.value(this.params, {}) )
 					options = store.baseParams;
 				}
 				,load: this.onStoreLoad
@@ -276,7 +276,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				    ,{header: L.Tags, width:200, dataIndex: 'sys_tags', hidden: true, sortable: false, renderer: App.customRenderers.tagIds}
 				    ,{ header: L.Date, width: 120, dataIndex: 'date',/* xtype: 'datecolumn',/**/ format: App.dateFormat+' '+App.timeFormat, renderer: App.customRenderers.datetime}
 				    ,{ header: L.Size, width: 80, dataIndex: 'size', renderer: App.customRenderers.filesize}
-				    ,{ header: L.Author, width: 200, dataIndex: 'cid', renderer: function(v){ return App.usersStore.getName(v)}}
+				    ,{ header: L.Author, width: 200, dataIndex: 'cid', renderer: function(v){ return CB.DB.usersStore.getName(v)}}
 				    ,{ header: L.CreatedDate, hidden:true, width: 120, dataIndex: 'cdate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
 				    ,{ header: L.UpdatedDate, hidden:true, width: 120, dataIndex: 'udate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
 				]
@@ -616,6 +616,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			this.actions.open.setDisabled(false);
 			this.actions['delete'].setDisabled(row.get('system') == 1);
 			
+			clog(this.params.descendants, this.grid.store.baseParams.query)
 			canOpenLocation = (this.params.descendants || !Ext.isEmpty(this.grid.store.baseParams.query) );
 			this.actions.openItemLocation.setDisabled(!canOpenLocation);
 
@@ -746,8 +747,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	}
 	,setParams: function(params){
 		if(Ext.isEmpty(params.path)) params.path = '/';
-		Ext.apply(this.grid.getStore().baseParams, Ext.value(params, {}));
-		this.requestedParams = params;
+		Ext.apply(this.params, Ext.value(params, {}));
+		// Ext.apply(this.grid.getStore().baseParams, Ext.value(params, {}));
+		// this.requestedParams = params;
 		this.grid.getBottomToolbar().changePage(1);
 	}
 	,onProxyLoad: function (proxy, o, options) {
@@ -838,7 +840,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		row = this.grid.selModel.getSelected();
 		if(!App.openObject(row.get('type'), row.get('nid'), e) ){
 			if(Ext.isEmpty(this.grid.store.baseParams.query) ){
-				path = this.params.path.split('/');
+				path = String(this.params.path).split('/');
 				path.push(row.get('nid'));
 				this.fireEvent('changeparams', {path: path.join('/')} )
 			}else{

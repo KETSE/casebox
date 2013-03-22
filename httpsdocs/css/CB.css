@@ -18,7 +18,10 @@ a:hover{ text-decoration: underline }
 .icon-node-case{ background-image:url(i/ico/briefcase.png) !important }
 .icon-gear { background-image:url(i/ico/gear.png) !important }
 .icon-lawyer{ background-image: url(i/ico/user-detective.png) !important; background-position: 0 50%; background-repeat: no-repeat }
-.icon-users { background-image:url(i/ico/users.png) !important }
+
+.icon-group { background-image:url(i/ico/user_group.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-users { background-image:url(i/ico/users.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+
 .icon-user, .icon-user- { background-image: url(i/ico/user-gray.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user32, .icon-user32-, .icon-user32-m { background-image: url(i/ico/32/user-male.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user32-f { background-image: url(i/ico/32/user-female.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -440,3 +443,17 @@ text-decoration: underline;}
 .node a{text-decoration: none}
 .node a text:hover{text-decoration: underline;}
 /* end of graphs */
+
+.x-plain .x-toolbar{
+	padding: 5px 10px;
+	background-color: none;
+	background: transparent;
+	border: 0;
+}
+.x-plain .x-plain-header{
+	padding: 5px 10px;
+	color: #15428b;
+	font-weight: bold;
+	font-size: 11px;
+	font-family: tahoma,arial,verdana,sans-serif;
+}

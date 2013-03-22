@@ -16,10 +16,13 @@ class Search extends SolrClient{
 
 	private function prepareParams(){
 		$p = &$this->inputParams;
-		//TODO: check if we are in a virtual folder
+		/* initial parameters */
 		$this->query = empty($p->query)? '' : $p->query;
 		$this->start = empty($p->start)? 0 : intval($p->start);
 		$this->rows = empty($p->rows)? CB_MAX_ROWS : intval($p->rows);
+		
+		$fq = array('dstatus:0'); //by default filter not deleted nodes
+
 
 		$this->params = array(
 			'defType' => 'dismax'
@@ -29,9 +32,15 @@ class Search extends SolrClient{
 			,'fl' => "id, pid, path, name, type, subtype, system, size, date, date_end, cid, cdate, udate, case_id, case, sys_tags,user_tags, template_id, user_ids, status, category_id, importance, versions"//iconCls, 
 			,'sort' => 'ntsc asc'
 		);
+		/* initial parameters */
 		
+		if(!empty($p->dstatus)) $fq = array('dstatus:'.intval($p->dstatus));
+		if(!empty($p->fq)) $fq = array_merge($fq, $p->fq);
+
+		/* set custom field list if specified */
 		if(!empty($p->fl)) $this->params['fl'] = $p->fl;
-		//status asc,date_end asc
+		
+		/*analize sort parameter (ex: status asc,date_end asc)/**/
 		if(isset($p->sort)){
 			$sort = array();
 			if(!is_array($p->sort)) $sort = array($p->sort => empty($p->dir) ? 'asc' : strtolower($p->dir) );
@@ -45,7 +54,15 @@ class Search extends SolrClient{
 		 	}
 		}else $this->params['sort'] .= ', subtype asc, sort_path asc';
 		
-		$fq = array();
+		/* adding additional query filters */
+
+		/* adding security filter*/
+		$everyoneGroup = Security::EveryoneGroupId();
+		$fq[] = 'allow_user_ids:('.$everyoneGroup.' OR '.$_SESSION['user']['id'].')';
+		//$fq[] = '!deny_user_ids:('.$everyoneGroup.' OR '.$_SESSION['user']['id'].')';
+		$fq[] = '!deny_user_ids:'.$_SESSION['user']['id'];
+		/* end of adding security filter*/
+
 		if(!empty($p->pid)) $fq[] = 'pid:'.intval($p->pid);
 		if(!empty($p->ids)){
 			if(!is_array($p->ids)) $p->ids = explode(',', $p->ids);
@@ -61,7 +78,10 @@ class Search extends SolrClient{
 		if(!empty($p->dateStart)) $fq[] = 'date:['.$p->dateStart.' TO '.$p->dateEnd.']';
 
 		$this->params['fq'] = $fq;
+		// var_dump($fq);
+		/* end of adding additional query filters */
 
+		/* setting highlight if query parrameter is present /**/
 		if(!empty($this->query)){
 			$this->params['hl'] = 'true';
 			$this->params['hl.fl'] = 'name,content';
@@ -71,9 +91,11 @@ class Search extends SolrClient{
 			$this->params['hl.highlightMultiTerm'] = 'true';
 			$this->params['hl.fragsize'] = '256';
 		}
+
 		$this->prepareFacetsParams();
 		$this->setFilters();
 	}
+	
 	private function setFilters(){
 		$p = &$this->inputParams;
 		if(!empty($p->filters)){
@@ -264,6 +286,10 @@ class Search extends SolrClient{
 					$this->params['facet.pivot'] = $p->facetPivot;
 				}
 				break;
+			case 'first_letter':
+				$this->params['facet.field'] = array(
+					'{!ex=name_first_letter key=0fl}name_first_letter'
+				);
 		}
 		if(!empty($this->params['facet.field']) || !empty($this->params['facet.pivot']) ){
 			$this->params['facet'] = 'true';

@@ -3,7 +3,31 @@ require_once 'Cases.php';
 require_once 'Security.php';
 require_once 'Log.php';
 class Browser{
-	
+	/* getCustomControllerResults function used to check if node has a controller specified in its "cfg" field
+		if node have custom controller then results from the controller are returned, otherwise false is returned
+	 */
+	public function getCustomControllerResults($path){
+		$rez = false;
+		$ids = explode('/', $path);
+		$id = array_pop($ids);
+		while( (!is_numeric($id) || ($id < 1)) && !empty($ids)) $id = array_pop($ids);
+
+		if(empty($id) || !is_numeric($id) ) return false;
+
+		$sql = 'select cfg from tree where id = $1';
+		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		if($r = $res->fetch_assoc()) {
+		 	if(!empty($r['cfg'])) $r['cfg'] = json_decode($r['cfg']);
+		 	if(!empty($r['cfg']->controller)){
+		 		$userMenu = new UserMenu();
+		 		$rez = $userMenu->{$r['cfg']->controller}($path);
+		 		unset($userMenu);
+		 	}
+		 }
+		 $res->close();
+		 return $rez;
+	}
+
 	function getObjectsForField($p){
 		// ,"scope": 'tree' //project, parent, self, $node_id
 		// ,"field": <field_name> //for field type
@@ -130,19 +154,38 @@ class Browser{
 
 	public function delete($paths){
 		if(!is_array($paths)) $paths = array($paths);
-		$deleted_ids = array();
+		/* collecting ids from paths */
+		$ids = array();
 		foreach($paths as $path){
 			$id = explode('/', $path);
 			$id = array_pop($id);
 			if(!is_numeric($id)) return array('success' => false);
-			mysqli_query_params('call p_delete_tree_node($1)', $id) or die(mysqli_query_error());
-			$deleted_ids[] = intval($id);
+			$ids[] = intval($id);
 		}
-		/* TODO: check security access */
-		$solr = new SolrClient;
-		foreach($deleted_ids as $id) $solr->deleteId($id);
-		unset($solr);
-		return array('success' => true, 'ids' => $deleted_ids);
+		if(empty($ids)) return array('success' => false);
+
+		/* before deleting we should check security for specified paths and all children */
+		
+		/* if access is granted then setting dstatus=1 for specified ids and dstatus = 2 for all their children /**/
+		mysqli_query_params('update tree set did = $1, dstatus = 1, ddate = CURRENT_TIMESTAMP where id in ('.implode(',', $ids).') ', $_SESSION['user']['id']) or die(mysqli_query_error());
+		foreach($ids as $id) mysqli_query_params('call p_mark_all_childs_as_deleted($1, $2)', array($id, $_SESSION['user']['id'])) or die(mysqli_query_error());
+		SolrClient::runCron();
+		return array('success' => true, 'ids' => $ids);
+		
+		// if(!is_array($paths)) $paths = array($paths);
+		// $deleted_ids = array();
+		// foreach($paths as $path){
+		// 	$id = explode('/', $path);
+		// 	$id = array_pop($id);
+		// 	if(!is_numeric($id)) return array('success' => false);
+		// 	mysqli_query_params('call p_delete_tree_node($1)', $id) or die(mysqli_query_error());
+		// 	$deleted_ids[] = intval($id);
+		// }
+		// /* TODO: check security access */
+		// $solr = new SolrClient;
+		// foreach($deleted_ids as $id) $solr->deleteId($id);
+		// unset($solr);
+		// return array('success' => true, 'ids' => $deleted_ids);
 	}
 
 	public function rename($p){
@@ -487,12 +530,15 @@ class Browser{
 		$rez = array('success' => true, 'data' => $ids); 
 		if(empty($ids)) return $rez;
 		$ids = implode(',', $ids);
-		mysqli_query_params('update tree set cid = $1, uid = $1 where id in ('.$ids.') and `system` = 0', $_SESSION['user']['id']) or die(mysqli_query_error());
-		mysqli_query_params('update cases set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
-		mysqli_query_params('update objects set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
-		mysqli_query_params('update files set cid = $1, uid = $1 where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
-		mysqli_query_params('update tasks set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());		
-		SolrClient::runCron();
+		mysqli_query_params('update tree set oid = $1, uid = $1 where id in ('.$ids.') and `system` = 0', $_SESSION['user']['id']) or die(mysqli_query_error());
+		//TODO: view if needed to mark all childs as updated, for security to be changed ....
+
+		// mysqli_query_params('update tree set cid = $1, uid = $1 where id in ('.$ids.') and `system` = 0', $_SESSION['user']['id']) or die(mysqli_query_error());
+		// mysqli_query_params('update cases set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
+		// mysqli_query_params('update objects set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
+		// mysqli_query_params('update files set cid = $1, uid = $1 where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
+		// mysqli_query_params('update tasks set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());		
+		// SolrClient::runCron();
 		return $rez;
 	}
 	public function isChildOf($id, $pid){
@@ -516,9 +562,16 @@ class Browser{
 	}
 	public function getRootProperties($id){
 		$rez = array('success' => true, 'data' => array());
-		$sql = 'select id `nid`, `system`, `type`, `subtype`, `name` from tree where id = $1';
+		$sql = 'select id `nid`, `system`, `type`, `subtype`, `name`, `cfg` from tree where id = $1';
 		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
-		if($r = $res->fetch_assoc()) $rez['data'] = $r;
+		if($r = $res->fetch_assoc()){
+			if(empty($r['cfg'])) unset($r['cfg']);
+			else $r['cfg'] = json_decode($r['cfg']);
+
+			$rez['data'] = array($r);
+			$this->updateLabels($rez['data']);
+			$rez['data'] = $rez['data'][0];
+		}
 		$res->close();
 		return $rez;
 	}
@@ -531,7 +584,7 @@ class Browser{
 		return $id;
 	}
 
-	private function markAllChildsAsUpdated($ids){
+	public static function markAllChildsAsUpdated($ids){
 		if(!is_array($ids)) $ids = explode(',', $ids);
 		$ids = array_filter($ids, 'is_numeric');
 		if(empty($ids)) return;
@@ -539,4 +592,59 @@ class Browser{
 			mysqli_query_params('call p_mark_all_childs_as_updated($1)', $id) or die(mysqli_query_error());
 		return true;
 	}
+
+	public function prepareResults(&$data){
+		if(empty($data) || !is_array($data)) return;
+		for ($i=0; $i < sizeof($data); $i++) { 
+			$d = &$data[$i];
+			if(isset($d['id']) && empty($d['nid'])){
+				$d['nid'] = $d['id'];
+				unset($d['id']);
+			}
+			if(!isset($d['loaded'])){
+				$sql = 'select count(*) from tree where pid = $1'.( empty($this->showFoldersContent) ? ' and `type` in (1, 3)' : '' );
+				$res = mysqli_query_params($sql, $d['nid']) or die(mysqli_query_error());
+				if($r = $res->fetch_row()) $d['loaded'] = empty($r[0]);
+				$res->close();
+			}
+		}
+
+	}
+	public function updateLabels(&$data){
+		for ($i=0; $i < sizeof($data); $i++) {
+			$d = &$data[$i];
+			unset($d['iconCls']);
+			@$d['nid'] = intval($d['nid']);
+			@$d['system'] = intval($d['system']);
+			@$d['type'] = intval($d['type']);
+			@$d['subtype'] = intval($d['subtype']);
+			switch($d['type']){
+				case 0: break; 
+				case 1: switch ($d['subtype']) {
+						case 1:	if( (substr($d['name'], 0, 1) == '[') && (substr($d['name'], -1, 1) == ']') )
+								$d['name'] = L(substr($d['name'], 1, strlen($d['name']) -2));
+							break;
+						case 2:	$d['name'] = L\Favorites; break;
+						case 3:	$d['name'] = L\MyCaseBox; break;
+						case 4:	$d['name'] = L\Cases; break;
+						case 5:	$d['name'] = L\Tasks; break;
+						case 6:	$d['name'] = L\Messages; break;
+						case 7:	$d['name'] = L\PrivateArea; break;
+						case 8:	break;
+						case 9: break;
+						case 10: $d['name'] = L\PublicFolder; break;
+						default: break;
+					}
+					break;
+				case 2: break;
+				case 3: break;
+				case 4: break;
+				case 5: break;
+				case 6: break;
+				case 7: break;
+			}
+		}
+		return $data;
+	}
+
 }

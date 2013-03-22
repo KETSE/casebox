@@ -186,7 +186,7 @@ Ext.namespace('CB.DB');
 		})
 	}
 createDirectStores = function(){
-	if(typeof(Thesauri) == 'undefined'){
+	if(typeof(Security) == 'undefined'){
 		createDirectStores.defer(500);
 		return;
 	}
@@ -215,15 +215,13 @@ createDirectStores = function(){
 		]
 		)
 		,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
-		,getName: function(id){
-			idx = this.findExact('id', parseInt(id))
-			return (idx >=0 ) ? this.getAt(idx).get('name') : '';
-		}
+		,getName: getStoreNames
 		,getIcon: function(id){
 			idx = this.findExact('id', parseInt(id))
 			return (idx >=0 ) ? this.getAt(idx).get('iconCls') : '';
 		}
 	});
+	
 	CB.DB.templates = new Ext.data.DirectStore({
 		autoLoad: true
 		,restful: false
@@ -251,16 +249,73 @@ createDirectStores = function(){
 			]
 		)
 		,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
-		,getName: function(id){
-			idx = this.findExact('id', parseInt(id))
-			return (idx >=0 ) ? this.getAt(idx).get('title') : '';
-		}
+		,getName: getStoreTitles
 		,getIcon: function(id){
 			idx = this.findExact('id', parseInt(id))
 			return (idx >=0 ) ? this.getAt(idx).get('iconCls') : '';
 		}
 		
 	});
+	
+	CB.DB.usersStore =  new Ext.data.DirectStore({
+		autoLoad: true
+		,proxy: new  Ext.data.DirectProxy({
+			paramsAsHash: true
+			,directFn: Security.getLowerLevelUsers
+		})
+		,reader: new Ext.data.JsonReader({
+				successProperty: 'success'
+				,idProperty: 'id'
+				,root: 'data'
+				,messageProperty: 'msg'
+			},[ {name: 'id', type: 'int'}, 'name', 'iconCls' ]
+		)
+		,getName: getStoreNames
+	});
+	
+	CB.DB.groupsStore =  new Ext.data.DirectStore({
+		autoLoad: true
+		,proxy: new  Ext.data.DirectProxy({
+			paramsAsHash: true
+			,api: {
+				read: Security.getUserGroups
+				,create: Security.createUserGroup
+				,update: Security.updateUserGroup
+				,destory: Security.destroyUserGroup
+
+			}
+		})
+		,reader: new Ext.data.JsonReader({
+				successProperty: 'success'
+				,idProperty: 'id'
+				,root: 'data'
+				,messageProperty: 'msg'
+			},[ {name: 'id', type: 'int'}, 'name', 'title', {name: 'system', type: 'int'}, {name: 'enabled', type: 'int'} ]
+		)
+		,sortInfo: {
+			field: 'title'
+			,direction: 'ASC'
+		}
+		,getName: getStoreTitles
+	});		
+	
+	CB.DB.usersGroupsSearchStore = new Ext.data.DirectStore({
+		autoLoad: false
+		,autoDestroy: false
+		,proxy: new  Ext.data.DirectProxy({
+			paramsAsHash: true
+			,directFn: Security.searchUserGroups
+		})
+		,reader: new Ext.data.JsonReader({
+				successProperty: 'success'
+				,idProperty: 'id'
+				,root: 'data'
+				,messageProperty: 'msg'
+			},[ {name: 'id', type: 'int'}, 'name', {name: 'system', type: 'int'}, {name: 'enabled', type: 'int'}, 'iconCls' ]
+		)
+		,getName: getStoreTitles
+	});
+
 	CB.DB.userTags = new Ext.data.DirectStore({
 		autoLoad: true
 		,restful: false
@@ -279,6 +334,7 @@ createDirectStores = function(){
 		},[	{name: 'id', type: 'int'},'name' ]
 		)
 	});
+	
 	CB.DB.updateTagGroups = function(data){
 		if(Ext.isEmpty(data)) return;
 		CB.DB.groupedTags.removeAll();

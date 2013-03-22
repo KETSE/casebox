@@ -7,13 +7,25 @@ class BrowserView extends BrowserTree{
 			'success' => true
 			,'pathtext' => Path::getPathText($p)
 			,'folderProperties' => Path::getPathProperties($p)
+			,'data' => false
 		);
 			
+		if(!empty($p->path)) $rez['data'] = $this->getCustomControllerResults($p->path);
+		if($rez['data'] === false) $rez['data'] = $this->getDefaultControllerResults($p);
+
+		$this->prepareResults($rez['data']);
+		$this->updateLabels($rez['data']);
+		return $rez;
+	}
+
+	private function getDefaultControllerResults($p){
 		$pid = null;
-		if(!empty($p->path)) $pid = Path::getId($p->path); elseif(!empty($p->pid)) $pid = is_numeric($p->pid) ? $p->pid : Browser::getRootFolderId();
+		if(!empty($p->path)) $pid = Path::getId($p->path);
+		elseif(!empty($p->pid)) $pid = is_numeric($p->pid) ? $p->pid : Browser::getRootFolderId();
+		
 		if(empty($p->descendants)) $p->pid = $pid; else $p->pids = $pid;
 		$s = new Search();
-		$rez = array_merge($rez, $s->query($p));
+		$rez = $s->query($p);
 		if(!empty($rez['data']))
 		for ($i=0; $i < sizeof($rez['data']); $i++) { 
 			$d = &$rez['data'][$i];
@@ -28,9 +40,9 @@ class BrowserView extends BrowserTree{
 			}
 			$res->close();
 		}
-		parent::updateLabels($rez['data']);
-		return $rez;
+		return $rez['data'];
 	}
+
 	public function getSummaryData($p){
 		/* result columns order : id, name, type, iconCls, total, total2*/
 		$rez = array(

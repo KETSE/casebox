@@ -16,6 +16,8 @@ foreach($CB_cores as $core){
 		$cd = prepare_cron($cron_id, 2, 'core: '.$core['db_name']);
 		if(!$cd['success']) exit(1);
 	}//$solr variable created outside by manual update all script
+	/* unset specific core globals */
+	unset($GLOBALS['EVERYONE_GROUP_ID']);
 
 	$solr = new SolrClient(array('core' => '/solr/'.$core['db_name'] ));
 	$solr->connect();

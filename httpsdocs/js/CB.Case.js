@@ -153,7 +153,7 @@ CB.CaseCard = Ext.extend(Ext.Panel, {
 					,renderHidden: true
 					,autoHeight: true
 					,items: [new CB.CaseCardProperties({ width: 450, params: this.params, listeners: {scope: this, load: this.onPropertiesLoad} })
-						,new CB.CaseCardMilestones({ params: this.params, bodyStyle: 'padding-left: 30px' })
+						,new CB.CaseCardMilestones({ flex: 1, params: this.params, bodyStyle: 'padding-left: 30px' })
 					]
 				}
 				,{ xtype: 'CaseCardDivider'}
@@ -163,7 +163,7 @@ CB.CaseCard = Ext.extend(Ext.Panel, {
 					,renderHidden: true
 					,autoHeight: true
 					,items: [new CB.CaseCardActions({ width: 450, params: this.params })
-						,new CB.CaseCardTasks({ params: this.params, bodyStyle: 'padding-left: 30px' })
+						,new CB.CaseCardTasks({ flex: 1, params: this.params, bodyStyle: 'padding-left: 30px' })
 					]
 				}
 			]
@@ -318,7 +318,7 @@ CB.CaseCardActions = Ext.extend(CB.CaseCardBlock, {
 		,'<tpl for=".">'
 		,'<li><a class="i {iconCls}" href="#{id}">{name}</a>'
 			,'<br />'
-			,'<span class="info"><a name="cid" href="#{cid}">{[ App.usersStore.getName(values.cid)]}</a>, {[values.date.format("F j")]}</span>'
+			,'<span class="info"><a name="cid" href="#{cid}">{[ CB.DB.usersStore.getName(values.cid)]}</a>, {[values.date.format("F j")]}</span>'
 		,'</li>'
 		,'</tpl>'
 		,'</ul>'
@@ -352,7 +352,7 @@ CB.CaseCardTasks = Ext.extend(CB.CaseCardBlock, {
 		,'<tr><th width="50%">' + L.Tasks + ', ' + L.Events+' <a name="addTask" class="click">'+L.addNew+' ...</a></th><th>'+L.Owner+'</th><th>'+L.TaskAssigned+'</th><th>'+L.Deadline+'</th><th>'+L.Completed+'</th></tr>'
 		,'<tpl for=".">'
 		,'<tr{[ (values.status == 3) ? \' class="done"\' :""]}><td><a class="i {iconCls}" href="#{id}">{name}</a></td>'
-			,'<td><a name="uid" href="#{cid}"><img src="photo/{cid}.jpg" class="photo32" title="{[ App.usersStore.getName(values.cid) ]}"/></a></td>'
+			,'<td><a name="uid" href="#{cid}"><img src="photo/{cid}.jpg" class="photo32" title="{[ CB.DB.usersStore.getName(values.cid) ]}"/></a></td>'
 			,'<td>'
 				,'<tpl for="users">'
 				,' <a name="uid" href="#{id}"><img src="photo/{id}.jpg" class="photo32" title="{name}"/></a> '
@@ -374,7 +374,7 @@ CB.CaseCardTasks = Ext.extend(CB.CaseCardBlock, {
 			for (var j = 0; j < userIds.length; j++) {
 				data[i].users.push({
 					id: userIds[j]
-					,name: App.usersStore.getName(userIds[j])
+					,name: CB.DB.usersStore.getName(userIds[j])
 				})
 			};
 		};

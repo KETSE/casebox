@@ -518,7 +518,8 @@ background-repeat: no-repeat; */
 .icon-folderView { background-image: url(i/ico/_folder2.png) !important; opacity: 0.7}
 .icon-descendants { background-image: url(i/ico/_descendants.png) !important}
 .icon-external { background-image: url(i/ico/_external2.png) !important}
-
+.icon-myCasebox {background-image: url(i/ico/_case2.png) !important; opacity: 0.8; }
+.icon-contacts {background-image: url(i/ico/_contact.png) !important; opacity: 0.8; }
 
 
 
@@ -632,13 +633,10 @@ background-color: #FFF;
 }
 .versions a {color: #333; text-decoration: none; }
 .versions a:hover {color: #000; text-decoration: underline; }
-.trash {
-    background-image: url(/i3/_trash.png); 
-}
+.trash {background-image: url(i/ico/_trash.png); }
+.icon-trash {background-image: url(i/ico/bin.png) !important; }
 
-.dttm {
-color: #777;
-}
+.dttm {color: #777; }
 
 .photo50 {
     width: 32px;
@@ -880,4 +878,9 @@ border: 1px solid #7195A3;
 .casecard .block-tasks tr.done a{ text-decoration: line-through; color: #777;}
 .casecard .block-tasks tr.done img{ opacity: 0.4 }
 .casecard .block-milestones{
+}
+
+.mtb_link{
+    padding: 0 5px;
+    text-decoration: underline;
 }

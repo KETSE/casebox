@@ -12,6 +12,9 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 	,enableDD: false//true
 	,ddGroup: 'CBDD'
 	,bodyStyle: 'background-color: #f4f4f4'
+	,hideBorders: true
+	,border: false
+	,hideToolbar: true
 	,initComponent: function(){
 	
 		this.sorters = {
@@ -145,6 +148,14 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 				,scope: this
 				,disabled: true
 				,handler: this.onPropertiesClick
+			})
+
+			,security: new Ext.Action({
+				text: L.Security
+				,iconCls: 'icon-key'
+				,scope: this
+				,disabled: true
+				,handler: this.onSecurityClick
 			})
 
 		}
@@ -310,7 +321,11 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			node.setText(Ext.value(Date.monthNames[parseInt(node.attributes.name) -1], node.attributes.name));
 		}else 
 		node.setText(node.attributes.name);// + ' ' + node.attributes.system + ' ' + node.attributes.type+'.' + node.attributes.subtype);
-		node.setIconCls( getItemIcon(node.attributes) );// + ' ' + node.attributes.system + ' ' + node.attributes.type+'.' + node.attributes.subtype);
+		
+		if(node.attributes.cfg && node.attributes.cfg.iconCls){
+			node.setIconCls( node.attributes.cfg.iconCls );
+		}else node.setIconCls( getItemIcon(node.attributes) );// + ' ' + node.attributes.system + ' ' + node.attributes.type+'.' + node.attributes.subtype);
+		
 		node.attributes.editable = false; //(node.attributes.system == 0);
 		node.draggable = (node.attributes.system == 0);
 	}
@@ -343,6 +358,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			this.actions.rename.setDisabled(true) ;
 			this.actions.reload.setDisabled(true) ;
 			this.actions.createFolder.setDisabled(true) ;
+			this.actions.security.setDisabled(true) ;
 		}else{
 			canOpen = ([2, 4, 5, 6, 7].indexOf(node.attributes.type) >= 0 )
 			this.actions.open.setHidden(!canOpen);
@@ -380,6 +396,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			this.actions.rename.setDisabled(!canRename) ;
 			
 			this.actions.reload.setDisabled(false) ;
+			this.actions.security.setDisabled(false) ;
 		}
 	}
 	,isFavoriteNode: function(node){
@@ -435,6 +452,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 					,menu:[ this.actions.createCase, '-', this.actions.createTask, '-', this.actions.createFolder]
 				}
 				,'-'
+				,this.actions.security
 				,this.actions.properties
 				]
 			})
@@ -544,6 +562,13 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		n = this.selModel.getSelectedNode();
 		if(Ext.isEmpty(n)) return;
 		App.clipboard.paste(n.attributes.nid, 'shortcut');
+	}
+	,onSecurityClick: function(b, e){
+		if(this.actions.security.isDisabled()) return;
+		n = this.selModel.getSelectedNode();
+		if(Ext.isEmpty(n)) return;
+		if(App.activateTab(null, n.attributes.nid, CB.SecurityPanel)) return;
+		App.addTab(null, new CB.SecurityPanel({data: { id: n.attributes.nid }}));
 	}
 	,onPropertiesClick: function(b, e){
 		if(this.actions.properties.isDisabled()) return;

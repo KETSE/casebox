@@ -164,7 +164,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				    		v = '<span class="n"><b>' + Ext.value(r.get('hl'), v ) + '</b></span>';
 						info = [];
 						if(!Ext.isEmpty(r.get('path'))) info.push(r.get('path'));
-				    		if(!Ext.isEmpty(r.get('user_ids'))) info.push(App.usersStore.getName(r.get('user_ids') ) )
+				    		if(!Ext.isEmpty(r.get('user_ids'))) info.push(CB.DB.usersStore.getName(r.get('user_ids') ) )
 				    		
 				    		if(!Ext.isEmpty(info)) v += '<div class="task-info">'+info.join('<br />') + '</div>';
 				    		return '<div class="letter">'+v+'</div>';
@@ -180,8 +180,8 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				    		return v;
 						}
 					}
-				    ,{header: L.Owner, width: 150, dataIndex: 'cid', renderer: function(v, m, r, ri, ci, s){ return App.usersStore.getName( v ); } }
-				    ,{header: L.TaskAssigned, width: 200, dataIndex: 'user_ids', sortable: false, renderer: function(v, m, r, ri, ci, s){ return App.usersStore.getName( v ); } }
+				    ,{header: L.Owner, width: 150, dataIndex: 'cid', renderer: function(v, m, r, ri, ci, s){ return CB.DB.usersStore.getName( v ); } }
+				    ,{header: L.TaskAssigned, width: 200, dataIndex: 'user_ids', sortable: false, renderer: function(v, m, r, ri, ci, s){ return CB.DB.usersStore.getName( v ); } }
 				    ,{ header: L.Category, width: 100, dataIndex: 'category_id', renderer: function(v, m, r, ri, ci, s){ 
 				    		if(Ext.isEmpty(v)) return '';
 				    		m.css = 'icon-grid-column-top '+CB.DB.thesauri.getIcon( v );
@@ -696,6 +696,7 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
 	,borders: false
 	,closable: true
 	,layout: 'fit'
+	,iconCls: 'icon-taskView'
 	,initComponent: function(){
 		
 		this.view = new CB.TasksViewGrid({
@@ -703,6 +704,7 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
 		})
 		Ext.apply(this,{
 			items: this.view
+			,iconCls: Ext.value(this.iconCls, 'icon-taskView')
 			,listeners:{
 				scope: this
 				,afterrender: this.onAfterRender

@@ -66,7 +66,7 @@ class Log{
 		}
 		if(!empty($to_user_ids)){
 			$p['to_user_ids'] = implode(',',$to_user_ids);
-			$res = mysqli_query_params('select name, '.$_SESSION['languages']['string'].', sex from users where id in ('.$p['to_user_ids'].')') or die(mysqli_query_error());
+			$res = mysqli_query_params('select name, '.$_SESSION['languages']['string'].', sex from users_groups where id in ('.$p['to_user_ids'].')') or die(mysqli_query_error());
 			while($r = $res->fetch_assoc()) $to_user_names_data[] = $r;
 			$res->close();
 		}
@@ -269,7 +269,7 @@ class Log{
 		if(empty($to_user_ids)) return ;
 		
 		$users_data = array();
-		$res = mysqli_query_params('select id, language_id from users where id in ('.implode(',',$to_user_ids).')') or die(mysqli_query_error());
+		$res = mysqli_query_params('select id, language_id from users_groups where id in ('.implode(',',$to_user_ids).')') or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()) $users_data[] = $r;
 		$res->close();
 		foreach($users_data as $u){
@@ -309,7 +309,7 @@ class Log{
 					 	case 30: $subject = L('aboutTaskCompletionOnBehalt', $l); break; //CHECKED
 					 	case 31: $subject = L('aboutTaskReopened', $l); break; //CHECKED
 					 }
-					$sql = 'select t.name, f_get_tree_path(t.id) `path`, u.'.$l.' `owner`, u.name `username` from tree t join users u on t.cid = u.id where t.id = $1';
+					$sql = 'select t.name, f_get_tree_path(t.id) `path`, u.'.$l.' `owner`, u.name `username` from tree t join users_groups u on t.cid = u.id where t.id = $1';
 					$res = mysqli_query_params($sql, $p['task_id']) or die(mysqli_query_error());
 					if($r = $res->fetch_assoc())
 						$subject = str_replace( array('{owner}', '{name}', '{path}'), array(coalesce($r['owner'], $r['username']), $r['name'], $r['path'] ), $subject );

@@ -287,7 +287,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		/* get and set userNames for responsible users */
 		this.userNames = [];
 		this.userNames2 = {};
-		App.usersStore.each(function(r){ 
+		CB.DB.usersStore.each(function(r){ 
 			if(this.responsibleUsers.indexOf(r.get('id')+'') >=0){
 				this.userNames.push(r.get('name')); 
 				this.userNames2[r.get('id')] = r.get('name');
@@ -309,7 +309,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		/* end of set canComplete flag */
 		
 		/* get and store owner's name */
-		this.ownerName = App.usersStore.getName(this.data.cid);
+		this.ownerName = CB.DB.usersStore.getName(this.data.cid);
 		/* end of get and store owner's name */
 		/* get and store responsible party's text */
 		if(!Ext.isEmpty(this.data.responsible_party_id)){
@@ -672,11 +672,11 @@ CB.Tasks = Ext.extend( Ext.Window, {
 				users: [{user_id:12, user_status:0, thesauri_response_id:null, comment:null},…]
 				*/
 				dd = this.data;
-				dd.creator_name = App.usersStore.getName(dd.cid);
+				dd.creator_name = CB.DB.usersStore.getName(dd.cid);
 				
 				if(Ext.isEmpty(dd.users)) dd.users = []
 				for (var i = 0; i < dd.users.length; i++) {
-					dd.users[i].name = App.usersStore.getName(dd.users[i].id)
+					dd.users[i].name = CB.DB.usersStore.getName(dd.users[i].id)
 					dd.users[i].canEdit = this.canEdit
 				};
 				/* end of preparing data for view template */
@@ -836,7 +836,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 	}
 	,onSetUserCompletedClick: function(user_id){
 		Ext.Msg.show({
-			title: L.SetCompleteStatusFor+ ' ' + App.usersStore.getName(user_id)
+			title: L.SetCompleteStatusFor+ ' ' + CB.DB.usersStore.getName(user_id)
 			,msg: L.Message
 			,width: 400
 			,height: 200
@@ -848,7 +848,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 	}
 	,onSetUserIncompleteClick: function(user_id){
 		Ext.Msg.show({
-			title: L.SetIncompleteStatusFor + App.usersStore.getName(user_id)
+			title: L.SetIncompleteStatusFor + CB.DB.usersStore.getName(user_id)
 			,msg: L.Message
 			,width: 400
 			,height: 200
@@ -865,7 +865,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 	,onSendMessageClick: function(user_id){
 		if(user_id == App.loginData.id) return;
 		Ext.Msg.show({
-			title: L.SendMessageTo + App.usersStore.getName(user_id)
+			title: L.SendMessageTo + CB.DB.usersStore.getName(user_id)
 			,msg: L.Message
 			,width: 400
 			,height: 200
@@ -1270,7 +1270,7 @@ CB.ActionTasksView = Ext.extend(Ext.DataView, {
 					,load: function(store, records, options){
 						Ext.each(records, function(r){
 							r.set('ago_text', r.get('cdate').format(App.dateFormat)  )
-							r.set('username', App.usersStore.getName(r.get('cid')))
+							r.set('username', CB.DB.usersStore.getName(r.get('cid')))
 						}, this)
 					}
 				}

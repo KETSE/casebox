@@ -57,7 +57,7 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
 					scope: this
 					,load: function(store, records, options){
 						Ext.each(records, function(r){
-							r.set('username', App.usersStore.getName(r.get('cid')))
+							r.set('username', CB.DB.usersStore.getName(r.get('cid')))
 							r.set('size', App.customRenderers.filesize(r.get('size')) )
 						}, this)
 					}
@@ -397,7 +397,7 @@ CB.ActionFilesView = Ext.extend(Ext.DataView, {
 					,load: function(store, records, options){
 						Ext.each(records, function(r){
 							r.set('ago_text', r.get('cdate').format(App.dateFormat)  )
-							r.set('username', App.usersStore.getName(r.get('cid')))
+							r.set('username', CB.DB.usersStore.getName(r.get('cid')))
 						}, this)
 					}
 				}
@@ -585,7 +585,7 @@ CB.FileDuplicatesView = Ext.extend(Ext.DataView, {
 				,'<tpl for=".">'
 					,'<tr class="item"><td class="k">{[ xindex ]}.</td><td><a class="path" href="#">{pathtext}</a>'
 					,'{[ Ext.isEmpty(values.name) ? "" : \'<br /><span style="color: maroon">\'+values.name+\'</span>\']}'
-					,'<p class="gr"><span class="dttm" title="cdate">{[values.cdate.format("Y, F j")]}</span>, {[ App.usersStore.getName(values.cid)]}</p>'
+					,'<p class="gr"><span class="dttm" title="cdate">{[values.cdate.format("Y, F j")]}</span>, {[ CB.DB.usersStore.getName(values.cid)]}</p>'
 					,'</td></tr>'
 				,'</tpl>'
 				,'</tbody>'
@@ -607,7 +607,7 @@ CB.FileDuplicatesView = Ext.extend(Ext.DataView, {
 					,load: function(store, records, options){
 						Ext.each(records, function(r){
 							//r.set('cdate', date_ISO_to_date(r.get('cdate'))  )
-							//r.set('username', App.usersStore.getName(r.get('cid')))
+							//r.set('username', CB.DB.usersStore.getName(r.get('cid')))
 						}, this)
 					}
 				}

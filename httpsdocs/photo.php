@@ -10,7 +10,7 @@
 
 	require_once('lib/DB.php');
 	connect2DB(); 	
-	$sql = 'select photo, sex from users where id = $1';
+	$sql = 'select photo, sex from users_groups where id = $1';
 	$res = mysqli_query_params($sql, array($id)) or die(mysqli_query_error());
 	if($r = $res->fetch_row()){
 		if(!empty($r['0']) && file_exists(CB_PHOTOS_PATH.$r[0])){

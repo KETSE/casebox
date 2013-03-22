@@ -49,7 +49,7 @@ foreach($CB_cores as $core){
 		$remind_users = array($r['user_id']);//explode(',', $r['remind_users']);
 		foreach($remind_users as $u){
 			if(!isset($users[$u])){
-				$res2 = mysqli_query_params('select id, sex, email, language_id, '.$_SESSION['languages']['string'].' from users where id = $1', $u) or die(mysqli_query_error());
+				$res2 = mysqli_query_params('select id, sex, email, language_id, '.$_SESSION['languages']['string'].' from users_groups where id = $1', $u) or die(mysqli_query_error());
 				if($r2 = $res2->fetch_assoc()) $users[$u] = $r2;
 				$res2->close();
 			}

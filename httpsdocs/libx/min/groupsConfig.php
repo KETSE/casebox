@@ -47,6 +47,7 @@ return array_merge($customConfigGroups, array(
 		,'//js/CB.Tasks.js'
 		,'//js/CB.PasteFromWord.js'
 		,'//js/CB.FileUploadWindow.js'
+		,'//js/CB.Security.js'
 		
 		,'//js/plugins/CB.plugins.customInterface.js'
 		,'//js/ux/Ext.ux.TagEditor.js'

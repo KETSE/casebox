@@ -193,7 +193,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 			]
 			,preprocessData: function(data){
 				for (var i = 0; i < data.length; i++) 
-					data[i][1] = App.usersStore.getName(data[i][0]);
+					data[i][1] = CB.DB.usersStore.getName(data[i][0]);
 			}
 		})
 		Ext.apply(this, {

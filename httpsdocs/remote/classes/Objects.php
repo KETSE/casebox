@@ -60,13 +60,13 @@ class Objects{
 			'FROM tasks t left join tasks_responsible_users ru on t.id = ru.task_id and ru.user_id = $2 where t.object_id = $1 and ((ru.user_id = $2) || (t.cid = $2) || (t.privacy = 0 ))  order by t.cdate';
 		$res = mysqli_query_params($sql, Array($d->id, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
-			$res2 = mysqli_query_params('select l'.UL_ID().' FROM users WHERE id =$1', $r['cid']) or die(mysqli_query_error());
+			$res2 = mysqli_query_params('select l'.UL_ID().' FROM users_groups WHERE id =$1', $r['cid']) or die(mysqli_query_error());
 			if($r2 = $res2->fetch_row()) $r['owner'] = $r2[0];
 			$res2->close();
 
 			if($r['cid'] != $r['responsible_user_ids']){
 				$r['users'] = array();
-				$res2 = mysqli_query_params('select id, l'.UL_ID().' FROM users WHERE id in (0'.$r['responsible_user_ids'].') order by 2') or die(mysqli_query_error());
+				$res2 = mysqli_query_params('select id, l'.UL_ID().' FROM users_groups WHERE id in (0'.$r['responsible_user_ids'].') order by 2') or die(mysqli_query_error());
 				while($r2 = $res2->fetch_row()) $r['users'][$r2[0]] = $r2[1];
 				$res2->close();
 			}

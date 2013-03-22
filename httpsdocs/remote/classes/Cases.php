@@ -225,7 +225,7 @@ class Cases{
 			  "CONCAT(CASE HOUR(diff)  WHEN 0 THEN '' WHEN 1 THEN '1 ".L\hour."' WHEN 2 THEN '2 ".L\hours."' WHEN 3 THEN '3 ".L\hours."' WHEN 4 THEN '4 ".L\hours."' ELSE CONCAT(HOUR(diff), ' ".L\ofHours."') END, ".
 			  "CASE WHEN HOUR(diff) + MINUTE(diff)  = 0 THEN ' 1 ".L\minute."' WHEN MINUTE(diff) = 0 THEN '' ELSE CONCAT(MINUTE(DIFF), ' ".L\min."') END) `time_passed` ".
 			  "FROM (SELECT od.user_id, od.opened, TIMEDIFF(NOW(), opened) AS diff FROM opened_cases od WHERE od.case_id =$case_id ORDER BY opened DESC LIMIT 1) l ".
-			  "LEFT JOIN users u ON l.user_id = u.id";
+			  "LEFT JOIN users_groups u ON l.user_id = u.id";
 		$res = mysqli_query_params($st) or die(mysqli_query_error());
 		if($row = $res->fetch_assoc())
 			if($row['user_id'] != $_SESSION['user']['id']) $rez = $row;

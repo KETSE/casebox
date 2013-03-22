@@ -172,7 +172,7 @@ function initApp(){
 					store = getThesauriStore(record.get('cfg').thesauriId);
 					break;
 				case 'users':
-					store = App.usersStore;
+					store = CB.DB.usersStore;
 					break;
 				default:
 					cw = (grid && grid.findParentByType) ? grid.findParentByType(CB.Objects): null;
@@ -506,7 +506,12 @@ function initApp(){
 									store = getThesauriStore(e.record.get('cfg').thesauriId);
 									break;
 								case 'users': 
-									store = App.usersStore;
+									store = CB.DB.usersStore;
+									break;
+								case 'groups': 
+									store = CB.DB.groupsStore;
+									break;
+								case 'usersgroups': 
 									break;
 								default: 
 									cw = e.grid.findParentByType(CB.Objects);
@@ -757,8 +762,7 @@ function initApp(){
 		switch(type){
 			// case 2:  //link
 			// 	break;
-			case 3: App.openCase(id);
-				break;
+			//case 3: App.openCase(id); break;
 			case 4:
 			case 8:
 				App.mainViewPort.fireEvent('openobject', {id: id}, e);

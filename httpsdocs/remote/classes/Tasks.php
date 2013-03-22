@@ -33,7 +33,7 @@ class Tasks{
 		while($r = $res->fetch_assoc()) $rez['data']['files'][] = $r;
 		$res->close();
 
-		$res = mysqli_query_params('select u.id, ru.status, ru.thesauri_response_id, ru.`time` from tasks_responsible_users ru join users u on ru.user_id = u.id where ru.task_id = $1 order by u.l'.UL_ID(), $id) or die(mysqli_query_error());
+		$res = mysqli_query_params('select u.id, ru.status, ru.thesauri_response_id, ru.`time` from tasks_responsible_users ru join users_groups u on ru.user_id = u.id where ru.task_id = $1 order by u.l'.UL_ID(), $id) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$rez['data']['users'][] = $r;
 			if($r['id'] == $_SESSION['user']['id']) $rez['data']['user'] = $r;
@@ -447,7 +447,7 @@ class Tasks{
 		$res = mysqli_query_params($sql, array($_SESSION['user']['id'], $case_id)) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			if(!empty($r['responsible_user_ids']) && ($r['responsible_user_ids'] != $r['cid'])){
-				$res2 = mysqli_query_params('select id, l'.UL_ID().' from users where id in (0'.$r['responsible_user_ids'].')') or die(mysqli_query_error());
+				$res2 = mysqli_query_params('select id, l'.UL_ID().' from users_groups where id in (0'.$r['responsible_user_ids'].')') or die(mysqli_query_error());
 				while($r2 = $res2->fetch_row()) $r['users'][$r2[0]] = $r2[1];
 				$res2->close();
 			}
@@ -487,8 +487,8 @@ class Tasks{
 		/* get visible lawyer ids */
 		$lawyer_ids = array();
 		$sql = 'SELECT DISTINCT ura2.user_id '.
-			'FROM users_roles_association ura1 '.
-			'JOIN users_roles_association ura2 ON ((ura1.office_id = 0) OR (ura2.office_id = 0) OR (ura1.office_id = ura2.office_id)) AND ura2.active = 1 '.
+			'FROM users_groups_association ura1 '.
+			'JOIN users_groups_association ura2 ON ((ura1.office_id = 0) OR (ura2.office_id = 0) OR (ura1.office_id = ura2.office_id)) AND ura2.active = 1 '.
 			//'JOIN cases_rights_effective e ON e.user_id = ura2.user_id AND e.access = 3 '.
 			'WHERE ura1.active = 1 AND ura1.user_id = $1';
 		$res = mysqli_query_params($sql, $_SESSION['user']['id']) or die(mysqli_query_error());
@@ -501,7 +501,7 @@ class Tasks{
 		$sql = 'SELECT u.id, u.l'.UL_ID().' `name`, COUNT(t.id) `count`'.
 			'FROM tasks t '.
 			'JOIN tasks_responsible_users ru ON ru.task_id = t.id  '.
-			',users u '.
+			',users_groups u '.
 			'WHERE t.status <> 3 '.
 			'GROUP BY u.id, 2  ORDER BY 2';
 		$res = mysqli_query_params($sql, $_SESSION['user']['id']) or die(mysqli_query_error());
@@ -602,13 +602,12 @@ class Tasks{
 		$user = array();
 		if($user_id == false) $user = &$_SESSION['user'];
 		else{
-			require_once 'UsersGroups.php';
 			$user = UsersGroups::getUserPreferences($user_id);
 			if(empty($user['language_id'])) $user['language_id'] = 1;
 		}
 		$sql = 'select `title`, date_start, date_end, description, status, category_id, importance, type, allday, has_deadline, cid'.
 			',f_get_tree_path(id) `path_text` '.
-			',(select l'.$user['language_id'].' from users where id = t.cid) owner_text'.
+			',(select l'.$user['language_id'].' from users_groups where id = t.cid) owner_text'.
 			',cdate'.
 			',responsible_user_ids'.
 			',(select reminds from tasks_reminders where task_id = $1 and user_id = $2) reminders'.
@@ -632,7 +631,7 @@ class Tasks{
 			}
 			//$left = formatLeftDays($r['days']);
 			$users = array();
-			$ures = mysqli_query_params('select u.id, u.l'.$user['language_id'].' `name`, ru.status, ru.time from users u '.
+			$ures = mysqli_query_params('select u.id, u.l'.$user['language_id'].' `name`, ru.status, ru.time from users_groups u '.
 				'left join tasks_responsible_users ru on u.id = ru.user_id and ru.task_id = $1 where u.id in (0'.$r['responsible_user_ids'].') order by 1', $id) or die(mysqli_query_error());
 			while($ur = $ures->fetch_assoc()){
 				$users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
