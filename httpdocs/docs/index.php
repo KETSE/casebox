@@ -641,7 +641,7 @@ Field config is specific per field type, here are the options common to all fiel
 <li><b>maxInstances</b>: [1..n] // how many instances of the field are allowed (by default 1). 
     A multiple field will feature a small [+] icon on the right side that can be clicked to create a new field.</li>
 <li><b>multiValued</b>: (true, false)</li>
-<li><b>editIn</b>: (grid, top, tabsheet). Specify where to render the field, in the top part, in a separate tabsheet (for a memo field) or in the grid.</li>
+<li><b>showIn</b>: (grid, top, tabsheet). Specify where to render the field, in the top part, in a separate tabsheet (for a memo field) or in the grid.</li>
 <li><b>value</b>: a default value for the field</li>
 <li><b>dependancy</b>: a config object that specifies how the current field depends on the parent one (the parent is specified in `pid` column).
                <p>In order to make dependable fields (for example to have two fields, Country/City),
