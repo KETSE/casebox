@@ -162,8 +162,8 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		    		,changeparams: this.onChangeParams //fired by an internal view
 		    		,afterrender: function(){
 		    			if(!Ext.isEmpty(this.rootId)){
-		    				this.params.path = this.rootId;
-		    				this.onReloadClick()
+		    				//this.params.path = this.rootId;
+		    				this.setParams({path: this.rootId});
 		    			}
 		    		}
 		    		,changeview: this.onChangeViewEvent  //fired from internal views when locating an item and change the view automaticly
@@ -249,12 +249,17 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 	}
 	,sameParams: function(params1, params2){
 		if(Ext.isEmpty(params1) && Ext.isEmpty(params2)) return true;
+		
 		if(Ext.isEmpty(params1)) params1 = {};
 		if(Ext.isEmpty(params2)) params2 = {};
-		if( (!Ext.isEmpty(params1.path) || !Ext.isEmpty(params2.path) ) && (params1.path != params2.path) ) return false;
+		path1 = Ext.value(params1.path, '');
+		path2 = Ext.value(params2.path, '');
+		while( (path1.length > 0) && (path1[0] == '/') ) path1 = path1.substr(1);
+		while( (path2.length > 0) && (path2[0] == '/') ) path2 = path2.substr(1);
+		if( (params1.path != params2.path) || !Ext.isDefined(params1.path) ) return false;
 		if( (!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants) ) && (params1.descendants != params2.descendants) ) return false;
 		if( (!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query) ) && (params1.query != params2.query) ) return false;
-
+		return true;
 	}
 	,onChangeParams: function(params, e){// fired by internal view
 		if(e && e.stopPropagation) e.stopPropagation();
@@ -266,6 +271,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		if(this.locked) return;
 		if(Ext.isEmpty(params.path)) params.path = '/';
 		sameParams = this.sameParams(this.params, Ext.apply({}, params, this.params) );
+		clog(sameParams);
 		if( Ext.isEmpty(this.requestParams) &&  sameParams) {
 			i = this.getLayout().activeItem;
 			if(i.grid) App.mainViewPort.selectGridObject(i.grid);
@@ -278,7 +284,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		this.loadParamsTask.delay(500);
 	}
 	,loadParams: function(){
-		if( this.sameParams(params, this.requestParams) ) return;
+		if( this.sameParams(this.params, this.requestParams) ) return;
 		if(!Ext.isDefined(this.historyIndex)){
 			if(!Ext.isEmpty(this.requestParams)){
 				this.history.push(Ext.apply({}, this.requestParams));

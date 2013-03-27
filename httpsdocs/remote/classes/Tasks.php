@@ -66,7 +66,7 @@ class Tasks{
 		if(!isset($p['id'])) $p['id'] = null;
 		if(!isset($p['pid'])) $p['pid'] = null;
 		$p['type'] = intval($p['type']);
-		try {
+		try{
 			$p['case_id'] = Cases::getId($p['pid']);
 		} catch (Exception $e) {
 		}
@@ -125,9 +125,11 @@ class Tasks{
 			if(!isset($p['autoclose'])) $p['autoclose'] = 1;
 
 			$sql = 'INSERT INTO tasks (id, case_id, object_id, `title`, `date_start`, `date_end`, `time`, `type`, `privacy`, responsible_party_id, responsible_user_ids, description, '.
-				'parent_ids, reminds, cid, status, autoclose, has_deadline, importance, category_id, allday)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) '.
-				'ON DUPLICATE KEY UPDATE `object_id`=$3, `title` = $4, `date_start` = $5, `date_end` = $6, `time` = $7, `type` = $8, `privacy` = $9, responsible_party_id = $10, responsible_user_ids = $11, description = $12, parent_ids = $13, reminds = $14, uid = $15, status = case status when 2 then 2 else $16 end, autoclose = $17, has_deadline = $18, importance = $19, category_id = $20, allday = $21 ';
+				'parent_ids, reminds, cid, status, autoclose, has_deadline, importance, category_id, allday, uid, udate)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, null, null) '.
+				'ON DUPLICATE KEY UPDATE `object_id`=$3, `title` = $4, `date_start` = $5, `date_end` = $6, `time` = $7, `type` = $8, `privacy` = $9'.
+				', responsible_party_id = $10, responsible_user_ids = $11, description = $12, parent_ids = $13, reminds = $14, uid = $15, udate = CURRENT_TIMESTAMP, status = case status when 2 then 2 else $16 end, autoclose = $17'.
+				', has_deadline = $18, importance = $19, category_id = $20, allday = $21 ';
 			mysqli_query_params($sql, @Array(
 				$p['id']
 				,$p['case_id']
@@ -171,6 +173,8 @@ class Tasks{
 			$files->storeFiles($params);
 			unset($files);
 			/*end of specified files*/
+			Cases::updateCaseUpdateInfo($p['id']);
+
 		}
 		$remind_users = null;
 		if(($log_action_type == 21) || ($log_action_type == 22)) $remind_users = $p['responsible_user_ids'];
@@ -243,28 +247,6 @@ class Tasks{
 		return array('success' => true, 'reminds' => $p['reminds']);
 	}
 	
-	function destroy($p){
-		if(!is_array($p)) $p = Array($p);
-		$p = array_filter($p, 'is_numeric');
-		if(empty($p)) return array('success'=> false);
-		$tasks = array();
-		$res = mysqli_query_params('select id, title, cid, responsible_user_ids from tasks where id in ('.implode(',', $p).')', $_SESSION['user']['id']) or die(mysqli_query_error());
-		while($r = $res->fetch_assoc()){
-			if(!Security::canManageTask($r['id'])) throw new exception(L\No_access_for_this_action);
-			$tasks[]  = $r;
-		}
-		$res->close();
-		foreach($tasks as $t)
-			Log::add(Array('action_type' => 24, 'task_id' => $t['id'], /*'to_user_ids' => $t['responsible_user_ids'],/**/ 'remind_users' => $t['cid'].','.$t['responsible_user_ids'], 'info' => 'title: '.$t['title'])); 
-		mysqli_query_params('delete from tree where id in ('.implode(',', $p).')') or die(mysqli_query_error());
-		//mysqli_query_params('delete from tasks where id in ('.implode(',', $p).')') or die(mysqli_query_error());
-
-		$solr = new SolrClient();
-		foreach($p as $id) $solr->deleteId($id);
-		unset($solr);
-		return array('success' => true, 'ids' => $p);
-	}
-
 	function setUserStatus($p){
 		$rez = array('success' => true, 'id' => $p->id);
 		$task = array();
@@ -286,6 +268,8 @@ class Tasks{
 			$autoclosed = $this->checkAutocloseTask($p->id);
 		}
 		Log::add(Array('action_type' => $action_type, 'task_id' => $p->id, 'to_user_ids' => $p->user_id, 'remind_users' => $task['cid'].','.$p->user_id, 'autoclosed' => $autoclosed, 'info' => 'title: '.$task['title'])); // TO REVIEW
+
+		Cases::updateCaseUpdateInfo($p->id);
 		
 		SolrClient::runCron();
 		//exec('php ../../casebox/crons/cron_solr_update_objects.php'); //??
@@ -331,6 +315,8 @@ class Tasks{
 		
 		Log::add(Array('action_type' => 23, 'task_id' => $p->id, /*'to_user_ids' => $task['responsible_user_ids'], /**/'remind_users' => $task['cid']/*.','.$task['responsible_user_ids']/**/, 'autoclosed' => $this->checkAutocloseTask($p->id), 'info' => 'title: '.$task['title']));
 
+		Cases::updateCaseUpdateInfo($p->id);
+
 		SolrClient::runCron();
 		//exec('php ../../casebox/crons/cron_solr_update_objects.php'); 
 		return array('success' => true);
@@ -346,6 +332,8 @@ class Tasks{
 		/* log and notify all users about task closing */
 		Log::add(Array('action_type' => 27, 'task_id' => $id, /*'to_user_ids' => $task['responsible_user_ids'],/**/ 'remind_users' => $task['cid'].','.$task['responsible_user_ids'], 'info' => 'title: '.$task['title']));
 		$this->updateChildTasks($id);
+
+		Cases::updateCaseUpdateInfo($id);
 
 		SolrClient::runCron();
 		//exec('php ../../casebox/crons/cron_solr_update_objects.php'); 
@@ -365,6 +353,8 @@ class Tasks{
 		/* log and notify all users about task closing */
 		Log::add(Array('action_type' => 31, 'task_id' => $id, 'remind_users' => $task['cid'].','.$task['responsible_user_ids'], 'info' => 'title: '.$task['title']));
 		$this->updateChildTasks($id);
+
+		Cases::updateCaseUpdateInfo($id);
 
 		SolrClient::runCron();
 		return array('success' => true, 'id' => $id);
@@ -469,7 +459,7 @@ class Tasks{
 		if(isset($p->task_id) && is_numeric($p->task_id)) 
 			try{
 				require_once 'Cases.php';
-				$case_id = Cases::getId(false, false, $p->task_id);
+				$case_id = Cases::getId($p->task_id);
 			}catch(Exception $e){
 			
 			}
@@ -657,7 +647,7 @@ class Tasks{
 			if(!empty($files)){
 				$files_text .= '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.L('Files', $user['language_id']).':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
 				foreach($files as $f){
-					$files_text .= '<li style="margin:0;padding: 3px 0"><a href="#" name="file" fid="'.$f['id'].'" style="text-decoration: underline; color: #15C"><img style="float:left;margin-right:5px" src="'.getCoreHost($r['db']).'css/i/ext/'.getFileIconFile($f['name']).'"> '.$f['name'].'</a></li>';
+					$files_text .= '<li style="margin:0;padding: 3px 0"><a href="#" name="file" fid="'.$f['id'].'" style="text-decoration: underline; color: #15C"><img style="float:left;margin-right:5px" src="'.getCoreHost($r['db']).'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
 				}
 				$files_text .= '</ul></td></tr>';
 			}

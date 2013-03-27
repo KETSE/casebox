@@ -20,5 +20,6 @@ httpsdocs/cores/
 # exclude config.ini
 httpsdocs/config.ini
 
+httpsdocs/photos/
 #exclude notes folder
 notes

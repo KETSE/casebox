@@ -150,12 +150,12 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 				,handler: this.onPropertiesClick
 			})
 
-			,security: new Ext.Action({
-				text: L.Security
+			,permissions: new Ext.Action({
+				text: L.Permissions
 				,iconCls: 'icon-key'
 				,scope: this
 				,disabled: true
-				,handler: this.onSecurityClick
+				,handler: this.onPermissionsClick
 			})
 
 		}
@@ -313,7 +313,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 	}
 	,onBeforeNodeAppend: function(tree, parent, node){
 		node.setId(Ext.id());
-		node.attributes.nid = parseInt(node.attributes.nid);
+		node.attributes.nid = Ext.num(node.attributes.nid, node.attributes.nid);
 		node.attributes.system = parseInt(node.attributes.system);
 		node.attributes.type = parseInt(node.attributes.type);
 		node.attributes.subtype = parseInt(node.attributes.subtype);
@@ -337,6 +337,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		this.getRootNode().cascade(function(n){ if(pids.indexOf(n.attributes.nid) >= 0 ) n.reload()}, this)
 	}
 	,onObjectsSaved: function(form, e){
+		if(!this.rendered) return
 		n = this.getRootNode();
 		if(n) n.cascade(function(n){ if(n.attributes.nid == form.data.pid) n.reload()}, this)
 	}
@@ -358,7 +359,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			this.actions.rename.setDisabled(true) ;
 			this.actions.reload.setDisabled(true) ;
 			this.actions.createFolder.setDisabled(true) ;
-			this.actions.security.setDisabled(true) ;
+			this.actions.permissions.setDisabled(true) ;
 		}else{
 			canOpen = ([2, 4, 5, 6, 7].indexOf(node.attributes.type) >= 0 )
 			this.actions.open.setHidden(!canOpen);
@@ -396,7 +397,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			this.actions.rename.setDisabled(!canRename) ;
 			
 			this.actions.reload.setDisabled(false) ;
-			this.actions.security.setDisabled(false) ;
+			this.actions.permissions.setDisabled(false) ;
 		}
 	}
 	,isFavoriteNode: function(node){
@@ -452,7 +453,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 					,menu:[ this.actions.createCase, '-', this.actions.createTask, '-', this.actions.createFolder]
 				}
 				,'-'
-				,this.actions.security
+				,this.actions.permissions
 				,this.actions.properties
 				]
 			})
@@ -563,8 +564,8 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		if(Ext.isEmpty(n)) return;
 		App.clipboard.paste(n.attributes.nid, 'shortcut');
 	}
-	,onSecurityClick: function(b, e){
-		if(this.actions.security.isDisabled()) return;
+	,onPermissionsClick: function(b, e){
+		if(this.actions.permissions.isDisabled()) return;
 		n = this.selModel.getSelectedNode();
 		if(Ext.isEmpty(n)) return;
 		if(App.activateTab(null, n.attributes.nid, CB.SecurityPanel)) return;

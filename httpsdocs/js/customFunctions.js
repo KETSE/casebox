@@ -18,7 +18,7 @@ function getItemIcon(d){
 		case 1: 
 			switch(parseInt(d['subtype'])){
 				case 1:	break;
-				case 2:	return 'icon-star'; break;
+				case 2:	return 'icon-home'; break;
 				case 3:	return 'icon-blue-folder'; break;
 				case 4:	return 'icon-briefcase'; break;
 				case 5:	return 'icon-calendar-small'; break;

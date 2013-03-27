@@ -16,6 +16,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
 	title: 'List facet'
 	,autoHeight: true
 	,layout: 'fit'
+	,cachedNames: {}//used by tree_tags
 	,initComponent: function(){
 		this.store = new Ext.data.JsonStore({
 			autoDestroy: true
@@ -93,6 +94,17 @@ CB.FacetList = Ext.extend( CB.Facet, {
 			case 'sys_tags':
 				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: Ext.value(CB.DB.thesauri.getName(k), L.noStatus), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
 				break;
+			case 'tree_tags':
+				Ext.iterate(serverData, function(k, v){ 
+					/*cache object names here, for use in active facet*/
+					count = 0;
+					if(!Ext.isPrimitive(v)){
+						this.cachedNames[k] = v.name;
+						count = v.count;
+					}else count = v;
+					data.push({id: k, title: this.cachedNames[k], active: (values.indexOf(k+'') >=0) ? 1 : 0, items: count }) 
+				}, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
+				break;
 			case 'importance':
 				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: Ext.value(CB.DB.tasksImportance.getName(k), L.noStatus), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
 				break;
@@ -112,78 +124,8 @@ CB.FacetList = Ext.extend( CB.Facet, {
 			case 'template_id':
 				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.templates.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
 				break;
-			/*case 'date_end':
-				this.setTitle(L.Deadline);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: L[k.substr(1)], active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'case_status':
-				this.setTitle(L.Status);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: Ext.value(CB.DB.thesauri.getName(k), L.noStatus), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'missed':
-				this.setTitle(L.Missed);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: (k == 'true') ? L.yes: L.no, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'critical':
-				this.setTitle(L.Critical);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: (k == 'true') ? L.yes: L.no, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'privacy':
-				this.setTitle(L.Private);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: k ? L.yes: L.no, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'lawyer_ids':
-				this.setTitle(L.Lawyers);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.usersStore.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'responsible_party_id':
-				this.setTitle(L.ResponsibleParty);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.thesauri.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'office_ids':
-				this.setTitle(L.Office);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.thesauri.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'sys_tags':
-				this.setTitle(L.SystemTags);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.thesauri.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'user_tags':
-				this.setTitle(L.UserTags);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.thesauri.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'internal_sys_tags':
-			case 'internal_user_tags':
-				this.setTitle(L[fid]);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.thesauri.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'case_id':
-				this.setTitle(L.Case);
-				data = serverData;
-				Ext.each(data, function(i){ i.active = (values.indexOf(i.id+'') >=0) ? 1 : 0; }, this)
-				break;
-			case 'template_id':
-				this.setTitle(L.Type);
-				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.templates.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;
-			case 'type':
-				this.setTitle(L.Type);
-				Ext.iterate(serverData, function(k, v){
-					title = L.noData;
-					switch(parseInt(k)){
-					case 4: title = L.Contact; break;
-					//case 5: title = L.Organization; break;
-					}
-					data.push({id: k, title: title, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v })
-				}, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				break;/**/
 			default:
-				//if(isNaN(this.facetId)){
-					Ext.iterate(serverData, function(k, v){ data.push({id: k, title: k, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				/*}else{
-					this.setTitle(CB.DB.tagGroups.getName(fid));
-					Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.thesauri.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
-				}/**/
+				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: k, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
 		}
 		return data;
 	}

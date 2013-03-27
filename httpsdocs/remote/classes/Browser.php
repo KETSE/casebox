@@ -300,18 +300,24 @@ class Browser{
 							break;
 					}
 					if(!empty($existent_name)) mysqli_query_params('update tree set name = $2 where id = $1', array($obj_id, $this->getNewCopyName($p->pid, $existent_name) ) ) or die(mysqli_query_error());
+					Cases::updateCaseUpdateInfo($obj_id);
 				}
 
 				break;
 			case 'move':
+				foreach($process_ids as $id) Cases::updateCaseUpdateInfo($id);
 				$res = mysqli_query_params('select pid from tree where id in ('.implode(',', $process_ids).')') or die(mysqli_query_error());
 				while($r = $res->fetch_row()) $modified_pids[] = intval($r[0]);
 				$res->close();
 				mysqli_query_params('update tree set pid = $1 where id in ('.implode(',', $process_ids).')', $p->pid) or die(mysqli_query_error());
+				
+				foreach($process_ids as $id) Cases::updateCaseUpdateInfo($id);
+				
 				$this->markAllChildsAsUpdated($process_ids);
 				break;
 			case 'shortcut':
 				mysqli_query_params('insert into tree (pid, `system`, `type`, `subtype`, target_id, `name`, cid) SELECT $1, 0, 2, 0, id, `name`, $2 from tree where id in ('.implode(',', $process_ids).')', array($p->pid, $_SESSION['user']['id'])) or die(mysqli_query_error());
+				Cases::updateCaseUpdateInfo(last_insert_id());
 				break;
 		}
 		SolrClient::runCron();
@@ -538,7 +544,7 @@ class Browser{
 		// mysqli_query_params('update objects set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
 		// mysqli_query_params('update files set cid = $1, uid = $1 where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
 		// mysqli_query_params('update tasks set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());		
-		// SolrClient::runCron();
+		SolrClient::runCron();
 		return $rez;
 	}
 	public function isChildOf($id, $pid){
@@ -614,7 +620,7 @@ class Browser{
 		for ($i=0; $i < sizeof($data); $i++) {
 			$d = &$data[$i];
 			unset($d['iconCls']);
-			@$d['nid'] = intval($d['nid']);
+			//@$d['nid'] = intval($d['nid']);
 			@$d['system'] = intval($d['system']);
 			@$d['type'] = intval($d['type']);
 			@$d['subtype'] = intval($d['subtype']);
@@ -624,12 +630,12 @@ class Browser{
 						case 1:	if( (substr($d['name'], 0, 1) == '[') && (substr($d['name'], -1, 1) == ']') )
 								$d['name'] = L(substr($d['name'], 1, strlen($d['name']) -2));
 							break;
-						case 2:	$d['name'] = L\Favorites; break;
-						case 3:	$d['name'] = L\MyCaseBox; break;
+						case 2:	$d['name'] = L\MyCaseBox; break;
+						case 3:	$d['name'] = L\MyDocuments; break;
 						case 4:	$d['name'] = L\Cases; break;
 						case 5:	$d['name'] = L\Tasks; break;
 						case 6:	$d['name'] = L\Messages; break;
-						case 7:	$d['name'] = L\PrivateArea; break;
+						//case 7:	$d['name'] = L\RecycleBin; break;
 						case 8:	break;
 						case 9: break;
 						case 10: $d['name'] = L\PublicFolder; break;
@@ -647,4 +653,47 @@ class Browser{
 		return $data;
 	}
 
+	public static function getIcon(&$data){
+		if(!isset($data['type'])) return '';
+		
+		switch(intval($data['type'])){
+			case 0: return coalesce($data['iconCls'], 'icon-folder');
+				break; 
+			case 1: 
+				switch(intval(@$data['subtype'])){
+					case 1:	break;
+					case 2:	return 'icon-home'; break;
+					case 3:	return 'icon-blue-folder'; break;
+					case 4:	return 'icon-briefcase'; break;
+					case 5:	return 'icon-calendar-small'; break;
+					case 6:	return 'icon-mail-medium'; break;
+					case 7:	return 'icon-blue-folder-stamp'; break;
+					case 8:	return 'icon-folder'; break;
+					case 9: return 'icon-blue-folder'; break;
+					case 10: return 'icon-blue-folder-share'; break;
+					default: return coalesce($data['iconCls'], 'icon-folder'); break;
+				}
+				break;
+			case 2: return 'icon-shortcut';//case
+				break;
+			case 3: return 'icon-briefcase';//case
+				break;
+			case 4: //case object
+				if(!empty($data['cfg']) && !empty($data['cfg']->iconCls)) return $data['cfg']->iconCls;
+				if(!empty($data['template_id'])) return Templates::getIcon($data['template_id']);
+				return 'icon-none';
+				break;
+			case 5: //file
+				return Files::getIcon($data['name']);
+				break;
+			case 6:
+				if(@$d['status'] == 3) return 'icon-task-completed';
+				return 'icon-task';//task
+				break;
+			case 7: return 'icon-event';//Event
+			case 8: return 'icon-mail';//Message (email)
+				break;
+
+		}
+	}
 }

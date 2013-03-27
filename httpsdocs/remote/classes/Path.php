@@ -99,6 +99,18 @@ class Path{
 
 		return $rez;
 	}
+	
+	/* tree nodes can contain Translation variable in place of name like: [MyDocuments] */
+	public static function replaceCustomNames($path){
+		$path = explode('/', $path);
+		for ($i=0; $i < sizeof($path); $i++)
+			if( (substr($path[$i], 0, 1) == '[') && (substr($path[$i], -1) == ']') ){
+				$l = substr($path[$i], 1, mb_strlen($path[$i])-2);
+				$path[$i] = coalesce( L( $l ), $l);
+			}
+		$path = implode('/', $path);
+		return $path;
+	}
 
 	public static function getNodeSubtype($id){
 		$rez = null;

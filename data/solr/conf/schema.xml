@@ -403,6 +403,18 @@
 			</analyzer>
 		</fieldType>
 
+		<fieldType name="first_letter" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+			<analyzer type="index">
+				<tokenizer class="solr.KeywordTokenizerFactory"/>
+				<filter class="solr.LowerCaseFilterFactory" />
+				<!-- The TrimFilter removes any leading or trailing whitespace -->
+				<filter class="solr.TrimFilterFactory" />
+			</analyzer>
+
+			<analyzer type="query">
+				<tokenizer class="solr.KeywordTokenizerFactory"/>
+			</analyzer>			
+		</fieldType>
 
 		<!-- since fields of this type are by default not stored or indexed,
 				 any data added to them will be ignored outright.  --> 
@@ -451,6 +463,7 @@
 		<field name="date"	type="tdate"  		indexed="true" stored="true" />
 		<field name="date_end"	type="tdate" 		indexed="true" stored="true" />
 
+		<field name="oid" 	type="tint"		indexed="true" stored="true" />
 		<field name="cid" 	type="tint"		indexed="true" stored="true" />
 		<field name="cdate" 	type="tdate" 		indexed="true" stored="true" />
 		<field name="uid" 	type="tint"		indexed="true" stored="true" />
@@ -472,14 +485,21 @@
 		<field name="versions"		type="tint"	indexed="true" stored="true"/>
 
 		<field name="sys_tags" 		type="int"	indexed="true" stored="true" multiValued="true" />
+		<field name="tree_tags" 	type="int"	indexed="true" stored="true" multiValued="true" /><!-- this field contain tag ids from tree -->
 		<field name="user_tags" 	type="int"	indexed="true" stored="true" multiValued="true" />
 		
 		<field name="metas" 		type="text_ws"		indexed="true" stored="true" />
 		<field name="content"		type="text_general"	indexed="true" 	stored="true" /> <!-- including associated files parsed content -->
 		<field name="ntsc"    		type="tint"		indexed="true" stored="false" /> <!-- node type sort coolumn -->
 		<field name="sort_path" 	type="text_general_sort" indexed="true" stored="true" />
+
+		<field name="role_ids1" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
+		<field name="role_ids2" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
+		<field name="role_ids3" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
+		<field name="role_ids4" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
+		<field name="role_ids5" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
 		
-		<field name="name_first_letter" type="string" indexed="true" stored="true" />
+		<field name="name_first_letter" type="first_letter" indexed="true" stored="false" />
  </fields>
 
  <!-- Field to use to determine and enforce document uniqueness. 

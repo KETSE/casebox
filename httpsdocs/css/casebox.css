@@ -476,11 +476,12 @@ background-repeat: no-repeat; */
 .icon32-download {background-image: url(i/ico/32/download.png) !important; min-width: 38px}
 
 .icon32-edit {background-image: url(i/ico/32/clipboard.png) !important; min-width: 38px}
-.icon32-create {background-image: url(i/ico/32/file.png) !important; min-width: 38px}
+.icon32-create {background-image: url(i/ico/32/plus-circle.png) !important; min-width: 38px}
     .icon32-del {background-image: url(i/ico/32/delete.png) !important; min-width: 38px}
 .icon32-event-new {background-image: url(i/ico/32/cal-event-new.png) !important; min-width: 38px}
-    .icon32-task-new {background-image: url(i/ico/32/task-new.png) !important; min-width: 38px}
-    .icon32-open {background-image: url(i/ico/32/open.png) !important; min-width: 38px}
+.icon32-task-new {background-image: url(i/ico/32/task-new.png) !important; min-width: 38px}
+.icon32-open {background-image: url(i/ico/32/file.png) !important; min-width: 38px}
+.icon32-browse {background-image: url(i/ico/32/open.png) !important; min-width: 38px}
 .icon32-filter {background-image: url(i/ico/32/filter.png) !important; min-width: 38px}
 .icon32-filter-on {background-image: url(i/ico/32/filter-on2.png) !important; min-width: 38px}
 .icon32-preview {background-image: url(i/ico/32/preview.png) !important; min-width: 38px}
@@ -498,6 +499,7 @@ background-repeat: no-repeat; */
 .x-menu-item .icon32-task-new {background-image: url(i/ico/task.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .x-menu-item .icon32-event-new {background-image: url(i/ico/calendar-blue.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .x-menu-item .icon32-open {background-image: url(i/ico/folder-open.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.x-menu-item .icon32-browse {background-image: url(i/ico/open.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 
 .icon32-task-complete { background-image: url(i/ico/32/green-tick.png) !important; min-width: 38px}
 .icon32-versions { background-image: url(i/ico/32/compare-versions.png) !important; min-width: 38px}

@@ -32,6 +32,20 @@ CB.AddUserForm = Ext.extend(Ext.Window, {
 			});
 		}, this);
 		
+		data = []
+		CB.DB.groupsStore.each( function(r){
+			if(r.get('system') == 0) data.push(r.data);
+		}, this)
+		this.groupsStore = new Ext.data.JsonStore({
+			autoLoad: true
+			,fields: [ {name: 'id', type: 'int'}, 'name', 'title', {name: 'system', type: 'int'}, {name: 'enabled', type: 'int'} ]
+			,sortInfo: {
+				field: 'title'
+				,direction: 'ASC'
+			}
+			,data: data
+		});
+
 		items.push({
 				xtype: 'textfield'
 				,allowBlank: false
@@ -51,45 +65,46 @@ CB.AddUserForm = Ext.extend(Ext.Window, {
 				,name: 'confirm_password'
 			},{
 				xtype: 'combo'
-				,fieldLabel: L.Office
+				,fieldLabel: L.Group
 				,editable: false
-				,name: 'office_id'
-				,hiddenName: 'office_id'
-				,store: new Ext.data.DirectStore({
-					autoLoad: true
-					,autoDestroy: true
-					,proxy: new  Ext.data.DirectProxy({ paramsAsHash: true, directFn: Security.getManagedOffices })
-					,reader: new Ext.data.JsonReader({
-						successProperty: 'success'
-						,idProperty: 'id'
-						,root: 'data'
-						,messageProperty: 'msg'
-						,fields: [ {name: 'id', type: 'int', mapping: 'id'}, 'name' ]
-					}
-					)
-					,listeners: {
-						scope: this
-						,beforeload: function(st, p){st.baseParams.withNoOffice = true}
-						,load: function(st, r, o){
-							cbr = this.find('hiddenName', 'office_id')[0];
-							v = Ext.value(this.data.office_id, 0);
-							cbr.setValue(v);
-							cbr.fireEvent('select', cbr);
-						}
-					}
-				})
+				,name: 'group_id'
+				,hiddenName: 'group_id'
+				,store: this.groupsStore
+				// new Ext.data.DirectStore({
+				// 	autoLoad: true
+				// 	,autoDestroy: true
+				// 	,proxy: new  Ext.data.DirectProxy({ paramsAsHash: true, directFn: Security.getManagedOffices })
+				// 	,reader: new Ext.data.JsonReader({
+				// 		successProperty: 'success'
+				// 		,idProperty: 'id'
+				// 		,root: 'data'
+				// 		,messageProperty: 'msg'
+				// 		,fields: [ {name: 'id', type: 'int'}, 'name' ]
+				// 	}
+				// 	)
+				// 	,listeners: {
+				// 		scope: this
+				// 		,beforeload: function(st, p){st.baseParams.withNoOffice = true}
+				// 		,load: function(st, r, o){
+				// 			cbr = this.find('hiddenName', 'office_id')[0];
+				// 			v = Ext.value(this.data.office_id, 0);
+				// 			cbr.setValue(v);
+				// 			cbr.fireEvent('select', cbr);
+				// 		}
+				// 	}
+				// })
 				,valueField: 'id'
-				,displayField: 'name'
+				,displayField: 'title'
 				,triggerAction: 'all'
-				,value: 0
+				,value: null
 				,mode: 'local'
-				,listeners: {
-					scope: this
-					,select : function(cb, r, idx){
-						this.find('name', 'role_id')[0].setDisabled(cb.getValue() == 0);
-					}
-				}
-			},{
+				// ,listeners: {
+				// 	scope: this
+				// 	,select : function(cb, r, idx){
+				// 		this.find('name', 'role_id')[0].setDisabled(cb.getValue() == 0);
+				// 	}
+				// }
+			}/*,{
 				xtype: 'combo'
 				,disabled: true
 				,editable: false
@@ -102,7 +117,7 @@ CB.AddUserForm = Ext.extend(Ext.Window, {
 				,triggerAction: 'all'
 				,mode: 'local'
 				,value: 4
-			},{xtype: 'label', name: 'E', hideLabel: true, cls:'cR', text: ''});
+			}/**/,{xtype: 'label', name: 'E', hideLabel: true, cls:'cR', text: ''});
 			
 		Ext.apply(this, {
 			buttons:[
@@ -161,20 +176,38 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 	,border: false
 	,enableDD: true
 	,initComponent: function(){
-	
-		treeMenuItems = [];
-		treeMenuItems.push({text: L.Add, iconCls: 'icon-plus', handler: function(){
-				w = new CB.AddUserForm({modal: true, ownerCt: this, data: {callback: this.addUser}});
-				w.show();
-			}, scope: this}
-		);
+		this.actions = {
+			add: new Ext.Action({
+				text: L.Add
+				,iconCls: 'icon-plus'
+				,handler: function(){
+					w = new CB.AddUserForm({modal: true, ownerCt: this, data: {callback: this.addUser}});
+					w.show();
+				}
+				,scope: this
+			})
+			,del: new Ext.Action({
+				text: L.Delete
+				,iconCls: 'icon-minus'
+				,disabled: true
+				,handler: this.delNode
+				,scope: this
+			})
+			,remove: new Ext.Action({
+				text: L.Remove
+				,iconCls: 'icon-user-arrow'
+				,disabled: true
+				,handler: this.deassociateNode
+				,scope: this
+			})
+			,reload: new Ext.Action({
+				iconCls: 'icon-reload'
+				,qtip: L.Reload
+				,scope:this
+				,handler: function(){this.getRootNode().reload();}
+			})
 
-		treeMenuItems.push([
-			{text: L.Delete, iconCls: 'icon-minus', disabled: true, handler: this.delNode, scope: this}
-			,{text: L.Remove, iconCls: 'icon-user-arrow', disabled: true, handler: this.deassociateNode, scope: this}
-			,'->'
-			,{iconCls: 'icon-reload', qtip: L.Reload, scope:this, handler: function(){this.getRootNode().reload();}}
-		]);
+		}
 		
 		Ext.apply(this, {
 			loader: new Ext.tree.TreeLoader({
@@ -200,14 +233,20 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 				,nid: 'root'
 				,text: 'root'
 			}
-			,tbar: treeMenuItems
+			,tbar: [
+				this.actions.add
+				,this.actions.del
+				,this.actions.remove
+				,'-'
+				,this.actions.reload
+			]
 			,listeners:{
 				afterlayout: function(){this.getRootNode().expand()}
 				,nodedragover: function(o){
 					if( (o.point != 'append')
 						|| (o.target == o.dropNode.parentNode)
-						|| (o.target.attributes.kind != 2) 
-						|| ((o.target.attributes.role_id < 1) || (o.target.attributes.role_id > 2))
+						|| (o.target.getDepth() != 1) 
+						|| (o.target.attributes.nid < 1) // || (o.target.attributes.role_id > 2)
 						){
 						o.cancel = true;
 						return;
@@ -220,18 +259,21 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 				,dragdrop: {scope: this, fn: function( tree, node, dd, e ){
 						this.sourceNode = dd.dragOverData.dropNode;
 						this.targetNode = dd.dragOverData.target;
-						UsersGroups.associate(this.sourceNode.attributes.id, this.targetNode.attributes.id, this.processAssociate, this);
+						UsersGroups.associate(this.sourceNode.attributes.nid, this.targetNode.attributes.nid, this.processAssociate, this);
 					}
 				}
 				,beforeappend: { scope: this, fn: function(t, p, n){ 
-					n.id = Ext.id();
-					if(n.attributes.kind == 1){
-						if(n.attributes.role_id > 0 && n.attributes.active != 1){n.attributes.text = n.attributes.text + ' <span class="cG">' + L.inactive + '</span>';}; 
-						n.attributes.iconCls = 'icon-user-role' + n.attributes.role_id + '-'+ Ext.value(n.attributes.sex, '');
+					//n.id = Ext.id();
+					// clog(p.getDepth());
+					if( p.getDepth() == 1 ){ //n.attributes.role_id > 0 && 
+						if(n.attributes.enabled != 1){
+							n.attributes.text = n.attributes.text + ' <span class="cG">' + L.inactive + '</span>';
+						}
+						n.attributes.iconCls = 'icon-user-' + Ext.value(n.attributes.sex, '');
 					}
-					if(n.attributes.role_id > 0 && n.attributes.role_id < 3){n.attributes.cls = n.attributes.cls + ' fwB'; n.getUI().addClass('fwB')}; 
-					if(n.attributes.pid == App.loginData.id){n.attributes.cls = n.attributes.cls + ' cDB'; n.getUI().addClass('cDB')};
-					if(n.attributes.users > 0) n.attributes.text += ' <span class="cG">(' + n.attributes.users + ')</span>';
+					// if(n.attributes.role_id > 0 && n.attributes.role_id < 3){n.attributes.cls = n.attributes.cls + ' fwB'; n.getUI().addClass('fwB')}; 
+					if(n.attributes.cid == App.loginData.id){n.attributes.cls = n.attributes.cls + ' cDB'; n.getUI().addClass('cDB')};
+					// if(n.attributes.users > 0) n.attributes.text += ' <span class="cG">(' + n.attributes.users + ')</span>';
 					n.setText(n.attributes.text);
 				} }
 				,remove: this.updateChildrenCount
@@ -240,21 +282,12 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 			,selModel: new Ext.tree.DefaultSelectionModel({
 				listeners: {
 					selectionchange: {scope: this, fn: function(sm, node){ 
-							tb = this.getTopToolbar();
 							if(Ext.isEmpty(node)){
-								tb.items.get(1).setDisabled(true); 
-								tb.items.get(2).setDisabled(true); 
+								this.actions.del.setDisabled(true); 
+								this.actions.remove.setDisabled(true); 
 							}else{
-								p = node.parentNode;
-								isGroupAdmin = false;
-								if(p) isGroupAdmin = ( (p.attributes.role_id > 0) && (p.attributes.role_id <= 2) );
-								if(App.loginData.admin){
-									tb.items.get(1).setDisabled(node.attributes.kind > 2);
-									tb.items.get(2).setDisabled(!isGroupAdmin);
-								}else{
-									tb.items.get(1).setDisabled((node.attributes.kind != '1') || ((node.attributes.pid != App.loginData.id) && (!App.loginData.admin))); 
-									tb.items.get(2).setDisabled((node.attributes.kind != '1') || (!isGroupAdmin)  || (p.attributes.role_id >= node.attributes.role_id) ); 
-								}
+								this.actions.del.setDisabled(node.getDepth() <2);
+								this.actions.remove.setDisabled( (node.getDepth() <2) || (node.parentNode.attributes.nid <1 ) );
 							}
 						} 
 					}
@@ -264,27 +297,26 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 		CB.UsersGroupsTree.superclass.initComponent.apply(this, arguments);
 	}
 	,afterRender: function() {
-        CB.UsersGroupsTree.superclass.afterRender.apply(this, arguments);
-    }
+		CB.UsersGroupsTree.superclass.afterRender.apply(this, arguments);
+	}
 	,addUser: function(params, t){
 		//params: name, office_id, role_id
 		UsersGroups.addUser(params, t.processAddUser, t);
 	}
 	,processAddUser: function(r, e){
 		if(r.success !== true) return false;
-		path = '/root/o-'+r.data.office_id+'/u-'+r.data.tag_id;
+		path = '/root/'+r.data.group_id+'/'+r.data.nid;
 		this.getRootNode().reload(function(){this.selectPath(path, 'nid')}, this);
 		App.mainViewPort.fireEvent('useradded', r.data);
 	}
 	,sortTree: function(n1, n2){ 
-		return ( 	  (n1.attributes.role_id > n2.attributes.role_id) ? 1 : 
-					( (n1.attributes.role_id < n2.attributes.role_id) ? -1 : ( (n1.text < n2.text) ? -1 : 1 ) )   )
+		return (n1.text < n2.text) ? -1 : 1;
 	}
 	,deassociateNode: function(){
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n) return;
-		Ext.Msg.confirm(L.ExtractUser, L.ExtractUserMessage.replace('{user}', n.attributes.name).replace('{office}', n.parentNode.attributes.text),
-			function(b){if(b == 'yes') UsersGroups.deassociate(n.attributes.id, n.parentNode.attributes.id, this.processDeassociate, this); }, this
+		Ext.Msg.confirm(L.ExtractUser, L.ExtractUserMessage.replace('{user}', n.attributes.name).replace('{group}', n.parentNode.attributes.text),
+			function(b){if(b == 'yes') UsersGroups.deassociate(n.attributes.nid, n.parentNode.attributes.nid, this.processDeassociate, this); }, this
 		)
 	}
 	,processDeassociate: function(r, e){
@@ -293,8 +325,8 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 		attr = n.attributes;
 		attr.iconCls = 'icon-user-gray';
 		n.remove(true);
-		if(r.outOfOffice){
-			p = this.getRootNode().findChild( 'nid', 'o-0');
+		if(r.outOfGroup){
+			p = this.getRootNode().findChild( 'nid', '-1');
 			if(p.loaded){
 				p.appendChild(attr);
 				p.sort(this.sortTree);
@@ -306,39 +338,39 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 	}
 	,processAssociate: function(r, e){
 		if(r.success !== true) return false;
-		attr = this.sourceNode.attributes;
-		//attr.id = Ext.id()
-		//attr.iconCls = 'icon-user-gray';
+		attr = Ext.apply({}, this.sourceNode.attributes);
 		if(this.targetNode.loaded){
+			attr.id = Ext.id();
 			this.targetNode.appendChild(attr);
 			this.targetNode.sort(this.sortTree);
 		}else{
 			this.targetNode.attributes.users++;
 			this.targetNode.setText(this.targetNode.attributes.text.split('<')[0] + ' <span class="cG">(' + this.targetNode.attributes.users + ')</span>');
 		}
-		if(this.sourceNode.parentNode.attributes.nid == 'o-0') this.sourceNode.remove(true);
+		if(this.sourceNode.parentNode.attributes.nid == '-1') this.sourceNode.remove(true);
 	}
 	,delNode: function(){
 		n = this.getSelectionModel().getSelectedNode();
+		clog(n);
 		if(!n) return;
-		switch(n.attributes.kind){
-		case '1': 
+		switch(n.getDepth()){
+		case 2: 
 			this.deletedUserData = n.attributes;
 			Ext.MessageBox.confirm(L.Confirmation, L.DeleteUser + ' "'+n.attributes.text+'"?', 
 			function(btn, text){
 				if(btn == 'yes'){
 					n = this.getSelectionModel().getSelectedNode();
-					UsersGroups.deleteUser(n.attributes.id, this.processDelNode, this);
+					UsersGroups.deleteUser(n.attributes.nid, this.processDelNode, this);
 				}
 			}
 			, this);
 			break;
-		case '2': 
-			Ext.MessageBox.confirm(L.Confirmation, L.DeleteOfficeConfirmationMessage + ' "'+n.attributes.text+'"?', 
+		case '1': 
+			Ext.MessageBox.confirm(L.Confirmation, L.DeleteGroupConfirmationMessage + ' "'+n.attributes.text+'"?', 
 			function(btn, text){
 				if(btn == 'yes'){
 					n = this.getSelectionModel().getSelectedNode();
-					UsersGroups.deleteOffice(n.attributes.id, this.processDelNode, this);
+					UsersGroups.deleteGroup(n.attributes.nid, this.processDelNode, this);
 				}
 			}
 			, this);
@@ -383,8 +415,8 @@ CB.UserEditWindow = Ext.extend(Ext.Window, {
 				header: false
 				,data: this.data
 				,api: {
-					load: 	UsersGroups.getUserData
-					,submit: 	UsersGroups.saveUserData
+					load: UsersGroups.getUserData
+					,submit: UsersGroups.saveUserData
 				}
 				,listeners: {
 					scope: this
@@ -411,7 +443,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 			return '';
 		}
 		this.userInfo = new Ext.DataView({
-			tpl: ['<img class="fl user-photo-field click icon-user32-{sex}" src="css/i/s.gif">'
+			tpl: ['<img class="fl user-photo-field click icon-user32-{sex}" src="/photo/{id}.png?{[ (new Date()).format("His") ]}">'
 				,'<span class="fwB click">{l'+App.loginData.language_id+'}</span><br />'
 				,'<span class="cG">'+L.User+':</span> {name}, <span class="cG">'+L.lastAction+':</span> {[ Ext.isEmpty(values.last_action_time) ? "" : values.last_action_time ]}<br />'
 				,'<span class="cG">'+L.addedByUser+':</span> {owner}, {cdate}'
@@ -470,7 +502,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 						,sm: new Ext.grid.CellSelectionModel()
 						,store: new Ext.data.JsonStore({
 							autoDestroy: true
-							,fields: ['id', 'office', 'manager', 'user']
+							,fields: [{name: 'id', type: 'int'}, 'name', {name: 'active', type: 'int'}]
 						})
 						,colModel: new Ext.grid.ColumnModel({
 							defaults: {
@@ -478,31 +510,31 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 								,sortable: true
 							}
 							,columns: [
-								{header: L.Offices, width: 150, dataIndex: 'office'}
-								,{header: L.Manager, dataIndex: 'manager', renderer: bulletRenderer}
+								{header: L.Groups, width: 150, dataIndex: 'name'}
+								,{header: L.Active, dataIndex: 'active', renderer: bulletRenderer}
 								//,{header: 'Адвокат', dataIndex: 'lawyer', renderer: bulletRenderer}
-								,{header: L.User, dataIndex: 'user', renderer: bulletRenderer}
+								// ,{header: L.User, dataIndex: 'user', renderer: bulletRenderer}
 							]
 						})
 						,viewConfig: {
 							forceFit: true
 							,markDirty: false
 							,getRowClass: function(r, index) {
-								return ((r.get('user') != 1)  && (r.get('manager') != 1)) ? '' : 'fwB';
+								return (r.get('active') != 1) ? '' : 'fwB';
 							}
 						}
 						,listeners:{
 							celldblclick: {scope: this, fn: function(g, ri, ci, e){
 									r = g.getStore().getAt(ri);
 									switch(g.getColumnModel().getDataIndex(ci)){
-										case 'manager':
-											r.set('manager', (r.get('manager') == 1) ? null : 1);
-											r.set('user', null);
+										case 'active':
+											r.set('active', (r.get('active') == 1) ? null : 1);
+											// r.set('user', null);
 											break;
-										case 'user': 
-											r.set('manager', null);
-											r.set('user', (r.get('user') == 1) ? null : 1);
-											break;
+										// case 'user': 
+										// 	r.set('manager', null);
+										// 	r.set('user', (r.get('user') == 1) ? null : 1);
+										// 	break;
 										default: return;
 									}
 									this.fireEvent('change');
@@ -552,8 +584,15 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 			this.userInfo.data = response.data;
 			this.userInfo.update(response.data);
 			this.grid.setDisabled(response.data.id == App.loginData.id);//disable editing access for self
-			this.grid.getStore().loadData(response.data.offices, false);
-			this.canEditUserData = ((App.loginData.admin) || (response.data.pid == App.loginData.id) || (response.data.id == App.loginData.id));
+			
+			accessData = [];
+			CB.DB.groupsStore.each( function(r){
+				if(r.get('system') == 0)
+					accessData.push( {id: r.get('id'), 'name': r.get('title'), 'active': (response.data.groups.indexOf(String(r.get('id') ) ) >=0 ) ? 1: 0})
+			}, this)
+			this.grid.getStore().loadData(accessData, false);
+			
+			this.canEditUserData = true;//((App.loginData.admin) || (response.data.cid == App.loginData.id) || (response.data.id == App.loginData.id));
 			eb = this.getTopToolbar().find('iconCls', 'icon-pencil')[0];
 			eb.setVisible(this.canEditUserData); // edit button
 			idx = this.getTopToolbar().items.indexOf(eb);
@@ -571,17 +610,14 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 	}
 	,saveData: function(){
 		this.fireEvent('beforesave');
-		/*if(this.find('name', 'passwd')[0].getValue() != this.find('name', 'passwd2')[0].getValue()){
-			Ext.Msg.alert(L.Error, L.PasswordMissmatch);
-			return;
-		}/**/
 		this.getEl().mask(L.SavingChanges + ' ...')
-		params = { offices: [] };
-		this.grid.getStore().each(function(r){params.offices.push(r.data)}, this);
+		params = { groups: [] };
+		this.grid.getStore().each(function(r){ if(r.get('active') == 1) params.groups.push(r.get('id'))}, this);
 		params.id = this.data.id;
 		UsersGroups.saveAccessData(params, function(r, e){ this.setDirty(false); this.getEl().unmask(); this.fireEvent('save');}, this);
 	}			
 	,onEditUserDataClick: function(w, idx, el, ev){
+		clog(arguments);
 		if(ev && (ev.getTarget().localName == "img") ) {
 			el = this.find('name', 'photo')[0].getEl();
 			el.dom.click();
@@ -683,12 +719,12 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
 	}
 	,onTreeSelectionChange: function(sm, node){
 		n = this.tree.getSelectionModel().getSelectedNode();
-		if((!n) || (n.attributes.kind != 1)){
+		if((!n) || (n.getDepth() != 2)){
 			this.form.setDisabled(true);
 			if(this.loadFormTask) this.loadFormTask.cancel();
 			return ;
 		}
-		this.loadId = n.attributes.id;
+		this.loadId = n.attributes.nid;
 		this.onLoadFormTask();
 	}
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -723,6 +759,7 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
 		}, this);
 	}
 	,onEditUserData: function(){
+		clog('onEditUserData')
 		if(!this.form.canEditUserData) return;
 		data = Ext.apply({}, this.form.data);
 		data.id = data.id.split('-').pop();

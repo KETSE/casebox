@@ -70,8 +70,8 @@ class Security {
 		$sql = 'select f_get_tree_path($1) `path`, name, f_get_tree_inherit_ids(id) `obj_ids` from tree where id = $1';
 		$res = mysqli_query_params($sql, $p->id) or die(mysqli_query_error());
 		if($r = $res->fetch_assoc()){
-			$rez['path'] = $r['path'];
-			$rez['name'] = $r['name'];
+			$rez['path'] = Path::replaceCustomNames($r['path']);
+			$rez['name'] = Path::replaceCustomNames($r['name']);
 			$obj_ids = explode('/', substr($r['obj_ids'], 1));
 		}
 		$res->close();
@@ -143,7 +143,6 @@ class Security {
 		$res = mysqli_query_params($sql, $user_group_id) or die(mysqli_query_error());
 		while($r = $res->fetch_row()) if(!in_array($r[0], $user_group_ids)) $user_group_ids[] = $r[0];
 		$res->close();
-		// if($user_group_id == 18) var_dump($user_group_ids);
 		/* end of getting group ids where passed $user_group_id is a member*/
 		
 		$acl_order = array_flip($ids);
@@ -158,7 +157,6 @@ class Security {
 		$set_bits = 0;
 		$i=0;
 		ksort($acl, SORT_NUMERIC);
-		// if($user_group_id == 18) var_dump($acl);
 		reset($acl);
 		while( ( current($acl) !== false ) && ($set_bits < 12) ){
 		 	$i = key($acl);
@@ -182,7 +180,6 @@ class Security {
 					}
 					$allow = $allow >> 1;
 				}
-				// if($user_group_id == 18) var_dump($rez);
 					
 			}
 			if(!empty($acl[$i]))
@@ -208,7 +205,6 @@ class Security {
 			}
 			next($acl);
 		}
-		// if($user_group_id == 18) var_dump($rez);
 					
 		return $rez;
 	}

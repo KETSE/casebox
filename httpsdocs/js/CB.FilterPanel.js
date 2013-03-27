@@ -47,8 +47,10 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
 	,updateActiveFiltersFacet: function(options){
 		if(Ext.isEmpty(this.activeFileterFacet)) return;
 		af_data = [];
+		clog('options', options)
 		Ext.iterate(options.params.filters, function(key, val, obj){
 			vals = {};
+			clog(val);
 			Ext.each(val, function(f){ for(i = 0; i < f.values.length; i++) vals[f.values[i]] = 1; }, this)
 			fd = CB.FacetList.prototype.getFacetData(key, vals, options);
 			for (var i = 0; i < fd.length; i++){

@@ -124,10 +124,15 @@ class System {
 		$pid = 0;
 		if($r = $res->fetch_row()){
 			$pid = $r[0];
+			try {
+				mysqli_query_params('delete from tags where id = $1', $id) or die(mysqli_query_error());
+				
+			} catch (Exception $e) {
+				return array('success' => false, 'msg' => 'Cannot delete selected tag, it is used in the system.');
+			}
 			mysqli_query_params('update tags set `order` = `order` - 1 where pid = $1 and `order` > $2', array($pid, $r[1])) or die(mysqli_query_error());
 		}
 		$res->close();
-		mysqli_query_params('delete from tags where id = $1', $id) or die(mysqli_query_error());
 		return array('success' => true, 'updatedTagGroups' => $this->updateTagGroupsResultTable($pid));
 	}
 

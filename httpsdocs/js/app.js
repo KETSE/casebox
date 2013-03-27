@@ -536,8 +536,9 @@ function initApp(){
 									Ext.each(data, function(d){ value.push( d.id ? d.id : d)}, this)
 									value = value.join(',');
 								}else value = data;
-								e.record.set('value', value);
-								this.grid.fireEvent('change');
+								this.record.set('value', value);
+								if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
+								else this.grid.fireEvent('change', e);
 							}, e)
 							if(w.setData) w.setData(data);
 							w.show();
@@ -762,7 +763,7 @@ function initApp(){
 		switch(type){
 			// case 2:  //link
 			// 	break;
-			//case 3: App.openCase(id); break;
+			case 3: App.openCase(id); break;
 			case 4:
 			case 8:
 				App.mainViewPort.fireEvent('openobject', {id: id}, e);

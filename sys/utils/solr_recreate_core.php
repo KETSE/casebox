@@ -8,8 +8,8 @@
 	example: php -f solr_recreate_core.php dev
 */
 if(PHP_OS == 'WINNT'){
-  echo exec('net stop jetty');
-}else echo exec('service jetty stop');
+  shell_exec('net stop jetty');
+}else shell_exec('service jetty stop');
 
 define('SOLR_DATA_PATH', realpath('../../data/solr/data').DIRECTORY_SEPARATOR);
 $dir = SOLR_DATA_PATH;

@@ -31,6 +31,7 @@
 	if(!is_array($f) || empty($f)) exit(0); //tree element does not exist
 	$preview = array();
 	switch($f['type']){
+		case 3:
 		case 4:
 		case 8:
 			$o = new Objects();

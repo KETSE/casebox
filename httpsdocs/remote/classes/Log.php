@@ -23,7 +23,7 @@ class Log{
 		if(empty($p['case_id']) && (!empty($p['object_id']) || !empty($p['file_id']) || !empty($p['task_id']))){
 			require_once 'Cases.php';
 			try{
-				@$p['case_id'] = Cases::getId($p['object_id'], $p['file_id'], $p['task_id']);
+				@$p['case_id'] = Cases::getId( coalesce($p['object_id'], $p['file_id'], $p['task_id']) );
 			}catch(Exception $e){
 				//Task is independent, not associated 
 			}

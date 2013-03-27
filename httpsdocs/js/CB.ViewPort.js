@@ -83,7 +83,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 				,favoritetoggle: this.toggleFavorite
 				,taskcreate: this.onTaskCreate
 				,taskedit: this.onTaskEdit
-				,tasksdelete: this.onTasksDelete
 				,useradded: this.onUsersChange
 				,userdeleted: this.onUsersChange
 				//,taskcreated: function(){}
@@ -162,6 +161,17 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 				});
 				w.show();
 			}}
+			,{text: L.UploadPhoto, iconCls: 'file-gif', handler: function(b, e){
+				w = new CB.FileUploadWindow({
+					title: L.UploadPhoto
+					,iconCls: 'file-gif'
+					,fieldName: 'photo'
+					,fileOnly: true
+					,api: User.uploadPhoto
+					,data: {id: App.loginData.id}
+				});
+				w.show();
+			}}
 			,{text: L.ChangePassword, iconCls: 'icon-key', handler: function(){
 				w = new CB.ChangePasswordWindow({data: {id: App.loginData.id}});
 				w.show();
@@ -208,16 +218,14 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		App.mainAccordion.getEl().unmask();
 		activeIndex = 0;
 		if(r.success !== true) return;
-		clog(r.tbarItems, 'r.tbarItems')
 		if(!Ext.isEmpty(r.tbarItems)){
 			/* inserting specified components before userMenu item */
 			userMenuItem = App.mainToolBar.find( 'name', 'userMenu')[0];
-			index = App.mainToolBar.items.indexOf(userMenuItem);
-			clog('index', index);
+			// index = App.mainToolBar.items.indexOf(userMenuItem);
+			index = 2;
 			for (var i = 0; i < r.tbarItems.length; i++) {
 				if(!Ext.isEmpty(r.tbarItems[i].link)) r.tbarItems[i].listeners = {scope: this, click: this.onAccordionLinkClick }
 				App.mainToolBar.insert(index, r.tbarItems[i]);
-				clog('inserting', r.tbarItems[i])
 				index++;
 				// App.mainAccordion.add(r.items[i])
 			}
@@ -237,9 +245,14 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			App.mainTree = trees[0];
 			for (var i = 0; i < trees.length; i++) {
 				trees[i].getSelectionModel().on('selectionchange', this.onChangeActiveFolder, this)
+				trees[i].on('click', this.onTreeNodeClick, this)
 				trees[i].on('afterrename', this.onRenameTreeElement, this)
 			};
 		}
+	}
+	,onTreeNodeClick: function(node, e){
+		if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
+		if(node.isSelected()) this.onChangeActiveFolder(null, node);
 	}
 	,onChangeActiveFolder: function(sm, node){
 		if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
@@ -269,8 +282,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		if(ev && ev. stopPropagation) ev.stopPropagation();
 		App.openUniqueTabbedWidget('CBCalendarPanel');
 	}
-	,openDefaultExplorer: function(ev){
-		if(!App.activateTab(App.mainTabPanel, 'explorer')) App.explorer = App.addTab(App.mainTabPanel, new CB.FolderView({ rootId: '/', data: {id: 'explorer' }, closable: false }) )
+	,openDefaultExplorer: function(rootId){
+		if(Ext.isEmpty(rootId)) rootId = Ext.value( App.mainTree.rootId, '/' );
+		if(!App.activateTab(App.mainTabPanel, 'explorer')) App.explorer = App.addTab(App.mainTabPanel, new CB.FolderView({ rootId: rootId, data: {id: 'explorer' }, closable: false }) )
 	}
 	,openCaseById: function(config){
 		c = App.activateTab(App.mainTabPanel, config.params.id, CB.Case);
@@ -393,19 +407,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
 		dw = new CB.Tasks(p);
 		dw.show();
-	}
-	,onTasksDelete: function(data){
-		msg = (data.ids.length == 1) ? L.DeletingConfirmationMessage +' ' + L.task + ' "' +data.title + '"?': L.DeleteSelectedTasksMessage;
-		Ext.MessageBox.confirm(L.Confirmation, msg, 
-		function(btn, text){
-			if(btn == 'yes'){
-				Tasks.destroy(ids, function(r, e){
-					if(r.success !== true) return;
-					this.fireEvent('tasksdeleted', r.ids);
-				}, this);
-			}
-		}
-		, this);		
 	}
 	,onUsersChange: function(){
 		CB.DB.usersStore.reload();

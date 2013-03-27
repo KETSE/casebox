@@ -19,12 +19,15 @@ class Auth {
 		
 		$rez = Array('success' => false, 'msg' => L\Auth_fail);
 		$user_id = false;
+		/* try to authentificate */
 		$res = mysqli_query_params('CALL p_user_login($1, $2, $3)', array($login, $pass, $ips)) or die(mysqli_query_error());
 		if (($r = $res->fetch_row()) && ($r[1] == 1))  $user_id = $r[0];
 		$res->close();
 		mysqli_clean_connection();
+
 		if($user_id){
 			$rez = Array('success' => true, 'user' => array());
+			
 			/*fetching core languages and store them in the session for any use */
 			$_SESSION['languages'] = array('per_id' => array(), 'per_abrev' => array(), 'string' => '', 'count' => 0);
 			$sql = 'SELECT id, name, abreviation, locale, long_date_format, short_date_format, time_format FROM languages order by name';
@@ -108,6 +111,8 @@ class Auth {
 				}
 			}
 			/* end of storing max file versions configuration fr core in session */
+
+			User::checkUserFolders();
 		}
 		Log::add(Array('action_type' => 1, 'result' => isset($_SESSION['user']), 'info' => 'user: '.$login."\nip: ".$ips));
 		return $rez;

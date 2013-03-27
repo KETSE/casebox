@@ -11,7 +11,7 @@ class BrowserView extends BrowserTree{
 		);
 			
 		if(!empty($p->path)) $rez['data'] = $this->getCustomControllerResults($p->path);
-		if($rez['data'] === false) $rez['data'] = $this->getDefaultControllerResults($p);
+		if($rez['data'] === false) $rez = array_merge($rez, $this->getDefaultControllerResults($p));
 
 		$this->prepareResults($rez['data']);
 		$this->updateLabels($rez['data']);
@@ -40,7 +40,7 @@ class BrowserView extends BrowserTree{
 			}
 			$res->close();
 		}
-		return $rez['data'];
+		return $rez;
 	}
 
 	public function getSummaryData($p){

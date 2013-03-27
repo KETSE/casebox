@@ -29,7 +29,7 @@ class Search extends SolrClient{
 			,'q.alt' => '*:*'
 			,'qf' => "name content^0.5"
 			,'tie' => '0.1'
-			,'fl' => "id, pid, path, name, type, subtype, system, size, date, date_end, cid, cdate, udate, case_id, case, sys_tags,user_tags, template_id, user_ids, status, category_id, importance, versions"//iconCls, 
+			,'fl' => "id, pid, path, name, type, subtype, system, size, date, date_end, oid, cid, cdate, udate, case_id, case, sys_tags,user_tags, template_id, user_ids, status, category_id, importance, versions"//iconCls, 
 			,'sort' => 'ntsc asc'
 		);
 		/* initial parameters */
@@ -63,22 +63,33 @@ class Search extends SolrClient{
 		$fq[] = '!deny_user_ids:'.$_SESSION['user']['id'];
 		/* end of adding security filter*/
 
-		if(!empty($p->pid)) $fq[] = 'pid:'.intval($p->pid);
+		if(!empty($p->pid)){
+			$ids = toNumericArray($p->pid);
+			if(!empty($ids)) $fq[] = 'pid:('.implode(' OR ', $ids).')';
+		}
 		if(!empty($p->ids)){
-			if(!is_array($p->ids)) $p->ids = explode(',', $p->ids);
-			if(!empty($p->ids)) $fq[] = 'id:('.implode(' OR ', $p->ids).')';
+			$ids = toNumericArray($p->ids);
+			if(!empty($ids)) $fq[] = 'id:('.implode(' OR ', $ids).')';
 		} 
 		if(!empty($p->pids)){
-			if(!is_array($p->pids)) $p->pids = explode(',', $p->pids);
-			if(!empty($p->pids)) $fq[] = 'pids:('.implode(' OR ', $p->pids).')';
+			$ids = toNumericArray($p->pids);
+			if(!empty($ids)) $fq[] = 'pids:('.implode(' OR ', $ids).')';
 		} 
-		if(!empty($p->types)) $fq[] = 'type:('.implode(' OR ', $p->types).')';
-		if(!empty($p->templates)) $fq[] = 'template_id:('.implode(' OR ', $p->templates).')';
-		if(!empty($p->tags)) $fq[] = 'sys_tags:('.implode(' OR ', $p->tags).')';
+		if(!empty($p->types)){
+			$ids = toNumericArray($p->types);
+			if(!empty($ids)) $fq[] = 'type:('.implode(' OR ', $ids).')';
+		}
+		if(!empty($p->templates)){
+			$ids = toNumericArray($p->templates);
+			if(!empty($ids)) $fq[] = 'template_id:('.implode(' OR ', $ids).')';
+		}
+		if(!empty($p->tags)){
+			$ids = toNumericArray($p->tags);
+			if(!empty($ids))$fq[] = 'sys_tags:('.implode(' OR ', $ids).')';
+		}
 		if(!empty($p->dateStart)) $fq[] = 'date:['.$p->dateStart.' TO '.$p->dateEnd.']';
 
 		$this->params['fq'] = $fq;
-		// var_dump($fq);
 		/* end of adding additional query filters */
 
 		/* setting highlight if query parrameter is present /**/
@@ -147,6 +158,9 @@ class Search extends SolrClient{
 		elseif(substr($k, 0, 4) == 'stg_'){
 			$k = 'sys_tags';
 		}
+		elseif(substr($k, 0, 4) == 'ttg_'){
+			$k = 'tree_tags';
+		}
 
 		if(!is_array($v)) $v = array($v);
 		foreach($v as $sv){
@@ -184,6 +198,7 @@ class Search extends SolrClient{
 					'{!ex=type key=0type}type'
 					,'{!ex=cid key=1cid}cid'
 					,'{!ex=sys_tags key=2sys_tags}sys_tags'
+					,'{!ex=tree_tags key=3tree_tags}tree_tags'
 				);
 				//Created: Today / Yesterday / This week / This month
 				$this->params['facet.query'] = array(
@@ -198,7 +213,8 @@ class Search extends SolrClient{
 					'{!ex=subtype key=0subtype}subtype'
 					,'{!ex=cid key=1cid}cid'
 					,'{!ex=sys_tags key=2sys_tags}sys_tags'
-					,'{!ex=template_id key=3template_id}template_id'
+					,'{!ex=tree_tags key=3tree_tags}tree_tags'
+					,'{!ex=template_id key=4template_id}template_id'
 				);
 				$this->params['facet.query'] = array(
 					//Date: Today / Yesterday / This week / This month
@@ -290,6 +306,9 @@ class Search extends SolrClient{
 				$this->params['facet.field'] = array(
 					'{!ex=name_first_letter key=0fl}name_first_letter'
 				);
+				$this->params['facet.method'] = "enum";
+				$this->params['facet.sort'] = "lex";
+				break;
 		}
 		if(!empty($this->params['facet.field']) || !empty($this->params['facet.pivot']) ){
 			$this->params['facet'] = 'true';
@@ -329,7 +348,6 @@ class Search extends SolrClient{
     		$rez = array();
 		$sr = &$this->results;
 		if(empty($sr->facet_counts)) return false;
-		
 		$fc = &$sr->facet_counts;
 		switch($this->inputParams->facets){
 			case 'general':
@@ -337,7 +355,11 @@ class Search extends SolrClient{
 					$k = substr($k, 1);
 					switch($k){
 						case 'sys_tags': 
-							if($this->analizeSystemTagsFacet($v, $rez))  break;
+							$this->analizeSystemTagsFacet($v, $rez);
+							break;
+						case 'tree_tags': 
+							$this->analizeTreeTagsFacet($v, $rez);
+							break;
 						default: 
 							$rez[$k] = array('f' => $k, 'items' => $v);
 							break;
@@ -362,7 +384,11 @@ class Search extends SolrClient{
 					$k = substr($k, 1);
 					switch($k){
 						case 'sys_tags': 
-							if($this->analizeSystemTagsFacet($v, $rez))  break;
+							$this->analizeSystemTagsFacet($v, $rez);
+							break;
+						case 'tree_tags': 
+							$this->analizeTreeTagsFacet($v, $rez);
+							break;
 						default: 
 							$rez[$k] = array('f' => $k, 'items' => $v);
 							break;
@@ -397,6 +423,13 @@ class Search extends SolrClient{
 					$rez[] = $row;
 				}
 				break;
+			case 'first_letter':
+				foreach($fc->facet_fields as $k => $v){
+					$k = substr($k, 1);
+					$rez[$k] = array('f' => $k, 'items' => $v);
+				}
+				break;
+
 		}
 
 		return $rez;
@@ -408,7 +441,10 @@ class Search extends SolrClient{
 		foreach($values as $k => $v) $ids[] = $k;
 		if(empty($ids)) return false;
 		switch($groups){
-			case 'all': return false;
+			case 'all': 
+				$rez['sys_tags'] = array('f' => 'sys_tags', 'items' => $values);
+				// return false;
+				break;
 			case 'pids': 
 				$res = mysqli_query_params('select t.id, p.pid, p.l'.UL_ID().' `title` from tags t join tags p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(mysqli_query_error());
 				while($r = $res->fetch_assoc()){
@@ -431,6 +467,50 @@ class Search extends SolrClient{
 					foreach($values as $k => $v){
 						$rez['sys_tags']['items'][$k] = $v;
 					}
+				break;
+		}
+		return true;
+	}
+
+	public function analizeTreeTagsFacet($values, &$rez){
+		$groups = empty($_SESSION['config']['tags_facet_grouping']) ? 'pids' : $_SESSION['config']['tags_facet_grouping'][0];
+		$ids = array();
+		foreach($values as $k => $v) $ids[] = $k;
+		// die($groups);
+		if(empty($ids)) return false;
+		
+		$names = array();
+		/* selecting names*/
+		$res = mysqli_query_params('select t.id, t.name from tree t where t.id in ('.implode(',', $ids).')') or die(mysqli_query_error());
+		while($r = $res->fetch_assoc()) $names[$r['id']] = $r['name'];
+		$res->close();
+		/* end of selecting names*/
+
+		switch($groups){
+			case 'all': 
+				foreach($values as $k => $v) $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
+				break;
+			case 'pids': 
+				$res = mysqli_query_params('select t.id, p.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(mysqli_query_error());
+				while($r = $res->fetch_assoc()){
+					$rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
+					$rez['ttg_'.$r['pid']]['title'] = $r['title'];
+					$rez['ttg_'.$r['pid']]['items'][$r['id']] =  array('name' => $names[$r['id']], 'count' => $values->{$r['id']});
+				}
+				$res->close();
+				break;
+			default: 
+				$res = mysqli_query_params('select t.id, p.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).') and p.id in('.$groups.')') or die(mysqli_query_error());
+				while($r = $res->fetch_assoc()){
+					$rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
+					$rez['ttg_'.$r['pid']]['title'] = $r['title'];
+					$rez['ttg_'.$r['pid']]['items'][$r['id']] = array('name' => $names[$r['id']], 'count' => $values->{$r['id']});
+					unset($values->{$r['id']});
+				}
+				$res->close();
+				
+				if(!empty($values))
+					foreach($values as $k => $v) $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
 				break;
 		}
 		return true;

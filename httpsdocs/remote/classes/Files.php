@@ -257,8 +257,8 @@ class Files{
 	}
 
 	public function updateFileProperties($p){
-		if(empty($f['id'])) return false;
-		mysqli_query_params('update tree set `date` = $2, title = $3 where id = $1', array($p['id'], clienttoMysqlDate($p['date']), $p['title'] ) ) or die(mysqli_query_error());
+		if(empty($p['id'])) return false;
+		mysqli_query_params('update files set `date` = $2, title = $3 where id = $1', array($p['id'], clienttoMysqlDate($p['date']), $p['title'] ) ) or die(mysqli_query_error());
 
 		mysqli_query_params('delete from files_tags where file_id = $1', $p['id']) or die(mysqli_query_error());
 		if(!empty($p['tags'])){
@@ -268,6 +268,9 @@ class Files{
 			if(!empty($tags->{4})) foreach($tags->{4} as $t) if(is_numeric($t)) $tv[] = $t.',4';
 			if(!empty($tv)) mysqli_query_params('insert into files_tags (file_id, tag_id, `level`) values ($1,'.implode('),($1,', $tv).')', $p['id']) or die(mysqli_query_error());
 		}
+
+		Cases::updateCaseUpdateInfo($p['id']);
+
 		return true;
 	}
 
@@ -583,7 +586,9 @@ class Files{
 			' on duplicate key update content_id = v.content_id, `date` = v.date, `name` = v.name, cid = v.cid, uid = $2, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP'
 			,array($id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
 		//mysqli_query_params('delete from files_versions where id = $1', $id) or die(mysqli_query_error());
-		
+
+		Cases::updateCaseUpdateInfo($id);
+
 		SolrClient::runCron();
 
 		return $rez;
@@ -599,6 +604,9 @@ class Files{
 		$this->removeContentId($content_id);
 
 		mysqli_query_params('update tree set `updated` = 1 where id = $1', $id) or die(mysqli_query_error());
+
+		Cases::updateCaseUpdateInfo($id);
+
 		SolrClient::runCron();
 
 		return $rez;
@@ -618,13 +626,19 @@ class Files{
 
 		$res = mysqli_query_params('insert into files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate) '.
 			' select $1, content_id, `date`, name, cid, uid, cdate, udate from files where id <> $1 and id in('.implode(',', $ids).')', $to_id) or die(mysqli_query_error());
-		mysqli_query_params('delete from tree where id <> $1 and id in ('.implode(',', $ids).')', $to_id) or die(mysqli_query_error());
+		
+		mysqli_query_params('update tree set did = $2, dstatus = 1 where id <> $1 and id in ('.implode(',', $ids).')', array($to_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
 
 		mysqli_query_params('update files set updated = 1 where id = $1', $to_id) or die(mysqli_query_error());
 		
 		$ids = array_diff($ids, array($to_id));
+
+		Cases::updateCaseUpdateInfo($id);
+
 		$solr = new SolrClient();
-		foreach($ids as $id) $solr->deleteId($id);
+
+		// foreach($ids as $id) $solr->deleteId($id);
+
 		$solr->runCron();
 
 		return array('success' => true, 'rez' => $ids);
@@ -654,5 +668,31 @@ class Files{
 
 		return $size;
 	}
+	function getIcon($filename){
+		if(empty($filename)) return 'file-unknown';
+		return 'file-'.mb_strtolower(getFileExtension($filename));
+	}
+
+	function getIconFileName($filename){
+		$ext = getFileExtension($filename);
+		switch($ext){
+			case 'docx':
+			case 'rtf': $ext = 'doc'; break;
+			case 'pptx': $ext = 'ppt'; break;
+			case 'txt': $ext = 'text'; break;
+			case 'html': $ext = 'htm'; break;
+			case 'rm': $ext = 'mp3'; break;
+			case 'gif':
+			case 'jpg':
+			case 'jpeg':
+			case 'tif':
+			case 'bmp':
+			case 'png': $ext = 'img'; break;
+		}
+		$filename = 'document-'.$ext.'.png';
+		$dir = (defined('CB_SITE_PATH') ? CB_SITE_PATH : PROJ_SITE_PATH).'css/i/ext/';
+		if(file_exists($dir.$filename)) return $filename; else return 'document.png';
+	}
+
 }
 ?>

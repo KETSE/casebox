@@ -270,7 +270,7 @@ CB.CaseCardProperties = Ext.extend(CB.CaseCardBlock, {
 	,tpl: ['<span class="fr"><a name="edit" href="#">'+L.edit+' ...</a></span>'
 		,'<table>'
 		,'<tpl for=".">'
-		,'<tr><th>{name}</th><td>{value}</td></tr>'
+		,'<tr><th style="padding-top: 3px">{name}</th><td>{value}</td></tr>'
 		,'</tpl>'
 		,'</table>'
 	]
@@ -279,12 +279,12 @@ CB.CaseCardProperties = Ext.extend(CB.CaseCardBlock, {
 		if(Ext.isEmpty(data['properties'])) return rez;
 		for (var i = 0; i < data['properties'].length; i++) {
 			f = data['properties'][i];
-			cfg = Ext.value(f.cfg, {});
-			r = App.getCustomRenderer(f.type);
-			if(r){
-				rec = new this.store.recordType(f);
-				f.value = r(f.value, {}, rec);
-			}
+			// cfg = Ext.value(f.cfg, {});
+			// r = App.getCustomRenderer(f.type);
+			// if(r){
+			// 	rec = new this.store.recordType(f);
+			// 	f.value = r(f.value, {}, rec);
+			// }
 			rez.push({id: Ext.id(), name: f.title, value: f.value})
 		};
 		return rez;

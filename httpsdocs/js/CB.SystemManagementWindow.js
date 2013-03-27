@@ -205,7 +205,7 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 					targetTree.processDragDrop(tree, node, dd, e);
 				}
 				,beforeappend: function(t, p, n){ 
-					n.setText(n.attributes['l'+App.loginData.language_id]);
+					n.setText(n.attributes['l'+App.loginData.language_id] + ' <span class="cG">(id: '+n.attributes.id+')</span>');
 					n.setIconCls((n.attributes.type != '1') ? 'icon-tree-folder' : Ext.value(n.attributes.iconCls, 'icon-tag-small'));
 					if(n.attributes.hidden) n.setCls('cG');
 					n.attributes.order = parseInt(n.attributes.order);
@@ -388,7 +388,10 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 	,processDelElement: function(r, e){
 		if(r.updatedTagGroups) CB.DB.updateTagGroups(r.updatedTagGroups);
 		this.getEl().unmask()
-		if(r.success !== true) return false;
+		if(r.success !== true){
+			Ext.Msg.alert(L.Error, Ext.value(r.msg, 'Error deleting element'));
+			return false;
+		}
 		sm = this.getSelectionModel();
 		n = sm.getSelectedNode();
 		if(!sm.selectNext(n)) sm.selectPrevious(n);
@@ -649,7 +652,10 @@ CB.TagGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 	}
 	,processDeleteNode: function(r, e){
 		this.getEl().unmask();
-		if(r.success !== true) return;
+		if(r.success !== true){
+			Ext.Msg.alert(L.Error, Ext.value(r.msg, 'Error deleting element'));
+			return;
+		}
 		if(r.updatedTagGroups) CB.DB.updateTagGroups(r.updatedTagGroups);
 		sm = this.getSelectionModel();
 		n = sm.getSelectedNode();

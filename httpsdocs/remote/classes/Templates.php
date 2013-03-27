@@ -311,7 +311,9 @@ class Templates{
 		$res->close();
 		return $rez;
 	}
-
+	public static function getIcon($template_id){
+	
+	}
 	public static function getTemplateFieldValue(&$field){
 		@$value = $field['value']['value'];
 		switch($field['type']){
@@ -356,6 +358,68 @@ class Templates{
 					$res->close();
 					if(sizeof($value) == 1) $value = $value[0];
 					break;
+			case '_objects': 
+					if(empty($value)) { $value = ''; break; }
+					$a = explode(',', $value);
+					$a = array_filter($a, 'is_numeric');
+					if(empty($a)){ $value = ''; break; }
+					$ids = implode(',', $a);
+					
+					switch(@$field['cfg']->source){
+					case 'tree': 
+					case 'related': 
+					case 'field':
+						$value = 'tree';
+						$sql = 'select id, name, `type`, `subtype`, cfg, f_get_tree_ids_path(pid) `path` from tree where id in ('.$ids.')';
+						break;
+					case 'users': 
+					case 'groups': 
+					case 'usersgroups': 
+						$value = 'users_groups';
+						$sql = 'select id, name, l'.UL_ID().' `title`, CASE WHEN (`type` = 1) THEN \'icon-group\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls` from users_groups where id in ('.$ids.')';
+						break;
+					default: 
+						$value = 'thesauri';
+						$sql = 'select id, l'.UL_ID().' `title`, iconCls from tags where id in ('.$ids.') order by `order`';
+						break;
+					}
+					
+					$res = mysqli_query_params($sql) or die(mysqli_query_error());
+					$value = array();
+					while($r = $res->fetch_assoc()){
+						@$label = coalesce($r['title'], $r['name']);
+						if(!empty($r['path'])) $label = '<a class="locate click" path="'.$r['path'].'" nid="'.$r['id'].'">'.$label.'</a>';
+
+						
+						switch(@$field['cfg']->renderer){
+							case 'listGreenIcons': 
+								$value[] = '<li class="icon-padding icon-element">'.$label.'</li>';
+								break;
+							case 'listObjIcons': 
+								if(!empty($r['cfg'])) $r['cfg'] = json_decode($r['cfg']);
+								
+								$icon = '';
+								switch(@$field['cfg']->source){
+								case 'tree': 
+								case 'related': 
+								case 'field':
+									$icon = Browser::getIcon($r);
+									break;
+								default: 
+									$icon = coalesce($r['iconCls'], 'icon-none');
+									break;
+								}
+
+								$value[] = '<li class="icon-padding '.$icon.'">'.$label.'</li>';
+								break;
+							default:
+								$value[] = '<li>'.$label.'</li>';
+						}
+					}
+					$res->close();
+					$value = '<ul class="clean">'.implode('', $value).'</ul>';
+					break;
+
 			case 'date': $value = formatMysqlDate($value); break;
 			case 'datetime': $value = formatMysqlTime($value); break;
 			case 'html': 

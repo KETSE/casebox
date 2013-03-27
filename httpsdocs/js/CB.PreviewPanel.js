@@ -46,6 +46,8 @@ CB.PreviewPanel = Ext.extend(Ext.Panel, {
 		this.attachEvents();
 	}
 	,attachEvents: function(){
+		a = this.getEl().query('a.locate');
+		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.openPath(el.attributes.getNamedItem('path').value, el.attributes.getNamedItem('nid').value) }, this)}, this)
 		a = this.getEl().query('a.task');
 		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.fireEvent('taskedit', {data: {id: el.attributes.getNamedItem('nid').value}}) }, this)}, this)
 		a = this.getEl().query('a.path');

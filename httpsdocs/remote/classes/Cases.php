@@ -44,7 +44,7 @@ class Cases{
 		if(empty($params->nr)) $params->nr = null;
 		/* end of SECURITY: check if current user can add cases for specified office */
 		if(empty($params->pid)) $params->pid = Browser::getRootFolderId();
-		mysqli_query_params('insert into tree (pid, name, `type`, cid, uid) values ($1, $2, 3, $2, $2)', array($params->pid, $params->name, $_SESSION['user']['id'])) or die(mysqli_query_error());
+		mysqli_query_params('insert into tree (pid, name, `type`, cid) values ($1, $2, 3, $3)', array($params->pid, $params->name, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		$id = last_insert_id();
 		$sql = 'insert into cases (id, nr, name, `date`, cid, type_id) values($1, $2, $3, $4, $5, $6)';
 		mysqli_query_params($sql, Array($id, $params->nr, $params->name, function_exists('clientToMysqlDate') ? clientToMysqlDate($params->date) : $params->date, $_SESSION['user']['id'], $params->case_type) ) or die(mysqli_query_error());
@@ -105,7 +105,7 @@ class Cases{
 		if( !Security::canManageCase($id) ) throw new Exception(L\No_access_for_this_action);
 		/* end of SECURITY check */
 		Log::add(Array('action_type' => 16, 'case_id' => $id, 'info' => 'name: '.$name));
-		mysqli_query_params('update cases set close_date = CURRENT_TIMESTAMP WHERE id = $1 and closed = 0', $id) or die(mysqli_query_error());
+		mysqli_query_params('update cases set close_date = CURRENT_TIMESTAMP, uid = $2, udate= CURRENT_TIMESTAMP WHERE id = $1 and closed = 0', array($id, $_SESSION['user']['id'] ) ) or die(mysqli_query_error());
 
 		$close_date = null;
 		$res = mysqli_query_params('SELECT close_date FROM cases WHERE id = $1', $id) or die(mysqli_query_error());
@@ -174,7 +174,6 @@ class Cases{
 						$res->close();
 						
 						$tf = Templates::getTemplateFieldsWithData($template_id, $query->id);
-						// var_dump($tf);
 						if(!empty($tf))
 						foreach($tf as $f){
 							if($f['name'] == '_title') continue;
@@ -313,6 +312,9 @@ class Cases{
 		if($params->action)
 			mysqli_query_params('insert into cases_tags (case_id, tag_id, level) values($1, $2, $3)', Array($params->case_id, $params->tag_id, $params->tag_level )) or die(mysqli_query_error());
 		else mysqli_query_params('delete from cases_tags where case_id = $1 and tag_id = $2 and level = $3', Array($params->case_id, $params->tag_id, $params->tag_level )) or die(mysqli_query_error());
+		
+		$this->updateCaseUpdateInfo($params->case_id);
+
 		return array('success' => true, 'data' => $this->getCaseTagIds($params->case_id));
 	}
 	
@@ -325,6 +327,9 @@ class Cases{
 		$tags = array_filter($params->tags, 'is_numeric');
 		mysqli_query_params('delete from cases_tags where case_id = $1 and level = $2 and tag_id not in(0'.implode(',', $tags).')', array($params->case_id, $params->tag_level)) or die(mysqli_query_error());
 		if(!empty($tags)) mysqli_query_params('insert into cases_tags (case_id, level, tag_id) values($1, $2,'.implode('),($1, $2,', $tags).') on duplicate key update tag_id = tag_id', array($params->case_id, $params->tag_level)) or die(mysqli_query_error());
+
+		$this->updateCaseUpdateInfo($params->case_id);
+
 		return array('success' => true, 'data' => $this->getCaseTagIds($params->case_id));
 	}
 	public function changeName($params){
@@ -334,7 +339,7 @@ class Cases{
 		/* end of SECURITY check */
 		$params->name = trim($params->name);
 		if(empty($params->name)) return array('success' => false, 'msg' => L\Error);
-		mysqli_query_params('update cases set name = $1 where id = $2', array($params->name, $params->id)) or die(mysqli_query_error());
+		mysqli_query_params('update cases set name = $1, uid = $3, udate = CURRENT_TIMESTAMP where id = $2', array($params->name, $params->id, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		return array('success' => true, 'name' => $params->name);
 	}
 	public function updateFileTags($params){
@@ -386,21 +391,27 @@ class Cases{
 		return $rez;
 	}
 
+	public static function getId($node_id){
+		$case_id = null;
+		$sql = 'select f_get_objects_case_id($1)';
+		$res = mysqli_query_params($sql, $node_id) or die(mysqli_query_error());
+		if($r = $res->fetch_row()) $case_id = $r[0];
+		$res->close();
+		return $case_id;	
+	}
+	
 	public function getCaseId($p){
 		$rez = array('success' => false);
-		$params = array();
-		if(!empty($p->nr)){
+		if(!empty($p->object_id)) $rez = array('success' => true, 'data' => array('id' =>  $this->getId($p->object_id) ) );
+		elseif(!empty($p->nr)){
 			$sql = 'select id from cases where nr = $1';
-			$params[] = $p->nr;
-		}elseif(!empty($p->object_id)){
-			$sql = 'select case_id from objects where id = $1';
-			$params[] = $p->object_id;
+			$res = mysqli_query_params($sql, $p->nr) or die(mysqli_query_error());
+			if( ($r = $res->fetch_row()) && Security::canReadCase($r[0])) $rez = array('success' => true, 'data' => array('id' => $r[0]));
+			$res->close();
 		}
-		$res = mysqli_query_params($sql, $params) or die(mysqli_query_error());
-		if( ($r = $res->fetch_row()) && Security::canReadCase($r[0])) $rez = array('success' => true, 'data' => array('id' => $r[0]));
-		$res->close();
 		return $rez;
 	}
+
 	public static function isOpened($case_id, $user_id = false){
 		/* checks if current user has opened the specified case */
 		$rez = false;
@@ -408,15 +419,6 @@ class Cases{
 		if($r = $res->fetch_assoc()) $rez = !empty($r['opened']);
 		$res->close();
 		return $rez;
-	}
-	public static function getId($object_id = false, $file_id = false, $task_id = false){
-		$case_id = null;
-		$sql = 'select f_get_objects_case_id($1)';
-		$res = mysqli_query_params($sql, $object_id) or die(mysqli_query_error());
-		if($r = $res->fetch_row()) $case_id = $r[0];
-		$res->close();
-		//if(!$case_id) throw new Exception(L('Object_not_found'));
-		return $case_id;	
 	}
 	public static function getName($case_id = false){
 		/*function deemed to get case name by its Id*/
@@ -502,6 +504,10 @@ class Cases{
 		$res->close();
 		return array('success' => true, 'data' => $data);
 	}
+	
+	public static function updateCaseUpdateInfo($case_or_caseObject_id){
+		mysqli_query_params('update cases set uid = $2, udate = CURRENT_TIMESTAMP where id = `f_get_objects_case_id`($1)', Array($case_or_caseObject_id, $_SESSION['user']['id'] )) or die(mysqli_query_error());
+	}
 
 	static function getSorlData($id){
 		$rez = array();
@@ -515,6 +521,19 @@ class Cases{
 			$rez['content'] = '';//$r['name'];	
 		}
 		$res->close();
+		/* selecting case tags, from case card, if present */
+		$sql = 'SELECT tag_id, level FROM objects_tags WHERE object_id = $1';
+		$dres = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		while($dr = $dres->fetch_row()) $rez[($dr[1] == 4) ? 'user_tags' : 'sys_tags'][] = intval($dr[0]);
+		$dres->close();
+		/* end of selecting case tags, from case card, if present*/
+		
+		/* selecting case tree tags, from case card, if present */
+		$sql = 'SELECT tag_object_id FROM objects_tree_tags WHERE object_id = $1';
+		$dres = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		while($dr = $dres->fetch_row()) $rez['tree_tags'][] = intval($dr[0]);
+		$dres->close();
+		/* end of selecting case tree tags, from case card, if present */
 		return $rez;
 	}
 }

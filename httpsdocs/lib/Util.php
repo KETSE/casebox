@@ -217,6 +217,7 @@ function getThesauriTitles($ids_string, $language_id = false){
 	if(sizeof($rez) == 1) return $rez[0];
 	return $rez;
 }
+
 function getThesauryIcon($id){
 	if(!is_numeric($id)) return '';
 	$rez = '';
@@ -238,26 +239,6 @@ function getFileExtension($filename){
 	$ext = array_pop($ext);
 	$ext = trim($ext);
 	return mb_strtolower($ext);
-}
-function getFileIconFile($filename){
-	$ext = getFileExtension($filename);
-	switch($ext){
-		case 'docx':
-		case 'rtf': $ext = 'doc'; break;
-		case 'pptx': $ext = 'ppt'; break;
-		case 'txt': $ext = 'text'; break;
-		case 'html': $ext = 'htm'; break;
-		case 'rm': $ext = 'mp3'; break;
-		case 'gif':
-		case 'jpg':
-		case 'jpeg':
-		case 'tif':
-		case 'bmp':
-		case 'png': $ext = 'img'; break;
-	}
-	$filename = 'document-'.$ext.'.png';
-	$dir = (defined('CB_SITE_PATH') ? CB_SITE_PATH : PROJ_SITE_PATH).'css/i/ext/';
-	if(file_exists($dir.$filename)) return $filename; else return 'document.png';
 }
 function getUsername($id){
 	if(!is_numeric($id)) return '';

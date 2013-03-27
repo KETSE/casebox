@@ -9,7 +9,7 @@ if(is_file($customUserMenuClass)){
 class UserMenu implements iUserMenu{
 	public function getAccordionItems(){
 		$rez = array(
-			array('title' => '<b>'.mb_strtoupper(L\MyCaseBox,'UTF8').'</b>'
+			/*array('title' => '<b>'.mb_strtoupper(L\MyCaseBox,'UTF8').'</b>'
 				,'iconCls' => 'icon-myCasebox'
 				,'active' => true
 				,'layout' => 'fit'
@@ -20,7 +20,7 @@ class UserMenu implements iUserMenu{
 					,'rootVisible' => true
 				)
 			)
-			,array('title' => '<b>'.mb_strtoupper(L\Folders,'UTF8').'</b>'
+			,/**/array('title' => '<b>'.mb_strtoupper(L\Folders,'UTF8').'</b>'
 				,'iconCls' => 'icon-folderView'
 				,'layout' => 'fit'
 				,'autoScroll' => false

@@ -95,7 +95,6 @@ class Objects{
 
 		$d = json_decode($p['data']);
 		fireEvent('beforeobjectsave', $d);
-		//var_dump($d);
 		$initial_object_id = $d->id;
 		$d->case_id = null;
 		//if(!is_numeric($d->case_id)) throw new Exception(L\Wrong_input_data);
@@ -111,16 +110,16 @@ class Objects{
 		
 		/* analisys of object id (inserting if new) */
 		//if($template['id'] == 1) $d->id = $this->getUniqueObjectId($d->case_id, $template['id'], $d->id); //this is for case card
-		
+		$isNewObject = true;
 		if(!is_numeric($d->id)){
-			mysqli_query_params('insert into tree (pid, name, `type`, subtype, cid, uid) values ($1, $2, $3, $4, $5, $5)', array($pid, 'new case object', 4, $template['type'], $_SESSION['user']['id'])) or die(mysqli_query_error());
+			mysqli_query_params('insert into tree (pid, name, `type`, subtype, cid) values ($1, $2, $3, $4, $5)', array($pid, 'new case object', 4, $template['type'], $_SESSION['user']['id'])) or die(mysqli_query_error());
 			$d->id = last_insert_id();
 			$sql = 'INSERT INTO objects (id, case_id, `title`, template_id, cid) VALUES($1, $2, $3, $4, $5)';
 			$params = Array($d->id, $d->case_id, '', $template['id'], $_SESSION['user']['id']);
 			mysqli_query_params($sql, $params) or die(mysqli_query_error());
 			
 			$log_action_type = 8; //else throw new Eception(L\Error_creating_object); // create action
-		}
+		}$isNewObject = false;
 		/* end of analizing object id */
 
 		/* save objects tags */
@@ -261,10 +260,11 @@ class Objects{
 
 		// updating object properties into the db																/*(empty($object_iconCls) ? '' : ', iconCls = $7')/**/
 		@mysqli_query_params('update objects set title = $1, custom_title = $2, date_start = $3, date_end = $4, author = $5'.
-			', iconCls = $7, private_for_user = $8, uid = $9 where id = $6', 
+			', iconCls = $7, private_for_user = $8'.
+			($isNewObject ? '' : ', uid = $9, udate = CURRENT_TIMESTAMP').' where id = $6', 
 			Array(ucfirst($object_title), $object_custom_title, $object_date_start, $object_date_end, $object_author, $d->id, $this->getObjectIcon($d->id), $d->pfu, $_SESSION['user']['id'])) or die(mysqli_query_error());
-		//if(is_debug_host()) echo $this->getObjectIcon($d->id).$d->id.'!';
 		/* end of updating object properties into the db */
+		Cases::updateCaseUpdateInfo($d->id);
 		$s = '{"data":{"case_id": '.coalesce($d->case_id, 'null').', "id":'.$d->id.', "template_id": '.$template['id'].'}}';
 		$p = json_decode($s);
 		
@@ -287,7 +287,11 @@ class Objects{
 		$top = '';
 		$body = '';
 		$bottom = '';
-		$data = $this->load(json_decode('{"data":{"id":'.$id.'} }'));
+		try {
+			$data = $this->load(json_decode('{"data":{"id":'.$id.'} }'));
+		} catch (Exception $e) {
+			return '';
+		}
 		$data = $data['data'];
 		
 		// $files = $this->getFiles(json_decode('{"object_id":"'.$id.'"}'));
@@ -304,7 +308,7 @@ class Objects{
 				if(!empty($v)){
 					//$top .= (($i > 0) ? ', ': '').'<span class="cG">'.$f['title'].': </span>'.$v;
 					$top .= '<tr><td class="prop-key">'.$f['title'].'</td><td class="prop-val">'.$v.'</td></tr>';
-					$i++;
+					// $i++;
 				}
 			}
 		if(!empty($gf['body']))
@@ -360,42 +364,6 @@ class Objects{
 		if(!empty($top)) $top = '<table class="obj-preview">'.$top.'</table><br />';
 
 		return '<div style="padding:10px">'.$top.$bottom.'</div>';
-	}
-	function destroy($p){
-		if(empty($p->ids)) return array('success' => false, msg => L\Wrong_id);
-		if(!is_array($p->ids)) $p->ids = explode(',',$p->ids);
-		$p->ids = array_filter($p->ids, 'is_numeric');
-		$p->case_id = Cases::getId($p->ids[0]);
-		// SECURITY: check if this objects case is opened by current user 
-		if(!Security::checkIfCaseOpened($p->case_id)) throw new Exception(L\case_not_oppened);
-		// end of SECURITY: check if this objects case is opened by current user 
-		// SECURITY: check if current user has at least read access to this case
-		if(!Security::canWriteCase($p->case_id)) throw new Exception(L\Access_denied);
-		// end of SECURITY: check if current user has at least read access to this case
-		/* selecting the object ids that have to update icon */
-		/* SHOULD BE REVIEWED $update_ids_icons = array();
-		/* selecting the object ids that have to update icon */
-		$update_solr = false;
-		if(file_exists('/var/lib/Apache/Solr/Service.php')){
-			require_once('/var/lib/Apache/Solr/Service.php');
-			$update_solr = true;
-		}
-		
-		Log::add(Array('action_type' => 10, 'case_id' => $p->case_id, 'object_id' => $p->ids[0])); // SHOULD BE REVIEWED FOR MULTIPLE 
-		mysqli_query_params('delete from objects where case_id = $1 and id in ('.implode(',', $p->ids).')', $p->case_id) or die(mysqli_query_error());
-		mysqli_query_params('delete from tree where id in ('.implode(',', $p->ids).')') or die(mysqli_query_error());//TODO: to think if delete only from tree and with triggers to delete from other tables
-
-		if($update_solr){
-			$solr = new Apache_Solr_Service('127.0.0.1', 8983, '/solr/'.CB_PROJ.'_actions/');
-			if (! $solr->ping()) { echo L('Solr_connection_error'); return; }
-			$solr->deleteByQuery('id:('.implode(' OR ', $p->ids).')');
-			$solr->commit();
-			unset($solr);
-		}
-		/*$update_ids_icons = array_keys($update_ids_icons);
-		foreach($update_ids_icons as $id) mysqli_query_params('update objects set iconCls = $1 where id = $2', array($this->getObjectIcon($id), $id)) or die(mysqli_query_error());
-		/**/
-		return Array('success' => true, 'data' => $p->ids);
 	}
 
 	function getViolations($object_id){
@@ -614,12 +582,55 @@ class Objects{
 			
 			/* selecting action tags */
 			$sql = 'SELECT tag_id, level FROM objects_tags WHERE object_id = $1';
-			$dres = mysqli_query_params($sql, $id) or die(mysqli_query_error()."\n".$sql);
+			$dres = mysqli_query_params($sql, $id) or die(mysqli_query_error());
 			while($dr = $dres->fetch_row()) $rez[($dr[1] == 4) ? 'user_tags' : 'sys_tags'][] = intval($dr[0]);
 			$dres->close();
 			/* end of selecting action tags */
+			
+			/* selecting tree tags */
+			$sql = 'SELECT tag_object_id FROM objects_tree_tags WHERE object_id = $1';
+			$dres = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+			while($dr = $dres->fetch_row()) $rez['tree_tags'][] = intval($dr[0]);
+			$dres->close();
+			/* end of selecting tree tags */
 		}
 		$res->close();
+		
 		return $rez;
 	}
+
+	/* setting case roles fields for an object data */
+	public static function setCaseRolesFields(&$objectData){
+		$case_id = null;//237
+		$db = null;
+
+		$sql = 'select DATABASE(), `f_get_objects_case_id`($1)';
+		$res = mysqli_query_params($sql, $objectData['id']) or die(mysqli_query_error());
+		if($r = $res->fetch_row()){
+			$db = $r[0];
+			$case_id = $r[1];
+		}
+		$res->close();
+
+		if(empty($case_id)) return;
+		
+		// check if cached
+		if(isset($GLOBALS[$db][$case_id])){
+			foreach($GLOBALS[$db][$case_id] as $k => $v) $objectData[$k] = $v;
+			return; 
+		}
+
+		$GLOBALS[$db][$case_id] = array();
+		$sql = 'SELECT solr_column_name, od.value FROM objects_data od '.
+			'JOIN templates_structure t ON od.`field_id` = t.`id` AND solr_column_name LIKE \'role_ids%\' '.
+			'WHERE object_id = $1';
+		$res = mysqli_query_params($sql, $case_id) or die(mysqli_query_error());
+
+		while($r = $res->fetch_row())
+			if(!empty($r[1])){
+				$GLOBALS[$db][$case_id][$r['0']] = explode(',', $r[1]);
+				$objectData[$r['0']] = explode(',', $r[1]);
+			}
+		$res->close();
+	} 
 }

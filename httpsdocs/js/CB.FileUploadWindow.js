@@ -86,15 +86,18 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 	,plain: true
 	,resizable: false
 	,stateful: false
-	,title: L.UploadFile
+	//,title: L.UploadFile
 	,iconCls: 'icon-upload'
-	,width: 350
+	,width: 370
+
+	,fileOnly: false
+	,fieldName: 'file'
 	,initComponent: function(){
 		
 		fieldsetItems = [{
 				fieldLabel: L.File
 				,inputType: 'file'
-				,name: 'file'
+				,name: this.fieldName
 				,xtype: 'textfield'
 			},{xtype: 'textfield'
 				,fieldLabel: L.Title
@@ -112,7 +115,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 				,boxLabel : L.byDefault
 			}
 		]
-		if(App.loginData.cfg.system_tags)
+		if(App.loginData.cfg.system_tags && !this.fileOnly)
 			fieldsetItems.push({
 				xtype: 'CBTagField'
 				,fieldLabel: L.Tags
@@ -124,7 +127,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 				,filter: function(r){ return ((r.get('system') == 0) || (r.get('system') == 6))}
 				,api:{search: UsersGroups.searchSysTags, searchGroup: 6}
 			})
-		if(App.loginData.cfg.personal_tags)
+		if(App.loginData.cfg.personal_tags && !this.fileOnly)
 			fieldsetItems.push({
 				xtype: 'CBTagField'
 				,fieldLabel: L.UserTags
@@ -152,7 +155,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 				}
 				,buttons: [{text: L.Upload, handler: this.doSubmit,  plugins: 'defaultButton', scope: this}
 						  ,{text: Ext.MessageBox.buttonText.cancel, handler: function(){this.hide()}, scope: this}]
-				,api: {submit: Browser.saveFile }
+				,api: {submit: Ext.value(this.api, Browser.saveFile) }
 				,paramOrder: ['id']
 				,listeners:{
 					actioncomplete: {
@@ -181,24 +184,32 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 		this.addEvents('submitsuccess');
 	},onShow: function(){
 		switch(this.data.uploadType){
-			case 'archive': this.setTitle(L.UploadArchive); break;
-			case 'multiple': this.setTitle(L.UploadMultipleFiles); break;
-			default: this.data.uploadType = 'single'; this.setTitle(L.UploadFile); break;
+			case 'archive': this.setTitle( Ext.value(this.title, L.UploadArchive) ); break;
+			case 'multiple': this.setTitle( Ext.value(this.title, L.UploadMultipleFiles) ); break;
+			default: this.data.uploadType = 'single'; this.setTitle( Ext.value(this.title, L.UploadFile) ); break;
 		}
-		if(!Ext.isEmpty(this.data.id)) this.findByType('form')[0].api.submit = Browser.uploadNewVersion
+		if(!Ext.isEmpty(this.data.id)) this.findByType('form')[0].api.submit = Ext.value(this.api, Browser.uploadNewVersion)
 		cb = this.find('name', 'title')[0];
-		cb.setVisible(this.data.uploadType == 'single')
+		cb.setVisible( !this.fileOnly && (this.data.uploadType == 'single') )
+		cb = this.find('name', 'date')[0];
+		cb.setVisible( !this.fileOnly )
 		cb = this.find('name', 'addFileButton')[0];
-		cb.setVisible(this.data.uploadType == 'multiple')
+		cb.setVisible( !this.fileOnly && (this.data.uploadType == 'multiple') )
 		cb = this.find('name', 'is_default')[0];
-		cb.setVisible(!Ext.isEmpty(this.data.object_id))
-		this.find('name', 'file')[0].allowBlank = !Ext.isEmpty(this.data.id);
+		cb.setVisible( !this.fileOnly && !Ext.isEmpty(this.data.object_id))
+		this.find('name', this.fieldName)[0].allowBlank = !Ext.isEmpty(this.data.id);
 		if(Ext.isEmpty(this.data.id) && Ext.isEmpty(this.data.date)) this.data.date = new Date();
 		this.findByType('form')[0].getForm().setValues(this.data);
 		ed = this.find('name', 'tags');
-		if(!Ext.isEmpty(ed)) ed[0].setValue(this.data.sys_tags)
+		if(!Ext.isEmpty(ed)){
+			ed[0].setValue(this.data.sys_tags)
+			ed[0].setVisible( !this.fileOnly );
+		}
 		ed = this.find('name', 'user_tags');
-		if(!Ext.isEmpty(ed)) ed[0].setValue(this.data.user_tags)
+		if(!Ext.isEmpty(ed)){
+			ed[0].setValue(this.data.user_tags);
+			ed[0].setVisible( !this.fileOnly );
+		}
 		
 		App.focusFirstField(this);
 	},doSubmit: function(){
@@ -294,7 +305,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 	},onAddFileFieldClick: function(f, idx, d, e){
 		fs = this.findByType('fieldset')[0];
 		a = fs.find('inputType', 'file');
-		fs.insert(a.length, {fieldLabel: L.File, inputType: 'file', name: 'file' +a.length, xtype: 'textfield'});
+		fs.insert(a.length, {fieldLabel: L.File, inputType: 'file', name: this.fieldName +a.length, xtype: 'textfield'});
 		f.setVisible(a.length < 9)
 		fs.doLayout();
 		this.syncSize();

@@ -879,7 +879,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		Ext.Msg.confirm(L.RemovingTask, L.RemovingTaskMessage, function(b){
 			if(b == 'yes'){ 
 				this.getEl().mask('Удаление ...', 'x-mask-loading');
-				Tasks.destroy(this.data.id, this.processDelete, this);
+				Browser['delete'](this.data.id, this.processDelete, this)
 			}
 		}, this)
 	}
@@ -1391,7 +1391,7 @@ CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
 			if(this.totalView.rendered) this.totalView.update(r.facets); else this.totalView.data = r.facets;
 		}
 		this.tasksView.store.loadData(r.data);
-		if(r.facets.total > 0) this.setVisible(true);
+		if( r.facets && (r.facets.total > 0) ) this.setVisible(true);
 		else this.setVisible(false);
 	}
 	,ontotalViewItemClick: function(c, idx, el, ev){

@@ -3,12 +3,52 @@
 class SolrClient{
 	var $connected = false;
 	var $solr = null;
-	var $solr_fields = 'id,pid,pids,path,name,system,type,subtype,size,date,date_end,cid,cdate,uid,udate,did,ddate,dstatus,case_id,case,template_id,user_ids,allow_user_ids,deny_user_ids,status,category_id,importance,versions,sys_tags,user_tags,metas,content,ntsc,sort_path';
+	var $solr_fields = array('id'
+		,'pid'
+		,'pids'
+		,'path'
+		,'name'
+		,'system'
+		,'type'
+		,'subtype'
+		,'size'
+		,'date'
+		,'date_end'
+		,'oid'
+		,'cid'
+		,'cdate'
+		,'uid'
+		,'udate'
+		,'did'
+		,'ddate'
+		,'dstatus'
+		,'case_id'
+		,'case'
+		,'template_id'
+		,'user_ids'
+		,'allow_user_ids'
+		,'deny_user_ids'
+		,'status'
+		,'category_id'
+		,'importance'
+		,'versions'
+		,'sys_tags'
+		,'tree_tags'
+		,'user_tags'
+		,'metas'
+		,'content'
+		,'ntsc'
+		,'sort_path'
+		,'role_ids1'
+		,'role_ids2'
+		,'role_ids3'
+		,'role_ids4'
+		,'role_ids5'
+		);
 	function SolrClient($p = array() ){
 		$this->host = empty($p['host']) ? CB_SOLR_HOST : $p['host'];
 		$this->port = empty($p['port']) ? CB_SOLR_PORT : $p['port'];
 		$this->core = empty($p['core']) ? CB_SOLR_CORE : $p['core'];
-		$this->solr_fields = explode(',', $this->solr_fields);
 
 	}
 	function connect(){
@@ -58,6 +98,7 @@ class SolrClient{
 			,case when type = 2 then (select `type` from tree where id = t.target_id) else null end `target_type`
 			,DATE_FORMAT(`date`, \'%Y-%m-%dT%H:%i:%sZ\') `date`
 			,DATE_FORMAT(`date_end`, \'%Y-%m-%dT%H:%i:%sZ\') `date_end`
+			,oid
 			,cid
 			,DATE_FORMAT(cdate, \'%Y-%m-%dT%H:%i:%sZ\') `cdate`		
 			,uid
@@ -83,6 +124,7 @@ class SolrClient{
 					$cres = mysqli_query_params('select name from cases where id = $1', $r['case_id']) or die(mysqli_query_error());
 					if($cr = $cres->fetch_row()) $r['case'] = $cr[0];
 					$cres->close();
+					Objects::setCaseRolesFields($r);
 				}
 				
 				switch($type){
