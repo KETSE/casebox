@@ -6,25 +6,38 @@
 <h1 style="border-bottom: 1px solid #CCC">CaseBox Documentation</h1>
 <br />
 
+<div style="float: right">
+  <a class="btn btn-primary btn-large" href="tech/">Technical Documentation</a>
+</div>
+
 <h3>Contents</h3>
 <ul>
 <li><a href="#intro">1. Introduction</a></li>
-<li><a href="#users">2. Offices, Managers and Users</a>
+
+<li><a href="#case-files">3. Working with files</a>
+    <ul><li><a href="#files-updown">Upload &amp; Download</a></li></ul>
+    <ul><li><a href="#files-preview">Preview</a></li></ul>
+    <ul><li><a href="#files-preview">File versioning</a></li></ul>
+    <ul><li><a href="#files-recycle">Recycle bin</a></li></ul>
+</li>
+
+<li><a href="#tasks">3. Task management</a></li>
+
+
+<li><a href="#users">2. Permissions</a>
 <ul><li><a href="#users-out-office">2.1. Users that doesn't belong to any office</a></li></ul>
 </li>
+
 
 <li><a href="#case">3. The Case</a>
   <ul>
   <li><a href="#case-actions">3.1. Actions</a></li>
-  <li><a href="#case-files">3.2. Files</a>
-    <ul><li><a href="#case-actions-files">3.2.1. Files of an action</a></li></ul>
-  </li>
   <li><a href="#case-objects">3.3. Objects</a></li>
   <li><a href="#case-objects">3.4. Tasks</a></li>
   <li><a href="#case-objects">3.5. Phases</a></li>
-  <li><a href="#case-access">3.6. Case access</a></li>
-  </ul>
+</ul>
 </li>
+
 <li><a href="#thesaurus">4. Thesaurus</a></li>
 <li><a href="#tags">5. Tags</a></li>
 <li><a href="#tpl">6. Templates</a></li>
@@ -124,16 +137,16 @@ Figure 4 illustrates how Edwin adds Johny, notice the <i>Office</i> field, it's 
 
 <tr><td><b>Tasks</b></td><td>Users may assign tasks to each other: the main lawyer of a case creates a task for the secondary lawyer for ex. CaseBox Dashboard displays all active tasks assigned or created by the user. Tasks may have deadlines. Reminders can be set to notify responsible users (users assigned to the task) about the approaching deadline.</td></tr>
 
-<tr><td><b>Phases</b></td><td>a case lifecycle may be splitted into several phases. There may be specific Action types per phase. Think of phases as if there are tags attached to a case, depending on the associated tags, the list of available actions change. Phases a tightly connected to the tagging system described below.</td></tr>
+<!-- <tr><td><b>Phases</b></td><td>a case lifecycle may be splitted into several phases. There may be specific Action types per phase. Think of phases as if there are tags attached to a case, depending on the associated tags, the list of available actions change. Phases a tightly connected to the tagging system described below.</td></tr> -->
 
 
-<tr><td><b>Activities</b></td><td><span class="label label-important">to be implemented</span> An activity is what/when and how long has been done. It's used to track laywer's time spent on a case to calculate the cost.</td></tr>
+<!-- <tr><td><b>Activities</b></td><td><span class="label label-important">to be implemented</span> An activity is what/when and how long has been done. It's used to track laywer's time spent on a case to calculate the cost.</td></tr> -->
 
-<tr><td><b>Messages</b></td><td><span class="label label-important">to be implemented</span> Users may send messages to each other.</td></tr>
+<!-- <tr><td><b>Messages</b></td><td><span class="label label-important">to be implemented</span> Users may send messages to each other.</td></tr> -->
 </tbody>
 </table>
 
-
+<!--
 <p>
 The picture below illustrates a case. Notice the action list (top-right) and custom action fields (type, who made decision) in the action preview panel (bottom-right).
 </p>
@@ -152,11 +165,15 @@ The picture below illustrates a case. Notice the action list (top-right) and cus
 </ul>
 
 <p>
-Both Incoming and Outgoing actions may be of different types. An action type is defined by a list of custom fields that describes the action. We may also call it an action template. Templates are discussed in section 5. Figure 7 shows an action with two custom fields (Type, Who made decision).
+Both Incoming and Outgoing actions may be of different types. 
+-->
+<h3><a name="actions"></a>3.1. Actions</h3>
+<p>
+An action type is defined by a list of custom fields that describes the action. We may also call it an action template. Templates are discussed in section 5. Figure 7 shows an action with several fields (Type, Who made decision).
 There are two basic action fields: the date when the action was performed and the title. Each action type may have a title template: i.e. the title will be generated automatically based on custom fields.
 </p>
 
-<p>A custom field (Property) has a Value, an additional text and attached files.</p>
+<p>A field (Property) has a Value and additional text.</p>
 
 <div class="scr">
 <img alt="Case" src="/i/docs/f7-case-action.png" />
@@ -164,58 +181,23 @@ There are two basic action fields: the date when the action was performed and th
 </div>
 
 <p>
-<span class="label label-info">Info</span> You may think of actions as "envelopes" for files. The envelope is like a form with a set of fields. An action is a core element in CaseBox and offers functionality like tasks, relationships between actions. You'll not be able to add a task or write a message for a file for ex, create an action first.
+<span class="label label-info">Info</span> You may think of actions as "envelopes" for files. The envelope is like a form with a set of fields. An action is a core element in CaseBox and offers functionality like establishing relationships between actions.
 </p>
 <br />
 
 
 <h3><a name="files"></a>3.2. Files</h3>
 <p>
-Normally files are added inside actions, but it's also possible to attach files directly to the case itself. For ex. you'd like to keep some research reports along with your case. Click the arrow icon <img src="/i/ico/external.png" /> located on the right of "Files" block to open Case Files of the case.
-</p>
-
-<p>
 You can upload one o several files, or even upload an archive and CaseBox will extract the files. And vice verca: you may select some files and download them archived in one ZIP file.
 For PDF/DOC files, the system determines the number of pages and displays it on the right side of the filename. 
 </p>
-
-
-<p>
-CaseBox is not using the traditional folder system because it has limitations: how to keep a file in two folders at the same time? The tagging approach is used instead. You may filter the list of files based on one or several tags.
-</p>
-
-<p>
-The chain icon <img src="/i/ico/chain.png" /> shows that the file belongs to an action (or several actions). The gray tags means that these tags were inherited from the action. i.e. the file itself may have it's own tags along with the tags it gots from the action attached to.
-</p>
-
-<div class="scr">
-<img alt="Case files" src="/i/docs/f8-case-files-desc.png" class="nb" />
-<p>Figure 8. Case files manager.</p>
-</div>
-
-<p>Click the <span class="bt bt-edit">Edit</span> button to change file properties:
-<ul>
-<li><b>File</b>: replace the file with another one</li>
-<li><b>Title</b>: a human readable title may be given to a file if the filename doesn't tell what the file is about.</li>
-<li><b>Date</b>: when the file was produced. Notice that it's not the date when the file was uploaded to the system. By default, when a file is attached to an action, the date of the action is used for the file.</li>
-<li><b>Common tags</b>: </li>
-<li><b>Personal tags</b>: each CaseBox user has it's own list of tags in addition to the list of common tags seen by everyone.</li>
-</ul>
-</p>
-<div class="scr">
-<img alt="Editing the properties of a file" src="/i/docs/f9-file-properties.png"  />
-<p>Figure 9. Editing the properties of a file.</p>
-</div>
-
 
 
 
 <br />
 <h4><a name="users"></a>3.2.1. Files of an action.</h3>
 
-<p>An action usually has one attached file, it's called <b>main file</b>, and eventually a set of additional attachments. Figure 10 shows a request by the applicant, 
-the word document is the main file, while two draft versions (1 alpha, 2 beta) are represented as additional files. Notice how attached files inherit action's tags, in this case it's "domestic".
-</p>
+<p>An action usually has one attached file (the DOC of a complaint being sent), and eventually a set of additional attachments.</p>
 
 <div class="scr">
 <img alt="Action files" src="/i/docs/f10-action-files-desc.png" class="nb" />
@@ -243,7 +225,7 @@ CaseBox will automatically extract all files. To do this, select "Upload archive
 
 
 
-<h3><a name="objects"></a>3.3. Objects</h3>
+<h3><a name="objects"></a>3.3. Actions and Objects</h3>
 <p>
 Objects have been introduced to CaseBox to allow custom information to be entered for a case or to connect with other elements of CaseBox system.
 Some examples:
@@ -271,6 +253,7 @@ In the screenshots above there are two objects for the Mangouras v. Spain case: 
 <p>Figure 11. Custom fields of a case object.</p>
 </div>
 
+<!-- 
 
 <h3><a name="object-contact"></a>3.3.1. Adding applicants and perpetrators to the case</h3>
 <p>
@@ -285,6 +268,7 @@ The solution was to create a separate <a href="#contactdb">Contacts Database</a>
 
 <p>The process of creating contacts and linking them to a case is described in <a href="#contactdb-object">Section 4.2.</a></p>
 
+-->
 
 <br />
 <br />
@@ -299,8 +283,8 @@ A task has the following main properties:
 <li><b>Creator</b>: the user who created the task. (If the task has a deadline and it's missed, the creator will be charged with this. i.e. He has to supervise the Responsible Users he assignes for the task.)</li>
 <li><b>Responsible users</b>: a list of users that should complete the task. The task will be marked as completed when ALL users will accomplish it.</li>
 <li><b>Deadline</b>: the date by which the task should be completed. It's an optional field.</li>
-<li><b>Critical</b>: Is this an <b>internal</b> (non-crictical) or <b>external</b> task (critical). Internal tasks, like "scan this document" or "sign this paper" usually doesn't affect the organization, we may also call them "soft" deadlines. External tasks are imposed by courts or other mechanisms, like ECHR for ex: they send letters and require an answer to be sent by a specific date. Missing such a deadline usually has serious implications.<br>
-(the label "critical" is to be discussed, maybe a better word can be found. What is clear is that we should delimit/tag important deadlines.)</li>
+<!-- <li><b>Critical</b>: Is this an <b>internal</b> (non-crictical) or <b>external</b> task (critical). Internal tasks, like "scan this document" or "sign this paper" usually doesn't affect the organization, we may also call them "soft" deadlines. External tasks are imposed by courts or other mechanisms, like ECHR for ex: they send letters and require an answer to be sent by a specific date. Missing such a deadline usually has serious implications.<br>
+(the label "critical" is to be discussed, maybe a better word can be found. What is clear is that we should delimit/tag important deadlines.)</li> -->
 <li><b>Title</b>: what actually has to be done</li>
 <li><b>Description</b>: a more detailed definition of the task</li>
 </ul>
@@ -329,6 +313,9 @@ We don't expect it to happen, but we mention this in the documentation for the s
 
 <p>When the task is created by clicking Create button, the system will send email notifications to all responsible users about this new task that has been assigned to them.</p>
 
+<!-- 
+
+
 <h4><a name="task-advanced"></a>3.4.1. Tasks: advanced properties</h4>
 <p>
 The following task properties were classifed as advanced due to seldom use:
@@ -342,6 +329,8 @@ The following task properties were classifed as advanced due to seldom use:
 
 <div class="scr">
 <img alt="Advanced task properties" src="/i/docs/f3-4_add-task-advanced.png" class="nb" />
+
+
 <p>Figure 3.4.3. Advanced task properties.</p>
 </div>
 
@@ -437,9 +426,9 @@ Let's allow offices/users to access the case:
 <p>Figure 15. Managing access to a case.</p>
 </div>
 <br /><br />
+-->
 
-
-
+<!--
 
 <h3><a name="contactdb"></a>4. Contacts Database</h3>
 <p>
@@ -489,6 +478,8 @@ The figure below shows how to add an Applicant to the case (the dropdown menu at
 <p>Figure 4.3. Adding an Applicant to the case and editing the template.</p>
 </div>
 
+-->
+
 <br /><br />
 <h3><a name="users"></a>5. Thesaurus</h3>
 <p>
@@ -526,197 +517,17 @@ You should drag&drop those thesauri values or group of values(folders) from the 
 
 
 
+<!--
 <h3><a name="tags"></a>5. Tags <span class="label label-important">todo</span></h3>
 <p>tags & actions ...</p>
 
-
-
-<br /><br />
-<h3><a name="tmpl"></a>6. Templates <span class="label label-important">todo</span></h3>
-<p>Field definition</p>
-<table class="table table-bordered table-condensed" style="width: 100%">
-<thead>
-<tr>
-<th>Field</th>
-<th>Info</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>id</td>
-<td>a unique identificator of the field</td>
-</tr>
-<tr>
-<td>pid</td>
-<td>parent id: the ID of the parent field.<br /> To create a subfield that appears when the parent field has a specific value, use the PID and PID_VALUES fields</td>
-</tr>
-
-<tr>
-<td>template_id</td>
-<td>The template this field belongs to (see templates table)</td>
-</tr>
-
-<tr>
-<td>tag</td>
-<td>it's actualy the field type: 
-<ul>
-<li><b>f</b>: normal field</li>
-<li><b>H</b>: a grouping header, but notice that it's doesn't act like a group of subfields</li>
-<li><b>b</b>: a block of fields, use a block when you whant to control a grou</li>
-</ul>
-</td>
-</tr>
-
-<tr>
-<td>order</td>
-<td>the ordering(position) of the field</td>
-</tr>
-
-<tr>
-<td>level</td>
-<td>indentation level, mostly used in field groups to visually indent the field</td>
-</tr>
-
-<tr>
-<td>name</td>
-<td>field name, used in search queries, website templates</td>
-</tr>
-
-<tr>
-<td>type</td>
-<td>
-<ul>
-<li><b>_title</b>: only to edit the title of the object, use the '_title_auto' type for this field
-
-
-<li><b>combo</b>: a dropdown combobox, conected to a thesauri (also specify thesauri_id field)</li>
-<li><b>varchar</b>: text field</li>
-<li><b>date</b>: calendar</li>
-<li><b>time</b>: time</li>
-<li><b>int</b>: integer</li>
-<li><b>float</b>: float</li>
-<li><b>populist</b>: popup list, multiple values. (setup: single/multiple)</li>
-<li><b>_contact</b>: server side filtered combobox
-<pre>
-  "tags": [5234, 233, 62]            // search only in client DB where tag IN tags
-  "templates": [213, 82, 425]        // template IDs
-  "multiple": true                   // if "editor" == "form", the user can select several items  (rename to "multiValued")
-  "editor":"combo, form, popuplist"  // if none specified, a combo is displayed
-  "dependant": "true"                // displays values where ParentContact.id = _contact.pid
-  "multiplicity": [1..n]             // how many instances. used only in grid  (rename to "maxInstances")
-  "advanced": true, false            // false by default. Show Advanced button if true
-  "parentTagFieldIds":               // filter values where {'editor': 'combo'} only used when multiple==false
-  
-  "autoLoad": true, false   // default: true
-  "showDate": true, false   // default: true   (show a new column before title)
-  "renderer": "string, listGreenIcons, listObjIcons"  // show date at the start if showDate == true  
-</pre>		
-when we know there are not so many contacts (judges of a court for ex), then it's more convenient to use a dropdown rather than a complex window.
-       <br><br>
-First 20 contacts found are loaded from the server.
- 
-		</li>
-<li><b>_language</b>: list of languages available for the core</li>
-<li><b>text</b>: plaing text editor (as a separate tabsheet)</li>
-<li><b>html</b>: WYSIWYG Editor similar to gmail (as a separate tabsheet)</li>
-<li><b>memo</b>: an inline text field with a specified height in cfg</li>
-<li><b>_sex</b>: used in contact and user profiles. CaseBox then will use a different icon to represent the user.</li>
-<li><b>_short_date_format</b>: date formats available in system</li>
-<li><b>_case</b>: 
-		"editor":"form"               // if none specified, a combo is displayed
-		"tags": [5234, 233, 62]       // search only in client DB where tag IN tags
-		"multiplicity": 0/1           // if "editor" == "form", the user can select several contacts
-</li>
-<li><b>_case_object:</b><br>
-     similar to _contact, note that "dependant" == "true" implicitly (show objects of the case)
-	 // a date filter will be added, idea: restrict objects where _date_start "<,>" object.$dateField ($dateField in template config)
-</li>
-
-
-<li><b></b></li>
-</ul>
-</td>
-</tr>
-
-<tr>
-<td>cfg</td>
-<td><ul>
-<li>thesauri_id: for combo fields, specify which is the thesauri to display</li>
-<li>maxInstances: [1..n] // how many instances of the field are allowed (by default 1). A multiple field will feature a small number icon on the right side and the "Add" button will be enabled when the field is selected in the grid.</li>
-<li>multiValued: [true, false]</li>
-<li>editor: [form]</li>
-<li>edit_in: [tabsheet]</li>
-<li>editor: [form]</li>
-<li>pid_values: for a child field, specify a list of comma separated thesauri_id values for the parent field. i.e. when the parent will be in pid_values, the current field will be displayed in the grid, otherwise the field is hidden. <p>
-In order to make dependable fields (for example to have two fields, Country/City),
-specify "dependant": true, this will use the 'pid' column to get the SelectedID</p></li>
-<li>tag_ids</li>
-<li>use_as_tags</li>
-<li>show_on_top: 
-by default fields are rendered in the grid. Important fields, like ActionDate, Title should be always visible and are displayed above the grid in the main Action panel.</li>
-</ul></td>
-</tr>
-
-<tr>
-<td>tags_system_group</td>
-<td>?</td>
-</tr>
-
-<tr>
-<td>visible</td>
-<td>how it is used?</td>
-</tr>
-
-<tr>
-<td>readonly</td>
-<td>the system field, like the id of the action, may be displayed in the grid but editing is not allowed</td>
-</tr>
-
-<tr>
-<td>solr_column_name</td>
-<td>?</td>
-</tr>
-
-<tr>
-<td>solr_faceted</td>
-<td>?</td>
-</tr>
-
-</tbody>
-</table>
-
-
-<div style="color: gray">
-<pre>
-Template types:
-[14:05:34] VvV: 0-folder, 1-case object, 2-in action, 3-out action, 4-applicant, 5-subject, 6-user, 7-client
-
-
-template_type: _contact
-{"show_on_top":"0"
-,"multiple": true     // if I can select multiple contacts
-,"dependant": true    // use the 'pid' column to get the SelectedID
-,"tags":[198]         // filter by tags associated to contacts
-,"templates": [63]    // organization, contact
-,"editor": "combo"    // a simple drodown when the list is not big
-
-}
-</pre>
-</div>
+-->
 
 
 
-<br /><br />
-<h3><a name="langs"></a>7. Languages <span class="label label-important">todo</span></h3>
-<p>
-per core, table languages, specify:
-short_date_format: 
-
-the grid will render with short_date_format + time_format;
-</p>
 
 
-<br /><br />
+
 <h3><a name="langs"></a>8. Email integration <span class="label label-important">todo</span></h3>
 <p>
 An email box can be monitored and incoming emails processed. 
@@ -777,11 +588,3 @@ php
 
 <hr class="soften">
 <?php include('../footer.php'); ?>
-
-
-
-
-
-
-
-

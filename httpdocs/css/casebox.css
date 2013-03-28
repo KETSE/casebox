@@ -231,3 +231,11 @@ padding-bottom: 10px;
 .sys {
     font-family: Menlo, Monaco, 'Courier New', monospace;
 }
+
+.gr {
+    color: #777;
+}
+
+.pl50 {
+    padding-left: 50px;
+}
