@@ -14,17 +14,27 @@
         </p>
       </div>
     </header>
-    <hr class="soften" />
     
+    
+    <div style="text-align: center">
+      <img src="/i/casebox-screenshot.png" alt="CaseBox screenshot" />
+
+    </div>
+    
+
+    <!-- <hr class="soften" /> -->
+    <br><br>
+
     <div class="marketing">
+
       <!-- <h1>Key Features</h1>
       <p class="marketing-byline">Need reasons to love CaseBox? Look no further.</p>
       -->
       <div class="row">
         <div class="span4">
-          <img src="/i/offices.png" style="margin-top: 12px" class="bs-icon">
-          <h2>Multiple Offices</h2>
-          <p>A user can see only cases of his office by default, but he may be a member of several offices.</p>
+          <img src="/i/lock.png" style="margin-top: 12px" class="bs-icon">
+          <h2>Permissions</h2>
+          <p>A user can specify exactly who is able to do what (read/write/delete) with a file/task/action.</p>
         </div>
         <div class="span4">
           <img src="/i/magnifier-left.png" class="bs-icon">
@@ -44,9 +54,9 @@
           <p>Separately manage the list of your clients, store custom information (address, phone, civil status and link them to your cases and organizations.</p>
         </div>
         <div class="span4">
-          <img src="/i/address-book.png" class="bs-icon">
-          <h2>Organization Database</h2>
-          <p>Similar to the Client database, but for managing the list of organizations you're working with: courts, prisons etc.</p>
+          <img src="/i/globe.png" class="bs-icon">
+          <h2>Localization</h2>
+          <p>CaseBox is available in English, French and Russian. New language packs can be added on request.</p>
         </div>
         <div class="span4">
           <img src="/i/database-import2.png" class="bs-icon">
@@ -56,9 +66,9 @@
       </div><!--/row-->
       <div class="row">
         <div class="span4">
-          <img src="/i/user-business.png" class="bs-icon">
-          <h2>Managers and Users</h2>
-          <p>Cases are created by managers and delegated to users (lawyers). A manager has an overview statistics of his office (for ex: list of tasks per user).</p>
+          <img src="/i/gear.png" class="bs-icon">
+          <h2>Plugin architecture</h2>
+          <p>Your developers can create custom functionality and use the plug&amp;play architecture to customize the system.</p>
         </div>
         <div class="span4">
           <img src="/i/system-monitor.png" class="bs-icon">
@@ -73,9 +83,7 @@
       </div><!--/row-->
       <div class="row">
         <div class="span4">
-          <img src="/i/globe.png" class="bs-icon">
-          <h2>Localization</h2>
-          <p>CaseBox is available in English, French and Russian. New language packs can be added on request.</p>
+
         </div>
         <div class="span4">
           <!-- 
@@ -111,7 +119,7 @@
           <p>The software will be released as opensource when out of beta.</p>
         </div>
         <div class="span3">
-          <img src="/i/gear.png" class="small-bs-icon">
+          <img src="/i/lifebuoy.png" class="small-bs-icon">
           <h3>Custom Development</h3>
           <p>New plugins and functionality may be developed by our team upon request.</p>
         </div>

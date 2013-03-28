@@ -6,25 +6,38 @@
 <h1 style="border-bottom: 1px solid #CCC">CaseBox Documentation</h1>
 <br />
 
+<div style="float: right">
+  <a class="btn btn-primary btn-large" href="tech/">Technical Documentation</a>
+</div>
+
 <h3>Contents</h3>
 <ul>
 <li><a href="#intro">1. Introduction</a></li>
-<li><a href="#users">2. Offices, Managers and Users</a>
+
+<li><a href="#case-files">3. Working with files</a>
+    <ul><li><a href="#files-updown">Upload &amp; Download</a></li></ul>
+    <ul><li><a href="#files-preview">Preview</a></li></ul>
+    <ul><li><a href="#files-preview">File versioning</a></li></ul>
+    <ul><li><a href="#files-recycle">Recycle bin</a></li></ul>
+</li>
+
+<li><a href="#tasks">3. Task management</a></li>
+
+
+<li><a href="#users">2. Permissions</a>
 <ul><li><a href="#users-out-office">2.1. Users that doesn't belong to any office</a></li></ul>
 </li>
+
 
 <li><a href="#case">3. The Case</a>
   <ul>
   <li><a href="#case-actions">3.1. Actions</a></li>
-  <li><a href="#case-files">3.2. Files</a>
-    <ul><li><a href="#case-actions-files">3.2.1. Files of an action</a></li></ul>
-  </li>
   <li><a href="#case-objects">3.3. Objects</a></li>
   <li><a href="#case-objects">3.4. Tasks</a></li>
   <li><a href="#case-objects">3.5. Phases</a></li>
-  <li><a href="#case-access">3.6. Case access</a></li>
-  </ul>
+</ul>
 </li>
+
 <li><a href="#thesaurus">4. Thesaurus</a></li>
 <li><a href="#tags">5. Tags</a></li>
 <li><a href="#tpl">6. Templates</a></li>
@@ -152,11 +165,15 @@ The picture below illustrates a case. Notice the action list (top-right) and cus
 </ul>
 
 <p>
-Both Incoming and Outgoing actions may be of different types. An action type is defined by a list of custom fields that describes the action. We may also call it an action template. Templates are discussed in section 5. Figure 7 shows an action with two custom fields (Type, Who made decision).
+Both Incoming and Outgoing actions may be of different types. 
+-->
+<h3><a name="actions"></a>3.1. Actions</h3>
+<p>
+An action type is defined by a list of custom fields that describes the action. We may also call it an action template. Templates are discussed in section 5. Figure 7 shows an action with several fields (Type, Who made decision).
 There are two basic action fields: the date when the action was performed and the title. Each action type may have a title template: i.e. the title will be generated automatically based on custom fields.
 </p>
 
-<p>A custom field (Property) has a Value, an additional text and attached files.</p>
+<p>A field (Property) has a Value and additional text.</p>
 
 <div class="scr">
 <img alt="Case" src="/i/docs/f7-case-action.png" />
@@ -164,58 +181,23 @@ There are two basic action fields: the date when the action was performed and th
 </div>
 
 <p>
-<span class="label label-info">Info</span> You may think of actions as "envelopes" for files. The envelope is like a form with a set of fields. An action is a core element in CaseBox and offers functionality like tasks, relationships between actions. You'll not be able to add a task or write a message for a file for ex, create an action first.
+<span class="label label-info">Info</span> You may think of actions as "envelopes" for files. The envelope is like a form with a set of fields. An action is a core element in CaseBox and offers functionality like establishing relationships between actions.
 </p>
 <br />
 
 
 <h3><a name="files"></a>3.2. Files</h3>
 <p>
-Normally files are added inside actions, but it's also possible to attach files directly to the case itself. For ex. you'd like to keep some research reports along with your case. Click the arrow icon <img src="/i/ico/external.png" /> located on the right of "Files" block to open Case Files of the case.
-</p>
-
-<p>
 You can upload one o several files, or even upload an archive and CaseBox will extract the files. And vice verca: you may select some files and download them archived in one ZIP file.
 For PDF/DOC files, the system determines the number of pages and displays it on the right side of the filename. 
 </p>
-
-
-<p>
-CaseBox is not using the traditional folder system because it has limitations: how to keep a file in two folders at the same time? The tagging approach is used instead. You may filter the list of files based on one or several tags.
-</p>
-
-<p>
-The chain icon <img src="/i/ico/chain.png" /> shows that the file belongs to an action (or several actions). The gray tags means that these tags were inherited from the action. i.e. the file itself may have it's own tags along with the tags it gots from the action attached to.
-</p>
-
-<div class="scr">
-<img alt="Case files" src="/i/docs/f8-case-files-desc.png" class="nb" />
-<p>Figure 8. Case files manager.</p>
-</div>
-
-<p>Click the <span class="bt bt-edit">Edit</span> button to change file properties:
-<ul>
-<li><b>File</b>: replace the file with another one</li>
-<li><b>Title</b>: a human readable title may be given to a file if the filename doesn't tell what the file is about.</li>
-<li><b>Date</b>: when the file was produced. Notice that it's not the date when the file was uploaded to the system. By default, when a file is attached to an action, the date of the action is used for the file.</li>
-<li><b>Common tags</b>: </li>
-<li><b>Personal tags</b>: each CaseBox user has it's own list of tags in addition to the list of common tags seen by everyone.</li>
-</ul>
-</p>
-<div class="scr">
-<img alt="Editing the properties of a file" src="/i/docs/f9-file-properties.png"  />
-<p>Figure 9. Editing the properties of a file.</p>
-</div>
-
 
 
 
 <br />
 <h4><a name="users"></a>3.2.1. Files of an action.</h3>
 
-<p>An action usually has one attached file, it's called <b>main file</b>, and eventually a set of additional attachments. Figure 10 shows a request by the applicant, 
-the word document is the main file, while two draft versions (1 alpha, 2 beta) are represented as additional files. Notice how attached files inherit action's tags, in this case it's "domestic".
-</p>
+<p>An action usually has one attached file (the DOC of a complaint being sent), and eventually a set of additional attachments.</p>
 
 <div class="scr">
 <img alt="Action files" src="/i/docs/f10-action-files-desc.png" class="nb" />
@@ -224,7 +206,7 @@ the word document is the main file, while two draft versions (1 alpha, 2 beta) a
 <br />
 
 
--->
+
 <br />
 <h4><a name="users"></a>3.2.2. Bulk upload (zip files) & Multiple upload.</h3>
 
@@ -243,7 +225,7 @@ CaseBox will automatically extract all files. To do this, select "Upload archive
 
 
 
-<h3><a name="objects"></a>3.3. Objects</h3>
+<h3><a name="objects"></a>3.3. Actions and Objects</h3>
 <p>
 Objects have been introduced to CaseBox to allow custom information to be entered for a case or to connect with other elements of CaseBox system.
 Some examples:
@@ -546,365 +528,6 @@ You should drag&drop those thesauri values or group of values(folders) from the 
 
 
 
-<br /><br />
-<h3><a name="tmpl"></a>6. Templates and Fields <span class="label label-important">todo</span></h3>
-
-<p>Template structure table definition:</p>
-
-<p>Field definition</p>
-<table class="table table-bordered table-condensed" style="width: 100%">
-<thead>
-<tr>
-<th>Field</th>
-<th>Info</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>id</td>
-<td>a unique identificator of the field</td>
-</tr>
-<tr>
-<td>pid</td>
-<td>parent id: the ID of the parent field.<br /> Use a parent field to control the visibility and values of a child field (i.e. dependent fields)</td>
-</tr>
-
-<tr>
-<td>template_id</td>
-<td>The template this field belongs to (see templates table)</td>
-</tr>
-
-<tr>
-<td>tag</td>
-<td>it's actualy the field type: 
-<ul>
-<li><b>f</b>: normal field</li>
-<li><b>H</b>: a header to visually delimit fields</li>
-<li><b>G</b>: a group of fields, use it when you need to control the visibility of several fields at a time.</li>
-</ul>
-</td>
-</tr>
-
-<tr>
-<td>level <span class="label label-important">do we need this field ?</span></td>
-<td>indentation level, mostly used in field groups to visually indent the field. </td>
-</tr>
-
-<tr>
-<td>name</td>
-<td>field name, used in search queries, website templates. There are special field names like "_title": used by CB to display the node in the grid/tree</td>
-</tr>
-
-<tr>
-<td>l1 ... lN</td>
-<td>field titles in different languages. (languages are configured in `languages` table)</td>
-</tr>
-
-<tr>
-<td>type</td>
-<td>
-<ul>
-<li><b>varchar</b>: text field</li>
-<li><b>date</b>: calendar</li>
-<li><b>time</b>: time</li>
-<li><b>int</b>: integer</li>
-<li><b>float</b>: float</li>
-<li><b>combo</b>: a dropdown combobox, conected to a thesauri (also specify thesauri_id field) <span class="label label-important">obsolete: Use _objects field</span>.</li>
-
-<li><b>text</b>: plaing text editor (as a separate tabsheet)</li>
-<li><b>html</b>: WYSIWYG Editor similar to gmail (as a separate tabsheet)</li>
-<li><b>memo</b>: an inline text field with a specified height in cfg</li>
-
-<li><b>_objects:</b> a complex field type that can show thesauri or tree nodes</li>
-
-<li><b>_sex</b>: used in contact and user profiles. CaseBox then will use a different icon to represent the user.</li>
-<li><b>_short_date_format</b>: date formats available in system</li>
-
-<li><b>_language</b>: list of languages available for the core</li>
-</ul>
-</td>
-</tr>
-
-<tr>
-<td>order</td>
-<td>the ordering(position) of the field in the grid</td>
-</tr>
-
-
-<tr>
-<td>cfg</td>
-<td>
-Field config is specific per field type, here are the options common to all field types:
-
-<ul>
-<li><b>readonly</b>: a readonly field</li>
-<li><b>maxInstances</b>: [1..n] // how many instances of the field are allowed (by default 1). 
-    A multiple field will feature a small [+] icon on the right side that can be clicked to create a new field.</li>
-<li><b>multiValued</b>: (true, false)</li>
-<li><b>showIn</b>: (grid, top, tabsheet). Specify where to render the field, in the top part, in a separate tabsheet (for a memo field) or in the grid.</li>
-<li><b>value</b>: a default value for the field</li>
-<li><b>dependancy</b>: a config object that specifies how the current field depends on the parent one (the parent is specified in `pid` column).
-               <p>In order to make dependable fields (for example to have two fields, Country/City),
-                you need to explicitly specify a `dependancy: {}` config group, even if there are no more dependancy conditions.</p>            
-</li>
-</ul></td>
-</tr>
-
-<tr>
-<td>use_as_tags</td>
-<td>Value/values of the field will be copied to the `sys_tags` SOLR column, and used to build filter facets.</td>
-</tr>
-
-
-<tr>
-<td>solr_column_name</td>
-<td>?</td>
-</tr>
-
-<tr>
-<td>solr_faceted</td>
-<td>?</td>
-</tr>
-
-</tbody>
-</table>
-
-
-<h3>Field dependancy</h3>
-To make dependant fields:
-<ul>
-  <li>specify `pid`: this will tell CB which is the parent field</li>
-  <li>add `dependency` block in `cfg`:
-      <pre>"dependency": {
-    "pidValues": []   // an ary of values
-    ,"tags": []
-    ,"tagMode": (OR, AND*)  // AND is default
-}</pre>
-  </li>
-</ul>
-
-
-<p>Examples:</p>
-<table class="table table-bordered table-condensed" style="width: 100%">
-<thead>
-<tr>
-<th>id</th>
-<th>pid</th>
-<th>tag</th>
-<th>name</th>
-<th>l1</th>
-<th>type</th>
-<th>order</th>
-<th>cfg</th>
-</tr>
-</thead>
-<tbody>
-  <tr>
-    <td>10</td>
-    <td>NULL</td>
-    <td>f</td>
-    <td>country</td>
-    <td>Country</td>
-    <td>_objects</td>
-    <td>1</td>
-    <td>{"source": "thesauri", "thesauriId": "217"}</td>
-  </tr>
-  <tr>
-    <td>11</td>
-    <td>10</td>
-    <td>f</td>
-    <td>city</td>
-    <td>City</td>
-    <td>_objects</td>
-    <td>2</td>
-    <td>{"source": "thesauri", "thesauriId": "variable", "dependency": {} }</td>
-  </tr>
-</tbody>  
-</table>
-
-
-<h3>_objects Field type</h3>
-<p>By object we mean a thesauri item, a tree node, a case, a folder, a system user etc.</p>
-
-<table class="table table-bordered table-condensed" style="width: 100%">
-  <tbody>
-    <tr>
-      <td>source</td>
-      <td>
-        from where to get values for the editor:
-        <ul>
-        <li>thesauri: also specify `thesauriId` in cfg</li>
-        <li>tree: use the Tree</li>
-        <li>related: use related nodes of a given node. <span class="label label-important">to be implemented</span></li>
-        <li>field: used for dependent fields when the parentField has a [field] of type _objects.</li>
-        <li>custom: a custom source, also specify `url` or `fn` cfg.</li>
-      </ul>
-       </td>
-    </tr>
-    <tr>
-      <td>scope</td>
-      <td><ul>
-        <li>tree*: the whole tree</li>
-        <li>project: start fetching from the parent Project (going up folder by folder up to a Project)</li>
-        <li>parent: parent node</li>
-        <li>self: the node itself</li>
-        <li>$node_id: a specific tree node (an integer)</li>
-        <li>[$node_id_ary]: an array of tree nodes</li>
-      </ul></td>
-    </tr>
-    <tr>
-      <td>field</td>
-      <td>fieldname of the object in the parentField from which to fetch values if source=field
-        <span class="label label-important">I suggest rename to `sourceField`</span></td>
-    </tr>
-    <tr>
-      <td>descendants</td>
-      <td>load recursively all children of the node specified in `scope`</td>
-    </tr>    
-    <tr>
-      <td>autoLoad</td>
-      <td>fetches the values when the editor is shown</td>
-    </tr>
-    <tr>
-      <td>showDate</td>
-      <td>[field_name]. Specify the field name that has a date. <span class="label label-important">this should be more flexible, for ex: the ability to have several columns in form editor</span></td>
-    </tr>
-    <tr>
-      <td>editor</td>
-      <td><ul>
-        <li>combo: a dropdown list</li>
-        <li>form: a popup</li>
-      </ul></td>
-    </tr>
-    <tr>
-      <td>renderer</td>
-      <td><ul>
-        <li>string: selected values are displayed as a comma separated list</li>
-        <li>listGreenIcons: values are displayed with a green tick icon</li>
-        <li>listObjIcons: use node icons</li>
-      </ul></td>
-    </tr>
-  </tbody>
-</table>
-
-
-<p><b>Examples:</b></p>
-<p>Assume we have list of organizations. 
-An organization can be a court, and for such organization type we need to specify a list of judges working in the court.
-Next: an organization publishes a decision. The decision will have an _objects field `court`. After selecting the court, 
-a new field should appear to select the judge working in that court that made the decision.
-</p>
-
-<p>Organization template</p>
-<table class="table table-bordered table-condensed" style="width: 100%">
-<thead>
-  <th>id</th>
-  <th>pid</th>
-  <th>tag</th>
-  <th>name</th>
-  <th>type</th>
-  <th>cfg</th>
-  <th>use_as_tags</th>
-</thead>
-  <tbody>
-    <tr>
-      <td>1</td>
-      <td>NULL</td>
-      <td>f</td>
-      <td>org_type</td>
-      <td>_objects</td>
-      <td>{"source": "thesauri", "thesauriId": "17", "editor": "combo"}</td>
-      <td>true<br>
-          <span class="gr">the value of this field goes to SOLR</span>
-      </td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td>1</td>
-      <td>f</td>
-      <td>judges</td>
-      <td>_objects</td>
-      <td>
-{"source": "tree"<br>
-,"scope": [2801]   <span class="gr pl50">// the judges are stored in a folder with ID=2801</span><br>
-,"descendants": true         <span class="gr pl50">// fetch all elements of the 2801 folder and all subfolders</span><br>
-,"templates": [69]           <span class="gr pl50">// judge templateId=69 (the 2801 folder may contain objects of other types)</span><br>
-,"autoLoad": true            <span class="gr pl50">// loading the list of judges when editor is shown</span> <br>
-,"renderer": "listObjIcons"  <span class="gr pl50">// visually display a list of nodes with the icon specified in template config</span><br>
-,"maxInstances": 3           <span class="gr pl50">// how many judge rows in the grid</span><br>
-,"editor":"form"             <span class="gr pl50">// shows a form with a list of judges</span><br>
-,"dependency": {<br>
-  "pidValues": [634]         <span class="gr pl50">// it means the `judges` field will appear only if the `org_type` field has value '634'</span><br>
-}<br>
-}</pre></td>
-      <td>false</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<p>Decision template:</p>
-
-<table class="table table-bordered table-condensed" style="width: 100%">
-<thead>
-  <th>id</th>
-  <th>pid</th>
-  <th>tag</th>
-  <th>name</th>
-  <th>type</th>
-  <th>cfg</th>
-</thead>
-  <tbody>
-    <tr>
-      <td>20</td>
-      <td>NULL</td>
-      <td>f</td>
-      <td>court</td>
-      <td>_objects</td>
-      <td>{<br>
-"source": "tree"<br>
-,"editor": "combo"<br>
-,"tags": [634]  <span class="gr pl50">// shows only organizations of type `court`</span>
-}</td>
-    </tr>
-    <tr>
-      <td>21</td>
-      <td>1</td>
-      <td>f</td>
-      <td>judge</td>
-      <td>_objects</td>
-      <td>
-{"source": "field"<br>
-,"field": "judge"            <span class="gr pl50">// the field of the parent node from which to load items</span><br>
-,"templates": [69]           <span class="gr pl50">// selects only judges(templateId=69) from the Court.Judges field</span><br>
-,"autoLoad": true            <span class="gr pl50">// loading the list of judges when editor is shown</span> <br>
-,"renderer": "listObjIcons"  <span class="gr pl50">// visually display a list of nodes with the icon specified in template config</span><br>
-,"maxInstances": 3           <span class="gr pl50">// how many judge rows in the grid</span><br>
-,"editor":"combo"            <span class="gr pl50">// shows a drop down list of judges</span><br>
-,"dependency": {}            <span class="gr pl50">// </span><br>
-}<br>
-}</pre></td>
-    </tr>
-  </tbody>
-</table>
-
-
-<h3>Field examples</h3> 
-thesauri_id: for combo fields, specify which is the thesauri to display</li>
-
-
-
-<br /><br />
-<h3><a name="langs"></a>7. Languages <span class="label label-important">todo</span></h3>
-<p>
-per core, table languages, specify:
-short_date_format: 
-
-the grid will render with short_date_format + time_format;
-</p>
-
-
-<br /><br />
 <h3><a name="langs"></a>8. Email integration <span class="label label-important">todo</span></h3>
 <p>
 An email box can be monitored and incoming emails processed. 
@@ -965,11 +588,3 @@ php
 
 <hr class="soften">
 <?php include('../footer.php'); ?>
-
-
-
-
-
-
-
-
