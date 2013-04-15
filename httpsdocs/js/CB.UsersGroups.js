@@ -70,54 +70,12 @@ CB.AddUserForm = Ext.extend(Ext.Window, {
 				,name: 'group_id'
 				,hiddenName: 'group_id'
 				,store: this.groupsStore
-				// new Ext.data.DirectStore({
-				// 	autoLoad: true
-				// 	,autoDestroy: true
-				// 	,proxy: new  Ext.data.DirectProxy({ paramsAsHash: true, directFn: Security.getManagedOffices })
-				// 	,reader: new Ext.data.JsonReader({
-				// 		successProperty: 'success'
-				// 		,idProperty: 'id'
-				// 		,root: 'data'
-				// 		,messageProperty: 'msg'
-				// 		,fields: [ {name: 'id', type: 'int'}, 'name' ]
-				// 	}
-				// 	)
-				// 	,listeners: {
-				// 		scope: this
-				// 		,beforeload: function(st, p){st.baseParams.withNoOffice = true}
-				// 		,load: function(st, r, o){
-				// 			cbr = this.find('hiddenName', 'office_id')[0];
-				// 			v = Ext.value(this.data.office_id, 0);
-				// 			cbr.setValue(v);
-				// 			cbr.fireEvent('select', cbr);
-				// 		}
-				// 	}
-				// })
 				,valueField: 'id'
 				,displayField: 'title'
 				,triggerAction: 'all'
 				,value: null
 				,mode: 'local'
-				// ,listeners: {
-				// 	scope: this
-				// 	,select : function(cb, r, idx){
-				// 		this.find('name', 'role_id')[0].setDisabled(cb.getValue() == 0);
-				// 	}
-				// }
-			}/*,{
-				xtype: 'combo'
-				,disabled: true
-				,editable: false
-				,name: 'role_id'
-				,hiddenName: 'role_id'
-				,store: this.rolesStore
-				,valueField: 'id'
-				,displayField: 'name'
-				,fieldLabel: L.Access
-				,triggerAction: 'all'
-				,mode: 'local'
-				,value: 4
-			}/**/,{xtype: 'label', name: 'E', hideLabel: true, cls:'cR', text: ''});
+			},{xtype: 'label', name: 'E', hideLabel: true, cls:'cR', text: ''});
 			
 		Ext.apply(this, {
 			buttons:[
@@ -177,13 +135,16 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 	,enableDD: true
 	,initComponent: function(){
 		this.actions = {
-			add: new Ext.Action({
-				text: L.Add
-				,iconCls: 'icon-plus'
-				,handler: function(){
-					w = new CB.AddUserForm({modal: true, ownerCt: this, data: {callback: this.addUser}});
-					w.show();
-				}
+			addUser: new Ext.Action({
+				text: L.User
+				,iconCls: 'icon-user'
+				,handler: this.onAddUserClick
+				,scope: this
+			})
+			,addGroup: new Ext.Action({
+				text: L.AddGroup
+				,iconCls: 'icon-users'
+				,handler: this.onAddGroupClick
 				,scope: this
 			})
 			,del: new Ext.Action({
@@ -213,6 +174,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 			loader: new Ext.tree.TreeLoader({
 				directFn: UsersGroups.getChildren
 				,paramsAsHash: true
+				,preloadChildren: true
 				,listeners:{
 					// Add NodePath to the params
 					beforeload: { fn: function(treeLoader, node) { treeLoader.baseParams.path = node.getPath('nid'); } }
@@ -234,7 +196,14 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 				,text: 'root'
 			}
 			,tbar: [
-				this.actions.add
+				{
+					text: L.Add
+					,iconCls: 'icon-plus'
+					,menu: [
+						this.actions.addUser
+						,this.actions.addGroup
+					]
+				}
 				,this.actions.del
 				,this.actions.remove
 				,'-'
@@ -263,17 +232,14 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 					}
 				}
 				,beforeappend: { scope: this, fn: function(t, p, n){ 
-					//n.id = Ext.id();
-					// clog(p.getDepth());
 					if( p.getDepth() == 1 ){ //n.attributes.role_id > 0 && 
 						if(n.attributes.enabled != 1){
 							n.attributes.text = n.attributes.text + ' <span class="cG">' + L.inactive + '</span>';
 						}
 						n.attributes.iconCls = 'icon-user-' + Ext.value(n.attributes.sex, '');
 					}
-					// if(n.attributes.role_id > 0 && n.attributes.role_id < 3){n.attributes.cls = n.attributes.cls + ' fwB'; n.getUI().addClass('fwB')}; 
+					if(n.attributes.type == 1){ n.attributes.cls = n.attributes.cls + ' fwB'; n.getUI().addClass('fwB') }; 
 					if(n.attributes.cid == App.loginData.id){n.attributes.cls = n.attributes.cls + ' cDB'; n.getUI().addClass('cDB')};
-					// if(n.attributes.users > 0) n.attributes.text += ' <span class="cG">(' + n.attributes.users + ')</span>';
 					n.setText(n.attributes.text);
 				} }
 				,remove: this.updateChildrenCount
@@ -286,7 +252,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 								this.actions.del.setDisabled(true); 
 								this.actions.remove.setDisabled(true); 
 							}else{
-								this.actions.del.setDisabled(node.getDepth() <2);
+								this.actions.del.setDisabled(node.attributes.system == 1);
 								this.actions.remove.setDisabled( (node.getDepth() <2) || (node.parentNode.attributes.nid <1 ) );
 							}
 						} 
@@ -299,6 +265,10 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 	,afterRender: function() {
 		CB.UsersGroupsTree.superclass.afterRender.apply(this, arguments);
 	}
+	,onAddUserClick: function(b, e){
+		w = new CB.AddUserForm({modal: true, ownerCt: this, data: {callback: this.addUser}});
+		w.show();
+	}
 	,addUser: function(params, t){
 		//params: name, office_id, role_id
 		UsersGroups.addUser(params, t.processAddUser, t);
@@ -308,6 +278,19 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 		path = '/root/'+r.data.group_id+'/'+r.data.nid;
 		this.getRootNode().reload(function(){this.selectPath(path, 'nid')}, this);
 		App.mainViewPort.fireEvent('useradded', r.data);
+	}
+	,onAddGroupClick: function(b, e){
+		Ext.Msg.prompt(L.Group, L.Name, function(b, text){
+			if((b == 'ok') && !Ext.isEmpty(text)){
+				rec = new CB.DB.groupsStore.recordType({
+					id: 0
+					,name: text
+					,title: text
+				})
+				CB.DB.groupsStore.addSorted(rec)
+				this.getRootNode().reload();
+			}
+		}, this)
 	}
 	,sortTree: function(n1, n2){ 
 		return (n1.text < n2.text) ? -1 : 1;
@@ -351,7 +334,6 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 	}
 	,delNode: function(){
 		n = this.getSelectionModel().getSelectedNode();
-		clog(n);
 		if(!n) return;
 		switch(n.getDepth()){
 		case 2: 
@@ -365,17 +347,19 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 			}
 			, this);
 			break;
-		case '1': 
+		case 1: 
 			Ext.MessageBox.confirm(L.Confirmation, L.DeleteGroupConfirmationMessage + ' "'+n.attributes.text+'"?', 
 			function(btn, text){
-				if(btn == 'yes'){
-					n = this.getSelectionModel().getSelectedNode();
-					UsersGroups.deleteGroup(n.attributes.nid, this.processDelNode, this);
-				}
+				if(btn == 'yes') Security.destroyUserGroup(n.attributes.nid, this.processDestroyUserGroup, this);
 			}
 			, this);
 			break;
 		}
+	}
+	,processDestroyUserGroup: function(r, e){
+		if(r.success !== true) return false;
+		this.processDelNode(r, e);
+		CB.DB.groupsStore.reload();
 	}
 	,processDelNode: function(r, e){
 		if(r.success !== true) return false;
@@ -396,6 +380,34 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 		}
 		p.attributes.users = p.childNodes.length;
 		p.setText(p.attributes.text.split('<')[0] + ' <span class="cG">(' + p.attributes.users + ')</span>');
+	}
+	,filter: function(text, property){
+		if(Ext.isEmpty(text)){
+			this.clearFilter();
+			 return;
+		}
+		text = text.toLowerCase();
+		rn = this.getRootNode();
+		visibleNodes = [];
+		rn.cascade(function(n){
+			visible = (n.attributes[property].toLowerCase().indexOf(text) >=0 );
+			if(visible){
+				n.ui.show();
+				p = n.parentNode;
+				while(p){
+					p.ui.show();
+					p.expand()
+					p = p.parentNode;
+				}
+			}else n.ui.hide();
+		}, this);
+
+	}
+	,clearFilter: function(){
+		rn = this.getRootNode();
+		rn.cascade(function(n){
+			n.ui.show();
+		}, this);
 	}
 })
 // ----------------------------------------------------------- edit user form
@@ -512,8 +524,6 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 							,columns: [
 								{header: L.Groups, width: 150, dataIndex: 'name'}
 								,{header: L.Active, dataIndex: 'active', renderer: bulletRenderer}
-								//,{header: 'Адвокат', dataIndex: 'lawyer', renderer: bulletRenderer}
-								// ,{header: L.User, dataIndex: 'user', renderer: bulletRenderer}
 							]
 						})
 						,viewConfig: {
@@ -529,12 +539,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 									switch(g.getColumnModel().getDataIndex(ci)){
 										case 'active':
 											r.set('active', (r.get('active') == 1) ? null : 1);
-											// r.set('user', null);
 											break;
-										// case 'user': 
-										// 	r.set('manager', null);
-										// 	r.set('user', (r.get('user') == 1) ? null : 1);
-										// 	break;
 										default: return;
 									}
 									this.fireEvent('change');
@@ -617,7 +622,6 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 		UsersGroups.saveAccessData(params, function(r, e){ this.setDirty(false); this.getEl().unmask(); this.fireEvent('save');}, this);
 	}			
 	,onEditUserDataClick: function(w, idx, el, ev){
-		clog(arguments);
 		if(ev && (ev.getTarget().localName == "img") ) {
 			el = this.find('name', 'photo')[0].getEl();
 			el.dom.click();
@@ -672,7 +676,7 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
 	,title: L.UserManagement
 	,initComponent: function(){
 		this.tree = new CB.UsersGroupsTree({
-			region: 'west'
+			region: 'center'
 			,width: 250
 			,split: true
 			,collapseMode: 'mini'
@@ -691,10 +695,24 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
 				,edit: this.onEditUserData
 			}
 		} );//center region
+		this.searchField = new Ext.ux.SearchField({region: 'south', listeners: {scope: this, 'search': this.onSearchQuery} } )
 
-		Ext.apply(this, { items: [this.tree, this.form] });
+		Ext.apply(this, { items: [{
+			layout: 'border'
+			,region: 'west'
+			,width: 250
+			,border: false
+			,split: true
+			,items: [
+				this.tree
+				,this.searchField
+			]
+		}, this.form] });
 
 		CB.UsersGroups.superclass.initComponent.apply(this, arguments);
+	}
+	,onSearchQuery: function(text, e){
+		this.tree.filter(text, 'text');
 	}
 	,onBeforeFormSave: function(){
 		this.lastPath = '';
@@ -759,7 +777,6 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
 		}, this);
 	}
 	,onEditUserData: function(){
-		clog('onEditUserData')
 		if(!this.form.canEditUserData) return;
 		data = Ext.apply({}, this.form.data);
 		data.id = data.id.split('-').pop();

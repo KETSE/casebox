@@ -73,6 +73,9 @@ class Tasks{
 		if(empty($p['case_id'])) $p['case_id'] = null;
 		
 		$log_action_type = 25; //suppose that only notifications are changed
+		
+		$removed_responsible_users = array();
+
 		if(!isset($p['id'])) $p['id'] = null;
 		if( !validId($p['id']) || Security::canManageTask($p['id']) ){
 			/* update the task details only if is admin or owner of the task /**/
@@ -114,12 +117,23 @@ class Tasks{
 				$res->close();
 			}
 			/* end of estimating deadline status in dependance with parent tasks statuses */
+			// $p['type'] = 6; //task type already set by client - task or event
+			$obj = (object)$p;
 			if(empty($p['id'])){
+				fireEvent('beforeNodeDbCreate', $obj);
 				$res = mysqli_query_params('insert into tree (pid, name, `type`, cid, uid) values ($1, $2, $3, $4, $4)', array($p['pid'], $p['title'], $p['type'], $_SESSION['user']['id'])) or die(mysqli_query_error());
 				$p['id'] = last_insert_id();
 			}else{
 				//mysqli_query_params('delete from tasks_dependance where task_id = $1', $p['id']) or die(mysqli_query_error());
 				$log_action_type = 22; // updating task
+				
+				/* selecting removed responsible_users */
+				$sql = 'select user_id from tasks_responsible_users where task_id = $1 and $2 not like concat(\'%,\',user_id,\',%\')';
+				$res = mysqli_query_params($sql, array($p['id'], ','.$p['responsible_user_ids'].',')) or die(mysqli_query_error());
+				while($r = $res->fetch_row()) $removed_responsible_users[] = $r[0];
+				$res->close();
+	
+				fireEvent('beforeNodeDbUpdate', $obj);
 			}
 			
 			if(!isset($p['autoclose'])) $p['autoclose'] = 1;
@@ -167,7 +181,7 @@ class Tasks{
 			$params = array(
 				'pid' => $p['id']
 				,'date' => $p['date_start']
-				,'responce' => 'newversion'
+				,'response' => 'newversion'
 				,'files' => &$_FILES
 			);
 			$files->storeFiles($params);
@@ -177,11 +191,34 @@ class Tasks{
 
 		}
 		$remind_users = null;
-		if(($log_action_type == 21) || ($log_action_type == 22)) $remind_users = $p['responsible_user_ids'];
-		$logParams = Array('action_type' => $log_action_type, 'case_id' => $p['case_id'], /*'object_id' => $p['object_id'], /**/'task_id' => $p['id'], 'to_user_ids' => $p['responsible_user_ids'], 'remind_users' => $remind_users, 'info' => 'title: '.$p['title']);
+		if(($log_action_type == 21) || ($log_action_type == 22)){
+			$remind_users = toNumericArray($p['responsible_user_ids']);
+			if(!empty($removed_responsible_users)) $remind_users = array_merge($remind_users, $removed_responsible_users);
+		}
+		
+		$logParams = Array(
+			'action_type' => $log_action_type
+			,'case_id' => $p['case_id']
+			,'task_id' => $p['id']
+			,'to_user_ids' => $p['responsible_user_ids']
+			,'remind_users' => $remind_users
+			,'removed_users' => $removed_responsible_users
+			,'info' => 'title: '.$p['title']);
 		Log::add($logParams);
 
 		$this->saveReminds($p, $log_action_type = 25);
+		
+		$obj = (object)$p;
+		switch($log_action_type){
+			case 21: //created
+				fireEvent('nodeDbCreate', $obj);
+				break;
+			case 22: //updated
+				fireEvent('nodeDbUpdate', $obj);
+				break;
+
+		}
+
 		SolrClient::runCron();
 		//exec('php ../../casebox/crons/cron_solr_update_objects.php');
 		$rez = $this->load($p['id']);
@@ -196,7 +233,9 @@ class Tasks{
 		try {
 			$p['case_id'] = @Cases::getId($p['pid']);
 			/* check if current user can read task */
-			if( !validId($p['case_id']) || !Security::canReadCase($p['case_id']) ) throw new Exception(L\Access_denied);
+			if( !validId($p['case_id']) 
+				// || !Security::canReadCase($p['case_id']) 
+				) throw new Exception(L\Access_denied);
 			$case_name = Cases::getName($p['case_id']);
 			/* save reminds for currents user /**/
 		} catch (Exception $e) {
@@ -378,7 +417,7 @@ class Tasks{
 	function getUserTasks($p){
 		$case_id = false;
 		if(!empty($p->case_id)){
-			if(!Security::canReadCase($p->case_id)) throw new Exception(L\Access_denied);
+			// if(!Security::canReadCase($p->case_id)) throw new Exception(L\Access_denied);
 			$case_id = $p->case_id;
 		}
 
@@ -587,7 +626,7 @@ class Tasks{
 		return $rez;
 	}
 
-	static function getTaskInfoForEmail($id, $user_id = false, $message = ''){
+	static function getTaskInfoForEmail($id, $user_id = false, $removed_users = false ){//, $message = ''
 		$rez = '';
 		$user = array();
 		if($user_id == false) $user = &$_SESSION['user'];
@@ -603,7 +642,7 @@ class Tasks{
 			',(select reminds from tasks_reminders where task_id = $1 and user_id = $2) reminders'.
 			',DATABASE() `db` '.
 			' from tasks t where id = $1';
-		$res = mysqli_query_params($sql, array($id, $user['id']) ) or die(mysqli_query_error());
+		$res = mysqli_query_params($sql, array($id, @$user['id']) ) or die(mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			$format = 'Y, F j';
 			if($r['allday'] != 1) $format .= ' H:i';
@@ -634,6 +673,20 @@ class Tasks{
 
 			}
 			$ures->close();
+
+			/* add removed users */
+			if(!empty($removed_users)) $removed_users = toNumericArray($removed_users);
+			if(!empty($removed_users)){
+				$ures = mysqli_query_params('select u.id, u.l'.$user['language_id'].' `name` from users_groups u where u.id in (0'.implode(',', $removed_users).') order by 1') or die(mysqli_query_error());
+				while($ur = $ures->fetch_assoc()){
+					$users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
+					"\n\r".'<img src="'.getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$ur['name'].'" title="'.$ur['name'].'"/>'.
+					"\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b style="color: #777; text-decoration: line-through">'.$ur['name'].'</b>'.
+					"\n\r".'</td></tr>';
+				}
+				$ures->close();
+			}
+			/* end of add removed users */
 			$users =  empty($users) ? '' : '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.L('TaskAssigned', $user['language_id']).':</td><td style="vertical-align:top">'.
 				'<table style="font-family: \'lucida grande\',tahoma,verdana,arial,sans-serif; font-size: 11px; color: #333; width: 100%; display: table; border-collapse: separate; border-spacing: 0;"><tbody>'.
 				implode('', $users).'</tbody></table></td></tr>';
@@ -670,7 +723,7 @@ class Tasks{
 				$reminders_text .= '</ul></td></tr>';
 			}
 
-			$message = str_replace( array('<i', '</i>'), array('<strong', '</strong>'), $message);
+			// $message = str_replace( array('<i', '</i>'), array('<strong', '</strong>'), $message);
 			$rez = file_get_contents(CB_TEMPLATES_PATH.'task_notification_email.html');
 			
 			$rez = str_replace(
@@ -703,7 +756,7 @@ class Tasks{
 					,'{bottom}'
 				)
 				,array(
-					$message
+					'' //$message
 					,'font-size: 1.5em; display: block;'.( ($r['status'] == 3 ) ? 'color: #555; text-decoration: line-through' : '')
 					,$r['title']
 					,$datetime_period
@@ -847,7 +900,7 @@ class Tasks{
 
 	static function getSorlData($id){
 		$rez = array();
-		$sql = 'SELECT 
+		$sql = 'SELECT
 			title
 			,status
 			,category_id
@@ -869,6 +922,7 @@ class Tasks{
 			$rez['status'] = $r['status'];
 			$rez['importance'] = $r['importance'];
 			$rez['category_id'] = $r['category_id'];
+			$rez['completed'] = $r['completed'];
 			$rez['parent_ids'] = empty($r['parent_ids']) ? null : explode(',', $r['parent_ids']);
 			if(!empty($r['responsible_user_ids'])) $rez['user_ids'] = explode(',', $r['responsible_user_ids']);
 			$rez['content'] = $r['description'];

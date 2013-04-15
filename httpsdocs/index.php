@@ -36,7 +36,8 @@
 <script type="text/javascript" src="/remote/api.php"></script>
 <script type="text/javascript" src="/js/CB.DB.php"></script>
 <?php
-	echo '<script type="text/javascript" src="'.Minify_getUri('js').(is_debug_host() ? '&debug=1': '').'"></script>';
+	echo '<script type="text/javascript" src="'.Minify_getUri('js').(is_debug_host() ? '&debug=0': '').'"></script>';
+	echo '<script type="text/javascript" src="'.Minify_getUri('jsdev').(is_debug_host() ? '&debug=1': '').'"></script>';
 	if(!empty($customGroupsConfig[CB_PROJ.'_js'])) echo '<script type="text/javascript" src="'.Minify_getUri(CB_PROJ.'_js', array('groupsConfigFile' => CB_CORES_PATH.'groupsRouter.php' )).(is_debug_host() ? '&debug=1': '').'" />';
 ?>
 <script type="text/javascript">document.getElementById('loading-msg').innerHTML = '<?php echo L('Initialization')?> ...';</script>

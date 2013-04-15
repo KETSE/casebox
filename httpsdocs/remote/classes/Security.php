@@ -1,6 +1,12 @@
 <?php 
 class Security {
 	/* groups methods */
+	
+	/**
+	 * Retreive defined groups
+	 * 
+	 * @returns array of groups records
+	 */
 	public function getUserGroups(){
 		$rez = array( 'success' => true, 'data' => array() );
 		$sql = 'select id, name, l'.UL_ID().' `title`, `system`, `enabled` from users_groups where type = 1 order by 3';
@@ -11,21 +17,38 @@ class Security {
 	}
 
 	public function createUserGroup($p){
+		$p->success = true;
 
-		return array( 'success' => true, 'data' => array() );
+		$p->data->name = trim($p->data->name);
+		// if(empty($p->name) || (!Security::isAdmin())) throw new Exception(L\Failed_creating_office);
+		
+		// check if group with that name already exists 
+		$res = mysqli_query_params('select id from users_groups where type = 1 and name = $1', $p->data->name) or die(mysqli_query_error());
+		if($r = $res->fetch_row()) throw new Exception(L\Group_exists);
+		$res->close();
+		// end of check if group with that name already exists 
+		
+		mysqli_query_params('insert into users_groups (type, name, l1, l2, l3, l4, cid) values(1, $1, $1, $1, $1, $1, $2)', array($p->data->name, $_SESSION['user']['id']) ) or die(mysqli_query_error());
+		$p->data->id = last_insert_id();
+
+		return $p;
 	}
 
 	public function updateUserGroup($p){
-
 		return array( 'success' => true, 'data' => array() );
 	}
 
 	public function destroyUserGroup($p){
-
-		return array( 'success' => true, 'data' => array() );
+		mysqli_query_params('delete from users_groups where id = $1', $p ) or die(mysqli_query_error());
+		return array( 'success' => true, 'data' => $p );
 	}
 	/* end of groups methods */
 	
+	/**
+	 * search users or groups for fields of type "objects"
+	 * 
+	 * This function receives field config as parameter (inluding text query) and returns the matched results.
+	 */
 	public function searchUserGroups($p){
 		/*{"editor":"form","source":"users","renderer":"listObjIcons","autoLoad":true,"multiValued":true,"maxInstances":1,"showIn":"grid","query":"test","objectId":"237","path":"/1"}*/
 		$rez = array('success' => true, 'data' => array());
@@ -86,7 +109,7 @@ class Security {
 			$r['iconCls'] = ($r['type'] == 1) ? 'icon-group' : 'icon-user-'.$r['sex'];
 			// unset($r['type']); // used internaly by setSolrAccess function
 			unset($r['sex']);
-			$access = $this->getUserGroupAccessForObject($r['id'], $p->id);
+			$access = $this->getUserGroupAccessForObject($p->id, $r['id']);
 			$r['allow'] = implode(',', $access[0]);
 			$r['deny'] = implode(',', $access[1]);
 			$rez['data'][] = $r;
@@ -97,7 +120,11 @@ class Security {
 		return $rez;
 	}
 	/**
-	* getUserGroupAccessForObject - returns estimated bidimentional array of access bits from acl for a user or a group
+	* Returns estimated bidimentional array of access bits, from object acl, for a user/group
+	* 
+	* Returned array has to array elements: 
+	* 	first - array bits for allow access 
+	* 	second - array bits for deny access 
 	* Each bit can have the following values:
 	*	-2 - deny, inherited from a parent
 	*	-1 - deny, directly set for the object
@@ -111,7 +138,7 @@ class Security {
 	*		Inherited Deny
 	*		Inherited allow
 	*/
-	public function getUserGroupAccessForObject($user_group_id, $object_id){
+	public static function getUserGroupAccessForObject($object_id, $user_group_id = false){
 		//0 List Folder/Read Data
 		//1 Create Folders
 		//2 Create Files
@@ -124,6 +151,7 @@ class Security {
 		//9 Change permissions
 		//10 Take Ownership
 		//11 Download
+		if($user_group_id === false) $user_group_id = $_SESSION['user']['id'];
 		$rez = array( array_fill(0,12, 0), array_fill(0,12, 0) );
 
 		/* getting object ids that have inherit set to true */
@@ -135,7 +163,6 @@ class Security {
 
 		/* reversing array for iterations from object to top parent */
 		$ids = array_reverse($ids);
-
 		$user_group_ids = array($user_group_id);
 		/* getting group ids where passed $user_group_id is a member*/
 		$sql = 'select distinct group_id from users_groups_association where user_id = $1'.
@@ -153,6 +180,7 @@ class Security {
 		while($r = $res->fetch_assoc())
 			$acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
 		$res->close();
+		
 		/* now iterating the $acl table and determine final set of bits/**/
 		$set_bits = 0;
 		$i=0;
@@ -161,6 +189,7 @@ class Security {
 		while( ( current($acl) !== false ) && ($set_bits < 12) ){
 		 	$i = key($acl);
 		 	$inherited = ($i > 0);
+			$direct_allow_user_group_access = array_fill(0,12, 0);
 			/* check firstly if direct access is specified for passed user_group_id */
 			if(!empty($acl[$i][$user_group_id])){
 				$deny = intval($acl[$i][$user_group_id][1]);
@@ -173,21 +202,27 @@ class Security {
 				}
 				$allow = intval($acl[$i][$user_group_id][0]);
 				for ($j=0; $j < sizeof($rez[0]); $j++){ 
-					// if($user_group_id == 18) echo $rez[0][$j].':'.($allow &1)."\n";
 					if( empty($rez[0][$j]) && ($allow & 1) ){
 						$rez[0][$j] = (1 + $inherited);
+						$direct_allow_user_group_access[$j] = (1 + $inherited);
 						$set_bits++;
 					}
 					$allow = $allow >> 1;
 				}
-					
+				
+				/* if we have direct access specified to requested user_group for input object_id then return just this direct access  and exclude any other access at the same level */
+				if( $acl_order[$object_id] == $i){
+					next($acl);
+					continue;
+				}
 			}
 			if(!empty($acl[$i]))
 			foreach($acl[$i] as $key => $value) {
-				if($key == $user_group_id) continue;
+				if($key == $user_group_id) continue; //skip direct access setting because analized above
 				$deny = intval($value[1]);
+
 				for ($j=0; $j < sizeof($rez[1]); $j++){ 
-					if( empty($rez[1][$j]) && ($deny & 1) ){
+					if( empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j]) ){ //set deny access only if not set directly for that credential allow access
 						$rez[1][$j] = -(1 + $inherited); 
 						$set_bits++;
 					}
@@ -195,7 +230,6 @@ class Security {
 				}
 				$allow = intval($value[0]);
 				for ($j=0; $j < sizeof($rez[0]); $j++){ 
-					// if($user_group_id == 18) echo $rez[0][$j].':'.($allow &1)."\n";
 					if( empty($rez[0][$j]) && ($allow & 1) ){
 						$rez[0][$j] = (1 + $inherited);
 						$set_bits++;
@@ -209,30 +243,62 @@ class Security {
 		return $rez;
 	}
 
-	// transferred to client side just for display purpose
-	// public function getAccessGroups($accessArray){
-	// 	$accessGroups = array(
-	// 		'FullControl' 	=> Array( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 )
-	// 		,'Modify' 	=> Array( 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1 )
-	// 		,'Read' 	=> Array( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 )
-	// 		,'Write' 	=> Array( 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0 )
-	// 	);
-	// 	$rez = array();
-	// 	foreach($accessGroups as $g => $gv){ 
-	// 		$lastBit = null;
-	// 		$bitsMatch = true;
-	// 		$i = 0;
-	// 		while( ($i < sizeof($accessArray) ) && $bitsMatch){
-	// 			if(is_null($lastBit) || (($gv[$i] == 1) && ($accessArray[$i] == $lastBit))  ){
-	// 				$bitsMatch = true;
-	// 				$lastBit = $accessArray[$i];
-	// 			}else $bitsMatch = false;
-	// 			$i++;
-	// 		}
-	// 		$rez[$g] = $bitsMatch ? $lastBit : 0; 
-	// 	}
-	// 	return $rez;
-	// }
+	public static function getAccessBitForObject($object_id, $access_bit_index, $user_group_id = false){
+		if($user_group_id === false) $user_group_id = $_SESSION['user']['id'];
+		$accessArray = Security::getUserGroupAccessForObject($object_id, $user_group_id);
+		if(!empty($accessArray[0][$access_bit_index])) return $accessArray[0][$access_bit_index];
+		if(!empty($accessArray[1][$access_bit_index])) return $accessArray[1][$access_bit_index];
+		return 0;
+	}
+
+	public static function canListFolderOrReadData($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 0, $user_group_id) > 0);
+	}
+	public static function canCreateFolders($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 1, $user_group_id) > 0);
+	}
+	public static function canCreateFiles($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 2, $user_group_id) > 0);
+	}
+	public static function canCreateActions($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 3, $user_group_id) > 0);
+	}
+	public static function canCreateTasks($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 4, $user_group_id) > 0);
+	}
+	public static function canRead($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 5, $user_group_id) > 0);
+	}
+	public static function canWrite($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 6, $user_group_id) > 0);
+	}
+	public static function canDeleteChilds($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 7, $user_group_id) > 0);
+	}
+	public static function canDelete($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 8, $user_group_id) > 0);
+	}
+	public static function canChangePermissions($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 9, $user_group_id) > 0);
+	}
+	public static function canTakeOwnership($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 10, $user_group_id) > 0);
+	}
+	public static function canTakeDownload($object_id, $user_group_id = false){
+		return (Security::getAccessBitForObject($object_id, 11, $user_group_id) > 0);
+	}
+		//0 List Folder/Read Data
+		//1 Create Folders
+		//2 Create Files
+		//3 Create Actions
+		//4 Create Tasks
+		//5 Read
+		//6 Write
+		//7 Delete child nodes
+		//8 Delete
+		//9 Change permissions
+		//10 Take Ownership
+		//11 Download
 
 	public function addObjectAccess($p){
 		$rez = array('success' => true, 'data' => array());
@@ -394,175 +460,32 @@ class Security {
 		$res->close();
 		return $rez;
 	}
-	/* ----------------------------------------------------  OLD METHODS ------------------------------------------ */
 
-	static function getCaseUsersRole($case_id, $user_id = false){
-		return 2;
-		/* return users role for specified case. If no user is specified then current sessions user is used  */
-		// $rez = false;
-		// if($user_id == false) $user_id = $_SESSION['user']['id'];
-		// $res = mysqli_query_params( 'select access from cases_rights_effective where case_id = $1 and user_id = $2', array($case_id, $user_id) ) or die(mysqli_query_error());
-		// while( $r = $res->fetch_row() ) $rez = $r[0];
-		// $res->close();
-		// if(!$rez) $rez = Security::isAdmin() ? 1 : false ;
-		// return $rez;
-	}
-	static function getUserRole($user_id = false){
-		return false;
-		/* return users role. If no user is specified then current sessions user is used  */
-		$rez = false;
-		if($user_id == false) $user_id = $_SESSION['user']['id'];
-		$sql = 'select min(role_id) from users_groups_association where user_id = $1 and active = 1';
-		// $sql = 'SELECT MIN(role_id) FROM '.
-		// 	'(SELECT MIN(role_id) `role_id` FROM users_groups_association WHERE user_id = $1 AND active = 1 '.
-		// 	'UNION '.
-		// 	'SELECT MIN(access) `role_id` FROM cases_rights cr JOIN users u ON cr.tag_id = u.tag_id WHERE u.id = $1 AND cr.valid = 1) t';
-		$sql = 'SELECT MIN(role_id) `role_id` FROM users_groups_association WHERE user_id = $1 AND active = 1';
-		$res = mysqli_query_params( $sql, array($user_id) ) or die(mysqli_query_error());
-		while( $r = $res->fetch_row() ) $rez = $r[0];
-		$res->close();
-		return $rez;
-	}
-	static function canManageCase($case_id, $user_id = false){
-		return true;
-		// $role = Security::getCaseUsersRole($case_id, $user_id);
-		// return ( (!empty($role)) && ($role < 3) );
-	}
-	static function canWriteCase($case_id, $user_id = false){
-		$role = Security::getCaseUsersRole($case_id, $user_id);
-		return ( (!empty($role)) && ($role < 4) );
-	}
-	static function canReadCase($case_id, $user_id = false){
-		return true;
-		// $role = Security::getCaseUsersRole($case_id, $user_id);
-		// return ( (!empty($role)) && ($role < 5) );
-	}
-	static function checkCaseReadAction($case_id, $user_id = false){
-		return true;
-		// if(!is_numeric($case_id)) throw new Exception(L\Wrong_input_data);
-		// // SECURITY: check if case is opened by the user 
-		// if(!Security::checkIfCaseOpened($case_id, $user_id)) throw new Exception(L\case_not_oppened);
-		// // end of SECURITY: check if case is opened by the user 
-		// // SECURITY: check if user has read access to case
-		// if(!Security::canReadCase($case_id, $user_id)) throw new Exception(L\Access_denied);
-		// // end of SECURITY: check if user has read access to this case
-		// return true;
-	}
-	static function checkCaseWriteAction($case_id, $user_id = false){
-		return true;
-		// if(!is_numeric($case_id)) throw new Exception(L\Wrong_input_data);
-		// // SECURITY: check if case is opened by the user 
-		// if(!Security::checkIfCaseOpened($case_id, $user_id)) throw new Exception(L\case_not_oppened);
-		// // end of SECURITY: check if case is opened by the user 
-		// // SECURITY: check if user has manage access to case
-		// if(!Security::canWriteCase($case_id, $user_id)) throw new Exception(L\Access_denied);
-		// // end of SECURITY: check if user has manage access to this case
-		// return true;
-	}
-	
-	static function getManagedOfficeIds(){
-		$rez = array();
-		$mr = Security::getManagedOffices();
-		foreach($mr['data'] as $v) $rez[] = $v['id'];
-		return $rez;
-	}
-
-	static function getManagedOffices($p = null){
-		$rez = Array('success' => true, 'data' => array());
-		return $rez;
-		// if($p && isset($p->withNoOffice) && $p->withNoOffice) $rez['data'][] = array('id' => 0, 'name' => L\Out_of_office);
-		// $sql = 'SELECT DISTINCT th.id, th.l'.UL_ID().' `name` '.
-		// 	'FROM users_groups_association ura '.
-		// 	'join users u on u.id = ura.user_id AND u.enabled = 1 AND u.deleted = 0 '.
-		// 	'join tag_groups__tags_result tr on tr.tags_group_id = $2 and (ura.office_id IN (tr.tag_id, 0)) '.
-		// 	'join tags th ON tr.tag_id = th.id '.
-		// 	'WHERE ura.user_id = $1 AND ura.role_id < 3  AND ura.active = 1';
-		// $res = mysqli_query_params( $sql, Array($_SESSION['user']['id'], $_SESSION['sysGroups'][1]) ) or die(mysqli_query_error());
-		// while($r = $res->fetch_assoc()) $rez['data'][] = $r;
-		// $res->close();
-		// mysqli_clean_connection();
-		// return $rez;
-	}
-	static function getVisibleOffices(){
-		/* return office ids where the user has at least read access  */
-		$rez = array();
-		return $rez;
-		// $res = mysqli_query_params( 'SELECT DISTINCT th.id, th.l'.UL_ID().' `name` '.
-		// 	'FROM users_groups_association ura '.
-		// 	'join users u on u.id = ura.user_id AND u.enabled = 1 AND u.deleted = 0 '.
-		// 	'join tag_groups__tags_result tr on tr.tags_group_id = $2 and (ura.office_id IN (tr.tag_id, 0)) '.
-		// 	'join tags th ON tr.tag_id = th.id '.
-		// 	'WHERE ura.user_id = $1 AND ura.role_id < 5  AND ura.active = 1', array($_SESSION['user']['id'], $_SESSION['sysGroups'][1]) ) or die(mysqli_query_error());
-		// while( $r = $res->fetch_row() ) $rez[] = $r[0];
-		// $res->close();
-		// mysqli_clean_connection();
-		// return $rez;
-	}
-	function getOfficeUsers($params){
-		$rez = Array('success' => true, 'data' => array());
-		return $rez;
-		// if(empty($params->office_id)) return $rez;
-		// $sql = 'SELECT u.id, coalesce(u.l'.UL_ID().', u.`name`) `name` FROM users u JOIN users_groups_association ur ON u.id = ur.user_id WHERE u.enabled = 1 and u.deleted = 0 and ur.active = 1 and ur.office_id = $1 ORDER BY ur.role_id';
-		// $res = mysqli_query_params( $sql, $params->office_id ) or die(mysqli_query_error());
-		// while($r = $res->fetch_assoc()) $rez['data'][] = $r;
-		// $res->close();
-		// return $rez;
-	}
-	static function getCaseLawyers( $case_id ){
-		if(!is_numeric($case_id) || ($case_id < 1)) throw new Exception(L\Wrong_input_data);
-		if(!Security::canReadCase($case_id)) throw new Exception(L\Access_denied);
-		$rez = Array('success' => true, 'data' => array());
-		return $rez;
-		// $res = mysqli_query_params( 'SELECT u.id, u.sex, u.l'.UL_ID().
-		// 	' FROM cases_rights cr '.
-		// 	'JOIN users u ON cr.tag_id = u.tag_id AND u.enabled = 1 AND u.deleted = 0 '.
-		// 	'WHERE cr.case_id = $1 AND (cr.access = 3) and cr.valid = 1', $case_id ) or die(mysqli_query_error());
-		// while($r = $res->fetch_assoc()) $rez['data'][] = $r;
-		// $res->close();
-		// return $rez;
-	}
-	static function getCaseLowerLevelUsers($params){
-		$case_id = is_array($params) ? $params['case_id'] : $params->case_id;
-		$rez = Array('success' => true, 'data' => array());
-		return $rez;
-		// if(!is_numeric($case_id) || ($case_id < 1)) throw new Exception(L\Wrong_input_data);
-		// $res = mysqli_query_params( 'select u.id, u.l'.UL_ID().' `name` from cases_rights_effective cr join users u on cr.user_id = u.id where cr.case_id = $1 and access >= $2', array($case_id, (Security::isAdmin() ? 1: 2)) ) or die(mysqli_query_error());
-		// while($r = $res->fetch_assoc()) $rez['data'][] = $r;
-		// $res->close();
-		// return $rez;
-	}
-	static function getLowerLevelUsers(){
+	static function getActiveUsers(){
 		$rez = Array('success' => true, 'data' => array());
 		$user_id = $_SESSION['user']['id'];
-		// $sql= 'SELECT DISTINCT u.id, u.l'.UL_ID().' `name`, concat(\'icon-user-\', coalesce(u.sex, \'\')) `iconCls` FROM users_groups_association ura1 '.
-		// 	'JOIN users_groups_association ura2 ON ((ura1.office_id = 0) OR (ura2.office_id = 0) OR (ura1.office_id = ura2.office_id)) AND ura2.active = 1 '. //AND ura1.role_id <= ura2.role_id
-		// 	',users u '.
-		// 	'WHERE ura1.active = 1 AND ura1.user_id = $1 AND ura2.user_id = u.id order by 2';
 		$sql = 'select id, l'.UL_ID().' `name`, concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls` from users_groups where `type` = 2 and deleted = 0 and enabled = 1 order by 2';
 		$res = mysqli_query_params( $sql, $user_id) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez['data'][] = $r;
 		$res->close();
 		return $rez;
 	}
-	static function checkIfCaseOpened($case_id){
-		return true;
-		// require_once 'Cases.php';
-		// if(!Cases::isOpened($case_id))  throw new Exception(L\case_not_oppened);
-		// return true;
-	}
+	/* ----------------------------------------------------  OLD METHODS ------------------------------------------ */
+
 	static function isAdmin($user_id = false){
 		$rez = false;
 		if($user_id == false) $user_id = $_SESSION['user']['id'];
-		$res = mysqli_query_params('select min(group_id) from users_groups_association where user_id = $1', $user_id) or die(mysqli_query_error());
-		if($r = $res->fetch_row()) $rez = ($r[0] == 1); else throw new Exception(L\User_not_found);
+		$res = mysqli_query_params('select $1 from users_groups g  '.
+			'join users_groups_association uga on g.id = uga.group_id and uga.user_id = $1 '.
+			'where g.system = 1  and g.name = \'system\'', $user_id) or die(mysqli_query_error());
+		if($r = $res->fetch_row()) $rez = !empty($r[0]);
 		$res->close();
 		return $rez;
-		//return (!empty($_SESSION['user']['admin']));
 	}
 	static function canManage($user_id = false){
 		return true; // TODO: Review
-		$role_id = Security::getUserRole($user_id);
-		return (($role_id > 0) && ($role_id <=2)); //Managers and administrators
+		// $role_id = Security::getUserRole($user_id);
+		// return (($role_id > 0) && ($role_id <=2)); //Managers and administrators
 	}
 	static function isUsersOwner($user_id){
 		$res = mysqli_query_params('select cid from users_groups where id = $1', $user_id) or die(mysqli_query_error());

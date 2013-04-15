@@ -261,7 +261,7 @@ createDirectStores = function(){
 		autoLoad: true
 		,proxy: new  Ext.data.DirectProxy({
 			paramsAsHash: true
-			,directFn: Security.getLowerLevelUsers
+			,directFn: Security.getActiveUsers
 		})
 		,reader: new Ext.data.JsonReader({
 				successProperty: 'success'
@@ -292,6 +292,7 @@ createDirectStores = function(){
 				,messageProperty: 'msg'
 			},[ {name: 'id', type: 'int'}, 'name', 'title', {name: 'system', type: 'int'}, {name: 'enabled', type: 'int'} ]
 		)
+		,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
 		,sortInfo: {
 			field: 'title'
 			,direction: 'ASC'

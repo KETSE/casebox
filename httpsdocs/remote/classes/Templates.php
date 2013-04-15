@@ -314,7 +314,7 @@ class Templates{
 	public static function getIcon($template_id){
 	
 	}
-	public static function getTemplateFieldValue(&$field){
+	public static function getTemplateFieldValue(&$field, $format = 'html'){
 		@$value = $field['value']['value'];
 		switch($field['type']){
 			case 'boolean':
@@ -388,12 +388,12 @@ class Templates{
 					$value = array();
 					while($r = $res->fetch_assoc()){
 						@$label = coalesce($r['title'], $r['name']);
-						if(!empty($r['path'])) $label = '<a class="locate click" path="'.$r['path'].'" nid="'.$r['id'].'">'.$label.'</a>';
+						if(!empty($r['path'])) $label = ($format == 'html') ? '<a class="locate click" path="'.$r['path'].'" nid="'.$r['id'].'">'.$label.'</a>' : $label;
 
 						
 						switch(@$field['cfg']->renderer){
 							case 'listGreenIcons': 
-								$value[] = '<li class="icon-padding icon-element">'.$label.'</li>';
+								$value[] =  ($format == 'html') ? '<li class="icon-padding icon-element">'.$label.'</li>' : $label;
 								break;
 							case 'listObjIcons': 
 								if(!empty($r['cfg'])) $r['cfg'] = json_decode($r['cfg']);
@@ -410,14 +410,14 @@ class Templates{
 									break;
 								}
 
-								$value[] = '<li class="icon-padding '.$icon.'">'.$label.'</li>';
+								$value[] = ($format == 'html') ? '<li class="icon-padding '.$icon.'">'.$label.'</li>': $label;
 								break;
 							default:
-								$value[] = '<li>'.$label.'</li>';
+								$value[] = ($format == 'html') ? '<li>'.$label.'</li>': $label;
 						}
 					}
 					$res->close();
-					$value = '<ul class="clean">'.implode('', $value).'</ul>';
+					$value = ($format == 'html') ? '<ul class="clean">'.implode('', $value).'</ul>': implode(', ', $value);
 					break;
 
 			case 'date': $value = formatMysqlDate($value); break;

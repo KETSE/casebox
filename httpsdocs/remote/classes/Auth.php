@@ -46,7 +46,7 @@ class Auth {
 			if ($r = $res->fetch_assoc()) {
 				$r['admin'] = Security::isAdmin($user_id);
 				$r['manage'] = Security::canManage($user_id);
-				$r['role'] = Security::getUserRole($user_id);
+				// $r['role'] = Security::getUserRole($user_id); //TODO: rethink roles mechanism and replace it with groups and accesses
 				
 				$r['language'] = $_SESSION['languages']['per_id'][$r['language_id']]['abreviation'];
 				$r['locale'] = 	$_SESSION['languages']['per_id'][$r['language_id']]['locale'];

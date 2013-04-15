@@ -40,6 +40,8 @@
 	array_pop($a);
 	$parent_dir = implode(DIRECTORY_SEPARATOR, $a).DIRECTORY_SEPARATOR;
 
+	ini_set('error_log', $parent_dir.'logs'.DIRECTORY_SEPARATOR.CB_PROJ.'_error_log');
+
 	define('CB_EXT_FOLDER', '/libx/ext');
 	define('CB_SYS_PATH', $parent_dir.'sys'.DIRECTORY_SEPARATOR);
 	define('CB_DATA_PATH', $parent_dir.'data'.DIRECTORY_SEPARATOR);
@@ -146,54 +148,23 @@
 		return (empty($_SERVER['SERVER_NAME']) || ($_SERVER['SERVER_NAME'] == 'casebox.vvv.md') || in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1','46.55.49.126', '93.116.243.178', '195.22.253.6', '193.226.64.181', '188.240.73.107', '109.185.172.018', '192.168.1.110')));
 	}
 	function is_loged(){
-		return ( !empty($_COOKIE['key']) && !empty($_SESSION['key']) && !empty($_SESSION['ips']) && !empty($_SESSION['user']) &&  ($_COOKIE['key'] == $_SESSION['key']) && ('|'.getIPs().'|' == $_SESSION['ips']) );
+		return ( !empty($_COOKIE['key']) && 
+			!empty($_SESSION['key']) && 
+			!empty($_SESSION['ips']) && 
+			!empty($_SESSION['user']) &&  
+			($_COOKIE['key'] == $_SESSION['key']) && 
+			('|'.getIPs().'|' == $_SESSION['ips']) 
+			);
 	}
 	function is_windows(){
 		return (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN');
-	}
-	function monthsShort($language = false){
-		if($language === false) $language = $GLOBALS['USER_LANGUAGE'];
-		switch($language){
-			case 'ro': return array('Jan' => 'Ian', 'Feb' => 'Feb', 'Mar' => 'Mar', 'Apr' => 'Apr', 'May' => 'Mai', 'Jun' => 'Iun', 'Jul' => 'Iul', 'Aug' => 'Aug', 'Sep' => 'Sep', 'Oct' => 'Oct', 'Nov' => 'Noi', 'Dec' => 'Dec'); break;
-			case 'ru': return array('Jan' => 'Янв', 'Feb' => 'Фев', 'Mar' => 'Марта', 'Apr' => 'Апр', 'May' => 'Мая', 'Jun' => 'Июня', 'Jul' => 'Июля', 'Aug' => 'Авг', 'Sep' => 'Сент', 'Oct' => 'Окт', 'Nov' => 'Ноября', 'Dec' => 'Дек'); break;
-			case 'hy': return array('Jan' => 'Հուն', 'Feb' => 'Փետ', 'Mar' => 'ապականել', 'Apr' => 'Ապ', 'May' => 'մայիս', 'Jun' => 'Հուն', 'Jul' => 'հլս', 'Aug' => 'օգս', 'Sep' => 'սեպ', 'Oct' => 'հոկ', 'Nov' => 'նոյ', 'Dec' => 'դեկ'); break;
-			default : return array('Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mar', 'Apr' => 'Apr', 'May' => 'May', 'Jun' => 'Jun', 'Jul' => 'Jul', 'Aug' => 'Aug', 'Sep' => 'Sep', 'Oct' => 'Oct', 'Nov' => 'Nov', 'Dec' => 'Dec');
-		}
-	}
-	function months($language = false){
-		if($language === false) $language = $GLOBALS['USER_LANGUAGE'];
-		switch($language){
-			case 'ro': return array('January' => 'Ianuarie', 'February' => 'Februarie', 'March' => 'Martie', 'April' => 'Aprilie', 'May' => 'Mai', 'June' => 'Iunie', 'July' => 'Iulie', 'August' => 'August', 'September' => 'Septembrie', 'October' => 'Octombrie', 'November' => 'Noiembrie', 'December' => 'Dec'); break;
-			case 'ru': return array('January' => 'Января', 'February' => 'Февраля', 'March' => 'Марта', 'April' => 'Апреля', 'May' => 'Мая', 'June' => 'Июня', 'July' => 'Июля', 'August' => 'Августа', 'September' => 'Сентября', 'October' => 'Октября', 'November' => 'Ноября', 'December' => 'Декабря'); break;
-			case 'hy': return array('January' => 'Հուն', 'February' => 'Փետ', 'March' => 'ապականել', 'April' => 'Ապ', 'May' => 'մայիս', 'June' => 'Հուն', 'July' => 'հլս', 'August' => 'օգս', 'September' => 'սեպ', 'October' => 'հոկ', 'November' => 'նոյ', 'December' => 'դեկ'); break;
-			default : return array('January' => 'January', 'February' => 'February', 'March' => 'March', 'April' => 'April', 'May' => 'May', 'June' => 'June', 'July' => 'July', 'August' => 'August', 'September' => 'September', 'October' => 'October', 'November' => 'November', 'December' => 'December');
-		}
-	}
-
-	function daysShort($language = false){
-		if($language === false) $language = $GLOBALS['USER_LANGUAGE'];
-		switch($language){
-			case 'ro': return array('Mon' => 'Luni', 'Tue' => 'Mar', 'Wed' => 'Mer', 'Thu' => 'Joi', 'Fri' => 'Vin', 'Sat' => 'Sâm', 'Sun' => 'Dum'); break;
-			case 'ru': return array('Mon' => 'Пон', 'Tue' => 'Вт', 'Wed' => 'Ср', 'Thu' => 'Чет', 'Fri' => 'Пят', 'Sat' => 'Суб', 'Sun' => 'Вос'); break;
-			//case 'hy': return array('Mon' => 'Mon', 'Tue' => 'Tue', 'Wed' => 'Wed', 'Thu' => 'Thu', 'Fri' => 'Fri', 'Sat' => 'Sat', 'Sun' => 'Sun'); break;
-			default : return array('Mon' => 'Mon', 'Tue' => 'Tue', 'Wed' => 'Wed', 'Thu' => 'Thu', 'Fri' => 'Fri', 'Sat' => 'Sat', 'Sun' => 'Sun');
-		}
-	}
-
-	function days($language = false){
-		if($language === false) $language = $GLOBALS['USER_LANGUAGE'];
-		switch($language){
-			case 'ro': return array('Monday' => 'Luni', 'Tuesday' => 'Marţi', 'Wednesday' => 'Mercuri', 'Thursday' => 'Joi', 'Friday' => 'Vineri', 'Saturday' => 'Sâmbătă', 'Sunday' => 'Duminică'); break;
-			case 'ru': return array('Monday' => 'Понедельник', 'Tuesday' => 'Вторник', 'Wednesday' => 'Среда', 'Thursday' => 'Четверг', 'Friday' => 'Пятница', 'Saturday' => 'Субота', 'Sunday' => 'Воскресенье'); break;
-			//case 'hy': return array('Monday' => 'Monday', 'Tuesday' => 'Tuesday', 'Wednesday' => 'Wednesday', 'Thursday' => 'Thursday', 'Friday' => 'Friday', 'Saturday' => 'Saturday', 'Sunday' => 'Sunday'); break;
-			default : return array('Monday' => 'Monday', 'Tuesday' => 'Tuesday', 'Wednesday' => 'Wednesday', 'Thursday' => 'Thursday', 'Friday' => 'Friday', 'Saturday' => 'Saturday', 'Sunday' => 'Sunday');
-		}
 	}
 
 	function initTranslations(){
 		if(isset($GLOBALS['TRANSLATIONS'])) return;
 		$lstr_abrev = isset($_SESSION['languages']['per_abrev'])  ? implode(',',array_keys($_SESSION['languages']['per_abrev'])) : $GLOBALS['USER_LANGUAGE'];
-		/* reading global translations */
+		
+		/* reading global translations table from casebox database*/
 		$res = mysqli_query_params('select name, '.$lstr_abrev.' from `casebox`.translations where `type` < 2') or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			reset($r);
@@ -201,6 +172,7 @@
 			while($v = next($r)) $GLOBALS['TRANSLATIONS'][key($r)][$name] = $v;
 		}
 		$res->close();
+		
 		/* reading specific translations of core */
 		$lstr = '';
 		if(!isset($_SESSION['languages'])){

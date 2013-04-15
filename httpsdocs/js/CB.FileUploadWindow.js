@@ -2,6 +2,7 @@ Ext.namespace('CB');
 
 CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
 	autoShow: true
+	,border: false
 	,bodyBorder: false
 	,closable: true
 	,closeAction: 'hide'
@@ -10,13 +11,13 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
 	,maximizable: false
 	,minimizable: false
 	,modal: true
-	//,plain: true
+	,plain: true
 	,resizable: false
 	,stateful: false
 	,title: L.UploadFile
 	,minWidth: 550
 	,width: 550
-	,bodyStyle: 'padding: 10px'
+	,bodyStyle: 'padding: 10px; border: 0'
 	,buttonAlign: 'center'
 	,data:{
 		single: true
@@ -36,12 +37,14 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
 			,scope: this
 			,handler: this.onButtonClick
 		});
-		if(!Ext.isEmpty(this.data.suggestedFilename)) buttons.push({
+		
+		this.renameButton = new Ext.Button({
 			text: L.Rename
 			,name: 'rename'
 			,scope: this
 			,handler: this.onButtonClick
 		});
+		if(!Ext.isEmpty(this.data.suggestedFilename)) buttons.push(this.renameButton);
 		
 		if(this.data.autorenameButton) buttons.push({
 			text: L.AutoRename
@@ -56,17 +59,31 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
 			,scope: this
 			,handler: this.onButtonClick
 		});
-
+		items = [
+			{xtype: 'label', text: this.data.msg}
+		]
+		if(this.data.single == false) items.push({
+			xtype: 'checkbox'
+			,boxLabel: L.ApplyForAll
+			,style: 'margin-top: 25px'
+			,listeners:{
+				check: function(cb, checked){
+					this.forAll = checked;
+					this.renameButton.setDisabled(checked);
+				}
+				,scope: this
+			}
+		})
 		Ext.apply(this, {
-			items: [{xtype: 'label', text: this.data.msg}]
+			items: items
 			,buttons: buttons
 		})
 		CB.FilesConfirmationWindow.superclass.initComponent.apply(this, arguments);
 
-		this.responce = 'cancel';
+		this.response = 'cancel';
 	}
 	,onButtonClick: function(b){
-		this.responce = b.name;
+		this.response = b.name;
 		this.hide();
 	}
 
@@ -234,31 +251,31 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 		}
 	},onSubmitSuccess: function(form, action){
 		/*on success actions*/
-		this.serverResponce = action.result;
-		this.fireEvent('submitsuccess', this, this.serverResponce.data);
+		this.serverResponse = action.result;
+		this.fireEvent('submitsuccess', this, this.serverResponse.data);
 		this.hide();
-		if(!Ext.isEmpty(this.serverResponce.msg)){
-			if(this.serverResponce.prompt_to_open)
-				Ext.Msg.confirm(L.Info, this.serverResponce.msg, function(b){ if(b == 'yes') App.mainViewPort.fireEvent('fileopen', {id: this.serverResponce.data.id})}, this);
-			else Ext.Msg.alert(L.Info, this.serverResponce.msg);
+		if(!Ext.isEmpty(this.serverResponse.msg)){
+			if(this.serverResponse.prompt_to_open)
+				Ext.Msg.confirm(L.Info, this.serverResponse.msg, function(b){ if(b == 'yes') App.mainViewPort.fireEvent('fileopen', {id: this.serverResponse.data.id})}, this);
+			else Ext.Msg.alert(L.Info, this.serverResponse.msg);
 		}
 	},onSubmitFailure: function(form, action){
 		/*on failure actions*/
 		if(action.result.type == 'filesexist'){
-			this.serverResponce = action.result;
+			this.serverResponse = action.result;
 			w = new CB.FilesConfirmationWindow({
 				title: L.FileExists
 				,icon: Ext.MessageBox.QUESTION
 				,data:{
-					msg: this.serverResponce.msg
-					,single: (this.serverResponce.count == 1)
-					,allow_new_version: this.serverResponce.allow_new_version
-					,suggestedFilename: this.serverResponce.suggestedFilename
+					msg: this.serverResponse.msg
+					,single: (this.serverResponse.count == 1)
+					,allow_new_version: this.serverResponse.allow_new_version
+					,suggestedFilename: this.serverResponse.suggestedFilename
 					,autorenameButton: true
 				}
 				,listeners: {
 					scope: this
-					,hide: this.onConfirmResponce
+					,hide: this.onConfirmResponse
 				}
 			})
 			w.show();
@@ -271,7 +288,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 			// 		,icon: Ext.MessageBox.QUESTION
 			// 		,listeners: {
 			// 			scope: this
-			// 			,hide: this.onConfirmResponce
+			// 			,hide: this.onConfirmResponse
 			// 		}
 			// 	})
 			// 	w.show();
@@ -284,22 +301,22 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 			// 		,data: {single: false, autorenameButton: true}
 			// 		,listeners: {
 			// 			scope: this
-			// 			,hide: this.onConfirmResponce
+			// 			,hide: this.onConfirmResponse
 			// 		}
 			// 	})
 			// 	w.show();
 			// 	break;
 			// default: App.formSubmitFailure(form, action);
 		}else App.formSubmitFailure(form, action);
-	},onConfirmResponce: function(w){
-		if(w.responce == 'rename'){
+	},onConfirmResponse: function(w){
+		if(w.response == 'rename'){
 			Ext.Msg.prompt(L.Rename, L.NewFileName, function(btn, text){
-				if( (btn == 'ok') && !Ext.isEmpty(text) ) Browser.confirmUploadRequest({responce: 'rename', newName: text}, this.onConfirmResponceProcess, this);
-				else Browser.confirmUploadRequest({responce: 'cancel'}, this.onConfirmResponceProcess, this);
-			}, this, false, this.serverResponce.suggestedFilename);
-		}else Browser.confirmUploadRequest({responce: w.responce}, this.onConfirmResponceProcess, this)
+				if( (btn == 'ok') && !Ext.isEmpty(text) ) Browser.confirmUploadRequest({response: 'rename', newName: text}, this.onConfirmResponseProcess, this);
+				else Browser.confirmUploadRequest({response: 'cancel'}, this.onConfirmResponseProcess, this);
+			}, this, false, this.serverResponse.suggestedFilename);
+		}else Browser.confirmUploadRequest({response: w.response}, this.onConfirmResponseProcess, this)
 		w.destroy();
-	},onConfirmResponceProcess: function(r, e){
+	},onConfirmResponseProcess: function(r, e){
 		if(r.success == true) this.onSubmitSuccess(this.findByType('form')[0], {result: r});
 		else this.onSubmitFailure(this.findByType('form')[0], {result: r});
 	},onAddFileFieldClick: function(f, idx, d, e){

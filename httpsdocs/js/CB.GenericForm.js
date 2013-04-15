@@ -71,7 +71,7 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 			params: {data: this.data}
 			,scope: this
 			,success: this.processLoadResponse
-			,failure: this.processLoadResponse
+			,failure: this.processLoadResponse.createDelegate(this)
 		})
 	}
 	,getTitle: function(){
@@ -96,7 +96,11 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 	,processLoadResponse: function(f, e){
 		r = e.result;
 		if(r.success !== true){
-			Ext.Msg.confirm( L.Error, L.readDataErrorMessage, function(b){ if(b == 'yes') this.loadData(); else this.doClose(); }, this );
+			if(App.hideFailureAlerts){
+				this.doClose();
+				return;
+			}
+			Ext.Msg.confirm( L.Error, Ext.value(e.msg, L.readDataErrorMessage), function(b){ if(b == 'yes') this.loadData(); else this.doClose(); }, this );
 			return;
 		}
 		if(!Ext.isDefined(r.data)) return;
@@ -151,12 +155,12 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 		if(this._confirmedClosing) return this.doClose();
 		this.getEl().unmask();
 	}
-	,onSaveFailure: function(f, a){
-		if(Ext.isDefined(a.result.already_opened_by)){
+	,onSaveFailure: function(form, action){
+		if(Ext.isDefined(action.result.already_opened_by)){
 			this.getEl().unmask();
 			Ext.Msg.show({
 			title: L.SavingDataConfirmation
-			,msg: a.result.already_opened_by
+			,msg: action.result.already_opened_by
 			,buttons: Ext.Msg.YESNO
 			,fn: function(b){if(b == 'yes'){this._forcedSave = 1; this.saveForm();} else {this.getEl().unmask(); this._confirmedClosing = 0;}}
 			,scope: this
@@ -164,8 +168,8 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 			,icon: Ext.MessageBox.QUESTION
 			});
 		}else{
-			this.fireEvent('savefail', this, a);
-			App.formSubmitFailure(f, a); 
+			this.fireEvent('savefail', this, action);
+			App.formSubmitFailure(form, action); 
 			this.getEl().unmask();
 		}
 	}

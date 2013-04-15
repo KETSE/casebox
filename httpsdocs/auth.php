@@ -1,4 +1,15 @@
 <?php
+/**
+ * User authentification script.
+ * 
+ * This script does first checks on submited values from login.php.
+ * Uses the Auth class and calls Login method with passed params to check authentification validity.
+ * If the user passes the authentification he's redirected to the index.php where the CaseBox interface starts loading.
+ * Otherwise, if the user do not pass authentification, it is redirected to login.php and the corresponding message is displayed (from $_SESSION['message']).
+ * 
+ * @package CaseBox
+ * 
+ * */
 include 'init.php';
 if ($_POST['s'] == L\Login) {
 	$errors = Array();

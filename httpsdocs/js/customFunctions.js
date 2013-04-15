@@ -53,10 +53,10 @@ function getItemIcon(d){
 }
 //function getItemCls()
 function getFileIcon(filename){
-	if(Ext.isEmpty(filename)) return 'file-unknown';
+	if(Ext.isEmpty(filename)) return 'file-';
 	a = String(filename).split('.');
-	if(a.length <2 ) return 'file-unknown';
-	return 'file-'+ Ext.util.Format.lowercase(a.pop());
+	if(a.length <2 ) return 'file-';
+	return 'file- file-'+ Ext.util.Format.lowercase(a.pop());
 }
 function getVersionsIcon(versionsCount){
 	if(isNaN(versionsCount)) return '';

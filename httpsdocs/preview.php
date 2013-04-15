@@ -6,6 +6,10 @@
 	 */
 	if(empty($_GET['f'])) exit(0);
 	require_once 'init.php';
+	if(!is_loged()){
+		echo 'Session expired. Please login.';
+		exit(0);
+	}
 	$f = $_GET['f'];
 	$f = explode('.', $f);
 	$a = array_shift($f);

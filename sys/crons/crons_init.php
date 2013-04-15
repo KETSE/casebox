@@ -1,9 +1,10 @@
 <?php
 /**
-*	initialization file for crons
+*	Initialization file for crons
+* 
 *	@author Țurcanu Vitalie <vitalie.turcanu@gmail.com>
 *	@access private
-*	@package CaseBox CMS
+*	@package CaseBox
 *	@copyright Copyright (c) 2011, CaseBox
 **/
 	ini_set('mbstring.substitute_character', "none");
@@ -74,7 +75,6 @@
 	require_once PROJ_LIB_DIR.'Util.php';
 	global $dbh;
 	include PROJ_LIB_DIR.'DB.php';
-	//include DIRECTORY_SEPARATOR.'SolrClient.php';
 	$dbh = connect2DB();
 	//---------------------------------------------------
 	function prepare_cron($cron_id, $execution_skip_times = 1, $info = ''){
@@ -105,12 +105,6 @@
 		
 		return $rez;
 	}
-	
-	// function formatMysqlDate($d, $format){
-	// 	if(empty($d)) return '';
-	// 	$d = explode('-',array_shift(explode(' ', $d)));
-	// 	return utf8_encode(ucfirst(strftime($format, mktime(0, 0, 0, $d[1], $d[2], $d[0]))));
-	// }	
 	
 	function notify_admin($subject, $message){
 		echo 'notifying admin: '.PROJ_ADMIN_EMAIL;
@@ -165,13 +159,9 @@
 		$res->close();
 	}
 	
-	// function coalesce() {
-	// 	$args = func_get_args();
-	// 	foreach ($args as $arg)
-	// 		if (!empty($arg)) return $arg;
-	// 	return $args[0];
-	// }
 	function __autoload($class_name) {
-    		require_once $class_name . '.php';
+		require_once $class_name . '.php';
+	}
+	function fireEvent($eventName, $params){ //just an empty function for crons and utils because they use platform classes that can fire events
 	}
 ?>

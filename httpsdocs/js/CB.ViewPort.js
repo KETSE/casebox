@@ -28,6 +28,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			,hideBorders: true
 			,listeners: {
 				tabchange: function(tp, p){
+					tp.syncSize();
 					p.syncSize();
 				}
 			}
@@ -66,8 +67,25 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			}
 		});
 
+		App.mainStatusBar = new Ext.Toolbar({
+				region: 'south'
+				,cls: 'x-panel-gray'
+				,style:'border-top: 1px solid #aeaeae'
+				,height: 25
+				,items: [
+					{xtype: 'tbspacer', width: 610}
+					// ,{text: 'Some text', iconCls: App.loginData.iconCls, menu: [], name: 'userMenu' }
+					,'->'
+					,{xtype: 'uploadwindowbutton'}
+					,{xtype: 'tbspacer', width: 20}
+				]
+		});
 		Ext.apply(this, {
-			items: [ App.mainToolBar, App.mainTabPanel, App.mainAccordion ]
+			items: [ App.mainToolBar
+				,App.mainTabPanel
+				,App.mainAccordion
+				,App.mainStatusBar
+			]
 			,listeners: {
 				scope: this
 				,login: this.onLogin 
@@ -187,15 +205,14 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		App.Favorites = new CB.Favorites();
 		App.Favorites.load();
 		this.populateMainMenu();
-		initFn = function(){
-			App.openUniqueTabbedWidget('CBDashboard');
-			if(CB.DB.templates.getCount() > 0){
-				App.mainViewPort.openDefaultExplorer();
-				App.mainTabPanel.setActiveTab(0)
-				//App.openUniqueTabbedWidget('CBSecurityPanel', null, { data: {id: 237} })
-			}else initFn.defer(500);
-		};
-		initFn.defer(500);
+		App.openUniqueTabbedWidget('CBDashboard');
+	}
+	,initCB: function(){
+		if(CB.DB.templates.getCount() > 0){
+			App.mainViewPort.openDefaultExplorer();
+			App.mainTabPanel.setActiveTab(0)
+			//App.openUniqueTabbedWidget('CBSecurityPanel', null, { data: {id: 237} })
+		}else App.mainViewPort.initCB.defer(500);
 	}
 	,logout: function(){
 		return Ext.Msg.show({
@@ -249,6 +266,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 				trees[i].on('afterrename', this.onRenameTreeElement, this)
 			};
 		}
+		App.mainViewPort.initCB();
 	}
 	,onTreeNodeClick: function(node, e){
 		if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;

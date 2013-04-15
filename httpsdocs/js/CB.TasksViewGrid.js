@@ -130,6 +130,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				, {name: 'importance', type: 'int'}
 				, {name: 'status', type: 'int'}
 				, {name: 'cid', type: 'int'}
+				, {name: 'completed', type: 'date'}
 				, {name: 'cdate', type: 'date'}
 				, {name: 'udate', type: 'date'}
 				, 'case'
@@ -192,6 +193,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				    ,{ header: L.Due, width: 120, dataIndex: 'date_end', format: App.dateFormat+' '+App.timeFormat, renderer: App.customRenderers.datetime}
 				    ,{ header: L.Importance, width: 100, dataIndex: 'importance', renderer: App.customRenderers.taskImportance}
 				    ,{ header: L.Status, width: 100, dataIndex: 'status', renderer: App.customRenderers.taskStatus }
+				    ,{ header: L.CompletedDate, hidden:true, width: 120, dataIndex: 'completed', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
 				    ,{ header: L.CreatedDate, hidden:true, width: 120, dataIndex: 'cdate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
 				    ,{ header: L.UpdatedDate, hidden:true, width: 120, dataIndex: 'udate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
 				]
@@ -681,12 +683,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
         ,onShowDescendantsClick: function(cb, e){
         	this.fireEvent('showdescendants', !cb.checked, e);
         }
-        ,setShowDescendants: function(v){
-        	v = (v === true);
-        	if(this.params.descendants == v) return;
-        	this.params.descendants = v;
-        }
-
 })
 
 Ext.reg('CBTasksViewGrid', CB.TasksViewGrid);

@@ -3,6 +3,8 @@ require_once 'Security.php';
 require_once 'SolrClient.php';
 
 class Search extends SolrClient{
+	/*when requested to sort by a field the other convenient sorting field can be used designed for sorting. Used for string fields. */
+	var $sortFields = array('name' => 'sort_name', 'path' => 'sort_path');
 	function query($p){
 		$this->results = false;
 		$this->inputParams = $p;
@@ -29,7 +31,7 @@ class Search extends SolrClient{
 			,'q.alt' => '*:*'
 			,'qf' => "name content^0.5"
 			,'tie' => '0.1'
-			,'fl' => "id, pid, path, name, type, subtype, system, size, date, date_end, oid, cid, cdate, udate, case_id, case, sys_tags,user_tags, template_id, user_ids, status, category_id, importance, versions"//iconCls, 
+			,'fl' => "id, pid, path, name, type, subtype, system, size, date, date_end, oid, cid, cdate, uid, udate, case_id, case, sys_tags, user_tags, template_id, user_ids, status, category_id, importance, completed, versions"//iconCls, 
 			,'sort' => 'ntsc asc'
 		);
 		/* initial parameters */
@@ -49,10 +51,13 @@ class Search extends SolrClient{
 				$sort[$s[0]] = empty($s[1]) ? 'asc' : strtolower($s[1]);
 			}
 			foreach($sort as $f => $d){
-		 		if(!in_array($f, array('name', 'path', 'size', 'date', 'date_end', 'importance', 'category_id', 'status', 'cid', 'uid', 'cdate', 'udate', 'case'))) continue;
+		 		if(!in_array($f, array('name', 'path', 'size', 'date', 'date_end', 'importance', 'completed',  'category_id', 'status', 'oid', 'cid', 'uid', 'cdate', 'udate', 'case'))) continue;
+		 		
+		 		if(isset($this->sortFields[$f])) $f = $this->sortFields[$f]; // replace with convenient sorting fields if defined
+		 		
 		 		$this->params['sort'] .= ",$f $d"; 	
 		 	}
-		}else $this->params['sort'] .= ', subtype asc, sort_path asc';
+		}else $this->params['sort'] .= ', sort_name asc';//, subtype asc
 		
 		/* adding additional query filters */
 
@@ -76,8 +81,20 @@ class Search extends SolrClient{
 			if(!empty($ids)) $fq[] = 'pids:('.implode(' OR ', $ids).')';
 		} 
 		if(!empty($p->types)){
-			$ids = toNumericArray($p->types);
-			if(!empty($ids)) $fq[] = 'type:('.implode(' OR ', $ids).')';
+			if(!is_array($p->types)) $p->types = explode(',', $p->types);
+			for ($i=0; $i < sizeof($p->types); $i++)
+				switch($p->types[$i]){
+					case 'folder':	$p->types[$i] = 1; break;
+					case 'link':	$p->types[$i] = 2; break;
+					case 'case':	$p->types[$i] = 3; break;
+					case 'object':	$p->types[$i] = 4; break;
+					case 'file':	$p->types[$i] = 5; break;
+					case 'task':	$p->types[$i] = 6; break;
+					case 'event':	$p->types[$i] = 7; break;
+					default: $p->types[$i] = intval($p->types[$i]);
+				}
+			// $ids = toNumericArray($p->types);
+			if(!empty($p->types)) $fq[] = 'type:('.implode(' OR ', $p->types).')';
 		}
 		if(!empty($p->templates)){
 			$ids = toNumericArray($p->templates);

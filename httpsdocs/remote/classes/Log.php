@@ -210,9 +210,8 @@ class Log{
 		}
 		/* setting remind_users field /**/
 		if(isset($p['remind_users'])){
-			if(!is_array($p['remind_users'])) $p['remind_users'] = explode(',', $p['remind_users']);
-			$p['remind_users'] = array_filter($p['remind_users'], 'is_numeric');
-			$p['remind_users'] = array_diff($p['remind_users'], array($_SESSION['user']['id']));
+			$p['remind_users'] = toNumericArray($p['remind_users']);
+			$p['remind_users'] = array_diff($p['remind_users'], array($_SESSION['user']['id'])); //do not remind the user that have made changes
 			if(empty($p['remind_users'])) unset($p['remind_users']); 
 			else $p['remind_users'] = implode(',', $p['remind_users']);
 		}/**/
@@ -253,6 +252,7 @@ class Log{
 		["task_id"]=>52
 		["to_user_ids"]=>'1,4'
 		["remind_users"]=>'4'
+		["removed_users"]=>'4'
 		["info"]=>'title: test3'
 		["user_id"]=>'1'
 		["file_id"]=>NULL
@@ -262,10 +262,7 @@ class Log{
 		}
 	/**/	
 		$to_user_ids = array();
-		if(!empty($p['remind_users'])){
-			if(!is_array($p['remind_users'])) $to_user_ids = explode(',', $p['remind_users']);
-			$to_user_ids = array_filter($to_user_ids, 'is_numeric');
-		}
+		if(!empty($p['remind_users'])) $to_user_ids = toNumericArray($p['remind_users']); 
 		if(empty($to_user_ids)) return ;
 		
 		$users_data = array();
@@ -314,7 +311,7 @@ class Log{
 					if($r = $res->fetch_assoc())
 						$subject = str_replace( array('{owner}', '{name}', '{path}'), array(coalesce($r['owner'], $r['username']), $r['name'], $r['path'] ), $subject );
 					$res->close();
-					$message = Tasks::getTaskInfoForEmail($p['task_id'], $u['id']/*, $message/**/);
+					$message = Tasks::getTaskInfoForEmail($p['task_id'], $u['id'], @$p["removed_users"]/*, $message/**/);
 					
 					/*aboutTaskCreated		- New task / {owner}: {title} ({$path})
 					aboutTaskUpdated		- Task update / {title} ({$path})

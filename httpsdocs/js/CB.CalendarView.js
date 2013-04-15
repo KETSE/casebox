@@ -166,16 +166,22 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 	,doReloadEventsStore: function(){
 		this.allowedReload = true;
 		if(Ext.isEmpty(this.getLayout().activeItem)) return;
+		if(Ext.isDefined(this.eventStore.requestedParams)) Ext.apply(this.eventStore.baseParams, this.eventStore.requestedParams)
+		delete this.eventStore.requestedParams;
 		params = Ext.apply({}, this.eventStore.baseParams);
 		Ext.apply(params, this.getLayout().activeItem.getViewBounds() )
+		
 		params.end.setHours(23);
 		params.end.setMinutes(59);
 		params.end.setSeconds(59);
 		params.end.setMilliseconds(999);
 		params.start = params.start.toISOString()
 		params.end = params.end.toISOString()
-		//params.filter = this.filter
+
 		params.facets = 'calendar'
+
+		if(Ext.isEmpty(params.path)) params.path = '/';
+
 		this.eventStore.load({ params: params })
 	}
 	// The edit popup window is not part of the CalendarPanel itself -- it is a separate component.
@@ -299,7 +305,7 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
 			}
 		});
 		this.calendar.eventStore.baseParams.facets = 'calendar'
-		this.calendar.eventStore.on('beforeload', this.onBeforeLoad, this)
+		// this.calendar.eventStore.on('beforeload', this.onBeforeLoad, this)
 		this.calendar.eventStore.proxy.on('load', this.onProxyLoaded, this);
 		
 		this.filterButton = new Ext.Button({
@@ -448,10 +454,10 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
         	}
         	);
         }
-	,onBeforeLoad: function(st, r, o){
-		if(Ext.isEmpty(this.requestedParams)) return false;
-		Ext.apply(st.baseParams, this.requestedParams)
-	}
+	// ,onBeforeLoad: function(st, r, o){
+	// 	if(!Ext.isDefined(this.eventStore.requestedParams)) return false;
+	// 	Ext.apply(st.baseParams, this.eventStore.requestedParams)
+	// }
 	,onProxyLoaded: function(proxy, o, options){
 		this.folderProperties = o.result.folderProperties
 		this.folderProperties.id = parseInt(this.folderProperties.id);
@@ -464,24 +470,13 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
 		this.filtersPanel.updateFacets(o.result.facets, options);
 	}
 	,setParams: function(params){
-		if(Ext.isEmpty(params.path)) params.path = '/';
-		//this.calendar.eventStore.baseParams = Ext.value(params, {});
-		this.requestedParams = Ext.apply({}, params, this.calendar.eventStore.baseParams);
+		this.calendar.eventStore.requestedParams = Ext.apply({}, params, this.calendar.eventStore.baseParams);
 		this.onReloadClick();
 	}
 	,onSearchQuery: function(query, e){
 		this.query = query;
 		this.onReloadClick();
 	}
-	// ,onChangeViewCkick: function(b, e){
-	// 	this.calendar.setActiveView(b.viewId)
-	// }
-        ,setShowDescendants: function(v){
-        	v = (v === true);
-        	if(this.showDescendants == v) return;
-        	this.showDescendants = v;
-        	//this.onReloadClick();
-        }
 	,onReloadClick: function(b, e){
 		this.calendar.doReloadEventsStore()
 	}
@@ -520,15 +515,13 @@ CB.CalendarViewPanel = Ext.extend(Ext.Panel, {
 	,layout: 'fit'
 	,iconCls: 'icon-calendarView'
 	,initComponent: function(){
-		this.view = new CB.CalendarView({
-			showDescendants: true
-		})
+		this.view = new CB.CalendarView()
 		Ext.apply(this,{
 			iconCls: Ext.value(this.iconCls, 'icon-calendarView')
 			,items: this.view
 		})
 		CB.CalendarViewPanel.superclass.initComponent.apply(this, arguments);
-		this.view.setParams({path:'/', filters: {"status":[{"mode":"OR","values":["1","2"]}],"assigned":[{"mode":"OR","values":[App.loginData.id]}]} });
+		this.view.setParams({path:'/', descendants: true, filters: {"status":[{"mode":"OR","values":["1","2"]}],"assigned":[{"mode":"OR","values":[App.loginData.id]}]} });
 	}
 })
 Ext.reg('CBCalendarViewPanel', CB.CalendarViewPanel);

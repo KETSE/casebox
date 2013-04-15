@@ -60,7 +60,7 @@ class Path{
 		for ($i=0; $i < sizeof($path); $i++) { 
 			if(isset($names[$path[$i]])){
 				if((substr($names[$path[$i]], 0, 1) == '[') && (substr($names[$path[$i]], -1, 1) == ']') )
-					$names[$path[$i]] = L(substr($names[$path[$i]], 1, strlen($names[$path[$i]]) -2));
+					$names[$path[$i]] = coalesce(L(substr($names[$path[$i]], 1, strlen($names[$path[$i]]) -2)) , $names[$path[$i]]);
 				$rez[] = $names[$path[$i]];
 			}else $rez[] = $path[$i]; 
 		}

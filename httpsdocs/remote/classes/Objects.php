@@ -5,8 +5,10 @@ class Objects{
 		/* procedure for loading all necessary properties of a given case object */
 		$rez = array();
 		$d = $p->data; //shortcut
-		// SECURITY: check if object id is numeric 
+		
 		if(!is_numeric($d->id)) throw new Exception(L\Wrong_input_data);
+		// SECURITY: check if object id is numeric 
+		if(!Security::canRead($d->id)) throw new Exception(L\Access_denied);
 		// end of SECURITY: check if object id is numeric 
 		
 		$template = $this->getTemplateInfo(null, $d->id);
@@ -15,16 +17,6 @@ class Objects{
 		$rez['iconCls'] = $template['iconCls'];
 		$rez['type'] = $template['type'];
 		$d->case_id = Cases::getId($d->id);
-		//die('!'.$d->case_id);
-		// SECURITY: check if object exists in DB
-		//if(!$this->getUniqueObjectId($d->case_id, $rez['template_id'], $d->id)) throw new Exception(L\Object_not_found);
-		// end of SECURITY: check if object exists in DB
-		// SECURITY: check if this objects case is opened by current user 
-		//if(!Security::checkIfCaseOpened($d->case_id)) throw new Exception(L\case_not_oppened);
-		// end of SECURITY: check if this objects case is opened by current user 
-		// SECURITY: check if current user has at least read access to this case
-		//if(!Security::canReadCase($d->case_id)) throw new Exception(L\Access_denied);
-		// end of SECURITY: check if current user has at least read access to this case
 		
 		$rez['id'] = $d->id;
 		if(empty($d->case_id)) $d->case_id = null;
@@ -81,6 +73,7 @@ class Objects{
 		
 		return Array('success' => true, 'data' => $rez);
 	}
+	
 	function save($p){
 		$log_action_type = 9; // update action
 		$object_title = '';
@@ -89,29 +82,24 @@ class Objects{
 		$object_date_end = null;
 		$object_violation = false;
 		$object_author = null;
-		//$object_iconCls = null;
 		$fields = Array();
 		$update_ids_icons = Array(); //$updated_decision_ids = Array(); //collecting ids to update their icon sets corresponding to the new values
 
 		$d = json_decode($p['data']);
-		fireEvent('beforeobjectsave', $d);
 		$initial_object_id = $d->id;
 		$d->case_id = null;
-		//if(!is_numeric($d->case_id)) throw new Exception(L\Wrong_input_data);
 		$pid = coalesce($d->pid, $d->case_id);
-		// SECURITY: check if current user has at least read access to this case
-		//if(!Security::canWriteCase($d->case_id)) throw new Exception(L\Access_denied);
-		// end of SECURITY: check if current user has at least read access to this case
-		// SECURITY: check if this objects case is opened by current user 
-		//if(!Security::checkIfCaseOpened($d->case_id)) throw new Exception(L\case_not_oppened);
-		// end of SECURITY: check if this objects case is opened by current user 
 
 		$template = $this->getTemplateInfo($d->template_id, $d->id);
 		
 		/* analisys of object id (inserting if new) */
-		//if($template['id'] == 1) $d->id = $this->getUniqueObjectId($d->case_id, $template['id'], $d->id); //this is for case card
 		$isNewObject = true;
+		$d->type = 4; //case object
 		if(!is_numeric($d->id)){
+			// SECURITY: check if current user has access
+			if(!Security::canCreateActions($pid)) throw new Exception(L\Access_denied);
+			fireEvent('beforeNodeDbCreate', $d);
+			
 			mysqli_query_params('insert into tree (pid, name, `type`, subtype, cid) values ($1, $2, $3, $4, $5)', array($pid, 'new case object', 4, $template['type'], $_SESSION['user']['id'])) or die(mysqli_query_error());
 			$d->id = last_insert_id();
 			$sql = 'INSERT INTO objects (id, case_id, `title`, template_id, cid) VALUES($1, $2, $3, $4, $5)';
@@ -119,7 +107,12 @@ class Objects{
 			mysqli_query_params($sql, $params) or die(mysqli_query_error());
 			
 			$log_action_type = 8; //else throw new Eception(L\Error_creating_object); // create action
-		}$isNewObject = false;
+		}else{
+			// SECURITY: check if current user has write access to this action
+			if(!Security::canWrite($d->id)) throw new Exception(L\Access_denied);
+			fireEvent('beforeNodeDbUpdate', $d);
+			$isNewObject = false;
+		}
 		/* end of analizing object id */
 
 		/* save objects tags */
@@ -166,8 +159,13 @@ class Objects{
 			$f = explode('_', $f);
 			$field_id = substr($f[0], 1);
 			$field = Array();
-			$res = mysqli_query_params('select name, type from templates_structure where id = $1', $field_id) or die(mysqli_query_error());
-			if($r = $res->fetch_assoc()) $field = $r;
+			$res = mysqli_query_params('select name, type, cfg from templates_structure where id = $1', $field_id) or die(mysqli_query_error());
+			if($r = $res->fetch_assoc()){
+				$field = $r;
+				if(!empty($field['cfg'])) $field['cfg'] = json_decode($field['cfg']);
+				$field['value'] = array('value' => $fv->value, 'info' => $fv->info);
+
+			}
 			$res->close();
 			
 			$duplicate_id = intval($duplicate_ids[$f[1]]);
@@ -179,43 +177,16 @@ class Objects{
 					else $duplicate_index++;
 				}
 			}
-			/* for titles processing */
-			$v = $fv->value;
 			
-			if($field['name'] == '_title') $object_custom_title = $v;
-			switch($field['type']){
-				//case 'object_title': $object_custom_title = $v; break;
-				case 'date': 
-				case 'datetime': 
-					if($field['name'] == '_date_start') $object_date_start = $v;
-					elseif($field['name'] == '_date_end') $object_date_end = $v;
-					$v = empty($v) ? null : implode('.', array_reverse(explode('-', substr($v, 0, 10)))); 
-					break;
-				//case 'object_author': $object_author = $v; 
-				case 'combo': 
-					if( (strpos($object_title, '{f'.$field_id.'}') !== false) || (strpos($object_title, '{'.$field['name'].'}') !== false) || (strpos($object_title, '<?php ') >= 0)){
-						$res = mysqli_query_params('SELECT l'.UL_ID().' `name` FROM tags WHERE id = $1', $v) or die(mysqli_query_error());
-						if($r = $res->fetch_row()) $v = addslashes($r[0]);
-						$res->close();
-					}
-					break;
-				case 'popuplist': 
-					if( (strpos($object_title, '{f'.$field_id.'}') !== false) || (strpos($object_title, '{'.$field['name'].'}') !== false) || (strpos($object_title, '<?php ') >= 0)){
-						$a = explode(',', $v);
-						$a = array_filter($a, 'is_numeric');
-						if(!empty($a)){
-							$v = array();
-							$res = mysqli_query_params('SELECT l'.UL_ID().' `name` FROM tags WHERE id in ('.implode(',', $a).')') or die(mysqli_query_error());
-							while($r = $res->fetch_row()) $v[] = addslashes($r[0]);
-							$res->close();
-							$v = implode(', ', $v);
-						}
-					}
-					break;
-				case 'case_title': mysqli_query_params('update cases set name = $1 where id = $2', Array($v, $d->case_id)) or die(mysqli_query_error()); break;
-				case 'object_violation': $object_violation = $v; break;
+			$v = $fv->value;
+			switch($field['name']){
+				case '_title': $object_custom_title = $v; break;
+				case '_date_start': $object_date_start = $v; break;
+				case '_date_end': $object_date_end = $v; break;
 			}
 
+			/* for titles processing */
+			$v = Templates::getTemplateFieldValue($field, 'text');
 			$object_title = str_replace( '{f'.$field_id.'}', $v, $object_title);
 			$object_title = str_replace( '{'.$field['name'].'}', $v, $object_title);
 			$object_title = str_replace( '{'.$field['name'].'_info}', $fv->info, $object_title);
@@ -223,7 +194,6 @@ class Objects{
 				$fields[$field_id]['duplicates'][$duplicate_index]['value_id'] = $fv->value;
 				$fields[$field_id]['duplicates'][$duplicate_index]['value'] = $v;
 				$fields[$field_id]['duplicates'][$duplicate_index]['details'] = $fv->info;
-				//$fields[$field_id]['duplicates'][$duplicate_index]['title'] = $field['name'];
 				$fields[$field['name']] = &$fields[$field_id];
 			}else{
 				$fields[$field_id]['value_id'] = $fv->value;
@@ -273,16 +243,20 @@ class Objects{
 		$update_ids_icons = array_keys($update_ids_icons);
 		foreach($update_ids_icons as $id) mysqli_query_params('update objects set iconCls = $1 where id = $2', array($this->getObjectIcon($id), $id)) or die(mysqli_query_error());
 		
-		fireEvent('afterobjectsave', $d);
-		
+		if($isNewObject) fireEvent('nodeDbCreate', $d);
+		else fireEvent('nodeDbUpdate', $d);
+
 		SolrClient::runCron();
-		
+
 		return $this->load( $p );
 	}
 	
 	function getPreview($id){ // This function is supposed to be used from communications glid list, to get the objects short info
 		$rez = array();
 		if(!is_numeric($id)) return;
+
+		// SECURITY: check if current user has at least read access to this case
+		if(!Security::canRead($id)) throw new Exception(L\Access_denied);
 
 		$top = '';
 		$body = '';
@@ -293,9 +267,6 @@ class Objects{
 			return '';
 		}
 		$data = $data['data'];
-		
-		// $files = $this->getFiles(json_decode('{"object_id":"'.$id.'"}'));
-		// foreach($files['data'] as $f) $data['files'][$f['id']] = $f;
 		
 		$gf = Templates::getGroupedTemplateFieldsWithData($data['template_id'], $id);
 		
@@ -369,7 +340,7 @@ class Objects{
 	function getViolations($object_id){
 		if(!is_numeric($object_id)) return Array('success' => false, 'msg' => L\Wrong_id);
 		$case_id = Cases::getId($object_id);
-		Security::checkCaseReadAction($case_id);
+		// Security::checkCaseReadAction($case_id);
 		$data = Array();
 		/* this select is for selecting all available violations */
 		$sql = 'SELECT vo.id, COALESCE(pvo.custom_title, pvo.title) `decision_title`, th.l'.UL_ID().' `violation_title`, vo.`date_start` `date`
@@ -406,13 +377,9 @@ class Objects{
 		if(is_numeric($p)) $p = json_decode('{"id": '.$p.'}');
 		if(empty($p->id)) return array('success' => true, 'data' => $data);
 		
-		// SECURITY: check if this objects case is opened by current user 
-		//if(!Security::checkIfCaseOpened($p->case_id)) throw new Exception(L\case_not_oppened);
-		// end of SECURITY: check if this objects case is opened by current user 
 		// SECURITY: check if current user has at least read access to this case
-		//if(!Security::canReadCase($p->case_id)) throw new Exception(L\Access_denied);
-		// end of SECURITY: check if current user has at least read access to this case
-		
+		if(!Security::canRead($p->id)) throw new Exception(L\Access_denied);
+
 		/* select distinct associated case ids from the case */
 		$sql = 'SELECT DISTINCT d.value
 		FROM objects co
@@ -423,7 +390,7 @@ class Objects{
 		$res = mysqli_query_params($sql, $p->id) or die(mysqli_query_error());
 		while($r = $res->fetch_row()){
 			$a = explode(',',$r[0]);
-			foreach($a as $id) if(!empty($id)) $ids[$id] = 1;
+			foreach($a as $id) if(!empty($id) && is_numeric($id)) $ids[$id] = 1;
 		}
 		$res->close();
 		$ids = array_keys($ids);

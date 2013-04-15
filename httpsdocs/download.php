@@ -18,7 +18,7 @@
 		if($r = $res->fetch_assoc()){
   			header('Content-Description: File Transfer');
   			header('Content-Type: '.$r['type'].'; charset=UTF-8');
-   			header('Content-Disposition: attachment; filename="'.$r['name'].'"');
+   			if(!isset($_GET['pw'])) header('Content-Disposition: attachment; filename="'.$r['name'].'"');
    			header('Content-Transfer-Encoding: binary');
 			header('Expires: 0');
 			header('Cache-Control: must-revalidate');

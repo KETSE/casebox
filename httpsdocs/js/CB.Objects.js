@@ -172,6 +172,13 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				,scope: this
 				,handler: this.onUploadClick.createInterceptor(this.autoSaveObjectInterceptor, this)
 			})
+			,paste: new Ext.Action({
+				tooltip: L.PasteFromClipboard
+				,text: L.PasteFromClipboard
+				,disabled: true
+				,scope: this
+				,handler: this.onPasteClick.createInterceptor(this.autoSaveObjectInterceptor, this)
+			})
 		}
 		Ext.apply(this, {
 			layout: 'fit'
@@ -200,27 +207,44 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 					}
 				}
 				,savesuccess: this.onObjectSaved
-				,beforedestroy: {scope: this, fn: function(){ 
-					this.getBubbleTarget().un('filesdeleted', this.onFilesDeleted, this); 
-					this.getBubbleTarget().un('fileuploaded', this.onFileUploaded, this);
-					if(this.grid){
-						this.grid.destroy();
-						delete this.grid;
-					}
-					if(this.filesGrid){
-						this.filesGrid.destroy();
-						delete this.filesGrid;
-					}
-					App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
+				,beforedestroy: {
+					scope: this
+					,fn: function(){ 
+						this.getBubbleTarget().un('filesdeleted', this.onFilesDeleted, this); 
+						this.getBubbleTarget().un('fileuploaded', this.onFileUploaded, this);
+						if(this.grid){
+							this.grid.destroy();
+							delete this.grid;
+						}
+						if(this.filesGrid){
+							this.filesGrid.destroy();
+							delete this.filesGrid;
+						}
+						App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
+						App.clipboard.un('change', this.onClipboardChange, this);
+						this.filesDropPlugin.destroy();
 					
 					}
 				}
 			}
 		});
+		
+		this.getProperty = function(propertyName){
+			if(this.data && this.data[propertyName]){
+				if(propertyName == 'pathtext') return this.data[propertyName]+this.data.name+'/';
+				return this.data[propertyName];
+			}
+			return null;
+		}
+		this.dropZoneConfig = {text: 'Drop files here'}
+		this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
+		this.filesDropPlugin.init(this);
+
   		CB.Objects.superclass.initComponent.apply(this, arguments);
 		this.addEvents('openobject', 'deleteobject', 'associateObject', 'deassociateObject', 'fileupload', 'filedownload');//, 'filesdelete'
 		this.enableBubble(['openobject', 'deleteobject', 'fileupload', 'filedownload']);//, 'filesdelete'
 		App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
+		App.clipboard.on('change', this.onClipboardChange, this);
 		App.fireEvent('objectinit', this);
 	}
 	,autoSaveObjectInterceptor: function(){
@@ -244,8 +268,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 	,menu: [
 				this.actions.upload //{text: 'Upload', iconCls: 'icon-upload'}
 				,'-'
-				,{text: 'Cut to clipboard', disabled: true}
-				,{text: 'Paste from clipboard', disabled: true}
+				//,{text: 'Cut to clipboard', disabled: true}
+				// ,{text: 'Paste from clipboard', disabled: true}
+				,this.actions.paste
 			]
          	})
 		/* insert create menu if any templates specified */
@@ -364,6 +389,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 	}
 	,onObjectsDeleted: function(ids){
 		if(ids.indexOf(parseInt(this.data.id)) >=0 ) this.destroy();
+	}
+	,onClipboardChange: function(cb){
+		this.actions.paste.setDisabled(cb.isEmpty());
 	}
 	,getBubbleTarget: function(){
 		//if(!this.caseWindow) this.caseWindow = this.findParentByType(CB.Case);
@@ -630,6 +658,10 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.tabPanel.setActiveTab(lastActiveTabIndex);
 		this.setDirty(false);
 		this.onObjectChanged();
+		this.focusFirstField();
+	}
+	,focusFirstField: function(){
+		App.focusFirstField(this);
 	}
 	,onCreateObjectClick: function(b, e) {
 		data = Ext.apply({}, {
@@ -783,6 +815,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 	,onUploadClick: function(b, e) { 
 		this.fireEvent('fileupload', {pid: this.data.id, uploadType: 'single'}, e) 
 	}
+	,onPasteClick: function(b, e) { 
+		App.clipboard.paste(this.data.id, null, this.onPasteProcess, this);
+	}
+	,onPasteProcess: function(pids){
+		this.childsPanel.reload();
+		this.filesPanel.reload();
+		this.tasksPanel.reload();
+		// this.propertiesPanel.reload();
+	}
 
 	,onObjectSaved: function(f, a){
 		if(!Ext.isEmpty(this.interceptorArguments)){
@@ -795,6 +836,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 	,onObjectChanged: function(){
 		this.actions.save.setDisabled(!this._isDirty && !isNaN(this.data.id));
 		this.actions['delete'].setDisabled(isNaN(this.data.id))
+		this.actions.paste.setDisabled(App.clipboard.isEmpty());
 		//this.actions.upload.setDisabled(isNaN(this.data.id))
 		//this.actions.createTask.setDisabled(isNaN(this.data.id))
 	}

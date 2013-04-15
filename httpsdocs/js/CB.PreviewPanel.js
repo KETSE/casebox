@@ -39,9 +39,15 @@ CB.PreviewPanel = Ext.extend(Ext.Panel, {
 		this.loadedId = this.newId;
 		this.loadedVersionId = this.newVersionId;
 		this.body.scrollTo('top', 0);
-		if(r.responseText == '&#160'){
-			this.update('<div style="margin: 10px" class="icon-padding icon-loading">'+L.processing+' ...</div>');
-			this.delayReload();
+		switch(r.responseText){
+			case '&#160':
+				this.update('<div style="margin: 10px" class="icon-padding icon-loading">'+L.processing+' ...</div>');
+				this.delayReload();
+				break;
+			case 'PDF':
+				elId = this.body.id;
+				var success = new PDFObject({ url: "/download.php?pw=&amp;id="+this.loadedId }).embed(elId);
+				break;
 		}
 		this.attachEvents();
 	}

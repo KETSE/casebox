@@ -117,8 +117,16 @@ class Browser{
 					break;
 			}
 		}
-
 		$p->fl = 'id,name,type,subtype,template_id,status';
+		if(!empty($p->fields)){
+			if(!is_array($p->fields)) $p->fields = explode(',', $p->fields);
+			for ($i=0; $i < sizeof($p->fields); $i++){
+				$fieldName = trim($p->fields[$i]);
+				if($fieldName == 'project') $fieldName = 'case';
+				if(in_array($fieldName, array('date', 'path', 'case', 'size', 'cid', 'oid', 'cdate', 'udate') ) ) $p->fl .= ','.$fieldName;
+			}
+		}
+
 		$search = new Search();
 		return $search->query($p);
 
@@ -130,8 +138,9 @@ class Browser{
 		$pid = array_pop($pid);
 		if(!is_numeric($pid)) return array('success' => false);
 
-		/* TODO: check security access */
-
+		/* check security access */
+		if(!Security::canCreateFolders($pid)) throw new Exception(L\Access_denied);
+		
 		/* find default folder name */
 		$newFolderName = L\NewFolder;
 		$existing_names = array();
@@ -167,25 +176,13 @@ class Browser{
 		/* before deleting we should check security for specified paths and all children */
 		
 		/* if access is granted then setting dstatus=1 for specified ids and dstatus = 2 for all their children /**/
+		fireEvent('beforeNodeDbDelete', $ids);
 		mysqli_query_params('update tree set did = $1, dstatus = 1, ddate = CURRENT_TIMESTAMP where id in ('.implode(',', $ids).') ', $_SESSION['user']['id']) or die(mysqli_query_error());
 		foreach($ids as $id) mysqli_query_params('call p_mark_all_childs_as_deleted($1, $2)', array($id, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		SolrClient::runCron();
-		return array('success' => true, 'ids' => $ids);
 		
-		// if(!is_array($paths)) $paths = array($paths);
-		// $deleted_ids = array();
-		// foreach($paths as $path){
-		// 	$id = explode('/', $path);
-		// 	$id = array_pop($id);
-		// 	if(!is_numeric($id)) return array('success' => false);
-		// 	mysqli_query_params('call p_delete_tree_node($1)', $id) or die(mysqli_query_error());
-		// 	$deleted_ids[] = intval($id);
-		// }
-		// /* TODO: check security access */
-		// $solr = new SolrClient;
-		// foreach($deleted_ids as $id) $solr->deleteId($id);
-		// unset($solr);
-		// return array('success' => true, 'ids' => $deleted_ids);
+		fireEvent('nodeDbDelete', $ids);
+		return array('success' => true, 'ids' => $ids);
 	}
 
 	public function rename($p){
@@ -194,8 +191,9 @@ class Browser{
 		$p->name = trim($p->name);
 		if(!is_numeric($id) || empty($p->name)) return array('success' => false);
 
-		/* TODO: check security access */
-
+		/* check security access */
+		if(!Security::canWrite($id)) throw new Exception(L\Access_denied);
+		
 		mysqli_query_params('update tree set name = $1 where id = $2', array($p->name, $id)) or die(mysqli_query_error());
 		mysqli_query_params('update cases set name = $1 where id = $2', array($p->name, $id)) or die(mysqli_query_error());
 		mysqli_query_params('update objects set custom_title = $1 where id = $2', array($p->name, $id)) or die(mysqli_query_error());
@@ -220,6 +218,7 @@ class Browser{
 			$res = mysqli_query_params($sql, $p->data[$i]->id) or die(mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$process_ids[] = $r['id'];
+				if(empty($p->action)) $p->action = 'copy';
 				if(!$p->confirmed && ($p->action !== 'copy') ){
 					$type = ($p->action == 'shortcut') ? 2 : $r['type'];
 					$sql = 'select id from tree where pid = $1 and system = $2 and type = $3 and subtype = $4 and name = $5';
@@ -378,7 +377,7 @@ class Browser{
 			if (!in_array($f['error'], Array(UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE))) return Array('success' => false, 'msg' => L\Error_uploading_file .': '.$f['error']);
 
 		/* retreiving files list  */
-		switch($p['uploadType']){
+		switch(@$p['uploadType']){
 			case 'archive':
 				$archiveFiles = array(); 
 				foreach($F as $fk => $f){
@@ -398,6 +397,8 @@ class Browser{
 		if( !empty($p['existentFilenames']) ){
 			// store current state serialized in a local file in incomming folder 
 			$files->saveUploadParams( $p );
+			if(!empty($p['response'])) return $this->confirmUploadRequest((object)$p); //it is supposed to work only for single files upload
+
 			$allow_new_version = false;
 			foreach($p['existentFilenames'] as $f){
 				$mfvc = getMFVC($f['name']);
@@ -441,12 +442,12 @@ class Browser{
 		//if cancel then delete all uploaded files from incomming
 		$files = new Files();
 		$a = $files->getUploadParams();
-		$a['responce'] = $p->responce;
-		switch($p->responce){
+		$a['response'] = $p->response;
+		switch($p->response){
 			case 'rename':
 				$a['newName'] = $p->newName;
 				//check if the new name does not also exist
-				if(empty($a['responce'])) return array('success' => false, 'msg' => L\FilenameCannotBeEmpty);
+				if(empty($a['response'])) return array('success' => false, 'msg' => L\FilenameCannotBeEmpty);
 				reset($a['files']);
 				$k = key($a['files']);
 				$a['files'][$k]['name'] = $a['newName'];
@@ -497,7 +498,7 @@ class Browser{
 		if($f['error'] != UPLOAD_ERR_OK) return Array('success' => false, 'msg' => L\Error_uploading_file .': '.$f['error']);
 
 		$p['files'] = &$_FILES;
-		$p['responce'] = 'overwrite';
+		$p['response'] = 'overwrite';
 		$files = new Files();
 		$files->storeFiles($p);
 		SolrClient::runCron();

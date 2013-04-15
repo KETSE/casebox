@@ -115,7 +115,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 			,cellCls: 'cell'
 			,title: L.Files
 			,tpl: ['<ul><tpl for=".">'
-				,'<li class="icon-padding {iconCls}"><a href="#">{name}</a></li>'
+				,'<li class="icon-padding file- {iconCls}"><a href="#">{name}</a></li>'
 				,'</tpl></ul>'
 			]
 			,listeners: {scope: this, click: this.onItemClick }
@@ -265,7 +265,6 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 		if(this.rendered) this.doLayout();
 	}
 	,onItemClick: function(){
-		clog(arguments)
 	}
 	,setParams: function(params){
 		if(Ext.isEmpty(params.path)) params.path = '/';
@@ -281,14 +280,6 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 	}
         ,onShowDescendantsClick: function(cb, e){
         	this.fireEvent('showdescendants', !cb.checked, e);
-        }
-        ,setShowDescendants: function(v){
-        	v = (v === true);
-        	if(this.params.descendants == v) return;
-        	this.params.descendants = v;
-		this.items.each( function(i){
-			Ext.apply(i, { options: this.params });
-		}, this)
         }
         ,onTasksChange: function(){
         	this.dvActiveTasks.reload()

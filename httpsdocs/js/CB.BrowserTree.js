@@ -193,7 +193,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 						treeloader.baseParams.path = node.getPath('nid');
 						treeloader.baseParams.showFoldersContent = this.showFoldersContent;
 					}
-					//,load: function(loader, node, responce){ this.sortNode(node); }
+					//,load: function(loader, node, response){ this.sortNode(node); }
 				}
 			})
 			,root: new Ext.tree.AsyncTreeNode({

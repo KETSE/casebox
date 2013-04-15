@@ -237,7 +237,6 @@ CB.SecurityPanel = Ext.extend(Ext.Panel, {
 		this.aclStore.load();
 	}
 	,onAclStoreLoad: function(store, records, options){
-		//clog(arguments);
 	}
 	,onAclProxyLoad: function(proxy, object, options){
 		this.getEl().unmask();
@@ -378,8 +377,6 @@ CB.SecurityPanel = Ext.extend(Ext.Panel, {
 			}
 		r.set('allow', allow.join(','));
 		r.set('deny', deny.join(','));
-		clog(r.get('allow'))
-		clog(r.get('deny'))
 		this.reloadPermissionsStore()
 	}
 	,reloadPermissionsStore: function(){

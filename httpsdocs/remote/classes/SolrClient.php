@@ -31,6 +31,7 @@ class SolrClient{
 		,'status'
 		,'category_id'
 		,'importance'
+		,'completed'
 		,'versions'
 		,'sys_tags'
 		,'tree_tags'
@@ -38,7 +39,6 @@ class SolrClient{
 		,'metas'
 		,'content'
 		,'ntsc'
-		,'sort_path'
 		,'role_ids1'
 		,'role_ids2'
 		,'role_ids3'
@@ -49,7 +49,6 @@ class SolrClient{
 		$this->host = empty($p['host']) ? CB_SOLR_HOST : $p['host'];
 		$this->port = empty($p['port']) ? CB_SOLR_PORT : $p['port'];
 		$this->core = empty($p['core']) ? CB_SOLR_CORE : $p['core'];
-
 	}
 	function connect(){
 		if($this->connected) return $this->solr;
@@ -67,7 +66,9 @@ class SolrClient{
 			if( in_array($fn, $this->solr_fields) && ( ($fn == 'dstatus') || !empty($fv) || ($fv === false)) )
 				$doc->$fn = $fv;
 		try {
+			fireEvent('beforeNodeSolrUpdate', $doc);
 			$this->solr->addDocument($doc);
+			fireEvent('nodeSolrUpdate', $doc);
 		} catch (Exception $e) {
 			echo "\n\n-------------------------------------------";
 			echo "\n\nError (id={$d['id']}): {$e->__toString()}\n";	
@@ -157,7 +158,7 @@ class SolrClient{
 				$r['subtype'] = intval($r['subtype']);
 
 				$r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
-				$r['sort_path'] = mb_strtolower($r['name'], 'UTF-8');
+				// $r['sort_path'] = mb_strtolower($r['name'], 'UTF-8');
 				$this->add( $r );
 				
 				mysqli_query_params('update tree set updated = -1 where id = $1', $r['id']) or die(mysqli_query_error()); 			

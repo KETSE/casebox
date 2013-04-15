@@ -271,7 +271,6 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		if(this.locked) return;
 		if(Ext.isEmpty(params.path)) params.path = '/';
 		sameParams = this.sameParams(this.params, Ext.apply({}, params, this.params) );
-		clog(sameParams);
 		if( Ext.isEmpty(this.requestParams) &&  sameParams) {
 			i = this.getLayout().activeItem;
 			if(i.grid) App.mainViewPort.selectGridObject(i.grid);
@@ -351,10 +350,6 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 	,onShowDescendantsClick: function(b, e){
 		if(this.locked) return b.toggle(!b.pressed);
 		this.setShowDescendants(b.pressed);
-		// if(i.setShowDescendants){
-		// 	i.setShowDescendants(b.pressed);
-		// 	i.onReloadClick();
-		// }
 	}
 	,onShowDescendantsEvent: function(show, e){
 		this.setShowDescendants(show);

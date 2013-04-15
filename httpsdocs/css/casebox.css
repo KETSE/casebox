@@ -564,7 +564,7 @@ background-color: #FFF;
 */
 
 
-.x-panel-gray .x-toolbar{
+.x-panel-gray, .x-panel-gray .x-toolbar{
     background-image: none !important;
     background-color: #F4F4F4;
 }

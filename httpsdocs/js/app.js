@@ -6,6 +6,12 @@ clog = function(){if(typeof(console) != 'undefined') console.log(arguments)}
 // application main entry point
 Ext.onReady(function(){
 	App = new Ext.util.Observable();
+	App.addEvents(
+		'dragfilesenter'
+		,'dragfilesover'
+		,'dragfilesleave'
+		,'filesdrop'
+	)
 	Ext.state.Manager.setProvider( new Ext.state.CookieProvider({
 		expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
 	}));
@@ -55,8 +61,7 @@ function initApp(){
 	}
 
 	App.PromtLogin = function (e){
-		if(!this.loginWindow || this.loginWindow.isDestroyed)
-			this.loginWindow = new CB.Login({});
+		if( !this.loginWindow || this.loginWindow.isDestroyed ) this.loginWindow = new CB.Login({});
 		this.loginWindow.show();
 	}
 
@@ -162,7 +167,6 @@ function initApp(){
   		}
   		,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
 			if(Ext.isEmpty(v)) return '';
-			
 			r = [];
 			store = null;
 			if(!Ext.isArray(v)) v = String(v).split(',');
@@ -332,6 +336,9 @@ function initApp(){
 			case 'date': 
 				return App.customRenderers.date;
 				break;
+			case 'datetime': 
+				return App.customRenderers.datetime;
+				break;
 			case '_objects': 
 				return App.customRenderers.objectsField;
 			case 'combo': 
@@ -488,7 +495,6 @@ function initApp(){
 			,objectId: e.objectId
 			,path: e.path
 		}
-		
 		switch(type){
 			case '_auto_title':
 				return new Ext.ux.TitleField(); break; //{minWidth: 100, anchor: '95%', boxMaxWidth: 800}
@@ -752,11 +758,17 @@ function initApp(){
 		}else tabPanel.setActiveTab(tabIdx);
 	}
 	App.showException = function(e){ 
+		App.hideFailureAlerts = true;
 		msg = '';
 		if(e) msg = e.msg;
 		if(!msg && e.result) msg = e.result.msg;
 		if(!msg && e.result) msg = L.ErrorOccured;
-		Ext.Msg.alert(L.Error, msg); 
+		Ext.Msg.alert(L.Error, msg);
+		
+		dhf = function(){
+			delete App.hideFailureAlerts;
+		}
+		dhf.defer(1500)
 	}
 
 	App.openObject = function(type, id, e){
@@ -787,6 +799,21 @@ function initApp(){
 	    }
 	});
 	/* disable back button */
+
+	/* upload files methods*/
+	App.getFileUploader = function(){
+		if(this.Uploader) return this.Uploader;
+		this.Uploader = new CB.Uploader({
+			listeners: {
+			}
+		});
+		// this.Uploader.init();
+		return this.Uploader;
+	}
+	App.addFilesToUploadQueue = function(FileList, options){
+		fu = App.getFileUploader();
+		fu.addFiles(FileList, options)
+	}
 
 }
 
@@ -882,4 +909,43 @@ function overrides(){
 	Ext.calendar.DateRangeField.prototype.allDayText = L.AllDay;
 
 
+}
+
+window.ondragstart = function(e){
+	window.dragFromWindow = true;
+	return true;
+}
+
+window.ondragenter = function(e){
+	e.dataTransfer.dropEffect = 'copy';
+	e.preventDefault();
+	if(!window.dragFromWindow){
+		App.fireEvent('dragfilesenter', e);
+	}
+	return false;
+}
+
+window.ondragover = function(e){
+	e.dataTransfer.dropEffect = 'copy';
+	e.preventDefault();
+	return false;
+}
+
+window.ondrop = function(e){
+	e.stopPropagation();
+	e.preventDefault();
+	if(!window.dragFromWindow){
+		App.fireEvent('filesdrop', e);
+	}
+	return false;
+}
+
+window.ondragleave = function(e){
+	if(!window.dragFromWindow && ( (e.pageX == 0) && (e.pageY == 0) ) ){
+		App.fireEvent('dragfilesleave', e);
+	}
+	return false;
+}
+window.ondragend = function(e){
+	delete window.dragFromWindow;
 }

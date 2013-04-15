@@ -46,7 +46,7 @@ function formatPastTime($mysqlTime) {
 	if ($time__ == date('j n Y', time())) return L\todayAt.' '.date('H:i', $time);
 	elseif ($time__ == date('j n Y', time()-3600 * 24)) return L\yesterdayAt.' '.date('H:i', $time);
 	elseif ($time__ == date('j n Y', time()-3600 * 24 * 2)) return L\beforeYesterdayAt.' '.date('H:i', $time);
-	else return strtr(date('j M Y', $time).' '.L\at.' '.date(' H:i', $time), monthsShort());
+	else return translateMonths(date('j M Y', $time).' '.L\at.' '.date(' H:i', $time));
 }
 
 function formatAgoTime($mysqlTime) {
@@ -85,16 +85,49 @@ function formatAgoTime($mysqlTime) {
 	if($interval < ($time - $YESTERDAY_START) ){
 		return L\Yesterday.' '.L\at.' '.date('H:i', $time);
 	}
-	if($interval < ($time - $WEEK_START) ){
-		return strtr(date('l', $time), days()).' '.L\at.' '.date('H:i', $time);;
-	}
-	if($interval < ($time - $YEAR_START) ){
-		return strtr(date('d F', $time), months());
-	}
+	if($interval < ($time - $WEEK_START) ) return translateDays(date('l', $time)).' '.L\at.' '.date('H:i', $time);
+
+	if($interval < ($time - $YEAR_START) ) return translateMonths(date('d F', $time));
 	//else 
-	return strtr(date('Y, F d', $time), months());
+	return translateMonths(date('Y, F d', $time));
 }
 
+function translateDays($dateString){
+	/* replace long day names */
+	$days_en = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
+	$days = explode(',', L\dayNames);
+	$days = array_combine($days_en, $days);
+	
+	$dateString = strtr($dateString, $days);
+	
+	/* replace short day names */
+	$days_en = array('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun');
+	$days = explode(',', L\dayNamesShort);
+	$days = array_combine($days_en, $days);
+
+	$dateString = strtr($dateString, $days);
+
+	return $dateString;
+}
+
+function translateMonths($dateString){
+	
+	/* replace long month names */
+	$months_en = array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
+	$months = explode(',', L\monthNames);
+	$months = array_combine($months_en, $months);
+
+	$dateString = strtr($dateString, $months);
+	
+	/* replace short month names */
+	$months_en = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+	$months = explode(',', L\monthNamesShort);
+	$months = array_combine($months_en, $months);
+	
+	$dateString = strtr($dateString, $months);
+
+	return $dateString;
+}
 
 function formatSpentTime($time) {
 	if (empty($time)) return '';
@@ -129,13 +162,15 @@ function formatTaskTime($mysqlTime) {
 	$today = mktime(0, 0, 0, date("m")  , date("d"), date("Y"));
 	
 	if ($time == $today) return '<span class="cM fwB">'.L\today.'</span>';
-	elseif ($today - $time > 3600 * 24 * 2) return strtr(date('j M Y', $time), monthsShort());
+	elseif ($today - $time > 3600 * 24 * 2) return translateMonths(date('j M Y', $time));
 	elseif ($today - $time > 3600 * 24) return L\beforeYesterday;
 	elseif ($today - $time > 0) return L\yesterday;
 	//elseif ($time - $today < 3600 * 24) return '<span class="cM">'.L\today.'</span>';
 	elseif ($time - $today < 3600 * 24 * 2) return '<span class="cM fwB">'.L\tomorow.'</span>';
 	elseif ($time - $today < 3600 * 24 * 6) return '<span class="cM fwB">'.(($time - $today) / (3600 * 24) ).' '.L\ofDays.'</span>';
-	else return strtr(date('j M Y', $time), monthsShort());
+	else{
+		return translateMonths(date('j M Y', $time));
+	}
 }
 function formatLeftDays($days_difference) {
 	if ($days_difference == 0) return L\today;

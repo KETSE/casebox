@@ -24,13 +24,17 @@ return array_merge($customConfigGroups, array(
 		,'//css/date-time-ux.css'
 		,'//css/spinner/Spinner.css'
 	)
+    ,'js_pdf' => array(
+		'//js/pdfobject.min.js'
+		)
     ,'js' => array(
 		'//js/iso8601.min.js'
-		,'//js/customFunctions.js'
+		,'//js/pdfobject.min.js'
+		,'//js/ux/md5/spark-md5.min.js'
+		,'//js/ux/md5/Ext.ux.FileMD5.js'
+		,'//js/ux/Ext.ux.WebkitEntriesIterator.js'
 		
-		,'//js/CB.ViewPort.js'
 		,'//js/CB.Login.js'
-		,'//js/app.js'
 		,'//js/CB.About.js'
 		,'//js/CB.Case.js'
 		,'//js/CB.GenericForm.js'
@@ -38,16 +42,12 @@ return array_merge($customConfigGroups, array(
 		,'//js/CB.Browser.js'
 		,'//js/CB.BrowserTree.js'
 		,'//js/CB.FolderView.js'
-		,'//js/CB.FolderViewGrid.js'
-		,'//js/CB.ActionsViewGrid.js'
-		,'//js/CB.TasksViewGrid.js'
 		,'//js/CB.VerticalEditGrid.js'
 		,'//js/CB.Objects.js'
 		,'//js/CB.ObjectsField.js'
 		,'//js/CB.Tasks.js'
 		,'//js/CB.PasteFromWord.js'
 		,'//js/CB.FileUploadWindow.js'
-		,'//js/CB.Security.js'
 		
 		,'//js/plugins/CB.plugins.customInterface.js'
 		,'//js/ux/Ext.ux.TagEditor.js'
@@ -69,29 +69,44 @@ return array_merge($customConfigGroups, array(
 
 		,'//js/CB.TextEditWindow.js'
 		,'//js/CB.HtmlEditWindow.js'
-		,'//js/CB.UsersGroups.js'
 		,'//js/CB.Facet.js'
 		,'//js/CB.FacetText.js'
 		,'//js/CB.FacetList.js'
-		,'//js/CB.SystemManagementWindow.js'
-		,'//js/CB.TemplatesManagementWindow.js'
 		,'//js/CB.Clipboard.js'
 		,'//js/CB.Dashboard.js'
-		,'//js/CB.FolderViewSummary.js'
 		,'//js/CB.PreviewPanel.js'
 		,'//js/CB.FilterPanel.js'
 		,'//js/CB.FileWindow.js'
 		
 		,'//js/calendar/calendar-all-debug.js'
-		,'//js/CB.CalendarView.js'
 		,'//js/CB.Favorites.js'
-		
 	)
 
+    ,'jsdev' => array(
+		'//js/customFunctions.js'
+		
+		,'//js/CB.ViewPort.js'
+		,'//js/app.js'
+		,'//js/CB.FolderViewGrid.js'
+		,'//js/CB.ActionsViewGrid.js'
+		,'//js/CB.TasksViewGrid.js'
+		,'//js/CB.FolderViewSummary.js'
+		,'//js/CB.CalendarView.js'
+		,'//js/CB.Security.js'
+		
+		,'//js/plugins/CB.plugins.FilesDropZone.js'
+		,'//js/CB.Uploader.js'
+		// ,'//js/ux/upload/Basic.js'
+		
+		,'//js/CB.UsersGroups.js'
+		,'//js/CB.SystemManagementWindow.js'
+		,'//js/CB.TemplatesManagementWindow.js'
+	)
 	,'lang-en' => array('//js/locale/en.js')
-	,'lang-ru' => array('//js/locale/ru.js')
+	,'lang-es' => array('//js/locale/es.js')
 	,'lang-fr' => array('//js/locale/fr.js')
 	,'lang-hy' => array('//js/locale/hy.js')
+	,'lang-ru' => array('//js/locale/ru.js')
 
     // custom source example
     /*'js2' => array(

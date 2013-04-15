@@ -9,7 +9,7 @@
 */
 if(PHP_OS == 'WINNT'){
   shell_exec('net stop jetty');
-}else shell_exec('service jetty stop');
+}else shell_exec('service jetty stop > /dev/null 2>&1');
 
 define('SOLR_DATA_PATH', realpath('../../data/solr/data').DIRECTORY_SEPARATOR);
 $dir = SOLR_DATA_PATH;
@@ -24,7 +24,7 @@ remove_indexes($dir);
 
 if(PHP_OS == 'WINNT'){
   echo exec('net start jetty');
-}else echo exec('service jetty start');
+}else echo exec('service jetty start > /dev/null 2>&1');
 
 echo "\nwaiting $sleep seconds for solr to recreate indexes .... \n";
 sleep($sleep);

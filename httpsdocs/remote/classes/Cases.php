@@ -5,7 +5,7 @@ class Cases{
 
 	public function getList($in){
 		/* SECURITY: get visible offices */
-		$visible_offices = Security::getVisibleOffices();
+		// $visible_offices = Security::getVisibleOffices();
 		/* end of SECURITY: get visible offices */
 		$data = Array();
 		$sql = 'SELECT c.id, c.nr, c.name title FROM cases c';
@@ -44,6 +44,9 @@ class Cases{
 		if(empty($params->nr)) $params->nr = null;
 		/* end of SECURITY: check if current user can add cases for specified office */
 		if(empty($params->pid)) $params->pid = Browser::getRootFolderId();
+
+		$params->type = 3; //case
+		fireEvent('beforeNodeDbCreate', $params);
 		mysqli_query_params('insert into tree (pid, name, `type`, cid) values ($1, $2, 3, $3)', array($params->pid, $params->name, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		$id = last_insert_id();
 		$sql = 'insert into cases (id, nr, name, `date`, cid, type_id) values($1, $2, $3, $4, $5, $6)';
@@ -61,6 +64,8 @@ class Cases{
 
 		//mysqli_query_params('CALL p_estimate_case_effective_access($1)', $id) or die(mysqli_query_error());
 		Log::add(Array('action_type' => 3, 'case_id' => $id, 'info' => 'name: '.$params->name));
+		fireEvent('nodeDbCreate', $params);
+
 		SolrClient::runCron();
 		return Array('success' => true, 'data' => Array('id' => $id, 'pid' => $params->pid, 'title' => $params->name));
 	}
@@ -102,7 +107,7 @@ class Cases{
 		if($r = $res->fetch_row()) $name = $r[1]; else throw new Exception(L('Object_not_found'));
 		$res->close();
 		/* SECURITY check */
-		if( !Security::canManageCase($id) ) throw new Exception(L\No_access_for_this_action);
+		// if( !Security::canManageCase($id) ) throw new Exception(L\No_access_for_this_action);
 		/* end of SECURITY check */
 		Log::add(Array('action_type' => 16, 'case_id' => $id, 'info' => 'name: '.$name));
 		mysqli_query_params('update cases set close_date = CURRENT_TIMESTAMP, uid = $2, udate= CURRENT_TIMESTAMP WHERE id = $1 and closed = 0', array($id, $_SESSION['user']['id'] ) ) or die(mysqli_query_error());
@@ -152,6 +157,11 @@ class Cases{
 			$sql = 'insert into objects (id, title, custom_title, template_id, date_start, cid, cdate, uid, udate) values ($1, $2, $2, $3, $4, $5, $6, $7, $8)';
 			mysqli_query_params($sql, array( $caseId, $case['name'], $tpl['id'], $case['date'], $case['cid'], $case['cdate'], $case['uid'], $case['udate'] ) ) or die(mysqli_query_error());
 			$rez['id'] = last_insert_id();
+			/* inserting title field value equal to case name */
+			$sql = 'INSERT INTO objects_data (object_id, field_id, duplicate_id, value) '.
+				'SELECT $1, s.id, 0, $2 FROM  templates_structure s where s.template_id = $3 and s.`name` = \'_title\' '.
+				'ON DUPLICATE KEY UPDATE `value` = $2';
+			mysqli_query_params($sql, array( $caseId, $case['name'], $tpl['id']) ) or die(mysqli_query_error());
 		}
 		return $rez;
 	}
@@ -234,7 +244,7 @@ class Cases{
 
 	public function lock($id){
 		/* SECURITY check */
-		if( !Security::canReadCase($id) ) throw new Exception(L\No_access_for_this_action);
+		// if( !Security::canReadCase($id) ) throw new Exception(L\No_access_for_this_action);
 		/* end of SECURITY check */
 		$st = 'INSERT INTO opened_cases (case_id, user_id, opened) VALUES ($1, $2, CURRENT_TIMESTAMP) '.
 			  'ON DUPLICATE KEY UPDATE user_id = $2, opened = CURRENT_TIMESTAMP';
@@ -245,7 +255,7 @@ class Cases{
 
 	public function unlock($id){
 		/* SECURITY check */
-		if( !Security::canReadCase($id) ) throw new Exception(L\No_access_for_this_action);
+		// if( !Security::canReadCase($id) ) throw new Exception(L\No_access_for_this_action);
 		/* end of SECURITY check */
 		$st = 'delete from opened_cases where case_id = $1 and user_id = $2';
 		mysqli_query_params($st, Array($id, $_SESSION['user']['id'])) or die(mysqli_query_error());
@@ -307,7 +317,7 @@ class Cases{
 		//case_id, $tag_id
 		/* SECURITY check */
 		if( $params->tag_level < 3) throw new Exception(L\No_access_for_this_action);
-		if( !Security::canWriteCase($params->case_id) ) throw new Exception(L\No_access_for_this_action);
+		// if( !Security::canWriteCase($params->case_id) ) throw new Exception(L\No_access_for_this_action);
 		/* end of SECURITY check */
 		if($params->action)
 			mysqli_query_params('insert into cases_tags (case_id, tag_id, level) values($1, $2, $3)', Array($params->case_id, $params->tag_id, $params->tag_level )) or die(mysqli_query_error());
@@ -322,7 +332,7 @@ class Cases{
 		//case_id, $tags
 		/* SECURITY check */
 		if( $params->tag_level < 2) throw new Exception(L\No_access_for_this_action);
-		if( !Security::canWriteCase($params->case_id) ) throw new Exception(L\No_access_for_this_action);
+		// if( !Security::canWriteCase($params->case_id) ) throw new Exception(L\No_access_for_this_action);
 		/* end of SECURITY check */
 		$tags = array_filter($params->tags, 'is_numeric');
 		mysqli_query_params('delete from cases_tags where case_id = $1 and level = $2 and tag_id not in(0'.implode(',', $tags).')', array($params->case_id, $params->tag_level)) or die(mysqli_query_error());
@@ -335,7 +345,7 @@ class Cases{
 	public function changeName($params){
 		//id, $name
 		/* SECURITY check */
-		if( !Security::canWriteCase($params->id) ) throw new Exception(L\No_access_for_this_action);
+		// if( !Security::canWriteCase($params->id) ) throw new Exception(L\No_access_for_this_action);
 		/* end of SECURITY check */
 		$params->name = trim($params->name);
 		if(empty($params->name)) return array('success' => false, 'msg' => L\Error);
@@ -345,7 +355,7 @@ class Cases{
 	public function updateFileTags($params){
 		//case_id, $tags
 		/* SECURITY check */
-		if( !Security::canWriteCase($this->getId(false, $params->id)) ) throw new Exception(L\No_access_for_this_action);
+		// if( !Security::canWriteCase($this->getId(false, $params->id)) ) throw new Exception(L\No_access_for_this_action);
 		/* end of SECURITY check */
 		for($i =3; $i<5; $i++)
 			if(isset($params->tags->{$i})){
@@ -406,7 +416,9 @@ class Cases{
 		elseif(!empty($p->nr)){
 			$sql = 'select id from cases where nr = $1';
 			$res = mysqli_query_params($sql, $p->nr) or die(mysqli_query_error());
-			if( ($r = $res->fetch_row()) && Security::canReadCase($r[0])) $rez = array('success' => true, 'data' => array('id' => $r[0]));
+			if( ($r = $res->fetch_row()) 
+				// && Security::canReadCase($r[0])
+			) $rez = array('success' => true, 'data' => array('id' => $r[0]));
 			$res->close();
 		}
 		return $rez;
@@ -436,10 +448,10 @@ class Cases{
 		if(empty($p->case_id)) return array('success' => true, 'data' => $data);
 		
 		// SECURITY: check if this objects case is opened by current user 
-		if(!Security::checkIfCaseOpened($p->case_id)) throw new Exception(L\case_not_oppened);
+		// if(!Security::checkIfCaseOpened($p->case_id)) throw new Exception(L\case_not_oppened);
 		// end of SECURITY: check if this objects case is opened by current user 
 		// SECURITY: check if current user has at least read access to this case
-		if(!Security::canReadCase($p->case_id)) throw new Exception(L\Access_denied);
+		// if(!Security::canReadCase($p->case_id)) throw new Exception(L\Access_denied);
 		// end of SECURITY: check if current user has at least read access to this case
 		
 		/* select distinct associated case ids from the case */
@@ -476,10 +488,10 @@ class Cases{
 		if(empty($p->case_id)) return array('success' => true, 'data' => $data);
 		
 		// SECURITY: check if this objects case is opened by current user 
-		if(!Security::checkIfCaseOpened($p->case_id)) throw new Exception(L\case_not_oppened);
+		// if(!Security::checkIfCaseOpened($p->case_id)) throw new Exception(L\case_not_oppened);
 		// end of SECURITY: check if this objects case is opened by current user 
 		// SECURITY: check if current user has at least read access to this case
-		if(!Security::canReadCase($p->case_id)) throw new Exception(L\Access_denied);
+		// if(!Security::canReadCase($p->case_id)) throw new Exception(L\Access_denied);
 		// end of SECURITY: check if current user has at least read access to this case
 		
 		/* select distinct associated case ids from the case */

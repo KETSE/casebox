@@ -18,13 +18,14 @@ CB.ObjectsFieldCommonFunctions = {
 			default:
 				//try to access object window to locate objects store
 				this.objectsStore = this.getObjectsStore();
-				
+
 				if(!Ext.isEmpty(this.data.pidValue)) params.pidValue = this.data.pidValue;
 				this.store = new Ext.data.DirectStore({
 					autoLoad: false //true
 					,autoDestroy: true
 					,restful: false
 					,baseParams: params
+					,remoteSort: true
 					,proxy: new Ext.data.DirectProxy({
 						paramsAsHash: true
 						,api: { read: Browser.getObjectsForField }
@@ -46,7 +47,14 @@ CB.ObjectsFieldCommonFunctions = {
 						,{name: 'subtype', type: 'int'}
 						,{name: 'template_id', type: 'int'}
 						,{name: 'status', type: 'int'}
-						, 'iconCls'
+						,'iconCls'
+						,'path'
+						,{name: 'size', type: 'int'}
+						,{name: 'oid', type: 'int'}
+						,{name: 'cid', type: 'int'}
+						,{name: 'cdate', type: 'date'}
+						,{name: 'udate', type: 'date'}
+						,'case'
 					]
 					)
 					,listeners: {
@@ -63,7 +71,22 @@ CB.ObjectsFieldCommonFunctions = {
 		}
 		
 		if(Ext.isEmpty(this.store)) this.store = new Ext.data.ArrayStore({ idIndex: 0, fields: [{name: 'id', type: 'int'}, 'name'], data:  [] });
-		this.store.getTexts = getStoreNames;		
+		this.store.getTexts = getStoreNames;
+
+		if(this.config.sort){
+			field = 'order';
+			dir = 'asc';
+			switch(this.config.sort){
+				case 'asc': 
+					field = 'name';
+					break;
+				case 'desc': 
+					field = 'name';
+					dir = 'desc';
+					break;
+			}
+			this.store.sort(field, dir);
+		}
 	}
 	,getObjectsStore: function(){
 		if( Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri') ) return this.getThesauriStore();
@@ -125,6 +148,9 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 					idx = this.objectsStore.findExact('id', record.get('id'));
 					if(idx < 0) this.objectsStore.loadData({data: [record.data]}, true);
 				}
+				,blur: function(field){
+					this.setValue(this.getValue());
+				}
 			}
 		})
 		
@@ -132,7 +158,17 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 		this.setValue = function(v){
 			if(!Ext.isEmpty(v)) v = parseInt(v);
 			this._setValue(v);
-			this.setRawValue(this.store.getTexts(v));
+			text = this.store.getTexts(v);
+			delete this.customIcon;
+			if(Ext.isEmpty(text) && this.objectsStore){
+				idx = this.objectsStore.findExact('id', v);
+				if(idx > 0){
+					r = this.objectsStore.getAt(idx);
+					if(this.icon) this.icon.className = 'ux-icon-combo-icon ' + r.get('iconCls');
+					text = this.objectsStore.getTexts(v);
+				}
+			}
+			this.setRawValue(text);
 		}
 		CB.ObjectsComboField.superclass.initComponent.apply(this, arguments);
 	}
@@ -223,6 +259,7 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
 			for(i = 0; i < v.length; i++) this.value.push(parseInt(v[i]));
 		}
 		data = [];
+		if(store) //check if store is set cause it could not be determined due to field configuration errors
 		for (var i = 0; i < this.value.length; i++) {
 			idx = store.findExact('id', this.value[i]);
 			if(idx >=0){
@@ -279,32 +316,101 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 	,modal: true
 	,layout: 'border'
 	,title: L.Associate
-	,config: {
-		multiValued: false
-	}
 	,initComponent: function(){
 		//CB.ObjectsSelectionForm.superclass.initComponent.call(this);
 		if(Ext.isEmpty(this.config)) this.config = {}
+		this.config = Ext.applyIf(this.config, { multiValued: false } );
 		if(this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
 		
 		Ext.apply(this, CB.ObjectsFieldCommonFunctions);
 		this.getStore();
 
 		columns = [
-			{dataIndex: 'name', scope: this, renderer: function(v, m, r, ri, ci, s){ 
-				switch(this.config.renderer){
-					case 'listGreenIcons': m.css = 'icon-grid-column icon-element'; break;
-					case 'listObjIcons': m.css = 'icon-grid-column '+r.get('iconCls'); break;
-				}
-				a = String(r.get('sys_tags')).split(',');
-				t = [];
-				Ext.each(a, function(i){t.push(CB.DB.thesauri.getName(i))}, this);
-				if(!Ext.isEmpty(t)) v += ' <span class="cG">' + t.join(', ') + '</span>'; 
-				//v += '<img class="open-object icon-information-white fr click" src="css/i/s.gif"/>'
-				return v;
+			{	dataIndex: 'name'
+				,header: L.Name
+				,width: 300
+				,scope: this
+				,renderer: function(v, m, r, ri, ci, s){ 
+					switch(this.config.renderer){
+						case 'listGreenIcons': 
+							idx = this.resultPanel.store.findExact('id', r.get('id'));
+							m.css = 'icon-grid-column ' +( (idx < 0) ? 'icon-element-off' : 'icon-element' );
+							break;
+						case 'listObjIcons': m.css = 'icon-grid-column '+r.get('iconCls'); break;
+					}
+					a = String(r.get('sys_tags')).split(',');
+					t = [];
+					Ext.each(a, function(i){t.push(CB.DB.thesauri.getName(i))}, this);
+					if(!Ext.isEmpty(t)) v += ' <span class="cG">' + t.join(', ') + '</span>'; 
+					//v += '<img class="open-object icon-information-white fr click" src="css/i/s.gif"/>'
+					return v;
 				}
 			}
 		]
+		if(!Ext.isEmpty(this.config.fields)){
+			if(!Ext.isArray(this.config.fields)) this.config.fields = this.config.fields.split(',');
+			for (var i = 0; i < this.config.fields.length; i++) {
+				fieldName = this.config.fields[i].trim();
+				switch(fieldName){
+					case 'name': break;
+					case 'date': 
+						columns.push( { 
+							header: L.Date
+							,width: 120
+							,dataIndex: 'date'
+							,format: App.dateFormat + ' ' + App.timeFormat
+							,renderer: App.customRenderers.datetime
+						})
+						this.width += 120;
+						break;
+					case 'path':
+						columns.push({
+							header: L.Path
+							,width: 150
+							,dataIndex: 'path'
+							,renderer: function(v, m, r, ri, ci, s){
+								m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+								return v;
+							}
+						});
+						this.width += 150;
+						break;
+					case 'project':
+						columns.push({
+							header: L.Project
+							,width: 150
+							,dataIndex: 'case'
+							,renderer: function(v, m, r, ri, ci, s){
+								m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+								return v;
+							}
+						});
+						break;
+					case 'size':
+						columns.push({ header: L.Size, width: 80, dataIndex: 'size', renderer: App.customRenderers.filesize});
+						this.width += 80;
+						break;
+					case 'cid':
+						columns.push({ header: L.Creator, width: 200, dataIndex: 'cid', renderer: function(v){ return CB.DB.usersStore.getName(v)}});
+						this.width += 200;
+						break;
+					case 'oid':
+						columns.push({ header: L.Owner, width: 200, dataIndex: 'oid', renderer: function(v){ return CB.DB.usersStore.getName(v)}})
+						this.width += 200;
+						break;
+					case 'cdate':
+						columns.push({ header: L.CreatedDate, width: 120, dataIndex: 'cdate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat})
+						this.width += 120;
+						break;
+					case 'udate':
+						columns.push({ header: L.UpdatedDate, width: 120, dataIndex: 'udate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat})
+						this.width += 120;
+						break;
+				}
+			};
+		}
+		this.width = Math.min(this.width, 1024);
+
 		if(this.config.showDate == true) columns.push({dataIndex: 'date', width: 50, renderer: App.customRenderers.datetime})
 
 		this.grid = new Ext.grid.GridPanel({
@@ -313,13 +419,18 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 			,border: false
 			,store: this.store
 			,autoScroll: true
-			,header: false
-			,hideHeaders:true
+			// ,header: false
+			// ,hideHeaders:true
 			,colModel: new Ext.grid.ColumnModel({
 				defaults: { sortable: true }
 				,columns: columns
 			})
-			,viewConfig: { autoFill: true, forceFit: true, markDirty: false, headersDisabled: true }
+			,viewConfig: { 
+				// autoFill: true
+				// ,forceFit: true
+				markDirty: false
+				// ,headersDisabled: true 
+			}
 			,sm: new Ext.grid.RowSelectionModel({ singleSelect: !this.config.multiValued })
 			,listeners: {  
 				scope: this
@@ -341,7 +452,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 			,hidden: !this.config.multiValued
 			,tpl: new Ext.XTemplate(
 				'<span class="fwB">'+L.Value+':</span><ul><tpl for=".">'
-				,'<li class="lh20 icon-padding16 {iconCls}"> &nbsp; {name} <span style="display: inline-block; width: 14px"><span class="buttons"><a href="#" class="icon-close-light" style="display:inline-block; width: 20px;text-decoration: none" title="'+L.Remove+'">&nbsp; &nbsp;</a></span></span></li>'
+				,'<li class="lh20 icon-padding16 '+ ((this.config.renderer == 'listGreenIcons') ? 'icon-element' : '{iconCls}') + '"> &nbsp; {name} <span style="display: inline-block; width: 14px"><span class="buttons"><a href="#" class="icon-close-light" style="display:inline-block; width: 20px;text-decoration: none" title="'+L.Remove+'">&nbsp; &nbsp;</a></span></span></li>'
 				,'</tpl></ul>'
 				,{compiled: true}
 			)
@@ -480,6 +591,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 				var u = new this.resultPanel.store.recordType(r.data);
 				this.resultPanel.store.add(u);
 			}
+			this.grid.getView().refresh();
 			this.items.last().syncSize();
 		}else  this.onOkClick();
 	}
@@ -488,6 +600,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 		if(!el.dom.classList.contains('icon-close-light')) return;
 		this.resultPanel.store.removeAt(idx);
 		//this.buttons[2].setDisabled(false);
+		this.grid.getView().refresh();
 		this.items.last().syncSize();
 	}
 	,getValue: function(){

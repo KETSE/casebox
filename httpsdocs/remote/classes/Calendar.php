@@ -16,7 +16,7 @@ class Calendar{
 			$rez['folderProperties'] = Path::getPathProperties($p);
 		}
 
-		$pid = explode('/', $p->path);
+		$pid = explode('/', @$p->path);
 		$pid = array_pop($pid);
 		$pid = is_numeric($pid) ? $pid : Browser::getRootFolderId();
 		if(empty($p->descendants)) $p->pid = $pid; else $p->pids = $pid;

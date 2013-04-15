@@ -39,7 +39,7 @@ Ext.extend(Ext.ux.plugins.IconCombo, Ext.util.Observable, {
             setIconCls:function() {
                 var rec = this.store.query(this.valueField, this.getValue()).itemAt(0);
                 if(rec && this.icon) {
-                    this.icon.className = 'ux-icon-combo-icon ' + (Ext.isEmpty(this.getValue()) ? '' : Ext.value(this.customIcon, rec.get(this.iconClsField)) );
+                    this.icon.className = 'ux-icon-combo-icon ' + (Ext.isEmpty(this.getValue()) ? '' : Ext.value( this.customIcon, rec.get(this.iconClsField) ) );
                 }
             }, // end of function setIconCls
  

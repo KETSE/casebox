@@ -54,9 +54,12 @@ class Files{
 			break;
 		}
 	}
+	
 	public function moveUploadedFilesToIncomming(&$F){
 		foreach($F as $fk => $f){
+			if(!empty($f['content_id'])) continue; //file content was not uploaded. Its content_id were sent as header param
 			$new_name = CB_FILES_INCOMMING_PATH.basename($f['tmp_name']);
+			if($f['tmp_name'] == $new_name) continue;
 			if(false === move_uploaded_file($f['tmp_name'], $new_name) ) return false;
 			$F[$fk]['tmp_name'] = $new_name;
 		}
@@ -109,6 +112,16 @@ class Files{
 		}
 		return $rez;
 	}
+	public function checkExistentContents($p){
+		foreach($p as $k => $v){
+			$sql = 'select id from files_content where `md5` = $1';
+			$res = mysqli_query_params($sql, array($v)) or die(mysqli_query_error());
+			$p->{$k} = ($r = $res->fetch_row()) ?  $r[0] : null;
+			$res->close();
+		}
+		return array('success' => true, 'data' => $p);
+	}
+
 	public function attachPostUploadInfo(&$FilesArray, &$result){
 		if(!is_array($FilesArray)) return;
 		/* if a single file is uploaded then check if it has duplicates and inform user about available file duplicates */
@@ -148,7 +161,7 @@ class Files{
 	public function getFileId($pid, $name = '', $dir = ''){ //checks if pid id exists in our tree or if filename exists under the pid. $dir is an optional relative path under pid. 
 		$rez = null;
 		/* check if pid exists /**/
-		$res = mysqli_query_params('select id from tree where id = $1', $pid) or die(mysqli_query_error()); 
+		$res = mysqli_query_params('select id from tree where id = $1 and dstatus = 0', $pid) or die(mysqli_query_error()); 
 		if($r = $res->fetch_assoc()){
 			$rez = $r['id'];
 		}else $rez = null;
@@ -164,7 +177,7 @@ class Files{
 			$dir = explode('/', $dir);
 			foreach($dir as $dir_name){
 				if(empty($dir_name) || ($dir_name == '.')) continue;
-				$res = mysqli_query_params('select id from tree where pid = $1 and name = $2', array($rez, $dir_name)) or die(mysqli_query_error());
+				$res = mysqli_query_params('select id from tree where pid = $1 and name = $2 and dstatus = 0', array($rez, $dir_name)) or die(mysqli_query_error());
 				if($r = $res->fetch_assoc()){
 					$rez = $r['id'];
 				}else $rez = null; 
@@ -197,7 +210,7 @@ class Files{
 
 	/**
 	 * [storeFiles move the files from incomming folder to file storage]
-	 * @param  array $p upload field values from upload form, files property - array of uploaded files, responce - responce from user when asket about overwrite for single or many file
+	 * @param  array $p upload field values from upload form, files property - array of uploaded files, response - response from user when asket about overwrite for single or many file
 	 */
 	public function storeFiles(&$p){
 		/* here we'll iterate all files and comparing the md5 with already contained files will upload only new contents to our store. Existent contents will be reused */
@@ -217,7 +230,7 @@ class Files{
 
 			if(!empty($file_id) ){
 				//newversion, replace, rename, autorename, cancel
-				switch(@$p['responce']){
+				switch(@$p['response']){
 					case 'newversion':
 					// case 'overwrite':
 					// case 'overwriteall':
@@ -242,6 +255,9 @@ class Files{
 						break;
 				}				
 			}
+			$f['type'] = 5;//file
+			$obj = (object)$f;
+			fireEvent('beforeNodeDbCreate', $obj);
 			mysqli_query_params('INSERT INTO tree  (id, pid, `name`, `type`, cid, uid, cdate, udate) VALUES($1, $2, $3, 5, $4, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) '.
 				' on duplicate key update id = last_insert_id($1), pid = $2, `name` = $3, `type` = 5, cid = $4, uid = $4, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP'
 				,Array($file_id, $pid, $f['name'], $_SESSION['user']['id'])) or die(mysqli_query_error());
@@ -250,15 +266,19 @@ class Files{
 			mysqli_query_params('insert into files (id, content_id, `date`, `name`, `title`, cid, uid, cdate, udate) values ($1, $2, $3, $4, $5, $6, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'.
 				' on duplicate key update content_id = $2, `date` = $3, `name` = $4, `title` = $5, cid = $6, uid = $6, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP'
 				,array($file_id, $p['files'][$fk]['content_id'], $p['files'][$fk]['date'], $f['name'], @$p['title'], $_SESSION['user']['id'])) or die(mysqli_query_error());
+			$f['id'] = $file_id;
 			$p['files'][$fk]['id'] = $file_id;
 			$this->updateFileProperties($p['files'][$fk]);
+			$obj = (object)$f;
+			fireEvent('nodeDbCreate', $obj);
+
 		}
 		return true;
 	}
 
 	public function updateFileProperties($p){
 		if(empty($p['id'])) return false;
-		mysqli_query_params('update files set `date` = $2, title = $3 where id = $1', array($p['id'], clienttoMysqlDate($p['date']), $p['title'] ) ) or die(mysqli_query_error());
+		mysqli_query_params('update files set `date` = $2, title = $3 where id = $1', array($p['id'], clienttoMysqlDate($p['date']), @$p['title'] ) ) or die(mysqli_query_error());
 
 		mysqli_query_params('delete from files_tags where file_id = $1', $p['id']) or die(mysqli_query_error());
 		if(!empty($p['tags'])){
@@ -302,7 +322,7 @@ class Files{
 		$path = explode('/', $path);
 		foreach($path as $dir){
 			if(empty($dir)) continue;
-			$sql = 'select id from tree where pid = $1 and name = $2';
+			$sql = 'select id from tree where pid = $1 and name = $2 and dstatus = 0';
 			$res = mysqli_query_params($sql, array($pid, $dir)) or die(mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$pid = $r['id'];
@@ -321,6 +341,7 @@ class Files{
 	}
 	public function storeContent(&$f, $filePath = false){
 		if($filePath == false) $filePath = CB_FILES_PATH;
+		if(!empty($f['content_id']) && is_numeric($f['content_id'])) return true; // content_id already defined
 		$f['content_id'] = null;
 		if(!file_exists($f['tmp_name']) || ($f['size'] == 0) ) return false;
 		$md5 = $this->getFileMD5($f);
@@ -357,7 +378,7 @@ class Files{
 			$a = explode('.', $r['name']);
 			$r['iconCls'] = 'file-'.( (sizeof($a) > 1) ? array_pop($a) : 'unknown');
 			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
-			$r['ago_date'] = strtr($r['ago_date'], months());
+			$r['ago_date'] = translateMonths($r['ago_date']);
 			$r['ago_text'] = formatAgoTime($r['cdate']);
 			$rez['data'] = $r;
 		}
@@ -367,7 +388,7 @@ class Files{
 		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
-			$r['ago_date'] = strtr($r['ago_date'], months());
+			$r['ago_date'] = translateMonths($r['ago_date']);
 			$r['ago_text'] = formatAgoTime($r['cdate']);
 			$rez['data']['versions'][] = $r;
 		}
@@ -384,6 +405,7 @@ class Files{
 			,f_get_tree_path(fd.id) `pathtext` 
 			FROM files f 
 			JOIN files fd ON f.content_id = fd.content_id AND fd.id <> $1
+			join tree t on fd.id = t.id and t.dstatus = 0
 			WHERE f.id = $1';
 		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez['data'][] = $r;
@@ -480,15 +502,35 @@ class Files{
 			case 'js':
 			case 'json':
 			case 'php':
+			case 'bat':
+			case 'ini':
+			case 'sys':
+			case 'sql':
 				file_put_contents( $preview_filename, '<pre>'.adjustTextForDisplay(file_get_contents($fn)).'<pre>' );
 				break;
 			case 'pdf':
-				mysqli_query_params('insert into file_previews (id, `group`, status, filename, size) values($1, \'pdf\', 1, null, 0) on duplicate key update `group` = \'pdf\', status =1, filename = null, size = 0, cdate = CURRENT_TIMESTAMP', $file['content_id'] ) or die(mysqli_query_error());
+				$html = 'PDF'; //Ext panel - PreviewPanel view
+				if(empty($_SERVER['HTTP_X_REQUESTED_WITH'])){ //full browser window view
+					$html = '<html><head><title>'.$file['name'].'</title>
+			    			<script type="text/javascript" src="'.Minify_getUri('js_pdf').'"></script>
+			    			<script type="text/javascript">
+			      				window.onload = function (){
+			        				var success = new PDFObject({ url: "/download.php?pw=&amp;id='.$file['id'].'" }).embed();
+			      				};
+			    			</script>
+			  			</head> 
+			  		<body>
+						<p>It appears you don\'t have Adobe Reader or PDF support in this web browser. <a href="/download.php?id='.$file['id'].'">Click here to download the PDF</a></p>
+					</body>
+					</html>';
+				}
+				return array('html' => $html);
+				/*mysqli_query_params('insert into file_previews (id, `group`, status, filename, size) values($1, \'pdf\', 1, null, 0) on duplicate key update `group` = \'pdf\', status =1, filename = null, size = 0, cdate = CURRENT_TIMESTAMP', $file['content_id'] ) or die(mysqli_query_error());
 				if(file_exists($preview_filename)) Files::deletePreview($file['content_id']);
 				$cmd = 'php -f '.CB_LIB_DIR.'preview_extractor_pdf.php '.CB_PROJ.' &> /dev/null &';
 				if(is_windows()) $cmd = 'start /D "'.CB_LIB_DIR.'" php -f preview_extractor_pdf.php '.CB_PROJ;
 				echo shell_exec($cmd);
-				return array('processing' => true);
+				return array('processing' => true);/**/
 				break;
 			case 'tif':
 			case 'tiff':
@@ -673,7 +715,7 @@ class Files{
 		return 'file-'.mb_strtolower(getFileExtension($filename));
 	}
 
-	function getIconFileName($filename){
+	public static function getIconFileName($filename){
 		$ext = getFileExtension($filename);
 		switch($ext){
 			case 'docx':
@@ -689,9 +731,9 @@ class Files{
 			case 'bmp':
 			case 'png': $ext = 'img'; break;
 		}
-		$filename = 'document-'.$ext.'.png';
+		$filename = $ext.'.png';
 		$dir = (defined('CB_SITE_PATH') ? CB_SITE_PATH : PROJ_SITE_PATH).'css/i/ext/';
-		if(file_exists($dir.$filename)) return $filename; else return 'document.png';
+		if(file_exists($dir.$filename)) return $filename; else return '.png';
 	}
 
 }

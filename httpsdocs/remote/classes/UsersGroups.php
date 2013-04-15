@@ -21,21 +21,33 @@ class UsersGroups{
 			$res = mysqli_query_params($sql, array()) or die(mysqli_query_error());
 			while($r = $res->fetch_assoc()){
 				$r['loaded'] = true;
+				// $r['expanded'] = true;
 				$rez[] = $r;
 			}
 			$res->close();
 		}elseif(is_null($node_type)){ /* root node childs*/
-			$sql = 'select id `nid`, name, l'.UL_ID().' `text`, (select count(*) from users_groups_association a JOIN users_groups u ON a.user_id = u.id AND u.deleted = 0 where group_id = g.id) `loaded`  from users_groups g where `type` = 1 and `system` = 0 order by 3, 2';
+			$sql = 'select id `nid`, name, l'.UL_ID().' `text`, `type`, `system`, (select count(*) from users_groups_association a JOIN users_groups u ON a.user_id = u.id AND u.deleted = 0 where group_id = g.id) `loaded`  from users_groups g where `type` = 1 and `system` = 0 order by 3, 2';
 			$res = mysqli_query_params($sql, array()) or die(mysqli_query_error());
 			while($r = $res->fetch_assoc()){
-				$r['iconCls'] = 'icon-group';
-				$r['loaded'] = empty($r['loaded']);
+				$r['iconCls'] = 'icon-users';
+				// if(empty($r['loaded'])) $r['loaded'] = true;
+				// else{ 
+					// unset($r['loaded']);
+					// $r['loaded'] = true;
+					// $r['children'] = $this->getChildren(json_decode('{"path":"/'.$r['nid'].'"}'));
+				// }
+				$r['expanded'] = true;
+				
 				$rez[] = $r;
 			}
 			$res->close();
 			$rez[] = array('nid' => -1
 				,'text' => L\Users_without_group
 				,'iconCls' => 'icon-users'
+				,'type' => 1
+				,'expanded' => true
+				
+				// ,'children' => $this->getChildren(json_decode('{"path":"/-1"}'))
 				);
 		}else{// group users
 			$sql = 'select u.id `nid`, u.cid, u.name, u.l'.UL_ID().' `text`, sex, enabled from users_groups_association a join users_groups u on a.user_id = u.id where a.group_id = $1 and u.deleted = 0 ';
@@ -131,7 +143,7 @@ class UsersGroups{
 	}
 	public function deleteUser($user_id){ 
 		if(!Security::canManage()) throw new Exception(L\Access_denied);
-		$res = mysqli_query_params('update users_groups set deleted = 1, did = $2 where id = $1 and (cid = $2) ', array($user_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
+		$res = mysqli_query_params('update users_groups set deleted = 1, did = $2 where id = $1 ', array($user_id, $_SESSION['user']['id']) ) or die(mysqli_query_error()); // and (cid = $2) !!!!
 		return Array('success' => affected_rows() ? true : false, 'data' => array($user_id, $_SESSION['user']['id']));
 	}
 	public function deleteGroup($group_id){ 
@@ -235,57 +247,6 @@ class UsersGroups{
 		return Array('success' => true);
 	}	
 
-//---------------------------------------------------------------------------------
-	
-
-	
-	
-	public function addGroup($params){ 
-		$rez = Array('success' => true, 'data' => array());
-		////params: name, office_id, role_id
-		$params->name = trim($params->name);
-		if(empty($params->name) || (!Security::isAdmin())) throw new Exception(L\Failed_creating_office);
-		// check if office with that name already exists 
-		$res = mysqli_query_params('select t.id from tag_groups g join tag_groups__tags_result tr on g.id = tr.tags_group_id join tags t on tr.tag_id = t.id where g.system = 1 and t.l'.UL_ID().' = $1', $params->name) or die(mysqli_query_error());
-		if($r = $res->fetch_row()) throw new Exception(L\Office_exists);
-		$res->close();
-		// end of check if office with that name already exists 
-		$pid = null;
-		$res = mysqli_query_params('select t.id from tag_groups g join tag_groups__tags tr on g.id = tr.tags_group_id join tags t on tr.tag_id = t.id where g.system = 1 order by t.`type`, t.`order`') or die(mysqli_query_error());
-		if($r = $res->fetch_row()) $pid = $r[0];
-		$res->close();
-		
-		$office_id = null;
-		mysqli_query_params('insert into tags (pid, '.$_SESSION['languages']['string'].', `type`) VALUES($1 '.str_repeat(',$2', $_SESSION['languages']['count']).', 1)', array($pid, $params->name) ) or die(mysqli_query_error());
-		if($office_id = last_insert_id()) $rez['data']['id'] = $office_id;
-		if(empty($pid)) mysqli_query_params('insert into tag_groups__tags (tags_group_id, tag_id, recursive) select id, $1, 1 from tag_groups where system = 1', $office_id ) or die(mysqli_query_error());
-		require_once 'System.php';
-		System::updateTagGroupsResultTable($office_id);
-		return $rez;
-	}/**/
-
-
-	public function changeRole($user_id, $office_id, $role_id){ //NOT USED IN INTERFACE
-		if(!Security::canManage()) throw new Exception(L\Access_denied);
-		$user_id = $this->extractId($user_id);
-		$office_id = $this->extractId($office_id);
-		if(!$this->validRole($role_id)) throw new Exception(L\Wrong_input_data);
-		if(!in_array($office_id, Security::getManagedOfficeIds())) throw new Exception(L\No_manage_access_for_office);
-		if($role_id < Security::getUserRole()) throw new Exception(L\Cannot_give_higher_access);
-		$res = mysqli_query_params('update users_groups_association set role_id = $1, uid = $4 where user_id = $2 and office_id = $3', Array($role_id, $user_id, $office_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
-		//mysqli_query_params('CALL p_estimate_user_effective_access($1)', $user_id) or die(mysqli_query_error());
-		return Array('success' => true);
-	}
-
-	public function setRoleActive($user_id, $office_id, $active){ //NOT USED IN INTERFACE
-		if(!Security::canManage()) throw new Exception(L\Access_denied);
-		$user_id = $this->extractId($user_id);
-		$office_id = $this->extractId($office_id);
-		if(!in_array($office_id, Security::getManagedOfficeIds())) throw new Exception(L\No_manage_access_for_office);
-		mysqli_query_params('update users_groups_association set `active` = $1, uid = $4 where user_id = $2 and office_id = $3', Array($active, $user_id, $office_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
-		//mysqli_query_params('CALL p_estimate_user_effective_access($1)', $user_id) or die(mysqli_query_error());
-		return Array('success' => true);
-	}
 	public function changePassword($p){ 
 		/* passord could be changed by: admin, user owner, user himself */
 		if(empty($p['password']) || ($p['password'] != $p['confirmpassword'])) throw new exception(L\Wrong_input_data);
@@ -304,6 +265,7 @@ class UsersGroups{
 		mysqli_query_params('update users_groups set `password` = MD5(CONCAT(\'aero\', $2)), uid = $3 where id = $1', array($user_id, $p['password'], $_SESSION['user']['id'])) or die(mysqli_query_error());
 		return array('success' => true);
 	}
+
 	public function changeUsername($p){ 
 		/* username could be changed by: admin or user owner */
 		$name = trim(strtolower($p->name));
@@ -312,11 +274,13 @@ class UsersGroups{
 		
 		$user_id = $this->extractId($p->id);
 
-		if(!Security::isAdmin() && !Security::isUsersOwner($user_id)) throw new Exception(L\Access_denied);
+		//if(!Security::isAdmin() && !Security::isUsersOwner($user_id)) throw new Exception(L\Access_denied);
 		
 		mysqli_query_params('update users_groups set `name` = $2, uid = $3 where id = $1', array($user_id, $name, $_SESSION['user']['id'])) or die(mysqli_query_error());
 		return array('success' => true, 'name' => $name);
 	}
+
+//---------------------------------------------------------------------------------
 	public function getUserTags(){
 		$tags = array();
 		$res = mysqli_query_params('select id, l'.UL_ID().' `name` from tags where user_id = $1 order by 2', $_SESSION['user']['id'] ) or die(mysqli_query_error());

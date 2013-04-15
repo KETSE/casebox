@@ -3,13 +3,7 @@
 	$cron_id = 'check_core_email'; 
 	$execution_skip_times = 3; //default is 1 
 	
-	/*$test_path = 2;
-	$test_user_id = 1;
-	// if on devel then should put 'casebox' string in place of core['db_name'] for files path saving
-	/**/
 	require_once('crons_init.php');
-	//set_include_path(get_include_path() . PATH_SEPARATOR . ZEND_PATH);
-	/*echo get_include_path()."\n\r";/**/
 	
 	require_once ZEND_PATH.'/Zend/Loader/StandardAutoloader.php';
 	 
@@ -41,12 +35,12 @@
 		
 		$res = mysqli_query_params('use `'.$core['db_name'].'`');
 		if(!$res) continue;
-		echo "\n\r Processing core \"".$core['db_name']."\"  (".$core['mail_user'].")\n\r";
+		echo "\nProcessing core \"".$core['db_name']."\"  (".$core['mail_user'].") ...";
 
 		$cd = prepare_cron($cron_id);
 		if(!$cd['success']){
-			echo " Failed to prepare cron\n";
-			continue; //exit(1); 	//skip this core if cron preparation fails
+			echo "\nFailed to prepare cron\n";
+			continue; //skip this core if cron preparation fails
 		}
 		date_default_timezone_set( empty($core['timezone']) ? 'UTC' : $core['timezone'] );
 	
@@ -74,7 +68,7 @@
 			);		
 		}catch(Exception $e){
 			notify_admin('Casebox: check mail Exception for core'.$core['db_name'], $e->getMessage());
-			echo "Error connecting to email\n";
+			echo " Error connecting to email\n";
 			continue; // skip this core if mail cannot be accesed
 		}
 		
@@ -86,7 +80,7 @@
 		$files = new Files();
 
 		$mail_count = $mailbox->countMessages();
-		echo 'Mail count: '.$mail_count."\n";
+		echo ' Mail count: '.$mail_count."\n";
 		
 		$delete_ids = array ();
 		$processed_ids = array ();
@@ -108,12 +102,6 @@
 			}else{
 				/*STORE IN /<USER_ID>/Emails folder*/
 				$pid = User::getEmailFolderId();
-				// if(empty($test_path)){
-				// 	$delete_ids[] = $mailbox->getUniqueId($k);
-				// 	mail($mail->from, 'Error processing your email: '.$subject, '. We didn\'t find target folder in the subject of your mail, please correct the subject and resend your email. Wrong messages are deleted automatically.'.$mail_requirements, 'From: '.$core['mail_user'] . "\r\n");
-				// 	echo "cannot find target folder in message subject: $subject  ... skipping\n";
-				// 	continue; // skip to next mail message
-				// }else $path = $test_path;
 			}
 			
 			/* end of try to get target folder from subject*/
@@ -130,8 +118,7 @@
 				$res->close();
 				while(!empty($path) && empty($path[0]) ) array_shift($path);
 				while(!empty($path) && empty($path[sizeof($path)-1]) ) array_pop($path);
-				// echo "Clearned path: ";
-				// print_r($path);
+
 				//check if first folder name in specified path is equal to root name from tree
 				if(empty($path)) $pid = $rootFolderId;
 				else{
@@ -150,7 +137,7 @@
 							$i++;
 						}
 					}else{
-						echo "\n root name is not equal to first element \n";
+						echo "\n root name is not equal to first element";
 					}
 					if(!$found){
 						$found = true;
@@ -169,33 +156,21 @@
 					if(!$found){
 						$delete_ids[] = $mailbox->getUniqueId($k);
 						mail($mail->from, 'Error processing your email: '.$subject, '. We didn\'t find the specified target folder, from the subject of your mail, in our database, please correct the subject and resend your email. Wrong messages are deleted automatically.'.$mail_requirements, 'From: '.$core['mail_user'] . "\r\n");
-						echo "cannot find corresponding folder in our database for: $subject ... skipping\n";
+						echo "\ncannot find corresponding folder in our database for: $subject ... skipping";
 						continue;
 					}else $pid = $lastPid;
 					
 				}
 				
-				// $res = mysqli_query_params('select id from tree where `nr` = $1', $case_nr) or die(mysqli_query_error());
-				// if($r = $res->fetch_row()) $pid = $r[0];
-				// $res->close();
-				// if($pid == false){
-				// 	if(empty($test_path)){
-				// 		$delete_ids[] = $mailbox->getUniqueId($k);
-				// 		mail($mail->from, 'Error processing your email: '.$subject, '. We didn\'t find the specified target folder, from the subject of your mail, in our database, please correct the subject and resend your email. Wrong messages are deleted automatically.'.$mail_requirements, 'From: '.$core['mail_user'] . "\r\n");
-				// 		echo "cannot find corresponding folder in our database for: $subject ... skipping\n";
-				// 		continue;
-				// 	}else $pid = $test_path;
-				// }
 			}
 			/* end of locate the corresponding folder in our database */
 			
-			/* try to find user from database that corresponds to this mail */
-			//Kell <kellaagnya@gmail.com>
+			/* try to find user from database that corresponds to this mail. Ex: Kell <kellaagnya@gmail.com> */
 			$email = false;
 			if(preg_match_all('/^[^<]*<?([^>]+)>?/i', $mail->from, $results)) $email = $results[1][0];
 			if($email == false){
 				$delete_ids[] = $mailbox->getUniqueId($k);
-				echo "cannot find senders email for: $subject ... skipping\n";
+				echo "\ncannot find senders email for: $subject ... skipping";
 				mail($mail->from, 'Error processing your email: '.$subject, '. We didn\'t find your email in received message. '.$mail_requirements, 'From: '.$core['mail_user'] . "\r\n");
 				continue;
 			}
@@ -208,13 +183,13 @@
 				if(empty($test_user_id)){
 					$delete_ids[] = $mailbox->getUniqueId($k);
 					mail($mail->from, 'Error processing your email: '.$subject, '. We didn\'t find your email address in our users database, please update your email address in your user profile of casebox and resend your mail. Wrong messages are deleted automatically.'.$mail_requirements, 'From: '.$core['mail_user'] . "\r\n");
-					echo "cannot find corresponding user in our database for email $email from message: $subject ... skipping\n";
+					echo "\ncannot find corresponding user in our database for email $email from message: $subject ... skipping";
 					continue;
 				}else $user_id = $test_user_id;
 			}
 			/* end of try to find user from database that corresponds to this mail */
 			
-			/* get email date /**/ //Thu, 24 Feb 2011 22:22:10 +0300
+			/* get email date. Ex: Thu, 24 Feb 2011 22:22:10 +0300 /**/
 			$time = strtotime($mail->date);
 			$time = date('Y-m-d H:i:s', $time);
 			/* end of get email date /**/ 
@@ -238,7 +213,7 @@
 			mysqli_query_params('insert into objects_data (object_id, field_id, duplicate_id, `value`) select $1, id, 0, $2 from templates_structure where template_id = $3 and name = $4', array($object_id, $time, $email_template_id, '_date_start') ) or die(mysqli_query_error());
 			mysqli_query_params('insert into objects_data (object_id, field_id, duplicate_id, `value`) select $1, id, 0, $2 from templates_structure where template_id = $3 and name = $4', array($object_id, $content, $email_template_id, '_content') ) or die(mysqli_query_error());
 			mysqli_query_params('insert into objects_data (object_id, field_id, duplicate_id, `value`) select $1, id, 0, $2 from templates_structure where template_id = $3 and name = $4', array($object_id, $mail->from, $email_template_id, 'from') ) or die(mysqli_query_error());
-			//$is_default = 1;
+
 			if(!empty($attachments)){
 				foreach($attachments as $a){
 					if(!$a['attachment']) continue;
@@ -295,7 +270,7 @@
 			$mailbox->moveMessage( $mailbox->getNumberByUniqueId($uniq_id), '[Gmail]/Trash' ); // 
 		}		
 		/* end of moving read messages from inbox to All Mail folder*/
-		echo "Ok\n";
+		echo " Done";
 
 	}
 
@@ -322,11 +297,6 @@ function getMailContentAndAtachment($message) {
 	if ($message->isMultipart()){
 		foreach(new RecursiveIteratorIterator($message) as $part){
 			$headers = $part->getHeaders()->toArray();
-			/*array(2) {
-			  ["Content-Type"]=> string(30) "text/plain;
-			 charset="KOI8-R""
-			  ["Content-Transfer-Encoding"]=> string(6) "base64"
-			}*/
 			$datapart = array('content-type' => $part->getHeaderField('content-type'));
 			try{
 				$datapart['attachment'] = true;
@@ -373,4 +343,3 @@ function getMailContentAndAtachment($message) {
     return $foundParts;
 }
 //----------------------------------------------------------------------------------------------------------------------	
-?>

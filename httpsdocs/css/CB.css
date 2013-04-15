@@ -63,6 +63,13 @@ a:hover{ text-decoration: underline }
 .icon-tick-small { background-image:url(i/ico/tick-small.png) !important; background-repeat: no-repeat; background-position: 0 50% }
 .icon-tick-small-red { background-image:url(i/ico/tick-small-red.png) !important; background-repeat: no-repeat }
 
+.icon-control { background-image:url(i/ico/control.png) !important; background-repeat: no-repeat }
+.icon-control-stop-square { background-image:url(i/ico/control-stop-square.png) !important; background-repeat: no-repeat }
+.icon-control-stop-square { background-image:url(i/ico/control-stop-square.png) !important; background-repeat: no-repeat }
+.icon-cross { background-image:url(i/ico/cross.png) !important; background-repeat: no-repeat }
+.icon-eraser { background-image:url(i/ico/eraser.png) !important; background-repeat: no-repeat }
+.icon-category { background-image:url(i/ico/category.png) !important; background-repeat: no-repeat }
+
 .icon-drive-download{ background-image: url(i/ico/drive-download.png); background-position: 0 50%; background-repeat: no-repeat;}
 .icon-received, .icon-new-received{ background-image:url(i/ico/inbox-download.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-answer, .icon-new-answer{ background-image:url(i/ico/inbox-upload.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -104,7 +111,7 @@ a:hover{ text-decoration: underline }
 .icon-arrow-down-medium{ background-image: url(i/ico/arrow-270-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
 .icon-arrow-045-small{ background-image: url(i/ico/arrow-045-small.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
 .icon-arrow-curve-090{ background-image: url(i/ico/arrow-curve-090.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
-.icon-arrow3{ background-image: url(i/ico/_arr3.png) !important; background-position: 0 50%; background-repeat: no-repeat !important }
+.icon-arrow3, .icon-start{ background-image: url(i/ico/_arr3.png) !important; background-position: 0 50%; background-repeat: no-repeat !important }
 img.icon-arrow3 {width:8px; height:8px; margin-left:5px;}
 .icon-sort-alphabet{ background-image: url(i/ico/sort-alphabet.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
 .icon-sort-alphabet-descending{ background-image: url(i/ico/sort-alphabet-descending.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
@@ -456,4 +463,29 @@ text-decoration: underline;}
 	font-weight: bold;
 	font-size: 11px;
 	font-family: tahoma,arial,verdana,sans-serif;
+}
+.drop-target, .drop-target .x-grid3-viewport{background-color: rgb(234, 255, 234);}
+div.grid-drop-zone {
+	position: absolute;
+	top: 55%;
+	left: 25%;
+	width: 50%;
+	border: 2px dashed #bbb;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	padding: 25px;
+	text-align: center;
+	font: 20pt bold,"Vollkorn";
+	color: #bbb;
+	background-color: #efffff;
+}
+div.grid-drop-zone-over{
+	border-color: green !important;
+	color: #aeaeae;
+}
+.upload-btn{
+	background-image: url(i/upload_bg.png);
+	background-position: -1px;
+	background-repeat: no-repeat;
 }
