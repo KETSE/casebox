@@ -18,7 +18,7 @@ httpsdocs/cores/
 !httpsdocs/cores/sample/
 
 # exclude config.ini
-httpsdocs/config.ini
+httpsdocs/system.ini
 
 httpsdocs/photos/
 

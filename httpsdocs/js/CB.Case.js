@@ -18,6 +18,11 @@ CB.AddCaseForm = Ext.extend(Ext.Window, { //added to tests
 			,fields: [ {name: 'id', type: 'int', mapping: 'id'}, 'name' ]
 		}
 		);
+		
+		default_casetype_id = null;
+		r = CB.DB.caseTypes.getAt(0);
+		if(r) default_casetype_id = r.get('id');
+		
 		Ext.apply(this, {
 			buttons:[ this.buttonSave, this.buttonCancel ]
 			,items: [{
@@ -36,7 +41,7 @@ CB.AddCaseForm = Ext.extend(Ext.Window, { //added to tests
 					,triggerAction: 'all'
 					,mode: 'local'
 					,store: CB.DB.caseTypes
-					,value: CB.DB.caseTypes.getAt(0).get('id')
+					,value: default_casetype_id
 					,hidden: (CB.DB.caseTypes.getCount() < 2)
 				},{
 					xtype: 'textfield'

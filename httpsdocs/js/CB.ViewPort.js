@@ -221,7 +221,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			,msg: L.ExitConfirmationMessage
 			,fn: function(btn, text){
 				if (btn == 'yes')
-					Auth.logout(function(response, e){
+					User.logout(function(response, e){
 						if(response.success === true) window.location.reload();
 					});
 			}
@@ -379,7 +379,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	,setUserLanguage: function(b, e){
 		if(b.data.id == App.loginData.language_id) return;
 		Ext.Msg.confirm(L.LanguageChange, L.LanguageChangeMessage, function(pb){
-			if(pb == 'yes') Auth.setLanguage(b.data.id, this.processSetUserLanguage, this);
+			if(pb == 'yes') User.setLanguage(b.data.id, this.processSetUserLanguage, this);
 			if(b.ownerCt) b.ownerCt.items.each(function(i){ i.setChecked(i.data.id == App.loginData.language_id)}, this);
 		}, this)
 	}
@@ -409,7 +409,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			directFn: Tasks.getUserTasks
 			,autoDestroy: true
 		}, CB.DB.tasksStoreConfig));
+		this.lastFocusedElement = Ext.get(document.activeElement);
 		dw = new CB.Tasks(p);
+		dw.on('beforedestroy', this.focusLastElement, this);
 		return dw.show();
 	}
 	,onTaskEdit: function(p, ev){//task_id, object_id, object_title, title
@@ -422,9 +424,15 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			}, CB.DB.tasksStoreConfig));
 			p.listeners = {beforedestroy: function(w){w.tasksStore.destroy();}}
 		}
-
+		this.lastFocusedElement = Ext.get(document.activeElement);
 		dw = new CB.Tasks(p);
+		dw.on('beforedestroy', this.focusLastElement, this);
 		dw.show();
+	}
+	,focusLastElement: function(){
+		if(this.lastFocusedElement){
+			this.lastFocusedElement.focus(500);
+		}
 	}
 	,onUsersChange: function(){
 		CB.DB.usersStore.reload();

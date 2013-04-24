@@ -10,6 +10,7 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
 	,init: function(owner) {
 		this.owner = owner;
 		owner.on('render', this.onRender, this);
+		// owner.on('destroy', this.onBeforeDestroy, this);
 		if(owner.dropZoneConfig) Ext.apply(this.dropZoneConfig, owner.dropZoneConfig);
 	}
 
@@ -23,6 +24,18 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
 		App.on('dragfilesleave', this.hideDropZone, this)
 		App.on('filesdrop', this.hideDropZone, this)
 	}
+	,onBeforeDestroy: function(){
+		// this.owner.un('render', this.onRender, this);
+		App.un('dragfilesenter', this.showDropZone, this)
+		App.un('dragfilesover', this.showDropZone, this)
+		App.un('dragfilesleave', this.hideDropZone, this)
+		App.un('filesdrop', this.hideDropZone, this)
+		if(this.dropZoneEl){
+			this.dropZoneEl.removeAllListeners();
+			this.dropZoneEl.remove();
+		}
+	}
+
 	,getTarget: function(e){
 		te = this.owner.getEl();
 		ce = e.getTarget('.x-grid3-row');
@@ -113,8 +126,14 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
 		return i;
 	}
 	,showDropZone: function(e){
+		el = this.owner.getEl();
+		if( Ext.isEmpty(el.dom) ){
+			this.onBeforeDestroy();
+			return;
+		}
+		if( !el.isVisible(true) ) return;
+		
 		if(!this.dropZoneEl){
-			if(!this.owner.getEl().isVisible(true)) return;
 			this.dropZoneEl = this.owner.getEl().appendChild(document.createElement('div'));
 			this.dropZoneEl.update(this.dropZoneConfig.text);
 			this.dropZoneEl.on('dragenter', function(e, el){Ext.get(el).addClass('grid-drop-zone-over')});

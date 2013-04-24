@@ -1,5 +1,7 @@
 <?php
-require_once 'Security.php';
+
+namespace CB;
+
 class Templates{
 
 	public function getChildren($params){
@@ -9,9 +11,9 @@ class Templates{
 		switch($t){
 			case 0: //user, contact and organization template + case templates folder
 		}
-		$res = mysqli_query_params('select id, l'.UL_ID().' `text`, `type`, `order`, `visible`, iconCls, (select count(*) '.
+		$res = DB\mysqli_query_params('select id, l'.USER_LANGUAGE_INDEX.' `text`, `type`, `order`, `visible`, iconCls, (select count(*) '.
 			'from templates where pid = t.id) `loaded` from templates t '.
-			'where `type` > -100 and pid'.( ($nodeId > 0) ? '=$1' : ' is NULL and is_folder=1' ).' order by `order`, `type`, 2' , $nodeId) or die(mysqli_query_error());
+			'where `type` > -100 and pid'.( ($nodeId > 0) ? '=$1' : ' is NULL and is_folder=1' ).' order by `order`, `type`, 2' , $nodeId) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$r['loaded'] = empty($r['loaded']);
 			if(empty($nodeId)) $r['expanded'] = true;
@@ -21,28 +23,28 @@ class Templates{
 		}
 		return $rez;
 	}
-	public static function getCaseTypeTempleId($case_type_id) {
-		$case_type_id = explode('-', $case_type_id);
-		$case_type_id = array_pop($case_type_id);
-		$case_type_id = intval($case_type_id);
-		$id = 0;
-		$sql = 'SELECT t.id FROM `templates_per_tags` tpt JOIN templates t ON tpt.`template_id` = t.id AND t.type = 4 WHERE tpt.case_type_id = $1';
-		$res = mysqli_query_params($sql, $case_type_id) or die(mysqli_query_error());
-		if($r = $res->fetch_row()){
-			$id = $r[0];
+	// public static function getCaseTypeTempleId($case_type_id) {
+	// 	$case_type_id = explode('-', $case_type_id);
+	// 	$case_type_id = array_pop($case_type_id);
+	// 	$case_type_id = intval($case_type_id);
+	// 	$id = 0;
+	// 	$sql = 'SELECT t.id FROM `templates_per_tags` tpt JOIN templates t ON tpt.`template_id` = t.id AND t.type = 4 WHERE tpt.case_type_id = $1';
+	// 	$res = DB\mysqli_query_params($sql, $case_type_id) or die(DB\mysqli_query_error());
+	// 	if($r = $res->fetch_row()){
+	// 		$id = $r[0];
 
-		}else{
-			$name = 'Template for case type '.$case_type_id;
-			mysqli_query_params('insert into templates (`type`, name, l1, l2, l3, visible) values (4, $1, $1, $1, $1, 0)', array($name) ) or die(mysqli_query_error());
-			$id = last_insert_id();
-			mysqli_query_params('insert into templates_per_tags (template_id, case_type_id) values($1, $2) ', array($id, $case_type_id)) or die(mysqli_query_error());
-		}
-		$res->close();
-		return array('success' => true, 'id' => $id);
-	}
+	// 	}else{
+	// 		$name = 'Template for case type '.$case_type_id;
+	// 		DB\mysqli_query_params('insert into templates (`type`, name, l1, l2, l3, visible) values (4, $1, $1, $1, $1, 0)', array($name) ) or die(DB\mysqli_query_error());
+	// 		$id = DB\last_insert_id();
+	// 		DB\mysqli_query_params('insert into templates_per_tags (template_id, case_type_id) values($1, $2) ', array($id, $case_type_id)) or die(DB\mysqli_query_error());
+	// 	}
+	// 	$res->close();
+	// 	return array('success' => true, 'id' => $id);
+	// }
 	
 	public function saveElement($params){//new folder or template
-		if(!Security::canManage()) throw new Exception(L\Access_denied);
+		if(!Security::canManage()) throw new \Exception(L\Access_denied);
 		
 		$p = array(
 			'id' => empty($params->id) ? null: $params->id
@@ -50,62 +52,53 @@ class Templates{
 			//,'pid' => (empty($params->pid) || (!is_numeric($params->pid))) ? null: $params->pid
 		);
 		$values_string = '$1, $2';
-		$res = mysqli_query_params('select id from templates where is_folder = 1 and `type` = $1 ',-$p['type']) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select id from templates where is_folder = 1 and `type` = $1 ',-$p['type']) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()){
 			$p['pid'] = $r[0];
 			$values_string .= ',$3';
 		}
 		$res->close();
 		$on_duplicate = '';
-		getLanguagesParams($params, $p, $values_string, $on_duplicate, $params->text);
+		Util\getLanguagesParams($params, $p, $values_string, $on_duplicate, $params->text);
 		
-		mysqli_query_params('insert into templates ('.implode(',', array_keys($p)).') values ('.$values_string.') on duplicate key update '.$on_duplicate, array_values($p)) or die(mysqli_query_error());
-		if(!is_numeric(@$params->id)) $p['id'] = last_insert_id();
+		DB\mysqli_query_params('insert into templates ('.implode(',', array_keys($p)).') values ('.$values_string.') on duplicate key update '.$on_duplicate, array_values($p)) or die(DB\mysqli_query_error());
+		if(!is_numeric(@$params->id)) $p['id'] = DB\last_insert_id();
 		
 		return array( 'success' => true, 'data' => array('id' => $p['id'], 'pid' => @$p['pid'], 'type' => $p['type'], 'text' => $params->text, 'loaded' => true));
 	}
 	public function deleteElement($id){
-		if(!Security::canManage()) throw new Exception(L\Access_denied);
-		mysqli_query_params('delete from templates where `type`> -100 and id = $1', $id) or die(mysqli_query_error());
+		if(!Security::canManage()) throw new \Exception(L\Access_denied);
+		DB\mysqli_query_params('delete from templates where `type`> -100 and id = $1', $id) or die(DB\mysqli_query_error());
 		return Array('success' => true, 'id' => $id);
 	}
 	public function moveElement($params){
-		mysqli_query_params('update templates set pid = $2 where id = $1', array($params->id, is_numeric($params->pid) ? $params->pid : null)) or die(mysqli_query_error());
+		DB\mysqli_query_params('update templates set pid = $2 where id = $1', array($params->id, is_numeric($params->pid) ? $params->pid : null)) or die(DB\mysqli_query_error());
 		return array('success' => true);
 	}
 	public function readAll($p){// return templates list
-		$sql = 'SELECT t.id, t.pid, t.type, t.l'.UL_ID().' `title`, t.iconCls, t.cfg, t.info_template FROM templates t  order by `order`, 5';
+		$sql = 'SELECT t.id, t.pid, t.type, t.l'.USER_LANGUAGE_INDEX.' `title`, t.iconCls, t.cfg, t.info_template, `visible` FROM templates t  order by 3, `order`, 4';
 		$data = Array();
-		$res = mysqli_query_params($sql) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			if(!empty($r['cfg'])) $r['cfg'] = (array)json_decode($r['cfg']);
-			
-			if(!isset($r['cfg']['system_tags']))
-				$r['cfg']['system_tags'] =  $_SESSION['system_tags'];
-
-			if(!isset($r['cfg']['personal_tags']))
-				$r['cfg']['personal_tags'] =  $_SESSION['personal_tags'];
-			// if(isset($_SESSION['personal_tags'])) $r['cfg']['personal_tags'] = $_SESSION['personal_tags'];
-			// elseif(!isset($r['cfg']['personal_tags'])) $r['cfg']['personal_tags'] = CB_PERSONAL_TAGS;
-			
 			$data[] = $r;
 		}
 		$res->close();
 		return Array('success' => true, 'data' => $data);
 	}
 	public function loadTemplate($params){
-		if(!Security::canManage()) throw new Exception(L\Access_denied);
+		if(!Security::canManage()) throw new \Exception(L\Access_denied);
 		
 		/* get field names of template properties editing template */
 		$template_fields = array();
-		$res = mysqli_query_params('SELECT ts.id, ts.name FROM templates_structure ts JOIN templates t ON t.id = ts.template_id WHERE t.type = -100') or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('SELECT ts.id, ts.name FROM templates_structure ts JOIN templates t ON t.id = ts.template_id WHERE t.type = -100') or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row())
 			$template_fields[$r[1]] = $r[0];
 		$res->close();
 		/* end of get field names of template properties editing template */
 
 		$data = array();
-		$res = mysqli_query_params('select id, `type`, name, '.$_SESSION['languages']['string'].', visible, iconCls, default_field, cfg from templates where id = $1', $params->data->id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select id, `type`, name, '.config\language_fields.', visible, iconCls, default_field, cfg from templates where id = $1', $params->data->id) or die(DB\mysqli_query_error());
 		//, `order` - removed
 		//,show_files, show_main_file, show_subjects, show_claimers, show_violations_edit, show_violations_association, show_decisions_association, show_complaints, show_appeals, gridJsClass
 		if($r = $res->fetch_assoc()){
@@ -126,9 +119,9 @@ class Templates{
 	}
 	public function getTemplatesStructure(){
 		$rez = array('success' => true, 'data' => array());
-		$sql = 'SELECT ts.id, ts.pid, t.id template_id, ts.tag, ts.`level`, ts.`name`, ts.l'.UL_ID().' `title`, ts.`type`, ts.`order`, ts.cfg, (coalesce(t.title_template, \'\') <> \'\' ) `has_title_template`'.
+		$sql = 'SELECT ts.id, ts.pid, t.id template_id, ts.tag, ts.`level`, ts.`name`, ts.l'.USER_LANGUAGE_INDEX.' `title`, ts.`type`, ts.`order`, ts.cfg, (coalesce(t.title_template, \'\') <> \'\' ) `has_title_template`'.
 				' FROM templates t left join templates_structure ts on t.id = ts.template_id ORDER BY template_id, `order`';
-		$res = mysqli_query_params($sql) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$t = $r['template_id'];
 			unset($r['template_id']);
@@ -140,12 +133,12 @@ class Templates{
 		return array('success' => true, 'data'  => $data);
 	}
 	public function saveTemplate($p){
-		if(!Security::canManage()) throw new Exception(L\Access_denied);
+		if(!Security::canManage()) throw new \Exception(L\Access_denied);
 		$d = json_decode($p['data']);
 
 		/* get field names of template properties editing template */
 		$template_fields = array();
-		$res = mysqli_query_params('SELECT ts.id, ts.name FROM templates_structure ts JOIN templates t ON t.id = ts.template_id WHERE t.type = -100') or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('SELECT ts.id, ts.name FROM templates_structure ts JOIN templates t ON t.id = ts.template_id WHERE t.type = -100') or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row())
 			$template_fields[$r[0]] = $r[1];
 		$res->close();
@@ -211,10 +204,10 @@ class Templates{
 		$values_string = implode(', ', $values_string);
 		$on_duplicate = implode(', ', $on_duplicate);
 		
-		getLanguagesParams($p, $params, $values_string, $on_duplicate);
+		Util\getLanguagesParams($p, $params, $values_string, $on_duplicate);
 		
-		mysqli_query_params('insert into templates (`'.implode('`,`', array_keys($params)).'`) values ('.$values_string.') on duplicate key update '.$on_duplicate, array_values($params)) or die(mysqli_query_error());
-		if(!is_numeric($params['id'])) $params['id'] = last_insert_id();
+		DB\mysqli_query_params('insert into templates (`'.implode('`,`', array_keys($params)).'`) values ('.$values_string.') on duplicate key update '.$on_duplicate, array_values($params)) or die(DB\mysqli_query_error());
+		if(!is_numeric($params['id'])) $params['id'] = DB\last_insert_id();
 
 		return array('success' => true, 'data' => $d);
 	}
@@ -232,7 +225,7 @@ class Templates{
 	public static function getTemplateStructure($template_id, $sorted = true){
 		/* get template structure */
 		$unsortedStructure = array();
-		$res = mysqli_query_params('SELECT id, pid, tag, `level`, ts.name, ts.l'.UL_ID().' `title`, `type`, `order`, cfg, (select count(*) from templates_structure where pid = ts.id) children FROM templates_structure ts WHERE template_id = $1 order by `order`', $template_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('SELECT id, pid, tag, `level`, ts.name, ts.l'.USER_LANGUAGE_INDEX.' `title`, `type`, `order`, cfg, (select count(*) from templates_structure where pid = ts.id) children FROM templates_structure ts WHERE template_id = $1 order by `order`', $template_id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			if(!empty($r['cfg'])) $r['cfg'] = json_decode($r['cfg']);
 			$unsortedStructure[$r['pid']][$r['id']] = $r;
@@ -299,14 +292,14 @@ class Templates{
 		require_once 'Security.php';
 		$rez = Array();
 		$is_admin = Security::canManage();
-		$res = mysqli_query_params($sql, $object_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $object_id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$field = $r['field'];
 			unset($r['field']);
 			if(empty($r['pfu']) || ($r['pfu'] == $_SESSION['user']['id']) || $is_admin) $rez['values'][$field] = $r; else $rez['hideFields'][] = $field;
 		}
 		$res->close();
-		$res = mysqli_query_params($sql2, $object_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql2, $object_id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()) $rez['duplicateFields'][$r[2]][$r[0]] = $r[1];
 		$res->close();
 		return $rez;
@@ -330,18 +323,18 @@ class Templates{
 				}
 				break;
 			case '_language':
-				@$value = $_SESSION['languages']['per_id'][$value]['name'];
+				@$value = $GLOBALS['language_settings'][$GLOBALS['languages'][$value -1]][0];
 				break;
 			case 'combo':
 			case 'popuplist': 
-				if(!empty($value)) $value = getThesauriTitles($value); break;
+				if(!empty($value)) $value = Util\getThesauriTitles($value); break;
 				break;
 			case '_case': 
 					if(empty($value)) { $value = ''; break; }
 					$a = explode(',', $value);
 					$a = array_filter($a, 'is_numeric');
 					if(empty($a)) { $value = ''; break; }
-					$res = mysqli_query_params('select name from cases where id in ('.implode(',', $a).') order by 1') or die(mysqli_query_error());
+					$res = DB\mysqli_query_params('select name from cases where id in ('.implode(',', $a).') order by 1') or die(DB\mysqli_query_error());
 					$value = array();
 					while($r = $res->fetch_row()) $value[] = $r[0];
 					$res->close();
@@ -352,7 +345,7 @@ class Templates{
 					$a = explode(',', $value);
 					$a = array_filter($a, 'is_numeric');
 					if(empty($a)) { $value = ''; break; }
-					$res = mysqli_query_params('select coalesce(custom_title, title) from objects where id in ('.implode(',', $a).') order by 1') or die(mysqli_query_error());
+					$res = DB\mysqli_query_params('select coalesce(custom_title, title) from objects where id in ('.implode(',', $a).') order by 1') or die(DB\mysqli_query_error());
 					$value = array();
 					while($r = $res->fetch_row()) $value[] = $r[0];
 					$res->close();
@@ -376,18 +369,18 @@ class Templates{
 					case 'groups': 
 					case 'usersgroups': 
 						$value = 'users_groups';
-						$sql = 'select id, name, l'.UL_ID().' `title`, CASE WHEN (`type` = 1) THEN \'icon-group\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls` from users_groups where id in ('.$ids.')';
+						$sql = 'select id, name, l'.USER_LANGUAGE_INDEX.' `title`, CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls` from users_groups where id in ('.$ids.')';
 						break;
 					default: 
 						$value = 'thesauri';
-						$sql = 'select id, l'.UL_ID().' `title`, iconCls from tags where id in ('.$ids.') order by `order`';
+						$sql = 'select id, l'.USER_LANGUAGE_INDEX.' `title`, iconCls from tags where id in ('.$ids.') order by `order`';
 						break;
 					}
 					
-					$res = mysqli_query_params($sql) or die(mysqli_query_error());
+					$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 					$value = array();
 					while($r = $res->fetch_assoc()){
-						@$label = coalesce($r['title'], $r['name']);
+						@$label = Util\coalesce($r['title'], $r['name']);
 						if(!empty($r['path'])) $label = ($format == 'html') ? '<a class="locate click" path="'.$r['path'].'" nid="'.$r['id'].'">'.$label.'</a>' : $label;
 
 						
@@ -406,7 +399,7 @@ class Templates{
 									$icon = Browser::getIcon($r);
 									break;
 								default: 
-									$icon = coalesce($r['iconCls'], 'icon-none');
+									$icon = Util\coalesce($r['iconCls'], 'icon-none');
 									break;
 								}
 
@@ -420,13 +413,12 @@ class Templates{
 					$value = ($format == 'html') ? '<ul class="clean">'.implode('', $value).'</ul>': implode(', ', $value);
 					break;
 
-			case 'date': $value = formatMysqlDate($value); break;
-			case 'datetime': $value = formatMysqlTime($value); break;
+			case 'date': $value = Util\formatMysqlDate($value); break;
+			case 'datetime': $value = Util\formatMysqlTime($value); break;
 			case 'html': 
 				//$value = trim(strip_tags($value));
 				//$value = nl2br($value);
 				break;
-			//case '_short_date_format':
 		}
 		return $value;
 	}

@@ -1,5 +1,8 @@
 <?php 
-$customUserMenuClass = CB_CONFIG_PATH.'php'.DIRECTORY_SEPARATOR.'UserMenu.php';
+
+namespace CB;
+
+$customUserMenuClass = CORE_ROOT.'php'.DIRECTORY_SEPARATOR.'UserMenu.php';
 if(is_file($customUserMenuClass)){
 	include($customUserMenuClass);
 	return;

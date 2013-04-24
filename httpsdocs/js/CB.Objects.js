@@ -222,7 +222,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 						}
 						App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
 						App.clipboard.un('change', this.onClipboardChange, this);
-						this.filesDropPlugin.destroy();
+						delete this.filesDropPlugin;
 					
 					}
 				}
@@ -285,7 +285,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                                		,scale: 'large'
                                		,menu: [ ]
                              	})
-				getGroupedTemplates(createButton, this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this, t);
+				// getGroupedTemplates(createButton, this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this, t);
+				updateMenu(createButton, getMenuConfig(this.data.id, this.data.path, this.data.template_id), this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this, t);
 				toolbarItems.push('-', createButton)
 			}
 
@@ -526,35 +527,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		}, this);
 		/* end of adding top fields and fields editable in tabsheet */
 		
-		/* adding tag fields to top fieldset */
-		if(this.templateData.cfg.system_tags)
-			this.topFieldSet.add({
-				xtype: 'CBTagField'
-				,tag_level: 3
-				,fieldLabel: L.Tags
-				,iconCls: 'icon-tag'
-				,tooltip: L.Tags
-				,name: 'tags'
-				,groupField: 'groupId'
-				,store: CB.DB.groupedTags
-				,filter: (((this.data.type == 2) || (this.data.type == 3)) ? function(r){ return ((r.get('system') == 0) || (r.get('system') == 4))} : function(r){ return ((r.get('system') == 0) || (r.get('system') == 3))})
-				,value: this.data.tags[3]
-				,width: 500
-			})
-		if(this.templateData.cfg.personal_tags)
-			this.topFieldSet.add({
-				xtype: 'CBTagField'
-				,tag_level: 4
-				,fieldLabel: L.UserTags
-				,iconCls: 'icon-tag-label'
-				,tooltip: L.UserTags
-				,name: 'user_tags'
-				,groupField: 'groupId'
-				,store: CB.DB.userTags
-				,value: this.data.tags[4]
-				,width: 500
-			})
-		/* end of adding tag fields to top fieldset */
 		if(!this.loaded){
 			this.loaded = true;
 			this.getBubbleTarget().on('filesdeleted', this.onFilesDeleted, this);

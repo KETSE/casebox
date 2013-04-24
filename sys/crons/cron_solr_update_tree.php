@@ -1,31 +1,24 @@
 #!/usr/bin/php
 <?php
-require_once 'crons_init.php';
-require_once CB_SOLR_CLIENT;
-$cron_id = 'solr_update_tree';
-foreach($CB_cores as $core){
-	$GLOBALS['CB_LANGUAGE'] = $core['default_language'];
-	try {
-		connect2DB($core);
-	} catch (Exception $e) {
-		continue;
-	}
-	
-	echo "\nProcessing core ".$core['db_name'].' ...';
-	if(empty($update_all)){
-		$cd = prepare_cron($cron_id, 2, 'core: '.$core['db_name']);
-		if(!$cd['success']) exit(1);
-	}
-	/* unset specific core globals */
-	unset($GLOBALS['EVERYONE_GROUP_ID']);
 
-	$solr = new SolrClient(array('core' => '/solr/'.$core['db_name'] ));
-	$solr->connect();
-	initLanguages();
-	$rez = $solr->updateTree(!empty($update_all));
-	echo "OK ... ";
-	mysqli_query_params('update crons set last_end_time = CURRENT_TIMESTAMP, execution_info = $2 where cron_id = $1', array($cron_id, json_encode($rez)) ) or die(mysqli_query_error()."\n".$sql);
-	unset($solr);
-	echo "Done";
+namespace CB;
+
+require_once 'init.php';
+
+$cron_id = 'solr_update_tree';
+
+$cd = prepare_cron($cron_id);
+if(!$cd['success']){
+	echo "\nerror preparing cron\n";
+	exit(1);
 }
-?>
+$solr = new SolrClient();
+if(@$argv[2] == 'all'){
+	$solr->deleteByQuery('*:*');
+	$solr->updateTree(true);
+	$solr->optimize();
+}else $solr->updateTree();
+
+unset($solr);
+
+DB\mysqli_query_params('update crons set last_end_time = CURRENT_TIMESTAMP, execution_info = \'ok\' where cron_id = $1', array($cron_id) ) or die( DB\mysqli_query_error() );

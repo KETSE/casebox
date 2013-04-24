@@ -75,7 +75,7 @@ CB.Login = Ext.extend(Ext.Window, {
 		if(!user.isValid() || !pass.isValid()) return false;
 		//Ext.util.Cookies.set('lastUser', user.getValue());
 		
-		Auth.login(user.getValue(), pass.getValue(), this.processLoginResponse);
+		User.login(user.getValue(), pass.getValue(), this.processLoginResponse);
 	}
 	,processLoginResponse: function(response, e){
 		lw = Ext.getCmp('CBLoginWindow');

@@ -132,28 +132,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 				,boxLabel : L.byDefault
 			}
 		]
-		if(App.loginData.cfg.system_tags && !this.fileOnly)
-			fieldsetItems.push({
-				xtype: 'CBTagField'
-				,fieldLabel: L.Tags
-				,iconCls: 'icon-tag'
-				,tooltip: L.Tags
-				,name: 'tags'
-				,groupField: 'groupId'
-				,store: CB.DB.groupedTags
-				,filter: function(r){ return ((r.get('system') == 0) || (r.get('system') == 6))}
-				,api:{search: UsersGroups.searchSysTags, searchGroup: 6}
-			})
-		if(App.loginData.cfg.personal_tags && !this.fileOnly)
-			fieldsetItems.push({
-				xtype: 'CBTagField'
-				,fieldLabel: L.UserTags
-				,iconCls: 'icon-tag-label'
-				,tooltip: L.UserTags
-				,name: 'user_tags'
-				,store: CB.DB.userTags
-				,api: {create: UsersGroups.addUserTag, search: UsersGroups.searchUserTags}
-			})
+
 		Ext.apply(this, {
 			items: {
 				border: false
@@ -232,16 +211,12 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 	},doSubmit: function(){
 		f = this.findByType('form')[0];
 		if(f.getForm().isValid()){
-			tags = {}
-			if(App.loginData.cfg.system_tags) tags[3] = this.find('name', 'tags')[0].getValue();
-			if(App.loginData.cfg.personal_tags) tags[4] = this.find('name', 'user_tags')[0].getValue();
 			f.getForm().submit({
 				clientValidation: true
 				,params: {
 					id: this.data.id
 					,case_id: this.data.case_id
 					,pid: this.data.pid
-					,tags: Ext.encode( tags )
 					,uploadType: this.data.uploadType
 				}
 				,scope: this

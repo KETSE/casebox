@@ -1,23 +1,25 @@
 <?php  
-          
+
+    namespace CB;
+              
     $dir = getDir();
 
     include dirname(__FILE__).'/config.php';
-    $timezone = CB_get_param('timezone');
+    $timezone = \CB\config\timezone;
     date_default_timezone_set( empty($timezone) ? 'Europe/Chisinau' : $timezone );
 
     require_once('lib/DB.php');
     
     $counter = 0;
     
-    connect2DB();     
+    DB\connect();     
     error_reporting(0);
         
     if($dir == 'import'){               
 
         $tesaurus = getTesaurus();
         
-        $existing_ids = [];
+        $existing_ids = array();
         foreach($tesaurus as $t) $existing_ids[] = $t['id'] * 1;
         
         $file = null;
@@ -33,7 +35,7 @@
         
         $array = rebuildImportFile($file);
        
-        $ids = [];
+        $ids = array();
         foreach($array as $row){   
             // id: 2   pid: 1
             if(check($row['id'],'int') && check($row['pid'],'int')){
@@ -115,25 +117,25 @@
         
         if($array['type']=='F') $array['type'] = 0; else $array['type'] = 1;        
                 
-        $langs = [];
+        $langs = array();
         foreach($array as $k=>$v)            
             if(preg_match('#^l[0-9]{1}$#', $k))
                 $langs[] = $k.'="'.$v.'"';        
               
-        $res = mysqli_query_params('update `tags` set '.implode(',',$langs).', `pid`="'.$array['pid'].'", `order` = '.$count.'
-            where id='.$array['id']) or die(mysqli_query_error());
+        $res = DB\mysqli_query_params('update `tags` set '.implode(',',$langs).', `pid`="'.$array['pid'].'", `order` = '.$count.'
+            where id='.$array['id']) or die( DB\mysqli_query_error() );
     
     }
     function delete($array){            
-        $res = mysqli_query_params('DELETE from tags WHERE id='.$array['id']) or die(mysqli_query_error());
+        $res = DB\mysqli_query_params('DELETE from tags WHERE id='.$array['id']) or die( DB\mysqli_query_error() );
     }
     function insert($array){ 
         global $count; $count++;
            
         if($array['type']=='F') $array['type'] = 0; else $array['type'] = 1;     
         
-        $langs = [];
-        $keys = [];
+        $langs = array();
+        $keys = array();
         foreach($array as $k=>$v)            
             if(preg_match('#^l[0-9]{1}$#', $k)){
                 $langs[$k] = '"'.$v.'"'; 
@@ -141,17 +143,17 @@
             }
                     
         $query = 'INSERT INTO tags (`order`, pid, type,'.implode(',',$keys).') VALUES ('.$count.','.$array['pid'].', '.$array['type'].', '.implode(',',$langs).')';        
-        $res = mysqli_query_params($query) or die(mysqli_query_error());
+        $res = DB\mysqli_query_params($query) or die( mysqli_query_error() );
         
-        return mysqli_insert_id($_SESSION['dbh']);    
+        return mysqli_insert_id($GLOBALS['dbh']);    
     }
     function insert_with_id($array){  
         global $count; $count++;
         
         if($array['type']=='F') $array['type'] = 0; else $array['type'] = 1;     
         
-        $langs = [];
-        $keys = [];
+        $langs = array();
+        $keys = array();
         foreach($array as $k=>$v)            
             if(preg_match('#^l[0-9]{1}$#', $k)){
                 $langs[$k] = '"'.$v.'"'; 
@@ -159,19 +161,19 @@
             }
                     
         $query = 'INSERT INTO tags (`order`, id, pid, type,'.implode(',',$keys).') VALUES ('.$count.','.$array['id'].','.$array['pid'].', '.$array['type'].', '.implode(',',$langs).')';        
-        $res = mysqli_query_params($query) or die(mysqli_query_error());
+        $res = DB\mysqli_query_params($query) or die( DB\mysqli_query_error() );
         
-        return mysqli_insert_id($_SESSION['dbh']);    
+        return mysqli_insert_id($GLOBALS['dbh']);    
     }
     
     function rebuildImportFile($file){
         $headers = getImportFileHeaders($file[0]);
         unset($file[0]);
        
-        $array = [];
+        $array = array();
         foreach($file as $k=>$line){
             $temp = mb_split(';', $line);
-            $tempArray = [];            
+            $tempArray = array();            
             foreach($temp as $j=>$t){         
                 $t = mb_ereg_replace('[\n"]{1,}','', $t);
                 
@@ -187,7 +189,7 @@
     function getImportFileHeaders($file){
         $headers = mb_split(';' ,$file);
         
-        $headKeys = [];
+        $headKeys = array();
         foreach($headers as $k=>$h)
             $headKeys[$k] = mb_ereg_replace('[\n]{1,}','', $h);
                 
@@ -206,12 +208,12 @@
     }
 
     function getTesaurus(){
-        $res = mysqli_query_params('select id,pid, 
+        $res = DB\mysqli_query_params('select id,pid, 
             CASE 
                   WHEN type = 0
                      THEN "F"
                   ELSE "" 
-             END AS TYPE, l1, l2, l3, l4 from tags') or die(mysqli_query_error());
+             END AS TYPE, l1, l2, l3, l4 from tags') or die( DB\mysqli_query_error() );
         $nodes = array(0 => array('id' => 0, 'pid' => 0));    
         while($r = $res->fetch_assoc()){
             $nodes[$r['id']] = $r;

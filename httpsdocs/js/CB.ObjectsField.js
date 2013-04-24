@@ -19,12 +19,10 @@ CB.ObjectsFieldCommonFunctions = {
 				//try to access object window to locate objects store
 				this.objectsStore = this.getObjectsStore();
 
-				if(!Ext.isEmpty(this.data.pidValue)) params.pidValue = this.data.pidValue;
 				this.store = new Ext.data.DirectStore({
 					autoLoad: false //true
 					,autoDestroy: true
 					,restful: false
-					,baseParams: params
 					,remoteSort: true
 					,proxy: new Ext.data.DirectProxy({
 						paramsAsHash: true
@@ -61,6 +59,7 @@ CB.ObjectsFieldCommonFunctions = {
 						scope: this
 						,beforeload: function(st, o ){
 							if(!Ext.isEmpty(this.data.pidValue)) o.params.pidValue = this.data.pidValue;
+							if(!Ext.isEmpty(this.data.path)) o.params.path = this.data.path;
 						}
 						,load: 	function(store, recs, options) {
 							Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data))}, this);
@@ -151,6 +150,10 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 				,blur: function(field){
 					this.setValue(this.getValue());
 				}
+				,beforedestroy: function(){
+					this.store.un('beforeload', this.onBeforeLoadStore, this);
+					this.store.un('load', this.onStoreLoad, this);
+				}
 			}
 		})
 		
@@ -159,7 +162,7 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 			if(!Ext.isEmpty(v)) v = parseInt(v);
 			this._setValue(v);
 			text = this.store.getTexts(v);
-			delete this.customIcon;
+			//delete this.customIcon;
 			if(Ext.isEmpty(text) && this.objectsStore){
 				idx = this.objectsStore.findExact('id', v);
 				if(idx > 0){
@@ -198,9 +201,6 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
 	,isFormField: true
 	,delimiter: '<br />'
 	,initComponent: function(){
-		//CB.ObjectsTriggerField.superclass.initComponent.call(this);
-		//listeners = Ext.value(this.listeners, {});
-		//Ext.apply(listeners, {scope: this, change: this.onTagsChange});
 		if(Ext.isEmpty(this.config)) this.config = {}
 		if(this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
 		
@@ -317,7 +317,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 	,layout: 'border'
 	,title: L.Associate
 	,initComponent: function(){
-		//CB.ObjectsSelectionForm.superclass.initComponent.call(this);
 		if(Ext.isEmpty(this.config)) this.config = {}
 		this.config = Ext.applyIf(this.config, { multiValued: false } );
 		if(this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
@@ -342,7 +341,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 					t = [];
 					Ext.each(a, function(i){t.push(CB.DB.thesauri.getName(i))}, this);
 					if(!Ext.isEmpty(t)) v += ' <span class="cG">' + t.join(', ') + '</span>'; 
-					//v += '<img class="open-object icon-information-white fr click" src="css/i/s.gif"/>'
 					return v;
 				}
 			}
@@ -419,17 +417,12 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 			,border: false
 			,store: this.store
 			,autoScroll: true
-			// ,header: false
-			// ,hideHeaders:true
 			,colModel: new Ext.grid.ColumnModel({
 				defaults: { sortable: true }
 				,columns: columns
 			})
 			,viewConfig: { 
-				// autoFill: true
-				// ,forceFit: true
 				markDirty: false
-				// ,headersDisabled: true 
 			}
 			,sm: new Ext.grid.RowSelectionModel({ singleSelect: !this.config.multiValued })
 			,listeners: {  
@@ -535,9 +528,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 		if(!Ext.isEmpty(this.data.objectId)) result.objectId = this.data.objectId;
 		if(!Ext.isEmpty(this.data.path)) result.path = this.data.path;
 
-		//if(!Ext.isEmpty(this.data.pidValue)) result.pidValue = this.data.pidValue;
-		//if(!Ext.isEmpty(this.config.pidValue)) result.pidValue = this.config.pidValue;
-		//if(!Ext.isEmpty(this.config.object_pid)) result.object_pid = this.config.object_pid;
 		return result;
 	}
 	,onLoad: function(store, records, options){
@@ -599,7 +589,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 		el = Ext.get(e.getTarget());
 		if(!el.dom.classList.contains('icon-close-light')) return;
 		this.resultPanel.store.removeAt(idx);
-		//this.buttons[2].setDisabled(false);
 		this.grid.getView().refresh();
 		this.items.last().syncSize();
 	}
@@ -618,7 +607,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
 			this.resultPanel.store.add(u);
 		}, this);
 		
-		//this.buttons[2].setDisabled(true);
 		if(this.rendered) this.items.last().syncSize();
 	}
 	,getData: function(){
@@ -663,7 +651,6 @@ CB.ObjectsSelectionPopupList = Ext.extend(Ext.Window, {
 	,minHeight: 250
 	,height: 350
 	,initComponent: function(){
-		//CB.ObjectsSelectionPopupList.superclass.initComponent.call(this);
 		if(Ext.isEmpty(this.config)) this.config = {}
 		if(this.data && this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
 		Ext.apply(this, CB.ObjectsFieldCommonFunctions);

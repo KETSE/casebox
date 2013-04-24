@@ -7,6 +7,8 @@
 	
 	example: php -f solr_recreate_core.php dev
 */
+error_reporting(E_ALL);
+
 if(PHP_OS == 'WINNT'){
   shell_exec('net stop jetty');
 }else shell_exec('service jetty stop > /dev/null 2>&1');
@@ -17,7 +19,7 @@ $sleep = 30;
 if(!empty($argv[1]) && ( $argv[1] !== 'all')){
 	$dir.= $argv[1];
 	if(!file_exists($dir)) die('core not found');
-	$sleep = 10;
+	$sleep = 5;
 }
 
 remove_indexes($dir);
@@ -28,7 +30,10 @@ if(PHP_OS == 'WINNT'){
 
 echo "\nwaiting $sleep seconds for solr to recreate indexes .... \n";
 sleep($sleep);
-include 'solr_reindex_core.php';
+
+$path = realpath(dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
+$cmd = 'php -f "'.$path.DIRECTORY_SEPARATOR.'run_cron.php" solr_update_tree '.@$argv[1].' all';
+echo shell_exec($cmd);
 
 function remove_indexes($dir) {
 	$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir), RecursiveIteratorIterator::CHILD_FIRST);

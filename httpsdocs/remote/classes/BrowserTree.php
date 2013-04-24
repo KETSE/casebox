@@ -1,5 +1,7 @@
 <?php
-require_once 'Browser.php';
+
+namespace CB;
+
 class BrowserTree extends Browser{
 	
 	public function getChildren($p){
@@ -17,7 +19,7 @@ class BrowserTree extends Browser{
 
 	private function getRootChildren(){
 		$data = array();
-		$res = mysqli_query_params('select id `nid`, `system`, `type`, `subtype`, `name` from tree where ((user_id = $1) or (user_id is null)) and (system = 1) and (pid is null) order by user_id desc, is_main', $_SESSION['user']['id']) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select id `nid`, `system`, `type`, `subtype`, `name` from tree where ((user_id = $1) or (user_id is null)) and (system = 1) and (pid is null) order by user_id desc, is_main', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$r['expanded'] = true;
 			if(!empty($data)) $r['cls'] = 'cb-group-padding';
@@ -50,13 +52,13 @@ class BrowserTree extends Browser{
 		$tags = null;
 		switch($type){
 			case 3: require_once('Cases.php');
-				$tags = Cases::getCaseTagIds($id);
+				// $tags = Cases::getCaseTagIds($id);
 				break;
 			case 4: require_once('Objects.php');
-				$tags = Objects::getObjectTagIds($id);
+				// $tags = Objects::getObjectTagIds($id);
 				break;
 			case 5: require_once('Cases.php');
-				$tags = Cases::getFileTagIds($id);
+				// $tags = Cases::getFileTagIds($id);
 				break;
 		}
 		if(empty($tags) || empty($tags[3])) return null;

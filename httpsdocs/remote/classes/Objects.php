@@ -1,14 +1,16 @@
 <?php
-require_once 'Cases.php';
+
+namespace CB;
+
 class Objects{
 	function load($p){
 		/* procedure for loading all necessary properties of a given case object */
 		$rez = array();
 		$d = $p->data; //shortcut
 		
-		if(!is_numeric($d->id)) throw new Exception(L\Wrong_input_data);
+		if(!is_numeric($d->id)) throw new \Exception(L\Wrong_input_data);
 		// SECURITY: check if object id is numeric 
-		if(!Security::canRead($d->id)) throw new Exception(L\Access_denied);
+		if(!Security::canRead($d->id)) throw new \Exception(L\Access_denied);
 		// end of SECURITY: check if object id is numeric 
 		
 		$template = $this->getTemplateInfo(null, $d->id);
@@ -27,13 +29,13 @@ class Objects{
 		}
 
 		/* get object title */
-		$res = mysqli_query_params('SELECT t.pid, o.title, o.custom_title, t.name, o.date_start, o.date_end, o.author, o.private_for_user `pfu`, (o.date_end < now()) is_active, files_count  '.
+		$res = DB\mysqli_query_params('SELECT t.pid, o.title, o.custom_title, t.name, o.date_start, o.date_end, o.author, o.private_for_user `pfu`, (o.date_end < now()) is_active, files_count  '.
 			',f_get_tree_ids_path(t.pid) `path` '.
 			',f_get_tree_path(t.id) `pathtext` '.
 			',t.cdate, t.udate, t.cid, t.uid '.
 			'FROM objects o '.
 			' join tree t on o.id = t.id '.
-			'WHERE o.id = $1', Array($d->id, $_SESSION['user']['id'])) or die(mysqli_query_error());
+			'WHERE o.id = $1', Array($d->id, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc())
 			// $rez['spentTime'] = array('hours' => $r['hours'], 'minutes' => $r['minutes']);
 			// unset($r['hours']);
@@ -42,23 +44,23 @@ class Objects{
 		$res->close();
 		/* end of get object title */
 		
-		$rez['tags'] = $this->getObjectTagIds($rez['id']);
+		// $rez['tags'] = $this->getObjectTagIds($rez['id']);
 
 		$rez['gridData'] = Templates::getObjectsData($d->id);
 
 		/* get Tasks */
 		$sql = 'SELECT distinct t.id, t.title, t.description, t.`date_end`, t.cdate, t.responsible_user_ids, t.responsible_party_id, t.cid, t.completed  '.
-			',(select l'.UL_ID().' from tags where id = t.responsible_party_id) responsible_party '.
+			',(select l'.USER_LANGUAGE_INDEX.' from tags where id = t.responsible_party_id) responsible_party '.
 			'FROM tasks t left join tasks_responsible_users ru on t.id = ru.task_id and ru.user_id = $2 where t.object_id = $1 and ((ru.user_id = $2) || (t.cid = $2) || (t.privacy = 0 ))  order by t.cdate';
-		$res = mysqli_query_params($sql, Array($d->id, $_SESSION['user']['id'])) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, Array($d->id, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
-			$res2 = mysqli_query_params('select l'.UL_ID().' FROM users_groups WHERE id =$1', $r['cid']) or die(mysqli_query_error());
+			$res2 = DB\mysqli_query_params('select l'.USER_LANGUAGE_INDEX.' FROM users_groups WHERE id =$1', $r['cid']) or die(DB\mysqli_query_error());
 			if($r2 = $res2->fetch_row()) $r['owner'] = $r2[0];
 			$res2->close();
 
 			if($r['cid'] != $r['responsible_user_ids']){
 				$r['users'] = array();
-				$res2 = mysqli_query_params('select id, l'.UL_ID().' FROM users_groups WHERE id in (0'.$r['responsible_user_ids'].') order by 2') or die(mysqli_query_error());
+				$res2 = DB\mysqli_query_params('select id, l'.USER_LANGUAGE_INDEX.' FROM users_groups WHERE id in (0'.$r['responsible_user_ids'].') order by 2') or die(DB\mysqli_query_error());
 				while($r2 = $res2->fetch_row()) $r['users'][$r2[0]] = $r2[1];
 				$res2->close();
 			}
@@ -88,7 +90,7 @@ class Objects{
 		$d = json_decode($p['data']);
 		$initial_object_id = $d->id;
 		$d->case_id = null;
-		$pid = coalesce($d->pid, $d->case_id);
+		$pid = Util\coalesce($d->pid, $d->case_id);
 
 		$template = $this->getTemplateInfo($d->template_id, $d->id);
 		
@@ -97,33 +99,33 @@ class Objects{
 		$d->type = 4; //case object
 		if(!is_numeric($d->id)){
 			// SECURITY: check if current user has access
-			if(!Security::canCreateActions($pid)) throw new Exception(L\Access_denied);
+			if(!Security::canCreateActions($pid)) throw new \Exception(L\Access_denied);
 			fireEvent('beforeNodeDbCreate', $d);
 			
-			mysqli_query_params('insert into tree (pid, name, `type`, subtype, cid) values ($1, $2, $3, $4, $5)', array($pid, 'new case object', 4, $template['type'], $_SESSION['user']['id'])) or die(mysqli_query_error());
-			$d->id = last_insert_id();
+			DB\mysqli_query_params('insert into tree (pid, name, `type`, subtype, cid) values ($1, $2, $3, $4, $5)', array($pid, 'new case object', 4, $template['type'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+			$d->id = DB\last_insert_id();
 			$sql = 'INSERT INTO objects (id, case_id, `title`, template_id, cid) VALUES($1, $2, $3, $4, $5)';
 			$params = Array($d->id, $d->case_id, '', $template['id'], $_SESSION['user']['id']);
-			mysqli_query_params($sql, $params) or die(mysqli_query_error());
+			DB\mysqli_query_params($sql, $params) or die(DB\mysqli_query_error());
 			
 			$log_action_type = 8; //else throw new Eception(L\Error_creating_object); // create action
 		}else{
 			// SECURITY: check if current user has write access to this action
-			if(!Security::canWrite($d->id)) throw new Exception(L\Access_denied);
+			if(!Security::canWrite($d->id)) throw new \Exception(L\Access_denied);
 			fireEvent('beforeNodeDbUpdate', $d);
 			$isNewObject = false;
 		}
 		/* end of analizing object id */
 
 		/* save objects tags */
-		if(!empty($d->tags)){
-			for($i = 3; $i< 5; $i++)
-			if(isset($d->tags->{$i})){
-				$tags = array_filter($d->tags->{$i}, 'is_numeric');
-				mysqli_query_params('delete from objects_tags where object_id = $1 and level = $2 and tag_id not in(0'.implode(',', $tags).')', array($d->id, $i)) or die(mysqli_query_error());
-				if(!empty($tags)) mysqli_query_params('insert into objects_tags (object_id, level, tag_id) values($1, $2,'.implode('),($1,$2,', $tags).') on duplicate key update tag_id = tag_id', array($d->id, $i)) or die(mysqli_query_error());
-			}
-		}
+		// if(!empty($d->tags)){
+		// 	for($i = 3; $i< 5; $i++)
+		// 	if(isset($d->tags->{$i})){
+		// 		$tags = array_filter($d->tags->{$i}, 'is_numeric');
+		// 		DB\mysqli_query_params('delete from objects_tags where object_id = $1 and level = $2 and tag_id not in(0'.implode(',', $tags).')', array($d->id, $i)) or die(DB\mysqli_query_error());
+		// 		if(!empty($tags)) DB\mysqli_query_params('insert into objects_tags (object_id, level, tag_id) values($1, $2,'.implode('),($1,$2,', $tags).') on duplicate key update tag_id = tag_id', array($d->id, $i)) or die(DB\mysqli_query_error());
+		// 	}
+		// }
 		/* end of save objects tags */
 		
 		/* save object duplicates from grid */
@@ -134,8 +136,8 @@ class Objects{
 				$i = 0;
 				foreach($fv as $duplicate_id => $duplicate_pid){
 					if(!is_numeric($duplicate_id)){
-						mysqli_query_params($sql, Array($duplicate_ids[$duplicate_pid], $d->id, $field_id)) or die(mysqli_query_error());
-						$duplicate_ids[$duplicate_id] = last_insert_id();
+						DB\mysqli_query_params($sql, Array($duplicate_ids[$duplicate_pid], $d->id, $field_id)) or die(DB\mysqli_query_error());
+						$duplicate_ids[$duplicate_id] = DB\last_insert_id();
 					}else $duplicate_ids[$duplicate_id] = $duplicate_id;
 					$fields[$field_id]['duplicates'][$i]['id'] = $duplicate_id;
 					$i++;
@@ -143,7 +145,7 @@ class Objects{
 			}
 		}
 		$filter_secure_fields = Security::isAdmin() ? '' : ' and id not in (select duplicate_id from objects_data where object_id = $1 and duplicate_id <> 0 and private_for_user <> '.$_SESSION['user']['id'].') ';
-		mysqli_query_params('delete from objects_duplicates where object_id = $1 and (id not in ('.implode(',', array_values($duplicate_ids)).') )'.$filter_secure_fields, $d->id) or die(mysqli_query_error());
+		DB\mysqli_query_params('delete from objects_duplicates where object_id = $1 and (id not in ('.implode(',', array_values($duplicate_ids)).') )'.$filter_secure_fields, $d->id) or die(DB\mysqli_query_error());
 		/* end of save object duplicates from grid */
 
 		$object_title = str_replace(array('{template_title}', '{phase_title}'), array($template['title'], ''/*$phase['name']/**/), $template['title_template']);
@@ -159,7 +161,7 @@ class Objects{
 			$f = explode('_', $f);
 			$field_id = substr($f[0], 1);
 			$field = Array();
-			$res = mysqli_query_params('select name, type, cfg from templates_structure where id = $1', $field_id) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params('select name, type, cfg from templates_structure where id = $1', $field_id) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$field = $r;
 				if(!empty($field['cfg'])) $field['cfg'] = json_decode($field['cfg']);
@@ -205,18 +207,18 @@ class Objects{
 			/* end of for titles processing */
 			if(empty($fv->pfu)) $fv->pfu = null;
 			@$params = Array($d->id, $field_id, $duplicate_id, $fv->value, $fv->info, $fv->files, $fv->pfu);
-			mysqli_query_params($sql, $params) or die(mysqli_query_error());
-			$res = mysqli_query_params('select id from objects_data where object_id = $1 and field_id = $2 and duplicate_id = $3', Array($d->id, $field_id, $duplicate_id) ) or die(mysqli_query_error());
+			DB\mysqli_query_params($sql, $params) or die(DB\mysqli_query_error());
+			$res = DB\mysqli_query_params('select id from objects_data where object_id = $1 and field_id = $2 and duplicate_id = $3', Array($d->id, $field_id, $duplicate_id) ) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_row())
 			array_push($ids, $r[0]);
 			$res->close();
 		}
 		$filter_secure_fields = Security::isAdmin() ? '' : ' and ((private_for_user is null) or (private_for_user = '.$_SESSION['user']['id'].')) ';
-		mysqli_query_params('delete from objects_data where object_id = $1 and (id not in ('.implode(',', $ids).') )'.$filter_secure_fields, $d->id) or die(mysqli_query_error());
+		DB\mysqli_query_params('delete from objects_data where object_id = $1 and (id not in ('.implode(',', $ids).') )'.$filter_secure_fields, $d->id) or die(DB\mysqli_query_error());
 		
 		//replacing field titles into object title variable
-		$sql = 'select id, name, l'.UL_ID().' from templates_structure where template_id = $1 and (($2 like concat(\'%{f\', id, \'t}%\') ) or ($2 like concat(\'%{\', name, \'_title}%\')))';
-		$res = mysqli_query_params($sql, Array($template['id'], $object_title)) or die(mysqli_query_error());
+		$sql = 'select id, name, l'.USER_LANGUAGE_INDEX.' from templates_structure where template_id = $1 and (($2 like concat(\'%{f\', id, \'t}%\') ) or ($2 like concat(\'%{\', name, \'_title}%\')))';
+		$res = DB\mysqli_query_params($sql, Array($template['id'], $object_title)) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()) $object_title = str_replace('{f'.$r[0].'t}', $r[2], $object_title);
 		$res->close();
 		// evaluating the title if contains php code
@@ -229,19 +231,19 @@ class Objects{
 		$object_title = stripslashes($object_title);
 
 		// updating object properties into the db																/*(empty($object_iconCls) ? '' : ', iconCls = $7')/**/
-		@mysqli_query_params('update objects set title = $1, custom_title = $2, date_start = $3, date_end = $4, author = $5'.
+		@DB\mysqli_query_params('update objects set title = $1, custom_title = $2, date_start = $3, date_end = $4, author = $5'.
 			', iconCls = $7, private_for_user = $8'.
 			($isNewObject ? '' : ', uid = $9, udate = CURRENT_TIMESTAMP').' where id = $6', 
-			Array(ucfirst($object_title), $object_custom_title, $object_date_start, $object_date_end, $object_author, $d->id, $this->getObjectIcon($d->id), $d->pfu, $_SESSION['user']['id'])) or die(mysqli_query_error());
+			Array(ucfirst($object_title), $object_custom_title, $object_date_start, $object_date_end, $object_author, $d->id, $this->getObjectIcon($d->id), $d->pfu, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		/* end of updating object properties into the db */
 		Cases::updateCaseUpdateInfo($d->id);
-		$s = '{"data":{"case_id": '.coalesce($d->case_id, 'null').', "id":'.$d->id.', "template_id": '.$template['id'].'}}';
+		$s = '{"data":{"case_id": '.Util\coalesce($d->case_id, 'null').', "id":'.$d->id.', "template_id": '.$template['id'].'}}';
 		$p = json_decode($s);
 		
 		Log::add(Array('action_type' => $log_action_type, 'case_id' => $d->case_id, 'object_id' => $d->id));
 
 		$update_ids_icons = array_keys($update_ids_icons);
-		foreach($update_ids_icons as $id) mysqli_query_params('update objects set iconCls = $1 where id = $2', array($this->getObjectIcon($id), $id)) or die(mysqli_query_error());
+		foreach($update_ids_icons as $id) DB\mysqli_query_params('update objects set iconCls = $1 where id = $2', array($this->getObjectIcon($id), $id)) or die(DB\mysqli_query_error());
 		
 		if($isNewObject) fireEvent('nodeDbCreate', $d);
 		else fireEvent('nodeDbUpdate', $d);
@@ -256,14 +258,14 @@ class Objects{
 		if(!is_numeric($id)) return;
 
 		// SECURITY: check if current user has at least read access to this case
-		if(!Security::canRead($id)) throw new Exception(L\Access_denied);
+		if(!Security::canRead($id)) throw new \Exception(L\Access_denied);
 
 		$top = '';
 		$body = '';
 		$bottom = '';
 		try {
 			$data = $this->load(json_decode('{"data":{"id":'.$id.'} }'));
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			return '';
 		}
 		$data = $data['data'];
@@ -314,15 +316,15 @@ class Objects{
 					$info .= ' &rarr; '.implode(', ',array_values($t['users']));
 				}
 				$small_fields = array();
-				if( $t['responsible_party_id'] != $_SESSION['config']['responsible_party'][1] ){
+				if( !defined('CB\\config\\responsible_party_default') || (config\responsible_party_default != $t['responsible_party_id']) ){
 					/* append responsible part */
 					$small_fields[] = L\Party.': '.$t['responsible_party'];
 				}
-				if(!empty($t['completed'])) $small_fields[] = L\Accomplished_date.': '.formatMysqlDate($t['completed']);
+				if(!empty($t['completed'])) $small_fields[] = L\Accomplished_date.': '.Util\formatMysqlDate($t['completed']);
 				$info .= ((empty($info) || empty($small_fields)) ? '' : '<br />').implode(', ', $small_fields);
 				
 				if(!empty($info)) $info = '<br /><span class="fs11 cG">'.$info.'</span>';
-				$d[] = '<tr><td><a class="task click" nid="'.$t['id'].'">'.$t['title'].'</a>'.$info.'</td><td>'.formatMysqlDate($t['cdate']).'</td><td>'.formatMysqlDate($t['date_end']);
+				$d[] = '<tr><td><a class="task click" nid="'.$t['id'].'">'.$t['title'].'</a>'.$info.'</td><td>'.Util\formatMysqlDate($t['cdate']).'</td><td>'.Util\formatMysqlDate($t['date_end']);
 			}
 			if(!empty($d)) $bottom .= '<table border="0" cellpadding="2" width="100%" style="padding: 5px 0px; border-bottom: 1px solid lightgray">'.
 				'<tr class="bgcLG cG"><th width="20%" class="icon-padding icon-calendar-task">'.L\Tasks.'</th><th width="25%">'.L\Created.'</th><th width="30%">'.L\Deadline.'</th></tr><tr>'.implode('</tr><tr>', $d).'</tr></table>';
@@ -343,7 +345,7 @@ class Objects{
 		// Security::checkCaseReadAction($case_id);
 		$data = Array();
 		/* this select is for selecting all available violations */
-		$sql = 'SELECT vo.id, COALESCE(pvo.custom_title, pvo.title) `decision_title`, th.l'.UL_ID().' `violation_title`, vo.`date_start` `date`
+		$sql = 'SELECT vo.id, coalesce(pvo.custom_title, pvo.title) `decision_title`, th.l'.USER_LANGUAGE_INDEX.' `violation_title`, vo.`date_start` `date`
 			,(select iconCls from templates where id = pvo.template_id) `decision_icon`
 			FROM objects vo 
 			LEFT JOIN templates t ON vo.template_id = t.id
@@ -351,26 +353,26 @@ class Objects{
 			,tags th
 			WHERE pvo.id = $1 and ( th.id = vo.type_id) 
 			order by vo.date_start';
-		$res = mysqli_query_params($sql, $object_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $object_id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()) $data[] = $r;
 		$res->close();
 		return Array( 'success' => true, 'data' => $data);
 	}
-	private function getObjectTags($object_id){
-		$rez = array();
-		$res = mysqli_query_params('select ot.level, t.id, t.l'.UL_ID().' from objects_tags ot join tags t on ot.tag_id = t.id '.
-			'where ot.object_id = $1 order by ot.level, t.order, 3', array($object_id, $_SESSION['user']['language_id'])) or die(mysqli_query_error());
-		while($r = $res->fetch_row()) $rez[$r[0]][] = array('id' => $r[1], 'name' => $r[2]);
-		$res->close();
-		return $rez;
-	}
-	static function getObjectTagIds($object_id){
-		$rez = array();
-		$res = mysqli_query_params('select level, tag_id from objects_tags where object_id = $1', $object_id) or die(mysqli_query_error());
-		while($r = $res->fetch_row()) $rez[$r[0]][] = $r[1];
-		$res->close();
-		return $rez;
-	}
+	// private function getObjectTags($object_id){
+	// 	$rez = array();
+	// 	$res = DB\mysqli_query_params('select ot.level, t.id, t.l'.USER_LANGUAGE_INDEX.' from objects_tags ot join tags t on ot.tag_id = t.id '.
+	// 		'where ot.object_id = $1 order by ot.level, t.order, 3', array($object_id, $_SESSION['user']['language_id'])) or die(DB\mysqli_query_error());
+	// 	while($r = $res->fetch_row()) $rez[$r[0]][] = array('id' => $r[1], 'name' => $r[2]);
+	// 	$res->close();
+	// 	return $rez;
+	// }
+	// static function getObjectTagIds($object_id){
+	// 	$rez = array();
+	// 	$res = DB\mysqli_query_params('select level, tag_id from objects_tags where object_id = $1', $object_id) or die(DB\mysqli_query_error());
+	// 	while($r = $res->fetch_row()) $rez[$r[0]][] = $r[1];
+	// 	$res->close();
+	// 	return $rez;
+	// }
 
 	public static function getAssociatedObjects($p){
 		$data = array();
@@ -378,7 +380,7 @@ class Objects{
 		if(empty($p->id)) return array('success' => true, 'data' => $data);
 		
 		// SECURITY: check if current user has at least read access to this case
-		if(!Security::canRead($p->id)) throw new Exception(L\Access_denied);
+		if(!Security::canRead($p->id)) throw new \Exception(L\Access_denied);
 
 		/* select distinct associated case ids from the case */
 		$sql = 'SELECT DISTINCT d.value
@@ -387,7 +389,7 @@ class Objects{
 		JOIN objects_data d on. d.field_id = s.id
 		WHERE co.id = $1';
 		$ids = array();
-		$res = mysqli_query_params($sql, $p->id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $p->id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()){
 			$a = explode(',',$r[0]);
 			foreach($a as $id) if(!empty($id) && is_numeric($id)) $ids[$id] = 1;
@@ -400,7 +402,7 @@ class Objects{
 		'left join objects o on t.id = o.id '.
 		'left join tasks t2 on t.id = t2.id '.
 		'WHERE t.id IN ('.implode(',', $ids).') order by 2';
-		$res = mysqli_query_params($sql) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			if(!empty($r['date'])){
 				$r['date'][10] = 'T';
@@ -423,14 +425,14 @@ class Objects{
 			$sql .= ' and id = $3';
 			array_push($params, $object_id);
 		}
-		$res = mysqli_query_params($sql, $params) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $params) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $rez = $r[0];
 		$res->close();
 		return $rez;
 	}
 	private function getTemplateInfo($template_id = false, $object_id = false){
 		if(is_numeric($template_id)){
-			$res = mysqli_query_params('SELECT id, pid, type, l'.UL_ID().' `title`, iconCls, default_field, title_template  FROM templates WHERE id = $1', $template_id) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params('SELECT id, pid, type, l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template  FROM templates WHERE id = $1', $template_id) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$res->close();
 				return $r;
@@ -438,20 +440,20 @@ class Objects{
 			$res->close();		
 		}
 		if(is_numeric($object_id)){
-			$res = mysqli_query_params('SELECT id, pid, type, t.l'.UL_ID().' `title`, iconCls, default_field, title_template from templates t  where id = (select template_id from objects where id = $1)', $object_id) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params('SELECT id, pid, type, t.l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template from templates t  where id = (select template_id from objects where id = $1)', $object_id) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$res->close();
 				return $r;
 			}
 			$res->close();		
 		}
-		throw new Exception(L\Template_not_found);
+		throw new \Exception(L\Template_not_found);
 	}
 	private function getObjectIcon($object_id){
 		$rez = null;
 
 		/* -- default icon by template /**/
-		$res = mysqli_query_params('SELECT t.iconCls  FROM objects o  JOIN templates t ON o.template_id = t.id  WHERE o.id = $1', $object_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('SELECT t.iconCls  FROM objects o  JOIN templates t ON o.template_id = t.id  WHERE o.id = $1', $object_id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $rez = $r[0];
 		$res->close();		
 		return $rez;
@@ -460,7 +462,7 @@ class Objects{
 	static function getFieldValue($object_id, $field_id, $duplicate_id = 0){
 		$rez = null;
 		$sql = 'select value from objects_data where object_id = $1 and field_id = $2 and duplicate_id = $3';
-		$res = mysqli_query_params($sql, array($object_id, $field_id, $duplicate_id)) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, array($object_id, $field_id, $duplicate_id)) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $rez = $r[0];
 		$res->close();
 		return $rez;
@@ -469,22 +471,22 @@ class Objects{
 	static function setFieldValue($object_id, $field_id, $value, $duplicate_id = 0){
 		$rez = null;
 		$sql = 'insert into objects_data (object_id, field_id, duplicate_id, `value`) values($1, $2, $3, $4) on duplicate key update `value` = $4';
-		mysqli_query_params($sql, array($object_id, $field_id, $duplicate_id, $value)) or die(mysqli_query_error());
+		DB\mysqli_query_params($sql, array($object_id, $field_id, $duplicate_id, $value)) or die(DB\mysqli_query_error());
 	}
 	
 	static function getSorlData($id){
 		$rez = array();
-		$lang_field = 'l'.$_SESSION['languages']['per_abrev'][$GLOBALS['CB_LANGUAGE']]['id'];
+		$lang_field = 'l'.LANGUAGE_INDEX;
 		$sql = 'SELECT 
 			co.id
 			,co.template_id
 			,co.cid
-			,COALESCE(co.custom_title, co.title) `title`
+			,coalesce(co.custom_title, co.title) `title`
 			,t.iconCls
 			,co.private_for_user
 			FROM objects co left join templates t on co.template_id = t.id where co.id = $1';
 		
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error()."\n".$sql);
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error()."\n".$sql);
 		while($r = $res->fetch_assoc()){
 			$rez['template_id'] = $r['template_id'];
 			$rez['content'] = '';//$r['title']."\n";
@@ -495,7 +497,7 @@ class Objects{
 				'JOIN objects_data d ON d.object_id = o.id '.
 				'JOIN templates_structure ts ON ts.template_id = o.template_id AND ts.id = d.field_id '.
 				'WHERE o.id = $1 and (d.private_for_user is null)';//and ts.solr_column_name IS NOT NULL
-			$dres = mysqli_query_params($sql, $id) or die(mysqli_query_error()."\n".$sql);
+			$dres = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error()."\n".$sql);
 			while($dr = $dres->fetch_assoc()){
 				$processed_values = array();
 				if(!empty($dr['value']))
@@ -507,7 +509,7 @@ class Objects{
 						break;
 					case 'date': 
 						$dr['value'] .= 'Z';
-						if($dr['value'][10] == ' ') $dr['value'][10] = 'T';
+						if(@$dr['value'][10] == ' ') $dr['value'][10] = 'T';
 						break;
 					//case 'object_author': 
 					case 'combo': 
@@ -515,7 +517,7 @@ class Objects{
 						$dr['value'] = implode(',', array_filter(explode(',', $dr['value']), 'is_numeric'));
 						if(empty($dr['value'])) break;
 						$sql = 'select '.$lang_field.' from tags where id in (0'.$dr['value'].')';
-						$sres = mysqli_query_params($sql, array($r['id'])) or die(mysqli_query_error()."\n".$sql);
+						$sres = DB\mysqli_query_params($sql, array($r['id'])) or die(DB\mysqli_query_error()."\n".$sql);
 						$dr['value'] = explode(',', $dr['value']);
 						while($sr = $sres->fetch_row()) $processed_values[] = $sr[0];
 						$sres->close();
@@ -548,17 +550,17 @@ class Objects{
 			$dres->close();
 			
 			/* selecting action tags */
-			$sql = 'SELECT tag_id, level FROM objects_tags WHERE object_id = $1';
-			$dres = mysqli_query_params($sql, $id) or die(mysqli_query_error());
-			while($dr = $dres->fetch_row()) $rez[($dr[1] == 4) ? 'user_tags' : 'sys_tags'][] = intval($dr[0]);
-			$dres->close();
+			// $sql = 'SELECT tag_id, level FROM objects_tags WHERE object_id = $1';
+			// $dres = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
+			// while($dr = $dres->fetch_row()) $rez[($dr[1] == 4) ? 'user_tags' : 'sys_tags'][] = intval($dr[0]);
+			// $dres->close();
 			/* end of selecting action tags */
 			
 			/* selecting tree tags */
-			$sql = 'SELECT tag_object_id FROM objects_tree_tags WHERE object_id = $1';
-			$dres = mysqli_query_params($sql, $id) or die(mysqli_query_error());
-			while($dr = $dres->fetch_row()) $rez['tree_tags'][] = intval($dr[0]);
-			$dres->close();
+			// $sql = 'SELECT tag_object_id FROM objects_tree_tags WHERE object_id = $1';
+			// $dres = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
+			// while($dr = $dres->fetch_row()) $rez['tree_tags'][] = intval($dr[0]);
+			// $dres->close();
 			/* end of selecting tree tags */
 		}
 		$res->close();
@@ -572,7 +574,7 @@ class Objects{
 		$db = null;
 
 		$sql = 'select DATABASE(), `f_get_objects_case_id`($1)';
-		$res = mysqli_query_params($sql, $objectData['id']) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $objectData['id']) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()){
 			$db = $r[0];
 			$case_id = $r[1];
@@ -591,7 +593,7 @@ class Objects{
 		$sql = 'SELECT solr_column_name, od.value FROM objects_data od '.
 			'JOIN templates_structure t ON od.`field_id` = t.`id` AND solr_column_name LIKE \'role_ids%\' '.
 			'WHERE object_id = $1';
-		$res = mysqli_query_params($sql, $case_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $case_id) or die(DB\mysqli_query_error());
 
 		while($r = $res->fetch_row())
 			if(!empty($r[1])){

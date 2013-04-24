@@ -30,7 +30,7 @@ Ext.onReady(function(){
 		Ext.fly('loading-mask').fadeOut({remove:true});
 	}, 250);
 	
-	Auth.getLoginInfo( function(r, e){
+	User.getLoginInfo( function(r, e){
 		if(r.success){
 			App.config = r.config;
 			App.loginData = r.user;

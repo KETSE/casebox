@@ -1,4 +1,7 @@
 <?php 
+
+namespace CB;
+
 class Security {
 	/* groups methods */
 	
@@ -9,8 +12,8 @@ class Security {
 	 */
 	public function getUserGroups(){
 		$rez = array( 'success' => true, 'data' => array() );
-		$sql = 'select id, name, l'.UL_ID().' `title`, `system`, `enabled` from users_groups where type = 1 order by 3';
-		$res = mysqli_query_params($sql) or die(mysqli_query_error());
+		$sql = 'select id, name, l'.USER_LANGUAGE_INDEX.' `title`, `system`, `enabled` from users_groups where type = 1 order by 3';
+		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez['data'][] = $r;
 		$res->close();
 		return $rez;
@@ -20,16 +23,16 @@ class Security {
 		$p->success = true;
 
 		$p->data->name = trim($p->data->name);
-		// if(empty($p->name) || (!Security::isAdmin())) throw new Exception(L\Failed_creating_office);
+		// if(empty($p->name) || (!Security::isAdmin())) throw new \Exception(L\Failed_creating_office);
 		
 		// check if group with that name already exists 
-		$res = mysqli_query_params('select id from users_groups where type = 1 and name = $1', $p->data->name) or die(mysqli_query_error());
-		if($r = $res->fetch_row()) throw new Exception(L\Group_exists);
+		$res = DB\mysqli_query_params('select id from users_groups where type = 1 and name = $1', $p->data->name) or die(DB\mysqli_query_error());
+		if($r = $res->fetch_row()) throw new \Exception(L\Group_exists);
 		$res->close();
 		// end of check if group with that name already exists 
 		
-		mysqli_query_params('insert into users_groups (type, name, l1, l2, l3, l4, cid) values(1, $1, $1, $1, $1, $1, $2)', array($p->data->name, $_SESSION['user']['id']) ) or die(mysqli_query_error());
-		$p->data->id = last_insert_id();
+		DB\mysqli_query_params('insert into users_groups (type, name, l1, l2, l3, l4, cid) values(1, $1, $1, $1, $1, $1, $2)', array($p->data->name, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
+		$p->data->id = DB\last_insert_id();
 
 		return $p;
 	}
@@ -39,7 +42,7 @@ class Security {
 	}
 
 	public function destroyUserGroup($p){
-		mysqli_query_params('delete from users_groups where id = $1', $p ) or die(mysqli_query_error());
+		DB\mysqli_query_params('delete from users_groups where id = $1', $p ) or die(DB\mysqli_query_error());
 		return array( 'success' => true, 'data' => $p );
 	}
 	/* end of groups methods */
@@ -62,7 +65,7 @@ class Security {
 				case 'groups': $where[] = '`type` = 1' ; break;
 			}
 		}elseif(!empty($p->types)){
-			$a = toNumericArray($p->types);
+			$a = Util\toNumericArray($p->types);
 			if(!empty($a)) $where[] = '`type` in ('.implode(',', $a).')';
 		}
 
@@ -71,10 +74,10 @@ class Security {
 			$params[] = ' %'.trim($p->query).'% ';
 		}
 
-		$sql = 'select id, l'.UL_ID().' `name`, `system`, `enabled`, `type`, `sex` from users_groups where deleted = 0 '.( empty($where) ? '' : ' and '.implode(' and ', $where) ).' order by `type`, 2 limit 50';
-		$res = mysqli_query_params($sql, $params) or die(mysqli_query_error());
+		$sql = 'select id, l'.USER_LANGUAGE_INDEX.' `name`, `system`, `enabled`, `type`, `sex` from users_groups where deleted = 0 '.( empty($where) ? '' : ' and '.implode(' and ', $where) ).' order by `type`, 2 limit 50';
+		$res = DB\mysqli_query_params($sql, $params) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
-			$r['iconCls'] = ($r['type'] == 1) ? 'icon-group' : 'icon-user-'.$r['sex'];
+			$r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
 			unset($r['type']);
 			unset($r['sex']);
 			$rez['data'][] = $r;
@@ -91,7 +94,7 @@ class Security {
 		/* set object title, path and inheriting access ids path*/
 		$obj_ids = array();
 		$sql = 'select f_get_tree_path($1) `path`, name, f_get_tree_inherit_ids(id) `obj_ids` from tree where id = $1';
-		$res = mysqli_query_params($sql, $p->id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $p->id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			$rez['path'] = Path::replaceCustomNames($r['path']);
 			$rez['name'] = Path::replaceCustomNames($r['name']);
@@ -101,12 +104,12 @@ class Security {
 		/* end of set object title and path*/
 
 		/* get the full set of access credentials(users and/or groups) including inherited from parents */
-		$lid = function_exists('UL_ID') ? UL_ID(): 1;
+		$lid = defined('CB\\USER_LANGUAGE_INDEX') ? USER_LANGUAGE_INDEX: 1;
 		$sql = 'select distinct u.id, u.l'.$lid.' `name`, u.`system`, u.`enabled`, u.`type`, u.`sex` from tree_acl a '.
 			'join users_groups u on a.user_group_id = u.id where a.node_id in('.implode(',', $obj_ids).') order by u.`type`, 2';
-		$res = mysqli_query_params($sql, $p->id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $p->id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
-			$r['iconCls'] = ($r['type'] == 1) ? 'icon-group' : 'icon-user-'.$r['sex'];
+			$r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
 			// unset($r['type']); // used internaly by setSolrAccess function
 			unset($r['sex']);
 			$access = $this->getUserGroupAccessForObject($p->id, $r['id']);
@@ -156,7 +159,7 @@ class Security {
 
 		/* getting object ids that have inherit set to true */
 		$sql = 'select f_get_tree_inherit_ids(id) `ids` from tree where id = $1';
-		$res = mysqli_query_params($sql, $object_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $object_id) or die(DB\mysqli_query_error());
 		$ids = array();
 		if($r = $res->fetch_assoc()) $ids = explode('/', substr($r['ids'], 1));
 		$res->close();
@@ -167,7 +170,7 @@ class Security {
 		/* getting group ids where passed $user_group_id is a member*/
 		$sql = 'select distinct group_id from users_groups_association where user_id = $1'.
 			' union select id from users_groups where `type` = 1 and `system` = 1 and name = \'everyone\''; // adding everyone group to our group ids
-		$res = mysqli_query_params($sql, $user_group_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $user_group_id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()) if(!in_array($r[0], $user_group_ids)) $user_group_ids[] = $r[0];
 		$res->close();
 		/* end of getting group ids where passed $user_group_id is a member*/
@@ -176,7 +179,7 @@ class Security {
 		$acl = array();
 		// selecting access list set for our path ids
 		$sql = 'select node_id, user_group_id, allow, deny from tree_acl where node_id in ('.implode(',', $ids).') and user_group_id in ('.implode(',', $user_group_ids).')';
-		$res = mysqli_query_params($sql, array()) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc())
 			$acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
 		$res->close();
@@ -303,7 +306,7 @@ class Security {
 	public function addObjectAccess($p){
 		$rez = array('success' => true, 'data' => array());
 		if(empty($p->data)) return $rez;
-		mysqli_query_params('insert into tree_acl (node_id, user_group_id, cid, uid) values ($1, $2, $3, $3) on duplicate key update id = last_insert_id(id), uid = $3', array($p->id, $p->data->id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
+		DB\mysqli_query_params('insert into tree_acl (node_id, user_group_id, cid, uid) values ($1, $2, $3, $3) on duplicate key update id = last_insert_id(id), uid = $3', array($p->id, $p->data->id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
 		
 		$rez['data'][] = $p->data;
 		SolrClient::RunCron();
@@ -322,13 +325,13 @@ class Security {
 		$allow = bindec( implode('', $allow) ) ;
 		$deny = bindec( implode('', $deny) );
 		$sql = 'insert into tree_acl (node_id, user_group_id, allow, deny, cid) values($1, $2, $3, $4, $5) on duplicate key update allow = $3, deny = $4, uid = $5, udate = CURRENT_TIMESTAMP';
-		mysqli_query_params($sql, array($p->id, $p->data->id, $allow, $deny, $_SESSION['user']['id']) ) or die(mysqli_query_error());
+		DB\mysqli_query_params($sql, array($p->id, $p->data->id, $allow, $deny, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
 		SolrClient::RunCron();
 		return array('succes' => true, 'data' => $p->data );
 	}
 	public function destroyObjectAccess($p){
 		if(empty($p->data)) return;
-		mysqli_query_params('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p->id, $p->data)) or die(mysqli_query_error());
+		DB\mysqli_query_params('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p->id, $p->data)) or die(DB\mysqli_query_error());
 		SolrClient::RunCron();
 		return array('success' => true, 'data'=> array());
 	}
@@ -392,7 +395,7 @@ class Security {
 		}
 		/* selecting node owner and store him into allow and remove from deny */
 		$sql = 'select oid from tree where id = $1';
-		$res = mysqli_query_params($sql, $objectRecord['id']) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $objectRecord['id']) or die(DB\mysqli_query_error());
 		if(($r = $res->fetch_row()) && !empty($r[0])){
 			if(!in_array($r[0], $allow_users)) $allow_users[] = $r[0];
 			$deny_users = array_diff($deny_users, array($r[0])); 
@@ -436,7 +439,7 @@ class Security {
 		// /* selecting user ids that have access specified for that object (including everyone object) */
 		// $sql = 'select group_id from users_groups_association where user_id = $1'.
 		// 	' union select id from users_groups where `type` = 1 and `system` = 1 and name = \'everyone\''; // adding everyone group to our group ids
-		// $res = mysqli_query_params($sql, $user_group_id) or die(mysqli_query_error());
+		// $res = DB\mysqli_query_params($sql, $user_group_id) or die(DB\mysqli_query_error());
 		// while($r = $res->fetch_row()) $user_group_ids[] = $r[0];
 		// $res->close();
 
@@ -447,7 +450,7 @@ class Security {
 		if(isset($GLOBALS['EVERYONE_GROUP_ID'])) return $GLOBALS['EVERYONE_GROUP_ID'];
 		$GLOBALS['EVERYONE_GROUP_ID'] = null;
 		$sql = "select id from users_groups where `type` = 1 and `system` = 1 and name = 'everyone'";
-		$res = mysqli_query_params($sql) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $GLOBALS['EVERYONE_GROUP_ID'] = $r[0];
 		$res->close();
 		return $GLOBALS['EVERYONE_GROUP_ID'];
@@ -455,7 +458,7 @@ class Security {
 	public function getGroupUserIds($groupId){
 		$rez = array();
 		$sql = 'select user_id from users_groups_association where group_id = $1';
-		$res = mysqli_query_params($sql, $groupId) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $groupId) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()) $rez[] = $r[0];
 		$res->close();
 		return $rez;
@@ -464,8 +467,8 @@ class Security {
 	static function getActiveUsers(){
 		$rez = Array('success' => true, 'data' => array());
 		$user_id = $_SESSION['user']['id'];
-		$sql = 'select id, l'.UL_ID().' `name`, concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls` from users_groups where `type` = 2 and deleted = 0 and enabled = 1 order by 2';
-		$res = mysqli_query_params( $sql, $user_id) or die(mysqli_query_error());
+		$sql = 'select id, l'.USER_LANGUAGE_INDEX.' `name`, concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls` from users_groups where `type` = 2 and deleted = 0 and enabled = 1 order by 2';
+		$res = DB\mysqli_query_params( $sql, $user_id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez['data'][] = $r;
 		$res->close();
 		return $rez;
@@ -475,9 +478,9 @@ class Security {
 	static function isAdmin($user_id = false){
 		$rez = false;
 		if($user_id == false) $user_id = $_SESSION['user']['id'];
-		$res = mysqli_query_params('select $1 from users_groups g  '.
+		$res = DB\mysqli_query_params('select $1 from users_groups g  '.
 			'join users_groups_association uga on g.id = uga.group_id and uga.user_id = $1 '.
-			'where g.system = 1  and g.name = \'system\'', $user_id) or die(mysqli_query_error());
+			'where g.system = 1  and g.name = \'system\'', $user_id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $rez = !empty($r[0]);
 		$res->close();
 		return $rez;
@@ -488,15 +491,15 @@ class Security {
 		// return (($role_id > 0) && ($role_id <=2)); //Managers and administrators
 	}
 	static function isUsersOwner($user_id){
-		$res = mysqli_query_params('select cid from users_groups where id = $1', $user_id) or die(mysqli_query_error());
-		if($r = $res->fetch_row()) $rez = ($r[0] == $_SESSION['user']['id']); else throw new Exception(L\User_not_found);
+		$res = DB\mysqli_query_params('select cid from users_groups where id = $1', $user_id) or die(DB\mysqli_query_error());
+		if($r = $res->fetch_row()) $rez = ($r[0] == $_SESSION['user']['id']); else throw new \Exception(L\User_not_found);
 		$res->close();
 		return $rez;
 	}
 	static function canManageTask($task_id, $user_id = false){
 		$rez = false;
 		if($user_id == false) $user_id = $_SESSION['user']['id'];
-		$res = mysqli_query_params('select t.cid, ru.user_id from tasks t left join tasks_responsible_users ru  on ru.task_id = t.id and ((t.cid = $2) or (ru.user_id = $2)) where t.id = $1', array($task_id, $user_id)) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select t.cid, ru.user_id from tasks t left join tasks_responsible_users ru  on ru.task_id = t.id and ((t.cid = $2) or (ru.user_id = $2)) where t.id = $1', array($task_id, $user_id)) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $rez = true;
 		$res->close();
 		if(!$rez) $rez = Security::isAdmin($user_id);

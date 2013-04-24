@@ -1,5 +1,7 @@
 <?php
-require_once 'BrowserTree.php';
+
+namespace CB;
+
 class BrowserView extends BrowserTree{
 	public function getChildren($p){
 		$p->showFoldersContent = true;
@@ -31,9 +33,9 @@ class BrowserView extends BrowserTree{
 			$d = &$rez['data'][$i];
 			$d['nid'] = $d['id'];
 			unset($d['id']);
-			if(!empty($d['name'])) $d['name'] = adjustTextForDisplay($d['name']);
+			if(!empty($d['name'])) $d['name'] = Util\adjustTextForDisplay($d['name']);
 
-			$res = mysqli_query_params('select cfg, (select 1 from tree where pid = $1 and dstatus = 0 limit 1) from tree where id = $1', $d['nid']) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params('select cfg, (select 1 from tree where pid = $1 and dstatus = 0 limit 1) from tree where id = $1', $d['nid']) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_row()){
 				if(!empty($r[0])) $d['cfg'] = json_decode($r[0]);
 				$d['has_childs'] = ($r[1] == 1);
@@ -95,7 +97,7 @@ class BrowserView extends BrowserTree{
 		$search = new Search();
 		foreach($p as $k => $v){
 			if(empty($default_filters[$k])) continue;
-			$params = coalesce(@$p->{$k}, $default_filters[$k]);
+			$params = Util\coalesce(@$p->{$k}, $default_filters[$k]);
 			if(!empty($v->path)){
 				$path = $v->path;
 				if(empty($v->descendants) ) $params->pid = Path::getId($path); else $params->pids = Path::getId($path);

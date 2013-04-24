@@ -1,8 +1,11 @@
 <?php
+	namespace CB;
+	use CB\config as config;
+	use CB\Util as Util;
+
 	header('content-type: text/javascript; charset=utf-8');
 	include '../init.php'; 
-	require_once('../lib/DB.php');
-	connect2DB();
+	DB\connect();
 ?>
 Ext.namespace('CB.DB');
 
@@ -58,8 +61,8 @@ Ext.namespace('CB.DB');
 
 <?php
 	$data = array();
-	if(!empty($_SESSION['config']['templateIcons'])){
-		$data = explode(',', $_SESSION['config']['templateIcons'][0]);
+	if(defined('CB\\config\\templateIcons')){
+		$data = explode(',', config\templateIcons);
 		$data = implode("\n", $data);
 		$data = str_replace("\r\n", "\n", $data);
 		$data = explode("\n", $data);
@@ -68,52 +71,50 @@ Ext.namespace('CB.DB');
 	echo 'CB.DB.templatesIconSet = new Ext.data.ArrayStore({ idIndex: 0,fields: ["id","name"], data: '. json_encode($data).'});';
 
 	/* case types */
-	$sql = 'SELECT DISTINCT t.id, t.l'.UL_ID().' `name`, t.iconCls 
-		FROM tag_groups tg 
-		JOIN tag_groups__tags_result tr  ON tr.tags_group_id = tg.id 
-		JOIN tags t ON t.id = tr.tag_id
-		WHERE tg.system =2 AND t.hidden IS NULL ORDER BY t.`order`';
-	$res = mysqli_query_params($sql) or die(mysqli_query_error());
-	$a = Array();
-	while($r = $res->fetch_row()) $a[] = $r;
-	echo 'CB.DB.caseTypes = new Ext.data.ArrayStore({fields: ["id", "name", "iconCls"], data: '.(empty($a) ? '[]' : json_encode($a)).'});';
+	$arr = Array();
+	if(defined('CB\\config\\case_templates')){
+		$template_ids = is_numeric(config\case_templates) ? array(config\case_templates) : Util\toNumericArray( json_decode(config\case_templates) );
+		$sql = 'SELECT DISTINCT id, l'.USER_LANGUAGE_INDEX.' `name`, iconCls 
+			FROM templates WHERE id in ('.implode(',', $template_ids).') ORDER BY `order`, 2';
+		$res = DB\mysqli_query_params($sql) or die( DB\mysqli_query_error() );
+		while($r = $res->fetch_row()) $arr[] = $r;
+		$res->close();
+	}
+	echo 'CB.DB.caseTypes = new Ext.data.ArrayStore({fields: ["id", "name", "iconCls"], data: '.(empty($arr) ? '[]' : json_encode($arr)).'});';
 	/* end of case types */
-	/* tag groups  */
-	$sql = 'SELECT id, l'.UL_ID().', `system`, `order` FROM tag_groups ORDER BY `system`, `order`, 2';
-	$res = mysqli_query_params($sql) or die(mysqli_query_error());
-	$a = Array();
-	while($r = $res->fetch_row()) $a[] = $r;
-	echo 'CB.DB.tagGroups = new Ext.data.ArrayStore({fields: [{name: "id", type: "int"}, "name", {name: "system", type: "int"}, {name: "order", type: "int"}], data: '.(empty($a) ? '[]' : json_encode($a)).'
-		,getName: function(id){ idx = this.findExact(\'id\', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get(\'name\') : \'\'; }
-	});';
-	/* end tags per groups */	/* tags per groups  */
-	$sql = 'SELECT DISTINCT t.id, t.pid, gt.pid_value, gt.template_id, t.l'.UL_ID().', t.iconCls, g.id, g.system, gt.parent_order'.
-		' FROM tag_groups g'.
-		' JOIN tag_groups__tags_result gt ON g.id = gt.tags_group_id'.
-		' JOIN tags t ON gt.tag_id = t.id AND t.hidden IS NULL'.
-		' ORDER BY `system`, g.`order`, g.l'.UL_ID().', gt.parent_order, t.order, 2';
-	$res = mysqli_query_params($sql) or die(mysqli_query_error());
-	$a = Array();
-	while($r = $res->fetch_row()) $a[] = $r;
-	echo 'CB.DB.groupedTags = new Ext.data.ArrayStore({fields: [{name: "id", type: "int"}, {name: "pid", type: "int"}, {name: "pid_value", type: "int"}, {name: "template_id", type: "int"}, "name", "iconCls", {name: "groupId", type: "int"}, {name: "system", type: "int"}, {name: "parent_order", type: "int"}], data: '.(empty($a) ? '[]' : json_encode($a)).'});';
-	/* end tags per groups */
-	/* languages */
-	$sql = 'SELECT id, name, abreviation, long_date_format, short_date_format FROM languages order by name';
-	$res = mysqli_query_params($sql) or die(mysqli_query_error());
 	
-	$a = Array();
-	while($r = $res->fetch_row()) $a[] = $r;
-	$res->close();
-	echo 'CB.DB.languages = new Ext.data.ArrayStore({'.
-		'fields: [{name: "id", type: "int"}, "name", "abreviation", "long_date_format", "short_date_format"]'.
-		',data: '.(empty($a) ? '[]' : json_encode($a)).
-		'});';
+	/* languages */
+	$arr = Array();
+	for ($i=0; $i < sizeof($GLOBALS['languages']); $i++){
+	 	$lang = &$GLOBALS['language_settings'][$GLOBALS['languages'][$i]];
+	 	$lp = array($i+1, $GLOBALS['languages'][$i], $lang['name'], $lang['long_date_format'], $lang['short_date_format'], $lang['time_format'] );
+	 	for ($j=0; $j < sizeof($lp); $j++) $lp[$j] = str_replace( array('%', '\/'), array('', '/'), $lp[$j]);
+		$arr[] = $lp;
+	}
+	
+	echo "\n".'CB.DB.languages = new Ext.data.ArrayStore({'.
+		'fields: [{name: "id", type: "int"}, "abreviation", "name", "long_date_format", "short_date_format", "time_format"]'.
+		',data: '.(empty($arr) ? '[]' : json_encode($arr)).
+		'});'."\n";
 	/* end of languages */
+
+	/* menu */
+	$arr = Array();
+	$res = DB\mysqli_query_params('select * from menu where user_group_ids is null or concat(\',\',user_group_ids, \',\') like \'%,'.$_SESSION['user']['id'].',%\'') or die( DB\mysqli_query_error() );
+	while($r = $res->fetch_row()) $arr[] = $r;
+	$res->close();
+
+	echo "\n".'CB.DB.menu = new Ext.data.ArrayStore({'.
+		'fields: [{name: "id", type: "int"}, "node_ids", "node_template_ids", "menu", "user_group_ids"]'.
+		',data: '.(empty($arr) ? '[]' : json_encode($arr)).
+		'});'."\n";
+	/* end of menu */
+
 	/* templates */
-	$sql = 'SELECT ts.id, ts.pid, t.id template_id, ts.tag, ts.`level`, ts.`name`, ts.l'.UL_ID().' `title`, ts.`type`, ts.`order`, ts.cfg'.
+	$sql = 'SELECT ts.id, ts.pid, t.id template_id, ts.tag, ts.`level`, ts.`name`, ts.l'.USER_LANGUAGE_INDEX.' `title`, ts.`type`, ts.`order`, ts.cfg'.
 			', (coalesce(t.title_template, \'\') <> \'\' ) `has_title_template`'.
 			' FROM templates t left join templates_structure ts on t.id = ts.template_id ORDER BY template_id, level, `order`';
-	$res = mysqli_query_params($sql, $_SESSION['user']['language_id']) or die(mysqli_query_error());
+	$res = DB\mysqli_query_params($sql, $_SESSION['user']['language_id']) or die( DB\mysqli_query_error() );
 	
 	$templates = Array();
 	while($r = $res->fetch_assoc()){
@@ -144,14 +145,6 @@ Ext.namespace('CB.DB');
 		',proxy: new Ext.data.MemoryProxy('.(empty($sf) ? '' : json_encode($sf)).')'.
 		'});';
 	}
-	/* templates per tags */
-	$res = mysqli_query_params('SELECT id from templates where `type` in (1, 2, 3, 4, 5, 7) and visible = 1 ORDER BY case when `type` = 1 then 3 when `type` = 3 then 1 else `type` end, `order`') or die(mysqli_query_error());
-	$a = Array();
-	while($r = $res->fetch_row()) $a[] = $r;
-	$res->close();
-	echo 'CB.DB.templates_per_tags = new Ext.data.ArrayStore({ fields: [{name: "template_id", type: "int"}, {name: "case_type_id", type: "int"}, {name: "tag_id", type: "int"}],data: '.(empty($a) ? '[]' : json_encode($a)).'});';
-	/* end of templates per tags */
-	
 ?>
 	reloadTemplates = function(){
 		CB.DB.templates.reload({
@@ -246,6 +239,7 @@ createDirectStores = function(){
 			,'iconCls'
 			,'cfg'
 			,'info_template'
+			,{name: 'visible', type: 'int'}
 			]
 		)
 		,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
@@ -317,30 +311,6 @@ createDirectStores = function(){
 		,getName: getStoreTitles
 	});
 
-	CB.DB.userTags = new Ext.data.DirectStore({
-		autoLoad: true
-		,restful: false
-		,proxy: new  Ext.data.DirectProxy({
-			paramsAsHash: true
-			,api: {
-				create:   UsersGroups.addUserTag
-				,read:    UsersGroups.getUserTags
-			}
-		})
-		,reader: new Ext.data.JsonReader({
-			successProperty: 'success'
-			,idProperty: 'id'
-			,root: 'data'
-			,messageProperty: 'msg'
-		},[	{name: 'id', type: 'int'},'name' ]
-		)
-	});
-	
-	CB.DB.updateTagGroups = function(data){
-		if(Ext.isEmpty(data)) return;
-		CB.DB.groupedTags.removeAll();
-		CB.DB.groupedTags.loadData(data);
-	}
 };
 createDirectStores.defer(500);
 

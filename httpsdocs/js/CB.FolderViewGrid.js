@@ -27,36 +27,30 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			,openItemLocation: new Ext.Action({
 				text: L.OpenItemLocation
 				,iconAlign:'top'
-				//,iconCls: 'icon32-open'
-				//,scale: 'large'
 				,disabled: true
 				,scope: this
 				,handler: this.onOpenItemLocationClick
 			})
 			,cut: new Ext.Action({
 				text: L.Cut
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onCutClick
 			})
 			,copy: new Ext.Action({
 				text: L.Copy
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onCopyClick
 			})
 			,paste: new Ext.Action({
 				text: L.Paste
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onPasteClick
 			})
 			,pasteShortcut: new Ext.Action({
 				text: L.PasteShortcut
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onPasteShortcutClick
@@ -64,7 +58,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 
 			,createShortcut: new Ext.Action({
 				text: L.CreateShortcut
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onCreateShortcutClick
@@ -87,7 +80,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			})
 			,rename: new Ext.Action({
 				text: L.Rename
-				//,iconCls: 'icon-minus'
 				,disabled: true
 				,scope: this
 				,handler: this.onRenameClick
@@ -132,7 +124,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 
 			,properties: new Ext.Action({
 				text: L.Properties
-				//,iconCls: 'icon-folder'
 				,scope: this
 				,disabled: true
 				,handler: this.onPropertiesClick
@@ -163,7 +154,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			})
 			,uploadNewVersion: new Ext.Action({
 				text: L.UploadNewVersion
-				//,iconCls: 'icon-documents-stack'
 				,disabled: true
 				,scope: this
 				,handler: this.onUploadNewVersionClick
@@ -193,7 +183,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				text: L.Permissions
 				,iconCls: 'icon-key'
 				,scope: this
-				//,disabled: true
 				,handler: this.onPermissionsClick
 			})
 
@@ -302,9 +291,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				,enableRowBody: true
 				,getRowClass: function(r, rowIndex, rp, ds){
 					rp.body = '';
-					//if(r && (String(r.get('name')).indexOf('class="hl"') < 0) ){
-						if(!Ext.isEmpty(r.get('content'))) rp.body += r.get('content');
-					//}
+					if(!Ext.isEmpty(r.get('content'))) rp.body += r.get('content');
 					
 					if(Ext.isEmpty(rp.body)) return '';
 					return 'hasBody';
@@ -360,7 +347,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 						}
 					}
 				}
-				// ,render: this.onGridRender
 			}
 			,keys: [{
 				key: Ext.EventObject.DOWN //down arrow (select forst row in the greed if no row already selected)  - does not work
@@ -545,12 +531,12 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 					,scope: this
 					,handler: this.onDownloadClick
 					,menu: [this.actions.downloadArchived]
-				},this.actions.open //{text: '&nbsp;Open&nbsp;&nbsp;', iconAlign:'top', iconCls: 'icon32-open', scale: 'large'}
+				},this.actions.open
 				,this.actions.browse
 				,'-'
 				,this.actions['delete']
 				,'-'
-				,this.actions.createTask //{text: 'New Task', iconCls: 'icon32-task-new', iconAlign:'top', scale: 'large'}
+				,this.actions.createTask
 				,'->'
 				,{
 					text: L.Preview
@@ -653,7 +639,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			this.actions['delete'].setDisabled(true);
 			this.actions.rename.setDisabled(true);
 			this.actions.properties.setDisabled(true);
-			// this.actions.permissions.setDisabled(fals) ;
 		}else{
 			row = sm.getSelected();
 			id = row.get('nid');
@@ -752,7 +737,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				,{
 					text: L.View
 					,hideOnClick: false
-					,menu: [{	//[this.actions.showFoldersChilds]
+					,menu: [{
 						xtype: 'menucheckitem'
 						,text: L.Descendants
 						,checked: this.params.descendants
@@ -767,18 +752,15 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				,this.actions.paste
 				,this.actions.pasteShortcut
 				,'-'
-				//,this.actions.createShortcut
 				,this.actions.uploadNewVersion
 				,this.actions.mergeFiles
 				,this.actions['delete']
 				,this.actions.rename
-				//,this.actions.reload
 				,'-'
 				,this.actions.takeOwnership
 				,'-'
 				,this.createMenuButton
 				,'-'
-				// ,this.actions.properties
 				,this.actions.permissions
 				]
 			})
@@ -793,8 +775,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	,setParams: function(params){
 		if(Ext.isEmpty(params.path)) params.path = '/';
 		Ext.apply(this.params, Ext.value(params, {}));
-		// Ext.apply(this.grid.getStore().baseParams, Ext.value(params, {}));
-		// this.requestedParams = params;
 		this.grid.getBottomToolbar().changePage(1);
 	}
 	,getProperty: function(propertyName){
@@ -848,13 +828,10 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		pagingVisible = (store.reader.jsonData.total > pt.pageSize);
 		if(pagingVisible) pt.show();
 		else pt.hide();
-		// pt.setVisible(pagingVisible);
 		this.grid.syncSize();
 		this.syncSize();
-		// pt.doLayout();
 		App.mainViewPort.selectGridObject(this.grid);
 
-		// this.doLayout();
 	}
 	,updateCreateMenuItems: function(menuButton) {
 		if(Ext.isEmpty(menuButton)){
@@ -864,7 +841,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			if(Ext.isEmpty(cmi)) return;
 			menuButton = cmi[0];
 		}
-		getGroupedTemplates(menuButton, this.onCreateObjectClick, this)
+		// getGroupedTemplates(menuButton, this.onCreateObjectClick, this)
+		updateMenu(menuButton, getMenuConfig(this.folderProperties.id, this.folderProperties.path, this.folderProperties.template_id), this.onCreateObjectClick, this);
+		
 		if( menuButton.menu.items.getCount() > 0 ){
 			if(!this.actions.createTask.isHidden() || !this.actions.createEvent.isHidden() ){
 				menuButton.menu.add('-');
@@ -1024,7 +1003,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		s = this.grid.selModel.getSelections();
 		if(Ext.isEmpty(s)) return;
 		Ext.Msg.confirm( L.DeleteConfirmation, (s.length == 1) ? L.DeleteConfirmationMessage + ' "' + s[0].get('name') + '"?' : L.DeleteSelectedConfirmationMessage, this.onDelete, this ) 
-		//Ext.Msg.confirm( L.DeleteConfirmation, L.DeleteConfirmationMessage + ' "' + this.grid.selModel.getSelected().get('name') + '"?', this.onDelete, this )
 	}
 	,onDelete: function (btn) {
 		if(btn !== 'yes') return;

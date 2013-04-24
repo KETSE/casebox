@@ -1,6 +1,9 @@
 <?php
-	ini_set('max_execution_time', 0);
-  ini_set('memory_limit', '-1');
+
+namespace CB;
+ini_set('max_execution_time', 0);
+ini_set('memory_limit', '-1');
+
 class preview_extractor{
 	function preview_extractor(){
 		global $argv;
@@ -11,16 +14,16 @@ class preview_extractor{
 			$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 		}
 		require_once dirname(__FILE__).'/../config.php';
-		require_once CB_LIB_DIR.'DB.php';
-		connect2DB();
+		require_once LIB_DIR.'DB.php';
+		DB\connect();
 	}
 	function removeFromQueue($id){
-		mysqli_query_params('delete from file_previews where id = $1', $id) or die(mysqli_query_error());
+		mysqli_query_params('delete from file_previews where id = $1', $id) or die( DB\mysqli_query_error() );
 	}
 	
 	function purify($html, $options = array()){
 		if(empty($html)) return '';
-		require_once CB_HTML_PURIFIER;
+		require_once HTML_PURIFIER;
 		require_once 'HTMLPurifier.func.php';
 
 		$cs = mb_detect_encoding($html);

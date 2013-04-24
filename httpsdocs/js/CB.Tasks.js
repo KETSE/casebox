@@ -150,7 +150,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		}
 
 		this.taskCategoriesStore = [];
-		if(!Ext.isEmpty(App.config.task_categories)) this.taskCategoriesStore = getThesauriStore(App.config.task_categories[0]);
+		if(!Ext.isEmpty(App.config.task_categories)) this.taskCategoriesStore = getThesauriStore(App.config.task_categories);
 		
 		this.pathStore = new Ext.data.ArrayStore({
 			idIndex: 0
@@ -313,7 +313,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		/* end of get and store owner's name */
 		/* get and store responsible party's text */
 		if(!Ext.isEmpty(this.data.responsible_party_id)){
-			st = getThesauriStore(App.config.responsible_party[0]);
+			st = getThesauriStore(App.config.responsible_party);
 			idx = st.findExact('id', this.data.responsible_party_id)
 			if(idx >=0) this.responsible_party = st.getAt(idx).get('name');
 		}

@@ -1,4 +1,9 @@
 <?php
+
+namespace CB\Util;
+use CB\DB as DB;
+use CB\L as L;
+
 function getIP() {
 	$ip = false;
 	if (!empty($_SERVER['HTTP_CLIENT_IP'])) $ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -37,6 +42,8 @@ function coalesce() {
 	return '';
 }
 
+/* date and time functions */
+
 function formatPastTime($mysqlTime) {
 	if(empty($mysqlTime)) return '';
 	$time = strtotime($mysqlTime);
@@ -68,7 +75,6 @@ function formatAgoTime($mysqlTime) {
 
 	$time = strtotime($mysqlTime);
 	$interval = strtotime('now') - $time;//11003
-	//if(is_debug_host()) echo 'interval: '.$interval.' ('.$mysqlTime.') '.strtotime('now').'('.date('Y-m-d H:i:s').')   '.$time;
 	if($interval < 0) return ''; //it's a foture time
 
 	if($interval < $AHOUR){
@@ -129,31 +135,31 @@ function translateMonths($dateString){
 	return $dateString;
 }
 
-function formatSpentTime($time) {
-	if (empty($time)) return '';
-	$t = '';
-	if (!empty($time['hours'])) {
-		$t = $time['hours'];
-		switch ($time['hours']) {
-		case 1: $t = $t.' '.L\hour; break;
-		case 2:
-		case 3:
-		case 4: $t = $t.' '.L\hours; break;
-		default: $t = $t.' '.L\ofHours; break;
-		}
-	}
-	if (!empty($time['minutes'])) {
-		$t = $t.' '.$time['minutes'];
-		switch (substr($time['minutes'], -1, 1)) {
-		case 1: $t = $t.' '.L\minute; break;
-		case 2:
-		case 3:
-		case 4: $t = $t.' '.L\minutes; break;
-		default: $t = $t.' '.L\ofMinutes; break;
-		}
-	}
-	return $t;
-}
+// function formatSpentTime($time) {
+// 	if (empty($time)) return '';
+// 	$t = '';
+// 	if (!empty($time['hours'])) {
+// 		$t = $time['hours'];
+// 		switch ($time['hours']) {
+// 		case 1: $t = $t.' '.L\hour; break;
+// 		case 2:
+// 		case 3:
+// 		case 4: $t = $t.' '.L\hours; break;
+// 		default: $t = $t.' '.L\ofHours; break;
+// 		}
+// 	}
+// 	if (!empty($time['minutes'])) {
+// 		$t = $t.' '.$time['minutes'];
+// 		switch (substr($time['minutes'], -1, 1)) {
+// 		case 1: $t = $t.' '.L\minute; break;
+// 		case 2:
+// 		case 3:
+// 		case 4: $t = $t.' '.L\minutes; break;
+// 		default: $t = $t.' '.L\ofMinutes; break;
+// 		}
+// 	}
+// 	return $t;
+// }
 
 function formatTaskTime($mysqlTime) {
 	$time = strtotime($mysqlTime);
@@ -199,10 +205,11 @@ function clientToMysqlDate($date) {
 	$d = date_parse_from_format (str_replace('%', '', $_SESSION['user']['short_date_format']), $date);
 	return $d['year'].'-'.$d['month'].'-'.$d['day'];
 }
-function solrToMysqlDate($date) {
-	if (empty($date)) return null;
-	return str_replace(array('T', 'Z'), array(' ', ''), $date);
-}
+// function solrToMysqlDate($date) {
+// 	if (empty($date)) return null;
+// 	return str_replace(array('T', 'Z'), array(' ', ''), $date);
+// }
+/* date and time functions */
 
 function formatFileSize($v) {
 	if (!is_numeric($v)) return '';
@@ -220,20 +227,21 @@ function validId($id = false){ return (!empty($id) && is_numeric($id) && ($id > 
 function getLanguagesParams($post_params, &$result_params_array, &$values_string, &$on_duplicate_string, $default_text_value = null){
 	if(is_array($post_params)) $p = &$post_params; else $p = (array)$post_params; 
 	$i = sizeof($result_params_array)+1;
-	foreach($_SESSION['languages']['per_id'] as $k => $v){
-		$k = 'l'.$k;
+	for ($lidx=0; $lidx < sizeof($GLOBALS['languages']); $lidx++) { 
+		$l = 'l'.($lidx+1);
 		$values_string .= (empty($values_string) ? '' : ',').'$'.$i;
-		$on_duplicate_string .= (empty($on_duplicate_string) ? '' : ',').'`'.$k.'`=$'.$i++;
-		$result_params_array[$k] = empty($p[$k]) ? $default_text_value: $p[$k];
+		$on_duplicate_string .= (empty($on_duplicate_string) ? '' : ',').'`'.$l.'`=$'.$i++;
+		$result_params_array[$l] = empty($p[$l]) ? $default_text_value: $p[$l];
 	}
 }
+
 function adjustTextForDisplay($text){
 	return htmlentities($text, ENT_COMPAT, 'UTF-8');
 }
 
 function getThesauriTitles($ids_string, $language_id = false){
 	if(empty($ids_string)) return '';
-	if($language_id === false) $language_id = UL_ID();
+	if($language_id === false) $language_id = \CB\USER_LANGUAGE_INDEX;
 	if(!is_array($ids_string)) $a = explode(',',$ids_string); else $a = &$ids_string;
 	$a = array_filter($a, 'is_numeric');
 	if(empty($a)) return '';
@@ -241,7 +249,7 @@ function getThesauriTitles($ids_string, $language_id = false){
 	foreach($a as $id){
 		if(isset($GLOBALS['TH'][$id])) $rez[] = $GLOBALS['TH'][$id];
 		else{
-			$res = mysqli_query_params('select l'.$language_id.' from tags where id = $1', $id) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params('select l'.$language_id.' from tags where id = $1', $id) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_row()){
 				$GLOBALS['TH'][$id] = $r[0];
 				$rez[] = $r[0];
@@ -258,7 +266,7 @@ function getThesauryIcon($id){
 	$rez = '';
 	if(isset($GLOBALS['TH_ICONS'][$id])) $rez = $GLOBALS['TH_ICONS'][$id];
 	else{
-		$res = mysqli_query_params('select iconCls from tags where id = $1', $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select iconCls from tags where id = $1', $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()){
 			$GLOBALS['TH_ICONS'][$id] = $r[0];
 			$rez = $r[0];
@@ -268,17 +276,10 @@ function getThesauryIcon($id){
 	return $rez;
 }
 
-function getFileExtension($filename){
-	$ext = explode('.', $filename);
-	if(sizeof($ext) <2 ) return '';
-	$ext = array_pop($ext);
-	$ext = trim($ext);
-	return mb_strtolower($ext);
-}
 function getUsername($id){
 	if(!is_numeric($id)) return '';
 	$rez = '';
-	$res = mysqli_query_params('select l'.UL_ID().' from users_groups where id = $1', $id) or die(mysqli_query_error());
+	$res = DB\mysqli_query_params('select l'.\CB\USER_LANGUAGE_INDEX.' from users_groups where id = $1', $id) or die(DB\mysqli_query_error());
 	if($r = $res->fetch_row()) $rez = $r[0];
 	$res->close();
 	return $rez;
@@ -299,7 +300,7 @@ function date_mysql_to_iso($date_string){
 }
 
 function getCoreHost($db_name = false){
-	if($db_name == false) $db_name = CB_get_param('db_name');
+	if($db_name == false) $db_name = \CB\config\db_name;
 	$core = $db_name;
 	if(substr($db_name, 0, 3) == 'cb_') $core = substr($db_name, 3);
 	switch($core){

@@ -1,4 +1,7 @@
 <?php
+
+namespace CB;
+
 class Path{
 	/* get last element di from a path or return root folder id if no int element is found */
 	public static function getId($path = ''){
@@ -12,7 +15,7 @@ class Path{
 		$rez = array('success' => false);
 		if(!is_numeric($id)) return $rez;
 		$sql = 'select f_get_tree_ids_path(case when `type` = 2 then target_id else id end) from tree where id = $1';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row())
 			$rez = array('success' => true, 'path' => $r[0]);
 		$res->close();
@@ -23,7 +26,7 @@ class Path{
 		$rez = array('success' => false);
 		if(!is_numeric($id)) return $rez;
 		$sql = 'select f_get_tree_ids_path(pid) from tree where id = $1';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row())
 			$rez = array('success' => true, 'id' => $id, 'path' => $r[0]);
 		$res->close();
@@ -36,7 +39,7 @@ class Path{
 		$path = explode('/', $path);
 		$ids = array_filter($path, 'is_numeric');
 		$id = array_pop($ids);
-		$res = mysqli_query_params('select f_get_tree_ids_path($1)', $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select f_get_tree_ids_path($1)', $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()){
 			$path = explode('/', $r[0]);
 			array_shift($path);
@@ -51,7 +54,7 @@ class Path{
 
 		$names = array();
 		$sql = 'select id, name from tree where id in ('.implode(',', $ids).')';
-		$res = mysqli_query_params($sql ) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql ) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()){
 			$names[$r[0]] = $r[1];
 		}
@@ -60,7 +63,7 @@ class Path{
 		for ($i=0; $i < sizeof($path); $i++) { 
 			if(isset($names[$path[$i]])){
 				if((substr($names[$path[$i]], 0, 1) == '[') && (substr($names[$path[$i]], -1, 1) == ']') )
-					$names[$path[$i]] = coalesce(L(substr($names[$path[$i]], 1, strlen($names[$path[$i]]) -2)) , $names[$path[$i]]);
+					$names[$path[$i]] = Util\coalesce(L\get(substr($names[$path[$i]], 1, strlen($names[$path[$i]]) -2)) , $names[$path[$i]]);
 				$rez[] = $names[$path[$i]];
 			}else $rez[] = $path[$i]; 
 		}
@@ -69,14 +72,14 @@ class Path{
 			if(sizeof($path) > 2){
 				if(empty($path[2])) $rez[2] = L\OutOfOffice;
 				else{
-					$sql = 'select l'.UL_ID().' from tags where id = $1';
-					$res = mysqli_query_params($sql, $path[2]) or die(mysqli_query_error());
+					$sql = 'select l'.USER_LANGUAGE_INDEX.' from tags where id = $1';
+					$res = DB\mysqli_query_params($sql, $path[2]) or die(DB\mysqli_query_error());
 					if($r = $res->fetch_row()) $rez[2] = $r[0];
 					$res->close();
 				}
 			}
 			if(sizeof($path) > 3) $rez[3] = empty($path[3]) ? strip_tags(L\noData) : $path[3];
-			if(sizeof($path) > 4) $rez[4] = coalesce($path[4], strip_tags(L\noData));
+			if(sizeof($path) > 4) $rez[4] = Util\coalesce($path[4], strip_tags(L\noData));
 		}
 		return '/'.implode('/', $rez);
 	}
@@ -92,8 +95,9 @@ class Path{
 		}
 		$rez = array();
 		$lastId = array_pop($ids);
-		$sql = 'select id, name, `system`, `type`, subtype, f_get_tree_ids_path(id) `path`, f_get_objects_case_id($1) `case_id` from tree where id = $1'; //in ('.implode(',', $ids).')';
-		$res = mysqli_query_params($sql, $lastId) or die(mysqli_query_error());
+		$sql = 'select id, name, `system`, `type`, subtype, f_get_tree_ids_path(id) `path`, f_get_objects_case_id($1) `case_id`'.
+			',(select template_id from objects where id = $1) `template_id` from tree where id = $1'; //in ('.implode(',', $ids).')';
+		$res = DB\mysqli_query_params($sql, $lastId) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez = $r;
 		$res->close();
 
@@ -106,7 +110,7 @@ class Path{
 		for ($i=0; $i < sizeof($path); $i++)
 			if( (substr($path[$i], 0, 1) == '[') && (substr($path[$i], -1) == ']') ){
 				$l = substr($path[$i], 1, mb_strlen($path[$i])-2);
-				$path[$i] = coalesce( L( $l ), $l);
+				$path[$i] = Util\coalesce( L\get( $l ), $l);
 			}
 		$path = implode('/', $path);
 		return $path;
@@ -115,7 +119,7 @@ class Path{
 	public static function getNodeSubtype($id){
 		$rez = null;
 		$sql = 'select `subtype` from tree where id = $1';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $rez = $r[0];
 		$res->close();
 		return $rez;

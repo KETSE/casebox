@@ -5,240 +5,244 @@
 *	@access private
 *	@package CaseBox
 *	@copyright Copyright (c) 2013, HURIDOCS, KETSE
+*	@version 2.0 refactoring 17 april 2013. Introduce CB namespace for casebox platform scripts
 **/
-	/* get the host name to include its config */
-	require_once('lib/Util.php');
+	namespace CB;
+/*
+	steps: 
+	1. Detect core name
+	2. Define main paths (for configuration, files, data folder, sessions path)
+	3. Read platform config.ini file
+	4. read core config.ini & system.ini files
+	5. based on loaded configs set casebox php options, session lifetime, error_reporting and define required casebox constants 
 
+*/
+	/* detecting core name (project name) from SERVER_NAME */
+	$arr = explode('.', $_SERVER['SERVER_NAME']);
+	if( in_array($arr[0], array( 'www', 'ww2' ) ) ) // remove www, ww2 and take the next parameter as the $coreName
+		array_shift($arr);
+	
+	define('CB\\CORENAME', $arr[0]);
+	/* end of detecting core name (project name) from SERVER_NAME */
+	
+	/* define main paths /**/
+	define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
+	define('CB\\APP_ROOT', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
+	define('CB\\CORE_ROOT', DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+	define('CB\\DATA_PATH', APP_ROOT.'data'.DIRECTORY_SEPARATOR);
+	define('CB\\SESSION_PATH', DATA_PATH.'sessions'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+	/* end of define main paths /**/
+
+	/* update include_path and include global script */
+	set_include_path(DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
+			DOC_ROOT.'remote'.DIRECTORY_SEPARATOR.'classes'.PATH_SEPARATOR.
+			CORE_ROOT.'php'. PATH_SEPARATOR.
+			get_include_path());
+	require_once 'global.php';
+	/* end of update include_path and include global script */
+
+	/* Reading platform system.ini file and define all parameters in base namespace*/
+	$filename = DOC_ROOT.'system.ini';
+	if(file_exists($filename)){
+		$arr = parse_ini_file($filename);
+		if(is_array($arr)) foreach ($arr as $key => $value){
+			if( ( substr($value, 0, 2) == '\\\\' ) || ( substr($value, 0, 2) == '//' ) ) $value = DOC_ROOT.substr($value, 2);
+			define('CB\\'.$key, $value);
+		}
+	}
+	/* end of Reading platform system.ini file */
+
+	// define default config for Casebox
+	$config = array();
+	$filename = DOC_ROOT.'config.ini';
+	if(file_exists($filename)) $config = array_merge( $config, parse_ini_file($filename) );
+
+	/* reading core config.ini merging values to config*/
+	$filename = CORE_ROOT.'config.ini';
+	if(file_exists($filename)) $config = array_merge( $config, parse_ini_file($filename));
+
+	/* read and apply platform config from DB and define platform languages */
+	if(!empty($config)){
+		
+		require_once 'lib/DB.php';
+		DB\connect($config);
+		
+		$platform_config = getPlatformDBConfig();
+		foreach($platform_config as $k => $v)
+			if( ( strlen($k) == 11 ) && ( substr($k, 0, 9) == 'language_') )
+				$GLOBALS['language_settings'][substr($k, 9)] = json_decode($v, true);
+			else $config[$k] = $v;
+
+		/* Define Casebox available languages */
+		define('CB\\LANGUAGES', implode(',', array_keys($GLOBALS['language_settings']) ));
+		
+		/* read and apply core config from DB */
+		$core_config = getCoreDBConfig();
+		foreach($core_config as $k => $v)
+			if( ( strlen($k) == 11 ) && ( substr($k, 0, 9) == 'language_') )
+				$GLOBALS['language_settings'][substr($k, 9)] = json_decode($v, true);
+			else $config[$k] = $v;
+	}
+
+	/* store fetched config in CB\config namespace /**/
+	foreach($config as $k => $v) define('CB\\config\\'.$k, $v);
+
+	/* Define Core available languages in $GLOBALS */
+	if( defined('CB\\config\\languages')){
+		$GLOBALS['languages'] = explode(',', config\languages);
+		for ($i=0; $i < sizeof($GLOBALS['languages']); $i++)
+			$GLOBALS['languages'][$i] = trim($GLOBALS['languages'][$i]);
+	}
+	
+	if( defined('CB\\config\\max_files_version_count') ) Files::setMFVC( config\max_files_version_count );
+	/* end of store fetched config in CB\config namespace /**/
+
+	/* So, we have defined main paths and loaded configs. Now define and configure all other options (for php, session, etc) */
+
+	
+	/* setting php configuration options, session lifetime and error_reporting level */
 	ini_set('max_execution_time', 300);
 	ini_set('short_open_tag', 'off');
-
+	
+	// upload params
 	ini_set('upload_max_filesize', '200M');
 	ini_set('post_max_size', '200M');
 	ini_set('max_file_uploads', '20');
 	ini_set('memory_limit', '200M');
-
+	
+	// session params
 	$sessionLifetime = is_debug_host() ? 0: 43200;
 	ini_set("session.gc_maxlifetime", $sessionLifetime);
 	ini_set("session.gc_divisor", "1000");
 	ini_set("session.gc_probability", "1");
 	ini_set("session.cookie_lifetime", "0");
+	
 	session_set_cookie_params($sessionLifetime, '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+	session_save_path(SESSION_PATH);
+	session_name( str_replace( array('.casebox.org', '.', '-'), '', $_SERVER['SERVER_NAME']) );
 
-	error_reporting(is_debug_host() ? E_ALL : 0);
+	//error reporting params
+	error_reporting( is_debug_host() ? E_ALL : 0 );
+	ini_set('error_log', APP_ROOT.'logs'.DIRECTORY_SEPARATOR.CORENAME.'_error_log');
 
+	// mb encoding config
 	mb_internal_encoding("UTF-8");
 	mb_detect_order('UTF-8,UTF-7,ASCII,EUC-JP,SJIS,eucJP-win,SJIS-win,JIS,ISO-2022-JP,WINDOWS-1251,WINDOWS-1250');
+	mb_substitute_character("none");
 
-	$a = explode('.', $_SERVER['SERVER_NAME']);
-	# remove www, ww2 and take the next parameter as the $coreName
-	if (($a[0] == 'www') || ($a[0] == 'ww2')) array_shift($a);
-	define('CB_PROJ', $a[0]);
-	define('CB_ADMIN_EMAIL', 'support@casebox.org');
+	// timezone
+	date_default_timezone_set( empty($config['timezone']) ? 'UTC' : $config['timezone'] );
 
-	$this_file_dir = dirname(__FILE__);
-	$a = explode(DIRECTORY_SEPARATOR, $this_file_dir);
-	array_pop($a);
-	$parent_dir = implode(DIRECTORY_SEPARATOR, $a).DIRECTORY_SEPARATOR;
+	/* end of setting php configuration options, session lifetime and error_reporting level */
 
-	ini_set('error_log', $parent_dir.'logs'.DIRECTORY_SEPARATOR.CB_PROJ.'_error_log');
-
-	define('CB_EXT_FOLDER', '/libx/ext');
-	define('CB_SYS_PATH', $parent_dir.'sys'.DIRECTORY_SEPARATOR);
-	define('CB_DATA_PATH', $parent_dir.'data'.DIRECTORY_SEPARATOR);
-	define('CB_CORES_PATH', $this_file_dir.DIRECTORY_SEPARATOR.'cores'.DIRECTORY_SEPARATOR);
-	define('CB_CONFIG_PATH', CB_CORES_PATH.CB_PROJ.DIRECTORY_SEPARATOR);
-	define('CB_CRONS_PATH', CB_SYS_PATH.'crons'.DIRECTORY_SEPARATOR);
-	define('CB_SITE_PATH', $this_file_dir.DIRECTORY_SEPARATOR);
-	define('CB_LIB_DIR', $this_file_dir.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
-	define('CB_LIBX_DIR', $this_file_dir.DIRECTORY_SEPARATOR.'libx'.DIRECTORY_SEPARATOR);
-	define('CB_JS_LOCALE_PATH', $this_file_dir.DIRECTORY_SEPARATOR.'js'.DIRECTORY_SEPARATOR.'locale');
-	define('CB_TEMPLATES_PATH', CB_SYS_PATH.'templates'.DIRECTORY_SEPARATOR);
-	define('CB_DEFAULT_MAX_ROWS', 50); /* Default row count limit used in grids */
-
-	/* reading system config */
-	$configFile = dirname(__FILE__).DIRECTORY_SEPARATOR.'config.ini';
-	if(file_exists($configFile)){
-		$c = parse_ini_file($configFile);
-		if(is_array($c)) foreach ($c as $key => $value) define($key, $value);
-	}
-
-	/* reading core settings */
-	global $CB_settings;
-	$CB_settings = array('timezone' => 'UTC', 'default_language' => 'en', 'personal_tags' => false, 'system_tags' => false, 'solr_host' => '127.0.0.1', 'solr_port' => 8983 );
-
-	if(file_exists(CB_CONFIG_PATH.'system.ini')){
-		$CB_settings = array_merge( $CB_settings, parse_ini_file(CB_CONFIG_PATH.'system.ini'));
-	}else die(header('location: http://www.casebox.org'));
-
-	if(file_exists(CB_CONFIG_PATH.'config.ini')){
-		$CB_settings = array_merge( $CB_settings, parse_ini_file(CB_CONFIG_PATH.'config.ini') );
-	}/* end of reading core settings */
+	/* define other constants used in casebox */
+	
+	//relative path to ExtJs framework. Used in index.php
+	const EXT_PATH = '/libx/ext';
+	//templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
+	define('CB\\TEMPLATES_PATH', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
+	
+	//used to include DB.php into preview_extractor scripts and in Files.php to start the extractors.
+	define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
+	
+	// Default row count limit used for solr results
+	if(!defined('CB\\config\\max_rows')) define('CB\\config\\max_rows', 50);
 
 	// custom Error log per Core, use it for debug/reporting purposes
-	define('CB_ERRORLOG', $parent_dir.'logs'.DIRECTORY_SEPARATOR.'cb_'.CB_PROJ.'_log');
+	define('DEBUG_LOG', APP_ROOT.'logs'.DIRECTORY_SEPARATOR.'cb_'.CORENAME.'_debug_log');
+	
+	// define solr_core as db_name if none is specified in config
+	if(!defined('CB\\config\\solr_core')) define('CB\\config\\solr_core', '/solr/'.config\db_name );
 
-	define('CB_HTML_PURIFIER', CB_LIBX_DIR.'htmlpurifier'.DIRECTORY_SEPARATOR.'library'.DIRECTORY_SEPARATOR.'HTMLPurifier.auto.php');
+	// path to photos folder
+	define('CB\\PHOTOS_PATH', DOC_ROOT.'photos'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+	// path to files folder
+	define('CB\\FILES_PATH', DATA_PATH.'files'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+	
+	/* path to incomming folder. In this folder files are stored when just uploaded and before checking existance in target. If no user intervention is required then files are stored in db. */
+	define('CB\\FILES_INCOMMING_PATH', FILES_PATH.'incomming'.DIRECTORY_SEPARATOR);
+	/* path to preview folder. Generated previews are stored for some filetypes */
+	define('CB\\FILES_PREVIEW_PATH', FILES_PATH.'preview'.DIRECTORY_SEPARATOR);
 
-	define('CB_SOLR_CLIENT', CB_LIBX_DIR.'Solr/Service.php');
-	define('CB_SOLR_HOST', CB_get_param('solr_host') );
-	define('CB_SOLR_PORT', CB_get_param('solr_port') );
-	define('CB_SOLR_CORE', coalesce(CB_get_param('solr_core'), '/solr/'.$CB_settings['db_name'] ) );
-	define('CB_MAX_ROWS', coalesce(CB_get_param('max_rows'), CB_DEFAULT_MAX_ROWS ) );
+	/* checking folders existance */
+	if(!file_exists(SESSION_PATH)) @mkdir(SESSION_PATH, 0755, true);
+	if(!file_exists(PHOTOS_PATH)) @mkdir(PHOTOS_PATH, 0755, true);
+	if(!file_exists(FILES_INCOMMING_PATH)) @mkdir(FILES_INCOMMING_PATH, 0777, true);
+	if(!file_exists(FILES_PREVIEW_PATH)) @mkdir(FILES_PREVIEW_PATH, 0777, true);
+	/* end of checking folders existance */
 
+	// define default core language constant
+	const LANGUAGE = config\default_language;
+	
+	/* USER_LANGUAGE is defined after starting session */
 
-	define('CB_SESSION_PATH', CB_DATA_PATH.'sessions'.DIRECTORY_SEPARATOR.CB_PROJ.DIRECTORY_SEPARATOR);
+	/* functions section*/
 
-	define('CB_PHOTOS_PATH', CB_SITE_PATH.'photos'.DIRECTORY_SEPARATOR.CB_PROJ.DIRECTORY_SEPARATOR);
-	if(!defined('CB_FILES_PATH')) define('CB_FILES_PATH', CB_DATA_PATH.'files'.DIRECTORY_SEPARATOR.CB_PROJ.DIRECTORY_SEPARATOR);
-	define('CB_FILES_INCOMMING_PATH', CB_FILES_PATH.'incomming'.DIRECTORY_SEPARATOR);
-	define('CB_FILES_PREVIEW_PATH', CB_FILES_PATH.'preview'.DIRECTORY_SEPARATOR);
-	define('CB_FILES_DELETED_PATH', CB_FILES_PATH.'deleted'.DIRECTORY_SEPARATOR);
-
-	if(!file_exists(CB_SESSION_PATH)) @mkdir(CB_SESSION_PATH, 0755, true);
-	// if(is_debug_host()){
-	// 	if(!file_exists(CB_PHOTOS_PATH)) @mkdir(CB_PHOTOS_PATH, 0755, true);
-	// 	if(!file_exists(CB_FILES_INCOMMING_PATH)) @mkdir(CB_FILES_INCOMMING_PATH, 0777, true);
-	// 	if(!file_exists(CB_FILES_PREVIEW_PATH)) @mkdir(CB_FILES_PREVIEW_PATH, 0777, true);
-	// 	if(!file_exists(CB_FILES_DELETED_PATH)) @mkdir(CB_FILES_DELETED_PATH, 0755, true);
-	// 	die(CB_PHOTOS_PATH);
-	// }
-	if(!file_exists(CB_PHOTOS_PATH)) @mkdir(CB_PHOTOS_PATH, 0755, true);
-	if(!file_exists(CB_FILES_INCOMMING_PATH)) @mkdir(CB_FILES_INCOMMING_PATH, 0777, true);
-	if(!file_exists(CB_FILES_PREVIEW_PATH)) @mkdir(CB_FILES_PREVIEW_PATH, 0777, true);
-	if(!file_exists(CB_FILES_DELETED_PATH)) @mkdir(CB_FILES_DELETED_PATH, 0755, true);
-
-	$GLOBALS['CB_LANGUAGE'] = CB_get_param('default_language');
-	$GLOBALS['USER_LANGUAGE'] = $GLOBALS['CB_LANGUAGE'];
-	if(!empty($_COOKIE['L']) && (strlen($_COOKIE['L']) == 2)) $GLOBALS['USER_LANGUAGE'] = strtolower($_COOKIE['L']);
-	if(!empty($_GET['l']) && (strlen($_GET['l']) == 2)) $GLOBALS['USER_LANGUAGE'] = strtolower($_GET['l']);
-
-	function CB_get_param($name){
-		global $CB_settings;
-		if(empty($name)) return false;
-		if(!isset($CB_settings[$name])) return null;
-		return $CB_settings[$name];
-	}
-	/* function to get the translation value, if defined, for custom specified language. if langiage not specified we return the translation for current user language  /**/
-	function L($name = false, $language = false){ //
-		if(empty($name)) return null;
-		if(empty($language)) return (defined('L\\'.$name) ? constant('L\\'.$name) : null);
-		else{
-			if(($language[0] == 'l') && (is_numeric($language[1]))) $language = substr($language, 1); // case when we receive laguage as "l{id}"
-			if(is_numeric($language)) $language = $_SESSION['languages']['per_id'][$language]['abreviation'];
-			return (isset($GLOBALS['TRANSLATIONS'][$language][$name]) ? $GLOBALS['TRANSLATIONS'][$language][$name] : null);
-		}
-	}
-	function UL(){ //return user language
-		//if(isset($_SESSION['languages']['per_id'])) return $_SESSION['languages']['per_abrev']['id'];
-		return $GLOBALS['USER_LANGUAGE'];
-	}
-	function UL_ID($language_abrev = false){
-		if(empty($language_abrev)) $language_abrev = UL();
-		if(!isset($_SESSION['languages']['per_abrev'][$language_abrev]['id'])){
-			$lang_id = null;
-			$sql = 'select id from languages where abreviation = $1';
-			$res = mysqli_query_params($sql, $language_abrev) or die(mysqli_query_error());
-			if($r = $res->fetch_row()) $lang_id = $r[0];
-			$res->close();
-			return $lang_id;
-		}
-		return $_SESSION['languages']['per_abrev'][$language_abrev]['id'];
-	}
-	function is_debug_host(){
-		return (empty($_SERVER['SERVER_NAME']) || ($_SERVER['SERVER_NAME'] == 'casebox.vvv.md') || in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1','46.55.49.126', '93.116.243.178', '195.22.253.6', '193.226.64.181', '188.240.73.107', '109.185.172.018', '192.168.1.110')));
-	}
-	function is_loged(){
-		return ( !empty($_COOKIE['key']) && 
-			!empty($_SESSION['key']) && 
-			!empty($_SESSION['ips']) && 
-			!empty($_SESSION['user']) &&  
-			($_COOKIE['key'] == $_SESSION['key']) && 
-			('|'.getIPs().'|' == $_SESSION['ips']) 
-			);
-	}
+	/**
+	 * Check server side operation system
+	 */
 	function is_windows(){
 		return (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN');
 	}
-
-	function initTranslations(){
-		if(isset($GLOBALS['TRANSLATIONS'])) return;
-		$lstr_abrev = isset($_SESSION['languages']['per_abrev'])  ? implode(',',array_keys($_SESSION['languages']['per_abrev'])) : $GLOBALS['USER_LANGUAGE'];
-		
-		/* reading global translations table from casebox database*/
-		$res = mysqli_query_params('select name, '.$lstr_abrev.' from `casebox`.translations where `type` < 2') or die(mysqli_query_error());
-		while($r = $res->fetch_assoc()){
-			reset($r);
-			$name = current($r);
-			while($v = next($r)) $GLOBALS['TRANSLATIONS'][key($r)][$name] = $v;
-		}
+	
+	/**
+	 * Get platform config from database
+	 */
+	function getPlatformDBConfig(){
+		$rez = array();
+		$sql = 'select param, `value` from casebox.config where pid is not null';
+		$res = DB\mysqli_query_params($sql) or die( DB\mysqli_query_error() );
+		while($r = $res->fetch_assoc())
+			$rez[$r['param']] = $r['value'];
 		$res->close();
-		
-		/* reading specific translations of core */
-		$lstr = '';
-		if(!isset($_SESSION['languages'])){
-			$res = mysqli_query_params('select id from languages where `abreviation` = $1', $GLOBALS['USER_LANGUAGE']) or die(mysqli_query_error());
-			if($r = $res->fetch_row()) $lstr = 'l'.$r[0];
-			$res->close();
-		}else $lstr = $_SESSION['languages']['string'];
-
-		$res = mysqli_query_params('select name, '.$lstr.' from translations where `type` < 2') or die(mysqli_query_error());
-		while($r = $res->fetch_assoc()){
-			reset($r);
-			$name = current($r);
-			while( ($v = next($r)) !== false ){
-				$l = substr(key($r), 1);
-				$l = isset($_SESSION['languages']['per_id'][$l]['abreviation']) ? $_SESSION['languages']['per_id'][$l]['abreviation'] : $GLOBALS['USER_LANGUAGE'];
-				$GLOBALS['TRANSLATIONS'][$l][$name] = $v;
-			}
-		}
-		$res->close();
-		/* verifying if localization JS file for current user language is up to date */
-		$last_translations_update_date = null;
-		$sql = 'SELECT MAX(udate) FROM (SELECT MAX(udate) `udate` FROM casebox.translations UNION SELECT MAX(udate) FROM translations) t';
-		$res = mysqli_query_params($sql) or die(mysqli_query_error());
-		if($r = $res->fetch_row()) $last_translations_update_date = strtotime($r[0]);
-		$res->close();
-
-		if(!empty($last_translations_update_date)){
-			$locale_filename = CB_JS_LOCALE_PATH.DIRECTORY_SEPARATOR.UL().'.js';
-			$create_locale_files = file_exists($locale_filename) ? (filemtime($locale_filename) < $last_translations_update_date) : true;
-			if($create_locale_files){
-				$rez = array();
-				$res = mysqli_query_params('select name, en, fr, ro, ru, hy from `casebox`.translations where `type` in (0,2)') or die(mysqli_query_error());
-				while($r = $res->fetch_assoc()){
-					reset($r);
-					$name = current($r);
-					while(($v = next($r)) !== false) $rez[key($r)][] = "'".$name."':'".addcslashes($v,"'")."'";
-				}
-				$res->close();
-				foreach($rez as $l => $v){
-					$filename = CB_JS_LOCALE_PATH.DIRECTORY_SEPARATOR.$l.'.js' ;
-					if(file_exists($filename)) unlink($filename);
-					file_put_contents($filename, 'L = {'.implode(',', $v).'}');
-				}
-			}
-		}
-		/* end of verifying if localization JS file for current user language is up to date */
-	}
-
-	function getMFVC($filename){//get Max File Version Count for an extension
-		$ext = getFileExtension($filename) || mb_strtolower( $filename);
-		$ext = trim($ext);
-		$rez = 0;
-		if(empty($_SESSION['mfvc'])) return $rez;
-		$ext = mb_strtolower($ext);
-		if(isset($_SESSION['mfvc'][$ext])) return $_SESSION['mfvc'][$ext];
-		if(isset($_SESSION['mfvc']['*'])) return $_SESSION['mfvc']['*'];
 		return $rez;
 	}
 
-	function getCustomGroupsConfig(){
-		$customGroupsConfig = array();
-		if(is_file(CB_CONFIG_PATH.'groupsConfig.php')) $customGroupsConfig = (require CB_CONFIG_PATH.'groupsConfig.php');
-		return $customGroupsConfig;
+	/**
+	 * Get core config from database
+	 */
+	function getCoreDBConfig(){
+		$rez = array();
+		$sql = 'select param, `value` from config';
+		$res = DB\mysqli_query_params($sql) or die( DB\mysqli_query_error() );
+		while($r = $res->fetch_assoc())
+			$rez[$r['param']] = $r['value'];
+		$res->close();
+		return $rez;
 	}
+
+	/**
+	 * Get custom core config for css, js, listeners 
+	 */
+	function getCustomConfig(){
+		$customConfig = array();
+		if(is_file(CORE_ROOT.'config.php')) $customConfig = (require CORE_ROOT.'config.php');
+		return $customConfig;
+	}
+
+	/**
+	 * Check if the client machine is debuging host
+	 */
+	function is_debug_host(){
+		return ( empty($_SERVER['SERVER_NAME'])
+			|| ($_SERVER['SERVER_NAME'] == 'casebox.vvv.md')
+			|| in_array( $_SERVER['REMOTE_ADDR'], array(
+					'127.0.0.1'
+					,'195.22.253.6'
+					,'193.226.64.181'
+					,'188.240.73.107'
+				)
+			)
+		);
+	}
+	
+	/**
+	 * Fire server side event
+	 * 
+	 * This function calls every defined listener for fired event
+	 */
 	function fireEvent($eventName, &$params){
-		$cfg = getCustomGroupsConfig();
+		$cfg = getCustomConfig();
 		if(empty($cfg['listeners'][$eventName])) return;
 		foreach ($cfg['listeners'][$eventName] as $className => $methods){
 			$class = new $className();
@@ -246,8 +250,4 @@
 			foreach($methods as $method) $class->$method($params);
 			unset($class);
 		}
-	}
-
-	function __autoload($class_name) {
-    		require_once $class_name . '.php';
 	}

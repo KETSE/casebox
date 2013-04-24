@@ -3,14 +3,18 @@
  * User authentification script.
  * 
  * This script does first checks on submited values from login.php.
- * Uses the Auth class and calls Login method with passed params to check authentification validity.
+ * Uses the User class and calls Login method with passed params to check authentification validity.
  * If the user passes the authentification he's redirected to the index.php where the CaseBox interface starts loading.
  * Otherwise, if the user do not pass authentification, it is redirected to login.php and the corresponding message is displayed (from $_SESSION['message']).
  * 
  * @package CaseBox
  * 
  * */
+
+namespace CB;
+
 include 'init.php';
+
 if ($_POST['s'] == L\Login) {
 	$errors = Array();
 	$u = strtolower(trim($_POST['u']));
@@ -19,14 +23,13 @@ if ($_POST['s'] == L\Login) {
 	if (empty($p)) $errors[] = L\Specify_password;
 
 	if (empty($errors)) {
-		require_once('lib/DB.php');
-		connect2DB();
-		require_once('remote/classes/Auth.php');
-		$r = Auth::Login($u, $p);
+		DB\connect();
+		$r = User::Login($u, $p);
 		if($r['success'] == false) $errors[] = L\Auth_fail;
 	}
 	$_SESSION['message'] = array_shift($errors);
 }
+
 if (empty($_SESSION['user'])) exit(header('Location: /login.php'));
+
 header('Location: /index.php');
-?>

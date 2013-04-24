@@ -1,4 +1,7 @@
 <?php
+
+namespace CB;
+
 class Calendar{
 
 	public function getEvents($p){
@@ -34,7 +37,7 @@ class Calendar{
 			$d = $sr['data'][$i];
 			$catIcon = '';
 			if(!empty($d['category_id'])){
-				$catIcon = getThesauryIcon($d['category_id']);
+				$catIcon = Util\getThesauryIcon($d['category_id']);
 				if(!empty($catIcon)) $catIcon = ' cal-cat-'.$catIcon;
 			}
 			@$rez['data'][] = array(
@@ -45,7 +48,7 @@ class Calendar{
 				,'title' => $d['name']
 				,'start' => $d['date']
 				,'category_id' => $d['category_id']
-				,'end' => coalesce($d['date_end'], $d['date'])
+				,'end' => Util\coalesce($d['date_end'], $d['date'])
 				//,'iconCls' => $d['iconCls']
 				,'cls' => 'cal-evt-bg-t'.$d['type'].$catIcon.(empty($d['iconCls']) ? '' : ' icon-padding '.$d['iconCls'])
 			);

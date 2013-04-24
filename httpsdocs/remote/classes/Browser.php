@@ -1,7 +1,7 @@
 <?php
-require_once 'Cases.php';
-require_once 'Security.php';
-require_once 'Log.php';
+
+namespace CB;
+
 class Browser{
 	/* getCustomControllerResults function used to check if node has a controller specified in its "cfg" field
 		if node have custom controller then results from the controller are returned, otherwise false is returned
@@ -15,7 +15,7 @@ class Browser{
 		if(empty($id) || !is_numeric($id) ) return false;
 
 		$sql = 'select cfg from tree where id = $1';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()) {
 		 	if(!empty($r['cfg'])) $r['cfg'] = json_decode($r['cfg']);
 		 	if(!empty($r['cfg']->controller)){
@@ -44,7 +44,7 @@ class Browser{
 		switch($p->source){
 			case 'field':
 			if( empty($p->pidValue) || empty($p->field) ) break;
-			$ids = toNumericArray($p->pidValue);
+			$ids = Util\toNumericArray($p->pidValue);
 			if(empty($ids)) break;
 				$sql = 'SELECT od.value FROM '.
 					'objects o '.
@@ -52,7 +52,7 @@ class Browser{
 					'JOIN templates_structure ts ON t.id = ts.`template_id` AND ts.name = $1 '.
 					'JOIN objects_data od ON o.id = od.`object_id` AND od.`field_id` = ts.id '.
 					'WHERE o.`id` IN ('.implode(',',$ids).');';
-				$res = mysqli_query_params($sql, $p->field) or die(mysqli_query_error());
+				$res = DB\mysqli_query_params($sql, $p->field) or die(DB\mysqli_query_error());
 				$ids = array();
 				while($r = $res->fetch_row()){
 					if(!empty($r[0])){
@@ -69,54 +69,57 @@ class Browser{
 				break;
 
 		}
+		$pids = false;
 		if(!empty($p->scope)){
 			switch($p->scope){
 				case 'project': /* limiting pid to project. If not in a project then to parent directory */
 					if(!empty($p->objectId) && is_numeric($p->objectId)){
 						$sql = 'select coalesce(f_get_objects_case_id($1), pid) from tree where id = $1 ';
-						$res = mysqli_query_params($sql, $p->objectId) or die(mysqli_query_error());
+						$res = DB\mysqli_query_params($sql, $p->objectId) or die(DB\mysqli_query_error());
 						if($r = $res->fetch_row()) $p->pids = $r[0]; 
 						$res->close();
 					}elseif(!empty($p->path)){
 						$v = explode('/',$p->path);
 						$pids = 0;
 						while(!empty($v) && empty($pids)) $pids = array_pop($v);
-						if(!empty($pids)) $p->pids = $pids;
 					}
 					break;
 				case 'parent':
 					if(!empty($p->objectId) && is_numeric($p->objectId)){
 						$sql = 'select pid from tree where id = $1 ';
-						$res = mysqli_query_params($sql, $p->objectId) or die(mysqli_query_error());
+						$res = DB\mysqli_query_params($sql, $p->objectId) or die(DB\mysqli_query_error());
 						if($r = $res->fetch_row()) $p->pids = $r[0]; 
 						$res->close();
 					}elseif(!empty($p->path)){
 						$v = explode('/',$p->path);
 						$pids = 0;
 						while(!empty($v) && empty($pids)) $pids = array_pop($v);
-						if(!empty($pids)) $p->pids = $pids;
 					}
 
 					break;
 				case 'self': 
 					if(!empty($p->objectId) && is_numeric($p->objectId)){
 						$sql = 'select id from tree where id = $1 ';
-						$res = mysqli_query_params($sql, $p->objectId) or die(mysqli_query_error());
+						$res = DB\mysqli_query_params($sql, $p->objectId) or die(DB\mysqli_query_error());
 						if($r = $res->fetch_row()) $p->pids = $r[0]; 
 						$res->close();
 					}elseif(!empty($p->path)){
 						$v = explode('/',$p->path);
 						$pids = 0;
 						while(!empty($v) && empty($pids)) $pids = array_pop($v);
-						if(!empty($pids)) $p->pids = $pids;
 					}
 					break;
 				default: 
-					if(empty($p->descendants)) $p->pid = toNumericArray($p->scope);
-					else $p->pids = toNumericArray($p->scope);
+					$pids = Util\toNumericArray($p->scope);
 					break;
 			}
 		}
+		if(!empty($pids)){
+			if(empty($p->descendants)) 
+				$p->pid = $pids;
+			else $p->pids = $pids;
+		}
+
 		$p->fl = 'id,name,type,subtype,template_id,status';
 		if(!empty($p->fields)){
 			if(!is_array($p->fields)) $p->fields = explode(',', $p->fields);
@@ -139,13 +142,13 @@ class Browser{
 		if(!is_numeric($pid)) return array('success' => false);
 
 		/* check security access */
-		if(!Security::canCreateFolders($pid)) throw new Exception(L\Access_denied);
+		if(!Security::canCreateFolders($pid)) throw new \Exception(L\Access_denied);
 		
 		/* find default folder name */
 		$newFolderName = L\NewFolder;
 		$existing_names = array();
 		$sql = 'select name from tree where pid = $1 and name like $2';
-		$res = mysqli_query_params($sql, array($pid, $newFolderName.'%')) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, array($pid, $newFolderName.'%')) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()) $existing_names[] = $r[0];
 		$res->close();
 		$i = 1;
@@ -155,8 +158,8 @@ class Browser{
 		}
 		/* end of find default folder name */
 
-		mysqli_query_params('insert into tree (pid, user_id, `type`, `name`, cid, uid) values ($1, $2, $3, $4, $2, $2)', array($pid, $_SESSION['user']['id'], 1, $newFolderName)) or die(mysqli_query_error());
-		$id = last_insert_id();
+		DB\mysqli_query_params('insert into tree (pid, user_id, `type`, `name`, cid, uid) values ($1, $2, $3, $4, $2, $2)', array($pid, $_SESSION['user']['id'], 1, $newFolderName)) or die(DB\mysqli_query_error());
+		$id = DB\last_insert_id();
 		SolrClient::runCron();
 		return array('success' => true, 'path' => $path, 'data' => array( 'nid' => $id, 'pid' => $pid, 'name' => $newFolderName, 'system' => 0, 'type' => 1, 'subtype' => 0, 'iconCls' => 'icon-folder', 'cid' => $_SESSION['user']['id']) );
 	}
@@ -177,8 +180,8 @@ class Browser{
 		
 		/* if access is granted then setting dstatus=1 for specified ids and dstatus = 2 for all their children /**/
 		fireEvent('beforeNodeDbDelete', $ids);
-		mysqli_query_params('update tree set did = $1, dstatus = 1, ddate = CURRENT_TIMESTAMP where id in ('.implode(',', $ids).') ', $_SESSION['user']['id']) or die(mysqli_query_error());
-		foreach($ids as $id) mysqli_query_params('call p_mark_all_childs_as_deleted($1, $2)', array($id, $_SESSION['user']['id'])) or die(mysqli_query_error());
+		DB\mysqli_query_params('update tree set did = $1, dstatus = 1, ddate = CURRENT_TIMESTAMP where id in ('.implode(',', $ids).') ', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+		foreach($ids as $id) DB\mysqli_query_params('call p_mark_all_childs_as_deleted($1, $2)', array($id, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		SolrClient::runCron();
 		
 		fireEvent('nodeDbDelete', $ids);
@@ -192,13 +195,13 @@ class Browser{
 		if(!is_numeric($id) || empty($p->name)) return array('success' => false);
 
 		/* check security access */
-		if(!Security::canWrite($id)) throw new Exception(L\Access_denied);
+		if(!Security::canWrite($id)) throw new \Exception(L\Access_denied);
 		
-		mysqli_query_params('update tree set name = $1 where id = $2', array($p->name, $id)) or die(mysqli_query_error());
-		mysqli_query_params('update cases set name = $1 where id = $2', array($p->name, $id)) or die(mysqli_query_error());
-		mysqli_query_params('update objects set custom_title = $1 where id = $2', array($p->name, $id)) or die(mysqli_query_error());
-		mysqli_query_params('update files set name = $1 where id = $2', array($p->name, $id)) or die(mysqli_query_error());
-		mysqli_query_params('update tasks set title = $1 where id = $2', array($p->name, $id)) or die(mysqli_query_error());
+		DB\mysqli_query_params('update tree set name = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update cases set name = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update objects set custom_title = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update files set name = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update tasks set title = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
 		SolrClient::runCron();
 		return array('success' => true, 'data' => array( 'id' => $id, 'newName' => $p->name) );
 	}
@@ -215,14 +218,14 @@ class Browser{
 			if( $this->isChildOf($p->pid, $p->data[$i]->id) ) return array('success' => false, 'msg' => L\CannotCopyObjectInsideItself);
 
 			$sql = 'select id, pid, name, `system`, `type`, subtype from tree where id = $1';
-			$res = mysqli_query_params($sql, $p->data[$i]->id) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params($sql, $p->data[$i]->id) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$process_ids[] = $r['id'];
 				if(empty($p->action)) $p->action = 'copy';
 				if(!$p->confirmed && ($p->action !== 'copy') ){
 					$type = ($p->action == 'shortcut') ? 2 : $r['type'];
 					$sql = 'select id from tree where pid = $1 and system = $2 and type = $3 and subtype = $4 and name = $5';
-					$res2 = mysqli_query_params($sql, array($p->pid, $r['system'], $type, $r['subtype'], $r['name'])) or die(mysqli_query_error());
+					$res2 = DB\mysqli_query_params($sql, array($p->pid, $r['system'], $type, $r['subtype'], $r['name'])) or die(DB\mysqli_query_error());
 					if($r2 = $res2->fetch_assoc()){
 						//if($r2['id'] == $r['id']) return array('success' => false, 'msg' => L\CannotCopyObjectOverItself);
 						return array('success' => false, 'confirm' => true, 'msg' => L\ConfirmOverwriting);
@@ -245,78 +248,78 @@ class Browser{
 				foreach($process_ids as $id){
 					$newName = '';
 					$sql = 'select t1.name, t2.name from tree t1 left join tree t2 on t2.pid = $2 and t2.name = t1.name where t1.id = $1';
-					$res = mysqli_query_params($sql, array($id, $p->pid)) or die(mysqli_query_error());
+					$res = DB\mysqli_query_params($sql, array($id, $p->pid)) or die(DB\mysqli_query_error());
 					if($r = $res->fetch_row()) $newName = empty($r[1]) ? $r[0] : $this->getNewCopyName($p->pid, $r[0]);
 					$res->close();
 
-					mysqli_query_params('insert into tree(pid, user_id, `system`, `type`, subtype, tag_id, name, `date`, size, is_main, cfg, cid, cdate, uid, udate)
-						select $2, user_id, 0, `type`, subtype, tag_id, $4, `date`, size, is_main, cfg, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP from tree where id =$1', array($id, $p->pid, $_SESSION['user']['id'], $newName) ) or die(mysqli_query_error());
-					$obj_id = last_insert_id();
+					DB\mysqli_query_params('insert into tree(pid, user_id, `system`, `type`, subtype, tag_id, name, `date`, size, is_main, cfg, cid, cdate, uid, udate)
+						select $2, user_id, 0, `type`, subtype, tag_id, $4, `date`, size, is_main, cfg, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP from tree where id =$1', array($id, $p->pid, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
+					$obj_id = DB\last_insert_id();
 					$type = 0;
-					$res = mysqli_query_params('select `type` from tree where id = $1', $id) or die(mysqli_query_error());
+					$res = DB\mysqli_query_params('select `type` from tree where id = $1', $id) or die(DB\mysqli_query_error());
 					if($r = $res->fetch_row()) $type = $r[0];
 					$res->close();
 					switch($type){
 						case 3://case
-							mysqli_query_params('INSERT INTO cases (id, nr, name, closed, close_date, cid, uid, cdate, udate)'.
-								' select $2, nr, $4, closed, close_date, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from cases where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(mysqli_query_error());
+							DB\mysqli_query_params('INSERT INTO cases (id, nr, name, closed, close_date, cid, uid, cdate, udate)'.
+								' select $2, nr, $4, closed, close_date, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from cases where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
 							break;
 						
 						case 4://case object
-							mysqli_query_params('INSERT INTO objects(id, type_id, title, custom_title, template_id, date_start, date_end, author, iconCls, details, private_for_user, cid, uid, cdate, udate)'.
-								' select $2, type_id, title, $4, template_id, date_start, date_end, author, iconCls, details, private_for_user, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from objects where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(mysqli_query_error());
+							DB\mysqli_query_params('INSERT INTO objects(id, type_id, title, custom_title, template_id, date_start, date_end, author, iconCls, details, private_for_user, cid, uid, cdate, udate)'.
+								' select $2, type_id, title, $4, template_id, date_start, date_end, author, iconCls, details, private_for_user, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from objects where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
 							
 							$duplicates = array(0 => 0);
 							$sql = 'select id, pid, object_id, field_id from objects_duplicates where object_id = $1 order by id';
-							$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+							$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 							while($r = $res->fetch_assoc()){
-								mysqli_query_params('INSERT INTO objects_duplicates(pid, object_id, field_id)'.
-								' values($1, $2, $3)', array($duplicates[$r['pid']], $r['object_id'], $r['field_id']) ) or die(mysqli_query_error());
-								$duplicates[$r['id']] = last_insert_id();
+								DB\mysqli_query_params('INSERT INTO objects_duplicates(pid, object_id, field_id)'.
+								' values($1, $2, $3)', array($duplicates[$r['pid']], $r['object_id'], $r['field_id']) ) or die(DB\mysqli_query_error());
+								$duplicates[$r['id']] = DB\last_insert_id();
 							}
 							$res->close();
 
 							$sql = 'select field_id, duplicate_id, `value`, info, files, private_for_user from objects_data where object_id =$1';
-							$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+							$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 							while($r = $res->fetch_assoc())
-								mysqli_query_params('INSERT INTO objects_data(object_id, field_id, duplicate_id, `value`, info, files, private_for_user)'.
-								' values($1, $2, $3, $4, $5, $6, $7)', array($obj_id, $r['field_id'], $duplicates[$r['duplicate_id']], $r['value'], $r['info'], $r['files'], $r['private_for_user']) ) or die(mysqli_query_error());
+								DB\mysqli_query_params('INSERT INTO objects_data(object_id, field_id, duplicate_id, `value`, info, files, private_for_user)'.
+								' values($1, $2, $3, $4, $5, $6, $7)', array($obj_id, $r['field_id'], $duplicates[$r['duplicate_id']], $r['value'], $r['info'], $r['files'], $r['private_for_user']) ) or die(DB\mysqli_query_error());
 							$res->close();
 							break;
 						
 						case 5://file
-							mysqli_query_params('insert INTO files(id, content_id, `date`, `name`, title, cid, uid, cdate, udate)'.
-								' select $2, content_id, `date`, $4, `title`, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from files where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(mysqli_query_error());
+							DB\mysqli_query_params('insert INTO files(id, content_id, `date`, `name`, title, cid, uid, cdate, udate)'.
+								' select $2, content_id, `date`, $4, `title`, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from files where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
 							break;
 						
 						case 6://task
 						case 7://event
-							mysqli_query_params('INSERT INTO tasks(id, title, date_start, date_end, `type`, privacy, responsible_party_id, responsible_user_ids, autoclose, description, parent_ids, child_ids, `time`, reminds, `status`, missed, completed, cid, uid, cdate, udate)'.
-								' select $2, $4, date_start, date_end, `type`, privacy, responsible_party_id, responsible_user_ids, autoclose, description, parent_ids, child_ids, `time`, reminds, `status`, missed, completed, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from tasks where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(mysqli_query_error());
+							DB\mysqli_query_params('INSERT INTO tasks(id, title, date_start, date_end, `type`, privacy, responsible_party_id, responsible_user_ids, autoclose, description, parent_ids, child_ids, `time`, reminds, `status`, missed, completed, cid, uid, cdate, udate)'.
+								' select $2, $4, date_start, date_end, `type`, privacy, responsible_party_id, responsible_user_ids, autoclose, description, parent_ids, child_ids, `time`, reminds, `status`, missed, completed, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from tasks where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
 							break;
 						
 						case 8://message
 							break;
 					}
-					if(!empty($existent_name)) mysqli_query_params('update tree set name = $2 where id = $1', array($obj_id, $this->getNewCopyName($p->pid, $existent_name) ) ) or die(mysqli_query_error());
+					if(!empty($existent_name)) DB\mysqli_query_params('update tree set name = $2 where id = $1', array($obj_id, $this->getNewCopyName($p->pid, $existent_name) ) ) or die(DB\mysqli_query_error());
 					Cases::updateCaseUpdateInfo($obj_id);
 				}
 
 				break;
 			case 'move':
 				foreach($process_ids as $id) Cases::updateCaseUpdateInfo($id);
-				$res = mysqli_query_params('select pid from tree where id in ('.implode(',', $process_ids).')') or die(mysqli_query_error());
+				$res = DB\mysqli_query_params('select pid from tree where id in ('.implode(',', $process_ids).')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_row()) $modified_pids[] = intval($r[0]);
 				$res->close();
-				mysqli_query_params('update tree set pid = $1 where id in ('.implode(',', $process_ids).')', $p->pid) or die(mysqli_query_error());
+				DB\mysqli_query_params('update tree set pid = $1 where id in ('.implode(',', $process_ids).')', $p->pid) or die(DB\mysqli_query_error());
 				
 				foreach($process_ids as $id) Cases::updateCaseUpdateInfo($id);
 				
 				$this->markAllChildsAsUpdated($process_ids);
 				break;
 			case 'shortcut':
-				mysqli_query_params('insert into tree (pid, `system`, `type`, `subtype`, target_id, `name`, cid) SELECT $1, 0, 2, 0, id, `name`, $2 from tree where id in ('.implode(',', $process_ids).')', array($p->pid, $_SESSION['user']['id'])) or die(mysqli_query_error());
-				Cases::updateCaseUpdateInfo(last_insert_id());
+				DB\mysqli_query_params('insert into tree (pid, `system`, `type`, `subtype`, target_id, `name`, cid) SELECT $1, 0, 2, 0, id, `name`, $2 from tree where id in ('.implode(',', $process_ids).')', array($p->pid, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+				Cases::updateCaseUpdateInfo(DB\last_insert_id());
 				break;
 		}
 		SolrClient::runCron();
@@ -337,7 +340,7 @@ class Browser{
 		do{
 			$newName = L\CopyOf.' '.$name.( ($i > 0) ? ' ('.$i.')' : '').$ext;
 			$sql = 'select id from tree where pid = $1 and name = $2';
-			$res = mysqli_query_params($sql, array($pid, $newName)) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params($sql, array($pid, $newName)) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()) $id = $r['id'];
 			else $id = null;
 			$res->close();
@@ -352,7 +355,7 @@ class Browser{
 		/* clean previous unhandled uploads if any */
 		$a = $files->getUploadParams();
 		if( ($a !== false) && !empty( $a['files'] ) ){
-			@unlink(CB_FILES_INCOMMING_PATH.$_SESSION['key']);
+			@unlink(FILES_INCOMMING_PATH.$_SESSION['key']);
 			$files->removeIncomingFiles($a['files']);
 		}
 		/* end of clean previous unhandled uploads if any */
@@ -367,7 +370,7 @@ class Browser{
 		}
 
 		//if( !$files->fileExists($p['pid']) ) return array('success' => false, 'msg' => L\TargetFolderDoesNotExist);
-		$res = mysqli_query_params('select id from tree where id = $1', $p['pid']) or die(mysqli_query_error()); 
+		$res = DB\mysqli_query_params('select id from tree where id = $1', $p['pid']) or die(DB\mysqli_query_error()); 
 		if($r = $res->fetch_assoc()){ }else return array('success' => false, 'msg' => L\TargetFolderDoesNotExist);
 		$res->close();
 
@@ -387,7 +390,7 @@ class Browser{
 				$F = $archiveFiles;
 				break;
 			default: 
-				$files->moveUploadedFilesToIncomming($F) or die('cannot move file to incomming '.CB_FILES_INCOMMING_PATH);
+				$files->moveUploadedFilesToIncomming($F) or die('cannot move file to incomming '.FILES_INCOMMING_PATH);
 				break;
 		}
 
@@ -401,7 +404,7 @@ class Browser{
 
 			$allow_new_version = false;
 			foreach($p['existentFilenames'] as $f){
-				$mfvc = getMFVC($f['name']);
+				$mfvc = Files::getMFVC($f['name']);
 				if($mfvc > 0) $allow_new_version = true;
 			}
 			$rez = array(
@@ -457,7 +460,7 @@ class Browser{
 						'success' => false
 						,'type' => 'filesexist'
 						//,'filename' => $a['newName']
-						,'allow_new_version' => (getMFVC($a['newName']) > 0)
+						,'allow_new_version' => (Files::getMFVC($a['newName']) > 0)
 						,'suggestedFilename' => $files->getAutoRenameFilename($a['pid'], $a['newName'])
 						,'msg' => str_replace( '{filename}', '"'.$a['newName'].'"', L\FilenameExistsInTarget )
 					);
@@ -484,7 +487,7 @@ class Browser{
 	function uploadNewVersion($p){
 
 		$sql = 'select pid from tree where id = $1';
-		$res = mysqli_query_params($sql, $p['id']) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $p['id']) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()) $p['pid'] = $r['pid'];
 		$res->close();
 
@@ -492,7 +495,7 @@ class Browser{
 		
 		$f = $_FILES['file'];
 		if($f['error'] == UPLOAD_ERR_NO_FILE){
-			mysqli_query_params('update files set `title` = $2, `date` = $3 where id = $1', array($p['id'], $p['title'], clientToMysqlDate($p['date']) ) ) or die(mysqli_query_error());
+			DB\mysqli_query_params('update files set `title` = $2, `date` = $3 where id = $1', array($p['id'], $p['title'], Util\clientToMysqlDate($p['date']) ) ) or die(DB\mysqli_query_error());
 			return $rez;
 		}
 		if($f['error'] != UPLOAD_ERR_OK) return Array('success' => false, 'msg' => L\Error_uploading_file .': '.$f['error']);
@@ -510,9 +513,9 @@ class Browser{
 		$favoriteFolderId = $this->getFavoriteFolderId();
 		$p->pid = $favoriteFolderId;
 		$sql = 'select id from tree where pid = $1 and `type` = 2 and target_id = $2';
-		$res = mysqli_query_params($sql, array($favoriteFolderId, $p->id)) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, array($favoriteFolderId, $p->id)) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()){
-			mysqli_query_params('delete from tree where id = $1', array($r[0]) ) or die(mysqli_query_error());
+			DB\mysqli_query_params('delete from tree where id = $1', array($r[0]) ) or die(DB\mysqli_query_error());
 			$res->close();
 			$p->favorite = 0;
 		}else{
@@ -520,13 +523,13 @@ class Browser{
 			/* get objects name */
 			$name = 'Llink';
 			$sql = 'select name from tree where id = $1';
-			$res = mysqli_query_params($sql, array($p->id)) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params($sql, array($p->id)) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_row()){
 				$name = $r[0];
 			}
 			$res->close();
 			/* end of get objects name */
-			mysqli_query_params('insert into tree (pid, user_id, `type`, name, target_id) values($1, $2, 2, $3, $4)', array($favoriteFolderId, $_SESSION['user']['id'], $name, $p->id) ) or die(mysqli_query_error());
+			DB\mysqli_query_params('insert into tree (pid, user_id, `type`, name, target_id) values($1, $2, 2, $3, $4)', array($favoriteFolderId, $_SESSION['user']['id'], $name, $p->id) ) or die(DB\mysqli_query_error());
 			$p->favorite = 1;
 		}
 		return array('success' => true, 'data' => $p,);
@@ -537,21 +540,21 @@ class Browser{
 		$rez = array('success' => true, 'data' => $ids); 
 		if(empty($ids)) return $rez;
 		$ids = implode(',', $ids);
-		mysqli_query_params('update tree set oid = $1, uid = $1 where id in ('.$ids.') and `system` = 0', $_SESSION['user']['id']) or die(mysqli_query_error());
+		DB\mysqli_query_params('update tree set oid = $1, uid = $1 where id in ('.$ids.') and `system` = 0', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
 		//TODO: view if needed to mark all childs as updated, for security to be changed ....
 
-		// mysqli_query_params('update tree set cid = $1, uid = $1 where id in ('.$ids.') and `system` = 0', $_SESSION['user']['id']) or die(mysqli_query_error());
-		// mysqli_query_params('update cases set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
-		// mysqli_query_params('update objects set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
-		// mysqli_query_params('update files set cid = $1, uid = $1 where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());
-		// mysqli_query_params('update tasks set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(mysqli_query_error());		
+		// DB\mysqli_query_params('update tree set cid = $1, uid = $1 where id in ('.$ids.') and `system` = 0', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+		// DB\mysqli_query_params('update cases set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+		// DB\mysqli_query_params('update objects set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+		// DB\mysqli_query_params('update files set cid = $1, uid = $1 where id in ('.$ids.')', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+		// DB\mysqli_query_params('update tasks set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(DB\mysqli_query_error());		
 		SolrClient::runCron();
 		return $rez;
 	}
 	public function isChildOf($id, $pid){
 		$rez = false;
 		$sql = 'SELECT f_get_tree_ids_path($1)';
-		$res = mysqli_query_params( $sql, $id ) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params( $sql, $id ) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()){
 			$r = '/'.$r[0].'/r';
 			$rez = ( strpos($r, "/$pid/") !== false ); 
@@ -562,7 +565,7 @@ class Browser{
 	static function getRootFolderId(){
 		$id = null;
 		$sql = 'select id from tree where pid is null and `system` = 1 and `type` = 1 and subtype = 0';
-		$res = mysqli_query_params($sql, array()) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $id = $r[0];
 		$res->close();
 		return $id;
@@ -570,7 +573,7 @@ class Browser{
 	public function getRootProperties($id){
 		$rez = array('success' => true, 'data' => array());
 		$sql = 'select id `nid`, `system`, `type`, `subtype`, `name`, `cfg` from tree where id = $1';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			if(empty($r['cfg'])) unset($r['cfg']);
 			else $r['cfg'] = json_decode($r['cfg']);
@@ -585,7 +588,7 @@ class Browser{
 	static function getFavoriteFolderId(){
 		$id = null;
 		$sql = 'select id from tree where pid is null and `system` = 1 and `type` = 1 and subtype = 2 and user_id = $1';
-		$res = mysqli_query_params($sql, array($_SESSION['user']['id'])) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, array($_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $id = $r[0];
 		$res->close();
 		return $id;
@@ -596,7 +599,7 @@ class Browser{
 		$ids = array_filter($ids, 'is_numeric');
 		if(empty($ids)) return;
 		foreach($ids as $id)
-			mysqli_query_params('call p_mark_all_childs_as_updated($1)', $id) or die(mysqli_query_error());
+			DB\mysqli_query_params('call p_mark_all_childs_as_updated($1)', $id) or die(DB\mysqli_query_error());
 		return true;
 	}
 
@@ -610,7 +613,7 @@ class Browser{
 			}
 			if(!isset($d['loaded'])){
 				$sql = 'select count(*) from tree where pid = $1'.( empty($this->showFoldersContent) ? ' and `type` in (1, 3)' : '' );
-				$res = mysqli_query_params($sql, $d['nid']) or die(mysqli_query_error());
+				$res = DB\mysqli_query_params($sql, $d['nid']) or die(DB\mysqli_query_error());
 				if($r = $res->fetch_row()) $d['loaded'] = empty($r[0]);
 				$res->close();
 			}
@@ -629,7 +632,7 @@ class Browser{
 				case 0: break; 
 				case 1: switch ($d['subtype']) {
 						case 1:	if( (substr($d['name'], 0, 1) == '[') && (substr($d['name'], -1, 1) == ']') )
-								$d['name'] = L(substr($d['name'], 1, strlen($d['name']) -2));
+								$d['name'] = L\get(substr($d['name'], 1, strlen($d['name']) -2));
 							break;
 						case 2:	$d['name'] = L\MyCaseBox; break;
 						case 3:	$d['name'] = L\MyDocuments; break;
@@ -658,7 +661,7 @@ class Browser{
 		if(!isset($data['type'])) return '';
 		
 		switch(intval($data['type'])){
-			case 0: return coalesce($data['iconCls'], 'icon-folder');
+			case 0: return Util\coalesce($data['iconCls'], 'icon-folder');
 				break; 
 			case 1: 
 				switch(intval(@$data['subtype'])){
@@ -672,7 +675,7 @@ class Browser{
 					case 8:	return 'icon-folder'; break;
 					case 9: return 'icon-blue-folder'; break;
 					case 10: return 'icon-blue-folder-share'; break;
-					default: return coalesce($data['iconCls'], 'icon-folder'); break;
+					default: return @Util\coalesce($data['iconCls'], 'icon-folder'); break;
 				}
 				break;
 			case 2: return 'icon-shortcut';//case

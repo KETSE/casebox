@@ -1,16 +1,8 @@
 <?php
-$customConfigGroups = getCustomGroupsConfig();
-$API = empty($customConfigGroups[CB_PROJ.'_api']) ? array() : $customConfigGroups[CB_PROJ.'_api'];
+$customConfig = \CB\getCustomConfig();
+$API = empty($customConfig[CB\CORENAME.'_api']) ? array() : $customConfig[CB\CORENAME.'_api'];
 $API = array_merge( $API, array(
-	'Auth' => array(
-		'methods'=>array(
-			'getLoginInfo'	=>	array('len' => 0)
-			,'login'		=>	array('len' => 2)
-			,'logout'		=>	array('len' => 0)
-			,'setLanguage'	=>	array('len' => 1)
-		)
-	)
-	,'Browser' => array(
+	'Browser' => array(
 		'methods' => array(
 			'createFolder'		=> array('len' => 1)
 			,'paste'		=> array('len' => 1)
@@ -63,8 +55,6 @@ $API = array_merge( $API, array(
 			'searchCases'		=>	array('len' => 1)
 			,'searchInCase'		=>	array('len' => 1)
 			,'searchObjects'	=>	array('len' => 1)
-			//,'saveQuery'		=>	array('len' => 1)
-			//,'getSavedQueries'	=>	array('len' => 0)
 		)
 	)
 
@@ -76,18 +66,14 @@ $API = array_merge( $API, array(
 	
 	,'Cases' => array(
 		'methods'=>array(
-			'getList'			=>	array('len'=>1)
-			,'create'			=>	array('len'=>1)
-			,'save'			=>	array('len'=>1)
-			,'close'			=>	array('len'=>1)
+			'getList'		=>	array('len'=>1)
+			,'create'		=>	array('len'=>1)
+			,'close'		=>	array('len'=>1)
 			,'load'			=>	array('len'=>1)
 			,'lock'			=>	array('len'=>1)
-			,'unlock'			=>	array('len'=>1)
+			,'unlock'		=>	array('len'=>1)
 			,'getTasks' 		=> 	array('len'=>2)
 			,'transmitCase'		=>	array('len'=>3)
-			,'toggleCaseTag'	=> 	array('len' => 1)
-			,'updateCaseTags'	=> 	array('len' => 1)
-			,'updateFileTags'	=> 	array('len' => 1)
 			,'getCaseId'		=> 	array('len' => 1)
 			,'toggleFavorite'	=> 	array('len' => 1)
 			,'getFavorites'		=> 	array('len' => 0)
@@ -106,7 +92,6 @@ $API = array_merge( $API, array(
 			,'create'		=>	array('len' => 1)
 			,'save'			=>	array('len' => 1, 'formHandler' => true)
 			,'saveReminds'		=>	array('len' => 1)
-			//,'destroy'		=>	array('len' => 1)
 			,'setUserStatus'	=>	array('len' => 1)
 			,'complete'		=>	array('len' => 1)
 			,'close'		=>	array('len' => 1)
@@ -121,29 +106,28 @@ $API = array_merge( $API, array(
 	
 	,'Objects' => array(
 		'methods'=>array(
-			'load'				=>	array('len'=>1)
+			'load'			=>	array('len'=>1)
 			,'save'			=>	array('len'=>1, 'formHandler' => true)
-			//,'destroy'			=>	array('len'=>1)
-			,'getViolations'		=>	array('len'=>1)
-			,'getAssociatedObjects'		=>	array('len'=>1)
+			,'getViolations'	=>	array('len'=>1)
+			,'getAssociatedObjects'	=>	array('len'=>1)
 		)
 	)
 
 	,'Files' => array(
 		'methods'=>array(
 			'getProperties'		=>	array('len'=>1)
-			,'restoreVersion'		=>	array('len'=>1)
-			,'deleteVersion'		=>	array('len'=>1)
-			,'merge'			=>	array('len'=>1)
-			,'getDuplicates'		=>	array('len'=>1)
-			,'checkExistentContents'	=>	array('len'=>1)
+			,'restoreVersion'	=>	array('len'=>1)
+			,'deleteVersion'	=>	array('len'=>1)
+			,'merge'		=>	array('len'=>1)
+			,'getDuplicates'	=>	array('len'=>1)
+			,'checkExistentContents'=>	array('len'=>1)
 		)
 	)
 	
 	,'Thesauri' => array(
 		'methods'=>array(
 			'create'	=>	array('len'=>1)
-			,'read'	=>	array('len'=>1)
+			,'read'		=>	array('len'=>1)
 			,'update'	=>	array('len'=>1)
 			,'destroy'	=>	array('len'=>1)
 		)
@@ -159,7 +143,7 @@ $API = array_merge( $API, array(
 			,'loadTemplate'	=>	array('len'=>1)
 			,'getTemplatesStructure'=>array('len'=>0)
 			,'saveTemplate'	=>	array('len'=>1, 'formHandler' => true)
-			,'getCaseTypeTempleId'=>array('len'=>1)
+			// ,'getCaseTypeTempleId'=>array('len'=>1)
 		)
 	)
 	
@@ -170,7 +154,11 @@ $API = array_merge( $API, array(
 	)
 	,'User' => array(
 		'methods' => array(
-			'getMainMenuItems' 	=> array('len' => 0)
+			'getLoginInfo'		=> array('len' => 0)
+			,'login'		=> array('len' => 2)
+			,'logout'		=> array('len' => 0)
+			,'setLanguage'		=> array('len' => 1)
+			,'getMainMenuItems' 	=> array('len' => 0)
 			,'uploadPhoto' 		=> array('len' => 1, 'formHandler' => true)
 		)
 	)
@@ -188,10 +176,6 @@ $API = array_merge( $API, array(
 			,'deleteUser'			=> array('len' => 1)
 			,'changePassword' 		=> array('len' => 1, 'formHandler' => true)
 			,'changeUsername' 		=> array('len' => 1)
-			,'getUserTags'			=> array('len' => 0)
-			,'addUserTag'			=> array('len' => 1)
-			,'searchUserTags'		=> array('len' => 1)
-			,'searchSysTags' 		=> array('len' => 1)
 		)
 	)
 	,'Security' => array(
@@ -218,17 +202,7 @@ $API = array_merge( $API, array(
 			,'tagsMoveElement'		=> array('len' => 1)
 			,'tagsDeleteElement'		=> array('len' => 1)
 			,'tagsSortChilds'		=> array('len' => 1)
-			,'tagGroupsGetChildren'		=> array('len' => 1)
-			,'tagsGroupSave'		=> array('len' => 1)
-			,'tagsGroupDelete'		=> array('len' => 1)
-			,'tagsGroupAddElement'		=> array('len' => 1)
-			,'tagsGroupRemoveElement'	=> array('len' => 1)
-			,'getTagGroupsTree'		=> array('len' => 1)
-			,'templateAssociateToTag'	=> array('len' => 1)
-			,'templateDeassociateFromTag'	=> array('len' => 1)
-			,'templateMoveToTag'		=> array('len' => 1)
 		)
 	)
 )
 );
-?>

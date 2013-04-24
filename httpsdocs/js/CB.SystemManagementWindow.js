@@ -177,7 +177,6 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 				,listeners:{
 					scope: this
 					,beforeload: function(treeLoader, node) { treeLoader.baseParams.path = node.getPath('id'); }
-					//,load: function(o, n, r) { if(n.attributes.kind > 1) n.sort(this.sortTree)}
 					,loadexception: function(loader, node, response) { node.leaf = false; node.loaded = false; }
 				}
 			})
@@ -194,7 +193,6 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 			,listeners:{
 				scope: this
 				,afterlayout: function(){this.getRootNode().expand()}
-				//,nodedragover: function(o){ if( (o.point != 'append') ){ o.cancel = true; return; } }
 				,beforenodedrop: function(o){
 					o.cancel = true;
 					o.dropStatus = true;
@@ -280,17 +278,14 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 	,onSaveElementProcess: function(r, e){
 		this.getEl().unmask();
 		if(r.success != true) return;
-		if(r.updatedTagGroups) CB.DB.updateTagGroups(r.updatedTagGroups);
 		pn = this.getSelectionModel().getSelectedNode();
 		if(pn.attributes.id == r.data.id){
 			Ext.apply(pn.attributes, r.data);
 			pn.setText(r.data['l'+App.loginData.language_id]);
 			pn.setCls(Ext.isEmpty(pn.attributes.hidden) ? '' : 'cG');
-			//pn.parentNode.sort(this.sortTree);
 		}else{
 			if(pn.isExpanded()){
 				n = pn.appendChild(r.data);
-				//pn.sort(this.sortTree);
 				sm = this.getSelectionModel();
 				sm.clearSelections();
 				sm.select(n);
@@ -316,11 +311,6 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 		w.on('hide', this.onSaveElementSubmitClick, this);
 		w.show();
 	}
-/*	,processAddFolder: function(r, e){
-		if(r.success !== true) return false;
-		path = '/root/o-'+r.data.office?_id+'/u-'+r.data.id;
-		this.getRootNode().reload(function(){this.selectPath(path, 'nid')}, this);
-	}/**/
 	,sortTree: function(n1, n2){ 
 		if(n1.attributes.type < n2.attributes.type) return -1;
 		if(n1.attributes.type > n2.attributes.type) return 1;
@@ -334,7 +324,6 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 	}
 	,processMoveElement: function(r, e){
 		if(r.success !== true) return false;
-		if(r.updatedTagGroups) CB.DB.updateTagGroups(r.updatedTagGroups);
 		attr = this.sourceNode.attributes;
 		if(this.sourceNode.hasChildNodes() || !this.sourceNode.loaded) attr.loaded = false;
 		this.sourceNode.remove(true);
@@ -370,7 +359,7 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 			this.getSelectionModel().clearSelections();
 			this.getSelectionModel().select(nn);
 		}
-	}/**/
+	}
 	,onDelNodeClick: function(){
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n) return;
@@ -386,7 +375,6 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 		, this);
 	}
 	,processDelElement: function(r, e){
-		if(r.updatedTagGroups) CB.DB.updateTagGroups(r.updatedTagGroups);
 		this.getEl().unmask()
 		if(r.success !== true){
 			Ext.Msg.alert(L.Error, Ext.value(r.msg, 'Error deleting element'));
@@ -481,207 +469,6 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 
 })
 
-// ---------------------------------------------- Tag groups tree grid
-CB.TagGroupsTree = Ext.extend(Ext.tree.TreePanel, {
-	autoScroll: true
-	,containerScroll: true
-	,stateId: 'CB_TagsGroupsTree'
-	,stateful: true
-	,rootVisible: false
-	,animate: false
-	,border: false
-	,enableDrop: true
-	,ddGroup:'tags'
-	,ddAppendOnly: true
-	,initComponent: function(){
-		treeMenuItems = [
-			// {text: L.AddTagGroup, iconCls: 'icon-plus', handler: this.onAddTagGroupClick, scope: this}
-			// ,'-'
-			// ,{text: L.Edit, iconCls: 'icon-pencil', disabled: true, handler: this.onEditNodeClick, scope: this}
-			// ,'-'
-			{text: L.Delete, iconCls: 'icon-minus', disabled: true, handler: this.onDelNodeClick, scope: this}
-			,'-'
-			,{text: L.Locate, iconCls: 'icon-locate', disabled: true, handler: this.onLocateNodeClick, scope: this}
-			,'->'
-			,{iconCls: 'icon-reload', qtip: L.Reload, scope:this, handler: function(){this.getRootNode().reload();}}
-		];
-		Ext.apply(this, {
-			loader: new Ext.tree.TreeLoader({
-				directFn: System.tagGroupsGetChildren
-				,paramsAsHash: true
-				,listeners:{
-					scope: this
-					,beforeload: function(treeLoader, node) { treeLoader.baseParams.path = node.getPath('nid'); }
-					,load: function(o, n, r) { if(n.attributes.kind > 1) n.sort(this.sortTree)}
-					,loadexception: function(loader, node, response) { node.leaf = false; node.loaded = false; }
-				}
-			})
-			,root: {
-				nodeType: 'async'
-				,expanded: false
-				,expandable: true
-				,iconCls: 'icon-home'
-				,leaf: false
-				,id: 'root'
-				,text: L.TagGroups
-			}
-			,tbar: treeMenuItems
-			,listeners:{
-				scope: this
-				,afterlayout: function(){this.getRootNode().expand()}
-				,nodedragover: function(o){
-					if( (o.point != 'append') ){
-						o.cancel = true;
-						return false;
-					}
-					if(o.target && ( (o.target.attributes.iconCls != 'icon-folder-bookmark') ||  o.target.findChild('id', 't-' + o.dropNode.attributes.id) ) ){
-						o.cancel = true;
-						return false;
-					}
-				}
-				,beforenodedrop: function(o){
-					o.cancel = true;
-					o.dropStatus = true;
-				}
-				,beforeappend: function(t, p, n){ 
-					n.setId(Ext.id());
-					n.setText(n.attributes['l'+App.loginData.language_id]);// + ' - '+n.attributes.nid);
-					if(Ext.isEmpty(n.attributes.type)) n.setCls('fwB');
-				}
-				//,beforedblclick: function(n, e){ this.onEditNodeClick(); return false;}
-			}
-			,selModel: new Ext.tree.DefaultSelectionModel({
-				listeners: {
-					scope: this
-					,selectionchange: function(sm, node){ 
-						tb = this.getTopToolbar();
-						tb.items.get(0).setDisabled(Ext.isEmpty(node) || (node.attributes.nid[0] !== 't'));
-						tb.items.get(2).setDisabled(Ext.isEmpty(node) || (node.attributes.nid[0] !== 't'));
-/*						if(!Ext.isEmpty(node)){
-							tb.items.get(2).setDisabled(node.getDepth() != 1); 
-							tb.items.get(4).setDisabled(node.attributes.system > 0); 
-							tb.items.get(6).setDisabled( (node.getDepth() < 2) || (node.attributes.system > 0) ); 
-						}else{
-							tb.items.get(2).setDisabled(true); 
-							tb.items.get(4).setDisabled(true); 
-							tb.items.get(6).setDisabled(true); 
-						}/**/
-					}
-				}
-			})
-			,keys: [{
-			// 	key: [10,13]
-			// 	,fn: this.onEditNodeClick
-			// 	,scope: this
-			// },
-			//{
-				key: [127]
-				,fn: this.onDelNodeClick
-				,scope: this
-			}]
-		})
-		CB.TagGroupsTree.superclass.initComponent.apply(this, arguments);
-	}
-	,onAddTagGroupClick: function(){
-		w = new CB.TagAddForm({title: L.NewTagsGroup, iconCls: 'icon-layers', data: {type: 0}});
-		w.on('hide', this.onSaveTagsGroupSubmitClick, this);
-		w.show();
-	}
-	// ,onEditNodeClick: function(b){
-	// 	n = this.getSelectionModel().getSelectedNode();
-	// 	if(!n || n.getDepth() != 1) return;
-	// 	data = {};
-	// 	fields = ['id', 'type', 'order'];
-	// 	CB.DB.languages.each(function(r){ fields.push('l'+r.get('id'))}, this);
-	// 	Ext.copyTo(data, n.attributes, fields);
-	// 	if(data.iconCls == 'icon-tags-small') delete data.iconCls;
-	// 	w = new CB.TagAddForm({title: L.EditTagsGroup, iconCls: n.attributes.iconCls, data: data});
-	// 	w.on('hide', this.onSaveTagsGroupSubmitClick, this);
-	// 	w.show();
-	// }
-	,onSaveTagsGroupSubmitClick: function(w){
-		if(w.status == 'ok'){
-			this.getEl().mask(L.LoadingData);
-			System.tagsGroupSave(w.data, this.processSaveTagsGroup, this);
-		}
-		w.destroy();
-	}	
-	,processSaveTagsGroup: function(r, e){
-		this.getEl().unmask();
-		if(r.success != true) return;
-		n = this.getSelectionModel().getSelectedNode();
-		if(n && n.attributes.id == r.data.id){
-			Ext.apply(n.attributes, r.data);
-			n.setText(n.attributes['l'+App.loginData.language_id]);
-		}else{
-			n = this.getRootNode().appendChild(r.data);
-			sm = this.getSelectionModel();
-			sm.clearSelections()
-			sm.select(n);
-		}
-		this.getRootNode().sort(this.sortTree);
-	}
-	,sortTree: function(n1, n2){ 
-		if(n1.attributes.system != n2.attributes.system){
-			if(n1.attributes.system == 0) return 1;
-			if(n2.attributes.system == 0) return -1;
-		} 
-		if(parseInt(n1.attributes.order) < parseInt(n2.attributes.order)) return -1;
-		if(parseInt(n1.attributes.order) > parseInt(n2.attributes.order)) return 1;
-		if(n1.attributes.system < n2.attributes.system) return 1;
-		if(n1.attributes.system > n2.attributes.system) return -1;
-		if(n1.attributes.type < n2.attributes.type) return -1;
-		if(n1.attributes.type > n2.attributes.type) return 1;
-		if(n1.text < n2.text) return -1;
-		if(n1.text > n2.text) return 1;
-		return 0;
-	}
-	,onDelNodeClick: function(){
-		n = this.getSelectionModel().getSelectedNode();
-		if(!n || n.getDepth() < 1) return;
-
-		Ext.MessageBox.confirm(L.Confirmation, (Ext.isEmpty(n.attributes.type) ?  L.DeleteTagsGroup : L.Remove) + ' "'+n.attributes.text+'"?', 
-		function(btn, text){
-			if(btn == 'yes'){
-				this.getEl().mask(L.Deleting)
-				if(n.getDepth() == 1) System.tagsGroupDelete(n.attributes.nid, this.processDeleteNode, this);
-				else System.tagsGroupRemoveElement({tag_group_id: n.parentNode.attributes.nid,  id: n.attributes.nid}, this.processDeleteNode, this);
-			}
-		}
-		, this);		
-	}
-	,processDeleteNode: function(r, e){
-		this.getEl().unmask();
-		if(r.success !== true){
-			Ext.Msg.alert(L.Error, Ext.value(r.msg, 'Error deleting element'));
-			return;
-		}
-		if(r.updatedTagGroups) CB.DB.updateTagGroups(r.updatedTagGroups);
-		sm = this.getSelectionModel();
-		n = sm.getSelectedNode();
-		if(!sm.selectNext(n)) sm.selectPrevious(n);
-		n.remove(true);
-	}
-	,processDragDrop: function(tree, node, dd, e){
-		this.sourceNode = dd.dragOverData.dropNode;
-		this.targetNode = dd.dragOverData.target;
-		System.tagsGroupAddElement({tag_id: this.sourceNode.attributes.id, tags_group_id: this.targetNode.attributes.nid}, this.processAddElement, this);
-	}
-	,processAddElement: function(r, e){
-		if(r.success != true) return;
-		if(r.updatedTagGroups) CB.DB.updateTagGroups(r.updatedTagGroups);
-		n = this.targetNode.appendChild(r.data);
-		this.targetNode.sort(this.sortTree);
-		sm = this.getSelectionModel();
-		sm.clearSelections();
-		sm.select(n);
-	}
-	,onLocateNodeClick: function(){
-		n = this.getSelectionModel().getSelectedNode();
-		if(!n) return;
-		this.fireEvent('locatetagnode', n);
-	}
-});
 // ---------------------------------------------- Main
 CB.SystemManagementWindow = Ext.extend(Ext.Panel, {
 	layout: 'border'
@@ -690,41 +477,17 @@ CB.SystemManagementWindow = Ext.extend(Ext.Panel, {
 	,iconCls: 'icon-application-tree'
 	,title: L.Thesaurus
 	,initComponent: function() {
-		
 		this.tagsTree = new CB.TagsTree({region: 'center', width: '300'});
-		this.tagGroupsTree = new CB.TagGroupsTree({
-			region: 'east'
-			,width: '50%'
-			,split: true
-			,collapseMode: 'mini'
-			,listeners: {
-				scope: this
-				,locatetagnode: this.onLocateTagNode
-			}
-		})
 		Ext.apply(this, {
 			hideBorders: true
-			,items: [this.tagsTree, this.tagGroupsTree]
+			,items: this.tagsTree
 			,listeners: {
 				beforedestroy: function(c){
 					c.tagsTree.destroy();
-					c.tagGroupsTree.destroy();
 				}
 			}
 		});
 		CB.SystemManagementWindow.superclass.initComponent.apply(this, arguments);
-	}
-	,onLocateTagNode: function(n){
-		if(!n) return;
-		System.getTagPath(n.attributes.nid, function(r, e){
-			if(r.success !== true) return false;
-			if(Ext.isEmpty(r.path)) return Ext.alert('Error', 'Tag path not found');
-			p =  '/' + this.tagsTree.getRootNode().attributes.id + '/' + r.path;
-			this.tagsTree.selectPath(p, 'id', function(bSuccess, oLastNode){
-				//if(bSuccess) oLastNode.getUI().getEl().frame('red');
-			})
-		}, this)
-	
 	}
 });
 Ext.reg('CBSystemManagementWindow', CB.SystemManagementWindow); // register xtype

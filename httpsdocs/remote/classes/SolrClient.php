@@ -1,5 +1,7 @@
 <?php
 
+namespace CB;
+
 class SolrClient{
 	var $connected = false;
 	var $solr = null;
@@ -45,23 +47,27 @@ class SolrClient{
 		,'role_ids4'
 		,'role_ids5'
 		);
-	function SolrClient($p = array() ){
-		$this->host = empty($p['host']) ? CB_SOLR_HOST : $p['host'];
-		$this->port = empty($p['port']) ? CB_SOLR_PORT : $p['port'];
-		$this->core = empty($p['core']) ? CB_SOLR_CORE : $p['core'];
+	function SolrClient( $p = array() ){
+		$this->host = empty($p['host']) ? config\solr_host : $p['host'];
+		$this->port = empty($p['port']) ? config\solr_port : $p['port'];
+		$this->core = empty($p['core']) ? config\solr_core : $p['core'];
 	}
 	function connect(){
 		if($this->connected) return $this->solr;
-		require_once CB_SOLR_CLIENT;
-		$this->solr = new Apache_Solr_Service($this->host, $this->port, $this->core );
+		if(empty($this->host)) $this->host = config\solr_host;
+		if(empty($this->port)) $this->port = config\solr_port;
+		if(empty($this->core)) $this->core = config\solr_core;
+
+		require_once SOLR_CLIENT;
+		$this->solr = new \Apache_Solr_Service($this->host, $this->port, $this->core );
 		if (! $this->solr->ping()){
-			throw new Exception(L('Solr_connection_error').( is_debug_host() ? ' ('.$this->host.':'.$this->port.' -> '.$this->core.' )' : ''), 1);
+			throw new \Exception(L\get('Solr_connection_error').( is_debug_host() ? ' ('.$this->host.':'.$this->port.' -> '.$this->core.' )' : ''), 1);
 		}
 		$this->connected = true;
 		return $this->solr;
 	}
 	function add($d){
-		$doc = new Apache_Solr_Document();
+		$doc = new \Apache_Solr_Document();
 		foreach($d as $fn => $fv) 
 			if( in_array($fn, $this->solr_fields) && ( ($fn == 'dstatus') || !empty($fv) || ($fv === false)) )
 				$doc->$fn = $fv;
@@ -69,7 +75,7 @@ class SolrClient{
 			fireEvent('beforeNodeSolrUpdate', $doc);
 			$this->solr->addDocument($doc);
 			fireEvent('nodeSolrUpdate', $doc);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			echo "\n\n-------------------------------------------";
 			echo "\n\nError (id={$d['id']}): {$e->__toString()}\n";	
 			return false;
@@ -85,14 +91,6 @@ class SolrClient{
 		$solr->connect();
 		$solr->updateTree();
 		unset($solr);
-
-		// $sql = 'select last_end_time from crons where cron_id = \'solr_update_tree\'';
-		// $res = mysqli_query_params($sql) or die(mysqli_query_error());
-		// $running = false;
-		// if($r = $res->fetch_row())
-		// 	if(empty($r[0])) $running = true;
-		// $res->close();
-		// if(!$running) exec('php -f "'.CB_CRONS_PATH.'cron_solr_update_tree.php"');
 	}
 	public function updateTree($all = false){
 		$sql = 'select id, pid, f_get_tree_pids(id) `pids`, f_get_tree_path(id) `path`, name, `system`, `type`, subtype, target_id
@@ -109,7 +107,7 @@ class SolrClient{
 			,dstatus
 			,f_get_objects_case_id(id) `case_id`
 			from tree t '.($all ? '' : ' where updated = 1');
-		$res = mysqli_query_params($sql) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 		$k = 0;
 		if($r = $res->fetch_assoc()){
 			$security = new Security();
@@ -122,7 +120,7 @@ class SolrClient{
 					$type = $r['target_type']; //link
 				}
 				if(!empty($r['case_id'])){
-					$cres = mysqli_query_params('select name from cases where id = $1', $r['case_id']) or die(mysqli_query_error());
+					$cres = DB\mysqli_query_params('select name from cases where id = $1', $r['case_id']) or die(DB\mysqli_query_error());
 					if($cr = $cres->fetch_row()) $r['case'] = $cr[0];
 					$cres->close();
 					Objects::setCaseRolesFields($r);
@@ -161,7 +159,7 @@ class SolrClient{
 				// $r['sort_path'] = mb_strtolower($r['name'], 'UTF-8');
 				$this->add( $r );
 				
-				mysqli_query_params('update tree set updated = -1 where id = $1', $r['id']) or die(mysqli_query_error()); 			
+				DB\mysqli_query_params('update tree set updated = -1 where id = $1', $r['id']) or die(DB\mysqli_query_error()); 			
 				
 				$k++;
 
@@ -179,6 +177,12 @@ class SolrClient{
 	public function deleteByQuery($query){
 		$this->connect();
 		$this->solr->deleteByQuery($query);
+		$this->commit();
+	}
+	
+	public function optimize(){
+		$this->connect();
+		$this->solr->optimize();
 		$this->commit();
 	}
 

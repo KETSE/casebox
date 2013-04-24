@@ -1,8 +1,11 @@
 <?php
+
+namespace CB;
+
 class Files{
-	static public function extractUploadedArchive(&$file){//DONE: on archive extraction also to take directories into consideration
+	public static function extractUploadedArchive(&$file){//DONE: on archive extraction also to take directories into consideration
 		$archive = $file['name'];
-		$ext = getFileExtension($archive);
+		$ext = Files::getExtension($archive);
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
 
 		switch($ext){
@@ -14,8 +17,8 @@ class Files{
 			$entries = rar_list($archive);
 			foreach ($entries as $entry)
 				if(!$entry->isDirectory()){ //we'll exclude empty directories
-					$tmp_name = tempnam(CB_FILES_INCOMMING_PATH, 'cb_arch');
-					$entry->extract( CB_FILES_INCOMMING_PATH, $tmp_name);
+					$tmp_name = tempnam(FILES_INCOMMING_PATH, 'cb_arch');
+					$entry->extract( FILES_INCOMMING_PATH, $tmp_name);
 					$file[] = array(
 						'dir' => dirname( $entry->getName() )
 						,'name' => basename( $entry->getName() )
@@ -35,7 +38,7 @@ class Files{
 			while ($zip_entry = zip_read($zip)) {
 				$name = zip_entry_name($zip_entry);
 				if( substr($name, -1) == '/' ) continue; //exclude directories
-				$tmp_name = tempnam(CB_FILES_INCOMMING_PATH, 'cb_arch');
+				$tmp_name = tempnam(FILES_INCOMMING_PATH, 'cb_arch');
 				$size = zip_entry_filesize($zip_entry);
 				if (zip_entry_open($zip, $zip_entry, "r")) {
 					file_put_contents($tmp_name, zip_entry_read($zip_entry, $size));
@@ -58,7 +61,7 @@ class Files{
 	public function moveUploadedFilesToIncomming(&$F){
 		foreach($F as $fk => $f){
 			if(!empty($f['content_id'])) continue; //file content was not uploaded. Its content_id were sent as header param
-			$new_name = CB_FILES_INCOMMING_PATH.basename($f['tmp_name']);
+			$new_name = FILES_INCOMMING_PATH.basename($f['tmp_name']);
 			if($f['tmp_name'] == $new_name) continue;
 			if(false === move_uploaded_file($f['tmp_name'], $new_name) ) return false;
 			$F[$fk]['tmp_name'] = $new_name;
@@ -73,28 +76,26 @@ class Files{
 
 	public function getExistentFilenames($F, $pid){
 		$rez = array(); //if no filenames already exists in target then the result will be an empty array
-		foreach($F as $fk => $f){
+		foreach($F as $fk => $f) 
 			if( $this->fileExists($pid, $f['name'], @$f['dir']) ) $rez[] = $f;
-			//else echo "Filename '".$f['name']."' not exists  in ".$pid.' subdir '.$f['dir']."\n\r";
-		}
 		switch(sizeof($rez)){
 			case 0: break;
 			case 1: //single match: retreive match info for content (if matches with current version or to an older version)
 				$existentFileId  = $this->getFileId($pid, $rez[0]['name'], @$rez[0]['dir']);
 				$md5 = $this->getFileMD5($rez[0]);
-				$sql = 'select (select l'.UL_ID().' from users_groups where id = f.cid) `user`, f.cdate from files f join files_content c on f.content_id = c.id and c.md5 = $2 where f.id = $1';
-				$res = mysqli_query_params($sql, array($existentFileId, $md5)) or die(mysqli_query_error());
+				$sql = 'select (select l'.USER_LANGUAGE_INDEX.' from users_groups where id = f.cid) `user`, f.cdate from files f join files_content c on f.content_id = c.id and c.md5 = $2 where f.id = $1';
+				$res = DB\mysqli_query_params($sql, array($existentFileId, $md5)) or die(DB\mysqli_query_error());
 				if($r = $res->fetch_assoc()){
-					$agoTime = formatAgoTime($r['cdate']);
+					$agoTime = Util\formatAgoTime($r['cdate']);
 					$rez[0]['msg'] = str_replace( array('{timeAgo}', '{user}'), array($agoTime, $r['user']), L\FileContentsIdentical);
 
 				}
 				$res->close();
 				if(empty($rez[0]['msg'])){
-					$sql = 'select (select l'.UL_ID().' from users_groups where id = f.cid) `user`, f.cdate from files_versions f join files_content c on f.content_id = c.id and c.md5 = $2 where f.file_id = $1';
-					$res = mysqli_query_params($sql, array($existentFileId, $md5)) or die(mysqli_query_error());
+					$sql = 'select (select l'.USER_LANGUAGE_INDEX.' from users_groups where id = f.cid) `user`, f.cdate from files_versions f join files_content c on f.content_id = c.id and c.md5 = $2 where f.file_id = $1';
+					$res = DB\mysqli_query_params($sql, array($existentFileId, $md5)) or die(DB\mysqli_query_error());
 					if($r = $res->fetch_assoc()){
-						$agoTime = formatAgoTime($r['cdate']);
+						$agoTime = Util\formatAgoTime($r['cdate']);
 						$rez[0]['msg'] = str_replace( array('{timeAgo}', '{user}'), array($agoTime, $r['user']), L\FileContentsIdenticalToAVersion);
 
 					}
@@ -115,7 +116,7 @@ class Files{
 	public function checkExistentContents($p){
 		foreach($p as $k => $v){
 			$sql = 'select id from files_content where `md5` = $1';
-			$res = mysqli_query_params($sql, array($v)) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params($sql, array($v)) or die(DB\mysqli_query_error());
 			$p->{$k} = ($r = $res->fetch_row()) ?  $r[0] : null;
 			$res->close();
 		}
@@ -161,7 +162,7 @@ class Files{
 	public function getFileId($pid, $name = '', $dir = ''){ //checks if pid id exists in our tree or if filename exists under the pid. $dir is an optional relative path under pid. 
 		$rez = null;
 		/* check if pid exists /**/
-		$res = mysqli_query_params('select id from tree where id = $1 and dstatus = 0', $pid) or die(mysqli_query_error()); 
+		$res = DB\mysqli_query_params('select id from tree where id = $1 and dstatus = 0', $pid) or die(DB\mysqli_query_error()); 
 		if($r = $res->fetch_assoc()){
 			$rez = $r['id'];
 		}else $rez = null;
@@ -177,7 +178,7 @@ class Files{
 			$dir = explode('/', $dir);
 			foreach($dir as $dir_name){
 				if(empty($dir_name) || ($dir_name == '.')) continue;
-				$res = mysqli_query_params('select id from tree where pid = $1 and name = $2 and dstatus = 0', array($rez, $dir_name)) or die(mysqli_query_error());
+				$res = DB\mysqli_query_params('select id from tree where pid = $1 and name = $2 and dstatus = 0', array($rez, $dir_name)) or die(DB\mysqli_query_error());
 				if($r = $res->fetch_assoc()){
 					$rez = $r['id'];
 				}else $rez = null; 
@@ -196,13 +197,13 @@ class Files{
 	}
 
 	public function saveUploadParams($p){
-		file_put_contents( CB_FILES_INCOMMING_PATH.$_SESSION['key'], serialize($p) );
+		file_put_contents( FILES_INCOMMING_PATH.$_SESSION['key'], serialize($p) );
 	}
 
 	public function getUploadParams(){
 		$rez = false;
-		if(file_exists(CB_FILES_INCOMMING_PATH.$_SESSION['key'])){
-			$rez = file_get_contents(CB_FILES_INCOMMING_PATH.$_SESSION['key']);
+		if(file_exists(FILES_INCOMMING_PATH.$_SESSION['key'])){
+			$rez = file_get_contents(FILES_INCOMMING_PATH.$_SESSION['key']);
 			$rez = unserialize($rez);
 		}
 		return $rez;
@@ -218,7 +219,7 @@ class Files{
 			if($f['error'] == UPLOAD_ERR_NO_FILE) continue; 
 			if($f['error'] !== UPLOAD_ERR_OK) continue; 
 
-			@$p['files'][$fk]['date'] = date_iso_to_mysql($p['date']);
+			@$p['files'][$fk]['date'] = Util\date_iso_to_mysql($p['date']);
 			
 			$this->storeContent( $p['files'][$fk] );
 		
@@ -235,13 +236,13 @@ class Files{
 					// case 'overwrite':
 					// case 'overwriteall':
 						//make the overwrite process: move record from files to files_versions, delete oldest version if exeeds versions limit for file type, add new record to files
-						$res = mysqli_query_params('insert into files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate) '.
-							' select id, content_id, `date`, name, cid, uid, cdate, udate from files where id = $1', $file_id) or die(mysqli_query_error());
+						$res = DB\mysqli_query_params('insert into files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate) '.
+							' select id, content_id, `date`, name, cid, uid, cdate, udate from files where id = $1', $file_id) or die(DB\mysqli_query_error());
 
 						break;
 					case 'replace':
 						/* TODO: only mark file as deleted but dont delte it */
-						mysqli_query_params('call p_delete_tree_node($1)', $file_id) or die(mysqli_query_error());
+						DB\mysqli_query_params('call p_delete_tree_node($1)', $file_id) or die(DB\mysqli_query_error());
 						$solr = new SolrClient();
 						$solr->deleteId($file_id);
 						break;
@@ -258,14 +259,14 @@ class Files{
 			$f['type'] = 5;//file
 			$obj = (object)$f;
 			fireEvent('beforeNodeDbCreate', $obj);
-			mysqli_query_params('INSERT INTO tree  (id, pid, `name`, `type`, cid, uid, cdate, udate) VALUES($1, $2, $3, 5, $4, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) '.
+			DB\mysqli_query_params('INSERT INTO tree  (id, pid, `name`, `type`, cid, uid, cdate, udate) VALUES($1, $2, $3, 5, $4, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) '.
 				' on duplicate key update id = last_insert_id($1), pid = $2, `name` = $3, `type` = 5, cid = $4, uid = $4, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP'
-				,Array($file_id, $pid, $f['name'], $_SESSION['user']['id'])) or die(mysqli_query_error());
-			$file_id = last_insert_id(); 
+				,Array($file_id, $pid, $f['name'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+			$file_id = DB\last_insert_id(); 
 					
-			mysqli_query_params('insert into files (id, content_id, `date`, `name`, `title`, cid, uid, cdate, udate) values ($1, $2, $3, $4, $5, $6, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'.
+			DB\mysqli_query_params('insert into files (id, content_id, `date`, `name`, `title`, cid, uid, cdate, udate) values ($1, $2, $3, $4, $5, $6, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'.
 				' on duplicate key update content_id = $2, `date` = $3, `name` = $4, `title` = $5, cid = $6, uid = $6, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP'
-				,array($file_id, $p['files'][$fk]['content_id'], $p['files'][$fk]['date'], $f['name'], @$p['title'], $_SESSION['user']['id'])) or die(mysqli_query_error());
+				,array($file_id, $p['files'][$fk]['content_id'], $p['files'][$fk]['date'], $f['name'], @$p['title'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 			$f['id'] = $file_id;
 			$p['files'][$fk]['id'] = $file_id;
 			$this->updateFileProperties($p['files'][$fk]);
@@ -278,16 +279,16 @@ class Files{
 
 	public function updateFileProperties($p){
 		if(empty($p['id'])) return false;
-		mysqli_query_params('update files set `date` = $2, title = $3 where id = $1', array($p['id'], clienttoMysqlDate($p['date']), @$p['title'] ) ) or die(mysqli_query_error());
+		DB\mysqli_query_params('update files set `date` = $2, title = $3 where id = $1', array($p['id'], Util\clienttoMysqlDate($p['date']), @$p['title'] ) ) or die(DB\mysqli_query_error());
 
-		mysqli_query_params('delete from files_tags where file_id = $1', $p['id']) or die(mysqli_query_error());
-		if(!empty($p['tags'])){
-			$tags = json_decode($p['tags']);
-			$tv = array();
-			if(!empty($tags->{3})) foreach($tags->{3} as $t) if(is_numeric($t)) $tv[] = $t.',3';
-			if(!empty($tags->{4})) foreach($tags->{4} as $t) if(is_numeric($t)) $tv[] = $t.',4';
-			if(!empty($tv)) mysqli_query_params('insert into files_tags (file_id, tag_id, `level`) values ($1,'.implode('),($1,', $tv).')', $p['id']) or die(mysqli_query_error());
-		}
+		// DB\mysqli_query_params('delete from files_tags where file_id = $1', $p['id']) or die(DB\mysqli_query_error());
+		// if(!empty($p['tags'])){
+		// 	$tags = json_decode($p['tags']);
+		// 	$tv = array();
+		// 	if(!empty($tags->{3})) foreach($tags->{3} as $t) if(is_numeric($t)) $tv[] = $t.',3';
+		// 	if(!empty($tags->{4})) foreach($tags->{4} as $t) if(is_numeric($t)) $tv[] = $t.',4';
+		// 	if(!empty($tv)) DB\mysqli_query_params('insert into files_tags (file_id, tag_id, `level`) values ($1,'.implode('),($1,', $tv).')', $p['id']) or die(DB\mysqli_query_error());
+		// }
 
 		Cases::updateCaseUpdateInfo($p['id']);
 
@@ -306,7 +307,7 @@ class Files{
 		do{
 			$newName = $name.' ('.$i.').'.$ext;
 			$sql = 'select id from tree where pid = $1 and name = $2';
-			$res = mysqli_query_params($sql, array($pid, $newName)) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params($sql, array($pid, $newName)) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc())
 				$id = $r['id'];
 			else $id = null;
@@ -323,12 +324,12 @@ class Files{
 		foreach($path as $dir){
 			if(empty($dir)) continue;
 			$sql = 'select id from tree where pid = $1 and name = $2 and dstatus = 0';
-			$res = mysqli_query_params($sql, array($pid, $dir)) or die(mysqli_query_error());
+			$res = DB\mysqli_query_params($sql, array($pid, $dir)) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$pid = $r['id'];
 			}else{
-				mysqli_query_params('insert into tree (pid, `name`, `type`, cid, uid) values($1, $2, 1, $3, $3)', array($pid, $dir, $_SESSION['user']['id'])) or die(mysqli_query_error());
-				$pid = last_insert_id();
+				DB\mysqli_query_params('insert into tree (pid, `name`, `type`, cid, uid) values($1, $2, 1, $3, $3)', array($pid, $dir, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+				$pid = DB\last_insert_id();
 			}
 			$res->close();
 		}
@@ -340,13 +341,13 @@ class Files{
 		return md5_file($file['tmp_name']).'s'.$file['size'];
 	}
 	public function storeContent(&$f, $filePath = false){
-		if($filePath == false) $filePath = CB_FILES_PATH;
+		if($filePath == false) $filePath = FILES_PATH;
 		if(!empty($f['content_id']) && is_numeric($f['content_id'])) return true; // content_id already defined
 		$f['content_id'] = null;
 		if(!file_exists($f['tmp_name']) || ($f['size'] == 0) ) return false;
 		$md5 = $this->getFileMD5($f);
 		$sql = 'select id, path from files_content where md5 = $1';
-		$res = mysqli_query_params($sql, $md5) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $md5) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) if(file_exists($filePath.$r[1].'/'.$r[0])) $f['content_id'] = $r[0];
 		$res->close();
 
@@ -357,8 +358,8 @@ class Files{
 
 		/* file date will be used from file variable (date parametter) if specified. If not specified then system file_date will be used */
 		$storage_subpath = empty($f['date']) ? date('Y/m/d', filemtime($f['tmp_name'])) : str_replace('-', '/', substr($f['date'], 0, 10) );
-		mysqli_query_params('insert into files_content (`size`, `type`, `path`, `md5`) values($1, $2, $3, $4) on duplicate key update id =last_insert_id(id), `size` = $1, `type` = $2, `path` = $3, `md5` = $4', array($f['size'], $f['type'], $storage_subpath, $md5)) or die(mysqli_query_error());
-		$f['content_id'] = last_insert_id();
+		DB\mysqli_query_params('insert into files_content (`size`, `type`, `path`, `md5`) values($1, $2, $3, $4) on duplicate key update id =last_insert_id(id), `size` = $1, `type` = $2, `path` = $3, `md5` = $4', array($f['size'], $f['type'], $storage_subpath, $md5)) or die(DB\mysqli_query_error());
+		$f['content_id'] = DB\last_insert_id();
 		@mkdir($filePath.$storage_subpath.'/', 0777, true);
 		copy($f['tmp_name'], $filePath.$storage_subpath.'/'.$f['content_id']);
 		return true;
@@ -373,23 +374,23 @@ class Files{
 			',(SELECT f_get_tree_ids_path(pid) FROM tree WHERE id = f.id) `path` '.
 			',f_get_tree_path(f.id) `pathtext` '.
 			'from files f left join files_content fc on f.content_id = fc.id where f.id = $1';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			$a = explode('.', $r['name']);
 			$r['iconCls'] = 'file-'.( (sizeof($a) > 1) ? array_pop($a) : 'unknown');
 			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
-			$r['ago_date'] = translateMonths($r['ago_date']);
-			$r['ago_text'] = formatAgoTime($r['cdate']);
+			$r['ago_date'] = Util\translateMonths($r['ago_date']);
+			$r['ago_text'] = Util\formatAgoTime($r['cdate']);
 			$rez['data'] = $r;
 		}
 		$res->close();
 		/* get versions */
 		$sql = 'select id, `date`, `name`, cid, uid, cdate, udate, (select `size` from files_content where id = v.content_id ) `size` FROM files_versions v WHERE file_id = $1 order by cdate desc';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
-			$r['ago_date'] = translateMonths($r['ago_date']);
-			$r['ago_text'] = formatAgoTime($r['cdate']);
+			$r['ago_date'] = Util\translateMonths($r['ago_date']);
+			$r['ago_text'] = Util\formatAgoTime($r['cdate']);
 			$rez['data']['versions'][] = $r;
 		}
 		$res->close();
@@ -407,7 +408,7 @@ class Files{
 			JOIN files fd ON f.content_id = fd.content_id AND fd.id <> $1
 			join tree t on fd.id = t.id and t.dstatus = 0
 			WHERE f.id = $1';
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez['data'][] = $r;
 		$res->close();
 		return $rez;
@@ -437,7 +438,7 @@ class Files{
 				'left join files_content c on f.content_id = c.id '.
 				'left join file_previews p on c.id = p.id where f.file_id = $1 and f.id = $2 and c.size > 0';
 
-		$res = mysqli_query_params($sql, array($id, $version_id)) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, array($id, $version_id)) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()) $file = $r;
 		$res->close();
 
@@ -459,10 +460,10 @@ class Files{
 
 		$rez['filename'] = $file['content_id'].'_.html';
 		
-		$preview_filename = CB_FILES_PREVIEW_PATH.$rez['filename'];
+		$preview_filename = FILES_PREVIEW_PATH.$rez['filename'];
 		
-		$fn = CB_FILES_PATH.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];
-		$nfn = CB_FILES_PREVIEW_PATH.$file['content_id'].'_.'.$ext;
+		$fn = FILES_PATH.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];
+		$nfn = FILES_PREVIEW_PATH.$file['content_id'].'_.'.$ext;
 		if(!file_exists($fn)) return false;
 		switch($ext){
 			case 'rtf':
@@ -476,11 +477,11 @@ class Files{
 			case 'xlsx':
 			case 'pptx':
 			case 'odt':
-				mysqli_query_params('insert into file_previews (id, `group`, status, filename, size) values($1, \'office\', 1, null, 0) on duplicate key update `group` = \'office\', status =1, filename = null, size = 0, cdate = CURRENT_TIMESTAMP', $file['content_id'] ) or die(mysqli_query_error());
+				DB\mysqli_query_params('insert into file_previews (id, `group`, status, filename, size) values($1, \'office\', 1, null, 0) on duplicate key update `group` = \'office\', status =1, filename = null, size = 0, cdate = CURRENT_TIMESTAMP', $file['content_id'] ) or die(DB\mysqli_query_error());
 				if(file_exists($preview_filename)) Files::deletePreview($file['content_id']);
 				
-				$cmd = 'php -f '.CB_LIB_DIR.'preview_extractor_office.php '.CB_PROJ.' &> '.CB_LIB_DIR.'office.log';
-				if(is_windows()) $cmd = 'start /D "'.CB_LIB_DIR.'" php -f preview_extractor_office.php '.CB_PROJ;
+				$cmd = 'php -f '.LIB_DIR.'preview_extractor_office.php '.CB\CORENAME.' &> '.LIB_DIR.'office.log';
+				if(is_windows()) $cmd = 'start /D "'.LIB_DIR.'" php -f preview_extractor_office.php '.CB\CORENAME;
 				pclose(popen($cmd, "r"));
 				return array('processing' => true);
 				break;
@@ -490,7 +491,7 @@ class Files{
 			case 'dhtml':
 			case 'xhtml':
 				//file_put_contents( $preview_filename, Files::purify(file_get_contents($fn)) );
-				require_once CB_LIB_DIR.'preview_extractor.php';
+				require_once LIB_DIR.'preview_extractor.php';
 				$content = file_get_contents($fn);
 				$pe = new preview_extractor();
 				$content = $pe->purify($content, array('URI.Base' => '/preview/', 'URI.MakeAbsolute' => true));
@@ -506,11 +507,13 @@ class Files{
 			case 'ini':
 			case 'sys':
 			case 'sql':
-				file_put_contents( $preview_filename, '<pre>'.adjustTextForDisplay(file_get_contents($fn)).'<pre>' );
+				file_put_contents( $preview_filename, '<pre>'.Util\adjustTextForDisplay(file_get_contents($fn)).'<pre>' );
 				break;
 			case 'pdf':
 				$html = 'PDF'; //Ext panel - PreviewPanel view
 				if(empty($_SERVER['HTTP_X_REQUESTED_WITH'])){ //full browser window view
+					require_once(MINIFY_PATH.'utils.php');
+					
 					$html = '<html><head><title>'.$file['name'].'</title>
 			    			<script type="text/javascript" src="'.Minify_getUri('js_pdf').'"></script>
 			    			<script type="text/javascript">
@@ -525,18 +528,12 @@ class Files{
 					</html>';
 				}
 				return array('html' => $html);
-				/*mysqli_query_params('insert into file_previews (id, `group`, status, filename, size) values($1, \'pdf\', 1, null, 0) on duplicate key update `group` = \'pdf\', status =1, filename = null, size = 0, cdate = CURRENT_TIMESTAMP', $file['content_id'] ) or die(mysqli_query_error());
-				if(file_exists($preview_filename)) Files::deletePreview($file['content_id']);
-				$cmd = 'php -f '.CB_LIB_DIR.'preview_extractor_pdf.php '.CB_PROJ.' &> /dev/null &';
-				if(is_windows()) $cmd = 'start /D "'.CB_LIB_DIR.'" php -f preview_extractor_pdf.php '.CB_PROJ;
-				echo shell_exec($cmd);
-				return array('processing' => true);/**/
 				break;
 			case 'tif':
 			case 'tiff':
-				$image = new Imagick($fn);
+				$image = new \Imagick($fn);
 				$image->setImageFormat('png');
-				$image->writeImage(CB_FILES_PREVIEW_PATH.$file['content_id'].'_.png');
+				$image->writeImage(FILES_PREVIEW_PATH.$file['content_id'].'_.png');
 				file_put_contents($preview_filename, '<img src="/preview/'.$file['content_id'].'_.png" style="max-width:90%;margin: auto" />');
 				break;
 			default: 
@@ -546,10 +543,10 @@ class Files{
 	}
 	static public function getFilesBlockForPreview($pid){
 		$rez = array();
-		$sql = 'select id, name, size, cdate from tree where pid = $1 and `type` = 5 order by cdate desc';
-		$res = mysqli_query_params($sql, $pid) or die(mysqli_query_error());
+		$sql = 'select id, name, size, cdate from tree where pid = $1 and `type` = 5 and dstatus = 0 order by cdate desc';
+		$res = DB\mysqli_query_params($sql, $pid) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
-			$rez[] = '<li class="icon-padding file-unknown file-'.getFileExtension($r['name']).'"><a name="file" href="#" nid="'.$r['id'].'">'.$r['name'].'</a><p class="cG">'.formatFileSize($r['size']).', '.formatAgoTime($r['cdate']).'</p>';
+			$rez[] = '<li class="icon-padding file-unknown file-'.Files::getExtension($r['name']).'"><a name="file" href="#" nid="'.$r['id'].'">'.$r['name'].'</a><p class="cG">'.Util\formatFileSize($r['size']).', '.Util\formatAgoTime($r['cdate']).'</p>';
 		}
 		$res->close();
 		$rez = empty($rez) ? '' : '<ul class="obj-files">'.implode('', $rez).'</ul>';
@@ -557,7 +554,7 @@ class Files{
 	}
 
 	static public function deletePreview($id){
-		if(is_windows()) $cmd = 'del '.CB_FILES_PREVIEW_PATH.$id.'_*'; else $cmd = 'find '.CB_FILES_PREVIEW_PATH.' -type f -name '.$id.'_* -print | xargs rm';
+		if(is_windows()) $cmd = 'del '.FILES_PREVIEW_PATH.$id.'_*'; else $cmd = 'find '.FILES_PREVIEW_PATH.' -type f -name '.$id.'_* -print | xargs rm';
 		exec($cmd);
 	}
 	static function getSorlData($id){
@@ -575,12 +572,12 @@ class Files{
 			FROM files f left join files_content c on f.content_id = c.id where f.id = $1';
 		//,parsed_content `content`'.
 		$filesPath = '';
-		if(defined('CB_FILES_PATH')) $filesPath = CB_FILES_PATH;
+		if(defined('FILES_PATH')) $filesPath = FILES_PATH;
 		else{
 			global $core;
-			$filesPath = PROJ_FILES_PATH.$core['name'].DIRECTORY_SEPARATOR;
+			$filesPath = FILES_PATH.$core['name'].DIRECTORY_SEPARATOR;
 		}
-		$res = mysqli_query_params($sql, $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			$rez['size'] = $r['size'];
 			$rez['versions'] = intval($r['versions']);
@@ -589,15 +586,15 @@ class Files{
 				$content =   file_get_contents($content);
 				$content = gzuncompress( $content );
 			}else $content = '';
-			$rez['content'] = coalesce($r['title'],'')."\n".
-			coalesce($r['type'],'')."\n".
-			coalesce($content, ''); 
+			$rez['content'] = Util\coalesce($r['title'],'')."\n".
+			Util\coalesce($r['type'],'')."\n".
+			Util\coalesce($content, ''); 
 			
 			/* selecting tags */
-			$sql = 'SELECT tag_id, level FROM files_tags WHERE file_id = $1 and level < 5'; //exclude derived tags
-			$dres = mysqli_query_params($sql, $id) or die(mysqli_query_error());
-			while($dr = $dres->fetch_row()) $rez[($dr[1] == 4) ? 'user_tags' : 'sys_tags'][] = intval($dr[0]);
-			$dres->close();
+			// $sql = 'SELECT tag_id, level FROM files_tags WHERE file_id = $1 and level < 5'; //exclude derived tags
+			// $dres = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
+			// while($dr = $dres->fetch_row()) $rez[($dr[1] == 4) ? 'user_tags' : 'sys_tags'][] = intval($dr[0]);
+			// $dres->close();
 			/* end of selecting tags */
 		}
 		$res->close();
@@ -609,25 +606,25 @@ class Files{
 		$rez = array('success' => true, 'data' => array( 'id' => 0, 'pid' => 0) );
 		$file_id = 0;
 		
-		$res = mysqli_query_params('select file_id from files_versions where id = $1', $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select file_id from files_versions where id = $1', $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()){
 			$file_id = $r[0];
 			$rez['data']['id'] = $r[0];
 		}
 		$res->close();
 
-		$res = mysqli_query_params('select pid from tree where id = $1', $file_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select pid from tree where id = $1', $file_id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $rez['data']['pid'] = $r[0];
 		$res->close();
 
-		$res = mysqli_query_params('insert into files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate) '.
-			' select id, content_id, `date`, name, cid, uid, cdate, udate from files where id = $1', $file_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('insert into files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate) '.
+			' select id, content_id, `date`, name, cid, uid, cdate, udate from files where id = $1', $file_id) or die(DB\mysqli_query_error());
 
-		mysqli_query_params('insert into files (id, content_id, `date`, `name`, cid, uid, cdate, udate) '.
+		DB\mysqli_query_params('insert into files (id, content_id, `date`, `name`, cid, uid, cdate, udate) '.
 			' select file_id, content_id, `date`, `name`, cid, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from files_versions v where id = $1 '.
 			' on duplicate key update content_id = v.content_id, `date` = v.date, `name` = v.name, cid = v.cid, uid = $2, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP'
-			,array($id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
-		//mysqli_query_params('delete from files_versions where id = $1', $id) or die(mysqli_query_error());
+			,array($id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
+		//DB\mysqli_query_params('delete from files_versions where id = $1', $id) or die(DB\mysqli_query_error());
 
 		Cases::updateCaseUpdateInfo($id);
 
@@ -638,14 +635,14 @@ class Files{
 	public function deleteVersion($id){
 		$rez = array('success' => true, 'id' => $id);
 		$content_id = 0;
-		$res = mysqli_query_params('select content_id from files_versions where id = $1', $id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select content_id from files_versions where id = $1', $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $content_id = $r[0];
 		$res->close();
 
-		mysqli_query_params('delete from files_versions where id = $1', $id) or die(mysqli_query_error());
+		DB\mysqli_query_params('delete from files_versions where id = $1', $id) or die(DB\mysqli_query_error());
 		$this->removeContentId($content_id);
 
-		mysqli_query_params('update tree set `updated` = 1 where id = $1', $id) or die(mysqli_query_error());
+		DB\mysqli_query_params('update tree set `updated` = 1 where id = $1', $id) or die(DB\mysqli_query_error());
 
 		Cases::updateCaseUpdateInfo($id);
 
@@ -660,18 +657,18 @@ class Files{
 		if(sizeof($ids) < 2) return array('success' => false);
 
 		$to_id = null;
-		$res = mysqli_query_params('select id from tree where id in ('.implode(',', $ids).') order by udate desc, id desc') or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('select id from tree where id in ('.implode(',', $ids).') order by udate desc, id desc') or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $to_id = $r[0];
 		$res->close();
 
-		mysqli_query_params('update files_versions set file_id = $1 where file_id in ('.implode(',', $ids).')', $to_id) or die(mysqli_query_error());
+		DB\mysqli_query_params('update files_versions set file_id = $1 where file_id in ('.implode(',', $ids).')', $to_id) or die(DB\mysqli_query_error());
 
-		$res = mysqli_query_params('insert into files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate) '.
-			' select $1, content_id, `date`, name, cid, uid, cdate, udate from files where id <> $1 and id in('.implode(',', $ids).')', $to_id) or die(mysqli_query_error());
+		$res = DB\mysqli_query_params('insert into files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate) '.
+			' select $1, content_id, `date`, name, cid, uid, cdate, udate from files where id <> $1 and id in('.implode(',', $ids).')', $to_id) or die(DB\mysqli_query_error());
 		
-		mysqli_query_params('update tree set did = $2, dstatus = 1 where id <> $1 and id in ('.implode(',', $ids).')', array($to_id, $_SESSION['user']['id']) ) or die(mysqli_query_error());
+		DB\mysqli_query_params('update tree set did = $2, dstatus = 1 where id <> $1 and id in ('.implode(',', $ids).')', array($to_id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
 
-		mysqli_query_params('update files set updated = 1 where id = $1', $to_id) or die(mysqli_query_error());
+		DB\mysqli_query_params('update files set updated = 1 where id = $1', $to_id) or die(DB\mysqli_query_error());
 		
 		$ids = array_diff($ids, array($to_id));
 
@@ -710,13 +707,22 @@ class Files{
 
 		return $size;
 	}
+
+	public static function getExtension($filename){
+		$ext = explode('.', $filename);
+		if(sizeof($ext) <2 ) return '';
+		$ext = array_pop($ext);
+		$ext = trim($ext);
+		return mb_strtolower($ext);
+	}
+	
 	function getIcon($filename){
 		if(empty($filename)) return 'file-unknown';
-		return 'file-'.mb_strtolower(getFileExtension($filename));
+		return 'file-'.$this->getExtension($filename);
 	}
 
 	public static function getIconFileName($filename){
-		$ext = getFileExtension($filename);
+		$ext = Files::getExtension($filename);
 		switch($ext){
 			case 'docx':
 			case 'rtf': $ext = 'doc'; break;
@@ -732,9 +738,44 @@ class Files{
 			case 'png': $ext = 'img'; break;
 		}
 		$filename = $ext.'.png';
-		$dir = (defined('CB_SITE_PATH') ? CB_SITE_PATH : PROJ_SITE_PATH).'css/i/ext/';
-		if(file_exists($dir.$filename)) return $filename; else return '.png';
+		if(file_exists(DOC_ROOT.'css/i/ext/'.$filename)) return $filename; else return '.png';
 	}
 
+	public static function setMFVC($configurationString){
+		/* storing max file versions count (mfvc)*/
+		//*:1;doc,docx,xls,xlsx,pdf:5;
+		$GLOBALS['mfvc'] = array('*' => 0);//default is no versions if nothing specified in config
+
+		$v = defined('CB\\config\\max_files_version_count') ? config\max_files_version_count : null;
+		if(!empty($v)){
+			$v = explode(';', $v);
+			foreach($v as $vc){
+				$vc = explode(':', $vc);
+				if(sizeof($vc) == 2){
+					$ext = trim($vc[0]);
+					$count = trim($vc[1]);
+					if(is_numeric($count)){
+						$ext = explode(',', $ext);
+						foreach($ext as $e){
+							$e = trim($e);
+							$e = mb_strtolower($e);
+							$GLOBALS['mfvc'][$e] = $count;
+						}
+					}
+				}
+			}
+		}
+		/* end of storing max file versions configuration fr core in session */
+	}
+	
+	public static function getMFVC($filename){//get Max File Version Count for an extension
+		$ext = Files::getExtension($filename) || mb_strtolower( $filename);
+		$ext = trim($ext);
+		$rez = 0;
+		if(empty($GLOBALS['mfvc'])) return $rez;
+		$ext = mb_strtolower($ext);
+		if(isset($GLOBALS['mfvc'][$ext])) return $GLOBALS['mfvc'][$ext];
+		if(isset($GLOBALS['mfvc']['*'])) return $GLOBALS['mfvc']['*'];
+		return $rez;
+	}
 }
-?>

@@ -48,7 +48,7 @@ function getItemIcon(d){
 		case 7: return 'icon-event';//Event
 		case 8: return 'icon-mail';//Message (email)
 			break;
-
+		default: return d.iconCls;
 	}
 }
 //function getItemCls()
@@ -105,20 +105,20 @@ setsHaveIntersection = function(set1, set2){
 	return !Ext.isEmpty(setsGetIntersection(set1, set2));
 }
 getGroupedTemplates = function(menuButton, handler, scope, templatesFilter){
-	a = []; //objects, in actions, out actions, applicants, subjects
-	CB.DB.templates_per_tags.each(function(r){ 
-		if(Ext.isEmpty(templatesFilter) || setsHaveIntersection(templatesFilter, r.get('template_id')) ){
-			idx = CB.DB.templates.findExact('id', r.get('template_id'));
-			tr = CB.DB.templates.getAt(idx);
+	a = [];
+
+	CB.DB.templates.each(function(r){ 
+		if( (r.get('visible') == 1) && ([1, 2, 3, 7].indexOf(r.get('type')) >= 0) )
+		if(Ext.isEmpty(templatesFilter) || setsHaveIntersection(templatesFilter, r.get('id')) ){
 			a.push({
-				text: tr.get('title')
-				,iconCls: tr.get('iconCls')
+				text: r.get('title')
+				,iconCls: r.get('iconCls')
 				,scope: scope
 				,handler: handler
 				,data: {
-					template_id: tr.get('id')
-					,type: tr.get('type')
-					,title: tr.get('title')
+					template_id: r.get('id')
+					,type: r.get('type')
+					,title: r.get('title')
 					
 				}
 			});
@@ -133,4 +133,106 @@ getGroupedTemplates = function(menuButton, handler, scope, templatesFilter){
 		}
 		menuButton.menu.add(a[i]);
 	}
+
+	return;
+	//we already do not have templates_per_tags, 
+	
+	// CB.DB.templates_per_tags.each(function(r){ 
+	// 	if(Ext.isEmpty(templatesFilter) || setsHaveIntersection(templatesFilter, r.get('template_id')) ){
+	// 		idx = CB.DB.templates.findExact('id', r.get('template_id'));
+	// 		tr = CB.DB.templates.getAt(idx);
+	// 		a.push({
+	// 			text: tr.get('title')
+	// 			,iconCls: tr.get('iconCls')
+	// 			,scope: scope
+	// 			,handler: handler
+	// 			,data: {
+	// 				template_id: tr.get('id')
+	// 				,type: tr.get('type')
+	// 				,title: tr.get('title')
+					
+	// 			}
+	// 		});
+	// 	}
+	// }, this);
+	// menuButton.menu.removeAll();
+	// menuButton.lastGroup = null;
+	// for(i = 0; i < a.length; i++){
+	// 	if(menuButton.lastGroup != a[i].data.type){
+	// 		if(menuButton.menu.items.getCount() > 0) menuButton.menu.add('-');
+	// 		menuButton.lastGroup = a[i].data.type;
+	// 	}
+	// 	menuButton.menu.add(a[i]);
+	// }
+}
+
+function updateMenu(menuButton, menuConfig, handler, scope){
+	if(Ext.isEmpty(menuButton) || Ext.isEmpty(menuConfig)) return;
+	menuButton.menu.removeAll();
+	menuConfig = String(menuConfig).split(',');
+	menu = [];
+	for (var i = 0; i < menuConfig.length; i++)
+		switch(menuConfig[i]){
+			case 'case': break;
+			case 'task': break;
+			case 'event': break;
+			case 'folder': break;
+			case '-': menu.push('-'); break;
+			default:
+				idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i]));
+				if(idx >=0){
+					tr = CB.DB.templates.getAt(idx);
+					menu.push({
+						text: tr.get('title')
+						,iconCls: tr.get('iconCls')
+						,scope: scope
+						,handler: handler
+						,data: {
+							template_id: tr.get('id')
+							,type: tr.get('type')
+							,title: tr.get('title')
+						}
+					});
+
+				}
+			break;
+
+		}
+
+	for(i = 0; i < menu.length; i++) menuButton.menu.add(menu[i]);
+}
+function getMenuConfig(node_id, ids_path, node_template_id){
+	lastWeight = 0
+	menuConfig = '';
+	CB.DB.menu.each( function(r){
+		weight = 0;
+		ug_ids = ',' + String(r.get('user_group_ids')).replace(' ','') + ',';
+		if(ug_ids.indexOf(','+App.loginData.id+',') >=0) weight++;
+		
+		nt_ids = ',' + String(r.get('node_template_ids')).replace(' ','') + ',';
+		if(nt_ids.indexOf(','+node_template_id+',') >=0) weight++;
+		
+		n_ids = ',' + String(r.get('node_ids')).replace(' ','') + ',';
+		if(n_ids.indexOf(','+node_id+',') >=0) weight += 2;
+
+		if(weight >= lastWeight){
+			lastWeight = weight;
+			menuConfig = r.get('menu');
+		}else{
+			if(!Ext.isEmpty(ids_path)){// find parents menu
+				ids = String(ids_path).split('/');
+				for (var i = ids.length -1; i > 0; i--) {
+					if(n_ids.indexOf(','+ids[i]+',') >=0){
+						weight ++;
+						if(weight >= lastWeight){
+							lastWeight = weight;
+							menuConfig = r.get('menu');
+						}
+						i = -1;
+					}
+				};
+			}
+		}
+	})
+	return menuConfig;
 }

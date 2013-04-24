@@ -1,7 +1,8 @@
 <?php
+	namespace CB;
 	require_once('../init.php');
-	require_once('../lib/DB.php');
-	connect2DB();
+	DB\connect();
+	
 	require('config.php');
 	require('classes/Log.php');
 	require('classes/Security.php');
@@ -33,7 +34,7 @@ if(isset($HTTP_RAW_POST_DATA)){
 function doRpc($cdata){
 	global $API;
 
-	if(!is_loged() && (($cdata->action != 'Auth') || ($cdata->method != 'login'))){
+	if(!User::is_loged() && (($cdata->action != 'User') || ($cdata->method != 'login'))){
 		return array(
 			array(
 				'type' => 'exception'
@@ -47,7 +48,7 @@ function doRpc($cdata){
 	  }
 	
 	try {
-		if(!isset($API[$cdata->action])) throw new Exception('Call to undefined action: ' . $cdata->action);
+		if(!isset($API[$cdata->action])) throw new \Exception('Call to undefined action: ' . $cdata->action);
 
 		$action = $cdata->action;
 		$a = $API[$action];
@@ -57,7 +58,7 @@ function doRpc($cdata){
 		$method = $cdata->method;
 		$mdef = $a['methods'][$method];
 		if(!$mdef){
-			throw new Exception("Call to undefined method: $method on action $action");
+			throw new \Exception("Call to undefined method: $method on action $action");
 		}
 		doAroundCalls($mdef['before'], $cdata);
 
@@ -69,7 +70,11 @@ function doRpc($cdata){
 		);
 
 		//require_once("classes/$action.php"); // it's managed by _autoload
-		$o = new $action();
+		if(class_exists($action)) $o = new $action();
+		else{
+		 	$action = 'CB\\'.$action;	
+			$o = new $action();
+		}
 
 		$params = isset($cdata->data) && is_array($cdata->data) ? $cdata->data : array();
 
@@ -78,7 +83,7 @@ function doRpc($cdata){
 		doAroundCalls($mdef['after'], $cdata, $r);
 		doAroundCalls($a['after'], $cdata, $r);
 	}
-	catch(Exception $e){
+	catch(\Exception $e){
 		$r['type'] = 'exception';
 		$r['result'] = array('success' => false);
 		$r['msg'] = $e->getMessage();

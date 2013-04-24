@@ -9,9 +9,9 @@
  * changes. http://yourdomain/min/builder/
  **/
 require_once realpath( dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..').DIRECTORY_SEPARATOR.'config.php';
-$customConfigGroups = getCustomGroupsConfig();
+$customConfig = \CB\getCustomConfig();
 
-return array_merge($customConfigGroups, array(
+return array_merge($customConfig, array(
     'css' => array(	
 		'//css/CB.css'
 		,'//css/template_icons.css'
