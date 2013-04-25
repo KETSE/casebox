@@ -40,29 +40,12 @@ class BrowserTree extends Browser{
 		
 		$p = (Object)array('pid' => $id, 'fl' => 'id,system,type,subtype,name,date,size,cid,cdate,uid,udate,template_id');
 
-		if(!$this->showFoldersContent) $p->types = array(1, 3);
+		if(!$this->showFoldersContent) $p->templates = $GLOBALS['folder_templates'];
 
 		$s = new Search();
 		$rez = $s->query($p);
 		$rez = $rez['data'];
 		return $rez;
-	}
-
-	private function getObjectTags($id, $type){
-		$tags = null;
-		switch($type){
-			case 3: require_once('Cases.php');
-				// $tags = Cases::getCaseTagIds($id);
-				break;
-			case 4: require_once('Objects.php');
-				// $tags = Objects::getObjectTagIds($id);
-				break;
-			case 5: require_once('Cases.php');
-				// $tags = Cases::getFileTagIds($id);
-				break;
-		}
-		if(empty($tags) || empty($tags[3])) return null;
-		return implode(',',$tags[3]);
 	}
 
 }

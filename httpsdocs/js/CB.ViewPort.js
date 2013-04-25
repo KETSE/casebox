@@ -74,7 +74,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 				,height: 25
 				,items: [
 					{xtype: 'tbspacer', width: 610}
-					// ,{text: 'Some text', iconCls: App.loginData.iconCls, menu: [], name: 'userMenu' }
 					,'->'
 					,{xtype: 'uploadwindowbutton'}
 					,{xtype: 'tbspacer', width: 20}
@@ -89,13 +88,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			,listeners: {
 				scope: this
 				,login: this.onLogin 
-				,casecreate: this.onCreateCase
 				,fileopen: this.onFileOpen
 				,fileupload: this.onFileUpload
 				,filedownload: this.onFilesDownload
-				,opencase: this.openCase
+				,createobject: this.createObject
 				,openobject: this.openObject
-				//,objectupdated: this.onObjectUpdated
 				,deleteobject: this.onDeleteObject
 				,opencalendar: this.openCalendar
 				,favoritetoggle: this.toggleFavorite
@@ -103,7 +100,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 				,taskedit: this.onTaskEdit
 				,useradded: this.onUsersChange
 				,userdeleted: this.onUsersChange
-				//,taskcreated: function(){}
 				
 			}
 		});
@@ -126,10 +122,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	}
 	,onLogin: function(r){
 		/* adding menu items */
-		if(App.loginData.manage){
-			//App.mainToolBar.insert(1, {xtype: 'button', text: L.NewCase, iconCls: 'icon-briefcase-plus', scope: this, handler: this.onCreateCase })
-			//App.mainToolBar.insert(1, '-');
-		}
 		um = App.mainToolBar.find( 'name', 'userMenu')[0];
 		um.setText(App.loginData['l'+App.loginData.language_id]);
 		um.setIconClass(App.loginData.iconCls);
@@ -211,7 +203,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		if(CB.DB.templates.getCount() > 0){
 			App.mainViewPort.openDefaultExplorer();
 			App.mainTabPanel.setActiveTab(0)
-			//App.openUniqueTabbedWidget('CBSecurityPanel', null, { data: {id: 237} })
 		}else App.mainViewPort.initCB.defer(500);
 	}
 	,logout: function(){
@@ -238,7 +229,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		if(!Ext.isEmpty(r.tbarItems)){
 			/* inserting specified components before userMenu item */
 			userMenuItem = App.mainToolBar.find( 'name', 'userMenu')[0];
-			// index = App.mainToolBar.items.indexOf(userMenuItem);
 			index = 2;
 			for (var i = 0; i < r.tbarItems.length; i++) {
 				if(!Ext.isEmpty(r.tbarItems[i].link)) r.tbarItems[i].listeners = {scope: this, click: this.onAccordionLinkClick }
@@ -304,32 +294,24 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		if(Ext.isEmpty(rootId)) rootId = Ext.value( App.mainTree.rootId, '/' );
 		if(!App.activateTab(App.mainTabPanel, 'explorer')) App.explorer = App.addTab(App.mainTabPanel, new CB.FolderView({ rootId: rootId, data: {id: 'explorer' }, closable: false }) )
 	}
-	,openCaseById: function(config){
-		c = App.activateTab(App.mainTabPanel, config.params.id, CB.Case);
-		if(c){
-			if(!Ext.isEmpty(config.selectActionId)) c.grid.selectAction(config.selectActionId);
-			return c;
+	,createObject: function(data, e){
+		clog('data', data);
+		tr = CB.DB.templates.getById(data.template_id);
+		if(tr)
+		switch(tr.get('type')){
+			case 'task':
+				this.onTaskCreate({data: data}, e);
+				break;
+			case 'case':
+			default: 
+				this.openObject(data, e);
+				break;
 		}
-		config.iconCls = 'icon-node-case';
-		var pn = new CB.Case(config);
-		App.mainTabPanel.add(pn);
-		App.mainTabPanel.setActiveTab(pn);
-		return pn;
-	}
-	,openCase: function(config, ev){
-		if(ev && ev.stopPropagation) ev.stopPropagation();
-		if(Ext.isEmpty(config) || Ext.isPrimitive(config) || Ext.isEmpty(config.params.id)){
-			if(Ext.isEmpty(v)) return;
-			Cases.getCaseId({nr: v}, function(r, e){
-				if(r.success != true) return Ext.Msg.alert(L.Error, L.CaseNotFound);
-				config = {params: {id: r.data.id}};
-				this.openCaseById(config)
-			}, this);
-		}else return this.openCaseById(config);
 	}
 	,openObject: function(data, e){
+		clog('open', data)
 		if(e){
-			e.stopEvent();
+			if(e.stopEvent) e.stopEvent();
 			if(e.processed === true) return;
 		}
 
@@ -346,23 +328,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
 		o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');/*, hideDeleteButton: (data.template_id == 1)/**/ 
 		return App.addTab(App.mainTabPanel, o);
-	}
-	,onCreateCase: function(b, e){ 
-		if(e) e.stopPropagation();
-		w = new CB.AddCaseForm({
-			modal: true
-			,ownerCt: this
-			,title: L.NewCase
-			,data:{ pid: b.data.pid, callback: this.onCreateCaseCallback }
-		});
-		w.show();
-		return w;
-	}
-	,onCreateCaseCallback: function(params){
-		Cases.create(params, function(r, e){
-			if(r.success !== true) return;
-			App.mainViewPort.fireEvent('savesuccess', r, e); // maybe case created
-		}, this)
 	}
 	,search: function(query, savedQueryId){
 		idx = App.findTab(App.mainTabPanel, 'search');

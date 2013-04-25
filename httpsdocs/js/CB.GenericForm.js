@@ -188,12 +188,7 @@ CB.GenericEditForm = Ext.extend(CB.GenericForm, {
 		this.grid = new CB.VerticalEditGrid({ 
 			refOwner: this
 			,autoHeight: true
-			//,region: 'center'
 			,viewConfig: {autoFill: true, forceFit: true}
-			// ,toolbarItems: [{text: L.Save, iconCls:'icon-save', disabled: true, handler: this.saveForm, scope: this, position: 0}
-			// 	,{text: Ext.MessageBox.buttonText.cancel, iconCls:'icon-cancel', disabled: true, handler: this.onCancelClick, scope: this, position: 1}
-			// 	,{xtype: 'tbseparator', position: 2}
-			// ]
 		});
 		
 		Ext.apply(this, {

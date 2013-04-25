@@ -379,25 +379,6 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
 				,scope: this
 				,hidden: true
 			})
-			// ,remove: new Ext.Action({
-			// 	text: L.Remove
-			// 	,iconCls: 'icon-remove'
-			// 	,handler: this.onRemoveClick
-			// 	,scope: this
-			// 	,disabled: true
-			// })
-			// ,removeAll: new Ext.Action({
-			// 	text: L.RemoveAll
-			// 	,iconCls: 'icon-remove-all'
-			// 	,handler: this.onRemoveAllClick
-			// 	,scope: this
-			// })
-			// ,removeUploaded: new Ext.Action({
-			// 	text: L.RemoveUploaded
-			// 	,iconCls: 'icon-remove-uploaded'
-			// 	,handler: this.onRemoveUploadedClick
-			// 	,scope: this
-			// })
 		}
 		this.statusLabel = new Ext.form.DisplayField({
 			value: L.ReadyToUpload
@@ -540,22 +521,7 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
 				,sortable: true
 				,dataIndex: 'msg'
 				,hidden: true
-			}/*,{
-				header: 'md5'
-				,width: 175
-				,sortable: true
-				,dataIndex: 'md5'
-			},{
-				header: 'md5_verified'
-				,width: 175
-				,sortable: true
-				,dataIndex: 'md5_verified'
-			},{
-				header: 'content_id'
-				,width: 175
-				,sortable: true
-				,dataIndex: 'content_id'
-			}/**/]
+			}]
 			,viewConfig: {
 				stripeRows: true
 				,markDirty: false
@@ -681,11 +647,7 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
 	}
 	,onOptionsClick: function(b, e){
 		this.uploader.config[b.name] = !b.checked;
-		// this.uploader.store.removeAll();
 	}
-	// ,onRemoveUploadedClick: function(b, e){
-	// 	this.uploader.store.each(function(r){ if(r.get('status') >1) this.uploader.store.remove(r); }, this)
-	// }
 })
 
 CB.UploadWindowButton = Ext.extend(Ext.Button, {

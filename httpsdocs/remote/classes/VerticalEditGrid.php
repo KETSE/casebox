@@ -52,10 +52,6 @@ class VerticalEditGrid{
 			if(!isset($fv->value)) $fv->value = null;
 			$f = explode('_', $f);
 			$field_id = substr($f[0], 1);
-			/*$field = Array();
-			$res = DB\mysqli_query_params('select name, type from templates_structure where id = $1', $field_id) or die(DB\mysqli_query_error());
-			if($r = $res->fetch_assoc()) $field = $r;
-			$res->close();/**/
 			
 			$duplicate_id = intval($duplicate_ids[$f[1]]);
 			$duplicate_index = 0;

@@ -17,12 +17,8 @@ CB.Browser = Ext.extend(Ext.Panel,{
 			,stateEvents: ['resize']
 			,getState: function(){ return {width: this.getWidth()}}
 		});
-		//this.tree.getSelectionModel().on('selectionchange', this.onTreeSelectionChange, this)
 
-		this.view = new CB.BrowserView({
-			//tree: this.tree
-			region: 'center'
-		});
+		this.view = new CB.BrowserView({region: 'center'});
 		Ext.apply(this, {
 			layout: 'border'
 			,items: [this.tree, this.view]

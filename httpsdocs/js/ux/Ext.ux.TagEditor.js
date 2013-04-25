@@ -61,15 +61,7 @@ Ext.ux.TagEditor = Ext.extend(Ext.Panel, {
 				,disabled: true
 			},'-');
 
-		items = [
-		/*{	
-			xtype: 'label'
-				,cls: 'fwB'
-				,style: 'display: block'
-				,height: 15
-				,width: '100%'
-				,text: L.Tags + ':'
-			}/**/]
+		items = []
 		if(!Ext.isEmpty(this.api) && !Ext.isEmpty(this.api.search)) items.push({ 
 			xtype: 'textfield'
 			,cls: 'icon-locate-right'

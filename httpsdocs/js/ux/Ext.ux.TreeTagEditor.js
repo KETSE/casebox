@@ -31,58 +31,9 @@ Ext.ux.TreeTagEditor = Ext.extend(Ext.Panel, {
 			,handler: this.onCloseClick
 		}
 		]
-		/*if(this.showFilterOptions) 	tbarItems.unshift({
-				tooltip: L.and
-				,criteria: 'and'
-				,iconCls: 'x-tool-chain'
-				,toggleGroup: 'criteria'
-				,allowDepress: false
-				,scope: this
-				,handler: this.valueChanged
-				,disabled: true
-			},{
-				tooltip: L.or
-				,criteria: 'or'
-				,iconCls: 'x-tool-unchain'
-				,toggleGroup: 'criteria'
-				,allowDepress: false
-				,pressed: true
-				,scope: this
-				,handler: this.valueChanged
-				,disabled: true
-			},{
-				tooltip: L.exact
-				,criteria: 'exact'
-				,iconCls: 'icon-magnifier-zoom-actual-equal'
-				,toggleGroup: 'criteria'
-				,allowDepress: false
-				,scope: this
-				,handler: this.valueChanged
-				,disabled: true
-			},'-');/**/
 
-		items = [
-		/*{	
-			xtype: 'label'
-				,cls: 'fwB'
-				,style: 'display: block'
-				,height: 15
-				,width: '100%'
-				,text: L.Tags + ':'
-			}/**/]
-		/*if(!Ext.isEmpty(this.api) && !Ext.isEmpty(this.api.search)) items.push({ 
-			xtype: 'textfield'
-			,cls: 'icon-locate-right'
-			,width: '100%'
-			,enableKeyEvents: true
-			,listeners: {
-				scope: this
-				,keyup: function(field, event){
-					if(this.lastSearchText == field.getValue()) return this.searchTask.cancel();
-					this.searchTask.delay(500);
-				}
-			}
-		});/**/
+
+		items = []
 		items.push({
 			xtype: 'dataview'
 			,boxMaxHeight: 500
@@ -104,7 +55,6 @@ Ext.ux.TreeTagEditor = Ext.extend(Ext.Panel, {
 				,click: this.onItemClick
 			}
 		})
-		//if(!Ext.isEmpty(this.api) && !Ext.isEmpty(this.api.create)) items.push({ xtype: 'dataview', height: 26, cls: 'taC pt10 btg', data: [], tpl: '<a href="#" class="cBl">'+L.CreateNewTag+'</a>', itemSelector: 'a', listeners: { click: {scope: this, fn: this.onCreateNewTagClick} } });
 		Ext.apply(this, {
 			items: items
 			,tbar: { items: tbarItems }
@@ -140,8 +90,6 @@ Ext.ux.TreeTagEditor = Ext.extend(Ext.Panel, {
 		this.ids = {0:[]}
 
 		this.treeData = [];
-/*		lastGroup = -1;
-		lastParentOrder = -1;/**/
 		if(this.store){// when a store is given then retreiving items from it
 			this.store.each(function(r){
 				if(!this.filter || this.filter(r)) this.ids[r.get(this.idField)] = [];
@@ -151,28 +99,10 @@ Ext.ux.TreeTagEditor = Ext.extend(Ext.Panel, {
 					if(Ext.isDefined(this.ids[r.get(this.pidField)])) this.ids[r.get(this.pidField)].push(r.get(this.idField)); else this.ids[0].push(r.get(this.idField))
 				}
 			}, this);
-			/*
-			this.store.each(function(r){
-				if(!this.filter || this.filter(r)){ 
-					this.ids[r.get(this.idField)] = [];
-					addDivider = ( ( (lastGroup != -1) && (lastGroup != r.get(this.groupField)) ) || ((lastParentOrder != -1) && (lastParentOrder != r.get(this.parentOrderField))) );
-					data.push([r.get(this.idField), r.get(this.nameField), (this.value.indexOf(r.get(this.idField)) > -1), r.get(this.groupField), addDivider]);
-					lastGroup = r.get(this.groupField);
-					lastParentOrder = r.get(this.parentOrderField);
-					
-				}
-			}, this);/**/
 		}else if(this.data){ //setting data from a given array of data
 			Ext.each(this.data, function(row){ this.ids[r[this.idField]] = []; }, this);
 			Ext.each(this.data, function(row){ if(Ext.isDefined(this.ids[r[this.pidField]])) this.ids[r[this.pidField]].push(r[this.idField]); else this.ids[0].push(r[this.idField]) }, this);
-			/*Ext.each(this.data, function(row){
-				addDivider = (lastGroup != -1) && (lastGroup != row[this.groupField]);
-				addDivider = ( ( (lastGroup != -1) && (lastGroup != row[this.groupField]) ) || ((lastParentOrder != -1) && (lastParentOrder != row[this.parentOrderField])) );
-				data.push([row[this.idField], row[this.nameField], (this.value.indexOf(parseInt(row[this.idField])) > -1), row[this.groupField], addDivider]);
-				lastGroup = row[this.groupField];
-				lastParentOrder = row[this.parentOrderField];
-			}, this);/**/
-		}/**/
+		}
 		this.iterateChildren(0, 0);
 		this.itemsStore.loadData(this.treeData);
 		if(this.isVisible()) this.ownerCt.doLayout();

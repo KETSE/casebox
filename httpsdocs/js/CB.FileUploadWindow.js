@@ -7,7 +7,6 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
 	,closable: true
 	,closeAction: 'hide'
 	,autoHeight: true
-	//,layout: 'fit'
 	,maximizable: false
 	,minimizable: false
 	,modal: true
@@ -254,34 +253,6 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 				}
 			})
 			w.show();
-			
-			// case 'fileexists': 
-			// 	this.filename = action.result.filename;
-			// 	w = new CB.FilesConfirmationWindow({
-			// 		title: L.FileExists
-			// 		,msg: action.result.msg //L.FilenameExistsInTarget.replace('[fileName]', '"' + this.filename + '"')
-			// 		,icon: Ext.MessageBox.QUESTION
-			// 		,listeners: {
-			// 			scope: this
-			// 			,hide: this.onConfirmResponse
-			// 		}
-			// 	})
-			// 	w.show();
-			// 	break;
-			// case 'multiplefileexists': 
-			// 	w = new CB.FilesConfirmationWindow({
-			// 		title: L.FileExists
-			// 		,msg: action.result.msg //L.SomeFilenamesExistsInTarget
-			// 		,icon: Ext.MessageBox.QUESTION
-			// 		,data: {single: false, autorenameButton: true}
-			// 		,listeners: {
-			// 			scope: this
-			// 			,hide: this.onConfirmResponse
-			// 		}
-			// 	})
-			// 	w.show();
-			// 	break;
-			// default: App.formSubmitFailure(form, action);
 		}else App.formSubmitFailure(form, action);
 	},onConfirmResponse: function(w){
 		if(w.response == 'rename'){

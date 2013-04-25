@@ -33,7 +33,6 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
 					,facetId: key
 					,facetTitle: value.title
 					,f: Ext.isEmpty(value.f) ? key: value.f
-					//,headerCfg: { cls: 'x-panel-header panel-header-nobg' }
 				})
 				this.insert(idx, facet);
 			}
@@ -70,7 +69,6 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
 		result = {}
 		this.items.each(function(fe){
 			if(!Ext.isEmpty(fe.facetId)){
-				//fid = fe.f ? fe.f : fe.facetId;
 				fid = Ext.value(fe.facetId, fe.f);
 				if(Ext.isEmpty(result[fid])) result[fid] = [];
 				result[fid].push(fe.getValue());

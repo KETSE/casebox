@@ -196,7 +196,7 @@ CB.TemplateEditWindow = Ext.extend(CB.GenericForm, {
 			,data: [[0, L.no],[1, L.inMenu], [2, L.inМenuАndАutoopen], [3, L.inTabsheet]]
 		});
 		
-		idx = CB.DB.templates.findExact('type', -100);
+		idx = CB.DB.templates.findExact('type', 'template');
 		template_id = (idx >=0 ) ? CB.DB.templates.getAt(idx).get('id') : -1;
 
 		this.propertiesGrid = Ext.create({ 
@@ -397,9 +397,7 @@ CB.TemplatesManagementWindow = Ext.extend(Ext.Panel, {
 		
 		this.tabPanel = new Ext.TabPanel({
 			region: 'center'
-			// ,activeTab: 0
 			,border: false
-			// ,items: [this.TemplatesTagGroupsTree]
 		});
 		Ext.apply(this, {
 			hideBorders: true
@@ -428,7 +426,6 @@ CB.TemplatesManagementWindow = Ext.extend(Ext.Panel, {
 	}
 	,onUpdateTemplate: function(w, action){
 		this.TemplatesTree.getRootNode().cascade(this.updateTreeNode, this);
-		// this.TemplatesTagGroupsTree.getRootNode().cascade(this.updateTreeNode, this);
 	}
 	,updateTreeNode: function(n){
 		a = String(n.attributes.id).split('-');

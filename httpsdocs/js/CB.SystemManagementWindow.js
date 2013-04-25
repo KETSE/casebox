@@ -79,7 +79,6 @@ CB.TagAddForm = Ext.extend(Ext.Window, {
 			items.push({fieldLabel: L.Name+ ' ('+r.get('abreviation')+')', name: 'l'+r.get('id'), xtype: 'textfield', allowBlank: false})
 		}, this);
 		
-		//items.push({fieldLabel: L.Order, name: 'order', xtype: 'numberfield'});
 		if(this.data.type == 1) items.push({fieldLabel: L.IconClass, name: 'iconCls', xtype: 'textfield'}, {fieldLabel: L.Hidden, name: 'hidden', xtype: 'checkbox', inputValue: 1, value: 0});
 		items.push({ xtype: 'displayfield', hideLabel: true, name: 'errorLabel', cls: 'taC cR', value: '&nbsp;' });
 		Ext.apply(this, {

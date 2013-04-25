@@ -24,16 +24,15 @@ class Log{
 		
 		//setting case_id if not specified and we have object_id or file_id specified
 		if(empty($p['case_id']) && (!empty($p['object_id']) || !empty($p['file_id']) || !empty($p['task_id']))){
-			require_once 'Cases.php';
 			try{
-				@$p['case_id'] = Cases::getId( Util\coalesce($p['object_id'], $p['file_id'], $p['task_id']) );
+				@$p['case_id'] = Objects::getCaseId( Util\coalesce($p['object_id'], $p['file_id'], $p['task_id']) );
 			}catch(\Exception $e){
 				//Task is independent, not associated 
 			}
 		}
 		// get case data
 		if(!empty($p['case_id'])){
-			$res = DB\mysqli_query_params('select id, name, nr from cases where id = $1', $p['case_id']) or die(DB\mysqli_query_error());
+			$res = DB\mysqli_query_params('select id, name from tree where id = $1', $p['case_id']) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()) $case_data = $r;
 			$res->close();
 		}else $p['case_id'] = null;
@@ -315,15 +314,6 @@ class Log{
 						$subject = str_replace( array('{owner}', '{name}', '{path}'), array(Util\coalesce($r['owner'], $r['username']), $r['name'], $r['path'] ), $subject );
 					$res->close();
 					$message = Tasks::getTaskInfoForEmail($p['task_id'], $u['id'], @$p["removed_users"]/*, $message/**/);
-					
-					/*aboutTaskCreated		- New task / {owner}: {title} ({$path})
-					aboutTaskUpdated		- Task update / {title} ({$path})
-					aboutTaskComplete 		- Task completed / {title} ({$path})
-					
-					aboutTaskOverdue		- Task overdue / {title} ({$path})
-					aboutTaskCompletionDecline	- Task completion declined / {owner}: {title} ({$path})
-					aboutTaskCompletionOnBehalt	- On behalf task completion / {owner}: {title} ({$path})
-					aboutTaskReopened		- Task reopened / {owner}: {title} ({$path})/**/
 					break;
 				}
 			$p['case_id'] = is_numeric($p['case_id']) ? $p['case_id'] : null;

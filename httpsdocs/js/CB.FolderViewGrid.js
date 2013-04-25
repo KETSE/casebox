@@ -841,33 +841,32 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			if(Ext.isEmpty(cmi)) return;
 			menuButton = cmi[0];
 		}
-		// getGroupedTemplates(menuButton, this.onCreateObjectClick, this)
 		updateMenu(menuButton, getMenuConfig(this.folderProperties.id, this.folderProperties.path, this.folderProperties.template_id), this.onCreateObjectClick, this);
-		
-		if( menuButton.menu.items.getCount() > 0 ){
-			if(!this.actions.createTask.isHidden() || !this.actions.createEvent.isHidden() ){
-				menuButton.menu.add('-');
-				menuButton.menu.add(this.actions.createTask);
-				menuButton.menu.add(this.actions.createEvent);
-			}
-		}
-		if(!this.actions.createFolder.isHidden()){
-			menuButton.menu.add('-');
-			menuButton.menu.add(this.actions.createFolder);
-		}
-		if(!this.actions.createCase.isHidden()){
-			menuButton.menu.add('-');
-			menuButton.menu.add(this.actions.createCase);
-		}
 
 		menuButton.setDisabled(menuButton.menu.items.getCount() < 1);
 	}
 	,onCreateObjectClick: function(b, e) {
-		b.data.pid = this.folderProperties.id;
-		b.data.path = this.folderProperties.path;
-		b.data.pathtext = this.folderProperties.pathtext;
-		this.fireEvent('openobject', b.data, e);
+		data = Ext.apply({}, b.data);
+		data.pid = this.folderProperties.id;
+		data.path = this.folderProperties.path;
+		data.pathtext = this.folderProperties.pathtext;
+		tr = CB.DB.templates.getById(data.template_id);
+		if(tr && (tr.get('cfg').createMethod == 'inline') )
+			Objects.create(data, this.processCreateInlineObject, this);
+		else this.fireEvent('createobject', data, e);
 	}
+	,processCreateInlineObject: function (r, e) {
+		this.getEl().unmask();
+		if(r.success !== true) return;
+		this.grid.store.loadData(r, true);
+		idx = this.grid.store.findExact('nid', parseInt(r.data.nid));
+		this.grid.selModel.clearSelections();
+		if(idx >= 0) this.grid.selModel.selectRow(idx);
+		this.justAddedFolder = r.data.nid;
+		this.fireEvent('objectupdated', { data: {id: r.data.nid, pid: r.data.pid } }, e )
+		this.onRenameClick(r, e);
+	}
+
 	,onDownClick: function(key, e) {
 		if(this.grid.selModel.hasSelection() || (this.grid.store.getCount() < 1)) return false;
 		this.grid.selModel.selectRow(0);

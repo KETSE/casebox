@@ -93,20 +93,23 @@ class SolrClient{
 		unset($solr);
 	}
 	public function updateTree($all = false){
-		$sql = 'select id, pid, f_get_tree_pids(id) `pids`, f_get_tree_path(id) `path`, name, `system`, `type`, subtype, target_id
-			,case when type = 2 then (select `type` from tree where id = t.target_id) else null end `target_type`
-			,DATE_FORMAT(`date`, \'%Y-%m-%dT%H:%i:%sZ\') `date`
-			,DATE_FORMAT(`date_end`, \'%Y-%m-%dT%H:%i:%sZ\') `date_end`
-			,oid
-			,cid
-			,DATE_FORMAT(cdate, \'%Y-%m-%dT%H:%i:%sZ\') `cdate`		
-			,uid
-			,DATE_FORMAT(udate, \'%Y-%m-%dT%H:%i:%sZ\') `udate`
-			,did
-			,DATE_FORMAT(ddate, \'%Y-%m-%dT%H:%i:%sZ\') `ddate`
-			,dstatus
-			,f_get_objects_case_id(id) `case_id`
-			from tree t '.($all ? '' : ' where updated = 1');
+		$sql = 'select t.id, t.pid, f_get_tree_pids(t.id) `pids`, f_get_tree_path(t.id) `path`, t.name, t.`system`, t.`type`, t.subtype, t.template_id, t.target_id
+			,case when t.type = 2 then (select `type` from tree where id = t.target_id) else null end `target_type`
+			,DATE_FORMAT(t.`date`, \'%Y-%m-%dT%H:%i:%sZ\') `date`
+			,DATE_FORMAT(t.`date_end`, \'%Y-%m-%dT%H:%i:%sZ\') `date_end`
+			,t.oid
+			,t.cid
+			,DATE_FORMAT(t.cdate, \'%Y-%m-%dT%H:%i:%sZ\') `cdate`		
+			,t.uid
+			,DATE_FORMAT(t.udate, \'%Y-%m-%dT%H:%i:%sZ\') `udate`
+			,t.did
+			,DATE_FORMAT(t.ddate, \'%Y-%m-%dT%H:%i:%sZ\') `ddate`
+			,t.dstatus
+			,f_get_objects_case_id(t.id) `case_id`
+			,nt.`type` template_type
+			from tree t 
+			left join templates nt on t.template_id = nt.id
+			'.($all ? '' : ' where t.updated = 1');
 		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 		$k = 0;
 		if($r = $res->fetch_assoc()){
@@ -120,43 +123,37 @@ class SolrClient{
 					$type = $r['target_type']; //link
 				}
 				if(!empty($r['case_id'])){
-					$cres = DB\mysqli_query_params('select name from cases where id = $1', $r['case_id']) or die(DB\mysqli_query_error());
+					$cres = DB\mysqli_query_params('select coalesce(custom_title, title) name from objects where id = $1', $r['case_id']) or die(DB\mysqli_query_error());
 					if($cr = $cres->fetch_row()) $r['case'] = $cr[0];
 					$cres->close();
 					Objects::setCaseRolesFields($r);
 				}
-				
-				switch($type){
-					case 1: //folder
-						$r['content'] = $r['name'];
-						$r['ntsc'] = 1;
-						break;
-					case 3: //case
-						$r = array_merge($r, Cases::getSorlData($id));
-						$r['ntsc'] = 2;
-						break;
-					case 4: //case object
-					case 8: //Emails
-					case 9: //Contact
+				$r['ntsc'] = sizeof($GLOBALS['folder_templates'])+1;
+				switch($r['template_type']){
+					case 'case':
+						$r['ntsc']--;
 						$r = array_merge($r, Objects::getSorlData($id));
-						$r['ntsc'] = 4;
 						break;
-					case 5: //file
+					case 'object':
+					case 'email':
+						$r = array_merge($r, Objects::getSorlData($id));
+						break;
+					case 'file':
 						$r = array_merge($r, Files::getSorlData($id));
-						$r['ntsc'] = 4;
 						break;
-					case 6: //tasks
-					case 7: //tasks
+					case 'task':
 						$r = array_merge($r, Tasks::getSorlData($id));
-						$r['ntsc'] = 4;
 						break;
 				}
+
+				$folder_index = array_search($r['template_id'], $GLOBALS['folder_templates']);
+				if($folder_index !== false) $r['ntsc'] = $folder_index;
+
+				$r['ntsc'] = intval($r['ntsc']);
 				$r['system'] = intval($r['system']);
 				$r['type'] = intval($r['type']);
 				$r['subtype'] = intval($r['subtype']);
-
 				$r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
-				// $r['sort_path'] = mb_strtolower($r['name'], 'UTF-8');
 				$this->add( $r );
 				
 				DB\mysqli_query_params('update tree set updated = -1 where id = $1', $r['id']) or die(DB\mysqli_query_error()); 			

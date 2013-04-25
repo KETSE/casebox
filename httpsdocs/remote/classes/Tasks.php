@@ -64,12 +64,11 @@ class Tasks{
 	}
 	
 	function save($p){
-		require_once 'Cases.php';
 		if(!isset($p['id'])) $p['id'] = null;
 		if(!isset($p['pid'])) $p['pid'] = null;
 		$p['type'] = intval($p['type']);
 		try{
-			$p['case_id'] = Cases::getId($p['pid']);
+			$p['case_id'] = Objects::getCaseId($p['pid']);
 		} catch (\Exception $e) {
 		}
 		if(empty($p['case_id'])) $p['case_id'] = null;
@@ -82,13 +81,6 @@ class Tasks{
 		if( !Util\validId($p['id']) || Security::canManageTask($p['id']) ){
 			/* update the task details only if is admin or owner of the task /**/
 
-			/* getting available user ids to assign task to for verification /**/
-			/*$u = Security::getCaseLowerLevelUsers($p); //TO REVIEW
-			$user_ids = Array();
-			foreach($u['data'] as $user) array_push($user_ids, $user['id']);
-			if(!in_array($p['user_id'], $user_ids)) throw new \Exception(L\Wrong_user_assigned);
-			/* end of getting available user ids to assign task to for verification /**/
-			
 			$log_action_type = 21;// suppose adding new task
 			if(is_numeric($p['create_in'])) $p['pid'] = $p['create_in'];
 			if(!is_numeric($p['pid'])) $p['pid'] = null;
@@ -119,11 +111,11 @@ class Tasks{
 				$res->close();
 			}
 			/* end of estimating deadline status in dependance with parent tasks statuses */
-			// $p['type'] = 6; //task type already set by client - task or event
 			$obj = (object)$p;
 			if(empty($p['id'])){
 				fireEvent('beforeNodeDbCreate', $obj);
-				$res = DB\mysqli_query_params('insert into tree (pid, name, `type`, cid, uid) values ($1, $2, $3, $4, $4)', array($p['pid'], $p['title'], $p['type'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+				$res = DB\mysqli_query_params('insert into tree (pid, name, `type`, template_id, cid, uid) values ($1, $2, $3, $4, $5, $5)'
+					, array($p['pid'], $p['title'], $p['type'], $p['template_id'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 				$p['id'] = DB\last_insert_id();
 			}else{
 				//DB\mysqli_query_params('delete from tasks_dependance where task_id = $1', $p['id']) or die(DB\mysqli_query_error());
@@ -170,13 +162,6 @@ class Tasks{
 				,$p['allday']
 				)) or die(DB\mysqli_query_error());
 
-			/* saving parent task ids into the additional table (tasks_dependance)*/
-			// $pt = explode(',', $p['parent_ids']);
-			// $pt = array_filter($pt, 'is_numeric');
-			// if(!empty($pt))
-			// DB\mysqli_query_params('insert into tasks_dependance (task_id, parent_task_id) select $1, id from tasks where id in (0'.implode(',', $pt).')', $p['id']) or die(DB\mysqli_query_error());
-			/* end of saving parent task ids into the additional table (tasks_dependance)*/
-			
 			/*storing specified files*/
 			require_once 'Files.php';
 			$files = new Files();
@@ -189,7 +174,7 @@ class Tasks{
 			$files->storeFiles($params);
 			unset($files);
 			/*end of specified files*/
-			Cases::updateCaseUpdateInfo($p['id']);
+			Objects::updateCaseUpdateInfo($p['id']);
 
 		}
 		$remind_users = null;
@@ -230,15 +215,14 @@ class Tasks{
 	
 	function saveReminds($p, $log_action_type = 25){
 		$p = (array)$p;
-		require_once 'Cases.php';
 		$case_name = '';
 		try {
-			$p['case_id'] = @Cases::getId($p['pid']);
+			$p['case_id'] = @Objects::getCaseId($p['pid']);
 			/* check if current user can read task */
 			if( !Util\validId($p['case_id']) 
 				// || !Security::canReadCase($p['case_id']) 
 				) throw new \Exception(L\Access_denied);
-			$case_name = Cases::getName($p['case_id']);
+			$case_name = Objects::getCaseName($p['case_id']);
 			/* save reminds for currents user /**/
 		} catch (\Exception $e) {
 		}
@@ -310,7 +294,7 @@ class Tasks{
 		}
 		Log::add(Array('action_type' => $action_type, 'task_id' => $p->id, 'to_user_ids' => $p->user_id, 'remind_users' => $task['cid'].','.$p->user_id, 'autoclosed' => $autoclosed, 'info' => 'title: '.$task['title'])); // TO REVIEW
 
-		Cases::updateCaseUpdateInfo($p->id);
+		Objects::updateCaseUpdateInfo($p->id);
 		
 		SolrClient::runCron();
 		//exec('php ../../casebox/crons/cron_solr_update_objects.php'); //??
@@ -337,29 +321,22 @@ class Tasks{
 	}
 	
 	function complete($p){
-		/*$case_id = null;
-		$object_id = null;
-		$status = null;/**/
 		$task = array();
 		$res = DB\mysqli_query_params('select t.case_id, t.object_id, t.status, ru.status `user_status`, t.cid, t.responsible_user_ids, t.title from tasks t join tasks_responsible_users ru on t.id = ru.task_id where t.id = $1 and ru.user_id = $2', array($p->id, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			if($r['user_status'] == 1) throw new \Exception(L\Task_already_completed);
 			$task = $r;
-			/*$case_id = $r['case_id'];
-			$object_id = $r['object_id'];
-			$status = $r['status'];/**/
 		}else if(!Security::isAdmin()) throw new \Exception(L\Access_denied);
 		$res->close();
 		DB\mysqli_query_params('update tasks_responsible_users set status = 1, `time` = current_timestamp where task_id = $1 and user_id = $2', array($p->id, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		DB\mysqli_query_params('insert into messages (cid, nid, message) values($1, $2, $3)', 
 			array($_SESSION['user']['id'], Util\coalesce($task['case_id'], $task['object_id'], $p->id), $p->message)) or die(DB\mysqli_query_error());
 		
-		Log::add(Array('action_type' => 23, 'task_id' => $p->id, /*'to_user_ids' => $task['responsible_user_ids'], /**/'remind_users' => $task['cid']/*.','.$task['responsible_user_ids']/**/, 'autoclosed' => $this->checkAutocloseTask($p->id), 'info' => 'title: '.$task['title']));
+		Log::add(Array('action_type' => 23, 'task_id' => $p->id, 'remind_users' => $task['cid'], 'autoclosed' => $this->checkAutocloseTask($p->id), 'info' => 'title: '.$task['title']));
 
-		Cases::updateCaseUpdateInfo($p->id);
+		Objects::updateCaseUpdateInfo($p->id);
 
 		SolrClient::runCron();
-		//exec('php ../../casebox/crons/cron_solr_update_objects.php'); 
 		return array('success' => true);
 	}
 	
@@ -374,10 +351,9 @@ class Tasks{
 		Log::add(Array('action_type' => 27, 'task_id' => $id, /*'to_user_ids' => $task['responsible_user_ids'],/**/ 'remind_users' => $task['cid'].','.$task['responsible_user_ids'], 'info' => 'title: '.$task['title']));
 		$this->updateChildTasks($id);
 
-		Cases::updateCaseUpdateInfo($id);
+		Objects::updateCaseUpdateInfo($id);
 
 		SolrClient::runCron();
-		//exec('php ../../casebox/crons/cron_solr_update_objects.php'); 
 		return array('success' => true, 'id' => $id);
 	}
 
@@ -395,7 +371,7 @@ class Tasks{
 		Log::add(Array('action_type' => 31, 'task_id' => $id, 'remind_users' => $task['cid'].','.$task['responsible_user_ids'], 'info' => 'title: '.$task['title']));
 		$this->updateChildTasks($id);
 
-		Cases::updateCaseUpdateInfo($id);
+		Objects::updateCaseUpdateInfo($id);
 
 		SolrClient::runCron();
 		return array('success' => true, 'id' => $id);
@@ -404,16 +380,6 @@ class Tasks{
 	function updateChildTasks($task_id){
 		// selecting child tasks (that depend on this task completition) 
 		$updatingChildTasks = array();
-		// $res = DB\mysqli_query_params('SELECT ct.id, COUNT(pt.id), SUM(pt.status)
-		// 	FROM tasks_dependance td 
-		// 	JOIN tasks ct ON td.task_id = ct.id AND ct.status = 0 -- child tasks of currently updated task
-		// 	JOIN tasks_dependance ctd ON ct.id = ctd.task_id
-		// 	JOIN tasks pt ON ctd.parent_task_id = pt.id AND ct.status = 0 -- al parent tasks of the child tasks
-		// 	WHERE td.parent_task_id = $1
-		// 	GROUP BY ct.id', $task_id) or die(DB\mysqli_query_error());
-		// while($r = $res->fetch_row()) if($r[1]*2 == $r[2]) $updatingChildTasks[] = $r[0];
-		// $res->close();
-		// if(!empty($updatingChildTasks)) DB\mysqli_query_params('update tasks set status = 2 where id in ('.implode(',', $updatingChildTasks).')') or die(DB\mysqli_query_error());
 	}
 
 	function getUserTasks($p){
@@ -499,8 +465,7 @@ class Tasks{
 		$case_id = false;
 		if(isset($p->task_id) && is_numeric($p->task_id)) 
 			try{
-				require_once 'Cases.php';
-				$case_id = Cases::getId($p->task_id);
+				$case_id = Objects::getCaseId($p->task_id);
 			}catch(\Exception $e){
 			
 			}
@@ -548,15 +513,12 @@ class Tasks{
 		$iconCls = 'icon-calendar-medium-clean';
 		if($task['status'] == 4){
 			$cls = 'cO';
-			//$iconCls = ' icon-bullet_gray';
 		}
 		if(!empty($task['missed'])){
-			//$cls = 'cM';
-			//$iconCls = 'icon-cross-script';
+
 		}
 		if(!empty($task['completed'])){
 			$cls = ($task['status'] != 3) ? 'cGR' : 'cG';
-			//$iconCls = 'icon-tick';
 		}
 		if(!empty($cls)) $task['cls'] = $cls;
 		if(!empty($iconCls)) $task['iconCls'] = $iconCls;
@@ -866,8 +828,6 @@ class Tasks{
 				$rez .= '</ul></td></tr>';
 			}
 
-			// 	//<!--tr><td class="k">Файлы:</td><td><!--ul class="obj-files"><li class="doc"><a href="#file1">Conference agenda with track.docx</a></li><li class="pdf"><a href="#file2">FOE-0506-Romanenko-1-web summary-DP-10 27 05.doc</a></li></ul-->
-			
 			if(!empty($d['reminds'])){
 				$rez .= '<tr><td class="k">'.L\Reminders.':</td><td><ul class="reminders">';
 				$r = explode('-', $d['reminds']);
@@ -882,7 +842,7 @@ class Tasks{
 					}
 					$rez .= '<li><a name="rem_edit" rid="1" href="#">'.$rem[1].' '.$units.'</a></li>';
 				}
-				$rez .= '</ul></td></tr>'; //<a class="click nlhl" name="rem_add">Добавить напоминание</a>
+				$rez .= '</ul></td></tr>';
 			}
 			$rez .= '</tbody></table></div>';
 

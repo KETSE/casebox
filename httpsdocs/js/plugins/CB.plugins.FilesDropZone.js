@@ -10,7 +10,6 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
 	,init: function(owner) {
 		this.owner = owner;
 		owner.on('render', this.onRender, this);
-		// owner.on('destroy', this.onBeforeDestroy, this);
 		if(owner.dropZoneConfig) Ext.apply(this.dropZoneConfig, owner.dropZoneConfig);
 	}
 
@@ -25,7 +24,6 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
 		App.on('filesdrop', this.hideDropZone, this)
 	}
 	,onBeforeDestroy: function(){
-		// this.owner.un('render', this.onRender, this);
 		App.un('dragfilesenter', this.showDropZone, this)
 		App.un('dragfilesover', this.showDropZone, this)
 		App.un('dragfilesleave', this.hideDropZone, this)

@@ -41,7 +41,6 @@ class System {
 			,'type' => empty($params->type) ? 0: 1
 			,'hidden' => empty($params->hidden) ? null: 1
 			,'iconCls' => (empty($params->iconCls) || ($params->iconCls == 'icon-tag-small')) ? null: $params->iconCls
-			//,'order' => $p->order
 		);
 		$values_string = '$1, $2, $3, $4, $5';
 		$on_duplicate =  'hidden = $4, iconCls = $5';

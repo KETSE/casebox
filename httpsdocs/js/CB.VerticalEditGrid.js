@@ -247,7 +247,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		if(!Ext.isDefined(this.popupForRow)) return;
 		this.store.getAt(this.popupForRow).set('files', data.id);
 		delete this.popupForRow;
-		this.fireEvent('change'); //this.refOwner.setDirty(true);
+		this.fireEvent('change');
 	}
 	,onFilesDeleted: function(fileId){
 	}

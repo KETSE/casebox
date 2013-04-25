@@ -409,43 +409,8 @@ class Security {
 		if(!empty($allow_users)) $objectRecord['allow_user_ids'] = $allow_users;
 		if(!empty($deny_users)) $objectRecord['deny_user_ids'] = $deny_users;
 
-		// foreach($acl as $access){
-		// 	$allow = explode(',',$access['allow']);
-		// 	$deny = explode(',',$access['deny']);
-		// 	if($deny[5] < 0){
-		// 		if($deny[5] == -2){
-		// 			$allow = ($allow[5] == 1);
-		// 			$deny = !$allow;
-		// 		}else{
-		// 			$allow = false;
-		// 			$deny = true;
-		// 		}
-		// 	}else{
-		// 		$allow = ($allow[5] > 0);
-		// 		$deny = false;
-		// 	}
-
-		// 	if( ($access['id'] == $everyoneGroupId) && $access['allow'])
-		// 	if($access['type'] == 1){//group
-
-		// 	}else{
-		// 		if($allow) $users['allow'][] = $access['id'];
-		// 		if($deny) $users['deny'][] = $access['id'];
-		// 	}
-
-		// }
-
-
-		// /* selecting user ids that have access specified for that object (including everyone object) */
-		// $sql = 'select group_id from users_groups_association where user_id = $1'.
-		// 	' union select id from users_groups where `type` = 1 and `system` = 1 and name = \'everyone\''; // adding everyone group to our group ids
-		// $res = DB\mysqli_query_params($sql, $user_group_id) or die(DB\mysqli_query_error());
-		// while($r = $res->fetch_row()) $user_group_ids[] = $r[0];
-		// $res->close();
-
-		// /* end of selecting user ids that have access specified for that object (including everyone object) */
-
 	}
+
 	static function EveryoneGroupId(){
 		if(isset($GLOBALS['EVERYONE_GROUP_ID'])) return $GLOBALS['EVERYONE_GROUP_ID'];
 		$GLOBALS['EVERYONE_GROUP_ID'] = null;
@@ -455,6 +420,7 @@ class Security {
 		$res->close();
 		return $GLOBALS['EVERYONE_GROUP_ID'];
 	} 
+
 	public function getGroupUserIds($groupId){
 		$rez = array();
 		$sql = 'select user_id from users_groups_association where group_id = $1';

@@ -199,50 +199,10 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 	        	case 6:  
 	        	case 7: 
 	        		App.mainViewPort.fireEvent('taskedit', {data: {type: rec.data.type, id: id} } );
-	        		//App.mainViewPort.fireEvent('eventedit', {id: id} );
 	        		break;
 	        	default: 
 
 	        }
-	        /*if(!this.editWin){
-	            this.editWin = new Ext.calendar.EventEditWindow({
-                    calendarStore: this.calendarStore,
-					listeners: {
-						'eventadd': {
-							fn: function(win, rec){
-								win.hide();
-								rec.data.IsNew = false;
-								this.eventStore.add(rec);
-                                this.showMsg('Event '+ rec.data.Title +' was added');
-							},
-							scope: this
-						},
-						'eventupdate': {
-							fn: function(win, rec){
-								win.hide();
-								rec.commit();
-                                this.showMsg('Event '+ rec.data.Title +' was updated');
-							},
-							scope: this
-						},
-						'eventdelete': {
-							fn: function(win, rec){
-								this.eventStore.remove(rec);
-								win.hide();
-                                this.showMsg('Event '+ rec.data.Title +' was deleted');
-							},
-							scope: this
-						},
-                        'editdetails': {
-                            fn: function(win, rec){
-                                win.hide();
-                                App.calendarPanel.showEditForm(rec);
-                            }
-                        }
-					}
-                });
-	        }
-	        this.editWin.show(rec, animateTarget);/**/
 	}
         
         // This is an application-specific way to communicate CalendarPanel event messages back to the user.
@@ -275,18 +235,11 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
             			break;
             		case 'monthview': this.titleItem.setText(ad.format('F Y')); break;
             	}
-            	// if(sd.clearTime().getTime() == ed.clearTime().getTime()) this.titleItem.setText(sd.format('F j, Y'));
-            	// else if(sd.getFullYear() == ed.getFullYear()){
-             //    	if(sd.getMonth() == ed.getMonth()) this.titleItem.setText(sd.format('F j') + ' - ' + ed.format('j, Y'));
-             //    	else this.titleItem.setText( ad.format('F Y') /*sd.format('F j') + ' - ' + ed.format('F j, Y')/**/);
-            	// }
-            	// else this.titleItem.setText(ad.format('F Y')/*sd.format('F j, Y') + ' - ' + ed.format('F j, Y')/**/);
         }
 })
 Ext.reg('CBCalendar', CB.Calendar);
 
 CB.CalendarView = Ext.extend(Ext.Panel, {
-	//title: L.Calendar
 	iconCls: 'icon-calendar'
 	,layout: 'border'
 	,closable: true
@@ -305,7 +258,6 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
 			}
 		});
 		this.calendar.eventStore.baseParams.facets = 'calendar'
-		// this.calendar.eventStore.on('beforeload', this.onBeforeLoad, this)
 		this.calendar.eventStore.proxy.on('load', this.onProxyLoaded, this);
 		
 		this.filterButton = new Ext.Button({
@@ -454,10 +406,6 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
         	}
         	);
         }
-	// ,onBeforeLoad: function(st, r, o){
-	// 	if(!Ext.isDefined(this.eventStore.requestedParams)) return false;
-	// 	Ext.apply(st.baseParams, this.eventStore.requestedParams)
-	// }
 	,onProxyLoaded: function(proxy, o, options){
 		this.folderProperties = o.result.folderProperties
 		this.folderProperties.id = parseInt(this.folderProperties.id);

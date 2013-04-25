@@ -32,8 +32,8 @@ foreach (new DirectoryIterator(CORES_DIR) as $file){
 }
 if(sizeof($cores) > 1) echo sizeof($cores)." cores found.\n";
 
-foreach($cores as $core)
+foreach($cores as $core){
 	echo "\nProcessing core $core ...";
 	echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3]);
-
+}
 echo "\nDone\n";

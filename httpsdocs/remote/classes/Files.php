@@ -259,9 +259,9 @@ class Files{
 			$f['type'] = 5;//file
 			$obj = (object)$f;
 			fireEvent('beforeNodeDbCreate', $obj);
-			DB\mysqli_query_params('INSERT INTO tree  (id, pid, `name`, `type`, cid, uid, cdate, udate) VALUES($1, $2, $3, 5, $4, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) '.
+			DB\mysqli_query_params('INSERT INTO tree  (id, pid, `name`, `type`, cid, uid, cdate, udate, template_id) VALUES($1, $2, $3, 5, $4, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $5) '.
 				' on duplicate key update id = last_insert_id($1), pid = $2, `name` = $3, `type` = 5, cid = $4, uid = $4, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP'
-				,Array($file_id, $pid, $f['name'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+				,Array($file_id, $pid, $f['name'], $_SESSION['user']['id'], config\default_file_template)) or die(DB\mysqli_query_error());
 			$file_id = DB\last_insert_id(); 
 					
 			DB\mysqli_query_params('insert into files (id, content_id, `date`, `name`, `title`, cid, uid, cdate, udate) values ($1, $2, $3, $4, $5, $6, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'.
@@ -281,31 +281,22 @@ class Files{
 		if(empty($p['id'])) return false;
 		DB\mysqli_query_params('update files set `date` = $2, title = $3 where id = $1', array($p['id'], Util\clienttoMysqlDate($p['date']), @$p['title'] ) ) or die(DB\mysqli_query_error());
 
-		// DB\mysqli_query_params('delete from files_tags where file_id = $1', $p['id']) or die(DB\mysqli_query_error());
-		// if(!empty($p['tags'])){
-		// 	$tags = json_decode($p['tags']);
-		// 	$tv = array();
-		// 	if(!empty($tags->{3})) foreach($tags->{3} as $t) if(is_numeric($t)) $tv[] = $t.',3';
-		// 	if(!empty($tags->{4})) foreach($tags->{4} as $t) if(is_numeric($t)) $tv[] = $t.',4';
-		// 	if(!empty($tv)) DB\mysqli_query_params('insert into files_tags (file_id, tag_id, `level`) values ($1,'.implode('),($1,', $tv).')', $p['id']) or die(DB\mysqli_query_error());
-		// }
-
-		Cases::updateCaseUpdateInfo($p['id']);
+		Objects::updateCaseUpdateInfo($p['id']);
 
 		return true;
 	}
 
-	public function getAutoRenameFilename($pid, $name){
+	public static function getAutoRenameFilename($pid, $name){
 		$a = explode('.', $name);
 		$ext = '';
-		if(sizeof($a) > 1) $ext = array_pop($a);
+		if( (sizeof($a) > 1) && (sizeof($a) < 5) ) $ext = array_pop($a);
 		$name = implode('.', $a);
 
 		$id = null;
 		$i = 1;
 		$newName = '';
 		do{
-			$newName = $name.' ('.$i.').'.$ext;
+			$newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
 			$sql = 'select id from tree where pid = $1 and name = $2';
 			$res = DB\mysqli_query_params($sql, array($pid, $newName)) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc())
@@ -328,7 +319,7 @@ class Files{
 			if($r = $res->fetch_assoc()){
 				$pid = $r['id'];
 			}else{
-				DB\mysqli_query_params('insert into tree (pid, `name`, `type`, cid, uid) values($1, $2, 1, $3, $3)', array($pid, $dir, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+				DB\mysqli_query_params('insert into tree (pid, `name`, `type`, cid, uid, template_id) values($1, $2, 1, $3, $3, $4)', array($pid, $dir, $_SESSION['user']['id'], config\default_folder_template)) or die(DB\mysqli_query_error());
 				$pid = DB\last_insert_id();
 			}
 			$res->close();
@@ -444,14 +435,6 @@ class Files{
 
 		if(empty($file)) return array('html' => '');
 		if($file['status'] > 0) return array('processing' => true);
-		/*switch($file['status']){
-		case 1: 
-			return array('html' => L\FileInQueue);
-			break;
-		case 2: 
-			return array('html' => L\FileIsProcessing);
-			break;
-		}/**/
 
 		$ext = explode('.', $file['name']);
 		$ext = array_pop($ext);
@@ -589,13 +572,6 @@ class Files{
 			$rez['content'] = Util\coalesce($r['title'],'')."\n".
 			Util\coalesce($r['type'],'')."\n".
 			Util\coalesce($content, ''); 
-			
-			/* selecting tags */
-			// $sql = 'SELECT tag_id, level FROM files_tags WHERE file_id = $1 and level < 5'; //exclude derived tags
-			// $dres = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
-			// while($dr = $dres->fetch_row()) $rez[($dr[1] == 4) ? 'user_tags' : 'sys_tags'][] = intval($dr[0]);
-			// $dres->close();
-			/* end of selecting tags */
 		}
 		$res->close();
 		return $rez;
@@ -624,9 +600,8 @@ class Files{
 			' select file_id, content_id, `date`, `name`, cid, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from files_versions v where id = $1 '.
 			' on duplicate key update content_id = v.content_id, `date` = v.date, `name` = v.name, cid = v.cid, uid = $2, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP'
 			,array($id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
-		//DB\mysqli_query_params('delete from files_versions where id = $1', $id) or die(DB\mysqli_query_error());
 
-		Cases::updateCaseUpdateInfo($id);
+		Objects::updateCaseUpdateInfo($id);
 
 		SolrClient::runCron();
 
@@ -644,7 +619,7 @@ class Files{
 
 		DB\mysqli_query_params('update tree set `updated` = 1 where id = $1', $id) or die(DB\mysqli_query_error());
 
-		Cases::updateCaseUpdateInfo($id);
+		Objects::updateCaseUpdateInfo($id);
 
 		SolrClient::runCron();
 
@@ -672,11 +647,9 @@ class Files{
 		
 		$ids = array_diff($ids, array($to_id));
 
-		Cases::updateCaseUpdateInfo($id);
+		Objects::updateCaseUpdateInfo($id);
 
 		$solr = new SolrClient();
-
-		// foreach($ids as $id) $solr->deleteId($id);
 
 		$solr->runCron();
 

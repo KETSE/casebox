@@ -32,7 +32,7 @@ class Search extends SolrClient{
 			,'q.alt' => '*:*'
 			,'qf' => "name content^0.5"
 			,'tie' => '0.1'
-			,'fl' => "id, pid, path, name, type, subtype, system, size, date, date_end, oid, cid, cdate, uid, udate, case_id, case, sys_tags, user_tags, template_id, user_ids, status, category_id, importance, completed, versions"//iconCls, 
+			,'fl' => "id, pid, path, name, type, subtype, system, size, date, date_end, oid, cid, cdate, uid, udate, case_id, case, template_id, user_ids, status, category_id, importance, completed, versions"//iconCls, 
 			,'sort' => 'ntsc asc'
 		);
 		/* initial parameters */

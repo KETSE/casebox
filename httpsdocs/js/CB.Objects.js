@@ -266,10 +266,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
 		toolbarItems.push('-',{text: 'Attach', iconCls: 'icon32-attach', scale: 'large', iconAlign:'top'
                 	,menu: [
-				this.actions.upload //{text: 'Upload', iconCls: 'icon-upload'}
+				this.actions.upload
 				,'-'
-				//,{text: 'Cut to clipboard', disabled: true}
-				// ,{text: 'Paste from clipboard', disabled: true}
 				,this.actions.paste
 			]
          	})
@@ -277,7 +275,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			if(!Ext.isEmpty(this.templateData.cfg.templates) ){
 				t = this.templateData.cfg.templates;
 				if(!Ext.isArray(t)) t = String(t).split(',');
-				//for (var i = 0; i < t.length; i++) t[i] = parseInt(t[i])
 				createButton = new Ext.Button({	
                              		text: L.Create
                              		,iconCls: 'icon32-create'
@@ -285,7 +282,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                                		,scale: 'large'
                                		,menu: [ ]
                              	})
-				// getGroupedTemplates(createButton, this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this, t);
 				updateMenu(createButton, getMenuConfig(this.data.id, this.data.path, this.data.template_id), this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this, t);
 				toolbarItems.push('-', createButton)
 			}
@@ -300,7 +296,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			title: L.Details
 			,show_files: this.templateData.cfg.files
 			,refOwner: this
-			//,autoHeight: true
 		}, Ext.value(this.templateData.cfg.gridJsClass, 'CBVerticalEditGrid'));
 		tabPanelItems = [  ]
 		//placing content elements
@@ -395,7 +390,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.actions.paste.setDisabled(cb.isEmpty());
 	}
 	,getBubbleTarget: function(){
-		//if(!this.caseWindow) this.caseWindow = this.findParentByType(CB.Case);
 		return App.mainViewPort;
 	}
 	,setFormValues: function(){
@@ -405,8 +399,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		if(!Ext.isDefined(this.data.tags)) this.data.tags = {};
 		/* adding top fields and fields editable in tabsheet */
 		if(Ext.isDefined(this.topFieldSet)){
-			//this.topFieldSet.suspendEvents();
-			//this.topFieldSet.autoHeight = false;
 			this.topFieldSet.removeAll(true);
 		}
 		/* remove tabpanel items that have edit position on tabsheet */
@@ -443,7 +435,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 					v.value = Date.parseDate(v.value.substr(0,10), 'Y-m-d');
 				if( (r.get('type') == 'datetime') && Ext.isString(v.value) && !Ext.isEmpty(v.value) )
 					v.value = Date.parseDate(v.value, (v.value.indexOf('T') >= 0) ? 'Y-m-dTH:i:s' : 'Y-m-d H:i:s' );
-				//if(r.get('type') == 'case_title') v.value = this.getBubbleTarget().data.title;
+
 				/* here we are adding fields to the top fieldSet */
 				pidValue = null;
 				disabled = false;
@@ -493,10 +485,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 							,templates: r.data.cfg.templates
 							,excludeIds: this.data.id
 						}
-						/*if((r.get('cfg').dependency == true) && !Ext.isEmpty(r.get('pid'))){ //actually it should be always dependent
-							ed.params.pidValue = this.data.gridData.values? Ext.value(this.data.gridData.values['f'+r.get('pid')+'_0'], {}).value : null;
-							ed.setDisabled(Ext.isEmpty(ed.params.pidValue));
-						}/**/
 					}
 					this.topFieldSet.add(ed);
 					//ed.enableBubble('change');
@@ -518,9 +506,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 					}
 				}
 				switch( r.get('type') ){
-					case 'text': tabPanelFieldItems.push(new Ext.form.TextArea(cfg));//this.tabPanel.insert(tpInsertIndex++, new Ext.form.TextArea(cfg)); 
+					case 'text': tabPanelFieldItems.push(new Ext.form.TextArea(cfg));
 						break; 
-					case 'html': tabPanelFieldItems.push(new Ext.ux.HtmlEditor(cfg)); //this.tabPanel.insert(tpInsertIndex++, new Ext.ux.HtmlEditor(cfg)); 
+					case 'html': tabPanelFieldItems.push(new Ext.ux.HtmlEditor(cfg));
 						break;
 				}
 			}
@@ -562,9 +550,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				}
 			});//this.tabPanel.items.removeAt(0);
 
-		fw = this.findByType(CB.CaseFilesWindow);
-		if( !Ext.isEmpty(fw) ) fw[0].data.object_id = this.data.id;
-		
 		if(this.topFieldSet){
 			if(this.topFieldSet.isRendered){
 				this.topFieldSet.syncSize()
@@ -809,8 +794,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.actions.save.setDisabled(!this._isDirty && !isNaN(this.data.id));
 		this.actions['delete'].setDisabled(isNaN(this.data.id))
 		this.actions.paste.setDisabled(App.clipboard.isEmpty());
-		//this.actions.upload.setDisabled(isNaN(this.data.id))
-		//this.actions.createTask.setDisabled(isNaN(this.data.id))
 	}
 	,onFocusContactField: function(editor){
 		if( Ext.isDefined(editor.dependency) || Ext.isEmpty(editor.pid)) return;

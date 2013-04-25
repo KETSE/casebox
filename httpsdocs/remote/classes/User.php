@@ -28,7 +28,6 @@ class User{
 			if ($r = $res->fetch_assoc()) {
 				$r['admin'] = Security::isAdmin($user_id);
 				$r['manage'] = Security::canManage($user_id);
-				// $r['role'] = Security::getUserRole($user_id); //TODO: rethink roles mechanism and replace it with groups and accesses
 				
 				$r['language'] = $GLOBALS['languages'][$r['language_id']-1];
 				$r['locale'] = 	$GLOBALS['language_settings'][$r['language']]['locale'];
@@ -108,7 +107,7 @@ class User{
 		if(is_null($home_folder_id)){
 			$cfg = defined('CB\\config\\default_home_folder_cfg') ? config\default_home_folder_cfg : null;
 
-			DB\mysqli_query_params('insert into tree (name, user_id, `system`, `type`, `subtype`, cfg) values(\'[Home]\', $1, 1, 1, 2, $2)', array($user_id, $cfg) ) or die( DB\mysqli_query_error() );
+			DB\mysqli_query_params('insert into tree (name, user_id, `system`, `type`, `subtype`, cfg, template_id) values(\'[Home]\', $1, 1, 1, 2, $2, $3)', array($user_id, $cfg, config\default_folder_template) ) or die( DB\mysqli_query_error() );
 			$home_folder_id = DB\last_insert_id();
 			$affected_rows++;
 		}
@@ -119,7 +118,7 @@ class User{
 		if($r = $res->fetch_row()) $my_docs_id = $r[0]; 
 		$res->close();
 		if(is_null($my_docs_id)){
-			DB\mysqli_query_params('insert into tree (pid, name, user_id, `system`, `type`, `subtype`) values($1, \'[MyDocuments]\', $2, 1, 1, 3)', array($home_folder_id, $user_id)) or die( DB\mysqli_query_error() );
+			DB\mysqli_query_params('insert into tree (pid, name, user_id, `system`, `type`, `subtype`, template_id) values($1, \'[MyDocuments]\', $2, 1, 1, 3, $3)', array($home_folder_id, $user_id, config\default_folder_template)) or die( DB\mysqli_query_error() );
 			$my_docs_id = DB\last_insert_id();
 			$affected_rows++;
 		}
@@ -172,7 +171,7 @@ class User{
 		if($r = $res->fetch_row()) $rez = $r[0];
 		$res->close();
 		if(empty($rez)){
-			DB\mysqli_query_params('insert into tree (user_id, `system`, `type`, `subtype`, `name`, cid) values ($1, 1, 1, 2, \'[Home]\', $2)', array($user_id, $_SESSION['user']['id']) ) or die( DB\mysqli_query_error() );
+			DB\mysqli_query_params('insert into tree (user_id, `system`, `type`, `subtype`, `name`, cid, template_id) values ($1, 1, 1, 2, \'[Home]\', $2, $3)', array($user_id, $_SESSION['user']['id'], config\default_folder_template) ) or die( DB\mysqli_query_error() );
 			$rez = DB\last_insert_id();
 			SolrClient::runCron();
 		}
@@ -188,7 +187,7 @@ class User{
 		if($r = $res->fetch_row()) $rez = $r[0];
 		$res->close();
 		if(empty($rez)){
-			DB\mysqli_query_params('insert into tree (pid, user_id, `system`, `type`, `subtype`, `name`, cid, uid) values ($1, $2, 1, 1, 6, \'[Emails]\', $3, $3)', array($pid, $user_id, $_SESSION['user']['id']) ) or die( DB\mysqli_query_error() );
+			DB\mysqli_query_params('insert into tree (pid, user_id, `system`, `type`, `subtype`, `name`, cid, uid, template_id) values ($1, $2, 1, 1, 6, \'[Emails]\', $3, $3, $4)', array($pid, $user_id, $_SESSION['user']['id'], config\default_folder_template) ) or die( DB\mysqli_query_error() );
 			$rez = DB\last_insert_id();
 			SolrClient::runCron();
 		}

@@ -35,7 +35,6 @@ return array_merge($customConfig, array(
 		,'//js/ux/Ext.ux.WebkitEntriesIterator.js'
 		
 		,'//js/CB.Login.js'
-		,'//js/CB.About.js'
 		,'//js/CB.Case.js'
 		,'//js/CB.GenericForm.js'
 		,'//js/CB.ThesauriWindow.js'
@@ -96,7 +95,6 @@ return array_merge($customConfig, array(
 		
 		,'//js/plugins/CB.plugins.FilesDropZone.js'
 		,'//js/CB.Uploader.js'
-		// ,'//js/ux/upload/Basic.js'
 		
 		,'//js/CB.UsersGroups.js'
 		,'//js/CB.SystemManagementWindow.js'

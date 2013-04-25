@@ -6,52 +6,27 @@ function isEmptyObject(ob){
 
 function date_ISO_to_date(date_string){
 	if(Ext.isEmpty(date_string)) return null;
-	//if(date_string.substr(-14) == 'T00:00:00.000Z') date_string = date_string.substr(0, 10);
 	d = Date.parse(date_string);
 	if(Ext.isEmpty(d)) return null;
 	return new Date(d);
 }
 function getItemIcon(d){
-	switch(parseInt(d['type'])){
-		case 0: return Ext.value(d['iconCls'], 'icon-folder'); //offices, year, month folders
-			break; 
-		case 1: 
-			switch(parseInt(d['subtype'])){
-				case 1:	break;
-				case 2:	return 'icon-home'; break;
-				case 3:	return 'icon-blue-folder'; break;
-				case 4:	return 'icon-briefcase'; break;
-				case 5:	return 'icon-calendar-small'; break;
-				case 6:	return 'icon-mail-medium'; break;
-				case 7:	return 'icon-blue-folder-stamp'; break;
-				case 8:	return 'icon-folder'; break;
-				case 9: return 'icon-blue-folder'; break;
-				case 10: return 'icon-blue-folder-share'; break;
-				default: return Ext.value(d['iconCls'], 'icon-folder'); break;
-			}
-			break;
-		case 2: return 'icon-shortcut';//case
-			break;
-		case 3: return 'icon-briefcase';//case
-			break;
-		case 4: //case object
-			if(!Ext.isEmpty(d.cfg) && !Ext.isEmpty(d.cfg.iconCls)) return d.cfg.iconCls;
-			return Ext.value( CB.DB.templates.getIcon(d['template_id']), 'icon-none' );
-			break;
-		case 5: //file
-			return getFileIcon(d['name']);
-			break;
-		case 6:
-			if(d['status'] == 3) return 'icon-task-completed';
-			return 'icon-task';//task
-			break;
-		case 7: return 'icon-event';//Event
-		case 8: return 'icon-mail';//Message (email)
-			break;
-		default: return d.iconCls;
+	
+	if(Ext.isEmpty(d.template_id)){
+		if(d['type'] == 2) return 'icon-shortcut';
+		return d.iconCls;
 	}
+	switch( CB.DB.templates.getType(d.template_id) ){
+		case 'file': return getFileIcon(d['name']); break;
+		case 'task':
+			if(d['status'] == 3) return 'icon-task-completed';
+		default:  
+			tr = CB.DB.templates.getById(d.template_id);
+			if(tr) return tr.get('iconCls');
+			return d.iconCls;
+	}
+	
 }
-//function getItemCls()
 function getFileIcon(filename){
 	if(Ext.isEmpty(filename)) return 'file-';
 	a = String(filename).split('.');
@@ -90,6 +65,7 @@ function getStoreNames(v){
 	}, this)
 	return texts.join(',');
 }
+
 setsGetIntersection = function(set1, set2){
 	rez = [];
 	if(Ext.isEmpty(set1) || Ext.isEmpty(set2)) return rez;
@@ -101,69 +77,9 @@ setsGetIntersection = function(set1, set2){
 	for (var i = 0; i < set2.length; i++) if( (set1.indexOf(set2[i]) >= 0) && (rez.indexOf(set2[i]) < 0 )) rez.push(set2[i]);
 	return rez;
 }
+
 setsHaveIntersection = function(set1, set2){
 	return !Ext.isEmpty(setsGetIntersection(set1, set2));
-}
-getGroupedTemplates = function(menuButton, handler, scope, templatesFilter){
-	a = [];
-
-	CB.DB.templates.each(function(r){ 
-		if( (r.get('visible') == 1) && ([1, 2, 3, 7].indexOf(r.get('type')) >= 0) )
-		if(Ext.isEmpty(templatesFilter) || setsHaveIntersection(templatesFilter, r.get('id')) ){
-			a.push({
-				text: r.get('title')
-				,iconCls: r.get('iconCls')
-				,scope: scope
-				,handler: handler
-				,data: {
-					template_id: r.get('id')
-					,type: r.get('type')
-					,title: r.get('title')
-					
-				}
-			});
-		}
-	}, this);
-	menuButton.menu.removeAll();
-	menuButton.lastGroup = null;
-	for(i = 0; i < a.length; i++){
-		if(menuButton.lastGroup != a[i].data.type){
-			if(menuButton.menu.items.getCount() > 0) menuButton.menu.add('-');
-			menuButton.lastGroup = a[i].data.type;
-		}
-		menuButton.menu.add(a[i]);
-	}
-
-	return;
-	//we already do not have templates_per_tags, 
-	
-	// CB.DB.templates_per_tags.each(function(r){ 
-	// 	if(Ext.isEmpty(templatesFilter) || setsHaveIntersection(templatesFilter, r.get('template_id')) ){
-	// 		idx = CB.DB.templates.findExact('id', r.get('template_id'));
-	// 		tr = CB.DB.templates.getAt(idx);
-	// 		a.push({
-	// 			text: tr.get('title')
-	// 			,iconCls: tr.get('iconCls')
-	// 			,scope: scope
-	// 			,handler: handler
-	// 			,data: {
-	// 				template_id: tr.get('id')
-	// 				,type: tr.get('type')
-	// 				,title: tr.get('title')
-					
-	// 			}
-	// 		});
-	// 	}
-	// }, this);
-	// menuButton.menu.removeAll();
-	// menuButton.lastGroup = null;
-	// for(i = 0; i < a.length; i++){
-	// 	if(menuButton.lastGroup != a[i].data.type){
-	// 		if(menuButton.menu.items.getCount() > 0) menuButton.menu.add('-');
-	// 		menuButton.lastGroup = a[i].data.type;
-	// 	}
-	// 	menuButton.menu.add(a[i]);
-	// }
 }
 
 function updateMenu(menuButton, menuConfig, handler, scope){
@@ -182,16 +98,18 @@ function updateMenu(menuButton, menuConfig, handler, scope){
 				idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i]));
 				if(idx >=0){
 					tr = CB.DB.templates.getAt(idx);
+					data = {
+							template_id: tr.get('id')
+							// ,type: tr.get('type')
+							,title: tr.get('title')
+					}
+					if(!Ext.isEmpty(tr.get('cfg').data)) Ext.apply(data, tr.get('cfg').data);
 					menu.push({
 						text: tr.get('title')
 						,iconCls: tr.get('iconCls')
 						,scope: scope
 						,handler: handler
-						,data: {
-							template_id: tr.get('id')
-							,type: tr.get('type')
-							,title: tr.get('title')
-						}
+						,data: data
 					});
 
 				}
@@ -201,19 +119,23 @@ function updateMenu(menuButton, menuConfig, handler, scope){
 
 	for(i = 0; i < menu.length; i++) menuButton.menu.add(menu[i]);
 }
+
 function getMenuConfig(node_id, ids_path, node_template_id){
 	lastWeight = 0
 	menuConfig = '';
 	CB.DB.menu.each( function(r){
 		weight = 0;
-		ug_ids = ',' + String(r.get('user_group_ids')).replace(' ','') + ',';
-		if(ug_ids.indexOf(','+App.loginData.id+',') >=0) weight++;
+		ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(' ','') + ',';
+		if(ug_ids.indexOf(','+App.loginData.id+',') >=0) weight++; 
+		else if( ug_ids != ',,') return;
 		
-		nt_ids = ',' + String(r.get('node_template_ids')).replace(' ','') + ',';
+		nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(' ','') + ',';
 		if(nt_ids.indexOf(','+node_template_id+',') >=0) weight++;
+		else if( nt_ids != ',,') return;
 		
-		n_ids = ',' + String(r.get('node_ids')).replace(' ','') + ',';
+		n_ids = ',' + String( Ext.value(r.get('node_ids'), '') ).replace(' ','') + ',';
 		if(n_ids.indexOf(','+node_id+',') >=0) weight += 2;
+		else if( n_ids != ',,') return;
 
 		if(weight >= lastWeight){
 			lastWeight = weight;
@@ -230,7 +152,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
 						}
 						i = -1;
 					}
-				};
+				}
 			}
 		}
 	})

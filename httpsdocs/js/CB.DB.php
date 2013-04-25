@@ -70,19 +70,6 @@ Ext.namespace('CB.DB');
 	}
 	echo 'CB.DB.templatesIconSet = new Ext.data.ArrayStore({ idIndex: 0,fields: ["id","name"], data: '. json_encode($data).'});';
 
-	/* case types */
-	$arr = Array();
-	if(defined('CB\\config\\case_templates')){
-		$template_ids = is_numeric(config\case_templates) ? array(config\case_templates) : Util\toNumericArray( json_decode(config\case_templates) );
-		$sql = 'SELECT DISTINCT id, l'.USER_LANGUAGE_INDEX.' `name`, iconCls 
-			FROM templates WHERE id in ('.implode(',', $template_ids).') ORDER BY `order`, 2';
-		$res = DB\mysqli_query_params($sql) or die( DB\mysqli_query_error() );
-		while($r = $res->fetch_row()) $arr[] = $r;
-		$res->close();
-	}
-	echo 'CB.DB.caseTypes = new Ext.data.ArrayStore({fields: ["id", "name", "iconCls"], data: '.(empty($arr) ? '[]' : json_encode($arr)).'});';
-	/* end of case types */
-	
 	/* languages */
 	$arr = Array();
 	for ($i=0; $i < sizeof($GLOBALS['languages']); $i++){
@@ -234,10 +221,10 @@ createDirectStores = function(){
 			,messageProperty: 'msg'
 		},[	{name: 'id', type: 'int'}
 			,{name: 'pid', type: 'int'}
-			,{name: 'type', type: 'int'}
+			,'type'
 			,'title'
 			,'iconCls'
-			,'cfg'
+			,{name: "cfg", convert: function(v, r){ return Ext.isEmpty(v) ? {} : v}}
 			,'info_template'
 			,{name: 'visible', type: 'int'}
 			]
@@ -247,6 +234,10 @@ createDirectStores = function(){
 		,getIcon: function(id){
 			idx = this.findExact('id', parseInt(id))
 			return (idx >=0 ) ? this.getAt(idx).get('iconCls') : '';
+		}
+		,getType: function(id){
+			idx = this.findExact('id', parseInt(id))
+			return (idx >=0 ) ? this.getAt(idx).get('type') : '';
 		}
 		
 	});

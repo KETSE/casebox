@@ -9,7 +9,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 	,lines: false
 	,useArrows: true
 	,showFoldersContent: false
-	,enableDD: false//true
+	,enableDD: false
 	,ddGroup: 'CBDD'
 	,bodyStyle: 'background-color: #f4f4f4'
 	,hideBorders: true
@@ -34,61 +34,45 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		this.actions = {
 			open: new Ext.Action({
 				text: L.Open
-				//,iconCls: 'icon-briefcase'
 				,scope: this
 				,handler: this.onOpenClick
 			})
 			,openInNewWindow: new Ext.Action({
 				text: L.OpenInNewWindow
-				//,iconCls: 'icon-briefcase'
 				,scope: this
 				,handler: this.onOpenInNewWindowClick
 			})
 			,expand: new Ext.Action({
 				text: L.Expand
-				//,iconCls: 'icon-briefcase'
 				,scope: this
 				,handler: this.onExpandClick
 			})
 			,collapse: new Ext.Action({
 				text: L.Collapse
-				//,iconCls: 'icon-briefcase'
 				,scope: this
 				,handler: this.onCollapseClick
 			})
-			/*,showFoldersChilds: new Ext.Action({
-				text: L.ShowFoldersContent
-				//,iconCls: 'icon-minus'
-				,enableToggle: true
-				,checked: true
-				,scope: this
-				,handler: this.onShowFoldersChildsClick
-			})/**/
 
 			,cut: new Ext.Action({
 				text: L.Cut
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onCutClick
 			})
 			,copy: new Ext.Action({
 				text: L.Copy
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onCopyClick
 			})
 			,paste: new Ext.Action({
 				text: L.Paste
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onPasteClick
 			})
 			,pasteShortcut: new Ext.Action({
 				text: L.PasteShortcut
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onPasteShortcutClick
@@ -96,21 +80,18 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 
 			,createShortcut: new Ext.Action({
 				text: L.CreateShortcut
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onCreateShortcutClick
 			})
 			,'delete': new Ext.Action({
 				text: L.Delete
-				//,iconCls: 'icon-minus'
 				,disabled: true
 				,scope: this
 				,handler: this.onDeleteClick
 			})
 			,rename: new Ext.Action({
 				text: L.Rename
-				//,iconCls: 'icon-minus'
 				,disabled: true
 				,scope: this
 				,handler: this.onRenameClick
@@ -144,7 +125,6 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 
 			,properties: new Ext.Action({
 				text: L.Properties
-				//,iconCls: 'icon-folder'
 				,scope: this
 				,disabled: true
 				,handler: this.onPropertiesClick
@@ -193,7 +173,6 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 						treeloader.baseParams.path = node.getPath('nid');
 						treeloader.baseParams.showFoldersContent = this.showFoldersContent;
 					}
-					//,load: function(loader, node, response){ this.sortNode(node); }
 				}
 			})
 			,root: new Ext.tree.AsyncTreeNode({
@@ -295,12 +274,11 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		CB.BrowserTree.superclass.initComponent.apply(this, arguments);
 		if(!Ext.isEmpty(this.rootId)) BrowserTree.getRootProperties(this.rootId, function(r, e){
 			Ext.apply(this.getRootNode().attributes, r.data)
-			//this.getRootNode().setText(r.data.name);
 			this.onBeforeNodeAppend(this, null, this.getRootNode())
 		}, this)
 
-		this.addEvents('casecreate', 'openobject', 'fileopen', 'filedownload', 'taskedit', 'afterrename');
-		this.enableBubble(['casecreate', 'openobject', 'fileopen', 'filedownload', 'taskedit']);
+		this.addEvents('casecreate', 'createobject', 'openobject', 'fileopen', 'filedownload', 'taskedit', 'afterrename');
+		this.enableBubble(['casecreate', 'createobject', 'openobject', 'fileopen', 'filedownload', 'taskedit']);
 		
 		App.clipboard.on('pasted', this.onClipboardAction, this);
 		App.mainViewPort.on('savesuccess', this.onObjectsSaved, this);
@@ -320,13 +298,13 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		if((node.attributes.type == 0) && (parent.getDepth() == 4 )){
 			node.setText(Ext.value(Date.monthNames[parseInt(node.attributes.name) -1], node.attributes.name));
 		}else 
-		node.setText(node.attributes.name);// + ' ' + node.attributes.system + ' ' + node.attributes.type+'.' + node.attributes.subtype);
+		node.setText(node.attributes.name);
 		
 		if(node.attributes.cfg && node.attributes.cfg.iconCls){
 			node.setIconCls( node.attributes.cfg.iconCls );
-		}else node.setIconCls( getItemIcon(node.attributes) );// + ' ' + node.attributes.system + ' ' + node.attributes.type+'.' + node.attributes.subtype);
+		}else node.setIconCls( getItemIcon(node.attributes) );
 		
-		node.attributes.editable = false; //(node.attributes.system == 0);
+		node.attributes.editable = false; 
 		node.draggable = (node.attributes.system == 0);
 	}
 	,onBeforeDestroy: function(p){
@@ -414,6 +392,11 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 	}
 	,onContextMenu: function (node, e) {
 		if(Ext.isEmpty(this.contextMenu)){/* create context menu if not aleready created */
+			this.createItem = new Ext.menu.Item({
+				text: L.Create
+				,hideOnClick: false
+				,menu:[]
+			})
 			this.contextMenu = new Ext.menu.Menu({
 				items: [
 				this.actions.open
@@ -424,11 +407,9 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 				,{
 					text: L.View
 					,hideOnClick: false
-					,menu: [{	//[this.actions.showFoldersChilds]
+					,menu: [{
 						xtype: 'menucheckitem'
 						,text: L.ShowFoldersContent
-						//,iconCls: 'icon-minus'
-						//,enableToggle: true
 						,checked: this.showFoldersContent
 						,scope: this
 						,handler: this.onShowFoldersChildsClick
@@ -446,12 +427,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 				,this.actions.rename
 				,this.actions.reload
 				,'-'
-				,{
-					text: L.Create
-					//,iconCls: 'icon-plus'
-					,hideOnClick: false
-					,menu:[ this.actions.createCase, '-', this.actions.createTask, '-', this.actions.createFolder]
-				}
+				,this.createItem
 				,'-'
 				,this.actions.permissions
 				,this.actions.properties
@@ -463,8 +439,46 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		e.stopPropagation()
 		e.preventDefault();
 		this.contextMenu.node = node;
+		
+		updateMenu(
+			this.createItem
+			,getMenuConfig(
+				node.attributes.nid
+				,node.getPath('nid')
+				,node.attributes.template_id
+			)
+			,this.onCreateObjectClick
+			,this
+		);
+
 		this.contextMenu.showAt(e.getXY());
 		
+	}
+	,onCreateObjectClick: function(b, e) {
+		data = Ext.apply({}, b.data);
+		data.pid = this.contextMenu.node.attributes.nid;
+		data.path = this.contextMenu.node.getPath('nid');
+		data.pathtext = this.contextMenu.node.getPath('text');
+		tr = CB.DB.templates.getById(data.template_id);
+		if(tr && (tr.get('cfg').createMethod == 'inline') )
+			Objects.create(data, this.processCreateInlineObject, this);
+		else this.fireEvent('createobject', data, e);
+	}
+	,processCreateInlineObject: function(r, e){
+		this.getEl().unmask();
+		if(r.success !== true) return;
+		this.root.cascade(function(node){
+			if(node.attributes.nid == r.data.pid){
+				if(!node.loaded){
+					if(node.isSelected()) node.expand(false, false, function(pn){ n = pn.findChild('nid', r.data.nid); if(n) this.startEditing(n); }, this)
+				}else{
+					r.data.loaded = true
+					node.expand();
+					n = node.appendChild(r.data);
+					this.startEditing(n);
+				}
+			}
+		}, this);
 	}
 	,onOpenClick: function (b, e) {
 		n = this.getSelectionModel().getSelectedNode();

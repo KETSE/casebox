@@ -84,6 +84,25 @@
 			else $config[$k] = $v;
 	}
 
+	/* Define folder templates */
+	
+	if(!empty($config['folder_templates'])){
+		$GLOBALS['folder_templates'] = explode(',',$config['folder_templates']);
+		unset($config['folder_templates']);
+	}else $GLOBALS['folder_templates'] = array();
+	
+	if(empty($config['default_folder_template'])){
+		$config['default_folder_template'] = empty($GLOBALS['folder_templates']) ? 0 : $GLOBALS['folder_templates'][0];
+	}
+
+	if(empty($config['default_file_template'])){
+		$sql = 'select id from templates where `type` = \'file\'';
+		$res = DB\mysqli_query_params($sql, array()) or die( DB\mysqli_query_error() );
+		if($r = $res->fetch_row()) $config['default_file_template'] = $r[0];
+			else $config['default_file_template'] = 0;
+		$res->close();
+	}
+
 	/* store fetched config in CB\config namespace /**/
 	foreach($config as $k => $v) define('CB\\config\\'.$k, $v);
 

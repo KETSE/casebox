@@ -1,88 +1,4 @@
 Ext.namespace('CB');
-// ----------------------------------------------------------- add case form
-CB.AddCaseForm = Ext.extend(Ext.Window, { //added to tests
-	data: {}
-	,layout: 'fit'
-	,width: 400
-	,title: L.NewCase
-	,iconCls: 'icon-briefcase'
-	,initComponent: function(){
-		this.buttonSave = this.hideTitle ?  new Ext.Button({text: L.Transfer, iconCls: 'icon-folder-export', disabled: true, handler: this.saveData, scope: this}) :
-			new Ext.Button({text: L.Save, iconCls: 'icon-save', disabled: true, handler: this.saveData, scope: this});
-		this.buttonCancel = new Ext.Button({text: Ext.MessageBox.buttonText.cancel, iconCls: 'icon-cancel', handler: function(b, e){e.stopPropagation();this.destroy();}, scope: this});
-		reader = new Ext.data.JsonReader({
-			successProperty: 'success'
-			,idProperty: 'id'
-			,root: 'data'
-			,messageProperty: 'msg'
-			,fields: [ {name: 'id', type: 'int', mapping: 'id'}, 'name' ]
-		}
-		);
-		
-		default_casetype_id = null;
-		r = CB.DB.caseTypes.getAt(0);
-		if(r) default_casetype_id = r.get('id');
-		
-		Ext.apply(this, {
-			buttons:[ this.buttonSave, this.buttonCancel ]
-			,items: [{
-				xtype: 'form'
-				,bodyStyle: 'padding:10px'
-				,border: false
-				,autoHeight: true
-				,defaults: {width: 250, bubbleEvents: ['change']}
-				,items: [{	xtype: 'combo'
-					,fieldLabel: L.CaseType
-					,editable: false
-					,name: 'case_type'
-					,hiddenName: 'case_type'
-					,valueField: 'id'
-					,displayField: 'name'
-					,triggerAction: 'all'
-					,mode: 'local'
-					,store: CB.DB.caseTypes
-					,value: default_casetype_id
-					,hidden: (CB.DB.caseTypes.getCount() < 2)
-				},{
-					xtype: 'textfield'
-					,fieldLabel: L.CaseNumber
-					,name: 'nr'
-					,value: Ext.value(this.data.nr, '')
-				},{
-					xtype: 'textfield'
-					,fieldLabel: L.CaseName
-					,name: 'name'
-					,hidden: this.hideTitle
-					,value: Ext.value(this.data.name, '')
-				},{
-					xtype: 'datefield'
-					,fieldLabel: L.Date
-					,name: 'date'
-					,format: App.dateFormat
-					,value: new Date()
-				}
-				]
-			}	
-			]
-			,listeners: { change: { scope: this, fn: function(field, newValue, oldValue){ this.setDirty(true); } } }
-		});
-		CB.AddCaseForm.superclass.initComponent.apply(this, arguments);
-		this.on('show', App.focusFirstField, this)
-	}
-	,setDirty: function(value){
-		this._isDirty = value;
-		u = this.find('name', 'name')[0];
-		this.buttonSave.setDisabled(!value || ( u.isVisible() && Ext.isEmpty(u.getValue())));// || emptyOffice
-	}
-	,saveData: function(){
-		params = this.items.itemAt(0).getForm().getValues();
-		params.pid = this.data.pid;
-		if(this.data.callback) this.data.callback(params, this.ownerCt);
-		this.destroy();
-	}
-})
-Ext.reg('CBAddCaseForm', CB.AddCaseForm);
-// ----------------------------------------------------------- end of add case form
 /* loader class for custom case card class (if defined) or generic case card*/
 CB.Case = Ext.extend(Ext.Panel, {
 	title: L.LoadingData + ' ...'
@@ -249,7 +165,7 @@ CB.CaseCardBlock = Ext.extend(Ext.Panel, {
 	,reload: function(){
 		params = {}
 		params[this.serverRoot] = this.params;
-		Cases.queryCaseData( params, this.processReload, this)
+		Objects.queryCaseData( params, this.processReload, this)
 	}
 	,processReload: function(r, e){
 		if(r.success !== true) return;
@@ -299,12 +215,8 @@ CB.CaseCardProperties = Ext.extend(CB.CaseCardBlock, {
 		if(Ext.isEmpty(a)) return;
 		switch(a.name){
 			case 'edit': 
-				Cases.getCasePropertiesObjectId(this.data.id, function(r, e){
-					if(r.success !== true) return;
-					if(!isNaN(r.id)) App.openObject(4, r.id);
-					
-				}, this);
-				 break;
+				App.openObject(4, this.data.id);
+				break;
 			default:
 				r = dv.store.getAt(itemIndex -1);
 				if(r) App.locateObject(r.get('id'), r.get('pid') );

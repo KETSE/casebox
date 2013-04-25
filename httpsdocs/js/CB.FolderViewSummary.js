@@ -1,6 +1,5 @@
 Ext.namespace('CB');
 CB.FolderViewSummary = Ext.extend(Ext.Panel, {
-	//title: L.Dashboard
 	closable: false
 	,bodyCssClass: 'summary'
 	,autoScroll: true

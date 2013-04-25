@@ -13,12 +13,6 @@ CB.Favorites = Ext.extend(Ext.util.Observable, {
 					,update: Favorites.update
 					,destroy: Favorites.destroy 
 				}
-				// ,listeners: {
-				// 	scope: this
-				// 	,load: function (proxy, o, options) {
-
-				// 	}
-				// }
 			})
 			,reader: new Ext.data.JsonReader({
 					successProperty: 'success'

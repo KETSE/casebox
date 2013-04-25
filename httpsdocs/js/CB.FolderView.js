@@ -12,8 +12,6 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 	,history: []
 	,params: {
 		descendants: false
-		//,query: ''
-		//,path: ''
 	}
 	,initComponent: function(){
 		this.actions = {
@@ -337,8 +335,6 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		params = Ext.apply({}, this.params);
 		params.query = query;
 		this.setParams(params);
-		// i = this.getLayout().activeItem;
-		// if(i.setParams) i.setParams(params, e);
 	}
 	,setShowDescendants: function(value){
 		value = (value == true);

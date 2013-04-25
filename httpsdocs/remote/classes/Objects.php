@@ -18,7 +18,7 @@ class Objects{
 		$rez['template_pid'] = $template['pid'];
 		$rez['iconCls'] = $template['iconCls'];
 		$rez['type'] = $template['type'];
-		$d->case_id = Cases::getId($d->id);
+		$d->case_id = Objects::getCaseId($d->id);
 		
 		$rez['id'] = $d->id;
 		if(empty($d->case_id)) $d->case_id = null;
@@ -36,16 +36,10 @@ class Objects{
 			'FROM objects o '.
 			' join tree t on o.id = t.id '.
 			'WHERE o.id = $1', Array($d->id, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
-		if($r = $res->fetch_assoc())
-			// $rez['spentTime'] = array('hours' => $r['hours'], 'minutes' => $r['minutes']);
-			// unset($r['hours']);
-			// unset($r['minutes']);
-			$rez = array_merge($rez, $r);
+		if($r = $res->fetch_assoc()) $rez = array_merge($rez, $r);
 		$res->close();
 		/* end of get object title */
 		
-		// $rez['tags'] = $this->getObjectTagIds($rez['id']);
-
 		$rez['gridData'] = Templates::getObjectsData($d->id);
 
 		/* get Tasks */
@@ -69,13 +63,31 @@ class Objects{
 		$res->close();
 		/* end of get Tasks */
 
-		global $data; // this method is used also internally (by getInfo method), so we skip logging for "load" method in this cases.
+		global $data; // this method is used also internally (by getInfo method), so we skip logging for "load" method in this cases
 		if(is_object($data) && ($data->method == 'load') ) /**/
 		Log::add(Array('action_type' => 11, 'case_id' => $d->case_id, 'object_id' => $d->id ));
 		
 		return Array('success' => true, 'data' => $rez);
 	}
-	
+	function create($p){
+		
+		$template = $this->getTemplateInfo($p->template_id);
+		if(!Security::canCreateActions($p->pid)) throw new \Exception(L\Access_denied);
+		fireEvent('beforeNodeDbCreate', $p);
+		$p->name = Files::getAutoRenameFilename($p->pid,  $template['title']);
+		DB\mysqli_query_params('insert into tree (pid, name, `type`, template_id, cid) values ($1, $2, $3, $4, $5)', array($p->pid, $p->name, 4, $template['id'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+		$p->nid = DB\last_insert_id();
+		$sql = 'INSERT INTO objects (id, `title`, template_id, cid) VALUES($1, $2, $3, $4)';
+		$params = Array($p->nid, $p->name, $template['id'], $_SESSION['user']['id']);
+		DB\mysqli_query_params($sql, $params) or die(DB\mysqli_query_error());
+		
+		fireEvent('nodeDbCreate', $d);
+
+		SolrClient::runCron();
+		
+		return array('success' => true, 'data' => $p);
+	}
+
 	function save($p){
 		$log_action_type = 9; // update action
 		$object_title = '';
@@ -102,7 +114,7 @@ class Objects{
 			if(!Security::canCreateActions($pid)) throw new \Exception(L\Access_denied);
 			fireEvent('beforeNodeDbCreate', $d);
 			
-			DB\mysqli_query_params('insert into tree (pid, name, `type`, subtype, cid) values ($1, $2, $3, $4, $5)', array($pid, 'new case object', 4, $template['type'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+			DB\mysqli_query_params('insert into tree (pid, name, `type`, subtype, template_id, cid) values ($1, $2, $3, $4, $5, $6)', array($pid, 'new case object', 4, $template['type'], $template['id'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 			$d->id = DB\last_insert_id();
 			$sql = 'INSERT INTO objects (id, case_id, `title`, template_id, cid) VALUES($1, $2, $3, $4, $5)';
 			$params = Array($d->id, $d->case_id, '', $template['id'], $_SESSION['user']['id']);
@@ -117,17 +129,6 @@ class Objects{
 		}
 		/* end of analizing object id */
 
-		/* save objects tags */
-		// if(!empty($d->tags)){
-		// 	for($i = 3; $i< 5; $i++)
-		// 	if(isset($d->tags->{$i})){
-		// 		$tags = array_filter($d->tags->{$i}, 'is_numeric');
-		// 		DB\mysqli_query_params('delete from objects_tags where object_id = $1 and level = $2 and tag_id not in(0'.implode(',', $tags).')', array($d->id, $i)) or die(DB\mysqli_query_error());
-		// 		if(!empty($tags)) DB\mysqli_query_params('insert into objects_tags (object_id, level, tag_id) values($1, $2,'.implode('),($1,$2,', $tags).') on duplicate key update tag_id = tag_id', array($d->id, $i)) or die(DB\mysqli_query_error());
-		// 	}
-		// }
-		/* end of save objects tags */
-		
 		/* save object duplicates from grid */
 		$duplicate_ids = Array(0 => 0);
 		if( isset($d->gridData->duplicateFields) ){
@@ -236,7 +237,7 @@ class Objects{
 			($isNewObject ? '' : ', uid = $9, udate = CURRENT_TIMESTAMP').' where id = $6', 
 			Array(ucfirst($object_title), $object_custom_title, $object_date_start, $object_date_end, $object_author, $d->id, $this->getObjectIcon($d->id), $d->pfu, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		/* end of updating object properties into the db */
-		Cases::updateCaseUpdateInfo($d->id);
+		Objects::updateCaseUpdateInfo($d->id);
 		$s = '{"data":{"case_id": '.Util\coalesce($d->case_id, 'null').', "id":'.$d->id.', "template_id": '.$template['id'].'}}';
 		$p = json_decode($s);
 		
@@ -253,6 +254,66 @@ class Objects{
 		return $this->load( $p );
 	}
 	
+	public function queryCaseData($queries){
+		$rez = array('success' => true);
+		foreach($queries as $key => $query){
+			$query->pids = $query->id;
+			switch($key){
+				case 'properties': 
+					$rez[$key] = $this->load($query);/* load general case properties */
+					
+					// $r = $this->getCasePropertiesObjectId($query->id);
+					if( !empty($query->id) ){
+						$template_id = null;
+						$properties = array();
+						$sql = 'select template_id from tree where id = $1';
+						$res = DB\mysqli_query_params($sql, $query->id) or die(DB\mysqli_query_error());
+						if($r = $res->fetch_assoc()) $template_id = $r['template_id'];
+						$res->close();
+						
+						$tf = Templates::getTemplateFieldsWithData($template_id, $query->id);
+						if(!empty($tf))
+						foreach($tf as $f){
+							if($f['name'] == '_title') continue;
+							if($f['name'] == '_date_start') continue;
+							$v = Templates::getTemplateFieldValue($f);
+							if(is_array($v)) $v = implode(', ', $v);
+							$f['value'] = $v;
+							$properties[] = array(
+								'name' => $f['name']
+								,'title' => $f['title']
+								,'type' => $f['type']
+								,'cfg' => $f['cfg']
+								,'value' => $v
+							);
+						}
+						$rez[$key]['data']['properties'] = $properties;
+					}
+
+					break;
+				case 'actions':
+					$s= new Search();
+					$query->fl = 'id,pid,name,type,subtype,date,template_id,cid';
+					$query->types = array(4);
+					$query->sort = array('date desc');
+					$rez[$key] = $s->query($query);
+					unset($s);
+					break;
+				case 'tasks':
+					$s= new Search();
+					$query->fl = 'id,name,type,date,date_end,cid,user_ids';
+					$query->types = array(6,7);
+					$query->sort = array('date desc');
+					$rez[$key] = $s->query($query);
+					unset($s);
+					break;
+				case 'milestones':
+					$rez[$key] = array();
+					break;
+			}
+		}
+		return $rez;
+	}	
 	function getPreview($id){ // This function is supposed to be used from communications glid list, to get the objects short info
 		$rez = array();
 		if(!is_numeric($id)) return;
@@ -278,11 +339,7 @@ class Objects{
 				if($f['name'] == '_date_start') continue;
 				$v = Templates::getTemplateFieldValue($f);
 				if(is_array($v)) $v = implode(', ', $v);
-				if(!empty($v)){
-					//$top .= (($i > 0) ? ', ': '').'<span class="cG">'.$f['title'].': </span>'.$v;
-					$top .= '<tr><td class="prop-key">'.$f['title'].'</td><td class="prop-val">'.$v.'</td></tr>';
-					// $i++;
-				}
+				if(!empty($v)) $top .= '<tr><td class="prop-key">'.$f['title'].'</td><td class="prop-val">'.$v.'</td></tr>';
 			}
 		if(!empty($gf['body']))
 			foreach($gf['body'] as $f){
@@ -341,7 +398,7 @@ class Objects{
 
 	function getViolations($object_id){
 		if(!is_numeric($object_id)) return Array('success' => false, 'msg' => L\Wrong_id);
-		$case_id = Cases::getId($object_id);
+		$case_id = Objects::getCaseId($object_id);
 		// Security::checkCaseReadAction($case_id);
 		$data = Array();
 		/* this select is for selecting all available violations */
@@ -358,21 +415,6 @@ class Objects{
 		$res->close();
 		return Array( 'success' => true, 'data' => $data);
 	}
-	// private function getObjectTags($object_id){
-	// 	$rez = array();
-	// 	$res = DB\mysqli_query_params('select ot.level, t.id, t.l'.USER_LANGUAGE_INDEX.' from objects_tags ot join tags t on ot.tag_id = t.id '.
-	// 		'where ot.object_id = $1 order by ot.level, t.order, 3', array($object_id, $_SESSION['user']['language_id'])) or die(DB\mysqli_query_error());
-	// 	while($r = $res->fetch_row()) $rez[$r[0]][] = array('id' => $r[1], 'name' => $r[2]);
-	// 	$res->close();
-	// 	return $rez;
-	// }
-	// static function getObjectTagIds($object_id){
-	// 	$rez = array();
-	// 	$res = DB\mysqli_query_params('select level, tag_id from objects_tags where object_id = $1', $object_id) or die(DB\mysqli_query_error());
-	// 	while($r = $res->fetch_row()) $rez[$r[0]][] = $r[1];
-	// 	$res->close();
-	// 	return $rez;
-	// }
 
 	public static function getAssociatedObjects($p){
 		$data = array();
@@ -384,10 +426,10 @@ class Objects{
 
 		/* select distinct associated case ids from the case */
 		$sql = 'SELECT DISTINCT d.value
-		FROM objects co
-		JOIN templates_structure s ON co.template_id = s.template_id AND s.type = \'_objects\'
+		FROM tree o
+		JOIN templates_structure s ON o.template_id = s.template_id AND s.type = \'_objects\'
 		JOIN objects_data d on. d.field_id = s.id
-		WHERE co.id = $1';
+		WHERE o.id = $1';
 		$ids = array();
 		$res = DB\mysqli_query_params($sql, $p->id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()){
@@ -398,8 +440,7 @@ class Objects{
 		$ids = array_keys($ids);
 		if(empty($ids)) return array('success' => true, 'data' => array());
 		/* end of select distinct case ids from the case */
-		$sql = 'SELECT DISTINCT t.id, t.`name`, t.date, t.`type`, t.subtype, o.template_id, t2.status FROM tree t '.
-		'left join objects o on t.id = o.id '.
+		$sql = 'SELECT DISTINCT t.id, t.`name`, t.date, t.`type`, t.subtype, t.template_id, t2.status FROM tree t '.
 		'left join tasks t2 on t.id = t2.id '.
 		'WHERE t.id IN ('.implode(',', $ids).') order by 2';
 		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
@@ -414,22 +455,6 @@ class Objects{
 		return array('success' => true, 'data' => $data);
 	}
 
-	private function getUniqueObjectId($case_id, $template_id, $object_id = null){
-		/* this function will get the id of the first object of a corresponding template for given case, actually it is designed to be used for singeton objects of specific template in the case .
-			It can also be used as a check for existance of a object with specified id.
-		*/
-		$rez = false;
-		$sql = 'select id from objects where case_id = $1 and template_id = $2';
-		$params = Array($case_id, $template_id);
-		if( !empty($object_id) ){
-			$sql .= ' and id = $3';
-			array_push($params, $object_id);
-		}
-		$res = DB\mysqli_query_params($sql, $params) or die(DB\mysqli_query_error());
-		if($r = $res->fetch_row()) $rez = $r[0];
-		$res->close();
-		return $rez;
-	}
 	private function getTemplateInfo($template_id = false, $object_id = false){
 		if(is_numeric($template_id)){
 			$res = DB\mysqli_query_params('SELECT id, pid, type, l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template  FROM templates WHERE id = $1', $template_id) or die(DB\mysqli_query_error());
@@ -440,7 +465,7 @@ class Objects{
 			$res->close();		
 		}
 		if(is_numeric($object_id)){
-			$res = DB\mysqli_query_params('SELECT id, pid, type, t.l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template from templates t  where id = (select template_id from objects where id = $1)', $object_id) or die(DB\mysqli_query_error());
+			$res = DB\mysqli_query_params('SELECT id, pid, type, t.l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template from templates t  where id = (select template_id from tree where id = $1)', $object_id) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$res->close();
 				return $r;
@@ -453,7 +478,7 @@ class Objects{
 		$rez = null;
 
 		/* -- default icon by template /**/
-		$res = DB\mysqli_query_params('SELECT t.iconCls  FROM objects o  JOIN templates t ON o.template_id = t.id  WHERE o.id = $1', $object_id) or die(DB\mysqli_query_error());
+		$res = DB\mysqli_query_params('SELECT t.iconCls  FROM tree o  JOIN templates t ON o.template_id = t.id  WHERE o.id = $1', $object_id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $rez = $r[0];
 		$res->close();		
 		return $rez;
@@ -481,10 +506,10 @@ class Objects{
 			co.id
 			,co.template_id
 			,co.cid
-			,coalesce(co.custom_title, co.title) `title`
+			,co.name `title`
 			,t.iconCls
-			,co.private_for_user
-			FROM objects co left join templates t on co.template_id = t.id where co.id = $1';
+			FROM tree co left join templates t on co.template_id = t.id where co.id = $1';
+			//,co.private_for_user
 		
 		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error()."\n".$sql);
 		while($r = $res->fetch_assoc()){
@@ -548,24 +573,32 @@ class Objects{
 				}
 			}
 			$dres->close();
-			
-			/* selecting action tags */
-			// $sql = 'SELECT tag_id, level FROM objects_tags WHERE object_id = $1';
-			// $dres = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
-			// while($dr = $dres->fetch_row()) $rez[($dr[1] == 4) ? 'user_tags' : 'sys_tags'][] = intval($dr[0]);
-			// $dres->close();
-			/* end of selecting action tags */
-			
-			/* selecting tree tags */
-			// $sql = 'SELECT tag_object_id FROM objects_tree_tags WHERE object_id = $1';
-			// $dres = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
-			// while($dr = $dres->fetch_row()) $rez['tree_tags'][] = intval($dr[0]);
-			// $dres->close();
-			/* end of selecting tree tags */
 		}
 		$res->close();
 		
 		return $rez;
+	}
+
+	public static function getCaseId($node_id){
+		$case_id = null;
+		$sql = 'select f_get_objects_case_id($1)';
+		$res = DB\mysqli_query_params($sql, $node_id) or die(DB\mysqli_query_error());
+		if($r = $res->fetch_row()) $case_id = $r[0];
+		$res->close();
+		return $case_id;
+	}
+	
+	public static function getCaseName($case_id = false){
+		/*function deemed to get case name by its Id*/
+		$rez = false;
+		$res = DB\mysqli_query_params('select name from tree where id = $1',  $case_id) or die(DB\mysqli_query_error());
+		if($r = $res->fetch_row()) $rez = $r[0];
+		$res->close();
+		return $rez;
+	}
+
+	public static function updateCaseUpdateInfo($case_or_caseObject_id){
+		DB\mysqli_query_params('update cases set uid = $2, udate = CURRENT_TIMESTAMP where id = `f_get_objects_case_id`($1)', Array($case_or_caseObject_id, $_SESSION['user']['id'] )) or die(DB\mysqli_query_error());
 	}
 
 	/* setting case roles fields for an object data */
@@ -602,4 +635,5 @@ class Objects{
 			}
 		$res->close();
 	} 
+
 }

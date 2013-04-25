@@ -201,8 +201,8 @@
 		/* end of get contents and attachments */
 		
 		/* creating email object in corresponding case and adding attachments if any */
-		DB\mysqli_query_params('insert into tree (old_id, pid, user_id, `type`, name, date, cid, uid) values ($1, $2, $3, 8, $4, $5, $3, $3)', 
-			array($mailbox->getUniqueId($k), $pid, $user_id, $subject, $time) ) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('insert into tree (old_id, pid, user_id, `type`, name, date, cid, uid, template_id) values ($1, $2, $3, 8, $4, $5, $3, $3, $4)', 
+			array($mailbox->getUniqueId($k), $pid, $user_id, $subject, $time, config\default_folder_template) ) or die(DB\mysqli_query_error());
 		$object_id = DB\last_insert_id();
 		DB\mysqli_query_params('insert into objects (id, `title`, `custom_title`, template_id, date_start, cid, uid) values ($1, $2, $2, $3, $4, $5, $5)'
 			, array($object_id, $subject, $email_template_id, $time, $user_id) ) or die(DB\mysqli_query_error());
@@ -225,8 +225,8 @@
 					);
 					$files->storeContent($f, FILES_PATH.$core['name'].DIRECTORY_SEPARATOR);
 
-					DB\mysqli_query_params('INSERT INTO tree  (pid, `name`, `type`, `date`, cid, uid) VALUES($1, $2, 5, $3, $4, $4) '
-						,Array($object_id, $a['filename'], $time, $user_id)) or die(DB\mysqli_query_error());
+					DB\mysqli_query_params('INSERT INTO tree  (pid, `name`, `type`, `date`, cid, uid, template_id) VALUES($1, $2, 5, $3, $4, $4, $5) '
+						,Array($object_id, $a['filename'], $time, $user_id, config\default_file_template)) or die(DB\mysqli_query_error());
 					$file_id = DB\last_insert_id(); 
 							
 					DB\mysqli_query_params('insert into files (id, content_id, `date`, `name`, `title`, cid, uid, cdate, udate) values ($1, $2, $3, $4, $5, $6, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'

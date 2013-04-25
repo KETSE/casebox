@@ -158,7 +158,7 @@ class Browser{
 		}
 		/* end of find default folder name */
 
-		DB\mysqli_query_params('insert into tree (pid, user_id, `type`, `name`, cid, uid) values ($1, $2, $3, $4, $2, $2)', array($pid, $_SESSION['user']['id'], 1, $newFolderName)) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('insert into tree (pid, user_id, `type`, `name`, cid, uid, template_id) values ($1, $2, $3, $4, $2, $2, $3)', array($pid, $_SESSION['user']['id'], 1, $newFolderName, config\default_folder_template)) or die(DB\mysqli_query_error());
 		$id = DB\last_insert_id();
 		SolrClient::runCron();
 		return array('success' => true, 'path' => $path, 'data' => array( 'nid' => $id, 'pid' => $pid, 'name' => $newFolderName, 'system' => 0, 'type' => 1, 'subtype' => 0, 'iconCls' => 'icon-folder', 'cid' => $_SESSION['user']['id']) );
@@ -252,8 +252,8 @@ class Browser{
 					if($r = $res->fetch_row()) $newName = empty($r[1]) ? $r[0] : $this->getNewCopyName($p->pid, $r[0]);
 					$res->close();
 
-					DB\mysqli_query_params('insert into tree(pid, user_id, `system`, `type`, subtype, tag_id, name, `date`, size, is_main, cfg, cid, cdate, uid, udate)
-						select $2, user_id, 0, `type`, subtype, tag_id, $4, `date`, size, is_main, cfg, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP from tree where id =$1', array($id, $p->pid, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
+					DB\mysqli_query_params('insert into tree(pid, user_id, `system`, `type`, subtype, template_id, tag_id, name, `date`, size, is_main, cfg, cid, cdate, uid, udate)
+						select $2, user_id, 0, `type`, subtype, template_id, tag_id, $4, `date`, size, is_main, cfg, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP from tree where id =$1', array($id, $p->pid, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
 					$obj_id = DB\last_insert_id();
 					$type = 0;
 					$res = DB\mysqli_query_params('select `type` from tree where id = $1', $id) or die(DB\mysqli_query_error());
@@ -302,24 +302,24 @@ class Browser{
 							break;
 					}
 					if(!empty($existent_name)) DB\mysqli_query_params('update tree set name = $2 where id = $1', array($obj_id, $this->getNewCopyName($p->pid, $existent_name) ) ) or die(DB\mysqli_query_error());
-					Cases::updateCaseUpdateInfo($obj_id);
+					Objects::updateCaseUpdateInfo($obj_id);
 				}
 
 				break;
 			case 'move':
-				foreach($process_ids as $id) Cases::updateCaseUpdateInfo($id);
+				foreach($process_ids as $id) Objects::updateCaseUpdateInfo($id);
 				$res = DB\mysqli_query_params('select pid from tree where id in ('.implode(',', $process_ids).')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_row()) $modified_pids[] = intval($r[0]);
 				$res->close();
 				DB\mysqli_query_params('update tree set pid = $1 where id in ('.implode(',', $process_ids).')', $p->pid) or die(DB\mysqli_query_error());
 				
-				foreach($process_ids as $id) Cases::updateCaseUpdateInfo($id);
+				foreach($process_ids as $id) Objects::updateCaseUpdateInfo($id);
 				
 				$this->markAllChildsAsUpdated($process_ids);
 				break;
 			case 'shortcut':
 				DB\mysqli_query_params('insert into tree (pid, `system`, `type`, `subtype`, target_id, `name`, cid) SELECT $1, 0, 2, 0, id, `name`, $2 from tree where id in ('.implode(',', $process_ids).')', array($p->pid, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
-				Cases::updateCaseUpdateInfo(DB\last_insert_id());
+				Objects::updateCaseUpdateInfo(DB\last_insert_id());
 				break;
 		}
 		SolrClient::runCron();
@@ -421,18 +421,6 @@ class Browser{
 			}else $rez['msg'] = L\SomeFilenamesExistsInTarget;
 			
 			return $rez;
-			// if( sizeof($p['existentFilenames']) == 1 )
-			// 	return array(
-			// 		'success' => false
-			// 		,'type' => 'fileexists'
-			// 		,'filename' => $p['existentFilenames'][0]['name']
-			// 		,'suggestedFilename' => $p['existentFilenames'][0]['suggestedFilename']
-			// 		,'allow_new_version' => $allow_new_version
-			// 	);
-			// return array( 'success' => false
-			// 	,'type' => 'multiplefileexists'
-			// 	,'count' => sizeof($p['existentFilenames'])
-			// );
 		}
 		$files->storeFiles($p); //if everithing is ok then store files
 		SolrClient::runCron();
@@ -467,9 +455,6 @@ class Browser{
 				}
 				// $files->storeFiles($a);
 				// break;
-			//newversion, replace, rename, autorename, cancel
-			// case 'overwrite':
-			// case 'overwriteall':
 			case 'newversion':
 			case 'replace':
 			case 'autorename': $files->storeFiles($a); break;
@@ -542,12 +527,6 @@ class Browser{
 		$ids = implode(',', $ids);
 		DB\mysqli_query_params('update tree set oid = $1, uid = $1 where id in ('.$ids.') and `system` = 0', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
 		//TODO: view if needed to mark all childs as updated, for security to be changed ....
-
-		// DB\mysqli_query_params('update tree set cid = $1, uid = $1 where id in ('.$ids.') and `system` = 0', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
-		// DB\mysqli_query_params('update cases set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
-		// DB\mysqli_query_params('update objects set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
-		// DB\mysqli_query_params('update files set cid = $1, uid = $1 where id in ('.$ids.')', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
-		// DB\mysqli_query_params('update tasks set cid = $1, uid = $1  where id in ('.$ids.')', $_SESSION['user']['id']) or die(DB\mysqli_query_error());		
 		SolrClient::runCron();
 		return $rez;
 	}

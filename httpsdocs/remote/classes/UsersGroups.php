@@ -33,12 +33,6 @@ class UsersGroups{
 			$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
 			while($r = $res->fetch_assoc()){
 				$r['iconCls'] = 'icon-users';
-				// if(empty($r['loaded'])) $r['loaded'] = true;
-				// else{ 
-					// unset($r['loaded']);
-					// $r['loaded'] = true;
-					// $r['children'] = $this->getChildren(json_decode('{"path":"/'.$r['nid'].'"}'));
-				// }
 				$r['expanded'] = true;
 				
 				$rez[] = $r;
@@ -49,9 +43,7 @@ class UsersGroups{
 				,'iconCls' => 'icon-users'
 				,'type' => 1
 				,'expanded' => true
-				
-				// ,'children' => $this->getChildren(json_decode('{"path":"/-1"}'))
-				);
+			);
 		}else{// group users
 			$sql = 'select u.id `nid`, u.cid, u.name, u.l'.USER_LANGUAGE_INDEX.' `text`, sex, enabled from users_groups_association a join users_groups u on a.user_id = u.id where a.group_id = $1 and u.deleted = 0 ';
 			$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());

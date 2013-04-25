@@ -23,25 +23,6 @@ class Templates{
 		}
 		return $rez;
 	}
-	// public static function getCaseTypeTempleId($case_type_id) {
-	// 	$case_type_id = explode('-', $case_type_id);
-	// 	$case_type_id = array_pop($case_type_id);
-	// 	$case_type_id = intval($case_type_id);
-	// 	$id = 0;
-	// 	$sql = 'SELECT t.id FROM `templates_per_tags` tpt JOIN templates t ON tpt.`template_id` = t.id AND t.type = 4 WHERE tpt.case_type_id = $1';
-	// 	$res = DB\mysqli_query_params($sql, $case_type_id) or die(DB\mysqli_query_error());
-	// 	if($r = $res->fetch_row()){
-	// 		$id = $r[0];
-
-	// 	}else{
-	// 		$name = 'Template for case type '.$case_type_id;
-	// 		DB\mysqli_query_params('insert into templates (`type`, name, l1, l2, l3, visible) values (4, $1, $1, $1, $1, 0)', array($name) ) or die(DB\mysqli_query_error());
-	// 		$id = DB\last_insert_id();
-	// 		DB\mysqli_query_params('insert into templates_per_tags (template_id, case_type_id) values($1, $2) ', array($id, $case_type_id)) or die(DB\mysqli_query_error());
-	// 	}
-	// 	$res->close();
-	// 	return array('success' => true, 'id' => $id);
-	// }
 	
 	public function saveElement($params){//new folder or template
 		if(!Security::canManage()) throw new \Exception(L\Access_denied);
@@ -49,7 +30,6 @@ class Templates{
 		$p = array(
 			'id' => empty($params->id) ? null: $params->id
 			,'type' => empty($params->type) ? 0: intval($params->type)
-			//,'pid' => (empty($params->pid) || (!is_numeric($params->pid))) ? null: $params->pid
 		);
 		$values_string = '$1, $2';
 		$res = DB\mysqli_query_params('select id from templates where is_folder = 1 and `type` = $1 ',-$p['type']) or die(DB\mysqli_query_error());
@@ -99,8 +79,7 @@ class Templates{
 
 		$data = array();
 		$res = DB\mysqli_query_params('select id, `type`, name, '.config\language_fields.', visible, iconCls, default_field, cfg from templates where id = $1', $params->data->id) or die(DB\mysqli_query_error());
-		//, `order` - removed
-		//,show_files, show_main_file, show_subjects, show_claimers, show_violations_edit, show_violations_association, show_decisions_association, show_complaints, show_appeals, gridJsClass
+
 		if($r = $res->fetch_assoc()){
 			if(!empty($r['cfg'])){
 				$cfg = json_decode($r['cfg']);
@@ -170,11 +149,6 @@ class Templates{
 		$cfg = array();
 		$params = array(
 			'id' => empty($d->id) ? null: $d->id
-			//,'order' => empty($p['order']) ? 0 : intval($p['order'])
-			//,'visible' => empty($p['visible']) ? 0 : 1
-			//,'iconCls' => empty($p['iconCls']) ? null: $p['iconCls']
-			//,'default_field' => empty($p['default_field']) ? null: $p['default_field']
-			//,'cfg' => empty($cfg) ? null: json_encode($cfg)
 		);
 		$values_string = array('$1');
 		$on_duplicate = array();//'`order` = $2, visible = $3, iconCls = $4, default_field = $5, cfg = $6';

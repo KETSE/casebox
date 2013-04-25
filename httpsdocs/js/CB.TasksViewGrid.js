@@ -23,8 +23,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 			,openItemLocation: new Ext.Action({
 				text: L.OpenItemLocation
 				,iconAlign:'top'
-				//,iconCls: 'icon32-open'
-				//,scale: 'large'
 				,disabled: true
 				,scope: this
 				,handler: this.onOpenItemLocationClick
@@ -32,21 +30,18 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 
 			,cut: new Ext.Action({
 				text: L.Cut
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onCutClick
 			})
 			,copy: new Ext.Action({
 				text: L.Copy
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onCopyClick
 			})
 			,paste: new Ext.Action({
 				text: L.Paste
-				//,iconCls: 'icon-shortcut'
 				,scope: this
 				,disabled: true
 				,handler: this.onPasteClick
@@ -311,7 +306,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 
 			,statefull: true
 			,stateId: 'tvg'//tasks view grid
-			//,stateEvents: ['columnmove', 'columnresize']
 		});
 		this.previewPanel = new CB.PreviewPanel({bodyStyle:'padding: 10px'});
 		this.filterButton = new Ext.Button({
@@ -356,7 +350,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
                              	,this.actions['delete']
                              	,'-'
                              	,this.actions.createTask
-                             	//,this.actions.createEvent
                              	,'-'
                              	,this.actions.completeTask
                              	,'->'
@@ -599,7 +592,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 	,onCompleteTaskClick: function(b, e) {
 		r = this.grid.getSelectionModel().getSelected();
 		if(Ext.isEmpty(r)) return false;
-		//this.fireEvent('taskcomplete', {data: {pid: this.folderProperties.id}})
 		Ext.Msg.show({
 			title: L.CompletingTask
 			,msg: L.Message

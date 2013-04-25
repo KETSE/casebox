@@ -5,7 +5,6 @@ xtemplate_facetList = new Ext.XTemplate(
 		,'<tpl for=".">'
 		,'<li{[ (values.active == 1) ? \' class="active"\' : ""]}>'
 		,	'<span class="{[ (values.active == 1) ? "b" : "t"]}">{items}</span>'
-		//,	'<span class="n">{new_items}</span>'
 		,	'<a href="#">{[Ext.value(values.title, "-")]}</a>'
 		,'</li>'
 	,'</tpl></ul>'
@@ -36,7 +35,6 @@ CB.FacetList = Ext.extend( CB.Facet, {
 						fn: function(dv, idx, el, ev){
 							r = this.store.getAt(idx);
 							r.set('active', (r.get('active') == 1) ? 0 : 1);
-							//this.store.sort([ { field : 'active', direction: 'DESC' } ], 'ASC');//, { field : 'title', direction: 'ASC' }
 							this.setLastField();
 							this.fireEvent('facetchange', this, ev);
 						}

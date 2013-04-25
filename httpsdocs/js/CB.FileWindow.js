@@ -96,7 +96,7 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
 	,onDeleteClick: function(index){
 		r = this.store.getAt(index);
 		if(Ext.isEmpty(r)) return;
-		Ext.Msg.confirm(L.DeleteConfirmation, L.versionDeleteConfirmation, //L.DeleteConfirmationMessage + ' "' + r.get('name') + '"?', 
+		Ext.Msg.confirm(L.DeleteConfirmation, L.versionDeleteConfirmation,
 			function(b){
 				if(b == 'yes') Files.deleteVersion(r.get('id'), this.processDelete, this); 
 			}
@@ -180,10 +180,6 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		this.previewPanel = new CB.PreviewPanel({
 			region: 'center'
 			,bodyStyle: 'padding: 5px'
-			// ,listeners: {
-			// 	scope: this
-			// 	,afterrender: function(p){ p.loadPreview(this.data.id) } 
-			// }
 		});
 	        
 		this.versionsView = new CB.FileVersionsView({
@@ -200,37 +196,22 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 				,pathclick: this.onPathClick
 			}
 		});
-	 //        this.versionsPanel = new Ext.Panel({
-		// 	region: 'east'
-		// 	,width: 250
-		// 	,split: true
-		// 	,hidden: false
-		// 	//,autoLoad: '/preview2/fileRightPanel.html'
-		// 	,bodyStyle: 'background-color: #F4F4F4'
-		// 	,tpl: [
-		// 		'<h3 style="padding: 5px 5px 10px 5px; font-size: 14px">'+L.RevisionHistory+'</h3>'
-		// 		,'<tpl for="versions">'
-		// 		,
-		// 		,'</tpl>'
-		// 	]
-		// });
 
 	        Ext.apply(this, {
 			tbar: [
-				this.actions.upload //{text: L.Upload, iconCls: 'icon32-upload', iconAlign:'top', scale: 'large'}
-				,this.actions.download //,{text: L.Download, iconCls: 'icon32-download', iconAlign:'top', scale: 'large'}
+				this.actions.upload
+				,this.actions.download
 	                	,'-'
-				,this.actions['delete'] //,{text: L.Delete, iconAlign:'top', iconCls: 'icon32-del', scale: 'large'}
+				,this.actions['delete']
 				,'->'
-				,this.actions.expand //,{text: L.Expand, iconAlign:'top', iconCls: 'icon32-expand', scale: 'large', enableToggle: true, toggleHandler: this.onFileExpandClick}
-				,this.actions.newwindow //,{text: L.NewWindow, iconAlign:'top', iconCls: 'icon32-external', scale: 'large'}
+				,this.actions.expand
+				,this.actions.newwindow
 				
 			]
 			,items: [ this.previewPanel
 				,{
 					region: 'east'
 					,width: 300
-					//,layout: 'fit'
 					,split: 'true'
 					,bodyStyle: 'background-color: #f4f4f4'
 					,autoScroll: true
@@ -279,7 +260,6 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		this.data.cdate = date_ISO_to_date(this.data.cdate);
 		this.data.udate = date_ISO_to_date(this.data.udate);
 		this.data.id = parseInt(this.data.id);
-		//this.data.size = App.customRenderers.filesize(this.data.size);
 		this.setIconClass(getFileIcon(r.data.name));
 		this.setTitle(r.data.name);
 		this.actions.download.setDisabled(false);
@@ -288,14 +268,11 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		this.actions['delete'].setDisabled(false);
 		this.previewPanel.clear();
 		this.previewPanel.loadPreview(this.data.id);
-		//this.versionsPanel.update(this.data);
 		if(Ext.isEmpty(this.data.versions)) this.data.versions = [];
 		this.data.cls = 'current';
 		this.versionsView.store.loadData([this.data].concat(this.data.versions), false);
 		this.items.last().items.first().syncSize();
-		//this.versionsView.store.loadData(this.data.versions, true);
 		this.duplicatesView.reload();
-		//this.propertiesPanel.data = this.data
 		this.propertiesPanel.update(this.data);
 
 	}
@@ -602,15 +579,6 @@ CB.FileDuplicatesView = Ext.extend(Ext.DataView, {
 					,'path'
 					,'pathtext'
 				]
-				,listeners:{
-					scope: this
-					,load: function(store, records, options){
-						Ext.each(records, function(r){
-							//r.set('cdate', date_ISO_to_date(r.get('cdate'))  )
-							//r.set('username', CB.DB.usersStore.getName(r.get('cid')))
-						}, this)
-					}
-				}
 				,data: []
 			})
 			,itemSelector: 'a'
@@ -651,15 +619,8 @@ CB.FileDuplicatesViewPanel = Ext.extend(Ext.Panel, {
 		Ext.apply(this, {
 			layout: 'fit'
 			,items: this.view
-			,listeners: {
-				scope: this
-				,beforedestroy: function(){
-					//App.mainViewPort.un('fileuploaded', this.onFileUploaded, this)
-				}
-			}
 		})
 		CB.FileDuplicatesViewPanel.superclass.initComponent.apply(this, arguments);
-		//App.mainViewPort.on('fileuploaded', this.onFileUploaded, this)
 	}
 	,getFileId: function(){
 		p = this.findParentByType(CB.FileWindow);
@@ -684,8 +645,4 @@ CB.FileDuplicatesViewPanel = Ext.extend(Ext.Panel, {
 		else return this.setVisible(false);
 
 	}
-	// ,onFileUploaded: function(r, e){
-	// 	if(r.data.pid == this.getFileId()) this.reload();
-	// }
-
 })

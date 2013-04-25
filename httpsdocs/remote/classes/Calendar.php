@@ -7,13 +7,8 @@ class Calendar{
 	public function getEvents($p){
 		$rez = array('success' => true, 'data' => array() );
 		
-		//if(empty($p->filter)) $p->filter = array(6, 7);
-		
 		if(empty($p->start) || empty($p->end)) return $rez;
-		//$p->filter = array_filter($p->filter, 'is_numeric');
-		//if(empty($p->filter)) return $rez;
 
-		// $pids = null;
 		if(!empty($p->path)){
 			$rez['pathtext'] = Path::getPathText($p);
 			$rez['folderProperties'] = Path::getPathProperties($p);

@@ -109,7 +109,6 @@ function initApp(){
 			if(Ext.isEmpty(thesauriId) && store.thesauriIds) thesauriId = store.thesauriIds[record.id]
 			if(!Ext.isEmpty(thesauriId)){
 				ts = getThesauriStore(thesauriId);
-				//ts.each(function(r){if(va.indexOf(r.get('id')) >=0 ) vt.push(r.get('name')); });
 				for (var i = 0; i < va.length; i++) {
 					idx = ts.findExact('id', parseInt(va[i]) );
 					if(idx >=0) vt.push(ts.getAt(idx).get('name'));
@@ -125,14 +124,6 @@ function initApp(){
 			if(ri < 0) return '';
 			return ed.store.getAt(ri).get(ed.displayField)
   		}
-		/*,organizationCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { 
-			if(Ext.isEmpty(v)) return '';
-			cw = grid.findParentByType(CB.Case);
-			if(!cw || !cw.organizationsStore) return '';
-			ri = cw.organizationsStore.findExact('id', parseInt(v));
-			if(ri < 0) return '';
-			return cw.organizationsStore.getAt(ri).get('name');
-  		}/**/
 		,objectCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
 			if(Ext.isEmpty(v)) return '';
 			cw = grid.findParentByType(CB.Objects);
@@ -316,19 +307,7 @@ function initApp(){
 		}
 		,taskStatus: function(v, m, r, ri, ci, s){
 			if(Ext.isEmpty(v)) return '';
-			//m.css = 'taskStatus'+v;
 			return '<span class="taskStatus'+v+'">'+L['taskStatus'+parseInt(v)]+'</span>';
-			/*switch(v){
-				case 1:
-				case '1':
-					return L.Processing;
-					break;
-				case 2:
-				case '2':
-					return L.Closed
-					break;
-				default: return L.Pending
-			}/**/
 		}
 	}
 	App.getCustomRenderer = function(fieldType){
@@ -436,10 +415,6 @@ function initApp(){
 		App.thesauriWindow = Ext.apply(App.thesauriWindow, config);
 		return App.thesauriWindow;
 	}
-	/*App.onHideThesauriWindow = function(w){
-		if(w.focusHandler) w.focusHandler();
-		w.un('hide', App.onHideThesauriWindow, this);
-	}/**/
 	App.getTextEditWindow = function(config){
 		if(!App.textEditWindow) App.textEditWindow = new CB.TextEditWindow();
 		App.textEditWindow = Ext.apply(App.textEditWindow, config);
@@ -566,15 +541,6 @@ function initApp(){
 					return new Ext.ux.CasesCombo({ownerCt: e.ownerCt, params: params})//, width: 500
 				}
 				break;
-			case '_case_object':
-				if(e.record.get('cfg').editor == 'form'){
-					if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateObjectsField({ownerCt: e.ownerCt}); //, width: 500//when it is in top fieldset
-				}else{
-					params = Ext.apply({}, e.record.get('cfg'));
-					if(!Ext.isEmpty(e.pidValue)) params.pidValue = e.pidValue;
-					return new Ext.ux.ObjectsCombo({ownerCt: e.ownerCt, params: params})//, width: 500
-				}
-				break;
 			case 'boolean': //depricated
 			case 'checkbox': return new Ext.form.ComboBox({
 						xtype: 'combo'
@@ -688,16 +654,6 @@ function initApp(){
 							this.grid.fireEvent('change'); 
 						}
 					}
-					// ,listeners: {
-					// 	scope: e 
-					// 	,setvalue: function(v, w){
-					// 		this.record.set('value', v);
-					// 		this.value = v;
-					// 		if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
-					// 		this.grid.fireEvent('change'); 
-					// 	}
-
-					// }
 				});
 				w.focusHandler = Ext.value(this.gainFocus, e.grid.gainFocus);
 				//w.on('hide', App.onHideThesauriWindow, e.grid);
