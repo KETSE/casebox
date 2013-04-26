@@ -116,13 +116,14 @@ $API = array_merge( $API, array(
 	,'Templates' => array(
 		'methods'=>array(
 			'getChildren'	=>	array('len'=>1)
-			,'saveElement'	=>	array('len'=>1)
 			,'deleteElement'=>	array('len'=>1)
 			,'moveElement'	=>	array('len'=>1)
 			,'readAll'	=>	array('len'=>1)
 			,'loadTemplate'	=>	array('len'=>1)
-			,'getTemplatesStructure'=>array('len'=>0)
+			,'createTemplate'=>	array('len'=>1)
+			,'createFolder'=>	array('len'=>1)
 			,'saveTemplate'	=>	array('len'=>1, 'formHandler' => true)
+			,'getTemplatesStructure'=>array('len'=>0)
 		)
 	)
 	

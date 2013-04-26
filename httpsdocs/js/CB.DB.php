@@ -19,6 +19,12 @@ Ext.namespace('CB.DB');
 		,fields: ['id', 'name']
 		,data:  [[null, '-'], ['m', L.male], ['f', L.female]]
 	});
+	CB.DB.templateTypes = new Ext.data.ArrayStore({
+		idIndex: 0
+		,fields: ['id', 'name']
+		,data:  [[null, '-'], ['case', 'case'], ['object', 'object'], ['file', 'file'], ['task', 'task'], ['email', 'email'], ['user', 'user']]
+		,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
+	});
 	CB.DB.reminderTypes = new Ext.data.ArrayStore({
 		idIndex: 0
 		,fields: [{name: 'id', type: 'int'}, 'name', 'iconCls']
@@ -46,12 +52,12 @@ Ext.namespace('CB.DB');
 		,data:  [[1, L.Folder, 'icon-folder'], [2, L.Link, 'icon-link'], [3, L.Case, 'icon-briefcase'], [4, L.Action, 'icon-action'], [5, L.File, 'icon-file-unknown'], [6, L.Task, 'icon-calendar-task'], [7, L.Event, 'icon-event'], [8, L.Email, 'icon-letter']]
 		,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
 	});
-	CB.DB.templateTypes = new Ext.data.ArrayStore({
+	/*CB.DB.templateTypes = new Ext.data.ArrayStore({
 		idIndex: 0
 		,fields: [{name: 'id', type: 'int'}, 'name']
 		,data:  [[0, L.Folder], [1, L.CaseObject], [2, L.IncomingAction], [3, L.OutgoingAction], [4, L.Applicant], [5, L.Subject], [6, L.User], [7, L.Contact], [8, L.Email]]
 		,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
-	});
+	});/**/
 	CB.DB.tasksImportance = new Ext.data.ArrayStore({
 		idIndex: 0
 		,fields: [{name: 'id', type: 'int'}, 'name']
@@ -151,7 +157,7 @@ Ext.namespace('CB.DB');
 		})
 	}
 	reloadThesauri = function(){
-		CB.DB.thesauri .reload({callback: function(){
+		CB.DB.thesauri.reload({callback: function(){
 			Ext.iterate(CB.DB, function(k, st){ 
 				if(k.substr(0, 13) == 'ThesauriStore'){
 					thesauriId = k.substr(13);

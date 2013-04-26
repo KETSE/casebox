@@ -48,7 +48,7 @@ while($r = $res->fetch_assoc()){
 				echo " pages: $pages";
 			}
 		}else $skip_parsing = 1;
-		echo "\nupdating db status of this file";
+
 		DB\mysqli_query_params('update files_content set parse_status = 1, pages = $2, skip_parsing = $3 where id = $1', Array($r['id'], $pages, $skip_parsing)) or die('error2');
 		$rez['Processed'] = $rez['Processed'] +1;
 		$rez['Processed List'][] =  $filename;

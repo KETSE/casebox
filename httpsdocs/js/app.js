@@ -116,7 +116,7 @@ function initApp(){
 			}
 			return App.xtemplates.cell.apply(vt);
 		}
-		,relatedCell: function(v, metaData, record, rowIndex, colIndex, store) { }
+		,relatedCell: function(v, metaData, record, rowIndex, colIndex, store) { } 
 		,combo: function(v, metaData, record, rowIndex, colIndex, store) { /* custom renderer for verticalEditGrid */
 			if(Ext.isEmpty(v)) return '';
 			ed = this.editor;
@@ -155,7 +155,7 @@ function initApp(){
 					}
 					return r.join(', ');
 			}
-  		}
+  		} 
   		,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
 			if(Ext.isEmpty(v)) return '';
 			r = [];
@@ -164,7 +164,7 @@ function initApp(){
 			source = Ext.isEmpty(record.get('cfg').source) ? 'thesauri': record.get('cfg').source;
 			switch(source){
 				case 'thesauri':
-					store = getThesauriStore(record.get('cfg').thesauriId);
+					store = isNaN(record.get('cfg').thesauriId) ? CB.DB.thesauri : getThesauriStore(record.get('cfg').thesauriId);
 					break;
 				case 'users':
 					store = CB.DB.usersStore;
@@ -212,6 +212,12 @@ function initApp(){
 			ri = CB.DB.sex.findExact('id', v);
 			if(ri < 0) return '';
 			return CB.DB.sex.getAt(ri).get('name');
+  		}
+		,templateTypesCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
+			if(Ext.isEmpty(v)) return '';
+			ri = CB.DB.templateTypes.findExact('id', v);
+			if(ri < 0) return '';
+			return CB.DB.templateTypes.getAt(ri).get('name');
   		}
 		,shortDateFormatCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
 			if(Ext.isEmpty(v)) return '';
@@ -309,6 +315,10 @@ function initApp(){
 			if(Ext.isEmpty(v)) return '';
 			return '<span class="taskStatus'+v+'">'+L['taskStatus'+parseInt(v)]+'</span>';
 		}
+		,memo: function(v, m, r, ri, ci, s){
+			if(Ext.isEmpty(v)) return '';
+			return '<pre style="white-space: pre-wrap">'+v+'</pre>';
+		}
 	}
 	App.getCustomRenderer = function(fieldType){
 		switch(fieldType){
@@ -329,6 +339,9 @@ function initApp(){
 			case '_sex': 
 				return App.customRenderers.sexCombo;
 				break;
+			case '_templateTypesCombo': 
+				return App.customRenderers.templateTypesCombo;
+				break;
 			case '_short_date_format': 
 				return App.customRenderers.shortDateFormatCombo;
 				break;
@@ -346,6 +359,9 @@ function initApp(){
 				break;
 			case 'popuplist': 
 				return App.customRenderers.thesauriCell;
+				break;
+			case 'memo': 
+				return App.customRenderers.memo;
 				break;
 			default: return null;
 		}
@@ -621,6 +637,18 @@ function initApp(){
 					,valueField: 'id'
 				})
 				break;
+			case '_templateTypesCombo':
+				return new Ext.form.ComboBox({
+					forceSelection: true
+					,triggerAction: 'all'
+					,lazyRender: true
+					,mode: 'local'
+					,editable: false
+					,store: CB.DB.templateTypes
+					,displayField: 'name'
+					,valueField: 'id'
+				})
+				break;
 			case '_short_date_format':
 				return new Ext.form.ComboBox({
 					forceSelection: true
@@ -731,7 +759,7 @@ function initApp(){
 		switch(type){
 			// case 2:  //link
 			// 	break;
-			case 3: App.openCase(id); break;
+			case 3: //App.openCase(id); break;
 			case 4:
 			case 8:
 				App.mainViewPort.fireEvent('openobject', {id: id}, e);
@@ -769,6 +797,9 @@ function initApp(){
 	App.addFilesToUploadQueue = function(FileList, options){
 		fu = App.getFileUploader();
 		fu.addFiles(FileList, options)
+	}
+	App.onComponentActivated = function(component){
+		clog('component activated', arguments, this);
 	}
 
 }

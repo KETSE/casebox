@@ -122,6 +122,9 @@ CB.FacetList = Ext.extend( CB.Facet, {
 			case 'template_id':
 				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: CB.DB.templates.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
 				break;
+			case 'template_type':
+				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: L['tt_'+k], active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
+				break;
 			default:
 				Ext.iterate(serverData, function(k, v){ data.push({id: k, title: k, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this) ; //'id', 'title', 'active', 'last', 'items', 'new_items' 
 		}

@@ -301,7 +301,7 @@ class Objects{
 					break;
 				case 'tasks':
 					$s= new Search();
-					$query->fl = 'id,name,type,date,date_end,cid,user_ids';
+					$query->fl = 'id,name,type,template_id,date,date_end,cid,user_ids';
 					$query->types = array(6,7);
 					$query->sort = array('date desc');
 					$rez[$key] = $s->query($query);

@@ -469,6 +469,14 @@ background-image: url(i/ico/32/folder-horizontal.png) !important;
 /* background-position: 0 50%;
 background-repeat: no-repeat; */
 }
+.icon32-folder-add {background-image: url(i/ico/32/folder_add.png) !important; min-width: 38px}
+.icon32-tag-add {background-image: url(i/ico/32/tag_blue_add.png) !important; min-width: 38px}
+.icon32-arrow-up {background-image: url(i/ico/32/arrow_up.png) !important; min-width: 38px}
+.icon32-arrow-down {background-image: url(i/ico/32/arrow_down.png) !important; min-width: 38px}
+.icon32-sort {background-image: url(i/ico/32/sort_columns.png) !important; min-width: 38px}
+.icon32-sort-asc {background-image: url(i/ico/32/sort_ascending.png) !important; min-width: 38px}
+.icon32-sort-desc {background-image: url(i/ico/32/sort_descending.png) !important; min-width: 38px}
+
 .icon32-save {background-image: url(i/ico/32/save.png) !important; min-width: 38px}
 .icon32-cancel {background-image: url(i/ico/32/cancel.png) !important; min-width: 38px}
 
@@ -476,6 +484,8 @@ background-repeat: no-repeat; */
 .icon32-download {background-image: url(i/ico/32/download.png) !important; min-width: 38px}
 
 .icon32-edit {background-image: url(i/ico/32/clipboard.png) !important; min-width: 38px}
+.icon32-doc-edit {background-image: url(i/ico/32/document_editing.png) !important; min-width: 38px}
+.icon32-refresh {background-image: url(i/ico/32/arrow_refresh.png) !important; min-width: 38px}
 .icon32-create {background-image: url(i/ico/32/plus-circle.png) !important; min-width: 38px}
     .icon32-del {background-image: url(i/ico/32/delete.png) !important; min-width: 38px}
 .icon32-event-new {background-image: url(i/ico/32/cal-event-new.png) !important; min-width: 38px}

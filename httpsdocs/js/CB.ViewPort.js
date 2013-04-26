@@ -295,7 +295,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		if(!App.activateTab(App.mainTabPanel, 'explorer')) App.explorer = App.addTab(App.mainTabPanel, new CB.FolderView({ rootId: rootId, data: {id: 'explorer' }, closable: false }) )
 	}
 	,createObject: function(data, e){
-		clog('data', data);
 		tr = CB.DB.templates.getById(data.template_id);
 		if(tr)
 		switch(tr.get('type')){
@@ -309,7 +308,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		}
 	}
 	,openObject: function(data, e){
-		clog('open', data)
 		if(e){
 			if(e.stopEvent) e.stopEvent();
 			if(e.processed === true) return;

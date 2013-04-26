@@ -332,6 +332,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				,rowcontextmenu: this.onRowContextMenu
 				,beforedestroy: this.onBeforeDestroy
 				,cellclick: this.onCellClick
+				,activate: App.onComponentActivated
 				,mousedown: function(e){
 					if(e.button == 2){ //rightclick
 						/* lock selection if rightclicking on a selected row. Unlock should be called after corresponding actions (usually called with defer).*/
@@ -874,7 +875,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	,onRowDblClick: function( grid, rowIndex, e ) {
 		r = grid.store.getAt(rowIndex);
 		if(!r) return;
-		if(r.get('type') == 3) this.onBrowseClick(grid, e);
+		if( App.config.folder_templates.indexOf( row.get('template_id')+'') >= 0 ) this.onBrowseClick(grid, e);
 		else this.onOpenClick(grid, e);
 	}
 	,onOpenClick: function(b, e) {
@@ -980,14 +981,30 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		this.fireEvent('casecreate', b, e);
 	}
 	,onCreateTaskClick: function(b, e) {
-		this.fireEvent('taskcreate', {data: {type: 6, pid: this.folderProperties.id, path: this.folderProperties.path, pathtext: this.folderProperties.pathtext }})
+		this.fireEvent('taskcreate', {
+			data: {
+				type: 6
+				,template_id: App.config.default_task_template
+				,pid: this.folderProperties.id
+				,path: this.folderProperties.path
+				,pathtext: this.folderProperties.pathtext
+			}
+		})
 	}
 	,onFiltersChange: function(filters){
 		this.grid.store.baseParams.filters = filters;
 		this.onReloadClick();
 	}
 	,onCreateEventClick: function(b, e) {
-		this.fireEvent('taskcreate', {data: {type: 7, pid: this.folderProperties.id}})
+		this.fireEvent('taskcreate', {
+			data: {
+				type: 7
+				,template_id: App.config.default_event_template
+				,pid: this.folderProperties.id
+				,path: this.folderProperties.path
+				,pathtext: this.folderProperties.pathtext
+			}
+		})
 	}
 	,onReloadClick: function(b, e){
 		this.grid.store.load()

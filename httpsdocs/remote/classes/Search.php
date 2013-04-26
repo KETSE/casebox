@@ -32,7 +32,7 @@ class Search extends SolrClient{
 			,'q.alt' => '*:*'
 			,'qf' => "name content^0.5"
 			,'tie' => '0.1'
-			,'fl' => "id, pid, path, name, type, subtype, system, size, date, date_end, oid, cid, cdate, uid, udate, case_id, case, template_id, user_ids, status, category_id, importance, completed, versions"//iconCls, 
+			,'fl' => "id, pid, path, name, type, subtype, system, size, date, date_end, oid, cid, cdate, uid, udate, case_id, case, template_id, user_ids, status, category_id, importance, completed, versions"
 			,'sort' => 'ntsc asc'
 		);
 		/* initial parameters */
@@ -213,10 +213,11 @@ class Search extends SolrClient{
 		switch($p->facets){
 			case 'general':
 				$this->params['facet.field'] = array(
-					'{!ex=type key=0type}type'
+					'{!ex=template_type key=0template_type}template_type'
 					,'{!ex=cid key=1cid}cid'
 					,'{!ex=sys_tags key=2sys_tags}sys_tags'
 					,'{!ex=tree_tags key=3tree_tags}tree_tags'
+					,'{!ex=template_id key=4template_id}template_id'
 				);
 				//Created: Today / Yesterday / This week / This month
 				$this->params['facet.query'] = array(

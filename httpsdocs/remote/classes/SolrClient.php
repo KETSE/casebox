@@ -27,6 +27,7 @@ class SolrClient{
 		,'case_id'
 		,'case'
 		,'template_id'
+		,'template_type'
 		,'user_ids'
 		,'allow_user_ids'
 		,'deny_user_ids'

@@ -150,23 +150,96 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 	,enableDD: true
 	,ddGroup: 'tags'
 	,initComponent: function(){
-		treeMenuItems = [
-			{text: L.AddTag, iconCls: 'icon-tag-plus', disabled: true, handler: this.onAddTagClick, scope: this}
-			,{text: L.AddFolder, iconCls: 'icon-folder-plus', disabled: true, handler: this.onAddFolderClick, scope: this}
-			,'-'
-			,{text: L.Edit, iconCls: 'icon-pencil', disabled: true, handler: this.onEditNodeClick, scope: this}
-			,'-'
-			,{text: L.Delete, iconCls: 'icon-minus', disabled: true, handler: this.onDelNodeClick, scope: this}
-			,'-'
-			,{iconCls: 'icon-arrow-up-medium', disabled: true, handler: this.onMoveUpClick, scope: this}
-			,{iconCls: 'icon-arrow-down-medium', disabled: true, handler: this.onMoveDownClick, scope: this}
-			,{iconCls: 'icon-sort-alphabet', disabled: true, handler: this.onSortClick, scope: this}
-			,{iconCls: 'icon-sort-alphabet-descending', disabled: true, handler: this.onSortDescendingClick, scope: this}
-			,'->'
-            ,{iconCls: 'icon-folder-export', disabled: true, handler: this.onExportCsvClick, scope: this}
-            ,{iconCls: 'icon-folder-export', disabled: true, handler: this.onImportCsvClick, scope: this}
+		this.actions = {
+			sortAsc: new Ext.Action({
+				text: L.sortAlpbabetAsc
+				,iconCls: 'icon-sort-alphabet'
+				,disabled: true
+				,handler: this.onSortClick
+				,scope: this
+			})
+			,sortDesc: new Ext.Action({
+				text: L.sortAlpbabetDesc
+				,iconCls: 'icon-sort-alphabet-descending'
+				,disabled: true
+				,handler: this.onSortDescendingClick
+				,scope: this
+			})
+		}
 
-			,{iconCls: 'icon-reload', qtip: L.Reload, scope:this, handler: function(){this.getRootNode().reload();}}
+		treeMenuItems = [
+			{	text: L.AddTag
+				,iconCls: 'icon32-tag-add'
+				,iconAlign:'top'
+				,scale: 'large'
+				,disabled: true
+				,handler: this.onAddTagClick
+				,scope: this
+			},{	text: L.AddFolder
+				,iconCls: 'icon32-folder-add'
+				,iconAlign:'top'
+				,scale: 'large'
+				,disabled: true
+				,handler: this.onAddFolderClick
+				,scope: this
+			},'-',{	text: L.Edit
+				,iconCls: 'icon32-doc-edit'
+				,iconAlign:'top'
+				,scale: 'large'
+				,disabled: true
+				,handler: this.onEditNodeClick
+				,scope: this
+			},'-',{	text: L.Delete
+				,iconCls: 'icon32-del'
+				,iconAlign:'top'
+				,scale: 'large'
+				,disabled: true
+				,handler: this.onDelNodeClick
+				,scope: this
+			},'-',{	text: L.MoveUp
+				,iconCls: 'icon32-arrow-up'
+				,iconAlign:'top'
+				,scale: 'large'
+				,disabled: true
+				,handler: this.onMoveUpClick
+				,scope: this
+			},{	text: L.MoveDown
+				,iconCls: 'icon32-arrow-down'
+				,iconAlign:'top'
+				,scale: 'large'
+				,disabled: true
+				,handler: this.onMoveDownClick
+				,scope: this
+
+			},{	text: L.Sort
+				,iconCls: 'icon32-sort'
+				,iconAlign:'top'
+				,scale: 'large'
+				,menu: [
+					this.actions.sortAsc
+					,this.actions.sortDesc
+				]
+			}
+			,'->'
+			// ,{	iconCls: 'icon-folder-export'
+			// 	,iconAlign:'top'
+			// 	,scale: 'large'
+			// 	,disabled: true
+			// 	,handler: this.onExportCsvClick
+			// 	,scope: this
+			// },{	iconCls: 'icon-folder-export'
+			// 	,iconAlign:'top'
+			// 	,scale: 'large'
+			// 	,disabled: true
+			// 	,handler: this.onImportCsvClick
+			// 	,scope: this}
+			,{	iconCls: 'icon32-refresh'
+				,iconAlign:'top'
+				,scale: 'large'
+				,text: L.Reload
+				,scope:this
+				,handler: function(){this.getRootNode().reload();}
+			}
 		];
 		
 		Ext.apply(this, {
@@ -189,6 +262,7 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 				,text: L.Tags
 			}
 			,tbar: treeMenuItems
+			,tbarCssClass: 'x-panel-white'
 			,listeners:{
 				scope: this
 				,afterlayout: function(){this.getRootNode().expand()}
@@ -234,10 +308,10 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 			tb.items.get(5).setDisabled(node.isRoot); 
 			tb.items.get(7).setDisabled(node.isFirst()); 
 			tb.items.get(8).setDisabled(node.isLast()); 
-			tb.items.get(9).setDisabled(!node.hasChildNodes() && node.loaded); 
-			tb.items.get(10).setDisabled(!node.hasChildNodes() && node.loaded); 
-            tb.items.get(12).setDisabled(false); 
-			tb.items.get(13).setDisabled(false); 
+			this.actions.sortAsc.setDisabled(!node.hasChildNodes() && node.loaded); 
+			this.actions.sortDesc.setDisabled(!node.hasChildNodes() && node.loaded); 
+			// tb.items.get(11).setDisabled(false); 
+			// tb.items.get(12).setDisabled(false); 
 
 		}else{
 			tb.items.get(0).setDisabled(true); 
@@ -246,11 +320,10 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 			tb.items.get(5).setDisabled(true); 
 			tb.items.get(7).setDisabled(true); 
 			tb.items.get(8).setDisabled(true); 
-			tb.items.get(9).setDisabled(true); 
-			tb.items.get(10).setDisabled(true); 
-            tb.items.get(12).setDisabled(true);  
-            tb.items.get(13).setDisabled(true);  
-
+			this.actions.sortAsc.setDisabled(true); 
+			this.actions.sortDesc.setDisabled(true); 
+			// tb.items.get(11).setDisabled(true);  
+			// tb.items.get(12).setDisabled(true);  
 		}
 	}
 	,onAddTagClick: function(){

@@ -1026,6 +1026,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 	,onTypeChangeClick: function(gr, radio){
 		switch(radio.inputValue){
 			case 6: //task
+				this.data.template_id = App.config.default_task_template
 				f = this.find('name', 'has_deadline')[0];
 				if(f){
 					f.setVisible(true);
@@ -1037,6 +1038,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 				if(f) f.setVisible(true);
 				break;
 			case 7: //event
+				this.data.template_id = App.config.default_event_template
 				f = this.find('name', 'has_deadline')[0];
 				if(f){
 					f.setVisible(false);

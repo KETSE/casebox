@@ -276,10 +276,10 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				t = this.templateData.cfg.templates;
 				if(!Ext.isArray(t)) t = String(t).split(',');
 				createButton = new Ext.Button({	
-                             		text: L.Create
-                             		,iconCls: 'icon32-create'
-                               		,iconAlign:'top'
-                               		,scale: 'large'
+					text: L.Create
+					,iconCls: 'icon32-create'
+					,iconAlign:'top'
+					,scale: 'large'
                                		,menu: [ ]
                              	})
 				updateMenu(createButton, getMenuConfig(this.data.id, this.data.path, this.data.template_id), this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this, t);

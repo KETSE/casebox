@@ -114,6 +114,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				, {name: 'system', type: 'int'}
 				, {name: 'type', type: 'int'}
 				, {name: 'subtype', type: 'int'}
+				, {name: 'template_id', type: 'int'}
 				, 'name'
 				, 'hl'
 				, 'path'
@@ -529,7 +530,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		this.filtersPanel.updateFacets(o.result.facets, options);
 	}
 	,onStoreLoad: function(store, recs, options) {
-		Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data))}, this);
+		Ext.each(recs, function(r){ r.set('iconCls', getItemIcon(r.data))}, this);
 		pt = this.grid.getBottomToolbar();
 		pt.setVisible(store.reader.jsonData.total > pt.pageSize); 
 		App.mainViewPort.selectGridObject(this.grid);
@@ -587,7 +588,15 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		App.clipboard.paste(this.folderProperties.id);
 	}
 	,onCreateTaskClick: function(b, e) {
-		this.fireEvent('taskcreate', {data: {type: 6, pid: this.folderProperties.id, path: this.folderProperties.path, pathtext: this.folderProperties.pathtext }})
+		this.fireEvent('taskcreate', {
+			data: {
+				type: 6
+				,template_id: App.config.default_task_template
+				,pid: this.folderProperties.id
+				,path: this.folderProperties.path
+				,pathtext: this.folderProperties.pathtext
+			}
+		})
 	}
 	,onCompleteTaskClick: function(b, e) {
 		r = this.grid.getSelectionModel().getSelected();
@@ -607,7 +616,15 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		App.mainViewPort.fireEvent('taskupdated', { data: {pid: this.folderProperties.id } }, e);
 	}
 	,onCreateEventClick: function(b, e) {
-		this.fireEvent('taskcreate', {data: {type: 7, pid: this.folderProperties.id}})
+		this.fireEvent('taskcreate', {
+			data: {
+				type: 7
+				,template_id: App.config.default_event_template
+				,pid: this.folderProperties.id
+				,path: this.folderProperties.path
+				,pathtext: this.folderProperties.pathtext
+			}
+		})
 	}
 	,onFiltersChange: function(filters){
 		this.grid.store.baseParams.filters = filters;

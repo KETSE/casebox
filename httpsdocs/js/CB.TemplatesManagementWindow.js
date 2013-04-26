@@ -8,47 +8,64 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 	,rootVisible: true
 	,animate: false
 	,border: false
-	,enableDrag: true
+	,enableDD: true
 	,ddGroup: 'templates'
-	,rootVisible: false
 	,initComponent: function(){
+		this.actions = {
+			createTemplate: new Ext.Action({
+				iconCls: 'icon-template'
+				,text: L.Template
+				,scope: this
+				,handler: this.onCreateTemplateClick
+			})
+			,createFolder: new Ext.Action({
+				iconCls: 'icon-folder'
+				,text: L.Folder
+				,scope: this
+				,handler: this.onCreateFolderClick
+			})
+			,edit: new Ext.Action({
+				text: L.Edit
+				,iconCls: 'icon32-doc-edit'
+				,iconAlign:'top'
+				,scale: 'large'
+				,disabled: true
+				,handler: this.onNodeDblClick
+				,scope: this
+			})
+			,'delete': new Ext.Action({
+				text: L.Delete
+				,iconAlign:'top'
+				,iconCls: 'icon32-del'
+				,scale: 'large'
+				,disabled: true
+				,handler: this.onDelNodeClick
+				,scope: this
+			})
+			,reload: new Ext.Action({
+				text: L.Reload
+				,iconAlign:'top'
+				,iconCls: 'icon32-refresh'
+				,scale: 'large'
+				,scope:this
+				,handler: function(){this.getRootNode().reload();}
+			})
+		}
+
 		treeMenuItems = [
 			{
-				text: L.Add, iconCls: 'icon-plus'
-				,menu: [{
-						iconCls: 'icon-object1'
-						,template_type: 1
-						,text: L.CaseObject
-						,scope: this
-						,handler: this.onAddTemplateClick
-					},{
-						iconCls: 'icon-object2'
-						,template_type: 2
-						,text: L.IncomingAction
-						,scope: this
-						,handler: this.onAddTemplateClick
-					},{
-						iconCls: 'icon-object3'
-						,template_type: 3
-						,text: L.OutgoingAction
-						,scope: this
-						,handler: this.onAddTemplateClick
-					},'-',{
-						iconCls: 'icon-object7'
-						,template_type: 7
-						,text: L.Contact
-						,scope: this
-						,handler: this.onAddTemplateClick
-					}
-					
-				]
+				text: L.Create
+				,iconCls: 'icon32-create'
+				,iconAlign:'top'
+				,scale: 'large'
+				,menu: [ this.actions.createTemplate, this.actions.createFolder ]
 			}
 			,'-'
-			,{text: L.Edit, iconCls: 'icon-pencil', disabled: true, handler: this.onNodeDblClick, scope: this}
+			,this.actions.edit
 			,'-'
-			,{text: L.Delete, iconCls: 'icon-minus', disabled: true, handler: this.onDelNodeClick, scope: this}
+			,this.actions['delete']
 			,'->'
-			,{iconCls: 'icon-reload', qtip: L.Reload, scope:this, handler: function(){this.getRootNode().reload();}}
+			,this.actions.reload
 		];
 		
 		Ext.apply(this, {
@@ -57,7 +74,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 				,paramsAsHash: true
 				,listeners:{
 					scope: this
-					,beforeload: function(treeLoader, node) { treeLoader.baseParams.path = node.getPath('id'); }
+					,beforeload: function(treeLoader, node) { treeLoader.baseParams.path = node.getPath('nid'); }
 					,load: function(o, n, r) { n.sort(this.sortTree)}
 					,loadexception: function(loader, node, response) { node.leaf = false; node.loaded = false; }
 				}
@@ -69,40 +86,56 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 				,iconCls: 'icon-home'
 				,leaf: false
 				,nid: 'root'
+				,is_folder: 1
 				,text: L.Templates
 			}
 			,tbar: treeMenuItems
+			,tbarCssClass: 'x-panel-white'
 			,listeners:{
 				scope: this
 				,afterlayout: function(){this.getRootNode().expand()}
-				,nodedragover: function(o){ if( (o.point != 'append') || (o.source.tree != o.tree)){ o.cancel = true; return; } }
+				,nodedragover: function(o){ 
+					if( ( (o.target.attributes.is_folder != 1) && (o.point == 'append') ) // don't append to templates
+						|| o.data.node.contains(o.target) // don't drop into a child
+						|| (o.data.node == o.target) // don't drop near itself
+					){ 
+						o.cancel = true;
+						return; 
+					}
+				}
 				,beforenodedrop: function(o){
 					o.cancel = true;
 					o.dropStatus = true;
 					return false;
 				}
 				,dragdrop: function( tree, node, dd, e ){
-					targetTree = dd.dragOverData.target.ownerTree;
-					targetTree.processDragDrop(tree, node, dd, e);
+					this.dropParams = {
+						id: node.attributes.nid
+						,target_id: dd.dragOverData.target.attributes.nid
+						,point: dd.dragOverData.point
+					};
+					Templates.moveElement(this.dropParams, this.processDrop, this)
 				}
 				,beforeappend: function(t, p, n){ 
-					if(n.attributes.type > 0) n.setText(n.attributes.text + ' <span class="cG">(id: '+n.attributes.id+')</span>');
-					if( (n.attributes.type == 2) && (n.attributes.visible != 1)) n.setText( '<i class="cG">'+n.attributes.text+'?</i>');
+					if(n.attributes.is_folder != 1) n.setText(n.attributes.text + ' <span class="cG">(id: '+n.attributes.nid+')</span>');
 				}
 				,dblClick: this.onNodeDblClick
 			}
 			,selModel: new Ext.tree.DefaultSelectionModel({
 				listeners: {
-					selectionchange: {scope: this, fn: function(sm, node){ 
-							tb = this.getTopToolbar();
-							if(!Ext.isEmpty(node)){
-								tb.items.get(2).setDisabled((node.attributes.type < 1) || (node.attributes.type == 6) || (node.attributes.type > 7)); 
-								tb.items.get(4).setDisabled((node.attributes.type < 1) || (node.attributes.type == 6) || (node.attributes.type > 7));
-							}else{
-								tb.items.get(2).setDisabled(true); 
-								tb.items.get(4).setDisabled(true); 
-							}
-						} 
+					scope: this
+					,selectionchange: function(sm, node){ 
+						if(Ext.isEmpty(node) || (node.getDepth() < 1) ){
+							this.actions.createTemplate.setDisabled(false);
+							this.actions.createFolder.setDisabled( false );
+							this.actions['delete'].setDisabled(true);
+							this.actions.edit.setDisabled(true);
+						}else{
+							this.actions.createTemplate.setDisabled(node.attributes.is_folder != 1);
+							this.actions.createFolder.setDisabled( node.attributes.is_folder != 1);
+							this.actions['delete'].setDisabled(false);
+							this.actions.edit.setDisabled(node.attributes.is_folder == 1);
+						}
 					}
 				}
 			})
@@ -115,37 +148,79 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 		CB.TemplatesTree.superclass.initComponent.apply(this, arguments);
 	}
 	,afterRender: function() { CB.TemplatesTree.superclass.afterRender.apply(this, arguments); }
-	,onAddTemplateClick: function(b){
-		Ext.Msg.prompt(L.NewTemplate +': ' + b.text, L.Name, function(btn, text){
-			if((btn == 'ok') && (!Ext.isEmpty(text))) Templates.saveElement({text: text, type: b.template_type}, this.processSaveElement, this);
+	,getPid: function(){
+		pid = null;
+		pn = this.getSelectionModel().getSelectedNode();
+		if(pn)  pid = pn.attributes.nid;
+		return pid;
+	}
+	,onCreateTemplateClick: function(b){
+		Ext.Msg.prompt(L.NewTemplate, L.Name, function(btn, text){
+			if((btn == 'ok') && (!Ext.isEmpty(text)))
+				Templates.createTemplate({ text: text, pid: this.getPid }, this.processCreateTemplate, this);
 		}, this, false, '');
 	}
-	,processSaveElement: function(r, e){
+	,processCreateTemplate: function(r, e){
 		this.getEl().unmask();
 		if(r.success != true) return;
-		pn = this.getRootNode().findChild('type', -r.data.type, true);
-			sm = this.getSelectionModel();
-			if(pn.isExpanded()){
-				n = pn.appendChild(r.data);
-				pn.sort(this.sortTree);
-				sm.select(n);
-			}else{
-				this.lastAddedNodeId = r.data.id;
-				pn.reload(function(pn){
-					n = pn.findChild('id', this.lastAddedNodeId);
-					if(n){
-						sm = this.getSelectionModel();
-						sm.clearSelections();
-						sm.select(n);				
-					}
-				}, this);
+		this.processNodeAppend(r, e)
+	}
+	,onCreateFolderClick: function(b, e){
+		Ext.Msg.prompt(L.NewFolder, L.Name, function(btn, text){
+			if((btn == 'ok') && (!Ext.isEmpty(text)))
+				Templates.createFolder({  text: text, pid: this.getPid() }, this.processCreateFolder, this);
+		}, this, false, L.NewFolder);
+	}
+	,processCreateFolder: function(r, e){
+		if(r.success !== true) return Ext.Msg.alert(L.Error, r.msg);
+		this.processNodeAppend(r, e);
+	}
+	,processNodeAppend: function(r, e){
+		sm = this.getSelectionModel();
+		pn = sm.getSelectedNode();
+		if(Ext.isEmpty(pn)) pn = this.getRootNode();
+		if(pn.isExpanded()){
+			n = pn.appendChild(r.data);
+			pn.sort(this.sortTree);
+			sm.select(n);
+			if(n.attributes.is_folder != 1) this.fireEvent('edittemplate', n.attributes.nid);
+		}else{
+			this.lastAddedNodeId = r.data.id;
+			pn.reload(function(pn){
+				n = pn.findChild('id', this.lastAddedNodeId);
+				if(n){
+					sm = this.getSelectionModel();
+					sm.clearSelections();
+					sm.select(n);
+					if(n.attributes.is_folder != 1) this.fireEvent('edittemplate', n.attributes.nid);		
+				}
+			}, this);
+		}
+	}
+	,processDrop: function(r, e){
+		if(r.success !== true) return;
+		root = this.getRootNode();
+		nodes = [];
+		root.cascade(function(n){
+			if(n.attributes.nid == this.dropParams.id) nodes.push(n);
+		}, this);
+		for(var i = 0; i < nodes.length; i++) if(nodes[i]) nodes[i].remove(true);
+
+		nodes = [];
+		root.cascade(function(n){
+			if(n.attributes.nid == this.dropParams.target_id){
+				if(this.dropParams.point == 'append') nodes.push(n);
+				else nodes.push(n.parentNode);
 			}
+		}, this);
+		for(var i = 0; i < nodes.length; i++) if(nodes[i]) nodes[i].reload();
+
 	}
 	,onNodeDblClick: function(){
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n || n.isRoot) return;
 		
-		if(n.attributes.type > 0) return this.fireEvent('edittemplate', n.attributes.id);
+		if( n.attributes.is_folder != 1 ) return this.fireEvent('edittemplate', n.attributes.nid);
 	}
 	,sortTree: function(n1, n2){ 
 		if(n1.attributes.order < n2.attributes.order) return -1;
@@ -165,7 +240,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 			if(btn == 'yes'){
 				this.getEl().mask(L.Deleting)
 				n = this.getSelectionModel().getSelectedNode();
-				Templates.deleteElement(n.attributes.id, this.processDelElement, this);
+				Templates.deleteElement(n.attributes.nid, this.processDelElement, this);
 			}
 		}
 		, this);		
@@ -180,7 +255,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 	}
 })
 
-CB.TemplateEditWindow = Ext.extend(CB.GenericForm, {
+CB.TemplateEditWindow = Ext.extend( CB.GenericForm, {
 	title: L.NewTemplate
 	,padding: 0
 	,initComponent: function(){
@@ -288,9 +363,24 @@ CB.TemplateEditWindow = Ext.extend(CB.GenericForm, {
 				,paramsAsHash: true
 			}
 			,tbar: [
-				{text: L.Save, iconCls:'icon-save', disabled: true, handler: this.saveForm, scope: this}
-				,{text: Ext.MessageBox.buttonText.cancel, iconCls:'icon-cancel', disabled: true, handler: this.loadData, scope: this}
+				{	text: L.Save
+					,disabled: true
+					,iconAlign:'top'
+					,iconCls: 'icon32-save'
+					,scale: 'large'
+					,handler: this.saveForm
+					, scope: this
+				}
+				,{	text: Ext.MessageBox.buttonText.cancel
+					,iconCls:'icon32-cancel'
+					,iconAlign:'top'
+					,scale: 'large'
+					,disabled: true
+					,handler: this.loadData
+					, scope: this
+				}
 			]
+			,tbarCssClass: 'x-panel-white'
 			,items: [{
 				xtype: 'panel'
 				,region: 'north'
@@ -397,6 +487,9 @@ CB.TemplatesManagementWindow = Ext.extend(Ext.Panel, {
 		
 		this.tabPanel = new Ext.TabPanel({
 			region: 'center'
+			,plain: true
+			,bodyStyle: 'background-color: #FFF'
+			,headerCfg: {cls: 'mainTabPanel'}
 			,border: false
 		});
 		Ext.apply(this, {

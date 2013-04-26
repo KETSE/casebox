@@ -164,7 +164,7 @@ class UsersGroups{
 			'date_format(last_action_time, \''.$_SESSION['user']['short_date_format'].' %H:%i\') last_action_time, '.
 			'date_format(cdate, \''.$_SESSION['user']['short_date_format'].' %H:%i\') `cdate`, '.
 			'(select l'.USER_LANGUAGE_INDEX.' from users_groups where id = u.cid) owner, '.
-			'(select id from templates where `type` = 6) template_id '.
+			'(select id from templates where `type` = \'user\') template_id '.
 			'from users_groups u where id = $1 ', $user_id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()) $rez = Array('success' => true, 'data' => $r);
 		$res->close();

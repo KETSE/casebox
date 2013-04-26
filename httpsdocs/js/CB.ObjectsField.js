@@ -58,8 +58,10 @@ CB.ObjectsFieldCommonFunctions = {
 					,listeners: {
 						scope: this
 						,beforeload: function(st, o ){
-							if(!Ext.isEmpty(this.data.pidValue)) o.params.pidValue = this.data.pidValue;
-							if(!Ext.isEmpty(this.data.path)) o.params.path = this.data.path;
+							if(this.data){
+								if(!Ext.isEmpty(this.data.pidValue)) o.params.pidValue = this.data.pidValue;
+								if(!Ext.isEmpty(this.data.path)) o.params.path = this.data.path;
+							}
 						}
 						,load: 	function(store, recs, options) {
 							Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data))}, this);
@@ -100,8 +102,11 @@ CB.ObjectsFieldCommonFunctions = {
 	,getThesauriStore: function(){
 		thesauriId = this.config.thesauriId;
 		if(this.config.thesauriId == 'variable'){
+			fieldName = this.data.record.store.fields.findIndex('name', 'field_id');
+			fieldName = (fieldName < 0) ? 'id': 'field_id';
 			pri = this.data.record.store.findBy(function(r){
-				return ( (r.get('id') == this.data.record.get('pid')) && (r.get('duplicate_id') == this.data.record.get('duplicate_id')) );}, this);
+				return ( (r.get(fieldName) == this.data.record.get('pid')) && (r.get('duplicate_id') == this.data.record.get('duplicate_id')) );
+			}, this);
 			if(pri > -1) thesauriId = this.data.pidValue;
 		}
 		if(!isNaN(thesauriId)) return getThesauriStore(thesauriId);
@@ -117,10 +122,11 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 	,displayField: 'name'
 	,valueField: 'id'
 	,minChars: 3
-	,data: {}
 	,initComponent: function(){
 		//CB.ObjectsComboField.superclass.initComponent.call(this);
 		Ext.apply(this, CB.ObjectsFieldCommonFunctions);
+		if(Ext.isEmpty(this.data)) this.data = {};
+	
 		this.store = [];
 		if(Ext.isEmpty(this.config)) this.config = {}
 		if(this.data.record) this.config = Ext.apply({}, Ext.value(this.data.record.get('cfg'), {}) );
@@ -128,6 +134,11 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 		mode = 'local'
 		if(this.store.proxy){
 			mode = 'remote'
+			
+			this.store.baseParams = Ext.apply({}, this.config)
+			if(!Ext.isEmpty(this.data.pidValue)) this.store.baseParams.pidValue = this.data.pidValue;
+			if(!Ext.isEmpty(this.data.path)) this.store.baseParams.path = this.data.path;
+
 			this.store.on('beforeload', this.onBeforeLoadStore, this);
 			this.store.on('load', this.onStoreLoad, this);
 			this.store.load();
@@ -145,7 +156,7 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 				,beforeselect: function( combo, record, index){
 					if(Ext.isEmpty(this.objectsStore)) return;
 					idx = this.objectsStore.findExact('id', record.get('id'));
-					if(idx < 0) this.objectsStore.loadData({data: [record.data]}, true);
+					if(idx < 0) this.objectsStore.loadData( {data: [record.data]}, true );
 				}
 				,blur: function(field){
 					this.setValue(this.getValue());
@@ -176,8 +187,7 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 		CB.ObjectsComboField.superclass.initComponent.apply(this, arguments);
 	}
 	,onBeforeLoadStore: function(st, options){ 
-		options = this.config;
-		st.baseParams= options
+		options.params = Ext.apply({}, this.config, options.params)
 	}
 	,onStoreLoad: function(store, recs, options) {
 		Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data))}, this);

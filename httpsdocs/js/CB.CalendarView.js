@@ -429,10 +429,26 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
 		this.calendar.doReloadEventsStore()
 	}
 	,onTaskCreateClick: function(b, e){
-		this.fireEvent('taskcreate', {data: {type: 6, pid: this.folderProperties.id, path: this.folderProperties.path, pathtext: this.folderProperties.pathtext }});
+		this.fireEvent('taskcreate', {
+			data: {
+				type: 6
+				,template_id: App.config.default_task_template
+				,pid: this.folderProperties.id
+				,path: this.folderProperties.path
+				,pathtext: this.folderProperties.pathtext
+			}
+		})
 	}
 	,onEventCreateClick: function(b, e){
-		this.fireEvent('taskcreate', {data: {type: 7, pid: this.folderProperties.id, path: this.folderProperties.path, pathtext: this.folderProperties.pathtext }});
+		this.fireEvent('taskcreate', {
+			data: {
+				type: 7
+				,template_id: App.config.default_event_template
+				,pid: this.folderProperties.id
+				,path: this.folderProperties.path
+				,pathtext: this.folderProperties.pathtext
+			}
+		})
 	}
 	,onEastPanelButtonClick: function(b, e){
 		if(b.pressed){

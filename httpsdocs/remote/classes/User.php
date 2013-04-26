@@ -61,11 +61,15 @@ class User{
 	}
 
 	public function getLoginInfo() {
-		$rez = array(
+		@$rez = array(
 			'success' => true
 			,'config' => array(
-				'task_categories' => defined('CB\\config\\task_categories') ? config\task_categories: null
-				,'responsible_party' => defined('CB\\config\\responsible_party') ? config\responsible_party: null
+				'task_categories' => constant('CB\\config\\task_categories')
+				,'responsible_party' => constant('CB\\config\\responsible_party')
+				,'responsible_party_default' => constant('CB\\config\\responsible_party_default')
+				,'folder_templates' => $GLOBALS['folder_templates']
+				,'default_task_template' => constant('CB\\config\\default_task_template')
+				,'default_event_template' => constant('CB\\config\\default_event_template')
 			)
 			,'user' => $_SESSION['user']
 		);

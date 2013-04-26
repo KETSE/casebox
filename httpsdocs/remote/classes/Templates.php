@@ -8,12 +8,10 @@ class Templates{
 		$rez = array();
 		$t = explode('/', $params->path);
 		$nodeId = intval(array_pop($t));
-		switch($t){
-			case 0: //user, contact and organization template + case templates folder
-		}
-		$res = DB\mysqli_query_params('select id, l'.USER_LANGUAGE_INDEX.' `text`, `type`, `order`, `visible`, iconCls, (select count(*) '.
+
+		$res = DB\mysqli_query_params('select id nid, l'.USER_LANGUAGE_INDEX.' `text`, `type`, is_folder, `order`, `visible`, iconCls, (select count(*) '.
 			'from templates where pid = t.id) `loaded` from templates t '.
-			'where `type` > -100 and pid'.( ($nodeId > 0) ? '=$1' : ' is NULL and is_folder=1' ).' order by `order`, `type`, 2' , $nodeId) or die(DB\mysqli_query_error());
+			'where `type` <> \'template\' and pid'.( ($nodeId > 0) ? '=$1' : ' is NULL' ).' order by `order`, `type`, 2' , $nodeId) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$r['loaded'] = empty($r['loaded']);
 			if(empty($nodeId)) $r['expanded'] = true;
@@ -24,39 +22,103 @@ class Templates{
 		return $rez;
 	}
 	
-	public function saveElement($params){//new folder or template
+	public function createTemplate($params){
 		if(!Security::canManage()) throw new \Exception(L\Access_denied);
 		
 		$p = array(
-			'id' => empty($params->id) ? null: $params->id
-			,'type' => empty($params->type) ? 0: intval($params->type)
+			'pid' => is_numeric(@$params->pid) ? $params->pid : null
+			,'type' => ''
+			,'iconCls' => 'icon-none'
 		);
-		$values_string = '$1, $2';
-		$res = DB\mysqli_query_params('select id from templates where is_folder = 1 and `type` = $1 ',-$p['type']) or die(DB\mysqli_query_error());
-		if($r = $res->fetch_row()){
-			$p['pid'] = $r[0];
-			$values_string .= ',$3';
-		}
-		$res->close();
+		$values_string = '$1, $2, $3';
 		$on_duplicate = '';
 		Util\getLanguagesParams($params, $p, $values_string, $on_duplicate, $params->text);
 		
 		DB\mysqli_query_params('insert into templates ('.implode(',', array_keys($p)).') values ('.$values_string.') on duplicate key update '.$on_duplicate, array_values($p)) or die(DB\mysqli_query_error());
-		if(!is_numeric(@$params->id)) $p['id'] = DB\last_insert_id();
+		$p['id'] = DB\last_insert_id();
 		
-		return array( 'success' => true, 'data' => array('id' => $p['id'], 'pid' => @$p['pid'], 'type' => $p['type'], 'text' => $params->text, 'loaded' => true));
+		return array( 'success' => true, 'data' => array('nid' => $p['id'], 'pid' => @$p['pid'], 'type' => $p['type'], 'iconCls' => 'icon-none', 'text' => $params->text, 'loaded' => true));
 	}
+	
+	public function createFolder($params){
+		if(!Security::canManage()) throw new \Exception(L\Access_denied);
+		$sql = 'select id from templates where name = $1 and pid '.(empty($params->pid) ? ' is null' : '=$2');
+		 $res = DB\mysqli_query_params($sql, array($params->text, @$params->pid) ) or die( DB\mysqli_query_error() );
+		 if($r = $res->fetch_assoc()) return array( 'success' => false, 'msg' => L\FolderExists );
+		 $res->close(); 
+		
+		$p = array(
+			'pid' => is_numeric(@$params->pid) ? $params->pid : null
+			,'name' => $params->text
+			,'type' => ''
+			,'is_folder' => 1
+			,'iconCls' => 'icon-folder'
+		);
+		$values_string = '$1, $2, $3, $4, $5';
+		$on_duplicate = '';
+		Util\getLanguagesParams($params, $p, $values_string, $on_duplicate, $params->text);
+
+		DB\mysqli_query_params('insert into templates ('.implode(',', array_keys($p)).') values ('.$values_string.') on duplicate key update '.$on_duplicate, array_values($p)) or die(DB\mysqli_query_error());
+		$p['id'] = DB\last_insert_id();
+		
+		return array( 'success' => true, 'data' => array('nid' => $p['id'], 'pid' => @$p['pid'], 'is_folder' => 1, 'iconCls' => 'icon-folder', 'text' => $params->text, 'loaded' => true));
+	}
+
 	public function deleteElement($id){
 		if(!Security::canManage()) throw new \Exception(L\Access_denied);
-		DB\mysqli_query_params('delete from templates where `type`> -100 and id = $1', $id) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('delete from templates where `type` <> \'template\' and id = $1', $id) or die(DB\mysqli_query_error());
 		return Array('success' => true, 'id' => $id);
 	}
-	public function moveElement($params){
-		DB\mysqli_query_params('update templates set pid = $2 where id = $1', array($params->id, is_numeric($params->pid) ? $params->pid : null)) or die(DB\mysqli_query_error());
+	public function moveElement($p){
+		if(!Security::canManage()) throw new \Exception(L\Access_denied);
+		// DB\mysqli_query_p('update templates set pid = $2 where id = $1', array($p->id, is_numeric($p->pid) ? $p->pid : null)) or die(DB\mysqli_query_error());
+		// return array('success' => true);
+		/* get old pid */
+		$res = DB\mysqli_query_params('select pid, `order` from templates where id = $1', $p->id) or die(DB\mysqli_query_error());
+		$old_pid = 0;
+		$old_order = 0;
+		if($r = $res->fetch_row()){
+			$old_pid = $r[0];
+			$old_order = $r[1];
+		}
+		$res->close();
+		/* end of get old pid */
+		$p->target_id = is_numeric($p->target_id) ? $p->target_id : null;
+		$order = 1;
+		switch($p->point){
+			case 'above':
+				/* get relative node order and pid */
+				$res = DB\mysqli_query_params('select pid, `order` from templates where id = $1', $p->target_id) or die(DB\mysqli_query_error());
+				if($r = $res->fetch_row()){
+					$p->target_id = $r[0];
+					$order = $r[1];
+				}
+				$res->close();
+				DB\mysqli_query_params('update templates set `order` = `order` + 1 where pid = $1 and `order` >= $2', array($p->target_id, $order)) or die(DB\mysqli_query_error());
+				break;
+			case 'below':
+				/* get relative node order and pid */
+				$res = DB\mysqli_query_params('select pid, `order` from templates where id = $1', $p->target_id) or die(DB\mysqli_query_error());
+				if($r = $res->fetch_row()){
+					$p->target_id = $r[0];
+					$order = $r[1]+1;
+				}
+				$res->close();
+				DB\mysqli_query_params('update templates set `order` = `order` + 1 where pid = $1 and `order` >= $2', array($p->target_id, $order)) or die(DB\mysqli_query_error());
+				break;
+			default:
+				$res = DB\mysqli_query_params('select max(`order`) from templates where pid = $1', $p->target_id) or die(DB\mysqli_query_error());
+				if($r = $res->fetch_row()){
+					$order = $r[0]+1;
+				}
+				$res->close();
+		}
+		DB\mysqli_query_params('update templates set pid = $2, `order` = $3 where id = $1', array($p->id, $p->target_id, $order)) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update templates set `order` = `order` - 1 where pid = $1 and `order` > $2', array($old_pid, $old_order)) or die(DB\mysqli_query_error());
 		return array('success' => true);
 	}
 	public function readAll($p){// return templates list
-		$sql = 'SELECT t.id, t.pid, t.type, t.l'.USER_LANGUAGE_INDEX.' `title`, t.iconCls, t.cfg, t.info_template, `visible` FROM templates t  order by 3, `order`, 4';
+		$sql = 'SELECT t.id, t.pid, t.type, t.l'.USER_LANGUAGE_INDEX.' `title`, t.iconCls, t.cfg, t.info_template, `visible` FROM templates t where is_folder = 0 order by 3, `order`, 4';
 		$data = Array();
 		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
@@ -71,7 +133,7 @@ class Templates{
 		
 		/* get field names of template properties editing template */
 		$template_fields = array();
-		$res = DB\mysqli_query_params('SELECT ts.id, ts.name FROM templates_structure ts JOIN templates t ON t.id = ts.template_id WHERE t.type = -100') or die(DB\mysqli_query_error());
+		$res = DB\mysqli_query_params('SELECT ts.id, ts.name FROM templates_structure ts JOIN templates t ON t.id = ts.template_id WHERE t.type = \'template\'') or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row())
 			$template_fields[$r[1]] = $r[0];
 		$res->close();
@@ -117,7 +179,7 @@ class Templates{
 
 		/* get field names of template properties editing template */
 		$template_fields = array();
-		$res = DB\mysqli_query_params('SELECT ts.id, ts.name FROM templates_structure ts JOIN templates t ON t.id = ts.template_id WHERE t.type = -100') or die(DB\mysqli_query_error());
+		$res = DB\mysqli_query_params('SELECT ts.id, ts.name FROM templates_structure ts JOIN templates t ON t.id = ts.template_id WHERE t.type = \'template\'') or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row())
 			$template_fields[$r[0]] = $r[1];
 		$res->close();

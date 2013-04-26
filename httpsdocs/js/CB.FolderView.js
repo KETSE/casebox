@@ -92,21 +92,12 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 			    		,scope: this
 			    		,handler: this.onChangeViewClick
 				},'-',{
-			    		iconCls: 'icon-actionView'
-			    		,enableToggle: true
-			    		,allowDepress: false
-			    		,toggleGroup: 'viewMode'
-			    		,text: L.Actions
-			    		,viewIndex: 1
-			    		,scope: this
-			    		,handler: this.onChangeViewClick
-				},{
 			    		iconCls: 'icon-taskView'
 			    		,enableToggle: true
 			    		,allowDepress: false
 			    		,toggleGroup: 'viewMode'
 			    		,text: L.Tasks
-			    		,viewIndex: 2
+			    		,viewIndex: 1
 			    		,scope: this
 			    		,handler: this.onChangeViewClick
 				},{
@@ -115,7 +106,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 			    		,allowDepress: false
 			    		,toggleGroup: 'viewMode'
 			    		,text: L.Calendar
-			    		,viewIndex: 3
+			    		,viewIndex: 2
 			    		,scope: this
 			    		,handler: this.onChangeViewClick
 				},{
@@ -124,7 +115,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 			    		,allowDepress: false
 			    		,toggleGroup: 'viewMode'
 			    		,text: L.Overview
-			    		,viewIndex: 4
+			    		,viewIndex: 3
 			    		,scope: this
 			    		,handler: this.onChangeViewClick
 				}
@@ -150,7 +141,6 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 			,defaults: { hideMode:'offsets' }
 		    	,items: [
 				new CB.FolderViewGrid({ iconCls: 'icon-grid-view' })
-				,new CB.ActionsViewGrid({ iconCls: 'icon-actions-view' })
 				,new CB.TasksViewGrid({ iconCls: 'icon-task-view' })
 				,new CB.CalendarView({ iconCls: 'icon-calendar-view' })
 				,new CB.FolderViewSummary({ iconCls: 'icon-summary-view' })
