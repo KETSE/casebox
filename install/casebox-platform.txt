@@ -85,25 +85,18 @@ The project will be available on GitHub, it depends on other software described 
 2. Requirements 
 CaseBox relies on the following software&libs to run:
 
-==Required==
-Sencha ExtJS 3.4.x                      (CaseBox web application is built with ExtJS framework)
+== Required ==
+- Apache 2.2.x
+- PHP 5.4.x,  extensions: mbstring
+- MySql 5.5.x
+- SOLR 4.x                                (for basic CaseBox operation and fulltext search)
+- Sencha ExtJS 3.4.x                      (CaseBox web application is built with ExtJS framework)
+- ZendFramework 2.x                       (the Zend-minimal is sufficient)
 
-ZendFramework 2.x                       (the Zend-minimal is sufficient)
 
-SOLR 4.x                                (for basic CaseBox operation and fulltext search)
-
-PHP 5.4.x, 
-extensions: mbstring
-
-MySql 5.5.x
-
-Apache 2.2.x
-
-==Optional==
-LibreOffice 3.6.x + unoconv             (for DOC, XLS, RTF file preview)
-
-ImageMagick 6.5.x + imagick PHP package (for TIFF conversion to PNG, JPG)
-
-swftools 0.9.2                          (for PDF preview using Adobe Flash)
+== Optional ==
+- LibreOffice 3.6.x + unoconv             (for DOC, XLS, RTF file preview)
+- ImageMagick 6.5.x + imagick PHP package (for TIFF conversion to PNG, JPG)
+- obsolete: swftools 0.9.2                (for PDF preview using Adobe Flash)
 
 

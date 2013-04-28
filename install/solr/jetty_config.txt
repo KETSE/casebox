@@ -1,7 +1,0 @@
-# /etc/default/jetty 
-
-JAVA_HOME=/usr/java/default
-JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr/multicore -Djava.util.logging.config.file=etc/logging.properties $JAVA_OPTIONS"
-JETTY_HOME=/opt/solr
-JETTY_USER=solr
-JETTY_LOGS=/opt/solr/logs
