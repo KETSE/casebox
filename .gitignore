@@ -14,8 +14,8 @@ logs/
 # ignore 'cores' configuration
 httpsdocs/cores/
 
-# except sample core
-!httpsdocs/cores/sample/
+## except sample core: demo cores are located in /install/examples now
+#!httpsdocs/cores/sample/
 
 # exclude system.ini
 httpsdocs/system.ini
