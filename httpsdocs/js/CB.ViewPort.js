@@ -119,8 +119,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			,'objectopened'
 		);
 		CB.ViewPort.superclass.initComponent.apply(this, arguments);
+		
 	}
-	,onLogin: function(r){
+	,onLogin: function(){
 		/* adding menu items */
 		um = App.mainToolBar.find( 'name', 'userMenu')[0];
 		um.setText(App.loginData['l'+App.loginData.language_id]);
@@ -200,10 +201,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		App.openUniqueTabbedWidget('CBDashboard');
 	}
 	,initCB: function(){
-		if(CB.DB.templates.getCount() > 0){
-			App.mainViewPort.openDefaultExplorer();
-			App.mainTabPanel.setActiveTab(0)
-		}else App.mainViewPort.initCB.defer(500);
+		if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){
+			this.onLogin();
+		}else this.initCB.defer(500, this);
 	}
 	,logout: function(){
 		return Ext.Msg.show({
@@ -256,7 +256,8 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 				trees[i].on('afterrename', this.onRenameTreeElement, this)
 			};
 		}
-		App.mainViewPort.initCB();
+		this.openDefaultExplorer();
+		App.mainTabPanel.setActiveTab(0)		
 	}
 	,onTreeNodeClick: function(node, e){
 		if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
@@ -264,7 +265,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	}
 	,onChangeActiveFolder: function(sm, node){
 		if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
-		App.locateObject(null, node.getPath('nid'));
+		App.openPath( node.getPath('nid') );
 	}
 	,onRenameTreeElement: function(tree, r, e){
 		node = tree.getSelectionModel().getSelectedNode();
@@ -433,8 +434,4 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		App.mainAccordion.setVisible(visible === true);
 		App.mainViewPort.syncSize();
 	}
-	,openPath: function(path, id){
-		App.locateObject(id, path);
-	}
-
 })

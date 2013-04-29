@@ -334,7 +334,7 @@ CB.SummaryBlock = Ext.extend( Ext.Panel, {
 	,onItemClick: function(obj, idx, el, ev){
 		row = this.store.getAt(idx);
 		if(!row) return;
-		if(!App.openObject(row.get('type'), row.get('id'), ev) ){
+		if(!App.openObject(row.get('template_id'), row.get('id'), ev) ){
 		}
 	}
 	,updateTitle: function(){

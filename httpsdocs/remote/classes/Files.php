@@ -287,6 +287,7 @@ class Files{
 	}
 
 	public static function getAutoRenameFilename($pid, $name){
+		$newName = $name;
 		$a = explode('.', $name);
 		$ext = '';
 		if( (sizeof($a) > 1) && (sizeof($a) < 5) ) $ext = array_pop($a);
@@ -294,15 +295,14 @@ class Files{
 
 		$id = null;
 		$i = 1;
-		$newName = '';
 		do{
-			$newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
-			$sql = 'select id from tree where pid = $1 and name = $2';
+			$sql = 'select id from tree where pid = $1 and name = $2 and dstatus = 0';
 			$res = DB\mysqli_query_params($sql, array($pid, $newName)) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc())
 				$id = $r['id'];
 			else $id = null;
 			$res->close();
+			if(!empty($id)) $newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
 			$i++;
 		}while(!empty($id));
 		return $newName;
@@ -463,8 +463,8 @@ class Files{
 				DB\mysqli_query_params('insert into file_previews (id, `group`, status, filename, size) values($1, \'office\', 1, null, 0) on duplicate key update `group` = \'office\', status =1, filename = null, size = 0, cdate = CURRENT_TIMESTAMP', $file['content_id'] ) or die(DB\mysqli_query_error());
 				if(file_exists($preview_filename)) Files::deletePreview($file['content_id']);
 				
-				$cmd = 'php -f '.LIB_DIR.'preview_extractor_office.php '.CB\CORENAME.' &> '.LIB_DIR.'office.log';
-				if(is_windows()) $cmd = 'start /D "'.LIB_DIR.'" php -f preview_extractor_office.php '.CB\CORENAME;
+				$cmd = 'php -f '.LIB_DIR.'preview_extractor_office.php '.CORENAME.' &> '.LIB_DIR.'office.log';
+				if(is_windows()) $cmd = 'start /D "'.LIB_DIR.'" php -f preview_extractor_office.php '.CORENAME;
 				pclose(popen($cmd, "r"));
 				return array('processing' => true);
 				break;
@@ -689,9 +689,9 @@ class Files{
 		return mb_strtolower($ext);
 	}
 	
-	function getIcon($filename){
+	public static function getIcon($filename){
 		if(empty($filename)) return 'file-unknown';
-		return 'file-'.$this->getExtension($filename);
+		return 'file- file-'.Files::getExtension($filename);
 	}
 
 	public static function getIconFileName($filename){

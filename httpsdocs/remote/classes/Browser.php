@@ -109,7 +109,7 @@ class Browser{
 						while(!empty($v) && empty($pids)) $pids = array_pop($v);
 					}
 					break;
-				case 'variable': 
+				case 'dependent': 
 					if(!empty($p->pidValue)) $pids = Util\toNumericArray($p->pidValue);
 					break;
 				default: 

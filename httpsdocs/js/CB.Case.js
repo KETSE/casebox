@@ -215,7 +215,7 @@ CB.CaseCardProperties = Ext.extend(CB.CaseCardBlock, {
 		if(Ext.isEmpty(a)) return;
 		switch(a.name){
 			case 'edit': 
-				App.openObject(4, this.data.id);
+				App.openObject(this.data.template_id, this.data.id);
 				break;
 			default:
 				r = dv.store.getAt(itemIndex -1);

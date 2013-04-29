@@ -1,10 +1,11 @@
 <?php
+namespace CB;
 include 'preview_extractor.php';
 class preview_extractor_office extends preview_extractor{
-
 	function execute(){
+		$this->init();
 		$sql = 'select count(*) from file_previews where `status` = 2 and `group` = \'office\'';
-		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
+		$res = DB\mysqli_query_params($sql) or die( DB\mysqli_query_error() );
 		$processing = false;
 		if($r = $res->fetch_row()) $processing = ($r[0] > 0);
 		$res->close();
@@ -38,8 +39,6 @@ class preview_extractor_office extends preview_extractor{
 		$res->close();
 	}
 }
-
 $extractor = new preview_extractor_office();
 $extractor->execute();
-
 ?>

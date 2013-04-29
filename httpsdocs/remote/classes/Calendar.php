@@ -23,7 +23,7 @@ class Calendar{
 		$p->dateEnd = $p->end;//substr($p->end, 0, 10).'T23:59:59.999Z';
 		unset($p->end);
 
-		$p->types = array(6, 7);
+		$p->types = array('task');
 		
 		$s = new Search();
 		$sr = $s->query($p);
@@ -38,7 +38,7 @@ class Calendar{
 			@$rez['data'][] = array(
 				'id' => $d['id']
 				,'ad' => ($d['allday'] == 1)
-				,'type' => $d['type']
+				,'template_id' => $d['template_id']
 				,'cid' => $d['cid']
 				,'title' => $d['name']
 				,'start' => $d['date']

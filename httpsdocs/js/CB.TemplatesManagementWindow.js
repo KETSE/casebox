@@ -259,9 +259,38 @@ CB.TemplateEditWindow = Ext.extend( CB.GenericForm, {
 	title: L.NewTemplate
 	,padding: 0
 	,initComponent: function(){
+		this.actions = {
+			save: new Ext.Action({	text: L.Save
+					,disabled: true
+					,iconAlign:'top'
+					,iconCls: 'icon32-save'
+					,scale: 'large'
+					,handler: this.saveForm
+					, scope: this
+			})
+			,cancel : new Ext.Action({
+				text: Ext.MessageBox.buttonText.cancel
+				,iconCls:'icon32-cancel'
+				,iconAlign:'top'
+				,scale: 'large'
+				,disabled: true
+				,handler: this.loadData
+				, scope: this
+			})
+		}
+
 		items = [];
 		CB.DB.languages.each(function(r){
-			items.push({fieldLabel: L.Name+ ' ('+r.get('abreviation')+')', name: 'l'+r.get('id'), xtype: 'textfield', allowBlank: false})
+			items.push({
+				fieldLabel: L.Name+ ' ('+r.get('abreviation')+')'
+				,name: 'l'+r.get('id')
+				,xtype: 'textfield'
+				,allowBlank: false
+				// ,listeners: {
+				// 	scope: this
+				// 	,change: this.
+				// }
+			})
 		}, this);
 
 		this.visibilityOptionsStore = new Ext.data.ArrayStore({
@@ -362,24 +391,7 @@ CB.TemplateEditWindow = Ext.extend( CB.GenericForm, {
 				}
 				,paramsAsHash: true
 			}
-			,tbar: [
-				{	text: L.Save
-					,disabled: true
-					,iconAlign:'top'
-					,iconCls: 'icon32-save'
-					,scale: 'large'
-					,handler: this.saveForm
-					, scope: this
-				}
-				,{	text: Ext.MessageBox.buttonText.cancel
-					,iconCls:'icon32-cancel'
-					,iconAlign:'top'
-					,scale: 'large'
-					,disabled: true
-					,handler: this.loadData
-					, scope: this
-				}
-			]
+			,tbar: [ this.actions.save, this.actions.cancel ]
 			,tbarCssClass: 'x-panel-white'
 			,items: [{
 				xtype: 'panel'
@@ -395,7 +407,10 @@ CB.TemplateEditWindow = Ext.extend( CB.GenericForm, {
 					,padding: 10
 					,labelWidth: 120
 					,items: items
-					,defaults: {anchor: '97%', msgTarget: 'side', listeners:{
+					,defaults: {
+						anchor: '97%'
+						,msgTarget: 'side'
+						,listeners:{
 							scope: this
 							,change: this.onChangeEvent
 							,check: this.onChangeEvent
@@ -424,10 +439,7 @@ CB.TemplateEditWindow = Ext.extend( CB.GenericForm, {
 					if(this.loaded) return; 
 					this.getEl().mask(L.Downloading + ' ...', 'x-mask-loading'); 
 				}
-				,change: function(){
-					this.setDirty(true);
-					this.onChange();
-				}
+				,change: this.onChangeEvent
 				,beforedestroy: function(){}
 			}
 		});
@@ -458,11 +470,8 @@ CB.TemplateEditWindow = Ext.extend( CB.GenericForm, {
 		this.onChange();
 	}
 	,onChange: function(){
-		tb = this.getTopToolbar();
-		b = tb.find('iconCls', 'icon-save')[0];
-		if(b) b.setDisabled(!this._isDirty)
-		b = tb.find('iconCls', 'icon-cancel')[0];
-		if(b) b.setDisabled(!this._isDirty)
+		this.actions.save.setDisabled(!this._isDirty)
+		this.actions.cancel.setDisabled(!this._isDirty)
 	}
 });
 // ---------------------------------------------- Main

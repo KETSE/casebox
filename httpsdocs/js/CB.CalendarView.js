@@ -45,6 +45,7 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 		});
 		
 		fields = Ext.calendar.EventRecord.prototype.fields.getRange();
+		fields.push({ name: 'template_id', type: 'int' });
 		fields.push('type');
 		fields.push('iconCls');
 		fields.push('cls');
@@ -189,20 +190,8 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         // it altogether. Because of this, it's up to the application code to tie the pieces together.
         // Note that this function is called from various event handlers in the CalendarPanel above.
 	,showEditWindow : function(rec, animateTarget){
-	        
 	        if(Ext.isEmpty(rec.data)) rec = new Ext.calendar.EventRecord(rec);
-	        id = rec.data.EventId
-	        switch(parseInt(rec.data.type)){
-	        	case 3: App.openCase(id); break;
-	        	case 4: App.openObject(id); break;
-	        	case 5: App.downloadFile(id); break;
-	        	case 6:  
-	        	case 7: 
-	        		App.mainViewPort.fireEvent('taskedit', {data: {type: rec.data.type, id: id} } );
-	        		break;
-	        	default: 
-
-	        }
+	        App.openObject( rec.data.template_id, rec.data.EventId );
 	}
         
         // This is an application-specific way to communicate CalendarPanel event messages back to the user.

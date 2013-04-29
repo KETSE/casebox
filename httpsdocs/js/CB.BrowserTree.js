@@ -277,8 +277,8 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			this.onBeforeNodeAppend(this, null, this.getRootNode())
 		}, this)
 
-		this.addEvents('casecreate', 'createobject', 'openobject', 'fileopen', 'filedownload', 'taskedit', 'afterrename');
-		this.enableBubble(['casecreate', 'createobject', 'openobject', 'fileopen', 'filedownload', 'taskedit']);
+		this.addEvents('casecreate', 'createobject', 'fileopen', 'filedownload', 'taskedit', 'afterrename');
+		this.enableBubble(['casecreate', 'createobject', 'fileopen', 'filedownload', 'taskedit']);
 		
 		App.clipboard.on('pasted', this.onClipboardAction, this);
 		App.mainViewPort.on('savesuccess', this.onObjectsSaved, this);
@@ -483,39 +483,13 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 	,onOpenClick: function (b, e) {
 		n = this.getSelectionModel().getSelectedNode();
 		if(Ext.isEmpty(n)) return;
-		switch(n.attributes.type){
-			case 2:  //link
-				this.locateObject(n.attributes.nid);
-				break;
-			case 3:  //App.openCase(n.attributes.nid);
-				break;
-			case 4:
-				this.fireEvent('openobject', {id: n.attributes.nid}, e);
-				break;
-			case 5:
-				this.fireEvent('fileopen', {id: n.attributes.nid}, e)
-				break;
-			case 6: 
-				this.fireEvent('taskedit', { data:{id: n.attributes.nid} }, e);
-				break;
-		}
-	
+		App.openObject(n.attributes.template_id, n.attributes.nid, e);
 	}
 	,onOpenInNewWindowClick: function (b, e) {
 		n = this.getSelectionModel().getSelectedNode();
 		if(Ext.isEmpty(n)) return;
 		id = 'view'+n.attributes.nid;
 		if(!App.activateTab(App.mainTabPanel, id)) App.addTab(App.mainTabPanel, new CB.FolderView({ rootId: n.attributes.nid, data: {id: id } }) )
-	}
-	,locateObject: function(id){
-		this.locateId = id;
-		Browser.getPath(id, this.processLocate, this);
-	}
-	,processLocate: function(r, e){
-		if(r.success !== true) return;
-		r.path = '/'+this.getRootNode().attributes.nid+r.path;
-		this.selectPath(r.path, 'nid', function(bSuccess, oSelNode){ if(!bSuccess) this.fireEvent('locateobject', this.locateId)})
-
 	}
 	,onExpandClick: function (b, e) {
 		n = this.getSelectionModel().getSelectedNode()

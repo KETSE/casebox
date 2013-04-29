@@ -316,7 +316,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		window.open('/preview/'+this.data.id+'_.html');
 	}
 	,onPathClick: function(){
-	 	App.mainViewPort.openPath( this.data.path, this.data.pid);
+	 	App.locateObject( this.data.pid, this.data.path );
 	 }
 });
 
@@ -478,7 +478,7 @@ CB.ActionFilesView = Ext.extend(Ext.DataView, {
 		if(Ext.isEmpty(r)) return;
 		Ext.Msg.confirm(L.DeleteConfirmation, L.fileDeleteConfirmation//L.DeleteConfirmationMessage + ' "' + r.get('name') + '"?', 
 			,function(b){
-				if(b == 'yes') Browser.delete(r.get('nid'), function(r, e){ App.mainViewPort.onProcessObjectsDeleted(r, e)}, this ); 
+				if(b == 'yes') Browser['delete'](r.get('nid'), function(r, e){ App.mainViewPort.onProcessObjectsDeleted(r, e)}, this ); 
 			}
 			, this
 		)

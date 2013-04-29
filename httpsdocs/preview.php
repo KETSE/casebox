@@ -45,13 +45,14 @@
 			break;
 		case 5:
 			$sql = 'SELECT p.filename FROM files f join file_previews p on f.content_id = p.id WHERE f.id = $1';
+
 			if(!empty($version_id)) $sql = 'SELECT p.filename FROM files_versions f join file_previews p on f.content_id = p.id WHERE f.file_id = $1 and f.id = $2';
 			$res = DB\mysqli_query_params($sql, array($id, $version_id)) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc())
 				if(!empty($r['filename']) && file_exists(FILES_PREVIEW_PATH.$r['filename']) ) $preview = $r;
 			$res->close();
+
 			if(empty($preview)) $preview = Files::generatePreview($id, $version_id);
-			
 			if(!empty($preview['processing'])) echo '&#160';
 			else{
 				$top = '';

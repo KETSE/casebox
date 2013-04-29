@@ -101,7 +101,7 @@ CB.ObjectsFieldCommonFunctions = {
 	}
 	,getThesauriStore: function(){
 		thesauriId = this.config.thesauriId;
-		if(this.config.thesauriId == 'variable'){
+		if(this.config.thesauriId == 'dependent'){
 			fieldName = this.data.record.store.fields.findIndex('name', 'field_id');
 			fieldName = (fieldName < 0) ? 'id': 'field_id';
 			pri = this.data.record.store.findBy(function(r){

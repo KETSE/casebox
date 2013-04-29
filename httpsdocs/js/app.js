@@ -31,18 +31,15 @@ Ext.onReady(function(){
 	}, 250);
 	
 	User.getLoginInfo( function(r, e){
-		if(r.success){
-			App.config = r.config;
-			App.loginData = r.user;
-			App.loginData.iconCls = 'icon-user-' + Ext.value(r.user.sex, '');
-			if(App.loginData.short_date_format) App.dateFormat = App.loginData.short_date_format;
-			if(App.loginData.long_date_format) App.longDateFormat = App.loginData.long_date_format;
-			App.mainViewPort = new CB.ViewPort();
-			App.mainViewPort.doLayout();
-			App.mainToolBar = App.mainViewPort.items.get(0);
-			App.mainTabPanel = App.mainViewPort.items.get(1);
-			App.mainViewPort.fireEvent('login', r, e);
-		} 
+		if(r.success !== true) return;
+		App.config = r.config;
+		App.loginData = r.user;
+		App.loginData.iconCls = 'icon-user-' + Ext.value(r.user.sex, '');
+		if(App.loginData.short_date_format) App.dateFormat = App.loginData.short_date_format;
+		if(App.loginData.long_date_format) App.longDateFormat = App.loginData.long_date_format;
+		App.mainViewPort = new CB.ViewPort();
+		App.mainViewPort.doLayout();
+		App.mainViewPort.initCB( r, e );
 	});
 });  
 
@@ -228,7 +225,7 @@ function initApp(){
 		,thesauriCombo: function(v, metaData, record, rowIndex, colIndex, store) { /* custom renderer for verticalEditGrid */
 			if(Ext.isEmpty(v)) return '';
 			th = record.get('cfg').thesauriId;
-			if(th == 'variable'){
+			if(th == 'dependent'){
 				pri = store.findBy(function(r){return ( (r.get('field_id') == record.get('pid')) && (r.get('duplicate_id') == record.get('duplicate_id')) );}, this);
 				if(pri > -1) th = store.getAt(pri).get('value');
 			}
@@ -441,15 +438,26 @@ function initApp(){
 		App.htmlEditWindow = Ext.apply(App.htmlEditWindow, config);
 		return App.htmlEditWindow;
 	}
-	App.openCase = function(id, options){ 
-		if(Ext.isElement(options)){
-			//click is catched from a html element
-			return App.mainViewPort.openCase({iconCls: 'icon-briefcase', params: {id: options.id}});
-		}
-		options = Ext.apply({iconCls: 'icon-briefcase', params: {id: id}}, options)
-		return App.mainViewPort.openCase(options);
-	}; // shortcut
 
+	App.isFolder = function( template_id){
+		return (App.config.folder_templates.indexOf( String(template_id) ) >= 0);
+	}
+	/**
+	* open path on active explorer tabsheet or in default eplorer tabsheet
+	* 
+	* this function will not reset explorer navigation params (filters, search query, descendants)
+	*/
+	App.openPath = function(path, params){
+		if(Ext.isEmpty(path)) path = '/';
+		params = Ext.value(params, {});
+		params.path = path;
+
+		tab = App.mainTabPanel.getActiveTab();
+		if(tab.isXType(CB.FolderView)) return tab.setParams(params);
+		App.mainTabPanel.setActiveTab(App.explorer);
+		App.explorer.setParams(params);
+	}
+	
 	App.locateObject = function(object_id, path){
 		if(Ext.isEmpty(path)){
 			Path.getPidPath(object_id, function(r, e){
@@ -458,13 +466,15 @@ function initApp(){
 			})
 			return;
 		}
+		
+		App.locateObjectId = parseInt(object_id);
 
-		tab = App.mainTabPanel.getActiveTab();
-		if(!Ext.isEmpty(object_id)) App.locateObjectId = parseInt(object_id);
-		params = {path: path};
-		if(tab.isXType(CB.FolderView)) return tab.setParams(params);
-		App.mainTabPanel.setActiveTab(App.explorer);
-		App.explorer.setParams(params);
+		params = {
+			descendants: false
+			,query: ''
+			,filters: {}
+		};
+		App.openPath(path, params);
 	}
 
 	App.downloadFile = function(fileId, zipped, versionId){
@@ -578,7 +588,7 @@ function initApp(){
 			//case 'object_author': //depricated
 			case 'combo':
 				th = e.record.get('cfg').thesauriId;
-				if(th == 'variable'){
+				if(th == 'dependent'){
 					pri = e.record.store.findBy(function(r){return ( (r.get('field_id') == e.record.get('pid')) && (r.get('duplicate_id') == e.record.get('duplicate_id')) );}, this);
 					if(pri > -1) th = e.record.store.getAt(pri).get('value');
 				}
@@ -596,7 +606,7 @@ function initApp(){
 				break;
 			case 'iconcombo':
 				th = e.record.get('cfg').thesauriId;
-				if(th == 'variable'){
+				if(th == 'dependent'){
 					pri = e.record.store.findBy(function(r){return ( (r.get('field_id') == e.record.get('pid')) && (r.get('duplicate_id') == e.record.get('duplicate_id')) );}, this);
 					if(pri > -1) th = e.record.store.getAt(pri).get('value');
 				}
@@ -755,26 +765,27 @@ function initApp(){
 		dhf.defer(1500)
 	}
 
-	App.openObject = function(type, id, e){
-		switch(type){
-			// case 2:  //link
-			// 	break;
-			case 3: //App.openCase(id); break;
-			case 4:
-			case 8:
+	App.openObject = function(template_id, id, e){
+		
+		switch( CB.DB.templates.getType(template_id) ){
+			case 'case':
+			case 'object':
+			case 'email':
 				App.mainViewPort.fireEvent('openobject', {id: id}, e);
 				break;
-			case 5:
+			case 'file':
 				App.mainViewPort.fireEvent('fileopen', {id: id}, e);
 				break;
-			case 6: 
-			case 7: 
+			case 'task': 
 				App.mainViewPort.fireEvent('taskedit', { data:{id: id} }, e);
 				break;
-			default: return false; break;
+			default: 
+				return false; 
+				break;
 		}
 		return true;
 	}
+	
 	App.clipboard = new CB.Clipboard();
 	/* disable back button */
 	Ext.EventManager.on(Ext.isIE ? document : window, 'keydown', function(e, t) {

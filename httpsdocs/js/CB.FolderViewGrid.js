@@ -265,7 +265,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 							return rez;
 						},scope: this
 						,editable: true
-						,editor: new Ext.form.TextField()
+						,editor: new Ext.form.TextField({selectOnFocus: true})
 					}
 					,{header: L.Path, hidden:true, width: 150, dataIndex: 'path', renderer: function(v, m, r, ri, ci, s){
 							m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
@@ -875,14 +875,13 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	,onRowDblClick: function( grid, rowIndex, e ) {
 		r = grid.store.getAt(rowIndex);
 		if(!r) return;
-		if( App.config.folder_templates.indexOf( row.get('template_id')+'') >= 0 ) this.onBrowseClick(grid, e);
+		if( App.isFolder( r.get('template_id') ) ) this.onBrowseClick(grid, e);
 		else this.onOpenClick(grid, e);
 	}
 	,onOpenClick: function(b, e) {
 		if(!this.grid.selModel.hasSelection()) return;
 		row = this.grid.selModel.getSelected();
-		if(!App.openObject(row.get('type'), row.get('nid'), e) )
-		this.onBrowseClick(b, e);
+		if( !App.openObject(row.get('template_id'), row.get('nid'), e) ) this.onBrowseClick(b, e);
 	}
 	,onBrowseClick: function(b, e) {
 		if(!this.grid.selModel.hasSelection()) return;
@@ -992,8 +991,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		})
 	}
 	,onFiltersChange: function(filters){
-		this.grid.store.baseParams.filters = filters;
-		this.onReloadClick();
+		params = Ext.apply({}, this.params);
+		params.filters = filters;
+		this.fireEvent('changeparams', params )
 	}
 	,onCreateEventClick: function(b, e) {
 		this.fireEvent('taskcreate', {

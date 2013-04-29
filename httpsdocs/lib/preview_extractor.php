@@ -6,6 +6,9 @@ ini_set('memory_limit', '-1');
 
 class preview_extractor{
 	function preview_extractor(){
+		$this->init();
+	}
+	function init(){
 		global $argv;
 		if(empty($_SERVER['SERVER_NAME'])){
 			if(empty($argv[1])) die('no core is passed');
@@ -33,7 +36,7 @@ class preview_extractor{
 		$cs = @iconv($cs, 'UTF-8', $html);
 		if(empty($cs)) $cs = $html;
 		
-		$config = HTMLPurifier_Config::createDefault();
+		$config = \HTMLPurifier_Config::createDefault();
 		$config->set('AutoFormat.AutoParagraph', false);
 		$config->set('AutoFormat.RemoveEmpty.RemoveNbsp', true);
 		//$config->set('AutoFormat.RemoveEmpty', true);//slows down htmls parsing 
@@ -45,7 +48,7 @@ class preview_extractor{
 		$config->set('Attr.EnableID', true);
 		if(!empty($options))
 			foreach($options as $k => $v) $config->set($k, $v);
-		$purifier = new HTMLPurifier($config);
+		$purifier = new \HTMLPurifier($config);
 		$html = $purifier->purify($cs);/**/
 		$html = str_replace('/preview/#', '#', $html);
 		return $html;

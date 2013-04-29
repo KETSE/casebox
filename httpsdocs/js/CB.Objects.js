@@ -241,8 +241,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.filesDropPlugin.init(this);
 
   		CB.Objects.superclass.initComponent.apply(this, arguments);
-		this.addEvents('openobject', 'deleteobject', 'associateObject', 'deassociateObject', 'fileupload', 'filedownload');//, 'filesdelete'
-		this.enableBubble(['openobject', 'deleteobject', 'fileupload', 'filedownload']);//, 'filesdelete'
+		this.addEvents('deleteobject', 'associateObject', 'deassociateObject', 'fileupload', 'filedownload');//, 'filesdelete'
+		this.enableBubble(['deleteobject', 'fileupload', 'filedownload']);//, 'filesdelete'
 		App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
 		App.clipboard.on('change', this.onClipboardChange, this);
 		App.fireEvent('objectinit', this);
@@ -626,7 +626,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			,path: this.data.path+'/'+this.data.id
 			,pathtext: this.data.pathtext+'/'+Ext.value(this.data.custom_title, this.data.title)
 		}, b.data);
-		this.fireEvent('openobject', data, e);
+		App.mainViewPort.openObject(data, e);
 	}
 	,onCreateTaskClick: function(o, e){
 		this.fireEvent('taskcreate', { data: {pid: this.data.id, path: this.data.path+'/'+this.data.id, pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)} })
@@ -819,7 +819,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		}
 	}
 	,onPathClick: function(){
-	 	App.mainViewPort.openPath(this.data.path, this.data.id);
+	 	App.locateObject( this.data.id, this.data.path );
 	 }
 })
 

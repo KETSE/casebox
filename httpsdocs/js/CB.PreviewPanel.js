@@ -53,11 +53,11 @@ CB.PreviewPanel = Ext.extend(Ext.Panel, {
 	}
 	,attachEvents: function(){
 		a = this.getEl().query('a.locate');
-		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.openPath(el.attributes.getNamedItem('path').value, el.attributes.getNamedItem('nid').value) }, this)}, this)
+		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.locateObject( el.attributes.getNamedItem('nid').value, el.attributes.getNamedItem('path').value ) }, this)}, this)
 		a = this.getEl().query('a.task');
 		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.fireEvent('taskedit', {data: {id: el.attributes.getNamedItem('nid').value}}) }, this)}, this)
 		a = this.getEl().query('a.path');
-		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.openPath(el.attributes.getNamedItem('path').value, this.loadedId) }, this)}, this)
+		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.locateObject( this.loadedId, el.attributes.getNamedItem('path').value ) }, this)}, this)
 		a = this.getEl().query('.file-unknown a');
 		Ext.each(a, function(t){Ext.get(t).addListener('click', function(ev, el){ App.mainViewPort.fireEvent('fileopen', {id: el.attributes.getNamedItem('nid').value} ) }, this)}, this)
 	}

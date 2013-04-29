@@ -74,12 +74,17 @@ class Objects{
 		$template = $this->getTemplateInfo($p->template_id);
 		if(!Security::canCreateActions($p->pid)) throw new \Exception(L\Access_denied);
 		fireEvent('beforeNodeDbCreate', $p);
-		$p->name = Files::getAutoRenameFilename($p->pid,  $template['title']);
-		DB\mysqli_query_params('insert into tree (pid, name, `type`, template_id, cid) values ($1, $2, $3, $4, $5)', array($p->pid, $p->name, 4, $template['id'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+		if(empty($p->name)) $p->name = $template['title'];
+		if(empty($p->tag_id)) $p->tag_id = null;
+		$p->name = Files::getAutoRenameFilename($p->pid,  $p->name);
+		$p->type = 4;
+		DB\mysqli_query_params('insert into tree (pid, name, `type`, template_id, cid, tag_id) values ($1, $2, $3, $4, $5, $6)'
+			, array($p->pid, $p->name, $p->type, $template['id'], $_SESSION['user']['id'], $p->tag_id)) or die(DB\mysqli_query_error());
 		$p->nid = DB\last_insert_id();
 		$sql = 'INSERT INTO objects (id, `title`, template_id, cid) VALUES($1, $2, $3, $4)';
-		$params = Array($p->nid, $p->name, $template['id'], $_SESSION['user']['id']);
-		DB\mysqli_query_params($sql, $params) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params($sql, Array($p->nid, $p->name, $template['id'], $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
+		
+		$this->createSystemFolders($p->nid, @$template['cfg']['system_folders']);
 		
 		fireEvent('nodeDbCreate', $d);
 
@@ -117,8 +122,9 @@ class Objects{
 			DB\mysqli_query_params('insert into tree (pid, name, `type`, subtype, template_id, cid) values ($1, $2, $3, $4, $5, $6)', array($pid, 'new case object', 4, $template['type'], $template['id'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 			$d->id = DB\last_insert_id();
 			$sql = 'INSERT INTO objects (id, case_id, `title`, template_id, cid) VALUES($1, $2, $3, $4, $5)';
-			$params = Array($d->id, $d->case_id, '', $template['id'], $_SESSION['user']['id']);
-			DB\mysqli_query_params($sql, $params) or die(DB\mysqli_query_error());
+			DB\mysqli_query_params($sql, Array($d->id, $d->case_id, '', $template['id'], $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+			
+			$this->createSystemFolders($d->id, @$template['cfg']['system_folders']);
 			
 			$log_action_type = 8; //else throw new Eception(L\Error_creating_object); // create action
 		}else{
@@ -456,24 +462,59 @@ class Objects{
 	}
 
 	private function getTemplateInfo($template_id = false, $object_id = false){
+		$rez = array();
 		if(is_numeric($template_id)){
-			$res = DB\mysqli_query_params('SELECT id, pid, type, l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template  FROM templates WHERE id = $1', $template_id) or die(DB\mysqli_query_error());
-			if($r = $res->fetch_assoc()){
-				$res->close();
-				return $r;
-			}
+			$res = DB\mysqli_query_params('SELECT id, pid, type, l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template, cfg  FROM templates WHERE id = $1', $template_id) or die(DB\mysqli_query_error());
+			if($r = $res->fetch_assoc()) $rez = $r;
+			$res->close();
+		}elseif(is_numeric($object_id)){
+			$res = DB\mysqli_query_params('SELECT id, pid, type, t.l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template, cfg from templates t  where id = (select template_id from tree where id = $1)', $object_id) or die(DB\mysqli_query_error());
+			if($r = $res->fetch_assoc()) $rez = $r;
 			$res->close();		
 		}
-		if(is_numeric($object_id)){
-			$res = DB\mysqli_query_params('SELECT id, pid, type, t.l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template from templates t  where id = (select template_id from tree where id = $1)', $object_id) or die(DB\mysqli_query_error());
-			if($r = $res->fetch_assoc()){
-				$res->close();
-				return $r;
-			}
-			$res->close();		
-		}
-		throw new \Exception(L\Template_not_found);
+		if(!empty($rez['cfg'])) $rez['cfg'] = json_decode($rez['cfg'], true);
+		return $rez;
 	}
+	
+	private function createSystemFolders($object_id, $folderIds){
+		$folderIds = Util\toNumericArray($folderIds);
+		if(empty($folderIds)) return;
+		$childs = array();
+		foreach($folderIds as $folderId)
+			array_push($childs, array( 
+				'pid' => $object_id
+				,'tag_id' => $folderId
+				)
+			);
+
+		$pid = $object_id;
+
+		while(!empty($childs)){
+			$node = array_shift($childs);
+			/*get tag name & type*/
+			$sql = 'select l'.USER_LANGUAGE_INDEX.',`type` from tags where id = $1';
+			$res = DB\mysqli_query_params($sql, $node['tag_id']) or die( DB\mysqli_query_error() );
+			if($r = $res->fetch_row()){
+				$node['name'] = $r[0];
+				$node['type'] = $r[1];
+				$node['template_id'] = config\default_folder_template;
+			}
+			$res->close();
+			/* end of get tag name & type*/
+			if($node['type'] == 1){
+				$rez = $this->create( (Object)$node);
+				$pid = $rez['data']->nid;
+			}else $pid = $node['pid'];
+
+			/* checking if childs exist for added folder and append them to childs table */
+			$sql = 'select id from tags where pid = $1';
+			$res = DB\mysqli_query_params($sql, $node['tag_id']) or die( DB\mysqli_query_error() );
+			while($r = $res->fetch_row()) $childs[] = array('pid' => $pid, 'tag_id' => $r[0]);
+			$res->close();
+			/* end of checking if childs exist for added folder and append them to childs table */
+		}
+	}
+
 	private function getObjectIcon($object_id){
 		$rez = null;
 
@@ -517,47 +558,57 @@ class Objects{
 			$rez['content'] = '';//$r['title']."\n";
 			$rez['iconCls'] = $r['iconCls'];
 			
-			$sql = 'SELECT ts.name, ts.'.$lang_field.' `title`, ts.`type`, ts.solr_column_name, d.`value`, info, files '.
+			$sql = 'SELECT ts.name, ts.'.$lang_field.' `title`, ts.`type`, ts.cfg, ts.solr_column_name, d.`value`, info, files '.
 				'FROM objects o '.
 				'JOIN objects_data d ON d.object_id = o.id '.
 				'JOIN templates_structure ts ON ts.template_id = o.template_id AND ts.id = d.field_id '.
 				'WHERE o.id = $1 and (d.private_for_user is null)';//and ts.solr_column_name IS NOT NULL
 			$dres = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error()."\n".$sql);
 			while($dr = $dres->fetch_assoc()){
+				
 				$processed_values = array();
-				if(!empty($dr['value']))
-				switch($dr['type']){
-					case 'boolean':
-					case 'checkbox':
-					case 'object_violation':
-						$dr['value'] = empty($dr['value']) ? false : true;
-						break;
-					case 'date': 
-						$dr['value'] .= 'Z';
-						if(@$dr['value'][10] == ' ') $dr['value'][10] = 'T';
-						break;
-					//case 'object_author': 
-					case 'combo': 
-					case 'popuplist': 
-						$dr['value'] = implode(',', array_filter(explode(',', $dr['value']), 'is_numeric'));
-						if(empty($dr['value'])) break;
-						$sql = 'select '.$lang_field.' from tags where id in (0'.$dr['value'].')';
-						$sres = DB\mysqli_query_params($sql, array($r['id'])) or die(DB\mysqli_query_error()."\n".$sql);
-						$dr['value'] = explode(',', $dr['value']);
-						while($sr = $sres->fetch_row()) $processed_values[] = $sr[0];
-						$sres->close();
-						break;
-					case 'html': 
-						$dr['value'] = strip_tags($dr['value']);
-						//$processed_values[] = strip_tags($dr['value']);
-						break;
-					case '_auto_title':
-					case 'memo': 
-					case 'text': 
-					case 'int': 
-					case 'float':
-					case 'time': 
-					default: break;
+				if(!empty($dr['value'])){
+					/* make changes to value if needed */
+					switch($dr['type']){
+						case 'boolean':
+						case 'checkbox':
+						case 'object_violation':
+							$dr['value'] = empty($dr['value']) ? false : true;
+							break;
+						case 'date': 
+							$dr['value'] .= 'Z';
+							if(@$dr['value'][10] == ' ') $dr['value'][10] = 'T';
+							break;
+						//case 'object_author': 
+						case 'combo': 
+						case 'popuplist': 
+							$dr['value'] = Util\toNumericArray($dr['value']);
+							if(empty($dr['value'])) break;
+							$sql = 'select '.$lang_field.' from tags where id in ('.implode(',',$dr['value'] ).')';
+							$sres = DB\mysqli_query_params( $sql ) or die(DB\mysqli_query_error()."\n".$sql);
+							while($sr = $sres->fetch_row()) $processed_values[] = $sr[0];
+							$sres->close();
+							break;
+						case 'html': 
+							$dr['value'] = strip_tags($dr['value']);
+							//$processed_values[] = strip_tags($dr['value']);
+							break;
+						case '_auto_title':
+						case 'memo': 
+						case 'text': 
+						case 'int': 
+						case 'float':
+						case 'time': 
+						default: break;
+					}
+					/* make changes to value if needed */
+					
+					$field_config = json_decode($dr['cfg'], true);
+					if(@$field_config['faceting']){
+						$solr_field = ( empty($field_config['source']) || ($field_config['source'] == 'thesauri') ) ? 'sys_tags' : 'tree_tags';
+						$arr = Util\toNumericArray($dr['value']);
+						for ($i=0; $i < sizeof($arr); $i++) $rez[$solr_field][$arr[$i]] = 1;
+					}
 				}
 				
 				if(!empty($dr['value']))
@@ -576,6 +627,11 @@ class Objects{
 		}
 		$res->close();
 		
+		if(!empty($rez['sys_tags'])) $rez['sys_tags'] = array_keys($rez['sys_tags']);
+		else unset($rez['sys_tags']);
+
+		if(!empty($rez['tree_tags'])) $rez['tree_tags'] = array_keys($rez['tree_tags']);
+		else unset($rez['tree_tags']);
 		return $rez;
 	}
 

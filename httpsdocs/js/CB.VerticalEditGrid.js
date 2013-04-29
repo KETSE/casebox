@@ -39,7 +39,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 					Ext.each(recs, function(r){
 						v = r.get('cfg');
 						if(Ext.isEmpty(v)) v = {}; 
-						v.maxInstances = Ext.value(v.maxInstances, 1);
+						v.maxInstances = parseInt( Ext.value(v.maxInstances, 1) );
 						v.showIn = Ext.value(v.showIn, 'grid');
 						r.set('cfg', v);
 					}, this);
@@ -449,7 +449,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		if(s) sm.select(s[0], s[1]);
 		if(e.value != e.originalValue){
 			this.fullStore.each( function(record){ //update dependent child field to null
-				if( ( ( record.get('cfg').thesauriId == 'variable') || ( Ext.isDefined(record.get('cfg').dependency) )  )
+				if( ( ( record.get('cfg').thesauriId == 'dependent') || ( Ext.isDefined(record.get('cfg').dependency) )  )
 					&& (e.record.get('field_id') == record.get('pid'))
 					&& (e.record.get('duplicate_id') == record.get('duplicate_id')) 
 					&& (record.get('cfg').readOnly !==true)
@@ -497,7 +497,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 						}
 						if( record.get('visible') == 1 ){
 							if( ( !Ext.isEmpty(v) && !setsHaveIntersection( va, pr.get('value') ) ) //if not empty pidValues specified and parent value out of pidValues then hide the field
-							    || ( (record.get('cfg').thesauriId == 'variable') && Ext.isEmpty(pr.get('value')) ) // OR if the field is dinamic and parent has no selected value
+							    || ( (record.get('cfg').thesauriId == 'dependent') && Ext.isEmpty(pr.get('value')) ) // OR if the field is dinamic and parent has no selected value
 							    || ( Ext.isDefined(record.get('cfg').dependency) && Ext.isEmpty(pr.get('value')) ) // OR if the field is dinamic and parent has no selected value
 							)
 							{
@@ -507,7 +507,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 						}else{ //when record is not visible
 							if( (pr.get('tag') == 'G') || (
 								!Ext.isEmpty(pr.get('value')) && (Ext.isEmpty(v) || setsHaveIntersection( va, pr.get('value') ))
-								&& ( (record.get('cfg').thesauriId !== 'variable') ||  !Ext.isEmpty(pr.get('value'))) 
+								&& ( (record.get('cfg').thesauriId !== 'dependent') ||  !Ext.isEmpty(pr.get('value'))) 
 								&& ( Ext.isDefined(record.get('cfg').dependency) ||  !Ext.isEmpty(pr.get('value'))) 
 							    )
 							) { //if no pidValues specified or pidValues contains the parent selected value then show the field
