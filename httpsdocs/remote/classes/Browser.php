@@ -353,8 +353,10 @@ class Browser{
 	}
 
 	function saveFile($p){
+		if(!file_exists(FILES_INCOMMING_PATH)) @mkdir(FILES_INCOMMING_PATH, 0777, true);
+		
 		$files = new Files();
-
+		
 		/* clean previous unhandled uploads if any */
 		$a = $files->getUploadParams();
 		if( ($a !== false) && !empty( $a['files'] ) ){
@@ -370,7 +372,7 @@ class Browser{
 		if(empty($F)){ //update only file properties (no files were uploaded)
 			$files->updateFileProperties($p);
 			return array( 'success' => true );
-		}
+		}else foreach ($F as $k => $v) $F[$k]['name'] = strip_tags(@$F[$k]['name']);
 
 		//if( !$files->fileExists($p['pid']) ) return array('success' => false, 'msg' => L\TargetFolderDoesNotExist);
 		$res = DB\mysqli_query_params('select id from tree where id = $1', $p['pid']) or die(DB\mysqli_query_error()); 

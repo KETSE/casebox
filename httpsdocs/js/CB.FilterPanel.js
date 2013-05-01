@@ -41,6 +41,7 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
 			idx++;
 		}, this);
 		this.updateActiveFiltersFacet(options)
+		this.syncSize();
 
 	}
 	,updateActiveFiltersFacet: function(options){

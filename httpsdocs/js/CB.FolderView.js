@@ -247,6 +247,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		if( (params1.path != params2.path) || !Ext.isDefined(params1.path) ) return false;
 		if( (!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants) ) && (params1.descendants != params2.descendants) ) return false;
 		if( (!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query) ) && (params1.query != params2.query) ) return false;
+		if( (!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters) ) && (params1.filters != params2.filters) ) return false;
 		return true;
 	}
 	,onChangeParams: function(params, e){// fired by internal view

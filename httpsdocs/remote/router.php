@@ -1,11 +1,8 @@
 <?php
 	namespace CB;
 	require_once('../init.php');
-	DB\connect();
 	
 	require('config.php');
-	require('classes/Log.php');
-	require('classes/Security.php');
 
 class BogusAction {
 	public $action;
@@ -18,23 +15,23 @@ $isForm = false;
 $isUpload = false;
 header('Content-Type: application/json; charset=UTF-8');
 if(isset($HTTP_RAW_POST_DATA)){
-	//header('Content-Type: application/json; charset=UTF-8');
 	$data = json_decode($HTTP_RAW_POST_DATA);
 }else if(isset($_POST['extAction'])){ // form post
 	$isForm = true;
-	$isUpload = $_POST['extUpload'] == 'true';
+	$isUpload = ($_POST['extUpload'] == 'true');
 	$data = new BogusAction();
 	$data->action = $_POST['extAction'];
 	$data->method = $_POST['extMethod'];
-	$data->tid = isset($_POST['extTID']) ? $_POST['extTID'] : null; // not set for upload
+	$data->tid = isset($_POST['extTID']) ? intval($_POST['extTID']) : null; // not set for upload
 	$data->data = array($_POST, $_FILES);
 }else die('Invalid request.');
+
 
 
 function doRpc($cdata){
 	global $API;
 
-	if(!User::is_loged() && (($cdata->action != 'User') || ($cdata->method != 'login'))){
+	if( !User::is_loged() && ( ($cdata->action != 'User') || ($cdata->method != 'login') ) ){
 		return array(
 			array(
 				'type' => 'exception'
@@ -100,14 +97,22 @@ function doAroundCalls(&$fns, &$cdata, &$returnData=null){
 	else $fns($cdata, $returnData);
 }
 
+function sanitizeParams(&$cdata){
+	$cdata->action = preg_replace( '/[^a-z]+/i', '', strip_tags($cdata->action) );
+	$cdata->method = preg_replace( '/[^a-z]+/i', '', strip_tags($cdata->method) );
+	$cdata->tid = intval( strip_tags($cdata->tid) );
+	//public $data;
+	return $cdata;
+}
+
 $response = null;
 if(is_array($data)){
 	$response = array();
 	foreach($data as $d){
-		$response[] = doRpc($d);
+		$response[] = doRpc( sanitizeParams($d) );
 	}
 }else{
-	$response = doRpc($data);
+	$response = doRpc( sanitizeParams($data) );
 }
 if($isForm && $isUpload){
 	header('Content-Type: text/html; charset=UTF-8');

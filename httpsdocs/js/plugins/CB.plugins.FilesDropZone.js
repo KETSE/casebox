@@ -95,11 +95,10 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
 		this.getRecursiveFileList(e);
 	}
 	,getRecursiveFileList: function(e){
-		clog(e)
-		clog(e.browserEvent)
-		clog(e.browserEvent.dataTransfer);
-		clog(e.browserEvent.dataTransfer.items);
 		dt = e.browserEvent.dataTransfer;
+		
+		if( Ext.isEmpty(dt.items) ) return this.processGetRecursiveFileList(dt.files);
+		
 		var length = dt.items.length;
 		entries = []
 		for (var i = 0; i < length; i++) {

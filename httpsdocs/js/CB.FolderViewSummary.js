@@ -248,7 +248,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 		
 		Ext.iterate(r.data, function(key, value, obj){
 			for (var i = 0; i < value.length; i++) 
-				obj[key][i][4] = getItemIcon({
+				obj[key][i][5] = getItemIcon({
 					'name': value[i][1]
 					,'type': value[i][2]
 					,'status': value[i][3]
@@ -301,8 +301,8 @@ CB.SummaryBlock = Ext.extend( Ext.Panel, {
 				,'name'
 				,{name: 'type', type: 'int'}
 				,{name: 'status', type: 'int'}
+				,{name: 'template_id', type: 'int'}
 				,'iconCls'
-				,'template_id'
 				,{name:'total', type: 'int'}
 				,{name:'total2', type: 'int'}
 			]
@@ -377,7 +377,7 @@ CB.SummaryBlock = Ext.extend( Ext.Panel, {
 		if(r.success !== true) return;
 		if(Ext.isEmpty(r.data[this.name])) r.data[this.name] = [];
 		for (var i = 0; i < r.data[this.name].length; i++)
-			r.data[this.name][i][4] = getItemIcon({
+			r.data[this.name][i][5] = getItemIcon({
 				'name': r.data[this.name][i][1]
 				,'type': r.data[this.name][i][2]
 				,'status': r.data[this.name][i][3]

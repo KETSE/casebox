@@ -204,11 +204,15 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
 		this.fireEvent('progresschange', this, this.status, this.stats);
 	}
 	,addFiles: function(FilesList, options){
+		if(this.config.autoShowWindow) this.showUploadWindow()
 		this.group++;
 		Ext.each(FilesList, function(f){
-			dir = f.fullPath.split('/');
-			dir.pop();
-			dir = dir.join('/');
+			dir = Ext.value(f.fullPath, f.mozFullPath);
+			if(!Ext.isEmpty(dir)){
+				dir = dir.split('/');
+				dir.pop();
+				dir = dir.join('/');
+			}else dir = '/';
 			record = new this.store.recordType({
 				id: Ext.id()
 				,group: this.group
@@ -230,7 +234,6 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
 			this.stats.totalSize += record.get('size');
 			this.stats.totalCount++;
 		}, this)
-		if(this.config.autoShowWindow) this.showUploadWindow()
 		
 		this.progressChange();
 		this.calculateFilesMd5()

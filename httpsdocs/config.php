@@ -136,6 +136,8 @@
 	ini_set("session.gc_probability", "1");
 	ini_set("session.cookie_lifetime", "0");
 	
+	if(!file_exists(SESSION_PATH)) @mkdir(SESSION_PATH, 0755, true);
+
 	session_set_cookie_params($sessionLifetime, '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 	session_save_path(SESSION_PATH);
 	session_name( str_replace( array('.casebox.org', '.', '-'), '', $_SERVER['SERVER_NAME']) );
@@ -182,13 +184,6 @@
 	define('CB\\FILES_INCOMMING_PATH', FILES_PATH.'incomming'.DIRECTORY_SEPARATOR);
 	/* path to preview folder. Generated previews are stored for some filetypes */
 	define('CB\\FILES_PREVIEW_PATH', FILES_PATH.'preview'.DIRECTORY_SEPARATOR);
-
-	/* checking folders existance */
-	if(!file_exists(SESSION_PATH)) @mkdir(SESSION_PATH, 0755, true);
-	if(!file_exists(PHOTOS_PATH)) @mkdir(PHOTOS_PATH, 0755, true);
-	if(!file_exists(FILES_INCOMMING_PATH)) @mkdir(FILES_INCOMMING_PATH, 0777, true);
-	if(!file_exists(FILES_PREVIEW_PATH)) @mkdir(FILES_PREVIEW_PATH, 0777, true);
-	/* end of checking folders existance */
 
 	// define default core language constant
 	const LANGUAGE = config\default_language;

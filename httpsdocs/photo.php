@@ -17,7 +17,7 @@ DB\connect();
 $sql = 'select photo, sex from users_groups where id = $1';
 $res = DB\mysqli_query_params($sql, array($id)) or die(DB\mysqli_query_error());
 if($r = $res->fetch_row()){
-	if(!empty($r['0']) && file_exists(PHOTOS_PATH.$r[0])){
+	if(!empty($r[0]) && file_exists(PHOTOS_PATH.$r[0])){
 		$path = PHOTOS_PATH;
 		$filename = $r[0];
 	}elseif($r[1] == 'f') $filename = 'user-female.png'; 

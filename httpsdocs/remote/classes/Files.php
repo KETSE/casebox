@@ -279,6 +279,7 @@ class Files{
 
 	public function updateFileProperties($p){
 		if(empty($p['id'])) return false;
+		$p['title'] = strip_tags(@$p['title']);
 		DB\mysqli_query_params('update files set `date` = $2, title = $3 where id = $1', array($p['id'], Util\clienttoMysqlDate($p['date']), @$p['title'] ) ) or die(DB\mysqli_query_error());
 
 		Objects::updateCaseUpdateInfo($p['id']);
@@ -443,6 +444,8 @@ class Files{
 
 		$rez['filename'] = $file['content_id'].'_.html';
 		
+		if(!file_exists(FILES_PREVIEW_PATH)) @mkdir(FILES_PREVIEW_PATH, 0777, true);
+
 		$preview_filename = FILES_PREVIEW_PATH.$rez['filename'];
 		
 		$fn = FILES_PATH.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];

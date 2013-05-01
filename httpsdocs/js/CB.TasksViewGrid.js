@@ -543,9 +543,9 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 	,onOpenClick: function(b, e) {
 		if(!this.grid.selModel.hasSelection()) return;
 		row = this.grid.selModel.getSelected();
-		if(!App.openObject(row.get('type'), row.get('nid'), e) ){
+		if(!App.openObject(row.get('template_id'), row.get('nid'), e) ){
 			if(Ext.isEmpty(this.grid.store.baseParams.query) ){
-				path = this.params.path.split('/');
+				path = Ext.value(this.params.path, '/').split('/');
 				path.push(row.get('nid'));
 				this.fireEvent('changeparams', {path: path.join('/')} )
 			}else{

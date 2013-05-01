@@ -204,7 +204,11 @@ class User{
 		if (substr($f['type'], 0, 6) !== 'image/') return Array('success' => false, 'msg' => 'Not an image');
 
 		$photoName = $p['id'].'_'.$object_title = preg_replace('/[^a-z0-9\.]/i', '_', $f['name']);
+
+		if(!file_exists(PHOTOS_PATH)) @mkdir(PHOTOS_PATH, 0755, true);
+
 		move_uploaded_file($f['tmp_name'], PHOTOS_PATH.$photoName);
+
 		$res = DB\mysqli_query_params('update users_groups set photo = $2 where id = $1', array($p['id'], $photoName)) or die( DB\mysqli_query_error() );		
 		return array('success' => true, 'photo' => $photoName);
 	}
