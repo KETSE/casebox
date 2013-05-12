@@ -60,11 +60,11 @@
 		 -->
 
 	<types>
-      &cb_solr_types;
+    		&cb_solr_types;
  	</types>
 	
 	<fields>
-      &cb_solr_fields;
+		&cb_solr_fields;
  	</fields>
 
 	<!-- Field to use to determine and enforce document uniqueness.
