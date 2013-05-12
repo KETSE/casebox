@@ -89,8 +89,8 @@
 		<copyField source="includes" dest="text"/>
 		<copyField source="manu" dest="manu_exact"/>
 	-->
-		<copyField source="name" dest="sort_name"/>
-		<copyField source="path" dest="sort_path"/>
+	<copyField source="name" dest="sort_name"/>
+	<copyField source="path" dest="sort_path"/>
 
 
 		<!-- Above, multiple source fields are copied to the [text] field.
