@@ -1,13 +1,13 @@
 CaseBox 0.9 - Content Management Platform
 Copyright (c) 2011-2013, Ketse, HURIDOCS
 All rights reserved.
-info@ketse.com
+Email: info@ketse.com, info@huridocs.org
 
 http://www.casebox.org/license/
 
 Open Source License
 ------------------------------------------------------------------------------------------
-This version of CaseBox is licensed under the terms of the Open Source GPL 3.0 license. 
+This version of CaseBox is licensed under the terms of the Open Source GPL 3.0 license.
 
 http://www.gnu.org/licenses/gpl.html
 
