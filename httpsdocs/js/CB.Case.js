@@ -20,7 +20,7 @@ CB.Case = Ext.extend(Ext.Panel, {
 	,onAfterShow: function(c){
 		if(Ext.isEmpty(this.params.id)) return;
 		this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-		Cases.load(this.params, this.processLoad, this);
+		Objects.load(this.params, this.processLoad, this);
 	}
 	,processLoad: function(r, e){
 		this.getEl().unmask();

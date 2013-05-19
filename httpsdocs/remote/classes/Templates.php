@@ -15,8 +15,6 @@ class Templates{
 		while($r = $res->fetch_assoc()){
 			$r['loaded'] = empty($r['loaded']);
 			if(empty($nodeId)) $r['expanded'] = true;
-			if(empty($r['type'])) $r['cls'] = 'fwB';
-			if($r['type'] < 0) $r['cls'] = 'fwB';
 			array_push($rez, $r);
 		}
 		return $rez;
@@ -62,6 +60,14 @@ class Templates{
 		$p['id'] = DB\last_insert_id();
 		
 		return array( 'success' => true, 'data' => array('nid' => $p['id'], 'pid' => @$p['pid'], 'is_folder' => 1, 'iconCls' => 'icon-folder', 'text' => $params->text, 'loaded' => true));
+	}
+	public function renameFolder($p){
+		if(!Security::canManage()) throw new \Exception(L\Access_denied);
+		$name = strip_tags($p->name);
+		$sql = 'update templates set l'.USER_LANGUAGE_INDEX.' = $2 where id = $1';
+		DB\mysqli_query_params($sql, array($p->id, $name) ) or die( DB\mysqli_query_error() );
+		
+		return array( 'success' => true, 'data' => array('id' => $p->id, 'newName' => $name));
 	}
 
 	public function deleteElement($id){
@@ -370,7 +376,7 @@ class Templates{
 					$a = explode(',', $value);
 					$a = array_filter($a, 'is_numeric');
 					if(empty($a)) { $value = ''; break; }
-					$res = DB\mysqli_query_params('select name from cases where id in ('.implode(',', $a).') order by 1') or die(DB\mysqli_query_error());
+					$res = DB\mysqli_query_params('select name from tree where id in ('.implode(',', $a).') order by 1') or die(DB\mysqli_query_error());
 					$value = array();
 					while($r = $res->fetch_row()) $value[] = $r[0];
 					$res->close();

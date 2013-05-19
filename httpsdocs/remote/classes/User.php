@@ -16,7 +16,7 @@ class User{
 		
 		/* try to authentificate */
 		$res = DB\mysqli_query_params('CALL p_user_login($1, $2, $3)', array($login, $pass, $ips)) or die( DB\mysqli_query_error() );
-		if (($r = $res->fetch_row()) && ($r[1] == 1))  $user_id = $r[0];
+		if( ($r = $res->fetch_row()) && ($r[1] == 1) )  $user_id = $r[0];
 		$res->close();
 		DB\mysqli_clean_connection();
 
@@ -40,6 +40,11 @@ class User{
 				$rez['user'] = $r;
 				$_SESSION['user'] = $r;
 				setcookie('L', $r['language']);
+
+				/* get user groups */
+				$rez['user']['groups'] = UsersGroups::getGroupIdsForUser();
+				$_SESSION['user']['groups'] = $rez['user']['groups'];
+				/* end of get user groups */
 			}
 			$res->close();
 
@@ -48,7 +53,6 @@ class User{
 		Log::add(Array('action_type' => 1, 'result' => isset($_SESSION['user']), 'info' => 'user: '.$login."\nip: ".$ips));
 		return $rez;
 	}
-	
 
 	public static function is_loged(){
 		return ( !empty($_COOKIE['key']) && 

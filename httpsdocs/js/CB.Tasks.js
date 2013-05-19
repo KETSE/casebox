@@ -816,7 +816,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		}
 	}
 	,saveReminds: function(){
-		Tasks.saveReminds({id: this.data.id, case_id: this.data.case_id, object_id: this.data.object_id, title: this.data.title, date_end: this.data.date_end, reminds: this.data.reminds.join('-')}
+		Tasks.saveReminds({id: this.data.id, object_id: this.data.object_id, title: this.data.title, date_end: this.data.date_end, reminds: this.data.reminds.join('-')}
 			,function(r, e){
 				if(r.success !== true) return;
 				this.data.reminds = r.reminds.split('-');

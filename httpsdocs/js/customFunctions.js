@@ -129,7 +129,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
 		ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(' ','') + ',';
 		if(ug_ids.indexOf(','+App.loginData.id+',') >=0) weight += 100; 
 		else{
-			if( ug_ids != ',,') return;//TODO: check if user is member of a specied group
+			if( ( ug_ids != ',,' ) && ( !setsHaveIntersection(ug_ids, App.loginData.groups ) ) ) return;
 			weight += 50;
 		}
 		/*end of check user_group ids */

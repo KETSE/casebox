@@ -214,7 +214,6 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 				clientValidation: true
 				,params: {
 					id: this.data.id
-					,case_id: this.data.case_id
 					,pid: this.data.pid
 					,uploadType: this.data.uploadType
 				}

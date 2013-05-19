@@ -32,14 +32,14 @@
 		If at least one condition is not satisfied then the email would not be processed and is deleted automatically.
 	";
 
-	if(!defined('config\mail_user')) continue; // skip core if no email is set in config
+	if(!defined('config\mail_user')) exit(); // skip core if no email is set in config
 	
 	echo " (".config\mail_user.") ...";
 
 	$cd = prepare_cron($cron_id);
 	if(!$cd['success']){
 		echo "\nFailed to prepare cron\n";
-		continue; //skip this core if cron preparation fails
+		exit(); //skip this core if cron preparation fails
 	}
 	
 	/* check if this core has an email template defined */
@@ -67,7 +67,7 @@
 	}catch(Exception $e){
 		notify_admin('Casebox: check mail Exception for core'.CORENAME, $e->getMessage());
 		echo " Error connecting to email\n";
-		continue; // skip this core if mail cannot be accesed
+		exit(); // skip this core if mail cannot be accesed
 	}
 	
 

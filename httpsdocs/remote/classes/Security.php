@@ -10,8 +10,11 @@ class Security {
 	 * 
 	 * @returns array of groups records
 	 */
-	public function getUserGroups(){
+	public static function getUserGroups(){
 		$rez = array( 'success' => true, 'data' => array() );
+		
+		// if( !Security::isAdmin() ) throw new \Exception(L\Access_denied);
+		
 		$sql = 'select id, name, l'.USER_LANGUAGE_INDEX.' `title`, `system`, `enabled` from users_groups where type = 1 order by 3';
 		$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez['data'][] = $r;
@@ -22,8 +25,8 @@ class Security {
 	public function createUserGroup($p){
 		$p->success = true;
 
-		$p->data->name = trim($p->data->name);
-		// if(empty($p->name) || (!Security::isAdmin())) throw new \Exception(L\Failed_creating_office);
+		if( !Security::isAdmin() ) throw new \Exception(L\Access_denied);
+		$p->data->name = trim( strip_tags( $p->data->name) );
 		
 		// check if group with that name already exists 
 		$res = DB\mysqli_query_params('select id from users_groups where type = 1 and name = $1', $p->data->name) or die(DB\mysqli_query_error());
@@ -38,10 +41,12 @@ class Security {
 	}
 
 	public function updateUserGroup($p){
+		if( !Security::isAdmin() ) throw new \Exception(L\Access_denied);
 		return array( 'success' => true, 'data' => array() );
 	}
 
 	public function destroyUserGroup($p){
+		if( !Security::isAdmin() ) throw new \Exception(L\Access_denied);
 		DB\mysqli_query_params('delete from users_groups where id = $1', $p ) or die(DB\mysqli_query_error());
 		return array( 'success' => true, 'data' => $p );
 	}
@@ -90,6 +95,8 @@ class Security {
 	public function getObjectAcl($p){
 		$rez = array( 'success' => true, 'data' => array(), 'name' => '');
 		if(!is_numeric($p->id)) return $rez;
+		
+		if( empty($this->internalAccessing) && !Security::canRead($p->id) ) throw new \Exception(L\Access_denied);
 		
 		/* set object title, path and inheriting access ids path*/
 		$obj_ids = array();
@@ -290,22 +297,25 @@ class Security {
 	public static function canTakeDownload($object_id, $user_group_id = false){
 		return (Security::getAccessBitForObject($object_id, 11, $user_group_id) > 0);
 	}
-		//0 List Folder/Read Data
-		//1 Create Folders
-		//2 Create Files
-		//3 Create Actions
-		//4 Create Tasks
-		//5 Read
-		//6 Write
-		//7 Delete child nodes
-		//8 Delete
-		//9 Change permissions
-		//10 Take Ownership
-		//11 Download
+	//0 List Folder/Read Data
+	//1 Create Folders
+	//2 Create Files
+	//3 Create Actions
+	//4 Create Tasks
+	//5 Read
+	//6 Write
+	//7 Delete child nodes
+	//8 Delete
+	//9 Change permissions
+	//10 Take Ownership
+	//11 Download
 
 	public function addObjectAccess($p){
 		$rez = array('success' => true, 'data' => array());
 		if(empty($p->data)) return $rez;
+
+		if( !Security::canChangePermissions($p->id) ) throw new \Exception(L\Access_denied);
+
 		DB\mysqli_query_params('insert into tree_acl (node_id, user_group_id, cid, uid) values ($1, $2, $3, $3) on duplicate key update id = last_insert_id(id), uid = $3', array($p->id, $p->data->id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
 		
 		$rez['data'][] = $p->data;
@@ -314,6 +324,8 @@ class Security {
 	}
 
 	public function updateObjectAccess($p){
+		if( !Security::canChangePermissions($p->id) ) throw new \Exception(L\Access_denied);
+
 		$allow = explode(',', $p->data->allow);
 		$deny = explode(',', $p->data->deny);
 		for ($i=0; $i < 12; $i++) { 
@@ -331,6 +343,7 @@ class Security {
 	}
 	public function destroyObjectAccess($p){
 		if(empty($p->data)) return;
+		if( !Security::canChangePermissions($p->id) ) throw new \Exception(L\Access_denied);
 		DB\mysqli_query_params('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p->id, $p->data)) or die(DB\mysqli_query_error());
 		SolrClient::RunCron();
 		return array('success' => true, 'data'=> array());
@@ -338,7 +351,34 @@ class Security {
 
 	/* end of objects acl methods*/
 	
+	/* Update the acl rules result for nodes that associated with any of given group or user */
+	public static function updateUserGroupAccess( $user_group_ids ){
+		$affected_nodes = Security::getAffectedNodes( $user_group_ids );
+		Security::updateNodesSecurity( $affected_nodes );
+	}
+
+	public static function getAffectedNodes( $user_group_ids ){
+		$rez = array();
+		$sql = 'select node_id from tree_acl where user_group_id in ('.implode(',', $user_group_ids).')';
+		$res = DB\mysqli_query_params($sql) or die( DB\mysqli_query_error() );
+		while($r = $res->fetch_assoc())
+			$rez[] = $r['node_id'];
+		$res->close();
+		return $rez;
+	}
+	
+	public static function updateNodesSecurity( $affected_node_ids ){
+		foreach( $affected_node_ids as $id)
+			DB\mysqli_query_params('call p_mark_all_childs_as_updated($1, 10)') or die( DB\mysqli_query_error() );
+		SolrClient::runCron();
+	}
+
+	/**
+	 * Set access field values for a given record from tree
+	 */
 	function setObjectSolrAccessFields(&$objectRecord){
+		
+		$this->internalAccessing = true;
 		
 		$acl = $this->getObjectAcl((Object)array('id' => $objectRecord['id']));
 		$acl = $acl['data'];
@@ -361,8 +401,8 @@ class Security {
 		foreach($acl as $access){
 			$allow = explode(',',$access['allow']);
 			$deny = explode(',',$access['deny']);
-			if($deny[5] < 0){
-				if( ($access['type'] == 2) || ($access['id'] == $everyoneGroupId)){
+			if($deny[5] < 0){ // 5 is index of read bit
+				if( ($access['type'] == 2) || ($access['id'] == $everyoneGroupId)){ //$access['type'] == 2 - user 
 					$idx = ($deny[5] == -1) ? 0 : 2;
 					$users[$access['id']][$idx] = -1;
 				}else{
@@ -370,7 +410,7 @@ class Security {
 					$groupUsers = $this->getGroupUserIds($access['id']);
 					foreach($groupUsers as $uid) $users[$uid][$idx] = -1;
 				}
-			}elseif($allow[5] > 0){
+			}elseif($allow[5] > 0){// 5 is index of read bit
 				if( ($access['type'] == 2) || ($access['id'] == $everyoneGroupId)){
 					$idx = ($allow[5] == 1) ? 0 : 2;
 					if(empty($users[$access['id']][$idx])) $users[$access['id']][$idx] = 1;
@@ -383,16 +423,18 @@ class Security {
 			}
 		}
 		/* end of collecting accesses for users (including everyone group if present) */
-		
 		/* grouping  user ids in allow and deny sets /**/
 		$allow_users = array();
 		$deny_users = array();
 		foreach($users as $uid => $ua){
+			// echo "user_id: $uid\n";
 			$access = array_shift($ua);
 			while(empty($access) && !empty($ua)) $access = array_shift($ua);
+			// echo "  access: $access\n";
 			if($access < 0) $deny_users[] = $uid;
 			elseif($access > 0) $allow_users[] = $uid;
 		}
+
 		/* selecting node owner and store him into allow and remove from deny */
 		$sql = 'select oid from tree where id = $1';
 		$res = DB\mysqli_query_params($sql, $objectRecord['id']) or die(DB\mysqli_query_error());
@@ -411,6 +453,9 @@ class Security {
 
 	}
 
+	/**
+	 * Retreive everyone group id
+	 */
 	static function EveryoneGroupId(){
 		if(isset($GLOBALS['EVERYONE_GROUP_ID'])) return $GLOBALS['EVERYONE_GROUP_ID'];
 		$GLOBALS['EVERYONE_GROUP_ID'] = null;
@@ -421,15 +466,21 @@ class Security {
 		return $GLOBALS['EVERYONE_GROUP_ID'];
 	} 
 
-	public function getGroupUserIds($groupId){
+	/**
+	 * Get an array of user ids associated to the given group
+	 */
+	public function getGroupUserIds($group_id){
 		$rez = array();
 		$sql = 'select user_id from users_groups_association where group_id = $1';
-		$res = DB\mysqli_query_params($sql, $groupId) or die(DB\mysqli_query_error());
+		$res = DB\mysqli_query_params($sql, $group_id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()) $rez[] = $r[0];
 		$res->close();
 		return $rez;
 	}
 
+	/**
+	 * Get the list of active users with basic data
+	 */
 	static function getActiveUsers(){
 		$rez = Array('success' => true, 'data' => array());
 		$user_id = $_SESSION['user']['id'];
@@ -441,6 +492,9 @@ class Security {
 	}
 	/* ----------------------------------------------------  OLD METHODS ------------------------------------------ */
 
+	/**
+	 * Check if user_id (or current loged user) is an administrator
+	 */
 	static function isAdmin($user_id = false){
 		$rez = false;
 		if($user_id == false) $user_id = $_SESSION['user']['id'];

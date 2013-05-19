@@ -123,12 +123,55 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
 
 CB.FileWindow = Ext.extend(Ext.Panel, {
     	closable: true
-	,layout: 'border'
-	,tbarCssClass: 'x-panel-white'
+	,layout: 'fit'
 	,hideBorders: true
 	,initComponent: function() {
        		this.actions = {
-			upload: new Ext.Action({
+			save: new Ext.Action({
+				text: L.Save
+				,iconAlign:'top'
+				,iconCls: 'icon32-save'
+				,scale: 'large'
+				,disabled: true
+				,scope: this
+				,hidden: true
+				,handler: this.onSaveClick
+			})
+			,'delete': new Ext.Action({
+				text: L.Delete
+				,iconAlign:'top'
+				,iconCls: 'icon32-del'
+				,scale: 'large'
+				,disabled: true
+				,scope: this
+				,handler: this.onDeleteClick
+			})
+			,createTask: new Ext.Action({
+				text: L.NewTask
+				,iconCls: 'icon32-task-new'
+				,iconAlign:'top'
+				,scale: 'large'
+				//,disabled: true
+				,scope: this
+				,handler: this.onCreateTaskClick
+			})
+			,paste: new Ext.Action({
+				tooltip: L.PasteFromClipboard
+				,text: L.PasteFromClipboard
+				,disabled: true
+				,scope: this
+				,handler: this.onPasteClick
+			})
+			,attachUpload: new Ext.Action({
+				text: L.Upload
+				,tooltip: L.UploadFile
+				,iconAlign:'top'
+				,iconCls: 'icon-drive-upload'
+				,disabled: true
+				,scope: this
+				,handler: this.onAttachUploadClick
+			})
+			,upload: new Ext.Action({
 				text: L.Upload
 				,tooltip: L.UploadFile
 				,iconAlign:'top'
@@ -148,15 +191,6 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 				,scope: this
 				,handler: this.onDownloadClick
 			})
-			,'delete': new Ext.Action({
-				text: L.Delete
-				,iconAlign:'top'
-				,iconCls: 'icon32-del'
-				,scale: 'large'
-				,disabled: true
-				,scope: this
-				,handler: this.onDeleteClick
-			})
 			,expand: new Ext.Action({
 				text: L.Expand
 				,iconAlign:'top'
@@ -166,7 +200,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 				,scope: this
 				,handler: this.onExpandClick
 			})
-			,newwindow: new Ext.Action({
+			,newWindow: new Ext.Action({
 				text: L.NewWindow
 				,iconAlign:'top'
 				,iconCls: 'icon32-external'
@@ -198,49 +232,20 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		});
 
 	        Ext.apply(this, {
-			tbar: [
-				this.actions.upload
-				,this.actions.download
-	                	,'-'
-				,this.actions['delete']
-				,'->'
-				,this.actions.expand
-				,this.actions.newwindow
-				
-			]
-			,items: [ this.previewPanel
-				,{
-					region: 'east'
-					,width: 300
-					,split: 'true'
-					,bodyStyle: 'background-color: #f4f4f4'
-					,autoScroll: true
-					,items: [{
-							xtype: 'panel'
-							//,region: 'center'
-							,layout: 'fit'
-							,bodyStyle: 'background-color: #f4f4f4; margin-bottom: 25px'
-							,padding: 0
-							,border: false
-							,autoHeight: true
-							,items: [this.versionsView]
-						}
-						,this.duplicatesView
-						,this.propertiesPanel
-					]
-				}
-			]
-			,listeners: {
+			listeners: {
 				scope: this
 				,beforedestroy: this.onBeforeDestroy
 			}
 		});
 			
 		CB.FileWindow.superclass.initComponent.apply(this, arguments);
-		this.addEvents('filedownload', 'fileupload');
-		this.enableBubble(['filedownload', 'fileupload']);
+		this.addEvents( 'taskcreate', 'fileupload', 'filedownload', 'fileupload');
+		this.enableBubble([ 'taskcreate', 'fileupload', 'filedownload', 'fileupload']);
 		App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
 		App.mainViewPort.on('fileuploaded', this.onFileUploaded, this);
+		App.mainViewPort.on('taskcreated', this.onTaskChange, this);
+		App.mainViewPort.on('taskupdated', this.onTaskChange, this);
+		App.clipboard.on('change', this.onClipboardChange, this);
 	}
 		
 	,afterRender: function() {
@@ -249,10 +254,13 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 	        this.loadProperties()
     	}
     	,onBeforeDestroy: function(){
+		if(this.grid) this.grid.destroy();
 		App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
+		App.mainViewPort.un('fileuploaded', this.onFileUploaded, this);
+		App.clipboard.un('change', this.onClipboardChange, this);
     	}
     	,loadProperties: function(){
-		Files.getProperties(this.data.id, this.processLoadProperties, this)    		
+		Files.getProperties(this.data.id, this.processLoadProperties, this);
     	}
 	,processLoadProperties: function(r, e){
 		if(r.success !== true) return;
@@ -262,25 +270,173 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		this.data.id = parseInt(this.data.id);
 		this.setIconClass(getFileIcon(r.data.name));
 		this.setTitle(r.data.name);
+		if( !this.loaded ){
+			this.prepareInterface();
+			this.loaded = true;
+		}
+		
+		if(this.grid) this.grid.reload();
+		
+		this.actions.save.setDisabled(true);
+		this.actions.attachUpload.setDisabled(false);
 		this.actions.download.setDisabled(false);
 		this.actions.upload.setDisabled(false);
-		this.actions.newwindow.setDisabled(false);
+		this.actions.newWindow.setDisabled(false);
 		this.actions['delete'].setDisabled(false);
+		
+
 		this.previewPanel.clear();
 		this.previewPanel.loadPreview(this.data.id);
+		
 		if(Ext.isEmpty(this.data.versions)) this.data.versions = [];
 		this.data.cls = 'current';
 		this.versionsView.store.loadData([this.data].concat(this.data.versions), false);
+		
 		this.items.last().items.first().syncSize();
+		
 		this.duplicatesView.reload();
 		this.propertiesPanel.update(this.data);
+	}
+	,prepareInterface: function(){
+		/* find out if need to show properties panel */
+		this.showPropertiesPanel = false;
+		if( !Ext.isEmpty( this.data.template_id) ){
+			templateStore = CB.DB['template'+this.data.template_id];
+			if(templateStore && (templateStore.getCount() > 0) ) this.showPropertiesPanel = true;
 
+		}
+		/* end of find out if need to show properties panel */
+		
+		toolbarItems = []
+
+		/* insert create menu if needed */
+		menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
+		if( !Ext.isEmpty(menuConfig) ){
+			createButton = new Ext.Button({	
+				text: L.Create
+				,iconCls: 'icon32-create'
+				,iconAlign:'top'
+				,scale: 'large'
+                       		,menu: [ ]
+                     	})
+			updateMenu(createButton, menuConfig, this.onCreateObjectClick, this);
+			toolbarItems.push(createButton, '-')
+		}
+		/**/
+		toolbarItems.push(this.actions.save);
+
+		if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
+		
+		toolbarItems.push('-',{text: 'Attach', iconCls: 'icon32-attach', scale: 'large', iconAlign:'top'
+                	,menu: [
+				this.actions.attachUpload
+				,'-'
+				,this.actions.paste
+			]
+         	})
+
+		toolbarItems.push(this.actions.createTask
+                	,'-'
+			,this.actions.upload
+			,this.actions.download
+			,'->'
+			,this.actions.expand
+			,this.actions.newWindow)
+		/* */
+
+		this.actions.save.setHidden( !this.showPropertiesPanel );
+		
+		contentItems = [ this.previewPanel ];
+		if(this.showPropertiesPanel){
+			this.previewPanel.title = L.Preview;
+			this.grid = new CB.VerticalEditGrid({ 
+				title: L.Properties
+				,refOwner: this
+				,autoHeight: true
+				,viewConfig: {autoFill: true, forceFit: true}
+				,listeners: {
+					scope: this
+					,change: function(){
+						this.actions.save.setDisabled(false);
+					}
+				}
+			})
+			contentItems = [{
+				xtype: 'tabpanel'
+				,plain: true
+				,headerCfg: {cls: 'mainTabPanel'}
+				,bodyStyle: 'background-color: #FFF'
+				,region: 'center'
+				,activeItem: 0
+				,items: [
+					this.previewPanel
+					,this.grid
+				]
+			}]
+		}
+
+		contentItems.push({
+			region: 'east'
+			,width: 300
+			,split: 'true'
+			,bodyStyle: 'background-color: #f4f4f4'
+			,autoScroll: true
+			,items: [{
+					xtype: 'panel'
+					,layout: 'fit'
+					,bodyStyle: 'background-color: #f4f4f4; margin-bottom: 25px'
+					,padding: 0
+					,border: false
+					,autoHeight: true
+					,items: [this.versionsView]
+				}
+				,this.duplicatesView
+				,this.propertiesPanel
+			]
+		})
+		
+		this.add({
+			layout: 'border'
+			,tbarCssClass: 'x-panel-white'
+			,hideBorders: true
+			,tbar: toolbarItems
+			,items: contentItems
+		})
+		this.doLayout();
 	}
 	,onVersionSelect: function(idx, e){
 		
 		vr = this.versionsView.store.getAt(idx);
 		if(Ext.isEmpty(vr)) return;
 		this.previewPanel.loadPreview(this.data.id, (idx ==0) ? '' : vr.get('id'));
+	}
+	,onClipboardChange: function(cb){
+		this.actions.paste.setDisabled(cb.isEmpty());
+	}
+	,onCreateObjectClick: function(b, e) {
+		data = Ext.apply({}, {
+			pid: this.data.id
+			,path: this.data.path+'/'+this.data.id
+			,pathtext: this.data.pathtext+'/'+this.data.name
+		}, b.data);
+		App.mainViewPort.createObject(data, e);
+	}
+	,onAttachUploadClick: function(b, e) { 
+		this.fireEvent('fileupload', {pid: this.data.id, uploadType: 'single'}, e) 
+	}
+	,onPasteClick: function(b, e) { 
+		App.clipboard.paste(this.data.id, null, this.onPasteProcess, this);
+	}
+	,onPasteProcess: function(pids){
+	}
+	,onCreateTaskClick: function(o, e){
+		this.fireEvent('taskcreate', { data: {pid: this.data.id, path: this.data.path+'/'+this.data.id, pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)} })
+	}
+	,onTaskChange: function(r){
+		if(r.data && (r.data.pid == this.data.id) ){
+			this.previewPanel.clear();
+			this.previewPanel.loadPreview(this.data.id);
+		}
 	}
 	,onUploadClick: function(b, e){
 		this.fireEvent('fileupload', this.data, e);
@@ -290,6 +446,17 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 	}
 	,onDownloadClick: function(b, e){
 		this.fireEvent('filedownload', this.data.id)
+	}
+	,onSaveClick: function(b, e){
+		if(Ext.isEmpty(this.grid)) return;
+		this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+		this.grid.readValues();
+		Files.saveProperties(this.data, this.processSaveClick, this);
+	}
+	,processSaveClick: function(r, e){
+		this.getEl().unmask();
+		this.actions.save.setDisabled(true);
+
 	}
 	,onDeleteClick: function(){
 		Ext.Msg.confirm( L.DeleteConfirmation, L.fileDeleteConfirmation// + ' "' + this.data.name + '"?'
@@ -309,7 +476,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 	}
 	,onExpandClick: function (b, e) {
             	App.mainViewPort.toggleWestRegion(!b.pressed);
-		this.items.last().setVisible(!b.pressed);
+		this.items.first().items.last().setVisible(!b.pressed);
 		//this.syncSize();
 	}
 	,onNewWindowClick: function(b, e){

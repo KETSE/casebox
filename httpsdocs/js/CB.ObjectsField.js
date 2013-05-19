@@ -59,6 +59,7 @@ CB.ObjectsFieldCommonFunctions = {
 						scope: this
 						,beforeload: function(st, o ){
 							if(this.data){
+								if(!Ext.isEmpty(this.data.objectId)) o.params.objectId = this.data.objectId;
 								if(!Ext.isEmpty(this.data.pidValue)) o.params.pidValue = this.data.pidValue;
 								if(!Ext.isEmpty(this.data.path)) o.params.path = this.data.path;
 							}
@@ -136,6 +137,7 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 			mode = 'remote'
 			
 			this.store.baseParams = Ext.apply({}, this.config)
+			if(!Ext.isEmpty(this.data.objectId)) this.store.baseParams.objectId = this.data.objectId;
 			if(!Ext.isEmpty(this.data.pidValue)) this.store.baseParams.pidValue = this.data.pidValue;
 			if(!Ext.isEmpty(this.data.path)) this.store.baseParams.path = this.data.path;
 

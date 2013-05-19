@@ -362,7 +362,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 					,ctrl: false
 					,shift: false
 					,stopEvent: true
-					,fn: this.onOpenClick
+					,fn: this.onRowDblClick
 					,scope: this
 				},{
 					key: 'x'
@@ -872,11 +872,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		if(this.grid.selModel.hasSelection() || (this.grid.store.getCount() < 1)) return false;
 		this.grid.selModel.selectRow(0);
 	}
-	,onRowDblClick: function( grid, rowIndex, e ) {
-		r = grid.store.getAt(rowIndex);
+	,onRowDblClick: function( ) {
+		r = this.grid.getSelectionModel().getSelected();
 		if(!r) return;
-		if( App.isFolder( r.get('template_id') ) ) this.onBrowseClick(grid, e);
-		else this.onOpenClick(grid, e);
+		if( App.isFolder( r.get('template_id') ) ) this.onBrowseClick();
+		else this.onOpenClick();
 	}
 	,onOpenClick: function(b, e) {
 		if(!this.grid.selModel.hasSelection()) return;

@@ -38,7 +38,7 @@ class Log{
 		}else $p['case_id'] = null;
 		// get object data
 		if(!empty($p['object_id'])){
-			$sql = 'select o.id,  o.type_id, coalesce(o.custom_title, o.title) `title`, t.iconCls from objects o join templates t on o.template_id = t.id where o.id = $1';
+			$sql = 'select o.id, coalesce(o.custom_title, o.title) `title`, t.iconCls from objects o join templates t on o.template_id = t.id where o.id = $1';
 			$res = DB\mysqli_query_params($sql, $p['object_id']) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()) $obj = $r;
 			$res->close();
@@ -84,7 +84,7 @@ class Log{
 		
 		$u = &$_SESSION['user'];
 		//create the htmls for each language
-		$template_types_translation_names = array('', 'Object', 'IncomingAction', 'OutgoingAction', 'User', 'Contact', 'Organization' );
+		// $template_types_translation_names = array('', 'Object', 'IncomingAction', 'OutgoingAction', 'User', 'Contact', 'Organization' );
 
 		L\initTranslations();
 		$fields = array('id', 'pid', 'user_id', 'to_user_ids', 'office_id', 'case_id', 'object_id', 'file_id', 'task_id', 'date', 'action_type', 'remind_users', 'result', 'info');
@@ -96,7 +96,7 @@ class Log{
 			@$case['a'] = ' <i class="case" id="'.$p['case_id'].'">'.(!empty($case_data['name']) ? $case_data['name'] : ((!empty($case_data['nr'])) ? L\get('Nr', $l).' '.$case_data['nr'] : 'id: '.$case_data['id']) ).'</i>';
 			
 			@$obj['a'] = ' <i class="obj'.(empty($obj['iconCls']) ? '' : ' '.$obj['iconCls']).'" id="'.$obj['id'].'">'.$obj['title'].'</i>';
-			@$obj['type'] = L\get($template_types_translation_names[$obj['type_id']], $l); 
+			@$obj['type'] = '';//L\get($template_types_translation_names[$obj['type_id']], $l); 
 			
 			@$task['a'] = ' "<i class="task">'.$task['title'].'</i>"';
 			

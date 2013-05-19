@@ -3,6 +3,43 @@
 namespace CB;
 
 class Files{
+	public function getProperties($id){
+		$rez = array('success' => true, 'data' => array());
+		$sql = 'select f.id, f.name, f.`date`, f.title, f.cid, f.uid, f.cdate, f.udate, fc.size, t.template_id '.
+			',f_get_tree_ids_path(t.pid) `path` '.
+			',f_get_tree_path(t.id) `pathtext` '.
+			'from tree t join files f on t.id = f.id left join files_content fc on f.content_id = fc.id where t.id = $1';
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
+		if($r = $res->fetch_assoc()){
+			$a = explode('.', $r['name']);
+			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
+			$r['ago_date'] = Util\translateMonths($r['ago_date']);
+			$r['ago_text'] = Util\formatAgoTime($r['cdate']);
+			$rez['data'] = $r;
+		}
+		$res->close();
+		/* get versions */
+		$sql = 'select id, `date`, `name`, cid, uid, cdate, udate, (select `size` from files_content where id = v.content_id ) `size` FROM files_versions v WHERE file_id = $1 order by cdate desc';
+		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
+		while($r = $res->fetch_assoc()){
+			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
+			$r['ago_date'] = Util\translateMonths($r['ago_date']);
+			$r['ago_text'] = Util\formatAgoTime($r['cdate']);
+			$rez['data']['versions'][] = $r;
+		}
+		$res->close();
+		/* end of get versions */
+
+		VerticalEditGrid::getData('objects', $rez['data'] );
+
+		return $rez;
+	}
+
+	public function saveProperties($p){
+		VerticalEditGrid::saveData('objects', $p);
+		return array('success' => true);
+	}
+
 	public static function extractUploadedArchive(&$file){//DONE: on archive extraction also to take directories into consideration
 		$archive = $file['name'];
 		$ext = Files::getExtension($archive);
@@ -260,7 +297,7 @@ class Files{
 			$obj = (object)$f;
 			fireEvent('beforeNodeDbCreate', $obj);
 			DB\mysqli_query_params('INSERT INTO tree  (id, pid, `name`, `type`, cid, uid, cdate, udate, template_id) VALUES($1, $2, $3, 5, $4, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $5) '.
-				' on duplicate key update id = last_insert_id($1), pid = $2, `name` = $3, `type` = 5, cid = $4, uid = $4, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP'
+				' on duplicate key update id = last_insert_id($1), pid = $2, `name` = $3, `type` = 5, cid = $4, uid = $4, cdate = CURRENT_TIMESTAMP, udate = CURRENT_TIMESTAMP, updated = (updated | 1)'
 				,Array($file_id, $pid, $f['name'], $_SESSION['user']['id'], config\default_file_template)) or die(DB\mysqli_query_error());
 			$file_id = DB\last_insert_id(); 
 					
@@ -280,7 +317,8 @@ class Files{
 	public function updateFileProperties($p){
 		if(empty($p['id'])) return false;
 		$p['title'] = strip_tags(@$p['title']);
-		DB\mysqli_query_params('update files set `date` = $2, title = $3 where id = $1', array($p['id'], Util\clienttoMysqlDate($p['date']), @$p['title'] ) ) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update files set `date` = $2, title = $3, uid = $3, udate = CURRENT_TIMESTAMP where id = $1'
+			,array( $p['id'], Util\clienttoMysqlDate($p['date']), @$p['title'], $_SESSION['user']['id'] ) ) or die(DB\mysqli_query_error());
 
 		Objects::updateCaseUpdateInfo($p['id']);
 
@@ -360,36 +398,6 @@ class Files{
 	public function removeContentId($id){
 	}
 
-	public function getProperties($id){
-		$rez = array('success' => true, 'data' => array());
-		$sql = 'select f.id, f.name, f.`date`, f.title, f.cid, f.uid, f.cdate, f.udate, fc.size '.
-			',(SELECT f_get_tree_ids_path(pid) FROM tree WHERE id = f.id) `path` '.
-			',f_get_tree_path(f.id) `pathtext` '.
-			'from files f left join files_content fc on f.content_id = fc.id where f.id = $1';
-		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
-		if($r = $res->fetch_assoc()){
-			$a = explode('.', $r['name']);
-			$r['iconCls'] = 'file-'.( (sizeof($a) > 1) ? array_pop($a) : 'unknown');
-			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
-			$r['ago_date'] = Util\translateMonths($r['ago_date']);
-			$r['ago_text'] = Util\formatAgoTime($r['cdate']);
-			$rez['data'] = $r;
-		}
-		$res->close();
-		/* get versions */
-		$sql = 'select id, `date`, `name`, cid, uid, cdate, udate, (select `size` from files_content where id = v.content_id ) `size` FROM files_versions v WHERE file_id = $1 order by cdate desc';
-		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
-		while($r = $res->fetch_assoc()){
-			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
-			$r['ago_date'] = Util\translateMonths($r['ago_date']);
-			$r['ago_text'] = Util\formatAgoTime($r['cdate']);
-			$rez['data']['versions'][] = $r;
-		}
-		$res->close();
-		/* end of get versions */
-
-		return $rez;
-	}
 	public function getDuplicates($id){
 		$rez = array('success' => true, 'data' => array());
 		if(!is_numeric($id)) return $rez;
@@ -620,7 +628,7 @@ class Files{
 		DB\mysqli_query_params('delete from files_versions where id = $1', $id) or die(DB\mysqli_query_error());
 		$this->removeContentId($content_id);
 
-		DB\mysqli_query_params('update tree set `updated` = 1 where id = $1', $id) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update tree set `updated` = (updated | 1) where id = $1', $id) or die(DB\mysqli_query_error());
 
 		Objects::updateCaseUpdateInfo($id);
 
@@ -644,9 +652,9 @@ class Files{
 		$res = DB\mysqli_query_params('insert into files_versions (file_id, content_id, `date`, name, cid, uid, cdate, udate) '.
 			' select $1, content_id, `date`, name, cid, uid, cdate, udate from files where id <> $1 and id in('.implode(',', $ids).')', $to_id) or die(DB\mysqli_query_error());
 		
-		DB\mysqli_query_params('update tree set did = $2, dstatus = 1 where id <> $1 and id in ('.implode(',', $ids).')', array($to_id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update tree set did = $2, dstatus = 1, updated = (updated | 1) where id <> $1 and id in ('.implode(',', $ids).')', array($to_id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
 
-		DB\mysqli_query_params('update files set updated = 1 where id = $1', $to_id) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update tree set updated = (updated | 1) where id = $1', $to_id) or die(DB\mysqli_query_error());
 		
 		$ids = array_diff($ids, array($to_id));
 

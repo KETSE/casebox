@@ -58,7 +58,7 @@ if( !function_exists( __NAMESPACE__.'\mysqli_query_params' ) ){
 
 if( !function_exists( __NAMESPACE__.'\mysqli_query_error' ) ){
 	function mysqli_query_error($dbh = false){
-		if(!\CB\is_debug_host()) return 'Error';
+		if(!\CB\is_debug_host()) return 'Query error';
 		if(!$dbh) $dbh = $GLOBALS['dbh'];
 		$rez = "\n\r<br /><hr />Query error: ".mysqli_error($dbh)."
 		       <hr /><br />\n\r";

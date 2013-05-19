@@ -74,7 +74,7 @@ class Browser{
 			switch($p->scope){
 				case 'project': /* limiting pid to project. If not in a project then to parent directory */
 					if(!empty($p->objectId) && is_numeric($p->objectId)){
-						$sql = 'select coalesce(f_get_objects_case_id($1), pid) from tree where id = $1 ';
+						$sql = 'select coalesce(case_id, pid) from tree where id = $1 ';
 						$res = DB\mysqli_query_params($sql, $p->objectId) or die(DB\mysqli_query_error());
 						if($r = $res->fetch_row()) $p->pids = $r[0]; 
 						$res->close();
@@ -175,6 +175,7 @@ class Browser{
 			$id = explode('/', $path);
 			$id = array_pop($id);
 			if(!is_numeric($id)) return array('success' => false);
+			if( !Security::canDelete($id) ) throw new \Exception( L\Access_denied );
 			$ids[] = intval($id);
 		}
 		if(empty($ids)) return array('success' => false);
@@ -183,7 +184,7 @@ class Browser{
 		
 		/* if access is granted then setting dstatus=1 for specified ids and dstatus = 2 for all their children /**/
 		fireEvent('beforeNodeDbDelete', $ids);
-		DB\mysqli_query_params('update tree set did = $1, dstatus = 1, ddate = CURRENT_TIMESTAMP where id in ('.implode(',', $ids).') ', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('update tree set did = $1, dstatus = 1, ddate = CURRENT_TIMESTAMP, updated = (updated | 1) where id in ('.implode(',', $ids).') ', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
 		foreach($ids as $id) DB\mysqli_query_params('call p_mark_all_childs_as_deleted($1, $2)', array($id, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		SolrClient::runCron();
 		
@@ -201,10 +202,15 @@ class Browser{
 		if(!Security::canWrite($id)) throw new \Exception(L\Access_denied);
 		
 		DB\mysqli_query_params('update tree set name = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
-		DB\mysqli_query_params('update cases set name = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
 		DB\mysqli_query_params('update objects set custom_title = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
 		DB\mysqli_query_params('update files set name = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
 		DB\mysqli_query_params('update tasks set title = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
+		
+		$sql = 'INSERT INTO objects_data (object_id, field_id, value) '.
+			'select $1, ts.id, $2 from tree t join templates_structure ts on t.template_id = ts.template_id where t.id = $1 and ts.name = \'_title\' '.
+			' on duplicate key update `value` = $2';
+		DB\mysqli_query_params($sql, Array($id, $p->name) ) or die(DB\mysqli_query_error());
+
 		SolrClient::runCron();
 		return array('success' => true, 'data' => array( 'id' => $id, 'newName' => $p->name) );
 	}
@@ -255,8 +261,8 @@ class Browser{
 					if($r = $res->fetch_row()) $newName = empty($r[1]) ? $r[0] : $this->getNewCopyName($p->pid, $r[0]);
 					$res->close();
 
-					DB\mysqli_query_params('insert into tree(pid, user_id, `system`, `type`, subtype, template_id, tag_id, name, `date`, size, is_main, cfg, cid, cdate, uid, udate)
-						select $2, user_id, 0, `type`, subtype, template_id, tag_id, $4, `date`, size, is_main, cfg, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP from tree where id =$1', array($id, $p->pid, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
+					DB\mysqli_query_params('insert into tree(pid, user_id, `system`, `type`, template_id, tag_id, name, `date`, size, is_main, cfg, cid, cdate, uid, udate)
+						select $2, user_id, 0, `type`, template_id, tag_id, $4, `date`, size, is_main, cfg, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP from tree where id =$1', array($id, $p->pid, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
 					$obj_id = DB\last_insert_id();
 					$type = 0;
 					$res = DB\mysqli_query_params('select `type` from tree where id = $1', $id) or die(DB\mysqli_query_error());
@@ -264,13 +270,9 @@ class Browser{
 					$res->close();
 					switch($type){
 						case 3://case
-							DB\mysqli_query_params('INSERT INTO cases (id, nr, name, closed, close_date, cid, uid, cdate, udate)'.
-								' select $2, nr, $4, closed, close_date, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from cases where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
-							break;
-						
 						case 4://case object
-							DB\mysqli_query_params('INSERT INTO objects(id, type_id, title, custom_title, template_id, date_start, date_end, author, iconCls, details, private_for_user, cid, uid, cdate, udate)'.
-								' select $2, type_id, title, $4, template_id, date_start, date_end, author, iconCls, details, private_for_user, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from objects where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
+							DB\mysqli_query_params('INSERT INTO objects(id, title, custom_title, template_id, date_start, date_end, author, iconCls, details, private_for_user, cid, uid, cdate, udate)'.
+								' select $2, title, $4, template_id, date_start, date_end, author, iconCls, details, private_for_user, $3, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP from objects where id =$1', array($id, $obj_id, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
 							
 							$duplicates = array(0 => 0);
 							$sql = 'select id, pid, object_id, field_id from objects_duplicates where object_id = $1 order by id';
@@ -314,11 +316,11 @@ class Browser{
 				$res = DB\mysqli_query_params('select pid from tree where id in ('.implode(',', $process_ids).')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_row()) $modified_pids[] = intval($r[0]);
 				$res->close();
-				DB\mysqli_query_params('update tree set pid = $1 where id in ('.implode(',', $process_ids).')', $p->pid) or die(DB\mysqli_query_error());
+				DB\mysqli_query_params('update tree set pid = $1, updated = (updated | 100) where id in ('.implode(',', $process_ids).')', $p->pid) or die(DB\mysqli_query_error());
 				
 				foreach($process_ids as $id) Objects::updateCaseUpdateInfo($id);
 				
-				$this->markAllChildsAsUpdated($process_ids);
+				$this->markAllChildsAsUpdated($process_ids, 100);
 				break;
 			case 'shortcut':
 				DB\mysqli_query_params('insert into tree (pid, `system`, `type`, `subtype`, target_id, `name`, cid) SELECT $1, 0, 2, 0, id, `name`, $2 from tree where id in ('.implode(',', $process_ids).')', array($p->pid, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
@@ -578,12 +580,12 @@ class Browser{
 		return $id;
 	}
 
-	public static function markAllChildsAsUpdated($ids){
+	public static function markAllChildsAsUpdated($ids, $bits = 11){
 		if(!is_array($ids)) $ids = explode(',', $ids);
 		$ids = array_filter($ids, 'is_numeric');
 		if(empty($ids)) return;
 		foreach($ids as $id)
-			DB\mysqli_query_params('call p_mark_all_childs_as_updated($1)', $id) or die(DB\mysqli_query_error());
+			DB\mysqli_query_params('call p_mark_all_childs_as_updated($1, $2)', array( $id, $bits ) ) or die(DB\mysqli_query_error());
 		return true;
 	}
 

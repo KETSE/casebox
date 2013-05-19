@@ -239,9 +239,9 @@
 	 */
 	function is_debug_host(){
 		return ( empty($_SERVER['SERVER_NAME'])
-			|| ($_SERVER['SERVER_NAME'] == 'casebox.vvv.md')
 			|| in_array( $_SERVER['REMOTE_ADDR'], array(
-					'127.0.0.1'
+					'localhost'
+					,'127.0.0.1'
 					,'195.22.253.6'
 					,'193.226.64.181'
 					,'188.240.73.107'

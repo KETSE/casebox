@@ -140,14 +140,15 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 
 		}
 		this.editor = new Ext.tree.TreeEditor(this, {
-	           	allowBlank: false
-	          	,blankText: 'A name is required'
-	            	,selectOnFocus: true
-	            	,ignoreNoChange: true 
-	        }); 
-	        this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
+			allowBlank: false
+			,blankText: 'A name is required'
+			,selectOnFocus: true
+			,ignoreNoChange: true 
+		})
+		
+		this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
 
-	        if(this.hideToolbar !== true)
+		if(this.hideToolbar !== true)
 			Ext.apply(this, {
 				tbar: [{
 						text: L.Create
@@ -450,9 +451,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			,this.onCreateObjectClick
 			,this
 		);
-
 		this.contextMenu.showAt(e.getXY());
-		
 	}
 	,onCreateObjectClick: function(b, e) {
 		data = Ext.apply({}, b.data);
@@ -572,18 +571,18 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 	,startEditing: function(node) {
 		if(!node.isSelected()) node.select();
 		var ge = this.editor;
-	        setTimeout(function(){
-	            	ge.editNode = node;
-	            	ge.startEdit(node.ui.textNode);
-	        }, 10);
+		setTimeout(function(){
+			ge.editNode = node;
+			ge.startEdit(node.ui.textNode);
+		}, 10);
 	}
 	,onBeforeEditComplete: function(editor, newVal, oldVal) {
-	        if(newVal === oldVal) return;
-	        var n = editor.editNode;
-	        editor.cancelEdit();
-	        this.getEl().mask(L.Processing, 'x-mask-loading');
-	        BrowserTree.rename({path: n.getPath('nid'), name: newVal}, this.processRename, this);
-	        return false;
+		if(newVal === oldVal) return;
+		var n = editor.editNode;
+		editor.cancelEdit();
+		this.getEl().mask(L.Processing, 'x-mask-loading');
+		BrowserTree.rename({path: n.getPath('nid'), name: newVal}, this.processRename, this);
+		return false;
 	}
 	,processRename: function(r, e){
 		this.getEl().unmask();

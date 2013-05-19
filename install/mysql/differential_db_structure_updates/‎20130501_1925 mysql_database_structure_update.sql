@@ -1,6 +1,5 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 
-USE `cb_achpr`;
 /* Create Procedure in target  */
 
 DELIMITER $$

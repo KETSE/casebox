@@ -369,10 +369,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		});		
 		if(Ext.isEmpty(p.title)) p.title = L.AddTask;
 		if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
-		if(Ext.isEmpty(p.tasksStore)) p.tasksStore = new Ext.data.DirectStore( Ext.applyIf({
-			directFn: Tasks.getUserTasks
-			,autoDestroy: true
-		}, CB.DB.tasksStoreConfig));
 		this.lastFocusedElement = Ext.get(document.activeElement);
 		dw = new CB.Tasks(p);
 		dw.on('beforedestroy', this.focusLastElement, this);
@@ -381,13 +377,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	,onTaskEdit: function(p, ev){//task_id, object_id, object_title, title
 		if(Ext.isEmpty(p.title)) p.title = L.EditTask;
 		if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
-		if(Ext.isEmpty(p.tasksStore)){
-				p.tasksStore = new Ext.data.DirectStore( Ext.applyIf({
-				directFn: Tasks.getAssociableTasks
-				,baseParams: {task_id: p.data.id}
-			}, CB.DB.tasksStoreConfig));
-			p.listeners = {beforedestroy: function(w){w.tasksStore.destroy();}}
-		}
 		this.lastFocusedElement = Ext.get(document.activeElement);
 		dw = new CB.Tasks(p);
 		dw.on('beforedestroy', this.focusLastElement, this);

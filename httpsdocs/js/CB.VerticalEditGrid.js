@@ -443,7 +443,10 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		if(s) this.getView().focusCell(s[0], s[1]);
 	}
 	,onAfterEditProperty: function(e){
-		if(e.field != 'value') return;
+		if(e.field != 'value'){
+			if(e.value != e.originalValue) this.fireEvent('change');
+			return;
+		}
 		sm = this.getSelectionModel();
 		s = this.getSelectionModel().getSelectedCell();
 		if(s) sm.select(s[0], s[1]);

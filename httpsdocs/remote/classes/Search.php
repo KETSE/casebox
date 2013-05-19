@@ -97,10 +97,16 @@ class Search extends SolrClient{
 			// $ids = Util\toNumericArray($p->types);
 			if(!empty($p->types)) $fq[] = 'type:('.implode(' OR ', $p->types).')';
 		}
+
 		if(!empty($p->templates)){
 			$ids = Util\toNumericArray($p->templates);
 			if(!empty($ids)) $fq[] = 'template_id:('.implode(' OR ', $ids).')';
 		}
+		if(!empty($p->template_types)){
+			if(!is_array($p->template_types)) $p->template_types = explode(',', $p->template_types);
+			if(!empty($p->template_types)) $fq[] = 'template_type:("'.implode('" OR "', $p->template_types).'")';
+		}
+
 		if(!empty($p->tags)){
 			$ids = Util\toNumericArray($p->tags);
 			if(!empty($ids))$fq[] = 'sys_tags:('.implode(' OR ', $ids).')';
@@ -529,26 +535,11 @@ class Search extends SolrClient{
 				$res->close();
 				
 				if(!empty($values))
-					foreach($values as $k => $v) $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
+					foreach($values as $k => $v) 
+						if(isset( $names[$k] )) $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
 				break;
 		}
 		return true;
-	}
-
-	public function searchObjects($p){
-		/* searching case objects */
-		$rez = array('success' => true, 'data' => array() );
-
-		if(!empty($p->object_pid) && is_numeric($p->object_pid)){
-			$res = DB\mysqli_query_params('select f_get_objects_case_id($1)', array($p->object_pid)) or die(DB\mysqli_query_error());
-			if($r = $res->fetch_row()){
-				if(!empty($r[0])) $p->object_pid = $r[0];
-			}
-			$res->close();
-			$p->pids = $p->object_pid;
-		}
-		$p->fl = 'id,name,type,subtype,status,date,sys_tags,template_id';
-		return $this->query($p);
 	}
 
 }

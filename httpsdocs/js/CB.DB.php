@@ -93,8 +93,11 @@ Ext.namespace('CB.DB');
 
 	/* menu */
 	$arr = Array();
-	$res = DB\mysqli_query_params('select * from menu where user_group_ids is null or concat(\',\',user_group_ids, \',\') like \'%,'.$_SESSION['user']['id'].',%\'') or die( DB\mysqli_query_error() );
-	while($r = $res->fetch_row()) $arr[] = $r;
+	$res = DB\mysqli_query_params('select * from menu') or die( DB\mysqli_query_error() );
+	while($r = $res->fetch_row()){
+		$intersection = array_intersect( explode(',', $r[4]), array_merge( $_SESSION['user']['groups'] , array($_SESSION['user']['id']) ) );
+		if( empty($r[4]) || !empty( $intersection ) ) $arr[] = $r;
+	}
 	$res->close();
 
 	echo "\n".'CB.DB.menu = new Ext.data.ArrayStore({'.
@@ -326,7 +329,8 @@ function getThesauriStore(thesauriId){
 	}
 	return CB.DB[storeName];
 }
-
+<?php 
+/*
 CB.DB.tasksStoreConfig = {
 	autoLoad: true
 	,paramsAsHash: true
@@ -366,3 +370,4 @@ CB.DB.tasksStoreConfig = {
 		}
 	)
 };
+/**/
