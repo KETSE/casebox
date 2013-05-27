@@ -1,6 +1,6 @@
 /*
-SQLyog Ultimate v10.42 
-MySQL - 5.5.28-log : Database - cb_demo1
+SQLyog Ultimate v11.11 (64 bit)
+MySQL - 5.5.31 : Database - cb_demo1
 *********************************************************************
 */
 
@@ -86,7 +86,7 @@ CREATE TABLE `crons` (
 
 /*Data for the table `crons` */
 
-insert  into `crons`(`id`,`cron_id`,`cron_file`,`last_start_time`,`last_end_time`,`execution_info`,`execution_skip_times`) values (1,'send_log_notifications','/var/www/vhosts/casebox.org/casebox/crons/cron_send_log_notifications.php','2013-04-22 09:14:31','2013-04-22 09:14:31','ok',0),(2,'solr_update_tree','/var/www/casebox/casebox/crons/cron_solr_update_tree.php','2013-05-19 11:27:21','2013-05-19 11:27:21','ok',0),(3,'extract_file_contents','/var/www/casebox/casebox/crons/cron_extracting_file_contents.php','2013-05-19 11:25:02','2013-05-19 11:25:02','{\"Total\":0,\"Processed\":0,\"Not found\":0,\"Processed List\":[],\"Not found List\":[]}',0),(4,'check_deadlines','/var/www/casebox/casebox/crons/cron_check_deadlines.php','2013-05-19 11:27:02','2013-05-19 11:27:02','ok',0),(5,'test','/var/www/casebox/casebox/crons/test_mail_format.php','2013-01-24 09:14:54','2013-01-24 09:14:54','ok',0),(6,'send_notifications','/var/www/casebox/sys/crons/cron_send_notifications.php','2013-05-19 11:28:03','2013-05-19 11:28:03','ok',0);
+insert  into `crons`(`id`,`cron_id`,`cron_file`,`last_start_time`,`last_end_time`,`execution_info`,`execution_skip_times`) values (1,'send_log_notifications','/var/www/vhosts/casebox.org/casebox/crons/cron_send_log_notifications.php','2013-04-22 09:14:31','2013-04-22 09:14:31','ok',0),(2,'solr_update_tree','/var/www/casebox/casebox/crons/cron_solr_update_tree.php','2013-05-23 10:25:51','2013-05-23 10:25:52','ok',0),(3,'extract_file_contents','/var/www/casebox/casebox/crons/cron_extracting_file_contents.php','2013-05-27 20:45:02','2013-05-27 20:45:02','{\"Total\":0,\"Processed\":0,\"Not found\":0,\"Processed List\":[],\"Not found List\":[]}',0),(4,'check_deadlines','/var/www/casebox/casebox/crons/cron_check_deadlines.php','2013-05-27 20:45:02','2013-05-27 20:45:02','ok',0),(5,'test','/var/www/casebox/casebox/crons/test_mail_format.php','2013-01-24 09:14:54','2013-01-24 09:14:54','ok',0),(6,'send_notifications','/var/www/casebox/sys/crons/cron_send_notifications.php','2013-05-27 20:46:02','2013-05-27 20:46:02','ok',0);
 
 /*Table structure for table `favorites` */
 
@@ -296,11 +296,11 @@ CREATE TABLE `objects` (
   KEY `FK_objects__cid` (`cid`),
   KEY `FK_objects__uid` (`uid`),
   KEY `FK_objects_pid` (`pid`),
+  CONSTRAINT `FK_objects_pid` FOREIGN KEY (`pid`) REFERENCES `objects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_objects__cid` FOREIGN KEY (`cid`) REFERENCES `users_groups` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `FK_objects__private_for_user` FOREIGN KEY (`private_for_user`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_objects__template_id` FOREIGN KEY (`template_id`) REFERENCES `templates` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_objects__uid` FOREIGN KEY (`uid`) REFERENCES `users_groups` (`id`) ON UPDATE CASCADE,
-  CONSTRAINT `FK_objects_pid` FOREIGN KEY (`pid`) REFERENCES `objects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_objects__uid` FOREIGN KEY (`uid`) REFERENCES `users_groups` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
 
 /*Data for the table `objects` */
@@ -328,7 +328,7 @@ CREATE TABLE `objects_data` (
   KEY `IDX_object_id` (`object_id`),
   CONSTRAINT `FK_objects_data__field_id` FOREIGN KEY (`field_id`) REFERENCES `templates_structure` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_objects_data__private_for_user` FOREIGN KEY (`private_for_user`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=184 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=160 DEFAULT CHARSET=utf8;
 
 /*Data for the table `objects_data` */
 
@@ -377,11 +377,11 @@ CREATE TABLE `tags` (
   KEY `FK_tags__user_id` (`user_id`),
   CONSTRAINT `FK_tags__pid` FOREIGN KEY (`pid`) REFERENCES `tags` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tags__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8;
 
 /*Data for the table `tags` */
 
-insert  into `tags`(`id`,`old_id`,`old_group_id`,`pid`,`l1`,`l2`,`l3`,`l4`,`type`,`order`,`hidden`,`iconCls`,`user_id`,`group_id`) values (1,NULL,NULL,NULL,'Administrator','Administrator','Administrator','Administrator',1,33,NULL,'icon-user-m',NULL,9),(28,NULL,NULL,NULL,'System folders','System folders',NULL,NULL,0,36,NULL,NULL,NULL,NULL),(29,NULL,NULL,28,'Folder 1','Folder 1',NULL,NULL,1,1,NULL,NULL,NULL,NULL),(30,NULL,NULL,28,'Folder 2','Folder 2',NULL,NULL,1,2,NULL,NULL,NULL,NULL),(32,NULL,NULL,NULL,'Demo User2','Demo User2','Демо Пользователь2',NULL,1,0,NULL,'icon-user-m',NULL,9),(33,NULL,NULL,NULL,'Keywords','Keywords',NULL,NULL,0,38,NULL,NULL,NULL,NULL),(34,NULL,NULL,NULL,'Descriptors','Descriptors',NULL,NULL,0,39,NULL,NULL,NULL,NULL),(67,NULL,NULL,NULL,'Demo User1','Demo User1','Демо Пользователь1',NULL,1,0,NULL,'icon-user-m',NULL,9),(69,NULL,NULL,NULL,'Task categories','Task categories',NULL,NULL,0,42,NULL,NULL,NULL,NULL),(70,NULL,NULL,69,'Regional','Regional',NULL,NULL,1,1,NULL,'task-blue',NULL,NULL),(71,NULL,NULL,69,'International','International',NULL,NULL,1,2,NULL,'task-orange',NULL,NULL),(73,NULL,NULL,NULL,'SYSTEM','SYSTÈME','СИСТЕМА',NULL,1,0,NULL,NULL,NULL,9),(74,NULL,NULL,NULL,'Everyone','Tous','Все',NULL,1,0,NULL,NULL,NULL,9),(75,NULL,NULL,NULL,'Administrators','Administrateurs','Администраторы',NULL,1,0,NULL,NULL,NULL,9),(76,NULL,NULL,NULL,'Managers','Gestionnaires','Менеджеры',NULL,1,0,NULL,NULL,NULL,9),(77,NULL,NULL,NULL,'Lawyers','Avocats','Адвокаты',NULL,1,0,NULL,NULL,NULL,9);
+insert  into `tags`(`id`,`old_id`,`old_group_id`,`pid`,`l1`,`l2`,`l3`,`l4`,`type`,`order`,`hidden`,`iconCls`,`user_id`,`group_id`) values (28,NULL,NULL,NULL,'System folders','System folders',NULL,NULL,0,36,NULL,NULL,NULL,NULL),(29,NULL,NULL,28,'Folder 1','Folder 1',NULL,NULL,1,1,NULL,NULL,NULL,NULL),(30,NULL,NULL,28,'Folder 2','Folder 2',NULL,NULL,1,2,NULL,NULL,NULL,NULL),(33,NULL,NULL,NULL,'Keywords','Keywords',NULL,NULL,0,38,NULL,NULL,NULL,NULL),(34,NULL,NULL,NULL,'Descriptors','Descriptors',NULL,NULL,0,39,NULL,NULL,NULL,NULL),(69,NULL,NULL,NULL,'Task categories','Task categories',NULL,NULL,0,42,NULL,NULL,NULL,NULL),(70,NULL,NULL,69,'Regional','Regional',NULL,NULL,1,1,NULL,'task-blue',NULL,NULL),(71,NULL,NULL,69,'International','International',NULL,NULL,1,2,NULL,'task-orange',NULL,NULL);
 
 /*Table structure for table `tasks` */
 
@@ -569,6 +569,7 @@ CREATE TABLE `tree` (
   `is_main` tinyint(1) DEFAULT NULL,
   `cfg` text,
   `inherit_acl` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'inherit the access permissions from parent',
+  `acl_count` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'Count of acl rules set for this node in tree_acl table',
   `cid` int(10) unsigned DEFAULT NULL COMMENT 'creator id',
   `cdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'creation date',
   `uid` int(10) DEFAULT NULL COMMENT 'updater id',
@@ -590,7 +591,7 @@ CREATE TABLE `tree` (
 
 /*Data for the table `tree` */
 
-insert  into `tree`(`id`,`old_id`,`pid`,`case_id`,`user_id`,`system`,`type`,`subtype`,`template_id`,`tag_id`,`target_id`,`name`,`date`,`date_end`,`size`,`is_main`,`cfg`,`inherit_acl`,`cid`,`cdate`,`uid`,`udate`,`updated`,`oid`,`did`,`ddate`,`dstatus`) values (1,NULL,NULL,NULL,NULL,1,1,0,18,NULL,NULL,'Home',NULL,NULL,NULL,1,NULL,1,1,'2012-11-17 12:22:37',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(2,NULL,NULL,NULL,1,1,1,2,18,NULL,NULL,'[Favorites]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(3,NULL,2,NULL,1,1,1,1,18,NULL,NULL,'[Recent]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(4,NULL,NULL,NULL,1,1,1,3,18,NULL,NULL,'[MyCaseBox]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(5,NULL,4,NULL,1,1,1,4,18,NULL,NULL,'[Cases]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(6,NULL,4,NULL,1,1,1,5,18,NULL,NULL,'[Tasks]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(7,NULL,6,NULL,1,1,1,1,18,NULL,NULL,'[Upcoming]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(8,NULL,6,NULL,1,1,1,1,18,NULL,NULL,'[Missed]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(9,NULL,6,NULL,1,1,1,1,18,NULL,NULL,'[Closed]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(10,NULL,4,NULL,1,1,1,6,18,NULL,NULL,'[Messages]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(11,NULL,10,NULL,1,1,1,1,18,NULL,NULL,'[New]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(12,NULL,10,NULL,1,1,1,1,18,NULL,NULL,'[Unread]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(13,NULL,4,NULL,1,1,1,7,18,NULL,NULL,'[PrivateArea]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(14,NULL,NULL,NULL,NULL,1,1,8,18,NULL,NULL,'Casebox',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(15,NULL,14,NULL,NULL,1,1,4,18,NULL,NULL,'[Cases]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(16,NULL,14,NULL,NULL,1,1,5,18,NULL,NULL,'[Tasks]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(17,NULL,16,NULL,NULL,1,1,1,18,NULL,NULL,'[Upcoming]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(18,NULL,16,NULL,NULL,1,1,1,18,NULL,NULL,'[Missed]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(19,NULL,16,NULL,NULL,1,1,1,18,NULL,NULL,'[Closed]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(20,NULL,14,NULL,NULL,1,1,6,18,NULL,NULL,'[Messages]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(21,NULL,20,NULL,NULL,1,1,1,18,NULL,NULL,'[New]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(22,NULL,20,NULL,NULL,1,1,1,18,NULL,NULL,'[Unread]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(23,NULL,1,NULL,1,0,1,0,18,NULL,NULL,'Articles',NULL,NULL,NULL,NULL,NULL,1,1,'2013-01-28 09:48:01',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(24,NULL,1,NULL,1,0,1,0,18,NULL,NULL,'Countries',NULL,NULL,NULL,NULL,NULL,1,1,'2013-01-28 09:48:18',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(63,NULL,23,NULL,1,0,1,0,18,NULL,NULL,'2012',NULL,NULL,NULL,NULL,NULL,1,1,'2013-01-31 09:49:36',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(64,NULL,23,NULL,1,0,1,0,18,NULL,NULL,'2011',NULL,NULL,NULL,NULL,NULL,1,1,'2013-01-31 09:49:42',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(73,NULL,1,NULL,NULL,0,1,0,18,NULL,NULL,'Authors',NULL,NULL,NULL,NULL,NULL,1,1,'2013-02-05 09:27:20',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(74,NULL,2,NULL,1,1,1,3,18,NULL,NULL,'[MyDocuments]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2013-04-27 19:28:09',NULL,NULL,0,NULL,NULL,NULL,0),(75,NULL,24,NULL,NULL,0,4,0,21,NULL,NULL,'Switzerland','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 20:55:36',NULL,NULL,0,1,NULL,NULL,0),(76,NULL,24,NULL,NULL,0,4,0,21,NULL,NULL,'Italy','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 20:55:44',NULL,NULL,0,1,NULL,NULL,0),(77,NULL,24,NULL,NULL,0,4,0,21,NULL,NULL,'Russia','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 20:55:53',NULL,NULL,0,1,NULL,NULL,0),(78,NULL,24,NULL,NULL,0,4,0,21,NULL,NULL,'Ukraine','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 20:56:01',NULL,NULL,0,1,NULL,NULL,0),(79,NULL,75,NULL,NULL,0,4,0,23,NULL,NULL,'Geneva','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 20:56:52',NULL,NULL,0,1,NULL,NULL,0),(80,NULL,75,NULL,NULL,0,4,0,23,NULL,NULL,'Bern','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 20:56:59',NULL,NULL,0,1,NULL,NULL,0),(81,NULL,77,NULL,NULL,0,4,0,23,NULL,NULL,'Moscow','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 20:57:17',NULL,NULL,0,1,NULL,NULL,0),(82,NULL,77,NULL,NULL,0,4,0,23,NULL,NULL,'Nizny-Novgorod','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 20:57:30',NULL,NULL,0,1,NULL,NULL,0),(83,NULL,73,NULL,NULL,0,4,0,18,NULL,NULL,'A','2013-04-27 20:57:44',NULL,NULL,NULL,NULL,1,1,'2013-04-27 20:57:44',NULL,NULL,0,1,NULL,NULL,0),(84,NULL,73,NULL,NULL,0,4,0,18,NULL,NULL,'B','2013-04-27 20:59:16',NULL,NULL,NULL,NULL,1,1,'2013-04-27 20:59:16',NULL,NULL,0,1,NULL,NULL,0),(85,NULL,73,NULL,NULL,0,4,0,18,NULL,NULL,'C','2013-04-27 20:59:20',NULL,NULL,NULL,NULL,1,1,'2013-04-27 20:59:20',NULL,NULL,0,1,NULL,NULL,0),(86,NULL,83,NULL,NULL,0,4,0,22,NULL,NULL,'Archie Bloomberg','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 20:59:53',NULL,NULL,0,1,NULL,NULL,0),(87,NULL,89,NULL,NULL,0,4,0,22,NULL,NULL,'Matthew Hamilton','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 21:00:08',NULL,NULL,0,1,NULL,NULL,0),(88,NULL,85,NULL,NULL,0,4,0,22,NULL,NULL,'Christopher Smith','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 21:00:33',NULL,NULL,0,1,NULL,NULL,0),(89,NULL,73,NULL,NULL,0,4,0,18,NULL,NULL,'M','2013-04-27 21:00:39',NULL,NULL,NULL,NULL,1,1,'2013-04-27 21:00:39',NULL,NULL,0,1,NULL,NULL,0),(90,NULL,85,NULL,NULL,0,4,0,22,NULL,NULL,'Carol Billings','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 21:01:33',NULL,NULL,0,1,NULL,NULL,0),(91,NULL,84,NULL,NULL,0,4,0,22,NULL,NULL,'Ben Sparks','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 21:02:07',NULL,NULL,0,1,NULL,NULL,0),(92,NULL,64,NULL,NULL,0,4,0,20,NULL,NULL,'Content Management Interoperability Services','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,1,'2013-04-27 21:10:45',3,'2013-04-29 21:27:34',0,1,NULL,NULL,0),(93,NULL,NULL,NULL,3,1,1,2,18,NULL,NULL,'[Home]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2013-04-28 08:35:24',NULL,NULL,0,NULL,NULL,NULL,0),(94,NULL,93,NULL,3,1,1,3,18,NULL,NULL,'[MyDocuments]',NULL,NULL,NULL,NULL,NULL,1,NULL,'2013-04-28 08:35:24',NULL,NULL,0,NULL,NULL,NULL,0),(95,NULL,63,NULL,NULL,0,4,0,20,NULL,NULL,'Content management system','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,3,'2013-04-28 08:38:33',3,'2013-04-28 08:52:47',0,3,NULL,NULL,0),(96,NULL,63,NULL,NULL,0,4,0,20,NULL,NULL,'Document management system','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,3,'2013-04-28 08:46:07',3,'2013-04-28 08:47:57',0,3,NULL,NULL,0),(97,NULL,76,NULL,NULL,0,4,0,23,NULL,NULL,'Milan','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,3,'2013-04-28 08:46:20',NULL,NULL,0,3,NULL,NULL,0),(98,NULL,76,NULL,NULL,0,4,0,23,NULL,NULL,'Rome','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,3,'2013-04-28 08:46:31',NULL,NULL,0,3,NULL,NULL,0),(99,NULL,78,NULL,NULL,0,4,0,23,NULL,NULL,'Kiev','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,3,'2013-04-28 08:46:39',NULL,NULL,0,3,NULL,NULL,0),(100,NULL,78,NULL,NULL,0,4,0,23,NULL,NULL,'Kharkov','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,3,'2013-04-28 08:46:56',NULL,NULL,0,3,NULL,NULL,0),(101,NULL,64,NULL,NULL,0,4,0,20,NULL,NULL,'Object-relational database','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,3,'2013-04-28 08:50:48',3,'2013-04-28 08:51:47',0,3,NULL,NULL,0),(102,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'hib.bat<img src=a onerror=alert(document.cookie)>','0000-00-00 00:00:00','0000-00-00 00:00:00',70,NULL,NULL,1,3,'2013-04-30 17:03:32',3,'2013-04-30 17:03:32',0,3,3,'2013-05-01 15:21:18',1),(103,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'rest.bat','0000-00-00 00:00:00','0000-00-00 00:00:00',55,NULL,NULL,1,3,'2013-05-01 15:21:05',3,'2013-05-01 15:21:05',0,3,3,'2013-05-01 15:27:44',1),(104,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'hib.bat','0000-00-00 00:00:00','0000-00-00 00:00:00',70,NULL,NULL,1,3,'2013-05-01 15:25:39',3,'2013-05-01 15:25:39',0,3,3,'2013-05-01 15:27:44',1),(105,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'hib (1).bat','0000-00-00 00:00:00','0000-00-00 00:00:00',70,NULL,NULL,1,3,'2013-05-01 15:26:44',3,'2013-05-01 15:26:44',0,3,3,'2013-05-01 15:27:12',1),(106,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'hib.bat','0000-00-00 00:00:00','0000-00-00 00:00:00',70,NULL,NULL,1,3,'2013-05-01 15:27:59',3,'2013-05-01 15:27:59',0,3,NULL,NULL,0),(107,NULL,64,NULL,NULL,0,5,0,19,NULL,NULL,'1351wordsforchildrenandadults.pdf','2013-05-12 09:02:45','2013-05-12 09:02:45',17897201,NULL,NULL,1,3,'2013-05-12 09:02:45',3,'2013-05-12 09:02:45',0,3,NULL,NULL,0),(108,NULL,64,NULL,NULL,0,5,0,19,NULL,NULL,'jquery_1_3_1440.png','2013-05-12 09:03:02','2013-05-12 09:03:02',719539,NULL,NULL,1,3,'2013-05-12 09:03:02',3,'2013-05-12 09:03:02',0,3,NULL,NULL,0);
+insert  into `tree`(`id`,`old_id`,`pid`,`case_id`,`user_id`,`system`,`type`,`subtype`,`template_id`,`tag_id`,`target_id`,`name`,`date`,`date_end`,`size`,`is_main`,`cfg`,`inherit_acl`,`acl_count`,`cid`,`cdate`,`uid`,`udate`,`updated`,`oid`,`did`,`ddate`,`dstatus`) values (1,NULL,NULL,NULL,NULL,1,1,0,18,NULL,NULL,'Home',NULL,NULL,NULL,1,NULL,1,2,1,'2012-11-17 12:22:37',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(2,NULL,NULL,NULL,1,1,1,2,18,NULL,NULL,'[Favorites]',NULL,NULL,NULL,NULL,NULL,1,1,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(3,NULL,2,NULL,1,1,1,1,18,NULL,NULL,'[Recent]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(4,NULL,NULL,NULL,1,1,1,3,18,NULL,NULL,'[MyCaseBox]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(5,NULL,4,NULL,1,1,1,4,18,NULL,NULL,'[Cases]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(6,NULL,4,NULL,1,1,1,5,18,NULL,NULL,'[Tasks]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(7,NULL,6,NULL,1,1,1,1,18,NULL,NULL,'[Upcoming]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(8,NULL,6,NULL,1,1,1,1,18,NULL,NULL,'[Missed]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(9,NULL,6,NULL,1,1,1,1,18,NULL,NULL,'[Closed]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(10,NULL,4,NULL,1,1,1,6,18,NULL,NULL,'[Messages]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(11,NULL,10,NULL,1,1,1,1,18,NULL,NULL,'[New]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(12,NULL,10,NULL,1,1,1,1,18,NULL,NULL,'[Unread]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(13,NULL,4,NULL,1,1,1,7,18,NULL,NULL,'[PrivateArea]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(14,NULL,NULL,NULL,NULL,1,1,8,18,NULL,NULL,'Casebox',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(15,NULL,14,NULL,NULL,1,1,4,18,NULL,NULL,'[Cases]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(16,NULL,14,NULL,NULL,1,1,5,18,NULL,NULL,'[Tasks]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(17,NULL,16,NULL,NULL,1,1,1,18,NULL,NULL,'[Upcoming]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(18,NULL,16,NULL,NULL,1,1,1,18,NULL,NULL,'[Missed]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(19,NULL,16,NULL,NULL,1,1,1,18,NULL,NULL,'[Closed]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(20,NULL,14,NULL,NULL,1,1,6,18,NULL,NULL,'[Messages]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(21,NULL,20,NULL,NULL,1,1,1,18,NULL,NULL,'[New]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(22,NULL,20,NULL,NULL,1,1,1,18,NULL,NULL,'[Unread]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2012-12-02 20:36:44',NULL,'2013-03-21 14:07:36',0,NULL,NULL,NULL,0),(23,NULL,1,NULL,1,0,1,0,18,NULL,NULL,'Articles',NULL,NULL,NULL,NULL,NULL,1,0,1,'2013-01-28 09:48:01',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(24,NULL,1,NULL,1,0,1,0,18,NULL,NULL,'Countries',NULL,NULL,NULL,NULL,NULL,1,2,1,'2013-01-28 09:48:18',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(63,NULL,23,NULL,1,0,1,0,18,NULL,NULL,'2012',NULL,NULL,NULL,NULL,NULL,1,0,1,'2013-01-31 09:49:36',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(64,NULL,23,NULL,1,0,1,0,18,NULL,NULL,'2011',NULL,NULL,NULL,NULL,NULL,1,0,1,'2013-01-31 09:49:42',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(73,NULL,1,NULL,NULL,0,1,0,18,NULL,NULL,'Authors',NULL,NULL,NULL,NULL,NULL,1,0,1,'2013-02-05 09:27:20',1,'2013-03-21 14:07:36',0,1,NULL,NULL,0),(74,NULL,2,NULL,1,1,1,3,18,NULL,NULL,'[MyDocuments]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2013-04-27 19:28:09',NULL,NULL,0,NULL,NULL,NULL,0),(75,NULL,24,NULL,NULL,0,4,0,21,NULL,NULL,'Switzerland','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 20:55:36',NULL,NULL,0,1,NULL,NULL,0),(76,NULL,24,NULL,NULL,0,4,0,21,NULL,NULL,'Italy','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 20:55:44',NULL,NULL,0,1,NULL,NULL,0),(77,NULL,24,NULL,NULL,0,4,0,21,NULL,NULL,'Russia','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 20:55:53',NULL,NULL,0,1,NULL,NULL,0),(78,NULL,24,NULL,NULL,0,4,0,21,NULL,NULL,'Ukraine','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 20:56:01',NULL,NULL,0,1,NULL,NULL,0),(79,NULL,75,NULL,NULL,0,4,0,23,NULL,NULL,'Geneva','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 20:56:52',NULL,NULL,0,1,NULL,NULL,0),(80,NULL,75,NULL,NULL,0,4,0,23,NULL,NULL,'Bern','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 20:56:59',NULL,NULL,0,1,NULL,NULL,0),(81,NULL,77,NULL,NULL,0,4,0,23,NULL,NULL,'Moscow','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 20:57:17',NULL,NULL,0,1,NULL,NULL,0),(82,NULL,77,NULL,NULL,0,4,0,23,NULL,NULL,'Nizny-Novgorod','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 20:57:30',NULL,NULL,0,1,NULL,NULL,0),(83,NULL,73,NULL,NULL,0,4,0,18,NULL,NULL,'A','2013-04-27 20:57:44',NULL,NULL,NULL,NULL,1,0,1,'2013-04-27 20:57:44',NULL,NULL,0,1,NULL,NULL,0),(84,NULL,73,NULL,NULL,0,4,0,18,NULL,NULL,'B','2013-04-27 20:59:16',NULL,NULL,NULL,NULL,1,0,1,'2013-04-27 20:59:16',NULL,NULL,0,1,NULL,NULL,0),(85,NULL,73,NULL,NULL,0,4,0,18,NULL,NULL,'C','2013-04-27 20:59:20',NULL,NULL,NULL,NULL,1,0,1,'2013-04-27 20:59:20',NULL,NULL,0,1,NULL,NULL,0),(86,NULL,83,NULL,NULL,0,4,0,22,NULL,NULL,'Archie Bloomberg','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 20:59:53',NULL,NULL,0,1,NULL,NULL,0),(87,NULL,89,NULL,NULL,0,4,0,22,NULL,NULL,'Matthew Hamilton','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 21:00:08',NULL,NULL,0,1,NULL,NULL,0),(88,NULL,85,NULL,NULL,0,4,0,22,NULL,NULL,'Christopher Smith','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 21:00:33',NULL,NULL,0,1,NULL,NULL,0),(89,NULL,73,NULL,NULL,0,4,0,18,NULL,NULL,'M','2013-04-27 21:00:39',NULL,NULL,NULL,NULL,1,0,1,'2013-04-27 21:00:39',NULL,NULL,0,1,NULL,NULL,0),(90,NULL,85,NULL,NULL,0,4,0,22,NULL,NULL,'Carol Billings','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 21:01:33',NULL,NULL,0,1,NULL,NULL,0),(91,NULL,84,NULL,NULL,0,4,0,22,NULL,NULL,'Ben Sparks','2013-04-27 00:00:00','2013-04-27 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 21:02:07',NULL,NULL,0,1,NULL,NULL,0),(92,NULL,64,NULL,NULL,0,4,0,20,NULL,NULL,'Content Management Interoperability Services','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,0,1,'2013-04-27 21:10:45',3,'2013-04-29 21:27:34',0,1,NULL,NULL,0),(93,NULL,NULL,NULL,3,1,1,2,18,NULL,NULL,'[Home]',NULL,NULL,NULL,NULL,NULL,1,1,NULL,'2013-04-28 08:35:24',NULL,NULL,0,NULL,NULL,NULL,0),(94,NULL,93,NULL,3,1,1,3,18,NULL,NULL,'[MyDocuments]',NULL,NULL,NULL,NULL,NULL,1,0,NULL,'2013-04-28 08:35:24',NULL,NULL,0,NULL,NULL,NULL,0),(95,NULL,63,NULL,NULL,0,4,0,20,NULL,NULL,'Content management system','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,0,3,'2013-04-28 08:38:33',3,'2013-04-28 08:52:47',0,3,NULL,NULL,0),(96,NULL,63,NULL,NULL,0,4,0,20,NULL,NULL,'Document management system','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,0,3,'2013-04-28 08:46:07',3,'2013-04-28 08:47:57',0,3,NULL,NULL,0),(97,NULL,76,NULL,NULL,0,4,0,23,NULL,NULL,'Milan','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,0,3,'2013-04-28 08:46:20',NULL,NULL,0,3,NULL,NULL,0),(98,NULL,76,NULL,NULL,0,4,0,23,NULL,NULL,'Rome','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,0,3,'2013-04-28 08:46:31',NULL,NULL,0,3,NULL,NULL,0),(99,NULL,78,NULL,NULL,0,4,0,23,NULL,NULL,'Kiev','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,0,3,'2013-04-28 08:46:39',NULL,NULL,0,3,NULL,NULL,0),(100,NULL,78,NULL,NULL,0,4,0,23,NULL,NULL,'Kharkov','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,0,3,'2013-04-28 08:46:56',NULL,NULL,0,3,NULL,NULL,0),(101,NULL,64,NULL,NULL,0,4,0,20,NULL,NULL,'Object-relational database','2013-04-28 00:00:00','2013-04-28 00:00:00',NULL,NULL,NULL,1,0,3,'2013-04-28 08:50:48',3,'2013-04-28 08:51:47',0,3,NULL,NULL,0),(102,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'hib.bat<img src=a onerror=alert(document.cookie)>','0000-00-00 00:00:00','0000-00-00 00:00:00',70,NULL,NULL,1,0,3,'2013-04-30 17:03:32',3,'2013-04-30 17:03:32',0,3,3,'2013-05-01 15:21:18',1),(103,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'rest.bat','0000-00-00 00:00:00','0000-00-00 00:00:00',55,NULL,NULL,1,0,3,'2013-05-01 15:21:05',3,'2013-05-01 15:21:05',0,3,3,'2013-05-01 15:27:44',1),(104,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'hib.bat','0000-00-00 00:00:00','0000-00-00 00:00:00',70,NULL,NULL,1,0,3,'2013-05-01 15:25:39',3,'2013-05-01 15:25:39',0,3,3,'2013-05-01 15:27:44',1),(105,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'hib (1).bat','0000-00-00 00:00:00','0000-00-00 00:00:00',70,NULL,NULL,1,0,3,'2013-05-01 15:26:44',3,'2013-05-01 15:26:44',0,3,3,'2013-05-01 15:27:12',1),(106,NULL,1,NULL,NULL,0,5,0,19,NULL,NULL,'hib.bat','0000-00-00 00:00:00','0000-00-00 00:00:00',70,NULL,NULL,1,0,3,'2013-05-01 15:27:59',3,'2013-05-01 15:27:59',0,3,NULL,NULL,0),(107,NULL,64,NULL,NULL,0,5,0,19,NULL,NULL,'1351wordsforchildrenandadults.pdf','2013-05-12 09:02:45','2013-05-12 09:02:45',17897201,NULL,NULL,1,0,3,'2013-05-12 09:02:45',3,'2013-05-12 09:02:45',0,3,NULL,NULL,0),(108,NULL,64,NULL,NULL,0,5,0,19,NULL,NULL,'jquery_1_3_1440.png','2013-05-12 09:03:02','2013-05-12 09:03:02',719539,NULL,NULL,1,0,3,'2013-05-12 09:03:02',3,'2013-05-12 09:03:02',0,3,NULL,NULL,0);
 
 /*Table structure for table `tree_acl` */
 
@@ -611,11 +612,23 @@ CREATE TABLE `tree_acl` (
   KEY `FK_tree_acl__user_group_id` (`user_group_id`),
   CONSTRAINT `FK_tree_acl__node_id` FOREIGN KEY (`node_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tree_acl__user_group_id` FOREIGN KEY (`user_group_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=528 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=522 DEFAULT CHARSET=utf8;
 
 /*Data for the table `tree_acl` */
 
 insert  into `tree_acl`(`id`,`node_id`,`user_group_id`,`allow`,`deny`,`cid`,`cdate`,`uid`,`udate`) values (1,1,6,4095,0,NULL,'2013-03-20 13:57:28',NULL,NULL),(2,1,7,4095,0,NULL,'2013-03-21 12:01:16',1,'2013-04-27 19:44:09'),(3,2,1,4095,0,NULL,'2013-04-27 19:28:09',NULL,NULL),(7,93,3,4095,0,NULL,'2013-04-28 08:35:24',NULL,NULL),(519,24,10,4095,0,3,'2013-05-07 16:20:09',3,'2013-05-07 16:20:14'),(521,24,7,0,4095,3,'2013-05-07 16:20:56',NULL,NULL);
+
+/*Table structure for table `tree_acl_security_sets` */
+
+DROP TABLE IF EXISTS `tree_acl_security_sets`;
+
+CREATE TABLE `tree_acl_security_sets` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `set` varchar(500) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `tree_acl_security_sets` */
 
 /*Table structure for table `users_groups` */
 
@@ -625,7 +638,6 @@ CREATE TABLE `users_groups` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `type` tinyint(3) unsigned NOT NULL DEFAULT '2' COMMENT '1 - group, 2 - user',
   `system` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `tag_id` int(11) unsigned DEFAULT NULL,
   `name` varchar(50) NOT NULL,
   `l1` varchar(150) DEFAULT NULL,
   `l2` varchar(150) DEFAULT NULL,
@@ -657,15 +669,13 @@ CREATE TABLE `users_groups` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `IDX_type__name` (`name`,`type`),
   KEY `IDX_recover_hash` (`recover_hash`),
-  KEY `FK_users_groups__tag_id` (`tag_id`),
   KEY `FK_users_groups_language` (`language_id`),
-  KEY `IDX_type` (`type`),
-  CONSTRAINT `FK_users_groups__tag_id` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+  KEY `IDX_type` (`type`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 /*Data for the table `users_groups` */
 
-insert  into `users_groups`(`id`,`type`,`system`,`tag_id`,`name`,`l1`,`l2`,`l3`,`l4`,`sex`,`email`,`photo`,`password`,`recover_hash`,`language_id`,`short_date_format`,`long_date_format`,`cfg`,`last_login`,`login_successful`,`login_from_ip`,`last_logout`,`last_action_time`,`enabled`,`visible_in_reports`,`deleted`,`cid`,`cdate`,`uid`,`udate`,`did`,`searchField`) values (1,2,0,1,'root','Administrator','Administrator','Administrator','Administrator','m',NULL,NULL,'8fe8b64432d3b41f7dbc5d8024337e04',NULL,1,'%d.%m.%Y',NULL,'{\"personal_tags\":false}','2013-05-07 16:26:05',1,'|109.185.172.18|',NULL,'2013-05-07 16:26:05',1,1,0,1,'2010-12-05 23:00:32',1,'2013-03-20 12:54:49',NULL,' root Administrator Administrator Administrator Administrator  '),(2,2,0,32,'demo2','Demo User2','Demo User2','Демо Пользователь2',NULL,'m',NULL,NULL,'2fb38c012f0742a23859ab029658c133',NULL,1,NULL,NULL,NULL,'2013-03-14 14:34:50',1,'|195.131.166.187|',NULL,'2013-03-14 14:34:50',1,1,0,1,'2013-01-29 14:11:13',1,'2013-03-20 12:54:49',NULL,' demo2 Demo User2 Demo User2 Демо Пользователь2   '),(3,2,0,67,'demo1','Demo User1','Demo User1','Демо Пользователь1',NULL,'m',NULL,'3_Al_Haq.png','16e9ccc303140d6395b5757c749ebaff',NULL,1,NULL,NULL,NULL,'2013-05-13 14:32:16',1,'|109.185.172.18|',NULL,'2013-05-13 14:32:16',1,1,0,1,'2013-03-06 05:31:41',1,'2013-03-20 12:54:49',NULL,' demo1 Demo User1 Demo User1 Демо Пользователь1   '),(6,1,1,73,'system','SYSTEM','SYSTÈME','СИСТЕМА',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:12',NULL,' system SYSTEM SYSTÈME СИСТЕМА   '),(7,1,1,74,'everyone','Everyone','Tous','Все',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:13',NULL,' everyone Everyone Tous Все   '),(8,1,0,75,'Administrators','Administrators','Administrateurs','Администраторы',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:13',NULL,' Administrators Administrators Administrateurs Администраторы   '),(9,1,0,76,'Managers','Managers','Gestionnaires','Менеджеры',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:13',NULL,' Managers Managers Gestionnaires Менеджеры   '),(10,1,0,77,'Lawyers','Lawyers','Avocats','Адвокаты',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:13',NULL,' Lawyers Lawyers Avocats Адвокаты   ');
+insert  into `users_groups`(`id`,`type`,`system`,`name`,`l1`,`l2`,`l3`,`l4`,`sex`,`email`,`photo`,`password`,`recover_hash`,`language_id`,`short_date_format`,`long_date_format`,`cfg`,`last_login`,`login_successful`,`login_from_ip`,`last_logout`,`last_action_time`,`enabled`,`visible_in_reports`,`deleted`,`cid`,`cdate`,`uid`,`udate`,`did`,`searchField`) values (1,2,0,'root','Administrator','Administrator','Administrator','Administrator','m',NULL,NULL,'8fe8b64432d3b41f7dbc5d8024337e04',NULL,1,'%d.%m.%Y',NULL,'{\"personal_tags\":false}','2013-05-07 16:26:05',1,'|109.185.172.18|',NULL,'2013-05-07 16:26:05',1,1,0,1,'2010-12-05 23:00:32',1,'2013-03-20 12:54:49',NULL,' root Administrator Administrator Administrator Administrator  '),(2,2,0,'demo2','Demo User2','Demo User2','Демо Пользователь2',NULL,'m',NULL,NULL,'2fb38c012f0742a23859ab029658c133',NULL,1,NULL,NULL,NULL,'2013-03-14 14:34:50',1,'|195.131.166.187|',NULL,'2013-03-14 14:34:50',1,1,0,1,'2013-01-29 14:11:13',1,'2013-03-20 12:54:49',NULL,' demo2 Demo User2 Demo User2 Демо Пользователь2   '),(3,2,0,'demo1','Demo User1','Demo User1','Демо Пользователь1',NULL,'m',NULL,'3_Al_Haq.png','16e9ccc303140d6395b5757c749ebaff',NULL,1,NULL,NULL,NULL,'2013-05-13 14:32:16',1,'|109.185.172.18|',NULL,'2013-05-13 14:32:16',1,1,0,1,'2013-03-06 05:31:41',1,'2013-03-20 12:54:49',NULL,' demo1 Demo User1 Demo User1 Демо Пользователь1   '),(6,1,1,'system','SYSTEM','SYSTÈME','СИСТЕМА',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:12',NULL,' system SYSTEM SYSTÈME СИСТЕМА   '),(7,1,1,'everyone','Everyone','Tous','Все',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:13',NULL,' everyone Everyone Tous Все   '),(8,1,0,'Administrators','Administrators','Administrateurs','Администраторы',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:13',NULL,' Administrators Administrators Administrateurs Администраторы   '),(9,1,0,'Managers','Managers','Gestionnaires','Менеджеры',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:13',NULL,' Managers Managers Gestionnaires Менеджеры   '),(10,1,0,'Lawyers','Lawyers','Avocats','Адвокаты',NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1,0,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:06:13',NULL,' Lawyers Lawyers Avocats Адвокаты   ');
 
 /*Table structure for table `users_groups_association` */
 
@@ -705,7 +715,7 @@ CREATE TABLE `users_groups_data` (
   KEY `FK_users_data__duplicate_id` (`duplicate_id`),
   CONSTRAINT `FK_users_data__field_id` FOREIGN KEY (`field_id`) REFERENCES `templates_structure` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `FK_users_data__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=379 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=370 DEFAULT CHARSET=utf8;
 
 /*Data for the table `users_groups_data` */
 
@@ -736,7 +746,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `actions_log_ai` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `actions_log_ai` AFTER INSERT ON `actions_log` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `actions_log_ai` AFTER INSERT ON `actions_log` FOR EACH ROW BEGIN
 	update users_groups set last_action_time = current_timestamp where id = NEW.user_id;
     END */$$
 
@@ -749,7 +759,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `files_ai` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `files_ai` AFTER INSERT ON `files` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `files_ai` AFTER INSERT ON `files` FOR EACH ROW BEGIN
 	UPDATE tree SET 
 		`name` = new.name
 		, `date` = COALESCE(new.date, new.cdate)
@@ -807,7 +817,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `files_ad` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `files_ad` AFTER DELETE ON `files` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `files_ad` AFTER DELETE ON `files` FOR EACH ROW BEGIN
 	IF(old.content_id IS NOT NULL) THEN
 		UPDATE files_content SET ref_count = ref_count - 1 WHERE id = old.content_id;
 	END IF;
@@ -822,7 +832,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `files_content_bi` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `files_content_bi` BEFORE INSERT ON `files_content` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `files_content_bi` BEFORE INSERT ON `files_content` FOR EACH ROW BEGIN
 	if( (coalesce(new.size, 0) = 0) or (new.type like 'image%') ) THEN
 		set new.skip_parsing = 1;
 	END IF;
@@ -850,7 +860,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `files_versions_ai` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `files_versions_ai` AFTER INSERT ON `files_versions` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `files_versions_ai` AFTER INSERT ON `files_versions` FOR EACH ROW BEGIN
 	if(new.content_id is not null) THEN
 		update files_content set ref_count = ref_count + 1 where id = new.content_id;
 	end if;
@@ -865,7 +875,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `files_versions_au` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `files_versions_au` AFTER UPDATE ON `files_versions` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `files_versions_au` AFTER UPDATE ON `files_versions` FOR EACH ROW BEGIN
 	if(coalesce(old.content_id, 0) <> coalesce(new.content_id, 0) ) then
 		IF(old.content_id IS NOT NULL) THEN
 			UPDATE files_content SET ref_count = ref_count - 1 WHERE id = old.content_id;
@@ -886,7 +896,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `files_versions_ad` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `files_versions_ad` AFTER DELETE ON `files_versions` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `files_versions_ad` AFTER DELETE ON `files_versions` FOR EACH ROW BEGIN
 	IF(old.content_id IS NOT NULL) THEN
 		UPDATE files_content SET ref_count = ref_count - 1 WHERE id = old.content_id;
 	END IF;
@@ -974,7 +984,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_bi` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `tasks_bi` BEFORE INSERT ON `tasks` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `tasks_bi` BEFORE INSERT ON `tasks` FOR EACH ROW BEGIN
 	SET new.missed = (new.date_end < current_timestamp);
 	IF((new.missed = 1) && (new.status != 3) ) THEN 
 		SET new.status = 1;
@@ -991,7 +1001,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_ai` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `tasks_ai` AFTER INSERT ON `tasks` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `tasks_ai` AFTER INSERT ON `tasks` FOR EACH ROW BEGIN
 	insert into tasks_responsible_users (task_id, user_id) select new.id, id from users_groups where concat(',',new.responsible_user_ids,',') like concat('%,',id,',%');
 	UPDATE tree SET 
 		`name` = new.title
@@ -1057,7 +1067,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `templates_structure_bi` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `templates_structure_bi` BEFORE INSERT ON `templates_structure` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `templates_structure_bi` BEFORE INSERT ON `templates_structure` FOR EACH ROW BEGIN
 	if(NEW.PID is not null) THEN
 	SET NEW.LEVEL = (select `level` +1 from templates_structure where id = NEW.PID);
 	END IF;
@@ -1072,7 +1082,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `templates_structure_bu` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `templates_structure_bu` BEFORE UPDATE ON `templates_structure` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `templates_structure_bu` BEFORE UPDATE ON `templates_structure` FOR EACH ROW BEGIN
 	IF(NEW.PID IS NOT NULL) THEN
 		SET NEW.LEVEL = (SELECT `level` +1 FROM templates_structure WHERE id = NEW.PID);
 	END IF;
@@ -1138,7 +1148,7 @@ DELIMITER $$
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tree_acl_ai` */$$
 
 /*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `tree_acl_ai` AFTER INSERT ON `tree_acl` FOR EACH ROW BEGIN
-	UPDATE tree SET updated = (10 | updated) WHERE id = new.node_id;
+	UPDATE tree SET updated = (10 | updated), acl_count = acl_count + 1 WHERE id = new.node_id;
 	CALL p_mark_all_childs_as_updated(new.node_id, 10);
     END */$$
 
@@ -1166,7 +1176,7 @@ DELIMITER $$
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tree_acl_ad` */$$
 
 /*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `tree_acl_ad` AFTER DELETE ON `tree_acl` FOR EACH ROW BEGIN
-	UPDATE tree SET updated = (updated | 10) WHERE id = old.node_id;
+	UPDATE tree SET updated = (updated | 10), acl_count = acl_count -1 WHERE id = old.node_id;
 	CALL p_mark_all_childs_as_updated(old.node_id, 10);
     END */$$
 
@@ -1179,7 +1189,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `users_groups_bi` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `users_groups_bi` BEFORE INSERT ON `users_groups` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `users_groups_bi` BEFORE INSERT ON `users_groups` FOR EACH ROW BEGIN
 	set new.searchField = concat(
 		' '
 		,coalesce(new.name, '')
@@ -1195,8 +1205,6 @@ DELIMITER $$
 		,COALESCE(new.email, '')
 		,' '
 	);
-	INSERT INTO tags (l1, l2, l3, l4, `type`, iconCls) VALUES (new.l1, new.l2, new.l3, new.l4, 1, CASE new.sex WHEN 'f' THEN 'icon-user-f' WHEN 'm' THEN 'icon-user-m' ELSE 'icon-user' END);
-	set new.tag_id = last_insert_id();
     END */$$
 
 
@@ -1208,8 +1216,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `users_groups_bu` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `users_groups_bu` BEFORE UPDATE ON `users_groups` FOR EACH ROW BEGIN
-	declare tmp_iconCls varchar(20) default 'icon-user';
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `users_groups_bu` BEFORE UPDATE ON `users_groups` FOR EACH ROW BEGIN
 	SET new.searchField = CONCAT(
 		' '
 		,COALESCE(new.name, '')
@@ -1225,24 +1232,6 @@ DELIMITER $$
 		,COALESCE(new.email, '')
 		,' '
 	);
-	set tmp_iconCls = CASE new.sex WHEN 'f' THEN 'icon-user-f' WHEN 'm' THEN 'icon-user-m' END;
-	
-	INSERT INTO tags (id, l1, l2, l3, l4, `type`, iconCls) VALUES (new.tag_id, new.l1, new.l2, new.l3, new.l4, 1, tmp_iconCls)
-		on duplicate key update id = last_insert_id(new.tag_id), l1 = new.l1, l2 = new.l2, l3 = new.l3, l4 = new.l4, `type` = 1, iconCls = tmp_iconCls;
-	SET new.tag_id = LAST_INSERT_ID();
-    END */$$
-
-
-DELIMITER ;
-
-/* Trigger structure for table `users_groups` */
-
-DELIMITER $$
-
-/*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `users_groups_ad` */$$
-
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `users_groups_ad` AFTER DELETE ON `users_groups` FOR EACH ROW BEGIN
-	delete from tags where id = old.tag_id;
     END */$$
 
 
@@ -1254,7 +1243,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `users_groups_data_ai` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `users_groups_data_ai` AFTER INSERT ON `users_groups_data` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `users_groups_data_ai` AFTER INSERT ON `users_groups_data` FOR EACH ROW BEGIN
 	DECLARE tmp_field_name VARCHAR(100) DEFAULT NULL;
 	SELECT `name` INTO tmp_field_name FROM templates_structure WHERE id = new.field_id;
 	IF(tmp_field_name = 'l1') THEN UPDATE users_groups SET l1 = new.value WHERE id = new.user_id;
@@ -1278,7 +1267,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `users_groups_data_au` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `users_groups_data_au` AFTER UPDATE ON `users_groups_data` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `users_groups_data_au` AFTER UPDATE ON `users_groups_data` FOR EACH ROW BEGIN
 	DECLARE tmp_field_name VARCHAR(100) DEFAULT NULL;
 	SELECT `name` INTO tmp_field_name FROM templates_structure WHERE id = new.field_id;
 	if(tmp_field_name = 'l1') THEN UPDATE users_groups SET l1 = new.value WHERE id = new.user_id;
@@ -1302,7 +1291,7 @@ DELIMITER $$
 
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `users_groups_data_ad` */$$
 
-/*!50003 CREATE */ /*!50017 DEFINER = 'webadmin'@'%' */ /*!50003 TRIGGER `users_groups_data_ad` AFTER DELETE ON `users_groups_data` FOR EACH ROW BEGIN
+/*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `users_groups_data_ad` AFTER DELETE ON `users_groups_data` FOR EACH ROW BEGIN
 	DECLARE tmp_field_name VARCHAR(100) DEFAULT NULL;
 	SELECT `name` INTO tmp_field_name FROM templates_structure WHERE id = old.field_id;
 	IF(tmp_field_name = 'l1') THEN UPDATE users_groups SET l1 = null WHERE id = old.user_id;
@@ -1407,15 +1396,21 @@ DELIMITER $$
     COMMENT 'Returns element ids path from the tree which inherit acl from parents'
 BEGIN
 	DECLARE tmp_pid BIGINT UNSIGNED DEFAULT NULL;
+	DECLARE tmp_acl_count INT UNSIGNED DEFAULT 0;
 	DECLARE tmp_inherit BOOL DEFAULT NULL;
 	DECLARE rez text CHARSET utf8 DEFAULT '';
 	
-	set rez = concat('/', in_id);
 	
-	SELECT pid, inherit_acl INTO tmp_pid, tmp_inherit FROM tree WHERE id = in_id;
-	WHILE( (tmp_pid IS NOT NULL) AND (tmp_inherit = 1) and ( INSTR(concat(rez, '/'), concat('/', tmp_pid, '/') ) =0) ) DO
-		SET rez = CONCAT('/', tmp_pid, rez);
-		SELECT pid, inherit_acl INTO tmp_pid, tmp_inherit FROM tree WHERE id = tmp_pid;
+	SELECT pid, inherit_acl, acl_count INTO tmp_pid, tmp_inherit, tmp_acl_count FROM tree WHERE id = in_id;
+	IF( tmp_acl_count > 0 ) THEN
+		SET rez = CONCAT('/', in_id);
+	END IF;
+	WHILE( (tmp_pid IS NOT NULL) AND (tmp_inherit = 1) and ( INSTR(concat(rez, '/'), concat('/', tmp_pid, '/') ) = 0) ) DO
+		SET in_id = tmp_pid;
+		SELECT pid, inherit_acl, acl_count INTO tmp_pid, tmp_inherit, tmp_acl_count FROM tree WHERE id = in_id;
+		IF( tmp_acl_count > 0 ) THEN
+			SET rez = CONCAT('/', in_id, rez);
+		END IF;
 	END WHILE;
 	RETURN rez;
     END */$$
@@ -1677,6 +1672,23 @@ BEGIN
     END */$$
 DELIMITER ;
 
+/* Procedure structure for procedure `p_recalculate_security_sets` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `p_recalculate_security_sets` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`local`@`localhost` PROCEDURE `p_recalculate_security_sets`()
+    MODIFIES SQL DATA
+    SQL SECURITY INVOKER
+BEGIN
+	truncate table `tree_acl_security_sets`;
+	insert into tree_acl_security_sets (id, `set`) 
+		select node_id, `f_get_tree_inherit_ids`(node_id) from 
+		(SELECT DISTINCT node_id FROM `tree_acl`) t;
+    END */$$
+DELIMITER ;
+
 /* Procedure structure for procedure `p_sort_tags` */
 
 /*!50003 DROP PROCEDURE IF EXISTS  `p_sort_tags` */;
@@ -1759,6 +1771,24 @@ DELIMITER $$
 BEGIN
 	UPDATE files_content c SET ref_count = COALESCE((SELECT COUNT(id) FROM files WHERE content_id = c.id), 0)+
 	COALESCE((SELECT COUNT(id) FROM files_versions WHERE content_id = c.id), 0);
+    END */$$
+DELIMITER ;
+
+/* Procedure structure for procedure `p_update_tree_acl_count` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `p_update_tree_acl_count` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`local`@`localhost` PROCEDURE `p_update_tree_acl_count`()
+    MODIFIES SQL DATA
+    SQL SECURITY INVOKER
+    COMMENT 'Update acl_count field in tree table'
+BEGIN
+	
+	create temporary table tmp_tree_acl_count select node_id `id`, count(*) `count` FROM `tree_acl` group by node_id;
+	UPDATE tree, tmp_tree_acl_count set tree.acl_count = tmp_tree_acl_count.count where tree.id = tmp_tree_acl_count.id;
+	drop table tmp_tree_acl_count;
     END */$$
 DELIMITER ;
 
