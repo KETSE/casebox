@@ -128,12 +128,9 @@ class UsersGroups{
 		require_once 'VerticalEditGrid.php';
 		VerticalEditGrid::addFormData('users_groups', $p);
 		
-		$res = DB\mysqli_query_params('select tag_id from users_groups where id = $1', $user_id) or die(DB\mysqli_query_error());
-		if($r = $res->fetch_row()) $rez['data']['tag_id'] = $r[0];
-		$res->close();
 		/* in case it was a deleted user we delete all old acceses */
 		DB\mysqli_query_params('delete from users_groups_association where user_id = $1', $user_id) or die(DB\mysqli_query_error());
-		DB\mysqli_query_params('delete from tree_acl where user_group_id = $1', $rez['data']['tag_id']) or die(DB\mysqli_query_error());
+		DB\mysqli_query_params('delete from tree_acl where user_group_id = $1', $rez['data']['id']) or die(DB\mysqli_query_error());
 		/* end of in case it was a deleted user we delete all old acceses */
 		if( isset($p->group_id) && is_numeric($p->group_id) ){ //&& ( in_array($p->group_id, Security::getManagedOfficeIds()) )
 			DB\mysqli_query_params('insert into users_groups_association (user_id, group_id, cid) values($1, $2, $3) on duplicate key update cid = $3', Array($user_id, $p->group_id, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
@@ -381,7 +378,7 @@ class UsersGroups{
 	 */
 	public static function getUserPreferences($user_id){
 		$rez = array();
-		$res = DB\mysqli_query_params('select id, tag_id, name, '.config\language_fields.', sex, email, language_id, short_date_format, long_date_format from users_groups where enabled = 1 and deleted = 0 and id = $1', $user_id) or die(DB\mysqli_query_error());
+		$res = DB\mysqli_query_params('select id, name, '.config\language_fields.', sex, email, language_id, short_date_format, long_date_format from users_groups where enabled = 1 and deleted = 0 and id = $1', $user_id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			$r['language'] = $GLOBALS['languages'][$r['language_id']-1];
 			$r['long_date_format'] = Util\coalesce($r['long_date_format'], $GLOBALS['language_settings'][$r['language']]['long_date_format']);

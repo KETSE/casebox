@@ -603,9 +603,11 @@ class Objects{
 					
 					$field_config = json_decode($dr['cfg'], true);
 					if(@$field_config['faceting']){
-						$solr_field = ( empty($field_config['source']) || ($field_config['source'] == 'thesauri') ) ? 'sys_tags' : 'tree_tags';
+						$solr_field = $dr['solr_column_name'];
+						if(empty($solr_field)) $solr_field = ( empty($field_config['source']) || ($field_config['source'] == 'thesauri') ) ? 'sys_tags' : 'tree_tags';
 						$arr = Util\toNumericArray($dr['value']);
-						for ($i=0; $i < sizeof($arr); $i++) $rez[$solr_field][$arr[$i]] = 1;
+						for ($i=0; $i < sizeof($arr); $i++) //$rez[$solr_field][$arr[$i]] = 1;
+							if( empty($rez[$solr_field]) || !in_array($arr[$i], $rez[$solr_field])) $rez[$solr_field][] = $arr[$i];
 					}
 				}
 				
@@ -625,11 +627,11 @@ class Objects{
 		}
 		$res->close();
 		
-		if(!empty($rez['sys_tags'])) $rez['sys_tags'] = array_keys($rez['sys_tags']);
-		else unset($rez['sys_tags']);
+		// if(!empty($rez['sys_tags'])) $rez['sys_tags'] = array_keys($rez['sys_tags']);
+		// else unset($rez['sys_tags']);
 
-		if(!empty($rez['tree_tags'])) $rez['tree_tags'] = array_keys($rez['tree_tags']);
-		else unset($rez['tree_tags']);
+		// if(!empty($rez['tree_tags'])) $rez['tree_tags'] = array_keys($rez['tree_tags']);
+		// else unset($rez['tree_tags']);
 		return $rez;
 	}
 

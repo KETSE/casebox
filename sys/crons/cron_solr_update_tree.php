@@ -14,8 +14,11 @@ if(!$cd['success']){
 }
 $solr = new SolrClient();
 if(@$argv[2] == 'all'){
+	echo "deleting all\n";
 	$solr->deleteByQuery('*:*');
+	echo "updating tree\n";
 	$solr->updateTree(true);
+	echo "optimizing\n";
 	$solr->optimize();
 }else $solr->updateTree();
 

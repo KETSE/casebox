@@ -215,8 +215,7 @@ class Search extends SolrClient{
 
 	private function prepareFacetsParams(){
 		$p = &$this->inputParams;
-		if(empty($p->facets)) return false;
-		switch($p->facets){
+		switch(@$p->facets){
 			case 'general':
 				$this->params['facet.field'] = array(
 					'{!ex=template_type key=0template_type}template_type'
@@ -334,17 +333,25 @@ class Search extends SolrClient{
 				$this->params['facet.method'] = "enum";
 				$this->params['facet.sort'] = "lex";
 				break;
+			default: 
+				if(!empty($p->{'facet.field'})) $this->params['facet.field'] = $p->{'facet.field'};
+				if(!empty($p->{'facet.query'})) $this->params['facet.query'] = $p->{'facet.query'};
+				if(!empty($p->{'facet.pivot'})) $this->params['facet.pivot'] = $p->{'facet.pivot'};
+				if(!empty($p->{'facet.method'})) $this->params['facet.method'] = $p->{'facet.method'};
+				if(!empty($p->{'facet.sort'})) $this->params['facet.sort'] = $p->{'facet.sort'};
+				if(!empty($p->{'facet.missing'})) $this->params['facet.missing'] = $p->{'facet.missing'};
+				break;
 		}
 		if(!empty($this->params['facet.field']) || !empty($this->params['facet.pivot']) ){
 			$this->params['facet'] = 'true';
-			$this->params['facet.mincount'] = 1;
+			$this->params['facet.mincount'] = isset($p->{'facet.mincount'}) ? $p->{'facet.mincount'} : 1;
 		}
 	}
 
 	private function executeQuery(){
-		try {
+		try{
 			$this->results = $this->solr->search($this->query, $this->start, $this->rows, $this->params);
-		} catch( \Exception $e ) {
+		}catch( \Exception $e ){
 			throw new \Exception("An error occured: \n\n {$e->__toString()}");
 		}
 	}
@@ -374,7 +381,7 @@ class Search extends SolrClient{
 		$sr = &$this->results;
 		if(empty($sr->facet_counts)) return false;
 		$fc = &$sr->facet_counts;
-		switch($this->inputParams->facets){
+		switch(@$this->inputParams->facets){
 			case 'general':
 				foreach($fc->facet_fields as $k => $v){
 					$k = substr($k, 1);
@@ -454,7 +461,9 @@ class Search extends SolrClient{
 					$rez[$k] = array('f' => $k, 'items' => $v);
 				}
 				break;
-
+			default: 
+				$rez = $fc;
+				break;
 		}
 
 		return $rez;

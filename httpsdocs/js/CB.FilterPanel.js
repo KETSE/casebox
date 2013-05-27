@@ -24,7 +24,7 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
 	}
 	,updateFacets: function(data, options){
 		this.items.each(function(i){ i.setVisible(false) }, this);
-		idx = 1;
+		this.facetIndex = 1;
 		Ext.iterate(data, function(key, value, obj){
 			facet = this.find('facetId', key)[0];
 			if(Ext.isEmpty(facet)){
@@ -34,11 +34,11 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
 					,facetTitle: value.title
 					,f: Ext.isEmpty(value.f) ? key: value.f
 				})
-				this.insert(idx, facet);
+				this.insert(this.facetIndex, facet);
 			}
 			facet.processServerData(value.items, options);
 			facet.setVisible(facet.store.getCount() > 0) ;
-			idx++;
+			this.facetIndex++;
 		}, this);
 		this.updateActiveFiltersFacet(options)
 		this.syncSize();

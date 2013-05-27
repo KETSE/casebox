@@ -37,7 +37,7 @@
 <field name="name"    	type="text_general" 	indexed="true" stored="true" />
 <!-- system: field for delimiting system folders (for system this field value is 1). System folders cannot be deleted by user -->
 <field name="system"  	type="tint"  		indexed="true" stored="true" />
-<!-- type: node type 
+<!-- type: node type
 	1. Folder
 	2. Link
 	3. Case
@@ -49,7 +49,7 @@
 	This definition can be updated when needed
  -->
 <field name="type"    	type="tint"  		indexed="true" stored="true" />
-<!-- subtype: this field is dependent on type field value   
+<!-- subtype: this field is dependent on type field value
 	for field "type" = 1 (Folder) there are defined following values for subtype:
 		1 - query. This type will be probably replaced by controller property in cfg field
 		2 – My Casebox (users home folder)
@@ -59,9 +59,9 @@
 		10 - Public case folder. It’ll be created by system for any case.
 
 	for field "type" = 4 (Case object)  this field uses already defined types from templates structure (1-case object, 2-in action, 3-out action, 4-case template)
-	
+
 	for other values in field "type" his field (subtype) is not used for now
-	
+
 	This definition can be updated when needed
  -->
 <field name="subtype" 	type="tint"  		indexed="true" stored="true" />
@@ -152,13 +152,11 @@
 	For example: in case_card template there can be fields that define Managers, Lawyers, Helpers for a case.
 	For these fields, in db.templates_structure we specify the value for column "solr_column_name" = 'role_ids1' / 'role_ids2' etc.
 	So specified values for these kind of fields will be joined together per solr_column_name. This means we can have many and different objects in a case that can define role_ids.
-	The result set for role_ids is specified for absolutely all objects in a case. 
+	The result set for role_ids is specified for absolutely all objects in a case.
  -->
 <field name="role_ids1" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
 <field name="role_ids2" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
 <field name="role_ids3" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
 <field name="role_ids4" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
 <field name="role_ids5" 	type="tint" 	indexed="true" stored="true" multiValued="true" />
-
-
-<field name="_version_" 	type="tint" 	indexed="true" stored="true" multiValued="false" />
+<field name="_version_" 	type="tlong" 	indexed="true" stored="true" multiValued="false" />

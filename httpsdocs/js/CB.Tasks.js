@@ -1368,7 +1368,7 @@ CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
 		if(Ext.isEmpty(id)) return;
 		BrowserView.getChildren({
 			pid: id
-			,types: [6, 7]
+			,template_types: ['task']
 			,filters: this.filters
 			,facets:"actiontasks"
 			,sort: ['status asc', 'date_end asc']

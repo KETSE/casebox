@@ -207,7 +207,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				,idProperty: 'nid'
 				,root: 'data'
 				,messageProperty: 'msg'
-			},[ 	{name: 'nid', type: 'int'}
+			},[ 	{name: 'nid'}
 				, {name: 'pid', type: 'int'}
 				, {name: 'system', type: 'int'}
 				, {name: 'type', type: 'int'}
@@ -787,7 +787,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		this.path = this.store.baseParams.path;
 		this.folderProperties = Ext.apply({}, o.result.folderProperties)
 		
-		this.folderProperties.id = parseInt(this.folderProperties.id);
+		this.folderProperties.id = this.folderProperties.id;
 		this.folderProperties.system = parseInt(this.folderProperties.system);
 		this.folderProperties.type = parseInt(this.folderProperties.type);
 		this.folderProperties.subtype = parseInt(this.folderProperties.subtype);

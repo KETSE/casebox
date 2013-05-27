@@ -627,8 +627,11 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		})
 	}
 	,onFiltersChange: function(filters){
-		this.grid.store.baseParams.filters = filters;
-		this.onReloadClick();
+		params = Ext.apply({}, this.params);
+		params.filters = filters;
+		this.fireEvent('changeparams', params )
+		// this.grid.store.baseParams.filters = filters;
+		// this.onReloadClick();
 	}
 	,onReloadClick: function(b, e){
 		p = Ext.value(this.grid.store.lastOptions, {});
@@ -713,12 +716,16 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
 			,listeners:{
 				scope: this
 				,afterrender: this.onAfterRender
+				,changeparams: this.onChangeParams
 			}
 		})
 		CB.TasksViewGridPanel.superclass.initComponent.apply(this, arguments);
 	}
 	,onAfterRender: function(){
-		this.view.onFiltersChange({"status":[{"mode":"OR","values":["1","2"]}],"assigned":[{"mode":"OR","values":[App.loginData.id]}]});
+		this.view.setParams( { 'filters': {"status":[{"mode":"OR","values":["1","2"]}],"assigned":[{"mode":"OR","values":[App.loginData.id]}]} });
+	}
+	,onChangeParams: function(params){
+		this.view.setParams( params );
 	}
 })
 Ext.reg('CBTasksViewGridPanel', CB.TasksViewGridPanel);

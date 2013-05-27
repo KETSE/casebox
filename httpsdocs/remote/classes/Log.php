@@ -100,7 +100,7 @@ class Log{
 			
 			@$task['a'] = ' "<i class="task">'.$task['title'].'</i>"';
 			
-			$username = empty($u[$l]) ? $u['name'] : $u[$l];
+			$username = empty($u[$l]) ? @$u['name'] : $u[$l];
 			$to_user_names = array();
 			if(!empty($to_user_names_data)){
 				foreach($to_user_names_data as $tu) $to_user_names[] = '<i class="icon-user-'.$tu['sex'].'">'.(empty($tu[$l]) ? $tu['name'] : $tu[$l]).'</i>';

@@ -23,7 +23,7 @@ class User{
 		if($user_id){
 			$rez = Array('success' => true, 'user' => array());
 			
-			$sql = 'SELECT u.id, u.tag_id, u.`language_id`, '.config\language_fields.', short_date_format, long_date_format, sex, cfg FROM users_groups u WHERE u.id = $1';
+			$sql = 'SELECT u.id, u.`language_id`, '.config\language_fields.', short_date_format, long_date_format, sex, cfg FROM users_groups u WHERE u.id = $1';
 			$res = DB\mysqli_query_params($sql, $user_id) or die( DB\mysqli_query_error() );
 			if ($r = $res->fetch_assoc()) {
 				$r['admin'] = Security::isAdmin($user_id);

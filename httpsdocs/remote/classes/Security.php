@@ -22,6 +22,13 @@ class Security {
 		return $rez;
 	}
 
+	/**
+	 * Create group
+	 * 
+	 * Create a security group
+	 * 
+	 * @returns group properties
+	 */
 	public function createUserGroup($p){
 		$p->success = true;
 
@@ -40,11 +47,17 @@ class Security {
 		return $p;
 	}
 
+	/**
+	 * Update a group
+	 */
 	public function updateUserGroup($p){
 		if( !Security::isAdmin() ) throw new \Exception(L\Access_denied);
 		return array( 'success' => true, 'data' => array() );
 	}
 
+	/**
+	 * Delete a securoty group
+	 */
 	public function destroyUserGroup($p){
 		if( !Security::isAdmin() ) throw new \Exception(L\Access_denied);
 		DB\mysqli_query_params('delete from users_groups where id = $1', $p ) or die(DB\mysqli_query_error());
@@ -129,9 +142,11 @@ class Security {
 
 		return $rez;
 	}
+	
 	/**
-	* Returns estimated bidimentional array of access bits, from object acl, for a user/group
+	* Returns estimated bidimentional array of access bits, from object acl, for a user or group
 	* 
+	* Used for access display in interface
 	* Returned array has to array elements: 
 	* 	first - array bits for allow access 
 	* 	second - array bits for deny access 
@@ -143,12 +158,12 @@ class Security {
 	*	 2 - allow, inherited from a parent
 	*
 	*	Permission Precedence: 
-	*		Explicit Deny
-	*		Explicit Allow
-	*		Inherited Deny
-	*		Inherited allow
+	*		Explicit Deny (access set for input object_id, not estimated in summary with near accesses for input object_id)
+	*		Explicit Allow (access set for input object_id, not estimated in summary with near accesses for input object_id)
+	*		Inherited Deny (access inherited from all parents)
+	*		Inherited allow (access inherited from all parents)
 	*/
-	public static function getUserGroupAccessForObject($object_id, $user_group_id = false){
+	private static function getUserGroupAccessForObject($object_id, $user_group_id = false){
 		//0 List Folder/Read Data
 		//1 Create Folders
 		//2 Create Files
@@ -161,8 +176,15 @@ class Security {
 		//9 Change permissions
 		//10 Take Ownership
 		//11 Download
+		/* if no user is specified as parameter then calculating for current loged user */
 		if($user_group_id === false) $user_group_id = $_SESSION['user']['id'];
+
+		/* prepearing result array (filling it with zeroes)*/
 		$rez = array( array_fill(0,12, 0), array_fill(0,12, 0) );
+		
+		$user_group_ids = array($user_group_id);
+		$everyoneGroupId = Security::EveryoneGroupId();
+		if( $user_group_id !== $everyoneGroupId) $user_group_ids[] = $everyoneGroupId;
 
 		/* getting object ids that have inherit set to true */
 		$sql = 'select f_get_tree_inherit_ids(id) `ids` from tree where id = $1';
@@ -173,10 +195,10 @@ class Security {
 
 		/* reversing array for iterations from object to top parent */
 		$ids = array_reverse($ids);
-		$user_group_ids = array($user_group_id);
+
+
 		/* getting group ids where passed $user_group_id is a member*/
-		$sql = 'select distinct group_id from users_groups_association where user_id = $1'.
-			' union select id from users_groups where `type` = 1 and `system` = 1 and name = \'everyone\''; // adding everyone group to our group ids
+		$sql = 'select distinct group_id from users_groups_association where user_id = $1';
 		$res = DB\mysqli_query_params($sql, $user_group_id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_row()) if(!in_array($r[0], $user_group_ids)) $user_group_ids[] = $r[0];
 		$res->close();
@@ -190,7 +212,141 @@ class Security {
 		while($r = $res->fetch_assoc())
 			$acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
 		$res->close();
+		/* now iterating the $acl table and determine final set of bits/**/
+		$set_bits = 0;
+		$i=0;
+		ksort($acl, SORT_NUMERIC);
+		reset($acl);
+		while( ( current($acl) !== false ) && ($set_bits < 12) ){
+		 	$i = key($acl);
+		 	$inherited = ($i > 0) || (!isset($acl_order[$object_id]));
+			$direct_allow_user_group_access = array_fill(0,12, 0);
+			/* check firstly if direct access is specified for passed user_group_id */
+			if(!empty($acl[$i][$user_group_id])){
+				$deny = intval($acl[$i][$user_group_id][1]);
+				for ($j=0; $j < sizeof($rez[1]); $j++){ 
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) ){
+						$rez[1][$j] = -(1 + $inherited); 
+						$set_bits++;
+					}
+					$deny = $deny >> 1;
+				}
+				$allow = intval($acl[$i][$user_group_id][0]);
+				for ($j=0; $j < sizeof($rez[0]); $j++){ 
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($allow & 1) ){
+						$rez[0][$j] = (1 + $inherited);
+						$direct_allow_user_group_access[$j] = (1 + $inherited);
+						$set_bits++;
+					}
+					$allow = $allow >> 1;
+				}
+			}
+			
+			/* if we have direct access specified to requested user_group for input object_id then return just this direct access  and exclude any other access at the same level (for our object_id) */
+			if( isset($acl_order[$object_id]) && ($acl_order[$object_id]== $i) ){
+				next($acl);
+				continue;
+			}
+
+
+			if(!empty($acl[$i]))
+			foreach($acl[$i] as $key => $value) {
+				if( ($key == $user_group_id) || ($key == $everyoneGroupId) ) continue; //skip direct access setting because analized above and everyone group id will be analized last
+				$deny = intval($value[1]);
+
+				for ($j=0; $j < sizeof($rez[1]); $j++){ 
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j]) ){ //set deny access only if not set directly for that credential allow access
+						$rez[1][$j] = -(1 + $inherited); 
+						$set_bits++;
+					}
+					$deny = $deny >> 1;
+				}
+				$allow = intval($value[0]);
+				for ($j=0; $j < sizeof($rez[0]); $j++){ 
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($allow & 1) ){
+						$rez[0][$j] = (1 + $inherited);
+						$set_bits++;
+					}
+					$allow = $allow >> 1;
+				}
+			}
+
+			// now analize for everyone group id if set, but only for higher levels (inherited parents)
+			if( !empty($acl[$i][$everyoneGroupId]) ){
+				$value = $acl[$i][$everyoneGroupId];
+				$deny = intval($value[1]);
+				for ($j=0; $j < sizeof($rez[1]); $j++){ 
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j]) ){ //set deny access only if not set directly for that credential allow access
+						$rez[1][$j] = -(1 + $inherited); 
+						$set_bits++;
+					}
+					$deny = $deny >> 1;
+				}
+				$allow = intval($value[0]);
+				for ($j=0; $j < sizeof($rez[0]); $j++){ 
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($allow & 1) ){
+						$rez[0][$j] = (1 + $inherited);
+						$set_bits++;
+					}
+					$allow = $allow >> 1;
+				}
+			}
+
+			next($acl);
+		}
+					
+		return $rez;
+	}
+
+	private static function getEstimatedUserAccessForObject($object_id, $user_id = false){
+		//0 List Folder/Read Data
+		//1 Create Folders
+		//2 Create Files
+		//3 Create Actions
+		//4 Create Tasks
+		//5 Read
+		//6 Write
+		//7 Delete child nodes
+		//8 Delete
+		//9 Change permissions
+		//10 Take Ownership
+		//11 Download
+		/* if no user is specified as parameter then calculating for current loged user */
+		if($user_id === false) $user_id = $_SESSION['user']['id'];
+
+		/* prepearing result array (filling it with zeroes)*/
+		$rez = array( array_fill(0,12, 0), array_fill(0,12, 0) );
 		
+		$user_group_ids = array($user_id);
+		$everyoneGroupId = Security::EveryoneGroupId();
+		if( $user_id !== $everyoneGroupId) $user_group_ids[] = $everyoneGroupId;
+
+		/* getting object ids that have inherit set to true */
+		$sql = 'select f_get_tree_inherit_ids(id) `ids` from tree where id = $1';
+		$res = DB\mysqli_query_params($sql, $object_id) or die(DB\mysqli_query_error());
+		$ids = array();
+		if($r = $res->fetch_assoc()) $ids = explode('/', substr($r['ids'], 1));
+		$res->close();
+
+		/* reversing array for iterations from object to top parent */
+		$ids = array_reverse($ids);
+
+
+		/* getting group ids where passed $user_id is a member*/
+		$sql = 'select distinct group_id from users_groups_association where user_id = $1';
+		$res = DB\mysqli_query_params($sql, $user_id) or die(DB\mysqli_query_error());
+		while($r = $res->fetch_row()) if(!in_array($r[0], $user_group_ids)) $user_group_ids[] = $r[0];
+		$res->close();
+		/* end of getting group ids where passed $user_id is a member*/
+		
+		$acl_order = array_flip($ids);
+		$acl = array();
+		// selecting access list set for our path ids
+		$sql = 'select node_id, user_group_id, allow, deny from tree_acl where node_id in ('.implode(',', $ids).') and user_group_id in ('.implode(',', $user_group_ids).')';
+		$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
+		while($r = $res->fetch_assoc())
+			$acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
+		$res->close();
 		/* now iterating the $acl table and determine final set of bits/**/
 		$set_bits = 0;
 		$i=0;
@@ -200,39 +356,42 @@ class Security {
 		 	$i = key($acl);
 		 	$inherited = ($i > 0);
 			$direct_allow_user_group_access = array_fill(0,12, 0);
-			/* check firstly if direct access is specified for passed user_group_id */
-			if(!empty($acl[$i][$user_group_id])){
-				$deny = intval($acl[$i][$user_group_id][1]);
+			/* check firstly if direct access is specified for passed user_id */
+			if(!empty($acl[$i][$user_id])){
+				$deny = intval($acl[$i][$user_id][1]);
 				for ($j=0; $j < sizeof($rez[1]); $j++){ 
-					if( empty($rez[1][$j]) && ($deny & 1) ){
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) ){
 						$rez[1][$j] = -(1 + $inherited); 
 						$set_bits++;
 					}
 					$deny = $deny >> 1;
 				}
-				$allow = intval($acl[$i][$user_group_id][0]);
+				$allow = intval($acl[$i][$user_id][0]);
 				for ($j=0; $j < sizeof($rez[0]); $j++){ 
-					if( empty($rez[0][$j]) && ($allow & 1) ){
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($allow & 1) ){
 						$rez[0][$j] = (1 + $inherited);
 						$direct_allow_user_group_access[$j] = (1 + $inherited);
 						$set_bits++;
 					}
 					$allow = $allow >> 1;
 				}
-				
-				/* if we have direct access specified to requested user_group for input object_id then return just this direct access  and exclude any other access at the same level */
-				if( $acl_order[$object_id] == $i){
+	
+				/* if we have direct access specified to requested user for input object_id then return just this direct access  and exclude any other access at the same level (for our object_id) */
+				if( $acl_order[$object_id] == $i ){
 					next($acl);
 					continue;
 				}
 			}
+			
+
+
 			if(!empty($acl[$i]))
 			foreach($acl[$i] as $key => $value) {
-				if($key == $user_group_id) continue; //skip direct access setting because analized above
+				if( ($key == $user_id) || ($key == $everyoneGroupId) ) continue; //skip direct access setting because analized above and everyone group id will be analized last
 				$deny = intval($value[1]);
 
 				for ($j=0; $j < sizeof($rez[1]); $j++){ 
-					if( empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j]) ){ //set deny access only if not set directly for that credential allow access
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j]) ){ //set deny access only if not set directly for that credential allow access
 						$rez[1][$j] = -(1 + $inherited); 
 						$set_bits++;
 					}
@@ -240,22 +399,44 @@ class Security {
 				}
 				$allow = intval($value[0]);
 				for ($j=0; $j < sizeof($rez[0]); $j++){ 
-					if( empty($rez[0][$j]) && ($allow & 1) ){
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($allow & 1) ){
 						$rez[0][$j] = (1 + $inherited);
 						$set_bits++;
 					}
 					$allow = $allow >> 1;
 				}
 			}
+
+			// now analize for everyone group id if set, but only for higher levels (inherited parents)
+			if( !empty($acl[$i][$everyoneGroupId]) ){
+				$value = $acl[$i][$everyoneGroupId];
+				$deny = intval($value[1]);
+				for ($j=0; $j < sizeof($rez[1]); $j++){ 
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j]) ){ //set deny access only if not set directly for that credential allow access
+						$rez[1][$j] = -(1 + $inherited); 
+						$set_bits++;
+					}
+					$deny = $deny >> 1;
+				}
+				$allow = intval($value[0]);
+				for ($j=0; $j < sizeof($rez[0]); $j++){ 
+					if( empty($rez[0][$j]) && empty($rez[1][$j]) && ($allow & 1) ){
+						$rez[0][$j] = (1 + $inherited);
+						$set_bits++;
+					}
+					$allow = $allow >> 1;
+				}
+			}
+
 			next($acl);
 		}
 					
 		return $rez;
 	}
 
-	public static function getAccessBitForObject($object_id, $access_bit_index, $user_group_id = false){
-		if($user_group_id === false) $user_group_id = $_SESSION['user']['id'];
-		$accessArray = Security::getUserGroupAccessForObject($object_id, $user_group_id);
+	public static function getAccessBitForObject($object_id, $access_bit_index, $user_id = false){
+		if($user_id === false) $user_id = $_SESSION['user']['id'];
+		$accessArray = Security::getEstimatedUserAccessForObject($object_id, $user_id);
 		if(!empty($accessArray[0][$access_bit_index])) return $accessArray[0][$access_bit_index];
 		if(!empty($accessArray[1][$access_bit_index])) return $accessArray[1][$access_bit_index];
 		return 0;
@@ -369,7 +550,7 @@ class Security {
 	
 	public static function updateNodesSecurity( $affected_node_ids ){
 		foreach( $affected_node_ids as $id)
-			DB\mysqli_query_params('call p_mark_all_childs_as_updated($1, 10)') or die( DB\mysqli_query_error() );
+			DB\mysqli_query_params('call p_mark_all_childs_as_updated($1, 10)', $id) or die( DB\mysqli_query_error() );
 		SolrClient::runCron();
 	}
 
@@ -380,61 +561,54 @@ class Security {
 		
 		$this->internalAccessing = true;
 		
-		$acl = $this->getObjectAcl((Object)array('id' => $objectRecord['id']));
-		$acl = $acl['data'];
-		
-		/* iterate acl and select user list for every group 
-			users will be stored in a array that will determine groups from which their access depends (if no directly the user is specified)
-			if the user is dependent only by one group then his access is set to groups (already calculated) access
-			if the user belongs to more groups then we can look if he has read access for all groups and no deny specified, if so then user is granted read
-			Otherwise (when user belong to more than one group - the access is calculated for this user)
+		$acl = array();
+		// $acl = $this->getObjectAcl((Object)array('id' => $objectRecord['id']));
 
-			when everyone group is present in access list (allow or deny) then only it will be specified in corresponding field without any other users
-		*/
-		$everyoneGroupId = $this->EveryoneGroupId();
-		$users = array();
-		/*
-		users:
-			user_id [explicit_user_access, explicit_group_access, inherited_user_access, inherited_group_access]
-		*/
-		/* collecting accesses for users */
-		foreach($acl as $access){
-			$allow = explode(',',$access['allow']);
-			$deny = explode(',',$access['deny']);
-			if($deny[5] < 0){ // 5 is index of read bit
-				if( ($access['type'] == 2) || ($access['id'] == $everyoneGroupId)){ //$access['type'] == 2 - user 
-					$idx = ($deny[5] == -1) ? 0 : 2;
-					$users[$access['id']][$idx] = -1;
-				}else{
-					$idx = ($deny[5] == -1) ? 1 : 3;
-					$groupUsers = $this->getGroupUserIds($access['id']);
-					foreach($groupUsers as $uid) $users[$uid][$idx] = -1;
-				}
-			}elseif($allow[5] > 0){// 5 is index of read bit
-				if( ($access['type'] == 2) || ($access['id'] == $everyoneGroupId)){
-					$idx = ($allow[5] == 1) ? 0 : 2;
-					if(empty($users[$access['id']][$idx])) $users[$access['id']][$idx] = 1;
-				}else{
-					$idx = ($deny[5] == -1) ? 1 : 3;
-					$groupUsers = $this->getGroupUserIds($access['id']);
-					foreach($groupUsers as $uid) 
-						if(empty($users[$uid][$idx]))$users[$uid][$idx] = 1;
-				}
-			}
+		/* get inheriting access ids path*/
+		$inherit_ids = '';
+		$sql = 'select f_get_tree_inherit_ids(id) `inherit_ids` from tree where id = $1';
+		$res = DB\mysqli_query_params($sql, $objectRecord['id']) or die(DB\mysqli_query_error());
+		if($r = $res->fetch_assoc()) $inherit_ids = $r['inherit_ids'];
+		$res->close();
+		/* end of get inheriting access ids path*/
+		
+		/* check if already calculated for these acl ids and return cached result if so */
+		if(isset($GLOBALS['tree_acl'][$inherit_ids])){
+			if(!empty($GLOBALS['tree_acl'][$inherit_ids]['a'])) $objectRecord['allow_user_ids'] = $GLOBALS['tree_acl'][$inherit_ids]['a'];
+			if(!empty($GLOBALS['tree_acl'][$inherit_ids]['d'])) $objectRecord['deny_user_ids'] = $GLOBALS['tree_acl'][$inherit_ids]['d'];
+			return;
 		}
-		/* end of collecting accesses for users (including everyone group if present) */
-		/* grouping  user ids in allow and deny sets /**/
+		/* end of check if already calculated for these acl ids and return cached result if so */
+		$obj_ids = explode('/', substr($inherit_ids, 1));
+		$everyoneGroupId = Security::EveryoneGroupId();
+		$users = array();
+
+		
+		/* iterate the full set of access credentials(users and/or groups) and estimate access for every user including everyone group */
+		if(!empty($inherit_ids)){
+			$sql = 'select distinct u.id, u.`type` from tree_acl a '.
+				'join users_groups u on a.user_group_id = u.id '.
+				'where a.node_id in('.implode(',', $obj_ids).') order by u.`type`';
+			$res = DB\mysqli_query_params($sql, $objectRecord['id']) or die(DB\mysqli_query_error());
+			while($r = $res->fetch_assoc()){
+				$group_users = array();
+				if( ($r['id'] == $everyoneGroupId) || ($r['type'] == 2) ) $group_users[] = $r['id'];
+				else $group_users = $this->getGroupUserIds($r['id']);
+				foreach($group_users as $user_id) 
+					if(empty($users[$user_id]))
+						$users[$user_id] = $this->getEstimatedUserAccessForObject( $objectRecord['id'], $user_id );
+			}
+			$res->close();
+		}
+		/* end of iterate the full set of access credentials(users and/or groups) and estimate access for every user including everyone group */
+
 		$allow_users = array();
 		$deny_users = array();
-		foreach($users as $uid => $ua){
-			// echo "user_id: $uid\n";
-			$access = array_shift($ua);
-			while(empty($access) && !empty($ua)) $access = array_shift($ua);
-			// echo "  access: $access\n";
-			if($access < 0) $deny_users[] = $uid;
-			elseif($access > 0) $allow_users[] = $uid;
+		foreach($users as $user_id => $access){
+			if($access[1][5] < 0) $deny_users[] = $user_id;
+			elseif($access[0][5] > 0) $allow_users[] = $user_id;
 		}
-
+		
 		/* selecting node owner and store him into allow and remove from deny */
 		$sql = 'select oid from tree where id = $1';
 		$res = DB\mysqli_query_params($sql, $objectRecord['id']) or die(DB\mysqli_query_error());
@@ -446,11 +620,17 @@ class Security {
 		/* end of selecting node owner and store him into allow and remove from deny */
 
 		if(in_array($everyoneGroupId, $allow_users)) $allow_users = array($everyoneGroupId);
-		if(in_array($everyoneGroupId, $deny_users)) $deny_users = array();//array($everyoneGroupId);
+		if(in_array($everyoneGroupId, $deny_users)) $deny_users = array();
+
+		/* caching in globals */
+		$GLOBALS['tree_acl'][$inherit_ids] = array(
+			'a' => $allow_users
+			,'d' => $deny_users
+		);
+		/* end of caching in globals */
 
 		if(!empty($allow_users)) $objectRecord['allow_user_ids'] = $allow_users;
 		if(!empty($deny_users)) $objectRecord['deny_user_ids'] = $deny_users;
-
 	}
 
 	/**

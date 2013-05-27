@@ -15,7 +15,7 @@ namespace CB;
 
 include 'init.php';
 
-if ($_POST['s'] == L\Login) {
+if( !empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u']) ){
 	$errors = Array();
 	$u = strtolower(trim($_POST['u']));
 	$p = $_POST['p'];

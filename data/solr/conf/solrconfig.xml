@@ -22,6 +22,8 @@
 -->
 <config>
 	<luceneMatchVersion>LUCENE_CURRENT</luceneMatchVersion>
+	<lockType>simple</lockType>
+	<unlockOnStartup>true</unlockOnStartup>
 	<updateHandler class="solr.DirectUpdateHandler2">
 		<updateLog>
 			<str name="dir">${solr.data.dir:}</str>

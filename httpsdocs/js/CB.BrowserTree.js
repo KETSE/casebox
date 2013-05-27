@@ -188,7 +188,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 				scope: this
 				,beforeappend: this.onBeforeNodeAppend
 				,load: function(node){ this.sortNode(node); }
-				,dblclick: this.onOpenClick
+				,dblclick: this.onDblClick
 				,contextmenu: this.onContextMenu 
 				,startdrag: function(tree, node, e){
 					if(node.attributes.system == 1){
@@ -479,9 +479,16 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			}
 		}, this);
 	}
+	,onDblClick: function(b, e){
+		n = this.getSelectionModel().getSelectedNode();
+		if(Ext.isEmpty(n)) return;
+		if( App.isFolder( n.attributes.template_id ) ) return;
+		this.onOpenClick(b, e)
+	}
 	,onOpenClick: function (b, e) {
 		n = this.getSelectionModel().getSelectedNode();
 		if(Ext.isEmpty(n)) return;
+		clog('opening',n.attributes)
 		App.openObject(n.attributes.template_id, n.attributes.nid, e);
 	}
 	,onOpenInNewWindowClick: function (b, e) {

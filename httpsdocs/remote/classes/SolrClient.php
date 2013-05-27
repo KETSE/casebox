@@ -47,6 +47,8 @@ class SolrClient{
 		,'role_ids3'
 		,'role_ids4'
 		,'role_ids5'
+		// custom core fields
+		,'substatus'
 		);
 	function SolrClient( $p = array() ){
 		$this->host = empty($p['host']) ? config\solr_host : $p['host'];
@@ -156,6 +158,9 @@ class SolrClient{
 	}
 	public function updateTree($all = false){
 		
+		// $log_file = dirname(__FILE__).DIRECTORY_SEPARATOR.'update_tree_'.CORENAME.'_log';
+		// error_log("\n\rStart at ".date('H:i:s')."\n\r", 3, $log_file);
+		
 		$lastId = 0;
 		$sql = 'SELECT t.id, t.pid, f_get_tree_pids(t.id) `pids`, f_get_tree_path(t.id) `path`, t.name, t.`system`, t.`type`, t.subtype, t.template_id, t.target_id
 			,CASE WHEN t.type = 2 then (SELECT `type` FROM tree WHERE id = t.target_id) ELSE null END `target_type`
@@ -254,11 +259,23 @@ class SolrClient{
 			}
 			$res->close();
 			if( !empty($docs) ){
-				$this->addDocuments($docs);
-				$this->commit();
+				// error_log(print_r($docs, 1), 3, $log_file);
+				try {
+					$this->addDocuments($docs);
+				} catch (\Exception $e) {
+					// error_log( " \n\r CANNOT add documents\n", 3, $log_file);
+				}
+				try {
+					$this->commit();
+				} catch (\Exception $e) {
+					// error_log( " \n\r CANNOT COMMIT\n", 3, $log_file);
+					exit();
+				}
+				
 			}
 		}
 		unset($security);
+		// error_log( "\n\rEnd at ".date('H:i:s')."\n\r", 3, $log_file);
 	}
 
 	public function deleteId($id){
@@ -268,7 +285,11 @@ class SolrClient{
 	public function deleteByQuery($query){
 		$this->connect();
 		$this->solr->deleteByQuery($query);
-		$this->commit();
+		try {
+			$this->commit();
+		} catch (\Exception $e) {
+			die("Cannot commit after delete\n");
+		}
 	}
 	
 	public function optimize(){
