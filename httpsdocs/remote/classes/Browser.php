@@ -599,7 +599,6 @@ class Browser{
 			}
 			if(!isset($d['loaded'])){
 				$sql = 'select count(*) from tree where pid = $1 and dstatus = 0'.( empty($this->showFoldersContent) ? ' and `template_id` in (0'.implode(',', $GLOBALS['folder_templates']).')' : '' );
-				//echo $sql;
 				$res = DB\mysqli_query_params($sql, $d['nid']) or die(DB\mysqli_query_error());
 				if($r = $res->fetch_row()) $d['loaded'] = empty($r[0]);
 				$res->close();

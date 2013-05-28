@@ -25,7 +25,7 @@ while(sizeof($_SESSION['last_sessions']) > 25) @unlink(session_save_path().DIREC
 /* check if loged in correctly, comparing with the key and ips */
 $arr = explode('/', $_SERVER['SCRIPT_NAME']);
 $script = array_pop($arr);
-if( !in_array($script, array('login.php', 'router.php', 'preview.php', 'recover_password.php') ) ){
+if( !in_array($script, array('login.php', 'router.php', 'preview.php', 'recover_password.php', 'download.php') ) ){
 	$ref = @explode('/', $_SERVER['HTTP_REFERER']);
 	$ref = @$ref[2];
 	if( $ref != $_SERVER['SERVER_NAME'] ){

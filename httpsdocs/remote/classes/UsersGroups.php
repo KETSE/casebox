@@ -226,7 +226,7 @@ class UsersGroups{
 		$rez = Array('success' => true);
 		$data = json_decode($params['data']);
 		
-		//if(!Security::isAdmin() && !Security::isUsersOwner($data->id) && !($_SESSION['user']['id'] == $data->id)) throw new \Exception(L\Access_denied);
+		if(!Security::isAdmin() && !Security::isUsersOwner($data->id) && !($_SESSION['user']['id'] == $data->id)) throw new \Exception(L\Access_denied);
 		require_once 'VerticalEditGrid.php';
 		VerticalEditGrid::saveData('users_groups', $data);
 		
@@ -351,7 +351,7 @@ class UsersGroups{
 		
 		$user_id = $this->extractId($p->id);
 
-		//if(!Security::isAdmin() && !Security::isUsersOwner($user_id)) throw new \Exception(L\Access_denied);
+		if(!Security::isAdmin() && !Security::isUsersOwner($user_id)) throw new \Exception(L\Access_denied);
 		
 		DB\mysqli_query_params('update users_groups set `name` = $2, uid = $3 where id = $1', array($user_id, $name, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		return array('success' => true, 'name' => $name);
@@ -366,7 +366,7 @@ class UsersGroups{
 		
 		$id = $this->extractId($p->id);
 
-		//if(!Security::isAdmin() && !Security::isUsersOwner($id)) throw new \Exception(L\Access_denied);
+		if(!Security::isAdmin() && !Security::isUsersOwner($id)) throw new \Exception(L\Access_denied);
 		
 		DB\mysqli_query_params('update users_groups set `l'.USER_LANGUAGE_INDEX.'` = $2, uid = $3 where id = $1 and type = 1', array($id, $title, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 		return array('success' => true, 'title' => $title);

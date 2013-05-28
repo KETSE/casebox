@@ -244,6 +244,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 				,beforeappend: { scope: this, fn: function(t, p, n){ 
 					text = n.attributes.title;
 					if( p.getDepth() == 1 ){ //n.attributes.role_id > 0 && 
+						text += ' <span class="cG">(id:' + n.attributes.nid + ')</span>';
 						if(n.attributes.enabled != 1){
 							text += ' <span class="cG">' + L.inactive + '</span>';
 						}
@@ -704,7 +705,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 				UsersGroups.renameUser(
 					{id: this.data.id, name: text}, 
 					function(r, e){ 
-						if(r.success !== true) return Ext.Msg.alert(L.Error, L.ErrorOccured);
+						if(r.success !== true) return Ext.Msg.alert(L.Error, Ext.value(e.msg, L.ErrorOccured) );
 						this.data.name = r.name; 
 						this.userInfo.data.name = r.name;
 						this.userInfo.update(this.userInfo.data);
@@ -824,7 +825,8 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
 	}
 	,onLoadFormData: function(data){
 		this.tree.getRootNode().cascade(function(n){
-			if(n.attributes.id == data.id) n.setText(data.title);
+			if(n.attributes.nid == data.id) 
+				n.setText(data.title + ' <span class="cG">(id:' + data.id + ')</span>');
 		}, this);
 	}
 	,onEditUserData: function(){

@@ -7,7 +7,6 @@ class Path{
 	public static function getId($path = ''){
 		$path = trim($path);
 		while(!empty($path) && (substr($path, -1) == '/') ) $path = substr($path, 0, strlen($path)-1);
-		// echo $path;
 		$id = explode('/', $path);
 		$id = array_pop($id);
 		$id = is_numeric($id) ? $id : Browser::getRootFolderId();

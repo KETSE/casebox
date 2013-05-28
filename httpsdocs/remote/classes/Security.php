@@ -475,7 +475,7 @@ class Security {
 	public static function canTakeOwnership($object_id, $user_group_id = false){
 		return (Security::getAccessBitForObject($object_id, 10, $user_group_id) > 0);
 	}
-	public static function canTakeDownload($object_id, $user_group_id = false){
+	public static function canDownload($object_id, $user_group_id = false){
 		return (Security::getAccessBitForObject($object_id, 11, $user_group_id) > 0);
 	}
 	//0 List Folder/Read Data

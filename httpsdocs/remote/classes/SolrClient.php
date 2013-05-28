@@ -80,7 +80,7 @@ class SolrClient{
 			fireEvent('nodeSolrUpdate', $doc);
 		} catch (\Exception $e) {
 			echo "\n\n-------------------------------------------";
-			echo "\n\nError (id={$d['id']}): {$e->__toString()}\n";	
+			echo "\n\nError (id={".$doc->id."}): {$e->__toString()}\n";	
 			return false;
 		}
 		return true;
@@ -102,14 +102,6 @@ class SolrClient{
 		if (curl_errno($ch)) {
 			print "curl_error:" . curl_error($ch);
 		}
-		// else {
-		//    	curl_close($ch);
-		//    	print "curl exited okay\n";
-		//    	echo "Data returned...\n";
-		//    	echo "------------------------------------\n";
-		//    	echo $data;
-		//    	echo "------------------------------------\n";
-		// }
 	}
 
 	function addDocuments(&$docs){
@@ -138,7 +130,7 @@ class SolrClient{
 
 		} catch (\Exception $e) {
 			echo "\n\n-------------------------------------------";
-			echo "\n\nError (id={$d['id']}): {$e->__toString()}\n";	
+			echo "\n\nError (adding multiple documents): {$e->__toString()}\n";	
 			return false;
 		}
 		for ($i=0; $i < sizeof($docs); $i++)
