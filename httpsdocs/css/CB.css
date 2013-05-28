@@ -489,3 +489,6 @@ div.grid-drop-zone-over{
 	background-position: -1px;
 	background-repeat: no-repeat;
 }
+.icon-dashboard{
+    background-image: url(/css/i/ico/32/newspaper.png);
+} 

@@ -264,21 +264,20 @@ class Objects{
 	public function queryCaseData($queries){
 		$rez = array('success' => true);
 		foreach($queries as $key => $query){
-			$query->pids = $query->id;
+			$query->pids = $query->caseId;
 			switch($key){
 				case 'properties': 
-					$rez[$key] = $this->load($query);/* load general case properties */
-					
-					// $r = $this->getCasePropertiesObjectId($query->id);
-					if( !empty($query->id) ){
+					$rez[$key] = $this->load( (object)array( 'data' => (object)array( 'id' => $query->caseId) ) );/* load general case properties */
+					// $r = $this->getCasePropertiesObjectId($query->caseId);
+					if( !empty($query->caseId) ){
 						$template_id = null;
 						$properties = array();
 						$sql = 'select template_id from tree where id = $1';
-						$res = DB\mysqli_query_params($sql, $query->id) or die(DB\mysqli_query_error());
+						$res = DB\mysqli_query_params($sql, $query->caseId) or die(DB\mysqli_query_error());
 						if($r = $res->fetch_assoc()) $template_id = $r['template_id'];
 						$res->close();
 						
-						$tf = Templates::getTemplateFieldsWithData($template_id, $query->id);
+						$tf = Templates::getTemplateFieldsWithData($template_id, $query->caseId);
 						if(!empty($tf))
 						foreach($tf as $f){
 							if($f['name'] == '_title') continue;
