@@ -142,7 +142,7 @@
 <!-- content: content of the objects for searching by content (including parsed files content). -->
 <field name="content"		type="text_general"	indexed="true" 	stored="true" />
 <!-- ntsc: node type sort coolumn. Used to sort Folders firstly -->
-<field name="ntsc"    		type="tint"		indexed="true" stored="false" />
+<field name="ntsc"    		type="tint"		indexed="true" stored="true" />
 <!-- sort_name: designed to sort by name -->
 <field name="sort_name" 	type="text_general_sort" indexed="true" stored="true" />
 <!-- sort_path: designed to sort by path -->

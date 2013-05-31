@@ -9,6 +9,7 @@ class Tasks{
 		$sql = 'select id, `title`, date_start, `date_end`, missed, `type`, privacy, responsible_party_id, responsible_user_ids, autoclose, description, parent_ids, child_ids'
 			.',DATEDIFF(`date_end`, UTC_DATE()) `days`'
 			.',(select pid from tree where id = $1) pid'
+			.',(select template_id from tree where id = $1) template_id'
 			.',(select reminds from tasks_reminders where task_id = $1 and user_id = $2) reminds'
 			.',(select name from tree where id = t.case_id) `case`'
 			.',(select concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title)) from objects where id = object_id) object'

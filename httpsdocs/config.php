@@ -29,6 +29,7 @@
 	define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 	define('CB\\APP_ROOT', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
 	define('CB\\CORE_ROOT', DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+	define('CB\\CRONS_PATH', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
 	define('CB\\DATA_PATH', APP_ROOT.'data'.DIRECTORY_SEPARATOR);
 	define('CB\\SESSION_PATH', DATA_PATH.'sessions'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
 	/* end of define main paths /**/
@@ -245,6 +246,7 @@
 					,'195.22.253.6'
 					,'193.226.64.181'
 					,'188.240.73.107'
+					,'92.115.133.211'
 				)
 			)
 		);

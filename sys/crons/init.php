@@ -43,9 +43,9 @@
 			  // seems that last execution of cron did not finish yet 
 			  DB\mysqli_query_params('update crons set execution_skip_times = coalesce(execution_skip_times, 0) + 1 where id = '.$r['id']) or die( DB\mysqli_query_error() );
 
-			  notify_admin('CaseBox cron notification ('.$cron_id.'), '.($r['execution_skip_times'] + 1).' skipping(s).', $info."\n\r".print_r($r, 1));
 			  return $rez;
-			}
+			}elseif($r['execution_skip_times'] == $execution_skip_times) notify_admin('CaseBox cron notification ('.$cron_id.'), '.($r['execution_skip_times'] + 1).' skipping(s).', $info."\n\r".print_r($r, 1));
+			
 			$rez = $r;
 			$rez['success'] = true;
 		}else{

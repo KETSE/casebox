@@ -220,10 +220,9 @@ CB.Tasks = Ext.extend( Ext.Window, {
 			}
 		});
 		if(!this.data) this.data = {};
-		this.radioVisible = !Ext.isEmpty(this.data.type);
+		this.radioHidden = !Ext.isEmpty(this.data.template_id);
 		Ext.applyIf(this.data, {
-			type: 6
-			,privacy: 0
+			privacy: 0
 			,importance: 1
 			,category_id: Ext.isEmpty(this.taskCategoriesStore) ? null : this.taskCategoriesStore.getAt(1).get('id')
 			,reminds: []//'1|10|1'
@@ -274,7 +273,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		this.data.date_end = date_ISO_to_date(this.data.date_end)
 		this.data.cdate = date_ISO_to_date(this.data.cdate)
 		this.data.completed = date_ISO_to_date(this.data.completed)
-		this.radioVisible = !Ext.isEmpty(this.data.type);
+		this.radioHidden = !Ext.isEmpty(this.data.template_id);
 		
 		this.updatePathStore();
 
@@ -425,16 +424,26 @@ CB.Tasks = Ext.extend( Ext.Window, {
 					}
 				});
 				this.filesview = new CB.TaskFilesPanel({ fieldLabel: L.Files });
+				
+				/* collect distinct task templates*/
+				taskItems = []
+				taskTemplates = CB.DB.templates.query('type', 'task');
+				taskTemplates.each( function( ttr ){ 
+					taskItems.push( {boxLabel: ttr.get('title'), flex: 0, name: 'template_id', inputValue: ttr.get('id')} );
+				}, this );
+				/* end of collect distinct task templates*/
 				fsItems = [];
+
 				fsItems.push({
-						name: 'type'
+						name: 'template_id'
 						,xtype: 'radiogroup'
-						,hidden: this.radioVisible
+						,hidden: this.radioHidden
 						,fieldLabel: ''
-						,items: [
-							{boxLabel: L.Task, flex: 0, name: 'type', inputValue: 6, disabled: this.radioVisible}
-							,{boxLabel: L.Event, flex: 1, name: 'type', inputValue: 7, disabled: this.radioVisible}
-						]
+						,items: taskItems
+						// [
+						// 	{boxLabel: L.Task, flex: 0, name: 'type', inputValue: 6, disabled: this.radioVisible}
+						// 	,{boxLabel: L.Event, flex: 1, name: 'type', inputValue: 7, disabled: this.radioVisible}
+						// ]
 						,listeners:{
 							scope: this
 							,change: this.onTypeChangeClick
@@ -570,19 +579,12 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		this.center();
 	}
 	,updateTitle: function(){
-		if(this.data.type == 7){
-			switch(this.status){
-				case 'view': this.setTitle( L.ViewEvent ); break;
-				default: this.setTitle( isNaN(this.data.id) ? L.NewEvent : L.EditEvent ); break;
-			}
-			this.setIconClass('icon-event');
-		}else{
-			switch(this.status){
-				case 'view': this.setTitle( L.ViewTask ); break;
-				default: this.setTitle( isNaN(this.data.id) ? L.NewTask : L.EditTask ); break;
-			}
-			this.setIconClass('icon-task');
+		templateTitle = CB.DB.templates.getName(this.data.template_id);
+		switch(this.status){
+			case 'view': this.setTitle( L.View + ' ' + templateTitle ); break;
+			default: this.setTitle( (isNaN(this.data.id) ? L.New : L.Edit) + ' ' + templateTitle ); break;
 		}
+		this.setIconClass( CB.DB.templates.getIcon(this.data.template_id) );
 	}
 	,getValues: function(){
 		if(!this.form) return;
@@ -610,14 +612,14 @@ CB.Tasks = Ext.extend( Ext.Window, {
 				if(this.data.allday){
 					d = this.date_start.getValue();
 					this.data.date_start = Ext.isEmpty(d) ? null : d.toISOString();
-					if(this.data.has_deadline || (this.data.type == 7) ){
+					if(this.data.has_deadline || (this.data.template_id != App.config.default_event_template) ){
 						d = this.date_end.getValue();
 						this.data.date_end = Ext.isEmpty(d) ? null : d.toISOString();
 					}
 				}else{
 					d = this.datetime_start.getValue();
 					this.data.date_start = Ext.isEmpty(d) ? null : d.toISOString();
-					if(this.data.has_deadline || (this.data.type == 7) ){
+					if(this.data.has_deadline || (this.data.template_id != App.config.default_event_template) ){
 						d = this.datetime_end.getValue();
 						this.data.date_end = Ext.isEmpty(d) ? null : d.toISOString();
 					}
@@ -1024,32 +1026,17 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		this.setDirty();
 	}
 	,onTypeChangeClick: function(gr, radio){
-		switch(radio.inputValue){
-			case 6: //task
-				this.data.template_id = App.config.default_task_template
-				f = this.find('name', 'has_deadline')[0];
-				if(f){
-					f.setVisible(true);
-					this.onHasDeadlineClick(f, f.checked);
-				}
-				f = this.find('name', 'allday')[0];
-				if(f) this.onAllDayClick(f, f.checked);
-				f = this.find('name', 'responsible_user_ids')[0];
-				if(f) f.setVisible(true);
-				break;
-			case 7: //event
-				this.data.template_id = App.config.default_event_template
-				f = this.find('name', 'has_deadline')[0];
-				if(f){
-					f.setVisible(false);
-					this.onHasDeadlineClick(f, true);
-				}
-				f = this.find('name', 'allday')[0];
-				if(f) this.onAllDayClick(f, f.checked);
-				f = this.find('name', 'responsible_user_ids')[0];
-				if(f) f.setVisible(false);
-				break;
+		this.data.template_id = radio.inputValue
+		f = this.find('name', 'has_deadline')[0];
+		if(f){
+			f.setVisible(radio.inputValue != App.config.default_event_template);
+			this.onHasDeadlineClick(f, f.checked);
 		}
+		f = this.find('name', 'allday')[0];
+		if(f) this.onAllDayClick(f, f.checked);
+		f = this.find('name', 'responsible_user_ids')[0];
+		if(f) f.setVisible(radio.inputValue != App.config.default_event_template);
+
 		this.syncSize();
 
 	}
@@ -1071,8 +1058,8 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		this.setDirty(true);
 	}
 	,onHasDeadlineClick: function(cb, checked){
-		this.date_end.setDisabled(!checked && (this.data.type == 6) ); 
-		this.datetime_end.setDisabled(!checked && (this.data.type == 6)); 
+		this.date_end.setDisabled(!checked && (this.data.template_id != App.config.default_event_template ) ); 
+		this.datetime_end.setDisabled(!checked && (this.data.template_id != App.config.default_event_template )); 
 		this.setDirty(true);
 	}
 	,setDirty: function(dirty){
@@ -1258,6 +1245,7 @@ CB.ActionTasksView = Ext.extend(Ext.DataView, {
 					,'name'
 					, {name: 'system', type: 'int'}
 					, {name: 'type', type: 'int'}
+					, {name: 'template_id', type: 'int'}
 					, {name: 'status', type: 'int'}
 					,{name:'cid', type: 'int'}
 					,{name:'uid', type: 'int'}

@@ -130,7 +130,9 @@ class SolrClient{
 
 		} catch (\Exception $e) {
 			echo "\n\n-------------------------------------------";
-			echo "\n\nError (adding multiple documents): {$e->__toString()}\n";	
+			echo "\n\nError (adding multiple documents): {$e->__toString()}\n";
+			print_r($addDocs);
+			print_r($updateDocs);
 			return false;
 		}
 		for ($i=0; $i < sizeof($docs); $i++)
@@ -148,8 +150,13 @@ class SolrClient{
 		$solr->updateTree();
 		unset($solr);
 	}
+	static public function runBackgroundCron(){
+		$cmd = 'php -f '.CRONS_PATH.'run_cron.php solr_update_tree '.CORENAME.' > '.CRONS_PATH.'bg_solr_update_tree.log &';
+		if(is_windows()) $cmd = 'start /D "'.CRONS_PATH.'" php -f run_cron.php '.CORENAME.' > '.CRONS_PATH.'bg_solr_update_tree.log';
+		pclose(popen($cmd, "r"));
+	}
 	public function updateTree($all = false){
-		
+		$this->connect();
 		// $log_file = dirname(__FILE__).DIRECTORY_SEPARATOR.'update_tree_'.CORENAME.'_log';
 		// error_log("\n\rStart at ".date('H:i:s')."\n\r", 3, $log_file);
 		

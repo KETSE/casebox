@@ -7,20 +7,27 @@ require_once 'init.php';
 
 $cron_id = 'solr_update_tree';
 
-$cd = prepare_cron($cron_id);
+$cd = prepare_cron($cron_id, 5);
 if(!$cd['success']){
 	echo "\nerror preparing cron\n";
 	exit(1);
 }
 $solr = new SolrClient();
-if(@$argv[2] == 'all'){
-	echo "deleting all\n";
-	$solr->deleteByQuery('*:*');
-	echo "updating tree\n";
-	$solr->updateTree(true);
-	echo "optimizing\n";
-	$solr->optimize();
-}else $solr->updateTree();
+try {
+	if(@$argv[2] == 'all'){
+		echo "deleting all\n";
+		$solr->deleteByQuery('*:*');
+		echo "updating tree\n";
+		$solr->updateTree(true);
+		echo "optimizing\n";
+		$solr->optimize();
+	}else{
+		$solr->updateTree();
+	}
+	
+} catch (\Exception $e) {
+	notify_admin('CaseBox cron execution exception ('.$solr->core.')', $e->getMessage() );		
+}
 
 unset($solr);
 

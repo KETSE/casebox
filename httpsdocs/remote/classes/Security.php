@@ -377,7 +377,7 @@ class Security {
 				}
 	
 				/* if we have direct access specified to requested user for input object_id then return just this direct access  and exclude any other access at the same level (for our object_id) */
-				if( $acl_order[$object_id] == $i ){
+				if( isset($acl_order[$object_id]) && ($acl_order[$object_id] == $i) ){
 					next($acl);
 					continue;
 				}
@@ -500,7 +500,7 @@ class Security {
 		DB\mysqli_query_params('insert into tree_acl (node_id, user_group_id, cid, uid) values ($1, $2, $3, $3) on duplicate key update id = last_insert_id(id), uid = $3', array($p->id, $p->data->id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
 		
 		$rez['data'][] = $p->data;
-		SolrClient::RunCron();
+		SolrClient::runBackgroundCron();
 		return $rez;
 	}
 
@@ -519,14 +519,14 @@ class Security {
 		$deny = bindec( implode('', $deny) );
 		$sql = 'insert into tree_acl (node_id, user_group_id, allow, deny, cid) values($1, $2, $3, $4, $5) on duplicate key update allow = $3, deny = $4, uid = $5, udate = CURRENT_TIMESTAMP';
 		DB\mysqli_query_params($sql, array($p->id, $p->data->id, $allow, $deny, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error());
-		SolrClient::RunCron();
+		SolrClient::runBackgroundCron();
 		return array('succes' => true, 'data' => $p->data );
 	}
 	public function destroyObjectAccess($p){
 		if(empty($p->data)) return;
 		if( !Security::canChangePermissions($p->id) ) throw new \Exception(L\Access_denied);
 		DB\mysqli_query_params('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p->id, $p->data)) or die(DB\mysqli_query_error());
-		SolrClient::RunCron();
+		SolrClient::runBackgroundCron();
 		return array('success' => true, 'data'=> array());
 	}
 
@@ -551,7 +551,7 @@ class Security {
 	public static function updateNodesSecurity( $affected_node_ids ){
 		foreach( $affected_node_ids as $id)
 			DB\mysqli_query_params('call p_mark_all_childs_as_updated($1, 10)', $id) or die( DB\mysqli_query_error() );
-		SolrClient::runCron();
+		SolrClient::runBackgroundCron();
 	}
 
 	/**

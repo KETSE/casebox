@@ -488,7 +488,6 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 	,onOpenClick: function (b, e) {
 		n = this.getSelectionModel().getSelectedNode();
 		if(Ext.isEmpty(n)) return;
-		clog('opening',n.attributes)
 		App.openObject(n.attributes.template_id, n.attributes.nid, e);
 	}
 	,onOpenInNewWindowClick: function (b, e) {
