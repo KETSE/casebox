@@ -141,6 +141,7 @@ class UsersGroups{
 		}else $rez['data']['group_id'] = 0;
 		
 		$this->updateUserEmails($user_id);
+        SolrClient::runBackgroundCron();
 		return $rez;
 	}
 
