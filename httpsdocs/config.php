@@ -17,13 +17,18 @@
 	5. based on loaded configs set casebox php options, session lifetime, error_reporting and define required casebox constants 
 
 */
-	/* detecting core name (project name) from SERVER_NAME */
-	$arr = explode('.', $_SERVER['SERVER_NAME']);
-	if( in_array($arr[0], array( 'www', 'ww2' ) ) ) // remove www, ww2 and take the next parameter as the $coreName
-		array_shift($arr);
-	
-	define('CB\\CORENAME', $arr[0]);
-	/* end of detecting core name (project name) from SERVER_NAME */
+	/* checking if corename defined in enviroment */
+	if( isset($_SERVER['CASEBOX_CORENAME']) ){
+		define( 'CB\\CORENAME', $_SERVER['CASEBOX_CORENAME'] );
+	}else{
+		/* detecting core name (project name) from SERVER_NAME */
+		$arr = explode('.', $_SERVER['SERVER_NAME']);
+		if( in_array($arr[0], array( 'www', 'ww2' ) ) ) // remove www, ww2 and take the next parameter as the $coreName
+			array_shift($arr);
+		
+		define('CB\\CORENAME', $arr[0]);
+		/* end of detecting core name (project name) from SERVER_NAME */
+	}
 	
 	/* define main paths /**/
 	define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
@@ -35,7 +40,8 @@
 	/* end of define main paths /**/
 
 	/* update include_path and include global script */
-	set_include_path(DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
+	set_include_path(DOC_ROOT.'libx'.PATH_SEPARATOR.
+			DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
 			DOC_ROOT.'remote'.DIRECTORY_SEPARATOR.'classes'.PATH_SEPARATOR.
 			CORE_ROOT.'php'. PATH_SEPARATOR.
 			get_include_path());

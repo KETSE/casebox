@@ -13,7 +13,7 @@ if(PHP_OS == 'WINNT'){
   shell_exec('net stop jetty');
 }else shell_exec('service jetty stop > /dev/null 2>&1');
 
-define('SOLR_DATA_PATH', realpath('../../data/solr/data').DIRECTORY_SEPARATOR);
+define('SOLR_DATA_PATH', realpath(dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'solr'.DIRECTORY_SEPARATOR.'data').DIRECTORY_SEPARATOR);
 $dir = SOLR_DATA_PATH;
 $sleep = 15;
 if(!empty($argv[1]) && ( $argv[1] !== 'all')){

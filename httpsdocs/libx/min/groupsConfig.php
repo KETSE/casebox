@@ -79,6 +79,9 @@ return array_merge($customConfig, array(
 		
 		,'//js/calendar/calendar-all-debug.js'
 		,'//js/CB.Favorites.js'
+
+		,'//js/plugins/CB.plugins.FilesDropZone.js'
+		,'//js/CB.Uploader.js'
 	)
 
     ,'jsdev' => array(
@@ -93,12 +96,11 @@ return array_merge($customConfig, array(
 		,'//js/CB.CalendarView.js'
 		,'//js/CB.Security.js'
 		
-		,'//js/plugins/CB.plugins.FilesDropZone.js'
-		,'//js/CB.Uploader.js'
-		
 		,'//js/CB.UsersGroups.js'
 		,'//js/CB.SystemManagementWindow.js'
 		,'//js/CB.TemplatesManagementWindow.js'
+
+		,'//js/CB.Account.js'
 	)
 	,'lang-en' => array('//js/locale/en.js')
 	,'lang-es' => array('//js/locale/es.js')

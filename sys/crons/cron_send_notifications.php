@@ -4,11 +4,11 @@
 namespace CB;
 
 $cron_id = 'send_notifications';
-//$execution_skip_times = 1; //default is 1
+$execution_timeout = 60; //default is 60 seconds
 
 include 'init.php';
 	
-$cd = prepare_cron($cron_id);
+$cd = prepare_cron($cron_id, $execution_timeout);
 if(!$cd['success']){
 	echo "\nerror preparing cron\n";
 	exit(1);
@@ -74,5 +74,6 @@ foreach($users as $u){
 			mail( $u['email'], $m[0], $message, "Content-type: text/html; charset=utf-8\r\nFrom: ".SENDER_EMAIL . "\r\n" );
 		}
 	}
+	DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
 }
 DB\mysqli_query_params('update crons set last_end_time = CURRENT_TIMESTAMP, execution_info = $2 where cron_id = $1', array($cron_id, 'ok') ) or die(DB\mysqli_query_error());

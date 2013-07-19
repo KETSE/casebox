@@ -31,6 +31,13 @@ a:hover{ text-decoration: underline }
 	margin: 5px 10px;
 	border: 0;
 }
+.user-photo-field2 {
+	width: 70px !important;
+	padding: 15px;
+	border: 1px solid #eaeaea;
+	clear: both;
+}
+
 .icon-merge {background-image: url(i/ico/vbox.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-m{ background-image: url(i/ico/user.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-f { background-image: url(i/ico/user-female.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -427,14 +434,14 @@ table.qtip td{ font-weight: normal; padding: 3px; color: black}
 
 .summary td.cell{width: 50%; vertical-align: top; border-bottom: 3px solid #EEE; padding: 15px;}
 .summary td.last{border-bottom: none;}
-.summary .block-header{font-size: 15px;
+.block-header{font-size: 15px;
 color: #555;
 font-weight: bold;
 font-family: tahoma,arial,verdana,sans-serif;
 margin: 0 0 10px 0;
 padding: 0;
 }
-.summary .block-header a {padding-left: 5px;
+.block-header a {padding-left: 5px;
 font-size: 11px;
 color: #15C;
 font-weight: normal;

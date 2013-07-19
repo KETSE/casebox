@@ -12,7 +12,7 @@ class Files{
 		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			$a = explode('.', $r['name']);
-			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
+			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['cfg']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['cfg']['time_format']), strtotime($r['cdate']));
 			$r['ago_date'] = Util\translateMonths($r['ago_date']);
 			$r['ago_text'] = Util\formatAgoTime($r['cdate']);
 			$rez['data'] = $r;
@@ -22,7 +22,7 @@ class Files{
 		$sql = 'select id, `date`, `name`, cid, uid, cdate, udate, (select `size` from files_content where id = v.content_id ) `size` FROM files_versions v WHERE file_id = $1 order by cdate desc';
 		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
-			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['time_format']), strtotime($r['cdate']));
+			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['cfg']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['cfg']['time_format']), strtotime($r['cdate']));
 			$r['ago_date'] = Util\translateMonths($r['ago_date']);
 			$r['ago_text'] = Util\formatAgoTime($r['cdate']);
 			$rez['data']['versions'][] = $r;
@@ -248,7 +248,7 @@ class Files{
 
 	/**
 	 * [storeFiles move the files from incomming folder to file storage]
-	 * @param  array $p upload field values from upload form, files property - array of uploaded files, response - response from user when asket about overwrite for single or many file
+	 * @param  array $p upload field values from upload form, files property - array of uploaded files, response - response from user when asked about overwrite for single or many file
 	 */
 	public function storeFiles(&$p){
 		/* here we'll iterate all files and comparing the md5 with already contained files will upload only new contents to our store. Existent contents will be reused */
@@ -392,6 +392,7 @@ class Files{
 		$f['content_id'] = DB\last_insert_id();
 		@mkdir($filePath.$storage_subpath.'/', 0777, true);
 		copy($f['tmp_name'], $filePath.$storage_subpath.'/'.$f['content_id']);
+		@unlink($f['tmp_name']);
 		return true;
 	}
 
@@ -474,7 +475,7 @@ class Files{
 				DB\mysqli_query_params('insert into file_previews (id, `group`, status, filename, size) values($1, \'office\', 1, null, 0) on duplicate key update `group` = \'office\', status =1, filename = null, size = 0, cdate = CURRENT_TIMESTAMP', $file['content_id'] ) or die(DB\mysqli_query_error());
 				if(file_exists($preview_filename)) Files::deletePreview($file['content_id']);
 				
-				$cmd = 'php -f '.LIB_DIR.'preview_extractor_office.php '.CORENAME.' &> '.LIB_DIR.'office.log';
+				$cmd = 'php -f '.LIB_DIR.'preview_extractor_office.php '.CORENAME.' &> '.DEBUG_LOG.'_office';
 				if(is_windows()) $cmd = 'start /D "'.LIB_DIR.'" php -f preview_extractor_office.php '.CORENAME;
 				pclose(popen($cmd, "r"));
 				return array('processing' => true);

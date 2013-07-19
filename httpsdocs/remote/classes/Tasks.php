@@ -12,7 +12,7 @@ class Tasks{
 			.',(select template_id from tree where id = $1) template_id'
 			.',(select reminds from tasks_reminders where task_id = $1 and user_id = $2) reminds'
 			.',(select name from tree where id = t.case_id) `case`'
-			.',(select concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title)) from objects where id = object_id) object'
+			.',(select concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['cfg']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title)) from objects where id = object_id) object'
 			.',status, cid, completed, cdate '
 			.',has_deadline, importance, category_id, allday '
 			.',(select f_get_tree_ids_path(pid) from tree where id = t.id) `path` '
@@ -52,7 +52,7 @@ class Tasks{
 	function save($p){
 		if(!isset($p['id'])) $p['id'] = null;
 		if(!isset($p['pid'])) $p['pid'] = null;
-		$p['type'] = intval($p['type']);
+		$p['type'] = 0;//intval($p['type']);
 		
 		$log_action_type = 25; //suppose that only notifications are changed
 		
@@ -418,7 +418,7 @@ class Tasks{
 		$sql = 'SELECT t.*'.
 			',DATEDIFF(t.`date_end`, UTC_DATE()) `days`'.
 			',(select name from tree where id = t.case_id) `case`'.
-			',(select concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title)) from objects where id = t.object_id) `object`'.
+			',(select concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['cfg']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title)) from objects where id = t.object_id) `object`'.
 			',(select l'.USER_LANGUAGE_INDEX.' from tags where id = t.responsible_party_id) `responsible_party` '.
 			$from.' order by t.cdate'.(empty($p->limit) ? '' : ' LIMIT '.intval($p->limit)).(empty($p->start) ? '' : ' OFFSET '.intval($p->start));
 		$res = DB\mysqli_query_params($sql, array($_SESSION['user']['id'], $case_id)) or die(DB\mysqli_query_error());
@@ -737,7 +737,7 @@ class Tasks{
 				'<span class="dttm" title="{full_create_date}">{create_date}</span></p></td></tr></tbody></table></td></tr>'
 			;
 			
-			$date_format = str_replace('%', '', $_SESSION['user']['short_date_format']);
+			$date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
 			$format = 'Y, F j';//$date_format;
 			if($d['allday'] != 1) $format .= ' H:i';
 			$i = strtotime($d['date_start']);

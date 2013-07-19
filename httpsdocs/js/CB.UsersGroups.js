@@ -934,7 +934,7 @@ CB.ChangePasswordWindow = Ext.extend(Ext.Window, {
 								clientValidation: true
 								,params: this.data
 								,scope: this
-								,success: this.destroy
+								,success: this.onSubmitSuccess
 							})
 						}
 					}
@@ -945,7 +945,12 @@ CB.ChangePasswordWindow = Ext.extend(Ext.Window, {
 				afterrender: function(){ f = this.findByType('form')[0]; f.syncSize(); App.focusFirstField(f) }
 			}
 		});
+		this.addEvents('passwordchanged');
 		CB.ChangePasswordWindow.superclass.initComponent.apply(this, arguments);
+	}
+	,onSubmitSuccess: function(r, e){
+		this.fireEvent('passwordchanged');
+		this.destroy();
 	}
 }
 )

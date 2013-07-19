@@ -92,7 +92,7 @@ class Security {
 			$params[] = ' %'.trim($p->query).'% ';
 		}
 
-		$sql = 'select id, l'.USER_LANGUAGE_INDEX.' `name`, `system`, `enabled`, `type`, `sex` from users_groups where deleted = 0 '.( empty($where) ? '' : ' and '.implode(' and ', $where) ).' order by `type`, 2 limit 50';
+		$sql = 'select id, l'.USER_LANGUAGE_INDEX.' `name`, `system`, `enabled`, `type`, `sex` from users_groups where did is null '.( empty($where) ? '' : ' and '.implode(' and ', $where) ).' order by `type`, 2 limit 50';
 		$res = DB\mysqli_query_params($sql, $params) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
@@ -478,6 +478,7 @@ class Security {
 	public static function canDownload($object_id, $user_group_id = false){
 		return (Security::getAccessBitForObject($object_id, 11, $user_group_id) > 0);
 	}
+
 	//0 List Folder/Read Data
 	//1 Create Folders
 	//2 Create Files
@@ -664,7 +665,7 @@ class Security {
 	static function getActiveUsers(){
 		$rez = Array('success' => true, 'data' => array());
 		$user_id = $_SESSION['user']['id'];
-		$sql = 'select id, l'.USER_LANGUAGE_INDEX.' `name`, concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls` from users_groups where `type` = 2 and deleted = 0 and enabled = 1 order by 2';
+		$sql = 'select id, l'.USER_LANGUAGE_INDEX.' `name`, concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls` from users_groups where `type` = 2 and did is null and enabled = 1 order by 2';
 		$res = DB\mysqli_query_params( $sql, $user_id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez['data'][] = $r;
 		$res->close();
@@ -695,6 +696,9 @@ class Security {
 		if($r = $res->fetch_row()) $rez = ($r[0] == $_SESSION['user']['id']); else throw new \Exception(L\User_not_found);
 		$res->close();
 		return $rez;
+	}
+	static function canEditUser($user_id){
+		return (Security::isAdmin() || Security::isUsersOwner($user_id) || ($_SESSION['user']['id'] == $user_id));
 	}
 	static function canManageTask($task_id, $user_id = false){
 		$rez = false;

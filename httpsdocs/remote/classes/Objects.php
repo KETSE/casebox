@@ -300,7 +300,7 @@ class Objects{
 				case 'actions':
 					$s= new Search();
 					$query->fl = 'id,pid,name,type,subtype,date,template_id,cid';
-					$query->types = array(4);
+					$query->template_types = 'object';
 					$query->sort = array('date desc');
 					$rez[$key] = $s->query($query);
 					unset($s);
@@ -308,7 +308,7 @@ class Objects{
 				case 'tasks':
 					$s= new Search();
 					$query->fl = 'id,name,type,template_id,date,date_end,cid,user_ids';
-					$query->types = array(6,7);
+					$query->template_types = 'task';
 					$query->sort = array('date desc');
 					$rez[$key] = $s->query($query);
 					unset($s);

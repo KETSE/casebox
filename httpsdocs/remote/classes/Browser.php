@@ -43,15 +43,16 @@ class Browser{
 		if(!empty($p->source))
 		switch($p->source){
 			case 'field':
-			if( empty($p->pidValue) || empty($p->field) ) break;
-			$ids = Util\toNumericArray($p->pidValue);
-			if(empty($ids)) break;
+				if( empty($p->pidValue) || empty($p->field) ) break;
+				$ids = Util\toNumericArray($p->pidValue);
+				if(empty($ids)) break;
+				/*get distinct target field values for selected objects in parent field */
 				$sql = 'SELECT od.value FROM '.
 					'objects o '.
 					'JOIN templates t ON t.id = o.`template_id` '.
 					'JOIN templates_structure ts ON t.id = ts.`template_id` AND ts.name = $1 '.
 					'JOIN objects_data od ON o.id = od.`object_id` AND od.`field_id` = ts.id '.
-					'WHERE o.`id` IN ('.implode(',',$ids).');';
+					'WHERE o.`id` IN ('.implode(',',$ids).')';
 				$res = DB\mysqli_query_params($sql, $p->field) or die(DB\mysqli_query_error());
 				$ids = array();
 				while($r = $res->fetch_row()){
@@ -65,6 +66,7 @@ class Browser{
 				$res->close();
 				$ids = array_keys($ids);
 				if(empty($ids)) return array('success' => true, 'data' => array() );
+
 				$p->ids = $ids;
 				break;
 

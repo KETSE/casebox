@@ -26,10 +26,17 @@ if( !empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u']) ){
 		DB\connect();
 		$r = User::Login($u, $p);
 		if($r['success'] == false) $errors[] = L\Auth_fail;
+		elseif(!empty($_SESSION['user']['cfg']['security']['TSV']['method'])) $_SESSION['check_TSV'] = time();
+		else $_SESSION['user']['TSV_checked'] = true;
 	}
 	$_SESSION['message'] = array_shift($errors);
+}elseif( !empty($_SESSION['check_TSV']) && !empty($_POST['c']) ){
+	$u = new User();
+	if( $u->verifyGACode($_POST['c']) ){
+		unset($_SESSION['check_TSV']);
+		$_SESSION['user']['TSV_checked'] = true;
+	}else $_SESSION['message'] = 'Wrong verification code. Please try again.';
 }
-
-if (empty($_SESSION['user'])) exit(header('Location: /login.php'));
+if (!User::is_loged()) exit(header('Location: /login.php'));
 
 header('Location: /index.php');

@@ -55,7 +55,7 @@ class BrowserView extends BrowserTree{
 		$default_filters = array(
 			'activeTasks' => (object)array(
 				'sort' => 'status'
-				,'types' => array(6)
+				,'template_types' => 'task'
 				,'filters' => (object)array(
 					'status' => array( (object)array('mode' => 'OR', 'values' => array(1, 2) ) )
 					,'user_ids' => array( (object)array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
@@ -63,7 +63,7 @@ class BrowserView extends BrowserTree{
 			)
 			,'completeTasks' => (object)array(
 				'sort' => 'status'
-				,'types' => array(6)
+				,'template_types' => 'task'
 				,'filters' => (object)array(
 					'status' => array( (object)array('mode' => 'OR', 'values' => array(1, 2) ) )
 					,'user_ids' => array( (object)array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
@@ -71,7 +71,8 @@ class BrowserView extends BrowserTree{
 			)
 			,'actions' => (object)array(
 				'sort' => 'status'
-				,'types' => array(6)
+				,'template_types' => 'object'
+				,'folders' => false
 				,'filters' => (object)array(
 					'status' => array( (object)array('mode' => 'OR', 'values' => array(1, 2) ) )
 					,'user_ids' => array( (object)array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
@@ -79,7 +80,7 @@ class BrowserView extends BrowserTree{
 			)
 			,'files' => (object)array(
 				'sort' => 'status'
-				,'types' => array(6)
+				,'template_types' => 'file'
 				,'filters' => (object)array(
 					'status' => array( (object)array('mode' => 'OR', 'values' => array(1, 2) ) )
 					,'user_ids' => array( (object)array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
@@ -87,7 +88,7 @@ class BrowserView extends BrowserTree{
 			)
 			,'tasksUsers' => (object)array(
 				'sort' => 'status'
-				,'types' => array(6)
+				,'template_types' => 'task'
 				,'filters' => (object)array(
 					'status' => array( (object)array('mode' => 'OR', 'values' => array(1, 2) ) )
 					,'user_ids' => array( (object)array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )

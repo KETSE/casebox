@@ -695,7 +695,7 @@ CB.ActionFilesPanel = Ext.extend(Ext.Panel, {
 		this.filesView.store.removeAll();
 		id = this.getCaseObjectId();
 		if(Ext.isEmpty(id)) return;
-		BrowserView.getChildren({pid: id, types: [5]}, this.processFilesLoad, this)
+		BrowserView.getChildren({pid: id, template_types: 'file'}, this.processFilesLoad, this)
 	}
 	,processFilesLoad: function(r, e){
 		if(r.success !== true) return;

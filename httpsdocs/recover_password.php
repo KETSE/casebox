@@ -32,7 +32,7 @@
 					}
 
 					DB\mysqli_query_params('update users_groups set `password` = md5($2), recover_hash = null where recover_hash = $1', array($hash, 'aero'.$p)) or die(DB\mysqli_query_error());
-					$_SESSION['msg'] = '<div class="alert alert-success">'.L\get('PasswordChanged').'<br /> <br /><a href="/">'.L\get('Login').'</a></div>';
+					$_SESSION['msg'] = '<div class="alert alert-success">'.L\get('PasswordChangedMsg').'<br /> <br /><a href="/">'.L\get('Login').'</a></div>';
 					break;
 				}
 

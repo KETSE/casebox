@@ -95,7 +95,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 			autoLoad: false
 			,autoDestroy: true
 			,remoteSort: true
-			,baseParams: {types: [6], facets: 'tasks'}//7
+			,baseParams: {template_types: 'task', facets: 'tasks'}//7
 			,proxy: new  Ext.data.DirectProxy({
 				paramsAsHash: true
 				,directFn: BrowserView.getChildren

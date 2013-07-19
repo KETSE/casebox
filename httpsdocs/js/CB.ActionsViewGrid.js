@@ -7,7 +7,7 @@ CB.ActionsViewGrid = Ext.extend(CB.FolderViewGrid,{
 			gridStateId: 'avg'
 		})
 		CB.ActionsViewGrid.superclass.initComponent.apply(this, arguments);
-		this.grid.store.baseParams = {types: [4], facets: 'actions'}
+		this.grid.store.baseParams = {template_types: 'object', facets: 'actions'}
 		tb =this.getTopToolbar();
 		idx = tb.items.findIndex('iconCls', 'icon32-upload');
 		if(idx > -1) tb.remove(idx);

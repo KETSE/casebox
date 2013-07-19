@@ -230,8 +230,8 @@ CB.CaseCardActions = Ext.extend(CB.CaseCardBlock, {
 	cls: 'block-actions'
 	,serverRoot: 'actions'
 	,fields: [{name: 'id', type: 'int'}, {name: 'pid', type: 'int'}, 'name', 'iconCls', {name: 'date', type: 'date'}, {name: 'cid', type: 'int'}, 'path' ]
-	,tpl: ['<b>'+L.Actions+'</b> <a name="addObject" class="click">'+L.addNew+' ...</a>'
-  		,'<ul>'
+	,tpl: ['<ul>'
+        ,'<li><b>' + L.Actions + '</b> <a name="addObject" class="click">' + L.addNew + ' ...</a></li>'
 		,'<tpl for=".">'
 		,'<li><a class="i {iconCls}" href="#{id}">{name}</a>'
 			,'<br />'
@@ -250,10 +250,19 @@ CB.CaseCardActions = Ext.extend(CB.CaseCardBlock, {
 	,onItemClick: function(dv, itemIndex, el, ev){
 		a = ev.getTarget('a')
 		if(Ext.isEmpty(a)) return;
-		if(a.name == 'cid') Ext.Msg.alert('Click', 'Open user window');
-		else{
-			r = dv.store.getAt(itemIndex);
-			App.locateObject(r.get('id'), r.get('pid') );
+        switch(a.name){
+            case 'cid': Ext.Msg.alert('Click', 'Open user window'); break;
+            case 'addObject':
+                data = Ext.apply({}, {
+                    pid: this.params.caseId
+                    ,path: this.params.path
+                    ,pathtext: this.params.pathtext
+                }, b.data);
+                App.mainViewPort.createObject(data, ev);
+                break;
+            default:
+                r = dv.store.getAt(itemIndex);
+                if(r) App.mainViewPort.openObject({id: r.get('id') });
 		}
 	}
 });
@@ -303,10 +312,11 @@ CB.CaseCardTasks = Ext.extend(CB.CaseCardBlock, {
 		switch(a.name){
 			case 'uid': Ext.Msg.alert('Click', 'Open user window'); break;
 			case 'addTask':
-				break;			
+                App.mainViewPort.fireEvent('taskcreate', {data: {pid: this.params.caseId,path: this.params.path,pathtext: this.params.pathtext}})
+				break;
 			default:
 				r = dv.store.getAt(itemIndex -1);
-				if(r) App.locateObject(r.get('id'), r.get('pid') );
+				if(r) App.openObject(86, r.get('id'), ev);
 		}
 	}
 });

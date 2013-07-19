@@ -19,7 +19,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 			,filters: [
 				{	name: L.assignedToMe
 					,value: {sort: ['status', 'date_end', 'date_start']
-						,types: [6]
+						,template_types: 'task'
 						,filters: {
 							status: [ {mode: 'OR', values: [1, 2] } ]
 							,user_ids: [ {mode: 'OR', values: [App.loginData.id] } ] 
@@ -27,7 +27,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 					}
 				},{ 	name: L.ownedByMe
 					,value: {sort: ['status', 'date_end', 'date_start']
-						,types: [6]
+						,template_types: 'task'
 						,filters: {
 							status: [ {mode: 'OR', values: [1, 2] } ]
 							,cid: [ {mode: 'OR', values: [App.loginData.id] } ] 
@@ -35,7 +35,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 					}
 				},{	name: L.all
 					,value: {sort: ['status', 'date_end', 'date_start']
-						,types: [6]
+						,template_types: 'task'
 						,filters: {
 							status: [ {mode: 'OR', values: [1, 2] } ]
 						}
@@ -58,7 +58,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 			,filters: [
 				{	name: L.assignedToMe
 					,value: {sort: ['udate desc', 'name']
-						,types: [6]
+						,template_types: 'task'
 						,filters: {
 							status: [ {mode: 'OR', values: [3] } ]
 							,user_ids: [ {mode: 'OR', values: [App.loginData.id] } ] 
@@ -66,7 +66,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 					}
 				},{	name: L.ownedByMe
 					,value: {sort: ['udate desc', 'name']
-						,types: [6]
+						,template_types: 'task'
 						,filters: {
 							status: [ {mode: 'OR', values: [3] } ]
 							,cid: [ {mode: 'OR', values: [App.loginData.id] } ] 
@@ -74,7 +74,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 					}
 				},{	name: L.all
 					,value: {sort: ['udate desc', 'name']
-						,types: [6]
+						,template_types: 'task'
 						,filters: {
 							status: [ {mode: 'OR', values: [3] } ]
 						}
@@ -96,14 +96,16 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 			,filters: [
 				{	name: L.modifiedByMe
 					,value: {sort: ['udate desc', 'name']
-						,types: [4]
+						,template_types: 'object'
+						,folders: false
 						,filters: {
 							uid: [ {mode: 'OR', values: [App.loginData.id] } ] 
 						}
 					}
 				},{	name: L.modifiedByAnybody
 					,value: {sort: ['udate desc', 'name']
-						,types: [4]
+						,template_types: 'object'
+						,folders: false
 					}
 				}
 			]
@@ -122,14 +124,14 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 			,filters: [
 				{	name: L.modifiedByMe
 					,value: {sort: ['udate desc', 'name']
-						,types: [5]
+						,template_types: 'file'
 						,filters: {
 							uid: [ {mode: 'OR', values: [App.loginData.id] } ] 
 						}
 					}
 				},{	name: L.modifiedByAnybody
 					,value: {sort: ['udate desc', 'name']
-						,types: [5]
+						,template_types: 'file'
 					}
 				}
 			]
@@ -152,7 +154,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 			,filters: [
 				{	name: L.thatCreatedTasksForMe
 					,value: { // group by cid, status
-						types: [6]
+						template_types: 'task'
 						,facets: 'activeTasksPerUsers'
 						,facetPivot: 'cid,status'
 						,filters: {
@@ -162,7 +164,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 					}
 				},{ 	name: L.assignedToTasksCreatedByMe
 					,value: { //group by user_ids, status
-						types: [6]
+						template_types: 'task'
 						,facets: 'activeTasksPerUsers'
 						,facetPivot: 'user_ids,status'
 						,filters: {
@@ -172,7 +174,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 					}
 				},{ 	name: L.createdTasks
 					,value: {// group by cid, status (but without filter for me)
-						types: [6]
+						template_types: 'task'
 						,facets: 'activeTasksPerUsers'
 						,facetPivot: 'cid,status'
 						,filters: {
@@ -181,7 +183,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 					}
 				},{ 	name: L.assignedToTasks
 					,value: {
-						types: [6]
+						template_types: 'task'
 						,facets: 'activeTasksPerUsers'
 						,facetPivot: 'user_ids,status'
 						,filters: {

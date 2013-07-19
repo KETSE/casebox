@@ -35,10 +35,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			)
 			,listeners:{
 				scope: this
-				,load: function(store, records, options){
-					Ext.each(records, function(r){ r.set('iconCls', getItemIcon(r.data)) }, this);
-					if(this.grid) this.grid.getView().refresh();
-				}
+				,add: this.onObjectsStoreChange
+				,load: this.onObjectsStoreChange
 			}
 			,getTexts: getStoreNames
 			,getData: function(v){
@@ -56,6 +54,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				idx = this.findExact('id', parseInt(data.id));
 				if(idx< 0){
 					r = new this.recordType(data);
+					r.set('iconCls', getItemIcon(data));
 					this.add(r);
 				}
 			}
@@ -258,6 +257,10 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.data.cdate = date_ISO_to_date(this.data.cdate);
 		this.data.udate = date_ISO_to_date(this.data.udate);
 	}
+	,onObjectsStoreChange: function(store, records, options){
+		Ext.each(records, function(r){ r.set('iconCls', getItemIcon(r.data)) }, this);
+		if(this.grid && !this.grid.editing) this.grid.getView().refresh();
+	}	
 	,prepareInterface: function(){
 		toolbarItems = []
 
@@ -931,13 +934,13 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
 		id = this.getCaseObjectId();
 		if(Ext.isEmpty(id)) return;
 		params = {pid: id
-			,types: [4]
+			,template_types: 'object'
+			,folders: false
 			,sort: 'udate'
 			,dir: 'desc'
 		}
 		p = this.findParentByType(CB.Objects);
 		if(!Ext.isEmpty(p) && !Ext.isEmpty(p.data.cfg) && !Ext.isEmpty(p.data.cfg.templates) )  params.templates = p.data.cfg.templates;
-
 		BrowserView.getChildren(params, this.processLoad, this)
 	}
 	,processLoad: function(r, e){

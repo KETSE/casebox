@@ -23,7 +23,7 @@ class UsersGroups{
 
 		
 		if($id == -1){ // users out of a group
-			$sql = 'select id `nid`, u.cid, name, l'.USER_LANGUAGE_INDEX.' `title`, sex, `enabled` from users_groups u left join users_groups_association a on u.id = a.user_id where u.`type` = 2 and u.deleted = 0 and a.group_id is null order by 3, 2';
+			$sql = 'select id `nid`, u.cid, name, l'.USER_LANGUAGE_INDEX.' `title`, sex, `enabled` from users_groups u left join users_groups_association a on u.id = a.user_id where u.`type` = 2 and u.did is NULL and a.group_id is null order by 3, 2';
 			$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
 			while($r = $res->fetch_assoc()){
 				$r['loaded'] = true;
@@ -32,7 +32,7 @@ class UsersGroups{
 			}
 			$res->close();
 		}elseif(is_null($node_type)){ /* root node childs*/
-			$sql = 'select id `nid`, name, l'.USER_LANGUAGE_INDEX.' `title`, `type`, `system`, (select count(*) from users_groups_association a JOIN users_groups u ON a.user_id = u.id AND u.deleted = 0 where group_id = g.id) `loaded`  from users_groups g where `type` = 1 and `system` = 0 order by 3, 2';
+			$sql = 'select id `nid`, name, l'.USER_LANGUAGE_INDEX.' `title`, `type`, `system`, (select count(*) from users_groups_association a JOIN users_groups u ON a.user_id = u.id AND u.did is NULL where group_id = g.id) `loaded`  from users_groups g where `type` = 1 and `system` = 0 order by 3, 2';
 			$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
 			while($r = $res->fetch_assoc()){
 				$r['iconCls'] = 'icon-users';
@@ -48,7 +48,7 @@ class UsersGroups{
 				,'expanded' => true
 			);
 		}else{// group users
-			$sql = 'select u.id `nid`, u.cid, u.name, u.l'.USER_LANGUAGE_INDEX.' `title`, sex, enabled from users_groups_association a join users_groups u on a.user_id = u.id where a.group_id = $1 and u.deleted = 0 ';
+			$sql = 'select u.id `nid`, u.cid, u.name, u.l'.USER_LANGUAGE_INDEX.' `title`, sex, enabled from users_groups_association a join users_groups u on a.user_id = u.id where a.group_id = $1 and u.did is NULL ';
 			$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 			while($r = $res->fetch_assoc()){
 				$r['loaded'] = true;
@@ -103,15 +103,15 @@ class UsersGroups{
 		$p->name = trim($p->name);
 		if(empty($p->name) || empty($p->password) || (empty($p->confirm_password) || ($p->password != $p->confirm_password))) return $rez;
 		$user_id = 0;
-		/*check user existance, if user already exists but is deleted then its record wiil be used for new user */
-		$res = DB\mysqli_query_params("select id from users_groups where name = $1 and deleted = 0", $p->name) or die(DB\mysqli_query_error());
+		/*check user existance, if user already exists but is deleted then its record will be used for new user */
+		$res = DB\mysqli_query_params("select id from users_groups where name = $1 and did is NULL", $p->name) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) throw new \Exception(L\User_exists);
 		$res->close();
 		/*end of check user existance */
 		
 		DB\mysqli_query_params('insert into users_groups (`name`, `cid`, `password`, language_id, cdate, uid, email) values($1, $2, MD5(CONCAT(\'aero\', $3)), $4, CURRENT_TIMESTAMP, $2, $5) '.
 			'on duplicate key update id = last_insert_id(id), `name` = $1, `cid` = $2, `password` = MD5(CONCAT(\'aero\', $3))'.
-			',last_login = null, login_successful = null, login_from_ip = null, last_logout = null, last_action_time = null, enabled = 1, visible_in_reports = 1, cdate = CURRENT_TIMESTAMP, deleted = 0, language_id = $4, uid = $2, cdate = CURRENT_TIMESTAMP'
+			',last_login = null, login_successful = null, login_from_ip = null, last_logout = null, last_action_time = null, enabled = 1, cdate = CURRENT_TIMESTAMP, did = NULL, ddate = NULL, language_id = $4, uid = $2, cdate = CURRENT_TIMESTAMP'
 			,array($p->name, $_SESSION['user']['id'], $p->password, LANGUAGE_INDEX, $p->email ) ) or die(DB\mysqli_query_error());
 		if($user_id = DB\last_insert_id()){
 			$rez = Array('success' => true, 'data' => Array('id' => $user_id));
@@ -120,8 +120,8 @@ class UsersGroups{
 		
 		DB\mysqli_query_params('delete from users_groups_data where user_id = $1',  $user_id) or die(DB\mysqli_query_error());
 		
-		$res = DB\mysqli_query_params('select id from templates where `type` = \'user\'') or die(DB\mysqli_query_error());
-		if($r = $res->fetch_row()) $p->template_id = $r[0];
+		//get users template id
+		$p->template_id = User::getTemplateId();
 		$p->sex = null;
 		//$p->email = '';
 		
@@ -140,7 +140,12 @@ class UsersGroups{
 		
 		}else $rez['data']['group_id'] = 0;
 		
+<<<<<<< HEAD
+		// $this->updateUserEmails($user_id);
+=======
 		$this->updateUserEmails($user_id);
+        SolrClient::runBackgroundCron();
+>>>>>>> 04c14c81307aa2d7f05c3a3badb1587045e4204e
 		return $rez;
 	}
 
@@ -161,7 +166,7 @@ class UsersGroups{
 	 */
 	public function deleteUser($user_id){ 
 		if(!Security::canManage()) throw new \Exception(L\Access_denied);
-		$res = DB\mysqli_query_params('update users_groups set deleted = 1, did = $2 where id = $1 ', array($user_id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error()); // and (cid = $2) !!!!
+		$res = DB\mysqli_query_params('update users_groups set did = $2, ddate = CURRENT_TIMESTAMP where id = $1 ', array($user_id, $_SESSION['user']['id']) ) or die(DB\mysqli_query_error()); // and (cid = $2) !!!!
 		
 		//TODO: destroy user session if loged in
 
@@ -204,16 +209,16 @@ class UsersGroups{
 		$rez = Array('success' => false, 'msg' => L\Wrong_id);
 		
 		$res = DB\mysqli_query_params('select id, cid, name, '.config\language_fields.', sex, email, enabled, '.
-			'date_format(last_action_time, \''.$_SESSION['user']['short_date_format'].' %H:%i\') last_action_time, '.
-			'date_format(cdate, \''.$_SESSION['user']['short_date_format'].' %H:%i\') `cdate`, '.
-			'(select l'.USER_LANGUAGE_INDEX.' from users_groups where id = u.cid) owner, '.
-			'(select id from templates where `type` = \'user\') template_id '.
+			'date_format(last_action_time, \''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') last_action_time, '.
+			'date_format(cdate, \''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') `cdate`, '.
+			'(select l'.USER_LANGUAGE_INDEX.' from users_groups where id = u.cid) owner '.
 			'from users_groups u where id = $1 ', $user_id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()) $rez = Array('success' => true, 'data' => $r);
 		$res->close();
 		if($rez['success'] == false) throw new \Exception(L\Wrong_id);
 		
-		require_once 'VerticalEditGrid.php';
+		$rez['data']['template_id'] = User::getTemplateId();
+		
 		VerticalEditGrid::getData('users_groups', $rez['data']);
 		
 		return $rez;
@@ -226,15 +231,15 @@ class UsersGroups{
 		$rez = Array('success' => true);
 		$data = json_decode($params['data']);
 		
-		if(!Security::isAdmin() && !Security::isUsersOwner($data->id) && !($_SESSION['user']['id'] == $data->id)) throw new \Exception(L\Access_denied);
-		require_once 'VerticalEditGrid.php';
+		if(!Security::canEditUser($data->id)) throw new \Exception(L\Access_denied);
 		VerticalEditGrid::saveData('users_groups', $data);
 		
 		/* if updating current logged user then checking if interface params have changed */
 		$interface_params_changed = false;
 		if($data->id == $_SESSION['user']['id']){
-			$res = DB\mysqli_query_params('select '.config\language_fields.', language_id, short_date_format, long_date_format from users_groups u where id = $1 ', $data->id) or die(DB\mysqli_query_error());
+			$res = DB\mysqli_query_params('select '.config\language_fields.', language_id, cfg from users_groups u where id = $1 ', $data->id) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()){
+				// TODO: review
 				$r['language'] = $GLOBALS['languages'][$r['language_id']-1];
 				if(empty($r['long_date_format'])) $r['long_date_format'] = $GLOBALS['language_settings'][$r['language']]['long_date_format'];
 				if(empty($r['short_date_format'])) $r['short_date_format'] = $GLOBALS['language_settings'][$r['language']]['short_date_format'];
@@ -248,7 +253,7 @@ class UsersGroups{
 			if($interface_params_changed) $rez['interface_params_changed'] = true;
 		}
 		/* end of if updating current logged user then checking if interface params have changed */
-		$this->updateUserEmails($data->id);
+		// $this->updateUserEmails($data->id);
 		return $rez;
 	}
 	
@@ -378,11 +383,12 @@ class UsersGroups{
 	 */
 	public static function getUserPreferences($user_id){
 		$rez = array();
-		$res = DB\mysqli_query_params('select id, name, '.config\language_fields.', sex, email, language_id, short_date_format, long_date_format from users_groups where enabled = 1 and deleted = 0 and id = $1', $user_id) or die(DB\mysqli_query_error());
+		$res = DB\mysqli_query_params('select id, name, '.config\language_fields.', sex, email, language_id, cfg from users_groups where enabled = 1 and did is NULL and id = $1', $user_id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			$r['language'] = $GLOBALS['languages'][$r['language_id']-1];
-			$r['long_date_format'] = Util\coalesce($r['long_date_format'], $GLOBALS['language_settings'][$r['language']]['long_date_format']);
-			$r['short_date_format'] = Util\coalesce($r['short_date_format'], $GLOBALS['language_settings'][$r['language']]['short_date_format']);
+			$r['cfg'] = empty($r['cfg']) ? array(): json_decode($r['cfg'], true);
+			$r['cfg']['long_date_format'] = Util\coalesce($r['cfg']['long_date_format'], $GLOBALS['language_settings'][$r['language']]['long_date_format']);
+			$r['cfg']['short_date_format'] = Util\coalesce($r['cfg']['short_date_format'], $GLOBALS['language_settings'][$r['language']]['short_date_format']);
 			$rez = $r;
 		}
 		$res->close();

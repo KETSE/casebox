@@ -162,21 +162,21 @@ function formatLeftDays($days_difference) {
 
 function formatMysqlDate($date, $format = false) {
 	if (empty($date)) return '';
-	if($format == false) $format = $_SESSION['user']['short_date_format'];
+	if($format == false) $format = $_SESSION['user']['cfg']['short_date_format'];
 	return date(str_replace('%', '', $format), strtotime($date));
 	//return implode('.', array_reverse(explode('-', substr($date, 0, 10))));
 }
 
 function formatMysqlTime($date, $format = false) {
 	if (empty($date)) return '';
-	if($format == false) $format = $_SESSION['user']['short_date_format'].' '.$_SESSION['user']['time_format'];
+	if($format == false) $format = $_SESSION['user']['cfg']['short_date_format'].' '.$_SESSION['user']['cfg']['time_format'];
 	return date(str_replace('%', '', $format), strtotime($date));
 	//return implode('.', array_reverse(explode('-', substr($date, 0, 10))));
 }
 
 function clientToMysqlDate($date) {
 	if (empty($date)) return null;
-	$d = date_parse_from_format (str_replace('%', '', $_SESSION['user']['short_date_format']), $date);
+	$d = date_parse_from_format (str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']), $date);
 	return $d['year'].'-'.$d['month'].'-'.$d['day'];
 }
 /* date and time functions */

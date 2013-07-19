@@ -63,12 +63,12 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
 			this.xhr.addEventListener("loadend",		this.onFileUploadLoadEnd.createDelegate(this), false);
 		}else if(this.xhr.attachEvent){
 			this.xhr.attachEvent("loadstart", 		this.onFileUploadStart.createDelegate(this), false);
-			this.xhr.upload.attachEvent("progress",	this.onFileUploadProgress.createDelegate(this), false);
-			this.xhr.attachEvent("abort",		this.onFileUploadAbort.createDelegate(this), false);
-			this.xhr.attachEvent("error",		this.onFileUploadError.createDelegate(this), false);
-			this.xhr.attachEvent("load",		this.onFileUploadLoad.createDelegate(this), false);
-			this.xhr.attachEvent("timeout",		this.onFileUploadTimeout.createDelegate(this), false);
-			this.xhr.attachEvent("loadend",		this.onFileUploadLoadEnd.createDelegate(this), false);
+			this.xhr.upload.attachEvent("progress",		this.onFileUploadProgress.createDelegate(this), false);
+			this.xhr.attachEvent("abort",			this.onFileUploadAbort.createDelegate(this), false);
+			this.xhr.attachEvent("error",			this.onFileUploadError.createDelegate(this), false);
+			this.xhr.attachEvent("load",			this.onFileUploadLoad.createDelegate(this), false);
+			this.xhr.attachEvent("timeout",			this.onFileUploadTimeout.createDelegate(this), false);
+			this.xhr.attachEvent("loadend",			this.onFileUploadLoadEnd.createDelegate(this), false);
 		}
 		this.addEvents({
 			'progresschange': true

@@ -135,8 +135,10 @@ class SolrClient{
 			print_r($updateDocs);
 			return false;
 		}
-		for ($i=0; $i < sizeof($docs); $i++)
-			fireEvent('nodeSolrUpdate', $doc);
+		for ($i=0; $i < sizeof($addDocs); $i++)
+			fireEvent('nodeSolrUpdate', $addDocs[$i]);
+		for ($i=0; $i < sizeof($updateDocs); $i++)
+			fireEvent('nodeSolrUpdate', $updateDocs[$i]);
 		return true;
 	}
 	
@@ -151,11 +153,11 @@ class SolrClient{
 		unset($solr);
 	}
 	static public function runBackgroundCron(){
-		$cmd = 'php -f '.CRONS_PATH.'run_cron.php solr_update_tree '.CORENAME.' > '.CRONS_PATH.'bg_solr_update_tree.log &';
+		$cmd = 'php -f '.CRONS_PATH.'run_cron.php solr_update_tree '.CORENAME.' all > '.CRONS_PATH.'bg_solr_update_tree.log &';
 		if(is_windows()) $cmd = 'start /D "'.CRONS_PATH.'" php -f run_cron.php '.CORENAME.' > '.CRONS_PATH.'bg_solr_update_tree.log';
 		pclose(popen($cmd, "r"));
 	}
-	public function updateTree($all = false){
+	public function updateTree($all = false, $cron_id = false){
 		$this->connect();
 		// $log_file = dirname(__FILE__).DIRECTORY_SEPARATOR.'update_tree_'.CORENAME.'_log';
 		// error_log("\n\rStart at ".date('H:i:s')."\n\r", 3, $log_file);
@@ -253,7 +255,7 @@ class SolrClient{
 						,'deny_user_ids' => array( 'set' => empty($r['deny_user_ids']) ? null : $r['deny_user_ids'] )
 					);
 				}
-				
+				if( !empty($cron_id) ) DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
 				DB\mysqli_query_params('update tree set updated = 0 where id = $1', $r['id']) or die(DB\mysqli_query_error()); 			
 			}
 			$res->close();
@@ -264,6 +266,8 @@ class SolrClient{
 				} catch (\Exception $e) {
 					// error_log( " \n\r CANNOT add documents\n", 3, $log_file);
 				}
+				if( !empty($cron_id) ) DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
+				
 				try {
 					$this->commit();
 				} catch (\Exception $e) {

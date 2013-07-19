@@ -106,6 +106,11 @@ class Search extends SolrClient{
 			if(!is_array($p->template_types)) $p->template_types = explode(',', $p->template_types);
 			if(!empty($p->template_types)) $fq[] = 'template_type:("'.implode('" OR "', $p->template_types).'")';
 		}
+		
+		if( isset($p->folders) && !empty($GLOBALS['folder_templates']) ){
+			if( $p->folders ) $fq[] = 'template_type:("'.implode('" AND "', $GLOBALS['folder_templates']).'")';
+			else $fq[] = '!template_id:('.implode(' OR ', $GLOBALS['folder_templates']).')';
+		}
 
 		if(!empty($p->tags)){
 			$ids = Util\toNumericArray($p->tags);
@@ -480,7 +485,7 @@ class Search extends SolrClient{
 				// return false;
 				break;
 			case 'pids': 
-				$res = DB\mysqli_query_params('select t.id, p.pid, p.l'.USER_LANGUAGE_INDEX.' `title` from tags t join tags p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(DB\mysqli_query_error());
+				$res = DB\mysqli_query_params('select t.id, t.pid, p.l'.USER_LANGUAGE_INDEX.' `title` from tags t join tags p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_assoc()){
 					$rez['stg_'.$r['pid']]['f'] = 'sys_tags';
 					$rez['stg_'.$r['pid']]['title'] = $r['title'];
@@ -489,7 +494,7 @@ class Search extends SolrClient{
 				$res->close();
 				break;
 			default: 
-				$res = DB\mysqli_query_params('select t.id, p.pid, p.l'.USER_LANGUAGE_INDEX.' `title` from tags t join tags p on t.pid = p.id where t.id in ('.implode(',', $ids).') and p.id in('.$groups.')') or die(DB\mysqli_query_error());
+				$res = DB\mysqli_query_params('select t.id, t.pid, p.l'.USER_LANGUAGE_INDEX.' `title` from tags t join tags p on t.pid = p.id where t.id in ('.implode(',', $ids).') and p.id in('.$groups.')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_assoc()){
 					$rez['stg_'.$r['pid']]['f'] = 'sys_tags';
 					$rez['stg_'.$r['pid']]['title'] = $r['title'];
@@ -525,7 +530,7 @@ class Search extends SolrClient{
 				foreach($values as $k => $v) $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
 				break;
 			case 'pids': 
-				$res = DB\mysqli_query_params('select t.id, p.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(DB\mysqli_query_error());
+				$res = DB\mysqli_query_params('select t.id, t.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_assoc()){
 					$rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
 					$rez['ttg_'.$r['pid']]['title'] = $r['title'];
@@ -534,7 +539,7 @@ class Search extends SolrClient{
 				$res->close();
 				break;
 			default: 
-				$res = DB\mysqli_query_params('select t.id, p.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).') and p.id in('.$groups.')') or die(DB\mysqli_query_error());
+				$res = DB\mysqli_query_params('select t.id, t.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).') and p.id in('.$groups.')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_assoc()){
 					$rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
 					$rez['ttg_'.$r['pid']]['title'] = $r['title'];
