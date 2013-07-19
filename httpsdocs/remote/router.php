@@ -98,7 +98,7 @@ function doAroundCalls(&$fns, &$cdata, &$returnData=null){
 }
 
 function sanitizeParams(&$cdata){
-	$cdata->action = preg_replace( '/[^a-z]+/i', '', strip_tags($cdata->action) );
+	$cdata->action = preg_replace( '/[^a-z\\\\]+/i', '', strip_tags($cdata->action) );
 	$cdata->method = preg_replace( '/[^a-z]+/i', '', strip_tags($cdata->method) );
 	$cdata->tid = intval( strip_tags($cdata->tid) );
 	//public $data;

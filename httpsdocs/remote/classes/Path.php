@@ -7,7 +7,6 @@ class Path{
 	public static function getId($path = ''){
 		$path = trim($path);
 		while(!empty($path) && (substr($path, -1) == '/') ) $path = substr($path, 0, strlen($path)-1);
-		// echo $path;
 		$id = explode('/', $path);
 		$id = array_pop($id);
 		$id = is_numeric($id) ? $id : Browser::getRootFolderId();
@@ -98,8 +97,7 @@ class Path{
 		}
 		$rez = array();
 		$lastId = array_pop($ids);
-		$sql = 'select id, name, `system`, `type`, subtype, f_get_tree_ids_path(id) `path`, f_get_objects_case_id($1) `case_id`'.
-			',(select template_id from objects where id = $1) `template_id` from tree where id = $1'; //in ('.implode(',', $ids).')';
+		$sql = 'select id, name, `system`, `type`, f_get_tree_ids_path(id) `path`, `case_id`, `template_id` from tree where id = $1'; //in ('.implode(',', $ids).')';
 		$res = DB\mysqli_query_params($sql, $lastId) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez = $r;
 		$res->close();

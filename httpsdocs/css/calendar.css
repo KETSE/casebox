@@ -876,4 +876,7 @@ example .cal-cat-taskBlue
 
 
 .cal-cat-task-blue {background-color: blue !important; background-position: 5px 50%}
+.cal-cat-task-gray {background-color: gray !important; background-position: 5px 50%}
+.cal-cat-task-purple {background-color: #800080 !important; background-position: 5px 50%}
+
 /* .cal-status-completed {} */

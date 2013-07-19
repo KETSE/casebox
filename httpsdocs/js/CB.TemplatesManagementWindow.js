@@ -30,7 +30,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 				,iconAlign:'top'
 				,scale: 'large'
 				,disabled: true
-				,handler: this.onNodeDblClick
+				,handler: this.onEditClick
 				,scope: this
 			})
 			,'delete': new Ext.Action({
@@ -68,6 +68,15 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 			,this.actions.reload
 		];
 		
+		this.editor = new Ext.tree.TreeEditor(this, {
+			allowBlank: false
+			,blankText: 'A name is required'
+			,selectOnFocus: true
+			,ignoreNoChange: true 
+		})
+		
+		this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
+
 		Ext.apply(this, {
 			loader: new Ext.tree.TreeLoader({
 				directFn: Templates.getChildren
@@ -119,7 +128,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 				,beforeappend: function(t, p, n){ 
 					if(n.attributes.is_folder != 1) n.setText(n.attributes.text + ' <span class="cG">(id: '+n.attributes.nid+')</span>');
 				}
-				,dblClick: this.onNodeDblClick
+				,dblClick: this.onEditClick
 			}
 			,selModel: new Ext.tree.DefaultSelectionModel({
 				listeners: {
@@ -134,14 +143,17 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 							this.actions.createTemplate.setDisabled(node.attributes.is_folder != 1);
 							this.actions.createFolder.setDisabled( node.attributes.is_folder != 1);
 							this.actions['delete'].setDisabled(false);
-							this.actions.edit.setDisabled(node.attributes.is_folder == 1);
+							this.actions.edit.setDisabled(node.getDepth() < 1);
 						}
 					}
 				}
 			})
 			,keys: [{
-				key: [10,13]
-				,fn: this.onNodeDblClick
+				key: [10,13,Ext.EventObject.F2]
+				,alt: false
+				,ctrl: false
+				,stopEvent: true
+				,fn: this.onEditClick
 				,scope: this
 			}]
 		});
@@ -216,11 +228,35 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 		for(var i = 0; i < nodes.length; i++) if(nodes[i]) nodes[i].reload();
 
 	}
-	,onNodeDblClick: function(){
+	,onEditClick: function(){
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n || n.isRoot) return;
 		
-		if( n.attributes.is_folder != 1 ) return this.fireEvent('edittemplate', n.attributes.nid);
+		if( n.attributes.is_folder == 1 ){
+			this.startEditing(n);
+		}else this.fireEvent('edittemplate', n.attributes.nid);
+	}
+	,startEditing: function(node) {
+		if(!node.isSelected()) node.select();
+		var ge = this.editor;
+		setTimeout(function(){
+			ge.editNode = node;
+			ge.startEdit(node.ui.textNode);
+		}, 10);
+	}
+
+	,onBeforeEditComplete: function(editor, newVal, oldVal) {
+		if(newVal === oldVal) return;
+		var n = editor.editNode;
+		editor.cancelEdit();
+		this.getEl().mask(L.Processing, 'x-mask-loading');
+		Templates.renameFolder({id: n.attributes.nid, name: newVal}, this.processRename, this);
+		return false;
+	}
+	,processRename: function(r, e){
+		this.getEl().unmask();
+		if(r.success !== true) return;
+		this.root.cascade( function (n){ if(n.attributes.nid == r.data.id){ n.attributes.name = r.data.newName; n.setText(r.data.newName); } }, this);
 	}
 	,sortTree: function(n1, n2){ 
 		if(n1.attributes.order < n2.attributes.order) return -1;
@@ -530,7 +566,7 @@ CB.TemplatesManagementWindow = Ext.extend(Ext.Panel, {
 		this.TemplatesTree.getRootNode().cascade(this.updateTreeNode, this);
 	}
 	,updateTreeNode: function(n){
-		a = String(n.attributes.id).split('-');
+		a = String(n.attributes.nid).split('-');
 		id = a.pop();
 		prefix = a.join('-');
 		if(!Ext.isEmpty(prefix)) prefix += '-';

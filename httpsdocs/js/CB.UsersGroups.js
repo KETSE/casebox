@@ -169,6 +169,16 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 			})
 
 		}
+
+		this.editor = new Ext.tree.TreeEditor(this, {
+			allowBlank: false
+			,blankText: 'A name is required'
+			,selectOnFocus: true
+			,ignoreNoChange: true 
+		}); 
+		this.editor.on('beforestartedit', this.onBeforeStartEdit, this);
+		this.editor.on('startedit', this.onStartEdit, this);
+		this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
 		
 		Ext.apply(this, {
 			loader: new Ext.tree.TreeLoader({
@@ -232,15 +242,17 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 					}
 				}
 				,beforeappend: { scope: this, fn: function(t, p, n){ 
+					text = n.attributes.title;
 					if( p.getDepth() == 1 ){ //n.attributes.role_id > 0 && 
+						text += ' <span class="cG">(id:' + n.attributes.nid + ')</span>';
 						if(n.attributes.enabled != 1){
-							n.attributes.text = n.attributes.text + ' <span class="cG">' + L.inactive + '</span>';
+							text += ' <span class="cG">' + L.inactive + '</span>';
 						}
 						n.attributes.iconCls = 'icon-user-' + Ext.value(n.attributes.sex, '');
 					}
 					if(n.attributes.type == 1){ n.attributes.cls = n.attributes.cls + ' fwB'; n.getUI().addClass('fwB') }; 
 					if(n.attributes.cid == App.loginData.id){n.attributes.cls = n.attributes.cls + ' cDB'; n.getUI().addClass('cDB')};
-					n.setText(n.attributes.text);
+					n.setText(text);
 				} }
 				,remove: this.updateChildrenCount
 				,append: this.updateChildrenCount
@@ -259,11 +271,51 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 					}
 				}
 			})
+			,keys: [{
+				key: Ext.EventObject.F2
+				,alt: false
+				,ctrl: false
+				,stopEvent: true
+				,fn: this.onRenameClick
+				,scope: this
+			}]
 		});
 		CB.UsersGroupsTree.superclass.initComponent.apply(this, arguments);
 	}
 	,afterRender: function() {
 		CB.UsersGroupsTree.superclass.afterRender.apply(this, arguments);
+	}
+	,onRenameClick: function(b, e){
+		n = this.getSelectionModel().getSelectedNode();
+		if(!n) return;
+		this.editor.editNode = n;
+		this.editor.startEdit(n.ui.textNode);
+	}
+	,onBeforeStartEdit: function(editor, boundEl, value){
+		n = this.getSelectionModel().getSelectedNode();
+		if( (n.attributes.type != 1) || (n.attributes.nid < 1) ) return false;
+	}
+	,onStartEdit: function(boundEl, value){
+		n = this.getSelectionModel().getSelectedNode();
+		if(n.attributes.type != 1) return false;
+		value = n.attributes.title;
+		this.editor.setValue(value);
+	}
+	,onBeforeEditComplete: function(editor, newVal, oldVal) {
+		n = this.getSelectionModel().getSelectedNode();
+		oldVal = n.attributes.title;
+		if(newVal === oldVal) return;
+		var n = editor.editNode;
+		editor.cancelEdit();
+		this.getEl().mask(L.Processing, 'x-mask-loading');
+		UsersGroups.renameGroup({id: n.attributes.nid, title: newVal}, this.processRenameGroup, this);
+		return false;
+	}
+	,processRenameGroup: function(r, e){
+		this.getEl().unmask();
+		if(r.success !== true) return;
+		this.editor.editNode.attributes.title = r.title
+		this.updateChildrenCount(this, this.editor.editNode);
 	}
 	,onAddUserClick: function(b, e){
 		w = new CB.AddUserForm({modal: true, ownerCt: this, data: {callback: this.addUser}});
@@ -372,14 +424,14 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
 			delete this.deletedUserData;
 		}
 	}
-	,updateChildrenCount: function( t, p, n ){
-		if(Ext.isEmpty(n)) return;
+	,updateChildrenCount: function( t, p ){
+		if(Ext.isEmpty(p)) return;
 		if(Ext.isEmpty(p.childNodes)){
-			p.setText(p.attributes.text.split('<')[0].trim());
+			p.setText(p.attributes.title);
 			return;
 		}
 		p.attributes.users = p.childNodes.length;
-		p.setText(p.attributes.text.split('<')[0] + ' <span class="cG">(' + p.attributes.users + ')</span>');
+		p.setText(p.attributes.title + ' <span class="cG">(' + p.attributes.users + ')</span>');
 	}
 	,filter: function(text, property){
 		if(Ext.isEmpty(text)){
@@ -650,10 +702,10 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 				if(Ext.isEmpty(text)) return Ext.Msg.alert(L.Error, L.UsernameCannotBeEmpty);
 				r = /^[a-z0-9\._]+$/i;
 				if(Ext.isEmpty(r.exec(text))) return Ext.Msg.alert(L.Error, L.UsernameInvalid);
-				UsersGroups.changeUsername(
+				UsersGroups.renameUser(
 					{id: this.data.id, name: text}, 
 					function(r, e){ 
-						if(r.success !== true) return Ext.Msg.alert(L.Error, L.ErrorOccured);
+						if(r.success !== true) return Ext.Msg.alert(L.Error, Ext.value(e.msg, L.ErrorOccured) );
 						this.data.name = r.name; 
 						this.userInfo.data.name = r.name;
 						this.userInfo.update(this.userInfo.data);
@@ -773,7 +825,8 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
 	}
 	,onLoadFormData: function(data){
 		this.tree.getRootNode().cascade(function(n){
-			if(n.attributes.id == data.id) n.setText(data.title);
+			if(n.attributes.nid == data.id) 
+				n.setText(data.title + ' <span class="cG">(id:' + data.id + ')</span>');
 		}, this);
 	}
 	,onEditUserData: function(){
@@ -881,7 +934,7 @@ CB.ChangePasswordWindow = Ext.extend(Ext.Window, {
 								clientValidation: true
 								,params: this.data
 								,scope: this
-								,success: this.destroy
+								,success: this.onSubmitSuccess
 							})
 						}
 					}
@@ -892,7 +945,12 @@ CB.ChangePasswordWindow = Ext.extend(Ext.Window, {
 				afterrender: function(){ f = this.findByType('form')[0]; f.syncSize(); App.focusFirstField(f) }
 			}
 		});
+		this.addEvents('passwordchanged');
 		CB.ChangePasswordWindow.superclass.initComponent.apply(this, arguments);
+	}
+	,onSubmitSuccess: function(r, e){
+		this.fireEvent('passwordchanged');
+		this.destroy();
 	}
 }
 )

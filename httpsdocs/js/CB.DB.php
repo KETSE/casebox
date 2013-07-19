@@ -52,18 +52,19 @@ Ext.namespace('CB.DB');
 		,data:  [[1, L.Folder, 'icon-folder'], [2, L.Link, 'icon-link'], [3, L.Case, 'icon-briefcase'], [4, L.Action, 'icon-action'], [5, L.File, 'icon-file-unknown'], [6, L.Task, 'icon-calendar-task'], [7, L.Event, 'icon-event'], [8, L.Email, 'icon-letter']]
 		,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
 	});
-	/*CB.DB.templateTypes = new Ext.data.ArrayStore({
-		idIndex: 0
-		,fields: [{name: 'id', type: 'int'}, 'name']
-		,data:  [[0, L.Folder], [1, L.CaseObject], [2, L.IncomingAction], [3, L.OutgoingAction], [4, L.Applicant], [5, L.Subject], [6, L.User], [7, L.Contact], [8, L.Email]]
-		,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
-	});/**/
 	CB.DB.tasksImportance = new Ext.data.ArrayStore({
 		idIndex: 0
 		,fields: [{name: 'id', type: 'int'}, 'name']
 		,data:  [ [1, L.Low], [2, L.Medium], [3, L.High] ]
 		,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
 	})
+	CB.DB.phone_codes = new Ext.data.ArrayStore({
+		idIndex: 0
+		,fields: [ 'code', 'name']
+		,data:  []
+		,
+	});
+
 
 <?php
 	$data = array();
@@ -90,11 +91,26 @@ Ext.namespace('CB.DB');
 		',data: '.(empty($arr) ? '[]' : json_encode($arr)).
 		'});'."\n";
 	/* end of languages */
+	
+	/* Security questions */
+	$arr = array();
+	for ($i=0; $i < 10; $i++) { 
+		if(defined('CB\\L\\SequrityQuestion'.$i) ) $arr[] = array($i, constant('CB\\L\\SequrityQuestion'.$i) );
+	}
+	if(defined('CB\\L\\OwnSequrityQuestion') ) $arr[] = array( -1 , constant('CB\\L\\OwnSequrityQuestion') );
+	echo "\n".'CB.DB.sequrityQuestions = new Ext.data.ArrayStore({'.
+		'fields: [{name: "id", type: "int"}, "text"]'.
+		',data: '.(empty($arr) ? '[]' : json_encode($arr)).
+		'});'."\n";
+	/* end of Security questions */
 
 	/* menu */
 	$arr = Array();
-	$res = DB\mysqli_query_params('select * from menu where user_group_ids is null or concat(\',\',user_group_ids, \',\') like \'%,'.$_SESSION['user']['id'].',%\'') or die( DB\mysqli_query_error() );
-	while($r = $res->fetch_row()) $arr[] = $r;
+	$res = DB\mysqli_query_params('select * from menu') or die( DB\mysqli_query_error() );
+	while($r = $res->fetch_row()){
+		$intersection = array_intersect( explode(',', $r[4]), array_merge( $_SESSION['user']['groups'] , array($_SESSION['user']['id']) ) );
+		if( empty($r[4]) || !empty( $intersection ) ) $arr[] = $r;
+	}
 	$res->close();
 
 	echo "\n".'CB.DB.menu = new Ext.data.ArrayStore({'.
@@ -308,6 +324,62 @@ createDirectStores = function(){
 		,getName: getStoreTitles
 	});
 
+	CB.DB.countries = new Ext.data.DirectStore({
+		autoLoad: false
+		,autoDestroy: false
+		,proxy: new  Ext.data.DirectProxy({
+			paramsAsHash: true
+			,directFn: System.getCountries
+		})
+		,reader: new Ext.data.ArrayReader({
+				successProperty: 'success'
+				,idProperty: 'id'
+				,root: 'data'
+				,messageProperty: 'msg'
+			},[ {name: 'id', type: 'int'}, 'name', 'phone_codes' ]
+		)
+		,listeners: {
+			load: function(st, recs, opts){
+				pc = []
+				for(i = 0; i < recs.length; i++){
+					codes = String(recs[i].get('phone_codes')).split('|');
+					for(j = 0; j < codes.length; j++)
+					pc.push([codes[j], recs[i].get('name')+ ' ' + codes[j]]);
+				}
+				CB.DB.phone_codes.loadData(pc, false);
+			}
+		}
+		,getName: getStoreNames
+ 		/*idx = CB.DB.countries.findExact('id', this.data.country_id);
+		if(idx >= 0){
+			codes = CB.DB.countries.getAt(idx).get('phone_codes');
+			codes = String(codes).split('|');
+			if(!Ext.isEmpty(codes)) data.country_code = codes[0];
+		}/**/
+	});
+	CB.DB.timezones = new Ext.data.DirectStore({
+		autoLoad: false
+		,autoDestroy: false
+		,proxy: new  Ext.data.DirectProxy({
+			paramsAsHash: true
+			,directFn: System.getTimezones
+		})
+		,reader: new Ext.data.ArrayReader({
+				successProperty: 'success'
+				,idProperty: 'id'
+				,root: 'data'
+				,messageProperty: 'msg'
+			},[ 'id', 'gmt_offset', 'caption' ]
+		)
+		,listeners:{
+			load: function( st, recs, opts){
+				for(i=0; i < recs.length; i++){
+					recs[i].set('caption', '(GMT'+ recs[i].get('gmt_offset') +') '+recs[i].get('id'));
+				}
+			}
+		}
+	});
+
 };
 createDirectStores.defer(500);
 
@@ -326,7 +398,8 @@ function getThesauriStore(thesauriId){
 	}
 	return CB.DB[storeName];
 }
-
+<?php 
+/*
 CB.DB.tasksStoreConfig = {
 	autoLoad: true
 	,paramsAsHash: true
@@ -366,3 +439,4 @@ CB.DB.tasksStoreConfig = {
 		}
 	)
 };
+/**/

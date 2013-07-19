@@ -1,7 +1,7 @@
 // JavaScript Document
 function isEmptyObject(ob){
-   for(var i in ob){ if(ob.hasOwnProperty(i)){return false;}}
-  return true;
+   	for(var i in ob){ if(ob.hasOwnProperty(i)){return false;}}
+  	return true;
 }
 
 function date_ISO_to_date(date_string){
@@ -129,7 +129,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
 		ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(' ','') + ',';
 		if(ug_ids.indexOf(','+App.loginData.id+',') >=0) weight += 100; 
 		else{
-			if( ug_ids != ',,') return;//TODO: check if user is member of a specied group
+			if( ( ug_ids != ',,' ) && ( !setsHaveIntersection(ug_ids, App.loginData.groups ) ) ) return;
 			weight += 50;
 		}
 		/*end of check user_group ids */
@@ -171,4 +171,32 @@ function getMenuConfig(node_id, ids_path, node_template_id){
 		}
 	}, this)
 	return menuConfig;
+}
+
+
+/**
+http://michaelapproved.com/articles/timezone-detect-and-ignore-daylight-saving-time-dst
+**/
+
+function TimezoneDetect(){
+	var dtDate = new Date('1/1/' + (new Date()).getUTCFullYear());
+	var intOffset = 10000; //set initial offset high so it is adjusted on the first attempt
+	var intMonth;
+	var intHoursUtc;
+	var intHours;
+	var intDaysMultiplyBy;
+ 
+	//go through each month to find the lowest offset to account for DST
+	for (intMonth=0;intMonth < 12;intMonth++){
+		//go to the next month
+		dtDate.setUTCMonth(dtDate.getUTCMonth() + 1);
+ 
+		//To ignore daylight saving time look for the lowest offset.
+		//Since, during DST, the clock moves forward, it'll be a bigger number.
+		if (intOffset > (dtDate.getTimezoneOffset() * (-1))){
+			intOffset = (dtDate.getTimezoneOffset() * (-1));
+		}
+	}
+ 
+	return intOffset;
 }

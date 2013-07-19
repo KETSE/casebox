@@ -209,7 +209,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 		this.searchField.emptyText = L.Search + ' ' + o.result.folderProperties.name;
 		if(Ext.isEmpty(this.params.query)) this.searchField.clear();
 		
-		this.actions.up.setDisabled( (o.result.pathtext == '/') || (this.rootId == o.result.folderProperties.id) );
+		this.actions.up.setDisabled( (o.result.pathtext == '/') ); // || (this.rootId == o.result.folderProperties.id)
 		this.favoritesButton.setActiveItem(o.result.folderProperties.id)
 	}
 	,onChangeViewClick: function(b, e){

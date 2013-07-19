@@ -134,4 +134,30 @@ class System {
 		$res->close();
 		return array('success' => true);
 	}
+
+	public function getCountries(){
+		$rez = array();
+		$res = DB\mysqli_query_params('select id, name, phone_codes from casebox.country_phone_codes order by name') or die(DB\mysqli_query_error());
+		while($r = $res->fetch_row())
+			$rez[] = $r;
+		return array('success' => true, 'data' => $rez);
+	}
+	public function getTimezones(){
+		$rez = array();
+		$res = DB\mysqli_query_params('SELECT caption, gmt_offset FROM casebox.zone ORDER BY gmt_offset, caption') or die(DB\mysqli_query_error());
+		while($r = $res->fetch_row()){
+			$offsetHours = floor(abs($r[1])/3600); 
+			$offsetMinutes = round((abs($r[1]) - $offsetHours * 3600) / 60);
+			if($offsetMinutes == 60){
+				$offsetHours++;
+				$offsetMinutes = 0;
+			}
+			$r[1] = ( ($r[1] < 0) ? '-': '+' )
+				. ($offsetHours < 10 ? '0' : '') . $offsetHours 
+				. ':' 
+				. ($offsetMinutes < 10 ? '0' : '') . $offsetMinutes; 			
+			$rez[] = $r;
+		}
+		return array('success' => true, 'data' => $rez);
+	}
 }

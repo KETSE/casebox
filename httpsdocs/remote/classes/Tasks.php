@@ -6,12 +6,13 @@ class Tasks{
 
 	function load($id){ //loading task data
 		$rez = array('success' => false);
-		$sql = 'select id, case_id, object_id, `title`, date_start, `date_end`, missed, `type`, privacy, responsible_party_id, responsible_user_ids, autoclose, description, parent_ids, child_ids'
+		$sql = 'select id, `title`, date_start, `date_end`, missed, `type`, privacy, responsible_party_id, responsible_user_ids, autoclose, description, parent_ids, child_ids'
 			.',DATEDIFF(`date_end`, UTC_DATE()) `days`'
 			.',(select pid from tree where id = $1) pid'
+			.',(select template_id from tree where id = $1) template_id'
 			.',(select reminds from tasks_reminders where task_id = $1 and user_id = $2) reminds'
-			.',(select name from cases where id = case_id) `case`'
-			.',(select concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title)) from objects where id = object_id) object'
+			.',(select name from tree where id = t.case_id) `case`'
+			.',(select concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['cfg']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title)) from objects where id = object_id) object'
 			.',status, cid, completed, cdate '
 			.',has_deadline, importance, category_id, allday '
 			.',(select f_get_tree_ids_path(pid) from tree where id = t.id) `path` '
@@ -48,30 +49,10 @@ class Tasks{
 		return $rez;
 	}
 	
-	function getCaseTasks($p){ // TO REVIEW
-		if(empty($p->case_id) || !is_numeric($p->case_id)) throw new \Exception(L\Wrong_id);
-		$rez = array('success' => true, 'data' => array());
-		$sql = 'select id, object_id, `title`, `date_end`, `type`, privacy, responsible_party_id, responsible_user_ids, autoclose, description, parent_ids, child_ids'.
-			',(select reminds from tasks_reminders where task_id = t.id and user_id = $2) reminds'.
-			',status, cid, completed, cdate from tasks t where case_id = $1';
-		$res = DB\mysqli_query_params($sql, array($p->case_id, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
-		while($r = $res->fetch_assoc()){
-			$this->getTaskStyles($r);
-			$rez['data'][] = $r;
-		}
-		$res->close();
-		return $rez;
-	}
-	
 	function save($p){
 		if(!isset($p['id'])) $p['id'] = null;
 		if(!isset($p['pid'])) $p['pid'] = null;
-		$p['type'] = intval($p['type']);
-		try{
-			$p['case_id'] = Objects::getCaseId($p['pid']);
-		} catch (\Exception $e) {
-		}
-		if(empty($p['case_id'])) $p['case_id'] = null;
+		$p['type'] = 0;//intval($p['type']);
 		
 		$log_action_type = 25; //suppose that only notifications are changed
 		
@@ -132,16 +113,14 @@ class Tasks{
 			
 			if(!isset($p['autoclose'])) $p['autoclose'] = 1;
 
-			$sql = 'INSERT INTO tasks (id, case_id, object_id, `title`, `date_start`, `date_end`, `time`, `type`, `privacy`, responsible_party_id, responsible_user_ids, description, '.
+			$sql = 'INSERT INTO tasks (id, `title`, `date_start`, `date_end`, `time`, `type`, `privacy`, responsible_party_id, responsible_user_ids, description, '.
 				'parent_ids, reminds, cid, status, autoclose, has_deadline, importance, category_id, allday, uid, udate)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, null, null) '.
-				'ON DUPLICATE KEY UPDATE `object_id`=$3, `title` = $4, `date_start` = $5, `date_end` = $6, `time` = $7, `type` = $8, `privacy` = $9'.
-				', responsible_party_id = $10, responsible_user_ids = $11, description = $12, parent_ids = $13, reminds = $14, uid = $15, udate = CURRENT_TIMESTAMP, status = case status when 2 then 2 else $16 end, autoclose = $17'.
-				', has_deadline = $18, importance = $19, category_id = $20, allday = $21 ';
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, null, null) '.
+				'ON DUPLICATE KEY UPDATE `title` = $2, `date_start` = $3, `date_end` = $4, `time` = $5, `type` = $6, `privacy` = $7'.
+				', responsible_party_id = $8, responsible_user_ids = $9, description = $10, parent_ids = $11, reminds = $12, uid = $13, udate = CURRENT_TIMESTAMP, status = case status when 2 then 2 else $14 end, autoclose = $15'.
+				', has_deadline = $16, importance = $17, category_id = $18, allday = $19 ';
 			DB\mysqli_query_params($sql, @Array(
 				$p['id']
-				,$p['case_id']
-				,null
 				,$p['title']
 				,$p['date_start']
 				,$p['date_end']
@@ -185,7 +164,6 @@ class Tasks{
 		
 		$logParams = Array(
 			'action_type' => $log_action_type
-			,'case_id' => $p['case_id']
 			,'task_id' => $p['id']
 			,'to_user_ids' => $p['responsible_user_ids']
 			,'remind_users' => $remind_users
@@ -205,6 +183,8 @@ class Tasks{
 				break;
 
 		}
+
+		DB\mysqli_query_params('update tree set updated = (updated | 1) where id = $1', $p['id']) or die( DB\mysqli_query_error() );
 
 		SolrClient::runCron();
 		//exec('php ../../casebox/crons/cron_solr_update_objects.php');
@@ -437,8 +417,8 @@ class Tasks{
 		/* selecting tasks /**/
 		$sql = 'SELECT t.*'.
 			',DATEDIFF(t.`date_end`, UTC_DATE()) `days`'.
-			',(select name from cases where id = t.case_id) `case`'.
-			',(select concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title)) from objects where id = t.object_id) `object`'.
+			',(select name from tree where id = t.case_id) `case`'.
+			',(select concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['cfg']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title)) from objects where id = t.object_id) `object`'.
 			',(select l'.USER_LANGUAGE_INDEX.' from tags where id = t.responsible_party_id) `responsible_party` '.
 			$from.' order by t.cdate'.(empty($p->limit) ? '' : ' LIMIT '.intval($p->limit)).(empty($p->start) ? '' : ' OFFSET '.intval($p->start));
 		$res = DB\mysqli_query_params($sql, array($_SESSION['user']['id'], $case_id)) or die(DB\mysqli_query_error());
@@ -459,22 +439,6 @@ class Tasks{
 		$res->close();
 		return $rez;
 		/* end of selecting tasks /**/
-	}
-	
-	function getAssociableTasks($p){
-		$case_id = false;
-		if(isset($p->task_id) && is_numeric($p->task_id)) 
-			try{
-				$case_id = Objects::getCaseId($p->task_id);
-			}catch(\Exception $e){
-			
-			}
-		$rez = ($case_id ? $this->getCaseTasks(json_decode('{"case_id": '.$case_id.'}')) : $this->getUserTasks(json_decode('{}')));
-		/* remove current task id from results */
-		for($i = 0; $i < sizeof($rez['data']); $i++)
-			if($rez['data'][$i]['id'] == $p->task_id) array_splice($rez['data'], $i, 1);
-		/* end of remove current task id from results */
-		return $rez;
 	}
 	
 	function getTasksByLawyer(){
@@ -548,7 +512,7 @@ class Tasks{
 				if(!empty($rd['date_end'])) $rd['date_end'] = substr($rd['date_end'], 0, 10);
 				if(!empty($rd['cdate'])) $rd['cdate'] = substr($rd['cdate'], 0, 10).' '.substr($rd['cdate'], 11, 8);
 				if(!empty($rd['case_id'])){
-					$res = DB\mysqli_query_params('select name from cases where id = $1', $rd['case_id']) or die(DB\mysqli_query_error());
+					$res = DB\mysqli_query_params('select name from tree where id = $1', $rd['case_id']) or die(DB\mysqli_query_error());
 					while($r = $res->fetch_row()) $rd['case'] = $r[0];
 					$res->close();
 				}
@@ -572,7 +536,7 @@ class Tasks{
 					$case_ids = array();
 					foreach($rez['facets']['case_id'] as $k => $v) $case_ids[$k] = array('id' => $k, 'items' => $v);
 					if(!empty($case_ids)){
-						$res = DB\mysqli_query_params('select id, name from cases where id in ('.implode(',', array_keys($case_ids)).')') or die(DB\mysqli_query_error());
+						$res = DB\mysqli_query_params('select id, name from tree where id in ('.implode(',', array_keys($case_ids)).')') or die(DB\mysqli_query_error());
 						while($r = $res->fetch_assoc()) $case_ids[$r['id']]['title'] = $r['name'];
 						$res->close();
 						$rez['facets']['case_id'] = array_values($case_ids);
@@ -773,7 +737,7 @@ class Tasks{
 				'<span class="dttm" title="{full_create_date}">{create_date}</span></p></td></tr></tbody></table></td></tr>'
 			;
 			
-			$date_format = str_replace('%', '', $_SESSION['user']['short_date_format']);
+			$date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
 			$format = 'Y, F j';//$date_format;
 			if($d['allday'] != 1) $format .= ' H:i';
 			$i = strtotime($d['date_start']);

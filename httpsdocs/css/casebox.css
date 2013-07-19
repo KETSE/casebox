@@ -777,8 +777,8 @@ table.obj-preview p.prop-info {
     background-color: #FDFDB0 !important;
 }
 .photo32 {
-    width: 32px;
-    height: 32px;
+    max-width: 32px;
+    max-height: 32px;
 }
 table.item-props {
 border-collapse: separate;
@@ -895,4 +895,15 @@ border: 1px solid #7195A3;
 .mtb_link{
     padding: 0 5px;
     text-decoration: underline;
+}
+.account-menu .x-btn {
+    background: none;
+    border: 0;
+    padding: 10px 15px;
+}
+.account-menu .x-btn-pressed {
+    font-weight: bold;
+}
+.account-menu .x-btn:hover {
+    background-color: #eaeaea;
 }

@@ -157,35 +157,38 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		um.menu.add(
 			{text: L.Language, iconCls: 'icon-language', hideOnClick: false, menu: langs}
 			,'-'
-			,{text: L.UserDetails, iconCls: App.loginData.iconCls, handler: function(){
-				w = new CB.UserEditWindow({
-					title: App.loginData['l'+App.loginData.language_id]
-					,iconCls: App.loginData.iconCls
-					,data: {id: App.loginData.id}
-					,listeners: {
-						scope: this
-						,savesuccess: function(f, a){
-							if(a.result.interface_params_changed)
-								Ext.Msg.confirm(L.InterfaceParamsChanged, L.InterfaceParamsChangedMessage, function(btn){ if(btn == 'yes')  document.location.reload(); }, this)
-						}
-					}
-				});
-				w.show();
-			}}
-			,{text: L.UploadPhoto, iconCls: 'file-gif', handler: function(b, e){
-				w = new CB.FileUploadWindow({
-					title: L.UploadPhoto
-					,iconCls: 'file-gif'
-					,fieldName: 'photo'
-					,fileOnly: true
-					,api: User.uploadPhoto
-					,data: {id: App.loginData.id}
-				});
-				w.show();
-			}}
-			,{text: L.ChangePassword, iconCls: 'icon-key', handler: function(){
-				w = new CB.ChangePasswordWindow({data: {id: App.loginData.id}});
-				w.show();
+			// ,{text: L.UserDetails, iconCls: App.loginData.iconCls, handler: function(){
+			// 	w = new CB.UserEditWindow({
+			// 		title: App.loginData['l'+App.loginData.language_id]
+			// 		,iconCls: App.loginData.iconCls
+			// 		,data: {id: App.loginData.id}
+			// 		,listeners: {
+			// 			scope: this
+			// 			,savesuccess: function(f, a){
+			// 				if(a.result.interface_params_changed)
+			// 					Ext.Msg.confirm(L.InterfaceParamsChanged, L.InterfaceParamsChangedMessage, function(btn){ if(btn == 'yes')  document.location.reload(); }, this)
+			// 			}
+			// 		}
+			// 	});
+			// 	w.show();
+			// }}
+			// ,{text: L.UploadPhoto, iconCls: 'file-gif', handler: function(b, e){
+			// 	w = new CB.FileUploadWindow({
+			// 		title: L.UploadPhoto
+			// 		,iconCls: 'file-gif'
+			// 		,fieldName: 'photo'
+			// 		,fileOnly: true
+			// 		,api: User.uploadPhoto
+			// 		,data: {id: App.loginData.id}
+			// 	});
+			// 	w.show();
+			// }}
+			// ,{text: L.ChangePassword, iconCls: 'icon-key', handler: function(){
+			// 	w = new CB.ChangePasswordWindow({data: {id: App.loginData.id}});
+			// 	w.show();
+			// }}
+			,{text: L.Account, iconCls: 'icon-user-' + App.loginData.sex, handler: function(){
+				App.openUniqueTabbedWidget( 'CBAccount' , null)
 			}}
 			,'-'
 			,{	text: L.Exit 
@@ -203,6 +206,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	,initCB: function(){
 		if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){
 			this.onLogin();
+			//App.openUniqueTabbedWidget('CBAccount')
 		}else this.initCB.defer(500, this);
 	}
 	,logout: function(){
@@ -234,7 +238,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 				if(!Ext.isEmpty(r.tbarItems[i].link)) r.tbarItems[i].listeners = {scope: this, click: this.onAccordionLinkClick }
 				App.mainToolBar.insert(index, r.tbarItems[i]);
 				index++;
-				// App.mainAccordion.add(r.items[i])
 			}
 			App.mainToolBar.syncSize()
 		}
@@ -369,10 +372,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		});		
 		if(Ext.isEmpty(p.title)) p.title = L.AddTask;
 		if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
-		if(Ext.isEmpty(p.tasksStore)) p.tasksStore = new Ext.data.DirectStore( Ext.applyIf({
-			directFn: Tasks.getUserTasks
-			,autoDestroy: true
-		}, CB.DB.tasksStoreConfig));
 		this.lastFocusedElement = Ext.get(document.activeElement);
 		dw = new CB.Tasks(p);
 		dw.on('beforedestroy', this.focusLastElement, this);
@@ -381,13 +380,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	,onTaskEdit: function(p, ev){//task_id, object_id, object_title, title
 		if(Ext.isEmpty(p.title)) p.title = L.EditTask;
 		if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
-		if(Ext.isEmpty(p.tasksStore)){
-				p.tasksStore = new Ext.data.DirectStore( Ext.applyIf({
-				directFn: Tasks.getAssociableTasks
-				,baseParams: {task_id: p.data.id}
-			}, CB.DB.tasksStoreConfig));
-			p.listeners = {beforedestroy: function(w){w.tasksStore.destroy();}}
-		}
 		this.lastFocusedElement = Ext.get(document.activeElement);
 		dw = new CB.Tasks(p);
 		dw.on('beforedestroy', this.focusLastElement, this);

@@ -18,7 +18,7 @@
 <?php
   	echo '<link rel="stylesheet" type="text/css" href="/libx/ext/resources/css/ext-all.css" />';
   	echo '<link rel="stylesheet" type="text/css" href="'.Minify_getUri('css').'" />';
-	if(!empty($customConfig[CORENAME.'_css'])) echo '<link rel="stylesheet" type="text/css" href="'.Minify_getUri(CORENAME.'_css').'" />';//, array('groupsConfigFile' => CB_CORES_PATH.'groupsRouter.php' )
+	if(!empty($customConfig[CORENAME.'_css'])) echo '<link rel="stylesheet" type="text/css" href="'.Minify_getUri(CORENAME.'_css').'" />';
   	echo '<title>'.constant('CB\\config\\project_name_'.USER_LANGUAGE).'</title>';
 ?></head>
 <body>
@@ -44,7 +44,7 @@
 <?php
 	echo '<script type="text/javascript" src="'.Minify_getUri('js').(is_debug_host() ? '&debug=1': '').'"></script>';
 	echo '<script type="text/javascript" src="'.Minify_getUri('jsdev').(is_debug_host() ? '&debug=1': '').'"></script>';
-	if(!empty($customConfig[CORENAME.'_js'])) echo '<script type="text/javascript" src="'.Minify_getUri(CORENAME.'_js').(is_debug_host() ? '&debug=1': '').'"></script>'; //, array('groupsConfigFile' => CB_CORES_PATH.'groupsRouter.php' )
+	if(!empty($customConfig[CORENAME.'_js'])) echo '<script type="text/javascript" src="'.Minify_getUri(CORENAME.'_js').(is_debug_host() ? '&debug=1': '').'"></script>';
 ?>
 <script type="text/javascript">document.getElementById('loading-msg').innerHTML = '<?php echo L\get('Initialization')?> ...';</script>
 </body>

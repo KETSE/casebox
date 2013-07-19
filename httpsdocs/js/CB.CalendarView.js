@@ -82,6 +82,8 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 			,listeners: {
 				scope: this
 				,beforeload: function(st, r, o){
+					el = this.getEl();
+					if( Ext.isEmpty(el) || !el.isVisible(true) ) return false;
 					// if(!Ext.isDate(r.params.start)) r.params.start = new Date()
 					//  || !Ext.isDate(r.params.end)) return false;
 					if(!this.allowedReload){

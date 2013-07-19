@@ -23,7 +23,7 @@ class Calendar{
 		$p->dateEnd = $p->end;//substr($p->end, 0, 10).'T23:59:59.999Z';
 		unset($p->end);
 
-		$p->types = array('task');
+		$p->template_types = array('task');
 		
 		$s = new Search();
 		$sr = $s->query($p);

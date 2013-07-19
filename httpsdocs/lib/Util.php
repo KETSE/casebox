@@ -135,32 +135,6 @@ function translateMonths($dateString){
 	return $dateString;
 }
 
-// function formatSpentTime($time) {
-// 	if (empty($time)) return '';
-// 	$t = '';
-// 	if (!empty($time['hours'])) {
-// 		$t = $time['hours'];
-// 		switch ($time['hours']) {
-// 		case 1: $t = $t.' '.L\hour; break;
-// 		case 2:
-// 		case 3:
-// 		case 4: $t = $t.' '.L\hours; break;
-// 		default: $t = $t.' '.L\ofHours; break;
-// 		}
-// 	}
-// 	if (!empty($time['minutes'])) {
-// 		$t = $t.' '.$time['minutes'];
-// 		switch (substr($time['minutes'], -1, 1)) {
-// 		case 1: $t = $t.' '.L\minute; break;
-// 		case 2:
-// 		case 3:
-// 		case 4: $t = $t.' '.L\minutes; break;
-// 		default: $t = $t.' '.L\ofMinutes; break;
-// 		}
-// 	}
-// 	return $t;
-// }
-
 function formatTaskTime($mysqlTime) {
 	$time = strtotime($mysqlTime);
 
@@ -188,27 +162,23 @@ function formatLeftDays($days_difference) {
 
 function formatMysqlDate($date, $format = false) {
 	if (empty($date)) return '';
-	if($format == false) $format = $_SESSION['user']['short_date_format'];
+	if($format == false) $format = $_SESSION['user']['cfg']['short_date_format'];
 	return date(str_replace('%', '', $format), strtotime($date));
 	//return implode('.', array_reverse(explode('-', substr($date, 0, 10))));
 }
 
 function formatMysqlTime($date, $format = false) {
 	if (empty($date)) return '';
-	if($format == false) $format = $_SESSION['user']['short_date_format'].' '.$_SESSION['user']['time_format'];
+	if($format == false) $format = $_SESSION['user']['cfg']['short_date_format'].' '.$_SESSION['user']['cfg']['time_format'];
 	return date(str_replace('%', '', $format), strtotime($date));
 	//return implode('.', array_reverse(explode('-', substr($date, 0, 10))));
 }
 
 function clientToMysqlDate($date) {
 	if (empty($date)) return null;
-	$d = date_parse_from_format (str_replace('%', '', $_SESSION['user']['short_date_format']), $date);
+	$d = date_parse_from_format (str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']), $date);
 	return $d['year'].'-'.$d['month'].'-'.$d['day'];
 }
-// function solrToMysqlDate($date) {
-// 	if (empty($date)) return null;
-// 	return str_replace(array('T', 'Z'), array(' ', ''), $date);
-// }
 /* date and time functions */
 
 function formatFileSize($v) {

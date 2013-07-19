@@ -35,9 +35,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			)
 			,listeners:{
 				scope: this
-				,load: function(store, records, options){
-					Ext.each(records, function(r){ r.set('iconCls', getItemIcon(r.data)) }, this);
-				}
+				,add: this.onObjectsStoreChange
+				,load: this.onObjectsStoreChange
 			}
 			,getTexts: getStoreNames
 			,getData: function(v){
@@ -55,15 +54,14 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				idx = this.findExact('id', parseInt(data.id));
 				if(idx< 0){
 					r = new this.recordType(data);
+					r.set('iconCls', getItemIcon(data));
 					this.add(r);
 				}
 			}
 		});
 		
-		if(!isNaN(this.data.id)){
-			this.objectsStore.baseParams = {id: this.data.id}
-			this.objectsStore.load();
-		}
+		this.objectsStore.baseParams = {id: this.data.id, template_id: this.data.template_id}
+		this.objectsStore.load();
 
 		this.topFieldSet = new Ext.form.FieldSet({
 			columnWidth: 0.9
@@ -229,13 +227,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			}
 		});
 		
-		this.getProperty = function(propertyName){
-			if(this.data && this.data[propertyName]){
-				if(propertyName == 'pathtext') return this.data[propertyName]+this.data.name+'/';
-				return this.data[propertyName];
-			}
-			return null;
-		}
 		this.dropZoneConfig = {text: 'Drop files here'}
 		this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
 		this.filesDropPlugin.init(this);
@@ -246,6 +237,13 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
 		App.clipboard.on('change', this.onClipboardChange, this);
 		App.fireEvent('objectinit', this);
+	}
+	,getProperty: function(propertyName){
+		if(this.data && this.data[propertyName]){
+			if(propertyName == 'pathtext') return this.data[propertyName]+this.data.name+'/';
+			return this.data[propertyName];
+		}
+		return null;
 	}
 	,autoSaveObjectInterceptor: function(){
 		if(isNaN(this.data.id)){
@@ -259,11 +257,31 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.data.cdate = date_ISO_to_date(this.data.cdate);
 		this.data.udate = date_ISO_to_date(this.data.udate);
 	}
+	,onObjectsStoreChange: function(store, records, options){
+		Ext.each(records, function(r){ r.set('iconCls', getItemIcon(r.data)) }, this);
+		if(this.grid && !this.grid.editing) this.grid.getView().refresh();
+	}	
 	,prepareInterface: function(){
-		toolbarItems = [
-			this.actions.save
-		]
+		toolbarItems = []
+
+		/* insert create menu if needed */
+		menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
+		if( !Ext.isEmpty(menuConfig) ){
+			createButton = new Ext.Button({	
+				text: L.Create
+				,iconCls: 'icon32-create'
+				,iconAlign:'top'
+				,scale: 'large'
+                       		,menu: [ ]
+                     	})
+			updateMenu(createButton, menuConfig, this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this);
+			toolbarItems.push(createButton, '-')
+		}
+		/**/
+		toolbarItems.push(this.actions.save);
+
 		if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
+		
 		toolbarItems.push('-',{text: 'Attach', iconCls: 'icon32-attach', scale: 'large', iconAlign:'top'
                 	,menu: [
 				this.actions.upload
@@ -271,23 +289,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 				,this.actions.paste
 			]
          	})
-		/* insert create menu if any templates specified */
-			if(!Ext.isEmpty(this.templateData.cfg.templates) ){
-				t = this.templateData.cfg.templates;
-				if(!Ext.isArray(t)) t = String(t).split(',');
-				createButton = new Ext.Button({	
-					text: L.Create
-					,iconCls: 'icon32-create'
-					,iconAlign:'top'
-					,scale: 'large'
-                               		,menu: [ ]
-                             	})
-				updateMenu(createButton, getMenuConfig(this.data.id, this.data.path, this.data.template_id), this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this, t);
-				toolbarItems.push('-', createButton)
-			}
 
-		/**/
 		toolbarItems.push(this.actions.createTask)
+		
 		if(!this.data.tags) this.data.tags = {};
 
 		northRegionItems = [ this.topFieldSet ]
@@ -626,7 +630,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			,path: this.data.path+'/'+this.data.id
 			,pathtext: this.data.pathtext+'/'+Ext.value(this.data.custom_title, this.data.title)
 		}, b.data);
-		App.mainViewPort.openObject(data, e);
+		App.mainViewPort.createObject(data, e);
 	}
 	,onCreateTaskClick: function(o, e){
 		this.fireEvent('taskcreate', { data: {pid: this.data.id, path: this.data.path+'/'+this.data.id, pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)} })
@@ -779,7 +783,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 		this.childsPanel.reload();
 		this.filesPanel.reload();
 		this.tasksPanel.reload();
-		// this.propertiesPanel.reload();
 	}
 
 	,onObjectSaved: function(f, a){
@@ -931,13 +934,13 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
 		id = this.getCaseObjectId();
 		if(Ext.isEmpty(id)) return;
 		params = {pid: id
-			,types: [4]
+			,template_types: 'object'
+			,folders: false
 			,sort: 'udate'
 			,dir: 'desc'
 		}
 		p = this.findParentByType(CB.Objects);
 		if(!Ext.isEmpty(p) && !Ext.isEmpty(p.data.cfg) && !Ext.isEmpty(p.data.cfg.templates) )  params.templates = p.data.cfg.templates;
-
 		BrowserView.getChildren(params, this.processLoad, this)
 	}
 	,processLoad: function(r, e){

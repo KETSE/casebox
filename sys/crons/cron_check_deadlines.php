@@ -3,11 +3,11 @@
 namespace CB;
 
 $cron_id = 'check_deadlines';
-//$execution_skip_times = 1; //default is 1
+$execution_timeout = 60; //default is 60 seconds
 
 include 'init.php';
 
-$cd = prepare_cron($cron_id);
+$cd = prepare_cron($cron_id, $execution_timeout);
 if(!$cd['success']){
 	echo "\nerror preparing cron\n";
 	exit(1);
@@ -24,6 +24,7 @@ while($r = $res->fetch_assoc()){
 		DB\mysqli_query_params('update tasks set status = 1 where id = $1', $r['id']) or die(DB\mysqli_query_error());
 		Log::add(Array('action_type' => 28, 'task_id' => $r['id'], 'remind_users' => $r['cid'].','.$r['responsible_user_ids'], 'info' => 'title: '.$r['title']));
 	}
+	DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
 }
 $res->close();
 

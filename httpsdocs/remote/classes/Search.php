@@ -97,10 +97,21 @@ class Search extends SolrClient{
 			// $ids = Util\toNumericArray($p->types);
 			if(!empty($p->types)) $fq[] = 'type:('.implode(' OR ', $p->types).')';
 		}
+
 		if(!empty($p->templates)){
 			$ids = Util\toNumericArray($p->templates);
 			if(!empty($ids)) $fq[] = 'template_id:('.implode(' OR ', $ids).')';
 		}
+		if(!empty($p->template_types)){
+			if(!is_array($p->template_types)) $p->template_types = explode(',', $p->template_types);
+			if(!empty($p->template_types)) $fq[] = 'template_type:("'.implode('" OR "', $p->template_types).'")';
+		}
+		
+		if( isset($p->folders) && !empty($GLOBALS['folder_templates']) ){
+			if( $p->folders ) $fq[] = 'template_type:("'.implode('" AND "', $GLOBALS['folder_templates']).'")';
+			else $fq[] = '!template_id:('.implode(' OR ', $GLOBALS['folder_templates']).')';
+		}
+
 		if(!empty($p->tags)){
 			$ids = Util\toNumericArray($p->tags);
 			if(!empty($ids))$fq[] = 'sys_tags:('.implode(' OR ', $ids).')';
@@ -209,8 +220,7 @@ class Search extends SolrClient{
 
 	private function prepareFacetsParams(){
 		$p = &$this->inputParams;
-		if(empty($p->facets)) return false;
-		switch($p->facets){
+		switch(@$p->facets){
 			case 'general':
 				$this->params['facet.field'] = array(
 					'{!ex=template_type key=0template_type}template_type'
@@ -328,17 +338,25 @@ class Search extends SolrClient{
 				$this->params['facet.method'] = "enum";
 				$this->params['facet.sort'] = "lex";
 				break;
+			default: 
+				if(!empty($p->{'facet.field'})) $this->params['facet.field'] = $p->{'facet.field'};
+				if(!empty($p->{'facet.query'})) $this->params['facet.query'] = $p->{'facet.query'};
+				if(!empty($p->{'facet.pivot'})) $this->params['facet.pivot'] = $p->{'facet.pivot'};
+				if(!empty($p->{'facet.method'})) $this->params['facet.method'] = $p->{'facet.method'};
+				if(!empty($p->{'facet.sort'})) $this->params['facet.sort'] = $p->{'facet.sort'};
+				if(!empty($p->{'facet.missing'})) $this->params['facet.missing'] = $p->{'facet.missing'};
+				break;
 		}
 		if(!empty($this->params['facet.field']) || !empty($this->params['facet.pivot']) ){
 			$this->params['facet'] = 'true';
-			$this->params['facet.mincount'] = 1;
+			$this->params['facet.mincount'] = isset($p->{'facet.mincount'}) ? $p->{'facet.mincount'} : 1;
 		}
 	}
 
 	private function executeQuery(){
-		try {
+		try{
 			$this->results = $this->solr->search($this->query, $this->start, $this->rows, $this->params);
-		} catch( \Exception $e ) {
+		}catch( \Exception $e ){
 			throw new \Exception("An error occured: \n\n {$e->__toString()}");
 		}
 	}
@@ -368,7 +386,7 @@ class Search extends SolrClient{
 		$sr = &$this->results;
 		if(empty($sr->facet_counts)) return false;
 		$fc = &$sr->facet_counts;
-		switch($this->inputParams->facets){
+		switch(@$this->inputParams->facets){
 			case 'general':
 				foreach($fc->facet_fields as $k => $v){
 					$k = substr($k, 1);
@@ -448,7 +466,9 @@ class Search extends SolrClient{
 					$rez[$k] = array('f' => $k, 'items' => $v);
 				}
 				break;
-
+			default: 
+				$rez = $fc;
+				break;
 		}
 
 		return $rez;
@@ -465,7 +485,7 @@ class Search extends SolrClient{
 				// return false;
 				break;
 			case 'pids': 
-				$res = DB\mysqli_query_params('select t.id, p.pid, p.l'.USER_LANGUAGE_INDEX.' `title` from tags t join tags p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(DB\mysqli_query_error());
+				$res = DB\mysqli_query_params('select t.id, t.pid, p.l'.USER_LANGUAGE_INDEX.' `title` from tags t join tags p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_assoc()){
 					$rez['stg_'.$r['pid']]['f'] = 'sys_tags';
 					$rez['stg_'.$r['pid']]['title'] = $r['title'];
@@ -474,7 +494,7 @@ class Search extends SolrClient{
 				$res->close();
 				break;
 			default: 
-				$res = DB\mysqli_query_params('select t.id, p.pid, p.l'.USER_LANGUAGE_INDEX.' `title` from tags t join tags p on t.pid = p.id where t.id in ('.implode(',', $ids).') and p.id in('.$groups.')') or die(DB\mysqli_query_error());
+				$res = DB\mysqli_query_params('select t.id, t.pid, p.l'.USER_LANGUAGE_INDEX.' `title` from tags t join tags p on t.pid = p.id where t.id in ('.implode(',', $ids).') and p.id in('.$groups.')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_assoc()){
 					$rez['stg_'.$r['pid']]['f'] = 'sys_tags';
 					$rez['stg_'.$r['pid']]['title'] = $r['title'];
@@ -510,7 +530,7 @@ class Search extends SolrClient{
 				foreach($values as $k => $v) $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
 				break;
 			case 'pids': 
-				$res = DB\mysqli_query_params('select t.id, p.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(DB\mysqli_query_error());
+				$res = DB\mysqli_query_params('select t.id, t.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_assoc()){
 					$rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
 					$rez['ttg_'.$r['pid']]['title'] = $r['title'];
@@ -519,7 +539,7 @@ class Search extends SolrClient{
 				$res->close();
 				break;
 			default: 
-				$res = DB\mysqli_query_params('select t.id, p.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).') and p.id in('.$groups.')') or die(DB\mysqli_query_error());
+				$res = DB\mysqli_query_params('select t.id, t.pid, p.name `title` from tree t join tree p on t.pid = p.id where t.id in ('.implode(',', $ids).') and p.id in('.$groups.')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_assoc()){
 					$rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
 					$rez['ttg_'.$r['pid']]['title'] = $r['title'];
@@ -529,26 +549,11 @@ class Search extends SolrClient{
 				$res->close();
 				
 				if(!empty($values))
-					foreach($values as $k => $v) $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
+					foreach($values as $k => $v) 
+						if(isset( $names[$k] )) $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
 				break;
 		}
 		return true;
-	}
-
-	public function searchObjects($p){
-		/* searching case objects */
-		$rez = array('success' => true, 'data' => array() );
-
-		if(!empty($p->object_pid) && is_numeric($p->object_pid)){
-			$res = DB\mysqli_query_params('select f_get_objects_case_id($1)', array($p->object_pid)) or die(DB\mysqli_query_error());
-			if($r = $res->fetch_row()){
-				if(!empty($r[0])) $p->object_pid = $r[0];
-			}
-			$res->close();
-			$p->pids = $p->object_pid;
-		}
-		$p->fl = 'id,name,type,subtype,status,date,sys_tags,template_id';
-		return $this->query($p);
 	}
 
 }

@@ -207,7 +207,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				,idProperty: 'nid'
 				,root: 'data'
 				,messageProperty: 'msg'
-			},[ 	{name: 'nid', type: 'int'}
+			},[ 	{name: 'nid'}
 				, {name: 'pid', type: 'int'}
 				, {name: 'system', type: 'int'}
 				, {name: 'type', type: 'int'}
@@ -362,7 +362,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 					,ctrl: false
 					,shift: false
 					,stopEvent: true
-					,fn: this.onOpenClick
+					,fn: this.onRowDblClick
 					,scope: this
 				},{
 					key: 'x'
@@ -787,7 +787,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		this.path = this.store.baseParams.path;
 		this.folderProperties = Ext.apply({}, o.result.folderProperties)
 		
-		this.folderProperties.id = parseInt(this.folderProperties.id);
+		this.folderProperties.id = this.folderProperties.id;
 		this.folderProperties.system = parseInt(this.folderProperties.system);
 		this.folderProperties.type = parseInt(this.folderProperties.type);
 		this.folderProperties.subtype = parseInt(this.folderProperties.subtype);
@@ -872,11 +872,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		if(this.grid.selModel.hasSelection() || (this.grid.store.getCount() < 1)) return false;
 		this.grid.selModel.selectRow(0);
 	}
-	,onRowDblClick: function( grid, rowIndex, e ) {
-		r = grid.store.getAt(rowIndex);
+	,onRowDblClick: function( ) {
+		r = this.grid.getSelectionModel().getSelected();
 		if(!r) return;
-		if( App.isFolder( r.get('template_id') ) ) this.onBrowseClick(grid, e);
-		else this.onOpenClick(grid, e);
+		if( App.isFolder( r.get('template_id') ) ) this.onBrowseClick();
+		else this.onOpenClick();
 	}
 	,onOpenClick: function(b, e) {
 		if(!this.grid.selModel.hasSelection()) return;

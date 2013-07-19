@@ -3,12 +3,12 @@
 
 namespace CB;
 
-$cron_id = 'extract_file_contents';
-//$execution_skip_times = 1; //default is 1
+$cron_id = 'extract_files_content';
+$execution_timeout = 60; //default is 60 seconds
 
 include 'init.php';
 
-$cd = prepare_cron($cron_id);
+$cd = prepare_cron($cron_id, $execution_timeout);
 if(!$cd['success']){
 	echo "\nerror preparing cron\n";
 	exit(1);
@@ -19,7 +19,7 @@ $processed_list = Array();
 $not_fount_list = Array();
 
 $where = 'skip_parsing = 0 and (parse_status is null)';
-if( @$argv[2] == 'all' ) $where =  $where = 'skip_parsing = 0';
+if( @$argv[2] == 'all' ) $where =  'skip_parsing = 0';
 
 $res = DB\mysqli_query_params('select id, path, `type`, pages from files_content where '.$where) or die('error1'); //and name like \'%.pdf\'
 while($r = $res->fetch_assoc()){
@@ -57,6 +57,8 @@ while($r = $res->fetch_assoc()){
 		$rez['Not found'] = $rez['Not found']+1;
 		$rez['Not found List'][] = $filename;
 	}
+
+	DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
 	echo '.';
 }
 $res->close();

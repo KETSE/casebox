@@ -19,7 +19,7 @@
 				if($r = $res->fetch_row()) $user_id = $r[0];
 				$res->close();
 				if(empty($user_id)){
-					$_SESSION['msg'] = L\get('RecoverHashNotFound').(is_debug_host() ? $hash: '');
+					$_SESSION['msg'] = '<div class="alert alert-error">'.L\get('RecoverHashNotFound').(is_debug_host() ? $hash: '').'</div>';
 					break;
 				}
 				
@@ -32,7 +32,7 @@
 					}
 
 					DB\mysqli_query_params('update users_groups set `password` = md5($2), recover_hash = null where recover_hash = $1', array($hash, 'aero'.$p)) or die(DB\mysqli_query_error());
-					$_SESSION['msg'] = L\get('PasswordChanged').'<br /> <br /><a href="/">'.L\get('Login').'</a>';
+					$_SESSION['msg'] = '<div class="alert alert-success">'.L\get('PasswordChangedMsg').'<br /> <br /><a href="/">'.L\get('Login').'</a></div>';
 					break;
 				}
 
@@ -104,7 +104,7 @@
 			if(!file_exists($template)) $template = TEMPLATES_PATH.'password_recovery_email_en.html';
 			if(!file_exists($template)){
 				mail(ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: noreply@casebox.org\r\n");
-				$_SESSION['msg'] = 'Error occured. Administrator has been notified by mail. Please retry later.';
+				$_SESSION['msg'] = '<div class="alert alert-error">Error occured. Administrator has been notified by mail. Please retry later.</div>';
 				header('location: /login/forgot-password/');
 				exit(0);
 			}
@@ -115,7 +115,7 @@
 			$mail = str_replace(array('{name}', '{link}'), array($user_name, '<a href="'.$href.'" >'.$href.'</a>'), $mail);
 
 			@mail($user_mail, L\get('MailRecoverSubject'), $mail, "Content-type: text/html; charset=utf-8\r\nFrom: noreply@casebox.org\r\n");			
-			$_SESSION['msg'] = L\get('RecoverMessageSent');
+			$_SESSION['msg'] = '<div class="alert alert-success">'.L\get('RecoverMessageSent').'</div>';
 			/* end of generating reset hash and sending mail */
 			break;
 		default: 
@@ -155,7 +155,7 @@ function editChanged(){
 	    	<form method="post" action="/login/reset-password/" class="standart_form tal" autocomplete="off">
 	    	<?php
 	    		if(!empty($_SESSION['msg'])){
-	    			echo '<div class="alert alert-error">'.$_SESSION['msg'].'</div>';
+	    			echo $_SESSION['msg'];
 	    			unset($_SESSION['msg']);
 	    		}elseif($prompt_for_new_password){
 	    			echo '<input type="hidden" name="h" value="'.$hash.'" />';

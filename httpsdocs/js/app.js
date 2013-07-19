@@ -35,8 +35,9 @@ Ext.onReady(function(){
 		App.config = r.config;
 		App.loginData = r.user;
 		App.loginData.iconCls = 'icon-user-' + Ext.value(r.user.sex, '');
-		if(App.loginData.short_date_format) App.dateFormat = App.loginData.short_date_format;
-		if(App.loginData.long_date_format) App.longDateFormat = App.loginData.long_date_format;
+		if(App.loginData.cfg.short_date_format) App.dateFormat = App.loginData.cfg.short_date_format;
+		if(App.loginData.cfg.long_date_format) App.longDateFormat = App.loginData.cfg.long_date_format;
+		if(App.loginData.cfg.time_format) App.timeFormat = App.loginData.cfg.time_format;
 		App.mainViewPort = new CB.ViewPort();
 		App.mainViewPort.doLayout();
 		App.mainViewPort.initCB( r, e );
@@ -722,7 +723,7 @@ function initApp(){
 			found = false;
 			i = 0;
 			while( !found && (i<a.length) ){
-				found = ( !Ext.isEmpty(a[i]) && !Ext.isEmpty(a[i].isXType) && !a[i].isXType('radiogroup') && (a[i].hidden !== true) );
+				found = ( !Ext.isEmpty(a[i]) && !Ext.isEmpty(a[i].isXType) && !a[i].isXType('radiogroup') && !a[i].isXType('displayfield') && (a[i].hidden !== true) );
 				i++;
 			}
 			if(!found) return;
@@ -741,7 +742,7 @@ function initApp(){
 		if(!App.testWindow) App.testWindow = new CB.TestingWindow({ closeAction: 'hide' });
 		App.testWindow.show();
 	}
-	App.openUniqueTabbedWidget = function(type, tabPanel, options){//experimenting
+	App.openUniqueTabbedWidget = function(type, tabPanel, options){
 		if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
 		tabIdx = App.findTabByType(tabPanel, type);
 		if(Ext.isEmpty(options)) options = {}
