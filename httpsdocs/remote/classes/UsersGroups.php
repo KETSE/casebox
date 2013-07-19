@@ -140,12 +140,8 @@ class UsersGroups{
 		
 		}else $rez['data']['group_id'] = 0;
 		
-<<<<<<< HEAD
 		// $this->updateUserEmails($user_id);
-=======
-		$this->updateUserEmails($user_id);
-        SolrClient::runBackgroundCron();
->>>>>>> 04c14c81307aa2d7f05c3a3badb1587045e4204e
+        	SolrClient::runBackgroundCron();
 		return $rez;
 	}
 
