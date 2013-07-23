@@ -440,10 +440,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
 						,hidden: this.radioHidden
 						,fieldLabel: ''
 						,items: taskItems
-						// [
-						// 	{boxLabel: L.Task, flex: 0, name: 'type', inputValue: 6, disabled: this.radioVisible}
-						// 	,{boxLabel: L.Event, flex: 1, name: 'type', inputValue: 7, disabled: this.radioVisible}
-						// ]
 						,listeners:{
 							scope: this
 							,change: this.onTypeChangeClick
@@ -642,37 +638,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		switch(this.status){
 			case 'setstatus': break;
 			case 'view': 
-				/* preparing data for view template */
-				/*
-				admin: true
-				autoclose: null
-				case: null
-				case_id: null
-				cls: "cG"
-				comment: null
-				completed: null
-				date_end: "2012-07-31"
-				description: "Some description, lorem ipsum↵Some description, lorem ipsum↵Some description, lorem ipsumSome description, lorem ipsumSome description, lorem ipsum↵Some description, lorem ipsum"
-				expired: "0"
-				iconCls: "icon-calendar-medium-clean"
-				id: "31"
-				cdate: "2012-05-29 17:25:49"
-				name: "A collective, dependent, general task 2"
-				object: null
-				object_id: null
-				cid: "1"
-				parent_ids: "30"
-				privacy: 1
-				reminds: "1|10|2-2|10|2"
-				responsible_party_id: "233"
-				responsible_user_ids: "1,12,4,14,9,13,10,11"
-				status: "0"
-				thesauri_response_id: null
-				type: 1
-				user_id: "1"
-				user_status: "0"
-				users: [{user_id:12, user_status:0, thesauri_response_id:null, comment:null},…]
-				*/
 				dd = this.data;
 				dd.creator_name = CB.DB.usersStore.getName(dd.cid);
 				

@@ -255,7 +255,8 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				    sortable: true
 				},
 				columns: [
-					{header: L.Name, width: 300, dataIndex: 'name', renderer: function(v, m, r, ri, ci, s){
+					{ header: 'ID', width: 80, dataIndex: 'nid', hidden: true}
+					,{header: L.Name, width: 300, dataIndex: 'name', renderer: function(v, m, r, ri, ci, s){
 							m.css = 'icon-grid-column-top '+ r.get('iconCls');
 							m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
 							rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';

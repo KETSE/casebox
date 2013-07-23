@@ -38,6 +38,8 @@
 	define('CB\\DATA_PATH', APP_ROOT.'data'.DIRECTORY_SEPARATOR);
 	define('CB\\SESSION_PATH', DATA_PATH.'sessions'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
 	/* end of define main paths /**/
+	
+	if(!file_exists(CORE_ROOT)) die('undefined core "'.CORENAME.'"');
 
 	/* update include_path and include global script */
 	set_include_path(DOC_ROOT.'libx'.PATH_SEPARATOR.

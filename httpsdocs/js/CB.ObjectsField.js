@@ -194,7 +194,7 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 	,onStoreLoad: function(store, recs, options) {
 		Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data))}, this);
 		store.insert( 0, new store.recordType({id: null, name:''}, Ext.id()) );
-		this.setValue(this.getValue());
+		if(Ext.isEmpty(this.lastQuery)) this.setValue(this.getValue());
 	}
 	,updateStore: function(){
 		oldStore = this.store;

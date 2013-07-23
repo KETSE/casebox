@@ -112,8 +112,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 			},[ 	{name: 'nid', type: 'int'}
 				, {name: 'pid', type: 'int'}
 				, {name: 'system', type: 'int'}
-				, {name: 'type', type: 'int'}
-				, {name: 'subtype', type: 'int'}
+				, 'template_type'
 				, {name: 'template_id', type: 'int'}
 				, 'name'
 				, 'hl'
@@ -155,7 +154,8 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				    sortable: true
 				},
 				columns: [
-				    {header: L.Name, width: 500, dataIndex: 'name', renderer: function(v, m, r, ri, ci, s){
+				    { header: 'ID', width: 80, dataIndex: 'nid', hidden: true}
+				    ,{header: L.Name, width: 500, dataIndex: 'name', renderer: function(v, m, r, ri, ci, s){
 				    		m.css = 'icon-grid-column-top '+ r.get('iconCls');
 				    		m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
 				    		v = '<span class="n"><b>' + Ext.value(r.get('hl'), v ) + '</b></span>';
@@ -439,19 +439,18 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 			this.actions.cut.setDisabled(!canCopy);
 			this.actions.copy.setDisabled(!canCopy);
 			
-			canDelete = (row.get('type') == 1) && ([0].indexOf(row.get('subtype')) >= 0) || ([2, 3, 4, 5, 6, 7].indexOf(row.get('type'))>=0);
+			canDelete = true;
 			this.actions['delete'].setDisabled(!canDelete);
 			
 			u = String(row.get('user_ids')).split(',');
-			canComplete = ((row.get('type') == 6) && (u.indexOf(App.loginData.id) >= 0) && (row.get('status') != 3) );
+			clog(u, row.get('status'), row.get('template_id'))
+			canComplete = ((row.get('template_id') == App.config.default_task_template) && (u.indexOf(App.loginData.id) >= 0) && (row.get('status') != 3) );
 			this.actions.completeTask.setDisabled(!canComplete);
 		}
 
 		canPaste = !App.clipboard.isEmpty() 
 			&& ( !this.folderProperties.inFavorites || App.clipboard.containShortcutsOnly() ) 
-			&& ( ( (this.folderProperties.system == 0) && (this.folderProperties.type != 5) ) 
-				|| ( (this.folderProperties.type == 1) && ([2, 7, 9, 10].indexOf(this.folderProperties.subtype) >= 0) ) 
-				|| ([3, 4, 6, 7].indexOf(this.folderProperties.type) >= 0 ) 
+			&& ( ( (this.folderProperties.system == 0) && (this.folderProperties.template_type != 'file') ) 
 			   );
 		this.actions.paste.setDisabled(!canPaste);
 		if(this.previewPanel) this.previewPanel.loadPreview(id);
@@ -520,8 +519,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 		this.folderProperties = o.result.folderProperties
 		this.folderProperties.id = parseInt(this.folderProperties.id);
 		this.folderProperties.system = parseInt(this.folderProperties.system);
-		this.folderProperties.type = parseInt(this.folderProperties.type);
-		this.folderProperties.subtype = parseInt(this.folderProperties.subtype);
 		this.folderProperties.pathtext = o.result.pathtext;
 		canCreate = true; //TODO: review where we can create tasks
 		this.actions.createTask.setDisabled(!canCreate); 
@@ -576,8 +573,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 				id: s[i].get('nid')
 				,name: s[i].get('name')
 				,system: s[i].get('system')
-				,type: s[i].get('type')
-				,subtype: s[i].get('subtype')
+				,template_type: s[i].get('template_type')
 				,iconCls: s[i].get('iconCls')
 			})
 		}
@@ -590,8 +586,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 	,onCreateTaskClick: function(b, e) {
 		this.fireEvent('taskcreate', {
 			data: {
-				type: 6
-				,template_id: App.config.default_task_template
+				template_id: App.config.default_task_template
 				,pid: this.folderProperties.id
 				,path: this.folderProperties.path
 				,pathtext: this.folderProperties.pathtext
@@ -618,8 +613,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 	,onCreateEventClick: function(b, e) {
 		this.fireEvent('taskcreate', {
 			data: {
-				type: 7
-				,template_id: App.config.default_event_template
+				template_id: App.config.default_event_template
 				,pid: this.folderProperties.id
 				,path: this.folderProperties.path
 				,pathtext: this.folderProperties.pathtext

@@ -475,7 +475,7 @@ class Files{
 				DB\mysqli_query_params('insert into file_previews (id, `group`, status, filename, size) values($1, \'office\', 1, null, 0) on duplicate key update `group` = \'office\', status =1, filename = null, size = 0, cdate = CURRENT_TIMESTAMP', $file['content_id'] ) or die(DB\mysqli_query_error());
 				if(file_exists($preview_filename)) Files::deletePreview($file['content_id']);
 				
-				$cmd = 'php -f '.LIB_DIR.'preview_extractor_office.php '.CORENAME.' &> '.DEBUG_LOG.'_office';
+				$cmd = 'php -f '.LIB_DIR.'preview_extractor_office.php '.CORENAME.' > '.DEBUG_LOG.'_office &';
 				if(is_windows()) $cmd = 'start /D "'.LIB_DIR.'" php -f preview_extractor_office.php '.CORENAME;
 				pclose(popen($cmd, "r"));
 				return array('processing' => true);
