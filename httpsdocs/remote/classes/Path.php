@@ -97,7 +97,7 @@ class Path{
 		}
 		$rez = array();
 		$lastId = array_pop($ids);
-		$sql = 'select id, name, `system`, `type`, f_get_tree_ids_path(id) `path`, `case_id`, `template_id` from tree where id = $1'; //in ('.implode(',', $ids).')';
+		$sql = 'select t.id, t.name, t.`system`, t.`type`, f_get_tree_ids_path(t.id) `path`, t.`case_id`, t.`template_id`, tt.`type` template_type from tree t left join templates tt on t.template_id = tt.id where t.id = $1'; //in ('.implode(',', $ids).')';
 		$res = DB\mysqli_query_params($sql, $lastId) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()) $rez = $r;
 		$res->close();

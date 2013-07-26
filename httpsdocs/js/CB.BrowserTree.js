@@ -296,7 +296,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		node.attributes.system = parseInt(node.attributes.system);
 		node.attributes.type = parseInt(node.attributes.type);
 		node.attributes.subtype = parseInt(node.attributes.subtype);
-		if((node.attributes.type == 0) && (parent.getDepth() == 4 )){
+		if((node.attributes.type == 0) && parent && (parent.getDepth() == 4 )){
 			node.setText(Ext.value(Date.monthNames[parseInt(node.attributes.name) -1], node.attributes.name));
 		}else 
 		node.setText(node.attributes.name);

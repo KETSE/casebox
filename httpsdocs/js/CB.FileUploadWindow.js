@@ -125,6 +125,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 				,name: 'date'
 				,altFormats: 'Y-m-d'
 				,format: App.dateFormat
+				,submitValue: false
 			},{	xtype : "checkbox"
 				,name : "is_default"
 				,inputValue : 1
@@ -145,11 +146,11 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 					,xtype: 'fieldset'
 					,style: 'margin-top: 10px'
 					,autoHeight: true
-					,defaults: {anchor: '100%'}
+					,defaults: { anchor: '100%' }
 					,items: fieldsetItems
 				}
 				,buttons: [{text: L.Upload, handler: this.doSubmit,  plugins: 'defaultButton', scope: this}
-						  ,{text: Ext.MessageBox.buttonText.cancel, handler: function(){this.hide()}, scope: this}]
+						  ,{text: Ext.MessageBox.buttonText.cancel, handler: function(){ this.hide() }, scope: this}]
 				,api: {submit: Ext.value(this.api, Browser.saveFile) }
 				,paramOrder: ['id']
 				,listeners:{
@@ -208,6 +209,13 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 		
 		App.focusFirstField(this);
 	},doSubmit: function(){
+		d = this.find('name', 'date');
+		if(d){
+			d = d[0];
+			d = d.getValue();
+			d = d ? d.toISOString() : null;
+		}else d = null;
+
 		f = this.findByType('form')[0];
 		if(f.getForm().isValid()){
 			f.getForm().submit({
@@ -216,6 +224,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 					id: this.data.id
 					,pid: this.data.pid
 					,uploadType: this.data.uploadType
+					,date: d
 				}
 				,scope: this
 				,success: this.onSubmitSuccess

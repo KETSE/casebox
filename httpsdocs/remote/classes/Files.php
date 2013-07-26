@@ -19,7 +19,13 @@ class Files{
 		}
 		$res->close();
 		/* get versions */
-		$sql = 'select id, `date`, `name`, cid, uid, cdate, udate, (select `size` from files_content where id = v.content_id ) `size` FROM files_versions v WHERE file_id = $1 order by cdate desc';
+		$sql = 'SELECT id, `date`, `name`, cid, uid, cdate, udate
+			, (SELECT `size`
+			   FROM files_content
+			   WHERE id = v.content_id) `size`
+			FROM files_versions v
+			WHERE file_id = $1
+			ORDER BY cdate DESC';
 		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc()){
 			$r['ago_date'] = date(str_replace('%', '', $_SESSION['user']['cfg']['long_date_format']), strtotime($r['cdate']) ).' '.L\at.' '.date(str_replace('%', '', $_SESSION['user']['cfg']['time_format']), strtotime($r['cdate']));
@@ -120,7 +126,15 @@ class Files{
 			case 1: //single match: retreive match info for content (if matches with current version or to an older version)
 				$existentFileId  = $this->getFileId($pid, $rez[0]['name'], @$rez[0]['dir']);
 				$md5 = $this->getFileMD5($rez[0]);
-				$sql = 'select (select l'.USER_LANGUAGE_INDEX.' from users_groups where id = f.cid) `user`, f.cdate from files f join files_content c on f.content_id = c.id and c.md5 = $2 where f.id = $1';
+				$sql = 'SELECT
+					        (SELECT l'.USER_LANGUAGE_INDEX.'
+					         FROM users_groups
+					         WHERE id = f.cid) `user`
+			                         , f.cdate
+					FROM files f
+					JOIN files_content c ON f.content_id = c.id
+					AND c.md5 = $2
+					WHERE f.id = $1';
 				$res = DB\mysqli_query_params($sql, array($existentFileId, $md5)) or die(DB\mysqli_query_error());
 				if($r = $res->fetch_assoc()){
 					$agoTime = Util\formatAgoTime($r['cdate']);
@@ -129,7 +143,16 @@ class Files{
 				}
 				$res->close();
 				if(empty($rez[0]['msg'])){
-					$sql = 'select (select l'.USER_LANGUAGE_INDEX.' from users_groups where id = f.cid) `user`, f.cdate from files_versions f join files_content c on f.content_id = c.id and c.md5 = $2 where f.file_id = $1';
+					$sql = 'SELECT
+						  (SELECT l'.USER_LANGUAGE_INDEX.'
+						   FROM users_groups
+						   WHERE id = f.cid) `user`
+						                   , f.cdate
+						FROM files_versions f
+						JOIN files_content c ON f.content_id = c.id
+						AND c.md5 = $2
+						WHERE f.file_id = $1';
+
 					$res = DB\mysqli_query_params($sql, array($existentFileId, $md5)) or die(DB\mysqli_query_error());
 					if($r = $res->fetch_assoc()){
 						$agoTime = Util\formatAgoTime($r['cdate']);
@@ -318,7 +341,7 @@ class Files{
 		if(empty($p['id'])) return false;
 		$p['title'] = strip_tags(@$p['title']);
 		DB\mysqli_query_params('update files set `date` = $2, title = $3, uid = $3, udate = CURRENT_TIMESTAMP where id = $1'
-			,array( $p['id'], Util\clienttoMysqlDate($p['date']), @$p['title'], $_SESSION['user']['id'] ) ) or die(DB\mysqli_query_error());
+			,array( $p['id'], Util\date_iso_to_mysql($p['date']), @$p['title'], $_SESSION['user']['id'] ) ) or die(DB\mysqli_query_error());
 
 		Objects::updateCaseUpdateInfo($p['id']);
 

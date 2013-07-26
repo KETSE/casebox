@@ -214,6 +214,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				, {name: 'subtype', type: 'int'}
 				, {name: 'status', type: 'int'}
 				, {name: 'template_id', type: 'int'}
+				, 'template_type'
 				, 'path'
 				, 'name'
 				, 'hl'
@@ -651,11 +652,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			canOpenLocation = (this.params.descendants || !Ext.isEmpty(this.grid.store.baseParams.query) );
 			this.actions.openItemLocation.setDisabled(!canOpenLocation);
 
-			canCopy = (row.get('system') == 0);
+			canCopy = (row.get('system') == 0) && (row.get('nid') > 0 );
 			this.actions.cut.setDisabled(!canCopy);
 			this.actions.copy.setDisabled(!canCopy);
 			
-			canDelete = (row.get('type') == 1) && ([0].indexOf(row.get('subtype')) >= 0) || ([2, 3, 4, 5, 6, 7, 8].indexOf(row.get('type'))>=0);
+			canDelete = (row.get('system') == 0) && (row.get('nid') > 0 );
 			this.actions['delete'].setDisabled(!canDelete);
 			canRename = (row.get('system') == 0);
 			this.actions.rename.setDisabled(!canRename);
@@ -669,27 +670,21 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 
 			canMerge = (s.length > 1);
 			for (var i = 0; i < s.length; i++) {
-				if(s[i].get('type') != 5) canMerge = false;
+				if(s[i].get('template_type') != 'file') canMerge = false;
 			}
 			this.actions.mergeFiles.setDisabled(!canMerge);
 
-			canUploadNewVersion = (row.get('type') == 5);
+			canUploadNewVersion = (row.get('template_type') == 'file');
 			this.actions.uploadNewVersion.setDisabled(!canUploadNewVersion)
 			// this.actions.permissions.setDisabled(false) ;
 		}
 		canPaste = !App.clipboard.isEmpty() 
-			&& ( !this.folderProperties.inFavorites || App.clipboard.containShortcutsOnly() ) 
-			&& ( ( (this.folderProperties.system == 0) && (this.folderProperties.type != 5) ) 
-				|| ( (this.folderProperties.type == 1) && ([0, 2, 7, 9, 10].indexOf(this.folderProperties.subtype) >= 0) ) 
-				|| ([3, 4, 6, 7].indexOf(this.folderProperties.type) >= 0 ) 
-			   );
+			&& ( !this.folderProperties.inFavorites || App.clipboard.containShortcutsOnly() );
+		
 		this.actions.paste.setDisabled(!canPaste);
 		canPasteShortcut = !App.clipboard.isEmpty() 
 			&& !App.clipboard.containShortcutsOnly() 
-			&& ( ( (this.folderProperties.system == 0) && (this.folderProperties.type != 5) ) 
-				|| ( (this.folderProperties.type == 1) && ([0, 2, 7, 9, 10].indexOf(this.folderProperties.subtype) >= 0) ) 
-				|| ([3, 4, 6, 7].indexOf(this.folderProperties.type) >= 0 ) 
-			   );
+			&& ( (this.folderProperties.system == 0) && (this.folderProperties.template_type != 'file') );
 		this.actions.pasteShortcut.setDisabled(!canPasteShortcut);
 
 		canDownload = sm.hasSelection();
@@ -701,7 +696,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				if(canDownload){
 					s = sm.getSelections();
 					for (var i = 0; i < s.length; i++) {
-						if(s[i].get('type') != 5) canDownload = false;
+						if(s[i].get('template_type') != 'file') canDownload = false;
 					};
 				}
 				db.setDisabled( !canDownload );
@@ -801,9 +796,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			ub = tb.find('iconCls', 'icon32-upload');
 			if(!Ext.isEmpty(ub)){
 				ub = ub[0];
-				canUpload = canUpload && (
-					([3, 4, 6, 7].indexOf(this.folderProperties.type) >= 0) || ( (this.folderProperties.type == 1) && ([0, 7, 9, 10].indexOf(this.folderProperties.subtype) >= 0 ) )
-					);
+				// canUpload = canUpload && ...;
 				ub.setDisabled( !canUpload );
 			}
 		}
@@ -814,7 +807,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		this.actions.createTask.setDisabled(false); 
 		this.actions.createEvent.setDisabled(false); 
 
-		canCreateFolder = (this.folderProperties.type == 1) && ([0, 2, 7, 9, 10].indexOf(this.folderProperties.subtype) >= 0) || (this.folderProperties.type == 3) || (this.folderProperties.type == 4);
+		canCreateFolder = (this.folderProperties.nid > 0 );
 		this.actions.createFolder.setDisabled(!canCreateFolder) ;
 
 		this.updateCreateMenuItems()
