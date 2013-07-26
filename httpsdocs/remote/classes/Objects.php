@@ -10,7 +10,7 @@ class Objects{
 		
 		if(!is_numeric($d->id)) throw new \Exception(L\Wrong_input_data);
 		// SECURITY: check if object id is numeric 
-		if(!Security::canRead($d->id)) throw new \Exception(L\Access_denied);
+		if(!Security::isAdmin() && !Security::canRead($d->id)) throw new \Exception(L\Access_denied);
 		// end of SECURITY: check if object id is numeric 
 		
 		$template = $this->getTemplateInfo(null, $d->id);
@@ -70,13 +70,13 @@ class Objects{
 	function create($p){
 		
 		$template = $this->getTemplateInfo($p->template_id);
-		if(!Security::canCreateActions($p->pid)) throw new \Exception(L\Access_denied);
+		if(!Security::isAdmin() && !Security::canCreateActions($p->pid)) throw new \Exception(L\Access_denied);
 		fireEvent('beforeNodeDbCreate', $p);
 		if(empty($p->name)) $p->name = $template['title'];
 		if(empty($p->tag_id)) $p->tag_id = null;
 		$p->name = Files::getAutoRenameFilename($p->pid,  $p->name);
 		$p->type = 4;
-		DB\mysqli_query_params('insert into tree (pid, name, `type`, template_id, cid, tag_id) values ($1, $2, $3, $4, $5, $6)'
+		DB\mysqli_query_params('insert into tree (pid, name, `type`, template_id, cid, tag_id, updated) values ($1, $2, $3, $4, $5, $6, 1)'
 			, array($p->pid, $p->name, $p->type, $template['id'], $_SESSION['user']['id'], $p->tag_id)) or die(DB\mysqli_query_error());
 		$p->nid = DB\last_insert_id();
 		$sql = 'INSERT INTO objects (id, `title`, template_id, cid) VALUES($1, $2, $3, $4)';
@@ -411,7 +411,7 @@ class Objects{
 		
 		if(!empty($p->id)){
 			// SECURITY: check if current user has at least read access to this case
-			if(!Security::canRead($p->id)) throw new \Exception(L\Access_denied);
+			if(!Security::isAdmin() && !Security::canRead($p->id)) throw new \Exception(L\Access_denied);
 
 			/* select distinct associated case ids from the case */
 			$sql = 'SELECT DISTINCT d.value

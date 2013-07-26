@@ -201,7 +201,7 @@ class Browser{
 		if(!is_numeric($id) || empty($p->name)) return array('success' => false);
 
 		/* check security access */
-		if(!Security::canWrite($id)) throw new \Exception(L\Access_denied);
+		if(!Security::isAdmin() && !Security::canWrite($id)) throw new \Exception(L\Access_denied);
 		
 		DB\mysqli_query_params('update tree set name = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
 		DB\mysqli_query_params('update objects set custom_title = $1 where id = $2', array($p->name, $id)) or die(DB\mysqli_query_error());
@@ -228,15 +228,14 @@ class Browser{
 			if($p->pid == $p->data[$i]->id) return array('success' => false, 'msg' => L\CannotCopyObjectToItself);
 			if( $this->isChildOf($p->pid, $p->data[$i]->id) ) return array('success' => false, 'msg' => L\CannotCopyObjectInsideItself);
 
-			$sql = 'select id, pid, name, `system`, `type`, subtype from tree where id = $1';
+			$sql = 'select id, pid, name, `system`, template_id from tree where id = $1';
 			$res = DB\mysqli_query_params($sql, $p->data[$i]->id) or die(DB\mysqli_query_error());
 			if($r = $res->fetch_assoc()){
 				$process_ids[] = $r['id'];
 				if(empty($p->action)) $p->action = 'copy';
 				if(!$p->confirmed && ($p->action !== 'copy') ){
-					$type = ($p->action == 'shortcut') ? 2 : $r['type'];
-					$sql = 'select id from tree where pid = $1 and system = $2 and type = $3 and subtype = $4 and name = $5';
-					$res2 = DB\mysqli_query_params($sql, array($p->pid, $r['system'], $type, $r['subtype'], $r['name'])) or die(DB\mysqli_query_error());
+					$sql = 'select id from tree where pid = $1 and system = $2 and name = $3 and template_id = $4';
+					$res2 = DB\mysqli_query_params($sql, array($p->pid, $r['system'], $r['name'], $r['template_id'])) or die(DB\mysqli_query_error());
 					if($r2 = $res2->fetch_assoc()){
 						//if($r2['id'] == $r['id']) return array('success' => false, 'msg' => L\CannotCopyObjectOverItself);
 						return array('success' => false, 'confirm' => true, 'msg' => L\ConfirmOverwriting);
@@ -263,8 +262,8 @@ class Browser{
 					if($r = $res->fetch_row()) $newName = empty($r[1]) ? $r[0] : $this->getNewCopyName($p->pid, $r[0]);
 					$res->close();
 
-					DB\mysqli_query_params('insert into tree(pid, user_id, `system`, `type`, template_id, tag_id, name, `date`, size, is_main, cfg, cid, cdate, uid, udate)
-						select $2, user_id, 0, `type`, template_id, tag_id, $4, `date`, size, is_main, cfg, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP from tree where id =$1', array($id, $p->pid, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
+					DB\mysqli_query_params('insert into tree(pid, user_id, `system`, `type`, template_id, tag_id, name, `date`, size, is_main, cfg, cid, cdate, uid, udate, updated)
+						select $2, user_id, 0, `type`, template_id, tag_id, $4, `date`, size, is_main, cfg, $3, CURRENT_TIMESTAMP, $3, CURRENT_TIMESTAMP, 1 from tree where id =$1', array($id, $p->pid, $_SESSION['user']['id'], $newName) ) or die(DB\mysqli_query_error());
 					$obj_id = DB\last_insert_id();
 					$type = 0;
 					$res = DB\mysqli_query_params('select `type` from tree where id = $1', $id) or die(DB\mysqli_query_error());
@@ -318,14 +317,14 @@ class Browser{
 				$res = DB\mysqli_query_params('select pid from tree where id in ('.implode(',', $process_ids).')') or die(DB\mysqli_query_error());
 				while($r = $res->fetch_row()) $modified_pids[] = intval($r[0]);
 				$res->close();
-				DB\mysqli_query_params('update tree set pid = $1, updated = (updated | 100) where id in ('.implode(',', $process_ids).')', $p->pid) or die(DB\mysqli_query_error());
+				DB\mysqli_query_params('update tree set pid = $1, updated = (updated | 1) where id in ('.implode(',', $process_ids).')', $p->pid) or die(DB\mysqli_query_error());
 				
 				foreach($process_ids as $id) Objects::updateCaseUpdateInfo($id);
 				
-				$this->markAllChildsAsUpdated($process_ids, 100);
+				$this->markAllChildsAsUpdated($process_ids, 1);
 				break;
 			case 'shortcut':
-				DB\mysqli_query_params('insert into tree (pid, `system`, `type`, `subtype`, target_id, `name`, cid) SELECT $1, 0, 2, 0, id, `name`, $2 from tree where id in ('.implode(',', $process_ids).')', array($p->pid, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
+				DB\mysqli_query_params('insert into tree (pid, `system`, `type`, `subtype`, target_id, `name`, cid, updated) SELECT $1, 0, 2, 0, id, `name`, $2, 1 from tree where id in ('.implode(',', $process_ids).')', array($p->pid, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
 				Objects::updateCaseUpdateInfo(DB\last_insert_id());
 				break;
 		}
@@ -489,7 +488,7 @@ class Browser{
 		
 		$f = $_FILES['file'];
 		if($f['error'] == UPLOAD_ERR_NO_FILE){
-			DB\mysqli_query_params('update files set `title` = $2, `date` = $3 where id = $1', array($p['id'], $p['title'], Util\clientToMysqlDate($p['date']) ) ) or die(DB\mysqli_query_error());
+			DB\mysqli_query_params('update files set `title` = $2, `date` = $3 where id = $1', array($p['id'], $p['title'], Util\date_iso_to_mysql($p['date']) ) ) or die(DB\mysqli_query_error());
 			return $rez;
 		}
 		if($f['error'] != UPLOAD_ERR_OK) return Array('success' => false, 'msg' => L\Error_uploading_file .': '.$f['error']);
@@ -552,10 +551,18 @@ class Browser{
 	}
 	static function getRootFolderId(){
 		$id = null;
-		$sql = 'select id from tree where pid is null and `system` = 1 and `type` = 1 and subtype = 0';
+		$sql = 'select id from tree where pid is null and `system` = 1 and `is_main` = 1';
 		$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $id = $r[0];
 		$res->close();
+		
+		/* create root folder */
+		if($id == null){
+			DB\mysqli_query_params('insert into tree (`system`, `name`, is_main, updated, template_id) values (1, \'root\', 1, 1, $1)', config\default_folder_template ) or die( DB\mysqli_query_error() );
+			$id = DB\last_insert_id();
+			SolrClient::runCron();
+		}
+
 		return $id;
 	}
 	public function getRootProperties($id){
@@ -616,6 +623,16 @@ class Browser{
 			@$d['system'] = intval($d['system']);
 			@$d['type'] = intval($d['type']);
 			@$d['subtype'] = intval($d['subtype']);
+			
+			if($d['system']){
+				if( (substr($d['name'], 0, 1) == '[') && (substr($d['name'], -1, 1) == ']') ){
+					$var_name = substr($d['name'], 1, strlen($d['name']) -2);
+					if(defined('CB\\L\\'.$var_name))
+						$d['name'] = L\get($var_name);
+				}
+
+			}
+			/* next switch should/will be excluded: */
 			switch($d['type']){
 				case 0: break; 
 				case 1: switch ($d['subtype']) {

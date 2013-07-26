@@ -207,7 +207,7 @@ class Security {
 		$acl_order = array_flip($ids);
 		$acl = array();
 		// selecting access list set for our path ids
-		$sql = 'select node_id, user_group_id, allow, deny from tree_acl where node_id in ('.implode(',', $ids).') and user_group_id in ('.implode(',', $user_group_ids).')';
+		$sql = 'select node_id, user_group_id, allow, deny from tree_acl where node_id in (0'.implode(',', $ids).') and user_group_id in ('.implode(',', $user_group_ids).')';
 		$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc())
 			$acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
@@ -342,7 +342,7 @@ class Security {
 		$acl_order = array_flip($ids);
 		$acl = array();
 		// selecting access list set for our path ids
-		$sql = 'select node_id, user_group_id, allow, deny from tree_acl where node_id in ('.implode(',', $ids).') and user_group_id in ('.implode(',', $user_group_ids).')';
+		$sql = 'select node_id, user_group_id, allow, deny from tree_acl where node_id in (0'.implode(',', $ids).') and user_group_id in ('.implode(',', $user_group_ids).')';
 		$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
 		while($r = $res->fetch_assoc())
 			$acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
