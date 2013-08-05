@@ -537,7 +537,7 @@ class Objects{
 		DB\mysqli_query_params($sql, array($object_id, $field_id, $duplicate_id, $value)) or die(DB\mysqli_query_error());
 	}
 	
-	static function getSorlData($id){
+	static function getSolrData($id){
 		$rez = array();
 		$lang_field = 'l'.LANGUAGE_INDEX;
 		$sql = 'SELECT 
@@ -636,7 +636,7 @@ class Objects{
 
 	public static function getCaseId($node_id){
 		$case_id = null;
-		$sql = 'select f_get_objects_case_id($1)';
+		$sql = 'select case_id from tree_info where id = $1';
 		$res = DB\mysqli_query_params($sql, $node_id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_row()) $case_id = $r[0];
 		$res->close();
@@ -653,7 +653,7 @@ class Objects{
 	}
 
 	public static function updateCaseUpdateInfo($case_or_caseObject_id){
-		DB\mysqli_query_params('update tree set uid = $2, udate = CURRENT_TIMESTAMP where id = `f_get_objects_case_id`($1)', Array($case_or_caseObject_id, $_SESSION['user']['id'] )) or die(DB\mysqli_query_error());
+		// DB\mysqli_query_params('update tree set uid = $2, udate = CURRENT_TIMESTAMP where id = `f_get_objects_case_id`($1)', Array($case_or_caseObject_id, $_SESSION['user']['id'] )) or die(DB\mysqli_query_error());
 	}
 
 	/* setting case roles fields for an object data */

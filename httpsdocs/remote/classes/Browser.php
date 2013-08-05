@@ -3,6 +3,7 @@
 namespace CB;
 
 class Browser{
+
 	/* getCustomControllerResults function used to check if node has a controller specified in its "cfg" field
 		if node have custom controller then results from the controller are returned, otherwise false is returned
 	 */
@@ -321,7 +322,8 @@ class Browser{
 				
 				foreach($process_ids as $id) Objects::updateCaseUpdateInfo($id);
 				
-				$this->markAllChildsAsUpdated($process_ids, 1);
+				// $this->markAllChildsAsUpdated($process_ids, 1);
+				Security::calculateUpdatedSecuritySets();
 				break;
 			case 'shortcut':
 				DB\mysqli_query_params('insert into tree (pid, `system`, `type`, `subtype`, target_id, `name`, cid, updated) SELECT $1, 0, 2, 0, id, `name`, $2, 1 from tree where id in ('.implode(',', $process_ids).')', array($p->pid, $_SESSION['user']['id'])) or die(DB\mysqli_query_error());
@@ -527,6 +529,7 @@ class Browser{
 		}
 		return array('success' => true, 'data' => $p,);
 	}
+	
 	public function takeOwnership($ids){
 		if(!is_array($ids)) $ids = explode(',', $ids);
 		$ids = array_filter($ids, 'is_numeric');
@@ -538,6 +541,7 @@ class Browser{
 		SolrClient::runCron();
 		return $rez;
 	}
+	
 	public function isChildOf($id, $pid){
 		$rez = false;
 		$sql = 'SELECT f_get_tree_ids_path($1)';
@@ -549,7 +553,10 @@ class Browser{
 		$res->close();
 		return $rez;
 	}
-	static function getRootFolderId(){
+	
+
+	static function checkRootFolder(){
+		
 		$id = null;
 		$sql = 'select id from tree where pid is null and `system` = 1 and `is_main` = 1';
 		$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
@@ -558,13 +565,51 @@ class Browser{
 		
 		/* create root folder */
 		if($id == null){
-			DB\mysqli_query_params('insert into tree (`system`, `name`, is_main, updated, template_id) values (1, \'root\', 1, 1, $1)', config\default_folder_template ) or die( DB\mysqli_query_error() );
+			DB\mysqli_query_params('INSERT INTO tree (`system`, `name`, is_main, updated, template_id)
+				VALUES (1
+					,\'root\'
+					,1
+				        ,1
+				        ,$1)'
+				, config\default_folder_template
+			) or die( DB\mysqli_query_error() );
+
 			$id = DB\last_insert_id();
+			
+			// assign full control for "system" group
+			DB\mysqli_query_params('INSERT INTO tree_acl (node_id, user_group_id, allow, deny)
+				VALUES ($1
+				      , $2
+				      , 4095
+				      , 0) ON duplicate KEY
+				UPDATE allow = 4095
+				     , deny = 0'
+				,array($id, Security::SystemGroupId() )
+			) or die( DB\mysqli_query_error() );
+
 			SolrClient::runCron();
 		}
+		return $id;
+	}
+	
+	static function getRootFolderId(){
+		if( defined('CB\\root_folder_id') ) return constant('CB\\root_folder_id');
+
+		$id = null;
+		$sql = 'select id from tree where pid is null and `system` = 1 and `is_main` = 1';
+		$res = DB\mysqli_query_params($sql, array()) or die(DB\mysqli_query_error());
+		if($r = $res->fetch_row()) $id = $r[0];
+		$res->close();
+		
+		if( $id == null ){
+			Browser::checkRootFolder();
+			return Browser::getRootFolderId();
+		}
+		define('CB\\root_folder_id', $id);
 
 		return $id;
 	}
+	
 	public function getRootProperties($id){
 		$rez = array('success' => true, 'data' => array());
 		$sql = 'select id `nid`, `system`, `type`, `subtype`, `name`, `cfg` from tree where id = $1';
@@ -580,6 +625,7 @@ class Browser{
 		$res->close();
 		return $rez;
 	}
+	
 	static function getFavoriteFolderId(){
 		$id = null;
 		$sql = 'select id from tree where pid is null and `system` = 1 and `type` = 1 and subtype = 2 and user_id = $1';

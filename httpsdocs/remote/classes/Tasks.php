@@ -824,7 +824,7 @@ class Tasks{
 		return $rez;
 	}
 
-	static function getSorlData($id){
+	static function getSolrData($id){
 		$rez = array();
 		$sql = 'SELECT
 			title

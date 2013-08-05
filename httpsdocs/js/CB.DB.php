@@ -95,10 +95,10 @@ Ext.namespace('CB.DB');
 	/* Security questions */
 	$arr = array();
 	for ($i=0; $i < 10; $i++) { 
-		if(defined('CB\\L\\SequrityQuestion'.$i) ) $arr[] = array($i, constant('CB\\L\\SequrityQuestion'.$i) );
+		if(defined('CB\\L\\SecurityQuestion'.$i) ) $arr[] = array($i, constant('CB\\L\\SecurityQuestion'.$i) );
 	}
-	if(defined('CB\\L\\OwnSequrityQuestion') ) $arr[] = array( -1 , constant('CB\\L\\OwnSequrityQuestion') );
-	echo "\n".'CB.DB.sequrityQuestions = new Ext.data.ArrayStore({'.
+	if(defined('CB\\L\\OwnSecurityQuestion') ) $arr[] = array( -1 , constant('CB\\L\\OwnSecurityQuestion') );
+	echo "\n".'CB.DB.securityQuestions = new Ext.data.ArrayStore({'.
 		'fields: [{name: "id", type: "int"}, "text"]'.
 		',data: '.(empty($arr) ? '[]' : json_encode($arr)).
 		'});'."\n";

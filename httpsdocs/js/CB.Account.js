@@ -503,7 +503,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
 						}
 						,items: [{
 							xtype: 'combo'
-							,store: CB.DB.sequrityQuestions
+							,store: CB.DB.securityQuestions
 							,name: 'question_idx'
 							,hiddenName: 'question_idx'
 							,fieldLabel: L.Question

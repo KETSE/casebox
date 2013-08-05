@@ -19,7 +19,22 @@ class BrowserTree extends Browser{
 
 	private function getRootChildren(){
 		$data = array();
-		$res = DB\mysqli_query_params('select id `nid`, `system`, `type`, `subtype`, `name` from tree where ((user_id = $1) or (user_id is null)) and (system = 1) and (pid is null) order by user_id desc, is_main', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+		
+		$res = DB\mysqli_query_params('SELECT id `nid`
+			     , `system`
+			     , `type`
+			     , `subtype`
+			     , `name`
+			FROM tree
+			WHERE ((user_id = $1)
+			       OR (user_id IS NULL))
+			        AND (SYSTEM = 1)
+			        AND (pid IS NULL)
+			ORDER BY user_id DESC, is_main'
+
+			,$_SESSION['user']['id']
+		) or die(DB\mysqli_query_error());
+
 		while($r = $res->fetch_assoc()){
 			$r['expanded'] = true;
 			if(!empty($data)) $r['cls'] = 'cb-group-padding';
@@ -27,9 +42,7 @@ class BrowserTree extends Browser{
 		}
 		$res->close();
 		
-		require_once 'User.php';
-		if(User::checkUserRootFolders($data)) return $data;
-		return $this->getRootChildren();
+		return $data;
 	}
 
 	private function getDefaultControllerResults($path){

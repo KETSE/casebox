@@ -575,7 +575,7 @@ class Files{
 		if(is_windows()) $cmd = 'del '.FILES_PREVIEW_PATH.$id.'_*'; else $cmd = 'find '.FILES_PREVIEW_PATH.' -type f -name '.$id.'_* -print | xargs rm';
 		exec($cmd);
 	}
-	static function getSorlData($id){
+	static function getSolrData($id){
 		$rez = array();
 		$sql = 'SELECT f.id
 			,c.type
@@ -595,7 +595,7 @@ class Files{
 			global $core;
 			$filesPath = FILES_PATH.$core['name'].DIRECTORY_SEPARATOR;
 		}
-		$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
+		/*$res = DB\mysqli_query_params($sql, $id) or die(DB\mysqli_query_error());
 		if($r = $res->fetch_assoc()){
 			$rez['size'] = $r['size'];
 			$rez['versions'] = intval($r['versions']);
@@ -608,7 +608,7 @@ class Files{
 			Util\coalesce($r['type'],'')."\n".
 			Util\coalesce($content, ''); 
 		}
-		$res->close();
+		$res->close();/**/
 		return $rez;
 	}
 
