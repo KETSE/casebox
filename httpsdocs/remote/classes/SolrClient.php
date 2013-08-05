@@ -50,31 +50,34 @@ class SolrClient
         // custom core fields
         ,'substatus'
     );
+
     public function SolrClient ($p = array())
+    {
+        $this->init($p);
+    }
+
+    private function init($p = array())
     {
         $this->host = empty($p['host']) ? config\solr_host : $p['host'];
         $this->port = empty($p['port']) ? config\solr_port : $p['port'];
         $this->core = empty($p['core']) ? config\solr_core : $p['core'];
+        $this->initialized = true;
     }
-    public function connect()
+
+    public function connect($p = array())
     {
+
         if ($this->connected) {
             return $this->solr;
         }
-        if (empty($this->host)) {
-            $this->host = config\solr_host;
-        }
-        if (empty($this->port)) {
-            $this->port = config\solr_port;
-        }
-        if (empty($this->core)) {
-            $this->core = config\solr_core;
+        if (empty($this->initialized)) {
+            $this->init();
         }
 
         require_once SOLR_CLIENT;
         $this->solr = new \Apache_Solr_Service($this->host, $this->port, $this->core);
         if (! $this->solr->ping()) {
-            throw new \Exception(L\get('Solr_connection_error').( is_debug_host() ? ' ('.$this->host.':'.$this->port.' -> '.$this->core.' )' : ''), 1);
+            throw new \Exception('Solr_connection_error'.( is_debug_host() ? ' ('.$this->host.':'.$this->port.' -> '.$this->core.' )' : ''), 1);
         }
         $this->connected = true;
 
@@ -287,27 +290,28 @@ class SolrClient
                     $r['type'] = intval($r['type']);
                     $r['subtype'] = intval($r['subtype']);
                     $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
-                    $docs[] = $r;
+                    $docs[$r['id']] = $r;
 
                 }
                 if (!empty($cron_id)) {
                     DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
                 }
 
-                $sql2 = 'UPDATE tree
-                         , tree_info
-                    SET tree.updated = 0
-                      , tree_info.updated = 0
-                    WHERE tree.id = $1
-                        AND tree_info.id = $1';
-
-                DB\mysqli_query_params($sql2, $r['id']) or die(DB\mysqli_query_error());
             }
             $res->close();
             if (!empty($docs)) {
                 // error_log(print_r($docs, 1), 3, $log_file);
                 try {
                     $this->addDocuments($docs);
+
+                    $sql2 = 'UPDATE tree
+                             , tree_info
+                        SET tree.updated = 0
+                          , tree_info.updated = 0
+                        WHERE tree.id in ('.implode(',',array_keys($docs)).')
+                            AND tree_info.id = tree.id';
+
+                    DB\mysqli_query_params($sql2, $r['id']) or die(DB\mysqli_query_error());
                 } catch (\Exception $e) {
                     // error_log( " \n\r CANNOT add documents\n", 3, $log_file);
                 }
@@ -350,19 +354,19 @@ class SolrClient
                 $r['update'] = true;
                 $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
 
-                $docs[] = $r;
+                $docs[$r['id']] = $r;
 
                 if (!empty($cron_id)) {
                     DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
                 }
 
-                DB\mysqli_query_params('UPDATE tree_info SET updated = 0 WHERE id = $1', $r['id']) or die(DB\mysqli_query_error());
             }
             $res->close();
 
             if (!empty($docs)) {
                 try {
                     $this->addDocuments($docs);
+                    DB\mysqli_query_params('UPDATE tree_info SET updated = 0 WHERE id in ('.implode(',', array_keys($docs)).')') or die(DB\mysqli_query_error());
                 } catch (\Exception $e) {
                     echo "error adding documents to solr";
                     // error_log( " \n\r CANNOT add documents\n", 3, $log_file);

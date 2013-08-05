@@ -17,7 +17,8 @@ $last_action_sql = 'UPDATE crons
 SET last_action = CURRENT_TIMESTAMP
 WHERE cron_id = $1';
 
-$solr = new SolrClient();
+$solr = new SolrClient;
+
 try {
     if (@$argv[2] == 'all') {
         echo "deleting all\n";
@@ -34,6 +35,7 @@ try {
     }
 
 } catch (\Exception $e) {
+    echo 'CaseBox cron execution exception ('.$solr->core.')'.$e->getMessage();
     notifyAdmin('CaseBox cron execution exception ('.$solr->core.')', $e->getMessage());
 }
 

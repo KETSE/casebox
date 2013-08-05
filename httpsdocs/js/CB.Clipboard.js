@@ -42,8 +42,9 @@ CB.Clipboard =  Ext.extend(Ext.util.Observable, {
 			}, this);
 			else Ext.Msg.alert(L.Error, r.msg);
 			return;
+		}else{
+			this.fireEvent('pasted', r.pids); //fire the event so that all components that are looking for clipboard will take action when clipboard is pasted and will update parent nodes
 		}
-		this.fireEvent('pasted', r.pids); //fire the event so that all components that are looking for clipboard will take action when clipboard is pasted and will update parent nodes
 		if(this.callback) this.callback(r.pids);
 	}
 });
