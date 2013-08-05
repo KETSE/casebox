@@ -113,7 +113,7 @@ class SolrClient
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-type:application/json; charset=utf-8"));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($docs));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($docs)));
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 
@@ -128,10 +128,10 @@ class SolrClient
     {
         $addDocs = array();
         $updateDocs = array();
-        for ($i=0; $i < sizeof($docs); $i++) {
-            if (empty($docs[$i]['update'])) {
+        foreach ($docs as $in_doc) {
+            if (empty($in_doc['update'])) {
                 $doc = new \Apache_Solr_Document();
-                foreach ($docs[$i] as $fn => $fv) {
+                foreach ($in_doc as $fn => $fv) {
                     if (in_array($fn, $this->solr_fields) && ( ($fn == 'dstatus') || !empty($fv) || ($fv === false))) {
                         $doc->$fn = $fv;
                     }
@@ -140,7 +140,7 @@ class SolrClient
                 $addDocs[] = $doc;
             } else {
                 $doc = array();
-                foreach ($docs[$i] as $fn => $fv) {
+                foreach ($in_doc as $fn => $fv) {
                     if (in_array($fn, $this->solr_fields)) {
                         if ($fn == 'id') {
                             $doc[$fn] = $fv;
@@ -308,7 +308,7 @@ class SolrClient
                              , tree_info
                         SET tree.updated = 0
                           , tree_info.updated = 0
-                        WHERE tree.id in ('.implode(',',array_keys($docs)).')
+                        WHERE tree.id in ('.implode(',', array_keys($docs)).')
                             AND tree_info.id = tree.id';
 
                     DB\mysqli_query_params($sql2, $r['id']) or die(DB\mysqli_query_error());

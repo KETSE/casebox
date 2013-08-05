@@ -223,7 +223,7 @@ class Browser
             ' on duplicate key update `value` = $2';
         DB\mysqli_query_params($sql, Array($id, $p->name) ) or die(DB\mysqli_query_error());
 
-        SolrClient::runCron();
+        SolrClient::runBackgroundCron();
 
         return array('success' => true, 'data' => array( 'id' => $id, 'newName' => $p->name) );
     }
