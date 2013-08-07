@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 namespace CB;
 
@@ -30,12 +29,12 @@ WHERE `type` = 6
     AND `status` IN (2, 4)
     AND has_deadline = 1';
 
-$res = DB\mysqli_query_params($sql) or die(DB\mysqli_query_error());
+$res = DB\dbQuery($sql) or die(DB\dbQueryError());
 while ($r = $res->fetch_assoc()) {
     echo " task ".$r['id'].': '.$r['expired'];
     if ($r['expired'] == 1) {
         // update task as expired
-        DB\mysqli_query_params('UPDATE tasks SET status = 1 WHERE id = $1', $r['id']) or die(DB\mysqli_query_error());
+        DB\dbQuery('UPDATE tasks SET status = 1 WHERE id = $1', $r['id']) or die(DB\dbQueryError());
         Log::add(
             array(
                 'action_type' => 28
@@ -46,15 +45,22 @@ while ($r = $res->fetch_assoc()) {
         );
     }
     //update cron last_action status
-    DB\mysqli_query_params('UPDATE crons SET last_action = CURRENT_TIMESTAMP WHERE cron_id = $1', $cron_id) or die('error updating crons last action');
+    DB\dbQuery(
+        'UPDATE crons
+        SET last_action = CURRENT_TIMESTAMP
+        WHERE cron_id = $1',
+        $cron_id
+    ) or die('error updating crons last action');
 }
 $res->close();
 
 // writing cron execution info
-DB\mysqli_query_params(
-    'UPDATE crons SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2 WHERE cron_id = $1',
+DB\dbQuery(
+    'UPDATE crons
+    SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
+    WHERE cron_id = $1',
     array($cron_id, 'ok')
-) or die(DB\mysqli_query_error());
+) or die(DB\dbQueryError());
 
 //Starting reindexing cron to update changes into solr
 SolrClient::runCron();

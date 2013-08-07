@@ -1,9 +1,8 @@
 <?php
-
 namespace CB;
 
-interface iUserMenu{
+interface IUserMenu
+{
     public function getAccordionItems();
     public function getToolbarItems();
 }
-

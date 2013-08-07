@@ -1,5 +1,4 @@
 <?php
-
 namespace CB;
 
 class User
@@ -24,18 +23,18 @@ class User
         $user_id = false;
 
         /* try to authentificate */
-        $res = DB\mysqli_query_params('CALL p_user_login($1, $2, $3)', array($login, $pass, $ips)) or die( DB\mysqli_query_error() );
+        $res = DB\dbQuery('CALL p_user_login($1, $2, $3)', array($login, $pass, $ips)) or die( DB\dbQueryError() );
         if (($r = $res->fetch_row()) && ($r[1] == 1)) {
             $user_id = $r[0];
         }
         $res->close();
-        DB\mysqli_clean_connection();
+        DB\dbCleanConnection();
 
         if ($user_id) {
             $rez = array('success' => true, 'user' => array());
 
-            $sql = 'SELECT u.id, u.`language_id`, first_name, last_name, '.config\language_fields.', sex, cfg FROM users_groups u WHERE u.id = $1';
-            $res = DB\mysqli_query_params($sql, $user_id) or die( DB\mysqli_query_error() );
+            $sql = 'SELECT u.id, u.`language_id`, first_name, last_name, '.CONFIG\LANGUAGE_FIELDS.', sex, cfg FROM users_groups u WHERE u.id = $1';
+            $res = DB\dbQuery($sql, $user_id) or die( DB\dbQueryError() );
             if ($r = $res->fetch_assoc()) {
                 $r['admin'] = Security::isAdmin($user_id);
                 $r['manage'] = Security::canManage($user_id);
@@ -83,7 +82,7 @@ class User
     {
         $rez = array( 'success' => false );
         unset($_SESSION['verified']);
-        $res = DB\mysqli_query_params('select id from users_groups where id = $1 and `password`= md5($2)', array($_SESSION['user']['id'], 'aero'.$pass)) or die( DB\mysqli_query_error() );
+        $res = DB\dbQuery('select id from users_groups where id = $1 and `password`= md5($2)', array($_SESSION['user']['id'], 'aero'.$pass)) or die( DB\dbQueryError() );
         if ($r = $res->fetch_row()) {
             $rez['success'] = true;
             $_SESSION['verified'] = time();
@@ -127,21 +126,21 @@ class User
     {
         $rez = array( 'success' => true );
         if ($this->verifyGACode($p->code)) {
-            $res = DB\mysqli_query_params(
+            $res = DB\dbQuery(
                 'SELECT cfg
                 FROM users_groups
                 WHERE enabled = 1
                     AND did IS NULL
                     AND id = $1',
                 $_SESSION['user']['id']
-            ) or die(DB\mysqli_query_error());
+            ) or die(DB\dbQueryError());
             $cfg = array();
             if ($r = $res->fetch_assoc()) {
                 if (!empty($r['cfg'])) {
                     $cfg = json_decode($r['cfg'], true);
                 }
                 $cfg['security']['TSV']['method'] = 'MGA';
-                DB\mysqli_query_params(
+                DB\dbQuery(
                     'UPDATE users_groups
                     SET cfg = $2
                     WHERE id = $1',
@@ -149,7 +148,7 @@ class User
                         $_SESSION['user']['id']
                         , json_encode($cfg)
                     )
-                ) or die(DB\mysqli_query_error());
+                ) or die(DB\dbQueryError());
             }
             $res->close();
 
@@ -162,14 +161,14 @@ class User
     public function disableTSV()
     {
         $rez = array( 'success' => true );
-        $res = DB\mysqli_query_params(
+        $res = DB\dbQuery(
             'SELECT cfg
             FROM users_groups
             WHERE enabled = 1
                 AND did IS NULL
                 AND id = $1',
             $_SESSION['user']['id']
-        ) or die(DB\mysqli_query_error());
+        ) or die(DB\dbQueryError());
         $cfg = array();
         if ($r = $res->fetch_assoc()) {
             if (!empty($r['cfg'])) {
@@ -177,7 +176,7 @@ class User
             }
             unset($cfg['security']['TSV']['method']);
             unset($cfg['security']['TSV']['sk']);
-            DB\mysqli_query_params(
+            DB\dbQuery(
                 'UPDATE users_groups
                 SET cfg = $2
                 WHERE id = $1',
@@ -185,7 +184,7 @@ class User
                     $_SESSION['user']['id']
                     ,json_encode($cfg)
                 )
-            ) or die(DB\mysqli_query_error());
+            ) or die(DB\dbQueryError());
         } else {
             $rez['success'] = false;
         }
@@ -197,7 +196,7 @@ class User
     /**
      * check if user is loged in current session
      */
-    public static function is_loged()
+    public static function isLoged()
     {
         return ( !empty($_COOKIE['key']) &&
             !empty($_SESSION['key']) &&
@@ -212,7 +211,7 @@ class User
     /**
      * check if user did a password verification check in specified period of time. Default is 5 minutes
      */
-    public static function is_verified($seconds = 300)
+    public static function isVerified($seconds = 300)
     {
         return ( !empty($_SESSION['verified']) &&
             ( (time() - $_SESSION['verified']) < $seconds )
@@ -231,12 +230,12 @@ class User
         @$rez = array(
             'success' => true
             ,'config' => array(
-                'task_categories' => constant('CB\\config\\task_categories')
-                ,'responsible_party' => constant('CB\\config\\responsible_party')
-                ,'responsible_party_default' => constant('CB\\config\\responsible_party_default')
+                'task_categories' => constant('CB\\CONFIG\\TASK_CATEGORIES')
+                ,'responsible_party' => constant('CB\\CONFIG\\RESPONSIBLE_PARTY')
+                ,'responsible_party_default' => constant('CB\\CONFIG\\RESPONSIBLE_PARTY_DEFAULT')
                 ,'folder_templates' => $GLOBALS['folder_templates']
-                ,'default_task_template' => constant('CB\\config\\default_task_template')
-                ,'default_event_template' => constant('CB\\config\\default_event_template')
+                ,'default_task_template' => constant('CB\\CONFIG\\DEFAULT_TASK_TEMPLATE')
+                ,'default_event_template' => constant('CB\\CONFIG\\DEFAULT_EVENT_TEMPLATE')
             )
             ,'user' => $_SESSION['user']
         );
@@ -252,7 +251,7 @@ class User
      */
     public function getAccountData()
     {
-        if (!$this->is_verified()) {
+        if (!$this->isVerified()) {
             return array('success' => false, 'verify' => true);
         }
         $_SESSION['verified'] = time(); //update verification time
@@ -284,7 +283,7 @@ class User
 
         // country, phone, date_formats should be set into cfg field as a json object
         $rez = array();
-        $res = DB\mysqli_query_params('select id, name, first_name, last_name, sex, email, language_id, cfg from users_groups where enabled = 1 and did is null and id = $1', $user_id) or die(DB\mysqli_query_error());
+        $res = DB\dbQuery('select id, name, first_name, last_name, sex, email, language_id, cfg from users_groups where enabled = 1 and did is null and id = $1', $user_id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $cfg = empty($r['cfg']) ? array(): json_decode($r['cfg'], true);
             unset($r['cfg']);
@@ -313,7 +312,7 @@ class User
     private function getSecurityData()
     {
         $rez = array();
-        $res = DB\mysqli_query_params('select password_change, cfg from users_groups where enabled = 1 and did is null and id = $1', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+        $res = DB\dbQuery('select password_change, cfg from users_groups where enabled = 1 and did is null and id = $1', $_SESSION['user']['id']) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $cfg = empty($r['cfg']) ? array(): json_decode($r['cfg'], true);
             if (!empty($cfg['security'])) {
@@ -340,7 +339,7 @@ class User
 
         $rez = array();
         $cfg = array();
-        $res = DB\mysqli_query_params('select cfg from users_groups where id = $1', $data->id) or die(DB\mysqli_query_error());
+        $res = DB\dbQuery('select cfg from users_groups where id = $1', $data->id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             if (!empty($r['cfg'])) {
                 $cfg = json_decode($r['cfg'], true);
@@ -364,7 +363,7 @@ class User
             $cfg['long_date_format'] = $data->long_date_format;
         }
 
-        @DB\mysqli_query_params(
+        @DB\dbQuery(
             'UPDATE users_groups
             SET first_name = $2
                 , last_name = $3
@@ -382,7 +381,7 @@ class User
                 ,$data->language_id
                 ,json_encode($cfg)
             )
-        ) or die( DB\mysqli_query_error() );
+        ) or die( DB\dbQueryError() );
 
         VerticalEditGrid::saveData('users_groups', $data);
 
@@ -391,13 +390,13 @@ class User
 
     public function saveSecurityData($data)
     {
-        if (!$this->is_verified()) {
+        if (!$this->isVerified()) {
             return array('success' => false, 'verify' => true);
         }
         $_SESSION['verified'] = time(); //update verification time
         $rez = array();
         $cfg = array();
-        $res = DB\mysqli_query_params('select cfg from users_groups where id = $1', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+        $res = DB\dbQuery('select cfg from users_groups where id = $1', $_SESSION['user']['id']) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             if (!empty($r['cfg'])) {
                 $cfg = json_decode($r['cfg'], true);
@@ -451,7 +450,7 @@ class User
             $cfg['security']['answer'] = $data->answer;
         }
 
-        @DB\mysqli_query_params(
+        @DB\dbQuery(
             'UPDATE users_groups
             SET cfg = $2
             WHERE id = $1',
@@ -459,7 +458,7 @@ class User
                 $_SESSION['user']['id']
                 ,json_encode($cfg)
             )
-        ) or die( DB\mysqli_query_error() );
+        ) or die( DB\dbQueryError() );
 
         return array('success' => true);
     }
@@ -468,7 +467,7 @@ class User
     public function getGASk()
     {
         $rez = array('success' => true, 'sk' => 'xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx' );
-        $res = DB\mysqli_query_params('select cfg from users_groups where enabled = 1 and did is null and id = $1', $_SESSION['user']['id']) or die(DB\mysqli_query_error());
+        $res = DB\dbQuery('select cfg from users_groups where enabled = 1 and did is null and id = $1', $_SESSION['user']['id']) or die(DB\dbQueryError());
         $cfg = array();
         if ($r = $res->fetch_assoc()) {
             if (!empty($r['cfg'])) {
@@ -485,7 +484,7 @@ class User
 
             if (empty($cfg['security']['TSV']['sk'])) {
                 $cfg['security']['TSV']['sk'] = $ga->createSecret(16);
-                DB\mysqli_query_params(
+                DB\dbQuery(
                     'UPDATE users_groups
                     SET cfg = $2
                     WHERE id = $1',
@@ -493,7 +492,7 @@ class User
                         $_SESSION['user']['id']
                         ,json_encode($cfg)
                     )
-                ) or die(DB\mysqli_query_error());
+                ) or die(DB\dbQueryError());
             }
             $rez['sk'] = $cfg['security']['TSV']['sk'];
             $rez['url'] = $ga->getQRCodeGoogleUrl($_SERVER['SERVER_NAME'], $rez['sk']);
@@ -554,7 +553,7 @@ class User
         } else {
             return array('success' => false);
         }
-        DB\mysqli_query_params('update users_groups set language_id = $2 where id = $1', array($_SESSION['user']['id'], $id)) or die( DB\mysqli_query_error() );
+        DB\dbQuery('update users_groups set language_id = $2 where id = $1', array($_SESSION['user']['id'], $id)) or die( DB\dbQueryError() );
 
         return array('success' => true);
     }
@@ -576,7 +575,7 @@ class User
         /* check user home folder existace */
         $home_folder_id = null;
 
-        $res = DB\mysqli_query_params(
+        $res = DB\dbQuery(
             'SELECT id
             FROM tree
             WHERE (user_id = $1)
@@ -585,16 +584,16 @@ class User
                     AND (`subtype` = 2)
                     AND (pid IS NULL)',
             $user_id
-        ) or die( DB\mysqli_query_error() );
+        ) or die( DB\dbQueryError() );
 
         if ($r = $res->fetch_row()) {
             $home_folder_id = $r[0];
         }
         $res->close();
         if (is_null($home_folder_id)) {
-            $cfg = defined('CB\\config\\default_home_folder_cfg') ? config\default_home_folder_cfg : null;
+            $cfg = defined('CB\\CONFIG\\DEFAULT_HOME_FOLDER_CFG') ? CONFIG\DEFAULT_HOME_FOLDER_CFG : null;
 
-            DB\mysqli_query_params(
+            DB\dbQuery(
                 'INSERT INTO tree (name, user_id, `system`, `type`, `subtype`, cfg, template_id)
                 VALUES(\'[Home]\', $1
                                  , 1
@@ -605,15 +604,15 @@ class User
                        )',
                 array($user_id
                     ,$cfg
-                    ,config\default_folder_template
+                    ,CONFIG\DEFAULT_FOLDER_TEMPLATE
                 )
-            ) or die( DB\mysqli_query_error() );
+            ) or die( DB\dbQueryError() );
 
-            $home_folder_id = DB\last_insert_id();
+            $home_folder_id = DB\dbLastInsertId();
             $affected_rows++;
 
             /* insert home folder security record in tree_acl */
-            DB\mysqli_query_params(
+            DB\dbQuery(
                 'INSERT INTO tree_acl (node_id, user_group_id, allow, deny)
                 VALUES ($1
                       , $2
@@ -624,14 +623,14 @@ class User
                 array($home_folder_id
                     ,$user_id
                 )
-            ) or die( DB\mysqli_query_error() );
+            ) or die( DB\dbQueryError() );
 
-            $affected_rows += DB\affected_rows();
+            $affected_rows += DB\dbAffectedRows();
         }
 
         /* check users "My documents" folder existace */
         $my_docs_id = null;
-        $res = DB\mysqli_query_params(
+        $res = DB\dbQuery(
             'SELECT id
             FROM tree
             WHERE (user_id = $1)
@@ -642,14 +641,14 @@ class User
             array($user_id
                 , $home_folder_id
             )
-        ) or die( DB\mysqli_query_error() );
+        ) or die( DB\dbQueryError() );
 
         if ($r = $res->fetch_row()) {
             $my_docs_id = $r[0];
         }
         $res->close();
         if (is_null($my_docs_id)) {
-            DB\mysqli_query_params(
+            DB\dbQuery(
                 'INSERT INTO tree (pid, name, user_id, `system`, `type`, `subtype`, template_id)
                 VALUES($1, \'[MyDocuments]\', $2
                                             , 1
@@ -658,11 +657,11 @@ class User
                                             , $3)',
                 array($home_folder_id
                     ,$user_id
-                    ,config\default_folder_template
+                    ,CONFIG\DEFAULT_FOLDER_TEMPLATE
                 )
-            ) or die( DB\mysqli_query_error() );
+            ) or die( DB\dbQueryError() );
 
-            $my_docs_id = DB\last_insert_id();
+            $my_docs_id = DB\dbLastInsertId();
             $affected_rows++;
         }
 
@@ -689,7 +688,7 @@ class User
             return constant('CB\\HOME_FOLDER'.$user_id);
         }
 
-        $res = DB\mysqli_query_params(
+        $res = DB\dbQuery(
             'SELECT id
             FROM tree
             WHERE user_id = $1
@@ -698,7 +697,7 @@ class User
                     AND TYPE = 1
                     AND subtype = 2',
             $_SESSION['user']['id']
-        ) or die( DB\mysqli_query_error() );
+        ) or die( DB\dbQueryError() );
 
         if ($r = $res->fetch_row()) {
             $rez = $r[0];
@@ -722,7 +721,7 @@ class User
         }
         $pid = User::getUserHomeFolderId($user_id);
 
-        $res = DB\mysqli_query_params(
+        $res = DB\dbQuery(
             'SELECT id
             FROM tree
             WHERE user_id = $1
@@ -734,14 +733,14 @@ class User
                 $_SESSION['user']['id']
                 ,$pid
             )
-        ) or die( DB\mysqli_query_error() );
+        ) or die( DB\dbQueryError() );
 
         if ($r = $res->fetch_row()) {
             $rez = $r[0];
         }
         $res->close();
         if (empty($rez)) {
-            DB\mysqli_query_params(
+            DB\dbQuery(
                 'INSERT INTO tree (pid, user_id, `system`, `type`, `subtype`, `name`, cid, uid, template_id)
                 VALUES (
                     $1
@@ -757,10 +756,10 @@ class User
                     $pid
                     ,$user_id
                     ,$_SESSION['user']['id']
-                    ,config\default_folder_template
+                    ,CONFIG\DEFAULT_FOLDER_TEMPLATE
                 )
-            ) or die( DB\mysqli_query_error() );
-            $rez = DB\last_insert_id();
+            ) or die( DB\dbQueryError() );
+            $rez = DB\dbLastInsertId();
             SolrClient::runCron();
         }
 
@@ -809,7 +808,7 @@ class User
 
         move_uploaded_file($f['tmp_name'], PHOTOS_PATH.$photoName);
 
-        $res = DB\mysqli_query_params('update users_groups set photo = $2 where id = $1', array($p['id'], $photoName)) or die( DB\mysqli_query_error() );
+        $res = DB\dbQuery('update users_groups set photo = $2 where id = $1', array($p['id'], $photoName)) or die( DB\dbQueryError() );
 
         return array('success' => true, 'photo' => $photoName);
     }
@@ -831,7 +830,7 @@ class User
         }
 
         /* delete photo file*/
-        $res = DB\mysqli_query_params('SELECT photo FROM users_groups WHERE id= $1', array($p->id)) or die( DB\mysqli_query_error() );
+        $res = DB\dbQuery('SELECT photo FROM users_groups WHERE id= $1', array($p->id)) or die( DB\dbQueryError() );
         if ($r = $res->fetch_row()) {
             @unlink(PHOTOS_PATH.$r[0]);
         }
@@ -839,7 +838,7 @@ class User
         /* enddelete photo file*/
 
         // update db record
-        DB\mysqli_query_params('UPDATE users_groups SET photo = NULL WHERE id= $1', array($p->id)) or die( DB\mysqli_query_error() );
+        DB\dbQuery('UPDATE users_groups SET photo = NULL WHERE id= $1', array($p->id)) or die( DB\dbQueryError() );
 
         return array('success' => true);
     }
@@ -847,7 +846,7 @@ class User
     public static function getTemplateId()
     {
         $rez = null;
-        $res = DB\mysqli_query_params('SELECT id FROM templates WHERE `type` =\'user\'') or die(DB\mysqli_query_error());
+        $res = DB\dbQuery('SELECT id FROM templates WHERE `type` =\'user\'') or die(DB\dbQueryError());
         if ($r = $res->fetch_row()) {
             $rez = $r[0];
         }

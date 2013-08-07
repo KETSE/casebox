@@ -1,4 +1,5 @@
 Ext.namespace('Dev');
+
 Dev.customizeObjectClass =  Ext.extend(CB.plugins.customInterface, {
 	init: function(owner) {
 		Dev.customizeObjectClass.superclass.init.call(this, arguments);
