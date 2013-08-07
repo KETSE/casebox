@@ -25,7 +25,13 @@ if (!file_exists($cron_path.$cron_file)) {
     die('cannot find cron '.$cron_path.$cron_file);
 }
 
-define('CORES_DIR', realpath(dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'httpsdocs'.DIRECTORY_SEPARATOR.'cores'.DIRECTORY_SEPARATOR));
+define(
+    'CORES_DIR',
+    realpath(
+        dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.
+        DIRECTORY_SEPARATOR.'httpsdocs'.DIRECTORY_SEPARATOR.'cores'.DIRECTORY_SEPARATOR
+    )
+);
 
 $cores = array();
 foreach (new DirectoryIterator(CORES_DIR) as $file) {
@@ -33,7 +39,9 @@ foreach (new DirectoryIterator(CORES_DIR) as $file) {
     if ($name == 'sample') {
         continue;
     }
-    if (!$file->isDot() && $file->isDir() && (empty($argv[2]) || ( $argv[2] == $name ) || ( $argv[2] == 'all' ) )) {
+    if (!$file->isDot() &&
+        $file->isDir() &&
+        (empty($argv[2]) || ( $argv[2] == $name ) || ( $argv[2] == 'all' ) )) {
         $cores[] = $name;
     }
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace CB;
 
 class Search extends SolrClient
@@ -44,7 +43,7 @@ class Search extends SolrClient
         /* initial parameters */
         $this->query = empty($p->query)? '' : $p->query;
         $this->start = empty($p->start)? 0 : intval($p->start);
-        $this->rows = empty($p->rows)? \CB\config\max_rows : intval($p->rows);
+        $this->rows = empty($p->rows)? \CB\CONFIG\MAX_ROWS : intval($p->rows);
 
         $fq = array('dstatus:0'); //by default filter not deleted nodes
 
@@ -507,7 +506,7 @@ class Search extends SolrClient
     private function processResult()
     {
         $rez = array( 'total' => $this->results->response->numFound, 'data' => array() );
-        if (is_debug_host()) {
+        if (isDebugHost()) {
             $rez['search'] = array(
                 'query' => $this->query
                 ,'start' => $this->start
@@ -529,7 +528,7 @@ class Search extends SolrClient
                     $rd['content'] = $sr->highlighting->{$rd['id']}->{'content'}[0];
                 }
             }
-            $res = DB\mysqli_query_params('SELECT f_get_tree_path($1)', array($rd['id'])) or die(DB\mysqli_query_error());
+            $res = DB\dbQuery('SELECT f_get_tree_path($1)', array($rd['id'])) or die(DB\dbQueryError());
             if ($r = $res->fetch_row()) {
                 $rd['path'] = $r[0];
             }
@@ -576,7 +575,7 @@ class Search extends SolrClient
                     FROM tree
                     WHERE pid = $1
                         AND `type` = 6';//active and overdue
-                $res = DB\mysqli_query_params($sql, $this->inputParams->pid) or die(DB\mysqli_query_error());
+                $res = DB\dbQuery($sql, $this->inputParams->pid) or die(DB\dbQueryError());
                 if ($r = $res->fetch_row()) {
                     $rez['total'] = $r[0];
                 }
@@ -588,7 +587,7 @@ class Search extends SolrClient
                         AND t.`type` = 6
                         AND t.id = tt.id
                         AND tt.status < 3';//active and overdue
-                $res = DB\mysqli_query_params($sql, $this->inputParams->pid) or die(DB\mysqli_query_error());
+                $res = DB\dbQuery($sql, $this->inputParams->pid) or die(DB\dbQueryError());
                 if ($r = $res->fetch_row()) {
                     $rez['active'] = $r[0];
                 }
@@ -668,7 +667,7 @@ class Search extends SolrClient
 
     public function analizeSystemTagsFacet($values, &$rez)
     {
-        $groups = defined('CB\\config\\tags_facet_grouping') ? config\tags_facet_grouping : 'pids';
+        $groups = defined('CB\\CONFIG\\TAGS_FACET_GROUPING') ? CONFIG\TAGS_FACET_GROUPING : 'pids';
         $ids = array();
         foreach ($values as $k => $v) {
             $ids[] = $k;
@@ -682,14 +681,14 @@ class Search extends SolrClient
                 // return false;
                 break;
             case 'pids':
-                $res = DB\mysqli_query_params(
+                $res = DB\dbQuery(
                     'SELECT t.id
                          , t.pid
                          , p.l'.USER_LANGUAGE_INDEX.' `title`
                     FROM tags t
                     JOIN tags p ON t.pid = p.id
                     WHERE t.id IN ('.implode(', ', $ids).')'
-                ) or die(DB\mysqli_query_error());
+                ) or die(DB\dbQueryError());
 
                 while ($r = $res->fetch_assoc()) {
                     $rez['stg_'.$r['pid']]['f'] = 'sys_tags';
@@ -699,7 +698,7 @@ class Search extends SolrClient
                 $res->close();
                 break;
             default:
-                $res = DB\mysqli_query_params(
+                $res = DB\dbQuery(
                     'SELECT t.id
                          , t.pid
                          , p.l'.USER_LANGUAGE_INDEX.' `title`
@@ -707,7 +706,7 @@ class Search extends SolrClient
                     JOIN tags p ON t.pid = p.id
                     WHERE t.id IN ('.implode(', ', $ids).')
                         AND p.id IN('.$groups.')'
-                ) or die(DB\mysqli_query_error());
+                ) or die(DB\dbQueryError());
 
                 while ($r = $res->fetch_assoc()) {
                     $rez['stg_'.$r['pid']]['f'] = 'sys_tags';
@@ -729,7 +728,7 @@ class Search extends SolrClient
 
     public function analizeTreeTagsFacet($values, &$rez)
     {
-        $groups = defined('CB\\config\\tags_facet_grouping') ? config\tags_facet_grouping : 'pids';
+        $groups = defined('CB\\CONFIG\\TAGS_FACET_GROUPING') ? CONFIG\TAGS_FACET_GROUPING : 'pids';
         $ids = array();
         foreach ($values as $k => $v) {
             $ids[] = $k;
@@ -741,12 +740,12 @@ class Search extends SolrClient
 
         $names = array();
         /* selecting names*/
-        $res = DB\mysqli_query_params(
+        $res = DB\dbQuery(
             'SELECT t.id
                  , t.name
             FROM tree t
             WHERE t.id IN ('.implode(', ', $ids).')'
-        ) or die(DB\mysqli_query_error());
+        ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
             $names[$r['id']] = $r['name'];
@@ -761,14 +760,14 @@ class Search extends SolrClient
                 }
                 break;
             case 'pids':
-                $res = DB\mysqli_query_params(
+                $res = DB\dbQuery(
                     'SELECT t.id
                          , t.pid
                          , p.name `title`
                     FROM tree t
                     JOIN tree p ON t.pid = p.id
                     WHERE t.id IN ('.implode(', ', $ids).')'
-                ) or die(DB\mysqli_query_error());
+                ) or die(DB\dbQueryError());
 
                 while ($r = $res->fetch_assoc()) {
                     $rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
@@ -778,7 +777,7 @@ class Search extends SolrClient
                 $res->close();
                 break;
             default:
-                $res = DB\mysqli_query_params(
+                $res = DB\dbQuery(
                     'SELECT t.id
                          , t.pid
                          , p.name `title`
@@ -786,7 +785,7 @@ class Search extends SolrClient
                     JOIN tree p ON t.pid = p.id
                     WHERE t.id IN ('.implode(', ', $ids).')
                         AND p.id IN('.$groups.')'
-                ) or die(DB\mysqli_query_error());
+                ) or die(DB\dbQueryError());
 
                 while ($r = $res->fetch_assoc()) {
                     $rez['ttg_'.$r['pid']]['f'] = 'tree_tags';

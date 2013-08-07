@@ -1,5 +1,4 @@
 <?php
-
 namespace CB;
 
 class SolrClient
@@ -50,31 +49,34 @@ class SolrClient
         // custom core fields
         ,'substatus'
     );
+
     public function SolrClient ($p = array())
     {
-        $this->host = empty($p['host']) ? config\solr_host : $p['host'];
-        $this->port = empty($p['port']) ? config\solr_port : $p['port'];
-        $this->core = empty($p['core']) ? config\solr_core : $p['core'];
+        $this->init($p);
     }
-    public function connect()
+
+    private function init($p = array())
     {
+        $this->host = empty($p['host']) ? CONFIG\SOLR_HOST : $p['host'];
+        $this->port = empty($p['port']) ? CONFIG\SOLR_PORT : $p['port'];
+        $this->core = empty($p['core']) ? CONFIG\SOLR_CORE : $p['core'];
+        $this->initialized = true;
+    }
+
+    public function connect($p = array())
+    {
+
         if ($this->connected) {
             return $this->solr;
         }
-        if (empty($this->host)) {
-            $this->host = config\solr_host;
-        }
-        if (empty($this->port)) {
-            $this->port = config\solr_port;
-        }
-        if (empty($this->core)) {
-            $this->core = config\solr_core;
+        if (empty($this->initialized)) {
+            $this->init();
         }
 
         require_once SOLR_CLIENT;
         $this->solr = new \Apache_Solr_Service($this->host, $this->port, $this->core);
         if (! $this->solr->ping()) {
-            throw new \Exception(L\get('Solr_connection_error').( is_debug_host() ? ' ('.$this->host.':'.$this->port.' -> '.$this->core.' )' : ''), 1);
+            throw new \Exception('Solr_connection_error'.( is_debug_host() ? ' ('.$this->host.':'.$this->port.' -> '.$this->core.' )' : ''), 1);
         }
         $this->connected = true;
 
@@ -110,7 +112,7 @@ class SolrClient
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-type:application/json; charset=utf-8"));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($docs));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($docs)));
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 
@@ -125,10 +127,10 @@ class SolrClient
     {
         $addDocs = array();
         $updateDocs = array();
-        for ($i=0; $i < sizeof($docs); $i++) {
-            if (empty($docs[$i]['update'])) {
+        foreach ($docs as $in_doc) {
+            if (empty($in_doc['update'])) {
                 $doc = new \Apache_Solr_Document();
-                foreach ($docs[$i] as $fn => $fv) {
+                foreach ($in_doc as $fn => $fv) {
                     if (in_array($fn, $this->solr_fields) && ( ($fn == 'dstatus') || !empty($fv) || ($fv === false))) {
                         $doc->$fn = $fv;
                     }
@@ -137,7 +139,7 @@ class SolrClient
                 $addDocs[] = $doc;
             } else {
                 $doc = array();
-                foreach ($docs[$i] as $fn => $fv) {
+                foreach ($in_doc as $fn => $fv) {
                     if (in_array($fn, $this->solr_fields)) {
                         if ($fn == 'id') {
                             $doc[$fn] = $fv;
@@ -206,7 +208,18 @@ class SolrClient
         // error_log("\n\rStart at ".date('H:i:s')."\n\r", 3, $log_file);
 
         $lastId = 0;
-        $sql = 'SELECT t.id, t.pid, ti.pids, ti.path, ti.case_id, ti.security_set_id, t.name, t.system, t.type, t.subtype, t.template_id, t.target_id
+        $sql = 'SELECT t.id
+                    ,t.pid
+                    ,ti.pids
+                    ,ti.path
+                    ,ti.case_id
+                    ,ti.security_set_id
+                    ,t.name
+                    ,t.system
+                    ,t.type
+                    ,t.subtype
+                    ,t.template_id
+                    ,t.target_id
             -- ,CASE WHEN t.type = 2 then (SELECT `type` FROM tree WHERE id = t.target_id) ELSE null END `target_type`
             ,DATE_FORMAT(t.`date`, \'%Y-%m-%dT%H:%i:%sZ\') `date`
             ,DATE_FORMAT(t.`date_end`, \'%Y-%m-%dT%H:%i:%sZ\') `date_end`
@@ -232,7 +245,7 @@ class SolrClient
         while (!empty($docs)) {
             $docs = array();
 
-            $res = DB\mysqli_query_params($sql, $lastId) or die(DB\mysqli_query_error());
+            $res = DB\dbQuery($sql, $lastId) or die(DB\dbQueryError());
             while ($r = $res->fetch_assoc()) {
                 $lastId = $r['id'];
                 if ($all || ($r['updated'] & 1)) { //update all object info
@@ -246,7 +259,13 @@ class SolrClient
                     if (!empty($r['case_id'])) {
                         if (!isset($cases_info[$r['case_id']])) {
                             $cases_info[$r['case_id']] = array('id' => $r['id']);
-                            $cres = DB\mysqli_query_params('select coalesce(custom_title, title) name from objects where id = $1', $r['case_id']) or die(DB\mysqli_query_error());
+                            $cres = DB\dbQuery(
+                                'SELECT coalesce(custom_title, title) name
+                                FROM objects
+                                WHERE id = $1',
+                                $r['case_id']
+                            ) or die(DB\dbQueryError());
+
                             if ($cr = $cres->fetch_row()) {
                                 $cases_info[$r['case_id']]['case'] = $cr[0];
                             }
@@ -287,32 +306,43 @@ class SolrClient
                     $r['type'] = intval($r['type']);
                     $r['subtype'] = intval($r['subtype']);
                     $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
-                    $docs[] = $r;
+                    $docs[$r['id']] = $r;
 
                 }
                 if (!empty($cron_id)) {
-                    DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
+                    DB\dbQuery(
+                        'UPDATE crons
+                        SET last_action = CURRENT_TIMESTAMP
+                        WHERE cron_id = $1',
+                        $cron_id
+                    ) or die('error updating crons last action');
                 }
 
-                $sql2 = 'UPDATE tree
-                         , tree_info
-                    SET tree.updated = 0
-                      , tree_info.updated = 0
-                    WHERE tree.id = $1
-                        AND tree_info.id = $1';
-
-                DB\mysqli_query_params($sql2, $r['id']) or die(DB\mysqli_query_error());
             }
             $res->close();
             if (!empty($docs)) {
                 // error_log(print_r($docs, 1), 3, $log_file);
                 try {
                     $this->addDocuments($docs);
+
+                    $sql2 = 'UPDATE tree
+                             , tree_info
+                        SET tree.updated = 0
+                          , tree_info.updated = 0
+                        WHERE tree.id in ('.implode(',', array_keys($docs)).')
+                            AND tree_info.id = tree.id';
+
+                    DB\dbQuery($sql2, $r['id']) or die(DB\dbQueryError());
                 } catch (\Exception $e) {
                     // error_log( " \n\r CANNOT add documents\n", 3, $log_file);
                 }
                 if (!empty($cron_id)) {
-                    DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
+                    DB\dbQuery(
+                        'UPDATE crons
+                        SET last_action = CURRENT_TIMESTAMP
+                        WHERE cron_id = $1',
+                        $cron_id
+                    ) or die('error updating crons last action');
                 }
 
                 try {
@@ -332,43 +362,60 @@ class SolrClient
     private function updateTreeInfo ($cron_id)
     {
         $lastId = 0;
-        $sql = 'SELECT ti.id, ti.pids, ti.`path`, ti.case_id, ti.security_set_id, t.dstatus
-            FROM tree_info ti
-            JOIN tree t on ti.id = t.id
-            WHERE ti.id > $1
-                AND ti.updated = 1
-            ORDER BY ti.id
+        $sql = 'SELECT id
+                    ,pids
+                    ,`path`
+                    ,case_id
+                    ,security_set_id
+            FROM tree_info
+            WHERE id > $1
+                AND updated = 1
+            ORDER BY id
             LIMIT 200';
 
         $docs = true;
         while (!empty($docs)) {
             $docs = array();
 
-            $res = DB\mysqli_query_params($sql, $lastId) or die(DB\mysqli_query_error());
+            $res = DB\dbQuery($sql, $lastId) or die(DB\dbQueryError());
             while ($r = $res->fetch_assoc()) {
                 $lastId = $r['id'];
                 $r['update'] = true;
                 $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
 
-                $docs[] = $r;
+                $docs[$r['id']] = $r;
 
                 if (!empty($cron_id)) {
-                    DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
+                    DB\dbQuery(
+                        'UPDATE crons
+                        SET last_action = CURRENT_TIMESTAMP
+                        WHERE cron_id = $1',
+                        $cron_id
+                    ) or die('error updating crons last action');
                 }
 
-                DB\mysqli_query_params('UPDATE tree_info SET updated = 0 WHERE id = $1', $r['id']) or die(DB\mysqli_query_error());
             }
             $res->close();
 
             if (!empty($docs)) {
                 try {
                     $this->addDocuments($docs);
+                    DB\dbQuery(
+                        'UPDATE tree_info
+                        SET updated = 0
+                        WHERE id IN ('.implode(', ', array_keys($docs)).')'
+                    ) or die(DB\dbQueryError());
                 } catch (\Exception $e) {
                     echo "error adding documents to solr";
                     // error_log( " \n\r CANNOT add documents\n", 3, $log_file);
                 }
                 if (!empty($cron_id)) {
-                    DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
+                    DB\dbQuery(
+                        'UPDATE crons
+                        SET last_action = CURRENT_TIMESTAMP
+                        WHERE cron_id = $1',
+                        $cron_id
+                    ) or die('error updating crons last action');
                 }
 
                 try {

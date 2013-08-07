@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 /*
     Recreate solr core
@@ -15,7 +14,14 @@ if (PHP_OS == 'WINNT') {
     shell_exec('service jetty stop > /dev/null 2>&1');
 }
 
-define('SOLR_DATA_PATH', realpath(dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'solr'.DIRECTORY_SEPARATOR.'data').DIRECTORY_SEPARATOR);
+define(
+    'SOLR_DATA_PATH',
+    realpath(
+        dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.
+        DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'solr'.
+        DIRECTORY_SEPARATOR.'data'
+    ).DIRECTORY_SEPARATOR
+);
 $dir = SOLR_DATA_PATH;
 $sleep = 15;
 if (!empty($argv[1]) && ( $argv[1] !== 'all')) {
@@ -43,7 +49,10 @@ echo shell_exec($cmd);
 
 function removeIndexes($dir)
 {
-    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir), RecursiveIteratorIterator::CHILD_FIRST);
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
     foreach ($iterator as $path) {
         if ($path->isDir()) {
             $dir = $path->__toString();

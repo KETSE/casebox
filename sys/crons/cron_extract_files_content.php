@@ -1,6 +1,4 @@
-#!/usr/bin/php
 <?php
-
 namespace CB;
 
 $cron_id = 'extract_files_content';
@@ -27,7 +25,7 @@ $not_fount_list = array();
 $sql = 'UPDATE crons
 SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
 WHERE cron_id = $1';
-DB\mysqli_query_params($sql, array($cron_id, json_encode($rez))) or die(DB\mysqli_query_error());
+DB\dbQuery($sql, array($cron_id, json_encode($rez))) or die(DB\dbQueryError());
 if (checkTikaService() == false) {
     startTikaService();
 }
@@ -43,7 +41,7 @@ $sql = 'SELECT id
      , pages
 FROM files_content
 WHERE'.$where;
-$res = DB\mysqli_query_params($sql) or die('error1'); //and name like \'%.pdf\'
+$res = DB\dbQuery($sql) or die('error1'); //and name like \'%.pdf\'
 
 while ($r = $res->fetch_assoc()) {
     $filename = FILES_PATH.$r['path'].DIRECTORY_SEPARATOR.$r['id'];
@@ -82,7 +80,7 @@ while ($r = $res->fetch_assoc()) {
             $skip_parsing = 1;
         }
 
-        DB\mysqli_query_params(
+        DB\dbQuery(
             'UPDATE files_content
             SET parse_status = 1
               , pages = $2
@@ -103,7 +101,7 @@ while ($r = $res->fetch_assoc()) {
         $rez['Not found List'][] = $filename;
     }
 
-    DB\mysqli_query_params(
+    DB\dbQuery(
         'UPDATE crons
         SET last_action = CURRENT_TIMESTAMP
         WHERE cron_id = $1',
@@ -113,7 +111,7 @@ while ($r = $res->fetch_assoc()) {
 }
 $res->close();
 $rez['Total'] = $rez['Processed'] + $rez['Not found'];
-DB\mysqli_query_params(
+DB\dbQuery(
     'UPDATE crons
     SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
     WHERE cron_id = $1',
@@ -121,7 +119,7 @@ DB\mysqli_query_params(
         $cron_id
         ,json_encode($rez)
     )
-) or die(DB\mysqli_query_error());
+) or die(DB\dbQueryError());
 
 SolrClient::runCron();
 
@@ -150,7 +148,7 @@ function checkTikaService()
 function startTikaService()
 {
     $cmd = 'java -Dfile.encoding=UTF8 -jar "'.TIKA_SERVER.'" --port 9998 &';
-    if (is_windows()) {
+    if (isWindows()) {
         $cmd = 'start /D "'.DOC_ROOT.'libx" tika_windows_service.bat';
     }
 

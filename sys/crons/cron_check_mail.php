@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 namespace CB;
 
@@ -50,7 +49,7 @@ if (!$cd['success']) {
 /* check if this core has an email template defined */
 $email_template_id = false;
 
-$res = DB\mysqli_query_params('SELECT id FROM templates WHERE `type` = 8') or die(DB\mysqli_query_error());
+$res = DB\dbQuery('SELECT id FROM templates WHERE `type` = 8') or die(DB\dbQueryError());
 if ($r = $res->fetch_row()) {
     $email_template_id = $r[0];
 }
@@ -101,7 +100,8 @@ foreach ($mailbox as $k => $mail) {
     /* try to get target folder from subject*/
     $path = false; //case_nr
 
-    /* try to find user from database that corresponds to this mail. Ex: Kell <kellaagnya@gmail.com> */
+    /* try to find user from database that corresponds to this mail.
+    Ex: Kell <kellaagnya@gmail.com> */
     $email = false;
     if (preg_match_all('/^[^<]*<?([^>]+)>?/i', $mail->from, $results)) {
         $email = $results[1][0];
@@ -120,7 +120,7 @@ foreach ($mailbox as $k => $mail) {
     }
 
     $user_id = false;
-    $res = DB\mysqli_query_params(
+    $res = DB\dbQuery(
         'SELECT id
         FROM users_groups
         WHERE (`email` LIKE $1)
@@ -131,7 +131,7 @@ foreach ($mailbox as $k => $mail) {
             ,'%,'.$email
             ,$email.',%'
         )
-    ) or die(DB\mysqli_query_error());
+    ) or die(DB\dbQueryError());
     if ($r = $res->fetch_row()) {
         $user_id = $r[0];
     }
@@ -149,7 +149,8 @@ foreach ($mailbox as $k => $mail) {
                 'From: '.$core['mail_user'] . "\n\r"
             );
 
-            echo "\rcannot find corresponding user in our database for email $email from message: $subject ... skipping";
+            echo "\rcannot find corresponding user in our database '.
+                'for email $email from message: $subject ... skipping";
             continue;
         } else {
             $user_id = $test_user_id;
@@ -174,7 +175,7 @@ foreach ($mailbox as $k => $mail) {
         $rootFolderId = Browser::getRootFolderId();
         $rootFolderName = null;
         $sql = 'SELECT name FROM tree WHERE id = $1';
-        $res = DB\mysqli_query_params($sql, $rootFolderId) or die(DB\mysqli_query_error());
+        $res = DB\dbQuery($sql, $rootFolderId) or die(DB\dbQueryError());
         if ($r = $res->fetch_row()) {
             $rootFolderName = $r[0];
         }
@@ -200,7 +201,7 @@ foreach ($mailbox as $k => $mail) {
                 while ($found && ($i < sizeof($path))) {
                     if (!empty($path[$i])) {
                         $sql = 'select id from tree where pid = $1 and name = $2';
-                        $res = DB\mysqli_query_params($sql, array($lastPid, $path[$i])) or die(DB\mysqli_query_error());
+                        $res = DB\dbQuery($sql, array($lastPid, $path[$i])) or die(DB\dbQueryError());
                         if ($r = $res->fetch_row()) {
                             $lastPid = $r[0];
                         } else {
@@ -220,7 +221,7 @@ foreach ($mailbox as $k => $mail) {
                 while ($found && ($i < sizeof($path))) {
                     if (!empty($path[$i])) {
                         $sql = 'select id from tree where pid = $1 and name = $2';
-                        $res = DB\mysqli_query_params($sql, array($lastPid, $path[$i])) or die(DB\mysqli_query_error());
+                        $res = DB\dbQuery($sql, array($lastPid, $path[$i])) or die(DB\dbQueryError());
                         if ($r = $res->fetch_row()) {
                             $lastPid = $r[0];
                         } else {
@@ -274,7 +275,7 @@ foreach ($mailbox as $k => $mail) {
     /* end of get contents and attachments */
 
     /* creating email object in corresponding case and adding attachments if any */
-    DB\mysqli_query_params(
+    DB\dbQuery(
         'INSERT INTO tree (
             old_id
             ,pid
@@ -302,11 +303,11 @@ foreach ($mailbox as $k => $mail) {
             ,$time
             ,config\default_folder_template
         )
-    ) or die(DB\mysqli_query_error());
+    ) or die(DB\dbQueryError());
 
     $object_id = DB\last_insert_id();
 
-    DB\mysqli_query_params(
+    DB\dbQuery(
         'INSERT INTO objects (
             id
             ,`title`
@@ -329,7 +330,7 @@ foreach ($mailbox as $k => $mail) {
             ,$time
             ,$user_id
         )
-    ) or die(DB\mysqli_query_error());
+    ) or die(DB\dbQueryError());
 
     $sql = 'INSERT INTO objects_data (
             object_id
@@ -343,10 +344,42 @@ foreach ($mailbox as $k => $mail) {
         FROM templates_structure
         WHERE template_id = $3
             AND name = $4';
-    DB\mysqli_query_params($sql, array($object_id, $subject, $email_template_id, '_title')) or die(DB\mysqli_query_error());
-    DB\mysqli_query_params($sql, array($object_id, $time, $email_template_id, '_date_start')) or die(DB\mysqli_query_error());
-    DB\mysqli_query_params($sql, array($object_id, $content, $email_template_id, '_content')) or die(DB\mysqli_query_error());
-    DB\mysqli_query_params($sql, array($object_id, $mail->from, $email_template_id, 'from')) or die(DB\mysqli_query_error());
+    DB\dbQuery(
+        $sql,
+        array(
+            $object_id
+            ,$subject
+            ,$email_template_id
+            ,'_title'
+        )
+    ) or die(DB\dbQueryError());
+    DB\dbQuery(
+        $sql,
+        array(
+            $object_id
+            ,$time
+            ,$email_template_id
+            ,'_date_start'
+        )
+    ) or die(DB\dbQueryError());
+    DB\dbQuery(
+        $sql,
+        array(
+            $object_id
+            ,$content
+            ,$email_template_id
+            ,'_content'
+        )
+    ) or die(DB\dbQueryError());
+    DB\dbQuery(
+        $sql,
+        array(
+            $object_id
+            ,$mail->from
+            ,$email_template_id
+            ,'from'
+        )
+    ) or die(DB\dbQueryError());
 
     if (!empty($attachments)) {
         foreach ($attachments as $a) {
@@ -363,7 +396,7 @@ foreach ($mailbox as $k => $mail) {
                 );
                 $files->storeContent($f, FILES_PATH.$core['name'].DIRECTORY_SEPARATOR);
 
-                DB\mysqli_query_params(
+                DB\dbQuery(
                     'INSERT INTO tree (
                         pid
                         ,`name`
@@ -386,10 +419,10 @@ foreach ($mailbox as $k => $mail) {
                         ,$user_id
                         ,config\default_file_template
                     )
-                ) or die(DB\mysqli_query_error());
+                ) or die(DB\dbQueryError());
                 $file_id = DB\last_insert_id();
 
-                DB\mysqli_query_params(
+                DB\dbQuery(
                     'INSERT INTO files (
                         id
                         ,content_id
@@ -418,7 +451,7 @@ foreach ($mailbox as $k => $mail) {
                         ,''
                         ,$user_id
                     )
-                ) or die(DB\mysqli_query_error());
+                ) or die(DB\dbQueryError());
         }
     }
 
@@ -433,7 +466,12 @@ foreach ($mailbox as $k => $mail) {
         $mailbox->noop(); // keep alive
     }
     /*end of keep alive each 10 messages*/
-    DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
+    DB\dbQuery(
+        'UPDATE crons
+        SET last_action = CURRENT_TIMESTAMP
+        WHERE cron_id = $1',
+        $cron_id
+    ) or die('error updating crons last action');
 }
 
 /* moving read messages from inbox to All Mail folder*/
@@ -444,8 +482,14 @@ foreach ($processed_ids as $uniq_id) {
         $mailbox->noop(); // keep alive
     }
     $mailbox->moveMessage($mailbox->getNumberByUniqueId($uniq_id), '[Gmail]/All Mail'); //
-    DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
+    DB\dbQuery(
+        'UPDATE crons
+        SET last_action = CURRENT_TIMESTAMP
+        WHERE cron_id = $1',
+        $cron_id
+    ) or die('error updating crons last action');
 }
+
 if ($i > 0) {
     SolrClient::runCron();
 }
@@ -459,10 +503,15 @@ foreach ($delete_ids as $uniq_id) {
         $mailbox->noop(); // keep alive
     }
     $mailbox->moveMessage($mailbox->getNumberByUniqueId($uniq_id), '[Gmail]/Trash'); //
-    DB\mysqli_query_params('update crons set last_action = CURRENT_TIMESTAMP where cron_id = $1', $cron_id) or die('error updating crons last action');
+    DB\dbQuery(
+        'UPDATE crons
+        SET last_action = CURRENT_TIMESTAMP
+        WHERE cron_id = $1',
+        $cron_id
+    ) or die('error updating crons last action');
 }
 /* end of moving read messages from inbox to All Mail folder*/
-DB\mysqli_query_params(
+DB\dbQuery(
     'UPDATE crons
     SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
     WHERE cron_id = $1',
@@ -470,7 +519,7 @@ DB\mysqli_query_params(
         $cron_id
         ,'ok'
     )
-) or die(DB\mysqli_query_error());
+) or die(DB\dbQueryError());
 
 //**********************************************************************************************************************
 function decodeSubject($str)

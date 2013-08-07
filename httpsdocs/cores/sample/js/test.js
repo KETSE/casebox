@@ -1,5 +1,4 @@
 
-
 initDevCustomFunctionality= function(){
 	DevHelperFunction('dummy value');
 	App.on('objectinit', function(objectWindow){

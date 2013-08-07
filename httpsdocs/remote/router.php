@@ -35,7 +35,7 @@ function doRpc($cdata)
 {
     global $API;
 
-    if (!User::is_loged() && ( ($cdata->action != 'User') || ($cdata->method != 'login') )) {
+    if (!User::isLoged() && ( ($cdata->action != 'User') || ($cdata->method != 'login') )) {
         return array(
             array(
                 'type' => 'exception'
@@ -90,7 +90,7 @@ function doRpc($cdata)
         $r['type'] = 'exception';
         $r['result'] = array('success' => false);
         $r['msg'] = $e->getMessage();
-        if (is_debug_host()) {
+        if (isDebugHost()) {
             $r['where'] = $e->getTraceAsString();
         }//else $r['message'] = 'Error';
     }
