@@ -1,9 +1,9 @@
 <?php
 namespace CB;
 
-$method = $method = $_SERVER['REQUEST_METHOD'] === 'POST'
-                    ? $_POST['method']
-                    : $_GET['method'];
+$method = $_SERVER['REQUEST_METHOD'] === 'POST'
+          ? @$_POST['method']
+          : @$_GET['method'];
 
 
 // TODO: the switch below may be changed into a more generic approach:
@@ -13,6 +13,11 @@ switch ($method) {
     case 'cb.files.download':
         cbFilesDownload();
         break;
+
+    case 'cb.objects.permissions.addRule':
+        cbObjectsPermissionsAddRule();
+        break;
+
     default:
         $r = ['status' => 'ok'];
         echo json_encode($r);
@@ -24,7 +29,16 @@ switch ($method) {
 
 function cbFilesDownload()
 {
-    $id = $_GET['id'];
+
+    # check credentials etc etc.
+    $id = @$_GET['id'];
     echo $id;
 
+}
+
+
+function cbObjectsPermissionsAddRule()
+{
+    // objectId
+    //
 }
