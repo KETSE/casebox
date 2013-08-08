@@ -734,34 +734,6 @@ class Security
 
     /* end of objects acl methods*/
 
-    /* Update the acl rules result for nodes that associated with any of given group or user */
-    public static function updateUserGroupAccess($user_group_ids)
-    {
-        $affected_nodes = Security::getAffectedNodes($user_group_ids);
-        Security::updateNodesSecurity($affected_nodes);
-    }
-
-    public static function getAffectedNodes($user_group_ids)
-    {
-        $rez = array();
-        $sql = 'select node_id from tree_acl where user_group_id in ('.implode(',', $user_group_ids).')';
-        $res = DB\dbQuery($sql) or die( DB\dbQueryError() );
-        while ($r = $res->fetch_assoc()) {
-            $rez[] = $r['node_id'];
-        }
-        $res->close();
-
-        return $rez;
-    }
-
-    public static function updateNodesSecurity ($affected_node_ids)
-    {
-        foreach ($affected_node_ids as $id) {
-            DB\dbQuery('call p_mark_all_childs_as_updated($1, 10)', $id) or die( DB\dbQueryError() );
-        }
-        SolrClient::runBackgroundCron();
-    }
-
     /**
      * return sets
      * @param  boolean $user_id          [description]
@@ -1041,7 +1013,7 @@ class Security
     }
     public static function isUsersOwner($user_id)
     {
-        $res = DB\dbQuery('select cid from users_groups where id = $1', $user_id) or die(DB\dbQueryError());
+        $res = DB\dbQuery('SELECT cid FROM users_groups WHERE id = $1', $user_id) or die(DB\dbQueryError());
         if ($r = $res->fetch_row()) {
             $rez = ($r[0] == $_SESSION['user']['id']);
         } else {

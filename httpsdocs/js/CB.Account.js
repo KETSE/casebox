@@ -85,7 +85,6 @@ CB.Account = Ext.extend(Ext.Panel, {
 					listeners:{
 						scope: this
 						,beforeclose: function(cmp){
-							clog('close', cmp.success);
 							if(w.success !== true) this.destroy();
 							else User.getAccountData( this.onGetData, this);
 						}
@@ -111,6 +110,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 	hideBorders: true
 	,fileUpload: true
 	,autoScroll: true
+	,data: {}
 	,initComponent: function(){
 
 		this.photoField = new Ext.form.TextField({
@@ -130,7 +130,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 				,'<div><a href="#" name="change" class="click">'+L.Change+'</a> &nbsp; <a href="#" name="remove" class="click">'+L.Delete+'</a></div>'
 				,'</tpl>'
 			]
-			,data: [{id: App.loginData.id }]
+			,data: [{}]
 			,itemSelector:'.click'
 			,autoHeight: true
 			,listeners:{ scope: this, click: this.onPhotoClick }
@@ -302,6 +302,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 		this.data = data;
 		this.getForm().setValues(data);
 		this.grid.reload();
+		this.photoView.update( [{id: this.data.id }] ) 
 		this.syncSize();
 		this.setDirty(false)
 	}
@@ -310,8 +311,9 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 		target = ev.getTarget();
 		if( (target.localName == "img") || (target.name == 'change') )
 			return this.photoField.getEl().dom.click();
-		if( target.name == 'remove' )
+		if (target.name == 'remove') {
 			return this.onPhotoRemoveClick();
+		}
 	}
 	,onPhotoChanged: function(ev, el, o){
 		if(Ext.isEmpty(this.photoField.getValue())) return;
@@ -321,18 +323,20 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 		form.submit({
 			clientValidation: false
 		   	,params: {
-		        	id: App.loginData.id	
+		        	id: this.data.id	
 		    	}
 			,scope: this
-			,success: function(form, action) { this.photoView.update( [{id: App.loginData.id }] ) }
-		    	,failure: App.formSubmitFailure
+			,success: function(form, action) { 
+				this.photoView.update( [{id: this.data.id }] ) 
+			}
+	    	,failure: App.formSubmitFailure
 		});
 	}
 	,onPhotoRemoveClick: function(){
 		Ext.Msg.confirm(L.Confirm, L.RemovePhotoConfirm, function(b, e){
 			if(b == 'yes'){
-				User.removePhoto( { id: App.loginData.id }, function(){
-					this.photoView.update( [{id: App.loginData.id }] )
+				User.removePhoto( { id: this.data.id }, function(){
+					this.photoView.update( [{id: this.data.id }] )
 				}, this);
 			}
 		}, this)
@@ -346,6 +350,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 	,onSaveProcess: function(r, e){
 		if(r.success !== true) return;
 		this.setDirty(false);
+        this.fireEvent('savesuccess', this, e);
 	}
 	,onResetClick: function(){
 		this.getForm().reset();
@@ -631,7 +636,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
 		this.data.recovery_question = cb.getValue();
 		this.data.question_idx = this.find( 'name', 'question_idx' )[0].getValue();
 		this.data.answer = this.find( 'name', 'answer' )[0].getValue();
-		clog(this.data);
+
 		User.saveSecurityData(this.data, this.onSaveProcess, this)
 	}
 	,onSaveProcess: function(r, e){

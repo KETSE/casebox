@@ -746,7 +746,6 @@ class Browser
                     Objects::updateCaseUpdateInfo($id);
                 }
 
-                // $this->markAllChildsAsUpdated($process_ids, 1);
                 Security::calculateUpdatedSecuritySets();
                 break;
             case 'shortcut':
@@ -1222,28 +1221,6 @@ class Browser
         $res->close();
 
         return $id;
-    }
-
-    public static function markAllChildsAsUpdated($ids, $bits = 11)
-    {
-        if (!is_array($ids)) {
-            $ids = explode(',', $ids);
-        }
-        $ids = array_filter($ids, 'is_numeric');
-        if (empty($ids)) {
-            return;
-        }
-        foreach ($ids as $id) {
-            DB\dbQuery(
-                'CALL p_mark_all_childs_as_updated($1, $2)',
-                array(
-                    $id
-                    ,$bits
-                )
-            ) or die(DB\dbQueryError());
-        }
-
-        return true;
     }
 
     public function prepareResults(&$data)

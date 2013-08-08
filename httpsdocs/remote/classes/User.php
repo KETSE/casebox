@@ -264,33 +264,48 @@ class User
     }
 
     /**
-     * get profile data for a user. This function receives user_id as param because user profile data can be edited by user owner.
+     * get profile data for a user. This function receives user_id as param because user profile data can be edited by another user (owner).
      */
     public function getProfileData($user_id)
     {
-        //sex, email, country, phone, language, timezone, date_format
-        // grid data
 
-        //remain fields in users_groups: type, name, email, photo, sex, password, recover_hash, language_id, system, enabled, deleted (remove it because we have did)
-            // To review:
-            //  UsersGroups.saveUserData
-            //  UsersGroups.getUserPreferences (used in tasks)
+        if (($user_id != $_SESSION['user']['id']) &&
+            !Security::isUsersOwner($user_id) &&
+            !Security::isAdmin()) {
+            throw new \Exception(L\Access_denied);
+        }
 
-            //  +short_date_format
-            //  +long_date_format
-            //  +time_format
-            //  - l1, l2, l3, should be removed form users_groups_table and moved into users template structure where is needed
-
-        // country, phone, date_formats should be set into cfg field as a json object
         $rez = array();
-        $res = DB\dbQuery('select id, name, first_name, last_name, sex, email, language_id, cfg from users_groups where enabled = 1 and did is null and id = $1', $user_id) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT id
+                 , name
+                 , first_name
+                 , last_name
+                 , sex
+                 , email
+                 , language_id
+                 , cfg
+            FROM users_groups
+            WHERE enabled = 1
+                AND did IS NULL
+                AND id = $1',
+            $user_id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $cfg = empty($r['cfg']) ? array(): json_decode($r['cfg'], true);
             unset($r['cfg']);
 
             $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
-            $r['long_date_format'] = empty($cfg['long_date_format']) ? $GLOBALS['language_settings'][$r['language']]['long_date_format'] : $cfg['long_date_format'];
-            $r['short_date_format'] = empty($cfg['short_date_format']) ? $GLOBALS['language_settings'][$r['language']]['short_date_format'] : $cfg['short_date_format'];
+
+            $r['long_date_format'] = empty($cfg['long_date_format']) ?
+                $GLOBALS['language_settings'][$r['language']]['long_date_format'] :
+                $cfg['long_date_format'];
+
+            $r['short_date_format'] = empty($cfg['short_date_format']) ?
+                $GLOBALS['language_settings'][$r['language']]['short_date_format'] :
+                $cfg['short_date_format'];
+
             if (!empty($cfg['country_code'])) {
                 $r['country_code'] = $cfg['country_code'];
             }
@@ -306,13 +321,24 @@ class User
         }
         $res->close();
 
+        $rez['success'] = true;
+
         return $rez;
     }
 
     private function getSecurityData()
     {
         $rez = array();
-        $res = DB\dbQuery('select password_change, cfg from users_groups where enabled = 1 and did is null and id = $1', $_SESSION['user']['id']) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT password_change
+                 , cfg
+            FROM users_groups
+            WHERE enabled = 1
+                AND did IS NULL
+                AND id = $1',
+            $_SESSION['user']['id']
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $cfg = empty($r['cfg']) ? array(): json_decode($r['cfg'], true);
             if (!empty($cfg['security'])) {

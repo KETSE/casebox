@@ -27,16 +27,36 @@ class UsersGroups
         }
 
         if ($id == -1) { // users out of a group
-            $sql = 'select id `nid`, u.cid, name, l'.USER_LANGUAGE_INDEX.' `title`, sex, `enabled` from users_groups u left join users_groups_association a on u.id = a.user_id where u.`type` = 2 and u.did is NULL and a.group_id is null order by 3, 2';
+            $sql = 'SELECT id `nid`
+                     , u.cid
+                     , name
+                     , first_name
+                     , last_name
+                     , sex
+                     , `enabled`
+                FROM users_groups u
+                LEFT JOIN users_groups_association a ON u.id = a.user_id
+                WHERE u.`type` = 2
+                    AND u.did IS NULL
+                    AND a.group_id IS NULL
+                ORDER BY 3, 2';
             $res = DB\dbQuery($sql, array()) or die(DB\dbQueryError());
             while ($r = $res->fetch_assoc()) {
                 $r['loaded'] = true;
-                // $r['expanded'] = true;
                 $rez[] = $r;
             }
             $res->close();
         } elseif (is_null($node_type)) { /* root node childs*/
-            $sql = 'select id `nid`, name, l'.USER_LANGUAGE_INDEX.' `title`, `type`, `system`, (select count(*) from users_groups_association a JOIN users_groups u ON a.user_id = u.id AND u.did is NULL where group_id = g.id) `loaded`  from users_groups g where `type` = 1 and `system` = 0 order by 3, 2';
+            $sql = 'SELECT id `nid`, name, first_name, last_name, `type`, `system`
+                  , (SELECT count(*)
+                     FROM users_groups_association a
+                     JOIN users_groups u ON a.user_id = u.id
+                     AND u.did IS NULL
+                     WHERE group_id = g.id) `loaded`
+                FROM users_groups g
+                WHERE `type` = 1
+                    AND `system` = 0
+                ORDER BY 3, 2';
             $res = DB\dbQuery($sql, array()) or die(DB\dbQueryError());
             while ($r = $res->fetch_assoc()) {
                 $r['iconCls'] = 'icon-users';
@@ -52,7 +72,17 @@ class UsersGroups
                 ,'expanded' => true
             );
         } else {// group users
-            $sql = 'select u.id `nid`, u.cid, u.name, u.l'.USER_LANGUAGE_INDEX.' `title`, sex, enabled from users_groups_association a join users_groups u on a.user_id = u.id where a.group_id = $1 and u.did is NULL ';
+            $sql = 'SELECT u.id `nid`
+                     , u.cid
+                     , u.name
+                     , first_name
+                     , last_name
+                     , sex
+                     , enabled
+                FROM users_groups_association a
+                JOIN users_groups u ON a.user_id = u.id
+                WHERE a.group_id = $1
+                    AND u.did IS NULL';
             $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
             while ($r = $res->fetch_assoc()) {
                 $r['loaded'] = true;
@@ -62,6 +92,20 @@ class UsersGroups
         }
 
         $pid = empty($id) ? 'is null' : ' = '.intval($id);
+
+        /* collapse first and last names into title */
+        for ($i=0; $i < sizeof($rez); $i++) {
+            if (!empty($rez[$i]['first_name']) && !empty($rez[$i]['last_name'])) {
+                $rez[$i]['title'] = trim(
+                    $rez[$i]['first_name'].
+                    ' '.
+                    $rez[$i]['last_name']
+                );
+            }
+            unset($rez[$i]['first_name']);
+            unset($rez[$i]['last_name']);
+        }
+        /* end of collapse first and last names into title */
 
         return $rez;
     }
@@ -98,7 +142,7 @@ class UsersGroups
         ) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
-        // Security::updateUserGroupAccess( array($user_id, $group_id) );
+
         return array('success' => true);
     }
 
@@ -119,7 +163,6 @@ class UsersGroups
         ) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
-        // Security::updateUserGroupAccess( array($user_id, $group_id) );
 
         //return if the user is associated to another office, otherwize it shoul be added to Users out of office folder
         $outOfGroup = true;
@@ -163,19 +206,23 @@ class UsersGroups
         /*end of check user existance */
 
         DB\dbQuery(
-            'INSERT INTO users_groups (`name`, `cid`, `password`, language_id, cdate, uid, email)
+            'INSERT INTO users_groups (`name`, first_name, last_name, `cid`, `password`, language_id, cdate, uid, email)
             VALUES($1
                 ,$2
-                ,MD5(CONCAT(\'aero\', $3))
+                ,$3
                 ,$4
+                ,MD5(CONCAT(\'aero\', $5))
+                ,$6
                 ,CURRENT_TIMESTAMP
-                ,$2
-                ,$5)
+                ,$4
+                ,$7)
             ON DUPLICATE KEY
             UPDATE id = last_insert_id(id)
                 ,`name` = $1
-                ,`cid` = $2
-                ,`password` = MD5(CONCAT(\'aero\', $3))
+                ,`first_name` = $2
+                ,`last_name` = $3
+                ,`cid` = $4
+                ,`password` = MD5(CONCAT(\'aero\', $5))
                 ,last_login = NULL
                 ,login_successful = NULL
                 ,login_from_ip = NULL
@@ -185,11 +232,13 @@ class UsersGroups
                 ,cdate = CURRENT_TIMESTAMP
                 ,did = NULL
                 ,ddate = NULL
-                ,language_id = $4
-                ,uid = $2
+                ,language_id = $6
+                ,uid = $4
                 ,cdate = CURRENT_TIMESTAMP',
             array(
                 $p->name
+                ,$p->first_name
+                ,$p->last_name
                 ,$_SESSION['user']['id']
                 ,$p->password
                 ,LANGUAGE_INDEX
@@ -208,19 +257,13 @@ class UsersGroups
             $user_id
         ) or die(DB\dbQueryError());
 
-        //get users template id
-        $p->template_id = User::getTemplateId();
-        $p->sex = null;
-        //$p->email = '';
-
-        require_once 'VerticalEditGrid.php';
-        VerticalEditGrid::addFormData('users_groups', $p);
-
         /* in case it was a deleted user we delete all old acceses */
         DB\dbQuery('delete from users_groups_association where user_id = $1', $user_id) or die(DB\dbQueryError());
         DB\dbQuery('delete from tree_acl where user_group_id = $1', $rez['data']['id']) or die(DB\dbQueryError());
         /* end of in case it was a deleted user we delete all old acceses */
-        if (isset($p->group_id) && is_numeric($p->group_id)) { //&& ( in_array($p->group_id, Security::getManagedOfficeIds()) )
+
+        // associating user to group if group was specified
+        if (isset($p->group_id) && is_numeric($p->group_id)) {
             DB\dbQuery(
                 'INSERT INTO users_groups_association (user_id, group_id, cid)
                 VALUES($1
@@ -234,14 +277,10 @@ class UsersGroups
                 )
             ) or die(DB\dbQueryError());
             $rez['data']['group_id'] = $p->group_id;
-
-            // Security::updateUserGroupAccess( array($user_id, $p->group_id) );
-
         } else {
             $rez['data']['group_id'] = 0;
         }
 
-        // $this->updateUserEmails($user_id);
         Security::calculateUpdatedSecuritySets();
         SolrClient::runBackgroundCron();
 
@@ -296,26 +335,15 @@ class UsersGroups
         if (!Security::isAdmin()) {
             throw new \Exception(L\Access_denied);
         }
-        /* selecting currently associated users to this group to estimate their access after deletition */
-        $user_ids = array();
-        $res = DB\dbQuery('select user_id from users_groups_association where group_id = $1', $group_id) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            $user_ids[] = $r[0];
-        }
-        $res->close();
-        DB\dbQuery('delete from users_groups_association where group_id = $1', $group_id) or die(DB\dbQueryError());
-        /* end of selecting currently associated users to this office to estimate their access after deletition */
 
-        //TODO: destroy users session, from this group, that are loged in
-
-        /* get nodes that have access rules set with this group */
-        $affected_nodes = Security::getAffectedNodes($group_id);
-
-        /* Delete group record. All security rules with this group wil be deleted by foreign key */
+        /* Delete group record. All security rules with this group wil be deleted by foreign key.
+        On deleting a group also the users associations are deleted by the foreign key
+        and corresponding security sets are marked, by trigger, as updated.
+        */
         DB\dbQuery('delete from users_groups where id = $1 and `type` = 1', $group_id) or die(DB\dbQueryError());
 
-        /* update security for affected nodes */
-        Security::updateNodesSecurity($affected_nodes);
+        /* call the recalculation method for security sets. */
+        Security::calculateUpdatedSecuritySets();
 
         return array('success' => true);
     }
@@ -335,7 +363,8 @@ class UsersGroups
             'SELECT id
                 ,cid
                 ,name
-                ,'.CONFIG\LANGUAGE_FIELDS.'
+                ,first_name
+                ,last_name
                 ,sex
                 ,email
                 ,enabled
@@ -349,6 +378,7 @@ class UsersGroups
             $user_id
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
+            $r['title'] = trim($r['first_name'].' '.$r['last_name']);
             $rez = array('success' => true, 'data' => $r);
         }
         $res->close();
@@ -478,8 +508,7 @@ class UsersGroups
             ) or die(DB\dbQueryError());
         }
 
-        $update_user_groups = array_merge(array($user_id), $new_groups, $deleting_groups);
-        Security::updateUserGroupAccess($update_user_groups);
+        Security::calculateUpdatedSecuritySets();
 
         return array('success' => true);
     }

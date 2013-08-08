@@ -194,7 +194,7 @@ class SolrClient
     public static function runBackgroundCron()
     {
         $cmd = 'php -f '.CRONS_PATH.'run_cron.php solr_update_tree '.CORENAME.' > '.CRONS_PATH.'bg_solr_update_tree.log &';
-        if (is_windows()) {
+        if (isWindows()) {
             $cmd = 'start /D "'.CRONS_PATH.'" php -f run_cron.php solr_update_tree '.CORENAME.' > '.CRONS_PATH.'bg_solr_update_tree.log';
         }
         // echo "$cmd \n";

@@ -137,6 +137,7 @@ $API = array_merge(
                 ,'uploadPhoto'      => array('len' => 1, 'formHandler' => true)
                 ,'removePhoto'      => array('len' => 1)
                 ,'getAccountData'   => array('len' => 0)
+                ,'getProfileData'  => array('len' => 1)
                 ,'saveProfileData'  => array('len' => 1)
                 ,'saveSecurityData'     => array('len' => 1)
                 ,'verifyPassword'   => array('len' => 1)
