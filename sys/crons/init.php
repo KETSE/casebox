@@ -11,6 +11,7 @@ namespace CB;
 
 // if no corename argument passed then exit
 if (empty($argv[1])) {
+    echo "\nError: no core argument given\n";
     exit(0);
 }
 

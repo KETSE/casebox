@@ -140,7 +140,9 @@ class Security
         }
 
         $sql = 'SELECT id
-                    ,l'.USER_LANGUAGE_INDEX.' `name`
+                    ,`name`
+                    ,`first_name`
+                    ,`last_name`
                     ,`system`
                     ,`enabled`
                     ,`type`
@@ -151,6 +153,13 @@ class Security
                        , 2 LIMIT 50';
         $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
+            $title = trim($r['first_name'].' '.$r['last_name']);
+            if (!empty($title)) {
+                $r['name'] = $title;
+            }
+            unset($r['first_name']);
+            unset($r['last_name']);
+
             $r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
             unset($r['type']);
             unset($r['sex']);
