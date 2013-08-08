@@ -103,10 +103,8 @@
 <!-- template_type: case, object, file, task, email -->
 <field name="template_type"    	type="string"  		indexed="true" stored="true" />
 
-<!-- allow_user_ids: user ids that are allowed to access this objects. Calculated by security module from security rules  -->
-<field name="allow_user_ids"	type="tint" 		indexed="true" stored="true" multiValued="true" />
-<!-- deny_user_ids: the user ids that have explicitly specified deny access -->
-<field name="deny_user_ids"	type="tint" 		indexed="true" stored="true" multiValued="true" />
+<!-- security_set_id: security set id -->
+<field name="security_set_id"	type="tint" 		indexed="true" stored="true" />
 
 
 <!-- TASKS SPECIFIC FIELDS -->

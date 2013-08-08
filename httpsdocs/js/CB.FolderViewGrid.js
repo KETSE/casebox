@@ -919,7 +919,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	}
 	,onPasteClick: function(buttonOrKey, e) {
 		if(this.actions.paste.isDisabled()) return;
-		App.clipboard.paste(this.folderProperties.id);
+		this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+		App.clipboard.paste(this.folderProperties.id, null, this.processPaste, this);
+	}
+	,processPaste: function(pids){
+		this.getEl().unmask();
 	}
 	,onPasteShortcutClick: function(buttonOrKey, e) {
 		if(this.actions.pasteShortcut.isDisabled()) return;
@@ -1005,9 +1009,10 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	}
 	,onRenameClick: function(b, e){
 		if(!this.grid.selModel.hasSelection()) return;
+		this.grid.stopEditing(true);
 		idx = this.grid.store.indexOf(this.grid.selModel.getSelected());
 		this.allowRename = true;
-		this.grid.startEditing(idx, 0);
+		this.grid.startEditing(idx, this.grid.getColumnModel().findColumnIndex('name'));
 	}
 	,onDeleteClick: function(b, e) {
 		s = this.grid.selModel.getSelections();

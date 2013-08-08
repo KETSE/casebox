@@ -20,7 +20,12 @@ Ext.onReady(function(){
 
 	Ext.Direct.addProvider(Ext.app.REMOTING_API); 
 	
-	Ext.Direct.on('login', function(r, e){ /*if(r.method == 'logout') /**/ window.location.reload(); /*else App.PromtLogin(); /**/});
+	Ext.Direct.on('login', function(r, e){ 
+		/*if(r.method == 'logout') /**/ 
+		clog('login exception');
+		//window.location.reload(); 
+		/*else App.PromtLogin(); /**/
+	});
 	Ext.Direct.on('exception', App.showException);
 	Ext.QuickTips.init();
 	Ext.apply(Ext.QuickTips.getQuickTip(), {showDelay: 1500});
