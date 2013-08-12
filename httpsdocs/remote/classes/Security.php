@@ -699,7 +699,12 @@ class Security
         $deny = array_reverse($deny);
         $allow = bindec(implode('', $allow));
         $deny = bindec(implode('', $deny));
-        $sql = 'INSERT INTO tree_acl (node_id, user_group_id, allow, deny, cid)
+        $sql = 'INSERT INTO tree_acl (
+                node_id
+                ,user_group_id
+                ,allow
+                ,deny
+                ,cid)
             VALUES($1
                  ,$2
                  ,$3
@@ -821,7 +826,9 @@ class Security
         and estimate access for every user including everyone group */
         if (!empty($set)) {
             $object_id = $obj_ids[sizeof($obj_ids) -1];
-            $sql = 'SELECT DISTINCT u.id, u.`type`
+            $sql = 'SELECT DISTINCT
+                    u.id
+                    ,u.`type`
                 FROM tree_acl a
                 JOIN users_groups u on a.user_group_id = u.id
                 WHERE a.node_id in(0'.implode(',', $obj_ids).')
