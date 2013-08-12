@@ -223,7 +223,7 @@ class Objects
         $d->type = 4; //case object
         if (!is_numeric($d->id)) {
             // SECURITY: check if current user has access
-            if (!Security::canCreateActions($d->pid)) {
+            if (!Security::isAdmin() && !Security::canCreateActions($d->pid)) {
                 throw new \Exception(L\Access_denied);
             }
             fireEvent('beforeNodeDbCreate', $d);
@@ -252,7 +252,7 @@ class Objects
             $log_action_type = 8; //else throw new Eception(L\Error_creating_object); // create action
         } else {
             // SECURITY: check if current user has write access to this action
-            if (!Security::canWrite($d->id)) {
+            if (!Security::isAdmin() && !Security::canWrite($d->id)) {
                 throw new \Exception(L\Access_denied);
             }
             fireEvent('beforeNodeDbUpdate', $d);
