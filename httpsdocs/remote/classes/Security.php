@@ -887,7 +887,7 @@ class Security
         foreach ($users as $user_id => $access) {
             $params = array( $set_id, $user_id );
             for ($i=0; $i < sizeof($access[0]); $i++) {
-                $params[] = ( empty($access[1][$i]) && ( $access[0][$i] >0 ) );
+                $params[] = ( empty($access[1][$i]) && ( $access[0][$i] >0 ) ) ? 1 : 0;
             }
             $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
         }
