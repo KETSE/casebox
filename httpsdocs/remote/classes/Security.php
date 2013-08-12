@@ -795,7 +795,7 @@ class Security
     public static function calculateUpdatedSecuritySets()
     {
         $sql = 'SELECT id FROM tree_acl_security_sets WHERE updated = 1';
-        $res = DB\dbQuery($sql) or die(dbQueryError());
+        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
             Security::updateSecuritySet($r['id']);
         }
@@ -867,7 +867,7 @@ class Security
             FROM tree_acl_security_sets_result
             WHERE security_set_id = $1';
 
-        $res = DB\dbQuery($sql, $set_id) or die(dbQueryError());
+        $res = DB\dbQuery($sql, $set_id) or die(DB\dbQueryError());
 
         $sql = 'INSERT INTO tree_acl_security_sets_result (security_set_id, user_id, bit0, bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8, bit9, bit10, bit11)
             VALUES ($1
@@ -889,13 +889,13 @@ class Security
             for ($i=0; $i < sizeof($access[0]); $i++) {
                 $params[] = ( empty($access[1][$i]) && ( $access[0][$i] >0 ) );
             }
-            $res = DB\dbQuery($sql, $params) or die(dbQueryError());
+            $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
         }
 
         $sql = 'UPDATE tree_acl_security_sets
             SET updated = 0
             WHERE id = $1';
-        $res = DB\dbQuery($sql, $set_id) or die(dbQueryError());
+        $res = DB\dbQuery($sql, $set_id) or die(DB\dbQueryError());
         /* end of update set in database */
     }
     /**
