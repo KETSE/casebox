@@ -1,0 +1,11 @@
+CaseBox 1.9 (2013-08-12)
+==============================
+New Features, Improvements
+--------------------------
+- Updated security model
+
+Fixed Bugs:
+----------
+- Fixed security model bugs: updated triggers and modified procedure p_update_child_security_sets
+    Note: after applying this update and executing database update 20130812_1624 mysql_database_structure_update.sql
+            you have to execute /sys/utils/update_tree_info.php <core_name>

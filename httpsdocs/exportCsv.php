@@ -185,7 +185,7 @@ function insert($array)
 
     $query = 'INSERT INTO tags (`order`, pid, type,'.implode(',', $keys).
         ') VALUES ('.$count.','.$array['pid'].', '.$array['type'].', '.implode(',', $langs).')';
-    $res = DB\dbQuery($query) or die( dbQueryError() );
+    $res = DB\dbQuery($query) or die( DB\dbQueryError() );
 
     return mysqli_insert_id($GLOBALS['dbh']);
 }
