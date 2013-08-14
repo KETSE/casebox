@@ -1,10 +1,16 @@
 <?php
 namespace CB;
 
-$method = $_SERVER['REQUEST_METHOD'] === 'POST'
-          ? @$_POST['method']
-          : @$_GET['method'];
+require_once '../config.php';
 
+$api = new Api();
+$ro = $api->processRequest();
+// var_dump($ro);
+echo $ro->getMethod()."<br />";
+echo 'OK';
+/*$method = $_SERVER['REQUEST_METHOD'] === 'POST'
+        ? @$_POST['method']
+        : @$_GET['method'];
 
 // TODO: the switch below may be changed into a more generic approach:
 // determine the class first, example, see if method starts with 'cb.files...' for example
@@ -24,9 +30,6 @@ switch ($method) {
         break;
 }
 
-
-
-
 function cbFilesDownload()
 {
 
@@ -36,9 +39,9 @@ function cbFilesDownload()
 
 }
 
-
 function cbObjectsPermissionsAddRule()
 {
     // objectId
     //
 }
+/**/

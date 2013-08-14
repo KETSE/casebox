@@ -156,8 +156,8 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 		this.getEl().unmask();
 	}
 	,onSaveFailure: function(form, action){
+		this.getEl().unmask();
 		if(Ext.isDefined(action.result.already_opened_by)){
-			this.getEl().unmask();
 			Ext.Msg.show({
 			title: L.SavingDataConfirmation
 			,msg: action.result.already_opened_by
@@ -170,7 +170,6 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 		}else{
 			this.fireEvent('savefail', this, action);
 			App.formSubmitFailure(form, action); 
-			this.getEl().unmask();
 		}
 	}
 })

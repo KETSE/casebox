@@ -22,8 +22,8 @@ Ext.onReady(function(){
 	
 	Ext.Direct.on('login', function(r, e){ 
 		/*if(r.method == 'logout') /**/ 
-		clog('login exception');
-		//window.location.reload(); 
+		// clog('login exception');
+		window.location.reload(); 
 		/*else App.PromtLogin(); /**/
 	});
 	Ext.Direct.on('exception', App.showException);

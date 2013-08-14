@@ -292,7 +292,7 @@ class Objects
                  FROM objects_data
                  WHERE object_id = $1
                      AND duplicate_id <> 0
-                     AND private_for_user <> '.$_SESSION['USER']['id'].') ';
+                     AND private_for_user <> '.$_SESSION['user']['id'].') ';
         DB\dbQuery(
             'DELETE
             FROM objects_duplicates

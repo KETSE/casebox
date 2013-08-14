@@ -1,5 +1,5 @@
 <?php
-namespace CB;
+namespace ExtDirect;
 
 require_once '../init.php';
 require_once 'config.php';
