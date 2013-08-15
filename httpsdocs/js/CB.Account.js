@@ -74,7 +74,7 @@ CB.Account = Ext.extend(Ext.Panel, {
 		// this.autoCloseTask = new Ext.util.DelayedTask(this.destroy, this);
 		// this.autoCloseTask.delay(1000*60*5);
 
-		User.getAccountData( this.onGetData, this);
+		CB_User.getAccountData( this.onGetData, this);
 
 	}
 	,onGetData: function(r, e){
@@ -86,7 +86,7 @@ CB.Account = Ext.extend(Ext.Panel, {
 						scope: this
 						,beforeclose: function(cmp){
 							if(w.success !== true) this.destroy();
-							else User.getAccountData( this.onGetData, this);
+							else CB_User.getAccountData( this.onGetData, this);
 						}
 					}
 				});
@@ -318,7 +318,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 	,onPhotoChanged: function(ev, el, o){
 		if(Ext.isEmpty(this.photoField.getValue())) return;
 		form = this.getForm();
-		form.api = {submit: User.uploadPhoto};
+		form.api = {submit: CB_User.uploadPhoto};
 
 		form.submit({
 			clientValidation: false
@@ -335,7 +335,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 	,onPhotoRemoveClick: function(){
 		Ext.Msg.confirm(L.Confirm, L.RemovePhotoConfirm, function(b, e){
 			if(b == 'yes'){
-				User.removePhoto( { id: this.data.id }, function(){
+				CB_User.removePhoto( { id: this.data.id }, function(){
 					this.photoView.update( [{id: this.data.id }] )
 				}, this);
 			}
@@ -345,7 +345,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 		Ext.apply(this.data, this.getForm().getValues());
 		if(this.data.phone == this.find('name', 'phone')[0].emptyText) this.data.phone = null;
 		this.grid.readValues();
-		User.saveProfileData(this.data, this.onSaveProcess, this)
+		CB_User.saveProfileData(this.data, this.onSaveProcess, this)
 	}
 	,onSaveProcess: function(r, e){
 		if(r.success !== true) return;
@@ -637,7 +637,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
 		this.data.question_idx = this.find( 'name', 'question_idx' )[0].getValue();
 		this.data.answer = this.find( 'name', 'answer' )[0].getValue();
 
-		User.saveSecurityData(this.data, this.onSaveProcess, this)
+		CB_User.saveSecurityData(this.data, this.onSaveProcess, this)
 	}
 	,onSaveProcess: function(r, e){
 		if(r.success !== true) return;
@@ -696,7 +696,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
 	,disableTSV: function(){
 		Ext.Msg.confirm(L.Confirm, 'Are you sure you want to disable '+L.TSV, function(b, e){
 			if(b == 'yes'){
-				User.disableTSV( function(r, e){
+				CB_User.disableTSV( function(r, e){
 					if(r.success == true){
 						delete this.data.TSV.method;
 						this.updateTSVStatus();
@@ -887,7 +887,7 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
 	}
 	,onMobileApplicationClick: function(){
 		this.getLayout().setActiveItem(1);
-		User.getGASk( this.processGetSk, this)
+		CB_User.getGASk( this.processGetSk, this)
 		this.center();
 	}
 	,onSMSMessageClick: function(){
@@ -907,7 +907,7 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
 	}
 	,onVerifyAndSaveClick: function(){
 		this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-		User.TSVSaveMGA( { code: this.getLayout().activeItem.buttons[1].getValue() }, this.processTSVSaveMGA, this)
+		CB_User.TSVSaveMGA( { code: this.getLayout().activeItem.buttons[1].getValue() }, this.processTSVSaveMGA, this)
 	}
 	,processTSVSaveMGA: function(r, e){
 		this.getLayout().activeItem.buttons[3].setVisible(r.success !== true);
@@ -921,7 +921,7 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
 	,onVerifyPhoneClick: function(){
 		if(this.form.getForm().isValid()){
 			this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-			User.verifyPhone(
+			CB_User.verifyPhone(
 				this.form.getForm().getValues()
 				,this.processPhoneVerification
 				,this

@@ -79,7 +79,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 
 		Ext.apply(this, {
 			loader: new Ext.tree.TreeLoader({
-				directFn: Templates.getChildren
+				directFn: CB_Templates.getChildren
 				,paramsAsHash: true
 				,listeners:{
 					scope: this
@@ -123,7 +123,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 						,target_id: dd.dragOverData.target.attributes.nid
 						,point: dd.dragOverData.point
 					};
-					Templates.moveElement(this.dropParams, this.processDrop, this)
+					CB_Templates.moveElement(this.dropParams, this.processDrop, this)
 				}
 				,beforeappend: function(t, p, n){ 
 					if(n.attributes.is_folder != 1) n.setText(n.attributes.text + ' <span class="cG">(id: '+n.attributes.nid+')</span>');
@@ -169,7 +169,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 	,onCreateTemplateClick: function(b){
 		Ext.Msg.prompt(L.NewTemplate, L.Name, function(btn, text){
 			if((btn == 'ok') && (!Ext.isEmpty(text)))
-				Templates.createTemplate({ text: text, pid: this.getPid }, this.processCreateTemplate, this);
+				CB_Templates.createTemplate({ text: text, pid: this.getPid }, this.processCreateTemplate, this);
 		}, this, false, '');
 	}
 	,processCreateTemplate: function(r, e){
@@ -180,7 +180,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 	,onCreateFolderClick: function(b, e){
 		Ext.Msg.prompt(L.NewFolder, L.Name, function(btn, text){
 			if((btn == 'ok') && (!Ext.isEmpty(text)))
-				Templates.createFolder({  text: text, pid: this.getPid() }, this.processCreateFolder, this);
+				CB_Templates.createFolder({  text: text, pid: this.getPid() }, this.processCreateFolder, this);
 		}, this, false, L.NewFolder);
 	}
 	,processCreateFolder: function(r, e){
@@ -250,7 +250,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 		var n = editor.editNode;
 		editor.cancelEdit();
 		this.getEl().mask(L.Processing, 'x-mask-loading');
-		Templates.renameFolder({id: n.attributes.nid, name: newVal}, this.processRename, this);
+		CB_Templates.renameFolder({id: n.attributes.nid, name: newVal}, this.processRename, this);
 		return false;
 	}
 	,processRename: function(r, e){
@@ -276,7 +276,7 @@ CB.TemplatesTree = Ext.extend(Ext.tree.TreePanel, {
 			if(btn == 'yes'){
 				this.getEl().mask(L.Deleting)
 				n = this.getSelectionModel().getSelectedNode();
-				Templates.deleteElement(n.attributes.nid, this.processDelElement, this);
+				CB_Templates.deleteElement(n.attributes.nid, this.processDelElement, this);
 			}
 		}
 		, this);		
@@ -421,8 +421,8 @@ CB.TemplateEditWindow = Ext.extend( CB.GenericForm, {
 			,hideBorders: true
 			,initialConfig:{
 				api: { 
-					load: Templates.loadTemplate
-					,submit: Templates.saveTemplate
+					load: CB_Templates.loadTemplate
+					,submit: CB_Templates.saveTemplate
 					,waitMsg: L.LoadingData + ' ...'
 				}
 				,paramsAsHash: true

@@ -170,8 +170,8 @@ class Security
         return $rez;
     }
 
-    /* objects acl methods*/
-    public function getObjectAcl($p)
+    /* get objects acl list*/
+    public function getObjectAcl($p, $inherited = true)
     {
         $rez = array( 'success' => true, 'data' => array(), 'name' => '');
         if (!is_numeric($p->id)) {
@@ -214,7 +214,8 @@ class Security
                     , u.`sex`
                 FROM tree_acl a
                 JOIN users_groups u ON a.user_group_id = u.id
-                WHERE a.node_id in(0'.implode(',', $obj_ids).')
+                WHERE a.node_id '.
+                ( $inherited ? ' in (0'.implode(',', $obj_ids).')' : ' = $1 ').'
                 ORDER BY u.`type`
                        , 2';
         $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
@@ -649,6 +650,13 @@ class Security
     //10 Take Ownership
     //11 Download
 
+    public function getObjectDirectAcl($p)
+    {
+        $rez = $this->getObjectAcl($p, false);
+
+        return $rez;
+    }
+
     public function addObjectAccess($p)
     {
         $rez = array('success' => true, 'data' => array());
@@ -666,7 +674,7 @@ class Security
                   , $3
                   , $3) ON duplicate KEY
             UPDATE id = last_insert_id(id)
-                      , uid = $3';
+                    , uid = $3';
         DB\dbQuery(
             $sql,
             array(

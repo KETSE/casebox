@@ -151,7 +151,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 				}
 				,buttons: [{text: L.Upload, handler: this.doSubmit,  plugins: 'defaultButton', scope: this}
 						  ,{text: Ext.MessageBox.buttonText.cancel, handler: function(){ this.hide() }, scope: this}]
-				,api: {submit: Ext.value(this.api, Browser.saveFile) }
+				,api: {submit: Ext.value(this.api, CB_Browser.saveFile) }
 				,paramOrder: ['id']
 				,listeners:{
 					actioncomplete: {
@@ -184,7 +184,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 			case 'multiple': this.setTitle( Ext.value(this.title, L.UploadMultipleFiles) ); break;
 			default: this.data.uploadType = 'single'; this.setTitle( Ext.value(this.title, L.UploadFile) ); break;
 		}
-		if(!Ext.isEmpty(this.data.id)) this.findByType('form')[0].api.submit = Ext.value(this.api, Browser.uploadNewVersion)
+		if(!Ext.isEmpty(this.data.id)) this.findByType('form')[0].api.submit = Ext.value(this.api, CB_Browser.uploadNewVersion)
 		cb = this.find('name', 'title')[0];
 		cb.setVisible( !this.fileOnly && (this.data.uploadType == 'single') )
 		cb = this.find('name', 'date')[0];
@@ -265,10 +265,10 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 	},onConfirmResponse: function(w){
 		if(w.response == 'rename'){
 			Ext.Msg.prompt(L.Rename, L.NewFileName, function(btn, text){
-				if( (btn == 'ok') && !Ext.isEmpty(text) ) Browser.confirmUploadRequest({response: 'rename', newName: text}, this.onConfirmResponseProcess, this);
-				else Browser.confirmUploadRequest({response: 'cancel'}, this.onConfirmResponseProcess, this);
+				if( (btn == 'ok') && !Ext.isEmpty(text) ) CB_Browser.confirmUploadRequest({response: 'rename', newName: text}, this.onConfirmResponseProcess, this);
+				else CB_Browser.confirmUploadRequest({response: 'cancel'}, this.onConfirmResponseProcess, this);
 			}, this, false, this.serverResponse.suggestedFilename);
-		}else Browser.confirmUploadRequest({response: w.response}, this.onConfirmResponseProcess, this)
+		}else CB_Browser.confirmUploadRequest({response: w.response}, this.onConfirmResponseProcess, this)
 		w.destroy();
 	},onConfirmResponseProcess: function(r, e){
 		if(r.success == true) this.onSubmitSuccess(this.findByType('form')[0], {result: r});

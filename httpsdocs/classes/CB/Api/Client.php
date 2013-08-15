@@ -13,7 +13,7 @@ class Client
     protected $responseBody;
     protected $responseInfo;
 
-    public function __construct ($url = null, $verb = 'GET', $requestBody = null)
+    public function __construct ($url = null, $verb = 'POST', $requestBody = null)
     {
         $this->url				= $url;
         $this->verb				= $verb;
@@ -34,7 +34,7 @@ class Client
     {
         $this->requestBody		= null;
         $this->requestLength	= 0;
-        $this->verb				= 'GET';
+        $this->verb				= 'POST';
         $this->responseBody		= null;
         $this->responseInfo		= null;
     }
@@ -131,7 +131,7 @@ class Client
     protected function doExecute (&$curlHandle)
     {
         $this->setCurlOpts($curlHandle);
-        $this->responseBody = curl_exec($curlHandle);
+        $this->responseBody = curl_exec($curlHandle) or die(curl_error($curlHandle));
         $this->responseInfo	= curl_getinfo($curlHandle);
 
         curl_close($curlHandle);
@@ -141,6 +141,7 @@ class Client
     {
         curl_setopt($curlHandle, CURLOPT_TIMEOUT, 10);
         curl_setopt($curlHandle, CURLOPT_URL, $this->url);
+        curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curlHandle, CURLOPT_HTTPHEADER, array ('Accept: ' . $this->acceptType));
     }
@@ -212,4 +213,24 @@ class Client
     {
         $this->verb = $verb;
     }
+
+    public function request($action, $method, $data = array())
+    {
+        $this->flush();
+
+        $this->buildPostBody(
+            array(
+                'action' => $action
+                ,'method' => $method
+                ,'data' => $data
+            )
+        );
+
+        $this->execute();
+        $rez = $this->getResponseBody();
+        $rez = json_decode($rez);
+
+        return $rez;
+    }
+
 }

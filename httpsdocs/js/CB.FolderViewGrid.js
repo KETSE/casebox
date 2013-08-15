@@ -196,7 +196,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			,baseParams: { facets: 'general' }
 			,proxy: new  Ext.data.DirectProxy({
 				paramsAsHash: true
-				,directFn: BrowserView.getChildren
+				,directFn: CB_BrowserView.getChildren
 				,listeners:{
 					scope: this
 					,load: this.onProxyLoad
@@ -317,7 +317,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 					if(e.value == e.originalValue) return;
 					this.renamedOriginalValue = e.originalValue;
 					this.renamedRecord = e.record;
-					BrowserView.rename({path: e.record.get('nid'), name: e.value}, function(r, e){
+					CB_BrowserView.rename({path: e.record.get('nid'), name: e.value}, function(r, e){
 						if(r.success !== true){
 							this.renamedRecord.set('name', this.renamedOriginalValue);
 							delete this.renamedOriginalValue;
@@ -847,7 +847,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		data.pathtext = this.folderProperties.pathtext;
 		tr = CB.DB.templates.getById(data.template_id);
 		if(tr && (tr.get('cfg').createMethod == 'inline') )
-			Objects.create(data, this.processCreateInlineObject, this);
+			CB_Objects.create(data, this.processCreateInlineObject, this);
 		else this.fireEvent('createobject', data, e);
 	}
 	,processCreateInlineObject: function (r, e) {
@@ -946,7 +946,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 			rez.push(s[i].get('nid'))
 		}
 		Ext.Msg.confirm( L.MergingFiles, L.MergeFilesConfirmation, function(b){
-			if(b == 'yes') Files.merge(rez, this.processMergingFiles, this);
+			if(b == 'yes') CB_Files.merge(rez, this.processMergingFiles, this);
 		}, this )
 	}
 	,processMergingFiles: function(r, e){
@@ -959,7 +959,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 	}
 	,onCreateFolderClick: function(b, e){
 		this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-		Browser.createFolder(this.folderProperties.id, this.processCreateFolder, this);
+		CB_Browser.createFolder(this.folderProperties.id, this.processCreateFolder, this);
 	}
 	,processCreateFolder: function (r, e) {
 		this.getEl().unmask();
@@ -1094,7 +1094,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 				for (var i = 0; i < s.length; i++) {
 					ids.push(s[i].get('nid'));
 				};
-				Browser.takeOwnership(ids, this.processTakeOwnership, this);
+				CB_Browser.takeOwnership(ids, this.processTakeOwnership, this);
 			}
 		}, this)
 	}

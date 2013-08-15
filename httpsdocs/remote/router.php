@@ -65,7 +65,7 @@ function doRpc($cdata)
         );
 
         //require_once("classes/$action.php"); // it's managed by _autoload
-        $action = '\\CB\\'.$action;
+        $action = str_replace('_', '\\', $action);
         $o = new $action();
 
         $params = isset($cdata->data) && is_array($cdata->data) ? $cdata->data : array();
@@ -103,7 +103,7 @@ function doAroundCalls(&$fns, &$cdata, &$returnData = null)
 
 function sanitizeParams(&$cdata)
 {
-    $cdata->action = preg_replace('/[^a-z\\\\]+/i', '', strip_tags($cdata->action));
+    $cdata->action = preg_replace('/[^a-z_\\\\]+/i', '', strip_tags($cdata->action));
     $cdata->method = preg_replace('/[^a-z]+/i', '', strip_tags($cdata->method));
     $cdata->tid = intval(strip_tags($cdata->tid));
 

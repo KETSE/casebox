@@ -313,7 +313,7 @@ class Tasks
             ) or die(DB\dbQueryError());
 
             /*storing specified files*/
-            require_once 'Files.php';
+
             $files = new Files();
             $params = array(
                 'pid' => $p['id']

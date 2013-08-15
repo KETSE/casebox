@@ -10,7 +10,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			,restful: false
 			,proxy: new  Ext.data.DirectProxy({
 				paramsAsHash: true
-				,api: { read: Objects.getAssociatedObjects }
+				,api: { read: CB_Objects.getAssociatedObjects }
 				,listeners:{
 					scope: this
 					,load: function(proxy, obj, opt){
@@ -182,8 +182,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 			layout: 'fit'
 			,initialConfig:{
 				api: { 
-					load: Objects.load
-					,submit: Objects.save
+					load: CB_Objects.load
+					,submit: CB_Objects.save
 					,waitMsg: L.LoadingData + ' ...'
 				}
 				,paramsAsHash: true
@@ -941,7 +941,7 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
 		}
 		p = this.findParentByType(CB.Objects);
 		if(!Ext.isEmpty(p) && !Ext.isEmpty(p.data.cfg) && !Ext.isEmpty(p.data.cfg.templates) )  params.templates = p.data.cfg.templates;
-		BrowserView.getChildren(params, this.processLoad, this)
+		CB_BrowserView.getChildren(params, this.processLoad, this)
 	}
 	,processLoad: function(r, e){
 		if(r.success !== true) return;

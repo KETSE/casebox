@@ -6,7 +6,7 @@ $API = empty($customConfig[\CB\CORENAME.'_api']) ? array() : $customConfig[\CB\C
 $API = array_merge(
     $API,
     array(
-        'Browser' => array(
+        'CB_Browser' => array(
             'methods' => array(
                 'createFolder'      => array('len' => 1)
                 ,'paste'        => array('len' => 1)
@@ -20,14 +20,14 @@ $API = array_merge(
             )
         )
 
-        ,'Path' => array(
+        ,'CB_Path' => array(
             'methods' => array(
                 'getPath'       => array('len' => 1)
                 ,'getPidPath'       => array('len' => 1)
             )
         )
 
-        ,'BrowserTree' => array(
+        ,'CB_BrowserTree' => array(
             'methods' => array(
                 'getChildren'       => array('len' => 1)
                 ,'createFolder'     => array('len' => 1)
@@ -36,7 +36,7 @@ $API = array_merge(
                 ,'getRootProperties'    => array('len' => 1)
             )
         )
-        ,'BrowserView' => array(
+        ,'CB_BrowserView' => array(
             'methods' => array(
                 'getChildren'       => array('len' => 1)
                 ,'getSummaryData'   => array('len' => 1)
@@ -45,7 +45,7 @@ $API = array_merge(
                 ,'rename'       => array('len' => 1)
             )
         )
-        ,'Favorites' => array(
+        ,'CB_Favorites' => array(
             'methods'=>array(
                 'create'        =>  array('len' => 1)
                 ,'read'         =>  array('len' => 1)
@@ -54,13 +54,13 @@ $API = array_merge(
             )
         )
 
-        ,'Calendar' => array(
+        ,'CB_Calendar' => array(
             'methods'=>array(
                 'getEvents'     =>  array('len' => 1)
             )
         )
 
-        ,'Tasks' => array(
+        ,'CB_Tasks' => array(
             'methods'=>array(
                 'load'          =>  array('len' => 1)
                 ,'create'       =>  array('len' => 1)
@@ -76,7 +76,7 @@ $API = array_merge(
             )
         )
 
-        ,'Objects' => array(
+        ,'CB_Objects' => array(
             'methods'=>array(
                 'load'          =>  array('len'=>1)
                 ,'create'       =>  array('len'=>1)
@@ -86,7 +86,7 @@ $API = array_merge(
             )
         )
 
-        ,'Files' => array(
+        ,'CB_Files' => array(
             'methods'=>array(
                 'getProperties'     =>  array('len'=>1)
                 ,'restoreVersion'   =>  array('len'=>1)
@@ -98,7 +98,7 @@ $API = array_merge(
             )
         )
 
-        ,'Thesauri' => array(
+        ,'CB_Thesauri' => array(
             'methods'=>array(
                 'create'    =>  array('len'=>1)
                 ,'read'     =>  array('len'=>1)
@@ -107,7 +107,7 @@ $API = array_merge(
             )
         )
 
-        ,'Templates' => array(
+        ,'CB_Templates' => array(
             'methods'=>array(
                 'getChildren'   =>  array('len'=>1)
                 ,'deleteElement'=>  array('len'=>1)
@@ -122,12 +122,12 @@ $API = array_merge(
             )
         )
 
-        ,'Log' => array(
+        ,'CB_Log' => array(
             'methods' => array(
                 'getLastLog' => array('len' => 0)
             )
         )
-        ,'User' => array(
+        ,'CB_User' => array(
             'methods' => array(
                 'getLoginInfo'      => array('len' => 0)
                 ,'login'        => array('len' => 2)
@@ -147,7 +147,7 @@ $API = array_merge(
                 ,'disableTSV'       => array('len' => 0)
             )
         )
-        ,'UsersGroups' => array(
+        ,'CB_UsersGroups' => array(
             'methods' => array(
                 'getChildren'           => array('len' => 1)
                 ,'getReadAccessChildren'    => array('len' => 1)
@@ -164,7 +164,7 @@ $API = array_merge(
                 ,'renameGroup'          => array('len' => 1)
             )
         )
-        ,'Security' => array(
+        ,'CB_Security' => array(
             'methods' => array(
                 'getUserGroups'         => array('len' => 1)
                 ,'createUserGroup'      => array('len' => 1)
@@ -180,7 +180,7 @@ $API = array_merge(
                 ,'getActiveUsers'       => array('len' => 1)
             )
         )
-        ,'System' => array(
+        ,'CB_System' => array(
             'methods' => array(
                 'tagsGetChildren'       => array('len' => 1)
                 ,'getTagPath'           => array('len' => 1)

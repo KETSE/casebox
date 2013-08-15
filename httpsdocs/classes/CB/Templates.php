@@ -504,7 +504,6 @@ class Templates
                 WHERE object_id = $1
                 ORDER BY id';
 
-        require_once 'Security.php';
         $rez = array();
         $is_admin = Security::canManage();
         $res = DB\dbQuery($sql, $object_id) or die(DB\dbQueryError());

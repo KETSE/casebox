@@ -98,7 +98,7 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
 		if(Ext.isEmpty(r)) return;
 		Ext.Msg.confirm(L.DeleteConfirmation, L.versionDeleteConfirmation,
 			function(b){
-				if(b == 'yes') Files.deleteVersion(r.get('id'), this.processDelete, this); 
+				if(b == 'yes') CB_Files.deleteVersion(r.get('id'), this.processDelete, this); 
 			}
 			, this
 		)
@@ -111,7 +111,7 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
 	,onRestoreClick: function(index){
 		r = this.store.getAt(index);
 		if(Ext.isEmpty(r)) return;
-		Files.restoreVersion(r.get('id'), function(r, e){ App.mainViewPort.fireEvent('fileuploaded', {data: r.data}) }, this)
+		CB_Files.restoreVersion(r.get('id'), function(r, e){ App.mainViewPort.fireEvent('fileuploaded', {data: r.data}) }, this)
 	}
 	,onDownloadClick: function(index){
 		r = this.store.getAt(index);
@@ -260,7 +260,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		App.clipboard.un('change', this.onClipboardChange, this);
     	}
     	,loadProperties: function(){
-		Files.getProperties(this.data.id, this.processLoadProperties, this);
+		CB_Files.getProperties(this.data.id, this.processLoadProperties, this);
     	}
 	,processLoadProperties: function(r, e){
 		if(r.success !== true) return;
@@ -451,7 +451,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 		if(Ext.isEmpty(this.grid)) return;
 		this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
 		this.grid.readValues();
-		Files.saveProperties(this.data, this.processSaveClick, this);
+		CB_Files.saveProperties(this.data, this.processSaveClick, this);
 	}
 	,processSaveClick: function(r, e){
 		this.getEl().unmask();
@@ -695,7 +695,7 @@ CB.ActionFilesPanel = Ext.extend(Ext.Panel, {
 		this.filesView.store.removeAll();
 		id = this.getCaseObjectId();
 		if(Ext.isEmpty(id)) return;
-		BrowserView.getChildren({pid: id, template_types: 'file'}, this.processFilesLoad, this)
+		CB_BrowserView.getChildren({pid: id, template_types: 'file'}, this.processFilesLoad, this)
 	}
 	,processFilesLoad: function(r, e){
 		if(r.success !== true) return;
@@ -800,7 +800,7 @@ CB.FileDuplicatesViewPanel = Ext.extend(Ext.Panel, {
 		this.view.store.removeAll();
 		id = this.getFileId();
 		if(Ext.isEmpty(id)) return;
-		Files.getDuplicates(id, this.processFilesLoad, this)
+		CB_Files.getDuplicates(id, this.processFilesLoad, this)
 	}
 	,processFilesLoad: function(r, e){
 		if(r.success !== true) return;

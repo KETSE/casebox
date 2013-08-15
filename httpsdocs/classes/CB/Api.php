@@ -7,7 +7,9 @@ class Api
     {
         // get our verb
         $request_method = strtolower($_SERVER['REQUEST_METHOD']);
+
         $return_obj     = new Api\Request();
+
         // we'll store our data here
         $data           = array();
 
@@ -40,7 +42,7 @@ class Api
 
         if (isset($data['data'])) {
             // translate the JSON to an Object for use however you want
-            $return_obj->setData(json_decode($data['data']));
+            $return_obj->setData($data['data']);
         }
 
         return $return_obj;
