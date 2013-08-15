@@ -12,7 +12,7 @@ Dev.customizeObjectClass =  Ext.extend(CB.plugins.customInterface, {
 	}
 	,onButtonClick: function(b, e){
 		Ext.Msg.alert('plugin', 'buttonClicked')
-		customizeObjects.getCustomInfo( this.owner.data.id, this.processInfo, this )
+		sample_CustomizeObjects.getCustomInfo( this.owner.data.id, this.processInfo, this )
 	}
 	,processInfo: function(r, e){
 		if(r.success !== true) return;

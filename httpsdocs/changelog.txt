@@ -1,4 +1,22 @@
-CaseBox 1.9 (2013-08-12)
+CaseBox 1.9.8 (2013-08-15)
+==============================
+New Features, Improvements
+--------------------------
+- Basic Api model
+    apache config for host should be updated ( install/httpd/ssl_casebox.conf )
+- due to psr0 adjustments, for custom cores code, we advice to:
+    - define custom code classes into custom namespace (name of the core)
+    - place custom code classes under php/<custom namespace>/ forder of your core
+    - accessed casebox functions and constants should pe prefixed with \CB\
+    - classes defined in api, to be accessible in javascript, should be prefixed with "<custom_namespace>_" (ex. sample_CustomClass)
+    - from custom javascript files api methods are also prefixed with namespace with underline after it (ex. sample_CustomClass.customMethod(params, this.processResponse, this) ).
+
+
+Fixed Bugs:
+----------
+- small fixes
+
+CaseBox 1.9.1 (2013-08-12)
 ==============================
 New Features, Improvements
 --------------------------
