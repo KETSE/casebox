@@ -157,36 +157,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		um.menu.add(
 			{text: L.Language, iconCls: 'icon-language', hideOnClick: false, menu: langs}
 			,'-'
-			// ,{text: L.UserDetails, iconCls: App.loginData.iconCls, handler: function(){
-			// 	w = new CB.UserEditWindow({
-			// 		title: App.loginData['l'+App.loginData.language_id]
-			// 		,iconCls: App.loginData.iconCls
-			// 		,data: {id: App.loginData.id}
-			// 		,listeners: {
-			// 			scope: this
-			// 			,savesuccess: function(f, a){
-			// 				if(a.result.interface_params_changed)
-			// 					Ext.Msg.confirm(L.InterfaceParamsChanged, L.InterfaceParamsChangedMessage, function(btn){ if(btn == 'yes')  document.location.reload(); }, this)
-			// 			}
-			// 		}
-			// 	});
-			// 	w.show();
-			// }}
-			// ,{text: L.UploadPhoto, iconCls: 'file-gif', handler: function(b, e){
-			// 	w = new CB.FileUploadWindow({
-			// 		title: L.UploadPhoto
-			// 		,iconCls: 'file-gif'
-			// 		,fieldName: 'photo'
-			// 		,fileOnly: true
-			// 		,api: User.uploadPhoto
-			// 		,data: {id: App.loginData.id}
-			// 	});
-			// 	w.show();
-			// }}
-			// ,{text: L.ChangePassword, iconCls: 'icon-key', handler: function(){
-			// 	w = new CB.ChangePasswordWindow({data: {id: App.loginData.id}});
-			// 	w.show();
-			// }}
 			,{text: L.Account, iconCls: 'icon-user-' + App.loginData.sex, handler: function(){
 				App.openUniqueTabbedWidget( 'CBAccount' , null)
 			}}
@@ -216,7 +186,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 			,msg: L.ExitConfirmationMessage
 			,fn: function(btn, text){
 				if (btn == 'yes')
-					User.logout(function(response, e){
+					CB_User.logout(function(response, e){
 						if(response.success === true) window.location.reload();
 					});
 			}
@@ -224,7 +194,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	}
 	,populateMainMenu: function(){
 		App.mainAccordion.getEl().mask(L.LoadingData, 'icon-loading');
-		User.getMainMenuItems(this.processMainMenuItems, this);
+		CB_User.getMainMenuItems(this.processMainMenuItems, this);
 	}
 	,processMainMenuItems: function(r, e){
 		App.mainAccordion.getEl().unmask();
@@ -346,7 +316,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	,setUserLanguage: function(b, e){
 		if(b.data.id == App.loginData.language_id) return;
 		Ext.Msg.confirm(L.LanguageChange, L.LanguageChangeMessage, function(pb){
-			if(pb == 'yes') User.setLanguage(b.data.id, this.processSetUserLanguage, this);
+			if(pb == 'yes') CB_User.setLanguage(b.data.id, this.processSetUserLanguage, this);
 			if(b.ownerCt) b.ownerCt.items.each(function(i){ i.setChecked(i.data.id == App.loginData.language_id)}, this);
 		}, this)
 	}
@@ -355,7 +325,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 		else Ext.Msg.Alert(L.Error, L.ErrorOccured);
 	}
 	,toggleFavorite: function(p){
-		Browser.toggleFavorite(p, this.processToggleFavorite, this);
+		CB_Browser.toggleFavorite(p, this.processToggleFavorite, this);
 	}
 	,processToggleFavorite: function(r, e){
 		this.fireEvent('favoritetoggled', r, e);

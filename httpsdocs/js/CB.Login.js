@@ -75,7 +75,7 @@ CB.Login = Ext.extend(Ext.Window, {
 		if(!user.isValid() || !pass.isValid()) return false;
 		//Ext.util.Cookies.set('lastUser', user.getValue());
 		
-		User.login(user.getValue(), pass.getValue(), this.processLoginResponse);
+		CB_User.login(user.getValue(), pass.getValue(), this.processLoginResponse);
 	}
 	,processLoginResponse: function(response, e){
 		lw = Ext.getCmp('CBLoginWindow');
@@ -160,7 +160,7 @@ CB.VerifyPassword = Ext.extend(Ext.Window, {
 		pass = this.find('name', 'password')[0];
 		if(!pass.isValid()) return false;
 		
-		User.verifyPassword( pass.getValue(), this.processVerifyResponse, this);
+		CB_User.verifyPassword( pass.getValue(), this.processVerifyResponse, this);
 	}
 	,processVerifyResponse: function(response, e){
 		if(e.result.success === true){

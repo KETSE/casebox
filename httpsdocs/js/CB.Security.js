@@ -65,10 +65,10 @@ CB.SecurityPanel = Ext.extend(Ext.Panel, {
 			,restful: true
 			,root: 'data'
 			,api:{
-				read: Security.getObjectAcl
-				,create: Security.addObjectAccess
-				,update: Security.updateObjectAccess
-				,destroy: Security.destroyObjectAccess
+				read: CB_Security.getObjectAcl
+				,create: CB_Security.addObjectAccess
+				,update: CB_Security.updateObjectAccess
+				,destroy: CB_Security.destroyObjectAccess
 			}
 			,fields: [
 				{name:'id', type: 'int'}

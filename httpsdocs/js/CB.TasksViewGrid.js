@@ -98,7 +98,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 			,baseParams: {template_types: 'task', facets: 'tasks'}//7
 			,proxy: new  Ext.data.DirectProxy({
 				paramsAsHash: true
-				,directFn: BrowserView.getChildren
+				,directFn: CB_BrowserView.getChildren
 				,listeners:{
 					scope: this
 					,load: this.onProxyLoad
@@ -603,7 +603,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 			,height: 200
 			,buttons: Ext.MessageBox.OKCANCEL
 			,multiline: true
-			,fn: function(b, message){ if(b == 'ok') Tasks.complete({id: r.get('nid'), message: message}, this.processTaskCompleting, this)}
+			,fn: function(b, message){ if(b == 'ok') CB_Tasks.complete({id: r.get('nid'), message: message}, this.processTaskCompleting, this)}
 			,scope: this
 		});
 	}

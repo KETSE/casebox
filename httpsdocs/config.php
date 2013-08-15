@@ -51,7 +51,7 @@ if (!file_exists(CORE_ROOT)) {
 set_include_path(
     DOC_ROOT.'libx'.PATH_SEPARATOR.
     DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
-    DOC_ROOT.'remote'.DIRECTORY_SEPARATOR.'classes'.PATH_SEPARATOR.
+    DOC_ROOT.'classes'.PATH_SEPARATOR.
     CORE_ROOT.'php'. PATH_SEPARATOR.
     get_include_path()
 );

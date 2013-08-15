@@ -224,7 +224,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
         
         Ext.apply(this, {
             loader: new Ext.tree.TreeLoader({
-                directFn: UsersGroups.getChildren
+                directFn: CB_UsersGroups.getChildren
                 ,paramsAsHash: true
                 ,preloadChildren: true
                 ,listeners:{
@@ -284,7 +284,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
                 ,dragdrop: {scope: this, fn: function( tree, node, dd, e ){
                         this.sourceNode = dd.dragOverData.dropNode;
                         this.targetNode = dd.dragOverData.target;
-                        UsersGroups.associate(this.sourceNode.attributes.nid, this.targetNode.attributes.nid, this.processAssociate, this);
+                        CB_UsersGroups.associate(this.sourceNode.attributes.nid, this.targetNode.attributes.nid, this.processAssociate, this);
                     }
                 }
                 ,beforeappend: { scope: this, fn: function(t, p, n){ 
@@ -356,7 +356,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
         var n = editor.editNode;
         editor.cancelEdit();
         this.getEl().mask(L.Processing, 'x-mask-loading');
-        UsersGroups.renameGroup({id: n.attributes.nid, title: newVal}, this.processRenameGroup, this);
+        CB_UsersGroups.renameGroup({id: n.attributes.nid, title: newVal}, this.processRenameGroup, this);
         return false;
     }
     ,processRenameGroup: function(r, e){
@@ -370,7 +370,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
         w.show();
     }
     ,addUser: function(params, t){
-        UsersGroups.addUser(params, t.processAddUser, t);
+        CB_UsersGroups.addUser(params, t.processAddUser, t);
     }
     ,processAddUser: function(r, e){
         if(r.success !== true) return false;
@@ -398,7 +398,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
         n = this.getSelectionModel().getSelectedNode();
         if(!n) return;
         Ext.Msg.confirm(L.ExtractUser, L.ExtractUserMessage.replace('{user}', n.attributes.name).replace('{group}', n.parentNode.attributes.text),
-            function(b){if(b == 'yes') UsersGroups.deassociate(n.attributes.nid, n.parentNode.attributes.nid, this.processDeassociate, this); }, this
+            function(b){if(b == 'yes') CB_UsersGroups.deassociate(n.attributes.nid, n.parentNode.attributes.nid, this.processDeassociate, this); }, this
         )
     }
     ,processDeassociate: function(r, e){
@@ -441,7 +441,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
             function(btn, text){
                 if(btn == 'yes'){
                     n = this.getSelectionModel().getSelectedNode();
-                    UsersGroups.deleteUser(n.attributes.nid, this.processDelNode, this);
+                    CB_UsersGroups.deleteUser(n.attributes.nid, this.processDelNode, this);
                 }
             }
             , this);
@@ -449,7 +449,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
         case 1: 
             Ext.MessageBox.confirm(L.Confirmation, L.DeleteGroupConfirmationMessage + ' "'+n.attributes.text+'"?', 
             function(btn, text){
-                if(btn == 'yes') Security.destroyUserGroup(n.attributes.nid, this.processDestroyUserGroup, this);
+                if(btn == 'yes') CB_Security.destroyUserGroup(n.attributes.nid, this.processDestroyUserGroup, this);
             }
             , this);
             break;
@@ -551,7 +551,7 @@ CB.UserEditWindow = Ext.extend(Ext.Window, {
     }
     ,onAfterRender: function(){
         this.getEl().mask(L.LoadingData + ' ...');
-        User.getProfileData(this.data.id, this.onLoadProfileData, this);
+        CB_User.getProfileData(this.data.id, this.onLoadProfileData, this);
     }
     ,onLoadProfileData: function(r, e){
         this.getEl().unmask();
@@ -584,7 +584,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
 
         Ext.apply(this, {
             layout: 'border'
-            ,api: {submit: User.uploadPhoto }
+            ,api: {submit: CB_User.uploadPhoto }
             ,hideBorders: true
             ,tbar:[{text: L.Save, iconCls: 'icon-save', disabled: true, handler: this.saveData, scope: this}
                 ,{text: Ext.MessageBox.buttonText.cancel, iconCls: 'icon-cancel', disabled: true, handler: function(b, e){e.stopPropagation();this.loadData();}, scope: this}
@@ -696,7 +696,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
     ,loadData: function(id){
         if(!Ext.isEmpty(id)) this.data.id = id;
         this.getEl().mask(L.LoadingData + ' ...');
-        UsersGroups.getAccessData(this.data.id, this.processLoadedData, this);
+        CB_UsersGroups.getAccessData(this.data.id, this.processLoadedData, this);
     }
     ,processLoadedData: function(response, e){
         if(response.success === true){
@@ -737,7 +737,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
         params = { groups: [] };
         this.grid.getStore().each(function(r){ if(r.get('active') == 1) params.groups.push(r.get('id'))}, this);
         params.id = this.data.id;
-        UsersGroups.saveAccessData(params, function(r, e){ this.setDirty(false); this.getEl().unmask(); this.fireEvent('save');}, this);
+        CB_UsersGroups.saveAccessData(params, function(r, e){ this.setDirty(false); this.getEl().unmask(); this.fireEvent('save');}, this);
     }           
     ,onEditUserDataClick: function(w, idx, el, ev){
         if(ev && (ev.getTarget().localName == "img") ) {
@@ -768,7 +768,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
                 if(Ext.isEmpty(text)) return Ext.Msg.alert(L.Error, L.UsernameCannotBeEmpty);
                 r = /^[a-z0-9\._]+$/i;
                 if(Ext.isEmpty(r.exec(text))) return Ext.Msg.alert(L.Error, L.UsernameInvalid);
-                UsersGroups.renameUser(
+                CB_UsersGroups.renameUser(
                     {id: this.data.id, name: text}, 
                     function(r, e){ 
                         if(r.success !== true) return Ext.Msg.alert(L.Error, Ext.value(e.msg, L.ErrorOccured) );
@@ -804,7 +804,7 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
 
         this.form = new CB.UsersGroupsForm( { 
             region: 'center'
-            ,api: {submit: User.uploadPhoto }
+            ,api: {submit: CB_User.uploadPhoto }
             ,listeners:{
                 scope: this
                 ,beforesave: this.onBeforeFormSave
@@ -961,7 +961,7 @@ CB.ChangePasswordWindow = Ext.extend(Ext.Window, {
                 ,monitorValid: true
                 ,baseParams: this.data
                 ,api: {
-                    submit: UsersGroups.changePassword
+                    submit: CB_UsersGroups.changePassword
                 }
                 ,items: {
                     xtype: 'fieldset'

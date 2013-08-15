@@ -219,6 +219,7 @@ class SolrClient
                     ,t.subtype
                     ,t.template_id
                     ,t.target_id
+                    ,t.size
             -- ,CASE WHEN t.type = 2 then (SELECT `type` FROM tree WHERE id = t.target_id) ELSE null END `target_type`
             ,DATE_FORMAT(t.`date`, \'%Y-%m-%dT%H:%i:%sZ\') `date`
             ,DATE_FORMAT(t.`date_end`, \'%Y-%m-%dT%H:%i:%sZ\') `date_end`
@@ -250,10 +251,10 @@ class SolrClient
                 if ($all || ($r['updated'] & 1)) { //update all object info
                     $id = $r['id'];
                     $type = $r['type'];
-                    if ($r['type'] == 2) {
-                        $id = $r['target_id']; //link
-                        $type = $r['target_type']; //link
-                    }
+                    // if ($r['type'] == 2) {
+                    //     $id = $r['target_id']; //link
+                    //     $type = $r['target_type']; //link
+                    // }
 
                     if (!empty($r['case_id'])) {
                         if (!isset($cases_info[$r['case_id']])) {

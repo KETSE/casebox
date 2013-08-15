@@ -8,10 +8,10 @@ CB.Favorites = Ext.extend(Ext.util.Observable, {
 			,proxy: new  Ext.data.DirectProxy({
 				paramsAsHash: true
 				,api: {
-					create: Favorites.create
-					,read: Favorites.read
-					,update: Favorites.update
-					,destroy: Favorites.destroy 
+					create: CB_Favorites.create
+					,read: CB_Favorites.read
+					,update: CB_Favorites.update
+					,destroy: CB_Favorites.destroy 
 				}
 			})
 			,reader: new Ext.data.JsonReader({

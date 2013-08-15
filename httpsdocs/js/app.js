@@ -22,8 +22,8 @@ Ext.onReady(function(){
 	
 	Ext.Direct.on('login', function(r, e){ 
 		/*if(r.method == 'logout') /**/ 
-		clog('login exception');
-		//window.location.reload(); 
+		// clog('login exception');
+		window.location.reload(); 
 		/*else App.PromtLogin(); /**/
 	});
 	Ext.Direct.on('exception', App.showException);
@@ -35,7 +35,7 @@ Ext.onReady(function(){
 		Ext.fly('loading-mask').fadeOut({remove:true});
 	}, 250);
 	
-	User.getLoginInfo( function(r, e){
+	CB_User.getLoginInfo( function(r, e){
 		if(r.success !== true) return;
 		App.config = r.config;
 		App.loginData = r.user;
@@ -466,7 +466,7 @@ function initApp(){
 	
 	App.locateObject = function(object_id, path){
 		if(Ext.isEmpty(path)){
-			Path.getPidPath(object_id, function(r, e){
+			CB_Path.getPidPath(object_id, function(r, e){
 				if(r.success !== true) return ;
 				App.locateObject(r.id, r.path);
 			})

@@ -1,44 +1,35 @@
 <?php
 namespace CB;
 
-$method = $_SERVER['REQUEST_METHOD'] === 'POST'
-          ? @$_POST['method']
-          : @$_GET['method'];
+require_once '../config.php';
 
+session_start();
+$_SESSION['user'] = array('id' => 1);// root
 
-// TODO: the switch below may be changed into a more generic approach:
-// determine the class first, example, see if method starts with 'cb.files...' for example
-// and then create an Api\Files object and call the method
-switch ($method) {
-    case 'cb.files.download':
-        cbFilesDownload();
-        break;
+$api = new Api();
+$request = $api->processRequest();
+$rv = $request->getRequestVars();
 
-    case 'cb.objects.permissions.addRule':
-        cbObjectsPermissionsAddRule();
-        break;
-
-    default:
-        $r = ['status' => 'ok'];
-        echo json_encode($r);
-        break;
+if (empty($rv['action']) || empty($rv['method'])) {
+    $api->sendResponse(501, '', 'text/html');
 }
 
+$action = $rv['action'];
+$method = $rv['method'];
+$data = @$rv['data'];
+//sanitize $action and $method
+$action = '\\CB\\Api\\'.preg_replace('/[^a-z_\\\\]+/i', '', strip_tags($action));
+$method = preg_replace('/[^a-z]+/i', '', strip_tags($method));
 
+$result = array( 'success' => 'false' );
 
+try {
+    $o = new $action();
+    $result = call_user_func_array(array($o, $method), array($data));
 
-function cbFilesDownload()
-{
-
-    # check credentials etc etc.
-    $id = @$_GET['id'];
-    echo $id;
-
+} catch (Exception $e) {
+    $api->sendResponse(501, '', 'text/html');
+    exit();
 }
 
-
-function cbObjectsPermissionsAddRule()
-{
-    // objectId
-    //
-}
+$api->sendResponse(200, json_encode($result), 'application/json');

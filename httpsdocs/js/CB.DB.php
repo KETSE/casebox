@@ -188,7 +188,7 @@ foreach ($templates as $t => $f) {
     reloadTemplates = function(){
         CB.DB.templates.reload({
             callback: function(){
-                Templates.getTemplatesStructure(function(r, e){
+                CB_Templates.getTemplatesStructure(function(r, e){
                     Ext.iterate(CB.DB, function(k, st){
                         if (k.substr(0, 8) == 'template') {
                             tid = k.substr(8);
@@ -218,7 +218,7 @@ foreach ($templates as $t => $f) {
         })
     }
 createDirectStores = function(){
-    if (typeof(Security) == 'undefined') {
+    if (typeof(CB_Security) == 'undefined') {
         createDirectStores.defer(500);
 
         return;
@@ -229,10 +229,10 @@ createDirectStores = function(){
         ,proxy: new  Ext.data.DirectProxy({
             paramsAsHash: true
             ,api: {
-                create:   Thesauri.create
-                ,read:    Thesauri.read
-                ,update:  Thesauri.update
-                ,destroy: Thesauri.destroy
+                create:   CB_Thesauri.create
+                ,read:    CB_Thesauri.read
+                ,update:  CB_Thesauri.update
+                ,destroy: CB_Thesauri.destroy
             }
         })
         ,reader: new Ext.data.JsonReader({
@@ -262,10 +262,10 @@ createDirectStores = function(){
         ,proxy: new  Ext.data.DirectProxy({
             paramsAsHash: true
             ,api: {
-                create:   Templates.create
-                ,read:    Templates.readAll
-                ,update:  Templates.update
-                ,destroy: Templates.destroy
+                create:   CB_Templates.create
+                ,read:    CB_Templates.readAll
+                ,update:  CB_Templates.update
+                ,destroy: CB_Templates.destroy
             }
         })
         ,reader: new Ext.data.JsonReader({
@@ -302,7 +302,7 @@ createDirectStores = function(){
         autoLoad: true
         ,proxy: new  Ext.data.DirectProxy({
             paramsAsHash: true
-            ,directFn: Security.getActiveUsers
+            ,directFn: CB_Security.getActiveUsers
         })
         ,reader: new Ext.data.JsonReader({
                 successProperty: 'success'
@@ -319,10 +319,10 @@ createDirectStores = function(){
         ,proxy: new  Ext.data.DirectProxy({
             paramsAsHash: true
             ,api: {
-                read: Security.getUserGroups
-                ,create: Security.createUserGroup
-                ,update: Security.updateUserGroup
-                ,destory: Security.destroyUserGroup
+                read: CB_Security.getUserGroups
+                ,create: CB_Security.createUserGroup
+                ,update: CB_Security.updateUserGroup
+                ,destory: CB_Security.destroyUserGroup
 
             }
         })
@@ -346,7 +346,7 @@ createDirectStores = function(){
         ,autoDestroy: false
         ,proxy: new  Ext.data.DirectProxy({
             paramsAsHash: true
-            ,directFn: Security.searchUserGroups
+            ,directFn: CB_Security.searchUserGroups
         })
         ,reader: new Ext.data.JsonReader({
                 successProperty: 'success'
@@ -363,7 +363,7 @@ createDirectStores = function(){
         ,autoDestroy: false
         ,proxy: new  Ext.data.DirectProxy({
             paramsAsHash: true
-            ,directFn: System.getCountries
+            ,directFn: CB_System.getCountries
         })
         ,reader: new Ext.data.ArrayReader({
                 successProperty: 'success'
@@ -396,7 +396,7 @@ createDirectStores = function(){
         ,autoDestroy: false
         ,proxy: new  Ext.data.DirectProxy({
             paramsAsHash: true
-            ,directFn: System.getTimezones
+            ,directFn: CB_System.getTimezones
         })
         ,reader: new Ext.data.ArrayReader({
                 successProperty: 'success'

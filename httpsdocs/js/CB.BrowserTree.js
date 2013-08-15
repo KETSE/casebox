@@ -166,7 +166,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 
 		Ext.apply(this, {
 			loader: new Ext.tree.TreeLoader({
-				directFn: BrowserTree.getChildren
+				directFn: CB_BrowserTree.getChildren
 				,paramsAsHash: true
 				,listeners: {
 					scope: this
@@ -273,7 +273,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 			]
 		})
 		CB.BrowserTree.superclass.initComponent.apply(this, arguments);
-		if(!Ext.isEmpty(this.rootId)) BrowserTree.getRootProperties(this.rootId, function(r, e){
+		if(!Ext.isEmpty(this.rootId)) CB_BrowserTree.getRootProperties(this.rootId, function(r, e){
 			Ext.apply(this.getRootNode().attributes, r.data)
 			this.onBeforeNodeAppend(this, null, this.getRootNode())
 		}, this)
@@ -460,7 +460,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		data.pathtext = this.contextMenu.node.getPath('text');
 		tr = CB.DB.templates.getById(data.template_id);
 		if(tr && (tr.get('cfg').createMethod == 'inline') )
-			Objects.create(data, this.processCreateInlineObject, this);
+			CB_Objects.create(data, this.processCreateInlineObject, this);
 		else this.fireEvent('createobject', data, e);
 	}
 	,processCreateInlineObject: function(r, e){
@@ -587,7 +587,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 		var n = editor.editNode;
 		editor.cancelEdit();
 		this.getEl().mask(L.Processing, 'x-mask-loading');
-		BrowserTree.rename({path: n.getPath('nid'), name: newVal}, this.processRename, this);
+		CB_BrowserTree.rename({path: n.getPath('nid'), name: newVal}, this.processRename, this);
 		return false;
 	}
 	,processRename: function(r, e){
@@ -598,7 +598,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 	}
 	,onCreateFolderClick: function(b, e){
 		this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-		BrowserTree.createFolder(this.getSelectionModel().getSelectedNode().getPath('nid'), this.processCreateFolder, this);
+		CB_BrowserTree.createFolder(this.getSelectionModel().getSelectedNode().getPath('nid'), this.processCreateFolder, this);
 	}
 	,processCreateFolder: function (r, e) {
 		this.getEl().unmask();

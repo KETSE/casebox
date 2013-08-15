@@ -1,5 +1,5 @@
 <?php
-namespace CB;
+namespace ExtDirect;
 
 echo json_encode(
     array(

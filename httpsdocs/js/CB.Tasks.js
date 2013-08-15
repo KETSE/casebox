@@ -260,7 +260,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 			return this.processLayout();
 		}
 		this.getEl().mask(L.LoadingData, 'x-mask-loading');
-		Tasks.load(this.data.id, this.onLoad, this);
+		CB_Tasks.load(this.data.id, this.onLoad, this);
 	}
 	,onLoad: function(r, e){
 		if(r.success == true) Ext.apply(this.data, r.data);
@@ -531,7 +531,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 					,autoHeight: true
 					,border: false
 					,bodyCssClass: 'task-form'
-					,api: {submit: Tasks.save}
+					,api: {submit: CB_Tasks.save}
 					,fileUpload: true
 					,labelWidth: 115
 					,monitorValid: true
@@ -783,7 +783,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		}
 	}
 	,saveReminds: function(){
-		Tasks.saveReminds({id: this.data.id, object_id: this.data.object_id, title: this.data.title, date_end: this.data.date_end, reminds: this.data.reminds.join('-')}
+		CB_Tasks.saveReminds({id: this.data.id, object_id: this.data.object_id, title: this.data.title, date_end: this.data.date_end, reminds: this.data.reminds.join('-')}
 			,function(r, e){
 				if(r.success !== true) return;
 				this.data.reminds = r.reminds.split('-');
@@ -809,7 +809,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 			,height: 200
 			,buttons: Ext.MessageBox.OKCANCEL
 			,multiline: true
-			,fn: function(b, message){ if(b == 'ok') Tasks.setUserStatus({id: this.data.id, user_id: user_id, status: 1, message: message}, this.processSettingUserStatus, this)}
+			,fn: function(b, message){ if(b == 'ok') CB_Tasks.setUserStatus({id: this.data.id, user_id: user_id, status: 1, message: message}, this.processSettingUserStatus, this)}
 			,scope: this
 		});
 	}
@@ -821,7 +821,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 			,height: 200
 			,buttons: Ext.MessageBox.OKCANCEL
 			,multiline: true
-			,fn: function(b, message){ if(b == 'ok') Tasks.setUserStatus({id: this.data.id, user_id: user_id, status: 0, message: message}, this.processSettingUserStatus, this)}
+			,fn: function(b, message){ if(b == 'ok') CB_Tasks.setUserStatus({id: this.data.id, user_id: user_id, status: 0, message: message}, this.processSettingUserStatus, this)}
 			,scope: this
 		});
 	}
@@ -871,7 +871,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 			,fn: function(b, message){ 
 				if(b == 'ok'){
 					this.getEl().mask(L.CompletingTask + ' ...', 'x-mask-loading');
-					Tasks.close(this.data.id, this.doCloseTask, this)
+					CB_Tasks.close(this.data.id, this.doCloseTask, this)
 				}
 			}
 			,scope: this
@@ -891,7 +891,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 		Ext.Msg.confirm( L.ReopeningTask, L.ReopenTaskConfirmationMsg, function(b){ 
 				if(b == 'yes'){
 					this.getEl().mask(L.ReopeningTask + ' ...', 'x-mask-loading');
-					Tasks.reopen(this.data.id, this.processTaskCompleting, this)
+					CB_Tasks.reopen(this.data.id, this.processTaskCompleting, this)
 				}
 			}
 			,this
@@ -909,7 +909,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
 			,height: 200
 			,buttons: Ext.MessageBox.OKCANCEL
 			,multiline: true
-			,fn: function(b, message){ if(b == 'ok') Tasks.complete({id: this.data.id, message: message}, this.processTaskCompleting, this)}
+			,fn: function(b, message){ if(b == 'ok') CB_Tasks.complete({id: this.data.id, message: message}, this.processTaskCompleting, this)}
 			,scope: this
 		});
 	}
@@ -1319,7 +1319,7 @@ CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
 		this.tasksView.store.removeAll();
 		id = this.getCaseObjectId();
 		if(Ext.isEmpty(id)) return;
-		BrowserView.getChildren({
+		CB_BrowserView.getChildren({
 			pid: id
 			,template_types: ['task']
 			,filters: this.filters

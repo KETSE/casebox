@@ -238,7 +238,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
 		this.items.each( function(i){
 			if(!Ext.isEmpty(i.getParams)) this.lastParams[i.name] = i.getParams();
 		}, this)
-		BrowserView.getSummaryData(this.lastParams, this.processReload, this);
+		CB_BrowserView.getSummaryData(this.lastParams, this.processReload, this);
 	}
 	,processReload: function(r, e){
 		if(this.rendered) this.getEl().unmask()
@@ -372,7 +372,7 @@ CB.SummaryBlock = Ext.extend( Ext.Panel, {
 		if(this.rendered) this.getEl().mask(L.LoadingData, 'icon-loading');
 		this.params = {}
 		this.params[this.name] = this.getParams()
-		BrowserView.getSummaryData( this.params, this.processReload, this);
+		CB_BrowserView.getSummaryData( this.params, this.processReload, this);
 	}
 	,processReload: function(r, e){
 		if(this.rendered) this.getEl().unmask()

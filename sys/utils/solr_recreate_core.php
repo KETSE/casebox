@@ -7,6 +7,7 @@
     example: php -f solr_recreate_core.php dev
 */
 error_reporting(E_ALL);
+ini_set('max_execution_time', 0);
 
 if (PHP_OS == 'WINNT') {
     shell_exec('net stop jetty');

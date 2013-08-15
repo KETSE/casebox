@@ -60,7 +60,7 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 			,autoDestroy: true
 			,proxy: new  Ext.data.DirectProxy({
 				paramsAsHash: true
-				,directFn: Calendar.getEvents
+				,directFn: CB_Calendar.getEvents
 				,listeners:{
 					scope: this
 					,load: function(proxy, obj, opt){

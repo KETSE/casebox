@@ -175,10 +175,10 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
 		this.uploadingFile.set('response', w.response);
 		if(w.response == 'rename'){
 			Ext.Msg.prompt(L.Rename, L.NewFileName, function(btn, text){
-				if( (btn == 'ok') && !Ext.isEmpty(text) ) Browser.confirmUploadRequest({response: 'rename', newName: text}, this.onConfirmResponseProcess, this);
+				if( (btn == 'ok') && !Ext.isEmpty(text) ) CB_Browser.confirmUploadRequest({response: 'rename', newName: text}, this.onConfirmResponseProcess, this);
 				else{
 					this.uploadingFile.set('status', 4);//abort
-					Browser.confirmUploadRequest({response: 'cancel'}, this.onConfirmResponseProcess, this);
+					CB_Browser.confirmUploadRequest({response: 'cancel'}, this.onConfirmResponseProcess, this);
 				}
 			}, this, false, this.serverResponse.suggestedFilename);
 		}else{
@@ -187,7 +187,7 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
 					if( (r.get('status') < 2) && (r.get('group') == this.uploadingFile.get('group')))
 						r.set('response', w.response);
 				}, this); //set default response for all files in this group
-			Browser.confirmUploadRequest({response: w.response}, this.onConfirmResponseProcess, this);
+			CB_Browser.confirmUploadRequest({response: w.response}, this.onConfirmResponseProcess, this);
 		}
 		w.destroy();
 	},onConfirmResponseProcess: function(r, e){
@@ -265,7 +265,7 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
 			}
 		}, this);
 		if(i > 0){
-			Files.checkExistentContents(md5array, this.processCheckExistentContents, this);
+			CB_Files.checkExistentContents(md5array, this.processCheckExistentContents, this);
 		}else if(this.config.autoStart) this.start();
 	}
 	,processCheckExistentContents: function(r, e){

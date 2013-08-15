@@ -30,14 +30,14 @@ CB.Clipboard =  Ext.extend(Ext.util.Observable, {
 		this.callback = scope ? callback.createDelegate(scope) : callback;
 		action = Ext.value(action, this.action);
 		this.lastParams = {pid: pid, data: this.data, action: action};
-		Browser.paste(this.lastParams, this.processPaste, this);
+		CB_Browser.paste(this.lastParams, this.processPaste, this);
 	}
 	,processPaste: function(r, e){
 		if(r.success !== true){
 			if(r.confirm == true) Ext.Msg.confirm(L.Confirmation, r.msg, function(b){
 				if(b == 'yes'){
 					this.lastParams.confirmed = true;
-					Browser.paste(this.lastParams, this.processPaste, this);
+					CB_Browser.paste(this.lastParams, this.processPaste, this);
 				}
 			}, this);
 			else Ext.Msg.alert(L.Error, r.msg);

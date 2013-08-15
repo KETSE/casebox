@@ -1,16 +1,8 @@
 <?php
-namespace CB;
+namespace ExtDirect;
 
 require_once '../init.php';
 require 'config.php';
-
-class BogusAction
-{
-    public $action;
-    public $method;
-    public $data;
-    public $tid;
-}
 
 $isForm = false;
 $isUpload = false;
@@ -35,7 +27,7 @@ function doRpc($cdata)
 {
     global $API;
 
-    if (!User::isLoged() && ( ($cdata->action != 'User') || ($cdata->method != 'login') )) {
+    if (!\CB\User::isLoged() && ( ($cdata->action != 'User') || ($cdata->method != 'login') )) {
         return array(
             array(
                 'type' => 'exception'
@@ -73,12 +65,8 @@ function doRpc($cdata)
         );
 
         //require_once("classes/$action.php"); // it's managed by _autoload
-        if (class_exists($action)) {
-            $o = new $action();
-        } else {
-            $action = 'CB\\'.$action;
-            $o = new $action();
-        }
+        $action = str_replace('_', '\\', $action);
+        $o = new $action();
 
         $params = isset($cdata->data) && is_array($cdata->data) ? $cdata->data : array();
 
@@ -86,11 +74,12 @@ function doRpc($cdata)
 
         doAroundCalls($mdef['after'], $cdata, $r);
         doAroundCalls($a['after'], $cdata, $r);
+
     } catch (\Exception $e) {
         $r['type'] = 'exception';
         $r['result'] = array('success' => false);
         $r['msg'] = $e->getMessage();
-        if (isDebugHost()) {
+        if (\CB\isDebugHost()) {
             $r['where'] = $e->getTraceAsString();
         }//else $r['message'] = 'Error';
     }
@@ -114,7 +103,7 @@ function doAroundCalls(&$fns, &$cdata, &$returnData = null)
 
 function sanitizeParams(&$cdata)
 {
-    $cdata->action = preg_replace('/[^a-z\\\\]+/i', '', strip_tags($cdata->action));
+    $cdata->action = preg_replace('/[^a-z_\\\\]+/i', '', strip_tags($cdata->action));
     $cdata->method = preg_replace('/[^a-z]+/i', '', strip_tags($cdata->method));
     $cdata->tid = intval(strip_tags($cdata->tid));
 

@@ -14,7 +14,7 @@ class Search extends SolrClient
          ,'date_end'
          ,'importance'
          ,'completed'
-         , 'category_id'
+         ,'category_id'
          ,'status'
          ,'oid'
          ,'cid'
@@ -100,11 +100,14 @@ class Search extends SolrClient
         /* adding additional query filters */
 
         /* assign security sets to filters */
-        $sets = Security::getSecuritySets();
-        if (empty($sets)) {
-            $sets = array(0);
+
+        if (!Security::isAdmin()) {
+            $sets = Security::getSecuritySets();
+            if (empty($sets)) {
+                $sets = array(0);
+            }
+            $fq[] = 'security_set_id:('.implode(' OR ', $sets).') OR oid:'.$_SESSION['user']['id'];
         }
-        $fq[] = 'security_set_id:('.implode(' OR ', $sets).') OR oid:'.$_SESSION['user']['id'];
         /* end of assign security sets to filters */
 
         /* adding security filter*/

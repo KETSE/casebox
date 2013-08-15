@@ -94,6 +94,7 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 	}
 	,getIconClass: Ext.emptyFn // this function should be redefined for child classes to return a corresponding icon for the window
 	,processLoadResponse: function(f, e){
+		this.getEl().unmask(); 
 		r = e.result;
 		if(r.success !== true){
 			if(App.hideFailureAlerts){
@@ -119,7 +120,6 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 			});
 			return;
 		}
-		this.getEl().unmask(); 
 		this._setFormValues();
 	}
 	,_setFormValues: function(){
@@ -156,13 +156,21 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 		this.getEl().unmask();
 	}
 	,onSaveFailure: function(form, action){
+		this.getEl().unmask();
 		if(Ext.isDefined(action.result.already_opened_by)){
-			this.getEl().unmask();
 			Ext.Msg.show({
 			title: L.SavingDataConfirmation
 			,msg: action.result.already_opened_by
 			,buttons: Ext.Msg.YESNO
-			,fn: function(b){if(b == 'yes'){this._forcedSave = 1; this.saveForm();} else {this.getEl().unmask(); this._confirmedClosing = 0;}}
+			,fn: function(b){
+				if(b == 'yes'){
+					this._forcedSave = 1;
+					this.saveForm();
+				} else {
+					this.getEl().unmask(); 
+					this._confirmedClosing = 0;
+				}
+			}
 			,scope: this
 			,animEl: this.getEl()
 			,icon: Ext.MessageBox.QUESTION
@@ -170,7 +178,6 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 		}else{
 			this.fireEvent('savefail', this, action);
 			App.formSubmitFailure(form, action); 
-			this.getEl().unmask();
 		}
 	}
 })

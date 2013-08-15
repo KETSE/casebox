@@ -20,7 +20,7 @@ CB.Case = Ext.extend(Ext.Panel, {
 	,onAfterShow: function(c){
 		if(Ext.isEmpty(this.params.id)) return;
 		this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-		Objects.load(this.params, this.processLoad, this);
+		CB_Objects.load(this.params, this.processLoad, this);
 	}
 	,processLoad: function(r, e){
 		this.getEl().unmask();
@@ -165,7 +165,7 @@ CB.CaseCardBlock = Ext.extend(Ext.Panel, {
 	,reload: function(){
 		params = {}
 		params[this.serverRoot] = this.params;
-		Objects.queryCaseData( params, this.processReload, this)
+		CB_Objects.queryCaseData( params, this.processReload, this)
 	}
 	,processReload: function(r, e){
 		if(r.success !== true) return;

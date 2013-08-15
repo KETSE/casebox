@@ -15,6 +15,7 @@ if (empty($argv[1])) {
     exit(0);
 }
 
+ini_set('max_execution_time', 0);
 ini_set('allow_url_fopen', true);
 error_reporting(E_ALL);
 

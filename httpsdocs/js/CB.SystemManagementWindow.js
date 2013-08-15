@@ -244,7 +244,7 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 		
 		Ext.apply(this, {
 			loader: new Ext.tree.TreeLoader({
-				directFn: System.tagsGetChildren
+				directFn: CB_System.tagsGetChildren
 				,paramsAsHash: true
 				,listeners:{
 					scope: this
@@ -343,7 +343,7 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 	,onSaveElementSubmitClick: function(w){
 		if(w.status == 'ok'){
 			this.getEl().mask(L.LoadingData);
-			System.tagsSaveElement(w.data, this.onSaveElementProcess, this);
+			CB_System.tagsSaveElement(w.data, this.onSaveElementProcess, this);
 		}
 		w.destroy();
 	}
@@ -441,7 +441,7 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 			if(btn == 'yes'){
 				this.getEl().mask(L.Deleting)
 				n = this.getSelectionModel().getSelectedNode();
-				System.tagsDeleteElement(n.attributes.id, this.processDelElement, this);
+				CB_System.tagsDeleteElement(n.attributes.id, this.processDelElement, this);
 			}
 		}
 		, this);
@@ -461,19 +461,19 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 		this.sourceNode = dd.dragOverData.dropNode;
 		this.point = dd.dragOverData.point;
 		this.targetNode = dd.dragOverData.target;
-		System.tagsMoveElement({id: this.sourceNode.attributes.id, toId: this.targetNode.attributes.id, point: dd.dragOverData.point}, this.processMoveElement, this);/**/
+		CB_System.tagsMoveElement({id: this.sourceNode.attributes.id, toId: this.targetNode.attributes.id, point: dd.dragOverData.point}, this.processMoveElement, this);/**/
 	}
 	,onMoveUpClick: function(){
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n) return;
 		this.sourceNode = n;
-		System.tagsMoveElement({id: n.attributes.id, toId: n.previousSibling.attributes.id, point: 'above'}, this.processMoveUp, this)
+		CB_System.tagsMoveElement({id: n.attributes.id, toId: n.previousSibling.attributes.id, point: 'above'}, this.processMoveUp, this)
 	}
 	,onMoveDownClick: function(b, e){
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n) return;
 		this.sourceNode = n;
-		System.tagsMoveElement({id: n.attributes.id, toId: n.nextSibling.attributes.id, point: 'below'}, this.processMoveDown, this)
+		CB_System.tagsMoveElement({id: n.attributes.id, toId: n.nextSibling.attributes.id, point: 'below'}, this.processMoveDown, this)
 	}
 	,processMoveUp: function(r, e){
 		if(r.success !== true) return;
@@ -493,19 +493,19 @@ CB.TagsTree = Ext.extend(Ext.tree.TreePanel, {
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n) return;
 		this.sourceNode = n;
-		System.tagsSortChilds({id: n.attributes.id, direction: 'asc'}, this.processSorting, this)
+		CB_System.tagsSortChilds({id: n.attributes.id, direction: 'asc'}, this.processSorting, this)
 	}
 	,onSortDescendingClick: function(b, e){
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n) return;
 		this.sourceNode = n;
-		System.tagsSortChilds({id: n.attributes.id, direction: 'asc'}, this.processSorting, this)
+		CB_System.tagsSortChilds({id: n.attributes.id, direction: 'asc'}, this.processSorting, this)
 	}
 	,onSortDescendingClick: function(b, e){
 		n = this.getSelectionModel().getSelectedNode();
 		if(!n) return;
 		this.sourceNode = n;
-		System.tagsSortChilds({id: n.attributes.id, direction: 'desc'}, this.processSorting, this)
+		CB_System.tagsSortChilds({id: n.attributes.id, direction: 'desc'}, this.processSorting, this)
 	}
 	,processSorting: function(r, e){
 		if(r.success !== true) return;
