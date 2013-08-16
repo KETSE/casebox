@@ -1,8 +1,8 @@
-Ext.namespace('Dev');
+Ext.namespace('Sample');
 
-Dev.customizeObjectClass =  Ext.extend(CB.plugins.customInterface, {
+Sample.CustomizeObjectClass =  Ext.extend(CB.plugins.customInterface, {
 	init: function(owner) {
-		Dev.customizeObjectClass.superclass.init.call(this, arguments);
+		Sample.CustomizeObjectClass.superclass.init.call(this, arguments);
 		this.owner = owner;
 		this.owner.on('objectopened', this.applyCustomization, this);
 	}
@@ -20,4 +20,4 @@ Dev.customizeObjectClass =  Ext.extend(CB.plugins.customInterface, {
 	}
 });
 
-Ext.ComponentMgr.registerPlugin('DevcustomizeObjectClasss', Dev.customizeObjectClass);
+Ext.ComponentMgr.registerPlugin('SampleCustomizeObjectClasss', Sample.CustomizeObjectClass);

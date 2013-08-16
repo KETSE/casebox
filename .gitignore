@@ -10,11 +10,20 @@ logs/
 # ignore .sublime files
 *sublime*
 
+## except sample core: demo cores are located in /install/examples now
+!httpsdocs/cores/sample/
+!httpsdocs/cores/sample/*
+!httpsdocs/cores/sample/css/
+!httpsdocs/cores/sample/css/*
+!httpsdocs/cores/sample/js/
+!httpsdocs/cores/sample/js/*
+!httpsdocs/cores/sample/php/
+!httpsdocs/cores/sample/php/*
+!httpsdocs/cores/sample/php/sample/
+!httpsdocs/cores/sample/php/sample/*
+
 # ignore 'cores' configuration
 httpsdocs/cores/
-
-## except sample core: demo cores are located in /install/examples now
-#!httpsdocs/cores/sample/
 
 # exclude system.ini
 httpsdocs/system.ini

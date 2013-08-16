@@ -1,15 +1,15 @@
 
-initDevCustomFunctionality= function(){
-	DevHelperFunction('dummy value');
+initSampleCustomFunctionality= function(){
+	SampleHelperFunction('dummy value');
 	App.on('objectinit', function(objectWindow){
-		if(Ext.isEmpty(objectWindow.plugins)) objectWindow.plugins = [new Dev.customizeObjectClass()];
+		if(Ext.isEmpty(objectWindow.plugins)) objectWindow.plugins = [new Sample.customizeObjectClass()];
 		else objectWindow.plugins.push(this);
 	})
 }
 
 
-DevHelperFunction = function(param1){
+SampleHelperFunction = function(param1){
 	clog('make something with param1', param1);
 }
 
-Ext.onReady(initDevCustomFunctionality)
+Ext.onReady(initSampleCustomFunctionality)
