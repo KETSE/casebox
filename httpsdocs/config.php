@@ -344,6 +344,7 @@ function fireEvent($eventName, &$params)
         return;
     }
     foreach ($cfg['listeners'][$eventName] as $className => $methods) {
+        $className = str_replace('_', '\\', $className);
         $class = new $className();
         if (!is_array($methods)) {
             $methods = array($methods);

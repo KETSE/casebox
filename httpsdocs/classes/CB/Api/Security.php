@@ -17,7 +17,11 @@ class Security
     }
     /**
      * insert or update an existing access for a node
-     * @param  array $p array containig the following params: node_id, user_grop_id, allow (read, write, modify, full_control), deny (read, write, modify, full_control)
+     * @param array $p array containig the following params:
+     *                  node_id,
+     *                  user_grop_id,
+     *                  allow (read, write, modify, full_control),
+     *                  deny (read, write, modify, full_control)
      * @return array array with boolean success propety
      */
     public function updateNodeAccess($p)
@@ -32,6 +36,17 @@ class Security
 
         $p['allow'] = $this->convertTextToAccessString($p['allow']);
         $p['deny'] = $this->convertTextToAccessString($p['deny'], -1);
+
+        /* validate access values */
+        $a = array_filter(explode(',', $p['allow']), 'is_numeric');
+        $b = array_filter(explode(',', $p['deny']), 'is_numeric');
+        if ((sizeof($a) <> 12) || (sizeof($b) <> 12)) {
+            return array(
+                'success' => false
+                ,'msg' => 'Wrong access value'
+            );
+        }
+        /* end of validate access values */
 
         $sec = new \CB\Security();
         $rez = $sec->updateObjectAccess(
@@ -49,7 +64,9 @@ class Security
     }
     /**
      * delete and access from a node
-     * @param  array $p array containing following params: node_id, user_group_id
+     * @param array $p array containing following params:
+     *                  node_id,
+     *                  user_group_id
      * @return array array with boolean success propety
      */
     public function deleteNodeAccess($p)
@@ -66,7 +83,8 @@ class Security
     }
 
     /**
-     * convert textual representation of accesses (read, write, modify, full_control) to access specific string of bits
+     * convert textual representation of accesses (read, write, modify, full_control)
+     * to access specific string of bits
      * @param  varchar $access_string textual access representation
      * @param  integer $sign          bits sign
      * @return varchar comma separated bits string

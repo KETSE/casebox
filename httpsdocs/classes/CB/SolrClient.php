@@ -75,7 +75,7 @@ class SolrClient
         require_once SOLR_CLIENT;
         $this->solr = new \Apache_Solr_Service($this->host, $this->port, $this->core);
         if (! $this->solr->ping()) {
-            throw new \Exception('Solr_connection_error'.( is_debug_host() ? ' ('.$this->host.':'.$this->port.' -> '.$this->core.' )' : ''), 1);
+            throw new \Exception('Solr_connection_error'.( isDebugHost() ? ' ('.$this->host.':'.$this->port.' -> '.$this->core.' )' : ''), 1);
         }
         $this->connected = true;
 
