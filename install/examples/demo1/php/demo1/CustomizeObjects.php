@@ -1,5 +1,5 @@
 <?php
-namespace sample;
+namespace demo1;
 
 use CB\DB as DB;
 
