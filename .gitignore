@@ -16,6 +16,9 @@ httpsdocs/cores/
 # exclude system.ini
 httpsdocs/system.ini
 
+# exclude config.ini
+httpsdocs/config.ini
+
 httpsdocs/photos/
 
 #exclude notes folder
