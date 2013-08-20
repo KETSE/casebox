@@ -493,8 +493,8 @@ class Files
                     case 'replace':
                         /* TODO: only mark file as deleted but dont delte it */
                         DB\dbQuery('CALL p_delete_tree_node($1)', $file_id) or die(DB\dbQueryError());
-                        $solr = new SolrClient();
-                        $solr->deleteId($file_id);
+                        $solr = new Solr\Client();
+                        $solr->deleteByQuery('id:'.$file_id.' OR pids:'.$file_id);
                         break;
                     case 'rename':
                         $file_id = null;
@@ -1166,7 +1166,7 @@ class Files
 
         Objects::updateCaseUpdateInfo($id);
 
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         return $rez;
     }
@@ -1204,7 +1204,7 @@ class Files
 
         Objects::updateCaseUpdateInfo($id);
 
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         return $rez;
     }
@@ -1279,9 +1279,7 @@ class Files
 
         Objects::updateCaseUpdateInfo($id);
 
-        $solr = new SolrClient();
-
-        $solr->runCron();
+        Solr\Client::runCron();
 
         return array('success' => true, 'rez' => $ids);
     }

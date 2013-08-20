@@ -433,6 +433,7 @@ class Security
         //9 Change permissions
         //10 Take Ownership
         //11 Download
+
         /* if no user is specified as parameter then calculating for current loged user */
         if ($user_id === false) {
             $user_id = $_SESSION['user']['id'];
@@ -523,7 +524,7 @@ class Security
                 foreach ($acl[$i] as $key => $value) {
                     if (($key == $user_id) || ($key == $everyoneGroupId)) {
                         //skip direct access setting because analized above and everyone group id will be analized last
-                        //continue;
+                        continue;
                     }
                     $deny = intval($value[1]);
 
@@ -686,7 +687,7 @@ class Security
 
         $rez['data'][] = $p->data;
         Security::calculateUpdatedSecuritySets();
-        SolrClient::runBackgroundCron();
+        Solr\Client::runBackgroundCron();
 
         return $rez;
     }
@@ -734,7 +735,7 @@ class Security
         ) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
-        SolrClient::runBackgroundCron();
+        Solr\Client::runBackgroundCron();
 
         return array('succes' => true, 'data' => $p->data );
     }
@@ -749,7 +750,7 @@ class Security
         DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p->id, $p->data)) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
-        SolrClient::runBackgroundCron();
+        Solr\Client::runBackgroundCron();
 
         return array('success' => true, 'data'=> array());
     }
@@ -812,7 +813,6 @@ class Security
 
     public static function updateSecuritySet($set_id)
     {
-
         $acl = array();
 
         /* get set */
@@ -911,27 +911,21 @@ class Security
      */
     public static function everyoneGroupId ()
     {
-        if (defined('CB\\EVERYONE_GROUP_ID')) {
-            return constant('CB\\EVERYONE_GROUP_ID');
+        if (!Cache::exist('everyone_group_id')) {
+            $sql = 'SELECT id
+                FROM users_groups
+                WHERE `type` = 1
+                        AND `system` = 1
+                        AND name = $1';
+            $res = DB\dbQuery($sql, 'everyone') or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                Cache::set('everyone_group_id', $r['id']);
+            }
+            $res->close();
         }
 
-        $rez = null;
-
-        $sql = 'SELECT id
-            FROM users_groups
-            WHERE `type` = 1
-                    AND `system` = 1
-                    AND name = $1';
-
-        $res = DB\dbQuery($sql, 'everyone') or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = $r[0];
-        }
-        $res->close();
-
-        define('CB\\EVERYONE_GROUP_ID', $rez);
-
-        return $rez;
+        return Cache::get('everyone_group_id');
     }
 
     /**
@@ -939,23 +933,20 @@ class Security
      */
     public static function systemGroupId()
     {
-        if (isset($GLOBALS['SYSTEM_GROUP_ID'])) {
-            return $GLOBALS['SYSTEM_GROUP_ID'];
+        if (!Cache::exist('system_group_id')) {
+            $sql = 'SELECT id
+                FROM users_groups
+                WHERE system = 1
+                        AND name = $1';
+            $res = DB\dbQuery($sql, 'system') or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                Cache::set('system_group_id', $r['id']);
+            }
+            $res->close();
         }
-        $GLOBALS['SYSTEM_GROUP_ID'] = null;
 
-        $sqll = 'SELECT id
-            FROM users_groups
-            WHERE system = 1
-                    AND name = $1';
-        $res = DB\dbQuery($sql, 'system') or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_row()) {
-            $GLOBALS['SYSTEM_GROUP_ID'] = $r[0];
-        }
-        $res->close();
-
-        return $GLOBALS['SYSTEM_GROUP_ID'];
+        return Cache::get('system_group_id');
     }
 
     /**
@@ -1009,25 +1000,23 @@ class Security
             $user_id = $_SESSION['user']['id'];
         }
 
-        if (defined('CB\\IS_ADMIN'.$user_id)) {
-            return constant('CB\\IS_ADMIN'.$user_id);
+        $var_name = 'is_admin'.$user_id;
+
+        if (!Cache::exist($var_name)) {
+            $sql = 'SELECT g.id
+                FROM users_groups g
+                JOIN users_groups_association uga ON g.id = uga.group_id
+                AND uga.user_id = $1
+                WHERE g.system = 1
+                    AND g.name = $2';
+            $res = DB\dbQuery($sql, array($user_id, 'system')) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                Cache::set($var_name, !empty($r['id']));
+            }
+            $res->close();
         }
 
-        $sql = 'SELECT $1
-            FROM users_groups g
-            JOIN users_groups_association uga ON g.id = uga.group_id
-            AND uga.user_id = $1
-            WHERE g.system = 1
-                AND g.name = $2';
-        $res = DB\dbQuery($sql, array($user_id, 'system')) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = !empty($r[0]);
-        }
-        $res->close();
-
-        define('CB\IS_ADMIN'.$user_id, $rez);
-
-        return $rez;
+        return Cache::get($var_name);
     }
     public static function canManage($user_id = false)
     {

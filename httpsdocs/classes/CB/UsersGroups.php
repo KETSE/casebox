@@ -282,7 +282,7 @@ class UsersGroups
         }
 
         Security::calculateUpdatedSecuritySets();
-        SolrClient::runBackgroundCron();
+        Solr\Client::runBackgroundCron();
 
         return $rez;
     }

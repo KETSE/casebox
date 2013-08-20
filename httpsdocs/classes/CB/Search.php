@@ -1,7 +1,7 @@
 <?php
 namespace CB;
 
-class Search extends SolrClient
+class Search extends Solr\Client
 {
     /*when requested to sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
@@ -498,9 +498,8 @@ class Search extends SolrClient
 
     private function executeQuery()
     {
-        // var_dump($this->params);
         try {
-            $this->results = $this->solr->search($this->query, $this->start, $this->rows, $this->params);
+            $this->results = $this->search($this->query, $this->start, $this->rows, $this->params);
         } catch ( \Exception $e ) {
             throw new \Exception("An error occured: \n\n {$e->__toString()}");
         }

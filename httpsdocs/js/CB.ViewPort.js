@@ -124,7 +124,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 	,onLogin: function(){
 		/* adding menu items */
 		um = App.mainToolBar.find( 'name', 'userMenu')[0];
-		um.setText(App.loginData['l'+App.loginData.language_id]);
+		um.setText(App.loginData['first_name']+' '+App.loginData['last_name']);
 		um.setIconClass(App.loginData.iconCls);
 		managementItems = [];
 		if(App.loginData.manage){//admin

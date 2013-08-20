@@ -1,3 +1,17 @@
+CaseBox 1.9.13 (2013-08-15)
+==============================
+New Features, Improvements
+--------------------------
+- refactored Solr class and added posibility to update an object by id into solr
+- added cache class and changed some places to use it instead of globals
+
+Fixed Bugs:
+----------
+- security interface checkbox sets
+- small fix for security calculations on nodes with everyone group and other groups specified
+- renaming an object did not display changes instantly in interface
+- display the correct username in main casebox menu
+
 CaseBox 1.9.8 (2013-08-15)
 ==============================
 New Features, Improvements

@@ -16,7 +16,7 @@ $last_action_sql = 'UPDATE crons
 SET last_action = CURRENT_TIMESTAMP
 WHERE cron_id = $1';
 
-$solr = new SolrClient;
+$solr = new Solr\Client;
 
 try {
     if (@$argv[2] == 'all') {
@@ -24,7 +24,7 @@ try {
         $solr->deleteByQuery('*:*');
         DB\dbQuery($last_action_sql, $cron_id) or die('error updating crons last action');
         echo "updating tree\n";
-        $solr->updateTree(true, $cron_id);
+        $solr->updateTree(array( 'all' => true, 'cron_id' => $cron_id));
         DB\dbQuery($last_action_sql, $cron_id) or die('error updating crons last action');
         echo "optimizing\n";
         $solr->optimize();
@@ -34,8 +34,8 @@ try {
     }
 
 } catch (\Exception $e) {
-    echo 'CaseBox cron execution exception ('.$solr->core.')'.$e->getMessage();
-    notifyAdmin('CaseBox cron execution exception ('.$solr->core.')', $e->getMessage());
+    echo 'CaseBox cron execution exception ('.CORENAME.')'.$e->getMessage();
+    notifyAdmin('CaseBox cron execution exception ('.CORENAME.')', $e->getMessage());
 }
 
 unset($solr);

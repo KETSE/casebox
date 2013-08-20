@@ -319,7 +319,7 @@ CB.SecurityPanel = Ext.extend(Ext.Panel, {
 		this.updateDeleteAction()
 	}
 	,onPermissionNodeClick: function(dataView, index, node, e){
-		r = dataView.getRecord(node);
+        r = dataView.getRecord(node);
 		cb = e.getTarget('input');
 		if(Ext.isEmpty(r) || Ext.isEmpty(cb) || cb.disabled ) return;
 		this.changeAccesses(r, cb.checked ? cb.value: 0);
@@ -340,24 +340,30 @@ CB.SecurityPanel = Ext.extend(Ext.Panel, {
 		return rez;
 	}
 	,accessToGroupValue: function(accessArray, groupBitsArray){
-		lastBit = null;
+        lastBit = null;
 		bitsMatch = true;
 		bitsCombinedMatch = false;
 		i = 0;
 		while( (i < accessArray.length ) && bitsMatch){
-			if(groupBitsArray[i] == 1){
+			currentBit = parseInt(accessArray[i]);
+            if(groupBitsArray[i] == 1){
 				if(Ext.isEmpty(lastBit)){
-					lastBit = accessArray[i];
-				}else if( (accessArray[i] * lastBit) > 0 ){
-					if(accessArray[i] != lastBit) bitsCombinedMatch = true;
+					lastBit = currentBit;
+				}else if( (currentBit * lastBit) > 0 ){
+					if(currentBit != lastBit) bitsCombinedMatch = true;
 				}else bitsMatch = false;
 			}
 			i++;
 		}
-		return bitsCombinedMatch ? ( (lastBit < 0) ? -1 : 1 ) : (bitsMatch ? lastBit : 0); 
+        return bitsMatch 
+            ? ( bitsCombinedMatch 
+                    ? ( (lastBit < 0) ? -1 : 1 )
+                    : lastBit
+              )
+            : 0; 
 	}
 	,changeAccesses: function(groupRecord, newValue){
-		r = this.aclList.getSelectedRecords()[0]; //user or group record
+        r = this.aclList.getSelectedRecords()[0]; //user or group record
 		if(Ext.isEmpty(r)) return;
 		allow = r.get('allow').split(',');
 		deny = r.get('deny').split(',');
@@ -382,8 +388,9 @@ CB.SecurityPanel = Ext.extend(Ext.Panel, {
 	,reloadPermissionsStore: function(){
 		data = [];
 		sr = this.aclList.getSelectedRecords()
-		if(!Ext.isEmpty(sr))
+		if(!Ext.isEmpty(sr)) {
 			data = this.accessToGroupsData(sr[0], this.permissionsStore.accessGroups)
+        }
 		this.permissionsStore.loadData( data );
 	}
 	,onSavePermissionsClick: function(){

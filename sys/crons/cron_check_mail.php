@@ -491,7 +491,7 @@ foreach ($processed_ids as $uniq_id) {
 }
 
 if ($i > 0) {
-    SolrClient::runCron();
+    Solr\Client::runCron();
 }
 /* end of moving read messages from inbox to All Mail folder*/
 
