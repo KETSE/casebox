@@ -364,7 +364,7 @@ class Tasks
             $p['id']
         ) or die( DB\dbQueryError() );
 
-        SolrClient::runCron();
+        Solr\Client::runCron();
         //exec('php ../../casebox/crons/cron_solr_update_objects.php');
         $rez = $this->load($p['id']);
         $rez['logParams'] = &$logParams;
@@ -601,7 +601,7 @@ class Tasks
 
         Objects::updateCaseUpdateInfo($p->id);
 
-        SolrClient::runCron();
+        Solr\Client::runCron();
         //exec('php ../../casebox/crons/cron_solr_update_objects.php'); //??
         return $rez;
     }/**/
@@ -722,7 +722,7 @@ class Tasks
 
         Objects::updateCaseUpdateInfo($p->id);
 
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         return array('success' => true);
     }
@@ -761,7 +761,7 @@ class Tasks
 
         Objects::updateCaseUpdateInfo($id);
 
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         return array('success' => true, 'id' => $id);
     }
@@ -819,7 +819,7 @@ class Tasks
 
         Objects::updateCaseUpdateInfo($id);
 
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         return array('success' => true, 'id' => $id);
     }

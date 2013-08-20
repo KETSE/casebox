@@ -253,7 +253,7 @@ class Browser
             )
         ) or die(DB\dbQueryError());
         $id = DB\dbLastInsertId();
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         return array(
             'success' => true
@@ -315,7 +315,7 @@ class Browser
                 )
             ) or die(DB\dbQueryError());
         }
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         fireEvent('nodeDbDelete', $ids);
 
@@ -346,6 +346,7 @@ class Browser
                 ,$id
             )
         ) or die(DB\dbQueryError());
+
         DB\dbQuery(
             'UPDATE objects
             SET custom_title = $1
@@ -355,6 +356,7 @@ class Browser
                 ,$id
             )
         ) or die(DB\dbQueryError());
+
         DB\dbQuery(
             'UPDATE files
             SET name = $1
@@ -364,6 +366,7 @@ class Browser
                 ,$id
             )
         ) or die(DB\dbQueryError());
+
         DB\dbQuery(
             'UPDATE tasks
             SET title = $1
@@ -386,7 +389,13 @@ class Browser
                 UPDATE `value` = $2';
         DB\dbQuery($sql, array($id, $p->name)) or die(DB\dbQueryError());
 
-        SolrClient::runBackgroundCron();
+        /*updating renamed document into solr directly (before runing background cron)
+            so that it'll be displayed with new name without delay*/
+        $solrClient = new Solr\Client();
+        $solrClient->updateTree(array('id' => $id));
+
+        //running background cron to index other nodes
+        $solrClient->runBackgroundCron();
 
         return array('success' => true, 'data' => array( 'id' => $id, 'newName' => $p->name) );
     }
@@ -769,7 +778,7 @@ class Browser
                 Objects::updateCaseUpdateInfo(DB\dbLastInsertId());
                 break;
         }
-        SolrClient::runBackgroundCron();
+        Solr\Client::runBackgroundCron();
 
         return array('success' => true, 'pids' => $modified_pids);
     }
@@ -911,7 +920,7 @@ class Browser
             return $rez;
         }
         $files->storeFiles($p); //if everithing is ok then store files
-        SolrClient::runCron();
+        Solr\Client::runCron();
         $rez = array('success' => true, 'data' => array('pid' => $p['pid']));
         $files->attachPostUploadInfo($F, $rez);
 
@@ -960,7 +969,7 @@ class Browser
                 return array('success' => true, 'data' => array() );
                 break;
         }
-        SolrClient::runCron();
+        Solr\Client::runCron();
         $rez = array('success' => true, 'data' => array('pid' => $a['pid']));
         $files->attachPostUploadInfo($a['files'], $rez);
 
@@ -1008,7 +1017,7 @@ class Browser
         $p['response'] = 'overwrite';
         $files = new Files();
         $files->storeFiles($p);
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         return $rez;
     }
@@ -1081,7 +1090,7 @@ class Browser
             $_SESSION['user']['id']
         ) or die(DB\dbQueryError());
         //TODO: view if needed to mark all childs as updated, for security to be changed ....
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         return $rez;
     }
@@ -1142,7 +1151,7 @@ class Browser
                 )
             ) or die( DB\dbQueryError() );
 
-            SolrClient::runCron();
+            Solr\Client::runCron();
         }
 
         return $id;

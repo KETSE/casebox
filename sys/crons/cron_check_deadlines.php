@@ -63,4 +63,4 @@ DB\dbQuery(
 ) or die(DB\dbQueryError());
 
 //Starting reindexing cron to update changes into solr
-SolrClient::runCron();
+Solr\Client::runCron();

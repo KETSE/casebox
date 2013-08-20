@@ -692,7 +692,7 @@ class User
         }
 
         if ($affected_rows > 0) {
-            SolrClient::runCron();
+            Solr\Client::runCron();
         }
 
         return true;
@@ -786,7 +786,7 @@ class User
                 )
             ) or die( DB\dbQueryError() );
             $rez = DB\dbLastInsertId();
-            SolrClient::runCron();
+            Solr\Client::runCron();
         }
 
         return $rez;

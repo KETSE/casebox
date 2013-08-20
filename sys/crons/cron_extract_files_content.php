@@ -121,7 +121,7 @@ DB\dbQuery(
     )
 ) or die(DB\dbQueryError());
 
-SolrClient::runCron();
+Solr\Client::runCron();
 
 function checkTikaService()
 {

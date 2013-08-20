@@ -196,7 +196,7 @@ class Objects
 
         fireEvent('nodeDbCreate', $d);
 
-        SolrClient::runCron();
+        Solr\Client::runCron();
 
         return array('success' => true, 'data' => $p);
     }
@@ -493,7 +493,13 @@ class Objects
             fireEvent('nodeDbUpdate', $d);
         }
 
-        SolrClient::runCron();
+        /*updating saved document into solr directly (before runing background cron)
+            so that it'll be displayed with new name without delay*/
+        $solrClient = new Solr\Client();
+        $solrClient->updateTree(array('id' => $d->id));
+
+        //running background cron to index other nodes
+        $solrClient->runBackgroundCron();
 
         $p = (object) array( 'data' => (object) array( "id" => $d->id, "template_id" => $template['id'] ) );
 
@@ -1041,20 +1047,27 @@ class Objects
         return $case_id;
     }
 
+    /* get case name by its Id*/
     public static function getCaseName($case_id = false)
     {
-        /*function deemed to get case name by its Id*/
-        $rez = false;
-        $res = DB\dbQuery(
-            'SELECT name FROM tree WHERE id = $1',
-            $case_id
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = $r[0];
+        if (!is_numeric($case_id)) {
+            return null;
         }
-        $res->close();
 
-        return $rez;
+        $var_name = 'cases['.$case_id."]['name']";
+
+        if (!Cache::exist($var_name)) {
+            $res = DB\dbQuery(
+                'SELECT name FROM tree WHERE id = $1',
+                $case_id
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_row()) {
+                Cache::set($var_name, $r[0]);
+            }
+            $res->close();
+        }
+
+        return Cache::get($var_name);
     }
 
     public static function updateCaseUpdateInfo($case_or_caseObject_id)
@@ -1067,10 +1080,10 @@ class Objects
     /* setting case roles fields for an object data */
     public static function setCaseRolesFields(&$objectData)
     {
-        $case_id = null;//237
+        $case_id = null;
         $db = null;
 
-        $sql = 'select DATABASE(), case_id from tree where id = $1';
+        $sql = 'select DATABASE(), case_id from tree_info where id = $1';
         $res = DB\dbQuery($sql, $objectData['id']) or die(DB\dbQueryError());
         if ($r = $res->fetch_row()) {
             $db = $r[0];
@@ -1083,26 +1096,30 @@ class Objects
         }
 
         // check if cached
-        if (isset($GLOBALS[$db][$case_id])) {
-            foreach ($GLOBALS[$db][$case_id] as $k => $v) {
+        $var_name = 'cases['.$case_id."]['roles']";
+        if (!Cache::exist($var_name)) {
+            $roles = array();
+            $sql = 'SELECT solr_column_name, od.value FROM objects_data od '.
+                'JOIN templates_structure t ON od.`field_id` = t.`id` AND solr_column_name LIKE \'role_ids%\' '.
+                'WHERE object_id = $1';
+            $res = DB\dbQuery($sql, $case_id) or die(DB\dbQueryError());
+
+            while ($r = $res->fetch_assoc()) {
+                if (!empty($r['value'])) {
+                    $roles[$r['solr_column_name']] = explode(',', $r['value']);
+                }
+            }
+            $res->close();
+
+            Cache::set($var_name, $roles);
+        }
+
+        $roles = Cache::get($var_name);
+
+        if (!empty($roles)) {
+            foreach ($roles as $k => $v) {
                 $objectData[$k] = $v;
             }
-
-            return;
         }
-
-        $GLOBALS[$db][$case_id] = array();
-        $sql = 'SELECT solr_column_name, od.value FROM objects_data od '.
-            'JOIN templates_structure t ON od.`field_id` = t.`id` AND solr_column_name LIKE \'role_ids%\' '.
-            'WHERE object_id = $1';
-        $res = DB\dbQuery($sql, $case_id) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_row()) {
-            if (!empty($r[1])) {
-                $GLOBALS[$db][$case_id][$r['0']] = explode(',', $r[1]);
-                $objectData[$r['0']] = explode(',', $r[1]);
-            }
-        }
-        $res->close();
     }
 }

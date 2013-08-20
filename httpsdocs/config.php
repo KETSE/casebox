@@ -41,6 +41,7 @@ define('CB\\CORE_ROOT', DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_
 define('CB\\CRONS_PATH', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
 define('CB\\DATA_PATH', APP_ROOT.'data'.DIRECTORY_SEPARATOR);
 define('CB\\SESSION_PATH', DATA_PATH.'sessions'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+define('CB\\LOGS_PATH', APP_ROOT.'logs'.DIRECTORY_SEPARATOR);
 /* end of define main paths /**/
 
 if (!file_exists(CORE_ROOT)) {
@@ -199,7 +200,7 @@ session_name(
 
 //error reporting params
 error_reporting(isDebugHost() ? E_ALL : 0);
-ini_set('error_log', APP_ROOT.'logs'.DIRECTORY_SEPARATOR.CORENAME.'_error_log');
+ini_set('error_log', LOGS_PATH.CORENAME.'_error_log');
 
 // mb encoding config
 mb_internal_encoding("UTF-8");
@@ -233,7 +234,7 @@ if (!defined('CB\\CONFIG\\MAX_ROWS')) {
 }
 
 // custom Error log per Core, use it for debug/reporting purposes
-define('DEBUG_LOG', APP_ROOT.'logs'.DIRECTORY_SEPARATOR.'cb_'.CORENAME.'_debug_log');
+define('DEBUG_LOG', LOGS_PATH.'cb_'.CORENAME.'_debug_log');
 
 // define solr_core as db_name if none is specified in config
 if (!defined('CB\\CONFIG\\SOLR_CORE')) {
@@ -332,6 +333,10 @@ function isDebugHost()
     );
 }
 
+function debug($msg)
+{
+    error_log($msg."\n", 3, DEBUG_LOG);
+}
 /**
  * Fire server side event
  *

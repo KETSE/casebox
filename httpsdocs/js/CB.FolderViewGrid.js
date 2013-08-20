@@ -1026,7 +1026,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 		this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
 		ids = [];
 		Ext.each(s, function(r){ ids.push(r.get('nid'))}, this)
-		BrowserView['delete'](ids, this.processDelete, this);
+		CB_BrowserView['delete'](ids, this.processDelete, this);
 	}
 	,processDelete: function(r, e){
 		this.getEl().unmask();
