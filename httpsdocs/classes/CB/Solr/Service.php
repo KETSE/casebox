@@ -25,6 +25,7 @@ class Service
      *     @type boolean $host    custom Solr host or default will be used from config
      *     @type string  $port    Solr port
      *     @type string  $core    Solr core
+     * }
      */
     public function __construct ($p = array())
     {

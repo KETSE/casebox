@@ -129,6 +129,7 @@ class Client extends Service
      *                          otherwise - only the nodes marked as updated will be reindexed in solr
      *     @type int[]  $id    id or array of object ids to update
      *     @type varchar $cron_id when this function is called by a cron then cron_id should be passed
+     * }
      */
     public function updateTree($p = array())
     {

@@ -190,15 +190,17 @@ class Security
         $sql = 'SELECT
                 ti.`path`
                 ,t.name
+                ,t.inherit_acl
                 ,ts.`set` `obj_ids`
             FROM tree t
             JOIN tree_info ti on t.id = ti.id
-            JOIN tree_acl_security_sets ts on ti.security_set_id = ts.id
+            LEFT JOIN tree_acl_security_sets ts on ti.security_set_id = ts.id
             WHERE t.id = $1';
         $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $rez['path'] = Path::replaceCustomNames($r['path']);
             $rez['name'] = Path::replaceCustomNames($r['name']);
+            $rez['inherit_acl'] = $r['inherit_acl'];
             $obj_ids = explode(',', $r['obj_ids']);
         }
         $res->close();
@@ -748,6 +750,114 @@ class Security
             throw new \Exception(L\Access_denied);
         }
         DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p->id, $p->data)) or die(DB\dbQueryError());
+
+        Security::calculateUpdatedSecuritySets();
+        Solr\Client::runBackgroundCron();
+
+        return array('success' => true, 'data'=> array());
+    }
+
+    /**
+     * setting security inheritance flag for a tree node
+     *
+     * @param array $p {
+     *     @type int      $id    id of tree node
+     *     @type boolean  $inherit    set inherit to true or false
+     *     @type string   $copyRules   when removing inheritance ($inherit = false)
+     *                                 then this value could be set to 'yes' or 'no'
+     *                                 for copying inherited rules to current node
+     * }
+     *
+     */
+    public function setInheritance($p)
+    {
+        /* check input params */
+        if (empty($p->id) ||
+            !isset($p->inherit) ||
+            !is_numeric($p->id) ||
+            !is_bool($p->inherit)
+        ) {
+            throw new \Exception(L\Wrong_input_data);
+        }
+        /* end of check input params */
+
+        if (!Security::isAdmin() && !Security::canChangePermissions($p->id)) {
+            throw new \Exception(L\Access_denied);
+        }
+
+        /* checking if current inherit value is not already set to requested state */
+        $inherit_acl = false;
+        $res = DB\dbQuery('SELECT inherit_acl FROM tree WHERE id = $1', $p->id) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $inherit_acl = $r['inherit_acl'];
+        } else {
+            throw new \Exception(L\Object_not_found);
+        }
+        $res->close();
+        if ($inherit_acl == $p->inherit) {
+            return array('success' => false);
+        }
+        /* end of checking if current inherit value is not already set to requested state */
+
+        // make pre update changes
+        if ($p->inherit) {
+            DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p->id) or die(DB\dbQueryError());
+        } else {
+            switch (@$p->copyRules) {
+                case 'yes': //copy all inherited rules to current object
+                    $acl = $this->getObjectAcl($p);
+                    foreach ($acl['data'] as $rule) {
+                        $allow = explode(',', str_replace('2', '1', $rule['allow']));
+                        $deny = explode(',', str_replace('2', '1', $rule['deny']));
+                        for ($i=0; $i < 12; $i++) {
+                            $allow[$i] = ($allow[$i] == 1) ? '1' : '0';
+                            $deny[$i] = ($deny[$i] == -1) ? '1' : '0';
+                        }
+                        $allow = array_reverse($allow);
+                        $deny = array_reverse($deny);
+                        $allow = bindec(implode('', $allow));
+                        $deny = bindec(implode('', $deny));
+                        $sql = 'INSERT INTO tree_acl (
+                                node_id
+                                ,user_group_id
+                                ,allow
+                                ,deny
+                                ,cid)
+                            VALUES($1
+                                 ,$2
+                                 ,$3
+                                 ,$4
+                                 ,$5) ON duplicate KEY
+                            UPDATE allow = $3
+                                    ,deny = $4
+                                    ,uid = $5
+                                    ,udate = CURRENT_TIMESTAMP';
+                        DB\dbQuery(
+                            $sql,
+                            array(
+                                $p->id
+                                ,$rule['id']
+                                ,$allow
+                                ,$deny
+                                ,$_SESSION['user']['id']
+                            )
+                        ) or die(DB\dbQueryError());
+                    }
+                    break;
+                default:
+                    DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p->id) or die(DB\dbQueryError());
+                    break;
+            }
+        }
+
+        // updating inherit flag for the object
+        DB\dbQuery(
+            'UPDATE tree SET inherit_acl = $2 WHERE id = $1',
+            array(
+                $p->id
+                ,$p->inherit
+            )
+        ) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();

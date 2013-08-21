@@ -1,3 +1,14 @@
+CaseBox 1.9.15 (2013-08-15)
+==============================
+New Features, Improvements
+--------------------------
+-   added security inheritance checkbox in interface 
+    and modified database triggers to take this flag into account.
+
+Notes: You should only update database structure after switching to this release (20130822_0014 mysql_database_structure_update.sql).
+    Generally there is no need to run any other scripts, 
+    because inheritance was enabled by default and checkbox was not available before.
+
 CaseBox 1.9.13 (2013-08-15)
 ==============================
 New Features, Improvements
@@ -22,8 +33,10 @@ New Features, Improvements
     - define custom code classes into custom namespace (name of the core)
     - place custom code classes under php/<custom namespace>/ forder of your core
     - accessed casebox functions and constants should pe prefixed with \CB\
-    - classes defined in api, to be accessible in javascript, should be prefixed with "<custom_namespace>_" (ex. sample_CustomClass)
-    - from custom javascript files api methods are also prefixed with namespace with underline after it (ex. sample_CustomClass.customMethod(params, this.processResponse, this) ).
+    - classes defined in api, to be accessible in javascript, 
+        should be prefixed with "<custom_namespace>_" (ex. sample_CustomClass)
+    - from custom javascript files api methods are also prefixed with namespace with underline after it 
+        (ex. sample_CustomClass.customMethod(params, this.processResponse, this) ).
 
 
 Fixed Bugs:
