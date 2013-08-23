@@ -37,6 +37,7 @@ class Client extends Service
         ,'template_id'
         ,'template_type'
         ,'user_ids'
+        ,'acl_count'
         ,'security_set_id'
         ,'status'
         ,'category_id'
@@ -153,6 +154,7 @@ class Client extends Service
                     ,ti.pids
                     ,ti.path
                     ,ti.case_id
+                    ,ti.acl_count
                     ,ti.security_set_id
                     ,t.name
                     ,t.system
@@ -280,6 +282,7 @@ class Client extends Service
                     ,pids
                     ,`path`
                     ,case_id
+                    ,acl_count
                     ,security_set_id
             FROM tree_info
             WHERE '.$where.'

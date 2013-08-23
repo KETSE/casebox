@@ -663,7 +663,7 @@ class Tasks
     {
         $task = array();
         $res = DB\dbQuery(
-            'SELECT t.case_id
+            'SELECT ti.case_id
                  , t.object_id
                  , t.status
                  , ru.status `user_status`
@@ -671,6 +671,7 @@ class Tasks
                  , t.responsible_user_ids
                  , t.title
             FROM tasks t
+            LEFT JOIN tree_info ti on t.id = ti.id
             JOIN tasks_responsible_users ru ON t.id = ru.task_id
             WHERE t.id = $1
                 AND ru.user_id = $2',

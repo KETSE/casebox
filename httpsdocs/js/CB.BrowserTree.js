@@ -307,6 +307,10 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
         
         node.attributes.editable = false; 
         node.draggable = (node.attributes.system == 0);
+        if(node.attributes.acl_count > 0) {
+            node.setCls('node-has-acl');
+        }
+
     }
     ,onBeforeDestroy: function(p){
         App.clipboard.un('pasted', this.onClipboardAction, this);

@@ -497,5 +497,13 @@ div.grid-drop-zone-over{
 	background-repeat: no-repeat;
 }
 .icon-dashboard{
-    background-image: url(/css/i/ico/32/newspaper.png);
+    background-image: url(i/ico/32/newspaper.png);
 } 
+.node-has-acl .x-tree-node-anchor{
+    background: url(i/ico/lock-small.png) 0px 2px no-repeat !important;
+    margin-left: -11px;
+    padding-left: 11px;
+}
+.node-has-acl .x-grid3-cell-inner {
+    background: url(i/ico/lock-small.png) 7px 5px no-repeat !important;
+}

@@ -26,16 +26,18 @@ class BrowserTree extends Browser
         $data = array();
 
         $res = DB\dbQuery(
-            'SELECT id `nid`
-                 , `system`
-                 , `type`
-                 , `subtype`
-                 , `name`
-            FROM tree
-            WHERE ((user_id = $1)
-                   OR (user_id IS NULL))
-                    AND (SYSTEM = 1)
-                    AND (pid IS NULL)
+            'SELECT t.id `nid`
+                , t.`system`
+                , t.`type`
+                , t.`subtype`
+                , t.`name`
+                , ti.acl_count
+            FROM tree t
+                JOIN tree_info ON t.id = ti.id
+            WHERE ((t.user_id = $1)
+                   OR (t.user_id IS NULL))
+                    AND (t.`system` = 1)
+                    AND (t.pid IS NULL)
             ORDER BY user_id DESC, is_main',
             $_SESSION['user']['id']
         ) or die(DB\dbQueryError());
@@ -61,7 +63,7 @@ class BrowserTree extends Browser
         }
         $id = array_pop($path);
 
-        $p = (Object)array('pid' => $id, 'fl' => 'id,system,type,subtype,name,date,size,cid,cdate,uid,udate,template_id');
+        $p = (Object)array('pid' => $id, 'fl' => 'id,system,type,subtype,name,date,size,cid,cdate,uid,udate,template_id,acl_count');
 
         if (!$this->showFoldersContent) {
             $p->templates = $GLOBALS['folder_templates'];

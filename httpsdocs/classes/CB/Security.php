@@ -459,6 +459,7 @@ class Security
         $ids = array();
         if ($r = $res->fetch_row()) {
             $ids = explode(',', $r[0]);
+            $ids = array_filter($ids, 'is_numeric');
         }
         $res->close();
 
@@ -855,7 +856,7 @@ class Security
             'UPDATE tree SET inherit_acl = $2 WHERE id = $1',
             array(
                 $p->id
-                ,$p->inherit
+                ,intval($p->inherit)
             )
         ) or die(DB\dbQueryError());
 

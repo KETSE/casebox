@@ -34,7 +34,7 @@ class Objects
         /* get object title */
         $res = DB\dbQuery(
             'SELECT t.pid
-                        ,t.case_id
+                        ,ti.case_id
                         ,o.title
                         ,o.custom_title
                         ,t.name
@@ -44,14 +44,15 @@ class Objects
                         ,o.private_for_user `pfu`
                         ,(o.date_end < now()) is_active
                        ,files_count
-                       , f_get_tree_ids_path(t.pid) `path`
-                       , f_get_tree_path(t.id) `pathtext`
-                       , t.cdate
-                       , t.udate
-                       , t.cid
-                       , t.uid
+                       ,ti.pids `path`
+                       ,ti.`path` pathtext
+                       ,t.cdate
+                       ,t.udate
+                       ,t.cid
+                       ,t.uid
             FROM objects o
             JOIN tree t ON o.id = t.id
+            JOIN tree_info ti on t.id = ti.id
             WHERE o.id = $1',
             array(
                 $d->id
@@ -60,6 +61,7 @@ class Objects
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
+            $r['path'] = str_replace(',', '/', $r['path']);
             $rez = array_merge($rez, $r);
         }
         $res->close();

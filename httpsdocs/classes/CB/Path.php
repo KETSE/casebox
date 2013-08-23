@@ -145,15 +145,17 @@ class Path
                  , t.name
                  , t.`system`
                  , t.`type`
-                 , f_get_tree_ids_path(t.id) `path`
-                 , t.`case_id`
+                 , ti.pids `path`
+                 , ti.`case_id`
                  , t.`template_id`
                  , tt.`type` template_type
             FROM tree t
+            JOIN tree_info ti on t.id = ti.id
             LEFT JOIN templates tt ON t.template_id = tt.id
             WHERE t.id = $1'; //in ('.implode(',', $ids).')';
         $res = DB\dbQuery($sql, $lastId) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
+        if ($r = $res->fetch_assoc()) {
+            $r['path'] = str_replace(',', '/', $r['path']);
             $rez = $r;
         }
         $res->close();

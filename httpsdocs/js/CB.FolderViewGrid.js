@@ -208,28 +208,29 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,root: 'data'
                 ,messageProperty: 'msg'
             },[     {name: 'nid'}
-                , {name: 'pid', type: 'int'}
-                , {name: 'system', type: 'int'}
-                , {name: 'type', type: 'int'}
-                , {name: 'subtype', type: 'int'}
-                , {name: 'status', type: 'int'}
-                , {name: 'template_id', type: 'int'}
-                , 'template_type'
-                , 'path'
-                , 'name'
-                , 'hl'
-                , 'iconCls'
-                , {name: 'date', type: 'date'}
-                , {name: 'size', type: 'int'}
-                , 'sys_tags'
+                ,{name: 'pid', type: 'int'}
+                ,{name: 'system', type: 'int'}
+                ,{name: 'type', type: 'int'}
+                ,{name: 'subtype', type: 'int'}
+                ,{name: 'status', type: 'int'}
+                ,{name: 'template_id', type: 'int'}
+                ,'template_type'
+                ,'path'
+                ,'name'
+                ,'hl'
+                ,'iconCls'
+                ,{name: 'date', type: 'date'}
+                ,{name: 'size', type: 'int'}
+                ,'sys_tags'
                 ,{name: 'oid', type: 'int'}
                 ,{name: 'cid', type: 'int'}
                 ,{name: 'versions', type: 'int'}
-                , {name: 'cdate', type: 'date'}
-                , {name: 'udate', type: 'date'}
-                , 'case'
-                , 'content' 
-                , {name: 'has_childs', type: 'bool'}
+                ,{name: 'cdate', type: 'date'}
+                ,{name: 'udate', type: 'date'}
+                ,'case'
+                ,'content' 
+                ,{name: 'has_childs', type: 'bool'}
+                ,{name: 'acl_count', type: 'int'}
                 ,'cfg'
             ]
             )
@@ -259,6 +260,10 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                     { header: 'ID', width: 80, dataIndex: 'nid', hidden: true}
                     ,{header: L.Name, width: 300, dataIndex: 'name', renderer: function(v, m, r, ri, ci, s){
                             m.css = 'icon-grid-column-top '+ r.get('iconCls');
+                            if(r.get('acl_count') > 0) {
+                                m.css += ' node-has-acl';
+                            }
+
                             m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
                             rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
                             if( (this.hideArrows !== true) && r.get('has_childs')) rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />'
