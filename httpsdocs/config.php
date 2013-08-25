@@ -355,7 +355,11 @@ function fireEvent($eventName, &$params)
             $methods = array($methods);
         }
         foreach ($methods as $method) {
-            $class->$method($params);
+            try {
+                $class->$method($params);
+            } catch (Exception $e) {
+                debug('Event Exception for '.$class.'->'.$method);
+            }
         }
         unset($class);
     }

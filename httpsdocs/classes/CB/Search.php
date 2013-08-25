@@ -530,7 +530,7 @@ class Search extends Solr\Client
                     $rd['content'] = $sr->highlighting->{$rd['id']}->{'content'}[0];
                 }
             }
-            $res = DB\dbQuery('SELECT f_get_tree_path($1)', array($rd['id'])) or die(DB\dbQueryError());
+            $res = DB\dbQuery('SELECT `path` from tree_info where id = $1', array($rd['id'])) or die(DB\dbQueryError());
             if ($r = $res->fetch_row()) {
                 $rd['path'] = $r[0];
             }

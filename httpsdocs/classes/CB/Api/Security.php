@@ -26,7 +26,6 @@ class Security
      */
     public function updateNodeAccess($p)
     {
-
         if (empty($p['allow'])) {
             $p['allow'] = '0,0,0,0,0,0,0,0,0,0,0,0';
         }
@@ -40,6 +39,7 @@ class Security
         /* validate access values */
         $a = array_filter(explode(',', $p['allow']), 'is_numeric');
         $b = array_filter(explode(',', $p['deny']), 'is_numeric');
+
         if ((sizeof($a) <> 12) || (sizeof($b) <> 12)) {
             return array(
                 'success' => false
@@ -103,7 +103,7 @@ class Security
                 $access_string = $bit.str_repeat(','.$bit, 6).',0,'.$bit.',0,0,'.$bit;
                 break;
             case 'full_control':
-                $access_string = $bit.str_repeat(','.$bit, 10);
+                $access_string = $bit.str_repeat(','.$bit, 11);
                 break;
         }
 

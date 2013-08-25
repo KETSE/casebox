@@ -10,7 +10,9 @@ Fixed Bugs:
 - reanalyzed triggers and added additional processings for inherit_acl field
 - updating solr data for moved node instantly into solr
 
-Notes: update database (20130822_0014 mysql_database_structure_update.sql) and execute update_tree_info.php.
+Notes: update database (20130822_0014 mysql_database_structure_update.sql),
+        run solr_recreate_core.php,
+        run update_tree_info.php.
 
 CaseBox 1.9.16 (2013-08-22)
 ==============================

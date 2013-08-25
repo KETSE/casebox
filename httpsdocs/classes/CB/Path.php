@@ -23,12 +23,11 @@ class Path
         if (!is_numeric($id)) {
             return $rez;
         }
-        $sql = 'SELECT f_get_tree_ids_path(CASE WHEN `type` = 2 THEN target_id ELSE id END)
-            FROM tree
-            WHERE id = $1';
+        $sql = 'SELECT pids FROM tree_info WHERE id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = array('success' => true, 'path' => $r[0]);
+        if ($r = $res->fetch_assoc()) {
+            $r['pids'] = str_replace(',', '/', $r['pids']);
+            $rez = array('success' => true, 'id' => $id, 'path' => $r['pids']);
         }
         $res->close();
 
@@ -41,12 +40,14 @@ class Path
         if (!is_numeric($id)) {
             return $rez;
         }
-        $sql = 'SELECT f_get_tree_ids_path(pid)
-            FROM tree
-            WHERE id = $1';
+        $sql = 'SELECT ti.pids
+            FROM tree t
+            JOIN tree_info ti ON t.id = ti.id
+            WHERE t.id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = array('success' => true, 'id' => $id, 'path' => $r[0]);
+        if ($r = $res->fetch_assoc()) {
+            $r['pids'] = str_replace(',', '/', $r['pids']);
+            $rez = array('success' => true, 'id' => $id, 'path' => $r['pids']);
         }
         $res->close();
 
@@ -62,10 +63,12 @@ class Path
         $path = explode('/', $path);
         $ids = array_filter($path, 'is_numeric');
         $id = array_pop($ids);
-        $res = DB\dbQuery('SELECT f_get_tree_ids_path($1)', $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $path = explode('/', $r[0]);
-            array_shift($path);
+        $res = DB\dbQuery('SELECT pids from tree_info WHERE id = $1', $id) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $path = explode(',', $r['pids']);
+            if (!empty($path) && empty($path[0])) {
+                array_shift($path);
+            }
             array_shift($path);
             $ids = $path;
         }

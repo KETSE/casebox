@@ -34,7 +34,7 @@ if ($argv[1] !== 'all') {
     if (!file_exists($dir)) {
         die('core not found');
     }
-    $sleep = 5;
+    $sleep = 10;
 }
 
 removeIndexes($dir);

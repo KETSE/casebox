@@ -50,11 +50,10 @@ class Tasks
                 ,importance
                 ,category_id
                 ,allday
-                , (SELECT f_get_tree_ids_path(pid)
-                    FROM tree
-                     WHERE id = t.id) `path`
-                ,f_get_tree_path(id) `pathtext`
+                ,ti.pids `path`
+                ,ti.path `pathtext`
                 FROM tasks t
+                JOIN tree_info ti on t.id = ti.id
                 WHERE id = $1';
         $res = DB\dbQuery($sql, array($id, $_SESSION['user']['id'])) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
@@ -64,6 +63,7 @@ class Tasks
             $r['date_end'] = Util\dateMysqlToISO($r['date_end']);
             $r['cdate'] = Util\dateMysqlToISO($r['cdate']);
             $r['completed'] = Util\dateMysqlToISO($r['completed']);
+            $r['path'] = str_replace(',', '/', $r['path']);
             $c = explode('/', $r['path']);
             $r['create_in'] = array_pop($c);
             $rez = array('success' => true, 'data' => $r);
@@ -1152,13 +1152,15 @@ class Tasks
             }
         }
         $sql = 'select `title`, date_start, date_end, description, status, category_id, importance, type, allday, has_deadline, cid'.
-            ',f_get_tree_path(id) `path_text` '.
+            ',ti.path `path_text` '.
             ',(select l'.$user['language_id'].' from users_groups where id = t.cid) owner_text'.
             ',cdate'.
             ',responsible_user_ids'.
             ',(select reminds from tasks_reminders where task_id = $1 and user_id = $2) reminders'.
             ',DATABASE() `db` '.
-            ' from tasks t where id = $1';
+            ' FROM tasks t
+            JOIN tree_info ti on t.id = ti.id
+            WHERE id = $1';
         $res = DB\dbQuery($sql, array($id, @$user['id'])) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $format = 'Y, F j';
@@ -1221,7 +1223,8 @@ class Tasks
                          , u.l'.$user['language_id'].' `name`
                     FROM users_groups u
                     WHERE u.id IN (0'.implode(', ', $removed_users).')
-                    ORDER BY 1') or die(DB\dbQueryError());
+                    ORDER BY 1'
+                ) or die(DB\dbQueryError());
                 while ($ur = $ures->fetch_assoc()) {
                     $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
                     "\n\r".'<img src="'.Util\getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$ur['name'].'" title="'.$ur['name'].'"/>'.

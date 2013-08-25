@@ -1110,10 +1110,10 @@ class Browser
     public function isChildOf($id, $pid)
     {
         $rez = false;
-        $res = DB\dbQuery('SELECT f_get_tree_ids_path($1)', $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $r = '/'.$r[0].'/r';
-            $rez = ( strpos($r, "/$pid/") !== false );
+        $res = DB\dbQuery('SELECT pids from tree_info where id = $1', $id) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $r = ','.$r['pids'].',';
+            $rez = ( strpos($r, ",$pid,") !== false );
         }
         $res->close();
 

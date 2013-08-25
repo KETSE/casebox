@@ -7,23 +7,25 @@ class Files
     {
         $rez = array('success' => true, 'data' => array());
         $sql = 'SELECT f.id
-                 , f.name
-                 , f.`date`
-                 , f.title
-                 , f.cid
-                 , f.uid
-                 , f.cdate
-                 , f.udate
-                 , fc.size
-                 , t.template_id
-                 , f_get_tree_ids_path(t.pid) `path`
-                 , f_get_tree_path(t.id) `pathtext`
+                ,f.name
+                ,f.`date`
+                ,f.title
+                ,f.cid
+                ,f.uid
+                ,f.cdate
+                ,f.udate
+                ,fc.size
+                ,t.template_id
+                ,ti.pids `path`
+                ,ti.path `pathtext`
             FROM tree t
+            JOIN tree_info ti on t.id = ti.id
             JOIN files f ON t.id = f.id
             LEFT JOIN files_content fc ON f.content_id = fc.id
             WHERE t.id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
+            $r['path'] = str_replace(',', '/', $r['path']);
             $a = explode('.', $r['name']);
             $r['ago_date'] = date(
                 str_replace(
@@ -790,14 +792,16 @@ class Files
                 ,fd.cid
                 ,fd.cdate
                 ,case when(fd.name = f.name) THEN "" ELSE fd.name END `name`
-                ,(SELECT f_get_tree_ids_path(pid) FROM tree WHERE id = fd.id) `path`
-                ,f_get_tree_path(fd.id) `pathtext`
+                ,ti.pids `path`
+                ,ti.path `pathtext`
             FROM files f
             JOIN files fd ON f.content_id = fd.content_id AND fd.id <> $1
-            join tree t on fd.id = t.id and t.dstatus = 0
+            JOIN tree t on fd.id = t.id and t.dstatus = 0
+            JOIN tree_info ti in t.id = ti.id
             WHERE f.id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
+            $r['path'] = str_replace(',', '/', $r['path']);
             $rez['data'][] = $r;
         }
         $res->close();
