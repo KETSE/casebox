@@ -332,7 +332,7 @@ class UsersGroups
      */
     public function deleteGroup($group_id)
     {
-        if (!Security::isAdmin()) {
+        if (!Security::canEditUser()) {
             throw new \Exception(L\Access_denied);
         }
 
@@ -555,9 +555,7 @@ class UsersGroups
         }
         /* end of check for old password if users changes password for himself */
 
-        if (!Security::isAdmin() &&
-            !Security::isUsersOwner($user_id) &&
-            !($_SESSION['user']['id'] == $user_id)) {
+        if (!Security::canEditUser()) {
             throw new \Exception(L\Access_denied);
         }
 
@@ -580,7 +578,7 @@ class UsersGroups
 
         $user_id = $this->extractId($p->id);
 
-        if (!Security::isAdmin() && !Security::isUsersOwner($user_id)) {
+        if (!Security::canEditUser()) {
             throw new \Exception(L\Access_denied);
         }
 
@@ -601,7 +599,7 @@ class UsersGroups
 
         $id = $this->extractId($p->id);
 
-        if (!Security::isAdmin() && !Security::isUsersOwner($id)) {
+        if (!Security::canEditUser()) {
             throw new \Exception(L\Access_denied);
         }
 

@@ -594,51 +594,51 @@ class Security
 
     public static function canListFolderOrReadData($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 0, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 0, $user_group_id) > 0));
     }
     public static function canCreateFolders($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 1, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 1, $user_group_id) > 0));
     }
     public static function canCreateFiles($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 2, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 2, $user_group_id) > 0));
     }
     public static function canCreateActions($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 3, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 3, $user_group_id) > 0));
     }
     public static function canCreateTasks($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 4, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 4, $user_group_id) > 0));
     }
     public static function canRead($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 5, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 5, $user_group_id) > 0));
     }
     public static function canWrite($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 6, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 6, $user_group_id) > 0));
     }
     public static function canDeleteChilds($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 7, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 7, $user_group_id) > 0));
     }
     public static function canDelete($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 8, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 8, $user_group_id) > 0));
     }
     public static function canChangePermissions($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 9, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 9, $user_group_id) > 0));
     }
     public static function canTakeOwnership($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 10, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 10, $user_group_id) > 0));
     }
     public static function canDownload($object_id, $user_group_id = false)
     {
-        return (Security::getAccessBitForObject($object_id, 11, $user_group_id) > 0);
+        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 11, $user_group_id) > 0));
     }
 
     //0 List Folder/Read Data
