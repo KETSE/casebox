@@ -796,8 +796,8 @@ class Files
                 ,ti.path `pathtext`
             FROM files f
             JOIN files fd ON f.content_id = fd.content_id AND fd.id <> $1
-            JOIN tree t on fd.id = t.id and t.dstatus = 0
-            JOIN tree_info ti in t.id = ti.id
+            JOIN tree t ON fd.id = t.id and t.dstatus = 0
+            JOIN tree_info ti ON t.id = ti.id
             WHERE f.id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {

@@ -3,6 +3,29 @@ namespace CB;
 
 class Api
 {
+    /**
+     * methods association table
+     *
+     * this associated methods are accessible only through http api requiest
+     *
+     * @var array
+     */
+    private $methods = array(
+        'cb.objects.permissions.getDirectRules' => 'Security.getNodeDirectAcl'
+        ,'cb.objects.permissions.addRule'       => 'Security.updateNodeAccess'
+        ,'cb.objects.permissions.updateRule'    => 'Security.updateNodeAccess'
+        ,'cb.objects.permissions.removeRule'    => 'Security.deleteNodeAccess'
+
+        ,'cb.files.get'         => 'Files.get'
+        ,'cb.files.download'    => 'Files.download'
+        ,'cb.files.view'        => 'Files.view'
+        ,
+    );
+
+    /**
+     * process remote request
+     * @return Api\Request
+     */
     public function processRequest()
     {
         // get our verb
@@ -32,6 +55,15 @@ class Api
                 $data = $put_vars;
                 break;
         }
+
+        /* if there is accessed a method from association table then convert it to target class.method */
+        if (isset($this->methods[$data['method']])) {
+            $tmp = explode('.', $this->methods[$data['method']]);
+            $data['action'] = $tmp[0];
+            $data['method'] = $tmp[1];
+        }
+        /* end of if there is accessed a method from association table then convert it to target class.method */
+
 
         // store the method
         $return_obj->setMethod($request_method);

@@ -31,5 +31,10 @@ try {
     $api->sendResponse(501, '', 'text/html');
     exit();
 }
-
-$api->sendResponse(200, json_encode($result), 'application/json');
+/*
+our api functions will always return a success property in every method,
+except for downloading files functions
+*/
+if (!empty($result) && isset($result['success'])) {
+    $api->sendResponse(200, json_encode($result), 'application/json');
+}
