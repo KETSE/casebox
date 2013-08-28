@@ -337,7 +337,7 @@ class Browser
         }
 
         /* check security access */
-        if (!Security::isAdmin() && !Security::canWrite($id)) {
+        if (!Security::canWrite($id)) {
             throw new \Exception(L\Access_denied);
         }
 

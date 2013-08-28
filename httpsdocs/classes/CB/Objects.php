@@ -13,7 +13,7 @@ class Objects
             throw new \Exception(L\Wrong_input_data);
         }
         // SECURITY: check if object id is numeric
-        if (!Security::isAdmin() && !Security::canRead($d->id)) {
+        if (!Security::canRead($d->id)) {
             throw new \Exception(L\Access_denied);
         }
         // end of SECURITY: check if object id is numeric
@@ -134,7 +134,7 @@ class Objects
     public function create($p)
     {
         $template = $this->getTemplateInfo($p->template_id);
-        if (!Security::isAdmin() && !Security::canCreateActions($p->pid)) {
+        if (!Security::canCreateActions($p->pid)) {
             throw new \Exception(L\Access_denied);
         }
         fireEvent('beforeNodeDbCreate', $p);
@@ -225,7 +225,7 @@ class Objects
         $d->type = 4; //case object
         if (!is_numeric($d->id)) {
             // SECURITY: check if current user has access
-            if (!Security::isAdmin() && !Security::canCreateActions($d->pid)) {
+            if (!Security::canCreateActions($d->pid)) {
                 throw new \Exception(L\Access_denied);
             }
             fireEvent('beforeNodeDbCreate', $d);
@@ -254,7 +254,7 @@ class Objects
             $log_action_type = 8; //else throw new Eception(L\Error_creating_object); // create action
         } else {
             // SECURITY: check if current user has write access to this action
-            if (!Security::isAdmin() && !Security::canWrite($d->id)) {
+            if (!Security::canWrite($d->id)) {
                 throw new \Exception(L\Access_denied);
             }
             fireEvent('beforeNodeDbUpdate', $d);
@@ -712,7 +712,7 @@ class Objects
 
         if (!empty($p->id)) {
             // SECURITY: check if current user has at least read access to this case
-            if (!Security::isAdmin() && !Security::canRead($p->id)) {
+            if (!Security::canRead($p->id)) {
                 throw new \Exception(L\Access_denied);
             }
 

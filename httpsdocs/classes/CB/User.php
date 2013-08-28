@@ -269,9 +269,7 @@ class User
     public function getProfileData($user_id)
     {
 
-        if (($user_id != $_SESSION['user']['id']) &&
-            !Security::isUsersOwner($user_id) &&
-            !Security::isAdmin()) {
+        if (!Security::canEditUser()) {
             throw new \Exception(L\Access_denied);
         }
 
@@ -849,9 +847,7 @@ class User
             return array('success' => false, 'msg' => L\Wrong_id);
         }
 
-        if (($p->id != $_SESSION['user']['id']) &&
-            !Security::isUsersOwner($p->id) &&
-            !Security::isAdmin()) {
+        if (!Security::canEditUser()) {
             throw new \Exception(L\Access_denied);
         }
 
