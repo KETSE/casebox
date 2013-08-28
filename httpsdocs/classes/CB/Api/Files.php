@@ -12,7 +12,6 @@ class Files
      */
     public function get($id)
     {
-        echo "File id: ".$id;
         $rez = array('success' => true, 'data' => array());
         $sql = 'SELECT t.id
                 ,t.pid
@@ -77,5 +76,62 @@ class Files
         \CB\VerticalEditGrid::getData('objects', $rez['data']);
 
         return $rez;
+    }
+
+    /**
+     * download a file
+     *
+     * outputs file content and set corresponding header params
+     *
+     * @param  int  $id file id
+     * @return void
+     */
+    public function download($id, $attachment = true)
+    {
+        $sql = 'SELECT f.id
+                     , f.content_id
+                     , c.path
+                     , f.name
+                     , c.`type`
+                     , c.size
+                FROM files f
+                LEFT JOIN files_content c ON f.content_id = c.id
+                WHERE f.id = $1';
+
+        $res = DB\dbQuery($sql, $id) or die( DB\dbQueryError() );
+        if ($r = $res->fetch_assoc()) {
+            //check if can download file
+            if (!\CB\Security::canDownload($r['id'])) {
+                throw new \Exception(L\Access_denied);
+            }
+
+            header('Content-Description: File Transfer');
+            header('Content-Type: '.$r['type'].'; charset=UTF-8');
+            if ($attachment) {
+                header('Content-Disposition: attachment; filename="'.$r['name'].'"');
+            }
+            header('Content-Transfer-Encoding: binary');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: '.$r['size']);
+            readfile(\CB\FILES_PATH.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
+        } else {
+            throw new \Exception(L\Object_not_found);
+        }
+        $res->close();
+    }
+
+    /**
+     * view file
+     *
+     * outputs file content and set corresponding header params
+     *
+     * @param  int  $id file id
+     * @return void
+     */
+    public function view($id)
+    {
+        $this->download($id, false);
     }
 }
