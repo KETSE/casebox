@@ -25,12 +25,16 @@ define(
 );
 $dir = SOLR_DATA_PATH;
 $sleep = 15;
-if (!empty($argv[1]) && ( $argv[1] !== 'all')) {
+
+if (empty($argv[1])) {
+    die('Please specify a core as argument');
+}
+if ($argv[1] !== 'all') {
     $dir.= $argv[1];
     if (!file_exists($dir)) {
         die('core not found');
     }
-    $sleep = 5;
+    $sleep = 10;
 }
 
 removeIndexes($dir);

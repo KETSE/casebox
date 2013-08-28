@@ -23,9 +23,10 @@ class Favorites
         $sql = 'SELECT t.id
                  , t.type
                  , t.name
-                 , f_get_tree_path(t.id) `path`
+                 , ti.`path`
             FROM favorites f
             JOIN tree t ON f.object_id = t.id
+            JOIN tree_info ti on t.id = ti.id
             WHERE f.user_id = $1
                 AND object_id = $2';
 
@@ -48,7 +49,11 @@ class Favorites
     public function read($p)
     {
         $rez = array('succes' => true, 'data' => array());
-        $sql = 'SELECT t.id, t.type, t.name, f_get_tree_path(t.id) `path` FROM favorites f JOIN tree t ON f.object_id = t.id WHERE f.user_id = $1';
+        $sql = 'SELECT t.id, t.type, t.name, ti.`path`
+            FROM favorites f
+            JOIN tree t ON f.object_id = t.id
+            JOIN tree_info ti on t.id = ti.id
+            WHERE f.user_id = $1';
         $res = DB\dbQuery($sql, $_SESSION['user']['id']) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
             $rez['data'][] = $r;

@@ -34,7 +34,7 @@ if (isset($_GET['u']) && is_numeric($_GET['u'])) {
     }
     $user = &$_SESSION['user'];
 }
-/* check if public user is given */
+/* end of check if public user is given */
 
 $ids = explode(',', $_GET['id']);
 $ids = array_filter($ids, 'is_numeric');
@@ -85,7 +85,6 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         header('Content-Length: '.$r['size']);
         readfile(FILES_PATH.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
         Log::add(array('action_type' => 14, 'file_id' => $r['id']));
-
     }
     $res->close();
     exit(0);

@@ -240,8 +240,8 @@ createDirectStores = function(){
             ,idProperty: 'id'
             ,root: 'data'
             ,messageProperty: 'msg'
-        },[	{name: 'id',	type: 'int'}
-            ,{name: 'pid',	type: 'int'}
+        },[ {name: 'id',    type: 'int'}
+            ,{name: 'pid',  type: 'int'}
             ,'name'
             ,{name: 'order', type: 'int'}
             ,'iconCls'
@@ -273,7 +273,7 @@ createDirectStores = function(){
             ,idProperty: 'id'
             ,root: 'data'
             ,messageProperty: 'msg'
-        },[	{name: 'id', type: 'int'}
+        },[ {name: 'id', type: 'int'}
             ,{name: 'pid', type: 'int'}
             ,'type'
             ,'title'

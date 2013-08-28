@@ -96,7 +96,11 @@ class Browser
             switch ($p->scope) {
                 case 'project': /* limiting pid to project. If not in a project then to parent directory */
                     if (!empty($p->objectId) && is_numeric($p->objectId)) {
-                        $sql = 'select coalesce(case_id, pid) from tree where id = $1 ';
+                        $sql = 'SELECT coalesce(ti.case_id, t.pid)
+                            FROM tree t
+                            JOIN tree_info ti
+                                on t.id = ti.id
+                            WHERE t.id = $1';
                         $res = DB\dbQuery($sql, $p->objectId) or die(DB\dbQueryError());
                         if ($r = $res->fetch_row()) {
                             $p->pids = $r[0];
@@ -778,7 +782,15 @@ class Browser
                 Objects::updateCaseUpdateInfo(DB\dbLastInsertId());
                 break;
         }
-        Solr\Client::runBackgroundCron();
+        /*updating renamed document into solr directly (before runing background cron)
+            so that it'll be displayed with new name without delay*/
+        $solrClient = new Solr\Client();
+        foreach ($process_ids as $id) {
+            $solrClient->updateTree(array('id' => $id));
+        }
+
+        //running background cron to index other nodes
+        $solrClient->runBackgroundCron();
 
         return array('success' => true, 'pids' => $modified_pids);
     }
@@ -1098,10 +1110,10 @@ class Browser
     public function isChildOf($id, $pid)
     {
         $rez = false;
-        $res = DB\dbQuery('SELECT f_get_tree_ids_path($1)', $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $r = '/'.$r[0].'/r';
-            $rez = ( strpos($r, "/$pid/") !== false );
+        $res = DB\dbQuery('SELECT pids from tree_info where id = $1', $id) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $r = ','.$r['pids'].',';
+            $rez = ( strpos($r, ",$pid,") !== false );
         }
         $res->close();
 
@@ -1188,14 +1200,16 @@ class Browser
     public function getRootProperties($id)
     {
         $rez = array('success' => true, 'data' => array());
-        $sql = 'SELECT id `nid`
-                 , `system`
-                 , `type`
-                 , `subtype`
-                 , `name`
-                 , `cfg`
-            FROM tree
-            WHERE id = $1';
+        $sql = 'SELECT t.id `nid`
+                ,t.`system`
+                ,t.`type`
+                ,t.`subtype`
+                ,t.`name`
+                ,t.`cfg`
+                ,ti.acl_count
+            FROM tree t
+            JOIN tree_info ti on t.id = ti.id
+            WHERE t.id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             if (empty($r['cfg'])) {

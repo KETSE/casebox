@@ -23,12 +23,11 @@ class Path
         if (!is_numeric($id)) {
             return $rez;
         }
-        $sql = 'SELECT f_get_tree_ids_path(CASE WHEN `type` = 2 THEN target_id ELSE id END)
-            FROM tree
-            WHERE id = $1';
+        $sql = 'SELECT pids FROM tree_info WHERE id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = array('success' => true, 'path' => $r[0]);
+        if ($r = $res->fetch_assoc()) {
+            $r['pids'] = str_replace(',', '/', $r['pids']);
+            $rez = array('success' => true, 'id' => $id, 'path' => $r['pids']);
         }
         $res->close();
 
@@ -41,12 +40,14 @@ class Path
         if (!is_numeric($id)) {
             return $rez;
         }
-        $sql = 'SELECT f_get_tree_ids_path(pid)
-            FROM tree
-            WHERE id = $1';
+        $sql = 'SELECT ti.pids
+            FROM tree t
+            JOIN tree_info ti ON t.id = ti.id
+            WHERE t.id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = array('success' => true, 'id' => $id, 'path' => $r[0]);
+        if ($r = $res->fetch_assoc()) {
+            $r['pids'] = str_replace(',', '/', $r['pids']);
+            $rez = array('success' => true, 'id' => $id, 'path' => $r['pids']);
         }
         $res->close();
 
@@ -62,10 +63,12 @@ class Path
         $path = explode('/', $path);
         $ids = array_filter($path, 'is_numeric');
         $id = array_pop($ids);
-        $res = DB\dbQuery('SELECT f_get_tree_ids_path($1)', $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $path = explode('/', $r[0]);
-            array_shift($path);
+        $res = DB\dbQuery('SELECT pids from tree_info WHERE id = $1', $id) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $path = explode(',', $r['pids']);
+            if (!empty($path) && empty($path[0])) {
+                array_shift($path);
+            }
             array_shift($path);
             $ids = $path;
         }
@@ -145,15 +148,17 @@ class Path
                  , t.name
                  , t.`system`
                  , t.`type`
-                 , f_get_tree_ids_path(t.id) `path`
-                 , t.`case_id`
+                 , ti.pids `path`
+                 , ti.`case_id`
                  , t.`template_id`
                  , tt.`type` template_type
             FROM tree t
+            JOIN tree_info ti on t.id = ti.id
             LEFT JOIN templates tt ON t.template_id = tt.id
             WHERE t.id = $1'; //in ('.implode(',', $ids).')';
         $res = DB\dbQuery($sql, $lastId) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
+        if ($r = $res->fetch_assoc()) {
+            $r['path'] = str_replace(',', '/', $r['path']);
             $rez = $r;
         }
         $res->close();

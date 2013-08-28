@@ -619,17 +619,35 @@ class Templates
                     case 'related':
                     case 'field':
                         $value = 'tree';
-                        $sql = 'select id, name, `type`, `subtype`, cfg, f_get_tree_ids_path(pid) `path` from tree where id in ('.$ids.')';
+                        $sql = 'SELECT t.id
+                                ,t.name
+                                ,t.`type`
+                                ,t.`subtype`
+                                ,t.cfg
+                                ,ti.pids `path`
+                            FROM tree t
+                            JOIN tree_info ti ON t.id = ti.id
+                            WHERE t.id IN ('.$ids.')';
                         break;
                     case 'users':
                     case 'groups':
                     case 'usersgroups':
                         $value = 'users_groups';
-                        $sql = 'select id, name, l'.USER_LANGUAGE_INDEX.' `title`, CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls` from users_groups where id in ('.$ids.')';
+                        $sql = 'SELECT id
+                                ,name
+                                ,l'.USER_LANGUAGE_INDEX.' `title`
+                                ,CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls`
+                            FROM users_groups
+                            WHERE id IN ('.$ids.')';
                         break;
                     default:
                         $value = 'thesauri';
-                        $sql = 'select id, l'.USER_LANGUAGE_INDEX.' `title`, iconCls from tags where id in ('.$ids.') order by `order`';
+                        $sql = 'SELECT id
+                                ,l'.USER_LANGUAGE_INDEX.' `title`
+                                ,iconCls
+                            FROM tags
+                            WHERE id IN ('.$ids.')
+                            ORDER BY `order`';
                         break;
                 }
 
@@ -638,6 +656,7 @@ class Templates
                 while ($r = $res->fetch_assoc()) {
                     @$label = Util\coalesce($r['title'], $r['name']);
                     if (!empty($r['path'])) {
+                        $r['path'] = str_replace(',', '/', $r['path']);
                         $label = ($format == 'html') ? '<a class="locate click" path="'.$r['path'].'" nid="'.$r['id'].'">'.$label.'</a>' : $label;
                     }
 

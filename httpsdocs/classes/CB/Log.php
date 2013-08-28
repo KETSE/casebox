@@ -416,10 +416,11 @@ class Log
                             break; //CHECKED
                     }
                     $sql = 'SELECT t.name
-                             , f_get_tree_path(t.id) `path`
+                             ,ti.`path`
                              , u.'.$l.' `owner`
                              , u.name `username`
                         FROM tree t
+                        JOIN tree_info ti ON t.id = ti.id
                         JOIN users_groups u ON t.cid = u.id
                         WHERE t.id = $1';
                     $res = DB\dbQuery($sql, $p['task_id']) or die(DB\dbQueryError());

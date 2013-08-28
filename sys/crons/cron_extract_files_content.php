@@ -36,12 +36,12 @@ if (@$argv[2] == 'all') {
 }
 
 $sql = 'SELECT id
-     , path
-     , `type`
-     , pages
+    ,path
+    ,`type`
+    ,pages
 FROM files_content
-WHERE'.$where;
-$res = DB\dbQuery($sql) or die('error1'); //and name like \'%.pdf\'
+WHERE '.$where;
+$res = DB\dbQuery($sql) or die(DB\dbQueryError()); //and name like \'%.pdf\'
 
 while ($r = $res->fetch_assoc()) {
     $filename = FILES_PATH.$r['path'].DIRECTORY_SEPARATOR.$r['id'];

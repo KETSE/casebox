@@ -53,7 +53,7 @@ class Search extends Solr\Client
             ,'qf' => "name content^0.5"
             ,'tie' => '0.1'
             ,'fl' => "id, pid, path, name, template_type, subtype, system, ".
-                "size, date, date_end, oid, cid, cdate, uid, udate, case_id, ".
+                "size, date, date_end, oid, cid, cdate, uid, udate, case_id, acl_count, ".
                 "case, template_id, user_ids, status, category_id, importance, completed, versions"
             ,'sort' => 'ntsc asc'
         );
@@ -530,7 +530,7 @@ class Search extends Solr\Client
                     $rd['content'] = $sr->highlighting->{$rd['id']}->{'content'}[0];
                 }
             }
-            $res = DB\dbQuery('SELECT f_get_tree_path($1)', array($rd['id'])) or die(DB\dbQueryError());
+            $res = DB\dbQuery('SELECT `path` from tree_info where id = $1', array($rd['id'])) or die(DB\dbQueryError());
             if ($r = $res->fetch_row()) {
                 $rd['path'] = $r[0];
             }

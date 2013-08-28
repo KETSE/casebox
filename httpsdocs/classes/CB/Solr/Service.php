@@ -25,6 +25,7 @@ class Service
      *     @type boolean $host    custom Solr host or default will be used from config
      *     @type string  $port    Solr port
      *     @type string  $core    Solr core
+     * }
      */
     public function __construct ($p = array())
     {
@@ -77,7 +78,9 @@ class Service
             $this->solr_handler->addDocument($doc);
             \CB\fireEvent('nodeSolrUpdate', $doc);
         } catch (\SolrClientException $e) {
-            throw new \Exception("Error adding document to solr (id:".$d['id'].')'.$this->debugInfo(), 1);
+            $msg = "Error adding document to solr (id:".$d['id'].')'.$this->debugInfo();
+            debug($msg);
+            throw new \Exception($msg, 1);
         }
 
         return true;
@@ -153,8 +156,9 @@ class Service
         } catch (\Exception $e) {
             var_dump($addDocs);
             var_dump($updateDocs);
-
-            throw new \Exception("Error adding multiple documents to solr.\n".$e->__toString().$this->debugInfo(), 1);
+            $msg = "Error adding multiple documents to solr.\n".$e->__toString().$this->debugInfo();
+            debug($msg);
+            throw new \Exception($msg, 1);
         }
 
         /* fire after update events */
@@ -198,7 +202,9 @@ class Service
             $this->solr_handler->deleteByQuery($query);
             $this->commit();
         } catch (\Exception $e) {
-            throw new Exception("Cannot delete by query".$this->debugInfo(), 1);
+            $msg = "Cannot delete by query".$this->debugInfo();
+            debug($msg);
+            throw new Exception($msg, 1);
         }
     }
 
@@ -212,7 +218,9 @@ class Service
             $this->solr_handler->optimize();
             $this->commit();
         } catch (\Exception $e) {
-            throw new Exception("Cannot optimize solr core".$this->debugInfo(), 1);
+            $msg = "Cannot optimize solr core".$this->debugInfo();
+            debug($msg);
+            throw new Exception($msg, 1);
         }
     }
 
