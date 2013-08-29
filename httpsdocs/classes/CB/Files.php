@@ -1035,8 +1035,10 @@ class Files
         }
         exec($cmd);
     }
-    public static function getSolrData($id)
+
+    public static function getSolrData(&$objectRecord)
     {
+        return; //TODO: refactor according to objectsRecord parametter and solr content search refactor
         $rez = array();
         $sql = 'SELECT f.id
             ,c.type
@@ -1073,6 +1075,11 @@ class Files
         $res->close();/**/
 
         return $rez;
+    }
+
+    public static function getBulkSolrData(&$objectRecords)
+    {
+        return; //TODO: refactor according to objectsRecords parametter and solr content search refactor
     }
 
     /* versions */

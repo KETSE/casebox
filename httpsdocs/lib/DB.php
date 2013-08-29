@@ -83,9 +83,10 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
         if (!\CB\isDebugHost()) {
             return 'Query error';
         }
-        if (!$dbh) {
+        if (empty($dbh)) {
             $dbh = $GLOBALS['dbh'];
         }
+
         $rez = "\n\r<br /><hr />Query error: ".mysqli_error($dbh).
             "<hr /><br />\n\r";
         if (!empty($GLOBALS['last_sql']) && \CB\isDebugHost()) {

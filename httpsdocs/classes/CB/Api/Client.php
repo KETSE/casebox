@@ -15,15 +15,15 @@ class Client
 
     public function __construct ($url = null, $verb = 'POST', $requestBody = null)
     {
-        $this->url				= $url;
-        $this->verb				= $verb;
-        $this->requestBody		= $requestBody;
-        $this->requestLength	= 0;
-        $this->username			= null;
-        $this->password			= null;
-        $this->acceptType		= 'application/json';
-        $this->responseBody		= null;
-        $this->responseInfo		= null;
+        $this->url              = $url;
+        $this->verb             = $verb;
+        $this->requestBody      = $requestBody;
+        $this->requestLength    = 0;
+        $this->username         = null;
+        $this->password         = null;
+        $this->acceptType       = 'application/json';
+        $this->responseBody     = null;
+        $this->responseInfo     = null;
 
         if ($this->requestBody !== null) {
             $this->buildPostBody();
@@ -32,11 +32,11 @@ class Client
 
     public function flush ()
     {
-        $this->requestBody		= null;
-        $this->requestLength	= 0;
-        $this->verb				= 'POST';
-        $this->responseBody		= null;
-        $this->responseInfo		= null;
+        $this->requestBody      = null;
+        $this->requestLength    = 0;
+        $this->verb             = 'POST';
+        $this->responseBody     = null;
+        $this->responseInfo     = null;
     }
 
     public function execute ()
@@ -132,7 +132,7 @@ class Client
     {
         $this->setCurlOpts($curlHandle);
         $this->responseBody = curl_exec($curlHandle) or die(curl_error($curlHandle));
-        $this->responseInfo	= curl_getinfo($curlHandle);
+        $this->responseInfo = curl_getinfo($curlHandle);
 
         curl_close($curlHandle);
     }
@@ -233,5 +233,4 @@ class Client
 
         return $rez;
     }
-
 }

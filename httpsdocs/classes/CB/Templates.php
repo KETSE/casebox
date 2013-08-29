@@ -657,12 +657,16 @@ class Templates
                     @$label = Util\coalesce($r['title'], $r['name']);
                     if (!empty($r['path'])) {
                         $r['path'] = str_replace(',', '/', $r['path']);
-                        $label = ($format == 'html') ? '<a class="locate click" path="'.$r['path'].'" nid="'.$r['id'].'">'.$label.'</a>' : $label;
+                        $label = ($format == 'html')
+                            ? '<a class="locate click" path="'.$r['path'].'" nid="'.$r['id'].'">'.$label.'</a>'
+                            : $label;
                     }
 
                     switch (@$field['cfg']->renderer) {
                         case 'listGreenIcons':
-                            $value[] =  ($format == 'html') ? '<li class="icon-padding icon-element">'.$label.'</li>' : $label;
+                            $value[] =  ($format == 'html')
+                                ? '<li class="icon-padding icon-element">'.$label.'</li>'
+                                : $label;
                             break;
                         case 'listObjIcons':
                             if (!empty($r['cfg'])) {
@@ -681,14 +685,20 @@ class Templates
                                     break;
                             }
 
-                            $value[] = ($format == 'html') ? '<li class="icon-padding '.$icon.'">'.$label.'</li>': $label;
+                            $value[] = ($format == 'html')
+                                ? '<li class="icon-padding '.$icon.'">'.$label.'</li>'
+                                : $label;
                             break;
                         default:
-                            $value[] = ($format == 'html') ? '<li>'.$label.'</li>': $label;
+                            $value[] = ($format == 'html')
+                                ? '<li>'.$label.'</li>'
+                                : $label;
                     }
                 }
                 $res->close();
-                $value = ($format == 'html') ? '<ul class="clean">'.implode('', $value).'</ul>': implode(', ', $value);
+                $value = ($format == 'html')
+                    ? '<ul class="clean">'.implode('', $value).'</ul>'
+                    : implode(', ', $value);
                 break;
 
             case 'date':

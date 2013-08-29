@@ -1501,9 +1501,8 @@ class Tasks
         return $rez;
     }
 
-    public static function getSolrData($id)
+    public static function getSolrData(&$object_record)
     {
-        $rez = array();
         $sql = 'SELECT
             title
             ,status
@@ -1521,20 +1520,63 @@ class Tasks
             ,cid
             FROM tasks where id = $1';
 
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError()."\n".$sql);
+        $res = DB\dbQuery($sql, $object_record['id']) or die(DB\dbQueryError()."\n".$sql);
         if ($r = $res->fetch_assoc()) {
-            $rez['status'] = $r['status'];
-            $rez['importance'] = $r['importance'];
-            $rez['category_id'] = $r['category_id'];
-            $rez['completed'] = $r['completed'];
-            $rez['parent_ids'] = empty($r['parent_ids']) ? null : explode(',', $r['parent_ids']);
+            $object_record['status'] = $r['status'];
+            $object_record['importance'] = $r['importance'];
+            $object_record['category_id'] = $r['category_id'];
+            $object_record['completed'] = $r['completed'];
+            $object_record['parent_ids'] = empty($r['parent_ids']) ? null : explode(',', $r['parent_ids']);
             if (!empty($r['responsible_user_ids'])) {
-                $rez['user_ids'] = explode(',', $r['responsible_user_ids']);
+                $object_record['user_ids'] = explode(',', $r['responsible_user_ids']);
             }
-            $rez['content'] = $r['description'];
+            $object_record['content'] = $r['description'];
         }
         $res->close();/**/
+    }
 
-        return $rez;
+    public static function getBulkSolrData(&$object_records)
+    {
+        $process_object_ids = array();
+        foreach ($object_records as $object_id => $object_record) {
+            if (@$object_record['template_type'] == 'task') {
+                $process_object_ids[] = $object_id;
+            }
+        }
+        if (empty($process_object_ids)) {
+            return;
+        }
+
+        $sql = 'SELECT
+            id
+            ,title
+            ,status
+            ,category_id
+            ,importance
+            ,privacy
+            ,responsible_party_id
+            ,responsible_user_ids
+            ,autoclose
+            ,description
+            ,parent_ids
+            ,child_ids
+            ,missed
+            ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
+            ,cid
+            FROM tasks where id in ('.implode(',', $process_object_ids).')';
+
+        $res = DB\dbQuery($sql) or die(DB\dbQueryError()."\n".$sql);
+        while ($r = $res->fetch_assoc()) {
+            $object_records[$r['id']]['status'] = $r['status'];
+            $object_records[$r['id']]['importance'] = $r['importance'];
+            $object_records[$r['id']]['category_id'] = $r['category_id'];
+            $object_records[$r['id']]['completed'] = $r['completed'];
+            $object_records[$r['id']]['parent_ids'] = empty($r['parent_ids']) ? null : explode(',', $r['parent_ids']);
+            if (!empty($r['responsible_user_ids'])) {
+                $object_records[$r['id']]['user_ids'] = explode(',', $r['responsible_user_ids']);
+            }
+            $object_records[$r['id']]['content'] = $r['description'];
+        }
+        $res->close();
     }
 }

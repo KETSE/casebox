@@ -804,7 +804,24 @@ class Objects
             }
             $res->close();
         } elseif (is_numeric($object_id)) {
-            $res = DB\dbQuery('SELECT id, pid, type, t.l'.USER_LANGUAGE_INDEX.' `title`, iconCls, default_field, title_template, cfg from templates t  where id = (select template_id from tree where id = $1)', $object_id) or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT
+                    id
+                    ,pid
+                    ,`type`
+                    ,t.l'.USER_LANGUAGE_INDEX.' `title`
+                    ,iconCls
+                    ,default_field
+                    ,title_template
+                    ,cfg
+                FROM templates t
+                WHERE id =
+                (SELECT template_id
+                FROM tree
+                WHERE id = $1)',
+                $object_id
+            ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 $rez = $r;
             }
@@ -916,124 +933,196 @@ class Objects
         DB\dbQuery($sql, array($object_id, $field_id, $duplicate_id, $value)) or die(DB\dbQueryError());
     }
 
-    public static function getSolrData($id)
+    public static function getSolrData(&$object_record)
     {
-        $rez = array();
-        $lang_field = 'l'.LANGUAGE_INDEX;
+        $template_collection = Templates\SingletonCollection::getInstance();
+
+        $template = $template_collection->getTemplate($object_record['template_id']);
+
+        $object_record['content'] = '';
+
         $sql = 'SELECT
-            co.id
-            ,co.template_id
-            ,co.cid
-            ,co.name `title`
-            ,t.iconCls
-            FROM tree co left join templates t on co.template_id = t.id where co.id = $1';
-            //,co.private_for_user
+                d.field_id
+                ,d.`value`
+                ,info
+            FROM objects o
+            JOIN objects_data d ON d.object_id = o.id
+            WHERE o.id = $1 and (d.private_for_user is null)';//and ts.solr_column_name IS NOT NULL
 
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError()."\n".$sql);
-        while ($r = $res->fetch_assoc()) {
-            $rez['template_id'] = $r['template_id'];
-            $rez['content'] = '';//$r['title']."\n";
-            $rez['iconCls'] = $r['iconCls'];
+        $dres = DB\dbQuery($sql, $object_record['id']) or die(DB\dbQueryError());
 
-            $sql = 'SELECT ts.name
-                    ,ts.'.$lang_field.' `title`
-                    ,ts.`type`
-                    ,ts.cfg
-                    ,ts.solr_column_name
-                    ,d.`value`
-                    ,info, files '.
-                'FROM objects o '.
-                'JOIN objects_data d ON d.object_id = o.id '.
-                'JOIN templates_structure ts ON ts.template_id = o.template_id AND ts.id = d.field_id '.
-                'WHERE o.id = $1 and (d.private_for_user is null)';//and ts.solr_column_name IS NOT NULL
-            $dres = DB\dbQuery($sql, $id) or die(DB\dbQueryError()."\n".$sql);
-            while ($dr = $dres->fetch_assoc()) {
-
-                $processed_values = array();
-                if (!empty($dr['value'])) {
-                    /* make changes to value if needed */
-                    switch ($dr['type']) {
-                        case 'boolean':
-                        case 'checkbox':
-                        case 'object_violation':
-                            $dr['value'] = empty($dr['value']) ? false : true;
-                            break;
-                        case 'date':
-                            $dr['value'] .= 'Z';
-                            if (@$dr['value'][10] == ' ') {
-                                $dr['value'][10] = 'T';
-                            }
-                            break;
-                        //case 'object_author':
-                        case 'combo':
-                        case 'popuplist':
-                            $dr['value'] = Util\toNumericArray($dr['value']);
-                            if (empty($dr['value'])) {
-                                break;
-                            }
-                            $sql = 'select '.$lang_field.' from tags where id in ('.implode(',', $dr['value']).')';
-                            $sres = DB\dbQuery($sql) or die(DB\dbQueryError()."\n".$sql);
-                            while ($sr = $sres->fetch_row()) {
-                                $processed_values[] = $sr[0];
-                            }
-                            $sres->close();
-                            break;
-                        case 'html':
-                            $dr['value'] = strip_tags($dr['value']);
-                            //$processed_values[] = strip_tags($dr['value']);
-                            break;
-                        case '_auto_title':
-                        case 'memo':
-                        case 'text':
-                        case 'int':
-                        case 'float':
-                        case 'time':
-                        default:
-                            break;
-                    }
-                    /* make changes to value if needed */
-
-                    $field_config = json_decode($dr['cfg'], true);
-                    if (@$field_config['faceting']) {
-                        $solr_field = $dr['solr_column_name'];
-                        if (empty($solr_field)) {
-                            $solr_field = ( empty($field_config['source']) || ($field_config['source'] == 'thesauri') ) ?
-                                'sys_tags' : 'tree_tags';
+        while ($dr = $dres->fetch_assoc()) {
+            $field = $template->getData()['fields'][$dr['field_id']];
+            $processed_values = array();
+            if (!empty($dr['value'])) {
+                /* make changes to value if needed */
+                switch ($field['type']) {
+                    case 'boolean':
+                    case 'checkbox':
+                    case 'object_violation':
+                        $dr['value'] = empty($dr['value']) ? false : true;
+                        break;
+                    case 'date':
+                        $dr['value'] .= 'Z';
+                        if (@$dr['value'][10] == ' ') {
+                            $dr['value'][10] = 'T';
                         }
-                        $arr = Util\toNumericArray($dr['value']);
-                        for ($i=0; $i < sizeof($arr); $i++) {
-                            //$rez[$solr_field][$arr[$i]] = 1;
-                            if (empty($rez[$solr_field]) || !in_array($arr[$i], $rez[$solr_field])) {
-                                $rez[$solr_field][] = $arr[$i];
-                            }
+                        break;
+                    case 'combo':
+                    case 'popuplist':
+                        $dr['value'] = Util\toNumericArray($dr['value']);
+                        if (empty($dr['value'])) {
+                            break;
                         }
-                    }
+                        $sql = 'SELECT l'.LANGUAGE_INDEX.' FROM tags WHERE id IN ('.implode(',', $dr['value']).')';
+                        $sres = DB\dbQuery($sql) or die(DB\dbQueryError());
+                        while ($sr = $sres->fetch_row()) {
+                            $processed_values[] = $sr[0];
+                        }
+                        $sres->close();
+                        break;
+                    case 'html':
+                        $dr['value'] = strip_tags($dr['value']);
+                        break;
                 }
+                /* make changes to value if needed */
 
-                if (!empty($dr['value'])) {
-                    if (!empty($processed_values)) {
-                        foreach ($processed_values as $v) {
-                            $rez['content'] .= $dr['title'].' '.$v."\n";
-                        }
-                    } elseif (!empty($dr['value'])) {
-                        if (!is_array($dr['value'])) {// $dr['value'] = implode(' ', $dr['value']);
-                            $rez['content'] .= $dr['title'].' '.
-                                (in_array($dr['solr_column_name'], array('date_start', 'date_end', 'dates')) ?
-                                    substr($dr['value'], 0, 10): $dr['value'])."\n";
+                if (@$field['cfg']->faceting) {
+                    $solr_field = $field['solr_column_name'];
+                    if (empty($solr_field)) {
+                        $solr_field = ( empty($field['cfg']->source) || ($field['cfg']->source == 'thesauri') ) ?
+                            'sys_tags' : 'tree_tags';
+                    }
+                    $arr = Util\toNumericArray($dr['value']);
+                    for ($i=0; $i < sizeof($arr); $i++) {
+                        if (empty($object_record[$solr_field]) || !in_array($arr[$i], $object_record[$solr_field])) {
+                            $object_record[$solr_field][] = $arr[$i];
                         }
                     }
                 }
             }
-            $dres->close();
+
+            if (!empty($dr['value'])) {
+                if (!empty($processed_values)) {
+                    foreach ($processed_values as $v) {
+                        $object_record['content'] .= $field['title'].' '.$v."\n";
+                    }
+                } elseif (!is_array($dr['value'])) {
+                    $object_record['content'] .= $field['title'].' '.
+                        (in_array($field['solr_column_name'], array('date_start', 'date_end', 'dates')) ?
+                            substr($dr['value'], 0, 10): $dr['value'])."\n";
+                }
+            }
         }
-        $res->close();
+        $dres->close();
+    }
 
-        // if(!empty($rez['sys_tags'])) $rez['sys_tags'] = array_keys($rez['sys_tags']);
-        // else unset($rez['sys_tags']);
+    public static function getBulkSolrData(&$object_records)
+    {
 
-        // if(!empty($rez['tree_tags'])) $rez['tree_tags'] = array_keys($rez['tree_tags']);
-        // else unset($rez['tree_tags']);
-        return $rez;
+        $process_object_ids = array();
+        foreach ($object_records as $object_id => $object_record) {
+            if (in_array(@$object_record['template_type'], array('case', 'object', 'email'))) {
+                $process_object_ids[] = $object_id;
+            }
+        }
+        if (empty($process_object_ids)) {
+            return;
+        }
+
+        $template_collection = Templates\SingletonCollection::getInstance();
+
+        $template = null;
+        $last_object_id = null;
+        $object_record = null;
+
+        $sql = 'SELECT
+                object_id
+                ,field_id
+                ,`value`
+                ,info
+            FROM objects_data d
+            WHERE object_id in ('.implode(',', $process_object_ids).')
+                AND (private_for_user is null)
+            ORDER BY object_id';
+
+        $dres = DB\dbQuery($sql) or die(DB\dbQueryError());
+
+        while ($dr = $dres->fetch_assoc()) {
+
+            if ($last_object_id != $dr['object_id']) {
+                $object_record = &$object_records[$dr['object_id']];
+                $template = $template_collection->getTemplate($object_record['template_id']);
+                $object_record['content'] = '';
+            }
+
+            $field = @$template->getData()['fields'][$dr['field_id']];
+            if (empty($field)) {
+                continue;
+            }
+
+            $processed_values = array();
+            if (!empty($dr['value'])) {
+                /* make changes to value if needed */
+                switch ($field['type']) {
+                    case 'boolean':
+                    case 'checkbox':
+                    case 'object_violation':
+                        $dr['value'] = empty($dr['value']) ? false : true;
+                        break;
+                    case 'date':
+                        $dr['value'] .= 'Z';
+                        if (@$dr['value'][10] == ' ') {
+                            $dr['value'][10] = 'T';
+                        }
+                        break;
+                    case 'combo':
+                    case 'popuplist':
+                        $dr['value'] = Util\toNumericArray($dr['value']);
+                        if (empty($dr['value'])) {
+                            break;
+                        }
+                        $sql = 'SELECT l'.LANGUAGE_INDEX.' FROM tags WHERE id IN ('.implode(',', $dr['value']).')';
+                        $sres = DB\dbQuery($sql) or die(DB\dbQueryError());
+                        while ($sr = $sres->fetch_row()) {
+                            $processed_values[] = $sr[0];
+                        }
+                        $sres->close();
+                        break;
+                    case 'html':
+                        $dr['value'] = strip_tags($dr['value']);
+                        break;
+                }
+                /* make changes to value if needed */
+
+                if (@$field['cfg']->faceting) {
+                    $solr_field = $field['solr_column_name'];
+                    if (empty($solr_field)) {
+                        $solr_field = ( empty($field['cfg']->source) || ($field['cfg']->source == 'thesauri') ) ?
+                            'sys_tags' : 'tree_tags';
+                    }
+                    $arr = Util\toNumericArray($dr['value']);
+                    for ($i=0; $i < sizeof($arr); $i++) {
+                        if (empty($object_record[$solr_field]) || !in_array($arr[$i], $object_record[$solr_field])) {
+                            $object_record[$solr_field][] = $arr[$i];
+                        }
+                    }
+                }
+            }
+
+            if (!empty($dr['value'])) {
+                if (!empty($processed_values)) {
+                    foreach ($processed_values as $v) {
+                        $object_record['content'] .= $field['title'].' '.$v."\n";
+                    }
+                } elseif (!is_array($dr['value'])) {
+                    $object_record['content'] .= $field['title'].' '.
+                        (in_array($field['solr_column_name'], array('date_start', 'date_end', 'dates')) ?
+                            substr($dr['value'], 0, 10): $dr['value'])."\n";
+                }
+            }
+        }
+        $dres->close();
     }
 
     public static function getCaseId($node_id)

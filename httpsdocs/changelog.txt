@@ -1,4 +1,13 @@
-CaseBox 1.9.17 (2013-08-23)
+CaseBox 1.9.28 (2013-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- refactored solr reindexing process 
+    and added bulk data reading of document properties 
+    that should go to solr
+- added basic Template class, Templates\Collection, Templates\SingletonCollection 
+
+CaseBox 1.9.28 (2013-08-29)
 ==============================
 Fixed Bugs:
 ----------

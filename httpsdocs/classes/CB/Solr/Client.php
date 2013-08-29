@@ -82,30 +82,39 @@ class Client extends Service
     }
 
     /**
-     * function that returns object data to be indexed in solr
-     * @param  int     $object_id
-     * @param  varchar $template_type
-     * @return array   object properties
+     * function that assigns additional data to object rectord
+     * @param  reference $objectRecord
+     * @return void
      */
-    private function getSolrData($object_id, $template_type)
+    private function getSolrData(&$objectRecord)
     {
-        switch ($template_type) {
+        switch ($objectRecord['template_type']) {
             case 'case':
-                return \CB\Objects::getSolrData($object_id);
+                \CB\Objects::getSolrData($objectRecord);
                 break;
             case 'object':
             case 'email':
-                return \CB\Objects::getSolrData($object_id);
+                \CB\Objects::getSolrData($objectRecord);
                 break;
             case 'file':
-                return \CB\Files::getSolrData($object_id);
+                \CB\Files::getSolrData($objectRecord);
                 break;
             case 'task':
-                return \CB\Tasks::getSolrData($object_id);
+                \CB\Tasks::getSolrData($objectRecord);
                 break;
         }
+    }
 
-        return array();
+    /**
+     * function that assigns additional data to an array of object rectords
+     * @param  array reference $objectRecords
+     * @return void
+     */
+    private function getBulkSolrData(&$objectRecords)
+    {
+        \CB\Objects::getBulkSolrData($objectRecords);
+        \CB\Files::getBulkSolrData($objectRecords);
+        \CB\Tasks::getBulkSolrData($objectRecords);
     }
 
     private function updateCronLastActionTime($cron_id)
@@ -140,10 +149,13 @@ class Client extends Service
         /** @type int the last processed document id */
         $lastId = 0;
 
+        $templatesCollection = \CB\Templates\SingletonCollection::getInstance();
+
         /* prepeare where condition for sql depending on incomming params */
         $where = '(t.updated > 0) and (t.id > $1)';
         if (isset($p['all']) && ($p['all'] == true)) {
             $where = '(t.id > $1)';
+            $templatesCollection->loadAll();
         } elseif (!empty($p['id'])) {
             $ids = \CB\Util\toNumericArray($p['id']);
             $where = '(t.id in (0'.implode(',', $ids).') ) and (t.id > $1)';
@@ -174,14 +186,12 @@ class Client extends Service
             ,t.did
             ,DATE_FORMAT(t.ddate, \'%Y-%m-%dT%H:%i:%sZ\') `ddate`
             ,t.dstatus
-            ,nt.`type` template_type
             ,t.updated
             FROM tree t
             LEFT JOIN tree_info ti ON t.id = ti.id
-            LEFT JOIN templates nt ON t.template_id = nt.id
             where '.$where.
             ' ORDER BY t.id
-            limit 200';
+            limit 500';
 
         $docs = true;
         while (!empty($docs)) {
@@ -190,13 +200,21 @@ class Client extends Service
             $res = DB\dbQuery($sql, $lastId) or die(DB\dbQueryError());
             while ($r = $res->fetch_assoc()) {
                 $lastId = $r['id'];
+
                 /* process full object update only if:
                     - updated = 1
                     - specific ids are specified
                     - if $all parameter is true
                 */
                 if (!empty($p['all']) || !empty($p['id']) || ($r['updated'] & 1)) {
-                    /* set the case name id case_id is present*/
+                    /* set template data */
+                    if (!empty($r['template_id'])) {
+                        $template = $templatesCollection->getTemplate($r['template_id']);
+                        $r['template_type'] = $template->getData()['type'];
+                        $r['iconCls'] = $template->getData()['iconCls'];
+                    }
+
+                    /* set the case name if case_id is present*/
                     if (!empty($r['case_id'])) {
                         $r['case'] = \CB\Objects::getCaseName($r['case_id']);
                     }
@@ -206,7 +224,7 @@ class Client extends Service
                     $r['ntsc'] = sizeof($GLOBALS['folder_templates']) + 1;
 
                     /* decrease ntsc (make 1 unit more important) in case of 'case' object types */
-                    if ($r['template_type'] == 'case') {
+                    if (@$r['template_type'] == 'case') {
                         $r['ntsc']--;
                     }
 
@@ -219,8 +237,8 @@ class Client extends Service
 
                     $r['content'] = $r['name'];
 
-                    /* get custom solr data based on template type */
-                    $r = array_merge($r, $this->getSolrData($r['id'], $r['template_type']));
+                    /* add custom solr data based on template type */
+                    // $this->getSolrData($r);
 
                     /* make some trivial type checks */
                     $r['ntsc'] = intval($r['ntsc']);
@@ -229,7 +247,7 @@ class Client extends Service
                     $r['subtype'] = @intval($r['subtype']);
                     $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
 
-                    $this->filterSolrFields($r);
+                    // $this->filterSolrFields($r);
 
                     /* append the obtained record to the result */
                     $docs[$r['id']] = $r;
@@ -239,6 +257,12 @@ class Client extends Service
             $res->close();
 
             if (!empty($docs)) {
+                $this->getBulkSolrData($docs);
+
+                foreach ($docs as $doc_id => $doc) {
+                    $this->filterSolrFields($docs[$doc_id]);
+                }
+
                 $this->addDocuments($docs);
 
                 /* reset updated flag into database for processed documents */
@@ -249,7 +273,7 @@ class Client extends Service
                     WHERE tree.id in ('.implode(',', array_keys($docs)).')
                         AND tree_info.id = tree.id';
 
-                DB\dbQuery($sql2, $r['id']) or die(DB\dbQueryError());
+                DB\dbQuery($sql2) or die(DB\dbQueryError());
 
                 $this->updateCronLastActionTime(@$p['cron_id']);
 
