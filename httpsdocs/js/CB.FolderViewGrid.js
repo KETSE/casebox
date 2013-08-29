@@ -898,7 +898,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         if(!this.grid.selModel.hasSelection()) return;
         row = this.grid.selModel.getSelected();
         this.fireEvent('changeparams', {path: row.get('pid'), descendants: false, query:'' }, e)    
-        App.locateObject(r.data.nid, r.data.pid);
+        App.locateObject(row.data.nid, row.data.pid);
     }
     ,onCutClick: function(buttonOrKey, e) {
         if(this.actions.cut.isDisabled()) return;

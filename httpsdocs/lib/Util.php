@@ -324,7 +324,7 @@ function getThesauriTitles($ids_string, $language_id = false)
     $rez = array();
     foreach ($a as $id) {
         $var_name = "TH[$id]['name']";
-        if (!Cache::exist($var_name)) {
+        if (!\CB\Cache::exist($var_name)) {
             $res = DB\dbQuery(
                 'SELECT l'.$language_id.'
                 FROM tags
@@ -333,11 +333,11 @@ function getThesauriTitles($ids_string, $language_id = false)
             ) or die(DB\dbQueryError());
 
             if ($r = $res->fetch_row()) {
-                Cache::set($var_name, $r[0]);
+                \CB\Cache::set($var_name, $r[0]);
             }
             $res->close();
         }
-        $rez[] = Cache::get($var_name);
+        $rez[] = \CB\Cache::get($var_name);
     }
 
     if (sizeof($rez) == 1) {
@@ -355,19 +355,19 @@ function getThesauryIcon($id)
 
     $var_name = 'TH['.$id."]['icon']";
 
-    if (!Cache::exist($var_name)) {
+    if (!\CB\Cache::exist($var_name)) {
         $res = DB\dbQuery(
             'SELECT iconCls FROM tags WHERE id = $1',
             $id
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            Cache::set($var_name, $r['iconCls']);
+            \CB\Cache::set($var_name, $r['iconCls']);
         }
         $res->close();
     }
 
-    return Cache::get($var_name);
+    return \CB\Cache::get($var_name);
 }
 
 function getUsername($id)

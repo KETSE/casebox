@@ -1,5 +1,13 @@
 CaseBox 1.9.17 (2013-08-23)
 ==============================
+Fixed Bugs:
+----------
+- js error on saving object 
+- misspelled variable in FolderViewGrid.js
+- missing namespace, in some places, when calling debug function
+
+CaseBox 1.9.17 (2013-08-23)
+==============================
 New Features, Improvements
 --------------------------
 - added icon in tree and folder view for nodes that have security rules associated. 

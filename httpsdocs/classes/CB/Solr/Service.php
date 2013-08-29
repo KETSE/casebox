@@ -79,7 +79,7 @@ class Service
             \CB\fireEvent('nodeSolrUpdate', $doc);
         } catch (\SolrClientException $e) {
             $msg = "Error adding document to solr (id:".$d['id'].')'.$this->debugInfo();
-            debug($msg);
+            \CB\debug($msg);
             throw new \Exception($msg, 1);
         }
 
@@ -157,7 +157,7 @@ class Service
             var_dump($addDocs);
             var_dump($updateDocs);
             $msg = "Error adding multiple documents to solr.\n".$e->__toString().$this->debugInfo();
-            debug($msg);
+            \CB\debug($msg);
             throw new \Exception($msg, 1);
         }
 
@@ -203,7 +203,7 @@ class Service
             $this->commit();
         } catch (\Exception $e) {
             $msg = "Cannot delete by query".$this->debugInfo();
-            debug($msg);
+            \CB\debug($msg);
             throw new Exception($msg, 1);
         }
     }
@@ -219,7 +219,7 @@ class Service
             $this->commit();
         } catch (\Exception $e) {
             $msg = "Cannot optimize solr core".$this->debugInfo();
-            debug($msg);
+            \CB\debug($msg);
             throw new Exception($msg, 1);
         }
     }
