@@ -39,7 +39,7 @@ class Collection
         while ($r = $res->fetch_assoc()) {
             $template_id = $r['template_id'];
             unset($r['template_id']);
-            $template_fields[$template_id]['fields'][$r['id']] = $r;
+            $template_fields[$template_id][$r['id']] = $r;
         }
         $res->close();
 
