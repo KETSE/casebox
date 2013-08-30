@@ -83,6 +83,39 @@ class Security
     }
 
     /**
+     * set security inheritance for a node
+     * @param array $p {
+     *     @type int      $node_id    id of tree node
+     *     @type boolean  $inherit    set inherit to true or false
+     *     @type string   $copyRules   when removing inheritance ($inherit = false)
+     *                                 then this value could be set to 'yes' or 'no'
+     *                                 for copying inherited rules to current node
+     * }
+     * @return array array with boolean success propety
+     */
+    public function setInheritance($p)
+    {
+        /* check params */
+        if (!is_numeric($p['node_id'])
+            || !isset($p['inherit'])
+        ) {
+            return array('success' => false, 'msg' => 'Wrong params');
+        }
+        /* end of check params */
+
+        $sec = new \CB\Security();
+        $rez = $sec->setInheritance(
+            (object) array(
+                'id' => $p['node_id']
+                ,'inherit' => $p['inherit']
+                ,'copyRules' => @$p['copyRules']
+            )
+        );
+
+        return $rez;
+    }
+
+    /**
      * convert textual representation of accesses (read, write, modify, full_control)
      * to access specific string of bits
      * @param  varchar $access_string textual access representation

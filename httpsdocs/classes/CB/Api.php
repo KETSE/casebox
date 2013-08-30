@@ -15,6 +15,7 @@ class Api
         ,'cb.objects.permissions.addRule'       => 'Security.updateNodeAccess'
         ,'cb.objects.permissions.updateRule'    => 'Security.updateNodeAccess'
         ,'cb.objects.permissions.removeRule'    => 'Security.deleteNodeAccess'
+        ,'cb.objects.permissions.setInheritance'=> 'Security.setInheritance'
 
         ,'cb.files.get'         => 'Files.get'
         ,'cb.files.download'    => 'Files.download'
