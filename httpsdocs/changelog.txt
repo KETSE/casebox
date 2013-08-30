@@ -1,4 +1,11 @@
-CaseBox 1.9.28 (2013-08-30)
+CaseBox 1.9.31 (2013-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- delayed task update status to 20 seconds
+- optimized Templates\Collection
+
+CaseBox 1.9.30 (2013-08-30)
 ==============================
 New Features, Improvements
 --------------------------
