@@ -120,8 +120,17 @@ class Client extends Service
     private function updateCronLastActionTime($cron_id)
     {
         if (empty($cron_id)) {
-            return false;
+            return;
         }
+        $cache_var_name = 'update_cron_'.$cron_id;
+        /* if less than 20 seconds have passed then skip updating db */
+        if (\CB\Cache::exist($cache_var_name) &&
+            ( (time() - \CB\Cache::get($cache_var_name)) < 20)
+        ) {
+            return;
+        }
+
+        \CB\Cache::set($cache_var_name, time());
 
         DB\dbQuery(
             'UPDATE crons

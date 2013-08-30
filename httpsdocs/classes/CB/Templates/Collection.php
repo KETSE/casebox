@@ -23,6 +23,27 @@ class Collection
     {
         $this->reset();
 
+        /* collecting template_fields */
+        $template_fields = array();
+        $sql = 'SELECT
+                id
+                ,template_id
+                ,name
+                ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
+                ,`type`
+                ,cfg
+                ,solr_column_name
+            FROM templates_structure';
+
+        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $template_id = $r['template_id'];
+            unset($r['template_id']);
+            $template_fields[$template_id]['fields'][$r['id']] = $r;
+        }
+        $res->close();
+
+        /* loading templates */
         $sql = 'SELECT id
                     ,pid
                     ,is_folder
@@ -43,30 +64,14 @@ class Collection
         while ($r = $res->fetch_assoc()) {
             $r['cfg'] = empty($r['cfg']) ? array(): json_decode($r['cfg']);
 
-            /* loading template fields */
-            $r['fields'] = array();
-            $sql = 'SELECT
-                    id
-                    ,name
-                    ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
-                    ,`type`
-                    ,cfg
-                    ,solr_column_name
-                FROM templates_structure
-                WHERE template_id = $1';
-
-            $fres = DB\dbQuery($sql, $r['id']) or die(DB\dbQueryError());
-            while ($fr = $fres->fetch_assoc()) {
-                $fr['cfg'] = empty($fr['cfg']) ? array(): json_decode($fr['cfg']);
-                $r['fields'][$fr['id']] = $fr;
-            }
-            $fres->close();
+            $r['fields'] = empty($template_fields[$r['id']])
+                ? array()
+                : $template_fields[$r['id']];
 
             /* store template in collection */
-            $this->templates[] = new \CB\Template($r);
+            $this->templates[$r['id']] = new \CB\Template($r);
         }
         $res->close();
-        //select name, type, cfg from templates_structure where id = $1
     }
 
     /**
