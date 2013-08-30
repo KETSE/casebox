@@ -1054,6 +1054,7 @@ class Objects
                 $object_record = &$object_records[$dr['object_id']];
                 $template = $template_collection->getTemplate($object_record['template_id']);
                 $object_record['content'] = '';
+                $last_object_id = $dr['object_id'];
             }
 
             $field = @$template->getData()['fields'][$dr['field_id']];
@@ -1095,12 +1096,17 @@ class Objects
                 }
                 /* make changes to value if needed */
 
+                @$solr_field = $field['solr_column_name'];
+
                 if (@$field['cfg']->faceting) {
-                    $solr_field = $field['solr_column_name'];
                     if (empty($solr_field)) {
-                        $solr_field = ( empty($field['cfg']->source) || ($field['cfg']->source == 'thesauri') ) ?
-                            'sys_tags' : 'tree_tags';
+                        $solr_field = ( empty($field['cfg']->source) || ($field['cfg']->source == 'thesauri') )
+                            ? 'sys_tags'
+                            : 'tree_tags';
                     }
+                }
+
+                if (!empty($solr_field)) {
                     $arr = Util\toNumericArray($dr['value']);
                     for ($i=0; $i < sizeof($arr); $i++) {
                         if (empty($object_record[$solr_field]) || !in_array($arr[$i], $object_record[$solr_field])) {
@@ -1108,6 +1114,7 @@ class Objects
                         }
                     }
                 }
+
             }
 
             if (!empty($dr['value'])) {

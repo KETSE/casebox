@@ -1006,7 +1006,7 @@ class Files
     public static function getFilesBlockForPreview($pid)
     {
         $rez = array();
-        $sql = 'SELECT id, name, SIZE, cdate
+        $sql = 'SELECT id, name, size, cdate
             FROM tree
             WHERE pid = $1
                 AND `type` = 5
