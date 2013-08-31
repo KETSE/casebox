@@ -1,3 +1,16 @@
+CaseBox 1.9.37 (2013-08-31)
+==============================
+New Features, Improvements
+--------------------------
+- excluded running solr indexing, of updated tree objects, when a custom event handler is executing
+- added remove methot for \CB\Cache class
+- case_id field removed from tree table, it is now into tree_info table
+- removed p_mark_all_childs_as_updated procedure from database  
+
+Fixed Bugs:
+----------
+- can't delete objects from tree because of not prefixed class name.
+
 CaseBox 1.9.31 (2013-08-30)
 ==============================
 New Features, Improvements

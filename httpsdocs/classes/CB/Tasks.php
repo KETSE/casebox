@@ -38,7 +38,7 @@ class Tasks
                          AND user_id = $2) reminds
                 , (SELECT name
                      FROM tree
-                     WHERE id = t.case_id) `case`
+                     WHERE id = ti.case_id) `case`
                   ,(SELECT concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['cfg']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title))
                      FROM objects
                      WHERE id = object_id) `object`

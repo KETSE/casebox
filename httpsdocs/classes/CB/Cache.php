@@ -24,6 +24,15 @@ class Cache extends Singleton
     }
 
     /**
+     * unset/remove a variable from the cache
+     * @param varchar $name name of variable
+     */
+    public static function remove($name)
+    {
+        unset(static::getInstance()->{$name});
+    }
+
+    /**
      * get a variable value from the cache
      * @param varchar $name name of variable
      * @param  $value

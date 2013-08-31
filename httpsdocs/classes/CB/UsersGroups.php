@@ -27,37 +27,44 @@ class UsersGroups
         }
 
         if ($id == -1) { // users out of a group
-            $sql = 'SELECT id `nid`
-                     , u.cid
-                     , name
-                     , first_name
-                     , last_name
-                     , sex
-                     , `enabled`
+            $sql = 'SELECT
+                    id `nid`
+                    ,u.cid
+                    ,name
+                    ,first_name
+                    ,last_name
+                    ,sex
+                    ,`enabled`
                 FROM users_groups u
                 LEFT JOIN users_groups_association a ON u.id = a.user_id
                 WHERE u.`type` = 2
                     AND u.did IS NULL
                     AND a.group_id IS NULL
                 ORDER BY 3, 2';
-            $res = DB\dbQuery($sql, array()) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
             while ($r = $res->fetch_assoc()) {
                 $r['loaded'] = true;
                 $rez[] = $r;
             }
             $res->close();
         } elseif (is_null($node_type)) { /* root node childs*/
-            $sql = 'SELECT id `nid`, name, first_name, last_name, `type`, `system`
-                  , (SELECT count(*)
-                     FROM users_groups_association a
-                     JOIN users_groups u ON a.user_id = u.id
-                     AND u.did IS NULL
-                     WHERE group_id = g.id) `loaded`
+            $sql = 'SELECT
+                    id `nid`
+                    ,name
+                    ,first_name
+                    ,last_name
+                    ,`type`
+                    ,`system`
+                    ,(SELECT count(*)
+                        FROM users_groups_association a
+                        JOIN users_groups u ON a.user_id = u.id
+                        AND u.did IS NULL
+                        WHERE group_id = g.id) `loaded`
                 FROM users_groups g
                 WHERE `type` = 1
                     AND `system` = 0
                 ORDER BY 3, 2';
-            $res = DB\dbQuery($sql, array()) or die(DB\dbQueryError());
+            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
             while ($r = $res->fetch_assoc()) {
                 $r['iconCls'] = 'icon-users';
                 $r['expanded'] = true;
@@ -72,13 +79,14 @@ class UsersGroups
                 ,'expanded' => true
             );
         } else {// group users
-            $sql = 'SELECT u.id `nid`
-                     , u.cid
-                     , u.name
-                     , first_name
-                     , last_name
-                     , sex
-                     , enabled
+            $sql = 'SELECT
+                    u.id `nid`
+                    ,u.cid
+                    ,u.name
+                    ,first_name
+                    ,last_name
+                    ,sex
+                    ,enabled
                 FROM users_groups_association a
                 JOIN users_groups u ON a.user_id = u.id
                 WHERE a.group_id = $1
@@ -131,9 +139,7 @@ class UsersGroups
         $res->close();
         DB\dbQuery(
             'INSERT INTO users_groups_association (user_id, group_id, cid)
-            VALUES ($1
-                  , $2
-                  , $3)',
+            VALUES ($1, $2, $3)',
             array(
                 $user_id
                 ,$group_id
@@ -266,9 +272,8 @@ class UsersGroups
         if (isset($p->group_id) && is_numeric($p->group_id)) {
             DB\dbQuery(
                 'INSERT INTO users_groups_association (user_id, group_id, cid)
-                VALUES($1
-                     , $2
-                     , $3) ON duplicate KEY
+                VALUES($1, $2, $3)
+                ON duplicate KEY
                 UPDATE cid = $3',
                 array(
                     $user_id
@@ -315,7 +320,7 @@ class UsersGroups
         $res = DB\dbQuery(
             'UPDATE users_groups
             SET did = $2
-                , ddate = CURRENT_TIMESTAMP
+               ,ddate = CURRENT_TIMESTAMP
             WHERE id = $1',
             array(
                 $user_id
@@ -485,9 +490,7 @@ class UsersGroups
         foreach ($new_groups as $group_id) {
             DB\dbQuery(
                 'INSERT INTO users_groups_association (user_id, group_id, cid)
-                VALUES($1
-                     , $2
-                     , $3)
+                VALUES($1, $2, $3)
                 ON DUPLICATE KEY
                 UPDATE uid = $3',
                 array(

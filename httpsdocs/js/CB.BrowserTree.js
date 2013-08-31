@@ -626,7 +626,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
     ,onDelete: function (btn) {
         if(btn !== 'yes') return;
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        BrowserTree['delete'](this.getSelectionModel().getSelectedNode().getPath('nid'), this.processDelete, this);
+        CB_BrowserTree['delete'](this.getSelectionModel().getSelectedNode().getPath('nid'), this.processDelete, this);
     }
     ,processDelete: function(r, e){
         this.getEl().unmask();

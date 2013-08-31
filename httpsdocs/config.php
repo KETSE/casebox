@@ -132,8 +132,8 @@ if (empty($config['default_folder_template'])) {
 }
 
 if (empty($config['default_file_template'])) {
-    $sql = 'select id from templates where `type` = \'file\'';
-    $res = DB\dbQuery($sql, array()) or die( DB\dbQueryError() );
+    $sql = 'SELECT id FROM templates WHERE `type` = \'file\'';
+    $res = DB\dbQuery($sql) or die( DB\dbQueryError() );
     if ($r = $res->fetch_row()) {
         $config['default_file_template'] = $r[0];
     } else {
@@ -355,11 +355,13 @@ function fireEvent($eventName, &$params)
             $methods = array($methods);
         }
         foreach ($methods as $method) {
+            $GLOBALS['running_trigger'] = true;
             try {
                 $class->$method($params);
             } catch (Exception $e) {
                 debug('Event Exception for '.$class.'->'.$method);
             }
+            unset($GLOBALS['running_trigger']);
         }
         unset($class);
     }

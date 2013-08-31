@@ -313,9 +313,18 @@ class Security
 
         $acl_order = array_flip($ids);
         $acl = array();
+
         // selecting access list set for our path ids
-        $sql = 'select node_id, user_group_id, allow, deny from tree_acl where node_id in (0'.implode(',', $ids).') and user_group_id in ('.implode(',', $user_group_ids).')';
-        $res = DB\dbQuery($sql, array()) or die(DB\dbQueryError());
+        $sql = 'SELECT
+                node_id
+                ,user_group_id
+                ,allow
+                ,deny
+            FROM tree_acl
+            WHERE node_id IN (0'.implode(',', $ids).')
+                AND user_group_id IN ('.implode(',', $user_group_ids).')';
+        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
         }
@@ -479,9 +488,18 @@ class Security
 
         $acl_order = array_flip($ids);
         $acl = array();
+
         // selecting access list set for our path ids
-        $sql = 'select node_id, user_group_id, allow, deny from tree_acl where node_id in (0'.implode(',', $ids).') and user_group_id in ('.implode(',', $user_group_ids).')';
-        $res = DB\dbQuery($sql, array()) or die(DB\dbQueryError());
+        $sql = 'SELECT
+                node_id
+                ,user_group_id
+                ,allow
+                ,deny
+            FROM tree_acl
+            WHERE node_id IN (0'.implode(',', $ids).')
+                AND user_group_id IN ('.implode(',', $user_group_ids).')';
+        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
         }

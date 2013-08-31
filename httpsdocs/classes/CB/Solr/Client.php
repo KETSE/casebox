@@ -64,6 +64,9 @@ class Client extends Service
      */
     public static function runCron()
     {
+        if (isset($GLOBALS['running_trigger'])) {
+            return;
+        }
         $solrClient = new \CB\Solr\Client();
         $solrClient->updateTree();
         unset($solrClient);
@@ -74,6 +77,9 @@ class Client extends Service
      */
     public static function runBackgroundCron()
     {
+        if (isset($GLOBALS['running_trigger'])) {
+            return;
+        }
         $cmd = 'php -f '.\CB\CRONS_PATH.'run_cron.php solr_update_tree '.\CB\CORENAME.' > '.\CB\LOGS_PATH.'bg_solr_update_tree.log &';
         if (\CB\isWindows()) {
             $cmd = 'start /D "'.\CB\CRONS_PATH.'" php -f run_cron.php solr_update_tree '.\CB\CORENAME.' > '.\CB\LOGS_PATH.'bg_solr_update_tree.log';
@@ -359,7 +365,7 @@ class Client extends Service
     private function filterSolrFields(&$doc)
     {
         foreach ($doc as $fn => $fv) {
-            if (!in_array($fn, $this->solr_fields) || ( ($fn !== 'dstatus') && empty($fv) && ($fv !== false))) {
+            if (!in_array($fn, $this->solr_fields) || ( empty($fv) && (strlen($fv) == 0) && ($fv !== false))) {
                 unset($doc[$fn]);
             }
         }

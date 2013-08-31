@@ -1128,7 +1128,7 @@ class Browser
             WHERE pid IS NULL
                 AND `system` = 1
                 AND `is_main` = 1';
-        $res = DB\dbQuery($sql, array()) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
         if ($r = $res->fetch_row()) {
             $id = $r[0];
         }
@@ -1181,7 +1181,7 @@ class Browser
             WHERE pid IS NULL
                 AND `system` = 1
                 AND `is_main` = 1';
-        $res = DB\dbQuery($sql, array()) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
         if ($r = $res->fetch_row()) {
             $id = $r[0];
         }
