@@ -1,15 +1,27 @@
+CaseBox 1.9.38 (2013-09-02)
+==============================
+New Features, Improvements
+--------------------------
+- modified ssl_casebox.conf for apache
+
+Fixed Bugs:
+----------
+- sql error on task create
+
 CaseBox 1.9.37 (2013-08-31)
 ==============================
 New Features, Improvements
 --------------------------
 - excluded running solr indexing, of updated tree objects, when a custom event handler is executing
-- added remove methot for \CB\Cache class
+- added "remove" method for \CB\Cache class
 - case_id field removed from tree table, it is now into tree_info table
 - removed p_mark_all_childs_as_updated procedure from database  
 
 Fixed Bugs:
 ----------
 - can't delete objects from tree because of not prefixed class name.
+
+Notes: apply database update "20130831_1429 db_update v1.9.37.sql"
 
 CaseBox 1.9.31 (2013-08-30)
 ==============================

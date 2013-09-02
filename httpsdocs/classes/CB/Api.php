@@ -58,7 +58,7 @@ class Api
         }
 
         /* if there is accessed a method from association table then convert it to target class.method */
-        if (isset($this->methods[$data['method']])) {
+        if (!empty($data['method']) && isset($this->methods[$data['method']])) {
             $tmp = explode('.', $this->methods[$data['method']]);
             $data['action'] = $tmp[0];
             $data['method'] = $tmp[1];

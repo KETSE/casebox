@@ -11,19 +11,20 @@ class Tasks
     public function load($id)
     {
         $rez = array('success' => false);
-        $sql = 'SELECT id
-                ,`title`
-                ,date_start
-                ,`date_end`
-                ,missed
-                ,`type`
-                ,privacy
-                ,responsible_party_id
-                ,responsible_user_ids
-                ,autoclose
-                ,description
-                ,parent_ids
-                ,child_ids
+        $sql = 'SELECT
+                t.id
+                ,t.`title`
+                ,t.date_start
+                ,t.`date_end`
+                ,t.missed
+                ,t.`type`
+                ,t.privacy
+                ,t.responsible_party_id
+                ,t.responsible_user_ids
+                ,t.autoclose
+                ,t.description
+                ,t.parent_ids
+                ,t.child_ids
                 ,DATEDIFF(`date_end`
                 ,UTC_DATE()) `days`
                   ,(SELECT pid
@@ -54,7 +55,7 @@ class Tasks
                 ,ti.path `pathtext`
                 FROM tasks t
                 JOIN tree_info ti on t.id = ti.id
-                WHERE id = $1';
+                WHERE t.id = $1';
         $res = DB\dbQuery($sql, array($id, $_SESSION['user']['id'])) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $this->getTaskStyles($r);
@@ -671,7 +672,7 @@ class Tasks
                  , t.responsible_user_ids
                  , t.title
             FROM tasks t
-            LEFT JOIN tree_info ti on t.id = ti.id
+            LEFT JOIN tree_info ti ON t.id = ti.id
             JOIN tasks_responsible_users ru ON t.id = ru.task_id
             WHERE t.id = $1
                 AND ru.user_id = $2',
