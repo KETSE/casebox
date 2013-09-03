@@ -1,3 +1,17 @@
+CaseBox 1.9.39 (2013-09-03)
+==============================
+New Features, Improvements
+--------------------------
+- removed database fields: actions_log.office_id, tasks.case_id, tasks.updated
+- removed old (not used) methods from Tasks: getUserTasks, getTasksByLawyer, browse 
+- added complete message, to notification mail, on completing task
+
+Fixed Bugs:
+----------
+- sql error: ambiguous id column on task complete
+
+Notes: apply database update "20130903_2215 db_update v1.9.39.sql"
+
 CaseBox 1.9.38 (2013-09-02)
 ==============================
 New Features, Improvements

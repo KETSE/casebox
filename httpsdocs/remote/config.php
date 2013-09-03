@@ -70,8 +70,6 @@ $API = array_merge(
                 ,'complete'         =>  array('len' => 1)
                 ,'close'            =>  array('len' => 1)
                 ,'reopen'           =>  array('len' => 1)
-                ,'getUserTasks'     =>  array('len' => 1)
-                ,'getTasksByLawyer' =>  array('len' => 0)
                 ,'browse'           =>  array('len' => 1)
             )
         )

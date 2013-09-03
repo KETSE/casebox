@@ -1147,12 +1147,14 @@ class Security
 
         return Cache::get($var_name);
     }
+
     public static function canManage($user_id = false)
     {
         return true; // TODO: Review
         // $role_id = Security::getUserRole($user_id);
         // return (($role_id > 0) && ($role_id <=2)); //Managers and administrators
     }
+
     public static function isUsersOwner($user_id)
     {
         $res = DB\dbQuery('SELECT cid FROM users_groups WHERE id = $1', $user_id) or die(DB\dbQueryError());
@@ -1165,10 +1167,23 @@ class Security
 
         return $rez;
     }
+
     public static function canEditUser($user_id)
     {
         return (Security::isAdmin() || Security::isUsersOwner($user_id) || ($_SESSION['user']['id'] == $user_id));
     }
+
+    /**
+     * function to check if a user cam manage task
+     *
+     * This function returns true if specified user can manage/update specified task.
+     * User can manage a task if he is Administrator, Creator of the task
+     * or is one of the responsible task users.
+     *
+     * @param  int     $task_id id of the task to be checked
+     * @param  int     $user_id id of the user to be checked
+     * @return boolean returns true in case of the user can manage the task
+     */
     public static function canManageTask($task_id, $user_id = false)
     {
         $rez = false;

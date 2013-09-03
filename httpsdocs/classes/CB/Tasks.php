@@ -42,7 +42,7 @@ class Tasks
                      WHERE id = ti.case_id) `case`
                   ,(SELECT concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['cfg']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title))
                      FROM objects
-                     WHERE id = object_id) `object`
+                     WHERE id = t.object_id) `object`
                 ,status
                 ,cid
                 ,completed
@@ -211,7 +211,10 @@ class Tasks
                 $log_action_type = 22; // updating task
 
                 /* selecting removed responsible_users */
-                $sql = 'select user_id from tasks_responsible_users where task_id = $1 and $2 not like concat(\'%,\',user_id,\',%\')';
+                $sql = 'SELECT user_id
+                    FROM tasks_responsible_users
+                    WHERE task_id = $1
+                        AND $2 NOT LIKE concat(\'%,\',user_id,\',%\')';
                 $res = DB\dbQuery($sql, array($p['id'], ','.$p['responsible_user_ids'].',')) or die(DB\dbQueryError());
                 while ($r = $res->fetch_row()) {
                     $removed_responsible_users[] = $r[0];
@@ -358,15 +361,7 @@ class Tasks
 
         }
 
-        DB\dbQuery(
-            'UPDATE tree
-            SET updated = (updated | 1)
-            WHERE id = $1',
-            $p['id']
-        ) or die( DB\dbQueryError() );
-
         Solr\Client::runCron();
-        //exec('php ../../casebox/crons/cron_solr_update_objects.php');
         $rez = $this->load($p['id']);
         $rez['logParams'] = &$logParams;
 
@@ -381,7 +376,7 @@ class Tasks
             $p['case_id'] = @Objects::getCaseId($p['pid']);
             /* check if current user can read task */
             if (!Util\validId($p['case_id'])
-                // || !Security::canReadCase($p['case_id'])
+                // || !Security::canRead($p['case_id'])
                 ) {
                 throw new \Exception(L\Access_denied);
             }
@@ -532,7 +527,6 @@ class Tasks
                     ,$_SESSION['user']['id']
                 )
             ) or die(DB\dbQueryError());
-            //$p['reminds'] = '';
         }
 
         return array('success' => true, 'reminds' => $p['reminds']);
@@ -660,9 +654,24 @@ class Tasks
         return $rez;
     }
 
+    /**
+     * task completion method for currently authenticated user
+     *
+     * @param array $p {
+     *     int $id  task id
+     * }
+     * @return array json responce
+     */
     public function complete($p)
     {
         $task = array();
+
+        /* check if current user can manage this task */
+        if (!Security::canManageTask($p->id)) {
+            throw new \Exception(L\Access_denied);
+        }
+
+        /* load task data */
         $res = DB\dbQuery(
             'SELECT ti.case_id
                  , t.object_id
@@ -687,14 +696,13 @@ class Tasks
                 throw new \Exception(L\Task_already_completed);
             }
             $task = $r;
-        } elseif (!Security::isAdmin()) {
-            throw new \Exception(L\Access_denied);
         }
         $res->close();
+
         DB\dbQuery(
             'UPDATE tasks_responsible_users
             SET status = 1
-              , `time` = CURRENT_TIMESTAMP
+                ,`time` = CURRENT_TIMESTAMP
             WHERE task_id = $1
                 AND user_id = $2',
             array(
@@ -704,11 +712,13 @@ class Tasks
         ) or die(DB\dbQueryError());
 
         DB\dbQuery(
-            'INSERT INTO messages (cid, nid, message) VALUES($1, $2, $3)',
+            'INSERT INTO messages (node_id, `type`, subject, message, cid) VALUES ($1, $2, $3, $4, $5)',
             array(
-                $_SESSION['user']['id']
-                ,Util\coalesce($task['case_id'], $task['object_id'], $p->id)
+                $p->id // Util\coalesce($task['case_id'], $task['object_id'], $p->id)
+                ,'task_complete'
+                ,'Complete task'
                 ,$p->message
+                ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
 
@@ -832,177 +842,6 @@ class Tasks
         $updatingChildTasks = array();
     }
 
-    public function getUserTasks($p)
-    {
-        $case_id = false;
-        if (!empty($p->case_id)) {
-            // if(!Security::canReadCase($p->case_id)) throw new \Exception(L\Access_denied);
-            $case_id = $p->case_id;
-        }
-
-        // get tasks that are owned by this user or is responsible
-        $rez = array('success' => true, 'data' => array());
-        $from = 'FROM tasks t LEFT JOIN tasks_responsible_users ru ON t.id = ru.task_id AND ru.user_id = $1 ';
-        /* analize filter for tasks */
-        //$where = '';
-        $criterias = $case_id ? array('t.case_id = $2 and ( (t.privacy = 0) or (t.cid = $1) OR (ru.user_id IS NOT NULL) ) ') : array();
-        if (!empty($p->showTasks)) {
-            $tasksCriteria = 0;
-            $internalCriteria = 0;
-            $deadlinesCriteria = 0;
-            $ownerCriteria = 0;
-            for ($i = 0; $i < sizeof($p->showTasks); $i++) {
-                if ($p->showTasks[$i] < 4) {
-                    $tasksCriteria = intval($p->showTasks[$i]);
-                } elseif ($p->showTasks[$i] < 6) {
-                    $internalCriteria = intval($p->showTasks[$i]);
-                } elseif ($p->showTasks[$i] == 6) {
-                    $deadlinesCriteria = intval($p->showTasks[$i]);
-                } else {
-                    $ownerCriteria = intval($p->showTasks[$i]);
-                }
-            }
-            //$where = ($tasksCriteria == 1) ? '' : ' where ';
-            switch ($tasksCriteria) {
-                case 0:
-                    if (!$case_id) {
-                        $criterias[] = ' (t.status <> 3)';
-                    }
-                    break;
-                case 1:
-                    break; // All
-                case 2:
-                    $criterias[] = ' (t.status <> 3)';
-                    break; //Active
-                case 3:
-                    $criterias[] = ' (t.completed is not null)';
-                    break; //Completed
-            }
-            //$where .= empty($internalCriteria) ? '' : (empty($where) ? '' : ' and ');
-            switch ($internalCriteria) {
-                case 0:
-                    break;
-                case 4:
-                    $criterias[] = ' (t.`type` = 0)';
-                    break;
-                case 5:
-                    $criterias[] = ' (t.`type` = 1)';
-                    break;
-            }
-            //$where .= empty($deadlinesCriteria) ? '' : (empty($where) ? '' : ' and ');
-            if ($deadlinesCriteria == 6) {
-                $criterias[] = ' (t.`date_end` is not null)';
-            }
-            //$where .= empty($where) ? '' : ' and ';
-            switch ($ownerCriteria) {
-                case 0:
-                    if (!$case_id) {
-                        $criterias[] = ' ((t.cid = $1) OR (ru.user_id IS NOT NULL))';
-                    }
-                    break;
-                case 7:
-                    $criterias[] = ' (t.cid = $1)';
-                    break;
-                case 8:
-                    $criterias[] = ' (ru.user_id is not null)';
-                    break;
-            }
-        }
-        $from .= empty($criterias) ? 'where ((t.cid = $1) OR (ru.user_id IS NOT NULL)) and (t.status <> 3)' : ' where '.implode(' and ', $criterias);
-        /* end of analize filter for tasks */
-        /* get tasks count */
-        $res = DB\dbQuery('select count(t.id) '.$from, array($_SESSION['user']['id'], $case_id)) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            $rez['total'] = $r[0];
-        }
-        $res->close();
-        /* end of get tasks count */
-        /* selecting tasks /**/
-        $sql = 'SELECT
-                t.*,
-                DATEDIFF(t.`date_end`, UTC_DATE()) `days`
-                ,(SELECT name
-                     FROM tree
-                     WHERE id = t.case_id) `case`
-                ,(SELECT concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['cfg']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title))
-                     FROM objects
-                     WHERE id = t.object_id) `object`
-                ,(SELECT l'.USER_LANGUAGE_INDEX.'
-                     FROM tags
-                     WHERE id = t.responsible_party_id) `responsible_party` '.
-                $from.'
-                ORDER BY t.cdate'.(empty($p->limit) ? '' : ' LIMIT '.intval($p->limit)).(empty($p->start) ? '' : ' OFFSET '.intval($p->start));
-        $res = DB\dbQuery($sql, array($_SESSION['user']['id'], $case_id)) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-            if (!empty($r['responsible_user_ids']) && ($r['responsible_user_ids'] != $r['cid'])) {
-                $res2 = DB\dbQuery(
-                    'SELECT id
-                         , l'.USER_LANGUAGE_INDEX.'
-                    FROM users_groups
-                    WHERE id IN (0'.$r['responsible_user_ids'].')'
-                ) or die(DB\dbQueryError());
-
-                while ($r2 = $res2->fetch_row()) {
-                    $r['users'][$r2[0]] = $r2[1];
-                }
-                $res2->close();
-            }
-            if (!empty($r['date_end'])) {
-                $r['days'] = Util\formatLeftDays($r['days']);
-                if (strpos($r['days'], '"cM') !== false) {
-                    $r['hot'] = 1;
-                }
-            }
-            if (!empty($r['completed'])) {
-                $r['completed_text'] = Util\formatTaskTime($r['completed']);
-            }
-            $this->getTaskStyles($r);
-            $rez['data'][] = $r;
-        }
-        $res->close();
-
-        return $rez;
-        /* end of selecting tasks /**/
-    }
-
-    public function getTasksByLawyer()
-    {
-        if (!Security::canManage()) {
-            throw new \Exception(L\Access_denied);
-        }
-        $rez = array('success' => true, 'data' => array());
-        /* get visible lawyer ids */
-        $lawyer_ids = array();
-        $sql = 'SELECT DISTINCT ura2.user_id '.
-            'FROM users_groups_association ura1 '.
-            'JOIN users_groups_association ura2 ON ((ura1.office_id = 0) OR (ura2.office_id = 0) OR (ura1.office_id = ura2.office_id)) AND ura2.active = 1 '.
-            //'JOIN cases_rights_effective e ON e.user_id = ura2.user_id AND e.access = 3 '.
-            'WHERE ura1.active = 1 AND ura1.user_id = $1';
-        $res = DB\dbQuery($sql, $_SESSION['user']['id']) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            $lawyer_ids[] = $r[0];
-        }
-        $res->close();
-
-        /* end of get visible lawyer ids */
-
-        /* retreiving lawyer tasks /**/
-        $sql = 'SELECT u.id, u.l'.USER_LANGUAGE_INDEX.' `name`, COUNT(t.id) `count`'.
-            'FROM tasks t '.
-            'JOIN tasks_responsible_users ru ON ru.task_id = t.id  '.
-            ',users_groups u '.
-            'WHERE t.status <> 3 '.
-            'GROUP BY u.id, 2  ORDER BY 2';
-        $res = DB\dbQuery($sql, $_SESSION['user']['id']) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-            $rez['data'][] = $r;
-        }
-        $res->close();
-        /* end of retreiving lawyer tasks /**/
-
-        return $rez;
-    }
-
     private function getTaskStyles(&$task)
     {
         $cls = '';
@@ -1025,121 +864,6 @@ class Tasks
         }
     }
 
-    public function browse($p)
-    {
-        $rez = array('success' => true, 'data' => array(), 'total' => 0);
-        if (!empty($p->facets) && !empty($p->facets->date_end)) {
-            for ($i = 0; $i < sizeof($p->facets->date_end); $i++) {
-                for ($j=0; $j < sizeof($p->facets->date_end[$i]->values); $j++) {
-                    switch ($p->facets->date_end[$i]->values[$j]) {
-                        case '0today':
-                            $p->facets->date_end[$i]->values[$j] = '[NOW/DAY TO NOW/DAY]';
-                            break;
-                        case '1tomorrow':
-                            $p->facets->date_end[$i]->values[$j] = '[NOW/DAY+1DAY TO NOW/DAY+1DAY]';
-                            break;
-                        case '2next7days':
-                            $p->facets->date_end[$i]->values[$j] = '[NOW/DAY TO NOW/DAY+6DAY ]';
-                            break;
-                        case '3currentMonth':
-                            $p->facets->date_end[$i]->values[$j] = '[NOW/MONTH TO NOW/MONTH+1MONTH]';
-                            break;
-                        case '4nextMonth':
-                            $p->facets->date_end[$i]->values[$j] = '[NOW/MONTH+1MONTH TO NOW/MONTH+2MONTH]';
-                            break;
-                        case '5noDeadline':
-                            $p->facets->date_end[$i]->values[$j] = '[* TO *]';
-                            break;
-                    }
-                }
-            }
-        }
-        require_once '../engine.php';
-        $sr = search_tasks($p);
-        if ($sr) {
-            $rez['total'] = $sr->response->numFound;
-            foreach ($sr->response->docs as $d) {
-                $rd = array();
-                foreach ($d as $fn => $fv) {
-                    $rd[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
-                }
-                $rd['missed'] = empty($rd['missed']) ? 0 : 1;
-                if (!empty($rd['date_end'])) {
-                    $rd['date_end'] = substr($rd['date_end'], 0, 10);
-                }
-                if (!empty($rd['cdate'])) {
-                    $rd['cdate'] = substr($rd['cdate'], 0, 10).' '.substr($rd['cdate'], 11, 8);
-                }
-                if (!empty($rd['case_id'])) {
-                    $res = DB\dbQuery(
-                        'SELECT name FROM tree WHERE id = $1',
-                        $rd['case_id']
-                    ) or die(DB\dbQueryError());
-
-                    while ($r = $res->fetch_row()) {
-                        $rd['case'] = $r[0];
-                    }
-                    $res->close();
-                }
-                if (!empty($rd['action_id'])) {
-                    $res = DB\dbQuery(
-                        'SELECT coalesce(custom_title, title) FROM objects WHERE id = $1',
-                        $rd['action_id']
-                    ) or die(DB\dbQueryError());
-
-                    while ($r = $res->fetch_row()) {
-                        $rd['object'] = $r[0];
-                    }
-                    $res->close();
-                    $rd['object_id'] = $rd['action_id'];
-                    unset($rd['action_id']);
-
-                }
-                $this->getTaskStyles($rd);
-                $rez['data'][] = $rd;
-            }
-
-            if (!empty($sr->facet_counts)) {
-                $rez['facets'] = array('date_end' => array());
-                foreach ($sr->facet_counts->facet_fields as $k => $f) {
-                    $rez['facets'][$k] = $f;
-                }
-                /* process cases facet */
-                if (!empty($rez['facets']['case_id'])) {
-                    $case_ids = array();
-                    foreach ($rez['facets']['case_id'] as $k => $v) {
-                        $case_ids[$k] = array('id' => $k, 'items' => $v);
-                    }
-                    if (!empty($case_ids)) {
-                        $res = DB\dbQuery(
-                            'SELECT id, name FROM tree WHERE id IN ('.implode(',', array_keys($case_ids)).')'
-                        ) or die(DB\dbQueryError());
-
-                        while ($r = $res->fetch_assoc()) {
-                            $case_ids[$r['id']]['title'] = $r['name'];
-                        }
-                        $res->close();
-                        $rez['facets']['case_id'] = array_values($case_ids);
-                    }
-                }
-                /* end of process cases facet */
-                if (!empty($sr->facet_counts->facet_queries)) {
-                    $deadlineFacet = array();
-                    foreach ($sr->facet_counts->facet_queries as $f => $fv) {
-                        if ($fv > 0) {
-                            $deadlineFacet[$f] = $fv;
-                        }
-                    }
-                    if (!empty($deadlineFacet)) {
-                        $rez['facets']['date_end'] = $deadlineFacet;
-                    }
-                }
-            }
-        }
-
-        return $rez;
-    }
-
     public static function getTaskInfoForEmail($id, $user_id = false, $removed_users = false)
     {
         $rez = '';
@@ -1152,16 +876,32 @@ class Tasks
                 $user['language_id'] = 1;
             }
         }
-        $sql = 'select `title`, date_start, date_end, description, status, category_id, importance, type, allday, has_deadline, cid'.
-            ',ti.path `path_text` '.
-            ',(select l'.$user['language_id'].' from users_groups where id = t.cid) owner_text'.
-            ',cdate'.
-            ',responsible_user_ids'.
-            ',(select reminds from tasks_reminders where task_id = $1 and user_id = $2) reminders'.
-            ',DATABASE() `db` '.
-            ' FROM tasks t
-            JOIN tree_info ti on t.id = ti.id
-            WHERE id = $1';
+        $sql = 'SELECT
+                `title`
+                ,date_start
+                ,date_end
+                ,description
+                ,status
+                ,category_id
+                ,importance
+                ,`type`
+                ,allday
+                ,has_deadline
+                ,cid
+                ,ti.path `path_text`
+                ,(SELECT l'.$user['language_id'].'
+                    FROM users_groups
+                    WHERE id = t.cid) owner_text
+                ,cdate
+                ,responsible_user_ids
+                ,(SELECT reminds
+                    FROM tasks_reminders
+                    WHERE task_id = $1
+                        AND user_id = $2) reminders
+                ,DATABASE() `db`
+            FROM tasks t
+            JOIN tree_info ti ON t.id = ti.id
+            WHERE t.id = $1';
         $res = DB\dbQuery($sql, array($id, @$user['id'])) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $format = 'Y, F j';
@@ -1190,12 +930,18 @@ class Tasks
             $users = array();
             $ures = DB\dbQuery(
                 'SELECT u.id
-                     , u.l'.$user['language_id'].' `name`
-                     , ru.status
-                     , ru.time
+                    ,u.l'.$user['language_id'].' `name`
+                    ,ru.status
+                    ,ru.time
+                    ,(SELECT `message`
+                        FROM messages
+                        WHERE node_id = ru.task_id
+                            AND cid = u.id
+                            AND `type` = \'task_complete\'
+                        ORDER BY cdate DESC LIMIT 1) `complete_message`
                 FROM users_groups u
                 LEFT JOIN tasks_responsible_users ru ON u.id = ru.user_id
-                AND ru.task_id = $1
+                    AND ru.task_id = $1
                 WHERE u.id IN (0'.$r['responsible_user_ids'].')
                 ORDER BY 1',
                 $id
@@ -1209,7 +955,9 @@ class Tasks
                 "\n\r".'<p style="color:#777;margin:0;padding:0">'.
                 "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
                     Util\formatMysqlDate($ur['time'], 'Y, F j H:i').'</span>' : L\get('waitingForAction', $user['language_id']) ).
-                "\n\r".'</p></td></tr>';
+                "\n\r".'</p>'.
+                ( (($ur['status'] == 1) && !empty($ur['complete_message'])) ? '<p><pre>'.$ur['complete_message'].'<pre></p>': '').
+                '</td></tr>';
 
             }
             $ures->close();
@@ -1479,7 +1227,7 @@ class Tasks
 
         return $rez;
     }
-    public static function getAxtiveTasksBlockForPreview($pid)
+    public static function getActiveTasksBlockForPreview($pid)
     {
         $rez = array();
         $sql = 'SELECT id

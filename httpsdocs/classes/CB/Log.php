@@ -123,22 +123,12 @@ class Log
             $res->close();
         }
 
-        // get office name if "office_id" is present in params
-        $office_name = '';
-        if (!empty($p['office_id'])) {
-            $res = DB\dbQuery('select name from tags where id = $1', $p['office_id']) or die(DB\dbQueryError());
-            if ($r = $res->fetch_row()) {
-                $office_name = $r[0];
-            }
-            $res->close();
-        }
-
         $u = &$_SESSION['user'];
         //create the htmls for each language
         // $template_types_translation_names = array('', 'Object', 'IncomingAction', 'OutgoingAction', 'User', 'Contact', 'Organization' );
 
         L\initTranslations();
-        $fields = array('id', 'pid', 'user_id', 'to_user_ids', 'office_id', 'case_id', 'object_id', 'file_id', 'task_id', 'date', 'action_type', 'remind_users', 'result', 'info');
+        $fields = array('id', 'pid', 'user_id', 'to_user_ids', 'case_id', 'object_id', 'file_id', 'task_id', 'date', 'action_type', 'remind_users', 'result', 'info');
         if (!empty($GLOBALS['languages'])) {
             for ($lk=0; $lk < sizeof($GLOBALS['languages']); $lk++) {
                 $l = 'l'.($lk+1);

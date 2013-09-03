@@ -641,7 +641,7 @@ class Objects
         if (!empty($tmp)) {
             $bottom .= '<div class="obj-preview-h pt10">'.L\Files.'</div>'.$tmp.'<br />';
         }
-        $tmp = Tasks::getAxtiveTasksBlockForPreview($id);
+        $tmp = Tasks::getActiveTasksBlockForPreview($id);
         if (!empty($tmp)) {
             $bottom .= '<div class="obj-preview-h pt10">'.L\ActiveTasks.'</div>'.$tmp.'<br />';
         }
@@ -1170,9 +1170,16 @@ class Objects
 
     public static function updateCaseUpdateInfo($case_or_caseObject_id)
     {
-        // DB\dbQuery('update tree set uid = $2, udate = CURRENT_TIMESTAMP
-        // where id = `f_get_objects_case_id`($1)',
-        // array($case_or_caseObject_id, $_SESSION['user']['id'] )) or die(DB\dbQueryError());
+        DB\dbQuery(
+            'UPDATE tree
+            SET uid = $2
+                ,udate = CURRENT_TIMESTAMP
+            WHERE id = (select case_id from tree_info where id = $1)',
+            array(
+                $case_or_caseObject_id
+                ,$_SESSION['user']['id']
+            )
+        ) or die(DB\dbQueryError());
     }
 
     /* setting case roles fields for an object data */

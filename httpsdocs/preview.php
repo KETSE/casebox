@@ -80,7 +80,7 @@ switch ($f['type']) {
             echo '&#160';
         } else {
             $top = '';
-            $tmp = Tasks::getAxtiveTasksBlockForPreview($id);
+            $tmp = Tasks::getActiveTasksBlockForPreview($id);
             if (!empty($tmp)) {
                 $top = '<div class="obj-preview-h pt10">'.L\ActiveTasks.'</div>'.$tmp;
             }
