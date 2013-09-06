@@ -137,24 +137,23 @@ class Objects
         if (!Security::canCreateActions($p->pid)) {
             throw new \Exception(L\Access_denied);
         }
-        fireEvent('beforeNodeDbCreate', $p);
         if (empty($p->name)) {
             $p->name = $template['title'];
         }
         if (empty($p->tag_id)) {
             $p->tag_id = null;
         }
-        $p->name = Files::getAutoRenameFilename($p->pid, $p->name);
         $p->type = 4;
+        $p->name = Files::getAutoRenameFilename($p->pid, $p->name);
+        fireEvent('beforeNodeDbCreate', $p);
+
         DB\dbQuery(
             'INSERT INTO tree (pid, name, `type`, template_id, cid, tag_id, updated)
-            VALUES ($1
-                  , $2
-                  , $3
-                  , $4
-                  , $5
-                  , $6
-                  , 1)',
+            VALUES ($1, $2, $3, $4, $5, $6, 1)
+            ON DUPLICATE KEY
+            UPDATE
+                id = last_insert_id(id)
+                ,name = $2',
             array(
                 $p->pid
                 ,$p->name
@@ -167,10 +166,9 @@ class Objects
         $p->nid = DB\dbLastInsertId();
         DB\dbQuery(
             'INSERT INTO objects (id, `title`, template_id, cid)
-            VALUES($1
-                 , $2
-                 , $3
-                 , $4)',
+            VALUES($1, $2, $3, $4)
+            ON DUPLICATE KEY
+            UPDATE `title` = $2',
             array(
                 $p->nid
                 ,$p->name
@@ -186,7 +184,9 @@ class Objects
                  , $2
             FROM templates_structure
             WHERE template_id = $3
-                AND name = \'_title\'',
+                AND name = \'_title\'
+            ON DUPLICATE KEY
+            UPDATE value = $2',
             array(
                 $p->nid
                 ,$p->name
@@ -196,7 +196,7 @@ class Objects
 
         $this->createSystemFolders($p->nid, @$template['cfg']['system_folders']);
 
-        fireEvent('nodeDbCreate', $d);
+        fireEvent('nodeDbCreate', $p);
 
         Solr\Client::runCron();
 
@@ -328,6 +328,9 @@ class Objects
             foreach ($d->gridData->values as $f => $fv) { //$c => $cv
                 if (!isset($fv->value)) {
                     $fv->value = null;
+                }
+                if (!isset($fv->info)) {
+                    $fv->info = null;
                 }
                 $f = explode('_', $f);
                 $field_id = substr($f[0], 1);
@@ -781,7 +784,7 @@ class Objects
         return array('success' => true, 'data' => $data);
     }
 
-    private function getTemplateInfo($template_id = false, $object_id = false)
+    public function getTemplateInfo($template_id = false, $object_id = false)
     {
         $rez = array();
         if (is_numeric($template_id)) {
@@ -789,7 +792,7 @@ class Objects
                 'SELECT id
                     ,pid
                     ,`type`
-                    ,l'.USER_LANGUAGE_INDEX.' `title`
+                    ,l1 `title`
                      ,iconCls
                      ,default_field
                      ,title_template
@@ -834,7 +837,7 @@ class Objects
         return $rez;
     }
 
-    private function createSystemFolders($object_id, $folderIds)
+    public function createSystemFolders($object_id, $folderIds)
     {
         $folderIds = Util\toNumericArray($folderIds);
         if (empty($folderIds)) {

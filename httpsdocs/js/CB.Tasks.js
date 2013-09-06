@@ -846,7 +846,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
         Ext.Msg.confirm(L.RemovingTask, L.RemovingTaskMessage, function(b){
             if(b == 'yes'){ 
                 this.getEl().mask('Удаление ...', 'x-mask-loading');
-                Browser['delete'](this.data.id, this.processDelete, this)
+                CB_Browser['delete'](this.data.id, this.processDelete, this)
             }
         }, this)
     }

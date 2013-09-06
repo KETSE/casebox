@@ -55,6 +55,12 @@ CB.ObjectsFieldCommonFunctions = {
                         ,'case'
                     ]
                     )
+                    
+                    ,sortInfo: {
+                        field: 'name'
+                        ,direction: 'ASC'
+                    }
+
                     ,listeners: {
                         scope: this
                         ,beforeload: function(st, o ){

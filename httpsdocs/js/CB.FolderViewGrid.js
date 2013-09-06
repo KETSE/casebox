@@ -890,7 +890,14 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             path.push(row.get('nid'));
             this.fireEvent('changeparams', {path: path.join('/')} )
         }else{
-            this.fireEvent('changeparams', {path: row.get('nid')} )
+            this.fireEvent(
+                'changeparams'
+                ,{
+                    path: row.get('nid')
+                    ,query: ''
+                    ,descendants: false
+                }
+            )
         }
     }
     ,onOpenItemLocationClick: function(b, e){

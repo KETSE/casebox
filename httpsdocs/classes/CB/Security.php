@@ -149,8 +149,7 @@ class Security
                     ,`sex`
                 FROM users_groups
                 WHERE did IS NULL '.( empty($where) ? '' : ' AND '.implode(' AND ', $where) ).'
-                ORDER BY `type`
-                       , 2 LIMIT 50';
+                ORDER BY `type`, 2 LIMIT 100';
         $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
             $title = trim($r['first_name'].' '.$r['last_name']);

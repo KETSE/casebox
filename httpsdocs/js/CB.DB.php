@@ -355,6 +355,10 @@ createDirectStores = function(){
                 ,messageProperty: 'msg'
             },[ {name: 'id', type: 'int'}, 'name', {name: 'system', type: 'int'}, {name: 'enabled', type: 'int'}, 'iconCls' ]
         )
+        ,sortInfo: {
+            field: 'name'
+            ,direction: 'ASC'
+        }
         ,getName: getStoreTitles
     });
 

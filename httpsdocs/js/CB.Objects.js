@@ -282,7 +282,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
         if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
         
-        toolbarItems.push('-',{text: 'Attach', iconCls: 'icon32-attach', scale: 'large', iconAlign:'top'
+        toolbarItems.push('-',{text: L.Attach, iconCls: 'icon32-attach', scale: 'large', iconAlign:'top'
                     ,menu: [
                 this.actions.upload
                 ,'-'

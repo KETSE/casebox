@@ -269,7 +269,7 @@ class User
     public function getProfileData($user_id)
     {
 
-        if (!Security::canEditUser()) {
+        if (!Security::canEditUser($user_id)) {
             throw new \Exception(L\Access_denied);
         }
 
@@ -847,7 +847,7 @@ class User
             return array('success' => false, 'msg' => L\Wrong_id);
         }
 
-        if (!Security::canEditUser()) {
+        if (!Security::canEditUser($p->id)) {
             throw new \Exception(L\Access_denied);
         }
 

@@ -125,31 +125,39 @@ function getMenuConfig(node_id, ids_path, node_template_id){
     menuConfig = '';
     CB.DB.menu.each( function(r){
         weight = 0;
+
         /*check user_group ids */
         ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(' ','') + ',';
-        if(ug_ids.indexOf(','+App.loginData.id+',') >=0) weight += 100; 
-        else{
+
+        if (ug_ids.indexOf(','+App.loginData.id+',') >=0) {
+            weight += 100; 
+        } else {
             if( ( ug_ids != ',,' ) && ( !setsHaveIntersection(ug_ids, App.loginData.groups ) ) ) return;
             weight += 50;
         }
         /*end of check user_group ids */
-        
+
         /* check template_ids /**/ 
         if(!Ext.isEmpty(node_template_id)){
             nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(' ','') + ',';
-        
             if(nt_ids.indexOf(','+node_template_id+',') >=0) weight += 100;
             else{
                 if( nt_ids != ',,') return;
                 weight += 50;
             }
-        }else if(!Ext.isEmpty(r.get('node_template_ids'))) return;
+        }else {
+            if(!Ext.isEmpty(r.get('node_template_ids'))){
+                return;
+            }
+        }
         
         n_ids = ',' + String( Ext.value(r.get('node_ids'), '') ).replace(' ','') + ',';
-        if( n_ids.indexOf(','+node_id+',') >=0 ) weight += 100;
-        else{
-            if( n_ids == ',,') weight += 50;
-            else{ /*check the nearest parents from path */
+        if( n_ids.indexOf(','+node_id+',') >= 0 ) {
+            weight += 100;
+        }else{
+            if( n_ids == ',,') {
+                weight += 50;
+            }else{ /*check the nearest parents from path */
                 ids = String(ids_path).split('/');
                 for (var i = ids.length -1; i > 0; i--) {
                     if(n_ids.indexOf(','+ids[i]+',') >=0){
@@ -162,6 +170,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
                         i = -1;
                     }
                 }
+                return;
             }
         }
 

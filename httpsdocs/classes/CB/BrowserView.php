@@ -13,7 +13,7 @@ class BrowserView extends BrowserTree
             ,'data' => false
         );
 
-        if (!empty($p->path)) {
+        if (!empty($p->path) && empty($p->query)) {
             $rez['data'] = $this->getCustomControllerResults($p->path);
         }
         if ($rez['data'] === false) {

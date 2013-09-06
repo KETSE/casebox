@@ -64,7 +64,9 @@ class Client extends Service
      */
     public static function runCron()
     {
-        if (isset($GLOBALS['running_trigger'])) {
+        if (isset($GLOBALS['running_trigger'])
+            || isset($GLOBALS['solr_index_disable_by_custom_script'])
+        ) {
             return;
         }
         $solrClient = new \CB\Solr\Client();
@@ -77,7 +79,9 @@ class Client extends Service
      */
     public static function runBackgroundCron()
     {
-        if (isset($GLOBALS['running_trigger'])) {
+        if (isset($GLOBALS['running_trigger'])
+            || isset($GLOBALS['solr_index_disable_by_custom_script'])
+        ) {
             return;
         }
         $cmd = 'php -f '.\CB\CRONS_PATH.'run_cron.php solr_update_tree '.\CB\CORENAME.' > '.\CB\LOGS_PATH.'bg_solr_update_tree.log &';

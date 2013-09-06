@@ -1,3 +1,24 @@
+CaseBox 1.9.40 (2013-09-06)
+==============================
+New Features, Improvements
+--------------------------
+- Changed users limit, displayed by default in form editor, from 50 to 100.
+- added flag $GLOBALS['solr_index_disable_by_custom_script'] for disabling solr indexing when runnig a custom script.
+- added default sorting by name for popup window of objects editor
+- reset search params when browsing an element from search results
+
+Fixed Bugs:
+----------
+- Corrections and Fixes implied by Stratelit requirements
+- fixed calls to Security::canEditUser without parameter
+- fixed some unprefixed ExtDirect method calls
+- fixed getMenuConfig javascript function
+- lowercase constant access from cron_send_notifications.php 
+
+Database updates:
+----------
+- 20130903_2215 db_update v1.9.39.sql
+
 CaseBox 1.9.39 (2013-09-03)
 ==============================
 New Features, Improvements

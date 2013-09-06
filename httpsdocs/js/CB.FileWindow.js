@@ -465,7 +465,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
     ,onDelete: function (btn) {
         if(btn !== 'yes') return;
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        BrowserTree['delete'](this.data.id, this.processDelete, this);
+        CB_BrowserTree['delete'](this.data.id, this.processDelete, this);
     }
     ,processDelete: function(r, e){
         this.getEl().unmask();
@@ -645,7 +645,15 @@ CB.ActionFilesView = Ext.extend(Ext.DataView, {
         if(Ext.isEmpty(r)) return;
         Ext.Msg.confirm(L.DeleteConfirmation, L.fileDeleteConfirmation//L.DeleteConfirmationMessage + ' "' + r.get('name') + '"?', 
             ,function(b){
-                if(b == 'yes') Browser['delete'](r.get('nid'), function(r, e){ App.mainViewPort.onProcessObjectsDeleted(r, e)}, this ); 
+                if(b == 'yes') {
+                    CB_Browser['delete'](
+                        r.get('nid')
+                        ,function(r, e){
+                            App.mainViewPort.onProcessObjectsDeleted(r, e)
+                        }
+                        ,this
+                    ); 
+                }
             }
             , this
         )

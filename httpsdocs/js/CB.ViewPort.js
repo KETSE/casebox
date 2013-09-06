@@ -364,7 +364,16 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         CB.DB.usersStore.reload();
     }
     ,onDeleteObject: function(data){
-        Ext.Msg.confirm(L.DeleteConfirmation, L.DeleteConfirmationMessage + ' "' + data.title+'"?', function(btn){ if(btn == 'yes')  Browser['delete'](data.id, this.onProcessObjectsDeleted, this); }, this)
+        Ext.Msg.confirm(
+            L.DeleteConfirmation
+            ,L.DeleteConfirmationMessage + ' "' + data.title+'"?'
+            ,function(btn){
+                if(btn == 'yes') {
+                    CB_Browser['delete'](data.id, this.onProcessObjectsDeleted, this);
+                }
+            }
+            ,this
+        )
 
     }
     ,onProcessObjectsDeleted: function(r, e){

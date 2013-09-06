@@ -65,7 +65,7 @@ while ($r = $res->fetch_assoc()) {
                      , sex
                      , email
                      , language_id
-                     , '.config\language_fields.'
+                     , '.CONFIG\LANGUAGE_FIELDS.'
                 FROM users_groups
                 WHERE id = $1',
                 $u
