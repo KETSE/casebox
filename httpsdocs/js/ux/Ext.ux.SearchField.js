@@ -24,6 +24,15 @@ Ext.ux.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
             }
         })
         Ext.ux.SearchField.superclass.initComponent.apply(this);
+        this._setValue = this.setValue;
+        this.setValue = function(value){
+            this._setValue(value);
+            if(Ext.isEmpty(value)){
+                this.triggers[0].hide();
+            }else{
+                this.triggers[0].show();
+            }
+        } 
     }
     ,afterRender: function() {
         Ext.ux.SearchField.superclass.afterRender.apply(this, arguments);
@@ -37,7 +46,7 @@ Ext.ux.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
     }
 
     ,onTrigger2Click : function(e){
-        this.fireEvent('search', this.getValue(), e);
+        this.fireEvent('search', this.getValue(), this, e);
     }
     ,clear: function(){
         this.setValue('');

@@ -443,7 +443,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
             this.actions['delete'].setDisabled(!canDelete);
             
             u = String(row.get('user_ids')).split(',');
-            clog(u, row.get('status'), row.get('template_id'))
+
             canComplete = ((row.get('template_id') == App.config.default_task_template) && (u.indexOf(App.loginData.id) >= 0) && (row.get('status') != 3) );
             this.actions.completeTask.setDisabled(!canComplete);
         }

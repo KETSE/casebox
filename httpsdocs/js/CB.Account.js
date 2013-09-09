@@ -91,7 +91,9 @@ CB.Account = Ext.extend(Ext.Panel, {
                     }
                 });
                 w.show();
-            }else this.close();
+            }else {
+                this.destroy();
+            }
             return;
         }
         this.cards.items.itemAt(0).loadData(r.profile);

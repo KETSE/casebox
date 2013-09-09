@@ -1,3 +1,14 @@
+CaseBox 1.9.41 (2013-09-09)
+==============================
+New Features, Improvements
+--------------------------
+- added search box near "dashboad" link at the top. Search box = search from "Home" & expandFolders=TRUE
+- added function \CB\Solr\Client.escapeLuceneChars() for escaping Lucene special chars
+
+Database updates:
+----------
+- install/mysql/casebox.sql (translation updates)
+
 CaseBox 1.9.40 (2013-09-06)
 ==============================
 New Features, Improvements

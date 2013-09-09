@@ -555,7 +555,10 @@ CB.UserEditWindow = Ext.extend(Ext.Window, {
     }
     ,onLoadProfileData: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) this.destroy();
+        if(r.success !== true) {
+            this.destroy();
+            return;
+        }
         this.profileForm.loadData(r);
     }
 })

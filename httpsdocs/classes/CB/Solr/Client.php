@@ -383,4 +383,28 @@ class Client extends Service
 
         return date('Y-m-d\TH:i:s\Z', $time1).' TO '.date('Y-m-d\TH:i:s\Z', $time2);
     }
+
+    /**
+     * escape Lucene special chars
+     *
+     * Lucene characters that need escaping with \ are + - && || ! ( ) { } [ ] ^ " ~ * ? : \
+     *
+     * @param  scalar $v incoming string
+     * @return scalar escaped variable
+     */
+    public function escapeLuceneChars($v)
+    {
+        $luceneReservedCharacters = preg_quote('+-&|!(){}[]^"~*?:\\');
+        // var_dump($luceneReservedCharacters);
+        $v = preg_replace_callback(
+            '/([' . $luceneReservedCharacters . '])/',
+            function ($matches) {
+                return '\\' . $matches[0];
+            },
+            $v
+        );
+
+        // var_dump($v);
+        return $v;
+    }
 }

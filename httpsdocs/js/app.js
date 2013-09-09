@@ -458,12 +458,18 @@ function initApp(){
         params = Ext.value(params, {});
         params.path = path;
 
-        tab = App.mainTabPanel.getActiveTab();
-        if(tab.isXType(CB.FolderView)) return tab.setParams(params);
-        App.mainTabPanel.setActiveTab(App.explorer);
-        App.explorer.setParams(params);
+        App.activateBrowserTab().setParams(params);
     }
     
+    App.activateBrowserTab = function(){
+        tab = App.mainTabPanel.getActiveTab();
+        if(tab.isXType(CB.FolderView)) {
+            return tab;
+        }
+        App.mainTabPanel.setActiveTab(App.explorer);
+        return App.explorer;
+    }
+
     App.locateObject = function(object_id, path){
         if(Ext.isEmpty(path)){
             CB_Path.getPidPath(object_id, function(r, e){

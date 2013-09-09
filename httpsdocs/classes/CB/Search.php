@@ -41,7 +41,9 @@ class Search extends Solr\Client
     {
         $p = &$this->inputParams;
         /* initial parameters */
-        $this->query = empty($p->query)? '' : $p->query;
+        $this->query = empty($p->query)
+            ? ''
+            : $this->escapeLuceneChars($p->query);
         $this->start = empty($p->start)? 0 : intval($p->start);
         $this->rows = empty($p->rows)? \CB\CONFIG\MAX_ROWS : intval($p->rows);
 
@@ -499,7 +501,12 @@ class Search extends Solr\Client
     private function executeQuery()
     {
         try {
-            $this->results = $this->search($this->query, $this->start, $this->rows, $this->params);
+            $this->results = $this->search(
+                $this->escapeLuceneChars($this->query),
+                $this->start,
+                $this->rows,
+                $this->params
+            );
         } catch ( \Exception $e ) {
             throw new \Exception("An error occured: \n\n {$e->__toString()}");
         }

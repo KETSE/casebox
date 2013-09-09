@@ -325,6 +325,9 @@ CB.FolderView = Ext.extend(Ext.Panel, {
         if(query == this.params.query) return;
         params = Ext.apply({}, this.params);
         params.query = query;
+        if(Ext.isEmpty(query)){
+            params.descendants = false
+        }
         this.setParams(params);
     }
     ,setShowDescendants: function(value){

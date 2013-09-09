@@ -124,6 +124,10 @@ class Security
      */
     private function convertTextToAccessString($access_string, $sign = 1)
     {
+        if (is_array($access_string)) {
+            $access_string = implode(',', $access_string);
+        }
+
         $bit = 1 * $sign;
         switch ($access_string) {
             case 'read':

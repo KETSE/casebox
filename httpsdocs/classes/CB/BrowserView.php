@@ -16,6 +16,7 @@ class BrowserView extends BrowserTree
         if (!empty($p->path) && empty($p->query)) {
             $rez['data'] = $this->getCustomControllerResults($p->path);
         }
+
         if ($rez['data'] === false) {
             $rez = array_merge($rez, $this->getDefaultControllerResults($p));
         }

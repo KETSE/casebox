@@ -11,7 +11,24 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 ,items: [
                     {xtype: 'tbtext', html: '<img src="/css/i/casebox-logo-small.png" style="padding: 2px"/>', height: 30}
                     ,'->'
+                    ,{
+                        width: 150
+                        ,minListWidth: 150
+                        ,emptyText: L.Search+' CaseBox'
+                        ,xtype: 'ExtuxSearchField'
+                        ,listeners: {
+                            scope: this
+                            ,'search': function(query, editor, event){
+                                editor.clear();
+                                App.activateBrowserTab().setParams({
+                                    query: query
+                                    ,descendants: !Ext.isEmpty(query)
+                                })
+                            }
+                        }
+                    }
                     ,{text: ' ', iconCls: App.loginData.iconCls, menu: [], name: 'userMenu' }
+
                 ]
         });
 
@@ -141,7 +158,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 ,{text: 'testing', iconCls: 'icon-bug', handler: App.showTestingWindow}
             );
         }
-        if(managementItems.length > 0) App.mainToolBar.insert(2, {text: L.Settings, iconCls: 'icon-gear', hideOnClick: false, menu: managementItems});
+        if(managementItems.length > 0) App.mainToolBar.insert(3, {text: L.Settings, iconCls: 'icon-gear', hideOnClick: false, menu: managementItems});
         App.mainToolBar.doLayout();
 
         langs = [];
@@ -203,7 +220,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if(!Ext.isEmpty(r.tbarItems)){
             /* inserting specified components before userMenu item */
             userMenuItem = App.mainToolBar.find( 'name', 'userMenu')[0];
-            index = 2;
+            index = 3;
             for (var i = 0; i < r.tbarItems.length; i++) {
                 if(!Ext.isEmpty(r.tbarItems[i].link)) r.tbarItems[i].listeners = {scope: this, click: this.onAccordionLinkClick }
                 App.mainToolBar.insert(index, r.tbarItems[i]);

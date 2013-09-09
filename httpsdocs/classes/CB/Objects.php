@@ -792,7 +792,7 @@ class Objects
                 'SELECT id
                     ,pid
                     ,`type`
-                    ,l1 `title`
+                    ,l'.USER_LANGUAGE_INDEX.' `title`
                      ,iconCls
                      ,default_field
                      ,title_template
