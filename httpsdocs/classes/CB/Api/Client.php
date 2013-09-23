@@ -64,7 +64,7 @@ class Client
         } catch (InvalidArgumentException $e) {
             curl_close($ch);
             throw $e;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             curl_close($ch);
             throw $e;
         }

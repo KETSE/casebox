@@ -177,6 +177,7 @@ class Objects
             )
         ) or die(DB\dbQueryError());
 
+        /* set internal title field for object if present in its template */
         DB\dbQuery(
             'INSERT INTO objects_data (object_id, field_id, value)
             SELECT $1
@@ -216,7 +217,20 @@ class Objects
         $update_ids_icons = array();
 
         $d = json_decode($p['data']);
-        $initial_object_id = $d->id;
+
+        /* validate pid and check its existance */
+        if (empty($d->pid)) {
+            throw new \Exception('pid cannot be null: '.$d->pid, 1);
+        } else {
+            $sql = 'SELECT id FROM tree WHERE id = $1';
+            $res = DB\dbQuery($sql, $d->pid) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+            } else {
+                throw new \Exception('pid not found: '.$d->pid, 1);
+            }
+            $res->close();
+        }
+        /* end of validate pid and check its existance */
 
         $template = $this->getTemplateInfo($d->template_id, $d->id);
 
@@ -350,7 +364,7 @@ class Objects
                 $duplicate_index = 0;
                 if (isset($fields[$field_id]['duplicates'])) {
                     foreach ($fields[$field_id]['duplicates'] as $k => $v) {
-                        if (is_array($v['id'])) {
+                        if (!empty($v['id']) && is_array($v['id'])) {
                             if ($v['id'] == $duplicate_id) {
                                 $fields[$field_id]['duplicates'][$k]['index'] = $duplicate_index;
                             } else {
@@ -375,6 +389,10 @@ class Objects
 
                 /* for titles processing */
                 $v = Templates::getTemplateFieldValue($field, 'text');
+                if (is_array($v)) {
+                    $v = implode(',', $v);
+                }
+
                 $object_title = str_replace('{f'.$field_id.'}', $v, $object_title);
                 $object_title = str_replace('{'.$field['name'].'}', $v, $object_title);
                 $object_title = str_replace('{'.$field['name'].'_info}', $fv->info, $object_title);
@@ -804,6 +822,9 @@ class Objects
 
             if ($r = $res->fetch_assoc()) {
                 $rez = $r;
+            } else {
+                throw new \Exception('Template not found: '.$template_id, 1);
+
             }
             $res->close();
         } elseif (is_numeric($object_id)) {

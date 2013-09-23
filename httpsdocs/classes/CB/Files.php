@@ -430,7 +430,7 @@ class Files
     }
 
     /**
-     * [storeFiles move the files from incomming folder to file storage]
+     * storeFiles move the files from incomming folder to file storage
      * @param array $p upload field values from upload form,
      * files property - array of uploaded files,
      * response - response from user when asked about overwrite for single or many file
@@ -438,8 +438,9 @@ class Files
     public function storeFiles(&$p)
     {
         /* here we'll iterate all files and comparing the md5 with already contained
-        files will upload only new contents to our store. Existent contents will be reused */
-        foreach ($p['files'] as $fk => $f) {
+        files will upload only new contents to our store. Existent contents will be reused
+        */
+        foreach ($p['files'] as $fk => &$f) {
             if ($f['error'] == UPLOAD_ERR_NO_FILE) {
                 continue;
             }
@@ -1059,20 +1060,22 @@ class Files
             global $core;
             $filesPath = FILES_PATH.$core['name'].DIRECTORY_SEPARATOR;
         }
-        /*$res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $rez['size'] = $r['size'];
             $rez['versions'] = intval($r['versions']);
             $content = $filesPath.$r['path'].DIRECTORY_SEPARATOR.$r['content_id'].'.gz';
             if (file_exists($content)) {
                 $content =   file_get_contents($content);
-                $content = gzuncompress( $content );
-            }else $content = '';
-            $rez['content'] = Util\coalesce($r['title'],'')."\n".
-            Util\coalesce($r['type'],'')."\n".
+                $content = gzuncompress($content);
+            } else {
+                $content = '';
+            }
+            $rez['content'] = Util\coalesce($r['title'], '')."\n".
+            Util\coalesce($r['type'], '')."\n".
             Util\coalesce($content, '');
         }
-        $res->close();/**/
+        $res->close();
 
         return $rez;
     }

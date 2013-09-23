@@ -8,8 +8,14 @@
 
 /**
  * Allow use of the Minify URI Builder app. Only set this to true while you need it.
- **/
+ */
 $min_enableBuilder = false;
+
+/**
+ * If non-empty, the Builder will be protected with HTTP Digest auth.
+ * The username is "admin".
+ */
+$min_builderPassword = 'admin';
 
 /**
  * Set to true to log messages to FirePHP (Firefox Firebug addon).
@@ -19,7 +25,7 @@ $min_enableBuilder = false;
  * If you want to use a custom error logger, set this to your logger
  * instance. Your object should have a method log(string $message).
  */
-$min_errorLogger = false;
+$min_errorLogger = true;
 
 /**
  * To allow debug mode output, you must set this option to true.
@@ -66,6 +72,7 @@ $min_documentRoot = '';
 //$min_documentRoot = $_SERVER['SUBDOMAIN_DOCUMENT_ROOT'];
  $_SERVER['DOCUMENT_ROOT'] = realpath(dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
 // $min_documentRoot = $_SERVER['DOCUMENT_ROOT'];
+
 /**
  * Cache file locking. Set to false if filesystem is NFS. On at least one
  * NFS system flock-ing attempts stalled PHP for 30 seconds!
@@ -95,16 +102,10 @@ $min_serveOptions['maxAge'] = 1800;
 
 
 /**
- * To use Google's Closure Compiler API (falling back to JSMin on failure),
- * uncomment the following lines:
+ * To use Google's Closure Compiler API to minify Javascript (falling back to JSMin
+ * on failure), uncomment the following line:
  */
-/*function closureCompiler($js) {
-    require_once 'Minify/JS/ClosureCompiler.php';
-
-    return Minify_JS_ClosureCompiler::minify($js);
-}
-$min_serveOptions['minifiers']['application/x-javascript'] = 'closureCompiler';
-//*/
+//$min_serveOptions['minifiers']['application/x-javascript'] = array('Minify_JS_ClosureCompiler', 'minify');
 
 /**
  * If you'd like to restrict the "f" option to files within/below
@@ -170,7 +171,6 @@ $min_symlinks = array();
  * @link http://winscp.net/eng/docs/ui_login_environment#daylight_saving_time
  */
 $min_uploaderHoursBehind = 0;
-
 
 /**
  * Path to Minify's lib folder. If you happen to move it, change

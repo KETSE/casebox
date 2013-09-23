@@ -530,7 +530,9 @@ CB.UserEditWindow = Ext.extend(Ext.Window, {
             ,listeners: {
                 scope: this
                 ,savesuccess: function(f, a){
+
                     this.fireEvent('savesuccess', f, a);
+                    App.fireEvent('userprofileupdated', f.data, a);
                     this.destroy() 
                 }
                 ,cancel: this.destroy
@@ -697,7 +699,9 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
     }
     //------------------------------------------------------------------------------------------------------------------------------------------------
     ,loadData: function(id){
-        if(!Ext.isEmpty(id)) this.data.id = id;
+        if(!Ext.isEmpty(id)) {
+            this.data.id = id;
+        }
         this.getEl().mask(L.LoadingData + ' ...');
         CB_UsersGroups.getAccessData(this.data.id, this.processLoadedData, this);
     }
@@ -738,9 +742,24 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
         this.fireEvent('beforesave');
         this.getEl().mask(L.SavingChanges + ' ...')
         params = { groups: [] };
-        this.grid.getStore().each(function(r){ if(r.get('active') == 1) params.groups.push(r.get('id'))}, this);
+        this.grid.getStore().each(
+            function(r){
+                if(r.get('active') == 1) {
+                    params.groups.push(r.get('id'))
+                }
+            },
+            this
+        );
         params.id = this.data.id;
-        CB_UsersGroups.saveAccessData(params, function(r, e){ this.setDirty(false); this.getEl().unmask(); this.fireEvent('save');}, this);
+        CB_UsersGroups.saveAccessData(
+            params,
+            function(r, e){
+                this.setDirty(false);
+                this.getEl().unmask();
+                this.fireEvent('save');
+            },
+            this
+        );
     }           
     ,onEditUserDataClick: function(w, idx, el, ev){
         if(ev && (ev.getTarget().localName == "img") ) {
@@ -889,7 +908,14 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
         }
     }
     ,onLoadFormTask: function(){
-        if(!this.loadFormTask) this.loadFormTask = new Ext.util.DelayedTask(function(){this.form.loadData(this.loadId);}, this);
+        if(!this.loadFormTask) {
+            this.loadFormTask = new Ext.util.DelayedTask(
+                function(){
+                    this.form.loadData(this.loadId);
+                },
+                this
+            );
+        }
         this.loadFormTask.delay(500);
     }
     ,onLoadFormData: function(data){
@@ -908,7 +934,17 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
         data.id = data.id.split('-').pop();
         n = this.tree.getSelectionModel().getSelectedNode();
         iconCls = n ? n.attributes.iconCls : 'icon-user';
-        w = new CB.UserEditWindow({title: data.title, iconCls: iconCls, data: data, listeners: {scope: this, savesuccess: function(){this.form.loadData()}}});
+        w = new CB.UserEditWindow({
+            title: data.title
+            ,iconCls: iconCls
+            ,data: data
+            ,listeners: {
+                scope: this
+                ,savesuccess: function(){
+                    this.form.loadData()
+                }
+            }
+        });
         w.show();
     }
 });

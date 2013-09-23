@@ -4,6 +4,10 @@ namespace CB\L;
 use CB\CONFIG as CONFIG;
 use CB\DB as DB;
 
+define('CB\\LANGUAGE_INDEX', getIndex(\CB\LANGUAGE));
+define('CB\\USER_LANGUAGE_INDEX', getIndex(\CB\USER_LANGUAGE));
+define('CB\\CONFIG\\LANGUAGE_FIELDS', languageStringToFieldNames(CONFIG\LANGUAGES));
+
 /* function to get the translation value, if defined, for custom specified language.
     If langiage not specified we return the translation for current user language  /**/
 function get($name = false, $language = false)

@@ -127,6 +127,7 @@ class Log
         //create the htmls for each language
         // $template_types_translation_names = array('', 'Object', 'IncomingAction', 'OutgoingAction', 'User', 'Contact', 'Organization' );
 
+        require_once DOC_ROOT.'language.php';
         L\initTranslations();
         $fields = array('id', 'pid', 'user_id', 'to_user_ids', 'case_id', 'object_id', 'file_id', 'task_id', 'date', 'action_type', 'remind_users', 'result', 'info');
         if (!empty($GLOBALS['languages'])) {

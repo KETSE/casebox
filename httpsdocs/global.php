@@ -8,7 +8,7 @@ function __autoload($className)
     // $arr = explode('\\', $className);
     // $className = array_pop($arr);
     // require_once $className . '.php';
-    require_once str_replace(
+    $className = str_replace(
         array(
             '\\'
             ,'_'
@@ -16,4 +16,5 @@ function __autoload($className)
         '/',
         $className
     ).'.php';
+    require_once $className;
 }

@@ -1,3 +1,28 @@
+CaseBox 1.9.42 (2013-09-23)
+==============================
+New Features, Improvements
+--------------------------
+- implemented cb.files.upload in Api
+- implemented cb.objects.create and cb.objects.save in Api
+- updated Minify
+- added script sys/utils/reorder_template_stucture_cfg_properties.php 
+    for ordering config properties of template fields
+- added reload button for global Tasks view
+- uncomented files content appending to solr data
+
+Fixed Bugs:
+----------
+- Old username is displayed for tree objects when a user is updated
+- prevent notice appearing in Solr\Client\filterSolrFields when processing array fields
+- excluded object id from pids when indexing into solr
+- server side: object title creation error on multivalued fields
+- client side: included name property for object title detection
+
+Notes:
+----------
+- database update should be applied: "20130923_1259 db_update v1.9.42.sql"
+- solr core should be reindexed
+
 CaseBox 1.9.41 (2013-09-09)
 ==============================
 New Features, Improvements

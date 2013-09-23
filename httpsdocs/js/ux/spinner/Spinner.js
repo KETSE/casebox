@@ -106,7 +106,8 @@ Ext.extend(Ext.ux.form.Spinner, Ext.form.TriggerField, {
 
         /*
         jsakalos suggestion
-        http://extjs.com/forum/showthread.php?p=121850#post121850 */
+        http://extjs.com/forum/showthread.php?p=121850#post121850 
+        */
         if('object' == typeof this.strategy && this.strategy.xtype) {
             switch(this.strategy.xtype) {
                 case 'number':

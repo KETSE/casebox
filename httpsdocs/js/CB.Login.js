@@ -126,7 +126,7 @@ CB.VerifyPassword = Ext.extend(Ext.Window, {
                             name: 'username'
                             ,fieldLabel: L.User
                             ,xtype: 'displayfield'
-                            ,value: App.loginData['l'+App.loginData.language_id]
+                            ,value: App.loginData.first_name + ' ' + App.loginData.last_name
                         },{ 
                             name: 'password'
                             ,fieldLabel: L.Password

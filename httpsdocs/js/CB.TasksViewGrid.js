@@ -12,7 +12,6 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
         this.actions = {
             open: new Ext.Action({
                 text: L.Open
-                ,iconCls: 'icon-folder-open'
                 ,iconAlign:'top'
                 ,iconCls: 'icon32-open'
                 ,scale: 'large'
@@ -714,6 +713,21 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
             }
         })
         CB.TasksViewGridPanel.superclass.initComponent.apply(this, arguments);
+
+        /* add reload button for this view */
+        reloadAction = new Ext.Action({
+                text: L.Reload
+                ,iconAlign:'top'
+                ,iconCls: 'icon32-refresh'
+                ,scale: 'large'
+                ,scope: this.view
+                ,handler: this.view.onReloadClick
+            })
+
+        toolbar = this.view.getTopToolbar();
+        toolbar.insert(6, '-');
+        toolbar.insert(7, reloadAction);
+        /* end of add reload button for this view */
     }
     ,onAfterRender: function(){
         this.view.setParams( { 'filters': {"status":[{"mode":"OR","values":["1","2"]}],"assigned":[{"mode":"OR","values":[App.loginData.id]}]} });

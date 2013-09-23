@@ -1362,7 +1362,7 @@ class Browser
 
         switch (intval($data['type'])) {
             case 0:
-                return Util\coalesce($data['iconCls'], 'icon-folder');
+                return Util\coalesce(@$data['iconCls'], 'icon-folder');
                 break;
             case 1:
                 switch (intval(@$data['subtype'])) {

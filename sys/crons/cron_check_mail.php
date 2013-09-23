@@ -71,7 +71,7 @@ try {
             ,'password' => config\mail_password
         )
     );
-} catch (Exception $e) {
+} catch (\Exception $e) {
     notifyAdmin('Casebox: check mail Exception for core'.CORENAME, $e->getMessage());
     echo " Error connecting to email\n";
     exit(); // skip this core if mail cannot be accesed
@@ -557,7 +557,7 @@ function getMailContentAndAtachment($message)
                 try {
                     $datapart['filename'] = decodeSubject($part->getHeaderField('content-disposition', 'filename'));
                     $datapart['filename'] = ($datapart['filename'] ? $datapart['filename'] : decodeSubject($part->getHeaderField('content-type', 'name')));
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $datapart['attachment'] = false;
                 }
                 // decode content

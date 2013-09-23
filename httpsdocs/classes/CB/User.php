@@ -19,7 +19,7 @@ class User
         $_COOKIE['key'] = $_SESSION['key'];
         setcookie('key', $_SESSION['key'], 0, '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 
-        $rez = array('success' => false, 'msg' => L\Auth_fail);
+        $rez = array('success' => false);
         $user_id = false;
 
         /* try to authentificate */
@@ -33,7 +33,7 @@ class User
         if ($user_id) {
             $rez = array('success' => true, 'user' => array());
 
-            $sql = 'SELECT u.id, u.`language_id`, first_name, last_name, '.CONFIG\LANGUAGE_FIELDS.', sex, cfg FROM users_groups u WHERE u.id = $1';
+            $sql = 'SELECT u.id, u.`language_id`, first_name, last_name, sex, cfg FROM users_groups u WHERE u.id = $1';
             $res = DB\dbQuery($sql, $user_id) or die( DB\dbQueryError() );
             if ($r = $res->fetch_assoc()) {
                 $r['admin'] = Security::isAdmin($user_id);
@@ -62,6 +62,8 @@ class User
             }
             $res->close();
 
+        } else {
+            $rez['msg'] = L\Auth_fail;
         }
         Log::add(
             array(

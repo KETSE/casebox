@@ -11,7 +11,9 @@ class Api
      * @var array
      */
     private $methods = array(
-        'cb.objects.permissions.getDirectRules' => 'Security.getNodeDirectAcl'
+        'cb.objects.create' => 'Objects.create'
+
+        ,'cb.objects.permissions.getDirectRules' => 'Security.getNodeDirectAcl'
         ,'cb.objects.permissions.addRule'       => 'Security.updateNodeAccess'
         ,'cb.objects.permissions.updateRule'    => 'Security.updateNodeAccess'
         ,'cb.objects.permissions.removeRule'    => 'Security.deleteNodeAccess'
@@ -20,7 +22,8 @@ class Api
         ,'cb.files.get'         => 'Files.get'
         ,'cb.files.download'    => 'Files.download'
         ,'cb.files.view'        => 'Files.view'
-        ,
+        ,'cb.files.upload'      => 'Files.upload'
+
     );
 
     /**

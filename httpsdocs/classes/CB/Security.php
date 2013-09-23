@@ -468,6 +468,8 @@ class Security
         if ($r = $res->fetch_row()) {
             $ids = explode(',', $r[0]);
             $ids = array_filter($ids, 'is_numeric');
+        } else {
+            throw new \Exception('Object not found', 1);
         }
         $res->close();
 
@@ -1100,8 +1102,7 @@ class Security
     {
         $rez = array('success' => true, 'data' => array());
         $user_id = $_SESSION['user']['id'];
-        $sql = 'SELECT id
-            ,l'.USER_LANGUAGE_INDEX.' `name`
+        $sql = 'SELECT id, name, first_name, last_name
             , concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls`
             FROM users_groups
             WHERE `type` = 2
@@ -1110,6 +1111,9 @@ class Security
             ORDER BY 2';
         $res = DB\dbQuery($sql, $user_id) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
+            if (!empty($r['first_name']) || !empty($r['last_name'])) {
+                $r['name'] = trim($r['first_name'].' '.$r['last_name']);
+            }
             $rez['data'][] = $r;
         }
         $res->close();

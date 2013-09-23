@@ -16,7 +16,7 @@ function connect($p = array())
         $db_name = empty($p['db_name']) ? CONFIG\DB_NAME: $p['db_name'];
         $port = empty($p['db_port']) ? CONFIG\DB_PORT: $p['db_port'];
         $dbh = new \mysqli($host, $user, $pass, $db_name, $port);
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
         $err = debug_backtrace();
         var_dump($err);
     }

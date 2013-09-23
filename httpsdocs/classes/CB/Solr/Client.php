@@ -264,7 +264,10 @@ class Client extends Service
                     $r['system'] = @intval($r['system']);
                     $r['type'] = @intval($r['type']);
                     $r['subtype'] = @intval($r['subtype']);
+
                     $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
+                    //exclude itself from pids
+                    array_pop($r['pids']);
 
                     // $this->filterSolrFields($r);
 
@@ -342,6 +345,8 @@ class Client extends Service
                 $lastId = $r['id'];
                 $r['update'] = true;
                 $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
+                //exclude itself from pids
+                array_pop($r['pids']);
 
                 $docs[$r['id']] = $r;
 
@@ -369,7 +374,13 @@ class Client extends Service
     private function filterSolrFields(&$doc)
     {
         foreach ($doc as $fn => $fv) {
-            if (!in_array($fn, $this->solr_fields) || ( empty($fv) && (strlen($fv) == 0) && ($fv !== false))) {
+            if (!in_array($fn, $this->solr_fields)
+                || ( ($fv !== false)
+                    && ( (!is_scalar($fv) && empty($fv))
+                        || (is_scalar($fv) && (strlen($fv) == 0))
+                    )
+                )
+            ) {
                 unset($doc[$fn]);
             }
         }

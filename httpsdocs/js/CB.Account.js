@@ -353,6 +353,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
         if(r.success !== true) return;
         this.setDirty(false);
         this.fireEvent('savesuccess', this, e);
+        App.fireEvent('userprofileupdated', this.data, e)
     }
     ,onResetClick: function(){
         this.getForm().reset();

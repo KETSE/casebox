@@ -75,12 +75,17 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
         })
     }
     ,getTitle: function(){
-        if(!Ext.isEmpty(this.data.custom_title))
+        if(!Ext.isEmpty(this.data.custom_title)){
             return this.data.custom_title;
-        else if(!Ext.isEmpty(this.data.title))
+        } else if(!Ext.isEmpty(this.data.title)) {
             return this.data.title;
-        else if(!isNaN(this.data.id))return '<'+L.noName+'> (id: '+this.data.id+')';
-        else return '<'+L.noName+'>';
+        } else if(!Ext.isEmpty(this.data.name)) {
+            return this.data.name;
+        } else if(!isNaN(this.data.id)) {
+            return '&lt;'+L.noName+'&gt; (id: '+this.data.id+')';
+        } else {
+            return '&lt;'+L.noName+'&gt;';
+        }
     }
     ,updateFormTitle: function(){
         t = '';

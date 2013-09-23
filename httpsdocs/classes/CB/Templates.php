@@ -635,7 +635,7 @@ class Templates
                         $value = 'users_groups';
                         $sql = 'SELECT id
                                 ,name
-                                ,l'.USER_LANGUAGE_INDEX.' `title`
+                                ,trim( CONCAT(coalesce(first_name, \'\'), \' \', coalesce(last_name, \'\')) ) `title`
                                 ,CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls`
                             FROM users_groups
                             WHERE id IN ('.$ids.')';
@@ -656,7 +656,9 @@ class Templates
                 while ($r = $res->fetch_assoc()) {
                     @$label = Util\coalesce($r['title'], $r['name']);
                     if (!empty($r['path'])) {
-                        $r['path'] = str_replace(',', '/', $r['path']);
+                        $path = explode(',', $r['path']);
+                        array_pop($path);
+                        $r['path'] = implode('/', $path);
                         $label = ($format == 'html')
                             ? '<a class="locate click" path="'.$r['path'].'" nid="'.$r['id'].'">'.$label.'</a>'
                             : $label;

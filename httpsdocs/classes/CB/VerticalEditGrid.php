@@ -6,6 +6,9 @@ class VerticalEditGrid
     // users
     public static function getData($objectName, &$data)
     {
+        if (empty($data['id'])) {
+            return;
+        }
         $id_field = VerticalEditGrid::getObjectIdField($objectName);
         /* get grid values */
         $gv = array();

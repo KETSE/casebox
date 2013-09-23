@@ -313,6 +313,7 @@ createDirectStores = function(){
         )
         ,getName: getStoreNames
     });
+    App.on('userprofileupdated', function(userData, event){ CB.DB.usersStore.reload();});
 
     CB.DB.groupsStore =  new Ext.data.DirectStore({
         autoLoad: true

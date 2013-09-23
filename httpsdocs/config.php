@@ -57,7 +57,7 @@ set_include_path(
     get_include_path()
 );
 
-require_once 'global.php';
+include 'global.php';
 
 /* end of update include_path and include global script */
 
@@ -157,6 +157,7 @@ if (defined('CB\\CONFIG\\LANGUAGES')) {
 }
 
 if (defined('CB\\CONFIG\\MAX_FILES_VERSION_COUNT')) {
+    __autoload('CB\\Files');
     Files::setMFVC(CONFIG\MAX_FILES_VERSION_COUNT);
 }
 /* end of store fetched config in CB\CONFIG namespace /**/
@@ -358,7 +359,7 @@ function fireEvent($eventName, &$params)
             $GLOBALS['running_trigger'] = true;
             try {
                 $class->$method($params);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 debug('Event Exception for '.$class.'->'.$method);
             }
             unset($GLOBALS['running_trigger']);

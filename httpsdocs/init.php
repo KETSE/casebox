@@ -8,7 +8,7 @@
 **/
 namespace CB;
 
-include dirname(__FILE__).'/config.php';
+require_once dirname(__FILE__).'/config.php';
 require_once 'lib/Util.php';
 
 //Starting Session
@@ -32,14 +32,9 @@ if (!in_array(
         ,'preview.php'
         ,'recover_password.php'
         ,'download.php'
+        ,'api.php'
         )
 )) {
-    $ref = @explode('/', $_SERVER['HTTP_REFERER']);
-    $ref = @$ref[2];
-    if ($ref != $_SERVER['SERVER_NAME']) {
-        header('Location: /login.php');
-        exit(0);
-    }
     if (($_SERVER['SCRIPT_NAME'] != '/auth.php') && !User::isLoged()) {
         header('Location: /login.php');
         exit(0);
@@ -56,7 +51,8 @@ if (!empty($_GET['l']) && (strlen($_GET['l']) == 2)) {
     $user_language = strtolower($_GET['l']);
 }
 
-/*if we do not have a tanslation file for users language, we use global core language. If there is no translation file for global set language then we use english by default */
+/*  If we do not have a tanslation file for users language, we use global core language.
+    If there is no translation file for global set language then we use english by default */
 if (isset($_SESSION['user']['language']) &&
     isset($GLOBALS['language_settings'][$_SESSION['user']['language']])
     ) {
@@ -74,9 +70,5 @@ DB\connect();
 
 // include languages and define Language constants and translations
 require_once 'language.php';
-
-define('CB\\LANGUAGE_INDEX', L\getIndex(LANGUAGE));
-define('CB\\USER_LANGUAGE_INDEX', L\getIndex(USER_LANGUAGE));
-define('CB\\CONFIG\\LANGUAGE_FIELDS', L\languageStringToFieldNames(CONFIG\LANGUAGES));
 
 L\initTranslations();

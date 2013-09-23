@@ -27,7 +27,7 @@ try {
     $o = new $action();
     $result = call_user_func_array(array($o, $method), array($data));
 
-} catch (Exception $e) {
+} catch (\Exception $e) {
     $api->sendResponse(501, '', 'text/html');
     exit();
 }
