@@ -33,7 +33,17 @@ class User
         if ($user_id) {
             $rez = array('success' => true, 'user' => array());
 
-            $sql = 'SELECT u.id, u.`language_id`, first_name, last_name, sex, cfg FROM users_groups u WHERE u.id = $1';
+            $sql = 'SELECT
+                    u.id
+                    ,u.`language_id`
+                    ,first_name
+                    ,last_name
+                    ,email
+                    ,sex
+                    ,cfg
+                FROM users_groups u
+                WHERE u.id = $1';
+
             $res = DB\dbQuery($sql, $user_id) or die( DB\dbQueryError() );
             if ($r = $res->fetch_assoc()) {
                 $r['admin'] = Security::isAdmin($user_id);
@@ -42,7 +52,10 @@ class User
                 $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
                 $r['locale'] =  $GLOBALS['language_settings'][$r['language']]['locale'];
 
-                $r['cfg'] = empty($r['cfg']) ? array() : json_decode($r['cfg'], true);
+                $r['cfg'] = json_decode($r['cfg'], true) or array();
+                // do not expose security params
+                unset($r['cfg']['security']);
+
                 if (empty($r['cfg']['long_date_format'])) {
                     $r['cfg']['long_date_format'] = $GLOBALS['language_settings'][$r['language']]['long_date_format'];
                 }
@@ -76,7 +89,8 @@ class User
         return $rez;
     }
     /**
-     * password verification method used for accessing sensitive data (like profile form) or for additional identity check
+     * password verification method used for accessing sensitive data (like profile form)
+     * or for additional identity check
      * @param varchar $passwd
      * return array json responce
      */
@@ -84,7 +98,17 @@ class User
     {
         $rez = array( 'success' => false );
         unset($_SESSION['verified']);
-        $res = DB\dbQuery('select id from users_groups where id = $1 and `password`= md5($2)', array($_SESSION['user']['id'], 'aero'.$pass)) or die( DB\dbQueryError() );
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM users_groups
+            WHERE id = $1
+                AND `password`= md5($2)',
+            array(
+                $_SESSION['user']['id']
+                ,'aero'.$pass
+            )
+        ) or die( DB\dbQueryError() );
+
         if ($r = $res->fetch_row()) {
             $rez['success'] = true;
             $_SESSION['verified'] = time();
@@ -97,7 +121,8 @@ class User
     }
 
     /**
-     * email verification method. send a confirmation message to specified mail with a url containing secret key
+     * email verification method. send a confirmation message
+     * to specified mail with a url containing secret key
      * @param varchar $email
      * return array json responce
      */
@@ -124,75 +149,49 @@ class User
 
         return $rez;
     }
-    public function TSVSaveMGA($p)
-    {
-        $rez = array( 'success' => true );
-        if ($this->verifyGACode($p->code)) {
-            $res = DB\dbQuery(
-                'SELECT cfg
-                FROM users_groups
-                WHERE enabled = 1
-                    AND did IS NULL
-                    AND id = $1',
-                $_SESSION['user']['id']
-            ) or die(DB\dbQueryError());
-            $cfg = array();
-            if ($r = $res->fetch_assoc()) {
-                if (!empty($r['cfg'])) {
-                    $cfg = json_decode($r['cfg'], true);
-                }
-                $cfg['security']['TSV']['method'] = 'MGA';
-                DB\dbQuery(
-                    'UPDATE users_groups
-                    SET cfg = $2
-                    WHERE id = $1',
-                    array(
-                        $_SESSION['user']['id']
-                        , json_encode($cfg)
-                    )
-                ) or die(DB\dbQueryError());
-            }
-            $res->close();
 
-        } else {
-            return array( 'success' => false );
+    /**
+     * enable Two Step Verification mechanism
+     * @param  object $p
+     * @return json   response
+     */
+    public function enableTSV($p)
+    {
+        // validate TSV mechanism
+        if (!in_array($p->method, array('ga', 'sms', 'ybk'))) {
+            return array('success' => false, 'msg' => 'Invalid authentication mechanism');
+        }
+        $data = empty($p->data) ? array(): (array) $p->data;
+        if (!empty($_SESSION['lastTSV'][$p->method])) {
+            //return array('success' => false, 'msg' => 'Error enabling TSV.');
+            $data = array_merge($_SESSION['lastTSV'][$p->method], $data);
         }
 
-        return array( 'success' => true );
-    }
-    public function disableTSV()
-    {
         $rez = array( 'success' => true );
-        $res = DB\dbQuery(
-            'SELECT cfg
-            FROM users_groups
-            WHERE enabled = 1
-                AND did IS NULL
-                AND id = $1',
-            $_SESSION['user']['id']
-        ) or die(DB\dbQueryError());
-        $cfg = array();
-        if ($r = $res->fetch_assoc()) {
-            if (!empty($r['cfg'])) {
-                $cfg = json_decode($r['cfg'], true);
-            }
-            unset($cfg['security']['TSV']['method']);
-            unset($cfg['security']['TSV']['sk']);
-            DB\dbQuery(
-                'UPDATE users_groups
-                SET cfg = $2
-                WHERE id = $1',
-                array(
-                    $_SESSION['user']['id']
-                    ,json_encode($cfg)
-                )
-            ) or die(DB\dbQueryError());
+
+        $authenticator = $this->getTSVAuthenticator($p->method);
+        $data = $authenticator->createSecretData($data);
+        $authenticator->setSecretData($data);
+
+        if ($authenticator->verifyCode($data['code'])) {
+            $cfg = array(
+                'method' => $p->method
+                ,'sd' => $data
+            );
+            $this->setTSVConfig($cfg);
+            unset($_SESSION['lastTSV']);
         } else {
             $rez['success'] = false;
         }
-        $res->close();
 
         return $rez;
+    }
+
+    public function disableTSV()
+    {
+        $this->setTSVConfig(null);
+
+        return array('success' => true);
     }
 
     /**
@@ -270,7 +269,6 @@ class User
      */
     public function getProfileData($user_id)
     {
-
         if (!Security::canEditUser($user_id)) {
             throw new \Exception(L\Access_denied);
         }
@@ -364,14 +362,7 @@ class User
         }
 
         $rez = array();
-        $cfg = array();
-        $res = DB\dbQuery('select cfg from users_groups where id = $1', $data->id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            if (!empty($r['cfg'])) {
-                $cfg = json_decode($r['cfg'], true);
-            }
-        }
-        $res->close();
+        $cfg = $this->getUserConfig();
 
         if (isset($data->country_code)) {
             $cfg['country_code'] = $data->country_code;
@@ -421,14 +412,7 @@ class User
         }
         $_SESSION['verified'] = time(); //update verification time
         $rez = array();
-        $cfg = array();
-        $res = DB\dbQuery('select cfg from users_groups where id = $1', $_SESSION['user']['id']) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            if (!empty($r['cfg'])) {
-                $cfg = json_decode($r['cfg'], true);
-            }
-        }
-        $res->close();
+        $cfg = $this->getUserConfig();
 
         if (empty($cfg['security'])) {
             $cfg['security'] = array();
@@ -476,54 +460,42 @@ class User
             $cfg['security']['answer'] = $data->answer;
         }
 
-        @DB\dbQuery(
-            'UPDATE users_groups
-            SET cfg = $2
-            WHERE id = $1',
-            array(
-                $_SESSION['user']['id']
-                ,json_encode($cfg)
-            )
-        ) or die( DB\dbQueryError() );
+        $this->setUserConfig($cfg);
 
         return array('success' => true);
     }
 
-    /* get Google Authenticator secret key */
-    public function getGASk()
+    /**
+     * get secret data
+     * @param  varchar $p authentication mechanism abreviation ('ga', 'sms', 'ybk')
+     * @return json    response
+     */
+    public function getTSVTemplateData($p)
     {
-        $rez = array('success' => true, 'sk' => 'xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx' );
-        $res = DB\dbQuery('select cfg from users_groups where enabled = 1 and did is null and id = $1', $_SESSION['user']['id']) or die(DB\dbQueryError());
-        $cfg = array();
-        if ($r = $res->fetch_assoc()) {
-            if (!empty($r['cfg'])) {
-                $cfg = json_decode($r['cfg'], true);
-            }
-            if (empty($cfg['security'])) {
-                $cfg['security'] = array();
-            }
-            if (empty($cfg['security']['TSV'])) {
-                $cfg['security']['TSV'] = array();
-            }
-
-            $ga = new \GoogleAuthenticator();
-
-            if (empty($cfg['security']['TSV']['sk'])) {
-                $cfg['security']['TSV']['sk'] = $ga->createSecret(16);
-                DB\dbQuery(
-                    'UPDATE users_groups
-                    SET cfg = $2
-                    WHERE id = $1',
-                    array(
-                        $_SESSION['user']['id']
-                        ,json_encode($cfg)
-                    )
-                ) or die(DB\dbQueryError());
-            }
-            $rez['sk'] = $cfg['security']['TSV']['sk'];
-            $rez['url'] = $ga->getQRCodeGoogleUrl($_SERVER['SERVER_NAME'], $rez['sk']);
+        // validate TSV mechanism
+        if (!in_array($p, array('ga', 'sms', 'ybk'))) {
+            return array('success' => false, 'msg' => 'Invalid authentication mechanism');
         }
-        $res->close();
+
+        $rez = array(
+            'success' => true
+            ,'data' => null
+        );
+
+        $cfg = $this->getTSVConfig();
+
+        $authenticator = $this->getTSVAuthenticator($p);
+
+        if (empty($cfg['method'])
+            || empty($cfg['sd'])
+            || ($cfg['method'] != $p)
+        ) {
+            $_SESSION['lastTSV'][$p] = $authenticator->prepareSecretDataCreation();
+        } else {
+            $_SESSION['lastTSV'][$p] = $cfg['sd'];
+        }
+        $authenticator->setSecretData($_SESSION['lastTSV'][$p]);
+        $rez['data'] = $authenticator->getTemplateData();
 
         return $rez;
     }
@@ -579,7 +551,7 @@ class User
         } else {
             return array('success' => false);
         }
-        DB\dbQuery('update users_groups set language_id = $2 where id = $1', array($_SESSION['user']['id'], $id)) or die( DB\dbQueryError() );
+        DB\dbQuery('UPDATE users_groups SET language_id = $2 WHERE id = $1', array($_SESSION['user']['id'], $id)) or die( DB\dbQueryError() );
 
         return array('success' => true);
     }
@@ -834,10 +806,14 @@ class User
 
         move_uploaded_file($f['tmp_name'], PHOTOS_PATH.$photoName);
 
-        $res = DB\dbQuery('update users_groups set photo = $2 where id = $1', array($p['id'], $photoName)) or die( DB\dbQueryError() );
+        $res = DB\dbQuery(
+            'UPDATE users_groups SET photo = $2 WHERE id = $1',
+            array($p['id'], $photoName)
+        ) or die(DB\dbQueryError());
 
         return array('success' => true, 'photo' => $photoName);
     }
+
     /**
      * remove users photo
      * @param  object $p json decoded object
@@ -877,5 +853,72 @@ class User
         $res->close();
 
         return $rez;
+    }
+
+    public function getTSVAuthenticator($authMechanism, $data = null)
+    {
+        if (!isset($this->authClasses[$authMechanism])) {
+            switch ($authMechanism) {
+                case 'ga':
+                case 'sms':
+                    $this->authClasses[$authMechanism]  = new Auth\GoogleAuthenticator(null, $data);
+                    break;
+                case 'ybk':
+                    $this->authClasses[$authMechanism] = new Auth\Yubikey($data);
+                    break;
+            }
+        }
+
+        return $this->authClasses[$authMechanism];
+    }
+
+    private function getUserConfig()
+    {
+        $res = DB\dbQuery(
+            'SELECT cfg
+            FROM users_groups
+            WHERE enabled = 1
+                AND did IS NULL
+                AND id = $1',
+            $_SESSION['user']['id']
+        ) or die(DB\dbQueryError());
+        $cfg = array();
+        if ($r = $res->fetch_assoc()) {
+            $cfg = json_decode($r['cfg'], true) or array();
+        }
+        $res->close();
+
+        return $cfg;
+    }
+
+    private function setUserConfig($cfg)
+    {
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET cfg = $2
+            WHERE id = $1',
+            array(
+                $_SESSION['user']['id']
+                ,json_encode($cfg)
+            )
+        ) or die(DB\dbQueryError());
+    }
+
+    public function getTSVConfig()
+    {
+        $rez = array();
+        $cfg = $this->getUserConfig();
+        if (!empty($cfg['security']['TSV'])) {
+            $rez = $cfg['security']['TSV'];
+        }
+
+        return $rez;
+    }
+
+    private function setTSVConfig($TSVConfig)
+    {
+        $cfg = $this->getUserConfig();
+        $cfg['security']['TSV'] = $TSVConfig;
+        $cfg = $this->setUserConfig($cfg);
     }
 }

@@ -681,13 +681,13 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         if(Ext.isEmpty(this.data.TSV)) this.data.TSV = {}
 
         switch(this.data.TSV.method){
-            case 'MGA': 
+            case 'ga': 
                 text = 'Mobile Google Aplication'
                 break;
-            case 'GA': 
-                text = 'Google Authenticator'
+            case 'sms': 
+                text = 'Google Authentication using SMS'
                 break;
-            case 'Yubikey':
+            case 'ybk':
                 text = 'Yubikey'
                 break;
         }
@@ -728,6 +728,13 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
         Ext.apply(this, {
             activeItem: 0
             ,bodyStyle: 'border: 20px solid white'
+            ,defaults: {
+                listeners: {
+                    scope: this
+                    ,verifyandsave: this.onVerifyAndSave
+                }
+
+            }
             ,items: [{
                 items: [{
                     xtype: 'displayfield'
@@ -737,189 +744,228 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
                     xtype: 'button'
                     ,html: '<a>Mobile application</a>'
                     ,style: 'padding:10px'
+                    ,name: 'ga'
                     ,scope: this
-                    ,handler: this.onMobileApplicationClick
+                    ,handler: this.onTSVMechanismClick
                 },{
                     xtype: 'button'
                     ,html: '<a>Sms message</a>'
                     ,style: 'padding:10px'
+                    ,name: 'sms'
                     ,scope: this
-                    ,handler: this.onSMSMessageClick
+                    ,handler: this.onTSVMechanismClick
                 },{
                     xtype: 'button'
-                    ,html: '<a class="cG">Yubikey</a>'
+                    ,html: '<a>Yubikey</a>'
                     ,style: 'padding:10px'
-                    ,disabled: true
+                    ,name: 'ybk'
                     ,scope: this
-                    ,handler: this.onYubikeyClick
+                    ,handler: this.onTSVMechanismClick
                 }
                 ]
             },{
-                style: 'background-color: #fff'
-                ,width:500
-                ,items: [{
-                    xtype: 'displayfield'
-                    ,style: 'font-size: 20px; padding-bottom:15px'
-                    ,value: 'Set up Google Authenticator'
-                },{
-                    autoHeight: true
-                    ,autoWidth:true
-                    ,border: false
-                    ,tpl: ['<tpl for=".">'
-                        ,'<p class="fwB"> Install the Google Authenticator app for your phone</p>'
-                        ,'<ol class="ol p10">'
-                        ,'<li> On your phone, open a web browser. </li>'
-                        ,'<li> Go to <span class="fwB">m.google.com/authenticator</span>. </li>'
-                        ,'<li> Download and install the Google Authenticator application. </li>'
-                        ,'</ol>'
-                        ,'<p class="fwB"> Now open and configure Google Authenticator. </p>'
-                        ,'<br /><p>Scan following Barcode to register the application automaticly:<p>'
-                        ,'<div class="taC p10">'
-                        ,'    <img src="{url}" width="100" height="100" />'
-                        ,'</div>'
-                        ,'<p> Or use the following secret key to register the aplication manually:</p>'
-                        ,'<div class="taC p10 bgcY">'
-                        ,'    <div class="fs14 fwB" dir="ltr">{sk}</div>'
-                        ,'    <div class="fs10 cG">Spaces don\'t matter.</div>'
-                        ,'</div><br />'
-                        ,'<p> Once you manually entered and saved your key, enter the 6-digit verification code generated<br /> by the Authenticator app. </p>'
-                        ,'</tpl>'
-                    ]
-                    ,data: {}
-                }
-                ]
-                ,buttonAlign: 'left'
-                ,buttons: [{
-                        xtype: 'displayfield'
-                        ,value: 'Code: '
-                    },{
-                        xtype: 'textfield'
-                        ,name: 'mga_code'
-                        ,width: '50'
-                        ,enableKeyEvents: true
-                        ,listeners: {
-                            scope: this
-                            ,keyup: function(field, e){
-                                this.getLayout().activeItem.buttons[2].setDisabled(Ext.isEmpty(field.getValue()))
-                            }
-                        }
-                    },{
-                        xtype: 'button'
-                        ,text: 'Verify and Save'
-                        ,disabled: true
-                        ,scope: this
-                        ,handler: this.onVerifyAndSaveClick
-                    },{
-                        xtype: 'displayfield'
-                        ,style: 'padding: 0 0 0 20px'
-                        ,cls: 'cR'
-                        ,value: '<img class="icon icon-exclamation fl" style="margin-right: 15px" src="/css/i/s.gif"> The code is incorrect. Try again'
-                        ,hidden: true
-                    }
-
-                    ]
+                xtype: 'TSVgaForm'
             },{
-                xtype: 'form'
-                ,monitorValid: true
-                ,autoWidth: true
-                ,autoHeight: true
-                ,labelWidth: 120
-                ,buttonAlign: 'left'
-                ,cls: 'bgcW'
-                ,items: [{
-                    xtype: 'displayfield'
-                    ,hideLabel: true
-                    ,value: L.SpecifyPhone
-                    ,style: 'font-size: 20px'
-                },{
-                    xtype: 'displayfield'
-                    ,hideLabel: true
-                    ,value: L.SpecifyPhoneMsg
-                    ,style: 'padding: 15px 0'
-                },{
-                    xtype: 'combo'
-                    ,name: 'country_code'
-                    ,hiddenName: 'country_code'
-                    ,fieldLabel: L.Country
-                    ,mode: 'local'
-                    ,triggerAction: 'all'
-                    ,editable: true
-                    ,forceSelection: true
-                    ,typeAhead: true
-                    ,store: CB.DB.phone_codes
-                    ,valueField: 'code'
-                    ,displayField: 'name'
-                    ,width: 200
-                    ,allowBlank: false
-                },{
-                    xtype: 'numberfield'
-                    ,name: 'phone_number'
-                    ,fieldLabel: L.PhoneNumber
-                    ,allowDecimals: false
-                    ,allowNegative: false
-                    ,width: 200
-                    ,allowBlank: false
-                }
-                ]
-                ,buttons: [{
-                    text: L.Verify
-                    ,formBind: true
-                    ,scope: this
-                    ,handler: this.onVerifyPhoneClick
-                },{
-                    text: L.SendCode
-                    ,type: 'submit'
-                    ,formBind: true
-                    ,scope: this
-                    ,handler: this.onSendCodeClick
-                }
-                ]
+                xtype: 'TSVsmsForm'
+            },{
+                xtype: 'TSVybkForm'
             }]
-            ,listeners: {
-                scope: this
-                ,afterrender: function(){ 
-                    f = this.findByType('form')[0];
-                    f.getForm().setValues(this.data);
-                    f.syncSize();
-                    App.focusFirstField(f)
-                }
-            }
         });
         CB.TSVWindow.superclass.initComponent.apply(this, arguments);
         this.form = this.findByType('form')[0];
     }
-    ,onMobileApplicationClick: function(){
-        this.getLayout().setActiveItem(1);
-        CB_User.getGASk( this.processGetSk, this)
+    ,onTSVMechanismClick: function(b, e){
+        this.TSVmethod = b.name;
+        this.getLayout().setActiveItem(b.ownerCt.items.indexOf(b));
+        this.getLayout().activeItem.prepareInterface(this.data);
         this.center();
     }
-    ,onSMSMessageClick: function(){
-        this.getLayout().setActiveItem(2);
+    ,onVerifyAndSave: function(data){
+        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+        CB_User.enableTSV({
+            method: this.TSVmethod
+            ,data: data
+        }, this.processEnableTSV, this)
     }
-    ,processGetSk: function(r, e){
-        if(r.success !== true) return;
-        sk = '';
-        while(!Ext.isEmpty(r.sk)){
-            sk += r.sk.substr(0,4) + ' ';
-            r.sk = r.sk.substr(4)
+    ,onYubikeySaveClick: function(){
+        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+        CB_User.TSVSaveYubikey( { code: this.getLayout().activeItem.buttons[1].getValue() }, this.processEnableTSV, this)
+    }
+    ,processEnableTSV: function(r, e){
+        this.getEl().unmask()
+        if(r.success === true){
+            this.fireEvent('tsvchange', this, this.TSVmethod);
+            this.destroy()
+        } else {
+            this.getLayout().activeItem.showError(r.msg);
+            this.syncSize();
         }
-        r.sk = sk;
-        p = this.getLayout().activeItem.items.itemAt(1);
+    }
+}
+)
+
+
+CB.TSVgaForm = Ext.extend(Ext.Panel, {
+    style: 'background-color: #fff'
+    ,width:500
+    ,initComponent: function(){
+        Ext.apply(this, {
+            items: [{
+                xtype: 'displayfield'
+                ,style: 'font-size: 20px; padding-bottom:15px'
+                ,value: 'Set up Google Authenticator'
+            },{
+                autoHeight: true
+                ,autoWidth:true
+                ,border: false
+                ,tpl: ['<tpl for="data">'
+                    ,'<p class="fwB"> Install the Google Authenticator app for your phone</p>'
+                    ,'<ol class="ol p10">'
+                    ,'<li> On your phone, open a web browser. </li>'
+                    ,'<li> Go to <span class="fwB">m.google.com/authenticator</span>. </li>'
+                    ,'<li> Download and install the Google Authenticator application. </li>'
+                    ,'</ol>'
+                    ,'<p class="fwB"> Now open and configure Google Authenticator. </p>'
+                    ,'<br /><p>Scan following Barcode to register the application automaticly:<p>'
+                    ,'<div class="taC p10">'
+                    ,'    <img src="{url}" width="100" height="100" />'
+                    ,'</div>'
+                    ,'<p> Or use the following secret key to register the aplication manually:</p>'
+                    ,'<div class="taC p10 bgcY">'
+                    ,'    <div class="fs14 fwB" dir="ltr">{sd}</div>'
+                    ,'    <div class="fs10 cG">Spaces don\'t matter.</div>'
+                    ,'</div><br />'
+                    ,'<p> Once you manually entered and saved your key, enter the 6-digit verification code generated<br /> by the Authenticator app. </p>'
+                    ,'</tpl>'
+                ]
+                ,data: {}
+            }
+            ]
+            ,buttonAlign: 'left'
+            ,buttons: [{
+                    xtype: 'displayfield'
+                    ,value: 'Code: '
+                },{
+                    xtype: 'textfield'
+                    ,name: 'code'
+                    ,width: '50'
+                    ,enableKeyEvents: true
+                    ,listeners: {
+                        scope: this
+                        ,keyup: function(field, e){
+                            this.buttons[2].setDisabled(Ext.isEmpty(field.getValue()))
+                        }
+                    }
+                },{
+                    xtype: 'button'
+                    ,text: 'Verify and Save'
+                    ,disabled: true
+                    ,scope: this
+                    ,handler: this.onVerifyAndSaveClick
+                },{
+                    xtype: 'displayfield'
+                    ,style: 'padding: 0 0 0 20px'
+                    ,cls: 'cR'
+                    ,value: ''
+                    ,hidden: true
+                }
+            ]
+        });
+        CB.TSVgaForm.superclass.initComponent.apply(this, arguments);
+    }
+    ,prepareInterface: function(data){
+        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+        CB_User.getTSVTemplateData('ga', this.processGetTSVTemplateData, this)
+    }
+    ,processGetTSVTemplateData: function(r, e){
+        this.getEl().unmask();
+        if(r.success !== true) return;
+        p = this.items.itemAt(1);
         p.data = r;
         p.update(r);
+        this.buttons[1].focus();
     }
     ,onVerifyAndSaveClick: function(){
-        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        CB_User.TSVSaveMGA( { code: this.getLayout().activeItem.buttons[1].getValue() }, this.processTSVSaveMGA, this)
+        this.fireEvent('verifyandsave', {
+            code: this.buttons[1].getValue()
+        });
     }
-    ,processTSVSaveMGA: function(r, e){
-        this.getLayout().activeItem.buttons[3].setVisible(r.success !== true);
-        this.getEl().unmask()
-        this.syncSize();
-        if(r.success === true){
-            this.fireEvent('tsvchange', this, 'MGA');
-            this.destroy()
+    ,showError: function(msg){
+        if(Ext.isEmpty(msg)) {
+            msg = 'The code is incorrect. Try again';
         }
+        msg = '<img class="icon icon-exclamation fl" style="margin-right: 15px" src="/css/i/s.gif">'+ msg
+        this.buttons[3].setValue(msg)
+        this.buttons[3].setVisible(true)
+    }
+});
+Ext.reg('TSVgaForm', CB.TSVgaForm);
+
+CB.TSVsmsForm = Ext.extend(Ext.form.FormPanel, {
+    monitorValid: true
+    ,autoWidth: true
+    ,autoHeight: true
+    ,labelWidth: 120
+    ,buttonAlign: 'left'
+    ,cls: 'bgcW'
+    ,initComponent: function(){
+        Ext.apply(this, {
+            items: [{
+                xtype: 'displayfield'
+                ,hideLabel: true
+                ,value: L.SpecifyPhone
+                ,style: 'font-size: 20px'
+            },{
+                xtype: 'displayfield'
+                ,hideLabel: true
+                ,value: L.SpecifyPhoneMsg
+                ,style: 'padding: 15px 0'
+            },{
+                xtype: 'combo'
+                ,name: 'country_code'
+                ,hiddenName: 'country_code'
+                ,fieldLabel: L.Country
+                ,mode: 'local'
+                ,triggerAction: 'all'
+                ,editable: true
+                ,forceSelection: true
+                ,typeAhead: true
+                ,store: CB.DB.phone_codes
+                ,valueField: 'code'
+                ,displayField: 'name'
+                ,width: 200
+                ,allowBlank: false
+            },{
+                xtype: 'numberfield'
+                ,name: 'phone_number'
+                ,fieldLabel: L.PhoneNumber
+                ,allowDecimals: false
+                ,allowNegative: false
+                ,width: 200
+                ,allowBlank: false
+            }
+            ]
+            ,buttons: [{
+                text: L.Verify
+                ,formBind: true
+                ,scope: this
+                ,handler: this.onVerifyPhoneClick
+            },{
+                text: L.SendCode
+                ,type: 'submit'
+                ,formBind: true
+                ,scope: this
+                ,handler: this.onSendCodeClick
+            }
+            ]
+        });
+        CB.TSVsmsForm.superclass.initComponent.apply(this, arguments);
+    }
+    ,prepareInterface: function(data){
+        clog(data)
+        this.getForm().setValues(data);
+        this.syncSize();
+        App.focusFirstField(this);
     }
     ,onVerifyPhoneClick: function(){
         if(this.form.getForm().isValid()){
@@ -937,9 +983,92 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
         this.getEl().unmask();
         clog('processPhoneVerification', arguments)
     }
-    ,onSubmitSuccess: function(r, e){
-        // this.fireEvent('passwordchanged');
-        // this.destroy();
+    ,showError: function(msg){}
+
+});
+Ext.reg('TSVsmsForm', CB.TSVsmsForm);
+
+CB.TSVybkForm = Ext.extend(Ext.form.FormPanel, {
+    monitorValid: true
+    ,autoWidth: true
+    ,autoHeight: true
+    ,labelWidth: 70
+    ,buttonAlign: 'left'
+    ,cls: 'bgcW'
+    ,initComponent: function(){
+        Ext.apply(this, {
+            items: [{
+                xtype: 'displayfield'
+                ,hideLabel: true
+                ,style: 'font-size: 20px; padding-bottom:15px'
+                ,value: 'Set up Yubikey Authenticator'
+            },{
+                autoHeight: true
+                ,autoWidth:true
+                ,border: false
+                ,style: 'font-size: 13px; padding-bottom:15px'
+                ,tpl: ['<tpl for=".">'
+                    ,'<ol>'
+                    ,'<li>1. Insert your YubiKey into a USB port.</li>'
+                    ,'<li>2. Enter your email in the email field. </li>'
+                    ,'<li>3. Select/Click the Code field, and touch the YubiKey button. </li>'
+                    ,'<li>4. Click Save.</li>'
+                    ,'</ol>'
+                    ,'<br />'
+                    ,'<p>Note that it may take up until 5 minutes until all validation servers know about your newly generated client.</p>'
+                    ,'</tpl>'
+                ]
+                ,data: {}
+            },{
+                xtype: 'textfield'
+                ,vtype: 'email'
+                ,name: 'email'
+                ,fieldLabel: L.Email 
+                ,width: 250
+                ,allowBlank: false
+                ,value: App.loginData.email
+            },{
+                xtype: 'textfield'
+                ,name: 'code'
+                ,fieldLabel: L.Code
+                ,width: 250
+                ,allowBlank: false
+            },{
+                xtype: 'displayfield'
+                ,style: 'padding: 0 0 0 20px; display: block'
+                ,cls: 'cR'
+                ,value: ''
+                ,hideLabel: true
+                ,hidden: true
+            }
+            ]
+            ,buttonAlign: 'left'
+            ,buttons: [{
+                    xtype: 'button'
+                    ,text: L.Save
+                    ,formBind: true
+                    ,scope: this
+                    ,handler: this.onSaveClick
+                }
+            ]
+        });
+        CB.TSVybkForm.superclass.initComponent.apply(this, arguments);
     }
-}
-)
+    ,prepareInterface: function(data){
+        this.getForm().setValues(data);
+        this.syncSize();
+        App.focusFirstField(this);
+    }
+    ,onSaveClick: function(){
+        this.fireEvent('verifyandsave', this.getForm().getValues());
+    }
+    ,showError: function(msg){
+        if(Ext.isEmpty(msg)) {
+            msg = 'The code is incorrect. Try again'
+        }
+        msg = '<img class="icon icon-exclamation fl" style="margin-right: 15px" src="/css/i/s.gif">'+ msg
+        this.items.itemAt(4).setValue(msg)
+        this.items.itemAt(4).setVisible(true)
+    }
+});
+Ext.reg('TSVybkForm', CB.TSVybkForm);

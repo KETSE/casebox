@@ -28,7 +28,6 @@ class FreeSMSGateway
         curl_setopt($ch, CURLOPT_POST, count($fields));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        //echo "$fields_string\n";var_dump($fields);
         $rez = curl_exec($ch);
 
         curl_close($ch);

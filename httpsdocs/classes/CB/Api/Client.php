@@ -228,7 +228,6 @@ class Client
 
         $this->execute();
         $rez = $this->getResponseBody();
-        // var_dump($rez);
         $rez = json_decode($rez);
 
         return $rez;

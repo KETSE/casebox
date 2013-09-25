@@ -36,11 +36,6 @@ require_once LIB_DIR.'Util.php';
 define('CB\\USER_LANGUAGE', CONFIG\DEFAULT_LANGUAGE);
 
 require_once(DOC_ROOT.'language.php');
-
-define('CB\\LANGUAGE_INDEX', L\getIndex(LANGUAGE));
-define('CB\\USER_LANGUAGE_INDEX', L\getIndex(USER_LANGUAGE));
-define('CB\\CONFIG\\LANGUAGE_FIELDS', L\languageStringToFieldNames(CONFIG\LANGUAGES));
-
 //L\initTranslations(); // would be called from inside crons that need translations
 
 //--------------------------------------------------- functions

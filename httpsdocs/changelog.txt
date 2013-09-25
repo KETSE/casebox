@@ -1,7 +1,19 @@
-CaseBox 1.9.42 (2013-09-23)
+CaseBox 1.9.43 (2013-09-25)
 ==============================
 New Features, Improvements
 --------------------------
+- refactored Two Step Authentication mechanism
+- added IAuth interface that is used for Google and Yubikey Authentication clases
+
+Fixed Bugs:
+----------
+- removed strage characterss from mysql differential updates filenames
+Notes:
+----------
+- update casebox database
+
+CaseBox 1.9.42 (2013-09-23)
+==============================
 - implemented cb.files.upload in Api
 - implemented cb.objects.create and cb.objects.save in Api
 - updated Minify

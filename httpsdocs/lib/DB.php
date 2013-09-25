@@ -18,7 +18,6 @@ function connect($p = array())
         $dbh = new \mysqli($host, $user, $pass, $db_name, $port);
     } catch (\Exception $e) {
         $err = debug_backtrace();
-        var_dump($err);
     }
 
     if (mysqli_connect_errno()) {

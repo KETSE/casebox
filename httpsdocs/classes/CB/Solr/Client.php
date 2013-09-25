@@ -406,7 +406,6 @@ class Client extends Service
     public function escapeLuceneChars($v)
     {
         $luceneReservedCharacters = preg_quote('+-&|!(){}[]^"~*?:\\');
-        // var_dump($luceneReservedCharacters);
         $v = preg_replace_callback(
             '/([' . $luceneReservedCharacters . '])/',
             function ($matches) {
@@ -415,7 +414,6 @@ class Client extends Service
             $v
         );
 
-        // var_dump($v);
         return $v;
     }
 }

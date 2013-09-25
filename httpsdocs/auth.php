@@ -29,23 +29,33 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
 
     if (empty($errors)) {
         DB\connect();
-        $r = User::Login($u, $p);
+        $user = new User();
+        $r = $user->Login($u, $p);
         if ($r['success'] == false) {
             $errors[] = L\Auth_fail;
-        } elseif (!empty($_SESSION['user']['cfg']['security']['TSV']['method'])) {
-            $_SESSION['check_TSV'] = time();
         } else {
-            $_SESSION['user']['TSV_checked'] = true;
+            $cfg = $user->getTSVConfig();
+            if (!empty($cfg['method'])) {
+                $_SESSION['check_TSV'] = time();
+            } else {
+                $_SESSION['user']['TSV_checked'] = true;
+            }
         }
     }
     $_SESSION['message'] = array_shift($errors);
 } elseif (!empty($_SESSION['check_TSV']) && !empty($_POST['c'])) {
     $u = new User();
-    if ($u->verifyGACode($_POST['c'])) {
+    $cfg = $u->getTSVConfig();
+    // var_dump($cfg);
+    $authenticator = $u->getTSVAuthenticator($cfg['method'], $cfg['sd']);
+    $verificationResult = $authenticator->verifyCode($_POST['c']);
+    if ($verificationResult === true) {
         unset($_SESSION['check_TSV']);
         $_SESSION['user']['TSV_checked'] = true;
     } else {
-        $_SESSION['message'] = 'Wrong verification code. Please try again.';
+        $_SESSION['message'] = is_string($verificationResult)
+            ? $verificationResult
+            : 'Wrong verification code. Please try again.';
     }
 }
 if (!User::isLoged()) {
