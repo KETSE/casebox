@@ -1,3 +1,25 @@
+CaseBox 1.9.44 (2013-09-26)
+==============================
+New Features, Improvements
+--------------------------
+- update task/event dates on drag or resize
+- quickfix for allday field in calendar view
+- replaced Type facet for filter panel in Calendar View with Template facet
+- removed responsible party from all tasks
+- send notification to assigned user of the task even if the user is creator of the task
+- moved Auth classes to libx/auth/
+- removed references to tika client
+
+Fixed Bugs:
+----------
+- The end date of a new event is not saved
+- Object not found error on remove security inheritance and clear security rules
+    Added check for owner in Security.getEstimatedUserAccessForObject
+
+Notes:
+----------
+- apply database update: 20130926_1835 db_update v1.9.44.sql
+
 CaseBox 1.9.43 (2013-09-25)
 ==============================
 New Features, Improvements

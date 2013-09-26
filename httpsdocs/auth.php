@@ -46,7 +46,6 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
 } elseif (!empty($_SESSION['check_TSV']) && !empty($_POST['c'])) {
     $u = new User();
     $cfg = $u->getTSVConfig();
-    // var_dump($cfg);
     $authenticator = $u->getTSVAuthenticator($cfg['method'], $cfg['sd']);
     $verificationResult = $authenticator->verifyCode($_POST['c']);
     if ($verificationResult === true) {

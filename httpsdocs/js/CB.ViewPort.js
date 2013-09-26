@@ -348,7 +348,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         this.fireEvent('favoritetoggled', r, e);
     }
     ,onTaskCreate: function(p, ev){
-        if(Ext.isEmpty(p)) p ={ data: {} };
+        if(Ext.isEmpty(p)) {
+            p ={ data: {} };
+        }
         
         Ext.apply(p, {
             admin: true
@@ -360,6 +362,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if(Ext.isEmpty(p.title)) p.title = L.AddTask;
         if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
         this.lastFocusedElement = Ext.get(document.activeElement);
+        delete p.data.title;
         dw = new CB.Tasks(p);
         dw.on('beforedestroy', this.focusLastElement, this);
         return dw.show();

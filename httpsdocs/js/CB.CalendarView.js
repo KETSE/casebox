@@ -144,15 +144,10 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                 }
                 //,rangeselect: this.onRangeSelect
                 ,eventmove: function(vw, rec){
-                    rec.reject();
-                    return;
-                    rec.commit();
-                    var time = rec.data.IsAllDay ? '' : ' \\a\\t g:i a';
-                    this.showMsg('Event '+ rec.data.Title +' was moved to '+rec.data.StartDate.format('F jS'+time));
+                    this.updateRecordDatesRemotely(rec);
                 }
                 ,eventresize: function(vw, rec){
-                    rec.commit();
-                    this.showMsg('Event '+ rec.data.Title +' was updated');
+                    this.updateRecordDatesRemotely(rec);
                 }
                 ,eventdelete: function(win, rec){
                     this.eventStore.remove(rec);
@@ -165,6 +160,23 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
             }
         });
         CB.Calendar.superclass.initComponent.apply(this, arguments);
+    }
+    ,updateRecordDatesRemotely: function(record){
+        CB_Tasks.updateDates(
+            {
+                id: record.get('EventId')
+                ,date_start: record.get('StartDate').toISOString()
+                ,date_end: record.get('EndDate').toISOString()
+            }
+            ,function(r, e){
+                if(r.success == true) {
+                    this.commit();
+                } else {
+                    this.reject();
+                }
+            }
+            ,record
+        )
     }
     ,doReloadEventsStore: function(){
         this.allowedReload = true;

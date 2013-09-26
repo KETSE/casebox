@@ -77,12 +77,8 @@ class Objects
                     ,t.`date_end`
                     ,t.cdate
                     ,t.responsible_user_ids
-                    ,t.responsible_party_id
                     ,t.cid
                     ,t.completed
-                    ,(SELECT l'.USER_LANGUAGE_INDEX.'
-                        FROM tags
-                        WHERE id = t.responsible_party_id) responsible_party
                 FROM tasks t
                 LEFT JOIN tasks_responsible_users ru ON t.id = ru.task_id
                 AND ru.user_id = $2
@@ -686,10 +682,6 @@ class Objects
                     $info .= ' &rarr; '.implode(', ', array_values($t['users']));
                 }
                 $small_fields = array();
-                if (!defined('CB\\CONFIG\\RESPONSIBLE_PARTY_DEFAULT') || (CONFIG\RESPONSIBLE_PARTY_DEFAULT != $t['responsible_party_id'])) {
-                    /* append responsible part */
-                    $small_fields[] = L\Party.': '.$t['responsible_party'];
-                }
                 if (!empty($t['completed'])) {
                     $small_fields[] = L\Accomplished_date.': '.Util\formatMysqlDate($t['completed']);
                 }

@@ -457,7 +457,6 @@ CB.DB.tasksStoreConfig = {
                 ,{name: 'missed', type: 'int'}
                 ,{name: 'type', type: 'int'}
                 ,{name: 'privacy', type: 'int'}
-                ,{name: 'responsible_party_id', type: 'int'}
                 ,'responsible_user_ids'
                 ,'description'
                 ,'parent_ids'
@@ -469,7 +468,6 @@ CB.DB.tasksStoreConfig = {
                 , {name: 'cdate', type: 'date', dateFormat: 'Y-m-d H:i:s'}
                 ,'case'
                 ,'object'
-                ,'responsible_party'
                 ,'days'
                 ,'completed_text'
                 ,{name: 'expired', type: 'bool'}

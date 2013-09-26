@@ -416,7 +416,7 @@ class Search extends Solr\Client
                             (all tasks will be with autoclose = true, so that when
                             all responsible users mark task as completed - it'll be automatically closed)
                         4 Pending /**/
-                    '{!ex=type key=0type}type'
+                    '{!ex=template_id key=0template_id}template_id'
                     ,'{!ex=status key=1status}status'
                     ,'{!ex=category_id key=2category_id}category_id'
                     ,'{!ex=importance key=3importance}importance'
@@ -537,7 +537,7 @@ class Search extends Solr\Client
                     $rd['content'] = $sr->highlighting->{$rd['id']}->{'content'}[0];
                 }
             }
-            $res = DB\dbQuery('SELECT `path` from tree_info where id = $1', array($rd['id'])) or die(DB\dbQueryError());
+            $res = DB\dbQuery('SELECT `path` FROM tree_info WHERE id = $1', array($rd['id'])) or die(DB\dbQueryError());
             if ($r = $res->fetch_row()) {
                 $rd['path'] = $r[0];
             }

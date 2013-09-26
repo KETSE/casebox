@@ -39,7 +39,7 @@ class GoogleAuthenticator implements \CB\IAuth
         if (!empty($data)) {
             $this->secretData = $data;
         }
-        $this->instance = new \GoogleAuthenticator();
+        $this->instance = new \Auth_GoogleAuthenticator();
     }
 
     /**

@@ -71,6 +71,7 @@ $API = array_merge(
                 ,'close'            =>  array('len' => 1)
                 ,'reopen'           =>  array('len' => 1)
                 ,'browse'           =>  array('len' => 1)
+                ,'updateDates'      =>  array('len' => 1)
             )
         )
 

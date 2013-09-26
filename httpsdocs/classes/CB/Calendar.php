@@ -43,9 +43,17 @@ class Calendar
                         $catIcon = ' cal-cat-'.$catIcon;
                     }
                 }
+                /* quick fix. Maybe add allday to solr */
+                $sql = 'SELECT allday FROM tasks WHERE id = $1';
+                $res = DB\dbQuery($sql, $d['id']) or die(DB\dbQueryError());
+                if ($r = $res->fetch_assoc()) {
+                    $d['allday'] = ($r['allday'] == 1);
+                }
+                $res->close();
+                /* end of quick fix. Maybe add allday to solr */
                 @$rez['data'][] = array(
                     'id' => $d['id']
-                    ,'ad' => ($d['allday'] == 1)
+                    ,'ad' => $d['allday']
                     ,'template_id' => $d['template_id']
                     ,'cid' => $d['cid']
                     ,'title' => $d['name']

@@ -622,8 +622,8 @@ class UsersGroups
         if ($r = $res->fetch_assoc()) {
             $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
             $r['cfg'] = empty($r['cfg']) ? array(): json_decode($r['cfg'], true);
-            $r['cfg']['long_date_format'] = Util\coalesce($r['cfg']['long_date_format'], $GLOBALS['language_settings'][$r['language']]['long_date_format']);
-            $r['cfg']['short_date_format'] = Util\coalesce($r['cfg']['short_date_format'], $GLOBALS['language_settings'][$r['language']]['short_date_format']);
+            $r['cfg']['long_date_format'] = Util\coalesce(@$r['cfg']['long_date_format'], $GLOBALS['language_settings'][$r['language']]['long_date_format']);
+            $r['cfg']['short_date_format'] = Util\coalesce(@$r['cfg']['short_date_format'], $GLOBALS['language_settings'][$r['language']]['short_date_format']);
             $rez = $r;
         }
         $res->close();

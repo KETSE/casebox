@@ -444,6 +444,8 @@ class Security
         //10 Take Ownership
         //11 Download
 
+        $is_owner = false;
+
         /* if no user is specified as parameter then calculating for current loged user */
         if ($user_id === false) {
             $user_id = $_SESSION['user']['id'];
@@ -459,17 +461,19 @@ class Security
         }
 
         /* getting object ids that have inherit set to true */
-        $sql = 'SELECT `set`
-            FROM tree_info ti
-            JOIN tree_acl_security_sets ts on ti.security_set_id = ts.id
-            WHERE ti.id = $1';
+        $sql = 'SELECT t.oid, ts.`set`
+            FROM tree t
+            JOIN tree_info ti on t.id = ti.id
+            LEFT JOIN tree_acl_security_sets ts on ti.security_set_id = ts.id
+            WHERE t.id = $1';
         $res = DB\dbQuery($sql, $object_id) or die(DB\dbQueryError());
         $ids = array();
-        if ($r = $res->fetch_row()) {
-            $ids = explode(',', $r[0]);
+        if ($r = $res->fetch_assoc()) {
+            $ids = explode(',', $r['set']);
             $ids = array_filter($ids, 'is_numeric');
+            $is_owner = ($user_id == $r['oid']);
         } else {
-            throw new \Exception('Object not found', 1);
+            throw new \Exception(L\Object_not_found, 1);
         }
         $res->close();
 
@@ -590,6 +594,17 @@ class Security
             }
 
             next($acl);
+        }
+        if ($is_owner) {
+            $rez[0][0] = 1;
+            $rez[0][5] = 1;
+            $rez[0][9] = 1;
+            $rez[0][10] = 1;
+
+            $rez[1][0] = 0;
+            $rez[1][5] = 0;
+            $rez[1][9] = 0;
+            $rez[1][10] = 0;
         }
 
         return $rez;

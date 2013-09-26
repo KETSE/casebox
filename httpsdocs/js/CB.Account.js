@@ -962,7 +962,6 @@ CB.TSVsmsForm = Ext.extend(Ext.form.FormPanel, {
         CB.TSVsmsForm.superclass.initComponent.apply(this, arguments);
     }
     ,prepareInterface: function(data){
-        clog(data)
         this.getForm().setValues(data);
         this.syncSize();
         App.focusFirstField(this);

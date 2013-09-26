@@ -666,7 +666,6 @@ class Browser
                                     ,date_end
                                     ,`type`
                                     ,privacy
-                                    ,responsible_party_id
                                     ,responsible_user_ids
                                     ,autoclose
                                     ,description
@@ -688,7 +687,6 @@ class Browser
                                     ,date_end
                                     ,`type`
                                     ,privacy
-                                    ,responsible_party_id
                                     ,responsible_user_ids
                                     ,autoclose
                                     ,description

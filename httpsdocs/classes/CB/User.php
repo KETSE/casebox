@@ -232,8 +232,6 @@ class User
             'success' => true
             ,'config' => array(
                 'task_categories' => constant('CB\\CONFIG\\TASK_CATEGORIES')
-                ,'responsible_party' => constant('CB\\CONFIG\\RESPONSIBLE_PARTY')
-                ,'responsible_party_default' => constant('CB\\CONFIG\\RESPONSIBLE_PARTY_DEFAULT')
                 ,'folder_templates' => $GLOBALS['folder_templates']
                 ,'default_task_template' => constant('CB\\CONFIG\\DEFAULT_TASK_TEMPLATE')
                 ,'default_event_template' => constant('CB\\CONFIG\\DEFAULT_EVENT_TEMPLATE')

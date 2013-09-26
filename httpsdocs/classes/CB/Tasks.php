@@ -19,20 +19,15 @@ class Tasks
                 ,t.missed
                 ,t.`type`
                 ,t.privacy
-                ,t.responsible_party_id
                 ,t.responsible_user_ids
                 ,t.autoclose
                 ,t.description
                 ,t.parent_ids
                 ,t.child_ids
-                ,DATEDIFF(`date_end`
+                ,DATEDIFF(t.`date_end`
                 ,UTC_DATE()) `days`
-                  ,(SELECT pid
-                     FROM tree
-                     WHERE id = $1) pid
-                  ,(SELECT template_id
-                     FROM tree
-                     WHERE id = $1) template_id
+                ,m.pid
+                ,m.template_id
                 ,(SELECT reminds
                      FROM tasks_reminders
                      WHERE task_id = $1
@@ -43,17 +38,18 @@ class Tasks
                   ,(SELECT concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['cfg']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title))
                      FROM objects
                      WHERE id = t.object_id) `object`
-                ,status
-                ,cid
-                ,completed
-                ,cdate
-                ,has_deadline
-                ,importance
-                ,category_id
-                ,allday
+                ,t.status
+                ,t.cid
+                ,t.completed
+                ,t.cdate
+                ,t.has_deadline
+                ,t.importance
+                ,t.category_id
+                ,t.allday
                 ,ti.pids `path`
                 ,ti.path `pathtext`
                 FROM tasks t
+                JOIN tree m on t.id = m.id
                 JOIN tree_info ti on t.id = ti.id
                 WHERE t.id = $1';
         $res = DB\dbQuery($sql, array($id, $_SESSION['user']['id'])) or die(DB\dbQueryError());
@@ -64,7 +60,9 @@ class Tasks
             $r['date_end'] = Util\dateMysqlToISO($r['date_end']);
             $r['cdate'] = Util\dateMysqlToISO($r['cdate']);
             $r['completed'] = Util\dateMysqlToISO($r['completed']);
-            $r['path'] = str_replace(',', '/', $r['path']);
+            $r['path'] = explode(',', $r['path']);
+            array_pop($r['path']);
+            $r['path'] = implode('/', $r['path']);
             $c = explode('/', $r['path']);
             $r['create_in'] = array_pop($c);
             $rez = array('success' => true, 'data' => $r);
@@ -150,7 +148,7 @@ class Tasks
                 $p['allday'] = 0;
             }
 
-            if (($p['has_deadline'] == 1) || ($p['type'] == 7)) {
+            if (($p['has_deadline'] == 1) || ($p['template_id'] == CONFIG\DEFAULT_EVENT_TEMPLATE)) {
                 $p['date_end'] = empty($p['date_end']) ? null : Util\dateISOToMysql($p['date_end']);
             } else {
                 $p['date_end'] = null;
@@ -236,7 +234,6 @@ class Tasks
                     ,`time`
                     ,`type`
                     ,`privacy`
-                    ,responsible_party_id
                     ,responsible_user_ids
                     ,description
                     ,parent_ids
@@ -268,7 +265,6 @@ class Tasks
                       , $16
                       , $17
                       , $18
-                      , $19
                       , NULL
                       , NULL)
                 ON DUPLICATE KEY
@@ -278,19 +274,18 @@ class Tasks
                     ,`time` = $5
                     ,`type` = $6
                     ,`privacy` = $7
-                    ,responsible_party_id = $8
-                    ,responsible_user_ids = $9
-                    ,description = $10
-                    ,parent_ids = $11
-                    ,reminds = $12
-                    ,uid = $13
+                    ,responsible_user_ids = $8
+                    ,description = $9
+                    ,parent_ids = $10
+                    ,reminds = $11
+                    ,uid = $12
                     ,udate = CURRENT_TIMESTAMP
-                    ,status = CASE status WHEN 2 THEN 2 ELSE $14 END
-                    ,autoclose = $15
-                    ,has_deadline = $16
-                    ,importance = $17
-                    ,category_id = $18
-                    ,allday = $19';
+                    ,status = CASE status WHEN 2 THEN 2 ELSE $13 END
+                    ,autoclose = $14
+                    ,has_deadline = $15
+                    ,importance = $16
+                    ,category_id = $17
+                    ,allday = $18';
             DB\dbQuery(
                 $sql,
                 @array(
@@ -301,7 +296,6 @@ class Tasks
                     ,$p['time']
                     ,$p['type']
                     ,intval($p['privacy'])
-                    ,$p['responsible_party_id']
                     ,$p['responsible_user_ids']
                     ,$p['description']
                     ,$p['parent_ids']
@@ -364,6 +358,45 @@ class Tasks
         Solr\Client::runCron();
         $rez = $this->load($p['id']);
         $rez['logParams'] = &$logParams;
+
+        return $rez;
+    }
+
+    /**
+     * update dates of a event or task (startDate, endDate)
+     * @param  object $p params object containing id and dates
+     * @return json   response
+     */
+    public function updateDates($p)
+    {
+        $rez = array('success' => true);
+        if (!Security::canManageTask($p->id)) {
+            throw new Exception(L\Access_denied, 1);
+        }
+        $sql = 'SELECT
+                t.allday
+                ,t.has_deadline
+                ,tt.template_id
+            FROM tasks t
+            JOIN tree tt on t.id = tt.id
+            WHERE t.id = $1';
+        $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $p->date_start = Util\dateISOToMysql($p->date_start);
+            $p->date_end = Util\dateISOToMysql($p->date_end);
+            if (($r['has_deadline'] == 0) && ($r['template_id'] != CONFIG\DEFAULT_EVENT_TEMPLATE)) {
+                $p->date_end = null;
+            }
+            DB\dbQuery(
+                'UPDATE tasks set date_start = $2, date_end = $3 WHERE id = $1',
+                array($p->id, $p->date_start, $p->date_end)
+            ) or die(DB\dbQueryError());
+        } else {
+            $rez['success'] = false;
+        }
+        $res->close();
+        Objects::updateCaseUpdateInfo($p->id);
+        Solr\Client::runCron();
 
         return $rez;
     }
@@ -1258,7 +1291,6 @@ class Tasks
             ,category_id
             ,importance
             ,privacy
-            ,responsible_party_id
             ,responsible_user_ids
             ,autoclose
             ,description
@@ -1303,7 +1335,6 @@ class Tasks
             ,category_id
             ,importance
             ,privacy
-            ,responsible_party_id
             ,responsible_user_ids
             ,autoclose
             ,description

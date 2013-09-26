@@ -310,13 +310,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
         /* get and store owner's name */
         this.ownerName = CB.DB.usersStore.getName(this.data.cid);
         /* end of get and store owner's name */
-        /* get and store responsible party's text */
-        if(!Ext.isEmpty(this.data.responsible_party_id)){
-            st = getThesauriStore(App.config.responsible_party);
-            idx = st.findExact('id', this.data.responsible_party_id)
-            if(idx >=0) this.responsible_party = st.getAt(idx).get('name');
-        }
-        /* end of get and store responsible party's text */
         
         this.data.reminds = Ext.isEmpty(this.data.reminds) ? [] : this.data.reminds.split('-');
         
@@ -608,14 +601,14 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 if(this.data.allday){
                     d = this.date_start.getValue();
                     this.data.date_start = Ext.isEmpty(d) ? null : d.toISOString();
-                    if(this.data.has_deadline || (this.data.template_id != App.config.default_event_template) ){
+                    if(this.data.has_deadline || (this.data.template_id == App.config.default_event_template) ){
                         d = this.date_end.getValue();
                         this.data.date_end = Ext.isEmpty(d) ? null : d.toISOString();
                     }
                 }else{
                     d = this.datetime_start.getValue();
                     this.data.date_start = Ext.isEmpty(d) ? null : d.toISOString();
-                    if(this.data.has_deadline || (this.data.template_id != App.config.default_event_template) ){
+                    if(this.data.has_deadline || (this.data.template_id == App.config.default_event_template) ){
                         d = this.datetime_end.getValue();
                         this.data.date_end = Ext.isEmpty(d) ? null : d.toISOString();
                     }

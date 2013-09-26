@@ -267,7 +267,7 @@ class Log
         /* setting remind_users field /**/
         if (isset($p['remind_users'])) {
             $p['remind_users'] = Util\toNumericArray($p['remind_users']);
-            $p['remind_users'] = array_diff($p['remind_users'], array($_SESSION['user']['id'])); //do not remind the user that have made changes
+            // $p['remind_users'] = array_diff($p['remind_users'], array($_SESSION['user']['id'])); //do not remind the user that have made changes
             if (empty($p['remind_users'])) {
                 unset($p['remind_users']);
             } else {
