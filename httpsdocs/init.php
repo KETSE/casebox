@@ -10,16 +10,15 @@ namespace CB;
 
 require_once dirname(__FILE__).'/config.php';
 require_once 'lib/Util.php';
+require_once 'lib/DB.php';
+
+// connect to DB
+DB\connect();
 
 //Starting Session
+$sessionHandler = new Session();
+session_set_save_handler($sessionHandler, true);
 session_start();
-
-/* store last 10 sessions and delete older ones */
-/*if(empty($_SESSION['last_sessions']) || !in_array(session_id(), $_SESSION['last_sessions'])) $_SESSION['last_sessions'][] = session_id();
-while(sizeof($_SESSION['last_sessions']) > 25) @unlink(session_save_path().DIRECTORY_SEPARATOR.'sess_'.array_shift($_SESSION['last_sessions']));
-/* end of store last 10 sessions and delete older ones */
-
-//session_regenerate_id(false);
 
 /* check if loged in correctly, comparing with the key and ips */
 $arr = explode('/', $_SERVER['SCRIPT_NAME']);
@@ -42,6 +41,11 @@ if (!in_array(
 }
 /* end of check if loged in correctly, comparing with the key and ips */
 
+// regenerate session id
+session_regenerate_id(false);
+
+/* end of regenerate session id*/
+
 /* define user_language constant /**/
 $user_language = LANGUAGE;
 if (!empty($_COOKIE['L']) && (strlen($_COOKIE['L']) == 2)) {
@@ -63,10 +67,6 @@ if (isset($_SESSION['user']['language']) &&
 define('CB\\USER_LANGUAGE', $user_language);
 
 /* end of define user_language constant /**/
-
-// connecting to DB
-require_once 'lib/DB.php';
-DB\connect();
 
 // include languages and define Language constants and translations
 require_once 'language.php';

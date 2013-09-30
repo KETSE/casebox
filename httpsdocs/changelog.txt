@@ -1,3 +1,21 @@
+CaseBox 1.9.45 (2013-09-30)
+==============================
+New Features, Improvements
+--------------------------
+- implement CB\Session class for session handling. 
+    Store the sessions in database.
+    Regenerate session id on each request for security reason.
+
+Fixed Bugs:
+----------
+- Closed tasks should be displayed with strike font in Calendar
+- Replace \n with <br> in {description} in task_notification_email.html template
+- Day & Week view doesn't work properly in Calendar
+
+Notes:
+----------
+- apply database update: 20130930_1308 db_update v1.9.45.sql
+
 CaseBox 1.9.44 (2013-09-26)
 ==============================
 New Features, Improvements

@@ -11,6 +11,7 @@ class Calendar
             return $rez;
         }
 
+        $p->fl = 'id, template_id, name, date, date_end, category_id, status';
         if (!empty($p->path)) {
             $rez['pathtext'] = Path::getPathText($p);
             $rez['folderProperties'] = Path::getPathProperties($p);
@@ -33,6 +34,9 @@ class Calendar
 
         $s = new Search();
         $sr = $s->query($p);
+        // if (isDebugHost()) {
+        //     var_dump($sr);
+        // }
         if (!empty($sr['data'])) {
             for ($i=0; $i < sizeof($sr['data']); $i++) {
                 $d = $sr['data'][$i];
@@ -55,13 +59,15 @@ class Calendar
                     'id' => $d['id']
                     ,'ad' => $d['allday']
                     ,'template_id' => $d['template_id']
-                    ,'cid' => $d['cid']
+                    ,'cid' => 1 //$d['cid'] cid is calendar id
                     ,'title' => $d['name']
                     ,'start' => $d['date']
                     ,'category_id' => $d['category_id']
                     ,'end' => Util\coalesce($d['date_end'], $d['date'])
-                    //,'iconCls' => $d['iconCls']
-                    ,'cls' => 'cal-evt-bg-t'.$d['type'].$catIcon.(empty($d['iconCls']) ? '' : ' icon-padding '.$d['iconCls'])
+                    ,'status' => $d['status']
+                    // ,'cls' => 'cal-evt-bg-t'.$d['type'].$catIcon.
+                    //     (empty($d['iconCls']) ? '' : ' icon-padding '.$d['iconCls']).
+                    //     (($d['status'] == 3) ? ' cal-status-c' : '')
                 );
             }
         }

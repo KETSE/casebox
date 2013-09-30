@@ -4,7 +4,7 @@ namespace CB;
 use CB\CONFIG as CONFIG;
 
 header('content-type: text/javascript; charset=utf-8');
-include '../init.php';
+require_once '../init.php';
 DB\connect();
 
 ?>

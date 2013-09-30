@@ -1,7 +1,7 @@
 <?php
 namespace CB;
 
-include 'init.php';
+require_once 'init.php';
 $action = explode('/', @$_GET['f']);
 $action = array_shift($action);
 $prompt_for_new_password = false;

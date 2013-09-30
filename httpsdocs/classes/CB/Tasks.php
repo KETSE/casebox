@@ -989,7 +989,7 @@ class Tasks
                 "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
                     Util\formatMysqlDate($ur['time'], 'Y, F j H:i').'</span>' : L\get('waitingForAction', $user['language_id']) ).
                 "\n\r".'</p>'.
-                ( (($ur['status'] == 1) && !empty($ur['complete_message'])) ? '<p><pre>'.$ur['complete_message'].'<pre></p>': '').
+                ( (($ur['status'] == 1) && !empty($ur['complete_message'])) ? '<p>'.nl2br(Util\adjustTextForDisplay($ur['complete_message'])).'</p>': '').
                 '</td></tr>';
 
             }

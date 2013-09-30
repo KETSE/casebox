@@ -4,7 +4,7 @@ namespace CB;
 $cron_id = 'extract_files_content';
 $execution_timeout = 60; //default is 60 seconds
 
-include 'init.php';
+require_once 'init.php';
 
 $cd = prepareCron($cron_id, $execution_timeout);
 if (!$cd['success']) {

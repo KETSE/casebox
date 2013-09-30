@@ -13,7 +13,6 @@ class User
     {
         $ips = '|'.Util\getIPs().'|';
 
-        session_regenerate_id(false);
         $_SESSION['ips'] = $ips;
         $_SESSION['key'] = md5($ips.$login.$pass.time());
         $_COOKIE['key'] = $_SESSION['key'];

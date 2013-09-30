@@ -177,9 +177,8 @@ ini_set('memory_limit', '200M');
 // session params
 $sessionLifetime = isDebugHost() ? 0: 43200;
 ini_set("session.gc_maxlifetime", $sessionLifetime);
-ini_set("session.gc_divisor", "1000");
+ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
-ini_set("session.cookie_lifetime", "0");
 
 if (!file_exists(SESSION_PATH)) {
     @mkdir(SESSION_PATH, 0755, true);

@@ -873,7 +873,7 @@ td.ext-cal-dtitle-today div {
 .cal-status-{status} 
 example .cal-cat-taskBlue
 */
-
+.cal-status-c {text-decoration: line-through !important} /*completed*/
 
 .cal-cat-task-blue {background-color: blue !important; background-position: 5px 50%}
 .cal-cat-task-gray {background-color: gray !important; background-position: 5px 50%}

@@ -14,7 +14,7 @@
  * */
 namespace CB;
 
-include 'init.php';
+require_once 'init.php';
 
 if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
     $errors = array();

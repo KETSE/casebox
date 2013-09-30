@@ -46,7 +46,7 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         
         fields = Ext.calendar.EventRecord.prototype.fields.getRange();
         fields.push({ name: 'template_id', type: 'int' });
-        fields.push('type');
+        fields.push('status');
         fields.push('iconCls');
         fields.push('cls');
         fields.push('category_id');
@@ -94,10 +94,13 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                 }
                 ,load: function(st, recs, opt){
                     Ext.each(recs, function(r){
-                        cls = 'cal-evt-bg-t'+r.get('type')+ ' cal-cat-'+CB.DB.thesauri.getIcon(r.get('category_id'));
+                        cls = 'cal-evt-bg-t'+r.get('type') + 
+                            ' cal-cat-'+ CB.DB.thesauri.getIcon(r.get('category_id')) + 
+                            ( (r.get('status') == 3) ? ' cal-status-c' : '');
                         r.set('iconCls', getItemIcon(r.data) )
                         if(!Ext.isEmpty(r.get('iconCls'))) cls = cls + ' icon-padding '+ r.get('iconCls');
                         r.set('cls', cls);
+                        r.commit()
                     }, this)
                     this.getLayout().activeItem.syncSize();
                 }
@@ -154,8 +157,8 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                     this.showMsg('Event '+ rec.data.Title +' was deleted');
                 }
                 ,initdrag: function(vw){
-                    return false;
-                    if(this.editWin && this.editWin.isVisible()) this.editWin.hide();
+                    // return false;
+                    // if(this.editWin && this.editWin.isVisible()) this.editWin.hide();
                 }
             }
         });

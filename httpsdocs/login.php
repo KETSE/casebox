@@ -1,7 +1,7 @@
 <?php
 namespace CB;
 
-include 'init.php';
+require_once 'init.php';
 if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180)) {
     unset($_SESSION['check_TSV']);
 }

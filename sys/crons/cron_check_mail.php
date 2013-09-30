@@ -4,7 +4,7 @@ namespace CB;
 $cron_id = 'check_core_email';
 $execution_timeout = 60; //default is 60 seconds
 
-include 'init.php';
+require_once 'init.php';
 
 require_once ZEND_PATH.'/Zend/Loader/StandardAutoloader.php';
 
