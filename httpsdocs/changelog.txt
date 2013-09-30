@@ -1,3 +1,13 @@
+CaseBox 1.9.46 (2013-09-30)
+==============================
+New Features, Improvements
+--------------------------
+- excluded session_start from crons initialization. Will monitor if session is needed in some crons.
+- "fq" (filter query) param for search can be pased as string, when we have only a single rule to pass. 
+- exclude objects with folder templates (defined in config) from objects list displayed case card block.
+- removed SESSION_PATH constant for sessions in config.php.
+    They are stored in database by CB\Session class.
+
 CaseBox 1.9.45 (2013-09-30)
 ==============================
 New Features, Improvements

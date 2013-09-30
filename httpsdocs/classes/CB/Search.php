@@ -65,6 +65,9 @@ class Search extends Solr\Client
             $fq = array('dstatus:'.intval($p->dstatus));
         }
         if (!empty($p->fq)) {
+            if (!is_array($p->fq)) {
+                $p->fq = array($p->fq);
+            }
             $fq = array_merge($fq, $p->fq);
         }
 

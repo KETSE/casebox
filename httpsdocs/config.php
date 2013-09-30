@@ -40,7 +40,6 @@ define('CB\\APP_ROOT', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
 define('CB\\CORE_ROOT', DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
 define('CB\\CRONS_PATH', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
 define('CB\\DATA_PATH', APP_ROOT.'data'.DIRECTORY_SEPARATOR);
-define('CB\\SESSION_PATH', DATA_PATH.'sessions'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
 define('CB\\LOGS_PATH', APP_ROOT.'logs'.DIRECTORY_SEPARATOR);
 /* end of define main paths /**/
 
@@ -180,12 +179,7 @@ ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
 
-if (!file_exists(SESSION_PATH)) {
-    @mkdir(SESSION_PATH, 0755, true);
-}
-
 session_set_cookie_params($sessionLifetime, '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
-session_save_path(SESSION_PATH);
 session_name(
     str_replace(
         array(

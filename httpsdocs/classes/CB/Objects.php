@@ -574,7 +574,10 @@ class Objects
                     break;
                 case 'actions':
                     $s= new Search();
-                    $query->fl = 'id,pid,name,type,subtype,date,template_id,cid';
+                    $query->fl = 'id,pid,name,type,subtype,date,template_id,oid,cid';
+                    if (!empty($GLOBALS['folder_templates'])) {
+                        $query->fq = '!template_id:('.implode(' OR ', $GLOBALS['folder_templates']).')';
+                    }
                     $query->template_types = 'object';
                     $query->sort = array('date desc');
                     $rez[$key] = $s->query($query);
@@ -582,7 +585,7 @@ class Objects
                     break;
                 case 'tasks':
                     $s= new Search();
-                    $query->fl = 'id,name,type,template_id,date,date_end,cid,user_ids';
+                    $query->fl = 'id,name,type,template_id,date,date_end,user_ids,oid,cid';
                     $query->template_types = 'task';
                     $query->sort = array('date desc');
                     $rez[$key] = $s->query($query);

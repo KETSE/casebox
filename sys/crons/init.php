@@ -21,7 +21,7 @@ error_reporting(E_ALL);
 
 $_SERVER['SERVER_NAME'] = $argv[1];
 $_SERVER['REMOTE_ADDR'] = 'localhost';
-session_start();
+// session_start();
 $_SESSION['user'] = array('id' => 1, 'name' => 'system');
 
 $site_path = realpath(
@@ -85,7 +85,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
                 ,$t[0]['file']
             )
         ) or die( DB\dbQueryError() );
-        $rez['id'] = DB\last_insert_id();
+        $rez['id'] = DB\dbLastInsertId();
     }
     $res->close();
     DB\dbQuery(
