@@ -6,6 +6,9 @@
  * @package Minify
  */
 
+/* include Casebox config file for use of MINIFY_CACHE_DIR defined by casebox*/
+require_once realpath(dirname(__FILE__).'/../..').'/config.php';
+
 /**
  * Allow use of the Minify URI Builder app. Only set this to true while you need it.
  */
@@ -49,6 +52,7 @@ $min_allowDebugFlag = true;
 //$min_cachePath = 'c:\\WINDOWS\\Temp';
 //$min_cachePath = '/tmp';
 //$min_cachePath = preg_replace('/^\\d+;/', '', session_save_path());
+$min_cachePath = CB\MINIFY_CACHE_DIR;
 /**
  * To use APC/Memcache/ZendPlatform for cache storage, require the class and
  * set $min_cachePath to an instance. Example below:

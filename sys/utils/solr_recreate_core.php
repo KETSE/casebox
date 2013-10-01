@@ -16,14 +16,14 @@ if (PHP_OS == 'WINNT') {
 }
 
 define(
-    'SOLR_DATA_PATH',
+    'SOLR_DATA_DIR',
     realpath(
         dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.
         DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'solr'.
         DIRECTORY_SEPARATOR.'data'
     ).DIRECTORY_SEPARATOR
 );
-$dir = SOLR_DATA_PATH;
+$dir = SOLR_DATA_DIR;
 $sleep = 15;
 
 if (empty($argv[1])) {

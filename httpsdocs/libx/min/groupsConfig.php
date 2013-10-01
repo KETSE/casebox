@@ -8,7 +8,6 @@
  * You may wish to use the Minify URI Builder app to suggest
  * changes. http://yourdomain/min/builder/
  **/
-require_once realpath(dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..').DIRECTORY_SEPARATOR.'config.php';
 $customConfig = \CB\getCustomConfig();
 
 return array_merge(

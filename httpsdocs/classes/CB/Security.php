@@ -900,6 +900,59 @@ class Security
         return array('success' => true, 'data'=> array());
     }
 
+    /**
+     * setting security inheritance flag for a tree node
+     *
+     * @param array $p {
+     *     @type int      $id    id of tree node
+     *     @type boolean  $inherit    set inherit to true or false
+     *     @type string   $copyRules   when removing inheritance ($inherit = false)
+     *                                 then this value could be set to 'yes' or 'no'
+     *                                 for copying inherited rules to current node
+     * }
+     *
+     */
+    public function removeChildPermissions($p)
+    {
+
+        if (!Security::isAdmin()) {
+            throw new \Exception(L\Access_denied);
+        }
+
+        $pids = null;
+        $sql = 'SELECT pids FROM tree_info WHERE id = $1';
+        $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $pids = $r['pids'];
+        } else {
+            throw new \Exception(L\Object_not_found);
+        }
+        $res->close();
+
+        $child_ids = array();
+
+        // selecting childs with accesses
+        $sql = 'SELECT id
+            FROM tree_info
+            WHERE pids like $1 and acl_count > 0';
+        $res = DB\dbQuery($sql, $pids.',%') or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $child_ids[] = $r['id'];
+        }
+        $res->close();
+
+        //remove security rules for childs
+        if (!empty($child_ids)) {
+            DB\dbQuery('DELETE FROM tree_acl WHERE node_id in ('.implode(',', $child_ids).')') or die(DB\dbQueryError());
+            // update inherit flag
+            DB\dbQuery('UPDATE tree SET inherit_acl = 1 WHERE id in ('.implode(',', $child_ids).')') or die(DB\dbQueryError());
+        }
+
+        Solr\Client::runBackgroundCron();
+
+        return array('success' => true);
+    }
+
     /* end of objects acl methods*/
 
     /**

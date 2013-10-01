@@ -7,7 +7,7 @@ if (isset($_SERVER['HTTP_X_FILE_OPTIONS'])) {
     // AJAX call
     $file = (array) json_decode($_SERVER['HTTP_X_FILE_OPTIONS']);
     $file['error'] = UPLOAD_ERR_OK;
-    $file['tmp_name'] = tempnam(FILES_INCOMMING_PATH, 'cbup');
+    $file['tmp_name'] = tempnam(INCOMMING_FILES_DIR, 'cbup');
     if (empty($file['content_id'])) {
         file_put_contents(
             $file['tmp_name'],

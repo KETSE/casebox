@@ -38,9 +38,12 @@ if (isset($_SERVER['CASEBOX_CORENAME'])) {
 define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 define('CB\\APP_ROOT', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
 define('CB\\CORE_ROOT', DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
-define('CB\\CRONS_PATH', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
-define('CB\\DATA_PATH', APP_ROOT.'data'.DIRECTORY_SEPARATOR);
-define('CB\\LOGS_PATH', APP_ROOT.'logs'.DIRECTORY_SEPARATOR);
+define('CB\\CRONS_DIR', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
+define('CB\\LOGS_DIR', APP_ROOT.'logs'.DIRECTORY_SEPARATOR);
+define('CB\\DATA_DIR', APP_ROOT.'data'.DIRECTORY_SEPARATOR);
+define('CB\\TEMP_DIR', DATA_DIR.'tmp'.DIRECTORY_SEPARATOR);
+define('CB\\UPLOAD_TEMP_DIR', TEMP_DIR.CORENAME.DIRECTORY_SEPARATOR);
+define('CB\\MINIFY_CACHE_DIR', TEMP_DIR.'minify'.DIRECTORY_SEPARATOR);
 /* end of define main paths /**/
 
 if (!file_exists(CORE_ROOT)) {
@@ -168,6 +171,7 @@ ini_set('max_execution_time', 300);
 ini_set('short_open_tag', 'off');
 
 // upload params
+ini_set('upload_tmp_dir', UPLOAD_TEMP_DIR);
 ini_set('upload_max_filesize', '200M');
 ini_set('post_max_size', '200M');
 ini_set('max_file_uploads', '20');
@@ -194,7 +198,7 @@ session_name(
 
 //error reporting params
 error_reporting(isDebugHost() ? E_ALL : 0);
-ini_set('error_log', LOGS_PATH.CORENAME.'_error_log');
+ini_set('error_log', LOGS_DIR.CORENAME.'_error_log');
 
 // mb encoding config
 mb_internal_encoding("UTF-8");
@@ -217,7 +221,7 @@ date_default_timezone_set(
 //relative path to ExtJs framework. Used in index.php
 const EXT_PATH = '/libx/ext';
 //templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
-define('CB\\TEMPLATES_PATH', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
+define('CB\\TEMPLATES_DIR', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
 
 //used to include DB.php into PreviewExtractor scripts and in Files.php to start the extractors.
 define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
@@ -228,7 +232,7 @@ if (!defined('CB\\CONFIG\\MAX_ROWS')) {
 }
 
 // custom Error log per Core, use it for debug/reporting purposes
-define('DEBUG_LOG', LOGS_PATH.'cb_'.CORENAME.'_debug_log');
+define('DEBUG_LOG', LOGS_DIR.'cb_'.CORENAME.'_debug_log');
 
 // define solr_core as db_name if none is specified in config
 if (!defined('CB\\CONFIG\\SOLR_CORE')) {
@@ -238,12 +242,14 @@ if (!defined('CB\\CONFIG\\SOLR_CORE')) {
 // path to photos folder
 define('CB\\PHOTOS_PATH', DOC_ROOT.'photos'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
 // path to files folder
-define('CB\\FILES_PATH', DATA_PATH.'files'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+define('CB\\FILES_DIR', DATA_DIR.'files'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
 
-/* path to incomming folder. In this folder files are stored when just uploaded and before checking existance in target. If no user intervention is required then files are stored in db. */
-define('CB\\FILES_INCOMMING_PATH', FILES_PATH.'incomming'.DIRECTORY_SEPARATOR);
+/* path to incomming folder. In this folder files are stored when just uploaded
+and before checking existance in target.
+If no user intervention is required then files are stored in db. */
+define('CB\\INCOMMING_FILES_DIR', UPLOAD_TEMP_DIR.'incomming'.DIRECTORY_SEPARATOR);
 /* path to preview folder. Generated previews are stored for some filetypes */
-define('CB\\FILES_PREVIEW_PATH', FILES_PATH.'preview'.DIRECTORY_SEPARATOR);
+define('CB\\FILES_PREVIEW_DIR', FILES_DIR.'preview'.DIRECTORY_SEPARATOR);
 
 // define default core language constant
 const LANGUAGE = CONFIG\DEFAULT_LANGUAGE;

@@ -83,7 +83,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
         header('Content-Length: '.$r['size']);
-        readfile(FILES_PATH.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
+        readfile(FILES_DIR.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
         Log::add(array('action_type' => 14, 'file_id' => $r['id']));
     }
     $res->close();
@@ -115,7 +115,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
             exit("cannot create archive\n");
         }
         foreach ($files as $f) {
-            $zip->addFile(FILES_PATH.$f['path'].DIRECTORY_SEPARATOR.$f['content_id'], $f['name']);
+            $zip->addFile(FILES_DIR.$f['path'].DIRECTORY_SEPARATOR.$f['content_id'], $f['name']);
         }
         $zip->close();
         header('Content-Type: application/zip; charset=UTF-8');

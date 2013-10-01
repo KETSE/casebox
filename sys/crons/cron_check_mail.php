@@ -394,7 +394,7 @@ foreach ($mailbox as $k => $mail) {
                     ,'date' => Util\date_mysql_to_iso($time)
                     ,'type' =>  finfo_file($finfo, $tmp_name)
                 );
-                $files->storeContent($f, FILES_PATH.$core['name'].DIRECTORY_SEPARATOR);
+                $files->storeContent($f, FILES_DIR.$core['name'].DIRECTORY_SEPARATOR);
 
                 DB\dbQuery(
                     'INSERT INTO tree (

@@ -758,7 +758,9 @@ CB.Tasks = Ext.extend( Ext.Window, {
     }
     ,processSaveReminder: function(reminderIndex, newValue){
         if(isNaN(reminderIndex)) this.data.reminds.push(newValue); else this.data.reminds[reminderIndex] = newValue;
-        if(this.status == 'view') this.saveReminds(); else{
+        if(this.status == 'view') {
+            this.saveReminds(); 
+        } else {
             this.setDirty(true);
             this.setReminds();
         }
@@ -770,13 +772,19 @@ CB.Tasks = Ext.extend( Ext.Window, {
     ,onDeleteReminderClick: function(reminderIndex){
         if(isNaN(reminderIndex)) return;
         this.data.reminds.splice(reminderIndex, 1);
-        if(this.status == 'view') this.saveReminds(); else{
+        if(this.status == 'view') {
+            this.saveReminds(); 
+        }else{
             this.setDirty(true);
             this.setReminds();
         }
     }
     ,saveReminds: function(){
-        CB_Tasks.saveReminds({id: this.data.id, object_id: this.data.object_id, title: this.data.title, date_end: this.data.date_end, reminds: this.data.reminds.join('-')}
+        CB_Tasks.saveReminds(
+            {
+                id: this.data.id
+                ,reminds: this.data.reminds.join('-')
+            }
             ,function(r, e){
                 if(r.success !== true) return;
                 this.data.reminds = r.reminds.split('-');

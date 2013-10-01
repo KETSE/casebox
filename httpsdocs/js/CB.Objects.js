@@ -14,7 +14,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ,listeners:{
                     scope: this
                     ,load: function(proxy, obj, opt){
-                        for (var i = 0; i < obj.result.data.length; i++) obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+                        for (var i = 0; i < obj.result.data.length; i++) {
+                            obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+                        }
                     }
                 }
             })
@@ -92,48 +94,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             ,enableTabScroll: true
             ,tabMargin: 120
         });
-        this.violationsStore = new Ext.data.JsonStore({
-            autoDestroy: true
-            ,proxy: new  Ext.data.MemoryProxy()
-            ,fields: [  'id', 'type_id', 'author', 'details', {name: 'date', type: 'date', dateFormat: 'Y-m-d'} ]
-        })
-        this.associatedDecisionsStore = new Ext.data.JsonStore({
-            autoDestroy: true
-            ,proxy: new  Ext.data.MemoryProxy()
-            ,fields: [  'id', 'decision_id', 'decision_title', {name: 'decision_date', type: 'date', dateFormat: 'Y-m-d'}, 'decision_icon', 'violation_id', 'viuolation_type', 'violation_title', {name: 'violation_date', type: 'date', dateFormat: 'Y-m-d'} ]
-            ,sortInfo: {
-                field: 'decision_date',
-                direction: 'ASC'
-            }
-        })
-        this.associatedViolationsStore = new Ext.data.JsonStore({
-            autoDestroy: true
-            ,proxy: new  Ext.data.MemoryProxy()
-            ,fields: [  'id', 'header_row', 'name', 'violation_id', 'violation_title', {name: 'violation_date', type: 'date', dateFormat: 'Y-m-d'}, 
-            'decision_id', 'decision_title', {name: 'decision_date', type: 'date', dateFormat: 'Y-m-d'}, 
-            'complaint_id', 'complaint_title', 'complaint_satisfaction', {name: 'complaint_date', type: 'date', dateFormat: 'Y-m-d'}, 'result', 'disciplining_duties', 'position' 
-            ,'complaint_icon', 'decision_icon'
-            ]
-        })
-        this.associatedComplaintsStore = new Ext.data.JsonStore({
-            autoDestroy: true
-            ,proxy: new  Ext.data.MemoryProxy()
-            ,fields: [  'id', 'name', 'header_row', { name: 'position', type: 'int'},
-            'complaint_id', 'complaint_title', 'complaint_icon', {name: 'complaint_date', type: 'date', dateFormat: 'Y-m-d'}, 'complaint_satisfaction',
-            'decision_id', 'decision_title', 'decision_icon', {name: 'decision_date', type: 'date', dateFormat: 'Y-m-d'}, 
-            'violation_id', 'violation_title', {name: 'violation_date', type: 'date', dateFormat: 'Y-m-d'},
-            'result', 'disciplining_duties'
-            ]
-        })
-        this.associatedAppealsStore = new Ext.data.JsonStore({
-            autoDestroy: true
-            ,proxy: new  Ext.data.MemoryProxy()
-            ,fields: [  'header_row', 'violation_id', 'violation_title',
-            'decision_id', 'decision_title', {name: 'decision_date', type: 'date', dateFormat: 'Y-m-d'}, 
-            'complaint_id', 'complaint_title', 'complaint_satisfaction', {name: 'complaint_date', type: 'date', dateFormat: 'Y-m-d'}, 'result', 'disciplining_duties'
-            ,'complaint_icon', 'decision_icon', {name: 'positions', type: 'int'}
-            ]
-        })
         this.actions = {
             save: new Ext.Action({
                 text: L.Save
@@ -398,7 +358,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     }
     ,setFormValues: function(){
         lastActiveTabIndex = this.tabPanel.items.indexOf(this.tabPanel.activeTab);
-        if(!Ext.isDefined(this.data.associatedObjects)) this.data.associatedObjects = [];
         if(Ext.isEmpty(this.data.gridData)) this.data.gridData = {};
         if(!Ext.isDefined(this.data.tags)) this.data.tags = {};
         /* adding top fields and fields editable in tabsheet */
@@ -562,44 +521,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.doLayout();
         this.items.first().items.first().syncSize();
         //setting all form values, inclusive in the grid
-        this.violationsStore.removeAll();
-        if(this.data.violations) this.violationsStore.loadData(this.data.violations, false);
-        this.associatedDecisionsStore.removeAll();
-        if(this.data.associatedDecisions) this.associatedDecisionsStore.loadData(this.data.associatedDecisions, false);
-        
-        this.associatedViolationsStore.removeAll();
-        if(this.data.associatedViolations) this.associatedViolationsStore.loadData(this.data.associatedViolations, false);
-        
-        this.associatedComplaintsStore.removeAll();
-        if(this.data.associatedComplaints){
-            Ext.each(this.data.associatedComplaints, function(i, idx, arr){
-                arr[idx].id = i.complaint_id + '_' + i.decision_id + '_' + i.violation_id;
-                arr[idx].position = 1 + (Ext.isEmpty(arr[idx].complaint_id) ? 1 : 0) + (Ext.isEmpty(arr[idx].decision_id) ? 1 : 0)
-            });
-            this.associatedComplaintsStore.loadData(this.data.associatedComplaints, false);
-        }
-        this.associatedAppealsStore.removeAll();
-        if(this.data.associatedAppeals) this.associatedAppealsStore.loadData(this.data.associatedAppeals, false);
-        switch(this.templateData.cfg.violations_edit){
-            case 2: if(this.violationsStore.getCount() == 0) break;
-            case 3: this.showViolationsEditPanel(0); break;
-        }
-        switch(this.templateData.cfg.decisions_association){
-            case 2: if(this.associatedDecisionsStore.getCount() == 0) break;
-            case 3: this.showDecisionsAssociationPanel(0); break;
-        }
-        switch(this.templateData.cfg.violations_association){
-            case 2: if(this.associatedViolationsStore.getCount() == 0) break;
-            case 3: this.showViolationsAssociationPanel(0); break;
-        }
-        switch(this.templateData.cfg.complaints){
-            case 2: if(this.associatedComplaintsStore.getCount() == 0) break;
-            case 3: this.showComplaintsEditPanel(0); break;
-        }
-        switch(this.templateData.cfg.appeals){
-            case 2: if(this.associatedAppealsStore.getCount() == 0) break;
-            case 3: this.showAssociatedAppealsPanel(0); break;
-        }
         
         tagsItem = this.mainToolBar.find('iconCls', 'icon-tag')[0];
         if(tagsItem) tagsItem.menu.items.first().setValue(Ext.value(this.data.tags[3], []));
@@ -659,32 +580,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             this.topFieldSet.items.each(function(i){
                 if(( i.name == 'tags' ) || (i.name == 'user_tags' )) this.data.tags[i.tag_level] = i.getValue();
                 else{
-                    this.data.gridData.values[i.name] = { info: '', file: '', value: i.getValue()}
+                    this.data.gridData.values[i.name] = { value: i.getValue()}
                     if( (i.isXType(Ext.ux.TitleField)) && (!i.hasCustomValue)) this.data.gridData.values[i.name].value = '';
                 }
             }, this);
         /* reading values from tabPanel */
         if(this.tabPanel) this.tabPanel.items.each(function(i){ 
                 if(i.isTemplateField) 
-                    this.data.gridData.values[i.name] = { value: i.getValue(), info: '', file: ''}
+                    this.data.gridData.values[i.name] = { value: i.getValue()}
             }, this)
-
-        this.data.pfu = Ext.isEmpty(this.data.pfu) ? App.loginData.id : null;
-        this.data.violations = [];
-        this.violationsStore.each(function(r){this.data.violations.push(r.data)}, this);
-        this.data.associatedViolations = [];
-        this.associatedViolationsStore.each(function(r){this.data.associatedViolations.push(r.data)}, this);
-        this.data.associatedDecisions = [];
-        this.associatedDecisionsStore.each(function(r){this.data.associatedDecisions.push(r.data)}, this);
-        this.data.associatedComplaints = [];
-        cs = null;
-        this.associatedComplaintsStore.each(function(r){ 
-            if(r.get('header_row') == 1) cs = r.get('complaint_satisfaction');
-            else{
-                r.set('complaint_satisfaction', cs);
-                this.data.associatedComplaints.push(r.data)
-            }
-        }, this);
     }
     ,getFileProperties: function(fileId){
         // return false or file properties if possible
@@ -712,61 +616,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         idx = CB.DB.templates.findExact('id', this.data.template_id);
         if(idx < 0) return;
         return CB.DB.templates.getAt(idx).get('iconCls');
-    }
-    ,showDecisionsAssociationPanel: function(focusTab){
-        if(!this.decisionsAssociationPanel){
-            this.decisionsAssociationPanel = new CB.ObjectsDecisionsAssociationPanel({
-                data:{ id: this.data.id }
-                ,store: this.associatedDecisionsStore
-                ,listeners:{ beforeclose: {scope: this, fn: this.onBeforeCloseObjectsPanel} }
-            });
-        }
-        if(Ext.isEmpty(this.tabPanel.findByType(CB.ObjectsDecisionsAssociationPanel))) this.tabPanel.add(this.decisionsAssociationPanel);
-        if(focusTab !== 0) this.tabPanel.setActiveTab(this.decisionsAssociationPanel);
-    }
-    ,showViolationsAssociationPanel: function(focusTab){
-        if(!this.violationsAssociationPanel){
-            this.violationsAssociationPanel = new CB.ObjectsViolationsAssociationPanel({
-                data:{ id: this.data.id }
-                ,store: this.associatedViolationsStore
-                ,listeners:{ beforeclose: {scope: this, fn: this.onBeforeCloseObjectsPanel} }
-            });
-        }
-        if(Ext.isEmpty(this.tabPanel.findByType(CB.ObjectsViolationsAssociationPanel))) this.tabPanel.add(this.decisionsAssociationPanel);
-        if(focusTab !== 0) this.tabPanel.setActiveTab(this.decisionsAssociationPanel);
-    }
-    ,showViolationsEditPanel: function(focusTab){
-        if(!this.violationsEditPanel){
-            this.violationsEditPanel = new CB.ObjectsViolationsEditPanel({
-                data:{ id: this.data.id }
-                ,store: this.violationsStore
-                ,listeners:{ beforeclose: {scope: this, fn: this.onBeforeCloseObjectsPanel} }
-            });
-        }
-        if(Ext.isEmpty(this.tabPanel.findByType(CB.ObjectsViolationsEditPanel))) this.tabPanel.add(this.violationsEditPanel);
-        if(focusTab !== 0) this.tabPanel.setActiveTab(this.violationsEditPanel);
-    }
-    ,showComplaintsEditPanel: function(focusTab){
-        if(!this.complaintsPanel){
-            this.complaintsPanel = new CB.ObjectsComplaintsEditPanel({
-                data:{id: this.data.id}
-                ,store: this.associatedComplaintsStore
-                ,listeners:{ beforeclose: {scope: this, fn: this.onBeforeCloseObjectsPanel} }
-            })
-        }
-        if(Ext.isEmpty(this.tabPanel.findByType(CB.ObjectsComplaintsEditPanel))) this.tabPanel.add(this.complaintsPanel);
-        if(focusTab !== 0) this.tabPanel.setActiveTab(this.complaintsPanel);
-    }
-    ,showAssociatedAppealsPanel: function(focusTab){
-        if(!this.appealsPanel){
-            this.appealsPanel = new CB.ObjectsAssociatedAppealsPanel({
-                data:{id: this.data.id}
-                ,store: this.associatedAppealsStore
-                ,listeners:{ beforeclose: {scope: this, fn: this.onBeforeCloseObjectsPanel} }
-            })
-        }
-        if(Ext.isEmpty(this.tabPanel.findByType(CB.ObjectsAssociatedAppealsPanel))) this.tabPanel.add(this.appealsPanel);
-        if(focusTab !== 0) this.tabPanel.setActiveTab(this.appealsPanel);
     }
     ,onBeforeCloseObjectsPanel: function(p){
         p.hide();

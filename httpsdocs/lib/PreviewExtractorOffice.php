@@ -44,9 +44,9 @@ class PreviewExtractorOffice extends PreviewExtractor
             $ext = explode('.', $r['name']);
             $ext = array_pop($ext);
             $ext = strtolower($ext);
-            $fn = FILES_PATH.$r['path'].DIRECTORY_SEPARATOR.$r['content_id'];
-            $nfn = FILES_PREVIEW_PATH.$r['content_id'].'_.'.$ext;
-            $pfn = FILES_PREVIEW_PATH.$r['content_id'].'_.html';
+            $fn = FILES_DIR.$r['path'].DIRECTORY_SEPARATOR.$r['content_id'];
+            $nfn = FILES_PREVIEW_DIR.$r['content_id'].'_.'.$ext;
+            $pfn = FILES_PREVIEW_DIR.$r['content_id'].'_.html';
 
             copy($fn, $nfn);
             file_put_contents($pfn, '');

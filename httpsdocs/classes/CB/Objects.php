@@ -41,9 +41,6 @@ class Objects
                         ,o.date_start
                         ,o.date_end
                         ,o.author
-                        ,o.private_for_user `pfu`
-                        ,(o.date_end < now()) is_active
-                       ,files_count
                        ,ti.pids `path`
                        ,ti.`path` pathtext
                        ,t.cdate
@@ -207,7 +204,6 @@ class Objects
         $object_custom_title = '';
         $object_date_start = null;
         $object_date_end = null;
-        $object_violation = false;
         $object_author = null;
         $fields = array();
         $update_ids_icons = array();
@@ -405,9 +401,7 @@ class Objects
                     $fields[$field['name']] = &$fields[$field_id];
                 }
                 /* end of for titles processing */
-                if (empty($fv->pfu)) {
-                    $fv->pfu = null;
-                }
+
                 @$params = array($d->id, $field_id, $duplicate_id, $fv->value, $fv->info, $fv->files, $fv->pfu);
                 DB\dbQuery($sql, $params) or die(DB\dbQueryError());
                 $res = DB\dbQuery(
@@ -483,7 +477,7 @@ class Objects
                 ,$object_author
                 ,$d->id
                 ,$this->getObjectIcon($d->id)
-                ,$d->pfu
+                ,@$d->pfu
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
@@ -978,7 +972,6 @@ class Objects
                 switch ($field['type']) {
                     case 'boolean':
                     case 'checkbox':
-                    case 'object_violation':
                         $dr['value'] = empty($dr['value']) ? false : true;
                         break;
                     case 'date':
@@ -1087,7 +1080,6 @@ class Objects
                 switch ($field['type']) {
                     case 'boolean':
                     case 'checkbox':
-                    case 'object_violation':
                         $dr['value'] = empty($dr['value']) ? false : true;
                         break;
                     case 'date':

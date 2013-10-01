@@ -2,6 +2,7 @@
 data/files/
 data/sessions/
 data/solr/data/
+data/tmp/
 
 # but the folder should exist for CaseBox to run
 logs/

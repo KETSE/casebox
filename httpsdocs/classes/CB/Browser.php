@@ -825,8 +825,8 @@ class Browser
 
     public function saveFile($p)
     {
-        if (!file_exists(FILES_INCOMMING_PATH)) {
-            @mkdir(FILES_INCOMMING_PATH, 0777, true);
+        if (!file_exists(INCOMMING_FILES_DIR)) {
+            @mkdir(INCOMMING_FILES_DIR, 0777, true);
         }
 
         $files = new Files();
@@ -834,7 +834,7 @@ class Browser
         /* clean previous unhandled uploads if any */
         $a = $files->getUploadParams();
         if (($a !== false) && !empty( $a['files'] )) {
-            @unlink(FILES_INCOMMING_PATH.$_SESSION['key']);
+            @unlink(INCOMMING_FILES_DIR.$_SESSION['key']);
             $files->removeIncomingFiles($a['files']);
         }
         /* end of clean previous unhandled uploads if any */
@@ -885,7 +885,7 @@ class Browser
                 $F = $archiveFiles;
                 break;
             default:
-                $files->moveUploadedFilesToIncomming($F) or die('cannot move file to incomming '.FILES_INCOMMING_PATH);
+                $files->moveUploadedFilesToIncomming($F) or die('cannot move file to incomming '.INCOMMING_FILES_DIR);
                 break;
         }
 

@@ -43,7 +43,7 @@ class Files
             WHERE t.id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
-            $r['content'] = file_get_contents(\CB\FILES_PATH.$r['content_path'].DIRECTORY_SEPARATOR.$r['content_id']);
+            $r['content'] = file_get_contents(\CB\FILES_DIR.$r['content_path'].DIRECTORY_SEPARATOR.$r['content_id']);
             unset($r['content_id']);
             unset($r['content_path']);
             $rez['data'] = $r;
@@ -116,7 +116,7 @@ class Files
             header('Cache-Control: must-revalidate');
             header('Pragma: public');
             header('Content-Length: '.$r['size']);
-            readfile(\CB\FILES_PATH.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
+            readfile(\CB\FILES_DIR.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
         } else {
             throw new \Exception(L\Object_not_found);
         }
@@ -177,7 +177,7 @@ class Files
 
         if (!empty($p['localFile'])) {
             $file_name = basename($p['localFile']);
-            $tmp_name = \CB\FILES_INCOMMING_PATH.$file_name;
+            $tmp_name = \CB\INCOMMING_FILES_DIR.$file_name;
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             copy($p['localFile'], $tmp_name);
 

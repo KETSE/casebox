@@ -342,7 +342,7 @@ class Tasks
             ,'info' => 'title: '.$p['title']);
         Log::add($logParams);
 
-        $this->saveReminds($p, $log_action_type = 25);
+        $this->saveReminds($p);
 
         $obj = (object) $p;
         switch ($log_action_type) {
@@ -404,19 +404,7 @@ class Tasks
     public function saveReminds($p, $log_action_type = 25)
     {
         $p = (array) $p;
-        $case_name = '';
-        try {
-            $p['case_id'] = @Objects::getCaseId($p['pid']);
-            /* check if current user can read task */
-            if (!Util\validId($p['case_id'])
-                // || !Security::canRead($p['case_id'])
-                ) {
-                throw new \Exception(L\Access_denied);
-            }
-            $case_name = Objects::getCaseName($p['case_id']);
-            /* save reminds for currents user /**/
-        } catch (\Exception $e) {
-        }
+
         DB\dbQuery(
             'INSERT INTO tasks_reminders (task_id, user_id, reminds)
             VALUES ($1
@@ -433,22 +421,23 @@ class Tasks
 
         /* create notifications for specified reminders */
         /* if no deadline is set for the task then no notifications will be set */
-        $deadline = false;
-        if (!empty($p['date_end'])) {
-            $deadline = $p['date_end'];
-        } else {
-            $res = DB\dbQuery(
-                'SELECT date_end
-                FROM tasks
-                WHERE id = $1',
-                $p['id']
-            ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_row()) {
-                $deadline = $r[0];
-            }
-            $res->close();
+        $res = DB\dbQuery(
+            'SELECT
+                t.title
+                ,t.date_start
+                ,t.date_end
+                ,ti.path
+            FROM tasks t
+            JOIN tree_info ti on t.id = ti.id
+            WHERE t.id = $1',
+            $p['id']
+        ) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $p = array_merge($p, $r);
         }
-        if (!empty($deadline)) {
+        $res->close();
+
+        if (!empty($p['date_end'])) {
             //selecting currently used notification ids to be updated with new data
             $ids = array();
             $res = DB\dbQuery(
@@ -470,8 +459,9 @@ class Tasks
             //end of selecting currently used notification ids to be updated with new data
 
             $a = explode('-', $p['reminds']);
-            $subject = L\Notification_for_task.' "'.$p['title'].'"';
-            $message = str_replace(array('{task_title}', '{case_name}'), array($p['title'], $case_name), L\Notification_for_task);
+
+            $subject = L\Reminder.': '.$p['title'].' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['TZ']).' ('.$p['path'].')';
+            $message = '<generateTaskViewOnSend>';
             foreach ($a as $r) {
                 $rem = explode('|', $r);    // user|remindType|remind delay|remindUnits
                 if ($rem[0] != 1) {
@@ -497,8 +487,6 @@ class Tasks
                     'INSERT INTO notifications (
                         id
                         ,action_type
-                        ,case_id
-                        ,object_id
                         ,task_id
                         ,subtype
                         ,subject
@@ -508,32 +496,26 @@ class Tasks
                     VALUES ($1
                           , $2
                           , $3
+                          , 1
                           , $4
                           , $5
-                          , 1
-                          , $6
-                          , $7
-                          , DATE_ADD($8, INTERVAL $9 '.$unit.')
-                          , $10)
+                          , DATE_ADD($6, INTERVAL $7 '.$unit.')
+                          , $8)
                     ON DUPLICATE KEY
                     UPDATE action_type = $2
-                        ,case_id = $3
-                        ,object_id = $4
-                        ,task_id = $5
+                        ,task_id = $3
                         ,subtype = 1
-                        ,subject = $6
-                        ,message = $7
-                        ,time = DATE_ADD($8, INTERVAL $9 '.$unit.')
-                        ,user_id = $10',
+                        ,subject = $4
+                        ,message = $5
+                        ,time = DATE_ADD($6, INTERVAL $7 '.$unit.')
+                        ,user_id = $8',
                     array(
                         $id
                         ,$log_action_type
-                        ,$p['case_id']
-                        ,null/*$p['object_id']/**/
                         ,$p['id']
                         ,$subject
                         ,$message
-                        ,$deadline
+                        ,$p['date_end']
                         ,-$rem[1]
                         ,$_SESSION['user']['id']
                     )
@@ -904,7 +886,7 @@ class Tasks
         if ($user_id == false) {
             $user = &$_SESSION['user'];
         } else {
-            $user = UsersGroups::getUserPreferences($user_id);
+            $user = User::getPreferences($user_id);
             if (empty($user['language_id'])) {
                 $user['language_id'] = 1;
             }
@@ -1070,7 +1052,7 @@ class Tasks
             }
 
             // $message = str_replace( array('<i', '</i>'), array('<strong', '</strong>'), $message);
-            $rez = file_get_contents(TEMPLATES_PATH.'task_notification_email.html');
+            $rez = file_get_contents(TEMPLATES_DIR.'task_notification_email.html');
 
             $rez = str_replace(
                 array(

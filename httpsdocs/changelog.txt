@@ -1,3 +1,30 @@
+CaseBox 1.9.47 (2013-10-01)
+==============================
+New Features, Improvements
+--------------------------
+- Added revoke child permissions button, for system users, in permission window
+- removed legacy code for objects (violations, Decisions, Complaints, Appeals, pfu, Sentences)
+- implemented Task notifications new reminder format task
+- optimized some User class functions
+- renamed config constans from CaseBox:
+    CRONS_PATH -> CRONS_DIR
+    LOGS_PATH -> LOGS_DIR
+    DATA_PATH -> DATA_DIR
+    FILES_PATH -> FILES_DIR
+    FILES_INCOMMING_PATH -> INCOMMING_FILES_DIR
+    FILES_PREVIEW_PATH -> FILES_PREVIEW_DIR
+    TEMPLATES_PATH -> TEMPLATES_DIR
+    SOLR_DATA_PATH -> SOLR_DATA_DIR
+
+- defined casebox configuration constants in config.php:
+    TEMP_DIR - casebox temporary folder (data/tmp)
+    UPLOAD_TEMP_DIR - folder for uploaded files, separated per core (/data/tmp/<core_name>)
+    MINIFY_CACHE_DIR - common folder for all cores (data/tmp/minify)
+
+Notes:
+----------
+- apply update for casebox database: casebox.sql
+
 CaseBox 1.9.46 (2013-09-30)
 ==============================
 New Features, Improvements

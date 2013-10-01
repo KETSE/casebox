@@ -121,9 +121,9 @@ switch ($action) {
         }
 
         /* generating reset hash and sending mail */
-        $template = TEMPLATES_PATH.'password_recovery_email_'.USER_LANGUAGE.'.html';
+        $template = TEMPLATES_DIR.'password_recovery_email_'.USER_LANGUAGE.'.html';
         if (!file_exists($template)) {
-            $template = TEMPLATES_PATH.'password_recovery_email_en.html';
+            $template = TEMPLATES_DIR.'password_recovery_email_en.html';
         }
         if (!file_exists($template)) {
             mail(ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: noreply@casebox.org\r\n");

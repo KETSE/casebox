@@ -54,6 +54,12 @@ CB.SecurityPanel = Ext.extend(Ext.Panel, {
                 ,hidden: true
                 ,disabled: true
             })
+            ,removeChildPermissions: new Ext.Action({
+                text: L.RemoveChildPermissions
+                ,iconCls: 'icon-key-minus'
+                ,scope: this
+                ,handler: this.onRemoveChildPermissionsClick
+            })
         }
 
         this.objectLabel = new Ext.form.DisplayField({value: 'Object name: ', style:'padding: 10px; background-color: #fff', reg_ion: 'north'})
@@ -184,9 +190,14 @@ CB.SecurityPanel = Ext.extend(Ext.Panel, {
                 ,check: this.onCbInheritClick
             }
         })
-
+        topToolbar = null
+        if(App.loginData.admin){
+            topToolbar = [ this.actions.removeChildPermissions ]
+        }
         Ext.apply(this, {
             autoHeight: true
+            ,tbarCssClass: 'x-panel-gray'
+            ,tbar: topToolbar
             ,items: [
                 this.objectLabel
                 ,{
@@ -446,6 +457,24 @@ CB.SecurityPanel = Ext.extend(Ext.Panel, {
         this.actions.save.setDisabled(true);
         this.actions.apply.setDisabled(true);
         this.actions.cancel.setDisabled(true);
+    }
+    ,onRemoveChildPermissionsClick: function(b, e){
+        Ext.Msg.confirm(
+            L.Confirmation
+            ,'Are you sure you want to remove child permissions and inherit all permissions from parent?'
+            ,function (button){
+                if(button == 'yes'){
+                    CB_Security.removeChildPermissions(
+                        {id: this.data.id}
+                        ,function(r, e) {
+                            Ext.Msg.alert(L.Info, 'Child permissions revoked successfully.');
+                        }
+                    )
+                }
+            }
+            ,this
+        );
+
     }
     ,onCbInheritLabelClick: function(){
         cb.setValue(!cb.getValue());

@@ -116,8 +116,8 @@ class Files
                 $entries = rar_list($archive);
                 foreach ($entries as $entry) {
                     if (!$entry->isDirectory()) { //we'll exclude empty directories
-                        $tmp_name = tempnam(FILES_INCOMMING_PATH, 'cb_arch');
-                        $entry->extract(FILES_INCOMMING_PATH, $tmp_name);
+                        $tmp_name = tempnam(INCOMMING_FILES_DIR, 'cb_arch');
+                        $entry->extract(INCOMMING_FILES_DIR, $tmp_name);
                         $file[] = array(
                             'dir' => dirname($entry->getName())
                             ,'name' => basename($entry->getName())
@@ -142,7 +142,7 @@ class Files
                     if (substr($name, -1) == '/') {
                         continue; //exclude directories
                     }
-                    $tmp_name = tempnam(FILES_INCOMMING_PATH, 'cb_arch');
+                    $tmp_name = tempnam(INCOMMING_FILES_DIR, 'cb_arch');
                     $size = zip_entry_filesize($zip_entry);
                     if (zip_entry_open($zip, $zip_entry, "r")) {
                         file_put_contents($tmp_name, zip_entry_read($zip_entry, $size));
@@ -169,7 +169,7 @@ class Files
                 //file content was not uploaded. Its content_id were sent as header param
                 continue;
             }
-            $new_name = FILES_INCOMMING_PATH.basename($f['tmp_name']);
+            $new_name = INCOMMING_FILES_DIR.basename($f['tmp_name']);
             if ($f['tmp_name'] == $new_name) {
                 continue;
             }
@@ -415,14 +415,14 @@ class Files
 
     public function saveUploadParams($p)
     {
-        file_put_contents(FILES_INCOMMING_PATH.$_SESSION['key'], serialize($p));
+        file_put_contents(INCOMMING_FILES_DIR.$_SESSION['key'], serialize($p));
     }
 
     public function getUploadParams()
     {
         $rez = false;
-        if (file_exists(FILES_INCOMMING_PATH.$_SESSION['key'])) {
-            $rez = file_get_contents(FILES_INCOMMING_PATH.$_SESSION['key']);
+        if (file_exists(INCOMMING_FILES_DIR.$_SESSION['key'])) {
+            $rez = file_get_contents(INCOMMING_FILES_DIR.$_SESSION['key']);
             $rez = unserialize($rez);
         }
 
@@ -721,7 +721,7 @@ class Files
     public function storeContent(&$f, $filePath = false)
     {
         if ($filePath == false) {
-            $filePath = FILES_PATH;
+            $filePath = FILES_DIR;
         }
         if (!empty($f['content_id']) && is_numeric($f['content_id'])) {
             return true; // content_id already defined
@@ -873,14 +873,14 @@ class Files
 
         $rez['filename'] = $file['content_id'].'_.html';
 
-        if (!file_exists(FILES_PREVIEW_PATH)) {
-            @mkdir(FILES_PREVIEW_PATH, 0777, true);
+        if (!file_exists(FILES_PREVIEW_DIR)) {
+            @mkdir(FILES_PREVIEW_DIR, 0777, true);
         }
 
-        $preview_filename = FILES_PREVIEW_PATH.$rez['filename'];
+        $preview_filename = FILES_PREVIEW_DIR.$rez['filename'];
 
-        $fn = FILES_PATH.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];
-        $nfn = FILES_PREVIEW_PATH.$file['content_id'].'_.'.$ext;
+        $fn = FILES_DIR.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];
+        $nfn = FILES_PREVIEW_DIR.$file['content_id'].'_.'.$ext;
         if (!file_exists($fn)) {
             return false;
         }
@@ -983,7 +983,7 @@ class Files
             case 'tiff':
                 $image = new \Imagick($fn);
                 $image->setImageFormat('png');
-                $image->writeImage(FILES_PREVIEW_PATH.$file['content_id'].'_.png');
+                $image->writeImage(FILES_PREVIEW_DIR.$file['content_id'].'_.png');
                 file_put_contents(
                     $preview_filename,
                     '<img src="/preview/'.$file['content_id'].
@@ -1030,9 +1030,9 @@ class Files
     public static function deletePreview($id)
     {
         if (isWindows()) {
-            $cmd = 'del '.FILES_PREVIEW_PATH.$id.'_*';
+            $cmd = 'del '.FILES_PREVIEW_DIR.$id.'_*';
         } else {
-            $cmd = 'find '.FILES_PREVIEW_PATH.' -type f -name '.$id.'_* -print | xargs rm';
+            $cmd = 'find '.FILES_PREVIEW_DIR.' -type f -name '.$id.'_* -print | xargs rm';
         }
         exec($cmd);
     }
@@ -1054,11 +1054,11 @@ class Files
             FROM files f left join files_content c on f.content_id = c.id where f.id = $1';
         //,parsed_content `content`'.
         $filesPath = '';
-        if (defined('FILES_PATH')) {
-            $filesPath = FILES_PATH;
+        if (defined('FILES_DIR')) {
+            $filesPath = FILES_DIR;
         } else {
             global $core;
-            $filesPath = FILES_PATH.$core['name'].DIRECTORY_SEPARATOR;
+            $filesPath = FILES_DIR.$core['name'].DIRECTORY_SEPARATOR;
         }
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {

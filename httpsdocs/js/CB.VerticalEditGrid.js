@@ -396,8 +396,18 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.data.values = {};
         /* reading values from the store */
         this.store.each(function(r){
-            if(!Ext.isEmpty(r.get('value')) || !Ext.isEmpty(r.get('info')) || !Ext.isEmpty(r.get('files')) || !Ext.isEmpty(r.get('pfu')))
-                this.data.values['f'+r.get('field_id')+'_'+r.get('duplicate_id')] = { value: r.get('value'), info: r.get('info'), files: r.get('files'), pfu:  r.get('pfu')};
+            fields = ['value', 'info', 'files', 'pfu'];
+            empty = true;
+            rec = {};
+            for (var i = fields.length - 1; i >= 0; i--) {
+                if(!Ext.isEmpty(r.get(fields[i]))) {
+                    empty = false;
+                    rec[fields[i]] = r.get(fields[i]);
+                }
+            };
+            if(!empty) {
+                this.data.values['f'+r.get('field_id')+'_'+r.get('duplicate_id')] = rec;
+            }
         }, this);
         w = this.getBubbleTarget();
         

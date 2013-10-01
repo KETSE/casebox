@@ -399,49 +399,6 @@ class UsersGroups
     }
 
     /**
-     * Save user details data from user details window
-     */
-    public function saveUserData($params)
-    {
-        $rez = array('success' => true);
-        $data = json_decode($params['data']);
-
-        if (!Security::canEditUser($data->id)) {
-            throw new \Exception(L\Access_denied);
-        }
-        VerticalEditGrid::saveData('users_groups', $data);
-
-        /* if updating current logged user then checking if interface params have changed */
-        $interface_params_changed = false;
-        if ($data->id == $_SESSION['user']['id']) {
-            $res = DB\dbQuery('select '.CONFIG\LANGUAGE_FIELDS.', language_id, cfg from users_groups u where id = $1 ', $data->id) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
-                // TODO: review
-                $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
-                if (empty($r['long_date_format'])) {
-                    $r['long_date_format'] = $GLOBALS['language_settings'][$r['language']]['long_date_format'];
-                }
-                if (empty($r['short_date_format'])) {
-                    $r['short_date_format'] = $GLOBALS['language_settings'][$r['language']]['short_date_format'];
-                }
-                foreach ($r as $k => $v) {
-                    if ($_SESSION['user'][$k] != $v) {
-                        $interface_params_changed = true;
-                        $_SESSION['user'][$k] = $v;
-                    }
-                }
-            }
-            $res->close();
-            if ($interface_params_changed) {
-                $rez['interface_params_changed'] = true;
-            }
-        }
-        /* end of if updating current logged user then checking if interface params have changed */
-        // $this->updateUserEmails($data->id);
-        return $rez;
-    }
-
-    /**
      * Get access data for a user to be displayed in user management window
      */
     public function getAccessData($user_id = false)
@@ -609,26 +566,6 @@ class UsersGroups
         DB\dbQuery('update users_groups set `l'.USER_LANGUAGE_INDEX.'` = $2, uid = $3 where id = $1 and type = 1', array($id, $title, $_SESSION['user']['id'])) or die(DB\dbQueryError());
 
         return array('success' => true, 'title' => $title);
-    }
-
-    //---------------------------------------------------------------------------------
-    /**
-     * Get user preferences
-     */
-    public static function getUserPreferences($user_id)
-    {
-        $rez = array();
-        $res = DB\dbQuery('select id, name, '.CONFIG\LANGUAGE_FIELDS.', sex, email, language_id, cfg from users_groups where enabled = 1 and did is NULL and id = $1', $user_id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
-            $r['cfg'] = empty($r['cfg']) ? array(): json_decode($r['cfg'], true);
-            $r['cfg']['long_date_format'] = Util\coalesce(@$r['cfg']['long_date_format'], $GLOBALS['language_settings'][$r['language']]['long_date_format']);
-            $r['cfg']['short_date_format'] = Util\coalesce(@$r['cfg']['short_date_format'], $GLOBALS['language_settings'][$r['language']]['short_date_format']);
-            $rez = $r;
-        }
-        $res->close();
-
-        return $rez;
     }
 
     // PRIVATE SECTION

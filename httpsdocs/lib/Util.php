@@ -200,6 +200,50 @@ function formatTaskTime($mysqlTime)
         return translateMonths(date('j M Y', $time));
     }
 }
+/**
+ * formats a dateTime period between two dates. For ex.: Tue Apr 30, 2013 00:10 - 01:10
+ * @param  varchar $fromDateTime mysql formated date
+ * @param  varchar $toDateTime   mysql formated date
+ * @param  string $TZ           timezone
+ * @return varchar               formated period
+ */
+function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
+{
+    $d1 = new \DateTime($fromDateTime);
+    $d2 = new \DateTime($toDateTime);
+    if (empty($TZ)) {
+        $TZ = 'UTC';
+    }
+    $d1->setTimezone(new \DateTimeZone($TZ));
+    $d2->setTimezone(new \DateTimeZone($TZ));
+
+    $rez = $d1->format('D M j, Y');
+    $hourText = $d1->format('H:i');
+    if ($hourText != '00:00') {
+        $rez .= ' '.$hourText;
+    }
+
+    $interval = date_diff($d1, $d2);
+
+    $d2format = '';
+    if ($interval->y > 0) {
+        $d2format = 'D M j, Y';
+    } elseif ($interval->m > 0) {
+        $d2format = 'D M j';
+    } elseif ($interval->d > 0) {
+        $d2format = 'D j';
+    }
+    $hourText = $d2->format('H:i');
+    if ($hourText != '00:00') {
+        $d2format .= (empty($d2format) ? '' : ', ').'H:i';
+    }
+
+    if (!empty($d2format)) {
+        $rez .= ' - '.$d2->format($d2format);
+    }
+
+    return $rez;
+}
 function formatLeftDays($days_difference)
 {
     if ($days_difference == 0) {

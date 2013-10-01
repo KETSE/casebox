@@ -591,7 +591,6 @@ function initApp(){
                         ,displayField: 'name'
                         ,valueField: 'id'
                     });
-            case 'object_violation': return new Ext.form.Checkbox({inputValue: 1}); break;
             case 'date':  return new Ext.form.DateField({format: App.dateFormat, width: 100}); break;
             case 'datetime': return new Ext.form.DateField({format: App.dateFormat+' '+App.timeFormat, width: 130}); break;
             case 'time':  return new Ext.form.TimeField({format: App.timeFormat}); break;

@@ -72,3 +72,18 @@ define('CB\\USER_LANGUAGE', $user_language);
 require_once 'language.php';
 
 L\initTranslations();
+
+/* verify required CaseBox folder existance */
+$required_folders = array(
+    MINIFY_CACHE_DIR
+    ,UPLOAD_TEMP_DIR
+    ,INCOMMING_FILES_DIR
+    ,FILES_PREVIEW_DIR
+    ,PHOTOS_PATH
+);
+foreach ($required_folders as $rfp) {
+    if (!file_exists($rfp)) {
+        @mkdir($rfp, 0750, true);
+    }
+}
+/* end of verify required CaseBox folder existance */

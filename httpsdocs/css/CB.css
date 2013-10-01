@@ -252,6 +252,7 @@ a.user-f { background-image: url(i/ico/user-small-female.png); background-positi
 .icon-office-plus{ background-image: url(i/ico/building--plus.png) !important;  background-position: 0 50%; background-repeat: no-repeat }
 .icon-no-office{ background-image: url(i/ico/building-old-gray.png) !important;  background-position: 0 50%; background-repeat: no-repeat }
 .icon-key{ background-image: url(i/ico/key.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-key-minus{ background-image: url(i/ico/key--minus.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-user-checked{ background-image: url(i/ico/xfn-friend-met.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-switch-titles{ background-image: url(i/ico/price-tag-label.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .hasBody .x-grid3-row-body, .hasBody0 .x-grid3-row-body{ padding: 6px 10px 6px 25px; color: #a0a0a0 }

@@ -46,6 +46,7 @@ $users = array();
 L\initTranslations();
 
 $sql = 'SELECT action_type
+         , task_id
          , user_id
          , subject
          , message
@@ -57,35 +58,20 @@ $sql = 'SELECT action_type
            , `time` DESC';
 $res = DB\dbQuery($sql) or die(DB\dbQueryError());
 while ($r = $res->fetch_assoc()) {
-    $remind_users = array($r['user_id']);
-    foreach ($remind_users as $u) {
-        if (!isset($users[$u])) {
-            $res2 = DB\dbQuery(
-                'SELECT id
-                     , sex
-                     , email
-                     , language_id
-                     , '.CONFIG\LANGUAGE_FIELDS.'
-                FROM users_groups
-                WHERE id = $1',
-                $u
-            ) or die(DB\dbQueryError());
-            if ($r2 = $res2->fetch_assoc()) {
-                $users[$u] = $r2;
-            }
-            $res2->close();
-        }
-        $users[$u]['mails'][] = array($r['subject'], stripslashes($r['message']));
+    if ($r['message'] == '<generateTaskViewOnSend>') {
+        $r['message'] = Tasks::getTaskInfoForEmail($r['task_id'], $r['user_id']);
+    } else {
+        $r['message'] = stripslashes($r['message']);
     }
+    if (!isset($users[$r['user_id']])) {
+        $users[$r['user_id']] = User::getPreferences($r['user_id']);
+    }
+    $users[$r['user_id']]['mails'][] = array($r['subject'], $r['message']);
 }
 $res->close();
 foreach ($users as $u) {
     if (empty($u['email'])) {
         continue;
-    }
-    @$l = 'l'.$u['language_id'];
-    if (!$l) {
-        $l = LANGUAGE;
     }
     $lang = $GLOBALS['languages'][$u['language_id']-1];
     if (filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {

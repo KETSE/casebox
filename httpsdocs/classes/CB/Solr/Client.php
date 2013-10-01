@@ -84,9 +84,9 @@ class Client extends Service
         ) {
             return;
         }
-        $cmd = 'php -f '.\CB\CRONS_PATH.'run_cron.php solr_update_tree '.\CB\CORENAME.' > '.\CB\LOGS_PATH.'bg_solr_update_tree.log &';
+        $cmd = 'php -f '.\CB\CRONS_DIR.'run_cron.php solr_update_tree '.\CB\CORENAME.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log &';
         if (\CB\isWindows()) {
-            $cmd = 'start /D "'.\CB\CRONS_PATH.'" php -f run_cron.php solr_update_tree '.\CB\CORENAME.' > '.\CB\LOGS_PATH.'bg_solr_update_tree.log';
+            $cmd = 'start /D "'.\CB\CRONS_DIR.'" php -f run_cron.php solr_update_tree '.\CB\CORENAME.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log';
         }
         pclose(popen($cmd, "r"));
     }

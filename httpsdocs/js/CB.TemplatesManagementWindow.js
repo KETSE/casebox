@@ -378,7 +378,7 @@ CB.TemplateEditWindow = Ext.extend( CB.GenericForm, {
                             autoLoad: true
                             ,autoDestroy: true
                             ,fields: ['id', 'name']
-                            ,data: [['', L.PropertiesEditGrid], ['CBSentencesEditGrid', L.SentencesEditGrid], ['CBDecisionsEditGrid', L.DecisionsEditGrid]]
+                            ,data: [['', L.PropertiesEditGrid]]
                         })
                         ,valueField: 'id'
                         ,displayField: 'name'
@@ -401,8 +401,6 @@ CB.TemplateEditWindow = Ext.extend( CB.GenericForm, {
                 }.createDelegate(this)
                 ,jsclasscombo: function(v){
                     switch(v){
-                        case 'CBSentencesEditGrid': return L.SentencesEditGrid; break;
-                        case 'CBDecisionsEditGrid': return L.DecisionsEditGrid; break;
                         default: return L.PropertiesEditGrid; break;
                     }
                 }

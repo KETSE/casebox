@@ -152,7 +152,6 @@ $API = array_merge(
                 ,'getReadAccessChildren'=> array('len' => 1)
                 ,'getUserData'          => array('len' => 1)
                 ,'getAccessData'        => array('len' => 1)
-                ,'saveUserData'         => array('len' => 1, 'formHandler' => true)
                 ,'saveAccessData'       => array('len' => 1)
                 ,'addUser'              => array('len' => 1)
                 ,'associate'            => array('len' => 2)
@@ -179,6 +178,7 @@ $API = array_merge(
                 ,'setInheritance'       => array('len' => 1)
 
                 ,'getActiveUsers'       => array('len' => 1)
+                ,'removeChildPermissions'=> array('len' => 1)
             )
         )
         ,'CB_System' => array(

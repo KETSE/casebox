@@ -23,7 +23,7 @@ $ext = array_pop($f);
 
 //TODO: check access with security model
 if ($ext !== 'html') {//this will provide other files (images, swfs)
-    $f = realpath(FILES_PREVIEW_PATH.$_GET['f']);
+    $f = realpath(FILES_PREVIEW_DIR.$_GET['f']);
     if (file_exists($f)) {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         header('Content-type: '.finfo_file($finfo, $f));
@@ -67,7 +67,7 @@ switch ($f['type']) {
         }
         $res = DB\dbQuery($sql, array($id, $version_id)) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
-            if (!empty($r['filename']) && file_exists(FILES_PREVIEW_PATH.$r['filename'])) {
+            if (!empty($r['filename']) && file_exists(FILES_PREVIEW_DIR.$r['filename'])) {
                 $preview = $r;
             }
         }
@@ -89,7 +89,7 @@ switch ($f['type']) {
             }
 
             if (!empty($preview['filename'])) {
-                $fn = FILES_PREVIEW_PATH.$preview['filename'];
+                $fn = FILES_PREVIEW_DIR.$preview['filename'];
                 if (file_exists($fn)) {
                     echo file_get_contents($fn);
                     $res = DB\dbQuery('update file_previews set ladate = CURRENT_TIMESTAMP where id = $1', $id) or die(DB\dbQueryError());

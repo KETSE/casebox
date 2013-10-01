@@ -21,6 +21,7 @@ error_reporting(E_ALL);
 
 $_SERVER['SERVER_NAME'] = $argv[1];
 $_SERVER['REMOTE_ADDR'] = 'localhost';
+
 // session_start();
 $_SESSION['user'] = array('id' => 1, 'name' => 'system');
 

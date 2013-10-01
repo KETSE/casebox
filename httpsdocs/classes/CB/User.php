@@ -32,48 +32,22 @@ class User
         if ($user_id) {
             $rez = array('success' => true, 'user' => array());
 
-            $sql = 'SELECT
-                    u.id
-                    ,u.`language_id`
-                    ,first_name
-                    ,last_name
-                    ,email
-                    ,sex
-                    ,cfg
-                FROM users_groups u
-                WHERE u.id = $1';
-
-            $res = DB\dbQuery($sql, $user_id) or die( DB\dbQueryError() );
-            if ($r = $res->fetch_assoc()) {
+            $r = User::getPreferences($user_id);
+            if (!empty($r)) {
                 $r['admin'] = Security::isAdmin($user_id);
                 $r['manage'] = Security::canManage($user_id);
 
-                $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
-                $r['locale'] =  $GLOBALS['language_settings'][$r['language']]['locale'];
-
-                $r['cfg'] = json_decode($r['cfg'], true) or array();
                 // do not expose security params
                 unset($r['cfg']['security']);
-
-                if (empty($r['cfg']['long_date_format'])) {
-                    $r['cfg']['long_date_format'] = $GLOBALS['language_settings'][$r['language']]['long_date_format'];
-                }
-                if (empty($r['cfg']['short_date_format'])) {
-                    $r['cfg']['short_date_format'] = $GLOBALS['language_settings'][$r['language']]['short_date_format'];
-                }
-                $r['cfg']['time_format'] = $GLOBALS['language_settings'][$r['language']]['time_format'];
 
                 $rez['user'] = $r;
                 $_SESSION['user'] = $r;
                 setcookie('L', $r['language']);
 
-                /* get user groups */
+                // set user groups
                 $rez['user']['groups'] = UsersGroups::getGroupIdsForUser();
                 $_SESSION['user']['groups'] = $rez['user']['groups'];
-                /* end of get user groups */
             }
-            $res->close();
-
         } else {
             $rez['msg'] = L\Auth_fail;
         }
@@ -241,6 +215,8 @@ class User
         $rez['user']['cfg']['long_date_format'] = str_replace('%', '', $rez['user']['cfg']['long_date_format']);
         $rez['user']['cfg']['time_format'] = str_replace('%', '', $rez['user']['cfg']['time_format']);
 
+        unset($rez['user']['TSV_checked']);
+
         return $rez;
     }
 
@@ -270,25 +246,11 @@ class User
             throw new \Exception(L\Access_denied);
         }
 
-        $rez = array();
-        $res = DB\dbQuery(
-            'SELECT id
-                 , name
-                 , first_name
-                 , last_name
-                 , sex
-                 , email
-                 , language_id
-                 , cfg
-            FROM users_groups
-            WHERE enabled = 1
-                AND did IS NULL
-                AND id = $1',
-            $user_id
-        ) or die(DB\dbQueryError());
+        $rez = array('success' => true);
 
-        if ($r = $res->fetch_assoc()) {
-            $cfg = empty($r['cfg']) ? array(): json_decode($r['cfg'], true);
+        $r = $this->getPreferences($user_id);
+        if (!empty($r)) {
+            $cfg = $r['cfg'];
             unset($r['cfg']);
 
             $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
@@ -314,9 +276,6 @@ class User
             VerticalEditGrid::getData('users_groups', $r);
             $rez = $r;
         }
-        $res->close();
-
-        $rez['success'] = true;
 
         return $rez;
     }
@@ -369,6 +328,15 @@ class User
         }
         if (isset($data->timezone)) {
             $cfg['timezone'] = $data->timezone;
+            unset($cfg['TZ']);
+            $sql = 'SELECT zone_name FROM casebox.zone WHERE caption = $1';
+            $res = DB\dbQuery($sql, $data->timezone) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                $cfg['TZ'] = $r['zone_name'];
+            }
+            $res->close();
+        } else {
+            unset($cfg['TZ']);
         }
         if (isset($data->short_date_format)) {
             $cfg['short_date_format'] = $data->short_date_format;
@@ -398,6 +366,32 @@ class User
         ) or die( DB\dbQueryError() );
 
         VerticalEditGrid::saveData('users_groups', $data);
+
+        /* updating session params if the updated user profile is currently logged user*/
+        // die($data->id.' == '.$_SESSION['user']['id']);
+        if ($data->id == $_SESSION['user']['id']) {
+            $u = &$_SESSION['user'];
+
+            $u['first_name'] = $data->first_name;
+            $u['last_name'] = $data->last_name;
+            $u['sex'] = $data->sex;
+            $u['email'] = $data->email;
+            $u['language_id'] = $data->language_id;
+
+            $u['language'] = $GLOBALS['languages'][$data->language_id-1];
+            $u['locale'] =  $GLOBALS['language_settings'][$u['language']]['locale'];
+
+            $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
+            $u['cfg']['TZ'] = empty($cfg['TZ']) ? '' :  $cfg['TZ'];
+
+            if (!empty($cfg['long_date_format'])) {
+                $u['cfg']['long_date_format'] = $cfg['long_date_format'];
+            }
+            if (!empty($cfg['short_date_format'])) {
+                $u['cfg']['short_date_format'] = $cfg['short_date_format'];
+            }
+            $u['cfg']['time_format'] = $GLOBALS['language_settings'][$u['language']]['time_format'];
+        }
 
         return array('success' => true);
     }
@@ -867,6 +861,48 @@ class User
         }
 
         return $this->authClasses[$authMechanism];
+    }
+
+    /**
+     * Get user preferences
+     */
+    public static function getPreferences($user_id)
+    {
+        $rez = array();
+        $res = DB\dbQuery(
+            'SELECT id
+                ,first_name
+                ,last_name
+                ,sex
+                ,email
+                ,language_id
+                ,cfg
+            FROM users_groups
+            WHERE enabled = 1
+                AND did IS NULL
+                AND id = $1',
+            $user_id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
+            $r['locale'] =  $GLOBALS['language_settings'][$r['language']]['locale'];
+
+            $r['cfg'] = json_decode($r['cfg'], true) or array();
+
+            if (empty($r['cfg']['long_date_format'])) {
+                $r['cfg']['long_date_format'] = $GLOBALS['language_settings'][$r['language']]['long_date_format'];
+            }
+            if (empty($r['cfg']['short_date_format'])) {
+                $r['cfg']['short_date_format'] = $GLOBALS['language_settings'][$r['language']]['short_date_format'];
+            }
+            $r['cfg']['time_format'] = $GLOBALS['language_settings'][$r['language']]['time_format'];
+
+            $rez = $r;
+        }
+        $res->close();
+
+        return $rez;
     }
 
     private function getUserConfig()

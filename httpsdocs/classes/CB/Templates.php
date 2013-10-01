@@ -307,7 +307,7 @@ class Templates
             }
         }
         ,"fields":{"values":{}}}/**/
-        $cfgProperties = array('gridJsClass', 'files', 'main_file');//, 'subjects', 'claimers', 'violations_edit', 'violations_association', 'decisions_association', 'complaints', 'appeals'
+        $cfgProperties = array('gridJsClass', 'files', 'main_file');
         $cfg = array();
         $params = array(
             'id' => empty($d->id) ? null: $d->id
@@ -535,7 +535,6 @@ class Templates
         switch ($field['type']) {
             case 'boolean':
             case 'checkbox':
-            case 'object_violation':
                 $value = empty($value) ? L\no : L\yes;
                 break;
             case '_sex':
