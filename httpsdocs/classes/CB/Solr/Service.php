@@ -154,10 +154,12 @@ class Service
             }
 
         } catch (\Exception $e) {
-            var_dump($addDocs);
-            var_dump($updateDocs);
-            $msg = "Error adding multiple documents to solr.\n".$e->__toString().$this->debugInfo();
-            \CB\debug($msg);
+            $msg = "Error adding multiple documents to solr.\n". $e->__toString(). $this->debugInfo();
+            \CB\debug(
+                $msg.
+                var_export($addDocs, 1).
+                var_export($updateDocs, 1)
+            );
             throw new \Exception($msg, 1);
         }
 

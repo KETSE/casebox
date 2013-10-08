@@ -102,7 +102,7 @@ CB.ObjectsFieldCommonFunctions = {
         if(Ext.isEmpty(this.data)) return;
         if(this.data.ownerCt) return this.data.ownerCt.objectsStore;
         if(this.data.grid) {
-            a = this.data.grid.findParentByType(CB.Objects);
+            a = this.data.grid.refOwner || this.data.grid.findParentByType(CB.Objects);
             if(!Ext.isEmpty(a)) return a.objectsStore;
         }
     }

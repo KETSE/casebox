@@ -501,8 +501,8 @@ background-repeat: no-repeat; */
 .icon32-cal-day { background-image: url(i/ico/32/cal-day.png) !important; min-width: 38px}
 .icon32-cal-week { background-image: url(i/ico/32/cal-week.png) !important; min-width: 38px}
 .icon32-cal-month { background-image: url(i/ico/32/cal-month.png) !important; min-width: 38px}
-.icon32-cal-prev { background-image: url(i/ico/32/prev.png) !important; min-width: 38px}
-.icon32-cal-next { background-image: url(i/ico/32/next.png) !important; min-width: 38px}
+.icon32-cal-prev, .icon32-prev { background-image: url(i/ico/32/prev.png) !important; min-width: 38px}
+.icon32-cal-next, .icon32-next { background-image: url(i/ico/32/next.png) !important; min-width: 38px}
 .calendar-title{font-size: 16px !important; font-weight: bold !important; color: #333}
 
 .x-menu-item .icon32-del {background-image: url(i/ico/cross-script.png) !important; background-position: 0 50%; background-repeat: no-repeat}

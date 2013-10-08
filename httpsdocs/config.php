@@ -252,8 +252,13 @@ define('CB\\INCOMMING_FILES_DIR', UPLOAD_TEMP_DIR.'incomming'.DIRECTORY_SEPARATO
 define('CB\\FILES_PREVIEW_DIR', FILES_DIR.'preview'.DIRECTORY_SEPARATOR);
 
 // define default core language constant
-const LANGUAGE = CONFIG\DEFAULT_LANGUAGE;
-
+define(
+    'CB\\LANGUAGE',
+    (defined('CB\\CONFIG\\DEFAULT_LANGUAGE')
+        ? CONFIG\DEFAULT_LANGUAGE
+        : $GLOBALS['languages'][0]
+    )
+);
 /* USER_LANGUAGE is defined after starting session */
 
 /* functions section*/

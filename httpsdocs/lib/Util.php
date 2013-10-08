@@ -481,6 +481,16 @@ function toNumericArray($v)
         $v = explode(',', $v);
     }
     $v = array_filter($v, 'is_numeric');
+    for ($i = sizeof($v) -1; $i >= 0; $i--) {
+        $val = trim($v[$i]);
+        $iv = intval($val);
+        if ($iv == $val) {
+            $v[$i] = $iv;
+        } else {
+            $v[$i] = $val;
+            settype($v[$i], 'float');
+        }
+    }
 
     return $v;
 }

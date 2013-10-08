@@ -129,7 +129,7 @@ function initApp(){
         }
         ,objectCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
             if(Ext.isEmpty(v)) return '';
-            cw = grid.findParentByType(CB.Objects);
+            cw = grid.refOwner || grid.findParentByType(CB.Objects);
             if(!cw || !cw.objectsStore) return '';
             r = [];
             if(!Ext.isArray(v)) v = String(v).split(',');
@@ -173,7 +173,10 @@ function initApp(){
                     store = CB.DB.usersStore;
                     break;
                 default:
-                    cw = (grid && grid.findParentByType) ? grid.findParentByType(CB.Objects): null;
+                    cw = null;
+                    if(grid && grid.findParentByType) {
+                        cw = grid.refOwner || grid.findParentByType(CB.Objects);
+                    }
                     if(!cw || !cw.objectsStore) return '';
                     store = cw.objectsStore;
             }
@@ -533,7 +536,7 @@ function initApp(){
                                 case 'usersgroups': 
                                     break;
                                 default: 
-                                    cw = e.grid.findParentByType(CB.Objects);
+                                    cw = e.grid.refOwner || e.grid.findParentByType(CB.Objects);
                                     if(cw && cw.objectsStore)  store = cw.objectsStore;
                             }
                             data = []

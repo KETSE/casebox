@@ -34,8 +34,6 @@ include $site_path.DIRECTORY_SEPARATOR.'config.php';
 
 require_once LIB_DIR.'Util.php';
 
-define('CB\\USER_LANGUAGE', CONFIG\DEFAULT_LANGUAGE);
-
 require_once(DOC_ROOT.'language.php');
 //L\initTranslations(); // would be called from inside crons that need translations
 

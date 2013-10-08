@@ -22,7 +22,6 @@ class Collection
     public function loadAll()
     {
         $this->reset();
-
         /* collecting template_fields */
         $template_fields = array();
         $sql = 'SELECT
@@ -39,6 +38,7 @@ class Collection
         while ($r = $res->fetch_assoc()) {
             $template_id = $r['template_id'];
             unset($r['template_id']);
+            $r['cfg'] = json_decode($r['cfg']) or array();
             $template_fields[$template_id][$r['id']] = $r;
         }
         $res->close();

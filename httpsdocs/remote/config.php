@@ -193,5 +193,11 @@ $API = array_merge(
                 ,'getTimezones'         => array('len' => 0)
             )
         )
+        ,'CB_Search' => array(
+            'methods' => array(
+                'load'       => array('len' => 1)
+                ,'query'       => array('len' => 1)
+            )
+        )
     )
 );

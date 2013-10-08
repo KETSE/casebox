@@ -9,8 +9,8 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
     ,lines: false
     ,useArrows: true
     ,showFoldersContent: false
-    ,enableDD: false
-    ,ddGroup: 'CBDD'
+    // ,enableDD: true
+    // ,ddGroup: 'CBO' //CaseBox Object(s)
     ,bodyStyle: 'background-color: #f4f4f4'
     ,hideBorders: true
     ,border: false
@@ -28,7 +28,6 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                 if(n1.attributes.name > n2.attributes.name) return 1;
                 if(n1.attributes.name < n2.attributes.name) return -1;
                 return 0;
-
             } 
         }
         this.actions = {
@@ -271,6 +270,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                     ,scope: this
                 }
             ]
+            ,plugins: [ new CB.DD.Tree({idProperty: 'nid'}) ]
         })
         CB.BrowserTree.superclass.initComponent.apply(this, arguments);
         if(!Ext.isEmpty(this.rootId)) CB_BrowserTree.getRootProperties(this.rootId, function(r, e){

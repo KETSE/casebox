@@ -83,13 +83,7 @@ return array_merge(
 
             ,'//js/plugins/CB.plugins.FilesDropZone.js'
             ,'//js/CB.Uploader.js'
-        )
 
-        ,'jsdev' => array(
-            '//js/customFunctions.js'
-
-            ,'//js/CB.ViewPort.js'
-            ,'//js/app.js'
             ,'//js/CB.FolderViewGrid.js'
             ,'//js/CB.ActionsViewGrid.js'
             ,'//js/CB.TasksViewGrid.js'
@@ -102,6 +96,17 @@ return array_merge(
             ,'//js/CB.TemplatesManagementWindow.js'
 
             ,'//js/CB.Account.js'
+            ,'//js/customFunctions.js'
+            ,'//js/CB.Search.js'
+        )
+
+        ,'jsdev' => array(
+            '//js/CB.ViewPort.js'
+            ,'//js/app.js'
+            ,'//js/CB.DD.js'
+            ,'//js/DD/CB.DD.Tree.js'
+            ,'//js/DD/CB.DD.Grid.js'
+            ,'//js/DD/CB.DD.Panel.js'
         )
         ,'lang-en' => array('//js/locale/en.js')
         ,'lang-es' => array('//js/locale/es.js')

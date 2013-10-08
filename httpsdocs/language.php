@@ -4,9 +4,30 @@ namespace CB\L;
 use CB\CONFIG as CONFIG;
 use CB\DB as DB;
 
-define('CB\\LANGUAGE_INDEX', getIndex(\CB\LANGUAGE));
-define('CB\\USER_LANGUAGE_INDEX', getIndex(\CB\USER_LANGUAGE));
 define('CB\\CONFIG\\LANGUAGE_FIELDS', languageStringToFieldNames(CONFIG\LANGUAGES));
+define('CB\\LANGUAGE_INDEX', getIndex(\CB\LANGUAGE)); // index for default core language
+
+/* define user_language constant /**/
+$user_language = \CB\LANGUAGE;
+if (!empty($_COOKIE['L']) && (strlen($_COOKIE['L']) == 2)) {
+    $user_language = strtolower($_COOKIE['L']);
+}
+if (!empty($_GET['l']) && (strlen($_GET['l']) == 2)) {
+    $user_language = strtolower($_GET['l']);
+}
+
+/*  If we do not have a tanslation file for users language, we use global core language.
+    If there is no translation file for global set language then we use english by default */
+if (isset($_SESSION['user']['language']) &&
+    isset($GLOBALS['language_settings'][$_SESSION['user']['language']])
+    ) {
+    $user_language = $_SESSION['user']['language'];
+} elseif (!isset($GLOBALS['language_settings'][@$_SESSION['user']['language']])) {
+    $user_language = \CB\LANGUAGE;
+}
+define('CB\\USER_LANGUAGE', $user_language);
+define('CB\\USER_LANGUAGE_INDEX', getIndex(\CB\USER_LANGUAGE)); // index for default user language
+/* end of define user_language constant /**/
 
 /* function to get the translation value, if defined, for custom specified language.
     If langiage not specified we return the translation for current user language  /**/

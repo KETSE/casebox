@@ -44,7 +44,7 @@ interface IAuth
     public function getSecretData();
 
     /**
-     * function to return data used for message displayed to user when enabling TSV.
+     * method for returning data used for message displaying to user when enabling TSV.
      * @param  $secretData secret data used for code generation
      * @return array
      */

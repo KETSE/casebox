@@ -232,7 +232,7 @@ class User
 
         return array(
             'success' => true
-            ,'profile' => $this->getProfileData($_SESSION['user']['id'])
+            ,'profile' => $this->getProfileData()
             ,'security' => $this->getSecurityData()
         );
     }
@@ -240,20 +240,27 @@ class User
     /**
      * get profile data for a user. This function receives user_id as param because user profile data can be edited by another user (owner).
      */
-    public function getProfileData($user_id)
+    public function getProfileData($user_id = false)
     {
+        if ($user_id === false) {
+            $user_id = $_SESSION['user']['id'];
+        }
         if (!Security::canEditUser($user_id)) {
             throw new \Exception(L\Access_denied);
         }
 
-        $rez = array('success' => true);
+        $rez = array();
 
         $r = $this->getPreferences($user_id);
         if (!empty($r)) {
             $cfg = $r['cfg'];
             unset($r['cfg']);
 
-            $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
+            $language_index = empty($r['language_id'])
+                ? USER_LANGUAGE_INDEX -1
+                : $r['language_id'] - 1;
+
+            $r['language'] = $GLOBALS['languages'][$language_index];
 
             $r['long_date_format'] = empty($cfg['long_date_format']) ?
                 $GLOBALS['language_settings'][$r['language']]['long_date_format'] :
@@ -276,6 +283,7 @@ class User
             VerticalEditGrid::getData('users_groups', $r);
             $rez = $r;
         }
+        $rez['success'] = true;
 
         return $rez;
     }
@@ -885,7 +893,11 @@ class User
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $r['language'] = $GLOBALS['languages'][$r['language_id']-1];
+            $language_index = empty($r['language_id'])
+                ? USER_LANGUAGE_INDEX -1
+                : $r['language_id'] - 1;
+
+            $r['language'] = $GLOBALS['languages'][$language_index];
             $r['locale'] =  $GLOBALS['language_settings'][$r['language']]['locale'];
 
             $r['cfg'] = json_decode($r['cfg'], true) or array();

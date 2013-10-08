@@ -1,3 +1,22 @@
+CaseBox 1.9.48 (2013-10-08)
+==============================
+New Features, Improvements
+--------------------------
+- created Search model window with VerticalEditGrid.
+- Util\toNumericArray was changed to cast numeric types accordingly. Ints to int, nonints to float.
+- some language related changes
+- changed .gitignore
+
+Fixed Bugs:
+----------
+- added filter for faceted field types, 
+    so that non integer fields woldn't try to be indexed as object tags, 
+    that would result in solr indexing error.
+- return path changed for locating and object in CB\Path.getPidPath()
+- language guess fixes
+- bug on save object for duplicated fields related to pfu (private_for_user) field
+- User edit window disappears, in users management
+
 CaseBox 1.9.47 (2013-10-01)
 ==============================
 New Features, Improvements

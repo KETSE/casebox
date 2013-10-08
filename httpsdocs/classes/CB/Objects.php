@@ -338,6 +338,9 @@ class Objects
                 if (!isset($fv->info)) {
                     $fv->info = null;
                 }
+                if (isset($fv->pfu) && empty($fv->pfu)) {
+                    $fv->pfu = null;
+                }
                 $f = explode('_', $f);
                 $field_id = substr($f[0], 1);
                 $field = array();
@@ -951,7 +954,6 @@ class Objects
         $template_collection = Templates\SingletonCollection::getInstance();
 
         $template = $template_collection->getTemplate($object_record['template_id']);
-
         $object_record['content'] = '';
 
         $sql = 'SELECT
@@ -999,7 +1001,7 @@ class Objects
                 }
                 /* make changes to value if needed */
 
-                if (@$field['cfg']->faceting) {
+                if (@$field['cfg']->faceting && in_array($field['type'], array('combo', 'int', '_objects'))) {
                     $solr_field = $field['solr_column_name'];
                     if (empty($solr_field)) {
                         $solr_field = ( empty($field['cfg']->source) || ($field['cfg']->source == 'thesauri') ) ?
@@ -1045,7 +1047,9 @@ class Objects
         $template_collection = Templates\SingletonCollection::getInstance();
 
         $template = null;
+        $template_data = null;
         $last_object_id = null;
+        $last_template_id = null;
         $object_record = null;
 
         $sql = 'SELECT
@@ -1061,15 +1065,18 @@ class Objects
         $dres = DB\dbQuery($sql) or die(DB\dbQueryError());
 
         while ($dr = $dres->fetch_assoc()) {
-
             if ($last_object_id != $dr['object_id']) {
                 $object_record = &$object_records[$dr['object_id']];
-                $template = $template_collection->getTemplate($object_record['template_id']);
                 $object_record['content'] = '';
                 $last_object_id = $dr['object_id'];
             }
+            if ($last_template_id != $object_record['template_id']) {
+                $template = $template_collection->getTemplate($object_record['template_id']);
+                $template_data = $template->getData();
+                $last_template_id = $object_record['template_id'];
+            }
 
-            $field = @$template->getData()['fields'][$dr['field_id']];
+            $field = @$template_data['fields'][$dr['field_id']];
             if (empty($field)) {
                 continue;
             }
@@ -1109,7 +1116,7 @@ class Objects
 
                 @$solr_field = $field['solr_column_name'];
 
-                if (@$field['cfg']->faceting) {
+                if (@$field['cfg']->faceting && in_array($field['type'], array('combo', 'int', '_objects'))) {
                     if (empty($solr_field)) {
                         $solr_field = ( empty($field['cfg']->source) || ($field['cfg']->source == 'thesauri') )
                             ? 'sys_tags'
@@ -1125,7 +1132,6 @@ class Objects
                         }
                     }
                 }
-
             }
 
             if (!empty($dr['value'])) {

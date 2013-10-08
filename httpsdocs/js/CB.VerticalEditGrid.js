@@ -601,7 +601,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,value: Ext.value(v.value, '')
                 ,info: Ext.value(v.info, '')
                 ,files: Ext.value(v.files, '')
-                ,pfu: Ext.value(v.pfu, 0)
+                ,pfu: Ext.value(v.pfu, null)
                 ,duplicate_id: duplicateId
                 ,duplicate_pid: duplicatePid
                 ,pid: r.get('pid')

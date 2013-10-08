@@ -46,7 +46,9 @@ class Path
             WHERE t.id = $1';
         $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
-            $r['pids'] = str_replace(',', '/', $r['pids']);
+            $r['pids'] = explode(',', $r['pids']);
+            array_pop($r['pids']);
+            $r['pids'] = implode('/', $r['pids']);
             $rez = array('success' => true, 'id' => $id, 'path' => $r['pids']);
         }
         $res->close();

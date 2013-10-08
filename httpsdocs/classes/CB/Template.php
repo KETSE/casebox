@@ -61,7 +61,6 @@ class Template
      */
     public function load($templateId)
     {
-
         $sql = 'SELECT id
                     ,pid
                     ,is_folder
@@ -91,18 +90,18 @@ class Template
         /* loading template fields */
         $this->data['fields'] = array();
         $sql = 'SELECT
-                id
-                ,name
-                ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
-                ,`type`
-                ,cfg
-                ,solr_column_name
-            FROM templates_structure
-            WHERE template_id = $1';//and ts.solr_column_name IS NOT NULL
+                    id
+                    ,name
+                    ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
+                    ,`type`
+                    ,cfg
+                    ,solr_column_name
+                FROM templates_structure
+                WHERE template_id = $1';//and ts.solr_column_name IS NOT NULL
 
         $res = DB\dbQuery($sql, $templateId) or die(DB\dbQueryError()."\n".$sql);
         while ($r = $res->fetch_assoc()) {
-            $r['cfg'] = empty($r['cfg']) ? array(): json_decode($r['cfg']);
+            $r['cfg'] = json_decode($r['cfg']) or array();
             $this->data['fields'][$r['id']] = $r;
         }
         $res->close();
