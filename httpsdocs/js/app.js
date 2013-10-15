@@ -816,12 +816,19 @@ function initApp(){
             listeners: {
             }
         });
-        // this.Uploader.init();
+        if(this.Uploader.init() === false){
+            delete this.Uploader;
+            return null;
+        }
         return this.Uploader;
     }
     App.addFilesToUploadQueue = function(FileList, options){
-        fu = App.getFileUploader();
-        fu.addFiles(FileList, options)
+        var fu = App.getFileUploader();
+        if(fu) {
+            fu.addFiles(FileList, options);
+        } else {
+            Ext.Msg.alert(L.Info, 'This browser does not support file uploading from desktop');
+        }
     }
     App.onComponentActivated = function(component){
         clog('component activated', arguments, this);

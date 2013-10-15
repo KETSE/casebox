@@ -9,8 +9,6 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
     ,lines: false
     ,useArrows: true
     ,showFoldersContent: false
-    // ,enableDD: true
-    // ,ddGroup: 'CBO' //CaseBox Object(s)
     ,bodyStyle: 'background-color: #f4f4f4'
     ,hideBorders: true
     ,border: false

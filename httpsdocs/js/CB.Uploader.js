@@ -25,6 +25,13 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
         this.config = config || {};
         Ext.applyIf(this.config, this.defaultConfig);
 
+        CB.Uploader.superclass.constructor.call(this, config)
+    }
+
+    ,init: function(){
+        if(!this.browserUploadingSupport()){
+            return false;
+        }
         this.store = new Ext.data.JsonStore({
             fields:['id'
                 ,{name:'group', type: 'int'}
@@ -59,11 +66,11 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
             this.xhr.addEventListener("abort",      this.onFileUploadAbort.createDelegate(this), false);
             this.xhr.addEventListener("error",      this.onFileUploadError.createDelegate(this), false);
             this.xhr.addEventListener("load",       this.onFileUploadLoad.createDelegate(this), false);
-            this.xhr.addEventListener("timeout",        this.onFileUploadTimeout.createDelegate(this), false);
-            this.xhr.addEventListener("loadend",        this.onFileUploadLoadEnd.createDelegate(this), false);
+            this.xhr.addEventListener("timeout",    this.onFileUploadTimeout.createDelegate(this), false);
+            this.xhr.addEventListener("loadend",    this.onFileUploadLoadEnd.createDelegate(this), false);
         }else if(this.xhr.attachEvent){
             this.xhr.attachEvent("loadstart",       this.onFileUploadStart.createDelegate(this), false);
-            this.xhr.upload.attachEvent("progress",     this.onFileUploadProgress.createDelegate(this), false);
+            this.xhr.upload.attachEvent("progress", this.onFileUploadProgress.createDelegate(this), false);
             this.xhr.attachEvent("abort",           this.onFileUploadAbort.createDelegate(this), false);
             this.xhr.attachEvent("error",           this.onFileUploadError.createDelegate(this), false);
             this.xhr.attachEvent("load",            this.onFileUploadLoad.createDelegate(this), false);
@@ -78,13 +85,13 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
         });
         this.fileMD5 = new Ext.ux.fileMD5();
         this.fileMD5.on('done', this.onFileMD5Calculated, this);
-
-        CB.Uploader.superclass.constructor.call(this, config)
-    }
-
-    ,init: function(){
+        return true;
     }
     
+    /* check if Browser supports file uploading from desktop */
+    ,browserUploadingSupport: function(){
+        return (typeof(FileReader) != 'undefined');
+    }
     /* XHR listeners */
     ,onFileUploadStart: function(e){
         this.uploadingFile.set('status', 1);//uploading
@@ -667,6 +674,12 @@ CB.UploadWindowButton = Ext.extend(Ext.Button, {
     cls: 'upload-btn'
     ,initComponent: function(){
         this.uploader = App.getFileUploader();
+        // if cant create an uploader then hide/destroy the button
+        if(!this.uploader){
+            this.hide();
+            this.destroy();
+            return;
+        }
 
         this.resetLabelTask = new Ext.util.DelayedTask( this.resetLabel, this );
         Ext.apply(this, {

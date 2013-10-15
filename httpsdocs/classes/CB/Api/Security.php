@@ -136,6 +136,9 @@ class Security
             case 'write':
                 $access_string = '0'.str_repeat(','.$bit, 4).',0,'.$bit.',0,0,0,0,0';
                 break;
+            case 'readwrite':
+                $access_string = $bit.str_repeat(','.$bit, 6).',0,0,0,0,0';
+                break;
             case 'modify':
                 $access_string = $bit.str_repeat(','.$bit, 6).',0,'.$bit.',0,0,'.$bit;
                 break;

@@ -25,9 +25,8 @@ $sql = 'SELECT id
            ELSE date_end <= date_end
        END `expired`
 FROM tasks
-WHERE `type` = 6
-    AND `status` IN (2, 4)
-    AND has_deadline = 1';
+WHERE `status` IN (2, 4)
+    AND (date_end IS NOT NULL)';
 
 $res = DB\dbQuery($sql) or die(DB\dbQueryError());
 while ($r = $res->fetch_assoc()) {

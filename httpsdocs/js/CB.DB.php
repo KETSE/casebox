@@ -439,6 +439,62 @@ function getThesauriStore(thesauriId)
 
     return CB.DB[storeName];
 }
+
+/* generic class for objects store, used in different components */
+CB.DB.objectsStore = Ext.extend(Ext.data.JsonStore, {
+    constructor: function(){
+        CB.DB.objectsStore.superclass.constructor.call(this, {
+            fields: [
+                {name: 'id', type: 'int'}
+                ,'name'
+                ,{name: 'date', type: 'date'}
+                ,{name: 'type', type: 'int'}
+                ,{name: 'subtype', type: 'int'}
+                ,{name: 'template_id', type: 'int'}
+                ,{name: 'status', type: 'int'}
+                ,'iconCls'
+            ]
+        });
+    }
+    ,initComponent: function(){
+        /*Ext.apply(this, {
+            reader: new Ext.data.JsonReader({},[
+                {name: 'id', type: 'int'}
+                ,'name'
+                ,{name: 'date', type: 'date'}
+                ,{name: 'type', type: 'int'}
+                ,{name: 'subtype', type: 'int'}
+                ,{name: 'template_id', type: 'int'}
+                ,{name: 'status', type: 'int'}
+                ,'iconCls'
+            ]
+            )
+            ,getTexts: getStoreNames
+        });/**/
+        CB.DB.objectsStore.superclass.initComponent.apply(this, arguments);
+    }
+    ,getData: function(v){
+        if(Ext.isEmpty(v)) return [];
+        ids = String(v).split(',');
+        data = [];
+        Ext.each(ids, function(id){
+             idx = this.findExact('id', parseInt(id));
+            if(idx >= 0) data.push(this.getAt(idx).data);
+        }, this)
+
+        return data;
+    }
+    ,checkRecordExistance: function(data){
+        if(Ext.isEmpty(data)) return false;
+        idx = this.findExact('id', parseInt(data.id));
+        if (idx < 0) {
+            r = new this.recordType(data);
+            r.set('iconCls', getItemIcon(data));
+            this.add(r);
+        }
+    }
+})
+
 <?php
 /*
 CB.DB.tasksStoreConfig = {

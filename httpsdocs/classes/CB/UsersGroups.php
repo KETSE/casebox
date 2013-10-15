@@ -563,7 +563,16 @@ class UsersGroups
             throw new \Exception(L\Access_denied);
         }
 
-        DB\dbQuery('update users_groups set `l'.USER_LANGUAGE_INDEX.'` = $2, uid = $3 where id = $1 and type = 1', array($id, $title, $_SESSION['user']['id'])) or die(DB\dbQueryError());
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET name = $2, uid = $3
+            WHERE id = $1 AND type = 1',
+            array(
+                $id
+                ,$title
+                ,$_SESSION['user']['id']
+            )
+        ) or die(DB\dbQueryError());
 
         return array('success' => true, 'title' => $title);
     }

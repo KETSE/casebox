@@ -290,6 +290,11 @@ CB.CaseCardTasks = Ext.extend(CB.CaseCardBlock, {
         ,'</tpl>'
         ,'</table>'
     ]
+    ,initComponent: function(){
+        CB.CaseCardTasks.superclass.initComponent.apply(this, arguments);
+        this.addEvents('taskcreate');
+        this.enableBubble(['taskcreate']);
+    }
     ,prepareLoadedData: function(data){
         for (var i = 0; i < data.length; i++) {
             data[i].date = date_ISO_to_date(data[i].date);
@@ -312,7 +317,16 @@ CB.CaseCardTasks = Ext.extend(CB.CaseCardBlock, {
         switch(a.name){
             case 'uid': Ext.Msg.alert('Click', 'Open user window'); break;
             case 'addTask':
-                App.mainViewPort.fireEvent('taskcreate', {data: {pid: this.params.caseId,path: this.params.path,pathtext: this.params.pathtext}})
+                this.fireEvent(
+                    'taskcreate'
+                    ,{
+                        data: {
+                            pid: this.params.caseId
+                            ,path: this.params.path
+                            ,pathtext: this.params.pathtext
+                        }
+                    }
+                )
                 break;
             default:
                 r = dv.store.getAt(itemIndex -1);

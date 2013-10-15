@@ -229,7 +229,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
             ,admin: true
             ,autoclose: 1
             ,allday: 1
-            ,has_deadline: !Ext.isEmpty(this.data.date_end)
         })
         CB.Tasks.superclass.initComponent.apply(this, arguments);
         this._dirty = false;
@@ -268,7 +267,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
         this.status = 'view';
         
         this.data.allday = parseInt(this.data.allday)
-        this.data.has_deadline = parseInt(this.data.has_deadline)
         this.data.date_start = date_ISO_to_date(this.data.date_start)
         this.data.date_end = date_ISO_to_date(this.data.date_end)
         this.data.cdate = date_ISO_to_date(this.data.cdate)
@@ -358,7 +356,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
                     name: 'date_end'
                     ,format: App.dateFormat
                     ,hidden: true
-                    ,disabled: true
                     ,listeners: {scope: this, change: this.setDirty}
                 })
                 this.datetime_start = new Ext.ux.form.DateTimeField({   
@@ -387,8 +384,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 this.datetime_end = new Ext.ux.form.DateTimeField({ 
                     fieldLabel: L.Due
                         ,name: 'datetime_end'
-                        ,disabled: true
-                    ,allowBlank: true
+                        ,allowBlank: true
                         ,timeFormat: App.timeFormat
                         ,dateFormat: App.dateFormat
                         ,picker: {
@@ -453,11 +449,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
                         ,inputValue: 1
                         ,name: 'allday'
                         ,listeners: {scope: this, check: this.onAllDayClick}
-                    },{ xtype: 'checkbox'
-                        ,fieldLabel: L.Deadline
-                        ,inputValue: 1
-                        ,name: 'has_deadline'
-                        ,listeners: {scope: this, check: this.onHasDeadlineClick}
                     },{xtype: 'displayfield', value: '&nbsp;'
                     },{ xtype: 'CBThesauriField'
                         ,iconCls: 'icon-users'
@@ -581,7 +572,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
             default: delete this.data.privacy;
                 delete this.data.autoclose;
                 delete this.data.allday;
-                delete this.data.has_deadline;
                 
                 Ext.apply(this.data, this.form.getForm().getValues());
                 this.data.responsible_user_ids = null;
@@ -601,14 +591,14 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 if(this.data.allday){
                     d = this.date_start.getValue();
                     this.data.date_start = Ext.isEmpty(d) ? null : d.toISOString();
-                    if(this.data.has_deadline || (this.data.template_id == App.config.default_event_template) ){
+                    if(this.data.template_id !== App.config.default_event_template){
                         d = this.date_end.getValue();
                         this.data.date_end = Ext.isEmpty(d) ? null : d.toISOString();
                     }
                 }else{
                     d = this.datetime_start.getValue();
                     this.data.date_start = Ext.isEmpty(d) ? null : d.toISOString();
-                    if(this.data.has_deadline || (this.data.template_id == App.config.default_event_template) ){
+                    if(this.data.template_id !== App.config.default_event_template){
                         d = this.datetime_end.getValue();
                         this.data.date_end = Ext.isEmpty(d) ? null : d.toISOString();
                     }
@@ -664,8 +654,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
                     this.datetime_end.setVisible(true);
                     this.date_end.setVisible(false);
                 }
-                this.datetime_end.setDisabled(!this.data.has_deadline);
-                this.date_end.setDisabled(!this.data.has_deadline);
                 this.findByType('compositefield')[0].syncSize();
                 if(this.taskview.rendered){
                     this.taskview.update(this.data);
@@ -993,11 +981,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
     }
     ,onTypeChangeClick: function(gr, radio){
         this.data.template_id = radio.inputValue
-        f = this.find('name', 'has_deadline')[0];
-        if(f){
-            f.setVisible(radio.inputValue != App.config.default_event_template);
-            this.onHasDeadlineClick(f, f.checked);
-        }
         f = this.find('name', 'allday')[0];
         if(f) this.onAllDayClick(f, f.checked);
         f = this.find('name', 'responsible_user_ids')[0];
@@ -1021,11 +1004,6 @@ CB.Tasks = Ext.extend( Ext.Window, {
             this.datetime_end.setVisible(true); 
         }
         this.findByType('compositefield')[0].doLayout();
-        this.setDirty(true);
-    }
-    ,onHasDeadlineClick: function(cb, checked){
-        this.date_end.setDisabled(!checked && (this.data.template_id != App.config.default_event_template ) ); 
-        this.datetime_end.setDisabled(!checked && (this.data.template_id != App.config.default_event_template )); 
         this.setDirty(true);
     }
     ,setDirty: function(dirty){

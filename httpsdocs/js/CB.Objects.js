@@ -554,7 +554,17 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         App.mainViewPort.createObject(data, e);
     }
     ,onCreateTaskClick: function(o, e){
-        this.fireEvent('taskcreate', { data: {pid: this.data.id, path: this.data.path+'/'+this.data.id, pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)} })
+        this.fireEvent(
+            'taskcreate'
+            ,{ 
+                data: {
+                    template_id: App.config.default_task_template
+                    ,pid: this.data.id
+                    ,path: this.data.path+'/'+this.data.id
+                    ,pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)
+                } 
+            }
+        )
     }
     ,onTaskUpdate: function(taskData){ // TO REVIEW
         if(taskData.object_id != this.data.id) return;

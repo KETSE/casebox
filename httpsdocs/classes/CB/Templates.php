@@ -525,13 +525,9 @@ class Templates
 
         return $rez;
     }
-    public static function getIcon($template_id)
-    {
-    }
     public static function getTemplateFieldValue(&$field, $format = 'html')
     {
         @$value = $field['value']['value'];
-
         switch ($field['type']) {
             case 'boolean':
             case 'checkbox':
@@ -620,6 +616,7 @@ class Templates
                         $value = 'tree';
                         $sql = 'SELECT t.id
                                 ,t.name
+                                ,t.template_id
                                 ,t.`type`
                                 ,t.`subtype`
                                 ,t.cfg

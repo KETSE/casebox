@@ -116,7 +116,7 @@ class Browser
                     break;
                 case 'parent':
                     if (!empty($p->objectId) && is_numeric($p->objectId)) {
-                        $sql = 'select pid from tree where id = $1 ';
+                        $sql = 'SELECT pid FROM tree WHERE id = $1 ';
                         $res = DB\dbQuery($sql, $p->objectId) or die(DB\dbQueryError());
                         if ($r = $res->fetch_row()) {
                             $p->pids = $r[0];
@@ -133,7 +133,7 @@ class Browser
                     break;
                 case 'self':
                     if (!empty($p->objectId) && is_numeric($p->objectId)) {
-                        $sql = 'select id from tree where id = $1 ';
+                        $sql = 'SELECT id FROM tree WHERE id = $1 ';
                         $res = DB\dbQuery($sql, $p->objectId) or die(DB\dbQueryError());
                         if ($r = $res->fetch_row()) {
                             $p->pids = $r[0];
@@ -423,7 +423,13 @@ class Browser
                 return array('success' => false, 'msg' => L\CannotCopyObjectInsideItself);
             }
 
-            $sql = 'select id, pid, name, `system`, template_id from tree where id = $1';
+            $sql = 'SELECT id
+                ,pid
+                ,name
+                ,`system`
+                ,template_id
+            FROM tree
+            WHERE id = $1';
             $res = DB\dbQuery($sql, $p->data[$i]->id) or die(DB\dbQueryError());
             if ($r = $res->fetch_assoc()) {
                 $process_ids[] = $r['id'];
@@ -1351,85 +1357,58 @@ class Browser
 
         return $data;
     }
-
+    /**
+     * detect object icon by analizing it's data
+     *
+     * object data could have set a custom iconCls in cfg property of the data,
+     * otherwise the icon is determined from it's template
+     * TODO: think about shortcuts
+     * @param  array   $data object data
+     * @return varchar iconCls
+     */
     public static function getIcon(&$data)
     {
-        if (!isset($data['type'])) {
-            return '';
+
+        if (!empty($data['cfg']) && !empty($data['cfg']->iconCls)) {
+            return $data['cfg']->iconCls;
         }
 
-        switch (intval($data['type'])) {
-            case 0:
-                return Util\coalesce(@$data['iconCls'], 'icon-folder');
-                break;
-            case 1:
-                switch (intval(@$data['subtype'])) {
-                    case 1:
-                        break;
-                    case 2:
-                        return 'icon-home';
-                        break;
-                    case 3:
-                        return 'icon-blue-folder';
-                        break;
-                    case 4:
-                        return 'icon-briefcase';
-                        break;
-                    case 5:
-                        return 'icon-calendar-small';
-                        break;
-                    case 6:
-                        return 'icon-mail-medium';
-                        break;
-                    case 7:
-                        return 'icon-blue-folder-stamp';
-                        break;
-                    case 8:
-                        return 'icon-folder';
-                        break;
-                    case 9:
-                        return 'icon-blue-folder';
-                        break;
-                    case 10:
-                        return 'icon-blue-folder-share';
-                        break;
-                    default:
-                        return @Util\coalesce($data['iconCls'], 'icon-folder');
-                        break;
+        if (empty($data['template_id'])) {
+            return 'icon-none';
+        }
+
+        $templates = Templates\SingletonCollection::getInstance();
+        $templateData = $templates->getTemplate($data['template_id'])->getData();
+
+        if (!empty($templateData['iconCls'])) {
+            return $templateData['iconCls'];
+        }
+
+        switch ($templateData['type']) {
+            case 'object':
+                if (in_array($data['template_id'], $GLOBALS['folder_templates'])) {
+                    return 'icon-folder';
                 }
                 break;
             case 2:
                 return 'icon-shortcut';//case
                 break;
-            case 3:
-                return 'icon-briefcase';//case
-                break;
-            case 4: //case object
-                if (!empty($data['cfg']) && !empty($data['cfg']->iconCls)) {
-                    return $data['cfg']->iconCls;
-                }
-                if (!empty($data['template_id'])) {
-                    return Templates::getIcon($data['template_id']);
-                }
 
-                return 'icon-none';
-                break;
-            case 5: //file
-
+            case 'file':
                 return Files::getIcon($data['name']);
                 break;
-            case 6:
+            case 'task':
                 if (@$d['status'] == 3) {
                     return 'icon-task-completed';
                 }
 
                 return 'icon-task';//task
                 break;
-            case 7:
-                return 'icon-event';//Event
-            case 8:
+            case 'email':
                 return 'icon-mail';//Message (email)
                 break;
         }
+
+        return 'icon-none';
     }
 }

@@ -430,7 +430,17 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
     ,onPasteProcess: function(pids){
     }
     ,onCreateTaskClick: function(o, e){
-        this.fireEvent('taskcreate', { data: {pid: this.data.id, path: this.data.path+'/'+this.data.id, pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)} })
+        this.fireEvent(
+            'taskcreate'
+            ,{ 
+                data: {
+                    template_id: App.config.default_task_template
+                    ,pid: this.data.id
+                    ,path: this.data.path+'/'+this.data.id
+                    ,pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)
+                }
+            }
+        )
     }
     ,onTaskChange: function(r){
         if(r.data && (r.data.pid == this.data.id) ){

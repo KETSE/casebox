@@ -250,7 +250,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ,cls: 'folder-grid'
             ,store: this.store
             ,loadMask: true
-            //,enableDragDrop: true
             ,colModel: new Ext.grid.ColumnModel({
                 defaults: {
                     width: 120,
@@ -446,7 +445,13 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ,statefull: true
             ,stateId: Ext.value(this.gridStateId, 'fvg')//folder view grid
             ,dropZoneConfig: { text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'}
-            ,plugins: [{ptype: 'CBPluginsFilesDropZone', pidPropety: 'nid'}]
+            ,plugins: [{
+                    ptype: 'CBPluginsFilesDropZone'
+                    , pidPropety: 'nid'
+                },{
+                    ptype: 'CBDDGrid'
+                }
+            ]
             ,getProperty: this.getProperty.createDelegate(this)
         });
         

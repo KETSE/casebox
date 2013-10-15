@@ -386,32 +386,38 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
         this.addEvents('taskcreate', 'viewloaded');
         this.enableBubble(['taskcreate', 'viewloaded']);
     }
-        ,onRangeSelect: function(c, range, callback){
-            allday = ((range.StartDate.format('H:i:s') == '00:00:00') && (range.EndDate.format('H:i:s') == '23:59:59') ) ? 1 : 0;
-            App.mainViewPort.fireEvent('taskcreate', { data: {
-                pid: this.folderProperties.id
-                ,date_start: range.StartDate
-                ,date_end: range.EndDate
-                ,allday: allday
-                ,path: this.folderProperties.path
-                ,pathtext: this.folderProperties.pathtext
+    ,onRangeSelect: function(c, range, callback){
+        allday = ((range.StartDate.format('H:i:s') == '00:00:00') && (range.EndDate.format('H:i:s') == '23:59:59') ) ? 1 : 0;
+        this.fireEvent(
+            'taskcreate'
+            ,{ 
+                data: {
+                    pid: this.folderProperties.id
+                    ,date_start: range.StartDate
+                    ,date_end: range.EndDate
+                    ,allday: allday
+                    ,path: this.folderProperties.path
+                    ,pathtext: this.folderProperties.pathtext
                 }
             }
-            );
-            callback()
-        }
-        ,onDayClick: function(c, date, ad, el){
-            allday = (date.format('H:i:s') == '00:00:00') ? 1 : 0;
-            App.mainViewPort.fireEvent('taskcreate', { data: {
-                pid: this.folderProperties.id
-                ,date_start: date
-                ,allday: allday
-                ,path: this.folderProperties.path
-                ,pathtext: this.folderProperties.pathtext
+        );
+        callback()
+    }
+    ,onDayClick: function(c, date, ad, el){
+        allday = (date.format('H:i:s') == '00:00:00') ? 1 : 0;
+        this.fireEvent(
+            'taskcreate'
+            ,{ 
+                data: {
+                    pid: this.folderProperties.id
+                    ,date_start: date
+                    ,allday: allday
+                    ,path: this.folderProperties.path
+                    ,pathtext: this.folderProperties.pathtext
                 }
             }
-            );
-        }
+        );
+    }
     ,onProxyLoaded: function(proxy, o, options){
         this.folderProperties = o.result.folderProperties
         this.folderProperties.id = parseInt(this.folderProperties.id);
@@ -435,26 +441,30 @@ CB.CalendarView = Ext.extend(Ext.Panel, {
         this.calendar.doReloadEventsStore()
     }
     ,onTaskCreateClick: function(b, e){
-        this.fireEvent('taskcreate', {
-            data: {
-                type: 6
-                ,template_id: App.config.default_task_template
-                ,pid: this.folderProperties.id
-                ,path: this.folderProperties.path
-                ,pathtext: this.folderProperties.pathtext
+        this.fireEvent(
+            'taskcreate'
+            ,{
+                data: {
+                    template_id: App.config.default_task_template
+                    ,pid: this.folderProperties.id
+                    ,path: this.folderProperties.path
+                    ,pathtext: this.folderProperties.pathtext
+                }
             }
-        })
+        )
     }
     ,onEventCreateClick: function(b, e){
-        this.fireEvent('taskcreate', {
-            data: {
-                type: 7
-                ,template_id: App.config.default_event_template
-                ,pid: this.folderProperties.id
-                ,path: this.folderProperties.path
-                ,pathtext: this.folderProperties.pathtext
+        this.fireEvent(
+            'taskcreate'
+            ,{
+                data: {
+                    template_id: App.config.default_event_template
+                    ,pid: this.folderProperties.id
+                    ,path: this.folderProperties.path
+                    ,pathtext: this.folderProperties.pathtext
+                }
             }
-        })
+        )
     }
     ,onEastPanelButtonClick: function(b, e){
         if(b.pressed){

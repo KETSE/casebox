@@ -152,7 +152,7 @@ span.icon-right{ float: right; width: 18px; display: inline-block !important }
 .icon-bullet_yellow	{ background-image:url(i/ico/bullet_yellow.png) !important; background-repeat: no-repeat}
 .icon-bullet_gray	{ background-image:url(i/ico/bullet_gray.png) !important; background-repeat: no-repeat}
 
-.icon-padding16 { padding-left: 16px; min-height: 16px }
+.icon-padding16 { padding-left: 16px !important; min-height: 16px !important }
 .icon-padding, .icon-padding .x-grid3-cell-inner { padding-left: 22px !important; min-height: 16px}
 .icon-padding2, .icon-padding2 .x-grid3-cell-inner { padding-left: 44px; background-position: 22px 50% !important }
 .icon-padding3, .icon-padding3 .x-grid3-cell-inner { padding-left: 44px; background-position: 44px 50% !important }

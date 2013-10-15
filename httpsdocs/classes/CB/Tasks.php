@@ -42,7 +42,6 @@ class Tasks
                 ,t.cid
                 ,t.completed
                 ,t.cdate
-                ,t.has_deadline
                 ,t.importance
                 ,t.category_id
                 ,t.allday
@@ -141,14 +140,11 @@ class Tasks
             }
 
             $p['date_start'] = empty($p['date_start']) ? null : Util\dateISOToMysql($p['date_start']);
-            if (!isset($p['has_deadline'])) {
-                $p['has_deadline'] = 0;
-            }
             if (!isset($p['allday'])) {
                 $p['allday'] = 0;
             }
 
-            if (($p['has_deadline'] == 1) || ($p['template_id'] == CONFIG\DEFAULT_EVENT_TEMPLATE)) {
+            if (($p['template_id'] !== CONFIG\DEFAULT_EVENT_TEMPLATE)) {
                 $p['date_end'] = empty($p['date_end']) ? null : Util\dateISOToMysql($p['date_end']);
             } else {
                 $p['date_end'] = null;
@@ -241,7 +237,6 @@ class Tasks
                     ,cid
                     ,status
                     ,autoclose
-                    ,has_deadline
                     ,importance
                     ,category_id
                     ,allday
@@ -264,7 +259,6 @@ class Tasks
                       , $15
                       , $16
                       , $17
-                      , $18
                       , NULL
                       , NULL)
                 ON DUPLICATE KEY
@@ -282,10 +276,9 @@ class Tasks
                     ,udate = CURRENT_TIMESTAMP
                     ,status = CASE status WHEN 2 THEN 2 ELSE $13 END
                     ,autoclose = $14
-                    ,has_deadline = $15
-                    ,importance = $16
-                    ,category_id = $17
-                    ,allday = $18';
+                    ,importance = $15
+                    ,category_id = $16
+                    ,allday = $17';
             DB\dbQuery(
                 $sql,
                 @array(
@@ -303,7 +296,6 @@ class Tasks
                     ,$_SESSION['user']['id']
                     ,$status
                     ,$p['autoclose']
-                    ,$p['has_deadline']
                     ,$p['importance']
                     ,$p['category_id']
                     ,$p['allday']
@@ -375,7 +367,6 @@ class Tasks
         }
         $sql = 'SELECT
                 t.allday
-                ,t.has_deadline
                 ,tt.template_id
             FROM tasks t
             JOIN tree tt on t.id = tt.id
@@ -383,10 +374,10 @@ class Tasks
         $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $p->date_start = Util\dateISOToMysql($p->date_start);
-            $p->date_end = Util\dateISOToMysql($p->date_end);
-            if (($r['has_deadline'] == 0) && ($r['template_id'] != CONFIG\DEFAULT_EVENT_TEMPLATE)) {
-                $p->date_end = null;
-            }
+            $p->date_end = empty($p->date_end)
+                ? null
+                : Util\dateISOToMysql($p->date_end);
+
             DB\dbQuery(
                 'UPDATE tasks set date_start = $2, date_end = $3 WHERE id = $1',
                 array($p->id, $p->date_start, $p->date_end)
@@ -815,10 +806,10 @@ class Tasks
         DB\dbQuery(
             'UPDATE tasks
             SET status = CASE
-                             WHEN ((has_deadline = 0)
-                                   OR ((has_deadline = 1)
-                                       AND (date_end > CURRENT_TIMESTAMP))) THEN 2
-                             ELSE 1
+                            WHEN ((date_end IS NULL)
+                                   OR (date_end > CURRENT_TIMESTAMP))
+                            THEN 2
+                            ELSE 1
                          END
             WHERE id = $1',
             $id
@@ -901,7 +892,6 @@ class Tasks
                 ,importance
                 ,`type`
                 ,allday
-                ,has_deadline
                 ,cid
                 ,ti.path `path_text`
                 ,(SELECT l'.$user['language_id'].'
@@ -924,7 +914,7 @@ class Tasks
                 $format .= ' H:i';
             }
             $datetime_period = Util\formatMysqlDate($r['date_start'], $format);
-            if ($r['has_deadline'] == 1) {
+            if (!empty($r['date_end'])) {
                 $i = strtotime($r['date_end']);
                 $datetime_period .= ' - '.Util\formatMysqlDate($r['date_end'], $format);
             }
@@ -1150,7 +1140,7 @@ class Tasks
         $i = strtotime($d['date_start']);
         $d['datetime_period'] = date($format, $i);
 
-        if ($d['has_deadline'] == 1) {
+        if (!empty($d['date_end'])) {
             $i = strtotime($d['date_end']);
             $d['datetime_period'] .= ' - '.date($format, $i);
         }

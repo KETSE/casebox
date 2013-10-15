@@ -29,7 +29,9 @@ CB.ObjectsFieldCommonFunctions = {
                         ,api: { read: CB_Browser.getObjectsForField }
                         ,listeners:{
                             load: function(proxy, obj, opt){
-                                for (var i = 0; i < obj.result.data.length; i++) obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+                                for (var i = 0; i < obj.result.data.length; i++) {
+                                    obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+                                }
                             }
                         }
                     })
@@ -78,7 +80,9 @@ CB.ObjectsFieldCommonFunctions = {
                 })           
         }
         
-        if(Ext.isEmpty(this.store)) this.store = new Ext.data.ArrayStore({ idIndex: 0, fields: [{name: 'id', type: 'int'}, 'name'], data:  [] });
+        if(Ext.isEmpty(this.store)) {
+            this.store = new Ext.data.ArrayStore({ idIndex: 0, fields: [{name: 'id', type: 'int'}, 'name'], data:  [] });
+        }
         this.store.getTexts = getStoreNames;
 
         if(this.config.sort){
@@ -643,7 +647,15 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
         }
         newValue = this.getData();
         objStore = this.getObjectsStore();
-        if(objStore) Ext.each(newValue, function(d){ objStore.checkRecordExistance(d)}, this)
+        if(objStore) {
+            Ext.each(
+                newValue
+                ,function(d){
+                    objStore.checkRecordExistance(d)
+                }
+                ,this
+            )
+        }
         this.fireEvent('setvalue', newValue, this);
         this.close();
     }

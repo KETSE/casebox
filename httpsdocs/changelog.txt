@@ -1,3 +1,23 @@
+CaseBox 1.9.49 (2013-10-13)
+==============================
+New Features, Improvements
+--------------------------
+- added check for FileReader browser support. Hide upload button for browser that do not support uploading from desktop.
+- changed Browser.getIcon method from types based to template based detection
+- Remove the "deadline" checkbox from Task Window, check if End date is empty
+- Refactor objectsStore and added CB.DB.objectsStore class
+- working on Drag and Drop inside CaseBox 
+
+Fixed Bugs:
+----------
+- Renaming a group, in users administration window, has no effect
+- Creating a task from Object window shows the radio Task/Event
+
+Notes:
+----------
+- apply database update: 20131013_1717 db_update v1.9.49.sql
+- apply update for casebox database: casebox.sql
+
 CaseBox 1.9.48 (2013-10-08)
 ==============================
 New Features, Improvements

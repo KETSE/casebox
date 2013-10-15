@@ -535,7 +535,7 @@ class Objects
                     if (!empty($query->caseId)) {
                         $template_id = null;
                         $properties = array();
-                        $sql = 'select template_id from tree where id = $1';
+                        $sql = 'SELECT template_id FROM tree WHERE id = $1';
                         $res = DB\dbQuery($sql, $query->caseId) or die(DB\dbQueryError());
                         if ($r = $res->fetch_assoc()) {
                             $template_id = $r['template_id'];

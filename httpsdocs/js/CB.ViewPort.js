@@ -136,7 +136,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,'objectopened'
         );
         CB.ViewPort.superclass.initComponent.apply(this, arguments);
-        
     }
     ,onLogin: function(){
         /* adding menu items */
@@ -193,7 +192,8 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     ,initCB: function(){
         if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){
             this.onLogin();
-            //App.openUniqueTabbedWidget('CBAccount')
+            App.DD = new CB.DD();
+            
         }else this.initCB.defer(500, this);
     }
     ,logout: function(){
