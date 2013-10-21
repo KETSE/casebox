@@ -97,12 +97,29 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
     }
 }
 
+if (!function_exists(__NAMESPACE__.'\startTransaction')) {
+    function startTransaction()
+    {
+        return $GLOBALS['dbh']->autocommit(false);
+    }
+}
+
+if (!function_exists(__NAMESPACE__.'\commitTransaction')) {
+    function commitTransaction()
+    {
+        $GLOBALS['dbh']->commit();
+
+        return $GLOBALS['dbh']->autocommit(true);
+    }
+}
+
 if (!function_exists(__NAMESPACE__.'\dbLastInsertId')) {
     function dbLastInsertId()
     {
         return mysqli_insert_id($GLOBALS['dbh']);
     }
 }
+
 if (!function_exists(__NAMESPACE__.'\dbAffectedRows')) {
     function dbAffectedRows()
     {

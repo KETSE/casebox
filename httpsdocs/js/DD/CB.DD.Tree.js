@@ -28,7 +28,15 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
     ,init: function(owner) {
         this.owner = owner;
         owner.on('render', this.onRender, this);
+        owner.on('beforedestroy', this.onBeforeDestroy, this);
+        App.on('objectsaction', this.onObjectsAction, this)
     }
+    
+    /**
+     * apply config to tree
+     * @param  Ext.tree.TreePanel tree 
+     * @return void
+     */
     ,onRender: function(tree){
         Ext.apply(this.owner, {
             enableDD: true
@@ -45,6 +53,18 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
         })
 
     }
+    
+    /**
+     * unset all assigned listeners
+     * @return void
+     */
+    ,onBeforeDestroy: function()
+    {
+        this.owner.un('render', this.onRender, this);
+        this.owner.un('beforedestroy', this.onBeforeDestroy, this);
+        App.un('objectsaction', this.onObjectsAction, this)
+    }
+    
     /**
      * transfers tree node data to generic structured object for D&D 
      * @param  node/atributtes node node object or its attributes
@@ -68,11 +88,76 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
         }
         return data;
     }
+
+    /**
+     * function used to update tree nodes for actions on abjects like create/copy/move/update/delete
+     * 
+     * @param  object r responce
+     * @param  event e 
+     * @return void
+     */
+    ,onObjectsAction: function(action, r, e){
+        switch(action){
+            case 'copy':
+                    this.reloadNode(r.targetId);
+                break;
+            case 'move':
+                if(!Ext.isEmpty(r.processedIds)){
+                    // remove moved nodes
+                    for (var i = 0; i < r.processedIds.length; i++) {
+                        this.removeNode(r.processedIds[i])
+                    }
+                    this.reloadNode(r.targetId);
+                }
+                break;
+            case 'create':
+                break;
+            case 'update':
+                break;
+            case 'delete':
+                break;
+        }
+    }
+    
+    /**
+     * remove a node by its id
+     * @param  int nodeId 
+     * @return boolean
+     */
+    ,removeNode: function(nodeId){
+        var rootNode = this.owner.getRootNode()
+        var node = rootNode.findChild(this.idProperty, nodeId, true); 
+        while(node){
+            node.remove(true);
+            node = rootNode.findChild(this.idProperty, nodeId, true); 
+        }
+    }
+    
+    /**
+     * reload a node by its id
+     * @param  int nodeId 
+     * @return boolean
+     */
+    ,reloadNode: function(nodeId){
+        var rootNode = this.owner.getRootNode()
+        var node = (rootNode.attributes[this.idProperty] == nodeId)
+            ? rootNode 
+            : rootNode.findChild(this.idProperty, nodeId, true);
+        if(node) {
+            if(node.isLoaded()) {
+                node.reload();
+            } else {
+                node.expand()
+            }
+            return true;
+        }
+        return false;
+    }
 });
 
 Ext.ComponentMgr.registerPlugin('CBDDTree', CB.DD.Tree);
 
-
+/* custom tree dragZone for handling casebox D&D of objects */
 CB.DD.TreeDragZone =  Ext.extend(Ext.tree.TreeDragZone, {
     idProperty: 'id'
     ,constructor: function(tree, config){
@@ -91,6 +176,7 @@ CB.DD.TreeDragZone =  Ext.extend(Ext.tree.TreeDragZone, {
 
 Ext.reg('CBDDTreeDragZone', CB.DD.TreeDragZone);
 
+/* custom tree dropZone for handling casebox D&D of objects */
 CB.DD.TreeDropZone =  Ext.extend(Ext.tree.TreeDropZone, {
     idProperty: 'id'
     ,appendOnly: true

@@ -789,7 +789,12 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
         return id;
     }
     ,reload: function(){
-        if(this.rendered) this.update([]); else this.data = [];
+        if(this.rendered) {
+            this.update([]);
+        } else {
+            this.data = [];
+        }
+
         id = this.getCaseObjectId();
         if(Ext.isEmpty(id)) return;
         params = {pid: id
@@ -799,10 +804,23 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
             ,dir: 'desc'
         }
         p = this.findParentByType(CB.Objects);
-        if(!Ext.isEmpty(p) && !Ext.isEmpty(p.data.cfg) && !Ext.isEmpty(p.data.cfg.templates) )  params.templates = p.data.cfg.templates;
+        if(!Ext.isEmpty(p) 
+            && !Ext.isEmpty(p.data.cfg) 
+            && !Ext.isEmpty(p.data.cfg.templates) 
+        ) {
+            params.templates = p.data.cfg.templates;
+        }
         CB_BrowserView.getChildren(params, this.processLoad, this)
     }
     ,processLoad: function(r, e){
+        /* add check for cases when objects window is closing but saved its changes.
+            In this case, the delay that appears while this component load its remote data 
+            and tries to render them could result in a js error. 
+            This is because objects window gets destroyed before this component tries to render.
+        */
+        if(this.isDestroyed) {
+            return;
+        }
         if(r.success !== true) return;
         for (var i = 0; i < r.data.length; i++)
             r.data[i].iconCls = getItemIcon(r.data[i]);

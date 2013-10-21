@@ -290,10 +290,10 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
     }
     ,onBeforeNodeAppend: function(tree, parent, node){
         node.setId(Ext.id());
-        node.attributes.nid = Ext.num(node.attributes.nid, node.attributes.nid);
-        node.attributes.system = parseInt(node.attributes.system);
-        node.attributes.type = parseInt(node.attributes.type);
-        node.attributes.subtype = parseInt(node.attributes.subtype);
+        node.attributes.nid = Ext.num(node.attributes.nid, null);
+        node.attributes.system = Ext.num(node.attributes.system, 0);
+        node.attributes.type = Ext.num(node.attributes.type, 0);
+        node.attributes.subtype = Ext.num(node.attributes.subtype, 0);
         if((node.attributes.type == 0) && parent && (parent.getDepth() == 4 )){
             node.setText(Ext.value(Date.monthNames[parseInt(node.attributes.name) -1], node.attributes.name));
         }else 
@@ -308,7 +308,6 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
         if(node.attributes.acl_count > 0) {
             node.setCls('node-has-acl');
         }
-
     }
     ,onBeforeDestroy: function(p){
         App.clipboard.un('pasted', this.onClipboardAction, this);
@@ -342,13 +341,13 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
             this.actions.createFolder.setDisabled(true) ;
             this.actions.permissions.setDisabled(true) ;
         }else{
-            canOpen = ([2, 4, 5, 6, 7].indexOf(node.attributes.type) >= 0 )
+            canOpen = true
             this.actions.open.setHidden(!canOpen);
-            canOpenInNewWindow = ([1, 3, 4].indexOf(node.attributes.type) >= 0 )
+            canOpenInNewWindow = true
             this.actions.openInNewWindow.setHidden(!canOpenInNewWindow);
-            canExpand = (!node.isExpanded() && ( (!node.loaded) || node.hasChildNodes() )) && (  (([1].indexOf(node.attributes.type) >= 0) && (node.attributes.subtype != 1)) || ([0, 3, 4, 6, 7].indexOf(node.attributes.type) >=0 ) );
+            canExpand = (!node.isExpanded() && ( (!node.loaded) || node.hasChildNodes() ));
             this.actions.expand.setHidden(!canExpand);
-            canCollapse = node.isExpanded() && node.hasChildNodes() && ( (([1].indexOf(node.attributes.type) >= 0) && (node.attributes.subtype != 1)) || ([0, 3, 4, 6, 7].indexOf(node.attributes.type) >=0 ) );
+            canCollapse = node.isExpanded() && node.hasChildNodes();
             this.actions.collapse.setHidden(!canCollapse);
             if(this.contextMenu) this.contextMenu.items.itemAt(3).setVisible(canOpen || canExpand || canCollapse);
 
@@ -357,22 +356,16 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
             this.actions.copy.setDisabled(!canCopy);
             canPaste = !App.clipboard.isEmpty() 
                 && ( !this.inFavorites(node) || App.clipboard.containShortcutsOnly() ) 
-                && ( ( (node.attributes.system == 0) && (node.attributes.type != 5) ) 
-                    || ( (node.attributes.type == 1) && ([2, 7, 9, 10].indexOf(node.attributes.subtype) >= 0) ) 
-                    || ([3, 4, 6, 7].indexOf(node.attributes.type) >= 0 ) 
-                   );
+                && ( node.attributes.system == 0 );
             this.actions.paste.setDisabled(!canPaste);
             canPasteShortcut = !App.clipboard.isEmpty() 
                 && !App.clipboard.containShortcutsOnly() 
-                && ( ( (node.attributes.system == 0) && (node.attributes.type != 5) ) 
-                    || ( (node.attributes.type == 1) && ([2, 7, 9, 10].indexOf(node.attributes.subtype) >= 0) ) 
-                    || ([3, 4, 6, 7].indexOf(node.attributes.type) >= 0 ) 
-                   );
+                && ( node.attributes.system == 0 );
             this.actions.pasteShortcut.setDisabled(!canPasteShortcut);
 
-            canCreateFolder = (node.attributes.type == 1) && ([0, 2, 7, 9, 10].indexOf(node.attributes.subtype) >= 0) || (node.attributes.type == 3) || (node.attributes.type == 4);
+            canCreateFolder = true;
             this.actions.createFolder.setDisabled(!canCreateFolder) ;
-            canDelete = (node.attributes.type == 1) && ([0].indexOf(node.attributes.subtype) >= 0) || ([2, 3, 4, 5, 6, 7].indexOf(node.attributes.type)>=0);
+            canDelete = (node.attributes.system == 0);
             this.actions['delete'].setDisabled(!canDelete) ;
             canRename = (node.attributes.system == 0);
             this.actions.rename.setDisabled(!canRename) ;

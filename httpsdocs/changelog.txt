@@ -1,4 +1,40 @@
-CaseBox 1.9.49 (2013-10-13)
+CaseBox 1.9.50 (2013-10-15)
+==============================
+New Features, Improvements
+--------------------------
+- Removed Browser.paste method used by clipboard class.
+    Instead, new improved methods, are reused  from D&D
+- new server side methoods required for D&D were created in other scripts
+    that will be targed scripts for refactoring. All reviewed methods will be
+    moved from old common classes to separated new ones. 
+- implemented Drag and Drop inside casebox
+    D&D is implemented by using plugins mechanism
+    D&D execution will generate common event 'objectsaction' for any component to listen to them
+    Server side actions for D&D are recursive (CB\Browser\Actions.php)
+    Averything works in concordance with security, but there are some moments to discuss
+
+    There are some problems with D&D on a field of Properties grid in Objects edit window.  Still working on it.
+    In future will be added more required/request drop zones
+
+- added CB\DB methods: startTransaction & commitTransaction
+- translations update
+
+Fixed Bugs:
+----------
+- cut/copy buttons not enabled for just created nodes, in popup menu of browser tree 
+- processing message did not disapear when canceling a paste confirmation
+- wrong security sets detection when everyone group is present with another user group 
+- child nodes not marked as updated in tree_info on adding new rule
+    for nodes that did not have any rule and security_set assigned.
+- UI gets locked when try to save an object on window close.
+- 'added by' empty in User info (Users window)
+
+Notes:
+----------
+- apply update for casebox database: casebox.sql
+- apply database update: 20131021_1605 db_update v1.9.50.sql
+
+CaseBox 1.9.49 (2013-10-15)
 ==============================
 New Features, Improvements
 --------------------------
@@ -16,7 +52,6 @@ Fixed Bugs:
 Notes:
 ----------
 - apply database update: 20131013_1717 db_update v1.9.49.sql
-- apply update for casebox database: casebox.sql
 
 CaseBox 1.9.48 (2013-10-08)
 ==============================

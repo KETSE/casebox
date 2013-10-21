@@ -1,4 +1,3 @@
-
 Ext.namespace('CB');
 
 /**
@@ -12,6 +11,7 @@ Ext.namespace('CB');
 CB.DD = Ext.extend(Ext.util.Observable, {
     data: []
     ,action: 'copy' // copy / move / shortcut
+    
     ,constructor: function(config){
         this.addEvents({
             'beforeexecute': true
@@ -20,7 +20,7 @@ CB.DD = Ext.extend(Ext.util.Observable, {
             ,'moved': true
             ,'shortcuted': true
         });
-        CB.Clipboard.superclass.constructor.call(this, config)
+        CB.DD.superclass.constructor.call(this, config)
     }
     /**
      * Execute a Drag and Drop operation
@@ -34,15 +34,17 @@ CB.DD = Ext.extend(Ext.util.Observable, {
      *     @param  object   targetData     generic data for target object
      *     @param  object/array   sourceData     generic data for source object(s)
      *     @param  boolean   confirm     set to false wen you don't need a confirmation dialog for the action. Default to true
+     * }
      *     @param  function|null callback 
      *     @param  object|null   scope   
-     * }
      * @return void
      */
-    ,execute: function (params){
-        return Ext.Msg.alert(L.Info, 'This action will work on next commit. Reviewing right now.');
+    ,execute: function (params, callback, scope){
         if(Ext.isObject(params.action)) {
             params.action = this.detectActionFromEvent(params.action)
+        }
+        if(callback) {
+            this.callback = scope ? callback.createDelegate(scope) : callback;
         }
         switch(params.action){
             case 'copy':
@@ -74,12 +76,17 @@ CB.DD = Ext.extend(Ext.util.Observable, {
             )
         } else this.onConfirmExecution('yes');
     }
+    /**
+     * confirm action execution function
+     * @param  varchar b pressed button text
+     * @return void
+     */
     ,onConfirmExecution: function (b){
         if(b != 'yes'){
             return;
         }
-        this.fireEvent('beforeexecute', r.pids);
-        CB_Browser.paste(this.lastParams, this.processPaste, this);
+        this.fireEvent('beforeexecute', this.params);
+        CB_Browser_Actions[this.params.action](this.params, this.processExecute, this);
     }
     /**
      * detect desired action from event
@@ -94,14 +101,34 @@ CB.DD = Ext.extend(Ext.util.Observable, {
         }
         return 'move';
     }
+    /**
+     * processing execution
+     * @param  json r server responce
+     * @param  event e event
+     * @return void
+     */
     ,processExecute: function(r, e){
-        this.fireEvent('execute', r.pids);
         
         if(r.success !== true){
+            if(r.confirm === true) {
+                Ext.Msg.confirm(L.Confirmation, r.msg, function(b){
+                    if(b == 'yes'){
+                        this.params.confirmedOverwrite = true;
+                        this.onConfirmExecution('yes');
+                    }
+                }, this);
+            } else {
+                Ext.Msg.alert(L.Error, Ext.value(r.msg, L.ErrorOccured));
+            }
         }else{
-            this.fireEvent('pasted', r.pids);
+            Ext.copyTo(r, this.params, 'sourceData,targetData');
+            r.targetId = r.targetData.id
+            App.fireEvent('objectsaction', this.params.action, r, e);
         }
-        if(this.callback) this.callback(r.pids);
+        if(this.callback) {
+            this.callback(r.pids);
+            delete this.callback;
+        }
     }
 }
 )

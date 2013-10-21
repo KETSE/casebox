@@ -19,6 +19,13 @@ $API = array_merge(
                 ,'getObjectsForField'   => array('len' => 1)
             )
         )
+        ,'CB_Browser_Actions' => array(
+            'methods' => array(
+                'copy'          => array('len' => 1)
+                ,'move'         => array('len' => 1)
+                ,'shortcut'     => array('len' => 1)
+            )
+        )
 
         ,'CB_Path' => array(
             'methods' => array(

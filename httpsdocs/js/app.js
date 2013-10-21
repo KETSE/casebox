@@ -11,6 +11,7 @@ Ext.onReady(function(){
         ,'dragfilesover'
         ,'dragfilesleave'
         ,'filesdrop'
+        ,'objectsaction'
         ,'userprofileupdated'
     )
     Ext.state.Manager.setProvider( new Ext.state.CookieProvider({

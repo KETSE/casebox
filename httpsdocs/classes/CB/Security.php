@@ -177,8 +177,7 @@ class Security
             return $rez;
         }
 
-        if (!Security::isAdmin()
-            && empty($this->internalAccessing)
+        if (empty($this->internalAccessing)
             && !Security::canRead($p->id)
         ) {
             throw new \Exception(L\Access_denied);
@@ -956,10 +955,10 @@ class Security
     /* end of objects acl methods*/
 
     /**
-     * return sets
+     * return sets for a user that have access on specified bit
      * @param  boolean $user_id          [description]
      * @param  integer $access_bit_index 5 is read bit index
-     * @return [type]  [description]
+     * @return array   security set ids
      */
     public static function getSecuritySets ($user_id = false, $access_bit_index = 5)
     {
@@ -989,9 +988,9 @@ class Security
         $res->close();
 
         foreach ($sets as $set_id => $set) {
-            if ((empty($set[$user_id]) && !empty($set[$everyoneGroupId]))
-                || !empty($set[$user_id])
-                ) {
+            if (!empty($set[$user_id])
+                || (!isset($set[$user_id]) && !empty($set[$everyoneGroupId]))
+            ) {
                 $rez[] = $set_id;
             }
         }

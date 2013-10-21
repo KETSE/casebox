@@ -488,60 +488,61 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
             store: this.uploader.store
             ,stateful: true
             ,multiSelect: true
-            // ,hideHeaders: true
             ,stateId: 'uploadGrid'
             ,border: false
-            ,columns: [{
-                header: 'Name'
-                ,width: 150
-                ,sortable: false
-                ,dataIndex: 'name'
-            },{
-                header: 'Size'
-                ,width: 90
-                ,sortable: true
-                ,align: 'right'
-                ,renderer: Ext.util.Format.fileSize
-                ,dataIndex: 'size'
-            },{
-                header: 'status'
-                ,width: 75
-                // ,hidden: true
-                ,sortable: true
-                ,dataIndex: 'status'
-                ,renderer: function(v, meta, r){
-                    return Ext.value(L['fileUploadStatus' + v], '');
-                    // 0 - ready to upload 
-                    // /* 1 - uploading */
-                    // /* 2 - upload error */
-                    // /* 3 - upload timeout */
-                    // /* 4 - upload abort */
-                    // /* 5 - uploaded/**/
+            ,columns: [
+                {
+                    header: 'Name'
+                    ,width: 150
+                    ,sortable: false
+                    ,dataIndex: 'name'
+                },{
+                    header: 'Size'
+                    ,width: 90
+                    ,sortable: true
+                    ,align: 'right'
+                    ,renderer: Ext.util.Format.fileSize
+                    ,dataIndex: 'size'
+                },{
+                    header: 'status'
+                    ,width: 75
+                    // ,hidden: true
+                    ,sortable: true
+                    ,dataIndex: 'status'
+                    ,renderer: function(v, meta, r){
+                        return Ext.value(L['fileUploadStatus' + v], '');
+                        // 0 - ready to upload 
+                        // /* 1 - uploading */
+                        // /* 2 - upload error */
+                        // /* 3 - upload timeout */
+                        // /* 4 - upload abort */
+                        // /* 5 - uploaded/**/
+                    }
+                },{
+                    header: 'Percent'
+                    ,width: 75
+                    ,sortable: true
+                    // ,hidden: true
+                    ,dataIndex: 'loaded'
+                    ,renderer: function(v, meta, r){
+                        if(r.get('status') == 0) return '';
+                        if(v == 0) return '';
+                        return Math.round(v*100/r.get('size')) + ' %';
+                    }
+                },{
+                    header: 'Path'
+                    ,width: 200
+                    ,sortable: true
+                    ,dataIndex: 'pathtext'
+                    ,renderer: function(v, m, r){ return v+r.get('dir').substr(1)}
+                },{
+                    header: 'msg'
+                    ,width: 175
+                    ,sortable: true
+                    ,dataIndex: 'msg'
+                    ,hidden: true
                 }
-            },{
-                header: 'Percent'
-                ,width: 75
-                ,sortable: true
-                // ,hidden: true
-                ,dataIndex: 'loaded'
-                ,renderer: function(v, meta, r){
-                    if(r.get('status') == 0) return '';
-                    if(v == 0) return '';
-                    return Math.round(v*100/r.get('size')) + ' %';
-                }
-            },{
-                header: 'Path'
-                ,width: 200
-                ,sortable: true
-                ,dataIndex: 'pathtext'
-                ,renderer: function(v, m, r){ return v+r.get('dir').substr(1)}
-            },{
-                header: 'msg'
-                ,width: 175
-                ,sortable: true
-                ,dataIndex: 'msg'
-                ,hidden: true
-            }]
+            ]
             ,viewConfig: {
                 stripeRows: true
                 ,markDirty: false

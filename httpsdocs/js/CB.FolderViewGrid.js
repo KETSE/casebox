@@ -444,7 +444,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 
             ,statefull: true
             ,stateId: Ext.value(this.gridStateId, 'fvg')//folder view grid
-            ,dropZoneConfig: { text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'}
+            ,dropZoneConfig: { 
+                text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
+                ,onScrollerDragDrop: this.onScrollerDragDrop
+                ,scope: this
+            }
             ,plugins: [{
                     ptype: 'CBPluginsFilesDropZone'
                     , pidPropety: 'nid'
@@ -599,6 +603,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 
         App.clipboard.on('change', this.onClipboardChange, this);
         App.clipboard.on('pasted', this.onClipboardAction, this);
+        App.on('objectsaction', this.onObjectsAction, this);
         App.on('filesuploaded', this.onClipboardAction, this);
         App.mainViewPort.on('savesuccess', this.onObjectsSaved, this);
         App.mainViewPort.on('fileuploaded', this.onObjectsSaved, this);
@@ -634,6 +639,47 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     }
     ,onClipboardAction: function(pids){
         if(pids.indexOf(this.folderProperties.id) >=0 ) this.onReloadClick();
+    }
+    ,onObjectsAction: function(action, r, e){
+        if(Ext.isEmpty(r.processedIds)) {
+            return;
+        }
+        // if(pids.indexOf(this.folderProperties.id) >=0 ) this.onReloadClick();
+
+        switch(action){
+            case 'copy':
+                if(r.targetId == this.folderProperties.id){
+                    this.onReloadClick();
+                }
+                break;
+            case 'move':
+                if(r.targetId == this.folderProperties.id){
+                    this.onReloadClick();
+                } else {
+                    // remove moved record
+                    for (var i = 0; i < r.processedIds.length; i++) {
+                        idx = this.store.findExact('nid', parseInt(r.processedIds[i]))
+                        if(idx > -1) { 
+                            this.store.removeAt(idx);
+                        }
+                    }
+                }
+                break;
+            case 'create':
+                break;
+            case 'update':
+                break;
+            case 'delete':
+                break;
+        }
+    }
+
+    ,onScrollerDragDrop: function(targetData, source, e, sourceData){
+        App.DD.execute({
+            action: e
+            ,targetData: this.folderProperties
+            ,sourceData: sourceData.data
+        });
     }
     ,onSelectionChange: function(sm) {
         id = null;
@@ -817,7 +863,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.actions.createTask.setDisabled(false); 
         this.actions.createEvent.setDisabled(false); 
 
-        canCreateFolder = (this.folderProperties.nid > 0 );
+        canCreateFolder = (this.folderProperties.id > 0 );
         this.actions.createFolder.setDisabled(!canCreateFolder) ;
 
         this.updateCreateMenuItems()
@@ -936,11 +982,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     }
     ,onPasteClick: function(buttonOrKey, e) {
         if(this.actions.paste.isDisabled()) return;
-        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        App.clipboard.paste(this.folderProperties.id, null, this.processPaste, this);
-    }
-    ,processPaste: function(pids){
-        this.getEl().unmask();
+        App.clipboard.paste(this.folderProperties.id, null);
     }
     ,onPasteShortcutClick: function(buttonOrKey, e) {
         if(this.actions.pasteShortcut.isDisabled()) return;

@@ -375,7 +375,7 @@ class UsersGroups
                 ,enabled
                 ,date_format(last_action_time,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') last_action_time
                 ,date_format(cdate,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') `cdate`
-                ,(SELECT l'.USER_LANGUAGE_INDEX.'
+                ,(SELECT COALESCE(TRIM(CONCAT(first_name, \' \', last_name)), name)
                     FROM users_groups
                     WHERE id = u.cid) `owner`
             FROM users_groups u
@@ -410,7 +410,7 @@ class UsersGroups
         $rez = $this->getUserData((Object)array( 'data' => (object) array('id' => $user_id)));
 
         $rez['data']['groups'] = array();
-        $sql = 'SELECT a.group_id from users_groups_association a where user_id = $1';
+        $sql = 'SELECT a.group_id FROM users_groups_association a WHERE user_id = $1';
         $res = DB\dbQuery($sql, $user_id) or die(DB\dbQueryError());
         while ($r = $res->fetch_row()) {
             $rez['data']['groups'][] = $r[0];

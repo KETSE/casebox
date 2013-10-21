@@ -20,16 +20,10 @@ class Objects
 
         $template = $this->getTemplateInfo(null, $d->id);
         $rez['template_id'] = $template['id'];
-        $rez['template_pid'] = $template['pid'];
         $rez['iconCls'] = $template['iconCls'];
         $rez['type'] = $template['type'];
 
         $rez['id'] = $d->id;
-
-        if ($rez['template_pid'] == 5 || $rez['template_pid'] == 6) {
-            $rez['spentTime'] = array();
-            $rez['tasks'] = array();
-        }
 
         /* get object title */
         $res = DB\dbQuery(
@@ -1152,7 +1146,7 @@ class Objects
     public static function getCaseId($node_id)
     {
         $case_id = null;
-        $sql = 'select case_id from tree_info where id = $1';
+        $sql = 'SELECT case_id FROM tree_info WHERE id = $1';
         $res = DB\dbQuery($sql, $node_id) or die(DB\dbQueryError());
         if ($r = $res->fetch_row()) {
             $case_id = $r[0];
@@ -1205,7 +1199,7 @@ class Objects
         $case_id = null;
         $db = null;
 
-        $sql = 'select DATABASE(), case_id from tree_info where id = $1';
+        $sql = 'SELECT DATABASE(), case_id FROM tree_info WHERE id = $1';
         $res = DB\dbQuery($sql, $objectData['id']) or die(DB\dbQueryError());
         if ($r = $res->fetch_row()) {
             $db = $r[0];
@@ -1243,5 +1237,90 @@ class Objects
                 $objectData[$k] = $v;
             }
         }
+    }
+
+    //--------------------- new refactoring methods
+
+    /**
+     * get template type of an object
+     * @param  int          $objectId
+     * @return varchar|null
+     */
+    public static function getTemplateType($objectId)
+    {
+        if (!is_numeric($objectId)) {
+            return null;
+        }
+
+        $var_name = 'obj_template_type'.$objectId;
+
+        if (!Cache::exist($var_name)) {
+            $res = DB\dbQuery(
+                'SELECT tt.`type`
+                FROM tree t
+                JOIN templates tt ON t.template_id = tt.id
+                WHERE t.id = $1',
+                $objectId
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                Cache::set($var_name, $r['type']);
+            }
+            $res->close();
+        }
+
+        return Cache::get($var_name);
+    }
+
+    /**
+     * get an instance of the class designed for objectId (based on it's template type)
+     * @param  int    $objectId
+     * @return object
+     */
+    public function getCustomClass($objectId)
+    {
+        $templateType = $this->getTemplateType($objectId);
+        if (empty($templateType)) {
+            return null;
+        }
+        switch ($templateType) {
+            case 'file':
+                return new Objects\File($objectId);
+                break;
+            case 'task':
+                return new Objects\Task($objectId);
+                break;
+            default:
+                return new Objects\Object($objectId);
+                break;
+        }
+
+    }
+
+    /**
+     * copy an unknown object to a $pid or over a $targetId
+     * @param  int $objectId
+     * @param  int $pid
+     * @param  int $targetId
+     * @return int new copied object id
+     */
+    public function copy($objectId, $pid = false, $targetId = false)
+    {
+        $class = $this->getCustomClass($objectId);
+
+        return $class->copyTo($pid, $targetId);
+    }
+
+    /**
+     * move an unknown object to a $pid or over a $targetId
+     * @param  int $objectId
+     * @param  int $pid
+     * @param  int $targetId
+     * @return int new moved object id
+     */
+    public function move($objectId, $pid = false, $targetId = false)
+    {
+        $class = $this->getCustomClass($objectId);
+
+        return $class->moveTo($pid, $targetId);
     }
 }

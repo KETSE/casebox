@@ -94,18 +94,16 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,dataIndex: 'info'
             ,editor: new Ext.form.TextField()
         }
-        //,'field_id', 'duplicate_id', 'duplicate_pid', 'pid', 'type', 'level'
         ];
         
         Ext.apply(this, {
-            //tbar: tbar
             store:  new Ext.data.JsonStore({ 
                 fields: fields
                 ,reader: new Ext.data.JsonReader({ idProperty: 'id', messageProperty: 'msg' })
                 ,proxy: new Ext.data.MemoryProxy([])
             })
             ,columns: gridColumns
-            ,sm: new Ext.grid.CellSelectionModel({ listeners: { selectionchange: {scope: this, fn: this.onSelectionChange} } })
+            ,sm: new Ext.grid.CellSelectionModel()
             ,stripeRows: true
             ,header: false
             ,clicksToEdit: 1
@@ -143,6 +141,14 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     return rez;
                 }
             }
+            // ,dropZoneConfig: { 
+            //     ,onNodeOver: function(){clog('nodeOver')}
+            //     ,onNodeDrop: function(){clog('nodeDrop')}
+            //     ,scope: this
+            // }
+            // ,plugins: [{
+            //     ptype: 'CBDDGrid'
+            // }]
         });
         cw = this.refOwner.getBubbleTarget();
         if(cw){
@@ -566,8 +572,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 (r.get('visible') == 1) && ((r.get('tag') == 'f') || (r.get('tag') == 'H')) &&
                 (Ext.isEmpty(this.data.hideFields) || (this.data.hideFields.indexOf(r.get('tag')+r.get('field_id') + '_' + r.get('duplicate_id')) < 0) )
             ); 
-    }
-    ,onSelectionChange: function(sm, o){
     }
     ,duplicateField: function(fieldId, duplicateId, duplicatePid){
         // 3 26 0

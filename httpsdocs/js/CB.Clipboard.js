@@ -27,28 +27,15 @@ CB.Clipboard =  Ext.extend(Ext.util.Observable, {
         return rez;
     }
     ,paste: function(pid, action, callback, scope){
-        this.callback = scope ? callback.createDelegate(scope) : callback;
-        action = Ext.value(action, this.action);
-        this.lastParams = {pid: pid, data: this.data, action: action};
-        CB_Browser.paste(this.lastParams, this.processPaste, this);
-    }
-    ,processPaste: function(r, e){
-        if(r.success !== true){
-            if(r.confirm == true) {
-                Ext.Msg.confirm(L.Confirmation, r.msg, function(b){
-                    if(b == 'yes'){
-                        this.lastParams.confirmed = true;
-                        CB_Browser.paste(this.lastParams, this.processPaste, this);
-                    }
-                }, this);
-            } else {
-                Ext.Msg.alert(L.Error, r.msg);
-            }
-            return;
-        }else{
-            this.fireEvent('pasted', r.pids); //fire the event so that all components that are looking for clipboard will take action when clipboard is pasted and will update parent nodes
+        App.DD.execute({
+            action: Ext.value(action, this.action)
+            ,confirm: false
+            ,targetData: {id: pid}
+            ,sourceData: this.data
         }
-        if(this.callback) this.callback(r.pids);
+        ,callback
+        ,scope
+        );
     }
 });
 
