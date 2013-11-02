@@ -13,21 +13,27 @@ class UsersGroups
         if (!Security::canManage()) {
             throw new \Exception(L\Access_denied);
         }
-        $path = explode('/', $p->path);
+        $path = explode('/', $p['path']);
         $id = array_pop($path);
         $node_type = null;
 
         if (is_numeric($id)) {
-            $sql = 'select type from users_groups where id = $1';
-            $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
-            if ($r = $res->fetch_row()) {
-                $node_type = $r[0];
+            $res = DB\dbQuery(
+                'SELECT type
+                FROM users_groups
+                WHERE id = $1',
+                $id
+            ) or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                $node_type = $r['type'];
             }
             $res->close();
         }
 
         if ($id == -1) { // users out of a group
-            $sql = 'SELECT
+            $res = DB\dbQuery(
+                'SELECT
                     id `nid`
                     ,u.cid
                     ,name
@@ -40,15 +46,17 @@ class UsersGroups
                 WHERE u.`type` = 2
                     AND u.did IS NULL
                     AND a.group_id IS NULL
-                ORDER BY 3, 2';
-            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+                ORDER BY 3, 2'
+            ) or die(DB\dbQueryError());
+
             while ($r = $res->fetch_assoc()) {
                 $r['loaded'] = true;
                 $rez[] = $r;
             }
             $res->close();
         } elseif (is_null($node_type)) { /* root node childs*/
-            $sql = 'SELECT
+            $res = DB\dbQuery(
+                'SELECT
                     id `nid`
                     ,name
                     ,first_name
@@ -63,8 +71,9 @@ class UsersGroups
                 FROM users_groups g
                 WHERE `type` = 1
                     AND `system` = 0
-                ORDER BY 3, 2';
-            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+                ORDER BY 3, 2'
+            ) or die(DB\dbQueryError());
+
             while ($r = $res->fetch_assoc()) {
                 $r['iconCls'] = 'icon-users';
                 $r['expanded'] = true;
@@ -79,7 +88,8 @@ class UsersGroups
                 ,'expanded' => true
             );
         } else {// group users
-            $sql = 'SELECT
+            $res = DB\dbQuery(
+                'SELECT
                     u.id `nid`
                     ,u.cid
                     ,u.name
@@ -90,8 +100,10 @@ class UsersGroups
                 FROM users_groups_association a
                 JOIN users_groups u ON a.user_id = u.id
                 WHERE a.group_id = $1
-                    AND u.did IS NULL';
-            $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+                    AND u.did IS NULL',
+                $id
+            ) or die(DB\dbQueryError());
+
             while ($r = $res->fetch_assoc()) {
                 $r['loaded'] = true;
                 $rez[] = $r;
@@ -133,7 +145,7 @@ class UsersGroups
                 AND group_id = $2',
             array($user_id, $group_id)
         ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
+        if ($r = $res->fetch_assoc()) {
             throw new \Exception(L\UserAlreadyInOffice);
         }
         $res->close();
@@ -170,7 +182,8 @@ class UsersGroups
 
         Security::calculateUpdatedSecuritySets();
 
-        //return if the user is associated to another office, otherwize it shoul be added to Users out of office folder
+        //return if the user is associated to another office,
+        //otherwise it shoul be added to Users out of office folder
         $outOfGroup = true;
         $res = DB\dbQuery(
             'SELECT group_id
@@ -178,7 +191,7 @@ class UsersGroups
             WHERE user_id = $1 LIMIT 1',
             $user_id
         ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
+        if ($r = $res->fetch_assoc()) {
             $outOfGroup = false;
         }
 
@@ -195,24 +208,40 @@ class UsersGroups
         }
         ////params: name, group_id
         $rez = array('success' => false, 'msg' => L\Missing_required_fields);
-        $p->name = trim($p->name);
-        if (empty($p->name) ||
-            empty($p->password) ||
-            (empty($p->confirm_password) ||
-            ($p->password != $p->confirm_password))) {
+        $p['name'] = trim($p['name']);
+        if (empty($p['name']) ||
+            empty($p['password']) ||
+            (empty($p['confirm_password']) ||
+            ($p['password'] != $p['confirm_password']))) {
             return $rez;
         }
         $user_id = 0;
-        /*check user existance, if user already exists but is deleted then its record will be used for new user */
-        $res = DB\dbQuery("select id from users_groups where name = $1 and did is NULL", $p->name) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
+        /*check user existance, if user already exists but is deleted
+        then its record will be used for new user */
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM users_groups
+            WHERE name = $1
+                AND did IS NULL',
+            $p['name']
+        ) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
             throw new \Exception(L\User_exists);
         }
         $res->close();
         /*end of check user existance */
 
         DB\dbQuery(
-            'INSERT INTO users_groups (`name`, first_name, last_name, `cid`, `password`, language_id, cdate, uid, email)
+            'INSERT INTO users_groups (
+                `name`
+                ,first_name
+                ,last_name
+                ,`cid`
+                ,`password`
+                ,language_id
+                ,cdate
+                ,uid
+                ,email)
             VALUES($1
                 ,$2
                 ,$3
@@ -242,18 +271,18 @@ class UsersGroups
                 ,uid = $4
                 ,cdate = CURRENT_TIMESTAMP',
             array(
-                $p->name
-                ,$p->first_name
-                ,$p->last_name
+                $p['name']
+                ,$p['first_name']
+                ,$p['last_name']
                 ,$_SESSION['user']['id']
-                ,$p->password
+                ,$p['password']
                 ,LANGUAGE_INDEX
-                ,$p->email
+                ,$p['email']
             )
         ) or die(DB\dbQueryError());
         if ($user_id = DB\dbLastInsertId()) {
             $rez = array('success' => true, 'data' => array('id' => $user_id));
-            $p->id = $user_id;
+            $p['id'] = $user_id;
         }
 
         DB\dbQuery(
@@ -264,12 +293,12 @@ class UsersGroups
         ) or die(DB\dbQueryError());
 
         /* in case it was a deleted user we delete all old acceses */
-        DB\dbQuery('delete from users_groups_association where user_id = $1', $user_id) or die(DB\dbQueryError());
-        DB\dbQuery('delete from tree_acl where user_group_id = $1', $rez['data']['id']) or die(DB\dbQueryError());
+        DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $user_id) or die(DB\dbQueryError());
+        DB\dbQuery('DELETE FROM tree_acl WHERE user_group_id = $1', $rez['data']['id']) or die(DB\dbQueryError());
         /* end of in case it was a deleted user we delete all old acceses */
 
         // associating user to group if group was specified
-        if (isset($p->group_id) && is_numeric($p->group_id)) {
+        if (isset($p['group_id']) && is_numeric($p['group_id'])) {
             DB\dbQuery(
                 'INSERT INTO users_groups_association (user_id, group_id, cid)
                 VALUES($1, $2, $3)
@@ -277,11 +306,11 @@ class UsersGroups
                 UPDATE cid = $3',
                 array(
                     $user_id
-                    ,$p->group_id
+                    ,$p['group_id']
                     ,$_SESSION['user']['id']
                 )
             ) or die(DB\dbQueryError());
-            $rez['data']['group_id'] = $p->group_id;
+            $rez['data']['group_id'] = $p['group_id'];
         } else {
             $rez['data']['group_id'] = 0;
         }
@@ -290,23 +319,6 @@ class UsersGroups
         Solr\Client::runBackgroundCron();
 
         return $rez;
-    }
-
-    /**
-     * Retreive all user emails specified in user details and concatenates them into a comma separated string into email field from users_groups table
-     */
-    private function updateUserEmails($user_id)
-    {
-        $emails = array();
-        $res = DB\dbQuery('SELECT ud.value FROM templates t  JOIN templates_structure ts ON ts.template_id = t.id AND ts.name = \'email\' JOIN users_groups_data ud ON ts.id = ud.field_id and ud.user_id = $1 WHERE t.`type` = 6', $user_id) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            if (!empty($r[0])) {
-                $emails[] = $r[0];
-            }
-        }
-        $res->close();
-        $emails = empty($emails) ? null : implode(', ', $emails);
-        DB\dbQuery('update users_groups set email = $1 where id = $2', array($emails, $user_id)) or die(DB\dbQueryError());
     }
 
     /**
@@ -329,7 +341,10 @@ class UsersGroups
         ) or die(DB\dbQueryError()); // and (cid = $2) !!!!
 
         //TODO: destroy user session if loged in
-        return array('success' => DB\dbAffectedRows() ? true : false, 'data' => array($user_id, $_SESSION['user']['id']));
+        return array(
+            'success' => DB\dbAffectedRows() ? true : false,
+            'data' => array($user_id, $_SESSION['user']['id'])
+        );
     }
 
     /**
@@ -345,8 +360,7 @@ class UsersGroups
         On deleting a group also the users associations are deleted by the foreign key
         and corresponding security sets are marked, by trigger, as updated.
         */
-        DB\dbQuery('delete from users_groups where id = $1 and `type` = 1', $group_id) or die(DB\dbQueryError());
-
+        DB\dbQuery('DELETE FROM users_groups WHERE id = $1 AND `type` = 1', $group_id) or die(DB\dbQueryError());
         /* call the recalculation method for security sets. */
         Security::calculateUpdatedSecuritySets();
 
@@ -358,10 +372,10 @@ class UsersGroups
      */
     public function getUserData($p)
     {
-        if (($_SESSION['user']['id'] != $p->data->id) && !Security::canManage()) {
+        if (($_SESSION['user']['id'] != $p['data']['id']) && !Security::canManage()) {
             throw new \Exception(L\Access_denied);
         }
-        $user_id = $p->data->id;
+        $user_id = $p['data']['id'];
         $rez = array('success' => false, 'msg' => L\Wrong_id);
 
         $res = DB\dbQuery(
@@ -407,13 +421,18 @@ class UsersGroups
             throw new \Exception(L\Access_denied);
         }
         $user_id = $this->extractId($user_id);
-        $rez = $this->getUserData((Object)array( 'data' => (object) array('id' => $user_id)));
+        $rez = $this->getUserData(array( 'data' => array('id' => $user_id)));
 
         $rez['data']['groups'] = array();
-        $sql = 'SELECT a.group_id FROM users_groups_association a WHERE user_id = $1';
-        $res = DB\dbQuery($sql, $user_id) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            $rez['data']['groups'][] = $r[0];
+        $res = DB\dbQuery(
+            'SELECT a.group_id
+            FROM users_groups_association a
+            WHERE user_id = $1',
+            $user_id
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $rez['data']['groups'][] = $r['group_id'];
         }
         $res->close();
 
@@ -474,7 +493,8 @@ class UsersGroups
     }
 
     /**
-     * Get an array of group ids for specified user. If no user is passed then current loged user is analized.
+     * Get an array of group ids for specified user.
+     * If no user is passed then current loged user is analized.
      *
      */
     public static function getGroupIdsForUser($user_id = false)
@@ -484,10 +504,15 @@ class UsersGroups
         }
 
         $groups = array();
-        $sql = 'select group_id from users_groups_association where user_id = $1';
-        $res = DB\dbQuery($sql, $user_id) or die( DB\dbQueryError() );
-        while ($r = $res->fetch_row()) {
-            $groups[] = $r[0];
+        $res = DB\dbQuery(
+            'SELECT group_id
+            FROM users_groups_association
+            WHERE user_id = $1',
+            $user_id
+        ) or die( DB\dbQueryError() );
+
+        while ($r = $res->fetch_assoc()) {
+            $groups[] = $r['group_id'];
         }
         $res->close();
 
@@ -507,8 +532,17 @@ class UsersGroups
 
         /* check for old password if users changes password for himself */
         if ($_SESSION['user']['id'] == $user_id) {
-            $res = DB\dbQuery('select id from users_groups where id = $1 and `password` = MD5(CONCAT(\'aero\', $2))', array($user_id, $p['currentpassword'])) or die(DB\dbQueryError());
-            if (!$res->fetch_row()) {
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM users_groups
+                WHERE id = $1
+                    AND `password` = MD5(CONCAT(\'aero\', $2))',
+                array(
+                    $user_id
+                    ,$p['currentpassword']
+                )
+            ) or die(DB\dbQueryError());
+            if (!$res->fetch_assoc()) {
                 throw new \Exception(L\WrongCurrentPassword);
             }
             $res->close();
@@ -519,7 +553,19 @@ class UsersGroups
             throw new \Exception(L\Access_denied);
         }
 
-        DB\dbQuery('update users_groups set `password` = MD5(CONCAT(\'aero\', $2)), uid = $3 where id = $1', array($user_id, $p['password'], $_SESSION['user']['id'])) or die(DB\dbQueryError());
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET `password` = MD5(CONCAT(\'aero\', $2))
+                ,uid = $3
+            WHERE id = $1',
+            array(
+                $user_id
+                ,$p['password']
+                ,$_SESSION['user']['id']
+            )
+        ) or die(DB\dbQueryError());
+
+        Session::clearUserSessions($user_id);
 
         return array('success' => true);
     }
@@ -530,19 +576,29 @@ class UsersGroups
     public function renameUser($p)
     {
         /* username could be changed by: admin or user owner */
-        $name = trim(strtolower(strip_tags($p->name)));
+        $name = trim(strtolower(strip_tags($p['name'])));
         $matches = preg_match('/^[a-z0-9\._]+$/', $name);
         if (empty($name) || empty($matches)) {
             throw new \Exception(L\Wrong_input_data);
         }
 
-        $user_id = $this->extractId($p->id);
+        $user_id = $this->extractId($p['id']);
 
         if (!Security::canEditUser($user_id)) {
             throw new \Exception(L\Access_denied);
         }
 
-        DB\dbQuery('update users_groups set `name` = $2, uid = $3 where id = $1', array($user_id, $name, $_SESSION['user']['id'])) or die(DB\dbQueryError());
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET `name` = $2
+                , uid = $3
+            WHERE id = $1',
+            array(
+                $user_id
+                ,$name
+                ,$_SESSION['user']['id']
+            )
+        ) or die(DB\dbQueryError());
 
         return array('success' => true, 'name' => $name);
     }
@@ -552,12 +608,12 @@ class UsersGroups
      */
     public function renameGroup($p)
     {
-        $title = trim(strip_tags($p->title));
+        $title = trim(strip_tags($p['title']));
         if (empty($title)) {
             throw new \Exception(L\Wrong_input_data);
         }
 
-        $id = $this->extractId($p->id);
+        $id = $this->extractId($p['id']);
 
         if (!Security::canEditUser($id)) {
             throw new \Exception(L\Access_denied);

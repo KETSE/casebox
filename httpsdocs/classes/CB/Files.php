@@ -6,7 +6,8 @@ class Files
     public function getProperties($id)
     {
         $rez = array('success' => true, 'data' => array());
-        $sql = 'SELECT f.id
+        $res = DB\dbQuery(
+            'SELECT f.id
                 ,f.name
                 ,f.`date`
                 ,f.title
@@ -22,8 +23,10 @@ class Files
             JOIN tree_info ti on t.id = ti.id
             JOIN files f ON t.id = f.id
             LEFT JOIN files_content fc ON f.content_id = fc.id
-            WHERE t.id = $1';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+            WHERE t.id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $r['path'] = str_replace(',', '/', $r['path']);
             $a = explode('.', $r['name']);
@@ -53,14 +56,23 @@ class Files
 
         /* get versions */
 
-        $sql = 'SELECT id, `date`, `name`, cid, uid, cdate, udate
-            , (SELECT `size`
-               FROM files_content
-               WHERE id = v.content_id) `size`
+        $res = DB\dbQuery(
+            'SELECT id
+                ,`date`
+                ,`name`
+                ,cid
+                ,uid
+                ,cdate
+                ,udate
+                ,(SELECT `size`
+                   FROM files_content
+                   WHERE id = v.content_id) `size`
             FROM files_versions v
             WHERE file_id = $1
-            ORDER BY cdate DESC';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+            ORDER BY cdate DESC',
+            $id
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $r['ago_date'] = date(
                 str_replace(
@@ -208,17 +220,16 @@ class Files
                 //(if matches with current version or to an older version)
                 $existentFileId  = $this->getFileId($pid, $rez[0]['name'], @$rez[0]['dir']);
                 $md5 = $this->getFileMD5($rez[0]);
-                $sql = 'SELECT
-                            (SELECT l'.USER_LANGUAGE_INDEX.'
-                             FROM users_groups
-                             WHERE id = f.cid) `user`
-                                     , f.cdate
+                $res = DB\dbQuery(
+                    'SELECT
+                        (SELECT l'.USER_LANGUAGE_INDEX.'
+                            FROM users_groups
+                            WHERE id = f.cid) `user`
+                        , f.cdate
                     FROM files f
                     JOIN files_content c ON f.content_id = c.id
                     AND c.md5 = $2
-                    WHERE f.id = $1';
-                $res = DB\dbQuery(
-                    $sql,
+                    WHERE f.id = $1',
                     array(
                         $existentFileId
                         ,$md5
@@ -235,18 +246,16 @@ class Files
                 }
                 $res->close();
                 if (empty($rez[0]['msg'])) {
-                    $sql = 'SELECT
-                          (SELECT l'.USER_LANGUAGE_INDEX.'
-                           FROM users_groups
-                           WHERE id = f.cid) `user`
-                                           , f.cdate
+                    $res = DB\dbQuery(
+                        'SELECT
+                            (SELECT l'.USER_LANGUAGE_INDEX.'
+                                FROM users_groups
+                                WHERE id = f.cid) `user`
+                            , f.cdate
                         FROM files_versions f
                         JOIN files_content c ON f.content_id = c.id
                         AND c.md5 = $2
-                        WHERE f.file_id = $1';
-
-                    $res = DB\dbQuery(
-                        $sql,
+                        WHERE f.file_id = $1',
                         array(
                             $existentFileId
                             ,$md5
@@ -269,7 +278,7 @@ class Files
                 if (!empty($rez[0]['dir'])) {
                     $subdirId = $this->getFileId($pid, '', $rez[0]['dir']);
                 }
-                $rez[0]['suggestedFilename'] = $this->getAutoRenameFilename($subdirId, $rez[0]['name']);
+                $rez[0]['suggestedFilename'] = Objects::getAvailableName($subdirId, $rez[0]['name']);
                 /* end of suggested new filename */
                 break;
             default: // multiple files match
@@ -282,9 +291,12 @@ class Files
     public function checkExistentContents($p)
     {
         foreach ($p as $k => $v) {
-            $sql = 'select id from files_content where `md5` = $1';
-            $res = DB\dbQuery($sql, array($v)) or die(DB\dbQueryError());
-            $p->{$k} = ($r = $res->fetch_row()) ?  $r[0] : null;
+            $res = DB\dbQuery(
+                'SELECT id FROM files_content WHERE `md5` = $1',
+                $v
+            ) or die(DB\dbQueryError());
+
+            $p[$k] = ($r = $res->fetch_assoc()) ?  $r['id'] : null;
             $res->close();
         }
 
@@ -431,9 +443,10 @@ class Files
 
     /**
      * storeFiles move the files from incomming folder to file storage
-     * @param array $p upload field values from upload form,
-     * files property - array of uploaded files,
-     * response - response from user when asked about overwrite for single or many file
+     * @param array $p [ //upload params
+     *       files property - array of uploaded files,
+     *       response - response from user when asked about overwrite for single or many file
+     * ]
      */
     public function storeFiles(&$p)
     {
@@ -448,17 +461,18 @@ class Files
                 continue;
             }
 
-            @$p['files'][$fk]['date'] = Util\dateISOToMysql($p['date']);
+            @$f['date'] = Util\dateISOToMysql($p['date']);
 
-            $this->storeContent($p['files'][$fk]);
+            $this->storeContent($f);
 
             $pid = $p['pid'];
             if (!empty($f['dir'])) {
                 $pid = $this->mkTreeDir($pid, $f['dir']);
             }
 
-            //$file_id = empty($p['id']) ? $this->getFileId($pid, $f['name']) : $p['id'];
-            $file_id = $this->getFileId($pid, $f['name']);
+            $file_id = empty($p['id'])
+                ? $this->getFileId($pid, $f['name'])
+                : $p['id'];
 
             if (!empty($file_id)) {
                 //newversion, replace, rename, autorename, cancel
@@ -505,13 +519,12 @@ class Files
                         break;
                     case 'autorename':
                         $file_id = null;
-                        $f['name'] = $this->getAutoRenameFilename($pid, $f['name']);
+                        $f['name'] = Objects::getAvailableName($pid, $f['name']);
                         break;
                 }
             }
             $f['type'] = 5;//file
-            $obj = (object) $f;
-            fireEvent('beforeNodeDbCreate', $obj);
+            fireEvent('beforeNodeDbCreate', $f);
             DB\dbQuery(
                 'INSERT INTO tree (
                     id
@@ -594,11 +607,9 @@ class Files
             ) or die(DB\dbQueryError());
 
             $f['id'] = $file_id;
-            $p['files'][$fk]['id'] = $file_id;
-            $this->updateFileProperties($p['files'][$fk]);
-            $obj = (object) $f;
-            fireEvent('nodeDbCreate', $obj);
-
+            // $p['files'][$fk]['id'] = $file_id;
+            $this->updateFileProperties($f);
+            fireEvent('nodeDbCreate', $f);
         }
 
         return true;
@@ -630,47 +641,6 @@ class Files
         return true;
     }
 
-    public static function getAutoRenameFilename($pid, $name)
-    {
-        $newName = $name;
-        $a = explode('.', $name);
-        $ext = '';
-        if ((sizeof($a) > 1) && (sizeof($a) < 5)) {
-            $ext = array_pop($a);
-        }
-        $name = implode('.', $a);
-
-        $id = null;
-        $i = 1;
-        do {
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM tree
-                WHERE pid = $1
-                    AND name = $2
-                    AND dstatus = 0',
-                array(
-                    $pid
-                    ,$newName
-                )
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $id = $r['id'];
-            } else {
-                $id = null;
-            }
-            $res->close();
-
-            if (!empty($id)) {
-                $newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
-            }
-            $i++;
-        } while (!empty($id));
-
-        return $newName;
-    }
-
     public function mkTreeDir($pid, $dir)
     {
         if (empty($dir) || ($dir == '.' )) {
@@ -682,8 +652,18 @@ class Files
             if (empty($dir)) {
                 continue;
             }
-            $sql = 'select id from tree where pid = $1 and name = $2 and dstatus = 0';
-            $res = DB\dbQuery($sql, array($pid, $dir)) or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM tree
+                WHERE pid = $1
+                    AND name = $2
+                    AND dstatus = 0',
+                array(
+                    $pid
+                    ,$dir
+                )
+            ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 $pid = $r['id'];
             } else {
@@ -732,11 +712,14 @@ class Files
             return false;
         }
         $md5 = $this->getFileMD5($f);
-        $sql = 'select id, path from files_content where md5 = $1';
-        $res = DB\dbQuery($sql, $md5) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            if (file_exists($filePath.$r[1].'/'.$r[0])) {
-                $f['content_id'] = $r[0];
+        $res = DB\dbQuery(
+            'SELECT id, path FROM files_content WHERE md5 = $1',
+            $md5
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            if (file_exists($filePath.$r['path'].'/'.$r['id'])) {
+                $f['content_id'] = $r['id'];
             }
         }
         $res->close();
@@ -788,7 +771,8 @@ class Files
         if (!is_numeric($id)) {
             return $rez;
         }
-        $sql = 'SELECT
+        $res = DB\dbQuery(
+            'SELECT
                  fd.id
                 ,fd.cid
                 ,fd.cdate
@@ -796,11 +780,18 @@ class Files
                 ,ti.pids `path`
                 ,ti.path `pathtext`
             FROM files f
-            JOIN files fd ON f.content_id = fd.content_id AND fd.id <> $1
-            JOIN tree t ON fd.id = t.id and t.dstatus = 0
-            JOIN tree_info ti ON t.id = ti.id
-            WHERE f.id = $1';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+            JOIN files fd
+                ON f.content_id = fd.content_id
+                AND fd.id <> $1
+            JOIN tree t
+                ON fd.id = t.id
+                and t.dstatus = 0
+            JOIN tree_info ti
+                ON t.id = ti.id
+            WHERE f.id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $r['path'] = str_replace(',', '/', $r['path']);
             $rez['data'][] = $r;
@@ -1007,13 +998,16 @@ class Files
     public static function getFilesBlockForPreview($pid)
     {
         $rez = array();
-        $sql = 'SELECT id, name, size, cdate
+        $res = DB\dbQuery(
+            'SELECT id, name, size, cdate
             FROM tree
             WHERE pid = $1
                 AND `type` = 5
                 AND dstatus = 0
-            ORDER BY cdate DESC';
-        $res = DB\dbQuery($sql, $pid) or die(DB\dbQueryError());
+            ORDER BY cdate DESC',
+            $pid
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $rez[] = '<li class="icon-padding file-unknown file-'.
                 Files::getExtension($r['name']).
@@ -1041,7 +1035,16 @@ class Files
     {
         return; //TODO: refactor according to objectsRecord parametter and solr content search refactor
         $rez = array();
-        $sql = 'SELECT f.id
+        //,parsed_content `content`'.
+        $filesPath = '';
+        if (defined('FILES_DIR')) {
+            $filesPath = FILES_DIR;
+        } else {
+            global $core;
+            $filesPath = FILES_DIR.$core['name'].DIRECTORY_SEPARATOR;
+        }
+        $res = DB\dbQuery(
+            'SELECT f.id
             ,c.type
             ,c.size
             ,c.pages
@@ -1051,16 +1054,10 @@ class Files
             ,f.cid
             ,f.content_id
             ,(select count(*) from files_versions where file_id = f.id) `versions`
-            FROM files f left join files_content c on f.content_id = c.id where f.id = $1';
-        //,parsed_content `content`'.
-        $filesPath = '';
-        if (defined('FILES_DIR')) {
-            $filesPath = FILES_DIR;
-        } else {
-            global $core;
-            $filesPath = FILES_DIR.$core['name'].DIRECTORY_SEPARATOR;
-        }
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+            FROM files f left join files_content c on f.content_id = c.id where f.id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $rez['size'] = $r['size'];
             $rez['versions'] = intval($r['versions']);
@@ -1104,9 +1101,9 @@ class Files
             $id
         ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_row()) {
-            $file_id = $r[0];
-            $rez['data']['id'] = $r[0];
+        if ($r = $res->fetch_assoc()) {
+            $file_id = $r['file_id'];
+            $rez['data']['id'] = $file_id;
         }
         $res->close();
 
@@ -1117,8 +1114,8 @@ class Files
             $file_id
         ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_row()) {
-            $rez['data']['pid'] = $r[0];
+        if ($r = $res->fetch_assoc()) {
+            $rez['data']['pid'] = $r['pid'];
         }
         $res->close();
 
@@ -1195,8 +1192,8 @@ class Files
             $id
         ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_row()) {
-            $content_id = $r[0];
+        if ($r = $res->fetch_assoc()) {
+            $content_id = $r['content_id'];
         }
         $res->close();
 
@@ -1241,8 +1238,8 @@ class Files
             ORDER BY udate DESC, id DESC'
         ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_row()) {
-            $to_id = $r[0];
+        if ($r = $res->fetch_assoc()) {
+            $to_id = $r['id'];
         }
         $res->close();
 

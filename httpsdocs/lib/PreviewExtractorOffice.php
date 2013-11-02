@@ -8,24 +8,31 @@ class PreviewExtractorOffice extends PreviewExtractor
     public function execute()
     {
         $this->init();
-        $sql = 'SELECT count(*)
+
+        $processing = false;
+
+        $res = DB\dbQuery(
+            'SELECT count(*) `count`
             FROM file_previews
             WHERE `status` = 2
-                AND `group` = \'office\'';
-        $res = DB\dbQuery($sql) or die( DB\dbQueryError() );
-        $processing = false;
-        if ($r = $res->fetch_row()) {
-            $processing = ($r[0] > 0);
+                AND `group` = $1',
+            'office'
+        ) or die( DB\dbQueryError() );
+
+        if ($r = $res->fetch_assoc()) {
+            $processing = ($r['count'] > 0);
         }
         $res->close();
+
         if ($processing) {
             exit(0);
         }
 
         $sql = 'SELECT c.id `content_id`, c.path, p.status
-                  , (SELECT name
-                     FROM files f
-                     WHERE f.content_id = c.id LIMIT 1) `name`
+                    ,(SELECT name
+                        FROM files f
+                        WHERE f.content_id = c.id LIMIT 1
+                    ) `name`
                 FROM file_previews p
                 LEFT JOIN files_content c ON p.id = c.id
                 WHERE p.`status` = 1

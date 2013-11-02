@@ -5,7 +5,7 @@ class BrowserView extends BrowserTree
 {
     public function getChildren($p)
     {
-        $p->showFoldersContent = true;
+        $p['showFoldersContent'] = true;
         $rez = array(
             'success' => true
             ,'pathtext' => Path::getPathText($p)
@@ -13,8 +13,8 @@ class BrowserView extends BrowserTree
             ,'data' => false
         );
 
-        if (!empty($p->path) && empty($p->query)) {
-            $rez['data'] = $this->getCustomControllerResults($p->path);
+        if (!empty($p['path']) && empty($p['query'])) {
+            $rez['data'] = $this->getCustomControllerResults($p['path']);
         }
 
         if ($rez['data'] === false) {
@@ -27,19 +27,24 @@ class BrowserView extends BrowserTree
         return $rez;
     }
 
+    /**
+     * default method for displaying a node childs
+     * @param  array $p params
+     * @return array existing nodes
+     */
     private function getDefaultControllerResults($p)
     {
         $pid = null;
-        if (!empty($p->path)) {
-            $pid = Path::getId($p->path);
-        } elseif (!empty($p->pid)) {
-            $pid = is_numeric($p->pid) ? $p->pid : Browser::getRootFolderId();
+        if (!empty($p['path'])) {
+            $pid = Path::getId($p['path']);
+        } elseif (!empty($p['pid'])) {
+            $pid = is_numeric($p['pid']) ? $p['pid'] : Browser::getRootFolderId();
         }
 
-        if (empty($p->descendants)) {
-            $p->pid = $pid;
+        if (empty($p['descendants'])) {
+            $p['pid'] = $pid;
         } else {
-            $p->pids = $pid;
+            $p['pids'] = $pid;
         }
         $s = new Search();
         $rez = $s->query($p);
@@ -57,17 +62,15 @@ class BrowserView extends BrowserTree
                       , (SELECT 1
                          FROM tree
                          WHERE pid = $1
-                             AND dstatus = 0 LIMIT 1)
+                             AND dstatus = 0 LIMIT 1) has_childs
                     FROM tree
                     WHERE id = $1',
                     $d['nid']
                 ) or die(DB\dbQueryError());
 
-                if ($r = $res->fetch_row()) {
-                    if (!empty($r[0])) {
-                        $d['cfg'] = json_decode($r[0]);
-                    }
-                    $d['has_childs'] = ($r[1] == 1);
+                if ($r = $res->fetch_assoc()) {
+                    $d['cfg'] = Util\toJSONArray($r['cfg']);
+                    $d['has_childs'] = !empty($r['has_childs']);
                 }
                 $res->close();
             }
@@ -85,45 +88,45 @@ class BrowserView extends BrowserTree
         );
         $path = '/';
         $default_filters = array(
-            'activeTasks' => (object) array(
+            'activeTasks' => array(
                 'sort' => 'status'
                 ,'template_types' => 'task'
-                ,'filters' => (object) array(
-                    'status' => array( (object) array('mode' => 'OR', 'values' => array(1, 2) ) )
-                    ,'user_ids' => array( (object) array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
+                ,'filters' => array(
+                    'status' => array( array('mode' => 'OR', 'values' => array(1, 2) ) )
+                    ,'user_ids' => array( array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
                 )
             )
-            ,'completeTasks' => (object) array(
+            ,'completeTasks' => array(
                 'sort' => 'status'
                 ,'template_types' => 'task'
-                ,'filters' => (object) array(
-                    'status' => array( (object) array('mode' => 'OR', 'values' => array(1, 2) ) )
-                    ,'user_ids' => array( (object) array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
+                ,'filters' => array(
+                    'status' => array( array('mode' => 'OR', 'values' => array(1, 2) ) )
+                    ,'user_ids' => array( array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
                 )
             )
-            ,'actions' => (object) array(
+            ,'actions' => array(
                 'sort' => 'status'
                 ,'template_types' => 'object'
                 ,'folders' => false
-                ,'filters' => (object) array(
-                    'status' => array( (object) array('mode' => 'OR', 'values' => array(1, 2) ) )
-                    ,'user_ids' => array( (object) array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
+                ,'filters' => array(
+                    'status' => array( array('mode' => 'OR', 'values' => array(1, 2) ) )
+                    ,'user_ids' => array( array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
                 )
             )
-            ,'files' => (object) array(
+            ,'files' => array(
                 'sort' => 'status'
                 ,'template_types' => 'file'
-                ,'filters' => (object) array(
-                    'status' => array( (object) array('mode' => 'OR', 'values' => array(1, 2) ) )
-                    ,'user_ids' => array( (object) array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
+                ,'filters' => array(
+                    'status' => array( array('mode' => 'OR', 'values' => array(1, 2) ) )
+                    ,'user_ids' => array( array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
                 )
             )
-            ,'tasksUsers' => (object) array(
+            ,'tasksUsers' => array(
                 'sort' => 'status'
                 ,'template_types' => 'task'
-                ,'filters' => (object) array(
-                    'status' => array( (object) array('mode' => 'OR', 'values' => array(1, 2) ) )
-                    ,'user_ids' => array( (object) array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
+                ,'filters' => array(
+                    'status' => array( array('mode' => 'OR', 'values' => array(1, 2) ) )
+                    ,'user_ids' => array( array('mode' => 'OR', 'values' => array($_SESSION['user']['id']) ) )
                 )
             )
         );
@@ -132,13 +135,13 @@ class BrowserView extends BrowserTree
             if (empty($default_filters[$k])) {
                 continue;
             }
-            $params = Util\coalesce(@$p->{$k}, $default_filters[$k]);
-            if (!empty($v->path)) {
-                $path = $v->path;
-                if (empty($v->descendants)) {
-                    $params->pid = Path::getId($path);
+            $params = Util\coalesce(@$p[$k], $default_filters[$k]);
+            if (!empty($v['path'])) {
+                $path = $v['path'];
+                if (empty($v['descendants'])) {
+                    $params['pid'] = Path::getId($path);
                 } else {
-                    $params->pids = Path::getId($path);
+                    $params['pids'] = Path::getId($path);
                 }
             }
             $sr = $search->query($params);
@@ -147,14 +150,14 @@ class BrowserView extends BrowserTree
                 case 'tasksUsers':
                     foreach ($sr['facets'] as $f) {
                         @$d[] = array(
-                            $f['id']
+                            $f->id
                             ,null
                             ,null
                             ,null
                             ,null
                             ,null
-                            ,$f['total']
-                            ,$f['total2']
+                            ,$f->total
+                            ,$f->total2
                         );
                     }
                     break;
@@ -175,7 +178,6 @@ class BrowserView extends BrowserTree
             $rez['params'][$k] = $search->params;
         }
 
-        $path = (object) array('path' => $path);
         $rez['pathtext'] = Path::getPathText($path);
         $rez['folderProperties'] = Path::getPathProperties($path);
 

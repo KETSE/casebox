@@ -269,12 +269,17 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                 }
             ]
             ,plugins: [ new CB.DD.Tree({idProperty: 'nid'}) ]
-        })
+        });
+
         CB.BrowserTree.superclass.initComponent.apply(this, arguments);
-        if(!Ext.isEmpty(this.rootId)) CB_BrowserTree.getRootProperties(this.rootId, function(r, e){
-            Ext.apply(this.getRootNode().attributes, r.data)
-            this.onBeforeNodeAppend(this, null, this.getRootNode())
-        }, this)
+        if(!Ext.isEmpty(this.rootId)) {
+            CB_BrowserTree.getRootProperties(
+                this.rootId
+                ,function(r, e){
+                    Ext.apply(this.getRootNode().attributes, r.data);
+                    this.onBeforeNodeAppend(this, null, this.getRootNode());
+            }, this);
+        }
 
         this.addEvents('casecreate', 'createobject', 'fileopen', 'filedownload', 'taskedit', 'afterrename');
         this.enableBubble(['casecreate', 'createobject', 'fileopen', 'filedownload', 'taskedit']);
@@ -290,7 +295,10 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
     }
     ,onBeforeNodeAppend: function(tree, parent, node){
         node.setId(Ext.id());
-        node.attributes.nid = Ext.num(node.attributes.nid, null);
+        
+        // node id could be literal, so we cannot eval it to int
+        // node.attributes.nid = Ext.num(node.attributes.nid, null);
+        
         node.attributes.system = Ext.num(node.attributes.system, 0);
         node.attributes.type = Ext.num(node.attributes.type, 0);
         node.attributes.subtype = Ext.num(node.attributes.subtype, 0);

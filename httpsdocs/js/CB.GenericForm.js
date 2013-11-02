@@ -1,7 +1,8 @@
-Ext.namespace('CB'); 
-/*  
+Ext.namespace('CB');
+/*
     An api should be defined for read and submitting form
-    for locking mechanism there should be specified lockEdit and unlockEdit functions. unlockEdit should call doClose or destroy the form at the end of unlock process
+    for locking mechanism there should be specified lockEdit and unlockEdit functions.
+    unlockEdit should call doClose or destroy the form at the end of unlock process
 
 */
 CB.GenericForm = Ext.extend(Ext.FormPanel, {
@@ -45,11 +46,11 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
             ,scope: this
             ,fn: function(b, text, opt){
                 switch(b){
-                case 'yes': 
+                case 'yes':
                     this._confirmedClosing = true;
                     this.saveForm();
                     break;
-                case 'no': 
+                case 'no':
                     this._confirmedClosing = true;
                     this._unlockEdit();
                     break;
@@ -58,7 +59,10 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
         });
         return false;
     }
-    ,doClose: function(){ this.suspendEvents(false); this.destroy(); }
+    ,doClose: function(){
+        this.suspendEvents(false);
+        this.destroy();
+    }
     ,loadData: function(){
         if(isNaN(this.data.id)){
             this.data.id = Ext.isEmpty(this.data.id) ? Ext.id(): this.data.id;
@@ -68,11 +72,13 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
             return;
         }
         this.getForm().load({
-            params: {data: this.data}
+            params: {
+                id: this.data.id
+            }
             ,scope: this
             ,success: this.processLoadResponse
             ,failure: this.processLoadResponse.createDelegate(this)
-        })
+        });
     }
     ,getTitle: function(){
         if(!Ext.isEmpty(this.data.custom_title)){
@@ -99,7 +105,7 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
     }
     ,getIconClass: Ext.emptyFn // this function should be redefined for child classes to return a corresponding icon for the window
     ,processLoadResponse: function(f, e){
-        this.getEl().unmask(); 
+        this.getEl().unmask();
         r = e.result;
         if(r.success !== true){
             if(App.hideFailureAlerts){
@@ -149,7 +155,7 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
             ,scope: this
             ,success: this.onSaveSuccess
             ,failure: this.onSaveFailure
-        })
+        });
     }
     ,onSaveSuccess: function(f, a){
         if(Ext.isDefined(a.result.data)) this.data = a.result.data;
@@ -172,7 +178,7 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
                     this._forcedSave = 1;
                     this.saveForm();
                 } else {
-                    this.getEl().unmask(); 
+                    this.getEl().unmask();
                     this._confirmedClosing = 0;
                 }
             }
@@ -182,80 +188,9 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
             });
         }else{
             this.fireEvent('savefail', this, action);
-            App.formSubmitFailure(form, action); 
+            App.formSubmitFailure(form, action);
         }
     }
-})
-
-Ext.reg('CBGenericForm', CB.GenericForm); // register xtype                                                 
-
-// ---------------------------------------------- Generic edit form
-CB.GenericEditForm = Ext.extend(CB.GenericForm, {
-    padding: 0
-    ,autoHeight: true
-    ,autoScroll: true
-    ,layout: 'fit'
-    ,api: {}
-    ,initComponent: function(){
-        this.grid = new CB.VerticalEditGrid({ 
-            refOwner: this
-            ,autoHeight: true
-            ,viewConfig: {autoFill: true, forceFit: true}
-        });
-        
-        Ext.apply(this, {
-            hideBorders: true
-            ,tbar: [{text: L.Save, iconCls:'icon-save', disabled: true, handler: this.saveForm, scope: this, position: 0}
-                ,{text: Ext.MessageBox.buttonText.cancel, iconCls:'icon-cancel', disabled: true, handler: this.onCancelClick, scope: this, position: 1}
-            ]
-            ,initialConfig:{
-                api: { 
-                    load: this.api.load
-                    ,submit: this.api.submit
-                    ,waitMsg: L.LoadingData + ' ...'
-                }
-                ,paramsAsHash: true
-            }
-            ,items: this.grid
-            ,listeners:{
-                scope: this
-                ,afterlayout: function(){
-                    if(this.loaded) return; 
-                    this.getEl().mask(L.Downloading + ' ...', 'x-mask-loading'); 
-                }
-                ,change: this.onChangeEvent
-                ,beforedestroy: function(){ this.grid.destroy() }
-                ,savesuccess: this.onChange
-            }
-        });
-        this.addEvents('cancel');
-        CB.GenericEditForm.superclass.initComponent.apply(this, arguments);
-    }
-    ,onCancelClick: function(){
-        this._setFormValues();
-        this.fireEvent('cancel', this);
-        this.onChange();
-    }
-    ,setFormValues: function(){
-        this.getEl().unmask();
-        if(!this.loaded) this.loaded = true;
-        this.grid.reload();
-        this.setTitle(this.data['l'+App.loginData.language_id]);
-    }
-    ,getFormValues: function(){
-        if(!Ext.isDefined(this.data.gridData)) this.data.gridData = {};
-        this.data.gridData.values = {};
-        this.grid.readValues(); // grid will reset the this.data.gridData array to only its values, so we read other values after it will do its data read
-    }
-    ,onChangeEvent: function(){
-        this.setDirty(true);
-        this.onChange();
-    }
-    ,onChange: function(){
-        tb = this.getTopToolbar();
-        b = tb.find('iconCls', 'icon-save')[0];
-        if(b) b.setDisabled(!this._isDirty)
-        b = tb.find('iconCls', 'icon-cancel')[0];
-        if(b) b.setDisabled(!this._isDirty)
-    }
 });
+
+Ext.reg('CBGenericForm', CB.GenericForm);

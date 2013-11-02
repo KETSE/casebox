@@ -228,7 +228,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,{name: 'cdate', type: 'date'}
                 ,{name: 'udate', type: 'date'}
                 ,'case'
-                ,'content' 
+                ,'content'
                 ,{name: 'has_childs', type: 'bool'}
                 ,{name: 'acl_count', type: 'int'}
                 ,'cfg'
@@ -236,7 +236,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             )
             ,listeners: {
                 scope: this
-                ,beforeload: function(store, options) { 
+                ,beforeload: function(store, options) {
                     Ext.apply(store.baseParams, Ext.value(this.params, {}) )
                     options = store.baseParams;
                 }
@@ -298,10 +298,10 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,getRowClass: function(r, rowIndex, rp, ds){
                     rp.body = '';
                     if(!Ext.isEmpty(r.get('content'))) rp.body += r.get('content');
-                    
+
                     if(Ext.isEmpty(rp.body)) return '';
                     return 'hasBody';
-                } 
+                }
             }
             ,sm: new Ext.grid.RowSelectionModel({
                 singleSelect: false
@@ -444,7 +444,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 
             ,statefull: true
             ,stateId: Ext.value(this.gridStateId, 'fvg')//folder view grid
-            ,dropZoneConfig: { 
+            ,dropZoneConfig: {
                 text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
                 ,onScrollerDragDrop: this.onScrollerDragDrop
                 ,scope: this
@@ -458,9 +458,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ]
             ,getProperty: this.getProperty.createDelegate(this)
         });
-        
+
         this.previewPanel = new CB.PreviewPanel({bodyStyle:'padding: 10px'});
-        
+
         this.filterButton = new Ext.Button({
             text: L.Filter
             ,enableToggle: true
@@ -481,8 +481,8 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,change: this.onFiltersChange
             }
         });
-        
-        
+
+
         this.eastPanel = new Ext.Panel({
             region: 'east'
             ,width: 300
@@ -497,32 +497,32 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ,stateId: Ext.value(this.gridStateId, 'fvg') + 'EP' //taskview east panel
             ,items: [ this.previewPanel, this.filtersPanel ]
         })
-        
+
         params = Ext.apply({}, this.params, {
             path: '/'
-            ,descendants: false 
+            ,descendants: false
         })
 
         Ext.apply(this, {
             params: params
             ,folderProperties: {}
             ,tbar: [
-                {   
+                {
                     text: L.Create
                     ,iconCls: 'icon32-create'
                     ,iconAlign:'top'
                     ,scale: 'large'
                     ,menu: [ ]
-                },{ 
+                },{
                     text: L.Edit
                     ,iconCls: 'icon32-edit'
                     ,iconAlign:'top'
                     ,scale: 'large'
                     ,menu: [
-                        this.actions.cut 
-                        ,this.actions.copy 
-                        ,this.actions.paste 
-                        ,this.actions.pasteShortcut 
+                        this.actions.cut
+                        ,this.actions.copy
+                        ,this.actions.paste
+                        ,this.actions.pasteShortcut
                         ,'-'
                         ,this.actions.mergeFiles
                         ,'-'
@@ -570,7 +570,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ,items: [this.grid, this.eastPanel]
         })
         CB.FolderViewGrid.superclass.initComponent.apply(this, arguments);
-        
+
         this.addEvents(
                 'selectionchange'
                 ,'casecreate'
@@ -659,7 +659,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                     // remove moved record
                     for (var i = 0; i < r.processedIds.length; i++) {
                         idx = this.store.findExact('nid', parseInt(r.processedIds[i]))
-                        if(idx > -1) { 
+                        if(idx > -1) {
                             this.store.removeAt(idx);
                         }
                     }
@@ -704,14 +704,14 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             this.actions.open.setDisabled(false);
             this.actions.browse.setDisabled(false);
             this.actions['delete'].setDisabled(row.get('system') == 1);
-            
+
             canOpenLocation = (this.params.descendants || !Ext.isEmpty(this.grid.store.baseParams.query) );
             this.actions.openItemLocation.setDisabled(!canOpenLocation);
 
             canCopy = (row.get('system') == 0) && (row.get('nid') > 0 );
             this.actions.cut.setDisabled(!canCopy);
             this.actions.copy.setDisabled(!canCopy);
-            
+
             canDelete = (row.get('system') == 0) && (row.get('nid') > 0 );
             this.actions['delete'].setDisabled(!canDelete);
             canRename = (row.get('system') == 0);
@@ -734,12 +734,12 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             this.actions.uploadNewVersion.setDisabled(!canUploadNewVersion)
             // this.actions.permissions.setDisabled(false) ;
         }
-        canPaste = !App.clipboard.isEmpty() 
+        canPaste = !App.clipboard.isEmpty()
             && ( !this.folderProperties.inFavorites || App.clipboard.containShortcutsOnly() );
-        
+
         this.actions.paste.setDisabled(!canPaste);
-        canPasteShortcut = !App.clipboard.isEmpty() 
-            && !App.clipboard.containShortcutsOnly() 
+        canPasteShortcut = !App.clipboard.isEmpty()
+            && !App.clipboard.containShortcutsOnly()
             && ( (this.folderProperties.system == 0) && (this.folderProperties.template_type != 'file') );
         this.actions.pasteShortcut.setDisabled(!canPasteShortcut);
 
@@ -838,14 +838,14 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     ,onProxyLoad: function (proxy, o, options) {
         this.path = this.store.baseParams.path;
         this.folderProperties = Ext.apply({}, o.result.folderProperties)
-        
+
         this.folderProperties.id = this.folderProperties.id;
         this.folderProperties.system = parseInt(this.folderProperties.system);
         this.folderProperties.type = parseInt(this.folderProperties.type);
         this.folderProperties.subtype = parseInt(this.folderProperties.subtype);
         this.folderProperties.pathtext = o.result.pathtext;
         this.fireEvent('viewloaded', proxy, o, options);
-        
+
         canUpload = !this.folderProperties.inFavorites;
         tb = this.getTopToolbar();
         if(!Ext.isEmpty(tb)){
@@ -860,8 +860,8 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.actions.uploadMultipleFiles.setDisabled(!canUpload);
 
         canCreateTask = true; //TODO: review where we can create tasks
-        this.actions.createTask.setDisabled(false); 
-        this.actions.createEvent.setDisabled(false); 
+        this.actions.createTask.setDisabled(false);
+        this.actions.createEvent.setDisabled(false);
 
         canCreateFolder = (this.folderProperties.id > 0 );
         this.actions.createFolder.setDisabled(!canCreateFolder) ;
@@ -870,11 +870,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.filtersPanel.updateFacets(o.result.facets, options);
     }
     ,onStoreLoad: function(store, recs, options) {
-        Ext.each(recs, function(r){ 
+        Ext.each(recs, function(r){
             cfg = Ext.value(r.get('cfg'), {});
             r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
         }, this);
-        
+
         pt = this.grid.getBottomToolbar();
         pagingVisible = (store.reader.jsonData.total > pt.pageSize);
         if(pagingVisible) pt.show();
@@ -931,7 +931,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     ,onOpenClick: function(b, e) {
         if(!this.grid.selModel.hasSelection()) return;
         row = this.grid.selModel.getSelected();
-        if( !App.openObject(row.get('template_id'), row.get('nid'), e) ) this.onBrowseClick(b, e);
+        if( !App.openObject(row.get('template_id'), row.get('nid'), e) ) {
+            this.onBrowseClick(b, e);
+        }
     }
     ,onBrowseClick: function(b, e) {
         if(!this.grid.selModel.hasSelection()) return;
@@ -955,7 +957,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         if(this.actions.openItemLocation.isDisabled()) return;
         if(!this.grid.selModel.hasSelection()) return;
         row = this.grid.selModel.getSelected();
-        this.fireEvent('changeparams', {path: row.get('pid'), descendants: false, query:'' }, e)    
+        this.fireEvent('changeparams', {path: row.get('pid'), descendants: false, query:'' }, e)
         App.locateObject(row.data.nid, row.data.pid);
     }
     ,onCutClick: function(buttonOrKey, e) {
@@ -1076,7 +1078,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     ,onDeleteClick: function(b, e) {
         s = this.grid.selModel.getSelections();
         if(Ext.isEmpty(s)) return;
-        Ext.Msg.confirm( L.DeleteConfirmation, (s.length == 1) ? L.DeleteConfirmationMessage + ' "' + s[0].get('name') + '"?' : L.DeleteSelectedConfirmationMessage, this.onDelete, this ) 
+        Ext.Msg.confirm( L.DeleteConfirmation, (s.length == 1) ? L.DeleteConfirmationMessage + ' "' + s[0].get('name') + '"?' : L.DeleteSelectedConfirmationMessage, this.onDelete, this )
     }
     ,onDelete: function (btn) {
         if(btn !== 'yes') return;

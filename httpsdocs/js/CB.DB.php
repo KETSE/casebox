@@ -23,7 +23,7 @@ Ext.namespace('CB.DB');
     CB.DB.templateTypes = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: ['id', 'name']
-        ,data:  [[null, '-'], ['case', 'case'], ['object', 'object'], ['file', 'file'], ['task', 'task'], ['email', 'email'], ['user', 'user']]
+        ,data:  [[null, '-'], ['case', 'case'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['object', 'object'], ['search', 'search'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
         ,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
     });
     CB.DB.reminderTypes = new Ext.data.ArrayStore({
@@ -115,17 +115,17 @@ echo "\n".'CB.DB.securityQuestions = new Ext.data.ArrayStore({'.
 
 /* menu */
 $arr = array();
-$res = DB\dbQuery('select * from menu') or die( DB\dbQueryError() );
-while ($r = $res->fetch_row()) {
+$res = DB\dbQuery('SELECT * FROM menu') or die( DB\dbQueryError() );
+while ($r = $res->fetch_assoc()) {
     $intersection = array_intersect(
-        explode(',', $r[4]),
+        explode(',', $r['user_group_ids']),
         array_merge(
             $_SESSION['user']['groups'],
             array($_SESSION['user']['id'])
         )
     );
-    if (empty($r[4]) || !empty( $intersection )) {
-        $arr[] = $r;
+    if (empty($r['user_group_ids']) || !empty( $intersection )) {
+        $arr[] = array_values($r);
     }
 }
 $res->close();
@@ -137,22 +137,37 @@ echo "\n".'CB.DB.menu = new Ext.data.ArrayStore({'.
 /* end of menu */
 
 /* templates */
-$sql = 'SELECT ts.id, ts.pid, t.id template_id, ts.tag, ts.`level`, ts.`name`, ts.l'.USER_LANGUAGE_INDEX.' `title`, ts.`type`, ts.`order`, ts.cfg'.
-        ', (coalesce(t.title_template, \'\') <> \'\' ) `has_title_template`'.
-        ' FROM templates t left join templates_structure ts on t.id = ts.template_id ORDER BY template_id, level, `order`';
-$res = DB\dbQuery($sql, $_SESSION['user']['language_id']) or die( DB\dbQueryError() );
+$res = DB\dbQuery(
+    'SELECT ts.id
+        ,ts.pid
+        ,t.id template_id
+        ,ts.tag
+        ,ts.`level`
+        ,ts.`name`
+        ,ts.l'.USER_LANGUAGE_INDEX.' `title`
+        ,ts.`type`
+        ,ts.`order`
+        ,ts.cfg
+        ,(coalesce(t.title_template, \'\') <> \'\' ) `has_title_template`
+    FROM templates t
+    LEFT JOIN templates_structure ts
+        ON t.id = ts.template_id
+    ORDER BY template_id, level, `order`',
+    $_SESSION['user']['language_id']
+) or die( DB\dbQueryError() );
 
 $templates = array();
 while ($r = $res->fetch_assoc()) {
     $t = $r['template_id'];
+    if ($r['pid'] == $t) {
+        $r['pid'] = null;
+    }
     unset($r['template_id']);
     if (($r['type'] == '_auto_title') && ($r['has_title_template'] == 0)) {
         $r['type'] = 'varchar';
     }
     unset($r['has_title_template']);
-    if (!empty($r['cfg'])) {
-        $r['cfg'] = json_decode($r['cfg']);
-    }
+    $r['cfg'] = Util\toJSONArray($r['cfg']);
     if (empty($r['id'])) {
         $templates[$t] = '';
     } else {

@@ -1,4 +1,4 @@
-Ext.namespace('CB'); 
+Ext.namespace('CB');
 
 CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
     border: false
@@ -14,7 +14,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 if(Ext.isDefined(i.position)) tbar.splice(i.position, 0, i);
                 else tbar.push(i);
         });
-        
+
         fields = ['id'
             ,{name: 'field_id', type: 'int'}
             ,'title'
@@ -35,19 +35,19 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,reader: new Ext.data.JsonReader({ idProperty: 'id', messageProperty: 'msg' })
             ,proxy: new Ext.data.MemoryProxy([])
             ,listeners:{
-                add: function(st, recs, idx){ 
+                add: function(st, recs, idx){
                     Ext.each(recs, function(r){
                         v = r.get('cfg');
-                        if(Ext.isEmpty(v)) v = {}; 
+                        if(Ext.isEmpty(v)) v = {};
                         v.maxInstances = parseInt( Ext.value(v.maxInstances, 1) );
                         v.showIn = Ext.value(v.showIn, 'grid');
                         r.set('cfg', v);
                     }, this);
-                
+
                 }
             }
         });
-        
+
         gridColumns = [{
             header: L.Property
             ,width: 250
@@ -95,9 +95,9 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,editor: new Ext.form.TextField()
         }
         ];
-        
+
         Ext.apply(this, {
-            store:  new Ext.data.JsonStore({ 
+            store:  new Ext.data.JsonStore({
                 fields: fields
                 ,reader: new Ext.data.JsonReader({ idProperty: 'id', messageProperty: 'msg' })
                 ,proxy: new Ext.data.MemoryProxy([])
@@ -141,14 +141,28 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     return rez;
                 }
             }
-            // ,dropZoneConfig: { 
-            //     ,onNodeOver: function(){clog('nodeOver')}
-            //     ,onNodeDrop: function(){clog('nodeDrop')}
-            //     ,scope: this
-            // }
-            // ,plugins: [{
-            //     ptype: 'CBDDGrid'
-            // }]
+            ,editors: {
+                iconcombo: function(){
+                    return new Ext.form.ComboBox({
+                        editable: false
+                        ,name: 'iconCls'
+                        ,hiddenName: 'iconCls'
+                        ,tpl: '<tpl for="."><div class="x-combo-list-item icon-padding16 {name}">{name}</div></tpl>'
+                        ,store: CB.DB.templatesIconSet
+                        ,valueField: 'name'
+                        ,displayField: 'name'
+                        ,iconClsField: 'name'
+                        ,triggerAction: 'all'
+                        ,mode: 'local'
+                        ,plugins: [new Ext.ux.plugins.IconCombo()]
+                    })
+                }
+            }
+            ,renderers: {
+                iconcombo: function(v, grid){
+                    return '<img src="css/i/s.gif" class="icon '+v+'" /> '+v
+                }
+            }
         });
         cw = this.refOwner.getBubbleTarget();
         if(cw){
@@ -161,9 +175,9 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
     }
     ,isDuplicateField: function(record){
         if(this.canDuplicateField(record)) return true;
-        if( !Ext.isEmpty(this.data) 
+        if( !Ext.isEmpty(this.data)
             && !Ext.isEmpty(this.data.duplicateFields)
-            && !Ext.isEmpty(this.data.duplicateFields[record.get('field_id')]) 
+            && !Ext.isEmpty(this.data.duplicateFields[record.get('field_id')])
         ) return true;
         return false;
     }
@@ -175,9 +189,9 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         if(!this.isDuplicateField(record)) return index;
         if(this.isFirstDuplicateField(record)) return 0;
         index = 0;
-        if( !Ext.isEmpty(this.data) 
+        if( !Ext.isEmpty(this.data)
             && !Ext.isEmpty(this.data.duplicateFields)
-            && !Ext.isEmpty(this.data.duplicateFields[record.get('field_id')]) 
+            && !Ext.isEmpty(this.data.duplicateFields[record.get('field_id')])
             && !Ext.isEmpty(this.data.duplicateFields[record.get('field_id')][record.get('duplicate_id')])
         ){
             Ext.iterate(this.data.duplicateFields[record.get('field_id')], function(k, v, o){
@@ -192,13 +206,13 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         return (record.get('duplicate_id') == 0);
     }
     ,isLastDuplicateField: function(record){
-        
+
         idx = this.store.indexOf(record);
         if(this.store.getCount() == (idx+1) ) return true;
         return (this.store.getAt(idx +1).get('field_id') != record.get('field_id') );
     }
     ,onCellClick: function(g, r, c, e){
-        if(g.getColumnModel().getDataIndex(c) == 'files') 
+        if(g.getColumnModel().getDataIndex(c) == 'files')
             return this.onPopupMenu(g, r, c, e);
         el = e.getTarget();
         if(el)
@@ -328,10 +342,10 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         cm = this.getColumnModel();
         s = sm.getSelectedCell();
         gv = this.getView();
-        
+
         if(Ext.isEmpty(s)) return;
         fieldName = cm.getDataIndex(s[1]);
-    
+
         if(fieldName == 'title'){
             c = gv.getCell(s[0], s[1]);
             c.className = c.className.replace( (c.className.indexOf(' x-grid3-cell-selected') >= 0 ? ' x-grid3-cell-selected' : 'x-grid3-cell-selected'), '')
@@ -347,7 +361,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         return this.parentWindow;
     }
     ,reload: function(){
-        // initialization 
+        // initialization
         this.data = {};
         w = this.refOwner;
         if(Ext.isDefined(w.data) && Ext.isDefined(w.data[this.root])) this.data = w.data[this.root];
@@ -381,7 +395,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             //if there is a date set for the date field, we are parsing it to a date value
             if( (d.type == 'date') && Ext.isString(d.value) && !Ext.isEmpty(d.value))
                 d.value = Date.parseDate(d.value.substr(0,10), 'Y-m-d');
-            /* adding record to the store */    
+            /* adding record to the store */
             record = new this.fullStore.recordType(d, Ext.id());
             this.fullStore.add( record );
         }, this);
@@ -416,7 +430,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
         }, this);
         w = this.getBubbleTarget();
-        
+
         if(Ext.isDefined(w.data)) w.data[this.root] = this.data;
     }
     ,onBeforeEditProperty: function(e){//grid, record, field, value, row, column, cancel
@@ -433,14 +447,14 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             e.path = pw.data.path;
         }
         if(pw && (t == '_case_object') ) e.pidValue = pw.data.id; /* setting by default parent case id for case_objects fields, this value will be overwriten if it is dependent on another field */
-        
+
         if( (Ext.isDefined(e.record.data.cfg.dependency) ) && !Ext.isEmpty(e.record.get('pid')) )/* get and set pidValue id dependent */
             if(Ext.isDefined(this.getBubbleTarget().getCurrentFieldValue)){
-                e.pidValue = this.getBubbleTarget().getCurrentFieldValue(e.record.get('pid'), e.record.get('duplicate_id')) 
-                if(Ext.isEmpty(e.pidValue)) e.pidValue = this.getBubbleTarget().getCurrentFieldValue(e.record.get('pid'), 0) 
+                e.pidValue = this.getBubbleTarget().getCurrentFieldValue(e.record.get('pid'), e.record.get('duplicate_id'))
+                if(Ext.isEmpty(e.pidValue)) e.pidValue = this.getBubbleTarget().getCurrentFieldValue(e.record.get('pid'), 0)
             }else{
                 e.pidValue = this.getFieldValue(e.record.get('pid'), e.record.get('duplicate_id'));
-                if(Ext.isEmpty(e.pidValue)) e.pidValue = this.getFieldValue(e.record.get('pid'), 0); 
+                if(Ext.isEmpty(e.pidValue)) e.pidValue = this.getFieldValue(e.record.get('pid'), 0);
             }
         col = e.grid.colModel.getColumnAt(e.column);
         ed = col.getEditor();
@@ -454,7 +468,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         }
     }
     ,gainFocus: function(){
-        this.focus(false); 
+        this.focus(false);
         s = this.getSelectionModel().getSelectedCell();
         if(s) this.getView().focusCell(s[0], s[1]);
     }
@@ -470,11 +484,11 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             this.fullStore.each( function(record){ //update dependent child field to null
                 if( ( ( record.get('cfg').thesauriId == 'dependent') || ( Ext.isDefined(record.get('cfg').dependency) )  )
                     && (e.record.get('field_id') == record.get('pid'))
-                    && (e.record.get('duplicate_id') == record.get('duplicate_id')) 
+                    && (e.record.get('duplicate_id') == record.get('duplicate_id'))
                     && (record.get('cfg').readOnly !==true)
                 ) record.set('value', null);
             }, this);
-            this.fireEvent('change'); 
+            this.fireEvent('change');
         }
         this.updateVisibility();
     }
@@ -526,8 +540,8 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                         }else{ //when record is not visible
                             if( (pr.get('tag') == 'G') || (
                                 !Ext.isEmpty(pr.get('value')) && (Ext.isEmpty(v) || setsHaveIntersection( va, pr.get('value') ))
-                                && ( (record.get('cfg').thesauriId !== 'dependent') ||  !Ext.isEmpty(pr.get('value'))) 
-                                && ( Ext.isDefined(record.get('cfg').dependency) ||  !Ext.isEmpty(pr.get('value'))) 
+                                && ( (record.get('cfg').thesauriId !== 'dependent') ||  !Ext.isEmpty(pr.get('value')))
+                                && ( Ext.isDefined(record.get('cfg').dependency) ||  !Ext.isEmpty(pr.get('value')))
                                 )
                             ) { //if no pidValues specified or pidValues contains the parent selected value then show the field
                                 record.set('visible', 1);
@@ -566,12 +580,12 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             delete this.toFocus;
         }
     }
-    ,storeFilter: function(r, id){ 
+    ,storeFilter: function(r, id){
         //return true;
-        return (    (r.get('cfg').showIn != 'top') && (r.get('cfg').showIn != 'tabsheet') && 
+        return (    (r.get('cfg').showIn != 'top') && (r.get('cfg').showIn != 'tabsheet') &&
                 (r.get('visible') == 1) && ((r.get('tag') == 'f') || (r.get('tag') == 'H')) &&
                 (Ext.isEmpty(this.data.hideFields) || (this.data.hideFields.indexOf(r.get('tag')+r.get('field_id') + '_' + r.get('duplicate_id')) < 0) )
-            ); 
+            );
     }
     ,duplicateField: function(fieldId, duplicateId, duplicatePid){
         // 3 26 0
@@ -579,9 +593,9 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         pidIndex = this.fullStore.findBy(function(r){ return ((r.get('field_id') == fieldId) && (r.get('duplicate_id') == duplicatePid))}, this);
         pidRow = this.fullStore.getAt(pidIndex);
         level = pidRow.get('level');
-        insertBeforeIndex = this.fullStore.findBy(function(r){ 
+        insertBeforeIndex = this.fullStore.findBy(function(r){
                 return ((r.get('cfg').showIn != 'top') && (r.get('cfg').showIn != 'tabsheet') && (r.get('level') <= level) && (r.get('field_id') != fieldId))
-            }, this, pidIndex +1 
+            }, this, pidIndex +1
         );
         /* collecting the rows set that should be duplicated */
         pids = [pidRow.get('field_id')]
@@ -623,11 +637,11 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         if(insertBeforeIndex >=0 )this.fullStore.insert(insertBeforeIndex, dra); else this.fullStore.add(dra);
         this.refilled = 0;
         /* end of collecting the rows set that should be duplicated */
-        
+
         if(!this.data.duplicateFields) this.data.duplicateFields = {};
         if(!this.data.duplicateFields[fieldId]) this.data.duplicateFields[fieldId] = {};
         this.data.duplicateFields[fieldId][duplicateId] = duplicatePid;
-        
+
         this.changeMaxInstances(fieldId, duplicatePid, -1);
     }
     ,changeMaxInstances: function(fieldId, duplicatePid, count){

@@ -41,8 +41,11 @@ if (!in_array(
 }
 /* end of check if loged in correctly, comparing with the key and ips */
 
-// regenerate session id
-session_regenerate_id(false);
+$sessionPersistence = getOption('session.persistent');
+if (empty($sessionPersistence)) {
+    // regenerate session id
+    session_regenerate_id(false);
+}
 
 // include languages and define Language constants and translations
 require_once 'language.php';

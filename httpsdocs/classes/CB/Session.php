@@ -11,6 +11,7 @@ namespace CB;
  *  `pid` varbinary(50) DEFAULT NULL COMMENT 'parrent session id',
  *  `last_action` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
  *  `expires` timestamp NULL DEFAULT NULL COMMENT 'expire could be null for non expiring sessions',
+ *  `user_id` int(10) unsigned NOT NULL,
  *  `data` text,
  *  PRIMARY KEY (`id`),
  *  KEY `idx_expires` (`expires`),
@@ -59,7 +60,10 @@ class Session implements \SessionHandlerInterface
      */
     public function destroy($session_id)
     {
-        $res = DB\dbQuery('DELETE FROM sessions WHERE id = $1', $session_id) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'DELETE FROM sessions WHERE id = $1',
+            $session_id
+        ) or die(DB\dbQueryError());
 
         return (DB\dbAffectedRows() > 0);
     }
@@ -106,14 +110,17 @@ class Session implements \SessionHandlerInterface
     public function read($session_id)
     {
         $rez = '';
-        $sql = 'SELECT data
+        $res = DB\dbQuery(
+            'SELECT data
             FROM sessions
             WHERE id = $1
                 AND (
                     (expires > CURRENT_TIMESTAMP)
                     OR (expires IS NULL)
-                )';
-        $res = DB\dbQuery($sql, $session_id) or die(DB\dbQueryError());
+                )',
+            $session_id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $rez = $r['data'];
         }
@@ -132,11 +139,12 @@ class Session implements \SessionHandlerInterface
      */
     public function write($session_id, $session_data)
     {
+        $lifetime = ini_get('session.cookie_lifetime');
         $lifetime = empty($this->lifetime) ? null : $this->lifetime;
 
         /* when updating/creating a new session
-        then parent session and all other child sessions shoould be marked as expiring
-        in corresponding timeout */
+        then parent session and all other child sessions shoould be marked as
+        expiring in corresponding timeout */
         if (!empty($this->previous_session_id)) {
             DB\dbQuery(
                 'UPDATE sessions
@@ -155,20 +163,40 @@ class Session implements \SessionHandlerInterface
 
         $res = DB\dbQuery(
             'INSERT INTO sessions
-            (id, pid, expires, data)
-            VALUES($1, $2, TIMESTAMPADD(SECOND, $3, CURRENT_TIMESTAMP), $4)
+            (id, pid, expires, user_id, data)
+            VALUES($1, $2, TIMESTAMPADD(SECOND, $3, CURRENT_TIMESTAMP), $4, $5)
             ON DUPLICATE KEY UPDATE
-            expires = TIMESTAMPADD(SECOND, $2, CURRENT_TIMESTAMP)
+            expires = TIMESTAMPADD(SECOND, $3, CURRENT_TIMESTAMP)
             ,last_action = CURRENT_TIMESTAMP
-            ,data = $3',
+            ,user_id = $4
+            ,data = $5',
             array(
                 $session_id
                 ,$this->previous_session_id
                 ,$lifetime
+                ,'0'.@$_SESSION['user']['id']
                 ,$session_data
             )
         ) or die(DB\dbQueryError());
 
         return (DB\dbAffectedRows() > 0);
+    }
+
+    /**
+     * clear user sessions
+     * @param  int     $userId
+     * @return boolean
+     */
+    public static function clearUserSessions($userId)
+    {
+        if (!Security::canEditUser($userId)) {
+            return false;
+        }
+        DB\dbQuery(
+            'DELETE FROM sessions WHERE user_id = $1',
+            $userId
+        ) or die(DB\dbQueryError());
+
+        return true;
     }
 }

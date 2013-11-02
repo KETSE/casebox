@@ -19,20 +19,15 @@ namespace CB;
 
 */
 
-/* checking if corename defined in enviroment */
-if (isset($_SERVER['CASEBOX_CORENAME'])) {
-    define('CB\\CORENAME', $_SERVER['CASEBOX_CORENAME']);
-} else {
-    /* detecting core name (project name) from SERVER_NAME */
-    $arr = explode('.', $_SERVER['SERVER_NAME']);
-    // remove www, ww2 and take the next parameter as the $coreName
-    if (in_array($arr[0], array( 'www', 'ww2' ))) {
-        array_shift($arr);
-    }
-
-    define('CB\\CORENAME', $arr[0]);
-    /* end of detecting core name (project name) from SERVER_NAME */
+/* detecting core name (project name) from SERVER_NAME */
+$arr = explode('.', $_SERVER['SERVER_NAME']);
+// remove www, ww2 and take the next parameter as the $coreName
+if (in_array($arr[0], array( 'www', 'ww2' ))) {
+    array_shift($arr);
 }
+
+define('CB\\CORENAME', $arr[0]);
+/* end of detecting core name (project name) from SERVER_NAME */
 
 /* define main paths /**/
 define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
@@ -134,10 +129,15 @@ if (empty($config['default_folder_template'])) {
 }
 
 if (empty($config['default_file_template'])) {
-    $sql = 'SELECT id FROM templates WHERE `type` = \'file\'';
-    $res = DB\dbQuery($sql) or die( DB\dbQueryError() );
-    if ($r = $res->fetch_row()) {
-        $config['default_file_template'] = $r[0];
+    $res = DB\dbQuery(
+        'SELECT id
+        FROM templates
+        WHERE `type` = $1',
+        'file'
+    ) or die( DB\dbQueryError() );
+
+    if ($r = $res->fetch_assoc()) {
+        $config['default_file_template'] = $r['id'];
     } else {
         $config['default_file_template'] = 0;
     }
@@ -178,7 +178,14 @@ ini_set('max_file_uploads', '20');
 ini_set('memory_limit', '200M');
 
 // session params
-$sessionLifetime = isDebugHost() ? 0: 43200;
+
+$sessionLifetime = getOption('session.lifetime');
+if (is_null($sessionLifetime)) {
+    $sessionLifetime = isDebugHost() ? 0: 43200;
+} else {
+
+}
+
 ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
@@ -261,7 +268,7 @@ define(
 );
 /* USER_LANGUAGE is defined after starting session */
 
-/* functions section*/
+/* config functions section */
 
 /**
  * Check server side operation system
@@ -277,8 +284,13 @@ function isWindows()
 function getPlatformDBConfig()
 {
     $rez = array();
-    $sql = 'select param, `value` from casebox.config where pid is not null';
-    $res = DB\dbQuery($sql) or die( DB\dbQueryError() );
+    $res = DB\dbQuery(
+        'SELECT param
+            ,`value`
+        FROM casebox.config
+        WHERE pid IS NOT NULL'
+    ) or die( DB\dbQueryError() );
+
     while ($r = $res->fetch_assoc()) {
         $rez[$r['param']] = $r['value'];
     }
@@ -293,8 +305,12 @@ function getPlatformDBConfig()
 function getCoreDBConfig()
 {
     $rez = array();
-    $sql = 'select param, `value` from config';
-    $res = DB\dbQuery($sql) or die( DB\dbQueryError() );
+    $res = DB\dbQuery(
+        'SELECT param
+            ,`value`
+        FROM config'
+    ) or die( DB\dbQueryError() );
+
     while ($r = $res->fetch_assoc()) {
         $rez[$r['param']] = $r['value'];
     }
@@ -317,7 +333,20 @@ function getCustomConfig()
 }
 
 /**
+ * returns true if scripts run on a Devel server
+ * @return boolean
+ */
+function isDevelServer()
+{
+    return (
+        (strpos($_SERVER['SERVER_NAME'], '.d.') !== false)
+        || ($_SERVER['SERVER_ADDR'] == '46.165.252.15')
+    );
+}
+
+/**
  * Check if the client machine is debuging host
+ * @return boolean
  */
 function isDebugHost()
 {
@@ -370,4 +399,48 @@ function fireEvent($eventName, &$params)
         }
         unset($class);
     }
+}
+
+/**
+ * get an option value from config
+ *
+ * config options could be defined in:
+ *     user config
+ *     core config
+ *     default casebox config
+ *
+ * user config is stored in session
+ *
+ * default casebox config is merged with core config file and
+ *     with database configuration values from config table
+ * The meged result is declared in CB\CONFIG namespace
+ *
+ * there are also some configuration variables stored in $GLOBALS
+ * (because there are no scalar values) like:
+ *    language_settings - settings if defined for each language
+ *    folder_templates - array of folder templates
+ *    languages - avalilable languages for core
+ *
+ * so the value of specified option is returned from first config where is defined
+ *     user config form session
+ *     merged config from CB\CONFIG namespace
+ *     $GLOBALS
+ * If not defined in any config then null is returned
+ *
+ * @param  varchar $optionName name of the option to get
+ * @return variant | null
+ */
+function getOption($optionName)
+{
+    if (!empty($_SESSION['user']['cfg'][$optionName])) {
+        return $_SESSION['user']['cfg'][$optionName];
+    }
+    if (defined('CB\\CONFIG\\'.mb_strtoupper($optionName))) {
+        return constant('CB\\CONFIG\\'.mb_strtoupper($optionName));
+    }
+    if (!empty($GLOBALS[$optionName])) {
+        return $GLOBALS[$optionName];
+    }
+
+    return null;
 }

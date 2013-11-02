@@ -32,9 +32,21 @@ class UserMenu implements IUserMenu
     public function getToolbarItems()
     {
         $rez = array(
-            array('html' => '<a href="#">'.L\Dashboard.'</a>', 'title' => L\Dashboard, 'cls' => 'mtb_link', 'link' => 'CBDashboard')
-            ,array('html' => '<a href="#">'.L\Tasks.'</a>', 'title' => L\Tasks, 'cls' => 'mtb_link', 'link' => 'CBTasksViewGridPanel') //, 'showDescendants' => true, , 'iconCls' => 'icon-taskView'
-            ,array('html' => '<a href="#">'.L\Calendar.'</a>', 'title' => L\Calendar, 'cls' => 'mtb_link', 'link' => 'CBCalendarViewPanel') //, 'iconCls' => 'icon-calendarView'
+            array(
+                'html' => '<a href="#">'.L\Dashboard.'</a>'
+                ,'title' => L\Dashboard
+                ,'cls' => 'mtb_link'
+                ,'link' => 'CBDashboard'
+            )
+            ,array(
+                'html' => '<a href="#">'.L\Tasks.'</a>'
+                , 'title' => L\Tasks, 'cls' => 'mtb_link'
+                , 'link' => 'CBTasksViewGridPanel')
+            ,array(
+                'html' => '<a href="#">'.L\Calendar.'</a>'
+                , 'title' => L\Calendar, 'cls' => 'mtb_link'
+                , 'link' => 'CBCalendarViewPanel'
+            )
         );
 
         return $rez;

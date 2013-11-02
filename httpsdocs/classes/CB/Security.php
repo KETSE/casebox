@@ -16,15 +16,17 @@ class Security
 
         // if (!Security::isAdmin() ) throw new \Exception(L\Access_denied);
 
-        $sql = 'SELECT id
-                     , name
-                     , l'.USER_LANGUAGE_INDEX.' `title`
-                                              , `system`
-                                              , `enabled`
-                FROM users_groups
-                WHERE TYPE = 1
-                ORDER BY 3';
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT id
+                ,name
+                ,l'.USER_LANGUAGE_INDEX.' `title`
+                ,`system`
+                ,`enabled`
+            FROM users_groups
+            WHERE TYPE = 1
+            ORDER BY 3'
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $rez['data'][] = $r;
         }
@@ -42,12 +44,12 @@ class Security
      */
     public function createUserGroup($p)
     {
-        $p->success = true;
+        $p['success'] = true;
 
         if (!Security::isAdmin()) {
             throw new \Exception(L\Access_denied);
         }
-        $p->data->name = trim(strip_tags($p->data->name));
+        $p['data']['name'] = trim(strip_tags($p['data']['name']));
 
         // check if group with that name already exists
         $res = DB\dbQuery(
@@ -55,25 +57,24 @@ class Security
             FROM users_groups
             WHERE TYPE = 1
                 AND name = $1',
-            $p->data->name
+            $p['data']['name']
         ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_row()) {
+        if ($r = $res->fetch_assoc()) {
             throw new \Exception(L\Group_exists);
         }
         $res->close();
         // end of check if group with that name already exists
 
-        $sql = 'INSERT INTO users_groups(TYPE, name, l1, l2, l3, l4, cid)
-            VALUES(1, $1 , $1 , $1 , $1 , $1, $2)';
         DB\dbQuery(
-            $sql,
+            'INSERT INTO users_groups(TYPE, name, l1, l2, l3, l4, cid)
+            VALUES(1, $1 , $1 , $1 , $1 , $1, $2)',
             array(
-                $p->data->name,
+                $p['data']['name'],
                 $_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
-        $p->data->id = DB\dbLastInsertId();
+        $p['data']['id'] = DB\dbLastInsertId();
 
         return $p;
     }
@@ -118,8 +119,8 @@ class Security
         $where = array();
         $params = array();
 
-        if (!empty($p->source)) {
-            switch ($p->source) {
+        if (!empty($p['source'])) {
+            switch ($p['source']) {
                 case 'users':
                     $where[] = '`type` = 2';
                     break;
@@ -127,30 +128,33 @@ class Security
                     $where[] = '`type` = 1';
                     break;
             }
-        } elseif (!empty($p->types)) {
-            $a = Util\toNumericArray($p->types);
+        } elseif (!empty($p['types'])) {
+            $a = Util\toNumericArray($p['types']);
             if (!empty($a)) {
                 $where[] = '`type` in ('.implode(',', $a).')';
             }
         }
 
-        if (!empty($p->query)) {
+        if (!empty($p['query'])) {
             $where[] = 'searchField like $1';
-            $params[] = ' %'.trim($p->query).'% ';
+            $params[] = ' %'.trim($p['query']).'% ';
         }
 
-        $sql = 'SELECT id
-                    ,`name`
-                    ,`first_name`
-                    ,`last_name`
-                    ,`system`
-                    ,`enabled`
-                    ,`type`
-                    ,`sex`
-                FROM users_groups
-                WHERE did IS NULL '.( empty($where) ? '' : ' AND '.implode(' AND ', $where) ).'
-                ORDER BY `type`, 2 LIMIT 100';
-        $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT id
+                ,`name`
+                ,`first_name`
+                ,`last_name`
+                ,`system`
+                ,`enabled`
+                ,`type`
+                ,`sex`
+            FROM users_groups
+            WHERE did IS NULL '.( empty($where) ? '' : ' AND '.implode(' AND ', $where) ).'
+            ORDER BY `type`, 2 LIMIT 100',
+            $params
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $title = trim($r['first_name'].' '.$r['last_name']);
             if (!empty($title)) {
@@ -173,28 +177,31 @@ class Security
     public function getObjectAcl($p, $inherited = true)
     {
         $rez = array( 'success' => true, 'data' => array(), 'name' => '');
-        if (!is_numeric($p->id)) {
+        if (!is_numeric($p['id'])) {
             return $rez;
         }
 
         if (empty($this->internalAccessing)
-            && !Security::canRead($p->id)
+            && !Security::canRead($p['id'])
         ) {
             throw new \Exception(L\Access_denied);
         }
 
         /* set object title, path and inheriting access ids path*/
         $obj_ids = array();
-        $sql = 'SELECT
+        $res = DB\dbQuery(
+            'SELECT
                 ti.`path`
                 ,t.name
                 ,t.inherit_acl
                 ,ts.`set` `obj_ids`
             FROM tree t
-            JOIN tree_info ti on t.id = ti.id
-            LEFT JOIN tree_acl_security_sets ts on ti.security_set_id = ts.id
-            WHERE t.id = $1';
-        $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
+            JOIN tree_info ti ON t.id = ti.id
+            LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
+            WHERE t.id = $1',
+            $p['id']
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $rez['path'] = Path::replaceCustomNames($r['path']);
             $rez['name'] = Path::replaceCustomNames($r['name']);
@@ -206,7 +213,8 @@ class Security
 
         /* get the full set of access credentials(users and/or groups) including inherited from parents */
         $lid = defined('CB\\USER_LANGUAGE_INDEX') ? USER_LANGUAGE_INDEX: 1;
-        $sql = 'SELECT DISTINCT u.id
+        $res = DB\dbQuery(
+            'SELECT DISTINCT u.id
                     , u.l'.$lid.' `name`
                     , u.`system`
                     , u.`enabled`
@@ -214,16 +222,19 @@ class Security
                     , u.`sex`
                 FROM tree_acl a
                 JOIN users_groups u ON a.user_group_id = u.id
-                WHERE a.node_id '.
-                ( $inherited ? ' in (0'.implode(',', $obj_ids).')' : ' = $1 ').'
-                ORDER BY u.`type`
-                       , 2';
-        $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
+                WHERE a.node_id '.(
+                    $inherited
+                    ? ' in (0'.implode(',', $obj_ids).')'
+                    : ' = $1 '
+                ).' ORDER BY u.`type`, 2',
+            $p['id']
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
             // unset($r['type']); // used internaly by setSolrAccess function
             unset($r['sex']);
-            $access = $this->getUserGroupAccessForObject($p->id, $r['id']);
+            $access = $this->getUserGroupAccessForObject($p['id'], $r['id']);
             $r['allow'] = implode(',', $access[0]);
             $r['deny'] = implode(',', $access[1]);
             $rez['data'][] = $r;
@@ -284,12 +295,15 @@ class Security
         }
 
         /* getting object ids that have inherit set to true */
-        $sql = 'SELECT ts.set `ids`
+        $ids = array();
+        $res = DB\dbQuery(
+            'SELECT ts.set `ids`
             FROM tree_info ti
             JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
-            WHERE ti.id = $1';
-        $res = DB\dbQuery($sql, $object_id) or die(DB\dbQueryError());
-        $ids = array();
+            WHERE ti.id = $1',
+            $object_id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $ids = explode(',', $r['ids']);
         }
@@ -299,11 +313,14 @@ class Security
         $ids = array_reverse($ids);
 
         /* getting group ids where passed $user_group_id is a member*/
-        $sql = 'select distinct group_id from users_groups_association where user_id = $1';
-        $res = DB\dbQuery($sql, $user_group_id) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            if (!in_array($r[0], $user_group_ids)) {
-                $user_group_ids[] = $r[0];
+        $res = DB\dbQuery(
+            'SELECT DISTINCT group_id FROM users_groups_association WHERE user_id = $1',
+            $user_group_id
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            if (!in_array($r['group_id'], $user_group_ids)) {
+                $user_group_ids[] = $r['group_id'];
             }
         }
         $res->close();
@@ -313,15 +330,16 @@ class Security
         $acl = array();
 
         // selecting access list set for our path ids
-        $sql = 'SELECT
+        $res = DB\dbQuery(
+            'SELECT
                 node_id
                 ,user_group_id
                 ,allow
                 ,deny
             FROM tree_acl
             WHERE node_id IN (0'.implode(',', $ids).')
-                AND user_group_id IN ('.implode(',', $user_group_ids).')';
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+                AND user_group_id IN ('.implode(',', $user_group_ids).')'
+        ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
             $acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
@@ -460,13 +478,16 @@ class Security
         }
 
         /* getting object ids that have inherit set to true */
-        $sql = 'SELECT t.oid, ts.`set`
+        $ids = array();
+        $res = DB\dbQuery(
+            'SELECT t.oid, ts.`set`
             FROM tree t
             JOIN tree_info ti on t.id = ti.id
             LEFT JOIN tree_acl_security_sets ts on ti.security_set_id = ts.id
-            WHERE t.id = $1';
-        $res = DB\dbQuery($sql, $object_id) or die(DB\dbQueryError());
-        $ids = array();
+            WHERE t.id = $1',
+            $object_id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $ids = explode(',', $r['set']);
             $ids = array_filter($ids, 'is_numeric');
@@ -480,11 +501,14 @@ class Security
         $ids = array_reverse($ids);
 
         /* getting group ids where passed $user_id is a member*/
-        $sql = 'select distinct group_id from users_groups_association where user_id = $1';
-        $res = DB\dbQuery($sql, $user_id) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            if (!in_array($r[0], $user_group_ids)) {
-                $user_group_ids[] = $r[0];
+        $res = DB\dbQuery(
+            'SELECT DISTINCT group_id FROM users_groups_association WHERE user_id = $1',
+            $user_id
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            if (!in_array($r['group_id'], $user_group_ids)) {
+                $user_group_ids[] = $r['group_id'];
             }
         }
         $res->close();
@@ -494,15 +518,16 @@ class Security
         $acl = array();
 
         // selecting access list set for our path ids
-        $sql = 'SELECT
+        $res = DB\dbQuery(
+            'SELECT
                 node_id
                 ,user_group_id
                 ,allow
                 ,deny
             FROM tree_acl
             WHERE node_id IN (0'.implode(',', $ids).')
-                AND user_group_id IN ('.implode(',', $user_group_ids).')';
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+                AND user_group_id IN ('.implode(',', $user_group_ids).')'
+        ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
             $acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
@@ -697,31 +722,30 @@ class Security
     public function addObjectAccess($p)
     {
         $rez = array('success' => true, 'data' => array());
-        if (empty($p->data)) {
+        if (empty($p['data'])) {
             return $rez;
         }
 
-        if (!Security::isAdmin() && !Security::canChangePermissions($p->id)) {
+        if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
             throw new \Exception(L\Access_denied);
         }
 
-        $sql = 'INSERT INTO tree_acl (node_id, user_group_id, cid, uid)
+        DB\dbQuery(
+            'INSERT INTO tree_acl (node_id, user_group_id, cid, uid)
             VALUES ($1
                   , $2
                   , $3
                   , $3) ON duplicate KEY
             UPDATE id = last_insert_id(id)
-                    , uid = $3';
-        DB\dbQuery(
-            $sql,
+                    , uid = $3',
             array(
-                $p->id
-                ,$p->data->id
+                $p['id']
+                ,$p['data']['id']
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
 
-        $rez['data'][] = $p->data;
+        $rez['data'][] = $p['data'];
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();
 
@@ -730,12 +754,12 @@ class Security
 
     public function updateObjectAccess($p)
     {
-        if (!Security::isAdmin() && !Security::canChangePermissions($p->id)) {
+        if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
             throw new \Exception(L\Access_denied);
         }
 
-        $allow = explode(',', $p->data->allow);
-        $deny = explode(',', $p->data->deny);
+        $allow = explode(',', $p['data']['allow']);
+        $deny = explode(',', $p['data']['deny']);
         for ($i=0; $i < 12; $i++) {
             $allow[$i] = ($allow[$i] == 1) ? '1' : '0';
             $deny[$i] = ($deny[$i] == -1) ? '1' : '0';
@@ -744,7 +768,8 @@ class Security
         $deny = array_reverse($deny);
         $allow = bindec(implode('', $allow));
         $deny = bindec(implode('', $deny));
-        $sql = 'INSERT INTO tree_acl (
+        DB\dbQuery(
+            'INSERT INTO tree_acl (
                 node_id
                 ,user_group_id
                 ,allow
@@ -758,12 +783,10 @@ class Security
             UPDATE allow = $3
                     ,deny = $4
                     ,uid = $5
-                    ,udate = CURRENT_TIMESTAMP';
-        DB\dbQuery(
-            $sql,
+                    ,udate = CURRENT_TIMESTAMP',
             array(
-                $p->id
-                ,$p->data->id
+                $p['id']
+                ,$p['data']['id']
                 ,$allow
                 ,$deny
                 ,$_SESSION['user']['id']
@@ -773,17 +796,17 @@ class Security
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();
 
-        return array('succes' => true, 'data' => $p->data );
+        return array('succes' => true, 'data' => $p['data'] );
     }
     public function destroyObjectAccess($p)
     {
-        if (empty($p->data)) {
+        if (empty($p['data'])) {
             return;
         }
-        if (!Security::isAdmin() && !Security::canChangePermissions($p->id)) {
+        if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
             throw new \Exception(L\Access_denied);
         }
-        DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p->id, $p->data)) or die(DB\dbQueryError());
+        DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p['id'], $p['data'])) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();
@@ -806,38 +829,38 @@ class Security
     public function setInheritance($p)
     {
         /* check input params */
-        if (empty($p->id) ||
-            !isset($p->inherit) ||
-            !is_numeric($p->id) ||
-            !is_bool($p->inherit)
+        if (empty($p['id']) ||
+            !isset($p['inherit']) ||
+            !is_numeric($p['id']) ||
+            !is_bool($p['inherit'])
         ) {
             throw new \Exception(L\Wrong_input_data);
         }
         /* end of check input params */
 
-        if (!Security::isAdmin() && !Security::canChangePermissions($p->id)) {
+        if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
             throw new \Exception(L\Access_denied);
         }
 
         /* checking if current inherit value is not already set to requested state */
         $inherit_acl = false;
-        $res = DB\dbQuery('SELECT inherit_acl FROM tree WHERE id = $1', $p->id) or die(DB\dbQueryError());
+        $res = DB\dbQuery('SELECT inherit_acl FROM tree WHERE id = $1', $p['id']) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $inherit_acl = $r['inherit_acl'];
         } else {
             throw new \Exception(L\Object_not_found);
         }
         $res->close();
-        if ($inherit_acl == $p->inherit) {
+        if ($inherit_acl == $p['inherit']) {
             return array('success' => false);
         }
         /* end of checking if current inherit value is not already set to requested state */
 
         // make pre update changes
-        if ($p->inherit) {
-            DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p->id) or die(DB\dbQueryError());
+        if ($p['inherit']) {
+            DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p['id']) or die(DB\dbQueryError());
         } else {
-            switch (@$p->copyRules) {
+            switch (@$p['copyRules']) {
                 case 'yes': //copy all inherited rules to current object
                     $acl = $this->getObjectAcl($p);
                     foreach ($acl['data'] as $rule) {
@@ -851,7 +874,8 @@ class Security
                         $deny = array_reverse($deny);
                         $allow = bindec(implode('', $allow));
                         $deny = bindec(implode('', $deny));
-                        $sql = 'INSERT INTO tree_acl (
+                        DB\dbQuery(
+                            'INSERT INTO tree_acl (
                                 node_id
                                 ,user_group_id
                                 ,allow
@@ -865,11 +889,9 @@ class Security
                             UPDATE allow = $3
                                     ,deny = $4
                                     ,uid = $5
-                                    ,udate = CURRENT_TIMESTAMP';
-                        DB\dbQuery(
-                            $sql,
+                                    ,udate = CURRENT_TIMESTAMP',
                             array(
-                                $p->id
+                                $p['id']
                                 ,$rule['id']
                                 ,$allow
                                 ,$deny
@@ -879,7 +901,7 @@ class Security
                     }
                     break;
                 default:
-                    DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p->id) or die(DB\dbQueryError());
+                    DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p['id']) or die(DB\dbQueryError());
                     break;
             }
         }
@@ -888,8 +910,8 @@ class Security
         DB\dbQuery(
             'UPDATE tree SET inherit_acl = $2 WHERE id = $1',
             array(
-                $p->id
-                ,intval($p->inherit)
+                $p['id']
+                ,intval($p['inherit'])
             )
         ) or die(DB\dbQueryError());
 
@@ -919,8 +941,11 @@ class Security
         }
 
         $pids = null;
-        $sql = 'SELECT pids FROM tree_info WHERE id = $1';
-        $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT pids FROM tree_info WHERE id = $1',
+            $p['id']
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $pids = $r['pids'];
         } else {
@@ -931,10 +956,13 @@ class Security
         $child_ids = array();
 
         // selecting childs with accesses
-        $sql = 'SELECT id
+        $res = DB\dbQuery(
+            'SELECT id
             FROM tree_info
-            WHERE pids like $1 and acl_count > 0';
-        $res = DB\dbQuery($sql, $pids.',%') or die(DB\dbQueryError());
+            WHERE pids like $1 and acl_count > 0',
+            $pids.',%'
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $child_ids[] = $r['id'];
         }
@@ -970,12 +998,10 @@ class Security
         }
         $everyoneGroupId = Security::EveryoneGroupId();
 
-        $sql = 'SELECT security_set_id, user_id, bit'.$access_bit_index.' `access`
-            FROM `tree_acl_security_sets_result`
-            WHERE user_id IN ($1, $2)';
-
         $res = DB\dbQuery(
-            $sql,
+            'SELECT security_set_id, user_id, bit'.$access_bit_index.' `access`
+            FROM `tree_acl_security_sets_result`
+            WHERE user_id IN ($1, $2)',
             array(
                 $user_id
                 ,$everyoneGroupId
@@ -1000,8 +1026,10 @@ class Security
 
     public static function calculateUpdatedSecuritySets()
     {
-        $sql = 'SELECT id FROM tree_acl_security_sets WHERE updated = 1';
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT id FROM tree_acl_security_sets WHERE updated = 1'
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             Security::updateSecuritySet($r['id']);
         }
@@ -1014,8 +1042,11 @@ class Security
 
         /* get set */
         $set = '';
-        $sql = 'select `set` from tree_acl_security_sets where id = $1';
-        $res = DB\dbQuery($sql, $set_id) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT `set` FROM tree_acl_security_sets WHERE id = $1',
+            $set_id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $set = $r['set'];
         }
@@ -1031,15 +1062,16 @@ class Security
         and estimate access for every user including everyone group */
         if (!empty($set)) {
             $object_id = $obj_ids[sizeof($obj_ids) -1];
-            $sql = 'SELECT DISTINCT
+
+            $res = DB\dbQuery(
+                'SELECT DISTINCT
                     u.id
                     ,u.`type`
                 FROM tree_acl a
                 JOIN users_groups u on a.user_group_id = u.id
                 WHERE a.node_id in(0'.implode(',', $obj_ids).')
-                ORDER BY u.`type`';
-
-            $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+                ORDER BY u.`type`'
+            ) or die(DB\dbQueryError());
             while ($r = $res->fetch_assoc()) {
                 $group_users = array();
                 if (($r['id'] == $everyoneGroupId) || ($r['type'] == 2)) {
@@ -1068,27 +1100,43 @@ class Security
         // if (in_array($everyoneGroupId, $deny_users)) $deny_users = array();
 
         /* update set in database */
-        $sql = 'DELETE
+
+        $res = DB\dbQuery(
+            'DELETE
             FROM tree_acl_security_sets_result
-            WHERE security_set_id = $1';
+            WHERE security_set_id = $1',
+            $set_id
+        ) or die(DB\dbQueryError());
 
-        $res = DB\dbQuery($sql, $set_id) or die(DB\dbQueryError());
-
-        $sql = 'INSERT INTO tree_acl_security_sets_result (security_set_id, user_id, bit0, bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8, bit9, bit10, bit11)
+        $sql = 'INSERT INTO tree_acl_security_sets_result
+                (security_set_id
+                ,user_id
+                ,bit0
+                ,bit1
+                ,bit2
+                ,bit3
+                ,bit4
+                ,bit5
+                ,bit6
+                ,bit7
+                ,bit8
+                ,bit9
+                ,bit10
+                ,bit11)
             VALUES ($1
-                  , $2
-                  , $3
-                  , $4
-                  , $5
-                  , $6
-                  , $7
-                  , $8
-                  , $9
-                  , $10
-                  , $11
-                  , $12
-                  , $13
-                  , $14)';
+                ,$2
+                ,$3
+                ,$4
+                ,$5
+                ,$6
+                ,$7
+                ,$8
+                ,$9
+                ,$10
+                ,$11
+                ,$12
+                ,$13
+                ,$14)';
         foreach ($users as $user_id => $access) {
             $params = array( $set_id, $user_id );
             for ($i=0; $i < sizeof($access[0]); $i++) {
@@ -1097,10 +1145,12 @@ class Security
             $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
         }
 
-        $sql = 'UPDATE tree_acl_security_sets
+        $res = DB\dbQuery(
+            'UPDATE tree_acl_security_sets
             SET updated = 0
-            WHERE id = $1';
-        $res = DB\dbQuery($sql, $set_id) or die(DB\dbQueryError());
+            WHERE id = $1',
+            $set_id
+        ) or die(DB\dbQueryError());
         /* end of update set in database */
     }
     /**
@@ -1109,12 +1159,14 @@ class Security
     public static function everyoneGroupId ()
     {
         if (!Cache::exist('everyone_group_id')) {
-            $sql = 'SELECT id
+            $res = DB\dbQuery(
+                'SELECT id
                 FROM users_groups
                 WHERE `type` = 1
                         AND `system` = 1
-                        AND name = $1';
-            $res = DB\dbQuery($sql, 'everyone') or die(DB\dbQueryError());
+                        AND name = $1',
+                'everyone'
+            ) or die(DB\dbQueryError());
 
             if ($r = $res->fetch_assoc()) {
                 Cache::set('everyone_group_id', $r['id']);
@@ -1131,11 +1183,13 @@ class Security
     public static function systemGroupId()
     {
         if (!Cache::exist('system_group_id')) {
-            $sql = 'SELECT id
+            $res = DB\dbQuery(
+                'SELECT id
                 FROM users_groups
                 WHERE system = 1
-                        AND name = $1';
-            $res = DB\dbQuery($sql, 'system') or die(DB\dbQueryError());
+                        AND name = $1',
+                'system'
+            ) or die(DB\dbQueryError());
 
             if ($r = $res->fetch_assoc()) {
                 Cache::set('system_group_id', $r['id']);
@@ -1152,10 +1206,13 @@ class Security
     public static function getGroupUserIds($group_id)
     {
         $rez = array();
-        $sql = 'select user_id from users_groups_association where group_id = $1';
-        $res = DB\dbQuery($sql, $group_id) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            $rez[] = $r[0];
+        $res = DB\dbQuery(
+            'SELECT user_id FROM users_groups_association WHERE group_id = $1',
+            $group_id
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $rez[] = $r['user_id'];
         }
         $res->close();
 
@@ -1169,14 +1226,17 @@ class Security
     {
         $rez = array('success' => true, 'data' => array());
         $user_id = $_SESSION['user']['id'];
-        $sql = 'SELECT id, name, first_name, last_name
+        $res = DB\dbQuery(
+            'SELECT id, name, first_name, last_name
             , concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls`
             FROM users_groups
             WHERE `type` = 2
                 AND did IS NULL
                 AND enabled = 1
-            ORDER BY 2';
-        $res = DB\dbQuery($sql, $user_id) or die(DB\dbQueryError());
+            ORDER BY 2',
+            $user_id
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             if (!empty($r['first_name']) || !empty($r['last_name'])) {
                 $r['name'] = trim($r['first_name'].' '.$r['last_name']);
@@ -1202,13 +1262,19 @@ class Security
         $var_name = 'is_admin'.$user_id;
 
         if (!Cache::exist($var_name)) {
-            $sql = 'SELECT g.id
+            $res = DB\dbQuery(
+                'SELECT g.id
                 FROM users_groups g
                 JOIN users_groups_association uga ON g.id = uga.group_id
                 AND uga.user_id = $1
                 WHERE g.system = 1
-                    AND g.name = $2';
-            $res = DB\dbQuery($sql, array($user_id, 'system')) or die(DB\dbQueryError());
+                    AND g.name = $2',
+                array(
+                    $user_id
+                    ,'system'
+                )
+            ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 Cache::set($var_name, !empty($r['id']));
             }
@@ -1228,8 +1294,8 @@ class Security
     public static function isUsersOwner($user_id)
     {
         $res = DB\dbQuery('SELECT cid FROM users_groups WHERE id = $1', $user_id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = ($r[0] == $_SESSION['user']['id']);
+        if ($r = $res->fetch_assoc()) {
+            $rez = ($r['cid'] == $_SESSION['user']['id']);
         } else {
             throw new \Exception(L\User_not_found);
         }
@@ -1274,7 +1340,7 @@ class Security
             )
         ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_row()) {
+        if ($r = $res->fetch_assoc()) {
             $rez = true;
         }
         $res->close();

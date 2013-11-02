@@ -22,20 +22,20 @@ class Actions
      */
     private function validateParams(&$p)
     {
-        if (empty($p->sourceIds) && !empty($p->sourceData)) {
-            $p->sourceIds = array();
-            foreach ($p->sourceData as $data) {
-                $p->sourceIds[] = $data->id;
+        if (empty($p['sourceIds']) && !empty($p['sourceData'])) {
+            $p['sourceIds'] = array();
+            foreach ($p['sourceData'] as $data) {
+                $p['sourceIds'][] = $data['id'];
             }
         }
-        if (empty($p->targetId) && !empty($p->targetData)) {
-            $p->targetId = $p->targetData->id;
+        if (empty($p['targetId']) && !empty($p['targetData'])) {
+            $p['targetId'] = $p['targetData']['id'];
         }
 
-        $p->sourceIds = array_unique(Util\toNumericArray(@$p->sourceIds), SORT_NUMERIC);
-        $p->targetId = intval(@$p->targetId);
+        $p['sourceIds'] = array_unique(Util\toNumericArray(@$p['sourceIds']), SORT_NUMERIC);
+        $p['targetId'] = intval(@$p['targetId']);
 
-        return (!empty($p->sourceIds) && !empty($p->targetId));
+        return (!empty($p['sourceIds']) && !empty($p['targetId']));
     }
 
     /**
@@ -49,8 +49,14 @@ class Actions
         /* dummy check if not pasting an object over itself
             But maybe in this case we can make a copy of the object with prefix 'Copy of ...'
         */
-        $sql = 'SELECT id FROM tree WHERE pid = $1 AND id IN ('.implode(',', $p->sourceIds).')';
-        $res = DB\dbQuery($sql, $p->targetId) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM tree
+            WHERE pid = $1
+                AND id IN ('.implode(',', $p['sourceIds']).')',
+            $p['targetId']
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             return L\CannotCopyObjectToItself;
         }
@@ -58,15 +64,20 @@ class Actions
         /* end of dummy check if not pasting an object over itself */
 
         /* dummy check if not copying inside a child of sourceIds */
-        if (in_array($p->targetId, $p->sourceIds)) {
+        if (in_array($p['targetId'], $p['sourceIds'])) {
             return L\CannotCopyObjectInsideItself;
         }
 
-        $sql = 'SELECT pids FROM tree_info WHERE id = $1';
-        $res = DB\dbQuery($sql, $p->targetId) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT pids
+            FROM tree_info
+            WHERE id = $1',
+            $p['targetId']
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $pids = explode(',', $r['pids']);
-            foreach ($p->sourceIds as $sourceId) {
+            foreach ($p['sourceIds'] as $sourceId) {
                 if (in_array($sourceId, $pids)) {
                     return L\CannotCopyObjectInsideItself;
                 }
@@ -138,7 +149,7 @@ class Actions
         }
 
         /* security checks */
-        foreach ($p->sourceIds as $sourceId) {
+        foreach ($p['sourceIds'] as $sourceId) {
             if (!\CB\Security::canRead($sourceId)) {
                 return array('success' => false, 'msg' => L\Access_denied);
             }
@@ -147,13 +158,13 @@ class Actions
             and in this case we should check for update rigths on
             those existing objects
         */
-        if (!\CB\Security::canWrite($p->targetId)) {
+        if (!\CB\Security::canWrite($p['targetId'])) {
             return array('success' => false, 'msg' => L\Access_denied);
         }
         /* end of security checks */
 
-        if (empty($p->confirmedOverwrite)) {
-            if ($this->overwriteCheck($p->sourceIds, $p->targetId) !== false) {
+        if (empty($p['confirmedOverwrite'])) {
+            if ($this->overwriteCheck($p['sourceIds'], $p['targetId']) !== false) {
                 return array(
                     'success' => false,
                     'confirm' => true,
@@ -162,7 +173,7 @@ class Actions
             }
         }
 
-        $processedIds = $this->doAction('copy', $p->sourceIds, $p->targetId);
+        $processedIds = $this->doAction('copy', $p['sourceIds'], $p['targetId']);
         $rez = array(
             'success' => !empty($processedIds)
             ,'processedIds' => $processedIds
@@ -189,18 +200,18 @@ class Actions
         }
 
         /* security checks */
-        foreach ($p->sourceIds as $sourceId) {
+        foreach ($p['sourceIds'] as $sourceId) {
             if (!\CB\Security::canDelete($sourceId)) {
                 return array('success' => false, 'msg' => L\Access_denied);
             }
         }
-        if (!\CB\Security::canWrite($p->targetId)) {
+        if (!\CB\Security::canWrite($p['targetId'])) {
             return array('success' => false, 'msg' => L\Access_denied);
         }
         /* end of security checks */
 
-        if (empty($p->confirmedOverwrite)) {
-            if ($this->overwriteCheck($p->sourceIds, $p->targetId) !== false) {
+        if (empty($p['confirmedOverwrite'])) {
+            if ($this->overwriteCheck($p['sourceIds'], $p['targetId']) !== false) {
                 return array(
                     'success' => false,
                     'confirm' => true,
@@ -209,7 +220,7 @@ class Actions
             }
         }
 
-        $processedIds = $this->doAction('move', $p->sourceIds, $p->targetId);
+        $processedIds = $this->doAction('move', $p['sourceIds'], $p['targetId']);
         $rez = array(
             'success' => !empty($processedIds)
             ,'processedIds' => $processedIds
@@ -243,15 +254,18 @@ class Actions
         }
 
         /* select only objects that current user can delete */
-        $sql = 'SELECT t.id
+        $objectIds = array();
+
+        $res = DB\dbQuery(
+            'SELECT t.id
             FROM tree t
             JOIN tree_info ti ON
                 t.id = ti.id
                 AND ti.security_set_id in (0'.implode(',', $this->access_security_sets).')
             WHERE t.id in ('.implode(',', $objectIds).')
-                AND t.dstatus = 0';
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
-        $objectIds = array();
+                AND t.dstatus = 0'
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $objectIds[] = $r['id'];
         }
@@ -319,13 +333,16 @@ class Actions
             }
 
             // select direct childs of the objects and make a recursive call with them
-            $sql = 'SELECT t.id
+            $res = DB\dbQuery(
+                'SELECT t.id
                 FROM tree t
                 JOIN tree_info ti ON
                     t.id = ti.id
                     AND ti.security_set_id in (0'.implode(',', $this->access_security_sets).')
-                WHERE t.pid = $1 AND t.dstatus = 0';
-            $res = DB\dbQuery($sql, $objectId) or die(DB\dbQueryError());
+                WHERE t.pid = $1 AND t.dstatus = 0',
+                $objectId
+            ) or die(DB\dbQueryError());
+
             $childIds = array();
             while ($r = $res->fetch_assoc()) {
                 $childIds[] = $r['id'];
@@ -348,12 +365,12 @@ class Actions
             return array('success' => false, 'msg' => L\ErroneousInputData);
         }
         /* security checks */
-        foreach ($p->sourceIds as $sourceId) {
+        foreach ($p['sourceIds'] as $sourceId) {
             if (!\CB\Security::canRead($sourceId)) {
                 return array('success' => false, 'msg' => L\Access_denied);
             }
         }
-        if (!\CB\Security::canWrite($p->targetId)) {
+        if (!\CB\Security::canWrite($p['targetId'])) {
             return array('success' => false, 'msg' => L\Access_denied);
         }
         $rez = $this->doCreateShortcut($p);

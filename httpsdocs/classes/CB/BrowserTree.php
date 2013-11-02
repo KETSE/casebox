@@ -5,9 +5,9 @@ class BrowserTree extends Browser
 {
     public function getChildren($p)
     {
-        $path = empty($p->path) ? '/' : $p->path;
+        $path = empty($p['path']) ? '/' : $p['path'];
         $rez = array();
-        $this->showFoldersContent = isset($p->showFoldersContent) ? $p->showFoldersContent : false;
+        $this->showFoldersContent = isset($p['showFoldersContent']) ? $p['showFoldersContent'] : false;
         if ($path == '/') {
             $rez = $this->getRootChildren();
         } else {
@@ -63,10 +63,13 @@ class BrowserTree extends Browser
         }
         $id = array_pop($path);
 
-        $p = (Object)array('pid' => $id, 'fl' => 'id,system,type,subtype,name,date,size,cid,cdate,uid,udate,template_id,acl_count');
+        $p = array(
+            'pid' => $id
+            ,'fl' => 'id,system,type,subtype,name,date,size,cid,cdate,uid,udate,template_id,acl_count'
+        );
 
         if (!$this->showFoldersContent) {
-            $p->templates = $GLOBALS['folder_templates'];
+            $p['templates'] = $GLOBALS['folder_templates'];
         }
 
         $s = new Search();

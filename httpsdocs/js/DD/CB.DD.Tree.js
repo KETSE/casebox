@@ -29,7 +29,7 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
         this.owner = owner;
         owner.on('render', this.onRender, this);
         owner.on('beforedestroy', this.onBeforeDestroy, this);
-        App.on('objectsaction', this.onObjectsAction, this)
+        App.on('objectsaction', this.onObjectsAction, this);
     }
     
     /**
@@ -50,7 +50,7 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
                 ,ddGroup: this.ddGroup
                 ,nodeToGenericData: this.nodeToGenericData
             })
-        })
+        });
 
     }
     
@@ -62,7 +62,7 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
     {
         this.owner.un('render', this.onRender, this);
         this.owner.un('beforedestroy', this.onBeforeDestroy, this);
-        App.un('objectsaction', this.onObjectsAction, this)
+        App.un('objectsaction', this.onObjectsAction, this);
     }
     
     /**
@@ -85,7 +85,7 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
             ,name: na.name
             ,path: na.path
             ,template_id: na.template_id
-        }
+        };
         return data;
     }
 
@@ -105,7 +105,7 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
                 if(!Ext.isEmpty(r.processedIds)){
                     // remove moved nodes
                     for (var i = 0; i < r.processedIds.length; i++) {
-                        this.removeNode(r.processedIds[i])
+                        this.removeNode(r.processedIds[i]);
                     }
                     this.reloadNode(r.targetId);
                 }
@@ -125,11 +125,11 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
      * @return boolean
      */
     ,removeNode: function(nodeId){
-        var rootNode = this.owner.getRootNode()
-        var node = rootNode.findChild(this.idProperty, nodeId, true); 
+        var rootNode = this.owner.getRootNode();
+        var node = rootNode.findChild(this.idProperty, nodeId, true);
         while(node){
             node.remove(true);
-            node = rootNode.findChild(this.idProperty, nodeId, true); 
+            node = rootNode.findChild(this.idProperty, nodeId, true);
         }
     }
     
@@ -139,15 +139,15 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
      * @return boolean
      */
     ,reloadNode: function(nodeId){
-        var rootNode = this.owner.getRootNode()
+        var rootNode = this.owner.getRootNode();
         var node = (rootNode.attributes[this.idProperty] == nodeId)
-            ? rootNode 
+            ? rootNode
             : rootNode.findChild(this.idProperty, nodeId, true);
         if(node) {
             if(node.isLoaded()) {
                 node.reload();
             } else {
-                node.expand()
+                node.expand();
             }
             return true;
         }
@@ -191,12 +191,12 @@ CB.DD.TreeDropZone =  Ext.extend(Ext.tree.TreeDropZone, {
             - any descendant of dragged node
         */
         var rez = this.dropAllowed;
-        var sourceData = Ext.isArray(data.data) 
+        var sourceData = Ext.isArray(data.data)
             ? data.data
             : [data.data];
         var i = 0;
         while ((i < sourceData.length) && (rez == this.dropAllowed))  {
-            var sourceNode = this.tree.getRootNode().findChild(this.idProperty, sourceData[i].id)
+            var sourceNode = this.tree.getRootNode().findChild(this.idProperty, sourceData[i].id);
             if( (targetData.node.attributes[this.idProperty] == sourceData[i].id)
                 || (targetData.node.attributes[this.idProperty] == sourceData[i].pid)
                 || targetData.node.isAncestor(sourceNode)
@@ -204,7 +204,7 @@ CB.DD.TreeDropZone =  Ext.extend(Ext.tree.TreeDropZone, {
                 rez = this.dropNotAllowed;
             }
             i++;
-        };
+        }
         return rez;
     }
     ,onNodeDrop: function(targetData, source, e, sourceData){

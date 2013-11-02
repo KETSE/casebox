@@ -10,15 +10,16 @@ $isUpload = false;
 header('Content-Type: application/json; charset=UTF-8');
 
 if (isset($HTTP_RAW_POST_DATA)) {
-    $data = json_decode($HTTP_RAW_POST_DATA);
+    $data = json_decode($HTTP_RAW_POST_DATA, true);
 } elseif (isset($_POST['extAction'])) { // form post
     $isForm = true;
     $isUpload = ($_POST['extUpload'] == 'true');
-    $data = new BogusAction();
-    $data->action = $_POST['extAction'];
-    $data->method = $_POST['extMethod'];
-    $data->tid = isset($_POST['extTID']) ? intval($_POST['extTID']) : null; // not set for upload
-    $data->data = array($_POST, $_FILES);
+    $data = array(
+        'action' => $_POST['extAction']
+        ,'method' => $_POST['extMethod']
+        ,'tid' => isset($_POST['extTID']) ? intval($_POST['extTID']) : null // not set for upload
+        ,'data' => array($_POST, $_FILES)
+    );
 } else {
     die('Invalid request.');
 }
@@ -27,30 +28,30 @@ function doRpc($cdata)
 {
     global $API;
 
-    if (!\CB\User::isLoged() && ( ($cdata->action != 'User') || ($cdata->method != 'login') )) {
+    if (!\CB\User::isLoged() && ( ($cdata['action'] != 'User') || ($cdata['method'] != 'login') )) {
         return array(
             array(
                 'type' => 'exception'
                 ,'name' => 'login'
-                ,'tid' => $cdata->tid
-                ,'action' => $cdata->action
-                ,'method' => $cdata->method
+                ,'tid' => $cdata['tid']
+                ,'action' => $cdata['action']
+                ,'method' => $cdata['method']
                 ,'result' => array('success' => false)
             )
         );
     }
 
     try {
-        if (!isset($API[$cdata->action])) {
-            throw new \Exception('Call to undefined action: ' . $cdata->action);
+        if (!isset($API[$cdata['action']])) {
+            throw new \Exception('Call to undefined action: ' . $cdata['action']);
         }
 
-        $action = $cdata->action;
+        $action = $cdata['action'];
         $a = $API[$action];
 
         doAroundCalls($a['before'], $cdata);
 
-        $method = $cdata->method;
+        $method = $cdata['method'];
         $mdef = $a['methods'][$method];
         if (!$mdef) {
             throw new \Exception("Call to undefined method: $method on action $action");
@@ -59,7 +60,7 @@ function doRpc($cdata)
 
         $r = array(
             'type'=>'rpc',
-            'tid'=>$cdata->tid,
+            'tid'=>$cdata['tid'],
             'action'=>$action,
             'method'=>$method
         );
@@ -68,7 +69,7 @@ function doRpc($cdata)
         $action = str_replace('_', '\\', $action);
         $o = new $action();
 
-        $params = isset($cdata->data) && is_array($cdata->data) ? $cdata->data : array();
+        $params = isset($cdata['data']) && is_array($cdata['data']) ? $cdata['data'] : array();
 
         $r['result'] = call_user_func_array(array($o, $method), $params);
 
@@ -103,15 +104,15 @@ function doAroundCalls(&$fns, &$cdata, &$returnData = null)
 
 function sanitizeParams(&$cdata)
 {
-    $cdata->action = preg_replace('/[^a-z_\\\\]+/i', '', strip_tags($cdata->action));
-    $cdata->method = preg_replace('/[^a-z]+/i', '', strip_tags($cdata->method));
-    $cdata->tid = intval(strip_tags($cdata->tid));
+    $cdata['action'] = preg_replace('/[^a-z_\\\\]+/i', '', strip_tags($cdata['action']));
+    $cdata['method'] = preg_replace('/[^a-z]+/i', '', strip_tags($cdata['method']));
+    $cdata['tid'] = intval(strip_tags($cdata['tid']));
 
     return $cdata;
 }
 
 $response = null;
-if (is_array($data)) {
+if (empty($data['action'])) {
     $response = array();
     foreach ($data as $d) {
         $response[] = doRpc(sanitizeParams($d));

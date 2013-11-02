@@ -35,8 +35,19 @@ if (!is_numeric($id)) {
     exit(0);
 }
 
-$sql = 'SELECT t.id, t.pid, te.type, t.subtype, t.name, t.updated FROM tree t join templates te on t.template_id = te.id WHERE t.id = $1';
-$res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+$res = DB\dbQuery(
+    'SELECT t.id
+        ,t.pid
+        ,te.type
+        ,t.subtype
+        ,t.name
+        ,t.updated
+    FROM tree t
+    JOIN templates te on t.template_id = te.id
+    WHERE t.id = $1',
+    $id
+) or die(DB\dbQueryError());
+
 if ($r = $res->fetch_assoc()) {
     $f = $r;
 }
@@ -48,6 +59,8 @@ $preview = array();
 switch ($f['type']) {
     case 'case':
     case 'object':
+    case 'template':
+    case 'field':
     case 'email':
         $o = new Objects();
         echo $o->getPreview($id);

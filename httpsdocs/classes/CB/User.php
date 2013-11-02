@@ -23,8 +23,8 @@ class User
 
         /* try to authentificate */
         $res = DB\dbQuery('CALL p_user_login($1, $2, $3)', array($login, $pass, $ips)) or die( DB\dbQueryError() );
-        if (($r = $res->fetch_row()) && ($r[1] == 1)) {
-            $user_id = $r[0];
+        if (($r = $res->fetch_assoc()) && ($r['status'] == 1)) {
+            $user_id = $r['user_id'];
         }
         $res->close();
         DB\dbCleanConnection();
@@ -82,7 +82,7 @@ class User
             )
         ) or die( DB\dbQueryError() );
 
-        if ($r = $res->fetch_row()) {
+        if ($r = $res->fetch_assoc()) {
             $rez['success'] = true;
             $_SESSION['verified'] = time();
         } else {
@@ -111,7 +111,7 @@ class User
     public function verifyPhone($p)
     {
         $rez = array( 'success' => true );
-        $phone = preg_replace('/[^0-9]+/', '', $p->country_code.$p->phone_number);
+        $phone = preg_replace('/[^0-9]+/', '', $p['country_code'].$p['phone_number']);
 
         $rez['info'] = \FreeSMSGateway::sendSms(
             array(
@@ -131,24 +131,24 @@ class User
     public function enableTSV($p)
     {
         // validate TSV mechanism
-        if (!in_array($p->method, array('ga', 'sms', 'ybk'))) {
+        if (!in_array($p['method'], array('ga', 'sms', 'ybk'))) {
             return array('success' => false, 'msg' => 'Invalid authentication mechanism');
         }
-        $data = empty($p->data) ? array(): (array) $p->data;
-        if (!empty($_SESSION['lastTSV'][$p->method])) {
+        $data = empty($p['data']) ? array(): (array) $p['data'];
+        if (!empty($_SESSION['lastTSV'][$p['method']])) {
             //return array('success' => false, 'msg' => 'Error enabling TSV.');
-            $data = array_merge($_SESSION['lastTSV'][$p->method], $data);
+            $data = array_merge($_SESSION['lastTSV'][$p['method']], $data);
         }
 
         $rez = array( 'success' => true );
 
-        $authenticator = $this->getTSVAuthenticator($p->method);
+        $authenticator = $this->getTSVAuthenticator($p['method']);
         $data = $authenticator->createSecretData($data);
         $authenticator->setSecretData($data);
 
         if ($authenticator->verifyCode($data['code'])) {
             $cfg = array(
-                'method' => $p->method
+                'method' => $p['method']
                 ,'sd' => $data
             );
             $this->setTSVConfig($cfg);
@@ -302,7 +302,7 @@ class User
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $cfg = empty($r['cfg']) ? array(): json_decode($r['cfg'], true);
+            $cfg = Util\toJSONArray($r['cfg']);
             if (!empty($cfg['security'])) {
                 $rez = $cfg['security'];
             }
@@ -318,27 +318,34 @@ class User
 
     /**
      * save user profile form data
+     * @param  array $p
+     * @return json  response
      */
-    public function saveProfileData($data)
+    public function saveProfileData($p)
     {
-        if (!Security::canEditUser($data->id)) {
+        if (!Security::canEditUser($p['id'])) {
             throw new \Exception(L\Access_denied);
         }
 
         $rez = array();
         $cfg = $this->getUserConfig();
 
-        if (isset($data->country_code)) {
-            $cfg['country_code'] = $data->country_code;
+        if (isset($p['country_code'])) {
+            $cfg['country_code'] = $p['country_code'];
         }
-        if (isset($data->phone)) {
-            $cfg['phone'] = $data->phone;
+        if (isset($p['phone'])) {
+            $cfg['phone'] = $p['phone'];
         }
-        if (isset($data->timezone)) {
-            $cfg['timezone'] = $data->timezone;
+        if (isset($p['timezone'])) {
+            $cfg['timezone'] = $p['timezone'];
             unset($cfg['TZ']);
-            $sql = 'SELECT zone_name FROM casebox.zone WHERE caption = $1';
-            $res = DB\dbQuery($sql, $data->timezone) or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT zone_name
+                FROM casebox.zone
+                WHERE caption = $1',
+                $p['timezone']
+            ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 $cfg['TZ'] = $r['zone_name'];
             }
@@ -346,11 +353,11 @@ class User
         } else {
             unset($cfg['TZ']);
         }
-        if (isset($data->short_date_format)) {
-            $cfg['short_date_format'] = $data->short_date_format;
+        if (isset($p['short_date_format'])) {
+            $cfg['short_date_format'] = $p['short_date_format'];
         }
-        if (isset($data->long_date_format)) {
-            $cfg['long_date_format'] = $data->long_date_format;
+        if (isset($p['long_date_format'])) {
+            $cfg['long_date_format'] = $p['long_date_format'];
         }
 
         @DB\dbQuery(
@@ -363,30 +370,29 @@ class User
                 , cfg = $7
             WHERE id = $1',
             array(
-                $data->id
-                ,$data->first_name
-                ,$data->last_name
-                ,$data->sex
-                ,$data->email
-                ,$data->language_id
+                $p['id']
+                ,$p['first_name']
+                ,$p['last_name']
+                ,$p['sex']
+                ,$p['email']
+                ,$p['language_id']
                 ,json_encode($cfg)
             )
         ) or die( DB\dbQueryError() );
 
-        VerticalEditGrid::saveData('users_groups', $data);
+        VerticalEditGrid::saveData('users_groups', $p);
 
         /* updating session params if the updated user profile is currently logged user*/
-        // die($data->id.' == '.$_SESSION['user']['id']);
-        if ($data->id == $_SESSION['user']['id']) {
+        if ($p['id'] == $_SESSION['user']['id']) {
             $u = &$_SESSION['user'];
 
-            $u['first_name'] = $data->first_name;
-            $u['last_name'] = $data->last_name;
-            $u['sex'] = $data->sex;
-            $u['email'] = $data->email;
-            $u['language_id'] = $data->language_id;
+            $u['first_name'] = $p['first_name'];
+            $u['last_name'] = $p['last_name'];
+            $u['sex'] = $p['sex'];
+            $u['email'] = $p['email'];
+            $u['language_id'] = $p['language_id'];
 
-            $u['language'] = $GLOBALS['languages'][$data->language_id-1];
+            $u['language'] = $GLOBALS['languages'][$p['language_id']-1];
             $u['locale'] =  $GLOBALS['language_settings'][$u['language']]['locale'];
 
             $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
@@ -404,7 +410,7 @@ class User
         return array('success' => true);
     }
 
-    public function saveSecurityData($data)
+    public function saveSecurityData($p)
     {
         if (!$this->isVerified()) {
             return array('success' => false, 'verify' => true);
@@ -416,47 +422,47 @@ class User
         if (empty($cfg['security'])) {
             $cfg['security'] = array();
         }
-        if (empty($data->recovery_mobile)) {
+        if (empty($p['recovery_mobile'])) {
             unset($cfg['security']['recovery_mobile']);
         } else {
             $cfg['security']['recovery_mobile'] = true;
         }
-        if (empty($data->country_code)) {
+        if (empty($p['country_code'])) {
             unset($cfg['security']['country_code']);
         } else {
-            $cfg['security']['country_code'] = $data->country_code;
+            $cfg['security']['country_code'] = $p['country_code'];
         }
-        if (empty($data->phone_number)) {
+        if (empty($p['phone_number'])) {
             unset($cfg['security']['phone_number']);
         } else {
-            $cfg['security']['phone_number'] = $data->phone_number;
+            $cfg['security']['phone_number'] = $p['phone_number'];
         }
 
-        if (empty($data->recovery_email)) {
+        if (empty($p['recovery_email'])) {
             unset($cfg['security']['recovery_email']);
         } else {
             $cfg['security']['recovery_email'] = true;
         }
-        if (empty($data->email)) {
+        if (empty($p['email'])) {
             unset($cfg['security']['email']);
         } else {
-            $cfg['security']['email'] = $data->email;
+            $cfg['security']['email'] = $p['email'];
         }
 
-        if (empty($data->recovery_question)) {
+        if (empty($p['recovery_question'])) {
             unset($cfg['security']['recovery_question']);
         } else {
             $cfg['security']['recovery_question'] = true;
         }
-        if (empty($data->question_idx)) {
+        if (empty($p['question_idx'])) {
             unset($cfg['security']['question_idx']);
         } else {
-            $cfg['security']['question_idx'] = $data->question_idx;
+            $cfg['security']['question_idx'] = $p['question_idx'];
         }
-        if (empty($data->answer)) {
+        if (empty($p['answer'])) {
             unset($cfg['security']['answer']);
         } else {
-            $cfg['security']['answer'] = $data->answer;
+            $cfg['security']['answer'] = $p['answer'];
         }
 
         $this->setUserConfig($cfg);
@@ -583,22 +589,30 @@ class User
             $user_id
         ) or die( DB\dbQueryError() );
 
-        if ($r = $res->fetch_row()) {
-            $home_folder_id = $r[0];
+        if ($r = $res->fetch_assoc()) {
+            $home_folder_id = $r['id'];
         }
         $res->close();
         if (is_null($home_folder_id)) {
             $cfg = defined('CB\\CONFIG\\DEFAULT_HOME_FOLDER_CFG') ? CONFIG\DEFAULT_HOME_FOLDER_CFG : null;
 
             DB\dbQuery(
-                'INSERT INTO tree (name, user_id, `system`, `type`, `subtype`, cfg, template_id)
-                VALUES(\'[Home]\', $1
-                                 , 1
-                                 , 1
-                                 , 2
-                                 , $2
-                                 , $3
-                       )',
+                'INSERT INTO tree (
+                    name
+                    ,user_id
+                    ,`system`
+                    ,`type`
+                    ,`subtype`
+                    ,cfg
+                    ,template_id)
+                VALUES(
+                    \'[Home]\'
+                    ,$1
+                    ,1
+                    ,1
+                    ,2
+                    ,$2
+                    ,$3)',
                 array($user_id
                     ,$cfg
                     ,CONFIG\DEFAULT_FOLDER_TEMPLATE
@@ -610,14 +624,21 @@ class User
 
             /* insert home folder security record in tree_acl */
             DB\dbQuery(
-                'INSERT INTO tree_acl (node_id, user_group_id, allow, deny)
-                VALUES ($1
-                      , $2
-                      , 4095
-                      , 0) ON duplicate KEY
+                'INSERT INTO tree_acl (
+                    node_id
+                    ,user_group_id
+                    ,allow
+                    ,deny)
+                VALUES (
+                    $1
+                    ,$2
+                    ,4095
+                    ,0)
+                ON DUPLICATE KEY
                 UPDATE allow = 4095
-                     , deny = 0',
-                array($home_folder_id
+                    ,deny = 0',
+                array(
+                    $home_folder_id
                     ,$user_id
                 )
             ) or die( DB\dbQueryError() );
@@ -640,18 +661,28 @@ class User
             )
         ) or die( DB\dbQueryError() );
 
-        if ($r = $res->fetch_row()) {
-            $my_docs_id = $r[0];
+        if ($r = $res->fetch_assoc()) {
+            $my_docs_id = $r['id'];
         }
         $res->close();
         if (is_null($my_docs_id)) {
             DB\dbQuery(
-                'INSERT INTO tree (pid, name, user_id, `system`, `type`, `subtype`, template_id)
-                VALUES($1, \'[MyDocuments]\', $2
-                                            , 1
-                                            , 1
-                                            , 3
-                                            , $3)',
+                'INSERT INTO tree (
+                    pid
+                    ,name
+                    ,user_id
+                    ,`system`
+                    ,`type`
+                    ,`subtype`
+                    ,template_id)
+                VALUES(
+                    $1
+                    ,\'[MyDocuments]\'
+                    ,$2
+                    ,1
+                    ,1
+                    ,3
+                    ,$3)',
                 array($home_folder_id
                     ,$user_id
                     ,CONFIG\DEFAULT_FOLDER_TEMPLATE
@@ -696,8 +727,8 @@ class User
             $_SESSION['user']['id']
         ) or die( DB\dbQueryError() );
 
-        if ($r = $res->fetch_row()) {
-            $rez = $r[0];
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['id'];
         }
         $res->close();
         define('CB\\HOME_FOLDER'.$user_id, $rez);
@@ -732,13 +763,22 @@ class User
             )
         ) or die( DB\dbQueryError() );
 
-        if ($r = $res->fetch_row()) {
-            $rez = $r[0];
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['id'];
         }
         $res->close();
         if (empty($rez)) {
             DB\dbQuery(
-                'INSERT INTO tree (pid, user_id, `system`, `type`, `subtype`, `name`, cid, uid, template_id)
+                'INSERT INTO tree (
+                    pid
+                    ,user_id
+                    ,`system`
+                    ,`type`
+                    ,`subtype`
+                    ,`name`
+                    ,cid
+                    ,uid
+                    ,template_id)
                 VALUES (
                     $1
                     ,$2
@@ -820,24 +860,35 @@ class User
      */
     public function removePhoto($p)
     {
-        if (!is_numeric($p->id)) {
+        if (!is_numeric($p['id'])) {
             return array('success' => false, 'msg' => L\Wrong_id);
         }
 
-        if (!Security::canEditUser($p->id)) {
+        if (!Security::canEditUser($p['id'])) {
             throw new \Exception(L\Access_denied);
         }
 
         /* delete photo file*/
-        $res = DB\dbQuery('SELECT photo FROM users_groups WHERE id= $1', array($p->id)) or die( DB\dbQueryError() );
-        if ($r = $res->fetch_row()) {
-            @unlink(PHOTOS_PATH.$r[0]);
+        $res = DB\dbQuery(
+            'SELECT photo
+            FROM users_groups
+            WHERE id= $1',
+            $p['id']
+        ) or die( DB\dbQueryError() );
+
+        if ($r = $res->fetch_assoc()) {
+            @unlink(PHOTOS_PATH.$r['photo']);
         }
         $res->close();
         /* enddelete photo file*/
 
         // update db record
-        DB\dbQuery('UPDATE users_groups SET photo = NULL WHERE id= $1', array($p->id)) or die( DB\dbQueryError() );
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET photo = NULL
+            WHERE id= $1',
+            $p['id']
+        ) or die( DB\dbQueryError() );
 
         return array('success' => true);
     }
@@ -845,9 +896,14 @@ class User
     public static function getTemplateId()
     {
         $rez = null;
-        $res = DB\dbQuery('SELECT id FROM templates WHERE `type` =\'user\'') or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = $r[0];
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM templates
+            WHERE `type` =\'user\''
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['id'];
         }
         $res->close();
 
@@ -869,6 +925,40 @@ class User
         }
 
         return $this->authClasses[$authMechanism];
+    }
+
+    /**
+     * get display name of a user
+     * @param  $id  id of the user
+     * @return varchar
+     */
+    public static function getDisplayName($id = false)
+    {
+        if (!is_numeric($id)) {
+            $id = $_SESSION['user']['id'];
+        }
+
+        $var_name = 'users['.$id."]['displayName']";
+
+        if (!Cache::exist($var_name)) {
+            $res = DB\dbQuery(
+                'SELECT name, first_name, last_name
+                FROM users_groups
+                WHERE id = $1',
+                $id
+            ) or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                $name = trim($r['first_name'].' '.$r['last_name']);
+                if (empty($name)) {
+                    $name = $r['name'];
+                }
+                Cache::set($var_name, $name);
+            }
+            $res->close();
+        }
+
+        return Cache::get($var_name);
     }
 
     /**
@@ -900,7 +990,7 @@ class User
             $r['language'] = $GLOBALS['languages'][$language_index];
             $r['locale'] =  $GLOBALS['language_settings'][$r['language']]['locale'];
 
-            $r['cfg'] = json_decode($r['cfg'], true) or array();
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
 
             if (empty($r['cfg']['long_date_format'])) {
                 $r['cfg']['long_date_format'] = $GLOBALS['language_settings'][$r['language']]['long_date_format'];
@@ -929,7 +1019,7 @@ class User
         ) or die(DB\dbQueryError());
         $cfg = array();
         if ($r = $res->fetch_assoc()) {
-            $cfg = json_decode($r['cfg'], true) or array();
+            $cfg = Util\toJSONArray($r['cfg']);
         }
         $res->close();
 

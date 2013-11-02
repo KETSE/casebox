@@ -11,7 +11,7 @@ class Security
     public function getNodeDirectAcl($p)
     {
         $sec = new \CB\Security();
-        $rez = $sec->getObjectDirectAcl((object) array('id' => $p['node_id']));
+        $rez = $sec->getObjectDirectAcl(array('id' => $p['node_id']));
 
         return $rez;
     }
@@ -50,9 +50,9 @@ class Security
 
         $sec = new \CB\Security();
         $rez = $sec->updateObjectAccess(
-            (object) array(
+            array(
                 'id' => $p['node_id']
-                ,'data' => (object) array(
+                ,'data' => array(
                     'id' => $p['user_group_id']
                     ,'allow' => $p['allow']
                     ,'deny' => $p['deny']
@@ -73,7 +73,7 @@ class Security
     {
         $sec = new \CB\Security();
         $rez = $sec->destroyObjectAccess(
-            (object) array(
+            array(
                 'id' => $p['node_id']
                 ,'data' => $p['user_group_id']
             )
@@ -105,7 +105,7 @@ class Security
 
         $sec = new \CB\Security();
         $rez = $sec->setInheritance(
-            (object) array(
+            array(
                 'id' => $p['node_id']
                 ,'inherit' => $p['inherit']
                 ,'copyRules' => @$p['copyRules']

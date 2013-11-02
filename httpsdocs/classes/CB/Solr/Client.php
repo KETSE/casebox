@@ -13,7 +13,8 @@ class Client extends Service
      * acceptable solr fields list
      * @var array
      */
-    private $solr_fields = array('id'
+    private $solr_fields = array(
+        'id'
         ,'pid'
         ,'pids'
         ,'path'
@@ -173,6 +174,7 @@ class Client extends Service
         /* prepeare where condition for sql depending on incomming params */
         $where = '(t.updated > 0) and (t.id > $1)';
         if (isset($p['all']) && ($p['all'] == true)) {
+            $this->deleteByQuery('*:*');
             $where = '(t.id > $1)';
             $templatesCollection->loadAll();
         } elseif (!empty($p['id'])) {
@@ -181,36 +183,36 @@ class Client extends Service
         }
 
         $sql = 'SELECT t.id
-                    ,t.pid
-                    ,ti.pids
-                    ,ti.path
-                    ,ti.case_id
-                    ,ti.acl_count
-                    ,ti.security_set_id
-                    ,t.name
-                    ,t.system
-                    ,t.type
-                    ,t.subtype
-                    ,t.template_id
-                    ,t.target_id
-                    ,t.size
-            -- ,CASE WHEN t.type = 2 then (SELECT `type` FROM tree WHERE id = t.target_id) ELSE null END `target_type`
-            ,DATE_FORMAT(t.`date`, \'%Y-%m-%dT%H:%i:%sZ\') `date`
-            ,DATE_FORMAT(t.`date_end`, \'%Y-%m-%dT%H:%i:%sZ\') `date_end`
-            ,t.oid
-            ,t.cid
-            ,DATE_FORMAT(t.cdate, \'%Y-%m-%dT%H:%i:%sZ\') `cdate`
-            ,t.uid
-            ,DATE_FORMAT(t.udate, \'%Y-%m-%dT%H:%i:%sZ\') `udate`
-            ,t.did
-            ,DATE_FORMAT(t.ddate, \'%Y-%m-%dT%H:%i:%sZ\') `ddate`
-            ,t.dstatus
-            ,t.updated
+                ,t.pid
+                ,ti.pids
+                ,ti.path
+                ,ti.case_id
+                ,ti.acl_count
+                ,ti.security_set_id
+                ,t.name
+                ,t.system
+                ,t.type
+                ,t.subtype
+                ,t.template_id
+                ,t.target_id
+                ,t.size
+                -- ,CASE WHEN t.type = 2 then (SELECT `type` FROM tree WHERE id = t.target_id) ELSE null END `target_type`
+                ,DATE_FORMAT(t.`date`, \'%Y-%m-%dT%H:%i:%sZ\') `date`
+                ,DATE_FORMAT(t.`date_end`, \'%Y-%m-%dT%H:%i:%sZ\') `date_end`
+                ,t.oid
+                ,t.cid
+                ,DATE_FORMAT(t.cdate, \'%Y-%m-%dT%H:%i:%sZ\') `cdate`
+                ,t.uid
+                ,DATE_FORMAT(t.udate, \'%Y-%m-%dT%H:%i:%sZ\') `udate`
+                ,t.did
+                ,DATE_FORMAT(t.ddate, \'%Y-%m-%dT%H:%i:%sZ\') `ddate`
+                ,t.dstatus
+                ,t.updated
             FROM tree t
             LEFT JOIN tree_info ti ON t.id = ti.id
-            where '.$where.
-            ' ORDER BY t.id
-            limit 500';
+            where '.$where.'
+            ORDER BY t.id
+            LIMIT 500';
 
         $docs = true;
         while (!empty($docs)) {
@@ -288,14 +290,14 @@ class Client extends Service
                 $this->addDocuments($docs);
 
                 /* reset updated flag into database for processed documents */
-                $sql2 = 'UPDATE tree
-                         , tree_info
+                DB\dbQuery(
+                    'UPDATE tree
+                        ,tree_info
                     SET tree.updated = 0
-                      , tree_info.updated = 0
+                        ,tree_info.updated = 0
                     WHERE tree.id in ('.implode(',', array_keys($docs)).')
-                        AND tree_info.id = tree.id';
-
-                DB\dbQuery($sql2) or die(DB\dbQueryError());
+                        AND tree_info.id = tree.id'
+                ) or die(DB\dbQueryError());
 
                 $this->updateCronLastActionTime(@$p['cron_id']);
 

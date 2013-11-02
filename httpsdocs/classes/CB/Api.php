@@ -14,10 +14,10 @@ class Api
         'cb.objects.create' => 'Objects.create'
 
         ,'cb.objects.permissions.getDirectRules' => 'Security.getNodeDirectAcl'
-        ,'cb.objects.permissions.addRule'       => 'Security.updateNodeAccess'
-        ,'cb.objects.permissions.updateRule'    => 'Security.updateNodeAccess'
-        ,'cb.objects.permissions.removeRule'    => 'Security.deleteNodeAccess'
-        ,'cb.objects.permissions.setInheritance'=> 'Security.setInheritance'
+        ,'cb.objects.permissions.addRule'        => 'Security.updateNodeAccess'
+        ,'cb.objects.permissions.updateRule'     => 'Security.updateNodeAccess'
+        ,'cb.objects.permissions.removeRule'     => 'Security.deleteNodeAccess'
+        ,'cb.objects.permissions.setInheritance' => 'Security.setInheritance'
 
         ,'cb.files.get'         => 'Files.get'
         ,'cb.files.download'    => 'Files.download'
@@ -86,11 +86,11 @@ class Api
 
     public function sendResponse($status = 200, $body = '', $content_type = 'text/html')
     {
-        $status_header = 'HTTP/1.1 ' . $status . ' ' . $this->getStatusCodeMessage($status);
+        $status_header = 'HTTP/1.1 '.$status.' '.$this->getStatusCodeMessage($status);
         // set the status
         header($status_header);
         // set the content type
-        header('Content-type: ' . $content_type);
+        header('Content-type: '.$content_type);
 
         // pages with body are easy
         if ($body != '') {
@@ -109,7 +109,7 @@ class Api
                     $message = 'You must be authorized to view this page.';
                     break;
                 case 404:
-                    $message = 'The requested URL ' . $_SERVER['REQUEST_URI'] . ' was not found.';
+                    $message = 'The requested URL '.$_SERVER['REQUEST_URI'].' was not found.';
                     break;
                 case 500:
                     $message = 'The server encountered an error processing your request.';
@@ -120,20 +120,26 @@ class Api
             }
 
             // servers don't always have a signature turned on (this is an apache directive "ServerSignature On")
-            $signature = ($_SERVER['SERVER_SIGNATURE'] == '') ? $_SERVER['SERVER_SOFTWARE'] . ' Server at ' . $_SERVER['SERVER_NAME'] . ' Port ' . $_SERVER['SERVER_PORT'] : $_SERVER['SERVER_SIGNATURE'];
+            $signature = ($_SERVER['SERVER_SIGNATURE'] == '')
+                ? $_SERVER['SERVER_SOFTWARE'] .
+                    ' Server at ' .
+                    $_SERVER['SERVER_NAME'] .
+                    ' Port ' .
+                    $_SERVER['SERVER_PORT']
+                : $_SERVER['SERVER_SIGNATURE'];
 
             // this should be templatized in a real-world solution
             $body = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
                         <html>
                             <head>
                                 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-                                <title>' . $status . ' ' . $this->getStatusCodeMessage($status) . '</title>
+                                <title>'.$status.' '.$this->getStatusCodeMessage($status).'</title>
                             </head>
                             <body>
-                                <h1>' . $this->getStatusCodeMessage($status) . '</h1>
-                                <p>' . $message . '</p>
+                                <h1>'.$this->getStatusCodeMessage($status).'</h1>
+                                <p>'.$message.'</p>
                                 <hr />
-                                <address>' . $signature . '</address>
+                                <address>'.$signature.'</address>
                             </body>
                         </html>';
 

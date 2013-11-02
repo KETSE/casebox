@@ -41,11 +41,11 @@ class Search extends Solr\Client
     {
         $p = &$this->inputParams;
         /* initial parameters */
-        $this->query = empty($p->query)
+        $this->query = empty($p['query'])
             ? ''
-            : $this->escapeLuceneChars($p->query);
-        $this->start = empty($p->start)? 0 : intval($p->start);
-        $this->rows = empty($p->rows)? \CB\CONFIG\MAX_ROWS : intval($p->rows);
+            : $this->escapeLuceneChars($p['query']);
+        $this->start = empty($p['start'])? 0 : intval($p['start']);
+        $this->rows = empty($p['rows'])? \CB\CONFIG\MAX_ROWS : intval($p['rows']);
 
         $fq = array('dstatus:0'); //by default filter not deleted nodes
 
@@ -61,28 +61,28 @@ class Search extends Solr\Client
         );
         /* initial parameters */
 
-        if (!empty($p->dstatus)) {
-            $fq = array('dstatus:'.intval($p->dstatus));
+        if (!empty($p['dstatus'])) {
+            $fq = array('dstatus:'.intval($p['dstatus']));
         }
-        if (!empty($p->fq)) {
-            if (!is_array($p->fq)) {
-                $p->fq = array($p->fq);
+        if (!empty($p['fq'])) {
+            if (!is_array($p['fq'])) {
+                $p['fq'] = array($p['fq']);
             }
-            $fq = array_merge($fq, $p->fq);
+            $fq = array_merge($fq, $p['fq']);
         }
 
         /* set custom field list if specified */
-        if (!empty($p->fl)) {
-            $this->params['fl'] = $p->fl;
+        if (!empty($p['fl'])) {
+            $this->params['fl'] = $p['fl'];
         }
 
         /*analize sort parameter (ex: status asc,date_end asc)/**/
-        if (isset($p->sort)) {
+        if (isset($p['sort'])) {
             $sort = array();
-            if (!is_array($p->sort)) {
-                $sort = array($p->sort => empty($p->dir) ? 'asc' : strtolower($p->dir) );
+            if (!is_array($p['sort'])) {
+                $sort = array($p['sort'] => empty($p['dir']) ? 'asc' : strtolower($p['dir']) );
             } else {
-                foreach ($p->sort as $s) {
+                foreach ($p['sort'] as $s) {
                     $s = explode(' ', $s);
                     $sort[$s[0]] = empty($s[1]) ? 'asc' : strtolower($s[1]);
                 }
@@ -122,91 +122,91 @@ class Search extends Solr\Client
         // $fq[] = '!deny_user_ids:'.$_SESSION['user']['id'];
         /* end of adding security filter*/
 
-        if (!empty($p->pid)) {
-            $ids = Util\toNumericArray($p->pid);
+        if (!empty($p['pid'])) {
+            $ids = Util\toNumericArray($p['pid']);
             if (!empty($ids)) {
                 $fq[] = 'pid:('.implode(' OR ', $ids).')';
             }
         }
-        if (!empty($p->ids)) {
-            $ids = Util\toNumericArray($p->ids);
+        if (!empty($p['ids'])) {
+            $ids = Util\toNumericArray($p['ids']);
             if (!empty($ids)) {
                 $fq[] = 'id:('.implode(' OR ', $ids).')';
             }
         }
-        if (!empty($p->pids)) {
-            $ids = Util\toNumericArray($p->pids);
+        if (!empty($p['pids'])) {
+            $ids = Util\toNumericArray($p['pids']);
             if (!empty($ids)) {
                 $fq[] = 'pids:('.implode(' OR ', $ids).')';
             }
         }
-        if (!empty($p->types)) {
-            if (!is_array($p->types)) {
-                $p->types = explode(',', $p->types);
+        if (!empty($p['types'])) {
+            if (!is_array($p['types'])) {
+                $p['types'] = explode(',', $p['types']);
             }
-            for ($i=0; $i < sizeof($p->types); $i++) {
-                switch ($p->types[$i]) {
+            for ($i=0; $i < sizeof($p['types']); $i++) {
+                switch ($p['types'][$i]) {
                     case 'folder':
-                        $p->types[$i] = 1;
+                        $p['types'][$i] = 1;
                         break;
                     case 'link':
-                        $p->types[$i] = 2;
+                        $p['types'][$i] = 2;
                         break;
                     case 'case':
-                        $p->types[$i] = 3;
+                        $p['types'][$i] = 3;
                         break;
                     case 'object':
-                        $p->types[$i] = 4;
+                        $p['types'][$i] = 4;
                         break;
                     case 'file':
-                        $p->types[$i] = 5;
+                        $p['types'][$i] = 5;
                         break;
                     case 'task':
-                        $p->types[$i] = 6;
+                        $p['types'][$i] = 6;
                         break;
                     case 'event':
-                        $p->types[$i] = 7;
+                        $p['types'][$i] = 7;
                         break;
-                    default: $p->types[$i] = intval($p->types[$i]);
+                    default: $p['types'][$i] = intval($p['types'][$i]);
                 }
             }
-            // $ids = Util\toNumericArray($p->types);
-            if (!empty($p->types)) {
-                $fq[] = 'type:('.implode(' OR ', $p->types).')';
+            // $ids = Util\toNumericArray($p['types']);
+            if (!empty($p['types'])) {
+                $fq[] = 'type:('.implode(' OR ', $p['types']).')';
             }
         }
 
-        if (!empty($p->templates)) {
-            $ids = Util\toNumericArray($p->templates);
+        if (!empty($p['templates'])) {
+            $ids = Util\toNumericArray($p['templates']);
             if (!empty($ids)) {
                 $fq[] = 'template_id:('.implode(' OR ', $ids).')';
             }
         }
-        if (!empty($p->template_types)) {
-            if (!is_array($p->template_types)) {
-                $p->template_types = explode(',', $p->template_types);
+        if (!empty($p['template_types'])) {
+            if (!is_array($p['template_types'])) {
+                $p['template_types'] = explode(',', $p['template_types']);
             }
-            if (!empty($p->template_types)) {
-                $fq[] = 'template_type:("'.implode('" OR "', $p->template_types).'")';
+            if (!empty($p['template_types'])) {
+                $fq[] = 'template_type:("'.implode('" OR "', $p['template_types']).'")';
             }
         }
 
-        if (isset($p->folders) && !empty($GLOBALS['folder_templates'])) {
-            if ($p->folders) {
+        if (isset($p['folders']) && !empty($GLOBALS['folder_templates'])) {
+            if ($p['folders']) {
                 $fq[] = 'template_type:("'.implode('" AND "', $GLOBALS['folder_templates']).'")';
             } else {
                 $fq[] = '!template_id:('.implode(' OR ', $GLOBALS['folder_templates']).')';
             }
         }
 
-        if (!empty($p->tags)) {
-            $ids = Util\toNumericArray($p->tags);
+        if (!empty($p['tags'])) {
+            $ids = Util\toNumericArray($p['tags']);
             if (!empty($ids)) {
                 $fq[] = 'sys_tags:('.implode(' OR ', $ids).')';
             }
         }
-        if (!empty($p->dateStart)) {
-            $fq[] = 'date:['.$p->dateStart.' TO '.$p->dateEnd.']';
+        if (!empty($p['dateStart'])) {
+            $fq[] = 'date:['.$p['dateStart'].' TO '.$p['dateEnd'].']';
         }
 
         $this->params['fq'] = $fq;
@@ -230,9 +230,9 @@ class Search extends Solr\Client
     private function setFilters()
     {
         $p = &$this->inputParams;
-        if (!empty($p->filters)) {
-            $p->filters = $p->filters;
-            foreach ($p->filters as $k => $v) {
+        if (!empty($p['filters'])) {
+            $p['filters'] = $p['filters'];
+            foreach ($p['filters'] as $k => $v) {
                 if ($k == 'OR') {
                     $conditions = array();
                     foreach ($v as $sk => $sv) {
@@ -303,8 +303,9 @@ class Search extends Solr\Client
                     }
                 }
             }
-        }elseif($k == 'assigned') $k = 'user_ids';
-        elseif (substr($k, 0, 4) == 'stg_') {
+        } elseif ($k == 'assigned') {
+            $k = 'user_ids';
+        } elseif (substr($k, 0, 4) == 'stg_') {
             $k = 'sys_tags';
         } elseif (substr($k, 0, 4) == 'ttg_') {
             $k = 'tree_tags';
@@ -352,7 +353,7 @@ class Search extends Solr\Client
     private function prepareFacetsParams()
     {
         $p = &$this->inputParams;
-        switch (@$p->facets) {
+        switch (@$p['facets']) {
             case 'general':
                 $this->params['facet.field'] = array(
                     '{!ex=template_type key=0template_type}template_type'
@@ -462,9 +463,9 @@ class Search extends Solr\Client
 
                 break;
             case 'activeTasksPerUsers':
-                if (!empty($p->facetPivot)) {
+                if (!empty($p['facetPivot'])) {
                     $this->rows = 0;
-                    $this->params['facet.pivot'] = $p->facetPivot;
+                    $this->params['facet.pivot'] = $p['facetPivot'];
                 }
                 break;
             case 'first_letter':
@@ -475,29 +476,29 @@ class Search extends Solr\Client
                 $this->params['facet.sort'] = "lex";
                 break;
             default:
-                if (!empty($p->{'facet.field'})) {
-                    $this->params['facet.field'] = $p->{'facet.field'};
+                if (!empty($p['facet.field'])) {
+                    $this->params['facet.field'] = $p['facet.field'];
                 }
-                if (!empty($p->{'facet.query'})) {
-                    $this->params['facet.query'] = $p->{'facet.query'};
+                if (!empty($p['facet.query'])) {
+                    $this->params['facet.query'] = $p['facet.query'];
                 }
-                if (!empty($p->{'facet.pivot'})) {
-                    $this->params['facet.pivot'] = $p->{'facet.pivot'};
+                if (!empty($p['facet.pivot'])) {
+                    $this->params['facet.pivot'] = $p['facet.pivot'];
                 }
-                if (!empty($p->{'facet.method'})) {
-                    $this->params['facet.method'] = $p->{'facet.method'};
+                if (!empty($p['facet.method'])) {
+                    $this->params['facet.method'] = $p['facet.method'];
                 }
-                if (!empty($p->{'facet.sort'})) {
-                    $this->params['facet.sort'] = $p->{'facet.sort'};
+                if (!empty($p['facet.sort'])) {
+                    $this->params['facet.sort'] = $p['facet.sort'];
                 }
-                if (!empty($p->{'facet.missing'})) {
-                    $this->params['facet.missing'] = $p->{'facet.missing'};
+                if (!empty($p['facet.missing'])) {
+                    $this->params['facet.missing'] = $p['facet.missing'];
                 }
                 break;
         }
         if (!empty($this->params['facet.field']) || !empty($this->params['facet.pivot'])) {
             $this->params['facet'] = 'true';
-            $this->params['facet.mincount'] = isset($p->{'facet.mincount'}) ? $p->{'facet.mincount'} : 1;
+            $this->params['facet.mincount'] = isset($p['facet.mincount']) ? $p['facet.mincount'] : 1;
         }
     }
 
@@ -540,9 +541,13 @@ class Search extends Solr\Client
                     $rd['content'] = $sr->highlighting->{$rd['id']}->{'content'}[0];
                 }
             }
-            $res = DB\dbQuery('SELECT `path` FROM tree_info WHERE id = $1', array($rd['id'])) or die(DB\dbQueryError());
-            if ($r = $res->fetch_row()) {
-                $rd['path'] = $r[0];
+            $res = DB\dbQuery(
+                'SELECT `path` FROM tree_info WHERE id = $1',
+                $rd['id']
+            ) or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                $rd['path'] = $r['path'];
             }
             $res->close();
             $rez['data'][] = $rd;
@@ -559,7 +564,7 @@ class Search extends Solr\Client
             return false;
         }
         $fc = &$sr->facet_counts;
-        switch (@$this->inputParams->facets) {
+        switch (@$this->inputParams['facets']) {
             case 'general':
                 foreach ($fc->facet_fields as $k => $v) {
                     $k = substr($k, 1);
@@ -583,25 +588,34 @@ class Search extends Solr\Client
 
                 break;
             case 'actiontasks':
-                $sql = 'SELECT count(*)
+                //active and overdue
+                $res = DB\dbQuery(
+                    'SELECT count(*) `total`
                     FROM tree
                     WHERE pid = $1
-                        AND `type` = 6';//active and overdue
-                $res = DB\dbQuery($sql, $this->inputParams->pid) or die(DB\dbQueryError());
-                if ($r = $res->fetch_row()) {
-                    $rez['total'] = $r[0];
+                        AND `type` = 6',
+                    $this->inputParams['pid']
+                ) or die(DB\dbQueryError());
+
+                if ($r = $res->fetch_assoc()) {
+                    $rez['total'] = $r['total'];
                 }
                 $res->close();
-                $sql = 'SELECT count(*)
+
+                //active and overdue
+                $res = DB\dbQuery(
+                    'SELECT count(*) `active`
                     FROM tree t
                     JOIN tasks tt
                     WHERE t.pid = $1
                         AND t.`type` = 6
                         AND t.id = tt.id
-                        AND tt.status < 3';//active and overdue
-                $res = DB\dbQuery($sql, $this->inputParams->pid) or die(DB\dbQueryError());
-                if ($r = $res->fetch_row()) {
-                    $rez['active'] = $r[0];
+                        AND tt.status < 3',
+                    $this->inputParams['pid']
+                ) or die(DB\dbQueryError());
+
+                if ($r = $res->fetch_assoc()) {
+                    $rez['active'] = $r['active'];
                 }
                 $res->close();
                 break;
@@ -650,7 +664,7 @@ class Search extends Solr\Client
                 break;
             case 'activeTasksPerUsers':
                 if (!empty($fc->facet_pivot)) {
-                    foreach ($fc->facet_pivot->{$this->inputParams->facetPivot} as $f) {
+                    foreach ($fc->facet_pivot->{$this->inputParams['facetPivot']} as $f) {
                         $row = array('id' => $f->value, 'total' => $f->count );
                         if (!empty($f->pivot)) {
                             foreach ($f->pivot as $st) {

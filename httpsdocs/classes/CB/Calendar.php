@@ -7,36 +7,33 @@ class Calendar
     {
         $rez = array('success' => true, 'data' => array() );
 
-        if (empty($p->start) || empty($p->end)) {
+        if (empty($p['start']) || empty($p['end'])) {
             return $rez;
         }
 
-        $p->fl = 'id, template_id, name, date, date_end, category_id, status';
-        if (!empty($p->path)) {
+        $p['fl'] = 'id, template_id, name, date, date_end, category_id, status';
+        if (!empty($p['path'])) {
             $rez['pathtext'] = Path::getPathText($p);
             $rez['folderProperties'] = Path::getPathProperties($p);
         }
 
-        $pid = explode('/', @$p->path);
+        $pid = explode('/', @$p['path']);
         $pid = array_pop($pid);
         $pid = is_numeric($pid) ? $pid : Browser::getRootFolderId();
-        if (empty($p->descendants)) {
-            $p->pid = $pid;
+        if (empty($p['descendants'])) {
+            $p['pid'] = $pid;
         } else {
-            $p->pids = $pid;
+            $p['pids'] = $pid;
         }
-        $p->dateStart = $p->start;//.'Z';
-        unset($p->start);
-        $p->dateEnd = $p->end;//substr($p->end, 0, 10).'T23:59:59.999Z';
-        unset($p->end);
+        $p['dateStart'] = $p['start'];//.'Z';
+        unset($p['start']);
+        $p['dateEnd'] = $p['end'];//substr($p['end'], 0, 10).'T23:59:59.999Z';
+        unset($p['end']);
 
-        $p->template_types = array('task');
+        $p['template_types'] = array('task');
 
         $s = new Search();
         $sr = $s->query($p);
-        // if (isDebugHost()) {
-        //     var_dump($sr);
-        // }
         if (!empty($sr['data'])) {
             for ($i=0; $i < sizeof($sr['data']); $i++) {
                 $d = $sr['data'][$i];
@@ -48,8 +45,11 @@ class Calendar
                     }
                 }
                 /* quick fix. Maybe add allday to solr */
-                $sql = 'SELECT allday FROM tasks WHERE id = $1';
-                $res = DB\dbQuery($sql, $d['id']) or die(DB\dbQueryError());
+                $res = DB\dbQuery(
+                    'SELECT allday FROM tasks WHERE id = $1',
+                    $d['id']
+                ) or die(DB\dbQueryError());
+
                 if ($r = $res->fetch_assoc()) {
                     $d['allday'] = ($r['allday'] == 1);
                 }

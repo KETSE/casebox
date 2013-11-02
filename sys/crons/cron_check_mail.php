@@ -50,8 +50,8 @@ if (!$cd['success']) {
 $email_template_id = false;
 
 $res = DB\dbQuery('SELECT id FROM templates WHERE `type` = 8') or die(DB\dbQueryError());
-if ($r = $res->fetch_row()) {
-    $email_template_id = $r[0];
+if ($r = $res->fetch_assoc()) {
+    $email_template_id = $r['id'];
 }
 $res->close();
 
@@ -132,8 +132,8 @@ foreach ($mailbox as $k => $mail) {
             ,$email.',%'
         )
     ) or die(DB\dbQueryError());
-    if ($r = $res->fetch_row()) {
-        $user_id = $r[0];
+    if ($r = $res->fetch_assoc()) {
+        $user_id = $r['id'];
     }
     $res->close();
     if ($user_id == false) {
@@ -176,8 +176,8 @@ foreach ($mailbox as $k => $mail) {
         $rootFolderName = null;
         $sql = 'SELECT name FROM tree WHERE id = $1';
         $res = DB\dbQuery($sql, $rootFolderId) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rootFolderName = $r[0];
+        if ($r = $res->fetch_assoc()) {
+            $rootFolderName = $r['name'];
         }
         $res->close();
         while (!empty($path) && empty($path[0])) {
@@ -200,10 +200,10 @@ foreach ($mailbox as $k => $mail) {
                 $i = 1;
                 while ($found && ($i < sizeof($path))) {
                     if (!empty($path[$i])) {
-                        $sql = 'select id from tree where pid = $1 and name = $2';
+                        $sql = 'SELECT id FROM tree WHERE pid = $1 AND name = $2';
                         $res = DB\dbQuery($sql, array($lastPid, $path[$i])) or die(DB\dbQueryError());
-                        if ($r = $res->fetch_row()) {
-                            $lastPid = $r[0];
+                        if ($r = $res->fetch_assoc()) {
+                            $lastPid = $r['id'];
                         } else {
                             $found = false;
                         }
@@ -220,10 +220,10 @@ foreach ($mailbox as $k => $mail) {
                 $i = 0;
                 while ($found && ($i < sizeof($path))) {
                     if (!empty($path[$i])) {
-                        $sql = 'select id from tree where pid = $1 and name = $2';
+                        $sql = 'SELECT id FROM tree WHERE pid = $1 AND name = $2';
                         $res = DB\dbQuery($sql, array($lastPid, $path[$i])) or die(DB\dbQueryError());
-                        if ($r = $res->fetch_row()) {
-                            $lastPid = $r[0];
+                        if ($r = $res->fetch_assoc()) {
+                            $lastPid = $r['id'];
                         } else {
                             $found = false;
                         }

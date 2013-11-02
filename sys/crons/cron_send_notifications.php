@@ -81,13 +81,18 @@ foreach ($users as $u) {
                 '<html xmlns="http://www.w3.org/1999/xhtml" lang="'.$lang.'" xml:lang="'.$lang.'">'.
                 '<head><title>CaseBox</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>'.
                 '<body style="font: normal 11px tahoma,arial,helvetica,sans-serif; line-height: 18px">'.$m[1].'</body></html>';
-            echo $u['email'].': '.$m[0]."\n";
-            mail(
-                $u['email'],
-                $m[0],
-                $message,
-                "Content-type: text/html; charset=utf-8\r\nFrom: ".SENDER_EMAIL . "\r\n"
-            );
+            //skip sending notifications from devel server to other emails than Admin
+            if (isDevelServer() && ($u['email'] !== ADMIN_EMAIL)) {
+                echo 'Devel skip: '.$u['email'].': '.$m[0]."\n";
+            } else {
+                echo $u['email'].': '.$m[0]."\n";
+                mail(
+                    $u['email'],
+                    $m[0],
+                    $message,
+                    "Content-type: text/html; charset=utf-8\r\nFrom: ".SENDER_EMAIL . "\r\n"
+                );
+            }
         }
     }
     DB\dbQuery(

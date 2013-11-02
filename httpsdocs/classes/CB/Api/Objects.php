@@ -187,8 +187,17 @@ class Objects
     private function fieldNameToId($field_name)
     {
         if (!isset($this->template_field_names[$field_name])) {
-            $sql = 'SELECT id FROM templates_structure WHERE template_id = $1 and name = $2';
-            $res = DB\dbQuery($sql, array($this->template_id, $field_name)) or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM templates_structure
+                WHERE template_id = $1
+                    AND name = $2',
+                array(
+                    $this->template_id
+                    ,$field_name
+                )
+            ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 $this->template_field_names[$field_name] = $r['id'];
             } else {
@@ -232,9 +241,15 @@ class Objects
                 return 'owner not specified';
             }
 
-            $sql = 'SELECT id FROM users_groups WHERE `type` = 2 and id = $1';
+            $sql = 'SELECT id
+                FROM users_groups
+                WHERE `type` = 2
+                    and id = $1';
             if (!is_numeric($p['owner'])) {
-                $sql = 'SELECT id FROM users_groups WHERE `type` = 2 and name = $1';
+                $sql = 'SELECT id
+                    FROM users_groups
+                    WHERE `type` = 2
+                        and name = $1';
             }
 
             $res = DB\dbQuery($sql, $p['owner']) or die(DB\dbQueryError());

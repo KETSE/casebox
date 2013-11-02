@@ -1,10 +1,10 @@
-Ext.namespace('CB'); 
+Ext.namespace('CB');
 
 CB.Objects = Ext.extend(CB.GenericForm, {
     title: L.NewObject
     ,padding: 0
     ,initComponent: function(){
-        
+
         this.objectsStore = new Ext.data.DirectStore({
             autoLoad: false
             ,restful: false
@@ -24,15 +24,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 successProperty: 'success'
                 ,root: 'data'
                 ,messageProperty: 'msg'
-            },[ 
-                    {name: 'id', type: 'int'}
-                    ,'name'
-                    ,{name: 'date', type: 'date'}
-                    ,{name: 'type', type: 'int'}
-                    ,{name: 'subtype', type: 'int'}
-                    ,{name: 'template_id', type: 'int'}
-                    ,{name: 'status', type: 'int'}
-                    , 'iconCls'
+            },[
+                {name: 'id', type: 'int'}
+                ,'name'
+                ,{name: 'date', type: 'date'}
+                ,{name: 'type', type: 'int'}
+                ,{name: 'subtype', type: 'int'}
+                ,{name: 'template_id', type: 'int'}
+                ,{name: 'status', type: 'int'}
+                , 'iconCls'
             ]
             )
             ,listeners:{
@@ -47,8 +47,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 data = [];
                 Ext.each(ids, function(id){
                      idx = this.findExact('id', parseInt(id));
-                    if(idx >= 0) data.push(this.getAt(idx).data);           
-                }, this)
+                    if(idx >= 0) data.push(this.getAt(idx).data);
+                }, this);
                 return data;
             }
             ,checkRecordExistance: function(data){
@@ -61,8 +61,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 }
             }
         });
-        
-        this.objectsStore.baseParams = {id: this.data.id, template_id: this.data.template_id}
+
+        this.objectsStore.baseParams = {
+            id: this.data.id
+            ,template_id: this.data.template_id
+        };
         this.objectsStore.load();
 
         this.topFieldSet = new Ext.form.FieldSet({
@@ -73,7 +76,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             ,labelWidth: 130
             ,bodyStyle: 'padding: 10px'
             ,cls: 'spacy-fields'
-            ,autoHeight: true
             ,defaults:{
                 minWidth: 90
                 ,anchor: '95%'
@@ -85,7 +87,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 scope: this
                 ,add: function(f, c, i){ c.enableBubble('change'); }
             }
-        })
+        });
         this.tabPanel = new Ext.TabPanel({
             xtype: 'tabpanel'
             ,region: 'center'
@@ -137,11 +139,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ,scope: this
                 ,handler: this.onPasteClick.createInterceptor(this.autoSaveObjectInterceptor, this)
             })
-        }
+        };
+
         Ext.apply(this, {
             layout: 'fit'
             ,initialConfig:{
-                api: { 
+                api: {
                     load: CB_Objects.load
                     ,submit: CB_Objects.save
                     ,waitMsg: L.LoadingData + ' ...'
@@ -150,14 +153,14 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             }
             ,listeners:{
                 afterlayout: {scope: this, fn: function(){
-                    if(this.loaded) return; 
-                    this.getEl().mask(L.Downloading + ' ...', 'x-mask-loading'); 
+                    if(this.loaded) return;
+                    this.getEl().mask(L.Downloading + ' ...', 'x-mask-loading');
                 }}
                 ,activate: function(){
                     ep = this.find('region', 'center');
                     if(!Ext.isEmpty(ep)) ep[0].syncSize();
                 }
-                ,change: function(c, v){ 
+                ,change: function(c, v){
                     this.setDirty(true);
                     this.onObjectChanged();
                     if(c && c.isXType && (c.isXType('combo')) ){
@@ -167,8 +170,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ,savesuccess: this.onObjectSaved
                 ,beforedestroy: {
                     scope: this
-                    ,fn: function(){ 
-                        this.getBubbleTarget().un('filesdeleted', this.onFilesDeleted, this); 
+                    ,fn: function(){
+                        this.getBubbleTarget().un('filesdeleted', this.onFilesDeleted, this);
                         this.getBubbleTarget().un('fileuploaded', this.onFileUploaded, this);
                         if(this.grid){
                             this.grid.destroy();
@@ -181,13 +184,13 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                         App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
                         App.clipboard.un('change', this.onClipboardChange, this);
                         delete this.filesDropPlugin;
-                    
+
                     }
                 }
             }
         });
-        
-        this.dropZoneConfig = {text: 'Drop files here'}
+
+        this.dropZoneConfig = {text: 'Drop files here'};
         this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
         this.filesDropPlugin.init(this);
 
@@ -218,50 +221,67 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.data.udate = date_ISO_to_date(this.data.udate);
     }
     ,onObjectsStoreChange: function(store, records, options){
-        Ext.each(records, function(r){ r.set('iconCls', getItemIcon(r.data)) }, this);
-        if(this.grid && !this.grid.editing) this.grid.getView().refresh();
-    }   
+        Ext.each(
+            records
+            ,function(r){
+                r.set('iconCls', getItemIcon(r.data));
+            }
+            ,this
+        );
+        if(this.grid && !this.grid.editing) {
+            this.grid.getView().refresh();
+        }
+    }
     ,prepareInterface: function(){
-        toolbarItems = []
+        toolbarItems = [];
 
         /* insert create menu if needed */
         menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
         if( !Ext.isEmpty(menuConfig) ){
-            createButton = new Ext.Button({ 
+            createButton = new Ext.Button({
                 text: L.Create
                 ,iconCls: 'icon32-create'
                 ,iconAlign:'top'
                 ,scale: 'large'
-                            ,menu: [ ]
-                        })
+                ,menu: [ ]
+            });
             updateMenu(createButton, menuConfig, this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this);
-            toolbarItems.push(createButton, '-')
+            toolbarItems.push(createButton, '-');
         }
         /**/
         toolbarItems.push(this.actions.save);
 
         if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
-        
-        toolbarItems.push('-',{text: L.Attach, iconCls: 'icon32-attach', scale: 'large', iconAlign:'top'
-                    ,menu: [
-                this.actions.upload
-                ,'-'
-                ,this.actions.paste
-            ]
-            })
 
-        toolbarItems.push(this.actions.createTask)
-        
-        if(!this.data.tags) this.data.tags = {};
+        toolbarItems.push(
+            '-'
+            ,{
+                text: L.Attach
+                ,iconCls: 'icon32-attach'
+                ,scale: 'large'
+                ,iconAlign:'top'
+                ,menu: [
+                    this.actions.upload
+                    ,'-'
+                    ,this.actions.paste
+                ]
+            }
+        );
 
-        northRegionItems = [ this.topFieldSet ]
+        toolbarItems.push(this.actions.createTask);
 
-        this.grid = Ext.create({ 
+        if(!this.data.tags) {
+            this.data.tags = {};
+        }
+
+        northRegionItems = [this.topFieldSet];
+
+        this.grid = Ext.create({
             title: L.Details
             ,show_files: this.templateData.cfg.files
             ,refOwner: this
         }, Ext.value(this.templateData.cfg.gridJsClass, 'CBVerticalEditGrid'));
-        tabPanelItems = [  ]
+
         //placing content elements
         contentItems = [this.tabPanel];
         if( (this.topFieldSet.items.getCount() > 0) )
@@ -311,14 +331,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             ]
         });
         this.mainToolBar = this.items.first().getTopToolbar();
-        while(i = tabPanelItems.pop()) this.tabPanel.insert(0, i);
-        
-        this.getEl().unmask();  
-        
+
+        this.getEl().unmask();
+
         this.addEvents('taskcreate', 'taskedit');
         this.enableBubble(['taskcreate', 'taskedit']);
-        this.getBubbleTarget().on('taskupdated', this.onTaskUpdate, this);
-        this.getBubbleTarget().on('tasksdeleted', this.onTaskDelete, this);
         this.fireEvent('objectopened', this);
     }
     ,onSaveClick: function(){
@@ -334,7 +351,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         idx = this.templateStore.findExact('name', '_date_start');
         if(idx >=0) {
             r = this.templateStore.getAt(idx);
-            return this.getCurrentFieldValue(r.get('id'), 0)
+            return this.getCurrentFieldValue(r.get('id'), 0);
         }
         return null;
     }
@@ -345,7 +362,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         return this.grid.getFieldValue(field_id, duplication_id);
     }
     ,onDeleteClick: function(b){
-        this.fireEvent('deleteobject', this.data)
+        this.fireEvent('deleteobject', this.data);
     }
     ,onObjectsDeleted: function(ids){
         if(ids.indexOf(parseInt(this.data.id)) >=0 ) this.destroy();
@@ -374,8 +391,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.templateData = {};
         idx = CB.DB.templates.findExact('id', parseInt(this.data.template_id));
         if(idx >= 0) this.templateData = CB.DB.templates.getAt(idx).data;
-        if(Ext.isEmpty(this.templateData.cfg)) this.templateData.cfg = {}
-    
+
+        if(Ext.isEmpty(this.templateData.cfg)) {
+            this.templateData.cfg = {};
+        }
+
         this.templateStore = CB.DB['template' + this.data.template_id];
         if(!this.templateStore){
             Ext.Msg.alert(L.Error, 'No template store identified');
@@ -419,35 +439,35 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     ed.disabled = disabled;
                     if(!Ext.isEmpty(r.get('cfg').hint)) ed.fieldLabel = '<span title="'+r.get('cfg').hint+'">'+ed.fieldLabel+'</span>';
                     ed.name = 'f' + r.get('id') + '_0';
-                    //setting the automatic title of the object 
+                    //setting the automatic title of the object
                     if(ed.isXType(Ext.ux.TitleField)) ed.setValues(this.data.title, v.value);
                     else ed.setValue(v.value);
-                    
+
                     if(r.get('type') == '_contact'){
                         ed.params = {
                             pid : r.get('pid')
-                            ,multiValued: (r.data.cfg.multiValued == true)
+                            ,multiValued: (r.data.cfg.multiValued === true)
                             ,dependency: r.data.cfg.dependency
                             ,tags: r.data.cfg.tags
                             ,templates: r.data.cfg.templates
-                        }
+                        };
                         ed.on('focus', this.onFocusContactField, this);
                     }else if(r.get('type') == '_case'){
                         ed.params = {
                             pid : r.get('pid')
-                            ,multiValued: (r.data.cfg.multiValued == true)
+                            ,multiValued: (r.data.cfg.multiValued === true)
                             ,dependency: r.data.cfg.dependency
                             ,tags: r.data.cfg.tags
-                        }
+                        };
                     }else if(r.get('type') == '_case_object'){
                         ed.params = {
                             pid: r.get('pid')
-                            ,multiValued: (r.data.cfg.multiValued == true)
+                            ,multiValued: (r.data.cfg.multiValued === true)
                             ,dependency: r.data.cfg.dependency
                             ,tags: r.data.cfg.tags
                             ,templates: r.data.cfg.templates
                             ,excludeIds: this.data.id
-                        }
+                        };
                     }
                     this.topFieldSet.add(ed);
                     //ed.enableBubble('change');
@@ -464,20 +484,20 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     ,value: v.value
                     ,listeners: {
                         scope: this
-                        ,change: function(){ this.fireEvent('change')}
-                        ,sync: function(){ this.fireEvent('change')}
+                        ,change: function(){ this.fireEvent('change'); }
+                        ,sync: function(){ this.fireEvent('change'); }
                     }
-                }
+                };
                 switch( r.get('type') ){
                     case 'text': tabPanelFieldItems.push(new Ext.form.TextArea(cfg));
-                        break; 
+                        break;
                     case 'html': tabPanelFieldItems.push(new Ext.ux.HtmlEditor(cfg));
                         break;
                 }
             }
         }, this);
         /* end of adding top fields and fields editable in tabsheet */
-        
+
         if(!this.loaded){
             this.loaded = true;
             this.getBubbleTarget().on('filesdeleted', this.onFilesDeleted, this);
@@ -487,9 +507,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             this.filesPanel.reload();
             this.tasksPanel.reload();
             this.propertiesPanel.data = this.data;
-        }else if(this.propertiesPanel && this.propertiesPanel.rendered) this.propertiesPanel.update(this.data)
+        } else if(this.propertiesPanel && this.propertiesPanel.rendered) {
+            this.propertiesPanel.update(this.data);
+        }
         this.grid.reload();
-        if((this.grid.store.getCount() > 0) && ( (this.tabPanel.items.getCount() == 0) || (this.tabPanel.items.first().items.first() != this.grid) ) )  
+        if( (this.grid.store.getCount() > 0)
+            && ( (this.tabPanel.items.getCount() === 0)
+                || (this.tabPanel.items.first().items.first() != this.grid)
+                )
+        ) {
             this.tabPanel.insert(0, {
                 title: L.Details
                 //,autoScroll:true
@@ -500,34 +526,35 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     scope: this
                     ,afterlayout: function(p){
                         w = p.getWidth();
-                        this.grid.setWidth(w-9)
+                        this.grid.setWidth(w-9);
                         this.grid.getEl().setWidth(w);
-                        
+
                         o = this.grid.getEl().query('.x-panel-body');
-                        for (var i = 0; i < o.length; i++) Ext.get(o[i]).setWidth(w)
+                        var i;
+                        for (i = 0; i < o.length; i++) Ext.get(o[i]).setWidth(w);
                         o = this.grid.getEl().query('.x-grid3');
-                        for (var i = 0; i < o.length; i++) Ext.get(o[i]).setWidth(w)
+                        for (i = 0; i < o.length; i++) Ext.get(o[i]).setWidth(w);
                         o = this.grid.getEl().query('.x-grid3-scroller');
-                        for (var i = 0; i < o.length; i++) Ext.get(o[i]).setWidth(w)
+                        for (i = 0; i < o.length; i++) Ext.get(o[i]).setWidth(w);
                     }
                 }
             });//this.tabPanel.items.removeAt(0);
-
+        }
         if(this.topFieldSet){
             if(this.topFieldSet.isRendered){
-                this.topFieldSet.syncSize()
+                this.topFieldSet.syncSize();
             }
         }
         this.doLayout();
         this.items.first().items.first().syncSize();
         //setting all form values, inclusive in the grid
-        
+
         tagsItem = this.mainToolBar.find('iconCls', 'icon-tag')[0];
         if(tagsItem) tagsItem.menu.items.first().setValue(Ext.value(this.data.tags[3], []));
         userTagsItem = this.mainToolBar.find('iconCls', 'icon-tag-label')[0];
         if(userTagsItem) userTagsItem.menu.items.first().setValue(Ext.value(this.data.tags[4], []));
-        
-        Ext.each(tabPanelFieldItems, function(i){this.tabPanel.insert(tpInsertIndex++, i);}, this)
+
+        Ext.each(tabPanelFieldItems, function(i){this.tabPanel.insert(tpInsertIndex++, i);}, this);
         lastActiveTabIndex = (lastActiveTabIndex > 0) ? lastActiveTabIndex : 0;
         p = this.tabPanel.items.itemAt(lastActiveTabIndex);
         if(!p || !p.isVisible()) {
@@ -535,7 +562,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             if(!p || !p.isVisible()) {
                 p = this.tabPanel.items.itemAt(lastActiveTabIndex-1);
                 if(p && p.isVisible()) lastActiveTabIndex--;
-            }else lastActiveTabIndex++
+            }else {
+                lastActiveTabIndex++;
+            }
         }
         this.tabPanel.setActiveTab(lastActiveTabIndex);
         this.setDirty(false);
@@ -556,29 +585,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     ,onCreateTaskClick: function(o, e){
         this.fireEvent(
             'taskcreate'
-            ,{ 
+            ,{
                 data: {
                     template_id: App.config.default_task_template
                     ,pid: this.data.id
                     ,path: this.data.path+'/'+this.data.id
                     ,pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)
-                } 
+                }
             }
-        )
-    }
-    ,onTaskUpdate: function(taskData){ // TO REVIEW
-        if(taskData.object_id != this.data.id) return;
-        i = 0;
-        while( (i < this.data.tasks.length) &&  (this.data.tasks[i].id != taskData.id) ) i++;
-        if(i < this.data.tasks.length) this.data.tasks[i] = taskData;
-        else this.data.tasks.push(taskData);
-    }
-    ,onTaskDelete: function(taskData){ // TO REVIEW
-        if(taskData.object_id != this.data.id) return;
-        i = 0;
-        while( (i < this.data.tasks.length) &&  (this.data.tasks[i].id != taskData.id) ) i++;
-        if(i < this.data.tasks.length) this.data.tasks.splice(i, 1);
-        this.updateTasksMenu();
+        );
     }
     ,getFormValues: function(){
         if(!Ext.isDefined(this.data.gridData)) this.data.gridData = {};
@@ -590,27 +605,33 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             this.topFieldSet.items.each(function(i){
                 if(( i.name == 'tags' ) || (i.name == 'user_tags' )) this.data.tags[i.tag_level] = i.getValue();
                 else{
-                    this.data.gridData.values[i.name] = { value: i.getValue()}
+                    this.data.gridData.values[i.name] = { value: i.getValue()};
                     if( (i.isXType(Ext.ux.TitleField)) && (!i.hasCustomValue)) this.data.gridData.values[i.name].value = '';
                 }
             }, this);
         /* reading values from tabPanel */
-        if(this.tabPanel) this.tabPanel.items.each(function(i){ 
-                if(i.isTemplateField) 
-                    this.data.gridData.values[i.name] = { value: i.getValue()}
-            }, this)
+        if(this.tabPanel) {
+            this.tabPanel.items.each(
+                function(i){
+                    if(i.isTemplateField) {
+                        this.data.gridData.values[i.name] = { value: i.getValue() };
+                    }
+                }
+                ,this
+            );
+        }
     }
     ,getFileProperties: function(fileId){
         // return false or file properties if possible
         if((!this.filesGrid) || isNaN(fileId)) return false;
         fielId = parseInt(fileId);
         fs = this.filesGrid.getStore();
-        ri = fs.findBy( function(r){ return (r.get('id') == fileId) }, this);
+        ri = fs.findBy( function(r){ return (r.get('id') == fileId); }, this);
         if(ri < 0) return false;
         return fs.getAt(ri).data;
     }
-    ,onFileUploaded: function(data){ 
-        if(data.object_id != this.data.id) return; 
+    ,onFileUploaded: function(data){
+        if(data.object_id != this.data.id) return;
     }
     ,onFilesDeleted: function(fileIds){
         st = this.grid.getStore();
@@ -619,11 +640,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 r.set('files', null);
                 this.fireEvent('change');
             }
-        }, this)
+        }, this);
     }
     ,getIconClass: function(){
         if(Ext.isEmpty(this.data.template_id)) return;
-        idx = CB.DB.templates.findExact('id', this.data.template_id);
+        idx = CB.DB.templates.findExact('id', parseInt(this.data.template_id));
         if(idx < 0) return;
         return CB.DB.templates.getAt(idx).get('iconCls');
     }
@@ -632,10 +653,10 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.tabPanel.remove(p, false);
         return false;
     }
-    ,onUploadClick: function(b, e) { 
-        this.fireEvent('fileupload', {pid: this.data.id, uploadType: 'single'}, e) 
+    ,onUploadClick: function(b, e) {
+        this.fireEvent('fileupload', {pid: this.data.id, uploadType: 'single'}, e);
     }
-    ,onPasteClick: function(b, e) { 
+    ,onPasteClick: function(b, e) {
         App.clipboard.paste(this.data.id, null, this.onPasteProcess, this);
     }
     ,onPasteProcess: function(pids){
@@ -646,7 +667,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
     ,onObjectSaved: function(f, a){
         if(!Ext.isEmpty(this.interceptorArguments)){
-            this.interceptorArguments[0].handler.call(this, this.interceptorArguments[0], this.interceptorArguments[1])
+            this.interceptorArguments[0].handler.call(
+                this
+                ,this.interceptorArguments[0]
+                ,this.interceptorArguments[1]
+            );
             delete this.interceptorArguments;
         }
         App.fireEvent('objectchanged', this);
@@ -654,7 +679,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     }
     ,onObjectChanged: function(){
         this.actions.save.setDisabled(!this._isDirty && !isNaN(this.data.id));
-        this.actions['delete'].setDisabled(isNaN(this.data.id))
+        this.actions['delete'].setDisabled(isNaN(this.data.id));
         this.actions.paste.setDisabled(App.clipboard.isEmpty());
     }
     ,onFocusContactField: function(editor){
@@ -669,7 +694,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 if((r.get('cfg').showIn == 'top') && Ext.isDefined(r.get('cfg').dependency) && (r.get('pid') == pid) ){
                     c = this.topFieldSet.find('name', 'f'+r.get('id')+'_0');
                     if(!Ext.isEmpty(c)){
-                        c = c[0]
+                        c = c[0];
                         c.setDisabled(Ext.isEmpty(newValue) || (!Ext.isEmpty(r.get('cfg').dependency.pidValues) && !setsHaveIntersection( r.get('cfg').dependency.pidValues, newValue) ) );
                         c.data.record = r;
                         c.data.pidValue = newValue;
@@ -677,15 +702,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                         delete c.lastQuery;
                     }
                 }
-            }, this)
+            }, this);
         }
     }
     ,onPathClick: function(){
         App.locateObject( this.data.id, this.data.path );
      }
-})
+});
 
-Ext.reg('CBObjects', CB.Objects); // register xtype                                                 
+Ext.reg('CBObjects', CB.Objects); // register xtype
 
 CB.ObjectsPropertiesPanel = Ext.extend(Ext.Panel, {
     border: false
@@ -708,18 +733,18 @@ CB.ObjectsPropertiesPanel = Ext.extend(Ext.Panel, {
             ,data: []
             ,listeners: {
                 scope: this
-                ,afterlayout: this.onAfterlayout 
-                ,afterrender: this.onAfterlayout 
+                ,afterlayout: this.onAfterlayout
+                ,afterrender: this.onAfterlayout
             }
-        })
+        });
         CB.ObjectsPropertiesPanel.superclass.initComponent.apply(this, arguments);
         this.addEvents('pathclick');
-        
+
         this._update= this.update;
         this.update = function(data){
             this._update(data);
             this.onAfterlayout();
-        }
+        };
     }
     ,onAfterlayout: function(){
         p = this.getEl().query('a.path');
@@ -732,7 +757,7 @@ CB.ObjectsPropertiesPanel = Ext.extend(Ext.Panel, {
     ,onPathClick: function(){
         this.fireEvent('pathclick');
     }
-})
+});
 
 CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
     border: false
@@ -751,20 +776,20 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
             ,data: []
             ,listeners: {
                 scope: this
-                ,afterlayout: this.attachListeners 
+                ,afterlayout: this.attachListeners
                 ,afterrender: this.attachListeners
                 ,beforedestroy: function(){
-                    App.mainViewPort.un('objectsdeleted', this.onObjectsChange, this)
+                    App.mainViewPort.un('objectsdeleted', this.onObjectsChange, this);
                     App.un('objectchanged', this.onObjectsChange, this);
                 }
             }
-        })
+        });
         CB.ActionChildsPanel.superclass.initComponent.apply(this, arguments);
         this._update= this.update;
         this.update = function(data){
             this._update(data);
             this.attachListeners();
-        }
+        };
 
         App.mainViewPort.on('objectsdeleted', this.onObjectsChange, this);
         App.on('objectchanged', this.onObjectsChange, this);
@@ -779,7 +804,7 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
             el = Ext.get(p[i]);
             el.un('click', this.onItemClick, this);
             el.on('click', this.onItemClick, this);
-        };
+        }
     }
     ,getCaseObjectId: function(){
         p = this.findParentByType(CB.Objects);
@@ -802,20 +827,20 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
             ,folders: false
             ,sort: 'udate'
             ,dir: 'desc'
-        }
+        };
         p = this.findParentByType(CB.Objects);
-        if(!Ext.isEmpty(p) 
-            && !Ext.isEmpty(p.data.cfg) 
-            && !Ext.isEmpty(p.data.cfg.templates) 
+        if(!Ext.isEmpty(p)
+            && !Ext.isEmpty(p.data.cfg)
+            && !Ext.isEmpty(p.data.cfg.templates)
         ) {
             params.templates = p.data.cfg.templates;
         }
-        CB_BrowserView.getChildren(params, this.processLoad, this)
+        CB_BrowserView.getChildren(params, this.processLoad, this);
     }
     ,processLoad: function(r, e){
         /* add check for cases when objects window is closing but saved its changes.
-            In this case, the delay that appears while this component load its remote data 
-            and tries to render them could result in a js error. 
+            In this case, the delay that appears while this component load its remote data
+            and tries to render them could result in a js error.
             This is because objects window gets destroyed before this component tries to render.
         */
         if(this.isDestroyed) {
@@ -829,6 +854,6 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
     }
     ,onItemClick: function(ev, el){
         if(Ext.isEmpty(el) || Ext.isEmpty(el.attributes['nid']) || Ext.isEmpty(el.attributes['nid'].value)) return;
-        App.mainViewPort.openObject({ id: el.attributes['nid'].value }, ev);        
+        App.mainViewPort.openObject({ id: el.attributes['nid'].value }, ev);
     }
-})
+});

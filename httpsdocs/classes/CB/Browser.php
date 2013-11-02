@@ -3,8 +3,11 @@ namespace CB;
 
 class Browser
 {
-    /* getCustomControllerResults function used to check if node has a controller specified in its "cfg" field
-        if node have custom controller then results from the controller are returned, otherwise false is returned
+    /**
+     * function used to check if node has a controller specified in its "cfg" field
+     * @param  varchar $path ids path (1/2/3)
+     * @return variant | false  if node have custom controller then results from
+     *                           the controller are returned, otherwise false
      */
     public function getCustomControllerResults($path)
     {
@@ -19,15 +22,16 @@ class Browser
             return false;
         }
 
-        $sql = 'select cfg from tree where id = $1';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT cfg FROM tree WHERE id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
-            if (!empty($r['cfg'])) {
-                $r['cfg'] = json_decode($r['cfg']);
-            }
-            if (!empty($r['cfg']->controller)) {
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
+            if (!empty($r['cfg']['controller'])) {
                 $userMenu = new UserMenu();
-                $rez = $userMenu->{$r['cfg']->controller}($path);
+                $rez = $userMenu->{$r['cfg']['controller']}($path);
                 unset($userMenu);
             }
         }
@@ -36,6 +40,11 @@ class Browser
          return $rez;
     }
 
+    /**
+     * return records for an objects field based on its config
+     * @param  array $p
+     * @return json  repsponce
+     */
     public function getObjectsForField($p)
     {
         // ,"scope": 'tree' //project, parent, self, $node_id
@@ -50,28 +59,30 @@ class Browser
 
         //,+query - user query
 
-        if (!empty($p->source)) {
-            switch ($p->source) {
+        if (!empty($p['source'])) {
+            switch ($p['source']) {
                 case 'field':
-                    if (empty($p->pidValue) || empty($p->field)) {
+                    if (empty($p['pidValue']) || empty($p['field'])) {
                         break;
                     }
-                    $ids = Util\toNumericArray($p->pidValue);
+                    $ids = Util\toNumericArray($p['pidValue']);
                     if (empty($ids)) {
                         break;
                     }
                     /*get distinct target field values for selected objects in parent field */
-                    $sql = 'SELECT od.value FROM
-                        objects o
+                    $res = DB\dbQuery(
+                        'SELECT od.value
+                        FROM objects o
                         JOIN templates t ON t.id = o.`template_id`
                         JOIN templates_structure ts ON t.id = ts.`template_id` AND ts.name = $1
                         JOIN objects_data od ON o.id = od.`object_id` AND od.`field_id` = ts.id
-                        WHERE o.`id` IN ('.implode(',', $ids).')';
-                    $res = DB\dbQuery($sql, $p->field) or die(DB\dbQueryError());
+                        WHERE o.`id` IN ('.implode(',', $ids).')',
+                        $p['field']
+                    ) or die(DB\dbQueryError());
                     $ids = array();
-                    while ($r = $res->fetch_row()) {
-                        if (!empty($r[0])) {
-                            $v = explode(',', $r[0]);
+                    while ($r = $res->fetch_assoc()) {
+                        if (!empty($r['value'])) {
+                            $v = explode(',', $r['value']);
                             for ($i=0; $i < sizeof($v); $i++) {
                                 if (!empty($v[$i])) {
                                     $ids[$v[$i]] = 1;
@@ -85,29 +96,31 @@ class Browser
                         return array('success' => true, 'data' => array() );
                     }
 
-                    $p->ids = $ids;
+                    $p['ids'] = $ids;
                     break;
 
             }
         }
 
         $pids = false;
-        if (!empty($p->scope)) {
-            switch ($p->scope) {
+        if (!empty($p['scope'])) {
+            switch ($p['scope']) {
                 case 'project': /* limiting pid to project. If not in a project then to parent directory */
-                    if (!empty($p->objectId) && is_numeric($p->objectId)) {
-                        $sql = 'SELECT coalesce(ti.case_id, t.pid)
+                    if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
+                        $res = DB\dbQuery(
+                            'SELECT coalesce(ti.case_id, t.pid) `pid`
                             FROM tree t
-                            JOIN tree_info ti
-                                on t.id = ti.id
-                            WHERE t.id = $1';
-                        $res = DB\dbQuery($sql, $p->objectId) or die(DB\dbQueryError());
-                        if ($r = $res->fetch_row()) {
-                            $p->pids = $r[0];
+                            JOIN tree_info ti ON t.id = ti.id
+                            WHERE t.id = $1',
+                            $p['objectId']
+                        ) or die(DB\dbQueryError());
+
+                        if ($r = $res->fetch_assoc()) {
+                            $p['pids'] = $r['pid'];
                         }
                         $res->close();
-                    } elseif (!empty($p->path)) {
-                        $v = explode('/', $p->path);
+                    } elseif (!empty($p['path'])) {
+                        $v = explode('/', $p['path']);
                         $pids = 0;
                         while (!empty($v) && empty($pids)) {
                             $pids = array_pop($v);
@@ -115,15 +128,18 @@ class Browser
                     }
                     break;
                 case 'parent':
-                    if (!empty($p->objectId) && is_numeric($p->objectId)) {
-                        $sql = 'SELECT pid FROM tree WHERE id = $1 ';
-                        $res = DB\dbQuery($sql, $p->objectId) or die(DB\dbQueryError());
-                        if ($r = $res->fetch_row()) {
-                            $p->pids = $r[0];
+                    if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
+                        $res = DB\dbQuery(
+                            'SELECT pid FROM tree WHERE id = $1',
+                            $p['objectId']
+                        ) or die(DB\dbQueryError());
+
+                        if ($r = $res->fetch_assoc()) {
+                            $p['pids'] = $r['pid'];
                         }
                         $res->close();
-                    } elseif (!empty($p->path)) {
-                        $v = explode('/', $p->path);
+                    } elseif (!empty($p['path'])) {
+                        $v = explode('/', $p['path']);
                         $pids = 0;
                         while (!empty($v) && empty($pids)) {
                             $pids = array_pop($v);
@@ -132,15 +148,17 @@ class Browser
 
                     break;
                 case 'self':
-                    if (!empty($p->objectId) && is_numeric($p->objectId)) {
-                        $sql = 'SELECT id FROM tree WHERE id = $1 ';
-                        $res = DB\dbQuery($sql, $p->objectId) or die(DB\dbQueryError());
-                        if ($r = $res->fetch_row()) {
-                            $p->pids = $r[0];
+                    if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
+                        $res = DB\dbQuery(
+                            'SELECT id FROM tree WHERE id = $1',
+                            $p['objectId']
+                        ) or die(DB\dbQueryError());
+                        if ($r = $res->fetch_assoc()) {
+                            $p['pids'] = $r['id'];
                         }
                         $res->close();
-                    } elseif (!empty($p->path)) {
-                        $v = explode('/', $p->path);
+                    } elseif (!empty($p['path'])) {
+                        $v = explode('/', $p['path']);
                         $pids = 0;
                         while (!empty($v) && empty($pids)) {
                             $pids = array_pop($v);
@@ -148,30 +166,30 @@ class Browser
                     }
                     break;
                 case 'dependent':
-                    if (!empty($p->pidValue)) {
-                        $pids = Util\toNumericArray($p->pidValue);
+                    if (!empty($p['pidValue'])) {
+                        $pids = Util\toNumericArray($p['pidValue']);
                     }
                     break;
                 default:
-                    $pids = Util\toNumericArray($p->scope);
+                    $pids = Util\toNumericArray($p['scope']);
                     break;
             }
         }
         if (!empty($pids)) {
-            if (empty($p->descendants)) {
-                $p->pid = $pids;
+            if (empty($p['descendants'])) {
+                $p['pid'] = $pids;
             } else {
-                $p->pids = $pids;
+                $p['pids'] = $pids;
             }
         }
 
-        $p->fl = 'id,name,type,subtype,template_id,status';
-        if (!empty($p->fields)) {
-            if (!is_array($p->fields)) {
-                $p->fields = explode(',', $p->fields);
+        $p['fl'] = 'id,name,type,subtype,template_id,status';
+        if (!empty($p['fields'])) {
+            if (!is_array($p['fields'])) {
+                $p['fields'] = explode(',', $p['fields']);
             }
-            for ($i=0; $i < sizeof($p->fields); $i++) {
-                $fieldName = trim($p->fields[$i]);
+            for ($i=0; $i < sizeof($p['fields']); $i++) {
+                $fieldName = trim($p['fields'][$i]);
                 if ($fieldName == 'project') {
                     $fieldName = 'case';
                 }
@@ -189,7 +207,7 @@ class Browser
                     )
                 )
                 ) {
-                    $p->fl .= ','.$fieldName;
+                    $p['fl'] .= ','.$fieldName;
                 }
             }
         }
@@ -226,8 +244,8 @@ class Browser
             )
         ) or die(DB\dbQueryError());
 
-        while ($r = $res->fetch_row()) {
-            $existing_names[] = $r[0];
+        while ($r = $res->fetch_assoc()) {
+            $existing_names[] = $r['name'];
         }
         $res->close();
         $i = 1;
@@ -238,14 +256,21 @@ class Browser
         /* end of find default folder name */
 
         DB\dbQuery(
-            'INSERT INTO tree (pid, user_id, `type`, `name`, cid, uid, template_id)
+            'INSERT INTO tree
+                (pid
+                ,user_id
+                ,`type`
+                ,`name`
+                ,cid
+                ,uid
+                ,template_id)
             VALUES ($1
-                  , $2
-                  , $3
-                  , $4
-                  , $2
-                  , $2
-                  , $3)',
+                ,$2
+                ,$3
+                ,$4
+                ,$2
+                ,$2
+                ,$3)',
             array(
                 $pid
                 ,$_SESSION['user']['id']
@@ -303,8 +328,9 @@ class Browser
         DB\dbQuery(
             'UPDATE tree
             SET did = $1
-                    , dstatus = 1
-                    , ddate = CURRENT_TIMESTAMP, updated = (updated | 1)
+                ,dstatus = 1
+                ,ddate = CURRENT_TIMESTAMP
+                ,updated = (updated | 1)
             WHERE id IN ('.implode(', ', $ids).')',
             $_SESSION['user']['id']
         ) or die(DB\dbQueryError());
@@ -326,11 +352,11 @@ class Browser
 
     public function rename($p)
     {
-        $id = explode('/', $p->path);
+        $id = explode('/', $p['path']);
         $id = array_pop($id);
-        $p->name = trim($p->name);
+        $p['name'] = trim($p['name']);
 
-        if (!is_numeric($id) || empty($p->name)) {
+        if (!is_numeric($id) || empty($p['name'])) {
             return array('success' => false);
         }
 
@@ -344,7 +370,7 @@ class Browser
             SET name = $1
             WHERE id = $2',
             array(
-                $p->name
+                $p['name']
                 ,$id
             )
         ) or die(DB\dbQueryError());
@@ -354,7 +380,7 @@ class Browser
             SET custom_title = $1
             WHERE id = $2',
             array(
-                $p->name
+                $p['name']
                 ,$id
             )
         ) or die(DB\dbQueryError());
@@ -364,7 +390,7 @@ class Browser
             SET name = $1
             WHERE id = $2',
             array(
-                $p->name
+                $p['name']
                 ,$id
             )
         ) or die(DB\dbQueryError());
@@ -374,22 +400,31 @@ class Browser
             SET title = $1
             WHERE id = $2',
             array(
-                $p->name
+                $p['name']
                 ,$id
             )
         ) or die(DB\dbQueryError());
 
-        $sql = 'INSERT INTO objects_data (object_id, field_id, value)
+        DB\dbQuery(
+            'INSERT INTO objects_data
+                (object_id
+                ,field_id
+                ,value)
             SELECT $1
                  , ts.id
                  , $2
             FROM tree t
-            JOIN templates_structure ts ON t.template_id = ts.template_id
+            JOIN templates_structure ts
+                ON t.template_id = ts.template_id
             WHERE t.id = $1
                 AND ts.name = \'_title\'
             ON DUPLICATE KEY
-                UPDATE `value` = $2';
-        DB\dbQuery($sql, array($id, $p->name)) or die(DB\dbQueryError());
+            UPDATE `value` = $2',
+            array(
+                $id
+                ,$p['name']
+            )
+        ) or die(DB\dbQueryError());
 
         /*updating renamed document into solr directly (before runing background cron)
             so that it'll be displayed with new name without delay*/
@@ -399,7 +434,7 @@ class Browser
         //running background cron to index other nodes
         $solrClient->runBackgroundCron();
 
-        return array('success' => true, 'data' => array( 'id' => $id, 'newName' => $p->name) );
+        return array('success' => true, 'data' => array( 'id' => $id, 'newName' => $p['name']) );
     }
 
     /**
@@ -429,8 +464,14 @@ class Browser
         $newName = '';
         do {
             $newName = L\CopyOf.' '.$name.( ($i > 0) ? ' ('.$i.')' : '').$ext;
-            $sql = 'SELECT id FROM tree WHERE pid = $1 AND name = $2';
-            $res = DB\dbQuery($sql, array($pid, $newName)) or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM tree
+                WHERE pid = $1
+                    AND name = $2',
+                array($pid, $newName)
+            ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 $id = $r['id'];
             } else {
@@ -475,7 +516,9 @@ class Browser
             }
         }
 
-        //if( !$files->fileExists($p['pid']) ) return array('success' => false, 'msg' => L\TargetFolderDoesNotExist);
+        //if ( !$files->fileExists($p['pid']) ) {
+        //  return array('success' => false, 'msg' => L\TargetFolderDoesNotExist);
+        //  }
         $res = DB\dbQuery(
             'SELECT id FROM tree WHERE id = $1',
             $p['pid']
@@ -517,7 +560,7 @@ class Browser
             $files->saveUploadParams($p);
             if (!empty($p['response'])) {
                 //it is supposed to work only for single files upload
-                return $this->confirmUploadRequest((object) $p);
+                return $this->confirmUploadRequest($p);
             }
 
             $allow_new_version = false;
@@ -563,10 +606,10 @@ class Browser
         //if cancel then delete all uploaded files from incomming
         $files = new Files();
         $a = $files->getUploadParams();
-        $a['response'] = $p->response;
-        switch ($p->response) {
+        $a['response'] = $p['response'];
+        switch ($p['response']) {
             case 'rename':
-                $a['newName'] = $p->newName;
+                $a['newName'] = $p['newName'];
                 //check if the new name does not also exist
                 if (empty($a['response'])) {
                     return array('success' => false, 'msg' => L\FilenameCannotBeEmpty);
@@ -582,7 +625,7 @@ class Browser
                         ,'type' => 'filesexist'
                         //,'filename' => $a['newName']
                         ,'allow_new_version' => (Files::getMFVC($a['newName']) > 0)
-                        ,'suggestedFilename' => $files->getAutoRenameFilename($a['pid'], $a['newName'])
+                        ,'suggestedFilename' => Objects::getAvailableName($a['pid'], $a['newName'])
                         ,'msg' => str_replace('{filename}', '"'.$a['newName'].'"', L\FilenameExistsInTarget)
                     );
                 }
@@ -606,10 +649,18 @@ class Browser
         return $rez;
     }
 
+    /**
+     * upload a new file version
+     * @param  array $p params
+     * @return json  responce
+     */
     public function uploadNewVersion($p)
     {
-        $sql = 'select pid from tree where id = $1';
-        $res = DB\dbQuery($sql, $p['id']) or die(DB\dbQueryError());
+        // get the pid and set it into params
+        $res = DB\dbQuery(
+            'SELECT pid FROM tree WHERE id = $1',
+            $p['id']
+        ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $p['pid'] = $r['pid'];
         }
@@ -620,12 +671,13 @@ class Browser
             ,'pid' => $p['pid'])
         );
 
-        $f = $_FILES['file'];
+        $f = &$_FILES['file'];
+        // if no file is uploaded then just update file properties
         if ($f['error'] == UPLOAD_ERR_NO_FILE) {
             DB\dbQuery(
                 'UPDATE files
                 SET `title` = $2
-                            , `date` = $3
+                    ,`date` = $3
                 WHERE id = $1',
                 array(
                     $p['id']
@@ -636,6 +688,8 @@ class Browser
 
             return $rez;
         }
+
+        //check for upload error
         if ($f['error'] != UPLOAD_ERR_OK) {
             return array(
                 'success' => false
@@ -644,9 +698,11 @@ class Browser
         }
 
         $p['files'] = &$_FILES;
-        $p['response'] = 'overwrite';
+        $p['response'] = 'newversion';
         $files = new Files();
+
         $files->storeFiles($p);
+
         Solr\Client::runCron();
 
         return $rez;
@@ -655,46 +711,57 @@ class Browser
     public function toggleFavorite($p)
     {
         $favoriteFolderId = $this->getFavoriteFolderId();
-        $p->pid = $favoriteFolderId;
-        $sql = 'SELECT id
+        $p['pid'] = $favoriteFolderId;
+        $res = DB\dbQuery(
+            'SELECT id
             FROM tree
             WHERE pid = $1
                 AND `type` = 2
-                AND target_id = $2';
-        $res = DB\dbQuery($sql, array($favoriteFolderId, $p->id)) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
+                AND target_id = $2',
+            array($favoriteFolderId, $p['id'])
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
             DB\dbQuery(
                 'DELETE FROM tree WHERE id = $1',
-                $r[0]
+                $r['id']
             ) or die(DB\dbQueryError());
             $res->close();
-            $p->favorite = 0;
+            $p['favorite'] = 0;
         } else {
             $res->close();
             /* get objects name */
             $name = 'Llink';
-            $sql = 'select name from tree where id = $1';
-            $res = DB\dbQuery($sql, array($p->id)) or die(DB\dbQueryError());
-            if ($r = $res->fetch_row()) {
-                $name = $r[0];
+            $res = DB\dbQuery(
+                'SELECT name FROM tree WHERE id = $1',
+                $p['id']
+            ) or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                $name = $r['name'];
             }
             $res->close();
             /* end of get objects name */
             DB\dbQuery(
-                'INSERT INTO tree (pid, user_id, `type`, name, target_id)
+                'INSERT INTO tree
+                    (pid
+                    ,user_id
+                    ,`type`
+                    ,name
+                    ,target_id)
                 VALUES($1
-                     , $2
-                     , 2
-                     , $3
-                     , $4)',
+                    ,$2
+                    ,2
+                    ,$3
+                    ,$4)',
                 array(
                     $favoriteFolderId
                     ,$_SESSION['user']['id']
                     ,$name
-                    ,$p->id
+                    ,$p['id']
                 )
             ) or die(DB\dbQueryError());
-            $p->favorite = 1;
+            $p['favorite'] = 1;
         }
 
         return array('success' => true, 'data' => $p,);
@@ -741,21 +808,28 @@ class Browser
     public static function checkRootFolder()
     {
         $id = null;
-        $sql = 'SELECT id
+        $res = DB\dbQuery(
+            'SELECT id
             FROM tree
             WHERE pid IS NULL
                 AND `system` = 1
-                AND `is_main` = 1';
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $id = $r[0];
+                AND `is_main` = 1'
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $id = $r['id'];
         }
         $res->close();
 
         /* create root folder */
         if ($id == null) {
             DB\dbQuery(
-                'INSERT INTO tree (`system`, `name`, is_main, updated, template_id)
+                'INSERT INTO tree
+                    (`system`
+                    , `name`
+                    , is_main
+                    , updated
+                    , template_id)
                 VALUES (1
                     ,\'root\'
                     ,1
@@ -768,11 +842,15 @@ class Browser
 
             // assign full control for "system" group
             DB\dbQuery(
-                'INSERT INTO tree_acl (node_id, user_group_id, allow, deny)
+                'INSERT INTO tree_acl
+                    (node_id
+                    , user_group_id
+                    , allow
+                    , deny)
                 VALUES ($1
-                      , $2
-                      , 4095
-                      , 0) ON duplicate KEY
+                    ,$2
+                    ,4095
+                    ,0) ON duplicate KEY
                 UPDATE allow = 4095
                      , deny = 0',
                 array(
@@ -794,14 +872,16 @@ class Browser
         }
 
         $id = null;
-        $sql = 'SELECT id
+        $res = DB\dbQuery(
+            'SELECT id
             FROM tree
             WHERE pid IS NULL
                 AND `system` = 1
-                AND `is_main` = 1';
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $id = $r[0];
+                AND `is_main` = 1'
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $id = $r['id'];
         }
         $res->close();
 
@@ -818,7 +898,8 @@ class Browser
     public function getRootProperties($id)
     {
         $rez = array('success' => true, 'data' => array());
-        $sql = 'SELECT t.id `nid`
+        $res = DB\dbQuery(
+            'SELECT t.id `nid`
                 ,t.`system`
                 ,t.`type`
                 ,t.`subtype`
@@ -827,15 +908,12 @@ class Browser
                 ,ti.acl_count
             FROM tree t
             JOIN tree_info ti on t.id = ti.id
-            WHERE t.id = $1';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            if (empty($r['cfg'])) {
-                unset($r['cfg']);
-            } else {
-                $r['cfg'] = json_decode($r['cfg']);
-            }
+            WHERE t.id = $1',
+            $id
+        ) or die(DB\dbQueryError());
 
+        if ($r = $res->fetch_assoc()) {
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
             $rez['data'] = array($r);
             $this->updateLabels($rez['data']);
             $rez['data'] = $rez['data'][0];
@@ -848,16 +926,19 @@ class Browser
     public static function getFavoriteFolderId()
     {
         $id = null;
-        $sql = 'SELECT id
+        $res = DB\dbQuery(
+            'SELECT id
             FROM tree
             WHERE pid IS NULL
                 AND `system` = 1
                 AND `type` = 1
                 AND subtype = 2
-                AND user_id = $1';
-        $res = DB\dbQuery($sql, array($_SESSION['user']['id'])) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $id = $r[0];
+                AND user_id = $1',
+            $_SESSION['user']['id']
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $id = $r['id'];
         }
         $res->close();
 
@@ -876,17 +957,20 @@ class Browser
                 unset($d['id']);
             }
             if (!isset($d['loaded'])) {
-                $sql = 'SELECT count(*)
+                $res = DB\dbQuery(
+                    'SELECT count(*) `has_childs`
                     FROM tree
                     WHERE pid = $1
                         AND dstatus = 0'.
                     ( empty($this->showFoldersContent) ?
                         ' AND `template_id` IN (0'.implode(',', $GLOBALS['folder_templates']).')'
                         : ''
-                    );
-                $res = DB\dbQuery($sql, $d['nid']) or die(DB\dbQueryError());
-                if ($r = $res->fetch_row()) {
-                    $d['loaded'] = empty($r[0]);
+                    ),
+                    $d['nid']
+                ) or die(DB\dbQueryError());
+
+                if ($r = $res->fetch_assoc()) {
+                    $d['loaded'] = empty($r['has_childs']);
                 }
                 $res->close();
             }
@@ -985,8 +1069,8 @@ class Browser
     public static function getIcon(&$data)
     {
 
-        if (!empty($data['cfg']) && !empty($data['cfg']->iconCls)) {
-            return $data['cfg']->iconCls;
+        if (!empty($data['cfg']) && !empty($data['cfg']['iconCls'])) {
+            return $data['cfg']['iconCls'];
         }
 
         if (empty($data['template_id'])) {

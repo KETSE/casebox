@@ -1,4 +1,75 @@
-CaseBox 1.9.50 (2013-10-15)
+CaseBox 1.9.51 (2013-11-02)
+==============================
+New Features, Improvements
+--------------------------
+- encoded html chars for rendering textual values in Vertical grid
+- Templates management in tree
+    - script casebox/sys/utils/create_templates_in_tree.php has been created
+        for templates migration to new model.
+        Firstly the database difference update should be applied.
+    - upgrade and migration process have been tested on all cores from devel
+
+    Note: Old interface is not removed until the new method is fully tested and functional
+
+- added new template types: field, search
+- removed methods:
+    UsersGroups.updateUserEmails
+    VerticalEditGrid.addFormData
+    Objects.getObjectIcon
+
+- Changed usage of fetch_row for fetch_assoc everywhere in CaseBox
+- moved methods:
+    Util\getUsername -> User::getDisplayName
+    Files::getAutoRenameFilename -> Objects::getAvailableName
+- removed following columns from objects table:
+    old_id
+    pid
+    template_id
+    is_active
+    author
+    details
+    files_count
+- removed acl_count column from tree table. This column were moved previously to tree_info.
+    in short future also will be deleted following columns from tree:
+        old_id - if necesar then will use another table for imports/associations
+        type -
+        subtype - we moved to templates mechanism
+        is_main - it's used for root folder only
+- changed everywhere json_decode to return associative arrays instead of objects
+    REMEMBER! : we will not use objects (like BogusAction from router).
+                All params will be associative array. No more objects.
+                Also custom code should be reviewed to make changes if necesary.
+- Moved Template.php class to CB\Objects and changed as inherited from Object
+- added a config function getOption($optionName)
+    this function is designed to be used in all cases and excep direct
+    accessing of configuration variables/constants.
+    It uses the priority to return requested param from available configs:
+        user config
+        core config
+        platform config
+- added config parameters:
+    session.lifetime
+    session.persistent
+
+    This params are defined in CaseBox platform (see config_sample.ini)
+    and can be overwriten by (importance low to high):
+        core config.ini
+        core database config
+        user config
+- Security issue: sessions must be destroyed when users password is changed
+
+Fixed Bugs:
+----------
+- recursive bug for custom node controllers because of non numeric ids
+- uploading new file version, from a file window, did overwrite target file
+- unexpected logout
+
+Notes:
+----------
+- apply database update for "casebox" database: casebox.sql
+- apply database update for core: 20131102_1839 db_update v1.9.51.sql
+
+CaseBox 1.9.50 (2013-10-21)
 ==============================
 New Features, Improvements
 --------------------------
@@ -6,12 +77,12 @@ New Features, Improvements
     Instead, new improved methods, are reused  from D&D
 - new server side methoods required for D&D were created in other scripts
     that will be targed scripts for refactoring. All reviewed methods will be
-    moved from old common classes to separated new ones. 
+    moved from old common classes to separated new ones.
 - implemented Drag and Drop inside casebox
     D&D is implemented by using plugins mechanism
     D&D execution will generate common event 'objectsaction' for any component to listen to them
     Server side actions for D&D are recursive (CB\Browser\Actions.php)
-    Averything works in concordance with security, but there are some moments to discuss
+    Everything works in concordance with security, but there are some moments to discuss
 
     There are some problems with D&D on a field of Properties grid in Objects edit window.  Still working on it.
     In future will be added more required/request drop zones
@@ -21,9 +92,9 @@ New Features, Improvements
 
 Fixed Bugs:
 ----------
-- cut/copy buttons not enabled for just created nodes, in popup menu of browser tree 
+- cut/copy buttons not enabled for just created nodes, in popup menu of browser tree
 - processing message did not disapear when canceling a paste confirmation
-- wrong security sets detection when everyone group is present with another user group 
+- wrong security sets detection when everyone group is present with another user group
 - child nodes not marked as updated in tree_info on adding new rule
     for nodes that did not have any rule and security_set assigned.
 - UI gets locked when try to save an object on window close.
@@ -42,7 +113,7 @@ New Features, Improvements
 - changed Browser.getIcon method from types based to template based detection
 - Remove the "deadline" checkbox from Task Window, check if End date is empty
 - Refactor objectsStore and added CB.DB.objectsStore class
-- working on Drag and Drop inside CaseBox 
+- working on Drag and Drop inside CaseBox
 
 Fixed Bugs:
 ----------
@@ -64,8 +135,8 @@ New Features, Improvements
 
 Fixed Bugs:
 ----------
-- added filter for faceted field types, 
-    so that non integer fields woldn't try to be indexed as object tags, 
+- added filter for faceted field types,
+    so that non integer fields woldn't try to be indexed as object tags,
     that would result in solr indexing error.
 - return path changed for locating and object in CB\Path.getPidPath()
 - language guess fixes
@@ -104,7 +175,7 @@ CaseBox 1.9.46 (2013-09-30)
 New Features, Improvements
 --------------------------
 - excluded session_start from crons initialization. Will monitor if session is needed in some crons.
-- "fq" (filter query) param for search can be pased as string, when we have only a single rule to pass. 
+- "fq" (filter query) param for search can be pased as string, when we have only a single rule to pass.
 - exclude objects with folder templates (defined in config) from objects list displayed case card block.
 - removed SESSION_PATH constant for sessions in config.php.
     They are stored in database by CB\Session class.
@@ -113,7 +184,7 @@ CaseBox 1.9.45 (2013-09-30)
 ==============================
 New Features, Improvements
 --------------------------
-- implement CB\Session class for session handling. 
+- implement CB\Session class for session handling.
     Store the sessions in database.
     Regenerate session id on each request for security reason.
 
@@ -168,7 +239,7 @@ CaseBox 1.9.42 (2013-09-23)
 - implemented cb.files.upload in Api
 - implemented cb.objects.create and cb.objects.save in Api
 - updated Minify
-- added script sys/utils/reorder_template_stucture_cfg_properties.php 
+- added script sys/utils/reorder_template_stucture_cfg_properties.php
     for ordering config properties of template fields
 - added reload button for global Tasks view
 - uncomented files content appending to solr data
@@ -212,7 +283,7 @@ Fixed Bugs:
 - fixed calls to Security::canEditUser without parameter
 - fixed some unprefixed ExtDirect method calls
 - fixed getMenuConfig javascript function
-- lowercase constant access from cron_send_notifications.php 
+- lowercase constant access from cron_send_notifications.php
 
 Database updates:
 ----------
@@ -223,7 +294,7 @@ CaseBox 1.9.39 (2013-09-03)
 New Features, Improvements
 --------------------------
 - removed database fields: actions_log.office_id, tasks.case_id, tasks.updated
-- removed old (not used) methods from Tasks: getUserTasks, getTasksByLawyer, browse 
+- removed old (not used) methods from Tasks: getUserTasks, getTasksByLawyer, browse
 - added complete message, to notification mail, on completing task
 
 Fixed Bugs:
@@ -249,7 +320,7 @@ New Features, Improvements
 - excluded running solr indexing, of updated tree objects, when a custom event handler is executing
 - added "remove" method for \CB\Cache class
 - case_id field removed from tree table, it is now into tree_info table
-- removed p_mark_all_childs_as_updated procedure from database  
+- removed p_mark_all_childs_as_updated procedure from database
 
 Fixed Bugs:
 ----------
@@ -268,16 +339,16 @@ CaseBox 1.9.30 (2013-08-30)
 ==============================
 New Features, Improvements
 --------------------------
-- refactored solr reindexing process 
-    and added bulk data reading of document properties 
+- refactored solr reindexing process
+    and added bulk data reading of document properties
     that should go to solr
-- added basic Template class, Templates\Collection, Templates\SingletonCollection 
+- added basic Template class, Templates\Collection, Templates\SingletonCollection
 
 CaseBox 1.9.28 (2013-08-29)
 ==============================
 Fixed Bugs:
 ----------
-- js error on saving object 
+- js error on saving object
 - misspelled variable in FolderViewGrid.js
 - missing namespace, in some places, when calling debug function
 
@@ -285,7 +356,7 @@ CaseBox 1.9.17 (2013-08-23)
 ==============================
 New Features, Improvements
 --------------------------
-- added icon in tree and folder view for nodes that have security rules associated. 
+- added icon in tree and folder view for nodes that have security rules associated.
 - added acl_count field to solr
 
 Fixed Bugs:
@@ -307,11 +378,11 @@ CaseBox 1.9.15 (2013-08-22)
 ==============================
 New Features, Improvements
 --------------------------
--   added security inheritance checkbox in interface 
+-   added security inheritance checkbox in interface
     and modified database triggers to take this flag into account.
 
 Notes: You should only update database structure after switching to this release (20130822_0014 mysql_database_structure_update.sql).
-    Generally there is no need to run any other scripts, 
+    Generally there is no need to run any other scripts,
     because inheritance was enabled by default and checkbox was not available before.
 
 CaseBox 1.9.13 (2013-08-20)
@@ -338,9 +409,9 @@ New Features, Improvements
     - define custom code classes into custom namespace (name of the core)
     - place custom code classes under php/<custom namespace>/ forder of your core
     - accessed casebox functions and constants should pe prefixed with \CB\
-    - classes defined in api, to be accessible in javascript, 
+    - classes defined in api, to be accessible in javascript,
         should be prefixed with "<custom_namespace>_" (ex. sample_CustomClass)
-    - from custom javascript files api methods are also prefixed with namespace with underline after it 
+    - from custom javascript files api methods are also prefixed with namespace with underline after it
         (ex. sample_CustomClass.customMethod(params, this.processResponse, this) ).
 
 

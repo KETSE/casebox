@@ -11,21 +11,22 @@ require_once 'init.php';
 
 $user = array();
 /* check if public user is given */
-$public_access = false;
 if (isset($_GET['u']) && is_numeric($_GET['u'])) {
-    $sql = 'select id, name, cfg from users_groups where id = $1';
-    $res = DB\dbQuery($sql, $_GET['u']) or die( DB\dbQueryError() );
+    $res = DB\dbQuery(
+        'SELECT id
+            ,name
+            ,cfg
+        FROM users_groups
+        WHERE id = $1',
+        $_GET['u']
+    ) or die( DB\dbQueryError() );
+
     if ($r = $res->fetch_assoc()) {
-        if (!empty($r['cfg'])) {
-            $user = $r;
-            $cfg = json_decode($r['cfg']);
-            if (!empty($cfg->public_access)) {
-                $public_access = true;
-            }
-        }
+        $r['cfg'] = Util\toJSONArray($r['cfg']);
+        $user = $r;
     }
     $res->close();
-    if (!$public_access) {
+    if (empty($user['cfg']['public_access'])) {
         exit(0);
     }
 } else {

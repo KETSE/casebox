@@ -59,6 +59,9 @@ if (!function_exists(__NAMESPACE__.'\dbQuery')) {
         }
 
         foreach ($parameters as $k => $v) {
+            if (!is_scalar($v) && !is_null($v)) {
+                throw new \Exception("param error: ".print_r($parameters, 1)."\n For SQL: $query", 1);
+            }
             $parameters[$k] = is_int($v) ? $v : (
                 null === $v ?
                 'NULL' :

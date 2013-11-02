@@ -1,5 +1,5 @@
 // JavaScript Document
-Ext.namespace('App'); 
+Ext.namespace('App');
 Ext.BLANK_IMAGE_URL = '/css/i/s.gif';
 
 clog = function(){if(typeof(console) != 'undefined') console.log(arguments)}
@@ -17,14 +17,14 @@ Ext.onReady(function(){
     Ext.state.Manager.setProvider( new Ext.state.CookieProvider({
         expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
     }));
-    
+
     initApp();
 
-    Ext.Direct.addProvider(Ext.app.REMOTING_API); 
-    
-    Ext.Direct.on('login', function(r, e){ 
-        /*if(r.method == 'logout') /**/ 
-        window.location.reload(); 
+    Ext.Direct.addProvider(Ext.app.REMOTING_API);
+
+    Ext.Direct.on('login', function(r, e){
+        /*if(r.method == 'logout') /**/
+        window.location.reload();
         /*else App.PromtLogin(); /**/
     });
     Ext.Direct.on('exception', App.showException);
@@ -35,7 +35,7 @@ Ext.onReady(function(){
         Ext.get('loading').remove();
         Ext.fly('loading-mask').fadeOut({remove:true});
     }, 250);
-    
+
     CB_User.getLoginInfo( function(r, e){
         if(r.success !== true) return;
         App.config = r.config;
@@ -48,15 +48,15 @@ Ext.onReady(function(){
         App.mainViewPort.doLayout();
         App.mainViewPort.initCB( r, e );
     });
-});  
+});
 
 //--------------------------------------------------------------------------- application initialization function
 function initApp(){
-    overrides(); 
+    overrides();
     App.dateFormat = 'd.m.Y';
     App.longDateFormat = 'j F Y';
     App.timeFormat = 'H:i';
-    
+
     App.shortenString = function (st, maxLen) {
         if(Ext.isEmpty(st)) return '';
         st = Ext.util.Format.stripTags(st);
@@ -82,15 +82,15 @@ function initApp(){
                Ext.Msg.alert(L.Error, msg);
            }
     }
-    
+
     App.includeJS = function(file){
        if (document.createElement && document.getElementsByTagName) {
          var head = document.getElementsByTagName('head')[0];
-    
+
          var script = document.createElement('script');
          script.setAttribute('type', 'text/javascript');
          script.setAttribute('src', file);
-    
+
          head.appendChild(script);
        } else {
             alert('Your browser can\'t deal with the DOM standard. That means it\'s old. Go fix it!');
@@ -103,7 +103,7 @@ function initApp(){
     }
     App.xtemplates.cell.compile();
     App.xtemplates.object.compile();
-    
+
     App.customRenderers = {
         thesauriCell: function(v, metaData, record, rowIndex, colIndex, store) {
             if(Ext.isEmpty(v)) return '';
@@ -120,7 +120,7 @@ function initApp(){
             }
             return App.xtemplates.cell.apply(vt);
         }
-        ,relatedCell: function(v, metaData, record, rowIndex, colIndex, store) { } 
+        ,relatedCell: function(v, metaData, record, rowIndex, colIndex, store) { }
         ,combo: function(v, metaData, record, rowIndex, colIndex, store) { /* custom renderer for verticalEditGrid */
             if(Ext.isEmpty(v)) return '';
             ed = this.editor;
@@ -143,7 +143,7 @@ function initApp(){
                     }
                     return '<ul>'+r.join('')+'</ul>';
                     break;
-                case 'listObjIcons': 
+                case 'listObjIcons':
                     for(i=0; i < v.length; i++){
                         ri = cw.objectsStore.findExact('id', parseInt(v[i]));
                         row = cw.objectsStore.getAt(ri);
@@ -151,15 +151,15 @@ function initApp(){
                     }
                     return '<ul>'+r.join('')+'</ul>';
                     break;
-                
-                default: 
+
+                default:
                     for(i=0; i < v.length; i++){
                         ri = cw.objectsStore.findExact('id', parseInt(v[i]));
                         if(ri >-1) r.push(cw.objectsStore.getAt(ri).get('title'));
                     }
                     return r.join(', ');
             }
-        } 
+        }
         ,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
             if(Ext.isEmpty(v)) return '';
             r = [];
@@ -190,7 +190,7 @@ function initApp(){
                     }
                     return '<ul>'+r.join('')+'</ul>';
                     break;
-                case 'listObjIcons': 
+                case 'listObjIcons':
                     for(i=0; i < v.length; i++){
                         ri = store.findExact('id', parseInt(v[i]));
                         row = store.getAt(ri);
@@ -198,8 +198,8 @@ function initApp(){
                     }
                     return '<ul>'+r.join('')+'</ul>';
                     break;
-                
-                default: 
+
+                default:
                     for(i=0; i < v.length; i++){
                         ri = store.findExact('id', parseInt(v[i]));
                         if(ri >-1) r.push(store.getAt(ri).get('name'));
@@ -269,28 +269,28 @@ function initApp(){
             if(!Ext.isEmpty(v.hours)){
                 t = v.hours;
                 switch(v.hours){
-                    case 1: t = t + ' '+L.hour; break; 
+                    case 1: t = t + ' '+L.hour; break;
                     case 2:
-                    case 3: 
-                    case 4: t = t + ' '+L.ofHour; break; 
-                    case 5: t = t + ' '+L.ofHours; break; 
+                    case 3:
+                    case 4: t = t + ' '+L.ofHour; break;
+                    case 5: t = t + ' '+L.ofHours; break;
                 }
             }
             if(!Ext.isEmpty(v.minutes)){
                 t = t + ' ' + v.minutes;
                 switch(v.minutes){
-                    case 1: t = t + ' ' + L.minute; break; 
-                    case 2: 
-                    case 3: 
-                    case 4: t = t + ' ' + L.ofMinute; break; 
-                    case 5: t = t + ' ' + L.ofMinutes; break; 
+                    case 1: t = t + ' ' + L.minute; break;
+                    case 2:
+                    case 3:
+                    case 4: t = t + ' ' + L.ofMinute; break;
+                    case 5: t = t + ' ' + L.ofMinutes; break;
                 }
             }
             return t;
         }
         ,filesize: function(v){
             if(isNaN(v) || Ext.isEmpty(v) || (v == 0)) return '';
-            if(v <= 0) return  '0 KB'; 
+            if(v <= 0) return  '0 KB';
             else if(v < 1024) return '1 KB';
             else if(v < 1024 * 1024) return (Math.round(v / 1024) + ' KB');
             else{
@@ -322,53 +322,53 @@ function initApp(){
             if(Ext.isEmpty(v)) return '';
             return '<span class="taskStatus'+v+'">'+L['taskStatus'+parseInt(v)]+'</span>';
         }
-        ,memo: function(v, m, r, ri, ci, s){
+        ,text: function(v, m, r, ri, ci, s){
             if(Ext.isEmpty(v)) return '';
-            return '<pre style="white-space: pre-wrap">'+v+'</pre>';
+            return '<pre style="white-space: pre-wrap">'+Ext.util.Format.htmlEncode(v)+'</pre>';
         }
     }
     App.getCustomRenderer = function(fieldType){
         switch(fieldType){
-            case 'date': 
+            case 'date':
                 return App.customRenderers.date;
                 break;
-            case 'datetime': 
+            case 'datetime':
                 return App.customRenderers.datetime;
                 break;
-            case '_objects': 
+            case '_objects':
                 return App.customRenderers.objectsField;
-            case 'combo': 
-            case 'object_author': 
+            case 'combo':
+            case 'object_author':
                 return App.customRenderers.thesauriCombo;
                 break;
-            case '_language': 
+            case '_language':
                 return App.customRenderers.languageCombo;
-            case '_sex': 
+            case '_sex':
                 return App.customRenderers.sexCombo;
                 break;
-            case '_templateTypesCombo': 
+            case '_templateTypesCombo':
                 return App.customRenderers.templateTypesCombo;
                 break;
-            case '_short_date_format': 
+            case '_short_date_format':
                 return App.customRenderers.shortDateFormatCombo;
                 break;
-            case '_contact': 
+            case '_contact':
                 return App.customRenderers.contactCombo;
                 break
-            case '_case': 
+            case '_case':
                 return App.customRenderers.caseCombo;
                 break
-            case '_case_object': 
+            case '_case_object':
                 return App.customRenderers.objectCombo;
                 break
-            case 'checkbox': 
+            case 'checkbox':
                 return App.customRenderers.checkbox;
                 break;
-            case 'popuplist': 
+            case 'popuplist':
                 return App.customRenderers.thesauriCell;
                 break;
-            case 'memo': 
-                return App.customRenderers.memo;
+            case 'text':
+                return App.customRenderers.text;
                 break;
             default: return null;
         }
@@ -454,7 +454,7 @@ function initApp(){
     }
     /**
     * open path on active explorer tabsheet or in default eplorer tabsheet
-    * 
+    *
     * this function will not reset explorer navigation params (filters, search query, descendants)
     */
     App.openPath = function(path, params){
@@ -464,7 +464,7 @@ function initApp(){
 
         App.activateBrowserTab().setParams(params);
     }
-    
+
     App.activateBrowserTab = function(){
         tab = App.mainTabPanel.getActiveTab();
         if(tab.isXType(CB.FolderView)) {
@@ -482,7 +482,7 @@ function initApp(){
             })
             return;
         }
-        
+
         App.locateObjectId = parseInt(object_id);
 
         params = {
@@ -501,7 +501,7 @@ function initApp(){
         url = 'download.php?id='+fileId;
         if(!Ext.isEmpty(versionId)) url += '&v='+versionId;
         if(zipped == true) url += '&z=1';
-        window.open(url, '_blank') 
+        window.open(url, '_blank')
     }
     App.getTypeEditor = function(type, e){
         objData = {
@@ -518,25 +518,25 @@ function initApp(){
             case '_objects':
                 //e should contain all necessary info
                 switch(e.record.get('cfg').editor){
-                    case 'form': 
+                    case 'form':
                         if(e && e.grid){
                             e.cancel = true;
                             /* prepeare data to set to popup windows */
                             store = false;
                             source = Ext.isEmpty(e.record.get('cfg').source) ? 'thesauri' : e.record.get('cfg').source;
                             switch(source){
-                                case 'thesauri': 
+                                case 'thesauri':
                                     store = getThesauriStore(e.record.get('cfg').thesauriId);
                                     break;
-                                case 'users': 
+                                case 'users':
                                     store = CB.DB.usersStore;
                                     break;
-                                case 'groups': 
+                                case 'groups':
                                     store = CB.DB.groupsStore;
                                     break;
-                                case 'usersgroups': 
+                                case 'usersgroups':
                                     break;
-                                default: 
+                                default:
                                     cw = e.grid.refOwner || e.grid.findParentByType(CB.Objects);
                                     if(cw && cw.objectsStore)  store = cw.objectsStore;
                             }
@@ -686,7 +686,7 @@ function initApp(){
                     ,valueField: 'id'
                 })
                 break;
-            case 'memo':  
+            case 'memo':
                 height = Ext.value(e.record.get('cfg').height, 50);
                 height = parseInt(height) + 7;
                 return new Ext.form.TextArea({ height: height })
@@ -700,11 +700,11 @@ function initApp(){
                     ,data: {
                         value: e.record.get('value')
                         ,scope: e
-                        ,callback: function(w, v){ 
-                            this.record.set('value', v); 
+                        ,callback: function(w, v){
+                            this.record.set('value', v);
                             this.value = v;
                             if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
-                            this.grid.fireEvent('change'); 
+                            this.grid.fireEvent('change');
                         }
                     }
                 });
@@ -730,10 +730,10 @@ function initApp(){
     }
     App.focusFirstField = function(scope){
         scope = Ext.value(scope, this);
-        f = function(){ 
+        f = function(){
             a = [];
-            if(scope.find) a = scope.find('isFormField', true); 
-            if(a.length == 0) return; 
+            if(scope.find) a = scope.find('isFormField', true);
+            if(a.length == 0) return;
             found = false;
             i = 0;
             while( !found && (i<a.length) ){
@@ -742,7 +742,7 @@ function initApp(){
             }
             if(!found) return;
             c = a[i-1];
-            if(c.isXType('compositefield'))  c = c.items.first(); 
+            if(c.isXType('compositefield'))  c = c.items.first();
             c.focus();
         }
         f.defer(500, scope);
@@ -766,14 +766,14 @@ function initApp(){
             tabPanel.setActiveTab(w);
         }else tabPanel.setActiveTab(tabIdx);
     }
-    App.showException = function(e){ 
+    App.showException = function(e){
         App.hideFailureAlerts = true;
         msg = '';
         if(e) msg = e.msg;
         if(!msg && e.result) msg = e.result.msg;
         if(!msg && e.result) msg = L.ErrorOccured;
         Ext.Msg.alert(L.Error, msg);
-        
+
         dhf = function(){
             delete App.hideFailureAlerts;
         }
@@ -781,26 +781,28 @@ function initApp(){
     }
 
     App.openObject = function(template_id, id, e){
-        
+
         switch( CB.DB.templates.getType(template_id) ){
             case 'case':
             case 'object':
+            case 'template':
+            case 'field':
             case 'email':
                 App.mainViewPort.fireEvent('openobject', {id: id}, e);
                 break;
             case 'file':
                 App.mainViewPort.fireEvent('fileopen', {id: id}, e);
                 break;
-            case 'task': 
+            case 'task':
                 App.mainViewPort.fireEvent('taskedit', { data:{id: id} }, e);
                 break;
-            default: 
-                return false; 
+            default:
+                return false;
                 break;
         }
         return true;
     }
-    
+
     App.clipboard = new CB.Clipboard();
     /* disable back button */
     Ext.EventManager.on(Ext.isIE ? document : window, 'keydown', function(e, t) {
@@ -856,7 +858,7 @@ function overrides(){
             Ext.tree.TreeDragZone.superclass.b4MouseDown.apply(this, arguments);
         }
     });
-     
+
     Ext.override(Ext.tree.TreeDragZone, {
         onMouseUp : function(e){
             var sm = this.tree.getSelectionModel();
@@ -865,11 +867,11 @@ function overrides(){
                 sm.resumeEvents();
             else{
                 sm.clearEventQueue();
-                sm.resumeEvents();        
+                sm.resumeEvents();
             }
             Ext.tree.TreeDragZone.superclass.onMouseUp.apply(this, arguments);
         }
-    }); 
+    });
 
     Ext.override(Ext.tree.DefaultSelectionModel, {
         clearEventQueue : function() {
@@ -877,7 +879,7 @@ function overrides(){
             delete me.eventQueue;
         }
     });
-    
+
     /* prevend deselecting of selected when rightClicking in a RowSelectionModel*/
     Ext.grid.RowSelectionModel.prototype.selectRow = function(index, keepExisting, preventViewNotify){
             if(this.isLocked() || (index < 0 || index >= this.grid.store.getCount()) || (keepExisting && this.isSelected(index))){

@@ -370,14 +370,14 @@ function getThesauriTitles($ids_string, $language_id = false)
         $var_name = "TH[$id]['name']";
         if (!\CB\Cache::exist($var_name)) {
             $res = DB\dbQuery(
-                'SELECT l'.$language_id.'
+                'SELECT l'.$language_id.' `title`
                 FROM tags
                 WHERE id = $1',
                 $id
             ) or die(DB\dbQueryError());
 
-            if ($r = $res->fetch_row()) {
-                \CB\Cache::set($var_name, $r[0]);
+            if ($r = $res->fetch_assoc()) {
+                \CB\Cache::set($var_name, $r['title']);
             }
             $res->close();
         }
@@ -412,21 +412,6 @@ function getThesauryIcon($id)
     }
 
     return \CB\Cache::get($var_name);
-}
-
-function getUsername($id)
-{
-    if (!is_numeric($id)) {
-        return '';
-    }
-    $rez = '';
-    $res = DB\dbQuery('select l'.\CB\USER_LANGUAGE_INDEX.' from users_groups where id = $1', $id) or die(DB\dbQueryError());
-    if ($r = $res->fetch_row()) {
-        $rez = $r[0];
-    }
-    $res->close();
-
-    return $rez;
 }
 
 function dateISOToMysql($date_string)
@@ -481,15 +466,53 @@ function toNumericArray($v)
         $v = explode(',', $v);
     }
     $v = array_filter($v, 'is_numeric');
-    for ($i = sizeof($v) -1; $i >= 0; $i--) {
-        $val = trim($v[$i]);
-        $iv = intval($val);
-        if ($iv == $val) {
-            $v[$i] = $iv;
+    foreach ($v as $k => $w) {
+        $w = trim($w);
+        $iw = intval($w);
+        if ($iw == $w) {
+            $v[$k] = $iw;
         } else {
-            $v[$i] = $val;
-            settype($v[$i], 'float');
+            $v[$k] = $w;
+            settype($v[$k], 'float');
         }
+    }
+    // for ($i = sizeof($v) -1; $i >= 0; $i--) {
+    //     $val = trim($v[$i]);
+    //     $iv = intval($val);
+    //     if ($iv == $val) {
+    //         $v[$i] = $iv;
+    //     } else {
+    //         $v[$i] = $val;
+    //         settype($v[$i], 'float');
+    //     }
+    // }
+    return $v;
+}
+
+/**
+ * convers a given variable to json array or empty array
+ * @param  [type] $v [description]
+ * @return [type]    [description]
+ */
+function toJSONArray($v)
+{
+    if (empty($v)) {
+        return array();
+    }
+    if (is_array($v)) {
+        return $v;
+    }
+
+    if (is_scalar($v)) {
+        $v = json_decode($v, true);
+    }
+    if (empty($v)) {
+        return array();
+    }
+    if (is_array($v)) {
+        return $v;
+    } elseif (is_object($v)) {
+        $v = (Array) $v;
     }
 
     return $v;

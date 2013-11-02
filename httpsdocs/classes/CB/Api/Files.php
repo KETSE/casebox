@@ -14,7 +14,8 @@ class Files
     public function get($id)
     {
         $rez = array('success' => true, 'data' => array());
-        $sql = 'SELECT t.id
+        $res = DB\dbQuery(
+            'SELECT t.id
                 ,t.pid
                 ,f.name
                 ,f.`date`
@@ -40,8 +41,10 @@ class Files
             JOIN tree_info ti on t.id = ti.id
             JOIN files f ON t.id = f.id
             LEFT JOIN files_content fc ON f.content_id = fc.id
-            WHERE t.id = $1';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+            WHERE t.id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $r['content'] = file_get_contents(\CB\FILES_DIR.$r['content_path'].DIRECTORY_SEPARATOR.$r['content_id']);
             unset($r['content_id']);
@@ -52,7 +55,8 @@ class Files
 
         /* get versions */
 
-        $sql = 'SELECT
+        $res = DB\dbQuery(
+            'SELECT
                 v.id
                 ,v.`date`
                 ,v.`name`
@@ -66,8 +70,9 @@ class Files
             FROM files_versions v
                 LEFT JOIN files_content fc on fc.id = v.content_id
             WHERE v.file_id = $1
-            ORDER BY v.cdate DESC';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+            ORDER BY v.cdate DESC',
+            $id
+        ) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
             $rez['data']['versions'][] = $r;
         }
@@ -89,17 +94,19 @@ class Files
      */
     public function download($id, $attachment = true)
     {
-        $sql = 'SELECT f.id
-                     , f.content_id
-                     , c.path
-                     , f.name
-                     , c.`type`
-                     , c.size
-                FROM files f
-                LEFT JOIN files_content c ON f.content_id = c.id
-                WHERE f.id = $1';
+        $res = DB\dbQuery(
+            'SELECT f.id
+                ,f.content_id
+                ,c.path
+                ,f.name
+                ,c.`type`
+                ,c.size
+            FROM files f
+            LEFT JOIN files_content c ON f.content_id = c.id
+            WHERE f.id = $1',
+            $id
+        ) or die( DB\dbQueryError() );
 
-        $res = DB\dbQuery($sql, $id) or die( DB\dbQueryError() );
         if ($r = $res->fetch_assoc()) {
             //check if can download file
             if (!\CB\Security::canDownload($r['id'])) {

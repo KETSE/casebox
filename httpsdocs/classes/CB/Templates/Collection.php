@@ -2,6 +2,7 @@
 namespace CB\Templates;
 
 use CB\DB as DB;
+use CB\Util as Util;
 
 /**
  * Templates collection class
@@ -24,7 +25,8 @@ class Collection
         $this->reset();
         /* collecting template_fields */
         $template_fields = array();
-        $sql = 'SELECT
+        $res = DB\dbQuery(
+            'SELECT
                 id
                 ,template_id
                 ,name
@@ -32,44 +34,46 @@ class Collection
                 ,`type`
                 ,cfg
                 ,solr_column_name
-            FROM templates_structure';
+            FROM templates_structure'
+        ) or die(DB\dbQueryError());
 
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
             $template_id = $r['template_id'];
             unset($r['template_id']);
-            $r['cfg'] = json_decode($r['cfg']) or array();
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
             $template_fields[$template_id][$r['id']] = $r;
         }
         $res->close();
 
         /* loading templates */
-        $sql = 'SELECT id
-                    ,pid
-                    ,is_folder
-                    ,`type`
-                    ,name
-                    ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
-                    ,`order`
-                    ,`visible`
-                    ,iconCls
-                    ,default_field
-                    ,cfg
-                    ,title_template
-                    ,info_template
-                FROM templates
-                WHERE is_folder = 0';
+        $res = DB\dbQuery(
+            'SELECT id
+                ,pid
+                ,is_folder
+                ,`type`
+                ,name
+                ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
+                ,`order`
+                ,`visible`
+                ,iconCls
+                ,default_field
+                ,cfg
+                ,title_template
+                ,info_template
+            FROM templates
+            WHERE is_folder = 0'
+        ) or die(DB\dbQueryError());
 
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
-            $r['cfg'] = empty($r['cfg']) ? array(): json_decode($r['cfg']);
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
 
             $r['fields'] = empty($template_fields[$r['id']])
                 ? array()
                 : $template_fields[$r['id']];
 
             /* store template in collection */
-            $this->templates[$r['id']] = new \CB\Template($r);
+            $this->templates[$r['id']] = new \CB\Objects\Template($r['id'], false);
+            $this->templates[$r['id']]->setData($r);
         }
         $res->close();
     }
@@ -77,19 +81,54 @@ class Collection
     /**
      * get template object by template id
      *
-     * @return \CB\Template
+     * @return \CB\Objects\Template
      */
     public function getTemplate($templateId)
     {
         if (!empty($this->templates[$templateId])) {
             return $this->templates[$templateId];
         }
-        $template = new \CB\Template();
-        $template->load($templateId);
+        $template = new \CB\Objects\Template($templateId, false);
+        $template->load();
 
         $this->templates[$templateId] = $template;
 
         return $template;
+    }
+
+    /**
+     * get template type by its id
+     * @param  int     $templateId
+     * @return varchar
+     */
+    public function getType($templateId)
+    {
+        if (!is_numeric($templateId)) {
+            return null;
+        }
+
+        // check if template has been loaded
+        if (!empty($this->templates[$templateId])) {
+            return $this->templates[$templateId]->getData['type'];
+        }
+
+        $var_name = 'template_type'.$templateId;
+
+        if (!Cache::exist($var_name)) {
+            //select from db
+            $res = DB\dbQuery(
+                'SELECT `type`
+                FROM templates
+                WHERE id = $1',
+                $templateId
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                Cache::set($var_name, $r['type']);
+            }
+            $res->close();
+        }
+
+        return Cache::get($var_name);
     }
 
     /**

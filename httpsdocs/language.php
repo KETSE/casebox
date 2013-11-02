@@ -121,10 +121,17 @@ function checkTranslationsUpToDate()
 {
     /* verifying if localization JS file for current user language is up to date */
     $last_translations_update_date = null;
-    $sql = 'SELECT MAX(udate) FROM (SELECT MAX(udate) `udate` FROM casebox.translations UNION SELECT MAX(udate) FROM translations) t';
-    $res = DB\dbQuery($sql) or die( DB\dbQueryError() );
-    if ($r = $res->fetch_row()) {
-        $last_translations_update_date = strtotime($r[0]);
+    $res = DB\dbQuery(
+        'SELECT MAX(udate) `max_date`
+        FROM
+            (SELECT MAX(udate) `udate`
+             FROM casebox.translations
+             UNION SELECT MAX(udate)
+             FROM translations) t'
+    ) or die( DB\dbQueryError() );
+
+    if ($r = $res->fetch_assoc()) {
+        $last_translations_update_date = strtotime($r['max_date']);
     }
     $res->close();
 

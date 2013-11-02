@@ -228,7 +228,7 @@ class Client
 
         $this->execute();
         $rez = $this->getResponseBody();
-        $rez = json_decode($rez);
+        $rez = json_decode($rez, true);
 
         return $rez;
     }

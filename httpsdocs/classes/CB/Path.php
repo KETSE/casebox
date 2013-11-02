@@ -23,8 +23,11 @@ class Path
         if (!is_numeric($id)) {
             return $rez;
         }
-        $sql = 'SELECT pids FROM tree_info WHERE id = $1';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT pids FROM tree_info WHERE id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $r['pids'] = str_replace(',', '/', $r['pids']);
             $rez = array('success' => true, 'id' => $id, 'path' => $r['pids']);
@@ -40,11 +43,14 @@ class Path
         if (!is_numeric($id)) {
             return $rez;
         }
-        $sql = 'SELECT ti.pids
+        $res = DB\dbQuery(
+            'SELECT ti.pids
             FROM tree t
             JOIN tree_info ti ON t.id = ti.id
-            WHERE t.id = $1';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
+            WHERE t.id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $r['pids'] = explode(',', $r['pids']);
             array_pop($r['pids']);
@@ -56,9 +62,26 @@ class Path
         return $rez;
     }
 
+    /**
+     * return textual repsentation of an ids path
+     * @param  varchar | array $p direct path string or an array containig 'path' index defined
+     * @return varchar
+     */
     public static function getPathText($p)
     {
-        $path = empty($p->path) ? '/' : $p->path;
+        $path = '';
+        if (is_array($p)) {
+            if (isset($p['path'])) {
+                $path = $p['path'];
+            }
+        } else {
+            $path = '';
+        }
+
+        if (empty($path)) {
+            $path = '/';
+        }
+
         while ($path[0] == '/') {
             $path = substr($path, 1);
         }
@@ -87,78 +110,81 @@ class Path
         }
 
         $names = array();
-        $sql = 'SELECT id
-                 , name
+        $res = DB\dbQuery(
+            'SELECT id
+                ,name
             FROM tree
-            WHERE id IN ('.implode(', ', $ids).')';
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            $names[$r[0]] = $r[1];
+            WHERE id IN ('.implode(', ', $ids).')'
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $names[$r['id']] = $r['name'];
         }
         $res->close();
         $rez = array();
         for ($i=0; $i < sizeof($path); $i++) {
             if (isset($names[$path[$i]])) {
                 if ((substr($names[$path[$i]], 0, 1) == '[') && (substr($names[$path[$i]], -1, 1) == ']')) {
-                    $names[$path[$i]] = Util\coalesce(L\get(substr($names[$path[$i]], 1, strlen($names[$path[$i]]) -2)), $names[$path[$i]]);
+                    $names[$path[$i]] = Util\coalesce(
+                        L\get(substr($names[$path[$i]], 1, strlen($names[$path[$i]]) -2)),
+                        $names[$path[$i]]
+                    );
                 }
                 $rez[] = $names[$path[$i]];
             } else {
                 $rez[] = $path[$i];
             }
         }
-        /* exception for virtual folders when in cases folder */
-        if ((sizeof($path) > 1) && (Path::getNodeSubtype($path[1]) == 4)) {
-            if (sizeof($path) > 2) {
-                if (empty($path[2])) {
-                    $rez[2] = L\OutOfOffice;
-                } else {
-                    $sql = 'select l'.USER_LANGUAGE_INDEX.' from tags where id = $1';
-                    $res = DB\dbQuery($sql, $path[2]) or die(DB\dbQueryError());
-                    if ($r = $res->fetch_row()) {
-                        $rez[2] = $r[0];
-                    }
-                    $res->close();
-                }
-            }
-            if (sizeof($path) > 3) {
-                $rez[3] = empty($path[3]) ? strip_tags(L\noData) : $path[3];
-            }
-            if (sizeof($path) > 4) {
-                $rez[4] = Util\coalesce($path[4], strip_tags(L\noData));
-            }
-        }
 
         return '/'.implode('/', $rez);
     }
 
+    /**
+     * return generic properties for a path of ids
+     * @param  varchar | array $p direct path string or an array containig 'path' index defined
+     * @return varchar
+     */
     public static function getPathProperties($p)
     {
-        $path = empty($p->path) ? '/' : $p->path;
+        $path = '';
+        if (is_array($p)) {
+            if (isset($p['path'])) {
+                $path = $p['path'];
+            }
+        } else {
+            $path = $p;
+        }
+
+        if (empty($path)) {
+            $path = '/';
+        }
         while ($path[0] == '/') {
             $path = substr($path, 1);
         }
         $path = explode('/', $path);
         $ids = array_filter($path, 'is_numeric');
         if (empty($ids)) {
-            $ids = array(Browser::getRootFolderId());//return '/';
+            $ids = array(Browser::getRootFolderId());
             $path = $ids;
         }
         $rez = array();
         $lastId = array_pop($ids);
-        $sql = 'SELECT t.id
-                 , t.name
-                 , t.`system`
-                 , t.`type`
-                 , ti.pids `path`
-                 , ti.`case_id`
-                 , t.`template_id`
-                 , tt.`type` template_type
+        $res = DB\dbQuery(
+            'SELECT t.id
+                ,t.name
+                ,t.`system`
+                ,t.`type`
+                ,ti.pids `path`
+                ,ti.`case_id`
+                ,t.`template_id`
+                ,tt.`type` template_type
             FROM tree t
             JOIN tree_info ti on t.id = ti.id
             LEFT JOIN templates tt ON t.template_id = tt.id
-            WHERE t.id = $1'; //in ('.implode(',', $ids).')';
-        $res = DB\dbQuery($sql, $lastId) or die(DB\dbQueryError());
+            WHERE t.id = $1',
+            $lastId
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $r['path'] = str_replace(',', '/', $r['path']);
             $rez = $r;
@@ -168,7 +194,11 @@ class Path
         return $rez;
     }
 
-    /* tree nodes can contain Translation variable in place of name like: [MyDocuments] */
+    /**
+     * tree nodes can contain Translation variable in place of name like: [MyDocuments]
+     * @param  vrchar  $path
+     * @return varchar
+     */
     public static function replaceCustomNames($path)
     {
         $path = explode('/', $path);
@@ -181,18 +211,5 @@ class Path
         $path = implode('/', $path);
 
         return $path;
-    }
-
-    public static function getNodeSubtype($id)
-    {
-        $rez = null;
-        $sql = 'select `subtype` from tree where id = $1';
-        $res = DB\dbQuery($sql, $id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = $r[0];
-        }
-        $res->close();
-
-        return $rez;
     }
 }

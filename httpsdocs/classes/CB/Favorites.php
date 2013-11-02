@@ -6,7 +6,7 @@ class Favorites
     public function create($p)
     {
         $rez = array('succes' => true, 'data' => array());
-        if (empty($p->data)) {
+        if (empty($p['data'])) {
             return $rez;
         }
         DB\dbQuery(
@@ -16,11 +16,12 @@ class Favorites
             UPDATE object_id = $2',
             array(
                 $_SESSION['user']['id']
-                ,$p->data->id
+                ,$p['data']['id']
             )
         ) or die(DB\dbQueryError());
 
-        $sql = 'SELECT t.id
+        $res = DB\dbQuery(
+            'SELECT t.id
                  , t.type
                  , t.name
                  , ti.`path`
@@ -28,13 +29,10 @@ class Favorites
             JOIN tree t ON f.object_id = t.id
             JOIN tree_info ti on t.id = ti.id
             WHERE f.user_id = $1
-                AND object_id = $2';
-
-        $res = DB\dbQuery(
-            $sql,
+                AND object_id = $2',
             array(
                 $_SESSION['user']['id']
-                ,$p->data->id
+                ,$p['data']['id']
             )
         ) or die(DB\dbQueryError());
 
@@ -49,12 +47,15 @@ class Favorites
     public function read($p)
     {
         $rez = array('succes' => true, 'data' => array());
-        $sql = 'SELECT t.id, t.type, t.name, ti.`path`
+        $res = DB\dbQuery(
+            'SELECT t.id, t.type, t.name, ti.`path`
             FROM favorites f
             JOIN tree t ON f.object_id = t.id
             JOIN tree_info ti on t.id = ti.id
-            WHERE f.user_id = $1';
-        $res = DB\dbQuery($sql, $_SESSION['user']['id']) or die(DB\dbQueryError());
+            WHERE f.user_id = $1',
+            $_SESSION['user']['id']
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $rez['data'][] = $r;
         }
@@ -79,7 +80,7 @@ class Favorites
                 AND object_id = $2',
             array(
                 $_SESSION['user']['id']
-                ,intval($p->data)
+                ,intval($p['data'])
             )
         ) or die(DB\dbQueryError());
 

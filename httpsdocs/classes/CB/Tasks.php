@@ -5,13 +5,14 @@ class Tasks
 {
     /**
      * loading task data
-     * @param  int    $id [description]
-     * @return [type] [description]
+     * @param  int  $id
+     * @return json response
      */
     public function load($id)
     {
         $rez = array('success' => false);
-        $sql = 'SELECT
+        $res = DB\dbQuery(
+            'SELECT
                 t.id
                 ,t.`title`
                 ,t.date_start
@@ -47,11 +48,16 @@ class Tasks
                 ,t.allday
                 ,ti.pids `path`
                 ,ti.path `pathtext`
-                FROM tasks t
-                JOIN tree m on t.id = m.id
-                JOIN tree_info ti on t.id = ti.id
-                WHERE t.id = $1';
-        $res = DB\dbQuery($sql, array($id, $_SESSION['user']['id'])) or die(DB\dbQueryError());
+            FROM tasks t
+            JOIN tree m on t.id = m.id
+            JOIN tree_info ti on t.id = ti.id
+            WHERE t.id = $1',
+            array(
+                $id
+                ,$_SESSION['user']['id']
+            )
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $this->getTaskStyles($r);
             $r['days'] = Util\formatLeftDays($r['days']);
@@ -86,9 +92,9 @@ class Tasks
 
         $res = DB\dbQuery(
             'SELECT u.id
-                 , ru.status
-                 , ru.thesauri_response_id
-                 , ru.`time`
+                ,ru.status
+                ,ru.thesauri_response_id
+                ,ru.`time`
             FROM tasks_responsible_users ru
             JOIN users_groups u ON ru.user_id = u.id
             WHERE ru.task_id = $1
@@ -168,29 +174,29 @@ class Tasks
                 /* if it's overdue - mysql trigger will change the status */
             } else {
                 $res = DB\dbQuery(
-                    'SELECT COUNT(id)
-                         , sum(status)
+                    'SELECT COUNT(id) `count`
+                         , sum(status) `status`
                     FROM tasks
                     WHERE id IN ('.$p['parent_ids'].')'
                 ) or die(DB\dbQueryError());
 
-                if (($r = $res->fetch_row()) && ($r[0]*2 == $r[1])) {
+                if (($r = $res->fetch_assoc()) && ($r['count']*2 == $r['status'])) {
                     $status = 2; //all parent tasks are completed
                 }
                 $res->close();
             }
             /* end of estimating deadline status in dependance with parent tasks statuses */
-            $obj = (object) $p;
             if (empty($p['id'])) {
-                fireEvent('beforeNodeDbCreate', $obj);
+                fireEvent('beforeNodeDbCreate', $p);
                 $res = DB\dbQuery(
                     'INSERT INTO tree (pid, name, `type`, template_id, cid, uid)
-                    VALUES ($1
-                          , $2
-                          , $3
-                          , $4
-                          , $5
-                          , $5)',
+                    VALUES (
+                        $1
+                        ,$2
+                        ,$3
+                        ,$4
+                        ,$5
+                        ,$5)',
                     array(
                         $p['pid']
                         ,$p['title']
@@ -205,24 +211,31 @@ class Tasks
                 $log_action_type = 22; // updating task
 
                 /* selecting removed responsible_users */
-                $sql = 'SELECT user_id
+                $res = DB\dbQuery(
+                    'SELECT user_id
                     FROM tasks_responsible_users
                     WHERE task_id = $1
-                        AND $2 NOT LIKE concat(\'%,\',user_id,\',%\')';
-                $res = DB\dbQuery($sql, array($p['id'], ','.$p['responsible_user_ids'].',')) or die(DB\dbQueryError());
-                while ($r = $res->fetch_row()) {
-                    $removed_responsible_users[] = $r[0];
+                        AND $2 NOT LIKE concat(\'%,\',user_id,\',%\')',
+                    array(
+                        $p['id']
+                        , ','.$p['responsible_user_ids'].','
+                    )
+                ) or die(DB\dbQueryError());
+
+                while ($r = $res->fetch_assoc()) {
+                    $removed_responsible_users[] = $r['user_id'];
                 }
                 $res->close();
 
-                fireEvent('beforeNodeDbUpdate', $obj);
+                fireEvent('beforeNodeDbUpdate', $p);
             }
 
             if (!isset($p['autoclose'])) {
                 $p['autoclose'] = 1;
             }
 
-            $sql = 'INSERT INTO tasks (
+            DB\dbQuery(
+                'INSERT INTO tasks (
                     id
                     ,`title`
                     ,`date_start`
@@ -242,25 +255,26 @@ class Tasks
                     ,allday
                     ,uid
                     ,udate)
-                VALUES ($1
-                      , $2
-                      , $3
-                      , $4
-                      , $5
-                      , $6
-                      , $7
-                      , $8
-                      , $9
-                      , $10
-                      , $11
-                      , $12
-                      , $13
-                      , $14
-                      , $15
-                      , $16
-                      , $17
-                      , NULL
-                      , NULL)
+                VALUES (
+                    $1
+                    ,$2
+                    ,$3
+                    ,$4
+                    ,$5
+                    ,$6
+                    ,$7
+                    ,$8
+                    ,$9
+                    ,$10
+                    ,$11
+                    ,$12
+                    ,$13
+                    ,$14
+                    ,$15
+                    ,$16
+                    ,$17
+                    ,NULL
+                    ,NULL)
                 ON DUPLICATE KEY
                 UPDATE `title` = $2
                     ,`date_start` = $3
@@ -278,9 +292,7 @@ class Tasks
                     ,autoclose = $14
                     ,importance = $15
                     ,category_id = $16
-                    ,allday = $17';
-            DB\dbQuery(
-                $sql,
+                    ,allday = $17',
                 @array(
                     $p['id']
                     ,$p['title']
@@ -336,13 +348,12 @@ class Tasks
 
         $this->saveReminds($p);
 
-        $obj = (object) $p;
         switch ($log_action_type) {
             case 21: //created
-                fireEvent('nodeDbCreate', $obj);
+                fireEvent('nodeDbCreate', $p);
                 break;
             case 22: //updated
-                fireEvent('nodeDbUpdate', $obj);
+                fireEvent('nodeDbUpdate', $p);
                 break;
 
         }
@@ -362,40 +373,47 @@ class Tasks
     public function updateDates($p)
     {
         $rez = array('success' => true);
-        if (!Security::canManageTask($p->id)) {
+        if (!Security::canManageTask($p['id'])) {
             throw new Exception(L\Access_denied, 1);
         }
-        $sql = 'SELECT
+        $res = DB\dbQuery(
+            'SELECT
                 t.allday
                 ,tt.template_id
             FROM tasks t
             JOIN tree tt on t.id = tt.id
-            WHERE t.id = $1';
-        $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
+            WHERE t.id = $1',
+            $p['id']
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
-            $p->date_start = Util\dateISOToMysql($p->date_start);
-            $p->date_end = empty($p->date_end)
+            $p['date_start'] = Util\dateISOToMysql($p['date_start']);
+            $p['date_end'] = empty($p['date_end'])
                 ? null
-                : Util\dateISOToMysql($p->date_end);
+                : Util\dateISOToMysql($p['date_end']);
 
             DB\dbQuery(
                 'UPDATE tasks set date_start = $2, date_end = $3 WHERE id = $1',
-                array($p->id, $p->date_start, $p->date_end)
+                array($p['id'], $p['date_start'], $p['date_end'])
             ) or die(DB\dbQueryError());
         } else {
             $rez['success'] = false;
         }
         $res->close();
-        Objects::updateCaseUpdateInfo($p->id);
+        Objects::updateCaseUpdateInfo($p['id']);
         Solr\Client::runCron();
 
         return $rez;
     }
 
+    /**
+     * save reminds for a task with deadlines
+     * @param  array   $p               task properties
+     * @param  integer $log_action_type
+     * @return json    response
+     */
     public function saveReminds($p, $log_action_type = 25)
     {
-        $p = (array) $p;
-
         DB\dbQuery(
             'INSERT INTO tasks_reminders (task_id, user_id, reminds)
             VALUES ($1
@@ -443,15 +461,17 @@ class Tasks
                 )
             ) or die(DB\dbQueryError());
 
-            while ($r = $res->fetch_row()) {
-                $ids[] = $r[0];
+            while ($r = $res->fetch_assoc()) {
+                $ids[] = $r['id'];
             }
             $res->close();
             //end of selecting currently used notification ids to be updated with new data
 
             $a = explode('-', $p['reminds']);
 
-            $subject = L\Reminder.': '.$p['title'].' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['TZ']).' ('.$p['path'].')';
+            $subject = L\Reminder.': '.$p['title'].
+                ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['TZ']).
+                ' ('.$p['path'].')';
             $message = '<generateTaskViewOnSend>';
             foreach ($a as $r) {
                 $rem = explode('|', $r);    // user|remindType|remind delay|remindUnits
@@ -484,14 +504,15 @@ class Tasks
                         ,message
                         ,time
                         ,user_id)
-                    VALUES ($1
-                          , $2
-                          , $3
-                          , 1
-                          , $4
-                          , $5
-                          , DATE_ADD($6, INTERVAL $7 '.$unit.')
-                          , $8)
+                    VALUES (
+                        $1
+                        ,$2
+                        ,$3
+                        ,1
+                        ,$4
+                        ,$5
+                        ,DATE_ADD($6, INTERVAL $7 '.$unit.')
+                        ,$8)
                     ON DUPLICATE KEY
                     UPDATE action_type = $2
                         ,task_id = $3
@@ -538,75 +559,90 @@ class Tasks
         return array('success' => true, 'reminds' => $p['reminds']);
     }
 
+    /**
+     * set complete or incomplete status for a responsible task user
+     * @param array $p params
+     */
     public function setUserStatus($p)
     {
-        $rez = array('success' => true, 'id' => $p->id);
+        $rez = array('success' => true, 'id' => $p['id']);
         $task = array();
         $res = DB\dbQuery(
             'SELECT responsible_user_ids
-                     , autoclose
-                     , title
-                     , status
-                     , autoclose
-                     , cid
-                FROM tasks
-                WHERE id = $1',
-            $p->id
+                ,autoclose
+                ,title
+                ,status
+                ,autoclose
+                ,cid
+            FROM tasks
+            WHERE id = $1',
+            $p['id']
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
             $task  = $r;
         }
         $res->close();
-        //if($task[status] != 1) throw new \Exception(L\TaskNotActive);
+
         $responsible_users = explode(',', $task['responsible_user_ids']);
         if (($_SESSION['user']['id'] != $task['cid']) && !Security::isAdmin()) {
             throw new \Exception(L\Access_denied);
         }
-        if (!in_array($p->user_id, $responsible_users)) {
+        if (!in_array($p['user_id'], $responsible_users)) {
             throw new \Exception(L\Wrong_id);
         }
-        if (empty($p->status)) {
-            $p->status = 0;
+        if (empty($p['status'])) {
+            $p['status'] = 0;
         }
         @DB\dbQuery(
-            'INSERT INTO tasks_responsible_users (task_id, user_id, status, thesauri_response_id, `time`)
-            VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP) ON duplicate KEY
+            'INSERT INTO tasks_responsible_users (
+                task_id
+                ,user_id
+                ,status
+                ,thesauri_response_id
+                ,`time`)
+            VALUES($1, $2, $3, $4, CURRENT_TIMESTAMP)
+            ON DUPLICATE KEY
             UPDATE status = $3
-                    ,thesauri_response_id = $4
-                    ,`time` = CURRENT_TIMESTAMP',
+                ,thesauri_response_id = $4
+                ,`time` = CURRENT_TIMESTAMP',
             array(
-                $p->id
-                ,$p->user_id
-                ,$p->status
-                ,$p->thesauri_response_id
+                $p['id']
+                ,$p['user_id']
+                ,$p['status']
+                ,$p['thesauri_response_id']
             )
         ) or die(DB\dbQueryError());
 
         $autoclosed = false;
         $action_type = 29; //aboutTaskCompletionDecline
-        if ($p->status == 1) {
+        if ($p['status'] == 1) {
             $action_type = 30; //aboutTaskCompletionOnBehalt
-            $autoclosed = $this->checkAutocloseTask($p->id);
+            $autoclosed = $this->checkAutocloseTask($p['id']);
         }
         Log::add(
             array(
                 'action_type' => $action_type
-                ,'task_id' => $p->id
-                ,'to_user_ids' => $p->user_id
-                ,'remind_users' => $task['cid'].','.$p->user_id
+                ,'task_id' => $p['id']
+                ,'to_user_ids' => $p['user_id']
+                ,'remind_users' => $task['cid'].','.$p['user_id']
                 ,'autoclosed' => $autoclosed
                 ,'info' => 'title: '.$task['title']
             )
         ); // TO REVIEW
 
-        Objects::updateCaseUpdateInfo($p->id);
+        Objects::updateCaseUpdateInfo($p['id']);
 
         Solr\Client::runCron();
-        //exec('php ../../casebox/crons/cron_solr_update_objects.php'); //??
-        return $rez;
-    }/**/
 
+        return $rez;
+    }
+
+    /**
+     * check if a task is autoclosable and if so - change it's status to closed
+     * @param  int     $id task id
+     * @return boolean
+     */
     public function checkAutocloseTask($id)
     {
         $rez = false;
@@ -619,7 +655,7 @@ class Tasks
             $id
         ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_row()) {
+        if ($r = $res->fetch_assoc()) {
             //there are unset user statuses, so nothing to change for this task
         } else {
             DB\dbQuery(
@@ -631,9 +667,9 @@ class Tasks
 
             $res = DB\dbQuery(
                 'SELECT title
-                     , autoclose
-                     , cid
-                     , responsible_user_ids
+                    ,autoclose
+                    ,cid
+                    ,responsible_user_ids
                 FROM tasks
                 WHERE id = $1',
                 $id
@@ -673,26 +709,26 @@ class Tasks
         $task = array();
 
         /* check if current user can manage this task */
-        if (!Security::canManageTask($p->id)) {
+        if (!Security::canManageTask($p['id'])) {
             throw new \Exception(L\Access_denied);
         }
 
         /* load task data */
         $res = DB\dbQuery(
             'SELECT ti.case_id
-                 , t.object_id
-                 , t.status
-                 , ru.status `user_status`
-                 , t.cid
-                 , t.responsible_user_ids
-                 , t.title
+                ,t.object_id
+                ,t.status
+                ,ru.status `user_status`
+                ,t.cid
+                ,t.responsible_user_ids
+                ,t.title
             FROM tasks t
             LEFT JOIN tree_info ti ON t.id = ti.id
             JOIN tasks_responsible_users ru ON t.id = ru.task_id
             WHERE t.id = $1
                 AND ru.user_id = $2',
             array(
-                $p->id
+                $p['id']
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
@@ -712,18 +748,24 @@ class Tasks
             WHERE task_id = $1
                 AND user_id = $2',
             array(
-                $p->id
+                $p['id']
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
 
         DB\dbQuery(
-            'INSERT INTO messages (node_id, `type`, subject, message, cid) VALUES ($1, $2, $3, $4, $5)',
+            'INSERT INTO messages (
+                node_id
+                ,`type`
+                ,subject
+                ,message
+                ,cid)
+            VALUES ($1, $2, $3, $4, $5)',
             array(
-                $p->id // Util\coalesce($task['case_id'], $task['object_id'], $p->id)
+                $p['id'] // Util\coalesce($task['case_id'], $task['object_id'], $p['id'])
                 ,'task_complete'
                 ,'Complete task'
-                ,$p->message
+                ,$p['message']
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
@@ -731,20 +773,25 @@ class Tasks
         Log::add(
             array(
                 'action_type' => 23
-                ,'task_id' => $p->id
+                ,'task_id' => $p['id']
                 ,'remind_users' => $task['cid']
-                ,'autoclosed' => $this->checkAutocloseTask($p->id)
+                ,'autoclosed' => $this->checkAutocloseTask($p['id'])
                 ,'info' => 'title: '.$task['title']
             )
         );
 
-        Objects::updateCaseUpdateInfo($p->id);
+        Objects::updateCaseUpdateInfo($p['id']);
 
         Solr\Client::runCron();
 
         return array('success' => true);
     }
 
+    /**
+     * method for marking task as closed
+     * @param  int  $id task id
+     * @return json response
+     */
     public function close($id)
     {
         $task = array();
@@ -764,7 +811,11 @@ class Tasks
         if (($_SESSION['user']['id'] !== $task['cid']) && !Security::isAdmin()) {
             return  array('success' => false, 'msg' => L\No_access_to_close_task);
         }
-        DB\dbQuery('UPDATE tasks SET status = 3 WHERE id = $1', $id) or die(DB\dbQueryError());
+        DB\dbQuery(
+            'UPDATE tasks SET status = 3 WHERE id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
         /* log and notify all users about task closing */
         Log::add(
             array(
@@ -784,13 +835,18 @@ class Tasks
         return array('success' => true, 'id' => $id);
     }
 
+    /**
+     * reopen a task
+     * @param  int  $id
+     * @return json response
+     */
     public function reopen($id)
     {
         $task = array();
         $res = DB\dbQuery(
             'SELECT cid
-                 , title
-                 , responsible_user_ids
+                ,title
+                ,responsible_user_ids
             FROM tasks
             WHERE id = $1',
             $id
@@ -806,11 +862,11 @@ class Tasks
         DB\dbQuery(
             'UPDATE tasks
             SET status = CASE
-                            WHEN ((date_end IS NULL)
-                                   OR (date_end > CURRENT_TIMESTAMP))
-                            THEN 2
-                            ELSE 1
-                         END
+                    WHEN ((date_end IS NULL)
+                           OR (date_end > CURRENT_TIMESTAMP))
+                    THEN 2
+                    ELSE 1
+                 END
             WHERE id = $1',
             $id
         ) or die(DB\dbQueryError());
@@ -848,10 +904,14 @@ class Tasks
         $updatingChildTasks = array();
     }
 
+    /**
+     * get task css classes depending on task status
+     * @param  [type] $task [description]
+     * @return [type] [description]
+     */
     private function getTaskStyles(&$task)
     {
         $cls = '';
-        //$iconCls = 'icon-calendar-small';
         $iconCls = 'icon-calendar-medium-clean';
         if ($task['status'] == 4) {
             $cls = 'cO';
@@ -870,6 +930,13 @@ class Tasks
         }
     }
 
+    /**
+     * get task html view for sending  to email
+     * @param  int     $id            task id
+     * @param  int     $user_id       destination user id
+     * @param  array   $removed_users list of users that have been removed from task
+     * @return varchar html content
+     */
     public static function getTaskInfoForEmail($id, $user_id = false, $removed_users = false)
     {
         $rez = '';
@@ -882,7 +949,8 @@ class Tasks
                 $user['language_id'] = 1;
             }
         }
-        $sql = 'SELECT
+        $res = DB\dbQuery(
+            'SELECT
                 `title`
                 ,date_start
                 ,date_end
@@ -906,8 +974,13 @@ class Tasks
                 ,DATABASE() `db`
             FROM tasks t
             JOIN tree_info ti ON t.id = ti.id
-            WHERE t.id = $1';
-        $res = DB\dbQuery($sql, array($id, @$user['id'])) or die(DB\dbQueryError());
+            WHERE t.id = $1',
+            array(
+                $id,
+                @$user['id']
+            )
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $format = 'Y, F j';
             if ($r['allday'] != 1) {
@@ -996,7 +1069,15 @@ class Tasks
 
             $files = array();
             $files_text = '';
-            $fres = DB\dbQuery('select id, name from tree where pid = $1 and `type` = 5 order by `name`', $id) or die(DB\dbQueryError());
+            $fres = DB\dbQuery(
+                'SELECT id, name
+                FROM tree
+                WHERE pid = $1
+                    AND `type` = 5
+                ORDER BY `name`',
+                $id
+            ) or die(DB\dbQueryError());
+
             while ($fr = $fres->fetch_assoc()) {
                 $files[] = $fr;
             }
@@ -1108,6 +1189,12 @@ class Tasks
 
         return $rez;
     }
+
+    /**
+     * generate html preview for a task
+     * @param  int     $id task id
+     * @return varchar html
+     */
     public function getPreview($id)
     {
         if (!is_numeric($id)) {
@@ -1169,7 +1256,7 @@ class Tasks
             ,'{path}' => $d['path']
             ,'{path_text}' => $d['pathtext']
             ,'{cid}' => $d['cid']
-            ,'{creator_name}' => Util\getUsername($d['cid'])
+            ,'{creator_name}' => User::getDisplayName($d['cid'])
             ,'{full_create_date}' => date($date_format.' H:i', strtotime($d['cdate']))
             ,'{create_date}' => date($date_format.' H:i', strtotime($d['cdate']))
             );
@@ -1178,7 +1265,7 @@ class Tasks
         if (!empty($d['users'])) {
             $rez .= '<tr><td class="k">'.L\TaskAssigned.':</td><td><table class="people"><tbody>';
             foreach ($d['users'] as $u) {
-                $un = Util\getUsername($u['id']);
+                $un = User::getDisplayName($u['id']);
                 $rez .= '<tr><td class="user"><div style="position: relative"><img class="photo32" src="photo/'.$u['id'].'.jpg" alt="'.$un.'" title="'.$un.'">'.
                 ( ($u['status'] == 1 ) ? '<img class="done icon icon-tick-circle" src="css/i/s.gif" />': "").
                 '</div></td><td><b>'.$un.'</b>'.
@@ -1232,18 +1319,30 @@ class Tasks
 
         return $rez;
     }
+
+    /**
+     * get a html block of active tasks under $pid object
+     *
+     * this block is used in preview of various objects
+     *
+     * @param  int     $pid
+     * @return varchar html
+     */
     public static function getActiveTasksBlockForPreview($pid)
     {
         $rez = array();
-        $sql = 'SELECT id
-                 , name
-                 , date_end
-                 , DATEDIFF(`date_end`, UTC_DATE()) `days`
+        $res = DB\dbQuery(
+            'SELECT id
+                ,name
+                ,date_end
+                ,DATEDIFF(`date_end`, UTC_DATE()) `days`
             FROM tree
             WHERE pid = $1
                 AND `type` = 6
-            ORDER BY date_end';
-        $res = DB\dbQuery($sql, $pid) or die(DB\dbQueryError());
+            ORDER BY date_end',
+            $pid
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             $rez[] = '<li class="icon-padding icon-task"><a class="task" href="#" nid="'.$r['id'].'">'.
                 $r['name'].'</a>'.(empty($r['date_end']) ? '' : '<p class="cG">'.
@@ -1255,25 +1354,32 @@ class Tasks
         return $rez;
     }
 
+    /**
+     * set additional data for storing into solr
+     * @param  reference $object_record
+     * @return void
+     */
     public static function getSolrData(&$object_record)
     {
-        $sql = 'SELECT
-            title
-            ,status
-            ,category_id
-            ,importance
-            ,privacy
-            ,responsible_user_ids
-            ,autoclose
-            ,description
-            ,parent_ids
-            ,child_ids
-            ,missed
-            ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
-            ,cid
-            FROM tasks where id = $1';
+        $res = DB\dbQuery(
+            'SELECT
+                title
+                ,status
+                ,category_id
+                ,importance
+                ,privacy
+                ,responsible_user_ids
+                ,autoclose
+                ,description
+                ,parent_ids
+                ,child_ids
+                ,missed
+                ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
+                ,cid
+            FROM tasks where id = $1',
+            $object_record['id']
+        ) or die(DB\dbQueryError());
 
-        $res = DB\dbQuery($sql, $object_record['id']) or die(DB\dbQueryError()."\n".$sql);
         if ($r = $res->fetch_assoc()) {
             $object_record['status'] = $r['status'];
             $object_record['importance'] = $r['importance'];
@@ -1285,8 +1391,14 @@ class Tasks
             }
             $object_record['content'] = $r['description'];
         }
-        $res->close();/**/
+        $res->close();
     }
+
+    /**
+     * set additional data for storing into solr for a set of records
+     * @param  reference $object_records
+     * @return void
+     */
 
     public static function getBulkSolrData(&$object_records)
     {
@@ -1300,24 +1412,25 @@ class Tasks
             return;
         }
 
-        $sql = 'SELECT
-            id
-            ,title
-            ,status
-            ,category_id
-            ,importance
-            ,privacy
-            ,responsible_user_ids
-            ,autoclose
-            ,description
-            ,parent_ids
-            ,child_ids
-            ,missed
-            ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
-            ,cid
-            FROM tasks where id in ('.implode(',', $process_object_ids).')';
+        $res = DB\dbQuery(
+            'SELECT
+                id
+                ,title
+                ,status
+                ,category_id
+                ,importance
+                ,privacy
+                ,responsible_user_ids
+                ,autoclose
+                ,description
+                ,parent_ids
+                ,child_ids
+                ,missed
+                ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
+                ,cid
+            FROM tasks where id in ('.implode(',', $process_object_ids).')'
+        ) or die(DB\dbQueryError());
 
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError()."\n".$sql);
         while ($r = $res->fetch_assoc()) {
             $object_records[$r['id']]['status'] = $r['status'];
             $object_records[$r['id']]['importance'] = $r['importance'];

@@ -12,8 +12,9 @@ class Log
             WHERE pid IS NULL
             ORDER BY `date` DESC, id DESC LIMIT 50'
         ) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            $data[] = array($r[0].' '.Util\formatPastTime($r[1]));
+
+        while ($r = $res->fetch_assoc()) {
+            $data[] = array($r['html'].' '.Util\formatPastTime($r['date']));
         }
 
         return array(
@@ -43,9 +44,20 @@ class Log
         }
 
         //setting case_id if not specified and we have object_id or file_id specified
-        if (empty($p['case_id']) && (!empty($p['object_id']) || !empty($p['file_id']) || !empty($p['task_id']))) {
+        if (empty($p['case_id'])
+            && (!empty($p['object_id'])
+                || !empty($p['file_id'])
+                || !empty($p['task_id'])
+            )
+        ) {
             try {
-                @$p['case_id'] = Objects::getCaseId(Util\coalesce($p['object_id'], $p['file_id'], $p['task_id']));
+                @$p['case_id'] = Objects::getCaseId(
+                    Util\coalesce(
+                        $p['object_id'],
+                        $p['file_id'],
+                        $p['task_id']
+                    )
+                );
             } catch (\Exception $e) {
                 //Task is independent, not associated
             }
@@ -69,13 +81,16 @@ class Log
         }
         // get object data
         if (!empty($p['object_id'])) {
-            $sql = 'SELECT o.id
-                     , coalesce(o.custom_title, o.title) `title`
-                     , t.iconCls
-                FROM objects o
-                JOIN templates t ON o.template_id = t.id
-                WHERE o.id = $1';
-            $res = DB\dbQuery($sql, $p['object_id']) or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT t.id
+                    ,t.name `title`
+                    ,tt.iconCls
+                FROM tree t
+                JOIN templates tt ON t.template_id = tt.id
+                WHERE t.id = $1',
+                $p['object_id']
+            ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 $obj = $r;
             }
@@ -85,7 +100,11 @@ class Log
         }
         // get task data
         if (!empty($p['task_id'])) {
-            $res = DB\dbQuery('select title from tasks where id = $1', $p['task_id']) or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT title FROM tasks WHERE id = $1',
+                $p['task_id']
+            ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 $task = $r;
             }
@@ -96,7 +115,11 @@ class Log
         // get file data
         $file = array();
         if (!empty($p['file_id'])) {
-            $res = DB\dbQuery('select id, name from files where id = $1', $p['file_id']) or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT id, name FROM files WHERE id = $1',
+                $p['file_id']
+            ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 $file = $r;
                 $t = explode('.', $file['name']);
@@ -116,7 +139,12 @@ class Log
         }
         if (!empty($to_user_ids)) {
             $p['to_user_ids'] = implode(',', $to_user_ids);
-            $res = DB\dbQuery('select name, '.CONFIG\LANGUAGE_FIELDS.', sex from users_groups where id in ('.$p['to_user_ids'].')') or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT name, '.CONFIG\LANGUAGE_FIELDS.', sex
+                FROM users_groups
+                WHERE id IN ('.$p['to_user_ids'].')'
+            ) or die(DB\dbQueryError());
+
             while ($r = $res->fetch_assoc()) {
                 $to_user_names_data[] = $r;
             }
@@ -129,16 +157,41 @@ class Log
 
         require_once DOC_ROOT.'language.php';
         L\initTranslations();
-        $fields = array('id', 'pid', 'user_id', 'to_user_ids', 'case_id', 'object_id', 'file_id', 'task_id', 'date', 'action_type', 'remind_users', 'result', 'info');
+        $fields = array(
+            'id'
+            ,'pid'
+            ,'user_id'
+            ,'to_user_ids'
+            ,'case_id'
+            ,'object_id'
+            ,'file_id'
+            ,'task_id'
+            ,'date'
+            ,'action_type'
+            ,'remind_users'
+            ,'result'
+            ,'info'
+        );
+
         if (!empty($GLOBALS['languages'])) {
             for ($lk=0; $lk < sizeof($GLOBALS['languages']); $lk++) {
                 $l = 'l'.($lk+1);
                 $fields[] = $l;
 
-                @$case['a'] = ' <i class="case" id="'.$p['case_id'].'">'.(!empty($case_data['name']) ? $case_data['name'] : ((!empty($case_data['nr'])) ? L\get('Nr', $l).' '.$case_data['nr'] : 'id: '.$case_data['id']) ).'</i>';
+                @$case['a'] = ' <i class="case" id="'.$p['case_id'].'">'.(
+                    !empty($case_data['name'])
+                        ? $case_data['name']
+                        : (
+                            (!empty($case_data['nr']))
+                                ? L\get('Nr', $l).' '.$case_data['nr']
+                                : 'id: '.$case_data['id']
+                        )
+                ).'</i>';
 
-                @$obj['a'] = ' <i class="obj'.(empty($obj['iconCls']) ? '' : ' '.$obj['iconCls']).'" id="'.$obj['id'].'">'.$obj['title'].'</i>';
-                @$obj['type'] = '';//L\get($template_types_translation_names[$obj['type_id']], $l);
+                @$obj['a'] = ' <i class="obj'.(empty($obj['iconCls'])
+                    ? ''
+                    : ' '.$obj['iconCls']).'" id="'.$obj['id'].'">'.$obj['title'].'</i>';
+                @$obj['type'] = '';
 
                 @$task['a'] = ' "<i class="task">'.$task['title'].'</i>"';
 
@@ -289,9 +342,13 @@ class Log
             }
         }
 
-        $sql = 'INSERT INTO actions_log ('.implode(',', $fn).') VALUES ('.implode(',', $fv).
-            ') on duplicate key UPDATE '.implode(',', $ufv);
-        DB\dbQuery($sql, $values) or die(DB\dbQueryError());
+        DB\dbQuery(
+            'INSERT INTO actions_log ('.implode(',', $fn).')
+            VALUES ('.implode(',', $fv).')
+            ON DUPLICATE KEY UPDATE '.implode(',', $ufv),
+            $values
+        ) or die(DB\dbQueryError());
+
         if (!empty($p['remind_users'])) {
             Log::addNotifications($p);
         }
@@ -301,7 +358,8 @@ class Log
 
     private static function getGenderString($sex, $property, $language = false)
     {
-        /* this function return translation for specified property with prefixes "he" or "she" from global translation variable L */
+        /* this function return translation for specified property
+        with prefixes "he" or "she" from global translation variable L */
         $prefix = ($sex == 'f') ? 'she' : 'he';
         $property = $prefix.ucfirst($property);
 
@@ -338,7 +396,7 @@ class Log
         $users_data = array();
         $res = DB\dbQuery(
             'SELECT id
-                 , language_id
+                ,language_id
             FROM users_groups
             WHERE id IN ('.implode(', ', $to_user_ids).')'
         ) or die(DB\dbQueryError());
@@ -406,15 +464,18 @@ class Log
                             $subject = L\get('aboutTaskReopened', $l);
                             break; //CHECKED
                     }
-                    $sql = 'SELECT t.name
-                             ,ti.`path`
-                             , u.'.$l.' `owner`
-                             , u.name `username`
+                    $res = DB\dbQuery(
+                        'SELECT t.name
+                            ,ti.`path`
+                            ,u.'.$l.' `owner`
+                            ,u.name `username`
                         FROM tree t
                         JOIN tree_info ti ON t.id = ti.id
                         JOIN users_groups u ON t.cid = u.id
-                        WHERE t.id = $1';
-                    $res = DB\dbQuery($sql, $p['task_id']) or die(DB\dbQueryError());
+                        WHERE t.id = $1',
+                        $p['task_id']
+                    ) or die(DB\dbQueryError());
+
                     if ($r = $res->fetch_assoc()) {
                         $subject = str_replace(
                             array(
@@ -431,7 +492,12 @@ class Log
                         );
                     }
                     $res->close();
-                    $message = Tasks::getTaskInfoForEmail($p['task_id'], $u['id'], @$p["removed_users"]/*, $message/**/);
+                    $message = Tasks::getTaskInfoForEmail(
+                        $p['task_id'],
+                        $u['id'],
+                        @$p["removed_users"]
+                        /*, $message/**/
+                    );
                     break;
             }
             $p['case_id'] = is_numeric($p['case_id']) ? $p['case_id'] : null;

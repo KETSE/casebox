@@ -3,540 +3,193 @@ namespace CB;
 
 class Objects
 {
+    /**
+     * load object and return json responce
+     * @param  array $p array containing id of object
+     * @return json  responce
+     */
     public function load($p)
     {
-        /* procedure for loading all necessary properties of a given case object */
         $rez = array();
-        $d = $p->data; //shortcut
 
-        if (!is_numeric($d->id)) {
+        // check if object id is numeric
+        if (!is_numeric($p['id'])) {
             throw new \Exception(L\Wrong_input_data);
         }
-        // SECURITY: check if object id is numeric
-        if (!Security::canRead($d->id)) {
+        $id = $p['id'];
+
+        // Access check
+        if (!Security::canRead($id)) {
             throw new \Exception(L\Access_denied);
         }
-        // end of SECURITY: check if object id is numeric
 
-        $template = $this->getTemplateInfo(null, $d->id);
-        $rez['template_id'] = $template['id'];
-        $rez['iconCls'] = $template['iconCls'];
-        $rez['type'] = $template['type'];
+        $object = $this->getCustomClassByObjectId($id);
+        $object->load();
+        $objectData = $object->getData();
 
-        $rez['id'] = $d->id;
+        $template = $object->getTemplate();
+        $templateData = $template->getData();
 
-        /* get object title */
-        $res = DB\dbQuery(
-            'SELECT t.pid
-                        ,ti.case_id
-                        ,o.title
-                        ,o.custom_title
-                        ,t.name
-                        ,o.date_start
-                        ,o.date_end
-                        ,o.author
-                       ,ti.pids `path`
-                       ,ti.`path` pathtext
-                       ,t.cdate
-                       ,t.udate
-                       ,t.cid
-                       ,t.uid
-            FROM objects o
-            JOIN tree t ON o.id = t.id
-            JOIN tree_info ti on t.id = ti.id
-            WHERE o.id = $1',
-            array(
-                $d->id
-                ,$_SESSION['user']['id']
-            )
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $r['path'] = str_replace(',', '/', $r['path']);
-            $rez = array_merge($rez, $r);
-        }
-        $res->close();
-        /* end of get object title */
-
-        $rez['gridData'] = Templates::getObjectsData($d->id);
-
-        /* get Tasks */
-        $sql = 'SELECT DISTINCT
-                    t.id
-                    ,t.title
-                    ,t.description
-                    ,t.`date_end`
-                    ,t.cdate
-                    ,t.responsible_user_ids
-                    ,t.cid
-                    ,t.completed
-                FROM tasks t
-                LEFT JOIN tasks_responsible_users ru ON t.id = ru.task_id
-                AND ru.user_id = $2
-                WHERE t.object_id = $1
-                    AND ((ru.user_id = $2) || (t.cid = $2) || (t.privacy = 0))
-                ORDER BY t.cdate';
-        $res = DB\dbQuery($sql, array($d->id, $_SESSION['user']['id'])) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-            $res2 = DB\dbQuery(
-                'SELECT l'.USER_LANGUAGE_INDEX.'
-                FROM users_groups
-                WHERE id =$1',
-                $r['cid']
-            ) or die(DB\dbQueryError());
-
-            if ($r2 = $res2->fetch_row()) {
-                $r['owner'] = $r2[0];
+        $resultData = array();
+        /* select only required properties for result */
+        $properties = array(
+            'id'
+            ,'pid'
+            ,'template_id'
+            ,'name'
+            ,'title'
+            ,'custom_title'
+            ,'date'
+            ,'date_end'
+            ,'pids'
+            ,'path'
+            ,'cid'
+            ,'uid'
+            ,'cdate'
+            ,'udate'
+            ,'case_id'
+            ,'gridData'
+        );
+        foreach ($properties as $property) {
+            if (isset($objectData[$property])) {
+                $resultData[$property] = $objectData[$property];
             }
-            $res2->close();
-
-            if ($r['cid'] != $r['responsible_user_ids']) {
-                $r['users'] = array();
-                $res2 = DB\dbQuery(
-                    'SELECT id
-                         , l'.USER_LANGUAGE_INDEX.'
-                    FROM users_groups
-                    WHERE id IN (0'.$r['responsible_user_ids'].')
-                    ORDER BY 2'
-                ) or die(DB\dbQueryError());
-                while ($r2 = $res2->fetch_row()) {
-                    $r['users'][$r2[0]] = $r2[1];
-                }
-                $res2->close();
-            }
-            $rez['tasks'][] = $r;
         }
-        $res->close();
-        /* end of get Tasks */
+
+        /* rename some properties for gui */
+        $resultData['date_start'] = @$resultData['date'];
+        unset($resultData['date']);
+
+        $resultData['pathtext'] = $resultData['path'];
+        unset($resultData['path']);
+
+        $resultData['path'] = str_replace(',', '/', $resultData['pids']);
+        unset($resultData['pids']);
+
+        // set type property from template
+        $objectData['type'] = $templateData['type'];
 
         global $data;
         // this method is used also internally (by getInfo method),
         // so we skip logging for "load" method in this cases
-        if (is_object($data) && ($data->method == 'load')) {
-            Log::add(array('action_type' => 11, 'object_id' => $d->id));
+        if (is_array($data) && ($data['method'] == 'load')) {
+            Log::add(array('action_type' => 11, 'object_id' => $id));
         }
 
-        return array('success' => true, 'data' => $rez);
+        return array('success' => true, 'data' => $resultData);
     }
+
+    /**
+     * create an object
+     * @param  array $p params
+     * @return json  responce
+     */
     public function create($p)
     {
-        $template = $this->getTemplateInfo($p->template_id);
-        if (!Security::canCreateActions($p->pid)) {
+        if (!Security::canCreateActions($p['pid'])) {
             throw new \Exception(L\Access_denied);
         }
-        if (empty($p->name)) {
-            $p->name = $template['title'];
+
+        $template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($p['template_id']);
+        $templateData = $template->getData();
+
+        $object = $this->getCustomClassByType($templateData['type']);
+
+        //prepare params
+        if (empty($p['name'])) {
+            $p['name'] = $templateData['title'];
         }
-        if (empty($p->tag_id)) {
-            $p->tag_id = null;
-        }
-        $p->type = 4;
-        $p->name = Files::getAutoRenameFilename($p->pid, $p->name);
-        fireEvent('beforeNodeDbCreate', $p);
+        $p['name'] = $this->getAvailableName($p['pid'], $p['name']);
 
-        DB\dbQuery(
-            'INSERT INTO tree (pid, name, `type`, template_id, cid, tag_id, updated)
-            VALUES ($1, $2, $3, $4, $5, $6, 1)
-            ON DUPLICATE KEY
-            UPDATE
-                id = last_insert_id(id)
-                ,name = $2',
+        $id = $object->create($p);
+        Log::add(
             array(
-                $p->pid
-                ,$p->name
-                ,$p->type
-                ,$template['id']
-                ,$_SESSION['user']['id']
-                ,$p->tag_id
+                'action_type' => 8
+                ,'object_id' => $id
             )
-        ) or die(DB\dbQueryError());
-        $p->nid = DB\dbLastInsertId();
-        DB\dbQuery(
-            'INSERT INTO objects (id, `title`, template_id, cid)
-            VALUES($1, $2, $3, $4)
-            ON DUPLICATE KEY
-            UPDATE `title` = $2',
-            array(
-                $p->nid
-                ,$p->name
-                ,$template['id']
-                ,$_SESSION['user']['id']
-            )
-        ) or die(DB\dbQueryError());
+        );
 
-        /* set internal title field for object if present in its template */
-        DB\dbQuery(
-            'INSERT INTO objects_data (object_id, field_id, value)
-            SELECT $1
-                 , id
-                 , $2
-            FROM templates_structure
-            WHERE template_id = $3
-                AND name = \'_title\'
-            ON DUPLICATE KEY
-            UPDATE value = $2',
-            array(
-                $p->nid
-                ,$p->name
-                ,$template['id']
-            )
-        ) or die(DB\dbQueryError());
-
-        $this->createSystemFolders($p->nid, @$template['cfg']['system_folders']);
-
-        fireEvent('nodeDbCreate', $p);
+        $this->createSystemFolders($id, @$templateData['cfg']['system_folders']);
 
         Solr\Client::runCron();
 
-        return array('success' => true, 'data' => $p);
+        return $this->load(array('id' => $id));
     }
 
+    /**
+     * save or create an object
+     * @param  array $p object properties
+     * @return json  responce
+     */
     public function save($p)
     {
-        $log_action_type = 9; // update action
-        $object_title = '';
-        $object_custom_title = '';
-        $object_date_start = null;
-        $object_date_end = null;
-        $object_author = null;
-        $fields = array();
-        $update_ids_icons = array();
 
-        $d = json_decode($p['data']);
+        $d = json_decode($p['data'], true);
 
-        /* validate pid and check its existance */
-        if (empty($d->pid)) {
-            throw new \Exception('pid cannot be null: '.$d->pid, 1);
-        } else {
-            $sql = 'SELECT id FROM tree WHERE id = $1';
-            $res = DB\dbQuery($sql, $d->pid) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
-            } else {
-                throw new \Exception('pid not found: '.$d->pid, 1);
-            }
-            $res->close();
+        // check if need to create object instead of update
+        if (empty($d['id']) || !is_numeric($d['id'])) {
+            return $createData = $this->create($d);
+            //$d['id'] = $createData['data']['nid'];
+            //return if create method is completed
         }
-        /* end of validate pid and check its existance */
 
-        $template = $this->getTemplateInfo($d->template_id, $d->id);
-
-        /* analisys of object id (inserting if new) */
-        $isNewObject = true;
-        $d->type = 4; //case object
-        if (!is_numeric($d->id)) {
-            // SECURITY: check if current user has access
-            if (!Security::canCreateActions($d->pid)) {
-                throw new \Exception(L\Access_denied);
-            }
-            fireEvent('beforeNodeDbCreate', $d);
-
-            DB\dbQuery(
-                'INSERT INTO tree (pid, name, `type`, template_id, cid)
-                VALUES ($1
-                      , $2
-                      , $3
-                      , $4
-                      , $5)',
-                array(
-                    $d->pid
-                    ,'new case object'
-                    ,4
-                    ,$template['id']
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
-            $d->id = DB\dbLastInsertId();
-            $sql = 'INSERT INTO objects (id, `title`, template_id, cid) VALUES($1, $2, $3, $4)';
-            DB\dbQuery($sql, array($d->id, '', $template['id'], $_SESSION['user']['id'])) or die(DB\dbQueryError());
-
-            $this->createSystemFolders($d->id, @$template['cfg']['system_folders']);
-
-            $log_action_type = 8; //else throw new Eception(L\Error_creating_object); // create action
-        } else {
-            // SECURITY: check if current user has write access to this action
-            if (!Security::canWrite($d->id)) {
-                throw new \Exception(L\Access_denied);
-            }
-            fireEvent('beforeNodeDbUpdate', $d);
-            $isNewObject = false;
+        // SECURITY: check if current user has write access to this action
+        if (!Security::canWrite($d['id'])) {
+            throw new \Exception(L\Access_denied);
         }
-        /* end of analizing object id */
 
-        /* save object duplicates from grid */
-        $duplicate_ids = array(0 => 0);
-        if (isset($d->gridData->duplicateFields)) {
-            $sql = 'INSERT INTO objects_duplicates (pid, object_id, field_id) VALUES ($1, $2, $3)';
-            foreach ($d->gridData->duplicateFields as $field_id => $fv) {
-                $i = 0;
-                foreach ($fv as $duplicate_id => $duplicate_pid) {
-                    if (!is_numeric($duplicate_id)) {
-                        DB\dbQuery(
-                            $sql,
-                            array(
-                                $duplicate_ids[$duplicate_pid]
-                                ,$d->id
-                                ,$field_id
-                            )
-                        ) or die(DB\dbQueryError());
-                        $duplicate_ids[$duplicate_id] = DB\dbLastInsertId();
-                    } else {
-                        $duplicate_ids[$duplicate_id] = $duplicate_id;
-                    }
-                    $fields[$field_id]['duplicates'][$i]['id'] = $duplicate_id;
-                    $i++;
-                }
-            }
-        }
-        $filter_secure_fields = Security::isAdmin() ?
-            '' :
-            ' AND id NOT IN
-                (SELECT duplicate_id
-                 FROM objects_data
-                 WHERE object_id = $1
-                     AND duplicate_id <> 0
-                     AND private_for_user <> '.$_SESSION['user']['id'].') ';
-        DB\dbQuery(
-            'DELETE
-            FROM objects_duplicates
-            WHERE object_id = $1
-                AND (id NOT IN ('.implode(', ', array_values($duplicate_ids)).'))'.$filter_secure_fields,
-            $d->id
-        ) or die(DB\dbQueryError());
-        /* end of save object duplicates from grid */
+        /* prepare params */
+        $d['date'] = $d['date_start'];
+        /* end of prepare params */
 
-        $object_title = str_replace(array('{template_title}', '{phase_title}'), array($template['title'], ''/*$phase['name']/**/), $template['title_template']);
+        // update object
+        $object = $this->getCustomClassByObjectId($d['id']);
+        $object->update($d);
 
-        /* save object values from grid */
-        $sql = 'INSERT INTO objects_data (object_id, field_id, duplicate_id, `value`, info, files, private_for_user)
-                VALUES ($1
-                      , $2
-                      , $3
-                      , $4
-                      , $5
-                      , $6
-                      , $7) ON DUPLICATE KEY
-                UPDATE object_id = $1
-                    , field_id = $2
-                    , duplicate_id = $3
-                    , `value` = $4
-                    , info = $5
-                    , files = $6
-                    , private_for_user = $7';
-        $ids = array(0);
-        $log = '';
-        if (isset($d->gridData)) {
-            foreach ($d->gridData->values as $f => $fv) { //$c => $cv
-                if (!isset($fv->value)) {
-                    $fv->value = null;
-                }
-                if (!isset($fv->info)) {
-                    $fv->info = null;
-                }
-                if (isset($fv->pfu) && empty($fv->pfu)) {
-                    $fv->pfu = null;
-                }
-                $f = explode('_', $f);
-                $field_id = substr($f[0], 1);
-                $field = array();
-                $res = DB\dbQuery('select name, type, cfg from templates_structure where id = $1', $field_id) or die(DB\dbQueryError());
-                if ($r = $res->fetch_assoc()) {
-                    $field = $r;
-                    if (!empty($field['cfg'])) {
-                        $field['cfg'] = json_decode($field['cfg']);
-                    }
-                    $field['value'] = array('value' => $fv->value, 'info' => $fv->info);
+        Objects::updateCaseUpdateInfo($d['id']);
 
-                }
-                $res->close();
-
-                $duplicate_id = intval($duplicate_ids[$f[1]]);
-                $duplicate_index = 0;
-                if (isset($fields[$field_id]['duplicates'])) {
-                    foreach ($fields[$field_id]['duplicates'] as $k => $v) {
-                        if (!empty($v['id']) && is_array($v['id'])) {
-                            if ($v['id'] == $duplicate_id) {
-                                $fields[$field_id]['duplicates'][$k]['index'] = $duplicate_index;
-                            } else {
-                                $duplicate_index++;
-                            }
-                        }
-                    }
-                }
-
-                $v = $fv->value;
-                switch ($field['name']) {
-                    case '_title':
-                        $object_custom_title = $v;
-                        break;
-                    case '_date_start':
-                        $object_date_start = $v;
-                        break;
-                    case '_date_end':
-                        $object_date_end = $v;
-                        break;
-                }
-
-                /* for titles processing */
-                $v = Templates::getTemplateFieldValue($field, 'text');
-                if (is_array($v)) {
-                    $v = implode(',', $v);
-                }
-
-                $object_title = str_replace('{f'.$field_id.'}', $v, $object_title);
-                $object_title = str_replace('{'.$field['name'].'}', $v, $object_title);
-                $object_title = str_replace('{'.$field['name'].'_info}', $fv->info, $object_title);
-                if ($duplicate_id > 0) {
-                    $fields[$field_id]['duplicates'][$duplicate_index]['value_id'] = $fv->value;
-                    $fields[$field_id]['duplicates'][$duplicate_index]['value'] = $v;
-                    $fields[$field_id]['duplicates'][$duplicate_index]['details'] = $fv->info;
-                    $fields[$field['name']] = &$fields[$field_id];
-                } else {
-                    $fields[$field_id]['value_id'] = $fv->value;
-                    $fields[$field_id]['value'] = $v;
-                    $fields[$field_id]['details'] = $fv->info;
-                    $fields[$field_id]['title'] = $field['name'];
-                    $fields[$field['name']] = &$fields[$field_id];
-                }
-                /* end of for titles processing */
-
-                @$params = array($d->id, $field_id, $duplicate_id, $fv->value, $fv->info, $fv->files, $fv->pfu);
-                DB\dbQuery($sql, $params) or die(DB\dbQueryError());
-                $res = DB\dbQuery(
-                    'SELECT id
-                    FROM objects_data
-                    WHERE object_id = $1
-                        AND field_id = $2
-                        AND duplicate_id = $3',
-                    array(
-                        $d->id
-                        ,$field_id
-                        ,$duplicate_id
-                    )
-                ) or die(DB\dbQueryError());
-
-                if ($r = $res->fetch_row()) {
-                    array_push($ids, $r[0]);
-                }
-                $res->close();
-            }
-        }
-        $filter_secure_fields = Security::isAdmin() ?
-            '' : ' and ((private_for_user is null) or (private_for_user = '.$_SESSION['user']['id'].')) ';
-        DB\dbQuery(
-            'DELETE
-            FROM objects_data
-            WHERE object_id = $1
-                AND (id NOT IN ('.implode(', ', $ids).'))'.$filter_secure_fields,
-            $d->id
-        ) or die(DB\dbQueryError());
-
-        //replacing field titles into object title variable
-        $sql = 'SELECT id
-                     , name
-                     , l'.USER_LANGUAGE_INDEX.'
-                FROM templates_structure
-                WHERE template_id = $1
-                    AND (($2 LIKE concat(\'%{f\', id, \'t}%\'))
-                         OR ($2 LIKE concat(\'%{\', name, \'_title}%\')))';
-        $res = DB\dbQuery($sql, array($template['id'], $object_title)) or die(DB\dbQueryError());
-        while ($r = $res->fetch_row()) {
-            $object_title = str_replace('{f'.$r[0].'t}', $r[2], $object_title);
-        }
-        $res->close();
-        // evaluating the title if contains php code
-        if (strpos($object_title, '<?php') !== false) {
-            @eval(' ?>'.$object_title.'<?php ');
-            if (!empty($title)) {
-                $object_title = $title;
-            }
-        }
-        //replacing any remained field placeholder from the title
-        $object_title = preg_replace('/\{[^\}]+\}/', '', $object_title);
-        $object_title = stripslashes($object_title);
-
-        // updating object properties into the db  /*(empty($object_iconCls) ? '' : ', iconCls = $7')/**/
-        @DB\dbQuery(
-            'UPDATE objects
-            SET title = $1
-                , custom_title = $2
-                , date_start = $3
-                , date_end = $4
-                , author = $5
-                , iconCls = $7
-                , private_for_user = $8 '.
-            ($isNewObject ? '' : ', uid = $9, udate = CURRENT_TIMESTAMP').'
-            WHERE id = $6',
+        Log::add(
             array(
-                ucfirst($object_title)
-                ,$object_custom_title
-                ,$object_date_start
-                ,$object_date_end
-                ,$object_author
-                ,$d->id
-                ,$this->getObjectIcon($d->id)
-                ,@$d->pfu
-                ,$_SESSION['user']['id']
+                'action_type' => 9
+                ,'object_id' => $d['id']
             )
-        ) or die(DB\dbQueryError());
-        /* end of updating object properties into the db */
-
-        Objects::updateCaseUpdateInfo($d->id);
-
-        Log::add(array('action_type' => $log_action_type, 'object_id' => $d->id));
-
-        $update_ids_icons = array_keys($update_ids_icons);
-        foreach ($update_ids_icons as $id) {
-            DB\dbQuery(
-                'UPDATE objects
-                SET iconCls = $1
-                WHERE id = $2',
-                array(
-                    $this->getObjectIcon($id)
-                    ,$id
-                )
-            ) or die(DB\dbQueryError());
-        }
-
-        if ($isNewObject) {
-            fireEvent('nodeDbCreate', $d);
-        } else {
-            fireEvent('nodeDbUpdate', $d);
-        }
+        );
 
         /*updating saved document into solr directly (before runing background cron)
             so that it'll be displayed with new name without delay*/
         $solrClient = new Solr\Client();
-        $solrClient->updateTree(array('id' => $d->id));
+        $solrClient->updateTree(array('id' => $d['id']));
 
         //running background cron to index other nodes
         $solrClient->runBackgroundCron();
 
-        $p = (object) array( 'data' => (object) array( "id" => $d->id, "template_id" => $template['id'] ) );
-
-        return $this->load($p);
+        return $this->load($d);
     }
 
     public function queryCaseData($queries)
     {
         $rez = array('success' => true);
         foreach ($queries as $key => $query) {
-            $query->pids = $query->caseId;
+            $query['pids'] = $query['caseId'];
             switch ($key) {
                 case 'properties':
                     /* load general case properties */
-                    $rez[$key] = $this->load((object) array( 'data' => (object) array( 'id' => $query->caseId) ));
-                    // $r = $this->getCasePropertiesObjectId($query->caseId);
-                    if (!empty($query->caseId)) {
+                    $rez[$key] = $this->load(array('id' => $query['caseId']));
+                    // $r = $this->getCasePropertiesObjectId($query['caseId']);
+                    if (!empty($query['caseId'])) {
                         $template_id = null;
                         $properties = array();
-                        $sql = 'SELECT template_id FROM tree WHERE id = $1';
-                        $res = DB\dbQuery($sql, $query->caseId) or die(DB\dbQueryError());
+                        $res = DB\dbQuery(
+                            'SELECT template_id FROM tree WHERE id = $1',
+                            $query['caseId']
+                        ) or die(DB\dbQueryError());
+
                         if ($r = $res->fetch_assoc()) {
                             $template_id = $r['template_id'];
                         }
                         $res->close();
 
-                        $tf = Templates::getTemplateFieldsWithData($template_id, $query->caseId);
+                        $tf = Templates::getTemplateFieldsWithData($template_id, $query['caseId']);
                         if (!empty($tf)) {
                             foreach ($tf as $f) {
                                 if ($f['name'] == '_title') {
@@ -545,7 +198,7 @@ class Objects
                                 if ($f['name'] == '_date_start') {
                                     continue;
                                 }
-                                $v = Templates::getTemplateFieldValue($f);
+                                $v = Objects\Template::formatValueForDisplay($f, $f['value']);
                                 if (is_array($v)) {
                                     $v = implode(', ', $v);
                                 }
@@ -565,20 +218,20 @@ class Objects
                     break;
                 case 'actions':
                     $s= new Search();
-                    $query->fl = 'id,pid,name,type,subtype,date,template_id,oid,cid';
+                    $query['fl'] = 'id,pid,name,type,subtype,date,template_id,oid,cid';
                     if (!empty($GLOBALS['folder_templates'])) {
-                        $query->fq = '!template_id:('.implode(' OR ', $GLOBALS['folder_templates']).')';
+                        $query['fq'] = '!template_id:('.implode(' OR ', $GLOBALS['folder_templates']).')';
                     }
-                    $query->template_types = 'object';
-                    $query->sort = array('date desc');
+                    $query['template_types'] = 'object';
+                    $query['sort'] = array('date desc');
                     $rez[$key] = $s->query($query);
                     unset($s);
                     break;
                 case 'tasks':
                     $s= new Search();
-                    $query->fl = 'id,name,type,template_id,date,date_end,user_ids,oid,cid';
-                    $query->template_types = 'task';
-                    $query->sort = array('date desc');
+                    $query['fl'] = 'id,name,type,template_id,date,date_end,user_ids,oid,cid';
+                    $query['template_types'] = 'task';
+                    $query['sort'] = array('date desc');
                     $rez[$key] = $s->query($query);
                     unset($s);
                     break;
@@ -590,7 +243,7 @@ class Objects
 
         return $rez;
     }
-    // This function is supposed to be used from communications glid list, to get the objects short info
+
     public function getPreview($id)
     {
         $rez = array();
@@ -607,7 +260,7 @@ class Objects
         $body = '';
         $bottom = '';
         try {
-            $data = $this->load(json_decode('{"data":{"id":'.$id.'} }'));
+            $data = $this->load(array("id" => $id));
         } catch (\Exception $e) {
             return '';
         }
@@ -623,7 +276,7 @@ class Objects
                 if ($f['name'] == '_date_start') {
                     continue;
                 }
-                $v = Templates::getTemplateFieldValue($f);
+                $v = Objects\Template::formatValueForDisplay($f, $f['value']);
                 if (is_array($v)) {
                     $v = implode(', ', $v);
                 }
@@ -634,7 +287,7 @@ class Objects
         }
         if (!empty($gf['body'])) {
             foreach ($gf['body'] as $f) {
-                $v = Templates::getTemplateFieldValue($f);
+                $v = Objects\Template::formatValueForDisplay($f, $f['value']);
                 if (is_array($v)) {
                     $v = implode('<br />', $v);
                 }
@@ -659,7 +312,7 @@ class Objects
 
         if (!empty($gf['bottom'])) {
             foreach ($gf['bottom'] as $f) {
-                $v = Templates::getTemplateFieldValue($f);
+                $v = Objects\Template::formatValueForDisplay($f, $f['value']);
                 if (empty($v)) {
                     continue;
                 }
@@ -688,7 +341,9 @@ class Objects
             }
             if (!empty($d)) {
                 $bottom .= '<table border="0" cellpadding="2" width="100%" style="padding: 5px 0px; border-bottom: 1px solid lightgray">'.
-                '<tr class="bgcLG cG"><th width="20%" class="icon-padding icon-calendar-task">'.L\Tasks.'</th><th width="25%">'.L\Created.'</th><th width="30%">'.L\Deadline.'</th></tr><tr>'.implode('</tr><tr>', $d).'</tr></table>';
+                '<tr class="bgcLG cG"><th width="20%" class="icon-padding icon-calendar-task">'.L\Tasks.
+                '</th><th width="25%">'.L\Created.'</th><th width="30%">'.
+                L\Deadline.'</th></tr><tr>'.implode('</tr><tr>', $d).'</tr></table>';
             }
         }
         /* end of tasks */
@@ -705,52 +360,63 @@ class Objects
         return '<div style="padding:10px">'.$top.$bottom.'</div>';
     }
 
+    /**
+     * get the list of objects referenced inside another object
+     * @param  array | int $p params
+     * @return json        response
+     */
     public static function getAssociatedObjects($p)
     {
         $data = array();
         if (is_numeric($p)) {
-            $p = (object) array('id' => $p);
+            $p = array('id' => $p);
         }
-        if (empty($p->id) && empty($p->template_id)) {
+        if (empty($p['id']) && empty($p['template_id'])) {
             return array('success' => true, 'data' => $data, 's'=>'1');
         }
 
         $ids = array();
 
-        if (!empty($p->id)) {
+        if (!empty($p['id'])) {
             // SECURITY: check if current user has at least read access to this case
-            if (!Security::canRead($p->id)) {
+            if (!Security::canRead($p['id'])) {
                 throw new \Exception(L\Access_denied);
             }
 
             /* select distinct associated case ids from the case */
-            $sql = 'SELECT DISTINCT d.value
-                    FROM tree o
-                    JOIN templates_structure s ON o.template_id = s.template_id AND s.type = \'_objects\'
-                    JOIN objects_data d on. d.field_id = s.id
-                    WHERE o.id = $1';
-            $res = DB\dbQuery($sql, $p->id) or die(DB\dbQueryError());
-            while ($r = $res->fetch_row()) {
-                $a = Util\toNumericArray($r[0]);
+            $res = DB\dbQuery(
+                'SELECT DISTINCT d.value
+                FROM tree o
+                JOIN templates_structure s ON o.template_id = s.template_id AND s.type = \'_objects\'
+                JOIN objects_data d on. d.field_id = s.id
+                WHERE o.id = $1',
+                $p['id']
+            ) or die(DB\dbQueryError());
+
+            while ($r = $res->fetch_assoc()) {
+                $a = Util\toNumericArray($r['value']);
                 foreach ($a as $id) {
                     $ids[$id] = 1;
                 }
             }
             $res->close();
         }
-        if (!empty($p->template_id)) {
-            $sql = 'SELECT DISTINCT cfg
+        if (!empty($p['template_id'])) {
+            $res = DB\dbQuery(
+                'SELECT DISTINCT cfg
                     FROM templates_structure
                     WHERE template_id = $1
-                        AND (cfg IS NOT NULL)';
-            $res = DB\dbQuery($sql, $p->template_id) or die(DB\dbQueryError());
-            while ($r = $res->fetch_row()) {
-                if (empty($r[0])) {
+                        AND (cfg IS NOT NULL)',
+                $p['template_id']
+            ) or die(DB\dbQueryError());
+
+            while ($r = $res->fetch_assoc()) {
+                if (empty($r['cfg'])) {
                     continue;
                 }
-                $cfg = json_decode($r[0]);
-                if (!empty($cfg->value)) {
-                    $a = Util\toNumericArray($cfg->value);
+                $cfg = json_decode($r['cfg'], true);
+                if (!empty($cfg['value'])) {
+                    $a = Util\toNumericArray($cfg['value']);
                     foreach ($a as $id) {
                         $ids[$id] = 1;
                     }
@@ -764,18 +430,20 @@ class Objects
             return array('success' => true, 'data' => array());
         }
         /* end of select distinct case ids from the case */
-        $sql = 'SELECT DISTINCT t.id
-                  , t.`name`
-                  , t.date
-                  , t.`type`
-                  , t.subtype
-                  , t.template_id
-                  , t2.status
-                FROM tree t
-                LEFT JOIN tasks t2 ON t.id = t2.id
-                WHERE t.id IN ('.implode(', ', $ids).')
-                ORDER BY 2';
-        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT DISTINCT t.id
+                ,t.`name`
+                ,t.date
+                ,t.`type`
+                ,t.subtype
+                ,t.template_id
+                ,t2.status
+            FROM tree t
+            LEFT JOIN tasks t2 ON t.id = t2.id
+            WHERE t.id IN ('.implode(', ', $ids).')
+            ORDER BY 2'
+        ) or die(DB\dbQueryError());
+
         while ($r = $res->fetch_assoc()) {
             if (!empty($r['date'])) {
                 $r['date'][10] = 'T';
@@ -788,62 +456,12 @@ class Objects
         return array('success' => true, 'data' => $data);
     }
 
-    public function getTemplateInfo($template_id = false, $object_id = false)
-    {
-        $rez = array();
-        if (is_numeric($template_id)) {
-            $res = DB\dbQuery(
-                'SELECT id
-                    ,pid
-                    ,`type`
-                    ,l'.USER_LANGUAGE_INDEX.' `title`
-                     ,iconCls
-                     ,default_field
-                     ,title_template
-                     ,cfg
-                FROM templates
-                WHERE id = $1',
-                $template_id
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $rez = $r;
-            } else {
-                throw new \Exception('Template not found: '.$template_id, 1);
-
-            }
-            $res->close();
-        } elseif (is_numeric($object_id)) {
-            $res = DB\dbQuery(
-                'SELECT
-                    id
-                    ,pid
-                    ,`type`
-                    ,t.l'.USER_LANGUAGE_INDEX.' `title`
-                    ,iconCls
-                    ,default_field
-                    ,title_template
-                    ,cfg
-                FROM templates t
-                WHERE id =
-                (SELECT template_id
-                FROM tree
-                WHERE id = $1)',
-                $object_id
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $rez = $r;
-            }
-            $res->close();
-        }
-        if (!empty($rez['cfg'])) {
-            $rez['cfg'] = json_decode($rez['cfg'], true);
-        }
-
-        return $rez;
-    }
-
+    /**
+     * create system foldes for an object
+     * @param  int   $object_id
+     * @param  array $folderIds
+     * @return void
+     */
     public function createSystemFolders($object_id, $folderIds)
     {
         $folderIds = Util\toNumericArray($folderIds);
@@ -866,83 +484,106 @@ class Objects
         while (!empty($childs)) {
             $node = array_shift($childs);
             /*get tag name & type*/
-            $sql = 'SELECT l'.USER_LANGUAGE_INDEX.', `type` FROM tags WHERE id = $1';
-            $res = DB\dbQuery($sql, $node['tag_id']) or die( DB\dbQueryError() );
-            if ($r = $res->fetch_row()) {
-                $node['name'] = $r[0];
-                $node['type'] = $r[1];
+            $res = DB\dbQuery(
+                'SELECT l'.USER_LANGUAGE_INDEX.' `title`, `type` FROM tags WHERE id = $1',
+                $node['tag_id']
+            ) or die( DB\dbQueryError() );
+
+            if ($r = $res->fetch_assoc()) {
+                $node['name'] = $r['title'];
+                $node['type'] = $r['type'];
                 $node['template_id'] = CONFIG\DEFAULT_FOLDER_TEMPLATE;
             }
             $res->close();
             /* end of get tag name & type*/
             if ($node['type'] == 1) {
-                $rez = $this->create((Object)$node);
+                $rez = $this->create($node);
                 $pid = $rez['data']->nid;
             } else {
                 $pid = $node['pid'];
             }
 
             /* checking if childs exist for added folder and append them to childs table */
-            $sql = 'SELECT id FROM tags WHERE pid = $1';
-            $res = DB\dbQuery($sql, $node['tag_id']) or die( DB\dbQueryError() );
-            while ($r = $res->fetch_row()) {
-                $childs[] = array('pid' => $pid, 'tag_id' => $r[0]);
+            $res = DB\dbQuery(
+                'SELECT id FROM tags WHERE pid = $1',
+                $node['tag_id']
+            ) or die( DB\dbQueryError() );
+
+            while ($r = $res->fetch_assoc()) {
+                $childs[] = array('pid' => $pid, 'tag_id' => $r['id']);
             }
             $res->close();
             /* end of checking if childs exist for added folder and append them to childs table */
         }
     }
 
-    private function getObjectIcon($object_id)
-    {
-        $rez = null;
-
-        /* -- default icon by template /**/
-        $res = DB\dbQuery(
-            'SELECT t.iconCls
-            FROM tree o
-            JOIN templates t ON o.template_id = t.id
-            WHERE o.id = $1',
-            $object_id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_row()) {
-            $rez = $r[0];
-        }
-        $res->close();
-
-        return $rez;
-    }
-
+    /**
+     * get field value for an object
+     * @param  int     $object_id
+     * @param  int     $field_id
+     * @param  int     $duplicate_id
+     * @return variant
+     */
     public static function getFieldValue($object_id, $field_id, $duplicate_id = 0)
     {
         $rez = null;
-        $sql = 'SELECT value
+        $res = DB\dbQuery(
+            'SELECT value
                 FROM objects_data
                 WHERE object_id = $1
                     AND field_id = $2
-                    AND duplicate_id = $3';
-        $res = DB\dbQuery($sql, array($object_id, $field_id, $duplicate_id)) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $rez = $r[0];
+                    AND duplicate_id = $3',
+            array(
+                $object_id
+                ,$field_id
+                ,$duplicate_id
+            )
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['value'];
         }
         $res->close();
 
         return $rez;
     }
 
+    /**
+     * set value for an object field
+     * @param int     $object_id
+     * @param int     $field_id
+     * @param variant $value
+     * @param int     $duplicate_id
+     */
     public static function setFieldValue($object_id, $field_id, $value, $duplicate_id = 0)
     {
         $rez = null;
-        $sql = 'INSERT INTO objects_data (object_id, field_id, duplicate_id, `value`)
-                VALUES($1
-                     , $2
-                     , $3
-                     , $4) ON duplicate KEY
-                UPDATE `value` = $4';
-        DB\dbQuery($sql, array($object_id, $field_id, $duplicate_id, $value)) or die(DB\dbQueryError());
+        DB\dbQuery(
+            'INSERT INTO objects_data (
+                object_id
+                ,field_id
+                ,duplicate_id
+                ,`value`)
+            VALUES($1
+                ,$2
+                ,$3
+                ,$4)
+            ON duplicate KEY
+            UPDATE `value` = $4',
+            array(
+                $object_id
+                ,$field_id
+                ,$duplicate_id
+                ,$value
+            )
+        ) or die(DB\dbQueryError());
     }
 
+    /**
+     * set additional data to be saved in solr
+     * @param  reference $object_record
+     * @return void
+     */
     public static function getSolrData(&$object_record)
     {
         $template_collection = Templates\SingletonCollection::getInstance();
@@ -950,15 +591,16 @@ class Objects
         $template = $template_collection->getTemplate($object_record['template_id']);
         $object_record['content'] = '';
 
-        $sql = 'SELECT
+        $dres = DB\dbQuery(
+            'SELECT
                 d.field_id
                 ,d.`value`
                 ,info
             FROM objects o
             JOIN objects_data d ON d.object_id = o.id
-            WHERE o.id = $1 and (d.private_for_user is null)';//and ts.solr_column_name IS NOT NULL
-
-        $dres = DB\dbQuery($sql, $object_record['id']) or die(DB\dbQueryError());
+            WHERE o.id = $1 and (d.private_for_user is null)',
+            $object_record['id']
+        ) or die(DB\dbQueryError());
 
         while ($dr = $dres->fetch_assoc()) {
             $field = $template->getData()['fields'][$dr['field_id']];
@@ -982,10 +624,14 @@ class Objects
                         if (empty($dr['value'])) {
                             break;
                         }
-                        $sql = 'SELECT l'.LANGUAGE_INDEX.' FROM tags WHERE id IN ('.implode(',', $dr['value']).')';
-                        $sres = DB\dbQuery($sql) or die(DB\dbQueryError());
-                        while ($sr = $sres->fetch_row()) {
-                            $processed_values[] = $sr[0];
+                        $sres = DB\dbQuery(
+                            'SELECT l'.LANGUAGE_INDEX.' `title`
+                            FROM tags
+                            WHERE id IN ('.implode(',', $dr['value']).')'
+                        ) or die(DB\dbQueryError());
+
+                        while ($sr = $sres->fetch_assoc()) {
+                            $processed_values[] = $sr['title'];
                         }
                         $sres->close();
                         break;
@@ -995,10 +641,10 @@ class Objects
                 }
                 /* make changes to value if needed */
 
-                if (@$field['cfg']->faceting && in_array($field['type'], array('combo', 'int', '_objects'))) {
+                if (@$field['cfg']['faceting'] && in_array($field['type'], array('combo', 'int', '_objects'))) {
                     $solr_field = $field['solr_column_name'];
                     if (empty($solr_field)) {
-                        $solr_field = ( empty($field['cfg']->source) || ($field['cfg']->source == 'thesauri') ) ?
+                        $solr_field = ( empty($field['cfg']['source']) || ($field['cfg']['source'] == 'thesauri') ) ?
                             'sys_tags' : 'tree_tags';
                     }
                     $arr = Util\toNumericArray($dr['value']);
@@ -1025,6 +671,11 @@ class Objects
         $dres->close();
     }
 
+    /**
+     * set additional data to be saved in solr for multiple records
+     * @param  reference $object_records
+     * @return void
+     */
     public static function getBulkSolrData(&$object_records)
     {
 
@@ -1046,7 +697,8 @@ class Objects
         $last_template_id = null;
         $object_record = null;
 
-        $sql = 'SELECT
+        $dres = DB\dbQuery(
+            'SELECT
                 object_id
                 ,field_id
                 ,`value`
@@ -1054,9 +706,8 @@ class Objects
             FROM objects_data d
             WHERE object_id in ('.implode(',', $process_object_ids).')
                 AND (private_for_user is null)
-            ORDER BY object_id';
-
-        $dres = DB\dbQuery($sql) or die(DB\dbQueryError());
+            ORDER BY object_id'
+        ) or die(DB\dbQueryError());
 
         while ($dr = $dres->fetch_assoc()) {
             if ($last_object_id != $dr['object_id']) {
@@ -1095,10 +746,14 @@ class Objects
                         if (empty($dr['value'])) {
                             break;
                         }
-                        $sql = 'SELECT l'.LANGUAGE_INDEX.' FROM tags WHERE id IN ('.implode(',', $dr['value']).')';
-                        $sres = DB\dbQuery($sql) or die(DB\dbQueryError());
-                        while ($sr = $sres->fetch_row()) {
-                            $processed_values[] = $sr[0];
+                        $sres = DB\dbQuery(
+                            'SELECT l'.LANGUAGE_INDEX.' `title`
+                            FROM tags
+                            WHERE id IN ('.implode(',', $dr['value']).')'
+                        ) or die(DB\dbQueryError());
+
+                        while ($sr = $sres->fetch_assoc()) {
+                            $processed_values[] = $sr['title'];
                         }
                         $sres->close();
                         break;
@@ -1110,9 +765,9 @@ class Objects
 
                 @$solr_field = $field['solr_column_name'];
 
-                if (@$field['cfg']->faceting && in_array($field['type'], array('combo', 'int', '_objects'))) {
+                if (@$field['cfg']['faceting'] && in_array($field['type'], array('combo', 'int', '_objects'))) {
                     if (empty($solr_field)) {
-                        $solr_field = ( empty($field['cfg']->source) || ($field['cfg']->source == 'thesauri') )
+                        $solr_field = ( empty($field['cfg']['source']) || ($field['cfg']['source'] == 'thesauri') )
                             ? 'sys_tags'
                             : 'tree_tags';
                     }
@@ -1143,20 +798,32 @@ class Objects
         $dres->close();
     }
 
+    /**
+     * get case id for a object
+     * @param  int $node_id
+     * @return int | null
+     */
     public static function getCaseId($node_id)
     {
         $case_id = null;
-        $sql = 'SELECT case_id FROM tree_info WHERE id = $1';
-        $res = DB\dbQuery($sql, $node_id) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $case_id = $r[0];
+        $res = DB\dbQuery(
+            'SELECT case_id FROM tree_info WHERE id = $1',
+            $node_id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $case_id = $r['case_id'];
         }
         $res->close();
 
         return $case_id;
     }
 
-    /* get case name by its Id*/
+    /**
+     * get case name by its Id
+     * @param  int     $case_id
+     * @return varchar
+     */
     public static function getCaseName($case_id = false)
     {
         if (!is_numeric($case_id)) {
@@ -1170,8 +837,8 @@ class Objects
                 'SELECT name FROM tree WHERE id = $1',
                 $case_id
             ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_row()) {
-                Cache::set($var_name, $r[0]);
+            if ($r = $res->fetch_assoc()) {
+                Cache::set($var_name, $r['name']);
             }
             $res->close();
         }
@@ -1179,6 +846,11 @@ class Objects
         return Cache::get($var_name);
     }
 
+    /**
+     * updates udate and uid for a case
+     * @param  int  $case_or_caseObject_id
+     * @return void
+     */
     public static function updateCaseUpdateInfo($case_or_caseObject_id)
     {
         DB\dbQuery(
@@ -1193,17 +865,25 @@ class Objects
         ) or die(DB\dbQueryError());
     }
 
-    /* setting case roles fields for an object data */
+    /**
+     * setting case roles fields for an object data
+     * @param reference $objectData
+     */
     public static function setCaseRolesFields(&$objectData)
     {
         $case_id = null;
         $db = null;
 
-        $sql = 'SELECT DATABASE(), case_id FROM tree_info WHERE id = $1';
-        $res = DB\dbQuery($sql, $objectData['id']) or die(DB\dbQueryError());
-        if ($r = $res->fetch_row()) {
-            $db = $r[0];
-            $case_id = $r[1];
+        $res = DB\dbQuery(
+            'SELECT DATABASE() `db`, case_id
+            FROM tree_info
+            WHERE id = $1',
+            $objectData['id']
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $db = $r['db'];
+            $case_id = $r['case_id'];
         }
         $res->close();
 
@@ -1215,10 +895,15 @@ class Objects
         $var_name = 'cases['.$case_id."]['roles']";
         if (!Cache::exist($var_name)) {
             $roles = array();
-            $sql = 'SELECT solr_column_name, od.value FROM objects_data od '.
-                'JOIN templates_structure t ON od.`field_id` = t.`id` AND solr_column_name LIKE \'role_ids%\' '.
-                'WHERE object_id = $1';
-            $res = DB\dbQuery($sql, $case_id) or die(DB\dbQueryError());
+            $res = DB\dbQuery(
+                'SELECT solr_column_name, od.value
+                FROM objects_data od
+                JOIN templates_structure t
+                    ON od.`field_id` = t.`id`
+                        AND solr_column_name LIKE \'role_ids%\'
+                WHERE object_id = $1',
+                $case_id
+            ) or die(DB\dbQueryError());
 
             while ($r = $res->fetch_assoc()) {
                 if (!empty($r['value'])) {
@@ -1246,7 +931,7 @@ class Objects
      * @param  int          $objectId
      * @return varchar|null
      */
-    public static function getTemplateType($objectId)
+    public static function getType($objectId)
     {
         if (!is_numeric($objectId)) {
             return null;
@@ -1276,24 +961,42 @@ class Objects
      * @param  int    $objectId
      * @return object
      */
-    public function getCustomClass($objectId)
+    public function getCustomClassByObjectId($objectId)
     {
-        $templateType = $this->getTemplateType($objectId);
-        if (empty($templateType)) {
+        $type = $this->getType($objectId);
+
+        return $this->getCustomClassByType($type, $objectId);
+    }
+
+    /**
+     * get an instance of the class designed for specified type
+     * @param  varchar $type
+     * @param  int     $objectId
+     * @return object
+     */
+    public function getCustomClassByType($type, $objectId = null)
+    {
+        if (empty($type)) {
             return null;
         }
-        switch ($templateType) {
+
+        switch ($type) {
             case 'file':
                 return new Objects\File($objectId);
                 break;
             case 'task':
                 return new Objects\Task($objectId);
                 break;
+            case 'template':
+                return new Objects\Template($objectId);
+                break;
+            case 'field':
+                return new Objects\TemplateField($objectId);
+                break;
             default:
                 return new Objects\Object($objectId);
                 break;
         }
-
     }
 
     /**
@@ -1305,7 +1008,7 @@ class Objects
      */
     public function copy($objectId, $pid = false, $targetId = false)
     {
-        $class = $this->getCustomClass($objectId);
+        $class = $this->getCustomClassByObjectId($objectId);
 
         return $class->copyTo($pid, $targetId);
     }
@@ -1319,8 +1022,83 @@ class Objects
      */
     public function move($objectId, $pid = false, $targetId = false)
     {
-        $class = $this->getCustomClass($objectId);
+        $class = $this->getCustomClassByObjectId($objectId);
 
         return $class->moveTo($pid, $targetId);
+    }
+
+    /**
+     * get a new name, that does not exist under specified $pid
+     *
+     * If there is no any active (not deleted) object with specied name under $pid
+     * then same name is returned.
+     * If name exists then a new name will be generated with " (<number>)" at the end.
+     * Note that extension is not changed.
+     * Extension is considered any combination of chars delimited by dot
+     * at the end of an object and its length is less than 5 chars.
+     *
+     * @param  int     $pid  parent id
+     * @param  varchar $name desired name
+     * @return varchar new name
+     */
+    public static function getAvailableName($pid, $name)
+    {
+        $newName = $name;
+        $a = explode('.', $name);
+        $ext = '';
+        if ((sizeof($a) > 1) && (sizeof($a) < 5)) {
+            $ext = array_pop($a);
+        }
+        $name = implode('.', $a);
+
+        $id = null;
+        $i = 1;
+        do {
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM tree
+                WHERE pid = $1
+                    AND name = $2
+                    AND dstatus = 0',
+                array(
+                    $pid
+                    ,$newName
+                )
+            ) or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                $id = $r['id'];
+            } else {
+                $id = null;
+            }
+            $res->close();
+
+            if (!empty($id)) {
+                $newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
+            }
+            $i++;
+        } while (!empty($id));
+
+        return $newName;
+    }
+
+    /**
+     * checks if given id exists in our tree
+     * @param  int     $id
+     * @return boolean
+     */
+    public static function idExists($id)
+    {
+        $rez = false;
+        if (empty($id)) {
+            return $rez;
+        }
+        $res = DB\dbQuery('SELECT id FROM tree WHERE id = $1', $id) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $rez = true;
+        }
+        $res->close();
+
+        return $rez;
     }
 }

@@ -19,10 +19,15 @@ switch ($action) {
         if (!empty($hash)) {
             //process hash from get and check it https://osji.casebox.org/login/reset-password/?h=a9199d0152081ca667f07fbfd684ad9a
             $user_id = null;
-            $sql = 'select id from users_groups where recover_hash = $1';
-            $res = DB\dbQuery($sql, $hash) or die(DB\dbQueryError());
-            if ($r = $res->fetch_row()) {
-                $user_id = $r[0];
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM users_groups
+                WHERE recover_hash = $1',
+                $hash
+            ) or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                $user_id = $r['id'];
             }
             $res->close();
             if (empty($user_id)) {
@@ -73,20 +78,23 @@ switch ($action) {
         $user_mail = null;
         if (!empty($e)) {
             if ($e = filter_var($e, FILTER_VALIDATE_EMAIL)) {
-                $sql = 'SELECT id
+                $res = DB\dbQuery(
+                    'SELECT id
                          , email
                          , l'.USER_LANGUAGE_INDEX.' `name`
                     FROM users_groups
-                    WHERE email LIKE $1';
-                $res = DB\dbQuery($sql, "%$e%") or die(DB\dbQueryError());
-                while (($r = $res->fetch_row() ) && empty($user_id)) {
-                    $mails = explode(',', $r[1]);
+                    WHERE email LIKE $1',
+                    "%$e%"
+                ) or die(DB\dbQueryError());
+
+                while (($r = $res->fetch_assoc() ) && empty($user_id)) {
+                    $mails = explode(',', $r['email']);
                     for ($i=0; $i < sizeof($mails); $i++) {
                         $mails[$i] = trim($mails[$i]);
                         if (mb_strtolower($mails[$i]) == $e) {
-                            $user_id = $r[0];
+                            $user_id = $r['id'];
                             $user_mail = $e;
-                            $user_name = $r[2];
+                            $user_name = $r['name'];
                         }
                     }
                 }
@@ -101,12 +109,19 @@ switch ($action) {
             }
         } elseif (!empty($u)) {
             $user_id = null;
-            $sql = 'select id, email, l'.USER_LANGUAGE_INDEX.' `name` from users_groups where name = $1';
-            $res = DB\dbQuery($sql, $u) or die(DB\dbQueryError());
-            if ($r = $res->fetch_row()) {
-                $user_id = $r[0];
-                $user_mail = $r[1];
-                $user_name = $r[2];
+            $res = DB\dbQuery(
+                'SELECT id
+                    ,email
+                    ,l'.USER_LANGUAGE_INDEX.' `name`
+                FROM users_groups
+                WHERE name = $1',
+                $u
+            ) or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                $user_id = $r['id'];
+                $user_mail = $r['email'];
+                $user_name = $r['name'];
             }
             $res->close();
             if (empty($user_id)) {
