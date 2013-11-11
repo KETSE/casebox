@@ -2,7 +2,8 @@
 SQLyog Ultimate v11.11 (64 bit)
 MySQL - 5.5.31 : Database - cb_demo1
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -81,6 +82,7 @@ CREATE TABLE `crons` (
   `last_end_time` timestamp NULL DEFAULT NULL,
   `execution_info` longtext,
   `execution_skip_times` smallint(6) unsigned DEFAULT '0',
+  `last_action` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
