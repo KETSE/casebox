@@ -2,7 +2,12 @@
 Ext.namespace('App');
 Ext.BLANK_IMAGE_URL = '/css/i/s.gif';
 
-clog = function(){if(typeof(console) != 'undefined') console.log(arguments)}
+clog = function(){
+    if(typeof(console) != 'undefined') {
+        console.log(arguments);
+    }
+};
+
 // application main entry point
 Ext.onReady(function(){
     App = new Ext.util.Observable();
@@ -13,7 +18,7 @@ Ext.onReady(function(){
         ,'filesdrop'
         ,'objectsaction'
         ,'userprofileupdated'
-    )
+    );
     Ext.state.Manager.setProvider( new Ext.state.CookieProvider({
         expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
     }));
@@ -62,12 +67,12 @@ function initApp(){
         st = Ext.util.Format.stripTags(st);
         return Ext.util.Format.ellipsis(st, maxLen);
         //return st.length > maxLen ? st.substr(0, maxLen) + '&hellip;' : st;
-    }
+    };
 
     App.PromtLogin = function (e){
         if( !this.loginWindow || this.loginWindow.isDestroyed ) this.loginWindow = new CB.Login({});
         this.loginWindow.show();
-    }
+    };
 
     App.formSubmitFailure = function(form, action){
         if(App.hideFailureAlerts) return;
@@ -81,54 +86,56 @@ function initApp(){
                msg = Ext.value(msg, L.ErrorOccured);
                Ext.Msg.alert(L.Error, msg);
            }
-    }
+    };
 
     App.includeJS = function(file){
-       if (document.createElement && document.getElementsByTagName) {
-         var head = document.getElementsByTagName('head')[0];
+        if (document.createElement && document.getElementsByTagName) {
+            var head = document.getElementsByTagName('head')[0];
 
-         var script = document.createElement('script');
-         script.setAttribute('type', 'text/javascript');
-         script.setAttribute('src', file);
+            var script = document.createElement('script');
+            script.setAttribute('type', 'text/javascript');
+            script.setAttribute('src', file);
 
-         head.appendChild(script);
-       } else {
+            head.appendChild(script);
+        } else {
             alert('Your browser can\'t deal with the DOM standard. That means it\'s old. Go fix it!');
-       }
-    }
+        }
+    };
 
     App.xtemplates = {
         cell: new Ext.XTemplate( '<ul class="thesauri_set"><tpl for="."><li>{.}</li></tpl></ul>' )
         ,object: new Ext.XTemplate( '<ul><tpl for="."><li class="case_object" object_id="{id}">{[Ext.isEmpty(values.title) ? \'&lt;'+L.noName+'&gt; (id: \'+values.id+\')\' : values.title]}</li></tpl></ul>' )
-    }
+    };
     App.xtemplates.cell.compile();
     App.xtemplates.object.compile();
 
     App.customRenderers = {
-        thesauriCell: function(v, metaData, record, rowIndex, colIndex, store) {
+        thesauriCell: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) return '';
             va = v.split(',');
             vt = [];
-            thesauriId = record.get('cfg').thesauriId;
-            if(Ext.isEmpty(thesauriId) && store.thesauriIds) thesauriId = store.thesauriIds[record.id]
+            thesauriId = grid.helperTree.getNode(record.get('id')).attributes.templateRecord.get('cfg').thesauriId;
+            if(Ext.isEmpty(thesauriId) && store.thesauriIds) {
+                thesauriId = store.thesauriIds[record.id];
+            }
             if(!Ext.isEmpty(thesauriId)){
                 ts = getThesauriStore(thesauriId);
                 for (var i = 0; i < va.length; i++) {
-                    idx = ts.findExact('id', parseInt(va[i]) );
+                    idx = ts.findExact('id', parseInt(va[i], 10));
                     if(idx >=0) vt.push(ts.getAt(idx).get('name'));
-                };
+                }
             }
             return App.xtemplates.cell.apply(vt);
         }
         ,relatedCell: function(v, metaData, record, rowIndex, colIndex, store) { }
-        ,combo: function(v, metaData, record, rowIndex, colIndex, store) { /* custom renderer for verticalEditGrid */
+        ,combo: function(v, metaData, record, rowIndex, colIndex, store) {
             if(Ext.isEmpty(v)) return '';
             ed = this.editor;
             ri = ed.store.findExact(ed.valueField, v);
             if(ri < 0) return '';
-            return ed.store.getAt(ri).get(ed.displayField)
+            return ed.store.getAt(ri).get(ed.displayField);
         }
-        ,objectCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
+        ,objectCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) return '';
             cw = grid.refOwner || grid.findParentByType(CB.Objects);
             if(!cw || !cw.objectsStore) return '';
@@ -137,38 +144,40 @@ function initApp(){
             switch(record.data.cfg.renderer){
                 case 'listGreenIcons':
                     for(i=0; i < v.length; i++){
-                        ri = cw.objectsStore.findExact('id', parseInt(v[i]));
+                        ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
                         row = cw.objectsStore.getAt(ri);
                         if(ri >-1) r.push('<li class="icon-padding icon-element">'+row.get('title')+'</li>');
                     }
                     return '<ul>'+r.join('')+'</ul>';
-                    break;
                 case 'listObjIcons':
                     for(i=0; i < v.length; i++){
-                        ri = cw.objectsStore.findExact('id', parseInt(v[i]));
+                        ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
                         row = cw.objectsStore.getAt(ri);
                         if(ri >-1) r.push('<li class="icon-padding '+row.get('iconCls')+'">'+row.get('title')+'</li>');
                     }
                     return '<ul>'+r.join('')+'</ul>';
-                    break;
-
                 default:
                     for(i=0; i < v.length; i++){
-                        ri = cw.objectsStore.findExact('id', parseInt(v[i]));
+                        ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
                         if(ri >-1) r.push(cw.objectsStore.getAt(ri).get('title'));
                     }
                     return r.join(', ');
             }
         }
-        ,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
-            if(Ext.isEmpty(v)) return '';
-            r = [];
+        ,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) {
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+            var r = [];
             store = null;
-            if(!Ext.isArray(v)) v = String(v).split(',');
-            source = Ext.isEmpty(record.get('cfg').source) ? 'thesauri': record.get('cfg').source;
+            v = toNumericArray(v);
+            var cfg = grid.helperTree.getNode(record.get('id')).attributes.templateRecord.get('cfg');
+            var source = (Ext.isEmpty(cfg.source))
+                ? 'thesauri'
+                : cfg.source;
             switch(source){
                 case 'thesauri':
-                    store = isNaN(record.get('cfg').thesauriId) ? CB.DB.thesauri : getThesauriStore(record.get('cfg').thesauriId);
+                    store = isNaN(cfg.thesauriId) ? CB.DB.thesauri : getThesauriStore(cfg.thesauriId);
                     break;
                 case 'users':
                     store = CB.DB.usersStore;
@@ -181,68 +190,66 @@ function initApp(){
                     if(!cw || !cw.objectsStore) return '';
                     store = cw.objectsStore;
             }
-            switch(record.data.cfg.renderer){
+            switch(cfg.renderer){
                 case 'listGreenIcons':
                     for(i=0; i < v.length; i++){
-                        ri = store.findExact('id', parseInt(v[i]));
+                        ri = store.findExact('id', parseInt(v[i], 10));
                         row = store.getAt(ri);
                         if(ri >-1) r.push('<li class="lh16 icon-padding icon-element">'+row.get('name')+'</li>');
                     }
                     return '<ul>'+r.join('')+'</ul>';
-                    break;
                 case 'listObjIcons':
                     for(i=0; i < v.length; i++){
-                        ri = store.findExact('id', parseInt(v[i]));
+                        ri = store.findExact('id', parseInt(v[i], 10));
                         row = store.getAt(ri);
                         if(ri >-1) r.push('<li class="lh16 icon-padding '+row.get('iconCls')+'">'+row.get('name')+'</li>');
                     }
                     return '<ul>'+r.join('')+'</ul>';
-                    break;
-
                 default:
                     for(i=0; i < v.length; i++){
-                        ri = store.findExact('id', parseInt(v[i]));
+                        ri = store.findExact('id', parseInt(v[i], 10));
                         if(ri >-1) r.push(store.getAt(ri).get('name'));
                     }
                     return r.join(', ');
             }
 
         }
-        ,languageCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
+        ,languageCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) return '';
-            ri = CB.DB.languages.findExact('id', parseInt(v));
+            ri = CB.DB.languages.findExact('id', parseInt(v, 10));
             if(ri < 0) return '';
             return CB.DB.languages.getAt(ri).get('name');
         }
-        ,sexCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
+        ,sexCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) return '';
             ri = CB.DB.sex.findExact('id', v);
             if(ri < 0) return '';
             return CB.DB.sex.getAt(ri).get('name');
         }
-        ,templateTypesCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
+        ,templateTypesCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) return '';
             ri = CB.DB.templateTypes.findExact('id', v);
             if(ri < 0) return '';
             return CB.DB.templateTypes.getAt(ri).get('name');
         }
-        ,shortDateFormatCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) { /* custom renderer for verticalEditGrid */
+        ,shortDateFormatCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) return '';
             ri = CB.DB.shortDateFormats.findExact('id', v);
             if(ri < 0) return '';
             return CB.DB.shortDateFormats.getAt(ri).get('name');
         }
-        ,thesauriCombo: function(v, metaData, record, rowIndex, colIndex, store) { /* custom renderer for verticalEditGrid */
+        ,thesauriCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) return '';
-            th = record.get('cfg').thesauriId;
+            var node = grid.helperTree.getNode(record.get('id'));
+            var tr = node.attributes.templateRecord;
+            var th = tr.get('cfg').thesauriId;
             if(th == 'dependent'){
-                pri = store.findBy(function(r){return ( (r.get('field_id') == record.get('pid')) && (r.get('duplicate_id') == record.get('duplicate_id')) );}, this);
-                if(pri > -1) th = store.getAt(pri).get('value');
+                th = grid.helperTree.getParentValue(node, tr.get('pid'));
             }
-            ts = getThesauriStore(th);
-            ri = ts.findExact('id', parseInt(v));
+            var ts = getThesauriStore(th);
+            var ri = ts.findExact('id', parseInt(v, 10));
             if(ri < 0) return '';
-            return ts.getAt(ri).get('name')
+            return ts.getAt(ri).get('name');
         }
         ,checkbox: function(v){
             if(v == 1) return L.yes;
@@ -289,7 +296,10 @@ function initApp(){
             return t;
         }
         ,filesize: function(v){
-            if(isNaN(v) || Ext.isEmpty(v) || (v == 0)) return '';
+            if(isNaN(v) || Ext.isEmpty(v) || (v == '0')) {
+                return '';
+            }
+
             if(v <= 0) return  '0 KB';
             else if(v < 1024) return '1 KB';
             else if(v < 1024 * 1024) return (Math.round(v / 1024) + ' KB');
@@ -309,8 +319,15 @@ function initApp(){
         ,tagIds: function(v){
             if(Ext.isEmpty(v)) return '';
             rez = [];
-            v = String(v).split(',')
-            Ext.each(v, function(i){rez.push(CB.DB.thesauri.getName(i))}, this);
+            v = String(v).split(',');
+            Ext.each(
+                v
+                ,function(i){
+                    rez.push(CB.DB.thesauri.getName(i));
+                }
+                ,this
+            );
+
             rez = rez.join(', ');
             return rez;
         }
@@ -320,59 +337,52 @@ function initApp(){
         }
         ,taskStatus: function(v, m, r, ri, ci, s){
             if(Ext.isEmpty(v)) return '';
-            return '<span class="taskStatus'+v+'">'+L['taskStatus'+parseInt(v)]+'</span>';
+            return '<span class="taskStatus'+v+'">'+L['taskStatus'+parseInt(v, 10)]+'</span>';
         }
         ,text: function(v, m, r, ri, ci, s){
             if(Ext.isEmpty(v)) return '';
             return '<pre style="white-space: pre-wrap">'+Ext.util.Format.htmlEncode(v)+'</pre>';
         }
-    }
+        ,titleAttribute: function(v, m, r, ri, ci, s){
+            m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+            return v;
+        }
+        ,userName: function(v){ return CB.DB.usersStore.getName(v);}
+    };
     App.getCustomRenderer = function(fieldType){
         switch(fieldType){
             case 'date':
                 return App.customRenderers.date;
-                break;
             case 'datetime':
                 return App.customRenderers.datetime;
-                break;
             case '_objects':
                 return App.customRenderers.objectsField;
             case 'combo':
             case 'object_author':
                 return App.customRenderers.thesauriCombo;
-                break;
             case '_language':
                 return App.customRenderers.languageCombo;
             case '_sex':
                 return App.customRenderers.sexCombo;
-                break;
             case '_templateTypesCombo':
                 return App.customRenderers.templateTypesCombo;
-                break;
             case '_short_date_format':
                 return App.customRenderers.shortDateFormatCombo;
-                break;
             case '_contact':
                 return App.customRenderers.contactCombo;
-                break
             case '_case':
                 return App.customRenderers.caseCombo;
-                break
             case '_case_object':
                 return App.customRenderers.objectCombo;
-                break
             case 'checkbox':
                 return App.customRenderers.checkbox;
-                break;
             case 'popuplist':
                 return App.customRenderers.thesauriCell;
-                break;
             case 'text':
                 return App.customRenderers.text;
-                break;
             default: return null;
         }
-    }
+    };
 
     App.getTemplatesXTemplate = function(template_id){
         template_id = String(template_id);
@@ -389,7 +399,7 @@ function initApp(){
             }
         }
         return App.xtemplates.object;
-    }
+    };
     App.findTab = function(tabPanel, id, xtype){
         tabIdx = -1;
         if(Ext.isEmpty(id)) return tabIdx;
@@ -403,7 +413,7 @@ function initApp(){
             i++;
         }
         return tabIdx;
-    }
+    };
     App.findTabByType = function(tabPanel, type){
         tabIdx = -1;
         if(Ext.isEmpty(type)) return tabIdx;
@@ -414,44 +424,44 @@ function initApp(){
             i++;
         }
         return tabIdx;
-    }
+    };
     App.activateTab = function(tabPanel, id, xtype){
         if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
         tabIdx = App.findTab(tabPanel, id, xtype);
         if(tabIdx < 0) return false;
         tabPanel.setActiveTab(tabIdx);
         return tabPanel.items.itemAt(tabIdx);
-    }
+    };
     App.addTab = function(tabPanel, o){
         if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
         c = tabPanel.add(o);
         o.show();
         return c;
-    }
+    };
     App.getFileUploadWindow = function(config){
         if(!App.thetFileUploadWindow) App.theFileUploadWindow = new CB.FileUploadWindow();
         App.theFileUploadWindow = Ext.apply(App.theFileUploadWindow, config);
         return App.theFileUploadWindow;
-    }
+    };
     App.getThesauriWindow = function(config){
         if(!App.thesauriWindow) App.thesauriWindow = new CB.ThesauriWindow();
         App.thesauriWindow = Ext.apply(App.thesauriWindow, config);
         return App.thesauriWindow;
-    }
+    };
     App.getTextEditWindow = function(config){
         if(!App.textEditWindow) App.textEditWindow = new CB.TextEditWindow();
         App.textEditWindow = Ext.apply(App.textEditWindow, config);
         return App.textEditWindow;
-    }
+    };
     App.getHtmlEditWindow = function(config){
         if(!App.htmlEditWindow) App.htmlEditWindow = new CB.HtmlEditWindow();
         App.htmlEditWindow = Ext.apply(App.htmlEditWindow, config);
         return App.htmlEditWindow;
-    }
+    };
 
     App.isFolder = function( template_id){
         return (App.config.folder_templates.indexOf( String(template_id) ) >= 0);
-    }
+    };
     /**
     * open path on active explorer tabsheet or in default eplorer tabsheet
     *
@@ -463,7 +473,7 @@ function initApp(){
         params.path = path;
 
         App.activateBrowserTab().setParams(params);
-    }
+    };
 
     App.activateBrowserTab = function(){
         tab = App.mainTabPanel.getActiveTab();
@@ -472,18 +482,18 @@ function initApp(){
         }
         App.mainTabPanel.setActiveTab(App.explorer);
         return App.explorer;
-    }
+    };
 
     App.locateObject = function(object_id, path){
         if(Ext.isEmpty(path)){
             CB_Path.getPidPath(object_id, function(r, e){
                 if(r.success !== true) return ;
                 App.locateObject(r.id, r.path);
-            })
+            });
             return;
         }
 
-        App.locateObjectId = parseInt(object_id);
+        App.locateObjectId = parseInt(object_id, 10);
 
         params = {
             descendants: false
@@ -491,7 +501,7 @@ function initApp(){
             ,filters: {}
         };
         App.openPath(path, params);
-    }
+    };
 
     App.downloadFile = function(fileId, zipped, versionId){
         if(Ext.isElement(fileId)){ //retreive id from html element
@@ -500,33 +510,41 @@ function initApp(){
         }
         url = 'download.php?id='+fileId;
         if(!Ext.isEmpty(versionId)) url += '&v='+versionId;
-        if(zipped == true) url += '&z=1';
-        window.open(url, '_blank')
-    }
+        if(zipped) {
+            url += '&z=1';
+        }
+        window.open(url, '_blank');
+    };
+
     App.getTypeEditor = function(type, e){
-        objData = {
+        var objData = {
             ownerCt: e.ownerCt
             ,record: e.record
             ,grid: e.grid
             ,pidValue: e.pidValue
             ,objectId: e.objectId
             ,path: e.path
-        }
+        };
+        var helper = (e.grid ? e.grid : e.ownerCt).helperTree;
+        var tr = e.grid
+            ? helper.getNode(e.record.get('id')).attributes.templateRecord
+            : e.record;
+        var cfg = tr.get('cfg');
         switch(type){
             case '_auto_title':
-                return new Ext.ux.TitleField(); break; //{minWidth: 100, anchor: '95%', boxMaxWidth: 800}
+                return new Ext.ux.TitleField();
             case '_objects':
                 //e should contain all necessary info
-                switch(e.record.get('cfg').editor){
+                switch(cfg.editor){
                     case 'form':
                         if(e && e.grid){
                             e.cancel = true;
                             /* prepeare data to set to popup windows */
-                            store = false;
-                            source = Ext.isEmpty(e.record.get('cfg').source) ? 'thesauri' : e.record.get('cfg').source;
+                            var store = false;
+                            source = Ext.isEmpty(cfg.source) ? 'thesauri' : cfg.source;
                             switch(source){
                                 case 'thesauri':
-                                    store = getThesauriStore(e.record.get('cfg').thesauriId);
+                                    store = getThesauriStore(cfg.thesauriId);
                                     break;
                                 case 'users':
                                     store = CB.DB.usersStore;
@@ -538,49 +556,73 @@ function initApp(){
                                     break;
                                 default:
                                     cw = e.grid.refOwner || e.grid.findParentByType(CB.Objects);
-                                    if(cw && cw.objectsStore)  store = cw.objectsStore;
+                                    if(cw && cw.objectsStore)  {
+                                        store = cw.objectsStore;
+                                    }
                             }
-                            data = []
+                            data = [];
                             if(store){
-                                value= e.record.get('value')
+                                value= e.record.get('value');
                                 value = Ext.isEmpty(value) ? [] : String(value).split(',');
                                 for(i=0; i < value.length; i++){
-                                    ri = store.findExact('id', parseInt(value[i]));
-                                    if(ri >-1) data.push(store.getAt(ri).data);
+                                    ri = store.findExact('id', parseInt(value[i], 10));
+                                    if(ri >-1) {
+                                        data.push(store.getAt(ri).data);
+                                    }
                                 }
                             }
 
-                            if( source == 'thesauri' ) w = new CB.ObjectsSelectionPopupList({data: objData, value: e.record.get('value')});
-                            else w = new CB.ObjectsSelectionForm({data: objData, value: e.record.get('value')});
+                            if( source == 'thesauri' ) {
+                                w = new CB.ObjectsSelectionPopupList({data: objData, value: e.record.get('value')});
+                            } else {
+                                w = new CB.ObjectsSelectionForm({data: objData, value: e.record.get('value')});
+                            }
 
                             w.on('setvalue', function(data){
-                                value = []
+                                value = [];
                                 if(Ext.isArray(data)){
-                                    Ext.each(data, function(d){ value.push( d.id ? d.id : d)}, this)
+                                    Ext.each(
+                                        data
+                                        ,function(d){
+                                            value.push( d.id ? d.id : d);
+                                        }
+                                        ,this
+                                    );
                                     value = value.join(',');
-                                }else value = data;
+                                } else {
+                                    value = data;
+                                }
                                 this.record.set('value', value);
-                                if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
-                                else this.grid.fireEvent('change', e);
-                            }, e)
-                            if(w.setData) w.setData(data);
+                                this.originalValue = this.value;
+                                this.value = value;
+                                if(this.grid.onAfterEditProperty) {
+                                    this.grid.onAfterEditProperty(this);
+                                } else {
+                                    this.grid.fireEvent('change', e);
+                                }
+                            }, e);
+                            if(w.setData) {
+                                w.setData(data);
+                            }
                             w.show();
+
                             return w;
-                        }else return new CB.ObjectsTriggerField({data: objData}); //, width: 500
+                        } else {
+                            return new CB.ObjectsTriggerField({data: objData}); //, width: 500
+                        }
                         break;
                     default:
                         return new CB.ObjectsComboField({data: objData});//, width: 500
-                        break;
                 }
 
                 break;
             case '_case':
-                if(e.record.get('cfg').editor == 'form'){
+                if(cfg.editor == 'form'){
                     if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateCasesField({ownerCt: e.ownerCt}); //, width: 500//when it is in top fieldset
                 }else{
-                    params = Ext.apply({}, e.record.get('cfg'));
+                    params = Ext.apply({}, cfg);
                     if(!Ext.isEmpty(e.pidValue)) params.pidValue = e.pidValue;
-                    return new Ext.ux.CasesCombo({ownerCt: e.ownerCt, params: params})//, width: 500
+                    return new Ext.ux.CasesCombo({ownerCt: e.ownerCt, params: params});
                 }
                 break;
             case 'boolean': //depricated
@@ -595,17 +637,21 @@ function initApp(){
                         ,displayField: 'name'
                         ,valueField: 'id'
                     });
-            case 'date':  return new Ext.form.DateField({format: App.dateFormat, width: 100}); break;
-            case 'datetime': return new Ext.form.DateField({format: App.dateFormat+' '+App.timeFormat, width: 130}); break;
-            case 'time':  return new Ext.form.TimeField({format: App.timeFormat}); break;
-            case 'int':  return new Ext.form.NumberField({allowDecimals: false, width: 90}); break;
-            case 'float':  return new Ext.form.NumberField({allowDecimals: true, width: 90}); break;
+            case 'date':
+                return new Ext.form.DateField({format: App.dateFormat, width: 100});
+            case 'datetime':
+                return new Ext.form.DateField({format: App.dateFormat+' '+App.timeFormat, width: 130});
+            case 'time':
+                return new Ext.form.TimeField({format: App.timeFormat});
+            case 'int':
+                return new Ext.form.NumberField({allowDecimals: false, width: 90});
+            case 'float':
+                return new Ext.form.NumberField({allowDecimals: true, width: 90});
             //case 'object_author': //depricated
             case 'combo':
-                th = e.record.get('cfg').thesauriId;
+                th = cfg.thesauriId;
                 if(th == 'dependent'){
-                    pri = e.record.store.findBy(function(r){return ( (r.get('field_id') == e.record.get('pid')) && (r.get('duplicate_id') == e.record.get('duplicate_id')) );}, this);
-                    if(pri > -1) th = e.record.store.getAt(pri).get('value');
+                    th = helper.getParentValue(e.record.get('id'), tr.get('pid'));
                 }
                 return new Ext.form.ComboBox({
                     forceSelection: true
@@ -617,13 +663,11 @@ function initApp(){
                     ,displayField: 'name'
                     ,typeAhead: true
                     ,valueField: 'id'
-                })
-                break;
+                });
             case 'iconcombo':
-                th = e.record.get('cfg').thesauriId;
+                th = cfg.thesauriId;
                 if(th == 'dependent'){
-                    pri = e.record.store.findBy(function(r){return ( (r.get('field_id') == e.record.get('pid')) && (r.get('duplicate_id') == e.record.get('duplicate_id')) );}, this);
-                    if(pri > -1) th = e.record.store.getAt(pri).get('value');
+                    th = helper.getParentValue(e.record.get('id'), tr.get('pid'));
                 }
                 return new Ext.form.ComboBox({
                     forceSelection: true
@@ -636,8 +680,7 @@ function initApp(){
                     ,valueField: 'id'
                     ,iconClsField: 'name'
                     ,plugins: [new Ext.ux.plugins.IconCombo()]
-                })
-                break;
+                });
             case '_language':
                 return new Ext.form.ComboBox({
                     forceSelection: true
@@ -648,8 +691,7 @@ function initApp(){
                     ,store: CB.DB.languages
                     ,displayField: 'name'
                     ,valueField: 'id'
-                })
-                break;
+                });
             case '_sex':
                 return new Ext.form.ComboBox({
                     forceSelection: true
@@ -660,8 +702,7 @@ function initApp(){
                     ,store: CB.DB.sex
                     ,displayField: 'name'
                     ,valueField: 'id'
-                })
-                break;
+                });
             case '_templateTypesCombo':
                 return new Ext.form.ComboBox({
                     forceSelection: true
@@ -672,8 +713,7 @@ function initApp(){
                     ,store: CB.DB.templateTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
-                })
-                break;
+                });
             case '_short_date_format':
                 return new Ext.form.ComboBox({
                     forceSelection: true
@@ -684,25 +724,23 @@ function initApp(){
                     ,store: CB.DB.shortDateFormats
                     ,displayField: 'name'
                     ,valueField: 'id'
-                })
-                break;
+                });
             case 'memo':
-                height = Ext.value(e.record.get('cfg').height, 50);
-                height = parseInt(height) + 7;
-                return new Ext.form.TextArea({ height: height })
-                //e.cancel = true;
-                break;
+                height = Ext.value(cfg.height, 50);
+                height = parseInt(height, 10) + 7;
+                return new Ext.form.TextArea({ height: height });
             case 'popuplist':
                 e.cancel = true;
                 w = App.getThesauriWindow({
-                    title: e.record.get('title')
-                    ,store: getThesauriStore( e.record.get('cfg').thesauriId )
+                    title: tr.get('title')
+                    ,store: getThesauriStore( cfg.thesauriId )
                     ,data: {
                         value: e.record.get('value')
                         ,scope: e
                         ,callback: function(w, v){
-                            this.record.set('value', v);
+                            this.originalValue = this.record.get('value');
                             this.value = v;
+                            this.record.set('value', v);
                             if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
                             this.grid.fireEvent('change');
                         }
@@ -714,26 +752,56 @@ function initApp(){
                 break;
             case 'text':
                 e.cancel = true;
-                w = App.getTextEditWindow( { title: e.record.get('title'), data: { value: e.record.get('value'), scope: e, callback: function(w, v){this.record.set('value', v); this.grid.fireEvent('change'); } } } );
+                w = App.getTextEditWindow({
+                    title: tr.get('title')
+                    ,data: {
+                        value: e.record.get('value')
+                        ,scope: e
+                        ,callback: function(w, v){
+                            this.originalValue = this.record.get('value');
+                            this.value = v;
+                            this.record.set('value', v);
+                            if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
+                            this.grid.fireEvent('change');
+                        }
+                    }
+                });
                 w.on('hide', e.grid.gainFocus, e.grid);
                 w.show();
                 break;
             case 'html':
                 e.cancel = true;
-                w = App.getHtmlEditWindow( { title: e.record.get('title'), data: { value: e.record.get('value'), scope: e, callback: function(w, v){ this.record.set('value', v); this.grid.fireEvent('change');} } } );
+                w = App.getHtmlEditWindow({
+                    title: tr.get('title')
+                    ,data: {
+                        value: e.record.get('value')
+                        ,scope: e
+                        ,callback: function(w, v){
+                            this.originalValue = this.record.get('value');
+                            this.value = v;
+                            this.record.set('value', v);
+                            if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
+                            this.grid.fireEvent('change');
+                        }
+                    }
+                });
                 if(!Ext.isEmpty(e.grid)) w.on('hide', e.grid.gainFocus, e.grid);
                 w.show();
                 break;
-            default:  return new Ext.form.TextField(); break;//{width: 500}
+            default:
+                return new Ext.form.TextField();
         }
         return false;
-    }
+    };
+
     App.focusFirstField = function(scope){
         scope = Ext.value(scope, this);
         f = function(){
             a = [];
             if(scope.find) a = scope.find('isFormField', true);
-            if(a.length == 0) return;
+            if(a.length < 1) {
+                return;
+            }
             found = false;
             i = 0;
             while( !found && (i<a.length) ){
@@ -744,28 +812,36 @@ function initApp(){
             c = a[i-1];
             if(c.isXType('compositefield'))  c = c.items.first();
             c.focus();
-        }
+        };
         f.defer(500, scope);
-    }
+    };
+
     App.successResponse = function(r){
-        if(r.success == true) return true;
+        if(r.success === true) {
+            return true;
+        }
         Ext.Msg.alert(L.Error, Ext.value(r.msg, L.ErrorOccured));
         return false;
-    }
+    };
+
     App.showTestingWindow =function(){
         if(!App.testWindow) App.testWindow = new CB.TestingWindow({ closeAction: 'hide' });
         App.testWindow.show();
-    }
+    };
+
     App.openUniqueTabbedWidget = function(type, tabPanel, options){
         if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
         tabIdx = App.findTabByType(tabPanel, type);
-        if(Ext.isEmpty(options)) options = {}
+        if(Ext.isEmpty(options)) {
+            options = {};
+        }
         if(tabIdx < 0) {
             w = Ext.create(options, type);
             App.addTab(tabPanel, w);
             tabPanel.setActiveTab(w);
         }else tabPanel.setActiveTab(tabIdx);
-    }
+    };
+
     App.showException = function(e){
         App.hideFailureAlerts = true;
         msg = '';
@@ -776,9 +852,9 @@ function initApp(){
 
         dhf = function(){
             delete App.hideFailureAlerts;
-        }
-        dhf.defer(1500)
-    }
+        };
+        dhf.defer(1500);
+    };
 
     App.openObject = function(template_id, id, e){
 
@@ -798,10 +874,9 @@ function initApp(){
                 break;
             default:
                 return false;
-                break;
         }
         return true;
-    }
+    };
 
     App.clipboard = new CB.Clipboard();
     /* disable back button */
@@ -824,7 +899,8 @@ function initApp(){
             return null;
         }
         return this.Uploader;
-    }
+    };
+
     App.addFilesToUploadQueue = function(FileList, options){
         var fu = App.getFileUploader();
         if(fu) {
@@ -832,10 +908,11 @@ function initApp(){
         } else {
             Ext.Msg.alert(L.Info, 'This browser does not support file uploading from desktop');
         }
-    }
+    };
+
     App.onComponentActivated = function(component){
         clog('component activated', arguments, this);
-    }
+    };
 
 }
 
@@ -853,7 +930,7 @@ function overrides(){
         b4MouseDown : function(e){
             var sm = this.tree.getSelectionModel();
             this.lastClickAt = e.getXY();
-            if(sm != null)
+            if(sm)
                 sm.suspendEvents(true);
             Ext.tree.TreeDragZone.superclass.b4MouseDown.apply(this, arguments);
         }
@@ -863,7 +940,7 @@ function overrides(){
         onMouseUp : function(e){
             var sm = this.tree.getSelectionModel();
             var loc = e.getXY();
-            if(sm != null && (this.lastClickAt == null || (this.lastClickAt[0] == loc[0] && this.lastClickAt[1] == loc[1])) )
+            if(sm && (Ext.isEmpty(this.lastClickAt) || (this.lastClickAt[0] == loc[0] && this.lastClickAt[1] == loc[1])) )
                 sm.resumeEvents();
             else{
                 sm.clearEventQueue();
@@ -900,7 +977,7 @@ function overrides(){
                     this.fireEvent('selectionchange', this);
                 }
             }
-        }
+        };
 
     Ext.grid.RowSelectionModel.prototype.handleMouseDown = function(g, rowIndex, e){
         if(e.button !== 0 || this.isLocked()) return;
@@ -919,7 +996,7 @@ function overrides(){
                 view.focusRow(rowIndex);
             }
         }
-    }
+    };
 
     Ext.calendar.CalendarPanel.prototype.todayText = L.Today;
     Ext.calendar.CalendarPanel.prototype.dayText = L.Day;
@@ -933,10 +1010,14 @@ function overrides(){
 
 }
 
+window.onbeforeunload = function() {
+    return "You work will be lost.";
+};
+
 window.ondragstart = function(e){
     window.dragFromWindow = true;
     return true;
-}
+};
 
 window.ondragenter = function(e){
     e.dataTransfer.dropEffect = 'copy';
@@ -945,13 +1026,13 @@ window.ondragenter = function(e){
         App.fireEvent('dragfilesenter', e);
     }
     return false;
-}
+};
 
 window.ondragover = function(e){
     e.dataTransfer.dropEffect = 'copy';
     e.preventDefault();
     return false;
-}
+};
 
 window.ondrop = function(e){
     e.stopPropagation();
@@ -960,14 +1041,14 @@ window.ondrop = function(e){
         App.fireEvent('filesdrop', e);
     }
     return false;
-}
+};
 
 window.ondragleave = function(e){
-    if(!window.dragFromWindow && ( (e.pageX == 0) && (e.pageY == 0) ) ){
+    if(!window.dragFromWindow && ( (e.pageX == '0') && (e.pageY == '0') ) ){
         App.fireEvent('dragfilesleave', e);
     }
     return false;
-}
+};
 window.ondragend = function(e){
     delete window.dragFromWindow;
-}
+};

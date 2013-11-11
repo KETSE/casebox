@@ -2,12 +2,13 @@
 namespace CB\Objects;
 
 use CB\DB as DB;
+use CB\Util as Util;
 
 /**
  * class for generic casebox objects
  */
 
-class Object
+class Object extends OldObject
 {
     /**
      * object id
@@ -90,7 +91,7 @@ class Object
             $p['tag_id'] = null;
         }
 
-        \CB\fireEvent('beforeNodeDbCreate', $p);
+        \CB\fireEvent('beforeNodeDbCreate', $this);
 
         DB\dbQuery(
             'INSERT INTO tree (
@@ -115,7 +116,7 @@ class Object
 
         $this->createCustomData();
 
-        \CB\fireEvent('nodeDbCreate', $p);
+        \CB\fireEvent('nodeDbCreate', $this);
 
         return $this->id;
     }
@@ -128,41 +129,27 @@ class Object
     {
         $p = &$this->data;
 
+        $p['data'] = Util\toJSONArray(@$p['data']);
+
         DB\dbQuery(
             'INSERT INTO objects (
                 id
                 ,`title`
+                ,`custom_title`
+                ,`data`
                 ,cid)
-            VALUES($1, $2, $3)
+            VALUES($1, $2, $3, $4, $5)
             ON DUPLICATE KEY
             UPDATE `title` = $2',
             array(
                 $this->id
                 ,$p['name']
+                ,$this->getFieldValue('_title')
+                ,json_encode($p['data'])
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
 
-        /* set internal title field for object if present in its template */
-        DB\dbQuery(
-            'INSERT INTO objects_data (
-                object_id
-                ,field_id
-                ,value)
-            SELECT $1
-                 , id
-                 , $2
-            FROM templates_structure
-            WHERE template_id = $3
-                AND name = \'_title\'
-            ON DUPLICATE KEY
-            UPDATE value = $2',
-            array(
-                $this->id
-                ,$p['name']
-                ,$p['template_id']
-            )
-        ) or die(DB\dbQueryError());
     }
 
     /**
@@ -201,7 +188,6 @@ class Object
         if ($r = $res->fetch_assoc()) {
             $this->data = $r;
 
-            // ($this->data['template_id'] != $this->id)
             if (!empty($this->data['template_id']) && $this->loadTemplate) {
                 $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
             }
@@ -217,7 +203,7 @@ class Object
      * load custom data for $this->id
      *
      * in this partucular case, for objects, this method sets
-     * gridData into $this->data
+     * data into $this->data
      * @return void
      */
     protected function loadCustomData()
@@ -226,6 +212,7 @@ class Object
         $res = DB\dbQuery(
             'SELECT title
                 ,custom_title
+                ,data
                 ,iconCls
                 ,private_for_user
             FROM objects
@@ -234,55 +221,19 @@ class Object
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
+            if (!empty($r['data'])) {
+                $r['data'] = json_decode($r['data'], true);
+            }
             $this->data = array_merge($this->data, $r);
         }
         $res->close();
 
-        /* load grid data */
-        $rez = array();
-        // managers can see private for user data
-        $canManage = \CB\Security::canManage();
-
-        $res = DB\dbQuery(
-            'SELECT concat(\'f\', field_id, \'_\', duplicate_id) field
-                ,id
-                ,`value`
-                ,info
-                ,files
-                ,private_for_user `pfu`
-            FROM objects_data
-            WHERE object_id = $1',
-            $this->id
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $field = $r['field'];
-            unset($r['field']);
-            if (empty($r['pfu']) || ($r['pfu'] == $_SESSION['user']['id']) || $canManage) {
-                $rez['values'][$field] = $r;
-            } else {
-                $rez['hideFields'][] = $field;
-            }
+        /* if data is null then this object has not been converted to new structure.
+            Load Old data an convert it to new format
+        */
+        if ((!isset($this->data['data']) || is_null($this->data['data'])) && $this->loadTemplate) {
+            $this->loadOldGridDataToNewFormat();
         }
-        $res->close();
-
-        $res = DB\dbQuery(
-            'SELECT id
-                ,pid
-                ,field_id
-            FROM objects_duplicates
-            WHERE object_id = $1
-            ORDER BY id',
-            $this->id
-        ) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-            $rez['duplicateFields'][$r['field_id']][$r['id']] = $r['pid'];
-        }
-        $res->close();
-
-        $this->data['gridData'] = $rez;
-
-        return $rez;
     }
 
     /**
@@ -307,7 +258,7 @@ class Object
             throw new \Exception("No object id specified for update", 1);
         }
 
-        \CB\fireEvent('beforeNodeDbUpdate', $this->data);
+        \CB\fireEvent('beforeNodeDbUpdate', $this);
 
         $tableFields = array(
             'pid'
@@ -352,7 +303,7 @@ class Object
 
         $this->updateCustomData();
 
-        \CB\fireEvent('nodeDbUpdate', $this->data);
+        \CB\fireEvent('nodeDbUpdate', $this);
 
         return true;
     }
@@ -369,158 +320,14 @@ class Object
             $templateData = $this->template->getData();
         }
 
-        $fields = array();
-
-        /* save object duplicates from grid */
-        $duplicate_ids = array(0 => 0);
-        if (isset($d['gridData']['duplicateFields'])) {
-            $sql = 'INSERT INTO objects_duplicates
-                    (pid
-                    ,object_id
-                    ,field_id)
-                VALUES ($1, $2, $3)';
-            foreach ($d['gridData']['duplicateFields'] as $field_id => $fv) {
-                $i = 0;
-                foreach ($fv as $duplicate_id => $duplicate_pid) {
-                    if (!is_numeric($duplicate_id)) {
-                        DB\dbQuery(
-                            $sql,
-                            array(
-                                $duplicate_ids[$duplicate_pid]
-                                ,$d['id']
-                                ,$field_id
-                            )
-                        ) or die(DB\dbQueryError());
-                        $duplicate_ids[$duplicate_id] = DB\dbLastInsertId();
-                    } else {
-                        $duplicate_ids[$duplicate_id] = $duplicate_id;
-                    }
-                    $fields[$field_id]['duplicates'][$i]['id'] = $duplicate_id;
-                    $i++;
-                }
-            }
-        }
-        // delete unused duplicate ids
-        DB\dbQuery(
-            'DELETE
-            FROM objects_duplicates
-            WHERE object_id = $1
-                AND (id NOT IN ('.implode(', ', array_values($duplicate_ids)).'))
-                '.(
-                    \CB\Security::isAdmin() // filter secure fields
-                    ? ''
-                    : ' AND id NOT IN
-                        (SELECT duplicate_id
-                         FROM objects_data
-                         WHERE object_id = $1
-                             AND duplicate_id <> 0
-                             AND private_for_user <> '.$_SESSION['user']['id'].'
-                        )'
-            ),
-            $d['id']
-        ) or die(DB\dbQueryError());
-        /* end of save object duplicates from grid */
-
-        /* save object values from grid */
-        $ids = array(0);
-        if (isset($d['gridData'])) {
-            foreach ($d['gridData']['values'] as $f => $fv) {
-                if (!isset($fv['value'])) {
-                    $fv['value'] = null;
-                }
-                if (!isset($fv['info'])) {
-                    $fv['info'] = null;
-                }
-                if (isset($fv['pfu']) && empty($fv['pfu'])) {
-                    $fv['pfu'] = null;
-                }
-                $f = explode('_', $f);
-                $field_id = substr($f[0], 1);
-
-                if (empty($field_id)) {
-                    continue;
-                }
-
-                $duplicate_id = intval($duplicate_ids[$f[1]]);
-                $duplicate_index = 0;
-                if (isset($fields[$field_id]['duplicates'])) {
-                    foreach ($fields[$field_id]['duplicates'] as $k => $v) {
-                        if (!empty($v['id']) && is_array($v['id'])) {
-                            if ($v['id'] == $duplicate_id) {
-                                $fields[$field_id]['duplicates'][$k]['index'] = $duplicate_index;
-                            } else {
-                                $duplicate_index++;
-                            }
-                        }
-                    }
-                }
-
-                if (!is_scalar($fv['value']) && !is_null($fv['value'])) {
-                    $fv['value'] = json_encode($fv['value']);
-                }
-
-                @$params = array(
-                    $d['id']
-                    ,$field_id
-                    ,$duplicate_id
-                    ,$fv['value']
-                    ,$fv['info']
-                    ,$fv['files']
-                    ,$fv['pfu']
-                );
-                DB\dbQuery(
-                    'INSERT INTO objects_data
-                        (object_id
-                        ,field_id
-                        ,duplicate_id
-                        ,`value`
-                        ,info
-                        ,files
-                        ,private_for_user)
-                    VALUES ($1
-                        ,$2
-                        ,$3
-                        ,$4
-                        ,$5
-                        ,$6
-                        ,$7) ON DUPLICATE KEY
-                    UPDATE
-                        id = last_insert_id(id)
-                        ,object_id = $1
-                        ,field_id = $2
-                        ,duplicate_id = $3
-                        ,`value` = $4
-                        ,info = $5
-                        ,files = $6
-                        ,private_for_user = $7',
-                    $params
-                ) or die(DB\dbQueryError());
-                array_push($ids, DB\dbLastInsertId());
-            }
-        }
-
-        DB\dbQuery(
-            'DELETE
-            FROM objects_data
-            WHERE object_id = $1
-                AND (id NOT IN ('.implode(', ', $ids).'))
-                '.(
-                    \CB\Security::isAdmin() // filter secure fields
-                    ? ''
-                    : ' AND ((private_for_user is null)
-                            OR (private_for_user = '.$_SESSION['user']['id'].')
-                            )'
-            ),
-            $d['id']
-        ) or die(DB\dbQueryError());
-
         // prepare params
         if (empty($d['title'])) {
             $d['title'] = ucfirst($this->getAutoTitle());
         }
 
-        if (empty($d['custom_title'])) {
-            $d['custom_title'] = $this->getFieldValue('_title');
+        $customTitle = $this->getFieldValue('_title');
+        if (!empty($customTitle)) {
+            $d['custom_title'] = $customTitle;
         }
 
         if (empty($d['date'])) {
@@ -529,6 +336,9 @@ class Object
 
         if (empty($d['date_end'])) {
             $d['date_end'] = $this->getFieldValue('_date_end');
+        }
+        if (empty($d['data'])) {
+            $d['data'] = array();
         }
 
         // updating object properties into the db  /*(empty($object_iconCls) ? '' : ', iconCls = $7')/**/
@@ -540,7 +350,8 @@ class Object
                 ,date_end = $5
                 ,iconCls = $6
                 ,private_for_user = $7
-                ,uid = $8
+                ,`data` = $8
+                ,uid = $9
                 ,udate = CURRENT_TIMESTAMP
             WHERE id = $1',
             array(
@@ -551,6 +362,7 @@ class Object
                 ,$d['date_end']
                 ,$templateData['iconCls']
                 ,@$d['pfu']
+                ,json_encode($d['data'])
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
@@ -560,28 +372,89 @@ class Object
     }
 
     /**
+     * delete an object from tree or marks it as deleted
+     * @param boolean $permanent Specify true to delete the object permanently.
+     *                            Default to false.
+     * @return void
+     */
+    public function delete($permanent = false)
+    {
+        \CB\fireEvent('beforeNodeDbDelete', $this);
+
+        if ($permanent) {
+            DB\dbQuery(
+                'UPDATE tree
+                SET did = $2
+                    ,dstatus = 1
+                    ,ddate = CURRENT_TIMESTAMP
+                    ,updated = (updated | 1)
+                WHERE id = $1',
+                array(
+                    $this->id
+                    ,$_SESSION['user']['id']
+                )
+            ) or die(DB\dbQueryError());
+            DB\dbQuery(
+                'CALL p_mark_all_childs_as_deleted($1, $2)',
+                array(
+                    $id
+                    ,$_SESSION['user']['id']
+                )
+            ) or die(DB\dbQueryError());
+        } else {
+            DB\dbQuery(
+                'DELETE from tree WHERE id = $1',
+                $this->id
+            ) or die(DB\dbQueryError());
+        }
+
+        $this->deleteCustomData($permanent);
+
+        \CB\fireEvent('nodeDbDelete', $this);
+    }
+
+    /**
+     * delete custom data for an object
+     *
+     * use this method (overwrite it) for descendant classes
+     * when there is need to delete custom data on object delete
+     * @return coid
+     */
+    protected function deleteCustomData()
+    {
+
+    }
+
+    /**
      * get a field value from current objects data ($this->data)
-     * @param  int | varchar $field          field name or its id
-     * @param  integer       $duplication_id optional. default 0
+     *
+     * TODO: this function should be reviewed for correct work with duplicates and subfields
+     *
+     * @param  varchar $fieldName  field name
+     * @param  integer $valueIndex optional value duplication index. default 0
      * @return variant
      */
-    public function getFieldValue($field, $duplication_id = 0)
+    public function getFieldValue($fieldName, $valueIndex = 0)
     {
         if (empty($this->template)) {
             return null;
         }
-        $field = $this->template->getField($field);
-        if (empty($field)) {
-            return null;
-        }
 
-        $field_index = 'f'.$field['id'].'_'.$duplication_id;
-        if (empty($this->data['gridData']['values'])) {
-            return null;
-        }
-        $values = &$this->data['gridData']['values'];
-        if (!empty($values[$field_index])) {
-            return $values[$field_index]['value'];
+        if (!empty($this->data['data'][$fieldName])) {
+            $v = &$this->data['data'][$fieldName];
+            if (is_scalar($v)) {
+                return $v;
+            }
+            if (isset($v['value'])) {
+                return $v['value'];
+            }
+            $v = &$v[0];
+
+            if (isset($v['value'])) {
+                return $v['value'];
+            }
+
+            return $v;
         }
 
         return null;
@@ -612,24 +485,28 @@ class Object
         );
 
         /* replace field values */
-        if (!empty($this->data['gridData']['values'])) {
-            foreach ($this->data['gridData']['values'] as $fk => $fv) {
-                $field_id = explode('_', $fk);
-                $field_id = substr(array_shift($field_id), 1);
-                $field = $this->template->getField($field_id);
-                $v = $this->template->formatValueForDisplay($field, $fv['value'], 'text');
+        if (!empty($this->data['data'])) {
+            foreach ($this->data['data'] as $fieldName => $fv) {
+                $field = $this->template->getField($fieldName);
+                $value = is_scalar($fv)
+                    ? $fv
+                    : (isset($fv['value'])
+                        ? $fv['value']
+                        : $fv[0]['value']
+                    );
+
+                $v = $this->template->formatValueForDisplay($field, $value, 'text');
                 if (is_array($v)) {
                     $v = implode(',', $v);
                 }
-                $rez = str_replace('{f'.$field_id.'}', $v, $rez);
-                $rez = str_replace('{'.$field['name'].'}', $v, $rez);
-                $rez = str_replace('{'.$field['name'].'_info}', @$fv['info'], $rez);
+                $rez = str_replace('{'.$fieldName.'}', $v, $rez);
+                // $rez = str_replace('{'.$fieldName.'_info}', @$fv['info'], $rez);
             }
         }
 
         //replacing field titles into object title variable
         foreach ($templateData['fields'] as $fk => $fv) {
-            $rez = str_replace('{f'.$fk.'t}', $fv['title'], $rez);
+            $rez = str_replace('{f'.$fv['name'].'t}', $fv['title'], $rez);
 
         }
         // evaluating the title if contains php code
@@ -654,6 +531,48 @@ class Object
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * get linear array of properties of object properties
+     *
+     * @param array $data template properties
+     */
+    public function getLinearData()
+    {
+        $rez = $this->getLinearNodeData($this->data['data']);
+
+        return $rez;
+    }
+
+    protected function getLinearNodeData($data)
+    {
+        $rez = array();
+        foreach ($data as $fieldName => $fieldValue) {
+            if (is_scalar($fieldValue) || is_null($fieldValue) || isset($fieldValue['value'])) {
+                $fieldValue = array($fieldValue);
+            }
+            foreach ($fieldValue as $fv) {
+                $value = array('name' => $fieldName);
+                if (is_scalar($fv) || is_null($fv)) {
+                    $value['value'] = $fv;
+                } elseif (isset($fv['value'])) {
+                    $value['value'] = $fv['value'];
+                    if (isset($value['info'])) {
+                        $value['info'] = $fv['info'];
+                    }
+                    if (isset($value['files'])) {
+                        $value['files'] = $fv['files'];
+                    }
+                }
+                $rez[] = $value;
+                if (!empty($fv['childs'])) {
+                    $rez = array_merge($rez, $this->getLinearNodeData($fv['childs']));
+                }
+            }
+        }
+
+        return $rez;
     }
 
     /**
@@ -865,8 +784,6 @@ class Object
 
     protected function copyCustomDataTo($targetId)
     {
-        // - objects, objects_data and objects_duplicates
-
         // copy data from objects table
         DB\dbQuery(
             'INSERT INTO `objects`
@@ -877,6 +794,7 @@ class Object
                 ,`date_end`
                 ,`iconCls`
                 ,`private_for_user`
+                ,`data`
                 ,`cid`
                 ,`cdate`
                 ,`uid`
@@ -889,6 +807,7 @@ class Object
                 ,`date_end`
                 ,`iconCls`
                 ,`private_for_user`
+                ,`data`
                 ,`cid`
                 ,`cdate`
                 ,$3
@@ -901,102 +820,6 @@ class Object
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
-
-        /* copy data from objects_duplicates table
-         We have to copy records from objects_duplicates firstly
-         because duplicate ids will change */
-        $oldDuplicates = array();
-        $newDuplicateIds = array( '0' => 0);
-
-        $res = DB\dbQuery(
-            'SELECT
-                `id`
-                ,`pid`
-                ,`object_id`
-                ,`field_id`
-            FROM `objects_duplicates`
-            WHERE object_id = $1 ORDER BY id',
-            $this->id
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $oldDuplicates[$r['id']] = $r;
-        }
-        $res->close();
-        foreach ($oldDuplicates as $duplicate_id => $values) {
-            DB\dbQuery(
-                'INSERT INTO `objects_duplicates`
-                    (`pid`
-                    ,`object_id`
-                    ,`field_id`)
-                VALUES ($1, $2, $3)',
-                array(
-                    $values['pid']
-                    ,$targetId
-                    ,$values['field_id']
-                )
-            ) or die(DB\dbQueryError());
-            $newDuplicateIds[$duplicate_id] = DB\dbLastInsertId();
-        }
-
-        // now update all old pids for duplicates to new generated ids
-        foreach ($oldDuplicates as $duplicate_id => $values) {
-            if ($values['pid'] == 0) {
-                continue;
-            }
-            DB\dbQuery(
-                'UPDATE objects_duplicates
-                SET pid = $2
-                WHERE id = $1',
-                array(
-                    $newDuplicateIds[$duplicate_id]
-                    ,$newDuplicateIds[$values['pid']]
-                )
-            ) or die(DB\dbQueryError());
-        }
-        /* end of copy data from objects_duplicates table */
-
-        // copy data from objects_data table.
-        $objectData = array();
-        $res = DB\dbQuery(
-            'SELECT
-                `field_id`
-                ,`duplicate_id`
-                ,`value`
-                ,`info`
-                ,`files`
-                ,`private_for_user`
-            FROM `objects_data`
-            WHERE object_id = $1',
-            $this->id
-        ) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-            $objectData[] = $r;
-        }
-        $res->close();
-
-        foreach ($objectData as $r) {
-            DB\dbQuery(
-                'INSERT INTO `objects_data`
-                    (`object_id`
-                    ,`field_id`
-                    ,`duplicate_id`
-                    ,`value`
-                    ,`info`
-                    ,`files`
-                    ,`private_for_user`)
-                VALUES($1, $2, $3, $4, $5, $6, $7)',
-                array(
-                    $targetId
-                    ,$r['field_id']
-                    ,'0'.@$newDuplicateIds[$r['duplicate_id']]
-                    ,$r['value']
-                    ,$r['info']
-                    ,$r['files']
-                    ,$r['private_for_user']
-                )
-            ) or die(DB\dbQueryError());
-        }
     }
 
     /**

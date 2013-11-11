@@ -46,14 +46,14 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ids = String(v).split(',');
                 data = [];
                 Ext.each(ids, function(id){
-                     idx = this.findExact('id', parseInt(id));
+                     idx = this.findExact('id', parseInt(id, 10));
                     if(idx >= 0) data.push(this.getAt(idx).data);
                 }, this);
                 return data;
             }
             ,checkRecordExistance: function(data){
                 if(Ext.isEmpty(data)) return false;
-                idx = this.findExact('id', parseInt(data.id));
+                idx = this.findExact('id', parseInt(data.id, 10));
                 if(idx< 0){
                     r = new this.recordType(data);
                     r.set('iconCls', getItemIcon(data));
@@ -270,10 +270,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
         toolbarItems.push(this.actions.createTask);
 
-        if(!this.data.tags) {
-            this.data.tags = {};
-        }
-
         northRegionItems = [this.topFieldSet];
 
         this.grid = Ext.create({
@@ -341,9 +337,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     ,onSaveClick: function(){
         this.saveForm();
     }
-    ,onTagsChange: function(ed, newValue){
-        this.fireEvent('change'); //this.setDirty(true);
-    }
     ,hasMainFile: function(){
         return (this.data.mainFile && !isNaN(this.data.mainFile.id));
     }
@@ -354,6 +347,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             return this.getCurrentFieldValue(r.get('id'), 0);
         }
         return null;
+    }
+    ,getFieldValue: function(fieldName, valueIndex) {
+        this.templateData
     }
     ,getCurrentFieldValue: function(field_id, duplication_id){
         ed = this.topFieldSet.find('name', 'f'+ field_id+'_0');
@@ -374,9 +370,10 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         return App.mainViewPort;
     }
     ,setFormValues: function(){
-        lastActiveTabIndex = this.tabPanel.items.indexOf(this.tabPanel.activeTab);
-        if(Ext.isEmpty(this.data.gridData)) this.data.gridData = {};
-        if(!Ext.isDefined(this.data.tags)) this.data.tags = {};
+        var lastActiveTabIndex = this.tabPanel.items.indexOf(this.tabPanel.activeTab);
+        if(Ext.isEmpty(this.data.data)) {
+            this.data.data = {};
+        }
         /* adding top fields and fields editable in tabsheet */
         if(Ext.isDefined(this.topFieldSet)){
             this.topFieldSet.removeAll(true);
@@ -389,7 +386,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         */
         /* we admit that the template property is available */
         this.templateData = {};
-        idx = CB.DB.templates.findExact('id', parseInt(this.data.template_id));
+        idx = CB.DB.templates.findExact('id', parseInt(this.data.template_id, 10));
         if(idx >= 0) this.templateData = CB.DB.templates.getAt(idx).data;
 
         if(Ext.isEmpty(this.templateData.cfg)) {
@@ -402,31 +399,62 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             this.doClose();
             return;
         }
-        tabPanelFieldItems = [];
+
+        if(!this.helperTree) {
+            this.helperTree = new CB.VerticalEditGridHelperTree();
+        }
+        this.helperTree.loadData(this.data.data, this.templateStore);
+
+        var tabPanelFieldItems = [];
         this.templateStore.each(function(r){
             if((r.get('cfg').showIn == 'top') && Ext.isDefined(this.topFieldSet)){
-                v = this.data.gridData.values ? this.data.gridData.values['f'+r.get('id')+'_0'] : (Ext.isDefined(r.get('cfg').value) ? {value: r.get('cfg').value} : {});
-                if(!v) v = {};
+                var v = this.data.data
+                    ? this.data.data[r.get('name')]
+                    : (Ext.isDefined(r.get('cfg').value)
+                        ? r.get('cfg').value
+                        : ''
+                    );
 
-                if((r.get('name') == '_title') && isNaN(this.data.id) && !Ext.isEmpty(this.data.custom_title))
-                    v.value = this.data.custom_title;
-                //if(it's object_date_start field and it is a new object then we are setting it's value to today)
-                if((r.get('name') == '_date_start') && isNaN(this.data.id))
-                    v.value = Ext.isEmpty(this.data.date_start) ? new Date() : this.data.date_start;
-                //if there is a date set for the date field, we are parsing it to a date value
-                if( (r.get('type') == 'date') && Ext.isString(v.value) && !Ext.isEmpty(v.value) )
-                    v.value = Date.parseDate(v.value.substr(0,10), 'Y-m-d');
-                if( (r.get('type') == 'datetime') && Ext.isString(v.value) && !Ext.isEmpty(v.value) )
-                    v.value = Date.parseDate(v.value, (v.value.indexOf('T') >= 0) ? 'Y-m-dTH:i:s' : 'Y-m-d H:i:s' );
-
-                /* here we are adding fields to the top fieldSet */
-                pidValue = null;
-                disabled = false;
-                if( Ext.isDefined(r.get('cfg').dependency) && !Ext.isEmpty(r.get('pid'))){
-                    pidValue = this.data.gridData.values? Ext.value(this.data.gridData.values['f'+r.get('pid')+'_0'], {}).value : null;
-                    disabled = Ext.isEmpty(pidValue);
+                if (!v) {
+                    v = {value: null};
+                }
+                if (!Ext.isDefined(v.value)) {
+                    v = {value: v};
                 }
 
+                if ((r.get('name') == '_title') && isNaN(this.data.id) && !Ext.isEmpty(this.data.custom_title)) {
+                    v.value = this.data.custom_title;
+                }
+                //if(it's object_date_start field and it is a new object then we are setting it's value to today)
+                if((r.get('name') == '_date_start') && isNaN(this.data.id)) {
+                    v.value = Ext.isEmpty(this.data.date_start)
+                        ? new Date()
+                        : this.data.date_start;
+                }
+                //if there is a date set for the date field, we are parsing it to a date value
+                if ((r.get('type') == 'date') && Ext.isString(v.value) && !Ext.isEmpty(v.value)) {
+                    v.value = Date.parseDate(v.value.substr(0,10), 'Y-m-d');
+                }
+
+                if ((r.get('type') == 'datetime') && Ext.isString(v.value) && !Ext.isEmpty(v.value)) {
+                    v.value = Date.parseDate(v.value, (v.value.indexOf('T') >= 0) ? 'Y-m-dTH:i:s' : 'Y-m-d H:i:s' );
+                }
+
+                /* here we are adding fields to the top fieldSet */
+                var pidValue = null;
+                var disabled = false;
+                if( Ext.isDefined(r.get('cfg').dependency) && !Ext.isEmpty(r.get('pid'))){
+                    var pidRowIndex = this.templateStore.findExact('id', r.get('pid'));
+                    var pidRow = this.templateStore.getAt(pidRowIndex);
+
+                    pidValue = this.data.data
+                        ? Ext.value(this.data.data[pidRow.get('name')], {})
+                        : null;
+                    if(pidValue['value']) {
+                        pidValue = pidValue['value'];
+                    }
+                    disabled = Ext.isEmpty(pidValue);
+                }
                 ed = App.getTypeEditor(r.get('type'), {
                     ownerCt: this
                     ,record: r
@@ -437,50 +465,38 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 if(ed){
                     ed.fieldLabel = r.get('title');
                     ed.disabled = disabled;
-                    if(!Ext.isEmpty(r.get('cfg').hint)) ed.fieldLabel = '<span title="'+r.get('cfg').hint+'">'+ed.fieldLabel+'</span>';
-                    ed.name = 'f' + r.get('id') + '_0';
-                    //setting the automatic title of the object
-                    if(ed.isXType(Ext.ux.TitleField)) ed.setValues(this.data.title, v.value);
-                    else ed.setValue(v.value);
-
-                    if(r.get('type') == '_contact'){
-                        ed.params = {
-                            pid : r.get('pid')
-                            ,multiValued: (r.data.cfg.multiValued === true)
-                            ,dependency: r.data.cfg.dependency
-                            ,tags: r.data.cfg.tags
-                            ,templates: r.data.cfg.templates
-                        };
-                        ed.on('focus', this.onFocusContactField, this);
-                    }else if(r.get('type') == '_case'){
-                        ed.params = {
-                            pid : r.get('pid')
-                            ,multiValued: (r.data.cfg.multiValued === true)
-                            ,dependency: r.data.cfg.dependency
-                            ,tags: r.data.cfg.tags
-                        };
-                    }else if(r.get('type') == '_case_object'){
-                        ed.params = {
-                            pid: r.get('pid')
-                            ,multiValued: (r.data.cfg.multiValued === true)
-                            ,dependency: r.data.cfg.dependency
-                            ,tags: r.data.cfg.tags
-                            ,templates: r.data.cfg.templates
-                            ,excludeIds: this.data.id
-                        };
+                    if(!Ext.isEmpty(r.get('cfg').hint)) {
+                        ed.fieldLabel = '<span title="'+r.get('cfg').hint+'">'+ed.fieldLabel+'</span>';
                     }
+                    ed.name = 'f' + r.get('name');
+                    //setting the automatic title of the object
+                    if(ed.isXType(Ext.ux.TitleField)) {
+                        ed.setValues(this.data.title, v.value);
+                    } else {
+                        ed.setValue(v.value);
+                    }
+
                     this.topFieldSet.add(ed);
                     //ed.enableBubble('change');
                 }
             }else if(r.get('cfg').showIn == 'tabsheet'){
-                v = this.data.gridData.values ? this.data.gridData.values['f'+r.get('id')+'_0'] : (Ext.isDefined(r.get('cfg').value) ? {value: r.get('cfg').value} : {});
+                v = this.data.data
+                    ? this.data.data[r.get('name')]
+                    : (Ext.isDefined(r.get('cfg').value)
+                        ? r.get('cfg').value
+                        : {}
+                    );
                 if(!v) v = {};
+                if(!v.value) {
+                    v = {value: v};
+                }
+
                 var cfg = {
                     border: false
                     ,hideBorders: true
                     ,title: r.get('title')
                     ,isTemplateField: true
-                    ,name: 'f'+r.get('id')+'_0'
+                    ,name: 'f'+r.get('name')
                     ,value: v.value
                     ,listeners: {
                         scope: this
@@ -495,7 +511,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                         break;
                 }
             }
-        }, this);
+        }
+        ,this
+        );
         /* end of adding top fields and fields editable in tabsheet */
 
         if(!this.loaded){
@@ -549,12 +567,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.items.first().items.first().syncSize();
         //setting all form values, inclusive in the grid
 
-        tagsItem = this.mainToolBar.find('iconCls', 'icon-tag')[0];
-        if(tagsItem) tagsItem.menu.items.first().setValue(Ext.value(this.data.tags[3], []));
-        userTagsItem = this.mainToolBar.find('iconCls', 'icon-tag-label')[0];
-        if(userTagsItem) userTagsItem.menu.items.first().setValue(Ext.value(this.data.tags[4], []));
-
-        Ext.each(tabPanelFieldItems, function(i){this.tabPanel.insert(tpInsertIndex++, i);}, this);
+       Ext.each(tabPanelFieldItems, function(i){this.tabPanel.insert(tpInsertIndex++, i);}, this);
         lastActiveTabIndex = (lastActiveTabIndex > 0) ? lastActiveTabIndex : 0;
         p = this.tabPanel.items.itemAt(lastActiveTabIndex);
         if(!p || !p.isVisible()) {
@@ -596,17 +609,18 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         );
     }
     ,getFormValues: function(){
-        if(!Ext.isDefined(this.data.gridData)) this.data.gridData = {};
-        this.data.gridData.values = {};
-        this.grid.readValues(); // grid will reset the this.data.gridData array to only its values, so we read other values after it will do its data read
+        if(!Ext.isDefined(this.data.data)) {
+            this.data.data = {};
+        }
+        this.grid.readValues(); // grid will reset the this.data.data array to only its values, so we read other values after it will do its data read
+
         /* reading values from top fieldSet */
-        if(Ext.isEmpty(this.data.tags)) this.data.tags = {};
         if(Ext.isDefined(this.topFieldSet))
             this.topFieldSet.items.each(function(i){
-                if(( i.name == 'tags' ) || (i.name == 'user_tags' )) this.data.tags[i.tag_level] = i.getValue();
-                else{
-                    this.data.gridData.values[i.name] = { value: i.getValue()};
-                    if( (i.isXType(Ext.ux.TitleField)) && (!i.hasCustomValue)) this.data.gridData.values[i.name].value = '';
+                fieldName = i.name.substr(1);
+                this.data.data[fieldName] = i.getValue();
+                if( (i.isXType(Ext.ux.TitleField)) && (!i.hasCustomValue)) {
+                    this.data.data[fieldName] = '';
                 }
             }, this);
         /* reading values from tabPanel */
@@ -614,7 +628,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             this.tabPanel.items.each(
                 function(i){
                     if(i.isTemplateField) {
-                        this.data.gridData.values[i.name] = { value: i.getValue() };
+                        this.data.data[i.name.substr(1)] = i.getValue();
                     }
                 }
                 ,this

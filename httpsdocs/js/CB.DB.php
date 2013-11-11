@@ -190,48 +190,43 @@ $res->close();
 foreach ($templates as $t => $f) {
     $sf = array();
     sortTemplateRows($f, null, $sf);
-    echo 'CB.DB.template'.$t.' = new Ext.data.JsonStore({'.
-    'autoLoad: true'.
-    ',baseParams: {template_id: '.$t.'}'.
-    ',fields: ["id", "pid","tag","level","name", "title", "type", "order", {name: "cfg", convert: function(v, r){ return Ext.isEmpty(v) ? {} : v}}'.
-    ']'.
-    ',proxy: new Ext.data.MemoryProxy('.(empty($sf) ? '' : json_encode($sf)).')'.
-    '});';
+    echo 'CB.DB.template'.$t.' = new CB.DB.TemplateStore({data:'.json_encode($sf).'});';
 }
 
 ?>
-    reloadTemplates = function(){
-        CB.DB.templates.reload({
-            callback: function(){
-                CB_Templates.getTemplatesStructure(function(r, e){
-                    Ext.iterate(CB.DB, function(k, st){
-                        if (k.substr(0, 8) == 'template') {
-                            tid = k.substr(8);
-                            if (!isNaN(tid)) {
-                                st.removeAll();
-                                if(r.data[tid]) st.loadData(r.data[tid]);
-                            }
+reloadTemplates = function(){
+    CB.DB.templates.reload({
+        callback: function(){
+            CB_Templates.getTemplatesStructure(function(r, e){
+                Ext.iterate(CB.DB, function(k, st){
+                    if (k.substr(0, 8) == 'template') {
+                        tid = k.substr(8);
+                        if (!isNaN(tid)) {
+                            st.removeAll();
+                            if(r.data[tid]) st.loadData(r.data[tid]);
                         }
-                    })
+                    }
                 })
+            })
+        }
+    })
+}
+reloadThesauri = function(){
+    CB.DB.thesauri.reload({callback: function(){
+        Ext.iterate(CB.DB, function(k, st){
+            if (k.substr(0, 13) == 'ThesauriStore') {
+                thesauriId = k.substr(13);
+                if (!isNaN(thesauriId)) {
+                    st.removeAll();
+                    data = CB.DB.thesauri.queryBy(function(record, id){ return (record.get('pid') == thesauriId); });
+                    st.add(data.items);
+                }
             }
         })
     }
-    reloadThesauri = function(){
-        CB.DB.thesauri.reload({callback: function(){
-            Ext.iterate(CB.DB, function(k, st){
-                if (k.substr(0, 13) == 'ThesauriStore') {
-                    thesauriId = k.substr(13);
-                    if (!isNaN(thesauriId)) {
-                        st.removeAll();
-                        data = CB.DB.thesauri.queryBy(function(record, id){ return (record.get('pid') == thesauriId); });
-                        st.add(data.items);
-                    }
-                }
-            })
-        }
-        })
-    }
+    })
+}
+
 createDirectStores = function(){
     if (typeof(CB_Security) == 'undefined') {
         createDirectStores.defer(500);
@@ -306,7 +301,7 @@ createDirectStores = function(){
             return (idx >=0 ) ? this.getAt(idx).get('iconCls') : '';
         }
         ,getType: function(id){
-            idx = this.findExact('id', parseInt(id))
+            idx = this.findExact('id', parseInt(id, 10))
 
             return (idx >=0 ) ? this.getAt(idx).get('type') : '';
         }
@@ -454,99 +449,3 @@ function getThesauriStore(thesauriId)
 
     return CB.DB[storeName];
 }
-
-/* generic class for objects store, used in different components */
-CB.DB.objectsStore = Ext.extend(Ext.data.JsonStore, {
-    constructor: function(){
-        CB.DB.objectsStore.superclass.constructor.call(this, {
-            fields: [
-                {name: 'id', type: 'int'}
-                ,'name'
-                ,{name: 'date', type: 'date'}
-                ,{name: 'type', type: 'int'}
-                ,{name: 'subtype', type: 'int'}
-                ,{name: 'template_id', type: 'int'}
-                ,{name: 'status', type: 'int'}
-                ,'iconCls'
-            ]
-        });
-    }
-    ,initComponent: function(){
-        /*Ext.apply(this, {
-            reader: new Ext.data.JsonReader({},[
-                {name: 'id', type: 'int'}
-                ,'name'
-                ,{name: 'date', type: 'date'}
-                ,{name: 'type', type: 'int'}
-                ,{name: 'subtype', type: 'int'}
-                ,{name: 'template_id', type: 'int'}
-                ,{name: 'status', type: 'int'}
-                ,'iconCls'
-            ]
-            )
-            ,getTexts: getStoreNames
-        });/**/
-        CB.DB.objectsStore.superclass.initComponent.apply(this, arguments);
-    }
-    ,getData: function(v){
-        if(Ext.isEmpty(v)) return [];
-        ids = String(v).split(',');
-        data = [];
-        Ext.each(ids, function(id){
-             idx = this.findExact('id', parseInt(id));
-            if(idx >= 0) data.push(this.getAt(idx).data);
-        }, this)
-
-        return data;
-    }
-    ,checkRecordExistance: function(data){
-        if(Ext.isEmpty(data)) return false;
-        idx = this.findExact('id', parseInt(data.id));
-        if (idx < 0) {
-            r = new this.recordType(data);
-            r.set('iconCls', getItemIcon(data));
-            this.add(r);
-        }
-    }
-})
-
-<?php
-/*
-CB.DB.tasksStoreConfig = {
-    autoLoad: true
-    ,paramsAsHash: true
-    ,sortInfo: { field: 'cdate', direction: 'ASC' }
-    ,reader: new Ext.data.JsonReader({
-            idProperty: 'id'
-            ,root: 'data'
-            ,fields: [
-                {name:'id', type: 'int'}
-                ,{name: 'case_id', type: 'int'}
-                ,{name: 'object_id', type: 'int'}
-                ,'title',
-                ,{name: 'date_end', type: 'date', dateFormat: 'Y-m-d'}
-                ,{name: 'missed', type: 'int'}
-                ,{name: 'type', type: 'int'}
-                ,{name: 'privacy', type: 'int'}
-                ,'responsible_user_ids'
-                ,'description'
-                ,'parent_ids'
-                ,'child_ids'
-                ,'reminds'
-                ,{name: 'status', type: 'int'}
-                ,{name: 'cid', type: 'int'}
-                ,{name: 'completed', type: 'date', dateFormat: 'Y-m-d H:i:s'}
-                , {name: 'cdate', type: 'date', dateFormat: 'Y-m-d H:i:s'}
-                ,'case'
-                ,'object'
-                ,'days'
-                ,'completed_text'
-                ,{name: 'expired', type: 'bool'}
-                ,'hot'
-                ,'cls'
-                ,'iconCls'
-            ]
-        }
-    )
-};
-/**/

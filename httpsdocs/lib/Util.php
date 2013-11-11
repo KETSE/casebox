@@ -266,7 +266,7 @@ function formatMysqlDate($date, $format = false)
         return '';
     }
     if ($format == false) {
-        $format = $_SESSION['user']['cfg']['short_date_format'];
+        $format = \CB\getOption('short_date_format');
     }
 
     return date(str_replace('%', '', $format), strtotime($date));
@@ -279,7 +279,7 @@ function formatMysqlTime($date, $format = false)
         return '';
     }
     if ($format == false) {
-        $format = $_SESSION['user']['cfg']['short_date_format'].' '.$_SESSION['user']['cfg']['time_format'];
+        $format = \CB\getOption('short_date_format').' '.\CB\getOption('time_format');
     }
 
     return date(str_replace('%', '', $format), strtotime($date));
@@ -295,7 +295,7 @@ function clientToMysqlDate($date)
         str_replace(
             '%',
             '',
-            $_SESSION['user']['cfg']['short_date_format']
+            \CB\getOption('short_date_format')
         ),
         $date
     );
@@ -476,16 +476,7 @@ function toNumericArray($v)
             settype($v[$k], 'float');
         }
     }
-    // for ($i = sizeof($v) -1; $i >= 0; $i--) {
-    //     $val = trim($v[$i]);
-    //     $iv = intval($val);
-    //     if ($iv == $val) {
-    //         $v[$i] = $iv;
-    //     } else {
-    //         $v[$i] = $val;
-    //         settype($v[$i], 'float');
-    //     }
-    // }
+
     return $v;
 }
 

@@ -11,7 +11,7 @@ function date_ISO_to_date(date_string){
     return new Date(d);
 }
 function getItemIcon(d){
-    
+
     if(Ext.isEmpty(d.template_id)){
         if(d['type'] == 2) return 'icon-shortcut';
         return d.iconCls;
@@ -20,12 +20,12 @@ function getItemIcon(d){
         case 'file': return getFileIcon(d['name']); break;
         case 'task':
             if(d['status'] == 3) return 'icon-task-completed';
-        default:  
+        default:
             tr = CB.DB.templates.getById(d.template_id);
             if(tr) return tr.get('iconCls');
             return d.iconCls;
     }
-    
+
 }
 function getFileIcon(filename){
     if(Ext.isEmpty(filename)) return 'file-';
@@ -51,7 +51,7 @@ function getStoreTitles(v){
     texts = [];
     Ext.each(ids, function(id){
          idx = this.findExact('id', parseInt(id));
-        if(idx >= 0) texts.push(this.getAt(idx).get('title'));          
+        if(idx >= 0) texts.push(this.getAt(idx).get('title'));
     }, this)
     return texts.join(',');
 }
@@ -61,9 +61,29 @@ function getStoreNames(v){
     texts = [];
     Ext.each(ids, function(id){
          idx = this.findExact('id', parseInt(id));
-        if(idx >= 0) texts.push(this.getAt(idx).get('name'));           
+        if(idx >= 0) texts.push(this.getAt(idx).get('name'));
     }, this)
     return texts.join(',');
+}
+
+function toNumericArray(v){
+    if (Ext.isEmpty(v)) {
+        return array();
+    }
+    if (!Ext.isArray(v)) {
+        v = String(v).split(',');
+    }
+
+    for (var i = v.length - 1; i >= 0; i--) {
+        w = String(v[i]).trim();
+        iw = parseInt(w, 10);
+        if (iw == w) {
+            v[i] = iw;
+        } else {
+            v[i] = parseFloat(w);
+        }
+    }
+    return v;
 }
 
 setsGetIntersection = function(set1, set2){
@@ -71,10 +91,22 @@ setsGetIntersection = function(set1, set2){
     if(Ext.isEmpty(set1) || Ext.isEmpty(set2)) return rez;
     if(Ext.isPrimitive(set1)) set1 = String(set1).split(',');
     if(Ext.isPrimitive(set2)) set2 = String(set2).split(',');
-    for (var i = 0; i < set1.length; i++) set1[i] = String(set1[i]);
-    for (var i = 0; i < set2.length; i++) set2[i] = String(set2[i]);
-    for (var i = 0; i < set1.length; i++) if( (set2.indexOf(set1[i]) >= 0) && (rez.indexOf(set1[i]) < 0 )) rez.push(set1[i]);
-    for (var i = 0; i < set2.length; i++) if( (set1.indexOf(set2[i]) >= 0) && (rez.indexOf(set2[i]) < 0 )) rez.push(set2[i]);
+    for (var i = 0; i < set1.length; i++) {
+        set1[i] = String(set1[i]);
+    }
+    for (var i = 0; i < set2.length; i++) {
+        set2[i] = String(set2[i]);
+    }
+    for (var i = 0; i < set1.length; i++) {
+        if( (set2.indexOf(set1[i]) >= 0) && (rez.indexOf(set1[i]) < 0 )) {
+            rez.push(set1[i]);
+        }
+    }
+    for (var i = 0; i < set2.length; i++) {
+        if( (set1.indexOf(set2[i]) >= 0) && (rez.indexOf(set2[i]) < 0 )) {
+            rez.push(set2[i]);
+        }
+    }
     return rez;
 }
 
@@ -130,14 +162,14 @@ function getMenuConfig(node_id, ids_path, node_template_id){
         ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(' ','') + ',';
 
         if (ug_ids.indexOf(','+App.loginData.id+',') >=0) {
-            weight += 100; 
+            weight += 100;
         } else {
             if( ( ug_ids != ',,' ) && ( !setsHaveIntersection(ug_ids, App.loginData.groups ) ) ) return;
             weight += 50;
         }
         /*end of check user_group ids */
 
-        /* check template_ids /**/ 
+        /* check template_ids /**/
         if(!Ext.isEmpty(node_template_id)){
             nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(' ','') + ',';
             if(nt_ids.indexOf(','+node_template_id+',') >=0) weight += 100;
@@ -150,7 +182,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
                 return;
             }
         }
-        
+
         n_ids = ',' + String( Ext.value(r.get('node_ids'), '') ).replace(' ','') + ',';
         if( n_ids.indexOf(','+node_id+',') >= 0 ) {
             weight += 100;

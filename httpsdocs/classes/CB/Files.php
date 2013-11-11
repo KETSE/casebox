@@ -6,106 +6,71 @@ class Files
     public function getProperties($id)
     {
         $rez = array('success' => true, 'data' => array());
-        $res = DB\dbQuery(
-            'SELECT f.id
-                ,f.name
-                ,f.`date`
-                ,f.title
-                ,f.cid
-                ,f.uid
-                ,f.cdate
-                ,f.udate
-                ,fc.size
-                ,t.template_id
-                ,ti.pids `path`
-                ,ti.path `pathtext`
-            FROM tree t
-            JOIN tree_info ti on t.id = ti.id
-            JOIN files f ON t.id = f.id
-            LEFT JOIN files_content fc ON f.content_id = fc.id
-            WHERE t.id = $1',
-            $id
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $r['path'] = str_replace(',', '/', $r['path']);
-            $a = explode('.', $r['name']);
-            $r['ago_date'] = date(
-                str_replace(
-                    '%',
-                    '',
-                    $_SESSION['user']['cfg']['long_date_format']
-                ),
-                strtotime($r['cdate'])
-            ).
-            ' '.L\at.' '.
-            date(
-                str_replace(
-                    '%',
-                    '',
-                    $_SESSION['user']['cfg']['time_format']
-                ),
-                strtotime($r['cdate'])
-            );
+        $file = new Objects\File($id);
+        $rez['data'] = $file->load();
 
-            $r['ago_date'] = Util\translateMonths($r['ago_date']);
-            $r['ago_text'] = Util\formatAgoTime($r['cdate']);
-            $rez['data'] = $r;
+        $d = &$rez['data'];
+        $d['path'] = str_replace(',', '/', $d['path']);
+        $a = explode('.', $d['name']);
+        $d['ago_date'] = date(
+            str_replace(
+                '%',
+                '',
+                $_SESSION['user']['cfg']['long_date_format']
+            ),
+            strtotime($d['cdate'])
+        ).
+        ' '.L\at.' '.
+        date(
+            str_replace(
+                '%',
+                '',
+                $_SESSION['user']['cfg']['time_format']
+            ),
+            strtotime($d['cdate'])
+        );
+
+        $d['ago_date'] = Util\translateMonths($d['ago_date']);
+        $d['ago_text'] = Util\formatAgoTime($d['cdate']);
+
+        if (!empty($d['versions'])) {
+            foreach ($d['versions'] as &$r) {
+                $r['ago_date'] = date(
+                    str_replace(
+                        '%',
+                        '',
+                        $_SESSION['user']['cfg']['long_date_format']
+                    ),
+                    strtotime($r['cdate'])
+                ).' '.L\at.' '.
+                date(
+                    str_replace(
+                        '%',
+                        '',
+                        $_SESSION['user']['cfg']['time_format']
+                    ),
+                    strtotime($r['cdate'])
+                );
+
+                $r['ago_date'] = Util\translateMonths($r['ago_date']);
+                $r['ago_text'] = Util\formatAgoTime($r['cdate']);
+            }
         }
-        $res->close();
-
-        /* get versions */
-
-        $res = DB\dbQuery(
-            'SELECT id
-                ,`date`
-                ,`name`
-                ,cid
-                ,uid
-                ,cdate
-                ,udate
-                ,(SELECT `size`
-                   FROM files_content
-                   WHERE id = v.content_id) `size`
-            FROM files_versions v
-            WHERE file_id = $1
-            ORDER BY cdate DESC',
-            $id
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $r['ago_date'] = date(
-                str_replace(
-                    '%',
-                    '',
-                    $_SESSION['user']['cfg']['long_date_format']
-                ),
-                strtotime($r['cdate'])
-            ).' '.L\at.' '.
-            date(
-                str_replace(
-                    '%',
-                    '',
-                    $_SESSION['user']['cfg']['time_format']
-                ),
-                strtotime($r['cdate'])
-            );
-
-            $r['ago_date'] = Util\translateMonths($r['ago_date']);
-            $r['ago_text'] = Util\formatAgoTime($r['cdate']);
-            $rez['data']['versions'][] = $r;
-        }
-        $res->close();
-        /* end of get versions */
-
-        VerticalEditGrid::getData('objects', $rez['data']);
 
         return $rez;
     }
 
     public function saveProperties($p)
     {
-        VerticalEditGrid::saveData('objects', $p);
+
+        // SECURITY: check if current user has write access
+        if (!Security::canWrite($p['id'])) {
+            throw new \Exception(L\Access_denied);
+        }
+        $file = new Objects\File($d['id']);
+        $file->setData($p);
+        $file->save();
 
         return array('success' => true);
     }
@@ -524,7 +489,7 @@ class Files
                 }
             }
             $f['type'] = 5;//file
-            fireEvent('beforeNodeDbCreate', $f);
+            // fireEvent('beforeNodeDbCreate', $f);
             DB\dbQuery(
                 'INSERT INTO tree (
                     id
@@ -609,7 +574,7 @@ class Files
             $f['id'] = $file_id;
             // $p['files'][$fk]['id'] = $file_id;
             $this->updateFileProperties($f);
-            fireEvent('nodeDbCreate', $f);
+            // fireEvent('nodeDbCreate', $f);
         }
 
         return true;

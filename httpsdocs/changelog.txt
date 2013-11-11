@@ -1,3 +1,37 @@
+CaseBox 1.9.52 (2013-11-11)
+==============================
+New Features, Improvements
+--------------------------
+- server side events already will receive an instance of object class (no array params).
+    Params for Solr events remain unchanged for now.
+    Events from Tasks.php and Files.php scripts are disabled until methods will be refactored.
+- added delete method to Object class
+- removed methods:
+    - Objects.getFieldValue
+    - Objects.setFieldValue
+    - Objects.getCaseId
+    - Objects.getCaseName
+    - Objects.setCaseRolesFields
+- store objects data as JSON in a database field instead of distinct tables
+    - created convertor for updating existent objects and users to new data storing format
+    - tables with "_data" and "_duplicates" suffixes will be removed on next commit,
+        after successful cores conversion.
+    - many other dependend changes ...
+- definition of CB.DB.objectsStore moved to js/DB/ObjectsStore.js and renamed to CB.DB.ObjectsStore
+- prevent user from accessing "Back" browser button and lose its work.
+
+Fixed Bugs:
+----------
+- Preview does not show for templates
+
+Notes:
+----------
+- You shoul to the following steps for update:
+    - apply database update for core: 20131111_1057 db_update v1.9.52.sql
+    - run script, for updating objects data into json field, /sys/utils/update_objects_and_users_data_fields.php <core_name>.
+      Next commit will delete tables with '_data' and '_duplicates' suffixes
+
+
 CaseBox 1.9.51 (2013-11-02)
 ==============================
 New Features, Improvements

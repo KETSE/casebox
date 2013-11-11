@@ -280,7 +280,7 @@ class User
                 $r['timezone'] = $cfg['timezone'];
             }
             $r['template_id'] = User::getTemplateId();
-            VerticalEditGrid::getData('users_groups', $r);
+
             $rez = $r;
         }
         $rez['success'] = true;
@@ -359,15 +359,19 @@ class User
         if (isset($p['long_date_format'])) {
             $cfg['long_date_format'] = $p['long_date_format'];
         }
+        if (empty($p['data'])) {
+            $p['data'] = array();
+        }
 
         @DB\dbQuery(
             'UPDATE users_groups
             SET first_name = $2
-                , last_name = $3
-                , sex = $4
-                , email = $5
-                , language_id = $6
-                , cfg = $7
+                ,last_name = $3
+                ,sex = $4
+                ,email = $5
+                ,language_id = $6
+                ,cfg = $7
+                ,data = $8
             WHERE id = $1',
             array(
                 $p['id']
@@ -377,10 +381,9 @@ class User
                 ,$p['email']
                 ,$p['language_id']
                 ,json_encode($cfg)
+                ,json_encode($p['data'])
             )
         ) or die( DB\dbQueryError() );
-
-        VerticalEditGrid::saveData('users_groups', $p);
 
         /* updating session params if the updated user profile is currently logged user*/
         if ($p['id'] == $_SESSION['user']['id']) {
@@ -975,6 +978,7 @@ class User
                 ,email
                 ,language_id
                 ,cfg
+                ,data
             FROM users_groups
             WHERE enabled = 1
                 AND did IS NULL
@@ -999,6 +1003,18 @@ class User
                 $r['cfg']['short_date_format'] = $GLOBALS['language_settings'][$r['language']]['short_date_format'];
             }
             $r['cfg']['time_format'] = $GLOBALS['language_settings'][$r['language']]['time_format'];
+
+            if (is_null($r['data'])) {
+                $oldObj = new Objects\OldObject();
+                $oldObj->id = $r['id'];
+                $oldObj->data = $r;
+                $oldObj->data['template_id'] = User::getTemplateId();
+                $oldObj->template = new Objects\Template($oldObj->data['template_id']);
+                $oldObj->template->load();
+
+                $oldObj->loadOldGridDataToNewFormat('users_groups');
+                $r['data'] = $oldObj->data['data'];
+            }
 
             $rez = $r;
         }

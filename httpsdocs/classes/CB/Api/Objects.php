@@ -89,7 +89,7 @@ class Objects
                 $p['data'] = array();
             }
         }
-        $data['gridData'] = $this->transformGridData($p['data']);
+        $data['data'] = $p['data'];
 
         $data = json_encode($data);
 
@@ -97,116 +97,6 @@ class Objects
         $rez = $objects->save(array('data' => $data));
 
         return $rez;
-    }
-
-    /**
-     * transform grid data
-     * @param  $data
-     * @return array
-     */
-    private function transformGridData(&$data)
-    {
-        $this->duplicationCounter = 0;
-        $this->gridData = array(
-            'values' => array()
-            // ,'duplicateFields' => array()
-        );
-        $this->transformFields($data);
-
-        return $this->gridData;
-    }
-
-    /**
-     * iterate fields array and transform them to needed structure for saving
-     * @param  array   $fieldsArray
-     * @param  integer $duplication_id
-     * @return void
-     */
-    private function transformFields(&$fieldsArray, $duplication_id = 0)
-    {
-        foreach ($fieldsArray as $field_id => $valuesArray) {
-            if (!is_numeric($field_id)) {
-                $field_id = $this->fieldNameToId($field_id);
-            }
-
-            if (is_scalar($valuesArray)) {
-                $valuesArray = array(
-                    'value' => $valuesArray
-                    ,'info' => null
-                );
-            }
-
-            // transform field with direct value to a generic form (array of values)
-            if (isset($valuesArray['value'])) {
-                $valuesArray = array($valuesArray);
-            }
-
-            foreach ($valuesArray as $i => $fieldData) {
-                if ($i > 0) {
-                    $duplication_id++;
-                    $this->gridData['duplicateFields'][$field_id]['d'.$duplication_id] =
-                        ($duplication_id == 1) ? 0 : 'd'.($duplication_id-1);
-                }
-                $this->transformField($field_id, $fieldData, $duplication_id);
-            }
-        }
-
-    }
-
-    /**
-     * transform field data to suitable structure for Object.save method
-     * @param  int  $id
-     * @param       $data
-     * @param  int  $duplication_id
-     * @return void
-     */
-    private function transformField($id, $data, $duplication_id)
-    {
-        if (is_scalar($data)) {
-            $data = array(
-                'value' => $data
-                ,'info' => null
-            );
-        }
-        $field_name = 'f'.$id.'_'.(empty($duplication_id) ? 0 : 'd'.$duplication_id);
-
-        $this->gridData['values'][$field_name] = array(
-            'value' => $data['value']
-            ,'info' => @$data['info']
-        );
-        if (!empty($data['childs'])) {
-            $this->transformFields($data['childs'], $duplication_id);
-        }
-    }
-
-    /**
-     * get fied id for a specified field name
-     * @param  varchar $field_name name of the field
-     * @return int     field id
-     */
-    private function fieldNameToId($field_name)
-    {
-        if (!isset($this->template_field_names[$field_name])) {
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM templates_structure
-                WHERE template_id = $1
-                    AND name = $2',
-                array(
-                    $this->template_id
-                    ,$field_name
-                )
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $this->template_field_names[$field_name] = $r['id'];
-            } else {
-                throw new \Exception("template field not found: ".$fieldNameToId, 1);
-            }
-            $res->close();
-        }
-
-        return $this->template_field_names[$field_name];
     }
 
     /**

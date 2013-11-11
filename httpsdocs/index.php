@@ -54,7 +54,6 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
 ?>
 <script type="text/javascript">document.getElementById('loading-msg').innerHTML = '<?php echo L\get('Loading_ExtJS_UI')?> ...';</script>
 <script type="text/javascript" src="/remote/api.php"></script>
-<script type="text/javascript" src="/js/CB.DB.php"></script>
 <?php
 
 echo '<script type="text/javascript" src="'.Minify_getUri('js').(isDebugHost() ? '&debug=1': '').'"></script>';
@@ -64,6 +63,7 @@ if (!empty($customConfig[CORENAME.'_js'])) {
 }
 
 ?>
+<script type="text/javascript" src="/js/CB.DB.php"></script>
 <script type="text/javascript">document.getElementById('loading-msg').innerHTML = '<?php echo L\get('Initialization')?> ...';</script>
 </body>
 </html>

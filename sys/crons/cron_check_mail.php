@@ -49,7 +49,7 @@ if (!$cd['success']) {
 /* check if this core has an email template defined */
 $email_template_id = false;
 
-$res = DB\dbQuery('SELECT id FROM templates WHERE `type` = 8') or die(DB\dbQueryError());
+$res = DB\dbQuery('SELECT id FROM templates WHERE `type` = \'email\'') or die(DB\dbQueryError());
 if ($r = $res->fetch_assoc()) {
     $email_template_id = $r['id'];
 }
@@ -266,7 +266,7 @@ foreach ($mailbox as $k => $mail) {
     $attachments = array();
     foreach ($parts as $p) {
         //content, filename, content-type
-        if (!$p['attachment']&&!$content) {
+        if (!$p['attachment'] && !$content) {
             $content = $p['content'];
         } else {
             $attachments[] = $p;
@@ -275,111 +275,25 @@ foreach ($mailbox as $k => $mail) {
     /* end of get contents and attachments */
 
     /* creating email object in corresponding case and adding attachments if any */
-    DB\dbQuery(
-        'INSERT INTO tree (
-            old_id
-            ,pid
-            ,user_id
-            ,`type`
-            ,name
-            ,`date`
-            ,cid
-            ,uid
-            ,template_id)
-        VALUES ($1
-              , $2
-              , $3
-              , 8
-              , $4
-              , $5
-              , $3
-              , $3
-              , $4)',
+    $obj = Objects::getCustomClassByType('email');
+    $objectId = $obj->create(
         array(
-            $mailbox->getUniqueId($k)
-            ,$pid
-            ,$user_id
-            ,$subject
-            ,$time
-            ,config\default_folder_template
+            'old_id' => $mailbox->getUniqueId($k)
+            ,'pid' => $pid
+            ,'user_id' => $user_id
+            ,'name' => $subject
+            ,'custom_title' => $subject
+            ,'template_id' => $email_template_id
+            ,'date' => $time
+            ,'cid' => $user_id
+            ,'data' => array(
+                '_title' => $subject
+                ,'_date_start' => $time
+                ,'_content' => $content
+                ,'from' => $mail->from
+            )
         )
-    ) or die(DB\dbQueryError());
-
-    $object_id = DB\last_insert_id();
-
-    DB\dbQuery(
-        'INSERT INTO objects (
-            id
-            ,`title`
-            ,`custom_title`
-            ,template_id
-            ,date_start
-            ,cid
-            ,uid)
-        VALUES ($1
-              ,$2
-              ,$2
-              ,$3
-              ,$4
-              ,$5
-              ,$5)',
-        array(
-            $object_id
-            ,$subject
-            ,$email_template_id
-            ,$time
-            ,$user_id
-        )
-    ) or die(DB\dbQueryError());
-
-    $sql = 'INSERT INTO objects_data (
-            object_id
-            ,field_id
-            ,duplicate_id
-            ,`value`)
-        SELECT $1
-             , id
-             , 0
-             , $2
-        FROM templates_structure
-        WHERE template_id = $3
-            AND name = $4';
-    DB\dbQuery(
-        $sql,
-        array(
-            $object_id
-            ,$subject
-            ,$email_template_id
-            ,'_title'
-        )
-    ) or die(DB\dbQueryError());
-    DB\dbQuery(
-        $sql,
-        array(
-            $object_id
-            ,$time
-            ,$email_template_id
-            ,'_date_start'
-        )
-    ) or die(DB\dbQueryError());
-    DB\dbQuery(
-        $sql,
-        array(
-            $object_id
-            ,$content
-            ,$email_template_id
-            ,'_content'
-        )
-    ) or die(DB\dbQueryError());
-    DB\dbQuery(
-        $sql,
-        array(
-            $object_id
-            ,$mail->from
-            ,$email_template_id
-            ,'from'
-        )
-    ) or die(DB\dbQueryError());
+    );
 
     if (!empty($attachments)) {
         foreach ($attachments as $a) {
@@ -417,7 +331,7 @@ foreach ($mailbox as $k => $mail) {
                         ,$a['filename']
                         ,$time
                         ,$user_id
-                        ,config\default_file_template
+                        ,getOption('default_file_template')
                     )
                 ) or die(DB\dbQueryError());
                 $file_id = DB\last_insert_id();

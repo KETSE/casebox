@@ -10,6 +10,60 @@ class File extends Object
 {
 
     /**
+     * load custom data for $this->id
+     *
+     * @return void
+     */
+    protected function loadCustomData()
+    {
+
+        parent::loadCustomData();
+
+        /* load custom data from objects table */
+        $res = DB\dbQuery(
+            'SELECT f.content_id
+                ,fc.size
+                ,fc.pages
+                ,fc.type
+                ,fc.path `content_path`
+            FROM files f
+            LEFT JOIN files_content fc ON f.content_id = fc.id
+            WHERE f.id = $1',
+            $this->id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $this->data = array_merge($this->data, $r);
+        }
+        $res->close();
+
+        /* get versions */
+
+        $res = DB\dbQuery(
+            'SELECT
+                v.id
+                ,v.`date`
+                ,v.`name`
+                ,v.cid
+                ,v.uid
+                ,v.cdate
+                ,v.udate
+                ,fc.size
+                ,fc.pages
+                ,fc.type
+            FROM files_versions v
+                LEFT JOIN files_content fc on fc.id = v.content_id
+            WHERE v.file_id = $1
+            ORDER BY v.cdate DESC',
+            $this->id
+        ) or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $this->data['versions'][] = $r;
+        }
+        $res->close();
+    }
+
+    /**
      * copy costom files data to targetId
      * @param  int  $targetId
      * @return void

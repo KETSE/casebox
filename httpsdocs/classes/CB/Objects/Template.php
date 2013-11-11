@@ -175,14 +175,14 @@ class Template extends Object
             if (!empty($this->template)) {
                 $field = $this->template->getField($fieldName);
             }
-            if (isset($p[$fieldName]) && ($p[$fieldName] !== 'id')) {
+            if (isset($p[$fieldName]) && ($fieldName !== 'id')) {
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value);
 
                 $saveFields[] = $fieldName;
-                $saveValues[] = $p[$fieldName];
+                $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
             } elseif (!empty($field)) {
@@ -286,20 +286,6 @@ class Template extends Object
         }
 
         return null;
-    }
-
-    /**
-     * get an array of fields grouped by pid field
-     * @return array
-     */
-    public function getFiledsGroupedByPid()
-    {
-        $rez = array();
-        foreach ($this->data['fields'] as $fieldId => $field) {
-            $rez[$field['pid']][$fieldId] = $field;
-        }
-
-        return $rez;
     }
 
     /**
@@ -464,7 +450,7 @@ class Template extends Object
                                 : $label;
                             break;
                         case 'listObjIcons':
-                            $r['cfg'] = Util\toJSONArray($r['cfg']);
+                            $r['cfg'] = Util\toJSONArray(@$r['cfg']);
 
                             $icon = '';
                             switch (@$field['cfg']['source']) {

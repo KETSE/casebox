@@ -21,7 +21,7 @@ if (empty($argv[1])) {
     die('Please specify a core as first argument');
 }
 $_SERVER['SERVER_NAME'] = $argv[1].'.casebox.local';
-$_SESSION['user']['id'] =
+$_SESSION['user']['id'] = 1;
 $pid = null;
 if (!empty($argv[2]) && is_numeric($argv[2])) {
     $pid = $argv[2];
@@ -67,7 +67,7 @@ if (is_null($pid)) {
 
 // before start we'll execute a special procedure that will clear all lost objects.
 // These objects can couse errors on sync templates with tree
-DB\dbQuery('CALL p_clear_lost_object()') or die(DB\dbQueryError());
+DB\dbQuery('CALL p_clear_lost_objects()') or die(DB\dbQueryError());
 
 // define template configs
 $tTConfig = array(
@@ -443,18 +443,18 @@ function iterateTemplates($treePid, $templatesPid = null)
         }
 
         /* set grid values */
-        $r['gridData']['values'] = array(
-            'f'.$tTObject->getField('_title')['id'].'_0' => array( 'value' => $r['name'])
-            // ,'f'.$fTObject->getField('l1')['id'].'_0' => array( 'value' => $r['l1'])
-            // ,'f'.$fTObject->getField('l2')['id'].'_0' => array( 'value' => $r['l2'])
-            // ,'f'.$fTObject->getField('l3')['id'].'_0' => array( 'value' => $r['l3'])
-            // ,'f'.$fTObject->getField('l4')['id'].'_0' => array( 'value' => $r['l4'])
-            ,'f'.$tTObject->getField('type')['id'].'_0' => array( 'value' => $r['type'])
-            ,'f'.$tTObject->getField('visible')['id'].'_0' => array( 'value' => $r['visible'])
-            ,'f'.$tTObject->getField('iconCls')['id'].'_0' => array( 'value' => $r['iconCls'])
-            ,'f'.$tTObject->getField('cfg')['id'].'_0' => array( 'value' => $r['cfg'])
-            ,'f'.$tTObject->getField('title_template')['id'].'_0' => array( 'value' => $r['title_template'])
-            ,'f'.$tTObject->getField('info_template')['id'].'_0' => array( 'value' => $r['info_template'])
+        $r['data'] = array(
+            $tTObject->getField('_title')['name'] => $r['name']
+            // ,$tTObject->getField('l1')['name'] => $r['l1']
+            // ,$tTObject->getField('l2')['name'] => $r['l2']
+            // ,$tTObject->getField('l3')['name'] => $r['l3']
+            // ,$tTObject->getField('l4')['name'] => $r['l4']
+            ,$tTObject->getField('type')['name'] => $r['type']
+            ,$tTObject->getField('visible')['name'] => $r['visible']
+            ,$tTObject->getField('iconCls')['name'] => $r['iconCls']
+            ,$tTObject->getField('cfg')['name'] => $r['cfg']
+            ,$tTObject->getField('title_template')['name'] => $r['title_template']
+            ,$tTObject->getField('info_template')['name'] => $r['info_template']
         );
         /* end of grid values */
 
@@ -467,7 +467,7 @@ function iterateTemplates($treePid, $templatesPid = null)
         ) or die(DB\dbQueryError());
 
         while ($fr = $fres->fetch_assoc()) {
-            $fr['cfg'] = Util\toJSONArray($r['cfg']);
+            $fr['cfg'] = Util\toJSONArray($fr['cfg']);
             $r['fields'][] = $fr;
         }
         $fres->close();
@@ -676,16 +676,16 @@ function processFields(&$templateConfig, $treePid, $fieldsPid = '')
 
         /* set grid values */
         if (!empty($fTObject)) {
-            $field['gridData']['values'] = array(
-                'f'.$fTObject->getField('_title')['id'].'_0' => array( 'value' => $field['name'])
-                ,'f'.$fTObject->getField('l1')['id'].'_0' => array( 'value' => $field['l1'])
-                ,'f'.$fTObject->getField('l2')['id'].'_0' => array( 'value' => $field['l2'])
-                ,'f'.$fTObject->getField('l3')['id'].'_0' => array( 'value' => $field['l3'])
-                ,'f'.$fTObject->getField('l4')['id'].'_0' => array( 'value' => $field['l4'])
-                ,'f'.$fTObject->getField('type')['id'].'_0' => array( 'value' => $field['type'])
-                ,'f'.$fTObject->getField('order')['id'].'_0' => array( 'value' => $field['order'])
-                ,'f'.$fTObject->getField('cfg')['id'].'_0' => array( 'value' => $field['cfg'])
-                ,'f'.$fTObject->getField('solr_column_name')['id'].'_0' => array( 'value' => $field['solr_column_name'])
+            $field['data'] = array(
+                $fTObject->getField('_title')['name'] => $field['name']
+                ,$fTObject->getField('l1')['name'] => $field['l1']
+                ,$fTObject->getField('l2')['name'] => $field['l2']
+                ,$fTObject->getField('l3')['name'] => $field['l3']
+                ,$fTObject->getField('l4')['name'] => $field['l4']
+                ,$fTObject->getField('type')['name'] => $field['type']
+                ,$fTObject->getField('order')['name'] => $field['order']
+                ,$fTObject->getField('cfg')['name'] => $field['cfg']
+                ,$fTObject->getField('solr_column_name')['name'] => $field['solr_column_name']
             );
         }
         /* end of grid values */

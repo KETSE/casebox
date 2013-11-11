@@ -96,7 +96,7 @@ return array_merge(
             ,'//js/CB.TemplatesManagementWindow.js'
 
             ,'//js/CB.Account.js'
-            ,'//js/customFunctions.js'
+            ,'//js/Util.js'
             ,'//js/CB.Search.js'
         )
 
@@ -107,6 +107,10 @@ return array_merge(
             ,'//js/DD/CB.DD.Tree.js'
             ,'//js/DD/CB.DD.Grid.js'
             ,'//js/DD/CB.DD.Panel.js'
+            ,'//js/DB/ObjectsStore.js'
+            ,'//js/DB/TemplateStore.js'
+            ,'//js/CB.VerticalEditGridHelperTree.js'
+
         )
         ,'lang-en' => array('//js/locale/en.js')
         ,'lang-es' => array('//js/locale/es.js')
