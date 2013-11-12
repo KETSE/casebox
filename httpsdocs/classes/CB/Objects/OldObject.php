@@ -100,7 +100,7 @@ class OldObject
                 $f = &$fieldValues[$i];
                 $templateField = $this->template->getField($f['field_id']);
                 // check if this field belongs to our $duplicatePid
-                if (($f['duplicate_id'] == 0) &&
+                if (($f['duplicate_id'] == 0) && !is_null($templateField) &&
                     ($templateField['pid'] == $this->data['template_id'])
                 ) {
                     // echo "First level field ".$templateField['name']." (".$templateField['id']."): <br />\n";

@@ -66,13 +66,18 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,scope: this
                 ,renderer : function(v, meta, record, row_idx, col_idx, store){
                     var id = record.get('id');
+
                     var n = this.helperTree.getNode(id);
+                    // temporary workaround for not found nodes
+                    if(!n) {
+                        return v;
+                    }
                     var tr = n.attributes.templateRecord;
                     if(tr.get('tag') == 'H'){
                         meta.css ='vgh';
                     }else{
                         meta.css = 'bgcLG vaT';
-                        meta.attr = 'style="margin-left: '+node.getDepth()+'0px"';
+                        meta.attr = 'style="margin-left: '+n.getDepth()+'0px"';
                     }
                     if(!Ext.isEmpty(tr.get('cfg').hint)) {
                         meta.attr += ' title="'+tr.get('cfg').hint+'"';
@@ -98,6 +103,10 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,scope: this
                 ,renderer: function(v, meta, record, row_idx, col_idx, store){
                     var n = this.helperTree.getNode(record.get('id'));
+                    // temporary workaround for not found nodes
+                    if(!n) {
+                        return v;
+                    }
                     var tr = n.attributes.templateRecord;
 
                     if(this.renderers && this.renderers[tr.get('type')]) {
@@ -163,11 +172,12 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,viewConfig:{
                 autoFill: false
                 ,getRowClass: function( record, index, rowParams, store ){
-                    rez = '';
+                    var rez = '';
                     if(record.get('tag') == 'H'){
                         rez = 'group-titles-colbg';
-                        if(!Ext.isEmpty(record.get('cfg').css)){
-                            rez += ' ' + record.get('cfg').css;
+                        var node = this.grid.helperTree.getNode(record.get('id'));
+                        if(node && !Ext.isEmpty(node.attributes.templateRecord.get('cfg').css)){
+                            rez += ' ' + node.attributes.templateRecord.get('cfg').css;
                         }
                     }
                     return rez;
@@ -499,6 +509,11 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
     ,onBeforeEditProperty: function(e){//grid, record, field, value, row, column, cancel
 
         var node = this.helperTree.getNode(e.record.get('id'));
+        // temporary workaround for not found nodes
+        if(!node) {
+            e.cancel = true;
+            return;
+        }
         var tr = node.attributes.templateRecord;
         if((tr.get('tag') == 'H') || (tr.get('cfg').readOnly == 1) ){
             e.cancel = true;
@@ -524,14 +539,15 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 e.pidValue = this.helperTree.getParentValue(e.record.get('id'), tr.get('pid'));
         }
 
-        col = e.grid.colModel.getColumnAt(e.column);
-        ed = col.getEditor();
+        var col = e.grid.colModel.getColumnAt(e.column);
+        var ed = col.getEditor();
         if(ed) {
             ed.destroy();
         }
         if(this.editors && this.editors[t]) {
             col.setEditor(new Ext.grid.GridEditor(this.editors[t](this)));
         }else{
+            e.fieldRecord = this.helperTree.getNode(e.record.get('id')).attributes.templateRecord;
             var te = App.getTypeEditor(t, e);
             if(e.cancel) {
                 return ;

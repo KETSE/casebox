@@ -349,7 +349,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         return null;
     }
     ,getFieldValue: function(fieldName, valueIndex) {
-        this.templateData
+        // this.templateData
     }
     ,getCurrentFieldValue: function(field_id, duplication_id){
         ed = this.topFieldSet.find('name', 'f'+ field_id+'_0');
@@ -361,7 +361,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.fireEvent('deleteobject', this.data);
     }
     ,onObjectsDeleted: function(ids){
-        if(ids.indexOf(parseInt(this.data.id)) >=0 ) this.destroy();
+        if(ids.indexOf(parseInt(this.data.id, 10)) >=0 ) {
+            this.destroy();
+        }
     }
     ,onClipboardChange: function(cb){
         this.actions.paste.setDisabled(cb.isEmpty());
@@ -406,9 +408,10 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.helperTree.loadData(this.data.data, this.templateStore);
 
         var tabPanelFieldItems = [];
+        var v;
         this.templateStore.each(function(r){
             if((r.get('cfg').showIn == 'top') && Ext.isDefined(this.topFieldSet)){
-                var v = this.data.data
+                v = this.data.data
                     ? this.data.data[r.get('name')]
                     : (Ext.isDefined(r.get('cfg').value)
                         ? r.get('cfg').value
@@ -457,7 +460,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 }
                 ed = App.getTypeEditor(r.get('type'), {
                     ownerCt: this
-                    ,record: r
+                    ,fieldRecord: r
                     ,pidValue: pidValue
                     ,objectId: this.data.id
                     ,path: this.data.path
@@ -638,7 +641,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     ,getFileProperties: function(fileId){
         // return false or file properties if possible
         if((!this.filesGrid) || isNaN(fileId)) return false;
-        fielId = parseInt(fileId);
+        fielId = parseInt(fileId, 10);
         fs = this.filesGrid.getStore();
         ri = fs.findBy( function(r){ return (r.get('id') == fileId); }, this);
         if(ri < 0) return false;
@@ -658,7 +661,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     }
     ,getIconClass: function(){
         if(Ext.isEmpty(this.data.template_id)) return;
-        idx = CB.DB.templates.findExact('id', parseInt(this.data.template_id));
+        idx = CB.DB.templates.findExact('id', parseInt(this.data.template_id, 10));
         if(idx < 0) return;
         return CB.DB.templates.getAt(idx).get('iconCls');
     }

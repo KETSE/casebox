@@ -19,7 +19,7 @@ $_SESSION['user']['id'] = 1;
 require_once '../../httpsdocs/config.php';
 require_once '../../httpsdocs/language.php';
 require_once '../../httpsdocs/lib/Util.php';
-
+L\initTranslations();
 //we should exclude template for fields from processing
 
 $fieldTemplates = array();

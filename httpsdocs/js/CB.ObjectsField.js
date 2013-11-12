@@ -156,10 +156,8 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
         if(Ext.isEmpty(this.config)) {
             this.config = {};
         }
-        var helper = (this.data.grid ? this.data.grid : this.data.ownerCt).helperTree;
-        if(helper) {
-            var tr = helper.getNode(this.data.record.get('id')).attributes.templateRecord;
-            this.config = Ext.apply({}, Ext.value(tr.get('cfg'), {}) );
+        if(this.data.fieldRecord) {
+            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.get('cfg'), {}) );
         }
         this.getStore();
         var mode = 'local';
@@ -250,15 +248,13 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(this.config)) {
             this.config = {};
         }
-        var helper = (this.data.grid ? this.data.grid : this.data.ownerCt).helperTree;
-        if(helper) {
-            var tr = helper.getNode(this.data.record.get('id')).attributes.templateRecord;
-            this.config = Ext.apply({}, Ext.value(tr.get('cfg'), {}) );
+        if(this.data.fieldRecord) {
+            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.get('cfg'), {}) );
         }
 
         this.triggerIconCls = 'icon-element';
         tpl = '<tpl for=".">{[ (xindex == 0) ? "" : "'+this.delimiter+'"]}{name}</tpl>';
-        switch(this.data.record.data.cfg.renderer){
+        switch(this.config.renderer){
             case 'listGreenIcons':
                     tpl = '<ul><tpl for="."><li class="icon-padding16 icon-element">{name}</li></tpl></ul>';
                     this.triggerIconCls = 'icon-element';
@@ -377,10 +373,8 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
         }
         this.config = Ext.applyIf(this.config, { multiValued: false } );
 
-        var helper = (this.data.grid ? this.data.grid : this.data.ownerCt).helperTree;
-        if(helper) {
-            var tr = helper.getNode(this.data.record.get('id')).attributes.templateRecord;
-            this.config = Ext.apply({}, Ext.value(tr.get('cfg'), {}) );
+        if(this.data.fieldRecord) {
+            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.get('cfg'), {}) );
         }
 
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);
@@ -727,10 +721,8 @@ CB.ObjectsSelectionPopupList = Ext.extend(Ext.Window, {
         if(Ext.isEmpty(this.config)) {
             this.config = {};
         }
-        var helper = (this.data.grid ? this.data.grid : this.data.ownerCt).helperTree;
-        if(helper) {
-            var tr = helper.getNode(this.data.record.get('id')).attributes.templateRecord;
-            this.config = Ext.apply({}, Ext.value(tr.get('cfg'), {}) );
+        if(this.data.fieldRecord) {
+            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.get('cfg'), {}) );
         }
 
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);

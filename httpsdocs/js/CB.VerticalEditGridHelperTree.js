@@ -42,7 +42,6 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         this.addNodes(this.getRootNode(), this.data);
 
         this.updateVisibility();
-
     }
 
     ,readValues: function ()
@@ -119,7 +118,10 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     return rez;
                 }
             }
+        } else {
+            rez[0].value = Ext.util.JSON.encode(fieldData);
         }
+
         return rez;
     }
 
@@ -144,20 +146,19 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                 }
                 break;
         }
-
         return value;
     }
     ,addNodes: function(parentNode, data, beforeNode){
         var pid = parentNode.attributes.nid;
-
+        data = data || {};
         this.templateStore.each(
             function(record) {
                 if(record.get('pid') == pid) {
                     /* no check to see if we have more duplicates and have to duplicate this node */
-                    fieldName = record.get('name');
-                    nodeValues = this.getGenericArrayDataForNodes(data[fieldName]);
+                    var fieldName = record.get('name');
+                    var nodeValues = this.getGenericArrayDataForNodes(data[fieldName]);
                     for (var i = 0; i < nodeValues.length; i++) {
-                        node = this.addNode(parentNode, record, beforeNode);
+                        var node = this.addNode(parentNode, record, beforeNode);
                         nodeValues[i].value = this.adjustValueToType(nodeValues[i].value, record.get('type'));
                         node.attributes.value = nodeValues[i];
                         this.addNodes(node, nodeValues[i].childs);
@@ -184,8 +185,8 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
     ,updateVisibility: function(){
         //flag for checking if any node visibility have been updated
         var rez = false;
-        this.visibilityUpdated = false;
         do{
+            this.visibilityUpdated = false;
             this.getRootNode().cascade(
                 this.updateNodeVisibility
                 ,this

@@ -1,3 +1,24 @@
+CaseBox 1.9.53 (2013-11-12)
+==============================
+New Features, Improvements
+--------------------------
+- modified params sent to javascript method App.getTypeEditor
+    for common usage from Objects.js form and from VerticalEditGrid.js
+- added isFieldValue method to Object class for comodity
+Fixed Bugs:
+----------
+- modified /sys/utils/create_templates_in_tree.php to work on new structure.
+    Can be used for update configurations into tree from database tables.
+- fixed infinite recursion appearing on updating fields visibility in greed
+- added pid field for loading templates from Templates\Collection.
+    It were causing Notices of undefined index "pid".
+-  in Template.formatValueForDisplay method there was a bug related to namespaces
+    and added verification for array values that are json encoded now for diplay
+- error appear on login in Log.php class because the event does not belong to an object
+Notes:
+----------
+- Template fields configuration should be reviewed and updated to new template ids.
+
 CaseBox 1.9.52 (2013-11-11)
 ==============================
 New Features, Improvements
@@ -26,7 +47,7 @@ Fixed Bugs:
 
 Notes:
 ----------
-- You shoul to the following steps for update:
+- You should do the following steps for update:
     - apply database update for core: 20131111_1057 db_update v1.9.52.sql
     - run script, for updating objects data into json field, /sys/utils/update_objects_and_users_data_fields.php <core_name>.
       Next commit will delete tables with '_data' and '_duplicates' suffixes

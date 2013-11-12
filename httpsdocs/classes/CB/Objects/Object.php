@@ -549,12 +549,14 @@ class Object extends OldObject
     {
         $rez = array();
         foreach ($data as $fieldName => $fieldValue) {
-            if (is_scalar($fieldValue) || is_null($fieldValue) || isset($fieldValue['value'])) {
+            if ($this->isFieldValue($fieldValue)) {
                 $fieldValue = array($fieldValue);
             }
             foreach ($fieldValue as $fv) {
                 $value = array('name' => $fieldName);
-                if (is_scalar($fv) || is_null($fv)) {
+                if (is_scalar($fv) ||
+                    is_null($fv)
+                ) {
                     $value['value'] = $fv;
                 } elseif (isset($fv['value'])) {
                     $value['value'] = $fv['value'];
@@ -564,6 +566,8 @@ class Object extends OldObject
                     if (isset($value['files'])) {
                         $value['files'] = $fv['files'];
                     }
+                } else {
+                    $value['value'] = $fv;
                 }
                 $rez[] = $value;
                 if (!empty($fv['childs'])) {
@@ -599,6 +603,36 @@ class Object extends OldObject
         return $this->template;
     }
 
+    /**
+     * detect if a given value is a generic field value
+     * from json array stored in data fields
+     *
+     * @param  variant $value
+     * @return boolean
+     */
+    public function isFieldValue($value)
+    {
+        if (is_scalar($value) ||
+            is_null($value)
+        ) {
+            return true;
+        }
+        // analize array values
+        if (is_array($value)) {
+            // non associative array
+            if (array_values($value) === $value) {
+                return false;
+            } else { //associative array
+                $keys = array_keys($value);
+                $diff = array_diff($keys, array('name', 'value', 'info', 'files', 'childs'));
+
+                return !empty($diff);
+            }
+        }
+
+        // not detected case;
+        return null;
+    }
     /**
      * copy an object to $pid or over $targetId
      *

@@ -520,15 +520,13 @@ function initApp(){
         var objData = {
             ownerCt: e.ownerCt
             ,record: e.record
+            ,fieldRecord: e.fieldRecord
             ,grid: e.grid
             ,pidValue: e.pidValue
             ,objectId: e.objectId
             ,path: e.path
         };
-        var helper = (e.grid ? e.grid : e.ownerCt).helperTree;
-        var tr = e.grid
-            ? helper.getNode(e.record.get('id')).attributes.templateRecord
-            : e.record;
+        var tr = e.fieldRecord;
         var cfg = tr.get('cfg');
         switch(type){
             case '_auto_title':
@@ -651,7 +649,7 @@ function initApp(){
             case 'combo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){
-                    th = helper.getParentValue(e.record.get('id'), tr.get('pid'));
+                    th = e.pidValue;
                 }
                 return new Ext.form.ComboBox({
                     forceSelection: true
@@ -667,7 +665,7 @@ function initApp(){
             case 'iconcombo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){
-                    th = helper.getParentValue(e.record.get('id'), tr.get('pid'));
+                    th = e.pidValue;
                 }
                 return new Ext.form.ComboBox({
                     forceSelection: true

@@ -457,7 +457,7 @@ class Template extends Object
                                 case 'tree':
                                 case 'related':
                                 case 'field':
-                                    $icon = Browser::getIcon($r);
+                                    $icon = \CB\Browser::getIcon($r);
                                     break;
                                 default:
                                     $icon = Util\coalesce($r['iconCls'], 'icon-none');
@@ -492,6 +492,10 @@ class Template extends Object
                 //$value = trim(strip_tags($value));
                 //$value = nl2br($value);
                 break;
+            default:
+                if (is_array($value)) {
+                    $value = json_encode($value);
+                }
         }
 
         return $value;

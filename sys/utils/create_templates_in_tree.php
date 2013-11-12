@@ -65,6 +65,7 @@ if (is_null($pid)) {
     }
 }
 
+DB\startTransaction();
 // before start we'll execute a special procedure that will clear all lost objects.
 // These objects can couse errors on sync templates with tree
 DB\dbQuery('CALL p_clear_lost_objects()') or die(DB\dbQueryError());
@@ -356,6 +357,8 @@ iterateTemplates($pid);
 echo "Updating menu and config ... \n";
 updateMenuAndConfig();
 
+DB\commitTransaction();
+
 echo "Updating solr ... \n";
 
 $solrClient = new Solr\Client();
@@ -602,11 +605,10 @@ function processTemplate($p, $pid)
     echo "processing fields\n";
     $tTObject->load();
     $data = $tTObject->getData();
+    echo "Loaded template data for fields processing:\n";
+    // var_dump($data);
+    processFields($data, $p['id']);
 
-    // process fields only if fields template is defined
-    // if (!empty($fTId)) {
-        processFields($data, $p['id']);
-    // }
     return $tId;
 }
 
@@ -617,7 +619,11 @@ function processFields(&$templateConfig, $treePid, $fieldsPid = '')
     $simpleObject = new Objects\Object();
 
     foreach ($templateConfig['fields'] as $field) {
-        if ($field['pid'] != $fieldsPid) {
+        // echo " compare ".$field['pid']." with ".$fieldsPid." \n";
+        if ((!empty($field['pid']) || !empty($fieldsPid)) &&
+            (empty($field['pid']) || !empty($fieldsPid) || ($field['pid'] != $templateConfig['id'])) &&
+            ($field['pid'] != $fieldsPid)
+        ) {
             continue;
         }
         // in some cores, there fields without name (not good).
@@ -684,7 +690,7 @@ function processFields(&$templateConfig, $treePid, $fieldsPid = '')
                 ,$fTObject->getField('l4')['name'] => $field['l4']
                 ,$fTObject->getField('type')['name'] => $field['type']
                 ,$fTObject->getField('order')['name'] => $field['order']
-                ,$fTObject->getField('cfg')['name'] => $field['cfg']
+                ,$fTObject->getField('cfg')['name'] => json_encode($field['cfg'])
                 ,$fTObject->getField('solr_column_name')['name'] => $field['solr_column_name']
             );
         }

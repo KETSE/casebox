@@ -28,6 +28,7 @@ class Collection
         $res = DB\dbQuery(
             'SELECT
                 id
+                ,pid
                 ,template_id
                 ,name
                 ,l'.\CB\USER_LANGUAGE_INDEX.' `title`

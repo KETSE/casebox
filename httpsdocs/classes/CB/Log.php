@@ -50,7 +50,9 @@ class Log
                 @$p['task_id']
             )
         );
-        $objData = $object->load();
+        $objData = $object
+            ? $object->load()
+            : array();
 
         @$p['case_id'] = $objData['case_id'];
 
