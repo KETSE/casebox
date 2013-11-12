@@ -24,7 +24,34 @@ Ext.namespace('CB.DB');
         idIndex: 0
         ,fields: ['id', 'name']
         ,data:  [[null, '-'], ['case', 'case'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['object', 'object'], ['search', 'search'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
-        ,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
+        ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
+    });
+    CB.DB.fieldTypes = new Ext.data.ArrayStore({
+        idIndex: 0
+        ,fields: ['id', 'name']
+        ,data:  [[null, '-']
+            ,['_auto_title', 'Auto title (uses title_template)']
+            ,['checkbox', 'CheckBox']
+            ,['combo', 'ComboBox']
+            ,['date', 'Date']
+            ,['datetime', 'Datetime']
+            ,['float', 'Float']
+            ,['H', 'Header']
+            ,['html', 'Html']
+            ,['iconcombo', 'IconCombo']
+            ,['int', 'Integer']
+            ,['_language', 'Language']
+            ,['memo', 'Memo']
+            ,['_objects', 'Objects']
+            ,['_sex', 'Sex']
+            ,['_short_date_format', 'Short date format combo']
+            ,['_fieldTypesCombo', 'Template field types combo']
+            ,['_templateTypesCombo', 'Template types combo']
+            ,['text', 'Text']
+            ,['time', 'Time']
+            ,['varchar', 'Varchar']
+        ]
+        ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
     });
     CB.DB.reminderTypes = new Ext.data.ArrayStore({
         idIndex: 0
@@ -141,7 +168,6 @@ $res = DB\dbQuery(
     'SELECT ts.id
         ,ts.pid
         ,t.id template_id
-        ,ts.tag
         ,ts.`level`
         ,ts.`name`
         ,ts.l'.USER_LANGUAGE_INDEX.' `title`

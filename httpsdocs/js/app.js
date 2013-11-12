@@ -226,12 +226,6 @@ function initApp(){
             if(ri < 0) return '';
             return CB.DB.sex.getAt(ri).get('name');
         }
-        ,templateTypesCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
-            if(Ext.isEmpty(v)) return '';
-            ri = CB.DB.templateTypes.findExact('id', v);
-            if(ri < 0) return '';
-            return CB.DB.templateTypes.getAt(ri).get('name');
-        }
         ,shortDateFormatCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) return '';
             ri = CB.DB.shortDateFormats.findExact('id', v);
@@ -365,7 +359,9 @@ function initApp(){
             case '_sex':
                 return App.customRenderers.sexCombo;
             case '_templateTypesCombo':
-                return App.customRenderers.templateTypesCombo;
+                return CB.DB.templateTypes.getName.createDelegate(CB.DB.templateTypes);
+            case '_fieldTypesCombo':
+                return CB.DB.fieldTypes.getName.createDelegate(CB.DB.fieldTypes);
             case '_short_date_format':
                 return App.customRenderers.shortDateFormatCombo;
             case '_contact':
@@ -709,6 +705,17 @@ function initApp(){
                     ,mode: 'local'
                     ,editable: false
                     ,store: CB.DB.templateTypes
+                    ,displayField: 'name'
+                    ,valueField: 'id'
+                });
+            case '_fieldTypesCombo':
+                return new Ext.form.ComboBox({
+                    forceSelection: true
+                    ,triggerAction: 'all'
+                    ,lazyRender: true
+                    ,mode: 'local'
+                    ,editable: false
+                    ,store: CB.DB.fieldTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });

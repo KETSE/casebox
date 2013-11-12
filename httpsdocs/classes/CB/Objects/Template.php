@@ -130,7 +130,6 @@ class Template extends Object
             'SELECT
                 id
                 ,pid
-                ,tag
                 ,level
                 ,name
                 ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
@@ -221,7 +220,6 @@ class Template extends Object
         $tableFields = array(
             // 'id'
             'pid'
-            ,'tag'
             ,'name'
             ,'l1'
             ,'l2'

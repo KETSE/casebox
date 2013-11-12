@@ -91,6 +91,11 @@ class Object extends OldObject
             $p['tag_id'] = null;
         }
 
+        $title = $this->getFieldValue('_title');
+        if (!empty($title)) {
+            $p['name'] = $title;
+        }
+
         \CB\fireEvent('beforeNodeDbCreate', $this);
 
         DB\dbQuery(
@@ -383,6 +388,13 @@ class Object extends OldObject
 
         if ($permanent) {
             DB\dbQuery(
+                'DELETE from tree WHERE id = $1',
+                $this->id
+            ) or die(DB\dbQueryError());
+            $solrClient = new \CB\Solr\Client();
+            $solrClient->deleteByQuery('id:'.$this->id);
+        } else {
+            DB\dbQuery(
                 'UPDATE tree
                 SET did = $2
                     ,dstatus = 1
@@ -397,14 +409,9 @@ class Object extends OldObject
             DB\dbQuery(
                 'CALL p_mark_all_childs_as_deleted($1, $2)',
                 array(
-                    $id
+                    $this->id
                     ,$_SESSION['user']['id']
                 )
-            ) or die(DB\dbQueryError());
-        } else {
-            DB\dbQuery(
-                'DELETE from tree WHERE id = $1',
-                $this->id
             ) or die(DB\dbQueryError());
         }
 

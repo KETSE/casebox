@@ -85,8 +85,7 @@ $tTConfig = array(
     ,'type' => 'template'
     ,'fields' => array(
         array(
-            'tag' => 'f'
-            ,'name' => '_title'
+            'name' => '_title'
             ,'l1' => 'Name'
             ,'l2' => 'Name'
             ,'l3' => 'Name'
@@ -99,8 +98,7 @@ $tTConfig = array(
             )
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'type'
+            'name' => 'type'
             ,'l1' => 'Type'
             ,'l2' => 'Type'
             ,'l3' => 'Type'
@@ -109,8 +107,7 @@ $tTConfig = array(
             ,'order' => 5
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'visible'
+            'name' => 'visible'
             ,'l1' => 'Active'
             ,'l2' => 'Active'
             ,'l3' => 'Active'
@@ -122,8 +119,7 @@ $tTConfig = array(
             )
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'iconCls'
+            'name' => 'iconCls'
             ,'l1' => 'Icon class'
             ,'l2' => 'Icon class'
             ,'l3' => 'Icon class'
@@ -132,8 +128,7 @@ $tTConfig = array(
             ,'order' => 7
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'cfg'
+            'name' => 'cfg'
             ,'l1' => 'Config'
             ,'l2' => 'Config'
             ,'l3' => 'Config'
@@ -145,8 +140,7 @@ $tTConfig = array(
             )
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'title_template'
+            'name' => 'title_template'
             ,'l1' => 'Title template'
             ,'l2' => 'Title template'
             ,'l3' => 'Title template'
@@ -158,8 +152,7 @@ $tTConfig = array(
             )
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'info_template'
+            'name' => 'info_template'
             ,'l1' => 'Info template'
             ,'l2' => 'Info template'
             ,'l3' => 'Info template'
@@ -187,8 +180,7 @@ $fTConfig = array(
     ,'type' => 'field'
     ,'fields' => array(
         array(
-            'tag' => 'f'
-            ,'name' => '_title'
+            'name' => '_title'
             ,'l1' => 'Name'
             ,'l2' => 'Name'
             ,'l3' => 'Name'
@@ -201,8 +193,7 @@ $fTConfig = array(
             )
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'type'
+            'name' => 'type'
             ,'l1' => 'Type'
             ,'l2' => 'Type'
             ,'l3' => 'Type'
@@ -211,8 +202,7 @@ $fTConfig = array(
             ,'order' => 5
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'order'
+            'name' => 'order'
             ,'l1' => 'Order'
             ,'l2' => 'Order'
             ,'l3' => 'Order'
@@ -221,8 +211,7 @@ $fTConfig = array(
             ,'order' => 6
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'cfg'
+            'name' => 'cfg'
             ,'l1' => 'Config'
             ,'l2' => 'Config'
             ,'l3' => 'Config'
@@ -234,8 +223,7 @@ $fTConfig = array(
             )
         )
         ,array(
-            'tag' => 'f'
-            ,'name' => 'solr_column_name'
+            'name' => 'solr_column_name'
             ,'l1' => 'Solr column name'
             ,'l2' => 'Solr column name'
             ,'l3' => 'Solr column name'
@@ -248,8 +236,7 @@ $fTConfig = array(
 $i = 1;
 foreach ($GLOBALS['languages'] as $language) {
     $field = array(
-        'tag' => 'f'
-        ,'name' => 'l'.$i
+        'name' => 'l'.$i
         ,'l1' => 'Title ('.$language.')'
         ,'l2' => 'Title ('.$language.')'
         ,'l3' => 'Title ('.$language.')'

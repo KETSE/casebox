@@ -373,7 +373,6 @@ class Templates
             'SELECT ts.id
                 ,ts.pid
                 ,t.id template_id
-                ,ts.tag
                 ,ts.`level`
                 ,ts.`name`
                 ,ts.l'.USER_LANGUAGE_INDEX.' `title`

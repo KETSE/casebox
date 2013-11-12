@@ -1,3 +1,22 @@
+CaseBox 1.9.54 (2013-11-12)
+==============================
+New Features, Improvements
+--------------------------
+- added fieldTypes store and fieldTypes combo for comod field type editing in field templates.
+    Also tag was removed from template structure and introduced a new equivaent field value for `type` field -'Header'.
+    Tag field should be removed in future from templates_structure table
+- changed field type for data field from text to medium text in db/
+
+Fixed Bugs:
+----------
+- Object.delete method did inverse parameter meaning and added deletion from solr on permanent delete.
+- updated TemplateField class to change field name on save to internal "_title" field, if present.
+  The same check added for Object class on create new object.
+Notes:
+----------
+- apply database update for core: 20131112_2355 db_update v1.9.54.sql
+- Also menu table should be checked for template id changes.
+
 CaseBox 1.9.53 (2013-11-12)
 ==============================
 New Features, Improvements
