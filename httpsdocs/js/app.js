@@ -522,8 +522,20 @@ function initApp(){
             ,objectId: e.objectId
             ,path: e.path
         };
+        var w;
         var tr = e.fieldRecord;
         var cfg = tr.get('cfg');
+        var objectWindow = e.ownerCt
+            ? e.ownerCt
+            : (e.grid
+                ? (
+                    e.grid.refOwner
+                        ? e.grid.refOwner
+                        : e.grid.findParentByType(CB.Objects)
+                )
+                : null
+            );
+
         switch(type){
             case '_auto_title':
                 return new Ext.ux.TitleField();
@@ -549,14 +561,15 @@ function initApp(){
                                 case 'usersgroups':
                                     break;
                                 default:
-                                    cw = e.grid.refOwner || e.grid.findParentByType(CB.Objects);
-                                    if(cw && cw.objectsStore)  {
-                                        store = cw.objectsStore;
+                                    if(objectWindow && objectWindow.objectsStore)  {
+                                        store = objectWindow.objectsStore;
                                     }
                             }
-                            data = [];
+                            var data = [];
+                            var value = e.record
+                                ? e.record.get('value')
+                                : null;
                             if(store){
-                                value= e.record.get('value');
                                 value = Ext.isEmpty(value) ? [] : String(value).split(',');
                                 for(i=0; i < value.length; i++){
                                     ri = store.findExact('id', parseInt(value[i], 10));
@@ -566,11 +579,9 @@ function initApp(){
                                 }
                             }
 
-                            if( source == 'thesauri' ) {
-                                w = new CB.ObjectsSelectionPopupList({data: objData, value: e.record.get('value')});
-                            } else {
-                                w = new CB.ObjectsSelectionForm({data: objData, value: e.record.get('value')});
-                            }
+                            w = (source == 'thesauri')
+                                ? new CB.ObjectsSelectionPopupList({data: objData, value: value})
+                                : new CB.ObjectsSelectionForm({data: objData, value: value});
 
                             w.on('setvalue', function(data){
                                 value = [];
@@ -862,14 +873,13 @@ function initApp(){
     };
 
     App.openObject = function(template_id, id, e){
-
         switch( CB.DB.templates.getType(template_id) ){
             case 'case':
             case 'object':
             case 'template':
             case 'field':
             case 'email':
-                App.mainViewPort.fireEvent('openobject', {id: id}, e);
+                App.mainViewPort.fireEvent('openobject', {id: id, template_id: template_id}, e);
                 break;
             case 'file':
                 App.mainViewPort.fireEvent('fileopen', {id: id}, e);

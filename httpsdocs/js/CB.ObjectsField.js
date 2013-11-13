@@ -114,13 +114,19 @@ CB.ObjectsFieldCommonFunctions = {
         }
     }
     ,getObjectsStore: function(){
-        if( Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri') ) return this.getThesauriStore();
+        if(Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri')) {
+            return this.getThesauriStore();
+        }
 
         if(Ext.isEmpty(this.data)) return;
-        if(this.data.ownerCt) return this.data.ownerCt.objectsStore;
+        if(this.data.ownerCt) {
+            return this.data.ownerCt.objectsStore;
+        }
         if(this.data.grid) {
             a = this.data.grid.refOwner || this.data.grid.findParentByType(CB.Objects);
-            if(!Ext.isEmpty(a)) return a.objectsStore;
+            if(!Ext.isEmpty(a)) {
+                return a.objectsStore;
+            }
         }
     }
     ,getThesauriStore: function(){
@@ -251,7 +257,6 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
         if(this.data.fieldRecord) {
             this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.get('cfg'), {}) );
         }
-
         this.triggerIconCls = 'icon-element';
         tpl = '<tpl for=".">{[ (xindex == 0) ? "" : "'+this.delimiter+'"]}{name}</tpl>';
         switch(this.config.renderer){
@@ -332,7 +337,8 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
                     ,setvalue : this.onSetValue
                 }
             });
-        }else this.form = new CB.ObjectsSelectionForm({
+        }else {
+            this.form = new CB.ObjectsSelectionForm({
                 data: this.data
                 ,value: this.getValue()
                 ,listeners:{
@@ -340,6 +346,7 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
                     ,setvalue : this.onSetValue
                 }
             });
+        }
         this.form.show();
     }
     ,onSetValue: function(data){

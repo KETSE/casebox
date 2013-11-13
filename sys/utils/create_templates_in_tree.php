@@ -366,10 +366,13 @@ function iterateTemplates($treePid, $templatesPid = null)
     $res = DB\dbQuery(
         'SELECT *
         FROM templates
-        WHERE ((pid = $1) OR ( ($1 is null) AND (pid is null) ) )
+        WHERE ((pid = $1) OR (pid = $2) OR ( ($1 is null) AND (pid is null) ) )
             AND  id not in ('.$tTId.','.$fTId.')
         ',
-        $templatesPid
+        array(
+            $templatesPid
+            ,$treePid // it's a little dangerous but in practice shouldn't have problems
+        )
     ) or die(DB\dbQueryError());
 
     while ($r = $res->fetch_assoc()) {

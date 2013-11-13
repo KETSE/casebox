@@ -228,7 +228,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             }
             ,this
         );
-        if(this.grid && !this.grid.editing) {
+        if(this.grid && !this.grid.editing && this.grid.getEl()) {
             this.grid.getView().refresh();
         }
     }
@@ -381,7 +381,14 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             this.topFieldSet.removeAll(true);
         }
         /* remove tabpanel items that have edit position on tabsheet */
-        this.tabPanel.items.each(function(i){ if(i.isTemplateField) this.tabPanel.remove(i, true); }, this);
+        this.tabPanel.items.each(
+            function(i){
+                if(i.isTemplateField) {
+                    this.tabPanel.remove(i, true);
+                }
+            }
+            ,this
+        );
         tpInsertIndex = 1;
         /* getting the template store and adding fields, that are set to be edited on top, to the fieldSet.
             Also creating tabs in our tabPanel for the fields that are set to be edited in tabpanel
@@ -489,11 +496,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                         ? r.get('cfg').value
                         : {}
                     );
-                if(!v) v = {};
-                if(!v.value) {
+                if(!v) {
+                    v = {value: null};
+                } else if(!v.value) {
                     v = {value: v};
                 }
-
                 var cfg = {
                     border: false
                     ,hideBorders: true

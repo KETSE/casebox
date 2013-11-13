@@ -86,7 +86,7 @@ class Objects
      */
     public function create($p)
     {
-        if (!Security::canCreateActions($p['pid'])) {
+        if (empty($p['pid']) || !Security::canCreateActions($p['pid'])) {
             throw new \Exception(L\Access_denied);
         }
 
@@ -579,9 +579,9 @@ class Objects
                             'sys_tags' : 'tree_tags';
                     }
                     $arr = Util\toNumericArray($f['value']);
-                    for ($i=0; $i < sizeof($arr); $i++) {
-                        if (empty($object_record[$solr_field]) || !in_array($arr[$i], $object_record[$solr_field])) {
-                            $object_record[$solr_field][] = $arr[$i];
+                    foreach ($arr as $v) {
+                        if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
+                            $object_record[$solr_field][] = $v;
                         }
                     }
                 }

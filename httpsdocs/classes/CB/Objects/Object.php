@@ -559,6 +559,7 @@ class Object extends OldObject
             if ($this->isFieldValue($fieldValue)) {
                 $fieldValue = array($fieldValue);
             }
+
             foreach ($fieldValue as $fv) {
                 $value = array('name' => $fieldName);
                 if (is_scalar($fv) ||
@@ -567,10 +568,10 @@ class Object extends OldObject
                     $value['value'] = $fv;
                 } elseif (isset($fv['value'])) {
                     $value['value'] = $fv['value'];
-                    if (isset($value['info'])) {
+                    if (isset($fv['info'])) {
                         $value['info'] = $fv['info'];
                     }
-                    if (isset($value['files'])) {
+                    if (isset($fv['files'])) {
                         $value['files'] = $fv['files'];
                     }
                 } else {
@@ -633,7 +634,7 @@ class Object extends OldObject
                 $keys = array_keys($value);
                 $diff = array_diff($keys, array('name', 'value', 'info', 'files', 'childs'));
 
-                return !empty($diff);
+                return empty($diff);
             }
         }
 

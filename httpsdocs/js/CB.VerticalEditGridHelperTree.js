@@ -209,8 +209,8 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         if(node == this.getRootNode()) {
             return;
         }
-
         // if the node isn't a subnode then it's always visible
+
         if(Ext.isEmpty(node.attributes.templateRecord.get('pid'))){
             if(node.attributes.visible === false) {
                 this.visibilityUpdated = true;
@@ -222,12 +222,11 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
 
         var r = node.attributes.templateRecord;
         var pr = node.parentNode.attributes.templateRecord;
-
         if(node.parentNode.attributes.visible === false) {
             if(node.attributes.visible !== false) {
                 this.visibilityUpdated = true;
+                node.attributes.visible = false;
             }
-            node.attributes.visible = false;
         } else { // if parent node is visible
             var v = ''; //dependency value
             var va = []; //dependency array value
@@ -247,13 +246,13 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     this.visibilityUpdated = true;
                 }
             }else{ //when record is not visible
-                if( (pr.get('tag') == 'G') || (
+                if( (pr.get('type') == 'G') || (
                     !Ext.isEmpty(parentNodeValue) && (Ext.isEmpty(v) || setsHaveIntersection( va, parentNodeValue ))
                     && ( (r.get('cfg').thesauriId !== 'dependent') ||  !Ext.isEmpty(parentNodeValue))
                     && ( Ext.isDefined(r.get('cfg').dependency) ||  !Ext.isEmpty(parentNodeValue))
                     )
                 ) { //if no pidValues specified or pidValues contains the parent selected value then show the field
-                    node.attributes.visible = false;
+                    node.attributes.visible = true;
                     this.visibilityUpdated = true;
                 }
             }
@@ -274,7 +273,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         return rez;
     }
     ,getNode: function(nodeId){
-        return this.getRootNode().findChild('id', nodeId);
+        return this.getRootNode().findChild('id', nodeId, true);
     }
 
     /**
