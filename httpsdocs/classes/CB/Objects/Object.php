@@ -497,7 +497,7 @@ class Object extends OldObject
                 $field = $this->template->getField($fieldName);
                 $value = is_scalar($fv)
                     ? $fv
-                    : (isset($fv['value'])
+                    : (array_key_exists('value', $fv)
                         ? $fv['value']
                         : $fv[0]['value']
                     );

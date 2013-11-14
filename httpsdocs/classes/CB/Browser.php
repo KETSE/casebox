@@ -941,14 +941,7 @@ class Browser
             @$d['subtype'] = intval($d['subtype']);
 
             if ($d['system']) {
-                if ((substr($d['name'], 0, 1) == '[') &&
-                    (substr($d['name'], -1, 1) == ']')) {
-                    $var_name = substr($d['name'], 1, strlen($d['name']) -2);
-                    if (defined('CB\\L\\'.$var_name)) {
-                        $d['name'] = L\get($var_name);
-                    }
-                }
-
+                $d['name'] = L\getTranslationIfPseudoValue($d['name']);
             }
             /* next switch should/will be excluded: */
             switch ($d['type']) {
@@ -957,16 +950,7 @@ class Browser
                 case 1:
                     switch ($d['subtype']) {
                         case 1:
-                            if ((substr($d['name'], 0, 1) == '[') &&
-                                (substr($d['name'], -1, 1) == ']')) {
-                                $d['name'] = L\get(
-                                    substr(
-                                        $d['name'],
-                                        1,
-                                        strlen($d['name']) -2
-                                    )
-                                );
-                            }
+                            $d['name'] = L\getTranslationIfPseudoValue($d['name']);
                             break;
                         case 2:
                             $d['name'] = L\MyCaseBox;

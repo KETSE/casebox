@@ -1,3 +1,18 @@
+CaseBox 1.9.56 (2013-11-14)
+==============================
+- added statefull for verticalEditGrid columns and removed forceFit
+- added \CB\L\getTranslationIfPseudoValue($value) method (in language.php) for translation
+    of pseudo values to their translation. Pseudo values are considered translations names
+    enclosed in square brackets.
+
+Fixed Bugs:
+----------
+- child paths not updated correctly on object rename
+- case name not updated on case object rename
+Notes:
+----------
+- apply database update for core: 20131114_1425 db_update v1.9.56.sql
+
 CaseBox 1.9.55 (2013-11-13)
 ==============================
 - Bugfixes during cores testing on devel server

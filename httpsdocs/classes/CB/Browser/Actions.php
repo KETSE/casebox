@@ -254,7 +254,7 @@ class Actions
         }
 
         /* select only objects that current user can delete */
-        $objectIds = array();
+        $accessibleIds = array();
 
         $res = DB\dbQuery(
             'SELECT t.id
@@ -267,12 +267,12 @@ class Actions
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $objectIds[] = $r['id'];
+            $accessibleIds[] = $r['id'];
         }
         $res->close();
-        if (!empty($objectIds)) {
+        if (!empty($accessibleIds)) {
             $this->objectsClass = new \CB\Objects();
-            $rez = $this->doRecursiveAction($action, $objectIds, $targetId);
+            $rez = $this->doRecursiveAction($action, $accessibleIds, $targetId);
         }
 
         DB\commitTransaction();

@@ -260,45 +260,45 @@ class Search extends Solr\Client
         if ($k == 'due') {
             $k = 'date_end';
             foreach ($v as $sv) {
-                for ($i = 0; $i < sizeof($sv->values); $i++) {
-                    switch (substr($sv->values[$i], 1)) {
+                for ($i = 0; $i < sizeof($sv['values']); $i++) {
+                    switch (substr($sv['values'][$i], 1)) {
                         case 'next7days':
-                            $sv->values[$i] = '[NOW/DAY TO NOW/DAY+6DAY]';
+                            $sv['values'][$i] = '[NOW/DAY TO NOW/DAY+6DAY]';
                             break;
                         case 'overdue':
                             $k = 'status';
-                            $sv->values[$i] = '1';
+                            $sv['values'][$i] = '1';
                             break;
                         case 'today':
-                            $sv->values[$i] = '[NOW/DAY TO NOW/DAY]';
+                            $sv['values'][$i] = '[NOW/DAY TO NOW/DAY]';
                             break;
                         case 'next31days':
-                            $sv->values[$i] = '[NOW/DAY TO NOW/DAY+31DAY]';
+                            $sv['values'][$i] = '[NOW/DAY TO NOW/DAY+31DAY]';
                             break;
                         case 'thisWeek':
-                            $sv->values[$i] = '['.$this->currentWeekDiapazon().']';
+                            $sv['values'][$i] = '['.$this->currentWeekDiapazon().']';
                             break;
                         case 'thisMonth':
-                            $sv->values[$i] = '[NOW/MONTH TO NOW/MONTH+1MONTH]';
+                            $sv['values'][$i] = '[NOW/MONTH TO NOW/MONTH+1MONTH]';
                             break;
                     }
                 }
             }
         } elseif (($k == 'date') || ($k == 'cdate')) {
             foreach ($v as $sv) {
-                for ($i = 0; $i < sizeof($sv->values); $i++) {
-                    switch (substr($sv->values[$i], 1)) {
+                for ($i = 0; $i < sizeof($sv['values']); $i++) {
+                    switch (substr($sv['values'][$i], 1)) {
                         case 'today':
-                            $sv->values[$i] = '[NOW/DAY TO NOW/DAY+1DAY]';
+                            $sv['values'][$i] = '[NOW/DAY TO NOW/DAY+1DAY]';
                             break;
                         case 'yesterday':
-                            $sv->values[$i] = '[NOW/DAY-1DAY TO NOW/DAY]';
+                            $sv['values'][$i] = '[NOW/DAY-1DAY TO NOW/DAY]';
                             break;
                         case 'thisWeek':
-                            $sv->values[$i] = '['.$this->currentWeekDiapazon().']';
+                            $sv['values'][$i] = '['.$this->currentWeekDiapazon().']';
                             break;
                         case 'thisMonth':
-                            $sv->values[$i] = '[NOW/MONTH TO NOW/MONTH+1MONTH]';
+                            $sv['values'][$i] = '[NOW/MONTH TO NOW/MONTH+1MONTH]';
                             break;
                     }
                 }
@@ -315,19 +315,19 @@ class Search extends Solr\Client
             $v = array($v);
         }
         foreach ($v as $sv) {
-            if (!empty($sv->values)) {
+            if (!empty($sv['values'])) {
                 if ($k == 'user_ids') {
-                    for ($i=0; $i < sizeof($sv->values); $i++) {
-                        if ($sv->values[$i] == -1) {
+                    for ($i=0; $i < sizeof($sv['values']); $i++) {
+                        if ($sv['values'][$i] == -1) {
                             $this->params['fq'][] = $this->getFacetTag('user_ids').'!user_ids:[* TO *]';//{!tag=unassigned}
-                            array_splice($sv->values, $i, 1);
+                            array_splice($sv['values'], $i, 1);
                         }
                     }
                 }
-                if (!empty($sv->values)) {
+                if (!empty($sv['values'])) {
                     $rez = ($withtag ? $this->getFacetTag($k): '' ).
                         $k.
-                        ':('.implode(' '.$sv->mode.' ', $sv->values).')';//'{!tag='.$k.'}'
+                        ':('.implode(' '.$sv['mode'].' ', $sv['values']).')';//'{!tag='.$k.'}'
                 }
             }
         }
@@ -774,7 +774,7 @@ class Search extends Solr\Client
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $names[$r['id']] = $r['name'];
+            $names[$r['id']] = L\getTranslationIfPseudoValue($r['name']);
         }
         $res->close();
         /* end of selecting names*/
@@ -797,7 +797,7 @@ class Search extends Solr\Client
 
                 while ($r = $res->fetch_assoc()) {
                     $rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
-                    $rez['ttg_'.$r['pid']]['title'] = $r['title'];
+                    $rez['ttg_'.$r['pid']]['title'] = L\getTranslationIfPseudoValue($r['title']);
                     $rez['ttg_'.$r['pid']]['items'][$r['id']] =  array('name' => $names[$r['id']], 'count' => $values->{$r['id']});
                 }
                 $res->close();

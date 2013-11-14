@@ -110,13 +110,23 @@ class OldObject
                         ,'files' => $f['files']
                         ,'childs' => $this->getOldChilds($f['duplicate_id'], $f['field_id'])
                     );
+                    $value = $this->formatOldValue($value);
                     $duplicates = $this->getOldDuplicates($f['duplicate_id'], $f['field_id']);
                     if (empty($duplicates)) {
-                        $rez[$templateField['name']] = $this->formatOldValue($value);
+                        if (!is_null($value)) {
+                            $rez[$templateField['name']] = $value;
+                        }
                     } else {
-                        $rez[$templateField['name']][] = $this->formatOldValue($value);
+                        if (!is_null($value)) {
+                            $rez[$templateField['name']][] = $value;
+                        }
                         foreach ($duplicates as $duplicate) {
-                            $rez[$templateField['name']][] = $this->formatOldValue($duplicate);
+                            if (!is_null($duplicate)) {
+                                $rez[$templateField['name']][] = $duplicate;
+                            }
+                        }
+                        if (!empty($rez[$templateField['name']]) && (sizeof($rez[$templateField['name']]) == 1)) {
+                            $rez[$templateField['name']] = $rez[$templateField['name']][0];
                         }
                     }
                 }
@@ -147,13 +157,23 @@ class OldObject
                         ,'files' => $f['files']
                         ,'childs' => $this->getOldChilds($f['duplicate_id'], $f['field_id'])
                     );
+                    $value = $this->formatOldValue($value);
                     $duplicates = $this->getOldDuplicates($f['duplicate_id'], $f['field_id']);
                     if (empty($duplicates)) {
-                        $rez[$templateField['name']] = $this->formatOldValue($value);
+                        if (!is_null($value)) {
+                            $rez[$templateField['name']] = $value;
+                        }
                     } else {
-                        $rez[$templateField['name']][] = $this->formatOldValue($value);
+                        if (!is_null($value)) {
+                            $rez[$templateField['name']][] = $value;
+                        }
                         foreach ($duplicates as $duplicate) {
-                            $rez[$templateField['name']][] = $this->formatOldValue($duplicate);
+                            if (!is_null($duplicate)) {
+                                $rez[$templateField['name']][] = $duplicate;
+                            }
+                        }
+                        if (!empty($rez[$templateField['name']]) && (sizeof($rez[$templateField['name']]) == 1)) {
+                            $rez[$templateField['name']] = $rez[$templateField['name']][0];
                         }
                     }
                 }
@@ -183,13 +203,23 @@ class OldObject
                         ,'files' => $f['files']
                         ,'childs' => $this->getOldChilds($f['duplicate_id'], $f['field_id'])
                     );
+                    $value = $this->formatOldValue($value);
                     $duplicates = $this->getOldDuplicates($f['duplicate_id'], $f['field_id']);
                     if (empty($duplicates)) {
-                        $rez[$templateField['name']] = $this->formatOldValue($value);
+                        if (!is_null($value)) {
+                            $rez[$templateField['name']] = $value;
+                        }
                     } else {
-                        $rez[$templateField['name']][] = $this->formatOldValue($value);
+                        if (!is_null($value)) {
+                            $rez[$templateField['name']][] = $value;
+                        }
                         foreach ($duplicates as $duplicate) {
-                            $rez[$templateField['name']][] = $this->formatOldValue($duplicate);
+                            if (!is_null($duplicate)) {
+                                $rez[$templateField['name']][] = $duplicate;
+                            }
+                        }
+                        if (!empty($rez[$templateField['name']]) && (sizeof($rez[$templateField['name']]) == 1)) {
+                            $rez[$templateField['name']] = $rez[$templateField['name']][0];
                         }
                     }
                 }
@@ -199,85 +229,8 @@ class OldObject
         return $rez;
     }
 
-    // protected function iterateOldData($duplicatePid = 0, $fieldId = null)
-    // {
-    //     $rez = array();
-    //     // iterate all values and select values for $duplicatePid
-    //     foreach ($this->oldValues as $fieldId => $fieldValues) {
-    //         // our old values are stored in an array
-    //         for ($i=0; $i < sizeof($fieldValues); $i++) {
-    //             $f = &$fieldValues[$i];
-    //             $templateField = $this->template->getField($f['field_id']);
-    //             // check if this field belongs to our $duplicatePid
-    //             if (($this->oldDuplicates[$f['duplicate_id']] == $duplicatePid) &&
-    //                 (is_null($fieldId) || ($fieldId == $f['field_id']))
-    //             ) {
-    //                 $value = array(
-    //                     'value' => $f['value']
-    //                     ,'info' => $f['info']
-    //                     ,'files' => $f['files']
-    //                     ,'childs' => $this->getOldChilds($f['duplicate_id'], $f['field_id'])
-    //                 );
-    //                 $duplicates = $this->iterateOldData($f['duplicate_id'], $f['field_id']);
-    //                 if (empty($duplicates)) {
-    //                     $rez[$templateField['name']] = $this->formatOldValue($value);
-    //                 } else {
-    //                     $rez[$templateField['name']][] = $this->formatOldValue($value);
-    //                     foreach ($duplicates as $duplicates) {
-    //                         $rez[$templateField['name']][] = $this->formatOldValue($duplicate);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     return $rez;
-    // }
-
-    // protected function getOldChilds($duplicateId, $fieldId)
-    // {
-    //     $rez = array();
-    //     // iterate all values and select values for $duplicateId
-    //     foreach ($this->oldValues as $fieldId => $fieldValues) {
-    //         // our old values are stored in an array
-    //         for ($i=0; $i < sizeof($fieldValues); $i++) {
-    //             $f = &$fieldValues[$i];
-    //             $templateField = $this->template->getField($f['field_id']);
-    //             // check if this field belongs to our $duplicateId
-    //             if (($f['duplicate_id'] == $duplicateId) &&
-    //                 ($fieldId == $templateField['pid'])
-    //             ) {
-    //                 $value = array(
-    //                     'value' => $f['value']
-    //                     ,'info' => $f['info']
-    //                     ,'files' => $f['files']
-    //                     ,'childs' => $this->getOldChilds($f['duplicate_id'], $f['field_id'])
-    //                 );
-    //                 $duplicates = $this->iterateOldData($f['duplicate_id'], $f['field_id']);
-    //                 if (empty($duplicates)) {
-    //                     $rez[$templateField['name']] = $this->formatOldValue($value);
-    //                 } else {
-    //                     $rez[$templateField['name']][] = $this->formatOldValue($value);
-    //                     foreach ($duplicates as $duplicates) {
-    //                         $rez[$templateField['name']][] = $this->formatOldValue($duplicate);
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //         return $rez;
-    //     }
-
-    // }
-
     protected function formatOldValue($value)
     {
-        if (empty($value['childs']) &&
-            empty($value['info']) &&
-            empty($value['files'])
-        ) {
-            return $value['value'];
-        }
         if (empty($value['files'])) {
             unset($value['files']);
         }
@@ -286,6 +239,19 @@ class OldObject
         }
         if (empty($value['childs'])) {
             unset($value['childs']);
+        }
+        if (($value['value'] == '0000-00-00') ||
+            ($value['value'] == '0000-00-00 00:00:00') ||
+            (
+                is_string($value['value']) &&
+                empty($value['value'])
+            )
+        ) {
+            $value['value'] = null;
+        }
+
+        if (array_key_exists('value', $value) && (sizeof($value) == 1)) {
+            $value = $value['value'];
         }
 
         return $value;
