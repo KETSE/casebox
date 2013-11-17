@@ -103,7 +103,6 @@ class OldObject
                 if (($f['duplicate_id'] == 0) && !is_null($templateField) &&
                     ($templateField['pid'] == $this->data['template_id'])
                 ) {
-                    // echo "First level field ".$templateField['name']." (".$templateField['id']."): <br />\n";
                     $value = array(
                         'value' => $f['value']
                         ,'info' => $f['info']
@@ -140,7 +139,6 @@ class OldObject
     {
         $rez = array();
         // iterate all values and select duplicate values
-        // echo "  Get duplicates for field $fieldId, duplication $duplicatePid <br />\n";
         foreach ($this->oldValues as $fieldId => $fieldValues) {
             // our old values are stored in an array
             for ($i=0; $i < sizeof($fieldValues); $i++) {
@@ -148,7 +146,7 @@ class OldObject
                 $templateField = $this->template->getField($f['field_id']);
                 // check if this field belongs to our $duplicatePid
                 if (!empty($f['duplicate_id']) &&
-                    ($this->oldDuplicates[$f['duplicate_id']] == $duplicatePid) &&
+                    (@$this->oldDuplicates[$f['duplicate_id']] == $duplicatePid) &&
                     ($templateField['id'] == $fieldId)
                 ) {
                     $value = array(
@@ -179,20 +177,20 @@ class OldObject
                 }
             }
         }
-        // echo "  Duplicates foundfor field $fieldId, duplication $duplicatePid ".sizeof($rez)."<br />\n";
+
         return $rez;
     }
 
     protected function getOldChilds($duplicateId = 0, $fieldId = null)
     {
         $rez = array();
-        // echo "  Get Childs for field $fieldId, duplication $duplicateId <br />\n";
         // iterate all values and select child values
         foreach ($this->oldValues as $fieldId => $fieldValues) {
             // our old values are stored in an array
             for ($i=0; $i < sizeof($fieldValues); $i++) {
                 $f = &$fieldValues[$i];
                 $templateField = $this->template->getField($f['field_id']);
+
                 // check if this field belongs to our $duplicatePid
                 if (($f['duplicate_id'] == $duplicateId) &&
                     ($templateField['pid'] == $fieldId)
@@ -225,7 +223,7 @@ class OldObject
                 }
             }
         }
-        // echo "  childs found".sizeof($rez)."<br />\n";
+
         return $rez;
     }
 

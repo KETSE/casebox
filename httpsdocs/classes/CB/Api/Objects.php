@@ -1,8 +1,6 @@
 <?php
 namespace CB\Api;
 
-use CB\DB as DB;
-
 /**
  * Objects processing api class
  *
@@ -130,23 +128,7 @@ class Objects
             if (!isset($p['owner'])) {
                 return 'owner not specified';
             }
-
-            $sql = 'SELECT id
-                FROM users_groups
-                WHERE `type` = 2
-                    and id = $1';
-            if (!is_numeric($p['owner'])) {
-                $sql = 'SELECT id
-                    FROM users_groups
-                    WHERE `type` = 2
-                        and name = $1';
-            }
-
-            $res = DB\dbQuery($sql, $p['owner']) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
-                $p['oid'] = $r['id'];
-            }
-            $res->close();
+            $p['oid'] = \CB\User::exists($p['owner']);
         }
 
         if (!is_numeric($p['oid'])) {

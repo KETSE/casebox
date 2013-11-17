@@ -1,3 +1,25 @@
+CaseBox 1.9.57 (2013-11-17)
+==============================
+- created script for creating/sync old tags table into tree
+    and transfer all template fields config to _objects config refering to created tags in tree.
+    All complex scripts from sys/utils will be transfered into classes under Util namespace.
+    For now only Tags transfering uses script sys/utils/tags_tree_sync.php that uses class Util\Tags\TreeSync.
+    Other cripts are transfered to destination folders where will be refactored to use described scheme.
+- added CB\Browser\CreateMenu class that will be completed for simple management of create menu displayed on client side.
+- added User.exists method for checking if a given user id or name exists
+- added Security.copyNodeAcl for copying security rules between two nodes.
+- aded Objects.getChildId method for simple child existance verification by its name under specified $pid
+
+Fixed Bugs:
+----------
+- param index mistake in Files.updateFileProperties for update query.
+
+Notes:
+----------
+- apply database update for core: 20131117_1108 db_update v1.9.57.sql
+- run script, for transfering tags into tree, /sys/utils/tags_tree_sync.php <core_name>.
+  In future commits tags table will be deleted, including all other scripts that are working with tags.
+
 CaseBox 1.9.56 (2013-11-14)
 ==============================
 - added statefull for verticalEditGrid columns and removed forceFit

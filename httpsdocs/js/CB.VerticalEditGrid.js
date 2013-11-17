@@ -202,9 +202,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 }
             }
             ,renderers: {
-                iconcombo: function(v, grid){
-                    return '<img src="css/i/s.gif" class="icon '+v+'" /> '+v;
-                }
+                iconcombo: App.customRenderers.iconcombo
             }
         });
         this.addEvents('change', 'fileupload', 'filedownload', 'filesdelete', 'loaded');
@@ -607,7 +605,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             return;
         }
         r = this.store.getAt(s[0]);
-        this.deleteDuplicate( r.get('id'));
+        this.helperTree.deleteDuplicate(r.get('id'));
         this.syncRecordsWithHelper();
         this.fireEvent('change');
     }

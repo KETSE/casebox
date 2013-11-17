@@ -153,7 +153,7 @@ class Browser
                         }
                     }
                     break;
-                case 'dependent':
+                case 'variable':
                     if (!empty($p['pidValue'])) {
                         $pids = Util\toNumericArray($p['pidValue']);
                     }

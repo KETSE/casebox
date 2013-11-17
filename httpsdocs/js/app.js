@@ -342,6 +342,12 @@ function initApp(){
             return v;
         }
         ,userName: function(v){ return CB.DB.usersStore.getName(v);}
+        ,iconcombo: function(v){
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+            return '<img src="css/i/s.gif" class="icon '+v+'" /> '+v;
+        }
     };
     App.getCustomRenderer = function(fieldType){
         switch(fieldType){

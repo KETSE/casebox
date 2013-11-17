@@ -139,7 +139,9 @@ class Objects
         }
 
         /* prepare params */
-        $d['date'] = $d['date_start'];
+        if (empty($d['date']) && !empty($d['date_start'])) {
+            $d['date'] = $d['date_start'];
+        }
         /* end of prepare params */
 
         // update object
@@ -652,14 +654,12 @@ class Objects
 
         if (!Cache::exist($var_name)) {
             $res = DB\dbQuery(
-                'SELECT tt.`type`
-                FROM tree t
-                JOIN templates tt ON t.template_id = tt.id
-                WHERE t.id = $1',
+                'SELECT template_id FROM tree WHERE id = $1',
                 $objectId
             ) or die(DB\dbQueryError());
             if ($r = $res->fetch_assoc()) {
-                Cache::set($var_name, $r['type']);
+                $tc = Templates\SingletonCollection::getInstance();
+                Cache::set($var_name, $tc->getType($r['template_id']));
             }
             $res->close();
         }
@@ -807,6 +807,35 @@ class Objects
         $res = DB\dbQuery('SELECT id FROM tree WHERE id = $1', $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $rez = true;
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get a child node id by its name under specified $pid
+     * @param  int      $id
+     * @param  varchar  $name
+     * @return int|null
+     */
+    public static function getChildId($pid, $name)
+    {
+        $rez = null;
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM tree
+            WHERE pid = $1
+                AND name = $2
+                AND dstatus = 0',
+            array(
+                $pid
+                ,$name
+            )
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['id'];
         }
         $res->close();
 

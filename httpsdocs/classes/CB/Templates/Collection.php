@@ -13,7 +13,7 @@ class Collection
      * array of \CB\Template classes
      * @var array
      */
-    private $templates = array();
+    public $templates = array();
 
     /**
      * load all templates from database
@@ -110,12 +110,12 @@ class Collection
 
         // check if template has been loaded
         if (!empty($this->templates[$templateId])) {
-            return $this->templates[$templateId]->getData['type'];
+            return $this->templates[$templateId]->getData()['type'];
         }
 
         $var_name = 'template_type'.$templateId;
 
-        if (!Cache::exist($var_name)) {
+        if (!\CB\Cache::exist($var_name)) {
             //select from db
             $res = DB\dbQuery(
                 'SELECT `type`
@@ -124,12 +124,12 @@ class Collection
                 $templateId
             ) or die(DB\dbQueryError());
             if ($r = $res->fetch_assoc()) {
-                Cache::set($var_name, $r['type']);
+                \CB\Cache::set($var_name, $r['type']);
             }
             $res->close();
         }
 
-        return Cache::get($var_name);
+        return \CB\Cache::get($var_name);
     }
 
     /**

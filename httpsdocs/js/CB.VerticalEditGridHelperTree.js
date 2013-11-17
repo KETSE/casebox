@@ -173,6 +173,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
             {
                 nid: templateRecord.get('id')
                 ,templateRecord: templateRecord
+                ,value: {}
             }
             ,beforeNode
         );

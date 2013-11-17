@@ -192,7 +192,6 @@ class Object extends OldObject
 
         if ($r = $res->fetch_assoc()) {
             $this->data = $r;
-
             if (!empty($this->data['template_id']) && $this->loadTemplate) {
                 $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
             }
@@ -258,7 +257,6 @@ class Object extends OldObject
                 $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
             }
         }
-
         if (!is_numeric($this->id)) {
             throw new \Exception("No object id specified for update", 1);
         }
@@ -547,12 +545,12 @@ class Object extends OldObject
      */
     public function getLinearData()
     {
-        $rez = $this->getLinearNodeData($this->data['data']);
+        $rez = $this->getLinearNodesData($this->data['data']);
 
         return $rez;
     }
 
-    protected function getLinearNodeData($data)
+    protected function getLinearNodesData($data)
     {
         $rez = array();
         foreach ($data as $fieldName => $fieldValue) {
@@ -579,7 +577,7 @@ class Object extends OldObject
                 }
                 $rez[] = $value;
                 if (!empty($fv['childs'])) {
-                    $rez = array_merge($rez, $this->getLinearNodeData($fv['childs']));
+                    $rez = array_merge($rez, $this->getLinearNodesData($fv['childs']));
                 }
             }
         }
@@ -595,6 +593,9 @@ class Object extends OldObject
     public function setData($data)
     {
         $this->data = $data;
+        if (array_key_exists('id', $data)) {
+            $this->id = $data['id'];
+        }
     }
 
     /**
@@ -776,39 +777,14 @@ class Object extends OldObject
 
         $objectId = DB\dbLastInsertId();
 
-        /* we have now object created, so we star copy all its possible data:
+        /* we have now object created, so we start copy all its possible data:
             - tree_info is filled automaticly by trigger
             - custom security rules from tree_acl
             - custom object data
         */
 
         // copy node custom security rules if set
-        DB\dbQuery(
-            'INSERT INTO `tree_acl`
-            (`node_id`
-            ,`user_group_id`
-            ,`allow`
-            ,`deny`
-            ,`cid`
-            ,`cdate`
-            ,`uid`
-            ,`udate`)
-            SELECT
-                $2
-                ,`user_group_id`
-                ,`allow`
-                ,`deny`
-                ,`cid`
-                ,`cdate`
-                ,`uid`
-                ,`udate`
-            FROM `tree_acl`
-            WHERE node_id = $1',
-            array(
-                $this->id
-                ,$objectId
-            )
-        ) or die(DB\dbQueryError());
+        \CB\Security::copyNodeAcl($this->id, $objectId);
 
         $this->copyCustomDataTo($objectId);
 

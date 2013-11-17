@@ -896,6 +896,30 @@ class User
         return array('success' => true);
     }
 
+    /**
+     * check if a given user id or name exists
+     * @param  int|varchar $user id or username of the user
+     * @return int|bool    user id or false
+     */
+    public static function exists($user)
+    {
+        $rez = false;
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM users_groups
+            WHERE `type` = 2
+                and '.(is_numeric($user) ? 'id' : 'name').' = $1',
+            $user
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['id'];
+        }
+        $res->close();
+
+        return $rez;
+    }
+
     public static function getTemplateId()
     {
         $rez = null;

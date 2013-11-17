@@ -590,7 +590,7 @@ class Files
             'UPDATE files
             SET `date` = $2
             ,title = $3
-            ,uid = $3
+            ,uid = $4
             ,udate = CURRENT_TIMESTAMP
             WHERE id = $1',
             array(
