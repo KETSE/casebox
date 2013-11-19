@@ -279,6 +279,12 @@ class User
             if (!empty($cfg['timezone'])) {
                 $r['timezone'] = $cfg['timezone'];
             }
+            if (!empty($cfg['canAddUsers'])) {
+                $r['canAddUsers'] = $cfg['canAddUsers'];
+            }
+            if (!empty($cfg['canAddGroups'])) {
+                $r['canAddGroups'] = $cfg['canAddGroups'];
+            }
             $r['template_id'] = User::getTemplateId();
             VerticalEditGrid::getData('users_groups', $r);
             $rez = $r;
@@ -358,6 +364,21 @@ class User
         }
         if (isset($p['long_date_format'])) {
             $cfg['long_date_format'] = $p['long_date_format'];
+        }
+
+        if ($p['id'] != $_SESSION['user']['id']) {
+            if (Security::canAddUser()) {
+                unset($cfg['canAddUsers']);
+                if (isset($p['canAddUsers'])) {
+                    $cfg['canAddUsers'] = $p['canAddUsers'];
+                }
+            }
+            if (Security::canAddGroup()) {
+                unset($cfg['canAddGroups']);
+                if (isset($p['canAddGroups'])) {
+                    $cfg['canAddGroups'] = $p['canAddGroups'];
+                }
+            }
         }
 
         @DB\dbQuery(

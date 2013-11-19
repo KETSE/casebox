@@ -103,8 +103,8 @@ class VerticalEditGrid
         $ids = array(0);
         if (isset($data['gridData'])) {
             foreach ($data['gridData']['values'] as $f => $fv) { //$c => $cv
-                if (!isset($fv->value)) {
-                    $fv->value = null;
+                if (!isset($fv['value'])) {
+                    $fv['value'] = null;
                 }
                 $f = explode('_', $f);
                 $field_id = substr($f[0], 1);

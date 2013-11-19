@@ -1,24 +1,24 @@
-Ext.namespace('CB'); 
+Ext.namespace('CB');
 
 // ----------------------------------------------------------- add user form
 CB.AddUserForm = Ext.extend(Ext.Window, {
     data: {}
     ,layout: 'fit'
     ,autoWidth: true
-    ,title: L.AddUser 
+    ,title: L.AddUser
     ,iconCls: 'icon-user-gray'
     ,initComponent: function(){
         recs = CB.DB.roles.queryBy(
-            function(r){ 
-                return ( (r.get('id') !=3) && 
-                    (r.get('id') !=1) && 
-                    (App.loginData.manage || (r.get('id') !=2)) 
+            function(r){
+                return ( (r.get('id') !=3) &&
+                    (r.get('id') !=1) &&
+                    (App.loginData.manage || (r.get('id') !=2))
                 );
             }
         );//&& (App.loginData.admin || (r.get('id') !=1))
-        
+
         data = [];
-        recs.each(function(r){data.push(r.data)}, this);
+        recs.each(function(r){data.push(r.data);}, this);
         this.rolesStore = new Ext.data.JsonStore({
             autoLoad: true
             ,autoDestroy: true
@@ -26,11 +26,11 @@ CB.AddUserForm = Ext.extend(Ext.Window, {
             ,proxy: new Ext.data.MemoryProxy()
             ,data: data
         });
-        
-        data = []
+
+        data = [];
         CB.DB.groupsStore.each( function(r){
             if(r.get('system') == 0) data.push(r.data);
-        }, this)
+        }, this);
 
         this.groupsStore = new Ext.data.JsonStore({
             autoLoad: true
@@ -93,7 +93,7 @@ CB.AddUserForm = Ext.extend(Ext.Window, {
                 ,cls:'cR'
                 ,text: ''
             }];
-            
+
         Ext.apply(this, {
             buttons:[
                 {   text: L.Save
@@ -121,9 +121,9 @@ CB.AddUserForm = Ext.extend(Ext.Window, {
                     ,bubbleEvents: ['change']
                 }
                 ,items: items
-            }   
+            }
             ]
-            ,listeners: { 
+            ,listeners: {
                 scope: this
                 ,change: function(e){
                     this.setDirty(true);
@@ -135,7 +135,7 @@ CB.AddUserForm = Ext.extend(Ext.Window, {
             }
         });
         CB.AddUserForm.superclass.initComponent.apply(this, arguments);
-        
+
         this.on('show', App.focusFirstField, this)
         this.on('close', function(){CB.DB.roles.clearFilter();}, this)
     }
@@ -163,7 +163,7 @@ CB.AddUserForm = Ext.extend(Ext.Window, {
         Ext.each(a, function(i){params[i.name] = i.getValue()}, this);
         if(this.data.callback) this.data.callback(params, this.ownerCt);
         this.destroy();
-    }           
+    }
 })
 // ----------------------------------------------------------- end of add user form
 CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
@@ -216,12 +216,12 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
             allowBlank: false
             ,blankText: 'A name is required'
             ,selectOnFocus: true
-            ,ignoreNoChange: true 
-        }); 
+            ,ignoreNoChange: true
+        });
         this.editor.on('beforestartedit', this.onBeforeStartEdit, this);
         this.editor.on('startedit', this.onStartEdit, this);
         this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
-        
+
         Ext.apply(this, {
             loader: new Ext.tree.TreeLoader({
                 directFn: CB_UsersGroups.getChildren
@@ -231,9 +231,9 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
                     scope: this
                     ,beforeload: function(treeLoader, node) {
                         // Add NodePath to the params
-                        treeLoader.baseParams.path = node.getPath('nid'); 
+                        treeLoader.baseParams.path = node.getPath('nid');
                     }
-                    ,load: function(o, n, r) { 
+                    ,load: function(o, n, r) {
                         if(n.attributes.kind > 1) n.sort(this.sortTree)
                     }
                     ,loadexception: function(loader, node, response) {
@@ -270,7 +270,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
                 ,nodedragover: function(o){
                     if( (o.point != 'append')
                         || (o.target == o.dropNode.parentNode)
-                        || (o.target.getDepth() != 1) 
+                        || (o.target.getDepth() != 1)
                         || (o.target.attributes.nid < 1) // || (o.target.attributes.role_id > 2)
                         ){
                         o.cancel = true;
@@ -287,18 +287,18 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
                         CB_UsersGroups.associate(this.sourceNode.attributes.nid, this.targetNode.attributes.nid, this.processAssociate, this);
                     }
                 }
-                ,beforeappend: { scope: this, fn: function(t, p, n){ 
+                ,beforeappend: { scope: this, fn: function(t, p, n){
                     text = Ext.value(n.attributes.title, n.attributes.name);
                     n.attributes.title = text;
 
-                    if( p.getDepth() == 1 ){ //n.attributes.role_id > 0 && 
+                    if( p.getDepth() == 1 ){ //n.attributes.role_id > 0 &&
                         text += ' <span class="cG">(id:' + n.attributes.nid + ')</span>';
                         if(n.attributes.enabled != 1){
                             text += ' <span class="cG">' + L.inactive + '</span>';
                         }
                         n.attributes.iconCls = 'icon-user-' + Ext.value(n.attributes.sex, '');
                     }
-                    if(n.attributes.type == 1){ n.attributes.cls = n.attributes.cls + ' fwB'; n.getUI().addClass('fwB') }; 
+                    if(n.attributes.type == 1){ n.attributes.cls = n.attributes.cls + ' fwB'; n.getUI().addClass('fwB') };
                     if(n.attributes.cid == App.loginData.id){n.attributes.cls = n.attributes.cls + ' cDB'; n.getUI().addClass('cDB')};
                     n.setText(text);
                 } }
@@ -307,15 +307,15 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
             }
             ,selModel: new Ext.tree.DefaultSelectionModel({
                 listeners: {
-                    selectionchange: {scope: this, fn: function(sm, node){ 
+                    selectionchange: {scope: this, fn: function(sm, node){
                             if(Ext.isEmpty(node)){
-                                this.actions.del.setDisabled(true); 
-                                this.actions.remove.setDisabled(true); 
+                                this.actions.del.setDisabled(true);
+                                this.actions.remove.setDisabled(true);
                             }else{
                                 this.actions.del.setDisabled(node.attributes.system == 1);
                                 this.actions.remove.setDisabled( (node.getDepth() <2) || (node.parentNode.attributes.nid <1 ) );
                             }
-                        } 
+                        }
                     }
                 }
             })
@@ -391,7 +391,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
             }
         }, this)
     }
-    ,sortTree: function(n1, n2){ 
+    ,sortTree: function(n1, n2){
         return (n1.text < n2.text) ? -1 : 1;
     }
     ,deassociateNode: function(){
@@ -435,9 +435,9 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
         n = this.getSelectionModel().getSelectedNode();
         if(!n) return;
         switch(n.getDepth()){
-        case 2: 
+        case 2:
             this.deletedUserData = n.attributes;
-            Ext.MessageBox.confirm(L.Confirmation, L.DeleteUser + ' "'+n.attributes.text+'"?', 
+            Ext.MessageBox.confirm(L.Confirmation, L.DeleteUser + ' "'+n.attributes.text+'"?',
             function(btn, text){
                 if(btn == 'yes'){
                     n = this.getSelectionModel().getSelectedNode();
@@ -446,8 +446,8 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
             }
             , this);
             break;
-        case 1: 
-            Ext.MessageBox.confirm(L.Confirmation, L.DeleteGroupConfirmationMessage + ' "'+n.attributes.text+'"?', 
+        case 1:
+            Ext.MessageBox.confirm(L.Confirmation, L.DeleteGroupConfirmationMessage + ' "'+n.attributes.text+'"?',
             function(btn, text){
                 if(btn == 'yes') CB_Security.destroyUserGroup(n.attributes.nid, this.processDestroyUserGroup, this);
             }
@@ -533,7 +533,7 @@ CB.UserEditWindow = Ext.extend(Ext.Window, {
 
                     this.fireEvent('savesuccess', f, a);
                     App.fireEvent('userprofileupdated', f.data, a);
-                    this.destroy() 
+                    this.destroy()
                 }
                 ,cancel: this.destroy
                 ,change: function(){
@@ -714,15 +714,15 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
             this.userInfo.data = response.data;
             this.userInfo.update(response.data);
             this.grid.setDisabled(response.data.id == App.loginData.id);//disable editing access for self
-            
+
             accessData = [];
             CB.DB.groupsStore.each( function(r){
                 if(r.get('system') == 0)
                     accessData.push( {id: r.get('id'), 'name': r.get('title'), 'active': (response.data.groups.indexOf(String(r.get('id') ) ) >=0 ) ? 1: 0})
             }, this)
             this.grid.getStore().loadData(accessData, false);
-            
-            this.canEditUserData = true;//((App.loginData.admin) || (response.data.cid == App.loginData.id) || (response.data.id == App.loginData.id));
+
+            this.canEditUserData = ((App.loginData.admin) || (response.data.cid == App.loginData.id) || (response.data.id == App.loginData.id));
             eb = this.getTopToolbar().find('iconCls', 'icon-pencil')[0];
             eb.setVisible(this.canEditUserData); // edit button
             idx = this.getTopToolbar().items.indexOf(eb);
@@ -760,7 +760,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
             },
             this
         );
-    }           
+    }
     ,onEditUserDataClick: function(w, idx, el, ev){
         if(ev && (ev.getTarget().localName == "img") ) {
             el = this.find('name', 'photo')[0].getEl();
@@ -772,7 +772,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
         this.getForm().submit({
             clientValidation: true
             ,params: {
-                    id: this.data.id    
+                    id: this.data.id
                 }
             ,scope: this
             ,success: function(form, action) { this.updatePhoto(action.result.photo); }
@@ -791,10 +791,10 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
                 r = /^[a-z0-9\._]+$/i;
                 if(Ext.isEmpty(r.exec(text))) return Ext.Msg.alert(L.Error, L.UsernameInvalid);
                 CB_UsersGroups.renameUser(
-                    {id: this.data.id, name: text}, 
-                    function(r, e){ 
+                    {id: this.data.id, name: text},
+                    function(r, e){
                         if(r.success !== true) return Ext.Msg.alert(L.Error, Ext.value(e.msg, L.ErrorOccured) );
-                        this.data.name = r.name; 
+                        this.data.name = r.name;
                         this.userInfo.data.name = r.name;
                         this.userInfo.update(this.userInfo.data);
                     }, this)
@@ -824,7 +824,7 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
         this.tree.getSelectionModel().on( 'selectionchange', this.onTreeSelectionChange, this );
         this.tree.getSelectionModel().on( 'beforeselect', this.onTreeBeforeSelect, this );
 
-        this.form = new CB.UsersGroupsForm( { 
+        this.form = new CB.UsersGroupsForm( {
             region: 'center'
             ,api: {submit: CB_User.uploadPhoto }
             ,listeners:{
@@ -860,19 +860,19 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
         if(n) this.lastPath = n.getPath('nid');
     }
     ,onFormSave: function(){
-        this.tree.getRootNode().reload(function(){this.tree.selectPath(this.lastPath, 'nid', 
+        this.tree.getRootNode().reload(function(){this.tree.selectPath(this.lastPath, 'nid',
             function(success){
                 if(!success){
                     this.form.setDisabled(true);
                     this.tree.getRootNode().cascade(function(n){
                         if(n.attributes.id == this.form.data.id) {
-                            this.tree.getSelectionModel().select(n); 
+                            this.tree.getSelectionModel().select(n);
                             this.form.setDisabled(false);
                             return false;
                         }
                     }, this);
                 }
-            }.createDelegate(this) 
+            }.createDelegate(this)
         )}, this);
     }
     ,onTreeSelectionChange: function(sm, node){
@@ -896,14 +896,14 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
                 ,msg: L.SaveChangesConfirmationMessage
                 ,scope: this
                 ,fn: function(btn, text){
-                    if (btn == 'yes') this.form.saveData(); 
+                    if (btn == 'yes') this.form.saveData();
                     else{
                         this._forceSelection = 1;
                         this.tree.getSelectionModel().select(this.newNode);
                         this.form.setDirty(false);
                     }
                 }
-            }); 
+            });
             return false;
         }
     }
@@ -922,7 +922,7 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
         this.tree.getRootNode().cascade(function(n){
             if(n.attributes.nid == data.id) {
                 n.setText(
-                    Ext.value(n.attributes.title, n.attributes.name) + 
+                    Ext.value(n.attributes.title, n.attributes.name) +
                     ' <span class="cG">(id:' + data.id + ')</span>'
                 );
             }
@@ -990,7 +990,7 @@ CB.ChangePasswordWindow = Ext.extend(Ext.Window, {
                 ,id: 'msgTarget'
                 ,value: '&nbsp;'
             });
-        
+
         Ext.apply(this, {
             items: {
                 xtype: 'form'
@@ -1048,7 +1048,7 @@ CB.ChangePasswordWindow = Ext.extend(Ext.Window, {
                         }
                     }
                     ,{text: Ext.MessageBox.buttonText.cancel, iconCls:'icon-cancel', handler: this.destroy, scope: this}
-                    ]           
+                    ]
             }
             ,listeners: {
                 afterrender: function(){ f = this.findByType('form')[0]; f.syncSize(); App.focusFirstField(f) }

@@ -1,3 +1,9 @@
+CaseBox 1.9.58 (2013-11-19)
+==============================
+New Features, Improvements
+--------------------------
+- added canAddUsers, canAddGroups in user config.
+
 CaseBox 1.9.51 (2013-11-02)
 ==============================
 New Features, Improvements

@@ -5,7 +5,7 @@ CB.Account = Ext.extend(Ext.Panel, {
     ,hideBorders: true
     ,closable: true
     ,initComponent: function() {
-        
+
         this.menu = new Ext.Panel({
             region: 'west'
             ,collapsible: false
@@ -52,12 +52,12 @@ CB.Account = Ext.extend(Ext.Panel, {
                 xtype: 'CBSecurityForm'
                 ,listeners: {
                     scope: this
-                    ,change: function(){ /*this.autoCloseTask.delay(1000*60*5);/**/ }   
+                    ,change: function(){ /*this.autoCloseTask.delay(1000*60*5);/**/ }
                 }
             }
             ]
             ,deferredRender: true
-        })
+        });
 
         Ext.apply(this, {
             iconCls: 'icon-user-' + App.loginData.sex
@@ -69,7 +69,7 @@ CB.Account = Ext.extend(Ext.Panel, {
             ]
         });
         CB.Account.superclass.initComponent.apply(this, arguments);
-        
+
         /* autoclose form if no activity in 5 minutes */
         // this.autoCloseTask = new Ext.util.DelayedTask(this.destroy, this);
         // this.autoCloseTask.delay(1000*60*5);
@@ -104,7 +104,7 @@ CB.Account = Ext.extend(Ext.Panel, {
         // this.autoCloseTask.delay(1000*60*5);
     }
 }
-)
+);
 
 Ext.reg('CBAccount', CB.Account);
 
@@ -136,7 +136,117 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
             ,itemSelector:'.click'
             ,autoHeight: true
             ,listeners:{ scope: this, click: this.onPhotoClick }
-        })
+        });
+
+        var fields = [
+            {
+                xtype: 'textfield'
+                ,name: 'first_name'
+                ,fieldLabel: L.FirstName
+                ,listeners: {scope: this, change: this.onChange }
+            },{
+                xtype: 'textfield'
+                ,name: 'last_name'
+                ,fieldLabel: L.LastName
+                ,listeners: {scope: this, change: this.onChange }
+            },{
+                xtype: 'combo'
+                ,name: 'sex'
+                ,hiddenName: 'sex'
+                ,fieldLabel: L.Gender
+                ,mode: 'local'
+                ,triggerAction: 'all'
+                ,editable: false
+                ,store: CB.DB.sex
+                ,valueField: 'id'
+                ,displayField: 'name'
+            },{
+                xtype: 'textfield'
+                ,name: 'email'
+                ,fieldLabel: L.PrimaryEmail
+                ,vtype: 'email'
+            },{
+                xtype: 'combo'
+                ,name: 'country_code'
+                ,hiddenName: 'country_code'
+                ,fieldLabel: L.Country
+                ,mode: 'local'
+                ,triggerAction: 'all'
+                ,editable: true
+                ,forceSelection: true
+                ,typeAhead: true
+                ,store: CB.DB.phone_codes
+                ,valueField: 'code'
+                ,displayField: 'name'
+                ,value: null
+                ,width: 250
+            },{
+                xtype: 'numberfield'
+                ,name: 'phone'
+                ,fieldLabel: L.Phone
+                ,allowDecimals: false
+                ,allowNegative: false
+            },{
+
+                html: '&nbsp;'
+                ,border: false
+            },{
+                xtype: 'combo'
+                ,name: 'language_id'
+                ,hiddenName: 'language_id'
+                ,fieldLabel: L.Language
+                ,mode: 'local'
+                ,triggerAction: 'all'
+                ,editable: true
+                ,forceSelection: true
+                ,typeAhead: true
+                ,store: CB.DB.languages
+                ,valueField: 'id'
+                ,displayField: 'name'
+            },{
+                xtype: 'combo'
+                ,name: 'timezone'
+                ,hiddenName: 'timezone'
+                ,fieldLabel: L.Timezone
+                ,mode: 'local'
+                ,triggerAction: 'all'
+                ,editable: false
+                ,store: CB.DB.timezones
+                ,valueField: 'id'
+                ,displayField: 'caption'
+                ,value: null
+            },{
+                xtype: 'combo'
+                ,name: 'short_date_format'
+                ,hiddenName: 'short_date_format'
+                ,fieldLabel: L.DateFormat
+                ,mode: 'local'
+                ,triggerAction: 'all'
+                ,editable: false
+                ,store: CB.DB.shortDateFormats
+                ,valueField: 'id'
+                ,displayField: 'name'
+                ,value: null
+            }
+        ];
+        if(App.loginData.id != this.data.id) {
+            if(App.loginData.admin || App.loginData.cfg.canAddUsers) {
+                fields.push({
+                    xtype: 'checkbox'
+                    ,name: 'canAddUsers'
+                    ,fieldLabel: Ext.value(L.CanAddUsers, 'Can add users')
+                    ,inputValue: true
+                });
+            }
+            if(App.loginData.admin || App.loginData.cfg.canAddGroups) {
+                fields.push({
+                    xtype: 'checkbox'
+                    ,name: 'canAddGroups'
+                    ,fieldLabel: Ext.value(L.CanAddGroups, 'Can add groups')
+                    ,inputValue: true
+                });
+            }
+        }
 
         Ext.apply(this,{
             items:[{
@@ -162,97 +272,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                                     ,select: this.onChange
                                 }
                             }
-                            ,items: [
-                                {
-                                    xtype: 'textfield'
-                                    ,name: 'first_name'
-                                    ,fieldLabel: L.FirstName
-                                    ,listeners: {scope: this, change: this.onChange }
-                                },{
-                                    xtype: 'textfield'
-                                    ,name: 'last_name'
-                                    ,fieldLabel: L.LastName
-                                    ,listeners: {scope: this, change: this.onChange }
-                                },{
-                                    xtype: 'combo'
-                                    ,name: 'sex'
-                                    ,hiddenName: 'sex'
-                                    ,fieldLabel: L.Gender
-                                    ,mode: 'local'
-                                    ,triggerAction: 'all'
-                                    ,editable: false
-                                    ,store: CB.DB.sex
-                                    ,valueField: 'id'
-                                    ,displayField: 'name'
-                                },{
-                                    xtype: 'textfield'
-                                    ,name: 'email'
-                                    ,fieldLabel: L.PrimaryEmail
-                                    ,vtype: 'email'
-                                },{
-                                    xtype: 'combo'
-                                    ,name: 'country_code'
-                                    ,hiddenName: 'country_code'
-                                    ,fieldLabel: L.Country
-                                    ,mode: 'local'
-                                    ,triggerAction: 'all'
-                                    ,editable: true
-                                    ,forceSelection: true
-                                    ,typeAhead: true
-                                    ,store: CB.DB.phone_codes
-                                    ,valueField: 'code'
-                                    ,displayField: 'name'
-                                    ,value: null
-                                    ,width: 250
-                                },{
-                                    xtype: 'numberfield'
-                                    ,name: 'phone'
-                                    ,fieldLabel: L.Phone
-                                    ,allowDecimals: false
-                                    ,allowNegative: false
-                                },{
-
-                                    html: '&nbsp;'
-                                    ,border: false
-                                },{
-                                    xtype: 'combo'
-                                    ,name: 'language_id'
-                                    ,hiddenName: 'language_id'
-                                    ,fieldLabel: L.Language
-                                    ,mode: 'local'
-                                    ,triggerAction: 'all'
-                                    ,editable: true
-                                    ,forceSelection: true
-                                    ,typeAhead: true
-                                    ,store: CB.DB.languages
-                                    ,valueField: 'id'
-                                    ,displayField: 'name'
-                                },{
-                                    xtype: 'combo'
-                                    ,name: 'timezone'
-                                    ,hiddenName: 'timezone'
-                                    ,fieldLabel: L.Timezone
-                                    ,mode: 'local'
-                                    ,triggerAction: 'all'
-                                    ,editable: false
-                                    ,store: CB.DB.timezones
-                                    ,valueField: 'id'
-                                    ,displayField: 'caption'
-                                    ,value: null
-                                },{
-                                    xtype: 'combo'
-                                    ,name: 'short_date_format'
-                                    ,hiddenName: 'short_date_format'
-                                    ,fieldLabel: L.DateFormat
-                                    ,mode: 'local'
-                                    ,triggerAction: 'all'
-                                    ,editable: false
-                                    ,store: CB.DB.shortDateFormats
-                                    ,valueField: 'id'
-                                    ,displayField: 'name'
-                                    ,value: null
-                                }
-                            ]
+                            ,items: fields
                         }
                 },{
                     xtype: 'panel'
@@ -290,7 +310,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,afterrender: this.onAfterRender
                 ,change: this.onChange
             }
-        })
+        });
         CB.ProfileForm.superclass.initComponent.apply(this, arguments);
         this.grid = this.items.itemAt(1);
 
@@ -298,15 +318,15 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
         if(CB.DB.timezones.getCount() == 0) CB.DB.timezones.load();
     }
     ,onAfterRender: function(cmp){
-        
+
     }
     ,loadData: function(data){
         this.data = data;
         this.getForm().setValues(data);
         this.grid.reload();
-        this.photoView.update( [{id: this.data.id }] ) 
+        this.photoView.update([{id: this.data.id }]);
         this.syncSize();
-        this.setDirty(false)
+        this.setDirty(false);
     }
     ,onPhotoClick: function(w, idx, el, ev){
         if(!ev) return;
@@ -325,11 +345,11 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
         form.submit({
             clientValidation: false
             ,params: {
-                    id: this.data.id    
+                    id: this.data.id
                 }
             ,scope: this
-            ,success: function(form, action) { 
-                this.photoView.update( [{id: this.data.id }] ) 
+            ,success: function(form, action) {
+                this.photoView.update([{id: this.data.id }]);
             }
             ,failure: App.formSubmitFailure
         });
@@ -338,29 +358,31 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
         Ext.Msg.confirm(L.Confirm, L.RemovePhotoConfirm, function(b, e){
             if(b == 'yes'){
                 CB_User.removePhoto( { id: this.data.id }, function(){
-                    this.photoView.update( [{id: this.data.id }] )
+                    this.photoView.update([{id: this.data.id }]);
                 }, this);
             }
-        }, this)
+        }, this);
     }
     ,onSaveClick: function(){
+        delete this.data.canAddUsers;
+        delete this.data.canAddGroups;
         Ext.apply(this.data, this.getForm().getValues());
         if(this.data.phone == this.find('name', 'phone')[0].emptyText) this.data.phone = null;
         this.grid.readValues();
-        CB_User.saveProfileData(this.data, this.onSaveProcess, this)
+        CB_User.saveProfileData(this.data, this.onSaveProcess, this);
     }
     ,onSaveProcess: function(r, e){
         if(r.success !== true) return;
         this.setDirty(false);
         this.fireEvent('savesuccess', this, e);
-        App.fireEvent('userprofileupdated', this.data, e)
+        App.fireEvent('userprofileupdated', this.data, e);
     }
     ,onResetClick: function(){
         this.getForm().reset();
         this.loadData(this.data);
     }
     ,onChange: function(){
-        this.setDirty(true)
+        this.setDirty(true);
     }
     ,setDirty: function(dirty){
         this._isDirty = (dirty !== false);
@@ -368,7 +390,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
         this.buttons[1].setDisabled(!this._isDirty);
     }
 
-})
+});
 
 Ext.reg('CBProfileForm', CB.ProfileForm);
 
@@ -420,7 +442,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                         hidden: true
                         ,name: 'recovery_mobile_panel'
                         ,layout: 'form'
-                        ,defaults: { 
+                        ,defaults: {
                             width: 200
                             ,listeners: {
                                 scope: this
@@ -447,7 +469,6 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                             ,fieldLabel: L.PhoneNumber
                             ,allowDecimals: false
                             ,allowNegative: false
-                            ,fieldLabel: 'Phone number'
                         }
                         ]
                     },{
@@ -501,7 +522,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                         hidden: true
                         ,name: 'recovery_question_panel'
                         ,layout: 'form'
-                        ,defaults: { 
+                        ,defaults: {
                             width: 200
                             ,listeners: {
                                 scope: this
@@ -575,10 +596,10 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                     ,handler: this.enableTSV
                     ,hidden: true
                 }
-                ]   
+                ]
             }
             ]
-        })
+        });
         CB.SecurityForm.superclass.initComponent.apply(this, arguments);
         this.saveButton = this.items.itemAt(1).buttons[0];
         this.resetButton = this.items.itemAt(1).buttons[1];
@@ -588,7 +609,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         this.data = data;
         if(!Ext.isEmpty(data.password_change)) this.find( 'name', 'passwordchanged' )[0].setValue(L.PasswordChanged+': '+data.password_change);
 
-        cb = this.items.itemAt(1).items.first().items.first()
+        cb = this.items.itemAt(1).items.first().items.first();
         cb.setValue(data.recovery_mobile == true);
         this.find( 'name', 'country_code' )[0].setValue( Ext.value(data.country_code, null) );
         this.find( 'name', 'phone_number' )[0].setValue( Ext.value(data.phone_number, null) );
@@ -607,10 +628,10 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         this.setDirty(false);
     }
     ,onCheckboxCheck: function(cb){
-        p = this.find('name', cb.name+'_panel')[0]
+        p = this.find('name', cb.name+'_panel')[0];
         p.setVisible(cb.checked);
         //this.data[cb.name] = cb.checked;
-        this.setDirty()
+        this.setDirty();
     }
     ,onChangePasswordClick: function(b){
         pw = new CB.ChangePasswordWindow({
@@ -626,7 +647,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         this.find('name', 'passwordchanged')[0].setValue(L.PasswordChanged+': '+L.today);
     }
     ,onSaveClick: function(){
-        cb = this.items.itemAt(1).items.first().items.first()
+        cb = this.items.itemAt(1).items.first().items.first();
         this.data.recovery_mobile = cb.getValue();
         this.data.country_code = this.find( 'name', 'country_code' )[0].getValue();
         this.data.phone_number = this.find( 'name', 'phone_number' )[0].getValue();
@@ -640,7 +661,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         this.data.question_idx = this.find( 'name', 'question_idx' )[0].getValue();
         this.data.answer = this.find( 'name', 'answer' )[0].getValue();
 
-        CB_User.saveSecurityData(this.data, this.onSaveProcess, this)
+        CB_User.saveSecurityData(this.data, this.onSaveProcess, this);
     }
     ,onSaveProcess: function(r, e){
         if(r.success !== true) return;
@@ -650,18 +671,18 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         this.loadData(this.data);
     }
     ,onChange: function(){
-        this.setDirty(true)
+        this.setDirty(true);
     }
     ,setDirty: function(dirty){
         this._isDirty = (dirty !== false);
         this.saveButton.setDisabled(!this._isDirty);
         this.resetButton.setDisabled(!this._isDirty);
-    }   
+    }
     ,enableTSV: function(b, e){
         data = Ext.value(this.data.TSV, {});
         data.country_code = Ext.value(data.country_code, this.data.country_code );
         data.phone_number = Ext.value(data.phone_number, this.data.phone_number );
-        w = new CB.TSVWindow({ 
+        w = new CB.TSVWindow({
             data: data
             ,listeners:{
                 scope: this
@@ -677,18 +698,18 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
     }
     ,updateTSVStatus: function(){
         text = '<span class="cG">'+ L.Disabled + '</span>';
-        
-        if(Ext.isEmpty(this.data.TSV)) this.data.TSV = {}
+
+        if(Ext.isEmpty(this.data.TSV)) this.data.TSV = {};
 
         switch(this.data.TSV.method){
-            case 'ga': 
-                text = 'Mobile Google Aplication'
+            case 'ga':
+                text = 'Mobile Google Aplication';
                 break;
-            case 'sms': 
-                text = 'Google Authentication using SMS'
+            case 'sms':
+                text = 'Google Authentication using SMS';
                 break;
             case 'ybk':
-                text = 'Yubikey'
+                text = 'Yubikey';
                 break;
         }
         this.items.itemAt(2).items.itemAt(0).setValue(L.Status+': ' + text);
@@ -700,15 +721,15 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         Ext.Msg.confirm(L.Confirm, 'Are you sure you want to disable '+L.TSV, function(b, e){
             if(b == 'yes'){
                 CB_User.disableTSV( function(r, e){
-                    if(r.success == true){
+                    if(r.success === true){
                         delete this.data.TSV.method;
                         this.updateTSVStatus();
                     }
                 }, this);
             }
-        }, this) 
+        }, this);
     }
-})
+});
 Ext.reg('CBSecurityForm', CB.SecurityForm);
 
 
@@ -785,24 +806,24 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
         CB_User.enableTSV({
             method: this.TSVmethod
             ,data: data
-        }, this.processEnableTSV, this)
+        }, this.processEnableTSV, this);
     }
     ,onYubikeySaveClick: function(){
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        CB_User.TSVSaveYubikey( { code: this.getLayout().activeItem.buttons[1].getValue() }, this.processEnableTSV, this)
+        CB_User.TSVSaveYubikey( { code: this.getLayout().activeItem.buttons[1].getValue() }, this.processEnableTSV, this);
     }
     ,processEnableTSV: function(r, e){
-        this.getEl().unmask()
+        this.getEl().unmask();
         if(r.success === true){
             this.fireEvent('tsvchange', this, this.TSVmethod);
-            this.destroy()
+            this.destroy();
         } else {
             this.getLayout().activeItem.showError(r.msg);
             this.syncSize();
         }
     }
 }
-)
+);
 
 
 CB.TSVgaForm = Ext.extend(Ext.Panel, {
@@ -853,7 +874,7 @@ CB.TSVgaForm = Ext.extend(Ext.Panel, {
                     ,listeners: {
                         scope: this
                         ,keyup: function(field, e){
-                            this.buttons[2].setDisabled(Ext.isEmpty(field.getValue()))
+                            this.buttons[2].setDisabled(Ext.isEmpty(field.getValue()));
                         }
                     }
                 },{
@@ -875,7 +896,7 @@ CB.TSVgaForm = Ext.extend(Ext.Panel, {
     }
     ,prepareInterface: function(data){
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        CB_User.getTSVTemplateData('ga', this.processGetTSVTemplateData, this)
+        CB_User.getTSVTemplateData('ga', this.processGetTSVTemplateData, this);
     }
     ,processGetTSVTemplateData: function(r, e){
         this.getEl().unmask();
@@ -894,9 +915,9 @@ CB.TSVgaForm = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(msg)) {
             msg = 'The code is incorrect. Try again';
         }
-        msg = '<img class="icon icon-exclamation fl" style="margin-right: 15px" src="/css/i/s.gif">'+ msg
-        this.buttons[3].setValue(msg)
-        this.buttons[3].setVisible(true)
+        msg = '<img class="icon icon-exclamation fl" style="margin-right: 15px" src="/css/i/s.gif">'+ msg;
+        this.buttons[3].setValue(msg);
+        this.buttons[3].setVisible(true);
     }
 });
 Ext.reg('TSVgaForm', CB.TSVgaForm);
@@ -973,14 +994,14 @@ CB.TSVsmsForm = Ext.extend(Ext.form.FormPanel, {
                 this.form.getForm().getValues()
                 ,this.processPhoneVerification
                 ,this
-            )
+            );
         }
     }
     ,onSendCodeClick: function(b, e){
     }
     ,processPhoneVerification: function(r, e){
         this.getEl().unmask();
-        clog('processPhoneVerification', arguments)
+        clog('processPhoneVerification', arguments);
     }
     ,showError: function(msg){}
 
@@ -1022,7 +1043,7 @@ CB.TSVybkForm = Ext.extend(Ext.form.FormPanel, {
                 xtype: 'textfield'
                 ,vtype: 'email'
                 ,name: 'email'
-                ,fieldLabel: L.Email 
+                ,fieldLabel: L.Email
                 ,width: 250
                 ,allowBlank: false
                 ,value: App.loginData.email
@@ -1063,11 +1084,11 @@ CB.TSVybkForm = Ext.extend(Ext.form.FormPanel, {
     }
     ,showError: function(msg){
         if(Ext.isEmpty(msg)) {
-            msg = 'The code is incorrect. Try again'
+            msg = 'The code is incorrect. Try again';
         }
-        msg = '<img class="icon icon-exclamation fl" style="margin-right: 15px" src="/css/i/s.gif">'+ msg
-        this.items.itemAt(4).setValue(msg)
-        this.items.itemAt(4).setVisible(true)
+        msg = '<img class="icon icon-exclamation fl" style="margin-right: 15px" src="/css/i/s.gif">'+ msg;
+        this.items.itemAt(4).setValue(msg);
+        this.items.itemAt(4).setVisible(true);
     }
 });
 Ext.reg('TSVybkForm', CB.TSVybkForm);

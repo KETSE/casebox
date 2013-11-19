@@ -1284,11 +1284,9 @@ class Security
         return Cache::get($var_name);
     }
 
-    public static function canManage($user_id = false)
+    public static function canManage($userId = false)
     {
-        return true; // TODO: Review
-        // $role_id = Security::getUserRole($user_id);
-        // return (($role_id > 0) && ($role_id <=2)); //Managers and administrators
+        return (Security::canAddUser($userId) || Security::canAddGroup($userId));
     }
 
     public static function isUsersOwner($user_id)
@@ -1302,6 +1300,32 @@ class Security
         $res->close();
 
         return $rez;
+    }
+
+    public static function canAddUser($userId = false)
+    {
+        if (Security::isAdmin($userId)) {
+            return true;
+        }
+
+        $userData = ($userId === false)
+            ? $_SESSION['user']
+            : User::getPreferences($userId);
+
+        return !empty($userData['cfg']['canAddUsers']);
+    }
+
+    public static function canAddGroup($userId = false)
+    {
+        if (Security::isAdmin($userId)) {
+            return true;
+        }
+
+        $userData = ($userId === false)
+            ? $_SESSION['user']
+            : User::getPreferences($userId);
+
+        return !empty($userData['cfg']['canAddGroups']);
     }
 
     public static function canEditUser($user_id)
