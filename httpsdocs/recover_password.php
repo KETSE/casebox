@@ -141,7 +141,7 @@ switch ($action) {
             $template = TEMPLATES_DIR.'password_recovery_email_en.html';
         }
         if (!file_exists($template)) {
-            mail(ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: noreply@casebox.org\r\n");
+            mail(CONFIG\ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: noreply@casebox.org\r\n");
             $_SESSION['msg'] = '<div class="alert alert-error">Error occured. Administrator has been notified by mail. Please retry later.</div>';
             header('location: /login/forgot-password/');
             exit(0);

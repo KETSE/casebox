@@ -35,7 +35,7 @@ class PreviewExtractor
         if (empty($html)) {
             return '';
         }
-        require_once HTML_PURIFIER;
+        require_once CONFIG\HTML_PURIFIER;
         require_once 'HTMLPurifier.func.php';
 
         $cs = mb_detect_encoding($html);

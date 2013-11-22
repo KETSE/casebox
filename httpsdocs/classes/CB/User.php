@@ -380,8 +380,8 @@ class User
                 ,$p['sex']
                 ,$p['email']
                 ,$p['language_id']
-                ,json_encode($cfg)
-                ,json_encode($p['data'])
+                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
+                ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
             )
         ) or die( DB\dbQueryError() );
 
@@ -1074,7 +1074,7 @@ class User
             WHERE id = $1',
             array(
                 $_SESSION['user']['id']
-                ,json_encode($cfg)
+                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
             )
         ) or die(DB\dbQueryError());
     }

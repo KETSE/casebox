@@ -505,6 +505,16 @@ class Search extends Solr\Client
     private function executeQuery()
     {
         try {
+            $eventParams = array(
+                'class' => &$this
+                ,'query' => &$this->query
+                ,'start' => &$this->start
+                ,'rows' => &$this->rows
+                ,'params' => &$this->params
+                ,'inputParams' => &$this->inputParams
+            );
+            \CB\fireEvent('beforeSolrQuery', $eventParams);
+
             $this->results = $this->search(
                 $this->escapeLuceneChars($this->query),
                 $this->start,
@@ -525,6 +535,7 @@ class Search extends Solr\Client
                 ,'start' => $this->start
                 ,'rows' => $this->rows
                 ,'params' => $this->params
+                ,'inputParams' => $this->inputParams
             );
         }
         $sr = &$this->results;
@@ -541,18 +552,18 @@ class Search extends Solr\Client
                     $rd['content'] = $sr->highlighting->{$rd['id']}->{'content'}[0];
                 }
             }
-            $res = DB\dbQuery(
-                'SELECT `path` FROM tree_info WHERE id = $1',
-                $rd['id']
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $rd['path'] = $r['path'];
-            }
-            $res->close();
             $rez['data'][] = $rd;
         }
         $rez['facets'] = $this->processResultFacets();
+
+        $eventParams = array(
+            'result' => &$rez
+            ,'params' => &$this->params
+            ,'inputParams' => &$this->inputParams
+        );
+
+        \CB\fireEvent('solrQuery', $eventParams);
+
         $this->results = $rez;
     }
 

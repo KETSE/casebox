@@ -1,10 +1,10 @@
 <?php
-namespace CB;
+namespace CB\Interfaces;
 
 /**
  * Interface for user menu classes
  */
-interface IUserMenu
+interface UserMenu
 {
     /**
      * return items to be displayed in left accordion region

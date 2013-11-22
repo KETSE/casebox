@@ -1,8 +1,8 @@
 <?php
 namespace ExtDirect;
 
-$customConfig = \CB\getCustomConfig();
-$API = empty($customConfig[\CB\CORENAME.'_api']) ? array() : $customConfig[\CB\CORENAME.'_api'];
+$apiList = \CB\Config::getApiList();
+$API = empty($apiList) ? array() : $apiList;
 $API = array_merge(
     $API,
     array(

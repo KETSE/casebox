@@ -123,8 +123,8 @@ if (empty($data['action'])) {
 if ($isForm && $isUpload) {
     header('Content-Type: text/html; charset=UTF-8');
     echo '<html><body><textarea>';
-    echo json_encode($response);
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
     echo '</textarea></body></html>';
 } else {
-    echo json_encode($response);
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
 }

@@ -19,6 +19,7 @@ class Templates
             JOIN templates tt
              ON t.`template_id` = tt.id
              AND tt.type = \'template\'
+             AND tt.name = \'TemplatesTemplate\'
             WHERE t.template_id = t.id'
         ) or die(DB\dbQueryError());
 

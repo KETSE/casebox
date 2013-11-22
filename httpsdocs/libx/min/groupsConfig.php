@@ -8,7 +8,7 @@
  * You may wish to use the Minify URI Builder app to suggest
  * changes. http://yourdomain/min/builder/
  **/
-$customConfig = \CB\getCustomConfig();
+$customConfig = \CB\Config::getMinifyGroups();
 
 return array_merge(
     $customConfig,

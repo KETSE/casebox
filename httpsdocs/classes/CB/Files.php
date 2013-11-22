@@ -916,7 +916,7 @@ class Files
             case 'pdf':
                 $html = 'PDF'; //Ext panel - PreviewPanel view
                 if (empty($_SERVER['HTTP_X_REQUESTED_WITH'])) { //full browser window view
-                    require_once(MINIFY_PATH.'utils.php');
+                    require_once(CONFIG\MINIFY_PATH.'utils.php');
 
                     $html = '<html><head><title>'.$file['name'].'</title>
                             <script type="text/javascript" src="'.Minify_getUri('js_pdf').'"></script>

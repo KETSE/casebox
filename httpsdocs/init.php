@@ -66,3 +66,5 @@ foreach ($required_folders as $rfp) {
     }
 }
 /* end of verify required CaseBox folder existance */
+
+/* load core custom config and plugins config */

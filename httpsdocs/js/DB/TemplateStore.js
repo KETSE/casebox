@@ -11,7 +11,6 @@ CB.DB.TemplateStore = Ext.extend(Ext.data.JsonStore, {
             {name: 'id', type: 'int'}
             ,{name:'pid', type: 'int'}
             ,'tag'
-            ,{name: 'level', type: 'int'}
             ,'name'
             ,'title'
             ,'type'

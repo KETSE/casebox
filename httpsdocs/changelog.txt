@@ -1,3 +1,21 @@
+CaseBox 1.9.59 (2013-11-20)
+==============================
+New Features, Improvements
+--------------------------
+- implemented Custom Columns display in grid. This functionality is realized as an attachable plugin.
+   This implied changes in structure and configuration for comod plugins loading.
+   Prepared for migration of different configs to database.
+- changed field sizes for fields iof menu table
+- added JSON_UNESCAPED_UNICODE param for all json_encode calls.
+- added plugins folder in document root. This folder will contain subfolder for each plugin.
+- Moved IAuth and IUserMenu interfaces in CB\Interfaces (folder/namespace).
+    Basic CaseBox interfaces will be stored in this folder.
+
+Notes:
+----------
+- update casebox database from casebox.sql
+- apply database update for core: 20131122_2256 db_update v1.9.59.sql
+
 CaseBox 1.9.57 (2013-11-17)
 ==============================
 - created script for creating/sync old tags table into tree

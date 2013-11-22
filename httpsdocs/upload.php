@@ -23,5 +23,5 @@ if (isset($_SERVER['HTTP_X_FILE_OPTIONS'])) {
         )
     );
     header('Content-Type: application/json; charset=UTF-8');
-    echo json_encode($result);
+    echo json_encode($result, JSON_UNESCAPED_UNICODE);
 }

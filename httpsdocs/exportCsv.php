@@ -118,7 +118,7 @@ if ($dir == 'import') {
 
 function report($array)
 {
-    echo json_encode($array);
+    echo json_encode($array, JSON_UNESCAPED_UNICODE);
     die();
 }
 // Import functions ------------

@@ -56,7 +56,7 @@ class Template extends Object
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value);
+                    : json_encode($value, JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -66,7 +66,7 @@ class Template extends Object
                 $value = $this->getFieldValue($fieldName);
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value);
+                    : json_encode($value, JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -178,7 +178,7 @@ class Template extends Object
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value);
+                    : json_encode($value, JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -188,7 +188,7 @@ class Template extends Object
                 $value = $this->getFieldValue($fieldName);
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value);
+                    : json_encode($value, JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -243,7 +243,7 @@ class Template extends Object
                 if (isset($field[$fieldName])) {
                     $value = (is_scalar($field[$fieldName]) || is_null($field[$fieldName]))
                         ? $field[$fieldName]
-                        : json_encode($field[$fieldName]);
+                        : json_encode($field[$fieldName], JSON_UNESCAPED_UNICODE);
                     $saveFields[] = $fieldName;
                     $saveValues[] = $value;
                     $insertParams[] = "\$$i";
@@ -492,7 +492,7 @@ class Template extends Object
                 break;
             default:
                 if (is_array($value)) {
-                    $value = json_encode($value);
+                    $value = json_encode($value, JSON_UNESCAPED_UNICODE);
                 }
         }
 

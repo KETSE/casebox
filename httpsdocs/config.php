@@ -33,6 +33,7 @@ define('CB\\CORENAME', $arr[0]);
 define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 define('CB\\APP_ROOT', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
 define('CB\\CORE_ROOT', DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+define('CB\\PLUGINS_PATH', DOC_ROOT.'plugins'.DIRECTORY_SEPARATOR);
 define('CB\\CRONS_DIR', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
 define('CB\\LOGS_DIR', APP_ROOT.'logs'.DIRECTORY_SEPARATOR);
 define('CB\\DATA_DIR', APP_ROOT.'data'.DIRECTORY_SEPARATOR);
@@ -50,6 +51,7 @@ set_include_path(
     DOC_ROOT.'libx'.PATH_SEPARATOR.
     DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
     DOC_ROOT.'classes'.PATH_SEPARATOR.
+    PLUGINS_PATH.PATH_SEPARATOR.
     CORE_ROOT.'php'. PATH_SEPARATOR.
     get_include_path()
 );
@@ -58,62 +60,15 @@ include 'global.php';
 
 /* end of update include_path and include global script */
 
-/* Reading platform system.ini file and define all parameters in main namespace*/
-$filename = DOC_ROOT.'system.ini';
-if (file_exists($filename)) {
-    $arr = parse_ini_file($filename);
-    if (is_array($arr)) {
-        foreach ($arr as $key => $value) {
-            if ((substr($value, 0, 2) == '\\\\') || (substr($value, 0, 2) == '//')) {
-                $value = DOC_ROOT.substr($value, 2);
-            }
-            define('CB\\'.strtoupper($key), $value);
-        }
-    }
-}
-/* end of Reading platform system.ini file */
+//load system config so that we can connect to db
+$cfg = Config::loadConfigFile(DOC_ROOT.'config.ini');
+$cfg = array_merge($cfg, Config::loadConfigFile(CORE_ROOT.'config.ini'));
+require_once 'lib/DB.php';
+DB\connect($cfg);
 
-// define default config for Casebox
-$config = array();
-$filename = DOC_ROOT.'config.ini';
-if (file_exists($filename)) {
-    $config = array_merge($config, parse_ini_file($filename));
-}
-
-/* reading core config.ini merging values to config*/
-$filename = CORE_ROOT.'config.ini';
-if (file_exists($filename)) {
-    $config = array_merge($config, parse_ini_file($filename));
-}
-
-/* read and apply platform config from DB and define platform languages */
-if (!empty($config)) {
-
-    require_once 'lib/DB.php';
-    DB\connect($config);
-
-    $platform_config = getPlatformDBConfig();
-    foreach ($platform_config as $k => $v) {
-        if (( strlen($k) == 11 ) && ( substr($k, 0, 9) == 'language_')) {
-            $GLOBALS['language_settings'][substr($k, 9)] = json_decode($v, true);
-        } else {
-            $config[$k] = $v;
-        }
-    }
-
-    /* Define Casebox available languages */
-    define('CB\\LANGUAGES', implode(',', array_keys($GLOBALS['language_settings'])));
-
-    /* read and apply core config from DB */
-    $core_config = getCoreDBConfig();
-    foreach ($core_config as $k => $v) {
-        if ((strlen($k) == 11) && (substr($k, 0, 9) == 'language_')) {
-            $GLOBALS['language_settings'][substr($k, 9)] = json_decode($v, true);
-        } else {
-            $config[$k] = $v;
-        }
-    }
-}
+//loading full config of the core
+require_once 'lib/Util.php';
+$config = Config::load();
 
 /* Define folder templates */
 
@@ -145,10 +100,18 @@ if (empty($config['default_file_template'])) {
     $res->close();
 }
 
-/* store fetched config in CB\CONFIG namespace /**/
+/*
+    store fetched config in CB\CONFIG namespace
+    TODO: remove constants declaration in CB namespace and migrate to Config class usage
+*/
 foreach ($config as $k => $v) {
-    define('CB\\CONFIG\\'.strtoupper($k), $v);
+    if (( strlen($k) == 11 ) && ( substr($k, 0, 9) == 'language_')) {
+        $GLOBALS['language_settings'][substr($k, 9)] = Util\toJSONArray($v);
+    } elseif (is_scalar($v)) {
+        define('CB\\CONFIG\\'.strtoupper($k), $v);
+    }
 }
+define('CB\\LANGUAGES', implode(',', array_keys($GLOBALS['language_settings'])));
 
 /* Define Core available languages in $GLOBALS */
 if (defined('CB\\CONFIG\\LANGUAGES')) {
@@ -279,60 +242,6 @@ function isWindows()
 }
 
 /**
- * Get platform config from database
- */
-function getPlatformDBConfig()
-{
-    $rez = array();
-    $res = DB\dbQuery(
-        'SELECT param
-            ,`value`
-        FROM casebox.config
-        WHERE pid IS NOT NULL'
-    ) or die( DB\dbQueryError() );
-
-    while ($r = $res->fetch_assoc()) {
-        $rez[$r['param']] = $r['value'];
-    }
-    $res->close();
-
-    return $rez;
-}
-
-/**
- * Get core config from database
- */
-function getCoreDBConfig()
-{
-    $rez = array();
-    $res = DB\dbQuery(
-        'SELECT param
-            ,`value`
-        FROM config'
-    ) or die( DB\dbQueryError() );
-
-    while ($r = $res->fetch_assoc()) {
-        $rez[$r['param']] = $r['value'];
-    }
-    $res->close();
-
-    return $rez;
-}
-
-/**
- * Get custom core config for css, js, listeners
- */
-function getCustomConfig()
-{
-    $customConfig = array();
-    if (is_file(CORE_ROOT.'config.php')) {
-        $customConfig = (require CORE_ROOT.'config.php');
-    }
-
-    return $customConfig;
-}
-
-/**
  * returns true if scripts run on a Devel server
  * @return boolean
  */
@@ -371,6 +280,7 @@ function debug($msg)
 {
     error_log($msg."\n", 3, DEBUG_LOG);
 }
+
 /**
  * Fire server side event
  *
@@ -378,11 +288,11 @@ function debug($msg)
  */
 function fireEvent($eventName, &$params)
 {
-    $cfg = getCustomConfig();
-    if (empty($cfg['listeners'][$eventName])) {
+    $listeners = Config::getListeners();
+    if (empty($listeners[$eventName])) {
         return;
     }
-    foreach ($cfg['listeners'][$eventName] as $className => $methods) {
+    foreach ($listeners[$eventName] as $className => $methods) {
         $className = str_replace('_', '\\', $className);
         $class = new $className();
         if (!is_array($methods)) {
