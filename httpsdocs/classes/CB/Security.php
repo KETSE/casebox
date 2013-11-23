@@ -980,6 +980,42 @@ class Security
         return array('success' => true);
     }
 
+    /**
+     * copy security rules from source node to target node from tree
+     * @param  int  $sourceNodeId
+     * @param  int  $targetNodeId
+     * @return void
+     */
+    public static function copyNodeAcl($sourceNodeId, $targetNodeId)
+    {
+        DB\dbQuery(
+            'INSERT INTO `tree_acl`
+            (`node_id`
+            ,`user_group_id`
+            ,`allow`
+            ,`deny`
+            ,`cid`
+            ,`cdate`
+            ,`uid`
+            ,`udate`)
+            SELECT
+                $2
+                ,`user_group_id`
+                ,`allow`
+                ,`deny`
+                ,`cid`
+                ,`cdate`
+                ,`uid`
+                ,`udate`
+            FROM `tree_acl`
+            WHERE node_id = $1',
+            array(
+                $sourceNodeId
+                ,$targetNodeId
+            )
+        ) or die(DB\dbQueryError());
+    }
+
     /* end of objects acl methods*/
 
     /**
@@ -1156,7 +1192,7 @@ class Security
     /**
      * Retreive everyone group id
      */
-    public static function everyoneGroupId ()
+    public static function everyoneGroupId()
     {
         if (!Cache::exist('everyone_group_id')) {
             $res = DB\dbQuery(

@@ -208,8 +208,10 @@ class Client extends Service
                 ,DATE_FORMAT(t.ddate, \'%Y-%m-%dT%H:%i:%sZ\') `ddate`
                 ,t.dstatus
                 ,t.updated
+                ,c.name `case`
             FROM tree t
             LEFT JOIN tree_info ti ON t.id = ti.id
+            LEFT JOIN tree c ON c.id = ti.case_id
             where '.$where.'
             ORDER BY t.id
             LIMIT 500';
@@ -233,11 +235,6 @@ class Client extends Service
                         $template = $templatesCollection->getTemplate($r['template_id']);
                         $r['template_type'] = $template->getData()['type'];
                         $r['iconCls'] = $template->getData()['iconCls'];
-                    }
-
-                    /* set the case name if case_id is present*/
-                    if (!empty($r['case_id'])) {
-                        $r['case'] = \CB\Objects::getCaseName($r['case_id']);
                     }
 
                     /* consider node type sort column (ntsc) equal to 1 unit more
@@ -320,22 +317,25 @@ class Client extends Service
         $lastId = 0;
 
         /* prepeare $where condition for sql */
-        $where = 'id > $1';
+        $where = 'ti.id > $1';
         if (!empty($p['id'])) {
             $ids = \CB\Util\toNumericArray($p['id']);
-            $where = 'id in (0'.implode(',', $ids).')';
+            $where = 'ti.id in (0'.implode(',', $ids).')';
         }
 
-        $sql = 'SELECT id
-                    ,pids
-                    ,`path`
-                    ,case_id
-                    ,acl_count
-                    ,security_set_id
-            FROM tree_info
+        $sql = 'SELECT ti.id
+                    ,ti.pids
+                    ,ti.`path`
+                    ,ti.case_id
+                    ,ti.acl_count
+                    ,ti.security_set_id
+                    ,t.name `case`
+            FROM tree_info ti
+            LEFT JOIN tree t
+                ON ti.case_id = t.id
             WHERE '.$where.'
-                AND updated = 1
-            ORDER BY id
+                AND ti.updated = 1
+            ORDER BY ti.id
             LIMIT 200';
 
         $docs = true;

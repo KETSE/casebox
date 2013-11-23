@@ -43,25 +43,19 @@ class Log
             $p['user_id'] = $_SESSION['user']['id'];
         }
 
-        //setting case_id if not specified and we have object_id or file_id specified
-        if (empty($p['case_id'])
-            && (!empty($p['object_id'])
-                || !empty($p['file_id'])
-                || !empty($p['task_id'])
+        $object = Objects::getCustomClassByObjectId(
+            Util\coalesce(
+                @$p['object_id'],
+                @$p['file_id'],
+                @$p['task_id']
             )
-        ) {
-            try {
-                @$p['case_id'] = Objects::getCaseId(
-                    Util\coalesce(
-                        $p['object_id'],
-                        $p['file_id'],
-                        $p['task_id']
-                    )
-                );
-            } catch (\Exception $e) {
-                //Task is independent, not associated
-            }
-        }
+        );
+        $objData = $object
+            ? $object->load()
+            : array();
+
+        @$p['case_id'] = $objData['case_id'];
+
         // get case data
         if (!empty($p['case_id'])) {
             $res = DB\dbQuery(

@@ -18,8 +18,6 @@ class TemplateField extends Object
     private $tableFields =  array(
         'id'
         ,'pid'
-        // ,'template_id'
-        ,'tag'
         ,'name'
         ,'l1'
         ,'l2'
@@ -40,6 +38,12 @@ class TemplateField extends Object
         parent::createCustomData();
 
         $p = &$this->data;
+
+        //update name to _title field if presend in data (actually it should be present)
+        $title = $this->getFieldValue('_title');
+        if (!empty($title)) {
+            $p['name'] = $title;
+        }
 
         $saveFields = array('template_id');
         $saveValues = array($this->detectParentTemplate());

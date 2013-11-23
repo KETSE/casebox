@@ -1,6 +1,6 @@
-Ext.namespace('CB'); 
+Ext.namespace('CB');
 /*
-    Search model form with VerticalEditGrid 
+    Search model form with VerticalEditGrid
  */
 
 CB.Search = Ext.extend(Ext.Panel, {
@@ -11,8 +11,8 @@ CB.Search = Ext.extend(Ext.Panel, {
     ,layout: 'fit'
     ,initComponent: function(){
         /* objectsStore used to keep selected values from the grid for rendering after edit*/
-        this.objectsStore = new CB.DB.objectsStore();
-        
+        this.objectsStore = new CB.DB.ObjectsStore();
+
         /* define all actions needed for this form */
         this.actions = {
             search: new Ext.Action({
@@ -26,7 +26,7 @@ CB.Search = Ext.extend(Ext.Panel, {
         }
 
         /* the gird actially */
-        this.grid = Ext.create({ 
+        this.grid = Ext.create({
             title: L.Params
             ,refOwner: this
         }, 'CBVerticalEditGrid');
@@ -43,7 +43,7 @@ CB.Search = Ext.extend(Ext.Panel, {
                 afterrender: this.onAfterRender
                 ,beforedestroy: {
                     scope: this
-                    ,fn: function(){ 
+                    ,fn: function(){
                         // destroy the grid
                         if(this.grid){
                             this.grid.destroy();
@@ -53,22 +53,22 @@ CB.Search = Ext.extend(Ext.Panel, {
                 }
             }
         });
-        
+
         CB.Search.superclass.initComponent.apply(this, arguments);
     }
     // initialize and read data into grid
     ,onAfterRender: function(){
-        if(Ext.isEmpty(this.data.gridData)) {
-            this.data.gridData = {};
+        if(Ext.isEmpty(this.data.data)) {
+            this.data.data = {};
         }
-        
+
         this.grid.reload();
-        
+
         App.focusFirstField(this);
     }
     //processing click on search button
     ,onSearchClick: function(){
-        this.data.gridData.values = {};
+        this.data.data = {};
         this.grid.readValues();
         CB_Search.query(this.data, this.processSearchQueryResponse, this)
     }
@@ -78,4 +78,4 @@ CB.Search = Ext.extend(Ext.Panel, {
     }
 })
 
-Ext.reg('CBSearch', CB.Search); // register xtype                                                 
+Ext.reg('CBSearch', CB.Search); // register xtype

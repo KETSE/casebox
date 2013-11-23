@@ -187,7 +187,7 @@ class Tasks
             }
             /* end of estimating deadline status in dependance with parent tasks statuses */
             if (empty($p['id'])) {
-                fireEvent('beforeNodeDbCreate', $p);
+                // fireEvent('beforeNodeDbCreate', $p);
                 $res = DB\dbQuery(
                     'INSERT INTO tree (pid, name, `type`, template_id, cid, uid)
                     VALUES (
@@ -227,7 +227,7 @@ class Tasks
                 }
                 $res->close();
 
-                fireEvent('beforeNodeDbUpdate', $p);
+                // fireEvent('beforeNodeDbUpdate', $p);
             }
 
             if (!isset($p['autoclose'])) {
@@ -350,10 +350,10 @@ class Tasks
 
         switch ($log_action_type) {
             case 21: //created
-                fireEvent('nodeDbCreate', $p);
+                // fireEvent('nodeDbCreate', $p);
                 break;
             case 22: //updated
-                fireEvent('nodeDbUpdate', $p);
+                // fireEvent('nodeDbUpdate', $p);
                 break;
 
         }

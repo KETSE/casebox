@@ -4,6 +4,120 @@ New Features, Improvements
 --------------------------
 - added canAddUsers, canAddGroups in user config.
 
+CaseBox 1.9.57 (2013-11-17)
+==============================
+- created script for creating/sync old tags table into tree
+    and transfer all template fields config to _objects config refering to created tags in tree.
+    All complex scripts from sys/utils will be transfered into classes under Util namespace.
+    For now only Tags transfering uses script sys/utils/tags_tree_sync.php that uses class Util\Tags\TreeSync.
+    Other cripts are transfered to destination folders where will be refactored to use described scheme.
+- added CB\Browser\CreateMenu class that will be completed for simple management of create menu displayed on client side.
+- added User.exists method for checking if a given user id or name exists
+- added Security.copyNodeAcl for copying security rules between two nodes.
+- aded Objects.getChildId method for simple child existance verification by its name under specified $pid
+
+Fixed Bugs:
+----------
+- param index mistake in Files.updateFileProperties for update query.
+
+Notes:
+----------
+- apply database update for core: 20131117_1108 db_update v1.9.57.sql
+- run script, for transfering tags into tree, /sys/utils/tags_tree_sync.php <core_name>.
+  In future commits tags table will be deleted, including all other scripts that are working with tags.
+
+CaseBox 1.9.56 (2013-11-14)
+==============================
+- added statefull for verticalEditGrid columns and removed forceFit
+- added \CB\L\getTranslationIfPseudoValue($value) method (in language.php) for translation
+    of pseudo values to their translation. Pseudo values are considered translations names
+    enclosed in square brackets.
+
+Fixed Bugs:
+----------
+- child paths not updated correctly on object rename
+- case name not updated on case object rename
+Notes:
+----------
+- apply database update for core: 20131114_1425 db_update v1.9.56.sql
+
+CaseBox 1.9.55 (2013-11-13)
+==============================
+- Bugfixes during cores testing on devel server
+
+CaseBox 1.9.54 (2013-11-12)
+==============================
+New Features, Improvements
+--------------------------
+- added fieldTypes store and fieldTypes combo for comod field type editing in field templates.
+    Also tag was removed from template structure and introduced a new equivaent field value for `type` field -'Header'.
+    Tag field should be removed in future from templates_structure table
+- changed field type for data field from text to medium text in db/
+
+Fixed Bugs:
+----------
+- Object.delete method did inverse parameter meaning and added deletion from solr on permanent delete.
+- updated TemplateField class to change field name on save to internal "_title" field, if present.
+  The same check added for Object class on create new object.
+Notes:
+----------
+- apply database update for core: 20131112_2355 db_update v1.9.54.sql
+- Also menu table should be checked for template id changes.
+
+CaseBox 1.9.53 (2013-11-12)
+==============================
+New Features, Improvements
+--------------------------
+- modified params sent to javascript method App.getTypeEditor
+    for common usage from Objects.js form and from VerticalEditGrid.js
+- added isFieldValue method to Object class for comodity
+Fixed Bugs:
+----------
+- modified /sys/utils/create_templates_in_tree.php to work on new structure.
+    Can be used for update configurations into tree from database tables.
+- fixed infinite recursion appearing on updating fields visibility in greed
+- added pid field for loading templates from Templates\Collection.
+    It were causing Notices of undefined index "pid".
+-  in Template.formatValueForDisplay method there was a bug related to namespaces
+    and added verification for array values that are json encoded now for diplay
+- error appear on login in Log.php class because the event does not belong to an object
+Notes:
+----------
+- Template fields configuration should be reviewed and updated to new template ids.
+
+CaseBox 1.9.52 (2013-11-11)
+==============================
+New Features, Improvements
+--------------------------
+- server side events already will receive an instance of object class (no array params).
+    Params for Solr events remain unchanged for now.
+    Events from Tasks.php and Files.php scripts are disabled until methods will be refactored.
+- added delete method to Object class
+- removed methods:
+    - Objects.getFieldValue
+    - Objects.setFieldValue
+    - Objects.getCaseId
+    - Objects.getCaseName
+    - Objects.setCaseRolesFields
+- store objects data as JSON in a database field instead of distinct tables
+    - created convertor for updating existent objects and users to new data storing format
+    - tables with "_data" and "_duplicates" suffixes will be removed on next commit,
+        after successful cores conversion.
+    - many other dependend changes ...
+- definition of CB.DB.objectsStore moved to js/DB/ObjectsStore.js and renamed to CB.DB.ObjectsStore
+- prevent user from accessing "Back" browser button and lose its work.
+
+Fixed Bugs:
+----------
+- Preview does not show for templates
+
+Notes:
+----------
+- You should do the following steps for update:
+    - apply database update for core: 20131111_1057 db_update v1.9.52.sql
+    - run script, for updating objects data into json field, /sys/utils/update_objects_and_users_data_fields.php <core_name>.
+      Next commit will delete tables with '_data' and '_duplicates' suffixes
+
 CaseBox 1.9.51 (2013-11-02)
 ==============================
 New Features, Improvements

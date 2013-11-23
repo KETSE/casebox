@@ -77,6 +77,26 @@ function languageStringToFieldNames($languagesString)
 
     return implode(',', $rez);
 }
+
+/**
+ * convert a pseudovalue to its defined translation
+ * @param  varchar $value  a pseudo value: "[translationName]"
+ * @return varchar
+ */
+function getTranslationIfPseudoValue($value)
+{
+    if ((substr($value, 0, 1) == '[') &&
+        (substr($value, -1, 1) == ']')
+    ) {
+        $var_name = substr($value, 1, strlen($value) - 2);
+        if (defined('CB\\L\\'.$var_name)) {
+            $value = get($var_name);
+        }
+    }
+
+    return $value;
+}
+
 /**
  * function for defining translations into $GLOBAL['TRANSLATIONS'] and recreating language files if updated
  */

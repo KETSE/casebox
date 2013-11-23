@@ -130,7 +130,6 @@ class Template extends Object
             'SELECT
                 id
                 ,pid
-                ,tag
                 ,level
                 ,name
                 ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
@@ -175,14 +174,14 @@ class Template extends Object
             if (!empty($this->template)) {
                 $field = $this->template->getField($fieldName);
             }
-            if (isset($p[$fieldName]) && ($p[$fieldName] !== 'id')) {
+            if (isset($p[$fieldName]) && ($fieldName !== 'id')) {
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value);
 
                 $saveFields[] = $fieldName;
-                $saveValues[] = $p[$fieldName];
+                $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
             } elseif (!empty($field)) {
@@ -221,7 +220,6 @@ class Template extends Object
         $tableFields = array(
             // 'id'
             'pid'
-            ,'tag'
             ,'name'
             ,'l1'
             ,'l2'
@@ -286,20 +284,6 @@ class Template extends Object
         }
 
         return null;
-    }
-
-    /**
-     * get an array of fields grouped by pid field
-     * @return array
-     */
-    public function getFiledsGroupedByPid()
-    {
-        $rez = array();
-        foreach ($this->data['fields'] as $fieldId => $field) {
-            $rez[$field['pid']][$fieldId] = $field;
-        }
-
-        return $rez;
     }
 
     /**
@@ -464,14 +448,14 @@ class Template extends Object
                                 : $label;
                             break;
                         case 'listObjIcons':
-                            $r['cfg'] = Util\toJSONArray($r['cfg']);
+                            $r['cfg'] = Util\toJSONArray(@$r['cfg']);
 
                             $icon = '';
                             switch (@$field['cfg']['source']) {
                                 case 'tree':
                                 case 'related':
                                 case 'field':
-                                    $icon = Browser::getIcon($r);
+                                    $icon = \CB\Browser::getIcon($r);
                                     break;
                                 default:
                                     $icon = Util\coalesce($r['iconCls'], 'icon-none');
@@ -506,6 +490,10 @@ class Template extends Object
                 //$value = trim(strip_tags($value));
                 //$value = nl2br($value);
                 break;
+            default:
+                if (is_array($value)) {
+                    $value = json_encode($value);
+                }
         }
 
         return $value;

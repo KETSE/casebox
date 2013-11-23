@@ -373,7 +373,6 @@ class Templates
             'SELECT ts.id
                 ,ts.pid
                 ,t.id template_id
-                ,ts.tag
                 ,ts.`level`
                 ,ts.`name`
                 ,ts.l'.USER_LANGUAGE_INDEX.' `title`
@@ -422,30 +421,7 @@ class Templates
             $template_fields[$r['id']] = $r['name'];
         }
         $res->close();
-        /* end of get field names of template properties editing template */
 
-        /*{"id":"11"
-        ,"type":"2"
-        ,"name":null
-        ,"l1":"reply"
-        ,"l2":null
-        ,"l3":"ответ"
-        ,"visible":"1"
-        ,"iconCls":null
-        ,"default_field":null
-        ,"files":"1"
-        ,"main_file":"1"
-        ,"subjects":"1"
-        ,"claimers":"1"
-        ,"properties":{
-            "values":{
-                "f270_0":{"value":"1","info":""}
-                ,"f267_0":{"value":"icon-arrow-left","info":""}
-                ,"f271_0":{"value":"1","info":""}
-                ,"f272_0":{"value":"1","info":""}
-            }
-        }
-        ,"fields":{"values":{}}}/**/
         $cfgProperties = array('gridJsClass', 'files', 'main_file');
         $cfg = array();
         $params = array(
@@ -500,107 +476,5 @@ class Templates
         }
 
         return array('success' => true, 'data' => $d);
-    }
-
-    private static function sortTemplateRows(&$array, $pid, &$result)
-    {
-        if (empty($pid)) {
-            $pid = null;
-        }
-        if (!empty($array[$pid])) {
-            foreach ($array[$pid] as $r) {
-                array_push($result, $r);
-                Templates::sortTemplateRows($array, $r['id'], $result);
-            }
-        }
-    }
-
-    /**
-     * iterates template structure fields recursively and returns
-     * a linear array of fields with assigned object value
-     *
-     * @param  [type]  $template_structure [description]
-     * @param  [type]  $gridData           [description]
-     * @param  [type]  $pid                [description]
-     * @param  integer $duplicate_id       [description]
-     * @return array   fields
-     */
-    private static function iterateFieldsWithData(&$template_structure, &$gridData, $pid = null, $duplicate_id = 0)
-    {
-        $rez = array();
-        if (empty($template_structure[$pid])) {
-            return false;
-        }
-        foreach ($template_structure[$pid] as $field) {
-            $field['value'] = @$gridData['values']['f'.$field['id'].'_'.$duplicate_id];
-            $subfields = Templates::iterateFieldsWithData($template_structure, $gridData, $field['id']);
-            if (!empty($field['value']) || !empty($subfields)) {
-                if ($field['tag'] == 'f') {
-                    $rez[] = $field;
-                }
-                if (!empty($subfields)) {
-                    $rez = array_merge($rez, $subfields);
-                }
-            }
-            if (isset($gridData['duplicateFields'][$field['id']])) {
-                foreach ($gridData['duplicateFields'][$field['id']] as $child_duplicate_id => $child_duplicate_pid) {
-                    if ($child_duplicate_pid == $duplicate_id) {
-                        $field['value'] = $gridData['values']['f'.$field['id'].'_'.$child_duplicate_id];
-                        $subfields = Templates::iterateFieldsWithData($template_structure, $gridData, $field['id'], $child_duplicate_id);
-                        if (!empty($field['value']) || !empty($subfields)) {
-                            if ($field['tag'] == 'f') {
-                                $rez[] = $field;
-                            }
-                            if (!empty($subfields)) {
-                                $rez = array_merge($rez, $subfields);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return $rez;
-    }
-
-    public static function getGroupedTemplateFieldsWithData($template_id, $object_id)
-    {
-        $rez = array();
-        $tf = Templates::getTemplateFieldsWithData($template_id, $object_id);
-
-        if (!empty($tf)) {
-            foreach ($tf as $f) {
-                if (empty($f['cfg'])) {
-                    $rez['body'][] = $f;
-                } elseif (@$f['cfg']['showIn'] == 'top') {
-                    $rez['top'][] = $f;
-                } elseif (@$f['cfg']['showIn'] == 'tabsheet') {
-                    $rez['bottom'][] = $f;
-                } else {
-                    $rez['body'][] = $f;
-                }
-            }
-        }
-
-        return $rez;
-    }
-    /**
-     * helper function for get template non empty fields for a object.
-     * Used for info/preview purposes
-     * @param  int   $template_id
-     * @param  int   $object_id
-     * @return array
-     */
-    public static function getTemplateFieldsWithData($template_id, $object_id)
-    {
-        $template = new Objects\Template($template_id);
-        $template->load();
-
-        $object = new Objects\Object($object_id);
-        $objectData = $object->load();
-
-        $groupedFields = $template->getFiledsGroupedByPid();
-
-        return Templates::iterateFieldsWithData($groupedFields, $objectData['gridData']);
     }
 }

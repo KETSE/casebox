@@ -285,13 +285,6 @@ class UsersGroups
             $p['id'] = $user_id;
         }
 
-        DB\dbQuery(
-            'DELETE
-            FROM users_groups_data
-            WHERE user_id = $1',
-            $user_id
-        ) or die(DB\dbQueryError());
-
         /* in case it was a deleted user we delete all old acceses */
         DB\dbQuery('DELETE FROM users_groups_association WHERE user_id = $1', $user_id) or die(DB\dbQueryError());
         DB\dbQuery('DELETE FROM tree_acl WHERE user_group_id = $1', $rez['data']['id']) or die(DB\dbQueryError());
@@ -387,6 +380,7 @@ class UsersGroups
                 ,sex
                 ,email
                 ,enabled
+                ,data
                 ,date_format(last_action_time,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') last_action_time
                 ,date_format(cdate,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') `cdate`
                 ,(SELECT COALESCE(TRIM(CONCAT(first_name, \' \', last_name)), name)
@@ -398,6 +392,13 @@ class UsersGroups
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $r['title'] = trim($r['first_name'].' '.$r['last_name']);
+            if (is_null($r['data'])) {
+                $oldObj = new Objects\OldObject();
+                $oldObj->id = $r['id'];
+                $oldObj->loadOldGridDataToNewFormat('users_groups');
+                $r['data'] = $oldObj->data['data'];
+            }
+
             $rez = array('success' => true, 'data' => $r);
         }
         $res->close();
@@ -406,8 +407,6 @@ class UsersGroups
         }
 
         $rez['data']['template_id'] = User::getTemplateId();
-
-        VerticalEditGrid::getData('users_groups', $rez['data']);
 
         return $rez;
     }

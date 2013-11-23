@@ -124,13 +124,7 @@ class Path
         $rez = array();
         for ($i=0; $i < sizeof($path); $i++) {
             if (isset($names[$path[$i]])) {
-                if ((substr($names[$path[$i]], 0, 1) == '[') && (substr($names[$path[$i]], -1, 1) == ']')) {
-                    $names[$path[$i]] = Util\coalesce(
-                        L\get(substr($names[$path[$i]], 1, strlen($names[$path[$i]]) -2)),
-                        $names[$path[$i]]
-                    );
-                }
-                $rez[] = $names[$path[$i]];
+                $rez[] = L\getTranslationIfPseudoValue($names[$path[$i]]);
             } else {
                 $rez[] = $path[$i];
             }
@@ -203,10 +197,7 @@ class Path
     {
         $path = explode('/', $path);
         for ($i=0; $i < sizeof($path); $i++) {
-            if ((substr($path[$i], 0, 1) == '[') && (substr($path[$i], -1) == ']')) {
-                $l = substr($path[$i], 1, mb_strlen($path[$i])-2);
-                $path[$i] = Util\coalesce(L\get($l), $l);
-            }
+            $path[$i] = L\getTranslationIfPseudoValue($path[$i]);
         }
         $path = implode('/', $path);
 

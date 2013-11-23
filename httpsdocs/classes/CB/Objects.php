@@ -23,7 +23,7 @@ class Objects
             throw new \Exception(L\Access_denied);
         }
 
-        $object = $this->getCustomClassByObjectId($id);
+        $object = $this->getCustomClassByObjectId($id) or die(L\Wrong_input_data);
         $object->load();
         $objectData = $object->getData();
 
@@ -48,7 +48,7 @@ class Objects
             ,'cdate'
             ,'udate'
             ,'case_id'
-            ,'gridData'
+            ,'data'
         );
         foreach ($properties as $property) {
             if (isset($objectData[$property])) {
@@ -86,7 +86,7 @@ class Objects
      */
     public function create($p)
     {
-        if (!Security::canCreateActions($p['pid'])) {
+        if (empty($p['pid']) || !Security::canCreateActions($p['pid'])) {
             throw new \Exception(L\Access_denied);
         }
 
@@ -139,7 +139,9 @@ class Objects
         }
 
         /* prepare params */
-        $d['date'] = $d['date_start'];
+        if (empty($d['date']) && !empty($d['date_start'])) {
+            $d['date'] = $d['date_start'];
+        }
         /* end of prepare params */
 
         // update object
@@ -174,43 +176,36 @@ class Objects
             switch ($key) {
                 case 'properties':
                     /* load general case properties */
-                    $rez[$key] = $this->load(array('id' => $query['caseId']));
-                    // $r = $this->getCasePropertiesObjectId($query['caseId']);
+
                     if (!empty($query['caseId'])) {
-                        $template_id = null;
+                        $case = $this->getCustomClassByObjectId($query['caseId']);
+                        $case->load();
+                        $rez[$key] = $case->getData();
                         $properties = array();
-                        $res = DB\dbQuery(
-                            'SELECT template_id FROM tree WHERE id = $1',
-                            $query['caseId']
-                        ) or die(DB\dbQueryError());
 
-                        if ($r = $res->fetch_assoc()) {
-                            $template_id = $r['template_id'];
-                        }
-                        $res->close();
+                        $template = $case->getTemplate();
+                        $linearData = $case->getLinearData();
 
-                        $tf = Templates::getTemplateFieldsWithData($template_id, $query['caseId']);
-                        if (!empty($tf)) {
-                            foreach ($tf as $f) {
-                                if ($f['name'] == '_title') {
-                                    continue;
-                                }
-                                if ($f['name'] == '_date_start') {
-                                    continue;
-                                }
-                                $v = Objects\Template::formatValueForDisplay($f, $f['value']);
-                                if (is_array($v)) {
-                                    $v = implode(', ', $v);
-                                }
-                                $f['value'] = $v;
-                                $properties[] = array(
-                                    'name' => $f['name']
-                                    ,'title' => $f['title']
-                                    ,'type' => $f['type']
-                                    ,'cfg' => $f['cfg']
-                                    ,'value' => $v
-                                );
+                        foreach ($linearData as $f) {
+                            $tf = $template->getField($f['name']);
+                            if ($f['name'] == '_title') {
+                                continue;
                             }
+                            if ($f['name'] == '_date_start') {
+                                continue;
+                            }
+                            $v = $template->formatValueForDisplay($tf, $f['value']);
+                            if (is_array($v)) {
+                                $v = implode(', ', $v);
+                            }
+                            $f['value'] = $v;
+                            $properties[] = array(
+                                'name' => $f['name']
+                                ,'title' => $tf['title']
+                                ,'type' => $tf['type']
+                                ,'cfg' => $tf['cfg']
+                                ,'value' => $v
+                            );
                         }
                         $rez[$key]['data']['properties'] = $properties;
                     }
@@ -260,13 +255,30 @@ class Objects
         $body = '';
         $bottom = '';
         try {
-            $data = $this->load(array("id" => $id));
+            $obj = $this->getCustomClassByObjectId($id);
+            $obj->load();
+            $linearData = $obj->getLinearData();
         } catch (\Exception $e) {
             return '';
         }
-        $data = $data['data'];
 
-        $gf = Templates::getGroupedTemplateFieldsWithData($data['template_id'], $id);
+        $template = $obj->getTemplate();
+        $gf = array();
+        //group fields in display blocks
+        foreach ($linearData as $field) {
+            $tf = $template->getField($field['name']);
+            if (empty($tf['cfg'])) {
+                $group = 'body';
+            } elseif (@$tf['cfg']['showIn'] == 'top') {
+                $group = 'top';
+            } elseif (@$tf['cfg']['showIn'] == 'tabsheet') {
+                $group = 'bottom';
+            } else {
+                $group = 'body';
+            }
+            $field['tf'] = $tf;
+            $gf[$group][] = $field;
+        }
 
         if (!empty($gf['top'])) {
             foreach ($gf['top'] as $f) {
@@ -276,28 +288,28 @@ class Objects
                 if ($f['name'] == '_date_start') {
                     continue;
                 }
-                $v = Objects\Template::formatValueForDisplay($f, $f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], $f['value']);
                 if (is_array($v)) {
                     $v = implode(', ', $v);
                 }
                 if (!empty($v)) {
-                    $top .= '<tr><td class="prop-key">'.$f['title'].'</td><td class="prop-val">'.$v.'</td></tr>';
+                    $top .= '<tr><td class="prop-key">'.$f['tf']['title'].'</td><td class="prop-val">'.$v.'</td></tr>';
                 }
             }
         }
         if (!empty($gf['body'])) {
             foreach ($gf['body'] as $f) {
-                $v = Objects\Template::formatValueForDisplay($f, $f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], $f['value']);
                 if (is_array($v)) {
                     $v = implode('<br />', $v);
                 }
 
-                if (empty($v) && empty($f['value']['info']) && empty($f['value']['files'])) {
+                if (empty($v) && empty($f['info']) && empty($f['files'])) {
                     continue;
                 }
-                $body .= '<tr><td'.(empty($f['level']) ? '' : ' style="padding-left: '.($f['level'] * 10).'px"').
-                    ' class="prop-key">'.$f['title'].'</td><td class="prop-val">'.$v.
-                    (empty($f['value']['info']) ? '' : '<p class="prop-info">'.$f['value']['info'].'</p>').'</td></tr>';
+                $body .= '<tr><td'.(empty($f['tf']['level']) ? '' : ' style="padding-left: '.($f['tf']['level'] * 10).'px"').
+                    ' class="prop-key">'.$f['tf']['title'].'</td><td class="prop-val">'.$v.
+                    (empty($f['info']) ? '' : '<p class="prop-info">'.$f['info'].'</p>').'</td></tr>';
             }
         }
 
@@ -312,11 +324,11 @@ class Objects
 
         if (!empty($gf['bottom'])) {
             foreach ($gf['bottom'] as $f) {
-                $v = Objects\Template::formatValueForDisplay($f, $f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], $f['value']);
                 if (empty($v)) {
                     continue;
                 }
-                $bottom .=  '<div class="obj-preview-h">'.$f['title'].'</div>'.$v.'<br />';
+                $bottom .=  '<div class="obj-preview-h">'.$f['tf']['title'].'</div>'.$v.'<br />';
             }
         }
 
@@ -348,7 +360,7 @@ class Objects
         }
         /* end of tasks */
 
-        Log::add(array('action_type' => 12, 'object_id' => $data['id'] ));
+        Log::add(array('action_type' => 12, 'object_id' => $id ));
         if (!empty($top)) {
             $top = '<div class="obj-preview-h">'.L\Details.'</div>'.$top;
         }
@@ -372,10 +384,16 @@ class Objects
             $p = array('id' => $p);
         }
         if (empty($p['id']) && empty($p['template_id'])) {
-            return array('success' => true, 'data' => $data, 's'=>'1');
+            return array(
+                'success' => true
+                ,'data' => $data
+                ,'s'=>'1'
+            );
         }
 
         $ids = array();
+
+        $template = null;
 
         if (!empty($p['id'])) {
             // SECURITY: check if current user has at least read access to this case
@@ -384,51 +402,37 @@ class Objects
             }
 
             /* select distinct associated case ids from the case */
-            $res = DB\dbQuery(
-                'SELECT DISTINCT d.value
-                FROM tree o
-                JOIN templates_structure s ON o.template_id = s.template_id AND s.type = \'_objects\'
-                JOIN objects_data d on. d.field_id = s.id
-                WHERE o.id = $1',
-                $p['id']
-            ) or die(DB\dbQueryError());
-
-            while ($r = $res->fetch_assoc()) {
-                $a = Util\toNumericArray($r['value']);
-                foreach ($a as $id) {
-                    $ids[$id] = 1;
+            $obj = new Objects\Object($p['id']);
+            $obj->load();
+            $template = $obj->getTemplate();
+            $linearData = $obj->getLinearData();
+            foreach ($linearData as $f) {
+                $tf = $template->getField($f['name']);
+                if ($tf['type'] == '_objects') {
+                    $a = Util\toNumericArray($f['value']);
+                    $ids = array_merge($ids, $a);
                 }
             }
-            $res->close();
+        } else {
+            $template = new Objects\Template($p['template_id']);
+            $template->load();
         }
-        if (!empty($p['template_id'])) {
-            $res = DB\dbQuery(
-                'SELECT DISTINCT cfg
-                    FROM templates_structure
-                    WHERE template_id = $1
-                        AND (cfg IS NOT NULL)',
-                $p['template_id']
-            ) or die(DB\dbQueryError());
 
-            while ($r = $res->fetch_assoc()) {
-                if (empty($r['cfg'])) {
-                    continue;
-                }
-                $cfg = json_decode($r['cfg'], true);
-                if (!empty($cfg['value'])) {
-                    $a = Util\toNumericArray($cfg['value']);
-                    foreach ($a as $id) {
-                        $ids[$id] = 1;
-                    }
+        if ($template) {
+            $templateData = $template->getData();
+            foreach ($templateData['fields'] as $field) {
+                if (!empty($field['cfg']['value'])) {
+                    $a = Util\toNumericArray($field['cfg']['value']);
+                    $ids = array_merge($ids, $a);
                 }
             }
-            $res->close();
         }
 
-        $ids = array_keys($ids);
+        $ids = array_unique($ids);
         if (empty($ids)) {
             return array('success' => true, 'data' => array());
         }
+
         /* end of select distinct case ids from the case */
         $res = DB\dbQuery(
             'SELECT DISTINCT t.id
@@ -498,7 +502,7 @@ class Objects
             /* end of get tag name & type*/
             if ($node['type'] == 1) {
                 $rez = $this->create($node);
-                $pid = $rez['data']->nid;
+                $pid = $rez['data']['id'];
             } else {
                 $pid = $node['pid'];
             }
@@ -518,116 +522,45 @@ class Objects
     }
 
     /**
-     * get field value for an object
-     * @param  int     $object_id
-     * @param  int     $field_id
-     * @param  int     $duplicate_id
-     * @return variant
-     */
-    public static function getFieldValue($object_id, $field_id, $duplicate_id = 0)
-    {
-        $rez = null;
-        $res = DB\dbQuery(
-            'SELECT value
-                FROM objects_data
-                WHERE object_id = $1
-                    AND field_id = $2
-                    AND duplicate_id = $3',
-            array(
-                $object_id
-                ,$field_id
-                ,$duplicate_id
-            )
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['value'];
-        }
-        $res->close();
-
-        return $rez;
-    }
-
-    /**
-     * set value for an object field
-     * @param int     $object_id
-     * @param int     $field_id
-     * @param variant $value
-     * @param int     $duplicate_id
-     */
-    public static function setFieldValue($object_id, $field_id, $value, $duplicate_id = 0)
-    {
-        $rez = null;
-        DB\dbQuery(
-            'INSERT INTO objects_data (
-                object_id
-                ,field_id
-                ,duplicate_id
-                ,`value`)
-            VALUES($1
-                ,$2
-                ,$3
-                ,$4)
-            ON duplicate KEY
-            UPDATE `value` = $4',
-            array(
-                $object_id
-                ,$field_id
-                ,$duplicate_id
-                ,$value
-            )
-        ) or die(DB\dbQueryError());
-    }
-
-    /**
      * set additional data to be saved in solr
      * @param  reference $object_record
      * @return void
      */
     public static function getSolrData(&$object_record)
     {
-        $template_collection = Templates\SingletonCollection::getInstance();
+        $obj = Objects::getCustomClassByObjectId($object_record['id']);
+        $objData = $obj->load();
+        $linearData = $obj->getLinearData();
+        $template = $obj->getTemplate();
 
-        $template = $template_collection->getTemplate($object_record['template_id']);
         $object_record['content'] = '';
 
-        $dres = DB\dbQuery(
-            'SELECT
-                d.field_id
-                ,d.`value`
-                ,info
-            FROM objects o
-            JOIN objects_data d ON d.object_id = o.id
-            WHERE o.id = $1 and (d.private_for_user is null)',
-            $object_record['id']
-        ) or die(DB\dbQueryError());
-
-        while ($dr = $dres->fetch_assoc()) {
-            $field = $template->getData()['fields'][$dr['field_id']];
+        foreach ($linearData as $f) {
+            $field = $template->getField($f['name']);
             $processed_values = array();
-            if (!empty($dr['value'])) {
+            if (!empty($f['value'])) {
                 /* make changes to value if needed */
                 switch ($field['type']) {
                     case 'boolean':
                     case 'checkbox':
-                        $dr['value'] = empty($dr['value']) ? false : true;
+                        $f['value'] = empty($f['value']) ? false : true;
                         break;
                     case 'date':
-                        $dr['value'] .= 'Z';
-                        if (@$dr['value'][10] == ' ') {
-                            $dr['value'][10] = 'T';
+                        $f['value'] .= 'Z';
+                        if (@$f['value'][10] == ' ') {
+                            $f['value'][10] = 'T';
                         }
                         break;
                     case 'combo':
                     case 'popuplist':
-                        $dr['value'] = Util\toNumericArray($dr['value']);
-                        if (empty($dr['value'])) {
+                        $f['value'] = Util\toNumericArray($f['value']);
+                        if (empty($f['value'])) {
                             break;
                         }
                         $sres = DB\dbQuery(
                             'SELECT l'.LANGUAGE_INDEX.' `title`
                             FROM tags
-                            WHERE id IN ('.implode(',', $dr['value']).')'
+                            WHERE id IN ('.implode(',', $f['value']).')'
                         ) or die(DB\dbQueryError());
 
                         while ($sr = $sres->fetch_assoc()) {
@@ -636,7 +569,7 @@ class Objects
                         $sres->close();
                         break;
                     case 'html':
-                        $dr['value'] = strip_tags($dr['value']);
+                        $f['value'] = strip_tags($f['value']);
                         break;
                 }
                 /* make changes to value if needed */
@@ -647,28 +580,27 @@ class Objects
                         $solr_field = ( empty($field['cfg']['source']) || ($field['cfg']['source'] == 'thesauri') ) ?
                             'sys_tags' : 'tree_tags';
                     }
-                    $arr = Util\toNumericArray($dr['value']);
-                    for ($i=0; $i < sizeof($arr); $i++) {
-                        if (empty($object_record[$solr_field]) || !in_array($arr[$i], $object_record[$solr_field])) {
-                            $object_record[$solr_field][] = $arr[$i];
+                    $arr = Util\toNumericArray($f['value']);
+                    foreach ($arr as $v) {
+                        if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
+                            $object_record[$solr_field][] = $v;
                         }
                     }
                 }
             }
 
-            if (!empty($dr['value'])) {
+            if (!empty($f['value'])) {
                 if (!empty($processed_values)) {
                     foreach ($processed_values as $v) {
                         $object_record['content'] .= $field['title'].' '.$v."\n";
                     }
-                } elseif (!is_array($dr['value'])) {
+                } elseif (!is_array($f['value'])) {
                     $object_record['content'] .= $field['title'].' '.
                         (in_array($field['solr_column_name'], array('date_start', 'date_end', 'dates')) ?
-                            substr($dr['value'], 0, 10): $dr['value'])."\n";
+                            substr($f['value'], 0, 10): $f['value'])."\n";
                 }
             }
         }
-        $dres->close();
     }
 
     /**
@@ -679,171 +611,11 @@ class Objects
     public static function getBulkSolrData(&$object_records)
     {
 
-        $process_object_ids = array();
-        foreach ($object_records as $object_id => $object_record) {
+        foreach ($object_records as $object_id => &$object_record) {
             if (in_array(@$object_record['template_type'], array('case', 'object', 'email'))) {
-                $process_object_ids[] = $object_id;
+                Objects::getSolrData($object_record);
             }
         }
-        if (empty($process_object_ids)) {
-            return;
-        }
-
-        $template_collection = Templates\SingletonCollection::getInstance();
-
-        $template = null;
-        $template_data = null;
-        $last_object_id = null;
-        $last_template_id = null;
-        $object_record = null;
-
-        $dres = DB\dbQuery(
-            'SELECT
-                object_id
-                ,field_id
-                ,`value`
-                ,info
-            FROM objects_data d
-            WHERE object_id in ('.implode(',', $process_object_ids).')
-                AND (private_for_user is null)
-            ORDER BY object_id'
-        ) or die(DB\dbQueryError());
-
-        while ($dr = $dres->fetch_assoc()) {
-            if ($last_object_id != $dr['object_id']) {
-                $object_record = &$object_records[$dr['object_id']];
-                $object_record['content'] = '';
-                $last_object_id = $dr['object_id'];
-            }
-            if ($last_template_id != $object_record['template_id']) {
-                $template = $template_collection->getTemplate($object_record['template_id']);
-                $template_data = $template->getData();
-                $last_template_id = $object_record['template_id'];
-            }
-
-            $field = @$template_data['fields'][$dr['field_id']];
-            if (empty($field)) {
-                continue;
-            }
-
-            $processed_values = array();
-            if (!empty($dr['value'])) {
-                /* make changes to value if needed */
-                switch ($field['type']) {
-                    case 'boolean':
-                    case 'checkbox':
-                        $dr['value'] = empty($dr['value']) ? false : true;
-                        break;
-                    case 'date':
-                        $dr['value'] .= 'Z';
-                        if (@$dr['value'][10] == ' ') {
-                            $dr['value'][10] = 'T';
-                        }
-                        break;
-                    case 'combo':
-                    case 'popuplist':
-                        $dr['value'] = Util\toNumericArray($dr['value']);
-                        if (empty($dr['value'])) {
-                            break;
-                        }
-                        $sres = DB\dbQuery(
-                            'SELECT l'.LANGUAGE_INDEX.' `title`
-                            FROM tags
-                            WHERE id IN ('.implode(',', $dr['value']).')'
-                        ) or die(DB\dbQueryError());
-
-                        while ($sr = $sres->fetch_assoc()) {
-                            $processed_values[] = $sr['title'];
-                        }
-                        $sres->close();
-                        break;
-                    case 'html':
-                        $dr['value'] = strip_tags($dr['value']);
-                        break;
-                }
-                /* make changes to value if needed */
-
-                @$solr_field = $field['solr_column_name'];
-
-                if (@$field['cfg']['faceting'] && in_array($field['type'], array('combo', 'int', '_objects'))) {
-                    if (empty($solr_field)) {
-                        $solr_field = ( empty($field['cfg']['source']) || ($field['cfg']['source'] == 'thesauri') )
-                            ? 'sys_tags'
-                            : 'tree_tags';
-                    }
-                }
-
-                if (!empty($solr_field)) {
-                    $arr = Util\toNumericArray($dr['value']);
-                    for ($i=0; $i < sizeof($arr); $i++) {
-                        if (empty($object_record[$solr_field]) || !in_array($arr[$i], $object_record[$solr_field])) {
-                            $object_record[$solr_field][] = $arr[$i];
-                        }
-                    }
-                }
-            }
-
-            if (!empty($dr['value'])) {
-                if (!empty($processed_values)) {
-                    foreach ($processed_values as $v) {
-                        $object_record['content'] .= $field['title'].' '.$v."\n";
-                    }
-                } elseif (!is_array($dr['value'])) {
-                    $object_record['content'] .= $field['title'].' '.
-                        (in_array($field['solr_column_name'], array('date_start', 'date_end', 'dates')) ?
-                            substr($dr['value'], 0, 10): $dr['value'])."\n";
-                }
-            }
-        }
-        $dres->close();
-    }
-
-    /**
-     * get case id for a object
-     * @param  int $node_id
-     * @return int | null
-     */
-    public static function getCaseId($node_id)
-    {
-        $case_id = null;
-        $res = DB\dbQuery(
-            'SELECT case_id FROM tree_info WHERE id = $1',
-            $node_id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $case_id = $r['case_id'];
-        }
-        $res->close();
-
-        return $case_id;
-    }
-
-    /**
-     * get case name by its Id
-     * @param  int     $case_id
-     * @return varchar
-     */
-    public static function getCaseName($case_id = false)
-    {
-        if (!is_numeric($case_id)) {
-            return null;
-        }
-
-        $var_name = 'cases['.$case_id."]['name']";
-
-        if (!Cache::exist($var_name)) {
-            $res = DB\dbQuery(
-                'SELECT name FROM tree WHERE id = $1',
-                $case_id
-            ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
-                Cache::set($var_name, $r['name']);
-            }
-            $res->close();
-        }
-
-        return Cache::get($var_name);
     }
 
     /**
@@ -865,65 +637,6 @@ class Objects
         ) or die(DB\dbQueryError());
     }
 
-    /**
-     * setting case roles fields for an object data
-     * @param reference $objectData
-     */
-    public static function setCaseRolesFields(&$objectData)
-    {
-        $case_id = null;
-        $db = null;
-
-        $res = DB\dbQuery(
-            'SELECT DATABASE() `db`, case_id
-            FROM tree_info
-            WHERE id = $1',
-            $objectData['id']
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $db = $r['db'];
-            $case_id = $r['case_id'];
-        }
-        $res->close();
-
-        if (empty($case_id)) {
-            return;
-        }
-
-        // check if cached
-        $var_name = 'cases['.$case_id."]['roles']";
-        if (!Cache::exist($var_name)) {
-            $roles = array();
-            $res = DB\dbQuery(
-                'SELECT solr_column_name, od.value
-                FROM objects_data od
-                JOIN templates_structure t
-                    ON od.`field_id` = t.`id`
-                        AND solr_column_name LIKE \'role_ids%\'
-                WHERE object_id = $1',
-                $case_id
-            ) or die(DB\dbQueryError());
-
-            while ($r = $res->fetch_assoc()) {
-                if (!empty($r['value'])) {
-                    $roles[$r['solr_column_name']] = explode(',', $r['value']);
-                }
-            }
-            $res->close();
-
-            Cache::set($var_name, $roles);
-        }
-
-        $roles = Cache::get($var_name);
-
-        if (!empty($roles)) {
-            foreach ($roles as $k => $v) {
-                $objectData[$k] = $v;
-            }
-        }
-    }
-
     //--------------------- new refactoring methods
 
     /**
@@ -941,14 +654,12 @@ class Objects
 
         if (!Cache::exist($var_name)) {
             $res = DB\dbQuery(
-                'SELECT tt.`type`
-                FROM tree t
-                JOIN templates tt ON t.template_id = tt.id
-                WHERE t.id = $1',
+                'SELECT template_id FROM tree WHERE id = $1',
                 $objectId
             ) or die(DB\dbQueryError());
             if ($r = $res->fetch_assoc()) {
-                Cache::set($var_name, $r['type']);
+                $tc = Templates\SingletonCollection::getInstance();
+                Cache::set($var_name, $tc->getType($r['template_id']));
             }
             $res->close();
         }
@@ -961,11 +672,11 @@ class Objects
      * @param  int    $objectId
      * @return object
      */
-    public function getCustomClassByObjectId($objectId)
+    public static function getCustomClassByObjectId($objectId)
     {
-        $type = $this->getType($objectId);
+        $type = Objects::getType($objectId);
 
-        return $this->getCustomClassByType($type, $objectId);
+        return Objects::getCustomClassByType($type, $objectId);
     }
 
     /**
@@ -974,7 +685,7 @@ class Objects
      * @param  int     $objectId
      * @return object
      */
-    public function getCustomClassByType($type, $objectId = null)
+    public static function getCustomClassByType($type, $objectId = null)
     {
         if (empty($type)) {
             return null;
@@ -1096,6 +807,35 @@ class Objects
         $res = DB\dbQuery('SELECT id FROM tree WHERE id = $1', $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $rez = true;
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get a child node id by its name under specified $pid
+     * @param  int      $id
+     * @param  varchar  $name
+     * @return int|null
+     */
+    public static function getChildId($pid, $name)
+    {
+        $rez = null;
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM tree
+            WHERE pid = $1
+                AND name = $2
+                AND dstatus = 0',
+            array(
+                $pid
+                ,$name
+            )
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['id'];
         }
         $res->close();
 

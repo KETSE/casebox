@@ -70,33 +70,21 @@ class Browser
                         break;
                     }
                     /*get distinct target field values for selected objects in parent field */
-                    $res = DB\dbQuery(
-                        'SELECT od.value
-                        FROM objects o
-                        JOIN templates t ON t.id = o.`template_id`
-                        JOIN templates_structure ts ON t.id = ts.`template_id` AND ts.name = $1
-                        JOIN objects_data od ON o.id = od.`object_id` AND od.`field_id` = ts.id
-                        WHERE o.`id` IN ('.implode(',', $ids).')',
-                        $p['field']
-                    ) or die(DB\dbQueryError());
-                    $ids = array();
-                    while ($r = $res->fetch_assoc()) {
-                        if (!empty($r['value'])) {
-                            $v = explode(',', $r['value']);
-                            for ($i=0; $i < sizeof($v); $i++) {
-                                if (!empty($v[$i])) {
-                                    $ids[$v[$i]] = 1;
-                                }
-                            }
-                        }
+                    $obj = new Objects\Object();
+                    $values = array();
+                    foreach ($ids as $id) {
+                        $obj->load(array('id' => $id));
+                        $fv = $obj->getFieldValue($p['field']);
+                        $fv = Util\toNumericArray($fv);
+                        $values = array_merge($values, $fv);
                     }
-                    $res->close();
-                    $ids = array_keys($ids);
-                    if (empty($ids)) {
+                    $values = array_unique($values);
+
+                    if (empty($values)) {
                         return array('success' => true, 'data' => array() );
                     }
 
-                    $p['ids'] = $ids;
+                    $p['ids'] = $values;
                     break;
 
             }
@@ -165,7 +153,7 @@ class Browser
                         }
                     }
                     break;
-                case 'dependent':
+                case 'variable':
                     if (!empty($p['pidValue'])) {
                         $pids = Util\toNumericArray($p['pidValue']);
                     }
@@ -324,28 +312,13 @@ class Browser
 
         /* if access is granted then setting dstatus=1 for specified ids
         and dstatus = 2 for all their children /**/
-        fireEvent('beforeNodeDbDelete', $ids);
-        DB\dbQuery(
-            'UPDATE tree
-            SET did = $1
-                ,dstatus = 1
-                ,ddate = CURRENT_TIMESTAMP
-                ,updated = (updated | 1)
-            WHERE id IN ('.implode(', ', $ids).')',
-            $_SESSION['user']['id']
-        ) or die(DB\dbQueryError());
-        foreach ($ids as $id) {
-            DB\dbQuery(
-                'CALL p_mark_all_childs_as_deleted($1, $2)',
-                array(
-                    $id
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
-        }
-        Solr\Client::runCron();
 
-        fireEvent('nodeDbDelete', $ids);
+        foreach ($ids as $id) {
+            $obj = Objects::getCustomClassByObjectId($id);
+            $obj->delete();
+        }
+
+        Solr\Client::runCron();
 
         return array('success' => true, 'ids' => $ids);
     }
@@ -402,27 +375,6 @@ class Browser
             array(
                 $p['name']
                 ,$id
-            )
-        ) or die(DB\dbQueryError());
-
-        DB\dbQuery(
-            'INSERT INTO objects_data
-                (object_id
-                ,field_id
-                ,value)
-            SELECT $1
-                 , ts.id
-                 , $2
-            FROM tree t
-            JOIN templates_structure ts
-                ON t.template_id = ts.template_id
-            WHERE t.id = $1
-                AND ts.name = \'_title\'
-            ON DUPLICATE KEY
-            UPDATE `value` = $2',
-            array(
-                $id
-                ,$p['name']
             )
         ) or die(DB\dbQueryError());
 
@@ -989,14 +941,7 @@ class Browser
             @$d['subtype'] = intval($d['subtype']);
 
             if ($d['system']) {
-                if ((substr($d['name'], 0, 1) == '[') &&
-                    (substr($d['name'], -1, 1) == ']')) {
-                    $var_name = substr($d['name'], 1, strlen($d['name']) -2);
-                    if (defined('CB\\L\\'.$var_name)) {
-                        $d['name'] = L\get($var_name);
-                    }
-                }
-
+                $d['name'] = L\getTranslationIfPseudoValue($d['name']);
             }
             /* next switch should/will be excluded: */
             switch ($d['type']) {
@@ -1005,16 +950,7 @@ class Browser
                 case 1:
                     switch ($d['subtype']) {
                         case 1:
-                            if ((substr($d['name'], 0, 1) == '[') &&
-                                (substr($d['name'], -1, 1) == ']')) {
-                                $d['name'] = L\get(
-                                    substr(
-                                        $d['name'],
-                                        1,
-                                        strlen($d['name']) -2
-                                    )
-                                );
-                            }
+                            $d['name'] = L\getTranslationIfPseudoValue($d['name']);
                             break;
                         case 2:
                             $d['name'] = L\MyCaseBox;
