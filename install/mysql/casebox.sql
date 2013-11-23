@@ -33,6 +33,22 @@ CREATE TABLE `config` (
 
 insert  into `config`(`id`,`pid`,`param`,`value`) values (1,NULL,'general',NULL),(2,1,'timezone','UTC'),(3,1,'languages','en,fr,ru'),(4,1,'default_language','en'),(5,NULL,'solr',NULL),(6,5,'solr_host','127.0.0.1'),(7,5,'solr_port','8983'),(8,NULL,'files',NULL),(9,8,'max_files_version_count','*:1;doc,docx,xls,xlsx,pdf:5;png,gif,jpg,jpeg,tif,tiff:2;'),(10,NULL,'languages',NULL),(11,10,'language_en','{\r\n\"name\": \"English\"\r\n,\"locale\": \"en_US\"\r\n,\"long_date_format\": \"%F %j, %Y\"\r\n,\"short_date_format\": \"%m/%d/%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}'),(12,10,'language_es','{\r\n\"name\": \"Spanish\"\r\n,\"locale\": \"es_ES\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}\r\n'),(13,10,'language_fr','{\r\n\"name\": \"French\"\r\n,\"locale\": \"fr_FR\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}\r\n'),(14,10,'language_hy','{\r\n\"name\": \"Armenian\"\r\n,\"locale\": \"hy_AM\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}'),(15,10,'language_ru','{\r\n\"name\": \"Русский\"\r\n,\"locale\": \"ru_RU\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}'),(16,10,'language_ro','{\r\n\"name\": \"Română\"\r\n,\"locale\": \"ro_RO\"\r\n,\"long_date_format\": \"%j %F %Y\"\r\n,\"short_date_format\": \"%d.%m.%Y\"\r\n,\"time_format\": \"%H:%i\"\r\n}');
 
+/*Table structure for table `cores` */
+
+DROP TABLE IF EXISTS `cores`;
+
+CREATE TABLE `cores` (
+  `id` int(10) unsigned NOT NULL,
+  `name` varchar(20) NOT NULL,
+  `cfg` mediumtext,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `cores` */
+
+insert  into `cores`(`id`,`name`,`cfg`,`active`) values (0,'git','{\r\n\"plugins\": [\r\n	\"DisplayColumns\"\r\n	]\r\n}',1);
+
 /*Table structure for table `country` */
 
 DROP TABLE IF EXISTS `country`;
@@ -77,6 +93,21 @@ CREATE TABLE `permissions_definition` (
 /*Data for the table `permissions_definition` */
 
 insert  into `permissions_definition`(`id`,`bit_position`,`translation_name`,`description`) values (1,0,'scb0','List Folder/Read Data'),(2,1,'scb1','Create Folders'),(3,2,'scb2','Create Files'),(4,3,'scb3','Create Actions'),(5,4,'scb4','Create Tasks'),(6,5,'scb5','Read'),(7,6,'scb6','Write'),(8,7,'scb7','Delete child nodes'),(9,8,'scb8','Delete'),(10,9,'scb9','Change permissions'),(11,10,'scb10','Take Ownership'),(12,11,'scb11','Download');
+
+/*Table structure for table `plugins` */
+
+DROP TABLE IF EXISTS `plugins`;
+
+CREATE TABLE `plugins` (
+  `name` varchar(100) NOT NULL,
+  `cfg` mediumtext COMMENT 'default plugin configuration',
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `plugins` */
+
+insert  into `plugins`(`name`,`cfg`,`active`) values ('DisplayColumns','{\r\n\"js\": [\r\n  \"DisplayColumns.js\"\r\n]\r\n,\"listeners\": {\r\n  \"beforeSolrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onBeforeSolrQuery\"\r\n    ]\r\n  }\r\n  ,\"solrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onSolrQuery\"\r\n    ]\r\n  }\r\n}\r\n}',1);
 
 /*Table structure for table `timezone` */
 
