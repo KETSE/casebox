@@ -36,5 +36,5 @@ our api functions will always return a success property in every method,
 except for downloading files functions
 */
 if (!empty($result) && isset($result['success'])) {
-    $api->sendResponse(200, json_encode($result), 'application/json');
+    $api->sendResponse(200, json_encode($result, JSON_UNESCAPED_UNICODE), 'application/json');
 }

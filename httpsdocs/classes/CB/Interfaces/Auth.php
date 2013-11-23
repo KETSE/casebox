@@ -1,12 +1,12 @@
 <?php
-namespace CB;
+namespace CB\Interfaces;
 
 /**
  * Auth interface for distinct authentication mechannisms like
  * Google Authenticator, Ybikey
  */
 
-interface IAuth
+interface Auth
 {
     /**
      * method for preparing secret data creation

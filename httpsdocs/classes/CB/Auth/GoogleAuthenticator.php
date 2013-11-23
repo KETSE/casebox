@@ -5,7 +5,7 @@ namespace CB\Auth;
  * Google authenticator CaseBox class
  */
 
-class GoogleAuthenticator implements \CB\IAuth
+class GoogleAuthenticator implements \CB\Interfaces\Auth
 {
     /**
      * secret key length used

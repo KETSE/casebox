@@ -1,10 +1,10 @@
 <?php
-namespace CB;
+namespace CB\Plugins;
 
 /**
- * abstract class for singleton classes definition
+ * Templates singleton collection class
  */
-abstract class Singleton
+class SingletonCollection extends Collection
 {
     protected static $_instance = null;
 

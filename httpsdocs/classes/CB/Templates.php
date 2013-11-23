@@ -455,7 +455,7 @@ class Templates
             }
         }
         $i++;
-        $cfg = json_encode($cfg);
+        $cfg = json_encode($cfg, JSON_UNESCAPED_UNICODE);
         $params['cfg'] = $cfg;
         $values_string[] = '$'.$i;
         $on_duplicate[] = '`cfg` = $'.$i;

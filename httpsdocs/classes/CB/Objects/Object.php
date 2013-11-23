@@ -150,7 +150,7 @@ class Object extends OldObject
                 $this->id
                 ,$p['name']
                 ,$this->getFieldValue('_title')
-                ,json_encode($p['data'])
+                ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
@@ -290,7 +290,7 @@ class Object extends OldObject
                 $saveFields[] = $fieldName;
                 $saveValues[] = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
                     ? $p[$fieldName]
-                    : json_encode($p[$fieldName]);
+                    : json_encode($p[$fieldName], JSON_UNESCAPED_UNICODE);
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
             }
@@ -365,7 +365,7 @@ class Object extends OldObject
                 ,$d['date_end']
                 ,$templateData['iconCls']
                 ,@$d['pfu']
-                ,json_encode($d['data'])
+                ,json_encode($d['data'], JSON_UNESCAPED_UNICODE)
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());

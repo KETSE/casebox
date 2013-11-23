@@ -87,7 +87,7 @@ while ($r = $res->fetch_assoc()) {
         }
 
         /* encoding json and save to db */
-        $cfg = json_encode($cfg, JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT);
+        $cfg = json_encode($cfg, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT);
         // echo "  New Config:\n".$cfg."\n\n";
         DB\dbQuery('UPDATE templates_structure set cfg = $2 where id = $1', array($r['id'], $cfg)) or die(DB\dbQueryError());
     }

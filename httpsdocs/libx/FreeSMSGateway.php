@@ -6,7 +6,7 @@ class FreeSMSGateway
     {
         $url = 'http://www.FreeSMSGateway.com/api_send';
         $post_contacts = array( $p['phone'] );
-        $json_contacts = json_encode($post_contacts);
+        $json_contacts = json_encode($post_contacts, JSON_UNESCAPED_UNICODE);
 
         $fields = array(
             'access_token' => '1dba8b9a5c87ef2a50ae887689d278ae'

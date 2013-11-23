@@ -186,7 +186,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,handler: this.onPermissionsClick
             })
 
-        }
+        };
 
 
         this.store = new Ext.data.DirectStore({
@@ -207,90 +207,97 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,idProperty: 'nid'
                 ,root: 'data'
                 ,messageProperty: 'msg'
-            },[     {name: 'nid'}
-                ,{name: 'pid', type: 'int'}
-                ,{name: 'system', type: 'int'}
-                ,{name: 'type', type: 'int'}
-                ,{name: 'subtype', type: 'int'}
-                ,{name: 'status', type: 'int'}
-                ,{name: 'template_id', type: 'int'}
-                ,'template_type'
-                ,'path'
-                ,'name'
-                ,'hl'
-                ,'iconCls'
-                ,{name: 'date', type: 'date'}
-                ,{name: 'size', type: 'int'}
-                ,'sys_tags'
-                ,{name: 'oid', type: 'int'}
-                ,{name: 'cid', type: 'int'}
-                ,{name: 'versions', type: 'int'}
-                ,{name: 'cdate', type: 'date'}
-                ,{name: 'udate', type: 'date'}
-                ,'case'
-                ,'content'
-                ,{name: 'has_childs', type: 'bool'}
-                ,{name: 'acl_count', type: 'int'}
-                ,'cfg'
+                ,fields: [
+                    {name: 'nid'}
+                    ,{name: 'pid', type: 'int'}
+                    ,{name: 'system', type: 'int'}
+                    ,{name: 'type', type: 'int'}
+                    ,{name: 'subtype', type: 'int'}
+                    ,{name: 'status', type: 'int'}
+                    ,{name: 'template_id', type: 'int'}
+                    ,'template_type'
+                    ,'path'
+                    ,'name'
+                    ,'hl'
+                    ,'iconCls'
+                    ,{name: 'date', type: 'date'}
+                    ,{name: 'size', type: 'int'}
+                    ,'sys_tags'
+                    ,{name: 'oid', type: 'int'}
+                    ,{name: 'cid', type: 'int'}
+                    ,{name: 'versions', type: 'int'}
+                    ,{name: 'cdate', type: 'date'}
+                    ,{name: 'udate', type: 'date'}
+                    ,'case'
+                    ,'content'
+                    ,{name: 'has_childs', type: 'bool'}
+                    ,{name: 'acl_count', type: 'int'}
+                    ,'cfg'
             ]
+            }
             )
             ,listeners: {
                 scope: this
                 ,beforeload: function(store, options) {
-                    Ext.apply(store.baseParams, Ext.value(this.params, {}) )
+                    Ext.apply(store.baseParams, Ext.value(this.params, {}));
                     options = store.baseParams;
                 }
                 ,load: this.onStoreLoad
             }
-        })
+        });
+
+        var columns = [
+            { header: 'ID', width: 80, dataIndex: 'nid', hidden: true}
+            ,{header: L.Name, width: 300, dataIndex: 'name', renderer: function(v, m, r, ri, ci, s){
+                    m.css = 'icon-grid-column-top '+ r.get('iconCls');
+                    if(r.get('acl_count') > 0) {
+                        m.css += ' node-has-acl';
+                    }
+
+                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+                    rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
+                    if( (this.hideArrows !== true) && r.get('has_childs')) {
+                        rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />';
+                    }
+                    vi = getVersionsIcon(r.get('versions'));
+                    if(!Ext.isEmpty(vi)) rez = '<span class="ver_count '+vi+'" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
+                    return rez;
+                },scope: this
+                ,editable: true
+                ,editor: new Ext.form.TextField({selectOnFocus: true})
+            }
+            ,{header: L.Path, hidden:true, width: 150, dataIndex: 'path', renderer: function(v, m, r, ri, ci, s){
+                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+                    return v;
+                }
+            }
+            ,{header: L.Project, width: 150, dataIndex: 'case', renderer: function(v, m, r, ri, ci, s){
+                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+                    return v;
+                }
+            }
+            ,{header: L.Tags, width:200, dataIndex: 'sys_tags', hidden: true, sortable: false, renderer: App.customRenderers.tagIds}
+            ,{ header: L.Date, width: 120, dataIndex: 'date',/* xtype: 'datecolumn',/**/ format: App.dateFormat + ' ' + App.timeFormat, renderer: App.customRenderers.datetime}
+            ,{ header: L.Size, width: 80, dataIndex: 'size', renderer: App.customRenderers.filesize}
+            ,{ header: L.Creator, hidden:true, width: 200, dataIndex: 'cid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
+            ,{ header: L.Owner, width: 200, dataIndex: 'oid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
+            ,{ header: L.CreatedDate, hidden:true, width: 120, dataIndex: 'cdate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
+            ,{ header: L.UpdatedDate, hidden:true, width: 120, dataIndex: 'udate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
+        ];
+
         this.grid = new Ext.grid.EditorGridPanel({
             loadMask: true
             ,region: 'center'
             ,tbarCssClass: 'x-panel-white'
             ,cls: 'folder-grid'
             ,store: this.store
-            ,loadMask: true
+            ,defaultColumns: Ext.apply([], columns)
             ,colModel: new Ext.grid.ColumnModel({
                 defaults: {
                     width: 120,
                     sortable: true
                 },
-                columns: [
-                    { header: 'ID', width: 80, dataIndex: 'nid', hidden: true}
-                    ,{header: L.Name, width: 300, dataIndex: 'name', renderer: function(v, m, r, ri, ci, s){
-                            m.css = 'icon-grid-column-top '+ r.get('iconCls');
-                            if(r.get('acl_count') > 0) {
-                                m.css += ' node-has-acl';
-                            }
-
-                            m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
-                            rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
-                            if( (this.hideArrows !== true) && r.get('has_childs')) rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />'
-                            vi = getVersionsIcon(r.get('versions'));
-                            if(!Ext.isEmpty(vi)) rez = '<span class="ver_count '+vi+'" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
-                            return rez;
-                        },scope: this
-                        ,editable: true
-                        ,editor: new Ext.form.TextField({selectOnFocus: true})
-                    }
-                    ,{header: L.Path, hidden:true, width: 150, dataIndex: 'path', renderer: function(v, m, r, ri, ci, s){
-                            m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
-                            return v;
-                        }
-                    }
-                    ,{header: L.Project, width: 150, dataIndex: 'case', renderer: function(v, m, r, ri, ci, s){
-                            m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
-                            return v;
-                        }
-                    }
-                    ,{header: L.Tags, width:200, dataIndex: 'sys_tags', hidden: true, sortable: false, renderer: App.customRenderers.tagIds}
-                    ,{ header: L.Date, width: 120, dataIndex: 'date',/* xtype: 'datecolumn',/**/ format: App.dateFormat + ' ' + App.timeFormat, renderer: App.customRenderers.datetime}
-                    ,{ header: L.Size, width: 80, dataIndex: 'size', renderer: App.customRenderers.filesize}
-                    ,{ header: L.Creator, hidden:true, width: 200, dataIndex: 'cid', renderer: function(v){ return CB.DB.usersStore.getName(v)}}
-                    ,{ header: L.Owner, width: 200, dataIndex: 'oid', renderer: function(v){ return CB.DB.usersStore.getName(v)}}
-                    ,{ header: L.CreatedDate, hidden:true, width: 120, dataIndex: 'cdate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
-                    ,{ header: L.UpdatedDate, hidden:true, width: 120, dataIndex: 'udate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
-                ]
+                columns: columns
             })
             ,viewConfig: {
                 forceFit: false
@@ -330,7 +337,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                         }
                         delete this.renamedOriginalValue;
                         delete this.renamedRecord;
-                        this.fireEvent('objectupdated', {data: {id: r.data.id, pid: this.folderProperties.id} }, e )
+                        this.fireEvent('objectupdated', {data: {id: r.data.id, pid: this.folderProperties.id} }, e );
                     }, this);
                 }
                 ,rowdblclick : this.onRowDblClick
@@ -472,7 +479,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ,itemIndex: 1
             ,scope: this
             ,toggleHandler: this.onEastPanelButtonClick
-        })
+        });
 
         this.filtersPanel = new CB.FilterPanel({
             bindButton: this.filterButton
@@ -496,12 +503,12 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ,statefull: true
             ,stateId: Ext.value(this.gridStateId, 'fvg') + 'EP' //taskview east panel
             ,items: [ this.previewPanel, this.filtersPanel ]
-        })
+        });
 
         params = Ext.apply({}, this.params, {
             path: '/'
             ,descendants: false
-        })
+        });
 
         Ext.apply(this, {
             params: params
@@ -568,7 +575,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 },this.filterButton
             ]
             ,items: [this.grid, this.eastPanel]
-        })
+        });
         CB.FolderViewGrid.superclass.initComponent.apply(this, arguments);
 
         this.addEvents(
@@ -628,14 +635,16 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     }
     ,onCellClick: function(grid, rowIndex, colIndex, e){
         el = e.getTarget();
-        if(el && el.classList.contains('icon-arrow3')) this.fireEvent('changeparams', {path: this.grid.store.getAt(rowIndex).get('nid')} )
+        if(el && el.classList.contains('icon-arrow3')) {
+            this.fireEvent('changeparams', {path: this.grid.store.getAt(rowIndex).get('nid')});
+        }
     }
     ,onSearchQuery: function(query, e){
         this.grid.getStore().baseParams.query = query;
         this.onReloadClick();
     }
     ,onClipboardChange: function(cb){
-        this.onSelectionChange(this.grid.getSelectionModel())
+        this.onSelectionChange(this.grid.getSelectionModel());
     }
     ,onClipboardAction: function(pids){
         if(pids.indexOf(this.folderProperties.id) >=0 ) this.onReloadClick();
@@ -658,7 +667,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 } else {
                     // remove moved record
                     for (var i = 0; i < r.processedIds.length; i++) {
-                        idx = this.store.findExact('nid', parseInt(r.processedIds[i]))
+                        idx = this.store.findExact('nid', parseInt(r.processedIds[i], 10));
                         if(idx > -1) {
                             this.store.removeAt(idx);
                         }
@@ -682,7 +691,8 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         });
     }
     ,onSelectionChange: function(sm) {
-        id = null;
+        var id = null;
+        var i;
         if(!sm.hasSelection()){
             this.actions.open.setDisabled(true);
             this.actions.browse.setDisabled(true);
@@ -719,19 +729,19 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 
             s = sm.getSelections();
             canTakeOwnership = true;
-            for (var i = 0; i < s.length; i++) {
+            for (i = 0; i < s.length; i++) {
                 if( (s[i].get('cid') == App.loginData.id) || (s[i].get('system') == 1) ) canTakeOwnership = false;
             }
             this.actions.takeOwnership.setDisabled(!canTakeOwnership);
 
             canMerge = (s.length > 1);
-            for (var i = 0; i < s.length; i++) {
+            for (i = 0; i < s.length; i++) {
                 if(s[i].get('template_type') != 'file') canMerge = false;
             }
             this.actions.mergeFiles.setDisabled(!canMerge);
 
             canUploadNewVersion = (row.get('template_type') == 'file');
-            this.actions.uploadNewVersion.setDisabled(!canUploadNewVersion)
+            this.actions.uploadNewVersion.setDisabled(!canUploadNewVersion);
             // this.actions.permissions.setDisabled(false) ;
         }
         canPaste = !App.clipboard.isEmpty()
@@ -751,9 +761,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 db = db[0];
                 if(canDownload){
                     s = sm.getSelections();
-                    for (var i = 0; i < s.length; i++) {
+                    for (i = 0; i < s.length; i++) {
                         if(s[i].get('template_type') != 'file') canDownload = false;
-                    };
+                    }
                 }
                 db.setDisabled( !canDownload );
             }
@@ -765,14 +775,14 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.fireEvent('selectionchange', sm, data);
     }
     ,onContextMenu: function(e) {
-        e.stopPropagation()
-        e.preventDefault()
+        e.stopPropagation();
+        e.preventDefault();
         this.onRowContextMenu(this.grid, -1, e);
     }
     ,onRowContextMenu: function(grid, rowIndex, e) {
         if(e){
-            e.stopPropagation()
-            e.preventDefault()
+            e.stopPropagation();
+            e.preventDefault();
         }
         grid.selModel.selectRow(rowIndex, false);
         row = grid.store.getAt(rowIndex);
@@ -781,7 +791,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 text: L.Create
                 ,hideOnClick: false
                 ,menu:[]
-            })
+            });
             this.contextMenu = new Ext.menu.Menu({
                 items: [
                 this.actions.open
@@ -816,7 +826,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,'-'
                 ,this.actions.permissions
                 ]
-            })
+            });
 
         }
         this.contextMenu.items.itemAt(3).menu.items.itemAt(0).setChecked(this.params.descendants);
@@ -833,16 +843,16 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     ,getProperty: function(propertyName){
         if(propertyName == 'nid') propertyName = 'id';
         if(this.folderProperties && this.folderProperties[propertyName]) return this.folderProperties[propertyName];
-        return null
+        return null;
     }
     ,onProxyLoad: function (proxy, o, options) {
         this.path = this.store.baseParams.path;
-        this.folderProperties = Ext.apply({}, o.result.folderProperties)
+        this.folderProperties = Ext.apply({}, o.result.folderProperties);
 
         this.folderProperties.id = this.folderProperties.id;
-        this.folderProperties.system = parseInt(this.folderProperties.system);
-        this.folderProperties.type = parseInt(this.folderProperties.type);
-        this.folderProperties.subtype = parseInt(this.folderProperties.subtype);
+        this.folderProperties.system = parseInt(this.folderProperties.system, 10);
+        this.folderProperties.type = parseInt(this.folderProperties.type, 10);
+        this.folderProperties.subtype = parseInt(this.folderProperties.subtype, 10);
         this.folderProperties.pathtext = o.result.pathtext;
         this.fireEvent('viewloaded', proxy, o, options);
 
@@ -866,7 +876,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         canCreateFolder = (this.folderProperties.id > 0 );
         this.actions.createFolder.setDisabled(!canCreateFolder) ;
 
-        this.updateCreateMenuItems()
+        this.updateCreateMenuItems();
         this.filtersPanel.updateFacets(o.result.facets, options);
     }
     ,onStoreLoad: function(store, recs, options) {
@@ -910,11 +920,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.getEl().unmask();
         if(r.success !== true) return;
         this.grid.store.loadData(r, true);
-        idx = this.grid.store.findExact('nid', parseInt(r.data.nid));
+        idx = this.grid.store.findExact('nid', parseInt(r.data.nid, 10));
         this.grid.selModel.clearSelections();
         if(idx >= 0) this.grid.selModel.selectRow(idx);
         this.justAddedFolder = r.data.nid;
-        this.fireEvent('objectupdated', { data: {id: r.data.nid, pid: r.data.pid } }, e )
+        this.fireEvent('objectupdated', { data: {id: r.data.nid, pid: r.data.pid } }, e);
         this.onRenameClick(r, e);
     }
 
@@ -941,7 +951,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         if(Ext.isEmpty(this.grid.store.baseParams.query) ){
             path = String(this.params.path).split('/');
             path.push(row.get('nid'));
-            this.fireEvent('changeparams', {path: path.join('/')} )
+            this.fireEvent('changeparams', {path: path.join('/')});
         }else{
             this.fireEvent(
                 'changeparams'
@@ -950,19 +960,19 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                     ,query: ''
                     ,descendants: false
                 }
-            )
+            );
         }
     }
     ,onOpenItemLocationClick: function(b, e){
         if(this.actions.openItemLocation.isDisabled()) return;
         if(!this.grid.selModel.hasSelection()) return;
         row = this.grid.selModel.getSelected();
-        this.fireEvent('changeparams', {path: row.get('pid'), descendants: false, query:'' }, e)
+        this.fireEvent('changeparams', {path: row.get('pid'), descendants: false, query:'' }, e);
         App.locateObject(row.data.nid, row.data.pid);
     }
     ,onCutClick: function(buttonOrKey, e) {
         if(this.actions.cut.isDisabled()) return;
-        this.onCopyClick(buttonOrKey, e)
+        this.onCopyClick(buttonOrKey, e);
         App.clipboard.setAction('move');
     }
     ,onCopyClick: function(buttonOrKey, e) {
@@ -978,7 +988,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,type: s[i].get('type')
                 ,subtype: s[i].get('subtype')
                 ,iconCls: s[i].get('iconCls')
-            })
+            });
         }
         App.clipboard.set(rez, 'copy');
     }
@@ -1004,11 +1014,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         if(Ext.isEmpty(s) || (s.length <2) ) return;
         rez = [];
         for (var i = 0; i < s.length; i++) {
-            rez.push(s[i].get('nid'))
+            rez.push(s[i].get('nid'));
         }
         Ext.Msg.confirm( L.MergingFiles, L.MergeFilesConfirmation, function(b){
             if(b == 'yes') CB_Files.merge(rez, this.processMergingFiles, this);
-        }, this )
+        }, this );
     }
     ,processMergingFiles: function(r, e){
         this.onReloadClick();
@@ -1026,15 +1036,17 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.getEl().unmask();
         if(r.success !== true) return;
         this.grid.store.loadData(r, true);
-        idx = this.grid.store.findExact('nid', parseInt(r.data.nid));
+        idx = this.grid.store.findExact('nid', parseInt(r.data.nid, 10));
         this.grid.selModel.clearSelections();
         if(idx >= 0) this.grid.selModel.selectRow(idx);
         this.justAddedFolder = r.data.nid;
-        this.fireEvent('objectupdated', { data: {id: r.data.nid, pid: r.data.pid } }, e )
+        this.fireEvent('objectupdated', { data: {id: r.data.nid, pid: r.data.pid } }, e);
         this.onRenameClick(r, e);
     }
     ,onCreateCaseClick: function(b, e){
-        if(Ext.isEmpty(b.data)) b.data = {}
+        if(Ext.isEmpty(b.data)) {
+            b.data = {};
+        }
         b.data.pid = this.folderProperties.id;
         this.fireEvent('casecreate', b, e);
     }
@@ -1047,12 +1059,12 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,path: this.folderProperties.path
                 ,pathtext: this.folderProperties.pathtext
             }
-        })
+        });
     }
     ,onFiltersChange: function(filters){
         params = Ext.apply({}, this.params);
         params.filters = filters;
-        this.fireEvent('changeparams', params )
+        this.fireEvent('changeparams', params);
     }
     ,onCreateEventClick: function(b, e) {
         this.fireEvent('taskcreate', {
@@ -1063,10 +1075,10 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,path: this.folderProperties.path
                 ,pathtext: this.folderProperties.pathtext
             }
-        })
+        });
     }
     ,onReloadClick: function(b, e){
-        this.grid.store.load()
+        this.grid.store.load();
     }
     ,onRenameClick: function(b, e){
         if(!this.grid.selModel.hasSelection()) return;
@@ -1078,7 +1090,14 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     ,onDeleteClick: function(b, e) {
         s = this.grid.selModel.getSelections();
         if(Ext.isEmpty(s)) return;
-        Ext.Msg.confirm( L.DeleteConfirmation, (s.length == 1) ? L.DeleteConfirmationMessage + ' "' + s[0].get('name') + '"?' : L.DeleteSelectedConfirmationMessage, this.onDelete, this )
+        Ext.Msg.confirm(
+            L.DeleteConfirmation
+            ,(s.length == 1)
+                ? L.DeleteConfirmationMessage + ' "' + s[0].get('name') + '"?'
+                : L.DeleteSelectedConfirmationMessage
+            ,this.onDelete
+            ,this
+        );
     }
     ,onDelete: function (btn) {
         if(btn !== 'yes') return;
@@ -1086,7 +1105,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         if(Ext.isEmpty(s)) return;
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
         ids = [];
-        Ext.each(s, function(r){ ids.push(r.get('nid'))}, this)
+        Ext.each(s, function(r){ ids.push(r.get('nid'));}, this);
         CB_BrowserView['delete'](ids, this.processDelete, this);
     }
     ,processDelete: function(r, e){
@@ -1100,12 +1119,12 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     ,onObjectsDeleted: function(ids){
         this.selectIdx = -1;
         for (var i = 0; i < ids.length; i++) {
-            idx = this.grid.store.findExact('nid', parseInt(ids[i]));
+            idx = this.grid.store.findExact('nid', parseInt(ids[i], 10));
             if(idx >=0){
                 if(this.grid.getSelectionModel().isSelected(idx)) this.selectIdx = idx;
                 this.grid.store.removeAt(idx);
             }
-        };
+        }
         if(this.selectIdx > -1){
             if(this.grid.store.getCount() > idx) this.grid.getSelectionModel().selectRow(idx);
             else this.grid.getSelectionModel().selectLastRow();
@@ -1119,7 +1138,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         }
         if(this.folderProperties.id == form.data.pid) this.onReloadClick();
     }
-    ,onUploadClick: function(b, e) { this.fireEvent('fileupload', {pid: this.folderProperties.id, uploadType: b.uploadType}, e) }
+    ,onUploadClick: function(b, e) { this.fireEvent('fileupload', {pid: this.folderProperties.id, uploadType: b.uploadType}, e); }
     ,onUploadNewVersionClick: function(b, e){
         if(!this.grid.selModel.hasSelection()) return;
         row = this.grid.selModel.getSelected();
@@ -1127,7 +1146,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     }
     ,onDownloadClick: function(b, e) {
         ids = [];
-        Ext.each(this.grid.getSelectionModel().getSelections(), function(r){ids.push(r.get('nid'))}, this)
+        Ext.each(this.grid.getSelectionModel().getSelections(), function(r){ids.push(r.get('nid'));}, this);
         if(!Ext.isEmpty(ids)) this.fireEvent('filedownload', ids, b.zipped, e);
     }
     ,onEastPanelButtonClick: function(b, e){
@@ -1141,7 +1160,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         }else{
             this.eastPanel.hide();
         }
-        this.syncSize()
+        this.syncSize();
     }
     ,onShowDescendantsClick: function(cb, e){
         this.fireEvent('showdescendants', !cb.checked, e);
@@ -1154,16 +1173,16 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 if(Ext.isEmpty(s)) return;
                 for (var i = 0; i < s.length; i++) {
                     ids.push(s[i].get('nid'));
-                };
+                }
                 CB_Browser.takeOwnership(ids, this.processTakeOwnership, this);
             }
-        }, this)
+        }, this);
     }
     ,processTakeOwnership: function(r, e){
         if(r.success !== true) return;
         this.onReloadClick();
     }
 
-})
+});
 
 Ext.reg('CBFolderViewGrid', CB.FolderViewGrid);

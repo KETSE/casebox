@@ -58,7 +58,7 @@ class TemplateField extends Object
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value);
+                    : json_encode($value, JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $p[$fieldName];
@@ -68,7 +68,7 @@ class TemplateField extends Object
                 $value = $this->getFieldValue($fieldName);
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value);
+                    : json_encode($value, JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -136,7 +136,7 @@ class TemplateField extends Object
             if (isset($p[$fieldName]) && ($p[$fieldName] !== 'id')) {
                 $value = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
                     ? $p[$fieldName]
-                    : json_encode($p[$fieldName]);
+                    : json_encode($p[$fieldName], JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -146,7 +146,7 @@ class TemplateField extends Object
                 $value = $this->getFieldValue($fieldName);
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value);
+                    : json_encode($value, JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;

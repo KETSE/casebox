@@ -6,20 +6,20 @@ $execution_timeout = 60; //default is 60 seconds
 
 require_once 'init.php';
 
-require_once ZEND_PATH.'/Zend/Loader/StandardAutoloader.php';
+require_once CONFIG\ZEND_PATH.'/Zend/Loader/StandardAutoloader.php';
 
 /** DURING INSTANTIATION **/
 $loader = new \Zend\Loader\StandardAutoloader(
     array(
         // absolute directory
-        'Zend' => ZEND_PATH.'/Zend'
+        'Zend' => CONFIG\ZEND_PATH.'/Zend'
     )
 );
 /** AFTER INSTANTIATION **/
 $loader = new \Zend\Loader\StandardAutoloader();
 
 // the path can be absolute or relative below:
-$loader->registerNamespace('Zend', ZEND_PATH.'/Zend');
+$loader->registerNamespace('Zend', CONFIG\ZEND_PATH.'/Zend');
 
 /** TO START AUTOLOADING */
 $loader->register();

@@ -105,7 +105,7 @@ if (defined('CB\\CONFIG\\TEMPLATEICONS')) {
         $data[$i] = array($data[$i], $data[$i]);
     }
 }
-echo 'CB.DB.templatesIconSet = new Ext.data.ArrayStore({ idIndex: 0,fields: ["id","name"], data: '. json_encode($data).'});';
+echo 'CB.DB.templatesIconSet = new Ext.data.ArrayStore({ idIndex: 0,fields: ["id","name"], data: '. json_encode($data, JSON_UNESCAPED_UNICODE).'});';
 
 /* languages */
 $arr = array();
@@ -120,7 +120,7 @@ for ($i=0; $i < sizeof($GLOBALS['languages']); $i++) {
 
 echo "\n".'CB.DB.languages = new Ext.data.ArrayStore({'.
     'fields: [{name: "id", type: "int"}, "abreviation", "name", "long_date_format", "short_date_format", "time_format"]'.
-    ',data: '.(empty($arr) ? '[]' : json_encode($arr)).
+    ',data: '.(empty($arr) ? '[]' : json_encode($arr, JSON_UNESCAPED_UNICODE)).
     '});'."\n";
 /* end of languages */
 
@@ -136,7 +136,7 @@ if (defined('CB\\L\\OwnSecurityQuestion')) {
 }
 echo "\n".'CB.DB.securityQuestions = new Ext.data.ArrayStore({'.
     'fields: [{name: "id", type: "int"}, "text"]'.
-    ',data: '.(empty($arr) ? '[]' : json_encode($arr)).
+    ',data: '.(empty($arr) ? '[]' : json_encode($arr, JSON_UNESCAPED_UNICODE)).
     '});'."\n";
 /* end of Security questions */
 
@@ -159,7 +159,7 @@ $res->close();
 
 echo "\n".'CB.DB.menu = new Ext.data.ArrayStore({'.
     'fields: [{name: "id", type: "int"}, "node_ids", "node_template_ids", "menu", "user_group_ids"]'.
-    ',data: '.(empty($arr) ? '[]' : json_encode($arr)).
+    ',data: '.(empty($arr) ? '[]' : json_encode($arr, JSON_UNESCAPED_UNICODE)).
     '});'."\n";
 /* end of menu */
 
@@ -168,7 +168,6 @@ $res = DB\dbQuery(
     'SELECT ts.id
         ,ts.pid
         ,t.id template_id
-        ,ts.`level`
         ,ts.`name`
         ,ts.l'.USER_LANGUAGE_INDEX.' `title`
         ,ts.`type`
@@ -178,7 +177,7 @@ $res = DB\dbQuery(
     FROM templates t
     LEFT JOIN templates_structure ts
         ON t.id = ts.template_id
-    ORDER BY template_id, level, `order`',
+    ORDER BY template_id, `order`',
     $_SESSION['user']['language_id']
 ) or die( DB\dbQueryError() );
 
@@ -216,7 +215,7 @@ $res->close();
 foreach ($templates as $t => $f) {
     $sf = array();
     sortTemplateRows($f, null, $sf);
-    echo 'CB.DB.template'.$t.' = new CB.DB.TemplateStore({data:'.json_encode($sf).'});';
+    echo 'CB.DB.template'.$t.' = new CB.DB.TemplateStore({data:'.json_encode($sf, JSON_UNESCAPED_UNICODE).'});';
 }
 
 ?>

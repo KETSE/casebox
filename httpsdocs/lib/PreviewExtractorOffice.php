@@ -57,7 +57,7 @@ class PreviewExtractorOffice extends PreviewExtractor
 
             copy($fn, $nfn);
             file_put_contents($pfn, '');
-            $cmd = UNOCONV.' -v -f html -o '.$pfn.' '.$nfn; //.' >> '.DEBUG_LOG.' 2>&1';
+            $cmd = CONFIG\UNOCONV.' -v -f html -o '.$pfn.' '.$nfn; //.' >> '.DEBUG_LOG.' 2>&1';
             exec($cmd);
             unlink($nfn);
             file_put_contents(

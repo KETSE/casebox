@@ -25,7 +25,7 @@ $not_fount_list = array();
 $sql = 'UPDATE crons
 SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
 WHERE cron_id = $1';
-DB\dbQuery($sql, array($cron_id, json_encode($rez))) or die(DB\dbQueryError());
+DB\dbQuery($sql, array($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE))) or die(DB\dbQueryError());
 if (checkTikaService() == false) {
     startTikaService();
 }
@@ -117,7 +117,7 @@ DB\dbQuery(
     WHERE cron_id = $1',
     array(
         $cron_id
-        ,json_encode($rez)
+        ,json_encode($rez, JSON_UNESCAPED_UNICODE)
     )
 ) or die(DB\dbQueryError());
 
@@ -147,7 +147,7 @@ function checkTikaService()
 
 function startTikaService()
 {
-    $cmd = 'java -Dfile.encoding=UTF8 -jar "'.TIKA_SERVER.'" --port 9998 &';
+    $cmd = 'java -Dfile.encoding=UTF8 -jar "'.CONFIG\TIKA_SERVER.'" --port 9998 &';
     if (isWindows()) {
         $cmd = 'start /D "'.DOC_ROOT.'libx" tika_windows_service.bat';
     }

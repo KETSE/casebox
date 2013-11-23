@@ -46,7 +46,7 @@ class Service
             return $this->solr_handler;
         }
 
-        require_once \CB\SOLR_CLIENT;
+        require_once \CB\CONFIG\SOLR_CLIENT;
 
         $this->solr_handler = new \Apache_Solr_Service(
             $this->host,
@@ -98,7 +98,7 @@ class Service
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-type:application/json; charset=utf-8"));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($docs)));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($docs), JSON_UNESCAPED_UNICODE));
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 

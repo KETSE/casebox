@@ -32,5 +32,5 @@ $cfg = array(
 
 echo 'Ext.app.REMOTING_API = ';
 
-echo json_encode($cfg);
+echo json_encode($cfg, JSON_UNESCAPED_UNICODE);
 echo ';';

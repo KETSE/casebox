@@ -9,7 +9,7 @@ if (is_file($customUserMenuClass)) {
 }
 
 /* define generic user menu class */
-class UserMenu implements IUserMenu
+class UserMenu implements Interfaces\UserMenu
 {
     public function getAccordionItems()
     {

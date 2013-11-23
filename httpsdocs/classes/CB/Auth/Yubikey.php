@@ -5,7 +5,7 @@ namespace CB\Auth;
  * Yubikey authenticator CaseBox class
  */
 
-class Yubikey implements \CB\IAuth
+class Yubikey implements \CB\Interfaces\Auth
 {
     /**
      * url used to create new secred data

@@ -8,9 +8,7 @@ if (empty($_SESSION['user'])) {
 
 L\checkTranslationsUpToDate();
 
-$customConfig = getCustomConfig();
-
-require_once(MINIFY_PATH.'utils.php');
+require_once(CONFIG\MINIFY_PATH.'utils.php');
 
 ?>
 <!DOCTYPE html>
@@ -23,7 +21,8 @@ require_once(MINIFY_PATH.'utils.php');
 
 echo '<link rel="stylesheet" type="text/css" href="/libx/ext/resources/css/ext-all.css" />';
 echo '<link rel="stylesheet" type="text/css" href="'.Minify_getUri('css').'" />';
-if (!empty($customConfig[CORENAME.'_css'])) {
+$css = Config::getCssList();
+if (!empty($css)) {
     echo '<link rel="stylesheet" type="text/css" href="'.Minify_getUri(CORENAME.'_css').'" />';
 }
 
@@ -58,7 +57,8 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
 
 echo '<script type="text/javascript" src="'.Minify_getUri('js').(isDebugHost() ? '&debug=1': '').'"></script>';
 echo '<script type="text/javascript" src="'.Minify_getUri('jsdev').(isDebugHost() ? '&debug=1': '').'"></script>';
-if (!empty($customConfig[CORENAME.'_js'])) {
+$js = Config::getJsList();
+if (!empty($js)) {
     echo '<script type="text/javascript" src="'.Minify_getUri(CORENAME.'_js').(isDebugHost() ? '&debug=1': '').'"></script>';
 }
 

@@ -1,253 +1,207 @@
 <?php
-namespace CB;
+namespace Util\Templates;
 
-/**
- * script for creating templates in tree
- *
- * params:
- *     core_name
- *     target_id - folder where templates structure should be created.
- *                 If no target id is specified then new templates
- *                 will be created in /Templates folder
- *
- * Note: We'll use here following abreviations:
- *     "tT" for "templatesTemplate"
- *     "fT" for "fieldTemplate"
- *
- */
+use CB\DB as DB;
 
-// check params
-if (empty($argv[1])) {
-    die('Please specify a core as first argument');
-}
-$_SERVER['SERVER_NAME'] = $argv[1].'.casebox.local';
-$_SESSION['user']['id'] = 1;
-$pid = null;
-if (!empty($argv[2]) && is_numeric($argv[2])) {
-    $pid = $argv[2];
-}
+class TreeSync extends \Util\TreeSync
+{
+    protected $targetFolderName = 'Templates';
 
-require_once '../crons/init.php';
-
-$GLOBALS['DFT'] = getOption('DEFAULT_FOLDER_TEMPLATE');
-// check $pid existance and create Templates Folder if needed
-if (is_null($pid)) {
-    $pid = Browser::getRootFolderId();
-    $res = DB\dbQuery(
-        'SELECT id
-        FROM tree
-        WHERE pid = $1
-            AND name = $2
-            AND dstatus = 0',
-        array(
-            $pid
-            ,'Templates'
-        )
-    ) or die(DB\dbQueryError());
-
-    if ($r = $res->fetch_assoc()) {
-        $pid = $r['id'];
-    } else {
-        $folderObj = new Objects\Object();
-        $pid = $folderObj->create(
+    private $tTConfig = array(
+        'name' => 'TemplatesTemplate'
+        ,'title' => 'Templates template'
+        ,'custom_title' => null
+        ,'l1' => 'Template for Templates'
+        ,'l2' => 'Template for Templates'
+        ,'l3' => 'Template for Templates'
+        ,'l4' => 'Template for Templates'
+        ,'template_id' => null //will be set later, after creation
+        ,'iconCls' => 'icon-template'
+        ,'type' => 'template'
+        ,'fields' => array(
             array(
-                'pid' => $pid
-                ,'name' => 'Templates'
-                ,'template_id' => $GLOBALS['DFT']
+                'name' => '_title'
+                ,'l1' => 'Name'
+                ,'l2' => 'Name'
+                ,'l3' => 'Name'
+                ,'l4' => 'Name'
+                ,'type' => 'varchar'
+                ,'order' => 0
+                ,'cfg' => array(
+                    'showIn' => 'top'
+                    ,'readOnly' => true
+                )
             )
-        ) or die('Error creating Templates folder');
-    }
-    $res->close();
+            ,array(
+                'name' => 'type'
+                ,'l1' => 'Type'
+                ,'l2' => 'Type'
+                ,'l3' => 'Type'
+                ,'l4' => 'Type'
+                ,'type' => '_templateTypesCombo'
+                ,'order' => 5
+            )
+            ,array(
+                'name' => 'visible'
+                ,'l1' => 'Active'
+                ,'l2' => 'Active'
+                ,'l3' => 'Active'
+                ,'l4' => 'Active'
+                ,'type' => 'checkbox'
+                ,'order' => 6
+                ,'cfg' => array(
+                    'showIn' => 'top'
+                )
+            )
+            ,array(
+                'name' => 'iconCls'
+                ,'l1' => 'Icon class'
+                ,'l2' => 'Icon class'
+                ,'l3' => 'Icon class'
+                ,'l4' => 'Icon class'
+                ,'type' => 'iconcombo'
+                ,'order' => 7
+            )
+            ,array(
+                'name' => 'cfg'
+                ,'l1' => 'Config'
+                ,'l2' => 'Config'
+                ,'l3' => 'Config'
+                ,'l4' => 'Config'
+                ,'type' => 'text'
+                ,'order' => 8
+                ,'cfg' => array(
+                    'height' => 100
+                )
+            )
+            ,array(
+                'name' => 'title_template'
+                ,'l1' => 'Title template'
+                ,'l2' => 'Title template'
+                ,'l3' => 'Title template'
+                ,'l4' => 'Title template'
+                ,'type' => 'text'
+                ,'order' => 9
+                ,'cfg' => array(
+                    'height' => 50
+                )
+            )
+            ,array(
+                'name' => 'info_template'
+                ,'l1' => 'Info template'
+                ,'l2' => 'Info template'
+                ,'l3' => 'Info template'
+                ,'l4' => 'Info template'
+                ,'type' => 'text'
+                ,'order' => 10
+                ,'cfg' => array(
+                    'height' => 50
+                )
+            )
+        )
+    );
 
-} else {
-    if (!Objects::idExists($pid)) {
-        die('Specified target id does not exist');
-    }
-}
+    private $fTConfig = array(
+        'name' => 'FieldsTemplate'
+        ,'title' => 'Fields template'
+        ,'custom_title' => null
+        ,'l1' => 'Template for Fields'
+        ,'l2' => 'Template for Fields'
+        ,'l3' => 'Template for Fields'
+        ,'l4' => 'Template for Fields'
+        ,'template_id' => null //will be set later, after creation
+        ,'iconCls' => 'icon-snippet'
+        ,'type' => 'field'
+        ,'fields' => array(
+            array(
+                'name' => '_title'
+                ,'l1' => 'Name'
+                ,'l2' => 'Name'
+                ,'l3' => 'Name'
+                ,'l4' => 'Name'
+                ,'type' => 'varchar'
+                ,'order' => 0
+                ,'cfg' => array(
+                    'showIn' => 'top'
+                    ,'readOnly' => true
+                )
+            )
+            ,array(
+                'name' => 'type'
+                ,'l1' => 'Type'
+                ,'l2' => 'Type'
+                ,'l3' => 'Type'
+                ,'l4' => 'Type'
+                ,'type' => '_fieldTypesCombo'
+                ,'order' => 5
+            )
+            ,array(
+                'name' => 'order'
+                ,'l1' => 'Order'
+                ,'l2' => 'Order'
+                ,'l3' => 'Order'
+                ,'l4' => 'Order'
+                ,'type' => 'int'
+                ,'order' => 6
+            )
+            ,array(
+                'name' => 'cfg'
+                ,'l1' => 'Config'
+                ,'l2' => 'Config'
+                ,'l3' => 'Config'
+                ,'l4' => 'Config'
+                ,'type' => 'text'
+                ,'order' => 7
+                ,'cfg' => array(
+                    'height' => 100
+                )
+            )
+            ,array(
+                'name' => 'solr_column_name'
+                ,'l1' => 'Solr column name'
+                ,'l2' => 'Solr column name'
+                ,'l3' => 'Solr column name'
+                ,'l4' => 'Solr column name'
+                ,'type' => 'varchar'
+                ,'order' => 8
+            )
+        )
+    );
 
+    protected function init()
+    {
+        parent::init();
+
+        /* adjust thesauri template config */
+        $this->tTConfig['pid'] = $this->mainPid;
+        $this->fTConfig['pid'] = $this->mainPid;
+
+        // $this->thesauriTemplateConfig['template_id'] = $this->mainTemplateId;
+        // $this->thesauriTemplateConfig['title_template'] = '{'.\CB\LANGUAGE.'}';
+
+        $i = 1;
+        foreach ($GLOBALS['languages'] as $language) {
+            $field = array(
+                'name' => $language
+                ,'l1' => 'Title ('.$language.')'
+                ,'l2' => 'Title ('.$language.')'
+                ,'l3' => 'Title ('.$language.')'
+                ,'l4' => 'Title ('.$language.')'
+                ,'type' => 'varchar'
+                ,'order' => $i
+                // ,'cfg' => array(
+                //     'showIn' => 'top'
+                // )
+            );
+            $this->fTConfig['fields'][] = $field;
+            $i++;
+        }
+    }
+//TODO: finish refactoring
 DB\startTransaction();
 // before start we'll execute a special procedure that will clear all lost objects.
 // These objects can couse errors on sync templates with tree
 DB\dbQuery('CALL p_clear_lost_objects()') or die(DB\dbQueryError());
-
-// define template configs
-$tTConfig = array(
-    'pid' => $pid
-    ,'name' => 'TemplatesTemplate'
-    ,'title' => 'Templates template'
-    ,'custom_title' => null
-    ,'l1' => 'Template for Templates'
-    ,'l2' => 'Template for Templates'
-    ,'l3' => 'Template for Templates'
-    ,'l4' => 'Template for Templates'
-    ,'template_id' => null //will be set later, after creation
-    ,'iconCls' => 'icon-template'
-    ,'type' => 'template'
-    ,'fields' => array(
-        array(
-            'name' => '_title'
-            ,'l1' => 'Name'
-            ,'l2' => 'Name'
-            ,'l3' => 'Name'
-            ,'l4' => 'Name'
-            ,'type' => 'varchar'
-            ,'order' => 0
-            ,'cfg' => array(
-                'showIn' => 'top'
-                ,'readOnly' => true
-            )
-        )
-        ,array(
-            'name' => 'type'
-            ,'l1' => 'Type'
-            ,'l2' => 'Type'
-            ,'l3' => 'Type'
-            ,'l4' => 'Type'
-            ,'type' => '_templateTypesCombo'
-            ,'order' => 5
-        )
-        ,array(
-            'name' => 'visible'
-            ,'l1' => 'Active'
-            ,'l2' => 'Active'
-            ,'l3' => 'Active'
-            ,'l4' => 'Active'
-            ,'type' => 'checkbox'
-            ,'order' => 6
-            ,'cfg' => array(
-                'showIn' => 'top'
-            )
-        )
-        ,array(
-            'name' => 'iconCls'
-            ,'l1' => 'Icon class'
-            ,'l2' => 'Icon class'
-            ,'l3' => 'Icon class'
-            ,'l4' => 'Icon class'
-            ,'type' => 'iconcombo'
-            ,'order' => 7
-        )
-        ,array(
-            'name' => 'cfg'
-            ,'l1' => 'Config'
-            ,'l2' => 'Config'
-            ,'l3' => 'Config'
-            ,'l4' => 'Config'
-            ,'type' => 'text'
-            ,'order' => 8
-            ,'cfg' => array(
-                'height' => 100
-            )
-        )
-        ,array(
-            'name' => 'title_template'
-            ,'l1' => 'Title template'
-            ,'l2' => 'Title template'
-            ,'l3' => 'Title template'
-            ,'l4' => 'Title template'
-            ,'type' => 'text'
-            ,'order' => 9
-            ,'cfg' => array(
-                'height' => 50
-            )
-        )
-        ,array(
-            'name' => 'info_template'
-            ,'l1' => 'Info template'
-            ,'l2' => 'Info template'
-            ,'l3' => 'Info template'
-            ,'l4' => 'Info template'
-            ,'type' => 'text'
-            ,'order' => 10
-            ,'cfg' => array(
-                'height' => 50
-            )
-        )
-    )
-);
-
-$fTConfig = array(
-    'pid' => $pid
-    ,'name' => 'FieldsTemplate'
-    ,'title' => 'Fields template'
-    ,'custom_title' => null
-    ,'l1' => 'Template for Fields'
-    ,'l2' => 'Template for Fields'
-    ,'l3' => 'Template for Fields'
-    ,'l4' => 'Template for Fields'
-    ,'template_id' => null //will be set later, after creation
-    ,'iconCls' => 'icon-snippet'
-    ,'type' => 'field'
-    ,'fields' => array(
-        array(
-            'name' => '_title'
-            ,'l1' => 'Name'
-            ,'l2' => 'Name'
-            ,'l3' => 'Name'
-            ,'l4' => 'Name'
-            ,'type' => 'varchar'
-            ,'order' => 0
-            ,'cfg' => array(
-                'showIn' => 'top'
-                ,'readOnly' => true
-            )
-        )
-        ,array(
-            'name' => 'type'
-            ,'l1' => 'Type'
-            ,'l2' => 'Type'
-            ,'l3' => 'Type'
-            ,'l4' => 'Type'
-            ,'type' => '_fieldTypesCombo'
-            ,'order' => 5
-        )
-        ,array(
-            'name' => 'order'
-            ,'l1' => 'Order'
-            ,'l2' => 'Order'
-            ,'l3' => 'Order'
-            ,'l4' => 'Order'
-            ,'type' => 'int'
-            ,'order' => 6
-        )
-        ,array(
-            'name' => 'cfg'
-            ,'l1' => 'Config'
-            ,'l2' => 'Config'
-            ,'l3' => 'Config'
-            ,'l4' => 'Config'
-            ,'type' => 'text'
-            ,'order' => 7
-            ,'cfg' => array(
-                'height' => 100
-            )
-        )
-        ,array(
-            'name' => 'solr_column_name'
-            ,'l1' => 'Solr column name'
-            ,'l2' => 'Solr column name'
-            ,'l3' => 'Solr column name'
-            ,'l4' => 'Solr column name'
-            ,'type' => 'varchar'
-            ,'order' => 8
-        )
-    )
-);
-$i = 1;
-foreach ($GLOBALS['languages'] as $language) {
-    $field = array(
-        'name' => 'l'.$i
-        ,'l1' => 'Title ('.$language.')'
-        ,'l2' => 'Title ('.$language.')'
-        ,'l3' => 'Title ('.$language.')'
-        ,'l4' => 'Title ('.$language.')'
-        ,'type' => 'varchar'
-        ,'order' => $i
-    );
-    // $tTConfig['fields'][] = $field;
-    $fTConfig['fields'][] = $field;
-    $i++;
-}
 
 /* create templates template and fields template */
 $fTId = processTemplate($fTConfig, $pid);
@@ -392,7 +346,7 @@ function iterateTemplates($treePid, $templatesPid = null)
                 array(
                     $r['id']
                     ,$treePid
-                    ,$GLOBALS['DFT']
+                    ,$this->DFT
                     ,$r['name']
                 )
             ) or die(DB\dbQueryError());
@@ -404,7 +358,7 @@ function iterateTemplates($treePid, $templatesPid = null)
                     array(
                         'pid' => $treePid
                         ,'name' => $r['name']
-                        ,'template_id' => $GLOBALS['DFT']
+                        ,'template_id' => $this->DFT
                     )
                 ) or die('Error creating Templates folder');
 
@@ -572,8 +526,8 @@ function processTemplate($p, $pid)
 
             $GLOBALS['replacedTemplates'][$tId] = $tTNewId;
             // check if folder templates changed
-            if ($GLOBALS['DFT'] == $tId) {
-                $GLOBALS['DFT'] = $tTNewId;
+            if ($this->DFT == $tId) {
+                $this->DFT = $tTNewId;
             }
 
             $tId = $tTNewId;
@@ -680,7 +634,7 @@ function processFields(&$templateConfig, $treePid, $fieldsPid = '')
                 ,$fTObject->getField('l4')['name'] => $field['l4']
                 ,$fTObject->getField('type')['name'] => $field['type']
                 ,$fTObject->getField('order')['name'] => $field['order']
-                ,$fTObject->getField('cfg')['name'] => json_encode($field['cfg'])
+                ,$fTObject->getField('cfg')['name'] => json_encode($field['cfg'], JSON_UNESCAPED_UNICODE)
                 ,$fTObject->getField('solr_column_name')['name'] => $field['solr_column_name']
             );
         }
