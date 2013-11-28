@@ -190,9 +190,10 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
             ,listeners: {
                 scope: this
                 ,beforeselect: function( combo, record, index){
-                    if(Ext.isEmpty(this.objectsStore)) return;
-                    idx = this.objectsStore.findExact('id', record.get('id'));
-                    if(idx < 0) this.objectsStore.loadData( {data: [record.data]}, true );
+                    if(Ext.isEmpty(this.objectsStore)) {
+                        return;
+                    }
+                    this.objectsStore.checkRecordExistance(record.data);
                 }
                 ,blur: function(field){
                     this.setValue(this.getValue());

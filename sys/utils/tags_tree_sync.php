@@ -29,6 +29,13 @@ if (!empty($argv[2]) && is_numeric($argv[2])) {
 require_once '../crons/init.php';
 
 L\initTranslations();
-$tagsSyncClass =  new \Util\Tags\TreeSync($pid);
 
+$tagsSyncClass =  new \Util\Tags\TreeSync($pid);
 $tagsSyncClass->execute();
+
+echo "Updating solr ... \n";
+
+$solrClient = new \CB\Solr\Client();
+$solrClient->updateTree(
+    // array('all' => true)
+);

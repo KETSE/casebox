@@ -247,7 +247,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     this.visibilityUpdated = true;
                 }
             }else{ //when record is not visible
-                if( (pr.get('type') == 'G') || (
+                if( pr && (pr.get('type') == 'G') || (
                     !Ext.isEmpty(parentNodeValue) && (Ext.isEmpty(v) || setsHaveIntersection( va, parentNodeValue ))
                     && ( (r.get('cfg').thesauriId !== 'dependent') ||  !Ext.isEmpty(parentNodeValue))
                     && ( Ext.isDefined(r.get('cfg').dependency) ||  !Ext.isEmpty(parentNodeValue))

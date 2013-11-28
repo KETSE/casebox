@@ -2,7 +2,8 @@
 SQLyog Ultimate v11.24 (64 bit)
 MySQL - 5.5.9 : Database - casebox
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -38,16 +39,16 @@ insert  into `config`(`id`,`pid`,`param`,`value`) values (1,NULL,'general',NULL)
 DROP TABLE IF EXISTS `cores`;
 
 CREATE TABLE `cores` (
-  `id` int(10) unsigned NOT NULL,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(20) NOT NULL,
   `cfg` mediumtext,
   `active` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 /*Data for the table `cores` */
 
-insert  into `cores`(`id`,`name`,`cfg`,`active`) values (0,'git','{\r\n\"plugins\": [\r\n	\"DisplayColumns\"\r\n	]\r\n}',1);
+insert  into `cores`(`id`,`name`,`cfg`,`active`) values (1,'git','{\r\n  \"plugins\": [\r\n    \"DisplayColumns\"\r\n  ]\r\n}',1);
 
 /*Table structure for table `country` */
 
@@ -107,7 +108,7 @@ CREATE TABLE `plugins` (
 
 /*Data for the table `plugins` */
 
-insert  into `plugins`(`name`,`cfg`,`active`) values ('DisplayColumns','{\r\n\"js\": [\r\n  \"DisplayColumns.js\"\r\n]\r\n,\"listeners\": {\r\n  \"beforeSolrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onBeforeSolrQuery\"\r\n    ]\r\n  }\r\n  ,\"solrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onSolrQuery\"\r\n    ]\r\n  }\r\n}\r\n}',1);
+insert  into `plugins`(`name`,`cfg`,`active`) values ('DisplayColumns','{\r\n\"js\": [\r\n  \"DisplayColumns.js\"\r\n]\r\n,\"listeners\": {\r\n  \"beforeSolrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onBeforeSolrQuery\"\r\n    ]\r\n  }\r\n  ,\"solrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onSolrQuery\"\r\n    ]\r\n  }\r\n}\r\n}',1),('Search','{\r\n\"css\": [\r\n  \"Search.css\"\r\n]\r\n\r\n,\"js\": [\r\n  \"Init.js\"\r\n  ,\"Button.js\"\r\n  ,\"Form.js\"\r\n  ,\"ResultForm.js\"\r\n]\r\n\r\n,\"remote\": {\r\n  \"handler\": \"CB_Browser_SearchRouter.search\"\r\n}\r\n\r\n}',1);
 
 /*Table structure for table `timezone` */
 
@@ -196,17 +197,17 @@ DELIMITER $$
     SQL SECURITY INVOKER
     COMMENT 'After timezones import from timezonedb.com, calling this procedure will add caption column to zones table and update it for later use on client side'
 BEGIN
-	IF NOT EXISTS (SELECT * 
-		FROM information_schema.COLUMNS 
-		WHERE 
-		    TABLE_SCHEMA = 'casebox' 
-		AND TABLE_NAME = 'zone' 
-		AND COLUMN_NAME = 'caption') THEN 
+	IF NOT EXISTS (SELECT *
+		FROM information_schema.COLUMNS
+		WHERE
+		    TABLE_SCHEMA = 'casebox'
+		AND TABLE_NAME = 'zone'
+		AND COLUMN_NAME = 'caption') THEN
 	    ALTER TABLE `zone`
 		ADD COLUMN `caption` VARCHAR(150) NULL AFTER `zone_name`,
 		ADD COLUMN `gmt_offset` INT NULL AFTER `caption`;
 	END IF;
-	
+
 	update zone set gmt_offset = (SELECT tz.gmt_offset
 		FROM `timezone` tz
 		WHERE tz.zone_id=zone.zone_id AND tz.time_start < UNIX_TIMESTAMP(UTC_TIMESTAMP()) AND tz.dst = 0

@@ -48,25 +48,30 @@ class Collection
 
         /* loading templates */
         $res = DB\dbQuery(
-            'SELECT id
-                ,pid
-                ,is_folder
-                ,`type`
-                ,name
-                ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
-                ,`order`
-                ,`visible`
-                ,iconCls
-                ,default_field
-                ,cfg
-                ,title_template
-                ,info_template
-            FROM templates
-            WHERE is_folder = 0'
+            'SELECT t.id
+                ,t.pid
+                ,t.is_folder
+                ,t.`type`
+                ,t.name
+                ,t.`order`
+                ,t.`visible`
+                ,t.iconCls
+                ,t.default_field
+                ,t.cfg
+                ,t.title_template
+                ,t.info_template
+                ,o.title
+                ,o.custom_title
+                ,o.data
+            FROM templates t
+            LEFT JOIN objects o
+                ON t.id = o.id
+            WHERE t.is_folder = 0'
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
             $r['cfg'] = Util\toJSONArray($r['cfg']);
+            $r['data'] = Util\toJSONArray($r['data']);
 
             $r['fields'] = empty($template_fields[$r['id']])
                 ? array()

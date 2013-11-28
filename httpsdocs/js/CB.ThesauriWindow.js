@@ -1,4 +1,4 @@
-Ext.namespace('CB'); 
+Ext.namespace('CB');
 
 CB.ThesauriWindow = Ext.extend(Ext.Window, {
     bodyBorder: false
@@ -43,7 +43,7 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
                 }
             }
         ];
-        this.trigger = new Ext.form.TriggerField({  
+        this.trigger = new Ext.form.TriggerField({
                 triggerClass: 'x-form-search-trigger'
                 ,border: false
                 ,emptyText: L.Filter
@@ -52,20 +52,20 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
                 ,tabIndex: 1
                 ,listeners: {
                     scope: this
-                    ,keyup: function(f,e){ 
+                    ,keyup: function(f,e){
                         this.doFilter(e);
                     }
                     ,specialkey: function(f,e){
                         switch(e.getKey()){
                             case e.DOWN:
                             case e.TAB: this.focusGrid(); break;
-                            case e.ENTER:  f.onTriggerClick() 
+                            case e.ENTER:  f.onTriggerClick()
                         }
                     }
                 }
             })
-        
-        this.grid = new Ext.grid.GridPanel({    
+
+        this.grid = new Ext.grid.GridPanel({
             border: false
             ,style: 'background-color: white'
             ,stripeRows: true
@@ -95,7 +95,7 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
                 }
             }
          });
-        
+
         Ext.apply(this, {
             buttonAlign: 'left'
             ,items: this.grid
@@ -109,7 +109,7 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
                     ,scope: this
                 }
             ]
-            ,buttons: [ 
+            ,buttons: [
                 {   xtype: 'combo'
                     ,hidden: true
                     ,editable: false
@@ -136,7 +136,7 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
         });
         CB.ThesauriWindow.superclass.initComponent.apply(this, arguments);
         this.addEvents('setvalue');
-        
+
         this.on('beforeshow', this.onBeforeShowEvent, this);
         this.on('hide', this.onHideEvent, this);
         this.on('show', this.onAfterLayoutEvent, this);
@@ -167,7 +167,7 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
             value = null;
             for(i = 0; i < this.filters.length; i++){
                 this.filters[i].id = i;
-                if(this.filters[i].selected) value = i; 
+                if(this.filters[i].selected) value = i;
             }
             c.store.loadData(this.filters, false);
             c.setValue(value);
@@ -181,7 +181,7 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
         this.selectedValues = this.data.value ? this.data.value.split(',') : [];
         if(this.store != this.grid.store) this.grid.reconfigure(this.store, this.grid.getColumnModel());
         if(this.store.fields.findIndex('name', this.dateColumn) >= 0){
-            this.grid.reconfigure(this.store, 
+            this.grid.reconfigure(this.store,
                 new Ext.grid.ColumnModel([{
                     header:' '
                     ,dataIndex: 'id'
@@ -211,8 +211,8 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
             ])
             );
         }
-        
-        
+
+
         this.doFilter();
         this.setTitle(this.title);
         if(this.iconCls)  this.setIconClass(this.iconCls);
@@ -248,7 +248,7 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
         this.grid.store.clearFilter();
         this.value = this.selectedValues.join(',');
         this.submited = true;
-        this.fireEvent('setvalue', v, w);
+        this.fireEvent('setvalue', v, this);
         this.data.callback.createDelegate(Ext.value(this.data.scope, this), [this, this.value])();
         this.doClose();
     },doClose: function(){
@@ -259,4 +259,4 @@ CB.ThesauriWindow = Ext.extend(Ext.Window, {
     }
 })
 
-Ext.reg('CBThesauriWindow', CB.ThesauriWindow); // register xtype                                                   
+Ext.reg('CBThesauriWindow', CB.ThesauriWindow); // register xtype

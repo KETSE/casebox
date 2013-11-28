@@ -25,34 +25,30 @@ $arr = explode('.', $_SERVER['SERVER_NAME']);
 if (in_array($arr[0], array( 'www', 'ww2' ))) {
     array_shift($arr);
 }
+$arr = explode('-', $arr[0]);
+$arr = explode('_', $arr[0]);
 
-define('CB\\CORENAME', $arr[0]);
+define('CB\\CORE_NAME', $arr[0]);
 /* end of detecting core name (project name) from SERVER_NAME */
 
 /* define main paths /**/
 define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
-define('CB\\APP_ROOT', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
-define('CB\\CORE_ROOT', DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
-define('CB\\PLUGINS_PATH', DOC_ROOT.'plugins'.DIRECTORY_SEPARATOR);
-define('CB\\CRONS_DIR', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
-define('CB\\LOGS_DIR', APP_ROOT.'logs'.DIRECTORY_SEPARATOR);
-define('CB\\DATA_DIR', APP_ROOT.'data'.DIRECTORY_SEPARATOR);
+define('CB\\APP_DIR', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
+define('CB\\PLUGINS_DIR', DOC_ROOT.'plugins'.DIRECTORY_SEPARATOR);
+define('CB\\CRONS_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
+define('CB\\LOGS_DIR', APP_DIR.'logs'.DIRECTORY_SEPARATOR);
+define('CB\\DATA_DIR', APP_DIR.'data'.DIRECTORY_SEPARATOR);
 define('CB\\TEMP_DIR', DATA_DIR.'tmp'.DIRECTORY_SEPARATOR);
-define('CB\\UPLOAD_TEMP_DIR', TEMP_DIR.CORENAME.DIRECTORY_SEPARATOR);
+define('CB\\UPLOAD_TEMP_DIR', TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR);
 define('CB\\MINIFY_CACHE_DIR', TEMP_DIR.'minify'.DIRECTORY_SEPARATOR);
 /* end of define main paths /**/
-
-if (!file_exists(CORE_ROOT)) {
-    die('undefined core "'.CORENAME.'"');
-}
 
 /* update include_path and include global script */
 set_include_path(
     DOC_ROOT.'libx'.PATH_SEPARATOR.
     DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
     DOC_ROOT.'classes'.PATH_SEPARATOR.
-    PLUGINS_PATH.PATH_SEPARATOR.
-    CORE_ROOT.'php'. PATH_SEPARATOR.
+    PLUGINS_DIR.PATH_SEPARATOR.
     get_include_path()
 );
 
@@ -60,15 +56,33 @@ include 'global.php';
 
 /* end of update include_path and include global script */
 
-//load system config so that we can connect to db
+//load main config so that we can connect to casebox db and read configuration for core
 $cfg = Config::loadConfigFile(DOC_ROOT.'config.ini');
-$cfg = array_merge($cfg, Config::loadConfigFile(CORE_ROOT.'config.ini'));
+
 require_once 'lib/DB.php';
 DB\connect($cfg);
 
+//get platform default config
+$cfg = array_merge($cfg, Config::loadConfigFile(DOC_ROOT.'system.ini'));
+
+//define default values for some params
+$cfg['core_dir'] = DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.CORE_NAME.DIRECTORY_SEPARATOR;
+$cfg['db_name'] = 'cb_'.CORE_NAME;
+
+//loading core defined params
+$cfg = array_merge($cfg, Config::getPlatformConfigForCore());
+
+DB\connectWithParams($cfg);
+
 //loading full config of the core
 require_once 'lib/Util.php';
-$config = Config::load();
+$config = Config::load($cfg);
+
+define('CB\\CORE_DIR', $config['core_dir']);
+set_include_path(
+    get_include_path().PATH_SEPARATOR.
+    CORE_DIR
+);
 
 /* Define folder templates */
 
@@ -168,7 +182,7 @@ session_name(
 
 //error reporting params
 error_reporting(isDebugHost() ? E_ALL : 0);
-ini_set('error_log', LOGS_DIR.CORENAME.'_error_log');
+ini_set('error_log', LOGS_DIR.CORE_NAME.'_error_log');
 
 // mb encoding config
 mb_internal_encoding("UTF-8");
@@ -191,7 +205,7 @@ date_default_timezone_set(
 //relative path to ExtJs framework. Used in index.php
 const EXT_PATH = '/libx/ext';
 //templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
-define('CB\\TEMPLATES_DIR', APP_ROOT.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
+define('CB\\TEMPLATES_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
 
 //used to include DB.php into PreviewExtractor scripts and in Files.php to start the extractors.
 define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
@@ -202,7 +216,7 @@ if (!defined('CB\\CONFIG\\MAX_ROWS')) {
 }
 
 // custom Error log per Core, use it for debug/reporting purposes
-define('DEBUG_LOG', LOGS_DIR.'cb_'.CORENAME.'_debug_log');
+define('DEBUG_LOG', LOGS_DIR.'cb_'.CORE_NAME.'_debug_log');
 
 // define solr_core as db_name if none is specified in config
 if (!defined('CB\\CONFIG\\SOLR_CORE')) {
@@ -210,9 +224,9 @@ if (!defined('CB\\CONFIG\\SOLR_CORE')) {
 }
 
 // path to photos folder
-define('CB\\PHOTOS_PATH', DOC_ROOT.'photos'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+define('CB\\PHOTOS_PATH', DOC_ROOT.'photos'.DIRECTORY_SEPARATOR.CORE_NAME.DIRECTORY_SEPARATOR);
 // path to files folder
-define('CB\\FILES_DIR', DATA_DIR.'files'.DIRECTORY_SEPARATOR.CORENAME.DIRECTORY_SEPARATOR);
+define('CB\\FILES_DIR', DATA_DIR.'files'.DIRECTORY_SEPARATOR.CORE_NAME.DIRECTORY_SEPARATOR);
 
 /* path to incomming folder. In this folder files are stored when just uploaded
 and before checking existance in target.

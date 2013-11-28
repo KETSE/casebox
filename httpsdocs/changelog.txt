@@ -1,4 +1,43 @@
-CaseBox 1.9.59 (2013-11-20)
+CaseBox 1.9.63 (2013-11-28)
+==============================
+New Features, Improvements
+--------------------------
+- improved plugins configuration structure and loading
+- updated class Browser\CreateMenu
+- refactored scripts for templates and tags synchronization into tree.
+- modified DisplayColumns plugin to read it's config from search templates on templated search
+- added CB_Browser_SearchRouter standard casebox class for templated searches
+- added Search plugin for templated searches
+- moved core configs into database (casebox.cores) as a json formated field
+    This implied refactoring of other units (lib/DB.php, Config.php, etc.)
+    Now the main config.ini file should contain a db_user and db_pass for
+        connection to casebox database.
+    Configuration for cores is stored in casebox.cores table and could be absolutely different
+        from casebox db config (basic config from config.ini).
+- renamed constants:
+    CORE_ROOT -> CORE_DIR
+    APP_ROOT -> APP_DIR
+    PLUGINS_PATH -> PLUGINS_DIR
+    CORENAME -> CORE_NAME
+- added following scripts in sys/utils folder:
+    4_steps_core_upgrade.php - it has a description inside. Please read.
+    solr_reindex_document.php - reindex a single document (used for testing)
+    transform_objects_old_data.php - transform objects old data format into new json format and save into data field.
+    template_fields_cfg_sync.php - sync of config fields properties from templates_structure table with field objects stored in tree.
+
+Fixed Bugs:
+----------
+- other small bugfixes
+- TemplateField class did not correctly detect it's parent template
+- wrong reference to $config variable
+- check for array param received in DisplayColumns plugin
+
+Notes:
+----------
+- update casebox database from casebox.sql
+- apply database update for core: 20131128_1954 db_update v1.9.63.sql
+
+CaseBox 1.9.59 (2013-11-22)
 ==============================
 New Features, Improvements
 --------------------------

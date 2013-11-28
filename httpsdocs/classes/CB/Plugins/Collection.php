@@ -59,7 +59,7 @@ class Collection
     }
 
     /**
-     * get active plugin list
+     * get active plugin list as an associative array ($pluginName => $pluginConfig)
      * @return varchar
      */
     public function getActivePlugins()
@@ -69,7 +69,7 @@ class Collection
 
         foreach ($this->items as $name => $data) {
             if ($data['active'] == 1) {
-                $rez[$name] = $data;
+                $rez[$name] = $data['cfg'];
             }
         }
 

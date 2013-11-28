@@ -1,21 +1,22 @@
 <?php
 namespace Util\Templates;
 
-use CB\DB as DB;
+use CB\DB;
+use CB\Browser;
+use CB\Objects;
 
 class TreeSync extends \Util\TreeSync
 {
     protected $targetFolderName = 'Templates';
 
     private $tTConfig = array(
-        'name' => 'TemplatesTemplate'
-        ,'title' => 'Templates template'
+        'name' => 'Templates template'
         ,'custom_title' => null
-        ,'l1' => 'Template for Templates'
-        ,'l2' => 'Template for Templates'
-        ,'l3' => 'Template for Templates'
-        ,'l4' => 'Template for Templates'
-        ,'template_id' => null //will be set later, after creation
+        ,'l1' => 'Templates template'
+        ,'l2' => 'Templates template'
+        ,'l3' => 'Templates template'
+        ,'l4' => 'Templates template'
+        ,'template_id' => null //will be set later when processing
         ,'iconCls' => 'icon-template'
         ,'type' => 'template'
         ,'fields' => array(
@@ -102,14 +103,13 @@ class TreeSync extends \Util\TreeSync
     );
 
     private $fTConfig = array(
-        'name' => 'FieldsTemplate'
-        ,'title' => 'Fields template'
+        'name' => 'Fields template'
         ,'custom_title' => null
-        ,'l1' => 'Template for Fields'
-        ,'l2' => 'Template for Fields'
-        ,'l3' => 'Template for Fields'
-        ,'l4' => 'Template for Fields'
-        ,'template_id' => null //will be set later, after creation
+        ,'l1' => 'Fields template'
+        ,'l2' => 'Fields template'
+        ,'l3' => 'Fields template'
+        ,'l4' => 'Fields template'
+        ,'template_id' => null //will be set later when processing
         ,'iconCls' => 'icon-snippet'
         ,'type' => 'field'
         ,'fields' => array(
@@ -170,7 +170,11 @@ class TreeSync extends \Util\TreeSync
 
     protected function init()
     {
-        parent::init();
+        echo "init\n";
+        $this->DFT = \CB\getOption('DEFAULT_FOLDER_TEMPLATE');
+        echo " DFT:".$this->DFT."\n";
+
+        $this->verifyPid();
 
         /* adjust thesauri template config */
         $this->tTConfig['pid'] = $this->mainPid;
@@ -193,535 +197,451 @@ class TreeSync extends \Util\TreeSync
                 //     'showIn' => 'top'
                 // )
             );
+            $this->tTConfig['fields'][] = $field;
             $this->fTConfig['fields'][] = $field;
             $i++;
         }
     }
-//TODO: finish refactoring
-DB\startTransaction();
-// before start we'll execute a special procedure that will clear all lost objects.
-// These objects can couse errors on sync templates with tree
-DB\dbQuery('CALL p_clear_lost_objects()') or die(DB\dbQueryError());
 
-/* create templates template and fields template */
-$fTId = processTemplate($fTConfig, $pid);
-$fTObject = new Objects\Template($fTId);
-$fTObject->load();
+    public function execute()
+    {
+        $this->prepareExecution();
 
-$tTId = processTemplate($tTConfig, $pid);
-$tTObject = new Objects\Template($tTId);
-$tTObject->load();
+        //create or update fields template
+        $this->fTId = \Util\Templates::createOrUpdateTemplate($this->fTConfig['pid'], $this->fTConfig);
+        $this->fTObject = new Objects\Template($this->fTId);
+        $data = $this->fTObject->load();
+        $data['template_id'] = $this->fTId;
+        $this->fTObject->update($data);
 
-// now that we've checked/created basic template, add this item to be available in target folders menu
-$menuId = null;
-$menu = '';
+        //create or update templates template
+        $this->tTId = \Util\Templates::createOrUpdateTemplate($this->tTConfig['pid'], $this->tTConfig);
+        $this->tTObject = new Objects\Template($this->tTId);
+        $data = $this->tTObject->load();
+        $data['template_id'] = $this->tTId;
+        $this->tTObject->update($data);
 
-$res = DB\dbQuery(
-    'SELECT id, menu
-    FROM menu
-    WHERE node_ids = $1',
-    $pid
-) or die(DB\dbQueryError());
+        // now that we've checked/created basic templates -
+        // add these items to be available in target folder menu
+        echo "Update Menu for target folder ".$this->mainPid."\n";
+        Browser\CreateMenu::updateMenuForNode(
+            $this->mainPid,
+            array(
+                $this->tTId
+                ,$this->fTId
+                ,$this->DFT
+            )
+        );
+        // also set menu to add fields when under a template
+        Browser\CreateMenu::updateMenuForTemplate($this->tTId, $this->fTId);
+        Browser\CreateMenu::updateMenuForTemplate($this->fTId, $this->fTId);
 
-if ($r = $res->fetch_assoc()) {
-    $menuId = $r['id'];
-    $menu = $r['menu'];
-}
-$res->close();
+        echo "loading all templates structure .. \n";
+        $this->loadTemplatesStructure();
 
-if (strpos(','.$menu.',', ','.$tTId.',') === false) {
-    if (!empty($menu)) {
-        $menu .= ',';
+        echo " Start sync:\n";
+        $this->syncStructure($this->rootItems);
+
+        echo "Update references ... \n";
+        $this->updateReferences();
+
+        echo "Done\n";
+
+        DB\commitTransaction();
     }
-    $menu .= $tTId;
-}
 
-DB\dbQuery(
-    'INSERT INTO menu (
-        id
-        ,node_ids
-        ,menu)
-    VALUES ($1, $2, $3)
-    ON DUPLICATE KEY UPDATE
-    menu = $3',
-    array(
-        $menuId
-        ,$pid
-        ,$menu
-    )
-) or die(DB\dbQueryError());
+    /**
+     * load all tags into an array $this->tags
+     * while loading we'll detect root nodes of tags tree
+     * and will create associative array of childs
+     * @return void
+     */
+    protected function loadTemplatesStructure()
+    {
+        $this->items = array();
+        $this->rootItems = array();
 
-// also set menu to add fields when under a template
-$menuId = null;
-$menu = '';
+        /* select all templates structure*/
+        $res = DB\dbQuery('SELECT * FROM templates') or die(DB\dbQueryError());
 
-$res = DB\dbQuery(
-    'SELECT id, menu
-    FROM menu
-    WHERE node_template_ids = $1',
-    $tTId.','.$fTId
-) or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $this->items[$r['id']] = $r;
+        }
+        $res->close();
 
-if ($r = $res->fetch_assoc()) {
-    $menuId = $r['id'];
-    $menu = $r['menu'];
-}
-$res->close();
-
-if (strpos(','.$menu.',', ','.$fTId.',') === false) {
-    if (!empty($menu)) {
-        $menu .= ',';
-    }
-    $menu .= $fTId;
-}
-
-DB\dbQuery(
-    'INSERT INTO menu (
-        id
-        ,node_template_ids
-        ,menu)
-    VALUES ($1, $2, $3)
-    ON DUPLICATE KEY UPDATE
-    menu = $3',
-    array(
-        $menuId
-        ,$tTId.','.$fTId
-        ,$menu
-    )
-) or die(DB\dbQueryError());
-
-//iterate templates and create them in tree if not already created
-// keep directory structure
-
-iterateTemplates($pid);
-
-echo "Updating menu and config ... \n";
-updateMenuAndConfig();
-
-DB\commitTransaction();
-
-echo "Updating solr ... \n";
-
-$solrClient = new Solr\Client();
-$solrClient->updateTree(array('all' => true));
-
-echo "Done";
-
-//-------------------------------------------------------------------------------------------------------------------
-
-function iterateTemplates($treePid, $templatesPid = null)
-{
-    global $tTId, $fTId, $tTObject, $fTObject;
-
-    $templateConfigs = array();
-
-    $folderObj = new Objects\Object();
-
-    $res = DB\dbQuery(
-        'SELECT *
-        FROM templates
-        WHERE ((pid = $1) OR (pid = $2) OR ( ($1 is null) AND (pid is null) ) )
-            AND  id not in ('.$tTId.','.$fTId.')
-        ',
-        array(
-            $templatesPid
-            ,$treePid // it's a little dangerous but in practice shouldn't have problems
-        )
-    ) or die(DB\dbQueryError());
-
-    while ($r = $res->fetch_assoc()) {
-
-        // check if it's a folder
-        if ($r['is_folder'] == 1) {
-            /** check if exists */
-            $folderId = null;
-            $fres = DB\dbQuery(
-                'SELECT id
-                FROM tree
-                WHERE id = $1
-                    and pid = $2
-                    AND template_id = $3
-                    AND name = $4
-                    AND dstatus = 0',
-                array(
-                    $r['id']
-                    ,$treePid
-                    ,$this->DFT
-                    ,$r['name']
-                )
-            ) or die(DB\dbQueryError());
-
-            if ($fr = $fres->fetch_assoc()) {
-                $folderId = $fr['id'];
+        // we have loaded all templates and now we are going to
+        // update childs and parent references and detect root nodes
+        foreach ($this->items as $id => &$item) {
+            if (isset($this->items[$item['pid']])) {
+                $parent = &$this->items[$item['pid']];
+                $parent['childs'][$item['id']] = &$item;
+                $item['parent'] = &$parent;
             } else {
-                $folderId = $folderObj->create(
-                    array(
-                        'pid' => $treePid
-                        ,'name' => $r['name']
-                        ,'template_id' => $this->DFT
-                    )
-                ) or die('Error creating Templates folder');
+                $this->rootItems[$item['id']] = &$item;
+            }
+        }
 
+        // now we\'ll load all fields for each template to a similar structure as above for templates
+
+        /* select all templates fields structure*/
+        $res = DB\dbQuery('SELECT * FROM templates_structure') or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $this->items[$r['template_id']]['fields'][$r['id']] = $r;
+        }
+        $res->close();
+
+        foreach ($this->items as $tId => &$template) {
+            if (empty($template['fields'])) {
+                $template['fields'] = array();
+            } else {
+                foreach ($template['fields'] as $fId => &$field) {
+                    if (isset($template['fields'][$field['pid']])) {
+                        $parent = &$template['fields'][$field['pid']];
+                        $parent['childs'][$field['id']] = &$field;
+                        $field['parent'] = &$parent;
+                    } else {
+                        $template['rootFields'][$field['id']] = &$field;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * create/update templates in tree by keeping exact structure
+     * @return void
+     */
+    protected function syncStructure(&$nodesArray)
+    {
+        foreach ($nodesArray as $id => &$node) {
+            $pid = isset($node['parent'])
+                ? $node['parent']['id']
+                : $this->mainPid;
+
+            $data = $this->getTemplateDataForTree($node);
+
+            $data['id'] = \CB\Objects::getChildId($pid, $data['name']);
+            $data['pid'] = $pid;
+
+            if (is_null($data['id'])) {
+                $data['id'] = $this->genericObject->create($data);
+            } else {
+                $this->genericObject->update($data);
+            }
+
+            $node['oldId'] = $node['id'];
+            $node['id'] = $data['id'];
+
+            if ($node['oldId'] != $node['id']) {
                 DB\dbQuery(
                     'UPDATE templates
                     SET id = $2
+                        ,pid = $3
+                    WHERE id = $1',
+                    array(
+                        $node['oldId']
+                        ,$node['id']
+                        ,$pid
+                    )
+                ) or die(DB\dbQueryError());
+            }
+            if ($node['oldId'] == $this->DFT) {
+                $this->DFT = $node['id'];
+                $GLOBALS['DFT'] = $node['id'];
+            }
+
+            if (!empty($node['childs'])) {
+                $this->syncStructure($node['childs']);
+            }
+
+            if (!empty($node['rootFields'])) {
+                $this->syncFieldsStructure($node['id'], $node['rootFields']);
+            }
+        }
+    }
+
+    protected function syncFieldsStructure($pid, $nodesArray)
+    {
+        foreach ($nodesArray as $id => &$node) {
+            $pid = isset($node['parent'])
+                ? $node['parent']['id']
+                : $pid;
+
+            $data = $this->getTemplateFieldDataForTree($node);
+            // some language fields could be skiped if not present in config
+            if (empty($data)) {
+                continue;
+            }
+
+            $data['id'] = \CB\Objects::getChildId($pid, $node['name']);
+            $data['pid'] = $pid;
+            if (is_null($data['id'])) {
+                $data['id'] = $this->genericObject->create($data);
+            } else {
+                $this->genericObject->update($data);
+            }
+
+            $node['oldId'] = $node['id'];
+            $node['id'] = $data['id'];
+
+            if ($node['oldId'] != $node['id']) {
+                DB\dbQuery(
+                    'UPDATE templates_structure
+                    SET id = $2
+                        ,pid = $3
+                    WHERE id = $1',
+                    array(
+                        $node['oldId']
+                        ,$node['id']
+                        ,$pid
+                    )
+                ) or die(DB\dbQueryError());
+            }
+
+            if (!empty($node['childs'])) {
+                $this->syncFieldsStructure($node['id'], $node['childs']);
+            }
+        }
+    }
+
+    /**
+     * get generic node data for creating in tree from template node properties
+     * @param  array $node
+     * @return array
+     */
+    protected function getTemplateDataForTree(&$node)
+    {
+        $rez = array(
+            'name' => $node['name']
+            ,'data' => array(
+            )
+        );
+        if (empty($rez['name'])) {
+            $rez['name'] = $node['l'.\CB\LANGUAGE_INDEX];
+        }
+
+        $rez['data']['_title'] = $rez['name'];
+
+        if ($node['is_folder'] == 1) { //folder
+            $rez['template_id'] = $this->DFT;
+            //if is folder - assign forcely it's name to l1
+            $rez['name'] = $node['l'.\CB\LANGUAGE_INDEX];
+            $rez['data']['_title'] = $rez['name'];
+        } else { //template
+            $rez['template_id'] = $this->tTId;
+            foreach ($this->languageFields as $field => $language) {
+                if (!empty($node[$field])) {
+                    $rez['data'][$language] = $node[$field];
+                }
+            }
+            if (!empty($node['type'])) {
+                $rez['data']['type'] = $node['type'];
+            }
+            if (!empty($node['visible'])) {
+                $rez['data']['visible'] = 1;
+            }
+            if (!empty($node['iconCls'])) {
+                $rez['data']['iconCls'] = $node['iconCls'];
+            }
+            // if (!empty($node['order'])) {
+            //     $rez['data']['order'] = $node['order'];
+            // }
+            if (!empty($node['cfg'])) {
+                $rez['data']['cfg'] = $node['cfg'];
+            }
+            if (!empty($node['title_template'])) {
+                $rez['data']['title_template'] = $node['title_template'];
+            }
+            if (!empty($node['info_template'])) {
+                $rez['data']['info_template'] = $node['info_template'];
+            }
+        }
+
+        return $rez;
+    }
+
+    protected function getTemplateFieldDataForTree(&$node)
+    {
+        $rez = array(
+            'name' => $node['name']//$node['l'.\CB\LANGUAGE_INDEX]
+            ,'data' => array(
+            )
+        );
+
+        if (!empty($this->languageFields[$rez['name']])) {
+            $rez['name'] = $this->languageFields[$rez['name']];
+        } elseif ((strlen($rez['name']) == 2) &&
+            ($rez['name'][0] == 'l') &&
+            is_numeric($rez['name'][1])
+        ) {
+            return null;
+        }
+
+        $rez['data']['_title'] = $rez['name'];
+        $rez['template_id'] = $this->fTId;
+
+        foreach ($this->languageFields as $field => $language) {
+            if (!empty($node[$field])) {
+                $rez['data'][$language] = $node[$field];
+            }
+        }
+        if (!empty($node['tag']) && ($node['tag'] == 'H')) {
+            $node['type'] = 'H';
+        }
+
+        if (!empty($node['type'])) {
+            $rez['data']['type'] = $node['type'];
+        }
+
+        if (!empty($node['order'])) {
+            $rez['data']['order'] = $node['order'];
+        }
+        if (!empty($node['cfg'])) {
+            $rez['data']['cfg'] = $node['cfg'];
+        }
+        if (!empty($node['solr_column_name'])) {
+            $rez['data']['solr_column_name'] = $node['solr_column_name'];
+        }
+
+        return $rez;
+    }
+
+    protected function updateTemplateStructureReferences()
+    {
+
+        echo "update TemplateStructureReferences ...\n";
+
+        $res = DB\dbQuery(
+            'SELECT * FROM templates_structure WHERE cfg LIKE \'%template%\''
+        ) or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $cfg = \CB\Util\toJSONArray($r['cfg']);
+            if (!empty($cfg['templates'])) {
+                $ids = \CB\Util\toNumericArray($cfg['templates']);
+                for ($i=0; $i < sizeof($ids); $i++) {
+                    foreach ($this->items as &$template) {
+                        if ($ids[$i] == $template['oldId']) {
+                            $ids[$i] = $template['id'];
+                        }
+                    }
+                }
+                $cfg['templates'] = $ids;
+                DB\dbQuery(
+                    'UPDATE templates_structure
+                    SET cfg = $2
                     WHERE id = $1',
                     array(
                         $r['id']
-                        ,$folderId
+                        ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
                     )
                 ) or die(DB\dbQueryError());
+            }
+        }
+        $res->close();
 
+        echo "update Templates config References ...\n";
+        $res = DB\dbQuery(
+            'SELECT * FROM templates WHERE cfg LIKE \'%templates%\''
+        ) or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $cfg = \CB\Util\toJSONArray($r['cfg']);
+            if (!empty($cfg['templates'])) {
+                $ids = \CB\Util\toNumericArray($cfg['templates']);
+                for ($i=0; $i < sizeof($ids); $i++) {
+                    foreach ($this->items as &$template) {
+                        if ($ids[$i] == $template['oldId']) {
+                            $ids[$i] = $template['id'];
+                        }
+                    }
+                }
+                $cfg['templates'] = $ids;
                 DB\dbQuery(
                     'UPDATE templates
-                    SET pid = $2
-                    WHERE pid = $1',
+                    SET cfg = $2
+                    WHERE id = $1',
                     array(
                         $r['id']
-                        ,$folderId
+                        ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
                     )
                 ) or die(DB\dbQueryError());
-                $fr['id'] = $folderId;
             }
-            $fres->close();
-
-            iterateTemplates($folderId, $fr['id']);
-            continue;
-        }
-
-        /* set grid values */
-        $r['data'] = array(
-            $tTObject->getField('_title')['name'] => $r['name']
-            // ,$tTObject->getField('l1')['name'] => $r['l1']
-            // ,$tTObject->getField('l2')['name'] => $r['l2']
-            // ,$tTObject->getField('l3')['name'] => $r['l3']
-            // ,$tTObject->getField('l4')['name'] => $r['l4']
-            ,$tTObject->getField('type')['name'] => $r['type']
-            ,$tTObject->getField('visible')['name'] => $r['visible']
-            ,$tTObject->getField('iconCls')['name'] => $r['iconCls']
-            ,$tTObject->getField('cfg')['name'] => $r['cfg']
-            ,$tTObject->getField('title_template')['name'] => $r['title_template']
-            ,$tTObject->getField('info_template')['name'] => $r['info_template']
-        );
-        /* end of grid values */
-
-        // now loading fields
-        $fres = DB\dbQuery(
-            'SELECT *
-            FROM templates_structure
-            WHERE template_id = $1',
-            $r['id']
-        ) or die(DB\dbQueryError());
-
-        while ($fr = $fres->fetch_assoc()) {
-            $fr['cfg'] = Util\toJSONArray($fr['cfg']);
-            $r['fields'][] = $fr;
-        }
-        $fres->close();
-
-        $r['pid'] = $treePid;
-        $r['template_id'] = $tTId;
-        if (empty($r['name'])) {
-            $r['name'] = $r['l1'];
-        }
-        $r['title'] = $r['l1'];
-        $templateConfigs[] = $r;
-    }
-    $res->close();
-
-    foreach ($templateConfigs as $tC) {
-        processTemplate($tC, $treePid);
-    }
-}
-
-function processTemplate($p, $pid)
-{
-    global $tTId, $fTId;
-
-    echo "Processing template ".$p['name']." (".@$p['id'].")\n";
-    $simpleObject = new Objects\Object();
-    $tTObject = new Objects\Template();
-
-    // check  template existance and create it if needed. Also keep its id for further usage
-    $tId = null;
-    if (!empty($p['id']) && is_numeric($p['id'])) {
-        $tId = $p['id'];
-    } else {
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM templates
-            WHERE
-                `type` = $1
-                and name = $2',
-            array(
-                $p['type']
-                ,$p['name']
-            )
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $tId = $r['id'];
         }
         $res->close();
     }
 
-    // create template if does not exist
-    if (empty($tId)) {
-        $tId = $tTObject->create($p) or die('Cannot create '.$p['name']);
-        $p['id'] = $tId;
-        if (empty($p['template_id'])) {
-            $p['template_id'] = $tId;
-        }
+    protected function updateReferences()
+    {
+        $this->updateMenuAndConfig();
+        $this->updateTemplateStructureReferences();
+    }
 
-        echo "Created ".$p['name']." with id: $tId\n";
-
-    } else {
-        //check if template exists in tree
-        echo "Found template ".$p['name']." in templates with id: $tId\n";
-        //create object in tree if does not exist
+    public function updateMenuAndConfig()
+    {
+        $config = array();
         $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE id = $1
-                '.(is_null($p['template_id'])
-                    ? ''
-                    : 'AND template_id = $2'
-                ).'
-                AND dstatus = 0',
-            array(
-                $tId
-                ,$p['template_id']
-            )
+            'SELECT id, param, `value`
+             FROM config
+            WHERE param LIKE \'%template%\''
         ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            echo "Found template in tree with id = ".$r['id']."\n";
-        } else {
-            //create just node in tree and objects data
-            echo "Creating template node in tree .. ";
-            $tTNewId = $simpleObject->create(
-                $p
-            ) or die('Cannot create '.$p['name']);
-            echo "id = $tTNewId\n";
-            /* update template id to new id from tree */
-            DB\dbQuery(
-                'UPDATE templates
-                SET id = $2
-                WHERE id = $1 ',
-                array(
-                    $tId
-                    ,$tTNewId
-                )
-            ) or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $config[$r['param']] = $r;
+        }
+        $res->close();
 
-            DB\dbQuery(
-                'UPDATE templates
-                SET pid = $2
-                WHERE pid = $1 ',
-                array(
-                    $tId
-                    ,$tTNewId
-                )
-            ) or die(DB\dbQueryError());
-
-            $GLOBALS['replacedTemplates'][$tId] = $tTNewId;
-            // check if folder templates changed
-            if ($this->DFT == $tId) {
-                $this->DFT = $tTNewId;
+        foreach ($this->items as $fromId => $template) {
+            foreach ($config as &$row) {
+                $row['value'] = trim(str_replace(','.$fromId.',', ','.$template['id'].',', ','.$row['value'].','), ',');
             }
-
-            $tId = $tTNewId;
         }
-
-        $p['id'] = $tId;
-        if (empty($p['template_id'])) {
-            $p['template_id'] = $tId;
+        /* set Templates to work as directories */
+        $ft = explode(',', $config['folder_templates']['value']);
+        if (!in_array($this->tTId, $ft)) {
+            $ft[] = $this->tTId;
         }
-    }
-    echo "Updating ..\n";
-    $tTObject->update($p) or die('Cannot update '.$p['name']);
-    if ($p['name'] == 'TemplatesTemplate') {
-        $tTId = $tId;
-    } elseif ($p['name'] == 'FieldsTemplate') {
-        $fTId = $tId;
-    }
+        $config['folder_templates']['value'] = implode(',', $ft);
 
-    echo "processing fields\n";
-    $tTObject->load();
-    $data = $tTObject->getData();
-    echo "Loaded template data for fields processing:\n";
-    // var_dump($data);
-    processFields($data, $p['id']);
-
-    return $tId;
-}
-
-function processFields(&$templateConfig, $treePid, $fieldsPid = '')
-{
-    global $tTId, $fTId, $tTObject, $fTObject;
-
-    $simpleObject = new Objects\Object();
-
-    foreach ($templateConfig['fields'] as $field) {
-        // echo " compare ".$field['pid']." with ".$fieldsPid." \n";
-        if ((!empty($field['pid']) || !empty($fieldsPid)) &&
-            (empty($field['pid']) || !empty($fieldsPid) || ($field['pid'] != $templateConfig['id'])) &&
-            ($field['pid'] != $fieldsPid)
-        ) {
-            continue;
-        }
-        // in some cores, there fields without name (not good).
-        if (empty($field['name'])) {
-            $field['name'] = '{unnamed}';
-        }
-        echo "  ".$field['name'];
-        $field['pid'] = $treePid;
-        $field['template_id'] = $fTId;
-        $field['custom_title'] = $field['name'];
-        // check field existance in tree
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE pid = $1
-                '.(is_null($fTId)
-                    ? ''
-                    : 'AND template_id = $2'
-                ).'
-                AND name = $3
-                AND dstatus = 0',
-            array(
-                $treePid
-                ,$fTId
-                ,$field['name']
-            )
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-
-        } else {
-            //create just node in tree and objects data
-            $fNewId = $simpleObject->create(
-                $field
-            ) or die('Can\'t create field '.$field['name']);
-
-            /* update template id to new id from tree */
-            DB\dbQuery(
-                'UPDATE templates_structure
-                SET id = $2
-                WHERE id = $1 ',
-                array(
-                    $field['id']
-                    ,$fNewId
-                )
-            ) or die(DB\dbQueryError());
-            // change pids in config to new pid
-            foreach ($templateConfig['fields'] as &$sf) {
-                if ($sf['pid'] == $field['id']) {
-                    $sf['pid'] = $fNewId;
-                }
-            }
-
-            $field['id'] = $fNewId;
-        }
-
-        /* set grid values */
-        if (!empty($fTObject)) {
-            $field['data'] = array(
-                $fTObject->getField('_title')['name'] => $field['name']
-                ,$fTObject->getField('l1')['name'] => $field['l1']
-                ,$fTObject->getField('l2')['name'] => $field['l2']
-                ,$fTObject->getField('l3')['name'] => $field['l3']
-                ,$fTObject->getField('l4')['name'] => $field['l4']
-                ,$fTObject->getField('type')['name'] => $field['type']
-                ,$fTObject->getField('order')['name'] => $field['order']
-                ,$fTObject->getField('cfg')['name'] => json_encode($field['cfg'], JSON_UNESCAPED_UNICODE)
-                ,$fTObject->getField('solr_column_name')['name'] => $field['solr_column_name']
-            );
-        }
-        /* end of grid values */
-        $fieldObjects = new Objects\TemplateField();
-        $fieldObjects->update($field) or die('Cannot update '.$field['name']);
-
-        processFields($templateConfig, $field['id'], $field['id']);
-    }
-    if (!empty($templateConfig['fields'])) {
-        echo "\n";
-    }
-
-    return $tTId;
-}
-
-// ----------------------------------------------- config functions
-function updateMenuAndConfig()
-{
-    if (empty($GLOBALS['replacedTemplates'])) {
-        return;
-    }
-    $replacements = &$GLOBALS['replacedTemplates'];
-
-    $config = array();
-    $res = DB\dbQuery(
-        'SELECT id, `value`
-         FROM config
-        WHERE param LIKE \'%template%\''
-    ) or die(DB\dbQueryError());
-
-    while ($r = $res->fetch_assoc()) {
-        $config[] = $r;
-    }
-    $res->close();
-
-    foreach ($replacements as $fromId => $toId) {
-        if (empty($fromId)) {
-            continue;
-        }
         foreach ($config as &$row) {
-            $row['value'] = trim(str_replace(','.$fromId.',', ','.$toId.',', ','.$row['value'].','), ',');
+            DB\dbQuery(
+                'UPDATE config
+                SET `value` = $2
+                WHERE id = $1',
+                array(
+                    $row['id']
+                    ,$row['value']
+                )
+            ) or die(DB\dbQueryError());
         }
-    }
 
-    foreach ($config as &$row) {
-        DB\dbQuery(
-            'UPDATE config
-            SET `value` = $2
-            WHERE id = $1',
-            array(
-                $row['id']
-                ,$row['value']
-            )
+        // now update menu
+        $menu = array();
+        $res = DB\dbQuery(
+            'SELECT id, `menu`
+             FROM menu'
         ) or die(DB\dbQueryError());
-    }
 
-    // now update menu
-    $menu = array();
-    $res = DB\dbQuery(
-        'SELECT id, `menu`
-         FROM menu'
-    ) or die(DB\dbQueryError());
-
-    while ($r = $res->fetch_assoc()) {
-        $menu[] = $r;
-    }
-    $res->close();
-
-    foreach ($replacements as $fromId => $toId) {
-        if (empty($fromId)) {
-            continue;
+        while ($r = $res->fetch_assoc()) {
+            $menu[] = $r;
         }
+        $res->close();
+
+        foreach ($this->items as $fromId => $template) {
+            foreach ($menu as &$row) {
+                $row['menu'] = trim(str_replace(','.$fromId.',', ','.$template['id'].',', ','.$row['menu'].','), ',');
+            }
+        }
+
         foreach ($menu as &$row) {
-            $row['menu'] = trim(str_replace(','.$fromId.',', ','.$toId.',', ','.$row['menu'].','), ',');
+            DB\dbQuery(
+                'UPDATE menu
+                SET `menu` = $2
+                WHERE id = $1',
+                array(
+                    $row['id']
+                    ,$row['menu']
+                )
+            ) or die(DB\dbQueryError());
         }
-    }
-
-    foreach ($menu as &$row) {
-        DB\dbQuery(
-            'UPDATE menu
-            SET `menu` = $2
-            WHERE id = $1',
-            array(
-                $row['id']
-                ,$row['menu']
-            )
-        ) or die(DB\dbQueryError());
     }
 }

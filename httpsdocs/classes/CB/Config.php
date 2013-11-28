@@ -11,43 +11,18 @@ class Config extends Singleton
     protected static $config = array();
     protected static $plugins = array();
 
-    public static function load()
+    /**
+     * method for laoding core config
+     * @param  array $cfg default configuration
+     * @return array throw an exception if core is not defined in db
+     */
+    public static function load($cfg = array())
     {
         $instance = static::getInstance();
 
-        /* load main casebox configs
-            later is possible that these configs will be moved to database
-            and only database conection params will be defined in a separate configuration file.
-        */
-        $cfg = static::loadConfigFile(DOC_ROOT.'system.ini');
-        $cfg = array_merge($cfg, static::loadConfigFile(DOC_ROOT.'config.ini'));
-
-        //TODO: remove this block after cofig migration to DB.
-        // core is not defined in cores table, so we try to load it's cofig from disc
-        // for backward compatibility
-        $cfg = array_merge($cfg, static::loadConfigFile(CORE_ROOT.'config.ini'));
         $cfg = array_merge($cfg, static::getPlatformDBConfig());
+        $cfg = array_merge($cfg, static::getPlatformConfigForCore());
         $cfg = array_merge($cfg, static::getCoreDBConfig());
-
-        $customCoreConfig = array();
-        if (is_file(CORE_ROOT.'config.php')) {
-            $customCoreConfig = (require CORE_ROOT.'config.php');
-            foreach ($customCoreConfig as $k => $v) {
-                $a = explode('_', $k);
-                $cfg[array_pop($a)] = $v;
-            }
-        }
-
-        /* try to select configuration of the core from database */
-        $res = DB\dbQuery(
-            'SELECT cfg FROM casebox.cores WHERE name = $1',
-            CORENAME
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $cfg = array_merge($cfg, Util\toJSONArray($r['cfg']));
-        }
-        $res->close();
 
         static::$config = static::adjustPaths($cfg);
 
@@ -74,7 +49,7 @@ class Config extends Singleton
      * TODO: remove this method after config migration
      * @return array
      */
-    private static function getPlatformDBConfig()
+    public static function getPlatformDBConfig()
     {
         $rez = array();
         $res = DB\dbQuery(
@@ -88,6 +63,35 @@ class Config extends Singleton
             $rez[$r['param']] = $r['value'];
         }
         $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get core config stored in casebox.cores table
+     *
+     * @return array
+     */
+    public static function getPlatformConfigForCore()
+    {
+        $rez = array();
+        $res = DB\dbQuery(
+            'SELECT cfg
+            FROM casebox.cores
+            WHERE name = $1',
+            CORE_NAME
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = json_decode($r['cfg'], true);
+        } else {
+            throw new \Exception('Core not defined in cores table: '.CORE_NAME, 1);
+        }
+        $res->close();
+
+        if ($rez === false) {
+            throw new \Exception('Error decoding core config', 1);
+        }
 
         return $rez;
     }
@@ -119,7 +123,7 @@ class Config extends Singleton
     {
         $rez = empty(static::$config['api'])
             ? array()
-            : $config['api'];
+            : static::$config['api'];
 
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
@@ -135,7 +139,7 @@ class Config extends Singleton
     {
         $rez = empty(static::$config['listeners'])
             ? array()
-            : $config['listeners'];
+            : static::$config['listeners'];
 
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
@@ -151,12 +155,12 @@ class Config extends Singleton
     {
         $rez = empty(static::$config['css'])
             ? array()
-            : static::$config['css'];
+            : static::adjustPaths(static::$config['css'], CORE_DIR);
 
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
             if (!empty($data['css'])) {
-                $css = array_merge($rez, static::adjustPaths($data['css'], PLUGINS_PATH.$name.DIRECTORY_SEPARATOR));
+                $rez = array_merge($rez, static::adjustPaths($data['css'], PLUGINS_DIR.$name.DIRECTORY_SEPARATOR));
             }
         }
 
@@ -167,12 +171,12 @@ class Config extends Singleton
     {
         $rez = empty(static::$config['js'])
             ? array()
-            : static::$config['js'];
+            : static::adjustPaths(static::$config['js'], CORE_DIR);
 
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
             if (!empty($data['js'])) {
-                $rez = array_merge($rez, static::adjustPaths($data['js'], PLUGINS_PATH.$name.DIRECTORY_SEPARATOR));
+                $rez = array_merge($rez, static::adjustPaths($data['js'], PLUGINS_DIR.$name.DIRECTORY_SEPARATOR));
             }
         }
 
@@ -185,13 +189,13 @@ class Config extends Singleton
         $css = static::getCssList();
 
         if (!empty($css)) {
-            $rez[CORENAME.'_css'] = $css;
+            $rez[CORE_NAME.'_css'] = $css;
         }
         $js = static::getJsList();
         if (!empty($js)) {
-            $rez[CORENAME.'_js'] = $js;
+            $rez[CORE_NAME.'_js'] = $js;
         }
-// var_dump($rez);
+
         return $rez;
     }
 
@@ -200,11 +204,29 @@ class Config extends Singleton
         if (!empty(static::$plugins)) {
             return static::$plugins;
         }
+
+        $plugins = array();
         $pc = Plugins\SingletonCollection::getInstance();
-        $plugins = isset(static::$config['plugins'])
-            ? static::$config['plugins']
-            : $pc->getActivePlugins();
-        static::$plugins = array();
+
+        if (!isset(static::$config['includeDefaultPlugins'])
+            || static::$config['includeDefaultPlugins']
+        ) {
+            $plugins = $pc->getActivePlugins();
+        }
+
+        if (!empty(static::$config['plugins'])) {
+            foreach (static::$config['plugins'] as $name => $config) {
+                if (is_numeric($name)) {
+                    $name = $config;
+                    $config = array();
+                }
+
+                if (!isset($plugins[$name])) {
+                    $plugins[$name] = array();
+                }
+                $plugins[$name] = array_merge($plugins[$name], $config);
+            }
+        }
 
         foreach ($plugins as $k => $v) {
             if (is_numeric($k)) {
@@ -220,11 +242,24 @@ class Config extends Singleton
         return static::$plugins;
     }
 
+    public static function getPluginsRemoteConfig()
+    {
+        $rez = array();
+        $plugins = static::getPlugins();
+        foreach ($plugins as $name => $cfg) {
+            if (!empty($cfg['remote'])) {
+                $rez[$name] = $cfg['remote'];
+            }
+        }
+
+        return $rez;
+    }
+
     /**
      * replace the begining double slash placeholder with document root path
      * or add main folder to begining
      * @param  varchar|array $value      single value or array of values
-     * @param  varchar       $mainFolder optional default folder used if no replacement is made with DOC_ROOT
+     * @param  varchar       $mainFolder optional default folder used. if not set then replacement is made with DOC_ROOT
      * @return varchar|array
      */
     public static function adjustPaths($value, $mainFolder = false)

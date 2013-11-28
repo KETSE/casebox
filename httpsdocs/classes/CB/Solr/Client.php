@@ -85,9 +85,9 @@ class Client extends Service
         ) {
             return;
         }
-        $cmd = 'php -f '.\CB\CRONS_DIR.'run_cron.php solr_update_tree '.\CB\CORENAME.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log &';
+        $cmd = 'php -f '.\CB\CRONS_DIR.'run_cron.php solr_update_tree '.\CB\CORE_NAME.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log &';
         if (\CB\isWindows()) {
-            $cmd = 'start /D "'.\CB\CRONS_DIR.'" php -f run_cron.php solr_update_tree '.\CB\CORENAME.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log';
+            $cmd = 'start /D "'.\CB\CRONS_DIR.'" php -f run_cron.php solr_update_tree '.\CB\CORE_NAME.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log';
         }
         pclose(popen($cmd, "r"));
     }
@@ -405,7 +405,7 @@ class Client extends Service
      * @param  scalar $v incoming string
      * @return scalar escaped variable
      */
-    public function escapeLuceneChars($v)
+    public static function escapeLuceneChars($v)
     {
         $luceneReservedCharacters = preg_quote('+-&|!(){}[]^"~*?:\\');
         $v = preg_replace_callback(

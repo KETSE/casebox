@@ -26,6 +26,43 @@ class CreateMenu
         $res->close();
         CreateMenu::replaceMenuForNode($menuId, $nodeId, $menuConfig);
     }
+
+    /**
+     * update menu for a given template_id
+     * @param int           $templateId
+     * @param varchar|array $menuConfig
+     */
+    public static function updateMenuForTemplate($templateId, $menuConfig)
+    {
+        if (is_array($menuConfig)) {
+            $menuConfig = implode(',', $menuConfig);
+        }
+        $menuId = null;
+        $res = DB\dbQuery(
+            'SELECT id FROM `menu` WHERE node_template_ids = $1',
+            $templateId
+        ) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $menuId = $r['id'];
+        }
+        $res->close();
+
+        DB\dbQuery(
+            'INSERT INTO menu (
+                id
+                ,node_template_ids
+                ,menu)
+            VALUES ($1, $2, $3)
+            ON DUPLICATE KEY UPDATE
+            menu = $3',
+            array(
+                $menuId
+                ,$templateId
+                ,$menuConfig
+            )
+        ) or die(DB\dbQueryError());
+    }
+
     /**
      * add a template for a given tree node
      * @param int $nodeId

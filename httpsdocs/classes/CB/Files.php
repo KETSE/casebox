@@ -872,9 +872,9 @@ class Files
                     Files::deletePreview($file['content_id']);
                 }
 
-                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php '.CORENAME.' > '.DEBUG_LOG.'_office &';
+                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php '.CORE_NAME.' > '.DEBUG_LOG.'_office &';
                 if (isWindows()) {
-                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php '.CORENAME;
+                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php '.CORE_NAME;
                 }
                 pclose(popen($cmd, "r"));
 

@@ -1,4 +1,4 @@
-Ext.namespace('CB.Plugins');
+Ext.namespace('CB.plugins');
 
 Ext.onReady(function(){
     var plugins = CB.FolderViewGrid.prototype.plugins || [];
@@ -9,7 +9,7 @@ Ext.onReady(function(){
 });
 
 
-CB.Plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
+CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
     lastColumns: []
 
     ,init: function(owner) {
@@ -26,7 +26,6 @@ CB.Plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
     }
 
     ,onProxyLoad: function(proxy, obj, options) {
-        clog(this.grid, this.cm);
         //add corresponding metadata to obj.result if DisplayColumns changed
         this.currentColumns = obj.result.DC || [];
         if(Ext.util.JSON.encode(this.lastColumns) !== Ext.util.JSON.encode(this.currentColumns)) {
@@ -87,4 +86,4 @@ CB.Plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
     }
 });
 
-Ext.ComponentMgr.registerPlugin('CBPluginsDisplayColumns', CB.Plugins.DisplayColumns);
+Ext.ComponentMgr.registerPlugin('CBPluginsDisplayColumns', CB.plugins.DisplayColumns);

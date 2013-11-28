@@ -23,7 +23,10 @@ $_SERVER['SERVER_NAME'] = $argv[1];
 $_SERVER['REMOTE_ADDR'] = 'localhost';
 
 // session_start();
-$_SESSION['user'] = array('id' => 1, 'name' => 'system');
+$_SESSION['user'] = array(
+    'id' => 1
+    ,'name' => 'system'
+);
 
 $site_path = realpath(
     dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.
@@ -61,7 +64,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
                 return $rez;
             } else { //timeout ocured of script cron execution
                 $title = 'CaseBox cron notification ('.$cron_id.'), timeout occured.';
-                $msg = $info."\n\rCore name: ".CORENAME.print_r($r, 1);
+                $msg = $info."\n\rCore name: ".CORE_NAME.print_r($r, 1);
                 echo $title."\n".$msg;
                 notifyAdmin($title, $msg);
             }

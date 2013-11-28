@@ -23,10 +23,10 @@ echo '<link rel="stylesheet" type="text/css" href="/libx/ext/resources/css/ext-a
 echo '<link rel="stylesheet" type="text/css" href="'.Minify_getUri('css').'" />';
 $css = Config::getCssList();
 if (!empty($css)) {
-    echo '<link rel="stylesheet" type="text/css" href="'.Minify_getUri(CORENAME.'_css').'" />';
+    echo '<link rel="stylesheet" type="text/css" href="'.Minify_getUri(CORE_NAME.'_css').'" />';
 }
 
-echo '<title>'.constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE)).'</title>';
+echo '<title>'.@constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE)).'</title>';
 
 ?></head>
 <body>
@@ -59,7 +59,11 @@ echo '<script type="text/javascript" src="'.Minify_getUri('js').(isDebugHost() ?
 echo '<script type="text/javascript" src="'.Minify_getUri('jsdev').(isDebugHost() ? '&debug=1': '').'"></script>';
 $js = Config::getJsList();
 if (!empty($js)) {
-    echo '<script type="text/javascript" src="'.Minify_getUri(CORENAME.'_js').(isDebugHost() ? '&debug=1': '').'"></script>';
+    echo '<script type="text/javascript" src="'.Minify_getUri(CORE_NAME.'_js').(isDebugHost() ? '&debug=1': '').'"></script>';
+}
+$prc = Config::getPluginsRemoteConfig();
+if (!empty($prc)) {
+    echo '<script type="text/javascript">CB.plugins.config = '.json_encode($prc, JSON_UNESCAPED_UNICODE).';</script>';
 }
 
 ?>

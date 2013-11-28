@@ -541,7 +541,6 @@ function initApp(){
                 )
                 : null
             );
-
         switch(type){
             case '_auto_title':
                 return new Ext.ux.TitleField();
@@ -852,16 +851,23 @@ function initApp(){
     };
 
     App.openUniqueTabbedWidget = function(type, tabPanel, options){
-        if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
-        tabIdx = App.findTabByType(tabPanel, type);
+        if(Ext.isEmpty(tabPanel)) {
+            tabPanel = App.mainTabPanel;
+        }
+        var tabIdx = App.findTabByType(tabPanel, type)
+        ;
         if(Ext.isEmpty(options)) {
             options = {};
         }
+        var rez = null;
         if(tabIdx < 0) {
-            w = Ext.create(options, type);
-            App.addTab(tabPanel, w);
-            tabPanel.setActiveTab(w);
-        }else tabPanel.setActiveTab(tabIdx);
+            rez = Ext.create(options, type);
+            App.addTab(tabPanel, rez);
+        } else {
+            rez = tabPanel.get(tabIdx);
+        }
+        tabPanel.setActiveTab(rez);
+        return rez;
     };
 
     App.showException = function(e){

@@ -18,6 +18,7 @@ class TemplateField extends Object
     private $tableFields =  array(
         'id'
         ,'pid'
+        //,'template_id'
         ,'name'
         ,'l1'
         ,'l2'
@@ -61,7 +62,7 @@ class TemplateField extends Object
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
-                $saveValues[] = $p[$fieldName];
+                $saveValues[] = $value;
                 $params[] = $i;
                 $i++;
             } elseif (!empty($field)) {
@@ -166,28 +167,20 @@ class TemplateField extends Object
 
     protected function detectParentTemplate()
     {
-        $rez = null;
         if (empty($this->data['pid'])) {
-            return $rez;
+            return null;
         }
+        $rez = $this->data['pid'];
 
         $res = DB\dbQuery(
-            'SELECT t.id, tt.type, COALESCE(ts.template_id, t.id) `template_id`
-            FROM tree t
-            JOIN templates tt
-                ON t.template_id = tt.id
-            LEFT JOIN templates_structure ts
-                ON t.id = ts.id
-            WHERE t.id = $1',
-            $this->data['pid']
+            'SELECT `template_id`
+            FROM templates_structure
+            WHERE id = $1',
+            $rez
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            if ($r['type'] == 'template') {
-                $rez = $r['id'];
-            } elseif ($r['type'] = 'field') {
-                $rez = $r['template_id'];
-            }
+            $rez = $r['template_id'];
         }
 
         return $rez;

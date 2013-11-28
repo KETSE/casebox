@@ -218,8 +218,8 @@ class Template extends Object
         }
 
         $tableFields = array(
-            // 'id'
-            'pid'
+            'id'
+            ,'pid'
             ,'name'
             ,'l1'
             ,'l2'
@@ -489,6 +489,9 @@ class Template extends Object
             case 'html':
                 //$value = trim(strip_tags($value));
                 //$value = nl2br($value);
+                break;
+            case 'text':
+                $value = nl2br(htmlspecialchars($value));
                 break;
             default:
                 if (is_array($value)) {

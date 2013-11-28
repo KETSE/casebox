@@ -1,7 +1,7 @@
 <?php
 namespace CB;
 
-$customUserMenuClass = CORE_ROOT.'php'.DIRECTORY_SEPARATOR.'CB'.DIRECTORY_SEPARATOR.'UserMenu.php';
+$customUserMenuClass = CORE_DIR.'php'.DIRECTORY_SEPARATOR.'CB'.DIRECTORY_SEPARATOR.'UserMenu.php';
 if (is_file($customUserMenuClass)) {
     include($customUserMenuClass);
 

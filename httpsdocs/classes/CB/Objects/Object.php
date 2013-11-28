@@ -50,7 +50,7 @@ class Object extends OldObject
     public function create($p = false)
     {
         if ($p !== false) {
-            if (isset($p['id'])) {
+            if (array_key_exists('id', $p)) {
                 if (is_numeric($p['id'])) {
                     $this->id = $p['id'];
                 } else {
@@ -91,24 +91,21 @@ class Object extends OldObject
             $p['tag_id'] = null;
         }
 
-        $title = $this->getFieldValue('_title');
-        if (!empty($title)) {
-            $p['name'] = $title;
-        }
-
         \CB\fireEvent('beforeNodeDbCreate', $this);
 
         DB\dbQuery(
             'INSERT INTO tree (
-                pid
+                id
+                ,pid
                 ,name
                 ,template_id
                 ,cid
                 ,tag_id
                 ,updated)
-            VALUES ($1, $2, $3, $4, $5, 1)',
+            VALUES ($1, $2, $3, $4, $5, $6, 1)',
             array(
-                $p['pid']
+                $this->id
+                ,$p['pid']
                 ,$p['name']
                 ,$p['template_id']
                 ,$_SESSION['user']['id']
@@ -136,20 +133,30 @@ class Object extends OldObject
 
         $p['data'] = Util\toJSONArray(@$p['data']);
 
+        $this->verifyAutoUpdatedParams();
+
         DB\dbQuery(
             'INSERT INTO objects (
                 id
                 ,`title`
                 ,`custom_title`
+                ,date_start
+                ,date_end
                 ,`data`
                 ,cid)
-            VALUES($1, $2, $3, $4, $5)
+            VALUES($1, $2, $3, $4, $5, $6, $7)
             ON DUPLICATE KEY
-            UPDATE `title` = $2',
+            UPDATE `title` = $2
+                    ,`custom_title` = $3
+                    ,`date_start` = $4
+                    ,`date_end` = $5
+                    ',
             array(
                 $this->id
-                ,$p['name']
-                ,$this->getFieldValue('_title')
+                ,@$p['title']
+                ,@$p['custom_title']
+                ,$p['date']
+                ,$p['date_end']
                 ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
                 ,$_SESSION['user']['id']
             )
@@ -249,7 +256,7 @@ class Object extends OldObject
     {
         if ($p !== false) {
             $this->data = $p;
-            if (isset($p['id'])) {
+            if (array_key_exists('id', $p)) {
                 $this->id = $p['id'];
             }
             $this->template = null;
@@ -323,23 +330,8 @@ class Object extends OldObject
             $templateData = $this->template->getData();
         }
 
-        // prepare params
-        if (empty($d['title'])) {
-            $d['title'] = ucfirst($this->getAutoTitle());
-        }
+        $this->verifyAutoUpdatedParams();
 
-        $customTitle = $this->getFieldValue('_title');
-        if (!empty($customTitle)) {
-            $d['custom_title'] = $customTitle;
-        }
-
-        if (empty($d['date'])) {
-            $d['date'] = $this->getFieldValue('_date_start');
-        }
-
-        if (empty($d['date_end'])) {
-            $d['date_end'] = $this->getFieldValue('_date_end');
-        }
         if (empty($d['data'])) {
             $d['data'] = array();
         }
@@ -359,8 +351,8 @@ class Object extends OldObject
             WHERE id = $1',
             array(
                 $d['id']
-                ,$d['title']
-                ,$d['custom_title']
+                ,@$d['title']
+                ,@$d['custom_title']
                 ,$d['date']
                 ,$d['date_end']
                 ,$templateData['iconCls']
@@ -430,6 +422,33 @@ class Object extends OldObject
 
     }
 
+    protected function verifyAutoUpdatedParams()
+    {
+        $p = &$this->data;
+
+        $autoTitle = ucfirst($this->getAutoTitle());
+        if (!empty($autoTitle)) {
+            $p['title'] = $autoTitle;
+        }
+
+        $titleField = $this->getFieldValue('_title');
+        if (!empty($titleField)) {
+            $p['custom_title'] = $titleField;
+        }
+
+        if (empty($p['title']) && empty($p['custom_title'])) {
+            $p['custom_title'] = $p['name'];
+        }
+
+        if (empty($p['date'])) {
+            $p['date'] = $this->getFieldValue('_date_start');
+        }
+
+        if (empty($p['date_end'])) {
+            $p['date_end'] = $this->getFieldValue('_date_end');
+        }
+
+    }
     /**
      * get a field value from current objects data ($this->data)
      *
@@ -476,7 +495,7 @@ class Object extends OldObject
         }
         $rez = '';
         $templateData = $this->template->getData();
-
+        $fields = array();//used from php templates of title
         $rez = str_replace(
             array(
                 '{template_title}'
@@ -493,18 +512,20 @@ class Object extends OldObject
         if (!empty($this->data['data'])) {
             foreach ($this->data['data'] as $fieldName => $fv) {
                 $field = $this->template->getField($fieldName);
-                $value = is_scalar($fv)
+                $value = !is_array($fv)
                     ? $fv
-                    : (array_key_exists('value', $fv)
-                        ? $fv['value']
+                    : ($this->isFieldValue($fv)
+                        ? @$fv['value']
                         : $fv[0]['value']
                     );
 
-                $v = $this->template->formatValueForDisplay($field, $value, 'text');
+                $v = $this->template->formatValueForDisplay($field, $value, false);
                 if (is_array($v)) {
                     $v = implode(',', $v);
                 }
+                $v = addcslashes($v, '\'');
                 $rez = str_replace('{'.$fieldName.'}', $v, $rez);
+                $fields[$fieldName] = $v;
                 // $rez = str_replace('{'.$fieldName.'_info}', @$fv['info'], $rez);
             }
         }
@@ -516,7 +537,7 @@ class Object extends OldObject
         }
         // evaluating the title if contains php code
         if (strpos($rez, '<?php') !== false) {
-            @eval(' ?>'.$rez.'<?php ');
+            eval(' ?>'.$rez.'<?php ');
             if (!empty($title)) {
                 $rez = $title;
             }
@@ -550,6 +571,23 @@ class Object extends OldObject
         return $rez;
     }
 
+    /**
+     * get an associative linear array of field values
+     *
+     * @param array $data template properties
+     */
+    public function getAssocLinearData()
+    {
+        $rez = array();
+        $linearData = $this->getLinearData();
+        foreach ($linearData as $field) {
+            $value = array_intersect_key($field, array('value' => 1, 'info' => 1, 'files' => 1));
+            $rez[$field['name']][] = $value;
+        }
+
+        return $rez;
+    }
+
     protected function getLinearNodesData($data)
     {
         $rez = array();
@@ -564,17 +602,20 @@ class Object extends OldObject
                     is_null($fv)
                 ) {
                     $value['value'] = $fv;
-                } elseif (isset($fv['value'])) {
-                    $value['value'] = $fv['value'];
-                    if (isset($fv['info'])) {
-                        $value['info'] = $fv['info'];
-                    }
-                    if (isset($fv['files'])) {
-                        $value['files'] = $fv['files'];
-                    }
                 } else {
-                    $value['value'] = $fv;
+                    $value = array_merge($value, $fv);
                 }
+                // if (isset($fv['value'])) {
+                //     $value['value'] = $fv['value'];
+                //     if (isset($fv['info'])) {
+                //         $value['info'] = $fv['info'];
+                //     }
+                //     if (isset($fv['files'])) {
+                //         $value['files'] = $fv['files'];
+                //     }
+                // } else {
+                //     $value['value'] = $fv;
+                // }
                 $rez[] = $value;
                 if (!empty($fv['childs'])) {
                     $rez = array_merge($rez, $this->getLinearNodesData($fv['childs']));
@@ -728,7 +769,6 @@ class Object extends OldObject
                 ,`is_main`
                 ,`cfg`
                 ,`inherit_acl`
-                ,`acl_count`
                 ,`cid`
                 ,`cdate`
                 ,`uid`
@@ -756,7 +796,6 @@ class Object extends OldObject
                 ,`is_main`
                 ,`cfg`
                 ,`inherit_acl`
-                ,0
                 ,`cid`
                 ,`cdate`
                 ,$3

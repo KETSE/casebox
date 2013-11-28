@@ -18,16 +18,16 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
         el.on('dragleave', this.onDragLeave, this);
         el.on('dragover', this.onDragOver, this);
         el.on('drop', this.onDrop, this);
-        App.on('dragfilesenter', this.showDropZone, this)
-        App.on('dragfilesover', this.showDropZone, this)
-        App.on('dragfilesleave', this.hideDropZone, this)
-        App.on('filesdrop', this.hideDropZone, this)
+        App.on('dragfilesenter', this.showDropZone, this);
+        App.on('dragfilesover', this.showDropZone, this);
+        App.on('dragfilesleave', this.hideDropZone, this);
+        App.on('filesdrop', this.hideDropZone, this);
     }
     ,onBeforeDestroy: function(){
-        App.un('dragfilesenter', this.showDropZone, this)
-        App.un('dragfilesover', this.showDropZone, this)
-        App.un('dragfilesleave', this.hideDropZone, this)
-        App.un('filesdrop', this.hideDropZone, this)
+        App.un('dragfilesenter', this.showDropZone, this);
+        App.un('dragfilesover', this.showDropZone, this);
+        App.un('dragfilesleave', this.hideDropZone, this);
+        App.un('filesdrop', this.hideDropZone, this);
         if(this.dropZoneEl){
             this.dropZoneEl.removeAllListeners();
             this.dropZoneEl.remove();
@@ -69,24 +69,24 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
     }
     ,onDragOver: function(e, el, o){
         e.browserEvent.dataTransfer.dropEffect = 'copy';
-        
+
         te = this.getTarget(e);
         if(Ext.isEmpty(te)) return false;
         te.addClass('drop-target');
         if(this.lastEl == te) return true;
-        
+
         if(!Ext.isEmpty(this.lastEl)) this.lastEl.removeClass('drop-target');
-        
-        
+
+
         this.lastEl = te;
-        
+
         return true;
     }
     ,onDrop: function(e) {
         this.onDragLeave(e);
 
         if(this.filesCount(e) < 1) return false;
-        
+
         this.getTargetData(e);
 
         e.stopPropagation();
@@ -96,11 +96,11 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
     }
     ,getRecursiveFileList: function(e){
         dt = e.browserEvent.dataTransfer;
-        
+
         if( Ext.isEmpty(dt.items) ) return this.processGetRecursiveFileList(dt.files);
-        
+
         var length = dt.items.length;
-        entries = []
+        var entries = [];
         for (var i = 0; i < length; i++) {
             entries.push( dt.items[i].webkitGetAsEntry() );
         }
@@ -133,12 +133,12 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
             return;
         }
         if( !el.isVisible(true) ) return;
-        
+
         if(!this.dropZoneEl){
             this.dropZoneEl = this.owner.getEl().appendChild(document.createElement('div'));
             this.dropZoneEl.update(this.dropZoneConfig.text);
-            this.dropZoneEl.on('dragenter', function(e, el){Ext.get(el).addClass('grid-drop-zone-over')});
-            this.dropZoneEl.on('dragleave', function(e, el){Ext.get(el).removeClass('grid-drop-zone-over')});
+            this.dropZoneEl.on('dragenter', function(e, el){Ext.get(el).addClass('grid-drop-zone-over');});
+            this.dropZoneEl.on('dragleave', function(e, el){Ext.get(el).removeClass('grid-drop-zone-over');});
 
             this.dropZoneEl.addClass('grid-drop-zone');
         }

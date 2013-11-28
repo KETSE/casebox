@@ -1,9 +1,13 @@
 <?php
 namespace Util\Tags;
 
-use CB\DB as DB;
-use CB\Browser as Browser;
-use CB\L as L;
+use CB\DB;
+use CB\Browser;
+use CB\Objects;
+
+// Known issues:
+//  - when you try to run this process more than once then object values are updated only first time
+//      Solution 1 : let the thesauriId property set for template fields config
 
 class TreeSync extends \Util\TreeSync
 {
@@ -19,34 +23,36 @@ class TreeSync extends \Util\TreeSync
         ,'l4' => 'Thesauri item'
         ,'iconCls' => 'icon-tag-small'
         ,'type' => 'object'
-        ,'fields' => array(
-            array(
-                'name' => 'iconCls'
-                ,'l1' => 'Icon class'
-                ,'l2' => 'Icon class'
-                ,'l3' => 'Icon class'
-                ,'l4' => 'Icon class'
-                ,'type' => 'iconcombo'
-                ,'order' => 5
-            )
-            ,array(
-                'name' => 'visible'
-                ,'l1' => 'Active'
-                ,'l2' => 'Active'
-                ,'l3' => 'Active'
-                ,'l4' => 'Active'
-                ,'type' => 'checkbox'
-                ,'order' => 6
-            )
-            ,array(
-                'name' => 'order'
-                ,'l1' => 'Order'
-                ,'l2' => 'Order'
-                ,'l3' => 'Order'
-                ,'l4' => 'Order'
-                ,'type' => 'int'
-                ,'order' => 7
-            )
+        ,'visible' => 1
+    );
+
+    private $thesauriTemplateFields = array(
+        array(
+            'name' => 'iconCls'
+            ,'l1' => 'Icon class'
+            ,'l2' => 'Icon class'
+            ,'l3' => 'Icon class'
+            ,'l4' => 'Icon class'
+            ,'type' => 'iconcombo'
+            ,'order' => 5
+        )
+        ,array(
+            'name' => 'visible'
+            ,'l1' => 'Active'
+            ,'l2' => 'Active'
+            ,'l3' => 'Active'
+            ,'l4' => 'Active'
+            ,'type' => 'checkbox'
+            ,'order' => 6
+        )
+        ,array(
+            'name' => 'order'
+            ,'l1' => 'Order'
+            ,'l2' => 'Order'
+            ,'l3' => 'Order'
+            ,'l4' => 'Order'
+            ,'type' => 'int'
+            ,'order' => 7
         )
     );
 
@@ -73,60 +79,48 @@ class TreeSync extends \Util\TreeSync
                     'showIn' => 'top'
                 )
             );
-            $this->thesauriTemplateConfig['fields'][] = $field;
+            $this->thesauriTemplateFields[] = $field;
             $i++;
         }
 
     }
 
-    /**
-     * check if template does not already exist and create it if needed
-     * @return void
-     */
-    protected function createOrUpdateThesauriTemplate()
-    {
-        $this->thesauriTemplateId = null;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM templates
-            WHERE name = $1
-                AND type = $2
-                AND pid = $3',
-            array(
-                $this->thesauriTemplateConfig['name']
-                ,$this->thesauriTemplateConfig['type']
-                ,$this->mainPid
-            )
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $this->thesauriTemplateId = $r['id'];
-        }
-        $res->close();
-
-        $thesauriTemplateObject = new \CB\Objects\Template();
-
-        if (empty($this->thesauriTemplateId)) {
-            $thesauriTemplateObject->setData($this->thesauriTemplateConfig);
-            $this->thesauriTemplateId = $thesauriTemplateObject->create();
-        } else {
-            $this->thesauriTemplateConfig['id'] = $this->thesauriTemplateId;
-            $thesauriTemplateObject->setData($this->thesauriTemplateConfig);
-            $thesauriTemplateObject->update();
-        }
-    }
-
     public function execute()
     {
-        $this->init();
+
+        $this->prepareExecution();
 
         $this->loadTags();
 
-        echo "Start transaction\n";
-        DB\startTransaction();
-
         echo "Create or update thesauri template\n";
-        $this->createOrUpdateThesauriTemplate();
+        $this->thesauriTemplateId = \Util\Templates::createOrUpdateTemplate($this->mainPid, $this->thesauriTemplateConfig);
+        $fieldObj = new Objects\TemplateField();
+        $templateForFields = \Util\Templates::getTemplateId(
+            array(
+                'name' => 'Fields template'
+                ,'type' => 'field'
+            )
+        );
+        foreach ($this->thesauriTemplateFields as $field) {
+            $field['id'] = Objects::getChildId($this->thesauriTemplateId, $field['name']);
+            $field['pid'] = $this->thesauriTemplateId;
+            $field['template_id'] = $templateForFields;
+
+            $field['data'] = array(
+                '_title' => $field['name']
+                ,'type' => $field['type']
+                ,'order' => $field['order']
+                ,'cfg' => @$field['cfg']
+            );
+            foreach ($GLOBALS['languages'] as $language) {
+                $field[$language] = $field['name'];
+            }
+            if (is_null($field['id'])) {
+                $fieldObj->create($field);
+            } else {
+                $fieldObj->update($field);
+            }
+        }
 
         // now that we've checked/created basic thesauri template -
         // add this item to be available in target folder menu
@@ -139,20 +133,6 @@ class TreeSync extends \Util\TreeSync
             )
         );
 
-        if (!isset($this->genericObject)) {
-            $this->genericObject = new \CB\Objects\Object();
-        }
-
-        // prepare languages association from fields
-        $languages = \CB\getOption('LANGUAGES');
-        $fields = L\languageStringToFieldNames($languages);
-        $languages = explode(',', $languages);
-        $fields = explode(',', $fields);
-        $this->languageFields = array_combine($fields, $languages);
-
-        // update possible cyclic references in templates_structure to template_id
-        DB\dbQuery('UPDATE templates_structure SET pid = template_id WHERE pid = id') or die(DB\dbQueryError());
-
         echo " Start updating tags:\n";
         $this->createOrUpdateTags($this->rootNodes);
 
@@ -162,13 +142,6 @@ class TreeSync extends \Util\TreeSync
         echo "Done\n";
 
         DB\commitTransaction();
-
-        echo "Updating solr ... \n";
-
-        $solrClient = new \CB\Solr\Client();
-        $solrClient->updateTree(
-            // array('all' => true)
-        );
     }
 
     /**
@@ -321,7 +294,7 @@ class TreeSync extends \Util\TreeSync
                             $field['cfg']['scope'] = $this->tags[$field['cfg']['thesauriId']]['id'];
                         }
                     }
-                    unset($field['cfg']['thesauriId']);
+                    // unset($field['cfg']['thesauriId']);
                     $field['cfg']['renderer'] = 'listObjIcons';
 
                     if (isset($field['editor']) && ($field['editor'] == 'popuplist')) {
@@ -333,16 +306,20 @@ class TreeSync extends \Util\TreeSync
             }
             if ($modified) {
                 $template->update($data);
+
                 $modifiedTemplateIds[$data['id']] = 1;
             }
         }
 
         //now selecting all object of modified template types and update their values
-
         if (!empty($modifiedTemplateIds)) {
+            $modifiedTemplateIds = array_keys($modifiedTemplateIds);
             $res = DB\dbQuery(
-                'SELECT id FROM tree WHERE template_id in ('.implode(',', $modifiedTemplateIds).')'
+                'SELECT id
+                FROM tree
+                WHERE template_id in ('.implode(',', $modifiedTemplateIds).')'
             ) or die(DB\dbQueryError());
+
             while ($r = $res->fetch_assoc()) {
                 $obj = \CB\Objects::getCustomClassByObjectId($r['id']);
                 $obj->load();
@@ -351,7 +328,7 @@ class TreeSync extends \Util\TreeSync
 
                 $objUpdated = false;
                 $processFields = array();
-                foreach ($data as $fn => &$fv) {
+                foreach ($data['data'] as $fn => &$fv) {
                     $tf = $template->getField($fn);
                     $processFields[] = array($tf, &$fv);
                 }
@@ -360,7 +337,7 @@ class TreeSync extends \Util\TreeSync
                     $field = array_shift($processFields);
                     $tf = &$field[0];
                     $fv = &$field[1];
-                    if (!empty($tf['cfg']['thesauriId'])) {
+                    if (@$tf['cfg']['source'] == 'tree') {
                         if (is_array($fv) && !array_key_exists('value', $fv)) {
                             foreach ($fv as &$mfv) {
                                 $this->modifyFieldValue($mfv);

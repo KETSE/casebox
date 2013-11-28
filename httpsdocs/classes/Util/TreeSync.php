@@ -1,6 +1,9 @@
 <?php
 namespace Util;
 
+use CB\DB;
+use CB\L;
+
 class TreeSync
 {
     protected $mainPid = null;
@@ -16,13 +19,22 @@ class TreeSync
     protected function init()
     {
         echo "init\n";
-        $this->DFT = \CB\getOption('DEFAULT_FOLDER_TEMPLATE');
+        $this->DFT =
+            empty($GLOBALS['DFT'])
+            ? \CB\getOption('DEFAULT_FOLDER_TEMPLATE')
+            : $GLOBALS['DFT'];
+
         echo " DFT:".$this->DFT."\n";
 
         $this->verifyPid();
 
-        $this->mainTemplateId = \Util\Templates::getMainTemplateId()
-            or die('Cannot detect main template for templates');
+        $this->mainTemplateId = \Util\Templates::getTemplateId(
+            array(
+                'name' => 'Templates template'
+                ,'type' => 'template'
+            )
+        ) or die('Cannot detect main template for templates');
+
         echo " mainTemplateId:".$this->mainTemplateId."\n";
 
     }
@@ -42,7 +54,7 @@ class TreeSync
             $rootFolderId = \CB\Browser::getRootFolderId();
             $this->mainPid = \CB\Objects::getChildId(
                 $rootFolderId,
-                'Thesauri'
+                $this->targetFolderName
             );
             if (is_null($this->mainPid)) {
                 $folderObj = new \CB\Objects\Object();
@@ -55,5 +67,30 @@ class TreeSync
                 ) or die('Error creating '.$this->targetFolderName.' folder');
             }
         }
+    }
+
+    protected function prepareExecution()
+    {
+        $this->init();
+
+        echo "Start transaction\n";
+        DB\startTransaction();
+
+        // before start we'll execute a special procedure that will clear all lost objects.
+        // These objects can couse errors on sync templates with tree
+        DB\dbQuery('CALL p_clear_lost_objects()') or die(DB\dbQueryError());
+
+        // update possible cyclic references in templates_structure to template_id
+        DB\dbQuery('UPDATE templates_structure SET pid = template_id WHERE pid = id') or die(DB\dbQueryError());
+
+        $this->genericObject = new \CB\Objects\Object();
+
+        // prepare languages association for fields
+        $languages = \CB\getOption('LANGUAGES');
+        $fields = L\languageStringToFieldNames($languages);
+        $languages = explode(',', $languages);
+        $fields = explode(',', $fields);
+        $this->languageFields = array_combine($fields, $languages);
+
     }
 }

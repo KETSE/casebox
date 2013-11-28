@@ -34,11 +34,11 @@ try {
     }
 
 } catch (\Exception $e) {
-    $msg = 'CaseBox cron execution exception ('.CORENAME."):<br />\n".
+    $msg = 'CaseBox cron execution exception ('.CORE_NAME."):<br />\n".
         $e->getMessage()."<br />\n".
         $e->getTraceAsString();
     echo $msg;
-    notifyAdmin('CaseBox cron execution exception ('.CORENAME.')', $msg);
+    notifyAdmin('CaseBox cron execution exception ('.CORE_NAME.')', $msg);
 }
 
 unset($solr);

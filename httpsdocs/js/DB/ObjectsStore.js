@@ -18,6 +18,7 @@ CB.DB.ObjectsStore = Ext.extend(Ext.data.JsonStore, {
                 ,'iconCls'
             ]
         });
+        this.getTexts = getStoreNames;
     }
     ,getData: function(v){
         if(Ext.isEmpty(v)) return [];

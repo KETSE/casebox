@@ -1,8 +1,9 @@
 <?php
 namespace DisplayColumns;
 
-use CB\DB as DB;
-use CB\Util as Util;
+use CB\DB;
+use CB\Util;
+use CB\Templates;
 
 class DCSingleton
 {
@@ -41,7 +42,7 @@ class DCSingleton
      * @param  int   $nodeId
      * @return array
      */
-    public static function getCustomDisplayColumns($nodeId)
+    public static function getNodeCustomDisplayColumns($nodeId)
     {
         //verify if already have cached result
         $var_name = 'CDC['.$nodeId.']';
@@ -83,7 +84,7 @@ class DCSingleton
         }
         $res->close();
 
-        // iterate node branch from the end to fiend the closes config
+        // iterate node branch from the end to find the closes config
         $pids = explode(',', $pids);
         $sortedProperties = array();
         $i = sizeof($pids) - 1;
@@ -102,10 +103,58 @@ class DCSingleton
         return $rez;
     }
 
-    public static function getSolrColumns($nodeId)
+    /**
+     * check if custom columns set for given template
+     * @param  int   $templateId
+     * @return array
+     */
+    public static function getTemplateCustomDisplayColumns($templateId)
     {
         $rez = array();
-        $displayColumns = static::getCustomDisplayColumns($nodeId);
+        $template = Templates\SingletonCollection::getInstance()->getTemplate($templateId);
+        $data = $template->getData();
+        if (!empty($data['cfg']['DC'])) {
+            $rez = $data['cfg']['DC'];
+        }
+
+        return $rez;
+    }
+
+    /**
+     * check if custom columns set for given template
+     * @param  int   $templateId
+     * @return array
+     */
+    public static function getCustomDisplayColumns($nodeId = false, $templateId = false)
+    {
+        $rez = array();
+        if ($templateId !== false) {
+            $rez = static::getTemplateCustomDisplayColumns($templateId);
+        }
+        if (empty($rez) && ($nodeId !== false)) {
+            $rez = static::getNodeCustomDisplayColumns($nodeId);
+        }
+
+        return $rez;
+    }
+
+    /**
+     * get solr columns for a node or for a search template
+     * @param  boolean $nodeId
+     * @param  boolean $templateId
+     * @return array
+     */
+    public static function getSolrColumns($nodeId = false, $templateId = false)
+    {
+        $rez = array();
+        $displayColumns = array();
+        if ($templateId !== false) {
+            $displayColumns = static::getTemplateCustomDisplayColumns($templateId);
+        }
+        if (empty($displayColumns) && ($nodeId !== false)) {
+            $displayColumns = static::getNodeCustomDisplayColumns($nodeId);
+        }
+
         foreach ($displayColumns as $column) {
             if (is_array($column) && !empty($column['solr_column_name'])) {
                 $rez[$column['solr_column_name']] = 1;

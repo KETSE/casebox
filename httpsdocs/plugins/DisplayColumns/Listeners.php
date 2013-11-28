@@ -14,10 +14,17 @@ class Listeners
         $searchClass = &$p['class'];
         $sp = &$p['params'];
         $ip = &$p['inputParams'];
-        if (empty($ip['pid'])) {
+
+        $pid = empty($ip['pid']) ? false : $ip['pid'];
+        $pid = is_array($pid) ? $pid[0] : $pid;
+
+        $templateId = empty($ip['template_id']) ? false : $ip['template_id'];
+
+        if (empty($pid) && empty($templateId)) {
             return;
         }
-        $requiredSolrColumns = $this->class->getSolrColumns($ip['pid']);
+
+        $requiredSolrColumns = $this->class->getSolrColumns($pid, $templateId);
         if (!empty($requiredSolrColumns)) {
             $fl = explode(',', $sp['fl']);
             foreach ($fl as $k => $f) {
@@ -38,12 +45,17 @@ class Listeners
         $ip = &$p['inputParams'];
         $data = &$p['result']['data'];
 
-        if (empty($ip['pid'])) {
+        $pid = empty($ip['pid']) ? false : $ip['pid'];
+        $pid = is_array($pid) ? $pid[0] : $pid;
+
+        $templateId = empty($ip['template_id']) ? false : $ip['template_id'];
+
+        if (empty($pid) && empty($templateId)) {
             return;
         }
 
-        $displayColumns = $this->class->getCustomDisplayColumns($ip['pid']);
-        // var_dump($displayColumns);
+        $displayColumns = $this->class->getCustomDisplayColumns($pid, $templateId);
+
         if (!empty($displayColumns)) {
             //set custom display columns data
             $customColumns = array();

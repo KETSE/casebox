@@ -374,7 +374,7 @@ class Tasks
     {
         $rez = array('success' => true);
         if (!Security::canManageTask($p['id'])) {
-            throw new Exception(L\Access_denied, 1);
+            throw new \Exception(L\Access_denied, 1);
         }
         $res = DB\dbQuery(
             'SELECT

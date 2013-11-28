@@ -416,19 +416,19 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
     ,reload: function(){
         // initialization
         this.data = {};
-        var parentWindow = this.getBubbleTarget();
-        if(Ext.isDefined(w.data) && Ext.isDefined(parentWindow.data[this.root])) {
-            this.data = parentWindow.data[this.root];
+        var pw = this.getBubbleTarget(); //parent window
+        if(Ext.isDefined(pw.data) && Ext.isDefined(pw.data[this.root])) {
+            this.data = pw.data[this.root];
         }
         //if not specified template_id directly to grid then try to look in owners data
-        this.template_id = Ext.value(this.template_id, parentWindow.data.template_id);
+        this.template_id = Ext.value(this.template_id, pw.data.template_id);
         if(isNaN(this.template_id)) {
-            return Ext.Msg.alert('Error', 'No template id specified in data for "' + parentWindow.title + '" window.');
+            return Ext.Msg.alert('Error', 'No template id specified in data for "' + pw.title + '" window.');
         }
         this.templateStore = CB.DB['template' + this.template_id];
 
         // if parent have a helperTree then it is responsible for helper reload
-        if(!parentWindow.helperTree) {
+        if(!pw.helperTree) {
             this.helperTree.loadData(this.data, this.templateStore);
         }
 

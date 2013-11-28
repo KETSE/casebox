@@ -105,7 +105,7 @@ class Service
         $data = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            throw new Exception("curl_error:" . curl_error($ch).$this->debugInfo(), 1);
+            throw new \Exception("curl_error:" . curl_error($ch).$this->debugInfo(), 1);
         }
     }
 
@@ -202,7 +202,7 @@ class Service
         } catch (\Exception $e) {
             $msg = "Cannot delete by query".$this->debugInfo();
             \CB\debug($msg);
-            throw new Exception($msg, 1);
+            throw new \Exception($msg, 1);
         }
     }
 
@@ -218,7 +218,7 @@ class Service
         } catch (\Exception $e) {
             $msg = "Cannot optimize solr core".$this->debugInfo();
             \CB\debug($msg);
-            throw new Exception($msg, 1);
+            throw new \Exception($msg, 1);
         }
     }
 

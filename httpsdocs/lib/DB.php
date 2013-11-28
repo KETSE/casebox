@@ -9,30 +9,87 @@ function connect($p = array())
     if (!empty($GLOBALS['dbh'])) {
         return $GLOBALS['dbh'];
     }
-    try {
-        $host = empty($p['db_host']) ? CONFIG\DB_HOST: $p['db_host'];
-        $user = empty($p['db_user']) ? CONFIG\DB_USER: $p['db_user'];
-        $pass = empty($p['db_pass']) ? CONFIG\DB_PASS: $p['db_pass'];
-        $db_name = empty($p['db_name']) ? CONFIG\DB_NAME: $p['db_name'];
-        $port = empty($p['db_port']) ? CONFIG\DB_PORT: $p['db_port'];
-        $dbh = new \mysqli($host, $user, $pass, $db_name, $port);
-    } catch (\Exception $e) {
-        $err = debug_backtrace();
+
+    if (empty($p['db_host'])) {
+        $p['db_host'] = CONFIG\DB_HOST;
+    }
+    if (empty($p['db_user'])) {
+        $p['db_user'] = CONFIG\DB_USER;
+    }
+    if (empty($p['db_pass'])) {
+        $p['db_pass'] = CONFIG\DB_PASS;
+    }
+    if (empty($p['db_name'])) {
+        $p['db_name'] = '';//CONFIG\DB_NAME;
+    }
+    if (empty($p['db_port'])) {
+        $p['db_port'] = CONFIG\DB_PORT;
     }
 
-    if (mysqli_connect_errno()) {
-        throw new \Exception('Unable to connect to DB: ' . mysqli_connect_error());
-        exit;
-    } else {
-        $dbh->query("SET NAMES 'UTF8'");
-        if (defined('CB\\CONFIG\\DB_INITSQL')) {
-            $dbh->query(CONFIG\DB_INITSQL);
-        }
-        if (!empty($GLOBALS['dbh'])) {
-            unset($GLOBALS['dbh']);
-        }
-        $GLOBALS['dbh'] = $dbh;
+    $dbh = connectWithParams($p);
+
+    return $dbh;
+}
+
+function connectWithParams($p)
+{
+    @$newParams = array(
+        'host' => $p['db_host'],
+        'user' => $p['db_user'],
+        'pass' => $p['db_pass'],
+        'name' => $p['db_name'],
+        'port' => $p['db_port'],
+        'initsql' => $p['initsql']
+    );
+
+    $dbh = null;
+    $lastParams = array();
+    if (!empty($GLOBALS['dbh'])) {
+        $dbh = $GLOBALS['dbh'];
+        $lastParams = $dbh->lastParams;
     }
+
+    //check if new params are different from last params
+    if ((@$lastParams['host'] != $newParams['host']) ||
+        (@$lastParams['user'] != $newParams['user']) ||
+        (@$lastParams['pass'] != $newParams['pass']) ||
+        (@$lastParams['port'] != $newParams['port'])
+    ) {
+        //close previous connection
+        if (!empty($dbh)) {
+            $dbh->close();
+        }
+
+        // connect with new params
+        try {
+            $dbh = new \mysqli(
+                $newParams['host'],
+                $newParams['user'],
+                $newParams['pass'],
+                $newParams['name'],
+                $newParams['port']
+            );
+        } catch (\Exception $e) {
+            if (\mysqli_connect_errno()) {
+                throw new \Exception('Unable to connect to DB: ' . \mysqli_connect_error());
+                exit;
+            }
+        }
+    }
+
+    // if database changed then apply initsql if set
+    if (@$lastParams['name'] != $newParams['name']) {
+        $newParams['name'] = $dbh->real_escape_string($newParams['name']);
+        $dbh->query('USE `'.$newParams['name'].'`');
+        $dbh->query("SET NAMES 'UTF8'");
+        if (!empty($newParams['initsql'])) {
+            $dbh->query($newParams['initsql']);
+        }
+    }
+
+    $dbh->lastParams = $newParams;
+
+    $GLOBALS['dbh']  = $dbh;
 
     return $dbh;
 }
