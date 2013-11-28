@@ -1,3 +1,9 @@
+CaseBox 1.9.64 (2013-11-28)
+==============================
+Fixed Bugs:
+----------
+- crons not running due to configuration changes
+
 CaseBox 1.9.63 (2013-11-28)
 ==============================
 New Features, Improvements
@@ -14,6 +20,38 @@ New Features, Improvements
         connection to casebox database.
     Configuration for cores is stored in casebox.cores table and could be absolutely different
         from casebox db config (basic config from config.ini).
+    Example of core configuration:
+        {
+            "core_dir": "//cores/test/"
+            ,"db_host": "localhost"
+            ,"db_name": "cb_hcav"
+            ,"db_user": "local"
+            ,"db_pass": "h0st"
+            ,"db_port": 3306
+            ,"listeners": {
+              "beforeNodeSolrUpdate": {
+                "test\\Search": [
+                  "update"
+                ]
+              }
+            }
+            ,"includeDefaultPlugins": true
+            ,"plugins": {
+              "Search": {
+                "api": {
+                  "test_SearchRouter": {
+                    "methods": {
+                      "search": {"len": 1}
+                    }
+                  }
+                }
+                ,"remote": {
+                  "handler": "test_SearchRouter.search"
+                }
+              }
+            }
+        }
+
 - renamed constants:
     CORE_ROOT -> CORE_DIR
     APP_ROOT -> APP_DIR

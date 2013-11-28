@@ -1,4 +1,7 @@
 <?php
+namespace CB;
+
+use CB\DB;
 
 /**
  * Running crons script.
@@ -11,7 +14,7 @@
  */
 
 if (sizeof($argv) < 3) {
-    die('Not enough parameters specified. Use run_cron.php <cron_name> <core_name>/all ');
+    die('Not enough parameters specified. Use run_cron.php <cron_name> <core_name>|all ');
 }
 
 $cron_file = explode('/', $argv[1]);
@@ -25,32 +28,41 @@ if (!file_exists($cron_path.$cron_file)) {
     die('cannot find cron '.$cron_path.$cron_file);
 }
 
-define(
-    'CORES_DIR',
-    realpath(
-        dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.
-        DIRECTORY_SEPARATOR.'httpsdocs'.DIRECTORY_SEPARATOR.'cores'.DIRECTORY_SEPARATOR
-    )
+/* update include_path and include global script */
+define('DOC_ROOT', realpath($cron_path.'../../httpsdocs/').DIRECTORY_SEPARATOR);
+set_include_path(
+    DOC_ROOT.'classes'.PATH_SEPARATOR.
+    get_include_path()
 );
 
+include DOC_ROOT.'global.php';
+
+$cfg = \CB\Config::loadConfigFile(DOC_ROOT.'config.ini');
+
+require_once DOC_ROOT.'lib/DB.php';
+DB\connect($cfg);
+
 $cores = array();
-foreach (new DirectoryIterator(CORES_DIR) as $file) {
-    $name =$file->getFilename();
-    if ($name == 'sample') {
-        continue;
-    }
-    if (!$file->isDot() &&
-        $file->isDir() &&
-        (empty($argv[2]) || ( $argv[2] == $name ) || ( $argv[2] == 'all' ) )) {
-        $cores[] = $name;
+$res = DB\dbQuery(
+    'SELECT name
+    FROM casebox.cores
+    WHERE active = 1',
+    array()
+) or die(DB\dbQueryError());
+while ($r = $res->fetch_assoc()) {
+    if (empty($argv[2]) || ($argv[2] == $r['name']) || ($argv[2] == 'all')) {
+        $cores[] = $r['name'];
     }
 }
-if (sizeof($cores) > 1) {
-    echo sizeof($cores)." cores found.\n";
-}
+$res->close();
 
 foreach ($cores as $core) {
     echo "\nProcessing core $core ...";
     echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3]);
 }
 echo "\nDone\n";
+
+function isDebugHost()
+{
+    return true;
+}
