@@ -431,7 +431,7 @@ class Object extends OldObject
             $p['title'] = $autoTitle;
         }
 
-        $titleField = $this->getFieldValue('_title');
+        $titleField = @$this->getFieldValue('_title', 0)['value'];
         if (!empty($titleField)) {
             $p['custom_title'] = $titleField;
         }
@@ -441,47 +441,37 @@ class Object extends OldObject
         }
 
         if (empty($p['date'])) {
-            $p['date'] = $this->getFieldValue('_date_start');
+            $p['date'] = @$this->getFieldValue('_date_start', 0)['value'];
         }
 
         if (empty($p['date_end'])) {
-            $p['date_end'] = $this->getFieldValue('_date_end');
+            $p['date_end'] = @$this->getFieldValue('_date_end', 0)['value'];
         }
 
     }
+
     /**
      * get a field value from current objects data ($this->data)
      *
-     * TODO: this function should be reviewed for correct work with duplicates and subfields
+     * This function return an array of values for duplicate fields
      *
      * @param  varchar $fieldName  field name
-     * @param  integer $valueIndex optional value duplication index. default 0
-     * @return variant
+     * @param  integer $valueIndex optional value duplication index. default false
+     * @return array
      */
-    public function getFieldValue($fieldName, $valueIndex = 0)
+    public function getFieldValue($fieldName, $valueIndex = false)
     {
-        if (empty($this->template)) {
-            return null;
+        $rez = array();
+        $ld = $this->getAssocLinearData();
+
+        if (!empty($ld[$fieldName])) {
+            $rez = $ld[$fieldName];
+        }
+        if ($valueIndex !== false) {
+            $rez = @$rez[$valueIndex];
         }
 
-        if (!empty($this->data['data'][$fieldName])) {
-            $v = &$this->data['data'][$fieldName];
-            if (is_scalar($v)) {
-                return $v;
-            }
-            if (isset($v['value'])) {
-                return $v['value'];
-            }
-            $v = &$v[0];
-
-            if (isset($v['value'])) {
-                return $v['value'];
-            }
-
-            return $v;
-        }
-
-        return null;
+        return $rez;
     }
 
     /**
@@ -588,7 +578,7 @@ class Object extends OldObject
         return $rez;
     }
 
-    protected function getLinearNodesData($data)
+    protected function getLinearNodesData(&$data)
     {
         $rez = array();
         foreach ($data as $fieldName => $fieldValue) {
@@ -605,17 +595,6 @@ class Object extends OldObject
                 } else {
                     $value = array_merge($value, $fv);
                 }
-                // if (isset($fv['value'])) {
-                //     $value['value'] = $fv['value'];
-                //     if (isset($fv['info'])) {
-                //         $value['info'] = $fv['info'];
-                //     }
-                //     if (isset($fv['files'])) {
-                //         $value['files'] = $fv['files'];
-                //     }
-                // } else {
-                //     $value['value'] = $fv;
-                // }
                 $rez[] = $value;
                 if (!empty($fv['childs'])) {
                     $rez = array_merge($rez, $this->getLinearNodesData($fv['childs']));

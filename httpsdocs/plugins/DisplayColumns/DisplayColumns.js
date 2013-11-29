@@ -62,6 +62,7 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
                 var column = value;
                 column.dataIndex = key;
                 column.header = Ext.value(column.header, column.title);
+                column.renderer = this.defaultColumnRenderer;
                 rez.push(column);
             }
             ,this
@@ -83,6 +84,9 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
             ,this
         );
         return rez;
+    }
+    ,defaultColumnRenderer: function (v, meta, record, row_idx, col_idx, store) {
+        return record.json[this.dataIndex];
     }
 });
 

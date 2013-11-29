@@ -74,8 +74,8 @@ class Browser
                     $values = array();
                     foreach ($ids as $id) {
                         $obj->load(array('id' => $id));
-                        $fv = $obj->getFieldValue($p['field']);
-                        $fv = Util\toNumericArray($fv);
+                        $fv = $obj->getFieldValue($p['field'], 0);
+                        $fv = Util\toNumericArray(@$fv['value']);
                         $values = array_merge($values, $fv);
                     }
                     $values = array_unique($values);

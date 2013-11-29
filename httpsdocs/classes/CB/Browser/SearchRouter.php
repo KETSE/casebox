@@ -49,8 +49,13 @@ class SearchRouter
         $this->genericObj->setData($this->inputParams);
         $this->prepareParams();
 
-        return $this->search->query($this->params);
+        $rez = $this->search->query($this->params);
+        foreach ($rez['data'] as &$r) {
+            $r['nid'] = $r['id'];
+            unset($r['id']);
+        }
 
+        return $rez;
     }
 
     protected function prepareParams()
@@ -68,6 +73,7 @@ class SearchRouter
                 ,'path' => 1
                 ,'descendants' => 1
                 ,'template_id' => 1
+                ,'filters' => 1
             )
         );
 

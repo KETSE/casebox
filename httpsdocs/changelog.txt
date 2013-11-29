@@ -4,6 +4,13 @@ Fixed Bugs:
 ----------
 - crons not running due to configuration changes
 
+CaseBox 1.9.64 (2013-11-29)
+==============================
+New Features, Improvements
+--------------------------
+- modified Object.getFieldValue method to return a generic structured result depending on arguments
+- updated DisplayColumns plugin
+
 CaseBox 1.9.63 (2013-11-28)
 ==============================
 New Features, Improvements
@@ -25,8 +32,8 @@ New Features, Improvements
             "core_dir": "//cores/test/"
             ,"db_host": "localhost"
             ,"db_name": "cb_hcav"
-            ,"db_user": "local"
-            ,"db_pass": "h0st"
+            ,"db_user": "username"
+            ,"db_pass": "password"
             ,"db_port": 3306
             ,"listeners": {
               "beforeNodeSolrUpdate": {

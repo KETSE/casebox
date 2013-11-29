@@ -63,7 +63,7 @@ class Template extends Object
                 $params[] = $i;
                 $i++;
             } elseif (!empty($field)) {
-                $value = $this->getFieldValue($fieldName);
+                $value = @$this->getFieldValue($fieldName, 0)['value'];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -185,7 +185,7 @@ class Template extends Object
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
             } elseif (!empty($field)) {
-                $value = $this->getFieldValue($fieldName);
+                $value = @$this->getFieldValue($fieldName, 0)['value'];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -484,6 +484,10 @@ class Template extends Object
 
             case 'datetime':
                 $value = Util\formatMysqlTime($value);
+                $tmp = explode(' ', $value);
+                if (!empty($tmp[1]) && ($tmp[1] == '00:00')) {
+                    $value = $tmp[0];
+                }
                 break;
 
             case 'html':

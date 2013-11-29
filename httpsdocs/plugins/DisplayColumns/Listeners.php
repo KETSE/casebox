@@ -70,12 +70,18 @@ class Listeners
                 foreach ($customColumns as $fieldName => &$col) {
                     $field = $template->getField($fieldName);
                     //populate column properties if empty
-                    if (empty($col)) {
+                    if (empty($col['title'])) {
                         $col['title'] = $field['title'];
                     }
 
-                    $value = $obj->getFieldValue($fieldName);
-                    $doc[$fieldName] = $template->formatValueForDisplay($field, $value);
+                    $values = $obj->getFieldValue($fieldName);
+                    $value = array();
+                    foreach ($values as $value) {
+                        $value = is_array($value)
+                            ? $value['value']
+                            : $value;
+                        $doc[$fieldName] = $template->formatValueForDisplay($field, $value, false);
+                    }
                 }
             }
             $p['result']['DC'] = $customColumns;

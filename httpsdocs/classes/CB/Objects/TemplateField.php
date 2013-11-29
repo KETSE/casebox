@@ -41,7 +41,7 @@ class TemplateField extends Object
         $p = &$this->data;
 
         //update name to _title field if presend in data (actually it should be present)
-        $title = $this->getFieldValue('_title');
+        $title = @$this->getFieldValue('_title', 0)['value'];
         if (!empty($title)) {
             $p['name'] = $title;
         }
@@ -66,7 +66,7 @@ class TemplateField extends Object
                 $params[] = $i;
                 $i++;
             } elseif (!empty($field)) {
-                $value = $this->getFieldValue($fieldName);
+                $value = @$this->getFieldValue($fieldName, 0)['value'];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -144,7 +144,7 @@ class TemplateField extends Object
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
             } elseif (!empty($field)) {
-                $value = $this->getFieldValue($fieldName);
+                $value = @$this->getFieldValue($fieldName, 0)['value'];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);

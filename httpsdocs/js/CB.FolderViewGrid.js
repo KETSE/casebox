@@ -854,6 +854,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.folderProperties.type = parseInt(this.folderProperties.type, 10);
         this.folderProperties.subtype = parseInt(this.folderProperties.subtype, 10);
         this.folderProperties.pathtext = o.result.pathtext;
+
         this.fireEvent('viewloaded', proxy, o, options);
 
         canUpload = !this.folderProperties.inFavorites;
@@ -1065,6 +1066,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         params = Ext.apply({}, this.params);
         params.filters = filters;
         this.fireEvent('changeparams', params);
+        this.setParams(params);
     }
     ,onCreateEventClick: function(b, e) {
         this.fireEvent('taskcreate', {
