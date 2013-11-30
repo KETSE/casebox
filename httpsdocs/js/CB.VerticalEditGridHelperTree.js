@@ -114,8 +114,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     rez[i] = {value: fieldData[i]};
                 }
                 if(Ext.isDefined(fieldData[i].value)){
-                    rez[0] = fieldData[i];
-                    return rez;
+                    rez[i] = fieldData[i];
                 }
             }
         } else {

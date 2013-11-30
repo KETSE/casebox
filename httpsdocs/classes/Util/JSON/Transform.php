@@ -17,7 +17,7 @@ class Transform
 
         DB\startTransaction();
         $res = DB\dbQuery(
-            'SELECT id FROM templates WHERE `type` = \'field\''
+            "SELECT id FROM templates WHERE `type` in ( 'field', 'template')"
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {

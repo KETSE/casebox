@@ -1,4 +1,11 @@
-CaseBox 1.9.66 (2013-11-29)
+CaseBox 1.9.67 (2013-11-30)
+==============================
+Fixed Bugs:
+----------
+- bug when loading duplicated values in Helper for VerticalEditGrid
+- exluded templates update from object data convertion script because the script will clear templates configurations.
+
+CaseBox 1.9.66 (2013-11-30)
 ==============================
 Fixed Bugs:
 ----------
