@@ -135,7 +135,7 @@ class OldObject
         return $rez;
     }
 
-    protected function getOldDuplicates($duplicatePid = 0, $fieldId = null)
+    protected function getOldDuplicates($duplicatePid = 0, $fieldPid = null)
     {
         $rez = array();
         // iterate all values and select duplicate values
@@ -145,9 +145,9 @@ class OldObject
                 $f = &$fieldValues[$i];
                 $templateField = $this->template->getField($f['field_id']);
                 // check if this field belongs to our $duplicatePid
-                if (!empty($f['duplicate_id']) &&
-                    (@$this->oldDuplicates[$f['duplicate_id']] == $duplicatePid) &&
-                    ($templateField['id'] == $fieldId)
+                if (!empty($f['duplicate_id']) && ($f['duplicate_id'] > 0) &&
+                    (@$this->oldDuplicates[$templateField['id']][$f['duplicate_id']] == $duplicatePid) &&
+                    ($templateField['id'] == $fieldPid)
                 ) {
                     $value = array(
                         'value' => $f['value']
@@ -181,7 +181,7 @@ class OldObject
         return $rez;
     }
 
-    protected function getOldChilds($duplicateId = 0, $fieldId = null)
+    protected function getOldChilds($duplicateId = 0, $fieldPid = null)
     {
         $rez = array();
         // iterate all values and select child values
@@ -193,7 +193,7 @@ class OldObject
 
                 // check if this field belongs to our $duplicatePid
                 if (($f['duplicate_id'] == $duplicateId) &&
-                    ($templateField['pid'] == $fieldId)
+                    ($templateField['pid'] == $fieldPid)
                 ) {
                     $value = array(
                         'value' => $f['value']

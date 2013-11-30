@@ -276,33 +276,43 @@ class TreeSync extends \Util\TreeSync
         $tc = \CB\Templates\SingletonCollection::getInstance();
         $tc->loadAll();
         $modifiedTemplateIds = array();
+        $modifiedTemplateFieldIds = array();
         foreach ($tc->templates as $template) {
             $data = $template->getData();
             $modified = false;
             foreach ($data['fields'] as &$field) {
-                if (!empty($field['cfg']['thesauriId'])) {
-                    // if (isset($modifiedTags[$field['cfg']['thesauriId']])) {
-                        // $field['cfg']['thesauriId'] = $modifiedTags[$field['cfg']['thesauriId']];
-                        // $modified = true;
-                    // }
-                    $field['cfg']['source'] = 'tree';
-                    if ($field['cfg']['thesauriId'] == 'dependent') {
-                        $field['cfg']['dependency'] = array();
-                        $field['cfg']['scope'] = 'variable';
-                    } else {
-                        if (isset($this->tags[$field['cfg']['thesauriId']]['id'])) {
-                            $field['cfg']['scope'] = $this->tags[$field['cfg']['thesauriId']]['id'];
+                switch ($field['type']) {
+                    case 'combo':
+                        if (empty($field['cfg']['thesauriId'])) {
+                            continue 2;
                         }
-                    }
-                    // unset($field['cfg']['thesauriId']);
-                    $field['cfg']['renderer'] = 'listObjIcons';
-
-                    if (isset($field['editor']) && ($field['editor'] == 'popuplist')) {
+                        break;
+                    case 'popuplist':
                         $field['cfg']['editor'] = 'form';
-                    }
-                    $field['type'] = '_objects';
-                    $modified = true;
+                        $field['cfg']['renderer'] = 'listGreenIcons';
+                        $field['cfg']['autoLoad'] = true;
+                        break;
+                    default:
+                        continue 2;
                 }
+                $field['type'] = '_objects';
+                $field['cfg']['source'] = 'tree';
+
+                if ($field['cfg']['thesauriId'] == 'dependent') {
+                    $field['cfg']['dependency'] = array();
+                    $field['cfg']['scope'] = 'variable';
+                } elseif (isset($this->tags[$field['cfg']['thesauriId']]['id'])) {
+                    $field['cfg']['scope'] = $this->tags[$field['cfg']['thesauriId']]['id'];
+                }
+
+                $modifiedTemplateFieldIds[$field['id']] = 1;
+                $modified = true;
+
+                // if (empty($field['cfg']['renderer'])) {
+                //     $field['cfg']['renderer'] = 'listObjIcons';
+                // }
+
+                // unset($field['cfg']['thesauriId']);
             }
             if ($modified) {
                 $template->update($data);
@@ -332,32 +342,32 @@ class TreeSync extends \Util\TreeSync
                     $tf = $template->getField($fn);
                     $processFields[] = array($tf, &$fv);
                 }
-
                 while (!empty($processFields)) {
                     $field = array_shift($processFields);
-                    $tf = &$field[0];
+                    $tf = $field[0];
                     $fv = &$field[1];
-                    if (@$tf['cfg']['source'] == 'tree') {
-                        if (is_array($fv) && !array_key_exists('value', $fv)) {
-                            foreach ($fv as &$mfv) {
-                                $this->modifyFieldValue($mfv);
-                                if (!empty($mfv['childs'])) {
-                                    foreach ($mfv['childs'] as $cfn => $cfv) {
-                                        $processFields[] = array($template->getField($cfn), &$cfv);
-                                    }
-                                }
+                    if (Objects\Object::isFieldValue($fv)) {
+                        if (!empty($modifiedTemplateFieldIds[$tf['id']])) {
+                            $fv = $this->modifyFieldValue($fv);
+                        }
+                        if (!empty($fv['childs'])) {
+                            foreach ($fv['childs'] as $cfn => &$cfv) {
+                                $processFields[] = array($template->getField($cfn), &$cfv);
                             }
-                        } else {
-                            $this->modifyFieldValue($fv);
+                        }
+                    } else {
+                        foreach ($fv as &$mfv) {
+                            if (!empty($modifiedTemplateFieldIds[$tf['id']])) {
+                                $mfv = $this->modifyFieldValue($mfv);
+                            }
                             if (!empty($mfv['childs'])) {
-                                foreach ($fv['childs'] as $cfn => $cfv) {
+                                foreach ($mfv['childs'] as $cfn => &$cfv) {
                                     $processFields[] = array($template->getField($cfn), &$cfv);
                                 }
                             }
                         }
                     }
                 }
-
                 $obj->update($data);
             }
             $res->close();
@@ -370,7 +380,6 @@ class TreeSync extends \Util\TreeSync
      */
     protected function modifyFieldValue(&$fieldValue)
     {
-        $rez = false;
         if (is_array($fieldValue)) {
             if (!empty($fieldValue['value'])) {
                 $vals = explode(',', $fieldValue['value']);
@@ -380,21 +389,17 @@ class TreeSync extends \Util\TreeSync
                     }
                 }
                 $fieldValue['value'] = implode(',', $vals);
-            } else {
-                return $rez;
             }
-        } else {
-            if (empty($fieldValue)) {
-                return $rez;
-            } else {
-                $vals = explode(',', $fieldValue);
-                for ($i=0; $i < sizeof($vals); $i++) {
-                    if (!empty($this->modifiedTags[$vals[$i]])) {
-                        $vals[$i] = $this->modifiedTags[$vals[$i]];
-                    }
+        } elseif (!empty($fieldValue)) {
+            $vals = explode(',', $fieldValue);
+            for ($i=0; $i < sizeof($vals); $i++) {
+                if (!empty($this->modifiedTags[$vals[$i]])) {
+                    $vals[$i] = $this->modifiedTags[$vals[$i]];
                 }
-                $fieldValue = implode(',', $vals);
             }
+            $fieldValue = implode(',', $vals);
         }
+
+        return $fieldValue;
     }
 }

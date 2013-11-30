@@ -1,4 +1,10 @@
-CaseBox 1.9.64 (2013-11-28)
+CaseBox 1.9.66 (2013-11-29)
+==============================
+Fixed Bugs:
+----------
+- fixed some bugs in cores upgrading process
+
+CaseBox 1.9.65 (2013-11-29)
 ==============================
 Fixed Bugs:
 ----------
@@ -23,8 +29,7 @@ New Features, Improvements
 - added Search plugin for templated searches
 - moved core configs into database (casebox.cores) as a json formated field
     This implied refactoring of other units (lib/DB.php, Config.php, etc.)
-    Now the main config.ini file should contain a db_user and db_pass for
-        connection to casebox database.
+    Now the main config.ini file should contain a db_user and db_pass for connection to casebox database.
     Configuration for cores is stored in casebox.cores table and could be absolutely different
         from casebox db config (basic config from config.ini).
     Example of core configuration:

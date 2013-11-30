@@ -27,7 +27,7 @@ class Transform
         if (empty($fieldTemplates)) {
             $fieldTemplates = '';
         } else {
-            $fieldTemplates = ' WHERE template_id NOT IN ('.implode(',', $fieldTemplates).')';//id = 5847 AND
+            $fieldTemplates = ' WHERE template_id NOT IN ('.implode(',', $fieldTemplates).')';
         }
 
         echo "Start processing objects :\n";
@@ -37,6 +37,7 @@ class Transform
             echo $r['id'].' ';
             $obj = Objects::getCustomClassByObjectId($r['id']);
             $obj->load();
+            $obj->loadOldGridDataToNewFormat();
             $obj->update();
         }
         $res->close();

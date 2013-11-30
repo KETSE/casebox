@@ -498,26 +498,17 @@ class Object extends OldObject
             $templateData['title_template']
         );
 
+        $ld = $this->getLinearData();
         /* replace field values */
-        if (!empty($this->data['data'])) {
-            foreach ($this->data['data'] as $fieldName => $fv) {
-                $field = $this->template->getField($fieldName);
-                $value = !is_array($fv)
-                    ? $fv
-                    : ($this->isFieldValue($fv)
-                        ? @$fv['value']
-                        : $fv[0]['value']
-                    );
-
-                $v = $this->template->formatValueForDisplay($field, $value, false);
-                if (is_array($v)) {
-                    $v = implode(',', $v);
-                }
-                $v = addcslashes($v, '\'');
-                $rez = str_replace('{'.$fieldName.'}', $v, $rez);
-                $fields[$fieldName] = $v;
-                // $rez = str_replace('{'.$fieldName.'_info}', @$fv['info'], $rez);
+        foreach ($ld as $field) {
+            $tf = $this->template->getField($field['name']);
+            $v = $this->template->formatValueForDisplay($tf, $field['value'], false);
+            if (is_array($v)) {
+                $v = implode(',', $v);
             }
+            $v = addcslashes($v, '\'');
+            $rez = str_replace('{'.$field['name'].'}', $v, $rez);
+            $fields[$field['name']] = $v;
         }
 
         //replacing field titles into object title variable
@@ -639,7 +630,7 @@ class Object extends OldObject
      * @param  variant $value
      * @return boolean
      */
-    public function isFieldValue($value)
+    public static function isFieldValue($value)
     {
         if (is_scalar($value) ||
             is_null($value)
