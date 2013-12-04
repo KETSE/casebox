@@ -155,8 +155,8 @@ class Object extends OldObject
                 $this->id
                 ,@$p['title']
                 ,@$p['custom_title']
-                ,$p['date']
-                ,$p['date_end']
+                ,@$p['date']
+                ,@$p['date_end']
                 ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
                 ,$_SESSION['user']['id']
             )
@@ -354,7 +354,7 @@ class Object extends OldObject
                 ,@$d['title']
                 ,@$d['custom_title']
                 ,$d['date']
-                ,$d['date_end']
+                ,@$d['date_end']
                 ,$templateData['iconCls']
                 ,@$d['pfu']
                 ,json_encode($d['data'], JSON_UNESCAPED_UNICODE)
@@ -440,12 +440,14 @@ class Object extends OldObject
             $p['custom_title'] = $p['name'];
         }
 
-        if (empty($p['date'])) {
-            $p['date'] = @$this->getFieldValue('_date_start', 0)['value'];
+        $dateStart = @$this->getFieldValue('_date_start', 0)['value'];
+        if (!empty($dateStart)) {
+            $p['date'] = $dateStart;
         }
 
-        if (empty($p['date_end'])) {
-            $p['date_end'] = @$this->getFieldValue('_date_end', 0)['value'];
+        $dateEnd = @$this->getFieldValue('_date_end', 0)['value'];
+        if (!empty($dateEnd)) {
+            $p['date_end'] = $dateEnd;
         }
 
     }

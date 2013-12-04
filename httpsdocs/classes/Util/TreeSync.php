@@ -76,13 +76,6 @@ class TreeSync
         echo "Start transaction\n";
         DB\startTransaction();
 
-        // before start we'll execute a special procedure that will clear all lost objects.
-        // These objects can couse errors on sync templates with tree
-        DB\dbQuery('CALL p_clear_lost_objects()') or die(DB\dbQueryError());
-
-        // update possible cyclic references in templates_structure to template_id
-        DB\dbQuery('UPDATE templates_structure SET pid = template_id WHERE pid = id') or die(DB\dbQueryError());
-
         $this->genericObject = new \CB\Objects\Object();
 
         // prepare languages association for fields

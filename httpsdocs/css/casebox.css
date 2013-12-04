@@ -4,7 +4,7 @@ a {color: #15C}
 .x-grid3-row td, .x-grid3-summary-row td {font: 11px "lucida grande",tahoma,verdana,arial,sans-serif}
 
 .panel-header-nobg {background: none}
-.generic-object {padding: 0px 5px 10px 5px; color: #555}
+.generic-object {padding: 0 5px 10px 5px; color: #555}
 
 .generic-object a, .generic-object a:link, .generic-object a:visited, .generic-object a:hover{ color: #333; text-decoration: none}
 .generic-object a:hover{ color: #286bcc; text-decoration: underline}
@@ -22,9 +22,7 @@ a {color: #15C}
 background-image: url(i/ico/calendar-blue.png);
 }
 
-.calendar {
-background-image: url(i/ico/calendar-blue.png);
-}
+.calendar {background-image: url(i/ico/calendar-blue.png)}
 
 .chain-or {padding-left: 18px; background: url(i/ico/chain-unchain.png) 0 0 no-repeat !important}
 .chain-and {padding-left: 18px; background: url(i/ico/chain.png) 0 0 no-repeat !important}
@@ -44,7 +42,7 @@ background-image: url(i/ico/calendar-blue.png);
 .open {background-image:url(i/ico/external.png) !important}
 
 /* . {margin-top: 2px} */
-.mainTabPanel  {background-color: #FFF !important; border: 0px !important}
+.mainTabPanel  {background-color: #FFF !important; border: 0 !important}
 
 ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}
 .caselist2  li {margin-left: 20px; color: #555}
@@ -106,7 +104,7 @@ ul.folder-list li {margin-left: 20px; color: #555}
 
 
 /*
-.folder-list span {float: right; text-align: right; width: 20px; text-align: center; font-size: 12px; background-color: #DFE8F6; padding: 0px 4px;  -moz-border-radius: 4px 4px 4px 4px; color: #333}
+.folder-list span {float: right; text-align: right; width: 20px; text-align: center; font-size: 12px; background-color: #DFE8F6; padding: 0 4px;  -moz-border-radius: 4px 4px 4px 4px; color: #333}
 */
 
 .folder-list span {float: right; text-align: right;
@@ -155,7 +153,7 @@ filter:alpha(opacity=100)
 ul.log li {
 color: #333;
 border-bottom: 1px solid #EEE;
-padding: 5px 0px;
+padding: 5px 0;
 /* font: 11px/13px arial,tahoma,helvetica,sans-serif; */
 }
 
@@ -170,8 +168,8 @@ filter:alpha(opacity=90)
 }
 
 span.decision {
-background: url(i/ico/auction-hammer.png) 0px 0 no-repeat;
-padding: 1px 0px 1px 16px;
+background: url(i/ico/auction-hammer.png) 0 0 no-repeat;
+padding: 1px 0 1px 16px;
 }
 
 
@@ -185,11 +183,11 @@ color: maroon;
 }
 
 div.letter {
-padding: 1px 0px 1px 20px;
+padding: 1px 0 1px 20px;
 /* color: #777; */
 }
 div.task {
-padding: 1px 0px 1px 19px;
+padding: 1px 0 1px 19px;
 color: #777;
 }
 
@@ -205,28 +203,28 @@ div.task-info {
 
 
 div.letter {
-padding: 1px 0px 1px 0px;
+padding: 1px 0 1px 0;
 /* color: #777; */
 }
 
 
-div.mail {background: url(i/ico/mail.png) 0px 0 no-repeat}
-div.app {background: url(i/ico/document-horizontal-text.png) 0px 0 no-repeat}
-div.decision {background: url(i/ico/auction-hammer.png) 0px 0 no-repeat}
-div.complaint {background: url(i/ico/fire.png) 0px 0 no-repeat}
-div.echr-app {background: url(i/ico/bank.png) 0px 0 no-repeat}
-div.comm {background: url(i/ico/megaphone.png) 0px 0 no-repeat}
+div.mail {background: url(i/ico/mail.png) 0 0 no-repeat}
+div.app {background: url(i/ico/document-horizontal-text.png) 0 0 no-repeat}
+div.decision {background: url(i/ico/auction-hammer.png) 0 0 no-repeat}
+div.complaint {background: url(i/ico/fire.png) 0 0 no-repeat}
+div.echr-app {background: url(i/ico/bank.png) 0 0 no-repeat}
+div.comm {background: url(i/ico/megaphone.png) 0 0 no-repeat}
 
 div.red {
-background: url(i/ico/cross-script.png) 0px 0 no-repeat;
+background: url(i/ico/cross-script.png) 0 0 no-repeat;
 }
 
 div.gray {
-background: url(i/ico/bullet_gray.png) 0px 0 no-repeat;
+background: url(i/ico/bullet_gray.png) 0 0 no-repeat;
 }
 
 div.green {
-background: url(i/ico/tick.png) 0px 0 no-repeat;
+background: url(i/ico/tick.png) 0 0 no-repeat;
 }
 
 a.pdf {
@@ -234,11 +232,11 @@ background: url(i/ico/document-pdf.png) 2px 0 no-repeat;
 }
 
 a.case {
-background: url(i/ico/briefcase-small.png) 0px 0 no-repeat !important;
+background: url(i/ico/briefcase-small.png) 0 0 no-repeat !important;
 }
 
 a.decision {
-background: url(i/ico/auction-hammer.png) 0px 0 no-repeat;
+background: url(i/ico/auction-hammer.png) 0 0 no-repeat;
 }
 
 a.system {
@@ -246,22 +244,22 @@ background: url(i/ico/server.png) 2px 0 no-repeat;
 }
 
 .deadline {
-background: url(i/ico/calendar-blue.png) 0px 0px no-repeat;
+background: url(i/ico/calendar-blue.png) 0 0 no-repeat;
 }
 
 
 
 
 a.deadline {
-background: url(i/ico/calendar-small.png) 0px 0 no-repeat;
+background: url(i/ico/calendar-small.png) 0 0 no-repeat;
 }
 
 a.user-m {
-background: url(i/ico/user-small.png) 0px 0 no-repeat;
+background: url(i/ico/user-small.png) 0 0 no-repeat;
 }
 
 a.user-f {
-background: url(i/ico/user-small-female.png) 0px 0 no-repeat;
+background: url(i/ico/user-small-female.png) 0 0 no-repeat;
 }
 
 
@@ -270,8 +268,8 @@ background: url(i/ico/user-small-female.png) 0px 0 no-repeat;
 
 .filter_list {
 /* width: 97%; */
-padding-left: 0px;
-margin:7px 0 0 0px;
+padding-left: 0;
+margin:7px 0 0 0;
 padding:0;
 list-style:none;
 /* font-size:9pt; */
@@ -359,7 +357,7 @@ float: left;
 }
 
 .active_filters .btn .st, .active_filters .btn .st i {
-padding-left: 0px;
+padding-left: 0;
 margin-left:0;
 }
 
@@ -403,7 +401,7 @@ background-repeat: no-repeat;
 display: block;
 height: 16px;
 width: 16px;
-left: 0px;
+left: 0;
 }
 
 .icon_close_red {
@@ -503,6 +501,11 @@ background-repeat: no-repeat; */
 .icon32-cal-month { background-image: url(i/ico/32/cal-month.png) !important; min-width: 38px}
 .icon32-cal-prev, .icon32-prev { background-image: url(i/ico/32/prev.png) !important; min-width: 38px}
 .icon32-cal-next, .icon32-next { background-image: url(i/ico/32/next.png) !important; min-width: 38px}
+.icon32-export{ background-image: url(i/ico/32/export.png) !important; min-width: 38px}
+.icon32-search{ background-image: url(i/ico/32/search.png) !important; min-width: 38px}
+
+.icon-search{background-image: url(i/ico/search.png); }
+.icon-documents{background-image: url(i/ico/32/documents.png); }
 .calendar-title{font-size: 16px !important; font-weight: bold !important; color: #333}
 
 .x-menu-item .icon32-del {background-image: url(i/ico/cross-script.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -589,7 +592,7 @@ background-color: #FFF;
     background-image: none !important;
     /* background-color: #FFF; */
 }
-.whiteTabPanel  {background-color: #FFF !important; border: 0px !important}
+.whiteTabPanel  {background-color: #FFF !important; border: 0 !important}
 
 .whiteTabPanel ul.x-tab-strip-top {
     background-color: #FFF;
@@ -611,7 +614,7 @@ background-color: #FFF;
 
 .versions .user {
     width: 1% !important;
-    padding-right: 0px;
+    padding-right: 0;
 }
 
 .versions {
@@ -742,15 +745,15 @@ table.obj-preview p.prop-info {
 }
 
 .obj-files li.doc {
-    background: url(/i3/document-doc.png) 0px 0 no-repeat;
+    background: url(/i3/document-doc.png) 0 0 no-repeat;
 }
 
 .obj-files li.pdf {
-    background: url(/i3/document-pdf.png) 0px 0 no-repeat;
+    background: url(/i3/document-pdf.png) 0 0 no-repeat;
 }
 
 .obj-files li.task {
-    background: url(/i3/task.png) 0px 0 no-repeat;
+    background: url(/i3/task.png) 0 0 no-repeat;
 }
 
 .gr {
@@ -799,7 +802,7 @@ border-bottom: 1px solid #DDD;
 }
 .path {text-decoration: none; color: #777; }
 .path:hover {text-decoration: underline; }
-.tasks-msg{color: #777; padding: 0px 5px 10px 5px}
+.tasks-msg{color: #777; padding: 0 5px 10px 5px}
 .tasks-msg a{color: #777; text-decoration: underline;}
 
 table.item-props, table.duplicates  {
@@ -825,7 +828,7 @@ table.duplicates  td  {
 table.duplicates td.k {
     width: 1%;
     color: #777;
-    padding-right: 0px;
+    padding-right: 0;
 }
 
 .rph {

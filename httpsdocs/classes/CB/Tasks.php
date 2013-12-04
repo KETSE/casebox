@@ -1213,7 +1213,7 @@ class Tasks
             <table class="props"><tbody>
             <tr><td class="k">'.L\Status.':</td><td><span class="status{status}">{status_text}</span></td></tr>
             <tr><td class="k">'.L\Importance.':</td><td>{importance_text}</td></tr>
-            <tr><td class="k">'.L\Category.':</td><td><img src="/css/i/s.gif" class="icon {category_icon}"> {category_text}</td></tr>
+            <tr><td class="k">'.L\Category.':</td><td>{category_text}</td></tr>
             <tr><td class="k">'.L\Path.':</td><td><a class="path" path="{path}" href="#">{path_text}</a></td></tr>
             <tr><td class="k">'.L\Owner.':</td><td><table class="people"><tbody>
                 <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg"></td><td><b>{creator_name}</b><p class="gr">'.L\Created.': '.
@@ -1251,8 +1251,17 @@ class Tasks
             ,'{status}' => $d['status']
             ,'{status_text}' => L\get('taskStatus'.$d['status'])
             ,'{importance_text}' => $d['importance_text']
-            ,'{category_icon}' => Util\getThesauryIcon($d['category_id'])
-            ,'{category_text}' => Util\getThesauriTitles($d['category_id'])
+            ,'{category_text}' => Objects\Template::formatValueForDisplay(
+                array(
+                    'type' => '_objects'
+                    ,'cfg' => array(
+                        'source' => 'tree'
+                        ,'renderer' => 'listObjIcons'
+                    )
+
+                ),
+                $d['category_id']
+            )
             ,'{path}' => $d['path']
             ,'{path_text}' => $d['pathtext']
             ,'{cid}' => $d['cid']

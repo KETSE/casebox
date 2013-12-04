@@ -3,7 +3,7 @@ Ext.namespace('CB.plugins.Search');
 CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
     title: L.Search
     ,id: 'SearchTab'
-    ,iconCls: 'icon-searchPlugin16'
+    ,iconCls: 'icon-search'
     ,closable: true
     ,autoScroll: true
     ,tbarCssClass: 'x-panel-white'
@@ -14,7 +14,7 @@ CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
             search: new Ext.Button({
                 text: L.Search
                 ,iconAlign:'top'
-                ,iconCls: 'icon-searchPlugin32'
+                ,iconCls: 'icon32-search'
                 ,scale: 'large'
                 ,scope: this
                 ,handler: this.onSearchButtonClick

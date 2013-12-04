@@ -36,6 +36,7 @@ Ext.namespace('CB.DB');
             ,['date', 'Date']
             ,['datetime', 'Datetime']
             ,['float', 'Float']
+            ,['G', 'Group']
             ,['H', 'Header']
             ,['html', 'Html']
             ,['iconcombo', 'IconCombo']
@@ -90,7 +91,6 @@ Ext.namespace('CB.DB');
         idIndex: 0
         ,fields: [ 'code', 'name']
         ,data:  []
-        ,
     });
 
 <?php

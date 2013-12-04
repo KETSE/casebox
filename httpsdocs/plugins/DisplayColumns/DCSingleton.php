@@ -64,7 +64,7 @@ class DCSingleton
         $res->close();
 
         if (empty($pids)) {
-            return;
+            return $rez;
         }
 
         //get properties for pids and detect closest DisplayColumns settings
@@ -147,20 +147,17 @@ class DCSingleton
     public static function getSolrColumns($nodeId = false, $templateId = false)
     {
         $rez = array();
-        $displayColumns = array();
-        if ($templateId !== false) {
-            $displayColumns = static::getTemplateCustomDisplayColumns($templateId);
-        }
-        if (empty($displayColumns) && ($nodeId !== false)) {
-            $displayColumns = static::getNodeCustomDisplayColumns($nodeId);
-        }
-
+        $displayColumns = static::getCustomDisplayColumns($nodeId, $templateId);
         foreach ($displayColumns as $column) {
             if (is_array($column) && !empty($column['solr_column_name'])) {
                 $rez[$column['solr_column_name']] = 1;
             }
         }
 
-        return array_keys($rez);
+        if (!empty($rez)) {
+            $rez = array_keys($rez);
+        }
+
+        return $rez;
     }
 }

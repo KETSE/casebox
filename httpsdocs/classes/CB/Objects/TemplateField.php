@@ -165,12 +165,15 @@ class TemplateField extends Object
         }
     }
 
-    protected function detectParentTemplate()
+    protected function detectParentTemplate($targetPid = false)
     {
-        if (empty($this->data['pid'])) {
+        $rez = ($targetPid === false)
+            ? $this->data['pid']
+            : $targetPid;
+
+        if (empty($rez)) {
             return null;
         }
-        $rez = $this->data['pid'];
 
         $res = DB\dbQuery(
             'SELECT `template_id`
@@ -184,5 +187,48 @@ class TemplateField extends Object
         }
 
         return $rez;
+    }
+
+    protected function copyCustomDataTo($targetId)
+    {
+        // copy data from templates structure table
+        DB\dbQuery(
+            'INSERT INTO `templates_structure`
+                (`id`
+                ,`pid`
+                ,`template_id`
+                ,`name`
+                ,`l1`
+                ,`l2`
+                ,`l3`
+                ,`l4`
+                ,`type`
+                ,`order`
+                ,`cfg`
+                ,`solr_column_name`
+)
+            SELECT
+                t.id
+                ,t.pid
+                ,$3
+                ,ts.name
+                ,ts.l1
+                ,ts.l2
+                ,ts.l3
+                ,ts.l4
+                ,ts.type
+                ,ts.order
+                ,ts.cfg
+                ,ts.solr_column_name
+            FROM `tree` t
+                ,templates_structure ts
+            WHERE t.id = $2
+                AND ts.id = $1',
+            array(
+                $this->id
+                ,$targetId
+                ,$this->detectParentTemplate($targetId)
+            )
+        ) or die(DB\dbQueryError());
     }
 }

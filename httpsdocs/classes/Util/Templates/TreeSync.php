@@ -207,6 +207,28 @@ class TreeSync extends \Util\TreeSync
     {
         $this->prepareExecution();
 
+        /* make some automatic adjustments */
+
+        // before start we'll execute a special procedure that will clear all lost objects.
+        // These objects can cause errors on sync templates with tree
+        DB\dbQuery('CALL p_clear_lost_objects()') or die(DB\dbQueryError());
+
+        // update possible cyclic references in templates_structure to template_id
+        DB\dbQuery('UPDATE templates_structure SET pid = template_id WHERE pid = id') or die(DB\dbQueryError());
+        //update header type
+        DB\dbQuery("UPDATE templates_structure SET `type` = 'H' WHERE tag = 'H'") or die(DB\dbQueryError());
+        //try to set empty names to values from language fields
+        DB\dbQuery("UPDATE templates_structure SET `name` = COALESCE(l1, l2, l3, l4, 'unnamed') WHERE (`name` = '')") or die(DB\dbQueryError());
+        //update group types
+        DB\dbQuery("UPDATE templates_structure SET NAME = 'group', TYPE = 'G' WHERE tag = 'G'") or die(DB\dbQueryError());
+        //update max id from tree to avoid id dublication in templates
+        $res = DB\dbQuery('SELECT (MAX(id)+1) `max_id` FROM templates_structure') or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            DB\dbQuery('ALTER TABLE `tree` AUTO_INCREMENT='.$r['max_id']) or die(DB\dbQueryError());
+        }
+        $res->close();
+        /* end of make some automatic adjustments */
+
         //create or update fields template
         $this->fTId = \Util\Templates::createOrUpdateTemplate($this->fTConfig['pid'], $this->fTConfig);
         $this->fTObject = new Objects\Template($this->fTId);
@@ -464,21 +486,11 @@ class TreeSync extends \Util\TreeSync
     protected function getTemplateFieldDataForTree(&$node)
     {
         $rez = array(
-            'name' => $node['name']//$node['l'.\CB\LANGUAGE_INDEX]
+            'name' => $node['name']
             ,'data' => array(
             )
         );
 
-        if (!empty($this->languageFields[$rez['name']])) {
-            $rez['name'] = $this->languageFields[$rez['name']];
-        } elseif ((strlen($rez['name']) == 2) &&
-            ($rez['name'][0] == 'l') &&
-            is_numeric($rez['name'][1])
-        ) {
-            return null;
-        }
-
-        $rez['data']['_title'] = $rez['name'];
         $rez['template_id'] = $this->fTId;
 
         foreach ($this->languageFields as $field => $language) {
@@ -486,6 +498,12 @@ class TreeSync extends \Util\TreeSync
                 $rez['data'][$language] = $node[$field];
             }
         }
+        if (empty($rez['name'])) {
+            $rez['name'] = $rez['data'][\CB\LANGUAGE];
+        }
+
+        $rez['data']['_title'] = $rez['name'];
+
         if (!empty($node['tag']) && ($node['tag'] == 'H')) {
             $node['type'] = 'H';
         }

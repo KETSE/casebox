@@ -2,7 +2,7 @@ Ext.namespace('CB.plugins.Search');
 
 CB.plugins.Search.ResultForm = Ext.extend(CB.FolderViewGrid, {
     title: L.SearchResults
-    ,iconCls: 'icon-searchPlugin16'
+    ,iconCls: 'icon-search'
     ,closable: true
     ,initComponent: function(){
         var config = {};
@@ -38,22 +38,13 @@ CB.plugins.Search.ResultForm = Ext.extend(CB.FolderViewGrid, {
 
         tb.insert(0, {
             text: L.Search
-            ,iconCls: 'icon-searchPlugin32'
+            ,iconCls: 'icon32-search'
             ,iconAlign:'top'
             ,scale: 'large'
             ,scope: this
             ,handler: function(){
                 App.openUniqueTabbedWidget( 'CBPluginsSearchForm', null, {data: this.data});
             }
-        });
-        idx = tb.items.findIndex('isFill', true);
-        tb.insert(idx, {
-            text: L.Export
-            ,iconAlign:'top'
-            ,iconCls: 'icon-export32'
-            ,scale: 'large'
-            ,scope: this
-            ,handler: this.onSearchButtonClick
         });
     }
 });

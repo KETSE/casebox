@@ -71,6 +71,7 @@ class SearchRouter
                 ,'dir' => 1
                 ,'facets' => 1
                 ,'path' => 1
+                ,'rows' => 1
                 ,'descendants' => 1
                 ,'template_id' => 1
                 ,'filters' => 1

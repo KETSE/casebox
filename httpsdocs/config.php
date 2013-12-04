@@ -26,7 +26,11 @@ if (in_array($arr[0], array( 'www', 'ww2' ))) {
     array_shift($arr);
 }
 $arr = explode('-', $arr[0]);
-$arr = explode('_', $arr[0]);
+if (in_array($arr[sizeof($arr)-1], array('local', 'd'))) {
+    array_pop($arr);
+}
+$arr = implode('-', $arr);
+$arr = explode('_', $arr);
 
 define('CB\\CORE_NAME', $arr[0]);
 /* end of detecting core name (project name) from SERVER_NAME */
@@ -317,7 +321,7 @@ function fireEvent($eventName, &$params)
             try {
                 $class->$method($params);
             } catch (\Exception $e) {
-                debug('Event Exception for '.$class.'->'.$method);
+                debug('Event Exception for '.$className.'->'.$method);
             }
             unset($GLOBALS['running_trigger']);
         }

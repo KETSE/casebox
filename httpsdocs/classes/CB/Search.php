@@ -5,9 +5,10 @@ class Search extends Solr\Client
 {
     /*when requested to sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
-    public $replaceSortFields = array('name' => 'sort_name', 'path' => 'sort_path');
+    public $replaceSortFields = array('nid' => 'id', 'name' => 'sort_name', 'path' => 'sort_path');
     public $acceptableSortFields = array(
-         'name'
+         'id'
+         ,'name'
          ,'path'
          ,'size'
          ,'date'
@@ -88,15 +89,14 @@ class Search extends Solr\Client
                 }
             }
             foreach ($sort as $f => $d) {
+                if (isset($this->replaceSortFields[$f])) {
+                    $f = $this->replaceSortFields[$f]; // replace with convenient sorting fields if defined
+                }
                 if (!in_array($f, $this->acceptableSortFields)) {
                     continue;
                 }
 
-                if (isset($this->replaceSortFields[$f])) {
-                    $f = $this->replaceSortFields[$f]; // replace with convenient sorting fields if defined
-                }
-
-                 $this->params['sort'] .= ",$f $d";
+                $this->params['sort'] .= ",$f $d";
             }
         } else {
             $this->params['sort'] .= ', sort_name asc';//, subtype asc

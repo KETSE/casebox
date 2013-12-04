@@ -163,7 +163,7 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
             this.config = {};
         }
         if(this.data.fieldRecord) {
-            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.get('cfg'), {}) );
+            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.data.cfg, {}) );
         }
         this.getStore();
         var mode = 'local';
@@ -256,7 +256,7 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
             this.config = {};
         }
         if(this.data.fieldRecord) {
-            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.get('cfg'), {}) );
+            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.data.cfg, {}) );
         }
         this.triggerIconCls = 'icon-element';
         tpl = '<tpl for=".">{[ (xindex == 0) ? "" : "'+this.delimiter+'"]}{name}</tpl>';
@@ -382,7 +382,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
         this.config = Ext.applyIf(this.config, { multiValued: false } );
 
         if(this.data.fieldRecord) {
-            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.get('cfg'), {}) );
+            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.data.cfg, {}) );
         }
 
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);
@@ -730,7 +730,7 @@ CB.ObjectsSelectionPopupList = Ext.extend(Ext.Window, {
             this.config = {};
         }
         if(this.data.fieldRecord) {
-            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.get('cfg'), {}) );
+            this.config = Ext.apply({}, Ext.value(this.data.fieldRecord.data.cfg, {}) );
         }
 
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);

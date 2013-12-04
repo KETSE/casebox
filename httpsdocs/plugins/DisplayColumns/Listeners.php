@@ -9,7 +9,7 @@ class Listeners
         $this->class = DCSingleton::getInstance();
     }
 
-    public function onBeforeSolrQuery($p)
+    public function onBeforeSolrQuery(&$p)
     {
         $searchClass = &$p['class'];
         $sp = &$p['params'];
@@ -68,19 +68,39 @@ class Listeners
                 $obj = $this->getObject($doc['id']);
                 $template = $obj->getTemplate();
                 foreach ($customColumns as $fieldName => &$col) {
-                    $field = $template->getField($fieldName);
-                    //populate column properties if empty
-                    if (empty($col['title'])) {
-                        $col['title'] = $field['title'];
+                    $customField = $fieldName;
+                    if (!empty($col['field_'.\CB\USER_LANGUAGE])) {
+                        $customField = $col['field_'.\CB\USER_LANGUAGE];
+                    } elseif (!empty($col['field'])) {
+                        $customField = $col['field'];
+                    }
+                    $customField = explode(':', $customField);
+                    $templateField = null;
+                    $values = array();
+                    switch ($customField[0]) {
+                        case 'solr':
+                            $templateField = $template->getField($fieldName);
+                            $values = array(@$doc[$customField[0]]);
+                            break;
+                        case 'calc':
+                            $templateField = $template->getField($fieldName);
+                            $values = array(); //CustomMethod call;
+                            break;
+                        default:
+                            $templateField = $template->getField($customField[0]);
+                            $values = $obj->getFieldValue($fieldName);
                     }
 
-                    $values = $obj->getFieldValue($fieldName);
-                    $value = array();
+                    //populate column properties if empty
+                    if (empty($col['title'])) {
+                        $col['title'] = $templateField['title'];
+                    }
+
                     foreach ($values as $value) {
                         $value = is_array($value)
-                            ? $value['value']
+                            ? @$value['value']
                             : $value;
-                        $doc[$fieldName] = $template->formatValueForDisplay($field, $value, false);
+                        $doc[$fieldName] = $template->formatValueForDisplay($templateField, $value, false);
                     }
                 }
             }

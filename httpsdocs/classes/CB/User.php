@@ -205,6 +205,7 @@ class User
             'success' => true
             ,'config' => array(
                 'task_categories' => constant('CB\\CONFIG\\TASK_CATEGORIES')
+                ,'default_task_category' => constant('CB\\CONFIG\\DEFAULT_TASK_CATEGORY')
                 ,'folder_templates' => $GLOBALS['folder_templates']
                 ,'default_task_template' => constant('CB\\CONFIG\\DEFAULT_TASK_TEMPLATE')
                 ,'default_event_template' => constant('CB\\CONFIG\\DEFAULT_EVENT_TEMPLATE')

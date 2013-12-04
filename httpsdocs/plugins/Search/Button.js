@@ -8,7 +8,7 @@ CB.plugins.Search.Button =  Ext.extend(CB.plugins.customInterface, {
 
         this.button = new Ext.Button({
             text: L.Search
-            ,iconCls: 'icon-searchPlugin32'
+            ,iconCls: 'icon32-search'
             ,scale: 'large'
             ,iconAlign:'top'
             ,menu:[]

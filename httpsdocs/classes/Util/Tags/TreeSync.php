@@ -90,6 +90,13 @@ class TreeSync extends \Util\TreeSync
 
         $this->prepareExecution();
 
+        //update max id from tree to avoid id dublication in tags
+        $res = DB\dbQuery('SELECT (MAX(id)+1) `max_id` FROM tags') or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            DB\dbQuery('ALTER TABLE `tree` AUTO_INCREMENT='.$r['max_id']) or die(DB\dbQueryError());
+        }
+        $res->close();
+
         $this->loadTags();
 
         echo "Create or update thesauri template\n";

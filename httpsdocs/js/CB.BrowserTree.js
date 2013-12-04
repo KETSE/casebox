@@ -14,7 +14,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
     ,border: false
     ,hideToolbar: true
     ,initComponent: function(){
-    
+
         this.sorters = {
             n30: function(n1, n2){
                 if(n1.attributes.system > n2.attributes.system) return -1;
@@ -26,8 +26,9 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                 if(n1.attributes.name > n2.attributes.name) return 1;
                 if(n1.attributes.name < n2.attributes.name) return -1;
                 return 0;
-            } 
-        }
+            }
+        };
+
         this.actions = {
             open: new Ext.Action({
                 text: L.Open
@@ -100,26 +101,6 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                 ,handler: this.onReloadClick
             })
 
-            ,createCase: new Ext.Action({
-                text: L.NewCase
-                ,iconCls: 'icon-briefcase'
-                ,scope: this
-                ,handler: this.onCreateCaseClick
-            })
-            ,createTask: new Ext.Action({
-                text: L.NewTask
-                ,iconCls: 'icon-calendar-task'
-                ,scope: this
-                ,handler: this.onCreateTaskClick
-            })
-            ,createFolder: new Ext.Action({
-                text: L.NewFolder
-                ,iconCls: 'icon-folder'
-                ,scope: this
-                ,disabled: true
-                ,handler: this.onCreateFolderClick
-            })
-
             ,properties: new Ext.Action({
                 text: L.Properties
                 ,scope: this
@@ -135,31 +116,16 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                 ,handler: this.onPermissionsClick
             })
 
-        }
+        };
+
         this.editor = new Ext.tree.TreeEditor(this, {
             allowBlank: false
             ,blankText: 'A name is required'
             ,selectOnFocus: true
-            ,ignoreNoChange: true 
-        })
-        
-        this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
+            ,ignoreNoChange: true
+        });
 
-        if(this.hideToolbar !== true)
-            Ext.apply(this, {
-                tbar: [{
-                        text: L.Create
-                        ,iconCls: 'icon-plus'
-                        ,menu:[ this.actions.createCase, '-', this.actions.createTask, '-', this.actions.createFolder]
-                    }
-                    , '->'
-                    ,{
-                        iconCls: 'icon-reload'
-                        ,scope: this
-                        ,handler: function(){this.getRootNode().reload()}
-                    }
-                ]
-            });
+        this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
 
         Ext.apply(this, {
             loader: new Ext.tree.TreeLoader({
@@ -186,7 +152,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                 ,beforeappend: this.onBeforeNodeAppend
                 ,load: function(node){ this.sortNode(node); }
                 ,dblclick: this.onDblClick
-                ,contextmenu: this.onContextMenu 
+                ,contextmenu: this.onContextMenu
                 ,startdrag: function(tree, node, e){
                     if(node.attributes.system == 1){
                         e.cancel = true;
@@ -281,9 +247,9 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
             }, this);
         }
 
-        this.addEvents('casecreate', 'createobject', 'fileopen', 'filedownload', 'taskedit', 'afterrename');
-        this.enableBubble(['casecreate', 'createobject', 'fileopen', 'filedownload', 'taskedit']);
-        
+        this.addEvents('createobject', 'afterrename');
+        this.enableBubble(['createobject']);
+
         App.clipboard.on('pasted', this.onClipboardAction, this);
         App.mainViewPort.on('savesuccess', this.onObjectsSaved, this);
         App.mainViewPort.on('fileuploaded', this.onObjectsSaved, this);
@@ -295,24 +261,26 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
     }
     ,onBeforeNodeAppend: function(tree, parent, node){
         node.setId(Ext.id());
-        
+
         // node id could be literal, so we cannot eval it to int
         // node.attributes.nid = Ext.num(node.attributes.nid, null);
-        
+
         node.attributes.system = Ext.num(node.attributes.system, 0);
         node.attributes.type = Ext.num(node.attributes.type, 0);
         node.attributes.subtype = Ext.num(node.attributes.subtype, 0);
-        if((node.attributes.type == 0) && parent && (parent.getDepth() == 4 )){
-            node.setText(Ext.value(Date.monthNames[parseInt(node.attributes.name) -1], node.attributes.name));
-        }else 
-        node.setText(node.attributes.name);
-        
+        var text = Ext.util.Format.htmlEncode(node.attributes.name);
+        if((node.attributes.type === 0) && parent && (parent.getDepth() == 4 )){
+            node.setText(Ext.value(Date.monthNames[parseInt(text, 10) -1], text));
+        } else {
+            node.setText(text);
+        }
+
         if(node.attributes.cfg && node.attributes.cfg.iconCls){
             node.setIconCls( node.attributes.cfg.iconCls );
         }else node.setIconCls( getItemIcon(node.attributes) );
-        
-        node.attributes.editable = false; 
-        node.draggable = (node.attributes.system == 0);
+
+        node.attributes.editable = false;
+        node.draggable = (node.attributes.system === 0);
         if(node.attributes.acl_count > 0) {
             node.setCls('node-has-acl');
         }
@@ -322,12 +290,30 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
         App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
     }
     ,onClipboardAction: function(pids){
-        this.getRootNode().cascade(function(n){ if(pids.indexOf(n.attributes.nid) >= 0 ) n.reload()}, this)
+        this.getRootNode().cascade(
+            function(n){
+                if(pids.indexOf(n.attributes.nid) >= 0 ) {
+                    n.reload();
+                }
+            }
+            ,this
+        );
     }
     ,onObjectsSaved: function(form, e){
-        if(!this.rendered) return
-        n = this.getRootNode();
-        if(n) n.cascade(function(n){ if(n.attributes.nid == form.data.pid) n.reload()}, this)
+        if(!this.rendered) {
+            return;
+        }
+        var n = this.getRootNode();
+        if(n) {
+            n.cascade(
+                function(n){
+                    if(n.attributes.nid == form.data.pid) {
+                        n.reload();
+                    }
+                }
+                ,this
+            );
+        }
     }
     ,sortNode: function(node){
         sorterName = 'n'+node.attributes.type + node.attributes.subtype;
@@ -346,12 +332,11 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
             this.actions['delete'].setDisabled(true) ;
             this.actions.rename.setDisabled(true) ;
             this.actions.reload.setDisabled(true) ;
-            this.actions.createFolder.setDisabled(true) ;
             this.actions.permissions.setDisabled(true) ;
         }else{
-            canOpen = true
+            canOpen = true;
             this.actions.open.setHidden(!canOpen);
-            canOpenInNewWindow = true
+            canOpenInNewWindow = true;
             this.actions.openInNewWindow.setHidden(!canOpenInNewWindow);
             canExpand = (!node.isExpanded() && ( (!node.loaded) || node.hasChildNodes() ));
             this.actions.expand.setHidden(!canExpand);
@@ -359,25 +344,23 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
             this.actions.collapse.setHidden(!canCollapse);
             if(this.contextMenu) this.contextMenu.items.itemAt(3).setVisible(canOpen || canExpand || canCollapse);
 
-            canCopy = (node.attributes.system == 0);
+            canCopy = (node.attributes.system === 0);
             this.actions.cut.setDisabled(!canCopy);
             this.actions.copy.setDisabled(!canCopy);
-            canPaste = !App.clipboard.isEmpty() 
-                && ( !this.inFavorites(node) || App.clipboard.containShortcutsOnly() ) 
-                && ( node.attributes.system == 0 );
+            canPaste = !App.clipboard.isEmpty()
+                && ( !this.inFavorites(node) || App.clipboard.containShortcutsOnly() )
+                && ( node.attributes.system === 0 );
             this.actions.paste.setDisabled(!canPaste);
-            canPasteShortcut = !App.clipboard.isEmpty() 
-                && !App.clipboard.containShortcutsOnly() 
-                && ( node.attributes.system == 0 );
+            canPasteShortcut = !App.clipboard.isEmpty()
+                && !App.clipboard.containShortcutsOnly()
+                && ( node.attributes.system === 0 );
             this.actions.pasteShortcut.setDisabled(!canPasteShortcut);
 
-            canCreateFolder = true;
-            this.actions.createFolder.setDisabled(!canCreateFolder) ;
-            canDelete = (node.attributes.system == 0);
+            canDelete = (node.attributes.system === 0);
             this.actions['delete'].setDisabled(!canDelete) ;
-            canRename = (node.attributes.system == 0);
+            canRename = (node.attributes.system === 0);
             this.actions.rename.setDisabled(!canRename) ;
-            
+
             this.actions.reload.setDisabled(false) ;
             this.actions.permissions.setDisabled(false) ;
         }
@@ -392,7 +375,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
             isFavoriteNode = this.isFavoriteNode(node);
             node = node.parentNode;
         }while(node && (node.getDepth() > 0) && !isFavoriteNode);
-        return isFavoriteNode; 
+        return isFavoriteNode;
     }
     ,onContextMenu: function (node, e) {
         if(Ext.isEmpty(this.contextMenu)){/* create context menu if not aleready created */
@@ -400,7 +383,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                 text: L.Create
                 ,hideOnClick: false
                 ,menu:[]
-            })
+            });
             this.contextMenu = new Ext.menu.Menu({
                 items: [
                 this.actions.open
@@ -436,14 +419,14 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                 ,this.actions.permissions
                 ,this.actions.properties
                 ]
-            })
+            });
 
         }
         node.select();
-        e.stopPropagation()
+        e.stopPropagation();
         e.preventDefault();
         this.contextMenu.node = node;
-        
+
         updateMenu(
             this.createItem
             ,getMenuConfig(
@@ -461,32 +444,57 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
         data.pid = this.contextMenu.node.attributes.nid;
         data.path = this.contextMenu.node.getPath('nid');
         data.pathtext = this.contextMenu.node.getPath('text');
-        tr = CB.DB.templates.getById(data.template_id);
-        if(tr && (tr.get('cfg').createMethod == 'inline') )
+
+        var tr = CB.DB.templates.getById(data.template_id);
+
+        if(tr && (tr.get('cfg').createMethod == 'inline')) {
             CB_Objects.create(data, this.processCreateInlineObject, this);
-        else this.fireEvent('createobject', data, e);
+        } else {
+            this.fireEvent('createobject', data, e);
+        }
     }
     ,processCreateInlineObject: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) return;
-        this.root.cascade(function(node){
-            if(node.attributes.nid == r.data.pid){
-                if(!node.loaded){
-                    if(node.isSelected()) node.expand(false, false, function(pn){ n = pn.findChild('nid', r.data.nid); if(n) this.startEditing(n); }, this)
-                }else{
-                    r.data.loaded = true
-                    node.expand();
-                    n = node.appendChild(r.data);
-                    this.startEditing(n);
+        if(r.success !== true) {
+            return;
+        }
+
+        r.data.nid = Ext.value(r.data.nid, r.data.id);
+        delete r.data.id;
+        this.root.cascade(
+            function(node){
+                //find parent node
+                if(node.attributes.nid == r.data.pid){
+                    if(!node.loaded){
+                        if(node.isSelected()) {
+                            node.expand(
+                                false
+                                ,false
+                                ,function(pn){
+                                    var n = pn.findChild('nid', r.data.nid);
+                                    if(n) {
+                                        this.startEditing(n);
+                                    }
+                                }
+                                ,this
+                            );
+                        }
+                    } else {
+                        r.data.loaded = true;
+                        node.expand();
+                        n = node.appendChild(r.data);
+                        this.startEditing(n);
+                    }
                 }
             }
-        }, this);
+            ,this
+        );
     }
     ,onDblClick: function(b, e){
         n = this.getSelectionModel().getSelectedNode();
         if(Ext.isEmpty(n)) return;
         if( App.isFolder( n.attributes.template_id ) ) return;
-        this.onOpenClick(b, e)
+        this.onOpenClick(b, e);
     }
     ,onOpenClick: function (b, e) {
         n = this.getSelectionModel().getSelectedNode();
@@ -497,20 +505,35 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
         n = this.getSelectionModel().getSelectedNode();
         if(Ext.isEmpty(n)) return;
         id = 'view'+n.attributes.nid;
-        if(!App.activateTab(App.mainTabPanel, id)) App.addTab(App.mainTabPanel, new CB.FolderView({ rootId: n.attributes.nid, data: {id: id } }) )
+        if(!App.activateTab(App.mainTabPanel, id)) {
+            App.addTab(
+                App.mainTabPanel
+                ,new CB.FolderView({
+                    rootId: n.attributes.nid
+                    ,data: {id: id }
+                })
+            );
+        }
     }
     ,onExpandClick: function (b, e) {
-        n = this.getSelectionModel().getSelectedNode()
-        n.expand(false, false, function(n){this.onSelectionChange(this.sm, n)}, this);
+        n = this.getSelectionModel().getSelectedNode();
+        n.expand(
+            false
+            ,false
+            ,function(n){
+                this.onSelectionChange(this.sm, n);
+            }
+            ,this
+        );
     }
     ,onCollapseClick: function (b, e) {
-        n = this.getSelectionModel().getSelectedNode()
+        n = this.getSelectionModel().getSelectedNode();
         n.collapse();
         this.onSelectionChange(this.sm, n);
     }
     ,onShowFoldersChildsClick: function(b, e){
         this.showFoldersContent = !b.checked;
-        this.saveTreeState()
+        this.saveTreeState();
         this.root.reload(this.restoreTreeState, this);
     }
     ,saveTreeState: function () {
@@ -518,14 +541,31 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
         this.lastSelectedPath = null;
         n = this.getSelectionModel().getSelectedNode();
         if(n) this.lastSelectedPath = n.getPath('nid');
-        this.root.cascade(function(n){
-            if(n.isExpanded()) this.treeState.push(n.getPath('nid'));
-        }, this)
+        this.root.cascade(
+            function(n){
+                if(n.isExpanded()) {
+                    this.treeState.push(n.getPath('nid'));
+                }
+            }
+            ,this
+        );
     }
     ,restoreTreeState: function () {
-        if(Ext.isEmpty(this.treeState)) return;
+        if(Ext.isEmpty(this.treeState)) {
+            return;
+        }
+        var f = function(bSuccess, oLastNode){
+            if(oLastNode) {
+                oLastNode.expand();
+            }
+        };
+
         for (var i = 0; i < this.treeState.length; i++) {
-            this.expandPath(this.treeState[i], 'nid', function(bSuccess, oLastNode){if(oLastNode) oLastNode.expand()});
+            this.expandPath(
+                this.treeState[i]
+                ,'nid'
+                ,f
+            );
         }
         if(!Ext.isEmpty(this.lastSelectedPath)) this.selectPath(this.lastSelectedPath, 'nid');
     }
@@ -533,7 +573,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
     ,onCutClick: function(b, e) {
         if(this.actions.cut.isDisabled()) return;
         this.onCopyClick(b, e);
-        App.clipboard.setAction('move')
+        App.clipboard.setAction('move');
     }
     ,onCopyClick: function(b, e) {
         if(this.actions.copy.isDisabled()) return;
@@ -582,12 +622,13 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
         var ge = this.editor;
         setTimeout(function(){
             ge.editNode = node;
-            ge.startEdit(node.ui.textNode);
+            ge.startEdit(node.ui.textNode, node.attributes.name);
         }, 10);
     }
     ,onBeforeEditComplete: function(editor, newVal, oldVal) {
-        if(newVal === oldVal) return;
         var n = editor.editNode;
+        n.setText(Ext.util.Format.htmlEncode(newVal));
+        if(newVal === oldVal) return;
         editor.cancelEdit();
         this.getEl().mask(L.Processing, 'x-mask-loading');
         CB_BrowserTree.rename({path: n.getPath('nid'), name: newVal}, this.processRename, this);
@@ -596,31 +637,24 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
     ,processRename: function(r, e){
         this.getEl().unmask();
         if(r.success !== true) return;
-        this.root.cascade( function (n){ if(n.attributes.nid == r.data.id){ n.attributes.name = r.data.newName; n.setText(r.data.newName); } }, this);
-        this.fireEvent('afterrename', this, r, e)
-    }
-    ,onCreateFolderClick: function(b, e){
-        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        CB_BrowserTree.createFolder(this.getSelectionModel().getSelectedNode().getPath('nid'), this.processCreateFolder, this);
-    }
-    ,processCreateFolder: function (r, e) {
-        this.getEl().unmask();
-        if(r.success !== true) return;
-        this.root.cascade(function(node){
-            if(node.attributes.nid == r.data.pid){
-                if(!node.loaded){
-                    if(node.isSelected()) node.expand(false, false, function(pn){ n = pn.findChild('nid', r.data.nid); if(n) this.startEditing(n); }, this)
-                }else{
-                    r.data.loaded = true
-                    node.expand();
-                    n = node.appendChild(r.data);
-                    this.startEditing(n);
+        this.root.cascade(
+            function (n){
+                if(n.attributes.nid == r.data.id){
+                    n.attributes.name = r.data.newName;
+                    n.setText(Ext.util.Format.htmlEncode(r.data.newName));
                 }
             }
-        }, this);
+            ,this
+        );
+        this.fireEvent('afterrename', this, r, e);
     }
     ,onDeleteClick: function(b, e){
-        Ext.Msg.confirm( L.DeleteConfirmation, L.DeleteConfirmationMessage + ' "' + this.getSelectionModel().getSelectedNode().text + '"?', this.onDelete, this ) 
+        Ext.Msg.confirm(
+            L.DeleteConfirmation
+            ,L.DeleteConfirmationMessage + ' "' + this.getSelectionModel().getSelectedNode().text + '"?'
+            ,this.onDelete
+            ,this
+        );
     }
     ,onDelete: function (btn) {
         if(btn !== 'yes') return;
@@ -641,19 +675,13 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
                 }
                 deleteNodes.push(n);
             }
-        }, this)
+        }, this);
         for (var i = 0; i < deleteNodes.length; i++) {
             deleteNodes[i].remove(true);
-        };
+        }
         /* TODO: also delete all visible nodes(links) that are links to the deleted node or any its child */
     }
-    ,onCreateCaseClick: function(b, e){
-        n = this.getSelectionModel().getSelectedNode();
-        if(!n) return;
-        b.data = {pid: n.attributes.nid};
-        this.fireEvent('casecreate', b, e);
-    }
 
-})
+});
 
 Ext.reg('CBBrowserTree', CB.BrowserTree);

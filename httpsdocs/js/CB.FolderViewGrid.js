@@ -90,12 +90,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,handler: this.onReloadClick
             })
 
-            ,createCase: new Ext.Action({
-                text: L.NewCase
-                ,iconCls: 'icon-briefcase'
-                ,scope: this
-                ,handler: this.onCreateCaseClick
-            })
             ,createTask: new Ext.Action({
                 text: L.NewTask
                 ,iconCls: 'icon32-task-new'
@@ -114,14 +108,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,scope: this
                 ,handler: this.onCreateEventClick
             })
-            ,createFolder: new Ext.Action({
-                text: L.NewFolder
-                ,iconCls: 'icon-folder'
-                ,scope: this
-                ,disabled: true
-                ,handler: this.onCreateFolderClick
-            })
-
             ,properties: new Ext.Action({
                 text: L.Properties
                 ,scope: this
@@ -254,7 +240,8 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                         m.css += ' node-has-acl';
                     }
 
-                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+                    v = Ext.util.Format.htmlEncode(v);
+                    m.attr = Ext.isEmpty(v) ? '' : "title='"+v+"'";
                     rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
                     if( (this.hideArrows !== true) && r.get('has_childs')) {
                         rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />';
@@ -264,7 +251,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                     return rez;
                 },scope: this
                 ,editable: true
-                ,editor: new Ext.form.TextField({selectOnFocus: true})
             }
             ,{header: L.Path, hidden:true, width: 150, dataIndex: 'path', renderer: function(v, m, r, ri, ci, s){
                     m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
@@ -320,25 +306,49 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ,listeners:{
                 scope: this
                 ,beforeedit: function(e){
-                    if(!this.allowRename) return false;
+                    if(!this.allowRename) {
+                        return false;
+                    }
+                    e.grid.getColumnModel().setEditor(
+                        e.column
+                        ,new Ext.form.TextField({selectOnFocus: true})
+                    );
                     delete this.allowRename;
                     return true;
                 }
                 ,afteredit: function(e){
-                    if(e.value == e.originalValue) return;
+                    if(e.value == e.originalValue) {
+                        return;
+                    }
                     this.renamedOriginalValue = e.originalValue;
                     this.renamedRecord = e.record;
-                    CB_BrowserView.rename({path: e.record.get('nid'), name: e.value}, function(r, e){
-                        if(r.success !== true){
-                            this.renamedRecord.set('name', this.renamedOriginalValue);
+                    CB_BrowserView.rename(
+                        {
+                            path: e.record.get('nid')
+                            ,name: e.value
+                        }
+                        ,function(r, e){
+                            if(r.success !== true){
+                                this.renamedRecord.set('name', this.renamedOriginalValue);
+                                delete this.renamedOriginalValue;
+                                delete this.renamedRecord;
+                                return;
+                            }
                             delete this.renamedOriginalValue;
                             delete this.renamedRecord;
-                            return;
+                            this.fireEvent(
+                                'objectupdated'
+                                ,{
+                                    data: {
+                                        id: parseInt(r.data.id, 10)
+                                        ,pid: this.folderProperties.id
+                                    }
+                                }
+                                ,e
+                            );
                         }
-                        delete this.renamedOriginalValue;
-                        delete this.renamedRecord;
-                        this.fireEvent('objectupdated', {data: {id: r.data.id, pid: this.folderProperties.id} }, e );
-                    }, this);
+                        ,this
+                    );
                 }
                 ,rowdblclick : this.onRowDblClick
                 ,contextmenu: this.onContextMenu
@@ -874,9 +884,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.actions.createTask.setDisabled(false);
         this.actions.createEvent.setDisabled(false);
 
-        canCreateFolder = (this.folderProperties.id > 0 );
-        this.actions.createFolder.setDisabled(!canCreateFolder) ;
-
         this.updateCreateMenuItems();
         this.filtersPanel.updateFacets(o.result.facets, options);
     }
@@ -903,7 +910,16 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             if(Ext.isEmpty(cmi)) return;
             menuButton = cmi[0];
         }
-        updateMenu(menuButton, getMenuConfig(this.folderProperties.id, this.folderProperties.path, this.folderProperties.template_id), this.onCreateObjectClick, this);
+        updateMenu(
+            menuButton
+            ,getMenuConfig(
+                this.folderProperties.id
+                ,this.folderProperties.path
+                ,this.folderProperties.template_id
+            )
+            ,this.onCreateObjectClick
+            ,this
+        );
 
         menuButton.setDisabled(menuButton.menu.items.getCount() < 1);
     }
@@ -913,13 +929,21 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         data.path = this.folderProperties.path;
         data.pathtext = this.folderProperties.pathtext;
         tr = CB.DB.templates.getById(data.template_id);
-        if(tr && (tr.get('cfg').createMethod == 'inline') )
+        if(tr && (tr.get('cfg').createMethod == 'inline')) {
             CB_Objects.create(data, this.processCreateInlineObject, this);
-        else this.fireEvent('createobject', data, e);
+        } else {
+            this.fireEvent('createobject', data, e);
+        }
     }
     ,processCreateInlineObject: function (r, e) {
         this.getEl().unmask();
-        if(r.success !== true) return;
+        if(r.success !== true) {
+            return;
+        }
+        r.data.nid = parseInt(Ext.value(r.data.nid, r.data.id), 10);
+        delete r.data.id;
+        r.data.pid = parseInt(r.data.pid, 10);
+
         this.grid.store.loadData(r, true);
         idx = this.grid.store.findExact('nid', parseInt(r.data.nid, 10));
         this.grid.selModel.clearSelections();
@@ -1029,28 +1053,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         if(this.actions.properties.isDisabled()) return;
         if(!this.grid.selModel.hasSelection()) return;
     }
-    ,onCreateFolderClick: function(b, e){
-        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        CB_Browser.createFolder(this.folderProperties.id, this.processCreateFolder, this);
-    }
-    ,processCreateFolder: function (r, e) {
-        this.getEl().unmask();
-        if(r.success !== true) return;
-        this.grid.store.loadData(r, true);
-        idx = this.grid.store.findExact('nid', parseInt(r.data.nid, 10));
-        this.grid.selModel.clearSelections();
-        if(idx >= 0) this.grid.selModel.selectRow(idx);
-        this.justAddedFolder = r.data.nid;
-        this.fireEvent('objectupdated', { data: {id: r.data.nid, pid: r.data.pid } }, e);
-        this.onRenameClick(r, e);
-    }
-    ,onCreateCaseClick: function(b, e){
-        if(Ext.isEmpty(b.data)) {
-            b.data = {};
-        }
-        b.data.pid = this.folderProperties.id;
-        this.fireEvent('casecreate', b, e);
-    }
     ,onCreateTaskClick: function(b, e) {
         this.fireEvent('taskcreate', {
             data: {
@@ -1083,7 +1085,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.grid.store.load();
     }
     ,onRenameClick: function(b, e){
-        if(!this.grid.selModel.hasSelection()) return;
+        if(!this.grid.selModel.hasSelection()) {
+            return;
+        }
         this.grid.stopEditing(true);
         idx = this.grid.store.indexOf(this.grid.selModel.getSelected());
         this.allowRename = true;

@@ -53,9 +53,6 @@ class BrowserView extends BrowserTree
                 $d = &$rez['data'][$i];
                 $d['nid'] = $d['id'];
                 unset($d['id']);
-                if (!empty($d['name'])) {
-                    $d['name'] = Util\adjustTextForDisplay($d['name']);
-                }
 
                 $res = DB\dbQuery(
                     'SELECT cfg

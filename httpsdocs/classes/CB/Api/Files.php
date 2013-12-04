@@ -1,8 +1,9 @@
 <?php
 namespace CB\Api;
 
-use CB\CONFIG as CONFIG;
-use CB\DB as DB;
+use CB\CONFIG;
+use CB\DB;
+use CB\L;
 
 class Files
 {

@@ -1,4 +1,4 @@
-Ext.namespace('CB'); 
+Ext.namespace('CB');
 CB.Tasks_ReminderWindow = Ext.extend(Ext.Window, {
     modal: true
     ,autoHeight: true
@@ -6,26 +6,27 @@ CB.Tasks_ReminderWindow = Ext.extend(Ext.Window, {
     ,layout: 'fit'
     ,initComponent: function(){
         this.value = this.value ?  (Ext.isArray(this.value) ? this.value : this.value.split('|')) : [1, 10, 1];
-        
-        this.fsItems = [new Ext.form.NumberField({
-            flex: 1
-            ,value: this.value[1]
-            ,allowBlank: false
-        })
-        ,new Ext.form.ComboBox({
-            value: this.value[2]
-            ,store: CB.DB.reminderUnits
-            ,typeAhead: true
-            ,triggerAction: 'all'
-            ,lazyRender:true
-            ,mode: 'local'
-            ,valueField: 'id'
-            ,displayField: 'name'
-            ,editable: false
-            ,flex: 2
-        })
-        ]
-        
+
+        this.fsItems = [
+            new Ext.form.NumberField({
+                flex: 1
+                ,value: this.value[1]
+                ,allowBlank: false
+            })
+            ,new Ext.form.ComboBox({
+                value: this.value[2]
+                ,store: CB.DB.reminderUnits
+                ,typeAhead: true
+                ,triggerAction: 'all'
+                ,lazyRender:true
+                ,mode: 'local'
+                ,valueField: 'id'
+                ,displayField: 'name'
+                ,editable: false
+                ,flex: 2
+            })
+        ];
+
         Ext.apply(this, {
             items: {
                 xtype: 'form'
@@ -51,7 +52,7 @@ CB.Tasks_ReminderWindow = Ext.extend(Ext.Window, {
                     ,{text: Ext.MessageBox.buttonText.cancel, handler: this.close, scope: this, iconCls: 'icon-cancel'}
                 ]
             }
-        })
+        });
 
         CB.Tasks_ReminderWindow.superclass.initComponent.apply(this, arguments);
     }
@@ -147,11 +148,8 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 ,scope: this
                 ,hidden: true
             })
-        }
+        };
 
-        this.taskCategoriesStore = [];
-        if(!Ext.isEmpty(App.config.task_categories)) this.taskCategoriesStore = getThesauriStore(App.config.task_categories);
-        
         this.pathStore = new Ext.data.ArrayStore({
             idIndex: 0
             ,fields: [{name: 'id', type: 'int'}, 'name']
@@ -194,13 +192,13 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 if(this.items.getCount() > 0) t = t + ' <span class="cG">[' + this.items.getCount() + ']</span>' + ((this.disabled && this.comment) ? ' - <span class="cB">' + this.comment + '</span>' : '');
                 this.setTitle(t);
             }
-            ,listeners:{ 
-                afterlayout: function(p, l){ p.updateTitle(); } 
-                ,disable: function(p){ p.updateTitle(); } 
-                ,enable: function(p){ p.updateTitle(); } 
+            ,listeners:{
+                afterlayout: function(p, l){ p.updateTitle(); }
+                ,disable: function(p){ p.updateTitle(); }
+                ,enable: function(p){ p.updateTitle(); }
             }
         });
-        
+
         Ext.apply(this, {
             items: this.contentPanel
             ,buttons: [
@@ -224,12 +222,12 @@ CB.Tasks = Ext.extend( Ext.Window, {
         Ext.applyIf(this.data, {
             privacy: 0
             ,importance: 1
-            ,category_id: Ext.isEmpty(this.taskCategoriesStore) ? null : this.taskCategoriesStore.getAt(1).get('id')
+            ,category_id: Ext.value(App.config.default_task_category, null)
             ,reminds: []//'1|10|1'
             ,admin: true
             ,autoclose: 1
             ,allday: 1
-        })
+        });
         CB.Tasks.superclass.initComponent.apply(this, arguments);
         this._dirty = false;
         this.setReminds();
@@ -237,19 +235,23 @@ CB.Tasks = Ext.extend( Ext.Window, {
     ,updatePathStore: function(){
         pathIds = String(this.data.path);
         pathTexts = String(this.data.pathtext);
-        while(pathIds.substr(-1) == '/') pathIds = pathIds.substr(0, pathIds.length -1)
-        while(pathTexts.substr(-1) == '/') pathTexts = pathTexts.substr(0, pathTexts.length -1)
+        while(pathIds.substr(-1) == '/') {
+            pathIds = pathIds.substr(0, pathIds.length -1);
+        }
+        while(pathTexts.substr(-1) == '/') {
+            pathTexts = pathTexts.substr(0, pathTexts.length -1);
+        }
         pathIds = pathIds.split('/');
         pathTexts =  pathTexts.split('/');
 
-        data = []
+        data = [];
         for (var i = pathIds.length -1; i > 0; i--) {
             if(!Ext.isEmpty(pathIds[i]));
             t = pathTexts.join('/');
             if(Ext.isEmpty(t)) t = '/';
             data.push([pathIds[i], t]);
-            pathTexts.pop()
-        };
+            pathTexts.pop();
+        }
         this.pathStore.loadData(data);
     }
     ,load: function(){
@@ -262,17 +264,19 @@ CB.Tasks = Ext.extend( Ext.Window, {
         CB_Tasks.load(this.data.id, this.onLoad, this);
     }
     ,onLoad: function(r, e){
-        if(r.success == true) Ext.apply(this.data, r.data);
+        if(r.success === true) {
+            Ext.apply(this.data, r.data);
+        }
         this.getEl().unmask();
         this.status = 'view';
-        
-        this.data.allday = parseInt(this.data.allday)
-        this.data.date_start = date_ISO_to_date(this.data.date_start)
-        this.data.date_end = date_ISO_to_date(this.data.date_end)
-        this.data.cdate = date_ISO_to_date(this.data.cdate)
-        this.data.completed = date_ISO_to_date(this.data.completed)
+
+        this.data.allday = parseInt(this.data.allday, 10);
+        this.data.date_start = date_ISO_to_date(this.data.date_start);
+        this.data.date_end = date_ISO_to_date(this.data.date_end);
+        this.data.cdate = date_ISO_to_date(this.data.cdate);
+        this.data.completed = date_ISO_to_date(this.data.completed);
         this.radioHidden = !Ext.isEmpty(this.data.template_id);
-        
+
         this.updatePathStore();
 
         /* set canEdit flag */
@@ -284,14 +288,14 @@ CB.Tasks = Ext.extend( Ext.Window, {
         /* get and set userNames for responsible users */
         this.userNames = [];
         this.userNames2 = {};
-        CB.DB.usersStore.each(function(r){ 
+        CB.DB.usersStore.each(function(r){
             if(this.responsibleUsers.indexOf(r.get('id')+'') >=0){
-                this.userNames.push(r.get('name')); 
+                this.userNames.push(r.get('name'));
                 this.userNames2[r.get('id')] = r.get('name');
             }
-        }, this)
+        }, this);
         /* end of get and set userNames for responsible users */
-        
+
         /* set canComplete flag */
         this.canClose = this.canEdit;
         this.canReopen = (this.data.status == 3) && (this.data.cid == App.loginData.id);
@@ -299,18 +303,18 @@ CB.Tasks = Ext.extend( Ext.Window, {
         if(this.canComplete)
             Ext.each(this.data.users, function(r){
                 if(r.id == App.loginData.id){
-                    this.canComplete = (r.status == 0);
+                    this.canComplete = (r.status == "0");
                     return false;
                 }
             }, this);
         /* end of set canComplete flag */
-        
+
         /* get and store owner's name */
         this.ownerName = CB.DB.usersStore.getName(this.data.cid);
         /* end of get and store owner's name */
-        
+
         this.data.reminds = Ext.isEmpty(this.data.reminds) ? [] : this.data.reminds.split('-');
-        
+
         this.setReminds();
         this.remindPanel.updateTitle();
         this.processLayout();
@@ -320,11 +324,11 @@ CB.Tasks = Ext.extend( Ext.Window, {
     }
     ,processLayout: function(){
         this.contentPanel.removeAll(true);
-        Ext.each(this.actions, function(a){ if(a.setHidden) a.setHidden(true) }, this);
+        Ext.each(this.actions, function(a){ if(a.setHidden) a.setHidden(true); }, this);
         items = [];
         if(isNaN(this.data.id) && Ext.isEmpty(this.data.date_start)) this.data.date_start = new Date();
         switch(this.status){
-            case 'view': 
+            case 'view':
                 this.taskview = new CB.TaskViewDataView({
                     listeners: {
                         scope: this
@@ -332,7 +336,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
                     }
                 });
                 items.push(this.taskview);
-                
+
                 this.actions['delete'].setHidden( true || !this.data.admin );// Delete - if is responsible person, office manager or root
                 this.actions.close.setHidden(!this.canClose);// close - hidden
                 this.actions.reopen.setHidden(!this.canReopen);
@@ -340,25 +344,25 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 this.actions.create.setHidden(!isNaN(this.data.id));// create - if no numeric id isset
                 this.actions.edit.setHidden( !this.canEdit );// Edit - if is owner or admin
                 this.actions.save.setHidden(true);// save - not visible, all actions from view mode are made remotely
-                this.actions.ok.setHidden(false);// 
+                this.actions.ok.setHidden(false);//
                 this.actions.cancel.setHidden(true);// cancel - hidden
                 this.actions.moreDetails.setHidden(false);
                 break;
             default:
-                
+
                 this.date_start = new Ext.form.DateField({
                     name: 'date_start'
                     ,format: App.dateFormat
                     ,hidden: true
                     ,listeners: {scope: this, change: this.setDirty}
-                })
+                });
                 this.date_end = new Ext.form.DateField({
                     name: 'date_end'
                     ,format: App.dateFormat
                     ,hidden: true
                     ,listeners: {scope: this, change: this.setDirty}
-                })
-                this.datetime_start = new Ext.ux.form.DateTimeField({   
+                });
+                this.datetime_start = new Ext.ux.form.DateTimeField({
                     fieldLabel: L.Start
                         ,name: 'datetime_start'
                         ,timeFormat: App.timeFormat
@@ -381,7 +385,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
                     }
                     ,listeners: {scope: this, change: this.setDirty}
                 });
-                this.datetime_end = new Ext.ux.form.DateTimeField({ 
+                this.datetime_end = new Ext.ux.form.DateTimeField({
                     fieldLabel: L.Due
                         ,name: 'datetime_end'
                         ,allowBlank: true
@@ -413,11 +417,11 @@ CB.Tasks = Ext.extend( Ext.Window, {
                     }
                 });
                 this.filesview = new CB.TaskFilesPanel({ fieldLabel: L.Files });
-                
+
                 /* collect distinct task templates*/
-                taskItems = []
+                taskItems = [];
                 taskTemplates = CB.DB.templates.query('type', 'task');
-                taskTemplates.each( function( ttr ){ 
+                taskTemplates.each( function( ttr ){
                     taskItems.push( {boxLabel: ttr.get('title'), flex: 0, name: 'template_id', inputValue: ttr.get('id')} );
                 }, this );
                 /* end of collect distinct task templates*/
@@ -485,20 +489,31 @@ CB.Tasks = Ext.extend( Ext.Window, {
                         ,valueField: 'id'
                         ,store: CB.DB.tasksImportance
                         ,listeners: {scope: this, change: this.setDirty}
-                    },new Ext.form.ComboBox({
+                    },new CB.ObjectsComboField({
                         fieldLabel: L.Category
                         ,name: 'category_id'
                         ,hiddenName: 'category_id'
                         ,triggerAction: 'all'
                         ,lazyRender: true
-                        ,mode: 'local'
-                        ,store: this.taskCategoriesStore
                         ,displayField: 'name'
                         ,editable: false
                         ,valueField: 'id'
                         ,iconClsField: 'iconCls'
-                        ,allowBlank: true 
+                        ,allowBlank: true
                         ,plugins: [new Ext.ux.plugins.IconCombo()]
+                        ,data: {
+                            objectId: this.data.id
+                            ,path: this.data.path
+                            ,fieldRecord: {
+                                data: {
+                                    cfg: {
+                                        source: 'tree'
+                                        ,scope: App.config.task_categories
+                                        ,renderer: 'listObjIcons'
+                                    }
+                                }
+                            }
+                        }
                     }),{    xtype: 'textarea'
                         ,fieldLabel: L.Description
                         ,name: 'description'
@@ -543,14 +558,14 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 this.actions.save.setHidden( !this.data.admin || isNaN(this.data.id) );// save - if is existent task
                 this.actions.moreDetails.setHidden(false);
                 this.actions.ok.setHidden( true );// save - if is existent task
-                
+
                 this.actions.close.setHidden( true );// close - hidden
                 this.actions.reopen.setHidden( true );// reopen - hidden
                 this.actions.cancel.setHidden(true);// cancel - visible
                 App.focusFirstField();
                 break;
         }
-        this.updateTitle()
+        this.updateTitle();
         this.contentPanel.add(items);
         this.contentPanel.doLayout();
         this.form = this.findByType('form')[0];
@@ -572,20 +587,20 @@ CB.Tasks = Ext.extend( Ext.Window, {
             default: delete this.data.privacy;
                 delete this.data.autoclose;
                 delete this.data.allday;
-                
+
                 Ext.apply(this.data, this.form.getForm().getValues());
                 this.data.responsible_user_ids = null;
                 f = this.form.find('name', 'responsible_user_ids')[0];
                 if(f){
                     v = f.getValue();
-                    if(v) v = v.join(',')
+                    if(v) v = v.join(',');
                     this.data.responsible_user_ids = v;
                 }
                 this.data.parent_ids = null;
                 f = this.form.find('name', 'parent_ids')[0];
                 if(f){
                     v = f.getValue();
-                    if(v) v = v.join(',')
+                    if(v) v = v.join(',');
                     this.data.parent_ids = v;
                 }
                 if(this.data.allday){
@@ -610,29 +625,35 @@ CB.Tasks = Ext.extend( Ext.Window, {
         if(this.form){
             this.form.getForm().setValues(this.data);
         }
-        if(!Ext.isEmpty(this.data.files))
-        for (var i = 0; i < this.data.files.length; i++) this.data.files[i].iconCls = getFileIcon(this.data.files[i].name);
+        var i;
+        if(!Ext.isEmpty(this.data.files)) {
+            for (i = 0; i < this.data.files.length; i++) {
+                this.data.files[i].iconCls = getFileIcon(this.data.files[i].name);
+            }
+        }
 
         this.data.reminds_view = [];
-        for (var i = 0; i < this.data.reminds.length; i++) {
+        for (i = 0; i < this.data.reminds.length; i++) {
             r = this.data.reminds[i].split('|');
             this.data.reminds_view.push( [r[1], CB.DB.reminderUnits.getName(r[2])] );
-        };
+        }
         switch(this.status){
             case 'setstatus': break;
-            case 'view': 
+            case 'view':
                 dd = this.data;
                 dd.creator_name = CB.DB.usersStore.getName(dd.cid);
-                
-                if(Ext.isEmpty(dd.users)) dd.users = []
-                for (var i = 0; i < dd.users.length; i++) {
-                    dd.users[i].name = CB.DB.usersStore.getName(dd.users[i].id)
-                    dd.users[i].canEdit = this.canEdit
-                };
+
+                if(Ext.isEmpty(dd.users)) {
+                    dd.users = [];
+                }
+                for (i = 0; i < dd.users.length; i++) {
+                    dd.users[i].name = CB.DB.usersStore.getName(dd.users[i].id);
+                    dd.users[i].canEdit = this.canEdit;
+                }
                 /* end of preparing data for view template */
                 this.taskview.update(dd);
                 break;
-            default: //case 'edit': 
+            default: //case 'edit':
                 f = this.form.find('name', 'responsible_user_ids')[0];
                 if(f) f.setValue(this.data.responsible_user_ids);
                 f = this.form.find('name', 'parent_ids')[0];
@@ -640,15 +661,15 @@ CB.Tasks = Ext.extend( Ext.Window, {
 
                 this.date_start.setValue(this.data.date_start);
                 this.datetime_start.setValue(this.data.date_start);
-                this.date_end.setValue(Ext.isEmpty(this.data.date_end) ? null : this.data.date_end )
-                this.datetime_end.setValue(Ext.isEmpty(this.data.date_end) ? null : this.data.date_end )
+                this.date_end.setValue(Ext.isEmpty(this.data.date_end) ? null : this.data.date_end);
+                this.datetime_end.setValue(Ext.isEmpty(this.data.date_end) ? null : this.data.date_end);
                 if(this.data.allday){
                     this.datetime_start.setVisible(false);
                     this.date_start.setVisible(true);
                     this.datetime_end.setVisible(false);
                     this.date_end.setVisible(true);
                 }else{
-                    
+
                     this.datetime_start.setVisible(true);
                     this.date_start.setVisible(false);
                     this.datetime_end.setVisible(true);
@@ -658,7 +679,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 if(this.taskview.rendered){
                     this.taskview.update(this.data);
                     this.syncSize();
-                }else{ 
+                }else{
                     this.taskview.data = this.data;
                 }
                 break;
@@ -669,26 +690,26 @@ CB.Tasks = Ext.extend( Ext.Window, {
         a = el.attributes.getNamedItem('name');
         if(Ext.isEmpty(a)) return;
         switch(el.attributes.getNamedItem('name').value){
-            case 'complete': 
+            case 'complete':
                 this.onSetUserCompletedClick(el.attributes.getNamedItem('uid').value);
                 break;
-            case 'revoke': 
+            case 'revoke':
                 this.onSetUserIncompleteClick(el.attributes.getNamedItem('uid').value);
                 break;
-            case 'rem_add': 
-                this.onAddReminderClick()
+            case 'rem_add':
+                this.onAddReminderClick();
                 break;
-            case 'rem_edit': 
-                this.onEditReminderClick(el.attributes.getNamedItem('rid').value -1)
+            case 'rem_edit':
+                this.onEditReminderClick(el.attributes.getNamedItem('rid').value -1);
                 break;
-            case 'rem_del': 
-                this.onDeleteReminderClick(el.attributes.getNamedItem('rid').value -1)
+            case 'rem_del':
+                this.onDeleteReminderClick(el.attributes.getNamedItem('rid').value -1);
                 break;
-            case 'file': 
+            case 'file':
                 App.mainViewPort.fireEvent('fileopen', {id: el.attributes.getNamedItem('fid').value}, e);
                 this.destroy();
                 break;
-            case 'path': 
+            case 'path':
                 App.locateObject(this.data.id, this.data.path);
                 this.destroy();
                 break;
@@ -699,7 +720,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
         for (var i = 0; i < this.data.reminds.length; i++) {
             r = this.data.reminds[i].split('|');
             this.data.reminds_view.push( [r[1], CB.DB.reminderUnits.getName(r[2])] );
-        };
+        }
 
         if(this.rendered && this.taskview ) this.taskview.update(this.data);
         if(this.rendered) this.syncSize();
@@ -714,19 +735,19 @@ CB.Tasks = Ext.extend( Ext.Window, {
             ,params:  this.data
             ,scope: this
             ,success: this.processSave
-            ,failure: App.formSubmitFailure         
+            ,failure: App.formSubmitFailure
         }
         );
     }
-    ,processSave: function(form, action){ 
+    ,processSave: function(form, action){
         r = action.result;
-        this.getEl().unmask()
+        this.getEl().unmask();
         if(r.success !== true) return;
         this.status = isNaN(this.data.id) ? 'created' : 'updated';
         Ext.apply(this.data, r.data);
         App.mainViewPort.fireEvent('task'+ this.status, r);
-        this.destroy(); 
-    } 
+        this.destroy();
+    }
     ,onEditClick: function(b, e){
         this.getValues();
         this.status = 'edit';
@@ -747,7 +768,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
     ,processSaveReminder: function(reminderIndex, newValue){
         if(isNaN(reminderIndex)) this.data.reminds.push(newValue); else this.data.reminds[reminderIndex] = newValue;
         if(this.status == 'view') {
-            this.saveReminds(); 
+            this.saveReminds();
         } else {
             this.setDirty(true);
             this.setReminds();
@@ -761,7 +782,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
         if(isNaN(reminderIndex)) return;
         this.data.reminds.splice(reminderIndex, 1);
         if(this.status == 'view') {
-            this.saveReminds(); 
+            this.saveReminds();
         }else{
             this.setDirty(true);
             this.setReminds();
@@ -779,11 +800,13 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 this.setReminds();
             }
             ,this
-        )
+        );
     }
     ,onResponsibleUserClick: function(b, idx, oel, e){
         user_id = oel.attributes.getNamedItem('user_id');
-        if(!user_id) return
+        if(!user_id) {
+            return;
+        }
         user_id =  user_id.value;
         el = Ext.get(e.getTarget());
         if(el.dom.classList.contains('icon-tick-small')) this.onSetUserCompletedClick(user_id);
@@ -798,7 +821,20 @@ CB.Tasks = Ext.extend( Ext.Window, {
             ,height: 200
             ,buttons: Ext.MessageBox.OKCANCEL
             ,multiline: true
-            ,fn: function(b, message){ if(b == 'ok') CB_Tasks.setUserStatus({id: this.data.id, user_id: user_id, status: 1, message: message}, this.processSettingUserStatus, this)}
+            ,fn: function(b, message){
+                if(b == 'ok') {
+                    CB_Tasks.setUserStatus(
+                        {
+                            id: this.data.id
+                            ,user_id: user_id
+                            ,status: 1
+                            ,message: message
+                        }
+                        ,this.processSettingUserStatus
+                        ,this
+                    );
+                }
+            }
             ,scope: this
         });
     }
@@ -810,7 +846,20 @@ CB.Tasks = Ext.extend( Ext.Window, {
             ,height: 200
             ,buttons: Ext.MessageBox.OKCANCEL
             ,multiline: true
-            ,fn: function(b, message){ if(b == 'ok') CB_Tasks.setUserStatus({id: this.data.id, user_id: user_id, status: 0, message: message}, this.processSettingUserStatus, this)}
+            ,fn: function(b, message){
+                if(b == 'ok') {
+                    CB_Tasks.setUserStatus(
+                        {
+                            id: this.data.id
+                            ,user_id: user_id
+                            ,status: 0
+                            ,message: message
+                        }
+                        ,this.processSettingUserStatus
+                        ,this
+                    );
+                }
+            }
             ,scope: this
         });
     }
@@ -827,21 +876,33 @@ CB.Tasks = Ext.extend( Ext.Window, {
             ,height: 200
             ,buttons: Ext.MessageBox.OKCANCEL
             ,multiline: true
-            ,fn: function(b, message){ if(b == 'ok') Msg.send({task_id: this.data.id, user_id: user_id, message: message}, this.processMessageSend, this)}
+            ,fn: function(b, message){
+                if(b == 'ok') {
+                    Msg.send(
+                        {
+                            task_id: this.data.id
+                            ,user_id: user_id
+                            ,message: message
+                        }
+                        ,this.processMessageSend
+                        ,this
+                    );
+                }
+            }
             ,scope: this
         });
     }
     ,onDeleteClick: function(b, e){
         Ext.Msg.confirm(L.RemovingTask, L.RemovingTaskMessage, function(b){
-            if(b == 'yes'){ 
+            if(b == 'yes'){
                 this.getEl().mask('Удаление ...', 'x-mask-loading');
-                CB_Browser['delete'](this.data.id, this.processDelete, this)
+                CB_Browser['delete'](this.data.id, this.processDelete, this);
             }
-        }, this)
+        }, this);
     }
     ,processDelete: function(r, e){
         if(r.success !== true)  return Ext.Msg.alert(L.RemovingTask, L.RemovingTaskErrorMessage);
-        this.status = 'deleted'; 
+        this.status = 'deleted';
         App.mainViewPort.fireEvent('tasksdeleted', r.ids, e);
         this.close();
     }
@@ -857,10 +918,10 @@ CB.Tasks = Ext.extend( Ext.Window, {
             ,height: 200
             ,buttons: Ext.MessageBox.OKCANCEL
             ,multiline: true
-            ,fn: function(b, message){ 
+            ,fn: function(b, message){
                 if(b == 'ok'){
                     this.getEl().mask(L.CompletingTask + ' ...', 'x-mask-loading');
-                    CB_Tasks.close(this.data.id, this.doCloseTask, this)
+                    CB_Tasks.close(this.data.id, this.doCloseTask, this);
                 }
             }
             ,scope: this
@@ -877,10 +938,10 @@ CB.Tasks = Ext.extend( Ext.Window, {
         }
     }
     ,onReopenTaskClick: function(o, e){
-        Ext.Msg.confirm( L.ReopeningTask, L.ReopenTaskConfirmationMsg, function(b){ 
+        Ext.Msg.confirm( L.ReopeningTask, L.ReopenTaskConfirmationMsg, function(b){
                 if(b == 'yes'){
                     this.getEl().mask(L.ReopeningTask + ' ...', 'x-mask-loading');
-                    CB_Tasks.reopen(this.data.id, this.processTaskCompleting, this)
+                    CB_Tasks.reopen(this.data.id, this.processTaskCompleting, this);
                 }
             }
             ,this
@@ -898,7 +959,18 @@ CB.Tasks = Ext.extend( Ext.Window, {
             ,height: 200
             ,buttons: Ext.MessageBox.OKCANCEL
             ,multiline: true
-            ,fn: function(b, message){ if(b == 'ok') CB_Tasks.complete({id: this.data.id, message: message}, this.processTaskCompleting, this)}
+            ,fn: function(b, message){
+                if(b == 'ok') {
+                    CB_Tasks.complete(
+                        {
+                            id: this.data.id
+                            ,message: message
+                        }
+                        ,this.processTaskCompleting
+                        ,this
+                    );
+                }
+            }
             ,scope: this
         });
     }
@@ -910,14 +982,14 @@ CB.Tasks = Ext.extend( Ext.Window, {
         if(Ext.isEmpty(valuesArray)) return '';
         if(!Ext.isArray(valuesArray)) valuesArray = valuesArray.split('|');
         html = '';
-        idx = CB.DB.reminderTypes.findExact('id', parseInt(valuesArray[0]));
+        idx = CB.DB.reminderTypes.findExact('id', parseInt(valuesArray[0], 10));
         if(idx >=0){
             r = CB.DB.reminderTypes.getAt(idx);
             html +='<img src="css/i/s.gif" class="icon '+r.get('iconCls')+'" title="'+r.get('name')+'"/> <a class="click">';
         }
         if(!Ext.isEmpty(valuesArray[1])){
             html += valuesArray[1];
-            idx = CB.DB.reminderUnits.findExact('id', parseInt(valuesArray[2]));
+            idx = CB.DB.reminderUnits.findExact('id', parseInt(valuesArray[2], 10));
             if(idx >=0){
                 r = CB.DB.reminderUnits.getAt(idx);
                 html +=' '+r.get('name');
@@ -929,24 +1001,24 @@ CB.Tasks = Ext.extend( Ext.Window, {
     }
     ,getReminderLayout: function(valuesArray, edit){
         if(!Ext.isArray(valuesArray)) valuesArray = [1, 10, 1];
-        if(edit == true)
+        if(edit === true) {
             return ;
-        else{
+        } else {
             text = '';
-            idx = CB.DB.reminderTypes.findExact('id', parseInt(valuesArray[0]));
+            idx = CB.DB.reminderTypes.findExact('id', parseInt(valuesArray[0], 10));
             if(idx >=0){
                 r = CB.DB.reminderTypes.getAt(idx);
                 text +='<img src="css/i/s.gif" class="icon '+r.get('iconCls')+'" title="'+r.get('name')+'"/> ';
             }
             if(!Ext.isEmpty(valuesArray[1])){
                 text += valuesArray[1];
-                idx = CB.DB.reminderUnits.findExact('id', parseInt(valuesArray[2]));
+                idx = CB.DB.reminderUnits.findExact('id', parseInt(valuesArray[2], 10));
                 if(idx >=0){
                     r = CB.DB.reminderUnits.getAt(idx);
                     text +=' '+r.get('name');
                 }
             }
-            
+
             return {
                 xtype: 'compositefield'
                 ,defaults: { submitValue: false }
@@ -970,7 +1042,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 ]
             };
         }
-    
+
     }
     ,addReminder: function(valuesArray, edit){
         if(this.remindPanel.items && this.remindPanel.items.getCount() > 4) return;
@@ -980,7 +1052,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
         this.setDirty();
     }
     ,onTypeChangeClick: function(gr, radio){
-        this.data.template_id = radio.inputValue
+        this.data.template_id = radio.inputValue;
         f = this.find('name', 'allday')[0];
         if(f) this.onAllDayClick(f, f.checked);
         f = this.find('name', 'responsible_user_ids')[0];
@@ -991,17 +1063,17 @@ CB.Tasks = Ext.extend( Ext.Window, {
     }
     ,onAllDayClick: function(cb, checked){
         if(checked){
-            this.datetime_start.setVisible(false); 
-            this.date_start.setVisible(true); 
-            
-            this.datetime_end.setVisible(false); 
-            this.date_end.setVisible(true); 
+            this.datetime_start.setVisible(false);
+            this.date_start.setVisible(true);
+
+            this.datetime_end.setVisible(false);
+            this.date_end.setVisible(true);
         }else{
-            this.date_start.setVisible(false); 
-            this.datetime_start.setVisible(true); 
-            
-            this.date_end.setVisible(false); 
-            this.datetime_end.setVisible(true); 
+            this.date_start.setVisible(false);
+            this.datetime_start.setVisible(true);
+
+            this.date_end.setVisible(false);
+            this.datetime_end.setVisible(true);
         }
         this.findByType('compositefield')[0].doLayout();
         this.setDirty(true);
@@ -1011,7 +1083,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
         this.actions.create.setDisabled(!this._dirty); //enable save only when changes made
         this.actions.save.setDisabled(!this._dirty); //enable save only when changes made
     }
-})
+});
 
 Ext.reg('CBTasks', CB.Tasks);
 
@@ -1022,10 +1094,10 @@ CB.TaskViewDataView = Ext.extend (Ext.DataView, {
         Ext.apply(this, {
             tpl: CB.TaskViewTemplate
             ,itemSelector: 'a'
-        })
-        CB.TaskViewDataView.superclass.initComponent.apply(this, arguments)
+        });
+        CB.TaskViewDataView.superclass.initComponent.apply(this, arguments);
     }
-})
+});
 Ext.reg('TaskViewDataView', CB.TaskViewDataView);
 
 CB.TaskFilesPanel = Ext.extend(Ext.Panel, {
@@ -1046,7 +1118,7 @@ CB.TaskFilesPanel = Ext.extend(Ext.Panel, {
                     ,html: '<a class="click nlhl fs12 pt10" name="file_add">' + L.AddFile + '</a>'
                     ,scope: this
                     ,handler: this.onFileAddClick
-                }       
+                }
             ]
             ,listeners:{
                 scope: this
@@ -1069,10 +1141,10 @@ CB.TaskRemindsDataView = Ext.extend (Ext.DataView, {
         Ext.apply(this, {
             tpl: CB.TaskRemindsViewTemplate
             ,itemSelector: 'a'
-        })
-        CB.TaskRemindsDataView.superclass.initComponent.apply(this)
+        });
+        CB.TaskRemindsDataView.superclass.initComponent.apply(this);
     }
-})
+});
 
 CB.TaskViewTemplate = new Ext.XTemplate(
     '<tpl for=".">'
@@ -1126,7 +1198,7 @@ CB.TaskViewTemplate = new Ext.XTemplate(
 
         ,'</td></tr>'
     ,'</tpl>'
-    
+
     ,'<tpl if="!Ext.isEmpty(values.files)">'
         ,'<tr><td class="k">' + L.Files + ':</td><td>'
         ,'<ul class="task_files">'
@@ -1151,7 +1223,7 @@ CB.TaskViewTemplate = new Ext.XTemplate(
     ,'</div>'
     ,'</tpl>'
     ,{compiled: true}
-) 
+);
 CB.TaskRemindsViewTemplate = new Ext.XTemplate(
     '<ul class="reminders">'
     ,'<tpl for="reminds_view">'
@@ -1160,7 +1232,7 @@ CB.TaskRemindsViewTemplate = new Ext.XTemplate(
     ,'</ul>'
     ,'<a class="click nlhl" name="rem_add">' + L.AddReminder + '</a>'
     ,{compiled: true}
-)
+);
 
 CB.ActionTasksView = Ext.extend(Ext.DataView, {
     style: 'background-color: #F4F4F4'
@@ -1183,7 +1255,7 @@ CB.ActionTasksView = Ext.extend(Ext.DataView, {
             )
             ,store: new Ext.data.JsonStore({
                 root: ''
-                ,fields: [ 
+                ,fields: [
                     {name:'nid', type: 'int'}
                     ,{name:'date', type: 'date', dateFormat: 'Y-m-d H:i:s'}
                     ,'name'
@@ -1203,9 +1275,9 @@ CB.ActionTasksView = Ext.extend(Ext.DataView, {
                     scope: this
                     ,load: function(store, records, options){
                         Ext.each(records, function(r){
-                            r.set('ago_text', r.get('cdate').format(App.dateFormat)  )
-                            r.set('username', CB.DB.usersStore.getName(r.get('cid')))
-                        }, this)
+                            r.set('ago_text', r.get('cdate').format(App.dateFormat));
+                            r.set('username', CB.DB.usersStore.getName(r.get('cid')));
+                        }, this);
                     }
                 }
                 ,data: []
@@ -1214,34 +1286,34 @@ CB.ActionTasksView = Ext.extend(Ext.DataView, {
             ,overClass:'item-over'
             ,singleSelect: true
             ,selectedClass: 'sel'
-            ,listeners: { 
+            ,listeners: {
                 scope: this
                 ,click: this.onItemClick
                 ,beforedestroy: function(){
-                    App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this)
+                    App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
                 }
             }
 
-        })
+        });
         CB.ActionTasksView.superclass.initComponent.apply(this, arguments);
-        this.addEvents('taskedit')//, 'showactivetasks', 'showowntasks'
-        this.enableBubble(['taskedit'])
-        App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this)
+        this.addEvents('taskedit');//, 'showactivetasks', 'showowntasks'
+        this.enableBubble(['taskedit']);
+        App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
     }
     ,onItemClick: function(el, index, ev){
         if(Ext.isElement(el)) return;
         r = this.store.getAt(index);
-        this.fireEvent('taskedit', {data: {id: r.get('nid')}})
+        this.fireEvent('taskedit', {data: {id: r.get('nid')}});
     }
     ,onObjectsDeleted: function(ids, e){
         if(Ext.isEmpty(this.store)) return;
         for (var i = 0; i < ids.length; i++) {
-            idx = this.store.findExact('nid', parseInt(ids[i]));
+            idx = this.store.findExact('nid', parseInt(ids[i], 10));
             if(idx >= 0 ) this.store.removeAt(idx);
         }
     }
 
-})
+});
 
 CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
     border: false
@@ -1269,7 +1341,7 @@ CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
                 scope: this
                 ,click: this.ontotalViewItemClick
             }
-        })
+        });
         this.tasksView = new CB.ActionTasksView({ autoHeight: true });
         Ext.apply(this, {
             layout: 'fit'
@@ -1278,14 +1350,14 @@ CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
             ,listeners: {
                 scope: this
                 ,beforedestroy: function(){
-                    App.mainViewPort.un('taskcreated', this.onTaskUpdated, this)
-                    App.mainViewPort.un('taskupdated', this.onTaskUpdated, this)
+                    App.mainViewPort.un('taskcreated', this.onTaskUpdated, this);
+                    App.mainViewPort.un('taskupdated', this.onTaskUpdated, this);
                 }
             }
-        })
+        });
         CB.ActionTasksPanel.superclass.initComponent.apply(this, arguments);
-        App.mainViewPort.on('taskcreated', this.onTaskUpdated, this)
-        App.mainViewPort.on('taskupdated', this.onTaskUpdated, this)
+        App.mainViewPort.on('taskcreated', this.onTaskUpdated, this);
+        App.mainViewPort.on('taskupdated', this.onTaskUpdated, this);
     }
     ,getCaseObjectId: function(){
         p = this.findParentByType(CB.Objects);
@@ -1305,14 +1377,14 @@ CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
             ,facets:"actiontasks"
             ,sort: ['status asc', 'date_end asc']
 
-        }, this.processLoad, this)
+        }, this.processLoad, this);
     }
     ,onShowActiveTasksClick: function(view){
-        this.filters = { "status":[{"mode":"OR","values":['1', "2"]}] }
+        this.filters = { "status":[{"mode":"OR","values":['1', "2"]}] };
         this.reload();
     }
     ,onShowAllTasksClick: function(view){
-        this.filters = { }
+        this.filters = { };
         this.reload();
     }
     ,processLoad: function(r, e){
@@ -1320,7 +1392,7 @@ CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
         for (var i = 0; i < r.data.length; i++) {
             r.data[i].cdate = date_ISO_to_date(r.data[i].cdate);
             r.data[i].iconCls = getItemIcon(r.data[i]);
-        };
+        }
         if(r.facets){
             if(this.totalView.rendered) this.totalView.update(r.facets); else this.totalView.data = r.facets;
         }
@@ -1337,4 +1409,4 @@ CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
     ,onTaskUpdated: function(r, e){
         if( r.data.pid == this.getCaseObjectId() ) this.reload();
     }
-})
+});

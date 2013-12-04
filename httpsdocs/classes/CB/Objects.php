@@ -299,7 +299,7 @@ class Objects
         }
         if (!empty($gf['body'])) {
             foreach ($gf['body'] as $f) {
-                $v = $template->formatValueForDisplay($f['tf'], $f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], @$f['value']);
                 if (is_array($v)) {
                     $v = implode('<br />', $v);
                 }
@@ -409,7 +409,7 @@ class Objects
             foreach ($linearData as $f) {
                 $tf = $template->getField($f['name']);
                 if ($tf['type'] == '_objects') {
-                    $a = Util\toNumericArray($f['value']);
+                    $a = Util\toNumericArray(@$f['value']);
                     $ids = array_merge($ids, $a);
                 }
             }
@@ -720,8 +720,19 @@ class Objects
     public function copy($objectId, $pid = false, $targetId = false)
     {
         $class = $this->getCustomClassByObjectId($objectId);
+        $data = $class->load();
+        $data['id'] = $targetId;
+        $data['pid'] = $pid;
 
-        return $class->copyTo($pid, $targetId);
+        $rez = $targetId;
+
+        if ($targetId === false) {
+            $rez = $class->create($data);
+        } else {
+            $class->update($data);
+        }
+
+        return $rez;
     }
 
     /**

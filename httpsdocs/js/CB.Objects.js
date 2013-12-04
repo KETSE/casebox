@@ -746,6 +746,7 @@ CB.ObjectsPropertiesPanel = Ext.extend(Ext.Panel, {
             tpl: new Ext.XTemplate(
                 '<h3 style="padding: 5px 5px 10px 5px; font-size: 14px">'+L.Properties+'</h3>'
                 ,'<table class="item-props">'
+                ,'{[ Ext.isEmpty(values.id) ? "" : \'<tr><td class="k">ID</td><td>\'+values.id+\'</td></tr>\']}'
                 ,'{[ Ext.isEmpty(values.name) ? "" : \'<tr><td class="k">'+L.Name+'</td><td>\'+values.name+\'</td></tr>\']}'
                 ,'<tbody><tr><td class="k">'+L.Path+'</td><td><a class="path" href="#">{pathtext}</a></td></tr>'
                 ,'{[ Ext.isEmpty(values.size) ? "" : \'<tr><td class="k">'+L.Size+'</td><td>\'+App.customRenderers.filesize(values.size)+\'</td></tr>\']}'

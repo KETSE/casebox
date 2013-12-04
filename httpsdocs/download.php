@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\L;
+
 header('Content-Type: text/plain; charset=UTF-8');
 
 if (empty($_GET['id'])) {
@@ -84,7 +86,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
         header('Content-Length: '.$r['size']);
-        readfile(FILES_DIR.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
+        @readfile(FILES_DIR.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
         Log::add(array('action_type' => 14, 'file_id' => $r['id']));
     }
     $res->close();
@@ -122,7 +124,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         header('Content-Type: application/zip; charset=UTF-8');
         header('Content-Disposition: attachment; filename="'.$archive_name.'"');
         header('Content-Length: '.filesize($tmp_name));
-        readfile($tmp_name);
+        @readfile($tmp_name);
         exit(0);
     }
 }
