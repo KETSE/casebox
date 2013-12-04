@@ -65,7 +65,7 @@ class Listeners
             }
             // fill custom columns data
             foreach ($data as &$doc) {
-                $obj = $this->getObject($doc['id']);
+                $obj = \CB\Objects::getCachedObject($doc['id']);
                 $template = $obj->getTemplate();
                 foreach ($customColumns as $fieldName => &$col) {
                     $customField = $fieldName;
@@ -106,19 +106,5 @@ class Listeners
             }
             $p['result']['DC'] = $customColumns;
         }
-    }
-
-    protected function getObject($id)
-    {
-        //verify if already have cached result
-        $var_name = 'Objects['.$id.']';
-        if (\CB\Cache::exist($var_name)) {
-            return \CB\Cache::get($var_name);
-        }
-        $obj = \CB\Objects::getCustomClassByObjectId($id);
-        $obj->load();
-        \CB\Cache::set($var_name, $obj);
-
-        return $obj;
     }
 }

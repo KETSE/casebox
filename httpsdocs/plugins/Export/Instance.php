@@ -7,6 +7,7 @@ use CB\User;
 
 class Instance //extends \CB\Plugin
 {
+    public $columns = array();
 
     public function install()
     {
@@ -26,7 +27,7 @@ class Instance //extends \CB\Plugin
 
         // form columns
         L\initTranslations();
-        $columns = array(
+        $this->columns = array(
             'nid' => 'ID'
             ,'name' => L\get('Name')
             ,'path' => L\get('Path')
@@ -59,16 +60,16 @@ class Instance //extends \CB\Plugin
         $results = $sr->search($p);
         if (!empty($results['DC'])) {
             foreach ($results['DC'] as $colName => $col) {
-                $columns[$colName] = $col['title'];
+                $this->columns[$colName] = @$col['title'];
             }
         }
         //insert header
-        $rez[] = array_values($columns);
+        $rez[] = array_values($this->columns);
 
         while (!empty($results['data'])) {
             foreach ($results['data'] as $r) {
                 $record = array();
-                foreach ($columns as $colName => $colTitle) {
+                foreach ($this->columns as $colName => $colTitle) {
                     if (strpos($colName, 'date') === false) {
                         if (in_array($colName, array('cid', 'uid'))) {
                             $record[] = User::getDisplayName($r[$colName]);

@@ -668,6 +668,25 @@ class Objects
     }
 
     /**
+     * get an object from cache or loads id and store in cache
+     * @param  int    $id
+     * @return object
+     */
+    public static function getCachedObject($id)
+    {
+        //verify if already have cached result
+        $var_name = 'Objects['.$id.']';
+        if (\CB\Cache::exist($var_name)) {
+            return \CB\Cache::get($var_name);
+        }
+        $obj = static::getCustomClassByObjectId($id);
+        $obj->load();
+        \CB\Cache::set($var_name, $obj);
+
+        return $obj;
+    }
+
+    /**
      * get an instance of the class designed for objectId (based on it's template type)
      * @param  int    $objectId
      * @return object

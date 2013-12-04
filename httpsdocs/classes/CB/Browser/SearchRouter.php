@@ -44,7 +44,6 @@ class SearchRouter
         }
 
          */
-
         $this->inputParams = $p;
         $this->genericObj->setData($this->inputParams);
         $this->prepareParams();
@@ -90,7 +89,7 @@ class SearchRouter
         }
 
         foreach ($ld as $fn => $values) {
-            //we'll analize for now gust first value for a field (duplicated fields are not processed)
+            //we'll analize for now just first value for a field (duplicated fields are not processed)
             $value = @$values[0];
 
             if (empty($value)) {
