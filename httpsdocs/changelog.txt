@@ -1,3 +1,26 @@
+CaseBox 1.9.68 (2013-12-04)
+==============================
+New Features, Improvements
+--------------------------
+- export results plugin. For now espors into html format as a table.
+- changed Objects.copy method to work as loading source object and save as a new target object.
+    We'll see if this method work without problems and will delete methods designed for copy.
+- added ID in properties panel of the object edit window
+- changed task categories to be displayed from tree
+    param names that could be set in config table of the core are:
+        task_categories: <id of the tags folder from tree>
+        default_task_category: <default value id>
+- changed DisplayColumns plugin config so it can load columns data differently for active language.
+
+Fixed Bugs:
+----------
+- sorting objects by id did not work
+- names with special chars did not show correctly on editing in grid
+- objects date not updated accordingly to internal object properties.
+- objects with createMethod = inline did not automatically appear in tree or browser in edit mode after clicking create.
+    This mostly refers to folders creation.
+- grid editor for name collumn was destroyed because of DisplayColumns plugin. It reconfigures column structure.
+
 CaseBox 1.9.67 (2013-11-30)
 ==============================
 Fixed Bugs:
