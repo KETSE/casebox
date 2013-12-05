@@ -9,6 +9,8 @@ use CB\Objects;
 //  - when you try to run this process more than once then object values are updated only first time
 //      Solution 1 : let the thesauriId property set for template fields config
 
+ini_set('max_execution_time', 0);
+
 class TreeSync extends \Util\TreeSync
 {
     protected $targetFolderName = 'Thesauri';

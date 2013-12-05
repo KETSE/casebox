@@ -504,7 +504,7 @@ class Object extends OldObject
         /* replace field values */
         foreach ($ld as $field) {
             $tf = $this->template->getField($field['name']);
-            $v = $this->template->formatValueForDisplay($tf, $field['value'], false);
+            $v = $this->template->formatValueForDisplay($tf, @$field['value'], false);
             if (is_array($v)) {
                 $v = implode(',', $v);
             }
@@ -574,6 +574,9 @@ class Object extends OldObject
     protected function getLinearNodesData(&$data)
     {
         $rez = array();
+        if (empty($data)) {
+            return $rez;
+        }
         foreach ($data as $fieldName => $fieldValue) {
             if ($this->isFieldValue($fieldValue)) {
                 $fieldValue = array($fieldValue);

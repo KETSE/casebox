@@ -70,6 +70,7 @@ if (!empty($argv[2]) && is_numeric($argv[2])) {
     $pid = $argv[2];
 }
 
+ini_set('max_execution_time', 0);
 require_once '../crons/init.php';
 
 L\initTranslations();

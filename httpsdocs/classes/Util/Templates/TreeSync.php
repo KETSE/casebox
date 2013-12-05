@@ -221,12 +221,6 @@ class TreeSync extends \Util\TreeSync
         DB\dbQuery("UPDATE templates_structure SET `name` = COALESCE(l1, l2, l3, l4, 'unnamed') WHERE (`name` = '')") or die(DB\dbQueryError());
         //update group types
         DB\dbQuery("UPDATE templates_structure SET NAME = 'group', TYPE = 'G' WHERE tag = 'G'") or die(DB\dbQueryError());
-        //update max id from tree to avoid id dublication in templates
-        $res = DB\dbQuery('SELECT (MAX(id)+1) `max_id` FROM templates_structure') or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            DB\dbQuery('ALTER TABLE `tree` AUTO_INCREMENT='.$r['max_id']) or die(DB\dbQueryError());
-        }
-        $res->close();
         /* end of make some automatic adjustments */
 
         //create or update fields template
@@ -242,6 +236,13 @@ class TreeSync extends \Util\TreeSync
         $data = $this->tTObject->load();
         $data['template_id'] = $this->tTId;
         $this->tTObject->update($data);
+
+        //update max id from tree to avoid id duplication in templates
+        $res = DB\dbQuery('SELECT (MAX(id)+1) `max_id` FROM templates_structure') or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            DB\dbQuery('ALTER TABLE `tree` AUTO_INCREMENT='.$r['max_id']) or die(DB\dbQueryError());
+        }
+        $res->close();
 
         // now that we've checked/created basic templates -
         // add these items to be available in target folder menu

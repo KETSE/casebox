@@ -109,8 +109,6 @@ class Objects
             )
         );
 
-        $this->createSystemFolders($id, @$templateData['cfg']['system_folders']);
-
         Solr\Client::runCron();
 
         return $this->load(array('id' => $id));
@@ -458,67 +456,6 @@ class Objects
         $res->close();
 
         return array('success' => true, 'data' => $data);
-    }
-
-    /**
-     * create system foldes for an object
-     * @param  int   $object_id
-     * @param  array $folderIds
-     * @return void
-     */
-    public function createSystemFolders($object_id, $folderIds)
-    {
-        $folderIds = Util\toNumericArray($folderIds);
-        if (empty($folderIds)) {
-            return;
-        }
-        $childs = array();
-        foreach ($folderIds as $folderId) {
-            array_push(
-                $childs,
-                array(
-                    'pid' => $object_id
-                    ,'tag_id' => $folderId
-                )
-            );
-        }
-
-        $pid = $object_id;
-
-        while (!empty($childs)) {
-            $node = array_shift($childs);
-            /*get tag name & type*/
-            $res = DB\dbQuery(
-                'SELECT l'.USER_LANGUAGE_INDEX.' `title`, `type` FROM tags WHERE id = $1',
-                $node['tag_id']
-            ) or die( DB\dbQueryError() );
-
-            if ($r = $res->fetch_assoc()) {
-                $node['name'] = $r['title'];
-                $node['type'] = $r['type'];
-                $node['template_id'] = CONFIG\DEFAULT_FOLDER_TEMPLATE;
-            }
-            $res->close();
-            /* end of get tag name & type*/
-            if ($node['type'] == 1) {
-                $rez = $this->create($node);
-                $pid = $rez['data']['id'];
-            } else {
-                $pid = $node['pid'];
-            }
-
-            /* checking if childs exist for added folder and append them to childs table */
-            $res = DB\dbQuery(
-                'SELECT id FROM tags WHERE pid = $1',
-                $node['tag_id']
-            ) or die( DB\dbQueryError() );
-
-            while ($r = $res->fetch_assoc()) {
-                $childs[] = array('pid' => $pid, 'tag_id' => $r['id']);
-            }
-            $res->close();
-            /* end of checking if childs exist for added folder and append them to childs table */
-        }
     }
 
     /**

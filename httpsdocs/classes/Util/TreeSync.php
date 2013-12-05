@@ -45,6 +45,14 @@ class TreeSync
      */
     protected function verifyPid()
     {
+
+        //update max id from tree to avoid id duplication in templates
+        $res = DB\dbQuery('SELECT (MAX(id)+20) `max_id` FROM templates_structure') or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            DB\dbQuery('ALTER TABLE `tree` AUTO_INCREMENT='.$r['max_id']) or die(DB\dbQueryError());
+        }
+        $res->close();
+
         $rez = true;
         if (is_numeric($this->mainPid)) {
             if (!\CB\Objects::idExists($this->mainPid)) {

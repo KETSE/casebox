@@ -1,3 +1,17 @@
+CaseBox 1.9.69 (2013-12-05)
+==============================
+New Features, Improvements
+--------------------------
+- system folders mechanism has been moved to a casebox plugin.
+    The essence of the plugin is to copy a structure, specified in the config of the created object template, to the created object.
+
+- adjustments for core upgrade process
+    Note: befre start process through 4_steps_core_upgrade.php you should check the following:
+        - if templates fields have names, if not then set names for fields that will result in a duplicate name from l1 field
+        - check template names and better set a name for empty names (names should be unique)
+        - check title_template field from templates, replace field ids with field names
+        - please make sure after core updgrades that templates do have correct sistem folders specified in config.
+
 CaseBox 1.9.68 (2013-12-04)
 ==============================
 New Features, Improvements
