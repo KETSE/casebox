@@ -20,7 +20,7 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
     ,buttonAlign: 'center'
     ,data:{
         single: true
-        ,autorenameButton: true 
+        ,autorenameButton: true
     }
     ,initComponent: function(){
         buttons = []
@@ -36,7 +36,7 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
             ,scope: this
             ,handler: this.onButtonClick
         });
-        
+
         this.renameButton = new Ext.Button({
             text: L.Rename
             ,name: 'rename'
@@ -44,7 +44,7 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
             ,handler: this.onButtonClick
         });
         if(!Ext.isEmpty(this.data.suggestedFilename)) buttons.push(this.renameButton);
-        
+
         if(this.data.autorenameButton) buttons.push({
             text: L.AutoRename
             ,name: 'autorename'
@@ -102,14 +102,13 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
     ,plain: true
     ,resizable: false
     ,stateful: false
-    //,title: L.UploadFile
     ,iconCls: 'icon-upload'
     ,width: 370
 
     ,fileOnly: false
     ,fieldName: 'file'
     ,initComponent: function(){
-        
+
         fieldsetItems = [{
                 fieldLabel: L.File
                 ,inputType: 'file'
@@ -118,7 +117,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
             },{xtype: 'textfield'
                 ,fieldLabel: L.Title
                 ,name: 'title'
-            },{ fieldLabel: '&nbsp;', labelSeparator: '', name: 'addFileButton',xtype: 'dataview', data: [], tpl: '<a href="#" class="cBl">'+L.addFile+'</a>', itemSelector: 'a', listeners: { click: {scope: this, fn: this.onAddFileFieldClick} } 
+            },{ fieldLabel: '&nbsp;', labelSeparator: '', name: 'addFileButton',xtype: 'dataview', data: [], tpl: '<a href="#" class="cBl">'+L.addFile+'</a>', itemSelector: 'a', listeners: { click: {scope: this, fn: this.onAddFileFieldClick} }
             },{
                 xtype: 'datefield'
                 ,fieldLabel: L.Date
@@ -174,7 +173,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
                 }
             }
         });
-        
+
         CB.FileUploadWindow.superclass.initComponent.apply(this, arguments);
         this.on('show', this.onShow, this);
         this.addEvents('submitsuccess');
@@ -206,7 +205,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
             ed[0].setValue(this.data.user_tags);
             ed[0].setVisible( !this.fileOnly );
         }
-        
+
         App.focusFirstField(this);
     },doSubmit: function(){
         d = this.find('name', 'date');

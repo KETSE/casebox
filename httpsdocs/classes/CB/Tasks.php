@@ -23,8 +23,6 @@ class Tasks
                 ,t.responsible_user_ids
                 ,t.autoclose
                 ,t.description
-                ,t.parent_ids
-                ,t.child_ids
                 ,DATEDIFF(t.`date_end`
                 ,UTC_DATE()) `days`
                 ,m.pid
@@ -33,12 +31,8 @@ class Tasks
                      FROM tasks_reminders
                      WHERE task_id = $1
                          AND user_id = $2) reminds
-                , (SELECT name
-                     FROM tree
-                     WHERE id = ti.case_id) `case`
-                  ,(SELECT concat(coalesce(concat(date_format(date_start, \''.$_SESSION['user']['cfg']['short_date_format'].'\'), \' - \'), \'\'), coalesce(custom_title, title))
-                     FROM objects
-                     WHERE id = t.object_id) `object`
+                ,(SELECT name FROM tree WHERE id = ti.case_id) `case`
+                ,(SELECT name FROM tree WHERE id = t.object_id) `object`
                 ,t.status
                 ,t.cid
                 ,t.completed
@@ -1026,10 +1020,14 @@ class Tasks
             ) or die(DB\dbQueryError());
 
             while ($ur = $ures->fetch_assoc()) {
+                $name = trim($ur['first_name'].' '.$ur['last_name']);
+                if (empty($name)) {
+                    $name = $ur['name'];
+                }
                 $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
-                "\n\r".'<img src="'.Util\getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px" alt="'.$ur['name'].'" title="'.$ur['name'].'"/>'.
+                "\n\r".'<img src="'.Util\getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px" alt="'.$name.'" title="'.$name.'"/>'.
                 "\n\r".( ($ur['status'] == 1) ? '<img src="'.Util\getCoreHost($r['db']).'css/i/ico/tick-circle.png" style="width:16px;height:16px; margin-left: -16px"/>': '').
-                "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b>'.$ur['name'].'</b>'.
+                "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b>'.$name.'</b>'.
                 "\n\r".'<p style="color:#777;margin:0;padding:0">'.
                 "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
                     Util\formatMysqlDate($ur['time'], 'Y, F j H:i').'</span>' : L\get('waitingForAction', $user['language_id']) ).
@@ -1047,15 +1045,21 @@ class Tasks
             if (!empty($removed_users)) {
                 $ures = DB\dbQuery(
                     'SELECT u.id
-                         , u.l'.$user['language_id'].' `name`
+                         ,u.name
+                         ,u.first_name
+                         ,u.last_name
                     FROM users_groups u
                     WHERE u.id IN (0'.implode(', ', $removed_users).')
                     ORDER BY 1'
                 ) or die(DB\dbQueryError());
                 while ($ur = $ures->fetch_assoc()) {
+                    $name = trim($ur['first_name'].' '.$ur['last_name']);
+                    if (empty($name)) {
+                        $name = $ur['name'];
+                    }
                     $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
-                    "\n\r".'<img src="'.Util\getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$ur['name'].'" title="'.$ur['name'].'"/>'.
-                    "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b style="color: #777; text-decoration: line-through">'.$ur['name'].'</b>'.
+                    "\n\r".'<img src="'.Util\getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$name.'" title="'.$name.'"/>'.
+                    "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b style="color: #777; text-decoration: line-through">'.$name.'</b>'.
                     "\n\r".'</td></tr>';
                 }
                 $ures->close();

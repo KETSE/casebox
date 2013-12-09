@@ -9,7 +9,9 @@ class Search extends Solr\Client
     public $acceptableSortFields = array(
          'id'
          ,'name'
+         ,'sort_name'
          ,'path'
+         ,'sort_path'
          ,'size'
          ,'date'
          ,'date_end'
@@ -514,7 +516,6 @@ class Search extends Solr\Client
                 ,'inputParams' => &$this->inputParams
             );
             \CB\fireEvent('beforeSolrQuery', $eventParams);
-
             $this->results = $this->search(
                 $this->escapeLuceneChars($this->query),
                 $this->start,
@@ -581,8 +582,6 @@ class Search extends Solr\Client
                     $k = substr($k, 1);
                     switch ($k) {
                         case 'sys_tags':
-                            $this->analizeSystemTagsFacet($v, $rez);
-                            break;
                         case 'tree_tags':
                             $this->analizeTreeTagsFacet($v, $rez);
                             break;
@@ -635,8 +634,6 @@ class Search extends Solr\Client
                     $k = substr($k, 1);
                     switch ($k) {
                         case 'sys_tags':
-                            $this->analizeSystemTagsFacet($v, $rez);
-                            break;
                         case 'tree_tags':
                             $this->analizeTreeTagsFacet($v, $rez);
                             break;
@@ -702,67 +699,6 @@ class Search extends Solr\Client
         return $rez;
     }
 
-    public function analizeSystemTagsFacet($values, &$rez)
-    {
-        $groups = defined('CB\\CONFIG\\TAGS_FACET_GROUPING') ? CONFIG\TAGS_FACET_GROUPING : 'pids';
-        $ids = array();
-        foreach ($values as $k => $v) {
-            $ids[] = $k;
-        }
-        if (empty($ids)) {
-            return false;
-        }
-        switch ($groups) {
-            case 'all':
-                $rez['sys_tags'] = array('f' => 'sys_tags', 'items' => $values);
-                // return false;
-                break;
-            case 'pids':
-                $res = DB\dbQuery(
-                    'SELECT t.id
-                         , t.pid
-                         , p.l'.USER_LANGUAGE_INDEX.' `title`
-                    FROM tags t
-                    JOIN tags p ON t.pid = p.id
-                    WHERE t.id IN ('.implode(', ', $ids).')'
-                ) or die(DB\dbQueryError());
-
-                while ($r = $res->fetch_assoc()) {
-                    $rez['stg_'.$r['pid']]['f'] = 'sys_tags';
-                    $rez['stg_'.$r['pid']]['title'] = $r['title'];
-                    $rez['stg_'.$r['pid']]['items'][$r['id']] = $values->{$r['id']};
-                }
-                $res->close();
-                break;
-            default:
-                $res = DB\dbQuery(
-                    'SELECT t.id
-                         , t.pid
-                         , p.l'.USER_LANGUAGE_INDEX.' `title`
-                    FROM tags t
-                    JOIN tags p ON t.pid = p.id
-                    WHERE t.id IN ('.implode(', ', $ids).')
-                        AND p.id IN('.$groups.')'
-                ) or die(DB\dbQueryError());
-
-                while ($r = $res->fetch_assoc()) {
-                    $rez['stg_'.$r['pid']]['f'] = 'sys_tags';
-                    $rez['stg_'.$r['pid']]['title'] = $r['title'];
-                    $rez['stg_'.$r['pid']]['items'][$r['id']] = $values->{$r['id']};
-                    unset($values->{$r['id']});
-                }
-                $res->close();
-                if (!empty($values)) {
-                    foreach ($values as $k => $v) {
-                        $rez['sys_tags']['items'][$k] = $v;
-                    }
-                }
-                break;
-        }
-
-        return true;
-    }
-
     public function analizeTreeTagsFacet($values, &$rez)
     {
         $groups = defined('CB\\CONFIG\\TAGS_FACET_GROUPING') ? CONFIG\TAGS_FACET_GROUPING : 'pids';
@@ -800,7 +736,7 @@ class Search extends Solr\Client
                 $res = DB\dbQuery(
                     'SELECT t.id
                          , t.pid
-                         , p.name `title`
+                         , p.name
                     FROM tree t
                     JOIN tree p ON t.pid = p.id
                     WHERE t.id IN ('.implode(', ', $ids).')'
@@ -808,7 +744,7 @@ class Search extends Solr\Client
 
                 while ($r = $res->fetch_assoc()) {
                     $rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
-                    $rez['ttg_'.$r['pid']]['title'] = L\getTranslationIfPseudoValue($r['title']);
+                    $rez['ttg_'.$r['pid']]['name'] = L\getTranslationIfPseudoValue($r['name']);
                     $rez['ttg_'.$r['pid']]['items'][$r['id']] =  array('name' => $names[$r['id']], 'count' => $values->{$r['id']});
                 }
                 $res->close();
@@ -817,7 +753,7 @@ class Search extends Solr\Client
                 $res = DB\dbQuery(
                     'SELECT t.id
                          , t.pid
-                         , p.name `title`
+                         , p.name
                     FROM tree t
                     JOIN tree p ON t.pid = p.id
                     WHERE t.id IN ('.implode(', ', $ids).')
@@ -826,7 +762,7 @@ class Search extends Solr\Client
 
                 while ($r = $res->fetch_assoc()) {
                     $rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
-                    $rez['ttg_'.$r['pid']]['title'] = $r['title'];
+                    $rez['ttg_'.$r['pid']]['name'] = $r['name'];
                     $rez['ttg_'.$r['pid']]['items'][$r['id']] = array('name' => $names[$r['id']], 'count' => $values->{$r['id']});
                     unset($values->{$r['id']});
                 }

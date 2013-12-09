@@ -1,3 +1,23 @@
+CaseBox 1.9.70 (2013-12-09)
+==============================
+New Features, Improvements
+--------------------------
+- removed all fields from objects and let only id, data, sys_data
+- moved automatic names generation for objects in a separate AutoSetFields plugin
+- removed old_id fields from database
+    Old ids should be keeped in special tables if needed or in sys_data of the object.
+- remove private_for_user functionality from casebox
+    This feature will be implemented later as a separated casebox plugin.
+
+Fixed Bugs:
+----------
+- Task responsible peson names missing from preview/notifications
+
+Notes:
+----------
+- update casebox database from casebox.sql (backup your current cores configuration)
+- apply database update for core: 20131209_2328 db_update v1.9.70.sql
+
 CaseBox 1.9.69 (2013-12-05)
 ==============================
 New Features, Improvements

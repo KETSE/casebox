@@ -1,4 +1,4 @@
-Ext.namespace('CB'); 
+Ext.namespace('CB');
 CB.FileVersionsView = Ext.extend(Ext.DataView, {
     width: 250
     ,split: true
@@ -9,7 +9,7 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
 
         Ext.apply(this, {
             tpl: new Ext.XTemplate(
-                
+
                 '<table class="versions">'
                 ,'<tbody>'
                 ,'<tpl for=".">'
@@ -39,7 +39,7 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
             )
             ,store: new Ext.data.JsonStore({
                 root: ''
-                ,fields: [ 
+                ,fields: [
                     {name:'id', type: 'int'}
                     ,{name:'date', type: 'date', dateFormat: 'Y-m-d H:i:s'}
                     ,'name'
@@ -67,13 +67,13 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
             ,overClass:'item-over'
             ,singleSelect: true
             ,selectedClass: 'sel'
-            ,listeners: { 
+            ,listeners: {
                 scope: this
                 ,click: this.onItemClick
             }
 
         })
-        
+
         CB.FileVersionsView.superclass.initComponent.apply(this, arguments);
         this.addEvents('versionselected');
     }
@@ -98,7 +98,7 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
         if(Ext.isEmpty(r)) return;
         Ext.Msg.confirm(L.DeleteConfirmation, L.versionDeleteConfirmation,
             function(b){
-                if(b == 'yes') CB_Files.deleteVersion(r.get('id'), this.processDelete, this); 
+                if(b == 'yes') CB_Files.deleteVersion(r.get('id'), this.processDelete, this);
             }
             , this
         )
@@ -210,12 +210,12 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
                 ,handler: this.onNewWindowClick
             })
             }
-        
+
         this.previewPanel = new CB.PreviewPanel({
             region: 'center'
             ,bodyStyle: 'padding: 5px'
         });
-            
+
         this.versionsView = new CB.FileVersionsView({
             listeners: {
                 scope: this
@@ -237,7 +237,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
                 ,beforedestroy: this.onBeforeDestroy
             }
         });
-            
+
         CB.FileWindow.superclass.initComponent.apply(this, arguments);
         this.addEvents( 'taskcreate', 'fileupload', 'filedownload', 'fileupload');
         this.enableBubble([ 'taskcreate', 'fileupload', 'filedownload', 'fileupload']);
@@ -247,7 +247,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         App.mainViewPort.on('taskupdated', this.onTaskChange, this);
         App.clipboard.on('change', this.onClipboardChange, this);
     }
-        
+
     ,afterRender: function() {
             // call parent
             CB.FileWindow.superclass.afterRender.apply(this, arguments);
@@ -274,26 +274,26 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             this.prepareInterface();
             this.loaded = true;
         }
-        
+
         if(this.grid) this.grid.reload();
-        
+
         this.actions.save.setDisabled(true);
         this.actions.attachUpload.setDisabled(false);
         this.actions.download.setDisabled(false);
         this.actions.upload.setDisabled(false);
         this.actions.newWindow.setDisabled(false);
         this.actions['delete'].setDisabled(false);
-        
+
 
         this.previewPanel.clear();
         this.previewPanel.loadPreview(this.data.id);
-        
+
         if(Ext.isEmpty(this.data.versions)) this.data.versions = [];
         this.data.cls = 'current';
         this.versionsView.store.loadData([this.data].concat(this.data.versions), false);
-        
+
         this.items.last().items.first().syncSize();
-        
+
         this.duplicatesView.reload();
         this.propertiesPanel.update(this.data);
     }
@@ -306,13 +306,13 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 
         }
         /* end of find out if need to show properties panel */
-        
+
         toolbarItems = []
 
         /* insert create menu if needed */
         menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
         if( !Ext.isEmpty(menuConfig) ){
-            createButton = new Ext.Button({ 
+            createButton = new Ext.Button({
                 text: L.Create
                 ,iconCls: 'icon32-create'
                 ,iconAlign:'top'
@@ -326,7 +326,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         toolbarItems.push(this.actions.save);
 
         if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
-        
+
         toolbarItems.push('-',{text: 'Attach', iconCls: 'icon32-attach', scale: 'large', iconAlign:'top'
                     ,menu: [
                 this.actions.attachUpload
@@ -345,11 +345,11 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         /* */
 
         this.actions.save.setHidden( !this.showPropertiesPanel );
-        
+
         contentItems = [ this.previewPanel ];
         if(this.showPropertiesPanel){
             this.previewPanel.title = L.Preview;
-            this.grid = new CB.VerticalEditGrid({ 
+            this.grid = new CB.VerticalEditGrid({
                 title: L.Properties
                 ,refOwner: this
                 ,autoHeight: true
@@ -394,7 +394,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
                 ,this.propertiesPanel
             ]
         })
-        
+
         this.add({
             layout: 'border'
             ,tbarCssClass: 'x-panel-white'
@@ -405,7 +405,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         this.doLayout();
     }
     ,onVersionSelect: function(idx, e){
-        
+
         vr = this.versionsView.store.getAt(idx);
         if(Ext.isEmpty(vr)) return;
         this.previewPanel.loadPreview(this.data.id, (idx ==0) ? '' : vr.get('id'));
@@ -421,10 +421,10 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         }, b.data);
         App.mainViewPort.createObject(data, e);
     }
-    ,onAttachUploadClick: function(b, e) { 
-        this.fireEvent('fileupload', {pid: this.data.id, uploadType: 'single'}, e) 
+    ,onAttachUploadClick: function(b, e) {
+        this.fireEvent('fileupload', {pid: this.data.id, uploadType: 'single'}, e)
     }
-    ,onPasteClick: function(b, e) { 
+    ,onPasteClick: function(b, e) {
         App.clipboard.paste(this.data.id, null, this.onPasteProcess, this);
     }
     ,onPasteProcess: function(pids){
@@ -432,12 +432,12 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
     ,onCreateTaskClick: function(o, e){
         this.fireEvent(
             'taskcreate'
-            ,{ 
+            ,{
                 data: {
                     template_id: App.config.default_task_template
                     ,pid: this.data.id
                     ,path: this.data.path+'/'+this.data.id
-                    ,pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)
+                    ,pathtext: this.data.pathtext+ this.data.name
                 }
             }
         )
@@ -470,7 +470,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
     }
     ,onDeleteClick: function(){
         Ext.Msg.confirm( L.DeleteConfirmation, L.fileDeleteConfirmation// + ' "' + this.data.name + '"?'
-            , this.onDelete, this ) 
+            , this.onDelete, this )
     }
     ,onDelete: function (btn) {
         if(btn !== 'yes') return;
@@ -529,7 +529,7 @@ CB.ActionFilesView = Ext.extend(Ext.DataView, {
             )
             ,store: new Ext.data.JsonStore({
                 root: ''
-                ,fields: [ 
+                ,fields: [
                     {name:'nid', type: 'int'}
                     ,{name:'date', type: 'date', dateFormat: 'Y-m-d H:i:s'}
                     ,'name'
@@ -561,7 +561,7 @@ CB.ActionFilesView = Ext.extend(Ext.DataView, {
             ,overClass:'item-over'
             ,singleSelect: true
             ,selectedClass: 'sel'
-            ,listeners: { 
+            ,listeners: {
                 scope: this
                 ,click: this.onItemClick
                 ,beforedestroy: function(){
@@ -648,12 +648,12 @@ CB.ActionFilesView = Ext.extend(Ext.DataView, {
             ,iconCls: r.get('iconCls')
         }]
         App.clipboard.set(rez, 'copy');
-    }   
+    }
     ,onDeleteClick: function(b, e){
         index = this.filesMenu.itemIndex
         r = this.store.getAt(index);
         if(Ext.isEmpty(r)) return;
-        Ext.Msg.confirm(L.DeleteConfirmation, L.fileDeleteConfirmation//L.DeleteConfirmationMessage + ' "' + r.get('name') + '"?', 
+        Ext.Msg.confirm(L.DeleteConfirmation, L.fileDeleteConfirmation//L.DeleteConfirmationMessage + ' "' + r.get('name') + '"?',
             ,function(b){
                 if(b == 'yes') {
                     CB_Browser['delete'](
@@ -662,7 +662,7 @@ CB.ActionFilesView = Ext.extend(Ext.DataView, {
                             App.mainViewPort.onProcessObjectsDeleted(r, e)
                         }
                         ,this
-                    ); 
+                    );
                 }
             }
             , this
@@ -756,7 +756,7 @@ CB.FileDuplicatesView = Ext.extend(Ext.DataView, {
             )
             ,store: new Ext.data.JsonStore({
                 root: ''
-                ,fields: [ 
+                ,fields: [
                     {name:'id', type: 'int'}
                     ,'name'
                     ,{name:'cid', type: 'int'}
@@ -770,7 +770,7 @@ CB.FileDuplicatesView = Ext.extend(Ext.DataView, {
             ,overClass:'item-over'
             ,singleSelect: true
             ,selectedClass: 'sel'
-            ,listeners: { 
+            ,listeners: {
                 scope: this
                 ,click: this.onItemClick
                 ,beforedestroy: function(){

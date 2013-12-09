@@ -432,15 +432,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     v = {value: v};
                 }
 
-                if ((r.get('name') == '_title') && isNaN(this.data.id) && !Ext.isEmpty(this.data.custom_title)) {
-                    v.value = this.data.custom_title;
-                }
-                //if(it's object_date_start field and it is a new object then we are setting it's value to today)
-                if((r.get('name') == '_date_start') && isNaN(this.data.id)) {
-                    v.value = Ext.isEmpty(this.data.date_start)
-                        ? new Date()
-                        : this.data.date_start;
-                }
                 //if there is a date set for the date field, we are parsing it to a date value
                 if ((r.get('type') == 'date') && Ext.isString(v.value) && !Ext.isEmpty(v.value)) {
                     v.value = Date.parseDate(v.value.substr(0,10), 'Y-m-d');
@@ -601,7 +592,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         data = Ext.apply({}, {
             pid: this.data.id
             ,path: this.data.path+'/'+this.data.id
-            ,pathtext: this.data.pathtext+'/'+Ext.value(this.data.custom_title, this.data.title)
+            ,pathtext: this.data.pathtext+'/'+ this.data.name
         }, b.data);
         App.mainViewPort.createObject(data, e);
     }
@@ -613,7 +604,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     template_id: App.config.default_task_template
                     ,pid: this.data.id
                     ,path: this.data.path+'/'+this.data.id
-                    ,pathtext: this.data.pathtext+ Ext.value(this.data.title, this.data.custom_title)
+                    ,pathtext: this.data.pathtext + this.data.name
                 }
             }
         );

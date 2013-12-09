@@ -349,16 +349,6 @@ class Browser
         ) or die(DB\dbQueryError());
 
         DB\dbQuery(
-            'UPDATE objects
-            SET custom_title = $1
-            WHERE id = $2',
-            array(
-                $p['name']
-                ,$id
-            )
-        ) or die(DB\dbQueryError());
-
-        DB\dbQuery(
             'UPDATE files
             SET name = $1
             WHERE id = $2',

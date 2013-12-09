@@ -60,8 +60,6 @@ class Collection
                 ,t.cfg
                 ,t.title_template
                 ,t.info_template
-                ,o.title
-                ,o.custom_title
                 ,o.data
             FROM templates t
             LEFT JOIN objects o

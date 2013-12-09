@@ -278,11 +278,9 @@ foreach ($mailbox as $k => $mail) {
     $obj = Objects::getCustomClassByType('email');
     $objectId = $obj->create(
         array(
-            'old_id' => $mailbox->getUniqueId($k)
-            ,'pid' => $pid
+            'pid' => $pid
             ,'user_id' => $user_id
             ,'name' => $subject
-            ,'custom_title' => $subject
             ,'template_id' => $email_template_id
             ,'date' => $time
             ,'cid' => $user_id
@@ -291,6 +289,9 @@ foreach ($mailbox as $k => $mail) {
                 ,'_date_start' => $time
                 ,'_content' => $content
                 ,'from' => $mail->from
+            )
+            ,'sys_data' => array(
+                'old_id' => $mailbox->getUniqueId($k)
             )
         )
     );

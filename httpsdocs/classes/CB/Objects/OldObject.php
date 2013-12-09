@@ -43,7 +43,7 @@ class OldObject
                 ,duplicate_id
                 ,`value`
                 ,info
-                '.($objectType == 'users_groups' ? '' : ',files,private_for_user `pfu`').'
+                '.($objectType == 'users_groups' ? '' : ',files').'
             FROM '.$objectType.'_data
             WHERE '.$this->getObjectIdField($objectType).' = $1',
             $this->id

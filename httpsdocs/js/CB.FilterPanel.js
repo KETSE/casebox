@@ -31,7 +31,7 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
                 facet = new CB.FacetList({
                     modeToggle: false
                     ,facetId: key
-                    ,facetTitle: value.title
+                    ,facetTitle: value.name
                     ,f: Ext.isEmpty(value.f) ? key: value.f
                 })
                 this.insert(this.facetIndex, facet);
@@ -52,19 +52,20 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
             Ext.each(val, function(f){ for(i = 0; i < f.values.length; i++) vals[f.values[i]] = 1; }, this)
             fd = CB.FacetList.prototype.getFacetData(key, vals, options);
             for (var i = 0; i < fd.length; i++){
-                af_data.push({id: Ext.id(), facetId: key, value: fd[i].id, title: fd[i].title} )
+                af_data.push({id: Ext.id(), facetId: key, value: fd[i].id, name: fd[i].name} )
             }
         }, this);
         this.activeFileterFacet.loadData(af_data);
         if(this.activeFileterFacet.store.getCount() > 0){
-            this.activeFileterFacet.store.loadData([{id: -1, value: -1, title: L.ResetAll}], true);
+            this.activeFileterFacet.store.loadData([{id: -1, value: -1, name: L.ResetAll}], true);
             this.activeFileterFacet.setVisible(true);
             if(this.bindButton) this.bindButton.setIconClass(this.bindButton.initialConfig.activeIconCls);
         }else if(this.bindButton) this.bindButton.setIconClass(this.bindButton.initialConfig.iconCls);
     }
     ,onFacetChange: function(o, e){
-        e.stopPropagation()
-        this.fireEvent('change', this.getFacetsValues() )
+        e.stopPropagation();
+        var p = this.getFacetsValues();
+        this.fireEvent('change', p, e);
     }
     ,getFacetsValues: function(){
         result = {}
@@ -103,10 +104,10 @@ CB.FacetActiveFilters = Ext.extend( Ext.Panel, {
         this.store = new Ext.data.JsonStore({
             autoDestroy: true
             ,proxy: new  Ext.data.MemoryProxy()
-            ,fields: [ 'id', 'facetId', 'value', 'title' ]
+            ,fields: [ 'id', 'facetId', 'value', 'name' ]
         });
         if( !Ext.isEmpty( this.data ) ) this.store.loadData( this.data, false );
-        
+
         Ext.apply(this, {
             items: new Ext.DataView({
                 autoHeight: true
@@ -116,12 +117,12 @@ CB.FacetActiveFilters = Ext.extend( Ext.Panel, {
                     '<ul class="filter_list">'
                         ,'<tpl for=".">'
                         ,'<li{[ (values.id == -1) ? \' class="reset"\' : ""]}>'
-                        ,   '<a href="#">{[Ext.value(values.title, "-")]}</a>'
+                        ,   '<a href="#">{[Ext.value(values.name, "-")]}</a>'
                         ,'</li>'
                     ,'</tpl></ul>'
                 ]
                 ,listeners: {
-                    click: {scope: this, 
+                    click: {scope: this,
                         fn: function(dv, idx, el, ev){
                             r = this.store.getAt(idx);
                             this.fireEvent('itemclick', idx, r.data, ev);

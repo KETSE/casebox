@@ -846,9 +846,18 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         this.grid.getSelectionModel().unlock.defer(500, this.grid.getSelectionModel());
     }
     ,setParams: function(params){
-        if(Ext.isEmpty(params.path)) params.path = '/';
-        Ext.apply(this.params, Ext.value(params, {}));
-        this.grid.getBottomToolbar().changePage(1);
+        if(Ext.isEmpty(params.path)) {
+            params.path = '/';
+        }
+        this.lastParams = Ext.apply({}, this.params);
+        var newParams = {};
+        Ext.apply(newParams, Ext.value(params, {}));
+
+        if(Ext.encode(this.lastParams) !== Ext.encode(newParams)) {
+            this.params = newParams;
+
+            this.grid.getBottomToolbar().changePage(1);
+        }
     }
     ,getProperty: function(propertyName){
         if(propertyName == 'nid') propertyName = 'id';

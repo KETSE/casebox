@@ -104,7 +104,7 @@ function initApp(){
 
     App.xtemplates = {
         cell: new Ext.XTemplate( '<ul class="thesauri_set"><tpl for="."><li>{.}</li></tpl></ul>' )
-        ,object: new Ext.XTemplate( '<ul><tpl for="."><li class="case_object" object_id="{id}">{[Ext.isEmpty(values.title) ? \'&lt;'+L.noName+'&gt; (id: \'+values.id+\')\' : values.title]}</li></tpl></ul>' )
+        ,object: new Ext.XTemplate( '<ul><tpl for="."><li class="case_object" object_id="{id}">{[Ext.isEmpty(values.name) ? \'&lt;'+L.noName+'&gt; (id: \'+values.id+\')\' : values.name]}</li></tpl></ul>' )
     };
     App.xtemplates.cell.compile();
     App.xtemplates.object.compile();
@@ -146,20 +146,20 @@ function initApp(){
                     for(i=0; i < v.length; i++){
                         ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
                         row = cw.objectsStore.getAt(ri);
-                        if(ri >-1) r.push('<li class="icon-padding icon-element">'+row.get('title')+'</li>');
+                        if(ri >-1) r.push('<li class="icon-padding icon-element">'+row.get('name')+'</li>');
                     }
                     return '<ul>'+r.join('')+'</ul>';
                 case 'listObjIcons':
                     for(i=0; i < v.length; i++){
                         ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
                         row = cw.objectsStore.getAt(ri);
-                        if(ri >-1) r.push('<li class="icon-padding '+row.get('iconCls')+'">'+row.get('title')+'</li>');
+                        if(ri >-1) r.push('<li class="icon-padding '+row.get('iconCls')+'">'+row.get('name')+'</li>');
                     }
                     return '<ul>'+r.join('')+'</ul>';
                 default:
                     for(i=0; i < v.length; i++){
                         ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
-                        if(ri >-1) r.push(cw.objectsStore.getAt(ri).get('title'));
+                        if(ri >-1) r.push(cw.objectsStore.getAt(ri).get('name'));
                     }
                     return r.join(', ');
             }
@@ -307,7 +307,7 @@ function initApp(){
             rez = [];
             Ext.each(v, function(i){rez.push(i.name);}, this);
             rez = rez.join(', ');
-            m.attr = 'title="' + rez.replace('"', '&quot;') + '"';
+            m.attr = 'name="' + rez.replace('"', '&quot;') + '"';
             return rez;
         }
         ,tagIds: function(v){
@@ -680,7 +680,8 @@ function initApp(){
                     th = e.pidValue;
                 }
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    forceSelection: false
+                    ,editable: false
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'

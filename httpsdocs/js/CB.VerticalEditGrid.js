@@ -186,7 +186,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,editors: {
                 iconcombo: function(){
                     return new Ext.form.ComboBox({
-                        editable: false
+                        editable: true
                         ,name: 'iconCls'
                         ,hiddenName: 'iconCls'
                         ,tpl: '<tpl for="."><div class="x-combo-list-item icon-padding16 {name}">{name}</div></tpl>'

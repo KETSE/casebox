@@ -516,7 +516,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
                 ,'</tpl></ul>'
                 ,{compiled: true}
             )
-            ,store: new Ext.data.JsonStore({ fields: [ {name:'id', type: 'int'}, 'title', 'iconCls', 'sys_tags', 'user_tags' ] })
+            ,store: new Ext.data.JsonStore({ fields: [ {name:'id', type: 'int'}, 'name', 'iconCls', 'sys_tags', 'user_tags' ] })
             ,itemSelector: 'li'
             ,overClass:'item-over'
             ,listeners: { click: {scope: this, fn: this.onRemoveItemClick} }
@@ -629,12 +629,12 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
                     cls: 'icon-padding'
                     ,style:'height:20px'
                 }
-                ,title: r.get('title')
+                ,title: r.get('name')
                 ,html: '<span class="icon-padding icon-loading">'+L.LoadingData+'</span>'
             });
         else {
             this.qt.hide();
-            this.qt.setTitle(r.get('title'), r.get('iconCls'));
+            this.qt.setTitle(r.get('name'), r.get('iconCls'));
             if(this.qt.contact_id != r.get('id')) this.qt.update('<span class="icon-padding icon-loading">'+L.LoadingData+'</span>');
         }
         this.qt.showAt(e.getXY());

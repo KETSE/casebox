@@ -56,7 +56,7 @@ a:hover{ text-decoration: underline }
 .icon-user-arrow { background-image: url(i/ico/user--arrow.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-exit { background-image:url(i/ico/sign-out.png) !important }
 .icon-expand, .icon-expand-all{background-image:url(i/tree/expand-all.gif) !important;}
-.icon-collapse, .icon-collapse-all {background-image:url(i/tree/collapse-all.gif) !important;}  
+.icon-collapse, .icon-collapse-all {background-image:url(i/tree/collapse-all.gif) !important;}
 .icon-plus { background-image:url(i/ico/plus-circle.png) !important; background-repeat: no-repeat }
 .icon-plus-small { background-image:url(i/ico/plus-small.png) !important; background-repeat: no-repeat }
 .icon-minus { background-image:url(i/ico/minus-circle.png) !important }
@@ -159,11 +159,11 @@ span.icon-right{ float: right; width: 18px; display: inline-block !important }
 .icon-pin		{ background-image:url(i/ico/pin.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
 
 .thesauri_set li{ padding-left: 20px }
-.icon-element, .thesauri_set li { background-image: url(i/ico/element.png) !important; background-position: 0 50%; background-repeat: no-repeat} 
-.icon-element-off { background-image: url(i/ico/element-off.png) !important; background-position: 0 50%; background-repeat: no-repeat} 
+.icon-element, .thesauri_set li { background-image: url(i/ico/element.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-element-off { background-image: url(i/ico/element-off.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .group-titles-colbg{ background-color: #F9F7ED }
 
-img.duplicate-plus {width:16px; height: 16px; background: url(i/duplication/ui-check-box-plus.png) 0 0 no-repeat} 
+img.duplicate-plus {width:16px; height: 16px; background: url(i/duplication/ui-check-box-plus.png) 0 0 no-repeat}
 .duplicate1{ width:16px; height: 16px;background-image: url(i/duplication/number-one.png); background-position: 4px 3px; background-repeat: no-repeat }
 .duplicate2{ width:16px; height: 16px;background-image: url(i/duplication/number-two.png); background-position: 4px 3px; background-repeat: no-repeat }
 .duplicate3{ width:16px; height: 16px;background-image: url(i/duplication/number-three.png); background-position: 4px 3px; background-repeat: no-repeat }
@@ -184,7 +184,7 @@ img.duplicate-plus {width:16px; height: 16px; background: url(i/duplication/ui-c
 
 .panel-header-nobg2{ background: none; border-width: 0px !important}
 .thesauri-header-row{ font-weight: bold !important; padding: 5px 0 3px 0 !important; color: #15428B !important }
-.tabpanel-header-nobg{ border-top: 0; border-right:0 ; border-left: 0 padding: 0; 
+.tabpanel-header-nobg{ border-top: 0; border-right:0 ; border-left: 0 padding: 0;
 	background-image: url(i/tb-bg.png) !important; background-position: 0px bottom !important; background-repeat: repeat-x !important;
 	background-color: #fff !important
 }
@@ -321,6 +321,7 @@ padding: 0px 2px;
 .icon-tag{ background-image: url(i/ico/tag.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag-label{ background-image: url(i/ico/tag-label.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag-label-small{ background-image: url(i/ico/tag-label-small.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-tag-medium {background-image: url(i/ico/tag-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag-small{ background-image: url(i/ico/tag-small.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag-plus{ background-image: url(i/ico/tag--plus.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-folder, .x-tree-node-collapsed .icon-tree-folder, .x-tree-node-leaf .icon-tree-folder{ background-image: url(i/ico/folder.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -353,6 +354,11 @@ padding: 0px 2px;
 .icon-locate-right{ background-image: url(i/ico/locate.gif) right 50% no-repeat !important }
 .icon-newspaper{ background-image:url(i/ico/newspaper.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
 .icon-newspaper-exclamation{ background-image:url(i/ico/newspaper-exclamation.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
+.icon-shield {background-image: url(i/ico/shield.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-document-bookmark {background-image: url(i/ico/document-bookmark.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-inbox-document {background-image: url(i/ico/inbox-document.png) !important; background-position: 0 50%; background-repeat: no-repeat;}
+.icon-globe-medium {background-image: url(i/ico/globe-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+
 
 .tag-item {padding: 4px 3px 4px 20px; font-size: 12px; cursor: hand; cursor: pointer}
 .tag-item-over{background-color: #ebf3fd !important}
@@ -499,7 +505,7 @@ div.grid-drop-zone-over{
 }
 .icon-dashboard{
     background-image: url(i/ico/32/newspaper.png);
-} 
+}
 .node-has-acl .x-tree-node-anchor{
     background: url(i/ico/lock-small.png) 0px 2px no-repeat !important;
     margin-left: -11px;

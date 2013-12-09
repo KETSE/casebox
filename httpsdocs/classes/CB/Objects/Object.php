@@ -67,6 +67,8 @@ class Object extends OldObject
             }
         }
 
+        \CB\fireEvent('beforeNodeDbCreate', $this);
+
         $p = &$this->data;
 
         // check input params
@@ -91,25 +93,50 @@ class Object extends OldObject
             $p['tag_id'] = null;
         }
 
-        \CB\fireEvent('beforeNodeDbCreate', $this);
-
         DB\dbQuery(
             'INSERT INTO tree (
                 id
                 ,pid
-                ,name
                 ,template_id
-                ,cid
                 ,tag_id
-                ,updated)
-            VALUES ($1, $2, $3, $4, $5, $6, 1)',
+                ,target_id
+                ,name
+                ,date
+                ,date_end
+                ,size
+                ,cfg
+                ,cid
+                ,oid
+                ,updated
+            )
+            VALUES (
+                $1
+                ,$2
+                ,$3
+                ,$4
+                ,$5
+                ,$6
+                ,$7
+                ,$8
+                ,$9
+                ,$10
+                ,$11
+                ,$12
+                ,1
+            )',
             array(
                 $this->id
                 ,$p['pid']
-                ,$p['name']
                 ,$p['template_id']
-                ,$_SESSION['user']['id']
                 ,$p['tag_id']
+                ,@$p['target_id']
+                ,$p['name']
+                ,@$p['date']
+                ,@$p['date_end']
+                ,@$p['size']
+                ,@$p['cfg']
+                ,$_SESSION['user']['id']
+                ,@$p['oid']
             )
         ) or die(DB\dbQueryError());
 
@@ -132,33 +159,18 @@ class Object extends OldObject
         $p = &$this->data;
 
         $p['data'] = Util\toJSONArray(@$p['data']);
+        $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
 
         $this->verifyAutoUpdatedParams();
-
         DB\dbQuery(
-            'INSERT INTO objects (
-                id
-                ,`title`
-                ,`custom_title`
-                ,date_start
-                ,date_end
-                ,`data`
-                ,cid)
-            VALUES($1, $2, $3, $4, $5, $6, $7)
+            'INSERT INTO objects (id ,`data`, `sys_data`)
+            VALUES($1, $2, $3)
             ON DUPLICATE KEY
-            UPDATE `title` = $2
-                    ,`custom_title` = $3
-                    ,`date_start` = $4
-                    ,`date_end` = $5
-                    ',
+            UPDATE  `data` = $2,`sys_data` = $3',
             array(
                 $this->id
-                ,@$p['title']
-                ,@$p['custom_title']
-                ,@$p['date']
-                ,@$p['date_end']
                 ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
-                ,$_SESSION['user']['id']
+                ,json_encode($p['sys_data'], JSON_UNESCAPED_UNICODE)
             )
         ) or die(DB\dbQueryError());
 
@@ -221,30 +233,18 @@ class Object extends OldObject
     {
         /* load custom data from objects table */
         $res = DB\dbQuery(
-            'SELECT title
-                ,custom_title
-                ,data
-                ,iconCls
-                ,private_for_user
+            'SELECT data, sys_data
             FROM objects
             WHERE id = $1',
             $this->id
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            if (!empty($r['data'])) {
-                $r['data'] = json_decode($r['data'], true);
-            }
-            $this->data = array_merge($this->data, $r);
+            $this->data['data'] = Util\toJSONArray($r['data']);
+            $this->data['sys_data'] = Util\toJSONArray($r['sys_data']);
+
         }
         $res->close();
-
-        /* if data is null then this object has not been converted to new structure.
-            Load Old data an convert it to new format
-        */
-        if ((!isset($this->data['data']) || is_null($this->data['data'])) && $this->loadTemplate) {
-            $this->loadOldGridDataToNewFormat();
-        }
     }
 
     /**
@@ -270,6 +270,8 @@ class Object extends OldObject
 
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
+        $p = &$this->data;
+
         $tableFields = array(
             'pid'
             ,'user_id'
@@ -281,9 +283,7 @@ class Object extends OldObject
             ,'date'
             ,'date_end'
             ,'size'
-            ,'is_main'
             ,'cfg'
-            ,'inherit_acl'
             ,'oid'
             ,'did'
             ,'dstatus'
@@ -335,30 +335,19 @@ class Object extends OldObject
         if (empty($d['data'])) {
             $d['data'] = array();
         }
+        if (empty($d['sys_data'])) {
+            $d['sys_data'] = array();
+        }
 
-        // updating object properties into the db  /*(empty($object_iconCls) ? '' : ', iconCls = $7')/**/
         @DB\dbQuery(
             'UPDATE objects
-            SET title = $2
-                ,custom_title = $3
-                ,date_start = $4
-                ,date_end = $5
-                ,iconCls = $6
-                ,private_for_user = $7
-                ,`data` = $8
-                ,uid = $9
-                ,udate = CURRENT_TIMESTAMP
+            SET `data` = $2
+                ,sys_data = $3
             WHERE id = $1',
             array(
                 $d['id']
-                ,@$d['title']
-                ,@$d['custom_title']
-                ,$d['date']
-                ,@$d['date_end']
-                ,$templateData['iconCls']
-                ,@$d['pfu']
                 ,json_encode($d['data'], JSON_UNESCAPED_UNICODE)
-                ,$_SESSION['user']['id']
+                ,json_encode($d['sys_data'], JSON_UNESCAPED_UNICODE)
             )
         ) or die(DB\dbQueryError());
         /* end of updating object properties into the db */
@@ -422,33 +411,37 @@ class Object extends OldObject
 
     }
 
+    /**
+     * TODO: functionality of the below method should be transfered to a plugin
+     * @return [type] [description]
+     */
     protected function verifyAutoUpdatedParams()
     {
         $p = &$this->data;
 
-        $autoTitle = ucfirst($this->getAutoTitle());
-        if (!empty($autoTitle)) {
-            $p['title'] = $autoTitle;
-        }
+        // $autoTitle = ucfirst($this->getAutoTitle());
+        // if (!empty($autoTitle)) {
+        //     $p['title'] = $autoTitle;
+        // }
 
-        $titleField = @$this->getFieldValue('_title', 0)['value'];
-        if (!empty($titleField)) {
-            $p['custom_title'] = $titleField;
-        }
+        // $titleField = @$this->getFieldValue('_title', 0)['value'];
+        // if (!empty($titleField)) {
+        //     $p['custom_title'] = $titleField;
+        // }
 
-        if (empty($p['title']) && empty($p['custom_title'])) {
-            $p['custom_title'] = $p['name'];
-        }
+        // if (empty($p['title']) && empty($p['custom_title'])) {
+        //     $p['custom_title'] = $p['name'];
+        // }
 
-        $dateStart = @$this->getFieldValue('_date_start', 0)['value'];
-        if (!empty($dateStart)) {
-            $p['date'] = $dateStart;
-        }
+        // $dateStart = @$this->getFieldValue('_date_start', 0)['value'];
+        // if (!empty($dateStart)) {
+        //     $p['date'] = $dateStart;
+        // }
 
-        $dateEnd = @$this->getFieldValue('_date_end', 0)['value'];
-        if (!empty($dateEnd)) {
-            $p['date_end'] = $dateEnd;
-        }
+        // $dateEnd = @$this->getFieldValue('_date_end', 0)['value'];
+        // if (!empty($dateEnd)) {
+        //     $p['date_end'] = $dateEnd;
+        // }
 
     }
 
@@ -472,62 +465,6 @@ class Object extends OldObject
         if ($valueIndex !== false) {
             $rez = @$rez[$valueIndex];
         }
-
-        return $rez;
-    }
-
-    /**
-     * return auto generated title for curent object data
-     * @return varchar
-     */
-    protected function getAutoTitle()
-    {
-        if (empty($this->template)) {
-            return;
-        }
-        $rez = '';
-        $templateData = $this->template->getData();
-        $fields = array();//used from php templates of title
-        $rez = str_replace(
-            array(
-                '{template_title}'
-                ,'{phase_title}'
-            ),
-            array(
-                $templateData['title']
-                , ''/*$phase['name']/**/
-            ),
-            $templateData['title_template']
-        );
-
-        $ld = $this->getLinearData();
-        /* replace field values */
-        foreach ($ld as $field) {
-            $tf = $this->template->getField($field['name']);
-            $v = $this->template->formatValueForDisplay($tf, @$field['value'], false);
-            if (is_array($v)) {
-                $v = implode(',', $v);
-            }
-            $v = addcslashes($v, '\'');
-            $rez = str_replace('{'.$field['name'].'}', $v, $rez);
-            $fields[$field['name']] = $v;
-        }
-
-        //replacing field titles into object title variable
-        foreach ($templateData['fields'] as $fk => $fv) {
-            $rez = str_replace('{f'.$fv['name'].'t}', $fv['title'], $rez);
-
-        }
-        // evaluating the title if contains php code
-        if (strpos($rez, '<?php') !== false) {
-            eval(' ?>'.$rez.'<?php ');
-            if (!empty($title)) {
-                $rez = $title;
-            }
-        }
-        //replacing any remained field placeholder from the title
-        $rez = preg_replace('/\{[^\}]+\}/', '', $rez);
-        $rez = stripslashes($rez);
 
         return $rez;
     }
@@ -728,7 +665,6 @@ class Object extends OldObject
         DB\dbQuery(
             'INSERT INTO `tree`
                 (`id`
-                ,`old_id`
                 ,`pid`
                 ,`user_id`
                 ,`system`
@@ -755,7 +691,6 @@ class Object extends OldObject
                 ,`dstatus`)
             SELECT
                 NULL
-                ,`old_id`
                 ,$2
                 ,`user_id`
                 ,`system`
@@ -820,36 +755,17 @@ class Object extends OldObject
         DB\dbQuery(
             'INSERT INTO `objects`
                 (`id`
-                ,`title`
-                ,`custom_title`
-                ,`date_start`
-                ,`date_end`
-                ,`iconCls`
-                ,`private_for_user`
                 ,`data`
-                ,`cid`
-                ,`cdate`
-                ,`uid`
-                ,`udate`)
+                ,`sys_data`)
             SELECT
                 $2
-                ,`title`
-                ,`custom_title`
-                ,`date_start`
-                ,`date_end`
-                ,`iconCls`
-                ,`private_for_user`
                 ,`data`
-                ,`cid`
-                ,`cdate`
-                ,$3
-                ,CURRENT_TIMESTAMP
+                ,`sys_data`
             FROM `objects`
             WHERE id = $1',
             array(
                 $this->id
                 ,$targetId
-                ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
     }

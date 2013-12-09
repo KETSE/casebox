@@ -17,13 +17,6 @@ a {color: #15C}
 .x-tool-calendar	{background-image:url(i/ico/calendar-select-days-span.png)}
 .x-tool-upload	{background-image:url(i/ico/drive-upload.png)}
 
-
-.deadlineTab {
-background-image: url(i/ico/calendar-blue.png);
-}
-
-.calendar {background-image: url(i/ico/calendar-blue.png)}
-
 .chain-or {padding-left: 18px; background: url(i/ico/chain-unchain.png) 0 0 no-repeat !important}
 .chain-and {padding-left: 18px; background: url(i/ico/chain.png) 0 0 no-repeat !important}
 
@@ -241,17 +234,6 @@ background: url(i/ico/auction-hammer.png) 0 0 no-repeat;
 
 a.system {
 background: url(i/ico/server.png) 2px 0 no-repeat;
-}
-
-.deadline {
-background: url(i/ico/calendar-blue.png) 0 0 no-repeat;
-}
-
-
-
-
-a.deadline {
-background: url(i/ico/calendar-small.png) 0 0 no-repeat;
 }
 
 a.user-m {
@@ -505,7 +487,7 @@ background-repeat: no-repeat; */
 .icon32-search{ background-image: url(i/ico/32/search.png) !important; min-width: 38px}
 
 .icon-search{background-image: url(i/ico/search.png); }
-.icon-documents{background-image: url(i/ico/32/documents.png); }
+.icon-documents{background-image: url(i/ico/32/documents.png) }
 .calendar-title{font-size: 16px !important; font-weight: bold !important; color: #333}
 
 .x-menu-item .icon32-del {background-image: url(i/ico/cross-script.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -561,13 +543,7 @@ background-repeat: no-repeat; */
 
 .icon-briefcase {background-image: url(i/ico/briefcase.png) !important; }
 
-.icon-taskNew { background-image: url(i/ico/task.png) !important}
-.icon-eventNew { background-image: url(i/ico/calendar-blue.png) !important}
-.icon-user-male { background-image: url(i/ico/user.png) !important}
-
-.x-tab-strip-active span.x-tab-strip-text {
-font-weight: normal !important;
-}
+.x-tab-strip-active span.x-tab-strip-text {font-weight: normal !important}
 
 /*
 white background for splitter

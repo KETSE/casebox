@@ -31,14 +31,13 @@ class Objects
         $templateData = $template->getData();
 
         $resultData = array();
+
         /* select only required properties for result */
         $properties = array(
             'id'
             ,'pid'
             ,'template_id'
             ,'name'
-            ,'title'
-            ,'custom_title'
             ,'date'
             ,'date_end'
             ,'pids'

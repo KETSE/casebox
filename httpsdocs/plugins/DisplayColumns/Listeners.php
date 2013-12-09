@@ -79,16 +79,23 @@ class Listeners
                     $values = array();
                     switch ($customField[0]) {
                         case 'solr':
-                            $templateField = $template->getField($fieldName);
-                            $values = array(@$doc[$customField[0]]);
+                            $templateField = $template->getField($customField[1]);
+                            if (empty($templateField)) {
+                                $templateField = array(
+                                    'type' => 'varchar'
+                                    ,'title' => $customField[1]
+                                );
+                            }
+                            $values = array(@$doc[$customField[1]]);
                             break;
                         case 'calc':
-                            $templateField = $template->getField($fieldName);
-                            $values = array(); //CustomMethod call;
+                            //CustomMethod call;
+                            // $templateField = $template->getField($fieldName);
+                            // $values = array();
                             break;
                         default:
                             $templateField = $template->getField($customField[0]);
-                            $values = $obj->getFieldValue($fieldName);
+                            $values = $obj->getFieldValue($customField[0]);
                     }
 
                     //populate column properties if empty

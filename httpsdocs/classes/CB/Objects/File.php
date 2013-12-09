@@ -80,8 +80,6 @@ class File extends Object
                 ,`date`
                 ,`name`
                 ,`title`
-                ,`old_id`
-                ,`old_name`
                 ,`cid`
                 ,`uid`
                 ,`cdate`
@@ -92,8 +90,6 @@ class File extends Object
                 ,`date`
                 ,`name`
                 ,`title`
-                ,`old_id`
-                ,`old_name`
                 ,`cid`
                 ,$3
                 ,`cdate`

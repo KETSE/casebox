@@ -70,7 +70,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
         this.viewButton = new Ext.Button({
             text: L.List
             ,iconCls: 'icon-listView'
-            ,menu: [{ 
+            ,menu: [{
                         iconCls: 'icon-listView'
                         ,enableToggle: true
                         ,allowDepress: false
@@ -80,7 +80,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
                         ,viewIndex: 0
                         ,scope: this
                         ,handler: this.onChangeViewClick
-                },{ 
+                },{
                         iconCls: 'icon-treeView'
                         ,enableToggle: true
                         ,allowDepress: false
@@ -178,7 +178,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
                 ,fn: this.onForwardClick
                 ,scope: this
             },{
-                key: Ext.EventObject.BACKSPACE  
+                key: Ext.EventObject.BACKSPACE
                 ,alt: true
                 ,ctrl: false
                 ,shift: false
@@ -187,7 +187,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
                 ,scope: this
             }]
         })
-        
+
         CB.FolderView.superclass.initComponent.apply(this, arguments);
     }
     ,onChangeViewEvent: function(index, e){
@@ -208,7 +208,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 
         this.searchField.emptyText = L.Search + ' ' + o.result.folderProperties.name;
         if(Ext.isEmpty(this.params.query)) this.searchField.clear();
-        
+
         this.actions.up.setDisabled( (o.result.pathtext == '/') ); // || (this.rootId == o.result.folderProperties.id)
         this.favoritesButton.setActiveItem(o.result.folderProperties.id)
     }
@@ -220,14 +220,14 @@ CB.FolderView = Ext.extend(Ext.Panel, {
     }
     ,onBackClick: function(b, e) {
         if(this.actions.back.isDisabled()) return;
-        this.historyIndex = (!Ext.isDefined(this.historyIndex)) ? this.history.length - 2 : this.historyIndex - 1; 
+        this.historyIndex = (!Ext.isDefined(this.historyIndex)) ? this.history.length - 2 : this.historyIndex - 1;
         this.setParams(this.history[this.historyIndex]);
         this.actions.back.setDisabled(this.historyIndex <= 0);
         this.actions.forward.setDisabled(false);
     }
     ,onForwardClick: function(b, e) {
         if(this.actions.forward.isDisabled()) return;
-        this.historyIndex = this.historyIndex + 1; 
+        this.historyIndex = this.historyIndex + 1;
         this.setParams(this.history[this.historyIndex]);
         this.actions.back.setDisabled(false);
         this.actions.forward.setDisabled(this.historyIndex >= (this.history.length -1));
@@ -237,7 +237,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
     }
     ,sameParams: function(params1, params2){
         if(Ext.isEmpty(params1) && Ext.isEmpty(params2)) return true;
-        
+
         if(Ext.isEmpty(params1)) params1 = {};
         if(Ext.isEmpty(params2)) params2 = {};
         path1 = Ext.value(params1.path, '');
@@ -268,7 +268,9 @@ CB.FolderView = Ext.extend(Ext.Panel, {
 
         if( sameParams ) return;
         this.requestParams = Ext.apply({}, params, this.params);
-        if(Ext.isEmpty(this.loadParamsTask)) this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
+        if(Ext.isEmpty(this.loadParamsTask)) {
+            this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
+        }
         this.loadParamsTask.delay(500);
     }
     ,loadParams: function(){
@@ -334,7 +336,7 @@ CB.FolderView = Ext.extend(Ext.Panel, {
         value = (value == true);
         if(value == this.params.descendants) return;
         params = Ext.apply({}, this.params);
-        params.descendants = value; 
+        params.descendants = value;
         this.setParams(params);
     }
     ,onShowDescendantsClick: function(b, e){
