@@ -74,7 +74,7 @@ return array_merge(
             ,'//js/CB.FacetList.js'
             ,'//js/CB.Clipboard.js'
             ,'//js/CB.Dashboard.js'
-            ,'//js/CB.PreviewPanel.js'
+            // ,'//js/CB.PreviewPanel.js'
             ,'//js/CB.FilterPanel.js'
             ,'//js/CB.FileWindow.js'
 
@@ -98,19 +98,25 @@ return array_merge(
             ,'//js/CB.Account.js'
             ,'//js/Util.js'
             ,'//js/CB.Search.js'
-        )
 
-        ,'jsdev' => array(
-            '//js/CB.ViewPort.js'
-            ,'//js/app.js'
             ,'//js/CB.DD.js'
             ,'//js/DD/CB.DD.Tree.js'
             ,'//js/DD/CB.DD.Grid.js'
             ,'//js/DD/CB.DD.Panel.js'
-            ,'//js/DB/ObjectsStore.js'
-            ,'//js/DB/TemplateStore.js'
             ,'//js/CB.VerticalEditGridHelperTree.js'
+            ,'//js/DB/ObjectsStore.js'
+            ,'//js/DB/DirectObjectsStore.js'
+            ,'//js/DB/TemplateStore.js'
 
+            ,'//js/CB.ViewPort.js'
+        )
+
+        ,'jsdev' => array(
+            '//js/app.js'
+            ,'//js/form/view/Object/Preview.js '
+            ,'//js/form/view/Object/Properties.js '
+            ,'//js/form/edit/Object.js '
+            ,'//js/ObjectCardView.js '
         )
         ,'lang-en' => array('//js/locale/en.js')
         ,'lang-es' => array('//js/locale/es.js')

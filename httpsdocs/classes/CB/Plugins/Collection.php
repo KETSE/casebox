@@ -29,10 +29,13 @@ class Collection
         $this->items = array();
 
         $res = DB\dbQuery(
-            'SELECT name
+            'SELECT id
+                ,name
                 ,cfg
                 ,`active`
-            FROM casebox.plugins'
+                ,`order`
+            FROM casebox.plugins
+            ORDER BY `order`'
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {

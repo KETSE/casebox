@@ -6,9 +6,9 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
     ,hideBorders: true
     ,folderProperties: {}
     ,params: {descendants: false}
-    
+
     ,initComponent: function(){
-        
+
         this.actions = {
             open: new Ext.Action({
                 text: L.Open
@@ -132,7 +132,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
             )
             ,listeners: {
                 scope: this
-                ,beforeload: function(store, options) { 
+                ,beforeload: function(store, options) {
                     this.params = this.requestedParams;
                     Ext.apply(store.baseParams, this.requestedParams);
                     options = store.baseParams
@@ -161,7 +161,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
                         info = [];
                         if(!Ext.isEmpty(r.get('path'))) info.push(r.get('path'));
                             if(!Ext.isEmpty(r.get('user_ids'))) info.push(CB.DB.usersStore.getName(r.get('user_ids') ) )
-                            
+
                             if(!Ext.isEmpty(info)) v += '<div class="task-info">'+info.join('<br />') + '</div>';
                             return '<div class="letter">'+v+'</div>';
                         }
@@ -178,10 +178,10 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
                     }
                     ,{header: L.Owner, width: 150, dataIndex: 'cid', renderer: function(v, m, r, ri, ci, s){ return CB.DB.usersStore.getName( v ); } }
                     ,{header: L.TaskAssigned, width: 200, dataIndex: 'user_ids', sortable: false, renderer: function(v, m, r, ri, ci, s){ return CB.DB.usersStore.getName( v ); } }
-                    ,{ header: L.Category, width: 100, dataIndex: 'category_id', renderer: function(v, m, r, ri, ci, s){ 
+                    ,{ header: L.Category, width: 100, dataIndex: 'category_id', renderer: function(v, m, r, ri, ci, s){
                             if(Ext.isEmpty(v)) return '';
                             m.css = 'icon-grid-column-top '+CB.DB.thesauri.getIcon( v );
-                            return CB.DB.thesauri.getName( v ); 
+                            return CB.DB.thesauri.getName( v );
                         }
                      }
                     ,{ header: L.Start, width: 120, dataIndex: 'date', format: App.dateFormat+' '+App.timeFormat, renderer: App.customRenderers.datetime}
@@ -201,7 +201,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
                     //if(r && (String(r.get('name')).indexOf('class="hl"') < 0) ){
                         if(!Ext.isEmpty(r.get('content'))) rp.body += r.get('content');
                     //}
-                    
+
                     if(Ext.isEmpty(rp.body)) return '';
                     return 'hasBody';
                 }
@@ -307,7 +307,8 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
             ,statefull: true
             ,stateId: 'tvg'//tasks view grid
         });
-        this.previewPanel = new CB.PreviewPanel({bodyStyle:'padding: 10px'});
+        this.previewPanel = new CB.form.view.object.Preview({bodyStyle:'padding: 10px'});
+        // this.previewPanel = new CB.PreviewPanel({bodyStyle:'padding: 10px'});
         this.filterButton = new Ext.Button({
                     text: L.Filter
                     ,enableToggle: true
@@ -327,7 +328,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
                         ,change: this.onFiltersChange
                     }
                 });
-        
+
         this.eastPanel = new Ext.Panel({
             region: 'east'
             ,width: 300
@@ -369,7 +370,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
             ,items: [this.grid, this.eastPanel]
         })
         CB.TasksViewGrid.superclass.initComponent.apply(this, arguments);
-        
+
         this.addEvents(
                 'selectionchange'
                 ,'taskcreate'
@@ -430,26 +431,26 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
             id = row.get('nid');
             this.actions.open.setDisabled(false);
             this.actions['delete'].setDisabled(row.get('system') == 1);
-            
+
             canOpenLocation = (this.params.descendants || !Ext.isEmpty(this.grid.store.baseParams.query) );
             this.actions.openItemLocation.setDisabled(!canOpenLocation);
 
             canCopy = (row.get('system') == 0);
             this.actions.cut.setDisabled(!canCopy);
             this.actions.copy.setDisabled(!canCopy);
-            
+
             canDelete = true;
             this.actions['delete'].setDisabled(!canDelete);
-            
+
             u = String(row.get('user_ids')).split(',');
 
             canComplete = ((row.get('template_id') == App.config.default_task_template) && (u.indexOf(App.loginData.id) >= 0) && (row.get('status') != 3) );
             this.actions.completeTask.setDisabled(!canComplete);
         }
 
-        canPaste = !App.clipboard.isEmpty() 
-            && ( !this.folderProperties.inFavorites || App.clipboard.containShortcutsOnly() ) 
-            && ( ( (this.folderProperties.system == 0) && (this.folderProperties.template_type != 'file') ) 
+        canPaste = !App.clipboard.isEmpty()
+            && ( !this.folderProperties.inFavorites || App.clipboard.containShortcutsOnly() )
+            && ( ( (this.folderProperties.system == 0) && (this.folderProperties.template_type != 'file') )
                );
         this.actions.paste.setDisabled(!canPaste);
         if(this.previewPanel) this.previewPanel.loadPreview(id);
@@ -520,15 +521,15 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
         this.folderProperties.system = parseInt(this.folderProperties.system);
         this.folderProperties.pathtext = o.result.pathtext;
         canCreate = true; //TODO: review where we can create tasks
-        this.actions.createTask.setDisabled(!canCreate); 
-        this.actions.createEvent.setDisabled(!canCreate); 
+        this.actions.createTask.setDisabled(!canCreate);
+        this.actions.createEvent.setDisabled(!canCreate);
 
         this.filtersPanel.updateFacets(o.result.facets, options);
     }
     ,onStoreLoad: function(store, recs, options) {
         Ext.each(recs, function(r){ r.set('iconCls', getItemIcon(r.data))}, this);
         pt = this.grid.getBottomToolbar();
-        pt.setVisible(store.reader.jsonData.total > pt.pageSize); 
+        pt.setVisible(store.reader.jsonData.total > pt.pageSize);
         App.mainViewPort.selectGridObject(this.grid);
         this.doLayout();
     }
@@ -554,7 +555,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
         if(!this.grid.selModel.hasSelection()) return;
         row = this.grid.selModel.getSelected();
         this.fireEvent('changeview', 0, e);
-        this.fireEvent('changeparams', {path: row.get('pid'), descendants: false}, e)   
+        this.fireEvent('changeparams', {path: row.get('pid'), descendants: false}, e)
         //App.locateObject(r.data.nid, r.data.pid);
     }
     ,onCutClick: function(buttonOrKey, e) {
@@ -635,7 +636,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
     ,onDeleteClick: function(b, e) {
         s = this.grid.selModel.getSelections();
         if(Ext.isEmpty(s)) return;
-        Ext.Msg.confirm( L.DeleteConfirmation, (s.length == 1) ? L.DeleteConfirmationMessage + ' "' + s[0].get('name') + '"?' : L.DeleteSelectedConfirmationMessage, this.onDelete, this ) 
+        Ext.Msg.confirm( L.DeleteConfirmation, (s.length == 1) ? L.DeleteConfirmationMessage + ' "' + s[0].get('name') + '"?' : L.DeleteSelectedConfirmationMessage, this.onDelete, this )
     }
     ,onDelete: function (btn) {
         if(btn !== 'yes') return;
@@ -699,7 +700,7 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
     ,layout: 'fit'
     ,iconCls: 'icon-taskView'
     ,initComponent: function(){
-        
+
         this.view = new CB.TasksViewGrid({
             params: {descendants: true}
         })

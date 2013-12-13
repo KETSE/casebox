@@ -142,11 +142,14 @@ class Config extends Singleton
             : static::$config['listeners'];
 
         $plugins = static::getPlugins();
+        $pl = array();
         foreach ($plugins as $name => $data) {
             if (!empty($data['listeners'])) {
-                $rez = array_merge($rez, $data['listeners']);
+                $pl = array_merge_recursive($pl, $data['listeners']);
             }
         }
+
+        $rez = array_merge_recursive($pl, $rez);
 
         return $rez;
     }

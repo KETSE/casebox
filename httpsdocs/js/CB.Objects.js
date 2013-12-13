@@ -5,67 +5,18 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     ,padding: 0
     ,initComponent: function(){
 
-        this.objectsStore = new Ext.data.DirectStore({
-            autoLoad: false
-            ,restful: false
-            ,proxy: new  Ext.data.DirectProxy({
-                paramsAsHash: true
-                ,api: { read: CB_Objects.getAssociatedObjects }
-                ,listeners:{
-                    scope: this
-                    ,load: function(proxy, obj, opt){
-                        for (var i = 0; i < obj.result.data.length; i++) {
-                            obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
-                        }
-                    }
-                }
-            })
-            ,reader: new Ext.data.JsonReader({
-                successProperty: 'success'
-                ,root: 'data'
-                ,messageProperty: 'msg'
-            },[
-                {name: 'id', type: 'int'}
-                ,'name'
-                ,{name: 'date', type: 'date'}
-                ,{name: 'type', type: 'int'}
-                ,{name: 'subtype', type: 'int'}
-                ,{name: 'template_id', type: 'int'}
-                ,{name: 'status', type: 'int'}
-                , 'iconCls'
-            ]
-            )
+        this.objectsStore = new CB.DB.DirectObjectsStore({
+            baseParams: {
+                id: this.data.id
+                ,template_id: this.data.template_id
+            }
             ,listeners:{
                 scope: this
                 ,add: this.onObjectsStoreChange
                 ,load: this.onObjectsStoreChange
             }
-            ,getTexts: getStoreNames
-            ,getData: function(v){
-                if(Ext.isEmpty(v)) return [];
-                ids = String(v).split(',');
-                data = [];
-                Ext.each(ids, function(id){
-                     idx = this.findExact('id', parseInt(id, 10));
-                    if(idx >= 0) data.push(this.getAt(idx).data);
-                }, this);
-                return data;
-            }
-            ,checkRecordExistance: function(data){
-                if(Ext.isEmpty(data)) return false;
-                idx = this.findExact('id', parseInt(data.id, 10));
-                if(idx< 0){
-                    r = new this.recordType(data);
-                    r.set('iconCls', getItemIcon(data));
-                    this.add(r);
-                }
-            }
         });
 
-        this.objectsStore.baseParams = {
-            id: this.data.id
-            ,template_id: this.data.template_id
-        };
         this.objectsStore.load();
 
         this.topFieldSet = new Ext.form.FieldSet({

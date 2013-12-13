@@ -211,7 +211,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             })
             }
 
-        this.previewPanel = new CB.PreviewPanel({
+        this.previewPanel = new CB.form.view.object.Preview({
             region: 'center'
             ,bodyStyle: 'padding: 5px'
         });

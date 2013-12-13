@@ -421,7 +421,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             this.data = pw.data[this.root];
         }
         //if not specified template_id directly to grid then try to look in owners data
-        this.template_id = Ext.value(this.template_id, pw.data.template_id);
+        this.template_id = Ext.value(pw.data.template_id, this.template_id);
         if(isNaN(this.template_id)) {
             return Ext.Msg.alert('Error', 'No template id specified in data for "' + pw.title + '" window.');
         }
@@ -444,7 +444,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         // remember last selected cell
         var lastCell = this.getSelectionModel().getSelectedCell();
 
-        var nodesList = this.helperTree.queryNodeListBy(this.helperNodesFilter);
+        var nodesList = this.helperTree.queryNodeListBy(this.helperNodesFilter.createDelegate(this));
 
         if(this.store && this.store.suspendEvents) {
             this.store.suspendEvents(true);
@@ -481,7 +481,12 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         }
 
         return (
-            (r.get('cfg').showIn != 'top') &&
+            (
+                (r.get('cfg').showIn != 'top') ||
+                ((r.get('cfg').showIn == 'top') &&
+                    this.includeTopFields
+                )
+            ) &&
             (r.get('cfg').showIn != 'tabsheet') &&
             (node.attributes.visible !== false)
         );

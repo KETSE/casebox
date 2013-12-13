@@ -321,7 +321,11 @@ function fireEvent($eventName, &$params)
             try {
                 $class->$method($params);
             } catch (\Exception $e) {
-                debug('Event Exception for '.$className.'->'.$method);
+                debug(
+                    'Event Exception for '.$className.'->'.$method."\n".
+                    $e->getMessage()."\n".
+                    $e->getTraceAsString()
+                );
             }
             unset($GLOBALS['running_trigger']);
         }

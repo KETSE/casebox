@@ -213,10 +213,12 @@ CB.FolderView = Ext.extend(Ext.Panel, {
         this.favoritesButton.setActiveItem(o.result.folderProperties.id)
     }
     ,onChangeViewClick: function(b, e){
-        l = this.getLayout();
-        if(!Ext.isDefined(b.viewIndex) || ( this.items.itemAt(b.viewIndex) == l.activeItem ) ) return;
-        this.onChangeViewEvent(b.viewIndex, e);
-        if(l.activeItem.setParams) l.activeItem.setParams(this.params);
+        var l = this.getLayout();
+        if(Ext.isDefined(b.viewIndex) && ( this.items.itemAt(b.viewIndex) != l.activeItem ) ) {
+            this.onChangeViewEvent(b.viewIndex, e);
+            if(l.activeItem.setParams) l.activeItem.setParams(this.params);
+        }
+        return l.activeItem;
     }
     ,onBackClick: function(b, e) {
         if(this.actions.back.isDisabled()) return;

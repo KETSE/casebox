@@ -1,3 +1,11 @@
+CaseBox 1.9.71 (2013-12-13)
+==============================
+New Features, Improvements
+--------------------------
+- implemented primary version for editing objects into right panel by default
+- changed casebox plugins listeners to be executet before custom code listeners.
+    Also casebox plugins are loaded/executed according to their order field value.
+
 CaseBox 1.9.70 (2013-12-09)
 ==============================
 New Features, Improvements

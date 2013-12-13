@@ -77,7 +77,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,stateful: true
             ,stateId: 'mAc'
             ,stateEvents: ['resize']
-            ,getState: function(){ 
+            ,getState: function(){
                 rez = {collapsed: this.collapsed}
                 if(this.getWidth() > 0) rez.width = this.getWidth();
                 return rez;
@@ -104,7 +104,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ]
             ,listeners: {
                 scope: this
-                ,login: this.onLogin 
+                ,login: this.onLogin
                 ,fileopen: this.onFileOpen
                 ,fileupload: this.onFileUpload
                 ,filedownload: this.onFilesDownload
@@ -117,7 +117,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 ,taskedit: this.onTaskEdit
                 ,useradded: this.onUsersChange
                 ,userdeleted: this.onUsersChange
-                
+
             }
         });
         this.addEvents(
@@ -177,7 +177,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 App.openUniqueTabbedWidget( 'CBAccount' , null)
             }}
             ,'-'
-            ,{  text: L.Exit 
+            ,{  text: L.Exit
                 ,iconCls: 'icon-exit'
                 ,handler: this.logout, scope: this
             }
@@ -193,7 +193,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){
             this.onLogin();
             App.DD = new CB.DD();
-            
+
         }else this.initCB.defer(500, this);
     }
     ,logout: function(){
@@ -247,7 +247,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             };
         }
         this.openDefaultExplorer();
-        App.mainTabPanel.setActiveTab(0)        
+        App.mainTabPanel.setActiveTab(0)
     }
     ,onTreeNodeClick: function(node, e){
         if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
@@ -275,7 +275,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     }
     ,onAccordionLinkClick: function(p, animate){
         p = App.openUniqueTabbedWidget(p.link, null, {iconCls: p.iconCls, title: p.title});
-        return false; 
+        return false;
     }
     ,openCalendar: function(ev){
         if(ev && ev. stopPropagation) ev.stopPropagation();
@@ -293,7 +293,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 this.onTaskCreate({data: data}, e);
                 break;
             case 'case':
-            default: 
+            default:
                 this.openObject(data, e);
                 break;
         }
@@ -306,16 +306,16 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
         if(App.activateTab(App.mainTabPanel, data.id, CB.Objects)) return true;
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');/*, hideDeleteButton: (data.template_id == 1)/**/ 
+        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');/*, hideDeleteButton: (data.template_id == 1)/**/
         this.fireEvent('objectopened', o);
         return App.addTab(App.mainTabPanel, o);
     }
     ,onFileOpen: function(data, e){
         if(e) e.stopEvent();
-        
+
         if(App.activateTab(App.mainTabPanel, data.id)) return true;
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');/*, hideDeleteButton: (data.template_id == 1)/**/ 
+        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');/*, hideDeleteButton: (data.template_id == 1)/**/
         return App.addTab(App.mainTabPanel, o);
     }
     ,search: function(query, savedQueryId){
@@ -327,7 +327,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             p = new CB.Search({data: {id: 'search'}});
             App.addTab(App.mainTabPanel, p)
         }
-        if(!Ext.isEmpty(savedQueryId)) p.openSavedQuery(savedQueryId); 
+        if(!Ext.isEmpty(savedQueryId)) p.openSavedQuery(savedQueryId);
             else p.searchText(query);
     }
     ,setUserLanguage: function(b, e){
@@ -351,14 +351,14 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if(Ext.isEmpty(p)) {
             p ={ data: {} };
         }
-        
+
         Ext.apply(p, {
             admin: true
             ,autoclose: 1
             ,privacy: 0
             ,reminds: "1|10|1"
             ,responsible_user_ids: App.loginData.id
-        });     
+        });
         if(Ext.isEmpty(p.title)) p.title = L.AddTask;
         if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
         this.lastFocusedElement = Ext.get(document.activeElement);
@@ -402,7 +402,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     }
     ,onFileUpload: function(data, e){
         if(e) e.stopPropagation();
-        
+
         w = App.getFileUploadWindow({data: data });
         w.on('submitsuccess', this.onFileUploaded, this);
         w.on('hide', function(w){ w.un('submitsuccess', this.onFileUploaded, this) }, this)

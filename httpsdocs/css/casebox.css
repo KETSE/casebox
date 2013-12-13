@@ -17,22 +17,22 @@ a {color: #15C}
 .x-tool-calendar	{background-image:url(i/ico/calendar-select-days-span.png)}
 .x-tool-upload	{background-image:url(i/ico/drive-upload.png)}
 
-.chain-or {padding-left: 18px; background: url(i/ico/chain-unchain.png) 0 0 no-repeat !important}
-.chain-and {padding-left: 18px; background: url(i/ico/chain.png) 0 0 no-repeat !important}
+.icon-chain-or {padding-left: 18px; background: url(i/ico/chain-unchain.png) 0 0 no-repeat !important}
+.icon-chain-and {padding-left: 18px; background: url(i/ico/chain.png) 0 0 no-repeat !important}
 
-.plus {background-image: url(i/ico/plus.png) !important}
+.icon-plus {background-image: url(i/ico/plus.png) !important}
 
-.incoming {background-image: url(i/ico/inbox-download.png) !important}
-.outgoing {background-image: url(i/ico/inbox-upload.png) !important}
-.print {background-image: url(i/ico/printer.png) !important}
-.edit {background-image: url(i/ico/document--pencil.png) !important}
+.icon-incoming {background-image: url(i/ico/inbox-download.png) !important}
+.icon-outgoing {background-image: url(i/ico/inbox-upload.png) !important}
+.icon-print {background-image: url(i/ico/printer.png) !important}
+.icon-edit {background-image: url(i/ico/document--pencil.png) !important}
 
-.case {background-image: url(i/ico/briefcase.png) !important}
-.lawyer {background-image: url(i/ico/user.png) !important}
-.folder {background-image: url(i/ico/folder-horizontal.png) !important}
-.globe {background-image: url(i/ico/globe-green.png) !important}
+.icon-case {background-image: url(i/ico/briefcase.png) !important}
+.icon-lawyer {background-image: url(i/ico/user.png) !important}
+.icon-folder {background-image: url(i/ico/folder-horizontal.png) !important}
+.icon-globe {background-image: url(i/ico/globe-green.png) !important}
 /*.summary {background-image: url(i/ico/details.gif) !important} /**/
-.open {background-image:url(i/ico/external.png) !important}
+.icon-open {background-image:url(i/ico/external.png) !important}
 
 /* . {margin-top: 2px} */
 .mainTabPanel  {background-color: #FFF !important; border: 0 !important}
@@ -485,6 +485,7 @@ background-repeat: no-repeat; */
 .icon32-cal-next, .icon32-next { background-image: url(i/ico/32/next.png) !important; min-width: 38px}
 .icon32-export{ background-image: url(i/ico/32/export.png) !important; min-width: 38px}
 .icon32-search{ background-image: url(i/ico/32/search.png) !important; min-width: 38px}
+.icon32-app-view{ background-image: url(i/ico/32/app-view.png) !important; min-width: 38px}
 
 .icon-search{background-image: url(i/ico/search.png); }
 .icon-documents{background-image: url(i/ico/32/documents.png) }
@@ -537,7 +538,7 @@ background-repeat: no-repeat; */
 .trigger-locate{ background-image: url(i/ico/trigger-locate.gif) !important; background-repeat: no-repeat}
 
 .icon-refresh { background-image: url(i/ico/_refresh.png) !important}
-.icon-browse { background-image: url(i/ico/_zoom.png) !important}
+.icon-browse, .icon-preview { background-image: url(i/ico/_zoom.png) !important}
 .icon-files { background-image: url(i/ico/_clip.png) !important}
 .icon-permissions { background-image: url(i/ico/_padlock.png) !important}
 

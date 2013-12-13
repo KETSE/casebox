@@ -476,7 +476,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ,getProperty: this.getProperty.createDelegate(this)
         });
 
-        this.previewPanel = new CB.PreviewPanel({bodyStyle:'padding: 10px'});
+        this.previewPanel = new CB.form.view.object.Preview({bodyStyle:'padding: 10px'});
 
         this.filterButton = new Ext.Button({
             text: L.Filter
@@ -493,6 +493,8 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 
         this.filtersPanel = new CB.FilterPanel({
             bindButton: this.filterButton
+            ,title: L.Filter
+            ,header: false
             ,listeners:{
                 scope: this
                 ,change: this.onFiltersChange
@@ -500,20 +502,21 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         });
 
 
-        this.eastPanel = new Ext.Panel({
+        this.objectPanel = new CB.ObjectCardView({
             region: 'east'
             ,width: 300
             ,split: true
             ,hidden: true
             ,animCollapse: false
-            ,border: false
-            ,layout: 'card'
-            ,activeItem: 0
-            ,hideBorders: true
             ,statefull: true
-            ,stateId: Ext.value(this.gridStateId, 'fvg') + 'EP' //taskview east panel
-            ,items: [ this.previewPanel, this.filtersPanel ]
+            ,stateId: Ext.value(this.gridStateId, 'fvg') + 'EP' //east panel
+            ,listeners: {
+                scope: this
+                ,hide: this.syncSize
+                ,show: this.syncSize
+            }
         });
+        this.objectPanel.add(this.filtersPanel);
 
         params = Ext.apply({}, this.params, {
             path: '/'
@@ -572,19 +575,10 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,'-'
                 ,this.actions.createTask
                 ,'->'
-                ,{
-                    text: L.Preview
-                    ,enableToggle: true
-                    ,iconCls: 'icon32-preview'
-                    ,iconAlign:'top'
-                    ,scale: 'large'
-                    ,toggleGroup: 'rightBtn'
-                    ,itemIndex: 0
-                    ,scope: this
-                    ,toggleHandler: this.onEastPanelButtonClick
-                },this.filterButton
+                ,this.objectPanel.getButton()
             ]
-            ,items: [this.grid, this.eastPanel]
+            ,items: [this.grid, this.objectPanel]
+            // ,items: [this.grid, this.eastPanel]
         });
         CB.FolderViewGrid.superclass.initComponent.apply(this, arguments);
 
@@ -779,7 +773,10 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             }
         }
         this.actions.downloadArchived.setDisabled(!canDownload);
-        if(this.previewPanel) this.previewPanel.loadPreview(id);
+        if(this.objectPanel) {
+            this.objectPanel.load(id);
+        }
+
         r = sm.getSelected();
         data = r ? r.data : null;
         this.fireEvent('selectionchange', sm, data);
@@ -974,10 +971,22 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     }
     ,onOpenClick: function(b, e) {
         if(!this.grid.selModel.hasSelection()) return;
-        row = this.grid.selModel.getSelected();
-        if( !App.openObject(row.get('template_id'), row.get('nid'), e) ) {
-            this.onBrowseClick(b, e);
-        }
+        var row = this.grid.selModel.getSelected();
+        this.objectPanel.edit(
+            {
+                id: row.get('nid')
+                ,template_id: row.get('template_id')
+            }
+        );
+        // if( !App.editObject(
+        //     {
+        //         template_id: row.get('template_id')
+        //         ,id: row.get('nid')
+        //     }
+        //     ,e
+        // ) ) {
+        //     this.onBrowseClick(b, e);
+        // }
     }
     ,onBrowseClick: function(b, e) {
         if(!this.grid.selModel.hasSelection()) return;
@@ -1170,7 +1179,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             this.eastPanel.show();
             if(b.itemIndex == 0){
                 r = this.grid.getSelectionModel().getSelected();
-                if(r) this.previewPanel.loadPreview(r.get('nid'));
+                if(r) {
+                    this.previewPanel.loadPreview(r.get('nid'));
+                }
             }
         }else{
             this.eastPanel.hide();
