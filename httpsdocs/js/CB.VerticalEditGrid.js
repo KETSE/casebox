@@ -45,6 +45,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,'readonly'
             ,'value'
             ,'info'
+            ,'type'
         ];
 
         // define helperTree if owner does not have already defined one
@@ -463,6 +464,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     ,readonly: ((r.get('type') == 'H') || (r.get('cfg').readOnly == 1))
                     ,value: attr.value.value
                     ,info: attr.value.info
+                    ,type: r.get('type')
                 })
             );
         }

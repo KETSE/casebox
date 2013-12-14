@@ -45,6 +45,8 @@ define('CB\\DATA_DIR', APP_DIR.'data'.DIRECTORY_SEPARATOR);
 define('CB\\TEMP_DIR', DATA_DIR.'tmp'.DIRECTORY_SEPARATOR);
 define('CB\\UPLOAD_TEMP_DIR', TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR);
 define('CB\\MINIFY_CACHE_DIR', TEMP_DIR.'minify'.DIRECTORY_SEPARATOR);
+define('ERROR_LOG', LOGS_DIR.'cb_'.CORE_NAME.'_error_log');
+
 /* end of define main paths /**/
 
 /* update include_path and include global script */
@@ -186,7 +188,7 @@ session_name(
 
 //error reporting params
 error_reporting(isDebugHost() ? E_ALL : 0);
-ini_set('error_log', LOGS_DIR.CORE_NAME.'_error_log');
+ini_set('error_log', ERROR_LOG);
 
 // mb encoding config
 mb_internal_encoding("UTF-8");
@@ -277,19 +279,15 @@ function isDevelServer()
  */
 function isDebugHost()
 {
+    $debugHosts = getOption('debug_hosts');
+    $debugHosts = explode(',', $debugHosts);
+
     return (
         empty($_SERVER['SERVER_NAME'])
         ||
         in_array(
             $_SERVER['REMOTE_ADDR'],
-            array(
-                'localhost'
-                ,'127.0.0.1'
-                ,'195.22.253.6'
-                ,'193.226.64.181'
-                ,'188.240.73.107'
-                ,'92.115.133.211'
-            )
+            $debugHosts
         )
     );
 }

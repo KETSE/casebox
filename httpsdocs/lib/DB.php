@@ -139,21 +139,22 @@ if (!function_exists(__NAMESPACE__.'\dbQuery')) {
 if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
     function dbQueryError($dbh = false)
     {
-        if (!\CB\isDebugHost()) {
-            return 'Query error';
-        }
         if (empty($dbh)) {
             $dbh = $GLOBALS['dbh'];
         }
 
         $rez = "\n\r<br /><hr />Query error: ".mysqli_error($dbh).
             "<hr /><br />\n\r";
-        if (!empty($GLOBALS['last_sql']) && \CB\isDebugHost()) {
+        if (!empty($GLOBALS['last_sql'])) {
             $rez = "\n\r<br /><hr />Query: ".$GLOBALS['last_sql'].$rez;
         }
-        throw new \Exception($rez);
+        error_log($rez, 3, ERROR_LOG);
 
-        return $rez;
+        if (!\CB\isDebugHost()) {
+            $rez ='Query error';
+        }
+
+        throw new \Exception($rez);
     }
 }
 

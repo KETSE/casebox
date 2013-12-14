@@ -134,7 +134,7 @@ class Object extends OldObject
                 ,@$p['date']
                 ,@$p['date_end']
                 ,@$p['size']
-                ,@$p['cfg']
+                ,@json_encode($p['cfg'], JSON_UNESCAPED_UNICODE)
                 ,$_SESSION['user']['id']
                 ,@$p['oid']
             )
@@ -161,7 +161,6 @@ class Object extends OldObject
         $p['data'] = Util\toJSONArray(@$p['data']);
         $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
 
-        $this->verifyAutoUpdatedParams();
         DB\dbQuery(
             'INSERT INTO objects (id ,`data`, `sys_data`)
             VALUES($1, $2, $3)
@@ -210,6 +209,7 @@ class Object extends OldObject
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
             $this->data = $r;
             if (!empty($this->data['template_id']) && $this->loadTemplate) {
                 $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
@@ -330,8 +330,6 @@ class Object extends OldObject
             $templateData = $this->template->getData();
         }
 
-        $this->verifyAutoUpdatedParams();
-
         if (empty($d['data'])) {
             $d['data'] = array();
         }
@@ -408,40 +406,6 @@ class Object extends OldObject
      */
     protected function deleteCustomData()
     {
-
-    }
-
-    /**
-     * TODO: functionality of the below method should be transfered to a plugin
-     * @return [type] [description]
-     */
-    protected function verifyAutoUpdatedParams()
-    {
-        $p = &$this->data;
-
-        // $autoTitle = ucfirst($this->getAutoTitle());
-        // if (!empty($autoTitle)) {
-        //     $p['title'] = $autoTitle;
-        // }
-
-        // $titleField = @$this->getFieldValue('_title', 0)['value'];
-        // if (!empty($titleField)) {
-        //     $p['custom_title'] = $titleField;
-        // }
-
-        // if (empty($p['title']) && empty($p['custom_title'])) {
-        //     $p['custom_title'] = $p['name'];
-        // }
-
-        // $dateStart = @$this->getFieldValue('_date_start', 0)['value'];
-        // if (!empty($dateStart)) {
-        //     $p['date'] = $dateStart;
-        // }
-
-        // $dateEnd = @$this->getFieldValue('_date_end', 0)['value'];
-        // if (!empty($dateEnd)) {
-        //     $p['date_end'] = $dateEnd;
-        // }
 
     }
 

@@ -584,7 +584,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
 
         this.addEvents(
                 'selectionchange'
-                ,'casecreate'
                 ,'taskcreate'
                 ,'taskedit'
                 ,'createobject'
@@ -598,8 +597,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,'showdescendants'
         );
         this.enableBubble([
-            'casecreate'
-            ,'taskcreate'
+            'taskcreate'
             ,'taskedit'
             ,'createobject'
             ,'objectupdated'
@@ -793,7 +791,8 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         }
         grid.selModel.selectRow(rowIndex, false);
         row = grid.store.getAt(rowIndex);
-        if(Ext.isEmpty(this.contextMenu)){/* create context menu if not aleready created */
+        /* create context menu if not aleready created */
+        if(Ext.isEmpty(this.contextMenu)){
             this.createMenuButton = new Ext.menu.Item({
                 text: L.Create
                 ,hideOnClick: false
@@ -938,7 +937,8 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         if(tr && (tr.get('cfg').createMethod == 'inline')) {
             CB_Objects.create(data, this.processCreateInlineObject, this);
         } else {
-            this.fireEvent('createobject', data, e);
+            this.objectPanel.edit(data);
+            // this.fireEvent('createobject', data, e);
         }
     }
     ,processCreateInlineObject: function (r, e) {
@@ -972,21 +972,33 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
     ,onOpenClick: function(b, e) {
         if(!this.grid.selModel.hasSelection()) return;
         var row = this.grid.selModel.getSelected();
-        this.objectPanel.edit(
-            {
-                id: row.get('nid')
-                ,template_id: row.get('template_id')
-            }
-        );
-        // if( !App.editObject(
-        //     {
-        //         template_id: row.get('template_id')
-        //         ,id: row.get('nid')
-        //     }
-        //     ,e
-        // ) ) {
-        //     this.onBrowseClick(b, e);
-        // }
+        var id = row.get('nid');
+        clog('id', id);
+        switch(CB.DB.templates.getType(row.get('template_id'))) {
+            case 'file':
+                App.mainViewPort.fireEvent('fileopen', {id: id}, e);
+                break;
+            case 'task':
+                App.mainViewPort.fireEvent('taskedit', { data:{id: id} }, e);
+                // if( !App.openObject(
+                //     {
+                //         template_id: row.get('template_id')
+                //         ,id: row.get('nid')
+                //     }
+                //     ,e
+                // ) ) {
+                //     this.onBrowseClick(b, e);
+                // }
+                break;
+            default:
+                this.objectPanel.edit(
+                    {
+                        id: row.get('nid')
+                        ,template_id: row.get('template_id')
+                    }
+                );
+        }
+
     }
     ,onBrowseClick: function(b, e) {
         if(!this.grid.selModel.hasSelection()) return;

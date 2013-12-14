@@ -287,6 +287,37 @@ class Template extends Object
     }
 
     /**
+     * get header field properties
+     * @param  int | varchar $field field id or name
+     * @return array
+     */
+    public function getHeaderField($field)
+    {
+        $rez = null;
+        $field = $this->getField($field);
+        if (empty($field)) {
+            return $rez;
+        }
+        $rez = $this->getField($field['pid']);
+        if (!empty($rez) && ($rez['type'] == 'H')) {
+            return $rez;
+        }
+        $rez = null;
+        foreach ($this->data['fields'] as $fid => $fv) {
+            if (($fv['id'] == $field['id'])) {
+                if ($rez['type'] !== 'H') {
+                    $rez = null;
+                }
+
+                return $rez;
+            }
+            $rez = $fv;
+        }
+
+        return null;
+    }
+
+    /**
      * formats a value for display according to it's field definition
      * @param  array | int $field array of field properties or field id
      * @param  variant     $value field value to be formated

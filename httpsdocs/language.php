@@ -43,7 +43,7 @@ function get($name = false, $language = false)
             $language = substr($language, 1); // case when we receive laguage as "l{index}"
         }
         if (is_numeric($language)) {
-            $language = $GLOBALS['languages'][ $language -1 ];
+            $language = $GLOBALS['languages'][$language -1];
         }
 
         return (isset($GLOBALS['TRANSLATIONS'][$language][$name]) ? $GLOBALS['TRANSLATIONS'][$language][$name] : null);

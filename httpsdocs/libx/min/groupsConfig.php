@@ -113,10 +113,10 @@ return array_merge(
 
         ,'jsdev' => array(
             '//js/app.js'
-            ,'//js/form/view/Object/Preview.js '
-            ,'//js/form/view/Object/Properties.js '
-            ,'//js/form/edit/Object.js '
-            ,'//js/ObjectCardView.js '
+            ,'//js/form/view/object/Preview.js'
+            ,'//js/form/view/object/Properties.js'
+            ,'//js/form/edit/object.js'
+            ,'//js/ObjectCardView.js'
         )
         ,'lang-en' => array('//js/locale/en.js')
         ,'lang-es' => array('//js/locale/es.js')

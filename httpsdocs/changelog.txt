@@ -1,3 +1,19 @@
+CaseBox 1.9.72 (2013-12-14)
+==============================
+New Features, Improvements
+--------------------------
+- Log query errors to [core]_log
+- Move the list of debug hosts to system.ini
+- render Headings in Preview
+
+Fixed Bugs:
+----------
+- Tried to upload the same file a second time, got stuck
+- Restore yellow color for Headings fields, now it's white
+- Titles of new template fields are not displayed in objects
+- Can't copy a field from one tmpl to another
+- onNewNode click: Object window open in the right panel, not a tabsheet
+
 CaseBox 1.9.71 (2013-12-13)
 ==============================
 New Features, Improvements

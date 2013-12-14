@@ -55,6 +55,7 @@ class TemplateField extends Object
             if (!empty($this->template)) {
                 $field = $this->template->getField($fieldName);
             }
+
             if (isset($p[$fieldName])) {
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
@@ -75,6 +76,19 @@ class TemplateField extends Object
                 $saveValues[] = $value;
                 $params[] = $i;
                 $i++;
+            } else {
+                // this if should be removed after complete migration to language abreviation titles
+                if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
+                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    if (!empty($lang)) {
+                        $value = @$this->getFieldValue($lang, 0)['value'];
+
+                        $saveFields[] = $fieldName;
+                        $saveValues[] = $value;
+                        $params[] = "`$fieldName` = \$$i";
+                        $i++;
+                    }
+                }
             }
         }
         if (!empty($saveFields)) {
@@ -145,6 +159,7 @@ class TemplateField extends Object
                 $i++;
             } elseif (!empty($field)) {
                 $value = @$this->getFieldValue($fieldName, 0)['value'];
+
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -153,6 +168,19 @@ class TemplateField extends Object
                 $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
+            } else {
+                // this if should be removed after complete migration to language abreviation titles
+                if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
+                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    if (!empty($lang)) {
+                        $value = @$this->getFieldValue($lang, 0)['value'];
+
+                        $saveFields[] = $fieldName;
+                        $saveValues[] = $value;
+                        $params[] = "`$fieldName` = \$$i";
+                        $i++;
+                    }
+                }
             }
         }
         if (!empty($saveFields)) {
