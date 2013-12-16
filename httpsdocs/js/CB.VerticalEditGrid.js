@@ -56,7 +56,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             this.helperTree = new CB.VerticalEditGridHelperTree();
         }
 
-        gridColumns = [
+        this.gridColumns = [
             {
                 header: L.Property
                 ,width: 200
@@ -150,7 +150,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     }
                 }
             })
-            ,columns: gridColumns
+            ,columns: Ext.apply([], this.gridColumns)
             ,sm: new Ext.grid.CellSelectionModel()
             ,stripeRows: true
             ,header: false
@@ -426,8 +426,30 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         if(isNaN(this.template_id)) {
             return Ext.Msg.alert('Error', 'No template id specified in data for "' + pw.title + '" window.');
         }
+        this.template_id = parseInt(this.template_id, 10);
+
         this.templateStore = CB.DB['template' + this.template_id];
 
+        var idx = CB.DB.templates.findExact('id', this.template_id);
+        if(idx >= 0) {
+            var cm = this.getColumnModel();
+            var tc = CB.DB.templates.getAt(idx).get('cfg');//template config
+
+            idx = cm.findColumnIndex('info');
+            var colExists = (idx >=0 );
+            var colRequired = (tc.infoColumn === true);
+            if(colExists !== colRequired) {
+                var newConfig = Ext.apply([], this.gridColumns);
+                if(!colRequired) {
+                    newConfig.pop();
+                }
+                cm.setConfig(newConfig);
+                var el = this.getEl();
+                if(el && el.isVisible(true)) {
+                    this.getView().refresh(true);
+                }
+            }
+        }
         // if parent have a helperTree then it is responsible for helper reload
         if(!pw.helperTree) {
             this.helperTree.loadData(this.data, this.templateStore);
@@ -520,7 +542,9 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         }
         if(e.field != 'value') return;
 
-        pw = this.findParentByType(CB.GenericForm, false); //CB.Objects & CB.TemplateEditWindow
+        pw = this.findParentByType(CB.GenericForm, false)
+            || this.refOwner
+        ; //CB.Objects & CB.TemplateEditWindow
         t = tr.get('type');
         if(pw && !Ext.isEmpty(pw.data)){
             e.objectId = pw.data.id;

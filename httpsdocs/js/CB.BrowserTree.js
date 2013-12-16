@@ -497,9 +497,17 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
         this.onOpenClick(b, e);
     }
     ,onOpenClick: function (b, e) {
-        n = this.getSelectionModel().getSelectedNode();
+        var n = this.getSelectionModel().getSelectedNode();
         if(Ext.isEmpty(n)) return;
-        App.openObject(n.attributes.template_id, n.attributes.nid, e);
+        // App.openObject(n.attributes.template_id, n.attributes.nid, e);
+        var tab = App.activateBrowserTab();
+        var view = tab.onChangeViewClick({viewIndex: 0}, e);
+        view.objectPanel.edit(
+            {
+                id: n.attributes.nid
+                ,template_id: n.attributes.template_id
+            }
+        );
     }
     ,onOpenInNewWindowClick: function (b, e) {
         n = this.getSelectionModel().getSelectedNode();

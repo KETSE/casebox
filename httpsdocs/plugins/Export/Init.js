@@ -1,6 +1,9 @@
 Ext.namespace('CB.plugins.Export');
 
 CB.plugins.Export.init = function(){
+    if(window.location.host.substr(0,5) !== 'hcav.') {
+        return;
+    }
     App.on('folderviewinit', function(c){
         if(!c.isXType(CB.FolderViewGrid, false)) {
             return;

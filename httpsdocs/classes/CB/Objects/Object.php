@@ -530,6 +530,22 @@ class Object extends OldObject
     }
 
     /**
+     * get object type from template
+     *
+     * @return varchar
+     */
+    public function getType()
+    {
+        $template = $this->getTemplate();
+        if (empty($template)) {
+            return null;
+        }
+        $data = $template->getData();
+
+        return @$data['type'];
+    }
+
+    /**
      * detect if a given value is a generic field value
      * from json array stored in data fields
      *

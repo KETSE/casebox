@@ -486,9 +486,9 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
             ,iconAlign:'top'
             ,scale: 'large'
             ,toggleGroup: 'rightBtn'
-            ,itemIndex: 1
+            ,itemIndex: 3
             ,scope: this
-            ,toggleHandler: this.onEastPanelButtonClick
+            ,toggleHandler: this.onFilterButtonClick
         });
 
         this.filtersPanel = new CB.FilterPanel({
@@ -553,21 +553,21 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                     ,iconCls: 'icon32-upload'
                     ,iconAlign:'top'
                     ,scale: 'large'
-                    ,xtype:'splitbutton'
+                    // ,xtype:'splitbutton'
                     ,disabled: true
                     ,scope: this
                     ,handler: this.onUploadClick
-                    ,menu: [this.actions.uploadArchive, this.actions.uploadMultipleFiles ]
+                    //,menu: [this.actions.uploadArchive, this.actions.uploadMultipleFiles ]
                 },{
                     text: L.Download
                     ,iconCls: 'icon32-download'
                     ,iconAlign:'top'
                     ,scale: 'large'
-                    ,xtype:'splitbutton'
+                    // ,xtype:'splitbutton'
                     ,disabled: true
                     ,scope: this
                     ,handler: this.onDownloadClick
-                    ,menu: [this.actions.downloadArchived]
+                    //,menu: [this.actions.downloadArchived]
                 },this.actions.open
                 ,this.actions.browse
                 ,'-'
@@ -576,6 +576,7 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
                 ,this.actions.createTask
                 ,'->'
                 ,this.objectPanel.getButton()
+                ,this.filterButton
             ]
             ,items: [this.grid, this.objectPanel]
             // ,items: [this.grid, this.eastPanel]
@@ -973,7 +974,6 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         if(!this.grid.selModel.hasSelection()) return;
         var row = this.grid.selModel.getSelected();
         var id = row.get('nid');
-        clog('id', id);
         switch(CB.DB.templates.getType(row.get('template_id'))) {
             case 'file':
                 App.mainViewPort.fireEvent('fileopen', {id: id}, e);
@@ -1198,6 +1198,11 @@ CB.FolderViewGrid = Ext.extend(Ext.Panel,{
         }else{
             this.eastPanel.hide();
         }
+        this.syncSize();
+    }
+    ,onFilterButtonClick: function(b, e){
+        this.objectPanel.onViewChangeClick(b.itemIndex);
+        b.toggle(false);
         this.syncSize();
     }
     ,onShowDescendantsClick: function(cb, e){

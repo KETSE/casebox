@@ -5,12 +5,22 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
     ,autoScroll: true
     ,html: ''
     ,tbarCssClass: 'x-panel-white'
-    ,loadMask: true
+    ,loadMask: false
     ,padding: 0
     ,width: 300
     ,layout: 'fit'
     ,initComponent: function(){
+        Ext.apply(this, {
+            listeners: {
+                scope: this
+                ,afterrender: this.onAfterRender
+            }
+        });
         CB.form.view.object.Preview.superclass.initComponent.apply(this, arguments);
+    }
+
+    ,onAfterRender: function(){
+        this.getUpdater().showLoading = Ext.emptyFn;
     }
 
     ,loadPreview: function(id, versionId){
@@ -27,7 +37,9 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         // }
     }
     ,delayReload: function(ms){
-        if(!this.delayedReloadTask) this.delayedReloadTask = new Ext.util.DelayedTask(this.reload, this);
+        if(!this.delayedReloadTask) {
+            this.delayedReloadTask = new Ext.util.DelayedTask(this.reload, this);
+        }
         this.delayedReloadTask.delay(Ext.value(ms, 3000), this.reload, this);
 
     }
@@ -42,8 +54,9 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             ,scope: this // optional scope for the callback
             ,discardUrl: false
             ,nocache: true
-            ,text: L.Loading
+            // ,text: L.Loading
             ,scripts: false
+
         });
     }
     ,processLoad: function(el, success, r, e){

@@ -279,12 +279,12 @@ class Objects
 
         if (!empty($gf['top'])) {
             foreach ($gf['top'] as $f) {
-                if ($f['name'] == '_title') {
-                    continue;
-                }
-                if ($f['name'] == '_date_start') {
-                    continue;
-                }
+                // if ($f['name'] == '_title') {
+                //     continue;
+                // }
+                // if ($f['name'] == '_date_start') {
+                //     continue;
+                // }
                 $v = $template->formatValueForDisplay($f['tf'], $f['value']);
                 if (is_array($v)) {
                     $v = implode(', ', $v);

@@ -101,6 +101,29 @@ class Collection
     }
 
     /**
+     * get template object by its name
+     *
+     * @return \CB\Objects\Template
+     */
+    public function getTemplateByName($name)
+    {
+        foreach ($this->templates as $template) {
+            $data = $template->getData();
+            if ($data['name'] == $name) {
+                return $template;
+            }
+        }
+
+        $res = DB\dbQuery('SELECT id from templates where name = $1', $name) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            return $this->getTemplate($r['id']);
+        }
+        $res->close();
+
+        return null;
+    }
+
+    /**
      * get template type by its id
      * @param  int     $templateId
      * @return varchar

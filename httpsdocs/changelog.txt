@@ -1,3 +1,27 @@
+CaseBox 1.9.73 (2013-12-17)
+==============================
+New Features, Improvements
+--------------------------
+- Hide Export button for all cores except Hcav
+- Restore the 'Preview', 'Filter' buttons in the right side of toolbar
+    Filter button works like a shortcut for view change
+- Remove dropdown menus from Upload/Download buttons
+- Remove dashboard & Overview mode in grid
+- Preview panel visual changes for loading process
+- By default, 3rd column should be disabled
+- solr_reindex_core.php should give an error if core doesn't exists
+- Opening objects from Tree should also open in RightTab
+
+Fixed Bugs:
+----------
+- DateTime of uploaded file not visible in Obj Window
+- _objects fields shows all actions instead of only case actions
+- can't save new objects
+- creating an object from Grid.New menu, the menu will not close itself
+- reviewed custom code of stratelit for users assignement and security change
+- wrong check in AutoSetFields plugin that affected plugin work and resulted in "titles haven't been migrated properly"
+- After closing _objects field, the grid is not focused
+
 CaseBox 1.9.72 (2013-12-14)
 ==============================
 New Features, Improvements

@@ -187,7 +187,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         App.Favorites = new CB.Favorites();
         App.Favorites.load();
         this.populateMainMenu();
-        App.openUniqueTabbedWidget('CBDashboard');
+        // App.openUniqueTabbedWidget('CBDashboard');
     }
     ,initCB: function(){
         if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){

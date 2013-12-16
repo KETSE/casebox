@@ -109,16 +109,17 @@ CB.FolderView = Ext.extend(Ext.Panel, {
                         ,viewIndex: 2
                         ,scope: this
                         ,handler: this.onChangeViewClick
-                },{
-                        iconCls: 'icon-summary-view'
-                        ,enableToggle: true
-                        ,allowDepress: false
-                        ,toggleGroup: 'viewMode'
-                        ,text: L.Overview
-                        ,viewIndex: 3
-                        ,scope: this
-                        ,handler: this.onChangeViewClick
                 }
+                // ,{
+                //         iconCls: 'icon-summary-view'
+                //         ,enableToggle: true
+                //         ,allowDepress: false
+                //         ,toggleGroup: 'viewMode'
+                //         ,text: L.Overview
+                //         ,viewIndex: 3
+                //         ,scope: this
+                //         ,handler: this.onChangeViewClick
+                // }
             ]
         })
         Ext.apply(this, {

@@ -107,7 +107,7 @@ function formatAgoTime($mysqlTime)
     $time = strtotime($mysqlTime);
     $interval = strtotime('now') - $time;//11003
     if ($interval < 0) {
-        return ''; //it's a foture time
+        return L\fewSecondsAgo; //it's a future time
     }
 
     if ($interval < $AHOUR) {

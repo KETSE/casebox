@@ -34,7 +34,7 @@ class Transform
 
         $res = DB\dbQuery('SELECT id FROM tree '.$fieldTemplates) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
-            echo $r['id'].' ';
+            echo '.';
             $obj = Objects::getCustomClassByObjectId($r['id']);
             $obj->load();
             $obj->loadOldGridDataToNewFormat();

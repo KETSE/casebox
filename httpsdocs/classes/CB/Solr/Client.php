@@ -279,7 +279,6 @@ class Client extends Service
 
             if (!empty($docs)) {
                 $this->getBulkSolrData($docs);
-
                 foreach ($docs as $doc_id => $doc) {
                     $this->filterSolrFields($docs[$doc_id]);
                 }

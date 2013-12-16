@@ -105,6 +105,9 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             return;
         }
         this.data = r.data;
+        if(Ext.isEmpty(this.data.data)) {
+            this.data.data = {};
+        }
 
         this.objectsStore.baseParams = {
             id: r.data.id
@@ -148,7 +151,10 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
                 }
                 ,this
             );
-            this.fieldsZone.syncSize();
+
+            if(this.fieldsZone.rendered) {
+                this.fieldsZone.syncSize();
+            }
         }
         this._isDirty = false;
 
@@ -162,7 +168,12 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             ,this
         );
         if(this.grid && !this.grid.editing && this.grid.getEl()) {
+            var sc = this.grid.getSelectionModel().getSelectedCell();
             this.grid.getView().refresh();
+            if(sc) {
+                this.grid.getSelectionModel().select(sc[0], sc[1]);
+                this.grid.getView().focusCell(sc[0], sc[1]);
+            }
         }
     }
 
