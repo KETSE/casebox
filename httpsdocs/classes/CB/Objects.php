@@ -71,7 +71,7 @@ class Objects
         global $data;
         // this method is used also internally (by getInfo method),
         // so we skip logging for "load" method in this cases
-        if (is_array($data) && ($data['method'] == 'load')) {
+        if (is_array($data) && (@$data['method'] == 'load')) {
             Log::add(array('action_type' => 11, 'object_id' => $id));
         }
 

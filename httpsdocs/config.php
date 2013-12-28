@@ -360,7 +360,7 @@ function fireEvent($eventName, &$params)
  * @param  varchar $optionName name of the option to get
  * @return variant | null
  */
-function getOption($optionName)
+function getOption($optionName, $defaultValue = null)
 {
     if (!empty($_SESSION['user']['cfg'][$optionName])) {
         return $_SESSION['user']['cfg'][$optionName];
@@ -372,5 +372,5 @@ function getOption($optionName)
         return $GLOBALS[$optionName];
     }
 
-    return null;
+    return $defaultValue;
 }

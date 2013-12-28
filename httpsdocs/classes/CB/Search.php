@@ -48,7 +48,7 @@ class Search extends Solr\Client
             ? ''
             : $this->escapeLuceneChars($p['query']);
         $this->start = empty($p['start'])? 0 : intval($p['start']);
-        $this->rows = empty($p['rows'])? \CB\CONFIG\MAX_ROWS : intval($p['rows']);
+        $this->rows = isset($p['rows']) ? intval($p['rows']) : \CB\CONFIG\MAX_ROWS;
 
         $fq = array('dstatus:0'); //by default filter not deleted nodes
 

@@ -130,7 +130,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             save: new Ext.Action({
                 text: L.Save
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-save'
+                ,iconCls: 'ib-save'
                 ,scale: 'large'
                 ,disabled: true
                 ,scope: this
@@ -140,7 +140,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             ,'delete': new Ext.Action({
                 text: L.Delete
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-del'
+                ,iconCls: 'ib-del'
                 ,scale: 'large'
                 ,disabled: true
                 ,scope: this
@@ -148,7 +148,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             })
             ,createTask: new Ext.Action({
                 text: L.NewTask
-                ,iconCls: 'icon32-task-new'
+                ,iconCls: 'ib-task-new'
                 ,iconAlign:'top'
                 ,scale: 'large'
                 //,disabled: true
@@ -175,7 +175,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
                 text: L.Upload
                 ,tooltip: L.UploadFile
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-upload'
+                ,iconCls: 'ib-upload'
                 ,scale: 'large'
                 ,disabled: true
                 ,scope: this
@@ -185,7 +185,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
                 text: L.Download
                 ,tooltip: L.Download
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-download'
+                ,iconCls: 'ib-download'
                 ,scale: 'large'
                 ,disabled: true
                 ,scope: this
@@ -194,7 +194,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             ,expand: new Ext.Action({
                 text: L.Expand
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-expand'
+                ,iconCls: 'ib-expand'
                 ,scale: 'large'
                 ,enableToggle: true
                 ,scope: this
@@ -203,7 +203,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             ,newWindow: new Ext.Action({
                 text: L.NewWindow
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-external'
+                ,iconCls: 'ib-external'
                 ,scale: 'large'
                 ,disabled: true
                 ,scope: this
@@ -314,7 +314,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         if( !Ext.isEmpty(menuConfig) ){
             createButton = new Ext.Button({
                 text: L.Create
-                ,iconCls: 'icon32-create'
+                ,iconCls: 'ib-create'
                 ,iconAlign:'top'
                 ,scale: 'large'
                             ,menu: [ ]
@@ -327,7 +327,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 
         if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
 
-        toolbarItems.push('-',{text: 'Attach', iconCls: 'icon32-attach', scale: 'large', iconAlign:'top'
+        toolbarItems.push('-',{text: 'Attach', iconCls: 'ib-attach', scale: 'large', iconAlign:'top'
                     ,menu: [
                 this.actions.attachUpload
                 ,'-'

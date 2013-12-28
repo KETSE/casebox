@@ -65,7 +65,7 @@ class Listeners
         $fields = array(); //used from php templates of title
         $rez = str_replace(
             '{template_title}',
-            $templateData['title'],
+            @$templateData['title'],
             $templateData['title_template']
         );
 

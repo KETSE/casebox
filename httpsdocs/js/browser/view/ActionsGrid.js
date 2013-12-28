@@ -1,19 +1,19 @@
-Ext.namespace('CB');
+Ext.namespace('CB.browser.view');
 
-CB.ActionsViewGrid = Ext.extend(CB.FolderViewGrid,{
+CB.browser.view.ActionsGrid = Ext.extend(CB.browser.view.Grid,{
     initComponent: function(){
-        
+
         Ext.apply(this, {
             gridStateId: 'avg'
         })
-        CB.ActionsViewGrid.superclass.initComponent.apply(this, arguments);
+        CB.browser.view.ActionsGrid.superclass.initComponent.apply(this, arguments);
         this.grid.store.baseParams = {template_types: 'object', facets: 'actions'}
         tb =this.getTopToolbar();
-        idx = tb.items.findIndex('iconCls', 'icon32-upload');
+        idx = tb.items.findIndex('iconCls', 'ib-upload');
         if(idx > -1) tb.remove(idx);
-        idx = tb.items.findIndex('iconCls', 'icon32-download');
+        idx = tb.items.findIndex('iconCls', 'ib-download');
         if(idx > -1) tb.remove(idx);
-        idx = tb.items.findIndex('iconCls', 'icon32-task-new');
+        idx = tb.items.findIndex('iconCls', 'ib-task-new');
         if(idx > -1){
             tb.remove(idx);
             tb.remove(idx-1);
@@ -25,16 +25,16 @@ CB.ActionsViewGrid = Ext.extend(CB.FolderViewGrid,{
     }
 })
 
-Ext.reg('CBActionsViewGrid', CB.ActionsViewGrid);
+Ext.reg('CBBrowserViewActionsGrid', CB.browser.view.ActionsGrid);
 
-CB.ActionsViewGridPanel = Ext.extend(Ext.Panel, {
+CB.browser.view.ActionsGridPanel = Ext.extend(Ext.Panel, {
     hideBorders: true
     ,borders: false
     ,closable: true
     ,layout: 'fit'
     ,initComponent: function(){
-        
-        this.view = new CB.ActionsViewGrid({
+
+        this.view = new CB.browser.view.ActionsGrid({
             hideArrows: true
             ,params: { descendants: true }
             ,listeners: {
@@ -49,13 +49,13 @@ CB.ActionsViewGridPanel = Ext.extend(Ext.Panel, {
                 ,afterrender: this.onAfterRender
             }
         })
-        CB.ActionsViewGridPanel.superclass.initComponent.apply(this, arguments);
+        CB.browser.view.ActionsGridPanel.superclass.initComponent.apply(this, arguments);
     }
     ,onAfterRender: function(){
         this.view.onFiltersChange();
     }
     ,onChangeParams: function(params){
-        this.view.onChangeParams(params)        
+        this.view.onChangeParams(params)
     }
 })
-Ext.reg('CBActionsViewGridPanel', CB.ActionsViewGridPanel);
+Ext.reg('CBBrowserViewActionsGridPanel', CB.browser.view.ActionsGridPanel);

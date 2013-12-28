@@ -1,5 +1,6 @@
-Ext.namespace('CB');
-CB.FolderViewSummary = Ext.extend(Ext.Panel, {
+Ext.namespace('CB.browser.view');
+
+CB.browser.view.Summary = Ext.extend(Ext.Panel, {
     closable: false
     ,bodyCssClass: 'summary'
     ,autoScroll: true
@@ -22,7 +23,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                         ,template_types: 'task'
                         ,filters: {
                             status: [ {mode: 'OR', values: [1, 2] } ]
-                            ,user_ids: [ {mode: 'OR', values: [App.loginData.id] } ] 
+                            ,user_ids: [ {mode: 'OR', values: [App.loginData.id] } ]
                         }
                     }
                 },{     name: L.ownedByMe
@@ -30,7 +31,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                         ,template_types: 'task'
                         ,filters: {
                             status: [ {mode: 'OR', values: [1, 2] } ]
-                            ,cid: [ {mode: 'OR', values: [App.loginData.id] } ] 
+                            ,cid: [ {mode: 'OR', values: [App.loginData.id] } ]
                         }
                     }
                 },{ name: L.all
@@ -61,7 +62,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                         ,template_types: 'task'
                         ,filters: {
                             status: [ {mode: 'OR', values: [3] } ]
-                            ,user_ids: [ {mode: 'OR', values: [App.loginData.id] } ] 
+                            ,user_ids: [ {mode: 'OR', values: [App.loginData.id] } ]
                         }
                     }
                 },{ name: L.ownedByMe
@@ -69,7 +70,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                         ,template_types: 'task'
                         ,filters: {
                             status: [ {mode: 'OR', values: [3] } ]
-                            ,cid: [ {mode: 'OR', values: [App.loginData.id] } ] 
+                            ,cid: [ {mode: 'OR', values: [App.loginData.id] } ]
                         }
                     }
                 },{ name: L.all
@@ -99,7 +100,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                         ,template_types: 'object'
                         ,folders: false
                         ,filters: {
-                            uid: [ {mode: 'OR', values: [App.loginData.id] } ] 
+                            uid: [ {mode: 'OR', values: [App.loginData.id] } ]
                         }
                     }
                 },{ name: L.modifiedByAnybody
@@ -109,7 +110,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                     }
                 }
             ]
-        }) 
+        })
         this.dvFiles = new CB.SummaryBlock({
             name: 'files'
             ,emptyText: 'No files'
@@ -126,7 +127,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                     ,value: {sort: ['udate desc', 'name']
                         ,template_types: 'file'
                         ,filters: {
-                            uid: [ {mode: 'OR', values: [App.loginData.id] } ] 
+                            uid: [ {mode: 'OR', values: [App.loginData.id] } ]
                         }
                     }
                 },{ name: L.modifiedByAnybody
@@ -135,7 +136,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                     }
                 }
             ]
-        }) 
+        })
         this.dvTasksUsers = new CB.SummaryBlock({
             name: 'tasksUsers'
             ,emptyText: 'No users'
@@ -159,7 +160,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                         ,facetPivot: 'cid,status'
                         ,filters: {
                             status: [ {mode: 'OR', values: [1, 2] } ]
-                            ,user_ids: [ {mode: 'OR', values: [App.loginData.id] } ] 
+                            ,user_ids: [ {mode: 'OR', values: [App.loginData.id] } ]
                         }
                     }
                 },{     name: L.assignedToTasksCreatedByMe
@@ -169,7 +170,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                         ,facetPivot: 'user_ids,status'
                         ,filters: {
                             status: [ {mode: 'OR', values: [1, 2] } ]
-                            ,cid: [ {mode: 'OR', values: [App.loginData.id] } ] 
+                            ,cid: [ {mode: 'OR', values: [App.loginData.id] } ]
                         }
                     }
                 },{     name: L.createdTasks
@@ -193,7 +194,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                 }
             ]
             ,preprocessData: function(data){
-                for (var i = 0; i < data.length; i++) 
+                for (var i = 0; i < data.length; i++)
                     data[i][1] = CB.DB.usersStore.getName(data[i][0]);
             }
         })
@@ -225,7 +226,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                 }
             }
         })
-        CB.FolderViewSummary.superclass.initComponent.apply(this, arguments);
+        CB.browser.view.Summary.superclass.initComponent.apply(this, arguments);
         this.addEvents('viewloaded');
         this.enableBubble(['viewloaded']);
         App.mainViewPort.on('taskcreated', this.onTasksChange, this);
@@ -243,13 +244,13 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
     ,processReload: function(r, e){
         if(this.rendered) this.getEl().unmask()
         if(r.success !== true) return;
-        
+
         this.params = this.requestedParams;
         this.folderProperties = r.folderProperties
         this.fireEvent('viewloaded', this, e, {params: this.lastParams});
-        
+
         Ext.iterate(r.data, function(key, value, obj){
-            for (var i = 0; i < value.length; i++) 
+            for (var i = 0; i < value.length; i++)
                 obj[key][i][5] = getItemIcon({
                     'name': value[i][1]
                     ,'type': value[i][2]
@@ -258,7 +259,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
                 });
         }, this)
 
-        this.items.each( function(i){ 
+        this.items.each( function(i){
             data = Ext.value(r.data[i.name], []);
             if(i.preprocessData) i.preprocessData(data)
             if(i.store) i.store.loadData(data)
@@ -269,7 +270,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
     }
     ,setParams: function(params){
         if(Ext.isEmpty(params.path)) params.path = '/';
-        
+
         this.requestedParams = Ext.apply({}, params, this.params);
         this.items.each( function(i){
             Ext.apply(i, {requestedParams: this.requestedParams});
@@ -287,7 +288,7 @@ CB.FolderViewSummary = Ext.extend(Ext.Panel, {
             this.dvCompleteTasks.reload()
         }
 })
-Ext.reg('CBFolderViewSummary', CB.FolderViewSummary);
+Ext.reg('CBBrowserViewSummary', CB.browser.view.Summary);
 
 CB.SummaryBlock = Ext.extend( Ext.Panel, {
     autoHeight: true
@@ -328,7 +329,7 @@ CB.SummaryBlock = Ext.extend( Ext.Panel, {
                 ,afterrender: this.onAfterRender
             }
         })
-        CB.SummaryBlock.superclass.initComponent.apply(this, arguments);        
+        CB.SummaryBlock.superclass.initComponent.apply(this, arguments);
     }
     ,onAfterRender: function(){
         this.updateTitle()
@@ -388,5 +389,5 @@ CB.SummaryBlock = Ext.extend( Ext.Panel, {
         data = Ext.value(r.data[this.name], []);
         if(!Ext.isEmpty(this.preprocessData)) this.preprocessData(data);
         this.store.loadData(data);
-    }   
+    }
 })

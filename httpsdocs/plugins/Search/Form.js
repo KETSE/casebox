@@ -8,13 +8,14 @@ CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
     ,autoScroll: true
     ,tbarCssClass: 'x-panel-white'
     ,params: {}
+
     ,initComponent: function(){
 
         this.actions = {
             search: new Ext.Button({
                 text: L.Search
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-search'
+                ,iconCls: 'ib-search'
                 ,scale: 'large'
                 ,scope: this
                 ,handler: this.onSearchButtonClick
@@ -43,6 +44,7 @@ CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
 
         CB.plugins.Search.Form.superclass.initComponent.apply(this, arguments);
     },
+
     onSearchButtonClick: function(){
         this.grid.readValues();
         var t = App.openUniqueTabbedWidget(
@@ -54,6 +56,7 @@ CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
             t.setParams(this.data);
         }
     },
+
     onAfterRender: function(){
         for(var i in this.grid.colModel.config){
             var el = this.grid.colModel.config[i];

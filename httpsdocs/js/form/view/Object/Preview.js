@@ -24,7 +24,8 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
     }
 
     ,loadPreview: function(id, versionId){
-        if(!this.getEl().isVisible(true)) {
+        var el = this.getEl();
+        if(Ext.isEmpty(el) || !el.isVisible(true)) {
             return;
         }
         if(this.delayedReloadTask) {
@@ -32,10 +33,11 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         }
         this.newId = id;
         this.newVersionId = Ext.value(versionId, '');
-        // if( (this.newId != this.loadedId) || (this.newVersionId != this.loadedVersionId) ) {
+        // if( (this.newId != this.data.id) || (this.newVersionId != this.loadedVersionId) ) {
         this.delayReload(300);
         // }
     }
+
     ,delayReload: function(ms){
         if(!this.delayedReloadTask) {
             this.delayedReloadTask = new Ext.util.DelayedTask(this.reload, this);
@@ -43,6 +45,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         this.delayedReloadTask.delay(Ext.value(ms, 3000), this.reload, this);
 
     }
+
     ,reload: function(){
         if(Ext.isEmpty(this.newId) || isNaN(this.newId) || !this.getEl().isVisible(true)) {
             return this.clear();
@@ -59,8 +62,9 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
 
         });
     }
+
     ,processLoad: function(el, success, r, e){
-        this.loadedId = this.newId;
+        this.data = {id: this.newId};
         this.loadedVersionId = this.newVersionId;
         this.body.scrollTo('top', 0);
         switch(r.responseText){
@@ -70,11 +74,12 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
                 break;
             case 'PDF':
                 elId = this.body.id;
-                success = new PDFObject({ url: "/download.php?pw=&amp;id="+this.loadedId }).embed(elId);
+                success = new PDFObject({ url: "/download.php?pw=&amp;id="+this.data.id }).embed(elId);
                 break;
         }
         this.attachEvents();
     }
+
     ,attachEvents: function(){
         a = this.getEl().query('a.locate');
         Ext.each(
@@ -123,7 +128,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
                     'click'
                     ,function(ev, el){
                         App.locateObject(
-                            this.loadedId
+                            this.data.id
                             ,el.attributes.getNamedItem('path').value
                         );
                     }
@@ -152,8 +157,9 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             ,this
         );
     }
+
     ,clear: function(){
-        delete this.loadedId;
+        delete this.data;
         delete this.loadedVersionId;
         this.update('');
         if(this.getEl().isVisible(true)) this.body.scrollTo('top', 0);

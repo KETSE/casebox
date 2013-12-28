@@ -5,7 +5,7 @@ CB.plugins.Export.init = function(){
         return;
     }
     App.on('folderviewinit', function(c){
-        if(!c.isXType(CB.FolderViewGrid, false)) {
+        if(!c.isXType(CB.browser.view.Grid, false)) {
             return;
         }
         var p = Ext.apply([], Ext.value(c.plugins, []));

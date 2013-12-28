@@ -62,6 +62,7 @@ switch ($f['type']) {
     case 'template':
     case 'field':
     case 'email':
+    case 'search':
         $o = new Objects();
         echo $o->getPreview($id);
         break;

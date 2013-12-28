@@ -8,7 +8,7 @@ CB.plugins.Export.Button =  Ext.extend(CB.plugins.customInterface, {
 
         this.button = new Ext.Button({
             text: L.Export
-            ,iconCls: 'icon32-export'
+            ,iconCls: 'ib-export'
             ,scale: 'large'
             ,iconAlign:'top'
             ,scope: this

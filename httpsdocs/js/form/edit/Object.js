@@ -1,11 +1,11 @@
 Ext.namespace('CB.form.edit');
 
-CB.form.edit.Object = Ext.extend(Ext.Panel, {
+CB.form.edit.Object = Ext.extend(Ext.Container, {
     xtype: 'panel'
-    ,autoScroll: true
     ,tbarCssClass: 'x-panel-white'
     ,loadMask: true
     ,padding:0
+    ,autoHeight: true
     ,layout: 'anchor'
     ,data: {}
     ,initComponent: function(){
@@ -45,7 +45,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
 
         Ext.apply(this, {
             defaults: {
-                anchor: '-5'
+                anchor: '-1'
                 ,style: 'margin: 0 0 15px 0'
             }
             ,items: [
@@ -81,6 +81,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             this.confirmDiscardChanges();
             return;
         }
+
 
         this.clear();
         this.getEl().mask(L.Loading + ' ...', 'x-mask-loading');
@@ -152,12 +153,16 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
                 ,this
             );
 
+            if(this.grid.rendered) {
+                this.grid.syncSize();
+            }
             if(this.fieldsZone.rendered) {
                 this.fieldsZone.syncSize();
             }
         }
         this._isDirty = false;
 
+        this.syncSize();
     }
     ,onObjectsStoreChange: function(store, records, options){
         Ext.each(

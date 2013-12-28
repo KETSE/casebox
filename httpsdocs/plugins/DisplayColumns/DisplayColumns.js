@@ -1,11 +1,11 @@
 Ext.namespace('CB.plugins');
 
 Ext.onReady(function(){
-    var plugins = CB.FolderViewGrid.prototype.plugins || [];
+    var plugins = CB.browser.view.Grid.prototype.plugins || [];
     plugins.push({
         ptype: 'CBPluginsDisplayColumns'
     });
-    CB.FolderViewGrid.prototype.plugins = plugins;
+    CB.browser.view.Grid.prototype.plugins = plugins;
 });
 
 

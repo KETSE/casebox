@@ -1,7 +1,7 @@
 
-Ext.namespace('CB');
+Ext.namespace('CB.browser');
 
-CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
+CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     rootVisible: false
     ,autoScroll: true
     ,containerScroll: true
@@ -237,7 +237,7 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
             ,plugins: [ new CB.DD.Tree({idProperty: 'nid'}) ]
         });
 
-        CB.BrowserTree.superclass.initComponent.apply(this, arguments);
+        CB.browser.Tree.superclass.initComponent.apply(this, arguments);
         if(!Ext.isEmpty(this.rootId)) {
             CB_BrowserTree.getRootProperties(
                 this.rootId
@@ -692,4 +692,4 @@ CB.BrowserTree = Ext.extend(Ext.tree.TreePanel,{
 
 });
 
-Ext.reg('CBBrowserTree', CB.BrowserTree);
+Ext.reg('CBBrowserTree', CB.browser.Tree);

@@ -1,6 +1,6 @@
-Ext.namespace('CB');
+Ext.namespace('CB.browser.view');
 
-CB.TasksViewGrid = Ext.extend(Ext.Panel,{
+CB.browser.view.TasksGrid = Ext.extend(Ext.Panel,{
     layout: 'border'
     ,tbarCssClass: 'x-panel-white'
     ,hideBorders: true
@@ -9,11 +9,12 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 
     ,initComponent: function(){
 
+        var viewGroup = Ext.id();
         this.actions = {
             open: new Ext.Action({
                 text: L.Open
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-open'
+                ,iconCls: 'ib-open'
                 ,scale: 'large'
                 ,disabled: true
                 ,scope: this
@@ -49,7 +50,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
             ,'delete': new Ext.Action({
                 text: L.Delete
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-del'
+                ,iconCls: 'ib-del'
                 ,scale: 'large'
                 ,disabled: true
                 ,scope: this
@@ -63,7 +64,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
 
             ,createTask: new Ext.Action({
                 text: L.NewTask
-                ,iconCls: 'icon32-task-new'
+                ,iconCls: 'ib-task-new'
                 ,iconAlign:'top'
                 ,scale: 'large'
                 ,disabled: true
@@ -72,7 +73,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
             })
             ,completeTask: new Ext.Action({
                 text: L.Complete
-                ,iconCls: 'icon32-task-complete'
+                ,iconCls: 'ib-task-complete'
                 ,iconAlign:'top'
                 ,scale: 'large'
                 ,disabled: true
@@ -81,7 +82,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
             })
             ,createEvent: new Ext.Action({
                 text: L.NewEvent
-                ,iconCls: 'icon32-event-new'
+                ,iconCls: 'ib-event-new'
                 ,iconAlign:'top'
                 ,scale: 'large'
                 ,disabled: true
@@ -312,18 +313,18 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
         this.filterButton = new Ext.Button({
                     text: L.Filter
                     ,enableToggle: true
-                    ,iconCls: 'icon32-filter'
-                    ,activeIconCls: 'icon32-filter-on'
+                    ,iconCls: 'ib-filter'
+                    ,activeIconCls: 'ib-filter-on'
                     ,iconAlign:'top'
                     ,scale: 'large'
-                    ,toggleGroup: 'rightBtn'
+                    ,toggleGroup: 'tvgRB' + viewGroup
                     ,itemIndex: 1
                     ,scope: this
                     ,toggleHandler: this.onEastPanelButtonClick
                 })
                 this.filtersPanel = new CB.FilterPanel({
-                    bindButton: this.filterButton
-                    ,listeners:{
+                    // bindButton: this.filterButton
+                    listeners:{
                         scope: this
                         ,change: this.onFiltersChange
                     }
@@ -357,10 +358,10 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
                                 ,{
                                     text: L.Preview
                                     ,enableToggle: true
-                                    ,iconCls: 'icon32-preview'
+                                    ,iconCls: 'ib-preview'
                                     ,iconAlign:'top'
                                     ,scale: 'large'
-                                    ,toggleGroup: 'rightBtn'
+                                    ,toggleGroup: 'tvgRB' + viewGroup
                                     ,itemIndex: 0
                                     ,scope: this
                                     ,toggleHandler: this.onEastPanelButtonClick
@@ -369,7 +370,7 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
                         ]
             ,items: [this.grid, this.eastPanel]
         })
-        CB.TasksViewGrid.superclass.initComponent.apply(this, arguments);
+        CB.browser.view.TasksGrid.superclass.initComponent.apply(this, arguments);
 
         this.addEvents(
                 'selectionchange'
@@ -691,9 +692,9 @@ CB.TasksViewGrid = Ext.extend(Ext.Panel,{
         }
 })
 
-Ext.reg('CBTasksViewGrid', CB.TasksViewGrid);
+Ext.reg('CBBrowserViewTasksGrid', CB.browser.view.TasksGrid);
 
-CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
+CB.browser.view.TasksGridPanel = Ext.extend(Ext.Panel, {
     hideBorders: true
     ,borders: false
     ,closable: true
@@ -701,7 +702,7 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
     ,iconCls: 'icon-taskView'
     ,initComponent: function(){
 
-        this.view = new CB.TasksViewGrid({
+        this.view = new CB.browser.view.TasksGrid({
             params: {descendants: true}
         })
         Ext.apply(this,{
@@ -713,13 +714,13 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
                 ,changeparams: this.onChangeParams
             }
         })
-        CB.TasksViewGridPanel.superclass.initComponent.apply(this, arguments);
+        CB.browser.view.TasksGridPanel.superclass.initComponent.apply(this, arguments);
 
         /* add reload button for this view */
         reloadAction = new Ext.Action({
                 text: L.Reload
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-refresh'
+                ,iconCls: 'ib-refresh'
                 ,scale: 'large'
                 ,scope: this.view
                 ,handler: this.view.onReloadClick
@@ -737,4 +738,4 @@ CB.TasksViewGridPanel = Ext.extend(Ext.Panel, {
         this.view.setParams( params );
     }
 })
-Ext.reg('CBTasksViewGridPanel', CB.TasksViewGridPanel);
+Ext.reg('CBBrowserViewTasksGridPanel', CB.browser.view.TasksGridPanel);

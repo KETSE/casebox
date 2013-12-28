@@ -35,13 +35,24 @@ return array_merge(
             ,'//js/ux/md5/Ext.ux.FileMD5.js'
             ,'//js/ux/Ext.ux.WebkitEntriesIterator.js'
 
+            ,'//js/calendar/calendar-all-debug.js'
+
             ,'//js/CB.Login.js'
             ,'//js/CB.Case.js'
             ,'//js/CB.GenericForm.js'
             ,'//js/CB.ThesauriWindow.js'
-            ,'//js/CB.Browser.js'
-            ,'//js/CB.BrowserTree.js'
-            ,'//js/CB.FolderView.js'
+            ,'//js/CB.Breadcrumb.js'
+            ,'//js/browser/Tree.js'
+            ,'//js/browser/View.js'
+            ,'//js/browser/ViewContainer.js'
+            ,'//js/browser/view/Interface.js'
+            ,'//js/browser/view/Grid.js'
+            ,'//js/browser/view/TasksGrid.js'
+            ,'//js/browser/view/Calendar.js'
+            ,'//js/browser/view/Charts.js'
+            ,'//js/browser/view/Summary.js'
+            ,'//js/browser/view/ActionsGrid.js'
+
             ,'//js/CB.VerticalEditGrid.js'
             ,'//js/CB.Objects.js'
             ,'//js/CB.ObjectsField.js'
@@ -78,17 +89,11 @@ return array_merge(
             ,'//js/CB.FilterPanel.js'
             ,'//js/CB.FileWindow.js'
 
-            ,'//js/calendar/calendar-all-debug.js'
             ,'//js/CB.Favorites.js'
 
             ,'//js/plugins/CB.plugins.FilesDropZone.js'
             ,'//js/CB.Uploader.js'
 
-            ,'//js/CB.FolderViewGrid.js'
-            ,'//js/CB.ActionsViewGrid.js'
-            ,'//js/CB.TasksViewGrid.js'
-            ,'//js/CB.FolderViewSummary.js'
-            ,'//js/CB.CalendarView.js'
             ,'//js/CB.Security.js'
 
             ,'//js/CB.UsersGroups.js'
@@ -115,7 +120,7 @@ return array_merge(
             '//js/app.js'
             ,'//js/form/view/object/Preview.js'
             ,'//js/form/view/object/Properties.js'
-            ,'//js/form/edit/object.js'
+            ,'//js/form/edit/Object.js'
             ,'//js/ObjectCardView.js'
         )
         ,'lang-en' => array('//js/locale/en.js')

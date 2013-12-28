@@ -1,3 +1,17 @@
+CaseBox 1.9.74 (2013-12-28)
+==============================
+New Features, Improvements
+--------------------------
+- refactored browser view interface
+- added primary version of charts view in browser
+- renamed browser related js classes and scripts
+- prepared basic structure for css themes
+- Sync Tree with the active folder in the Grid
+
+Fixed Bugs:
+----------
+- letter case mistake in minify groupsConfig.php
+
 CaseBox 1.9.73 (2013-12-17)
 ==============================
 New Features, Improvements

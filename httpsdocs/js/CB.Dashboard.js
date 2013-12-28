@@ -4,7 +4,7 @@ CB.Dashboard = Ext.extend(Ext.Panel, {
     ,closable: false
     ,'layout': 'fit'
     ,initComponent: function(){
-        this.view = new CB.FolderViewSummary();
+        this.view = new CB.browser.view.Summary();
         Ext.apply(this, {
             hideBorders: true
             ,tbarCssClass: 'x-panel-gray'

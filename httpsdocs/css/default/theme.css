@@ -1,0 +1,51 @@
+/* ib stands for icon big */
+.ib-apps{background-image: url(b/apps.png); min-width: 38px}
+.ib-attach{background-image: url(b/attach.png); min-width: 38px}
+.ib-back{background-image: url(b/back.png); min-width: 38px}
+.ib-browse{background-image: url(b/browse.png); min-width: 38px}
+.ib-cal-day{background-image: url(b/cal-day.png); min-width: 38px}
+.ib-cal-month{background-image: url(b/cal-month.png); min-width: 38px}
+.ib-cal-today{background-image: url(b/today.png); min-width: 38px}
+.ib-cal-week{background-image: url(b/cal-week.png); min-width: 38px}
+.ib-cal-prev,.ib-prev{background-image: url(b/prev.png); min-width: 38px}
+.ib-cal-next, .ib-next{background-image: url(b/next.png); min-width: 38px}
+.ib-cancel{background-image: url(b/cancel.png); min-width: 38px}
+.ib-create{background-image: url(b/plus-circle.png); min-width: 38px}
+.ib-del{background-image: url(b/delete.png); min-width: 38px}
+.ib-download{background-image: url(b/download.png); min-width: 38px}
+.ib-edit{background-image: url(b/clipboard.png); min-width: 38px}
+.ib-edit-obj{background-image: url(b/edit.png); min-width: 38px}
+.ib-event-new{background-image: url(b/cal-event-new.png); min-width: 38px}
+.ib-expand{background-image: url(b/expand.png); min-width: 38px}
+.ib-export{background-image: url(b/export.png); min-width: 38px}
+.ib-external{background-image: url(b/external.png); min-width: 38px}
+.ib-filter{background-image: url(b/filter.png); min-width: 38px}
+.ib-filter-on{background-image: url(b/filter-on.png); min-width: 38px}
+.ib-open{background-image: url(b/open.png); min-width: 38px}
+.ib-points{background-image: url(b/points.png); min-width: 38px}
+.ib-preview{background-image: url(b/preview.png); min-width: 38px}
+.ib-refresh{background-image: url(b/refresh.png); min-width: 38px}
+.ib-save{background-image: url(b/save.png); min-width: 38px}
+.ib-search{background-image: url(b/search.png); min-width: 38px}
+.ib-task-complete{background-image: url(b/green-tick.png); min-width: 38px}
+.ib-task-new{background-image: url(b/task-new.png); min-width: 38px}
+.ib-trash{background-image: url(b/trash.png); min-width: 38px}
+.ib-upload{background-image: url(b/upload.png); min-width: 38px}
+.ib-view-list{background-image: url(b/list.png); min-width: 38px}
+.ib-view-tasks{background-image: url(b/tasks.png); min-width: 38px}
+.ib-view-calendar{background-image: url(b/calendar.png); min-width: 38px}
+.ib-view-charts{background-image: url(b/charts.png); min-width: 38px}
+.ib-chart-area{background-image: url(b/chart-area.png); min-width: 38px}
+.ib-chart-bar{background-image: url(b/chart-bar.png); min-width: 38px}
+.ib-chart-bar-stacked{background-image: url(b/chart-bar-stacked.png); min-width: 38px}
+.ib-chart-column{background-image: url(b/chart-column.png); min-width: 38px}
+.ib-chart-column-stacked{background-image: url(b/chart-column-stacked.png); min-width: 38px}
+.ib-chart-line{background-image: url(b/chart-line.png); min-width: 38px}
+.ib-chart-pie{background-image: url(b/chart-pie.png); min-width: 38px}
+.ib-chart-table{background-image: url(b/chart-table.png); min-width: 38px}
+
+.x-menu-item .ib-browse{background-image: url(s/folder-horizontal-open.png); background-position: 0 50%; background-repeat: no-repeat}
+.x-menu-item .ib-del{background-image: url(s/cross-script.png); background-position: 0 50%; background-repeat: no-repeat}
+.x-menu-item .ib-event-new{background-image: url(s/calendar-blue.png); background-position: 0 50%; background-repeat: no-repeat}
+.x-menu-item .ib-open{background-image: url(s/folder-open.png); background-position: 0 50%; background-repeat: no-repeat}
+.x-menu-item .ib-task-new{background-image: url(s/task.png); background-position: 0 50%; background-repeat: no-repeat}

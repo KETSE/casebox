@@ -8,7 +8,7 @@ CB.plugins.Search.Button =  Ext.extend(CB.plugins.customInterface, {
 
         this.button = new Ext.Button({
             text: L.Search
-            ,iconCls: 'icon32-search'
+            ,iconCls: 'ib-search'
             ,scale: 'large'
             ,iconAlign:'top'
             ,menu:[]
@@ -17,10 +17,10 @@ CB.plugins.Search.Button =  Ext.extend(CB.plugins.customInterface, {
         this.loadSearchTemplates();
 
         var tb = this.owner.getTopToolbar();
-        var idx = tb.items.findIndex('isFill', 'true');
+        var idx = tb.items.findIndex('isFill', 'true')+1;
 
-        tb.insert(idx, this.button);
         tb.insert(idx, '-');
+        tb.insert(idx, this.button);
     },
     loadSearchTemplates: function(){
         var menu = this.button.menu;

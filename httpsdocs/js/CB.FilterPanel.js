@@ -3,8 +3,9 @@ Ext.namespace('CB');
 CB.FilterPanel = Ext.extend(Ext.Panel, {
     xtype: 'panel'
     ,autoScroll: true
-        ,bodyStyle: 'background-color: #F4F4F4'
-        ,padding:0
+    ,bodyStyle: 'background-color: #F4F4F4'
+    ,padding:0
+
     ,initComponent: function(){
         this.activeFileterFacet = new CB.FacetActiveFilters({
             listeners:{
@@ -18,12 +19,19 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
                 scope: this
                 ,facetchange: this.onFacetChange
             }
-        })
+        });
         CB.FilterPanel.superclass.initComponent.apply(this, arguments);
         this.addEvents('change');
     }
+
     ,updateFacets: function(data, options){
-        this.items.each(function(i){ i.setVisible(false) }, this);
+        this.items.each(
+            function(i){
+                i.setVisible(false);
+            }
+            ,this
+        );
+
         this.facetIndex = 1;
         Ext.iterate(data, function(key, value, obj){
             facet = this.find('facetId', key)[0];
@@ -33,45 +41,67 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
                     ,facetId: key
                     ,facetTitle: value.name
                     ,f: Ext.isEmpty(value.f) ? key: value.f
-                })
+                });
                 this.insert(this.facetIndex, facet);
             }
             facet.processServerData(value.items, options);
             facet.setVisible(facet.store.getCount() > 0) ;
             this.facetIndex++;
         }, this);
-        this.updateActiveFiltersFacet(options)
+        this.updateActiveFiltersFacet(options);
 
         if(this.rendered) {
             this.syncSize();
         }
 
     }
+
     ,updateActiveFiltersFacet: function(options){
         if(Ext.isEmpty(this.activeFileterFacet)) return;
         af_data = [];
         Ext.iterate(options.params.filters, function(key, val, obj){
             vals = {};
-            Ext.each(val, function(f){ for(i = 0; i < f.values.length; i++) vals[f.values[i]] = 1; }, this)
+            Ext.each(
+                val
+                ,function(f){
+                    for(i = 0; i < f.values.length; i++) {
+                        vals[f.values[i]] = 1;
+                    }
+                }
+                ,this
+            );
             fd = CB.FacetList.prototype.getFacetData(key, vals, options);
             for (var i = 0; i < fd.length; i++){
-                af_data.push({id: Ext.id(), facetId: key, value: fd[i].id, name: fd[i].name} )
+                af_data.push({
+                    id: Ext.id()
+                    ,facetId: key
+                    ,value: fd[i].id
+                    ,name: fd[i].name
+                });
             }
         }, this);
         this.activeFileterFacet.loadData(af_data);
         if(this.activeFileterFacet.store.getCount() > 0){
             this.activeFileterFacet.store.loadData([{id: -1, value: -1, name: L.ResetAll}], true);
             this.activeFileterFacet.setVisible(true);
-            if(this.bindButton) this.bindButton.setIconClass(this.bindButton.initialConfig.activeIconCls);
-        }else if(this.bindButton) this.bindButton.setIconClass(this.bindButton.initialConfig.iconCls);
+            if(this.bindButton) {
+                this.bindButton.setIconClass(this.bindButton.initialConfig.activeIconCls);
+            }
+        }else {
+            if(this.bindButton) {
+                this.bindButton.setIconClass(this.bindButton.initialConfig.iconCls);
+            }
+        }
     }
+
     ,onFacetChange: function(o, e){
         e.stopPropagation();
         var p = this.getFacetsValues();
         this.fireEvent('change', p, e);
     }
+
     ,getFacetsValues: function(){
-        result = {}
+        result = {};
         this.items.each(function(fe){
             if(!Ext.isEmpty(fe.facetId)){
                 fid = Ext.value(fe.facetId, fe.f);
@@ -81,16 +111,17 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
         }, this);
         return result;
     }
+
     ,onActiveFiltersItemClick: function(idx, data, e){
         if(data.id == -1) return this.fireEvent('change', {} );
         i = this.find('facetId', data.facetId)[0];
         if(i){
             i.uncheck(data.value);
             fv = this.getFacetsValues();
-            this.fireEvent('change', fv )
+            this.fireEvent('change', fv);
         }
     }
-})
+});
 
 Ext.reg('CBFilterPanel', CB.FilterPanel);
 
@@ -103,6 +134,7 @@ CB.FacetActiveFilters = Ext.extend( Ext.Panel, {
     ,border: false
     ,style: 'border:0'
     ,bodyStyle: 'background: none'
+
     ,initComponent: function(){
         this.store = new Ext.data.JsonStore({
             autoDestroy: true
@@ -133,15 +165,16 @@ CB.FacetActiveFilters = Ext.extend( Ext.Panel, {
                     }
                 }
             })
-        })
+        });
         CB.FacetActiveFilters.superclass.initComponent.apply(this, arguments);
         this.addEvents('itemclick');
     }
+
     ,loadData: function(data){
         this.store.loadData(data, false);
         this.doLayout();
     }
 }
-)
+);
 
 Ext.reg('CBFacetActiveFilters', CB.FacetActiveFilters);

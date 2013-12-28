@@ -1,5 +1,6 @@
-Ext.namespace('CB');
-CB.FolderView = Ext.extend(Ext.Panel, {
+Ext.namespace('CB.browser');
+
+CB.browser.View = Ext.extend(Ext.Panel, {
     title: 'Folder view'
     ,iconCls: 'icon-folder'
     ,closable: true
@@ -57,7 +58,8 @@ CB.FolderView = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onShowDescendantsClick
             })
-        }
+        };
+
         this.favoritesButton = new CB.FavoritesMenuItem({
             listeners: {
                 scope: this
@@ -66,7 +68,15 @@ CB.FolderView = Ext.extend(Ext.Panel, {
                 }
             }
         });
-        this.searchField = new Ext.ux.SearchField({width: 250, minListWidth: 250, listeners: {scope: this, 'search': this.onSearchQuery} } )
+        this.searchField = new Ext.ux.SearchField({
+            width: 250
+            ,minListWidth: 250
+            ,listeners: {
+                scope: this
+                ,'search': this.onSearchQuery
+            }
+        });
+
         this.viewButton = new Ext.Button({
             text: L.List
             ,iconCls: 'icon-listView'
@@ -110,18 +120,19 @@ CB.FolderView = Ext.extend(Ext.Panel, {
                         ,scope: this
                         ,handler: this.onChangeViewClick
                 }
-                // ,{
-                //         iconCls: 'icon-summary-view'
-                //         ,enableToggle: true
-                //         ,allowDepress: false
-                //         ,toggleGroup: 'viewMode'
-                //         ,text: L.Overview
-                //         ,viewIndex: 3
-                //         ,scope: this
-                //         ,handler: this.onChangeViewClick
-                // }
+                ,{
+                        iconCls: 'icon-chart'
+                        ,enableToggle: true
+                        ,allowDepress: false
+                        ,toggleGroup: 'viewMode'
+                        ,text: L.Charts
+                        ,viewIndex: 3
+                        ,scope: this
+                        ,handler: this.onChangeViewClick
+                }
             ]
-        })
+        });
+
         Ext.apply(this, {
                 tbar: [
                 this.actions.back
@@ -141,10 +152,10 @@ CB.FolderView = Ext.extend(Ext.Panel, {
             ]
             ,defaults: { hideMode:'offsets' }
                 ,items: [
-                new CB.FolderViewGrid({ iconCls: 'icon-grid-view' })
-                ,new CB.TasksViewGrid({ iconCls: 'icon-task-view' })
-                ,new CB.CalendarView({ iconCls: 'icon-calendar-view' })
-                ,new CB.FolderViewSummary({ iconCls: 'icon-summary-view' })
+                    new CB.browser.view.Grid({ iconCls: 'icon-grid-view' })
+                    ,new CB.browser.view.TasksGrid({ iconCls: 'icon-task-view' })
+                    ,new CB.browser.view.Calendar({ iconCls: 'icon-calendar-view' })
+                    ,new CB.browser.view.Charts({ iconCls: 'icon-charts-view' })
                 ]
                 ,listeners:{
                     scope: this
@@ -187,37 +198,44 @@ CB.FolderView = Ext.extend(Ext.Panel, {
                 ,fn: this.onUpClick
                 ,scope: this
             }]
-        })
+        });
 
-        CB.FolderView.superclass.initComponent.apply(this, arguments);
+        CB.browser.View.superclass.initComponent.apply(this, arguments);
     }
     ,onChangeViewEvent: function(index, e){
         e.stopPropagation();
-        idx = this.viewButton.menu.items.findIndex('viewIndex', index);
+        var idx = this.viewButton.menu.items.findIndex('viewIndex', index);
         if(idx >= 0){
-            b = this.viewButton.menu.items.itemAt(idx);
-            l = this.getLayout();
-            if( this.items.itemAt(b.viewIndex) == l.activeItem ) return;
+            var b = this.viewButton.menu.items.itemAt(idx);
+            var l = this.getLayout();
+            if( this.items.itemAt(b.viewIndex) == l.activeItem ) {
+                return;
+            }
+
             l.setActiveItem(index);
-            this.viewButton.setText(b.text)
-            this.viewButton.setIconClass(b.iconCls)
+            this.viewButton.setText(b.text);
+            this.viewButton.setIconClass(b.iconCls);
+
+            if(l.activeItem.setParams) {
+                l.activeItem.setParams(this.params);
+            }
+
         }
     }
     ,onViewLoaded: function(proxy, o, options){
-        this.params.path = o.result.folderProperties.path
+        this.params.path = o.result.folderProperties.path;
         this.setTitle(o.result.pathtext);
 
         this.searchField.emptyText = L.Search + ' ' + o.result.folderProperties.name;
         if(Ext.isEmpty(this.params.query)) this.searchField.clear();
 
-        this.actions.up.setDisabled( (o.result.pathtext == '/') ); // || (this.rootId == o.result.folderProperties.id)
-        this.favoritesButton.setActiveItem(o.result.folderProperties.id)
+        this.actions.up.setDisabled((o.result.pathtext == '/')); // || (this.rootId == o.result.folderProperties.id)
+        this.favoritesButton.setActiveItem(o.result.folderProperties.id);
     }
     ,onChangeViewClick: function(b, e){
         var l = this.getLayout();
         if(Ext.isDefined(b.viewIndex) && ( this.items.itemAt(b.viewIndex) != l.activeItem ) ) {
             this.onChangeViewEvent(b.viewIndex, e);
-            if(l.activeItem.setParams) l.activeItem.setParams(this.params);
         }
         return l.activeItem;
     }
@@ -352,4 +370,4 @@ CB.FolderView = Ext.extend(Ext.Panel, {
     }
 });
 
-Ext.reg('CBFolderView', CB.FolderView);
+Ext.reg('CBBrowserView', CB.browser.View);
