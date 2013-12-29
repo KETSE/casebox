@@ -422,7 +422,6 @@ class Object extends OldObject
     {
         $rez = array();
         $ld = $this->getAssocLinearData();
-
         if (!empty($ld[$fieldName])) {
             $rez = $ld[$fieldName];
         }

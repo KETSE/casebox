@@ -1,3 +1,9 @@
+CaseBox 1.9.76 (2013-12-30)
+==============================
+Fixed Bugs:
+----------
+- field names for task template are not displayed
+
 CaseBox 1.9.75 (2013-12-29)
 ==============================
 New Features, Improvements

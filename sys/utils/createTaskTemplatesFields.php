@@ -57,7 +57,7 @@ foreach ($taskTemplates as $templateId) {
             '_title' => '_title'
             ,'type' => 'varchar'
             ,'order' => 1
-            ,'cfg' => array("showIn" => "top")
+            ,'cfg' => '{"showIn": "top"}'
         )
     );
     foreach ($GLOBALS['languages'] as $language) {
@@ -74,7 +74,7 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'allday'
             ,'type' => 'checkbox'
             ,'order' => 2
-            ,'cfg' => array("showIn" => "top", "value" => 1)
+            ,'cfg' => '{"showIn": "top", "value": 1}'
         )
     );
     foreach ($GLOBALS['languages'] as $language) {
@@ -91,7 +91,7 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'date_start'
             ,'type' => 'date'
             ,'order' => 3
-            ,'cfg' => array("dependency" => array("pidValues" => 1) )
+            ,'cfg' => '"{dependency": {"pidValues": [1]}}'
         )
     );
 
@@ -109,7 +109,7 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'date_end'
             ,'type' => 'date'
             ,'order' => 4
-            ,'cfg' => array("dependency" => array("pidValues" => 1) )
+            ,'cfg' => '{"dependency": {"pidValues": [1]} }'
         )
     );
 
@@ -127,7 +127,7 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'datetim_start'
             ,'type' => 'datetime'
             ,'order' => 5
-            ,'cfg' => array("dependency" => array("pidValues" => -1) )
+            ,'cfg' => '{"dependency": {"pidValues": [-1]}}'
         )
     );
 
@@ -145,7 +145,7 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'datetime_end'
             ,'type' => 'datetime'
             ,'order' => 6
-            ,'cfg' => array("dependency" => array("pidValues" => -1) )
+            ,'cfg' => '{"dependency": {"pidValues": [-1]}}'
         )
     );
 
@@ -163,13 +163,13 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'assigned'
             ,'type' => '_objects'
             ,'order' => 7
-            ,'cfg' => array(
-                "editor" => "form"
-                ,"source" => "users"
-                ,"renderer" => "listObjIcons"
-                ,"autoLoad" => true
-                ,"multiValued" => true
-            )
+            ,'cfg' => '{
+                "editor": "form"
+                ,"source": "users"
+                ,"renderer": "listObjIcons"
+                ,"autoLoad": true
+                ,"multiValued": true
+            }'
         )
     );
 
@@ -187,9 +187,9 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'importance'
             ,'type' => 'importance'
             ,'order' => 8
-            ,'cfg' => array(
-                "value" => 1
-            )
+            ,'cfg' => '{
+                "value": 1
+            }'
         )
     );
 
@@ -207,13 +207,13 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'category'
             ,'type' => '_objects'
             ,'order' => 9
-            ,'cfg' => array(
-                "source" => "tree"
-                ,"renderer" => "listObjIcons"
-                ,"autoLoad" => true
-                ,"scope" => \CB\getOption('task_categories')
-                ,"value" => \CB\getOption('default_task_category')
-            )
+            ,'cfg' => '{
+                "source": "tree"
+                ,"renderer": "listObjIcons"
+                ,"autoLoad": true
+                ,"scope": '.\CB\getOption('task_categories').'
+                ,"value": '.\CB\getOption('default_task_category').'
+            }'
         )
     );
 
@@ -231,9 +231,9 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'description'
             ,'type' => 'memo'
             ,'order' => 10
-            ,'cfg' => array(
-                "height" => 100
-            )
+            ,'cfg' => '{
+                "height": 100
+            }'
         )
     );
 
@@ -251,9 +251,9 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'reminders'
             ,'type' => 'H'
             ,'order' => 11
-            ,'cfg' => array(
-                "maxInstances" => 5
-            )
+            ,'cfg' => '{
+                "maxInstances": 5
+            }'
         )
     );
 
@@ -277,7 +277,7 @@ foreach ($taskTemplates as $templateId) {
     foreach ($GLOBALS['languages'] as $language) {
         $data['data'][$language] = 'Count';
     }
-    $pid = $tfObject->create($data);
+    $tfObject->create($data);
 
     $data = array(
         'id' => null
