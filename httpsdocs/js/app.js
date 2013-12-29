@@ -325,9 +325,13 @@ function initApp(){
             rez = rez.join(', ');
             return rez;
         }
-        ,taskImportance: function(v){
+        ,importance: function(v){
             if(Ext.isEmpty(v)) return '';
-            return CB.DB.tasksImportance.getName(v);
+            return CB.DB.importance.getName(v);
+        }
+        ,timeUnits: function(v){
+            if(Ext.isEmpty(v)) return '';
+            return CB.DB.timeUnits.getName(v);
         }
         ,taskStatus: function(v, m, r, ri, ci, s){
             if(Ext.isEmpty(v)) return '';
@@ -351,6 +355,8 @@ function initApp(){
     };
     App.getCustomRenderer = function(fieldType){
         switch(fieldType){
+            case 'checkbox':
+                return App.customRenderers.checkbox;
             case 'date':
                 return App.customRenderers.date;
             case 'datetime':
@@ -364,6 +370,10 @@ function initApp(){
                 return App.customRenderers.languageCombo;
             case '_sex':
                 return App.customRenderers.sexCombo;
+            case 'importance':
+                return App.customRenderers.importance;
+            case 'timeunits':
+                return App.customRenderers.timeUnits;
             case '_templateTypesCombo':
                 return CB.DB.templateTypes.getName.createDelegate(CB.DB.templateTypes);
             case '_fieldTypesCombo':
@@ -376,8 +386,6 @@ function initApp(){
                 return App.customRenderers.caseCombo;
             case '_case_object':
                 return App.customRenderers.objectCombo;
-            case 'checkbox':
-                return App.customRenderers.checkbox;
             case 'popuplist':
                 return App.customRenderers.thesauriCell;
             case 'text':
@@ -644,6 +652,28 @@ function initApp(){
                         ,mode: 'local'
                         ,editable: false
                         ,store: CB.DB.yesno
+                        ,displayField: 'name'
+                        ,valueField: 'id'
+                    });
+            case 'timeunits': return new Ext.form.ComboBox({
+                        xtype: 'combo'
+                        ,forceSelection: true
+                        ,triggerAction: 'all'
+                        ,lazyRender: true
+                        ,mode: 'local'
+                        ,editable: false
+                        ,store: CB.DB.timeUnits
+                        ,displayField: 'name'
+                        ,valueField: 'id'
+                    });
+            case 'importance': return new Ext.form.ComboBox({
+                        xtype: 'combo'
+                        ,forceSelection: true
+                        ,triggerAction: 'all'
+                        ,lazyRender: true
+                        ,mode: 'local'
+                        ,editable: false
+                        ,store: CB.DB.importance
                         ,displayField: 'name'
                         ,valueField: 'id'
                     });

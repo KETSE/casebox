@@ -406,7 +406,7 @@ class Tasks
      * @param  integer $log_action_type
      * @return json    response
      */
-    public function saveReminds($p, $log_action_type = 25)
+    public static function saveReminds($p, $log_action_type = 25)
     {
         DB\dbQuery(
             'INSERT INTO tasks_reminders (task_id, user_id, reminds)

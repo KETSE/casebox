@@ -85,7 +85,7 @@ class TemplateField extends Object
 
                         $saveFields[] = $fieldName;
                         $saveValues[] = $value;
-                        $params[] = "`$fieldName` = \$$i";
+                        $params[] = "$i";
                         $i++;
                     }
                 }

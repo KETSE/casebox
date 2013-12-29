@@ -59,7 +59,7 @@ Ext.namespace('CB.DB');
         ,fields: [{name: 'id', type: 'int'}, 'name', 'iconCls']
         ,data:  [[1, L.byMail, 'icon-mail'], [2, L.bySystem, 'icon-bell']]
     });
-    CB.DB.reminderUnits = new Ext.data.ArrayStore({
+    CB.DB.timeUnits = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: [{name: 'id', type: 'int'}, 'name']
         ,data:  [[1, L.ofMinutes], [2, L.ofHours], [3, L.ofDays], [4, L.ofWeeks]]
@@ -81,7 +81,7 @@ Ext.namespace('CB.DB');
         ,data:  [[1, L.Folder, 'icon-folder'], [2, L.Link, 'icon-link'], [3, L.Case, 'icon-briefcase'], [4, L.Action, 'icon-action'], [5, L.File, 'icon-file-unknown'], [6, L.Task, 'icon-calendar-task'], [7, L.Event, 'icon-event'], [8, L.Email, 'icon-letter']]
         ,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
     });
-    CB.DB.tasksImportance = new Ext.data.ArrayStore({
+    CB.DB.importance = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: [{name: 'id', type: 'int'}, 'name']
         ,data:  [ [1, L.Low], [2, L.Medium], [3, L.High] ]

@@ -515,7 +515,7 @@ div.grid-drop-zone-over{
     background: url(i/ico/lock-small.png) 7px 5px no-repeat !important;
 }
 
-ul.breadcrumb { list-style: none; padding-left: 5px }
+ul.breadcrumb { list-style: none; padding: 0 5px }
 ul.breadcrumb li { padding: 2px 2px 2px 2px; margin: 1px; white-space:nowrap; overflow: hidden; display: inline-block; color: gray; }
 ul.breadcrumb li a{ color: #5e5e5e; }
 ul.breadcrumb li a:hover{ color: #2061a3; }

@@ -36,7 +36,7 @@ a {color: #15C}
 .icon-open {background-image:url(i/ico/external.png) !important}
 
 /* . {margin-top: 2px} */
-.mainTabPanel  {background-color: #FFF !important; border: 0 !important}
+.mainTabPanel  {background-color: #F0F0F0 !important; border: 0}
 
 ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}
 .caselist2  li {margin-left: 20px; color: #555}

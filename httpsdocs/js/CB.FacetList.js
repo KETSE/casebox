@@ -102,7 +102,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
                 }, this);
                 break;
             case 'importance':
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: Ext.value(CB.DB.tasksImportance.getName(k), L.noStatus), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
+                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: Ext.value(CB.DB.importance.getName(k), L.noStatus), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
                 break;
             case 'assigned':
             case 'owner':

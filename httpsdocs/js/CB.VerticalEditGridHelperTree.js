@@ -113,7 +113,10 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                 if(Ext.isPrimitive(fieldData[i])) {
                     rez[i] = {value: fieldData[i]};
                 }
-                if(Ext.isDefined(fieldData[i].value)){
+                if(Ext.isDefined(fieldData[i].value) ||
+                    Ext.isDefined(fieldData[i].info) ||
+                    Ext.isDefined(fieldData[i].childs)
+                ){
                     rez[i] = fieldData[i];
                 }
             }
@@ -156,6 +159,12 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     /* no check to see if we have more duplicates and have to duplicate this node */
                     var fieldName = record.get('name');
                     var nodeValues = this.getGenericArrayDataForNodes(data[fieldName]);
+
+                    //set default values for new objects
+                    if(isNaN(this.data.id) && !Ext.isEmpty(record.get('cfg').value)) {
+                        nodeValues[0].value = record.get('cfg').value;
+                    }
+
                     for (var i = 0; i < nodeValues.length; i++) {
                         var node = this.addNode(parentNode, record, beforeNode);
                         nodeValues[i].value = this.adjustValueToType(nodeValues[i].value, record.get('type'));

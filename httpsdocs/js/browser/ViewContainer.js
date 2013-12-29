@@ -46,7 +46,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,iconAlign:'top'
                 ,scale: 'large'
                 ,iconCls: 'ib-upload'
-                ,disabled: true
                 ,scope: this
                 ,handler: this.onUploadClick
             })
@@ -57,6 +56,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,iconAlign:'top'
                 ,scale: 'large'
                 ,iconCls: 'ib-download'
+                ,hidden: true
                 ,disabled: true
                 ,scope: this
                 ,handler: this.onDownloadClick
@@ -247,6 +247,16 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
         });
 
+        this.descendantsButton = new Ext.Button({
+            text: ' ... '
+            ,tooltip: L.Descendants
+            ,enableToggle: true
+            ,allowDepress: true
+            ,width: 20
+            ,scope: this
+            ,handler: this.onDescendantsClick
+        });
+
         this.searchField = new Ext.ux.SearchField({
             width: 250
             ,minListWidth: 250
@@ -262,6 +272,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,this.actions.forward
                 ,this.actions.reload
                 ,this.breadcrumb
+                ,this.descendantsButton
                 ,'->'
                 ,this.searchField
             ]
@@ -292,6 +303,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ,width: 300
             ,layout: 'card'
             ,activeItem: 1
+            ,statefull: true
+            ,stateId: 'vcrp'
             ,items: [
                 this.filtersPanel
                 ,this.objectPanel
@@ -434,6 +447,20 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         });
 
         CB.browser.ViewContainer.superclass.initComponent.apply(this, arguments);
+
+        this.addEvents(
+            'viewloaded'
+            ,'fileupload'
+            ,'filedownload'
+        );
+
+        this.enableBubble([
+            'viewloaded'
+            ,'fileupload'
+            ,'filedownload'
+        ]);
+
+        App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
     }
 
     ,onSetToolbarItems: function(buttonsArray) {
@@ -460,7 +487,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 b = this.buttonCollection.get(buttonsArray[i]);
                 clog('b', buttonsArray[i], b);
                 if(b) {
-                    b.setVisible(true);
+                    // b.setVisible(true);
                     this.viewToolbar.add(b);
                 }
             }
@@ -520,7 +547,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         b.unshift(L.Home);
         this.breadcrumb.setValue(b);
         /* end of updating breadcrumb */
-        // this.fireEvent('viewloaded', proxy, o, options);
+        this.fireEvent('viewloaded', proxy, o, options);
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
         this.filtersPanel.updateFacets(o.result.facets, options);
@@ -617,7 +644,16 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,updateCreateMenuItems: function(menuButton) {
-        updateMenu(menuButton, getMenuConfig(this.folderProperties.id, this.folderProperties.path, this.folderProperties.template_id), this.onCreateObjectClick, this);
+        updateMenu(
+            menuButton
+            ,getMenuConfig(
+                this.folderProperties.id
+                ,this.folderProperties.path
+                ,this.folderProperties.template_id
+            )
+            ,this.onCreateObjectClick
+            ,this
+        );
         menuButton.setDisabled(menuButton.menu.items.getCount() < 1);
     }
 
@@ -635,11 +671,97 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.changeSomeParams({'path': v});
     }
 
+    ,onDescendantsClick: function(b, e) {
+        this.changeSomeParams({'descendants': b.pressed});
+    }
+
     ,onObjectsSelectionChange: function(objectsDataArray){
+        this.cardContainer.getLayout().activeItem.currentSelection = objectsDataArray;
+        // !App.clipboard.isEmpty() //listen to clipboard changes
+        /*}else{
+            this.actions['delete'].setDisabled(row.get('system') == 1);
+
+            canCopy = (row.get('system') == 0) && (row.get('nid') > 0 );
+            this.actions.cut.setDisabled(!canCopy);
+            this.actions.copy.setDisabled(!canCopy);
+
+            canDelete = (row.get('system') == 0) && (row.get('nid') > 0 );
+            this.actions['delete'].setDisabled(!canDelete);
+            canRename = (row.get('system') == 0);
+            this.actions.rename.setDisabled(!canRename);
+
+            s = sm.getSelections();
+            canTakeOwnership = true;
+            for (i = 0; i < s.length; i++) {
+                if( (s[i].get('cid') == App.loginData.id) || (s[i].get('system') == 1) ) canTakeOwnership = false;
+            }
+            this.actions.takeOwnership.setDisabled(!canTakeOwnership);
+
+            canMerge = (s.length > 1);
+            for (i = 0; i < s.length; i++) {
+                if(s[i].get('template_type') != 'file') canMerge = false;
+            }
+            this.actions.mergeFiles.setDisabled(!canMerge);
+
+            canUploadNewVersion = (row.get('template_type') == 'file');
+            this.actions.uploadNewVersion.setDisabled(!canUploadNewVersion);
+            // this.actions.permissions.setDisabled(false) ;
+        }
+
+        canDownload = sm.hasSelection();
+        tb = this.getTopToolbar();
+        if(!Ext.isEmpty(tb)){
+            db = tb.find('iconCls', 'icon32-download');
+            if(!Ext.isEmpty(db)){
+                db = db[0];
+                if(canDownload){
+                    s = sm.getSelections();
+                    for (i = 0; i < s.length; i++) {
+                        if(s[i].get('template_type') != 'file') canDownload = false;
+                    }
+                }
+                db.setDisabled( !canDownload );
+            }
+        }
+        */
+        clog(objectsDataArray);
         if(Ext.isEmpty(objectsDataArray)) {
+            this.actions.cut.setDisabled(true);
+            this.actions.copy.setDisabled(true);
+            this.actions.takeOwnership.setDisabled(true);
+            this.actions.mergeFiles.setDisabled(true);
+            // this.actions.createShortcut.setDisabled(true);
+
+            this.actions.download.setDisabled(true);
+            this.actions.download.hide();
+
+            this.actions['delete'].setDisabled(true);
+            this.actions['delete'].hide();
+            // this.actions.rename.setDisabled(true);
+
+            /* update preview */
             this.objectPanel.load(null);
         } else {
+
+            var canDownload = true;
+            for (var i = 0; i < objectsDataArray.length; i++) {
+                if(objectsDataArray[i].template_type !== 'file') {
+                    canDownload = false;
+                }
+            }
+            this.actions.download.setDisabled(!canDownload);
+            if(canDownload) {
+                this.actions.download.show();
+            } else {
+                this.actions.download.hide();
+            }
+
+            this.actions['delete'].setDisabled(false);
+            this.actions['delete'].show();
+
+            /* update preview */
             this.objectPanel.load(objectsDataArray[0].nid);
+
         }
     }
 
@@ -657,6 +779,80 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onSearchQuery: function(query, e){
         this.changeSomeParams({query: query});
+    }
+
+    ,onCreateObjectClick: function(b, e) {
+        b.data.pid = this.folderProperties.id;
+        this.objectPanel.edit(b.data);
+    }
+
+    ,onUploadClick: function(b, e) {
+        this.fireEvent(
+            'fileupload'
+            ,{
+                pid: this.folderProperties.id
+                ,uploadType: b.uploadType
+            }
+            ,e
+        );
+    }
+
+    ,onDownloadClick: function(b, e) {
+        var ids = [];
+        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        if(Ext.isEmpty(selection)) {
+            return;
+        }
+        for (var i = 0; i < selection.length; i++) {
+            ids.push(selection[i].nid);
+        }
+        this.fireEvent('filedownload', ids, false, e);
+    }
+
+    ,onDeleteClick: function(b, e) {
+        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        if(Ext.isEmpty(selection)) {
+            return;
+        }
+        Ext.Msg.confirm(
+            L.DeleteConfirmation
+            ,(selection.length == 1)
+                ? L.DeleteConfirmationMessage + ' "' + selection[0].name + '"?'
+                : L.DeleteSelectedConfirmationMessage
+            ,this.onDelete
+            ,this
+        );
+    }
+
+    ,onDelete: function (btn) {
+        if(btn !== 'yes') {
+            return;
+        }
+        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        if(Ext.isEmpty(s)) {
+            return;
+        }
+        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+        var ids = [];
+        for (var i = 0; i < selection.length; i++) {
+            ids.push(selection[i].nid);
+        }
+        CB_BrowserView['delete'](ids, this.processDelete, this);
+    }
+
+    ,processDelete: function(r, e){
+        this.getEl().unmask();
+        App.mainViewPort.fireEvent('objectsdeleted', r.ids, e);
+    }
+
+    ,onObjectsDeleted: function(ids, e) {
+        var idx;
+        for (var i = 0; i < ids.length; i++) {
+            idx = this.store.findExact('nid', ids[i]);
+            if(idx >= 0) {
+                this.store.removeAt(idx);
+            }
+        }
     }
 });
 

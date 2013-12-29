@@ -1,3 +1,17 @@
+CaseBox 1.9.75 (2013-12-29)
+==============================
+New Features, Improvements
+--------------------------
+- edit/create tasks in right side
+    Note: cores that have task templates without fields defined should run
+    sys/utils/createTaskTemplatesFields.php <core_name>
+- added importance and timeunits field types
+- interface adjustments
+
+Fixed Bugs:
+----------
+- default value not set when creating objects
+
 CaseBox 1.9.74 (2013-12-28)
 ==============================
 New Features, Improvements
