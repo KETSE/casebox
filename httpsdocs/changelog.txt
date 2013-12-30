@@ -1,3 +1,18 @@
+CaseBox 1.9.77 (2013-12-30)
+==============================
+New Features, Improvements
+--------------------------
+- enabled clipboard actions navigation views
+- some small interface adjustments according to proto
+- Enable 3 types of chart: hbar, vbar, pie + facet selector
+- Limit the length of one breadcrumb item
+
+Fixed Bugs:
+----------
+- Switching Apps to Charts then Calendar then back to Explorer, hides Apps button
+- Can't create a new task: Query error alert
+- duplicated Start field when changing allDay to 'no'
+
 CaseBox 1.9.76 (2013-12-30)
 ==============================
 Fixed Bugs:

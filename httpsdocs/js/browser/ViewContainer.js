@@ -461,10 +461,23 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         ]);
 
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
+
+        App.clipboard.on('change', this.onClipboardChange, this);
+        App.clipboard.on('pasted', this.onClipboardAction, this);
+
+        App.on('objectsaction', this.onObjectsAction, this);
+        App.on('filesuploaded', this.onClipboardAction, this);
+    }
+
+    ,onBeforeDestroy: function(p){
+        App.clipboard.un('change', this.onClipboardChange, this);
+        App.clipboard.un('pasted', this.onClipboardAction, this);
+
+        App.un('objectsaction', this.onObjectsAction, this);
+        App.un('filesuploaded', this.onClipboardAction, this);
     }
 
     ,onSetToolbarItems: function(buttonsArray) {
-        clog('setting toolbar items', buttonsArray);
         // this.viewToolbar.removeAll(false); // this method does not work as expected
         var b;
         while(this.viewToolbar.items.getCount() > 0) {
@@ -485,9 +498,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 this.viewToolbar.add('-');
             } else {
                 b = this.buttonCollection.get(buttonsArray[i]);
-                clog('b', buttonsArray[i], b);
                 if(b) {
-                    // b.setVisible(true);
+                    b.setVisible(!b.disabled);
                     this.viewToolbar.add(b);
                 }
             }
@@ -664,7 +676,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onBreadcrumbItemClick: function(el, idx, ev) {
-        clog('processing!', arguments);
         var v = this.folderProperties.path.split('/');
         v = v.slice(0, idx+1);
         v = v.join('/');
@@ -677,54 +688,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onObjectsSelectionChange: function(objectsDataArray){
         this.cardContainer.getLayout().activeItem.currentSelection = objectsDataArray;
-        // !App.clipboard.isEmpty() //listen to clipboard changes
-        /*}else{
-            this.actions['delete'].setDisabled(row.get('system') == 1);
 
-            canCopy = (row.get('system') == 0) && (row.get('nid') > 0 );
-            this.actions.cut.setDisabled(!canCopy);
-            this.actions.copy.setDisabled(!canCopy);
-
-            canDelete = (row.get('system') == 0) && (row.get('nid') > 0 );
-            this.actions['delete'].setDisabled(!canDelete);
-            canRename = (row.get('system') == 0);
-            this.actions.rename.setDisabled(!canRename);
-
-            s = sm.getSelections();
-            canTakeOwnership = true;
-            for (i = 0; i < s.length; i++) {
-                if( (s[i].get('cid') == App.loginData.id) || (s[i].get('system') == 1) ) canTakeOwnership = false;
-            }
-            this.actions.takeOwnership.setDisabled(!canTakeOwnership);
-
-            canMerge = (s.length > 1);
-            for (i = 0; i < s.length; i++) {
-                if(s[i].get('template_type') != 'file') canMerge = false;
-            }
-            this.actions.mergeFiles.setDisabled(!canMerge);
-
-            canUploadNewVersion = (row.get('template_type') == 'file');
-            this.actions.uploadNewVersion.setDisabled(!canUploadNewVersion);
-            // this.actions.permissions.setDisabled(false) ;
-        }
-
-        canDownload = sm.hasSelection();
-        tb = this.getTopToolbar();
-        if(!Ext.isEmpty(tb)){
-            db = tb.find('iconCls', 'icon32-download');
-            if(!Ext.isEmpty(db)){
-                db = db[0];
-                if(canDownload){
-                    s = sm.getSelections();
-                    for (i = 0; i < s.length; i++) {
-                        if(s[i].get('template_type') != 'file') canDownload = false;
-                    }
-                }
-                db.setDisabled( !canDownload );
-            }
-        }
-        */
-        clog(objectsDataArray);
         if(Ext.isEmpty(objectsDataArray)) {
             this.actions.cut.setDisabled(true);
             this.actions.copy.setDisabled(true);
@@ -743,18 +707,24 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             this.objectPanel.load(null);
         } else {
 
+            this.actions.cut.setDisabled(false);
+            this.actions.copy.setDisabled(false);
+
             var canDownload = true;
             for (var i = 0; i < objectsDataArray.length; i++) {
                 if(objectsDataArray[i].template_type !== 'file') {
                     canDownload = false;
                 }
             }
+
             this.actions.download.setDisabled(!canDownload);
+
             if(canDownload) {
                 this.actions.download.show();
             } else {
                 this.actions.download.hide();
             }
+            this.actions.mergeFiles.setDisabled(!canDownload || (objectsDataArray.length < 2));
 
             this.actions['delete'].setDisabled(false);
             this.actions['delete'].show();
@@ -852,6 +822,128 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             if(idx >= 0) {
                 this.store.removeAt(idx);
             }
+        }
+    }
+
+    ,onCutClick: function(buttonOrKey, e) {
+        if(this.actions.cut.isDisabled()) {
+            return;
+        }
+        this.onCopyClick(buttonOrKey, e);
+        App.clipboard.setAction('move');
+    }
+
+    ,onCopyClick: function(buttonOrKey, e) {
+        if(this.actions.copy.isDisabled()) {
+            return;
+        }
+        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        if(Ext.isEmpty(selection)) {
+            return;
+        }
+        var rez = [];
+        for (var i = 0; i < selection.length; i++) {
+            rez.push({
+                id: selection[i].nid
+                ,name: selection[i].name
+                ,system: selection[i].system
+                ,type: selection[i].type
+                ,subtype: selection[i].subtype
+                ,iconCls: selection[i].iconCls
+            });
+        }
+        App.clipboard.set(rez, 'copy');
+    }
+
+    ,onPasteClick: function(buttonOrKey, e) {
+        if(this.actions.paste.isDisabled()) {
+            return;
+        }
+        App.clipboard.paste(this.folderProperties.id, null);
+    }
+
+    ,onPasteShortcutClick: function(buttonOrKey, e) {
+        if(this.actions.pasteShortcut.isDisabled()) {
+            return;
+        }
+        App.clipboard.paste(this.folderProperties.id, 'shortcut');
+    }
+
+    ,onPermissionsClick: function(b, e){
+        if(this.actions.permissions.isDisabled()) {
+            return;
+        }
+        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        var id = Ext.isEmpty(selection)
+            ? this.folderProperties.id
+            : s[0].nid;
+
+        if(App.activateTab(null, id, CB.SecurityPanel)) {
+            return;
+        }
+        App.addTab(null, new CB.SecurityPanel({data: { id: id }}));
+    }
+
+    ,onMergeFilesClick: function(buttonOrKey, e) {
+        if(this.actions.mergeFiles.isDisabled()) {
+            return;
+        }
+        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        if(Ext.isEmpty(selection) || (selection.length <2) ) return;
+        rez = [];
+        for (var i = 0; i < s.length; i++) {
+            rez.push(selection[i].nid);
+        }
+        Ext.Msg.confirm( L.MergingFiles, L.MergeFilesConfirmation, function(b){
+            if(b == 'yes') CB_Files.merge(rez, this.processMergingFiles, this);
+        }, this );
+    }
+
+    ,processMergingFiles: function(r, e){
+        this.onReloadClick();
+        App.mainViewPort.onProcessObjectsDeleted(r, e);
+    }
+
+    ,onClipboardChange: function(cb){
+        this.actions.paste.setDisabled( App.clipboard.isEmpty() );
+        this.actions.pasteShortcut.setDisabled( App.clipboard.isEmpty() );
+    }
+    ,onClipboardAction: function(pids){
+        if(pids.indexOf(this.folderProperties.id) >=0 ) {
+            this.onReloadClick();
+        }
+    }
+    ,onObjectsAction: function(action, r, e){
+        if(Ext.isEmpty(r.processedIds)) {
+            return;
+        }
+        // if(pids.indexOf(this.folderProperties.id) >=0 ) this.onReloadClick();
+
+        switch(action){
+            case 'copy':
+                if(r.targetId == this.folderProperties.id){
+                    this.onReloadClick();
+                }
+                break;
+            case 'move':
+                if(r.targetId == this.folderProperties.id){
+                    this.onReloadClick();
+                } else {
+                    // remove moved record
+                    for (var i = 0; i < r.processedIds.length; i++) {
+                        idx = this.store.findExact('nid', parseInt(r.processedIds[i], 10));
+                        if(idx > -1) {
+                            this.store.removeAt(idx);
+                        }
+                    }
+                }
+                break;
+            case 'create':
+                break;
+            case 'update':
+                break;
+            case 'delete':
+                break;
         }
     }
 });

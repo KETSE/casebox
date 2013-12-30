@@ -99,7 +99,10 @@ switch ($f['type']) {
                 $top = '<div class="obj-preview-h pt10">'.L\ActiveTasks.'</div>'.$tmp;
             }
             if (!empty($top)) {
-                echo '<div class="p10">'.$top.'</div><hr />';
+                echo //'<div class="p10">'.
+                $top.
+                // '</div>'.
+                '<hr />';
             }
 
             if (!empty($preview['filename'])) {

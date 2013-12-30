@@ -91,7 +91,7 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'date_start'
             ,'type' => 'date'
             ,'order' => 3
-            ,'cfg' => '"{dependency": {"pidValues": [1]}}'
+            ,'cfg' => '{"dependency": {"pidValues": [1]}}'
         )
     );
 

@@ -34,19 +34,19 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
         });
 
         this.refOwner.buttonCollection.addAll(
+            // new Ext.Button({
+            //     text: L.ChartLine
+            //     ,id: 'linechart'
+            //     ,enableToggle: true
+            //     ,allowDepress: false
+            //     ,iconCls: 'ib-chart-line'
+            //     ,iconAlign:'top'
+            //     ,scale: 'large'
+            //     ,toggleGroup: 'cv' + viewGroup
+            //     ,scope: this
+            //     ,handler: this.onChangeChartClick
+            // })
             new Ext.Button({
-                text: L.ChartLine
-                ,id: 'linechart'
-                ,enableToggle: true
-                ,allowDepress: false
-                ,iconCls: 'ib-chart-line'
-                ,iconAlign:'top'
-                ,scale: 'large'
-                ,toggleGroup: 'cv' + viewGroup
-                ,scope: this
-                ,handler: this.onChangeChartClick
-            })
-            ,new Ext.Button({
                 text: L.ChartArea
                 ,id: 'barchart'
                 ,enableToggle: true
@@ -58,18 +58,18 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 ,scope: this
                 ,handler: this.onChangeChartClick
             })
-            ,new Ext.Button({
-                text: L.ChartArea
-                ,id: 'stackedbarchart'
-                ,enableToggle: true
-                ,allowDepress: false
-                ,iconCls: 'ib-chart-bar-stacked'
-                ,iconAlign:'top'
-                ,scale: 'large'
-                ,toggleGroup: 'cv' + viewGroup
-                ,scope: this
-                ,handler: this.onChangeChartClick
-            })
+            // ,new Ext.Button({
+            //     text: L.ChartArea
+            //     ,id: 'stackedbarchart'
+            //     ,enableToggle: true
+            //     ,allowDepress: false
+            //     ,iconCls: 'ib-chart-bar-stacked'
+            //     ,iconAlign:'top'
+            //     ,scale: 'large'
+            //     ,toggleGroup: 'cv' + viewGroup
+            //     ,scope: this
+            //     ,handler: this.onChangeChartClick
+            // })
             ,new Ext.Button({
                 text: L.ChartArea
                 ,id: 'columnchart'
@@ -82,18 +82,18 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 ,scope: this
                 ,handler: this.onChangeChartClick
             })
-            ,new Ext.Button({
-                text: L.ChartBar
-                ,id: 'stackedcolumnchart'
-                ,enableToggle: true
-                ,allowDepress: false
-                ,iconCls: 'ib-chart-column-stacked'
-                ,iconAlign:'top'
-                ,scale: 'large'
-                ,toggleGroup: 'cv' + viewGroup
-                ,scope: this
-                ,handler: this.onChangeChartClick
-            })
+            // ,new Ext.Button({
+            //     text: L.ChartBar
+            //     ,id: 'stackedcolumnchart'
+            //     ,enableToggle: true
+            //     ,allowDepress: false
+            //     ,iconCls: 'ib-chart-column-stacked'
+            //     ,iconAlign:'top'
+            //     ,scale: 'large'
+            //     ,toggleGroup: 'cv' + viewGroup
+            //     ,scope: this
+            //     ,handler: this.onChangeChartClick
+            // })
             ,new Ext.Button({
                 text: L.ChartPie
                 ,id: 'piechart'
@@ -106,18 +106,18 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 ,scope: this
                 ,handler: this.onChangeChartClick
             })
-            ,new Ext.Button({
-                text: L.ChartTable
-                ,id: 'pivotgrid'
-                ,enableToggle: true
-                ,allowDepress: false
-                ,iconCls: 'ib-chart-table'
-                ,iconAlign:'top'
-                ,scale: 'large'
-                ,toggleGroup: 'cv' + viewGroup
-                ,scope: this
-                ,handler: this.onChangeChartClick
-            })
+            // ,new Ext.Button({
+            //     text: L.ChartTable
+            //     ,id: 'pivotgrid'
+            //     ,enableToggle: true
+            //     ,allowDepress: false
+            //     ,iconCls: 'ib-chart-table'
+            //     ,iconAlign:'top'
+            //     ,scale: 'large'
+            //     ,toggleGroup: 'cv' + viewGroup
+            //     ,scope: this
+            //     ,handler: this.onChangeChartClick
+            // })
             ,new Ext.form.Label({
                 id: 'facetslabel'
                 ,text: 'Facets: '
@@ -244,7 +244,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
             }
         });
         CB.browser.view.Charts.superclass.initComponent.apply(this, arguments);
-        this.currentButton = this.refOwner.buttonCollection.get('linechart');
+        this.currentButton = this.refOwner.buttonCollection.get('barchart');
         this.store.proxy.on('load', this.onProxyLoad, this);
     }
 

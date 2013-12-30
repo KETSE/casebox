@@ -29,13 +29,13 @@ class Task extends Object
 
         @$params = array(
             $this->id
-            ,$this->getFieldValue('_title', 0)['value']
+            ,$this->getFieldValue('_title', 0)['value'].''
             ,$allday
             ,$dateStart
             ,$dateEnd
             ,$this->getFieldValue('importance', 0)['value']
             ,$this->getFieldValue('category', 0)['value']
-            ,$this->getFieldValue('assigned', 0)['value']
+            ,$this->getFieldValue('assigned', 0)['value'].''
             ,$this->getFieldValue('description', 0)['value']
         );
 
@@ -55,7 +55,7 @@ class Task extends Object
         $p = array();
         foreach ($reminds as $remind) {
             if (!empty($remind['childs']['count'])) {
-                $p[] = @$_SESSION['user']['id'].'|'.$remind['childs']['count'].'|'.$remind['childs']['units'];
+                @$p[] = $_SESSION['user']['id'].'|'.$remind['childs']['count'].'|'.$remind['childs']['units'];
             }
         }
         \CB\Tasks::saveReminds(

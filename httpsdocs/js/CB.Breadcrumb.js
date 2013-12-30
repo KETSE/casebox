@@ -5,7 +5,7 @@ CB.Breadcrumb = Ext.extend( Ext.DataView, {
     ,initComponent: function(){
         this.tpl = new Ext.XTemplate(
             '<ul class="breadcrumb"><tpl for=".">'
-            ,'<li><a href="#">{name}</a>'
+            ,'<li><a href="#">{[values.name.substring(0,30)]}</a>'
             ,'{[(xindex < xcount) ? \'</li><li>/\': \'\']}'
             ,'</li></tpl></ul>'
             ,{compiled: true}

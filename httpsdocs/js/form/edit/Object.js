@@ -3,7 +3,6 @@ Ext.namespace('CB.form.edit');
 CB.form.edit.Object = Ext.extend(Ext.Container, {
     xtype: 'panel'
     ,tbarCssClass: 'x-panel-white'
-    ,loadMask: true
     ,padding:0
     ,autoHeight: true
     ,layout: 'anchor'
@@ -84,7 +83,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
 
 
         this.clear();
-        this.getEl().mask(L.Loading + ' ...', 'x-mask-loading');
+        // this.getEl().mask(L.LoadingData + ' ...', 'x-mask-loading');
 
         if(Ext.isNumber(objectData.id)) {
             CB_Objects.load(

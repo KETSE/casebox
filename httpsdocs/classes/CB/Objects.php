@@ -363,14 +363,17 @@ class Objects
 
         Log::add(array('action_type' => 12, 'object_id' => $id ));
         if (!empty($top)) {
-            $top = '<div class="obj-preview-h">'.L\Details.'</div>'.$top;
+            // $top = '<div class="obj-preview-h">'.L\Details.'</div>'.$top;
         }
         $top .= $body;
         if (!empty($top)) {
             $top = '<table class="obj-preview">'.$top.'</table><br />';
         }
 
-        return '<div style="padding:10px">'.$top.$bottom.'</div>';
+        return //'<div style="padding:10px">'.
+            $top.$bottom
+            // .'</div>'
+            ;
     }
 
     /**
