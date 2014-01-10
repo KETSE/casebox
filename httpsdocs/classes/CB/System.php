@@ -1,10 +1,6 @@
 <?php
 namespace CB;
 
-if (!Security::canManage()) {
-    throw new \Exception(L\Access_denied);
-}
-
 class System
 {
     public function tagsGetChildren($p)
@@ -313,9 +309,10 @@ class System
     {
         $rez = array();
         $res = DB\dbQuery(
-            'SELECT id
-                 , name
-                 , phone_codes
+            'SELECT
+                id
+                ,name
+                ,phone_codes
             FROM casebox.country_phone_codes
             ORDER BY name'
         ) or die(DB\dbQueryError());

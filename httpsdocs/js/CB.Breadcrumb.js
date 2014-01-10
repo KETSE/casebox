@@ -27,7 +27,6 @@ CB.Breadcrumb = Ext.extend( Ext.DataView, {
         clog('breadcrumb click', arguments);
     }
     ,setValue: function(dataArray) {
-        clog('breadcrumb set value', dataArray);
         var data = [];
         for (var i = 0; i < dataArray.length; i++) {
             if(Ext.isObject(dataArray[i])) {

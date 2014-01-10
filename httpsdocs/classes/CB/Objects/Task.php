@@ -175,6 +175,10 @@ class Task extends Object
 
         // save reminds
         $reminds = @$this->data['data']['reminders'];
+        if (empty($reminds)) {
+            $reminds = array();
+        }
+
         if (isset($reminds['childs'])) {
             $reminds = array($reminds);
         }
@@ -182,7 +186,7 @@ class Task extends Object
         $p = array();
         foreach ($reminds as $remind) {
             if (!empty($remind['childs']['count'])) {
-                $p[] = @$_SESSION['user']['id'].'|'.$remind['childs']['count'].'|'.$remind['childs']['units'];
+                @$p[] = $_SESSION['user']['id'].'|'.$remind['childs']['count'].'|'.$remind['childs']['units'];
             }
         }
         \CB\Tasks::saveReminds(

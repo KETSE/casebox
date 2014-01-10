@@ -304,10 +304,16 @@ function debug($msg)
  */
 function fireEvent($eventName, &$params)
 {
+    //skip trigering events from other triggers
+    if (!empty($GLOBALS['running_trigger'])) {
+        return;
+    }
+
     $listeners = Config::getListeners();
     if (empty($listeners[$eventName])) {
         return;
     }
+
     foreach ($listeners[$eventName] as $className => $methods) {
         $className = str_replace('_', '\\', $className);
         $class = new $className();

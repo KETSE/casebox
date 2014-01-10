@@ -501,8 +501,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         if(Ext.isEmpty(n)) return;
         // App.openObject(n.attributes.template_id, n.attributes.nid, e);
         var tab = App.activateBrowserTab();
-        var view = tab.onChangeViewClick({viewIndex: 0}, e);
-        view.objectPanel.edit(
+        tab.objectPanel.edit(
             {
                 id: n.attributes.nid
                 ,template_id: n.attributes.template_id

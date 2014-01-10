@@ -517,8 +517,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         Ext.each(
             trees
             ,function(t){
-                if(t && t.getEl && t.getEl().isVisible(true)) {
-                    activeTree = t;
+                if(t && t.getEl) {
+                    var el = t.getEl();
+                    if(el && el.isVisible(true)) {
+                        activeTree = t;
+                    }
                 }
             }
             ,this

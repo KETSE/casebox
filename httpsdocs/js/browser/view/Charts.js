@@ -308,6 +308,12 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
             this.data
             ,function(key, val, o) {
                 data[key] = CB.FacetList.prototype.getFacetData(key, val.items);
+                for (var i = 0; i < data[key].length; i++) {
+                    if(Ext.isObject(data[key][i].items)) {
+                        data[key][i].name = data[key][i].items.name;
+                        data[key][i].items = data[key][i].items.count;
+                    }
+                }
             }
             ,this
         );

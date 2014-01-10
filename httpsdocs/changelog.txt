@@ -1,3 +1,21 @@
+CaseBox 1.9.78 (2014-01-10)
+==============================
+New Features, Improvements
+--------------------------
+- Remove Title & Date fields in 'Upload' popup
+- htmlEditor.height = 200 in EditMode
+- Disabled events triggering from another event handler to avoid recursion,
+    should think on the model if this feature will be needed.
+
+Fixed Bugs:
+----------
+- after a node is created, the grid doesn't refresh, and the node doesn't appear in preview
+- PopupMenu: click Open, JS error.
+- Switching from Chart view to GridView will show Download&Delete buttons
+- Resize Tree (bigger/smaller panel width) and the buttons in toolbar are not right alligned
+- Clicking User photo / Account gives 'Access is denied' error
+- Charts doesn't work for _objects facets
+
 CaseBox 1.9.77 (2013-12-30)
 ==============================
 New Features, Improvements

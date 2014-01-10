@@ -347,9 +347,11 @@ class TreeSync extends \Util\TreeSync
 
                 $objUpdated = false;
                 $processFields = array();
-                foreach ($data['data'] as $fn => &$fv) {
-                    $tf = $template->getField($fn);
-                    $processFields[] = array($tf, &$fv);
+                if (!empty($data['data'])) {
+                    foreach ($data['data'] as $fn => &$fv) {
+                        $tf = $template->getField($fn);
+                        $processFields[] = array($tf, &$fv);
+                    }
                 }
                 while (!empty($processFields)) {
                     $field = array_shift($processFields);

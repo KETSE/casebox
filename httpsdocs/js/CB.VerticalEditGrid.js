@@ -494,7 +494,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.store.add(records);
 
         if(lastCell && this.getEl().isVisible(true)){
-            clog('selecting last cell', lastCell);
             this.getSelectionModel().select(lastCell[0], lastCell[1]);
         }
     }

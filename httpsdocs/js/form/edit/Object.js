@@ -22,11 +22,16 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         this.grid = new CB.VerticalEditGrid({
             title: L.Details
             ,autoHeight: true
+            ,autoScroll: true
             ,minHeight: 100
             ,boxMinHeight: 100
             ,hidden: true
             ,refOwner: this
             ,includeTopFields: true
+            ,viewConfig: {
+                autoFill: true
+                ,forceFit: false
+            }
         });
 
         this.fieldsZone = new Ext.form.FormPanel({
@@ -132,7 +137,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                             ,isTemplateField: true
                             ,name: r.get('name')
                             ,value: this.data.data[r.get('name')]
-                            ,height: Ext.value(r.get('cfg').height, 70)
+                            ,height: Ext.value(r.get('cfg').height, 200)
                             ,anchor: '100%'
                             ,style: 'resize: vertical'
                             ,grow: true
@@ -226,6 +231,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
 
         this.fieldsZone.getForm().submit({
             clientValidation: true
+            ,loadMask: false
             ,params: {
                 data: Ext.encode(this.data)
             }
@@ -247,6 +253,8 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             this.saveCallback(this);
             delete this.saveCallback;
         }
+        App.fireEvent('objectchanged', r.data);
+
     }
     ,clear: function(){
         this.data = {};

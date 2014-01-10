@@ -521,7 +521,7 @@ class Object extends OldObject
      */
     public function getTemplate()
     {
-        if (empty($this->template) && $this->loadTemplate) {
+        if (empty($this->template) && $this->loadTemplate && !empty($this->data['template_id'])) {
             $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
         }
 

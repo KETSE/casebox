@@ -275,7 +275,7 @@ CB.browser.View = Ext.extend(Ext.Panel, {
         if(e && e.stopPropagation) e.stopPropagation();
         if(this.locked) return;
         this.spliceHistory();
-        this.setParams(params)
+        this.setParams(params);
     }
     ,setParams: function(params){
         if(this.locked) return;
@@ -305,14 +305,16 @@ CB.browser.View = Ext.extend(Ext.Panel, {
             }
         }
         Ext.apply(this.params, this.requestParams);
-        this.applyParamsVisually()
+        this.applyParamsVisually();
         i = this.getLayout().activeItem;
-        if(i.setParams) i.setParams(this.params)
+        if(i.setParams) {
+            i.setParams(this.params);
+        }
     }
     ,applyParamsVisually: function(){
         this.getTopToolbar().find('iconCls', 'icon-descendants')[0].toggle(this.params.descendants);
         if(Ext.isEmpty(this.params.query)){
-            this.searchField.clear()
+            this.searchField.clear();
             this.getTopToolbar().removeClass('search-on');
         }else{
             this.searchField.setValue(this.params.query);

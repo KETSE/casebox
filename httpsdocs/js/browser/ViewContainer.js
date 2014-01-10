@@ -58,6 +58,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,iconCls: 'ib-download'
                 ,hidden: true
                 ,disabled: true
+                ,hideParent: false
                 ,scope: this
                 ,handler: this.onDownloadClick
             })
@@ -118,7 +119,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,iconAlign:'top'
                 ,iconCls: 'ib-trash'
                 ,scale: 'large'
+                ,hidden: true
                 ,disabled: true
+                ,hideParent: false
                 ,scope: this
                 ,handler: this.onDeleteClick
             })
@@ -213,11 +216,22 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             //each view should define it's custom buttons in buttonCollection
             //and specify buttons for diplay
             ,items: []
+            ,listeners: {
+                scope: this
+                ,afterlayout: function(c) {
+                    var ic = c.items.getCount();
+                    for (var i = 0; i < ic; i++) {
+                        if(c.items.itemAt(i).disabled) {
+                            c.items.itemAt(i).hide();
+                        }
+                    }
+                }
+            }
         });
 
         this.containerToolbar = new Ext.Toolbar({
-            autoWidth: true
-            ,region: 'east'
+            region: 'east'
+            ,border: true
             ,defaults: {
                 iconAlign:'top'
                 ,scale: 'large'
@@ -239,6 +253,16 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,this.containerToolbar
 
             ]
+            ,listeners: {
+                scope: this
+                ,resize: function(c, adjWidth, adjHeight, rawWidth, rawHeight){
+                    if(this.viewToolbar.rendered) {
+                        var cw = this.containerToolbar.items.getCount() * 48;
+                        this.viewToolbar.setWidth(adjWidth - cw);
+                        this.containerToolbar.setWidth(cw);
+                    }
+                }
+            }
         });
         this.breadcrumb = new CB.Breadcrumb({
             listeners: {
@@ -298,6 +322,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ,split: true
             ,collapsible: true
             ,collapseMode: 'mini'
+            ,animCollapse: false
             ,hideBorders: true
             ,region: 'east'
             ,width: 300
@@ -466,6 +491,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         App.clipboard.on('pasted', this.onClipboardAction, this);
 
         App.on('objectsaction', this.onObjectsAction, this);
+        App.on('objectchanged', this.onObjectChanged, this);
         App.on('filesuploaded', this.onClipboardAction, this);
     }
 
@@ -482,14 +508,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         var b;
         while(this.viewToolbar.items.getCount() > 0) {
             b = this.viewToolbar.items.itemAt(0);
-            b.hide();
+            if(b.id !== 'apps') {
+                b.hide();
+            }
             this.viewToolbar.remove(b, b.isXType('tbseparator'));
         }
         this.viewToolbar.doLayout(false);
         if(buttonsArray.indexOf('apps') < 0) {
-            b = this.buttonCollection.get('apps');
-            b.setVisible(true);
-            this.viewToolbar.add(b);
+            buttonsArray.unshift('apps');
         }
 
 
@@ -499,7 +525,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             } else {
                 b = this.buttonCollection.get(buttonsArray[i]);
                 if(b) {
-                    b.setVisible(!b.disabled);
                     this.viewToolbar.add(b);
                 }
             }
@@ -752,6 +777,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onCreateObjectClick: function(b, e) {
+        // this.onRightPanelViewChangeClick(this.buttonCollection.get('preview'));
+        this.buttonCollection.get('preview').toggle(true);
         b.data.pid = this.folderProperties.id;
         this.objectPanel.edit(b.data);
     }
@@ -910,6 +937,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
     ,onClipboardAction: function(pids){
         if(pids.indexOf(this.folderProperties.id) >=0 ) {
+            this.onReloadClick();
+        }
+    }
+    ,onObjectChanged: function(objData){
+        if(objData.pid == this.folderProperties.id) {
             this.onReloadClick();
         }
     }
