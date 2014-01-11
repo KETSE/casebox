@@ -4,7 +4,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
     xtype: 'panel'
     ,tbarCssClass: 'x-panel-white'
     ,padding:0
-    ,autoHeight: true
+    ,autoScroll: true
     ,layout: 'anchor'
     ,data: {}
     ,initComponent: function(){
@@ -22,15 +22,12 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         this.grid = new CB.VerticalEditGrid({
             title: L.Details
             ,autoHeight: true
-            ,autoScroll: true
-            ,minHeight: 100
-            ,boxMinHeight: 100
             ,hidden: true
             ,refOwner: this
             ,includeTopFields: true
             ,viewConfig: {
-                autoFill: true
-                ,forceFit: false
+                forceFit: true
+                // ,autoFill: true
             }
         });
 
@@ -52,8 +49,14 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 anchor: '-1'
                 ,style: 'margin: 0 0 15px 0'
             }
-            ,items: [
-                this.grid
+            ,items: [ {
+                    xtype: 'panel'
+                    ,layout: 'fit'
+                    ,autoHeight: true
+                    ,autoScroll: true
+                    ,border: false
+                    ,items: this.grid
+                }
                 ,this.fieldsZone
             ]
             ,listeners: {
@@ -123,6 +126,10 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         this.grid.reload();
         if(this.grid.store.getCount() > 0) {
             this.grid.show();
+            this.grid.getView().refresh(true);
+            this.grid.doLayout();
+            this.grid.focus();
+            this.grid.getSelectionModel().select(0, 1);
         }
 
         if(this.grid.templateStore) {
@@ -157,15 +164,18 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 ,this
             );
 
-            if(this.grid.rendered) {
-                this.grid.syncSize();
-            }
-            if(this.fieldsZone.rendered) {
-                this.fieldsZone.syncSize();
-            }
+            // if(this.grid.rendered) {
+            //     this.grid.doLayout();
+            //     this.grid.syncSize();
+            // }
+            // if(this.fieldsZone.rendered) {
+            //     this.fieldsZone.doLayout();
+            //     this.fieldsZone.syncSize();
+            // }
         }
         this._isDirty = false;
 
+        this.doLayout();
         this.syncSize();
     }
     ,onObjectsStoreChange: function(store, records, options){
@@ -178,7 +188,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         );
         if(this.grid && !this.grid.editing && this.grid.getEl()) {
             var sc = this.grid.getSelectionModel().getSelectedCell();
-            this.grid.getView().refresh();
+            this.grid.getView().refresh(true);
             if(sc) {
                 this.grid.getSelectionModel().select(sc[0], sc[1]);
                 this.grid.getView().focusCell(sc[0], sc[1]);

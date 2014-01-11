@@ -6,7 +6,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     ,activeItem: 0
     ,hideBorders: true
     ,tbarCssClass: 'x-panel-white'
-    ,autoScroll: true
     ,initComponent: function() {
         this.actions = {
             edit: new Ext.Action({
@@ -94,10 +93,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             ,listeners: {
                 scope: this
                 ,add: this.onCardItemAdd
-                ,resize: function(c){
-                    var ai = this.getLayout().activeItem;
-                    ai.setWidth(this.getWidth() - 10);
-                }
+                ,afterrender: this.doLoad
             }
         });
 
@@ -208,8 +204,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     ,doLoad: function() {
         this.loadedId = this.requestedLoadId;
         var activeItem = this.getLayout().activeItem;
+
         switch(activeItem.getXType()) {
             case 'CBObjectPreview':
+                this.getTopToolbar().setVisible(!Ext.isEmpty(this.requestedLoadId));
+                this.doLayout();
                 activeItem.loadPreview(this.requestedLoadId);
                 break;
             case 'CBEditObject':

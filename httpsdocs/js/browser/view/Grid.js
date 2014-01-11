@@ -47,6 +47,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
             loadMask: true
             ,cls: 'folder-grid'
             ,store: this.store
+            ,getProperty: this.getProperty // link to view container method
             ,defaultColumns: Ext.apply([], columns)
             ,colModel: new Ext.grid.ColumnModel({
                 defaults: {
@@ -231,6 +232,15 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 ,displayInfo: true
                 ,pageSize: 50
                 ,hidden: true
+                ,listeners: {
+                    scope: this
+                    //prevent toolbar from changing store params and reloading the store
+                    //we'll make this through viewContainer
+                    ,beforechange: function(pt, p) {
+                        this.fireEvent('changeparams', p);
+                        return false;
+                    }
+                }
             })
 
             ,statefull: true
@@ -260,6 +270,9 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
             }
         });
         CB.browser.view.Grid.superclass.initComponent.apply(this, arguments);
+
+        this.store.on('load', this.onStoreLoad, this);
+
     }
 
     ,onActivate: function() {
@@ -276,6 +289,20 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 ,'delete'
             ]
         );
+    }
+    ,onStoreLoad: function(store, recs, options) {
+        var pt = this.grid.getBottomToolbar();
+        var pagingVisible = (store.reader.jsonData.total > pt.pageSize);
+        if(pagingVisible) {
+            pt.show();
+        } else {
+            pt.hide();
+        }
+
+        this.grid.syncSize();
+        this.syncSize();
+
+        App.mainViewPort.selectGridObject(this.grid);
     }
 
     ,onCellClick: function(grid, rowIndex, colIndex, e){

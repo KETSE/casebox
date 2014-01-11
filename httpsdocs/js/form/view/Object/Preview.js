@@ -161,7 +161,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
     ,clear: function(){
         delete this.data;
         delete this.loadedVersionId;
-        this.update('');
+        this.update('<div class="x-preview-mask">Select an item for preview</div>');
         if(this.getEl().isVisible(true)) this.body.scrollTo('top', 0);
     }
 

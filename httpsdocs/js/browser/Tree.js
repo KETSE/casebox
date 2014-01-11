@@ -501,10 +501,10 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         if(Ext.isEmpty(n)) return;
         // App.openObject(n.attributes.template_id, n.attributes.nid, e);
         var tab = App.activateBrowserTab();
-        tab.objectPanel.edit(
+        tab.onObjectsOpenEvent(
             {
-                id: n.attributes.nid
-                ,template_id: n.attributes.template_id
+                nid: n.attributes.nid
+                // ,template_id: n.attributes.template_id
             }
         );
     }

@@ -50,6 +50,7 @@ Ext.namespace('CB.DB');
             ,['_templateTypesCombo', 'Template types combo']
             ,['text', 'Text']
             ,['time', 'Time']
+            ,['timeunits', 'Time units']
             ,['varchar', 'Varchar']
         ]
         ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }

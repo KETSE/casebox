@@ -813,3 +813,12 @@ border: 1px solid #7195A3;
 .account-menu .x-btn:hover {
     background-color: #eaeaea;
 }
+
+div.x-preview-mask{
+background: #eaeaea;
+border: 0;
+height: 100%;
+text-align: center;
+vertical-align: middle;
+padding-top: 45%;
+}

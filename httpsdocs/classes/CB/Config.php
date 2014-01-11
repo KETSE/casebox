@@ -161,7 +161,7 @@ class Config extends Singleton
             : static::adjustPaths(static::$config['css'], CORE_DIR);
 
         array_unshift($rez, DOC_ROOT.'/css/'.getOption('theme', 'default').'/theme.css');
-        // var_dump($rez);
+
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
             if (!empty($data['css'])) {

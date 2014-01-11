@@ -397,6 +397,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
         });
 
+        var getPropertyHandler = this.getProperty.createDelegate(this);
+
         this.cardContainer = new Ext.Panel({
             layout: 'card'
             ,activeItem: 0
@@ -406,6 +408,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     iconCls: 'icon-grid-view'
                     ,refOwner: this
                     ,store: this.store
+                    ,getProperty: getPropertyHandler
                     ,listeners: {
                         scope: this
                         ,selectionchange: this.onObjectsSelectionChange
@@ -416,6 +419,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     iconCls: 'icon-calendar-view'
                     ,refOwner: this
                     ,store: this.store
+                    ,getProperty: getPropertyHandler
                     ,listeners: {
                         scope: this
                         ,selectionchange: this.onObjectsSelectionChange
@@ -426,6 +430,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     iconCls: 'icon-chart'
                     ,refOwner: this
                     ,store: this.store
+                    ,getProperty: getPropertyHandler
                     ,listeners: {
                         scope: this
                         ,selectionchange: this.onObjectsSelectionChange
@@ -501,6 +506,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
         App.un('objectsaction', this.onObjectsAction, this);
         App.un('filesuploaded', this.onClipboardAction, this);
+    }
+
+    ,getProperty: function(propertyName){
+        if(propertyName == 'nid') propertyName = 'id';
+        if(this.folderProperties && this.folderProperties[propertyName]) {
+            return this.folderProperties[propertyName];
+        }
+        return null;
     }
 
     ,onSetToolbarItems: function(buttonsArray) {
@@ -596,14 +609,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             cfg = Ext.value(r.get('cfg'), {});
             r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
         }, this);
-
-        // pt = this.grid.getBottomToolbar();
-        // pagingVisible = (store.reader.jsonData.total > pt.pageSize);
-        // if(pagingVisible) pt.show();
-        // else pt.hide();
-        // this.grid.syncSize();
-        // this.syncSize();
-        // App.mainViewPort.selectGridObject(this.grid);
     }
 
     ,sameParams: function(params1, params2){
@@ -615,10 +620,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         path2 = Ext.value(params2.path, '');
         while( (path1.length > 0) && (path1[0] == '/') ) path1 = path1.substr(1);
         while( (path2.length > 0) && (path2[0] == '/') ) path2 = path2.substr(1);
-        if( (params1.path != params2.path) || !Ext.isDefined(params1.path) ) return false;
-        if( (!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants) ) && (params1.descendants != params2.descendants) ) return false;
-        if( (!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query) ) && (params1.query != params2.query) ) return false;
-        if( (!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters) ) && (params1.filters != params2.filters) ) return false;
+        if ((params1.path != params2.path) || !Ext.isDefined(params1.path) ) return false;
+        if ((Ext.num(params1.start, 0) != Ext.num(params2.start, 0))) return false;
+        if ((!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants) ) && (params1.descendants != params2.descendants) ) return false;
+        if ((!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query) ) && (params1.query != params2.query) ) return false;
+        if ((!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters) ) && (params1.filters != params2.filters) ) return false;
         return true;
     }
 
@@ -645,10 +651,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(params.path)) {
             params.path = '/';
         }
-
+        var newParams = Ext.apply({}, params, this.params);
         var sameParams = this.sameParams(
             this.params
-            ,Ext.apply({}, params, this.params)
+            ,newParams
         );
 
         if(sameParams) {
@@ -708,7 +714,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onDescendantsClick: function(b, e) {
-        this.changeSomeParams({'descendants': b.pressed});
+        this.changeSomeParams({
+            'descendants': b.pressed
+            ,start: 0
+        });
     }
 
     ,onObjectsSelectionChange: function(objectsDataArray){
@@ -764,7 +773,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(App.isFolder(objData.template_id)) {
             this.changeSomeParams({path: objData.nid});
         } else {
-            this.objectPanel.edit(objData.nid);
+            this.buttonCollection.get('preview').toggle(true);
+            this.objectPanel.edit( {id: objData.nid} );
         }
     }
 
@@ -942,6 +952,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
     ,onObjectChanged: function(objData){
         if(objData.pid == this.folderProperties.id) {
+            App.locateObjectId = objData.id;
             this.onReloadClick();
         }
     }

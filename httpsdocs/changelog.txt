@@ -1,3 +1,27 @@
+CaseBox 1.9.79 (2014-01-11)
+==============================
+New Features, Improvements
+--------------------------
+- Display an empty gray panel if no row is selected
+- Display an empty gray panel if no row is selected
+- focus the grid in right panel when creating/editing a node
+- Creating a task, grid doesn't focus it
+
+Fixed Bugs:
+----------
+- Issues with right margin in preview panel
+- issues with created tasks
+- focus preview/edit panel when opening a node for editing
+- Pagination not visible
+- Saving a node will show "Undefined" text in progress panel
+- Can't D&D files in grid
+- Crytical bug: Infinite loop, CPU at 100% = configuration problem
+- "Все дела" folder recursively shows only Case first letters
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
 CaseBox 1.9.78 (2014-01-10)
 ==============================
 New Features, Improvements

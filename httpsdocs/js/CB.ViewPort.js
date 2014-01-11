@@ -328,14 +328,18 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         }
     }
     ,selectGridObject: function(g){
-        if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) return;
-        idx = g.store.findExact('nid', App.locateObjectId);
+        if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) {
+            return;
+        }
+        var idx = g.store.findExact('nid', parseInt(App.locateObjectId, 10));
         if(idx >=0){
             sm = g.getSelectionModel();
-            if(sm.hasSelection()) {
+            if( (sm.getCount() > 1) ||
+                !sm.isSelected(idx)
+            ) {
                 sm.clearSelections();
+                sm.selectRow(idx);
             }
-            sm.selectRow(idx);
             delete App.locateObjectId;
         }
     }

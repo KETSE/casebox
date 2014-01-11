@@ -96,6 +96,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 }
             },{
                 header: L.Value
+                ,id: 'value'
                 ,width: 200
                 ,dataIndex: 'value'
                 ,editor: new Ext.form.TextField()
@@ -129,6 +130,24 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,editor: new Ext.form.TextField()
             }
         ];
+
+        var viewCfg = {
+            autoFill: false
+            ,getRowClass: function( record, index, rowParams, store ){
+                var rez = '';
+                if(record.get('type') == 'H'){
+                    rez = 'group-titles-colbg';
+                    var node = this.grid.helperTree.getNode(record.get('id'));
+                    if(node && !Ext.isEmpty(node.attributes.templateRecord.get('cfg').css)){
+                        rez += ' ' + node.attributes.templateRecord.get('cfg').css;
+                    }
+                }
+                return rez;
+            }
+        };
+        if(this.viewConfig) {
+            Ext.apply(viewCfg, this.viewConfig);
+        }
 
         Ext.apply(this, {
             store:  new Ext.data.JsonStore({
@@ -170,20 +189,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
             ,statefull: true
             ,stateId: Ext.value(this.stateId, 'veg')//vertical edit grid
-            ,viewConfig:{
-                autoFill: false
-                ,getRowClass: function( record, index, rowParams, store ){
-                    var rez = '';
-                    if(record.get('type') == 'H'){
-                        rez = 'group-titles-colbg';
-                        var node = this.grid.helperTree.getNode(record.get('id'));
-                        if(node && !Ext.isEmpty(node.attributes.templateRecord.get('cfg').css)){
-                            rez += ' ' + node.attributes.templateRecord.get('cfg').css;
-                        }
-                    }
-                    return rez;
-                }
-            }
+            ,viewConfig: viewCfg
             ,editors: {
                 iconcombo: function(){
                     return new Ext.form.ComboBox({
@@ -203,6 +209,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
             ,renderers: {
                 iconcombo: App.customRenderers.iconcombo
+                ,H: function(){ return '';}
             }
         });
         this.addEvents('change', 'fileupload', 'filedownload', 'filesdelete', 'loaded');
@@ -497,6 +504,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             this.getSelectionModel().select(lastCell[0], lastCell[1]);
         }
     }
+
     ,helperNodesFilter: function(node){
         var r = node.attributes.templateRecord;
         //skip check for root node
@@ -515,6 +523,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             (node.attributes.visible !== false)
         );
     }
+
     ,readValues: function(){
         if(!Ext.isDefined(this.data)) {
             this.data = {};
@@ -527,6 +536,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             w.data[this.root] = this.data;
         }
     }
+
     ,onBeforeEditProperty: function(e){//grid, record, field, value, row, column, cancel
 
         var node = this.helperTree.getNode(e.record.get('id'));
@@ -578,6 +588,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             col.setEditor(new Ext.grid.GridEditor(te));
         }
     }
+
     ,gainFocus: function(){
         this.focus(false);
         var sm = this.getSelectionModel();
@@ -588,6 +599,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
         }
     }
+
     ,onAfterEditProperty: function(e){
         if(e.field != 'value'){
             if(e.value != e.originalValue) {
@@ -602,6 +614,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.syncRecordsWithHelper();
         this.gainFocus();
     }
+
     ,getFieldValue: function(field_id, duplication_id){
         //TODO: review
         result = null;
@@ -628,6 +641,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.syncRecordsWithHelper();
         this.fireEvent('change');
     }
+
     ,onDeleteDuplicateFieldClick: function(b){
         var s = this.getSelectionModel().getSelectedCell();
         if(Ext.isEmpty(s)) {
