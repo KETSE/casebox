@@ -78,7 +78,7 @@ class Browser
     {
 
         $this->path = array();
-        $path = explode('/', $this->requestParams['path']);
+        $path = explode('/', @$this->requestParams['path']);
         while (!empty($path)) {
             $npid = null;
             $nodeId = null;

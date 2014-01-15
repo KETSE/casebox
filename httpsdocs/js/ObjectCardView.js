@@ -166,7 +166,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.reload.show();
                 this.actions.save.hide();
                 this.actions.cancel.hide();
-                // this.actions.openInTabsheet.hide();
+                this.actions.openInTabsheet.hide();
                 // this.actions.pin.hide();
                 //this.load(this.loadedId);
                 break;
@@ -249,10 +249,12 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.onViewChangeClick(0);
     }
     ,onOpenInTabsheetClick: function(b, e) {
-        App.mainViewPort.openObject(
-            this.getLayout().activeItem.data
-            ,e
-        );
+        var d = this.getLayout().activeItem.data;
+        if(CB.DB.templates.getType(d.template_id) == 'task') {
+            App.mainViewPort.onTaskEdit({data: d}, e);
+        } else {
+            App.mainViewPort.openObject(d, e);
+        }
         this.getLayout().activeItem.clear();
         this.onViewChangeClick(0);
     }

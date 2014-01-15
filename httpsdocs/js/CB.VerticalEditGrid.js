@@ -5,6 +5,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
     ,root: 'data'
     ,cls: 'spacy-rows'
     ,autoScroll: true
+
     ,initComponent: function() {
         var tbar = [
             {
@@ -250,6 +251,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
         }
     }
+
     ,getFilesPopupMenu: function(){
         if(!this.filesPopupMenu) {
             this.filesPopupMenu = new Ext.menu.Menu({
@@ -333,6 +335,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         );
         return this.filesPopupMenu;
     }
+
     ,onFileUploaded: function(data){
         if(!Ext.isDefined(this.popupForRow)) {
             return;
@@ -341,6 +344,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         delete this.popupForRow;
         this.fireEvent('change');
     }
+
     ,onPopupMenu: function(g, r, c, e){
         e.preventDefault();
         switch(g.getColumnModel().getDataIndex(c)){
@@ -352,6 +356,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 break;
         }
     }
+
     ,showFilesPopupMenu: function(grid, rowIndex, cellIndex, e){
         if(rowIndex <0) {
             return;
@@ -394,6 +399,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         if(fm.menu.items.getCount() < 1) fm.setVisible(false);
         pm.showAt(e.getXY());
     }
+
     ,showTitlePopupMenu: function(grid, rowIndex, cellIndex, e){
         r = grid.getStore().getAt(rowIndex);
         this.popupForRow = rowIndex;
@@ -414,12 +420,14 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.titlePopupMenu.items.itemAt(1).setDisabled(this.helperTree.isFirstDuplicate(r.get('id')));
         this.titlePopupMenu.showAt(e.getXY());
     }
+
     ,setPropertyFile: function(b){
         if(!Ext.isDefined(this.popupForRow)) return;
         this.store.getAt(this.popupForRow).set('files', b.data.id);
         delete this.popupForRow;
         this.fireEvent('change');  //this.refOwner.setDirty(true);
     }
+
     ,onFieldTitleDblClick: function(){
         var sm = this.getSelectionModel();
         var cm = this.getColumnModel();
@@ -436,12 +444,14 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             this.startEditing(s[0], s[1]);//begin field edit
         }
     }
+
     ,getBubbleTarget: function(){
         if(!this.parentWindow){
             this.parentWindow = this.findParentByType('CBGenericForm') || this.refOwner;
         }
         return this.parentWindow;
     }
+
     ,reload: function(){
         // initialization
         this.data = {};
@@ -476,7 +486,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     header: ''
                     ,dataIndex: 'id'
                     ,hideable: false
-                    ,width: 3
+                    ,width: 0
                     ,resizable: false
                     ,renderer: Ext.emptyFn
                 });
@@ -497,6 +507,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
         this.fireEvent('loaded', this);
     }
+
     ,syncRecordsWithHelper: function(){
         if(!this.store) {
             return;
