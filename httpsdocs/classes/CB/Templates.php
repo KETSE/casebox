@@ -477,4 +477,27 @@ class Templates
 
         return array('success' => true, 'data' => $d);
     }
+
+    /**
+     * get template ids by template type
+     * @param  varchar $type
+     * @return array
+     */
+    public static function getIdsByType($type)
+    {
+        $rez = array();
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM templates
+            WHERE `type` = $1',
+            $type
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $rez[] = $r['id'];
+        }
+        $res->close();
+
+        return $rez;
+    }
 }

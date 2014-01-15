@@ -299,6 +299,10 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             }
         }
         this.openDefaultExplorer();
+        if(App.mainTree && App.explorer) {
+            var rn = App.mainTree.getRootNode();
+            App.mainTree.selectPath('/'+ rn.attributes.nid);
+        }
         App.mainTabPanel.setActiveTab(0);
     }
     ,onTreeNodeClick: function(node, e){
@@ -362,7 +366,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                     ,closable: false
                 })
             );
-            App.explorer.setParams({});
+            // App.explorer.setParams({});
         }
     }
     ,createObject: function(data, e){
@@ -539,7 +543,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             action.result.folderProperties
         ) {
             activeTree.selectPath(
-                '/'+ action.result.folderProperties.path
+                action.result.folderProperties.path
                 ,'nid'
                 ,function(){
                     delete this.pathSelectionByViewport;

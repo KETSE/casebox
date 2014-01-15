@@ -27,6 +27,15 @@ class Task extends Object
         $dateStart = empty($dateStart) ? null : Util\dateISOToMysql($dateStart);
         $dateEnd = empty($dateEnd) ? null : Util\dateISOToMysql($dateEnd);
 
+        $status = 2; // active
+        if (!empty($dateEnd)) {
+            echo strtotime($dateEnd).' < '.strtotime('now');
+            if (strtotime($dateEnd) < strtotime('now')) {
+                $status = 1;
+            }
+
+        }
+
         @$params = array(
             $this->id
             ,$this->getFieldValue('_title', 0)['value'].''
@@ -37,12 +46,13 @@ class Task extends Object
             ,$this->getFieldValue('category', 0)['value']
             ,$this->getFieldValue('assigned', 0)['value'].''
             ,$this->getFieldValue('description', 0)['value']
+            ,$status
         );
 
         DB\dbQuery(
             'INSERT into tasks
-            (id, title, allday, date_start, date_end, importance, category_id, responsible_user_ids, description)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+            (id, title, allday, date_start, date_end, importance, category_id, responsible_user_ids, description, status)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
             $params
         ) or die(DB\dbQueryError());
 
@@ -146,6 +156,14 @@ class Task extends Object
         $dateStart = empty($dateStart) ? null : Util\dateISOToMysql($dateStart);
         $dateEnd = empty($dateEnd) ? null : Util\dateISOToMysql($dateEnd);
 
+        $status = 2; // active
+        if (!empty($dateEnd)) {
+            if (strtotime($dateEnd) < strtotime('now')) {
+                $status = 1;
+            }
+
+        }
+
         @$params = array(
             $this->id
             ,$this->getFieldValue('_title', 0)['value']
@@ -156,6 +174,7 @@ class Task extends Object
             ,$this->getFieldValue('category', 0)['value']
             ,$this->getFieldValue('assigned', 0)['value']
             ,$this->getFieldValue('description', 0)['value']
+            ,$status
         );
 
         DB\dbQuery(
@@ -169,6 +188,7 @@ class Task extends Object
                 ,category_id = $7
                 ,responsible_user_ids = $8
                 ,description = $9
+                ,status = $10
             WHERE id = $1',
             $params
         ) or die(DB\dbQueryError());

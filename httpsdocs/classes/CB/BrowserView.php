@@ -1,80 +1,63 @@
 <?php
 namespace CB;
 
-class BrowserView extends BrowserTree
+class BrowserView extends Browser
 {
     public function getChildren($p)
     {
         $p['showFoldersContent'] = true;
-        $rez = array(
-            'success' => true
-            ,'pathtext' => Path::getPathText($p)
-            ,'folderProperties' => Path::getPathProperties($p)
-            ,'data' => false
-        );
 
-        if (!empty($p['path']) && empty($p['query'])) {
-            $rez['data'] = $this->getCustomControllerResults($p['path']);
-        }
-
-        if ($rez['data'] === false) {
-            $rez = array_merge($rez, $this->getDefaultControllerResults($p));
-        }
-
-        $this->prepareResults($rez['data']);
-        $this->updateLabels($rez['data']);
-
-        return $rez;
+        return parent::getChildren($p);
     }
 
-    /**
-     * default method for displaying a node childs
-     * @param  array $p params
-     * @return array existing nodes
-     */
-    private function getDefaultControllerResults($p)
-    {
-        $pid = null;
-        if (!empty($p['path'])) {
-            $pid = Path::getId($p['path']);
-        } elseif (!empty($p['pid'])) {
-            $pid = is_numeric($p['pid']) ? $p['pid'] : Browser::getRootFolderId();
-        }
+    // /**
+    //  * default method for displaying a node childs
+    //  * @param  array $p params
+    //  * @return array existing nodes
+    //  */
+    // private function getDefaultControllerResults($p)
+    // {
+    //     $pid = null;
+    //     if (!empty($p['path'])) {
+    //         $pid = Path::getId($p['path']);
+    //     } elseif (!empty($p['pid'])) {
+    //         $pid = is_numeric($p['pid']) ? $p['pid'] : Browser::getRootFolderId();
+    //     }
 
-        if (empty($p['descendants'])) {
-            $p['pid'] = $pid;
-        } else {
-            $p['pids'] = $pid;
-        }
-        $s = new Search();
-        $rez = $s->query($p);
-        if (!empty($rez['data'])) {
-            for ($i=0; $i < sizeof($rez['data']); $i++) {
-                $d = &$rez['data'][$i];
-                $d['nid'] = $d['id'];
-                unset($d['id']);
+    //     if (empty($p['descendants'])) {
+    //         $p['pid'] = $pid;
+    //     } else {
+    //         $p['pids'] = $pid;
+    //     }
+    //     $s = new Search();
+    //     $rez = $s->query($p);
+    //     if (!empty($rez['data'])) {
+    //         for ($i=0; $i < sizeof($rez['data']); $i++) {
+    //             $d = &$rez['data'][$i];
+    //             $d['nid'] = $d['id'];
+    //             unset($d['id']);
 
-                $res = DB\dbQuery(
-                    'SELECT cfg
-                      , (SELECT 1
-                         FROM tree
-                         WHERE pid = $1
-                             AND dstatus = 0 LIMIT 1) has_childs
-                    FROM tree
-                    WHERE id = $1',
-                    $d['nid']
-                ) or die(DB\dbQueryError());
+    //             $res = DB\dbQuery(
+    //                 'SELECT cfg
+    //                   , (SELECT 1
+    //                      FROM tree
+    //                      WHERE pid = $1
+    //                          AND dstatus = 0 LIMIT 1) has_childs
+    //                 FROM tree
+    //                 WHERE id = $1',
+    //                 $d['nid']
+    //             ) or die(DB\dbQueryError());
 
-                if ($r = $res->fetch_assoc()) {
-                    $d['cfg'] = Util\toJSONArray($r['cfg']);
-                    $d['has_childs'] = !empty($r['has_childs']);
-                }
-                $res->close();
-            }
-        }
+    //             if ($r = $res->fetch_assoc()) {
+    //                 $d['cfg'] = Util\toJSONArray($r['cfg']);
+    //                 $d['has_childs'] = !empty($r['has_childs']);
+    //             }
+    //             $res->close();
+    //         }
+    //     }
 
-        return $rez;
-    }
+    //     return $rez;
+    // }
 
     public function getSummaryData($p)
     {

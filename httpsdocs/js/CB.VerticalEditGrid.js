@@ -101,6 +101,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,dataIndex: 'value'
                 ,editor: new Ext.form.TextField()
                 ,scope: this
+                ,resizable: true
                 ,renderer: function(v, meta, record, row_idx, col_idx, store){
                     var n = this.helperTree.getNode(record.get('id'));
                     // temporary workaround for not found nodes
@@ -128,6 +129,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,width: 200
                 ,dataIndex: 'info'
                 ,editor: new Ext.form.TextField()
+                ,hideable: false
             }
         ];
 
@@ -169,8 +171,13 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     }
                 }
             })
-            ,columns: Ext.apply([], this.gridColumns)
-            ,sm: new Ext.grid.CellSelectionModel()
+            ,columns: Ext.apply([], this.gridColumns) //leave default column definitions intact
+            ,sm: new Ext.grid.CellSelectionModel({
+                listeners: {
+                    scope: this
+                    ,beforecellselect: this.onBeforeCellSelect
+                }
+            })
             ,stripeRows: true
             ,header: false
             ,clicksToEdit: 1
@@ -216,6 +223,21 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.enableBubble(['change', 'fileupload', 'filedownload', 'filesdelete', 'loaded']);
         CB.VerticalEditGrid.superclass.initComponent.apply(this, arguments);
     }
+
+    ,onBeforeCellSelect: function(sm, ri, ci){
+        var cm = this.getColumnModel();
+        var cc = cm.getColumnCount();
+        if(ci < (cc - 1)) {
+            return true;
+        }
+        for (var i = cc - 2; i >= 0; i--) {
+            if(!cm.isHidden(i)) {
+                sm.select(ri, i);
+                return false;
+            }
+        }
+    }
+
     ,onCellClick: function(g, r, c, e){
         if(g.getColumnModel().getDataIndex(c) == 'files')
             return this.onPopupMenu(g, r, c, e);
@@ -406,7 +428,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
         if(Ext.isEmpty(s)) return;
         var fieldName = cm.getDataIndex(s[1]);
-
         if(fieldName == 'title'){
             c = gv.getCell(s[0], s[1]);
             c.className = c.className.replace( (c.className.indexOf(' x-grid3-cell-selected') >= 0 ? ' x-grid3-cell-selected' : 'x-grid3-cell-selected'), '');
@@ -450,6 +471,16 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 if(!colRequired) {
                     newConfig.pop();
                 }
+
+                newConfig.push({
+                    header: ''
+                    ,dataIndex: 'id'
+                    ,hideable: false
+                    ,width: 3
+                    ,resizable: false
+                    ,renderer: Ext.emptyFn
+                });
+
                 cm.setConfig(newConfig);
                 var el = this.getEl();
                 if(el && el.isVisible(true)) {
@@ -559,12 +590,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         if(pw && !Ext.isEmpty(pw.data)){
             e.objectId = pw.data.id;
             e.path = pw.data.path;
-        }
-
-        /* setting by default parent case id for case_objects fields,
-        this value will be overwriten if it is dependent on another field */
-        if(pw && (t == '_case_object') ) {
-            e.pidValue = pw.data.id;
         }
 
         /* get and set pidValue if dependent */

@@ -308,7 +308,12 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
     ,onCellClick: function(grid, rowIndex, colIndex, e){
         el = e.getTarget();
         if(el && el.classList.contains('icon-arrow3')) {
-            this.fireEvent('changeparams', {path: this.grid.store.getAt(rowIndex).get('nid')});
+            var path = String(this.refOwner.folderProperties.path);
+            if(path.substr(-1) != '/') {
+                path += '/';
+            }
+            path += this.grid.store.getAt(rowIndex).get('nid');
+            this.fireEvent('changeparams', {path: path});
         }
     }
 

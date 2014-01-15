@@ -166,6 +166,9 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
             }
         });
         CB.Calendar.superclass.initComponent.apply(this, arguments);
+
+        this.addEvents('objectopen');
+        this.enableBubble('objectopen');
     }
     ,updateRecordDatesRemotely: function(record){
         CB_Tasks.updateDates(
@@ -213,8 +216,29 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         // it altogether. Because of this, it's up to the application code to tie the pieces together.
         // Note that this function is called from various event handlers in the CalendarPanel above.
     ,showEditWindow : function(rec, animateTarget){
-            if(Ext.isEmpty(rec.data)) rec = new Ext.calendar.EventRecord(rec);
-            App.openObject( rec.data.template_id, rec.data.EventId );
+            if(Ext.isEmpty(rec.data)) {
+                rec = new Ext.calendar.EventRecord(rec);
+            }
+
+            var s = [
+                {
+                    nid: rec.data.EventId
+                    ,template_id: rec.data.template_id
+                    ,name: rec.data.Title
+                }
+            ];
+
+            this.fireEvent('selectionchange', s);
+
+            // this.fireEvent(
+            //     'objectopen'
+            //     ,{
+            //         nid: rec.data.EventId
+            //         ,template_id: rec.data.template_id
+            //     }
+            // );
+
+            //App.openObject( rec.data.template_id, rec.data.EventId );
     }
 
         // This is an application-specific way to communicate CalendarPanel event messages back to the user.
@@ -272,14 +296,20 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
                 scope: this
                 ,rangeselect: this.onRangeSelect
                 ,dayclick: this.onDayClick
+                ,selectionchange: this.onSelectionChange
             }
         });
+
         // this.calendar.eventStore.baseParams.facets = 'calendar';
         // this.calendar.eventStore.proxy.on('load', this.onProxyLoaded, this);
 
         Ext.apply(this, {
             title: L.Calendar
             ,items: this.calendar
+            ,listeners: {
+                scope: this
+                ,activate: this.onActivate
+            }
         });
         CB.browser.view.Calendar.superclass.initComponent.apply(this, arguments);
     }
@@ -322,6 +352,24 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
                 }
             }
         );
+    }
+
+    ,onActivate: function() {
+        this.fireEvent(
+            'settoolbaritems'
+            ,[
+                'apps'
+                ,'create'
+                ,'-'
+                ,'edit'
+                ,'-'
+                ,'delete'
+            ]
+        );
+    }
+
+    ,onSelectionChange: function(selection) {
+        this.fireEvent('selectionchange', selection);
     }
 });
 

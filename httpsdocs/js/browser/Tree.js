@@ -131,11 +131,17 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             loader: new Ext.tree.TreeLoader({
                 directFn: CB_BrowserTree.getChildren
                 ,paramsAsHash: true
+                ,baseParams: {
+                    from: 'tree'
+                }
                 ,listeners: {
                     scope: this
                     ,beforeload: function(treeloader, node, callback) {
-                        treeloader.baseParams.path = node.getPath('nid');
-                        treeloader.baseParams.showFoldersContent = this.showFoldersContent;
+                        var p = {
+                            path: node.getPath('nid')
+                            ,showFoldersContent: this.showFoldersContent
+                        };
+                        Ext.apply(treeloader.baseParams, p);
                     }
                 }
             })
@@ -266,18 +272,16 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         // node.attributes.nid = Ext.num(node.attributes.nid, null);
 
         node.attributes.system = Ext.num(node.attributes.system, 0);
-        node.attributes.type = Ext.num(node.attributes.type, 0);
-        node.attributes.subtype = Ext.num(node.attributes.subtype, 0);
         var text = Ext.util.Format.htmlEncode(node.attributes.name);
-        if((node.attributes.type === 0) && parent && (parent.getDepth() == 4 )){
-            node.setText(Ext.value(Date.monthNames[parseInt(text, 10) -1], text));
-        } else {
-            node.setText(text);
-        }
+        node.setText(text);
 
-        if(node.attributes.cfg && node.attributes.cfg.iconCls){
-            node.setIconCls( node.attributes.cfg.iconCls );
-        }else node.setIconCls( getItemIcon(node.attributes) );
+        if(Ext.isEmpty(node.attributes.iconCls)) {
+            if(node.attributes.cfg && node.attributes.cfg.iconCls){
+                node.setIconCls( node.attributes.cfg.iconCls );
+            } else {
+                node.setIconCls( getItemIcon(node.attributes) );
+            }
+        }
 
         node.attributes.editable = false;
         node.draggable = (node.attributes.system === 0);

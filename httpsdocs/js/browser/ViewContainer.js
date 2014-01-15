@@ -206,7 +206,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             })
         ]);
 
-
         this.viewToolbar = new Ext.Toolbar({
             region: 'center'
             ,defaults: {
@@ -340,7 +339,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
         });
 
-
         this.store = new Ext.data.DirectStore({
             autoLoad: false
             ,autoDestroy: true
@@ -473,6 +471,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 scope: this
                 ,changeparams: this.changeSomeParams
                 ,settoolbaritems: this.onSetToolbarItems
+                ,objectopen: this.onObjectsOpenEvent
             }
         });
 
@@ -521,16 +520,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         var b;
         while(this.viewToolbar.items.getCount() > 0) {
             b = this.viewToolbar.items.itemAt(0);
-            if(b.id !== 'apps') {
-                b.hide();
-            }
+            b.hide();
             this.viewToolbar.remove(b, b.isXType('tbseparator'));
+
         }
-        this.viewToolbar.doLayout(false);
+
         if(buttonsArray.indexOf('apps') < 0) {
             buttonsArray.unshift('apps');
         }
-
 
         for (var i = 0; i < buttonsArray.length; i++) {
             if(buttonsArray[i] == '-') {
@@ -539,11 +536,15 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 b = this.buttonCollection.get(buttonsArray[i]);
                 if(b) {
                     this.viewToolbar.add(b);
+                    if(!b.disabled) {
+                        b.show();
+                    }
                 }
             }
         }
         this.viewToolbar.doLayout();
     }
+
     ,onCardItemChangeClick: function(b, e) {
         this.cardContainer.getLayout().setActiveItem(b.viewIndex);
         this.onReloadClick();
@@ -594,7 +595,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if((b.length > 0) && Ext.isEmpty(b[b.length-1])) {
             b.pop();
         }
-        b.unshift(L.Home);
         this.breadcrumb.setValue(b);
         /* end of updating breadcrumb */
         this.fireEvent('viewloaded', proxy, o, options);
@@ -609,6 +609,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             cfg = Ext.value(r.get('cfg'), {});
             r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
         }, this);
+        this.updatePreview();
     }
 
     ,sameParams: function(params1, params2){
@@ -708,8 +709,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onBreadcrumbItemClick: function(el, idx, ev) {
         var v = this.folderProperties.path.split('/');
-        v = v.slice(0, idx+1);
+        v = v.slice(0, idx+2);
         v = v.join('/');
+        if(v.substr(0, 1) !== '/') {
+            v = '/' + v;
+        }
         this.changeSomeParams({'path': v});
     }
 
@@ -736,9 +740,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             this.actions['delete'].setDisabled(true);
             this.actions['delete'].hide();
             // this.actions.rename.setDisabled(true);
-
-            /* update preview */
-            this.objectPanel.load(null);
         } else {
 
             this.actions.cut.setDisabled(false);
@@ -762,14 +763,27 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
             this.actions['delete'].setDisabled(false);
             this.actions['delete'].show();
-
-            /* update preview */
-            this.objectPanel.load(objectsDataArray[0].nid);
-
         }
+
+        this.updatePreview();
     }
 
-    ,onObjectsOpenEvent: function(objData) {
+    ,updatePreview: function() {
+        var s = this.cardContainer.getLayout().activeItem.currentSelection;
+        var id = Ext.isEmpty(s)
+                ? this.folderProperties.id
+                : s[0].nid;
+
+        clog('loading', id);
+        this.objectPanel.load(id);
+    }
+
+    ,onObjectsOpenEvent: function(objData, e) {
+        if(e && e.stopPropagation) {
+            e.stopPropagation();
+            e.stopEvent();
+        }
+
         if(App.isFolder(objData.template_id)) {
             this.changeSomeParams({path: objData.nid});
         } else {

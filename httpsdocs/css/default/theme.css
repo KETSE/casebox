@@ -49,3 +49,6 @@
 .x-menu-item .ib-event-new{background-image: url(s/calendar-blue.png); background-position: 0 50%; background-repeat: no-repeat}
 .x-menu-item .ib-open{background-image: url(s/folder-open.png); background-position: 0 50%; background-repeat: no-repeat}
 .x-menu-item .ib-task-new{background-image: url(s/task.png); background-position: 0 50%; background-repeat: no-repeat}
+
+.i-flag, .x-tree-node .i-flag{background-image: url(s/flag.png); background-position: 0 50%; background-repeat: no-repeat}
+.is-flag, .x-tree-node .is-flag{background-image: url(s/flag-small.png); background-position: 0 50%; background-repeat: no-repeat}

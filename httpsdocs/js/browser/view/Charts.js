@@ -245,6 +245,9 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
         });
         CB.browser.view.Charts.superclass.initComponent.apply(this, arguments);
         this.currentButton = this.refOwner.buttonCollection.get('barchart');
+
+        this.selectedFacets = [];
+
         this.store.proxy.on('load', this.onProxyLoad, this);
     }
 
@@ -284,7 +287,6 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
 
     ,loadAvailableFacets: function() {
         var data = [];
-
         Ext.iterate(
             this.data
             ,function(key, val, o) {
@@ -318,7 +320,9 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
             ,this
         );
         this.chartData = data;
-        this.chartDataStore.loadData(data[this.selectedFacets[0]]);
+        if(data[this.selectedFacets[0]]) {
+            this.chartDataStore.loadData(data[this.selectedFacets[0]]);
+        }
     }
 
     ,onProxyLoad: function(proxy, o, options) {

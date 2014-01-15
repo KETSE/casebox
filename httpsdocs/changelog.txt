@@ -1,8 +1,26 @@
+CaseBox 1.9.83 (2014-01-15)
+==============================
+New Features, Improvements
+--------------------------
+- Preview/Edit panels behavior
+- Clicking a task in Calendar should preview it on the right panel
+- transferred navigation to plugin system
+- onCreate, default Start date of task = now
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
+Fixed Bugs:
+----------
+- After changing view from Calendar to Explorer, toolbar buttons are hidden
+- some view buttons do not appear on view change
+- Can't resize the 2nd column in Profile grid
+
 CaseBox 1.9.79 (2014-01-11)
 ==============================
 New Features, Improvements
 --------------------------
-- Display an empty gray panel if no row is selected
 - Display an empty gray panel if no row is selected
 - focus the grid in right panel when creating/editing a node
 - Creating a task, grid doesn't focus it
@@ -15,7 +33,7 @@ Fixed Bugs:
 - Pagination not visible
 - Saving a node will show "Undefined" text in progress panel
 - Can't D&D files in grid
-- Crytical bug: Infinite loop, CPU at 100% = configuration problem
+- Critical bug: Infinite loop, CPU at 100% = configuration problem
 - "Все дела" folder recursively shows only Case first letters
 
 Notes:
@@ -36,7 +54,7 @@ Fixed Bugs:
 - after a node is created, the grid doesn't refresh, and the node doesn't appear in preview
 - PopupMenu: click Open, JS error.
 - Switching from Chart view to GridView will show Download&Delete buttons
-- Resize Tree (bigger/smaller panel width) and the buttons in toolbar are not right alligned
+- Resize Tree (bigger/smaller panel width) and the buttons in toolbar are not right aligned
 - Clicking User photo / Account gives 'Access is denied' error
 - Charts doesn't work for _objects facets
 
@@ -318,9 +336,9 @@ CaseBox 1.9.57 (2013-11-17)
 ==============================
 - created script for creating/sync old tags table into tree
     and transfer all template fields config to _objects config refering to created tags in tree.
-    All complex scripts from sys/utils will be transfered into classes under Util namespace.
+    All complex scripts from sys/utils will be transferred into classes under Util namespace.
     For now only Tags transfering uses script sys/utils/tags_tree_sync.php that uses class Util\Tags\TreeSync.
-    Other cripts are transfered to destination folders where will be refactored to use described scheme.
+    Other cripts are transferred to destination folders where will be refactored to use described scheme.
 - added CB\Browser\CreateMenu class that will be completed for simple management of create menu displayed on client side.
 - added User.exists method for checking if a given user id or name exists
 - added Security.copyNodeAcl for copying security rules between two nodes.

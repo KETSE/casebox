@@ -91,7 +91,7 @@ foreach ($taskTemplates as $templateId) {
             '_title' => 'date_start'
             ,'type' => 'date'
             ,'order' => 3
-            ,'cfg' => '{"dependency": {"pidValues": [1]}}'
+            ,'cfg' => '{"dependency": {"pidValues": [1]}, "value": "now"}'
         )
     );
 
@@ -122,12 +122,12 @@ foreach ($taskTemplates as $templateId) {
         'id' => null
         ,'pid' => $pid
         ,'template_id' => $fieldsTemplateId
-        ,'name' => 'datetim_start'
+        ,'name' => 'datetime_start'
         ,'data' => array(
-            '_title' => 'datetim_start'
+            '_title' => 'datetime_start'
             ,'type' => 'datetime'
             ,'order' => 5
-            ,'cfg' => '{"dependency": {"pidValues": [-1]}}'
+            ,'cfg' => '{"dependency": {"pidValues": [-1]}, "value": "now"}'
         )
     );
 

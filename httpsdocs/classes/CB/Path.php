@@ -3,7 +3,7 @@ namespace CB;
 
 class Path
 {
-    /* get last element di from a path or return root folder id if no int element is found */
+    /* get last element id from a path or return root folder id if no int element is found */
     public static function getId($path = '')
     {
         $path = trim($path);

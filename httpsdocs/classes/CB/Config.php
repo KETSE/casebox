@@ -295,4 +295,17 @@ class Config extends Singleton
 
         return $rez;
     }
+
+    /*
+    * @param  varchar $optionName name of the option to get
+    * @return variant | null
+    */
+    public static function get($optionName, $defaultValue = null)
+    {
+        if (!empty(static::$config[$optionName])) {
+            return static::$config[$optionName];
+        }
+
+        return $defaultValue;
+    }
 }

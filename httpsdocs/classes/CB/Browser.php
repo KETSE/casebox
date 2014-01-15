@@ -3,41 +3,202 @@ namespace CB;
 
 class Browser
 {
-    /**
-     * function used to check if node has a controller specified in its "cfg" field
-     * @param  varchar $path ids path (1/2/3)
-     * @return variant | false  if node have custom controller then results from
-     *                           the controller are returned, otherwise false
-     */
-    public function getCustomControllerResults($path)
+
+    protected $path = [];
+    protected $treeNodeConfigs = array();
+    protected $treeNodeGUIDConfigs = array();
+    protected $treeNodeClasses = array();
+
+    public function getChildren($p)
     {
-        $rez = false;
-        $ids = explode('/', $path);
-        $id = array_pop($ids);
-        while ((!is_numeric($id) || ($id < 1)) && !empty($ids)) {
-            $id = array_pop($ids);
+        $rez = array();
+
+        /* prepare params */
+        $path = empty($p['path']) ? '/' : $p['path'];
+        $this->showFoldersContent = isset($p['showFoldersContent'])
+            ? $p['showFoldersContent']
+            : false;
+
+        $this->requestParams = $p;
+        /* end of prepare params */
+
+        /* we should:
+            1. load available plugins for the tree with their configs
+            2. fire the on treeInitialize event
+            3. call each plugin with received params
+            4. join and sort received data
+        */
+
+        $this->treeNodeConfigs = Config::get('treeNodes', array('Dbnode'));
+        $params = array(
+            'params' => &$p,
+            'plugins' => &$this->treeNodeConfigs
+        );
+
+        fireEvent('onTreeInitialize', $params);
+
+        $this->initNodeClasses();
+        $this->createNodesPath();
+
+        $this->collectAllChildren();
+        $this->prepareResult();
+
+        $rez = array(
+            'success' => true
+            ,'pathtext' => $this->getPathText($p)
+            ,'folderProperties' => $this->getPathProperties($p)
+            ,'data' => $this->data
+            ,'facets' => $this->facets
+        );
+
+        return $rez;
+
+    }
+
+    public function initNodeClasses()
+    {
+        $this->treeNodeClasses = array();
+
+        foreach ($this->treeNodeConfigs as $p => $cfg) {
+            $class = empty($cfg['class']) ? '\\CB\\TreeNode\\'.$p : $cfg['class'];
+            $cfg['guid'] = $this->getGUID($p);
+            $cfg['class'] = $class;
+
+            try {
+                $class = new $class($cfg);
+                $this->treeNodeGUIDConfigs[$cfg['guid']] = $cfg;
+                $this->treeNodeClasses[$cfg['guid']] = $class;
+            } catch (\Exception $e) {
+                debug('error creating class '.$class);
+            }
+        }
+    }
+
+    protected function createNodesPath()
+    {
+
+        $this->path = array();
+        $path = explode('/', $this->requestParams['path']);
+        while (!empty($path)) {
+            $npid = null;
+            $nodeId = null;
+
+            $el = array_shift($path);
+            if (empty($el)) {
+                continue;
+            }
+
+            $el = explode('-', $el);
+            if (sizeof($el) > 1) {
+                $npid = $el[0];
+                $nodeId = $el[1];
+            } else {
+                $npid = $this->getGUID('Dbnode');
+                $nodeId = $el[0];
+            }
+
+            $cfg = $this->treeNodeGUIDConfigs[$npid];
+
+            $class = new $cfg['class']($cfg, $nodeId);
+            //set parent node
+            if (!empty($this->path)) {
+                $class->parent = $this->path[sizeof($this->path) - 1];
+            }
+
+            array_push(
+                $this->path,
+                $class
+            );
+        };
+    }
+
+    protected function getPathText()
+    {
+        $rez = array();
+        if (empty($this->path)) {
+            return '/';
         }
 
-        if (empty($id) || !is_numeric($id)) {
-            return false;
+        foreach ($this->path as $n) {
+            $rez[] = $n->getName();
         }
 
+        return implode('/', $rez);
+    }
+
+    protected function getPathProperties()
+    {
+        $rez = array();
+        if (empty($this->path)) {
+            $rez['path'] = '/';
+        } else {
+            $rez = $this->path[sizeof($this->path) - 1]->getData();
+
+            $idsPath = array();
+            foreach ($this->path as $n) {
+                $idsPath[] = $n->getId();
+            }
+
+            $rez['path'] = '/'.implode('/', $idsPath);
+        }
+
+        return $rez;
+    }
+
+    protected function collectAllChildren()
+    {
+        $this->data = array();
+        $this->facets = array();
+        foreach ($this->treeNodeClasses as $class) {
+            $rez = $class->getChildren($this->path, $this->requestParams);
+            if (!empty($rez['data'])) {
+                foreach ($rez['data'] as $node) {
+                    $node['nid'] = $node['id'];
+                    unset($node['id']);
+                    $this->data[] = $node;
+                }
+            }
+            if (!empty($rez['facets'])) {
+                $this->facets = $rez['facets'];
+            }
+        }
+    }
+
+    protected function sortResult()
+    {
+        //sorting nodes;
+    }
+
+    protected function prepareResult()
+    {
+        $this->sortResult();
+        // foreach ($this->data as &$node) {
+
+        // }
+    }
+
+    protected function getGUID($name)
+    {
+        $rez = null;
         $res = DB\dbQuery(
-            'SELECT cfg FROM tree WHERE id = $1',
-            $id
+            'SELECT id FROM `casebox`.guids WHERE name = $1',
+            $name
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
-            if (!empty($r['cfg']['controller'])) {
-                $userMenu = new UserMenu();
-                $rez = $userMenu->{$r['cfg']['controller']}($path);
-                unset($userMenu);
-            }
+            $rez = $r['id'];
+        } else {
+            DB\dbQuery(
+                'INSERT INTO `casebox`.guids
+                (`name`)
+                VALUES ($1)',
+                $name
+            ) or die(DB\dbQueryError());
+            $rez = DB\dbLastInsertId();
         }
-         $res->close();
+        $res->close();
 
-         return $rez;
+        return $rez;
     }
 
     /**

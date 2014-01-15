@@ -146,6 +146,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             return;
         }
 
+        this.getLayout().activeItem.clear();
         this.getLayout().setActiveItem(idx);
         if(!mb.pressed) {
             mb.toggle();
@@ -168,7 +169,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 // this.actions.openInTabsheet.hide();
                 // this.actions.pin.hide();
                 //this.load(this.loadedId);
-            break;
+                break;
             case 'CBEditObject':
                 tb.setVisible(true);
                 this.actions.edit.hide();
@@ -177,7 +178,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.cancel.show();
                 this.actions.openInTabsheet.show();
                 // this.actions.pin.hide();
-            break;
+                break;
             case 'CBObjectProperties':
                 tb.setVisible(true);
                 this.actions.edit.show();
@@ -186,7 +187,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.cancel.hide();
                 this.actions.openInTabsheet.hide();
                 // this.actions.pin.hide();
-            break;
+                break;
             default:
                 tb.setVisible(false);
 
@@ -237,7 +238,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             function(component){
                 component.clear();
                 this.onViewChangeClick(0);
-                this.getLayout().activeItem.loadPreview(this.loadedId);
+                this.requestedLoadId = this.loadedId;
+                this.getLayout().activeItem.reload();
             }
             ,this
         );

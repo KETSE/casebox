@@ -26,7 +26,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             ,refOwner: this
             ,includeTopFields: true
             ,viewConfig: {
-                forceFit: true
+                // forceFit: true
                 // ,autoFill: true
             }
         });
@@ -178,6 +178,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         this.doLayout();
         this.syncSize();
     }
+
     ,onObjectsStoreChange: function(store, records, options){
         Ext.each(
             records
