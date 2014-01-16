@@ -476,17 +476,16 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             idx = cm.findColumnIndex('info');
             var colExists = (idx >=0 );
             var colRequired = (tc.infoColumn === true);
+            var newConfig = Ext.apply([], this.gridColumns);
             if(colExists !== colRequired) {
-                var newConfig = Ext.apply([], this.gridColumns);
                 if(!colRequired) {
                     newConfig.pop();
                 }
-
                 newConfig.push({
                     header: ''
                     ,dataIndex: 'id'
                     ,hideable: false
-                    ,width: 0
+                    ,width: 3
                     ,resizable: false
                     ,renderer: Ext.emptyFn
                 });

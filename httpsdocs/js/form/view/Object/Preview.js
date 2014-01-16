@@ -50,9 +50,11 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(this.newId) || isNaN(this.newId) || !this.getEl().isVisible(true)) {
             return this.clear();
         }
-
+        this.doLoad(this.newId, this.newVersionId);
+    }
+    ,doLoad: function(id, vId) {
         this.load({
-            url: '/preview/'+this.newId+'_'+this.newVersionId+'.html'
+            url: '/preview/'+ id +'_' + vId + '.html'
             ,callback: this.processLoad
             ,scope: this // optional scope for the callback
             ,discardUrl: false

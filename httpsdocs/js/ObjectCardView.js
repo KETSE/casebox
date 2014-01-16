@@ -237,15 +237,15 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.getLayout().activeItem.save(
             function(component){
                 component.clear();
-                this.onViewChangeClick(0);
                 this.requestedLoadId = this.loadedId;
-                this.getLayout().activeItem.reload();
+                this.items.itemAt(0).doLoad(this.loadedId);
+                this.onViewChangeClick(0, false);
+                // this.getLayout().activeItem.reload();
             }
             ,this
         );
     }
     ,onCancelClick: function() {
-        this.getLayout().activeItem.clear();
         this.onViewChangeClick(0);
     }
     ,onOpenInTabsheetClick: function(b, e) {

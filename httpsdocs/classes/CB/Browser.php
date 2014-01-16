@@ -29,7 +29,7 @@ class Browser
             4. join and sort received data
         */
 
-        $this->treeNodeConfigs = Config::get('treeNodes', array('Dbnode'));
+        $this->treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
         $params = array(
             'params' => &$p,
             'plugins' => &$this->treeNodeConfigs
@@ -48,8 +48,15 @@ class Browser
             ,'pathtext' => $this->getPathText($p)
             ,'folderProperties' => $this->getPathProperties($p)
             ,'data' => $this->data
-            ,'facets' => $this->facets
+            ,'total' => $this->total
         );
+
+        if (!empty($this->facets)) {
+            $rez['facets'] = &$this->facets;
+        }
+        if (!empty($this->search)) {
+            $rez['search'] = &$this->search;
+        }
 
         return $rez;
 
@@ -58,7 +65,6 @@ class Browser
     public function initNodeClasses()
     {
         $this->treeNodeClasses = array();
-
         foreach ($this->treeNodeConfigs as $p => $cfg) {
             $class = empty($cfg['class']) ? '\\CB\\TreeNode\\'.$p : $cfg['class'];
             $cfg['guid'] = $this->getGUID($p);
@@ -149,6 +155,8 @@ class Browser
     {
         $this->data = array();
         $this->facets = array();
+        $this->total = 0;
+        $this->search = array();
         foreach ($this->treeNodeClasses as $class) {
             $rez = $class->getChildren($this->path, $this->requestParams);
             if (!empty($rez['data'])) {
@@ -160,6 +168,16 @@ class Browser
             }
             if (!empty($rez['facets'])) {
                 $this->facets = $rez['facets'];
+            }
+
+            if (isset($rez['total'])) {
+                $this->total += $rez['total'];
+            } elseif (!empty($rez['data'])) {
+                $this->total += sizeof($rez['data']);
+            }
+
+            if (isset($rez['search'])) {
+                $this->search[] = $rez['search'];
             }
         }
     }

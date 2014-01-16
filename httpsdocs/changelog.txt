@@ -1,3 +1,16 @@
+CaseBox 1.9.85 (2014-01-16)
+==============================
+New Features, Improvements
+--------------------------
+- added new tree plugins
+
+Fixed Bugs:
+----------
+- Can't resize the 2nd column in Profile grid
+- grid 2nd column not resizable in EditMode
+- Improve UI experience when creating nodes (preview of other nodes showing)
+- incorrect default plugin definition for cores that don't have defined treePlugins
+
 CaseBox 1.9.84 (2014-01-15)
 ==============================
 New Features, Improvements

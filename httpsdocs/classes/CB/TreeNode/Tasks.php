@@ -6,36 +6,60 @@ use CB\Templates;
 
 class Tasks extends Base
 {
+    protected function acceptedPath()
+    {
+        $p = &$this->path;
+        if (empty($p)) {
+            return false;
+        }
+
+        if (($this->lastNode->id <> $this->rootId) && !($this->lastNode instanceof Tasks)) {
+            return false;
+        }
+
+        return true;
+
+    }
+
+    protected function createDefaultFilter()
+    {
+        $this->fq = array();
+
+        //select only task templates
+        $taskTemplates = Templates::getIdsByType('task');
+        if (!empty($taskTemplates)) {
+            $this->fq[] = 'template_id:('.implode(' OR ', $taskTemplates).')';
+        }
+    }
+
     public function getChildren(&$pathArray, $requestParams)
     {
-        $this->depth = sizeof($pathArray);
-        //show only under root node
-        if (empty($pathArray)) {
-            return;
-        }
-
-        $node = $pathArray[sizeof($pathArray) - 1];
-
-        if (($this->depth > 1) && !($node instanceof Tasks)) {
-            return;
-        }
 
         $this->path = $pathArray;
-
+        $this->lastNode = $pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
+        $this->rootId = \CB\Browser::getRootFolderId();
 
-        switch ($this->depth) {
-            case 1:
-                $rez = $this->getRootNodes();
-                break;
-            case 2:
-                $rez = $this->getDepthChildren2();
-                break;
-            case 3:
-                $rez = $this->getDepthChildren3();
-                break;
-            default:
-                $rez = $this->getChildrenTasks();
+        if (!$this->acceptedPath()) {
+            return;
+        }
+
+        $this->createDefaultFilter();
+
+        if ($this->lastNode instanceof Dbnode) {
+            $rez = $this->getRootNodes();
+        } else {
+            switch ($this->lastNode->id) {
+                case 1:
+                    $rez = $this->getDepthChildren2();
+                    break;
+                case 2:
+                case 3:
+                    $rez = $this->getDepthChildren3();
+                    break;
+                default:
+                    $rez = $this->getChildrenTasks();
+            }
         }
 
         return $rez;
@@ -63,10 +87,24 @@ class Tasks extends Base
 
     protected function getRootNodes()
     {
+        $fq = $this->fq;
+        $fq[] = 'status:(1 OR 2)';
+        $s = new \CB\Search();
+        $rez = $s->query(
+            array(
+                'rows' => 0
+                ,'fq' => $fq
+            )
+        );
+        $count = '';
+        if (!empty($rez['total'])) {
+            $count = ' ('.$rez['total'].')';
+        }
+
         return array(
             'data' => array(
                 array(
-                    'name' => L\Tasks
+                    'name' => L\Tasks.$count
                     ,'id' => $this->getId(1)
                     ,'iconCls' => 'i-flag'
                     ,'has_childs' => true
@@ -77,46 +115,101 @@ class Tasks extends Base
 
     protected function getDepthChildren2()
     {
-        return array(
-            'data' => array(
+        $fq = $this->fq;
+        $fq[] = 'status:(1 OR 2)';
+
+        if (@$this->requestParams['from'] == 'tree') {
+            $s = new \CB\Search();
+            $sr = $s->query(
                 array(
-                    'name' => L\AssignedToMe
+                    'rows' => 0
+                    ,'fq' => $fq
+                    ,'facet' => true
+                    ,'facet.field' => array(
+                        '{!ex=user_ids key=1assigned}user_ids'
+                        ,'{!ex=cid key=2cid}cid'
+                    )
+                )
+            );
+            $rez = array('data' => array());
+            if (!empty($sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']})) {
+                $rez['data'][] = array(
+                    'name' => L\AssignedToMe.' ('.$sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']}.')'
                     ,'id' => $this->getId(2)
                     ,'iconCls' => 'is-flag'
                     ,'has_childs' => true
-                )
-                ,array(
-                    'name' => L\Created
+                );
+            }
+            if (!empty($sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']})) {
+                $rez['data'][] = array(
+                    'name' => L\Created.' ('.$sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']}.')'
                     ,'id' => $this->getId(3)
                     ,'iconCls' => 'is-flag'
                     ,'has_childs' => true
-                )
-            )
-        );
+                );
+            }
+
+            return $rez;
+        }
+
+        // for other views
+        $s = new \CB\Search();
+        $rez = $s->query(array('fq' => $fq));
+
+        return $rez;
     }
 
     protected function getDepthChildren3()
     {
-        $rez = array(
-            'data' => array(
+        $fq = $this->fq;
+
+        if ($this->lastNode->id == 2) {
+            $fq[] = 'user_ids:'.$_SESSION['user']['id'];
+        } else {
+            $fq[] = 'cid:'.$_SESSION['user']['id'];
+        }
+
+        $fq[] = 'status:(1 OR 2)';
+
+        $rez = array();
+
+        if (@$this->requestParams['from'] == 'tree') {
+            $s = new \CB\Search();
+            $sr = $s->query(
                 array(
-                    'name' => lcfirst(L\Overdue)
+                    'rows' => 0
+                    ,'fq' => $fq
+                    ,'facet' => true
+                    ,'facet.field' => array(
+                        '{!ex=status key=0status}status'
+                    )
+                )
+            );
+            $rez = array('data' => array());
+            if (!empty($sr['facets']->facet_fields->{'0status'}->{'1'})) {
+                $rez['data'][] = array(
+                    'name' => lcfirst(L\Overdue).' ('.$sr['facets']->facet_fields->{'0status'}->{'1'}.')'
                     ,'id' => $this->getId(4)
                     ,'iconCls' => 'is-flag'
-                )
-                ,array(
-                    'name' => lcfirst(L\Ongoing)
+                );
+            }
+            if (!empty($sr['facets']->facet_fields->{'0status'}->{'2'})) {
+                $rez['data'][] = array(
+                    'name' => lcfirst(L\Ongoing).' ('.$sr['facets']->facet_fields->{'0status'}->{'2'}.')'
                     ,'id' => $this->getId(5)
                     ,'iconCls' => 'is-flag'
-                )
-                ,array(
-                    'name' => lcfirst(L\Closed)
+                );
+            }
+            if (!empty($sr['facets']->facet_fields->{'0status'}->{'3'})) {
+                $rez['data'][] = array(
+                    'name' => lcfirst(L\Closed).' ('.$sr['facets']->facet_fields->{'0status'}->{'3'}.')'
                     ,'id' => $this->getId(6)
                     ,'iconCls' => 'is-flag'
-                )
-            )
-        );
-        if (@$this->requestParams['from'] != 'tree') {
+                );
+            }
+        } else {
+            $s = new \CB\Search();
+            $rez = $s->query(array('fq' => $fq));
             foreach ($rez['data'] as &$n) {
                 $n['has_childs'] = true;
             }
@@ -127,22 +220,17 @@ class Tasks extends Base
 
     protected function getChildrenTasks()
     {
-        $fq = array();
-        //select only task templates
-        $taskTemplates = Templates::getIdsByType('task');
-        if (!empty($taskTemplates)) {
-            $fq[] = 'template_id:('.implode(' OR ', $taskTemplates).')';
-        }
+        $fq = $this->fq;
 
-        $node = $this->path[sizeof($this->path) - 1];
-        $parent = $node->parent;
+        $parent = $this->lastNode->parent;
+
         if ($parent->id == 2) {
             $fq[] = 'user_ids:'.$_SESSION['user']['id'];
         } else {
             $fq[] = 'cid:'.$_SESSION['user']['id'];
         }
 
-        switch ($node->id) {
+        switch ($this->lastNode->id) {
             case 4:
                 $fq[] = 'status:1';
                 break;
