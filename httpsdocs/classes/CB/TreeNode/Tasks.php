@@ -13,7 +13,12 @@ class Tasks extends Base
             return false;
         }
 
-        if (($this->lastNode->id <> $this->rootId) && !($this->lastNode instanceof Tasks)) {
+        // echo '!'.get_class($this->lastNode);
+        if ($this->lastNode instanceof Dbnode) {
+            if ($this->lastNode->id <> $this->rootId) {
+                return false;
+            }
+        } elseif (get_class($this->lastNode) != get_class($this)) {
             return false;
         }
 
@@ -30,6 +35,8 @@ class Tasks extends Base
         if (!empty($taskTemplates)) {
             $this->fq[] = 'template_id:('.implode(' OR ', $taskTemplates).')';
         }
+        $this->fq[] = '(user_ids:'.$_SESSION['user']['id'].' OR cid:'.$_SESSION['user']['id'].')';
+
     }
 
     public function getChildren(&$pathArray, $requestParams)
@@ -45,8 +52,12 @@ class Tasks extends Base
         }
 
         $this->createDefaultFilter();
+        // echo "in ".get_class($this);
+        // var_dump($this->fq);
 
         if ($this->lastNode instanceof Dbnode) {
+            // var_dump($this->lastNode);
+            // var_dump($this->path);
             $rez = $this->getRootNodes();
         } else {
             switch ($this->lastNode->id) {
@@ -168,8 +179,6 @@ class Tasks extends Base
         } else {
             $fq[] = 'cid:'.$_SESSION['user']['id'];
         }
-
-        $fq[] = 'status:(1 OR 2)';
 
         $rez = array();
 

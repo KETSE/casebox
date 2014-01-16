@@ -5,8 +5,7 @@ class TasksForCase extends Tasks
 {
     protected function acceptedPath()
     {
-        $p = &$this->path;
-        if (empty($p)) {
+        if (empty($this->path)) {
             return false;
         }
 
@@ -14,7 +13,7 @@ class TasksForCase extends Tasks
             if (\CB\Objects::getType($this->lastNode->id) !== 'case') {
                 return false;
             }
-        } elseif (!($this->lastNode instanceof Dbnode)) {
+        } elseif (get_class($this->lastNode) != get_class($this)) {
             return false;
         }
 
@@ -25,9 +24,8 @@ class TasksForCase extends Tasks
     protected function createDefaultFilter()
     {
         parent::createDefaultFilter();
-
         //add case_id filter
-        $node = &$this->lastNode;
+        $node = $this->lastNode;
         while (!($node instanceof Dbnode) && !empty($node->parent)) {
             $node = $node->parent;
         }

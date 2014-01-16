@@ -1,3 +1,9 @@
+CaseBox 1.9.86 (2014-01-17)
+==============================
+New Features, Improvements
+--------------------------
+- some changes to task plugins
+
 CaseBox 1.9.85 (2014-01-16)
 ==============================
 New Features, Improvements
