@@ -1,3 +1,9 @@
+CaseBox 1.9.88 (2014-01-18)
+==============================
+New Features, Improvements
+--------------------------
+- browser script update for correct child count detection/display
+
 CaseBox 1.9.87 (2014-01-18)
 ==============================
 New Features, Improvements

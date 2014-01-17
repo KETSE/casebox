@@ -41,7 +41,7 @@ class Browser
         $this->createNodesPath();
 
         $this->collectAllChildren();
-        $this->prepareResult();
+        $this->prepareResults($this->data);
 
         $rez = array(
             'success' => true
@@ -160,11 +160,12 @@ class Browser
         foreach ($this->treeNodeClasses as $class) {
             $rez = $class->getChildren($this->path, $this->requestParams);
             if (!empty($rez['data'])) {
-                foreach ($rez['data'] as $node) {
-                    $node['nid'] = $node['id'];
-                    unset($node['id']);
-                    $this->data[] = $node;
-                }
+                $this->data = array_merge($this->data, $rez['data']);
+                // foreach ($rez['data'] as $node) {
+                //     $node['nid'] = $node['id'];
+                //     unset($node['id']);
+                //     $this->data[] = $node;
+                // }
             }
             if (!empty($rez['facets'])) {
                 $this->facets = $rez['facets'];
@@ -185,14 +186,6 @@ class Browser
     protected function sortResult()
     {
         //sorting nodes;
-    }
-
-    protected function prepareResult()
-    {
-        $this->sortResult();
-        // foreach ($this->data as &$node) {
-
-        // }
     }
 
     protected function getGUID($name)
@@ -1071,27 +1064,28 @@ class Browser
         if (empty($data) || !is_array($data)) {
             return;
         }
+
+        //this->sortNodes();
+        $sql = 'SELECT count(*) `has_childs`
+            FROM tree
+            WHERE pid = $1
+                AND dstatus = 0'.
+            ( empty($this->showFoldersContent) ?
+                ' AND `template_id` IN (0'.implode(',', $GLOBALS['folder_templates']).')'
+                : ''
+            );
+
         for ($i=0; $i < sizeof($data); $i++) {
             $d = &$data[$i];
             if (isset($d['id']) && empty($d['nid'])) {
                 $d['nid'] = $d['id'];
                 unset($d['id']);
             }
-            if (!isset($d['loaded'])) {
-                $res = DB\dbQuery(
-                    'SELECT count(*) `has_childs`
-                    FROM tree
-                    WHERE pid = $1
-                        AND dstatus = 0'.
-                    ( empty($this->showFoldersContent) ?
-                        ' AND `template_id` IN (0'.implode(',', $GLOBALS['folder_templates']).')'
-                        : ''
-                    ),
-                    $d['nid']
-                ) or die(DB\dbQueryError());
+            if (is_numeric($d['nid']) && !isset($d['loaded'])) {
+                $res = DB\dbQuery($sql, $d['nid']) or die(DB\dbQueryError());
 
                 if ($r = $res->fetch_assoc()) {
-                    $d['loaded'] = empty($r['has_childs']);
+                    $d['has_childs'] = !empty($r['has_childs']);
                 }
                 $res->close();
             }
