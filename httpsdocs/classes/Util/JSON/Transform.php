@@ -37,7 +37,10 @@ class Transform
             echo '.';
             $obj = Objects::getCustomClassByObjectId($r['id']);
             $obj->load();
-            $obj->loadOldGridDataToNewFormat();
+            //tasks are loading as needed
+            if ($obj->getType() !== 'task') {
+                $obj->loadOldGridDataToNewFormat();
+            }
             $obj->update();
         }
         $res->close();

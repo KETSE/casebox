@@ -125,6 +125,16 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
 
         this.grid.reload();
         if(this.grid.store.getCount() > 0) {
+            var cm = this.grid.getColumnModel();
+            var ci = cm.findColumnIndex('title');
+            var ci2 = cm.findColumnIndex('value');
+            if(CB.DB.templates.getType(r.data.template_id) == 'case') {
+                cm.setColumnHeader(ci, 'Case Card');
+                cm.setColumnHeader(ci2, 'Details');
+            } else {
+                cm.setColumnHeader(ci, L.Property);
+                cm.setColumnHeader(ci2, L.Value);
+            }
             this.grid.show();
             this.grid.getView().refresh(true);
             this.grid.doLayout();

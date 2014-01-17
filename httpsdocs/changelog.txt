@@ -1,3 +1,18 @@
+CaseBox 1.9.87 (2014-01-18)
+==============================
+New Features, Improvements
+--------------------------
+- custom changes for case templates
+
+Fixed Bugs:
+----------
+- fixed the upgrade process to update some specific field configs related to thesauri
+- upgrade script did overwrite new data for tasks on upgrade
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
 CaseBox 1.9.86 (2014-01-17)
 ==============================
 New Features, Improvements

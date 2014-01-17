@@ -66,6 +66,16 @@ class TemplateField extends Object
                 $saveValues[] = $value;
                 $params[] = $i;
                 $i++;
+            } elseif (isset($p['data'][$fieldName])) {
+                $value = $p['data'][$fieldName];
+                $value = (is_scalar($value) || is_null($value))
+                    ? $value
+                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+
+                $saveFields[] = $fieldName;
+                $saveValues[] = $value;
+                $params[] = $i;
+                $i++;
             } elseif (!empty($field)) {
                 $value = @$this->getFieldValue($fieldName, 0)['value'];
                 // this if should be removed after complete migration to language abreviation titles

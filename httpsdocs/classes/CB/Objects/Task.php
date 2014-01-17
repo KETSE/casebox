@@ -119,6 +119,7 @@ class Task extends Object
             unset($r['date_end']);
 
             $re = explode('-', $r['reminds']); //1|10|1-1|10|2
+            unset($r['reminds']);
             foreach ($re as $remind) {
                 if (empty($remind)) {
                     continue;

@@ -291,6 +291,11 @@ class TreeSync extends \Util\TreeSync
             $modified = false;
             foreach ($data['fields'] as &$field) {
                 switch ($field['type']) {
+                    case '_objects':
+                        if (@$field['cfg']['source'] !== 'thesauri') {
+                            continue 2;
+                        }
+                        break;
                     case 'combo':
                         if (empty($field['cfg']['thesauriId'])) {
                             continue 2;
@@ -313,7 +318,10 @@ class TreeSync extends \Util\TreeSync
                 } elseif (isset($this->tags[$field['cfg']['thesauriId']]['id'])) {
                     $field['cfg']['scope'] = $this->tags[$field['cfg']['thesauriId']]['id'];
                 }
-
+                if (!empty($field['cfg']['thesauriId'])) {
+                    $field['cfg']['oldThesauriId'] = $field['cfg']['thesauriId'];
+                    unset($field['cfg']['thesauriId']);
+                }
                 $modifiedTemplateFieldIds[$field['id']] = 1;
                 $modified = true;
 
