@@ -250,11 +250,17 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
     ,onOpenInTabsheetClick: function(b, e) {
         var d = this.getLayout().activeItem.data;
-        if(CB.DB.templates.getType(d.template_id) == 'task') {
-            App.mainViewPort.onTaskEdit({data: d}, e);
-        } else {
-            App.mainViewPort.openObject(d, e);
+        switch(CB.DB.templates.getType(d.template_id)) {
+            case 'task':
+                App.mainViewPort.onTaskEdit({data: d}, e);
+                break;
+            case 'file':
+                App.mainViewPort.onFileOpen(d, e);
+                break;
+            default:
+                App.mainViewPort.openObject(d, e);
         }
+
         this.getLayout().activeItem.clear();
         this.onViewChangeClick(0);
     }

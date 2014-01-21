@@ -14,7 +14,15 @@ class Browser
         $rez = array();
 
         /* prepare params */
-        $path = empty($p['path']) ? '/' : $p['path'];
+        $path = '/';
+        if (empty($p['path'])) {
+            if (!empty($p['pid'])) {
+                $path = $p['pid'];
+            }
+        } else {
+            $path = $p['path'];
+        }
+        $p['path'] = $path;
         $this->showFoldersContent = isset($p['showFoldersContent'])
             ? $p['showFoldersContent']
             : false;
@@ -191,7 +199,7 @@ class Browser
         //sorting nodes;
     }
 
-    protected function getGUID($name)
+    public static function getGUID($name)
     {
         $rez = null;
         $res = DB\dbQuery(
@@ -621,6 +629,8 @@ class Browser
         if (empty($p['pid'])) {
             return array('success' => false, 'msg' => L\Error_uploading_file);
         }
+        $p['pid'] = Path::detectRealTargetId($p['pid']);
+
         //TODO: SECURITY: check if current user has write access to folder
 
         if (empty($F)) { //update only file properties (no files were uploaded)

@@ -1,3 +1,16 @@
+CaseBox 1.9.89 (2014-01-21)
+==============================
+New Features, Improvements
+--------------------------
+- added detection method for creating objects under virtual folders
+
+Fixed Bugs:
+----------
+- open files in window for files editing when clicking on "open in tabsheet"
+- right properties panels did not work after migrate to virtual tree
+- double clicking a virtual node tries to open it for editing
+
+
 CaseBox 1.9.88 (2014-01-21)
 ==============================
 New Features, Improvements

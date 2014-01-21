@@ -784,9 +784,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             e.stopEvent();
         }
 
-        if(App.isFolder(objData.template_id)) {
+        if( (Ext.num(objData.template_id, 0) == 0) || App.isFolder(objData.template_id)) {
+            clog('here');
             this.changeSomeParams({path: objData.nid});
         } else {
+            clog('not');
             this.buttonCollection.get('preview').toggle(true);
             this.objectPanel.edit( {id: objData.nid} );
         }
@@ -811,7 +813,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.fireEvent(
             'fileupload'
             ,{
-                pid: this.folderProperties.id
+                pid: Ext.value(this.folderProperties.id, this.folderProperties.path)
                 ,uploadType: b.uploadType
             }
             ,e

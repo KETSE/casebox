@@ -85,9 +85,13 @@ class Objects
      */
     public function create($p)
     {
-        if (empty($p['pid']) || !Security::canCreateActions($p['pid'])) {
-            $p['pid'] = \CB\Browser::getRootFolderId();
-            // throw new \Exception(L\Access_denied);
+        if (empty($p['pid'])) {
+            throw new \Exception(L\Access_denied);
+        }
+        $p['pid'] = Path::detectRealTargetId($p['pid']);
+
+        if (!Security::canCreateActions($p['pid'])) {
+            throw new \Exception(L\Access_denied);
         }
 
         $template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($p['template_id']);

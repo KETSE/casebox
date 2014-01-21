@@ -203,4 +203,57 @@ class Path
 
         return $path;
     }
+
+    //------------------------------------------------------------------------
+
+    /**
+     * try to detect real target id from a ginven path/path element
+     * $p  path or path element
+     * @return int | null
+     */
+    public static function detectRealTargetId($p)
+    {
+        $rez = null;
+        if (empty($p)) {
+            return $rez;
+        }
+
+        $treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
+        $GUIDConfigs = array();
+        foreach ($treeNodeConfigs as $plugin => $cfg) {
+            $class = empty($cfg['class']) ? '\\CB\\TreeNode\\'.$plugin : $cfg['class'];
+            $cfg['guid'] = Browser::getGUID($plugin);
+            $cfg['class'] = $class;
+            $GUIDConfigs[$cfg['guid']] = $cfg;
+        }
+
+        $path = explode('/', @$p);
+        while (!empty($path) && empty($path[0])) {
+            array_shift($path);
+        }
+        while (!empty($path) && empty($path[sizeof($path)-1])) {
+            array_pop($path);
+        }
+        if (empty($path)) {
+            return $rez;
+        }
+
+        while (is_null($rez) && !empty($path)) {
+            $el = array_pop($path);
+            if (is_numeric($el)) { //it's a real node id
+                $rez = $el;
+            } else {
+                list($guid, $el) = explode('-', $el);
+                if (!empty($GUIDConfigs[$guid]['realNodeId'])) {
+                    $rez = $GUIDConfigs[$guid]['realNodeId'];
+                }
+            }
+        }
+
+        if ($rez == 'root') {
+            $rez = Browser::getRootFolderId();
+        }
+
+        return $rez;
+    }
 }
