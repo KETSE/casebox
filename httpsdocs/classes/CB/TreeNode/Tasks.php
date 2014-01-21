@@ -9,11 +9,10 @@ class Tasks extends Base
     protected function acceptedPath()
     {
         $p = &$this->path;
-        if (empty($p)) {
+        if (empty($p) || (sizeof($p) > 1)) {
             return false;
         }
 
-        // echo '!'.get_class($this->lastNode);
         if ($this->lastNode instanceof Dbnode) {
             if ($this->lastNode->id <> $this->rootId) {
                 return false;
@@ -43,7 +42,7 @@ class Tasks extends Base
     {
 
         $this->path = $pathArray;
-        $this->lastNode = $pathArray[sizeof($pathArray) - 1];
+        $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
         $this->rootId = \CB\Browser::getRootFolderId();
 

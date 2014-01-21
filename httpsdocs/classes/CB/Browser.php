@@ -35,12 +35,13 @@ class Browser
             'plugins' => &$this->treeNodeConfigs
         );
 
-        fireEvent('onTreeInitialize', $params);
+        fireEvent('treeInitialize', $params);
 
         $this->initNodeClasses();
         $this->createNodesPath();
 
         $this->collectAllChildren();
+
         $this->prepareResults($this->data);
 
         $rez = array(
@@ -103,7 +104,9 @@ class Browser
                 $nodeId = $el[0];
             }
 
-            $cfg = $this->treeNodeGUIDConfigs[$npid];
+            $cfg = empty($this->treeNodeGUIDConfigs[$npid])
+                ? array( 'class' => 'CB\TreeNode\\Dbnode', 'guid' => $npid)
+                : $this->treeNodeGUIDConfigs[$npid];
 
             $class = new $cfg['class']($cfg, $nodeId);
             //set parent node

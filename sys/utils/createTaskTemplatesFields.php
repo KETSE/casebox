@@ -39,10 +39,13 @@ $res->close();
 
 $fieldsTemplateId = \Util\Templates::getTemplateId(
     array(
-        'name' => 'FieldsTemplate'
+        'name' => 'Fields template'
+        ,'type' => 'field'
     )
 );
-
+if (empty($fieldsTemplateId)) {
+    die('cannot detect field template id');
+}
 DB\startTransaction();
 
 $tfObject = new \CB\Objects\TemplateField();

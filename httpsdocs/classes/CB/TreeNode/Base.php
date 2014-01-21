@@ -9,6 +9,14 @@ class Base implements \CB\Interfaces\TreeNode
 
     public function __construct ($config = array(), $id = null)
     {
+        if (!empty($config['pid']) && ($config['pid'] == 'root')) {
+            $config['pid'] = \CB\Browser::getRootFolderId();
+        }
+
+        if (!empty($config['realNodeId']) && ($config['realNodeId'] == 'root')) {
+            $config['realNodeId'] = \CB\Browser::getRootFolderId();
+        }
+
         $this->config = $config;
         $this->guid = $config['guid'];
         $this->id = $id;

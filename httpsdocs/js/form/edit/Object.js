@@ -76,7 +76,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             return;
         }
 
-        if(Ext.isNumber(objectData)) {
+        if(!isNaN(objectData)) {
             objectData = {id: objectData};
         }
         this.loadData(objectData);
@@ -89,21 +89,21 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             return;
         }
 
-
+        clog('loading data', objectData);
         this.clear();
         // this.getEl().mask(L.LoadingData + ' ...', 'x-mask-loading');
 
-        if(Ext.isNumber(objectData.id)) {
-            CB_Objects.load(
-                {id: objectData.id}
-                ,this.processLoadData
-                ,this
-            );
-        } else {
+        if(isNaN(objectData.id)) {
             this.processLoadData({
                     success: true
                     ,data: objectData
                 }
+            );
+        } else {
+            CB_Objects.load(
+                {id: objectData.id}
+                ,this.processLoadData
+                ,this
             );
         }
     }

@@ -29,7 +29,6 @@ class Task extends Object
 
         $status = 2; // active
         if (!empty($dateEnd)) {
-            echo strtotime($dateEnd).' < '.strtotime('now');
             if (strtotime($dateEnd) < strtotime('now')) {
                 $status = 1;
             }

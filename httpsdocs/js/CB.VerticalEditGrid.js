@@ -455,9 +455,14 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
     ,reload: function(){
         // initialization
         this.data = {};
+        this.newItem = true;
         var pw = this.getBubbleTarget(); //parent window
-        if(Ext.isDefined(pw.data) && Ext.isDefined(pw.data[this.root])) {
-            this.data = pw.data[this.root];
+
+        if(Ext.isDefined(pw.data)) {
+            this.newItem = isNaN(pw.data.id);
+            if(Ext.isDefined(pw.data[this.root])) {
+                this.data = pw.data[this.root];
+            }
         }
         //if not specified template_id directly to grid then try to look in owners data
         this.template_id = Ext.value(pw.data.template_id, this.template_id);
@@ -499,6 +504,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         }
         // if parent have a helperTree then it is responsible for helper reload
         if(!pw.helperTree) {
+            this.helperTree.newItem = this.newItem;
             this.helperTree.loadData(this.data, this.templateStore);
         }
 

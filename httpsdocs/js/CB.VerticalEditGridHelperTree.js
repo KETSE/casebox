@@ -161,7 +161,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     var nodeValues = this.getGenericArrayDataForNodes(data[fieldName]);
 
                     //set default values for new objects
-                    if(isNaN(this.data.id) && !Ext.isEmpty(record.get('cfg').value)) {
+                    if(this.newItem && !Ext.isEmpty(record.get('cfg').value)) {
                         var v = record.get('cfg').value;
                         if(v == 'now') {
                             v = new Date();

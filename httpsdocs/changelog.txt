@@ -1,8 +1,14 @@
-CaseBox 1.9.88 (2014-01-18)
+CaseBox 1.9.88 (2014-01-21)
 ==============================
 New Features, Improvements
 --------------------------
+- changes related to osji virtual tree creation
 - browser script update for correct child count detection/display
+
+Fixed Bugs:
+----------
+- default value displayed for empty fields on existing objects
+- sometimes error msg occures when clicking edit from item preview panel
 
 CaseBox 1.9.87 (2014-01-18)
 ==============================

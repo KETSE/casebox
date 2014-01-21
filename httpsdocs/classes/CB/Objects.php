@@ -22,8 +22,8 @@ class Objects
         if (!Security::canRead($id)) {
             throw new \Exception(L\Access_denied);
         }
-
         $object = $this->getCustomClassByObjectId($id) or die(L\Wrong_input_data);
+
         $object->load();
         $objectData = $object->getData();
 
@@ -86,7 +86,8 @@ class Objects
     public function create($p)
     {
         if (empty($p['pid']) || !Security::canCreateActions($p['pid'])) {
-            throw new \Exception(L\Access_denied);
+            $p['pid'] = \CB\Browser::getRootFolderId();
+            // throw new \Exception(L\Access_denied);
         }
 
         $template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($p['template_id']);
