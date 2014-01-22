@@ -26,8 +26,8 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             ,refOwner: this
             ,includeTopFields: true
             ,viewConfig: {
-                // forceFit: true
-                // ,autoFill: true
+                forceFit: true
+                ,autoFill: true
             }
         });
 
@@ -89,7 +89,6 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             return;
         }
 
-        clog('loading data', objectData);
         this.clear();
         // this.getEl().mask(L.LoadingData + ' ...', 'x-mask-loading');
 

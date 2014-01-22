@@ -774,7 +774,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ? this.folderProperties.id
                 : s[0].nid;
 
-        clog('loading', id);
         this.objectPanel.load(id);
     }
 
@@ -785,10 +784,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
 
         if( (Ext.num(objData.template_id, 0) == 0) || App.isFolder(objData.template_id)) {
-            clog('here');
             this.changeSomeParams({path: objData.nid});
         } else {
-            clog('not');
             this.buttonCollection.get('preview').toggle(true);
             this.objectPanel.edit( {id: objData.nid} );
         }
@@ -806,6 +803,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         // this.onRightPanelViewChangeClick(this.buttonCollection.get('preview'));
         this.buttonCollection.get('preview').toggle(true);
         b.data.pid = this.folderProperties.id;
+        b.data.path = this.folderProperties.path;
         this.objectPanel.edit(b.data);
     }
 

@@ -486,14 +486,14 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 if(!colRequired) {
                     newConfig.pop();
                 }
-                newConfig.push({
-                    header: ''
-                    ,dataIndex: 'id'
-                    ,hideable: false
-                    ,width: 3
-                    ,resizable: false
-                    ,renderer: Ext.emptyFn
-                });
+                // newConfig.push({
+                //     header: ''
+                //     ,dataIndex: 'id'
+                //     ,hideable: false
+                //     ,width: 3
+                //     ,resizable: false
+                //     ,renderer: Ext.emptyFn
+                // });
 
                 cm.setConfig(newConfig);
                 var el = this.getEl();

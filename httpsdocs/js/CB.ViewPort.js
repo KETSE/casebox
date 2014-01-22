@@ -453,8 +453,12 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,reminds: "1|10|1"
             ,responsible_user_ids: App.loginData.id
         });
-        if(Ext.isEmpty(p.title)) p.title = L.AddTask;
-        if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
+        if(Ext.isEmpty(p.title)) {
+            p.title = L.AddTask;
+        }
+        if(Ext.isEmpty(p.usersStore)) {
+            p.usersStore = CB.DB.usersStore;
+        }
         this.lastFocusedElement = Ext.get(document.activeElement);
         delete p.data.title;
         dw = new CB.Tasks(p);

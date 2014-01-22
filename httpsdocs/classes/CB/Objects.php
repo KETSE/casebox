@@ -85,10 +85,13 @@ class Objects
      */
     public function create($p)
     {
-        if (empty($p['pid'])) {
+        $pid = empty($p['pid'])
+            ? @$p['path']
+            : $p['pid'];
+        if (empty($pid)) {
             throw new \Exception(L\Access_denied);
         }
-        $p['pid'] = Path::detectRealTargetId($p['pid']);
+        $p['pid'] = Path::detectRealTargetId($pid);
 
         if (!Security::canCreateActions($p['pid'])) {
             throw new \Exception(L\Access_denied);
@@ -482,6 +485,13 @@ class Objects
         $template = $obj->getTemplate();
 
         $object_record['content'] = '';
+
+        /* possible to add collumn iconCls to solr fields */
+        // if (!empty($objData['data']['iconCls'])) {
+        //     $object_record['iconCls'] = $objData['data']['iconCls'];
+        // } elseif (!empty($objData['cfg']['iconCls'])) {
+        //     $object_record['iconCls'] = $objData['cfg']['iconCls'];
+        // }
 
         foreach ($linearData as $f) {
             $field = $template->getField($f['name']);

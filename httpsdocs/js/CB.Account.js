@@ -291,6 +291,11 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,width: 800
                 ,style: 'margin-bottom: 50px'
                 ,autoHeight: true
+                ,viewConfig: {
+                    forceFit: true
+                    ,autoFill: true
+                }
+
             }
             ]
             ,buttonAlign: 'left'

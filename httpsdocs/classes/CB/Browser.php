@@ -385,7 +385,25 @@ class Browser
 
         $search = new Search();
 
-        return $search->query($p);
+        $rez = $search->query($p);
+
+        foreach ($rez['data'] as &$doc) {
+            $res = DB\dbQuery(
+                'SELECT cfg FROM tree WHERE id = $1 AND cfg IS NOT NULL',
+                $doc['id']
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                if (!empty($r['cfg'])) {
+                    $cfg = Util\toJSONArray($r['cfg']);
+                    if (!empty($cfg['iconCls'])) {
+                        $doc['iconCls'] = $cfg['iconCls'];
+                    }
+                }
+            }
+            $res->close();
+        }
+
+        return $rez;
     }
 
     public function createFolder($path)

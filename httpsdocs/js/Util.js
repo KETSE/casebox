@@ -12,14 +12,20 @@ function date_ISO_to_date(date_string){
 }
 function getItemIcon(d){
 
+    if(!Ext.isEmpty(d.iconCls)) {
+        return d.iconCls;
+    }
     if(Ext.isEmpty(d.template_id)){
         if(d['type'] == 2) return 'icon-shortcut';
         return d.iconCls;
     }
     switch( CB.DB.templates.getType(d.template_id) ){
-        case 'file': return getFileIcon(d['name']); break;
+        case 'file':
+            return getFileIcon(d['name']);
         case 'task':
-            if(d['status'] == 3) return 'icon-task-completed';
+            if(d['status'] == 3) {
+                return 'icon-task-completed';
+            }
         default:
             tr = CB.DB.templates.getById(d.template_id);
             if(tr) return tr.get('iconCls');

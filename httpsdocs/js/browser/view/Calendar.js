@@ -312,6 +312,9 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
             }
         });
         CB.browser.view.Calendar.superclass.initComponent.apply(this, arguments);
+
+        this.addEvents('taskcreate');
+        this.enableBubble('taskcreate');
     }
 
     ,getViewParams: function() {

@@ -474,7 +474,9 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
     ,updateChildrenCount: function( t, p ){
         if(Ext.isEmpty(p)) return;
         if(Ext.isEmpty(p.childNodes)){
-            p.setText(p.attributes.title);
+            if(!Ext.isEmpty(p.attributes)) {
+                p.setText(p.attributes.title);
+            }
             return;
         }
         p.attributes.users = p.childNodes.length;

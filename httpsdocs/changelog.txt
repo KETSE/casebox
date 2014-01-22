@@ -1,3 +1,15 @@
+CaseBox 1.9.90 (2014-01-22)
+==============================
+Fixed Bugs:
+----------
+- Virtual folders with tasks did not show all content folders
+- Saving an object gives a js error
+- Can't see icons for 'Program' when editing Category in a task
+- Trying to create a task in /Tree/Test Case N1, gives 'Access is denied'
+- Can't create a case in /Tree/ folder, access denied
+- Trying to create a task will show EditWindow with fields of the previous task
+- Can't upload a file to dev.casebox.org using D&D
+
 CaseBox 1.9.89 (2014-01-21)
 ==============================
 New Features, Improvements
