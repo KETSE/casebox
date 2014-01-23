@@ -173,12 +173,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 }
             })
             ,columns: Ext.apply([], this.gridColumns) //leave default column definitions intact
-            ,sm: new Ext.grid.CellSelectionModel({
-                listeners: {
-                    scope: this
-                    ,beforecellselect: this.onBeforeCellSelect
-                }
-            })
+            ,sm: new Ext.grid.CellSelectionModel()
             ,stripeRows: true
             ,header: false
             ,clicksToEdit: 1
@@ -223,20 +218,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.addEvents('change', 'fileupload', 'filedownload', 'filesdelete', 'loaded');
         this.enableBubble(['change', 'fileupload', 'filedownload', 'filesdelete', 'loaded']);
         CB.VerticalEditGrid.superclass.initComponent.apply(this, arguments);
-    }
-
-    ,onBeforeCellSelect: function(sm, ri, ci){
-        var cm = this.getColumnModel();
-        var cc = cm.getColumnCount();
-        if(ci < (cc - 1)) {
-            return true;
-        }
-        for (var i = cc - 2; i >= 0; i--) {
-            if(!cm.isHidden(i)) {
-                sm.select(ri, i);
-                return false;
-            }
-        }
     }
 
     ,onCellClick: function(g, r, c, e){

@@ -471,7 +471,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 scope: this
                 ,changeparams: this.changeSomeParams
                 ,settoolbaritems: this.onSetToolbarItems
-                ,objectopen: this.onObjectsOpenEvent
+                // ,objectopen: this.onObjectsOpenEvent
             }
         });
 

@@ -1,3 +1,25 @@
+CaseBox 1.9.91 (2014-01-23)
+==============================
+New Features, Improvements
+--------------------------
+- Implement virtual folder /Program/Cases/...
+- Implement virtual node /Program/Users/[user]/Cases
+
+Fixed Bugs:
+----------
+- New case doesnt appear in /Program/
+- Wrong owner for Task, Event, Milestone
+- Program virtual folder doesn't work
+- erratic value in Group field for Program content type
+- Milestone preview doesn't work
+- critical: can't focus 2nd column of VerticalGrid for editing
+- Creating system folders for Cases
+- Virtual folders: Lead, Support not working for user oburlaca
+
+Notes:
+----------
+- apply database update for core: 20140123_1641 db_update v1.9.91.sql
+
 CaseBox 1.9.90 (2014-01-22)
 ==============================
 Fixed Bugs:

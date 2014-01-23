@@ -182,6 +182,9 @@ function initApp(){
                 case 'users':
                     store = CB.DB.usersStore;
                     break;
+                case 'groups':
+                    store = CB.DB.groupsStore;
+                    break;
                 default:
                     cw = null;
                     if(grid && grid.findParentByType) {
