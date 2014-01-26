@@ -271,7 +271,6 @@ class Object extends OldObject
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
         $p = &$this->data;
-
         $tableFields = array(
             'pid'
             ,'user_id'
@@ -293,7 +292,7 @@ class Object extends OldObject
         $params = array('`uid` = $2', '`udate` = CURRENT_TIMESTAMP', 'updated = 1');
         $i = 3;
         foreach ($tableFields as $fieldName) {
-            if (isset($p[$fieldName]) && ($p[$fieldName] !== 'id')) {
+            if (array_key_exists($fieldName, $p) && ($p[$fieldName] !== 'id')) {
                 $saveFields[] = $fieldName;
                 $saveValues[] = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
                     ? $p[$fieldName]

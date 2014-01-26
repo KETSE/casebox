@@ -298,10 +298,7 @@ createDirectStores = function(){
         ,proxy: new  Ext.data.DirectProxy({
             paramsAsHash: true
             ,api: {
-                create:   CB_Templates.create
-                ,read:    CB_Templates.readAll
-                ,update:  CB_Templates.update
-                ,destroy: CB_Templates.destroy
+                read:    CB_Templates.readAll
             }
         })
         ,reader: new Ext.data.JsonReader({

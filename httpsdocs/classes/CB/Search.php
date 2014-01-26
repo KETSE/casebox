@@ -207,6 +207,7 @@ class Search extends Solr\Client
                 $fq[] = 'sys_tags:('.implode(' OR ', $ids).')';
             }
         }
+
         if (!empty($p['dateStart'])) {
             $fq[] = 'date:['.$p['dateStart'].' TO '.$p['dateEnd'].']';
         }

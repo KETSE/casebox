@@ -450,8 +450,7 @@ class Objects
             'SELECT DISTINCT t.id
                 ,t.`name`
                 ,t.date
-                ,t.`type`
-                ,t.subtype
+                ,t.cfg
                 ,t.template_id
                 ,t2.status
             FROM tree t
@@ -461,6 +460,7 @@ class Objects
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
             if (!empty($r['date'])) {
                 $r['date'][10] = 'T';
                 $r['date'] .= 'Z';

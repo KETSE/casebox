@@ -97,15 +97,12 @@ class Tasks extends Base
 
     protected function getRootNodes()
     {
-        $fq = $this->fq;
-        $fq[] = 'status:(1 OR 2)';
+        $p = $this->requestParams;
+        $p['fq'] = $this->fq;
+        $p['fq'][] = 'status:(1 OR 2)';
+        $p['rows'] = 0;
         $s = new \CB\Search();
-        $rez = $s->query(
-            array(
-                'rows' => 0
-                ,'fq' => $fq
-            )
-        );
+        $rez = $s->query($p);
         $count = '';
         if (!empty($rez['total'])) {
             $count = ' ('.$rez['total'].')';
@@ -125,22 +122,19 @@ class Tasks extends Base
 
     protected function getDepthChildren2()
     {
-        $fq = $this->fq;
-        $fq[] = 'status:(1 OR 2)';
+        $p = $this->requestParams;
+        $p['fq'] = $this->fq;
+        $p['fq'][] = 'status:(1 OR 2)';
 
         if (@$this->requestParams['from'] == 'tree') {
             $s = new \CB\Search();
-            $sr = $s->query(
-                array(
-                    'rows' => 0
-                    ,'fq' => $fq
-                    ,'facet' => true
-                    ,'facet.field' => array(
-                        '{!ex=user_ids key=1assigned}user_ids'
-                        ,'{!ex=cid key=2cid}cid'
-                    )
-                )
+            $p['rows'] = 0;
+            $p['facet'] = true;
+            $p['facet.field'] = array(
+                '{!ex=user_ids key=1assigned}user_ids'
+                ,'{!ex=cid key=2cid}cid'
             );
+            $sr = $s->query($p);
             $rez = array('data' => array());
             if (!empty($sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']})) {
                 $rez['data'][] = array(
@@ -164,7 +158,7 @@ class Tasks extends Base
 
         // for other views
         $s = new \CB\Search();
-        $rez = $s->query(array('fq' => $fq));
+        $rez = $s->query($p);
 
         return $rez;
     }

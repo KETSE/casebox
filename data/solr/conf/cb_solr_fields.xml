@@ -103,6 +103,9 @@
 <!-- template_type: case, object, file, task, email -->
 <field name="template_type"     type="string"       indexed="true" stored="true" />
 
+<!-- cls: custom css class  -->
+<field name="cls"     type="string"       indexed="true" stored="true" />
+
 <!-- acl_count: count of security rules assigned to this node -->
 <field name="acl_count"   type="tint"         indexed="true" stored="true" />
 

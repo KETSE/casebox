@@ -205,7 +205,16 @@ function initApp(){
                     for(i=0; i < v.length; i++){
                         ri = store.findExact('id', parseInt(v[i], 10));
                         row = store.getAt(ri);
-                        if(ri >-1) r.push('<li class="lh16 icon-padding '+row.get('iconCls')+'">'+row.get('name')+'</li>');
+                        if(ri >-1) {
+                            var icon = row.get('cfg');
+                            if(!Ext.isEmpty(icon)) {
+                                icon = icon.iconCls;
+                            }
+                            if(Ext.isEmpty(icon)) {
+                                icon = row.get('iconCls');
+                            }
+                            r.push('<li class="lh16 icon-padding '+icon+'">'+row.get('name')+'</li>');
+                        }
                     }
                     return '<ul>'+r.join('')+'</ul>';
                 default:

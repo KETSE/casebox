@@ -164,6 +164,7 @@ class Browser
 
     protected function collectAllChildren()
     {
+
         $this->data = array();
         $this->facets = array();
         $this->total = 0;

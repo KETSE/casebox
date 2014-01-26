@@ -37,6 +37,7 @@ class Client extends Service
         ,'case'
         ,'template_id'
         ,'template_type'
+        ,'cls'
         ,'user_ids'
         ,'acl_count'
         ,'security_set_id'
@@ -170,7 +171,6 @@ class Client extends Service
         $lastId = 0;
 
         $templatesCollection = \CB\Templates\SingletonCollection::getInstance();
-
         /* prepeare where condition for sql depending on incomming params */
         $where = '(t.updated > 0) and (t.id > $1)';
         if (isset($p['all']) && ($p['all'] == true)) {

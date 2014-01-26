@@ -363,6 +363,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,{name: 'system', type: 'int'}
                     ,{name: 'status', type: 'int'}
                     ,{name: 'template_id', type: 'int'}
+                    ,{name: 'category_id', type: 'int'}
                     ,'template_type'
                     ,'path'
                     ,'name'
@@ -380,6 +381,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,{name: 'has_childs', type: 'bool'}
                     ,{name: 'acl_count', type: 'int'}
                     ,'cfg'
+                    ,'cls'
             ]
             }
             )
@@ -471,6 +473,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 scope: this
                 ,changeparams: this.changeSomeParams
                 ,settoolbaritems: this.onSetToolbarItems
+                ,createobject: this.onCreateObjectEvent
+                ,reload: this.onReloadClick
                 // ,objectopen: this.onObjectsOpenEvent
             }
         });
@@ -626,6 +630,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if ((!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants) ) && (params1.descendants != params2.descendants) ) return false;
         if ((!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query) ) && (params1.query != params2.query) ) return false;
         if ((!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters) ) && (params1.filters != params2.filters) ) return false;
+        if ((!Ext.isEmpty(params1.dateStart) || !Ext.isEmpty(params2.dateStart) ) && (params1.dateStart != params2.dateStart) ) return false;
+        if ((!Ext.isEmpty(params1.dateEnd) || !Ext.isEmpty(params2.dateEnd) ) && (params1.dateEnd != params2.dateEnd) ) return false;
         return true;
     }
 
@@ -783,8 +789,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             e.stopEvent();
         }
 
-        if( (Ext.num(objData.template_id, 0) == 0) || App.isFolder(objData.template_id)) {
-            this.changeSomeParams({path: objData.nid});
+        if( (Ext.num(objData.template_id, 0) === 0) || App.isFolder(objData.template_id)) {
+            var path = this.folderProperties.path;
+            if(path.substr(-1, 1) !== '/') {
+                path += '/';
+            }
+            path += objData.nid;
+            this.changeSomeParams({path: path});
         } else {
             this.buttonCollection.get('preview').toggle(true);
             this.objectPanel.edit( {id: objData.nid} );
@@ -797,6 +808,17 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onSearchQuery: function(query, e){
         this.changeSomeParams({query: query});
+    }
+
+    ,onCreateObjectEvent: function(objectData, e) {
+        if(Ext.isEmpty(objectData.pid)) {
+            objectData.pid = this.folderProperties.id;
+        }
+        if(Ext.isEmpty(objectData.path)) {
+            objectData.path = this.folderProperties.path;
+        }
+        this.buttonCollection.get('preview').toggle(true);
+        this.objectPanel.edit(objectData);
     }
 
     ,onCreateObjectClick: function(b, e) {

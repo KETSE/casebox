@@ -390,6 +390,11 @@ class Tasks
                 'UPDATE tasks set date_start = $2, date_end = $3 WHERE id = $1',
                 array($p['id'], $p['date_start'], $p['date_end'])
             ) or die(DB\dbQueryError());
+
+            DB\dbQuery(
+                'UPDATE tree set `date` = $2, date_end = $3, updated = 1 WHERE id = $1',
+                array($p['id'], $p['date_start'], $p['date_end'])
+            ) or die(DB\dbQueryError());
         } else {
             $rez['success'] = false;
         }
@@ -408,6 +413,7 @@ class Tasks
      */
     public static function saveReminds($p, $log_action_type = 25)
     {
+
         DB\dbQuery(
             'INSERT INTO tasks_reminders (task_id, user_id, reminds)
             VALUES ($1
@@ -1374,37 +1380,30 @@ class Tasks
      */
     public static function getSolrData(&$object_record)
     {
-        $res = DB\dbQuery(
-            'SELECT
-                title
-                ,status
-                ,category_id
-                ,importance
-                ,privacy
-                ,responsible_user_ids
-                ,autoclose
-                ,description
-                ,parent_ids
-                ,child_ids
-                ,missed
-                ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
-                ,cid
-            FROM tasks where id = $1',
-            $object_record['id']
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $object_record['status'] = $r['status'];
-            $object_record['importance'] = $r['importance'];
-            $object_record['category_id'] = $r['category_id'];
-            $object_record['completed'] = $r['completed'];
-            $object_record['parent_ids'] = empty($r['parent_ids']) ? null : explode(',', $r['parent_ids']);
-            if (!empty($r['responsible_user_ids'])) {
-                $object_record['user_ids'] = explode(',', $r['responsible_user_ids']);
-            }
-            $object_record['content'] = $r['description'];
+        $obj = Objects::getCustomClassByObjectId($object_record['id']);
+        $objData = $obj->load();
+        $linearData = $obj->getLinearData();
+        $template = $obj->getTemplate();
+
+        $object_record['status'] = @$objData['status'];
+        $object_record['importance'] = @$obj->getFieldValue('importance', 0)['value'];
+        $object_record['category_id'] = @$obj->getFieldValue('category_id', 0)['value'];
+        $user_ids = @$obj->getFieldValue('assigned', 0)['value'];
+        if (!empty($user_ids)) {
+            $object_record['user_ids'] = Util\toNumericArray($user_ids);
         }
-        $res->close();
+        $object_record['content'] = @$obj->getFieldValue('description', 0)['value'];
+
+        if (!empty($objData['completed'])) {
+            $object_record['completed'] = $objData['completed'];
+        }
+
+        @$object_record['cls'] = $template->formatValueForDisplay(
+            $template->getField('color'),
+            $obj->getFieldValue('color', 0)['value'],
+            false
+        );
     }
 
     /**
@@ -1416,45 +1415,10 @@ class Tasks
     public static function getBulkSolrData(&$object_records)
     {
         $process_object_ids = array();
-        foreach ($object_records as $object_id => $object_record) {
+        foreach ($object_records as $object_id => &$object_record) {
             if (@$object_record['template_type'] == 'task') {
-                $process_object_ids[] = $object_id;
+                static::getSolrData($object_record);
             }
         }
-        if (empty($process_object_ids)) {
-            return;
-        }
-
-        $res = DB\dbQuery(
-            'SELECT
-                id
-                ,title
-                ,status
-                ,category_id
-                ,importance
-                ,privacy
-                ,responsible_user_ids
-                ,autoclose
-                ,description
-                ,parent_ids
-                ,child_ids
-                ,missed
-                ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
-                ,cid
-            FROM tasks where id in ('.implode(',', $process_object_ids).')'
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $object_records[$r['id']]['status'] = $r['status'];
-            $object_records[$r['id']]['importance'] = $r['importance'];
-            $object_records[$r['id']]['category_id'] = $r['category_id'];
-            $object_records[$r['id']]['completed'] = $r['completed'];
-            $object_records[$r['id']]['parent_ids'] = empty($r['parent_ids']) ? null : explode(',', $r['parent_ids']);
-            if (!empty($r['responsible_user_ids'])) {
-                $object_records[$r['id']]['user_ids'] = explode(',', $r['responsible_user_ids']);
-            }
-            $object_records[$r['id']]['content'] = $r['description'];
-        }
-        $res->close();
     }
 }

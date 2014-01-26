@@ -8,6 +8,23 @@ class Task extends Object
 {
 
     /**
+     * create an object with specified params
+     * @param  array $p object properties
+     * @return int   created id
+     */
+    public function create($p = false)
+    {
+        if ($p === false) {
+            $p = $this->data;
+        }
+        $this->data = $p;
+
+        $this->setDateParamsFromData($p);
+
+        return parent::create($p);
+    }
+
+    /**
      * internal function used by create method for creating custom data
      * @return void
      */
@@ -64,7 +81,8 @@ class Task extends Object
         $p = array();
         foreach ($reminds as $remind) {
             if (!empty($remind['childs']['count'])) {
-                @$p[] = $_SESSION['user']['id'].'|'.$remind['childs']['count'].'|'.$remind['childs']['units'];
+                //1 - by mail
+                @$p[] = '1|'.$remind['childs']['count'].'|'.$remind['childs']['units'];
             }
         }
         \CB\Tasks::saveReminds(
@@ -95,6 +113,8 @@ class Task extends Object
                 ,responsible_user_ids `assigned`
                 ,description
                 ,(SELECT reminds FROM tasks_reminders WHERE task_id = $1 AND user_id = $2) reminds
+                ,status
+                ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
             FROM tasks t
             WHERE id = $1',
             array(
@@ -104,6 +124,15 @@ class Task extends Object
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
+            if (!empty($r['status'])) {
+                $this->data['status'] = $r['status'];
+            }
+            if (!empty($r['completed'])) {
+                $this->data['completed'] = $r['completed'];
+            }
+            unset($r['status']);
+            unset($r['completed']);
+
             $r['allday'] = array(
                 'value' => $r['allday']
             );
@@ -134,6 +163,23 @@ class Task extends Object
 
             $this->data['data'] = array_merge($this->data['data'], $r);
         }
+    }
+
+    /**
+     * update object
+     * @param  array   $p optional properties. If not specified then $this-data is used
+     * @return boolean
+     */
+    public function update($p = false)
+    {
+        if ($p === false) {
+            $p = $this->data;
+        }
+        $this->data = $p;
+
+        $this->setDateParamsFromData($p);
+
+        return parent::update($p);
     }
 
     /**
@@ -206,7 +252,8 @@ class Task extends Object
         $p = array();
         foreach ($reminds as $remind) {
             if (!empty($remind['childs']['count'])) {
-                @$p[] = $_SESSION['user']['id'].'|'.$remind['childs']['count'].'|'.$remind['childs']['units'];
+                // 1 - by mail
+                @$p[] = '1|'.$remind['childs']['count'].'|'.$remind['childs']['units'];
             }
         }
         \CB\Tasks::saveReminds(
@@ -317,5 +364,23 @@ class Task extends Object
                 ,$targetId
             )
         ) or die(DB\dbQueryError());
+    }
+
+    protected function setDateParamsFromData(&$p)
+    {
+        /* analize if task dates are set */
+        switch ($this->getFieldValue('allday', 0)['value']) {
+            case 1:
+                $p['date'] = $this->getFieldValue('date_start', 0)['value'];
+                $p['date_end'] = $this->getFieldValue('date_end', 0)['value'];
+                break;
+            case -1:
+                $p['date'] = $this->getFieldValue('datetime_start', 0)['value'];
+                $p['date_end'] = $this->getFieldValue('datetime_end', 0)['value'];
+                break;
+            default:
+                $p['date'] = null;
+                $p['date_end'] = null;
+        }
     }
 }

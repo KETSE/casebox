@@ -38,7 +38,6 @@ return array_merge(
             ,'//js/calendar/calendar-all-debug.js'
 
             ,'//js/CB.Login.js'
-            ,'//js/CB.Case.js'
             ,'//js/CB.GenericForm.js'
             ,'//js/CB.ThesauriWindow.js'
             ,'//js/CB.Breadcrumb.js'
@@ -97,8 +96,6 @@ return array_merge(
             ,'//js/CB.Security.js'
 
             ,'//js/CB.UsersGroups.js'
-            ,'//js/CB.SystemManagementWindow.js'
-            ,'//js/CB.TemplatesManagementWindow.js'
 
             ,'//js/CB.Account.js'
             ,'//js/Util.js'
@@ -128,23 +125,5 @@ return array_merge(
         ,'lang-fr' => array('//js/locale/fr.js')
         ,'lang-hy' => array('//js/locale/hy.js')
         ,'lang-ru' => array('//js/locale/ru.js')
-        // custom source example
-        /*'js2' => array(
-            dirname(__FILE__) . '/../min_unit_tests/_test_files/js/before.js',
-            // do NOT process this file
-            new Minify_Source(array(
-                'filepath' => dirname(__FILE__) . '/../min_unit_tests/_test_files/js/before.js',
-                'minifier' => create_function('$a', 'return $a;')
-            ))
-        ),//*/
-
-        /*'js3' => array(
-            dirname(__FILE__) . '/../min_unit_tests/_test_files/js/before.js',
-            // do NOT process this file
-            new Minify_Source(array(
-                'filepath' => dirname(__FILE__) . '/../min_unit_tests/_test_files/js/before.js',
-                'minifier' => array('Minify_Packer', 'minify')
-            ))
-        ),//*/
     )
 );

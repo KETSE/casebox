@@ -56,9 +56,9 @@ function getStoreTitles(v){
     ids = String(v).split(',');
     texts = [];
     Ext.each(ids, function(id){
-         idx = this.findExact('id', parseInt(id));
+         idx = this.findExact('id', parseInt(id, 10));
         if(idx >= 0) texts.push(this.getAt(idx).get('title'));
-    }, this)
+    }, this);
     return texts.join(',');
 }
 function getStoreNames(v){
@@ -66,9 +66,9 @@ function getStoreNames(v){
     ids = String(v).split(',');
     texts = [];
     Ext.each(ids, function(id){
-         idx = this.findExact('id', parseInt(id));
+         idx = this.findExact('id', parseInt(id, 10));
         if(idx >= 0) texts.push(this.getAt(idx).get('name'));
-    }, this)
+    }, this);
     return texts.join(',');
 }
 
@@ -93,32 +93,32 @@ function toNumericArray(v){
 }
 
 setsGetIntersection = function(set1, set2){
-    rez = [];
+    var i, rez = [];
     if(Ext.isEmpty(set1) || Ext.isEmpty(set2)) return rez;
     if(Ext.isPrimitive(set1)) set1 = String(set1).split(',');
     if(Ext.isPrimitive(set2)) set2 = String(set2).split(',');
-    for (var i = 0; i < set1.length; i++) {
+    for (i = 0; i < set1.length; i++) {
         set1[i] = String(set1[i]);
     }
-    for (var i = 0; i < set2.length; i++) {
+    for (i = 0; i < set2.length; i++) {
         set2[i] = String(set2[i]);
     }
-    for (var i = 0; i < set1.length; i++) {
+    for (i = 0; i < set1.length; i++) {
         if( (set2.indexOf(set1[i]) >= 0) && (rez.indexOf(set1[i]) < 0 )) {
             rez.push(set1[i]);
         }
     }
-    for (var i = 0; i < set2.length; i++) {
+    for (i = 0; i < set2.length; i++) {
         if( (set1.indexOf(set2[i]) >= 0) && (rez.indexOf(set2[i]) < 0 )) {
             rez.push(set2[i]);
         }
     }
     return rez;
-}
+};
 
 setsHaveIntersection = function(set1, set2){
     return !Ext.isEmpty(setsGetIntersection(set1, set2));
-}
+};
 
 function updateMenu(menuButton, menuConfig, handler, scope){
     if(Ext.isEmpty(menuButton) || Ext.isEmpty(menuConfig)) return;
@@ -133,14 +133,14 @@ function updateMenu(menuButton, menuConfig, handler, scope){
             case 'folder': break;
             case '-': menu.push('-'); break;
             default:
-                idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i]));
+                idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i], 10));
                 if(idx >=0){
                     tr = CB.DB.templates.getAt(idx);
                     data = {
                             template_id: tr.get('id')
                             // ,type: tr.get('type')
                             ,title: tr.get('title')
-                    }
+                    };
                     if(!Ext.isEmpty(tr.get('cfg').data)) Ext.apply(data, tr.get('cfg').data);
                     menu.push({
                         text: tr.get('title')
@@ -159,7 +159,7 @@ function updateMenu(menuButton, menuConfig, handler, scope){
 }
 
 function getMenuConfig(node_id, ids_path, node_template_id){
-    lastWeight = 0
+    lastWeight = 0;
     menuConfig = '';
     CB.DB.menu.each( function(r){
         weight = 0;
@@ -216,34 +216,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
             lastWeight = weight;
             menuConfig = r.get('menu');
         }
-    }, this)
+    }, this);
+
     return menuConfig;
-}
-
-
-/**
-http://michaelapproved.com/articles/timezone-detect-and-ignore-daylight-saving-time-dst
-**/
-
-function TimezoneDetect(){
-    var dtDate = new Date('1/1/' + (new Date()).getUTCFullYear());
-    var intOffset = 10000; //set initial offset high so it is adjusted on the first attempt
-    var intMonth;
-    var intHoursUtc;
-    var intHours;
-    var intDaysMultiplyBy;
- 
-    //go through each month to find the lowest offset to account for DST
-    for (intMonth=0;intMonth < 12;intMonth++){
-        //go to the next month
-        dtDate.setUTCMonth(dtDate.getUTCMonth() + 1);
- 
-        //To ignore daylight saving time look for the lowest offset.
-        //Since, during DST, the clock moves forward, it'll be a bigger number.
-        if (intOffset > (dtDate.getTimezoneOffset() * (-1))){
-            intOffset = (dtDate.getTimezoneOffset() * (-1));
-        }
-    }
- 
-    return intOffset;
 }

@@ -44,7 +44,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         ];
 
         this.grid = new Ext.grid.EditorGridPanel({
-            loadMask: true
+            loadMask: false
             ,cls: 'folder-grid'
             ,store: this.store
             ,getProperty: this.getProperty // link to view container method

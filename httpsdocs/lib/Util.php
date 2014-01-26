@@ -401,12 +401,19 @@ function getThesauryIcon($id)
 
     if (!\CB\Cache::exist($var_name)) {
         $res = DB\dbQuery(
-            'SELECT iconCls FROM tags WHERE id = $1',
+            'SELECT t.cfg, tt.iconCls
+            FROM tree t
+            JOIN templates tt on t.id = tt.id
+            WHERE t.id = $1',
             $id
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            \CB\Cache::set($var_name, $r['iconCls']);
+            $cfg = toJSONArray($r['cfg']);
+            $iconCls = empty($cfg['iconCls'])
+                ? $r['iconCls']
+                : $cfg['iconCls'];
+            \CB\Cache::set($var_name, $iconCls);
         }
         $res->close();
     }

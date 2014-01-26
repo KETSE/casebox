@@ -36,7 +36,7 @@ class Dbnode extends Base
 
         $p = &$requestParams;
 
-        $p['fl'] = 'id,system,type,subtype,name,date,size,cid,cdate,uid,udate,template_id,acl_count';
+        $p['fl'] = 'id,system,path,name,case,date,size,cid,oid,cdate,uid,udate,template_id,acl_count';
 
         if (empty($p['showFoldersContent'])) {
             $p['templates'] = $GLOBALS['folder_templates'];
@@ -47,7 +47,6 @@ class Dbnode extends Base
         } else {
             $p['pids'] = $pid;
         }
-
         $s = new \CB\Search();
         $rez = $s->query($p);
         if (!empty($rez['data'])) {

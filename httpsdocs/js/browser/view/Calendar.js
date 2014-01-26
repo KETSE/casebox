@@ -20,6 +20,8 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
     //showTime: false,
     //title: 'My Calendar', // the header of the calendar, could be a subtitle for the app
 
+    ,params: {
+    }
     // Once this component inits it will set a reference to itself as an application
     // member property for easy reference in other functions within App.
     ,initComponent: function(){
@@ -55,54 +57,57 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         // implementation would likely be loading remote data via an HttpProxy, but the
         // underlying store functionality is the same.  Note that if you would like to
         // provide custom data mappings for events, see EventRecord.js.
-        this.eventStore = new Ext.data.DirectStore({
+        this.eventStore = new Ext.data.JsonStore({
             autoLoad: false
             ,autoDestroy: true
-            ,proxy: new  Ext.data.DirectProxy({
-                paramsAsHash: true
-                ,directFn: CB_Calendar.getEvents
-                ,listeners:{
-                    scope: this
-                    ,load: function(proxy, obj, opt){
-                        for (var i = 0; i < obj.result.data.length; i++) {
-                            obj.result.data[i].start = date_ISO_to_date(obj.result.data[i].start);
-                            obj.result.data[i].end = Ext.value(date_ISO_to_date(obj.result.data[i].end), obj.result.data[i].start);
-                        }
-                    }
-                }
-            })
-            ,reader: new Ext.data.JsonReader({
-                successProperty: 'success'
-                ,idProperty: 'id'
-                ,root: 'data'
-                ,messageProperty: 'msg'
-                ,fields: fields
-            }
-            )
+            // ,proxy: new  Ext.data.DirectProxy({
+            //     paramsAsHash: true
+            //     ,directFn: CB_Calendar.getEvents
+            //     ,listeners:{
+            //         scope: this
+            //         ,load: function(proxy, obj, opt){
+            //             for (var i = 0; i < obj.result.data.length; i++) {
+            //                 obj.result.data[i].start = date_ISO_to_date(obj.result.data[i].start);
+            //                 obj.result.data[i].end = Ext.value(date_ISO_to_date(obj.result.data[i].end), obj.result.data[i].start);
+            //             }
+            //         }
+            //     }
+            // })
+            // ,reader: new Ext.data.JsonReader({
+            //     successProperty: 'success'
+            //     ,idProperty: 'id'
+            //     ,root: 'data'
+            //     ,messageProperty: 'msg'
+            //     ,fields: fields
+            // }
+            // )
+            ,fields: fields
             ,listeners: {
                 scope: this
 
-                ,beforeload: function(st, r, o){
-                    el = this.getEl();
-                    if( Ext.isEmpty(el) || !el.isVisible(true) ) return false;
-                    // if(!Ext.isDate(r.params.start)) r.params.start = new Date()
-                    //  || !Ext.isDate(r.params.end)) return false;
-                    if(!this.allowedReload){
-                        this.eventsReloadTask.delay(500);
-                        return false;
-                    }
-                    this.allowedReload = false;
-                }
+                // ,beforeload: function(st, r, o){
+                //     el = this.getEl();
+                //     if( Ext.isEmpty(el) || !el.isVisible(true) ) return false;
+                //     // if(!Ext.isDate(r.params.start)) r.params.start = new Date()
+                //     //  || !Ext.isDate(r.params.end)) return false;
+                //     if(!this.allowedReload){
+                //         this.eventsReloadTask.delay(500);
+                //         return false;
+                //     }
+                //     this.allowedReload = false;
+                // }
 
                 ,load: function(st, recs, opt){
                     Ext.each(
                         recs
                         , function(r){
                             cls = 'cal-evt-bg-t'+r.get('type') +
-                                ' cal-cat-'+ CB.DB.thesauri.getIcon(r.get('category_id')) +
+                                ' cal-cat-'+ r.get('cls') +
                                 ( (r.get('status') == 3) ? ' cal-status-c' : '');
                             r.set('iconCls', getItemIcon(r.data));
-                            if(!Ext.isEmpty(r.get('iconCls'))) cls = cls + ' icon-padding '+ r.get('iconCls');
+                            if(!Ext.isEmpty(r.get('iconCls'))) {
+                                cls = cls + ' icon-padding '+ r.get('iconCls');
+                            }
                             r.set('cls', cls);
                             r.commit();
                         }
@@ -145,7 +150,7 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                         // will be null when switching to the event edit form so ignore
                         //Ext.getCmp('app-nav-picker').setValue(dateInfo.activeDate);
                         this.updateTitle(dateInfo, vw);
-                        this.eventsReloadTask.delay(500);
+                        this.eventsReloadTask.delay(200);
                     }
                 }
                 ,dayclick: function(vw, dt, ad, el){
@@ -167,8 +172,8 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         });
         CB.Calendar.superclass.initComponent.apply(this, arguments);
 
-        this.addEvents('objectopen');
-        this.enableBubble('objectopen');
+        this.addEvents('objectopen', 'changeparams', 'reload');
+        this.enableBubble(['objectopen', 'changeparams', 'reload']);
     }
     ,updateRecordDatesRemotely: function(record){
         CB_Tasks.updateDates(
@@ -190,25 +195,18 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
     ,doReloadEventsStore: function(){
         this.allowedReload = true;
         if(Ext.isEmpty(this.getLayout().activeItem)) return;
-        if(Ext.isDefined(this.eventStore.requestedParams)) {
-            Ext.apply(this.eventStore.baseParams, this.eventStore.requestedParams);
-        }
-        delete this.eventStore.requestedParams;
-        params = Ext.apply({}, this.eventStore.baseParams);
-        Ext.apply(params, this.getLayout().activeItem.getViewBounds());
+        var bounds =  this.getLayout().activeItem.getViewBounds();
+        var p = {};
 
-        params.end.setHours(23);
-        params.end.setMinutes(59);
-        params.end.setSeconds(59);
-        params.end.setMilliseconds(999);
-        params.start = params.start.toISOString();
-        params.end = params.end.toISOString();
+        bounds.end.setHours(23);
+        bounds.end.setMinutes(59);
+        bounds.end.setSeconds(59);
+        bounds.end.setMilliseconds(999);
+        p.dateStart = bounds.start.toISOString();
+        p.dateEnd = bounds.end.toISOString();
+        Ext.apply(this.params, p);
 
-        params.facets = 'calendar';
-
-        if(Ext.isEmpty(params.path)) params.path = '/';
-
-        this.eventStore.load({ params: params });
+        this.fireEvent('reload', this);
     }
 
     // The edit popup window is not part of the CalendarPanel itself -- it is a separate component.
@@ -300,6 +298,7 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
             }
         });
 
+        this.store.on('load', this.onMainStoreLoad, this);
         // this.calendar.eventStore.baseParams.facets = 'calendar';
         // this.calendar.eventStore.proxy.on('load', this.onProxyLoaded, this);
 
@@ -313,48 +312,88 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
         });
         CB.browser.view.Calendar.superclass.initComponent.apply(this, arguments);
 
-        this.addEvents('taskcreate');
-        this.enableBubble('taskcreate');
+        this.addEvents('createobject');
+        this.enableBubble(['createobject']);
     }
 
     ,getViewParams: function() {
-        return {
-            facets: 'calendar'
+        var p = {
+            from: 'calendar'
+            // ,facets: 'calendar'
         };
+        Ext.apply(p, this.calendar.params);
+        return p;
+    }
+
+    ,onMainStoreLoad: function(store, records, options) {
+        var el = this.getEl();
+        if(Ext.isEmpty(el) || !el.isVisible(true)) {
+            return false;
+        }
+
+        var data = [];
+        store.each(
+            function(r) {
+                var d = r.data;
+                var sd = App.customRenderers.datetime(d.date);
+                var ed = App.customRenderers.datetime(d.date_end);
+                var ad = ((sd.length < 11) && (sd.length < 11));
+                if(!Ext.isEmpty(d.date)) {
+                    data.push({
+                        id: d.nid
+                        ,ad: ad
+                        ,category_id: d.category_id
+                        ,cid: 1 //that's calendar id
+                        ,start: d.date
+                        ,end: Ext.value(d.date_end, d.date)
+                        ,status: d.status
+                        ,template_id: d.template_id
+                        ,title: d.name
+                        ,cls: d.cls
+                    });
+                }
+            }
+            ,this
+        );
+        this.calendar.eventStore.loadData(data);
     }
 
     ,onRangeSelect: function(c, range, callback){
-        var allday = ((range.StartDate.format('H:i:s') == '00:00:00') && (range.EndDate.format('H:i:s') == '23:59:59') ) ? 1 : 0;
-        this.fireEvent(
-            'taskcreate'
-            ,{
-                data: {
-                    pid: this.folderProperties.id
-                    ,date_start: range.StartDate
-                    ,date_end: range.EndDate
-                    ,allday: allday
-                    ,path: this.folderProperties.path
-                    ,pathtext: this.folderProperties.pathtext
+        var allday = ((range.StartDate.format('H:i:s') == '00:00:00') && (range.EndDate.format('H:i:s') == '23:59:59') ) ? 1 : -1;
+        var prefix = (allday == 1) ? 'date' : 'datetime';
+        var data = {
+            template_id: App.config.default_task_template
+            ,data: {
+                allday: {
+                    value: allday
+                    ,childs: {}
                 }
             }
-        );
+        };
+        data.data.allday.childs[prefix + '_start'] = range.StartDate;
+        data.data.allday.childs[prefix + '_end'] = range.EndDate;
+
+        this.fireEvent('createobject', data);
         callback();
     }
 
     ,onDayClick: function(c, date, ad, el){
-        allday = (date.format('H:i:s') == '00:00:00') ? 1 : 0;
-        this.fireEvent(
-            'taskcreate'
-            ,{
-                data: {
-                    pid: this.folderProperties.id
-                    ,date_start: date
-                    ,allday: allday
-                    ,path: this.folderProperties.path
-                    ,pathtext: this.folderProperties.pathtext
+        var allday = (date.format('H:i:s') == '00:00:00') ? 1 : -1;
+        var prefix = (allday == 1) ? 'date' : 'datetime';
+        var data = {
+            template_id: App.config.default_task_template
+            ,data: {
+                allday: {
+                    value: allday
+                    ,childs: {
+                        date_start: date
+                    }
                 }
             }
-        );
+        };
+        data.data.allday.childs[prefix + '_start'] = date;
+
+        this.fireEvent('createobject', data);
     }
 
     ,onActivate: function() {
@@ -412,3 +451,20 @@ CB.browser.view.CalendarPanel = Ext.extend(Ext.Panel, {
     }
 });
 Ext.reg('CBBrowserViewCalendarPanel', CB.browser.view.CalendarPanel);
+
+
+/* calendar component overrides */
+Ext.calendar.CalendarView.prototype.setStartDate = function(start, refresh) {
+    this.startDate = start.clearTime();
+    this.setViewBounds(start);
+    // this.store.load({
+    //     params: {
+    //         start: this.viewStart.format('m-d-Y'),
+    //         end: this.viewEnd.format('m-d-Y')
+    //     }
+    // });
+    if (refresh === true) {
+        this.refresh();
+    }
+    this.fireEvent('datechange', this, this.startDate, this.viewStart, this.viewEnd);
+};

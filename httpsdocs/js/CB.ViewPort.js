@@ -125,12 +125,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 ,fileopen: this.onFileOpen
                 ,fileupload: this.onFileUpload
                 ,filedownload: this.onFilesDownload
-                ,createobject: this.createObject
+                // ,createobject: this.createObject
                 ,openobject: this.openObject
                 ,deleteobject: this.onDeleteObject
                 ,opencalendar: this.openCalendar
                 ,favoritetoggle: this.toggleFavorite
-                ,taskcreate: this.onTaskCreate
                 ,taskedit: this.onTaskEdit
                 ,useradded: this.onUsersChange
                 ,userdeleted: this.onUsersChange
@@ -369,28 +368,32 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             // App.explorer.setParams({});
         }
     }
-    ,createObject: function(data, e){
-        tr = CB.DB.templates.getById(data.template_id);
-        if(tr)
-        switch(tr.get('type')){
-            case 'task':
-                this.onTaskCreate({data: data}, e);
-                break;
-            // case 'case':
-            default:
-                this.openObject(data, e);
-                break;
-        }
-    }
+    // ,createObject: function(data, e){
+        // tr = CB.DB.templates.getById(data.template_id);
+        // if(tr)
+        // switch(tr.get('type')){
+        //     case 'task':
+        //         this.onTaskCreate({data: data}, e);
+        //         break;
+        //     // case 'case':
+        //     default:
+                // this.openObject(data, e);
+        //         break;
+        // }
+    // }
     ,openObject: function(data, e){
         if(e){
             if(e.stopEvent) e.stopEvent();
-            if(e.processed === true) return;
+            if(e.processed === true) {
+                return;
+            }
         }
 
-        if(App.activateTab(App.mainTabPanel, data.id, CB.Objects)) return true;
+        if(App.activateTab(App.mainTabPanel, data.id, CB.Objects)) {
+            return true;
+        }
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');/*, hideDeleteButton: (data.template_id == 1)/**/
+        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');
         this.fireEvent('objectopened', o);
         return App.addTab(App.mainTabPanel, o);
     }
@@ -399,7 +402,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
         if(App.activateTab(App.mainTabPanel, data.id)) return true;
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');/*, hideDeleteButton: (data.template_id == 1)/**/
+        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');
         return App.addTab(App.mainTabPanel, o);
     }
     ,search: function(query, savedQueryId){
@@ -441,30 +444,30 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     ,processToggleFavorite: function(r, e){
         this.fireEvent('favoritetoggled', r, e);
     }
-    ,onTaskCreate: function(p, ev){
-        if(Ext.isEmpty(p)) {
-            p ={ data: {} };
-        }
+    // ,onTaskCreate: function(p, ev){
+    //     if(Ext.isEmpty(p)) {
+    //         p ={ data: {} };
+    //     }
 
-        Ext.apply(p, {
-            admin: true
-            ,autoclose: 1
-            ,privacy: 0
-            ,reminds: "1|10|1"
-            ,responsible_user_ids: App.loginData.id
-        });
-        if(Ext.isEmpty(p.title)) {
-            p.title = L.AddTask;
-        }
-        if(Ext.isEmpty(p.usersStore)) {
-            p.usersStore = CB.DB.usersStore;
-        }
-        this.lastFocusedElement = Ext.get(document.activeElement);
-        delete p.data.title;
-        dw = new CB.Tasks(p);
-        dw.on('beforedestroy', this.focusLastElement, this);
-        return dw.show();
-    }
+    //     Ext.apply(p, {
+    //         admin: true
+    //         ,autoclose: 1
+    //         ,privacy: 0
+    //         ,reminds: "1|10|1"
+    //         ,responsible_user_ids: App.loginData.id
+    //     });
+    //     if(Ext.isEmpty(p.title)) {
+    //         p.title = L.AddTask;
+    //     }
+    //     if(Ext.isEmpty(p.usersStore)) {
+    //         p.usersStore = CB.DB.usersStore;
+    //     }
+    //     this.lastFocusedElement = Ext.get(document.activeElement);
+    //     delete p.data.title;
+    //     dw = new CB.Tasks(p);
+    //     dw.on('beforedestroy', this.focusLastElement, this);
+    //     return dw.show();
+    // }
     ,onTaskEdit: function(p, ev){//task_id, object_id, object_title, title
         if(Ext.isEmpty(p.title)) p.title = L.EditTask;
         if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;

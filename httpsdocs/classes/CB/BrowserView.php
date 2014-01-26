@@ -6,58 +6,18 @@ class BrowserView extends Browser
     public function getChildren($p)
     {
         $p['showFoldersContent'] = true;
+        if (@$p['from'] == 'calendar') {
+            $p['fl'] = 'id,category_id,cid,date_end,date,status,template_id,name,cls';
+        }
 
-        return parent::getChildren($p);
+        $rez = parent::getChildren($p);
+        // if (@$p['from'] == 'calendar') {
+        //     foreach ($rez['data'] as &$d) {
+        //         // $d['cls'] = Util\getThesauryIcon($d['category_id']);
+        //     }
+        // }
+        return $rez;
     }
-
-    // /**
-    //  * default method for displaying a node childs
-    //  * @param  array $p params
-    //  * @return array existing nodes
-    //  */
-    // private function getDefaultControllerResults($p)
-    // {
-    //     $pid = null;
-    //     if (!empty($p['path'])) {
-    //         $pid = Path::getId($p['path']);
-    //     } elseif (!empty($p['pid'])) {
-    //         $pid = is_numeric($p['pid']) ? $p['pid'] : Browser::getRootFolderId();
-    //     }
-
-    //     if (empty($p['descendants'])) {
-    //         $p['pid'] = $pid;
-    //     } else {
-    //         $p['pids'] = $pid;
-    //     }
-    //     $s = new Search();
-    //     $rez = $s->query($p);
-    //     if (!empty($rez['data'])) {
-    //         for ($i=0; $i < sizeof($rez['data']); $i++) {
-    //             $d = &$rez['data'][$i];
-    //             $d['nid'] = $d['id'];
-    //             unset($d['id']);
-
-    //             $res = DB\dbQuery(
-    //                 'SELECT cfg
-    //                   , (SELECT 1
-    //                      FROM tree
-    //                      WHERE pid = $1
-    //                          AND dstatus = 0 LIMIT 1) has_childs
-    //                 FROM tree
-    //                 WHERE id = $1',
-    //                 $d['nid']
-    //             ) or die(DB\dbQueryError());
-
-    //             if ($r = $res->fetch_assoc()) {
-    //                 $d['cfg'] = Util\toJSONArray($r['cfg']);
-    //                 $d['has_childs'] = !empty($r['has_childs']);
-    //             }
-    //             $res->close();
-    //         }
-    //     }
-
-    //     return $rez;
-    // }
 
     public function getSummaryData($p)
     {

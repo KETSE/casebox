@@ -222,7 +222,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.onViewChangeClick(1, false);
         this.getLayout().activeItem.load(objectData);
         this.loadedId = objectData.id;
-        // this.requestedLoadId = objectData.id;
     }
     ,onEditClick: function() {
         this.onViewChangeClick(1);
