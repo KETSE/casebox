@@ -1037,6 +1037,10 @@ class User
                 ? USER_LANGUAGE_INDEX -1
                 : $r['language_id'] - 1;
 
+            if (empty($GLOBALS['languages'][$language_index])) {
+                $r['language_id'] = LANGUAGE_INDEX;
+                $language_index = LANGUAGE_INDEX -1;
+            }
             $r['language'] = $GLOBALS['languages'][$language_index];
             $r['locale'] =  $GLOBALS['language_settings'][$r['language']]['locale'];
 

@@ -240,13 +240,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.getLayout().activeItem.save(
             function(component, form, action){
                 var id = Ext.value(action.result.data.id, this.loadedId);
-                clog('clear component');
                 component.clear();
-                clog('set request load id to ', id);
                 this.requestedLoadId = id;
-                clog('call doLoad', id);
                 this.items.itemAt(0).doLoad(id);
-                clog('call onViewChange', id);
                 this.onViewChangeClick(0, false);
 
                 this.skipNextPreviewLoadOnBrowserRefresh = true;

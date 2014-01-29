@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\L;
+
 class Tasks
 {
     /**
@@ -944,9 +946,6 @@ class Tasks
             $user = &$_SESSION['user'];
         } else {
             $user = User::getPreferences($user_id);
-            if (empty($user['language_id'])) {
-                $user['language_id'] = 1;
-            }
         }
         $res = DB\dbQuery(
             'SELECT
@@ -1007,7 +1006,9 @@ class Tasks
             $users = array();
             $ures = DB\dbQuery(
                 'SELECT u.id
-                    ,u.l'.$user['language_id'].' `name`
+                    ,u.`name`
+                    ,first_name
+                    ,last_name
                     ,ru.status
                     ,ru.time
                     ,(SELECT `message`
@@ -1214,7 +1215,24 @@ class Tasks
             return '';
         }
         $d = $d['data'];
-        debug(var_export($d, 1));
+
+        $canEdit = (($d['status'] != 3) && $d['admin']);
+        $canClose = $canEdit;
+        $canReopen = ($d['status'] == 3) && ($d['cid'] == $_SESSION['user']['id']);
+        $canComplete = (($d['status'] != 3) && !empty($d['user']) && (@$d['user']['status'] == 0));
+
+        $actions = array();
+
+        if ($canClose) {
+            $actions[] = '<a action="close" class="taskA click">'.L\Close.'</a>';
+        }
+        if ($canReopen) {
+            $actions[] = '<a action="reopen" class="taskA click">'.L\Reopen.'</a>';
+        }
+        if (!$canClose && $canComplete) {
+            $actions[] = '<a action="complete" class="taskA click">'.L\Complete.'</a>';
+        }
+
         $rez = '<div class="taskview">
             <h2 '.( ($d['status'] == 3) ? 'class=\'completed\'"' : '' ).'>{name}</h2>
             <div class="datetime">{datetime_period}</div>
@@ -1290,14 +1308,39 @@ class Tasks
                 '</div></td><td><b>'.$un.'</b>'.
                 '<p class="gr">'.(
                     ($u['status'] == 1)
-                    ? L\Completed.': '.date($date_format.' H:i', strtotime($u['time']))
-                    : L\waitingForAction
+                    ? L\Completed.': '.date($date_format.' H:i', strtotime($u['time'])).
+                        ( ($canEdit == 1) ? '<a class="bt taskA click" action="markincomplete" uid="'.$u['id'].'">'.L\revoke.'</a>' : '')
+                    : L\waitingForAction.
+                        (($canEdit == 1) ? '<a class="bt taskA click" action="markcomplete" uid="'.$u['id'].'">'.L\complete.'</a>' : '' )
                 ).'</p></td></tr>';
                 //<a class="bt" name="complete" uid="1" href="#">завершить</a>
 
             }
             $rez .= '</tbody></table></td></tr>';
         }
+
+                // "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
+                //     Util\formatMysqlDate($ur['time'], 'Y, F j H:i').'</span>'.
+                //     : L\get('waitingForAction', $user['language_id'])
+                // ).
+                // "\n\r".'</p>'.
+                // ( (($ur['status'] == 1) && !empty($ur['complete_message'])) ? '<p>'.nl2br(Util\adjustTextForDisplay($ur['complete_message'])).'</p>': '').
+                // '</td></tr>';
+
+            // }
+            // ,'<tr><td class="user">'
+            // ,'<div style="position: relative">'
+            // ,'<img class="photo32" src="photo/{id}.jpg" alt="{name}" title="{name}">'
+            // ,'{[ (values.status == 1) ? \'<img class="done icon icon-tick-circle" src="'+Ext.BLANK_IMAGE_URL+'"/>\': ""]}'
+            // ,'</div>'
+            // ,'</td><td><b>{name}</b>'
+            // ,'<p class="gr">'
+            // ,'{[ (values.status == 1) ? "' + L.Completed + ': <span class=\'dttm\' title=\'"+values.time+"\'>"+values.time+"</span>" + '
+            // ,' ( (values.canEdit == 1) ? "<a class=\'bt\' name=\'revoke\' uid=\'"+values.id+"\' href=\'#\'>' + L.revoke + '</a>" : "" )'
+            // ,' :  "'+L.waitingForAction+' " + '
+            // ,' ( (values.canEdit == 1) ? "<a class=\'bt\' name=\'complete\' uid=\'"+values.id+"\' href=\'#\'>'+L.complete+'</a>" : "" ) '
+            // ,']}'
+            // ,'</p></td></tr>'
 
         if (!empty($d['files'])) {
             $rez .= '<tr><td class="k">'.L\Files.':</td><td><ul class="task_files">';
@@ -1335,6 +1378,8 @@ class Tasks
             $rez .= '</ul></td></tr>';
         }
         $rez .= '</tbody></table></div>';
+
+        $rez .= '<div class="p15">'.implode(' &nbsp; ', $actions).'</div>';
 
         return $rez;
     }

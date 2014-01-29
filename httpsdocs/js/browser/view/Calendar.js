@@ -403,7 +403,6 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
                 var ed = App.customRenderers.datetime(d.date_end);
                 var ad = ((sd.length < 11) && (sd.length < 11));
                 if(!Ext.isEmpty(d.date)) {
-                    clog('d.date_end', d.date_end, d);
                     data.push({
                         id: d.nid
                         ,ad: ad
@@ -420,7 +419,6 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
             }
             ,this
         );
-        clog('loading data to calendar: ', data);
         this.calendar.eventStore.loadData(data);
     }
 

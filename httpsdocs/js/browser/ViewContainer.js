@@ -579,13 +579,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,reloadView: function(){
         this.getEl().mask(L.Loading, 'x-mask-loading');
-        clog(this.params, 'this.params')
         this.store.load(this.params);
         // this.store.reload();
     }
 
     ,onProxyLoad: function (proxy, o, options) {
-        clog('loaded', arguments);
         this.path = this.store.baseParams.path;
         this.folderProperties = Ext.apply({}, o.result.folderProperties);
 
