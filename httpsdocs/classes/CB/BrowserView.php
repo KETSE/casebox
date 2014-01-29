@@ -7,15 +7,11 @@ class BrowserView extends Browser
     {
         $p['showFoldersContent'] = true;
         if (@$p['from'] == 'calendar') {
-            $p['fl'] = 'id,category_id,cid,date_end,date,status,template_id,name,cls';
+            $p['fl'] = 'id,category_id,cid,date,date_end,status,template_id,name,cls';
         }
 
         $rez = parent::getChildren($p);
-        // if (@$p['from'] == 'calendar') {
-        //     foreach ($rez['data'] as &$d) {
-        //         // $d['cls'] = Util\getThesauryIcon($d['category_id']);
-        //     }
-        // }
+
         return $rez;
     }
 

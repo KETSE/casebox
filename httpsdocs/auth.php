@@ -57,8 +57,9 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
             : 'Wrong verification code. Please try again.';
     }
 }
+
 if (!User::isLoged()) {
-    exit(header('Location: /login.php'));
+    exit(header('Location: '.URI_PREFIX.'login.php'));
 }
 
-header('Location: /index.php');
+header('Location: '.URI_PREFIX.'index.php');

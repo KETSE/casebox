@@ -199,7 +199,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.delayedLoadTask.cancel();
         this.requestedLoadId = objectId;
         if(this.getLayout().activeItem.getXType() !== 'CBEditObject') {
-            this.delayedLoadTask.delay(300, this.doLoad, this);
+            if(this.skipNextPreviewLoadOnBrowserRefresh) {
+                delete this.skipNextPreviewLoadOnBrowserRefresh;
+            } else {
+                this.delayedLoadTask.delay(300, this.doLoad, this);
+            }
         }
     }
     ,doLoad: function() {
@@ -234,12 +238,18 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
     ,onSaveClick: function() {
         this.getLayout().activeItem.save(
-            function(component){
+            function(component, form, action){
+                var id = Ext.value(action.result.data.id, this.loadedId);
+                clog('clear component');
                 component.clear();
-                this.requestedLoadId = this.loadedId;
-                this.items.itemAt(0).doLoad(this.loadedId);
+                clog('set request load id to ', id);
+                this.requestedLoadId = id;
+                clog('call doLoad', id);
+                this.items.itemAt(0).doLoad(id);
+                clog('call onViewChange', id);
                 this.onViewChangeClick(0, false);
-                // this.getLayout().activeItem.reload();
+
+                this.skipNextPreviewLoadOnBrowserRefresh = true;
             }
             ,this
         );

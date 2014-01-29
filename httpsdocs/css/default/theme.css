@@ -1,5 +1,7 @@
 /* ib stands for icon big */
 .ib-apps{background-image: url(b/apps.png); min-width: 38px}
+.ib-arr-l{background-image: url(b/arr_l.png); min-width: 38px}
+.ib-arr-r{background-image: url(b/arr_r.png); min-width: 38px}
 .ib-attach{background-image: url(b/attach.png); min-width: 38px}
 .ib-back{background-image: url(b/back.png); min-width: 38px}
 .ib-browse{background-image: url(b/browse.png); min-width: 38px}

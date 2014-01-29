@@ -270,7 +270,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         }
         this._isDirty = false;
         if(this.saveCallback) {
-            this.saveCallback(this);
+            this.saveCallback(this, form, action);
             delete this.saveCallback;
         }
         App.fireEvent('objectchanged', r.data);

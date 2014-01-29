@@ -20,19 +20,25 @@ namespace CB;
 */
 
 /* detecting core name (project name) from SERVER_NAME */
-$arr = explode('.', $_SERVER['SERVER_NAME']);
-// remove www, ww2 and take the next parameter as the $coreName
-if (in_array($arr[0], array( 'www', 'ww2' ))) {
-    array_shift($arr);
-}
-$arr = explode('-', $arr[0]);
-if (in_array($arr[sizeof($arr)-1], array('local', 'd'))) {
-    array_pop($arr);
-}
-$arr = implode('-', $arr);
-$arr = explode('_', $arr);
+if (isset($_GET['c'])) {
+    define('CB\\CORE_NAME', $_GET['c']);
+    define('CB\\URI_PREFIX', '/'.CORE_NAME.'/');
+} else {
+    $arr = explode('.', $_SERVER['SERVER_NAME']);
+    // remove www, ww2 and take the next parameter as the $coreName
+    if (in_array($arr[0], array( 'www', 'ww2' ))) {
+        array_shift($arr);
+    }
+    $arr = explode('-', $arr[0]);
+    if (in_array($arr[sizeof($arr)-1], array('local', 'd'))) {
+        array_pop($arr);
+    }
+    $arr = implode('-', $arr);
+    $arr = explode('_', $arr);
 
-define('CB\\CORE_NAME', $arr[0]);
+    define('CB\\CORE_NAME', $arr[0]);
+    define('CB\\URI_PREFIX', '/');
+}
 /* end of detecting core name (project name) from SERVER_NAME */
 
 /* define main paths /**/

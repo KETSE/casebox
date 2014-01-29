@@ -370,6 +370,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,'hl'
                     ,'iconCls'
                     ,{name: 'date', type: 'date'}
+                    ,{name: 'date_end', type: 'date'}
                     ,{name: 'size', type: 'int'}
                     ,{name: 'oid', type: 'int'}
                     ,{name: 'cid', type: 'int'}
@@ -578,10 +579,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,reloadView: function(){
         this.getEl().mask(L.Loading, 'x-mask-loading');
-        this.store.reload();
+        clog(this.params, 'this.params')
+        this.store.load(this.params);
+        // this.store.reload();
     }
 
     ,onProxyLoad: function (proxy, o, options) {
+        clog('loaded', arguments);
         this.path = this.store.baseParams.path;
         this.folderProperties = Ext.apply({}, o.result.folderProperties);
 
@@ -604,6 +608,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.fireEvent('viewloaded', proxy, o, options);
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
+        this.searchField.setValue(Ext.value(options.params.query, ''));
         this.filtersPanel.updateFacets(o.result.facets, options);
     }
 
@@ -643,6 +648,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,changeSomeParams: function(paramsSubset){
         var p = Ext.apply({}, this.params);
+        if(!Ext.isDefined(paramsSubset.start)) {
+            paramsSubset.start = 0;
+        }
         Ext.apply(p, paramsSubset);
         this.setParams(p);
     }
@@ -795,7 +803,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 path += '/';
             }
             path += objData.nid;
-            this.changeSomeParams({path: path});
+            this.changeSomeParams({
+                path: path
+                ,query: null
+            });
         } else {
             this.buttonCollection.get('preview').toggle(true);
             this.objectPanel.edit( {id: objData.nid} );
@@ -987,7 +998,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
     }
     ,onObjectChanged: function(objData){
-        if(objData.pid == this.folderProperties.id) {
+        if(
+            isNaN(this.folderProperties.id) ||
+            (objData.pid == this.folderProperties.id)
+        ) {
             App.locateObjectId = objData.id;
             this.onReloadClick();
         }

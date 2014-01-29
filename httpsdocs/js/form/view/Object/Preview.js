@@ -24,6 +24,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
     }
 
     ,loadPreview: function(id, versionId){
+        clog('Load preview ', arguments);
         var el = this.getEl();
         if(Ext.isEmpty(el) || !el.isVisible(true)) {
             return;
@@ -34,7 +35,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         this.newId = id;
         this.newVersionId = Ext.value(versionId, '');
         // if( (this.newId != this.data.id) || (this.newVersionId != this.loadedVersionId) ) {
-        this.delayReload(300);
+        this.delayReload(50);
         // }
     }
 
@@ -42,7 +43,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         if(!this.delayedReloadTask) {
             this.delayedReloadTask = new Ext.util.DelayedTask(this.reload, this);
         }
-        this.delayedReloadTask.delay(Ext.value(ms, 3000), this.reload, this);
+        this.delayedReloadTask.delay(Ext.value(ms, 50), this.reload, this);
 
     }
 
@@ -53,6 +54,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         this.doLoad(this.newId, this.newVersionId);
     }
     ,doLoad: function(id, vId) {
+        clog('doLoad accessed with id', id);
         this.load({
             url: '/preview/'+ id +'_' + vId + '.html'
             ,callback: this.processLoad

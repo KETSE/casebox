@@ -223,20 +223,38 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
         $rez .= ' '.$hourText;
     }
 
-    $interval = date_diff($d1, $d2);
-
     $d2format = '';
-    if ($interval->y > 0) {
-        $d2format = 'D M j, Y';
-    } elseif ($interval->m > 0) {
+    if ($d1->format('Y') != $d2->format('Y')) {
+         $d2format = 'D M j, Y';
+    } elseif ($d1->format('M') != $d2->format('M')) {
         $d2format = 'D M j';
-    } elseif ($interval->d > 0) {
+    } elseif ($d1->format('j') != $d2->format('j')) {
         $d2format = 'D j';
+    } elseif ($d1->format('D') != $d2->format('D')) {
+        $d2format = 'D';
     }
+
     $hourText = $d2->format('H:i');
-    if ($hourText != '00:00') {
+
+    if (($hourText != '00:00') || empty($d2format)) {
         $d2format .= (empty($d2format) ? '' : ', ').'H:i';
     }
+
+    // $interval = date_diff($d1, $d2);
+
+    // $d2format = '';
+    // if ($interval->y > 0) {
+    //     $d2format = 'D M j, Y';
+    // } elseif ($interval->m > 0) {
+    //     $d2format = 'D M j';
+    // } elseif ($interval->d > 0) {
+    //     $d2format = 'D j';
+    // }
+    // $hourText = $d2->format('H:i');
+    // echo $hourText;
+    // if ($hourText != '00:00') {
+    //     $d2format .= (empty($d2format) ? '' : ', ').'H:i';
+    // }
 
     if (!empty($d2format)) {
         $rez .= ' - '.$d2->format($d2format);

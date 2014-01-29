@@ -23,10 +23,11 @@ class Tasks
                 ,t.responsible_user_ids
                 ,t.autoclose
                 ,t.description
-                ,DATEDIFF(t.`date_end`
-                ,UTC_DATE()) `days`
+                ,DATEDIFF(t.`date_end`, UTC_DATE()) `days`
                 ,m.pid
                 ,m.template_id
+                ,m.cid
+                ,m.cdate
                 ,(SELECT reminds
                      FROM tasks_reminders
                      WHERE task_id = $1
@@ -34,9 +35,7 @@ class Tasks
                 ,(SELECT name FROM tree WHERE id = ti.case_id) `case`
                 ,(SELECT name FROM tree WHERE id = t.object_id) `object`
                 ,t.status
-                ,t.cid
                 ,t.completed
-                ,t.cdate
                 ,t.importance
                 ,t.category_id
                 ,t.allday
@@ -1215,7 +1214,7 @@ class Tasks
             return '';
         }
         $d = $d['data'];
-
+        debug(var_export($d, 1));
         $rez = '<div class="taskview">
             <h2 '.( ($d['status'] == 3) ? 'class=\'completed\'"' : '' ).'>{name}</h2>
             <div class="datetime">{datetime_period}</div>
@@ -1238,8 +1237,9 @@ class Tasks
         $d['datetime_period'] = date($format, $i);
 
         if (!empty($d['date_end'])) {
-            $i = strtotime($d['date_end']);
-            $d['datetime_period'] .= ' - '.date($format, $i);
+            // $i = strtotime($d['date_end']);
+            // $d['datetime_period'] .= ' - '.date($format, $i);
+            $d['datetime_period'] = Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['TZ']);
         }
 
         $d['importance_text'] = '';
@@ -1399,7 +1399,7 @@ class Tasks
             $object_record['completed'] = $objData['completed'];
         }
 
-        @$object_record['cls'] = $template->formatValueForDisplay(
+        $object_record['cls'] = $template->formatValueForDisplay(
             $template->getField('color'),
             $obj->getFieldValue('color', 0)['value'],
             false

@@ -1,3 +1,22 @@
+CaseBox 1.9.93 (2014-01-29)
+==============================
+New Features, Improvements
+--------------------------
+- Clear the search box (i.e. remove fulltext filter) when Path changes
+- Move (Day, Week, Month) toggle buttons in toolbar (as in proto)
+- Add 3 YM (YearMonth) columns for Object.cdate and Task.Start, Task.End
+- Task smart period rendering
+- the view for virtual nodes will always reload when saving/updating an object
+    We don't know what objects return a virtual node.
+
+Fixed Bugs:
+----------
+- modifying filtering options should reset result pageNumber to 1
+- Tasks did not display with color specified in its prperties
+- DateEnd ignored when a task is displayed in calendar
+- Creating tasks in calendar visual bugs with preview after save, and view reloading
+
+
 CaseBox 1.9.92 (2014-01-26)
 ==============================
 New Features, Improvements

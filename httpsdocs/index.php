@@ -2,6 +2,7 @@
 namespace CB;
 
 require_once 'init.php';
+
 if (empty($_SESSION['user'])) {
     exit(header('Location: /login.php'));
 }

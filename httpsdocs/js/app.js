@@ -493,6 +493,8 @@ function initApp(){
         if(Ext.isEmpty(path)) path = '/';
         params = Ext.value(params, {});
         params.path = path;
+        params.query = null;
+        params.start = 0;
 
         App.activateBrowserTab().setParams(params);
     };

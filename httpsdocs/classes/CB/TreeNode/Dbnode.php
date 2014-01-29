@@ -36,7 +36,7 @@ class Dbnode extends Base
 
         $p = &$requestParams;
 
-        $p['fl'] = 'id,system,path,name,case,date,size,cid,oid,cdate,uid,udate,template_id,acl_count';
+        $p['fl'] = 'id,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls';
 
         if (empty($p['showFoldersContent'])) {
             $p['templates'] = $GLOBALS['folder_templates'];

@@ -283,13 +283,16 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
     ,initComponent: function(){
 
         this.titleItem = new Ext.Toolbar.TextItem({
-            cls: 'calendar-title'
+            id: 'caltitle'
+            ,cls: 'calendar-title'
             ,text: '<span style="font-size: 16px; font-weight: bold; color: #333">December 2012</span>'
         });
+        var viewGroup = Ext.id();
 
         this.calendar = new CB.Calendar({
-            titleItem: this.titleItem
-            ,region: 'center'
+            // titleItem: this.titleItem
+            region: 'center'
+            ,showNavBar: false
             ,listeners:{
                 scope: this
                 ,rangeselect: this.onRangeSelect
@@ -298,9 +301,71 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
             }
         });
 
-        this.store.on('load', this.onMainStoreLoad, this);
-        // this.calendar.eventStore.baseParams.facets = 'calendar';
-        // this.calendar.eventStore.proxy.on('load', this.onProxyLoaded, this);
+        if(this.store) {
+            this.store.on('load', this.onMainStoreLoad, this);
+        }
+
+        this.refOwner.buttonCollection.addAll(
+            new Ext.Button({
+                text: L.Day
+                ,id: 'dayview'
+                ,enableToggle: true
+                ,allowDepress: false
+                ,iconCls: 'ib-cal-day'
+                ,iconAlign:'top'
+                ,scale: 'large'
+                ,toggleGroup: 'cv' + viewGroup
+                ,scope: this.calendar
+                ,handler: this.calendar.onDayClick
+            })
+
+            ,new Ext.Button({
+                text: L.Week
+                ,id: 'weekview'
+                ,enableToggle: true
+                ,allowDepress: false
+                ,iconCls: 'ib-cal-week'
+                ,iconAlign:'top'
+                ,scale: 'large'
+                ,toggleGroup: 'cv' + viewGroup
+                ,scope: this.calendar
+                ,handler: this.calendar.onWeekClick
+            })
+
+            ,new Ext.Button({
+                text: L.Month
+                ,id: 'monthview'
+                ,enableToggle: true
+                ,allowDepress: false
+                ,iconCls: 'ib-cal-month'
+                ,iconAlign:'top'
+                ,scale: 'large'
+                ,toggleGroup: 'cv' + viewGroup
+                ,pressed: true
+                ,scope: this.calendar
+                ,handler: this.calendar.onMonthClick
+            })
+
+            ,new Ext.Button({
+                id: 'calprev'
+                ,iconCls: 'ib-arr-l'
+                ,iconAlign:'top'
+                ,scale: 'large'
+                ,scope: this.calendar
+                ,handler: this.calendar.onPrevClick
+            })
+
+            ,new Ext.Button({
+                id: 'calnext'
+                ,iconCls: 'ib-arr-r'
+                ,iconAlign:'top'
+                ,scale: 'large'
+                ,scope: this.calendar
+                ,handler: this.calendar.onNextClick
+            })
+
+            ,this.titleItem
+        );
 
         Ext.apply(this, {
             title: L.Calendar
@@ -319,7 +384,6 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
     ,getViewParams: function() {
         var p = {
             from: 'calendar'
-            // ,facets: 'calendar'
         };
         Ext.apply(p, this.calendar.params);
         return p;
@@ -339,6 +403,7 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
                 var ed = App.customRenderers.datetime(d.date_end);
                 var ad = ((sd.length < 11) && (sd.length < 11));
                 if(!Ext.isEmpty(d.date)) {
+                    clog('d.date_end', d.date_end, d);
                     data.push({
                         id: d.nid
                         ,ad: ad
@@ -355,7 +420,12 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
             }
             ,this
         );
+        clog('loading data to calendar: ', data);
         this.calendar.eventStore.loadData(data);
+    }
+
+    ,onChangeViewClick: function() {
+
     }
 
     ,onRangeSelect: function(c, range, callback){
@@ -406,6 +476,13 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
                 ,'edit'
                 ,'-'
                 ,'delete'
+                ,'-'
+                ,'dayview'
+                ,'weekview'
+                ,'monthview'
+                ,'calprev'
+                ,'calnext'
+                ,'caltitle'
             ]
         );
     }

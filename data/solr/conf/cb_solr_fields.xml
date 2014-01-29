@@ -152,6 +152,16 @@
 <!-- sort_path: designed to sort by path -->
 <field name="sort_path"     type="text_general_sort" indexed="true" stored="true" />
 
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering. By default this field contains data from creation object date  -->
+<field name="ym1"     type="tint" indexed="true" stored="true" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering. By default this field contains start date for tasks  -->
+<field name="ym2"     type="tint" indexed="true" stored="true" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering.
+By default this field contains end date for tasks or creation date if end date is empty -->
+<field name="ym3"     type="tint" indexed="true" stored="true" />
+
 <!-- role_ids: these columns can be used by object templates to store specific values and later to be able to filter or search by them.
     For example: in case_card template there can be fields that define Managers, Lawyers, Helpers for a case.
     For these fields, in db.templates_structure we specify the value for column "solr_column_name" = 'role_ids1' / 'role_ids2' etc.

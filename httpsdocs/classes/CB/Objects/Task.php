@@ -371,8 +371,8 @@ class Task extends Object
         /* analize if task dates are set */
         switch ($this->getFieldValue('allday', 0)['value']) {
             case 1:
-                $p['date'] = $this->getFieldValue('date_start', 0)['value'];
-                $p['date_end'] = $this->getFieldValue('date_end', 0)['value'];
+                $p['date'] = substr($this->getFieldValue('date_start', 0)['value'], 0, 10);
+                $p['date_end'] = substr($this->getFieldValue('date_end', 0)['value'], 0, 10);
                 break;
             case -1:
                 $p['date'] = $this->getFieldValue('datetime_start', 0)['value'];

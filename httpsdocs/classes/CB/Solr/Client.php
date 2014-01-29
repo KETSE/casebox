@@ -59,6 +59,9 @@ class Client extends Service
         ,'role_ids5'
         // custom core fields
         ,'substatus'
+        ,'ym1'
+        ,'ym2'
+        ,'ym3'
     );
 
     /**
@@ -102,8 +105,6 @@ class Client extends Service
     {
         switch ($objectRecord['template_type']) {
             case 'case':
-                \CB\Objects::getSolrData($objectRecord);
-                break;
             case 'object':
             case 'email':
                 \CB\Objects::getSolrData($objectRecord);
@@ -256,7 +257,7 @@ class Client extends Service
                     $r['content'] = $r['name'];
 
                     /* add custom solr data based on template type */
-                    // $this->getSolrData($r);
+                    $this->getSolrData($r);
 
                     /* make some trivial type checks */
                     $r['ntsc'] = intval($r['ntsc']);
@@ -267,6 +268,23 @@ class Client extends Service
                     $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
                     //exclude itself from pids
                     array_pop($r['pids']);
+
+                    /* fill "ym" fields for date faceting by cdate, date, date_end */
+                    $ym1 = str_replace('-', '', substr($r['cdate'], 2, 5));
+                    $ym2 = str_replace('-', '', substr($r['date'], 2, 5));
+                    $ym3 = str_replace('-', '', substr($r['date_end'], 2, 5));
+                    if (empty($ym3)) {
+                        $ym3 = $ym2;
+                    }
+                    if (!empty($ym1)) {
+                        $r['ym1'] = $ym1;
+                    }
+                    if (!empty($ym2)) {
+                        $r['ym2'] = $ym2;
+                    }
+                    if (!empty($ym3)) {
+                        $r['ym3'] = $ym3;
+                    }
 
                     // $this->filterSolrFields($r);
 
