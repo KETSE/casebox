@@ -35,9 +35,13 @@
 <field name="path"      type="text_general"     indexed="true" stored="true" />
 <!-- name: node name -->
 <field name="name"      type="text_general"     indexed="true" stored="true" />
-<!-- system: field for delimiting system folders (for system this field value is 1). System folders cannot be deleted by user -->
+<!-- system: field for delimiting system elements from tree, like some folders, system messages etc -->
 <field name="system"    type="tint"         indexed="true" stored="true" />
-<!-- type: node type
+<!--
+Note: This field is obsolete, we rely on templates and template_types.
+Should be removed on cleanup if wouldn't be used for other purposes.
+
+type: node type
     1. Folder
     2. Link
     3. Case
@@ -49,7 +53,10 @@
     This definition can be updated when needed
  -->
 <field name="type"      type="tint"         indexed="true" stored="true" />
-<!-- subtype: this field is dependent on type field value
+<!--
+Note: fis field will be removed on cleanup.
+
+subtype: this field is dependent on type field value
     for field "type" = 1 (Folder) there are defined following values for subtype:
         1 - query. This type will be probably replaced by controller property in cfg field
         2 – My Casebox (users home folder)

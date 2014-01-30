@@ -229,6 +229,8 @@ if (!defined('CB\\CONFIG\\MAX_ROWS')) {
 
 // custom Error log per Core, use it for debug/reporting purposes
 define('DEBUG_LOG', LOGS_DIR.'cb_'.CORE_NAME.'_debug_log');
+//clear debug_log for each request
+@unlink(DEBUG_LOG);
 
 // define solr_core as db_name if none is specified in config
 if (!defined('CB\\CONFIG\\SOLR_CORE')) {

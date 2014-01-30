@@ -24,6 +24,17 @@ class Config extends Singleton
         $cfg = array_merge($cfg, static::getPlatformConfigForCore());
         $cfg = array_merge($cfg, static::getCoreDBConfig());
 
+        $dfd = array();
+        //get facet definitions defined globally in casebox config
+        if (!empty($cfg['default_facets'])) {
+            $dfd = Util\toJSONArray($cfg['default_facets']);
+        }
+        //check if have defined facets in core config
+        if (!empty($cfg['facet_definitions'])) {
+            $dfd = array_merge($dfd, $cfg['facet_definitions']);
+        }
+        $cfg['default_facets'] = $dfd;
+
         static::$config = static::adjustPaths($cfg);
 
         return static::$config;

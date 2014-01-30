@@ -456,6 +456,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
         });
 
+        App.fireEvent('browserinit', this);
+
         Ext.apply(this, {
             tbarCssClass: 'x-panel-white'
             ,tbar: this.mainToolbar
@@ -522,7 +524,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onSetToolbarItems: function(buttonsArray) {
         // this.viewToolbar.removeAll(false); // this method does not work as expected
-        var b;
+        if(!this.getEl().isVisible(true)) {
+            return;
+        }
+        var i, b;
         while(this.viewToolbar.items.getCount() > 0) {
             b = this.viewToolbar.items.itemAt(0);
             b.hide();
@@ -533,8 +538,15 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(buttonsArray.indexOf('apps') < 0) {
             buttonsArray.unshift('apps');
         }
+        //add plugin buttons if defined
+        if(!Ext.isEmpty(this.pluginButtons)) {
+            for (i = 0; i < this.pluginButtons.length; i++) {
+                buttonsArray.push(this.pluginButtons[i]);
+            }
+        }
 
-        for (var i = 0; i < buttonsArray.length; i++) {
+
+        for (i = 0; i < buttonsArray.length; i++) {
             if(buttonsArray[i] == '-') {
                 this.viewToolbar.add('-');
             } else {
@@ -594,14 +606,16 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.folderProperties.pathtext = o.result.pathtext;
 
         /* updating breadcrumb */
-        var b = o.result.pathtext.split('/');
-        if(Ext.isEmpty(b[0])) {
-            b.shift();
+        if(!Ext.isEmpty(o.result.pathtext)) {
+            var b = o.result.pathtext.split('/');
+            if(Ext.isEmpty(b[0])) {
+                b.shift();
+            }
+            if((b.length > 0) && Ext.isEmpty(b[b.length-1])) {
+                b.pop();
+            }
+            this.breadcrumb.setValue(b);
         }
-        if((b.length > 0) && Ext.isEmpty(b[b.length-1])) {
-            b.pop();
-        }
-        this.breadcrumb.setValue(b);
         /* end of updating breadcrumb */
         this.fireEvent('viewloaded', proxy, o, options);
 

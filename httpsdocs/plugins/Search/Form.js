@@ -46,6 +46,10 @@ CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
     },
 
     onSearchButtonClick: function(){
+
+        // App.mainViewPort.openDefaultExplorer();
+        // App.explorer.setParams(this.data);
+
         this.grid.readValues();
         var t = App.openUniqueTabbedWidget(
             'CBPluginsSearchResultForm'
