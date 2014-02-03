@@ -32,6 +32,7 @@ if (!in_array(
         ,'recover_password.php'
         ,'download.php'
         ,'api.php'
+        ,'webdav.php'
         )
 )) {
     if (($_SERVER['SCRIPT_NAME'] != '/auth.php') && !User::isLoged()) {
