@@ -75,9 +75,12 @@ class Tasks extends Base
         return $rez;
     }
 
-    public function getName()
+    public function getName($id = false)
     {
-        switch ($this->id) {
+        if ($id === false) {
+            $id = $this->id;
+        }
+        switch ($id) {
             case 1:
                 return L\Tasks;
             case 2:

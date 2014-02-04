@@ -632,6 +632,8 @@ class Tasks
             )
         ); // TO REVIEW
 
+        DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $p['id']) or die(DB\dbQueryError());
+
         Objects::updateCaseUpdateInfo($p['id']);
 
         Solr\Client::runCron();
@@ -781,6 +783,8 @@ class Tasks
             )
         );
 
+        DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $p['id']) or die(DB\dbQueryError());
+
         Objects::updateCaseUpdateInfo($p['id']);
 
         Solr\Client::runCron();
@@ -797,11 +801,12 @@ class Tasks
     {
         $task = array();
         $res = DB\dbQuery(
-            'SELECT cid
-                 , title
-                 , responsible_user_ids
-            FROM tasks
-            WHERE id = $1',
+            'SELECT t.cid
+                 , t.name
+                 , tt.responsible_user_ids
+            FROM tree t
+            JOIN tasks tt on t.id = tt.id
+            WHERE t.id = $1',
             $id
         ) or die(DB\dbQueryError());
 
@@ -824,9 +829,12 @@ class Tasks
                 ,'task_id' => $id
                 //,'to_user_ids' => $task['responsible_user_ids']
                 ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'info' => 'title: '.$task['title']
+                ,'info' => 'title: '.$task['name']
             )
         );
+
+        DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $id) or die(DB\dbQueryError());
+
         $this->updateChildTasks($id);
 
         Objects::updateCaseUpdateInfo($id);
@@ -845,11 +853,13 @@ class Tasks
     {
         $task = array();
         $res = DB\dbQuery(
-            'SELECT cid
-                ,title
-                ,responsible_user_ids
-            FROM tasks
-            WHERE id = $1',
+            'SELECT t.cid
+                ,t.name
+                ,tt.responsible_user_ids
+            FROM tree t
+            JOIN tasks tt
+                ON t.id = tt.id
+            WHERE t.id = $1',
             $id
         ) or die(DB\dbQueryError());
 
@@ -887,9 +897,12 @@ class Tasks
                 'action_type' => 31
                 ,'task_id' => $id
                 ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'info' => 'title: '.$task['title']
+                ,'info' => 'title: '.$task['name']
             )
         );
+
+        DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $id) or die(DB\dbQueryError());
+
         $this->updateChildTasks($id);
 
         Objects::updateCaseUpdateInfo($id);

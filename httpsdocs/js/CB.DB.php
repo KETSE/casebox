@@ -76,12 +76,6 @@ Ext.namespace('CB.DB');
         ,fields: [{name: 'id', type: 'int'}, 'name']
         ,data:  [<?php echo '[1, "'.L\Administrator.'"], [2, "'.L\Manager.'"], [3, "'.L\Lawyer.'"], [4, "'.L\User.'"]'; ?>]
     });
-    CB.DB.objectTypes = new Ext.data.ArrayStore({
-        idIndex: 0
-        ,fields: [{name: 'id', type: 'int'}, 'name', 'iconCls']
-        ,data:  [[1, L.Folder, 'icon-folder'], [2, L.Link, 'icon-link'], [3, L.Case, 'icon-briefcase'], [4, L.Action, 'icon-action'], [5, L.File, 'icon-file-unknown'], [6, L.Task, 'icon-calendar-task'], [7, L.Event, 'icon-event'], [8, L.Email, 'icon-letter']]
-        ,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
-    });
     CB.DB.importance = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: [{name: 'id', type: 'int'}, 'name']

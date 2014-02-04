@@ -56,7 +56,7 @@ class RealSubnode extends Base
     //     return $id;
     // }
 
-    public function getName()
+    public function getName($id = false)
     {
         return $this->config['title'];
     }

@@ -796,11 +796,17 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,updatePreview: function() {
         var s = this.cardContainer.getLayout().activeItem.currentSelection;
-        var id = Ext.isEmpty(s)
-                ? this.folderProperties.id
-                : s[0].nid;
+        var data = Ext.isEmpty(s)
+                ? {
+                    id: this.folderProperties.id
+                    ,name: this.folderProperties.name
+                }
+                : {
+                    id: s[0].nid
+                    ,name: s[0].name
+                };
 
-        this.objectPanel.load(id);
+        this.objectPanel.load(data);
     }
 
     ,onObjectsOpenEvent: function(objData, e) {
@@ -821,7 +827,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             });
         } else {
             this.buttonCollection.get('preview').toggle(true);
-            this.objectPanel.edit( {id: objData.nid} );
+            this.objectPanel.edit( {
+                id: objData.nid
+                ,name: objData.name
+            } );
         }
     }
 

@@ -280,7 +280,8 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
     ,onTaskChanged: function(r, e){
         this.getEl().unmask();
         this.reload();
-        App.mainViewPort.fireEvent('taskupdated', this, e);
+        App.fireEvent('objectchanged', this.data);
+        // App.mainViewPort.fireEvent('taskupdated', this, e);
     }
 
     ,clear: function(){

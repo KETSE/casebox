@@ -47,7 +47,7 @@ class Browser
 
         $this->initNodeClasses();
         $this->createNodesPath();
-
+        Cache::set('current_path', $this->path);
         $this->collectAllChildren();
 
         $this->prepareResults($this->data);

@@ -18,7 +18,7 @@ class Base implements \CB\Interfaces\TreeNode
         }
 
         $this->config = $config;
-        $this->guid = $config['guid'];
+        $this->guid = @$config['guid'];
         $this->id = $id;
     }
 
@@ -39,7 +39,7 @@ class Base implements \CB\Interfaces\TreeNode
         return $id;
     }
 
-    public function getName()
+    public function getName($id = false)
     {
         return 'no name';
     }
@@ -83,5 +83,48 @@ class Base implements \CB\Interfaces\TreeNode
     public function hasChildren()
     {
 
+    }
+
+    /**
+     * get list of facets classses  that should be available for this node
+     * @return array
+     */
+    public function getFacets()
+    {
+        $rez = array();
+        $nodesFacetsConfig = \CB\Config::get('node_facets');
+        if (empty($nodesFacetsConfig[$this->id])) {
+            if (empty($this->parent)) {
+                return $rez;
+            }
+
+            return $this->parent->getFacets();
+        }
+
+        $cfg = $nodesFacetsConfig[$this->id];
+
+        //creating facets
+        $facetsDefinitions = \CB\Config::get('facet_configs');
+        $facets = array();
+        foreach ($cfg as $k => $v) {
+            $name = $k;
+            $config = null;
+            if (is_scalar($v)) {
+                $name = $v;
+                if (!empty($facetsDefinitions[$name])) {
+                    $config = $facetsDefinitions[$name];
+                }
+            } else {
+                $config = $v;
+            }
+            if (is_null($config)) {
+                \CB\debug('Cannot find facet config:'.var_export($name, 1).var_export($v, 1));
+            } else {
+                $config['name'] = $name;
+                $facets[$name] = \CB\Facets::getFacetObject($config);
+            }
+        }
+
+        return $facets;
     }
 }

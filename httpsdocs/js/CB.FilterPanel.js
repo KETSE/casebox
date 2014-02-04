@@ -25,6 +25,7 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
     }
 
     ,updateFacets: function(data, options){
+        //hide all facets by default
         this.items.each(
             function(i){
                 i.setVisible(false);
@@ -37,10 +38,11 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
             facet = this.find('facetId', key)[0];
             if(Ext.isEmpty(facet)){
                 facet = new CB.FacetList({
-                    modeToggle: false
+                    modeToggle: Ext.value(value.boolMode, true)
                     ,facetId: key
-                    ,facetTitle: value.name
+                    ,title: value.title
                     ,f: Ext.isEmpty(value.f) ? key: value.f
+                    ,manualPeriod: value.manualPeriod
                 });
                 this.insert(this.facetIndex, facet);
             }
@@ -57,29 +59,39 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
     }
 
     ,updateActiveFiltersFacet: function(options){
-        if(Ext.isEmpty(this.activeFileterFacet)) return;
-        af_data = [];
-        Ext.iterate(options.params.filters, function(key, val, obj){
-            vals = {};
-            Ext.each(
-                val
-                ,function(f){
-                    for(i = 0; i < f.values.length; i++) {
-                        vals[f.values[i]] = 1;
+        if(Ext.isEmpty(this.activeFileterFacet)) {
+            return;
+        }
+
+        var af_data = [];
+        Ext.iterate(
+            options.params.filters
+            ,function(key, val, obj){
+                var facet = this.find('facetId', key)[0];
+                if(!Ext.isEmpty(facet)){
+                    var vals = [];
+                    Ext.each(
+                        val
+                        ,function(f){
+                            for(i = 0; i < f.values.length; i++) {
+                                if(vals.indexOf(f.values[i]) < 0) {
+                                    vals.push(f.values[i]);
+                                }
+                            }
+                        }
+                        ,this
+                    );
+
+                    for (var i = 0; i < vals.length; i++){
+                        af_data.push({
+                            id: Ext.id()
+                            ,facetId: key
+                            ,value: vals[i]
+                            ,name: facet.cachedNames[vals[i]]
+                        });
                     }
                 }
-                ,this
-            );
-            fd = CB.FacetList.prototype.getFacetData(key, vals, options);
-            for (var i = 0; i < fd.length; i++){
-                af_data.push({
-                    id: Ext.id()
-                    ,facetId: key
-                    ,value: fd[i].id
-                    ,name: fd[i].name
-                });
-            }
-        }, this);
+            }, this);
         this.activeFileterFacet.loadData(af_data);
         if(this.activeFileterFacet.store.getCount() > 0){
             this.activeFileterFacet.store.loadData([{id: -1, value: -1, name: L.ResetAll}], true);

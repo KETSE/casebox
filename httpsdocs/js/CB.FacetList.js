@@ -16,7 +16,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
     ,autoHeight: true
     ,layout: 'fit'
     ,cachedNames: {}//used by tree_tags
-    ,mode: 'checklist' //radio
+    ,listMode: 'checklist' //radio
     ,initComponent: function(){
         this.store = new Ext.data.JsonStore({
             autoDestroy: true
@@ -24,20 +24,61 @@ CB.FacetList = Ext.extend( CB.Facet, {
             ,fields: [ 'id', 'name', { name: 'active', type: 'int'}, 'last', 'items', 'new_items' ]
         });
         if( !Ext.isEmpty( this.data ) ) this.store.loadData( this.data, false );
+        var items = [
+            new Ext.DataView({
+                    autoHeight: true
+                    ,store: this.store
+                    ,itemSelector: 'li'
+                    ,tpl: xtemplate_facetList
+                    ,listeners: {
+                        click: {
+                            scope: this
+                            ,fn: this.onItemClick
+                        }
+                    }
+                })
+        ];
+
+        if(this.manualPeriod === true) {
+            this.addPeriodPanel = new Ext.form.CompositeField({
+                height: 'auto'
+                ,hidden: true
+                ,style: 'background-color: transparent; padding-left: 15px'
+                ,items: [{
+                    xtype: 'datefield'
+                    ,width: 100
+                    ,height: 20
+                    ,name: 'from'
+                },{
+                    xtype: 'label'
+                    ,width: 15
+                    ,html: ' &nbsp;– '
+                },{
+                    xtype: 'datefield'
+                    ,width: 100
+                    ,name: 'to'
+                },{
+                    xtype: 'button'
+                    ,width: 20
+                    ,iconCls: 'i-check-alt'
+                    ,scope: this
+                    ,handler: this.onAddPeriodClick
+                },{
+                    xtype: 'button'
+                    ,width: 20
+                    ,iconCls: 'i-cancel'
+                    ,scope: this
+                    ,handler: function() {
+                        this.addPeriodPanel.hide();
+                    }
+                }]
+            });
+
+            items.push(this.addPeriodPanel);
+        }
 
         Ext.apply(this, {
-            items: new Ext.DataView({
-                autoHeight: true
-                ,store: this.store
-                ,itemSelector: 'li'
-                ,tpl: xtemplate_facetList
-                ,listeners: {
-                    click: {
-                        scope: this
-                        ,fn: this.onItemClick
-                    }
-                }
-            })
+            items: items
             ,listeners: {
                 modechange: {
                     scope: this
@@ -53,84 +94,99 @@ CB.FacetList = Ext.extend( CB.Facet, {
         else this.fireEvent('facetchange', this, ev);
     }
     ,loadData: function(data){
+        for (var i = 0; i < data.length; i++) {
+            this.cachedNames[data[i].id] = data[i].name;
+        }
         this.store.loadData(data, false);
         this.setLastField();
         this.setModeVisible(this.getValue().values.length > 1);
         this.doLayout();
     }
     ,processServerData: function(serverData, options){
-        this.setTitle(Ext.value(this.facetTitle, L['facet_'+this.facetId]) );
-
         this.loadData(this.getFacetData(this.facetId, serverData, options));
     }
     ,getFacetData: function(fid, serverData, options){
         var data = [];
         var values = [];
-        facetField = Ext.value(this.f, fid);
+        var facetField = Ext.value(this.f, fid);
         if(options && options.params && options.params.filters && options.params.filters[fid]){
-            Ext.each(options.params.filters[fid], function(f){
-                if(!Ext.isEmpty(f.f)) facetField = f.f;
-                for(i = 0; i < f.values.length; i++) values.push(f.values[i]);
-            }, this);
+            Ext.each(
+                options.params.filters[fid]
+                ,function(f){
+                    if(!Ext.isEmpty(f.f)) facetField = f.f;
+                    for(i = 0; i < f.values.length; i++) {
+                        values.push(f.values[i]);
+                    }
+                }
+                ,this
+            );
         }
         this.serverValues = values;
+
+        Ext.iterate(
+            serverData
+            ,function(k, v){
+                this.cachedNames[k] =
+                data.push({
+                    id: k
+                    ,name: L['taskStatus' + k]
+                    ,active: (values.indexOf(k+'') >=0) ? 1 : 0
+                    ,items: v
+                });
+            }
+            ,this
+        );
         //'id', 'name', 'active', 'last', 'items', 'new_items'
         switch(facetField){
-            case 'due':
-            case 'date':
-            case 'cdate':
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: L['due_' + k.substr(1)], active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
-                break;
             case 'status':
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: L['taskStatus' + k], active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
-                break;
-            case 'category_id':
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: Ext.value(CB.DB.thesauri.getName(k), L.noStatus), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
-                break;
-            case 'sys_tags':
-                // Ext.iterate(serverData, function(k, v){ data.push({id: k, name: Ext.value(CB.DB.thesauri.getName(k), L.noStatus), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }) }, this);
-                // break;
-            case 'tree_tags':
-                Ext.iterate(serverData, function(k, v){
-                    /*cache object names here, for use in active facet*/
-                    count = 0;
-                    if(!Ext.isPrimitive(v)){
-                        this.cachedNames[k] = v.name;
-                        count = v.count;
-                    }else count = v;
-                    data.push({id: k, name: this.cachedNames[k], active: (values.indexOf(k+'') >=0) ? 1 : 0, items: count });
-                }, this);
-                break;
-            case 'importance':
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: Ext.value(CB.DB.importance.getName(k), L.noStatus), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
-                break;
-            case 'assigned':
-            case 'owner':
-            case 'cid':
-                //'id', 'name', 'active', 'last', 'items', 'new_items'
                 Ext.iterate(
                     serverData
                     ,function(k, v){
-                        var name = (k == -1) ? L.Unassigned : CB.DB.usersStore.getName(k);
-                        data.push({ id: k, name: name, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v });
+                        if(!Ext.isEmpty(L['taskStatus' + k])) {
+                            data.push({
+                                id: k
+                                ,name: L['taskStatus' + k]
+                                ,active: (values.indexOf(k+'') >=0) ? 1 : 0
+                                ,items: v
+                            });
+                        }
                     }
                     ,this
                 );
                 break;
-            case 'type':
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: CB.DB.objectTypes.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
-                break;
-            case 'subtype':
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: CB.DB.templateTypes.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
-                break;
-            case 'template_id':
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: CB.DB.templates.getName(k), active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
+
+            case 'importance':
+                Ext.iterate(
+                    serverData
+                    ,function(k, v){
+                        data.push({
+                            id: k
+                            ,name: Ext.value(CB.DB.importance.getName(k), L.noStatus)
+                            ,active: (values.indexOf(k+'') >=0)
+                                ? 1
+                                : 0
+                            ,items: v
+                        });
+                    }
+                    ,this
+                );
                 break;
             case 'template_type':
                 Ext.iterate(serverData, function(k, v){ data.push({id: k, name: L['tt_'+k], active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
                 break;
             default:
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: k, active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
+                Ext.iterate(
+                    serverData
+                    ,function(k, v){
+                        data.push({
+                            id: k
+                            ,name: Ext.isPrimitive(v) ? k : v['name']
+                            ,active: (values.indexOf(k+'') >=0) ? 1 : 0
+                            ,items: Ext.isPrimitive(v) ? v : v.count
+                        });
+                    }
+                    ,this
+                );
         }
         return data;
     }
@@ -156,7 +212,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
     }
 
     ,onItemClick: function(dv, idx, el, ev){
-        switch(this.mode) {
+        switch(this.listMode) {
             case 'radio':
                 r = this.store.getAt(idx);
                 var currentlyChecked = (r.get('active') == 1);
@@ -193,6 +249,42 @@ CB.FacetList = Ext.extend( CB.Facet, {
             }
             ,this
         );
+    }
+    ,onPeriodAddClick: function() {
+        this.addPeriodPanel.items.itemAt(0).setValue(new Date());
+        this.addPeriodPanel.show();
+    }
+    ,onAddPeriodClick: function(b, e) {
+        var from = this.addPeriodPanel.items.itemAt(0).getValue();
+        var to = this.addPeriodPanel.items.itemAt(1).getValue();
+        var id = '';
+        var name = '';
+        if(!Ext.isEmpty(from)) {
+            id = from.toISOString();
+            name = from.format(App.dateFormat);
+        }
+        id +='~';
+        name += ' - ';
+
+        if(!Ext.isEmpty(to)) {
+            id += to.toISOString();
+            name += to.format(App.dateFormat);
+        }
+        if(id == '-') {
+            return;
+        }
+        this.store.loadData(
+            [{
+                id: id
+                ,name: name
+                ,active: 1
+            }
+            ]
+            ,true
+        );
+        this.cachedNames[id] = name;
+        this.addPeriodPanel.hide();
+        this.fireEvent('facetchange', this, e);
     }
 }
 );

@@ -209,9 +209,14 @@ class User
                 ,'folder_templates' => $GLOBALS['folder_templates']
                 ,'default_task_template' => constant('CB\\CONFIG\\DEFAULT_TASK_TEMPLATE')
                 ,'default_event_template' => constant('CB\\CONFIG\\DEFAULT_EVENT_TEMPLATE')
+                ,'webdav_url' => Config::get('webdav_url')
+                ,'webdav_files' => Config::get('webdav_files')
             )
             ,'user' => $_SESSION['user']
         );
+        $rez['config']['webdav_url'] = str_replace('{core_name}', \CB\CORE_NAME, $rez['config']['webdav_url']);
+        $rez['config']['webdav_files'] = explode(',', $rez['config']['webdav_files']);
+
         $rez['user']['cfg']['short_date_format'] = str_replace('%', '', $rez['user']['cfg']['short_date_format']);
         $rez['user']['cfg']['long_date_format'] = str_replace('%', '', $rez['user']['cfg']['long_date_format']);
         $rez['user']['cfg']['time_format'] = str_replace('%', '', $rez['user']['cfg']['time_format']);

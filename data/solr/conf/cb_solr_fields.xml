@@ -124,7 +124,7 @@ subtype: this field is dependent on type field value
 
 <!-- user_ids: this field is used now for assigned users in tasks  -->
 <field name="user_ids"      type="tint"         indexed="true" stored="true" multiValued="true" />
-<!-- status: the tasks status (1 Overdue, 2 Active, 3 Completed, 4 Pending)
+<!-- status: the tasks status (1 Overdue, 2 Active, 3 Closed, 4 Pending)
     can also be used, when needed, for other objects to specify their status -->
 <field name="status"        type="tint" indexed="true" stored="true" />
 <!-- category_id: tasks category (a thesaury defined set of values) -->

@@ -102,9 +102,13 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                         recs
                         , function(r){
                             cls = 'cal-evt-bg-t'+r.get('type') +
-                                ' cal-cat-'+ r.get('cls') +
+                                ' cal-cat-'+ Ext.value(r.get('cls'), 'default') +
                                 ( (r.get('status') == 3) ? ' cal-status-c' : '');
-                            r.set('iconCls', getItemIcon(r.data));
+                            if(r.get('template_id') == App.config.default_task_template) {
+                                r.set('iconCls', '');
+                            } else {
+                                r.set('iconCls', getItemIcon(r.data));
+                            }
                             if(!Ext.isEmpty(r.get('iconCls'))) {
                                 cls = cls + ' icon-padding '+ r.get('iconCls');
                             }

@@ -119,7 +119,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     ,onButtonToggle: function(b, e){
         if(b.pressed){
             this.show();
-            this.load(this.loadedId);
+            this.load(this.loadedData);
         }else{
             this.hide();
         }
@@ -153,7 +153,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         }
         this.onViewChange(idx);
         if(autoLoad !== false) {
-            this.load(this.requestedLoadId);
+            this.load(this.requestedLoadData);
         }
     }
     ,onViewChange: function(index) {
@@ -168,7 +168,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.cancel.hide();
                 this.actions.openInTabsheet.hide();
                 // this.actions.pin.hide();
-                //this.load(this.loadedId);
+                //this.load(this.loadedData);
                 break;
             case 'CBEditObject':
                 tb.setVisible(true);
@@ -195,9 +195,14 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
     }
 
-    ,load: function(objectId) {
+    ,load: function(objectData) {
+        if(!isNaN(objectData)) {
+            objectData = {
+                id: objectData
+            };
+        }
         this.delayedLoadTask.cancel();
-        this.requestedLoadId = objectId;
+        this.requestedLoadData = Ext.apply({}, objectData);
         if(this.getLayout().activeItem.getXType() !== 'CBEditObject') {
             if(this.skipNextPreviewLoadOnBrowserRefresh) {
                 delete this.skipNextPreviewLoadOnBrowserRefresh;
@@ -207,30 +212,41 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         }
     }
     ,doLoad: function() {
-        this.loadedId = this.requestedLoadId;
+        this.loadedData = Ext.apply({}, this.requestedLoadData);
         var activeItem = this.getLayout().activeItem;
 
         switch(activeItem.getXType()) {
             case 'CBObjectPreview':
-                this.getTopToolbar().setVisible(!Ext.isEmpty(this.requestedLoadId));
+                if(Ext.isEmpty(this.requestedLoadData)) {
+                    return;
+                }
+                this.getTopToolbar().setVisible(!Ext.isEmpty(this.requestedLoadData.id));
                 this.doLayout();
-                activeItem.loadPreview(this.requestedLoadId);
+                activeItem.loadPreview(this.requestedLoadData.id);
                 break;
             case 'CBEditObject':
-                activeItem.load(this.requestedLoadId);
+                activeItem.load(this.requestedLoadData.id);
                 break;
         }
         this.actions.edit.enable();
     }
     ,edit: function (objectData) {
+        if(App.isWebDavDocument(objectData.name)) {
+            App.openWebdavDocument(objectData);
+            return;
+        }
         this.onViewChangeClick(1, false);
         this.getLayout().activeItem.load(objectData);
-        this.loadedId = objectData.id;
+        // this.loadedData.id = objectData.id;
     }
     ,onEditClick: function() {
+        if(App.isWebDavDocument(this.loadedData.name)) {
+            App.openWebdavDocument(this.loadedData);
+            return;
+        }
         this.onViewChangeClick(1);
         // this.actions.save.setDisabled(true);
-        this.getLayout().activeItem.load(this.loadedId);
+        this.getLayout().activeItem.load(this.loadedData.id);
     }
     ,onReloadClick: function() {
         this.getLayout().activeItem.reload();
@@ -239,9 +255,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     ,onSaveClick: function() {
         this.getLayout().activeItem.save(
             function(component, form, action){
-                var id = Ext.value(action.result.data.id, this.loadedId);
+                var id = Ext.value(action.result.data.id, this.loadedData.id);
+                var name = Ext.value(action.result.data.name, this.loadedData.name);
                 component.clear();
-                this.requestedLoadId = id;
+                this.requestedLoadData.id = id;
+                this.requestedLoadData.name = name;
                 this.items.itemAt(0).doLoad(id);
                 this.onViewChangeClick(0, false);
 

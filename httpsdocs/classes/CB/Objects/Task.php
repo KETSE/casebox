@@ -63,12 +63,13 @@ class Task extends Object
             ,$this->getFieldValue('assigned', 0)['value'].''
             ,$this->getFieldValue('description', 0)['value']
             ,$status
+            ,$_SESSION['user']['id']
         );
 
         DB\dbQuery(
             'INSERT into tasks
-            (id, title, allday, date_start, date_end, importance, category_id, responsible_user_ids, description, status)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+            (id, title, allday, date_start, date_end, importance, category_id, responsible_user_ids, description, status, cid)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11)',
             $params
         ) or die(DB\dbQueryError());
 

@@ -36,7 +36,7 @@ class Dbnode extends Base
 
         $p = &$requestParams;
 
-        $p['fl'] = 'id,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls';
+        $p['fl'] = 'id,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls,status';
 
         if (empty($p['showFoldersContent'])) {
             $p['templates'] = $GLOBALS['folder_templates'];
@@ -89,13 +89,17 @@ class Dbnode extends Base
         return $id;
     }
 
-    public function getName()
+    public function getName($id = false)
     {
         $rez = 'no name';
+        if ($id === false) {
+            $id = $this->id;
+        }
         $res = DB\dbQuery(
             'SELECT name FROM tree WHERE id = $1',
-            $this->id
+            $id
         ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $rez = $r['name'];
         }

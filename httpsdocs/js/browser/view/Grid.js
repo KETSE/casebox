@@ -134,16 +134,17 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 ,mousedown: function(e){
                     if(e.button == 2){ //rightclick
                         /* lock selection if rightclicking on a selected row. Unlock should be called after corresponding actions (usually called with defer).*/
-                        sm = this.grid.getSelectionModel();
-                        s = sm.getSelections();
-                        target = e.getTarget('.x-grid3-row');
-                        for (var i = 0; i < s.length; i++) {
-                            el = this.grid.getView().getRow(this.grid.store.indexOf(s[i]));
-                            if( el == target ){
-                                sm.lock();
-                                return;
-                            }
-                        }
+                        //TO REENABLE THE CODE AFTER POPUP MENU REVIEW
+                        // sm = this.grid.getSelectionModel();
+                        // s = sm.getSelections();
+                        // target = e.getTarget('.x-grid3-row');
+                        // for (var i = 0; i < s.length; i++) {
+                        //     el = this.grid.getView().getRow(this.grid.store.indexOf(s[i]));
+                        //     if( el == target ){
+                        //         sm.lock();
+                        //         return;
+                        //     }
+                        // }
                     }
                 }
             }

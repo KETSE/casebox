@@ -380,7 +380,6 @@ img.open-object{display: inline-block; width: 16px; height: 16px; padding: 0; bo
 .buttons{display: none}
 .item-over .buttons{ display: inline-block}
 .plugin{padding: 5px 10px 20px 10px}
-.multivalued .x-tool-chain, .multivalued .x-tool-unchain{display: inline-block}
 ul.caselist { list-style: disc inside none !important;}
 ul.caselist li { white-space: nowrap}
 .ttl { border-collapse: collapse; border: 0}

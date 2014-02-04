@@ -396,9 +396,10 @@ td.ext-cal-dtitle-today div {
 
 /* Default rounded event div (Gecko/Webkit/W3C) */
 .ext-cal-evr { /* rounded */
-    -moz-border-radius:5px;
+/*    -moz-border-radius:5px;
     -webkit-border-radius:5px;
     border-radius:5px;
+*/
     overflow:hidden;
     padding: 2px 1px 2px 5px;
     white-space:nowrap;
@@ -666,7 +667,8 @@ td.ext-cal-dtitle-today div {
 .ext-cal-evr,
 .ext-cal-evi,
 .ext-cal-evt dl {
-	color: #fff;
+	/*color: #fff;*/
+    color: #1d1d1d;
 }
 
 .ext-color-1,
@@ -859,13 +861,11 @@ td.ext-cal-dtitle-today div {
 }
 
 /* custom CaseBox styles */
-.cal-evt-bg-t3{background-color: #447294 !important; background-position: 5px 50%}/*cases*/
+.cal-cat-default {background-color: gray; background-position: 5px 50%}
+/*
+oburlaca: will uncomment later;
+.cal-evt-milestone {background-image: url(/i/cl/stripe.png); background-repeat: repeat;} */
 
-.cal-evt-bg-t4{background-color: #006E2E !important; background-position: 5px 50%}/*actions*/
-.cal-evt-bg-t5{background-color: #73880A !important; background-position: 5px 50%}/*files*/
-
-.cal-evt-bg-t6{background-color: #B02B2C !important; background-position: 5px 50%}/*tasks*/
-.cal-evt-bg-t7{background-color: #356AA0 !important; background-position: 5px 50%}/*events*/
 
 /*
 .cal-cat
@@ -875,7 +875,7 @@ example .cal-cat-taskBlue
 */
 .cal-status-c {text-decoration: line-through !important} /*completed*/
 
-.cal-cat-task-blue, .cal-cat-blue {background-color: blue; background-position: 5px 50%}
+.cal-cat-task-blue, .cal-cat-blue {background-color: #9DB7E8; background-position: 5px 50%}
 .cal-cat-task-gray, .cal-cat-gray {background-color: gray; background-position: 5px 50%}
 .cal-cat-task-green, .cal-cat-green {background-color: #78D168; background-position: 5px 50%}
 .cal-cat-task-olive, .cal-cat-olive {background-color: #C6D2B0; background-position: 5px 50%}

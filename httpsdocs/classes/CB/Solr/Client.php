@@ -406,13 +406,6 @@ class Client extends Service
     }
 
     /* ----------------------- functions ---------------------------------*/
-    public function currentWeekDiapazon()
-    {
-          $time1 = strtotime('previous monday');
-          $time2 = strtotime('previous monday + 1 week');
-
-        return date('Y-m-d\TH:i:s\Z', $time1).' TO '.date('Y-m-d\TH:i:s\Z', $time2);
-    }
 
     /**
      * escape Lucene special chars

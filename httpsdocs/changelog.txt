@@ -1,3 +1,20 @@
+CaseBox 1.9.96 (2014-02-04)
+==============================
+New Features, Improvements
+--------------------------
+- Changed Faceting mechaniscm
+- added possibility to open documents with a specific webdav url
+
+Fixed Bugs:
+----------
+- Right click grid to open popup menu blocks Grid.Selection
+
+CaseBox 1.9.95 (2014-01-30)
+==============================
+New Features, Improvements
+--------------------------
+- update search and Export plugins for hcav
+
 CaseBox 1.9.94 (2014-01-29)
 ==============================
 New Features, Improvements

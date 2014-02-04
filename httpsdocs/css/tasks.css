@@ -2,7 +2,7 @@
 
 .icon-task{ background-image: url(i/ico/task.png) !important; background-position: 0 0%; background-repeat: no-repeat}
 .icon-task-completed{ background-image: url(i/ico/task-completed.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.icon-task-completed b, .icon-task-completed .n, .icon-task-completed em{ color: #777; text-decoration: line-through }
+.task-completed, .icon-task-completed b, .icon-task-completed .n, .icon-task-completed em{ color: #777; text-decoration: line-through }
 .letter b em{font-weight: bold}
 
 .icon-calendar-task{ background-image: url(i/ico/calendar-task.png) !important; background-position: 0 50%; background-repeat: no-repeat}

@@ -28,12 +28,17 @@ class Config extends Singleton
         //get facet definitions defined globally in casebox config
         if (!empty($cfg['default_facets'])) {
             $dfd = Util\toJSONArray($cfg['default_facets']);
+            unset($cfg['default_facets']);
         }
         //check if have defined facets in core config
-        if (!empty($cfg['facet_definitions'])) {
-            $dfd = array_merge($dfd, $cfg['facet_definitions']);
+        if (!empty($cfg['facet_configs'])) {
+            $dfd = array_merge($dfd, Util\toJSONArray($cfg['facet_configs']));
         }
-        $cfg['default_facets'] = $dfd;
+        $cfg['facet_configs'] = $dfd;
+
+        if (!empty($cfg['node_facets'])) {
+            $cfg['node_facets'] = json_decode($cfg['node_facets'], true);
+        }
 
         static::$config = static::adjustPaths($cfg);
 

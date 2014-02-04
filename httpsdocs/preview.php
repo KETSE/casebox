@@ -111,7 +111,11 @@ switch ($f['type']) {
                     echo file_get_contents($fn);
                     $res = DB\dbQuery('update file_previews set ladate = CURRENT_TIMESTAMP where id = $1', $id) or die(DB\dbQueryError());
                 }
-            }elseif(!empty($preview['html'])) echo $preview['html'];
+            } elseif (!empty($preview['html'])) {
+                echo $preview['html'];
+            }
+            $dbNode = new TreeNode\Dbnode();
+            echo '<!-- NodeName:'.$dbNode->getName($id).' -->';
         }
         break;
     case 'task':
