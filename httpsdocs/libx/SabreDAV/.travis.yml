@@ -1,0 +1,20 @@
+language: php
+php:
+  - 5.3.3
+  - 5.3
+  - 5.4
+  - 5.5
+
+services:
+  - mysql
+
+before_script:
+  - mysql -e 'create database sabredav'
+  - composer install --prefer-source
+#  - echo "zend.enable_gc=0" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`
+
+script:
+  - phpunit --configuration tests/phpunit.xml
+  - cp tests/composer.vobject3.json composer.json
+  - composer update --no-dev
+  - phpunit --configuration tests/phpunit.xml
