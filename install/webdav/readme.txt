@@ -1,5 +1,8 @@
 == WEBDAV support ==
 
+By default we use dav.casebox.org as server name. You need to change ServerName option in webdav conf files.
+You can access to webdav typing https://dav.casebox.org/coreName
+
 You need to add one more(at least) virtual host into your apache config, to enable WebDav support.
 
 Copy webdav conf file to your apache conf directory (/etc/httpd/conf by default)
