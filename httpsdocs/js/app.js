@@ -485,17 +485,14 @@ function initApp(){
         return (App.config.folder_templates.indexOf( String(template_id) ) >= 0);
     };
     App.isWebDavDocument = function(name){
-        clog(name, App.config.webdav_files);
         if(!Ext.isPrimitive(name) || Ext.isEmpty(name) || Ext.isEmpty(App.config.webdav_files)) {
             return false;
         }
         var ext = name.split('.').pop();
-        clog(App.config.webdav_files, ext, (App.config.webdav_files.indexOf(ext) >= 0));
         return (App.config.webdav_files.indexOf(ext) >= 0);
     };
     App.openWebdavDocument = function(data){
         if(Ext.isEmpty(App.config.webdav_url)) {
-            clog('No webdav url found');
             return;
         }
         var url = App.config.webdav_url;

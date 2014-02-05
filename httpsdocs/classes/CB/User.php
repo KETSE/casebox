@@ -113,13 +113,12 @@ class User
         $rez = array( 'success' => true );
         $phone = preg_replace('/[^0-9]+/', '', $p['country_code'].$p['phone_number']);
 
-        $rez['info'] = \FreeSMSGateway::sendSms(
-            array(
-                'phone' => $phone
-                ,'message' => $this->getGACode()
-            )
-        );
-
+        // $rez['info'] = \FreeSMSGateway::sendSms(
+        //     array(
+        //         'phone' => $phone
+        //         ,'message' => $this->getGACode()
+        //     )
+        // );
         return $rez;
     }
 
@@ -834,22 +833,6 @@ class User
     }
 
     /**
-     * get left accordion and top toolbar items
-     * @return array json reponce
-     */
-    public function getMainMenuItems()
-    {
-        $userMenu = new UserMenu();
-        $rez = array(
-            'success' => true
-            ,'items' => $userMenu->getAccordionItems()
-            ,'tbarItems' => $userMenu->getToolbarItems()
-        );
-
-        return $rez;
-    }
-
-    /**
      * upload user photo
      * @param  array $p upload params using form post
      * @return array json responce
@@ -1023,6 +1006,7 @@ class User
         $rez = array();
         $res = DB\dbQuery(
             'SELECT id
+                ,name
                 ,first_name
                 ,last_name
                 ,sex

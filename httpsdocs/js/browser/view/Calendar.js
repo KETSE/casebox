@@ -101,8 +101,7 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                     Ext.each(
                         recs
                         , function(r){
-                            cls = 'cal-evt-bg-t'+r.get('type') +
-                                ' cal-cat-'+ Ext.value(r.get('cls'), 'default') +
+                            cls = 'cal-cat-'+ Ext.value(r.get('cls'), 'default') +
                                 ( (r.get('status') == 3) ? ' cal-status-c' : '');
                             if(r.get('template_id') == App.config.default_task_template) {
                                 r.set('iconCls', '');
@@ -294,8 +293,8 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
         var viewGroup = Ext.id();
 
         this.calendar = new CB.Calendar({
-            // titleItem: this.titleItem
-            region: 'center'
+            titleItem: this.titleItem
+            ,region: 'center'
             ,showNavBar: false
             ,listeners:{
                 scope: this

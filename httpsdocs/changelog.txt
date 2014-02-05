@@ -1,12 +1,37 @@
-CaseBox 1.9.96 (2014-02-04)
+CaseBox 1.9.98 (2014-02-05)
 ==============================
 New Features, Improvements
 --------------------------
+- "Tree" node should be real node, not virtual
+- checked password recovery process
+- session.lifetime, use minutes instead of seconds, default 180 minutes
+- Move ADMIN_EMAIL, SENDER_EMAIL to config.ini
+- clean "Recovery options", only email recovery is avaible for now
+- Remove SMS functionality
+- removed UserMenu classes
+- User picture in top-right corner should have the username/name as a hint
+- added verification, in solr Search class, for manually set facet params
+
+Fixed Bugs:
+----------
+- Task preview always show time for AllDayTasks
+- Calendar label (active month/period) doesn't work
+
+CaseBox 1.9.97 (2014-02-04)
+==============================
+New Features, Improvements
+--------------------------
+- Default facet config for root node should include tasks facets (Status, Category, Importance, Assigned)
+- Add a default class to nodes in calendar without explicit color ".cal-cat-default"
+- Remove 'cal-evt-bg-t[int]' classes
+- Add "icon-padding icon-task" classes only to nodes of type Task (in calendar view)
+- 'date' facet instead of 'create' + Custom date period
 - Changed Faceting mechaniscm
 - added possibility to open documents with a specific webdav url
 
 Fixed Bugs:
 ----------
+- Add "cal-cat-task-closed" class to closed tasks
 - Right click grid to open popup menu blocks Grid.Selection
 
 CaseBox 1.9.95 (2014-01-30)

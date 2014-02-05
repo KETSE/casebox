@@ -5,10 +5,9 @@ class TasksForCase extends Tasks
 {
     protected function acceptedPath()
     {
-        if (empty($this->path)) {
+        if (empty($this->lastNode)) {
             return false;
         }
-
         if ($this->lastNode instanceof Dbnode) {
             if (\CB\Objects::getType($this->lastNode->id) !== 'case') {
                 return false;

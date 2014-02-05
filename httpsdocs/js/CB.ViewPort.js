@@ -33,7 +33,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                     }
                     ,'->'
                     ,{
-                        html: '<img src="/photo/' + App.loginData.id + '.jpg" style="margin-top: 4px; width: 32px; height: 32px;" />'
+                        html: '&nbsp;'
                         // ,xtype: 'tbtext'
                         // ,iconCls: App.loginData.iconCls
                         ,menu: []
@@ -68,7 +68,8 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
         App.mainAccordion = new Ext.Panel({
             region: 'west'
-            ,layout: 'accordion'
+            // ,layout: 'accordion'
+            ,layout: 'fit'
             ,collapsible: false
             ,width: 250
             ,split: true
@@ -156,9 +157,14 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     }
     ,onLogin: function(){
         /* adding menu items */
-        um = App.mainToolBar.find( 'name', 'userMenu')[0];
-        um.setText(App.loginData['first_name']+' '+App.loginData['last_name']);
-        // um.setIconClass(App.loginData.iconCls);
+        var um = App.mainToolBar.find( 'name', 'userMenu')[0];
+        if(um) {
+            um.update('<img src="/photo/' + App.loginData.id + '.jpg" ' +
+                'style="margin-top: 4px; width: 32px; height: 32px;" ' +
+                'title="'+App.loginData['first_name']+' '+App.loginData['last_name']+'"" />'
+            );
+        }
+
         managementItems = [];
         if(App.loginData.manage) {
             managementItems.push(
@@ -243,50 +249,22 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         });
     }
     ,populateMainMenu: function(){
-        App.mainAccordion.getEl().mask(L.LoadingData, 'icon-loading');
-        CB_User.getMainMenuItems(this.processMainMenuItems, this);
-    }
-    ,processMainMenuItems: function(r, e){
-        App.mainAccordion.getEl().unmask();
-        var i, activeIndex = 0;
+        App.mainAccordion.add({
+            xtype: 'CBBrowserTree'
+            ,border: true
+            ,rootId: 0
+            ,rootVisible:true
+        });
+        // App.mainAccordion.getLayout().setActiveItem(0);
+        App.mainAccordion.syncSize();
 
-        if(r.success !== true) return;
-        // if(!Ext.isEmpty(r.tbarItems)){
-        //     /* inserting specified components before userMenu item */
-        //     userMenuItem = App.mainToolBar.find( 'name', 'userMenu')[0];
-        //     index = 3;
-        //     for (i = 0; i < r.tbarItems.length; i++) {
-        //         if(!Ext.isEmpty(r.tbarItems[i].link)) {
-        //             r.tbarItems[i].listeners = {
-        //                 scope: this
-        //                 ,click: this.onAccordionLinkClick
-        //             };
-        //         }
-        //         App.mainToolBar.insert(index, r.tbarItems[i]);
-        //         index++;
-        //     }
-        //     App.mainToolBar.syncSize();
-        // }
-
-        if(!Ext.isEmpty(r.items))
-        for (i = 0; i < r.items.length; i++) {
-
-            if(!Ext.isEmpty(r.items[i].link)) {
-                r.items[i].listeners = {
-                    scope: this
-                    ,beforeexpand: this.onAccordionLinkClick
-                };
-            }
-            if(r.items[i].active === true) {
-                activeIndex = i;
-            }
-            App.mainAccordion.add(r.items[i]);
-        }
-        App.mainAccordion.getLayout().setActiveItem(activeIndex);
-        App.mainAccordion.doLayout();
         var trees = App.mainAccordion.findByType(CB.browser.Tree);
         if(!Ext.isEmpty(trees)){
             App.mainTree = trees[0];
+            var rn = App.mainTree.getRootNode();
+            rn.attributes.name = 'My CaseBox';
+            App.mainTree.on('afterrender', this.selectTreeRootNode, this);
+
             for (i = 0; i < trees.length; i++) {
                 trees[i].getSelectionModel().on(
                     'selectionchange'
@@ -298,11 +276,18 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             }
         }
         this.openDefaultExplorer();
-        if(App.mainTree && App.explorer) {
-            var rn = App.mainTree.getRootNode();
-            App.mainTree.selectPath('/'+ rn.attributes.nid);
-        }
+
+        this.selectTreeRootNode();
+
         App.mainTabPanel.setActiveTab(0);
+    }
+    ,selectTreeRootNode: function() {
+        if(App.mainTree && App.explorer) {
+            if(App.mainTree.rendered) {
+                var rn = App.mainTree.getRootNode();
+                App.mainTree.selectPath('/'+ rn.attributes.nid);
+            }
+        }
     }
     ,onTreeNodeClick: function(node, e){
         if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) {
@@ -320,7 +305,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         ) {
             return;
         }
-        App.openPath( node.getPath('nid') );
+        App.openPath( '/' + node.getPath('nid') );
     }
     ,onRenameTreeElement: function(tree, r, e){
         node = tree.getSelectionModel().getSelectedNode();
@@ -550,7 +535,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             action.result.folderProperties
         ) {
             activeTree.selectPath(
-                action.result.folderProperties.path
+                '/0' + action.result.folderProperties.path
                 ,'nid'
                 ,function(){
                     delete this.pathSelectionByViewport;

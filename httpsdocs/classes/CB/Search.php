@@ -26,11 +26,17 @@ class Search extends Solr\Client
          ,'udate'
          ,'case'
      );
+    protected $facetsSetManually = false;
 
     public function query($p)
     {
         $this->results = false;
         $this->inputParams = $p;
+        $this->facetsSetManually = (
+            isset($p['facet']) ||
+            isset($p['facet.field']) ||
+            isset($p['facet.qury'])
+        );
         $this->prepareParams();
         $this->connect();
         $this->executeQuery();
@@ -219,10 +225,13 @@ class Search extends Solr\Client
             $this->params['hl.fragsize'] = '256';
         }
 
-        $path = Cache::get('current_path');
-        if (!empty($path)) {
-            $lastNode = $path[sizeof($path) -1];
-            $this->facets = $lastNode->getFacets();
+        $this->facets = array();
+        if (!$this->facetsSetManually) {
+            $path = Cache::get('current_path');
+            if (!empty($path)) {
+                $lastNode = $path[sizeof($path) -1];
+                $this->facets = $lastNode->getFacets();
+            }
         }
 
         $this->prepareFacetsParams();
@@ -231,7 +240,7 @@ class Search extends Solr\Client
 
     private function setFilters()
     {
-        if (empty($this->facets)) {
+        if ($this->facetsSetManually) {
             return;
         }
 
@@ -245,23 +254,28 @@ class Search extends Solr\Client
 
     private function prepareFacetsParams()
     {
-        if (empty($this->facets)) {
-            return;
-        }
-
         $facetParams = array();
-        foreach ($this->facets as $facet) {
-            $fp = $facet->getSolrParams();
-            if (!empty($fp['facet.field'])) {
-                if (empty($facetParams['facet.field'])) {
-                    $facetParams['facet.field'] = array();
+        if ($this->facetsSetManually) {
+            if (!empty($this->inputParams['facet.field'])) {
+                $facetParams['facet.field'] = $this->inputParams['facet.field'];
+            }
+            if (!empty($this->inputParams['facet.query'])) {
+                $facetParams['facet.query'] = $this->inputParams['facet.query'];
+            }
+        } else {
+            foreach ($this->facets as $facet) {
+                $fp = $facet->getSolrParams();
+                if (!empty($fp['facet.field'])) {
+                    if (empty($facetParams['facet.field'])) {
+                        $facetParams['facet.field'] = array();
+                    }
+                    $facetParams['facet.field'] = @array_merge($facetParams['facet.field'], $fp['facet.field']);
+                } elseif (!empty($fp['facet.query'])) {
+                    if (empty($facetParams['facet.query'])) {
+                        $facetParams['facet.query'] = array();
+                    }
+                    $facetParams['facet.query'] = @array_merge($facetParams['facet.query'], $fp['facet.query']);
                 }
-                $facetParams['facet.field'] = @array_merge($facetParams['facet.field'], $fp['facet.field']);
-            } elseif (!empty($fp['facet.query'])) {
-                if (empty($facetParams['facet.query'])) {
-                    $facetParams['facet.query'] = array();
-                }
-                $facetParams['facet.query'] = @array_merge($facetParams['facet.query'], $fp['facet.query']);
             }
         }
 
@@ -341,16 +355,13 @@ class Search extends Solr\Client
 
     private function processResultFacets()
     {
-        $rez = array();
-        $sr = &$this->results;
-        if (empty($this->facets) || empty($sr->facet_counts)) {
-            return false;
+        if ($this->facetsSetManually) {
+            return $this->results->facet_counts;
         }
 
-        $fc = &$sr->facet_counts;
         $rez = array();
         foreach ($this->facets as $facet) {
-            $facet->loadSolrResult($fc);
+            $facet->loadSolrResult($this->results->facet_counts);
             $fr = $facet->getClientData();
             if (!empty($fr)) {
                 $rez[$fr['f']] = $fr;

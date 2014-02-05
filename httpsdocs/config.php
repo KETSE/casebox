@@ -168,12 +168,10 @@ ini_set('memory_limit', '200M');
 
 // session params
 
-$sessionLifetime = getOption('session.lifetime');
-if (is_null($sessionLifetime)) {
-    $sessionLifetime = isDebugHost() ? 0: 43200;
-} else {
-
-}
+$sessionLifetime = (isDebugHost()
+        ? 0
+        : Config::get('session.lifetime', 180)
+    ) * 60;
 
 ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
@@ -287,7 +285,7 @@ function isDevelServer()
  */
 function isDebugHost()
 {
-    $debugHosts = getOption('debug_hosts');
+    $debugHosts = Config::get('debug_hosts');
     $debugHosts = explode(',', $debugHosts);
 
     return (

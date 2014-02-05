@@ -1268,9 +1268,9 @@ class Tasks
         $d['datetime_period'] = date($format, $i);
 
         if (!empty($d['date_end'])) {
-            // $i = strtotime($d['date_end']);
-            // $d['datetime_period'] .= ' - '.date($format, $i);
-            $d['datetime_period'] = Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['TZ']);
+            $d['datetime_period'] = ($d['allday'] == 1)
+                ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
+                : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['TZ']);
         }
 
         $d['importance_text'] = '';

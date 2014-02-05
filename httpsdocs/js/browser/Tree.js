@@ -244,7 +244,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         });
 
         CB.browser.Tree.superclass.initComponent.apply(this, arguments);
-        if(!Ext.isEmpty(this.rootId)) {
+        if(!isNaN(this.rootId)) {
             CB_BrowserTree.getRootProperties(
                 this.rootId
                 ,function(r, e){

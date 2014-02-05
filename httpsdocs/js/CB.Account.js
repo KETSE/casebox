@@ -430,12 +430,13 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                 ,items: [
                     {
                         xtype: 'compositefield'
+                        ,hidden: true
                         ,items: [{
                             xtype: 'checkbox'
                             ,name: 'recovery_mobile'
                             ,listeners: {
                                 scope: this
-                                ,check: this.onCheckboxCheck
+                                // ,check: this.onCheckboxCheck
                             }
                         },{
                             xtype: 'displayfield'
@@ -510,12 +511,13 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                         ]
                     },{
                         xtype: 'compositefield'
+                        ,hidden: true
                         ,items: [{
                             xtype: 'checkbox'
                             ,name: 'recovery_question'
                             ,listeners: {
                                 scope: this
-                                ,check: this.onCheckboxCheck
+                                // ,check: this.onCheckboxCheck
                             }
                         },{
                             xtype: 'displayfield'
@@ -768,18 +770,18 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
                     ,value: 'Select authentication method'
                 },{
                     xtype: 'button'
-                    ,html: '<a>Mobile application</a>'
+                    ,html: '<a>Google Authenticator</a>'
                     ,style: 'padding:10px'
                     ,name: 'ga'
                     ,scope: this
                     ,handler: this.onTSVMechanismClick
-                },{
-                    xtype: 'button'
-                    ,html: '<a>Sms message</a>'
-                    ,style: 'padding:10px'
-                    ,name: 'sms'
-                    ,scope: this
-                    ,handler: this.onTSVMechanismClick
+                // },{
+                //     xtype: 'button'
+                //     ,html: '<a>Sms message</a>'
+                //     ,style: 'padding:10px'
+                //     ,name: 'sms'
+                //     ,scope: this
+                //     ,handler: this.onTSVMechanismClick
                 },{
                     xtype: 'button'
                     ,html: '<a>Yubikey</a>'
@@ -791,8 +793,8 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
                 ]
             },{
                 xtype: 'TSVgaForm'
-            },{
-                xtype: 'TSVsmsForm'
+            // },{
+            //     xtype: 'TSVsmsForm'
             },{
                 xtype: 'TSVybkForm'
             }]

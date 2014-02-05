@@ -318,7 +318,7 @@ class Config extends Singleton
     */
     public static function get($optionName, $defaultValue = null)
     {
-        if (!empty(static::$config[$optionName])) {
+        if (isset(static::$config[$optionName])) {
             return static::$config[$optionName];
         }
 

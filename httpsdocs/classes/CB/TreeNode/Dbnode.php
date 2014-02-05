@@ -9,17 +9,11 @@ class Dbnode extends Base
     public function getChildren(&$pathArray, $requestParams)
     {
         $pid = null;
-
         /* should start with path check and see if child request is for a real db node*/
         if (empty($pathArray)) {
-            if (empty($requestParams['pid'])) {
-                // we are in root so continue loading
-                $pid = \CB\Browser::getRootFolderId();
-            } else {
-                $pid = $requestParams['pid'];
-            }
+            return ;
         } else {
-            $lastNode = $pathArray[sizeof($pathArray)-1];
+            $lastNode = @$pathArray[sizeof($pathArray)-1];
             if ($lastNode instanceof Dbnode) {
                 $pid = $lastNode->id;
             } else {

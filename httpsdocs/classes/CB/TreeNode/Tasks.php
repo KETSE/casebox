@@ -9,10 +9,8 @@ class Tasks extends Base
     protected function acceptedPath()
     {
         $p = &$this->path;
-        if (empty($p) ||
-            (   (sizeof($p) > 1) &&
-                (get_class($this->lastNode) != get_class($this))
-            )
+        if ((sizeof($p) > 0) &&
+            (get_class($this->lastNode) != get_class($this))
         ) {
             return false;
         }
@@ -56,7 +54,7 @@ class Tasks extends Base
 
         $this->createDefaultFilter();
 
-        if ($this->lastNode instanceof Dbnode) {
+        if (empty($this->lastNode)) {
             $rez = $this->getRootNodes();
         } else {
             switch ($this->lastNode->id) {

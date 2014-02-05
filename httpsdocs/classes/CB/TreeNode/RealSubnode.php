@@ -8,24 +8,21 @@ class RealSubnode extends Base
     protected function acceptedPath()
     {
         $p = &$this->path;
-        if (empty($p)) {
-            return false;
-        }
 
-        if (($this->lastNode->getId() != $this->config['pid']) ||
-            (get_class($this->lastNode) == get_class($this))
+        if (((empty($this->config['pid']) || (@$this->config['pid'] == '0')) && empty($this->lastNode)) ||
+            (!empty($this->lastNode) && (@$this->config['pid'] == $this->lastNode->id))
         ) {
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     public function getChildren(&$pathArray, $requestParams)
     {
         $rez = array();
         $this->path = $pathArray;
-        $this->lastNode = $pathArray[sizeof($pathArray) - 1];
+        $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
 
         if (!$this->acceptedPath()) {
@@ -37,7 +34,7 @@ class RealSubnode extends Base
             'data' => array(
                 array(
                     'name' => $this->config['title']
-                    ,'id' => $this->getId($this->config['realNodeId'])
+                    ,'id' => $this->config['realNodeId']
                     ,'iconCls' => 'icon-folder'
                     ,'has_childs' => true
                 )

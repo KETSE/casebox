@@ -41,7 +41,8 @@ if (!in_array(
 }
 /* end of check if loged in correctly, comparing with the key and ips */
 
-$sessionPersistence = getOption('session.persistent');
+$sessionPersistence = Config::get('session.persistent', true);
+debug("!$sessionPersistence!");
 if (empty($sessionPersistence)) {
     // regenerate session id
     session_regenerate_id(false);

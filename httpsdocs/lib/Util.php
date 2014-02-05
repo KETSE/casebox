@@ -200,6 +200,38 @@ function formatTaskTime($mysqlTime)
         return translateMonths(date('j M Y', $time));
     }
 }
+
+/**
+ * formats a dateTime period between two dates (without time). For ex.: Tue Apr 30, 2013 - 31
+ * @param  varchar $fromDateTime mysql formated date
+ * @param  varchar $toDateTime   mysql formated date
+ * @return varchar               formated period
+ */
+function formatDatePeriod($fromDateTime, $toDateTime)
+{
+    $d1 = new \DateTime($fromDateTime);
+    $d2 = new \DateTime($toDateTime);
+
+    $rez = $d1->format('D M j, Y');
+
+    $d2format = '';
+    if ($d1->format('Y') != $d2->format('Y')) {
+         $d2format = 'D M j, Y';
+    } elseif ($d1->format('M') != $d2->format('M')) {
+        $d2format = 'D M j';
+    } elseif ($d1->format('j') != $d2->format('j')) {
+        $d2format = 'D j';
+    } elseif ($d1->format('D') != $d2->format('D')) {
+        $d2format = 'D';
+    }
+
+    if (!empty($d2format)) {
+        $rez .= ' - '.$d2->format($d2format);
+    }
+
+    return $rez;
+}
+
 /**
  * formats a dateTime period between two dates. For ex.: Tue Apr 30, 2013 00:10 - 01:10
  * @param  varchar $fromDateTime mysql formated date
@@ -239,22 +271,6 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
     if (($hourText != '00:00') || empty($d2format)) {
         $d2format .= (empty($d2format) ? '' : ', ').'H:i';
     }
-
-    // $interval = date_diff($d1, $d2);
-
-    // $d2format = '';
-    // if ($interval->y > 0) {
-    //     $d2format = 'D M j, Y';
-    // } elseif ($interval->m > 0) {
-    //     $d2format = 'D M j';
-    // } elseif ($interval->d > 0) {
-    //     $d2format = 'D j';
-    // }
-    // $hourText = $d2->format('H:i');
-    // echo $hourText;
-    // if ($hourText != '00:00') {
-    //     $d2format .= (empty($d2format) ? '' : ', ').'H:i';
-    // }
 
     if (!empty($d2format)) {
         $rez .= ' - '.$d2->format($d2format);

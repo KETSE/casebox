@@ -65,9 +65,6 @@ class Calendar
                     ,'category_id' => $d['category_id']
                     ,'end' => Util\coalesce($d['date_end'], $d['date'])
                     ,'status' => $d['status']
-                    // ,'cls' => 'cal-evt-bg-t'.$d['type'].$catIcon.
-                    //     (empty($d['iconCls']) ? '' : ' icon-padding '.$d['iconCls']).
-                    //     (($d['status'] == 3) ? ' cal-status-c' : '')
                 );
             }
         }
