@@ -24,13 +24,9 @@ class Auth{
                     $_SESSION['user'] = $r['user'];
 
                     $auth_flag = true;
-                    Utils::log('login OK');
-                } else {
-                    Utils::log('login BAD pass=' . $auth_params[1]);
                 }
             }else {
                 $auth_flag = true;
-                
             }
         }
 

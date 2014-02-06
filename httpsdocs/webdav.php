@@ -1,71 +1,101 @@
 <?php
     namespace CB;
 
-    prepare_environment();
+    $env = prepare_environment();
+
     require_once '../../casebox/httpsdocs/init.php';
     require_once 'libx/SabreDAV/vendor/autoload.php';
 
     $auth = new WebDAV\Auth();
     $only = null;
 
-    if(preg_match('@^/edit/(\d{1,})@',$_SERVER['REQUEST_URI'],$matches)) {
-
-        $path = WebDAV\Utils::getPathFromId($matches[1]);
+    // check direct link edit
+    if($env['action'] == 'edit'){
+        // get path to requested object ID
+        $path = WebDAV\Utils::getPathFromId($env['id']);
         $path = ($path == '') ? WEBDAV_PATH_DELIMITER : $path;
 
-        $_SERVER['REQUEST_URI']  = preg_replace('@^\/edit\/\d{1,}@',$path, $_SERVER['REQUEST_URI']);
+        // patch request for sabredav
+        $_SERVER['REQUEST_URI'] = $path.$env['request'];
 
-        $object = WebDAV\Utils::getNodeById($matches[1]);
+        // prepare only needed objects
+        $object = WebDAV\Utils::getNodeById($env['id']);
         $only = array_slice(explode(',', $object['pids']), 1);
     }
 
     $rootDirectory = new WebDAV\Directory("Home", null, $only);
-
     $server = new \Sabre\DAV\Server($rootDirectory);
-    $lockBackend = new \Sabre\DAV\Locks\Backend\File(TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR.'locks');
-    $lockPlugin = new \Sabre\DAV\Locks\Plugin($lockBackend);
-    $browsePlugin = new \Sabre\DAV\Browser\Plugin();
+
+    // if there is no locking file for this core, create one
+    if(!is_file(TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR.'locks'))
+        file_put_contents(TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR.'locks','');
+
     $tempFilesPlugin = new \Sabre\DAV\TemporaryFileFilterPlugin(TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR);
 
     // todo Remove after LibreOffice fix bug with locking
-    if($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice') $server->addPlugin($lockPlugin);
+    // LibreOffice dont remove lock when working with files, so disable locking with hope for the future
+    if($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice') {
+        $lockBackend = new \Sabre\DAV\Locks\Backend\File(TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR.'locks');
+        $lockPlugin = new \Sabre\DAV\Locks\Plugin($lockBackend);
+        $server->addPlugin($lockPlugin);
+    }
 
     $server->addPlugin($tempFilesPlugin);
-    $server->addPlugin($lockPlugin);
     $server->setBaseUri('/');
     $server->exec();
 
     // --- Additional ---
 
     function prepare_environment(){
+        $result = array();
+
         session_start();
         define('WEBDAV_PATH_DELIMITER', '/');
 
-        if(!is_file(TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR.'locks'))
-            file_put_contents(TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR.'locks','');
-
         $_SERVER['REQUEST_URI']  = $_SERVER['REDIRECT_URL'];
 
-        $temp = explode(WEBDAV_PATH_DELIMITER, trim($_SERVER['REQUEST_URI'], WEBDAV_PATH_DELIMITER));
+        $url_parts = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 
-        $uri = array();
-        foreach ($temp as $u) if($u != '') $uri[] = $u;
+        if(count($url_parts)<1) return;
 
-        if(count($uri) == 0) die();
+        // prepare env
+        if(preg_match('#^/?dav-(.*)$#',$url_parts[0], $matches)){
+            // ordinary webdav request
+            $result['core'] = $matches[1];
+            $result['action'] = 'request';
+            $result['request'] = implode('/', array_slice($url_parts,1));
+        }else if($url_parts[0] =='edit'){
+            // direct link webdav request
+            $result['core'] = $url_parts[1];
+            $result['action'] = 'edit';
+            $result['request'] = implode('/', array_slice($url_parts,3));
 
-        if($uri[0] == 'edit'){
-            $core = $uri[1];
-            unset($uri[1]);
-        }else{
-            $core = $uri[0];
-            unset($uri[0]);
+            // get object id
+            if(isset($url_parts[2]))
+                if(preg_match('@(\d{1,})@', $url_parts[2], $matches))
+                    $result['id'] = $matches[1];
         }
 
+        // core defined, bring it to casebox
+        if(isset($result['core'])){
+            $sn = explode('.', $_SERVER['SERVER_NAME']);
+            $index = in_array($sn[0], array('www','ww2')) ? 1 : 0;
+            $sn[$index] = $result['core'];
+
+            // bring
+            $_SERVER['SERVER_NAME'] = implode('.',$sn);
+        }
+
+        // bring request to webdav server
+        if(isset($result['request']))
+            $_SERVER['REQUEST_URI'] = WEBDAV_PATH_DELIMITER.$result['request'];
+
+        // HTTP_DESTINATION is in charge for destination of file
+        // Patch this var, so we can process MOVE requsts (Word cant save without it)
         if(isset($_SERVER['HTTP_DESTINATION'])){
             $url = parse_url($_SERVER['HTTP_DESTINATION']);
-            $_SERVER['HTTP_DESTINATION'] = preg_replace('@/'.$core.'/@','/', $url['path']);
+            $_SERVER['HTTP_DESTINATION'] = preg_replace('@^/dav-'.$result['core'].'/@','/', $url['path']);
         }
 
-        $_SERVER['SERVER_NAME'] = $core.'.casebox.org';
-        $_SERVER['REQUEST_URI'] = WEBDAV_PATH_DELIMITER.implode(WEBDAV_PATH_DELIMITER, $uri);
+        return $result;
     }
