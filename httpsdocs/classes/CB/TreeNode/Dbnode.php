@@ -11,7 +11,7 @@ class Dbnode extends Base
         $pid = null;
         /* should start with path check and see if child request is for a real db node*/
         if (empty($pathArray)) {
-            return ;
+            $pid = 1;
         } else {
             $lastNode = @$pathArray[sizeof($pathArray)-1];
             if ($lastNode instanceof Dbnode) {
