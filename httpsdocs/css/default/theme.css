@@ -58,6 +58,23 @@
 .i-building, .x-tree-node .i-building{background-image: url(s/building.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-check-alt{background-image: url(s/check-alt.png)}
 .i-cancel{background-image: url(s/cancel.png)}
+.i-trash{background-image: url(s/trash.png)}
+.i-cross{background-image: url(s/cross.png)}
+.i-plus{background-image: url(s/plus.png)}
 
 .calendar-mono, .x-tool-period {background-image: url(s/calendar-mono.png); background-position: 0 50%; background-repeat: no-repeat}
 
+.preview-thumb {
+    opacity: 1;
+    transition: opacity .25s ease-in-out;
+    -o-transition: opacity .25s ease-in-out;
+    -moz-transition: opacity .25s ease-in-out;
+    -webkit-transition: opacity .25s ease-in-out;
+    background-image: url(l/none-icon.png);
+    width: 128px;
+    height: 128px;
+}
+.preview-thumb:hover {opacity: 0.5}
+
+.pr-th-doc, .pr-th-docx {background-image: url(l/word.png) }
+.pr-th-pdf {background-image: url(l/pdf.png) }

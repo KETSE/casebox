@@ -66,6 +66,9 @@ class Browser
         if (!empty($this->search)) {
             $rez['search'] = &$this->search;
         }
+        if (!empty($this->DC)) {
+            $rez['DC'] = &$this->DC[0];
+        }
 
         return $rez;
 
@@ -169,15 +172,11 @@ class Browser
         $this->facets = array();
         $this->total = 0;
         $this->search = array();
+        $this->DC = array();
         foreach ($this->treeNodeClasses as $class) {
             $rez = $class->getChildren($this->path, $this->requestParams);
             if (!empty($rez['data'])) {
                 $this->data = array_merge($this->data, $rez['data']);
-                // foreach ($rez['data'] as $node) {
-                //     $node['nid'] = $node['id'];
-                //     unset($node['id']);
-                //     $this->data[] = $node;
-                // }
             }
             if (!empty($rez['facets'])) {
                 $this->facets = $rez['facets'];
@@ -191,6 +190,10 @@ class Browser
 
             if (isset($rez['search'])) {
                 $this->search[] = $rez['search'];
+            }
+
+            if (isset($rez['DC'])) {
+                $this->DC[] = $rez['DC'];
             }
         }
     }
@@ -1041,7 +1044,7 @@ class Browser
         return $id;
     }
 
-    public function getRootProperties($id)
+    public static function getRootProperties($id)
     {
         $rez = array('success' => true, 'data' => array());
         $res = DB\dbQuery(
@@ -1061,7 +1064,7 @@ class Browser
         if ($r = $res->fetch_assoc()) {
             $r['cfg'] = Util\toJSONArray($r['cfg']);
             $rez['data'] = array($r);
-            $this->updateLabels($rez['data']);
+            Browser::updateLabels($rez['data']);
             $rez['data'] = $rez['data'][0];
         }
         $res->close();
@@ -1125,7 +1128,7 @@ class Browser
 
     }
 
-    public function updateLabels(&$data)
+    public static function updateLabels(&$data)
     {
         for ($i=0; $i < sizeof($data); $i++) {
             $d = &$data[$i];

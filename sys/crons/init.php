@@ -103,6 +103,6 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
 
 function notifyAdmin($subject, $message)
 {
-    echo 'Notifying admin: '.ADMIN_EMAIL;
-    mail(ADMIN_EMAIL, $subject, $message, 'From: '.SENDER_EMAIL. "\r\n");
+    echo 'Notifying admin: '.CONFIG\ADMIN_EMAIL;
+    mail(CONFIG\ADMIN_EMAIL, $subject, $message, 'From: '.CONFIG\SENDER_EMAIL. "\r\n");
 }

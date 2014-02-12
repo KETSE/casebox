@@ -805,7 +805,7 @@ class Tasks
                  , t.name
                  , tt.responsible_user_ids
             FROM tree t
-            JOIN tasks tt on t.id = tt.id
+            LEFT JOIN tasks tt on t.id = tt.id
             WHERE t.id = $1',
             $id
         ) or die(DB\dbQueryError());

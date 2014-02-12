@@ -20,6 +20,7 @@ return array_merge(
             ,'//css/casebox.css'
             ,'//css/common.css'
             ,'//css/facets.css'
+            ,'//css/obj_plugins.css'
             ,'//css/Ext.ux.plugins.IconCombo.css'
             ,'//css/calendar.css'
             ,'//css/date-time-ux.css'
@@ -115,10 +116,22 @@ return array_merge(
 
         ,'jsdev' => array(
             '//js/app.js'
+            ,'//js/PluginPanel.js'
+            ,'//js/PluginsPanel.js'
             ,'//js/form/view/object/Preview.js'
             ,'//js/form/view/object/Properties.js'
             ,'//js/form/edit/Object.js'
             ,'//js/ObjectCardView.js'
+            ,'//js/objects/plugins/Base.js'
+            ,'//js/objects/plugins/Thumb.js'
+            ,'//js/objects/plugins/Comments.js'
+            ,'//js/objects/plugins/ContentItems.js'
+            ,'//js/objects/plugins/Files.js'
+            ,'//js/objects/plugins/Meta.js'
+            ,'//js/objects/plugins/ObjectProperties.js'
+            ,'//js/objects/plugins/SystemProperties.js'
+            ,'//js/objects/plugins/Tasks.js'
+            ,'//js/objects/plugins/Versions.js'
         )
         ,'lang-en' => array('//js/locale/en.js')
         ,'lang-es' => array('//js/locale/es.js')

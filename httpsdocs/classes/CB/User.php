@@ -220,6 +220,22 @@ class User
         $rez['user']['cfg']['long_date_format'] = str_replace('%', '', $rez['user']['cfg']['long_date_format']);
         $rez['user']['cfg']['time_format'] = str_replace('%', '', $rez['user']['cfg']['time_format']);
 
+        /* default root node config */
+        $root = Config::get('rootNode');
+        if (is_null($root)) {
+            $root = Browser::getRootProperties(
+                Browser::getRootFolderId()
+            )['data'];
+        } else {
+            $root = Util\toJSONArray($root);
+            if (isset($root['id'])) {
+                $root['nid'] = $root['id'];
+                unset($root['id']);
+            }
+        }
+        $rez['config']['rootNode'] = $root;
+        /*end of default root node config */
+
         unset($rez['user']['TSV_checked']);
 
         return $rez;

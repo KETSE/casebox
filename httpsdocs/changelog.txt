@@ -1,3 +1,32 @@
+CaseBox 1.9.108 (2014-02-12)
+==============================
+New Features, Improvements
+--------------------------
+- Implement plugins in right preview/edit panel:
+    -   thumb: Thumbnail
+    -   meta: Metadata
+    -   tasks
+    -   comments
+    -   objectProperties: Internal Object Properties preview
+    -   systemProperties: System/general properties preview
+    -   contentItems: Contents
+- changed root node concept in left tree, it is real root node by default if not configured to be another (virtual) node
+- Open "cbdav:" links in the same window
+- Enable notifications for task management
+- Add 'Login' button below the message at /login/reset-password/ after you click Reset password
+
+Fixed Bugs:
+----------
+- display columns data was not transmited by tree nodes plugins
+- Custom faceting doesn't work: custom fields were filtered when indexing in solr
+- "My CaseBox" displays the subfolders of "/Tree" in Grid
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+- apply database update for core: 20140123_1641 db_update v1.9.108.sql
+
+
 CaseBox 1.9.98 (2014-02-05)
 ==============================
 New Features, Improvements

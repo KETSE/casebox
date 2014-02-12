@@ -40,6 +40,14 @@ class Config extends Singleton
             $cfg['node_facets'] = json_decode($cfg['node_facets'], true);
         }
 
+        if (!empty($cfg['default_object_plugins'])) {
+            $cfg['default_object_plugins'] = json_decode($cfg['default_object_plugins'], true);
+        }
+
+        if (!empty($cfg['object_type_plugins'])) {
+            $cfg['object_type_plugins'] = json_decode($cfg['object_type_plugins'], true);
+        }
+
         static::$config = static::adjustPaths($cfg);
 
         return static::$config;

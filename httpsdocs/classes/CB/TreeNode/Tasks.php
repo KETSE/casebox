@@ -54,7 +54,7 @@ class Tasks extends Base
 
         $this->createDefaultFilter();
 
-        if (empty($this->lastNode)) {
+        if (empty($this->lastNode) || (\CB\Objects::getType($this->lastNode->id) == 'case')) {
             $rez = $this->getRootNodes();
         } else {
             switch ($this->lastNode->id) {

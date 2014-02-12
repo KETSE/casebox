@@ -73,6 +73,20 @@ class Task extends Object
             $params
         ) or die(DB\dbQueryError());
 
+        /* adding to log that will create notification */
+        $remind_users = implode(',', Util\toNumericArray($this->getFieldValue('assigned', 0)['value']));
+
+        $logParams = array(
+            'action_type' => 21
+            ,'task_id' => $this->id
+            ,'to_user_ids' => $remind_users
+            ,'remind_users' => $remind_users
+            ,'info' => 'title: '.$this->data['name']
+        );
+
+        \CB\Log::add($logParams);
+        /***/
+
         // save reminds
         $reminds = @$this->data['data']['reminders'];
         if (isset($reminds['childs'])) {
@@ -86,12 +100,14 @@ class Task extends Object
                 @$p[] = '1|'.$remind['childs']['count'].'|'.$remind['childs']['units'];
             }
         }
+
         \CB\Tasks::saveReminds(
             array(
                 'id' => $this->id
                 ,'reminds' => implode('-', $p)
             )
         );
+
     }
 
     /**
@@ -210,6 +226,19 @@ class Task extends Object
             }
 
         }
+        /* get previous responsible users to notify the users that has been removed */
+        $oldResponsibleUsers = array();
+        $res = DB\dbQuery(
+            'SELECT responsible_user_ids
+            FROM tasks
+            WHERE id = $1',
+            $this->id
+        ) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $oldResponsibleUsers = Util\toNumericArray($r['responsible_user_ids']);
+        }
+        $res->close();
+        /* end of get previous responsible users to notify the users that has been removed */
 
         @$params = array(
             $this->id
@@ -239,6 +268,26 @@ class Task extends Object
             WHERE id = $1',
             $params
         ) or die(DB\dbQueryError());
+
+        /* adding to log that will create notification */
+        $remindUsers = Util\toNumericArray($this->getFieldValue('assigned', 0)['value']);
+        $toUserIds = implode(',', $remindUsers);
+        if (!empty($oldResponsibleUsers)) {
+            $remindUsers = array_merge($remindUsers, $oldResponsibleUsers);
+            $remindUsers = array_unique($remindUsers);
+        }
+        $remindUsers = implode(',', $remindUsers);
+
+        $logParams = array(
+            'action_type' => 22
+            ,'task_id' => $this->id
+            ,'to_user_ids' => $toUserIds
+            ,'remind_users' => $remindUsers
+            ,'info' => 'title: '.$this->data['name']
+        );
+
+        \CB\Log::add($logParams);
+        /***/
 
         // save reminds
         $reminds = @$this->data['data']['reminders'];

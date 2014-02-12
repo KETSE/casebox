@@ -65,10 +65,15 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 // ,this.actions.pin
             ]
             ,items: [{
-                    title: L.Preview
-                    ,iconCls: 'icon-preview'
+                    title: L.Properties
+                    ,iconCls: 'icon-infoView'
                     ,header: false
-                    ,xtype: 'CBObjectPreview'
+                    ,xtype: 'CBObjectProperties'
+                    ,api: CB_Objects.getPluginsData
+                    ,listeners: {
+                        scope: this
+                        ,openpreview: this.onOpenPreviewEvent
+                    }
                 },{
                     title: L.Edit
                     ,iconCls: 'icon-edit'
@@ -84,10 +89,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                         }
                     }
                 },{
-                    title: L.Properties
-                    ,iconCls: 'icon-infoView'
+                    title: L.Preview
+                    ,iconCls: 'icon-preview'
                     ,header: false
-                    ,xtype: 'CBObjectProperties'
+                    ,xtype: 'CBObjectPreview'
                 }
             ]
             ,listeners: {
@@ -160,7 +165,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         var activeItem = this.getLayout().activeItem;
         var tb = this.getTopToolbar();
         switch(activeItem.getXType()) {
-            case 'CBObjectPreview':
+            case 'CBObjectProperties':
                 tb.setVisible(true);
                 this.actions.edit.show();
                 this.actions.reload.show();
@@ -168,7 +173,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.cancel.hide();
                 this.actions.openInTabsheet.hide();
                 // this.actions.pin.hide();
-                //this.load(this.loadedData);
                 break;
             case 'CBEditObject':
                 tb.setVisible(true);
@@ -179,7 +183,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.openInTabsheet.show();
                 // this.actions.pin.hide();
                 break;
-            case 'CBObjectProperties':
+            case 'CBObjectPreview':
                 tb.setVisible(true);
                 this.actions.edit.show();
                 this.actions.reload.show();
@@ -187,10 +191,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.cancel.hide();
                 this.actions.openInTabsheet.hide();
                 // this.actions.pin.hide();
+                //this.load(this.loadedData);
                 break;
             default:
                 tb.setVisible(false);
-
         }
 
     }
@@ -204,10 +208,12 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.delayedLoadTask.cancel();
         this.requestedLoadData = Ext.apply({}, objectData);
         if(this.getLayout().activeItem.getXType() !== 'CBEditObject') {
+            this.items.itemAt(0).clear();
+            this.onViewChangeClick(0);
             if(this.skipNextPreviewLoadOnBrowserRefresh) {
                 delete this.skipNextPreviewLoadOnBrowserRefresh;
             } else {
-                this.delayedLoadTask.delay(300, this.doLoad, this);
+                this.delayedLoadTask.delay(60, this.doLoad, this);
             }
         }
     }
@@ -224,8 +230,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.doLayout();
                 activeItem.loadPreview(this.requestedLoadData.id);
                 break;
+            case 'CBObjectProperties':
             case 'CBEditObject':
-                activeItem.load(this.requestedLoadData.id);
+                activeItem.load(this.loadedData.id);
                 break;
         }
         this.actions.edit.enable();
@@ -286,6 +293,13 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         this.getLayout().activeItem.clear();
         this.onViewChangeClick(0);
+    }
+
+    ,onOpenPreviewEvent: function(sourceCmp, ev) {
+        this.getLayout().setActiveItem(2);
+        this.onViewChange(2);
+        this.getLayout().activeItem.loadPreview(this.loadedData.id);
+
     }
 
 }

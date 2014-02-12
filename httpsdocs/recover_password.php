@@ -137,7 +137,7 @@ switch ($action) {
             $template = TEMPLATES_DIR.'password_recovery_email_en.html';
         }
         if (!file_exists($template)) {
-            mail(CONFIG\ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: noreply@casebox.org\r\n");
+            mail(CONFIG\ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: ".CONFIG\SENDER_EMAIL."\r\n");
             $_SESSION['msg'] = '<div class="alert alert-error">Error occured. Administrator has been notified by mail. Please retry later.</div>';
             header('location: /login/forgot-password/');
             exit(0);
@@ -163,7 +163,7 @@ switch ($action) {
         $mail = file_get_contents($template);
         $mail = str_replace(array('{name}', '{link}'), array($user_name, '<a href="'.$href.'" >'.$href.'</a>'), $mail);
 
-        @mail($user_mail, L\get('MailRecoverSubject'), $mail, "Content-type: text/html; charset=utf-8\r\nFrom: noreply@casebox.org\r\n");
+        @mail($user_mail, L\get('MailRecoverSubject'), $mail, "Content-type: text/html; charset=utf-8\r\nFrom: ".CONFIG\SENDER_EMAIL."\r\n");
         $_SESSION['msg'] = '<div class="alert alert-success">'.L\get('RecoverMessageSent').'</div>';
         /* end of generating reset hash and sending mail */
         break;
@@ -204,9 +204,10 @@ setTimeout(editChanged, 500)
             <a href="/" class="dib"><img src="/css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
         <form method="post" action="/login/reset-password/" class="standart_form tal" autocomplete="off">
         <?php
+        $homeLink = '<a href="/" class="btn btn-info">'.L\get('Login').'</a>';
 
         if (!empty($_SESSION['msg'])) {
-            echo $_SESSION['msg'];
+            echo $_SESSION['msg'].$homeLink;
             unset($_SESSION['msg']);
         } elseif ($prompt_for_new_password) {
             echo '<input type="hidden" name="h" value="'.$hash.'" />';

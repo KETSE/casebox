@@ -252,7 +252,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         App.mainAccordion.add({
             xtype: 'CBBrowserTree'
             ,border: true
-            ,rootId: 0
+            ,data: {
+                rootNode: App.config.rootNode
+            }
             ,rootVisible:true
         });
         // App.mainAccordion.getLayout().setActiveItem(0);
@@ -275,6 +277,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 trees[i].on('afterrename', this.onRenameTreeElement, this);
             }
         }
+
         this.openDefaultExplorer();
 
         this.selectTreeRootNode();
@@ -340,7 +343,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         App.openUniqueTabbedWidget('CBCalendarPanel');
     }
     ,openDefaultExplorer: function(rootId){
-        if(Ext.isEmpty(rootId)) rootId = Ext.value( App.mainTree.rootId, '/' );
+        if(Ext.isEmpty(rootId)) {
+            rootId = Ext.value( App.mainTree.rootId, '/' );
+        }
         if(!App.activateTab(App.mainTabPanel, 'explorer')) {
             App.explorer = App.addTab(
                 App.mainTabPanel

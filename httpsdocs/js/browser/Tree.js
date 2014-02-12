@@ -14,6 +14,9 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     ,border: false
     ,hideToolbar: true
     ,initComponent: function(){
+        if(Ext.isEmpty(this.data)) {
+            this.data = {};
+        }
 
         this.sorters = {
             n30: function(n1, n2){
@@ -126,6 +129,18 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         });
 
         this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
+        var rootConfig = Ext.value(this.data.rootNode, {});
+        rootConfig = Ext.apply(
+            {
+                nid: Ext.value(this.rootId, '')
+                ,expanded: true
+                ,editable: false
+                ,leaf: false
+                ,iconCls:'icon-folder'
+            }
+            ,rootConfig
+        );
+        rootConfig.text = Ext.value(rootConfig.text, rootConfig.name);
 
         Ext.apply(this, {
             loader: new Ext.tree.TreeLoader({
@@ -145,14 +160,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
                     }
                 }
             })
-            ,root: new Ext.tree.AsyncTreeNode({
-                text: 'root'
-                ,nid: Ext.value(this.rootId, '')
-                ,expanded: true
-                ,editable: false
-                ,leaf: false
-                ,iconCls:'icon-folder'
-            })
+            ,root: new Ext.tree.AsyncTreeNode(rootConfig)
             ,listeners:{
                 scope: this
                 ,beforeappend: this.onBeforeNodeAppend

@@ -392,8 +392,10 @@ class Client extends Service
     }
     private function filterSolrFields(&$doc)
     {
+        $some_fields = array('iconCls', 'target_id', 'updated');
+
         foreach ($doc as $fn => $fv) {
-            if (!in_array($fn, $this->solr_fields)
+            if (in_array($fn, $some_fields)
                 || ( ($fv !== false)
                     && ( (!is_scalar($fv) && empty($fv))
                         || (is_scalar($fv) && (strlen($fv) == 0))

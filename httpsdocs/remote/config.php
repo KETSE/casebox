@@ -93,7 +93,8 @@ $API = array_merge(
                 ,'create'               =>  array('len'=>1)
                 ,'save'                 =>  array('len'=>1, 'formHandler' => true)
                 ,'getAssociatedObjects' =>  array('len'=>1)
-                ,'queryCaseData'        =>  array('len'=>1)
+                ,'getPluginsData'       =>  array('len'=>1)
+                ,'addComment'           =>  array('len'=>1)
             )
         )
 

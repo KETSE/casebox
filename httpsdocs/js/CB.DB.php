@@ -23,7 +23,7 @@ Ext.namespace('CB.DB');
     CB.DB.templateTypes = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: ['id', 'name']
-        ,data:  [[null, '-'], ['case', 'case'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['object', 'object'], ['search', 'search'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
+        ,data:  [[null, '-'], ['case', 'case'], ['comment', 'comment'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['object', 'object'], ['search', 'search'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
         ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
     });
     CB.DB.fieldTypes = new Ext.data.ArrayStore({

@@ -80,6 +80,12 @@ class Search extends Solr\Client
             $fq = array_merge($fq, $p['fq']);
         }
 
+        if (isset($p['system'])) {
+            $fq[] = 'system:'.$p['system'];
+        } else {
+            $fq[] = 'system:[0 TO 1]';
+        }
+
         /* set custom field list if specified */
         if (!empty($p['fl'])) {
             $this->params['fl'] = $p['fl'];

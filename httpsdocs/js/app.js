@@ -498,7 +498,8 @@ function initApp(){
         var url = App.config.webdav_url;
         url = url.replace('{node_id}', data.id);
         url = url.replace('{name}', data.name);
-        window.open(url, '_blank');
+        App.confirmLeave = false;
+        window.open(url, '_self');
     };
 
     /**
@@ -1100,7 +1101,11 @@ function overrides(){
 }
 
 window.onbeforeunload = function() {
-    return "You work will be lost.";
+    if(App.confirmLeave === false) {
+        delete App.confirmLeave;
+    } else {
+        return "You work will be lost.";
+    }
 };
 
 window.ondragstart = function(e){

@@ -107,6 +107,7 @@ class Object extends OldObject
                 ,cfg
                 ,cid
                 ,oid
+                ,`system`
                 ,updated
             )
             VALUES (
@@ -122,6 +123,7 @@ class Object extends OldObject
                 ,$10
                 ,$11
                 ,$12
+                ,$13
                 ,1
             )',
             array(
@@ -137,6 +139,7 @@ class Object extends OldObject
                 ,@json_encode($p['cfg'], JSON_UNESCAPED_UNICODE)
                 ,$_SESSION['user']['id']
                 ,@$p['oid']
+                ,@intval($p['system'])
             )
         ) or die(DB\dbQueryError());
 
