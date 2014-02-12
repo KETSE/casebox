@@ -438,7 +438,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                         ,objectopen: this.onObjectsOpenEvent
                     }
                 })
-                // ,new CB.browser.view.TasksGrid({ iconCls: 'icon-task-view' })
             ]
             ,listeners: {
                 scope: this

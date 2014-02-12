@@ -994,14 +994,21 @@ class Tasks
 
         if ($r = $res->fetch_assoc()) {
             $format = 'Y, F j';
+
+
             if ($r['allday'] != 1) {
                 $format .= ' H:i';
             }
-            $datetime_period = Util\formatMysqlDate($r['date_start'], $format);
+
+            $i = strtotime($r['date_start']);
+            $rdatetime_period = date($format, $i);
+
             if (!empty($r['date_end'])) {
-                $i = strtotime($r['date_end']);
-                $datetime_period .= ' - '.Util\formatMysqlDate($r['date_end'], $format);
+                $rdatetime_period = ($r['allday'] == 1)
+                    ? Util\formatDatePeriod($r['date_start'], $r['date_end'])
+                    : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['TZ']);
             }
+
             $created_date_text = Util\formatMysqlDate($r['cdate'], 'Y, F j H:i');
             $importance_text = '';
             switch ($r['importance']) {

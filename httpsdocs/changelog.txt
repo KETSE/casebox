@@ -1,3 +1,14 @@
+CaseBox 1.9.109 (2014-02-12)
+==============================
+New Features, Improvements
+--------------------------
+- removed obsolete scripts for old views
+
+Fixed Bugs:
+----------
+- Timezone & display format incorrect in Task notifications
+- Titles of custom facets not visible & long facet labels in charts
+
 CaseBox 1.9.108 (2014-02-12)
 ==============================
 New Features, Improvements

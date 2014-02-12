@@ -295,7 +295,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 }
                 data.push({
                     id: key
-                    ,name: Ext.value(val['name'], L['facet_'+key])
+                    ,name: Ext.value(val['title'], L['facet_'+key])
                 });
             }
             ,this
@@ -315,6 +315,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                         data[key][i].name = data[key][i].items.name;
                         data[key][i].items = data[key][i].items.count;
                     }
+                    data[key][i].name = App.shortenString(data[key][i].name, 30);
                 }
             }
             ,this
