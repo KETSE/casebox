@@ -400,6 +400,7 @@ function initApp(){
                 return App.customRenderers.objectCombo;
             case 'popuplist':
                 return App.customRenderers.thesauriCell;
+            case 'memo':
             case 'text':
                 return App.customRenderers.text;
             default: return null;

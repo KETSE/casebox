@@ -730,6 +730,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.rightPanel.getLayout().setActiveItem(b.itemIndex);
         this.rightPanel.show();
         this.rightPanel.syncSize();
+        var s = this.cardContainer.getLayout().activeItem.currentSelection;
+        if(!Ext.isEmpty(s)) {
+            if(this.rightPanel.getLayout().activeItem == this.objectPanel){
+                this.objectPanel.load(s[0]);
+                this.objectPanel.doLoad();
+            }
+        }
+
     }
 
     ,onBreadcrumbItemClick: function(el, idx, ev) {
@@ -772,7 +780,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
             var canDownload = true;
             for (var i = 0; i < objectsDataArray.length; i++) {
-                if(objectsDataArray[i].template_type !== 'file') {
+                if(CB.DB.templates.getType(objectsDataArray[i].template_id) !== 'file') {
                     canDownload = false;
                 }
             }

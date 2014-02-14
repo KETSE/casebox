@@ -109,13 +109,18 @@ switch ($f['type']) {
                 $fn = FILES_PREVIEW_DIR.$preview['filename'];
                 if (file_exists($fn)) {
                     echo file_get_contents($fn);
-                    $res = DB\dbQuery('update file_previews set ladate = CURRENT_TIMESTAMP where id = $1', $id) or die(DB\dbQueryError());
+                    $res = DB\dbQuery(
+                        'UPDATE file_previews
+                        SET ladate = CURRENT_TIMESTAMP
+                        WHERE id = $1',
+                        $id
+                    ) or die(DB\dbQueryError());
                 }
             } elseif (!empty($preview['html'])) {
                 echo $preview['html'];
             }
             $dbNode = new TreeNode\Dbnode();
-            echo '<!-- NodeName:'.$dbNode->getName($id).' -->';
+            // echo '<!-- NodeName:'.$dbNode->getName($id).' -->';
         }
         break;
     case 'task':

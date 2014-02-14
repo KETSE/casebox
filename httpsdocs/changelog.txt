@@ -1,3 +1,25 @@
+CaseBox 1.9.110 (2014-02-14)
+==============================
+New Features, Improvements
+--------------------------
+- remove second date display for tasks plugin
+- Remove files block from Task preview
+- added listeners and handlers to action links for tasks in new preview plugin
+- treeNodes can also be defined in core.config table
+- changed treeNode Tasks plugin so it could be attached to a specific node id
+- global search should always search phisical tree
+
+Fixed Bugs:
+----------
+- 'Modified' datetime in 'Properties' plugin doesnt have the hint with date time
+- Preview not showing after edit and after switching to Filter and back
+- changing page on a Tasks virtual folder did not change page (displayed items)
+- download button do not show when selecting files
+- When you exit cellEdit mode, you don't see new lines
+- adding comment did not return creator id for correct icon display
+- updating closed tasks - automaticly change their status to active
+- mistake in SystemProperties plugin
+
 CaseBox 1.9.109 (2014-02-12)
 ==============================
 New Features, Improvements

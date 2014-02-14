@@ -11,7 +11,9 @@ class Dbnode extends Base
         $pid = null;
         /* should start with path check and see if child request is for a real db node*/
         if (empty($pathArray)) {
-            return;
+            if (empty($requestParams['query'])) {
+                return;
+            }
         } else {
             $lastNode = @$pathArray[sizeof($pathArray)-1];
             if ($lastNode instanceof Dbnode) {
@@ -41,6 +43,7 @@ class Dbnode extends Base
         } else {
             $p['pids'] = $pid;
         }
+
         $s = new \CB\Search();
         $rez = $s->query($p);
         if (!empty($rez['data'])) {

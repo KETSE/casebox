@@ -242,18 +242,23 @@ function formatDatePeriod($fromDateTime, $toDateTime)
 function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 {
     $d1 = new \DateTime($fromDateTime);
-    $d2 = new \DateTime($toDateTime);
     if (empty($TZ)) {
         $TZ = 'UTC';
     }
     $d1->setTimezone(new \DateTimeZone($TZ));
-    $d2->setTimezone(new \DateTimeZone($TZ));
+
 
     $rez = $d1->format('D M j, Y');
     $hourText = $d1->format('H:i');
     if ($hourText != '00:00') {
         $rez .= ' '.$hourText;
     }
+
+    if (empty($toDateTime)) {
+        return $rez;
+    }
+    $d2 = new \DateTime($toDateTime);
+    $d2->setTimezone(new \DateTimeZone($TZ));
 
     $d2format = '';
     if ($d1->format('Y') != $d2->format('Y')) {

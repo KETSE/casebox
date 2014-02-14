@@ -91,6 +91,7 @@ class Objects
         if (empty($pid)) {
             throw new \Exception(L\Access_denied);
         }
+
         $p['pid'] = Path::detectRealTargetId($pid);
 
         if (!Security::canCreateActions($p['pid'])) {
@@ -537,8 +538,10 @@ class Objects
             return \CB\Cache::get($var_name);
         }
         $obj = static::getCustomClassByObjectId($id);
-        $obj->load();
-        \CB\Cache::set($var_name, $obj);
+        if (!empty($obj)) {
+            $obj->load();
+            \CB\Cache::set($var_name, $obj);
+        }
 
         return $obj;
     }
@@ -751,22 +754,24 @@ class Objects
             3. a generic config,  named default_object_plugins, could be defined in core config
         */
 
-        $o = $this->getCachedObject($id);
-        $template = $o->getTemplate();
-        $templateData = is_null($template)
-            ? null
-            : $template->getData();
         $objectPlugins = null;
-        if (!empty($templateData['cfg']['object_plugins'])) {
-            $objectPlugins = $templateData['cfg']['object_plugins'];
-        } else {
-            $tmp = Config::get('object_type_plugins');
-            if (!empty($tmp[$o->getType()])) {
-                $objectPlugins = $tmp[$o->getType()];
+        $o = $this->getCachedObject($id);
+        if (!empty($o)) {
+            $template = $o->getTemplate();
+            $templateData = is_null($template)
+                ? null
+                : $template->getData();
+            if (!empty($templateData['cfg']['object_plugins'])) {
+                $objectPlugins = $templateData['cfg']['object_plugins'];
             } else {
-                $tmp = Config::get('default_object_plugins');
-                if (!empty($tmp)) {
-                    $objectPlugins = $tmp;
+                $tmp = Config::get('object_type_plugins');
+                if (!empty($tmp[$o->getType()])) {
+                    $objectPlugins = $tmp[$o->getType()];
+                } else {
+                    $tmp = Config::get('default_object_plugins');
+                    if (!empty($tmp)) {
+                        $objectPlugins = $tmp;
+                    }
                 }
             }
         }
@@ -831,6 +836,7 @@ class Objects
                 ,'pid' => $p['id']
                 ,'template_id' => $data['template_id']
                 ,'cdate_text' => Util\formatAgoTime('now')
+                ,'cid' => $_SESSION['user']['id']
                 ,'user' => User::getDisplayName($_SESSION['user']['id'])
                 ,'content' => $p['msg']
             )

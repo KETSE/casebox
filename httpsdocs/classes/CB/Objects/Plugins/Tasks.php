@@ -29,7 +29,7 @@ class Tasks extends Base
         $s = new \CB\Search();
         $sr = $s->query($params);
         foreach ($sr['data'] as $d) {
-            $d['ago_text'] = Util\formatDateTimePeriod($d['date'], $d['date_end'], @$_SESSION['user']['cfg']['TZ']);
+            $d['ago_text'] = @Util\formatDateTimePeriod($d['date'], null, @$_SESSION['user']['cfg']['TZ']);
             $d['user'] = User::getDisplayName($d['cid']);
             $rez['data'][] = $d;
         }

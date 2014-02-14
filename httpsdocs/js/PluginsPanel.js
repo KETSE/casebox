@@ -6,17 +6,14 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
     ,initComponent: function(){
         CB.PluginsPanel.superclass.initComponent.apply(this, arguments);
 
+        App.on('objectchanged', this.onObjectChanged, this);
+
         this.delayLoadTask = new Ext.util.DelayedTask(this.doLoad, this);
     }
 
     ,load: function (params) {
         if(!isNaN(params)) {
             params = {id: params};
-        }
-
-        if(Ext.isEmpty(params)) {
-            this.clear();
-            return;
         }
 
         this.delayLoadTask.cancel();
@@ -35,13 +32,19 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(this.api)) {
             return;
         }
+        if(!isNaN(params)) {
+            params = {id: params};
+        }
+        this.clear();
+        if(Ext.isEmpty(params)) {
+            return;
+        }
 
         this.loadedParams = params;
         this.api(params, this.onLoadData, this);
     }
 
     ,onLoadData: function(r, e) {
-        this.clear();
         var items = [];
         Ext.iterate(
             r.data
@@ -58,16 +61,21 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
             }
             ,this
         );
-        this.syncSize();
-        // if(items.length > 0) {
-        //     this.add(items);
-        // }
+        this.doLayout(true, true);
     }
 
     ,clear: function() {
         this.removeAll(true);
+        delete this.loadedParams;
     }
-
+    ,onObjectChanged: function(data) {
+        if(!isNaN(data)) {
+            data = {id: data};
+        }
+        if(data.id == this.loadedParams.id) {
+            this.reload();
+        }
+    }
     ,reload: function() {
         this.doLoad(this.loadedParams);
     }

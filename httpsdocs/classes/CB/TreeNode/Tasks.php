@@ -9,14 +9,16 @@ class Tasks extends Base
     protected function acceptedPath()
     {
         $p = &$this->path;
-        if ((sizeof($p) > 0) &&
-            (get_class($this->lastNode) != get_class($this))
-        ) {
-            return false;
+
+        $lastId = 0;
+        if (!empty($p)) {
+            $lastId = $this->lastNode->id;
         }
 
+        $ourPid = @intval($this->config['pid']);
+
         if ($this->lastNode instanceof Dbnode) {
-            if ($this->lastNode->id <> $this->rootId) {
+            if ($ourPid != $lastId) {
                 return false;
             }
         } elseif (get_class($this->lastNode) != get_class($this)) {
@@ -36,7 +38,6 @@ class Tasks extends Base
         if (!empty($taskTemplates)) {
             $this->fq[] = 'template_id:('.implode(' OR ', $taskTemplates).')';
         }
-        $this->fq[] = '(user_ids:'.$_SESSION['user']['id'].' OR cid:'.$_SESSION['user']['id'].')';
 
     }
 
@@ -54,7 +55,10 @@ class Tasks extends Base
 
         $this->createDefaultFilter();
 
-        if (empty($this->lastNode) || (\CB\Objects::getType($this->lastNode->id) == 'case')) {
+        if (empty($this->lastNode) ||
+            (($this->lastNode->id == @$this->config['pid']) && (get_class($this->lastNode) != get_class($this))) ||
+            (\CB\Objects::getType($this->lastNode->id) == 'case')
+        ) {
             $rez = $this->getRootNodes();
         } else {
             switch ($this->lastNode->id) {
@@ -100,8 +104,10 @@ class Tasks extends Base
     {
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
+        $p['fq'][] = '(user_ids:'.$_SESSION['user']['id'].' OR cid:'.$_SESSION['user']['id'].')';
         $p['fq'][] = 'status:(1 OR 2)';
         $p['rows'] = 0;
+
         $s = new \CB\Search();
         $rez = $s->query($p);
         $count = '';
@@ -114,7 +120,7 @@ class Tasks extends Base
                 array(
                     'name' => L\Tasks.$count
                     ,'id' => $this->getId(1)
-                    ,'iconCls' => 'i-flag'
+                    ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
                 )
             )
@@ -125,6 +131,7 @@ class Tasks extends Base
     {
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
+        $p['fq'][] = '(user_ids:'.$_SESSION['user']['id'].' OR cid:'.$_SESSION['user']['id'].')';
         $p['fq'][] = 'status:(1 OR 2)';
 
         if (@$this->requestParams['from'] == 'tree') {
@@ -141,7 +148,7 @@ class Tasks extends Base
                 $rez['data'][] = array(
                     'name' => L\AssignedToMe.' ('.$sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']}.')'
                     ,'id' => $this->getId(2)
-                    ,'iconCls' => 'is-flag'
+                    ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
                 );
             }
@@ -149,7 +156,7 @@ class Tasks extends Base
                 $rez['data'][] = array(
                     'name' => L\Created.' ('.$sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']}.')'
                     ,'id' => $this->getId(3)
-                    ,'iconCls' => 'is-flag'
+                    ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
                 );
             }
@@ -166,22 +173,24 @@ class Tasks extends Base
 
     protected function getDepthChildren3()
     {
-        $fq = $this->fq;
+        $p = $this->requestParams;
+        $p['fq'] = $this->fq;
 
         if ($this->lastNode->id == 2) {
-            $fq[] = 'user_ids:'.$_SESSION['user']['id'];
+            $p['fq'][] = 'user_ids:'.$_SESSION['user']['id'];
         } else {
-            $fq[] = 'cid:'.$_SESSION['user']['id'];
+            $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
         }
 
         $rez = array();
 
         if (@$this->requestParams['from'] == 'tree') {
             $s = new \CB\Search();
+
             $sr = $s->query(
                 array(
                     'rows' => 0
-                    ,'fq' => $fq
+                    ,'fq' => $p['fq']
                     ,'facet' => true
                     ,'facet.field' => array(
                         '{!ex=status key=0status}status'
@@ -193,26 +202,29 @@ class Tasks extends Base
                 $rez['data'][] = array(
                     'name' => lcfirst(L\Overdue).' ('.$sr['facets']->facet_fields->{'0status'}->{'1'}.')'
                     ,'id' => $this->getId(4)
-                    ,'iconCls' => 'is-flag'
+                    ,'iconCls' => 'icon-task'
                 );
             }
             if (!empty($sr['facets']->facet_fields->{'0status'}->{'2'})) {
                 $rez['data'][] = array(
                     'name' => lcfirst(L\Ongoing).' ('.$sr['facets']->facet_fields->{'0status'}->{'2'}.')'
                     ,'id' => $this->getId(5)
-                    ,'iconCls' => 'is-flag'
+                    ,'iconCls' => 'icon-task'
                 );
             }
             if (!empty($sr['facets']->facet_fields->{'0status'}->{'3'})) {
                 $rez['data'][] = array(
                     'name' => lcfirst(L\Closed).' ('.$sr['facets']->facet_fields->{'0status'}->{'3'}.')'
                     ,'id' => $this->getId(6)
-                    ,'iconCls' => 'is-flag'
+                    ,'iconCls' => 'icon-task'
                 );
             }
         } else {
+
+            $p['fq'][] = 'status:(1 OR 2)';
+
             $s = new \CB\Search();
-            $rez = $s->query(array('fq' => $fq));
+            $rez = $s->query($p);
             foreach ($rez['data'] as &$n) {
                 $n['has_childs'] = true;
             }

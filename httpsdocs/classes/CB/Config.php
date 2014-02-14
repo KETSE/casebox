@@ -37,15 +37,20 @@ class Config extends Singleton
         $cfg['facet_configs'] = $dfd;
 
         if (!empty($cfg['node_facets'])) {
-            $cfg['node_facets'] = json_decode($cfg['node_facets'], true);
+            $cfg['node_facets'] = Util\toJSONArray($cfg['node_facets']);
         }
 
         if (!empty($cfg['default_object_plugins'])) {
-            $cfg['default_object_plugins'] = json_decode($cfg['default_object_plugins'], true);
+            $cfg['default_object_plugins'] = Util\toJSONArray($cfg['default_object_plugins']);
         }
 
         if (!empty($cfg['object_type_plugins'])) {
-            $cfg['object_type_plugins'] = json_decode($cfg['object_type_plugins'], true);
+            $cfg['object_type_plugins'] = Util\toJSONArray($cfg['object_type_plugins']);
+        }
+
+        if (!empty($cfg['treeNodes'])) {
+            $cfg['treeNodes'] = Util\toJSONArray($cfg['treeNodes']);
+            // var_dump($cfg['treeNodes']);
         }
 
         static::$config = static::adjustPaths($cfg);

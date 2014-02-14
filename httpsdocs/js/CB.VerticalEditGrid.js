@@ -115,7 +115,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                         return this.renderers[tr.get('type')](v, this);
                     }
                     if(!Ext.isEmpty(tr.get('cfg').height)) {
-                        meta.attr = ' style="height:' + tr.get('cfg').height + 'px"';
+                        meta.attr = ' style="min-height:' + tr.get('cfg').height + 'px"';
                     }
 
                     if(Ext.isEmpty(v)) return '';
