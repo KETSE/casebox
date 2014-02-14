@@ -401,7 +401,9 @@ class Tasks
         }
         $res->close();
         Objects::updateCaseUpdateInfo($p['id']);
-        Solr\Client::runCron();
+
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $p['id']));
 
         return $rez;
     }
@@ -636,7 +638,8 @@ class Tasks
 
         Objects::updateCaseUpdateInfo($p['id']);
 
-        Solr\Client::runCron();
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $p['id']));
 
         return $rez;
     }
@@ -787,7 +790,8 @@ class Tasks
 
         Objects::updateCaseUpdateInfo($p['id']);
 
-        Solr\Client::runCron();
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $p['id']));
 
         return array('success' => true);
     }
@@ -839,7 +843,8 @@ class Tasks
 
         Objects::updateCaseUpdateInfo($id);
 
-        Solr\Client::runCron();
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $id));
 
         return array('success' => true, 'id' => $id);
     }
@@ -907,7 +912,8 @@ class Tasks
 
         Objects::updateCaseUpdateInfo($id);
 
-        Solr\Client::runCron();
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $id));
 
         return array('success' => true, 'id' => $id);
     }
@@ -1001,10 +1007,10 @@ class Tasks
             }
 
             $i = strtotime($r['date_start']);
-            $rdatetime_period = date($format, $i);
+            $datetime_period = date($format, $i);
 
             if (!empty($r['date_end'])) {
-                $rdatetime_period = ($r['allday'] == 1)
+                $datetime_period = ($r['allday'] == 1)
                     ? Util\formatDatePeriod($r['date_start'], $r['date_end'])
                     : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['TZ']);
             }
@@ -1097,61 +1103,6 @@ class Tasks
                 'color: #333; width: 100%; display: table; border-collapse: separate; border-spacing: 0;"><tbody>'.
                 implode('', $users).'</tbody></table></td></tr>';
 
-            $files = array();
-            $files_text = '';
-            $fres = DB\dbQuery(
-                'SELECT id, name
-                FROM tree
-                WHERE pid = $1
-                    AND `type` = 5
-                ORDER BY `name`',
-                $id
-            ) or die(DB\dbQueryError());
-
-            while ($fr = $fres->fetch_assoc()) {
-                $files[] = $fr;
-            }
-            $fres->close();
-
-            if (!empty($files)) {
-                $files_text .= '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
-                    L\get('Files', $user['language_id']).':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
-                foreach ($files as $f) {
-                    $files_text .= '<li style="margin:0;padding: 3px 0"><a href="#" name="file" fid="'.$f['id'].
-                        '" style="text-decoration: underline; color: #15C"><img style="float:left;margin-right:5px" src="'.
-                        Util\getCoreHost($r['db']).'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
-                }
-                $files_text .= '</ul></td></tr>';
-            }
-
-            $reminders_text = '';
-            if (!empty($r['reminders'])) {
-                $reminders_text .= '<tr><td  style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
-                    L\get('Reminders', $user['language_id']).':</td><td style="vertical-align:top">'.
-                    '<ul style="list-style: none; text-decoration: none; color: #333;margin:0;padding: 0">';
-                $ra = explode('-', $r['reminders']);
-                foreach ($ra as $rem) {
-                    $rem = explode('|', $rem);
-                    $units = '';
-                    switch ($rem[2]) {
-                        case 1:
-                            $units = L\get('ofMinutes', $user['language_id']);
-                            break;
-                        case 2:
-                            $units = L\get('ofHours', $user['language_id']);
-                            break;
-                        case 3:
-                            $units = L\get('ofDays', $user['language_id']);
-                            break;
-                        case 4:
-                            $units = L\get('ofWeeks', $user['language_id']);
-                            break;
-                    }
-                    $reminders_text .= '<li>'.$rem[1].' '.$units.'</li>';
-                }
-                $reminders_text .= '</ul></td></tr>';
-            }
-
             // $message = str_replace( array('<i', '</i>'), array('<strong', '</strong>'), $message);
             $rez = file_get_contents(TEMPLATES_DIR.'task_notification_email.html');
 
@@ -1207,9 +1158,9 @@ class Tasks
                     ,$r['owner_text']
                     ,$users //{assigned_text}
                     ,L\get('Files', $user['language_id'])
-                    ,$files_text
-                    ,L\get('Reminders', $user['language_id'])
-                    ,$reminders_text
+                    ,''
+                    ,''
+                    ,''
                     ,''
                 ),
                 $rez

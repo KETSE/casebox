@@ -161,7 +161,10 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if(um) {
             um.update('<img src="/photo/' + App.loginData.id + '.jpg" ' +
                 'style="margin-top: 4px; width: 32px; height: 32px;" ' +
-                'title="'+App.loginData['first_name']+' '+App.loginData['last_name']+'"" />'
+                'title="'+
+                    App.loginData['first_name']+' '+
+                    App.loginData['last_name']+ "\n" +
+                    ' (' + App.loginData['email'] +')" />'
             );
         }
 

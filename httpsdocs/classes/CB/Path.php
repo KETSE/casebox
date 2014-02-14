@@ -213,7 +213,8 @@ class Path
      */
     public static function detectRealTargetId($p)
     {
-        $rez = null;
+        $rootId = Browser::getRootFolderId();
+        $rez = $rootId;
         if (empty($p)) {
             return $rez;
         }
@@ -238,6 +239,7 @@ class Path
             return $rez;
         }
 
+        $rez = null;
         while (is_null($rez) && !empty($path)) {
             $el = array_pop($path);
             if (is_numeric($el)) { //it's a real node id
@@ -250,8 +252,8 @@ class Path
             }
         }
 
-        if ($rez == 'root') {
-            $rez = Browser::getRootFolderId();
+        if (empty($rez) || ($rez == 'root')) {
+            $rez = $rootId;
         }
 
         return $rez;

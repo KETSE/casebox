@@ -987,8 +987,10 @@ class User
      */
     public static function getDisplayName($id = false)
     {
-        if (!is_numeric($id)) {
+        if ($id === false) {
             $id = $_SESSION['user']['id'];
+        } elseif (!is_numeric($id)) {
+            return '';
         }
 
         $var_name = 'users['.$id."]['displayName']";

@@ -208,11 +208,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.delayedLoadTask.cancel();
         this.requestedLoadData = Ext.apply({}, objectData);
         if(this.getLayout().activeItem.getXType() !== 'CBEditObject') {
-            this.items.itemAt(0).clear();
             this.onViewChangeClick(0);
             if(this.skipNextPreviewLoadOnBrowserRefresh) {
                 delete this.skipNextPreviewLoadOnBrowserRefresh;
             } else {
+                this.items.itemAt(0).clear();
                 this.delayedLoadTask.delay(60, this.doLoad, this);
             }
         }
@@ -220,19 +220,22 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     ,doLoad: function() {
         this.loadedData = Ext.apply({}, this.requestedLoadData);
         var activeItem = this.getLayout().activeItem;
+        var id = this.requestedLoadData
+            ? Ext.value(this.requestedLoadData.nid, this.requestedLoadData.id)
+            : null;
 
         switch(activeItem.getXType()) {
             case 'CBObjectPreview':
                 if(Ext.isEmpty(this.requestedLoadData)) {
                     return;
                 }
-                this.getTopToolbar().setVisible(!Ext.isEmpty(this.requestedLoadData.id));
+                this.getTopToolbar().setVisible(!Ext.isEmpty(id));
                 this.doLayout();
-                activeItem.loadPreview(this.requestedLoadData.id);
+                activeItem.loadPreview(id);
                 break;
             case 'CBObjectProperties':
             case 'CBEditObject':
-                activeItem.load(this.loadedData.id);
+                activeItem.load({id: id});
                 break;
         }
         this.actions.edit.enable();
@@ -264,7 +267,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             function(component, form, action){
                 var id = Ext.value(action.result.data.id, this.loadedData.id);
                 var name = Ext.value(action.result.data.name, this.loadedData.name);
-                component.clear();
                 this.requestedLoadData.id = id;
                 this.requestedLoadData.name = name;
                 this.items.itemAt(0).doLoad(id);
@@ -276,14 +278,12 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         );
     }
     ,onCancelClick: function() {
+        this.requestedLoadData = this.loadedData;
         this.onViewChangeClick(0);
     }
     ,onOpenInTabsheetClick: function(b, e) {
         var d = this.getLayout().activeItem.data;
         switch(CB.DB.templates.getType(d.template_id)) {
-            case 'task':
-                App.mainViewPort.onTaskEdit({data: d}, e);
-                break;
             case 'file':
                 App.mainViewPort.onFileOpen(d, e);
                 break;

@@ -300,6 +300,9 @@ function isDebugHost()
 
 function debug($msg)
 {
+    if (!is_scalar($msg)) {
+        $msg = var_export($msg, 1);
+    }
     error_log($msg."\n", 3, DEBUG_LOG);
 }
 

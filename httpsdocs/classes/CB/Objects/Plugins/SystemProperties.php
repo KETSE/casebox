@@ -29,14 +29,15 @@ class SystemProperties extends Base
                 ,t.udate
             FROM tree t
             JOIN tree_info ti on t.id = ti.id
-            LEFT JOIN tree tt on t.template_id = tt.id',
-            array()
+            LEFT JOIN tree tt on t.template_id = tt.id
+            where t.id = $1',
+            $this->id
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $r['cid_text'] = User::getDisplayName($r['cid']);
             $r['cdate_text'] = Util\formatAgoTime($r['cdate']);
             $r['uid_text'] = User::getDisplayName($r['uid']);
-            $r['udate_text'] = Util\formatAgoTime($r['cdate']);
+            $r['udate_text'] = Util\formatAgoTime($r['udate']);
             $rez['data'] = $r;
         }
         $res->close();

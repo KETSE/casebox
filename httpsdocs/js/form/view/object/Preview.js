@@ -33,9 +33,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         }
         this.newId = id;
         this.newVersionId = Ext.value(versionId, '');
-        // if( (this.newId != this.data.id) || (this.newVersionId != this.loadedVersionId) ) {
         this.delayReload(50);
-        // }
     }
 
     ,delayReload: function(ms){

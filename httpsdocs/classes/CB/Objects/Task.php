@@ -219,12 +219,13 @@ class Task extends Object
         $dateStart = empty($dateStart) ? null : Util\dateISOToMysql($dateStart);
         $dateEnd = empty($dateEnd) ? null : Util\dateISOToMysql($dateEnd);
 
-        $status = 2; // active
-        if (!empty($dateEnd)) {
-            if (strtotime($dateEnd) < strtotime('now')) {
-                $status = 1;
+        if (empty($this->data['status'])) {
+            $this->data['status'] = 2; // active
+            if (!empty($dateEnd)) {
+                if (strtotime($dateEnd) < strtotime('now')) {
+                    $this->data['status'] = 1;
+                }
             }
-
         }
         /* get previous responsible users to notify the users that has been removed */
         $oldResponsibleUsers = array();
@@ -250,7 +251,7 @@ class Task extends Object
             ,$this->getFieldValue('category', 0)['value']
             ,$this->getFieldValue('assigned', 0)['value']
             ,$this->getFieldValue('description', 0)['value']
-            ,$status
+            ,$this->data['status']
         );
 
         DB\dbQuery(
