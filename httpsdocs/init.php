@@ -11,6 +11,7 @@ namespace CB;
 require_once dirname(__FILE__).'/config.php';
 require_once 'lib/Util.php';
 require_once 'lib/DB.php';
+require_once \CB\CONFIG\SOLR_CLIENT;
 
 // connect to DB
 DB\connect();
