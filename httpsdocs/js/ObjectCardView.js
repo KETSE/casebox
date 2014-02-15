@@ -21,6 +21,15 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onReloadClick
             })
+            ,download: new Ext.Action({
+                qtip: L.Download
+                ,iconAlign:'top'
+                ,scale: 'large'
+                ,iconCls: 'ib-download'
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onDownloadClick
+            })
 
             ,save: new Ext.Action({
                 iconCls: 'ib-save'
@@ -58,6 +67,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             tbar: [
                 this.actions.edit
                 ,this.actions.reload
+                ,this.actions.download
                 ,this.actions.save
                 ,this.actions.cancel
                 ,'->'
@@ -106,7 +116,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         this.delayedLoadTask = new Ext.util.DelayedTask(this.doLoad, this);
 
+        this.addEvents('filedownload');
+        this.enableBubble(['filedownload']);
     }
+
     ,getButton: function() {
         if(!this.button) {
             this.button = new Ext.SplitButton({
@@ -200,6 +213,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,load: function(objectData) {
+        clog(objectData);
         if(!isNaN(objectData)) {
             objectData = {
                 id: objectData
@@ -238,6 +252,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 activeItem.load({id: id});
                 break;
         }
+        if(CB.DB.templates.getType(this.loadedData.template_id) == 'file') {
+            this.actions.download.show();
+        } else {
+            this.actions.download.hide();
+        }
         this.actions.edit.enable();
     }
     ,edit: function (objectData) {
@@ -269,7 +288,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 var name = Ext.value(action.result.data.name, this.loadedData.name);
                 this.requestedLoadData.id = id;
                 this.requestedLoadData.name = name;
-                this.items.itemAt(0).doLoad(id);
+                this.items.itemAt(0).load(id);
                 this.onViewChangeClick(0, false);
 
                 this.skipNextPreviewLoadOnBrowserRefresh = true;
@@ -300,6 +319,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.onViewChange(2);
         this.getLayout().activeItem.loadPreview(this.loadedData.id);
 
+    }
+    ,onDownloadClick: function(b, e) {
+        this.fireEvent('filedownload', [this.loadedData.id], false, e);
     }
 
 }

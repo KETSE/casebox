@@ -102,10 +102,13 @@ background-color: #FFFFCC;
 .obj-plugin-h {
     margin-bottom: 0;
     color: #333;
-    padding: 0 5px 0 10px;
+    padding: 0 5px 0 8px;
     border-bottom: 2px solid #CCC;
 }
 
+.obj-plugin-h .x-toolbar-left{
+    vertical-align: bottom;
+}
 .obj-plugin-h label{
     font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;
     font-weight: bold;

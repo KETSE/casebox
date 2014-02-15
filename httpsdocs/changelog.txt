@@ -1,3 +1,25 @@
+CaseBox 1.9.111 (2014-02-15)
+==============================
+New Features, Improvements
+--------------------------
+- Add 'Download' button for files in rightPanel
+- Remove 'Refresh' button in grid status bar, or make it work
+- _objects popupForm, add checkbox as a first column
+- _objects popupEditor: clear the values before showing the form & loading items
+- change padding for plugin titles as in proto
+- created virtual folder: 'Manager's Calendar' for osji.
+    This plugin has reference to programs template id inside.
+    It should be added config for display in tree.
+- created MyCalendar plugin
+    It should be added config for display in tree.
+- Add virtual folder /Tasks/created by me/Assigned/
+
+Fixed Bugs:
+----------
+- 'Refresh' button in grid status bar did not it work
+- After FullText search, the 'ExpandFolders' is ON (Reset all filters on navigation)
+- Sorting doesn't work in VFolders (trying to sort tasks by date)
+
 CaseBox 1.9.110 (2014-02-14)
 ==============================
 New Features, Improvements

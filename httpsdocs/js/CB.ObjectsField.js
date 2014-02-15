@@ -388,16 +388,27 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);
         this.getStore();
 
-        columns = [
-            {   dataIndex: 'name'
+        var sm = new Ext.grid.CheckboxSelectionModel({
+            checkOnly: true
+            ,singleSelect: !this.config.multiValued
+            ,listeners: {
+                scope: this
+                ,rowselect: this.onRowSelect
+                ,rowdeselect: this.onRowDeselect
+                // ,selectionchange: this.onCheckBoxSelectionChange
+            }
+        });
+        var columns = [
+            sm
+            ,{   dataIndex: 'name'
                 ,header: L.Name
                 ,width: 300
                 ,scope: this
                 ,renderer: function(v, m, r, ri, ci, s){
+                    var selected = (this.resultPanel.store.findExact('id', r.get('id')) >= 0);
                     switch(this.config.renderer){
                         case 'listGreenIcons':
-                            idx = this.resultPanel.store.findExact('id', r.get('id'));
-                            m.css = 'icon-grid-column ' +( (idx < 0) ? 'icon-element-off' : 'icon-element' );
+                            m.css = 'icon-grid-column ' +( (!selected) ? 'icon-element-off' : 'icon-element' );
                             break;
                         case 'listObjIcons': m.css = 'icon-grid-column '+r.get('iconCls'); break;
                     }
@@ -491,11 +502,11 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
             ,viewConfig: {
                 markDirty: false
             }
-            ,sm: new Ext.grid.RowSelectionModel({ singleSelect: !this.config.multiValued })
+            ,sm: sm
             ,listeners: {
                 scope: this
                 ,rowclick: this.onRowClick
-                ,rowdblclick: this.onSelectItemClick
+                ,rowdblclick: this.onRowDblClick
             }
             ,bbar: new Ext.PagingToolbar({
                 store: this.store       // grid and PagingToolbar using same store
@@ -561,7 +572,10 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
             ,listeners: {
                 scope: this
                 ,show: function(){
-                    if(this.config.autoLoad === true) this.onGridReloadTask();
+                    this.store.removeAll();
+                    if(this.config.autoLoad === true) {
+                        this.onGridReloadTask();
+                    }
                     this.triggerField.focus(false, 400);
                 }
                 ,facetchange: function(o, ev){ ev.stopPropagation(); this.onGridReloadTask(); }
@@ -573,6 +587,9 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
                 ,{text: Ext.MessageBox.buttonText.cancel, iconCls: 'icon-cancel', scope: this, handler: this.destroy}]
         });
         CB.ObjectsSelectionForm.superclass.initComponent.apply(this, arguments);
+
+        this.store.on('load', this.onLoad, this);
+
         this.addEvents('setvalue');
         this.triggerField = this.findByType('trigger')[0];
     }
@@ -599,13 +616,33 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
     }
     ,onLoad: function(store, records, options){
         this.getEl().unmask();
-        if(Ext.isEmpty(records)) this.grid.getEl().mask(L.noData);
-        else{
+        if(Ext.isEmpty(records)) {
+            this.grid.getEl().mask(L.noData);
+        } else {
             this.grid.getEl().unmask();
-            Ext.each(records, function(r){ r.set('iconCls', getItemIcon(r.data)); }, this);
+            var currentValue = this.getValue();
+            var selectedRecords = [];
+            this.selectValueOnLoad = true;
+            currentValue = currentValue.split(',');
+            clog('currentValue', currentValue);
+            Ext.each(
+                records
+                ,function(r){
+                    r.set('iconCls', getItemIcon(r.data));
+                    if(currentValue.indexOf(r.get('id')+'') >= 0) {
+                        selectedRecords.push(r);
+                    }
+                }
+                ,this
+            );
+            if(!Ext.isEmpty(selectedRecords)) {
+                this.grid.getSelectionModel().selectRecords(selectedRecords);
+            }
+            this.selectValueOnLoad = false;
         }
-        this.triggerField.setValue(options.params.query);
-        this.grid.getBottomToolbar().setVisible(store.reader.jsonData.total > store.reader.jsonData.data.length);
+        clog(this, arguments, this.triggerField.rendered, this.rendered);
+        // this.triggerField.setValue(options.params.query);
+        // this.grid.getBottomToolbar().setVisible(store.reader.jsonData.total > store.reader.jsonData.data.length);
     }
     ,onSelectionChange: function(sm, selection){
         //this.buttons[0].setDisabled(!sm.hasSelection());
@@ -639,29 +676,89 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
         }
         this.qt.showAt(e.getXY());
     }
-    ,onSelectItemClick: function(g, ri, e){
-        r = g.getStore().getAt(ri);
-        idx = this.resultPanel.store.findExact('id', r.get('id'));
-        if(this.config.multiValued){
-            if(idx > -1) this.resultPanel.store.removeAt(idx);
-            else{
-                var u = new this.resultPanel.store.recordType(r.data);
-                this.resultPanel.store.add(u);
-            }
-            this.grid.getView().refresh();
-            this.items.last().syncSize();
-        }else  this.onOkClick();
+    ,onRowDblClick: function(g, ri, e){
+
+        var sm = this.grid.getSelectionModel();
+        if(sm.isSelected(ri)) {
+            sm.deselectRow(ri);
+        } else {
+            sm.selectRow(ri, this.config.multiValued);
+        }
     }
-    ,onRemoveItemClick: function(b, idx, oel, e){
-        el = Ext.get(e.getTarget());
-        if(!el.dom.classList.contains('icon-close-light')) return;
-        this.resultPanel.store.removeAt(idx);
+    ,onRowSelect: function (sm, ri, r) {
+        clog('select', arguments);
+        if(!this.selectValueOnLoad) {
+            this.resultPanel.store.loadData(r.data, true);
+            this.items.last().syncSize();
+        }
+    }
+    ,onRowDeselect: function (sm, ri, r) {
+        clog('deselect', arguments);
+        var idx = this.resultPanel.store.findExact('id', r.get('id'));
+        if(idx >= 0 ) {
+            this.resultPanel.store.removeAt(idx);
+        }
+        this.items.last().syncSize();
+    }
+    ,onCheckBoxSelectionChange: function (sm) {
+        return;
+        if(this.selectValueOnLoad) {
+            return;
+        }
+
+        var s = sm.getSelections();
+        clog('selection change', s);
+
+        var data = [];
+        for (var i = 0; i < s.length; i++) {
+            data.push(s[i].data);
+        }
+        this.resultPanel.store.loadData(data);
+
         this.grid.getView().refresh();
         this.items.last().syncSize();
+
+        // var r = g.getStore().getAt(ri);
+        // var idx = this.resultPanel.store.findExact('id', r.get('id'));
+        // if(this.config.multiValued){
+        //     if(idx > -1) {
+        //         this.resultPanel.store.removeAt(idx);
+        //     } else {
+        //         var u = new this.resultPanel.store.recordType(r.data);
+        //         this.resultPanel.store.add(u);
+        //     }
+        //     this.grid.getView().refresh();
+        //     this.items.last().syncSize();
+        // } else {
+        //     this.onOkClick();
+        // }
+    }
+
+    ,onRemoveItemClick: function(b, idx, oel, e){
+        el = Ext.get(e.getTarget());
+        if(!el.dom.classList.contains('icon-close-light')) {
+            return;
+        }
+        var r = this.resultPanel.store.getAt(idx);
+        var gridIdx = this.grid.store.findExact('id', r.get('id'));
+        this.resultPanel.store.removeAt(idx);
+        if(gridIdx >=0) {
+            this.grid.getSelectionModel().deselectRow(gridIdx);
+        }
+
+        // this.grid.getView().refresh();
+        // this.items.last().syncSize();
     }
     ,getValue: function(){
         rez = [];
-        this.resultPanel.store.each(function(r){ rez.push(r.data.id); }, this);
+        if(this.resultPanel && this.resultPanel.store) {
+            this.resultPanel.store.each(
+                function(r){
+                    rez.push(r.data.id);
+                }
+                ,this
+            );
+        }
         return rez.join(',');
     }
     ,setData: function(data){
@@ -674,7 +771,9 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
             this.resultPanel.store.add(u);
         }, this);
 
-        if(this.rendered) this.items.last().syncSize();
+        if(this.rendered) {
+            this.items.last().syncSize();
+        }
     }
     ,getData: function(){
         rez = [];

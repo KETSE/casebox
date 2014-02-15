@@ -30,25 +30,31 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             ,itemSelector:'tr'
         });
 
-        this.messageField = new Ext.form.TextField({
+        this.messageField = new Ext.form.TextArea({
             emptyText: 'Write a comment...'
             ,flex: 1
+            ,height: 32
+            // ,autoHeight: true
             ,enableKeyEvents: true
+            ,style: 'margin-top: 5px; font-family: \'lucida grande\',tahoma,verdana,arial,sans-serif; font-size: 11px'
             ,listeners: {
                 scope: this
                 ,keypress: this.onMessageBoxKeyPress
             }
         });
+        this.messageField.on('focus', this.messageField.syncSize, this.messageField);
 
         Ext.apply(this, {
             title: L.Comments
             ,cls: 'block-plugin-comments'
+            ,autoHeight: true
             ,items: [
                 this.dataView
                 ,{
                     xtype: 'compositefield'
                     ,layout: 'hbox'
                     ,cls: 'msg-box'
+                    ,autoHeight: true
                     ,items: [
                         {
                             xtype: 'label'
@@ -73,19 +79,25 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,onMessageBoxKeyPress: function(tf, e) {
-        if(e.getKey() == e.ENTER) {
-            var msg = tf.getValue().trim();
-            if(Ext.isEmpty(msg)) {
-                return;
-            }
-            CB_Objects.addComment(
-                {
-                    id: this.params.id
-                    ,msg: msg
+        this.messageField.syncSize();
+        this.syncSize();
+        if ((e.getKey() == e.ENTER)) {
+            if(e.hasModifier()) {
+                // this.messageField.setValue(this.messageField.getValue()+"\n");
+            } else {
+                var msg = tf.getValue().trim();
+                if(Ext.isEmpty(msg)) {
+                    return;
                 }
-                ,this.onAddCommentProcess
-                ,this
-            );
+                CB_Objects.addComment(
+                    {
+                        id: this.params.id
+                        ,msg: msg
+                    }
+                    ,this.onAddCommentProcess
+                    ,this
+                );
+            }
         }
     }
 

@@ -391,7 +391,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,beforeload: function(store, options) {
                     options = {facets: 'general'};
                     Ext.apply(options, Ext.value(this.params, {}));
-                    Ext.apply(options, this.cardContainer.getLayout().activeItem.getViewParams());
+                    var vp = this.cardContainer.getLayout().activeItem.getViewParams();
+                    if(!Ext.isEmpty(vp) && (vp.from == 'calendar') &&
+                        (Ext.isEmpty(vp.dateStart) || Ext.isEmpty(vp.dateEnd))
+                    ) {
+                        return false;
+                    }
+
+                    Ext.apply(options, vp);
                     store.baseParams = options;
                 }
                 ,load: this.onStoreLoad
@@ -562,6 +569,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onCardItemChangeClick: function(b, e) {
+        delete this.params.view;
         this.cardContainer.getLayout().setActiveItem(b.viewIndex);
         this.onReloadClick();
     }
@@ -589,9 +597,19 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,reloadView: function(){
+        if(this.params && this.params.view) {
+            var viewName = 'CBBrowserView' + Ext.util.Format.capitalize(this.params.view);
+            this.cardContainer.items.each(
+                function(i, idx) {
+                    if(i.getXType() == viewName) {
+                        this.cardContainer.getLayout().setActiveItem(idx);
+                    }
+                }
+                ,this
+            );
+        }
         this.getEl().mask(L.Loading, 'x-mask-loading');
         this.store.load(this.params);
-        // this.store.reload();
     }
 
     ,onProxyLoad: function (proxy, o, options) {
@@ -648,6 +666,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if ((!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters) ) && (params1.filters != params2.filters) ) return false;
         if ((!Ext.isEmpty(params1.dateStart) || !Ext.isEmpty(params2.dateStart) ) && (params1.dateStart != params2.dateStart) ) return false;
         if ((!Ext.isEmpty(params1.dateEnd) || !Ext.isEmpty(params2.dateEnd) ) && (params1.dateEnd != params2.dateEnd) ) return false;
+        if ((!Ext.isEmpty(params1.view) || !Ext.isEmpty(params2.view) ) && (params1.view != params2.view) ) return false;
         return true;
     }
 
@@ -677,7 +696,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(params.path)) {
             params.path = '/';
         }
-        var newParams = Ext.apply({}, params, this.params);
+        var newParams = Ext.apply({}, params);//, this.params
         var sameParams = this.sameParams(
             this.params
             ,newParams
@@ -687,7 +706,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             return;
         }
 
-        this.requestParams = Ext.apply({}, params, this.params);
+        this.requestParams = newParams;
 
         if(Ext.isEmpty(this.loadParamsTask)) {
             this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
@@ -708,7 +727,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 this.actions.forward.setDisabled(true);
             }
         }
-        Ext.apply(this.params, this.requestParams);
+        this.params = Ext.apply({}, this.requestParams);
         this.reloadView();
     }
 
@@ -807,10 +826,12 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ? {
                     id: this.folderProperties.id
                     ,name: this.folderProperties.name
+                    ,template_id: this.folderProperties.template_id
                 }
                 : {
                     id: s[0].nid
                     ,name: s[0].name
+                    ,template_id: s[0].template_id
                 };
 
         this.objectPanel.load(data);
@@ -861,7 +882,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onCreateObjectClick: function(b, e) {
-        // this.onRightPanelViewChangeClick(this.buttonCollection.get('preview'));
+        // var tplRec = CB.DB.templates.getById(b.data.template_id);
+        // if(tplRec && tplRec.data && tplRec.data.cfg && (tplRec.data.cfg.createMethod == 'inline')) {
+        //     //to decide what's the best method for creating inline objects:
+        //     // - in modal window
+        //     // - inside active view or let the view decide the creation method
+        //     // - on the right side panel as usual objects creations
+        //     return;
+        // }
         this.buttonCollection.get('preview').toggle(true);
         b.data.pid = this.folderProperties.id;
         b.data.path = this.folderProperties.path;

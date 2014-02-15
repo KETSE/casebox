@@ -95,6 +95,12 @@ class Tasks extends Base
                 return lcfirst(L\Ongoing);
             case 6:
                 return lcfirst(L\Closed);
+            case 'assignee':
+                return lcfirst(L\Assignee);
+            default:
+                if (substr($id, 0, 3) == 'au_') {
+                    return \CB\User::getDisplayName(substr($id, 3));
+                }
         }
 
         return 'none';
@@ -219,6 +225,15 @@ class Tasks extends Base
                     ,'iconCls' => 'icon-task'
                 );
             }
+            // Add assignee node if there are any created tasks already added to result
+            if (($this->lastNode->id == 3) && !empty($rez['data'])) {
+                $rez['data'][] = array(
+                    'name' => lcfirst(L\Assignee)
+                    ,'id' => $this->getId('assignee')
+                    ,'iconCls' => 'icon-task'
+                    ,'has_childs' => true
+                );
+            }
         } else {
 
             $p['fq'][] = 'status:(1 OR 2)';
@@ -235,31 +250,98 @@ class Tasks extends Base
 
     protected function getChildrenTasks()
     {
-        $fq = $this->fq;
+        $p = $this->requestParams;
+        $p['fq'] = $this->fq;
 
         $parent = $this->lastNode->parent;
 
         if ($parent->id == 2) {
-            $fq[] = 'user_ids:'.$_SESSION['user']['id'];
+            $p['fq'][] = 'user_ids:'.$_SESSION['user']['id'];
         } else {
-            $fq[] = 'cid:'.$_SESSION['user']['id'];
+            $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
         }
 
         switch ($this->lastNode->id) {
             case 4:
-                $fq[] = 'status:1';
+                $p['fq'][] = 'status:1';
                 break;
             case 5:
-                $fq[] = 'status:2';
+                $p['fq'][] = 'status:2';
                 break;
             case 6:
-                $fq[] = 'status:3';
+                $p['fq'][] = 'status:3';
                 break;
+            case 'assignee':
+                return $this->getAssigneeUsers();
+                break;
+            default:
+                if (substr($this->lastNode->id, 0, 3) == 'au_') {
+                    return $this->getAssigneeTasks();
+                }
         }
 
         $s = new \CB\Search();
-        $rez = $s->query(array('fq' => $fq));
+        $rez = $s->query($p);
 
         return $rez;
+    }
+
+    protected function getAssigneeUsers()
+    {
+        $p = $this->requestParams;
+        $p['fq'] = $this->fq;
+
+        $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
+        $p['fq'][] = 'status:[1 TO 2]';
+
+        $p['rows'] = 0;
+        $p['facet'] = true;
+        $p['facet.field'] = array(
+            '{!ex=user_ids key=user_ids}user_ids'
+        );
+        $rez = array();
+
+        $s = new \CB\Search();
+
+        $sr = $s->query($p);
+
+        $rez = array('data' => array());
+        if (!empty($sr['facets']->facet_fields->{'user_ids'})) {
+            foreach ($sr['facets']->facet_fields->{'user_ids'} as $k => $v) {
+                $k = 'au_'.$k;
+                $r = array(
+                    'name' => $this->getName($k).' ('.$v.')'
+                    ,'id' => $this->getId($k)
+                    ,'iconCls' => 'icon-user'
+                );
+
+                if (!empty($p['showFoldersContent']) ||
+                    (@$this->requestParams['from'] != 'tree')
+                ) {
+                    $r['has_childs'] = true;
+                }
+                $rez['data'][] = $r;
+            }
+        }
+
+        return $rez;
+    }
+
+    protected function getAssigneeTasks()
+    {
+        $p = $this->requestParams;
+        $p['fq'] = $this->fq;
+
+        $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
+        $p['fq'][] = 'status:[1 TO 2]';
+
+        $user_id = substr($this->lastNode->id, 3);
+        $p['fq'][] = 'user_ids:'.$user_id;
+
+        $s = new \CB\Search();
+
+        $sr = $s->query($p);
+
+        return $sr;
     }
 }

@@ -163,6 +163,13 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     ,stopEvent: true
                     ,fn: this.onEnterKeyPress
                     ,scope: this
+                },{
+                    key: Ext.EventObject.F2
+                    ,alt: false
+                    ,ctrl: false
+                    ,stopEvent: true
+                    ,fn: this.onRenameClick
+                    ,scope: this
                 // },{
                 //     key: 'x'
                 //     ,ctrl: true
@@ -199,13 +206,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 //     ,fn: this.onDeleteClick
                 //     ,scope: this
                 // },{
-                //     key: Ext.EventObject.F2
-                //     ,alt: false
-                //     ,ctrl: false
-                //     ,stopEvent: true
-                //     ,fn: this.onRenameClick
-                //     ,scope: this
-                // },{
                 //     key: Ext.EventObject.F5
                 //     ,alt: false
                 //     ,ctrl: false
@@ -233,6 +233,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 ,displayInfo: true
                 ,pageSize: 50
                 ,hidden: true
+                ,doRefresh: this.onReloadClick.createDelegate(this)
                 ,listeners: {
                     scope: this
                     //prevent toolbar from changing store params and reloading the store
@@ -273,6 +274,9 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         CB.browser.view.Grid.superclass.initComponent.apply(this, arguments);
 
         this.store.on('load', this.onStoreLoad, this);
+
+        this.addEvents('reload');
+        this.enableBubble(['reload']);
 
     }
 
@@ -351,6 +355,19 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         }
 
         this.grid.selModel.selectRow(0);
+    }
+
+    ,onRenameClick: function(b, e){
+        if(!this.grid.selModel.hasSelection()) {
+            return;
+        }
+        this.grid.stopEditing(true);
+        var idx = this.grid.store.indexOf(this.grid.selModel.getSelected());
+        this.allowRename = true;
+        this.grid.startEditing(idx, this.grid.getColumnModel().findColumnIndex('name'));
+    }
+    ,onReloadClick: function() {
+        this.fireEvent('reload', this);
     }
 });
 

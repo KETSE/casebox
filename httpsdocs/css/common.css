@@ -279,9 +279,9 @@ a.file{min-height: 16px; display: inline-block}
 
 
 .icon-none{background: none !important}
-.i16{width: 16px; height 16px}
-.i16u{width: 16px; height 16px; background-image:url(/css/i/ext/.png)}
-.i32{width: 32px; height 32px}
+.i16{width: 16px; height: 16px}
+.i16u{width: 16px; height: 16px; background-image:url(/css/i/ext/.png)}
+.i32{width: 32px; height: 32px}
 .wsNW {white-space: nowrap}
 .click, .header-click{ cursor: hand; cursor: pointer }
 .click:hover{ color: #286bcc !important; text-decoration: underline }

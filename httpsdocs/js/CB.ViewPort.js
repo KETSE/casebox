@@ -164,7 +164,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 'title="'+
                     App.loginData['first_name']+' '+
                     App.loginData['last_name']+ "\n" +
-                    ' (' + App.loginData['email'] +')" />'
+                    '(' + App.loginData['email'] +')" />'
             );
         }
 
@@ -311,7 +311,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         ) {
             return;
         }
-        App.openPath( '/' + node.getPath('nid') );
+        params = {}
+        if(!Ext.isEmpty(node.attributes.view)) {
+            params.view = node.attributes.view;
+        }
+        App.openPath( '/' + node.getPath('nid'), params );
     }
     ,onRenameTreeElement: function(tree, r, e){
         node = tree.getSelectionModel().getSelectedNode();
@@ -358,22 +362,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                     ,closable: false
                 })
             );
-            // App.explorer.setParams({});
         }
     }
-    // ,createObject: function(data, e){
-        // tr = CB.DB.templates.getById(data.template_id);
-        // if(tr)
-        // switch(tr.get('type')){
-        //     case 'task':
-        //         this.onTaskCreate({data: data}, e);
-        //         break;
-        //     // case 'case':
-        //     default:
-                // this.openObject(data, e);
-        //         break;
-        // }
-    // }
+
     ,openObject: function(data, e){
         if(e){
             if(e.stopEvent) e.stopEvent();
@@ -390,6 +381,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         this.fireEvent('objectopened', o);
         return App.addTab(App.mainTabPanel, o);
     }
+
     ,onFileOpen: function(data, e){
         if(e) e.stopEvent();
 
@@ -398,6 +390,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');
         return App.addTab(App.mainTabPanel, o);
     }
+
     ,search: function(query, savedQueryId){
         idx = App.findTab(App.mainTabPanel, 'search');
         if(idx > -1){
@@ -410,6 +403,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if(!Ext.isEmpty(savedQueryId)) p.openSavedQuery(savedQueryId);
             else p.searchText(query);
     }
+
     ,setUserLanguage: function(b, e){
         if(b.data.id == App.loginData.language_id) return;
         Ext.Msg.confirm(L.LanguageChange, L.LanguageChangeMessage, function(pb){
@@ -437,30 +431,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     ,processToggleFavorite: function(r, e){
         this.fireEvent('favoritetoggled', r, e);
     }
-    // ,onTaskCreate: function(p, ev){
-    //     if(Ext.isEmpty(p)) {
-    //         p ={ data: {} };
-    //     }
 
-    //     Ext.apply(p, {
-    //         admin: true
-    //         ,autoclose: 1
-    //         ,privacy: 0
-    //         ,reminds: "1|10|1"
-    //         ,responsible_user_ids: App.loginData.id
-    //     });
-    //     if(Ext.isEmpty(p.title)) {
-    //         p.title = L.AddTask;
-    //     }
-    //     if(Ext.isEmpty(p.usersStore)) {
-    //         p.usersStore = CB.DB.usersStore;
-    //     }
-    //     this.lastFocusedElement = Ext.get(document.activeElement);
-    //     delete p.data.title;
-    //     dw = new CB.Tasks(p);
-    //     dw.on('beforedestroy', this.focusLastElement, this);
-    //     return dw.show();
-    // }
     ,onTaskEdit: function(p, ev){//task_id, object_id, object_title, title
         if(Ext.isEmpty(p.title)) p.title = L.EditTask;
         if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
