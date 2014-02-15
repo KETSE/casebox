@@ -1,3 +1,9 @@
+CaseBox 1.9.115 (2014-02-15)
+==============================
+Fixed Bugs:
+----------
+- changes made before to solr_client inclusion does not allow normal execution of reindexing cron
+
 CaseBox 1.9.111 (2014-02-15)
 ==============================
 New Features, Improvements
@@ -16,6 +22,7 @@ New Features, Improvements
 
 Fixed Bugs:
 ----------
+- After saving an object, the Right panel is showing all blocks duplicated
 - 'Refresh' button in grid status bar did not it work
 - After FullText search, the 'ExpandFolders' is ON (Reset all filters on navigation)
 - Sorting doesn't work in VFolders (trying to sort tasks by date)
