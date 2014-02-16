@@ -69,7 +69,10 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         this.body.scrollTo('top', 0);
         switch(r.responseText){
             case '&#160':
-                this.update('<div style="margin: 10px" class="icon-padding icon-loading">'+L.processing+' ...</div>');
+                this.update(
+                    '<div style="margin-top: 40px; text-align:center; color: 555; font-weight: bold">'+
+                    '<img src="'+Ext.BLANK_IMAGE_URL+'" class="i16 d-loader" style="vertical-align:middle; margin-right: 5px"> '+L.generatingPreview+' &hellip; </div>'
+                );
                 this.delayReload();
                 break;
             case 'PDF':

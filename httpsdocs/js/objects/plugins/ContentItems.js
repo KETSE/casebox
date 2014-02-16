@@ -21,7 +21,7 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
             ,'        <img class="i16u {iconCls}" src="'+ Ext.BLANK_IMAGE_URL +'">'
             ,'    </td>'
             ,'    <td>'
-            ,'        <span class="">{name}</span><br />'
+            ,'        <span class="click">{name}</span><br />'
             ,'        <span class="gr">{user}, {ago_text}</span>'
             ,'    </td>'
             ,'    <td class="elips">'
@@ -83,6 +83,9 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
             this.showActionsMenu(e.getXY());
         }
 
+        if(te.hasClass('click')) {
+            this.openObjectProperties(this.store.getAt(index).data);
+        }
     }
 
     ,showActionsMenu: function(coord){

@@ -21,7 +21,7 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
             ,'        <img class="i32" src="/photo/{cid}.jpg" title="{user}">'
             ,'    </td>'
             ,'    <td>'
-            ,'        <span class="">{name}</span><br />'
+            ,'        <span class="click">{name}</span><br />'
             ,'        <span class="gr">{ago_text}</span>'
             ,'    </td>'
             ,'    <td class="elips">'
@@ -62,7 +62,6 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
             ,items: this.dataView
         });
         CB.objects.plugins.Tasks.superclass.initComponent.apply(this, arguments);
-
     }
 
     ,onLoadData: function(r, e) {
@@ -77,6 +76,10 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
 
         if(te.hasClass('menu')) {
             this.showActionsMenu(e.getXY());
+        }
+
+        if(te.hasClass('click')) {
+            this.openObjectProperties(this.store.getAt(index).data);
         }
 
     }

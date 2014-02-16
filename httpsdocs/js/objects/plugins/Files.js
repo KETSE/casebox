@@ -21,7 +21,7 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
             ,'        <div><img class="file- {iconCls}" src="'+ Ext.BLANK_IMAGE_URL +'"></div>'
             ,'    </td>'
             ,'    <td>'
-            ,'        <span class="">{name}</span><br />'
+            ,'        <span class="click">{name}</span><br />'
             ,'        <span class="gr">{[ App.customRenderers.filesize(values.size) ]}, {ago_text}</span>'
             ,'    </td>'
             ,'    <td class="elips">'
@@ -104,6 +104,9 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
             this.showActionsMenu(e.getXY());
         }
 
+        if(te.hasClass('click')) {
+            this.openObjectProperties(this.store.getAt(index).data);
+        }
     }
 
     ,showActionsMenu: function(coord){

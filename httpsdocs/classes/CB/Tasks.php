@@ -771,7 +771,7 @@ class Tasks
                 $p['id'] // Util\coalesce($task['case_id'], $task['object_id'], $p['id'])
                 ,'task_complete'
                 ,'Complete task'
-                ,$p['message']
+                ,@$p['message']
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());

@@ -44,15 +44,6 @@ class RealSubnode extends Base
         return $rez;
     }
 
-    // public function getId($id = null)
-    // {
-    //     if (is_null($id)) {
-    //         $id = $this->id;
-    //     }
-
-    //     return $id;
-    // }
-
     public function getName($id = false)
     {
         return $this->config['title'];

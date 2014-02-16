@@ -1,3 +1,19 @@
+CaseBox 1.9.116 (2014-02-16)
+==============================
+New Features, Improvements
+--------------------------
+- Task, Files and Contents plugins should have clickable items
+- OnTaskComplete, OnClose: don't show the popup for the message
+- replace loading.gif with loader.gif from proto & improve "processing" hint
+
+Fixed Bugs:
+----------
+- Filtering doesn't work in virtual folders for tasks
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
 CaseBox 1.9.115 (2014-02-15)
 ==============================
 Fixed Bugs:
@@ -19,6 +35,7 @@ New Features, Improvements
 - created MyCalendar plugin
     It should be added config for display in tree.
 - Add virtual folder /Tasks/created by me/Assigned/
+- Remove files list from Task preview html
 
 Fixed Bugs:
 ----------

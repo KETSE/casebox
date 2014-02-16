@@ -6,6 +6,7 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
     ,tbarCssClass: 'obj-plugin-h'
     ,initComponent: function(){
         this.prepareToolbar();
+
         CB.objects.plugins.Base.superclass.initComponent.apply(this, arguments);
 
     }
@@ -42,6 +43,16 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
     ,getToolbarItems: function() {
         return [];
     }
+
+    ,openObjectProperties: function(data) {
+        var pp = this.findParentByType('CBPluginsPanel');
+        if(pp) {
+            pp.load(data);
+            return true;
+        }
+        return false;
+    }
+
 });
 
 Ext.reg('CBObjectsPluginsBase', CB.objects.plugins.Base);
