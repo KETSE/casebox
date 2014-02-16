@@ -139,6 +139,9 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             this.grid.doLayout();
             this.grid.focus();
             this.grid.getSelectionModel().select(0, 1);
+            if(isNaN(this.data.id)) {
+                this.grid.startEditing(0, 1);
+            }
         }
 
         if(this.grid.templateStore) {
@@ -236,12 +239,17 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             }
         });
     }
+    ,readValues: function() {
+        this.grid.readValues();
+        this.data.data = Ext.apply(this.data.data, this.fieldsZone.getForm().getFieldValues());
+        return this.data;
+    }
     ,save: function(callback, scope) {
         if(!this._isDirty) {
             return;
         }
-        this.grid.readValues();
-        this.data.data = Ext.apply(this.data.data, this.fieldsZone.getForm().getFieldValues());
+
+        this.readValues();
 
         if(callback) {
             this.saveCallback = callback.createDelegate(scope || this);

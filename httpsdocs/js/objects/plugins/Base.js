@@ -7,6 +7,10 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
     ,initComponent: function(){
         this.prepareToolbar();
 
+        Ext.apply(this, {
+            bubbleEvents: ['openproperties']
+        });
+
         CB.objects.plugins.Base.superclass.initComponent.apply(this, arguments);
 
     }
@@ -45,12 +49,15 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
     }
 
     ,openObjectProperties: function(data) {
-        var pp = this.findParentByType('CBPluginsPanel');
-        if(pp) {
-            pp.load(data);
-            return true;
-        }
-        return false;
+        clog('firing openproperties', data);
+        this.fireEvent('openproperties', data);
+
+        // var pp = this.findParentByType('CBPluginsPanel');
+        // if(pp) {
+        //     pp.load(data);
+        //     return true;
+        // }
+        // return false;
     }
 
 });

@@ -210,6 +210,7 @@ class User
                 ,'default_event_template' => constant('CB\\CONFIG\\DEFAULT_EVENT_TEMPLATE')
                 ,'webdav_url' => Config::get('webdav_url')
                 ,'webdav_files' => Config::get('webdav_files')
+                ,'template_info_column' => Config::get('template_info_column')
             )
             ,'user' => $_SESSION['user']
         );
@@ -985,7 +986,7 @@ class User
      * @param  $id  id of the user
      * @return varchar
      */
-    public static function getDisplayName($id = false)
+    public static function getDisplayName($id = false, $withEmail = false)
     {
         if ($id === false) {
             $id = $_SESSION['user']['id'];
@@ -993,11 +994,15 @@ class User
             return '';
         }
 
-        $var_name = 'users['.$id."]['displayName']";
+        $var_name = 'users['.$id."]['displayName$withEmail']";
 
         if (!Cache::exist($var_name)) {
             $res = DB\dbQuery(
-                'SELECT name, first_name, last_name
+                'SELECT
+                    name
+                    ,first_name
+                    ,last_name
+                    ,email
                 FROM users_groups
                 WHERE id = $1',
                 $id
@@ -1007,6 +1012,9 @@ class User
                 $name = trim($r['first_name'].' '.$r['last_name']);
                 if (empty($name)) {
                     $name = $r['name'];
+                }
+                if (($withEmail == true) && (!empty($r['email']))) {
+                    $name .= "\n(".$r['email'].")";
                 }
                 Cache::set($var_name, $name);
             }

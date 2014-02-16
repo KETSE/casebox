@@ -42,7 +42,7 @@ CB.objects.plugins.Thumb = Ext.extend(CB.objects.plugins.Base, {
         }
 
         if(te.hasClass('preview-thumb')) {
-            this.fireEvent('openpreview', this, e);
+            this.fireEvent('openpreview', this.params, e);
         }
     }
 });

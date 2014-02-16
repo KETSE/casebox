@@ -1,3 +1,20 @@
+CaseBox 1.9.117 (2014-02-16)
+==============================
+New Features, Improvements
+--------------------------
+- Delete & Download buttons should be hidden when View==Calendar
+- User photos & hints
+- changed opening properties mechanism for an object from inside the right plugins panel
+- Hide separator after Clipboard button
+- overwrited x-mask-loading ext style for display another loading image
+
+Fixed Bugs:
+----------
+- JS Error when saving an item
+- double separator in calendar
+- Two previews bug
+- deleted fields from templates structure appear on new object creation
+
 CaseBox 1.9.116 (2014-02-16)
 ==============================
 New Features, Improvements

@@ -39,7 +39,7 @@ class Comments extends Base
         $rez['total'] = $sr['total'];
         foreach ($sr['data'] as $d) {
             $d['cdate_text'] = Util\formatAgoTime($d['cdate']);
-            $d['user'] = User::getDisplayName($d['cid']);
+            $d['user'] = User::getDisplayName($d['cid'], true);
             $rez['data'][] = $d;
         }
 

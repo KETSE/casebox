@@ -204,22 +204,22 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
         if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
 
-        toolbarItems.push(
-            '-'
-            ,{
-                text: L.Attach
-                ,iconCls: 'ib-attach'
-                ,scale: 'large'
-                ,iconAlign:'top'
-                ,menu: [
-                    this.actions.upload
-                    ,'-'
-                    ,this.actions.paste
-                ]
-            }
-        );
+        // toolbarItems.push(
+        //     '-'
+        //     ,{
+        //         text: L.Attach
+        //         ,iconCls: 'ib-attach'
+        //         ,scale: 'large'
+        //         ,iconAlign:'top'
+        //         ,menu: [
+        //             this.actions.upload
+        //             ,'-'
+        //             ,this.actions.paste
+        //         ]
+        //     }
+        // );
 
-        toolbarItems.push(this.actions.createTask);
+        // toolbarItems.push(this.actions.createTask);
 
         northRegionItems = [this.topFieldSet];
 

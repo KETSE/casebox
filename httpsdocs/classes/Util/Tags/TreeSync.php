@@ -310,7 +310,20 @@ class TreeSync extends \Util\TreeSync
                         continue 2;
                 }
                 $field['type'] = '_objects';
+                $field['data']['type'] = '_objects';
                 $field['cfg']['source'] = 'tree';
+
+                if (!empty($field['cfg']['dependency']['pidValues'])) {
+                    $a = \CB\Util\toNumericArray($field['cfg']['dependency']['pidValues']);
+                    echo "\n".implode(', ', $a)." -> ";
+                    for ($i=0; $i < sizeof($a); $i++) {
+                        if (isset($this->tags[$a[$i]]['id'])) {
+                            $a[$i] = $this->tags[$a[$i]]['id'];
+                        }
+                    }
+                    echo implode(', ', $a)." \n";
+                    $field['cfg']['dependency']['pidValues'] = $a;
+                }
 
                 if ($field['cfg']['thesauriId'] == 'dependent') {
                     $field['cfg']['dependency'] = array();
@@ -322,6 +335,10 @@ class TreeSync extends \Util\TreeSync
                     $field['cfg']['oldThesauriId'] = $field['cfg']['thesauriId'];
                     unset($field['cfg']['thesauriId']);
                 }
+                if (!empty($field['cfg']['value']) && isset($this->tags[$field['cfg']['value']]['id'])) {
+                    $field['cfg']['value'] = $this->tags[$field['cfg']['value']]['id'];
+                }
+
                 $modifiedTemplateFieldIds[$field['id']] = 1;
                 $modified = true;
 

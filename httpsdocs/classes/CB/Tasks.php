@@ -979,7 +979,7 @@ class Tasks
                 ,allday
                 ,cid
                 ,ti.path `path_text`
-                ,(SELECT l'.$user['language_id'].'
+                ,(SELECT l'.USER_LANGUAGE_INDEX.'
                     FROM users_groups
                     WHERE id = t.cid) owner_text
                 ,cdate
@@ -1157,7 +1157,7 @@ class Tasks
                     ,Util\getCoreHost($r['db']).'photo/'.$r['cid'].'.jpg'
                     ,$r['owner_text']
                     ,$users //{assigned_text}
-                    ,L\get('Files', $user['language_id'])
+                    ,''
                     ,''
                     ,''
                     ,''
@@ -1288,40 +1288,6 @@ class Tasks
 
             }
             $rez .= '</tbody></table></td></tr>';
-        }
-
-                // "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
-                //     Util\formatMysqlDate($ur['time'], 'Y, F j H:i').'</span>'.
-                //     : L\get('waitingForAction', $user['language_id'])
-                // ).
-                // "\n\r".'</p>'.
-                // ( (($ur['status'] == 1) && !empty($ur['complete_message'])) ? '<p>'.nl2br(Util\adjustTextForDisplay($ur['complete_message'])).'</p>': '').
-                // '</td></tr>';
-
-            // }
-            // ,'<tr><td class="user">'
-            // ,'<div style="position: relative">'
-            // ,'<img class="photo32" src="photo/{id}.jpg" alt="{name}" title="{name}">'
-            // ,'{[ (values.status == 1) ? \'<img class="done icon icon-tick-circle" src="'+Ext.BLANK_IMAGE_URL+'"/>\': ""]}'
-            // ,'</div>'
-            // ,'</td><td><b>{name}</b>'
-            // ,'<p class="gr">'
-            // ,'{[ (values.status == 1) ? "' + L.Completed + ': <span class=\'dttm\' title=\'"+values.time+"\'>"+values.time+"</span>" + '
-            // ,' ( (values.canEdit == 1) ? "<a class=\'bt\' name=\'revoke\' uid=\'"+values.id+"\' href=\'#\'>' + L.revoke + '</a>" : "" )'
-            // ,' :  "'+L.waitingForAction+' " + '
-            // ,' ( (values.canEdit == 1) ? "<a class=\'bt\' name=\'complete\' uid=\'"+values.id+"\' href=\'#\'>'+L.complete+'</a>" : "" ) '
-            // ,']}'
-            // ,'</p></td></tr>'
-
-        if (!empty($d['files'])) {
-            $rez .= '<tr><td class="k">'.L\Files.':</td><td><ul class="task_files">';
-            foreach ($d['files'] as $f) {
-                $rez .= '<li><a href="#" name="file" fid="'.$f['id'].
-                    '" onclick="App.mainViewPort.fireEvent(\'fileopen\', {id:'.$f['id'].
-                    '})" class="dib lh16 icon-padding file-unknown file-'.Files::getExtension($f['name']).'">'.
-                    $f['name'].'</a></li>';
-            }
-            $rez .= '</ul></td></tr>';
         }
 
         if (!empty($d['reminds'])) {

@@ -814,7 +814,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             this.actions.mergeFiles.setDisabled(!canDownload || (objectsDataArray.length < 2));
 
             this.actions['delete'].setDisabled(false);
-            this.actions['delete'].show();
+            if(this.cardContainer.getLayout().activeItem.isXType('CBBrowserViewGrid')) {
+                this.actions['delete'].show();
+            }
         }
 
         this.updatePreview();
@@ -939,7 +941,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             return;
         }
         var selection = this.cardContainer.getLayout().activeItem.currentSelection;
-        if(Ext.isEmpty(s)) {
+        if(Ext.isEmpty(selection)) {
             return;
         }
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');

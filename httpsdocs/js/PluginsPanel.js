@@ -40,12 +40,13 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
             return;
         }
 
-        this.loadedParams = params;
+        this.loadedParams = Ext.apply({}, params);
         this.api(params, this.onLoadData, this);
     }
 
     ,onLoadData: function(r, e) {
         var items = [];
+        this.removeAll(true);
         Ext.iterate(
             r.data
             ,function(k, v, o) {
@@ -72,8 +73,10 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
         if(!isNaN(data)) {
             data = {id: data};
         }
-        if(data.id == this.loadedParams.id) {
-            this.reload();
+        if(!Ext.isEmpty(this.loadedParams)) {
+            if(data.id == this.loadedParams.id) {
+                this.reload();
+            }
         }
     }
     ,reload: function() {

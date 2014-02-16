@@ -573,7 +573,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
                 scope: this
                 ,show: function(){
                     this.store.removeAll();
-                    if(this.config.autoLoad === true) {
+                    if((!Ext.isDefined(this.config.autoLoad)) || (this.config.autoLoad === true)) {
                         this.onGridReloadTask();
                     }
                     this.triggerField.focus(false, 400);

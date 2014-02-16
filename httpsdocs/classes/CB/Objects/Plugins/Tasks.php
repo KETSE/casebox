@@ -30,7 +30,7 @@ class Tasks extends Base
         $sr = $s->query($params);
         foreach ($sr['data'] as $d) {
             $d['ago_text'] = @Util\formatDateTimePeriod($d['date'], null, @$_SESSION['user']['cfg']['TZ']);
-            $d['user'] = User::getDisplayName($d['cid']);
+            $d['user'] = User::getDisplayName($d['cid'], true);
             $rez['data'][] = $d;
         }
 

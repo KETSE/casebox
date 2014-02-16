@@ -172,6 +172,8 @@ $res = DB\dbQuery(
     FROM templates t
     LEFT JOIN templates_structure ts
         ON t.id = ts.template_id
+    ,tree tr
+    WHERE ts.id = tr.id and tr.dstatus = 0
     ORDER BY template_id, `order`',
     $_SESSION['user']['language_id']
 ) or die( DB\dbQueryError() );

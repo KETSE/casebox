@@ -81,9 +81,7 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
 
         if(te.hasClass('menu')) {
             this.showActionsMenu(e.getXY());
-        }
-
-        if(te.hasClass('click')) {
+        } else if(te.hasClass('click')) {
             this.openObjectProperties(this.store.getAt(index).data);
         }
     }

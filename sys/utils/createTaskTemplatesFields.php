@@ -215,10 +215,10 @@ foreach ($taskTemplates as $templateId) {
                 ,"renderer": "listObjIcons"
                 ,"autoLoad": true
                 ,"scope": '.\CB\getOption('task_categories').'
-                ,"value": '.\CB\getOption('default_task_category').'
             }'
         )
     );
+    // ,"value": '.intval(var)\CB\getOption('default_task_category').'
 
     foreach ($GLOBALS['languages'] as $language) {
         $data['data'][$language] = 'Category';

@@ -83,6 +83,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                     ,listeners: {
                         scope: this
                         ,openpreview: this.onOpenPreviewEvent
+                        ,openproperties: this.onOpenPropertiesEvent
                     }
                 },{
                     title: L.Edit
@@ -301,7 +302,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.onViewChangeClick(0);
     }
     ,onOpenInTabsheetClick: function(b, e) {
-        var d = this.getLayout().activeItem.data;
+        var d = Ext.apply({}, this.getLayout().activeItem.data);
+        var ai = this.getLayout().activeItem;
+        if(ai.readValues) {
+            d = Ext.apply(d, ai.readValues());
+        }
         switch(CB.DB.templates.getType(d.template_id)) {
             case 'file':
                 App.mainViewPort.onFileOpen(d, e);
@@ -310,15 +315,28 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 App.mainViewPort.openObject(d, e);
         }
 
-        this.getLayout().activeItem.clear();
+        ai.clear();
         this.onViewChangeClick(0);
     }
 
-    ,onOpenPreviewEvent: function(sourceCmp, ev) {
+    ,onOpenPreviewEvent: function(data, ev) {
+        if(Ext.isEmpty(data)) {
+            data = this.loadedData;
+        }
         this.getLayout().setActiveItem(2);
         this.onViewChange(2);
-        this.getLayout().activeItem.loadPreview(this.loadedData.id);
-
+        this.getLayout().activeItem.loadPreview(data.id);
+        this.loadedData = data;
+    }
+    ,onOpenPropertiesEvent: function(data, sourceCmp, ev) {
+        clog('onOpenPropertiesEvent', arguments);
+        if(Ext.isEmpty(data)) {
+            data = this.loadedData;
+        }
+        // this.getLayout().setActiveItem(0);
+        // this.onViewChange(0);
+        this.load(data);
+        // this.getLayout().activeItem.load(data.id);
     }
     ,onDownloadClick: function(b, e) {
         this.fireEvent('filedownload', [this.loadedData.id], false, e);

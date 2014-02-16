@@ -473,10 +473,9 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
             ,[
                 'apps'
                 ,'create'
-                ,'-'
-                ,'edit'
-                ,'-'
-                ,'delete'
+                // ,'-'
+                // ,'edit'
+                // ,'delete'
                 ,'-'
                 ,'dayview'
                 ,'weekview'

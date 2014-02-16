@@ -290,7 +290,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 ,'download'
                 ,'-'
                 ,'edit'
-                ,'-'
                 ,'delete'
             ]
         );
