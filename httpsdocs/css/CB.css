@@ -380,7 +380,6 @@ img.open-object{display: inline-block; width: 16px; height: 16px; padding: 0; bo
 .buttons{display: none}
 .item-over .buttons{ display: inline-block}
 .plugin{padding: 5px 10px 20px 10px}
-.multivalued .x-tool-chain, .multivalued .x-tool-unchain{display: inline-block}
 ul.caselist { list-style: disc inside none !important;}
 ul.caselist li { white-space: nowrap}
 .ttl { border-collapse: collapse; border: 0}
@@ -514,3 +513,8 @@ div.grid-drop-zone-over{
 .node-has-acl .x-grid3-cell-inner {
     background: url(i/ico/lock-small.png) 7px 5px no-repeat !important;
 }
+
+ul.breadcrumb { list-style: none; padding: 0 5px }
+ul.breadcrumb li { padding: 2px 2px 2px 2px; margin: 1px; white-space:nowrap; overflow: hidden; display: inline-block; color: gray; }
+ul.breadcrumb li a{ color: #5e5e5e; }
+ul.breadcrumb li a:hover{ color: #2061a3; }

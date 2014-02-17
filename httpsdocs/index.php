@@ -2,6 +2,7 @@
 namespace CB;
 
 require_once 'init.php';
+
 if (empty($_SESSION['user'])) {
     exit(header('Location: /login.php'));
 }
@@ -33,7 +34,7 @@ echo '<title>'.@constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE)).
 <div id="loading-mask"></div>
 <div id="loading" style="width: 250px">
         <div>
-        <img src="/css/i/loading.gif" width="41" height="39" style="margin-right:8px;float:left;vertical-align:top; margin-top: -5px" alt="Loading ..." />
+        <img src="/css/default/d/loader.gif" width="32" height="32" style="margin-right:10px;float:left;vertical-align:top; margin-top: -5px" alt="Loading ..." />
         <span style="color: #003399; padding-right: 2px">Case</span><span style="color: #3AAF00;">Box</span><br /><span id="loading-msg"><?php echo L\get('Loading_CSS')?> ...</span>
         </div>
 </div>

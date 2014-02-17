@@ -107,6 +107,7 @@ class Object extends OldObject
                 ,cfg
                 ,cid
                 ,oid
+                ,`system`
                 ,updated
             )
             VALUES (
@@ -122,6 +123,7 @@ class Object extends OldObject
                 ,$10
                 ,$11
                 ,$12
+                ,$13
                 ,1
             )',
             array(
@@ -137,6 +139,7 @@ class Object extends OldObject
                 ,@json_encode($p['cfg'], JSON_UNESCAPED_UNICODE)
                 ,$_SESSION['user']['id']
                 ,@$p['oid']
+                ,@intval($p['system'])
             )
         ) or die(DB\dbQueryError());
 
@@ -271,7 +274,6 @@ class Object extends OldObject
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
         $p = &$this->data;
-
         $tableFields = array(
             'pid'
             ,'user_id'
@@ -293,7 +295,7 @@ class Object extends OldObject
         $params = array('`uid` = $2', '`udate` = CURRENT_TIMESTAMP', 'updated = 1');
         $i = 3;
         foreach ($tableFields as $fieldName) {
-            if (isset($p[$fieldName]) && ($p[$fieldName] !== 'id')) {
+            if (array_key_exists($fieldName, $p) && ($p[$fieldName] !== 'id')) {
                 $saveFields[] = $fieldName;
                 $saveValues[] = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
                     ? $p[$fieldName]
@@ -422,7 +424,6 @@ class Object extends OldObject
     {
         $rez = array();
         $ld = $this->getAssocLinearData();
-
         if (!empty($ld[$fieldName])) {
             $rez = $ld[$fieldName];
         }
@@ -522,7 +523,7 @@ class Object extends OldObject
      */
     public function getTemplate()
     {
-        if (empty($this->template) && $this->loadTemplate) {
+        if (empty($this->template) && $this->loadTemplate && !empty($this->data['template_id'])) {
             $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
         }
 

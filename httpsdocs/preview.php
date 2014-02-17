@@ -62,6 +62,7 @@ switch ($f['type']) {
     case 'template':
     case 'field':
     case 'email':
+    case 'search':
         $o = new Objects();
         echo $o->getPreview($id);
         break;
@@ -98,16 +99,28 @@ switch ($f['type']) {
                 $top = '<div class="obj-preview-h pt10">'.L\ActiveTasks.'</div>'.$tmp;
             }
             if (!empty($top)) {
-                echo '<div class="p10">'.$top.'</div><hr />';
+                echo //'<div class="p10">'.
+                $top.
+                // '</div>'.
+                '<hr />';
             }
 
             if (!empty($preview['filename'])) {
                 $fn = FILES_PREVIEW_DIR.$preview['filename'];
                 if (file_exists($fn)) {
                     echo file_get_contents($fn);
-                    $res = DB\dbQuery('update file_previews set ladate = CURRENT_TIMESTAMP where id = $1', $id) or die(DB\dbQueryError());
+                    $res = DB\dbQuery(
+                        'UPDATE file_previews
+                        SET ladate = CURRENT_TIMESTAMP
+                        WHERE id = $1',
+                        $id
+                    ) or die(DB\dbQueryError());
                 }
-            }elseif(!empty($preview['html'])) echo $preview['html'];
+            } elseif (!empty($preview['html'])) {
+                echo $preview['html'];
+            }
+            $dbNode = new TreeNode\Dbnode();
+            // echo '<!-- NodeName:'.$dbNode->getName($id).' -->';
         }
         break;
     case 'task':

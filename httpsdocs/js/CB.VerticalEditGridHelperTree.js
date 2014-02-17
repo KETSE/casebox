@@ -60,6 +60,11 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     rez[fieldName] = [];
                 }
                 var value = node.attributes.value;
+                if(node.attributes.templateRecord.get('type') == 'datetime') {
+                    if(Ext.isDate(value.value)) {
+                        value.value = value.value.toISOString();
+                    }
+                }
                 value.childs = this.readChilds(node);
                 rez[fieldName].push(this.simplifyValue(value));
             }
@@ -100,7 +105,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         if(Ext.isEmpty(fieldData)) {
             return rez;
         }
-        if(Ext.isPrimitive(fieldData)) {
+        if(Ext.isPrimitive(fieldData) || Ext.isDate(fieldData)) {
             rez[0].value = fieldData;
             return rez;
         }
@@ -113,7 +118,10 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                 if(Ext.isPrimitive(fieldData[i])) {
                     rez[i] = {value: fieldData[i]};
                 }
-                if(Ext.isDefined(fieldData[i].value)){
+                if(Ext.isDefined(fieldData[i].value) ||
+                    Ext.isDefined(fieldData[i].info) ||
+                    Ext.isDefined(fieldData[i].childs)
+                ){
                     rez[i] = fieldData[i];
                 }
             }
@@ -135,14 +143,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                 }
                 break;
             case 'datetime':
-                if(Ext.isString(value)) {
-                    value = Date.parseDate(
-                        value
-                        ,(value.indexOf('T') >= 0)
-                            ? 'Y-m-dTH:i:s'
-                            : 'Y-m-d H:i:s'
-                    );
-                }
+                value = date_ISO_to_date(value);
                 break;
         }
         return value;
@@ -150,12 +151,28 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
     ,addNodes: function(parentNode, data, beforeNode){
         var pid = parentNode.attributes.nid;
         data = data || {};
+        if(Ext.isEmpty(this.templateStore)) {
+            return;
+        }
         this.templateStore.each(
             function(record) {
                 if(record.get('pid') == pid) {
                     /* no check to see if we have more duplicates and have to duplicate this node */
                     var fieldName = record.get('name');
                     var nodeValues = this.getGenericArrayDataForNodes(data[fieldName]);
+
+                    //set default values for new objects
+                    if(Ext.isEmpty(nodeValues[0].value) &&
+                        this.newItem &&
+                        !Ext.isEmpty(record.get('cfg').value)
+                    ) {
+                        var v = record.get('cfg').value;
+                        if(v == 'now') {
+                            v = new Date();
+                        }
+                        nodeValues[0].value = v;
+                    }
+
                     for (var i = 0; i < nodeValues.length; i++) {
                         var node = this.addNode(parentNode, record, beforeNode);
                         nodeValues[i].value = this.adjustValueToType(nodeValues[i].value, record.get('type'));

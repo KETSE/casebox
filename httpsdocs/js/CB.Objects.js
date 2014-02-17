@@ -51,7 +51,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             save: new Ext.Action({
                 text: L.Save
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-save'
+                ,iconCls: 'ib-save'
                 ,scale: 'large'
                 ,disabled: true
                 ,scope: this
@@ -60,7 +60,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             ,'delete': new Ext.Action({
                 text: L.Delete
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-del'
+                ,iconCls: 'ib-del'
                 ,scale: 'large'
                 ,disabled: true
                 ,scope: this
@@ -68,7 +68,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             })
             ,createTask: new Ext.Action({
                 text: L.NewTask
-                ,iconCls: 'icon32-task-new'
+                ,iconCls: 'ib-task-new'
                 ,iconAlign:'top'
                 ,scale: 'large'
                 //,disabled: true
@@ -191,7 +191,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         if( !Ext.isEmpty(menuConfig) ){
             createButton = new Ext.Button({
                 text: L.Create
-                ,iconCls: 'icon32-create'
+                ,iconCls: 'ib-create'
                 ,iconAlign:'top'
                 ,scale: 'large'
                 ,menu: [ ]
@@ -204,22 +204,22 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
         if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
 
-        toolbarItems.push(
-            '-'
-            ,{
-                text: L.Attach
-                ,iconCls: 'icon32-attach'
-                ,scale: 'large'
-                ,iconAlign:'top'
-                ,menu: [
-                    this.actions.upload
-                    ,'-'
-                    ,this.actions.paste
-                ]
-            }
-        );
+        // toolbarItems.push(
+        //     '-'
+        //     ,{
+        //         text: L.Attach
+        //         ,iconCls: 'ib-attach'
+        //         ,scale: 'large'
+        //         ,iconAlign:'top'
+        //         ,menu: [
+        //             this.actions.upload
+        //             ,'-'
+        //             ,this.actions.paste
+        //         ]
+        //     }
+        // );
 
-        toolbarItems.push(this.actions.createTask);
+        // toolbarItems.push(this.actions.createTask);
 
         northRegionItems = [this.topFieldSet];
 

@@ -5,6 +5,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
     ,root: 'data'
     ,cls: 'spacy-rows'
     ,autoScroll: true
+
     ,initComponent: function() {
         var tbar = [
             {
@@ -96,10 +97,12 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 }
             },{
                 header: L.Value
+                ,id: 'value'
                 ,width: 200
                 ,dataIndex: 'value'
                 ,editor: new Ext.form.TextField()
                 ,scope: this
+                ,resizable: true
                 ,renderer: function(v, meta, record, row_idx, col_idx, store){
                     var n = this.helperTree.getNode(record.get('id'));
                     // temporary workaround for not found nodes
@@ -112,7 +115,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                         return this.renderers[tr.get('type')](v, this);
                     }
                     if(!Ext.isEmpty(tr.get('cfg').height)) {
-                        meta.attr = ' style="height:' + tr.get('cfg').height + 'px"';
+                        meta.attr = ' style="min-height:' + tr.get('cfg').height + 'px"';
                     }
 
                     if(Ext.isEmpty(v)) return '';
@@ -127,8 +130,27 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,width: 200
                 ,dataIndex: 'info'
                 ,editor: new Ext.form.TextField()
+                ,hideable: false
             }
         ];
+
+        var viewCfg = {
+            autoFill: false
+            ,getRowClass: function( record, index, rowParams, store ){
+                var rez = '';
+                if(record.get('type') == 'H'){
+                    rez = 'group-titles-colbg';
+                    var node = this.grid.helperTree.getNode(record.get('id'));
+                    if(node && !Ext.isEmpty(node.attributes.templateRecord.get('cfg').css)){
+                        rez += ' ' + node.attributes.templateRecord.get('cfg').css;
+                    }
+                }
+                return rez;
+            }
+        };
+        if(this.viewConfig) {
+            Ext.apply(viewCfg, this.viewConfig);
+        }
 
         Ext.apply(this, {
             store:  new Ext.data.JsonStore({
@@ -150,7 +172,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     }
                 }
             })
-            ,columns: Ext.apply([], this.gridColumns)
+            ,columns: Ext.apply([], this.gridColumns) //leave default column definitions intact
             ,sm: new Ext.grid.CellSelectionModel()
             ,stripeRows: true
             ,header: false
@@ -170,20 +192,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
             ,statefull: true
             ,stateId: Ext.value(this.stateId, 'veg')//vertical edit grid
-            ,viewConfig:{
-                autoFill: false
-                ,getRowClass: function( record, index, rowParams, store ){
-                    var rez = '';
-                    if(record.get('type') == 'H'){
-                        rez = 'group-titles-colbg';
-                        var node = this.grid.helperTree.getNode(record.get('id'));
-                        if(node && !Ext.isEmpty(node.attributes.templateRecord.get('cfg').css)){
-                            rez += ' ' + node.attributes.templateRecord.get('cfg').css;
-                        }
-                    }
-                    return rez;
-                }
-            }
+            ,viewConfig: viewCfg
             ,editors: {
                 iconcombo: function(){
                     return new Ext.form.ComboBox({
@@ -203,12 +212,14 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
             ,renderers: {
                 iconcombo: App.customRenderers.iconcombo
+                ,H: function(){ return '';}
             }
         });
         this.addEvents('change', 'fileupload', 'filedownload', 'filesdelete', 'loaded');
         this.enableBubble(['change', 'fileupload', 'filedownload', 'filesdelete', 'loaded']);
         CB.VerticalEditGrid.superclass.initComponent.apply(this, arguments);
     }
+
     ,onCellClick: function(g, r, c, e){
         if(g.getColumnModel().getDataIndex(c) == 'files')
             return this.onPopupMenu(g, r, c, e);
@@ -221,6 +232,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
         }
     }
+
     ,getFilesPopupMenu: function(){
         if(!this.filesPopupMenu) {
             this.filesPopupMenu = new Ext.menu.Menu({
@@ -304,6 +316,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         );
         return this.filesPopupMenu;
     }
+
     ,onFileUploaded: function(data){
         if(!Ext.isDefined(this.popupForRow)) {
             return;
@@ -312,6 +325,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         delete this.popupForRow;
         this.fireEvent('change');
     }
+
     ,onPopupMenu: function(g, r, c, e){
         e.preventDefault();
         switch(g.getColumnModel().getDataIndex(c)){
@@ -323,6 +337,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 break;
         }
     }
+
     ,showFilesPopupMenu: function(grid, rowIndex, cellIndex, e){
         if(rowIndex <0) {
             return;
@@ -365,6 +380,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         if(fm.menu.items.getCount() < 1) fm.setVisible(false);
         pm.showAt(e.getXY());
     }
+
     ,showTitlePopupMenu: function(grid, rowIndex, cellIndex, e){
         r = grid.getStore().getAt(rowIndex);
         this.popupForRow = rowIndex;
@@ -385,12 +401,14 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.titlePopupMenu.items.itemAt(1).setDisabled(this.helperTree.isFirstDuplicate(r.get('id')));
         this.titlePopupMenu.showAt(e.getXY());
     }
+
     ,setPropertyFile: function(b){
         if(!Ext.isDefined(this.popupForRow)) return;
         this.store.getAt(this.popupForRow).set('files', b.data.id);
         delete this.popupForRow;
         this.fireEvent('change');  //this.refOwner.setDirty(true);
     }
+
     ,onFieldTitleDblClick: function(){
         var sm = this.getSelectionModel();
         var cm = this.getColumnModel();
@@ -399,7 +417,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
         if(Ext.isEmpty(s)) return;
         var fieldName = cm.getDataIndex(s[1]);
-
         if(fieldName == 'title'){
             c = gv.getCell(s[0], s[1]);
             c.className = c.className.replace( (c.className.indexOf(' x-grid3-cell-selected') >= 0 ? ' x-grid3-cell-selected' : 'x-grid3-cell-selected'), '');
@@ -408,18 +425,25 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             this.startEditing(s[0], s[1]);//begin field edit
         }
     }
+
     ,getBubbleTarget: function(){
         if(!this.parentWindow){
             this.parentWindow = this.findParentByType('CBGenericForm') || this.refOwner;
         }
         return this.parentWindow;
     }
+
     ,reload: function(){
         // initialization
         this.data = {};
+        this.newItem = true;
         var pw = this.getBubbleTarget(); //parent window
-        if(Ext.isDefined(pw.data) && Ext.isDefined(pw.data[this.root])) {
-            this.data = pw.data[this.root];
+
+        if(Ext.isDefined(pw.data)) {
+            this.newItem = isNaN(pw.data.id);
+            if(Ext.isDefined(pw.data[this.root])) {
+                this.data = pw.data[this.root];
+            }
         }
         //if not specified template_id directly to grid then try to look in owners data
         this.template_id = Ext.value(pw.data.template_id, this.template_id);
@@ -437,12 +461,28 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
             idx = cm.findColumnIndex('info');
             var colExists = (idx >=0 );
-            var colRequired = (tc.infoColumn === true);
+            var colRequired = (
+                (tc.infoColumn === true) ||
+                (
+                    (!Ext.isDefined(tc.infoColumn)) &&
+                    (!Ext.isEmpty(App.config.template_info_column))
+                )
+            );
+
+            var newConfig = Ext.apply([], this.gridColumns);
             if(colExists !== colRequired) {
-                var newConfig = Ext.apply([], this.gridColumns);
                 if(!colRequired) {
                     newConfig.pop();
                 }
+                // newConfig.push({
+                //     header: ''
+                //     ,dataIndex: 'id'
+                //     ,hideable: false
+                //     ,width: 3
+                //     ,resizable: false
+                //     ,renderer: Ext.emptyFn
+                // });
+
                 cm.setConfig(newConfig);
                 var el = this.getEl();
                 if(el && el.isVisible(true)) {
@@ -452,6 +492,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         }
         // if parent have a helperTree then it is responsible for helper reload
         if(!pw.helperTree) {
+            this.helperTree.newItem = this.newItem;
             this.helperTree.loadData(this.data, this.templateStore);
         }
 
@@ -459,6 +500,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
         this.fireEvent('loaded', this);
     }
+
     ,syncRecordsWithHelper: function(){
         if(!this.store) {
             return;
@@ -493,10 +535,11 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.store.resumeEvents();
         this.store.add(records);
 
-        if(lastCell){
+        if(lastCell && this.getEl().isVisible(true)){
             this.getSelectionModel().select(lastCell[0], lastCell[1]);
         }
     }
+
     ,helperNodesFilter: function(node){
         var r = node.attributes.templateRecord;
         //skip check for root node
@@ -515,6 +558,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             (node.attributes.visible !== false)
         );
     }
+
     ,readValues: function(){
         if(!Ext.isDefined(this.data)) {
             this.data = {};
@@ -527,6 +571,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             w.data[this.root] = this.data;
         }
     }
+
     ,onBeforeEditProperty: function(e){//grid, record, field, value, row, column, cancel
 
         var node = this.helperTree.getNode(e.record.get('id'));
@@ -551,12 +596,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             e.path = pw.data.path;
         }
 
-        /* setting by default parent case id for case_objects fields,
-        this value will be overwriten if it is dependent on another field */
-        if(pw && (t == '_case_object') ) {
-            e.pidValue = pw.data.id;
-        }
-
         /* get and set pidValue if dependent */
         if( (Ext.isDefined(tr.get('cfg').dependency) ) && !Ext.isEmpty(tr.get('pid')) ) {
                 e.pidValue = this.helperTree.getParentValue(e.record.get('id'), tr.get('pid'));
@@ -578,6 +617,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             col.setEditor(new Ext.grid.GridEditor(te));
         }
     }
+
     ,gainFocus: function(){
         this.focus(false);
         var sm = this.getSelectionModel();
@@ -588,6 +628,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
         }
     }
+
     ,onAfterEditProperty: function(e){
         if(e.field != 'value'){
             if(e.value != e.originalValue) {
@@ -602,6 +643,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.syncRecordsWithHelper();
         this.gainFocus();
     }
+
     ,getFieldValue: function(field_id, duplication_id){
         //TODO: review
         result = null;
@@ -628,6 +670,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.syncRecordsWithHelper();
         this.fireEvent('change');
     }
+
     ,onDeleteDuplicateFieldClick: function(b){
         var s = this.getSelectionModel().getSelectedCell();
         if(Ext.isEmpty(s)) {

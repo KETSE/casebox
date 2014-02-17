@@ -106,7 +106,7 @@ class OldObject
                     $value = array(
                         'value' => $f['value']
                         ,'info' => $f['info']
-                        ,'files' => $f['files']
+                        ,'files' => @$f['files']
                         ,'childs' => $this->getOldChilds($f['duplicate_id'], $f['field_id'])
                     );
                     $value = $this->formatOldValue($value);

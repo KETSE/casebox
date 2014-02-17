@@ -8,7 +8,8 @@ CB.plugins.Export.Button =  Ext.extend(CB.plugins.customInterface, {
 
         this.button = new Ext.Button({
             text: L.Export
-            ,iconCls: 'icon32-export'
+            ,id: 'pluginexportresultsbutton'
+            ,iconCls: 'ib-export'
             ,scale: 'large'
             ,iconAlign:'top'
             ,scope: this
@@ -16,17 +17,15 @@ CB.plugins.Export.Button =  Ext.extend(CB.plugins.customInterface, {
         });
 
 
-        var tb = this.owner.getTopToolbar();
-        var idx = tb.items.findIndex('isFill', 'true');
-
-        tb.insert(idx, this.button);
-        if(!this.owner.isXType('CBPluginsSearchResultForm')) {
-            tb.insert(idx, '-');
+        owner.buttonCollection.add(this.button);
+        if(Ext.isEmpty(owner.pluginButtons)) {
+            owner.pluginButtons = ['pluginexportresultsbutton'];
+        } else {
+            owner.pluginButtons.push('pluginexportresultsbutton');
         }
     }
     ,onExportClick: function(b, e) {
         window.open('get.php?export=' + Ext.encode(this.owner.params));
-        // Export_Instance.getCSV(this.owner.params);
     }
 });
 

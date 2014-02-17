@@ -93,7 +93,8 @@ $API = array_merge(
                 ,'create'               =>  array('len'=>1)
                 ,'save'                 =>  array('len'=>1, 'formHandler' => true)
                 ,'getAssociatedObjects' =>  array('len'=>1)
-                ,'queryCaseData'        =>  array('len'=>1)
+                ,'getPluginsData'       =>  array('len'=>1)
+                ,'addComment'           =>  array('len'=>1)
             )
         )
 
@@ -120,15 +121,7 @@ $API = array_merge(
 
         ,'CB_Templates' => array(
             'methods'=>array(
-                'getChildren'           => array('len'=>1)
-                ,'deleteElement'        => array('len'=>1)
-                ,'moveElement'          => array('len'=>1)
-                ,'readAll'              => array('len'=>1)
-                ,'loadTemplate'         => array('len'=>1)
-                ,'createTemplate'       => array('len'=>1)
-                ,'createFolder'         => array('len'=>1)
-                ,'renameFolder'         => array('len'=>1)
-                ,'saveTemplate'         => array('len'=>1, 'formHandler' => true)
+                'readAll'=> array('len' => 1)
                 ,'getTemplatesStructure'=> array('len'=>0)
             )
         )
@@ -144,7 +137,6 @@ $API = array_merge(
                 ,'login'              => array('len' => 2)
                 ,'logout'             => array('len' => 0)
                 ,'setLanguage'        => array('len' => 1)
-                ,'getMainMenuItems'   => array('len' => 0)
                 ,'uploadPhoto'        => array('len' => 1, 'formHandler' => true)
                 ,'removePhoto'        => array('len' => 1)
                 ,'getAccountData'     => array('len' => 0)
@@ -195,13 +187,7 @@ $API = array_merge(
         )
         ,'CB_System' => array(
             'methods' => array(
-                'tagsGetChildren'       => array('len' => 1)
-                ,'getTagPath'           => array('len' => 1)
-                ,'tagsSaveElement'      => array('len' => 1)
-                ,'tagsMoveElement'      => array('len' => 1)
-                ,'tagsDeleteElement'    => array('len' => 1)
-                ,'tagsSortChilds'       => array('len' => 1)
-                ,'getCountries'         => array('len' => 0)
+                'getCountries'         => array('len' => 0)
                 ,'getTimezones'         => array('len' => 0)
             )
         )

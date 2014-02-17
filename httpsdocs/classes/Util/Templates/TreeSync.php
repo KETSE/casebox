@@ -30,7 +30,7 @@ class TreeSync extends \Util\TreeSync
                 ,'order' => 0
                 ,'cfg' => array(
                     'showIn' => 'top'
-                    ,'readOnly' => true
+                    ,'_readOnly' => true
                 )
             )
             ,array(
@@ -123,7 +123,7 @@ class TreeSync extends \Util\TreeSync
                 ,'order' => 0
                 ,'cfg' => array(
                     'showIn' => 'top'
-                    ,'readOnly' => true
+                    ,'_readOnly' => true
                 )
             )
             ,array(

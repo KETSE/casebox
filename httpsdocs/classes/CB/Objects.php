@@ -22,8 +22,8 @@ class Objects
         if (!Security::canRead($id)) {
             throw new \Exception(L\Access_denied);
         }
-
         $object = $this->getCustomClassByObjectId($id) or die(L\Wrong_input_data);
+
         $object->load();
         $objectData = $object->getData();
 
@@ -71,7 +71,7 @@ class Objects
         global $data;
         // this method is used also internally (by getInfo method),
         // so we skip logging for "load" method in this cases
-        if (is_array($data) && ($data['method'] == 'load')) {
+        if (is_array($data) && (@$data['method'] == 'load')) {
             Log::add(array('action_type' => 11, 'object_id' => $id));
         }
 
@@ -85,7 +85,16 @@ class Objects
      */
     public function create($p)
     {
-        if (empty($p['pid']) || !Security::canCreateActions($p['pid'])) {
+        $pid = empty($p['pid'])
+            ? @$p['path']
+            : $p['pid'];
+        if (empty($pid)) {
+            throw new \Exception(L\Access_denied);
+        }
+
+        $p['pid'] = Path::detectRealTargetId($pid);
+
+        if (!Security::canCreateActions($p['pid'])) {
             throw new \Exception(L\Access_denied);
         }
 
@@ -165,78 +174,7 @@ class Objects
         return $this->load($d);
     }
 
-    public function queryCaseData($queries)
-    {
-        $rez = array('success' => true);
-        foreach ($queries as $key => $query) {
-            $query['pids'] = $query['caseId'];
-            switch ($key) {
-                case 'properties':
-                    /* load general case properties */
-
-                    if (!empty($query['caseId'])) {
-                        $case = $this->getCustomClassByObjectId($query['caseId']);
-                        $case->load();
-                        $rez[$key] = $case->getData();
-                        $properties = array();
-
-                        $template = $case->getTemplate();
-                        $linearData = $case->getLinearData();
-
-                        foreach ($linearData as $f) {
-                            $tf = $template->getField($f['name']);
-                            if ($f['name'] == '_title') {
-                                continue;
-                            }
-                            if ($f['name'] == '_date_start') {
-                                continue;
-                            }
-                            $v = $template->formatValueForDisplay($tf, $f['value']);
-                            if (is_array($v)) {
-                                $v = implode(', ', $v);
-                            }
-                            $f['value'] = $v;
-                            $properties[] = array(
-                                'name' => $f['name']
-                                ,'title' => $tf['title']
-                                ,'type' => $tf['type']
-                                ,'cfg' => $tf['cfg']
-                                ,'value' => $v
-                            );
-                        }
-                        $rez[$key]['data']['properties'] = $properties;
-                    }
-
-                    break;
-                case 'actions':
-                    $s= new Search();
-                    $query['fl'] = 'id,pid,name,type,subtype,date,template_id,oid,cid';
-                    if (!empty($GLOBALS['folder_templates'])) {
-                        $query['fq'] = '!template_id:('.implode(' OR ', $GLOBALS['folder_templates']).')';
-                    }
-                    $query['template_types'] = 'object';
-                    $query['sort'] = array('date desc');
-                    $rez[$key] = $s->query($query);
-                    unset($s);
-                    break;
-                case 'tasks':
-                    $s= new Search();
-                    $query['fl'] = 'id,name,type,template_id,date,date_end,user_ids,oid,cid';
-                    $query['template_types'] = 'task';
-                    $query['sort'] = array('date desc');
-                    $rez[$key] = $s->query($query);
-                    unset($s);
-                    break;
-                case 'milestones':
-                    $rez[$key] = array();
-                    break;
-            }
-        }
-
-        return $rez;
-    }
-
-    public function getPreview($id)
+    public static function getPreview($id)
     {
         $rez = array();
         if (!is_numeric($id)) {
@@ -252,8 +190,15 @@ class Objects
         $body = '';
         $bottom = '';
         try {
-            $obj = $this->getCustomClassByObjectId($id);
+            $obj = static::getCustomClassByObjectId($id);
             $obj->load();
+
+            if ($obj->getType() == 'task') {
+                $tc = new Tasks();
+
+                return $tc->getPreview($id);
+            }
+
             $linearData = $obj->getLinearData();
         } catch (\Exception $e) {
             return '';
@@ -314,15 +259,6 @@ class Objects
             }
         }
 
-        $tmp = Files::getFilesBlockForPreview($id);
-        if (!empty($tmp)) {
-            $bottom .= '<div class="obj-preview-h pt10">'.L\Files.'</div>'.$tmp.'<br />';
-        }
-        $tmp = Tasks::getActiveTasksBlockForPreview($id);
-        if (!empty($tmp)) {
-            $bottom .= '<div class="obj-preview-h pt10">'.L\ActiveTasks.'</div>'.$tmp.'<br />';
-        }
-
         if (!empty($gf['bottom'])) {
             foreach ($gf['bottom'] as $f) {
                 $v = $template->formatValueForDisplay($f['tf'], $f['value']);
@@ -333,44 +269,19 @@ class Objects
             }
         }
 
-        if (!empty($data['tasks'])) {
-            $d = array();
-            foreach ($data['tasks'] as $t) {
-                $info = $t['owner'];
-                if ($t['responsible_user_ids'] != $t['cid']) {
-                    /* showing users list */
-                    $info .= ' &rarr; '.implode(', ', array_values($t['users']));
-                }
-                $small_fields = array();
-                if (!empty($t['completed'])) {
-                    $small_fields[] = L\Accomplished_date.': '.Util\formatMysqlDate($t['completed']);
-                }
-                $info .= ((empty($info) || empty($small_fields)) ? '' : '<br />').implode(', ', $small_fields);
-
-                if (!empty($info)) {
-                    $info = '<br /><span class="fs11 cG">'.$info.'</span>';
-                }
-                $d[] = '<tr><td><a class="task click" nid="'.$t['id'].'">'.$t['title'].'</a>'.$info.'</td><td>'.Util\formatMysqlDate($t['cdate']).'</td><td>'.Util\formatMysqlDate($t['date_end']);
-            }
-            if (!empty($d)) {
-                $bottom .= '<table border="0" cellpadding="2" width="100%" style="padding: 5px 0px; border-bottom: 1px solid lightgray">'.
-                '<tr class="bgcLG cG"><th width="20%" class="icon-padding icon-calendar-task">'.L\Tasks.
-                '</th><th width="25%">'.L\Created.'</th><th width="30%">'.
-                L\Deadline.'</th></tr><tr>'.implode('</tr><tr>', $d).'</tr></table>';
-            }
-        }
-        /* end of tasks */
-
         Log::add(array('action_type' => 12, 'object_id' => $id ));
         if (!empty($top)) {
-            $top = '<div class="obj-preview-h">'.L\Details.'</div>'.$top;
+            // $top = '<div class="obj-preview-h">'.L\Details.'</div>'.$top;
         }
         $top .= $body;
         if (!empty($top)) {
             $top = '<table class="obj-preview">'.$top.'</table><br />';
         }
 
-        return '<div style="padding:10px">'.$top.$bottom.'</div>';
+        return //'<div style="padding:10px">'.
+            $top.$bottom
+            // .'</div>'
+            ;
     }
 
     /**
@@ -439,8 +350,7 @@ class Objects
             'SELECT DISTINCT t.id
                 ,t.`name`
                 ,t.date
-                ,t.`type`
-                ,t.subtype
+                ,t.cfg
                 ,t.template_id
                 ,t2.status
             FROM tree t
@@ -450,6 +360,7 @@ class Objects
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
             if (!empty($r['date'])) {
                 $r['date'][10] = 'T';
                 $r['date'] .= 'Z';
@@ -474,6 +385,13 @@ class Objects
         $template = $obj->getTemplate();
 
         $object_record['content'] = '';
+
+        /* possible to add collumn iconCls to solr fields */
+        // if (!empty($objData['data']['iconCls'])) {
+        //     $object_record['iconCls'] = $objData['data']['iconCls'];
+        // } elseif (!empty($objData['cfg']['iconCls'])) {
+        //     $object_record['iconCls'] = $objData['cfg']['iconCls'];
+        // }
 
         foreach ($linearData as $f) {
             $field = $template->getField($f['name']);
@@ -620,8 +538,10 @@ class Objects
             return \CB\Cache::get($var_name);
         }
         $obj = static::getCustomClassByObjectId($id);
-        $obj->load();
-        \CB\Cache::set($var_name, $obj);
+        if (!empty($obj)) {
+            $obj->load();
+            \CB\Cache::set($var_name, $obj);
+        }
 
         return $obj;
     }
@@ -810,5 +730,116 @@ class Objects
         $res->close();
 
         return $rez;
+    }
+
+    /**
+     * get data for defined plugins to be displayed in properties panel for selected object
+     * @param  array $p remote properties containing object id
+     * @return ext   direct responce
+     */
+    public function getPluginsData($p)
+    {
+        $rez = array(
+            'success' => false
+            ,'data' => array()
+        );
+        if (empty($p['id'])) {
+            return $rez;
+        }
+
+        $id = $p['id'];
+        /* now we'll try to detect plugins config that could be found in following places:
+            1. in config of the template for the given object, named object_plugins
+            2. in core config, property object_type_plugins (config definitions per available template type values: object, case, task etc)
+            3. a generic config,  named default_object_plugins, could be defined in core config
+        */
+
+        $objectPlugins = null;
+        $o = $this->getCachedObject($id);
+        if (!empty($o)) {
+            $template = $o->getTemplate();
+            $templateData = is_null($template)
+                ? null
+                : $template->getData();
+            if (!empty($templateData['cfg']['object_plugins'])) {
+                $objectPlugins = $templateData['cfg']['object_plugins'];
+            } else {
+                $tmp = Config::get('object_type_plugins');
+                if (!empty($tmp[$o->getType()])) {
+                    $objectPlugins = $tmp[$o->getType()];
+                } else {
+                    $tmp = Config::get('default_object_plugins');
+                    if (!empty($tmp)) {
+                        $objectPlugins = $tmp;
+                    }
+                }
+            }
+        }
+
+        $rez['success'] = true;
+
+        if (empty($objectPlugins)) {
+            return $rez;
+        }
+
+        foreach ($objectPlugins as $pluginName) {
+            $class = '\\CB\\Objects\\Plugins\\'.ucfirst($pluginName);
+            $pClass = new $class($id);
+            $prez = $pClass->getData();
+            if (!empty($prez) && isset($prez['data'])) {
+                $rez['data'][$pluginName] = $prez;
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
+     * add comments for an objects
+     * @param array $p input params (id, msg)
+     */
+    public function addComment($p)
+    {
+        $rez = array('success' => false);
+        if (empty($p['id']) || !is_numeric($p['id']) || empty($p['msg'])) {
+            $rez['msg'] = L\Wrong_input_data;
+
+            return $rez;
+        }
+
+        $commentTemplates = Templates::getIdsByType('comment');
+        if (empty($commentTemplates)) {
+            $rez['msg'] = 'No comment templates found';
+
+            return $rez;
+        }
+
+        $co = new Objects\Object();
+
+        $data = array(
+            'pid' => $p['id']
+            ,'template_id' => array_shift($commentTemplates)
+            ,'system' => 2
+            ,'data' => array(
+                '_title' => $p['msg']
+            )
+        );
+
+        $id = $co->create($data);
+
+        Solr\Client::runCron();
+
+        return array(
+            'success' => true
+            ,'data' => array(
+                'id' => $id
+                ,'pid' => $p['id']
+                ,'template_id' => $data['template_id']
+                ,'cdate_text' => Util\formatAgoTime('now')
+                ,'cid' => $_SESSION['user']['id']
+                ,'user' => User::getDisplayName($_SESSION['user']['id'])
+                ,'content' => $p['msg']
+            )
+        );
     }
 }

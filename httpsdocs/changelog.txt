@@ -1,3 +1,430 @@
+CaseBox 1.9.117 (2014-02-16)
+==============================
+New Features, Improvements
+--------------------------
+- Delete & Download buttons should be hidden when View==Calendar
+- User photos & hints
+- changed opening properties mechanism for an object from inside the right plugins panel
+- Hide separator after Clipboard button
+- overwrited x-mask-loading ext style for display another loading image
+
+Fixed Bugs:
+----------
+- JS Error when saving an item
+- double separator in calendar
+- Two previews bug
+- deleted fields from templates structure appear on new object creation
+
+CaseBox 1.9.116 (2014-02-16)
+==============================
+New Features, Improvements
+--------------------------
+- Task, Files and Contents plugins should have clickable items
+- OnTaskComplete, OnClose: don't show the popup for the message
+- replace loading.gif with loader.gif from proto & improve "processing" hint
+
+Fixed Bugs:
+----------
+- Filtering doesn't work in virtual folders for tasks
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
+CaseBox 1.9.115 (2014-02-15)
+==============================
+Fixed Bugs:
+----------
+- changes made before to solr_client inclusion does not allow normal execution of reindexing cron
+
+CaseBox 1.9.111 (2014-02-15)
+==============================
+New Features, Improvements
+--------------------------
+- Add 'Download' button for files in rightPanel
+- Remove 'Refresh' button in grid status bar, or make it work
+- _objects popupForm, add checkbox as a first column
+- _objects popupEditor: clear the values before showing the form & loading items
+- change padding for plugin titles as in proto
+- created virtual folder: 'Manager's Calendar' for osji.
+    This plugin has reference to programs template id inside.
+    It should be added config for display in tree.
+- created MyCalendar plugin
+    It should be added config for display in tree.
+- Add virtual folder /Tasks/created by me/Assigned/
+- Remove files list from Task preview html
+
+Fixed Bugs:
+----------
+- After saving an object, the Right panel is showing all blocks duplicated
+- 'Refresh' button in grid status bar did not it work
+- After FullText search, the 'ExpandFolders' is ON (Reset all filters on navigation)
+- Sorting doesn't work in VFolders (trying to sort tasks by date)
+
+CaseBox 1.9.110 (2014-02-14)
+==============================
+New Features, Improvements
+--------------------------
+- remove second date display for tasks plugin
+- Remove files block from Task preview
+- added listeners and handlers to action links for tasks in new preview plugin
+- treeNodes can also be defined in core.config table
+- changed treeNode Tasks plugin so it could be attached to a specific node id
+- global search should always search phisical tree
+
+Fixed Bugs:
+----------
+- 'Modified' datetime in 'Properties' plugin doesnt have the hint with date time
+- Preview not showing after edit and after switching to Filter and back
+- changing page on a Tasks virtual folder did not change page (displayed items)
+- download button do not show when selecting files
+- When you exit cellEdit mode, you don't see new lines
+- adding comment did not return creator id for correct icon display
+- updating closed tasks - automaticly change their status to active
+- mistake in SystemProperties plugin
+
+CaseBox 1.9.109 (2014-02-12)
+==============================
+New Features, Improvements
+--------------------------
+- removed obsolete scripts for old views
+
+Fixed Bugs:
+----------
+- Timezone & display format incorrect in Task notifications
+- Titles of custom facets not visible & long facet labels in charts
+
+CaseBox 1.9.108 (2014-02-12)
+==============================
+New Features, Improvements
+--------------------------
+- Implement plugins in right preview/edit panel:
+    -   thumb: Thumbnail
+    -   meta: Metadata
+    -   tasks
+    -   comments
+    -   objectProperties: Internal Object Properties preview
+    -   systemProperties: System/general properties preview
+    -   contentItems: Contents
+- changed root node concept in left tree, it is real root node by default if not configured to be another (virtual) node
+- Open "cbdav:" links in the same window
+- Enable notifications for task management
+- Add 'Login' button below the message at /login/reset-password/ after you click Reset password
+
+Fixed Bugs:
+----------
+- display columns data was not transmited by tree nodes plugins
+- Custom faceting doesn't work: custom fields were filtered when indexing in solr
+- "My CaseBox" displays the subfolders of "/Tree" in Grid
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+- apply database update for core: 20140123_1641 db_update v1.9.108.sql
+
+
+CaseBox 1.9.98 (2014-02-05)
+==============================
+New Features, Improvements
+--------------------------
+- "Tree" node should be real node, not virtual
+- checked password recovery process
+- session.lifetime, use minutes instead of seconds, default 180 minutes
+- Move ADMIN_EMAIL, SENDER_EMAIL to config.ini
+- clean "Recovery options", only email recovery is avaible for now
+- Remove SMS functionality
+- removed UserMenu classes
+- User picture in top-right corner should have the username/name as a hint
+- added verification, in solr Search class, for manually set facet params
+
+Fixed Bugs:
+----------
+- Task preview always show time for AllDayTasks
+- Calendar label (active month/period) doesn't work
+
+CaseBox 1.9.97 (2014-02-04)
+==============================
+New Features, Improvements
+--------------------------
+- Default facet config for root node should include tasks facets (Status, Category, Importance, Assigned)
+- Add a default class to nodes in calendar without explicit color ".cal-cat-default"
+- Remove 'cal-evt-bg-t[int]' classes
+- Add "icon-padding icon-task" classes only to nodes of type Task (in calendar view)
+- 'date' facet instead of 'create' + Custom date period
+- Changed Faceting mechaniscm
+- added possibility to open documents with a specific webdav url
+
+Fixed Bugs:
+----------
+- Add "cal-cat-task-closed" class to closed tasks
+- Right click grid to open popup menu blocks Grid.Selection
+
+CaseBox 1.9.95 (2014-01-30)
+==============================
+New Features, Improvements
+--------------------------
+- update search and Export plugins for hcav
+
+CaseBox 1.9.94 (2014-01-29)
+==============================
+New Features, Improvements
+--------------------------
+- added check for user language existance when getting user preferences
+- added action links for tasks preview
+
+Notes:
+----------
+- should update casebox.translations table from 20140123_1641 db_update v1.9.94.sql
+
+CaseBox 1.9.93 (2014-01-29)
+==============================
+New Features, Improvements
+--------------------------
+- Clear the search box (i.e. remove fulltext filter) when Path changes
+- Move (Day, Week, Month) toggle buttons in toolbar (as in proto)
+- Add 3 YM (YearMonth) columns for Object.cdate and Task.Start, Task.End
+- Task smart period rendering
+- the view for virtual nodes will always reload when saving/updating an object
+    We don't know what objects return a virtual node.
+
+Fixed Bugs:
+----------
+- modifying filtering options should reset result pageNumber to 1
+- Tasks did not display with color specified in its prperties
+- DateEnd ignored when a task is displayed in calendar
+- Creating tasks in calendar visual bugs with preview after save, and view reloading
+
+
+CaseBox 1.9.92 (2014-01-26)
+==============================
+New Features, Improvements
+--------------------------
+- removed old popuplist type and thesauri window
+- added cls field in default solr fields config, used now for task colors
+- verified tasks and calendar view
+
+Fixed Bugs:
+----------
+- Lead/Support/Manager Folders still not working
+- Case childs: case & owner is empty
+- Lead/Support/Manager Folders still not working
+
+Notes:
+----------
+- solr config changed
+
+CaseBox 1.9.91 (2014-01-23)
+==============================
+New Features, Improvements
+--------------------------
+- Implement virtual folder /Program/Cases/...
+- Implement virtual node /Program/Users/[user]/Cases
+
+Fixed Bugs:
+----------
+- New case doesnt appear in /Program/
+- Wrong owner for Task, Event, Milestone
+- Program virtual folder doesn't work
+- erratic value in Group field for Program content type
+- Milestone preview doesn't work
+- critical: can't focus 2nd column of VerticalGrid for editing
+- Creating system folders for Cases
+- Virtual folders: Lead, Support not working for user oburlaca
+
+Notes:
+----------
+- apply database update for core: 20140123_1641 db_update v1.9.91.sql
+
+CaseBox 1.9.90 (2014-01-22)
+==============================
+Fixed Bugs:
+----------
+- Virtual folders with tasks did not show all content folders
+- Saving an object gives a js error
+- Can't see icons for 'Program' when editing Category in a task
+- Trying to create a task in /Tree/Test Case N1, gives 'Access is denied'
+- Can't create a case in /Tree/ folder, access denied
+- Trying to create a task will show EditWindow with fields of the previous task
+- Can't upload a file to dev.casebox.org using D&D
+
+CaseBox 1.9.89 (2014-01-21)
+==============================
+New Features, Improvements
+--------------------------
+- added detection method for creating objects under virtual folders
+
+Fixed Bugs:
+----------
+- open files in window for files editing when clicking on "open in tabsheet"
+- right properties panels did not work after migrate to virtual tree
+- double clicking a virtual node tries to open it for editing
+
+
+CaseBox 1.9.88 (2014-01-21)
+==============================
+New Features, Improvements
+--------------------------
+- changes related to osji virtual tree creation
+- browser script update for correct child count detection/display
+
+Fixed Bugs:
+----------
+- default value displayed for empty fields on existing objects
+- sometimes error msg occures when clicking edit from item preview panel
+
+CaseBox 1.9.87 (2014-01-18)
+==============================
+New Features, Improvements
+--------------------------
+- custom changes for case templates
+
+Fixed Bugs:
+----------
+- fixed the upgrade process to update some specific field configs related to thesauri
+- upgrade script did overwrite new data for tasks on upgrade
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
+CaseBox 1.9.86 (2014-01-17)
+==============================
+New Features, Improvements
+--------------------------
+- some changes to task plugins
+
+CaseBox 1.9.85 (2014-01-16)
+==============================
+New Features, Improvements
+--------------------------
+- added new tree plugins
+
+Fixed Bugs:
+----------
+- Can't resize the 2nd column in Profile grid
+- grid 2nd column not resizable in EditMode
+- Improve UI experience when creating nodes (preview of other nodes showing)
+- incorrect default plugin definition for cores that don't have defined treePlugins
+
+CaseBox 1.9.84 (2014-01-15)
+==============================
+New Features, Improvements
+--------------------------
+- added opening old task window from new window, until all functionality is realized
+
+Fixed Bugs:
+----------
+- small fixes
+
+CaseBox 1.9.83 (2014-01-15)
+==============================
+New Features, Improvements
+--------------------------
+- Preview/Edit panels behavior
+- Clicking a task in Calendar should preview it on the right panel
+- transferred navigation to plugin system
+- onCreate, default Start date of task = now
+
+Fixed Bugs:
+----------
+- After changing view from Calendar to Explorer, toolbar buttons are hidden
+- some view buttons do not appear on view change
+- Can't resize the 2nd column in Profile grid
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
+CaseBox 1.9.79 (2014-01-11)
+==============================
+New Features, Improvements
+--------------------------
+- Display an empty gray panel if no row is selected
+- focus the grid in right panel when creating/editing a node
+- Creating a task, grid doesn't focus it
+
+Fixed Bugs:
+----------
+- Issues with right margin in preview panel
+- issues with created tasks
+- focus preview/edit panel when opening a node for editing
+- Pagination not visible
+- Saving a node will show "Undefined" text in progress panel
+- Can't D&D files in grid
+- Critical bug: Infinite loop, CPU at 100% = configuration problem
+- "Все дела" folder recursively shows only Case first letters
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
+CaseBox 1.9.78 (2014-01-10)
+==============================
+New Features, Improvements
+--------------------------
+- Remove Title & Date fields in 'Upload' popup
+- htmlEditor.height = 200 in EditMode
+- Disabled events triggering from another event handler to avoid recursion,
+    should think on the model if this feature will be needed.
+
+Fixed Bugs:
+----------
+- after a node is created, the grid doesn't refresh, and the node doesn't appear in preview
+- PopupMenu: click Open, JS error.
+- Switching from Chart view to GridView will show Download&Delete buttons
+- Resize Tree (bigger/smaller panel width) and the buttons in toolbar are not right aligned
+- Clicking User photo / Account gives 'Access is denied' error
+- Charts doesn't work for _objects facets
+
+CaseBox 1.9.77 (2013-12-30)
+==============================
+New Features, Improvements
+--------------------------
+- enabled clipboard actions navigation views
+- some small interface adjustments according to proto
+- Enable 3 types of chart: hbar, vbar, pie + facet selector
+- Limit the length of one breadcrumb item
+
+Fixed Bugs:
+----------
+- Switching Apps to Charts then Calendar then back to Explorer, hides Apps button
+- Can't create a new task: Query error alert
+- duplicated Start field when changing allDay to 'no'
+
+CaseBox 1.9.76 (2013-12-30)
+==============================
+Fixed Bugs:
+----------
+- field names for task template are not displayed
+
+CaseBox 1.9.75 (2013-12-29)
+==============================
+New Features, Improvements
+--------------------------
+- edit/create tasks in right side
+    Note: cores that have task templates without fields defined should run
+    sys/utils/createTaskTemplatesFields.php <core_name>
+- added importance and timeunits field types
+- interface adjustments
+
+Fixed Bugs:
+----------
+- default value not set when creating objects
+
+CaseBox 1.9.74 (2013-12-28)
+==============================
+New Features, Improvements
+--------------------------
+- refactored browser view interface
+- added primary version of charts view in browser
+- renamed browser related js classes and scripts
+- prepared basic structure for css themes
+- Sync Tree with the active folder in the Grid
+
+Fixed Bugs:
+----------
+- letter case mistake in minify groupsConfig.php
+
 CaseBox 1.9.73 (2013-12-17)
 ==============================
 New Features, Improvements
@@ -227,9 +654,9 @@ CaseBox 1.9.57 (2013-11-17)
 ==============================
 - created script for creating/sync old tags table into tree
     and transfer all template fields config to _objects config refering to created tags in tree.
-    All complex scripts from sys/utils will be transfered into classes under Util namespace.
+    All complex scripts from sys/utils will be transferred into classes under Util namespace.
     For now only Tags transfering uses script sys/utils/tags_tree_sync.php that uses class Util\Tags\TreeSync.
-    Other cripts are transfered to destination folders where will be refactored to use described scheme.
+    Other cripts are transferred to destination folders where will be refactored to use described scheme.
 - added CB\Browser\CreateMenu class that will be completed for simple management of create menu displayed on client side.
 - added User.exists method for checking if a given user id or name exists
 - added Security.copyNodeAcl for copying security rules between two nodes.

@@ -1,11 +1,10 @@
 Ext.namespace('CB.form.edit');
 
-CB.form.edit.Object = Ext.extend(Ext.Panel, {
+CB.form.edit.Object = Ext.extend(Ext.Container, {
     xtype: 'panel'
-    ,autoScroll: true
     ,tbarCssClass: 'x-panel-white'
-    ,loadMask: true
     ,padding:0
+    ,autoScroll: true
     ,layout: 'anchor'
     ,data: {}
     ,initComponent: function(){
@@ -23,11 +22,13 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
         this.grid = new CB.VerticalEditGrid({
             title: L.Details
             ,autoHeight: true
-            ,minHeight: 100
-            ,boxMinHeight: 100
             ,hidden: true
             ,refOwner: this
             ,includeTopFields: true
+            ,viewConfig: {
+                forceFit: true
+                ,autoFill: true
+            }
         });
 
         this.fieldsZone = new Ext.form.FormPanel({
@@ -45,11 +46,17 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
 
         Ext.apply(this, {
             defaults: {
-                anchor: '-5'
+                anchor: '-1'
                 ,style: 'margin: 0 0 15px 0'
             }
-            ,items: [
-                this.grid
+            ,items: [ {
+                    xtype: 'panel'
+                    ,layout: 'fit'
+                    ,autoHeight: true
+                    ,autoScroll: true
+                    ,border: false
+                    ,items: this.grid
+                }
                 ,this.fieldsZone
             ]
             ,listeners: {
@@ -69,7 +76,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             return;
         }
 
-        if(Ext.isNumber(objectData)) {
+        if(!isNaN(objectData)) {
             objectData = {id: objectData};
         }
         this.loadData(objectData);
@@ -83,19 +90,19 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
         }
 
         this.clear();
-        this.getEl().mask(L.Loading + ' ...', 'x-mask-loading');
+        // this.getEl().mask(L.LoadingData + ' ...', 'x-mask-loading');
 
-        if(Ext.isNumber(objectData.id)) {
-            CB_Objects.load(
-                {id: objectData.id}
-                ,this.processLoadData
-                ,this
-            );
-        } else {
+        if(isNaN(objectData.id)) {
             this.processLoadData({
                     success: true
                     ,data: objectData
                 }
+            );
+        } else {
+            CB_Objects.load(
+                {id: objectData.id}
+                ,this.processLoadData
+                ,this
             );
         }
     }
@@ -117,7 +124,24 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
 
         this.grid.reload();
         if(this.grid.store.getCount() > 0) {
+            var cm = this.grid.getColumnModel();
+            var ci = cm.findColumnIndex('title');
+            var ci2 = cm.findColumnIndex('value');
+            if(CB.DB.templates.getType(r.data.template_id) == 'case') {
+                cm.setColumnHeader(ci, 'Case Card');
+                cm.setColumnHeader(ci2, 'Details');
+            } else {
+                cm.setColumnHeader(ci, L.Property);
+                cm.setColumnHeader(ci2, L.Value);
+            }
             this.grid.show();
+            this.grid.getView().refresh(true);
+            this.grid.doLayout();
+            this.grid.focus();
+            this.grid.getSelectionModel().select(0, 1);
+            if(isNaN(this.data.id)) {
+                this.grid.startEditing(0, 1);
+            }
         }
 
         if(this.grid.templateStore) {
@@ -132,7 +156,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
                             ,isTemplateField: true
                             ,name: r.get('name')
                             ,value: this.data.data[r.get('name')]
-                            ,height: Ext.value(r.get('cfg').height, 70)
+                            ,height: Ext.value(r.get('cfg').height, 200)
                             ,anchor: '100%'
                             ,style: 'resize: vertical'
                             ,grow: true
@@ -152,13 +176,21 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
                 ,this
             );
 
-            if(this.fieldsZone.rendered) {
-                this.fieldsZone.syncSize();
-            }
+            // if(this.grid.rendered) {
+            //     this.grid.doLayout();
+            //     this.grid.syncSize();
+            // }
+            // if(this.fieldsZone.rendered) {
+            //     this.fieldsZone.doLayout();
+            //     this.fieldsZone.syncSize();
+            // }
         }
         this._isDirty = false;
 
+        this.doLayout();
+        this.syncSize();
     }
+
     ,onObjectsStoreChange: function(store, records, options){
         Ext.each(
             records
@@ -169,7 +201,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
         );
         if(this.grid && !this.grid.editing && this.grid.getEl()) {
             var sc = this.grid.getSelectionModel().getSelectedCell();
-            this.grid.getView().refresh();
+            this.grid.getView().refresh(true);
             if(sc) {
                 this.grid.getSelectionModel().select(sc[0], sc[1]);
                 this.grid.getView().focusCell(sc[0], sc[1]);
@@ -207,12 +239,17 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             }
         });
     }
+    ,readValues: function() {
+        this.grid.readValues();
+        this.data.data = Ext.apply(this.data.data, this.fieldsZone.getForm().getFieldValues());
+        return this.data;
+    }
     ,save: function(callback, scope) {
         if(!this._isDirty) {
             return;
         }
-        this.grid.readValues();
-        this.data.data = Ext.apply(this.data.data, this.fieldsZone.getForm().getFieldValues());
+
+        this.readValues();
 
         if(callback) {
             this.saveCallback = callback.createDelegate(scope || this);
@@ -222,6 +259,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
 
         this.fieldsZone.getForm().submit({
             clientValidation: true
+            ,loadMask: false
             ,params: {
                 data: Ext.encode(this.data)
             }
@@ -240,9 +278,11 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
         }
         this._isDirty = false;
         if(this.saveCallback) {
-            this.saveCallback(this);
+            this.saveCallback(this, form, action);
             delete this.saveCallback;
         }
+        App.fireEvent('objectchanged', r.data);
+
     }
     ,clear: function(){
         this.data = {};

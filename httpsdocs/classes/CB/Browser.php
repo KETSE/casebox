@@ -3,41 +3,228 @@ namespace CB;
 
 class Browser
 {
-    /**
-     * function used to check if node has a controller specified in its "cfg" field
-     * @param  varchar $path ids path (1/2/3)
-     * @return variant | false  if node have custom controller then results from
-     *                           the controller are returned, otherwise false
-     */
-    public function getCustomControllerResults($path)
+
+    protected $path = [];
+    protected $treeNodeConfigs = array();
+    protected $treeNodeGUIDConfigs = array();
+    protected $treeNodeClasses = array();
+
+    public function getChildren($p)
     {
-        $rez = false;
-        $ids = explode('/', $path);
-        $id = array_pop($ids);
-        while ((!is_numeric($id) || ($id < 1)) && !empty($ids)) {
-            $id = array_pop($ids);
+        $rez = array();
+
+        /* prepare params */
+        $path = '/';
+        if (empty($p['path'])) {
+            if (!empty($p['pid'])) {
+                $path = $p['pid'];
+            }
+        } else {
+            $path = $p['path'];
+        }
+        $p['path'] = $path;
+        $this->showFoldersContent = isset($p['showFoldersContent'])
+            ? $p['showFoldersContent']
+            : false;
+
+        $this->requestParams = $p;
+        /* end of prepare params */
+
+        /* we should:
+            1. load available plugins for the tree with their configs
+            2. fire the on treeInitialize event
+            3. call each plugin with received params
+            4. join and sort received data
+        */
+
+        $this->treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
+        $params = array(
+            'params' => &$p,
+            'plugins' => &$this->treeNodeConfigs
+        );
+
+        fireEvent('treeInitialize', $params);
+
+        $this->initNodeClasses();
+        $this->createNodesPath();
+        Cache::set('current_path', $this->path);
+        $this->collectAllChildren();
+
+        $this->prepareResults($this->data);
+
+        $rez = array(
+            'success' => true
+            ,'pathtext' => $this->getPathText($p)
+            ,'folderProperties' => $this->getPathProperties($p)
+            ,'data' => $this->data
+            ,'total' => $this->total
+        );
+
+        if (!empty($this->facets)) {
+            $rez['facets'] = &$this->facets;
+        }
+        if (!empty($this->search)) {
+            $rez['search'] = &$this->search;
+        }
+        if (!empty($this->DC)) {
+            $rez['DC'] = &$this->DC[0];
         }
 
-        if (empty($id) || !is_numeric($id)) {
-            return false;
+        return $rez;
+
+    }
+
+    public function initNodeClasses()
+    {
+        $this->treeNodeClasses = array();
+        foreach ($this->treeNodeConfigs as $p => $cfg) {
+            $class = empty($cfg['class']) ? '\\CB\\TreeNode\\'.$p : $cfg['class'];
+            $cfg['guid'] = $this->getGUID($p);
+            $cfg['class'] = $class;
+
+            try {
+                $class = new $class($cfg);
+                $this->treeNodeGUIDConfigs[$cfg['guid']] = $cfg;
+                $this->treeNodeClasses[$cfg['guid']] = $class;
+            } catch (\Exception $e) {
+                debug('error creating class '.$class);
+            }
+        }
+    }
+
+    protected function createNodesPath()
+    {
+
+        $this->path = array();
+        $path = explode('/', @$this->requestParams['path']);
+        while (!empty($path)) {
+            $npid = null;
+            $nodeId = null;
+
+            $el = array_shift($path);
+            if (empty($el)) {
+                continue;
+            }
+
+            $el = explode('-', $el);
+            if (sizeof($el) > 1) {
+                $npid = $el[0];
+                $nodeId = $el[1];
+            } else {
+                $npid = $this->getGUID('Dbnode');
+                $nodeId = $el[0];
+            }
+
+            $cfg = empty($this->treeNodeGUIDConfigs[$npid])
+                ? array( 'class' => 'CB\TreeNode\\Dbnode', 'guid' => $npid)
+                : $this->treeNodeGUIDConfigs[$npid];
+
+            $class = new $cfg['class']($cfg, $nodeId);
+            //set parent node
+            if (!empty($this->path)) {
+                $class->parent = $this->path[sizeof($this->path) - 1];
+            }
+
+            array_push(
+                $this->path,
+                $class
+            );
+        };
+    }
+
+    protected function getPathText()
+    {
+        $rez = array();
+        if (empty($this->path)) {
+            return '/';
         }
 
+        foreach ($this->path as $n) {
+            $rez[] = $n->getName();
+        }
+
+        return implode('/', $rez);
+    }
+
+    protected function getPathProperties()
+    {
+        $rez = array();
+        if (empty($this->path)) {
+            $rez['path'] = '/';
+        } else {
+            $rez = $this->path[sizeof($this->path) - 1]->getData();
+
+            $idsPath = array();
+            foreach ($this->path as $n) {
+                $idsPath[] = $n->getId();
+            }
+
+            $rez['path'] = '/'.implode('/', $idsPath);
+        }
+
+        return $rez;
+    }
+
+    protected function collectAllChildren()
+    {
+
+        $this->data = array();
+        $this->facets = array();
+        $this->total = 0;
+        $this->search = array();
+        $this->DC = array();
+        foreach ($this->treeNodeClasses as $class) {
+            $rez = $class->getChildren($this->path, $this->requestParams);
+            if (!empty($rez['data'])) {
+                $this->data = array_merge($this->data, $rez['data']);
+            }
+            if (!empty($rez['facets'])) {
+                $this->facets = $rez['facets'];
+            }
+
+            if (isset($rez['total'])) {
+                $this->total += $rez['total'];
+            } elseif (!empty($rez['data'])) {
+                $this->total += sizeof($rez['data']);
+            }
+
+            if (isset($rez['search'])) {
+                $this->search[] = $rez['search'];
+            }
+
+            if (isset($rez['DC'])) {
+                $this->DC[] = $rez['DC'];
+            }
+        }
+    }
+
+    protected function sortResult()
+    {
+        //sorting nodes;
+    }
+
+    public static function getGUID($name)
+    {
+        $rez = null;
         $res = DB\dbQuery(
-            'SELECT cfg FROM tree WHERE id = $1',
-            $id
+            'SELECT id FROM `casebox`.guids WHERE name = $1',
+            $name
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
-            if (!empty($r['cfg']['controller'])) {
-                $userMenu = new UserMenu();
-                $rez = $userMenu->{$r['cfg']['controller']}($path);
-                unset($userMenu);
-            }
+            $rez = $r['id'];
+        } else {
+            DB\dbQuery(
+                'INSERT INTO `casebox`.guids
+                (`name`)
+                VALUES ($1)',
+                $name
+            ) or die(DB\dbQueryError());
+            $rez = DB\dbLastInsertId();
         }
-         $res->close();
+        $res->close();
 
-         return $rez;
+        return $rez;
     }
 
     /**
@@ -202,7 +389,25 @@ class Browser
 
         $search = new Search();
 
-        return $search->query($p);
+        $rez = $search->query($p);
+
+        foreach ($rez['data'] as &$doc) {
+            $res = DB\dbQuery(
+                'SELECT cfg FROM tree WHERE id = $1 AND cfg IS NOT NULL',
+                $doc['id']
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                if (!empty($r['cfg'])) {
+                    $cfg = Util\toJSONArray($r['cfg']);
+                    if (!empty($cfg['iconCls'])) {
+                        $doc['iconCls'] = $cfg['iconCls'];
+                    }
+                }
+            }
+            $res->close();
+        }
+
+        return $rez;
     }
 
     public function createFolder($path)
@@ -446,6 +651,8 @@ class Browser
         if (empty($p['pid'])) {
             return array('success' => false, 'msg' => L\Error_uploading_file);
         }
+        $p['pid'] = Path::detectRealTargetId($p['pid']);
+
         //TODO: SECURITY: check if current user has write access to folder
 
         if (empty($F)) { //update only file properties (no files were uploaded)
@@ -837,7 +1044,7 @@ class Browser
         return $id;
     }
 
-    public function getRootProperties($id)
+    public static function getRootProperties($id)
     {
         $rez = array('success' => true, 'data' => array());
         $res = DB\dbQuery(
@@ -857,7 +1064,7 @@ class Browser
         if ($r = $res->fetch_assoc()) {
             $r['cfg'] = Util\toJSONArray($r['cfg']);
             $rez['data'] = array($r);
-            $this->updateLabels($rez['data']);
+            Browser::updateLabels($rez['data']);
             $rez['data'] = $rez['data'][0];
         }
         $res->close();
@@ -892,27 +1099,28 @@ class Browser
         if (empty($data) || !is_array($data)) {
             return;
         }
+
+        //this->sortNodes();
+        $sql = 'SELECT count(*) `has_childs`
+            FROM tree
+            WHERE pid = $1
+                AND dstatus = 0'.
+            ( empty($this->showFoldersContent) ?
+                ' AND `template_id` IN (0'.implode(',', $GLOBALS['folder_templates']).')'
+                : ''
+            );
+
         for ($i=0; $i < sizeof($data); $i++) {
             $d = &$data[$i];
             if (isset($d['id']) && empty($d['nid'])) {
                 $d['nid'] = $d['id'];
                 unset($d['id']);
             }
-            if (!isset($d['loaded'])) {
-                $res = DB\dbQuery(
-                    'SELECT count(*) `has_childs`
-                    FROM tree
-                    WHERE pid = $1
-                        AND dstatus = 0'.
-                    ( empty($this->showFoldersContent) ?
-                        ' AND `template_id` IN (0'.implode(',', $GLOBALS['folder_templates']).')'
-                        : ''
-                    ),
-                    $d['nid']
-                ) or die(DB\dbQueryError());
+            if (is_numeric($d['nid']) && !isset($d['loaded'])) {
+                $res = DB\dbQuery($sql, $d['nid']) or die(DB\dbQueryError());
 
                 if ($r = $res->fetch_assoc()) {
-                    $d['loaded'] = empty($r['has_childs']);
+                    $d['has_childs'] = !empty($r['has_childs']);
                 }
                 $res->close();
             }
@@ -920,7 +1128,7 @@ class Browser
 
     }
 
-    public function updateLabels(&$data)
+    public static function updateLabels(&$data)
     {
         for ($i=0; $i < sizeof($data); $i++) {
             $d = &$data[$i];

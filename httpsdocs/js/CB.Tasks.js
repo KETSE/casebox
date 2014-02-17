@@ -15,7 +15,7 @@ CB.Tasks_ReminderWindow = Ext.extend(Ext.Window, {
             })
             ,new Ext.form.ComboBox({
                 value: this.value[2]
-                ,store: CB.DB.reminderUnits
+                ,store: CB.DB.timeUnits
                 ,typeAhead: true
                 ,triggerAction: 'all'
                 ,lazyRender:true
@@ -487,7 +487,7 @@ CB.Tasks = Ext.extend( Ext.Window, {
                         ,displayField: 'name'
                         ,editable: false
                         ,valueField: 'id'
-                        ,store: CB.DB.tasksImportance
+                        ,store: CB.DB.importance
                         ,listeners: {scope: this, change: this.setDirty}
                     },new CB.ObjectsComboField({
                         fieldLabel: L.Category
@@ -1161,7 +1161,7 @@ CB.TaskViewTemplate = new Ext.XTemplate(
     ,'{[ L["taskStatus"+values.status] ]}</span>{[ ( (values.status == 3) && !Ext.isEmpty(values.completed)) ? \' <span class="dttm" title="\'+values.completed.format(\'Y, F j\') + \' at \' + values.completed.format(\'H:i\')+\'">\'+values.completed.format(\'Y, F j\') + \' at \' + values.completed.format(\'H:i\')+\'</span>\' : ""]}'
     ,'<!-- <span class="overdue">overdue</span>, active, pending -->'
     ,'</td></tr>'
-    ,'<tr><td class="k">' + L.Importance+':</td><td>{[CB.DB.tasksImportance.getName(values.importance)]}</td></tr>'
+    ,'<tr><td class="k">' + L.Importance+':</td><td>{[CB.DB.importance.getName(values.importance)]}</td></tr>'
     ,'<tr><td class="k">' + L.Category + ':</td><td><img src="'+Ext.BLANK_IMAGE_URL+'" class="icon {[CB.DB.thesauri.getIcon(values.category_id)]}"> {[CB.DB.thesauri.getName(values.category_id)]}</td></tr>'
     ,'<tr><td class="k">' + L.Path + ':</td><td><a class="path" name="path" href="#">{pathtext}</a></td></tr>'
     ,'<tr><td class="k">' + L.Owner + ':</td><td>'

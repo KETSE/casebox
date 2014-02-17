@@ -18,7 +18,7 @@ CB.Search = Ext.extend(Ext.Panel, {
             search: new Ext.Action({
                 text: L.Search
                 ,iconAlign:'top'
-                ,iconCls: 'icon32-next'
+                ,iconCls: 'ib-next'
                 ,scale: 'large'
                 ,scope: this
                 ,handler: this.onSearchClick

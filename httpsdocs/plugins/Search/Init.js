@@ -1,8 +1,8 @@
 Ext.namespace('CB.plugins.Search');
 
 CB.plugins.Search.init = function(){
-    App.on('folderviewinit', function(c){
-        if(!c.isXType(CB.FolderViewGrid, true)) {
+    App.on('browserinit', function(c){
+        if(!c.isXType(CB.browser.ViewContainer, true)) {
             return;
         }
         /* check if we have search templates */

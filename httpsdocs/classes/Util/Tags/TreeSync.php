@@ -291,6 +291,11 @@ class TreeSync extends \Util\TreeSync
             $modified = false;
             foreach ($data['fields'] as &$field) {
                 switch ($field['type']) {
+                    case '_objects':
+                        if (@$field['cfg']['source'] !== 'thesauri') {
+                            continue 2;
+                        }
+                        break;
                     case 'combo':
                         if (empty($field['cfg']['thesauriId'])) {
                             continue 2;
@@ -305,13 +310,33 @@ class TreeSync extends \Util\TreeSync
                         continue 2;
                 }
                 $field['type'] = '_objects';
+                $field['data']['type'] = '_objects';
                 $field['cfg']['source'] = 'tree';
+
+                if (!empty($field['cfg']['dependency']['pidValues'])) {
+                    $a = \CB\Util\toNumericArray($field['cfg']['dependency']['pidValues']);
+                    echo "\n".implode(', ', $a)." -> ";
+                    for ($i=0; $i < sizeof($a); $i++) {
+                        if (isset($this->tags[$a[$i]]['id'])) {
+                            $a[$i] = $this->tags[$a[$i]]['id'];
+                        }
+                    }
+                    echo implode(', ', $a)." \n";
+                    $field['cfg']['dependency']['pidValues'] = $a;
+                }
 
                 if ($field['cfg']['thesauriId'] == 'dependent') {
                     $field['cfg']['dependency'] = array();
                     $field['cfg']['scope'] = 'variable';
                 } elseif (isset($this->tags[$field['cfg']['thesauriId']]['id'])) {
                     $field['cfg']['scope'] = $this->tags[$field['cfg']['thesauriId']]['id'];
+                }
+                if (!empty($field['cfg']['thesauriId'])) {
+                    $field['cfg']['oldThesauriId'] = $field['cfg']['thesauriId'];
+                    unset($field['cfg']['thesauriId']);
+                }
+                if (!empty($field['cfg']['value']) && isset($this->tags[$field['cfg']['value']]['id'])) {
+                    $field['cfg']['value'] = $this->tags[$field['cfg']['value']]['id'];
                 }
 
                 $modifiedTemplateFieldIds[$field['id']] = 1;
@@ -347,9 +372,11 @@ class TreeSync extends \Util\TreeSync
 
                 $objUpdated = false;
                 $processFields = array();
-                foreach ($data['data'] as $fn => &$fv) {
-                    $tf = $template->getField($fn);
-                    $processFields[] = array($tf, &$fv);
+                if (!empty($data['data'])) {
+                    foreach ($data['data'] as $fn => &$fv) {
+                        $tf = $template->getField($fn);
+                        $processFields[] = array($tf, &$fv);
+                    }
                 }
                 while (!empty($processFields)) {
                     $field = array_shift($processFields);

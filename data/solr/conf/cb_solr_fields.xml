@@ -35,9 +35,13 @@
 <field name="path"      type="text_general"     indexed="true" stored="true" />
 <!-- name: node name -->
 <field name="name"      type="text_general"     indexed="true" stored="true" />
-<!-- system: field for delimiting system folders (for system this field value is 1). System folders cannot be deleted by user -->
+<!-- system: field for delimiting system elements from tree, like some folders, system messages etc -->
 <field name="system"    type="tint"         indexed="true" stored="true" />
-<!-- type: node type
+<!--
+Note: This field is obsolete, we rely on templates and template_types.
+Should be removed on cleanup if wouldn't be used for other purposes.
+
+type: node type
     1. Folder
     2. Link
     3. Case
@@ -49,7 +53,10 @@
     This definition can be updated when needed
  -->
 <field name="type"      type="tint"         indexed="true" stored="true" />
-<!-- subtype: this field is dependent on type field value
+<!--
+Note: fis field will be removed on cleanup.
+
+subtype: this field is dependent on type field value
     for field "type" = 1 (Folder) there are defined following values for subtype:
         1 - query. This type will be probably replaced by controller property in cfg field
         2 – My Casebox (users home folder)
@@ -103,6 +110,9 @@
 <!-- template_type: case, object, file, task, email -->
 <field name="template_type"     type="string"       indexed="true" stored="true" />
 
+<!-- cls: custom css class  -->
+<field name="cls"     type="string"       indexed="true" stored="true" />
+
 <!-- acl_count: count of security rules assigned to this node -->
 <field name="acl_count"   type="tint"         indexed="true" stored="true" />
 
@@ -114,7 +124,7 @@
 
 <!-- user_ids: this field is used now for assigned users in tasks  -->
 <field name="user_ids"      type="tint"         indexed="true" stored="true" multiValued="true" />
-<!-- status: the tasks status (1 Overdue, 2 Active, 3 Completed, 4 Pending)
+<!-- status: the tasks status (1 Overdue, 2 Active, 3 Closed, 4 Pending)
     can also be used, when needed, for other objects to specify their status -->
 <field name="status"        type="tint" indexed="true" stored="true" />
 <!-- category_id: tasks category (a thesaury defined set of values) -->
@@ -148,6 +158,16 @@
 <field name="sort_name"     type="text_general_sort" indexed="true" stored="true" />
 <!-- sort_path: designed to sort by path -->
 <field name="sort_path"     type="text_general_sort" indexed="true" stored="true" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering. By default this field contains data from creation object date  -->
+<field name="ym1"     type="tint" indexed="true" stored="true" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering. By default this field contains start date for tasks  -->
+<field name="ym2"     type="tint" indexed="true" stored="true" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering.
+By default this field contains end date for tasks or creation date if end date is empty -->
+<field name="ym3"     type="tint" indexed="true" stored="true" />
 
 <!-- role_ids: these columns can be used by object templates to store specific values and later to be able to filter or search by them.
     For example: in case_card template there can be fields that define Managers, Lawyers, Helpers for a case.

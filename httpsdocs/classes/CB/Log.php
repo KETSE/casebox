@@ -387,23 +387,11 @@ class Log
             return ;
         }
 
-        $users_data = array();
-        $res = DB\dbQuery(
-            'SELECT id
-                ,language_id
-            FROM users_groups
-            WHERE id IN ('.implode(', ', $to_user_ids).')'
-        ) or die(DB\dbQueryError());
+        foreach ($to_user_ids as $uid) {
+            $u = User::getPreferences($uid);
 
-        while ($r = $res->fetch_assoc()) {
-            $users_data[] = $r;
-        }
-        $res->close();
-        foreach ($users_data as $u) {
-            $l = 'l'.$u['language_id'];
-            if (!$l) {
-                $l = LANGUAGE;
-            }
+            $l = $u['language'];
+
             $subject = L\get('CaseBoxNotification', $l).' ';
             $message = (empty($p[$l]) ? '' : '<p>'.$p[$l].'.</p>'); //log message
             switch ($p['action_type']) {
@@ -461,11 +449,9 @@ class Log
                     $res = DB\dbQuery(
                         'SELECT t.name
                             ,ti.`path`
-                            ,u.'.$l.' `owner`
-                            ,u.name `username`
+                            ,t.cid
                         FROM tree t
                         JOIN tree_info ti ON t.id = ti.id
-                        JOIN users_groups u ON t.cid = u.id
                         WHERE t.id = $1',
                         $p['task_id']
                     ) or die(DB\dbQueryError());
@@ -478,7 +464,7 @@ class Log
                                 ,'{path}'
                             ),
                             array(
-                                Util\coalesce($r['owner'], $r['username'])
+                                User::getDisplayName($r['cid'])
                                 ,$r['name']
                                 ,$r['path']
                             ),

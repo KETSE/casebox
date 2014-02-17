@@ -200,6 +200,38 @@ function formatTaskTime($mysqlTime)
         return translateMonths(date('j M Y', $time));
     }
 }
+
+/**
+ * formats a dateTime period between two dates (without time). For ex.: Tue Apr 30, 2013 - 31
+ * @param  varchar $fromDateTime mysql formated date
+ * @param  varchar $toDateTime   mysql formated date
+ * @return varchar               formated period
+ */
+function formatDatePeriod($fromDateTime, $toDateTime)
+{
+    $d1 = new \DateTime($fromDateTime);
+    $d2 = new \DateTime($toDateTime);
+
+    $rez = $d1->format('D M j, Y');
+
+    $d2format = '';
+    if ($d1->format('Y') != $d2->format('Y')) {
+         $d2format = 'D M j, Y';
+    } elseif ($d1->format('M') != $d2->format('M')) {
+        $d2format = 'D M j';
+    } elseif ($d1->format('j') != $d2->format('j')) {
+        $d2format = 'D j';
+    } elseif ($d1->format('D') != $d2->format('D')) {
+        $d2format = 'D';
+    }
+
+    if (!empty($d2format)) {
+        $rez .= ' - '.$d2->format($d2format);
+    }
+
+    return $rez;
+}
+
 /**
  * formats a dateTime period between two dates. For ex.: Tue Apr 30, 2013 00:10 - 01:10
  * @param  varchar $fromDateTime mysql formated date
@@ -210,12 +242,11 @@ function formatTaskTime($mysqlTime)
 function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 {
     $d1 = new \DateTime($fromDateTime);
-    $d2 = new \DateTime($toDateTime);
     if (empty($TZ)) {
         $TZ = 'UTC';
     }
     $d1->setTimezone(new \DateTimeZone($TZ));
-    $d2->setTimezone(new \DateTimeZone($TZ));
+
 
     $rez = $d1->format('D M j, Y');
     $hourText = $d1->format('H:i');
@@ -223,18 +254,26 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
         $rez .= ' '.$hourText;
     }
 
-    $interval = date_diff($d1, $d2);
+    if (empty($toDateTime)) {
+        return $rez;
+    }
+    $d2 = new \DateTime($toDateTime);
+    $d2->setTimezone(new \DateTimeZone($TZ));
 
     $d2format = '';
-    if ($interval->y > 0) {
-        $d2format = 'D M j, Y';
-    } elseif ($interval->m > 0) {
+    if ($d1->format('Y') != $d2->format('Y')) {
+         $d2format = 'D M j, Y';
+    } elseif ($d1->format('M') != $d2->format('M')) {
         $d2format = 'D M j';
-    } elseif ($interval->d > 0) {
+    } elseif ($d1->format('j') != $d2->format('j')) {
         $d2format = 'D j';
+    } elseif ($d1->format('D') != $d2->format('D')) {
+        $d2format = 'D';
     }
+
     $hourText = $d2->format('H:i');
-    if ($hourText != '00:00') {
+
+    if (($hourText != '00:00') || empty($d2format)) {
         $d2format .= (empty($d2format) ? '' : ', ').'H:i';
     }
 
@@ -401,12 +440,19 @@ function getThesauryIcon($id)
 
     if (!\CB\Cache::exist($var_name)) {
         $res = DB\dbQuery(
-            'SELECT iconCls FROM tags WHERE id = $1',
+            'SELECT t.cfg, tt.iconCls
+            FROM tree t
+            JOIN templates tt on t.id = tt.id
+            WHERE t.id = $1',
             $id
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            \CB\Cache::set($var_name, $r['iconCls']);
+            $cfg = toJSONArray($r['cfg']);
+            $iconCls = empty($cfg['iconCls'])
+                ? $r['iconCls']
+                : $cfg['iconCls'];
+            \CB\Cache::set($var_name, $iconCls);
         }
         $res->close();
     }

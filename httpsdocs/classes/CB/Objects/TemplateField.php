@@ -66,8 +66,26 @@ class TemplateField extends Object
                 $saveValues[] = $value;
                 $params[] = $i;
                 $i++;
+            } elseif (isset($p['data'][$fieldName])) {
+                $value = $p['data'][$fieldName];
+                $value = (is_scalar($value) || is_null($value))
+                    ? $value
+                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+
+                $saveFields[] = $fieldName;
+                $saveValues[] = $value;
+                $params[] = $i;
+                $i++;
             } elseif (!empty($field)) {
                 $value = @$this->getFieldValue($fieldName, 0)['value'];
+                // this if should be removed after complete migration to language abreviation titles
+                if (empty($value) && in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
+                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    if (!empty($lang)) {
+                        $value = @$this->getFieldValue($lang, 0)['value'];
+                    }
+                }
+
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -85,7 +103,7 @@ class TemplateField extends Object
 
                         $saveFields[] = $fieldName;
                         $saveValues[] = $value;
-                        $params[] = "`$fieldName` = \$$i";
+                        $params[] = "$i";
                         $i++;
                     }
                 }

@@ -19,6 +19,9 @@ CB.DB.DirectObjectsStore = Ext.extend(Ext.data.DirectStore, {
                         load: function(proxy, obj, opt){
                             for (var i = 0; i < obj.result.data.length; i++) {
                                 obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+                                if(!Ext.isEmpty(obj.result.data[i].cfg.iconCls)) {
+                                    obj.result.data[i].iconCls = obj.result.data[i].cfg.iconCls;
+                                }
                             }
                         }
                     }
@@ -31,11 +34,10 @@ CB.DB.DirectObjectsStore = Ext.extend(Ext.data.DirectStore, {
                     {name: 'id', type: 'int'}
                     ,'name'
                     ,{name: 'date', type: 'date'}
-                    ,{name: 'type', type: 'int'}
-                    ,{name: 'subtype', type: 'int'}
                     ,{name: 'template_id', type: 'int'}
                     ,{name: 'status', type: 'int'}
                     , 'iconCls'
+                    , 'cfg'
                 ]
                 )
             }
@@ -59,7 +61,14 @@ CB.DB.DirectObjectsStore = Ext.extend(Ext.data.DirectStore, {
         idx = this.findExact('id', parseInt(data.id, 10));
         if(idx< 0){
             r = new this.recordType(data);
-            r.set('iconCls', getItemIcon(data));
+            var icon = null;
+            if(!Ext.isEmpty(data.cfg)) {
+                icon = data.cfg.iconCls;
+            }
+            if(Ext.isEmpty(icon)) {
+                icon = getItemIcon(data);
+            }
+            r.set('iconCls', icon);
             this.add(r);
         }
     }

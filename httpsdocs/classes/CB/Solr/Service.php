@@ -46,7 +46,9 @@ class Service
             return $this->solr_handler;
         }
 
-        require_once \CB\CONFIG\SOLR_CLIENT;
+        if (!class_exists('\\Apache_Solr_Service', false)) {
+            require_once \CB\CONFIG\SOLR_CLIENT;
+        }
 
         $this->solr_handler = new \Apache_Solr_Service(
             $this->host,

@@ -36,7 +36,7 @@
 .bgcLG{ background-color: #eee }
 .bgcW{ background-color: #FFF !important }
 .bgcY{ background-color: #FFFF88 !important } /*Interactive action yellow*/
-.bgcLR{ background-color: #FFCCCC !important } 
+.bgcLR{ background-color: #FFCCCC !important }
 .p2{ padding: 2px }
 .p5{ padding: 5px }
 .p10{ padding: 10px }
@@ -171,7 +171,7 @@
 a.file{min-height: 16px; display: inline-block}
 .file-grid-cell{ text-indent: 15px !important; padding-top: 0px; background-position: 0 50% }
 
-.file-, .file-unknown { background-image:url(/css/i/ext/.png) !important; background-position: 0 0%; background-repeat: no-repeat }
+.file-, .file-unknown { background-image:url(/css/i/ext/.png) !important; background-position: 0 0%; background-repeat: no-repeat; min-width: 16px; }
 
 .file-ppt, .file-pptx { background-image:url(/css/i/ext/ppt.png) !important }
 .file-mp3 { background-image:url(/css/i/ext/mp3.png) !important }
@@ -279,6 +279,9 @@ a.file{min-height: 16px; display: inline-block}
 
 
 .icon-none{background: none !important}
+.i16{width: 16px; height: 16px}
+.i16u{width: 16px; height: 16px; background-image:url(/css/i/ext/.png)}
+.i32{width: 32px; height: 32px}
 .wsNW {white-space: nowrap}
 .click, .header-click{ cursor: hand; cursor: pointer }
 .click:hover{ color: #286bcc !important; text-decoration: underline }

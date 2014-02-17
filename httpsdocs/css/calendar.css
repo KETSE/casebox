@@ -6,13 +6,13 @@
  */
 
 /*******************************************
- * 
+ *
  * Ext Calendar styles
  *
  ******************************************/
 
 /* -----------------------------------------
- * Shared calendar view containers 
+ * Shared calendar view containers
  */
 .x-panel-tbar .ext-cal-toolbar {
     padding: 3px;
@@ -129,12 +129,12 @@
 .x-calendar-nonav .ext-cal-hd-ad-inner {
     margin-top: 3px;
 }
-.x-calendar-nonav .ext-cal-hd-ct {
+/*.x-calendar-nonav .ext-cal-hd-ct {
     border-top: 1px solid #99BBE8;
-}
+}*/
 .ext-cal-dayview .ext-cal-dtitle {
     padding: 8px 1px 2px;
-} 
+}
 .ext-cal-hd-ad-bg-tbl {
     position: absolute;
     left: 0;
@@ -396,9 +396,10 @@ td.ext-cal-dtitle-today div {
 
 /* Default rounded event div (Gecko/Webkit/W3C) */
 .ext-cal-evr { /* rounded */
-    -moz-border-radius:5px;
+/*    -moz-border-radius:5px;
     -webkit-border-radius:5px;
     border-radius:5px;
+*/
     overflow:hidden;
     padding: 2px 1px 2px 5px;
     white-space:nowrap;
@@ -660,13 +661,14 @@ td.ext-cal-dtitle-today div {
     filter:alpha(opacity=50);
 }
 
-/* 
- * Calendar event colors 
+/*
+ * Calendar event colors
  */
 .ext-cal-evr,
 .ext-cal-evi,
 .ext-cal-evt dl {
-	color: #fff;
+	/*color: #fff;*/
+    color: #1d1d1d;
 }
 
 .ext-color-1,
@@ -773,9 +775,9 @@ td.ext-cal-dtitle-today div {
 }
 
 /*******************************************
- * 
+ *
  * Calendar navigation picker styles
- * 
+ *
  ******************************************/
 .ext-cal-nav-picker {
     border-style: none none solid;
@@ -816,7 +818,7 @@ td.ext-cal-dtitle-today div {
 }
 
 /*******************************************
- * 
+ *
  * Calendar form styles
  *
  ******************************************/
@@ -844,7 +846,7 @@ td.ext-cal-dtitle-today div {
 }
 
 /*******************************************
- * 
+ *
  * DateRangeField styles
  *
  ******************************************/
@@ -859,24 +861,30 @@ td.ext-cal-dtitle-today div {
 }
 
 /* custom CaseBox styles */
-.cal-evt-bg-t3{background-color: #447294 !important; background-position: 5px 50%}/*cases*/
+.cal-cat-default {background-color: gray; background-position: 5px 50%}
+/*
+oburlaca: will uncomment later;
+.cal-evt-milestone {background-image: url(/i/cl/stripe.png); background-repeat: repeat;} */
 
-.cal-evt-bg-t4{background-color: #006E2E !important; background-position: 5px 50%}/*actions*/
-.cal-evt-bg-t5{background-color: #73880A !important; background-position: 5px 50%}/*files*/
-
-.cal-evt-bg-t6{background-color: #B02B2C !important; background-position: 5px 50%}/*tasks*/
-.cal-evt-bg-t7{background-color: #356AA0 !important; background-position: 5px 50%}/*events*/
 
 /*
 .cal-cat
 .cal-cat-{iconCls}
-.cal-status-{status} 
+.cal-status-{status}
 example .cal-cat-taskBlue
 */
 .cal-status-c {text-decoration: line-through !important} /*completed*/
 
-.cal-cat-task-blue {background-color: blue !important; background-position: 5px 50%}
-.cal-cat-task-gray {background-color: gray !important; background-position: 5px 50%}
-.cal-cat-task-purple {background-color: #800080 !important; background-position: 5px 50%}
+.cal-cat-task-blue, .cal-cat-blue {background-color: #9DB7E8; background-position: 5px 50%}
+.cal-cat-task-gray, .cal-cat-gray {background-color: gray; background-position: 5px 50%}
+.cal-cat-task-green, .cal-cat-green {background-color: #78D168; background-position: 5px 50%}
+.cal-cat-task-olive, .cal-cat-olive {background-color: #C6D2B0; background-position: 5px 50%}
+.cal-cat-task-orange, .cal-cat-orange {background-color: #F9BA89; background-position: 5px 50%}
+.cal-cat-task-orange, .cal-cat-orange {background-color: #F9BA89; background-position: 5px 50%}
+.cal-cat-task-purple, .cal-cat-purple {background-color: #800080; background-position: 5px 50%}
+.cal-cat-task-red, .cal-cat-red {background-color: #E7A1A2; background-position: 5px 50%}
+.cal-cat-task-steel, .cal-cat-steel {background-color: #DAD9DC; background-position: 5px 50%}
+.cal-cat-task-teal, .cal-cat-teal {background-color: #9FDCC9; background-position: 5px 50%}
+.cal-cat-task-yellow, .cal-cat-yellow {background-color: #FCFA90; background-position: 5px 50%}
 
 /* .cal-status-completed {} */

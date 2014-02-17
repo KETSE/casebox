@@ -32,6 +32,7 @@ if (!in_array(
         ,'recover_password.php'
         ,'download.php'
         ,'api.php'
+        ,'webdav.php'
         )
 )) {
     if (($_SERVER['SCRIPT_NAME'] != '/auth.php') && !User::isLoged()) {
@@ -41,7 +42,7 @@ if (!in_array(
 }
 /* end of check if loged in correctly, comparing with the key and ips */
 
-$sessionPersistence = getOption('session.persistent');
+$sessionPersistence = Config::get('session.persistent', true);
 if (empty($sessionPersistence)) {
     // regenerate session id
     session_regenerate_id(false);

@@ -113,13 +113,12 @@ class User
         $rez = array( 'success' => true );
         $phone = preg_replace('/[^0-9]+/', '', $p['country_code'].$p['phone_number']);
 
-        $rez['info'] = \FreeSMSGateway::sendSms(
-            array(
-                'phone' => $phone
-                ,'message' => $this->getGACode()
-            )
-        );
-
+        // $rez['info'] = \FreeSMSGateway::sendSms(
+        //     array(
+        //         'phone' => $phone
+        //         ,'message' => $this->getGACode()
+        //     )
+        // );
         return $rez;
     }
 
@@ -209,12 +208,34 @@ class User
                 ,'folder_templates' => $GLOBALS['folder_templates']
                 ,'default_task_template' => constant('CB\\CONFIG\\DEFAULT_TASK_TEMPLATE')
                 ,'default_event_template' => constant('CB\\CONFIG\\DEFAULT_EVENT_TEMPLATE')
+                ,'webdav_url' => Config::get('webdav_url')
+                ,'webdav_files' => Config::get('webdav_files')
+                ,'template_info_column' => Config::get('template_info_column')
             )
             ,'user' => $_SESSION['user']
         );
+        $rez['config']['webdav_url'] = str_replace('{core_name}', \CB\CORE_NAME, $rez['config']['webdav_url']);
+        $rez['config']['webdav_files'] = explode(',', $rez['config']['webdav_files']);
+
         $rez['user']['cfg']['short_date_format'] = str_replace('%', '', $rez['user']['cfg']['short_date_format']);
         $rez['user']['cfg']['long_date_format'] = str_replace('%', '', $rez['user']['cfg']['long_date_format']);
         $rez['user']['cfg']['time_format'] = str_replace('%', '', $rez['user']['cfg']['time_format']);
+
+        /* default root node config */
+        $root = Config::get('rootNode');
+        if (is_null($root)) {
+            $root = Browser::getRootProperties(
+                Browser::getRootFolderId()
+            )['data'];
+        } else {
+            $root = Util\toJSONArray($root);
+            if (isset($root['id'])) {
+                $root['nid'] = $root['id'];
+                unset($root['id']);
+            }
+        }
+        $rez['config']['rootNode'] = $root;
+        /*end of default root node config */
 
         unset($rez['user']['TSV_checked']);
 
@@ -829,22 +850,6 @@ class User
     }
 
     /**
-     * get left accordion and top toolbar items
-     * @return array json reponce
-     */
-    public function getMainMenuItems()
-    {
-        $userMenu = new UserMenu();
-        $rez = array(
-            'success' => true
-            ,'items' => $userMenu->getAccordionItems()
-            ,'tbarItems' => $userMenu->getToolbarItems()
-        );
-
-        return $rez;
-    }
-
-    /**
      * upload user photo
      * @param  array $p upload params using form post
      * @return array json responce
@@ -981,17 +986,23 @@ class User
      * @param  $id  id of the user
      * @return varchar
      */
-    public static function getDisplayName($id = false)
+    public static function getDisplayName($id = false, $withEmail = false)
     {
-        if (!is_numeric($id)) {
+        if ($id === false) {
             $id = $_SESSION['user']['id'];
+        } elseif (!is_numeric($id)) {
+            return '';
         }
 
-        $var_name = 'users['.$id."]['displayName']";
+        $var_name = 'users['.$id."]['displayName$withEmail']";
 
         if (!Cache::exist($var_name)) {
             $res = DB\dbQuery(
-                'SELECT name, first_name, last_name
+                'SELECT
+                    name
+                    ,first_name
+                    ,last_name
+                    ,email
                 FROM users_groups
                 WHERE id = $1',
                 $id
@@ -1001,6 +1012,9 @@ class User
                 $name = trim($r['first_name'].' '.$r['last_name']);
                 if (empty($name)) {
                     $name = $r['name'];
+                }
+                if (($withEmail == true) && (!empty($r['email']))) {
+                    $name .= "\n(".$r['email'].")";
                 }
                 Cache::set($var_name, $name);
             }
@@ -1018,6 +1032,7 @@ class User
         $rez = array();
         $res = DB\dbQuery(
             'SELECT id
+                ,name
                 ,first_name
                 ,last_name
                 ,sex
@@ -1037,6 +1052,10 @@ class User
                 ? USER_LANGUAGE_INDEX -1
                 : $r['language_id'] - 1;
 
+            if (empty($GLOBALS['languages'][$language_index])) {
+                $r['language_id'] = LANGUAGE_INDEX;
+                $language_index = LANGUAGE_INDEX -1;
+            }
             $r['language'] = $GLOBALS['languages'][$language_index];
             $r['locale'] =  $GLOBALS['language_settings'][$r['language']]['locale'];
 

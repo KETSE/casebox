@@ -26,11 +26,17 @@ class Search extends Solr\Client
          ,'udate'
          ,'case'
      );
+    protected $facetsSetManually = false;
 
     public function query($p)
     {
         $this->results = false;
         $this->inputParams = $p;
+        $this->facetsSetManually = (
+            isset($p['facet']) ||
+            isset($p['facet.field']) ||
+            isset($p['facet.qury'])
+        );
         $this->prepareParams();
         $this->connect();
         $this->executeQuery();
@@ -48,7 +54,7 @@ class Search extends Solr\Client
             ? ''
             : $this->escapeLuceneChars($p['query']);
         $this->start = empty($p['start'])? 0 : intval($p['start']);
-        $this->rows = empty($p['rows'])? \CB\CONFIG\MAX_ROWS : intval($p['rows']);
+        $this->rows = isset($p['rows']) ? intval($p['rows']) : \CB\CONFIG\MAX_ROWS;
 
         $fq = array('dstatus:0'); //by default filter not deleted nodes
 
@@ -72,6 +78,12 @@ class Search extends Solr\Client
                 $p['fq'] = array($p['fq']);
             }
             $fq = array_merge($fq, $p['fq']);
+        }
+
+        if (isset($p['system'])) {
+            $fq[] = 'system:'.$p['system'];
+        } else {
+            $fq[] = 'system:[0 TO 1]';
         }
 
         /* set custom field list if specified */
@@ -116,13 +128,6 @@ class Search extends Solr\Client
             $fq[] = 'security_set_id:('.implode(' OR ', $sets).') OR oid:'.$_SESSION['user']['id'];
         }
         /* end of assign security sets to filters */
-
-        /* adding security filter*/
-        // $everyoneGroup = Security::EveryoneGroupId();
-        // $fq[] = 'allow_user_ids:('.$everyoneGroup.' OR '.$_SESSION['user']['id'].')';
-        // //$fq[] = '!deny_user_ids:('.$everyoneGroup.' OR '.$_SESSION['user']['id'].')';
-        // $fq[] = '!deny_user_ids:'.$_SESSION['user']['id'];
-        /* end of adding security filter*/
 
         if (!empty($p['pid'])) {
             $ids = Util\toNumericArray($p['pid']);
@@ -207,6 +212,7 @@ class Search extends Solr\Client
                 $fq[] = 'sys_tags:('.implode(' OR ', $ids).')';
             }
         }
+
         if (!empty($p['dateStart'])) {
             $fq[] = 'date:['.$p['dateStart'].' TO '.$p['dateEnd'].']';
         }
@@ -225,283 +231,68 @@ class Search extends Solr\Client
             $this->params['hl.fragsize'] = '256';
         }
 
+        $this->facets = array();
+        if (!$this->facetsSetManually) {
+            $path = Cache::get('current_path');
+            if (!empty($path)) {
+                $lastNode = $path[sizeof($path) -1];
+                $this->facets = $lastNode->getFacets();
+            }
+        }
+
         $this->prepareFacetsParams();
         $this->setFilters();
     }
 
     private function setFilters()
     {
-        $p = &$this->inputParams;
-        if (!empty($p['filters'])) {
-            $p['filters'] = $p['filters'];
-            foreach ($p['filters'] as $k => $v) {
-                if ($k == 'OR') {
-                    $conditions = array();
-                    foreach ($v as $sk => $sv) {
-                        $condition = $this->analizeFilter($sk, $sv, false);
-                        if (!empty($condition)) {
-                            $conditions[] = $condition;
-                        }
-                    }
-                    if (!empty($conditions)) {
-                        $this->params['fq'][] = '('.implode(' OR ', $conditions).')';
-                    }
-                } else {
-                    $condition = $this->analizeFilter($k, $v);
-                    if (!empty($condition)) {
-                        $this->params['fq'][] = $condition;
-                    }
-                }
-
-            }
-        }
-    }
-    private function analizeFilter(&$k, &$v, $withtag = true)
-    {
-        $rez = null;
-        if ($k == 'due') {
-            $k = 'date_end';
-            foreach ($v as $sv) {
-                for ($i = 0; $i < sizeof($sv['values']); $i++) {
-                    switch (substr($sv['values'][$i], 1)) {
-                        case 'next7days':
-                            $sv['values'][$i] = '[NOW/DAY TO NOW/DAY+6DAY]';
-                            break;
-                        case 'overdue':
-                            $k = 'status';
-                            $sv['values'][$i] = '1';
-                            break;
-                        case 'today':
-                            $sv['values'][$i] = '[NOW/DAY TO NOW/DAY]';
-                            break;
-                        case 'next31days':
-                            $sv['values'][$i] = '[NOW/DAY TO NOW/DAY+31DAY]';
-                            break;
-                        case 'thisWeek':
-                            $sv['values'][$i] = '['.$this->currentWeekDiapazon().']';
-                            break;
-                        case 'thisMonth':
-                            $sv['values'][$i] = '[NOW/MONTH TO NOW/MONTH+1MONTH]';
-                            break;
-                    }
-                }
-            }
-        } elseif (($k == 'date') || ($k == 'cdate')) {
-            foreach ($v as $sv) {
-                for ($i = 0; $i < sizeof($sv['values']); $i++) {
-                    switch (substr($sv['values'][$i], 1)) {
-                        case 'today':
-                            $sv['values'][$i] = '[NOW/DAY TO NOW/DAY+1DAY]';
-                            break;
-                        case 'yesterday':
-                            $sv['values'][$i] = '[NOW/DAY-1DAY TO NOW/DAY]';
-                            break;
-                        case 'thisWeek':
-                            $sv['values'][$i] = '['.$this->currentWeekDiapazon().']';
-                            break;
-                        case 'thisMonth':
-                            $sv['values'][$i] = '[NOW/MONTH TO NOW/MONTH+1MONTH]';
-                            break;
-                    }
-                }
-            }
-        } elseif ($k == 'assigned') {
-            $k = 'user_ids';
-        } elseif (substr($k, 0, 4) == 'stg_') {
-            $k = 'sys_tags';
-        } elseif (substr($k, 0, 4) == 'ttg_') {
-            $k = 'tree_tags';
+        if ($this->facetsSetManually) {
+            return;
         }
 
-        if (!is_array($v)) {
-            $v = array($v);
-        }
-        foreach ($v as $sv) {
-            if (!empty($sv['values'])) {
-                if ($k == 'user_ids') {
-                    for ($i=0; $i < sizeof($sv['values']); $i++) {
-                        if ($sv['values'][$i] == -1) {
-                            $this->params['fq'][] = $this->getFacetTag('user_ids').'!user_ids:[* TO *]';//{!tag=unassigned}
-                            array_splice($sv['values'], $i, 1);
-                        }
-                    }
-                }
-                if (!empty($sv['values'])) {
-                    $rez = ($withtag ? $this->getFacetTag($k): '' ).
-                        $k.
-                        ':('.implode(' '.$sv['mode'].' ', $sv['values']).')';//'{!tag='.$k.'}'
-                }
+        foreach ($this->facets as $facet) {
+            $f = $facet->getFilters($this->inputParams);
+            if (!empty($f['fq'])) {
+                $this->params['fq'] = array_merge($this->params['fq'], $f['fq']);
             }
         }
-
-        return $rez;
-    }
-    private function getFacetTag($k)
-    {
-        if (empty($this->params['facet.field'])) {
-            return '';
-        }
-        foreach ($this->params['facet.field'] as $f) {
-            if (substr($f, -strlen($k) -1) == '}'.$k) {
-                if (preg_match('/ex=([^\s}]+)/', $f, $matches)) {
-                    return '{!tag='.$matches[1].'}';
-                }
-            }
-        }
-
-        return '';
     }
 
     private function prepareFacetsParams()
     {
-        $p = &$this->inputParams;
-        switch (@$p['facets']) {
-            case 'general':
-                $this->params['facet.field'] = array(
-                    '{!ex=template_type key=0template_type}template_type'
-                    ,'{!ex=cid key=1cid}cid'
-                    ,'{!ex=sys_tags key=2sys_tags}sys_tags'
-                    ,'{!ex=tree_tags key=3tree_tags}tree_tags'
-                    ,'{!ex=template_id key=4template_id}template_id'
-                );
-                //Created: Today / Yesterday / This week / This month
-                $this->params['facet.query'] = array(
-                    '{!key=0today}cdate:[NOW/DAY TO NOW/DAY+1DAY ]'
-                    ,'{!key=1yesterday}cdate:[NOW/DAY-1DAY TO NOW/DAY]'
-                    ,'{!key=2thisWeek}cdate:['.$this->currentWeekDiapazon().']'
-                    ,'{!key=3thisMonth}cdate:[NOW/MONTH TO NOW/MONTH+1MONTH]'
-                );/**/
-                break;
-            case 'actions':
-                $this->params['facet.field'] = array(
-                    '{!ex=subtype key=0subtype}subtype'
-                    ,'{!ex=cid key=1cid}cid'
-                    ,'{!ex=sys_tags key=2sys_tags}sys_tags'
-                    ,'{!ex=tree_tags key=3tree_tags}tree_tags'
-                    ,'{!ex=template_id key=4template_id}template_id'
-                );
-                $this->params['facet.query'] = array(
-                    //Date: Today / Yesterday / This week / This month
-                    '{!key=date_0today}date:[NOW/DAY TO NOW/DAY+1DAY ]'
-                    ,'{!key=date_1yesterday}date:[NOW/DAY-1DAY TO NOW/DAY]'
-                    ,'{!key=date_2thisWeek}date:['.$this->currentWeekDiapazon().']'
-                    ,'{!key=date_3thisMonth}date:[NOW/MONTH TO NOW/MONTH+1MONTH]'
-                    //Created: Today / Yesterday / This week / This month
-                    ,'{!key=cdate_0today}cdate:[NOW/DAY TO NOW/DAY+1DAY ]'
-                    ,'{!key=cdate_1yesterday}cdate:[NOW/DAY-1DAY TO NOW/DAY]'
-                    ,'{!key=cdate_2thisWeek}cdate:['.$this->currentWeekDiapazon().']'
-                    ,'{!key=cdate_3thisMonth}cdate:[NOW/MONTH TO NOW/MONTH+1MONTH]'
-                );/**/
-                break;
-            case 'actiontasks':
-                $this->params['facet.field'] = array(
-                    '{!ex=status key=0status}status'
-                    ,'{!ex=user_ids key=1assigned}user_ids'
-                    ,'{!ex=cid key=2cid}cid'
-                );
-                break;
-            case 'calendar':
-                $this->params['facet.query'] = array(
-                    //Due date: Next 7 days / Overdue / Today / Next 31 days / This week / This month
-                    '{!key=0next7days}date_end:[NOW/DAY TO NOW/DAY+6DAY ]'
-                    ,'{!key=1overdue}status:1'
-                    ,'{!key=2today}date_end:[NOW/DAY TO NOW/DAY]'
-                    ,'{!key=3next31days}date_end:[NOW/DAY TO NOW/DAY+31DAY ]'
-                    ,'{!key=4thisWeek}date_end:['.$this->currentWeekDiapazon().']'
-                    ,'{!key=5thisMonth}date_end:[NOW/MONTH TO NOW/MONTH+1MONTH]'
-                    ,'{!ex=unassigned key=unassigned}!user_ids:[* TO *]'
-                );/**/
-                $this->params['facet.field'] = array(
-                    /*Status: Overdue / Active / Completed / Pending
-                    there were following task statuses: Pending, Active, Closed
-                        with following substatuses/flags: Active:  Completed + Missed , Closed: Completed + Missed
-                    Now we'll transfer to statuses:
-                        1 Overdue - all tasks that passes their deadline will be moved to this status (from pending or active)
-                        2 Active
-                        3 Completed - it's equivalent to a completed and closed task
-                            (all tasks will be with autoclose = true, so that when
-                            all responsible users mark task as completed - it'll be automatically closed)
-                        4 Pending /**/
-                    '{!ex=template_id key=0template_id}template_id'
-                    ,'{!ex=status key=1status}status'
-                    ,'{!ex=category_id key=2category_id}category_id'
-                    ,'{!ex=importance key=3importance}importance'
-                    //Assigned: Me / Unassigned / Ben Batros / Amrit Singh / Indira Goris
-                    ,'{!ex=user_ids key=4assigned}user_ids'
-                    //Created: Me / Ben Batros / Rupert Skillbeck
-                    ,'{!ex=cid key=5cid}cid'
-                );
-                break;
-            case 'tasks':
-                $this->params['facet.query'] = array(
-                    //Due date: Next 7 days / Overdue / Today / Next 31 days / This week / This month
-                    '{!key=0next7days}date_end:[NOW/DAY TO NOW/DAY+6DAY ]'
-                    ,'{!key=1overdue}status:1'
-                    ,'{!key=2today}date_end:[NOW/DAY TO NOW/DAY]'
-                    ,'{!key=3next31days}date_end:[NOW/DAY TO NOW/DAY+31DAY ]'
-                    ,'{!key=4thisWeek}date_end:['.$this->currentWeekDiapazon().']'
-                    ,'{!key=5thisMonth}date_end:[NOW/MONTH TO NOW/MONTH+1MONTH]'
-                    ,'{!ex=unassigned key=unassigned}!user_ids:[* TO *]'
-                );/**/
-                $this->params['facet.field'] = array(
-                    /*Status: Overdue / Active / Completed / Pending
-                    there were following task statuses: Pending, Active, Closed
-                        with following substatuses/flags: Active:  Completed + Missed , Closed: Completed + Missed
-                    Now we'll transfer to statuses:
-                        1 Overdue - all tasks that passes their deadline will be moved to this status (from pending or active)
-                        2 Active
-                        3 Completed - it's equivalent to a completed and closed task
-                            (all tasks will be with autoclose = true,
-                            so that when all responsible users mark task as completed - it'll be automatically closed)
-                        4 Pending /**/
-                    '{!ex=status key=1status}status'
-                    ,'{!ex=category_id key=2category_id}category_id'
-                    ,'{!ex=importance key=3importance}importance'
-                    //Assigned: Me / Unassigned / Ben Batros / Amrit Singh / Indira Goris
-                    ,'{!ex=user_ids key=4assigned}user_ids'
-                    //Created: Me / Ben Batros / Rupert Skillbeck
-                    ,'{!ex=cid key=5cid}cid'
-                );
+        $facetParams = array();
+        if ($this->facetsSetManually) {
+            if (!empty($this->inputParams['facet.field'])) {
+                $facetParams['facet.field'] = $this->inputParams['facet.field'];
+            }
+            if (!empty($this->inputParams['facet.query'])) {
+                $facetParams['facet.query'] = $this->inputParams['facet.query'];
+            }
+        } else {
+            foreach ($this->facets as $facet) {
+                $fp = $facet->getSolrParams();
+                if (!empty($fp['facet.field'])) {
+                    if (empty($facetParams['facet.field'])) {
+                        $facetParams['facet.field'] = array();
+                    }
+                    $facetParams['facet.field'] = @array_merge($facetParams['facet.field'], $fp['facet.field']);
+                } elseif (!empty($fp['facet.query'])) {
+                    if (empty($facetParams['facet.query'])) {
+                        $facetParams['facet.query'] = array();
+                    }
+                    $facetParams['facet.query'] = @array_merge($facetParams['facet.query'], $fp['facet.query']);
+                }
+            }
+        }
 
-                break;
-            case 'activeTasksPerUsers':
-                if (!empty($p['facetPivot'])) {
-                    $this->rows = 0;
-                    $this->params['facet.pivot'] = $p['facetPivot'];
-                }
-                break;
-            case 'first_letter':
-                $this->params['facet.field'] = array(
-                    '{!ex=name_first_letter key=0fl}name_first_letter'
-                );
-                $this->params['facet.method'] = "enum";
-                $this->params['facet.sort'] = "lex";
-                break;
-            default:
-                if (!empty($p['facet.field'])) {
-                    $this->params['facet.field'] = $p['facet.field'];
-                }
-                if (!empty($p['facet.query'])) {
-                    $this->params['facet.query'] = $p['facet.query'];
-                }
-                if (!empty($p['facet.pivot'])) {
-                    $this->params['facet.pivot'] = $p['facet.pivot'];
-                }
-                if (!empty($p['facet.method'])) {
-                    $this->params['facet.method'] = $p['facet.method'];
-                }
-                if (!empty($p['facet.sort'])) {
-                    $this->params['facet.sort'] = $p['facet.sort'];
-                }
-                if (!empty($p['facet.missing'])) {
-                    $this->params['facet.missing'] = $p['facet.missing'];
-                }
-                break;
+        if (!empty($facetParams)) {
+            $facetParams['facet'] = 'true';
+            if (empty($facetParams['facet.mincount'])) {
+                $facetParams['facet.mincount'] = 1;
+            }
         }
-        if (!empty($this->params['facet.field']) || !empty($this->params['facet.pivot'])) {
-            $this->params['facet'] = 'true';
-            $this->params['facet.mincount'] = isset($p['facet.mincount']) ? $p['facet.mincount'] : 1;
-        }
+
+        $this->params = array_merge($this->params, $facetParams);
     }
 
     private function executeQuery()
@@ -570,130 +361,17 @@ class Search extends Solr\Client
 
     private function processResultFacets()
     {
-            $rez = array();
-        $sr = &$this->results;
-        if (empty($sr->facet_counts)) {
-            return false;
+        if ($this->facetsSetManually) {
+            return $this->results->facet_counts;
         }
-        $fc = &$sr->facet_counts;
-        switch (@$this->inputParams['facets']) {
-            case 'general':
-                foreach ($fc->facet_fields as $k => $v) {
-                    $k = substr($k, 1);
-                    switch ($k) {
-                        case 'sys_tags':
-                        case 'tree_tags':
-                            $this->analizeTreeTagsFacet($v, $rez);
-                            break;
-                        default:
-                            $rez[$k] = array('f' => $k, 'items' => $v);
-                            break;
-                    }
-                }
-                foreach ($fc->facet_queries as $k => $v) {
-                    if ($v > 0) {
-                        $rez['cdate']['items'][$k] = $v;
-                    }
-                }
 
-                break;
-            case 'actiontasks':
-                //active and overdue
-                $res = DB\dbQuery(
-                    'SELECT count(*) `total`
-                    FROM tree
-                    WHERE pid = $1
-                        AND `type` = 6',
-                    $this->inputParams['pid']
-                ) or die(DB\dbQueryError());
-
-                if ($r = $res->fetch_assoc()) {
-                    $rez['total'] = $r['total'];
-                }
-                $res->close();
-
-                //active and overdue
-                $res = DB\dbQuery(
-                    'SELECT count(*) `active`
-                    FROM tree t
-                    JOIN tasks tt
-                    WHERE t.pid = $1
-                        AND t.`type` = 6
-                        AND t.id = tt.id
-                        AND tt.status < 3',
-                    $this->inputParams['pid']
-                ) or die(DB\dbQueryError());
-
-                if ($r = $res->fetch_assoc()) {
-                    $rez['active'] = $r['active'];
-                }
-                $res->close();
-                break;
-            case 'actions':
-                foreach ($fc->facet_fields as $k => $v) {
-                    $k = substr($k, 1);
-                    switch ($k) {
-                        case 'sys_tags':
-                        case 'tree_tags':
-                            $this->analizeTreeTagsFacet($v, $rez);
-                            break;
-                        default:
-                            $rez[$k] = array('f' => $k, 'items' => $v);
-                            break;
-                    }
-                }
-                foreach ($fc->facet_queries as $k => $v) {
-                    $k = explode('_', $k);
-                    if ($v > 0) {
-                        $rez[$k[0]]['items'][$k[1]] = $v;
-                    }
-                }
-                break;
-            case 'calendar':
-            case 'tasks':
-                foreach ($fc->facet_queries as $k => $v) {
-                    if ($k == 'unassigned') {
-                        continue;
-                    }
-                    if ($v > 0) {
-                        $rez['due']['items'][$k] = $v;
-                    }
-                }
-                foreach ($fc->facet_fields as $k => $v) {
-                    $k = substr($k, 1);
-                    $rez[$k] = array('f' => $k, 'items' => $v);
-                    if ($k == 'assigned' &&
-                        !empty($fc->facet_queries) &&
-                        !empty($fc->facet_queries->{'unassigned'})) {
-
-                        $rez[$k]['items']->{'-1'} = $fc->facet_queries->{'unassigned'};
-                    }
-                }
-                break;
-            case 'activeTasksPerUsers':
-                if (!empty($fc->facet_pivot)) {
-                    foreach ($fc->facet_pivot->{$this->inputParams['facetPivot']} as $f) {
-                        $row = array('id' => $f->value, 'total' => $f->count );
-                        if (!empty($f->pivot)) {
-                            foreach ($f->pivot as $st) {
-                                if ($st->value == 1) {
-                                    $row['total2'] = $st->count;
-                                }
-                            }
-                        }
-                        $rez[] = $row;
-                    }
-                }
-                break;
-            case 'first_letter':
-                foreach ($fc->facet_fields as $k => $v) {
-                    $k = substr($k, 1);
-                    $rez[$k] = array('f' => $k, 'items' => $v);
-                }
-                break;
-            default:
-                $rez = $fc;
-                break;
+        $rez = array();
+        foreach ($this->facets as $facet) {
+            $facet->loadSolrResult($this->results->facet_counts);
+            $fr = $facet->getClientData();
+            if (!empty($fr)) {
+                $rez[$fr['f']] = $fr;
+            }
         }
 
         return $rez;

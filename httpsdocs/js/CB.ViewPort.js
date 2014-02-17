@@ -6,16 +6,20 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     ,initComponent: function(){
         App.mainToolBar = new Ext.Toolbar({
                 region: 'north'
-                ,style:'background: #fff; border: 0'
-                ,height: 34
+                ,style:'background: #F0F0F0; border: 0; padding-top: 10px'
+                ,height: 53
                 ,items: [
-                    {xtype: 'tbtext', html: '<img src="/css/i/casebox-logo-small.png" style="padding: 2px"/>', height: 30}
-                    ,'->'
+                    {
+                        xtype: 'tbtext'
+                        ,html: '<img src="/css/i/casebox-logo-small.png" style="padding: 0 20px; margin-top: -3px"/>'
+                    }
                     ,{
-                        width: 150
+                        xtype: 'ExtuxSearchField'
+                        ,emptyText: L.Search + ' CaseBox'
                         ,minListWidth: 150
-                        ,emptyText: L.Search+' CaseBox'
-                        ,xtype: 'ExtuxSearchField'
+                        ,height: 24
+                        ,width: 300
+                        ,style: 'font: 14px arial,sans-serif'
                         ,listeners: {
                             scope: this
                             ,'search': function(query, editor, event){
@@ -23,11 +27,22 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                                 App.activateBrowserTab().setParams({
                                     query: query
                                     ,descendants: !Ext.isEmpty(query)
-                                })
+                                });
                             }
                         }
                     }
-                    ,{text: ' ', iconCls: App.loginData.iconCls, menu: [], name: 'userMenu' }
+                    ,'->'
+                    ,{
+                        html: '&nbsp;'
+                        // ,xtype: 'tbtext'
+                        // ,iconCls: App.loginData.iconCls
+                        ,menu: []
+                        ,name: 'userMenu'
+                    }
+                    ,{
+                        text: '<span style="margin-right: 10px">&nbsp;</span>'
+                        ,xtype: 'tbtext'
+                    }
 
                 ]
         });
@@ -53,7 +68,8 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
         App.mainAccordion = new Ext.Panel({
             region: 'west'
-            ,layout: 'accordion'
+            // ,layout: 'accordion'
+            ,layout: 'fit'
             ,collapsible: false
             ,width: 250
             ,split: true
@@ -78,8 +94,10 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,stateId: 'mAc'
             ,stateEvents: ['resize']
             ,getState: function(){
-                rez = {collapsed: this.collapsed}
-                if(this.getWidth() > 0) rez.width = this.getWidth();
+                var rez = {collapsed: this.collapsed};
+                if(this.getWidth() > 0) {
+                    rez.width = this.getWidth();
+                }
                 return rez;
             }
         });
@@ -108,15 +126,15 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 ,fileopen: this.onFileOpen
                 ,fileupload: this.onFileUpload
                 ,filedownload: this.onFilesDownload
-                ,createobject: this.createObject
+                // ,createobject: this.createObject
                 ,openobject: this.openObject
                 ,deleteobject: this.onDeleteObject
                 ,opencalendar: this.openCalendar
                 ,favoritetoggle: this.toggleFavorite
-                ,taskcreate: this.onTaskCreate
                 ,taskedit: this.onTaskEdit
                 ,useradded: this.onUsersChange
                 ,userdeleted: this.onUsersChange
+                ,viewloaded: this.onViewLoaded
 
             }
         });
@@ -139,45 +157,67 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     }
     ,onLogin: function(){
         /* adding menu items */
-        um = App.mainToolBar.find( 'name', 'userMenu')[0];
-        um.setText(App.loginData['first_name']+' '+App.loginData['last_name']);
-        um.setIconClass(App.loginData.iconCls);
-        managementItems = [];
-        if(App.loginData.manage){//admin
-            managementItems.push(
-                {text: L.Thesaurus, iconCls: 'icon-application-tree', handler: function(){ App.openUniqueTabbedWidget('CBSystemManagementWindow') }}
-                ,{text: L.Templates, iconCls: 'icon-documents-stack', handler: function(){ App.openUniqueTabbedWidget('CBTemplatesManagementWindow') }}
+        var um = App.mainToolBar.find( 'name', 'userMenu')[0];
+        if(um) {
+            um.update('<img src="/photo/' + App.loginData.id + '.jpg" ' +
+                'style="margin-top: 4px; width: 32px; height: 32px;" ' +
+                'title="'+
+                    App.loginData['first_name']+' '+
+                    App.loginData['last_name']+ "\n" +
+                    '(' + App.loginData['email'] +')" />'
             );
         }
-        if(App.loginData.manage) managementItems.push('-',{text: L.Users, iconCls: 'icon-users', handler: function(){ App.openUniqueTabbedWidget('CBUsersGroups') }});
-        if(App.loginData.admin){
+
+        managementItems = [];
+        if(App.loginData.manage) {
             managementItems.push(
                 '-'
-                ,{text: 'Reload thesaury', iconCls: 'icon-reload', handler: reloadThesauri}
-                ,{text: 'testing', iconCls: 'icon-bug', handler: App.showTestingWindow}
+                ,{
+                    text: L.Users
+                    ,iconCls: 'icon-users'
+                    ,handler: function(){
+                        App.openUniqueTabbedWidget('CBUsersGroups');
+                    }
+                }
             );
         }
         if(managementItems.length > 0) App.mainToolBar.insert(3, {text: L.Settings, iconCls: 'icon-gear', hideOnClick: false, menu: managementItems});
         App.mainToolBar.doLayout();
 
         langs = [];
-        CB.DB.languages.each(function(r){langs.push({
-            text: r.get('name')
-            ,xtype: 'menucheckitem'
-            ,checked: (r.get('id') == App.loginData.language_id)
-            ,data:{id: r.get('id')}
-            ,scope: this
-            ,handler: this.setUserLanguage
-            ,group: 'language'
-        })}, this);
+        CB.DB.languages.each(
+            function(r){
+                langs.push({
+                    text: r.get('name')
+                    ,xtype: 'menucheckitem'
+                    ,checked: (r.get('id') == App.loginData.language_id)
+                    ,data:{id: r.get('id')}
+                    ,scope: this
+                    ,handler: this.setUserLanguage
+                    ,group: 'language'
+                });
+            }
+            ,this
+        );
+
         um.menu.add(
-            {text: L.Language, iconCls: 'icon-language', hideOnClick: false, menu: langs}
+            {
+                text: L.Language
+                ,iconCls: 'icon-language'
+                ,hideOnClick: false
+                ,menu: langs
+            }
             ,'-'
-            ,{text: L.Account, iconCls: 'icon-user-' + App.loginData.sex, handler: function(){
-                App.openUniqueTabbedWidget( 'CBAccount' , null)
-            }}
+            ,{
+                text: L.Account
+                ,iconCls: 'icon-user-' + App.loginData.sex
+                ,handler: function(){
+                    App.openUniqueTabbedWidget( 'CBAccount' , null);
+                }
+            }
             ,'-'
-            ,{  text: L.Exit
+            ,{
+                text: L.Exit
                 ,iconCls: 'icon-exit'
                 ,handler: this.logout, scope: this
             }
@@ -194,7 +234,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             this.onLogin();
             App.DD = new CB.DD();
 
-        }else this.initCB.defer(500, this);
+        }else {
+            this.initCB.defer(500, this);
+        }
     }
     ,logout: function(){
         return Ext.Msg.show({
@@ -210,66 +252,92 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         });
     }
     ,populateMainMenu: function(){
-        App.mainAccordion.getEl().mask(L.LoadingData, 'icon-loading');
-        CB_User.getMainMenuItems(this.processMainMenuItems, this);
-    }
-    ,processMainMenuItems: function(r, e){
-        App.mainAccordion.getEl().unmask();
-        activeIndex = 0;
-        if(r.success !== true) return;
-        if(!Ext.isEmpty(r.tbarItems)){
-            /* inserting specified components before userMenu item */
-            userMenuItem = App.mainToolBar.find( 'name', 'userMenu')[0];
-            index = 3;
-            for (var i = 0; i < r.tbarItems.length; i++) {
-                if(!Ext.isEmpty(r.tbarItems[i].link)) r.tbarItems[i].listeners = {scope: this, click: this.onAccordionLinkClick }
-                App.mainToolBar.insert(index, r.tbarItems[i]);
-                index++;
+        App.mainAccordion.add({
+            xtype: 'CBBrowserTree'
+            ,border: true
+            ,data: {
+                rootNode: App.config.rootNode
             }
-            App.mainToolBar.syncSize()
-        }
+            ,rootVisible:true
+        });
+        // App.mainAccordion.getLayout().setActiveItem(0);
+        App.mainAccordion.syncSize();
 
-        if(!Ext.isEmpty(r.items))
-        for (var i = 0; i < r.items.length; i++) {
-            if(!Ext.isEmpty(r.items[i].link)) r.items[i].listeners = {scope: this, beforeexpand: this.onAccordionLinkClick }
-            if(r.items[i].active == true) activeIndex = i;
-            App.mainAccordion.add(r.items[i])
-        }
-        App.mainAccordion.getLayout().setActiveItem(activeIndex);
-        App.mainAccordion.doLayout()
-        trees = App.mainAccordion.findByType(CB.BrowserTree)
+        var trees = App.mainAccordion.findByType(CB.browser.Tree);
         if(!Ext.isEmpty(trees)){
             App.mainTree = trees[0];
-            for (var i = 0; i < trees.length; i++) {
-                trees[i].getSelectionModel().on('selectionchange', this.onChangeActiveFolder, this)
-                trees[i].on('click', this.onTreeNodeClick, this)
-                trees[i].on('afterrename', this.onRenameTreeElement, this)
-            };
+            var rn = App.mainTree.getRootNode();
+            rn.attributes.name = 'My CaseBox';
+            App.mainTree.on('afterrender', this.selectTreeRootNode, this);
+
+            for (i = 0; i < trees.length; i++) {
+                trees[i].getSelectionModel().on(
+                    'selectionchange'
+                    ,this.onChangeActiveFolder
+                    ,this
+                );
+                trees[i].on('click', this.onTreeNodeClick, this);
+                trees[i].on('afterrename', this.onRenameTreeElement, this);
+            }
         }
+
         this.openDefaultExplorer();
-        App.mainTabPanel.setActiveTab(0)
+
+        this.selectTreeRootNode();
+
+        App.mainTabPanel.setActiveTab(0);
+    }
+    ,selectTreeRootNode: function() {
+        if(App.mainTree && App.explorer) {
+            if(App.mainTree.rendered) {
+                var rn = App.mainTree.getRootNode();
+                App.mainTree.selectPath('/'+ rn.attributes.nid);
+            }
+        }
     }
     ,onTreeNodeClick: function(node, e){
-        if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
-        if(node.isSelected()) this.onChangeActiveFolder(null, node);
+        if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) {
+            return;
+        }
+
+        if(node.isSelected()) {
+            this.onChangeActiveFolder(null, node);
+        }
     }
     ,onChangeActiveFolder: function(sm, node){
-        if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
-        App.openPath( node.getPath('nid') );
+        if( this.pathSelectionByViewport ||
+            Ext.isEmpty(node) ||
+            Ext.isEmpty(node.getPath)
+        ) {
+            return;
+        }
+        params = {}
+        if(!Ext.isEmpty(node.attributes.view)) {
+            params.view = node.attributes.view;
+        }
+        App.openPath( '/' + node.getPath('nid'), params );
     }
     ,onRenameTreeElement: function(tree, r, e){
         node = tree.getSelectionModel().getSelectedNode();
         if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
         tab = App.mainTabPanel.getActiveTab();
-        if(tab.isXType(CB.FolderView)) tab.onReloadClick();
+        if(tab.isXType(CB.browser.ViewContainer)) {
+            tab.onReloadClick();
+        }
     }
     ,selectGridObject: function(g){
-        if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) return;
-        idx = g.store.findExact('nid', App.locateObjectId);
+        if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) {
+            return;
+        }
+        var idx = g.store.findExact('nid', parseInt(App.locateObjectId, 10));
         if(idx >=0){
             sm = g.getSelectionModel();
-            if(sm.hasSelection()) sm.clearSelections()
-            sm.selectRow(idx);
+            if( (sm.getCount() > 1) ||
+                !sm.isSelected(idx)
+            ) {
+                sm.clearSelections();
+                sm.selectRow(idx);
+            }
             delete App.locateObjectId;
         }
     }
@@ -282,42 +350,47 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         App.openUniqueTabbedWidget('CBCalendarPanel');
     }
     ,openDefaultExplorer: function(rootId){
-        if(Ext.isEmpty(rootId)) rootId = Ext.value( App.mainTree.rootId, '/' );
-        if(!App.activateTab(App.mainTabPanel, 'explorer')) App.explorer = App.addTab(App.mainTabPanel, new CB.FolderView({ rootId: rootId, data: {id: 'explorer' }, closable: false }) )
-    }
-    ,createObject: function(data, e){
-        tr = CB.DB.templates.getById(data.template_id);
-        if(tr)
-        switch(tr.get('type')){
-            case 'task':
-                this.onTaskCreate({data: data}, e);
-                break;
-            case 'case':
-            default:
-                this.openObject(data, e);
-                break;
+        if(Ext.isEmpty(rootId)) {
+            rootId = Ext.value( App.mainTree.rootId, '/' );
+        }
+        if(!App.activateTab(App.mainTabPanel, 'explorer')) {
+            App.explorer = App.addTab(
+                App.mainTabPanel
+                ,new CB.browser.ViewContainer({
+                    rootId: rootId
+                    ,data: {id: 'explorer' }
+                    ,closable: false
+                })
+            );
         }
     }
+
     ,openObject: function(data, e){
         if(e){
             if(e.stopEvent) e.stopEvent();
-            if(e.processed === true) return;
+            if(e.processed === true) {
+                return;
+            }
         }
 
-        if(App.activateTab(App.mainTabPanel, data.id, CB.Objects)) return true;
+        if(App.activateTab(App.mainTabPanel, data.id, CB.Objects)) {
+            return true;
+        }
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');/*, hideDeleteButton: (data.template_id == 1)/**/
+        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');
         this.fireEvent('objectopened', o);
         return App.addTab(App.mainTabPanel, o);
     }
+
     ,onFileOpen: function(data, e){
         if(e) e.stopEvent();
 
         if(App.activateTab(App.mainTabPanel, data.id)) return true;
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');/*, hideDeleteButton: (data.template_id == 1)/**/
+        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');
         return App.addTab(App.mainTabPanel, o);
     }
+
     ,search: function(query, savedQueryId){
         idx = App.findTab(App.mainTabPanel, 'search');
         if(idx > -1){
@@ -325,21 +398,32 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             App.mainTabPanel.setActiveTab(idx);
         }else{
             p = new CB.Search({data: {id: 'search'}});
-            App.addTab(App.mainTabPanel, p)
+            App.addTab(App.mainTabPanel, p);
         }
         if(!Ext.isEmpty(savedQueryId)) p.openSavedQuery(savedQueryId);
             else p.searchText(query);
     }
+
     ,setUserLanguage: function(b, e){
         if(b.data.id == App.loginData.language_id) return;
         Ext.Msg.confirm(L.LanguageChange, L.LanguageChangeMessage, function(pb){
             if(pb == 'yes') CB_User.setLanguage(b.data.id, this.processSetUserLanguage, this);
-            if(b.ownerCt) b.ownerCt.items.each(function(i){ i.setChecked(i.data.id == App.loginData.language_id)}, this);
-        }, this)
+            if(b.ownerCt) {
+                b.ownerCt.items.each(
+                    function(i){
+                        i.setChecked(i.data.id == App.loginData.language_id);
+                    }
+                    ,this
+                );
+            }
+        }, this);
     }
     ,processSetUserLanguage: function(r, e){
-        if(r.success == true) document.location.reload();
-        else Ext.Msg.Alert(L.Error, L.ErrorOccured);
+        if(r.success === true) {
+            document.location.reload();
+        } else {
+            Ext.Msg.Alert(L.Error, L.ErrorOccured);
+        }
     }
     ,toggleFavorite: function(p){
         CB_Browser.toggleFavorite(p, this.processToggleFavorite, this);
@@ -347,26 +431,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     ,processToggleFavorite: function(r, e){
         this.fireEvent('favoritetoggled', r, e);
     }
-    ,onTaskCreate: function(p, ev){
-        if(Ext.isEmpty(p)) {
-            p ={ data: {} };
-        }
 
-        Ext.apply(p, {
-            admin: true
-            ,autoclose: 1
-            ,privacy: 0
-            ,reminds: "1|10|1"
-            ,responsible_user_ids: App.loginData.id
-        });
-        if(Ext.isEmpty(p.title)) p.title = L.AddTask;
-        if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
-        this.lastFocusedElement = Ext.get(document.activeElement);
-        delete p.data.title;
-        dw = new CB.Tasks(p);
-        dw.on('beforedestroy', this.focusLastElement, this);
-        return dw.show();
-    }
     ,onTaskEdit: function(p, ev){//task_id, object_id, object_title, title
         if(Ext.isEmpty(p.title)) p.title = L.EditTask;
         if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
@@ -393,7 +458,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 }
             }
             ,this
-        )
+        );
 
     }
     ,onProcessObjectsDeleted: function(r, e){
@@ -405,7 +470,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
         w = App.getFileUploadWindow({data: data });
         w.on('submitsuccess', this.onFileUploaded, this);
-        w.on('hide', function(w){ w.un('submitsuccess', this.onFileUploaded, this) }, this)
+        w.on('hide', function(w){ w.un('submitsuccess', this.onFileUploaded, this); }, this);
         w.show();/**/
     }
     ,onFileUploaded: function(w, data){
@@ -425,4 +490,36 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         App.mainAccordion.setVisible(visible === true);
         App.mainViewPort.syncSize();
     }
-})
+    ,onViewLoaded: function(proxy, action, options) {
+        var trees  = App.mainAccordion.findByType(CB.browser.Tree);
+        var activeTree = null;
+        Ext.each(
+            trees
+            ,function(t){
+                if(t && t.getEl) {
+                    var el = t.getEl();
+                    if(el && el.isVisible(true)) {
+                        activeTree = t;
+                    }
+                }
+            }
+            ,this
+        );
+
+        this.pathSelectionByViewport = true;
+
+        if(activeTree &&
+            action &&
+            action.result &&
+            action.result.folderProperties
+        ) {
+            activeTree.selectPath(
+                '/0' + action.result.folderProperties.path
+                ,'nid'
+                ,function(){
+                    delete this.pathSelectionByViewport;
+                }.createDelegate(this)
+            );
+        }
+    }
+});

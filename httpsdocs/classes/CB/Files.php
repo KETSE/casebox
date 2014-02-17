@@ -960,31 +960,6 @@ class Files
 
         return $rez;
     }
-    public static function getFilesBlockForPreview($pid)
-    {
-        $rez = array();
-        $res = DB\dbQuery(
-            'SELECT id, name, size, cdate
-            FROM tree
-            WHERE pid = $1
-                AND `type` = 5
-                AND dstatus = 0
-            ORDER BY cdate DESC',
-            $pid
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $rez[] = '<li class="icon-padding file-unknown file-'.
-                Files::getExtension($r['name']).
-                '"><a name="file" href="#" nid="'.$r['id'].'">'.$r['name'].
-                '</a><p class="cG">'.Util\formatFileSize($r['size']).', '.
-                Util\formatAgoTime($r['cdate']).'</p>';
-        }
-        $res->close();
-        $rez = empty($rez) ? '' : '<ul class="obj-files">'.implode('', $rez).'</ul>';
-
-        return $rez;
-    }
 
     public static function deletePreview($id)
     {

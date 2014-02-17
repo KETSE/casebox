@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\L;
+
 class Tasks
 {
     /**
@@ -23,10 +25,11 @@ class Tasks
                 ,t.responsible_user_ids
                 ,t.autoclose
                 ,t.description
-                ,DATEDIFF(t.`date_end`
-                ,UTC_DATE()) `days`
+                ,DATEDIFF(t.`date_end`, UTC_DATE()) `days`
                 ,m.pid
                 ,m.template_id
+                ,m.cid
+                ,m.cdate
                 ,(SELECT reminds
                      FROM tasks_reminders
                      WHERE task_id = $1
@@ -34,9 +37,7 @@ class Tasks
                 ,(SELECT name FROM tree WHERE id = ti.case_id) `case`
                 ,(SELECT name FROM tree WHERE id = t.object_id) `object`
                 ,t.status
-                ,t.cid
                 ,t.completed
-                ,t.cdate
                 ,t.importance
                 ,t.category_id
                 ,t.allday
@@ -390,12 +391,19 @@ class Tasks
                 'UPDATE tasks set date_start = $2, date_end = $3 WHERE id = $1',
                 array($p['id'], $p['date_start'], $p['date_end'])
             ) or die(DB\dbQueryError());
+
+            DB\dbQuery(
+                'UPDATE tree set `date` = $2, date_end = $3, updated = 1 WHERE id = $1',
+                array($p['id'], $p['date_start'], $p['date_end'])
+            ) or die(DB\dbQueryError());
         } else {
             $rez['success'] = false;
         }
         $res->close();
         Objects::updateCaseUpdateInfo($p['id']);
-        Solr\Client::runCron();
+
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $p['id']));
 
         return $rez;
     }
@@ -406,8 +414,9 @@ class Tasks
      * @param  integer $log_action_type
      * @return json    response
      */
-    public function saveReminds($p, $log_action_type = 25)
+    public static function saveReminds($p, $log_action_type = 25)
     {
+
         DB\dbQuery(
             'INSERT INTO tasks_reminders (task_id, user_id, reminds)
             VALUES ($1
@@ -625,9 +634,12 @@ class Tasks
             )
         ); // TO REVIEW
 
+        DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $p['id']) or die(DB\dbQueryError());
+
         Objects::updateCaseUpdateInfo($p['id']);
 
-        Solr\Client::runCron();
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $p['id']));
 
         return $rez;
     }
@@ -759,7 +771,7 @@ class Tasks
                 $p['id'] // Util\coalesce($task['case_id'], $task['object_id'], $p['id'])
                 ,'task_complete'
                 ,'Complete task'
-                ,$p['message']
+                ,@$p['message']
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
@@ -774,9 +786,12 @@ class Tasks
             )
         );
 
+        DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $p['id']) or die(DB\dbQueryError());
+
         Objects::updateCaseUpdateInfo($p['id']);
 
-        Solr\Client::runCron();
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $p['id']));
 
         return array('success' => true);
     }
@@ -790,11 +805,12 @@ class Tasks
     {
         $task = array();
         $res = DB\dbQuery(
-            'SELECT cid
-                 , title
-                 , responsible_user_ids
-            FROM tasks
-            WHERE id = $1',
+            'SELECT t.cid
+                 , t.name
+                 , tt.responsible_user_ids
+            FROM tree t
+            LEFT JOIN tasks tt on t.id = tt.id
+            WHERE t.id = $1',
             $id
         ) or die(DB\dbQueryError());
 
@@ -817,14 +833,18 @@ class Tasks
                 ,'task_id' => $id
                 //,'to_user_ids' => $task['responsible_user_ids']
                 ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'info' => 'title: '.$task['title']
+                ,'info' => 'title: '.$task['name']
             )
         );
+
+        DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $id) or die(DB\dbQueryError());
+
         $this->updateChildTasks($id);
 
         Objects::updateCaseUpdateInfo($id);
 
-        Solr\Client::runCron();
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $id));
 
         return array('success' => true, 'id' => $id);
     }
@@ -838,11 +858,13 @@ class Tasks
     {
         $task = array();
         $res = DB\dbQuery(
-            'SELECT cid
-                ,title
-                ,responsible_user_ids
-            FROM tasks
-            WHERE id = $1',
+            'SELECT t.cid
+                ,t.name
+                ,tt.responsible_user_ids
+            FROM tree t
+            JOIN tasks tt
+                ON t.id = tt.id
+            WHERE t.id = $1',
             $id
         ) or die(DB\dbQueryError());
 
@@ -880,14 +902,18 @@ class Tasks
                 'action_type' => 31
                 ,'task_id' => $id
                 ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'info' => 'title: '.$task['title']
+                ,'info' => 'title: '.$task['name']
             )
         );
+
+        DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $id) or die(DB\dbQueryError());
+
         $this->updateChildTasks($id);
 
         Objects::updateCaseUpdateInfo($id);
 
-        Solr\Client::runCron();
+        $solr = new  Solr\Client();
+        $solr->updateTree(array('id' => $id));
 
         return array('success' => true, 'id' => $id);
     }
@@ -939,9 +965,6 @@ class Tasks
             $user = &$_SESSION['user'];
         } else {
             $user = User::getPreferences($user_id);
-            if (empty($user['language_id'])) {
-                $user['language_id'] = 1;
-            }
         }
         $res = DB\dbQuery(
             'SELECT
@@ -956,7 +979,7 @@ class Tasks
                 ,allday
                 ,cid
                 ,ti.path `path_text`
-                ,(SELECT l'.$user['language_id'].'
+                ,(SELECT l'.USER_LANGUAGE_INDEX.'
                     FROM users_groups
                     WHERE id = t.cid) owner_text
                 ,cdate
@@ -977,14 +1000,21 @@ class Tasks
 
         if ($r = $res->fetch_assoc()) {
             $format = 'Y, F j';
+
+
             if ($r['allday'] != 1) {
                 $format .= ' H:i';
             }
-            $datetime_period = Util\formatMysqlDate($r['date_start'], $format);
+
+            $i = strtotime($r['date_start']);
+            $datetime_period = date($format, $i);
+
             if (!empty($r['date_end'])) {
-                $i = strtotime($r['date_end']);
-                $datetime_period .= ' - '.Util\formatMysqlDate($r['date_end'], $format);
+                $datetime_period = ($r['allday'] == 1)
+                    ? Util\formatDatePeriod($r['date_start'], $r['date_end'])
+                    : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['TZ']);
             }
+
             $created_date_text = Util\formatMysqlDate($r['cdate'], 'Y, F j H:i');
             $importance_text = '';
             switch ($r['importance']) {
@@ -1002,7 +1032,9 @@ class Tasks
             $users = array();
             $ures = DB\dbQuery(
                 'SELECT u.id
-                    ,u.l'.$user['language_id'].' `name`
+                    ,u.`name`
+                    ,first_name
+                    ,last_name
                     ,ru.status
                     ,ru.time
                     ,(SELECT `message`
@@ -1071,61 +1103,6 @@ class Tasks
                 'color: #333; width: 100%; display: table; border-collapse: separate; border-spacing: 0;"><tbody>'.
                 implode('', $users).'</tbody></table></td></tr>';
 
-            $files = array();
-            $files_text = '';
-            $fres = DB\dbQuery(
-                'SELECT id, name
-                FROM tree
-                WHERE pid = $1
-                    AND `type` = 5
-                ORDER BY `name`',
-                $id
-            ) or die(DB\dbQueryError());
-
-            while ($fr = $fres->fetch_assoc()) {
-                $files[] = $fr;
-            }
-            $fres->close();
-
-            if (!empty($files)) {
-                $files_text .= '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
-                    L\get('Files', $user['language_id']).':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
-                foreach ($files as $f) {
-                    $files_text .= '<li style="margin:0;padding: 3px 0"><a href="#" name="file" fid="'.$f['id'].
-                        '" style="text-decoration: underline; color: #15C"><img style="float:left;margin-right:5px" src="'.
-                        Util\getCoreHost($r['db']).'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
-                }
-                $files_text .= '</ul></td></tr>';
-            }
-
-            $reminders_text = '';
-            if (!empty($r['reminders'])) {
-                $reminders_text .= '<tr><td  style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
-                    L\get('Reminders', $user['language_id']).':</td><td style="vertical-align:top">'.
-                    '<ul style="list-style: none; text-decoration: none; color: #333;margin:0;padding: 0">';
-                $ra = explode('-', $r['reminders']);
-                foreach ($ra as $rem) {
-                    $rem = explode('|', $rem);
-                    $units = '';
-                    switch ($rem[2]) {
-                        case 1:
-                            $units = L\get('ofMinutes', $user['language_id']);
-                            break;
-                        case 2:
-                            $units = L\get('ofHours', $user['language_id']);
-                            break;
-                        case 3:
-                            $units = L\get('ofDays', $user['language_id']);
-                            break;
-                        case 4:
-                            $units = L\get('ofWeeks', $user['language_id']);
-                            break;
-                    }
-                    $reminders_text .= '<li>'.$rem[1].' '.$units.'</li>';
-                }
-                $reminders_text .= '</ul></td></tr>';
-            }
-
             // $message = str_replace( array('<i', '</i>'), array('<strong', '</strong>'), $message);
             $rez = file_get_contents(TEMPLATES_DIR.'task_notification_email.html');
 
@@ -1180,10 +1157,10 @@ class Tasks
                     ,Util\getCoreHost($r['db']).'photo/'.$r['cid'].'.jpg'
                     ,$r['owner_text']
                     ,$users //{assigned_text}
-                    ,L\get('Files', $user['language_id'])
-                    ,$files_text
-                    ,L\get('Reminders', $user['language_id'])
-                    ,$reminders_text
+                    ,''
+                    ,''
+                    ,''
+                    ,''
                     ,''
                 ),
                 $rez
@@ -1210,6 +1187,23 @@ class Tasks
         }
         $d = $d['data'];
 
+        $canEdit = (($d['status'] != 3) && $d['admin']);
+        $canClose = $canEdit;
+        $canReopen = ($d['status'] == 3) && ($d['cid'] == $_SESSION['user']['id']);
+        $canComplete = (($d['status'] != 3) && !empty($d['user']) && (@$d['user']['status'] == 0));
+
+        $actions = array();
+
+        if ($canClose) {
+            $actions[] = '<a action="close" class="taskA click">'.L\Close.'</a>';
+        }
+        if ($canReopen) {
+            $actions[] = '<a action="reopen" class="taskA click">'.L\Reopen.'</a>';
+        }
+        if (!$canClose && $canComplete) {
+            $actions[] = '<a action="complete" class="taskA click">'.L\Complete.'</a>';
+        }
+
         $rez = '<div class="taskview">
             <h2 '.( ($d['status'] == 3) ? 'class=\'completed\'"' : '' ).'>{name}</h2>
             <div class="datetime">{datetime_period}</div>
@@ -1232,8 +1226,9 @@ class Tasks
         $d['datetime_period'] = date($format, $i);
 
         if (!empty($d['date_end'])) {
-            $i = strtotime($d['date_end']);
-            $d['datetime_period'] .= ' - '.date($format, $i);
+            $d['datetime_period'] = ($d['allday'] == 1)
+                ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
+                : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['TZ']);
         }
 
         $d['importance_text'] = '';
@@ -1284,24 +1279,15 @@ class Tasks
                 '</div></td><td><b>'.$un.'</b>'.
                 '<p class="gr">'.(
                     ($u['status'] == 1)
-                    ? L\Completed.': '.date($date_format.' H:i', strtotime($u['time']))
-                    : L\waitingForAction
+                    ? L\Completed.': '.date($date_format.' H:i', strtotime($u['time'])).
+                        ( ($canEdit == 1) ? '<a class="bt taskA click" action="markincomplete" uid="'.$u['id'].'">'.L\revoke.'</a>' : '')
+                    : L\waitingForAction.
+                        (($canEdit == 1) ? '<a class="bt taskA click" action="markcomplete" uid="'.$u['id'].'">'.L\complete.'</a>' : '' )
                 ).'</p></td></tr>';
                 //<a class="bt" name="complete" uid="1" href="#">завершить</a>
 
             }
             $rez .= '</tbody></table></td></tr>';
-        }
-
-        if (!empty($d['files'])) {
-            $rez .= '<tr><td class="k">'.L\Files.':</td><td><ul class="task_files">';
-            foreach ($d['files'] as $f) {
-                $rez .= '<li><a href="#" name="file" fid="'.$f['id'].
-                    '" onclick="App.mainViewPort.fireEvent(\'fileopen\', {id:'.$f['id'].
-                    '})" class="dib lh16 icon-padding file-unknown file-'.Files::getExtension($f['name']).'">'.
-                    $f['name'].'</a></li>';
-            }
-            $rez .= '</ul></td></tr>';
         }
 
         if (!empty($d['reminds'])) {
@@ -1329,6 +1315,8 @@ class Tasks
             $rez .= '</ul></td></tr>';
         }
         $rez .= '</tbody></table></div>';
+
+        $rez .= '<div class="p15">'.implode(' &nbsp; ', $actions).'</div>';
 
         return $rez;
     }
@@ -1374,37 +1362,30 @@ class Tasks
      */
     public static function getSolrData(&$object_record)
     {
-        $res = DB\dbQuery(
-            'SELECT
-                title
-                ,status
-                ,category_id
-                ,importance
-                ,privacy
-                ,responsible_user_ids
-                ,autoclose
-                ,description
-                ,parent_ids
-                ,child_ids
-                ,missed
-                ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
-                ,cid
-            FROM tasks where id = $1',
-            $object_record['id']
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $object_record['status'] = $r['status'];
-            $object_record['importance'] = $r['importance'];
-            $object_record['category_id'] = $r['category_id'];
-            $object_record['completed'] = $r['completed'];
-            $object_record['parent_ids'] = empty($r['parent_ids']) ? null : explode(',', $r['parent_ids']);
-            if (!empty($r['responsible_user_ids'])) {
-                $object_record['user_ids'] = explode(',', $r['responsible_user_ids']);
-            }
-            $object_record['content'] = $r['description'];
+        $obj = Objects::getCustomClassByObjectId($object_record['id']);
+        $objData = $obj->load();
+        $linearData = $obj->getLinearData();
+        $template = $obj->getTemplate();
+
+        $object_record['status'] = @$objData['status'];
+        $object_record['importance'] = @$obj->getFieldValue('importance', 0)['value'];
+        $object_record['category_id'] = @$obj->getFieldValue('category_id', 0)['value'];
+        $user_ids = @$obj->getFieldValue('assigned', 0)['value'];
+        if (!empty($user_ids)) {
+            $object_record['user_ids'] = Util\toNumericArray($user_ids);
         }
-        $res->close();
+        $object_record['content'] = @$obj->getFieldValue('description', 0)['value'];
+
+        if (!empty($objData['completed'])) {
+            $object_record['completed'] = $objData['completed'];
+        }
+
+        $object_record['cls'] = $template->formatValueForDisplay(
+            $template->getField('color'),
+            $obj->getFieldValue('color', 0)['value'],
+            false
+        );
     }
 
     /**
@@ -1416,45 +1397,10 @@ class Tasks
     public static function getBulkSolrData(&$object_records)
     {
         $process_object_ids = array();
-        foreach ($object_records as $object_id => $object_record) {
+        foreach ($object_records as $object_id => &$object_record) {
             if (@$object_record['template_type'] == 'task') {
-                $process_object_ids[] = $object_id;
+                static::getSolrData($object_record);
             }
         }
-        if (empty($process_object_ids)) {
-            return;
-        }
-
-        $res = DB\dbQuery(
-            'SELECT
-                id
-                ,title
-                ,status
-                ,category_id
-                ,importance
-                ,privacy
-                ,responsible_user_ids
-                ,autoclose
-                ,description
-                ,parent_ids
-                ,child_ids
-                ,missed
-                ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
-                ,cid
-            FROM tasks where id in ('.implode(',', $process_object_ids).')'
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $object_records[$r['id']]['status'] = $r['status'];
-            $object_records[$r['id']]['importance'] = $r['importance'];
-            $object_records[$r['id']]['category_id'] = $r['category_id'];
-            $object_records[$r['id']]['completed'] = $r['completed'];
-            $object_records[$r['id']]['parent_ids'] = empty($r['parent_ids']) ? null : explode(',', $r['parent_ids']);
-            if (!empty($r['responsible_user_ids'])) {
-                $object_records[$r['id']]['user_ids'] = explode(',', $r['responsible_user_ids']);
-            }
-            $object_records[$r['id']]['content'] = $r['description'];
-        }
-        $res->close();
     }
 }

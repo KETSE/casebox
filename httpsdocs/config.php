@@ -20,19 +20,25 @@ namespace CB;
 */
 
 /* detecting core name (project name) from SERVER_NAME */
-$arr = explode('.', $_SERVER['SERVER_NAME']);
-// remove www, ww2 and take the next parameter as the $coreName
-if (in_array($arr[0], array( 'www', 'ww2' ))) {
-    array_shift($arr);
-}
-$arr = explode('-', $arr[0]);
-if (in_array($arr[sizeof($arr)-1], array('local', 'd'))) {
-    array_pop($arr);
-}
-$arr = implode('-', $arr);
-$arr = explode('_', $arr);
+if (isset($_GET['c'])) {
+    define('CB\\CORE_NAME', $_GET['c']);
+    define('CB\\URI_PREFIX', '/'.CORE_NAME.'/');
+} else {
+    $arr = explode('.', $_SERVER['SERVER_NAME']);
+    // remove www, ww2 and take the next parameter as the $coreName
+    if (in_array($arr[0], array( 'www', 'ww2' ))) {
+        array_shift($arr);
+    }
+    $arr = explode('-', $arr[0]);
+    if (in_array($arr[sizeof($arr)-1], array('local', 'd'))) {
+        array_pop($arr);
+    }
+    $arr = implode('-', $arr);
+    $arr = explode('_', $arr);
 
-define('CB\\CORE_NAME', $arr[0]);
+    define('CB\\CORE_NAME', $arr[0]);
+    define('CB\\URI_PREFIX', '/');
+}
 /* end of detecting core name (project name) from SERVER_NAME */
 
 /* define main paths /**/
@@ -162,12 +168,10 @@ ini_set('memory_limit', '200M');
 
 // session params
 
-$sessionLifetime = getOption('session.lifetime');
-if (is_null($sessionLifetime)) {
-    $sessionLifetime = isDebugHost() ? 0: 43200;
-} else {
-
-}
+$sessionLifetime = (isDebugHost()
+        ? 0
+        : Config::get('session.lifetime', 180)
+    ) * 60;
 
 ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
@@ -223,6 +227,8 @@ if (!defined('CB\\CONFIG\\MAX_ROWS')) {
 
 // custom Error log per Core, use it for debug/reporting purposes
 define('DEBUG_LOG', LOGS_DIR.'cb_'.CORE_NAME.'_debug_log');
+//clear debug_log for each request
+@unlink(DEBUG_LOG);
 
 // define solr_core as db_name if none is specified in config
 if (!defined('CB\\CONFIG\\SOLR_CORE')) {
@@ -279,7 +285,7 @@ function isDevelServer()
  */
 function isDebugHost()
 {
-    $debugHosts = getOption('debug_hosts');
+    $debugHosts = Config::get('debug_hosts');
     $debugHosts = explode(',', $debugHosts);
 
     return (
@@ -294,6 +300,9 @@ function isDebugHost()
 
 function debug($msg)
 {
+    if (!is_scalar($msg)) {
+        $msg = var_export($msg, 1);
+    }
     error_log($msg."\n", 3, DEBUG_LOG);
 }
 
@@ -304,10 +313,16 @@ function debug($msg)
  */
 function fireEvent($eventName, &$params)
 {
+    //skip trigering events from other triggers
+    if (!empty($GLOBALS['running_trigger'])) {
+        return;
+    }
+
     $listeners = Config::getListeners();
     if (empty($listeners[$eventName])) {
         return;
     }
+
     foreach ($listeners[$eventName] as $className => $methods) {
         $className = str_replace('_', '\\', $className);
         $class = new $className();
@@ -360,7 +375,7 @@ function fireEvent($eventName, &$params)
  * @param  varchar $optionName name of the option to get
  * @return variant | null
  */
-function getOption($optionName)
+function getOption($optionName, $defaultValue = null)
 {
     if (!empty($_SESSION['user']['cfg'][$optionName])) {
         return $_SESSION['user']['cfg'][$optionName];
@@ -372,5 +387,5 @@ function getOption($optionName)
         return $GLOBALS[$optionName];
     }
 
-    return null;
+    return $defaultValue;
 }

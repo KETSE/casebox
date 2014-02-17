@@ -82,7 +82,7 @@ foreach ($users as $u) {
                 '<head><title>CaseBox</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>'.
                 '<body style="font: normal 11px tahoma,arial,helvetica,sans-serif; line-height: 18px">'.$m[1].'</body></html>';
             //skip sending notifications from devel server to other emails than Admin
-            if (isDevelServer() && ($u['email'] !== ADMIN_EMAIL)) {
+            if (isDevelServer() && ($u['email'] !== CONFIG\ADMIN_EMAIL)) {
                 echo 'Devel skip: '.$u['email'].': '.$m[0]."\n";
             } else {
                 echo $u['email'].': '.$m[0]."\n";
@@ -90,7 +90,7 @@ foreach ($users as $u) {
                     $u['email'],
                     $m[0],
                     $message,
-                    "Content-type: text/html; charset=utf-8\r\nFrom: ".SENDER_EMAIL . "\r\n"
+                    "Content-type: text/html; charset=utf-8\r\nFrom: ".CONFIG\SENDER_EMAIL."\r\n"
                 );
             }
         }

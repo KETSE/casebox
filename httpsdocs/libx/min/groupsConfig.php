@@ -20,6 +20,7 @@ return array_merge(
             ,'//css/casebox.css'
             ,'//css/common.css'
             ,'//css/facets.css'
+            ,'//css/obj_plugins.css'
             ,'//css/Ext.ux.plugins.IconCombo.css'
             ,'//css/calendar.css'
             ,'//css/date-time-ux.css'
@@ -35,13 +36,20 @@ return array_merge(
             ,'//js/ux/md5/Ext.ux.FileMD5.js'
             ,'//js/ux/Ext.ux.WebkitEntriesIterator.js'
 
+            ,'//js/calendar/calendar-all-debug.js'
+
             ,'//js/CB.Login.js'
-            ,'//js/CB.Case.js'
             ,'//js/CB.GenericForm.js'
             ,'//js/CB.ThesauriWindow.js'
-            ,'//js/CB.Browser.js'
-            ,'//js/CB.BrowserTree.js'
-            ,'//js/CB.FolderView.js'
+            ,'//js/CB.Breadcrumb.js'
+            ,'//js/browser/Tree.js'
+            ,'//js/browser/ViewContainer.js'
+            ,'//js/browser/view/Interface.js'
+            ,'//js/browser/view/Grid.js'
+            ,'//js/browser/view/Calendar.js'
+            ,'//js/browser/view/Charts.js'
+            ,'//js/browser/view/Summary.js'
+
             ,'//js/CB.VerticalEditGrid.js'
             ,'//js/CB.Objects.js'
             ,'//js/CB.ObjectsField.js'
@@ -78,22 +86,14 @@ return array_merge(
             ,'//js/CB.FilterPanel.js'
             ,'//js/CB.FileWindow.js'
 
-            ,'//js/calendar/calendar-all-debug.js'
             ,'//js/CB.Favorites.js'
 
             ,'//js/plugins/CB.plugins.FilesDropZone.js'
             ,'//js/CB.Uploader.js'
 
-            ,'//js/CB.FolderViewGrid.js'
-            ,'//js/CB.ActionsViewGrid.js'
-            ,'//js/CB.TasksViewGrid.js'
-            ,'//js/CB.FolderViewSummary.js'
-            ,'//js/CB.CalendarView.js'
             ,'//js/CB.Security.js'
 
             ,'//js/CB.UsersGroups.js'
-            ,'//js/CB.SystemManagementWindow.js'
-            ,'//js/CB.TemplatesManagementWindow.js'
 
             ,'//js/CB.Account.js'
             ,'//js/Util.js'
@@ -113,33 +113,27 @@ return array_merge(
 
         ,'jsdev' => array(
             '//js/app.js'
+            ,'//js/PluginPanel.js'
+            ,'//js/PluginsPanel.js'
             ,'//js/form/view/object/Preview.js'
             ,'//js/form/view/object/Properties.js'
-            ,'//js/form/edit/object.js'
+            ,'//js/form/edit/Object.js'
             ,'//js/ObjectCardView.js'
+            ,'//js/objects/plugins/Base.js'
+            ,'//js/objects/plugins/Thumb.js'
+            ,'//js/objects/plugins/Comments.js'
+            ,'//js/objects/plugins/ContentItems.js'
+            ,'//js/objects/plugins/Files.js'
+            ,'//js/objects/plugins/Meta.js'
+            ,'//js/objects/plugins/ObjectProperties.js'
+            ,'//js/objects/plugins/SystemProperties.js'
+            ,'//js/objects/plugins/Tasks.js'
+            ,'//js/objects/plugins/Versions.js'
         )
         ,'lang-en' => array('//js/locale/en.js')
         ,'lang-es' => array('//js/locale/es.js')
         ,'lang-fr' => array('//js/locale/fr.js')
         ,'lang-hy' => array('//js/locale/hy.js')
         ,'lang-ru' => array('//js/locale/ru.js')
-        // custom source example
-        /*'js2' => array(
-            dirname(__FILE__) . '/../min_unit_tests/_test_files/js/before.js',
-            // do NOT process this file
-            new Minify_Source(array(
-                'filepath' => dirname(__FILE__) . '/../min_unit_tests/_test_files/js/before.js',
-                'minifier' => create_function('$a', 'return $a;')
-            ))
-        ),//*/
-
-        /*'js3' => array(
-            dirname(__FILE__) . '/../min_unit_tests/_test_files/js/before.js',
-            // do NOT process this file
-            new Minify_Source(array(
-                'filepath' => dirname(__FILE__) . '/../min_unit_tests/_test_files/js/before.js',
-                'minifier' => array('Minify_Packer', 'minify')
-            ))
-        ),//*/
     )
 );

@@ -114,23 +114,23 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
                 ,inputType: 'file'
                 ,name: this.fieldName
                 ,xtype: 'textfield'
-            },{xtype: 'textfield'
-                ,fieldLabel: L.Title
-                ,name: 'title'
-            },{ fieldLabel: '&nbsp;', labelSeparator: '', name: 'addFileButton',xtype: 'dataview', data: [], tpl: '<a href="#" class="cBl">'+L.addFile+'</a>', itemSelector: 'a', listeners: { click: {scope: this, fn: this.onAddFileFieldClick} }
-            },{
-                xtype: 'datefield'
-                ,fieldLabel: L.Date
-                ,name: 'date'
-                ,altFormats: 'Y-m-d'
-                ,format: App.dateFormat
-                ,submitValue: false
+            // },{xtype: 'textfield'
+            //     ,fieldLabel: L.Title
+            //     ,name: 'title'
+            // },{ fieldLabel: '&nbsp;', labelSeparator: '', name: 'addFileButton',xtype: 'dataview', data: [], tpl: '<a href="#" class="cBl">'+L.addFile+'</a>', itemSelector: 'a', listeners: { click: {scope: this, fn: this.onAddFileFieldClick} }
+            // },{
+            //     xtype: 'datefield'
+            //     ,fieldLabel: L.Date
+            //     ,name: 'date'
+            //     ,altFormats: 'Y-m-d'
+            //     ,format: App.dateFormat
+            //     ,submitValue: false
             },{ xtype : "checkbox"
                 ,name : "is_default"
                 ,inputValue : 1
                 ,boxLabel : L.byDefault
             }
-        ]
+        ];
 
         Ext.apply(this, {
             items: {
@@ -184,12 +184,16 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
             default: this.data.uploadType = 'single'; this.setTitle( Ext.value(this.title, L.UploadFile) ); break;
         }
         if(!Ext.isEmpty(this.data.id)) this.findByType('form')[0].api.submit = Ext.value(this.api, CB_Browser.uploadNewVersion)
-        cb = this.find('name', 'title')[0];
-        cb.setVisible( !this.fileOnly && (this.data.uploadType == 'single') )
-        cb = this.find('name', 'date')[0];
-        cb.setVisible( !this.fileOnly )
+        var cb;
+        // cb = this.find('name', 'title')[0];
+        // cb.setVisible( !this.fileOnly && (this.data.uploadType == 'single') )
+        // cb = this.find('name', 'date')[0];
+        // cb.setVisible( !this.fileOnly )
         cb = this.find('name', 'addFileButton')[0];
-        cb.setVisible( !this.fileOnly && (this.data.uploadType == 'multiple') )
+        if(cb) {
+            cb.setVisible( !this.fileOnly && (this.data.uploadType == 'multiple') )
+        }
+
         cb = this.find('name', 'is_default')[0];
         cb.setVisible( !this.fileOnly && !Ext.isEmpty(this.data.object_id))
         this.find('name', this.fieldName)[0].allowBlank = !Ext.isEmpty(this.data.id);
@@ -208,12 +212,12 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 
         App.focusFirstField(this);
     },doSubmit: function(){
-        d = this.find('name', 'date');
-        if(d){
-            d = d[0];
-            d = d.getValue();
-            d = d ? d.toISOString() : null;
-        }else d = null;
+        // d = this.find('name', 'date');
+        // if(d){
+        //     d = d[0];
+        //     d = d.getValue();
+        //     d = d ? d.toISOString() : null;
+        // }else d = null;
 
         f = this.findByType('form')[0];
         if(f.getForm().isValid()){
@@ -223,7 +227,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
                     id: this.data.id
                     ,pid: this.data.pid
                     ,uploadType: this.data.uploadType
-                    ,date: d
+                    ,date: null
                 }
                 ,scope: this
                 ,success: this.onSubmitSuccess
@@ -233,7 +237,11 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
     },onSubmitSuccess: function(form, action){
         /*on success actions*/
         this.serverResponse = action.result;
+
         this.fireEvent('submitsuccess', this, this.serverResponse.data);
+
+        App.fireEvent('objectchanged', action.result.data);
+
         this.hide();
         if(!Ext.isEmpty(this.serverResponse.msg)){
             if(this.serverResponse.prompt_to_open)

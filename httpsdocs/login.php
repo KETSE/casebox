@@ -16,9 +16,9 @@ if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180))
 echo constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE));
 
 ?></title>
-    <link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap-responsive.min.css" />
-    <link type='text/css' rel="stylesheet" href="/css/login.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo URI_PREFIX; ?>css/bs/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo URI_PREFIX; ?>css/bs/css/bootstrap-responsive.min.css" />
+    <link type='text/css' rel="stylesheet" href="<?php echo URI_PREFIX; ?>css/login.css" />
 </head>
 <body onload="javascript: e = document.getElementById('u'); if(!e) e = document.getElementById('c'); e.focus(); editChanged();">
 <script type="text/javascript">
@@ -54,7 +54,7 @@ if (empty($_SESSION['check_TSV'])) {
 </script>
 <div class="main">
     <div class="form_login tac">
-        <a href="/" class="dib"><img src="/css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
+        <a href="/" class="dib"><img src="<?php echo URI_PREFIX; ?>css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
         <form method="post" action="auth.php" class="standart_form tal" autocomplete="off">
 <?php
 

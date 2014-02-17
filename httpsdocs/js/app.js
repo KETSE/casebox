@@ -182,6 +182,9 @@ function initApp(){
                 case 'users':
                     store = CB.DB.usersStore;
                     break;
+                case 'groups':
+                    store = CB.DB.groupsStore;
+                    break;
                 default:
                     cw = null;
                     if(grid && grid.findParentByType) {
@@ -202,7 +205,16 @@ function initApp(){
                     for(i=0; i < v.length; i++){
                         ri = store.findExact('id', parseInt(v[i], 10));
                         row = store.getAt(ri);
-                        if(ri >-1) r.push('<li class="lh16 icon-padding '+row.get('iconCls')+'">'+row.get('name')+'</li>');
+                        if(ri >-1) {
+                            var icon = row.get('cfg');
+                            if(!Ext.isEmpty(icon)) {
+                                icon = icon.iconCls;
+                            }
+                            if(Ext.isEmpty(icon)) {
+                                icon = row.get('iconCls');
+                            }
+                            r.push('<li class="lh16 icon-padding '+icon+'">'+row.get('name')+'</li>');
+                        }
                     }
                     return '<ul>'+r.join('')+'</ul>';
                 default:
@@ -325,9 +337,13 @@ function initApp(){
             rez = rez.join(', ');
             return rez;
         }
-        ,taskImportance: function(v){
+        ,importance: function(v){
             if(Ext.isEmpty(v)) return '';
-            return CB.DB.tasksImportance.getName(v);
+            return CB.DB.importance.getName(v);
+        }
+        ,timeUnits: function(v){
+            if(Ext.isEmpty(v)) return '';
+            return CB.DB.timeUnits.getName(v);
         }
         ,taskStatus: function(v, m, r, ri, ci, s){
             if(Ext.isEmpty(v)) return '';
@@ -351,6 +367,8 @@ function initApp(){
     };
     App.getCustomRenderer = function(fieldType){
         switch(fieldType){
+            case 'checkbox':
+                return App.customRenderers.checkbox;
             case 'date':
                 return App.customRenderers.date;
             case 'datetime':
@@ -364,6 +382,10 @@ function initApp(){
                 return App.customRenderers.languageCombo;
             case '_sex':
                 return App.customRenderers.sexCombo;
+            case 'importance':
+                return App.customRenderers.importance;
+            case 'timeunits':
+                return App.customRenderers.timeUnits;
             case '_templateTypesCombo':
                 return CB.DB.templateTypes.getName.createDelegate(CB.DB.templateTypes);
             case '_fieldTypesCombo':
@@ -376,10 +398,9 @@ function initApp(){
                 return App.customRenderers.caseCombo;
             case '_case_object':
                 return App.customRenderers.objectCombo;
-            case 'checkbox':
-                return App.customRenderers.checkbox;
             case 'popuplist':
                 return App.customRenderers.thesauriCell;
+            case 'memo':
             case 'text':
                 return App.customRenderers.text;
             default: return null;
@@ -464,6 +485,24 @@ function initApp(){
     App.isFolder = function( template_id){
         return (App.config.folder_templates.indexOf( String(template_id) ) >= 0);
     };
+    App.isWebDavDocument = function(name){
+        if(!Ext.isPrimitive(name) || Ext.isEmpty(name) || Ext.isEmpty(App.config.webdav_files)) {
+            return false;
+        }
+        var ext = name.split('.').pop();
+        return (App.config.webdav_files.indexOf(ext) >= 0);
+    };
+    App.openWebdavDocument = function(data){
+        if(Ext.isEmpty(App.config.webdav_url)) {
+            return;
+        }
+        var url = App.config.webdav_url;
+        url = url.replace('{node_id}', data.id);
+        url = url.replace('{name}', data.name);
+        App.confirmLeave = false;
+        window.open(url, '_self');
+    };
+
     /**
     * open path on active explorer tabsheet or in default eplorer tabsheet
     *
@@ -473,6 +512,8 @@ function initApp(){
         if(Ext.isEmpty(path)) path = '/';
         params = Ext.value(params, {});
         params.path = path;
+        params.query = null;
+        params.start = 0;
 
         App.activateBrowserTab().setParams(params);
     };
@@ -644,6 +685,28 @@ function initApp(){
                         ,mode: 'local'
                         ,editable: false
                         ,store: CB.DB.yesno
+                        ,displayField: 'name'
+                        ,valueField: 'id'
+                    });
+            case 'timeunits': return new Ext.form.ComboBox({
+                        xtype: 'combo'
+                        ,forceSelection: true
+                        ,triggerAction: 'all'
+                        ,lazyRender: true
+                        ,mode: 'local'
+                        ,editable: false
+                        ,store: CB.DB.timeUnits
+                        ,displayField: 'name'
+                        ,valueField: 'id'
+                    });
+            case 'importance': return new Ext.form.ComboBox({
+                        xtype: 'combo'
+                        ,forceSelection: true
+                        ,triggerAction: 'all'
+                        ,lazyRender: true
+                        ,mode: 'local'
+                        ,editable: false
+                        ,store: CB.DB.importance
                         ,displayField: 'name'
                         ,valueField: 'id'
                     });
@@ -1039,7 +1102,11 @@ function overrides(){
 }
 
 window.onbeforeunload = function() {
-    return "You work will be lost.";
+    if(App.confirmLeave === false) {
+        delete App.confirmLeave;
+    } else {
+        return "You work will be lost.";
+    }
 };
 
 window.ondragstart = function(e){

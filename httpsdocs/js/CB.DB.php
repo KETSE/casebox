@@ -23,7 +23,7 @@ Ext.namespace('CB.DB');
     CB.DB.templateTypes = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: ['id', 'name']
-        ,data:  [[null, '-'], ['case', 'case'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['object', 'object'], ['search', 'search'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
+        ,data:  [[null, '-'], ['case', 'case'], ['comment', 'comment'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['object', 'object'], ['search', 'search'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
         ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
     });
     CB.DB.fieldTypes = new Ext.data.ArrayStore({
@@ -50,6 +50,7 @@ Ext.namespace('CB.DB');
             ,['_templateTypesCombo', 'Template types combo']
             ,['text', 'Text']
             ,['time', 'Time']
+            ,['timeunits', 'Time units']
             ,['varchar', 'Varchar']
         ]
         ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
@@ -59,7 +60,7 @@ Ext.namespace('CB.DB');
         ,fields: [{name: 'id', type: 'int'}, 'name', 'iconCls']
         ,data:  [[1, L.byMail, 'icon-mail'], [2, L.bySystem, 'icon-bell']]
     });
-    CB.DB.reminderUnits = new Ext.data.ArrayStore({
+    CB.DB.timeUnits = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: [{name: 'id', type: 'int'}, 'name']
         ,data:  [[1, L.ofMinutes], [2, L.ofHours], [3, L.ofDays], [4, L.ofWeeks]]
@@ -75,13 +76,7 @@ Ext.namespace('CB.DB');
         ,fields: [{name: 'id', type: 'int'}, 'name']
         ,data:  [<?php echo '[1, "'.L\Administrator.'"], [2, "'.L\Manager.'"], [3, "'.L\Lawyer.'"], [4, "'.L\User.'"]'; ?>]
     });
-    CB.DB.objectTypes = new Ext.data.ArrayStore({
-        idIndex: 0
-        ,fields: [{name: 'id', type: 'int'}, 'name', 'iconCls']
-        ,data:  [[1, L.Folder, 'icon-folder'], [2, L.Link, 'icon-link'], [3, L.Case, 'icon-briefcase'], [4, L.Action, 'icon-action'], [5, L.File, 'icon-file-unknown'], [6, L.Task, 'icon-calendar-task'], [7, L.Event, 'icon-event'], [8, L.Email, 'icon-letter']]
-        ,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
-    });
-    CB.DB.tasksImportance = new Ext.data.ArrayStore({
+    CB.DB.importance = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: [{name: 'id', type: 'int'}, 'name']
         ,data:  [ [1, L.Low], [2, L.Medium], [3, L.High] ]
@@ -177,6 +172,8 @@ $res = DB\dbQuery(
     FROM templates t
     LEFT JOIN templates_structure ts
         ON t.id = ts.template_id
+    ,tree tr
+    WHERE ts.id = tr.id and tr.dstatus = 0
     ORDER BY template_id, `order`',
     $_SESSION['user']['language_id']
 ) or die( DB\dbQueryError() );
@@ -297,10 +294,7 @@ createDirectStores = function(){
         ,proxy: new  Ext.data.DirectProxy({
             paramsAsHash: true
             ,api: {
-                create:   CB_Templates.create
-                ,read:    CB_Templates.readAll
-                ,update:  CB_Templates.update
-                ,destroy: CB_Templates.destroy
+                read:    CB_Templates.readAll
             }
         })
         ,reader: new Ext.data.JsonReader({

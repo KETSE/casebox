@@ -65,11 +65,9 @@ class Listeners
         $fields = array(); //used from php templates of title
         $rez = str_replace(
             '{template_title}',
-            $templateData['title'],
+            @$templateData['title'],
             $templateData['title_template']
         );
-
-        \CB\debug($rez);
 
         $ld = $object->getLinearData();
         /* replace field values */
@@ -82,7 +80,6 @@ class Listeners
             $v = addcslashes($v, '\'');
             $rez = str_replace('{'.$field['name'].'}', $v, $rez);
             $fields[$field['name']] = $v;
-            \CB\debug($field['name'].' = '.$v);
         }
 
         //replacing field titles into object title variable
@@ -100,7 +97,6 @@ class Listeners
         //replacing any remained field placeholder from the title
         $rez = preg_replace('/\{[^\}]+\}/', '', $rez);
         $rez = stripslashes($rez);
-        \CB\debug(" result: $rez");
 
         return $rez;
     }

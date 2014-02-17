@@ -20,6 +20,7 @@ a {color: #15C}
 .icon-chain-or {padding-left: 18px; background: url(i/ico/chain-unchain.png) 0 0 no-repeat !important}
 .icon-chain-and {padding-left: 18px; background: url(i/ico/chain.png) 0 0 no-repeat !important}
 
+.icon-chart {background-image: url(i/ico/chart.png)}
 .icon-plus {background-image: url(i/ico/plus.png) !important}
 
 .icon-incoming {background-image: url(i/ico/inbox-download.png) !important}
@@ -35,7 +36,7 @@ a {color: #15C}
 .icon-open {background-image:url(i/ico/external.png) !important}
 
 /* . {margin-top: 2px} */
-.mainTabPanel  {background-color: #FFF !important; border: 0 !important}
+.mainTabPanel  {background-color: #F0F0F0 !important; border: 0}
 
 ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}
 .caselist2  li {margin-left: 20px; color: #555}
@@ -442,67 +443,9 @@ color: black !important;
   background-color: yellow;
 }
 
-
-
-.ico-folder32 {
-background-image: url(i/ico/32/folder-horizontal.png) !important;
-/* background-position: 0 50%;
-background-repeat: no-repeat; */
-}
-.icon32-folder-add {background-image: url(i/ico/32/folder_add.png) !important; min-width: 38px}
-.icon32-tag-add {background-image: url(i/ico/32/tag_blue_add.png) !important; min-width: 38px}
-.icon32-arrow-up {background-image: url(i/ico/32/arrow_up.png) !important; min-width: 38px}
-.icon32-arrow-down {background-image: url(i/ico/32/arrow_down.png) !important; min-width: 38px}
-.icon32-sort {background-image: url(i/ico/32/sort_columns.png) !important; min-width: 38px}
-.icon32-sort-asc {background-image: url(i/ico/32/sort_ascending.png) !important; min-width: 38px}
-.icon32-sort-desc {background-image: url(i/ico/32/sort_descending.png) !important; min-width: 38px}
-
-.icon32-save {background-image: url(i/ico/32/save.png) !important; min-width: 38px}
-.icon32-cancel {background-image: url(i/ico/32/cancel.png) !important; min-width: 38px}
-
-.icon32-upload {background-image: url(i/ico/32/upload.png) !important; min-width: 38px}
-.icon32-download {background-image: url(i/ico/32/download.png) !important; min-width: 38px}
-
-.icon32-edit {background-image: url(i/ico/32/clipboard.png) !important; min-width: 38px}
-.icon32-doc-edit {background-image: url(i/ico/32/document_editing.png) !important; min-width: 38px}
-.icon32-refresh {background-image: url(i/ico/32/arrow_refresh.png) !important; min-width: 38px}
-.icon32-create {background-image: url(i/ico/32/plus-circle.png) !important; min-width: 38px}
-    .icon32-del {background-image: url(i/ico/32/delete.png) !important; min-width: 38px}
-.icon32-event-new {background-image: url(i/ico/32/cal-event-new.png) !important; min-width: 38px}
-.icon32-task-new {background-image: url(i/ico/32/task-new.png) !important; min-width: 38px}
-.icon32-open {background-image: url(i/ico/32/file.png) !important; min-width: 38px}
-.icon32-browse {background-image: url(i/ico/32/open.png) !important; min-width: 38px}
-.icon32-filter {background-image: url(i/ico/32/filter.png) !important; min-width: 38px}
-.icon32-filter-on {background-image: url(i/ico/32/filter-on2.png) !important; min-width: 38px}
-.icon32-preview {background-image: url(i/ico/32/preview.png) !important; min-width: 38px}
-.icon32-external { background-image: url(i/ico/32/_external.png) !important; min-width: 38px}
-
-.icon32-cal-today { background-image: url(i/ico/32/today.png) !important; min-width: 38px}
-.icon32-cal-day { background-image: url(i/ico/32/cal-day.png) !important; min-width: 38px}
-.icon32-cal-week { background-image: url(i/ico/32/cal-week.png) !important; min-width: 38px}
-.icon32-cal-month { background-image: url(i/ico/32/cal-month.png) !important; min-width: 38px}
-.icon32-cal-prev, .icon32-prev { background-image: url(i/ico/32/prev.png) !important; min-width: 38px}
-.icon32-cal-next, .icon32-next { background-image: url(i/ico/32/next.png) !important; min-width: 38px}
-.icon32-export{ background-image: url(i/ico/32/export.png) !important; min-width: 38px}
-.icon32-search{ background-image: url(i/ico/32/search.png) !important; min-width: 38px}
-.icon32-app-view{ background-image: url(i/ico/32/app-view.png) !important; min-width: 38px}
-
 .icon-search{background-image: url(i/ico/search.png); }
 .icon-documents{background-image: url(i/ico/32/documents.png) }
 .calendar-title{font-size: 16px !important; font-weight: bold !important; color: #333}
-
-.x-menu-item .icon32-del {background-image: url(i/ico/cross-script.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.x-menu-item .icon32-task-new {background-image: url(i/ico/task.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.x-menu-item .icon32-event-new {background-image: url(i/ico/calendar-blue.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.x-menu-item .icon32-open {background-image: url(i/ico/folder-open.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.x-menu-item .icon32-browse {background-image: url(i/ico/open.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-
-.icon32-task-complete { background-image: url(i/ico/32/green-tick.png) !important; min-width: 38px}
-.icon32-versions { background-image: url(i/ico/32/compare-versions.png) !important; min-width: 38px}
-.icon32-external { background-image: url(i/ico/32/external.png) !important; min-width: 38px}
-.icon32-expand { background-image: url(i/ico/32/expand.png) !important; min-width: 38px}
-.icon32-attach { background-image: url(i/ico/32/attach.png) !important;}
-
 
 .icon-gridView {background-image: url(i/ico/_grid.png) !important}
 .icon-listView { background-image: url(i/ico/_list.png) !important}
@@ -698,6 +641,9 @@ table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
 .obj-preview ul{list-style: square outside }
 .obj-preview ul li{margin-left:20px; }
 
+.obj-preview-h{ padding: 10px 10px 10px 10px; border-bottom: 2px solid #CCC; margin-bottom: 0; }
+.obj-files li{ border-top: 1px solid #EEE; padding: 10px 10px 10px 35px !important; background-position: 10px; }
+
 .obj-files li {
     display: list-item;
     padding-left: 20px;
@@ -869,4 +815,13 @@ border: 1px solid #7195A3;
 }
 .account-menu .x-btn:hover {
     background-color: #eaeaea;
+}
+
+div.x-preview-mask{
+background: #eaeaea;
+border: 0;
+height: 100%;
+text-align: center;
+vertical-align: middle;
+padding-top: 45%;
 }

@@ -74,16 +74,15 @@ switch ($action) {
             exit(0);
         }
         $user_id = null;
-        $user_name = null;
         $user_mail = null;
         if (!empty($e)) {
             if ($e = filter_var($e, FILTER_VALIDATE_EMAIL)) {
                 $res = DB\dbQuery(
                     'SELECT id
                          , email
-                         , l'.USER_LANGUAGE_INDEX.' `name`
                     FROM users_groups
-                    WHERE email LIKE $1',
+                    WHERE email LIKE $1
+                        AND enabled = 1',
                     "%$e%"
                 ) or die(DB\dbQueryError());
 
@@ -94,7 +93,6 @@ switch ($action) {
                         if (mb_strtolower($mails[$i]) == $e) {
                             $user_id = $r['id'];
                             $user_mail = $e;
-                            $user_name = $r['name'];
                         }
                     }
                 }
@@ -112,7 +110,6 @@ switch ($action) {
             $res = DB\dbQuery(
                 'SELECT id
                     ,email
-                    ,l'.USER_LANGUAGE_INDEX.' `name`
                 FROM users_groups
                 WHERE name = $1',
                 $u
@@ -121,7 +118,6 @@ switch ($action) {
             if ($r = $res->fetch_assoc()) {
                 $user_id = $r['id'];
                 $user_mail = $r['email'];
-                $user_name = $r['name'];
             }
             $res->close();
             if (empty($user_id)) {
@@ -141,18 +137,33 @@ switch ($action) {
             $template = TEMPLATES_DIR.'password_recovery_email_en.html';
         }
         if (!file_exists($template)) {
-            mail(CONFIG\ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: noreply@casebox.org\r\n");
+            mail(CONFIG\ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: ".CONFIG\SENDER_EMAIL."\r\n");
             $_SESSION['msg'] = '<div class="alert alert-error">Error occured. Administrator has been notified by mail. Please retry later.</div>';
             header('location: /login/forgot-password/');
             exit(0);
         }
         $hash = md5($user_id.$user_mail.date(DATE_ISO8601));
-        DB\dbQuery('update users_groups set recover_hash = $2 where id = $1', array($user_id, $hash)) or die(DB\dbQueryError());
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET recover_hash = $2
+            WHERE id = $1',
+            array(
+                $user_id
+                ,$hash)
+        ) or die(DB\dbQueryError());
+        $userData = User::getPreferences($user_id);
+        if (!empty($userData['cfg']['security']['recovery_email']) && !empty($userData['cfg']['security']['email'])) {
+            $user_mail = $userData['cfg']['security']['email'];
+        }
+        $user_name = trim($userData['first_name'].'_'.$userData['last_name']);
+        if (empty($user_name)) {
+            $user_name = $userData['name'];
+        }
         $href = Util\getCoreHost().'login/reset-password/?h='.$hash;
         $mail = file_get_contents($template);
         $mail = str_replace(array('{name}', '{link}'), array($user_name, '<a href="'.$href.'" >'.$href.'</a>'), $mail);
 
-        @mail($user_mail, L\get('MailRecoverSubject'), $mail, "Content-type: text/html; charset=utf-8\r\nFrom: noreply@casebox.org\r\n");
+        @mail($user_mail, L\get('MailRecoverSubject'), $mail, "Content-type: text/html; charset=utf-8\r\nFrom: ".CONFIG\SENDER_EMAIL."\r\n");
         $_SESSION['msg'] = '<div class="alert alert-success">'.L\get('RecoverMessageSent').'</div>';
         /* end of generating reset hash and sending mail */
         break;
@@ -193,9 +204,10 @@ setTimeout(editChanged, 500)
             <a href="/" class="dib"><img src="/css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
         <form method="post" action="/login/reset-password/" class="standart_form tal" autocomplete="off">
         <?php
+        $homeLink = '<a href="/" class="btn btn-info">'.L\get('Login').'</a>';
 
         if (!empty($_SESSION['msg'])) {
-            echo $_SESSION['msg'];
+            echo $_SESSION['msg'].$homeLink;
             unset($_SESSION['msg']);
         } elseif ($prompt_for_new_password) {
             echo '<input type="hidden" name="h" value="'.$hash.'" />';

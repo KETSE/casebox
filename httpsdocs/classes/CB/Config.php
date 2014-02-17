@@ -24,6 +24,35 @@ class Config extends Singleton
         $cfg = array_merge($cfg, static::getPlatformConfigForCore());
         $cfg = array_merge($cfg, static::getCoreDBConfig());
 
+        $dfd = array();
+        //get facet definitions defined globally in casebox config
+        if (!empty($cfg['default_facets'])) {
+            $dfd = Util\toJSONArray($cfg['default_facets']);
+            unset($cfg['default_facets']);
+        }
+        //check if have defined facets in core config
+        if (!empty($cfg['facet_configs'])) {
+            $dfd = array_merge($dfd, Util\toJSONArray($cfg['facet_configs']));
+        }
+        $cfg['facet_configs'] = $dfd;
+
+        if (!empty($cfg['node_facets'])) {
+            $cfg['node_facets'] = Util\toJSONArray($cfg['node_facets']);
+        }
+
+        if (!empty($cfg['default_object_plugins'])) {
+            $cfg['default_object_plugins'] = Util\toJSONArray($cfg['default_object_plugins']);
+        }
+
+        if (!empty($cfg['object_type_plugins'])) {
+            $cfg['object_type_plugins'] = Util\toJSONArray($cfg['object_type_plugins']);
+        }
+
+        if (!empty($cfg['treeNodes'])) {
+            $cfg['treeNodes'] = Util\toJSONArray($cfg['treeNodes']);
+            // var_dump($cfg['treeNodes']);
+        }
+
         static::$config = static::adjustPaths($cfg);
 
         return static::$config;
@@ -160,6 +189,8 @@ class Config extends Singleton
             ? array()
             : static::adjustPaths(static::$config['css'], CORE_DIR);
 
+        array_unshift($rez, DOC_ROOT.'/css/'.getOption('theme', 'default').'/theme.css');
+
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
             if (!empty($data['css'])) {
@@ -292,5 +323,18 @@ class Config extends Singleton
         }
 
         return $rez;
+    }
+
+    /*
+    * @param  varchar $optionName name of the option to get
+    * @return variant | null
+    */
+    public static function get($optionName, $defaultValue = null)
+    {
+        if (isset(static::$config[$optionName])) {
+            return static::$config[$optionName];
+        }
+
+        return $defaultValue;
     }
 }
