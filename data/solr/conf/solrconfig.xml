@@ -17,8 +17,8 @@
 -->
 
 <!--
- This is a stripped down config file used for a simple example...  
- It is *not* a good example to work from. 
+ This is a stripped down config file used for a simple example...
+ It is *not* a good example to work from.
 -->
 <config>
 	<luceneMatchVersion>LUCENE_CURRENT</luceneMatchVersion>
@@ -33,12 +33,12 @@
 	<requestDispatcher handleSelect="true" >
 		<requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
 	</requestDispatcher>
-	
+
 	<requestHandler name="standard" class="solr.StandardRequestHandler" default="true" />
 	<requestHandler name="/update" class="solr.UpdateRequestHandler" />
 	<requestHandler name="/update/json" class="solr.JsonUpdateRequestHandler"/>
 	<requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" />
-	
+
 	<!-- ping/healthcheck -->
 	<requestHandler name="/admin/ping" class="PingRequestHandler">
 		<lst name="defaults">
@@ -47,8 +47,8 @@
 			<str name="echoParams">all</str>
 		</lst>
 	</requestHandler>
-	
-	<!-- config for the admin interface --> 
+
+	<!-- config for the admin interface -->
 	<admin>
 		<defaultQuery>solr</defaultQuery>
 	</admin>

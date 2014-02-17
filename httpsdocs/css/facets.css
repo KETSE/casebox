@@ -1,6 +1,7 @@
 .facet{padding: 5px 5px 5px 5px; border-top: 1px solid #CCC;}
 .facet .x-panel-header, .activeFilters .x-panel-header{ background: none !important; border: 0; color: black;}
 .facet .x-tool-chain, .facet .x-tool-unchain{display: none}
+.multivalued .x-tool-chain, .multivalued .x-tool-unchain{display: inline-block}
 
 .filter_list {
 	margin:0;

@@ -1,0 +1,34 @@
+.ib-attach{background-image: url(b/attach.png)}
+.ib-browse{background-image: url(b/open.png); min-width: 38px}
+.ib-cal-day{background-image: url(b/cal-day.png); min-width: 38px}
+.ib-cal-month{background-image: url(b/cal-month.png); min-width: 38px}
+.ib-cal-today{background-image: url(b/today.png); min-width: 38px}
+.ib-cal-week{background-image: url(b/cal-week.png); min-width: 38px}
+.ib-cal-prev,.ib-prev{background-image: url(b/prev.png); min-width: 38px}
+.ib-cal-next, .ib-next{background-image: url(b/next.png); min-width: 38px}
+.ib-cancel{background-image: url(b/cancel.png); min-width: 38px}
+.ib-create{background-image: url(b/plus-circle.png); min-width: 38px}
+.ib-del{background-image: url(b/delete.png); min-width: 38px}
+.ib-download{background-image: url(b/download.png); min-width: 38px}
+.ib-edit{background-image: url(b/clipboard.png); min-width: 38px}
+.ib-event-new{background-image: url(b/cal-event-new.png); min-width: 38px}
+.ib-expand{background-image: url(b/expand.png); min-width: 38px}
+.ib-export{background-image: url(b/export.png); min-width: 38px}
+.ib-external{background-image: url(b/external.png); min-width: 38px}
+.ib-filter{background-image: url(b/filter.png); min-width: 38px}
+.ib-filter-on{background-image: url(b/filter-on.png); min-width: 38px}
+.ib-folder-add{background-image: url(b/folder_add.png); min-width: 38px}
+.ib-open{background-image: url(b/file.png); min-width: 38px}
+.ib-preview{background-image: url(b/preview.png); min-width: 38px}
+.ib-refresh{background-image: url(b/arrow_refresh.png); min-width: 38px}
+.ib-save{background-image: url(b/save.png); min-width: 38px}
+.ib-search{background-image: url(b/search.png); min-width: 38px}
+.ib-task-complete{background-image: url(b/green-tick.png); min-width: 38px}
+.ib-task-new{background-image: url(b/task-new.png); min-width: 38px}
+.ib-upload{background-image: url(b/upload.png); min-width: 38px}
+
+.x-menu-item .ib-browse{background-image: url(s/folder-horizontal-open.png); background-position: 0 50%; background-repeat: no-repeat}
+.x-menu-item .ib-del{background-image: url(s/cross-script.png); background-position: 0 50%; background-repeat: no-repeat}
+.x-menu-item .ib-event-new{background-image: url(s/calendar-blue.png); background-position: 0 50%; background-repeat: no-repeat}
+.x-menu-item .ib-open{background-image: url(s/folder-open.png); background-position: 0 50%; background-repeat: no-repeat}
+.x-menu-item .ib-task-new{background-image: url(s/task.png); background-position: 0 50%; background-repeat: no-repeat}

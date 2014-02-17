@@ -1,7 +1,9 @@
 <?php
 namespace CB;
 
-if(empty($_GET['f'])) exit(0);
+if (empty($_GET['f'])) {
+    exit(0);
+}
 
 require_once 'config.php';
 $f = $_GET['f'];
@@ -11,16 +13,24 @@ $id = array_shift($f);
 $path = DOC_ROOT.'css/i/ico/32/';
 $filename = 'user-male.png';
 
-require_once('lib/DB.php');
+require_once 'lib/DB.php';
 DB\connect();
 
-$sql = 'select photo, sex from users_groups where id = $1';
-$res = DB\mysqli_query_params($sql, array($id)) or die(DB\mysqli_query_error());
-if($r = $res->fetch_row()){
-	if(!empty($r[0]) && file_exists(PHOTOS_PATH.$r[0])){
-		$path = PHOTOS_PATH;
-		$filename = $r[0];
-	}elseif($r[1] == 'f') $filename = 'user-female.png'; 
+$res = DB\dbQuery(
+    'SELECT photo
+        ,sex
+    FROM users_groups
+    WHERE id = $1',
+    $id
+) or die(DB\dbQueryError());
+
+if ($r = $res->fetch_assoc()) {
+    if (!empty($r['photo']) && file_exists(PHOTOS_PATH.$r['photo'])) {
+        $path = PHOTOS_PATH;
+        $filename = $r['photo'];
+    } elseif ($r['sex'] == 'f') {
+        $filename = 'user-female.png';
+    }
 }
 $res->close();
 // seconds, minutes, hours, days

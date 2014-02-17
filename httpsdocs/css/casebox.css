@@ -1,10 +1,10 @@
 body {font-family: "lucida grande",tahoma,verdana,arial,sans-serif; font-size: 11px}
-a {color: #15C} 
+a {color: #15C}
 
 .x-grid3-row td, .x-grid3-summary-row td {font: 11px "lucida grande",tahoma,verdana,arial,sans-serif}
 
 .panel-header-nobg {background: none}
-.generic-object {padding: 0px 5px 10px 5px; color: #555}
+.generic-object {padding: 0 5px 10px 5px; color: #555}
 
 .generic-object a, .generic-object a:link, .generic-object a:visited, .generic-object a:hover{ color: #333; text-decoration: none}
 .generic-object a:hover{ color: #286bcc; text-decoration: underline}
@@ -17,42 +17,34 @@ a {color: #15C}
 .x-tool-calendar	{background-image:url(i/ico/calendar-select-days-span.png)}
 .x-tool-upload	{background-image:url(i/ico/drive-upload.png)}
 
+.icon-chain-or {padding-left: 18px; background: url(i/ico/chain-unchain.png) 0 0 no-repeat !important}
+.icon-chain-and {padding-left: 18px; background: url(i/ico/chain.png) 0 0 no-repeat !important}
 
-.deadlineTab {
-background-image: url(i/ico/calendar-blue.png);
-}
+.icon-chart {background-image: url(i/ico/chart.png)}
+.icon-plus {background-image: url(i/ico/plus.png) !important}
 
-.calendar {
-background-image: url(i/ico/calendar-blue.png);
-}
+.icon-incoming {background-image: url(i/ico/inbox-download.png) !important}
+.icon-outgoing {background-image: url(i/ico/inbox-upload.png) !important}
+.icon-print {background-image: url(i/ico/printer.png) !important}
+.icon-edit {background-image: url(i/ico/document--pencil.png) !important}
 
-.chain-or {padding-left: 18px; background: url(i/ico/chain-unchain.png) 0 0 no-repeat !important} 
-.chain-and {padding-left: 18px; background: url(i/ico/chain.png) 0 0 no-repeat !important} 
-
-.plus {background-image: url(i/ico/plus.png) !important} 
-
-.incoming {background-image: url(i/ico/inbox-download.png) !important} 
-.outgoing {background-image: url(i/ico/inbox-upload.png) !important} 
-.print {background-image: url(i/ico/printer.png) !important} 
-.edit {background-image: url(i/ico/document--pencil.png) !important} 
-
-.case {background-image: url(i/ico/briefcase.png) !important} 
-.lawyer {background-image: url(i/ico/user.png) !important} 
-.folder {background-image: url(i/ico/folder-horizontal.png) !important} 
-.globe {background-image: url(i/ico/globe-green.png) !important} 
+.icon-case {background-image: url(i/ico/briefcase.png) !important}
+.icon-lawyer {background-image: url(i/ico/user.png) !important}
+.icon-folder {background-image: url(i/ico/folder-horizontal.png) !important}
+.icon-globe {background-image: url(i/ico/globe-green.png) !important}
 /*.summary {background-image: url(i/ico/details.gif) !important} /**/
-.open {background-image:url(i/ico/external.png) !important} 
+.icon-open {background-image:url(i/ico/external.png) !important}
 
 /* . {margin-top: 2px} */
-.mainTabPanel  {background-color: #FFF !important; border: 0px !important}
+.mainTabPanel  {background-color: #F0F0F0 !important; border: 0}
 
 ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}
 .caselist2  li {margin-left: 20px; color: #555}
 
 .caselist {margin-top: 3px; list-style: none outside none}
-.caselist li {padding-left: 16px; background: url(i/ico/briefcase-small.png) 0 1px no-repeat !important} 
-.caselist2 li.new {color: maroon} 
-.caselist2 li.old {color: #CCC} 
+.caselist li {padding-left: 16px; background: url(i/ico/briefcase-small.png) 0 1px no-repeat !important}
+.caselist2 li.new {color: maroon}
+.caselist2 li.old {color: #CCC}
 
 ul.action-list {
 font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
@@ -64,19 +56,19 @@ padding: 0;
 line-height: 20px;
 }
 .filelist {margin-top: 7px; margin-left: 5px; list-style: none outside none}
-.filelist li {padding-left: 16px; background: url(i/ico/briefcase-small.png) 0 1px no-repeat !important} 
+.filelist li {padding-left: 16px; background: url(i/ico/briefcase-small.png) 0 1px no-repeat !important}
 
 .filelist span {
-    float: right; 
-    text-align: right; 
+    float: right;
+    text-align: right;
     display: inline-block;
     vertical-align: middle;
     padding-top: 2px;
 }
 
 .caselist2 span.dt {
-    float: right; 
-    text-align: right; 
+    float: right;
+    text-align: right;
     display: inline-block;
     vertical-align: middle;
     padding-left: 5px;
@@ -87,10 +79,10 @@ line-height: 20px;
     color: maroon;
 }
 
-.filelist li.pdf {padding-left: 19px; background-image: url(i/ico/document-pdf.png) !important} 
-.filelist li.doc {padding-left: 19px; background-image: url(i/ico/document-doc.png) !important} 
-.filelist li.img {padding-left: 19px; background-image: url(i/ico/document-img.png) !important} 
-.filelist li.mp3 {padding-left: 19px; background-image: url(i/ico/document-mp3.png) !important} 
+.filelist li.pdf {padding-left: 19px; background-image: url(i/ico/document-pdf.png) !important}
+.filelist li.doc {padding-left: 19px; background-image: url(i/ico/document-doc.png) !important}
+.filelist li.img {padding-left: 19px; background-image: url(i/ico/document-img.png) !important}
+.filelist li.mp3 {padding-left: 19px; background-image: url(i/ico/document-mp3.png) !important}
 
 
 .generic-object li {padding-bottom: 5px}
@@ -99,17 +91,17 @@ line-height: 20px;
 .generic-list li {padding-left: 20px}
 
 ul.folder-list {margin-top: 3px; list-style: disc outside none !important}
-ul.folder-list li {margin-left: 20px; color: #555} 
+ul.folder-list li {margin-left: 20px; color: #555}
 
 /* background: url(i/ico/folder-horizontal.png) 0 0 no-repeat !important */
 
 
 
 /*
-.folder-list span {float: right; text-align: right; width: 20px; text-align: center; font-size: 12px; background-color: #DFE8F6; padding: 0px 4px;  -moz-border-radius: 4px 4px 4px 4px; color: #333}
+.folder-list span {float: right; text-align: right; width: 20px; text-align: center; font-size: 12px; background-color: #DFE8F6; padding: 0 4px;  -moz-border-radius: 4px 4px 4px 4px; color: #333}
 */
 
-.folder-list span {float: right; text-align: right; 
+.folder-list span {float: right; text-align: right;
     -moz-border-radius: 10px 10px 10px 10px;
     -moz-box-shadow: 0 1px 2px 0 white;
     background-color: #ECECEC;
@@ -118,12 +110,12 @@ ul.folder-list li {margin-left: 20px; color: #555}
     font-family: Tahoma;
     line-height: 1em;
     margin-right: 4px;
-    padding: 2px 10px 3px; 
+    padding: 2px 10px 3px;
     text-align: center;
     vertical-align: middle;
 }
 
-div.more {float: right; padding-top: 5px; 
+div.more {float: right; padding-top: 5px;
 /*
 font-size: 12px;
 font-family: tahoma; font-size: 10px
@@ -131,7 +123,7 @@ font-family: tahoma; font-size: 10px
 
 }
 
-span.updated {font-size: 9px; color: #999; 
+span.updated {font-size: 9px; color: #999;
 /* font-family: Tahoma;
 */
 }
@@ -144,18 +136,18 @@ span.info {color: #777 !important}
 
 
 .log a, .log a:link, .log a:visited, .log a:hover{ color: black; text-decoration: none}
-.log a:hover{ 
-color: #286bcc; 
+.log a:hover{
+color: #286bcc;
 text-decoration: underline;
-opacity:1; 
+opacity:1;
 filter:alpha(opacity=100)
 }
- 
+
 
 ul.log li {
 color: #333;
 border-bottom: 1px solid #EEE;
-padding: 5px 0px;
+padding: 5px 0;
 /* font: 11px/13px arial,tahoma,helvetica,sans-serif; */
 }
 
@@ -165,13 +157,13 @@ background-color: #EEE;
 
 ul.log a {
 padding-left: 19px;
-opacity:0.90; 
+opacity:0.90;
 filter:alpha(opacity=90)
 }
 
 span.decision {
-background: url(i/ico/auction-hammer.png) 0px 0 no-repeat;
-padding: 1px 0px 1px 16px;
+background: url(i/ico/auction-hammer.png) 0 0 no-repeat;
+padding: 1px 0 1px 16px;
 }
 
 
@@ -185,11 +177,11 @@ color: maroon;
 }
 
 div.letter {
-padding: 1px 0px 1px 20px;
+padding: 1px 0 1px 20px;
 /* color: #777; */
 }
 div.task {
-padding: 1px 0px 1px 19px;
+padding: 1px 0 1px 19px;
 color: #777;
 }
 
@@ -205,28 +197,28 @@ div.task-info {
 
 
 div.letter {
-padding: 1px 0px 1px 0px;
+padding: 1px 0 1px 0;
 /* color: #777; */
 }
 
 
-div.mail {background: url(i/ico/mail.png) 0px 0 no-repeat}
-div.app {background: url(i/ico/document-horizontal-text.png) 0px 0 no-repeat}
-div.decision {background: url(i/ico/auction-hammer.png) 0px 0 no-repeat}
-div.complaint {background: url(i/ico/fire.png) 0px 0 no-repeat}
-div.echr-app {background: url(i/ico/bank.png) 0px 0 no-repeat}
-div.comm {background: url(i/ico/megaphone.png) 0px 0 no-repeat}
+div.mail {background: url(i/ico/mail.png) 0 0 no-repeat}
+div.app {background: url(i/ico/document-horizontal-text.png) 0 0 no-repeat}
+div.decision {background: url(i/ico/auction-hammer.png) 0 0 no-repeat}
+div.complaint {background: url(i/ico/fire.png) 0 0 no-repeat}
+div.echr-app {background: url(i/ico/bank.png) 0 0 no-repeat}
+div.comm {background: url(i/ico/megaphone.png) 0 0 no-repeat}
 
 div.red {
-background: url(i/ico/cross-script.png) 0px 0 no-repeat;
+background: url(i/ico/cross-script.png) 0 0 no-repeat;
 }
 
 div.gray {
-background: url(i/ico/bullet_gray.png) 0px 0 no-repeat;
+background: url(i/ico/bullet_gray.png) 0 0 no-repeat;
 }
 
 div.green {
-background: url(i/ico/tick.png) 0px 0 no-repeat;
+background: url(i/ico/tick.png) 0 0 no-repeat;
 }
 
 a.pdf {
@@ -234,34 +226,23 @@ background: url(i/ico/document-pdf.png) 2px 0 no-repeat;
 }
 
 a.case {
-background: url(i/ico/briefcase-small.png) 0px 0 no-repeat !important;
+background: url(i/ico/briefcase-small.png) 0 0 no-repeat !important;
 }
 
 a.decision {
-background: url(i/ico/auction-hammer.png) 0px 0 no-repeat;
+background: url(i/ico/auction-hammer.png) 0 0 no-repeat;
 }
 
 a.system {
 background: url(i/ico/server.png) 2px 0 no-repeat;
 }
 
-.deadline {
-background: url(i/ico/calendar-blue.png) 0px 0px no-repeat;
-}
-
-
-
-
-a.deadline {
-background: url(i/ico/calendar-small.png) 0px 0 no-repeat;
-}
-
 a.user-m {
-background: url(i/ico/user-small.png) 0px 0 no-repeat;
+background: url(i/ico/user-small.png) 0 0 no-repeat;
 }
 
 a.user-f {
-background: url(i/ico/user-small-female.png) 0px 0 no-repeat;
+background: url(i/ico/user-small-female.png) 0 0 no-repeat;
 }
 
 
@@ -270,8 +251,8 @@ background: url(i/ico/user-small-female.png) 0px 0 no-repeat;
 
 .filter_list {
 /* width: 97%; */
-padding-left: 0px;
-margin:7px 0 0 0px;
+padding-left: 0;
+margin:7px 0 0 0;
 padding:0;
 list-style:none;
 /* font-size:9pt; */
@@ -359,7 +340,7 @@ float: left;
 }
 
 .active_filters .btn .st, .active_filters .btn .st i {
-padding-left: 0px;
+padding-left: 0;
 margin-left:0;
 }
 
@@ -403,7 +384,7 @@ background-repeat: no-repeat;
 display: block;
 height: 16px;
 width: 16px;
-left: 0px;
+left: 0;
 }
 
 .icon_close_red {
@@ -462,61 +443,9 @@ color: black !important;
   background-color: yellow;
 }
 
-
-
-.ico-folder32 {
-background-image: url(i/ico/32/folder-horizontal.png) !important;
-/* background-position: 0 50%;
-background-repeat: no-repeat; */
-}
-.icon32-folder-add {background-image: url(i/ico/32/folder_add.png) !important; min-width: 38px}
-.icon32-tag-add {background-image: url(i/ico/32/tag_blue_add.png) !important; min-width: 38px}
-.icon32-arrow-up {background-image: url(i/ico/32/arrow_up.png) !important; min-width: 38px}
-.icon32-arrow-down {background-image: url(i/ico/32/arrow_down.png) !important; min-width: 38px}
-.icon32-sort {background-image: url(i/ico/32/sort_columns.png) !important; min-width: 38px}
-.icon32-sort-asc {background-image: url(i/ico/32/sort_ascending.png) !important; min-width: 38px}
-.icon32-sort-desc {background-image: url(i/ico/32/sort_descending.png) !important; min-width: 38px}
-
-.icon32-save {background-image: url(i/ico/32/save.png) !important; min-width: 38px}
-.icon32-cancel {background-image: url(i/ico/32/cancel.png) !important; min-width: 38px}
-
-.icon32-upload {background-image: url(i/ico/32/upload.png) !important; min-width: 38px}
-.icon32-download {background-image: url(i/ico/32/download.png) !important; min-width: 38px}
-
-.icon32-edit {background-image: url(i/ico/32/clipboard.png) !important; min-width: 38px}
-.icon32-doc-edit {background-image: url(i/ico/32/document_editing.png) !important; min-width: 38px}
-.icon32-refresh {background-image: url(i/ico/32/arrow_refresh.png) !important; min-width: 38px}
-.icon32-create {background-image: url(i/ico/32/plus-circle.png) !important; min-width: 38px}
-    .icon32-del {background-image: url(i/ico/32/delete.png) !important; min-width: 38px}
-.icon32-event-new {background-image: url(i/ico/32/cal-event-new.png) !important; min-width: 38px}
-.icon32-task-new {background-image: url(i/ico/32/task-new.png) !important; min-width: 38px}
-.icon32-open {background-image: url(i/ico/32/file.png) !important; min-width: 38px}
-.icon32-browse {background-image: url(i/ico/32/open.png) !important; min-width: 38px}
-.icon32-filter {background-image: url(i/ico/32/filter.png) !important; min-width: 38px}
-.icon32-filter-on {background-image: url(i/ico/32/filter-on2.png) !important; min-width: 38px}
-.icon32-preview {background-image: url(i/ico/32/preview.png) !important; min-width: 38px}
-.icon32-external { background-image: url(i/ico/32/_external.png) !important; min-width: 38px}
-
-.icon32-cal-today { background-image: url(i/ico/32/today.png) !important; min-width: 38px}
-.icon32-cal-day { background-image: url(i/ico/32/cal-day.png) !important; min-width: 38px}
-.icon32-cal-week { background-image: url(i/ico/32/cal-week.png) !important; min-width: 38px}
-.icon32-cal-month { background-image: url(i/ico/32/cal-month.png) !important; min-width: 38px}
-.icon32-cal-prev { background-image: url(i/ico/32/prev.png) !important; min-width: 38px}
-.icon32-cal-next { background-image: url(i/ico/32/next.png) !important; min-width: 38px}
+.icon-search{background-image: url(i/ico/search.png); }
+.icon-documents{background-image: url(i/ico/32/documents.png) }
 .calendar-title{font-size: 16px !important; font-weight: bold !important; color: #333}
-
-.x-menu-item .icon32-del {background-image: url(i/ico/cross-script.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.x-menu-item .icon32-task-new {background-image: url(i/ico/task.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.x-menu-item .icon32-event-new {background-image: url(i/ico/calendar-blue.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.x-menu-item .icon32-open {background-image: url(i/ico/folder-open.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.x-menu-item .icon32-browse {background-image: url(i/ico/open.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-
-.icon32-task-complete { background-image: url(i/ico/32/green-tick.png) !important; min-width: 38px}
-.icon32-versions { background-image: url(i/ico/32/compare-versions.png) !important; min-width: 38px}
-.icon32-external { background-image: url(i/ico/32/external.png) !important; min-width: 38px}
-.icon32-expand { background-image: url(i/ico/32/expand.png) !important; min-width: 38px}
-.icon32-attach { background-image: url(i/ico/32/attach.png) !important;}
-
 
 .icon-gridView {background-image: url(i/ico/_grid.png) !important}
 .icon-listView { background-image: url(i/ico/_list.png) !important}
@@ -552,19 +481,13 @@ background-repeat: no-repeat; */
 .trigger-locate{ background-image: url(i/ico/trigger-locate.gif) !important; background-repeat: no-repeat}
 
 .icon-refresh { background-image: url(i/ico/_refresh.png) !important}
-.icon-browse { background-image: url(i/ico/_zoom.png) !important}
+.icon-browse, .icon-preview { background-image: url(i/ico/_zoom.png) !important}
 .icon-files { background-image: url(i/ico/_clip.png) !important}
 .icon-permissions { background-image: url(i/ico/_padlock.png) !important}
 
 .icon-briefcase {background-image: url(i/ico/briefcase.png) !important; }
 
-.icon-taskNew { background-image: url(i/ico/task.png) !important}
-.icon-eventNew { background-image: url(i/ico/calendar-blue.png) !important}
-.icon-user-male { background-image: url(i/ico/user.png) !important}
-
-.x-tab-strip-active span.x-tab-strip-text {
-font-weight: normal !important;
-}
+.x-tab-strip-active span.x-tab-strip-text {font-weight: normal !important}
 
 /*
 white background for splitter
@@ -589,7 +512,7 @@ background-color: #FFF;
     background-image: none !important;
     /* background-color: #FFF; */
 }
-.whiteTabPanel  {background-color: #FFF !important; border: 0px !important}
+.whiteTabPanel  {background-color: #FFF !important; border: 0 !important}
 
 .whiteTabPanel ul.x-tab-strip-top {
     background-color: #FFF;
@@ -611,7 +534,7 @@ background-color: #FFF;
 
 .versions .user {
     width: 1% !important;
-    padding-right: 0px;
+    padding-right: 0;
 }
 
 .versions {
@@ -627,7 +550,7 @@ background-color: #FFF;
 .versions td {
     vertical-align: top;
     padding-bottom: 10px;
-    padding: 7px 10px; 
+    padding: 7px 10px;
     border-bottom: 1px solid #CCC;
 }
 
@@ -702,28 +625,11 @@ table.obj-preview  {
     font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;
 }
 
-table.obj-preview  td {
-    vertical-align: top;
-    padding: 5px 7px;
-    border-top: 1px solid #DDD;
-}
-
-table.obj-preview td.prop-key {
-    width: 40%;
-    background-color: #F4F4F4;
-}
-
-table.obj-preview td.prop-val {
-    width: 60%;
-    
-}
-
-table.obj-preview p.prop-info {
-    margin-top: 3px;
-    color: #777;
-    font-size: 11px;
-    
-}
+table.obj-preview td, table.obj-preview th {vertical-align: top; padding: 5px 7px; border-top: 1px solid #DDD}
+table.obj-preview tr.prop-header th {font-weight: bold; background-color: #F9F7ED;}
+table.obj-preview td.prop-key {width: 40%; background-color: #F4F4F4}
+table.obj-preview td.prop-val {width: 60%}
+table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
 
 .obj-preview-h {
     font: 13px "lucida grande",tahoma,verdana,arial,sans-serif;
@@ -735,6 +641,9 @@ table.obj-preview p.prop-info {
 .obj-preview ul{list-style: square outside }
 .obj-preview ul li{margin-left:20px; }
 
+.obj-preview-h{ padding: 10px 10px 10px 10px; border-bottom: 2px solid #CCC; margin-bottom: 0; }
+.obj-files li{ border-top: 1px solid #EEE; padding: 10px 10px 10px 35px !important; background-position: 10px; }
+
 .obj-files li {
     display: list-item;
     padding-left: 20px;
@@ -742,15 +651,15 @@ table.obj-preview p.prop-info {
 }
 
 .obj-files li.doc {
-    background: url(/i3/document-doc.png) 0px 0 no-repeat;
+    background: url(/i3/document-doc.png) 0 0 no-repeat;
 }
 
 .obj-files li.pdf {
-    background: url(/i3/document-pdf.png) 0px 0 no-repeat;
+    background: url(/i3/document-pdf.png) 0 0 no-repeat;
 }
 
 .obj-files li.task {
-    background: url(/i3/task.png) 0px 0 no-repeat;
+    background: url(/i3/task.png) 0 0 no-repeat;
 }
 
 .gr {
@@ -799,7 +708,7 @@ border-bottom: 1px solid #DDD;
 }
 .path {text-decoration: none; color: #777; }
 .path:hover {text-decoration: underline; }
-.tasks-msg{color: #777; padding: 0px 5px 10px 5px}
+.tasks-msg{color: #777; padding: 0 5px 10px 5px}
 .tasks-msg a{color: #777; text-decoration: underline;}
 
 table.item-props, table.duplicates  {
@@ -825,7 +734,7 @@ table.duplicates  td  {
 table.duplicates td.k {
     width: 1%;
     color: #777;
-    padding-right: 0px;
+    padding-right: 0;
 }
 
 .rph {
@@ -906,4 +815,13 @@ border: 1px solid #7195A3;
 }
 .account-menu .x-btn:hover {
     background-color: #eaeaea;
+}
+
+div.x-preview-mask{
+background: #eaeaea;
+border: 0;
+height: 100%;
+text-align: center;
+vertical-align: middle;
+padding-top: 45%;
 }

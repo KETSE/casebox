@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 namespace CB;
 
@@ -6,8 +5,10 @@ require_once 'init.php';
 
 require_once SOLR_CLIENT;
 
-echo "\nOptimizing core \"".config\solr_core."\"...";
+echo "\nOptimizing core \"".CONFIG\SOLR_CORE."\"...";
 
-$solr = new SolrClien();
+$solr = new Solr\Client();
+
 $solr->optimize();
+
 unset($solr);

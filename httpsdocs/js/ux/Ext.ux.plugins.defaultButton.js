@@ -12,25 +12,25 @@
      * @version 0.1
      *
      */
-	ns.DefaultButton =  Ext.extend(Object, {
-		init: function(button) {
-			button.on('afterRender', setupKeyListener, button);
-		}
-	});
+    ns.DefaultButton =  Ext.extend(Object, {
+        init: function(button) {
+            button.on('afterRender', setupKeyListener, button);
+        }
+    });
 
-	function setupKeyListener() {
-		var formPanel = this.findParentByType('form');
-		new Ext.KeyMap(formPanel.el, {
-			key: Ext.EventObject.ENTER
-			,shift: false
-			,alt: false
-			,fn: function(keyCode, e) {
-				if (e.target.type === 'textarea' && !e.ctrlKey)  return true;
-				this.el.select('button').item(0).dom.click();
-				return false;
-			}
-			,scope: this
-		});
-	}
-	Ext.ComponentMgr.registerPlugin('defaultButton', ns.DefaultButton);
+    function setupKeyListener() {
+        var formPanel = this.findParentByType('form');
+        new Ext.KeyMap(formPanel.el, {
+            key: Ext.EventObject.ENTER
+            ,shift: false
+            ,alt: false
+            ,fn: function(keyCode, e) {
+                if (e.target.type === 'textarea' && !e.ctrlKey)  return true;
+                this.el.select('button').item(0).dom.click();
+                return false;
+            }
+            ,scope: this
+        });
+    }
+    Ext.ComponentMgr.registerPlugin('defaultButton', ns.DefaultButton);
 })();
