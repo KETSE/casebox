@@ -64,7 +64,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         };
 
         Ext.apply(this, {
-            tbar: [
+            hideMode: 'offsets'
+            ,defaults: {
+                hideMode: 'offsets'
+            }
+            ,tbar: [
                 this.actions.edit
                 ,this.actions.reload
                 ,this.actions.download
@@ -214,7 +218,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,load: function(objectData) {
-        clog(objectData);
         if(!isNaN(objectData)) {
             objectData = {
                 id: objectData
@@ -307,6 +310,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         if(ai.readValues) {
             d = Ext.apply(d, ai.readValues());
         }
+
+        ai.clear();
+        this.onViewChangeClick(0);
+
         switch(CB.DB.templates.getType(d.template_id)) {
             case 'file':
                 App.mainViewPort.onFileOpen(d, e);
@@ -314,9 +321,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             default:
                 App.mainViewPort.openObject(d, e);
         }
-
-        ai.clear();
-        this.onViewChangeClick(0);
     }
 
     ,onOpenPreviewEvent: function(data, ev) {
@@ -329,14 +333,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.loadedData = data;
     }
     ,onOpenPropertiesEvent: function(data, sourceCmp, ev) {
-        clog('onOpenPropertiesEvent', arguments);
         if(Ext.isEmpty(data)) {
             data = this.loadedData;
         }
-        // this.getLayout().setActiveItem(0);
-        // this.onViewChange(0);
         this.load(data);
-        // this.getLayout().activeItem.load(data.id);
     }
     ,onDownloadClick: function(b, e) {
         this.fireEvent('filedownload', [this.loadedData.id], false, e);

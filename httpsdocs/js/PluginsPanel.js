@@ -16,6 +16,11 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
             params = {id: params};
         }
 
+        var el = this.getEl();
+        if(Ext.isEmpty(el) || !el.isVisible(true)) {
+            return;
+        }
+
         this.delayLoadTask.cancel();
 
         /* check if not the same as current params */

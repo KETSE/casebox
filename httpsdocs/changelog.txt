@@ -1,3 +1,24 @@
+CaseBox 1.9.121 (2014-02-18)
+==============================
+New Features, Improvements
+--------------------------
+- DoubleClick enters object as folder, only files are downloaded/webDav_opened
+- added sending indicator on comment send
+- added email notifications when adding comments
+- added verification for fields with type date to be sent to server without time.
+
+Fixed Bugs:
+----------
+- Comments block breaks after I click "Edit in external"
+- visual bug for Comments block header
+- in object preview plugin new lines missing from Memo field type
+- Sorting not ok in Tasks folders
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+- apply database update for core: 20140217_1916 db_update v1.9.121.sql
+
 CaseBox 1.9.117 (2014-02-16)
 ==============================
 New Features, Improvements

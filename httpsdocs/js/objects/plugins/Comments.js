@@ -42,6 +42,13 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
                 ,keypress: this.onMessageBoxKeyPress
             }
         });
+        this.loadLabel = new Ext.form.Label({
+            flex: 1
+            ,height: 32
+            ,cls: 'msg-load'
+            ,html: '<div class="d-loader">' + L.sending + ' ... </div>'
+            ,hidden: true
+        });
         this.messageField.on('focus', this.messageField.syncSize, this.messageField);
 
         Ext.apply(this, {
@@ -61,6 +68,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
                             ,html: '<img class="i32" src="/photo/' + App.loginData.id + '.jpg">'
                         }
                         ,this.messageField
+                        ,this.loadLabel
                     ]
                 }
             ]
@@ -76,6 +84,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
         } else {
             this.dataView.data = r;
         }
+        this.doLayout(false, true);
     }
 
     ,onMessageBoxKeyPress: function(tf, e) {
@@ -83,12 +92,13 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
         this.syncSize();
         if ((e.getKey() == e.ENTER)) {
             if(e.hasModifier()) {
-                // this.messageField.setValue(this.messageField.getValue()+"\n");
             } else {
                 var msg = tf.getValue().trim();
                 if(Ext.isEmpty(msg)) {
                     return;
                 }
+                this.messageField.hide();
+                this.loadLabel.show();
                 CB_Objects.addComment(
                     {
                         id: this.params.id
@@ -103,6 +113,8 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
 
     ,onAddCommentProcess: function(r, e) {
         this.messageField.setValue('');
+        this.loadLabel.hide();
+        this.messageField.show();
         if(r.success !== true) {
             return;
         }
