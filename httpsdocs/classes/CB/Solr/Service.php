@@ -188,7 +188,9 @@ class Service
      */
     public function commit()
     {
+        \CB\fireEvent('onBeforeSolrCommit', $updateDocs[$i]);
         $this->solr_handler->commit();
+        \CB\fireEvent('onSolrCommit', $updateDocs[$i]);
     }
 
     /**

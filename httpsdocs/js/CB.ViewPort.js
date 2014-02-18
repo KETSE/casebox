@@ -246,7 +246,10 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,fn: function(btn, text){
                 if (btn == 'yes')
                     CB_User.logout(function(response, e){
-                        if(response.success === true) window.location.reload();
+                        if(response.success === true) {
+                            App.confirmLeave = false;
+                            window.location.reload();
+                        }
                     });
             }
         });

@@ -11,7 +11,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             edit: new Ext.Action({
                 iconCls: 'ib-edit-obj'
                 ,scale: 'large'
-                ,disabled: true
+                // ,disabled: true
                 ,scope: this
                 ,handler: this.onEditClick
             })
@@ -174,14 +174,20 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         if(!mb.pressed) {
             mb.toggle();
         }
-        this.onViewChange(idx);
+        this.onViewChange();
         if(autoLoad !== false) {
             this.load(this.requestedLoadData);
         }
     }
-    ,onViewChange: function(index) {
+    ,onViewChange: function() {
         var activeItem = this.getLayout().activeItem;
         var tb = this.getTopToolbar();
+        var d = this.loadedData;
+        var canDownload = (
+            d &&
+            d.template_id &&
+            (CB.DB.templates.getType(d.template_id) == 'file')
+        );
         switch(activeItem.getXType()) {
             case 'CBObjectProperties':
                 tb.setVisible(true);
@@ -191,6 +197,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.cancel.hide();
                 this.actions.openInTabsheet.hide();
                 // this.actions.pin.hide();
+                clog('sethidden', !canDownload)
+                this.actions.download.setHidden(!canDownload);
                 break;
             case 'CBEditObject':
                 tb.setVisible(true);
@@ -199,6 +207,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.save.show();
                 this.actions.cancel.show();
                 this.actions.openInTabsheet.show();
+                this.actions.download.setHidden(true);
                 // this.actions.pin.hide();
                 break;
             case 'CBObjectPreview':
@@ -208,6 +217,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.save.hide();
                 this.actions.cancel.hide();
                 this.actions.openInTabsheet.hide();
+                this.actions.download.setHidden(!canDownload);
                 // this.actions.pin.hide();
                 //this.load(this.loadedData);
                 break;
@@ -256,12 +266,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 activeItem.load({id: id});
                 break;
         }
-        if(CB.DB.templates.getType(this.loadedData.template_id) == 'file') {
-            this.actions.download.show();
-        } else {
-            this.actions.download.hide();
-        }
-        this.actions.edit.enable();
+        this.onViewChange();
     }
     ,edit: function (objectData) {
         if(App.isWebDavDocument(objectData.name)) {

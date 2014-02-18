@@ -127,9 +127,11 @@ class Listeners
             ,'off' => $offUsers
         );
         DB\dbQuery(
-            'UPDATE objects
-            SET sys_data = $2
-            WHERE id = $1',
+            'INSERT INTO objects
+            (id, sys_data)
+            VALUES ($1, $2)
+            ON DUPLICATE KEY
+            UPDATE sys_data = $2',
             array(
                 $objectId
                 ,json_encode($d['sys_data'], JSON_UNESCAPED_UNICODE)

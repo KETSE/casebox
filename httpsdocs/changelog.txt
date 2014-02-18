@@ -1,3 +1,17 @@
+CaseBox 1.9.122 (2014-02-18)
+==============================
+New Features, Improvements
+--------------------------
+- modal window for WebDav files
+- Add eventHandler 'onSolrCommit'
+- Memo editor height/autoHeight
+- Adjusting notification email Sender & Subject
+- onLogout, don't show browser popup confirmation "Do you want to leave page"
+
+Fixed Bugs:
+----------
+- Download button appears while creating a task
+
 CaseBox 1.9.121 (2014-02-18)
 ==============================
 New Features, Improvements

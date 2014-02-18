@@ -129,6 +129,7 @@ return array_merge(
             ,'//js/objects/plugins/SystemProperties.js'
             ,'//js/objects/plugins/Tasks.js'
             ,'//js/objects/plugins/Versions.js'
+            ,'//js/CB.WebdavWindow.js'
         )
         ,'lang-en' => array('//js/locale/en.js')
         ,'lang-es' => array('//js/locale/es.js')
