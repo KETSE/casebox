@@ -18,7 +18,7 @@ class Utils{
 
     public static function  getNodeContent($id, $myPath, $only = null){
         $s = new \CB\Search();
-        $data = $s->search('pid:'.$id, 0, 9999, array('fq'=> array('dstatus:0'), 'sort'=> 'sort_name asc'));
+        $data = $s->search('pid:'.$id, 0, 9999, array('fq'=> array('dstatus:0','system:[0 TO 1]'), 'sort'=> 'sort_name asc'));
 
         $array = array();
         foreach($data->response->docs as $item){
@@ -66,7 +66,6 @@ class Utils{
             'pid' => $pid
             ,'name' => $name
             ,'date' => date('Y-m-d')
-            ,'cdate' => date('Y-m-d')."T00:00:00Z"
             ,'template_id' => \CB\CONFIG\DEFAULT_FOLDER_TEMPLATE
             ,'data' => array('_title'=>$name)
         );
@@ -88,7 +87,6 @@ class Utils{
             ,'localFile' => $path
             ,'owner' => $_SESSION['user']['id']
             ,'tmplId' => \CB\CONFIG\DEFAULT_FILE_TEMPLATE
-            ,'date' =>  date('Y-m-d')."T00:00:00Z"
             ,'fileExistAction' => 'replace'
         );
         $fl = new \CB\Api\Files();

@@ -47,11 +47,10 @@
     // --- Additional ---
 
     function prepare_environment(){
-        $result = array();
-
-        session_start();
+        error_reporting(0);
         define('WEBDAV_PATH_DELIMITER', '/');
 
+        $result = array();
         $_SERVER['REQUEST_URI']  = $_SERVER['REDIRECT_URL'];
 
         $url_parts = explode('/', trim($_SERVER['REQUEST_URI'],'/'));

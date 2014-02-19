@@ -43,11 +43,11 @@ class File extends \Sabre\DAV\FS\Node implements \Sabre\DAV\IFile {
     }
 
     function getETag() {
-        return '"' . md5_file($this->realPath) . '"';
+        return md5_file($this->realPath);
     }
 
     function getLastModified(){
-        return strtotime((is_null($this->object['udate'])) ? $this->object['cdate'] : $this->object['udate']);
+        return is_null($this->object['udate']) ? $this->object['cdate'] : $this->object['udate'];
     }
 
     function getContentType(){
