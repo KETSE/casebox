@@ -36,10 +36,17 @@ Ext.onReady(function(){
     Ext.QuickTips.init();
     Ext.apply(Ext.QuickTips.getQuickTip(), {showDelay: 1500});
 
+
+    // return;
+
     setTimeout(function(){
         Ext.get('loading').remove();
-        Ext.fly('loading-mask').fadeOut({remove:true});
-    }, 250);
+        // Ext.fly('loading-mask').remove();
+        // Ext.fly('loading-mask').fadeOut({remove:true});
+    }, 10);
+
+
+
 
     CB_User.getLoginInfo( function(r, e){
         if(r.success !== true) return;
