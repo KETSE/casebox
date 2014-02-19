@@ -14,3 +14,5 @@ We support two ways to work with Casebox over WebDav protocol.
    You can download, or edit your file with Word or LibreOffice
         https://yourdomain.com/edit/[coreName]/[fileId]/[fileName]
 
+
+3. INSERT into `config` (`param`,`value`) VALUES ('webdav_url', 'https://{core_name}.casebox.org/edit/{core_name}/{node_id}/{name}');
