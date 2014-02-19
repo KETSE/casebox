@@ -69,6 +69,11 @@ background-color: #FFFFCC;
     border-bottom: 1px solid #FFF;
 }
 
+.block-plugin-comments .obj pre{
+    font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+    font-size: 11px;
+}
+
 .block-plugin-comments .x-panel-body {
     margin-bottom: 30px;
     background-color: #EEE;

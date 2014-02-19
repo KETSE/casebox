@@ -240,7 +240,7 @@ class Client extends Service
 
                     /* consider node type sort column (ntsc) equal to 1 unit more
                     than total count of folder templates */
-                    $r['ntsc'] = sizeof($GLOBALS['folder_templates']) + 1;
+                    $r['ntsc'] = sizeof($GLOBALS['folder_templates']) + 100;
 
                     /* decrease ntsc (make 1 unit more important) in case of 'case' object types */
                     if (@$r['template_type'] == 'case') {

@@ -50,7 +50,6 @@ class Config extends Singleton
 
         if (!empty($cfg['treeNodes'])) {
             $cfg['treeNodes'] = Util\toJSONArray($cfg['treeNodes']);
-            // var_dump($cfg['treeNodes']);
         }
 
         static::$config = static::adjustPaths($cfg);

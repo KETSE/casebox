@@ -23,7 +23,7 @@ CB.Search = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onSearchClick
             })
-        }
+        };
 
         /* the gird actially */
         this.grid = Ext.create({
@@ -70,12 +70,12 @@ CB.Search = Ext.extend(Ext.Panel, {
     ,onSearchClick: function(){
         this.data.data = {};
         this.grid.readValues();
-        CB_Search.query(this.data, this.processSearchQueryResponse, this)
+        CB_Search.query(this.data, this.processSearchQueryResponse, this);
     }
     // process server responce to our last search query
     ,processSearchQueryResponse: function (r, e){
         clog('processing search query result');
     }
-})
+});
 
 Ext.reg('CBSearch', CB.Search); // register xtype
