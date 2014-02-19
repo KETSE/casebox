@@ -76,7 +76,7 @@ class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection{
     }
 
     function getLastModified(){
-        return strtotime((is_null($this->object['udate'])) ? $this->object['cdate'] : $this->object['udate']);
+        return is_null($this->object['udate']) ? $this->object['cdate'] : $this->object['udate'];
     }
 
     function createDirectory($name){
