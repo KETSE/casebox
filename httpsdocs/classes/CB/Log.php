@@ -387,6 +387,8 @@ class Log
             return ;
         }
 
+        $sender = User::getDisplayName(). " (".\CB\CORE_NAME.") <".Config::get('sender_email').'>';
+
         foreach ($to_user_ids as $uid) {
             $u = User::getPreferences($uid);
 
@@ -490,6 +492,7 @@ class Log
                     ,object_id
                     ,task_id
                     ,subtype
+                    ,sender
                     ,subject
                     ,message
                     ,time
@@ -501,13 +504,15 @@ class Log
                     ,0
                     ,$5
                     ,$6
+                    ,$7
                     ,CURRENT_TIMESTAMP
-                    ,$7)',
+                    ,$8)',
                 array(
                     $p['action_type']
                     ,$p['case_id']
                     ,$p['object_id']
                     ,$p['task_id']
+                    ,$sender
                     ,$subject
                     ,$message
                     ,$u['id']

@@ -497,10 +497,18 @@ function initApp(){
             return;
         }
         var url = App.config.webdav_url;
-        url = url.replace('{node_id}', data.id);
+        url = url.replace('{node_id}', Ext.value(data.id, data.nid));
         url = url.replace('{name}', data.name);
         App.confirmLeave = false;
-        window.open(url, '_self');
+
+        if(Ext.util.Cookies.get('webdavHideDlg') == 1) {
+            window.open('cbdav:' + url, '_self');
+        } else {
+            var w = new CB.WebdavWindow({
+                data: {link: url}
+            });
+            w.show();
+        }
     };
 
     /**
@@ -811,8 +819,18 @@ function initApp(){
                     ,valueField: 'id'
                 });
             case 'memo':
-                height = Ext.value(cfg.height, 50);
+                clog('arguements', arguments);
+                var height = Ext.value(cfg.height, 50);
                 height = parseInt(height, 10) + 7;
+                if(e.grid) {
+                    var rowEl = e.grid.getView().getRow(e.row);
+                    if(rowEl) {
+                        var rowHeight = Ext.get(rowEl).getHeight() - 2;
+                        if(height < rowHeight) {
+                            height = rowHeight;
+                        }
+                    }
+                }
                 return new Ext.form.TextArea({ height: height });
             case 'popuplist':
                 e.cancel = true;

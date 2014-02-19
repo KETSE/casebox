@@ -60,10 +60,17 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     rez[fieldName] = [];
                 }
                 var value = node.attributes.value;
-                if(node.attributes.templateRecord.get('type') == 'datetime') {
-                    if(Ext.isDate(value.value)) {
-                        value.value = value.value.toISOString();
-                    }
+                switch (node.attributes.templateRecord.get('type')) {
+                    case 'datetime':
+                        if(Ext.isDate(value.value)) {
+                            value.value = value.value.toISOString();
+                        }
+                        break;
+                    case 'date':
+                        if(Ext.isDate(value.value)) {
+                            value.value = dateToDateString(value.value);
+                        }
+                        break;
                 }
                 value.childs = this.readChilds(node);
                 rez[fieldName].push(this.simplifyValue(value));

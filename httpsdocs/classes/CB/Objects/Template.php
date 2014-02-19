@@ -525,6 +525,7 @@ class Template extends Object
                 //$value = trim(strip_tags($value));
                 //$value = nl2br($value);
                 break;
+            case 'memo':
             case 'text':
                 $value = nl2br(htmlspecialchars($value));
                 break;

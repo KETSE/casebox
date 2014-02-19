@@ -484,6 +484,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,settoolbaritems: this.onSetToolbarItems
                 ,createobject: this.onCreateObjectEvent
                 ,reload: this.onReloadClick
+                ,activate: function() {
+                    this.updatePreview();
+                }
                 // ,objectopen: this.onObjectsOpenEvent
             }
         });
@@ -823,6 +826,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,updatePreview: function() {
+        if(Ext.isEmpty(this.folderProperties)) {
+            return;
+        }
         var s = this.cardContainer.getLayout().activeItem.currentSelection;
         var data = Ext.isEmpty(s)
                 ? {
@@ -845,23 +851,23 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             e.stopEvent();
         }
 
-        if( (Ext.num(objData.template_id, 0) === 0) || App.isFolder(objData.template_id)) {
-            var path = this.folderProperties.path;
-            if(path.substr(-1, 1) !== '/') {
-                path += '/';
+        if(CB.DB.templates.getType(objData.template_id) == 'file') {
+            if(App.isWebDavDocument(objData.name)) {
+                App.openWebdavDocument(objData);
+            } else {
+                this.onDownloadClick();
             }
-            path += objData.nid;
-            this.changeSomeParams({
-                path: path
-                ,query: null
-            });
-        } else {
-            this.buttonCollection.get('preview').toggle(true);
-            this.objectPanel.edit( {
-                id: objData.nid
-                ,name: objData.name
-            } );
+            return;
         }
+        var path = this.folderProperties.path;
+        if(path.substr(-1, 1) !== '/') {
+            path += '/';
+        }
+        path += objData.nid;
+        this.changeSomeParams({
+            path: path
+            ,query: null
+        });
     }
 
     ,onFiltersChange: function(filters){
