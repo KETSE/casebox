@@ -10,6 +10,23 @@ function date_ISO_to_date(date_string){
     if(Ext.isEmpty(d)) return null;
     return new Date(d);
 }
+
+/**
+ * Convert a date to a date string with time filled with 0
+ * // 2014-02-17T00:00:00Z
+ * @param  date
+ * @return varchar
+ */
+function dateToDateString(date) {
+    rez = null;
+    if(Ext.isPrimitive(date)) {
+        rez = date;
+    } else if(Ext.isDate(date)) {
+        rez = date.format('Y-m-d') + 'T00:00:00Z';
+    }
+    return rez;
+}
+
 function getItemIcon(d){
 
     if(!Ext.isEmpty(d.iconCls)) {

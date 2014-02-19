@@ -395,7 +395,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
                 scope: this
                 ,rowselect: this.onRowSelect
                 ,rowdeselect: this.onRowDeselect
-                // ,selectionchange: this.onCheckBoxSelectionChange
             }
         });
         var columns = [
@@ -624,7 +623,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
             var selectedRecords = [];
             this.selectValueOnLoad = true;
             currentValue = currentValue.split(',');
-            clog('currentValue', currentValue);
             Ext.each(
                 records
                 ,function(r){
@@ -640,7 +638,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
             }
             this.selectValueOnLoad = false;
         }
-        clog(this, arguments, this.triggerField.rendered, this.rendered);
         // this.triggerField.setValue(options.params.query);
         // this.grid.getBottomToolbar().setVisible(store.reader.jsonData.total > store.reader.jsonData.data.length);
     }
@@ -686,52 +683,17 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
         }
     }
     ,onRowSelect: function (sm, ri, r) {
-        clog('select', arguments);
         if(!this.selectValueOnLoad) {
             this.resultPanel.store.loadData(r.data, true);
             this.items.last().syncSize();
         }
     }
     ,onRowDeselect: function (sm, ri, r) {
-        clog('deselect', arguments);
         var idx = this.resultPanel.store.findExact('id', r.get('id'));
         if(idx >= 0 ) {
             this.resultPanel.store.removeAt(idx);
         }
         this.items.last().syncSize();
-    }
-    ,onCheckBoxSelectionChange: function (sm) {
-        return;
-        if(this.selectValueOnLoad) {
-            return;
-        }
-
-        var s = sm.getSelections();
-        clog('selection change', s);
-
-        var data = [];
-        for (var i = 0; i < s.length; i++) {
-            data.push(s[i].data);
-        }
-        this.resultPanel.store.loadData(data);
-
-        this.grid.getView().refresh();
-        this.items.last().syncSize();
-
-        // var r = g.getStore().getAt(ri);
-        // var idx = this.resultPanel.store.findExact('id', r.get('id'));
-        // if(this.config.multiValued){
-        //     if(idx > -1) {
-        //         this.resultPanel.store.removeAt(idx);
-        //     } else {
-        //         var u = new this.resultPanel.store.recordType(r.data);
-        //         this.resultPanel.store.add(u);
-        //     }
-        //     this.grid.getView().refresh();
-        //     this.items.last().syncSize();
-        // } else {
-        //     this.onOkClick();
-        // }
     }
 
     ,onRemoveItemClick: function(b, idx, oel, e){
@@ -745,9 +707,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
         if(gridIdx >=0) {
             this.grid.getSelectionModel().deselectRow(gridIdx);
         }
-
-        // this.grid.getView().refresh();
-        // this.items.last().syncSize();
     }
     ,getValue: function(){
         rez = [];

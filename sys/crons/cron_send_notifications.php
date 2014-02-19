@@ -46,10 +46,11 @@ $users = array();
 L\initTranslations();
 
 $sql = 'SELECT action_type
-         , task_id
-         , user_id
-         , subject
-         , message
+        ,task_id
+        ,user_id
+        ,sender
+        ,subject
+        ,message
     FROM notifications
     WHERE `time` < CURRENT_TIMESTAMP '.(empty($cd['last_start_time']) ? '' : '
         AND `time` > \''.$cd['last_start_time'].'\' ').'
@@ -66,7 +67,7 @@ while ($r = $res->fetch_assoc()) {
     if (!isset($users[$r['user_id']])) {
         $users[$r['user_id']] = User::getPreferences($r['user_id']);
     }
-    $users[$r['user_id']]['mails'][] = array($r['subject'], $r['message']);
+    $users[$r['user_id']]['mails'][] = array($r['subject'], $r['message'], $r['sender']);
 }
 $res->close();
 foreach ($users as $u) {
@@ -90,7 +91,11 @@ foreach ($users as $u) {
                     $u['email'],
                     $m[0],
                     $message,
-                    "Content-type: text/html; charset=utf-8\r\nFrom: ".CONFIG\SENDER_EMAIL."\r\n"
+                    "Content-type: text/html; charset=utf-8\r\nFrom: ".
+                    (empty($m[2])
+                        ? CONFIG\SENDER_EMAIL
+                        : $m[2]
+                    )."\r\n"
                 );
             }
         }

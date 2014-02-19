@@ -31,7 +31,7 @@ class Comments extends Base
             ,'fl' => 'id,pid,name,template_id,cid,cdate,content'
             ,'sort' => 'cdate'
             ,'rows' => 10
-            ,'dir' => 'asc'
+            ,'dir' => 'desc'
         );
 
         $s = new \CB\Search();
@@ -40,7 +40,7 @@ class Comments extends Base
         foreach ($sr['data'] as $d) {
             $d['cdate_text'] = Util\formatAgoTime($d['cdate']);
             $d['user'] = User::getDisplayName($d['cid'], true);
-            $rez['data'][] = $d;
+            array_unshift($rez['data'], $d);
         }
 
         return $rez;
