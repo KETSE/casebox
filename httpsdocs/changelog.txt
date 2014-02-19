@@ -1,3 +1,14 @@
+CaseBox 1.9.123 (2014-02-19)
+==============================
+New Features, Improvements
+--------------------------
+- add padding & space between obj.Content and other blocks
+- Escape tags in comments
+
+Fixed Bugs:
+----------
+- solr "commit" event error
+
 CaseBox 1.9.122 (2014-02-18)
 ==============================
 New Features, Improvements

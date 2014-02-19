@@ -267,6 +267,7 @@ class Objects
                 }
                 $bottom .=  '<div class="obj-preview-h">'.$f['tf']['title'].'</div>'.$v.'<br />';
             }
+            $bottom = '<div style="padding: 0 10px">'.$bottom.'</div>';
         }
 
         Log::add(array('action_type' => 12, 'object_id' => $id ));

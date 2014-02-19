@@ -4,7 +4,8 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
 
     initComponent: function(){
         Ext.apply(this, {
-            html: ''
+            cls: 'block-plugin'
+            ,html: ''
             ,listeners: {
                 scope: this
                 ,afterrender: this.attachEvents
