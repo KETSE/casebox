@@ -5,7 +5,7 @@
 
     require_once '../../casebox/httpsdocs/init.php';
     require_once 'libx/SabreDAV/vendor/autoload.php';
-error_reporting(1);
+
     $auth = new WebDAV\Auth();
     $only = null;
 
