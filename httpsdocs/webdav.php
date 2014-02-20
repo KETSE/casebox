@@ -3,7 +3,7 @@
 
     $env = prepare_environment();
 
-    require_once '../../casebox/httpsdocs/init.php';
+    require_once 'init.php';
     require_once 'libx/SabreDAV/vendor/autoload.php';
 
     $auth = new WebDAV\Auth();
@@ -16,14 +16,21 @@
         $path = ($path == '') ? WEBDAV_PATH_DELIMITER : $path;
 
         // patch request for sabredav
-        $_SERVER['REQUEST_URI'] = $path.$env['request'];
+        $_SERVER['REQUEST_URI'] = WEBDAV_PATH_DELIMITER.
+            'dav-'.$env['core'].WEBDAV_PATH_DELIMITER.
+            $env['core'].WEBDAV_PATH_DELIMITER.
+            $path.$env['request'];
 
         // prepare only needed objects
         $object = WebDAV\Utils::getNodeById($env['id']);
-        $only = array_slice(explode(',', $object['pids']), 1);
+        $env['onlyFile'] = array_slice(explode(',', $object['pids']), 1);
     }
 
-    $rootDirectory = new WebDAV\Directory("Home", null, $only);
+    $rootDirectory = new \Sabre\DAV\SimpleCollection('root',array(
+        new \Sabre\DAV\SimpleCollection('dav-'.$env['core'],array(
+                new WebDAV\Directory($env['core'], null, $env['onlyFile'], $env['core'])
+            ))
+    ));
     $server = new \Sabre\DAV\Server($rootDirectory);
 
     // if there is no locking file for this core, create one
@@ -48,11 +55,10 @@
 
     function prepare_environment(){
         error_reporting(0);
+
         define('WEBDAV_PATH_DELIMITER', '/');
 
-        $result = array();
-        $_SERVER['REQUEST_URI']  = $_SERVER['REDIRECT_URL'];
-
+        $result = array('onlyFile'=> null);
         $url_parts = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 
         if(count($url_parts)<1) return;
@@ -62,7 +68,6 @@
             // ordinary webdav request
             $result['core'] = $matches[1];
             $result['action'] = 'request';
-            $result['request'] = implode('/', array_slice($url_parts,1));
         }else if($url_parts[0] =='edit'){
             // direct link webdav request
             $result['core'] = $url_parts[1];
@@ -84,17 +89,5 @@
             // bring
             $_SERVER['SERVER_NAME'] = implode('.',$sn);
         }
-
-        // bring request to webdav server
-        if(isset($result['request']))
-            $_SERVER['REQUEST_URI'] = WEBDAV_PATH_DELIMITER.$result['request'];
-
-        // HTTP_DESTINATION is in charge for destination of file
-        // Patch this var, so we can process MOVE requsts (Word cant save without it)
-        if(isset($_SERVER['HTTP_DESTINATION'])){
-            $url = parse_url($_SERVER['HTTP_DESTINATION']);
-            $_SERVER['HTTP_DESTINATION'] = preg_replace('@^/dav-'.$result['core'].'/@','/', $url['path']);
-        }
-
         return $result;
     }
