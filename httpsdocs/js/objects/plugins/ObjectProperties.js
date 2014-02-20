@@ -5,6 +5,7 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
     initComponent: function(){
         Ext.apply(this, {
             html: ''
+            ,cls: ''
             ,bodyStyle: 'margin-bottom: 30px'
             ,listeners: {
                 scope: this

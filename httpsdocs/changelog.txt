@@ -1,5 +1,14 @@
 CaseBox 1.9.124 (2014-02-20)
 ==============================
+- implemented search by id
+
+Fixed Bugs:
+----------
+- Preview not displayed for selected node in tree
+- comments view bug & some minor changes
+
+CaseBox 1.9.124 (2014-02-20)
+==============================
 New Features, Improvements
 --------------------------
 - added history & back button in right panel

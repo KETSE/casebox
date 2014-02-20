@@ -24,6 +24,13 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                             scope: this
                             ,'search': function(query, editor, event){
                                 editor.clear();
+                                if(Ext.isEmpty(query)) {
+                                    return;
+                                }
+                                if((query.substr(0,3) == 'id:') && !isNaN(query.substr(3))) {
+                                    App.locateObject(query.substr(3));
+                                    return;
+                                }
                                 App.activateBrowserTab().setParams({
                                     query: query
                                     ,descendants: !Ext.isEmpty(query)
@@ -314,7 +321,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         ) {
             return;
         }
-        params = {}
+        params = {};
         if(!Ext.isEmpty(node.attributes.view)) {
             params.view = node.attributes.view;
         }
@@ -338,9 +345,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             if( (sm.getCount() > 1) ||
                 !sm.isSelected(idx)
             ) {
-                sm.clearSelections();
-                sm.selectRow(idx);
+                // sm.clearSelections();
+                sm.selectRow(idx, false);
             }
+            var view = g.getView();
+            Ext.get(view.getRow(idx)).scrollIntoView(view.scroller);
             delete App.locateObjectId;
         }
     }

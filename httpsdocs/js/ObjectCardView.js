@@ -25,8 +25,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,handler: this.onEditClick
             })
             ,reload: new Ext.Action({
-                iconCls: 'ib-refresh'
-                ,scale: 'large'
+                iconCls: 'i-refresh'
+                ,text: L.Refresh
                 ,scope: this
                 ,handler: this.onReloadClick
             })
@@ -64,29 +64,85 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,handler: this.onOpenInTabsheetClick
             })
 
-            // ,pin: new Ext.Action({
-            //     iconCls: 'icon-pin'
-            //     ,scope: this
-            //     ,handler: this.onPinClick
-            // })
+            ,addTask: new Ext.Action({
+                iconCls: 'icon-task'
+                ,text: L.AddTask
+                ,scope: this
+                ,handler: this.onAddTaskClick
+            })
+            ,completeTask: new Ext.Action({
+                iconCls: 'icon-task'
+                ,text: L.CompletingTask
+                ,scope: this
+                ,handler: this.onCompleteTaskClick
+            })
+            ,closeTask: new Ext.Action({
+                iconCls: 'icon-task'
+                ,text: L.ClosingTask
+                ,scope: this
+                ,handler: this.onCloseTaskClick
+            })
+            ,reopenTask: new Ext.Action({
+                iconCls: 'icon-task'
+                ,text: L.ReopeningTask
+                ,scope: this
+                ,handler: this.onReopenTaskClick
+            })
+            ,attachFile: new Ext.Action({
+                iconCls: 'icon-file'
+                ,text: L.AttachFile
+                ,scope: this
+                ,handler: this.onAttachFileClick
+            })
+            ,webdavLink: new Ext.Action({
+                text: 'WebDAV Link'
+                ,scope: this
+                ,handler: this.onWebDAVLinkClick
+            })
 
         };
 
+        this.newMenu = new Ext.menu.Menu();
+        this.newButton = new Ext.menu.Item({
+            text: L.New
+            ,menu: this.newMenu
+        });
+        this.menu = new Ext.menu.Menu({
+            items: [
+                this.actions.reload
+                ,'-'
+                ,this.actions.addTask
+                ,this.actions.completeTask
+                ,this.actions.closeTask
+                ,this.actions.reopenTask
+                ,'-'
+                ,this.actions.attachFile
+                ,'-'
+                ,this.actions.webdavLink
+                ,this.newButton
+            ]
+        });
+        this.moreButton = new Ext.Button({
+            iconCls: 'ib-points'
+            ,scale: 'large'
+            ,scope: this
+            ,handler: function(b, e) {
+                this.menu.show(b.getEl());
+            }
+
+        });
+
         Ext.apply(this, {
             hideMode: 'offsets'
-            ,defaults: {
-                hideMode: 'offsets'
-            }
             ,tbar: [
                 this.actions.back
                 ,this.actions.edit
-                ,this.actions.reload
                 ,this.actions.download
                 ,this.actions.save
                 ,this.actions.cancel
                 ,'->'
                 ,this.actions.openInTabsheet
-                // ,this.actions.pin
+                ,this.moreButton
             ]
             ,items: [{
                     title: L.Properties
@@ -207,17 +263,17 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             case 'CBObjectProperties':
                 tb.setVisible(true);
                 this.actions.edit.show();
-                this.actions.reload.show();
+                this.actions.reload.enable();
                 this.actions.save.hide();
                 this.actions.cancel.hide();
-                this.actions.openInTabsheet.hide();
+                this.actions.openInTabsheet.show();
                 // this.actions.pin.hide();
                 this.actions.download.setHidden(!canDownload);
                 break;
             case 'CBEditObject':
                 tb.setVisible(true);
                 this.actions.edit.hide();
-                this.actions.reload.hide();
+                this.actions.reload.disable();
                 this.actions.save.show();
                 this.actions.cancel.show();
                 this.actions.openInTabsheet.show();
@@ -227,16 +283,57 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             case 'CBObjectPreview':
                 tb.setVisible(true);
                 this.actions.edit.show();
-                this.actions.reload.show();
+                this.actions.reload.enable();
                 this.actions.save.hide();
                 this.actions.cancel.hide();
-                this.actions.openInTabsheet.hide();
+                this.actions.openInTabsheet.show();
                 this.actions.download.setHidden(!canDownload);
                 // this.actions.pin.hide();
                 //this.load(this.loadedData);
                 break;
             default:
                 tb.setVisible(false);
+        }
+
+        clog(d.template_id, CB.DB.templates.getType(d.template_id));
+
+        this.moreButton.enable();
+        switch(CB.DB.templates.getType(d.template_id)) {
+            case 'file':
+                this.actions.addTask.show();
+                this.actions.completeTask.hide();
+                this.actions.closeTask.hide();
+                this.actions.reopenTask.hide();
+                this.actions.attachFile.show();
+                this.actions.webdavLink.show();
+                this.newButton.hide();
+                break;
+            case 'task':
+                this.actions.addTask.hide();
+
+                // if(d.status == 3) { //closed
+
+                // }
+                this.actions.completeTask.show();
+                this.actions.closeTask.show();
+                this.actions.reopenTask.show();
+
+                this.actions.attachFile.show();
+                this.actions.webdavLink.hide();
+                this.newButton.show();
+                break;
+            case 'object':
+            case 'case':
+                this.actions.addTask.show();
+                this.actions.completeTask.hide();
+                this.actions.closeTask.hide();
+                this.actions.reopenTask.hide();
+                this.actions.attachFile.show();
+                this.actions.webdavLink.hide();
+                this.newButton.show();
+                break;
+            default:
+                this.moreButton.disable();
         }
     }
 
@@ -307,9 +404,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             ? Ext.value(this.requestedLoadData.nid, this.requestedLoadData.id)
             : null;
 
-        if(Ext.isEmpty(id)) {
-            return;
-        }
+        // if(Ext.isEmpty(id)) {
+        //     return;
+        // }
 
         this.addParamsToHistory(this.loadedData);
 
@@ -336,22 +433,29 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 break;
             case 'CBObjectProperties':
             case 'CBEditObject':
-                activeItem.load({id: id});
+                activeItem.load(this.loadedData);
                 break;
         }
         this.onViewChange();
     }
 
     ,onCardItemLoaded: function(item) {
-        if(Ext.isEmpty(this.loadedData.scroll)) {
+        if(Ext.isEmpty(this.loadedData) || Ext.isEmpty(this.loadedData.scroll)) {
             return;
         }
-        item.body.scrollTo('left', this.loadedData.scroll.left);
-        item.body.scrollTo('top', this.loadedData.scroll.top);
+        if(item.body) {
+            item.body.scrollTo('left', this.loadedData.scroll.left);
+            item.body.scrollTo('top', this.loadedData.scroll.top);
+        }
     }
 
     ,addParamsToHistory: function(p) {
-        if(Ext.isEmpty(p) ||
+        var ai = this.getLayout().activeItem;
+        //current view index
+        var cvi = this.items.indexOf(ai);
+
+        if((cvi == 1) || // edit view
+            Ext.isEmpty(p) ||
             (Ext.encode(p) == '{}') ||
             (isNaN(p.id)) ||
             this.historyNavigation
@@ -378,6 +482,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,edit: function (objectData) {
+        clog(Ext.encode(objectData));
         if(App.isWebDavDocument(objectData.name)) {
             App.openWebdavDocument(objectData);
             return;

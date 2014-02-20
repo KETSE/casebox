@@ -16,8 +16,8 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             ,'        <img class="i32" src="/photo/{cid}.jpg" title="{user}">'
             ,'    </td>'
             ,'    <td>'
-            ,'        {[ Ext.util.Format.htmlEncode(values.content)]}'
-            ,'        <span class="gr">{cdate_text}</span>'
+            ,'        {[ Ext.util.Format.nl2br(Ext.util.Format.htmlEncode(values.content))]}'
+            ,'        <div class="gr" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</div>'
             ,'    </td>'
             ,'</tr>'
             ,'</tpl>'
@@ -26,6 +26,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
 
         this.dataView = new Ext.DataView({
             tpl: tpl
+            ,anchor: '100%'
             ,autoHeight: true
             ,itemSelector:'tr'
         });
@@ -53,8 +54,10 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
 
         Ext.apply(this, {
             title: L.Comments
-            ,cls: 'block-plugin-comments'
+            ,cls: 'obj-plugin block-plugin-comments'
             ,autoHeight: true
+            ,layout: 'anchor'
+            ,anchor: '100%'
             ,items: [
                 this.dataView
                 ,{
@@ -65,7 +68,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
                     ,items: [
                         {
                             xtype: 'label'
-                            ,html: '<img class="i32" src="/photo/' + App.loginData.id + '.jpg">'
+                            ,html: '<img class="i32" src="/photo/' + App.loginData.id + '.jpg" title="' + getUserDisplayName(true) + '">'
                         }
                         ,this.messageField
                         ,this.loadLabel

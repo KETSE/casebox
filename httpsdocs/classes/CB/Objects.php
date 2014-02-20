@@ -47,7 +47,12 @@ class Objects
             ,'cdate'
             ,'udate'
             ,'case_id'
+            ,'status'
             ,'data'
+            ,'canEdit'
+            ,'canClose'
+            ,'canReopen'
+            ,'canComplete'
         );
         foreach ($properties as $property) {
             if (isset($objectData[$property])) {
