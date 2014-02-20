@@ -10,10 +10,10 @@ class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection{
     private $object;
     private $only;
 
-    function __construct($myPath, $parent = null, $only = null) {
+    function __construct($myPath, $parent = null, $only = null, $root = null) {
         $this->only = $only;
 
-        if($myPath == "Home"){
+        if($myPath == $root){
             $this->id = 1;
         }else{
             foreach($parent->content as $node){
