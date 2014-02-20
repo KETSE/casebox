@@ -16,7 +16,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             ,'        <img class="i32" src="/photo/{cid}.jpg" title="{user}">'
             ,'    </td>'
             ,'    <td>'
-            ,'        <pre>{[ Ext.util.Format.htmlEncode(values.content)]}</pre>'
+            ,'        {[ Ext.util.Format.htmlEncode(values.content)]}'
             ,'        <span class="gr">{cdate_text}</span>'
             ,'    </td>'
             ,'</tr>'
@@ -90,24 +90,23 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
     ,onMessageBoxKeyPress: function(tf, e) {
         this.messageField.syncSize();
         this.syncSize();
-        if ((e.getKey() == e.ENTER)) {
-            if(e.hasModifier()) {
-            } else {
-                var msg = tf.getValue().trim();
-                if(Ext.isEmpty(msg)) {
-                    return;
-                }
-                this.messageField.hide();
-                this.loadLabel.show();
-                CB_Objects.addComment(
-                    {
-                        id: this.params.id
-                        ,msg: msg
-                    }
-                    ,this.onAddCommentProcess
-                    ,this
-                );
+
+        if ((e.getKey() == 10) && e.hasModifier()) {
+            var msg = tf.getValue().trim();
+
+            if(Ext.isEmpty(msg)) {
+                return;
             }
+            this.messageField.hide();
+            this.loadLabel.show();
+            CB_Objects.addComment(
+                {
+                    id: this.params.id
+                    ,msg: msg
+                }
+                ,this.onAddCommentProcess
+                ,this
+            );
         }
     }
 

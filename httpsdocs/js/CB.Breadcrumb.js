@@ -24,7 +24,6 @@ CB.Breadcrumb = Ext.extend( Ext.DataView, {
         CB.Breadcrumb.superclass.initComponent.apply(this, arguments);
     }
     ,onItemClick: function (el, idx, ev){
-        clog('breadcrumb click', arguments);
     }
     ,setValue: function(dataArray) {
         var data = [];

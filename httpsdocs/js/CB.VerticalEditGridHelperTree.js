@@ -116,10 +116,15 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
             rez[0].value = fieldData;
             return rez;
         }
-        if(Ext.isDefined(fieldData.value)){
+
+        if(Ext.isDefined(fieldData.value) ||
+            Ext.isDefined(fieldData.info) ||
+            Ext.isDefined(fieldData.childs)
+        ){
             rez[0] = fieldData;
             return rez;
         }
+
         if(Ext.isArray(fieldData)) {
             for (var i = 0; i < fieldData.length; i++) {
                 if(Ext.isPrimitive(fieldData[i])) {
@@ -161,6 +166,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         if(Ext.isEmpty(this.templateStore)) {
             return;
         }
+
         this.templateStore.each(
             function(record) {
                 if(record.get('pid') == pid) {

@@ -6,9 +6,18 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     ,activeItem: 0
     ,hideBorders: true
     ,tbarCssClass: 'x-panel-white'
+    ,loadedData: {}
+    ,history: []
     ,initComponent: function() {
         this.actions = {
-            edit: new Ext.Action({
+            back: new Ext.Action({
+                iconCls: 'ib-back'
+                ,scale: 'large'
+                ,disabled: true
+                ,scope: this
+                ,handler: this.onBackClick
+            })
+            ,edit: new Ext.Action({
                 iconCls: 'ib-edit-obj'
                 ,scale: 'large'
                 // ,disabled: true
@@ -69,7 +78,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 hideMode: 'offsets'
             }
             ,tbar: [
-                this.actions.edit
+                this.actions.back
+                ,this.actions.edit
                 ,this.actions.reload
                 ,this.actions.download
                 ,this.actions.save
@@ -88,6 +98,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                         scope: this
                         ,openpreview: this.onOpenPreviewEvent
                         ,openproperties: this.onOpenPropertiesEvent
+                        ,loaded: this.onCardItemLoaded
                     }
                 },{
                     title: L.Edit
@@ -102,12 +113,16 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                         ,clear: function(){
                             this.actions.save.setDisabled(true);
                         }
+                        ,loaded: this.onCardItemLoaded
                     }
                 },{
                     title: L.Preview
                     ,iconCls: 'icon-preview'
                     ,header: false
                     ,xtype: 'CBObjectPreview'
+                    ,listeners: {
+                        loaded: this.onCardItemLoaded
+                    }
                 }
             ]
             ,listeners: {
@@ -197,7 +212,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.actions.cancel.hide();
                 this.actions.openInTabsheet.hide();
                 // this.actions.pin.hide();
-                clog('sethidden', !canDownload)
                 this.actions.download.setHidden(!canDownload);
                 break;
             case 'CBEditObject':
@@ -224,33 +238,92 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             default:
                 tb.setVisible(false);
         }
-
     }
 
+    /**
+     * loading an object into the panel in a specific view
+     * @param  {[type]} objectData [description]
+     * @return {[type]}            [description]
+     */
     ,load: function(objectData) {
         if(!isNaN(objectData)) {
             objectData = {
                 id: objectData
             };
         }
+        var ai = this.getLayout().activeItem;
+
+        //current view index
+        var cvi = this.items.indexOf(ai);
+
+        // check  if a new load is waiting to be loaded
+        if(Ext.isEmpty(this.requestedLoadData)) {
+
+            //check if object data are identical to previous loaded object
+            if((objectData.id == this.loadedData.id) &&
+                (Ext.value(objectData.viewIndex, cvi) == Ext.value(this.loadedData.viewIndex, cvi))
+            ) {
+                return;
+            }
+
+            // save current croll position for history navigation
+            if(!Ext.isEmpty(ai.body)) {
+                this.loadedData.scroll = ai.body.getScroll();
+            }
+        } else {
+            //check if object data are identical to previous load request
+            if((objectData.id == this.requestedLoadData.id) &&
+                (Ext.value(objectData.viewIndex, cvi) == Ext.value(this.requestedLoadData.viewIndex, cvi))
+                ) {
+                return;
+            }
+        }
+
+        // cancel previous wating request and start a new one
         this.delayedLoadTask.cancel();
+
+        // save requested data
         this.requestedLoadData = Ext.apply({}, objectData);
+
+        //check if we are not in edit mode
         if(this.getLayout().activeItem.getXType() !== 'CBEditObject') {
+
+            //automatic switch to plugins panel
             this.onViewChangeClick(0);
+
             if(this.skipNextPreviewLoadOnBrowserRefresh) {
                 delete this.skipNextPreviewLoadOnBrowserRefresh;
             } else {
                 this.items.itemAt(0).clear();
+
+                // instantiate a delay to exclude flood requests
                 this.delayedLoadTask.delay(60, this.doLoad, this);
             }
         }
     }
+
     ,doLoad: function() {
-        this.loadedData = Ext.apply({}, this.requestedLoadData);
-        var activeItem = this.getLayout().activeItem;
         var id = this.requestedLoadData
             ? Ext.value(this.requestedLoadData.nid, this.requestedLoadData.id)
             : null;
+
+        if(Ext.isEmpty(id)) {
+            return;
+        }
+
+        this.addParamsToHistory(this.loadedData);
+
+        this.loadedData = Ext.apply({}, this.requestedLoadData);
+
+        if(Ext.isDefined(this.loadedData.viewIndex)) {
+            this.onViewChangeClick(this.loadedData.viewIndex, false);
+        }
+
+        delete this.requestedLoadData;
+
+        var activeItem = this.getLayout().activeItem;
+
+        this.loadedData.viewIndex = this.items.indexOf(activeItem);
 
         switch(activeItem.getXType()) {
             case 'CBObjectPreview':
@@ -268,23 +341,62 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         }
         this.onViewChange();
     }
+
+    ,onCardItemLoaded: function(item) {
+        if(Ext.isEmpty(this.loadedData.scroll)) {
+            return;
+        }
+        item.body.scrollTo('left', this.loadedData.scroll.left);
+        item.body.scrollTo('top', this.loadedData.scroll.top);
+    }
+
+    ,addParamsToHistory: function(p) {
+        if(Ext.isEmpty(p) ||
+            (Ext.encode(p) == '{}') ||
+            (isNaN(p.id)) ||
+            this.historyNavigation
+        ) {
+            delete this.historyNavigation;
+            return;
+        }
+        this.history.push(p);
+        this.actions.back.setDisabled(false);
+    }
+
+    ,onBackClick: function() {
+        if(Ext.isEmpty(this.history)) {
+            this.actions.back.setDisabled(true);
+            return;
+        }
+        this.delayedLoadTask.cancel();
+        this.historyNavigation = true;
+        this.requestedLoadData = this.history.pop();
+        if(Ext.isEmpty(this.history)) {
+            this.actions.back.setDisabled(true);
+        }
+        this.doLoad();
+    }
+
     ,edit: function (objectData) {
         if(App.isWebDavDocument(objectData.name)) {
             App.openWebdavDocument(objectData);
             return;
         }
-        this.onViewChangeClick(1, false);
-        this.getLayout().activeItem.load(objectData);
-        // this.loadedData.id = objectData.id;
+        objectData.viewIndex = 1;
+        this.delayedLoadTask.cancel();
+        this.requestedLoadData = objectData;
+        this.doLoad();
     }
     ,onEditClick: function() {
         if(App.isWebDavDocument(this.loadedData.name)) {
             App.openWebdavDocument(this.loadedData);
             return;
         }
-        this.onViewChangeClick(1);
-        // this.actions.save.setDisabled(true);
-        this.getLayout().activeItem.load(this.loadedData.id);
+        var p = Ext.apply({}, this.loadedData);
+        p.viewIndex = 1;
+        this.delayedLoadTask.cancel();
+        this.requestedLoadData = p;
+        this.doLoad();
     }
     ,onReloadClick: function() {
         this.getLayout().activeItem.reload();
@@ -295,19 +407,25 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             function(component, form, action){
                 var id = Ext.value(action.result.data.id, this.loadedData.id);
                 var name = Ext.value(action.result.data.name, this.loadedData.name);
-                this.requestedLoadData.id = id;
-                this.requestedLoadData.name = name;
-                this.items.itemAt(0).load(id);
-                this.onViewChangeClick(0, false);
 
+                var p = Ext.apply({}, this.loadedData);
+                p.id = id;
+                p.name = name;
+                p.viewIndex = 0;
+                this.requestedLoadData = p;
+                this.doLoad();
+                // this.items.itemAt(0).load(id);
+                // this.onViewChangeClick(0, false);
                 this.skipNextPreviewLoadOnBrowserRefresh = true;
             }
             ,this
         );
     }
     ,onCancelClick: function() {
-        this.requestedLoadData = this.loadedData;
-        this.onViewChangeClick(0);
+        var p = Ext.apply({}, this.loadedData);
+        p.viewIndex = 0;
+        this.requestedLoadData = p;
+        this.doLoad();
     }
     ,onOpenInTabsheetClick: function(b, e) {
         var d = Ext.apply({}, this.getLayout().activeItem.data);
@@ -315,7 +433,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         if(ai.readValues) {
             d = Ext.apply(d, ai.readValues());
         }
-
         ai.clear();
         this.onViewChangeClick(0);
 

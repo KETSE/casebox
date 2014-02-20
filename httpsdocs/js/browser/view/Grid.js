@@ -75,6 +75,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 singleSelect: false
                 ,listeners: {
                     scope: this
+                    ,beforerowselect: this.onBeforeRowSelect
                     ,selectionchange: this.onSelectionChange
                 }
             })
@@ -129,7 +130,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 // ,contextmenu: this.onContextMenu
                 // ,rowcontextmenu: this.onRowContextMenu
                 // ,beforedestroy: this.onBeforeDestroy
-                ,cellclick: this.onCellClick
                 // ,activate: App.onComponentActivated
                 ,mousedown: function(e){
                     if(e.button == 2){ //rightclick
@@ -309,18 +309,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         App.mainViewPort.selectGridObject(this.grid);
     }
 
-    ,onCellClick: function(grid, rowIndex, colIndex, e){
-        el = e.getTarget();
-        if(el && el.classList.contains('icon-arrow3')) {
-            var path = String(this.refOwner.folderProperties.path);
-            if(path.substr(-1) != '/') {
-                path += '/';
-            }
-            path += this.grid.store.getAt(rowIndex).get('nid');
-            this.fireEvent('changeparams', {path: path});
-        }
-    }
-
     ,onScrollerDragDrop: function(targetData, source, e, sourceData){
         App.DD.execute({
             action: e
@@ -329,7 +317,11 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         });
     }
 
+    ,onBeforeRowSelect: function( sm, rowIndex, keepExisting, record ) {
+        clog('on before row select');
+    }
     ,onSelectionChange: function() {
+        clog('on selection change');
         var s = this.grid.getSelectionModel().getSelections();
         for (var i = 0; i < s.length; i++) {
             s[i] = s[i].data;

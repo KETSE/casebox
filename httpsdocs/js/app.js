@@ -819,7 +819,6 @@ function initApp(){
                     ,valueField: 'id'
                 });
             case 'memo':
-                clog('arguements', arguments);
                 var height = Ext.value(cfg.height, 50);
                 height = parseInt(height, 10) + 7;
                 if(e.grid) {
