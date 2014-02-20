@@ -3,7 +3,7 @@
 
     $env = prepare_environment();
 
-    require_once '../../casebox/httpsdocs/init.php';
+    require_once 'init.php';
     require_once 'libx/SabreDAV/vendor/autoload.php';
 
     $auth = new WebDAV\Auth();
