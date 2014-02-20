@@ -57,7 +57,6 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             ,scope: this // optional scope for the callback
             ,discardUrl: false
             ,nocache: true
-            // ,text: L.Loading
             ,scripts: false
 
         });
@@ -81,6 +80,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
                 break;
         }
         this.attachEvents();
+        this.fireEvent('loaded', this);
     }
 
     ,attachEvents: function(){

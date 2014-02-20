@@ -576,20 +576,40 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.cardContainer.getLayout().setActiveItem(b.viewIndex);
         this.onReloadClick();
     }
+
     ,onBackClick: function(b, e) {
-        if(this.actions.back.isDisabled()) return;
-        this.historyIndex = (!Ext.isDefined(this.historyIndex)) ? this.history.length - 2 : this.historyIndex - 1;
+        if(this.actions.back.isDisabled()) {
+            return;
+        }
+        this.historyIndex = (!Ext.isDefined(this.historyIndex))
+            ? this.history.length - 2
+            : this.historyIndex - 1;
+        this.isHistoryAction = true;
         this.setParams(this.history[this.historyIndex]);
         this.actions.back.setDisabled(this.historyIndex <= 0);
         this.actions.forward.setDisabled(false);
     }
 
     ,onForwardClick: function(b, e) {
-        if(this.actions.forward.isDisabled()) return;
+        if(this.actions.forward.isDisabled()) {
+            return;
+        }
         this.historyIndex = this.historyIndex + 1;
+        this.isHistoryAction = true;
         this.setParams(this.history[this.historyIndex]);
         this.actions.back.setDisabled(false);
         this.actions.forward.setDisabled(this.historyIndex >= (this.history.length -1));
+    }
+
+    ,spliceHistory: function() {
+        if(this.isHistoryAction) {
+            delete this.isHistoryAction;
+            return;
+        }
+        if(Ext.isDefined(this.historyIndex)){
+            this.history.splice(this.historyIndex + 1, this.history.length - this.historyIndex);
+            delete this.historyIndex;
+        }
     }
 
     ,onReloadClick: function(){
@@ -675,7 +695,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onChangeParams: function(params, e){// fired by internal view
         if(e && e.stopPropagation) e.stopPropagation();
-        this.spliceHistory();
         this.setParams(params);
     }
 
@@ -711,6 +730,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
         this.requestParams = newParams;
 
+        this.spliceHistory();
+
         if(Ext.isEmpty(this.loadParamsTask)) {
             this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
         }
@@ -725,7 +746,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(!Ext.isDefined(this.historyIndex)){
             if(!Ext.isEmpty(this.requestParams)){
                 this.history.push(Ext.apply({}, this.requestParams));
-                if(this.history.length > 99) this.history.shift();
+                if(this.history.length > 99) {
+                    this.history.shift();
+                }
                 this.actions.back.setDisabled(this.history.length < 2);
                 this.actions.forward.setDisabled(true);
             }

@@ -68,6 +68,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
             ,this
         );
         this.doLayout(true, true);
+        this.fireEvent('loaded', this);
     }
 
     ,clear: function() {

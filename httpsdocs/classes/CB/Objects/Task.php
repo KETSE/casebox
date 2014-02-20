@@ -117,23 +117,26 @@ class Task extends Object
     {
         parent::loadCustomData();
 
-        if (empty($this->data['data'])) {
-            $this->data['data'] = array();
+        $d = &$this->data;
+
+        if (empty($d['data'])) {
+            $d['data'] = array();
         }
         $res = DB\dbQuery(
-            'SELECT title `_title`
-                ,date_start
-                ,date_end
-                ,allday
-                ,importance
-                ,category_id
-                ,responsible_user_ids `assigned`
-                ,description
+            'SELECT t.title `_title`
+                ,t.date_start
+                ,t.date_end
+                ,t.allday
+                ,t.importance
+                ,t.category_id
+                ,t.responsible_user_ids `assigned`
+                ,t.description
+                ,t.status
                 ,(SELECT reminds FROM tasks_reminders WHERE task_id = $1 AND user_id = $2) reminds
-                ,status
-                ,DATE_FORMAT(completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
+                ,(SELECT status FROM `tasks_responsible_users` WHERE task_id = $1 AND user_id = $2) user_status
+                ,DATE_FORMAT(t.completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
             FROM tasks t
-            WHERE id = $1',
+            WHERE t.id = $1',
             array(
                 $this->id
                 ,$_SESSION['user']['id']
@@ -142,12 +145,16 @@ class Task extends Object
 
         if ($r = $res->fetch_assoc()) {
             if (!empty($r['status'])) {
-                $this->data['status'] = $r['status'];
+                $d['status'] = $r['status'];
+            }
+            if (!empty($r['user_status'])) {
+                $d['user_status'] = $r['user_status'];
             }
             if (!empty($r['completed'])) {
-                $this->data['completed'] = $r['completed'];
+                $d['completed'] = $r['completed'];
             }
             unset($r['status']);
+            unset($r['user_status']);
             unset($r['completed']);
 
             $r['allday'] = array(
@@ -178,8 +185,16 @@ class Task extends Object
                 );
             }
 
-            $this->data['data'] = array_merge($this->data['data'], $r);
+            $d['data'] = array_merge($d['data'], $r);
         }
+
+        /* add possible action flags, for comodity */
+        $isTaskAdmin = (\CB\Security::isAdmin() || ($d['cid'] == $_SESSION['user']['id']));
+
+        $d['canEdit'] = (($d['status'] != 3) && ($isTaskAdmin));
+        $d['canClose'] = $d['canEdit'];
+        $d['canReopen'] = (($d['status'] == 3) && ($d['cid'] == $_SESSION['user']['id']));
+        $d['canComplete'] = (($d['status'] != 3) && (empty($d['user_status'])));
     }
 
     /**

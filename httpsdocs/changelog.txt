@@ -1,3 +1,25 @@
+CaseBox 1.9.124 (2014-02-20)
+==============================
+- implemented search by id
+
+Fixed Bugs:
+----------
+- Preview not displayed for selected node in tree
+- comments view bug & some minor changes
+
+CaseBox 1.9.124 (2014-02-20)
+==============================
+New Features, Improvements
+--------------------------
+- added history & back button in right panel
+- Open newObj in new tabsheet should keep field values
+- Date rendering in TaskBlock not ok
+- Update the Filter panel to look as in proto, i.e css
+
+Fixed Bugs:
+----------
+- Navigation buttons back/forward doesn't work ok
+
 CaseBox 1.9.123 (2014-02-19)
 ==============================
 New Features, Improvements

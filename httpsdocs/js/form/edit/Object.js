@@ -120,6 +120,9 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             id: r.data.id
             ,template_id: r.data.template_id
         };
+
+        this.startEditAfterObjectsStoreLoadIfNewObject = true;
+
         this.objectsStore.reload();
 
         this.grid.reload();
@@ -139,9 +142,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             this.grid.doLayout();
             this.grid.focus();
             this.grid.getSelectionModel().select(0, 1);
-            if(isNaN(this.data.id)) {
-                this.grid.startEditing(0, 1);
-            }
+
         }
 
         if(this.grid.templateStore) {
@@ -175,20 +176,13 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 }
                 ,this
             );
-
-            // if(this.grid.rendered) {
-            //     this.grid.doLayout();
-            //     this.grid.syncSize();
-            // }
-            // if(this.fieldsZone.rendered) {
-            //     this.fieldsZone.doLayout();
-            //     this.fieldsZone.syncSize();
-            // }
-        }
+         }
         this._isDirty = false;
 
         this.doLayout();
         this.syncSize();
+
+        this.fireEvent('loaded', this);
     }
 
     ,onObjectsStoreChange: function(store, records, options){
@@ -201,10 +195,15 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         );
         if(this.grid && !this.grid.editing && this.grid.getEl()) {
             var sc = this.grid.getSelectionModel().getSelectedCell();
+
             this.grid.getView().refresh(true);
             if(sc) {
                 this.grid.getSelectionModel().select(sc[0], sc[1]);
                 this.grid.getView().focusCell(sc[0], sc[1]);
+
+                if(this.startEditAfterObjectsStoreLoadIfNewObject && isNaN(this.data.id)) {
+                    this.grid.startEditing(0, 1);
+                }
             }
         }
     }

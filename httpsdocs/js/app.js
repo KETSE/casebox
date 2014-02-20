@@ -546,6 +546,7 @@ function initApp(){
         if(Ext.isEmpty(path)){
             CB_Path.getPidPath(object_id, function(r, e){
                 if(r.success !== true) return ;
+                clog('!!!', r.id, r.path);
                 App.locateObject(r.id, r.path);
             });
             return;
@@ -826,7 +827,6 @@ function initApp(){
                     ,valueField: 'id'
                 });
             case 'memo':
-                clog('arguements', arguments);
                 var height = Ext.value(cfg.height, 50);
                 height = parseInt(height, 10) + 7;
                 if(e.grid) {
