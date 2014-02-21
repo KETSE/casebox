@@ -38,8 +38,9 @@ class Utils
             ,'sort' => 'sort_name asc'
         );
 
-        if(is_array($onlyFileId))
+        if (is_array($onlyFileId)) {
             $params['fq'][] = 'id:('.implode(' OR ', $onlyFileId).')';
+        }
 
         $data = $s->search(
             $query,
@@ -60,6 +61,7 @@ class Utils
                 ,'udate' => $item->udate
                 ,'path' => $myPath . DIRECTORY_SEPARATOR . $item->name
             );
+
             if ($item->template_id != \CB\CONFIG\DEFAULT_FILE_TEMPLATE) {
                 $el['path'] = $myPath .DIRECTORY_SEPARATOR. $item->name;
             } else {

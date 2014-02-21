@@ -237,16 +237,33 @@ function formatDatePeriod($fromDateTime, $toDateTime)
  * @param  varchar $fromDateTime mysql formated date
  * @return varchar               modified time if timezone present
  */
-function dateTimeToUserTimezone($dateTime)
+function UTCTimeToUserTimezone($dateTime)
 {
     if (empty($dateTime) || empty($_SESSION['user']['cfg']['TZ'])) {
         return $dateTime;
     }
 
-    $d1 = new \DateTime($fromDateTime);
-    $d1->setTimezone(new \DateTimeZone($_SESSION['user']['cfg']['TZ']));
+    $d = new \DateTime($dateTime);
+    $d->setTimezone(new \DateTimeZone($_SESSION['user']['cfg']['TZ']));
 
-    return $d2format .= $d1->format('Y-m-d H:i:s');
+    return $d->format('Y-m-d H:i:s');
+}
+
+/**
+ * formats a dateTime string according to user timezone from session for webdav
+ * @param  varchar $fromDateTime mysql formated date
+ * @return varchar               modified time if timezone present
+ */
+function userTimeToUTCTimezone($dateTime)
+{
+    if (empty($dateTime) || empty($_SESSION['user']['cfg']['TZ'])) {
+        return $dateTime;
+    }
+
+    $d = new \DateTime($dateTime, new \DateTimeZone($_SESSION['user']['cfg']['TZ']));
+    $d->setTimezone('UTC');
+
+    return $d->format('Y-m-d H:i:s');
 }
 
 /**
