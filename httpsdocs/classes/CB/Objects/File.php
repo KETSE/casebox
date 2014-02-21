@@ -26,6 +26,7 @@ class File extends Object
                 ,fc.pages
                 ,fc.type
                 ,fc.path `content_path`
+                ,fc.md5
             FROM files f
             LEFT JOIN files_content fc ON f.content_id = fc.id
             WHERE f.id = $1',
