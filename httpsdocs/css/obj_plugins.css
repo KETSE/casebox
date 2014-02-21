@@ -21,7 +21,12 @@
     border: none;
 }
 
+.block-plugin .gr {
+    margin-top: 4px;
+}
+
 .block-plugin td {
+    vertical-align: top;
     border-top: 1px solid #EEE;
     border-bottom: 1px solid #EEE;
     padding: 4px 10px 4px 10px;
@@ -71,7 +76,7 @@ background-color: #FFFFCC;
 
 .block-plugin-comments .x-panel-body {
     margin-bottom: 30px;
-    background-color: #EEE;
+    background-color: #F1F1F1;
 }
 
 .block-plugin-comments .obj-plugin-h label {
