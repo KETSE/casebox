@@ -6,6 +6,11 @@ New Features, Improvements
 - removed devel server ip from config.php & added a new function in Config.php class
     for easy check if a value is present in a config param of comma separated values
 
+Fixed Bugs:
+----------
+- Comments sending indicator doesn't look ok
+- no date/time title for just added comment
+
 CaseBox 1.9.124 (2014-02-20)
 ==============================
 New Features, Improvements

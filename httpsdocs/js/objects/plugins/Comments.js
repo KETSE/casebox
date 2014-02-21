@@ -35,7 +35,6 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             emptyText: 'Write a comment...'
             ,flex: 1
             ,height: 32
-            // ,autoHeight: true
             ,enableKeyEvents: true
             ,style: 'margin-top: 5px; font-family: \'lucida grande\',tahoma,verdana,arial,sans-serif; font-size: 11px'
             ,listeners: {
@@ -101,6 +100,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
                 return;
             }
             this.messageField.hide();
+            this.syncSize();
             this.loadLabel.show();
             CB_Objects.addComment(
                 {

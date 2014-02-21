@@ -841,6 +841,7 @@ class Objects
                 'id' => $id
                 ,'pid' => $p['id']
                 ,'template_id' => $data['template_id']
+                ,'cdate' => date(DATE_ATOM)
                 ,'cdate_text' => Util\formatAgoTime('now')
                 ,'cid' => $_SESSION['user']['id']
                 ,'user' => User::getDisplayName($_SESSION['user']['id'])

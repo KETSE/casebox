@@ -107,6 +107,7 @@ border-radius: 4;
 }
 .msg-load{
     vertical-align: middle;
+    width: 100% !important;
 }
 
 .msg-load div {
