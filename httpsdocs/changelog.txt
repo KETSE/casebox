@@ -1,5 +1,15 @@
+CaseBox 1.9.125 (2014-02-21)
+==============================
+New Features, Improvements
+--------------------------
+- set timezone for database connection to "+00:00"
+- removed devel server ip from config.php & added a new function in Config.php class
+    for easy check if a value is present in a config param of comma separated values
+
 CaseBox 1.9.124 (2014-02-20)
 ==============================
+New Features, Improvements
+--------------------------
 - implemented search by id
 
 Fixed Bugs:

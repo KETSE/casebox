@@ -33,14 +33,14 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         }
         this.newId = id;
         this.newVersionId = Ext.value(versionId, '');
-        this.delayReload(50);
+        this.delayReload(100);
     }
 
     ,delayReload: function(ms){
         if(!this.delayedReloadTask) {
             this.delayedReloadTask = new Ext.util.DelayedTask(this.reload, this);
         }
-        this.delayedReloadTask.delay(Ext.value(ms, 50), this.reload, this);
+        this.delayedReloadTask.delay(Ext.value(ms, 1000), this.reload, this);
 
     }
 
