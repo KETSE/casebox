@@ -1,56 +1,67 @@
 <?php
 namespace CB\WebDAV;
 
-class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection{
-
+class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection
+{
     private $myPath;
 
     public $id;
+    protected $parent;
+
     public $content;
-    private $object;
+    private $objectData;
     private $only;
 
-    function __construct($myPath, $parent = null, $only = null, $root = null) {
+    public function __construct($myPath, $parent = null, $only = null, $root = null, $objectData = null)
+    {
         $this->only = $only;
 
-        if($myPath == $root){
+        if ($myPath == $root) {
             $this->id = 1;
-        }else{
-            foreach($parent->content as $node){
-                if($node['path'] == $myPath){
+        } else {
+            foreach ($parent->content as $node) {
+                if ($node['path'] == $myPath) {
                     $this->id = $node['id'];
                     break;
                 }
             }
         }
 
+        $this->parent = $parent;
         $this->myPath = $myPath;
         $this->content = Utils::getNodeContent($this->id, $this->myPath);
-        $this->object = Utils::getNodeById($this->id);
+        $this->objectData = is_null($objectData)
+            ? Utils::getNodeById($this->id)
+            : $objectData;
     }
 
-    function getChildren() {
+    public function getChildren()
+    {
         $children = array();
         // Loop through the directory, and create objects for each node
 
-        foreach($this->content as $node) {
-            if($this->only == null)
+        foreach ($this->content as $node) {
+            if ($this->only == null) {
                 $children[] = $this->getChild($node['name']);
-            else
-                if($this->only[0] == $node['id'])
+            } else {
+                if ($this->only[0] == $node['id']) {
                     $children[] = $this->getChild($node['name']);
+                }
+            }
         }
+
         return $children;
     }
 
-    function getChild($name) {
+    public function getChild($name)
+    {
         $path = $this->myPath . WEBDAV_PATH_DELIMITER . $name;
-        foreach($this->content as $item){
-            if($item['name'] == $name){
-                if($item['template_id'] != \CB\CONFIG\DEFAULT_FILE_TEMPLATE){
-                    return new Directory($path, $this);
-                }else{
-                    return new File($path, $item['id'], $this);
+        foreach ($this->content as $item) {
+            if ($item['name'] == $name) {
+                if ($item['template_id'] != \CB\CONFIG\DEFAULT_FILE_TEMPLATE) {
+                    return new Directory($path, $this, null, null, $item);
+                } else {
+                    return new File($path, $item['id'], $this, $item);
                 }
             }
         }
@@ -58,37 +69,48 @@ class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection{
         throw new \Sabre\DAV\Exception\NotFound('The file with name: ' . $name . ' could not be found');
     }
 
-    function childExists($name) {
-        foreach($this->content as $item){
-            if($item['name'] == $name){
+    public function childExists($name)
+    {
+        foreach ($this->content as $item) {
+            if ($item['name'] == $name) {
                 return true;
             }
         }
+
         return false;
     }
 
-    function getName() {
+    public function getName()
+    {
         return basename($this->myPath);
     }
 
-    function setName($name) {
+    public function setName($name)
+    {
         Utils::renameObject($this->id, $name);
     }
 
-    function getLastModified(){
-        return is_null($this->object['udate']) ? $this->object['cdate'] : $this->object['udate'];
+    //method for creation date is also required ???
+    public function getLastModified()
+    {
+        return ( empty($this->objectData['udate'])
+            ? $this->objectData['cdate']
+            : $this->objectData['udate']
+        );
     }
 
-    function createDirectory($name){
+    public function createDirectory($name)
+    {
         return Utils::createDirectory($this->id, $name);
     }
 
-    function createFile($name, $data = null){
+    public function createFile($name, $data = null)
+    {
         Utils::createCaseboxFile($this->id, $name, $data);
     }
 
-    function delete(){
+    public function delete()
+    {
         Utils::deleteObject($this->id);
     }
 }
-
