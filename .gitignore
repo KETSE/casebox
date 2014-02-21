@@ -9,6 +9,9 @@ logs/
 # ignore .sublime files
 *sublime*
 
+# ignore phpStorm project files
+.idea/
+
 # ignore 'cores' configuration
 httpsdocs/cores/
 

@@ -176,7 +176,7 @@ class Utils
         $data['name'] = $name;
         $data['data']['_title'] = $name;
 
-        $file->setData($date);
+        $file->setData($data);
         $file->update();
 
         \CB\Solr\Client::runCron();
