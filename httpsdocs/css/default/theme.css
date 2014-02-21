@@ -93,6 +93,7 @@
 }
 .msg-load{
     vertical-align: middle;
+    width: 100% !important;
 }
 
 .msg-load div {
