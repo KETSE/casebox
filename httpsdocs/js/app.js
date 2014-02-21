@@ -36,10 +36,17 @@ Ext.onReady(function(){
     Ext.QuickTips.init();
     Ext.apply(Ext.QuickTips.getQuickTip(), {showDelay: 1500});
 
+
+    // return;
+
     setTimeout(function(){
         Ext.get('loading').remove();
-        Ext.fly('loading-mask').fadeOut({remove:true});
-    }, 250);
+        // Ext.fly('loading-mask').remove();
+        // Ext.fly('loading-mask').fadeOut({remove:true});
+    }, 10);
+
+
+
 
     CB_User.getLoginInfo( function(r, e){
         if(r.success !== true) return;
@@ -539,6 +546,7 @@ function initApp(){
         if(Ext.isEmpty(path)){
             CB_Path.getPidPath(object_id, function(r, e){
                 if(r.success !== true) return ;
+                clog('!!!', r.id, r.path);
                 App.locateObject(r.id, r.path);
             });
             return;
@@ -819,7 +827,6 @@ function initApp(){
                     ,valueField: 'id'
                 });
             case 'memo':
-                clog('arguements', arguments);
                 var height = Ext.value(cfg.height, 50);
                 height = parseInt(height, 10) + 7;
                 if(e.grid) {

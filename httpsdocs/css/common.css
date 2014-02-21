@@ -1,5 +1,6 @@
 @charset "utf-8";
 /* Common CSS Document */
+.fs8, .fs8 *{ font-size: 8px}
 .fs10, .fs10 *{ font-size: 10px}
 .fs11, .fs11 *{ font-size: 11px !important}
 .fs12, .fs12 *{ font-size: 12px !important}

@@ -80,8 +80,14 @@ function connectWithParams($p)
     // if database changed then apply initsql if set
     if (@$lastParams['name'] != $newParams['name']) {
         $newParams['name'] = $dbh->real_escape_string($newParams['name']);
+
         $dbh->query('USE `'.$newParams['name'].'`');
+
         $dbh->query("SET NAMES 'UTF8'");
+
+        // set time zone for database to 00:00
+        $dbh->query('SET @@session.time_zone = "+00:00"') or die(dbQueryError());
+
         if (!empty($newParams['initsql'])) {
             $dbh->query($newParams['initsql']);
         }

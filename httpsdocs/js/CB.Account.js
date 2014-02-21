@@ -1008,7 +1008,6 @@ CB.TSVsmsForm = Ext.extend(Ext.form.FormPanel, {
     }
     ,processPhoneVerification: function(r, e){
         this.getEl().unmask();
-        clog('processPhoneVerification', arguments);
     }
     ,showError: function(msg){}
 

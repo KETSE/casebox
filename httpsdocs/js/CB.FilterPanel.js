@@ -3,7 +3,7 @@ Ext.namespace('CB');
 CB.FilterPanel = Ext.extend(Ext.Panel, {
     xtype: 'panel'
     ,autoScroll: true
-    ,bodyStyle: 'background-color: #F4F4F4'
+    ,bodyStyle: 'padding: 10px 0'
     ,padding:0
 
     ,initComponent: function(){

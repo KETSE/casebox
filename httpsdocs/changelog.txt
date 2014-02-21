@@ -1,3 +1,40 @@
+CaseBox 1.9.125 (2014-02-21)
+==============================
+New Features, Improvements
+--------------------------
+- set timezone for database connection to "+00:00"
+- removed devel server ip from config.php & added a new function in Config.php class
+    for easy check if a value is present in a config param of comma separated values
+
+Fixed Bugs:
+----------
+- Comments sending indicator doesn't look ok
+- no date/time title for just added comment
+
+CaseBox 1.9.124 (2014-02-20)
+==============================
+New Features, Improvements
+--------------------------
+- implemented search by id
+
+Fixed Bugs:
+----------
+- Preview not displayed for selected node in tree
+- comments view bug & some minor changes
+
+CaseBox 1.9.124 (2014-02-20)
+==============================
+New Features, Improvements
+--------------------------
+- added history & back button in right panel
+- Open newObj in new tabsheet should keep field values
+- Date rendering in TaskBlock not ok
+- Update the Filter panel to look as in proto, i.e css
+
+Fixed Bugs:
+----------
+- Navigation buttons back/forward doesn't work ok
+
 CaseBox 1.9.123 (2014-02-19)
 ==============================
 New Features, Improvements

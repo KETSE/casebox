@@ -1,5 +1,16 @@
-.facet{padding: 5px 5px 5px 5px; border-top: 1px solid #CCC;}
-.facet .x-panel-header, .activeFilters .x-panel-header{ background: none !important; border: 0; color: black;}
+.facet{
+	margin: 10px 0 20px 0;
+}
+.facet .x-panel-header, .activeFilters .x-panel-header{
+	background: none;
+	border-bottom: 2px solid #CCC;
+	color: #333;
+	text-transform: uppercase;
+	padding: 0 5px 4px 4px;
+	margin: 0;
+	font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;
+	font-weight: bold;
+}
 .facet .x-tool-chain, .facet .x-tool-unchain{display: none}
 .multivalued .x-tool-chain, .multivalued .x-tool-unchain{display: inline-block}
 
@@ -8,12 +19,10 @@
 	padding:0;
 	list-style: none;
 }
-ul.filter_list { margin-top: 5px}
-.filter_list li { line-height:16px; padding: 3px 10px 5px 20px; margin-left: 10px; background: url(i/squares.png) 5px -151px no-repeat;}
-.filter_list li.active { background-position: 5px -99px }
-.filter_list a {text-decoration: none; color: #333; }
+.filter_list li { line-height:16px; padding: 3px 10px 5px 20px; background: url(i/squares.png) 5px -151px no-repeat;}
+.filter_list .active { background-position: 5px -99px }
+.filter_list a {text-decoration: none; color: #555; }
 .filter_list a:hover {text-decoration: underline; color: #000; }
-.activeFilters ul.filter_list {margin-bottom:10px}
 .activeFilters .filter_list li{margin-left:0;}
 .activeFilters .filter_list li, .activeFilters .filter_list li a { background-position: 5px 6px; color: #C1272D; }
 .activeFilters .filter_list li.reset, .activeFilters .filter_list li.reset a { background-position: 5px -47px; color: #676767; }
@@ -33,8 +42,8 @@ ul.filter_list { margin-top: 5px}
 	font-size:8pt
 }
 .active_filters .filter { padding-right: 10px; float: left; }
-.active_filters .btn .st, .active_filters .btn .st i { padding-left: 0px; margin-left:0; }
-li.last_active_filter {
+.active_filters .btn .st, .active_filters .btn .st i { padding-left: 0; margin-left:0; }
+.last_active_filter {
 	background:none;
 	padding-bottom:10px;
 	margin-bottom:5px;
@@ -44,7 +53,6 @@ li.last_active_filter {
 a:hover .icon_basic_filter, span:hover .icon_basic_filter, .stactive .icon_basic_filter, .midactive .icon_basic_filter, .endactive .icon_basic_filter { background-position: -16px -48px }
 a:hover .icon_close_red, span:hover .icon_close_red, .stactive .icon_close_red, .midactive .icon_close_red, .endactive .icon_close_red { background-position: 0 -16px }
 .ico {
-	display: inline-block;
 	height: 16px;
 	width: 16px;
 	float: left;
@@ -61,7 +69,7 @@ a:hover .icon_close_red, span:hover .icon_close_red, .stactive .icon_close_red, 
 	display: block;
 	height: 16px;
 	width: 16px;
-	left: 0px;
+	left: 0;
 }
 .icon_close_red {background-position: 0 0 }
 .icon_close_white { background-position: -16px 0}

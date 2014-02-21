@@ -200,13 +200,7 @@ mb_detect_order('UTF-8,UTF-7,ASCII,EUC-JP,SJIS,eucJP-win,SJIS-win,JIS,ISO-2022-J
 mb_substitute_character("none");
 
 // timezone
-date_default_timezone_set(
-    empty($config['timezone'])
-    ?
-    'UTC'
-    :
-    $config['timezone']
-);
+date_default_timezone_set('UTC');
 
 /* end of setting php configuration options, session lifetime and error_reporting level */
 
@@ -274,8 +268,8 @@ function isWindows()
 function isDevelServer()
 {
     return (
-        (strpos($_SERVER['SERVER_NAME'], '.d.') !== false)
-        || ($_SERVER['SERVER_ADDR'] == '46.165.252.15')
+        (strpos($_SERVER['SERVER_NAME'], '.d.') !== false) ||
+        Config::isInListValue('devel_hosts', $_SERVER['REMOTE_ADDR'])
     );
 }
 
@@ -285,16 +279,9 @@ function isDevelServer()
  */
 function isDebugHost()
 {
-    $debugHosts = Config::get('debug_hosts');
-    $debugHosts = explode(',', $debugHosts);
-
     return (
-        empty($_SERVER['SERVER_NAME'])
-        ||
-        in_array(
-            $_SERVER['REMOTE_ADDR'],
-            $debugHosts
-        )
+        empty($_SERVER['SERVER_NAME']) ||
+        Config::isInListValue('debug_hosts', $_SERVER['REMOTE_ADDR'])
     );
 }
 

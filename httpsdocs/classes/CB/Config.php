@@ -324,7 +324,8 @@ class Config extends Singleton
         return $rez;
     }
 
-    /*
+    /**
+    *
     * @param  varchar $optionName name of the option to get
     * @return variant | null
     */
@@ -336,4 +337,26 @@ class Config extends Singleton
 
         return $defaultValue;
     }
+
+    /**
+    * Check if a given value is presend in a config property
+    * Property is considered to be an array or a comma separated list of values
+    *
+    * @param  varchar $optionName name of the option to get
+    * @param  varchar $value checked value
+    * @return boolean
+    */
+    public static function isInListValue($optionName, $value)
+    {
+        $v = static::get($optionName);
+        if (is_scalar($v)) {
+            $v = explode(',', $v);
+        }
+
+        return in_array(
+            $value,
+            $v
+        );
+    }
+
 }

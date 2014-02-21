@@ -4,6 +4,7 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
     border: false
     ,header: false
     ,tbarCssClass: 'obj-plugin-h'
+    ,cls: 'obj-plugin'
     ,initComponent: function(){
         this.prepareToolbar();
 

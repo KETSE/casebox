@@ -33,14 +33,14 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         }
         this.newId = id;
         this.newVersionId = Ext.value(versionId, '');
-        this.delayReload(50);
+        this.delayReload(100);
     }
 
     ,delayReload: function(ms){
         if(!this.delayedReloadTask) {
             this.delayedReloadTask = new Ext.util.DelayedTask(this.reload, this);
         }
-        this.delayedReloadTask.delay(Ext.value(ms, 50), this.reload, this);
+        this.delayedReloadTask.delay(Ext.value(ms, 1000), this.reload, this);
 
     }
 
@@ -57,7 +57,6 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             ,scope: this // optional scope for the callback
             ,discardUrl: false
             ,nocache: true
-            // ,text: L.Loading
             ,scripts: false
 
         });
@@ -81,6 +80,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
                 break;
         }
         this.attachEvents();
+        this.fireEvent('loaded', this);
     }
 
     ,attachEvents: function(){

@@ -11,6 +11,25 @@ function date_ISO_to_date(date_string){
     return new Date(d);
 }
 
+function getUserDisplayName(withEmail) {
+    var rez = App.loginData.first_name + ' ' + App.loginData.last_name;
+    rez = rez.trim();
+    if (Ext.isEmpty(rez)) {
+        rez = App.loginData.rez;
+    }
+    if ((withEmail === true) && (!Ext.isEmpty(App.loginData.email))) {
+        rez += "\n(" + App.loginData.email + ")";
+    }
+    return rez;
+}
+
+function displayDateTime(date){
+    var d = date_ISO_to_date(date);
+    if(Ext.isDate(d)) {
+        return d.format(App.longDateFormat + ' ' + App.timeFormat);
+    }
+    return '';
+}
 /**
  * Convert a date to a date string with time filled with 0
  * // 2014-02-17T00:00:00Z

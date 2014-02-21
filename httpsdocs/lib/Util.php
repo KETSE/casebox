@@ -233,6 +233,23 @@ function formatDatePeriod($fromDateTime, $toDateTime)
 }
 
 /**
+ * formats a dateTime string according to user timezone from session for webdav
+ * @param  varchar $fromDateTime mysql formated date
+ * @return varchar               modified time if timezone present
+ */
+function dateTimeToUserTimezone($dateTime)
+{
+    if (empty($dateTime) || empty($_SESSION['user']['cfg']['TZ'])) {
+        return $dateTime;
+    }
+
+    $d1 = new \DateTime($fromDateTime);
+    $d1->setTimezone(new \DateTimeZone($_SESSION['user']['cfg']['TZ']));
+
+    return $d2format .= $d1->format('Y-m-d H:i:s');
+}
+
+/**
  * formats a dateTime period between two dates. For ex.: Tue Apr 30, 2013 00:10 - 01:10
  * @param  varchar $fromDateTime mysql formated date
  * @param  varchar $toDateTime   mysql formated date

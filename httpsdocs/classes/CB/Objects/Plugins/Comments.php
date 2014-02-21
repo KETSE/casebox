@@ -37,6 +37,7 @@ class Comments extends Base
         $s = new \CB\Search();
         $sr = $s->query($params);
         $rez['total'] = $sr['total'];
+
         foreach ($sr['data'] as $d) {
             $d['cdate_text'] = Util\formatAgoTime($d['cdate']);
             $d['user'] = User::getDisplayName($d['cid'], true);

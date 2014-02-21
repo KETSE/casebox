@@ -21,7 +21,12 @@
     border: none;
 }
 
+.block-plugin .gr {
+    margin-top: 4px;
+}
+
 .block-plugin td {
+    vertical-align: top;
     border-top: 1px solid #EEE;
     border-bottom: 1px solid #EEE;
     padding: 4px 10px 4px 10px;
@@ -69,14 +74,9 @@ background-color: #FFFFCC;
     border-bottom: 1px solid #FFF;
 }
 
-.block-plugin-comments .obj pre{
-    font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
-    font-size: 11px;
-}
-
 .block-plugin-comments .x-panel-body {
     margin-bottom: 30px;
-    background-color: #EEE;
+    background-color: #F1F1F1;
 }
 
 .block-plugin-comments .obj-plugin-h label {
@@ -108,7 +108,9 @@ background-color: #FFFFCC;
     margin-bottom: 0;
     color: #333;
     padding: 0 5px 0 8px;
-    border-bottom: 2px solid #CCC;
+}
+.obj-plugin .x-panel-body-noborder {
+    border-top: 2px solid #CCC;
 }
 
 .obj-plugin-h .x-toolbar-left{
