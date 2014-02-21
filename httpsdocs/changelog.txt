@@ -1,3 +1,11 @@
+CaseBox 1.9.148 (2014-02-21)
+==============================
+New Features, Improvements
+--------------------------
+- added functions to Util :
+    UTCTimeToUserTimezone
+    userTimeToUTCTimezone
+
 CaseBox 1.9.125 (2014-02-21)
 ==============================
 New Features, Improvements
