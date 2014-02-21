@@ -7,7 +7,6 @@ class File extends \Sabre\DAV\FS\Node implements \Sabre\DAV\IFile
     private $myPath;
     private $parent;
     private $objectData;
-    // private $realPath;
 
     public function __construct($myPath, $id, &$parent = null, $objectData = null)
     {
@@ -19,8 +18,6 @@ class File extends \Sabre\DAV\FS\Node implements \Sabre\DAV\IFile
         $this->objectData = is_null($objectData)
             ? Utils::getFileById($id)
             : $objectData;
-
-        // $this->realPath = \CB\FILES_DIR.$this->object['content_path'] . '/' . $this->object['content_id'];
     }
 
     public function getName()
@@ -45,20 +42,17 @@ class File extends \Sabre\DAV\FS\Node implements \Sabre\DAV\IFile
 
     public function get()
     {
-        return fopen($this->objectData['content_path'], 'r');
-        // return fopen($this->realPath, 'r');
+        return fopen(\CB\FILES_DIR.$this->objectData['content_path'], 'r');
     }
 
     public function getSize()
     {
         return $this->objectData['size'];
-        // return filesize($this->realPath);
     }
 
     public function getETag()
     {
         return $this->objectData['md5'];
-        // return md5_file($this->realPath);
     }
 
     public function getLastModified()
@@ -67,10 +61,10 @@ class File extends \Sabre\DAV\FS\Node implements \Sabre\DAV\IFile
             ? $this->objectData['cdate']
             : $this->objectData['udate']
         );
-        // return is_null($this->object['udate']) ? $this->object['cdate'] : $this->object['udate'];
     }
 
     public function getContentType()
     {
+        return $this->objectData['type'];
     }
 }

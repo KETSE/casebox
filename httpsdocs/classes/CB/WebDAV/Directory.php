@@ -4,17 +4,17 @@ namespace CB\WebDAV;
 class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection
 {
     private $myPath;
+    private $onlyFileId;
 
     public $id;
     protected $parent;
 
     public $content;
     private $objectData;
-    private $only;
 
-    public function __construct($myPath, $parent = null, $only = null, $root = null, $objectData = null)
+    public function __construct($myPath, $parent = null, $onlyFileId = null, $root = null, $objectData = null)
     {
-        $this->only = $only;
+        $this->onlyFileId = $onlyFileId;
 
         if ($myPath == $root) {
             $this->id = 1;
@@ -29,8 +29,8 @@ class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection
 
         $this->parent = $parent;
         $this->myPath = $myPath;
-        $this->content = Utils::getNodeContent($this->id, $this->myPath);
-        $this->objectData = is_null($objectData)
+        $this->content = Utils::getNodeContent($this->id, $this->myPath, $this->onlyFileId);
+           $this->objectData = is_null($objectData)
             ? Utils::getNodeById($this->id)
             : $objectData;
     }
@@ -41,13 +41,7 @@ class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection
         // Loop through the directory, and create objects for each node
 
         foreach ($this->content as $node) {
-            if ($this->only == null) {
-                $children[] = $this->getChild($node['name']);
-            } else {
-                if ($this->only[0] == $node['id']) {
-                    $children[] = $this->getChild($node['name']);
-                }
-            }
+            $children[] = $this->getChild($node['name']);
         }
 
         return $children;
@@ -55,11 +49,11 @@ class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection
 
     public function getChild($name)
     {
-        $path = $this->myPath . WEBDAV_PATH_DELIMITER . $name;
+        $path = $this->myPath . DIRECTORY_SEPARATOR . $name;
         foreach ($this->content as $item) {
             if ($item['name'] == $name) {
                 if ($item['template_id'] != \CB\CONFIG\DEFAULT_FILE_TEMPLATE) {
-                    return new Directory($path, $this, null, null, $item);
+                    return new Directory($path, $this, $this->onlyFileId, null, $item);
                 } else {
                     return new File($path, $item['id'], $this, $item);
                 }

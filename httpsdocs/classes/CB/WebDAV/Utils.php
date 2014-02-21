@@ -23,25 +23,23 @@ class Utils
         return $file->load();
     }
 
-    public static function getNodeContent($id, $myPath, $onlyId = null)
+    public static function getNodeContent($id, $myPath, $onlyFileId = null)
     {
         $s = new \CB\Search();
 
         $query = 'pid:'.$id;
 
-        if (is_numeric($onlyId)) {
-            $query = 'id:'.$onlyId;
-        }
-
         $params = array(
-            // Alex, specify only the columns that you need for webdav
-            'fl' => 'id,name,template_id,date,cdate,udate'
+            'fl' => 'id,name,template_id,date,cdate,udate,size'
             ,'fq'=> array(
                 'dstatus:0'
                 ,'system:[0 TO 1]'
             )
             ,'sort' => 'sort_name asc'
         );
+
+        if(is_array($onlyFileId))
+            $params['fq'][] = 'id:('.implode(' OR ', $onlyFileId).')';
 
         $data = $s->search(
             $query,
@@ -57,9 +55,13 @@ class Utils
                 'id' => $item->id
                 ,'name' => $item->name
                 ,'template_id' => $item->template_id
+                ,'size' => $item->size
+                ,'cdate' => $item->cdate
+                ,'udate' => $item->udate
+                ,'path' => $myPath . DIRECTORY_SEPARATOR . $item->name
             );
             if ($item->template_id != \CB\CONFIG\DEFAULT_FILE_TEMPLATE) {
-                $el['path'] = $myPath .WEBDAV_PATH_DELIMITER. $item->name;
+                $el['path'] = $myPath .DIRECTORY_SEPARATOR. $item->name;
             } else {
                 $fileIds[] = $el['id'];
             }
@@ -68,11 +70,12 @@ class Utils
 
         /* select additional info required for files */
         if (!empty($fileIds)) {
-            $res = DB\dbQuery(
+            $res = \CB\DB\dbQuery(
                 'SELECT
                     f.id
                     ,CONCAT(c.path, \'/\', f.content_id) `content_path`
                     ,c.md5
+                    ,c.type
                 FROM files f
                 LEFT JOIN files_content c ON f.content_id = c.id
                 WHERE f.id in (' . implode(',', $fileIds) . ')'
@@ -83,25 +86,7 @@ class Utils
             }
             $res->close();
         }
-        /* end of select additional info required for files */
 
-        // foreach ($data->response->docs as $item) {
-        //     if ($item->template_id == \CB\CONFIG\DEFAULT_FILE_TEMPLATE) {
-        //         $array[] = array(
-        //             'id' => $item->id
-        //             ,'name' => $item->name
-        //             ,'template_id' => $item->template_id
-        //         );
-        //     }
-        // }
-
-        // if ($only != null) {
-        //     foreach ($array as $k => $item) {
-        //         if ($item['id'] != $only) {
-        //             unset($array[$k]);
-        //         }
-        //     }
-        // }
         return $array;
     }
 
@@ -176,7 +161,7 @@ class Utils
 
     public static function log($name)
     {
-        $f = fopen('webdav.log', 'a');
+        $f = fopen('webdav.log', 'a+');
         fwrite($f, $name."\n");
         fclose($f);
     }
