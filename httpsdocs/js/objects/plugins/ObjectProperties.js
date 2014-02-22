@@ -89,6 +89,31 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
         this.getEl().unmask();
         App.fireEvent('objectchanged', this.params);
     }
+
+    ,getContainerToolbarItems: function() {
+        rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(this.params) {
+            if(this.params.can) {
+                clog('can', this.params.can);
+                if(this.params.can.complete) {
+                    rez['tbar']['completetask' + this.instanceId] = {};
+                }
+                if(this.params.can.close) {
+                    rez['menu']['closetask' + this.instanceId] = {};
+                }
+                if(this.params.can.reopen) {
+                    rez['menu']['reopentask' + this.instanceId] = {};
+                }
+            }
+        }
+
+        return rez;
+    }
+
 });
 
 Ext.reg('CBObjectsPluginsObjectProperties', CB.objects.plugins.ObjectProperties);

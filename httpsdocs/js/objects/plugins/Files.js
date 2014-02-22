@@ -132,9 +132,25 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
     ,getToolbarItems: function() {
         return [this.actions.add];
     }
+
+    ,getContainerToolbarItems: function() {
+        var rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(this.params) {
+            if(!this.isVisible()) {
+                rez.menu['attachfile' + this.instanceId] = {};
+            }
+        }
+        return rez;
+    }
+
     ,onAddClick: function(b, e) {
         this.dragPanel.show();
     }
+
     ,onDragPanelClick: function(ev, el) {
         var te = ev.getTarget();
         if(Ext.isEmpty(te)) {

@@ -49,10 +49,7 @@ class Objects
             ,'case_id'
             ,'status'
             ,'data'
-            ,'canEdit'
-            ,'canClose'
-            ,'canReopen'
-            ,'canComplete'
+            ,'can'
         );
         foreach ($properties as $property) {
             if (isset($objectData[$property])) {
@@ -195,8 +192,7 @@ class Objects
         $body = '';
         $bottom = '';
         try {
-            $obj = static::getCustomClassByObjectId($id);
-            $obj->load();
+            $obj = static::getCachedObject($id);
 
             if ($obj->getType() == 'task') {
                 $tc = new Tasks();
@@ -792,9 +788,9 @@ class Objects
             $class = '\\CB\\Objects\\Plugins\\'.ucfirst($pluginName);
             $pClass = new $class($id);
             $prez = $pClass->getData();
-            if (!empty($prez) && isset($prez['data'])) {
-                $rez['data'][$pluginName] = $prez;
-            }
+            // if (!empty($prez) && isset($prez['data'])) {
+            $rez['data'][$pluginName] = $prez;
+            //}
         }
 
         return $rez;

@@ -29,7 +29,7 @@
 .ib-refresh{background-image: url(b/refresh.png); min-width: 38px}
 .ib-save{background-image: url(b/save.png); min-width: 38px}
 .ib-search{background-image: url(b/search.png); min-width: 38px}
-.ib-task-complete{background-image: url(b/green-tick.png); min-width: 38px}
+.ib-task-complete{background-image: url(b/task-complete.png); min-width: 38px}
 .ib-task-new{background-image: url(b/task-new.png); min-width: 38px}
 .ib-trash{background-image: url(b/trash.png); min-width: 38px}
 .ib-upload{background-image: url(b/upload.png); min-width: 38px}
@@ -54,6 +54,8 @@
 
 
 .i-refresh {background-image: url(s/refresh.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-points {background-image: url(s/points-gray.png); background-position: 0 50%; background-repeat: no-repeat}
+
 .i-flag, .x-tree-node .i-flag{background-image: url(s/flag.png); background-position: 0 50%; background-repeat: no-repeat}
 .is-flag, .x-tree-node .is-flag{background-image: url(s/flag-small.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-magnifier, .x-tree-node .i-magnifier{background-image: url(s/magnifier.png); background-position: 0 50%; background-repeat: no-repeat}

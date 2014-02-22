@@ -52,6 +52,22 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
         }
 
     }
+
+    ,getContainerToolbarItems: function() {
+        rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(this.params) {
+            clog('!!!!!!!!', CB.DB.templates.getType(this.params.template_id));
+            if(CB.DB.templates.getType(this.params.template_id) == 'file') {
+                rez.menu['webdavlink' + this.instanceId]  = {};
+            }
+        }
+
+        return rez;
+    }
 });
 
 Ext.reg('CBObjectsPluginsSystemProperties', CB.objects.plugins.SystemProperties);

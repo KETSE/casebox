@@ -1187,20 +1187,17 @@ class Tasks
         }
         $d = $d['data'];
 
-        $canEdit = (($d['status'] != 3) && $d['admin']);
-        $canClose = $canEdit;
-        $canReopen = ($d['status'] == 3) && ($d['cid'] == $_SESSION['user']['id']);
-        $canComplete = (($d['status'] != 3) && !empty($d['user']) && (@$d['user']['status'] == 0));
+        static::setTaskActionFlags($d);
 
         $actions = array();
 
-        if ($canClose) {
+        if (!empty($d['can']['close'])) {
             $actions[] = '<a action="close" class="taskA click">'.L\Close.'</a>';
         }
-        if ($canReopen) {
+        if (!empty($d['can']['reopen'])) {
             $actions[] = '<a action="reopen" class="taskA click">'.L\Reopen.'</a>';
         }
-        if (!$canClose && $canComplete) {
+        if (empty($d['can']['close']) && !empty($d['can']['complete'])) {
             $actions[] = '<a action="complete" class="taskA click">'.L\Complete.'</a>';
         }
 
@@ -1280,9 +1277,9 @@ class Tasks
                 '<p class="gr">'.(
                     ($u['status'] == 1)
                     ? L\Completed.': '.date($date_format.' H:i', strtotime($u['time'])).
-                        ( ($canEdit == 1) ? '<a class="bt taskA click" action="markincomplete" uid="'.$u['id'].'">'.L\revoke.'</a>' : '')
+                        ( (!empty($d['can']['edit'])) ? '<a class="bt taskA click" action="markincomplete" uid="'.$u['id'].'">'.L\revoke.'</a>' : '')
                     : L\waitingForAction.
-                        (($canEdit == 1) ? '<a class="bt taskA click" action="markcomplete" uid="'.$u['id'].'">'.L\complete.'</a>' : '' )
+                        ((!empty($d['can']['edit'])) ? '<a class="bt taskA click" action="markcomplete" uid="'.$u['id'].'">'.L\complete.'</a>' : '' )
                 ).'</p></td></tr>';
                 //<a class="bt" name="complete" uid="1" href="#">завершить</a>
 
@@ -1402,5 +1399,67 @@ class Tasks
                 static::getSolrData($object_record);
             }
         }
+    }
+
+    /**
+     *  set the flags for actions that could be made to the tasks by a specific or current user
+     * @param  reference $object_records
+     * @return void
+     */
+    public static function setTaskActionFlags(&$taskData, $userId = false)
+    {
+        $p = array(&$taskData);
+        static::setTasksActionFlags($p, $userId);
+    }
+
+    /**
+     *  set the flags for actions that could be made to the tasks by a specific or current user
+     * @param  reference $object_records
+     * @return void
+     */
+    public static function setTasksActionFlags(&$tasksDataArray, $userId = false)
+    {
+        if ($userId === false) {
+            $userId = $_SESSION['user']['id'];
+        }
+
+        $isAdmin = \CB\Security::isAdmin();
+        $taskTemplates = Templates::getIdsByType('task');
+        $ta = array();
+        foreach ($tasksDataArray as &$d) {
+            if (!in_array($d['template_id'], $taskTemplates)) {
+                continue;
+            }
+            $ta[$d['id']] = &$d;
+
+            $canEdit = ($d['status'] != 3) && ($isAdmin || ($d['cid'] == $userId));
+            $d['can'] = array(
+                'edit' => $canEdit
+                ,'close' => $canEdit
+                ,'reopen' => (($d['status'] == 3) && ($d['cid'] == $userId))
+            );
+        }
+
+        if (empty($ta)) {
+            return;
+        }
+
+        // select status of the user in tasks (completed or not)
+        $res = DB\dbQuery(
+            'SELECT task_id, status
+            FROM `tasks_responsible_users`
+            WHERE task_id in ('.implode(',', array_keys($ta)).')
+                AND user_id = $1',
+            $userId
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $userStatus = $r['status'];
+            $d = &$ta[$r['task_id']];
+            $canEdit = ($d['status'] != 3) && ($isAdmin || ($d['cid'] == $userId));
+            $d['can']['complete'] = (($d['status'] != 3) && (empty($userStatus)));
+        }
+        $res->close();
+
     }
 }

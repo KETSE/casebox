@@ -21,7 +21,7 @@ class Tasks extends Base
             ,'fq' => array(
                 'template_type:task'
             )
-            ,'fl' => 'id,pid,name,template_id,date,date_end,cid'
+            ,'fl' => 'id,pid,name,template_id,date,date_end,cid,status'
             ,'sort' => 'cdate'
             ,'dir' => 'desc'
         );
@@ -31,6 +31,9 @@ class Tasks extends Base
         foreach ($sr['data'] as $d) {
             $d['ago_text'] = @Util\formatDateTimePeriod($d['date'], null, @$_SESSION['user']['cfg']['TZ']);
             $d['user'] = User::getDisplayName($d['cid'], true);
+
+            \CB\Tasks::setTaskActionFlags($d);
+
             $rez['data'][] = $d;
         }
 

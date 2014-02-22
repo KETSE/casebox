@@ -72,6 +72,7 @@ class Dbnode extends Base
                 }
                 $res->close();
             }
+            \CB\Tasks::setTasksActionFlags($rez['data']);
         }
 
         return $rez;

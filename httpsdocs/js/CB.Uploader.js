@@ -324,7 +324,7 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
         this.targetStatus = 5; //DONE
 
         params = {
-            name: r.get('name')
+            name: encodeURIComponent(r.get('name'))
             ,type: r.get('type')
             ,size: r.get('size')
             ,pid: r.get('pid')

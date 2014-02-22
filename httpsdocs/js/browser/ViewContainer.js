@@ -383,6 +383,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,{name: 'acl_count', type: 'int'}
                     ,'cfg'
                     ,'cls'
+                    ,'can'
             ]
             }
             )
@@ -863,6 +864,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     id: s[0].nid
                     ,name: s[0].name
                     ,template_id: s[0].template_id
+                    ,can: s[0].can
                 };
 
         this.objectPanel.load(data);

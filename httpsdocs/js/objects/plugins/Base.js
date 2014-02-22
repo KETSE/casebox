@@ -49,6 +49,10 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
         return [];
     }
 
+    ,getContainerToolbarItems: function() {
+        return {};
+    }
+
     ,openObjectProperties: function(data) {
         this.fireEvent('openproperties', data);
     }

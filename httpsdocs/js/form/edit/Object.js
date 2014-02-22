@@ -291,6 +291,10 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         this.fireEvent('clear', this);
     }
 
+    ,getContainerToolbarItems: function() {
+
+    }
+
 });
 
 Ext.reg('CBEditObject', CB.form.edit.Object);

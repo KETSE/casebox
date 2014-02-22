@@ -122,6 +122,8 @@ class Listeners
             return;
         }
 
+        $onUsers[] = $_SESSION['user']['id'];
+
         $d['sys_data']['subscribers'] = array(
             'on' => $onUsers
             ,'off' => $offUsers

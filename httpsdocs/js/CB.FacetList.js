@@ -15,7 +15,6 @@ CB.FacetList = Ext.extend( CB.Facet, {
     title: 'List facet'
     ,autoHeight: true
     ,layout: 'fit'
-    ,cachedNames: {}//used by tree_tags
     ,listMode: 'checklist' //radio
     ,initComponent: function(){
         this.store = new Ext.data.JsonStore({
@@ -79,6 +78,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
 
         Ext.apply(this, {
             items: items
+            ,cachedNames: {}//used by tree_tags
             ,listeners: {
                 modechange: {
                     scope: this

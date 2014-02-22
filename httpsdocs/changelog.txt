@@ -1,3 +1,24 @@
+CaseBox 1.9.150 (2014-02-22)
+==============================
+New Features, Improvements
+--------------------------
+- right panel actions / buttons concept implementation
+
+Fixed Bugs:
+----------
+- uploading files with non asci symbols in name result in error
+    used encodeURIComponent on client side and urldecode on server.
+
+CaseBox 1.9.149 (2014-02-21)
+==============================
+New Features, Improvements
+--------------------------
+- If preview generation didn't succeed, don't "mark" the file as like having the preview generated
+
+Fixed Bugs:
+----------
+- Active facet displayed wrong titles sometimes
+
 CaseBox 1.9.148 (2014-02-21)
 ==============================
 New Features, Improvements

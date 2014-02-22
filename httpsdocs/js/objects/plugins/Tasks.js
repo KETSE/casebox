@@ -105,6 +105,25 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
     ,getToolbarItems: function() {
         return [this.actions.add];
     }
+
+    ,getContainerToolbarItems: function() {
+        rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(this.params) {
+            rez['menu']['addtask' + this.instanceId] = {};
+
+            if(CB.DB.templates.getType(this.params.template_id) !== 'file') {
+                rez['menu']['new' + this.instanceId] = {};
+            }
+        }
+
+
+        return rez;
+    }
+
     ,onAddClick: function(b, e) {
         //adding new task
     }

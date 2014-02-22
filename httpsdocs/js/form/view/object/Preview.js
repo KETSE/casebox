@@ -292,6 +292,9 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         if(this.getEl().isVisible(true)) this.body.scrollTo('top', 0);
     }
 
+    ,getContainerToolbarItems: function() {
+
+    }
 });
 
 Ext.reg('CBObjectPreview', CB.form.view.object.Preview);

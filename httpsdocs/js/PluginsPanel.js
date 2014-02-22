@@ -58,12 +58,17 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
                 var cl = Ext.util.Format.capitalize(k.substr(0,1)) + k.substr(1);
                 cl = 'CBObjectsPlugins' + cl;
                 var c = Ext.create({
-                        params: this.loadedParams
+                        instanceId: this.instanceId
+                        ,params: this.loadedParams
                     }
                     ,cl
                 );
                 this.add(c);
-                c.onLoadData(v);
+                if(Ext.isEmpty(v.data)) {
+                    c.setVisible(false);
+                } else {
+                    c.onLoadData(v);
+                }
             }
             ,this
         );
@@ -87,6 +92,9 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
     }
     ,reload: function() {
         this.doLoad(this.loadedParams);
+    }
+    ,getContainerToolbarItems: function() {
+
     }
 });
 
