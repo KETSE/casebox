@@ -292,7 +292,14 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
     }
 
     ,getContainerToolbarItems: function() {
+        var rez = {
+            tbar: {}
+        };
+        rez.tbar['save'] = {};
+        rez.tbar['cancel'] = {};
+        rez.tbar['openInTabsheet'] = {};
 
+        return rez;
     }
 
 });

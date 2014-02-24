@@ -58,8 +58,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
                 var cl = Ext.util.Format.capitalize(k.substr(0,1)) + k.substr(1);
                 cl = 'CBObjectsPlugins' + cl;
                 var c = Ext.create({
-                        instanceId: this.instanceId
-                        ,params: this.loadedParams
+                        params: this.loadedParams
                     }
                     ,cl
                 );

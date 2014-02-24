@@ -6,6 +6,9 @@ CB.objects.plugins.Versions = Ext.extend(CB.objects.plugins.Base, {
         CB.objects.plugins.Versions.superclass.initComponent.apply(this, arguments);
     }
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
         // if(this.rendered) {
         //     this.dataView.update(r.data);
         // } else {

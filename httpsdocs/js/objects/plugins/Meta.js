@@ -6,6 +6,9 @@ CB.objects.plugins.Meta = Ext.extend(CB.objects.plugins.Base, {
         CB.objects.plugins.Meta.superclass.initComponent.apply(this, arguments);
     }
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
         // if(this.rendered) {
         //     this.dataView.update(r.data);
         // } else {

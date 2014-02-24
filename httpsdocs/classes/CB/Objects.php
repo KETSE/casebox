@@ -241,6 +241,7 @@ class Objects
             }
         }
         if (!empty($gf['body'])) {
+            $previousHeader = '';
             foreach ($gf['body'] as $f) {
                 $v = $template->formatValueForDisplay($f['tf'], @$f['value']);
                 if (is_array($v)) {
@@ -251,9 +252,11 @@ class Objects
                     continue;
                 }
                 $headerField = $template->getHeaderField($f['tf']['id']);
-                if (!empty($headerField)) {
+                if (!empty($headerField) && ($previousHeader != $headerField)) {
                     $body .= '<tr class="prop-header"><th colspan="3"'.(empty($headerField['level']) ? '' : ' style="padding-left: '.($headerField['level'] * 10).'px"').'>'.$headerField['title'].'</th></tr>';
                 }
+                $previousHeader = $headerField;
+
                 $body .= '<tr><td'.(empty($f['tf']['level']) ? '' : ' style="padding-left: '.($f['tf']['level'] * 10).'px"').
                     ' class="prop-key">'.$f['tf']['title'].'</td><td class="prop-val">'.$v.
                     (empty($f['info']) ? '' : '<p class="prop-info">'.$f['info'].'</p>').'</td></tr>';

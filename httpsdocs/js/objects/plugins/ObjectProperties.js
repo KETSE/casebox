@@ -16,6 +16,12 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
+
+        Ext.apply(this.params, r.data);
+
         if(this.rendered) {
             this.update(r.data.html);
         } else {
@@ -100,13 +106,13 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
             if(this.params.can) {
                 clog('can', this.params.can);
                 if(this.params.can.complete) {
-                    rez['tbar']['completetask' + this.instanceId] = {};
+                    rez['tbar']['completetask'] = {};
                 }
                 if(this.params.can.close) {
-                    rez['menu']['closetask' + this.instanceId] = {};
+                    rez['menu']['closetask'] = {};
                 }
                 if(this.params.can.reopen) {
-                    rez['menu']['reopentask' + this.instanceId] = {};
+                    rez['menu']['reopentask'] = {};
                 }
             }
         }

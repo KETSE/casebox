@@ -499,7 +499,7 @@ function initApp(){
         var ext = name.split('.').pop();
         return (App.config.webdav_files.indexOf(ext) >= 0);
     };
-    App.openWebdavDocument = function(data){
+    App.openWebdavDocument = function(data, checkCookie){
         if(Ext.isEmpty(App.config.webdav_url)) {
             return;
         }
@@ -508,7 +508,9 @@ function initApp(){
         url = url.replace('{name}', data.name);
         App.confirmLeave = false;
 
-        if(Ext.util.Cookies.get('webdavHideDlg') == 1) {
+        if((checkCookie !== false) &&
+            (Ext.util.Cookies.get('webdavHideDlg') == 1)
+        ) {
             window.open('cbdav:' + url, '_self');
         } else {
             var w = new CB.WebdavWindow({

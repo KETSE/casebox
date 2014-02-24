@@ -1,16 +1,23 @@
 Ext.namespace('CB.plugins');
 CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
     pidPropety: 'nid'
-    ,dropZoneConfig:{
-        text: 'Drop files here'
-    }
     ,constructor: function(config){
-        if(config) Ext.apply(this, config);
+        Ext.apply(this, {
+            dropZoneConfig:{
+                //text: 'Drop files here'
+            }
+        });
+
+        if(config) {
+            Ext.apply(this, config);
+        }
     }
     ,init: function(owner) {
         this.owner = owner;
         owner.on('render', this.onRender, this);
-        if(owner.dropZoneConfig) Ext.apply(this.dropZoneConfig, owner.dropZoneConfig);
+        if(owner.dropZoneConfig) {
+            Ext.apply(this.dropZoneConfig, owner.dropZoneConfig);
+        }
     }
 
     ,onRender: function(grid){
@@ -132,10 +139,14 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
             this.onBeforeDestroy();
             return;
         }
-        if( !el.isVisible(true) ) return;
+        if( !el.isVisible(true) ) {
+            return;
+        }
 
+        clog('dropZoneEl', this.dropZoneEl);
         if(!this.dropZoneEl){
             this.dropZoneEl = this.owner.getEl().appendChild(document.createElement('div'));
+            this.dropZoneEl.addClass('desktop-drop-zone');
             this.dropZoneEl.update(this.dropZoneConfig.text);
             this.dropZoneEl.on('dragenter', function(e, el){Ext.get(el).addClass('grid-drop-zone-over');});
             this.dropZoneEl.on('dragleave', function(e, el){Ext.get(el).removeClass('grid-drop-zone-over');});
@@ -145,10 +156,19 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
         this.dropZoneEl.applyStyles("display:block");
     }
     ,hideDropZone: function(e){
-        if(this.dropZoneEl){
-            this.dropZoneEl.applyStyles("display:none");
-            this.dropZoneEl.removeClass('grid-drop-zone-over');
+        clog('try hiding', this.dropZoneEl);
+        var a = Ext.query('.desktop-drop-zone');
+        if(!Ext.isEmpty(a)) {
+            for (var i = a.length - 1; i >= 0; i--) {
+                a = Ext.get(a);
+                a.applyStyles("display:none");
+                a.removeClass('grid-drop-zone-over');
+            };
         }
+        // if(this.dropZoneEl){
+        //     this.dropZoneEl.applyStyles("display:none");
+        //     this.dropZoneEl.removeClass('grid-drop-zone-over');
+        // }
     }
 });
 

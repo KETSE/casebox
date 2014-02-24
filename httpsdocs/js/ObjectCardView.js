@@ -26,13 +26,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onEditClick
             })
-            ,reload: new Ext.Action({
-                iconCls: 'i-refresh'
-                ,id: 'reload' + this.instanceId
-                ,text: L.Refresh
-                ,scope: this
-                ,handler: this.onReloadClick
-            })
             ,download: new Ext.Action({
                 qtip: L.Download
                 ,id: 'download' + this.instanceId
@@ -71,12 +64,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,handler: this.onOpenInTabsheetClick
             })
 
-            ,addTask: new Ext.Action({
-                id: 'addtask' + this.instanceId
-                ,text: L.AddTask
-                ,scope: this
-                ,handler: this.onAddTaskClick
-            })
             ,completeTask: new Ext.Action({
                 iconCls: 'ib-task-complete'
                 ,id: 'completetask' + this.instanceId
@@ -85,37 +72,61 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onCompleteTaskClick
             })
-            ,closeTask: new Ext.Action({
-                id: 'closetask' + this.instanceId
-                ,text: L.ClosingTask
+        };
+
+        this.menuItemConfigs = {
+            reload: {
+                iconCls: 'i-refresh'
+                ,id: 'reload' + this.instanceId
+                ,text: L.Refresh
+                ,scope: this
+                ,handler: this.onReloadClick
+            }
+            ,addtask: {
+                text: L.AddTask
+                ,data: {
+                    template_id: App.config.default_task_template
+                }
+                ,scope: this
+                ,handler: this.onCreateObjectClick
+            }
+            ,completetask: {
+                iconCls: 'ib-task-complete'
+                ,id: 'completetask' + this.instanceId
+                ,scale: 'large'
+                ,text: L.Done
+                ,scope: this
+                ,handler: this.onCompleteTaskClick
+            }
+            ,closetask: {
+                text: L.ClosingTask
                 ,scope: this
                 ,handler: this.onCloseTaskClick
-            })
-            ,reopenTask: new Ext.Action({
-                id: 'reopentask' + this.instanceId
-                ,text: L.ReopeningTask
+            }
+            ,reopentask: {
+                text: L.ReopeningTask
                 ,scope: this
                 ,handler: this.onReopenTaskClick
-            })
-            ,attachFile: new Ext.Action({
-                id: 'attachfile' + this.instanceId
-                ,text: L.AttachFile
+            }
+            ,attachfile: {
+                text: L.AttachFile
                 ,scope: this
                 ,handler: this.onAttachFileClick
-            })
-            ,webdavLink: new Ext.Action({
+            }
+            ,webdavlink: {
                 text: 'WebDAV Link'
                 ,id: 'webdavlink' + this.instanceId
                 ,scope: this
                 ,handler: this.onWebDAVLinkClick
-            })
-
+            }
+            ,'new': {
+                text: L.New
+                ,menu: []
+            }
         };
 
         /* will user BC abreviation for Button Collection */
         this.BC = new Ext.util.MixedCollection();
-
-        this.newMenu = new Ext.menu.Menu();
 
         this.BC.addAll([
             new Ext.Button(this.actions.back)
@@ -124,18 +135,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             ,new Ext.Button(this.actions.save)
             ,new Ext.Button(this.actions.cancel)
             ,new Ext.Button(this.actions.openInTabsheet)
-            ,new Ext.menu.Item(this.actions.reload)
-            ,new Ext.menu.Item(this.actions.addTask)
             ,new Ext.Button(this.actions.completeTask)
-            ,new Ext.menu.Item(this.actions.closeTask)
-            ,new Ext.menu.Item(this.actions.reopenTask)
-            ,new Ext.menu.Item(this.actions.attachFile)
-            ,new Ext.menu.Item(this.actions.webdavLink)
-            ,new Ext.menu.Item({
-                text: L.New
-                ,id: 'new' + this.instanceId
-                ,menu: this.newMenu
-            })
+
             ,new Ext.Button({
                 iconCls: 'ib-points'
                 ,id: 'more' + this.instanceId
@@ -146,24 +147,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 }
             })
         ]);
-
-        // hide all buttons by default
-        // this.BC.each(function(i){ i.hide();}, this);
-
-        this.menu = new Ext.menu.Menu({
-            items: [
-                this.BC.get('reload' + this.instanceId)
-                ,'-'
-                ,this.BC.get('addtask' + this.instanceId)
-                ,this.BC.get('closetask' + this.instanceId)
-                ,this.BC.get('reopentask' + this.instanceId)
-                ,'-'
-                ,this.BC.get('attachfile' + this.instanceId)
-                ,'-'
-                ,this.BC.get('webdavlink' + this.instanceId)
-                ,this.BC.get('new' + this.instanceId)
-            ]
-        });
 
         Ext.apply(this, {
             hideMode: 'offsets'
@@ -177,19 +160,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,'->'
                 ,this.BC.get('openInTabsheet' + this.instanceId)
                 ,this.BC.get('more' + this.instanceId)
-
-                // this.actions.back
-                // ,this.actions.edit
-                // ,this.actions.download
-                // ,this.actions.save
-                // ,this.actions.cancel
-                // ,'->'
-                // ,this.actions.openInTabsheet
-                // ,this.BC.get('more')
             ]
-            ,defaults: {
-                instanceId: this.instanceId
-            }
             ,items: [{
                     title: L.Properties
                     ,iconCls: 'icon-infoView'
@@ -223,7 +194,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                     ,header: false
                     ,xtype: 'CBObjectPreview'
                     ,listeners: {
-                        loaded: this.onCardItemLoaded
+                        scope: this
+                        ,loaded: this.onCardItemLoaded
                     }
                 }
             ]
@@ -231,6 +203,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 scope: this
                 ,add: this.onCardItemAdd
                 ,afterrender: this.doLoad
+                ,lockpanel: this.onLockPanelEvent
             }
         });
 
@@ -238,8 +211,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         this.delayedLoadTask = new Ext.util.DelayedTask(this.doLoad, this);
 
-        this.addEvents('filedownload');
-        this.enableBubble(['filedownload']);
+        this.addEvents('filedownload', 'createobject');
+        this.enableBubble(['filedownload', 'createobject']);
     }
 
     ,getButton: function() {
@@ -305,84 +278,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             d.template_id &&
             (CB.DB.templates.getType(d.template_id) == 'file')
         );
-        /*switch(activeItem.getXType()) {
-            case 'CBObjectProperties':
-                tb.setVisible(true);
-                this.actions.edit.show();
-                this.actions.reload.enable();
-                this.actions.save.hide();
-                this.actions.cancel.hide();
-                this.actions.openInTabsheet.show();
-                // this.actions.pin.hide();
-                this.actions.download.setHidden(!canDownload);
-                break;
-            case 'CBEditObject':
-                tb.setVisible(true);
-                this.actions.edit.hide();
-                this.actions.reload.disable();
-                this.actions.save.show();
-                this.actions.cancel.show();
-                this.actions.openInTabsheet.show();
-                this.actions.download.setHidden(true);
-                // this.actions.pin.hide();
-                break;
-            case 'CBObjectPreview':
-                tb.setVisible(true);
-                this.actions.edit.show();
-                this.actions.reload.enable();
-                this.actions.save.hide();
-                this.actions.cancel.hide();
-                this.actions.openInTabsheet.show();
-                this.actions.download.setHidden(!canDownload);
-                // this.actions.pin.hide();
-                //this.load(this.loadedData);
-                break;
-            default:
-                tb.setVisible(false);
-        }
-
-        clog(d.template_id, CB.DB.templates.getType(d.template_id));
-
-        // this.moreButton.enable();
-        switch(CB.DB.templates.getType(d.template_id)) {
-            case 'file':
-                this.actions.addTask.show();
-                this.actions.completeTask.hide();
-                this.actions.closeTask.hide();
-                this.actions.reopenTask.hide();
-                this.actions.attachFile.show();
-                this.actions.webdavLink.show();
-                this.newButton.hide();
-                break;
-            case 'task':
-                this.actions.addTask.hide();
-
-                // if(d.status == 3) { //closed
-
-                // }
-                this.actions.completeTask.show();
-                this.actions.closeTask.show();
-                this.actions.reopenTask.show();
-
-                this.actions.attachFile.show();
-                this.actions.webdavLink.hide();
-                this.newButton.show();
-                break;
-            case 'object':
-            case 'case':
-                this.actions.addTask.show();
-                this.actions.completeTask.hide();
-                this.actions.closeTask.hide();
-                this.actions.reopenTask.hide();
-                this.actions.attachFile.show();
-                this.actions.webdavLink.hide();
-                this.newButton.show();
-                break;
-            default:
-                this.moreButton.disable();
-        }/**/
-
-
     }
 
     /**
@@ -391,6 +286,12 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
      * @return {[type]}            [description]
      */
     ,load: function(objectData) {
+
+        if(this.locked) {
+            delete this.requestedLoadData;
+            return;
+        }
+
         if(!isNaN(objectData)) {
             objectData = {
                 id: objectData
@@ -448,13 +349,14 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,doLoad: function() {
+        if(this.locked) {
+            delete this.requestedLoadData;
+            return;
+        }
+
         var id = this.requestedLoadData
             ? Ext.value(this.requestedLoadData.nid, this.requestedLoadData.id)
             : null;
-
-        // if(Ext.isEmpty(id)) {
-        //     return;
-        // }
 
         this.addParamsToHistory(this.loadedData);
 
@@ -504,14 +406,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         var ti = ai.getContainerToolbarItems();
         var tb = this.getTopToolbar();
 
-        // this.menu.removeAll(false);
-        this.menu.items.each(
-            function(i) {
-                if(i.id != 'reload' + this.instanceId) {
-                    i.hide();
-                }
-            }
-        );
+        if(this.menu) {
+            this.menu.removeAll(false);
+            this.menu.destroy();
+        }
+        this.menu = new Ext.menu.Menu({items:[]});
 
         if(Ext.isEmpty(ti)) {
             return;
@@ -519,49 +418,67 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         tb.items.each(
             function(i) {
-                if(i.id != 'back' + this.instanceId) {
+                if(i.id != 'back') {
                     i.hide();
                 }
             }
         );
 
         /* update menu items */
+        var isFirstItem = true;
         Ext.iterate(
             ti.menu
             ,function(k, v, o) {
-                clog('menu', k, v);
+
                 if(k == '-') {
                     this.menu.add('-');
                 } else {
-                    var b = this.BC.get(k);
-                    clog('b', b);
+                    if ((!isFirstItem) &&
+                      (v.addDivider == 'top')
+                    ) {
+                        this.menu.add('-');
+                    }
+
+                    var b = this.menuItemConfigs[k];
                     if(b) {
-                        b.show();
-                        // this.menu.add(b);
-                    } else {
-                        clog(k, 'not found');
+                        var cfg = Ext.apply({}, b);
+                        var item = this.menu.add(cfg);
+                        isFirstItem = false;
+
+                        if(k == 'new') {
+                            updateMenu(
+                                item
+                                ,getMenuConfig(
+                                    this.loadedData.id
+                                    ,this.loadedData.path
+                                    ,this.loadedData.template_id
+                                )
+                                ,this.onCreateObjectClick
+                                ,this
+                            );
+                            item.setDisabled(item.menu.items.getCount() < 1);
+                        }
                     }
                 }
             }
             ,this
         );
 
-        clog('menu items count', this.menu.items.getCount());
         //add "more" button to toolbar config if menu is not empty
         if(this.menu.items.getCount() > 0) {
-            ti.tbar['more' + this.instanceId] = {};
+            ti.tbar['more'] = {};
         }
 
         // add back button to config (always visible)
-        if(!Ext.isDefined(ti.tbar['back' + this.instanceId])) {
-            ti.tbar['back' + this.instanceId] = {};
+        if(!Ext.isDefined(ti.tbar['back'])) {
+            ti.tbar['back'] = {};
         }
 
         // hide all bottons from toolbar
         Ext.iterate(
             ti.tbar
             ,function(k, v, o) {
-                var b = this.BC.get(k);
+                var b = this.BC.get(k + this.instanceId);
                 //if not defined the we should add this custom button
                 //to the collection to be available later
                 if(b) {
@@ -590,7 +507,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             delete this.historyNavigation;
             return;
         }
-        this.history.push(p);
+        this.history.push(Ext.apply({}, p));
         this.actions.back.setDisabled(false);
     }
 
@@ -600,6 +517,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             return;
         }
         this.delayedLoadTask.cancel();
+
         this.historyNavigation = true;
         this.requestedLoadData = this.history.pop();
         if(Ext.isEmpty(this.history)) {
@@ -609,7 +527,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,edit: function (objectData) {
-        clog(Ext.encode(objectData));
         if(App.isWebDavDocument(objectData.name)) {
             App.openWebdavDocument(objectData);
             return;
@@ -643,21 +560,29 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 var p = Ext.apply({}, this.loadedData);
                 p.id = id;
                 p.name = name;
-                p.viewIndex = 0;
-                this.requestedLoadData = p;
-                this.doLoad();
-                // this.items.itemAt(0).load(id);
-                // this.onViewChangeClick(0, false);
-                this.skipNextPreviewLoadOnBrowserRefresh = true;
+                if(this.goBackOnSave) {
+                    this.onBackClick();
+                } else {
+                    p.viewIndex = 0;
+                    this.requestedLoadData = p;
+                    this.doLoad();
+                    this.skipNextPreviewLoadOnBrowserRefresh = true;
+                }
+                delete this.goBackOnSave;
             }
             ,this
         );
     }
     ,onCancelClick: function() {
-        var p = Ext.apply({}, this.loadedData);
-        p.viewIndex = 0;
-        this.requestedLoadData = p;
-        this.doLoad();
+        if(isNaN(this.loadedData.id)) {
+            this.onBackClick();
+        } else {
+            var p = Ext.apply({}, this.loadedData);
+            p.viewIndex = 0;
+            this.requestedLoadData = p;
+            this.doLoad();
+        }
+        delete this.goBackOnSave;
     }
     ,onOpenInTabsheetClick: function(b, e) {
         var ai = this.getLayout().activeItem;
@@ -701,6 +626,59 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.fireEvent('filedownload', [this.loadedData.id], false, e);
     }
 
+    ,onCreateObjectClick: function(b, e) {
+        this.goBackOnSave = true;
+
+        b.data.pid = this.loadedData.id;
+        b.data.path = this.loadedData.path;
+        this.fireEvent('createobject', b.data, e);
+    }
+
+    ,onCloseTaskClick: function(b, e) {
+        this.getEl().mask(L.CompletingTask + ' ...', 'x-mask-loading');
+        CB_Tasks.close(this.loadedData.id, this.onTaskChanged, this);
+    }
+    ,onReopenTaskClick: function(b, e) {
+        this.getEl().mask(L.ReopeningTask + ' ...', 'x-mask-loading');
+        CB_Tasks.reopen(this.loadedData.id, this.onTaskChanged, this);
+    }
+
+    ,onCompleteTaskClick: function(b, e) {
+        CB_Tasks.complete(
+            {
+                id: this.loadedData.id
+                ,message: ''
+            }
+            ,this.onTaskChanged
+            ,this
+        );
+    }
+
+    ,onTaskChanged: function(r, e){
+        this.getEl().unmask();
+        App.fireEvent('objectchanged', this.loadedData);
+    }
+
+    ,onAttachFileClick: function(b, e) {
+        this.onViewChangeClick(0);
+        var fp = this.findByType('CBObjectsPluginsFiles');
+        if(Ext.isEmpty(fp)) {
+            return;
+        }
+        fp = fp[0];
+        fp.show();
+        fp.onAddClick(b, e);
+    }
+    ,onWebDAVLinkClick: function(b, e) {
+        App.openWebdavDocument(
+            this.loadedData
+            ,false
+        );
+    }
+
+    ,onLockPanelEvent: function(status) {
+        this.locked = status;
+    }
 }
 );
 

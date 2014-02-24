@@ -7,23 +7,40 @@ CB.form.view.object.Properties = Ext.extend(CB.PluginsPanel, {
     ,getContainerToolbarItems: function() {
         var rez = {
             tbar: {}
-            ,menu: {}
+            ,menu: {
+                reload: {}
+            }
         };
-        rez.tbar['edit' +  this.instanceId] = {};
-        rez.tbar['openInTabsheet' +  this.instanceId] = {};
+        rez.tbar['edit'] = {};
+        rez.tbar['openInTabsheet'] = {};
 
         if(CB.DB.templates.getType(this.loadedParams.template_id) == 'file') {
-            rez.tbar['download' +  this.instanceId] = {};
+            rez.tbar['download'] = {};
         }
 
         this.items.each(
             function(i) {
                 var pi = i.getContainerToolbarItems();
-                clog('pi', i, pi)
+
                 if(pi.tbar) {
                     rez.tbar = Ext.apply(rez.tbar, pi.tbar);
                 }
                 if(pi.menu) {
+                    /* adding dividesrs for first item of each plugin */
+                    var isFirstItem = true;
+                    Ext.iterate(
+                        pi.menu
+                        ,function(key, value){
+                            if(isFirstItem) {
+                                value.addDivider = 'top';
+                                isFirstItem = false;
+                            } else {
+                                return false;
+                            }
+                        }
+                        ,this
+                    );
+
                     rez.menu = Ext.apply(rez.menu, pi.menu);
                 }
             }

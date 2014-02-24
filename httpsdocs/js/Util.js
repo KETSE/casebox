@@ -167,10 +167,12 @@ function updateMenu(menuButton, menuConfig, handler, scope){
             case 'task': break;
             case 'event': break;
             case 'folder': break;
-            case '-': menu.push('-'); break;
+            case '-':
+                menu.push('-');
+                break;
             default:
                 idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i], 10));
-                if(idx >=0){
+                if(idx >= 0){
                     tr = CB.DB.templates.getAt(idx);
                     data = {
                             template_id: tr.get('id')

@@ -1,3 +1,9 @@
+CaseBox 1.9.151 (2014-02-24)
+==============================
+New Features, Improvements
+--------------------------
+- right panel implementation
+
 CaseBox 1.9.150 (2014-02-22)
 ==============================
 New Features, Improvements
