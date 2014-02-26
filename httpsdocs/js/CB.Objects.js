@@ -141,7 +141,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             }
         });
 
-        this.dropZoneConfig = {text: 'Drop files here'};
+        this.dropZoneConfig = {};//text: 'Drop files here'
         this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
         this.filesDropPlugin.init(this);
 

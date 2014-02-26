@@ -181,6 +181,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 scope: this
                 ,beforeedit: this.onBeforeEditProperty
                 ,afteredit: this.onAfterEditProperty
+                // ,afterrender: this.onAfterRender
                 ,keypress:  function(e){
                     if( (e.getKey() == e.ENTER) && (!e.hasModifier())) {
                         this.onFieldTitleDblClick();
@@ -214,10 +215,71 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 iconcombo: App.customRenderers.iconcombo
                 ,H: function(){ return '';}
             }
+
+            ,plugins: [
+                {
+                    ptype: 'CBDDGrid'
+                    ,dragZoneConfig:  {
+                        beforeDragEnter: function() {
+                            return false;
+                        }
+                    }
+                    ,dropZoneConfig:  {
+                        onNodeOver: this.onNodeDragOver.createDelegate(this)
+                        ,onNodeDrop: this.onNodeDrop.createDelegate(this)
+                    }
+                }
+            ]
         });
-        this.addEvents('change', 'fileupload', 'filedownload', 'filesdelete', 'loaded');
-        this.enableBubble(['change', 'fileupload', 'filedownload', 'filesdelete', 'loaded']);
+        this.addEvents('change', 'fileupload', 'filedownload', 'filesdelete', 'loaded', 'saveobject');
+        this.enableBubble(['change', 'fileupload', 'filedownload', 'filesdelete', 'loaded', 'saveobject']);
         CB.VerticalEditGrid.superclass.initComponent.apply(this, arguments);
+    }
+
+    ,onNodeDragOver: function (targetData, source, e, data){
+        var rez = this.dropZone.dropNotAllowed;
+        if(!Ext.isDefined(data.data) || !targetData.record) {
+            return rez;
+        }
+
+        var node = this.helperTree.getNode(targetData.record.get('id'));
+        var tr = node.attributes.templateRecord;
+
+        return ((tr.get('type') == '_objects')
+            ? this.dropZone.dropAllowed
+            : this.dropZone.dropNotAllowed
+        );
+    }
+
+    ,onNodeDrop: function(targetData, source, e, sourceData){
+        var dz = this.dropZone;
+
+        if(this.onNodeDragOver(targetData, source, e, sourceData) == dz.dropAllowed){
+            if(targetData.record) {
+                var bt = this.getBubbleTarget();
+                var node = this.helperTree.getNode(targetData.record.get('id'));
+                var tr = node.attributes.templateRecord;
+                var v = toNumericArray(node.attributes.value.value);
+
+                var idx = null;
+
+
+                for (var i = 0; i < sourceData.data.length; i++) {
+                    idx = v.indexOf(sourceData.data[i].id);
+                    if(idx >= 0) {
+                        v.splice(idx, 1);
+                    } else {
+                        v.push(sourceData.data[i].id);
+                        if(bt.objectsStore) {
+                            bt.objectsStore.checkRecordExistance(sourceData.data[i]);
+                        }
+                    }
+                }
+                v = v.join(',');
+                targetData.record.set('value', v);
+            }
+            return true;
+        }
     }
 
     ,onCellClick: function(g, r, c, e){
@@ -614,7 +676,9 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             if(e.cancel) {
                 return ;
             }
-            col.setEditor(new Ext.grid.GridEditor(te));
+            this.attachKeyListeners(te);
+            var ge = new Ext.grid.GridEditor(te);
+            col.setEditor(ge);
         }
     }
 
@@ -627,6 +691,34 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 this.getView().focusCell(s[0], s[1]);
             }
         }
+    }
+
+    ,attachKeyListeners: function(comp) {
+        if(Ext.isEmpty(comp)) {
+            return;
+        }
+        comp.on(
+            'afterrender'
+            ,function(c)
+            {
+                var map = new Ext.KeyMap(c.getEl(), [
+                    {
+                        key: "s"
+                        ,ctrl:true
+                        ,shift:false
+                        ,scope: this
+                        ,stopEvent: true
+                        ,fn: this.onSaveObjectEvent
+                    }
+                ]);
+            }
+            ,this);
+    }
+    ,onSaveObjectEvent: function (key, event){
+        if(this.editing) {
+            this.stopEditing(false);
+        }
+        this.fireEvent('saveobject');
     }
 
     ,onAfterEditProperty: function(e){

@@ -34,6 +34,9 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
         if(this.rendered) {
             this.dataView.update(r.data);
         } else {
@@ -51,6 +54,21 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
             //opening path
         }
 
+    }
+
+    ,getContainerToolbarItems: function() {
+        rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(this.params) {
+            if(CB.DB.templates.getType(this.params.template_id) == 'file') {
+                rez.menu['webdavlink']  = {};
+            }
+        }
+
+        return rez;
     }
 });
 

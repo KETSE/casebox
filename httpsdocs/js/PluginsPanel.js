@@ -63,7 +63,11 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
                     ,cl
                 );
                 this.add(c);
-                c.onLoadData(v);
+                if(!Ext.isDefined(v.data)) {
+                    c.setVisible(false);
+                } else {
+                    c.onLoadData(v);
+                }
             }
             ,this
         );
@@ -87,6 +91,9 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
     }
     ,reload: function() {
         this.doLoad(this.loadedParams);
+    }
+    ,getContainerToolbarItems: function() {
+
     }
 });
 

@@ -76,7 +76,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 singleSelect: false
                 ,listeners: {
                     scope: this
-                    ,beforerowselect: this.onBeforeRowSelect
                     ,selectionchange: this.onSelectionChange
                 }
             })
@@ -318,11 +317,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         });
     }
 
-    ,onBeforeRowSelect: function( sm, rowIndex, keepExisting, record ) {
-        clog('on before row select');
-    }
     ,onSelectionChange: function() {
-        clog('on selection change');
         var s = this.grid.getSelectionModel().getSelections();
         for (var i = 0; i < s.length; i++) {
             s[i] = s[i].data;

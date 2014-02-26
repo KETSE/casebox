@@ -49,10 +49,7 @@ class Objects
             ,'case_id'
             ,'status'
             ,'data'
-            ,'canEdit'
-            ,'canClose'
-            ,'canReopen'
-            ,'canComplete'
+            ,'can'
         );
         foreach ($properties as $property) {
             if (isset($objectData[$property])) {
@@ -195,8 +192,7 @@ class Objects
         $body = '';
         $bottom = '';
         try {
-            $obj = static::getCustomClassByObjectId($id);
-            $obj->load();
+            $obj = static::getCachedObject($id);
 
             if ($obj->getType() == 'task') {
                 $tc = new Tasks();
@@ -245,6 +241,7 @@ class Objects
             }
         }
         if (!empty($gf['body'])) {
+            $previousHeader = '';
             foreach ($gf['body'] as $f) {
                 $v = $template->formatValueForDisplay($f['tf'], @$f['value']);
                 if (is_array($v)) {
@@ -255,9 +252,11 @@ class Objects
                     continue;
                 }
                 $headerField = $template->getHeaderField($f['tf']['id']);
-                if (!empty($headerField)) {
+                if (!empty($headerField) && ($previousHeader != $headerField)) {
                     $body .= '<tr class="prop-header"><th colspan="3"'.(empty($headerField['level']) ? '' : ' style="padding-left: '.($headerField['level'] * 10).'px"').'>'.$headerField['title'].'</th></tr>';
                 }
+                $previousHeader = $headerField;
+
                 $body .= '<tr><td'.(empty($f['tf']['level']) ? '' : ' style="padding-left: '.($f['tf']['level'] * 10).'px"').
                     ' class="prop-key">'.$f['tf']['title'].'</td><td class="prop-val">'.$v.
                     (empty($f['info']) ? '' : '<p class="prop-info">'.$f['info'].'</p>').'</td></tr>';
@@ -792,9 +791,9 @@ class Objects
             $class = '\\CB\\Objects\\Plugins\\'.ucfirst($pluginName);
             $pClass = new $class($id);
             $prez = $pClass->getData();
-            if (!empty($prez) && isset($prez['data'])) {
-                $rez['data'][$pluginName] = $prez;
-            }
+            // if (!empty($prez) && isset($prez['data'])) {
+            $rez['data'][$pluginName] = $prez;
+            //}
         }
 
         return $rez;

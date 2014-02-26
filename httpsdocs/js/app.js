@@ -49,7 +49,14 @@ Ext.onReady(function(){
 
 
     CB_User.getLoginInfo( function(r, e){
-        if(r.success !== true) return;
+        if(r.success !== true) {
+            return;
+        }
+
+        /* use this session id as appended query string for images that reload form session to session
+            Such kind of images are user photos that could be updated.
+        */
+        App.sid = '&qq=' + Date.parse(Date());
         App.config = r.config;
         App.loginData = r.user;
         App.loginData.iconCls = 'icon-user-' + Ext.value(r.user.sex, '');
@@ -499,7 +506,7 @@ function initApp(){
         var ext = name.split('.').pop();
         return (App.config.webdav_files.indexOf(ext) >= 0);
     };
-    App.openWebdavDocument = function(data){
+    App.openWebdavDocument = function(data, checkCookie){
         if(Ext.isEmpty(App.config.webdav_url)) {
             return;
         }
@@ -508,7 +515,9 @@ function initApp(){
         url = url.replace('{name}', data.name);
         App.confirmLeave = false;
 
-        if(Ext.util.Cookies.get('webdavHideDlg') == 1) {
+        if((checkCookie !== false) &&
+            (Ext.util.Cookies.get('webdavHideDlg') == 1)
+        ) {
             window.open('cbdav:' + url, '_self');
         } else {
             var w = new CB.WebdavWindow({
@@ -543,10 +552,9 @@ function initApp(){
     };
 
     App.locateObject = function(object_id, path){
-        if(Ext.isEmpty(path)){
+        if(path === undefined){
             CB_Path.getPidPath(object_id, function(r, e){
                 if(r.success !== true) return ;
-                clog('!!!', r.id, r.path);
                 App.locateObject(r.id, r.path);
             });
             return;
@@ -576,6 +584,10 @@ function initApp(){
     };
 
     App.getTypeEditor = function(type, e){
+        var editorCfg = {
+            //enable key events by default
+            enableKeyEvents: true
+        };
         var objData = {
             ownerCt: e.ownerCt
             ,record: e.record
@@ -600,7 +612,7 @@ function initApp(){
             );
         switch(type){
             case '_auto_title':
-                return new Ext.ux.TitleField();
+                return new Ext.ux.TitleField(editorCfg);
             case '_objects':
                 //e should contain all necessary info
                 switch(cfg.editor){
@@ -675,11 +687,17 @@ function initApp(){
 
                             return w;
                         } else {
-                            return new CB.ObjectsTriggerField({data: objData}); //, width: 500
+                            return new CB.ObjectsTriggerField({
+                                enableKeyEvents: true
+                                ,data: objData
+                            }); //, width: 500
                         }
                         break;
                     default:
-                        return new CB.ObjectsComboField({data: objData});//, width: 500
+                        return new CB.ObjectsComboField({
+                            enableKeyEvents: true
+                            ,data: objData
+                        });//, width: 500
                 }
 
                 break;
@@ -689,12 +707,16 @@ function initApp(){
                 }else{
                     params = Ext.apply({}, cfg);
                     if(!Ext.isEmpty(e.pidValue)) params.pidValue = e.pidValue;
-                    return new Ext.ux.CasesCombo({ownerCt: e.ownerCt, params: params});
+                    return new Ext.ux.CasesCombo({
+                        enableKeyEvents: true
+                        ,ownerCt: e.ownerCt
+                        ,params: params
+                    });
                 }
                 break;
             case 'boolean': //depricated
             case 'checkbox': return new Ext.form.ComboBox({
-                        xtype: 'combo'
+                        enableKeyEvents: true
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
@@ -705,7 +727,7 @@ function initApp(){
                         ,valueField: 'id'
                     });
             case 'timeunits': return new Ext.form.ComboBox({
-                        xtype: 'combo'
+                        enableKeyEvents: true
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
@@ -716,7 +738,7 @@ function initApp(){
                         ,valueField: 'id'
                     });
             case 'importance': return new Ext.form.ComboBox({
-                        xtype: 'combo'
+                        enableKeyEvents: true
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
@@ -727,15 +749,34 @@ function initApp(){
                         ,valueField: 'id'
                     });
             case 'date':
-                return new Ext.form.DateField({format: App.dateFormat, width: 100});
+                return new Ext.form.DateField({
+                    enableKeyEvents: true
+                    ,format: App.dateFormat
+                    ,width: 100
+                });
             case 'datetime':
-                return new Ext.form.DateField({format: App.dateFormat+' '+App.timeFormat, width: 130});
+                return new Ext.form.DateField({
+                    enableKeyEvents: true
+                    ,format: App.dateFormat+' '+App.timeFormat
+                    ,width: 130
+                });
             case 'time':
-                return new Ext.form.TimeField({format: App.timeFormat});
+                return new Ext.form.TimeField({
+                    enableKeyEvents: true
+                    ,format: App.timeFormat
+                });
             case 'int':
-                return new Ext.form.NumberField({allowDecimals: false, width: 90});
+                return new Ext.form.NumberField({
+                    enableKeyEvents: true
+                    ,allowDecimals: false
+                    ,width: 90
+                });
             case 'float':
-                return new Ext.form.NumberField({allowDecimals: true, width: 90});
+                return new Ext.form.NumberField({
+                    enableKeyEvents: true
+                    ,allowDecimals: true
+                    ,width: 90
+                });
             //case 'object_author': //depricated
             case 'combo':
                 th = cfg.thesauriId;
@@ -743,7 +784,8 @@ function initApp(){
                     th = e.pidValue;
                 }
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
@@ -759,7 +801,8 @@ function initApp(){
                     th = e.pidValue;
                 }
                 return new Ext.form.ComboBox({
-                    forceSelection: false
+                    enableKeyEvents: true
+                    ,forceSelection: false
                     ,editable: false
                     ,triggerAction: 'all'
                     ,lazyRender: true
@@ -773,7 +816,8 @@ function initApp(){
                 });
             case '_language':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
@@ -784,7 +828,8 @@ function initApp(){
                 });
             case '_sex':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
@@ -795,7 +840,8 @@ function initApp(){
                 });
             case '_templateTypesCombo':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
@@ -806,7 +852,8 @@ function initApp(){
                 });
             case '_fieldTypesCombo':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
@@ -817,7 +864,8 @@ function initApp(){
                 });
             case '_short_date_format':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
@@ -838,7 +886,10 @@ function initApp(){
                         }
                     }
                 }
-                return new Ext.form.TextArea({ height: height });
+                return new Ext.form.TextArea({
+                    enableKeyEvents: true
+                    ,height: height
+                });
             case 'popuplist':
                 e.cancel = true;
                 w = App.getThesauriWindow({
@@ -899,7 +950,9 @@ function initApp(){
                 w.show();
                 break;
             default:
-                return new Ext.form.TextField();
+                return new Ext.form.TextField({
+                    enableKeyEvents: true
+                });
         }
         return false;
     };
@@ -1123,7 +1176,36 @@ function overrides(){
     Ext.calendar.DateRangeField.prototype.toText = L.to;
     Ext.calendar.DateRangeField.prototype.allDayText = L.AllDay;
 
+    /* avoid errors for grid dragZone when using cell selection model */
+    Ext.grid.GridDragZone.prototype._getDragData = Ext.grid.GridDragZone.prototype.getDragData;
+    Ext.grid.GridDragZone.prototype.getDragData = function(e) {
+        var t = Ext.lib.Event.getTarget(e);
+        var rowIndex = this.view.findRowIndex(t);
+        if(rowIndex !== false){
+            var sm = this.grid.selModel;
+            // return default method result if selection model has isSelected method
+            if(sm.isSelected) {
+                return this._getDragData(e);
+            }
 
+            // process in the scope of cell selection model
+            sm.getCount = function() {return 1;};
+            var selections = [];
+            var sc = sm.getSelectedCell();
+            if(Ext.isEmpty(sc)) {
+                if((sc[0] != rowIndex) || e.hasModifier()){
+                    sm.handleMouseDown(this.grid, rowIndex, e);
+                }
+                selections = [this.grid.store.getAt(rowIndex)];
+            }
+            return {
+                grid: this.grid
+                ,ddel: this.ddel
+                ,rowIndex: rowIndex
+                ,selections: selections
+            };
+        }
+    };
 }
 
 window.onbeforeunload = function() {

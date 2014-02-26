@@ -5,7 +5,7 @@
     border-collapse: collapse;
     table-layout: fixed;
     color: #333;
-    margin-bottom: 30px;
+    /*margin-bottom: 30px;*/
 }
 
 .block-plugin a {
@@ -109,8 +109,9 @@ background-color: #FFFFCC;
     color: #333;
     padding: 0 5px 0 8px;
 }
-.obj-plugin .x-panel-body-noborder {
+.obj-plugin > .x-panel-bwrap > .x-panel-body-noborder{
     border-top: 2px solid #CCC;
+    margin-bottom: 30px;
 }
 
 .obj-plugin-h .x-toolbar-left{
@@ -159,4 +160,30 @@ background-color: #FFFFCC;
 
 .block-plugin td.obj div {
     margin: auto; width: 16px; height: 16px;
+}
+.files-drop {
+    display: block;
+    font-weight: bold;
+    color: rgb(85, 85, 85);
+    background-color: rgb(228, 241, 246);
+    margin: 5px 0;
+    text-align: center;
+    padding: 15px 10px;
+    border-top-width: 1px;
+    border-top-style: dashed;
+    border-top-color: rgb(153, 218, 242);
+    border-bottom-width: 1px;
+    border-bottom-style: dashed;
+    border-bottom-color: rgb(153, 218, 242);
+}
+.drop-target .files-drop {
+    border-color: green;
+}
+.obj-plugin {
+    background-color: #fff;
+}
+.obj-plugin .grid-drop-zone {
+    margin-left: -1000px;
+    width:0;
+    height:0;
 }

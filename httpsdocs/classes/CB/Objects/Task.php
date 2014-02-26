@@ -133,7 +133,6 @@ class Task extends Object
                 ,t.description
                 ,t.status
                 ,(SELECT reminds FROM tasks_reminders WHERE task_id = $1 AND user_id = $2) reminds
-                ,(SELECT status FROM `tasks_responsible_users` WHERE task_id = $1 AND user_id = $2) user_status
                 ,DATE_FORMAT(t.completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
             FROM tasks t
             WHERE t.id = $1',
@@ -188,13 +187,8 @@ class Task extends Object
             $d['data'] = array_merge($d['data'], $r);
         }
 
-        /* add possible action flags, for comodity */
-        $isTaskAdmin = (\CB\Security::isAdmin() || ($d['cid'] == $_SESSION['user']['id']));
-
-        $d['canEdit'] = (($d['status'] != 3) && ($isTaskAdmin));
-        $d['canClose'] = $d['canEdit'];
-        $d['canReopen'] = (($d['status'] == 3) && ($d['cid'] == $_SESSION['user']['id']));
-        $d['canComplete'] = (($d['status'] != 3) && (empty($d['user_status'])));
+        /* add possible action flags*/
+        \CB\Tasks::setTaskActionFlags($d);
     }
 
     /**

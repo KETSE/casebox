@@ -8,6 +8,9 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
            add: new Ext.Action({
                 text: L.Add
                 ,iconCls: 'i-plus'
+                ,data: {
+                    template_id: App.config.default_task_template
+                }
                 ,scope: this
                 ,handler: this.onAddClick
             })
@@ -65,6 +68,9 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
         this.store.loadData(r.data);
     }
 
@@ -105,8 +111,27 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
     ,getToolbarItems: function() {
         return [this.actions.add];
     }
+
+    ,getContainerToolbarItems: function() {
+        rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(this.params) {
+            rez['menu']['addtask'] = {};
+
+            if(CB.DB.templates.getType(this.params.template_id) !== 'file') {
+                rez['menu']['new'] = {};
+            }
+        }
+
+
+        return rez;
+    }
+
     ,onAddClick: function(b, e) {
-        //adding new task
+        this.fireEvent('createobject', b.data, e);
     }
 });
 
