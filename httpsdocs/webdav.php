@@ -52,6 +52,7 @@
     }
 
     $server->addPlugin($tempFilesPlugin);
+    $server->addPlugin(new WebDAV\CustomPropertiesPlugin());
     $server->setBaseUri('/');
     $server->exec();
 

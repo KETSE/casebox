@@ -63,6 +63,10 @@ class File extends \Sabre\DAV\FS\Node implements \Sabre\DAV\IFile
         );
     }
 
+    public function getCreationDate(){
+        return $this->objectData['cdate'];
+    }
+
     public function getContentType()
     {
         return $this->objectData['type'];

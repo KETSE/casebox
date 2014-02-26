@@ -84,13 +84,16 @@ class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection
         Utils::renameObject($this->id, $name);
     }
 
-    //method for creation date is also required ???
     public function getLastModified()
     {
         return ( empty($this->objectData['udate'])
             ? $this->objectData['cdate']
             : $this->objectData['udate']
         );
+    }
+
+    public function getCreationDate(){
+        return $this->objectData['cdate'];
     }
 
     public function createDirectory($name)
