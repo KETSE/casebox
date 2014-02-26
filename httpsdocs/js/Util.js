@@ -110,7 +110,7 @@ function getStoreNames(v){
 
 function toNumericArray(v){
     if (Ext.isEmpty(v)) {
-        return array();
+        return [];
     }
     if (!Ext.isArray(v)) {
         v = String(v).split(',');

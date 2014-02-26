@@ -166,7 +166,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         /* adding menu items */
         var um = App.mainToolBar.find( 'name', 'userMenu')[0];
         if(um) {
-            um.update('<img src="/photo/' + App.loginData.id + '.jpg" ' +
+            um.update('<img src="/photo/' + App.loginData.id + '.jpg' + App.sid + '" ' +
                 'style="margin-top: 4px; width: 32px; height: 32px;" ' +
                 'title="'+
                     App.loginData['first_name']+' '+

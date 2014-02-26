@@ -25,6 +25,14 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             ,hidden: true
             ,refOwner: this
             ,includeTopFields: true
+            ,keys: [{
+                key: "s"
+                ,ctrl:true
+                ,shift:false
+                ,scope: this
+                ,stopEvent: true
+                ,fn: this.onSaveObjectEvent
+            }]
             ,viewConfig: {
                 forceFit: true
                 ,autoFill: true
@@ -62,13 +70,31 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             ,listeners: {
                 scope: this
                 ,change: this.onChange
+                ,afterrender: this.onAfterRender
             }
         });
         CB.form.edit.Object.superclass.initComponent.apply(this, arguments);
+
+        this.addEvents('saveobject');
+        this.enableBubble(['saveobject']);
     }
 
     ,onChange: function(){
         this._isDirty = true;
+    }
+
+    ,onAfterRender: function(c) {
+
+        // map multiple keys to multiple actions by strings and array of codes
+        var map = new Ext.KeyMap(c.getEl(), [
+            {
+                key: "s"
+                ,ctrl:true
+                ,shift:false
+                ,scope: this
+                ,fn: this.onSaveObjectEvent
+            }
+        ]);
     }
 
     ,load: function(objectData) {
@@ -289,6 +315,10 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         this.fieldsZone.removeAll(true);
         this._isDirty = false;
         this.fireEvent('clear', this);
+    }
+
+    ,onSaveObjectEvent: function() {
+        this.fireEvent('saveobject', this);
     }
 
     ,getContainerToolbarItems: function() {

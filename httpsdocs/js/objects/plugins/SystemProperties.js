@@ -63,7 +63,6 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
         };
 
         if(this.params) {
-            clog('!!!!!!!!', CB.DB.templates.getType(this.params.template_id));
             if(CB.DB.templates.getType(this.params.template_id) == 'file') {
                 rez.menu['webdavlink']  = {};
             }

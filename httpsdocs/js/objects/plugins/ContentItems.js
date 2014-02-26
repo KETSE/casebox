@@ -114,7 +114,6 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,onAddClick: function(b, e) {
-        clog('!', arguments);
         if(this.pmenu) {
             this.pmenu.destroy();
         }

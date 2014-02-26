@@ -104,7 +104,6 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
 
         if(this.params) {
             if(this.params.can) {
-                clog('can', this.params.can);
                 if(this.params.can.complete) {
                     rez['tbar']['completetask'] = {};
                 }

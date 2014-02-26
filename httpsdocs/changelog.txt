@@ -1,3 +1,20 @@
+CaseBox 1.9.152 (2014-02-25)
+==============================
+New Features, Improvements
+--------------------------
+- Implemented D&D from casebox to objects edit window (in vertical grid) into objects fields
+- formated enter and special chars for description of tasks notifications
+- Added "Ctrl+S" shortcut for object save when in edit mode
+    A: Ex: "Ctrl+S" saves the edited node and focus back the grid
+    Q: focus which grid ? browsing or editing grid
+
+Fixed Bugs:
+----------
+- disable edit button from right panel for non real nodes
+- Photo not visible after uploading
+- Comments block disappeared from folders/tasks
+- Back button doesn't work ok for files
+
 CaseBox 1.9.151 (2014-02-24)
 ==============================
 New Features, Improvements

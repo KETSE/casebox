@@ -185,7 +185,6 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,lockPanel: function (status) {
-        clog('fire lockpanel event', status);
         this.fireEvent('lockpanel', status, this);
     }
 

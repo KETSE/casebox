@@ -143,7 +143,6 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
             return;
         }
 
-        clog('dropZoneEl', this.dropZoneEl);
         if(!this.dropZoneEl){
             this.dropZoneEl = this.owner.getEl().appendChild(document.createElement('div'));
             this.dropZoneEl.addClass('desktop-drop-zone');
@@ -156,7 +155,6 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
         this.dropZoneEl.applyStyles("display:block");
     }
     ,hideDropZone: function(e){
-        clog('try hiding', this.dropZoneEl);
         var a = Ext.query('.desktop-drop-zone');
         if(!Ext.isEmpty(a)) {
             for (var i = a.length - 1; i >= 0; i--) {

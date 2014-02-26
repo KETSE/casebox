@@ -2,6 +2,7 @@
 namespace CB;
 
 use CB\L;
+use CB\Util;
 
 class Tasks
 {
@@ -1140,7 +1141,7 @@ class Tasks
                     ,'font-size: 1.5em; display: block;'.( ($r['status'] == 3 ) ? 'color: #555; text-decoration: line-through' : '')
                     ,$r['title']
                     ,$datetime_period
-                    ,$r['description']
+                    ,nl2br(Util\adjustTextForDisplay($r['description']))
                     ,L\get('Status', $user['language_id'])
                     ,'status-style'
                     ,L\get('taskStatus'.$r['status'], $user['language_id'])

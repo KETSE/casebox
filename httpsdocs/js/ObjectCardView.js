@@ -23,6 +23,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 iconCls: 'ib-edit-obj'
                 ,id: 'edit' + this.instanceId
                 ,scale: 'large'
+                ,disabled: true
                 ,scope: this
                 ,handler: this.onEditClick
             })
@@ -204,6 +205,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,add: this.onCardItemAdd
                 ,afterrender: this.doLoad
                 ,lockpanel: this.onLockPanelEvent
+                ,saveobject: this.onSaveObjectEvent
             }
         });
 
@@ -278,6 +280,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             d.template_id &&
             (CB.DB.templates.getType(d.template_id) == 'file')
         );
+
+        this.actions.edit.setDisabled(isNaN(d.template_id));
     }
 
     /**
@@ -374,9 +378,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         switch(activeItem.getXType()) {
             case 'CBObjectPreview':
-                if(Ext.isEmpty(this.requestedLoadData)) {
-                    return;
-                }
                 this.getTopToolbar().setVisible(!Ext.isEmpty(id));
                 this.doLayout();
                 activeItem.loadPreview(id);
@@ -573,6 +574,14 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             ,this
         );
     }
+
+    ,onSaveObjectEvent: function(objComp) {
+        if(this.actions.save.isDisabled()) {
+            return false;
+        }
+        this.onSaveClick();
+    }
+
     ,onCancelClick: function() {
         if(isNaN(this.loadedData.id)) {
             this.onBackClick();
@@ -611,10 +620,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(data)) {
             data = this.loadedData;
         }
-        this.getLayout().setActiveItem(2);
-        this.onViewChange(2);
-        this.getLayout().activeItem.loadPreview(data.id);
-        this.loadedData = data;
+        var p = Ext.apply({}, data);
+        p.viewIndex = 2;
+        this.delayedLoadTask.cancel();
+        this.requestedLoadData = p;
+        this.doLoad();
     }
     ,onOpenPropertiesEvent: function(data, sourceCmp, ev) {
         if(Ext.isEmpty(data)) {

@@ -63,7 +63,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
                     ,cl
                 );
                 this.add(c);
-                if(Ext.isEmpty(v.data)) {
+                if(!Ext.isDefined(v.data)) {
                     c.setVisible(false);
                 } else {
                     c.onLoadData(v);
