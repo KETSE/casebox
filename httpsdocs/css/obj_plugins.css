@@ -187,3 +187,17 @@ background-color: #FFFFCC;
     width:0;
     height:0;
 }
+.obj-plugin-title {
+    margin: 0 !important;
+}
+.obj-header {
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    overflow: hidden;
+}
+
+.taskview h2 {
+    font-size: 14px;
+    overflow: hidden;
+}

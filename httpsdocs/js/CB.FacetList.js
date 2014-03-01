@@ -126,7 +126,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
         Ext.iterate(
             serverData
             ,function(k, v){
-                this.cachedNames[k] =
+                // this.cachedNames[k] =
                 data.push({
                     id: k
                     ,name: L['taskStatus' + k]

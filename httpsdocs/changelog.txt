@@ -1,4 +1,17 @@
-CaseBox 1.9.152 (2014-02-25)
+CaseBox 1.9.153 (2014-03-01)
+==============================
+New Features, Improvements
+--------------------------
+- charts
+- Add object title in right panel
+
+Fixed Bugs:
+----------
+- If a core has no tasks, warnings appear
+- faceting doesn't work on fullText search when a virtual node selected
+- Chart not displayed due to JS error
+
+CaseBox 1.9.152 (2014-02-26)
 ==============================
 New Features, Improvements
 --------------------------

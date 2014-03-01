@@ -125,6 +125,37 @@ class Base implements \CB\Interfaces\TreeNode
             }
         }
 
+        /* add pivot facet if we are in pivot view*/
+        $rp = \CB\Cache::get('requestParams');
+        if (!empty($rp['from']) && ($rp['from'] == 'pivot') && (sizeof($facets) > 1)) {
+            reset($facets);
+            $facet1 = current($facets);
+            next($facets);
+            $facet2 = current($facets);
+
+            if (!empty($rp['selectedFacets']) && (is_array($rp['selectedFacets'])) && sizeof($rp['selectedFacets'] > 1)) {
+                $facet1 = $rp['selectedFacets'][0];
+                $facet2 = $rp['selectedFacets'][1];
+                foreach ($facets as $facet) {
+                    if ($facet->field == $facet1) {
+                        $facet1 = $facet;
+                    }
+                    if ($facet->field == $facet2) {
+                        $facet2 = $facet;
+                    }
+                }
+            }
+
+            $config = array(
+                'type' => 'pivot'
+                ,'name' => 'pivot'
+                ,'facet1' => $facet1
+                ,'facet2' => $facet2
+            );
+            $facets[] = \CB\Facets::getFacetObject($config);
+        }
+        /* end of add pivot facet if we are in pivot view*/
+
         return $facets;
     }
 }

@@ -786,13 +786,12 @@ function initApp(){
                 return new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    //,editable: false
                     ,store: getThesauriStore(th)
                     ,displayField: 'name'
-                    ,typeAhead: true
                     ,valueField: 'id'
                 });
             case 'iconcombo':
@@ -803,13 +802,12 @@ function initApp(){
                 return new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: false
-                    ,editable: false
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
                     ,store: getThesauriStore(th)
                     ,displayField: 'name'
-                    ,typeAhead: true
                     ,valueField: 'id'
                     ,iconClsField: 'name'
                     ,plugins: [new Ext.ux.plugins.IconCombo()]
@@ -818,10 +816,10 @@ function initApp(){
                 return new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.languages
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -830,10 +828,10 @@ function initApp(){
                 return new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.sex
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -842,10 +840,10 @@ function initApp(){
                 return new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.templateTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -854,10 +852,10 @@ function initApp(){
                 return new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.fieldTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -866,10 +864,10 @@ function initApp(){
                 return new Ext.form.ComboBox({
                     enableKeyEvents: true
                     ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.shortDateFormats
                     ,displayField: 'name'
                     ,valueField: 'id'

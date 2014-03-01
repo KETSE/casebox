@@ -35,7 +35,7 @@ class Search extends Solr\Client
         $this->facetsSetManually = (
             isset($p['facet']) ||
             isset($p['facet.field']) ||
-            isset($p['facet.qury'])
+            isset($p['facet.query'])
         );
         $this->prepareParams();
         $this->connect();
@@ -281,6 +281,11 @@ class Search extends Solr\Client
                         $facetParams['facet.query'] = array();
                     }
                     $facetParams['facet.query'] = @array_merge($facetParams['facet.query'], $fp['facet.query']);
+                } elseif (!empty($fp['facet.pivot'])) {
+                    if (empty($facetParams['facet.pivot'])) {
+                        $facetParams['facet.pivot'] = array();
+                    }
+                    $facetParams['facet.pivot'] = @array_merge($facetParams['facet.pivot'], $fp['facet.pivot']);
                 }
             }
         }
@@ -346,7 +351,7 @@ class Search extends Solr\Client
             }
             $rez['data'][] = $rd;
         }
-        $rez['facets'] = $this->processResultFacets();
+        $rez = array_merge($rez, $this->processResultFacets());
 
         $eventParams = array(
             'result' => &$rez
@@ -362,7 +367,9 @@ class Search extends Solr\Client
     private function processResultFacets()
     {
         if ($this->facetsSetManually) {
-            return $this->results->facet_counts;
+            return array(
+                'facets' => $this->results->facet_counts
+            );
         }
 
         $rez = array();
@@ -370,7 +377,11 @@ class Search extends Solr\Client
             $facet->loadSolrResult($this->results->facet_counts);
             $fr = $facet->getClientData();
             if (!empty($fr)) {
-                $rez[$fr['f']] = $fr;
+                $idx = empty($fr['index'])
+                    ? 'facets'
+                    : $fr['index'];
+
+                $rez[$idx][$fr['f']] = $fr;
             }
         }
 

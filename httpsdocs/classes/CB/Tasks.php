@@ -1314,8 +1314,7 @@ class Tasks
         }
         $rez .= '</tbody></table></div>';
 
-        $rez .= '<div class="p15">'.implode(' &nbsp; ', $actions).'</div>';
-
+        // $rez .= '<div class="p15">'.implode(' &nbsp; ', $actions).'</div>';
         return $rez;
     }
 
@@ -1428,7 +1427,9 @@ class Tasks
         $taskTemplates = Templates::getIdsByType('task');
         $ta = array();
         foreach ($tasksDataArray as &$d) {
-            if (!in_array($d['template_id'], $taskTemplates)) {
+            if ((!in_array($d['template_id'], $taskTemplates)) ||
+                empty($d['status'])
+            ) {
                 continue;
             }
             $ta[$d['id']] = &$d;

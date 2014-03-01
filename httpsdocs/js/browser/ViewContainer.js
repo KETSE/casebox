@@ -333,10 +333,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 this.filtersPanel
                 ,this.objectPanel
             ]
-            ,listeners: {
-                scope: this
-                ,
-            }
         });
 
         this.store = new Ext.data.DirectStore({
@@ -438,6 +434,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,new CB.browser.view.Charts({
                     iconCls: 'icon-chart'
                     ,refOwner: this
+                    ,addDivider: true // forr atdding a divider in menu before this view element
                     ,store: this.store
                     ,getProperty: getPropertyHandler
                     ,listeners: {
@@ -446,12 +443,26 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                         ,objectopen: this.onObjectsOpenEvent
                     }
                 })
+                ,new CB.browser.view.Pivot({
+                    refOwner: this
+                    ,store: this.store
+                    ,getProperty: getPropertyHandler
+                    ,listeners: {
+                        scope: this
+                        // ,selectionchange: this.onObjectsSelectionChange
+                        // ,objectopen: this.onObjectsOpenEvent
+                    }
+                })
             ]
             ,listeners: {
                 scope: this
                 ,add: function(o, c, idx) {
                     if(c.isXType('CBBrowserViewInterface')) {
-                        this.buttonCollection.get('apps').menu.add({
+                        var b = this.buttonCollection.get('apps');
+                        if(c.addDivider === true) {
+                            b.menu.add('-');
+                        }
+                        b.menu.add({
                             text: c.title
                             ,iconCls: c.iconCls
                             ,scope: this

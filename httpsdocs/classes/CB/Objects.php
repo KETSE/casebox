@@ -200,11 +200,16 @@ class Objects
                 return $tc->getPreview($id);
             }
 
+            // $objData = $obj->getData();
+
             $linearData = $obj->getLinearData();
+
         } catch (\Exception $e) {
             return '';
         }
 
+        // set object name block
+        // $top = '<div class="obj-header">'.$objData['name'].'</div>';
         $template = $obj->getTemplate();
         $gf = array();
         //group fields in display blocks
@@ -225,9 +230,9 @@ class Objects
 
         if (!empty($gf['top'])) {
             foreach ($gf['top'] as $f) {
-                // if ($f['name'] == '_title') {
-                //     continue;
-                // }
+                if ($f['name'] == '_title') {
+                    continue;
+                }
                 // if ($f['name'] == '_date_start') {
                 //     continue;
                 // }

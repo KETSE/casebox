@@ -60,7 +60,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.gridColumns = [
             {
                 header: L.Property
-                ,width: 200
+                // ,width: 200
                 ,dataIndex: 'title'
                 ,editable: false
                 ,scope: this
@@ -98,7 +98,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             },{
                 header: L.Value
                 ,id: 'value'
-                ,width: 200
+                // ,width: 200
                 ,dataIndex: 'value'
                 ,editor: new Ext.form.TextField()
                 ,scope: this
@@ -127,7 +127,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 }
             },{
                 header: L.Additionally
-                ,width: 200
+                // ,width: 200
                 ,dataIndex: 'info'
                 ,editor: new Ext.form.TextField()
                 ,hideable: false

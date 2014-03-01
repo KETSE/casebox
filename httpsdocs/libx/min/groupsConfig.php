@@ -27,11 +27,11 @@ return array_merge(
             ,'//css/spinner/Spinner.css'
         )
         ,'js_pdf' => array(
-            '//js/pdfobject.min.js'
+            '//js/pdfobject.js'
             )
         ,'js' => array(
             '//js/iso8601.min.js'
-            ,'//js/pdfobject.min.js'
+            ,'//js/pdfobject.js'
             ,'//js/ux/md5/spark-md5.min.js'
             ,'//js/ux/md5/Ext.ux.FileMD5.js'
             ,'//js/ux/Ext.ux.WebkitEntriesIterator.js'
@@ -48,6 +48,7 @@ return array_merge(
             ,'//js/browser/view/Grid.js'
             ,'//js/browser/view/Calendar.js'
             ,'//js/browser/view/Charts.js'
+            ,'//js/browser/view/Pivot.js'
             ,'//js/browser/view/Summary.js'
 
             ,'//js/CB.VerticalEditGrid.js'

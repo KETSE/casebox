@@ -52,6 +52,23 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
     ,onLoadData: function(r, e) {
         var items = [];
         this.removeAll(true);
+
+        if(CB.DB.templates.getType(this.loadedParams.template_id) != 'task') {
+            var titleView = new Ext.DataView({
+                autoHeight: true
+                ,cls: 'obj-plugin-title'
+                ,tpl: [
+                    '<tpl for=".">'
+                    ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(values.name) ]}</div>'
+                    ,'</tpl>'
+                ]
+                ,data: this.loadedParams
+                ,getContainerToolbarItems: function(){ return {};}
+            });
+
+            this.add(titleView);
+        }
+
         Ext.iterate(
             r.data
             ,function(k, v, o) {

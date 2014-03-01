@@ -3,7 +3,7 @@ Ext.namespace('CB.form.edit');
 CB.form.edit.Object = Ext.extend(Ext.Container, {
     xtype: 'panel'
     ,tbarCssClass: 'x-panel-white'
-    ,padding:0
+    ,padding: 0
     ,autoScroll: true
     ,layout: 'anchor'
     ,data: {}
@@ -19,12 +19,25 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             }
         });
 
+        this.titleView = new Ext.DataView({
+            autoHeight: true
+            ,cls: 'obj-plugin-title'
+            ,tpl: [
+                '<tpl for=".">'
+                ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(values.name) ]}</div>'
+                ,'</tpl>'
+            ]
+            ,data: {}
+        });
+
         this.grid = new CB.VerticalEditGrid({
             title: L.Details
             ,autoHeight: true
             ,hidden: true
             ,refOwner: this
             ,includeTopFields: true
+            ,stateId: 'oevg' //object edit vertical grid
+            ,autoExpandColumn: 'value'
             ,keys: [{
                 key: "s"
                 ,ctrl:true
@@ -34,8 +47,14 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 ,fn: this.onSaveObjectEvent
             }]
             ,viewConfig: {
-                forceFit: true
-                ,autoFill: true
+                // forceFit: true
+                autoFill: true
+            }
+            ,listeners: {
+                scope: this
+                ,staterestore: function(){ clog('statereatore', arguments);}
+                ,statesave: function(){ clog('statesave', arguments);}
+
             }
         });
 
@@ -57,7 +76,9 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 anchor: '-1'
                 ,style: 'margin: 0 0 15px 0'
             }
-            ,items: [ {
+            ,items: [
+                this.titleView
+                ,{
                     xtype: 'panel'
                     ,layout: 'fit'
                     ,autoHeight: true
@@ -119,6 +140,11 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         // this.getEl().mask(L.LoadingData + ' ...', 'x-mask-loading');
 
         if(isNaN(objectData.id)) {
+
+            if(Ext.isEmpty(objectData.name)) {
+                objectData.name = L.New + ' ' + CB.DB.templates.getName(objectData.template_id);
+            }
+
             this.processLoadData({
                     success: true
                     ,data: objectData
@@ -141,6 +167,8 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         if(Ext.isEmpty(this.data.data)) {
             this.data.data = {};
         }
+
+        this.titleView.update(this.data);
 
         this.objectsStore.baseParams = {
             id: r.data.id
@@ -311,6 +339,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
     }
     ,clear: function(){
         this.data = {};
+        this.titleView.update(this.data);
         this.grid.hide();
         this.fieldsZone.removeAll(true);
         this._isDirty = false;
