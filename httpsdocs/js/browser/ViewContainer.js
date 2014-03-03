@@ -131,7 +131,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
         this.buttonCollection.addAll([
             new Ext.Button({
-                text: L.Apps
+                text: L.Views
                 ,id: 'apps'
                 ,iconAlign:'top'
                 ,iconCls: 'ib-apps'
@@ -388,9 +388,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,beforeload: function(store, options) {
                     options = {facets: 'general'};
                     Ext.apply(options, Ext.value(this.params, {}));
-                    var vp = this.cardContainer.getLayout().activeItem.getViewParams();
-                    if(!Ext.isEmpty(vp) && (vp.from == 'calendar') &&
-                        (Ext.isEmpty(vp.dateStart) || Ext.isEmpty(vp.dateEnd))
+
+                    var vp = this.cardContainer.getLayout().activeItem.getViewParams(options);
+                    if( (vp === false) ||
+                        (
+                            !Ext.isEmpty(vp) && (vp.from == 'calendar') &&
+                            (Ext.isEmpty(vp.dateStart) || Ext.isEmpty(vp.dateEnd))
+                        )
                     ) {
                         return false;
                     }
@@ -414,22 +418,22 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,refOwner: this
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    ,listeners: {
-                        scope: this
-                        ,selectionchange: this.onObjectsSelectionChange
-                        ,objectopen: this.onObjectsOpenEvent
-                    }
+                    // ,listeners: {
+                    //     scope: this
+                    //     ,selectionchange: this.onObjectsSelectionChange
+                    //     ,objectopen: this.onObjectsOpenEvent
+                    // }
                 })
                 ,new CB.browser.view.Calendar({
                     iconCls: 'icon-calendar-view'
                     ,refOwner: this
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    ,listeners: {
-                        scope: this
-                        ,selectionchange: this.onObjectsSelectionChange
-                        ,objectopen: this.onObjectsOpenEvent
-                    }
+                    // ,listeners: {
+                    //     scope: this
+                    //     ,selectionchange: this.onObjectsSelectionChange
+                    //     ,objectopen: this.onObjectsOpenEvent
+                    // }
                 })
                 ,new CB.browser.view.Charts({
                     iconCls: 'icon-chart'
@@ -437,21 +441,15 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,addDivider: true // forr atdding a divider in menu before this view element
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    ,listeners: {
-                        scope: this
-                        ,selectionchange: this.onObjectsSelectionChange
-                        ,objectopen: this.onObjectsOpenEvent
-                    }
+                    // ,listeners: {
+                    //     scope: this
+                    //     ,selectionchange: this.onObjectsSelectionChange
+                    // }
                 })
                 ,new CB.browser.view.Pivot({
                     refOwner: this
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    ,listeners: {
-                        scope: this
-                        // ,selectionchange: this.onObjectsSelectionChange
-                        // ,objectopen: this.onObjectsOpenEvent
-                    }
                 })
             ]
             ,listeners: {
@@ -471,6 +469,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                         });
                     }
                 }
+                ,selectionchange: this.onObjectsSelectionChange
+                ,objectopen: this.onObjectsOpenEvent
             }
         });
 
@@ -643,8 +643,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,this
             );
         }
-        this.getEl().mask(L.Loading, 'x-mask-loading');
-        this.store.load(this.params);
+
+        if(this.store.load(this.params)) {
+            this.getEl().mask(L.Loading, 'x-mask-loading');
+        }
     }
 
     ,onProxyLoad: function (proxy, o, options) {
@@ -790,7 +792,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         var s = this.cardContainer.getLayout().activeItem.currentSelection;
         if(!Ext.isEmpty(s)) {
             if(this.rightPanel.getLayout().activeItem == this.objectPanel){
-                this.objectPanel.load(s[0]);
+                this.objectPanel.requestedLoadData = s[0];
                 this.objectPanel.doLoad();
             }
         }
@@ -872,7 +874,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,template_id: this.folderProperties.template_id
                 }
                 : {
-                    id: s[0].nid
+                    id: Ext.value(s[0].nid, s[0].id)
                     ,name: s[0].name
                     ,template_id: s[0].template_id
                     ,can: s[0].can

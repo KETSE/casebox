@@ -7,6 +7,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
         CB.PluginsPanel.superclass.initComponent.apply(this, arguments);
 
         App.on('objectchanged', this.onObjectChanged, this);
+        App.on('filesuploaded', this.onFilesUploaded, this);
 
         this.delayLoadTask = new Ext.util.DelayedTask(this.doLoad, this);
     }
@@ -101,7 +102,14 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
             data = {id: data};
         }
         if(!Ext.isEmpty(this.loadedParams)) {
-            if(data.id == this.loadedParams.id) {
+            if(data.pid == this.loadedParams.id) {
+                this.reload();
+            }
+        }
+    }
+    ,onFilesUploaded: function(pids) {
+        if(!Ext.isEmpty(this.loadedParams)) {
+            if(pids.indexOf(String(this.loadedParams.id)) >=0 ) {
                 this.reload();
             }
         }

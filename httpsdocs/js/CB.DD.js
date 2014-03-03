@@ -3,15 +3,15 @@ Ext.namespace('CB');
 /**
  * Base class for processing Drag and Drop requests
  *
- * On this class relies other Drang and Drop plugins created for Panels, Trees, Grids etc. 
- * An instance of CB.DD class will be crated in App.DD 
+ * On this class relies other Drang and Drop plugins created for Panels, Trees, Grids etc.
+ * An instance of CB.DD class will be crated in App.DD
  *     and any component would be able to listen to DD events through this instance.
  */
 
 CB.DD = Ext.extend(Ext.util.Observable, {
     data: []
     ,action: 'copy' // copy / move / shortcut
-    
+
     ,constructor: function(config){
         this.addEvents({
             'beforeexecute': true
@@ -20,12 +20,12 @@ CB.DD = Ext.extend(Ext.util.Observable, {
             ,'moved': true
             ,'shortcuted': true
         });
-        CB.DD.superclass.constructor.call(this, config)
+        CB.DD.superclass.constructor.call(this, config);
     }
     /**
      * Execute a Drag and Drop operation
-     * object  params {  
-     *     @param  varchar/event   action   'copy' | 'move' | 'shortcut'. 
+     * object  params {
+     *     @param  varchar/event   action   'copy' | 'move' | 'shortcut'.
      *             When drag event is passed - the action will be guessed from the event, relying on pressed keys.
      *             Shift - move
      *             Ctrl - copy
@@ -35,13 +35,13 @@ CB.DD = Ext.extend(Ext.util.Observable, {
      *     @param  object/array   sourceData     generic data for source object(s)
      *     @param  boolean   confirm     set to false wen you don't need a confirmation dialog for the action. Default to true
      * }
-     *     @param  function|null callback 
-     *     @param  object|null   scope   
+     *     @param  function|null callback
+     *     @param  object|null   scope
      * @return void
      */
     ,execute: function (params, callback, scope){
         if(Ext.isObject(params.action)) {
-            params.action = this.detectActionFromEvent(params.action)
+            params.action = this.detectActionFromEvent(params.action);
         }
         if(callback) {
             this.callback = scope ? callback.createDelegate(scope) : callback;
@@ -56,13 +56,13 @@ CB.DD = Ext.extend(Ext.util.Observable, {
             case 'shortcut':
                 this.postEvent = 'shortcuted';
                 break;
-            default: 
+            default:
                 return Ext.Msg.alert('Error', 'CB.DD: Invalid action specified for execute');
         }
 
         if(!Ext.isArray(params.sourceData)){
             params.sourceData = [params.sourceData];
-        } 
+        }
         this.params = params;
         if(params.confirm !== false){
             var sourceText = (params.sourceData.length == 1)
@@ -73,8 +73,10 @@ CB.DD = Ext.extend(Ext.util.Observable, {
                 ,L['DDActionMsg_' + params.action].replace('{source}', sourceText).replace('{target}', params.targetData.name)
                 ,this.onConfirmExecution
                 ,this
-            )
-        } else this.onConfirmExecution('yes');
+            );
+        } else {
+            this.onConfirmExecution('yes');
+        }
     }
     /**
      * confirm action execution function
@@ -90,8 +92,8 @@ CB.DD = Ext.extend(Ext.util.Observable, {
     }
     /**
      * detect desired action from event
-     * @param  object event 
-     * @return varchar       
+     * @param  object event
+     * @return varchar
      */
     ,detectActionFromEvent: function(event){
         if(event.ctrlKey) {
@@ -108,7 +110,7 @@ CB.DD = Ext.extend(Ext.util.Observable, {
      * @return void
      */
     ,processExecute: function(r, e){
-        
+
         if(r.success !== true){
             if(r.confirm === true) {
                 Ext.Msg.confirm(L.Confirmation, r.msg, function(b){
@@ -122,7 +124,7 @@ CB.DD = Ext.extend(Ext.util.Observable, {
             }
         }else{
             Ext.copyTo(r, this.params, 'sourceData,targetData');
-            r.targetId = r.targetData.id
+            r.targetId = r.targetData.id;
             App.fireEvent('objectsaction', this.params.action, r, e);
         }
         if(this.callback) {
@@ -131,6 +133,6 @@ CB.DD = Ext.extend(Ext.util.Observable, {
         }
     }
 }
-)
+);
 
 Ext.reg('CBDD', CB.DD);

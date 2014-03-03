@@ -11,6 +11,10 @@ clog = function(){
 // application main entry point
 Ext.onReady(function(){
     App = new Ext.util.Observable();
+
+    // used for charts
+    App.colors = [ "#94ae0a", "#115fa6","#a61120", "#ff8809", "#ffd13e", "#a61187", "#24ad9a", "#7c7474", "#a66111"];
+
     App.addEvents(
         'dragfilesenter'
         ,'dragfilesover'

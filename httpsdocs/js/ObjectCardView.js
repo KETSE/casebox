@@ -364,7 +364,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         this.addParamsToHistory(this.loadedData);
 
-        this.loadedData = Ext.apply({}, this.requestedLoadData);
+        this.loadedData = Ext.apply({id: id}, this.requestedLoadData);
 
         if(Ext.isDefined(this.loadedData.viewIndex)) {
             this.onViewChangeClick(this.loadedData.viewIndex, false);
@@ -375,7 +375,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         var activeItem = this.getLayout().activeItem;
 
         this.loadedData.viewIndex = this.items.indexOf(activeItem);
-
         switch(activeItem.getXType()) {
             case 'CBObjectPreview':
                 this.getTopToolbar().setVisible(!Ext.isEmpty(id));

@@ -321,10 +321,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         ) {
             return;
         }
-        params = {};
-        if(!Ext.isEmpty(node.attributes.view)) {
-            params.view = node.attributes.view;
-        }
+        params = {
+            view: Ext.isEmpty(node.attributes.view)
+                ? 'grid'
+                : node.attributes.view
+        };
         App.openPath( '/' + node.getPath('nid'), params );
     }
     ,onRenameTreeElement: function(tree, r, e){

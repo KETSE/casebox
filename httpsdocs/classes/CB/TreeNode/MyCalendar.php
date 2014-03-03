@@ -101,6 +101,8 @@ class MyCalendar extends Base
         }
 
         $p['fq'] = $this->fq;
+        $p['fq'][] = 'user_ids:'.$_SESSION['user']['id'];
+        $p['fq'][] = 'status:[0 TO 2]';
 
         $s = new \CB\Search();
         $rez = $s->query($p);

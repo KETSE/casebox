@@ -36,20 +36,19 @@ class Config extends Singleton
         }
         $cfg['facet_configs'] = $dfd;
 
-        if (!empty($cfg['node_facets'])) {
-            $cfg['node_facets'] = Util\toJSONArray($cfg['node_facets']);
-        }
+        $jsonProperties = array(
+            'api'
+            ,'js'
+            ,'node_facets'
+            ,'default_object_plugins'
+            ,'object_type_plugins'
+            ,'treeNodes'
+        );
 
-        if (!empty($cfg['default_object_plugins'])) {
-            $cfg['default_object_plugins'] = Util\toJSONArray($cfg['default_object_plugins']);
-        }
-
-        if (!empty($cfg['object_type_plugins'])) {
-            $cfg['object_type_plugins'] = Util\toJSONArray($cfg['object_type_plugins']);
-        }
-
-        if (!empty($cfg['treeNodes'])) {
-            $cfg['treeNodes'] = Util\toJSONArray($cfg['treeNodes']);
+        foreach ($jsonProperties as $property) {
+            if (!empty($cfg[$property])) {
+                $cfg[$property] = Util\toJSONArray($cfg[$property]);
+            }
         }
 
         static::$config = static::adjustPaths($cfg);
@@ -358,5 +357,4 @@ class Config extends Singleton
             $v
         );
     }
-
 }

@@ -47,14 +47,8 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 ,fn: this.onSaveObjectEvent
             }]
             ,viewConfig: {
-                // forceFit: true
-                autoFill: true
-            }
-            ,listeners: {
-                scope: this
-                ,staterestore: function(){ clog('statereatore', arguments);}
-                ,statesave: function(){ clog('statesave', arguments);}
-
+                forceFit: true
+                ,autoFill: true
             }
         });
 

@@ -720,7 +720,11 @@ class Files
         ) or die(DB\dbQueryError());
         $f['content_id'] = DB\dbLastInsertId();
         @mkdir($filePath.$storage_subpath.'/', 0777, true);
-        copy($f['tmp_name'], $filePath.$storage_subpath.'/'.$f['content_id']);
+
+        if (copy($f['tmp_name'], $filePath.$storage_subpath.'/'.$f['content_id']) !== true) {
+            throw new \Exception("Error copying file to destination folder, possible permission problems.", 1);
+        }
+
         @unlink($f['tmp_name']);
 
         return true;

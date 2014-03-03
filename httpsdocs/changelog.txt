@@ -1,3 +1,19 @@
+CaseBox 1.9.159 (2014-03-03)
+==============================
+New Features, Improvements
+--------------------------
+- added demosrc as demo core
+- refresh right panel on files upload
+- don't hide pivot table when showing charts
+- added legend in pivoting charts and changed series colors
+- implemented graph view for demosrc core
+- Change active view to Grid when accessing folders
+- switch from Filter to Preview panel in right side, preview the selected node in Grid
+
+Fixed Bugs:
+----------
+- Ctrl + Enter did not send comments in other browsers
+
 CaseBox 1.9.153 (2014-03-01)
 ==============================
 New Features, Improvements

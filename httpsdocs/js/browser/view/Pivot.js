@@ -19,6 +19,13 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
 
         Ext.chart.Chart.CHART_URL = '/libx/ext/resources/charts.swf';
 
+        this.seriesStyles = [];
+        for (var i = 0; i < App.colors.length; i++) {
+            this.seriesStyles.push({
+                color: App.colors[i]
+            });
+        }
+
         this.rowsCombo = new Ext.form.ComboBox({
             xtype: 'combo'
             ,id: 'rowsCombo' + this.instanceId
@@ -105,66 +112,9 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
             data: []
         });
 
-        // this.chartConfigs = {
-        //     'stackedbarchart': {
-        //         xtype: 'stackedbarchart'
-        //         // ,store: this.chartDataStore
-        //         ,yField: 'name'
-        //         ,xAxis: new Ext.chart.NumericAxis({
-        //             stackingEnabled: true
-        //         })
-        //         ,series: [{
-        //             xField: 'items'
-        //             ,displayName: 'Items'
-        //         }]
-        //     }
-        //     ,'stackedcolumnchart': {
-        //         xtype: 'columnchart'
-        //         ,store: this.chartDataStore
-        //         ,xField: 'name'
-        //         ,yField: 'items'
-        //         ,series: [{
-        //             yField: 'items'
-        //             ,displayName: 'Items'
-        //         }]
-        //         ,listeners: {
-        //             scope: this
-        //             ,itemclick: this.onChartItemClick
-        //         }
-        //     }
-        //     // ,'pivotgrid': {
-        //     //     xtype: 'pivotgrid'
-        //     //     ,border: false
-        //     //     ,autoScroll: true
-        //     //     ,store: this.chartDataStore
-        //     //     ,aggregator: 'sum'
-        //     //     ,measure   : 'items'
-        //     //     ,leftAxis: [
-        //     //         {
-        //     //             width: 60
-        //     //             ,dataIndex: 'name'
-        //     //             ,direction: 'ASC'
-        //     //         }
-        //     //     ]
-        //     //     ,topAxis: [
-        //     //         {
-        //     //             dataIndex: 'items'
-        //     //             ,direction: 'ASC'
-        //     //         }
-        //     //     ]
-        //     //     ,listeners: {
-        //     //         scope: this
-        //     //         ,itemclick: this.onChartItemClick
-        //     //         ,afterrender: function(c){
-        //     //             c.view.refresh(true);
-        //     //         }
-        //     //     }
-        //     // }
-        // };
-
         this.chartContainer = new Ext.Panel({
             region: 'center'
-            ,layout: 'fit'
+            ,autoScroll: 'true'
         });
 
         Ext.apply(this, {
@@ -219,64 +169,63 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
 
         this.chartContainer.removeAll(true);
 
-        if(this.activeChart == 'table') {
-            var html = '';
+        // if(this.activeChart == 'table') {
+        var html = '';
 
-            var hr = '<th> &nbsp; </th>';
-            Ext.iterate(
-                this.pivot.titles[1]
-                ,function(k, v, o) {
-                    hr += '<th>' + v + '</th>';
-                }
-                ,this
-            );
-            html += '<tr>' + hr + '<th>' + L.Total + '</th></tr>';
+        var hr = '<th> &nbsp; </th>';
+        Ext.iterate(
+            this.pivot.titles[1]
+            ,function(k, v, o) {
+                hr += '<th>' + v + '</th>';
+            }
+            ,this
+        );
+        html += '<tr>' + hr + '<th>' + L.Total + '</th></tr>';
 
-            Ext.iterate(
-                this.pivot.titles[0]
-                ,function(k, v, o) {
-                    var r = '<th>' + v + '</th>';
-                    Ext.iterate(
-                        this.pivot.titles[1]
-                        ,function(q, z, y) {
-                            r += '<td>' + Ext.value(this.refs[k + '_' + q], '') + '</td>';
-                        }
-                        ,this
-                    );
-
-                    html += '<tr>' + r + '<td class="total">' + Ext.value(this.refs[k + '_t'], '') + '</td></tr>';
-                }
-                ,this
-            );
-
-            var total = 0;
-            var r = '<th>' + L.Total + '</th>';
-            Ext.iterate(
-                this.pivot.titles[1]
-                ,function(q, z, y) {
-                    var nr = Ext.value(this.refs['t_' + q], '');
-                    r += '<td class="total">' + nr + '</td>';
-                    if(!isNaN(nr)) {
-                        total += nr;
+        Ext.iterate(
+            this.pivot.titles[0]
+            ,function(k, v, o) {
+                var r = '<th>' + v + '</th>';
+                Ext.iterate(
+                    this.pivot.titles[1]
+                    ,function(q, z, y) {
+                        r += '<td>' + Ext.value(this.refs[k + '_' + q], '') + '</td>';
                     }
+                    ,this
+                );
+
+                html += '<tr>' + r + '<td class="total">' + Ext.value(this.refs[k + '_t'], '') + '</td></tr>';
+            }
+            ,this
+        );
+
+        var total = 0;
+        var r = '<th>' + L.Total + '</th>';
+        Ext.iterate(
+            this.pivot.titles[1]
+            ,function(q, z, y) {
+                var nr = Ext.value(this.refs['t_' + q], '');
+                r += '<td class="total">' + nr + '</td>';
+                if(!isNaN(nr)) {
+                    total += nr;
                 }
-                ,this
-            );
+            }
+            ,this
+        );
 
-            html += '<tr>' + r + '<td class="total">' + total + '</td></tr>';
+        html += '<tr>' + r + '<td class="total">' + total + '</td></tr>';
 
-            html = '<table class="pivot">' + html + '</table>';
+        html = '<table class="pivot">' + html + '</table>';
 
-            clog('html', html);
+        this.chartContainer.add({
+            xtype: 'panel'
+            ,border: false
+            ,autoHeight: true
+            ,padding: 10
+            ,html: html
+        });
 
-            this.chartContainer.add({
-                xtype: 'panel'
-                ,border: false
-                ,autoScroll: true
-                ,padding: 10
-                ,html: html
-            });
-        } else {
+        if(this.activeChart != 'table') {
 
             /* create data, stores and charts on the fly */
             var fields1 = [this.selectedFacets[0]]
@@ -347,92 +296,44 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
                 ,this
             );
 
-            /*{
-                xtype: 'stackedbarchart'
-                ,store: new Ext.data.JsonStore({
-                    fields: fields1 //['year', 'comedy', 'action', 'drama', 'thriller']
-                    ,data: data1
-                    // [
-                    //     {year: 2005, comedy: 34000000, action: 23890000, drama: 18450000, thriller: 20060000},
-                    //     {year: 2006, comedy: 56703000, action: 38900000, drama: 12650000, thriller: 21000000},
-                    //     {year: 2007, comedy: 42100000, action: 50410000, drama: 25780000, thriller: 23040000},
-                    //     {year: 2008, comedy: 38910000, action: 56070000, drama: 24810000, thriller: 26940000}
-                    // ]
-                })
-                ,yField: 'year',
-                ,xAxis: new Ext.chart.NumericAxis({
-                    stackingEnabled: true
-                    // ,labelRenderer: Ext.util.Format.usMoney
-                })
-                ,series:
-                // [{
-                //         xField: 'comedy',
-                //         displayName: 'Comedy'
-                //     },{
-                //         xField: 'action',
-                //         displayName: 'Action'
-                //     },{
-                //         xField: 'drama',
-                //         displayName: 'Drama'
-                //     },{
-                //         xField: 'thriller',
-                //         displayName: 'Thriller'
-                //     }
-                // ]
-            }/**/
-            // this.chart1 = new Ext.create(this.chartConfigs['stackedbarchart']);
-            // // this.chartContainer.add(this.chart);
-            // this.chart2 = new Ext.create(this.chartConfigs['stackedcolumnchart']);
-
-            clog('fields1', fields1);
-            clog('fields2', fields2);
-            clog('data1', data1);
-            clog('data2', data2);
-            clog('series1', series1);
-            clog('series2', series2);
-
             var chartItems = [
                 {
                     xtype: this.activeChart
+                    ,height: 400
                     ,store: new Ext.data.JsonStore({
                         fields: fields1
                         ,data: data1
                     })
                     ,yField: this.selectedFacets[0]
 
-                    ,legend: {
-                         position: 'bottom',
-                         labelFont: 'tahoma'
+                    ,extraStyle:{
+                        legend:{
+                            display: 'right'
+                        }
                     }
-                    // ,xAxis: new Ext.chart.NumericAxis({
-                    //     stackingEnabled: true
-                    //     ,scope: this
-                    //     ,labelRenderer: function() {
-                    //         clog('label renderer', arguments);
-                    //     }
-                    // })
+                    ,seriesStyles: this.seriesStyles
                     ,series: series1
                 }, {
                     xtype: this.activeChart
+                    ,height: 400
                     ,store: new Ext.data.JsonStore({
                         fields: fields2
                         ,data: data2
                     })
                     ,yField: this.selectedFacets[1]
-                    // ,xAxis: new Ext.chart.NumericAxis({
-                    //     stackingEnabled: true
-                    // })
+                    ,extraStyle:{
+                        legend:{
+                            display: 'right'
+                        }
+                    }
+                    ,seriesStyles: this.seriesStyles
                     ,series: series2
                 }
             ];
             chartItems[0][axis1+'Field'] = this.selectedFacets[0];
             chartItems[1][axis1+'Field'] = this.selectedFacets[1];
 
-            this.chartContainer.add({
-                xtype: 'panel'
-                ,autoScroll: true
-                ,items: chartItems
-            });
+            this.chartContainer.add(chartItems);
         }
         this.chartContainer.syncSize();
     }
@@ -519,7 +420,6 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
             ,titles: [] // 2 levels, for both facets
         };
 
-        clog('this.selectedFacets', this.selectedFacets);
         if(this.data.pivot) {
             if(Ext.isEmpty(this.selectedFacets)) {
                 //just get the facets the server returned the pivot for
@@ -540,7 +440,6 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
         }
 
         this.loadAvailableFacets();
-        clog(this.selectedFacets, this.pivot);
         this.onChangeChartClick();
     }
 

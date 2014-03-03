@@ -93,7 +93,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
         this.messageField.syncSize();
         this.syncSize();
 
-        if ((e.getKey() == 10) && e.hasModifier()) {
+        if ( ([10, 13].indexOf(e.getKey()) >= 0) && e.ctrlKey) {
             var msg = tf.getValue().trim();
 
             if(Ext.isEmpty(msg)) {
