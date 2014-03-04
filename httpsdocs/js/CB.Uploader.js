@@ -313,7 +313,9 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
             };
 
             this.progressChange();
-            if(!Ext.isEmpty(this.updatedPids)) App.fireEvent('filesuploaded', this.updatedPids);
+            if(!Ext.isEmpty(this.updatedPids)) {
+                App.fireEvent('filesuploaded', this.updatedPids);
+            }
             return;
         }
         r = this.store.getAt(idx);

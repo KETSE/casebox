@@ -28,7 +28,6 @@ class PivotFacet extends StringsFacet
 
     public function loadSolrResult($solrResult)
     {
-        \CB\debug($solrResult);
         $this->solrData = array();
         $cfg = &$this->config;
 
@@ -72,6 +71,7 @@ class PivotFacet extends StringsFacet
                 unset($sv->field);
             }
         }
+        unset($v);
 
         /* clone facet classes and get data for each separately */
         $facet1 = clone $cfg['facet1'];

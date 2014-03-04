@@ -1,3 +1,17 @@
+CaseBox 1.9.159 (2014-03-04)
+==============================
+New Features, Improvements
+--------------------------
+- _objects field default: {"source": "tree"}
+- add scroller to graph
+
+Fixed Bugs:
+----------
+- VerticalEdit grid doesn't generate onChange event on D&D
+- one facet not shown in pivot table
+- Incorrect URL generated in recovery password emails
+- 'Undefined' appears in preview for virtual nodes
+
 CaseBox 1.9.159 (2014-03-03)
 ==============================
 New Features, Improvements

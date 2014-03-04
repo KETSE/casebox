@@ -5,7 +5,7 @@
 
 CB.ObjectsFieldCommonFunctions = {
     getStore: function(){
-        source = Ext.isEmpty(this.config.source) ? 'thesauri': this.config.source;
+        var source = Ext.isEmpty(this.config.source) ? 'tree': this.config.source;
         switch(source){
             case 'thesauri':
                 this.store = this.getThesauriStore();
@@ -114,7 +114,7 @@ CB.ObjectsFieldCommonFunctions = {
         }
     }
     ,getObjectsStore: function(){
-        if(Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri')) {
+        if(this.config.source == 'thesauri') {
             return this.getThesauriStore();
         }
 
@@ -329,7 +329,7 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
         return this.value.join(',');
     }
     ,onTriggerClick: function(e){
-        if( Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri') ){
+        if(this.config.source == 'thesauri'){
             this.form = new CB.ObjectsSelectionPopupList({
                 data: this.data
                 ,value: this.getValue()
@@ -338,7 +338,7 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
                     ,setvalue : this.onSetValue
                 }
             });
-        }else {
+        } else {
             this.form = new CB.ObjectsSelectionForm({
                 data: this.data
                 ,value: this.getValue()

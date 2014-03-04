@@ -54,7 +54,9 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
         var items = [];
         this.removeAll(true);
 
-        if(CB.DB.templates.getType(this.loadedParams.template_id) != 'task') {
+        if((CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
+            !Ext.isEmpty(this.loadedParams.name)
+        ){
             var titleView = new Ext.DataView({
                 autoHeight: true
                 ,cls: 'obj-plugin-title'

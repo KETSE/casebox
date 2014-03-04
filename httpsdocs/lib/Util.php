@@ -518,6 +518,10 @@ function dateMysqlToISO($date_string)
 
 function getCoreHost($db_name = false)
 {
+    if (!empty($_SERVER['SERVER_NAME'])) {
+        return 'https://'.$_SERVER['SERVER_NAME'].'/';
+    }
+
     if ($db_name == false) {
         $db_name = \CB\CONFIG\DB_NAME;
     }
@@ -525,14 +529,8 @@ function getCoreHost($db_name = false)
     if (substr($db_name, 0, 3) == 'cb_') {
         $core = substr($db_name, 3);
     }
-    switch ($core) {
-        case 'cb2':
-            $core = 'http://cb2.vvv.md/';
-            break;
-        default:
-            $core = 'https://'.$core.'.casebox.org/';
-            break;
-    }
+    $d = isDevelServer() ? '.d' : '';
+    $core = 'https://'.$core.$d.'.casebox.org/';
 
     return $core;
 }

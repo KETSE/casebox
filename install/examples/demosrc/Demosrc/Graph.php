@@ -200,7 +200,7 @@ class Graph
         $graphNodes = $solrNodes;
 
         $this->prepareGraphNodes($graphNodes);
-        \CB\debug($graphNodes);
+
         $this->setGraphTimeline($graphNodes);
 
         $rez = '';

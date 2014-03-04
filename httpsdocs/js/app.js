@@ -625,7 +625,7 @@ function initApp(){
                             e.cancel = true;
                             /* prepeare data to set to popup windows */
                             var store = false;
-                            source = Ext.isEmpty(cfg.source) ? 'thesauri' : cfg.source;
+                            var source = Ext.isEmpty(cfg.source) ? 'tree' : cfg.source;
                             switch(source){
                                 case 'thesauri':
                                     store = getThesauriStore(cfg.thesauriId);
