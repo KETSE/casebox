@@ -357,11 +357,6 @@ class Template extends Object
                 break;
 
             case 'combo':
-            case 'popuplist':
-                if (!empty($value)) {
-                    $value = Util\getThesauriTitles($value);
-                }
-                break;
 
             case '_case':
                 if (empty($value)) {
@@ -449,14 +444,7 @@ class Template extends Object
                             WHERE id IN ('.$ids.')';
                         break;
                     default:
-                        $value = 'thesauri';
-                        $sql = 'SELECT id
-                                ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
-                                ,iconCls
-                            FROM tags
-                            WHERE id IN ('.$ids.')
-                            ORDER BY `order`';
-                        break;
+                        return $value;
                 }
 
                 $res = DB\dbQuery($sql) or die(DB\dbQueryError());

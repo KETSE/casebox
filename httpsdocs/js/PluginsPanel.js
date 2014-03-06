@@ -104,7 +104,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
             data = {id: data};
         }
         if(!Ext.isEmpty(this.loadedParams)) {
-            if(data.pid == this.loadedParams.id) {
+            if((data.pid == this.loadedParams.id) || (data.id == this.loadedParams.id)) {
                 this.reload();
             }
         }

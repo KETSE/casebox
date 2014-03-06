@@ -819,6 +819,8 @@ class Object extends OldObject
             array($this->id, $pid)
         ) or die(DB\dbQueryError());
 
+        $this->moveCustomDataTo($pid);
+
         // move childs from overwriten targetId (which has been marked with dstatus = 3)
         // to newly copied object
         if (is_numeric($targetId)) {
@@ -829,5 +831,14 @@ class Object extends OldObject
         }
 
         return $this->id;
+    }
+
+    /**
+     *  method that should be overwriten in descendants classes
+     * if any custom actions should be made on objects move
+    */
+    protected function moveCustomDataTo($targetId)
+    {
+
     }
 }

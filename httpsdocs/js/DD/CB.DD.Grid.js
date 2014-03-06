@@ -29,9 +29,25 @@ CB.DD.Grid =  Ext.extend(Ext.util.Observable, {
     ,init: function(owner) {
         this.owner = owner;
         this.idProperty = owner.store.reader.meta.idProperty;
-        Ext.apply(this.owner, {
-            enableDragDrop: true
-        });
+
+        var cfg = {};
+        if(!Ext.isDefined(this.enableDragDrop) &&
+            !Ext.isDefined(this.enableDrag) &&
+            !Ext.isDefined(this.enableDrop)
+        ) {
+            this.enableDragDrop = true;
+        }
+
+        cfg.enableDrag = this.enableDragDrop || this.enableDrag;
+        cfg.enableDrop = this.enableDragDrop || this.enableDrop;
+
+        if(cfg.enableDrag && cfg.enableDrop) {
+            cfg.enableDragDrop = true;
+        }
+
+        Ext.apply(this, cfg);
+        Ext.apply(this.owner, cfg);
+
         owner.on('render', this.onRender, this);
         owner.on('beforedestroy', this.onBeforeDestroy, this);
 
@@ -40,21 +56,25 @@ CB.DD.Grid =  Ext.extend(Ext.util.Observable, {
     }
 
     ,onRender: function(grid){
-        var dragZoneConfig = this.dragZoneConfig || {};
-        Ext.apply(dragZoneConfig, {
-            idProperty: this.idProperty
-            ,ddGroup: this.ddGroup
-            ,nodeToGenericData: this.nodeToGenericData
-        });
-        this.owner.getView().dragZone = new CB.DD.GridDragZone(this.owner, dragZoneConfig);
+        if(this.enableDrag) {
+            var dragZoneConfig = this.dragZoneConfig || {};
+            Ext.apply(dragZoneConfig, {
+                idProperty: this.idProperty
+                ,ddGroup: this.ddGroup
+                ,nodeToGenericData: this.nodeToGenericData
+            });
+            this.owner.getView().dragZone = new CB.DD.GridDragZone(this.owner, dragZoneConfig);
+        }
 
-        var dropZoneConfig = this.dropZoneConfig || {};
-        Ext.apply(dropZoneConfig, {
-            idProperty: this.idProperty
-            ,ddGroup: this.ddGroup
-            ,nodeToGenericData: this.nodeToGenericData
-        });
-        this.owner.dropZone = new CB.DD.GridDropZone(this.owner, dropZoneConfig);
+        if(this.enableDrop) {
+            var dropZoneConfig = this.dropZoneConfig || {};
+            Ext.apply(dropZoneConfig, {
+                idProperty: this.idProperty
+                ,ddGroup: this.ddGroup
+                ,nodeToGenericData: this.nodeToGenericData
+            });
+            this.owner.dropZone = new CB.DD.GridDropZone(this.owner, dropZoneConfig);
+        }
     }
 
     /**
@@ -123,6 +143,7 @@ CB.DD.GridDragZone =  Ext.extend(Ext.grid.GridDragZone, {
                 ,data: data
             };
         }
+
         return rez;
     }
     ,getSelections: function() {
@@ -187,7 +208,10 @@ CB.DD.GridDropZone =  Ext.extend(Ext.dd.DropZone, {
             - any descendant of dragged node
         */
         var rez = this.dropAllowed;
-        if(!Ext.isDefined(data.data) || !targetData.record) {
+        if(!targetData.record ||
+            Ext.isEmpty(data.data) ||
+            isNaN(data.data[0].id)
+        ) {
             return this.dropNotAllowed;
         }
 

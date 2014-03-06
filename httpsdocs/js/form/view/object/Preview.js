@@ -17,6 +17,8 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             }
         });
         CB.form.view.object.Preview.superclass.initComponent.apply(this, arguments);
+
+        App.on('objectchanged', this.onObjectChanged, this);
     }
 
     ,onAfterRender: function(){
@@ -294,6 +296,16 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
 
     ,getContainerToolbarItems: function() {
 
+    }
+    ,onObjectChanged: function(data) {
+        if(!isNaN(data)) {
+            data = {id: data};
+        }
+        if(!Ext.isEmpty(this.data)) {
+            if(data.id == this.data.id) {
+                this.reload();
+            }
+        }
     }
 });
 

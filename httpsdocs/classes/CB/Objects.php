@@ -419,23 +419,6 @@ class Objects
                             $f['value'][10] = 'T';
                         }
                         break;
-                    case 'combo':
-                    case 'popuplist':
-                        $f['value'] = Util\toNumericArray($f['value']);
-                        if (empty($f['value'])) {
-                            break;
-                        }
-                        $sres = DB\dbQuery(
-                            'SELECT l'.LANGUAGE_INDEX.' `title`
-                            FROM tags
-                            WHERE id IN ('.implode(',', $f['value']).')'
-                        ) or die(DB\dbQueryError());
-
-                        while ($sr = $sres->fetch_assoc()) {
-                            $processed_values[] = $sr['title'];
-                        }
-                        $sres->close();
-                        break;
                     case 'html':
                         $f['value'] = strip_tags($f['value']);
                         break;
@@ -444,14 +427,12 @@ class Objects
 
                 if (@$field['cfg']['faceting'] && in_array($field['type'], array('combo', 'int', '_objects'))) {
                     $solr_field = $field['solr_column_name'];
-                    if (empty($solr_field)) {
-                        $solr_field = ( empty($field['cfg']['source']) || ($field['cfg']['source'] == 'thesauri') ) ?
-                            'sys_tags' : 'tree_tags';
-                    }
-                    $arr = Util\toNumericArray($f['value']);
-                    foreach ($arr as $v) {
-                        if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
-                            $object_record[$solr_field][] = $v;
+                    if (!empty($solr_field)) {
+                        $arr = Util\toNumericArray($f['value']);
+                        foreach ($arr as $v) {
+                            if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
+                                $object_record[$solr_field][] = $v;
+                            }
                         }
                     }
                 }

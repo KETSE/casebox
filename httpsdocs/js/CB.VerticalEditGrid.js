@@ -219,11 +219,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,plugins: [
                 {
                     ptype: 'CBDDGrid'
-                    ,dragZoneConfig:  {
-                        beforeDragEnter: function() {
-                            return false;
-                        }
-                    }
+                    ,enableDrop: true
                     ,dropZoneConfig:  {
                         onNodeOver: this.onNodeDragOver.createDelegate(this)
                         ,onNodeDrop: this.onNodeDrop.createDelegate(this)
@@ -238,7 +234,10 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
     ,onNodeDragOver: function (targetData, source, e, data){
         var rez = this.dropZone.dropNotAllowed;
-        if(!Ext.isDefined(data.data) || !targetData.record) {
+        if(!targetData.record ||
+            Ext.isEmpty(data.data) ||
+            isNaN(data.data[0].id)
+        ) {
             return rez;
         }
 

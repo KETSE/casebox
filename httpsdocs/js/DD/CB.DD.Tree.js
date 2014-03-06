@@ -1,7 +1,7 @@
 Ext.namespace('CB.DD');
 /**
  * Plugin for drag and drop from/to tree components in casebox
- * 
+ *
  */
 
 CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
@@ -9,7 +9,7 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
     ,ddGroup: 'CBO'
     /**
      * just pass the idProperty used in tree for nodes.
-     * @param  json config 
+     * @param  json config
      * @return void
      */
     ,constructor: function(config){
@@ -21,7 +21,7 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
      * init method called by the tree when initializing plugins
      *
      * In this method we set all required configurantion and listeners to the tree
-     *     
+     *
      * @param  Ext.tree.TreePanel owner
      * @return void
      */
@@ -31,10 +31,10 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
         owner.on('beforedestroy', this.onBeforeDestroy, this);
         App.on('objectsaction', this.onObjectsAction, this);
     }
-    
+
     /**
      * apply config to tree
-     * @param  Ext.tree.TreePanel tree 
+     * @param  Ext.tree.TreePanel tree
      * @return void
      */
     ,onRender: function(tree){
@@ -53,7 +53,7 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
         });
 
     }
-    
+
     /**
      * unset all assigned listeners
      * @return void
@@ -64,9 +64,9 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
         this.owner.un('beforedestroy', this.onBeforeDestroy, this);
         App.un('objectsaction', this.onObjectsAction, this);
     }
-    
+
     /**
-     * transfers tree node data to generic structured object for D&D 
+     * transfers tree node data to generic structured object for D&D
      * @param  node/atributtes node node object or its attributes
      * @return object
      */
@@ -91,9 +91,9 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
 
     /**
      * function used to update tree nodes for actions on abjects like create/copy/move/update/delete
-     * 
+     *
      * @param  object r responce
-     * @param  event e 
+     * @param  event e
      * @return void
      */
     ,onObjectsAction: function(action, r, e){
@@ -118,10 +118,10 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
                 break;
         }
     }
-    
+
     /**
      * remove a node by its id
-     * @param  int nodeId 
+     * @param  int nodeId
      * @return boolean
      */
     ,removeNode: function(nodeId){
@@ -132,10 +132,10 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
             node = rootNode.findChild(this.idProperty, nodeId, true);
         }
     }
-    
+
     /**
      * reload a node by its id
-     * @param  int nodeId 
+     * @param  int nodeId
      * @return boolean
      */
     ,reloadNode: function(nodeId){
@@ -197,9 +197,10 @@ CB.DD.TreeDropZone =  Ext.extend(Ext.tree.TreeDropZone, {
         var i = 0;
         while ((i < sourceData.length) && (rez == this.dropAllowed))  {
             var sourceNode = this.tree.getRootNode().findChild(this.idProperty, sourceData[i].id);
-            if( (targetData.node.attributes[this.idProperty] == sourceData[i].id)
-                || (targetData.node.attributes[this.idProperty] == sourceData[i].pid)
-                || targetData.node.isAncestor(sourceNode)
+            if(isNaN(sourceData[i].id) ||
+                (targetData.node.attributes[this.idProperty] == sourceData[i].id) ||
+                (targetData.node.attributes[this.idProperty] == sourceData[i].pid) ||
+                targetData.node.isAncestor(sourceNode)
             ) {
                 rez = this.dropNotAllowed;
             }
@@ -208,7 +209,7 @@ CB.DD.TreeDropZone =  Ext.extend(Ext.tree.TreeDropZone, {
         return rez;
     }
     ,onNodeDrop: function(targetData, source, e, sourceData){
-        
+
         if(this.onNodeOver(targetData, source, e, sourceData) == this.dropAllowed){
             App.DD.execute({
                 action: e

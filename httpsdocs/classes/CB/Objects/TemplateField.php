@@ -252,7 +252,7 @@ class TemplateField extends Object
                 ,`order`
                 ,`cfg`
                 ,`solr_column_name`
-)
+                )
             SELECT
                 t.id
                 ,t.pid
@@ -274,6 +274,19 @@ class TemplateField extends Object
                 $this->id
                 ,$targetId
                 ,$this->detectParentTemplate($targetId)
+            )
+        ) or die(DB\dbQueryError());
+    }
+
+    protected function moveCustomDataTo($targetId)
+    {
+        DB\dbQuery(
+            'UPDATE templates_structure
+            SET pid = $2
+            WHERE id = $1',
+            array(
+                $this->id
+                ,$targetId
             )
         ) or die(DB\dbQueryError());
     }

@@ -1,4 +1,29 @@
-CaseBox 1.9.159 (2014-03-04)
+CaseBox 1.9.161 (2014-03-06)
+==============================
+New Features, Improvements
+--------------------------
+- pivot table view: added clicks on table cells
+- Remove deprecated mysql tables and related code. For now removed:
+    messages
+    objects_data
+    objects_duplicates
+    tags
+- Refresh the preview panel for Task when user reopens it
+
+Fixed Bugs:
+----------
+- After _objects field is edited, grid focuses the first row
+- fixed some d&d issues related to vertical edit grid
+    (cells did not select with mouse and disabled drag from properties grid)
+- combo editors, value is deleted if working with keyboard
+- Opening a "field" template in new tab gives JS error
+- pid of template fields doesn't change when moving the element in tree
+
+Notes:
+----------
+- apply database update for core: 20140306_1626 db_update v1.9.161.sql
+
+CaseBox 1.9.160 (2014-03-04)
 ==============================
 New Features, Improvements
 --------------------------

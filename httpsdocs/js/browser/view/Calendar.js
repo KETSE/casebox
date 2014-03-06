@@ -60,43 +60,9 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         this.eventStore = new Ext.data.JsonStore({
             autoLoad: false
             ,autoDestroy: true
-            // ,proxy: new  Ext.data.DirectProxy({
-            //     paramsAsHash: true
-            //     ,directFn: CB_Calendar.getEvents
-            //     ,listeners:{
-            //         scope: this
-            //         ,load: function(proxy, obj, opt){
-            //             for (var i = 0; i < obj.result.data.length; i++) {
-            //                 obj.result.data[i].start = date_ISO_to_date(obj.result.data[i].start);
-            //                 obj.result.data[i].end = Ext.value(date_ISO_to_date(obj.result.data[i].end), obj.result.data[i].start);
-            //             }
-            //         }
-            //     }
-            // })
-            // ,reader: new Ext.data.JsonReader({
-            //     successProperty: 'success'
-            //     ,idProperty: 'id'
-            //     ,root: 'data'
-            //     ,messageProperty: 'msg'
-            //     ,fields: fields
-            // }
-            // )
             ,fields: fields
             ,listeners: {
                 scope: this
-
-                // ,beforeload: function(st, r, o){
-                //     el = this.getEl();
-                //     if( Ext.isEmpty(el) || !el.isVisible(true) ) return false;
-                //     // if(!Ext.isDate(r.params.start)) r.params.start = new Date()
-                //     //  || !Ext.isDate(r.params.end)) return false;
-                //     if(!this.allowedReload){
-                //         this.eventsReloadTask.delay(500);
-                //         return false;
-                //     }
-                //     this.allowedReload = false;
-                // }
-
                 ,load: function(st, recs, opt){
                     Ext.each(
                         recs
@@ -230,16 +196,6 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
             ];
 
             this.fireEvent('selectionchange', s);
-
-            // this.fireEvent(
-            //     'objectopen'
-            //     ,{
-            //         nid: rec.data.EventId
-            //         ,template_id: rec.data.template_id
-            //     }
-            // );
-
-            //App.openObject( rec.data.template_id, rec.data.EventId );
     }
 
         // This is an application-specific way to communicate CalendarPanel event messages back to the user.
@@ -473,9 +429,6 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
             ,[
                 'apps'
                 ,'create'
-                // ,'-'
-                // ,'edit'
-                // ,'delete'
                 ,'-'
                 ,'dayview'
                 ,'weekview'
@@ -534,12 +487,7 @@ Ext.reg('CBBrowserViewCalendarPanel', CB.browser.view.CalendarPanel);
 Ext.calendar.CalendarView.prototype.setStartDate = function(start, refresh) {
     this.startDate = start.clearTime();
     this.setViewBounds(start);
-    // this.store.load({
-    //     params: {
-    //         start: this.viewStart.format('m-d-Y'),
-    //         end: this.viewEnd.format('m-d-Y')
-    //     }
-    // });
+
     if (refresh === true) {
         this.refresh();
     }

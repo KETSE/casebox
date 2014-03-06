@@ -98,13 +98,23 @@ function getStoreTitles(v){
     return texts.join(',');
 }
 function getStoreNames(v){
-    if(Ext.isEmpty(v)) return '';
-    ids = String(v).split(',');
-    texts = [];
-    Ext.each(ids, function(id){
-         idx = this.findExact('id', parseInt(id, 10));
-        if(idx >= 0) texts.push(this.getAt(idx).get('name'));
-    }, this);
+    if(Ext.isEmpty(v)) {
+        return '';
+    }
+    var ids = String(v).split(',');
+    var texts = [];
+    Ext.each(
+        ids
+        ,function(id){
+            var idx = this.findExact('id', parseInt(id, 10));
+            if(idx >= 0) {
+                var d = this.getAt(idx).data;
+                texts.push(this.getAt(idx).get('name'));
+            }
+        }
+        ,this
+    );
+
     return texts.join(',');
 }
 

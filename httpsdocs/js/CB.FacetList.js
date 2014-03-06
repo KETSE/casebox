@@ -78,7 +78,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
 
         Ext.apply(this, {
             items: items
-            ,cachedNames: {}//used by tree_tags
+            ,cachedNames: {}
             ,listeners: {
                 modechange: {
                     scope: this

@@ -35,7 +35,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     return v;
                 }
             }
-            ,{header: L.Tags, width:200, dataIndex: 'sys_tags', hidden: true, sortable: false, renderer: App.customRenderers.tagIds}
             ,{ header: L.Date, width: 120, dataIndex: 'date',/* xtype: 'datecolumn',/**/ format: App.dateFormat + ' ' + App.timeFormat, renderer: App.customRenderers.datetime}
             ,{ header: L.Size, width: 80, dataIndex: 'size', renderer: App.customRenderers.filesize}
             ,{ header: L.Creator, hidden:true, width: 200, dataIndex: 'cid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
@@ -254,7 +253,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
             }
             ,plugins: [{
                     ptype: 'CBPluginsFilesDropZone'
-                    , pidPropety: 'nid'
+                    ,pidPropety: 'nid'
                 },{
                     ptype: 'CBDDGrid'
                 }

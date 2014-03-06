@@ -233,21 +233,6 @@ reloadTemplates = function(){
         }
     })
 }
-reloadThesauri = function(){
-    CB.DB.thesauri.reload({callback: function(){
-        Ext.iterate(CB.DB, function(k, st){
-            if (k.substr(0, 13) == 'ThesauriStore') {
-                thesauriId = k.substr(13);
-                if (!isNaN(thesauriId)) {
-                    st.removeAll();
-                    data = CB.DB.thesauri.queryBy(function(record, id){ return (record.get('pid') == thesauriId); });
-                    st.add(data.items);
-                }
-            }
-        })
-    }
-    })
-}
 
 createDirectStores = function(){
     if (typeof(CB_Security) == 'undefined') {
@@ -255,19 +240,8 @@ createDirectStores = function(){
 
         return;
     }
-    CB.DB.thesauri = new Ext.data.DirectStore({
-        autoLoad: true
-        ,restful: false
-        ,proxy: new  Ext.data.DirectProxy({
-            paramsAsHash: true
-            ,api: {
-                create:   CB_Thesauri.create
-                ,read:    CB_Thesauri.read
-                ,update:  CB_Thesauri.update
-                ,destroy: CB_Thesauri.destroy
-            }
-        })
-        ,reader: new Ext.data.JsonReader({
+    CB.DB.thesauri = new Ext.data.JsonStore({
+        reader: new Ext.data.JsonReader({
             successProperty: 'success'
             ,idProperty: 'id'
             ,root: 'data'
@@ -279,7 +253,6 @@ createDirectStores = function(){
             ,'iconCls'
         ]
         )
-        ,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
         ,getName: getStoreNames
         ,getIcon: function(id){
             idx = this.findExact('id', parseInt(id))

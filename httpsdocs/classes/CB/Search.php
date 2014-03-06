@@ -206,13 +206,6 @@ class Search extends Solr\Client
             }
         }
 
-        if (!empty($p['tags'])) {
-            $ids = Util\toNumericArray($p['tags']);
-            if (!empty($ids)) {
-                $fq[] = 'sys_tags:('.implode(' OR ', $ids).')';
-            }
-        }
-
         if (!empty($p['dateStart'])) {
             $fq[] = 'date:['.$p['dateStart'].' TO '.$p['dateEnd'].']';
         }
@@ -386,87 +379,5 @@ class Search extends Solr\Client
         }
 
         return $rez;
-    }
-
-    public function analizeTreeTagsFacet($values, &$rez)
-    {
-        $groups = defined('CB\\CONFIG\\TAGS_FACET_GROUPING') ? CONFIG\TAGS_FACET_GROUPING : 'pids';
-        $ids = array();
-        foreach ($values as $k => $v) {
-            $ids[] = $k;
-        }
-
-        if (empty($ids)) {
-            return false;
-        }
-
-        $names = array();
-        /* selecting names*/
-        $res = DB\dbQuery(
-            'SELECT t.id
-                 , t.name
-            FROM tree t
-            WHERE t.id IN ('.implode(', ', $ids).')'
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $names[$r['id']] = L\getTranslationIfPseudoValue($r['name']);
-        }
-        $res->close();
-        /* end of selecting names*/
-
-        switch ($groups) {
-            case 'all':
-                foreach ($values as $k => $v) {
-                    $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
-                }
-                break;
-            case 'pids':
-                $res = DB\dbQuery(
-                    'SELECT t.id
-                         , t.pid
-                         , p.name
-                    FROM tree t
-                    JOIN tree p ON t.pid = p.id
-                    WHERE t.id IN ('.implode(', ', $ids).')'
-                ) or die(DB\dbQueryError());
-
-                while ($r = $res->fetch_assoc()) {
-                    $rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
-                    $rez['ttg_'.$r['pid']]['name'] = L\getTranslationIfPseudoValue($r['name']);
-                    $rez['ttg_'.$r['pid']]['items'][$r['id']] =  array('name' => $names[$r['id']], 'count' => $values->{$r['id']});
-                }
-                $res->close();
-                break;
-            default:
-                $res = DB\dbQuery(
-                    'SELECT t.id
-                         , t.pid
-                         , p.name
-                    FROM tree t
-                    JOIN tree p ON t.pid = p.id
-                    WHERE t.id IN ('.implode(', ', $ids).')
-                        AND p.id IN('.$groups.')'
-                ) or die(DB\dbQueryError());
-
-                while ($r = $res->fetch_assoc()) {
-                    $rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
-                    $rez['ttg_'.$r['pid']]['name'] = $r['name'];
-                    $rez['ttg_'.$r['pid']]['items'][$r['id']] = array('name' => $names[$r['id']], 'count' => $values->{$r['id']});
-                    unset($values->{$r['id']});
-                }
-                $res->close();
-
-                if (!empty($values)) {
-                    foreach ($values as $k => $v) {
-                        if (isset( $names[$k] )) {
-                            $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
-                        }
-                    }
-                }
-                break;
-        }
-
-        return true;
     }
 }

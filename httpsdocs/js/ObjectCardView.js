@@ -594,6 +594,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
     ,onOpenInTabsheetClick: function(b, e) {
         var ai = this.getLayout().activeItem;
+        var cai = this.items.indexOf(ai);
         var d = Ext.apply({}, this.loadedData);
 
         if(ai.getXType() == 'CBEditObject') {
@@ -603,8 +604,12 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             }
         }
 
-        ai.clear();
-        this.onViewChangeClick(0);
+        if(cai > 0) {
+            ai.clear();
+            this.requestedLoadData = Ext.apply({}, this.loadedData);
+            this.requestedLoadData.viewIndex = 0;
+            this.onViewChangeClick(0);
+        }
 
         switch(CB.DB.templates.getType(d.template_id)) {
             case 'file':

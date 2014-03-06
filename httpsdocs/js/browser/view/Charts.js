@@ -125,6 +125,13 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
             ,this.facetsCombo
         );
 
+        this.seriesStyles = [];
+        for (var i = 0; i < App.colors.length; i++) {
+            this.seriesStyles.push({
+                color: App.colors[i]
+            });
+        }
+
         this.chartDataStore = new Ext.data.JsonStore({
             fields:['id', 'name', {name:'items', type: 'int'}],
             data: []
@@ -136,6 +143,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 ,store: this.chartDataStore
                 ,xField: 'name'
                 ,yField: 'items'
+                ,seriesStyles: this.seriesStyles
                 ,listeners: {
                     scope: this
                     ,itemclick: this.onChartItemClick
@@ -145,6 +153,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 xtype: 'barchart'
                 ,store: this.chartDataStore
                 ,yField: 'name'
+                ,seriesStyles: this.seriesStyles
                 ,xAxis: new Ext.chart.NumericAxis({
                     stackingEnabled: true
                 })
@@ -157,6 +166,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 xtype: 'barchart'
                 ,store: this.chartDataStore
                 ,yField: 'name'
+                ,seriesStyles: this.seriesStyles
                 ,xAxis: new Ext.chart.NumericAxis({
                     stackingEnabled: true
                 })
@@ -170,6 +180,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 ,store: this.chartDataStore
                 ,xField: 'name'
                 ,yField: 'items'
+                ,seriesStyles: this.seriesStyles
                 ,listeners: {
                     scope: this
                     ,itemclick: this.onChartItemClick
@@ -180,6 +191,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 ,store: this.chartDataStore
                 ,xField: 'name'
                 ,yField: 'items'
+                ,seriesStyles: this.seriesStyles
                 ,series: [{
                     yField: 'items'
                     ,displayName: 'Items'

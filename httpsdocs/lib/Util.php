@@ -1,7 +1,6 @@
 <?php
 namespace CB\Util;
 
-use CB\DB as DB;
 use CB\L as L;
 
 function getIP()
@@ -419,79 +418,6 @@ function getLanguagesParams($post_params, &$result_params_array, &$values_string
 function adjustTextForDisplay($text)
 {
     return htmlentities($text, ENT_COMPAT, 'UTF-8');
-}
-
-function getThesauriTitles($ids_string, $language_id = false)
-{
-    if (empty($ids_string)) {
-        return '';
-    }
-    if ($language_id === false) {
-        $language_id = \CB\USER_LANGUAGE_INDEX;
-    }
-    if (!is_array($ids_string)) {
-        $a = explode(',', $ids_string);
-    } else {
-        $a = &$ids_string;
-    }
-    $a = array_filter($a, 'is_numeric');
-    if (empty($a)) {
-        return '';
-    }
-    $rez = array();
-    foreach ($a as $id) {
-        $var_name = "TH[$id]['name']";
-        if (!\CB\Cache::exist($var_name)) {
-            $res = DB\dbQuery(
-                'SELECT l'.$language_id.' `title`
-                FROM tags
-                WHERE id = $1',
-                $id
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                \CB\Cache::set($var_name, $r['title']);
-            }
-            $res->close();
-        }
-        $rez[] = \CB\Cache::get($var_name);
-    }
-
-    if (sizeof($rez) == 1) {
-        return $rez[0];
-    }
-
-    return $rez;
-}
-
-function getThesauryIcon($id)
-{
-    if (!is_numeric($id)) {
-        return '';
-    }
-
-    $var_name = 'TH['.$id."]['icon']";
-
-    if (!\CB\Cache::exist($var_name)) {
-        $res = DB\dbQuery(
-            'SELECT t.cfg, tt.iconCls
-            FROM tree t
-            JOIN templates tt on t.id = tt.id
-            WHERE t.id = $1',
-            $id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $cfg = toJSONArray($r['cfg']);
-            $iconCls = empty($cfg['iconCls'])
-                ? $r['iconCls']
-                : $cfg['iconCls'];
-            \CB\Cache::set($var_name, $iconCls);
-        }
-        $res->close();
-    }
-
-    return \CB\Cache::get($var_name);
 }
 
 function dateISOToMysql($date_string)

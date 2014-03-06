@@ -476,7 +476,7 @@ class Tasks
             $subject = L\Reminder.': '.$p['title'].
                 ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['TZ']).
                 ' ('.$p['path'].')';
-            $message = '<generateTaskViewOnSend>';
+
             foreach ($a as $r) {
                 $rem = explode('|', $r);    // user|remindType|remind delay|remindUnits
                 if ($rem[0] != 1) {
@@ -530,7 +530,7 @@ class Tasks
                         ,$log_action_type
                         ,$p['id']
                         ,$subject
-                        ,$message
+                        ,'<generateTaskViewOnSend>'
                         ,$p['date_end']
                         ,-$rem[1]
                         ,$_SESSION['user']['id']
@@ -760,23 +760,6 @@ class Tasks
             )
         ) or die(DB\dbQueryError());
 
-        DB\dbQuery(
-            'INSERT INTO messages (
-                node_id
-                ,`type`
-                ,subject
-                ,message
-                ,cid)
-            VALUES ($1, $2, $3, $4, $5)',
-            array(
-                $p['id'] // Util\coalesce($task['case_id'], $task['object_id'], $p['id'])
-                ,'task_complete'
-                ,'Complete task'
-                ,@$p['message']
-                ,$_SESSION['user']['id']
-            )
-        ) or die(DB\dbQueryError());
-
         Log::add(
             array(
                 'action_type' => 23
@@ -980,6 +963,7 @@ class Tasks
                 ,allday
                 ,cid
                 ,ti.path `path_text`
+                ,(SELECT name from tree where id = t.category_id) `category`
                 ,(SELECT l'.USER_LANGUAGE_INDEX.'
                     FROM users_groups
                     WHERE id = t.cid) owner_text
@@ -1038,12 +1022,6 @@ class Tasks
                     ,last_name
                     ,ru.status
                     ,ru.time
-                    ,(SELECT `message`
-                        FROM messages
-                        WHERE node_id = ru.task_id
-                            AND cid = u.id
-                            AND `type` = \'task_complete\'
-                        ORDER BY cdate DESC LIMIT 1) `complete_message`
                 FROM users_groups u
                 LEFT JOIN tasks_responsible_users ru ON u.id = ru.user_id
                     AND ru.task_id = $1
@@ -1065,7 +1043,6 @@ class Tasks
                 "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
                     Util\formatMysqlDate($ur['time'], 'Y, F j H:i').'</span>' : L\get('waitingForAction', $user['language_id']) ).
                 "\n\r".'</p>'.
-                ( (($ur['status'] == 1) && !empty($ur['complete_message'])) ? '<p>'.nl2br(Util\adjustTextForDisplay($ur['complete_message'])).'</p>': '').
                 '</td></tr>';
 
             }
@@ -1104,7 +1081,6 @@ class Tasks
                 'color: #333; width: 100%; display: table; border-collapse: separate; border-spacing: 0;"><tbody>'.
                 implode('', $users).'</tbody></table></td></tr>';
 
-            // $message = str_replace( array('<i', '</i>'), array('<strong', '</strong>'), $message);
             $rez = file_get_contents(TEMPLATES_DIR.'task_notification_email.html');
 
             $rez = str_replace(
@@ -1137,7 +1113,7 @@ class Tasks
                     ,'{bottom}'
                 ),
                 array(
-                    '' //$message
+                    ''
                     ,'font-size: 1.5em; display: block;'.( ($r['status'] == 3 ) ? 'color: #555; text-decoration: line-through' : '')
                     ,$r['title']
                     ,$datetime_period
@@ -1151,7 +1127,7 @@ class Tasks
                     ,$importance_text
                     ,L\get('Category', $user['language_id'])
                     ,'category_style'
-                    ,Util\getThesauriTitles($r['category_id'], $user['language_id'])
+                    ,$r['category']
                     ,L\get('Path', $user['language_id'])
                     ,$r['path_text']
                     ,L\get('Owner', $user['language_id'])

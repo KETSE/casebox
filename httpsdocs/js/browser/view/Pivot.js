@@ -189,12 +189,12 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
                 Ext.iterate(
                     this.pivot.titles[1]
                     ,function(q, z, y) {
-                        r += '<td>' + Ext.value(this.refs[k + '_' + q], '') + '</td>';
+                        r += '<td f="' + k + '|' + q + '">' + Ext.value(this.refs[k + '_' + q], '') + '</td>';
                     }
                     ,this
                 );
 
-                html += '<tr>' + r + '<td class="total">' + Ext.value(this.refs[k + '_t'], '') + '</td></tr>';
+                html += '<tr>' + r + '<td class="total" f="'+ k +'|">' + Ext.value(this.refs[k + '_t'], '') + '</td></tr>';
             }
             ,this
         );
@@ -205,7 +205,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
             this.pivot.titles[1]
             ,function(q, z, y) {
                 var nr = Ext.value(this.refs['t_' + q], '');
-                r += '<td class="total">' + nr + '</td>';
+                r += '<td class="total" f="|'+ q +'">' + nr + '</td>';
                 if(!isNaN(nr)) {
                     total += nr;
                 }
@@ -217,13 +217,23 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
 
         html = '<table class="pivot">' + html + '</table>';
 
-        this.chartContainer.add({
+        var table = this.chartContainer.add({
             xtype: 'panel'
             ,border: false
             ,autoHeight: true
             ,padding: 10
             ,html: html
+            ,listeners: {
+                scope: this
+                ,afterrender: function(p) {
+                    var a = p.getEl().query('td');
+                    for (var i = 0; i < a.length; i++) {
+                        Ext.get(a[i]).on('click', this.onTableCellClick, this);
+                    }
+                }
+            }
         });
+
 
         if(this.activeChart != 'table') {
 
@@ -452,6 +462,34 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
         this.selectedFacets[combo.selectedFacetIndex] = record.get('id');
         this.fireEvent('reload', this);
         // this.loadChartData();
+    }
+
+    ,onTableCellClick: function(ev, el, p) {
+        if(Ext.isEmpty(el) || Ext.isEmpty(el.textContent)) {
+            return;
+        }
+        var f = el.attributes.getNamedItem('f').value.split('|');
+
+        var params = {
+            view: 'grid'
+            ,filters: {}
+        };
+        if(!Ext.isEmpty(f[0])) {
+            params['filters'][this.selectedFacets[0]] = [{
+                f: this.selectedFacets[0]
+                ,mode: 'OR'
+                ,values: [f[0]]
+            }];
+        }
+        if(!Ext.isEmpty(f[1])) {
+            params['filters'][this.selectedFacets[1]] = [{
+                f: this.selectedFacets[1]
+                ,mode: 'OR'
+                ,values: [f[1]]
+            }];
+        }
+
+        this.fireEvent('changeparams', params);
     }
 });
 

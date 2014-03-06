@@ -66,12 +66,6 @@ $API = array_merge(
             )
         )
 
-        ,'CB_Calendar' => array(
-            'methods'=>array(
-                'getEvents'     =>  array('len' => 1)
-            )
-        )
-
         ,'CB_Tasks' => array(
             'methods'=>array(
                 'load'              =>  array('len' => 1)
@@ -107,15 +101,6 @@ $API = array_merge(
                 ,'getDuplicates'        =>  array('len'=>1)
                 ,'checkExistentContents'=>  array('len'=>1)
                 ,'saveProperties'       =>  array('len'=>1)
-            )
-        )
-
-        ,'CB_Thesauri' => array(
-            'methods'=>array(
-                'create'    =>  array('len'=>1)
-                ,'read'     =>  array('len'=>1)
-                ,'update'   =>  array('len'=>1)
-                ,'destroy'  =>  array('len'=>1)
             )
         )
 
