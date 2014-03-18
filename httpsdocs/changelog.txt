@@ -2,6 +2,16 @@ CaseBox 1.9.162 (2014-03-18)
 ==============================
 New Features, Improvements
 --------------------------
+- checked right panel plugins for displaying Datetime hint
+
+Fixed Bugs:
+----------
+- child values from vertical grid not saving
+
+CaseBox 1.9.162 (2014-03-18)
+==============================
+New Features, Improvements
+--------------------------
 - added validation function for dates validISO8601Date in Util.php
 - browsing the object of type "search" will display search results that are prepared by SearchResults treeNode plugin
 - added search templates

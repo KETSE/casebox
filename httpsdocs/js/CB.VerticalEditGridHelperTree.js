@@ -73,7 +73,8 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                         break;
                 }
                 value.childs = this.readChilds(node);
-                rez[fieldName].push(this.simplifyValue(value));
+                value = this.simplifyValue(value);
+                rez[fieldName].push(value);
             }
             ,this
         );
@@ -106,7 +107,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
             delete value.childs;
         }
         if(isEmptyObject(value.cond)) {
-            delete value.childs;
+            delete value.cond;
         }
         return value;
     }

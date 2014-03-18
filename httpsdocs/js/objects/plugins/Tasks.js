@@ -25,7 +25,7 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'
-            ,'        <span class="gr">{ago_text}</span>'
+            ,'        <span class="gr" title="{[ displayDateTime(values.cdate) ]}">{ago_text}</span>'
             ,'    </td>'
             ,'    <td class="elips">'
             ,'        <span class="click menu"></span>'
@@ -45,6 +45,7 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
                 ,{name: 'template_id', type: 'int'}
                 ,{name: 'cid', type: 'int'}
                 ,'user'
+                ,'cdate'
                 ,'ago_text'
             ]
         });

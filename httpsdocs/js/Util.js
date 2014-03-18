@@ -5,9 +5,24 @@ function isEmptyObject(ob){
 }
 
 function date_ISO_to_date(date_string){
+    if(Ext.isEmpty(date_string)) {
+        return null;
+    }
+
+    var d = Date.parse(date_string);
+    if(Ext.isEmpty(d)) {
+        return null;
+    }
+    return new Date(d);
+}
+
+function date_ISO_to_local_date(date_string){
+
     if(Ext.isEmpty(date_string)) return null;
-    d = Date.parse(date_string);
-    if(Ext.isEmpty(d)) return null;
+    var d = Date.parse(date_string);
+    if(Ext.isEmpty(d)) {
+        return null;
+    }
     return new Date(d);
 }
 

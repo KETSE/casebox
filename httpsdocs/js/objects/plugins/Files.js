@@ -22,7 +22,7 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'
-            ,'        <span class="gr">{[ App.customRenderers.filesize(values.size) ]}, {ago_text}</span>'
+            ,'        <span class="gr" title="{[ displayDateTime(values.cdate) ]}">{[ App.customRenderers.filesize(values.size) ]}, {ago_text}</span>'
             ,'    </td>'
             ,'    <td class="elips">'
             ,'        <span class="click menu"></span>'

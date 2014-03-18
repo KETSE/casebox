@@ -21,7 +21,7 @@ class Tasks extends Base
             ,'fq' => array(
                 'template_type:task'
             )
-            ,'fl' => 'id,pid,name,template_id,date,date_end,cid,status'
+            ,'fl' => 'id,pid,name,template_id,date,date_end,cid,cdate,status'
             ,'sort' => 'cdate'
             ,'dir' => 'desc'
         );

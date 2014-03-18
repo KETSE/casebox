@@ -1238,8 +1238,8 @@ class Tasks
             ,'{path_text}' => $d['pathtext']
             ,'{cid}' => $d['cid']
             ,'{creator_name}' => User::getDisplayName($d['cid'])
-            ,'{full_create_date}' => date($date_format.' H:i', strtotime($d['cdate']))
-            ,'{create_date}' => date($date_format.' H:i', strtotime($d['cdate']))
+            ,'{full_create_date}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['TZ'])
+            ,'{create_date}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['TZ'])
             );
         $rez = str_replace(array_keys($params), array_values($params), $rez);
 

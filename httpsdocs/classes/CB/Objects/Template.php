@@ -361,6 +361,8 @@ class Template extends Object
 
             if (isset($value['value'])) {
                 $value = $value['value'];
+            } else {
+                $value = null;
             }
         }
 

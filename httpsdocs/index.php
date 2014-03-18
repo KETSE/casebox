@@ -101,7 +101,7 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 </style>
 
 <script type="text/javascript">
-    public function setProgress(label, percentage)
+    function setProgress(label, percentage)
     {
         document.getElementById('loading-msg').innerHTML = label + '…';
         document.getElementById('lpt').style.width = percentage;
