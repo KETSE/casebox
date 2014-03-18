@@ -203,7 +203,6 @@ class Objects
             // $objData = $obj->getData();
 
             $linearData = $obj->getLinearData();
-
         } catch (\Exception $e) {
             return '';
         }
@@ -236,7 +235,7 @@ class Objects
                 // if ($f['name'] == '_date_start') {
                 //     continue;
                 // }
-                $v = $template->formatValueForDisplay($f['tf'], $f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], $f); //['value']
                 if (is_array($v)) {
                     $v = implode(', ', $v);
                 }
@@ -248,7 +247,7 @@ class Objects
         if (!empty($gf['body'])) {
             $previousHeader = '';
             foreach ($gf['body'] as $f) {
-                $v = $template->formatValueForDisplay($f['tf'], @$f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], @$f); //['value']
                 if (is_array($v)) {
                     $v = implode('<br />', $v);
                 }
@@ -270,7 +269,7 @@ class Objects
 
         if (!empty($gf['bottom'])) {
             foreach ($gf['bottom'] as $f) {
-                $v = $template->formatValueForDisplay($f['tf'], $f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], $f); //['value']
                 if (empty($v)) {
                     continue;
                 }

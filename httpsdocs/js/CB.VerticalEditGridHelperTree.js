@@ -91,6 +91,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
     ,simplifyValue: function(value) {
         if(Ext.isEmpty(value.info) &&
             Ext.isEmpty(value.files) &&
+            Ext.isEmpty(value.cond) &&
             isEmptyObject(value.childs)
         ) {
             return value.value;
@@ -102,6 +103,9 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
             delete value.files;
         }
         if(isEmptyObject(value.childs)) {
+            delete value.childs;
+        }
+        if(isEmptyObject(value.cond)) {
             delete value.childs;
         }
         return value;
@@ -119,7 +123,8 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
 
         if(Ext.isDefined(fieldData.value) ||
             Ext.isDefined(fieldData.info) ||
-            Ext.isDefined(fieldData.childs)
+            Ext.isDefined(fieldData.childs) ||
+            Ext.isDefined(fieldData.cond)
         ){
             rez[0] = fieldData;
             return rez;
@@ -132,7 +137,8 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                 }
                 if(Ext.isDefined(fieldData[i].value) ||
                     Ext.isDefined(fieldData[i].info) ||
-                    Ext.isDefined(fieldData[i].childs)
+                    Ext.isDefined(fieldData[i].childs) ||
+                    Ext.isDefined(fieldData[i].cond)
                 ){
                     rez[i] = fieldData[i];
                 }
@@ -184,6 +190,13 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                             v = new Date();
                         }
                         nodeValues[0].value = v;
+                    }
+                    //set default condition for new objects
+                    if(Ext.isEmpty(nodeValues[0].cond) &&
+                        this.newItem &&
+                        !Ext.isEmpty(record.get('cfg').cond)
+                    ) {
+                        nodeValues[0].cond = record.get('cfg').cond;
                     }
 
                     for (var i = 0; i < nodeValues.length; i++) {
@@ -270,13 +283,17 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                 if( ( !Ext.isEmpty(v) &&
                     !setsHaveIntersection( va, parentNodeValue) ) //if not empty pidValues specified and parent value out of pidValues then hide the field
                     || ( (r.get('cfg').thesauriId == 'dependent') && Ext.isEmpty(parentNodeValue) ) // OR if the field is dinamic and parent has no selected value
-                    || ( Ext.isDefined(r.get('cfg').dependency) && Ext.isEmpty(parentNodeValue) ) // OR if the field is dinamic and parent has no selected value
+                    || ( Ext.isDefined(r.get('cfg').dependency) && Ext.isEmpty(parentNodeValue) && !Ext.isEmpty(va) ) // OR if the field is dinamic and parent has no selected value
                 ) {
                     node.attributes.visible = false;
                     this.visibilityUpdated = true;
                 }
             }else{ //when record is not visible
-                if( pr && (pr.get('type') == 'G') || (
+                if( (pr &&
+                        (pr.get('type') == 'G') &&
+                        (pr.get('type') == 'G')
+                        // (node.parentNode.attributes.visible !==
+                    ) || (
                     !Ext.isEmpty(parentNodeValue) && (Ext.isEmpty(v) || setsHaveIntersection( va, parentNodeValue ))
                     && ( (r.get('cfg').thesauriId !== 'dependent') ||  !Ext.isEmpty(parentNodeValue))
                     && ( Ext.isDefined(r.get('cfg').dependency) ||  !Ext.isEmpty(parentNodeValue))

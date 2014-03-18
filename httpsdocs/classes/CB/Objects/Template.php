@@ -64,6 +64,15 @@ class Template extends Object
                 $i++;
             } elseif (!empty($field)) {
                 $value = @$this->getFieldValue($fieldName, 0)['value'];
+
+                // this if should be removed after complete migration to language abreviation titles
+                if (empty($value) && in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
+                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    if (!empty($lang)) {
+                        $value = @$this->getFieldValue($lang, 0)['value'];
+                    }
+                }
+
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -194,6 +203,19 @@ class Template extends Object
                 $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
+            } else {
+                // this if should be removed after complete migration to language abreviation titles
+                if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
+                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    if (!empty($lang)) {
+                        $value = @$this->getFieldValue($lang, 0)['value'];
+
+                        $saveFields[] = $fieldName;
+                        $saveValues[] = $value;
+                        $params[] = "`$fieldName` = \$$i";
+                        $i++;
+                    }
+                }
             }
         }
         if (!empty($saveFields)) {
@@ -329,8 +351,17 @@ class Template extends Object
         if (is_numeric($field)) {
             $field = $this->data->fields[$field];
         }
-        if (is_array($value) && isset($value['value'])) {
-            $value = $value['value'];
+
+        //condition is specified for values from search templates
+        $condition = null;
+        if (is_array($value)) {
+            if (isset($value['cond'])) {
+                $condition = Template::formatConditionForDisplay($field, $value['cond'], $html).' ';
+            }
+
+            if (isset($value['value'])) {
+                $value = $value['value'];
+            }
         }
 
         switch ($field['type']) {
@@ -417,6 +448,7 @@ class Template extends Object
                 $ids = implode(',', $a);
 
                 switch (@$field['cfg']['source']) {
+                    case '':
                     case 'tree':
                     case 'related':
                     case 'field':
@@ -466,11 +498,13 @@ class Template extends Object
                                 ? '<li class="icon-padding icon-element">'.$label.'</li>'
                                 : $label;
                             break;
-                        case 'listObjIcons':
+                        // case 'listObjIcons':
+                        default:
                             $r['cfg'] = Util\toJSONArray(@$r['cfg']);
 
                             $icon = '';
                             switch (@$field['cfg']['source']) {
+                                case '':
                                 case 'tree':
                                 case 'related':
                                 case 'field':
@@ -485,10 +519,6 @@ class Template extends Object
                                 ? '<li class="icon-padding '.$icon.'">'.$label.'</li>'
                                 : $label;
                             break;
-                        default:
-                            $value[] = $html
-                                ? '<li>'.$label.'</li>'
-                                : $label;
                     }
                 }
                 $res->close();
@@ -523,6 +553,88 @@ class Template extends Object
                 }
         }
 
-        return $value;
+        return $condition.$value;
+    }
+
+    public static function formatConditionForDisplay(&$field, $condition, $html = true)
+    {
+        $rez = '';
+        if (empty($condition)) {
+            return $rez;
+        }
+
+        switch ($field['type']) {
+            case 'int':
+            case 'float':
+            case 'date':
+            case 'datetime':
+                $rez = $condition;
+                break;
+
+            case '_objects':
+            case 'combo':
+            case 'iconcombo':
+            case 'timeunits':
+            case '_sex':
+                switch ($condition) {
+                    case '<':
+                        $rez = 'contains any';
+                        break;
+                    case '>':
+                        $rez = 'contains all';
+                        break;
+                    case '=':
+                        $rez = 'equal';
+                        break;
+                    case '!=':
+                        $rez = 'not equal';
+                        break;
+                }
+                break;
+
+            case '_auto_title':
+            case 'varchar':
+            case 'text':
+            case 'memo':
+            case 'html':
+                switch ($condition) {
+                    case 'contain':
+                        $rez = 'contain';
+                        break;
+                    case 'start':
+                        $rez = 'start with';
+                        break;
+                    case 'end':
+                        $rez = 'end with';
+                        break;
+                    case 'not':
+                        $rez = 'does not contain';
+                        break;
+                    case '=':
+                        $rez = 'equal';
+                        break;
+                    case '!=':
+                        $rez = 'not equal';
+                        break;
+                }
+                break;
+
+            case 'checkbox':
+                switch ($condition) {
+                    case '=':
+                        $rez = 'is';
+                        break;
+                    case '!=':
+                        $rez = 'is not';
+                        break;
+                }
+                break;
+        }
+
+        if ($html) {
+            $rez = htmlspecialchars($rez);
+        }
+
+        return $rez;
     }
 }

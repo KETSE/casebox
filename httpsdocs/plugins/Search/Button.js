@@ -32,26 +32,10 @@ CB.plugins.Search.Button =  Ext.extend(CB.plugins.customInterface, {
             function(t){
                 menu.add({
                     iconCls: t.data.iconCls
-                    ,data: {id: t.data.id}
-                    // ,enableToggle: true
-                    // ,allowDepress: false
-                    // ,toggleGroup: 'viewMode'
-                    // ,pressed: true
+                    ,data: {template_id: t.data.id}
                     ,text: t.data.title
-                    // ,viewIndex: 0
-                    ,handler: function() {
-                        App.mainTabPanel.remove('CBPluginsSearchForm', true);
-                        App.mainTabPanel.remove('CBPluginsSearchResultForm', true);
-                        App.openUniqueTabbedWidget(
-                            'CBPluginsSearchForm'
-                            ,null
-                            ,{
-                                data:{
-                                    template_id: t.data.id
-                                }
-                            }
-                        );
-                    }
+                    ,scope: this.owner
+                    ,handler: this.owner.onCreateObjectClick
                 });
             }
             ,this

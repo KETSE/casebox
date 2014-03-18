@@ -232,7 +232,7 @@ class Security
 
         while ($r = $res->fetch_assoc()) {
             $r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
-            // unset($r['type']); // used internaly by setSolrAccess function
+
             unset($r['sex']);
             $access = $this->getUserGroupAccessForObject($p['id'], $r['id']);
             $r['allow'] = implode(',', $access[0]);
@@ -279,6 +279,7 @@ class Security
         //9 Change permissions
         //10 Take Ownership
         //11 Download
+
         /* if no user is specified as parameter then calculating for current loged user */
 
         if ($user_group_id === false) {
@@ -579,7 +580,8 @@ class Security
                     $deny = intval($value[1]);
 
                     for ($j=0; $j < sizeof($rez[1]); $j++) {
-                        if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j])) { //set deny access only if not set directly for that credential allow access
+                        //set deny access only if not set directly for that credential allow access
+                        if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j])) {
                             $rez[1][$j] = -(1 + $inherited);
                             $set_bits++;
                         }
@@ -601,7 +603,8 @@ class Security
                 $value = $acl[$i][$everyoneGroupId];
                 $deny = intval($value[1]);
                 for ($j=0; $j < sizeof($rez[1]); $j++) {
-                    if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j])) { //set deny access only if not set directly for that credential allow access
+                    //set deny access only if not set directly for that credential allow access
+                    if (empty($rez[0][$j]) && empty($rez[1][$j]) && ($deny & 1) && empty($direct_allow_user_group_access[$j])) {
                         $rez[1][$j] = -(1 + $inherited);
                         $set_bits++;
                     }
@@ -698,19 +701,6 @@ class Security
     {
         return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 11, $user_group_id) > 0));
     }
-
-    //0 List Folder/Read Data
-    //1 Create Folders
-    //2 Create Files
-    //3 Create Actions
-    //4 Create Tasks
-    //5 Read
-    //6 Write
-    //7 Delete child nodes
-    //8 Delete
-    //9 Change permissions
-    //10 Take Ownership
-    //11 Download
 
     public function getObjectDirectAcl($p)
     {
@@ -861,7 +851,8 @@ class Security
             DB\dbQuery('DELETE from tree_acl WHERE node_id = $1', $p['id']) or die(DB\dbQueryError());
         } else {
             switch (@$p['copyRules']) {
-                case 'yes': //copy all inherited rules to current object
+                case 'yes':
+                    //copy all inherited rules to current object
                     $acl = $this->getObjectAcl($p);
                     foreach ($acl['data'] as $rule) {
                         $allow = explode(',', str_replace('2', '1', $rule['allow']));
@@ -1124,16 +1115,6 @@ class Security
             $res->close();
         }
         /* end of iterate the full set of access credentials(users and/or groups) and estimate access for every user including everyone group */
-
-        // $allow_users = array();
-        // $deny_users = array();
-        // foreach ($users as $user_id => $access) {
-        //     if ($access[1][5] < 0) $deny_users[] = $user_id;
-        //     elseif($access[0][5] > 0) $allow_users[] = $user_id;
-        // }
-
-        // if (in_array($everyoneGroupId, $allow_users)) $allow_users = array($everyoneGroupId);
-        // if (in_array($everyoneGroupId, $deny_users)) $deny_users = array();
 
         /* update set in database */
 

@@ -1,3 +1,23 @@
+CaseBox 1.9.162 (2014-03-18)
+==============================
+New Features, Improvements
+--------------------------
+- added validation function for dates validISO8601Date in Util.php
+- browsing the object of type "search" will display search results that are prepared by SearchResults treeNode plugin
+- added search templates
+- modified Object edit form to create different grid types. For search templates using VerticalSearchEditGrid
+- changed VerticalEditGrid.js for easier implementation of VerticalSearchEditGrid
+- removed demo1 from install\examples and updated sql for demosrc example
+- removed differential_db_structure_updates
+- removed Scripts related to casebox upgrade process.
+- use default scope "tree" in formatValueForDisplay method of templates class
+- added function plog = clog. plog will be used only for messajes that should remain in production version
+
+Fixed Bugs:
+----------
+- template titles did not save automaticly in templates table (switch between languages to l<index>)
+- values were not displayed in vertical grid for fields with no specified source
+
 CaseBox 1.9.161 (2014-03-06)
 ==============================
 New Features, Improvements

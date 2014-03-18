@@ -106,7 +106,8 @@ function formatAgoTime($mysqlTime)
     $time = strtotime($mysqlTime);
     $interval = strtotime('now') - $time;//11003
     if ($interval < 0) {
-        return L\fewSecondsAgo; //it's a future time
+        //it's a future time
+        return L\fewSecondsAgo;
     }
 
     if ($interval < $AHOUR) {
@@ -138,7 +139,7 @@ function formatAgoTime($mysqlTime)
     if ($interval < ($time - $YEAR_START)) {
         return translateMonths(date('d F', $time));
     }
-    //else
+
     return translateMonths(date('Y, F d', $time));
 }
 
@@ -192,7 +193,6 @@ function formatTaskTime($mysqlTime)
     } elseif ($today - $time > 3600 * 24 * 2) return translateMonths(date('j M Y', $time));
     elseif ($today - $time > 3600 * 24) return L\beforeYesterday;
     elseif ($today - $time > 0) return L\yesterday;
-    //elseif ($time - $today < 3600 * 24) return '<span class="cM">'.L\today.'</span>';
     elseif ($time - $today < 3600 * 24 * 2) return '<span class="cM fwB">'.L\tomorow.'</span>';
     elseif ($time - $today < 3600 * 24 * 6) return '<span class="cM fwB">'.(($time - $today) / (3600 * 24) ).' '.L\ofDays.'</span>';
     else{
@@ -342,7 +342,6 @@ function formatMysqlDate($date, $format = false)
     }
 
     return date(str_replace('%', '', $format), strtotime($date));
-    //return implode('.', array_reverse(explode('-', substr($date, 0, 10))));
 }
 
 function formatMysqlTime($date, $format = false)
@@ -355,7 +354,6 @@ function formatMysqlTime($date, $format = false)
     }
 
     return date(str_replace('%', '', $format), strtotime($date));
-    //return implode('.', array_reverse(explode('-', substr($date, 0, 10))));
 }
 
 function clientToMysqlDate($date)
@@ -425,7 +423,6 @@ function dateISOToMysql($date_string)
     if (empty($date_string)) {
         return null;
     }
-    //$date_string = '2004-02-12T15:19:21+00:00';
     $d = strtotime($date_string);
 
     return date('Y-m-d H:i:s.u', $d);
@@ -436,7 +433,6 @@ function dateMysqlToISO($date_string)
     if (empty($date_string)) {
         return null;
     }
-    //$date_string = '2004-02-12T15:19:21+00:00';
     $d = strtotime($date_string);
 
     return date('Y-m-d\TH:i:s.u\Z', $d);
@@ -511,4 +507,16 @@ function toJSONArray($v)
     }
 
     return $v;
+}
+
+function validISO8601Date($value)
+{
+    try {
+        $timestamp = strtotime($value);
+        $date = date(DATE_ISO8601, $timestamp);
+
+        return ($date === $value);
+    } catch (\Exception $e) {
+        return false;
+    }
 }

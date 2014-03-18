@@ -24,7 +24,6 @@ $projectTitle = Config::get('project_name_'.USER_LANGUAGE, CORE_NAME);
     <link rel="stylesheet" type="text/css" href="/libx/ext/resources/css/ext-all.css" />
 <?php
 
-// echo '<link rel="stylesheet" type="text/css" href="/libx/ext/resources/css/ext-all.css" />' . "\n";
 echo '<link rel="stylesheet" type="text/css" href="'. Minify_getUri('css') . '" />' . "\n";
 
 // Custom CSS for the core
@@ -102,7 +101,7 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 </style>
 
 <script type="text/javascript">
-    function setProgress(label, percentage)
+    public function setProgress(label, percentage)
     {
         document.getElementById('loading-msg').innerHTML = label + '…';
         document.getElementById('lpt').style.width = percentage;

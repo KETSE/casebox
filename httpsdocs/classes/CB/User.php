@@ -113,12 +113,6 @@ class User
         $rez = array( 'success' => true );
         $phone = preg_replace('/[^0-9]+/', '', $p['country_code'].$p['phone_number']);
 
-        // $rez['info'] = \FreeSMSGateway::sendSms(
-        //     array(
-        //         'phone' => $phone
-        //         ,'message' => $this->getGACode()
-        //     )
-        // );
         return $rez;
     }
 
@@ -135,7 +129,6 @@ class User
         }
         $data = empty($p['data']) ? array(): (array) $p['data'];
         if (!empty($_SESSION['lastTSV'][$p['method']])) {
-            //return array('success' => false, 'msg' => 'Error enabling TSV.');
             $data = array_merge($_SESSION['lastTSV'][$p['method']], $data);
         }
 
@@ -250,7 +243,8 @@ class User
         if (!$this->isVerified()) {
             return array('success' => false, 'verify' => true);
         }
-        $_SESSION['verified'] = time(); //update verification time
+        //update verification time
+        $_SESSION['verified'] = time();
 
         return array(
             'success' => true
@@ -461,7 +455,8 @@ class User
         if (!$this->isVerified()) {
             return array('success' => false, 'verify' => true);
         }
-        $_SESSION['verified'] = time(); //update verification time
+        //update verification time
+        $_SESSION['verified'] = time();
         $rez = array();
         $cfg = $this->getUserConfig();
 

@@ -1,4 +1,3 @@
-// JavaScript Document
 Ext.namespace('App');
 Ext.BLANK_IMAGE_URL = '/css/i/s.gif';
 
@@ -7,6 +6,8 @@ clog = function(){
         console.log(arguments);
     }
 };
+
+plog = clog;
 
 // application main entry point
 Ext.onReady(function(){
@@ -41,12 +42,8 @@ Ext.onReady(function(){
     Ext.apply(Ext.QuickTips.getQuickTip(), {showDelay: 1500});
 
 
-    // return;
-
     setTimeout(function(){
         Ext.get('loading').remove();
-        // Ext.fly('loading-mask').remove();
-        // Ext.fly('loading-mask').fadeOut({remove:true});
     }, 10);
 
 
@@ -84,7 +81,6 @@ function initApp(){
         if(Ext.isEmpty(st)) return '';
         st = Ext.util.Format.stripTags(st);
         return Ext.util.Format.ellipsis(st, maxLen);
-        //return st.length > maxLen ? st.substr(0, maxLen) + '&hellip;' : st;
     };
 
     App.PromtLogin = function (e){
@@ -191,7 +187,7 @@ function initApp(){
             v = toNumericArray(v);
             var cfg = grid.helperTree.getNode(record.get('id')).attributes.templateRecord.get('cfg');
             var source = (Ext.isEmpty(cfg.source))
-                ? 'thesauri'
+                ? 'tree'
                 : cfg.source;
             switch(source){
                 case 'thesauri':
@@ -575,7 +571,8 @@ function initApp(){
     };
 
     App.downloadFile = function(fileId, zipped, versionId){
-        if(Ext.isElement(fileId)){ //retreive id from html element
+        if(Ext.isElement(fileId)){
+            //retreive id from html element
             fileId = fileId.id;
             zipped = false;
         }
@@ -694,20 +691,20 @@ function initApp(){
                             return new CB.ObjectsTriggerField({
                                 enableKeyEvents: true
                                 ,data: objData
-                            }); //, width: 500
+                            });
                         }
                         break;
                     default:
                         return new CB.ObjectsComboField({
                             enableKeyEvents: true
                             ,data: objData
-                        });//, width: 500
+                        });
                 }
 
                 break;
             case '_case':
                 if(cfg.editor == 'form'){
-                    if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateCasesField({ownerCt: e.ownerCt}); //, width: 500//when it is in top fieldset
+                    if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateCasesField({ownerCt: e.ownerCt});
                 }else{
                     params = Ext.apply({}, cfg);
                     if(!Ext.isEmpty(e.pidValue)) params.pidValue = e.pidValue;
@@ -718,7 +715,6 @@ function initApp(){
                     });
                 }
                 break;
-            case 'boolean': //depricated
             case 'checkbox': return new Ext.form.ComboBox({
                         enableKeyEvents: true
                         ,forceSelection: true
@@ -781,7 +777,6 @@ function initApp(){
                     ,allowDecimals: true
                     ,width: 90
                 });
-            //case 'object_author': //depricated
             case 'combo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){
@@ -910,7 +905,6 @@ function initApp(){
                     }
                 });
                 w.focusHandler = Ext.value(this.gainFocus, e.grid.gainFocus);
-                //w.on('hide', App.onHideThesauriWindow, e.grid);
                 w.show();
                 break;
             case 'text':
@@ -1082,7 +1076,7 @@ function initApp(){
     };
 
     App.onComponentActivated = function(component){
-        clog('component activated', arguments, this);
+        plog('component activated', arguments, this);
     };
 
 }

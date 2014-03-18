@@ -52,6 +52,7 @@ return array_merge(
             ,'//js/browser/view/Summary.js'
 
             ,'//js/CB.VerticalEditGrid.js'
+            ,'//js/CB.VerticalSearchEditGrid.js'
             ,'//js/CB.Objects.js'
             ,'//js/CB.ObjectsField.js'
             ,'//js/CB.Tasks.js'

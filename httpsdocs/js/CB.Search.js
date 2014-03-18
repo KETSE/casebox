@@ -74,7 +74,7 @@ CB.Search = Ext.extend(Ext.Panel, {
     }
     // process server responce to our last search query
     ,processSearchQueryResponse: function (r, e){
-        clog('processing search query result');
+        plog('processing search query result');
     }
 });
 

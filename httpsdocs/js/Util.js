@@ -109,7 +109,7 @@ function getStoreNames(v){
             var idx = this.findExact('id', parseInt(id, 10));
             if(idx >= 0) {
                 var d = this.getAt(idx).data;
-                texts.push(this.getAt(idx).get('name'));
+                texts.push(d.name);
             }
         }
         ,this

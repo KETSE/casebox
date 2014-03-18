@@ -8,6 +8,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     ,tbarCssClass: 'x-panel-white'
     ,loadedData: {}
     ,history: []
+
     ,initComponent: function() {
         this.instanceId = Ext.id();
         this.actions = {
@@ -38,6 +39,15 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,handler: this.onDownloadClick
             })
 
+            ,search: new Ext.Action({
+                iconCls: 'ib-search'
+                ,id: 'search' + this.instanceId
+                ,scale: 'large'
+                ,tooltip: L.Search
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onSearchClick
+            })
             ,save: new Ext.Action({
                 iconCls: 'ib-save'
                 ,id: 'save' + this.instanceId
@@ -133,6 +143,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             new Ext.Button(this.actions.back)
             ,new Ext.Button(this.actions.edit)
             ,new Ext.Button(this.actions.download)
+            ,new Ext.Button(this.actions.search)
             ,new Ext.Button(this.actions.save)
             ,new Ext.Button(this.actions.cancel)
             ,new Ext.Button(this.actions.openInTabsheet)
@@ -153,6 +164,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             hideMode: 'offsets'
             ,tbar: [
                 this.BC.get('back' + this.instanceId)
+                ,this.BC.get('search' + this.instanceId)
                 ,this.BC.get('edit' + this.instanceId)
                 ,this.BC.get('download' + this.instanceId)
                 ,this.BC.get('save' + this.instanceId)
@@ -213,8 +225,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         this.delayedLoadTask = new Ext.util.DelayedTask(this.doLoad, this);
 
-        this.addEvents('filedownload', 'createobject');
-        this.enableBubble(['filedownload', 'createobject']);
+        this.addEvents('changeparams', 'filedownload', 'createobject');
+        this.enableBubble(['changeparams', 'filedownload', 'createobject']);
     }
 
     ,getButton: function() {
@@ -231,6 +243,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         }
         return this.button;
     }
+
     ,onButtonToggle: function(b, e){
         if(b.pressed){
             this.show();
@@ -239,6 +252,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             this.hide();
         }
     }
+
     ,onCardItemAdd: function(container, component, index){
         if(container !== this) {
             return;
@@ -251,6 +265,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             ,handler: this.onViewChangeClick
         });
     }
+
     ,onViewChangeClick: function(buttonOrIndex, autoLoad){
         var currentItemIndex = this.items.indexOf(this.getLayout().activeItem);
         var mb = this.getButton();
@@ -271,6 +286,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             this.load(this.requestedLoadData);
         }
     }
+
     ,onViewChange: function() {
         var activeItem = this.getLayout().activeItem;
         var tb = this.getTopToolbar();
@@ -536,6 +552,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.requestedLoadData = objectData;
         this.doLoad();
     }
+
     ,onEditClick: function() {
         if(App.isWebDavDocument(this.loadedData.name)) {
             App.openWebdavDocument(this.loadedData);
@@ -547,8 +564,19 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.requestedLoadData = p;
         this.doLoad();
     }
+
     ,onReloadClick: function() {
         this.getLayout().activeItem.reload();
+    }
+
+    ,onSearchClick: function() {
+        var p = Ext.copyTo({}, this.loadedData, 'id,template_id');
+        var ai = this.getLayout().activeItem;
+        if(ai.readValues) {
+            p.data = ai.readValues().data;
+        }
+
+        this.fireEvent('changeparams', {search: p});
     }
 
     ,onSaveClick: function() {
@@ -630,12 +658,14 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.requestedLoadData = p;
         this.doLoad();
     }
+
     ,onOpenPropertiesEvent: function(data, sourceCmp, ev) {
         if(Ext.isEmpty(data)) {
             data = this.loadedData;
         }
         this.load(data);
     }
+
     ,onDownloadClick: function(b, e) {
         this.fireEvent('filedownload', [this.loadedData.id], false, e);
     }
@@ -652,6 +682,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.getEl().mask(L.CompletingTask + ' ...', 'x-mask-loading');
         CB_Tasks.close(this.loadedData.id, this.onTaskChanged, this);
     }
+
     ,onReopenTaskClick: function(b, e) {
         this.getEl().mask(L.ReopeningTask + ' ...', 'x-mask-loading');
         CB_Tasks.reopen(this.loadedData.id, this.onTaskChanged, this);
@@ -673,6 +704,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         App.fireEvent('objectchanged', this.loadedData);
     }
 
+
     ,onAttachFileClick: function(b, e) {
         this.onViewChangeClick(0);
         var fp = this.findByType('CBObjectsPluginsFiles');
@@ -683,6 +715,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         fp.show();
         fp.onAddClick(b, e);
     }
+
     ,onWebDAVLinkClick: function(b, e) {
         App.openWebdavDocument(
             this.loadedData

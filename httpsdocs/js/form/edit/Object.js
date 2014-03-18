@@ -30,28 +30,6 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             ,data: {}
         });
 
-        this.grid = new CB.VerticalEditGrid({
-            title: L.Details
-            ,autoHeight: true
-            ,hidden: true
-            ,refOwner: this
-            ,includeTopFields: true
-            ,stateId: 'oevg' //object edit vertical grid
-            ,autoExpandColumn: 'value'
-            ,keys: [{
-                key: "s"
-                ,ctrl:true
-                ,shift:false
-                ,scope: this
-                ,stopEvent: true
-                ,fn: this.onSaveObjectEvent
-            }]
-            ,viewConfig: {
-                forceFit: true
-                ,autoFill: true
-            }
-        });
-
         this.fieldsZone = new Ext.form.FormPanel({
             title: L.Fields
             ,header: false
@@ -78,7 +56,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                     ,autoHeight: true
                     ,autoScroll: true
                     ,border: false
-                    ,items: this.grid
+                    ,items: [] // this.grid
                 }
                 ,this.fieldsZone
             ]
@@ -170,10 +148,46 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         };
 
         this.startEditAfterObjectsStoreLoadIfNewObject = true;
-
         this.objectsStore.reload();
 
+        /* detect template type of the opened object and create needed grid */
+        var gridType = (CB.DB.templates.getType(this.data.template_id) == 'search')
+            ? 'CBVerticalSearchEditGrid'
+            : 'CBVerticalEditGrid';
+
+        if(this.lastgGridType != gridType) {
+            this.items.itemAt(1).removeAll(true);
+            this.grid = Ext.create(
+                {
+                    title: L.Details
+                    ,autoHeight: true
+                    ,hidden: true
+                    ,refOwner: this
+                    ,includeTopFields: true
+                    ,stateId: 'oevg' //object edit vertical grid
+                    ,autoExpandColumn: 'value'
+                    ,keys: [{
+                        key: "s"
+                        ,ctrl:true
+                        ,shift:false
+                        ,scope: this
+                        ,stopEvent: true
+                        ,fn: this.onSaveObjectEvent
+                    }]
+                    ,viewConfig: {
+                        forceFit: true
+                        ,autoFill: true
+                    }
+                }
+                ,gridType
+            );
+            this.lastgGridType = gridType;
+
+            this.items.itemAt(1).add(this.grid);
+        }
+
         this.grid.reload();
+
         if(this.grid.store.getCount() > 0) {
             var cm = this.grid.getColumnModel();
             var ci = cm.findColumnIndex('title');
@@ -186,10 +200,10 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 cm.setColumnHeader(ci2, L.Value);
             }
             this.grid.show();
-            this.grid.getView().refresh(true);
-            this.grid.doLayout();
-            this.grid.focus();
-            this.grid.getSelectionModel().select(0, 1);
+            if(this.grid.rendered) {
+                this.grid.getView().refresh(true);
+                this.grid.doLayout();
+            }
 
         }
 
@@ -233,6 +247,28 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         this.fireEvent('loaded', this);
     }
 
+    /**
+     * focus value column in first row, and start editing if it's a new object
+     * @return void
+     */
+    ,focusDefaultCell: function() {
+        if(this.grid &&
+            !this.grid.editing &&
+            this.grid.getEl() &&
+            (this.grid.store.getCount() > 0)
+        ) {
+            var colIdx = this.grid.getColumnModel().findColumnIndex('value');
+            this.grid.getSelectionModel().select(0, colIdx);
+            this.grid.getView().focusCell(0, colIdx);
+
+            if(this.startEditAfterObjectsStoreLoadIfNewObject && isNaN(this.data.id)) {
+                this.grid.startEditing(0, colIdx);
+            }
+            delete this.startEditAfterObjectsStoreLoadIfNewObject;
+        }
+
+    }
+
     ,onObjectsStoreChange: function(store, records, options){
         Ext.each(
             records
@@ -241,18 +277,12 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             }
             ,this
         );
-        if(this.grid && !this.grid.editing && this.grid.getEl()) {
-            var sc = this.grid.getSelectionModel().getSelectedCell();
 
-            this.grid.getView().refresh(true);
-            if(sc) {
-                this.grid.getSelectionModel().select(sc[0], sc[1]);
-                this.grid.getView().focusCell(sc[0], sc[1]);
+        this.grid.getView().refresh();
 
-                if(this.startEditAfterObjectsStoreLoadIfNewObject && isNaN(this.data.id)) {
-                    this.grid.startEditing(0, 1);
-                }
-            }
+        // focus only when object just loaded
+        if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
+            this.focusDefaultCell();
         }
     }
 
@@ -334,7 +364,9 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
     ,clear: function(){
         this.data = {};
         this.titleView.update(this.data);
-        this.grid.hide();
+        if(this.grid) {
+            this.grid.hide();
+        }
         this.fieldsZone.removeAll(true);
         this._isDirty = false;
         this.fireEvent('clear', this);
@@ -348,6 +380,11 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         var rez = {
             tbar: {}
         };
+
+        if(CB.DB.templates.getType(this.data.template_id) == 'search') {
+            rez.tbar['search'] = {};
+        }
+
         rez.tbar['save'] = {};
         rez.tbar['cancel'] = {};
         rez.tbar['openInTabsheet'] = {};
