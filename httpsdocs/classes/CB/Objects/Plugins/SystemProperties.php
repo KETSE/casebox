@@ -35,7 +35,11 @@ class SystemProperties extends Base
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $r['cid_text'] = User::getDisplayName($r['cid']);
+
             $r['cdate_text'] = Util\formatAgoTime($r['cdate']);
+            $r['cdate'] = Util\dateMysqlToISO($r['cdate']);
+            $r['udate'] = Util\dateMysqlToISO($r['udate']);
+
             $r['uid_text'] = User::getDisplayName($r['uid']);
             $r['udate_text'] = Util\formatAgoTime($r['udate']);
             $rez['data'] = $r;

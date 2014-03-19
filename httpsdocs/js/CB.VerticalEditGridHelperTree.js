@@ -63,7 +63,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                 switch (node.attributes.templateRecord.get('type')) {
                     case 'datetime':
                         if(Ext.isDate(value.value)) {
-                            value.value = value.value.toISOString();
+                            value.value = date_local_to_ISO_string(value.value);
                         }
                         break;
                     case 'date':
@@ -162,7 +162,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                 }
                 break;
             case 'datetime':
-                value = date_ISO_to_date(value);
+                value = date_ISO_to_local_date(value);
                 break;
         }
         return value;

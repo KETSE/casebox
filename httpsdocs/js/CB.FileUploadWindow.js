@@ -214,13 +214,6 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 
         App.focusFirstField(this);
     },doSubmit: function(){
-        // d = this.find('name', 'date');
-        // if(d){
-        //     d = d[0];
-        //     d = d.getValue();
-        //     d = d ? d.toISOString() : null;
-        // }else d = null;
-
         f = this.findByType('form')[0];
         if(f.getForm().isValid()){
             f.getForm().submit({

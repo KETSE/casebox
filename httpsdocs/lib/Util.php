@@ -428,6 +428,15 @@ function dateISOToMysql($date_string)
     return date('Y-m-d H:i:s.u', $d);
 }
 
+// function dateMysqlToISO($date_string)
+// {
+//     if (empty($date_string)) {
+//         return null;
+//     }
+
+//     return str_replace(' ', 'T', $date_string).'Z';
+// }
+
 function dateMysqlToISO($date_string)
 {
     if (empty($date_string)) {
@@ -435,7 +444,7 @@ function dateMysqlToISO($date_string)
     }
     $d = strtotime($date_string);
 
-    return date('Y-m-d\TH:i:s.u\Z', $d);
+    return date('Y-m-d\TH:i:s\Z', $d);
 }
 
 function getCoreHost($db_name = false)

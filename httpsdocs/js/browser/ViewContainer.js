@@ -335,6 +335,44 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ]
         });
 
+        var reader = new Ext.data.JsonReader({
+            successProperty: 'success'
+            ,idProperty: 'nid'
+            ,root: 'data'
+            ,messageProperty: 'msg'
+            ,fields: [
+                {name: 'nid'}
+                ,{name: 'pid', type: 'int'}
+                ,{name: 'system', type: 'int'}
+                ,{name: 'status', type: 'int'}
+                ,{name: 'template_id', type: 'int'}
+                ,{name: 'category_id', type: 'int'}
+                ,'template_type'
+                ,'path'
+                ,'name'
+                ,'hl'
+                ,'iconCls'
+                ,{name: 'date', type: 'date'}
+                ,{name: 'date_end', type: 'date'}
+                ,{name: 'size', type: 'int'}
+                ,{name: 'oid', type: 'int'}
+                ,{name: 'cid', type: 'int'}
+                ,{name: 'versions', type: 'int'}
+                ,{name: 'cdate', type: 'date'}
+                ,{name: 'udate', type: 'date'}
+                ,'case'
+                ,'content'
+                ,{name: 'has_childs', type: 'bool'}
+                ,{name: 'acl_count', type: 'int'}
+                ,'cfg'
+                ,'cls'
+                ,'can'
+            ]
+        }
+        );
+
+        reader.readRecords = reader.readRecords.createInterceptor(CB.DB.convertJsonReaderDates);
+
         this.store = new Ext.data.DirectStore({
             autoLoad: false
             ,autoDestroy: true
@@ -348,41 +386,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,load: this.onProxyLoad
                 }
             })
-            ,reader: new Ext.data.JsonReader({
-                successProperty: 'success'
-                ,idProperty: 'nid'
-                ,root: 'data'
-                ,messageProperty: 'msg'
-                ,fields: [
-                    {name: 'nid'}
-                    ,{name: 'pid', type: 'int'}
-                    ,{name: 'system', type: 'int'}
-                    ,{name: 'status', type: 'int'}
-                    ,{name: 'template_id', type: 'int'}
-                    ,{name: 'category_id', type: 'int'}
-                    ,'template_type'
-                    ,'path'
-                    ,'name'
-                    ,'hl'
-                    ,'iconCls'
-                    ,{name: 'date', type: 'date'}
-                    ,{name: 'date_end', type: 'date'}
-                    ,{name: 'size', type: 'int'}
-                    ,{name: 'oid', type: 'int'}
-                    ,{name: 'cid', type: 'int'}
-                    ,{name: 'versions', type: 'int'}
-                    ,{name: 'cdate', type: 'date'}
-                    ,{name: 'udate', type: 'date'}
-                    ,'case'
-                    ,'content'
-                    ,{name: 'has_childs', type: 'bool'}
-                    ,{name: 'acl_count', type: 'int'}
-                    ,'cfg'
-                    ,'cls'
-                    ,'can'
-            ]
-            }
-            )
+            ,reader: reader
             ,listeners: {
                 scope: this
                 ,beforeload: function(store, options) {
@@ -671,6 +675,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             this.breadcrumb.setValue(b);
         }
         /* end of updating breadcrumb */
+
         this.fireEvent('viewloaded', proxy, o, options);
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
@@ -681,7 +686,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     ,onStoreLoad: function(store, recs, options) {
         this.getEl().unmask();
         Ext.each(recs, function(r){
-            cfg = Ext.value(r.get('cfg'), {});
+            var cfg = Ext.value(r.get('cfg'), {});
             r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
         }, this);
         this.updatePreview();

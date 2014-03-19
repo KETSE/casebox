@@ -228,6 +228,14 @@ class Config extends Singleton
             $rez[CORE_NAME.'_js'] = $js;
         }
 
+        // add available languages of the core to the minify groups
+        $languages = Config::get('languages', 'en');
+        $a = explode(',', $languages);
+        foreach ($a as $l) {
+            $k = mb_strtolower(trim($l));
+            $rez['lang-'.$l] = array('//js/locale/'.$l.'.js');
+        }
+
         return $rez;
     }
 

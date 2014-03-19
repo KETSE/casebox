@@ -1,3 +1,11 @@
+CaseBox 1.9.162 (2014-03-19)
+==============================
+New Features, Improvements
+--------------------------
+- all dates should be displayed timezone specified in profile of the user
+- removed language groups from groupsConfig of minify library.
+    These groups are added on the fly from the languages property of core config.
+
 CaseBox 1.9.162 (2014-03-18)
 ==============================
 New Features, Improvements

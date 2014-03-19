@@ -277,18 +277,37 @@ function initApp(){
             return '';
         }
         ,date: function(v){
-            if(Ext.isEmpty(v)) return '';
-            return ( v.format ? v.format(App.dateFormat) : Date.parseDate(v.substr(0,10), 'Y-m-d').format(App.dateFormat));
+            var rez = '';
+            if(Ext.isEmpty(v)) {
+                return rez;
+            }
+            rez = (v.format ? v.format(App.dateFormat) : Date.parseDate(v.substr(0,10), 'Y-m-d').format(App.dateFormat));
+            return rez;
         }
         ,datetime: function(v){
-            if(Ext.isEmpty(v)) return '';
-            if(Ext.isPrimitive(v)) v = date_ISO_to_date(v);
-            s = v.toISOString();
-            if(s.substr(-14) == 'T00:00:00.000Z') v = v.clearTime(true);
-            d = v.format(App.dateFormat+' '+App.timeFormat);
-            if(Ext.isEmpty(d)) return '';
-            if(d.substr(-5) == '00:00') d = d.substr(0,10);
-            return d;
+            var rez = '';
+            if(Ext.isEmpty(v)) {
+                return rez;
+            }
+
+            rez = Ext.isPrimitive(v)
+                ? date_ISO_to_locale_date(v)
+                : v;
+
+            var s = date_local_to_ISO_string(rez);
+            if(s.substr(-14) == 'T00:00:00.000Z') {
+                rez = rez.clearTime(true);
+            }
+
+            rez = rez.format(App.dateFormat+' '+App.timeFormat);
+            if(Ext.isEmpty(rez)) {
+                return '';
+            }
+            if(rez.substr(-5) == '00:00') {
+                rez = rez.substr(0,10);
+            }
+
+            return rez;
         }
         ,time: function(v){
             if(v && Ext.isPrimitive(v)) return v;

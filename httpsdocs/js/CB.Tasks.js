@@ -271,10 +271,10 @@ CB.Tasks = Ext.extend( Ext.Window, {
         this.status = 'view';
 
         this.data.allday = parseInt(this.data.allday, 10);
-        this.data.date_start = date_ISO_to_date(this.data.date_start);
-        this.data.date_end = date_ISO_to_date(this.data.date_end);
-        this.data.cdate = date_ISO_to_date(this.data.cdate);
-        this.data.completed = date_ISO_to_date(this.data.completed);
+        this.data.date_start = date_ISO_to_local_date(this.data.date_start);
+        this.data.date_end = date_ISO_to_local_date(this.data.date_end);
+        this.data.cdate = date_ISO_to_local_date(this.data.cdate);
+        this.data.completed = date_ISO_to_local_date(this.data.completed);
         this.radioHidden = !Ext.isEmpty(this.data.template_id);
 
         this.updatePathStore();
@@ -605,17 +605,17 @@ CB.Tasks = Ext.extend( Ext.Window, {
                 }
                 if(this.data.allday){
                     d = this.date_start.getValue();
-                    this.data.date_start = Ext.isEmpty(d) ? null : d.toISOString();
+                    this.data.date_start = date_local_to_ISO_string(d);
                     if(this.data.template_id !== App.config.default_event_template){
                         d = this.date_end.getValue();
-                        this.data.date_end = Ext.isEmpty(d) ? null : d.toISOString();
+                        this.data.date_end = date_local_to_ISO_string(d);
                     }
                 }else{
                     d = this.datetime_start.getValue();
-                    this.data.date_start = Ext.isEmpty(d) ? null : d.toISOString();
+                    this.data.date_start = date_local_to_ISO_string(d);
                     if(this.data.template_id !== App.config.default_event_template){
                         d = this.datetime_end.getValue();
-                        this.data.date_end = Ext.isEmpty(d) ? null : d.toISOString();
+                        this.data.date_end = date_local_to_ISO_string(d);
                     }
                 }
                 break;
@@ -1390,7 +1390,7 @@ CB.ActionTasksPanel = Ext.extend(Ext.Panel, {
     ,processLoad: function(r, e){
         if(r.success !== true) return;
         for (var i = 0; i < r.data.length; i++) {
-            r.data[i].cdate = date_ISO_to_date(r.data[i].cdate);
+            r.data[i].cdate = date_ISO_to_local_date(r.data[i].cdate);
             r.data[i].iconCls = getItemIcon(r.data[i]);
         }
         if(r.facets){

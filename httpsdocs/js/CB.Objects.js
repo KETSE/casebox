@@ -168,8 +168,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         return true;
     }
     ,onFormLoaded: function(r, e){
-        this.data.cdate = date_ISO_to_date(this.data.cdate);
-        this.data.udate = date_ISO_to_date(this.data.udate);
+        this.data.cdate = date_ISO_to_local_date(this.data.cdate);
+        this.data.udate = date_ISO_to_local_date(this.data.udate);
     }
     ,onObjectsStoreChange: function(store, records, options){
         Ext.each(

@@ -30,7 +30,7 @@ CB.ObjectsFieldCommonFunctions = {
                         ,listeners:{
                             load: function(proxy, obj, opt){
                                 for (var i = 0; i < obj.result.data.length; i++) {
-                                    obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+                                    obj.result.data[i].date = date_ISO_to_local_date(obj.result.data[i].date);
                                 }
                             }
                         }

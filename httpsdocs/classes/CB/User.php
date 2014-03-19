@@ -295,6 +295,7 @@ class User
             if (!empty($cfg['timezone'])) {
                 $r['timezone'] = $cfg['timezone'];
             }
+
             if (!empty($cfg['canAddUsers'])) {
                 $r['canAddUsers'] = $cfg['canAddUsers'];
             }
@@ -362,7 +363,7 @@ class User
             $cfg['timezone'] = $p['timezone'];
             unset($cfg['TZ']);
             $res = DB\dbQuery(
-                'SELECT zone_name
+                'SELECT zone_name, gmt_offset
                 FROM casebox.zone
                 WHERE caption = $1',
                 $p['timezone']
@@ -370,10 +371,12 @@ class User
 
             if ($r = $res->fetch_assoc()) {
                 $cfg['TZ'] = $r['zone_name'];
+                $cfg['gmt_offset'] = intval($r['gmt_offset'] / 60); //minutes
             }
             $res->close();
         } else {
             unset($cfg['TZ']);
+            unset($cfg['gmt_offset']);
         }
         if (isset($p['short_date_format'])) {
             $cfg['short_date_format'] = $p['short_date_format'];
@@ -437,6 +440,7 @@ class User
 
             $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
             $u['cfg']['TZ'] = empty($cfg['TZ']) ? '' :  $cfg['TZ'];
+            $u['cfg']['gmt_offset'] = empty($cfg['gmt_offset']) ? null :  $cfg['gmt_offset'];
 
             if (!empty($cfg['long_date_format'])) {
                 $u['cfg']['long_date_format'] = $cfg['long_date_format'];
@@ -1063,6 +1067,10 @@ class User
                 $r['cfg']['short_date_format'] = $GLOBALS['language_settings'][$r['language']]['short_date_format'];
             }
             $r['cfg']['time_format'] = $GLOBALS['language_settings'][$r['language']]['time_format'];
+
+            if (!empty($r['cfg']['TZ'])) {
+                $r['cfg']['gmt_offset'] = System::getGmtOffset($r['cfg']['TZ']);
+            }
 
             if (is_null($r['data'])) {
                 $oldObj = new Objects\OldObject();

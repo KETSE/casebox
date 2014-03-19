@@ -4,6 +4,11 @@ function isEmptyObject(ob){
     return true;
 }
 
+/**
+ * create date object from iso string
+ * @param  varchar date_string [description]
+ * @return Date | null
+ */
 function date_ISO_to_date(date_string){
     if(Ext.isEmpty(date_string)) {
         return null;
@@ -17,13 +22,44 @@ function date_ISO_to_date(date_string){
 }
 
 function date_ISO_to_local_date(date_string){
+    /*
+    d = new Date(Date.parse('2014-03-18T01:00:00Z')); d = d.add(Date.MINUTE, -180); d = d.add(Date.MINUTE, +120); clog(d.toISOString(), d); d = d.add(Date.MINUTE, -120); d = d.add(Date.MINUTE, +180); clog(d.toISOString(), d);
+    // ["2014-03-18T00:00:00.000Z", Tue Mar 18 2014 02:00:00 GMT+0200 (GTB Standard Time)]
+    // ["2014-03-18T01:00:00.000Z", Tue Mar 18 2014 03:00:00 GMT+0200 (GTB Standard Time)]
+    /**/
+    var d = date_ISO_to_date(date_string);
 
-    if(Ext.isEmpty(date_string)) return null;
-    var d = Date.parse(date_string);
     if(Ext.isEmpty(d)) {
         return null;
     }
-    return new Date(d);
+
+    if(!isNaN(App.loginData.cfg.gmt_offset)) {
+        var localOffset = -d.getTimezoneOffset();
+        var userOffset = App.loginData.cfg.gmt_offset;
+
+        if(localOffset != userOffset) {
+            // decrease date with local offset and encrease with user offset
+            d = d.add(Date.MINUTE, -localOffset + userOffset);
+        }
+    }
+
+    return d;
+}
+
+function date_local_to_ISO_string(date) {
+    if(!Ext.isDate(date)) {
+        return null;
+    }
+
+    var localOffset = - date.getTimezoneOffset();
+    var userOffset = App.loginData.cfg.gmt_offset;
+
+    if(localOffset != userOffset) {
+        // decrease date with user offset and encrease with local offset
+        date = date.add(Date.MINUTE, localOffset - userOffset);
+    }
+
+    return date.toISOString();
 }
 
 function getUserDisplayName(withEmail) {
@@ -39,7 +75,7 @@ function getUserDisplayName(withEmail) {
 }
 
 function displayDateTime(date){
-    var d = date_ISO_to_date(date);
+    var d = date_ISO_to_local_date(date);
     if(Ext.isDate(d)) {
         return d.format(App.longDateFormat + ' ' + App.timeFormat);
     }

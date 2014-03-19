@@ -63,4 +63,23 @@ class System
 
         return array('success' => true, 'data' => $rez);
     }
+
+    public static function getGmtOffset($timezone)
+    {
+        $rez = null;
+
+        $res = DB\dbQuery(
+            'SELECT gmt_offset
+            FROM casebox.zone
+            WHERE zone_name = $1',
+            $timezone
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = intval($r['gmt_offset'] / 60);
+        }
+        $res->close();
+
+        return $rez;
+    }
 }

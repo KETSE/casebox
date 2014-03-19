@@ -424,6 +424,22 @@ createDirectStores = function(){
 };
 createDirectStores.defer(500);
 
+CB.DB.convertJsonReaderDates = function (jsonData) {
+    if (jsonData && Ext.isArray(jsonData.data)) {
+        for (var f = 0; f < this.meta.fields.length; f++) {
+            if (Ext.isObject(this.meta.fields[f]) && (this.meta.fields[f].type == 'date')) {
+                var fn = this.meta.fields[f].name;
+                for (var i = 0; i < jsonData.data.length; i++) {
+                    if (!Ext.isEmpty(jsonData.data[i][fn])) {
+                        var d = date_ISO_to_local_date(jsonData.data[i][fn]);
+                        jsonData.data[i][fn] = d;
+                    }
+                }
+            }
+        }
+    }
+}
+
 function getThesauriStore(thesauriId)
 {
     storeName = 'ThesauriStore'+thesauriId;
