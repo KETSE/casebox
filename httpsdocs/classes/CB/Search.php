@@ -56,7 +56,8 @@ class Search extends Solr\Client
         $this->start = empty($p['start'])? 0 : intval($p['start']);
         $this->rows = isset($p['rows']) ? intval($p['rows']) : \CB\CONFIG\MAX_ROWS;
 
-        $fq = array('dstatus:0'); //by default filter not deleted nodes
+        //by default filter not deleted nodes
+        $fq = array('dstatus:0');
 
         $this->params = array(
             'defType' => 'dismax'
@@ -104,7 +105,8 @@ class Search extends Solr\Client
             }
             foreach ($sort as $f => $d) {
                 if (isset($this->replaceSortFields[$f])) {
-                    $f = $this->replaceSortFields[$f]; // replace with convenient sorting fields if defined
+                    // replace with convenient sorting fields if defined
+                    $f = $this->replaceSortFields[$f];
                 }
                 if (!in_array($f, $this->acceptableSortFields)) {
                     continue;
@@ -177,7 +179,6 @@ class Search extends Solr\Client
                     default: $p['types'][$i] = intval($p['types'][$i]);
                 }
             }
-            // $ids = Util\toNumericArray($p['types']);
             if (!empty($p['types'])) {
                 $fq[] = 'type:('.implode(' OR ', $p['types']).')';
             }

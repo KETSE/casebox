@@ -260,14 +260,14 @@ CB.FacetList = Ext.extend( CB.Facet, {
         var id = '';
         var name = '';
         if(!Ext.isEmpty(from)) {
-            id = from.toISOString();
+            id = date_local_to_ISO_string(from);
             name = from.format(App.dateFormat);
         }
         id +='~';
         name += ' - ';
 
         if(!Ext.isEmpty(to)) {
-            id += to.toISOString();
+            id += date_local_to_ISO_string(to);
             name += to.format(App.dateFormat);
         }
         if(id == '-') {

@@ -22,7 +22,7 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'
-            ,'        <span class="gr">{user}, {ago_text}</span>'
+            ,'        <span class="gr" title="{[ displayDateTime(values.cdate) ]}">{user}, {ago_text}</span>'
             ,'    </td>'
             ,'    <td class="elips">'
             ,'        <span class="click menu"></span>'
@@ -43,6 +43,7 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
                 ,{name: 'cid', type: 'int'}
                 ,'iconCls'
                 ,'user'
+                ,'cdate'
                 ,'ago_text'
             ]
         });

@@ -4,11 +4,59 @@ function isEmptyObject(ob){
     return true;
 }
 
+/**
+ * create date object from iso string
+ * @param  varchar date_string [description]
+ * @return Date | null
+ */
 function date_ISO_to_date(date_string){
-    if(Ext.isEmpty(date_string)) return null;
-    d = Date.parse(date_string);
-    if(Ext.isEmpty(d)) return null;
+    if(Ext.isEmpty(date_string)) {
+        return null;
+    }
+
+    var d = Date.parse(date_string);
+    if(Ext.isEmpty(d)) {
+        return null;
+    }
     return new Date(d);
+}
+
+function date_ISO_to_local_date(date_string){
+    var d = date_ISO_to_date(date_string);
+
+    if(Ext.isEmpty(d)) {
+        return null;
+    }
+
+    if(!isNaN(App.loginData.cfg.gmt_offset)) {
+        var localOffset = -d.getTimezoneOffset();
+        var userOffset = App.loginData.cfg.gmt_offset;
+
+        if(localOffset != userOffset) {
+            // decrease date with local offset and encrease with user offset
+            d = d.add(Date.MINUTE, -localOffset + userOffset);
+        }
+    }
+
+    return d;
+}
+
+function date_local_to_ISO_string(date) {
+    if(!Ext.isDate(date)) {
+        return null;
+    }
+
+    if(!isNaN(App.loginData.cfg.gmt_offset)) {
+        var localOffset = - date.getTimezoneOffset();
+        var userOffset = Ext.num(App.loginData.cfg.gmt_offset, 0);
+
+        if(localOffset != userOffset) {
+            // decrease date with user offset and encrease with local offset
+            date = date.add(Date.MINUTE, localOffset - userOffset);
+        }
+    }
+
+    return date.toISOString();
 }
 
 function getUserDisplayName(withEmail) {
@@ -24,7 +72,7 @@ function getUserDisplayName(withEmail) {
 }
 
 function displayDateTime(date){
-    var d = date_ISO_to_date(date);
+    var d = date_ISO_to_local_date(date);
     if(Ext.isDate(d)) {
         return d.format(App.longDateFormat + ' ' + App.timeFormat);
     }
@@ -109,7 +157,7 @@ function getStoreNames(v){
             var idx = this.findExact('id', parseInt(id, 10));
             if(idx >= 0) {
                 var d = this.getAt(idx).data;
-                texts.push(this.getAt(idx).get('name'));
+                texts.push(d.name);
             }
         }
         ,this

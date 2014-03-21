@@ -15,7 +15,7 @@ Demosrc.view.Graph = Ext.extend(CB.browser.view.Interface,{
             }
         });
 
-        CB.ObjectsPropertiesPanel.superclass.initComponent.apply(this, arguments);
+        Demosrc.view.Graph.superclass.initComponent.apply(this, arguments);
 
         this.addEvents('selectionchange');
         this.enableBubble(['selectionchange']);

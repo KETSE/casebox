@@ -142,7 +142,6 @@ class Collection
         $var_name = 'template_type'.$templateId;
 
         if (!\CB\Cache::exist($var_name)) {
-            //select from db
             $res = DB\dbQuery(
                 'SELECT `type`
                 FROM templates

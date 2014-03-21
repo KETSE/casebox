@@ -148,8 +148,8 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         CB_Tasks.updateDates(
             {
                 id: record.get('EventId')
-                ,date_start: record.get('StartDate').toISOString()
-                ,date_end: record.get('EndDate').toISOString()
+                ,date_start: date_local_to_ISO_string(record.get('StartDate'))
+                ,date_end: date_local_to_ISO_string(record.get('EndDate'))
             }
             ,function(r, e){
                 if(r.success === true) {
@@ -171,8 +171,8 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         bounds.end.setMinutes(59);
         bounds.end.setSeconds(59);
         bounds.end.setMilliseconds(999);
-        p.dateStart = bounds.start.toISOString();
-        p.dateEnd = bounds.end.toISOString();
+        p.dateStart = date_local_to_ISO_string(bounds.start);
+        p.dateEnd = date_local_to_ISO_string(bounds.end);
         Ext.apply(this.params, p);
 
         this.fireEvent('reload', this);

@@ -466,7 +466,16 @@ class Object extends OldObject
         $rez = array();
         $linearData = $this->getLinearData();
         foreach ($linearData as $field) {
-            $value = array_intersect_key($field, array('value' => 1, 'info' => 1, 'files' => 1));
+            $value = array_intersect_key(
+                $field,
+                array(
+                    'value' => 1
+                    ,'info' => 1
+                    ,'files' => 1
+                    ,'cond' => 1
+                )
+            );
+
             $rez[$field['name']][] = $value;
         }
 
@@ -567,7 +576,7 @@ class Object extends OldObject
                 return false;
             } else { //associative array
                 $keys = array_keys($value);
-                $diff = array_diff($keys, array('name', 'value', 'info', 'files', 'childs'));
+                $diff = array_diff($keys, array('name', 'value', 'info', 'files', 'childs', 'cond'));
 
                 return empty($diff);
             }

@@ -1,3 +1,62 @@
+CaseBox 1.9.166 (2014-03-21)
+==============================
+Fixed Bugs:
+----------
+- timezone display bugfixes in right panel plugins and in email notification
+
+CaseBox 1.9.165 (2014-03-21)
+==============================
+New Features, Improvements
+--------------------------
+- When click "Edit Task", for a few miliseconds "undefined" is displayed
+- transfered timezones usage from mysql table to php
+    Tables related to timezones will be deleted from main casebox database
+- implemented search templates changes as in proto
+- made cleanup, removed obsolete js scripts
+
+Fixed Bugs:
+----------
+- missing template_id warning
+- After d&d files in right panel for a node the right panel is locked
+
+CaseBox 1.9.162 (2014-03-19)
+==============================
+New Features, Improvements
+--------------------------
+- all dates should be displayed timezone specified in profile of the user
+- removed language groups from groupsConfig of minify library.
+    These groups are added on the fly from the languages property of core config.
+
+CaseBox 1.9.162 (2014-03-18)
+==============================
+New Features, Improvements
+--------------------------
+- checked right panel plugins for displaying Datetime hint
+
+Fixed Bugs:
+----------
+- child values from vertical grid not saving
+
+CaseBox 1.9.162 (2014-03-18)
+==============================
+New Features, Improvements
+--------------------------
+- added validation function for dates validISO8601Date in Util.php
+- browsing the object of type "search" will display search results that are prepared by SearchResults treeNode plugin
+- added search templates
+- modified Object edit form to create different grid types. For search templates using VerticalSearchEditGrid
+- changed VerticalEditGrid.js for easier implementation of VerticalSearchEditGrid
+- removed demo1 from install\examples and updated sql for demosrc example
+- removed differential_db_structure_updates
+- removed Scripts related to casebox upgrade process.
+- use default scope "tree" in formatValueForDisplay method of templates class
+- added function plog = clog. plog will be used only for messajes that should remain in production version
+
+Fixed Bugs:
+----------
+- template titles did not save automaticly in templates table (switch between languages to l<index>)
+- values were not displayed in vertical grid for fields with no specified source
+
 CaseBox 1.9.161 (2014-03-06)
 ==============================
 New Features, Improvements

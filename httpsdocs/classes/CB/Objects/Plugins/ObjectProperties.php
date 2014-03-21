@@ -3,6 +3,7 @@
 namespace CB\Objects\Plugins;
 
 use CB\Objects;
+use CB\Util;
 
 class ObjectProperties extends Base
 {
@@ -37,6 +38,10 @@ class ObjectProperties extends Base
                         ,'can'
                     )
                 )) {
+                    if (in_array($k, array('date', 'date_end', 'cdate'))) {
+                        $v = Util\dateMysqlToISO($v);
+                    }
+
                     $rez['data'][$k] = $v;
                 }
             }

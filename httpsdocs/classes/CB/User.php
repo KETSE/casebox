@@ -113,12 +113,6 @@ class User
         $rez = array( 'success' => true );
         $phone = preg_replace('/[^0-9]+/', '', $p['country_code'].$p['phone_number']);
 
-        // $rez['info'] = \FreeSMSGateway::sendSms(
-        //     array(
-        //         'phone' => $phone
-        //         ,'message' => $this->getGACode()
-        //     )
-        // );
         return $rez;
     }
 
@@ -135,7 +129,6 @@ class User
         }
         $data = empty($p['data']) ? array(): (array) $p['data'];
         if (!empty($_SESSION['lastTSV'][$p['method']])) {
-            //return array('success' => false, 'msg' => 'Error enabling TSV.');
             $data = array_merge($_SESSION['lastTSV'][$p['method']], $data);
         }
 
@@ -250,7 +243,8 @@ class User
         if (!$this->isVerified()) {
             return array('success' => false, 'verify' => true);
         }
-        $_SESSION['verified'] = time(); //update verification time
+        //update verification time
+        $_SESSION['verified'] = time();
 
         return array(
             'success' => true
@@ -301,6 +295,7 @@ class User
             if (!empty($cfg['timezone'])) {
                 $r['timezone'] = $cfg['timezone'];
             }
+
             if (!empty($cfg['canAddUsers'])) {
                 $r['canAddUsers'] = $cfg['canAddUsers'];
             }
@@ -366,20 +361,6 @@ class User
         }
         if (isset($p['timezone'])) {
             $cfg['timezone'] = $p['timezone'];
-            unset($cfg['TZ']);
-            $res = DB\dbQuery(
-                'SELECT zone_name
-                FROM casebox.zone
-                WHERE caption = $1',
-                $p['timezone']
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $cfg['TZ'] = $r['zone_name'];
-            }
-            $res->close();
-        } else {
-            unset($cfg['TZ']);
         }
         if (isset($p['short_date_format'])) {
             $cfg['short_date_format'] = $p['short_date_format'];
@@ -442,7 +423,7 @@ class User
             $u['locale'] =  $GLOBALS['language_settings'][$u['language']]['locale'];
 
             $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
-            $u['cfg']['TZ'] = empty($cfg['TZ']) ? '' :  $cfg['TZ'];
+            $u['cfg']['gmt_offset'] = empty($cfg['timezone']) ? null :  System::getGmtOffset($cfg['timezone']);
 
             if (!empty($cfg['long_date_format'])) {
                 $u['cfg']['long_date_format'] = $cfg['long_date_format'];
@@ -461,7 +442,8 @@ class User
         if (!$this->isVerified()) {
             return array('success' => false, 'verify' => true);
         }
-        $_SESSION['verified'] = time(); //update verification time
+        //update verification time
+        $_SESSION['verified'] = time();
         $rez = array();
         $cfg = $this->getUserConfig();
 
@@ -1068,6 +1050,16 @@ class User
                 $r['cfg']['short_date_format'] = $GLOBALS['language_settings'][$r['language']]['short_date_format'];
             }
             $r['cfg']['time_format'] = $GLOBALS['language_settings'][$r['language']]['time_format'];
+
+            //check for backward compatibility
+            if (!empty($r['cfg']['TZ'])) {
+                $r['cfg']['timezone'] = $r['cfg']['TZ'];
+                unset($r['cfg']['TZ']);
+            }
+
+            if (!empty($r['cfg']['timezone'])) {
+                $r['cfg']['gmt_offset'] = System::getGmtOffset($r['cfg']['timezone']);
+            }
 
             if (is_null($r['data'])) {
                 $oldObj = new Objects\OldObject();

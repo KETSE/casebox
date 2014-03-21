@@ -24,7 +24,6 @@ $projectTitle = Config::get('project_name_'.USER_LANGUAGE, CORE_NAME);
     <link rel="stylesheet" type="text/css" href="/libx/ext/resources/css/ext-all.css" />
 <?php
 
-// echo '<link rel="stylesheet" type="text/css" href="/libx/ext/resources/css/ext-all.css" />' . "\n";
 echo '<link rel="stylesheet" type="text/css" href="'. Minify_getUri('css') . '" />' . "\n";
 
 // Custom CSS for the core

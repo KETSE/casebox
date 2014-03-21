@@ -30,7 +30,7 @@ CB.ObjectsFieldCommonFunctions = {
                         ,listeners:{
                             load: function(proxy, obj, opt){
                                 for (var i = 0; i < obj.result.data.length; i++) {
-                                    obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+                                    obj.result.data[i].date = date_ISO_to_local_date(obj.result.data[i].date);
                                 }
                             }
                         }
@@ -179,7 +179,6 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
 
             this.store.on('beforeload', this.onBeforeLoadStore, this);
             this.store.on('load', this.onStoreLoad, this);
-            // this.store.proxy.on('load', this.onProxyLoad, this);
             this.store.load();
         }
         customIcon = (this.config.renderer == 'listGreenIcons') ? 'icon-element' : '';
@@ -204,7 +203,6 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
                 ,beforedestroy: function(){
                     this.store.un('beforeload', this.onBeforeLoadStore, this);
                     this.store.un('load', this.onStoreLoad, this);
-                    this.store.proxy.un('load', this.onProxyLoad, this);
                 }
                 ,expand: function(c){
                     var idx = c.store.findExact('id', c.getValue()) -1;

@@ -223,13 +223,13 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             }
         });
         this.duplicatesView = new CB.FileDuplicatesViewPanel();
-        this.propertiesPanel = new CB.ObjectsPropertiesPanel({
-            style: 'margin-top: 25px'
-            ,listeners:{
-                scope: this
-                ,pathclick: this.onPathClick
-            }
-        });
+        // this.propertiesPanel = new CB.ObjectsPropertiesPanel({
+        //     style: 'margin-top: 25px'
+        //     ,listeners:{
+        //         scope: this
+        //         ,pathclick: this.onPathClick
+        //     }
+        // });
 
             Ext.apply(this, {
             listeners: {
@@ -265,8 +265,8 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
     ,processLoadProperties: function(r, e){
         if(r.success !== true) return;
         this.data = r.data;
-        this.data.cdate = date_ISO_to_date(this.data.cdate);
-        this.data.udate = date_ISO_to_date(this.data.udate);
+        this.data.cdate = date_ISO_to_local_date(this.data.cdate);
+        this.data.udate = date_ISO_to_local_date(this.data.udate);
         this.data.id = parseInt(this.data.id);
         this.setIconClass(getFileIcon(r.data.name));
         this.setTitle(r.data.name);
@@ -295,7 +295,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         this.items.last().items.first().syncSize();
 
         this.duplicatesView.reload();
-        this.propertiesPanel.update(this.data);
+        // this.propertiesPanel.update(this.data);
     }
     ,prepareInterface: function(){
         /* find out if need to show properties panel */
@@ -391,7 +391,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
                     ,items: [this.versionsView]
                 }
                 ,this.duplicatesView
-                ,this.propertiesPanel
+                // ,this.propertiesPanel
             ]
         })
 
@@ -719,7 +719,7 @@ CB.ActionFilesPanel = Ext.extend(Ext.Panel, {
         if(r.success !== true) return;
         for (var i = 0; i < r.data.length; i++) {
             r.data[i].size = App.customRenderers.filesize(r.data[i].size);
-            r.data[i].cdate = date_ISO_to_date(r.data[i].cdate);
+            r.data[i].cdate = date_ISO_to_local_date(r.data[i].cdate);
             r.data[i].iconCls = getFileIcon32(r.data[i].name);
         };
         this.filesView.store.loadData(r.data);
@@ -823,7 +823,7 @@ CB.FileDuplicatesViewPanel = Ext.extend(Ext.Panel, {
     ,processFilesLoad: function(r, e){
         if(r.success !== true) return;
         for (var i = 0; i < r.data.length; i++) {
-            r.data[i].cdate = date_ISO_to_date(r.data[i].cdate);
+            r.data[i].cdate = date_ISO_to_local_date(r.data[i].cdate);
         };
         this.view.store.loadData(r.data);
         if(this.view.store.getCount() > 0) this.setVisible(true);
