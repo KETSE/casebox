@@ -542,8 +542,8 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 var map = new Ext.KeyMap(c.getEl(), [
                     {
                         key: "s"
-                        ,ctrl:true
-                        ,shift:false
+                        ,ctrl: true
+                        ,shift: false
                         ,scope: this
                         ,stopEvent: true
                         ,fn: this.onSaveObjectEvent

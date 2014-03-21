@@ -138,7 +138,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 ,deleteobject: this.onDeleteObject
                 ,opencalendar: this.openCalendar
                 ,favoritetoggle: this.toggleFavorite
-                ,taskedit: this.onTaskEdit
                 ,useradded: this.onUsersChange
                 ,userdeleted: this.onUsersChange
                 ,viewloaded: this.onViewLoaded
@@ -234,7 +233,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         App.Favorites = new CB.Favorites();
         App.Favorites.load();
         this.populateMainMenu();
-        // App.openUniqueTabbedWidget('CBDashboard');
     }
     ,initCB: function(){
         if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){
@@ -390,7 +388,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             return true;
         }
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');
+        var o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');
         this.fireEvent('objectopened', o);
         return App.addTab(App.mainTabPanel, o);
     }
@@ -402,19 +400,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
         o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');
         return App.addTab(App.mainTabPanel, o);
-    }
-
-    ,search: function(query, savedQueryId){
-        idx = App.findTab(App.mainTabPanel, 'search');
-        if(idx > -1){
-            p = App.mainTabPanel.items.itemAt(idx);
-            App.mainTabPanel.setActiveTab(idx);
-        }else{
-            p = new CB.Search({data: {id: 'search'}});
-            App.addTab(App.mainTabPanel, p);
-        }
-        if(!Ext.isEmpty(savedQueryId)) p.openSavedQuery(savedQueryId);
-            else p.searchText(query);
     }
 
     ,setUserLanguage: function(b, e){
@@ -445,14 +430,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         this.fireEvent('favoritetoggled', r, e);
     }
 
-    ,onTaskEdit: function(p, ev){//task_id, object_id, object_title, title
-        if(Ext.isEmpty(p.title)) p.title = L.EditTask;
-        if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
-        this.lastFocusedElement = Ext.get(document.activeElement);
-        dw = new CB.Tasks(p);
-        dw.on('beforedestroy', this.focusLastElement, this);
-        dw.show();
-    }
     ,focusLastElement: function(){
         if(this.lastFocusedElement){
             this.lastFocusedElement.focus(500);

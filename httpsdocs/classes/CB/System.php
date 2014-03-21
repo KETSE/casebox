@@ -40,46 +40,53 @@ class System
      */
     public function getTimezones()
     {
-        $rez = array();
-        $res = DB\dbQuery(
-            'SELECT caption, gmt_offset
-            FROM casebox.zone
-            ORDER BY gmt_offset, caption'
-        ) or die(DB\dbQueryError());
 
-        while ($r = $res->fetch_assoc()) {
-            $offsetHours = floor(abs($r['gmt_offset'])/3600);
-            $offsetMinutes = round((abs($r['gmt_offset']) - $offsetHours * 3600) / 60);
-            if ($offsetMinutes == 60) {
-                $offsetHours++;
-                $offsetMinutes = 0;
-            }
-            $r['gmt_offset'] = ( ($r['gmt_offset'] < 0) ? '-': '+' )
-                . ($offsetHours < 10 ? '0' : '') . $offsetHours
-                . ':'
-                . ($offsetMinutes < 10 ? '0' : '') . $offsetMinutes;
-            $rez[] = array_values($r);
+        $timezones = [];
+        $offsets = [];
+        $now = new \DateTime();
+
+        foreach (\DateTimeZone::listIdentifiers() as $timezone) {
+            $now->setTimezone(new \DateTimeZone($timezone));
+            $offsets[] = $offset = $now->getOffset();
+            $timezones[$timezone] = array(
+                $timezone
+                ,$offset
+                ,'(GMT'.$this->formatGmtOffset($offset).') '.$this->formatTimezoneName($timezone)
+            );
         }
 
-        return array('success' => true, 'data' => $rez);
+        array_multisort($offsets, $timezones);
+
+        return array('success' => true, 'data' => array_values($timezones));
     }
 
+    /**
+     * get gmt offset in minutes
+     * @param  varchar $timezone php compatible timezone
+     * @return int
+     */
     public static function getGmtOffset($timezone)
     {
-        $rez = null;
+        $now = new \DateTime();
+        $now->setTimezone(new \DateTimeZone($timezone));
 
-        $res = DB\dbQuery(
-            'SELECT gmt_offset
-            FROM casebox.zone
-            WHERE zone_name = $1',
-            $timezone
-        ) or die(DB\dbQueryError());
+        return ($now->getOffset() / 60);
+    }
 
-        if ($r = $res->fetch_assoc()) {
-            $rez = intval($r['gmt_offset'] / 60);
-        }
-        $res->close();
+    public function formatGmtOffset($offset)
+    {
+        $hours = intval($offset / 3600);
+        $minutes = abs(intval($offset % 3600 / 60));
 
-        return $rez;
+        return ($offset ? sprintf('%+03d:%02d', $hours, $minutes) : '');
+    }
+
+    public function formatTimezoneName($name)
+    {
+        $name = str_replace('/', ', ', $name);
+        $name = str_replace('_', ' ', $name);
+        $name = str_replace('St ', 'St. ', $name);
+
+        return $name;
     }
 }

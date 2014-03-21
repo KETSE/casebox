@@ -64,7 +64,7 @@ class SearchResults extends DBNode
         }
 
         $ld = $searchObject->getLinearData();
-        foreach ($ld as $fn => $v) {
+        foreach ($ld as $v) {
             $condition = $this->adjustCondition($tpl->getField($v['name']), $v);
             if (!empty($condition)) {
                 $rez['fq'][] = $condition;
@@ -156,18 +156,18 @@ class SearchResults extends DBNode
                 if (!empty($v)) {
                     switch ($value['cond']) {
                         case '<=':
-                            $rez = $f.':['.implode(' OR ', $v).']';
+                            $rez = $f.':('.implode(' OR ', $v).')';
                             break;
                         case '>=':
-                            $rez = $f.':['.implode(' AND ', $v).']';
+                            $rez = $f.':('.implode(' AND ', $v).')';
                             break;
                         case '!=':
-                            $rez = '-'.$f.':['.implode(' OR ', $v).']';
+                            $rez = '-'.$f.':('.implode(' OR ', $v).')';
                             break;
 
                         case '=':
                         default:
-                            $rez = $f.':['.implode(' AND ', $v).'] AND -'.$f.':[* TO *]';
+                            $rez = $f.':('.implode(' AND ', $v).') AND -'.$f.':[* TO *]';
                             break;
                     }
                 }
@@ -220,6 +220,8 @@ class SearchResults extends DBNode
                 ];/**/
                 break;
         }
+
+        return $rez;
     }
 
     protected function toSolrDate($date)

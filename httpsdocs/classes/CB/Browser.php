@@ -39,7 +39,12 @@ class Browser
             4. join and sort received data
         */
 
-        $this->treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
+        //detect tree nodes config,
+        //but leave only SearchResults plugin when searching
+        $this->treeNodeConfigs = empty($p['search'])
+            ? Config::get('treeNodes', array('Dbnode' => array()))
+            : array('SearchResults' => array());
+
         $params = array(
             'params' => &$p,
             'plugins' => &$this->treeNodeConfigs

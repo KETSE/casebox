@@ -22,11 +22,6 @@ function date_ISO_to_date(date_string){
 }
 
 function date_ISO_to_local_date(date_string){
-    /*
-    d = new Date(Date.parse('2014-03-18T01:00:00Z')); d = d.add(Date.MINUTE, -180); d = d.add(Date.MINUTE, +120); clog(d.toISOString(), d); d = d.add(Date.MINUTE, -120); d = d.add(Date.MINUTE, +180); clog(d.toISOString(), d);
-    // ["2014-03-18T00:00:00.000Z", Tue Mar 18 2014 02:00:00 GMT+0200 (GTB Standard Time)]
-    // ["2014-03-18T01:00:00.000Z", Tue Mar 18 2014 03:00:00 GMT+0200 (GTB Standard Time)]
-    /**/
     var d = date_ISO_to_date(date_string);
 
     if(Ext.isEmpty(d)) {
@@ -51,12 +46,14 @@ function date_local_to_ISO_string(date) {
         return null;
     }
 
-    var localOffset = - date.getTimezoneOffset();
-    var userOffset = App.loginData.cfg.gmt_offset;
+    if(!isNaN(App.loginData.cfg.gmt_offset)) {
+        var localOffset = - date.getTimezoneOffset();
+        var userOffset = Ext.num(App.loginData.cfg.gmt_offset, 0);
 
-    if(localOffset != userOffset) {
-        // decrease date with user offset and encrease with local offset
-        date = date.add(Date.MINUTE, localOffset - userOffset);
+        if(localOffset != userOffset) {
+            // decrease date with user offset and encrease with local offset
+            date = date.add(Date.MINUTE, localOffset - userOffset);
+        }
     }
 
     return date.toISOString();

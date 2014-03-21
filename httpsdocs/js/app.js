@@ -149,35 +149,7 @@ function initApp(){
             if(ri < 0) return '';
             return ed.store.getAt(ri).get(ed.displayField);
         }
-        ,objectCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
-            if(Ext.isEmpty(v)) return '';
-            cw = grid.refOwner || grid.findParentByType(CB.Objects);
-            if(!cw || !cw.objectsStore) return '';
-            r = [];
-            if(!Ext.isArray(v)) v = String(v).split(',');
-            switch(record.data.cfg.renderer){
-                case 'listGreenIcons':
-                    for(i=0; i < v.length; i++){
-                        ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
-                        row = cw.objectsStore.getAt(ri);
-                        if(ri >-1) r.push('<li class="icon-padding icon-element">'+row.get('name')+'</li>');
-                    }
-                    return '<ul>'+r.join('')+'</ul>';
-                case 'listObjIcons':
-                    for(i=0; i < v.length; i++){
-                        ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
-                        row = cw.objectsStore.getAt(ri);
-                        if(ri >-1) r.push('<li class="icon-padding '+row.get('iconCls')+'">'+row.get('name')+'</li>');
-                    }
-                    return '<ul>'+r.join('')+'</ul>';
-                default:
-                    for(i=0; i < v.length; i++){
-                        ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
-                        if(ri >-1) r.push(cw.objectsStore.getAt(ri).get('name'));
-                    }
-                    return r.join(', ');
-            }
-        }
+
         ,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) {
                 return '';
@@ -409,8 +381,6 @@ function initApp(){
             case '_objects':
                 return App.customRenderers.objectsField;
             case 'combo':
-            case 'object_author':
-                return App.customRenderers.thesauriCombo;
             case '_language':
                 return App.customRenderers.languageCombo;
             case '_sex':
@@ -425,14 +395,6 @@ function initApp(){
                 return CB.DB.fieldTypes.getName.createDelegate(CB.DB.fieldTypes);
             case '_short_date_format':
                 return App.customRenderers.shortDateFormatCombo;
-            case '_contact':
-                return App.customRenderers.contactCombo;
-            case '_case':
-                return App.customRenderers.caseCombo;
-            case '_case_object':
-                return App.customRenderers.objectCombo;
-            case 'popuplist':
-                return App.customRenderers.thesauriCell;
             case 'memo':
             case 'text':
                 return App.customRenderers.text;
@@ -498,11 +460,6 @@ function initApp(){
         if(!App.thetFileUploadWindow) App.theFileUploadWindow = new CB.FileUploadWindow();
         App.theFileUploadWindow = Ext.apply(App.theFileUploadWindow, config);
         return App.theFileUploadWindow;
-    };
-    App.getThesauriWindow = function(config){
-        if(!App.thesauriWindow) App.thesauriWindow = new CB.ThesauriWindow();
-        App.thesauriWindow = Ext.apply(App.thesauriWindow, config);
-        return App.thesauriWindow;
     };
     App.getTextEditWindow = function(config){
         if(!App.textEditWindow) App.textEditWindow = new CB.TextEditWindow();
@@ -617,7 +574,7 @@ function initApp(){
             ,objectId: e.objectId
             ,path: e.path
         };
-        var w;
+        var w, th;
         var tr = e.fieldRecord;
         var cfg = tr.get('cfg');
         var objectWindow = e.ownerCt
@@ -678,7 +635,7 @@ function initApp(){
                                 : new CB.ObjectsSelectionForm({data: objData, value: value});
 
                             w.on('setvalue', function(data){
-                                value = [];
+                                var value = [];
                                 if(Ext.isArray(data)){
                                     Ext.each(
                                         data
@@ -720,19 +677,6 @@ function initApp(){
                         });
                 }
 
-                break;
-            case '_case':
-                if(cfg.editor == 'form'){
-                    if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateCasesField({ownerCt: e.ownerCt});
-                }else{
-                    params = Ext.apply({}, cfg);
-                    if(!Ext.isEmpty(e.pidValue)) params.pidValue = e.pidValue;
-                    return new Ext.ux.CasesCombo({
-                        enableKeyEvents: true
-                        ,ownerCt: e.ownerCt
-                        ,params: params
-                    });
-                }
                 break;
             case 'checkbox': return new Ext.form.ComboBox({
                         enableKeyEvents: true
@@ -906,26 +850,6 @@ function initApp(){
                     enableKeyEvents: true
                     ,height: height
                 });
-            case 'popuplist':
-                e.cancel = true;
-                w = App.getThesauriWindow({
-                    title: tr.get('title')
-                    ,store: getThesauriStore( cfg.thesauriId )
-                    ,data: {
-                        value: e.record.get('value')
-                        ,scope: e
-                        ,callback: function(w, v){
-                            this.originalValue = this.record.get('value');
-                            this.value = v;
-                            this.record.set('value', v);
-                            if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
-                            this.grid.fireEvent('change');
-                        }
-                    }
-                });
-                w.focusHandler = Ext.value(this.gainFocus, e.grid.gainFocus);
-                w.show();
-                break;
             case 'text':
                 e.cancel = true;
                 w = App.getTextEditWindow({
@@ -1048,13 +972,11 @@ function initApp(){
             case 'template':
             case 'field':
             case 'email':
+            case 'task':
                 App.mainViewPort.fireEvent('openobject', {id: id, template_id: template_id}, e);
                 break;
             case 'file':
                 App.mainViewPort.fireEvent('fileopen', {id: id}, e);
-                break;
-            case 'task':
-                App.mainViewPort.fireEvent('taskedit', { data:{id: id} }, e);
                 break;
             default:
                 return false;

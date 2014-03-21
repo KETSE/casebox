@@ -511,12 +511,11 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     ,onOpenClick: function (b, e) {
         var n = this.getSelectionModel().getSelectedNode();
         if(Ext.isEmpty(n)) return;
-        // App.openObject(n.attributes.template_id, n.attributes.nid, e);
         var tab = App.activateBrowserTab();
         tab.onObjectsOpenEvent(
             {
                 nid: n.attributes.nid
-                // ,template_id: n.attributes.template_id
+                ,template_id: n.attributes.template_id
             }
         );
     }

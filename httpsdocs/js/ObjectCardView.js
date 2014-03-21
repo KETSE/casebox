@@ -406,6 +406,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,onCardItemLoaded: function(item) {
+        this.locked = false;
+
         this.updateToolbarAndMenuItems();
 
         if(Ext.isEmpty(this.loadedData) || Ext.isEmpty(this.loadedData.scroll)) {

@@ -1,3 +1,18 @@
+CaseBox 1.9.162 (2014-03-21)
+==============================
+New Features, Improvements
+--------------------------
+- When click "Edit Task", for a few miliseconds "undefined" is displayed
+- transfered timezones usage from mysql table to php
+    Tables related to timezones will be deleted from main casebox database
+- implemented search templates changes as in proto
+- made cleanup, removed obsolete js scripts
+
+Fixed Bugs:
+----------
+- missing template_id warning
+- After d&d files in right panel for a node the right panel is locked
+
 CaseBox 1.9.162 (2014-03-19)
 ==============================
 New Features, Improvements

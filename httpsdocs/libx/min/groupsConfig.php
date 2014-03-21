@@ -40,7 +40,7 @@ return array_merge(
 
             ,'//js/CB.Login.js'
             ,'//js/CB.GenericForm.js'
-            ,'//js/CB.ThesauriWindow.js'
+
             ,'//js/CB.Breadcrumb.js'
             ,'//js/browser/Tree.js'
             ,'//js/browser/ViewContainer.js'
@@ -49,26 +49,21 @@ return array_merge(
             ,'//js/browser/view/Calendar.js'
             ,'//js/browser/view/Charts.js'
             ,'//js/browser/view/Pivot.js'
-            ,'//js/browser/view/Summary.js'
 
             ,'//js/CB.VerticalEditGrid.js'
             ,'//js/CB.VerticalSearchEditGrid.js'
             ,'//js/CB.Objects.js'
             ,'//js/CB.ObjectsField.js'
-            ,'//js/CB.Tasks.js'
             ,'//js/CB.PasteFromWord.js'
             ,'//js/CB.FileUploadWindow.js'
 
             ,'//js/plugins/CB.plugins.customInterface.js'
-            ,'//js/ux/Ext.ux.TagEditor.js'
-            ,'//js/ux/Ext.ux.TreeTagEditor.js'
-            ,'//js/ux/Ext.ux.TagField.js'
             ,'//js/ux/Ext.ux.htmlEditor.js'
             ,'//js/ux/Ext.ux.plugins.defaultButton.js'
             ,'//js/ux/Ext.ux.plugins.IconCombo.js'
             ,'//js/ux/Ext.ux.TitleField.js'
             ,'//js/ux/Ext.ux.SearchField.js'
-            ,'//js/ux/Ext.ux.ThesauriField.js'
+
             ,'//js/ux/spinner/Spinner.js'
             ,'//js/ux/spinner/SpinnerStrategy.js'
             ,'//js/ux/date-time-ux/BaseTimePicker.js'
@@ -83,8 +78,6 @@ return array_merge(
             ,'//js/CB.FacetText.js'
             ,'//js/CB.FacetList.js'
             ,'//js/CB.Clipboard.js'
-            ,'//js/CB.Dashboard.js'
-            // ,'//js/CB.PreviewPanel.js'
             ,'//js/CB.FilterPanel.js'
             ,'//js/CB.FileWindow.js'
 
@@ -99,12 +92,12 @@ return array_merge(
 
             ,'//js/CB.Account.js'
             ,'//js/Util.js'
-            ,'//js/CB.Search.js'
 
             ,'//js/CB.DD.js'
             ,'//js/DD/CB.DD.Tree.js'
             ,'//js/DD/CB.DD.Grid.js'
             ,'//js/DD/CB.DD.Panel.js'
+
             ,'//js/CB.VerticalEditGridHelperTree.js'
             ,'//js/DB/ObjectsStore.js'
             ,'//js/DB/DirectObjectsStore.js'
@@ -132,6 +125,8 @@ return array_merge(
             ,'//js/objects/plugins/Tasks.js'
             ,'//js/objects/plugins/Versions.js'
             ,'//js/CB.WebdavWindow.js'
+
+            ,'//js/SearchPanel.js'
         )
     )
 );

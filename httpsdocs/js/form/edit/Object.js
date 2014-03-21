@@ -1,6 +1,6 @@
 Ext.namespace('CB.form.edit');
 
-CB.form.edit.Object = Ext.extend(Ext.Container, {
+CB.form.edit.Object = Ext.extend(Ext.Panel, {
     xtype: 'panel'
     ,tbarCssClass: 'x-panel-white'
     ,padding: 0
@@ -21,10 +21,11 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
 
         this.titleView = new Ext.DataView({
             autoHeight: true
+            ,hidden: (this.hideTitle === true)
             ,cls: 'obj-plugin-title'
             ,tpl: [
                 '<tpl for=".">'
-                ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(values.name) ]}</div>'
+                ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(Ext.value(values.name, \'\')) ]}</div>'
                 ,'</tpl>'
             ]
             ,data: {}
@@ -56,7 +57,7 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                     ,autoHeight: true
                     ,autoScroll: true
                     ,border: false
-                    ,items: [] // this.grid
+                    ,items: []
                 }
                 ,this.fieldsZone
             ]
@@ -278,12 +279,15 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             ,this
         );
 
-        this.grid.getView().refresh();
+        if(!this.grid.editing) {
+            this.grid.getView().refresh();
 
-        // focus only when object just loaded
-        if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
-            this.focusDefaultCell();
+            // focus only when object just loaded
+            if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
+                this.focusDefaultCell();
+            }
         }
+
     }
 
     ,confirmDiscardChanges: function(){
@@ -379,15 +383,17 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
     ,getContainerToolbarItems: function() {
         var rez = {
             tbar: {}
+            ,menu: {}
         };
 
         if(CB.DB.templates.getType(this.data.template_id) == 'search') {
             rez.tbar['search'] = {};
+            rez.menu['save'] = {};
+        } else {
+            rez.tbar['save'] = {};
+            rez.tbar['cancel'] = {};
+            rez.tbar['openInTabsheet'] = {};
         }
-
-        rez.tbar['save'] = {};
-        rez.tbar['cancel'] = {};
-        rez.tbar['openInTabsheet'] = {};
 
         return rez;
     }

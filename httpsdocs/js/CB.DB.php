@@ -412,13 +412,6 @@ createDirectStores = function(){
                 ,messageProperty: 'msg'
             },[ 'id', 'gmt_offset', 'caption' ]
         )
-        ,listeners:{
-            load: function( st, recs, opts){
-                for (i=0; i < recs.length; i++) {
-                    recs[i].set('caption', '(GMT'+ recs[i].get('gmt_offset') +') '+recs[i].get('id'));
-                }
-            }
-        }
     });
 
 };

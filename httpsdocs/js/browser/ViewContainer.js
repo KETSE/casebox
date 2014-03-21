@@ -422,22 +422,12 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,refOwner: this
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    // ,listeners: {
-                    //     scope: this
-                    //     ,selectionchange: this.onObjectsSelectionChange
-                    //     ,objectopen: this.onObjectsOpenEvent
-                    // }
                 })
                 ,new CB.browser.view.Calendar({
                     iconCls: 'icon-calendar-view'
                     ,refOwner: this
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    // ,listeners: {
-                    //     scope: this
-                    //     ,selectionchange: this.onObjectsSelectionChange
-                    //     ,objectopen: this.onObjectsOpenEvent
-                    // }
                 })
                 ,new CB.browser.view.Charts({
                     iconCls: 'icon-chart'
@@ -445,10 +435,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,addDivider: true // forr atdding a divider in menu before this view element
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    // ,listeners: {
-                    //     scope: this
-                    //     ,selectionchange: this.onObjectsSelectionChange
-                    // }
                 })
                 ,new CB.browser.view.Pivot({
                     refOwner: this
@@ -557,7 +543,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             b = this.viewToolbar.items.itemAt(0);
             b.hide();
             this.viewToolbar.remove(b, b.isXType('tbseparator'));
-
         }
 
         if(buttonsArray.indexOf('apps') < 0) {
@@ -565,6 +550,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
         //add plugin buttons if defined
         if(!Ext.isEmpty(this.pluginButtons)) {
+            buttonsArray.push('->');
             for (i = 0; i < this.pluginButtons.length; i++) {
                 buttonsArray.push(this.pluginButtons[i]);
             }
@@ -572,8 +558,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
 
         for (i = 0; i < buttonsArray.length; i++) {
-            if(buttonsArray[i] == '-') {
-                this.viewToolbar.add('-');
+            if((buttonsArray[i] == '-') || (buttonsArray[i] == '->')) {
+                this.viewToolbar.add(buttonsArray[i]);
             } else {
                 b = this.buttonCollection.get(buttonsArray[i]);
                 if(b) {
@@ -795,6 +781,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.rightPanel.getLayout().setActiveItem(b.itemIndex);
         this.rightPanel.show();
         this.rightPanel.syncSize();
+
+        // loading last selected object into objects panel
         var s = this.cardContainer.getLayout().activeItem.currentSelection;
         if(!Ext.isEmpty(s)) {
             if(this.rightPanel.getLayout().activeItem == this.objectPanel){

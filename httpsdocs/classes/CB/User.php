@@ -361,22 +361,6 @@ class User
         }
         if (isset($p['timezone'])) {
             $cfg['timezone'] = $p['timezone'];
-            unset($cfg['TZ']);
-            $res = DB\dbQuery(
-                'SELECT zone_name, gmt_offset
-                FROM casebox.zone
-                WHERE caption = $1',
-                $p['timezone']
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $cfg['TZ'] = $r['zone_name'];
-                $cfg['gmt_offset'] = intval($r['gmt_offset'] / 60); //minutes
-            }
-            $res->close();
-        } else {
-            unset($cfg['TZ']);
-            unset($cfg['gmt_offset']);
         }
         if (isset($p['short_date_format'])) {
             $cfg['short_date_format'] = $p['short_date_format'];
@@ -439,8 +423,7 @@ class User
             $u['locale'] =  $GLOBALS['language_settings'][$u['language']]['locale'];
 
             $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
-            $u['cfg']['TZ'] = empty($cfg['TZ']) ? '' :  $cfg['TZ'];
-            $u['cfg']['gmt_offset'] = empty($cfg['gmt_offset']) ? null :  $cfg['gmt_offset'];
+            $u['cfg']['gmt_offset'] = empty($cfg['timezone']) ? null :  System::getGmtOffset($cfg['timezone']);
 
             if (!empty($cfg['long_date_format'])) {
                 $u['cfg']['long_date_format'] = $cfg['long_date_format'];
@@ -1068,8 +1051,14 @@ class User
             }
             $r['cfg']['time_format'] = $GLOBALS['language_settings'][$r['language']]['time_format'];
 
+            //check for backward compatibility
             if (!empty($r['cfg']['TZ'])) {
-                $r['cfg']['gmt_offset'] = System::getGmtOffset($r['cfg']['TZ']);
+                $r['cfg']['timezone'] = $r['cfg']['TZ'];
+                unset($r['cfg']['TZ']);
+            }
+
+            if (!empty($r['cfg']['timezone'])) {
+                $r['cfg']['gmt_offset'] = System::getGmtOffset($r['cfg']['timezone']);
             }
 
             if (is_null($r['data'])) {

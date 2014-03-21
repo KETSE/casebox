@@ -474,7 +474,7 @@ class Tasks
             $a = explode('-', $p['reminds']);
 
             $subject = L\Reminder.': '.$p['title'].
-                ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['TZ']).
+                ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['timezone']).
                 ' ('.$p['path'].')';
 
             // user|remindType|remind delay|remindUnits
@@ -997,7 +997,7 @@ class Tasks
             if (!empty($r['date_end'])) {
                 $datetime_period = ($r['allday'] == 1)
                     ? Util\formatDatePeriod($r['date_start'], $r['date_end'])
-                    : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['TZ']);
+                    : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['timezone']);
             }
 
             $created_date_text = Util\formatMysqlDate($r['cdate'], 'Y, F j H:i');
@@ -1201,7 +1201,7 @@ class Tasks
         if (!empty($d['date_end'])) {
             $d['datetime_period'] = ($d['allday'] == 1)
                 ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
-                : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['TZ']);
+                : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['timezone']);
         }
 
         $d['importance_text'] = '';
@@ -1238,8 +1238,8 @@ class Tasks
             ,'{path_text}' => $d['pathtext']
             ,'{cid}' => $d['cid']
             ,'{creator_name}' => User::getDisplayName($d['cid'])
-            ,'{full_create_date}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['TZ'])
-            ,'{create_date}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['TZ'])
+            ,'{full_create_date}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['timezone'])
+            ,'{create_date}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['timezone'])
             );
         $rez = str_replace(array_keys($params), array_values($params), $rez);
 
@@ -1399,7 +1399,7 @@ class Tasks
         $taskTemplates = Templates::getIdsByType('task');
         $ta = array();
         foreach ($tasksDataArray as &$d) {
-            if ((!in_array($d['template_id'], $taskTemplates)) ||
+            if ((!in_array(@$d['template_id'], $taskTemplates)) ||
                 empty($d['status'])
             ) {
                 continue;

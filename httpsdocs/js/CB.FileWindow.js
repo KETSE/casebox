@@ -223,13 +223,13 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             }
         });
         this.duplicatesView = new CB.FileDuplicatesViewPanel();
-        this.propertiesPanel = new CB.ObjectsPropertiesPanel({
-            style: 'margin-top: 25px'
-            ,listeners:{
-                scope: this
-                ,pathclick: this.onPathClick
-            }
-        });
+        // this.propertiesPanel = new CB.ObjectsPropertiesPanel({
+        //     style: 'margin-top: 25px'
+        //     ,listeners:{
+        //         scope: this
+        //         ,pathclick: this.onPathClick
+        //     }
+        // });
 
             Ext.apply(this, {
             listeners: {
@@ -295,7 +295,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         this.items.last().items.first().syncSize();
 
         this.duplicatesView.reload();
-        this.propertiesPanel.update(this.data);
+        // this.propertiesPanel.update(this.data);
     }
     ,prepareInterface: function(){
         /* find out if need to show properties panel */
@@ -391,7 +391,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
                     ,items: [this.versionsView]
                 }
                 ,this.duplicatesView
-                ,this.propertiesPanel
+                // ,this.propertiesPanel
             ]
         })
 
