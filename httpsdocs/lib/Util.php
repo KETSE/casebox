@@ -332,7 +332,7 @@ function formatLeftDays($days_difference)
     return '';
 }
 
-function formatMysqlDate($date, $format = false)
+function formatMysqlDate($date, $format = false, $TZ = 'UTC')
 {
     if (empty($date)) {
         return '';
@@ -341,7 +341,15 @@ function formatMysqlDate($date, $format = false)
         $format = \CB\getOption('short_date_format');
     }
 
-    return date(str_replace('%', '', $format), strtotime($date));
+    $d1 = new \DateTime($date);
+
+    $d1->setTimezone(new \DateTimeZone($TZ));
+
+
+    $rez = $d1->format($format);
+
+    return $rez;
+    // return date(str_replace('%', '', $format), strtotime($date));
 }
 
 function formatMysqlTime($date, $format = false)

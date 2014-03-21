@@ -530,7 +530,7 @@ class Template extends Object
                 break;
 
             case 'date':
-                $value = Util\formatMysqlDate($value);
+                $value = Util\formatMysqlDate($value, false, @$_SESSION['user']['cfg']['timezone']);
                 break;
 
             case 'datetime':

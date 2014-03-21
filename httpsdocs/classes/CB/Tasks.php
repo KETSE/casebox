@@ -984,23 +984,11 @@ class Tasks
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $format = 'Y, F j';
+            $datetime_period = ($r['allday'] == 1)
+                ? Util\formatDatePeriod($r['date_start'], $r['date_end'])
+                : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['timezone']);
 
-
-            if ($r['allday'] != 1) {
-                $format .= ' H:i';
-            }
-
-            $i = strtotime($r['date_start']);
-            $datetime_period = date($format, $i);
-
-            if (!empty($r['date_end'])) {
-                $datetime_period = ($r['allday'] == 1)
-                    ? Util\formatDatePeriod($r['date_start'], $r['date_end'])
-                    : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['timezone']);
-            }
-
-            $created_date_text = Util\formatMysqlDate($r['cdate'], 'Y, F j H:i');
+            $created_date_text = Util\formatMysqlDate($r['cdate'], 'Y, F j H:i', @$user['cfg']['timezone']);
             $importance_text = '';
             switch ($r['importance']) {
                 case 1:
@@ -1040,7 +1028,7 @@ class Tasks
                 "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b>'.$name.'</b>'.
                 "\n\r".'<p style="color:#777;margin:0;padding:0">'.
                 "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
-                    Util\formatMysqlDate($ur['time'], 'Y, F j H:i').'</span>' : L\get('waitingForAction', $user['language_id']) ).
+                    Util\formatMysqlDate($ur['time'], 'Y, F j H:i', @$user['cfg']['timezone']).'</span>' : L\get('waitingForAction', $user['language_id']) ).
                 "\n\r".'</p>'.
                 '</td></tr>';
 
@@ -1188,21 +1176,13 @@ class Tasks
             <tr><td class="k">'.L\Path.':</td><td><a class="path" path="{path}" href="#">{path_text}</a></td></tr>
             <tr><td class="k">'.L\Owner.':</td><td><table class="people"><tbody>
                 <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg"></td><td><b>{creator_name}</b><p class="gr">'.L\Created.': '.
-                '<span class="dttm" title="{full_create_date}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
+                '<span class="dttm" title="{full_created_date_text}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
 
         $date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
-        $format = 'Y, F j';
-        if ($d['allday'] != 1) {
-            $format .= ' H:i';
-        }
-        $i = strtotime($d['date_start']);
-        $d['datetime_period'] = date($format, $i);
 
-        if (!empty($d['date_end'])) {
-            $d['datetime_period'] = ($d['allday'] == 1)
-                ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
-                : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['timezone']);
-        }
+        $d['datetime_period'] = ($d['allday'] == 1)
+            ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
+            : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['timezone']);
 
         $d['importance_text'] = '';
         switch ($d['importance']) {
@@ -1238,7 +1218,7 @@ class Tasks
             ,'{path_text}' => $d['pathtext']
             ,'{cid}' => $d['cid']
             ,'{creator_name}' => User::getDisplayName($d['cid'])
-            ,'{full_create_date}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['timezone'])
+            ,'{full_created_date_text}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['timezone'])
             ,'{create_date}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['timezone'])
             );
         $rez = str_replace(array_keys($params), array_values($params), $rez);

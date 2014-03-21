@@ -1,4 +1,10 @@
-CaseBox 1.9.162 (2014-03-21)
+CaseBox 1.9.166 (2014-03-21)
+==============================
+Fixed Bugs:
+----------
+- timezone display bugfixes in right panel plugins and in email notification
+
+CaseBox 1.9.165 (2014-03-21)
 ==============================
 New Features, Improvements
 --------------------------
