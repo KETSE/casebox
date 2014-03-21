@@ -131,7 +131,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
         this.buttonCollection.addAll([
             new Ext.Button({
-                text: L.Apps
+                text: L.Views
                 ,id: 'apps'
                 ,iconAlign:'top'
                 ,iconCls: 'ib-apps'
@@ -333,11 +333,45 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 this.filtersPanel
                 ,this.objectPanel
             ]
-            ,listeners: {
-                scope: this
-                ,
-            }
         });
+
+        var reader = new Ext.data.JsonReader({
+            successProperty: 'success'
+            ,idProperty: 'nid'
+            ,root: 'data'
+            ,messageProperty: 'msg'
+            ,fields: [
+                {name: 'nid'}
+                ,{name: 'pid', type: 'int'}
+                ,{name: 'system', type: 'int'}
+                ,{name: 'status', type: 'int'}
+                ,{name: 'template_id', type: 'int'}
+                ,{name: 'category_id', type: 'int'}
+                ,'template_type'
+                ,'path'
+                ,'name'
+                ,'hl'
+                ,'iconCls'
+                ,{name: 'date', type: 'date'}
+                ,{name: 'date_end', type: 'date'}
+                ,{name: 'size', type: 'int'}
+                ,{name: 'oid', type: 'int'}
+                ,{name: 'cid', type: 'int'}
+                ,{name: 'versions', type: 'int'}
+                ,{name: 'cdate', type: 'date'}
+                ,{name: 'udate', type: 'date'}
+                ,'case'
+                ,'content'
+                ,{name: 'has_childs', type: 'bool'}
+                ,{name: 'acl_count', type: 'int'}
+                ,'cfg'
+                ,'cls'
+                ,'can'
+            ]
+        }
+        );
+
+        reader.readRecords = reader.readRecords.createInterceptor(CB.DB.convertJsonReaderDates);
 
         this.store = new Ext.data.DirectStore({
             autoLoad: false
@@ -352,48 +386,19 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,load: this.onProxyLoad
                 }
             })
-            ,reader: new Ext.data.JsonReader({
-                successProperty: 'success'
-                ,idProperty: 'nid'
-                ,root: 'data'
-                ,messageProperty: 'msg'
-                ,fields: [
-                    {name: 'nid'}
-                    ,{name: 'pid', type: 'int'}
-                    ,{name: 'system', type: 'int'}
-                    ,{name: 'status', type: 'int'}
-                    ,{name: 'template_id', type: 'int'}
-                    ,{name: 'category_id', type: 'int'}
-                    ,'template_type'
-                    ,'path'
-                    ,'name'
-                    ,'hl'
-                    ,'iconCls'
-                    ,{name: 'date', type: 'date'}
-                    ,{name: 'date_end', type: 'date'}
-                    ,{name: 'size', type: 'int'}
-                    ,{name: 'oid', type: 'int'}
-                    ,{name: 'cid', type: 'int'}
-                    ,{name: 'versions', type: 'int'}
-                    ,{name: 'cdate', type: 'date'}
-                    ,{name: 'udate', type: 'date'}
-                    ,'case'
-                    ,'content'
-                    ,{name: 'has_childs', type: 'bool'}
-                    ,{name: 'acl_count', type: 'int'}
-                    ,'cfg'
-                    ,'cls'
-            ]
-            }
-            )
+            ,reader: reader
             ,listeners: {
                 scope: this
                 ,beforeload: function(store, options) {
                     options = {facets: 'general'};
                     Ext.apply(options, Ext.value(this.params, {}));
-                    var vp = this.cardContainer.getLayout().activeItem.getViewParams();
-                    if(!Ext.isEmpty(vp) && (vp.from == 'calendar') &&
-                        (Ext.isEmpty(vp.dateStart) || Ext.isEmpty(vp.dateEnd))
+
+                    var vp = this.cardContainer.getLayout().activeItem.getViewParams(options);
+                    if( (vp === false) ||
+                        (
+                            !Ext.isEmpty(vp) && (vp.from == 'calendar') &&
+                            (Ext.isEmpty(vp.dateStart) || Ext.isEmpty(vp.dateEnd))
+                        )
                     ) {
                         return false;
                     }
@@ -417,40 +422,35 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,refOwner: this
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    ,listeners: {
-                        scope: this
-                        ,selectionchange: this.onObjectsSelectionChange
-                        ,objectopen: this.onObjectsOpenEvent
-                    }
                 })
                 ,new CB.browser.view.Calendar({
                     iconCls: 'icon-calendar-view'
                     ,refOwner: this
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    ,listeners: {
-                        scope: this
-                        ,selectionchange: this.onObjectsSelectionChange
-                        ,objectopen: this.onObjectsOpenEvent
-                    }
                 })
                 ,new CB.browser.view.Charts({
                     iconCls: 'icon-chart'
                     ,refOwner: this
+                    ,addDivider: true // forr atdding a divider in menu before this view element
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                    ,listeners: {
-                        scope: this
-                        ,selectionchange: this.onObjectsSelectionChange
-                        ,objectopen: this.onObjectsOpenEvent
-                    }
+                })
+                ,new CB.browser.view.Pivot({
+                    refOwner: this
+                    ,store: this.store
+                    ,getProperty: getPropertyHandler
                 })
             ]
             ,listeners: {
                 scope: this
                 ,add: function(o, c, idx) {
                     if(c.isXType('CBBrowserViewInterface')) {
-                        this.buttonCollection.get('apps').menu.add({
+                        var b = this.buttonCollection.get('apps');
+                        if(c.addDivider === true) {
+                            b.menu.add('-');
+                        }
+                        b.menu.add({
                             text: c.title
                             ,iconCls: c.iconCls
                             ,scope: this
@@ -459,6 +459,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                         });
                     }
                 }
+                ,selectionchange: this.onObjectsSelectionChange
+                ,objectopen: this.onObjectsOpenEvent
             }
         });
 
@@ -541,7 +543,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             b = this.viewToolbar.items.itemAt(0);
             b.hide();
             this.viewToolbar.remove(b, b.isXType('tbseparator'));
-
         }
 
         if(buttonsArray.indexOf('apps') < 0) {
@@ -549,6 +550,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
         //add plugin buttons if defined
         if(!Ext.isEmpty(this.pluginButtons)) {
+            buttonsArray.push('->');
             for (i = 0; i < this.pluginButtons.length; i++) {
                 buttonsArray.push(this.pluginButtons[i]);
             }
@@ -556,8 +558,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
 
         for (i = 0; i < buttonsArray.length; i++) {
-            if(buttonsArray[i] == '-') {
-                this.viewToolbar.add('-');
+            if((buttonsArray[i] == '-') || (buttonsArray[i] == '->')) {
+                this.viewToolbar.add(buttonsArray[i]);
             } else {
                 b = this.buttonCollection.get(buttonsArray[i]);
                 if(b) {
@@ -576,20 +578,40 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.cardContainer.getLayout().setActiveItem(b.viewIndex);
         this.onReloadClick();
     }
+
     ,onBackClick: function(b, e) {
-        if(this.actions.back.isDisabled()) return;
-        this.historyIndex = (!Ext.isDefined(this.historyIndex)) ? this.history.length - 2 : this.historyIndex - 1;
+        if(this.actions.back.isDisabled()) {
+            return;
+        }
+        this.historyIndex = (!Ext.isDefined(this.historyIndex))
+            ? this.history.length - 2
+            : this.historyIndex - 1;
+        this.isHistoryAction = true;
         this.setParams(this.history[this.historyIndex]);
         this.actions.back.setDisabled(this.historyIndex <= 0);
         this.actions.forward.setDisabled(false);
     }
 
     ,onForwardClick: function(b, e) {
-        if(this.actions.forward.isDisabled()) return;
+        if(this.actions.forward.isDisabled()) {
+            return;
+        }
         this.historyIndex = this.historyIndex + 1;
+        this.isHistoryAction = true;
         this.setParams(this.history[this.historyIndex]);
         this.actions.back.setDisabled(false);
         this.actions.forward.setDisabled(this.historyIndex >= (this.history.length -1));
+    }
+
+    ,spliceHistory: function() {
+        if(this.isHistoryAction) {
+            delete this.isHistoryAction;
+            return;
+        }
+        if(Ext.isDefined(this.historyIndex)){
+            this.history.splice(this.historyIndex + 1, this.history.length - this.historyIndex);
+            delete this.historyIndex;
+        }
     }
 
     ,onReloadClick: function(){
@@ -611,8 +633,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,this
             );
         }
-        this.getEl().mask(L.Loading, 'x-mask-loading');
-        this.store.load(this.params);
+
+        if(this.store.load(this.params)) {
+            this.getEl().mask(L.Loading, 'x-mask-loading');
+        }
     }
 
     ,onProxyLoad: function (proxy, o, options) {
@@ -637,6 +661,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             this.breadcrumb.setValue(b);
         }
         /* end of updating breadcrumb */
+
         this.fireEvent('viewloaded', proxy, o, options);
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
@@ -647,7 +672,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     ,onStoreLoad: function(store, recs, options) {
         this.getEl().unmask();
         Ext.each(recs, function(r){
-            cfg = Ext.value(r.get('cfg'), {});
+            var cfg = Ext.value(r.get('cfg'), {});
             r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
         }, this);
         this.updatePreview();
@@ -670,12 +695,12 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if ((!Ext.isEmpty(params1.dateStart) || !Ext.isEmpty(params2.dateStart) ) && (params1.dateStart != params2.dateStart) ) return false;
         if ((!Ext.isEmpty(params1.dateEnd) || !Ext.isEmpty(params2.dateEnd) ) && (params1.dateEnd != params2.dateEnd) ) return false;
         if ((!Ext.isEmpty(params1.view) || !Ext.isEmpty(params2.view) ) && (params1.view != params2.view) ) return false;
+        if ((!Ext.isEmpty(params1.search) || !Ext.isEmpty(params2.search) ) && (Ext.encode(params1.search) != Ext.encode(params2.search)) ) return false;
         return true;
     }
 
     ,onChangeParams: function(params, e){// fired by internal view
         if(e && e.stopPropagation) e.stopPropagation();
-        this.spliceHistory();
         this.setParams(params);
     }
 
@@ -711,6 +736,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
         this.requestParams = newParams;
 
+        this.spliceHistory();
+
         if(Ext.isEmpty(this.loadParamsTask)) {
             this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
         }
@@ -725,7 +752,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(!Ext.isDefined(this.historyIndex)){
             if(!Ext.isEmpty(this.requestParams)){
                 this.history.push(Ext.apply({}, this.requestParams));
-                if(this.history.length > 99) this.history.shift();
+                if(this.history.length > 99) {
+                    this.history.shift();
+                }
                 this.actions.back.setDisabled(this.history.length < 2);
                 this.actions.forward.setDisabled(true);
             }
@@ -752,10 +781,12 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.rightPanel.getLayout().setActiveItem(b.itemIndex);
         this.rightPanel.show();
         this.rightPanel.syncSize();
+
+        // loading last selected object into objects panel
         var s = this.cardContainer.getLayout().activeItem.currentSelection;
         if(!Ext.isEmpty(s)) {
             if(this.rightPanel.getLayout().activeItem == this.objectPanel){
-                this.objectPanel.load(s[0]);
+                this.objectPanel.requestedLoadData = s[0];
                 this.objectPanel.doLoad();
             }
         }
@@ -837,9 +868,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,template_id: this.folderProperties.template_id
                 }
                 : {
-                    id: s[0].nid
+                    id: Ext.value(s[0].nid, s[0].id)
                     ,name: s[0].name
                     ,template_id: s[0].template_id
+                    ,can: s[0].can
                 };
 
         this.objectPanel.load(data);

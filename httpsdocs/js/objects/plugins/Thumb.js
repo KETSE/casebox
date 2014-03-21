@@ -21,7 +21,8 @@ CB.objects.plugins.Thumb = Ext.extend(CB.objects.plugins.Base, {
         });
 
         Ext.apply(this, {
-            items: this.dataView
+            cls: ''
+            ,items: this.dataView
         });
         CB.objects.plugins.Thumb.superclass.initComponent.apply(this, arguments);
 

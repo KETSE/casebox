@@ -1,4 +1,3 @@
-// JavaScript Document
 Ext.namespace('App');
 Ext.BLANK_IMAGE_URL = '/css/i/s.gif';
 
@@ -8,9 +7,15 @@ clog = function(){
     }
 };
 
+plog = clog;
+
 // application main entry point
 Ext.onReady(function(){
     App = new Ext.util.Observable();
+
+    // used for charts
+    App.colors = [ "#3A84CB", "#94ae0a", "#115fa6","#a61120", "#ff8809", "#ffd13e", "#a61187", "#24ad9a", "#7c7474", "#a66111"];
+
     App.addEvents(
         'dragfilesenter'
         ,'dragfilesover'
@@ -37,19 +42,22 @@ Ext.onReady(function(){
     Ext.apply(Ext.QuickTips.getQuickTip(), {showDelay: 1500});
 
 
-    // return;
-
     setTimeout(function(){
         Ext.get('loading').remove();
-        // Ext.fly('loading-mask').remove();
-        // Ext.fly('loading-mask').fadeOut({remove:true});
     }, 10);
 
 
 
 
     CB_User.getLoginInfo( function(r, e){
-        if(r.success !== true) return;
+        if(r.success !== true) {
+            return;
+        }
+
+        /* use this session id as appended query string for images that reload form session to session
+            Such kind of images are user photos that could be updated.
+        */
+        App.sid = '&qq=' + Date.parse(Date());
         App.config = r.config;
         App.loginData = r.user;
         App.loginData.iconCls = 'icon-user-' + Ext.value(r.user.sex, '');
@@ -73,7 +81,6 @@ function initApp(){
         if(Ext.isEmpty(st)) return '';
         st = Ext.util.Format.stripTags(st);
         return Ext.util.Format.ellipsis(st, maxLen);
-        //return st.length > maxLen ? st.substr(0, maxLen) + '&hellip;' : st;
     };
 
     App.PromtLogin = function (e){
@@ -142,35 +149,7 @@ function initApp(){
             if(ri < 0) return '';
             return ed.store.getAt(ri).get(ed.displayField);
         }
-        ,objectCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
-            if(Ext.isEmpty(v)) return '';
-            cw = grid.refOwner || grid.findParentByType(CB.Objects);
-            if(!cw || !cw.objectsStore) return '';
-            r = [];
-            if(!Ext.isArray(v)) v = String(v).split(',');
-            switch(record.data.cfg.renderer){
-                case 'listGreenIcons':
-                    for(i=0; i < v.length; i++){
-                        ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
-                        row = cw.objectsStore.getAt(ri);
-                        if(ri >-1) r.push('<li class="icon-padding icon-element">'+row.get('name')+'</li>');
-                    }
-                    return '<ul>'+r.join('')+'</ul>';
-                case 'listObjIcons':
-                    for(i=0; i < v.length; i++){
-                        ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
-                        row = cw.objectsStore.getAt(ri);
-                        if(ri >-1) r.push('<li class="icon-padding '+row.get('iconCls')+'">'+row.get('name')+'</li>');
-                    }
-                    return '<ul>'+r.join('')+'</ul>';
-                default:
-                    for(i=0; i < v.length; i++){
-                        ri = cw.objectsStore.findExact('id', parseInt(v[i], 10));
-                        if(ri >-1) r.push(cw.objectsStore.getAt(ri).get('name'));
-                    }
-                    return r.join(', ');
-            }
-        }
+
         ,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) {
                 return '';
@@ -180,7 +159,7 @@ function initApp(){
             v = toNumericArray(v);
             var cfg = grid.helperTree.getNode(record.get('id')).attributes.templateRecord.get('cfg');
             var source = (Ext.isEmpty(cfg.source))
-                ? 'thesauri'
+                ? 'tree'
                 : cfg.source;
             switch(source){
                 case 'thesauri':
@@ -270,18 +249,37 @@ function initApp(){
             return '';
         }
         ,date: function(v){
-            if(Ext.isEmpty(v)) return '';
-            return ( v.format ? v.format(App.dateFormat) : Date.parseDate(v.substr(0,10), 'Y-m-d').format(App.dateFormat));
+            var rez = '';
+            if(Ext.isEmpty(v)) {
+                return rez;
+            }
+            rez = (v.format ? v.format(App.dateFormat) : Date.parseDate(v.substr(0,10), 'Y-m-d').format(App.dateFormat));
+            return rez;
         }
         ,datetime: function(v){
-            if(Ext.isEmpty(v)) return '';
-            if(Ext.isPrimitive(v)) v = date_ISO_to_date(v);
-            s = v.toISOString();
-            if(s.substr(-14) == 'T00:00:00.000Z') v = v.clearTime(true);
-            d = v.format(App.dateFormat+' '+App.timeFormat);
-            if(Ext.isEmpty(d)) return '';
-            if(d.substr(-5) == '00:00') d = d.substr(0,10);
-            return d;
+            var rez = '';
+            if(Ext.isEmpty(v)) {
+                return rez;
+            }
+
+            rez = Ext.isPrimitive(v)
+                ? date_ISO_to_locale_date(v)
+                : v;
+
+            var s = date_local_to_ISO_string(rez);
+            if(s.substr(-14) == 'T00:00:00.000Z') {
+                rez = rez.clearTime(true);
+            }
+
+            rez = rez.format(App.dateFormat+' '+App.timeFormat);
+            if(Ext.isEmpty(rez)) {
+                return '';
+            }
+            if(rez.substr(-5) == '00:00') {
+                rez = rez.substr(0,10);
+            }
+
+            return rez;
         }
         ,time: function(v){
             if(v && Ext.isPrimitive(v)) return v;
@@ -383,8 +381,6 @@ function initApp(){
             case '_objects':
                 return App.customRenderers.objectsField;
             case 'combo':
-            case 'object_author':
-                return App.customRenderers.thesauriCombo;
             case '_language':
                 return App.customRenderers.languageCombo;
             case '_sex':
@@ -399,14 +395,6 @@ function initApp(){
                 return CB.DB.fieldTypes.getName.createDelegate(CB.DB.fieldTypes);
             case '_short_date_format':
                 return App.customRenderers.shortDateFormatCombo;
-            case '_contact':
-                return App.customRenderers.contactCombo;
-            case '_case':
-                return App.customRenderers.caseCombo;
-            case '_case_object':
-                return App.customRenderers.objectCombo;
-            case 'popuplist':
-                return App.customRenderers.thesauriCell;
             case 'memo':
             case 'text':
                 return App.customRenderers.text;
@@ -473,11 +461,6 @@ function initApp(){
         App.theFileUploadWindow = Ext.apply(App.theFileUploadWindow, config);
         return App.theFileUploadWindow;
     };
-    App.getThesauriWindow = function(config){
-        if(!App.thesauriWindow) App.thesauriWindow = new CB.ThesauriWindow();
-        App.thesauriWindow = Ext.apply(App.thesauriWindow, config);
-        return App.thesauriWindow;
-    };
     App.getTextEditWindow = function(config){
         if(!App.textEditWindow) App.textEditWindow = new CB.TextEditWindow();
         App.textEditWindow = Ext.apply(App.textEditWindow, config);
@@ -499,7 +482,7 @@ function initApp(){
         var ext = name.split('.').pop();
         return (App.config.webdav_files.indexOf(ext) >= 0);
     };
-    App.openWebdavDocument = function(data){
+    App.openWebdavDocument = function(data, checkCookie){
         if(Ext.isEmpty(App.config.webdav_url)) {
             return;
         }
@@ -508,7 +491,9 @@ function initApp(){
         url = url.replace('{name}', data.name);
         App.confirmLeave = false;
 
-        if(Ext.util.Cookies.get('webdavHideDlg') == 1) {
+        if((checkCookie !== false) &&
+            (Ext.util.Cookies.get('webdavHideDlg') == 1)
+        ) {
             window.open('cbdav:' + url, '_self');
         } else {
             var w = new CB.WebdavWindow({
@@ -543,7 +528,7 @@ function initApp(){
     };
 
     App.locateObject = function(object_id, path){
-        if(Ext.isEmpty(path)){
+        if(path === undefined){
             CB_Path.getPidPath(object_id, function(r, e){
                 if(r.success !== true) return ;
                 App.locateObject(r.id, r.path);
@@ -562,7 +547,8 @@ function initApp(){
     };
 
     App.downloadFile = function(fileId, zipped, versionId){
-        if(Ext.isElement(fileId)){ //retreive id from html element
+        if(Ext.isElement(fileId)){
+            //retreive id from html element
             fileId = fileId.id;
             zipped = false;
         }
@@ -575,6 +561,10 @@ function initApp(){
     };
 
     App.getTypeEditor = function(type, e){
+        var editorCfg = {
+            //enable key events by default
+            enableKeyEvents: true
+        };
         var objData = {
             ownerCt: e.ownerCt
             ,record: e.record
@@ -584,7 +574,7 @@ function initApp(){
             ,objectId: e.objectId
             ,path: e.path
         };
-        var w;
+        var w, th;
         var tr = e.fieldRecord;
         var cfg = tr.get('cfg');
         var objectWindow = e.ownerCt
@@ -599,7 +589,7 @@ function initApp(){
             );
         switch(type){
             case '_auto_title':
-                return new Ext.ux.TitleField();
+                return new Ext.ux.TitleField(editorCfg);
             case '_objects':
                 //e should contain all necessary info
                 switch(cfg.editor){
@@ -608,7 +598,7 @@ function initApp(){
                             e.cancel = true;
                             /* prepeare data to set to popup windows */
                             var store = false;
-                            source = Ext.isEmpty(cfg.source) ? 'thesauri' : cfg.source;
+                            var source = Ext.isEmpty(cfg.source) ? 'tree' : cfg.source;
                             switch(source){
                                 case 'thesauri':
                                     store = getThesauriStore(cfg.thesauriId);
@@ -645,7 +635,7 @@ function initApp(){
                                 : new CB.ObjectsSelectionForm({data: objData, value: value});
 
                             w.on('setvalue', function(data){
-                                value = [];
+                                var value = [];
                                 if(Ext.isArray(data)){
                                     Ext.each(
                                         data
@@ -674,26 +664,22 @@ function initApp(){
 
                             return w;
                         } else {
-                            return new CB.ObjectsTriggerField({data: objData}); //, width: 500
+                            return new CB.ObjectsTriggerField({
+                                enableKeyEvents: true
+                                ,data: objData
+                            });
                         }
                         break;
                     default:
-                        return new CB.ObjectsComboField({data: objData});//, width: 500
+                        return new CB.ObjectsComboField({
+                            enableKeyEvents: true
+                            ,data: objData
+                        });
                 }
 
                 break;
-            case '_case':
-                if(cfg.editor == 'form'){
-                    if(!Ext.isEmpty(e.ownerCt)) return new Ext.ux.AssociateCasesField({ownerCt: e.ownerCt}); //, width: 500//when it is in top fieldset
-                }else{
-                    params = Ext.apply({}, cfg);
-                    if(!Ext.isEmpty(e.pidValue)) params.pidValue = e.pidValue;
-                    return new Ext.ux.CasesCombo({ownerCt: e.ownerCt, params: params});
-                }
-                break;
-            case 'boolean': //depricated
             case 'checkbox': return new Ext.form.ComboBox({
-                        xtype: 'combo'
+                        enableKeyEvents: true
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
@@ -704,7 +690,7 @@ function initApp(){
                         ,valueField: 'id'
                     });
             case 'timeunits': return new Ext.form.ComboBox({
-                        xtype: 'combo'
+                        enableKeyEvents: true
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
@@ -715,7 +701,7 @@ function initApp(){
                         ,valueField: 'id'
                     });
             case 'importance': return new Ext.form.ComboBox({
-                        xtype: 'combo'
+                        enableKeyEvents: true
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
@@ -726,30 +712,48 @@ function initApp(){
                         ,valueField: 'id'
                     });
             case 'date':
-                return new Ext.form.DateField({format: App.dateFormat, width: 100});
+                return new Ext.form.DateField({
+                    enableKeyEvents: true
+                    ,format: App.dateFormat
+                    ,width: 100
+                });
             case 'datetime':
-                return new Ext.form.DateField({format: App.dateFormat+' '+App.timeFormat, width: 130});
+                return new Ext.form.DateField({
+                    enableKeyEvents: true
+                    ,format: App.dateFormat+' '+App.timeFormat
+                    ,width: 130
+                });
             case 'time':
-                return new Ext.form.TimeField({format: App.timeFormat});
+                return new Ext.form.TimeField({
+                    enableKeyEvents: true
+                    ,format: App.timeFormat
+                });
             case 'int':
-                return new Ext.form.NumberField({allowDecimals: false, width: 90});
+                return new Ext.form.NumberField({
+                    enableKeyEvents: true
+                    ,allowDecimals: false
+                    ,width: 90
+                });
             case 'float':
-                return new Ext.form.NumberField({allowDecimals: true, width: 90});
-            //case 'object_author': //depricated
+                return new Ext.form.NumberField({
+                    enableKeyEvents: true
+                    ,allowDecimals: true
+                    ,width: 90
+                });
             case 'combo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){
                     th = e.pidValue;
                 }
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    //,editable: false
                     ,store: getThesauriStore(th)
                     ,displayField: 'name'
-                    ,typeAhead: true
                     ,valueField: 'id'
                 });
             case 'iconcombo':
@@ -758,75 +762,79 @@ function initApp(){
                     th = e.pidValue;
                 }
                 return new Ext.form.ComboBox({
-                    forceSelection: false
-                    ,editable: false
+                    enableKeyEvents: true
+                    ,forceSelection: false
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
                     ,store: getThesauriStore(th)
                     ,displayField: 'name'
-                    ,typeAhead: true
                     ,valueField: 'id'
                     ,iconClsField: 'name'
                     ,plugins: [new Ext.ux.plugins.IconCombo()]
                 });
             case '_language':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.languages
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
             case '_sex':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.sex
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
             case '_templateTypesCombo':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.templateTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
             case '_fieldTypesCombo':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.fieldTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
             case '_short_date_format':
                 return new Ext.form.ComboBox({
-                    forceSelection: true
+                    enableKeyEvents: true
+                    ,forceSelection: true
+                    ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
                     ,mode: 'local'
-                    ,editable: false
                     ,store: CB.DB.shortDateFormats
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
             case 'memo':
-                clog('arguements', arguments);
                 var height = Ext.value(cfg.height, 50);
                 height = parseInt(height, 10) + 7;
                 if(e.grid) {
@@ -838,28 +846,10 @@ function initApp(){
                         }
                     }
                 }
-                return new Ext.form.TextArea({ height: height });
-            case 'popuplist':
-                e.cancel = true;
-                w = App.getThesauriWindow({
-                    title: tr.get('title')
-                    ,store: getThesauriStore( cfg.thesauriId )
-                    ,data: {
-                        value: e.record.get('value')
-                        ,scope: e
-                        ,callback: function(w, v){
-                            this.originalValue = this.record.get('value');
-                            this.value = v;
-                            this.record.set('value', v);
-                            if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
-                            this.grid.fireEvent('change');
-                        }
-                    }
+                return new Ext.form.TextArea({
+                    enableKeyEvents: true
+                    ,height: height
                 });
-                w.focusHandler = Ext.value(this.gainFocus, e.grid.gainFocus);
-                //w.on('hide', App.onHideThesauriWindow, e.grid);
-                w.show();
-                break;
             case 'text':
                 e.cancel = true;
                 w = App.getTextEditWindow({
@@ -899,7 +889,9 @@ function initApp(){
                 w.show();
                 break;
             default:
-                return new Ext.form.TextField();
+                return new Ext.form.TextField({
+                    enableKeyEvents: true
+                });
         }
         return false;
     };
@@ -980,13 +972,11 @@ function initApp(){
             case 'template':
             case 'field':
             case 'email':
+            case 'task':
                 App.mainViewPort.fireEvent('openobject', {id: id, template_id: template_id}, e);
                 break;
             case 'file':
                 App.mainViewPort.fireEvent('fileopen', {id: id}, e);
-                break;
-            case 'task':
-                App.mainViewPort.fireEvent('taskedit', { data:{id: id} }, e);
                 break;
             default:
                 return false;
@@ -1027,7 +1017,7 @@ function initApp(){
     };
 
     App.onComponentActivated = function(component){
-        clog('component activated', arguments, this);
+        plog('component activated', arguments, this);
     };
 
 }
@@ -1123,7 +1113,36 @@ function overrides(){
     Ext.calendar.DateRangeField.prototype.toText = L.to;
     Ext.calendar.DateRangeField.prototype.allDayText = L.AllDay;
 
+    /* avoid errors for grid dragZone when using cell selection model */
+    Ext.grid.GridDragZone.prototype._getDragData = Ext.grid.GridDragZone.prototype.getDragData;
+    Ext.grid.GridDragZone.prototype.getDragData = function(e) {
+        var t = Ext.lib.Event.getTarget(e);
+        var rowIndex = this.view.findRowIndex(t);
+        if(rowIndex !== false){
+            var sm = this.grid.selModel;
+            // return default method result if selection model has isSelected method
+            if(sm.isSelected) {
+                return this._getDragData(e);
+            }
 
+            // process in the scope of cell selection model
+            sm.getCount = function() {return 1;};
+            var selections = [];
+            var sc = sm.getSelectedCell();
+            if(Ext.isEmpty(sc)) {
+                if((sc[0] != rowIndex) || e.hasModifier()){
+                    sm.handleMouseDown(this.grid, rowIndex, e);
+                }
+                selections = [this.grid.store.getAt(rowIndex)];
+            }
+            return {
+                grid: this.grid
+                ,ddel: this.ddel
+                ,rowIndex: rowIndex
+                ,selections: selections
+            };
+        }
+    };
 }
 
 window.onbeforeunload = function() {

@@ -5,7 +5,7 @@
 
 CB.ObjectsFieldCommonFunctions = {
     getStore: function(){
-        source = Ext.isEmpty(this.config.source) ? 'thesauri': this.config.source;
+        var source = Ext.isEmpty(this.config.source) ? 'tree': this.config.source;
         switch(source){
             case 'thesauri':
                 this.store = this.getThesauriStore();
@@ -30,7 +30,7 @@ CB.ObjectsFieldCommonFunctions = {
                         ,listeners:{
                             load: function(proxy, obj, opt){
                                 for (var i = 0; i < obj.result.data.length; i++) {
-                                    obj.result.data[i].date = date_ISO_to_date(obj.result.data[i].date);
+                                    obj.result.data[i].date = date_ISO_to_local_date(obj.result.data[i].date);
                                 }
                             }
                         }
@@ -96,7 +96,9 @@ CB.ObjectsFieldCommonFunctions = {
                 ,data:  []
             });
         }
-        this.store.getTexts = getStoreNames;
+        if(Ext.isEmpty(this.store.getTexts)) {
+            this.store.getTexts = getStoreNames;
+        }
 
         if(this.config.sort){
             field = 'order';
@@ -114,7 +116,7 @@ CB.ObjectsFieldCommonFunctions = {
         }
     }
     ,getObjectsStore: function(){
-        if(Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri')) {
+        if(this.config.source == 'thesauri') {
             return this.getThesauriStore();
         }
 
@@ -202,6 +204,10 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
                     this.store.un('beforeload', this.onBeforeLoadStore, this);
                     this.store.un('load', this.onStoreLoad, this);
                 }
+                ,expand: function(c){
+                    var idx = c.store.findExact('id', c.getValue()) -1;
+                    c.select(idx, true);
+                }
             }
         });
 
@@ -211,16 +217,20 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
                 v = parseInt(v, 10);
             }
             this._setValue(v);
-            text = this.store.getTexts(v);
+            var text = this.store.getTexts(v);
             //delete this.customIcon;
             if(Ext.isEmpty(text) && this.objectsStore){
-                idx = this.objectsStore.findExact('id', v);
+                var idx = this.objectsStore.findExact('id', v);
+
                 if(idx > 0){
                     r = this.objectsStore.getAt(idx);
-                    if(this.icon) this.icon.className = 'ux-icon-combo-icon ' + r.get('iconCls');
+                    if(this.icon) {
+                        this.icon.className = 'ux-icon-combo-icon ' + r.get('iconCls');
+                    }
                     text = this.objectsStore.getTexts(v);
                 }
             }
+
             this.setRawValue(text);
         };
         CB.ObjectsComboField.superclass.initComponent.apply(this, arguments);
@@ -229,10 +239,29 @@ CB.ObjectsComboField = Ext.extend(Ext.form.ComboBox, {
         options.params = Ext.apply({}, this.config, options.params);
     }
     ,onStoreLoad: function(store, recs, options) {
-        Ext.each(recs, function(r){r.set('iconCls', getItemIcon(r.data));}, this);
-        store.insert( 0, new store.recordType({id: null, name:''}, Ext.id()) );
-        if(Ext.isEmpty(this.lastQuery)) this.setValue(this.getValue());
+        Ext.each(
+            recs
+            ,function(r){
+                r.set('iconCls', getItemIcon(r.data));
+            }
+            ,this
+        );
+
+        store.insert(
+            0
+            ,new store.recordType({
+                    id: null
+                    ,name:''
+                }
+                ,Ext.id()
+            )
+        );
+
+        if(Ext.isEmpty(this.lastQuery)) {
+            this.setValue(this.getValue());
+        }
     }
+
     ,updateStore: function(){
         oldStore = this.store;
         this.getStore();
@@ -329,7 +358,7 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
         return this.value.join(',');
     }
     ,onTriggerClick: function(e){
-        if( Ext.isEmpty(this.config.source) || (this.config.source == 'thesauri') ){
+        if(this.config.source == 'thesauri'){
             this.form = new CB.ObjectsSelectionPopupList({
                 data: this.data
                 ,value: this.getValue()
@@ -338,7 +367,7 @@ CB.ObjectsTriggerField = Ext.extend(Ext.Panel, {
                     ,setvalue : this.onSetValue
                 }
             });
-        }else {
+        } else {
             this.form = new CB.ObjectsSelectionForm({
                 data: this.data
                 ,value: this.getValue()
@@ -411,16 +440,6 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
                             break;
                         case 'listObjIcons': m.css = 'icon-grid-column '+r.get('iconCls'); break;
                     }
-                    a = String(r.get('sys_tags')).split(',');
-                    t = [];
-                    Ext.each(
-                        a
-                        ,function(i){
-                            t.push(CB.DB.thesauri.getName(i));
-                        }
-                        ,this
-                    );
-                    if(!Ext.isEmpty(t)) v += ' <span class="cG">' + t.join(', ') + '</span>';
                     return v;
                 }
             }
@@ -526,7 +545,7 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
                 ,'</tpl></ul>'
                 ,{compiled: true}
             )
-            ,store: new Ext.data.JsonStore({ fields: [ {name:'id', type: 'int'}, 'name', 'iconCls', 'sys_tags', 'user_tags' ] })
+            ,store: new Ext.data.JsonStore({ fields: [ {name:'id', type: 'int'}, 'name', 'iconCls' ] })
             ,itemSelector: 'li'
             ,overClass:'item-over'
             ,listeners: { click: {scope: this, fn: this.onRemoveItemClick} }
@@ -555,7 +574,9 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
                                     ,triggerClass: 'x-form-search-trigger'
                                     ,enableKeyEvents: true
                                     ,scope: this
-                                    ,onTriggerClick: function(){ this.scope.onGridReloadTask(); }
+                                    ,onTriggerClick: function(){
+                                        this.scope.onGridReloadTask();
+                                    }
                                     ,listeners: {
                                         scope: this
                                         ,specialkey: function(ed, ev){ if(ev.getKey() == ev.ENTER) this.onGridReloadTask();}
@@ -830,7 +851,9 @@ CB.ObjectsSelectionPopupList = Ext.extend(Ext.Window, {
                 ,border: false
                 ,emptyText: L.Filter
                 ,enableKeyEvents: true
-                ,onTriggerClick: function(e){this.doFilter(e);}.createDelegate(this)
+                ,onTriggerClick: function(e){
+                    this.doFilter(e);
+                }.createDelegate(this)
                 ,tabIndex: 1
                 ,listeners: {
                     scope: this

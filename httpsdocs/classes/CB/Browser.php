@@ -28,6 +28,8 @@ class Browser
             : false;
 
         $this->requestParams = $p;
+        Cache::set('requestParams', $p);
+
         /* end of prepare params */
 
         /* we should:
@@ -37,7 +39,12 @@ class Browser
             4. join and sort received data
         */
 
-        $this->treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
+        //detect tree nodes config,
+        //but leave only SearchResults plugin when searching
+        $this->treeNodeConfigs = empty($p['search'])
+            ? Config::get('treeNodes', array('Dbnode' => array()))
+            : array('SearchResults' => array());
+
         $params = array(
             'params' => &$p,
             'plugins' => &$this->treeNodeConfigs
@@ -62,6 +69,9 @@ class Browser
 
         if (!empty($this->facets)) {
             $rez['facets'] = &$this->facets;
+        }
+        if (!empty($this->pivot)) {
+            $rez['pivot'] = &$this->pivot;
         }
         if (!empty($this->search)) {
             $rez['search'] = &$this->search;
@@ -170,6 +180,7 @@ class Browser
 
         $this->data = array();
         $this->facets = array();
+        $this->pivot = array();
         $this->total = 0;
         $this->search = array();
         $this->DC = array();
@@ -180,6 +191,9 @@ class Browser
             }
             if (!empty($rez['facets'])) {
                 $this->facets = $rez['facets'];
+            }
+            if (!empty($rez['pivot'])) {
+                $this->pivot = $rez['pivot'];
             }
 
             if (isset($rez['total'])) {

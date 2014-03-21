@@ -16,8 +16,8 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             ,'        <img class="i32" src="/photo/{cid}.jpg" title="{user}">'
             ,'    </td>'
             ,'    <td>'
-            ,'        <pre>{[ Ext.util.Format.htmlEncode(values.content)]}</pre>'
-            ,'        <span class="gr">{cdate_text}</span>'
+            ,'        {[ Ext.util.Format.nl2br(Ext.util.Format.htmlEncode(values.content))]}'
+            ,'        <div class="gr" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</div>'
             ,'    </td>'
             ,'</tr>'
             ,'</tpl>'
@@ -26,6 +26,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
 
         this.dataView = new Ext.DataView({
             tpl: tpl
+            ,anchor: '100%'
             ,autoHeight: true
             ,itemSelector:'tr'
         });
@@ -34,7 +35,6 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             emptyText: 'Write a comment...'
             ,flex: 1
             ,height: 32
-            // ,autoHeight: true
             ,enableKeyEvents: true
             ,style: 'margin-top: 5px; font-family: \'lucida grande\',tahoma,verdana,arial,sans-serif; font-size: 11px'
             ,listeners: {
@@ -53,8 +53,10 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
 
         Ext.apply(this, {
             title: L.Comments
-            ,cls: 'block-plugin-comments'
+            ,cls: 'obj-plugin block-plugin-comments'
             ,autoHeight: true
+            ,layout: 'anchor'
+            ,anchor: '100%'
             ,items: [
                 this.dataView
                 ,{
@@ -65,7 +67,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
                     ,items: [
                         {
                             xtype: 'label'
-                            ,html: '<img class="i32" src="/photo/' + App.loginData.id + '.jpg">'
+                            ,html: '<img class="i32" src="/photo/' + App.loginData.id + '.jpg" title="' + getUserDisplayName(true) + '">'
                         }
                         ,this.messageField
                         ,this.loadLabel
@@ -90,24 +92,24 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
     ,onMessageBoxKeyPress: function(tf, e) {
         this.messageField.syncSize();
         this.syncSize();
-        if ((e.getKey() == e.ENTER)) {
-            if(e.hasModifier()) {
-            } else {
-                var msg = tf.getValue().trim();
-                if(Ext.isEmpty(msg)) {
-                    return;
-                }
-                this.messageField.hide();
-                this.loadLabel.show();
-                CB_Objects.addComment(
-                    {
-                        id: this.params.id
-                        ,msg: msg
-                    }
-                    ,this.onAddCommentProcess
-                    ,this
-                );
+
+        if ( ([10, 13].indexOf(e.getKey()) >= 0) && e.ctrlKey) {
+            var msg = tf.getValue().trim();
+
+            if(Ext.isEmpty(msg)) {
+                return;
             }
+            this.messageField.hide();
+            this.syncSize();
+            this.loadLabel.show();
+            CB_Objects.addComment(
+                {
+                    id: this.params.id
+                    ,msg: msg
+                }
+                ,this.onAddCommentProcess
+                ,this
+            );
         }
     }
 

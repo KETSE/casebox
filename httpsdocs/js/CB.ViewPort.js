@@ -24,6 +24,13 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                             scope: this
                             ,'search': function(query, editor, event){
                                 editor.clear();
+                                if(Ext.isEmpty(query)) {
+                                    return;
+                                }
+                                if((query.substr(0,3) == 'id:') && !isNaN(query.substr(3))) {
+                                    App.locateObject(query.substr(3));
+                                    return;
+                                }
                                 App.activateBrowserTab().setParams({
                                     query: query
                                     ,descendants: !Ext.isEmpty(query)
@@ -131,7 +138,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 ,deleteobject: this.onDeleteObject
                 ,opencalendar: this.openCalendar
                 ,favoritetoggle: this.toggleFavorite
-                ,taskedit: this.onTaskEdit
                 ,useradded: this.onUsersChange
                 ,userdeleted: this.onUsersChange
                 ,viewloaded: this.onViewLoaded
@@ -159,7 +165,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         /* adding menu items */
         var um = App.mainToolBar.find( 'name', 'userMenu')[0];
         if(um) {
-            um.update('<img src="/photo/' + App.loginData.id + '.jpg" ' +
+            um.update('<img src="/photo/' + App.loginData.id + '.jpg' + App.sid + '" ' +
                 'style="margin-top: 4px; width: 32px; height: 32px;" ' +
                 'title="'+
                     App.loginData['first_name']+' '+
@@ -227,7 +233,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         App.Favorites = new CB.Favorites();
         App.Favorites.load();
         this.populateMainMenu();
-        // App.openUniqueTabbedWidget('CBDashboard');
     }
     ,initCB: function(){
         if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){
@@ -314,10 +319,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         ) {
             return;
         }
-        params = {}
-        if(!Ext.isEmpty(node.attributes.view)) {
-            params.view = node.attributes.view;
-        }
+        params = {
+            view: Ext.isEmpty(node.attributes.view)
+                ? 'grid'
+                : node.attributes.view
+        };
         App.openPath( '/' + node.getPath('nid'), params );
     }
     ,onRenameTreeElement: function(tree, r, e){
@@ -338,9 +344,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             if( (sm.getCount() > 1) ||
                 !sm.isSelected(idx)
             ) {
-                sm.clearSelections();
-                sm.selectRow(idx);
+                // sm.clearSelections();
+                sm.selectRow(idx, false);
             }
+            var view = g.getView();
+            Ext.get(view.getRow(idx)).scrollIntoView(view.scroller);
             delete App.locateObjectId;
         }
     }
@@ -380,7 +388,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             return true;
         }
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');
+        var o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBObjects');
         this.fireEvent('objectopened', o);
         return App.addTab(App.mainTabPanel, o);
     }
@@ -392,19 +400,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
         o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');
         return App.addTab(App.mainTabPanel, o);
-    }
-
-    ,search: function(query, savedQueryId){
-        idx = App.findTab(App.mainTabPanel, 'search');
-        if(idx > -1){
-            p = App.mainTabPanel.items.itemAt(idx);
-            App.mainTabPanel.setActiveTab(idx);
-        }else{
-            p = new CB.Search({data: {id: 'search'}});
-            App.addTab(App.mainTabPanel, p);
-        }
-        if(!Ext.isEmpty(savedQueryId)) p.openSavedQuery(savedQueryId);
-            else p.searchText(query);
     }
 
     ,setUserLanguage: function(b, e){
@@ -435,14 +430,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         this.fireEvent('favoritetoggled', r, e);
     }
 
-    ,onTaskEdit: function(p, ev){//task_id, object_id, object_title, title
-        if(Ext.isEmpty(p.title)) p.title = L.EditTask;
-        if(Ext.isEmpty(p.usersStore)) p.usersStore = CB.DB.usersStore;
-        this.lastFocusedElement = Ext.get(document.activeElement);
-        dw = new CB.Tasks(p);
-        dw.on('beforedestroy', this.focusLastElement, this);
-        dw.show();
-    }
     ,focusLastElement: function(){
         if(this.lastFocusedElement){
             this.lastFocusedElement.focus(500);

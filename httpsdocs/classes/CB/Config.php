@@ -36,20 +36,19 @@ class Config extends Singleton
         }
         $cfg['facet_configs'] = $dfd;
 
-        if (!empty($cfg['node_facets'])) {
-            $cfg['node_facets'] = Util\toJSONArray($cfg['node_facets']);
-        }
+        $jsonProperties = array(
+            'api'
+            ,'js'
+            ,'node_facets'
+            ,'default_object_plugins'
+            ,'object_type_plugins'
+            ,'treeNodes'
+        );
 
-        if (!empty($cfg['default_object_plugins'])) {
-            $cfg['default_object_plugins'] = Util\toJSONArray($cfg['default_object_plugins']);
-        }
-
-        if (!empty($cfg['object_type_plugins'])) {
-            $cfg['object_type_plugins'] = Util\toJSONArray($cfg['object_type_plugins']);
-        }
-
-        if (!empty($cfg['treeNodes'])) {
-            $cfg['treeNodes'] = Util\toJSONArray($cfg['treeNodes']);
+        foreach ($jsonProperties as $property) {
+            if (!empty($cfg[$property])) {
+                $cfg[$property] = Util\toJSONArray($cfg[$property]);
+            }
         }
 
         static::$config = static::adjustPaths($cfg);
@@ -229,6 +228,14 @@ class Config extends Singleton
             $rez[CORE_NAME.'_js'] = $js;
         }
 
+        // add available languages of the core to the minify groups
+        $languages = Config::get('languages', 'en');
+        $a = explode(',', $languages);
+        foreach ($a as $l) {
+            $k = mb_strtolower(trim($l));
+            $rez['lang-'.$l] = array('//js/locale/'.$l.'.js');
+        }
+
         return $rez;
     }
 
@@ -324,7 +331,8 @@ class Config extends Singleton
         return $rez;
     }
 
-    /*
+    /**
+    *
     * @param  varchar $optionName name of the option to get
     * @return variant | null
     */
@@ -335,5 +343,26 @@ class Config extends Singleton
         }
 
         return $defaultValue;
+    }
+
+    /**
+    * Check if a given value is presend in a config property
+    * Property is considered to be an array or a comma separated list of values
+    *
+    * @param  varchar $optionName name of the option to get
+    * @param  varchar $value checked value
+    * @return boolean
+    */
+    public static function isInListValue($optionName, $value)
+    {
+        $v = static::get($optionName);
+        if (is_scalar($v)) {
+            $v = explode(',', $v);
+        }
+
+        return in_array(
+            $value,
+            $v
+        );
     }
 }

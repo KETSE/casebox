@@ -8,6 +8,7 @@ if (isset($_SERVER['HTTP_X_FILE_OPTIONS'])) {
     $file = json_decode($_SERVER['HTTP_X_FILE_OPTIONS'], true);
     $file['error'] = UPLOAD_ERR_OK;
     $file['tmp_name'] = tempnam(INCOMMING_FILES_DIR, 'cbup');
+    $file['name'] = urldecode($file['name']);
     if (empty($file['content_id'])) {
         file_put_contents(
             $file['tmp_name'],

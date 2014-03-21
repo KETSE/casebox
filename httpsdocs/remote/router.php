@@ -11,7 +11,8 @@ header('Content-Type: application/json; charset=UTF-8');
 
 if (isset($HTTP_RAW_POST_DATA)) {
     $data = json_decode($HTTP_RAW_POST_DATA, true);
-} elseif (isset($_POST['extAction'])) { // form post
+} elseif (isset($_POST['extAction'])) {
+    // form post
     $isForm = true;
     $isUpload = ($_POST['extUpload'] == 'true');
     $data = array(
@@ -65,7 +66,6 @@ function doRpc($cdata)
             'method'=>$method
         );
 
-        //require_once("classes/$action.php"); // it's managed by _autoload
         $action = str_replace('_', '\\', $action);
         $o = new $action();
 
@@ -82,7 +82,7 @@ function doRpc($cdata)
         $r['msg'] = $e->getMessage();
         if (\CB\isDebugHost()) {
             $r['where'] = $e->getTraceAsString();
-        }//else $r['message'] = 'Error';
+        }
     }
 
     return $r;

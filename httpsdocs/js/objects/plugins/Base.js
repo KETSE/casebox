@@ -4,11 +4,12 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
     border: false
     ,header: false
     ,tbarCssClass: 'obj-plugin-h'
+    ,cls: 'obj-plugin'
     ,initComponent: function(){
         this.prepareToolbar();
 
         Ext.apply(this, {
-            bubbleEvents: ['openproperties']
+            bubbleEvents: ['openproperties', 'createobject']
         });
 
         CB.objects.plugins.Base.superclass.initComponent.apply(this, arguments);
@@ -16,6 +17,9 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
     }
 
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
         //overwrite this method and add your logic
     }
     ,prepareToolbar: function()
@@ -46,6 +50,10 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
     }
     ,getToolbarItems: function() {
         return [];
+    }
+
+    ,getContainerToolbarItems: function() {
+        return {};
     }
 
     ,openObjectProperties: function(data) {

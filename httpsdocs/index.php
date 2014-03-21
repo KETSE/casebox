@@ -10,7 +10,7 @@ if (empty($_SESSION['user'])) {
 L\checkTranslationsUpToDate();
 
 require_once(CONFIG\MINIFY_PATH . 'utils.php');
-$projectTitle = @constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE));
+$projectTitle = Config::get('project_name_'.USER_LANGUAGE, CORE_NAME);
 
 ?>
 <!DOCTYPE html>
@@ -24,7 +24,6 @@ $projectTitle = @constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE))
     <link rel="stylesheet" type="text/css" href="/libx/ext/resources/css/ext-all.css" />
 <?php
 
-// echo '<link rel="stylesheet" type="text/css" href="/libx/ext/resources/css/ext-all.css" />' . "\n";
 echo '<link rel="stylesheet" type="text/css" href="'. Minify_getUri('css') . '" />' . "\n";
 
 // Custom CSS for the core
@@ -70,7 +69,6 @@ margin: 1em;
     margin-left: auto;
 }
 
-
 @-webkit-keyframes pb { 0% { background-position:0 0; } 100% { background-position:-16px 0; } }
 
 #lpt {
@@ -102,9 +100,9 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 }
 </style>
 
-
 <script type="text/javascript">
-    function setProgress(label, percentage) {
+    function setProgress(label, percentage)
+    {
         document.getElementById('loading-msg').innerHTML = label + '…';
         document.getElementById('lpt').style.width = percentage;
     }
@@ -113,11 +111,8 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 
 <body>
 
-
-
 <div style="font-size:0px;color:white;z-index:-9;position:absolute;left:-999px">
 </div>
-
 
 <div id="loading">
     <div class="cmsg">
@@ -179,11 +174,9 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
 
 ?>
 
-
 <script type="text/javascript">setProgress('<?php echo L\get('Loading_ExtJS_UI')?>', '60%')</script>
 
 <script type="text/javascript" src="/remote/api.php"></script>
-
 
 <?php
 
@@ -202,7 +195,6 @@ if (!empty($prc)) {
 <script type="text/javascript" src="/js/CB.DB.php"></script>
 
 <script type="text/javascript">setProgress('<?php echo L\get('Initialization')?>', '100%')</script>
-
 
 </body>
 </html>

@@ -141,7 +141,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             }
         });
 
-        this.dropZoneConfig = {text: 'Drop files here'};
+        this.dropZoneConfig = {};//text: 'Drop files here'
         this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
         this.filesDropPlugin.init(this);
 
@@ -168,8 +168,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         return true;
     }
     ,onFormLoaded: function(r, e){
-        this.data.cdate = date_ISO_to_date(this.data.cdate);
-        this.data.udate = date_ISO_to_date(this.data.udate);
+        this.data.cdate = date_ISO_to_local_date(this.data.cdate);
+        this.data.udate = date_ISO_to_local_date(this.data.udate);
     }
     ,onObjectsStoreChange: function(store, records, options){
         Ext.each(
@@ -204,23 +204,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
         if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
 
-        // toolbarItems.push(
-        //     '-'
-        //     ,{
-        //         text: L.Attach
-        //         ,iconCls: 'ib-attach'
-        //         ,scale: 'large'
-        //         ,iconAlign:'top'
-        //         ,menu: [
-        //             this.actions.upload
-        //             ,'-'
-        //             ,this.actions.paste
-        //         ]
-        //     }
-        // );
-
-        // toolbarItems.push(this.actions.createTask);
-
         northRegionItems = [this.topFieldSet];
 
         this.grid = Ext.create({
@@ -241,15 +224,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ,padding: 0
                 ,items: northRegionItems
         });
-        this.childsPanel = new CB.ActionChildsPanel({style: 'margin-bottom: 25px', hidden: true});
-        this.filesPanel = new CB.ActionFilesPanel({style: 'margin-bottom: 25px', hidden: true});
-        this.tasksPanel = new CB.ActionTasksPanel({style: 'margin-bottom: 25px', hidden: true});
-        this.propertiesPanel = new CB.ObjectsPropertiesPanel({
-            listeners:{
-                scope: this
-                ,pathclick: this.onPathClick
-            }
-        });
+        // this.childsPanel = new CB.ActionChildsPanel({style: 'margin-bottom: 25px', hidden: true});
+        // this.filesPanel = new CB.ActionFilesPanel({style: 'margin-bottom: 25px', hidden: true});
+        // this.tasksPanel = new CB.ActionTasksPanel({style: 'margin-bottom: 25px', hidden: true});
+        // this.propertiesPanel = new CB.ObjectsPropertiesPanel({
+        //     listeners:{
+        //         scope: this
+        //         ,pathclick: this.onPathClick
+        //     }
+        // });
         this.add({
             xtype: 'panel'
             ,tbar: toolbarItems
@@ -273,7 +256,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     ,stateId: 'coEP' //case object east panel
                     ,bodyStyle: 'background-color: #F4F4F4'
                     ,autoScroll: true
-                    ,items: [this.childsPanel, this.filesPanel, this.tasksPanel, this.propertiesPanel]
+                    ,items: [
+                        // this.childsPanel
+                        // ,this.filesPanel
+                        // ,this.tasksPanel
+                        // ,this.propertiesPanel
+                    ]
                 }
             ]
         });
@@ -281,8 +269,8 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
         this.getEl().unmask();
 
-        this.addEvents('taskcreate', 'taskedit');
-        this.enableBubble(['taskcreate', 'taskedit']);
+        this.addEvents('taskcreate');
+        this.enableBubble(['taskcreate']);
         this.fireEvent('objectopened', this);
     }
     ,onSaveClick: function(){
@@ -473,12 +461,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             this.getBubbleTarget().on('filesdeleted', this.onFilesDeleted, this);
             this.getBubbleTarget().on('fileuploaded', this.onFileUploaded, this);
             this.prepareInterface();
-            this.childsPanel.reload();
-            this.filesPanel.reload();
-            this.tasksPanel.reload();
-            this.propertiesPanel.data = this.data;
-        } else if(this.propertiesPanel && this.propertiesPanel.rendered) {
-            this.propertiesPanel.update(this.data);
+            // this.childsPanel.reload();
+            // this.filesPanel.reload();
+            // this.tasksPanel.reload();
+            // this.propertiesPanel.data = this.data;
+        // } else if(this.propertiesPanel && this.propertiesPanel.rendered) {
+            // this.propertiesPanel.update(this.data);
         }
         this.grid.reload();
         if( (this.grid.store.getCount() > 0)
@@ -626,9 +614,9 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         App.clipboard.paste(this.data.id, null, this.onPasteProcess, this);
     }
     ,onPasteProcess: function(pids){
-        this.childsPanel.reload();
-        this.filesPanel.reload();
-        this.tasksPanel.reload();
+        // this.childsPanel.reload();
+        // this.filesPanel.reload();
+        // this.tasksPanel.reload();
     }
 
     ,onObjectSaved: function(f, a){
@@ -678,53 +666,53 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
 Ext.reg('CBObjects', CB.Objects); // register xtype
 
-CB.ObjectsPropertiesPanel = Ext.extend(Ext.Panel, {
-    border: false
-    ,hideBorders: true
-    ,autoHeight: true
-    ,bodyStyle: 'background-color: #F4F4F4'
-    ,initComponent: function(){
-        Ext.apply(this, {
-            tpl: new Ext.XTemplate(
-                '<h3 style="padding: 5px 5px 10px 5px; font-size: 14px">'+L.Properties+'</h3>'
-                ,'<table class="item-props">'
-                ,'{[ Ext.isEmpty(values.id) ? "" : \'<tr><td class="k">ID</td><td>\'+values.id+\'</td></tr>\']}'
-                ,'{[ Ext.isEmpty(values.name) ? "" : \'<tr><td class="k">'+L.Name+'</td><td>\'+values.name+\'</td></tr>\']}'
-                ,'<tbody><tr><td class="k">'+L.Path+'</td><td><a class="path" href="#">{pathtext}</a></td></tr>'
-                ,'{[ Ext.isEmpty(values.size) ? "" : \'<tr><td class="k">'+L.Size+'</td><td>\'+App.customRenderers.filesize(values.size)+\'</td></tr>\']}'
-                ,'<tr><td class="k">'+L.Created+'</td><td>{[ CB.DB.usersStore.getName(values.cid) ]}<br><span class="dttm" title="Friday, December 14, 2012 at 11:26">{[ Ext.isEmpty(values.cdate) ? "" : values.cdate.format(App.dateFormat) ]}</span></td></tr>'
-                ,'<tr><td class="k">'+L.Modified+'</td><td>{[ CB.DB.usersStore.getName(values.uid) ]}<br><span class="dttm" title="Friday, December 14, 2012 at 11:26">{[ Ext.isEmpty(values.udate) ? "" : values.udate.format(App.dateFormat) ]}</span></td></tr>'
-                ,'</tbody></table>'
-                ,{compiled: true}
-            )
-            ,data: []
-            ,listeners: {
-                scope: this
-                ,afterlayout: this.onAfterlayout
-                ,afterrender: this.onAfterlayout
-            }
-        });
-        CB.ObjectsPropertiesPanel.superclass.initComponent.apply(this, arguments);
-        this.addEvents('pathclick');
+// CB.ObjectsPropertiesPanel = Ext.extend(Ext.Panel, {
+//     border: false
+//     ,hideBorders: true
+//     ,autoHeight: true
+//     ,bodyStyle: 'background-color: #F4F4F4'
+//     ,initComponent: function(){
+//         Ext.apply(this, {
+//             tpl: new Ext.XTemplate(
+//                 '<h3 style="padding: 5px 5px 10px 5px; font-size: 14px">'+L.Properties+'</h3>'
+//                 ,'<table class="item-props">'
+//                 ,'{[ Ext.isEmpty(values.id) ? "" : \'<tr><td class="k">ID</td><td>\'+values.id+\'</td></tr>\']}'
+//                 ,'{[ Ext.isEmpty(values.name) ? "" : \'<tr><td class="k">'+L.Name+'</td><td>\'+values.name+\'</td></tr>\']}'
+//                 ,'<tbody><tr><td class="k">'+L.Path+'</td><td><a class="path" href="#">{pathtext}</a></td></tr>'
+//                 ,'{[ Ext.isEmpty(values.size) ? "" : \'<tr><td class="k">'+L.Size+'</td><td>\'+App.customRenderers.filesize(values.size)+\'</td></tr>\']}'
+//                 ,'<tr><td class="k">'+L.Created+'</td><td>{[ CB.DB.usersStore.getName(values.cid) ]}<br><span class="dttm" title="Friday, December 14, 2012 at 11:26">{[ Ext.isEmpty(values.cdate) ? "" : values.cdate.format(App.dateFormat) ]}</span></td></tr>'
+//                 ,'<tr><td class="k">'+L.Modified+'</td><td>{[ CB.DB.usersStore.getName(values.uid) ]}<br><span class="dttm" title="Friday, December 14, 2012 at 11:26">{[ Ext.isEmpty(values.udate) ? "" : values.udate.format(App.dateFormat) ]}</span></td></tr>'
+//                 ,'</tbody></table>'
+//                 ,{compiled: true}
+//             )
+//             ,data: []
+//             ,listeners: {
+//                 scope: this
+//                 ,afterlayout: this.onAfterlayout
+//                 ,afterrender: this.onAfterlayout
+//             }
+//         });
+//         CB.ObjectsPropertiesPanel.superclass.initComponent.apply(this, arguments);
+//         this.addEvents('pathclick');
 
-        this._update= this.update;
-        this.update = function(data){
-            this._update(data);
-            this.onAfterlayout();
-        };
-    }
-    ,onAfterlayout: function(){
-        p = this.getEl().query('a.path');
-        if(Ext.isEmpty(p)) return;
-        p = Ext.get(p[0]);
-        p.un('click', this.onPathClick, this);
-        p.on('click', this.onPathClick, this);
+//         this._update= this.update;
+//         this.update = function(data){
+//             this._update(data);
+//             this.onAfterlayout();
+//         };
+//     }
+//     ,onAfterlayout: function(){
+//         p = this.getEl().query('a.path');
+//         if(Ext.isEmpty(p)) return;
+//         p = Ext.get(p[0]);
+//         p.un('click', this.onPathClick, this);
+//         p.on('click', this.onPathClick, this);
 
-    }
-    ,onPathClick: function(){
-        this.fireEvent('pathclick');
-    }
-});
+//     }
+//     ,onPathClick: function(){
+//         this.fireEvent('pathclick');
+//     }
+// });
 
 CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
     border: false

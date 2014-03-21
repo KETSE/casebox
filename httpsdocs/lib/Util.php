@@ -1,7 +1,6 @@
 <?php
 namespace CB\Util;
 
-use CB\DB as DB;
 use CB\L as L;
 
 function getIP()
@@ -107,7 +106,8 @@ function formatAgoTime($mysqlTime)
     $time = strtotime($mysqlTime);
     $interval = strtotime('now') - $time;//11003
     if ($interval < 0) {
-        return L\fewSecondsAgo; //it's a future time
+        //it's a future time
+        return L\fewSecondsAgo;
     }
 
     if ($interval < $AHOUR) {
@@ -139,7 +139,7 @@ function formatAgoTime($mysqlTime)
     if ($interval < ($time - $YEAR_START)) {
         return translateMonths(date('d F', $time));
     }
-    //else
+
     return translateMonths(date('Y, F d', $time));
 }
 
@@ -193,7 +193,6 @@ function formatTaskTime($mysqlTime)
     } elseif ($today - $time > 3600 * 24 * 2) return translateMonths(date('j M Y', $time));
     elseif ($today - $time > 3600 * 24) return L\beforeYesterday;
     elseif ($today - $time > 0) return L\yesterday;
-    //elseif ($time - $today < 3600 * 24) return '<span class="cM">'.L\today.'</span>';
     elseif ($time - $today < 3600 * 24 * 2) return '<span class="cM fwB">'.L\tomorow.'</span>';
     elseif ($time - $today < 3600 * 24 * 6) return '<span class="cM fwB">'.(($time - $today) / (3600 * 24) ).' '.L\ofDays.'</span>';
     else{
@@ -230,6 +229,40 @@ function formatDatePeriod($fromDateTime, $toDateTime)
     }
 
     return $rez;
+}
+
+/**
+ * formats a dateTime string according to user timezone from session for webdav
+ * @param  varchar $fromDateTime mysql formated date
+ * @return varchar               modified time if timezone present
+ */
+function UTCTimeToUserTimezone($dateTime)
+{
+    if (empty($dateTime) || empty($_SESSION['user']['cfg']['TZ'])) {
+        return $dateTime;
+    }
+
+    $d = new \DateTime($dateTime);
+    $d->setTimezone(new \DateTimeZone($_SESSION['user']['cfg']['TZ']));
+
+    return $d->format('Y-m-d H:i:s');
+}
+
+/**
+ * formats a dateTime string according to user timezone from session for webdav
+ * @param  varchar $fromDateTime mysql formated date
+ * @return varchar               modified time if timezone present
+ */
+function userTimeToUTCTimezone($dateTime)
+{
+    if (empty($dateTime) || empty($_SESSION['user']['cfg']['TZ'])) {
+        return $dateTime;
+    }
+
+    $d = new \DateTime($dateTime, new \DateTimeZone($_SESSION['user']['cfg']['TZ']));
+    $d->setTimezone('UTC');
+
+    return $d->format('Y-m-d H:i:s');
 }
 
 /**
@@ -299,7 +332,7 @@ function formatLeftDays($days_difference)
     return '';
 }
 
-function formatMysqlDate($date, $format = false)
+function formatMysqlDate($date, $format = false, $TZ = 'UTC')
 {
     if (empty($date)) {
         return '';
@@ -308,8 +341,15 @@ function formatMysqlDate($date, $format = false)
         $format = \CB\getOption('short_date_format');
     }
 
-    return date(str_replace('%', '', $format), strtotime($date));
-    //return implode('.', array_reverse(explode('-', substr($date, 0, 10))));
+    $d1 = new \DateTime($date);
+
+    $d1->setTimezone(new \DateTimeZone($TZ));
+
+
+    $rez = $d1->format($format);
+
+    return $rez;
+    // return date(str_replace('%', '', $format), strtotime($date));
 }
 
 function formatMysqlTime($date, $format = false)
@@ -322,7 +362,6 @@ function formatMysqlTime($date, $format = false)
     }
 
     return date(str_replace('%', '', $format), strtotime($date));
-    //return implode('.', array_reverse(explode('-', substr($date, 0, 10))));
 }
 
 function clientToMysqlDate($date)
@@ -387,103 +426,41 @@ function adjustTextForDisplay($text)
     return htmlentities($text, ENT_COMPAT, 'UTF-8');
 }
 
-function getThesauriTitles($ids_string, $language_id = false)
-{
-    if (empty($ids_string)) {
-        return '';
-    }
-    if ($language_id === false) {
-        $language_id = \CB\USER_LANGUAGE_INDEX;
-    }
-    if (!is_array($ids_string)) {
-        $a = explode(',', $ids_string);
-    } else {
-        $a = &$ids_string;
-    }
-    $a = array_filter($a, 'is_numeric');
-    if (empty($a)) {
-        return '';
-    }
-    $rez = array();
-    foreach ($a as $id) {
-        $var_name = "TH[$id]['name']";
-        if (!\CB\Cache::exist($var_name)) {
-            $res = DB\dbQuery(
-                'SELECT l'.$language_id.' `title`
-                FROM tags
-                WHERE id = $1',
-                $id
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                \CB\Cache::set($var_name, $r['title']);
-            }
-            $res->close();
-        }
-        $rez[] = \CB\Cache::get($var_name);
-    }
-
-    if (sizeof($rez) == 1) {
-        return $rez[0];
-    }
-
-    return $rez;
-}
-
-function getThesauryIcon($id)
-{
-    if (!is_numeric($id)) {
-        return '';
-    }
-
-    $var_name = 'TH['.$id."]['icon']";
-
-    if (!\CB\Cache::exist($var_name)) {
-        $res = DB\dbQuery(
-            'SELECT t.cfg, tt.iconCls
-            FROM tree t
-            JOIN templates tt on t.id = tt.id
-            WHERE t.id = $1',
-            $id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $cfg = toJSONArray($r['cfg']);
-            $iconCls = empty($cfg['iconCls'])
-                ? $r['iconCls']
-                : $cfg['iconCls'];
-            \CB\Cache::set($var_name, $iconCls);
-        }
-        $res->close();
-    }
-
-    return \CB\Cache::get($var_name);
-}
-
 function dateISOToMysql($date_string)
 {
     if (empty($date_string)) {
         return null;
     }
-    //$date_string = '2004-02-12T15:19:21+00:00';
     $d = strtotime($date_string);
 
     return date('Y-m-d H:i:s.u', $d);
 }
+
+// function dateMysqlToISO($date_string)
+// {
+//     if (empty($date_string)) {
+//         return null;
+//     }
+
+//     return str_replace(' ', 'T', $date_string).'Z';
+// }
 
 function dateMysqlToISO($date_string)
 {
     if (empty($date_string)) {
         return null;
     }
-    //$date_string = '2004-02-12T15:19:21+00:00';
     $d = strtotime($date_string);
 
-    return date('Y-m-d\TH:i:s.u\Z', $d);
+    return date('Y-m-d\TH:i:s\Z', $d);
 }
 
 function getCoreHost($db_name = false)
 {
+    if (!empty($_SERVER['SERVER_NAME'])) {
+        return 'https://'.$_SERVER['SERVER_NAME'].'/';
+    }
+
     if ($db_name == false) {
         $db_name = \CB\CONFIG\DB_NAME;
     }
@@ -491,14 +468,8 @@ function getCoreHost($db_name = false)
     if (substr($db_name, 0, 3) == 'cb_') {
         $core = substr($db_name, 3);
     }
-    switch ($core) {
-        case 'cb2':
-            $core = 'http://cb2.vvv.md/';
-            break;
-        default:
-            $core = 'https://'.$core.'.casebox.org/';
-            break;
-    }
+    $d = isDevelServer() ? '.d' : '';
+    $core = 'https://'.$core.$d.'.casebox.org/';
 
     return $core;
 }
@@ -553,4 +524,16 @@ function toJSONArray($v)
     }
 
     return $v;
+}
+
+function validISO8601Date($value)
+{
+    try {
+        $timestamp = strtotime($value);
+        $date = date(DATE_ISO8601, $timestamp);
+
+        return ($date === $value);
+    } catch (\Exception $e) {
+        return false;
+    }
 }

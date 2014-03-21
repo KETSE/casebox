@@ -17,6 +17,8 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             }
         });
         CB.form.view.object.Preview.superclass.initComponent.apply(this, arguments);
+
+        App.on('objectchanged', this.onObjectChanged, this);
     }
 
     ,onAfterRender: function(){
@@ -33,14 +35,14 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         }
         this.newId = id;
         this.newVersionId = Ext.value(versionId, '');
-        this.delayReload(50);
+        this.delayReload(100);
     }
 
     ,delayReload: function(ms){
         if(!this.delayedReloadTask) {
             this.delayedReloadTask = new Ext.util.DelayedTask(this.reload, this);
         }
-        this.delayedReloadTask.delay(Ext.value(ms, 50), this.reload, this);
+        this.delayedReloadTask.delay(Ext.value(ms, 1000), this.reload, this);
 
     }
 
@@ -57,7 +59,6 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             ,scope: this // optional scope for the callback
             ,discardUrl: false
             ,nocache: true
-            // ,text: L.Loading
             ,scripts: false
 
         });
@@ -81,6 +82,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
                 break;
         }
         this.attachEvents();
+        this.fireEvent('loaded', this);
     }
 
     ,attachEvents: function(){
@@ -102,27 +104,6 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             ,this
         );
 
-        a = this.getEl().query('a.task');
-        Ext.each(
-            a
-            ,function(t){
-                Ext.get(t).addListener(
-                    'click'
-                    ,function(ev, el){
-                        App.mainViewPort.fireEvent(
-                            'taskedit'
-                            ,{
-                                data: {
-                                    id: el.attributes.getNamedItem('nid').value
-                                }
-                            }
-                        );
-                    }
-                    ,this
-                );
-            }
-            ,this
-        );
         a = this.getEl().query('a.taskA');
         Ext.each(
             a
@@ -292,6 +273,19 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         if(this.getEl().isVisible(true)) this.body.scrollTo('top', 0);
     }
 
+    ,getContainerToolbarItems: function() {
+
+    }
+    ,onObjectChanged: function(data) {
+        if(!isNaN(data)) {
+            data = {id: data};
+        }
+        if(!Ext.isEmpty(this.data)) {
+            if(data.id == this.data.id) {
+                this.reload();
+            }
+        }
+    }
 });
 
 Ext.reg('CBObjectPreview', CB.form.view.object.Preview);

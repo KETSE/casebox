@@ -22,7 +22,7 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'
-            ,'        <span class="gr">{[ App.customRenderers.filesize(values.size) ]}, {ago_text}</span>'
+            ,'        <span class="gr" title="{[ displayDateTime(values.cdate) ]}">{[ App.customRenderers.filesize(values.size) ]}, {ago_text}</span>'
             ,'    </td>'
             ,'    <td class="elips">'
             ,'        <span class="click menu"></span>'
@@ -62,7 +62,7 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
             border: false
             ,padding: 0
             ,hidden: true
-            ,html: '<div style="display: block; font-weight: bold; color: rgb(85, 85, 85); background-color: rgb(228, 241, 246); margin: 5px 0px; text-align: center; vertical-align: middle; padding: 15px 10px; border-top-width: 1px; border-top-style: dashed; border-top-color: rgb(153, 218, 242); border-bottom-width: 1px; border-bottom-style: dashed; border-bottom-color: rgb(153, 218, 242);">'+
+            ,html: '<div class="files-drop">'+
                 'Drag files here, or <a class="click upload">'+L.Upload+'</a> <span class="i-cross click close" style="float: right; display: inline-block; height: 16px; width: 16px;"></span>'+
             '</div>'
             ,listeners: {
@@ -82,12 +82,22 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
         });
         CB.objects.plugins.Files.superclass.initComponent.apply(this, arguments);
 
-        this.dropZoneConfig = {text: 'Drop files here'};
+        this.addEvents('fileupload', 'lockpanel');
+        this.enableBubble(['fileupload', 'lockpanel']);
+
+        this.dropZoneConfig = {
+            pidPropety: 'id'
+            ,dropZoneEl: this.dragPanel.getEl()
+        };
         this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
         this.filesDropPlugin.init(this);
 
     }
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
+
         for (var i = 0; i < r.data.length; i++) {
             r.data[i].iconCls = getItemIcon(r.data[i]);
         }
@@ -132,9 +142,26 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
     ,getToolbarItems: function() {
         return [this.actions.add];
     }
+
+    ,getContainerToolbarItems: function() {
+        var rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(this.params) {
+            if(!this.isVisible()) {
+                rez.menu['attachfile'] = {};
+            }
+        }
+        return rez;
+    }
+
     ,onAddClick: function(b, e) {
+        this.lockPanel(true);
         this.dragPanel.show();
     }
+
     ,onDragPanelClick: function(ev, el) {
         var te = ev.getTarget();
         if(Ext.isEmpty(te)) {
@@ -143,11 +170,26 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
         te = Ext.get(te);
         if(te.hasClass('close')) {
             this.dragPanel.hide();
+            this.lockPanel(false);
         }
         if(te.hasClass('upload')) {
-            //upload dialog'
+            this.fireEvent(
+                'fileupload'
+                ,{pid: Ext.value(this.params.id, this.params.path)}
+                ,ev
+            );
+
             this.dragPanel.hide();
+            this.lockPanel(false);
         }
+    }
+
+    ,lockPanel: function (status) {
+        this.fireEvent('lockpanel', status, this);
+    }
+
+    ,getProperty: function(propertyName) {
+        return this.params[propertyName];
     }
 });
 

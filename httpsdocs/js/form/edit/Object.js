@@ -1,9 +1,9 @@
 Ext.namespace('CB.form.edit');
 
-CB.form.edit.Object = Ext.extend(Ext.Container, {
+CB.form.edit.Object = Ext.extend(Ext.Panel, {
     xtype: 'panel'
     ,tbarCssClass: 'x-panel-white'
-    ,padding:0
+    ,padding: 0
     ,autoScroll: true
     ,layout: 'anchor'
     ,data: {}
@@ -19,16 +19,16 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             }
         });
 
-        this.grid = new CB.VerticalEditGrid({
-            title: L.Details
-            ,autoHeight: true
-            ,hidden: true
-            ,refOwner: this
-            ,includeTopFields: true
-            ,viewConfig: {
-                forceFit: true
-                ,autoFill: true
-            }
+        this.titleView = new Ext.DataView({
+            autoHeight: true
+            ,hidden: (this.hideTitle === true)
+            ,cls: 'obj-plugin-title'
+            ,tpl: [
+                '<tpl for=".">'
+                ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(Ext.value(values.name, \'\')) ]}</div>'
+                ,'</tpl>'
+            ]
+            ,data: {}
         });
 
         this.fieldsZone = new Ext.form.FormPanel({
@@ -49,26 +49,46 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 anchor: '-1'
                 ,style: 'margin: 0 0 15px 0'
             }
-            ,items: [ {
+            ,items: [
+                this.titleView
+                ,{
                     xtype: 'panel'
                     ,layout: 'fit'
                     ,autoHeight: true
                     ,autoScroll: true
                     ,border: false
-                    ,items: this.grid
+                    ,items: []
                 }
                 ,this.fieldsZone
             ]
             ,listeners: {
                 scope: this
                 ,change: this.onChange
+                ,afterrender: this.onAfterRender
             }
         });
         CB.form.edit.Object.superclass.initComponent.apply(this, arguments);
+
+        this.addEvents('saveobject');
+        this.enableBubble(['saveobject']);
     }
 
     ,onChange: function(){
         this._isDirty = true;
+    }
+
+    ,onAfterRender: function(c) {
+
+        // map multiple keys to multiple actions by strings and array of codes
+        var map = new Ext.KeyMap(c.getEl(), [
+            {
+                key: "s"
+                ,ctrl:true
+                ,shift:false
+                ,scope: this
+                ,fn: this.onSaveObjectEvent
+            }
+        ]);
     }
 
     ,load: function(objectData) {
@@ -93,6 +113,11 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
         // this.getEl().mask(L.LoadingData + ' ...', 'x-mask-loading');
 
         if(isNaN(objectData.id)) {
+
+            if(Ext.isEmpty(objectData.name)) {
+                objectData.name = L.New + ' ' + CB.DB.templates.getName(objectData.template_id);
+            }
+
             this.processLoadData({
                     success: true
                     ,data: objectData
@@ -116,13 +141,54 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             this.data.data = {};
         }
 
+        this.titleView.update(this.data);
+
         this.objectsStore.baseParams = {
             id: r.data.id
             ,template_id: r.data.template_id
         };
+
+        this.startEditAfterObjectsStoreLoadIfNewObject = true;
         this.objectsStore.reload();
 
+        /* detect template type of the opened object and create needed grid */
+        var gridType = (CB.DB.templates.getType(this.data.template_id) == 'search')
+            ? 'CBVerticalSearchEditGrid'
+            : 'CBVerticalEditGrid';
+
+        if(this.lastgGridType != gridType) {
+            this.items.itemAt(1).removeAll(true);
+            this.grid = Ext.create(
+                {
+                    title: L.Details
+                    ,autoHeight: true
+                    ,hidden: true
+                    ,refOwner: this
+                    ,includeTopFields: true
+                    ,stateId: 'oevg' //object edit vertical grid
+                    ,autoExpandColumn: 'value'
+                    ,keys: [{
+                        key: "s"
+                        ,ctrl:true
+                        ,shift:false
+                        ,scope: this
+                        ,stopEvent: true
+                        ,fn: this.onSaveObjectEvent
+                    }]
+                    ,viewConfig: {
+                        forceFit: true
+                        ,autoFill: true
+                    }
+                }
+                ,gridType
+            );
+            this.lastgGridType = gridType;
+
+            this.items.itemAt(1).add(this.grid);
+        }
+
         this.grid.reload();
+
         if(this.grid.store.getCount() > 0) {
             var cm = this.grid.getColumnModel();
             var ci = cm.findColumnIndex('title');
@@ -135,13 +201,11 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 cm.setColumnHeader(ci2, L.Value);
             }
             this.grid.show();
-            this.grid.getView().refresh(true);
-            this.grid.doLayout();
-            this.grid.focus();
-            this.grid.getSelectionModel().select(0, 1);
-            if(isNaN(this.data.id)) {
-                this.grid.startEditing(0, 1);
+            if(this.grid.rendered) {
+                this.grid.getView().refresh(true);
+                this.grid.doLayout();
             }
+
         }
 
         if(this.grid.templateStore) {
@@ -175,20 +239,35 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
                 }
                 ,this
             );
-
-            // if(this.grid.rendered) {
-            //     this.grid.doLayout();
-            //     this.grid.syncSize();
-            // }
-            // if(this.fieldsZone.rendered) {
-            //     this.fieldsZone.doLayout();
-            //     this.fieldsZone.syncSize();
-            // }
-        }
+         }
         this._isDirty = false;
 
         this.doLayout();
         this.syncSize();
+
+        this.fireEvent('loaded', this);
+    }
+
+    /**
+     * focus value column in first row, and start editing if it's a new object
+     * @return void
+     */
+    ,focusDefaultCell: function() {
+        if(this.grid &&
+            !this.grid.editing &&
+            this.grid.getEl() &&
+            (this.grid.store.getCount() > 0)
+        ) {
+            var colIdx = this.grid.getColumnModel().findColumnIndex('value');
+            this.grid.getSelectionModel().select(0, colIdx);
+            this.grid.getView().focusCell(0, colIdx);
+
+            if(this.startEditAfterObjectsStoreLoadIfNewObject && isNaN(this.data.id)) {
+                this.grid.startEditing(0, colIdx);
+            }
+            delete this.startEditAfterObjectsStoreLoadIfNewObject;
+        }
+
     }
 
     ,onObjectsStoreChange: function(store, records, options){
@@ -199,14 +278,16 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
             }
             ,this
         );
-        if(this.grid && !this.grid.editing && this.grid.getEl()) {
-            var sc = this.grid.getSelectionModel().getSelectedCell();
-            this.grid.getView().refresh(true);
-            if(sc) {
-                this.grid.getSelectionModel().select(sc[0], sc[1]);
-                this.grid.getView().focusCell(sc[0], sc[1]);
+
+        if(!this.grid.editing) {
+            this.grid.getView().refresh();
+
+            // focus only when object just loaded
+            if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
+                this.focusDefaultCell();
             }
         }
+
     }
 
     ,confirmDiscardChanges: function(){
@@ -286,10 +367,35 @@ CB.form.edit.Object = Ext.extend(Ext.Container, {
     }
     ,clear: function(){
         this.data = {};
-        this.grid.hide();
+        this.titleView.update(this.data);
+        if(this.grid) {
+            this.grid.hide();
+        }
         this.fieldsZone.removeAll(true);
         this._isDirty = false;
         this.fireEvent('clear', this);
+    }
+
+    ,onSaveObjectEvent: function() {
+        this.fireEvent('saveobject', this);
+    }
+
+    ,getContainerToolbarItems: function() {
+        var rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(CB.DB.templates.getType(this.data.template_id) == 'search') {
+            rez.tbar['search'] = {};
+            rez.menu['save'] = {};
+        } else {
+            rez.tbar['save'] = {};
+            rez.tbar['cancel'] = {};
+            rez.tbar['openInTabsheet'] = {};
+        }
+
+        return rez;
     }
 
 });

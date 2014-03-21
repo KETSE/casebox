@@ -15,7 +15,6 @@ CB.FacetList = Ext.extend( CB.Facet, {
     title: 'List facet'
     ,autoHeight: true
     ,layout: 'fit'
-    ,cachedNames: {}//used by tree_tags
     ,listMode: 'checklist' //radio
     ,initComponent: function(){
         this.store = new Ext.data.JsonStore({
@@ -79,6 +78,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
 
         Ext.apply(this, {
             items: items
+            ,cachedNames: {}
             ,listeners: {
                 modechange: {
                     scope: this
@@ -126,7 +126,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
         Ext.iterate(
             serverData
             ,function(k, v){
-                this.cachedNames[k] =
+                // this.cachedNames[k] =
                 data.push({
                     id: k
                     ,name: L['taskStatus' + k]
@@ -260,14 +260,14 @@ CB.FacetList = Ext.extend( CB.Facet, {
         var id = '';
         var name = '';
         if(!Ext.isEmpty(from)) {
-            id = from.toISOString();
+            id = date_local_to_ISO_string(from);
             name = from.format(App.dateFormat);
         }
         id +='~';
         name += ' - ';
 
         if(!Ext.isEmpty(to)) {
-            id += to.toISOString();
+            id += date_local_to_ISO_string(to);
             name += to.format(App.dateFormat);
         }
         if(id == '-') {

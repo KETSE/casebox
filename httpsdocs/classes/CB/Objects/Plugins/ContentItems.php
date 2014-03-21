@@ -35,7 +35,7 @@ class ContentItems extends Base
         $sr = $s->query($params);
         foreach ($sr['data'] as $d) {
             $d['ago_text'] = Util\formatAgoTime($d['cdate']);
-            $d['user'] = User::getDisplayName($d['cid']);
+            $d['user'] = @User::getDisplayName($d['cid']);
             $rez['data'][] = $d;
         }
 

@@ -2,6 +2,7 @@
 namespace CB;
 
 use CB\L;
+use CB\Util;
 
 class Tasks
 {
@@ -120,9 +121,10 @@ class Tasks
         if (!isset($p['pid'])) {
             $p['pid'] = null;
         }
-        $p['type'] = 0;//intval($p['type']);
+        $p['type'] = 0;
 
-        $log_action_type = 25; //suppose that only notifications are changed
+        //suppose that only notifications are changed
+        $log_action_type = 25;
 
         $removed_responsible_users = array();
 
@@ -132,7 +134,8 @@ class Tasks
         if (!Util\validId($p['id']) || Security::canManageTask($p['id'])) {
             /* update the task details only if is admin or owner of the task /**/
 
-            $log_action_type = 21;// suppose adding new task
+            // suppose adding new task
+            $log_action_type = 21;
             if (is_numeric($p['create_in'])) {
                 $p['pid'] = $p['create_in'];
             }
@@ -152,7 +155,7 @@ class Tasks
             }
 
             if (empty($p['time'])) {
-                $p['time'] = null;//'00:00';
+                $p['time'] = null;
             }
 
             /* estimating deadline status in dependance with parent tasks statuses */
@@ -176,13 +179,13 @@ class Tasks
                 ) or die(DB\dbQueryError());
 
                 if (($r = $res->fetch_assoc()) && ($r['count']*2 == $r['status'])) {
-                    $status = 2; //all parent tasks are completed
+                    //all parent tasks are completed
+                    $status = 2;
                 }
                 $res->close();
             }
             /* end of estimating deadline status in dependance with parent tasks statuses */
             if (empty($p['id'])) {
-                // fireEvent('beforeNodeDbCreate', $p);
                 $res = DB\dbQuery(
                     'INSERT INTO tree (pid, name, `type`, template_id, cid, uid)
                     VALUES (
@@ -202,7 +205,6 @@ class Tasks
                 ) or die(DB\dbQueryError());
                 $p['id'] = DB\dbLastInsertId();
             } else {
-                //DB\dbQuery('delete from tasks_dependance where task_id = $1', $p['id']) or die(DB\dbQueryError());
                 $log_action_type = 22; // updating task
 
                 /* selecting removed responsible_users */
@@ -222,7 +224,6 @@ class Tasks
                 }
                 $res->close();
 
-                // fireEvent('beforeNodeDbUpdate', $p);
             }
 
             if (!isset($p['autoclose'])) {
@@ -473,11 +474,12 @@ class Tasks
             $a = explode('-', $p['reminds']);
 
             $subject = L\Reminder.': '.$p['title'].
-                ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['TZ']).
+                ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['timezone']).
                 ' ('.$p['path'].')';
-            $message = '<generateTaskViewOnSend>';
+
+            // user|remindType|remind delay|remindUnits
             foreach ($a as $r) {
-                $rem = explode('|', $r);    // user|remindType|remind delay|remindUnits
+                $rem = explode('|', $r);
                 if ($rem[0] != 1) {
                     continue; // not by mail
                 }
@@ -529,7 +531,7 @@ class Tasks
                         ,$log_action_type
                         ,$p['id']
                         ,$subject
-                        ,$message
+                        ,'<generateTaskViewOnSend>'
                         ,$p['date_end']
                         ,-$rem[1]
                         ,$_SESSION['user']['id']
@@ -759,23 +761,6 @@ class Tasks
             )
         ) or die(DB\dbQueryError());
 
-        DB\dbQuery(
-            'INSERT INTO messages (
-                node_id
-                ,`type`
-                ,subject
-                ,message
-                ,cid)
-            VALUES ($1, $2, $3, $4, $5)',
-            array(
-                $p['id'] // Util\coalesce($task['case_id'], $task['object_id'], $p['id'])
-                ,'task_complete'
-                ,'Complete task'
-                ,@$p['message']
-                ,$_SESSION['user']['id']
-            )
-        ) or die(DB\dbQueryError());
-
         Log::add(
             array(
                 'action_type' => 23
@@ -831,7 +816,6 @@ class Tasks
             array(
                 'action_type' => 27
                 ,'task_id' => $id
-                //,'to_user_ids' => $task['responsible_user_ids']
                 ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
                 ,'info' => 'title: '.$task['name']
             )
@@ -979,6 +963,7 @@ class Tasks
                 ,allday
                 ,cid
                 ,ti.path `path_text`
+                ,(SELECT name from tree where id = t.category_id) `category`
                 ,(SELECT l'.USER_LANGUAGE_INDEX.'
                     FROM users_groups
                     WHERE id = t.cid) owner_text
@@ -999,23 +984,11 @@ class Tasks
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $format = 'Y, F j';
+            $datetime_period = ($r['allday'] == 1)
+                ? Util\formatDatePeriod($r['date_start'], $r['date_end'])
+                : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['timezone']);
 
-
-            if ($r['allday'] != 1) {
-                $format .= ' H:i';
-            }
-
-            $i = strtotime($r['date_start']);
-            $datetime_period = date($format, $i);
-
-            if (!empty($r['date_end'])) {
-                $datetime_period = ($r['allday'] == 1)
-                    ? Util\formatDatePeriod($r['date_start'], $r['date_end'])
-                    : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['TZ']);
-            }
-
-            $created_date_text = Util\formatMysqlDate($r['cdate'], 'Y, F j H:i');
+            $created_date_text = Util\formatMysqlDate($r['cdate'], 'Y, F j H:i', @$user['cfg']['timezone']);
             $importance_text = '';
             switch ($r['importance']) {
                 case 1:
@@ -1028,7 +1001,6 @@ class Tasks
                     $importance_text = L\get('High', $user['language_id']);
                     break;
             }
-            //$left = Util\formatLeftDays($r['days']);
             $users = array();
             $ures = DB\dbQuery(
                 'SELECT u.id
@@ -1037,12 +1009,6 @@ class Tasks
                     ,last_name
                     ,ru.status
                     ,ru.time
-                    ,(SELECT `message`
-                        FROM messages
-                        WHERE node_id = ru.task_id
-                            AND cid = u.id
-                            AND `type` = \'task_complete\'
-                        ORDER BY cdate DESC LIMIT 1) `complete_message`
                 FROM users_groups u
                 LEFT JOIN tasks_responsible_users ru ON u.id = ru.user_id
                     AND ru.task_id = $1
@@ -1062,9 +1028,8 @@ class Tasks
                 "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b>'.$name.'</b>'.
                 "\n\r".'<p style="color:#777;margin:0;padding:0">'.
                 "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
-                    Util\formatMysqlDate($ur['time'], 'Y, F j H:i').'</span>' : L\get('waitingForAction', $user['language_id']) ).
+                    Util\formatMysqlDate($ur['time'], 'Y, F j H:i', @$user['cfg']['timezone']).'</span>' : L\get('waitingForAction', $user['language_id']) ).
                 "\n\r".'</p>'.
-                ( (($ur['status'] == 1) && !empty($ur['complete_message'])) ? '<p>'.nl2br(Util\adjustTextForDisplay($ur['complete_message'])).'</p>': '').
                 '</td></tr>';
 
             }
@@ -1103,7 +1068,6 @@ class Tasks
                 'color: #333; width: 100%; display: table; border-collapse: separate; border-spacing: 0;"><tbody>'.
                 implode('', $users).'</tbody></table></td></tr>';
 
-            // $message = str_replace( array('<i', '</i>'), array('<strong', '</strong>'), $message);
             $rez = file_get_contents(TEMPLATES_DIR.'task_notification_email.html');
 
             $rez = str_replace(
@@ -1136,11 +1100,11 @@ class Tasks
                     ,'{bottom}'
                 ),
                 array(
-                    '' //$message
+                    ''
                     ,'font-size: 1.5em; display: block;'.( ($r['status'] == 3 ) ? 'color: #555; text-decoration: line-through' : '')
                     ,$r['title']
                     ,$datetime_period
-                    ,$r['description']
+                    ,nl2br(Util\adjustTextForDisplay($r['description']))
                     ,L\get('Status', $user['language_id'])
                     ,'status-style'
                     ,L\get('taskStatus'.$r['status'], $user['language_id'])
@@ -1150,13 +1114,13 @@ class Tasks
                     ,$importance_text
                     ,L\get('Category', $user['language_id'])
                     ,'category_style'
-                    ,Util\getThesauriTitles($r['category_id'], $user['language_id'])
+                    ,$r['category']
                     ,L\get('Path', $user['language_id'])
                     ,$r['path_text']
                     ,L\get('Owner', $user['language_id'])
                     ,Util\getCoreHost($r['db']).'photo/'.$r['cid'].'.jpg'
                     ,$r['owner_text']
-                    ,$users //{assigned_text}
+                    ,$users
                     ,''
                     ,''
                     ,''
@@ -1187,20 +1151,17 @@ class Tasks
         }
         $d = $d['data'];
 
-        $canEdit = (($d['status'] != 3) && $d['admin']);
-        $canClose = $canEdit;
-        $canReopen = ($d['status'] == 3) && ($d['cid'] == $_SESSION['user']['id']);
-        $canComplete = (($d['status'] != 3) && !empty($d['user']) && (@$d['user']['status'] == 0));
+        static::setTaskActionFlags($d);
 
         $actions = array();
 
-        if ($canClose) {
+        if (!empty($d['can']['close'])) {
             $actions[] = '<a action="close" class="taskA click">'.L\Close.'</a>';
         }
-        if ($canReopen) {
+        if (!empty($d['can']['reopen'])) {
             $actions[] = '<a action="reopen" class="taskA click">'.L\Reopen.'</a>';
         }
-        if (!$canClose && $canComplete) {
+        if (empty($d['can']['close']) && !empty($d['can']['complete'])) {
             $actions[] = '<a action="complete" class="taskA click">'.L\Complete.'</a>';
         }
 
@@ -1215,21 +1176,13 @@ class Tasks
             <tr><td class="k">'.L\Path.':</td><td><a class="path" path="{path}" href="#">{path_text}</a></td></tr>
             <tr><td class="k">'.L\Owner.':</td><td><table class="people"><tbody>
                 <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg"></td><td><b>{creator_name}</b><p class="gr">'.L\Created.': '.
-                '<span class="dttm" title="{full_create_date}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
+                '<span class="dttm" title="{full_created_date_text}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
 
         $date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
-        $format = 'Y, F j';//$date_format;
-        if ($d['allday'] != 1) {
-            $format .= ' H:i';
-        }
-        $i = strtotime($d['date_start']);
-        $d['datetime_period'] = date($format, $i);
 
-        if (!empty($d['date_end'])) {
-            $d['datetime_period'] = ($d['allday'] == 1)
-                ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
-                : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['TZ']);
-        }
+        $d['datetime_period'] = ($d['allday'] == 1)
+            ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
+            : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['timezone']);
 
         $d['importance_text'] = '';
         switch ($d['importance']) {
@@ -1265,8 +1218,8 @@ class Tasks
             ,'{path_text}' => $d['pathtext']
             ,'{cid}' => $d['cid']
             ,'{creator_name}' => User::getDisplayName($d['cid'])
-            ,'{full_create_date}' => date($date_format.' H:i', strtotime($d['cdate']))
-            ,'{create_date}' => date($date_format.' H:i', strtotime($d['cdate']))
+            ,'{full_created_date_text}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['timezone'])
+            ,'{create_date}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['timezone'])
             );
         $rez = str_replace(array_keys($params), array_values($params), $rez);
 
@@ -1280,12 +1233,10 @@ class Tasks
                 '<p class="gr">'.(
                     ($u['status'] == 1)
                     ? L\Completed.': '.date($date_format.' H:i', strtotime($u['time'])).
-                        ( ($canEdit == 1) ? '<a class="bt taskA click" action="markincomplete" uid="'.$u['id'].'">'.L\revoke.'</a>' : '')
+                        ( (!empty($d['can']['edit'])) ? '<a class="bt taskA click" action="markincomplete" uid="'.$u['id'].'">'.L\revoke.'</a>' : '')
                     : L\waitingForAction.
-                        (($canEdit == 1) ? '<a class="bt taskA click" action="markcomplete" uid="'.$u['id'].'">'.L\complete.'</a>' : '' )
+                        ((!empty($d['can']['edit'])) ? '<a class="bt taskA click" action="markcomplete" uid="'.$u['id'].'">'.L\complete.'</a>' : '' )
                 ).'</p></td></tr>';
-                //<a class="bt" name="complete" uid="1" href="#">завершить</a>
-
             }
             $rez .= '</tbody></table></td></tr>';
         }
@@ -1315,8 +1266,6 @@ class Tasks
             $rez .= '</ul></td></tr>';
         }
         $rez .= '</tbody></table></div>';
-
-        $rez .= '<div class="p15">'.implode(' &nbsp; ', $actions).'</div>';
 
         return $rez;
     }
@@ -1402,5 +1351,69 @@ class Tasks
                 static::getSolrData($object_record);
             }
         }
+    }
+
+    /**
+     *  set the flags for actions that could be made to the tasks by a specific or current user
+     * @param  reference $object_records
+     * @return void
+     */
+    public static function setTaskActionFlags(&$taskData, $userId = false)
+    {
+        $p = array(&$taskData);
+        static::setTasksActionFlags($p, $userId);
+    }
+
+    /**
+     *  set the flags for actions that could be made to the tasks by a specific or current user
+     * @param  reference $object_records
+     * @return void
+     */
+    public static function setTasksActionFlags(&$tasksDataArray, $userId = false)
+    {
+        if ($userId === false) {
+            $userId = $_SESSION['user']['id'];
+        }
+
+        $isAdmin = \CB\Security::isAdmin();
+        $taskTemplates = Templates::getIdsByType('task');
+        $ta = array();
+        foreach ($tasksDataArray as &$d) {
+            if ((!in_array(@$d['template_id'], $taskTemplates)) ||
+                empty($d['status'])
+            ) {
+                continue;
+            }
+            $ta[$d['id']] = &$d;
+
+            $canEdit = ($d['status'] != 3) && ($isAdmin || ($d['cid'] == $userId));
+            $d['can'] = array(
+                'edit' => $canEdit
+                ,'close' => $canEdit
+                ,'reopen' => (($d['status'] == 3) && ($d['cid'] == $userId))
+            );
+        }
+
+        if (empty($ta)) {
+            return;
+        }
+
+        // select status of the user in tasks (completed or not)
+        $res = DB\dbQuery(
+            'SELECT task_id, status
+            FROM `tasks_responsible_users`
+            WHERE task_id in ('.implode(',', array_keys($ta)).')
+                AND user_id = $1',
+            $userId
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $userStatus = $r['status'];
+            $d = &$ta[$r['task_id']];
+            $canEdit = ($d['status'] != 3) && ($isAdmin || ($d['cid'] == $userId));
+            $d['can']['complete'] = (($d['status'] != 3) && (empty($userStatus)));
+        }
+        $res->close();
+
     }
 }

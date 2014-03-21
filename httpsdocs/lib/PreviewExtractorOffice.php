@@ -42,6 +42,9 @@ class PreviewExtractorOffice extends PreviewExtractor
         $res = DB\dbQuery($sql) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
+            //start the transaction so that the file status would not change on script fail
+            DB\startTransaction();
+
             DB\dbQuery(
                 'UPDATE file_previews
                 SET `status` = 2
@@ -58,32 +61,48 @@ class PreviewExtractorOffice extends PreviewExtractor
             copy($fn, $nfn);
             file_put_contents($pfn, '');
             $cmd = CONFIG\UNOCONV.' -v -f html -o '.$pfn.' '.$nfn; //.' >> '.DEBUG_LOG.' 2>&1';
+            \CB\debug($cmd);
             exec($cmd);
             unlink($nfn);
-            file_put_contents(
-                $pfn,
-                '<div style="padding: 5px">'.$this->purify(
-                    file_get_contents($pfn),
-                    array(
-                        'URI.Base' => '/preview/'
-                        ,'URI.MakeAbsolute' => true
-                    )
-                ).'</div>'
-            );
+            if (file_exists($pfn)) {
+                file_put_contents(
+                    $pfn,
+                    '<div style="padding: 5px">'.$this->purify(
+                        file_get_contents($pfn),
+                        array(
+                            'URI.Base' => '/preview/'
+                            ,'URI.MakeAbsolute' => true
+                        )
+                    ).'</div>'
+                );
 
-            DB\dbQuery(
-                'UPDATE file_previews
-                SET `status` = 0
-                    ,`filename` = $2
-                    ,`size` = $3
-                WHERE id = $1',
-                array(
+                DB\dbQuery(
+                    'UPDATE file_previews
+                    SET `status` = 0
+                        ,`filename` = $2
+                        ,`size` = $3
+                    WHERE id = $1',
+                    array(
+                        $r['content_id']
+                        ,$r['content_id'].'_.html'
+                        ,filesize($pfn)
+                    )
+                )  or die(DB\dbQueryError());
+                $res->close();
+            } else {
+                //preview not generated for some reason, probably unoconv service not started
+                \CB\debug('UNOCONV execution error: '.$cmd);
+                DB\dbQuery(
+                    'UPDATE file_previews
+                    SET `status` = 1
+                    WHERE id = $1',
                     $r['content_id']
-                    ,$r['content_id'].'_.html'
-                    ,filesize($pfn)
-                )
-            )  or die(DB\dbQueryError());
-            $res->close();
+                )  or die(DB\dbQueryError());
+
+            }
+
+            DB\commitTransaction();
+
             $res = DB\dbQuery($sql) or die(DB\dbQueryError());
         }
         $res->close();

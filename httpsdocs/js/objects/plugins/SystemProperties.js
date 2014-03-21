@@ -9,8 +9,8 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
             ,'<tbody><tr><td class="k">Id</td><td>{id}</td></tr>'
             ,'<tr><td class="k">'+L.Path+'</td><td><a class="click path">{path}</a></td></tr>'
             ,'<tr><td class="k">'+L.Template+'</td><td>{template_name} <span class="dttm">(id: {template_id})</span></td></tr>'
-            ,'<tr><td class="k">'+L.Created+'</td><td>{cid_text}<br><span class="dttm" title="{cdate}">{cdate_text}</span></td></tr>'
-            ,'<tr><td class="k">'+L.Modified+'</td><td>{uid_text}<br><span class="dttm" title="{udate}">{udate_text}</span></td></tr>'
+            ,'<tr><td class="k">'+L.Created+'</td><td>{cid_text}<br><span class="dttm" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</span></td></tr>'
+            ,'<tr><td class="k">'+L.Modified+'</td><td>{uid_text}<br><span class="dttm" title="{[ displayDateTime(values.udate) ]}">{udate_text}</span></td></tr>'
             ,'</tbody></table>'
         );
 
@@ -34,6 +34,9 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
         if(this.rendered) {
             this.dataView.update(r.data);
         } else {
@@ -51,6 +54,21 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
             //opening path
         }
 
+    }
+
+    ,getContainerToolbarItems: function() {
+        rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(this.params) {
+            if(CB.DB.templates.getType(this.params.template_id) == 'file') {
+                rez.menu['webdavlink']  = {};
+            }
+        }
+
+        return rez;
     }
 });
 

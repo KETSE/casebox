@@ -7,6 +7,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
         CB.PluginsPanel.superclass.initComponent.apply(this, arguments);
 
         App.on('objectchanged', this.onObjectChanged, this);
+        App.on('filesuploaded', this.onFilesUploaded, this);
 
         this.delayLoadTask = new Ext.util.DelayedTask(this.doLoad, this);
     }
@@ -52,6 +53,25 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
     ,onLoadData: function(r, e) {
         var items = [];
         this.removeAll(true);
+
+        if((CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
+            !Ext.isEmpty(this.loadedParams.name)
+        ){
+            var titleView = new Ext.DataView({
+                autoHeight: true
+                ,cls: 'obj-plugin-title'
+                ,tpl: [
+                    '<tpl for=".">'
+                    ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(values.name) ]}</div>'
+                    ,'</tpl>'
+                ]
+                ,data: this.loadedParams
+                ,getContainerToolbarItems: function(){ return {};}
+            });
+
+            this.add(titleView);
+        }
+
         Ext.iterate(
             r.data
             ,function(k, v, o) {
@@ -63,11 +83,16 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
                     ,cl
                 );
                 this.add(c);
-                c.onLoadData(v);
+                if(!Ext.isDefined(v.data)) {
+                    c.setVisible(false);
+                } else {
+                    c.onLoadData(v);
+                }
             }
             ,this
         );
         this.doLayout(true, true);
+        this.fireEvent('loaded', this);
     }
 
     ,clear: function() {
@@ -79,13 +104,23 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
             data = {id: data};
         }
         if(!Ext.isEmpty(this.loadedParams)) {
-            if(data.id == this.loadedParams.id) {
+            if((data.pid == this.loadedParams.id) || (data.id == this.loadedParams.id)) {
+                this.reload();
+            }
+        }
+    }
+    ,onFilesUploaded: function(pids) {
+        if(!Ext.isEmpty(this.loadedParams)) {
+            if(pids.indexOf(String(this.loadedParams.id)) >=0 ) {
                 this.reload();
             }
         }
     }
     ,reload: function() {
         this.doLoad(this.loadedParams);
+    }
+    ,getContainerToolbarItems: function() {
+
     }
 });
 

@@ -4,8 +4,9 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
 
     initComponent: function(){
         Ext.apply(this, {
-            cls: 'block-plugin'
-            ,html: ''
+            html: ''
+            ,cls: ''
+            ,bodyStyle: 'margin-bottom: 30px'
             ,listeners: {
                 scope: this
                 ,afterrender: this.attachEvents
@@ -15,6 +16,12 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
+
+        Ext.apply(this.params, r.data);
+
         if(this.rendered) {
             this.update(r.data.html);
         } else {
@@ -88,6 +95,30 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
         this.getEl().unmask();
         App.fireEvent('objectchanged', this.params);
     }
+
+    ,getContainerToolbarItems: function() {
+        rez = {
+            tbar: {}
+            ,menu: {}
+        };
+
+        if(this.params) {
+            if(this.params.can) {
+                if(this.params.can.complete) {
+                    rez['tbar']['completetask'] = {};
+                }
+                if(this.params.can.close) {
+                    rez['menu']['closetask'] = {};
+                }
+                if(this.params.can.reopen) {
+                    rez['menu']['reopentask'] = {};
+                }
+            }
+        }
+
+        return rez;
+    }
+
 });
 
 Ext.reg('CBObjectsPluginsObjectProperties', CB.objects.plugins.ObjectProperties);

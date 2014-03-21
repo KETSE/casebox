@@ -466,7 +466,16 @@ class Object extends OldObject
         $rez = array();
         $linearData = $this->getLinearData();
         foreach ($linearData as $field) {
-            $value = array_intersect_key($field, array('value' => 1, 'info' => 1, 'files' => 1));
+            $value = array_intersect_key(
+                $field,
+                array(
+                    'value' => 1
+                    ,'info' => 1
+                    ,'files' => 1
+                    ,'cond' => 1
+                )
+            );
+
             $rez[$field['name']][] = $value;
         }
 
@@ -567,7 +576,7 @@ class Object extends OldObject
                 return false;
             } else { //associative array
                 $keys = array_keys($value);
-                $diff = array_diff($keys, array('name', 'value', 'info', 'files', 'childs'));
+                $diff = array_diff($keys, array('name', 'value', 'info', 'files', 'childs', 'cond'));
 
                 return empty($diff);
             }
@@ -819,6 +828,8 @@ class Object extends OldObject
             array($this->id, $pid)
         ) or die(DB\dbQueryError());
 
+        $this->moveCustomDataTo($pid);
+
         // move childs from overwriten targetId (which has been marked with dstatus = 3)
         // to newly copied object
         if (is_numeric($targetId)) {
@@ -829,5 +840,14 @@ class Object extends OldObject
         }
 
         return $this->id;
+    }
+
+    /**
+     *  method that should be overwriten in descendants classes
+     * if any custom actions should be made on objects move
+    */
+    protected function moveCustomDataTo($targetId)
+    {
+
     }
 }

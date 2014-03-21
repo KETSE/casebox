@@ -2,15 +2,15 @@ Ext.namespace('CB.DD');
 
 /**
  * Plugin for drag and drop from/to grid components in casebox
- * 
+ *
  */
 
 CB.DD.Grid =  Ext.extend(Ext.util.Observable, {
     ddGroup: 'CBO'
-   
+
     /**
      * pass another ddGroup if needed
-     * @param  json config 
+     * @param  json config
      * @return void
      */
     ,constructor: function(config){
@@ -22,39 +22,59 @@ CB.DD.Grid =  Ext.extend(Ext.util.Observable, {
      * init method called by the grid when initializing plugins
      *
      * In this method we set all required configurantion and listeners to the grid
-     *     
+     *
      * @param  Ext.grid.GridPanel owner
      * @return void
      */
     ,init: function(owner) {
         this.owner = owner;
-        this.idProperty = owner.store.reader.meta.idProperty
-        Ext.apply(this.owner, {
-            enableDragDrop: true
-        });
+        this.idProperty = owner.store.reader.meta.idProperty;
+
+        var cfg = {};
+        if(!Ext.isDefined(this.enableDragDrop) &&
+            !Ext.isDefined(this.enableDrag) &&
+            !Ext.isDefined(this.enableDrop)
+        ) {
+            this.enableDragDrop = true;
+        }
+
+        cfg.enableDrag = this.enableDragDrop || this.enableDrag;
+        cfg.enableDrop = this.enableDragDrop || this.enableDrop;
+
+        if(cfg.enableDrag && cfg.enableDrop) {
+            cfg.enableDragDrop = true;
+        }
+
+        Ext.apply(this, cfg);
+        Ext.apply(this.owner, cfg);
+
         owner.on('render', this.onRender, this);
         owner.on('beforedestroy', this.onBeforeDestroy, this);
-        
-        // for general case we don't know there the grid stores its params 
+
+        // for general case we don't know there the grid stores its params
         // so listeners for actions on objects should be implemented by grid itself
     }
-    
+
     ,onRender: function(grid){
-        this.owner.getView().dragZone = new CB.DD.GridDragZone(
-            this.owner
-            ,{
+        if(this.enableDrag) {
+            var dragZoneConfig = this.dragZoneConfig || {};
+            Ext.apply(dragZoneConfig, {
                 idProperty: this.idProperty
                 ,ddGroup: this.ddGroup
                 ,nodeToGenericData: this.nodeToGenericData
-            }
-        )
-        var dropZoneConfig = this.owner.dropZoneConfig || {};
-        Ext.apply(dropZoneConfig, {
-            idProperty: this.idProperty
-            ,ddGroup: this.ddGroup
-            ,nodeToGenericData: this.nodeToGenericData
-        })
-        this.owner.dropZone = new CB.DD.GridDropZone(this.owner, dropZoneConfig)
+            });
+            this.owner.getView().dragZone = new CB.DD.GridDragZone(this.owner, dragZoneConfig);
+        }
+
+        if(this.enableDrop) {
+            var dropZoneConfig = this.dropZoneConfig || {};
+            Ext.apply(dropZoneConfig, {
+                idProperty: this.idProperty
+                ,ddGroup: this.ddGroup
+                ,nodeToGenericData: this.nodeToGenericData
+            });
+            this.owner.dropZone = new CB.DD.GridDropZone(this.owner, dropZoneConfig);
+        }
     }
 
     /**
@@ -68,7 +88,7 @@ CB.DD.Grid =  Ext.extend(Ext.util.Observable, {
     }
 
     /**
-     * transfers grid record data to generic structured object for D&D 
+     * transfers grid record data to generic structured object for D&D
      * @param  record/data record record or its data
      * @return object
      */
@@ -87,7 +107,7 @@ CB.DD.Grid =  Ext.extend(Ext.util.Observable, {
             ,name: na.name
             ,path: na.path
             ,template_id: na.template_id
-        }
+        };
         return data;
     }
 });
@@ -97,14 +117,13 @@ Ext.ComponentMgr.registerPlugin('CBDDGrid', CB.DD.Grid);
 /* custom grid dragZone for handling casebox D&D of objects */
 CB.DD.GridDragZone =  Ext.extend(Ext.grid.GridDragZone, {
     idProperty: 'id'
-    
+
     ,constructor: function(grid, config){
         this.grid = grid;
         this.view = grid.getView();
         Ext.apply(this, config || {});
         CB.DD.GridDragZone.superclass.constructor.call(this, grid, config);
     }
-    
     ,getDragData: function(e){
         var rez = false;
         var sourceEl = e.getTarget(this.view.itemSelector, 10);
@@ -112,7 +131,7 @@ CB.DD.GridDragZone =  Ext.extend(Ext.grid.GridDragZone, {
             var d = sourceEl.cloneNode(true);
             d.id = Ext.id();
 
-            var data = []
+            var data = [];
             records = this.getSelections();
             for (var i = 0; i < records.length; i++) {
                 data[i] = this.nodeToGenericData(records[i]);
@@ -122,12 +141,14 @@ CB.DD.GridDragZone =  Ext.extend(Ext.grid.GridDragZone, {
                 ,repairXY: Ext.fly(sourceEl).getXY()
                 ,ddel: d
                 ,data: data
-            }
+            };
         }
+
         return rez;
     }
     ,getSelections: function() {
         var sm = this.grid.getSelectionModel();
+
         if(sm.getSelections) {
             return sm.getSelections();
         } else if(sm.getSelectedCell){
@@ -146,7 +167,7 @@ Ext.reg('CBDDGridDragZone', CB.DD.GridDragZone);
 CB.DD.GridDropZone =  Ext.extend(Ext.dd.DropZone, {
     idProperty: 'id'
     ,appendOnly: true
-    
+
     ,constructor: function(grid, config){
         this.grid = grid;
         this.view = grid.getView();
@@ -166,20 +187,20 @@ CB.DD.GridDropZone =  Ext.extend(Ext.dd.DropZone, {
                 };
             }
         }
-        // if owner has handler for dropping in grid's free space 
+        // if owner has handler for dropping in grid's free space
         // then analize for x-grid3-scroller target
         if(this.onScrollerDragDrop){
-            var t = e.getTarget('.x-grid3-scroller');
+            t = e.getTarget('.x-grid3-scroller');
             if (t) {
                 return { node: t};
             }
         }
     }
-    
+
     ,onNodeEnter: function(nodeData, source, e, data){
         Ext.get(nodeData.node).addClass('drop-target');
     }
-    
+
     ,onNodeOver: function (targetData, source, e, data){
         /* deny drop on:
             - node itself
@@ -187,10 +208,14 @@ CB.DD.GridDropZone =  Ext.extend(Ext.dd.DropZone, {
             - any descendant of dragged node
         */
         var rez = this.dropAllowed;
-        if(!targetData.record) {
-            return rez;
+        if(!targetData.record ||
+            Ext.isEmpty(data.data) ||
+            isNaN(data.data[0].id)
+        ) {
+            return this.dropNotAllowed;
         }
-        var sourceData = Ext.isArray(data.data) 
+
+        var sourceData = Ext.isArray(data.data)
             ? data.data
             : [data.data];
         var i = 0;
@@ -201,14 +226,14 @@ CB.DD.GridDropZone =  Ext.extend(Ext.dd.DropZone, {
                 rez = this.dropNotAllowed;
             }
             i++;
-        };
+        }
         return rez;
     }
-    
+
     ,onNodeOut: function(nodeData, source, e, data){
         Ext.get(nodeData.node).removeClass('drop-target');
     }
-    
+
     ,onNodeDrop: function(targetData, source, e, sourceData){
         if(this.onNodeOver(targetData, source, e, sourceData) == this.dropAllowed){
             if(targetData.record) {
@@ -218,10 +243,10 @@ CB.DD.GridDropZone =  Ext.extend(Ext.dd.DropZone, {
                     ,sourceData: sourceData.data
                 });
             } else { //drop over scroller area of the grid
-                callback = this.scope 
+                callback = this.scope
                     ? this.onScrollerDragDrop.createDelegate(this.scope)
                     : this.onScrollerDragDrop;
-                callback(targetData, source, e, sourceData)
+                callback(targetData, source, e, sourceData);
             }
             return true;
         }
@@ -229,4 +254,4 @@ CB.DD.GridDropZone =  Ext.extend(Ext.dd.DropZone, {
 
 });
 
-Ext.reg('CBDDGridDropZone', CB.DD.GridDropZone);
+Ext.ComponentMgr.registerPlugin('CBDDGridDropZone', CB.DD.GridDropZone);

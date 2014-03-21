@@ -23,13 +23,13 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
         ,autorenameButton: true
     }
     ,initComponent: function(){
-        buttons = []
+        var buttons = [];
         if(this.data.allow_new_version) buttons.push({
             text: L.NewVersion
             ,name: 'newversion'
             ,scope: this
             ,handler: this.onButtonClick
-        })
+        });
         buttons.push({
             text: L.Replace
             ,name: 'replace'
@@ -60,8 +60,8 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
         });
         items = [
             {xtype: 'label', text: this.data.msg}
-        ]
-        if(this.data.single == false) items.push({
+        ];
+        if(this.data.single === false) items.push({
             xtype: 'checkbox'
             ,boxLabel: L.ApplyForAll
             ,style: 'margin-top: 25px'
@@ -72,11 +72,11 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
                 }
                 ,scope: this
             }
-        })
+        });
         Ext.apply(this, {
             items: items
             ,buttons: buttons
-        })
+        });
         CB.FilesConfirmationWindow.superclass.initComponent.apply(this, arguments);
 
         this.response = 'cancel';
@@ -86,7 +86,7 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
         this.hide();
     }
 
-})/**/
+});
 
 CB.FileUploadWindow = Ext.extend(Ext.Window, {
     autoShow: true
@@ -149,7 +149,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
                     ,items: fieldsetItems
                 }
                 ,buttons: [{text: L.Upload, handler: this.doSubmit,  plugins: 'defaultButton', scope: this}
-                          ,{text: Ext.MessageBox.buttonText.cancel, handler: function(){ this.hide() }, scope: this}]
+                          ,{text: Ext.MessageBox.buttonText.cancel, handler: function(){ this.hide(); }, scope: this}]
                 ,api: {submit: Ext.value(this.api, CB_Browser.saveFile) }
                 ,paramOrder: ['id']
                 ,listeners:{
@@ -183,7 +183,9 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
             case 'multiple': this.setTitle( Ext.value(this.title, L.UploadMultipleFiles) ); break;
             default: this.data.uploadType = 'single'; this.setTitle( Ext.value(this.title, L.UploadFile) ); break;
         }
-        if(!Ext.isEmpty(this.data.id)) this.findByType('form')[0].api.submit = Ext.value(this.api, CB_Browser.uploadNewVersion)
+        if(!Ext.isEmpty(this.data.id)) {
+            this.findByType('form')[0].api.submit = Ext.value(this.api, CB_Browser.uploadNewVersion);
+        }
         var cb;
         // cb = this.find('name', 'title')[0];
         // cb.setVisible( !this.fileOnly && (this.data.uploadType == 'single') )
@@ -191,17 +193,17 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
         // cb.setVisible( !this.fileOnly )
         cb = this.find('name', 'addFileButton')[0];
         if(cb) {
-            cb.setVisible( !this.fileOnly && (this.data.uploadType == 'multiple') )
+            cb.setVisible(!this.fileOnly && (this.data.uploadType == 'multiple'));
         }
 
         cb = this.find('name', 'is_default')[0];
-        cb.setVisible( !this.fileOnly && !Ext.isEmpty(this.data.object_id))
+        cb.setVisible(!this.fileOnly && !Ext.isEmpty(this.data.object_id));
         this.find('name', this.fieldName)[0].allowBlank = !Ext.isEmpty(this.data.id);
         if(Ext.isEmpty(this.data.id) && Ext.isEmpty(this.data.date)) this.data.date = new Date();
         this.findByType('form')[0].getForm().setValues(this.data);
         ed = this.find('name', 'tags');
         if(!Ext.isEmpty(ed)){
-            ed[0].setValue(this.data.sys_tags)
+            ed[0].setValue(this.data.sys_tags);
             ed[0].setVisible( !this.fileOnly );
         }
         ed = this.find('name', 'user_tags');
@@ -212,13 +214,6 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
 
         App.focusFirstField(this);
     },doSubmit: function(){
-        // d = this.find('name', 'date');
-        // if(d){
-        //     d = d[0];
-        //     d = d.getValue();
-        //     d = d ? d.toISOString() : null;
-        // }else d = null;
-
         f = this.findByType('form')[0];
         if(f.getForm().isValid()){
             f.getForm().submit({
@@ -232,7 +227,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
                 ,scope: this
                 ,success: this.onSubmitSuccess
                 ,failure: this.onSubmitFailure
-            })
+            });
         }
     },onSubmitSuccess: function(form, action){
         /*on success actions*/
@@ -245,7 +240,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
         this.hide();
         if(!Ext.isEmpty(this.serverResponse.msg)){
             if(this.serverResponse.prompt_to_open)
-                Ext.Msg.confirm(L.Info, this.serverResponse.msg, function(b){ if(b == 'yes') App.mainViewPort.fireEvent('fileopen', {id: this.serverResponse.data.id})}, this);
+                Ext.Msg.confirm(L.Info, this.serverResponse.msg, function(b){ if(b == 'yes') App.mainViewPort.fireEvent('fileopen', {id: this.serverResponse.data.id});}, this);
             else Ext.Msg.alert(L.Info, this.serverResponse.msg);
         }
     },onSubmitFailure: function(form, action){
@@ -266,7 +261,7 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
                     scope: this
                     ,hide: this.onConfirmResponse
                 }
-            })
+            });
             w.show();
         }else App.formSubmitFailure(form, action);
     },onConfirmResponse: function(w){
@@ -275,16 +270,18 @@ CB.FileUploadWindow = Ext.extend(Ext.Window, {
                 if( (btn == 'ok') && !Ext.isEmpty(text) ) CB_Browser.confirmUploadRequest({response: 'rename', newName: text}, this.onConfirmResponseProcess, this);
                 else CB_Browser.confirmUploadRequest({response: 'cancel'}, this.onConfirmResponseProcess, this);
             }, this, false, this.serverResponse.suggestedFilename);
-        }else CB_Browser.confirmUploadRequest({response: w.response}, this.onConfirmResponseProcess, this)
+        } else {
+            CB_Browser.confirmUploadRequest({response: w.response}, this.onConfirmResponseProcess, this);
+        }
         w.destroy();
     },onConfirmResponseProcess: function(r, e){
-        if(r.success == true) this.onSubmitSuccess(this.findByType('form')[0], {result: r});
+        if(r.success === true) this.onSubmitSuccess(this.findByType('form')[0], {result: r});
         else this.onSubmitFailure(this.findByType('form')[0], {result: r});
     },onAddFileFieldClick: function(f, idx, d, e){
         fs = this.findByType('fieldset')[0];
         a = fs.find('inputType', 'file');
         fs.insert(a.length, {fieldLabel: L.File, inputType: 'file', name: this.fieldName +a.length, xtype: 'textfield'});
-        f.setVisible(a.length < 9)
+        f.setVisible(a.length < 9);
         fs.doLayout();
         this.syncSize();
     }

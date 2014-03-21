@@ -8,7 +8,7 @@ class UsersGroups
      * Get the child list to be displayed in user management window in left tree
      */
     public function getChildren($p)
-    { //CHECKED
+    {
         $rez = array();
         if (!Security::canManage()) {
             throw new \Exception(L\Access_denied);
@@ -31,7 +31,8 @@ class UsersGroups
             $res->close();
         }
 
-        if ($id == -1) { // users out of a group
+        // users out of a group
+        if ($id == -1) {
             $res = DB\dbQuery(
                 'SELECT
                     id `nid`
@@ -87,7 +88,8 @@ class UsersGroups
                 ,'type' => 1
                 ,'expanded' => true
             );
-        } else {// group users
+        } else {
+            // group users
             $res = DB\dbQuery(
                 'SELECT
                     u.id `nid`
@@ -200,13 +202,14 @@ class UsersGroups
 
     /**
      * Add a new user
+     * params: name, group_id
      */
     public function addUser($p)
     {
         if (!Security::canManage()) {
             throw new \Exception(L\Access_denied);
         }
-        ////params: name, group_id
+
         $rez = array('success' => false, 'msg' => L\Missing_required_fields);
         $p['name'] = trim($p['name']);
         if (empty($p['name']) ||
@@ -331,7 +334,7 @@ class UsersGroups
                 $user_id
                 ,$_SESSION['user']['id']
             )
-        ) or die(DB\dbQueryError()); // and (cid = $2) !!!!
+        ) or die(DB\dbQueryError());
 
         //TODO: destroy user session if loged in
         return array(

@@ -313,7 +313,9 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
             };
 
             this.progressChange();
-            if(!Ext.isEmpty(this.updatedPids)) App.fireEvent('filesuploaded', this.updatedPids);
+            if(!Ext.isEmpty(this.updatedPids)) {
+                App.fireEvent('filesuploaded', this.updatedPids);
+            }
             return;
         }
         r = this.store.getAt(idx);
@@ -324,7 +326,7 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
         this.targetStatus = 5; //DONE
 
         params = {
-            name: r.get('name')
+            name: encodeURIComponent(r.get('name'))
             ,type: r.get('type')
             ,size: r.get('size')
             ,pid: r.get('pid')

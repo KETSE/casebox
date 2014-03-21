@@ -5,7 +5,7 @@ use CB\L;
 use CB\Util;
 use CB\User;
 
-class Instance //extends \CB\Plugin
+class Instance
 {
     public $columns = array();
 
@@ -38,18 +38,6 @@ class Instance //extends \CB\Plugin
             ,'cdate' => L\get('Created')
             ,'uid' => L\get('heUpdated')
             ,'udate' => L\get('UpdatedDate')
-            // ,'status' => 'DC'
-            // ,'contact' => 'DC'
-            // ,'submit_method' => 'DC'
-            // ,'type' => 'DC'
-            // ,'body' => 'DC'
-            // ,'right' => 'DC'
-            // ,'comments' => 'DC'
-            // ,'description' => 'DC'
-            // ,'constitution_articles' => 'DC'
-            // ,'acts' => 'DC'
-            // ,'acts_articles' =>'DC'
-
         );
 
         // retreive data

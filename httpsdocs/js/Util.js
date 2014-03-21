@@ -4,13 +4,80 @@ function isEmptyObject(ob){
     return true;
 }
 
+/**
+ * create date object from iso string
+ * @param  varchar date_string [description]
+ * @return Date | null
+ */
 function date_ISO_to_date(date_string){
-    if(Ext.isEmpty(date_string)) return null;
-    d = Date.parse(date_string);
-    if(Ext.isEmpty(d)) return null;
+    if(Ext.isEmpty(date_string)) {
+        return null;
+    }
+
+    var d = Date.parse(date_string);
+    if(Ext.isEmpty(d)) {
+        return null;
+    }
     return new Date(d);
 }
 
+function date_ISO_to_local_date(date_string){
+    var d = date_ISO_to_date(date_string);
+
+    if(Ext.isEmpty(d)) {
+        return null;
+    }
+
+    if(!isNaN(App.loginData.cfg.gmt_offset)) {
+        var localOffset = -d.getTimezoneOffset();
+        var userOffset = App.loginData.cfg.gmt_offset;
+
+        if(localOffset != userOffset) {
+            // decrease date with local offset and encrease with user offset
+            d = d.add(Date.MINUTE, -localOffset + userOffset);
+        }
+    }
+
+    return d;
+}
+
+function date_local_to_ISO_string(date) {
+    if(!Ext.isDate(date)) {
+        return null;
+    }
+
+    if(!isNaN(App.loginData.cfg.gmt_offset)) {
+        var localOffset = - date.getTimezoneOffset();
+        var userOffset = Ext.num(App.loginData.cfg.gmt_offset, 0);
+
+        if(localOffset != userOffset) {
+            // decrease date with user offset and encrease with local offset
+            date = date.add(Date.MINUTE, localOffset - userOffset);
+        }
+    }
+
+    return date.toISOString();
+}
+
+function getUserDisplayName(withEmail) {
+    var rez = App.loginData.first_name + ' ' + App.loginData.last_name;
+    rez = rez.trim();
+    if (Ext.isEmpty(rez)) {
+        rez = App.loginData.rez;
+    }
+    if ((withEmail === true) && (!Ext.isEmpty(App.loginData.email))) {
+        rez += "\n(" + App.loginData.email + ")";
+    }
+    return rez;
+}
+
+function displayDateTime(date){
+    var d = date_ISO_to_local_date(date);
+    if(Ext.isDate(d)) {
+        return d.format(App.longDateFormat + ' ' + App.timeFormat);
+    }
+    return '';
+}
 /**
  * Convert a date to a date string with time filled with 0
  * // 2014-02-17T00:00:00Z
@@ -79,19 +146,29 @@ function getStoreTitles(v){
     return texts.join(',');
 }
 function getStoreNames(v){
-    if(Ext.isEmpty(v)) return '';
-    ids = String(v).split(',');
-    texts = [];
-    Ext.each(ids, function(id){
-         idx = this.findExact('id', parseInt(id, 10));
-        if(idx >= 0) texts.push(this.getAt(idx).get('name'));
-    }, this);
+    if(Ext.isEmpty(v)) {
+        return '';
+    }
+    var ids = String(v).split(',');
+    var texts = [];
+    Ext.each(
+        ids
+        ,function(id){
+            var idx = this.findExact('id', parseInt(id, 10));
+            if(idx >= 0) {
+                var d = this.getAt(idx).data;
+                texts.push(d.name);
+            }
+        }
+        ,this
+    );
+
     return texts.join(',');
 }
 
 function toNumericArray(v){
     if (Ext.isEmpty(v)) {
-        return array();
+        return [];
     }
     if (!Ext.isArray(v)) {
         v = String(v).split(',');
@@ -148,10 +225,12 @@ function updateMenu(menuButton, menuConfig, handler, scope){
             case 'task': break;
             case 'event': break;
             case 'folder': break;
-            case '-': menu.push('-'); break;
+            case '-':
+                menu.push('-');
+                break;
             default:
                 idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i], 10));
-                if(idx >=0){
+                if(idx >= 0){
                     tr = CB.DB.templates.getAt(idx);
                     data = {
                             template_id: tr.get('id')

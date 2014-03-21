@@ -13,7 +13,7 @@ if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180))
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title><?php
 
-echo constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE));
+echo Config::get('project_name_'.USER_LANGUAGE, CORE_NAME);
 
 ?></title>
     <link rel="stylesheet" type="text/css" href="<?php echo URI_PREFIX; ?>css/bs/css/bootstrap.min.css" />

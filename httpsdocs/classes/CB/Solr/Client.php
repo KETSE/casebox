@@ -10,61 +10,6 @@ use CB\DB as DB;
 class Client extends Service
 {
     /**
-     * acceptable solr fields list
-     * @var array
-     */
-    private $solr_fields = array(
-        'id'
-        ,'pid'
-        ,'pids'
-        ,'path'
-        ,'name'
-        ,'system'
-        ,'type'
-        ,'subtype'
-        ,'size'
-        ,'date'
-        ,'date_end'
-        ,'oid'
-        ,'cid'
-        ,'cdate'
-        ,'uid'
-        ,'udate'
-        ,'did'
-        ,'ddate'
-        ,'dstatus'
-        ,'case_id'
-        ,'case'
-        ,'template_id'
-        ,'template_type'
-        ,'cls'
-        ,'user_ids'
-        ,'acl_count'
-        ,'security_set_id'
-        ,'status'
-        ,'category_id'
-        ,'importance'
-        ,'completed'
-        ,'versions'
-        ,'sys_tags'
-        ,'tree_tags'
-        ,'user_tags'
-        ,'metas'
-        ,'content'
-        ,'ntsc'
-        ,'role_ids1'
-        ,'role_ids2'
-        ,'role_ids3'
-        ,'role_ids4'
-        ,'role_ids5'
-        // custom core fields
-        ,'substatus'
-        ,'ym1'
-        ,'ym2'
-        ,'ym3'
-    );
-
-    /**
      * running cron for updating tree changes into solr
      */
     public static function runCron()

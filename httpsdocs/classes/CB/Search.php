@@ -35,7 +35,7 @@ class Search extends Solr\Client
         $this->facetsSetManually = (
             isset($p['facet']) ||
             isset($p['facet.field']) ||
-            isset($p['facet.qury'])
+            isset($p['facet.query'])
         );
         $this->prepareParams();
         $this->connect();
@@ -56,7 +56,8 @@ class Search extends Solr\Client
         $this->start = empty($p['start'])? 0 : intval($p['start']);
         $this->rows = isset($p['rows']) ? intval($p['rows']) : \CB\CONFIG\MAX_ROWS;
 
-        $fq = array('dstatus:0'); //by default filter not deleted nodes
+        //by default filter not deleted nodes
+        $fq = array('dstatus:0');
 
         $this->params = array(
             'defType' => 'dismax'
@@ -104,7 +105,8 @@ class Search extends Solr\Client
             }
             foreach ($sort as $f => $d) {
                 if (isset($this->replaceSortFields[$f])) {
-                    $f = $this->replaceSortFields[$f]; // replace with convenient sorting fields if defined
+                    // replace with convenient sorting fields if defined
+                    $f = $this->replaceSortFields[$f];
                 }
                 if (!in_array($f, $this->acceptableSortFields)) {
                     continue;
@@ -177,7 +179,6 @@ class Search extends Solr\Client
                     default: $p['types'][$i] = intval($p['types'][$i]);
                 }
             }
-            // $ids = Util\toNumericArray($p['types']);
             if (!empty($p['types'])) {
                 $fq[] = 'type:('.implode(' OR ', $p['types']).')';
             }
@@ -203,13 +204,6 @@ class Search extends Solr\Client
                 $fq[] = 'template_type:("'.implode('" AND "', $GLOBALS['folder_templates']).'")';
             } else {
                 $fq[] = '!template_id:('.implode(' OR ', $GLOBALS['folder_templates']).')';
-            }
-        }
-
-        if (!empty($p['tags'])) {
-            $ids = Util\toNumericArray($p['tags']);
-            if (!empty($ids)) {
-                $fq[] = 'sys_tags:('.implode(' OR ', $ids).')';
             }
         }
 
@@ -281,6 +275,11 @@ class Search extends Solr\Client
                         $facetParams['facet.query'] = array();
                     }
                     $facetParams['facet.query'] = @array_merge($facetParams['facet.query'], $fp['facet.query']);
+                } elseif (!empty($fp['facet.pivot'])) {
+                    if (empty($facetParams['facet.pivot'])) {
+                        $facetParams['facet.pivot'] = array();
+                    }
+                    $facetParams['facet.pivot'] = @array_merge($facetParams['facet.pivot'], $fp['facet.pivot']);
                 }
             }
         }
@@ -346,7 +345,7 @@ class Search extends Solr\Client
             }
             $rez['data'][] = $rd;
         }
-        $rez['facets'] = $this->processResultFacets();
+        $rez = array_merge($rez, $this->processResultFacets());
 
         $eventParams = array(
             'result' => &$rez
@@ -362,7 +361,9 @@ class Search extends Solr\Client
     private function processResultFacets()
     {
         if ($this->facetsSetManually) {
-            return $this->results->facet_counts;
+            return array(
+                'facets' => $this->results->facet_counts
+            );
         }
 
         $rez = array();
@@ -370,92 +371,14 @@ class Search extends Solr\Client
             $facet->loadSolrResult($this->results->facet_counts);
             $fr = $facet->getClientData();
             if (!empty($fr)) {
-                $rez[$fr['f']] = $fr;
+                $idx = empty($fr['index'])
+                    ? 'facets'
+                    : $fr['index'];
+
+                $rez[$idx][$fr['f']] = $fr;
             }
         }
 
         return $rez;
-    }
-
-    public function analizeTreeTagsFacet($values, &$rez)
-    {
-        $groups = defined('CB\\CONFIG\\TAGS_FACET_GROUPING') ? CONFIG\TAGS_FACET_GROUPING : 'pids';
-        $ids = array();
-        foreach ($values as $k => $v) {
-            $ids[] = $k;
-        }
-
-        if (empty($ids)) {
-            return false;
-        }
-
-        $names = array();
-        /* selecting names*/
-        $res = DB\dbQuery(
-            'SELECT t.id
-                 , t.name
-            FROM tree t
-            WHERE t.id IN ('.implode(', ', $ids).')'
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $names[$r['id']] = L\getTranslationIfPseudoValue($r['name']);
-        }
-        $res->close();
-        /* end of selecting names*/
-
-        switch ($groups) {
-            case 'all':
-                foreach ($values as $k => $v) {
-                    $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
-                }
-                break;
-            case 'pids':
-                $res = DB\dbQuery(
-                    'SELECT t.id
-                         , t.pid
-                         , p.name
-                    FROM tree t
-                    JOIN tree p ON t.pid = p.id
-                    WHERE t.id IN ('.implode(', ', $ids).')'
-                ) or die(DB\dbQueryError());
-
-                while ($r = $res->fetch_assoc()) {
-                    $rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
-                    $rez['ttg_'.$r['pid']]['name'] = L\getTranslationIfPseudoValue($r['name']);
-                    $rez['ttg_'.$r['pid']]['items'][$r['id']] =  array('name' => $names[$r['id']], 'count' => $values->{$r['id']});
-                }
-                $res->close();
-                break;
-            default:
-                $res = DB\dbQuery(
-                    'SELECT t.id
-                         , t.pid
-                         , p.name
-                    FROM tree t
-                    JOIN tree p ON t.pid = p.id
-                    WHERE t.id IN ('.implode(', ', $ids).')
-                        AND p.id IN('.$groups.')'
-                ) or die(DB\dbQueryError());
-
-                while ($r = $res->fetch_assoc()) {
-                    $rez['ttg_'.$r['pid']]['f'] = 'tree_tags';
-                    $rez['ttg_'.$r['pid']]['name'] = $r['name'];
-                    $rez['ttg_'.$r['pid']]['items'][$r['id']] = array('name' => $names[$r['id']], 'count' => $values->{$r['id']});
-                    unset($values->{$r['id']});
-                }
-                $res->close();
-
-                if (!empty($values)) {
-                    foreach ($values as $k => $v) {
-                        if (isset( $names[$k] )) {
-                            $rez['tree_tags']['items'][$k] = array('name' => $names[$k], 'count' => $v);
-                        }
-                    }
-                }
-                break;
-        }
-
-        return true;
     }
 }

@@ -16,7 +16,8 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     m.attr = Ext.isEmpty(v) ? '' : "title='"+v+"'";
                     rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
                     if( (this.hideArrows !== true) && r.get('has_childs')) {
-                        rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />';
+                        rez += ' <span class="fs9">&hellip;</span>';
+                        // rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />';
                     }
                     vi = getVersionsIcon(r.get('versions'));
                     if(!Ext.isEmpty(vi)) rez = '<span class="ver_count '+vi+'" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
@@ -34,7 +35,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     return v;
                 }
             }
-            ,{header: L.Tags, width:200, dataIndex: 'sys_tags', hidden: true, sortable: false, renderer: App.customRenderers.tagIds}
             ,{ header: L.Date, width: 120, dataIndex: 'date',/* xtype: 'datecolumn',/**/ format: App.dateFormat + ' ' + App.timeFormat, renderer: App.customRenderers.datetime}
             ,{ header: L.Size, width: 80, dataIndex: 'size', renderer: App.customRenderers.filesize}
             ,{ header: L.Creator, hidden:true, width: 200, dataIndex: 'cid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
@@ -129,7 +129,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 // ,contextmenu: this.onContextMenu
                 // ,rowcontextmenu: this.onRowContextMenu
                 // ,beforedestroy: this.onBeforeDestroy
-                ,cellclick: this.onCellClick
                 // ,activate: App.onComponentActivated
                 ,mousedown: function(e){
                     if(e.button == 2){ //rightclick
@@ -254,7 +253,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
             }
             ,plugins: [{
                     ptype: 'CBPluginsFilesDropZone'
-                    , pidPropety: 'nid'
+                    ,pidPropety: 'nid'
                 },{
                     ptype: 'CBDDGrid'
                 }
@@ -307,18 +306,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         this.syncSize();
 
         App.mainViewPort.selectGridObject(this.grid);
-    }
-
-    ,onCellClick: function(grid, rowIndex, colIndex, e){
-        el = e.getTarget();
-        if(el && el.classList.contains('icon-arrow3')) {
-            var path = String(this.refOwner.folderProperties.path);
-            if(path.substr(-1) != '/') {
-                path += '/';
-            }
-            path += this.grid.store.getAt(rowIndex).get('nid');
-            this.fireEvent('changeparams', {path: path});
-        }
     }
 
     ,onScrollerDragDrop: function(targetData, source, e, sourceData){

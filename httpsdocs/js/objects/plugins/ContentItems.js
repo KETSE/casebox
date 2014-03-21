@@ -22,7 +22,7 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'
-            ,'        <span class="gr">{user}, {ago_text}</span>'
+            ,'        <span class="gr" title="{[ displayDateTime(values.cdate) ]}">{user}, {ago_text}</span>'
             ,'    </td>'
             ,'    <td class="elips">'
             ,'        <span class="click menu"></span>'
@@ -43,6 +43,7 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
                 ,{name: 'cid', type: 'int'}
                 ,'iconCls'
                 ,'user'
+                ,'cdate'
                 ,'ago_text'
             ]
         });
@@ -67,6 +68,9 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,onLoadData: function(r, e) {
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
         for (var i = 0; i < r.data.length; i++) {
             r.data[i].iconCls = getItemIcon(r.data[i]);
         }
@@ -109,9 +113,32 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
     ,getToolbarItems: function() {
         return [this.actions.add];
     }
+
     ,onAddClick: function(b, e) {
-        clog('adding new task');
+        if(this.pmenu) {
+            this.pmenu.destroy();
+        }
+        this.pmenu = new Ext.menu.Menu({items: []});
+
+        updateMenu(
+            {menu: this.pmenu}
+            ,getMenuConfig(
+                this.params.id
+                ,this.params.path
+                ,this.params.template_id
+            )
+            ,this.onCreateObjectClick
+            ,this
+        );
+        this.pmenu.show(b.getEl());
     }
+
+    ,onCreateObjectClick: function(b, e) {
+        b.data.pid = this.params.id;
+        b.data.path = this.params.path;
+        this.fireEvent('createobject', b.data, e);
+    }
+
 });
 
 Ext.reg('CBObjectsPluginsContentItems', CB.objects.plugins.ContentItems);

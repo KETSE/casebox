@@ -47,7 +47,9 @@ class Objects
             ,'cdate'
             ,'udate'
             ,'case_id'
+            ,'status'
             ,'data'
+            ,'can'
         );
         foreach ($properties as $property) {
             if (isset($objectData[$property])) {
@@ -190,8 +192,7 @@ class Objects
         $body = '';
         $bottom = '';
         try {
-            $obj = static::getCustomClassByObjectId($id);
-            $obj->load();
+            $obj = static::getCachedObject($id);
 
             if ($obj->getType() == 'task') {
                 $tc = new Tasks();
@@ -199,11 +200,15 @@ class Objects
                 return $tc->getPreview($id);
             }
 
+            // $objData = $obj->getData();
+
             $linearData = $obj->getLinearData();
         } catch (\Exception $e) {
             return '';
         }
 
+        // set object name block
+        // $top = '<div class="obj-header">'.$objData['name'].'</div>';
         $template = $obj->getTemplate();
         $gf = array();
         //group fields in display blocks
@@ -224,13 +229,13 @@ class Objects
 
         if (!empty($gf['top'])) {
             foreach ($gf['top'] as $f) {
-                // if ($f['name'] == '_title') {
-                //     continue;
-                // }
+                if ($f['name'] == '_title') {
+                    continue;
+                }
                 // if ($f['name'] == '_date_start') {
                 //     continue;
                 // }
-                $v = $template->formatValueForDisplay($f['tf'], $f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], $f); //['value']
                 if (is_array($v)) {
                     $v = implode(', ', $v);
                 }
@@ -240,8 +245,9 @@ class Objects
             }
         }
         if (!empty($gf['body'])) {
+            $previousHeader = '';
             foreach ($gf['body'] as $f) {
-                $v = $template->formatValueForDisplay($f['tf'], @$f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], @$f); //['value']
                 if (is_array($v)) {
                     $v = implode('<br />', $v);
                 }
@@ -250,9 +256,11 @@ class Objects
                     continue;
                 }
                 $headerField = $template->getHeaderField($f['tf']['id']);
-                if (!empty($headerField)) {
+                if (!empty($headerField) && ($previousHeader != $headerField)) {
                     $body .= '<tr class="prop-header"><th colspan="3"'.(empty($headerField['level']) ? '' : ' style="padding-left: '.($headerField['level'] * 10).'px"').'>'.$headerField['title'].'</th></tr>';
                 }
+                $previousHeader = $headerField;
+
                 $body .= '<tr><td'.(empty($f['tf']['level']) ? '' : ' style="padding-left: '.($f['tf']['level'] * 10).'px"').
                     ' class="prop-key">'.$f['tf']['title'].'</td><td class="prop-val">'.$v.
                     (empty($f['info']) ? '' : '<p class="prop-info">'.$f['info'].'</p>').'</td></tr>';
@@ -261,7 +269,7 @@ class Objects
 
         if (!empty($gf['bottom'])) {
             foreach ($gf['bottom'] as $f) {
-                $v = $template->formatValueForDisplay($f['tf'], $f['value']);
+                $v = $template->formatValueForDisplay($f['tf'], $f); //['value']
                 if (empty($v)) {
                     continue;
                 }
@@ -410,23 +418,6 @@ class Objects
                             $f['value'][10] = 'T';
                         }
                         break;
-                    case 'combo':
-                    case 'popuplist':
-                        $f['value'] = Util\toNumericArray($f['value']);
-                        if (empty($f['value'])) {
-                            break;
-                        }
-                        $sres = DB\dbQuery(
-                            'SELECT l'.LANGUAGE_INDEX.' `title`
-                            FROM tags
-                            WHERE id IN ('.implode(',', $f['value']).')'
-                        ) or die(DB\dbQueryError());
-
-                        while ($sr = $sres->fetch_assoc()) {
-                            $processed_values[] = $sr['title'];
-                        }
-                        $sres->close();
-                        break;
                     case 'html':
                         $f['value'] = strip_tags($f['value']);
                         break;
@@ -435,14 +426,12 @@ class Objects
 
                 if (@$field['cfg']['faceting'] && in_array($field['type'], array('combo', 'int', '_objects'))) {
                     $solr_field = $field['solr_column_name'];
-                    if (empty($solr_field)) {
-                        $solr_field = ( empty($field['cfg']['source']) || ($field['cfg']['source'] == 'thesauri') ) ?
-                            'sys_tags' : 'tree_tags';
-                    }
-                    $arr = Util\toNumericArray($f['value']);
-                    foreach ($arr as $v) {
-                        if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
-                            $object_record[$solr_field][] = $v;
+                    if (!empty($solr_field)) {
+                        $arr = Util\toNumericArray($f['value']);
+                        foreach ($arr as $v) {
+                            if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
+                                $object_record[$solr_field][] = $v;
+                            }
                         }
                     }
                 }
@@ -787,9 +776,9 @@ class Objects
             $class = '\\CB\\Objects\\Plugins\\'.ucfirst($pluginName);
             $pClass = new $class($id);
             $prez = $pClass->getData();
-            if (!empty($prez) && isset($prez['data'])) {
-                $rez['data'][$pluginName] = $prez;
-            }
+            // if (!empty($prez) && isset($prez['data'])) {
+            $rez['data'][$pluginName] = $prez;
+            //}
         }
 
         return $rez;
@@ -836,6 +825,7 @@ class Objects
                 'id' => $id
                 ,'pid' => $p['id']
                 ,'template_id' => $data['template_id']
+                ,'cdate' => date(DATE_ATOM)
                 ,'cdate_text' => Util\formatAgoTime('now')
                 ,'cid' => $_SESSION['user']['id']
                 ,'user' => User::getDisplayName($_SESSION['user']['id'])
