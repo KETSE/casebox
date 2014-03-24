@@ -724,7 +724,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(params.path)) {
             params.path = '/';
         }
-        var newParams = Ext.apply({}, params);//, this.params
+        var newParams = Ext.decode(Ext.encode(params));//, this.params
         var sameParams = this.sameParams(
             this.params
             ,newParams

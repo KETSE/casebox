@@ -26,11 +26,6 @@ $API = array_merge(
                 ,'shortcut'     => array('len' => 1)
             )
         )
-        ,'CB_Browser_SearchRouter' => array(
-            'methods' => array(
-                'search'          => array('len' => 1)
-            )
-        )
 
         ,'CB_Path' => array(
             'methods' => array(

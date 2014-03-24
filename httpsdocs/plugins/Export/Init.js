@@ -5,9 +5,6 @@ CB.plugins.Export.init = function(){
         return;
     }
     App.on('browserinit', function(c){
-        if(!c.isXType(CB.plugins.Search.ResultForm, false)) {
-            return;
-        }
         var p = Ext.apply([], Ext.value(c.plugins, []));
         p.push({ptype: 'CBPluginsExportButton'});
         c.plugins = p;

@@ -337,6 +337,9 @@ function formatMysqlDate($date, $format = false, $TZ = 'UTC')
     if (empty($date)) {
         return '';
     }
+    if (empty($TZ)) {
+        $TZ = 'UTC';
+    }
     if ($format == false) {
         $format = \CB\getOption('short_date_format');
     }
@@ -346,10 +349,9 @@ function formatMysqlDate($date, $format = false, $TZ = 'UTC')
     $d1->setTimezone(new \DateTimeZone($TZ));
 
 
-    $rez = $d1->format($format);
+    $rez = $d1->format(str_replace('%', '', $format));
 
     return $rez;
-    // return date(str_replace('%', '', $format), strtotime($date));
 }
 
 function formatMysqlTime($date, $format = false)
