@@ -1,3 +1,9 @@
+CaseBox 1.9.179 (2014-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- move "more" button with export above grid
+
 CaseBox 1.9.178 (2014-03-25)
 ==============================
 New Features, Improvements
