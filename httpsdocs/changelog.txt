@@ -1,3 +1,14 @@
+CaseBox 1.9.178 (2014-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- moved export button under "more" button
+
+Fixed Bugs:
+----------
+- corrected wrong method name in export plugin
+- char case syntactic bug
+
 CaseBox 1.9.177 (2014-03-24)
 ==============================
 New Features, Improvements

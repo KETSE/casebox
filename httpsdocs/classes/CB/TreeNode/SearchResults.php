@@ -3,7 +3,7 @@ namespace CB\TreeNode;
 
 use CB\Util;
 
-class SearchResults extends DBNode
+class SearchResults extends Dbnode
 {
     protected function acceptedPath()
     {

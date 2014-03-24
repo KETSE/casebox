@@ -173,8 +173,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,iconCls: 'ib-points'
                 ,iconAlign:'top'
                 ,scale: 'large'
-                ,menu: [
-                ]
+                ,scope: this
+                ,handler: function(b, e) {
+                    this.tbarMoreMenu.show(b.getEl());
+                }
             })
             ,new Ext.Button({
                 text: L.Filter
@@ -238,7 +240,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ,items: [
                 this.buttonCollection.get('filter')
                 ,this.buttonCollection.get('preview')
-                // ,this.buttonCollection.more
+                ,this.buttonCollection.get('more')
 
             ]
         });
@@ -300,6 +302,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,this.searchField
             ]
         });
+
+        this.tbarMoreMenu = new Ext.menu.Menu({items: []});
 
         this.objectPanel = new CB.ObjectCardView();
 

@@ -80,7 +80,7 @@ class Instance
 
             if (($p['start'] + $p['rows']) < $results['total']) {
                 $p['start'] += $p['rows'];
-                $results = $sr->search($p);
+                $results = $sr->getChildren($p);
             } else {
                 $results['data'] = array();
             }
