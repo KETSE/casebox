@@ -1,3 +1,30 @@
+CaseBox 1.9.179 (2014-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- move "more" button with export above grid
+
+CaseBox 1.9.178 (2014-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- moved export button under "more" button
+
+Fixed Bugs:
+----------
+- corrected wrong method name in export plugin
+- char case syntactic bug
+
+CaseBox 1.9.177 (2014-03-24)
+==============================
+New Features, Improvements
+--------------------------
+- search adjustments related to hcav
+
+Fixed Bugs:
+----------
+- Error appears on preview when user does not have timezone specified in its profile
+
 CaseBox 1.9.166 (2014-03-21)
 ==============================
 Fixed Bugs:

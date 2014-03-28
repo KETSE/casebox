@@ -68,8 +68,9 @@ CB.plugins.Search.Button =  Ext.extend(CB.plugins.customInterface, {
 
     ,onSearchTemplateClick: function(b, e) {
         var tid, data, objectsStoreData = [];
-        this.owner.onRightPanelViewChangeClick({itemIndex: 2});
 
+        this.owner.onRightPanelViewChangeClick({itemIndex: 2});
+        this.button.toggle(true);
         //save currently specified values from search form
         //we also need to save records from objectsStore (used for rendering in grid)
         if(!Ext.isEmpty(this.searchForm.data.template_id)) {
@@ -93,7 +94,7 @@ CB.plugins.Search.Button =  Ext.extend(CB.plugins.customInterface, {
 
         //loading data for newly selected template
         tid = b.data.template_id;
-        data = Ext.value(this.historyData[tid], {});
+        data = Ext.value(this.historyData[tid], {template_id: tid});
         objectsStoreData = [];
 
         if(!Ext.isEmpty(this.historyData[tid])) {

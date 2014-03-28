@@ -357,14 +357,14 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             //automatic switch to plugins panel
             this.onViewChangeClick(0);
 
-            if(this.skipNextPreviewLoadOnBrowserRefresh) {
-                delete this.skipNextPreviewLoadOnBrowserRefresh;
-            } else {
+            // if(this.skipNextPreviewLoadOnBrowserRefresh) {
+            //     delete this.skipNextPreviewLoadOnBrowserRefresh;
+            // } else {
                 this.items.itemAt(0).clear();
 
                 // instantiate a delay to exclude flood requests
                 this.delayedLoadTask.delay(60, this.doLoad, this);
-            }
+            // }
         }
     }
 
@@ -596,7 +596,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                     p.viewIndex = 0;
                     this.requestedLoadData = p;
                     this.doLoad();
-                    this.skipNextPreviewLoadOnBrowserRefresh = true;
+                    // this.skipNextPreviewLoadOnBrowserRefresh = true;
                 }
                 delete this.goBackOnSave;
             }

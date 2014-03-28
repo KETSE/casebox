@@ -173,8 +173,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,iconCls: 'ib-points'
                 ,iconAlign:'top'
                 ,scale: 'large'
-                ,menu: [
-                ]
+                ,scope: this
+                ,handler: function(b, e) {
+                    this.tbarMoreMenu.show(b.getEl());
+                }
             })
             ,new Ext.Button({
                 text: L.Filter
@@ -238,7 +240,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ,items: [
                 this.buttonCollection.get('filter')
                 ,this.buttonCollection.get('preview')
-                // ,this.buttonCollection.more
 
             ]
         });
@@ -300,6 +301,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,this.searchField
             ]
         });
+
+        this.tbarMoreMenu = new Ext.menu.Menu({items: []});
 
         this.objectPanel = new CB.ObjectCardView();
 
@@ -548,6 +551,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(buttonsArray.indexOf('apps') < 0) {
             buttonsArray.unshift('apps');
         }
+
+        if(buttonsArray.indexOf('more') < 0) {
+            buttonsArray.push('more');
+        }
+
         //add plugin buttons if defined
         if(!Ext.isEmpty(this.pluginButtons)) {
             buttonsArray.push('->');
@@ -724,7 +732,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(params.path)) {
             params.path = '/';
         }
-        var newParams = Ext.apply({}, params);//, this.params
+        var newParams = Ext.decode(Ext.encode(params));//, this.params
         var sameParams = this.sameParams(
             this.params
             ,newParams

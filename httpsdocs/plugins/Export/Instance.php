@@ -44,8 +44,8 @@ class Instance
         $p['start'] = 0;
         $p['rows'] = 500;
 
-        $sr = new \Hcav\SearchRouter();
-        $results = $sr->search($p);
+        $sr = new \CB\Browser();
+        $results = $sr->getChildren($p);
         if (!empty($results['DC'])) {
             foreach ($results['DC'] as $colName => $col) {
                 $this->columns[$colName] = @$col['title'];
@@ -80,7 +80,7 @@ class Instance
 
             if (($p['start'] + $p['rows']) < $results['total']) {
                 $p['start'] += $p['rows'];
-                $results = $sr->search($p);
+                $results = $sr->getChildren($p);
             } else {
                 $results['data'] = array();
             }

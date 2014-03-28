@@ -51,6 +51,11 @@ CB.VerticalSearchEditGrid = Ext.extend(CB.VerticalEditGrid, {
             return this.oldOnBeforeEditProperty(e);
         }
 
+        if(e.record.get('type') == 'H') {
+            e.cancel = true;
+            return;
+        }
+
         var ed = new Ext.form.ComboBox({
             enableKeyEvents: true
             ,forceSelection: true
@@ -71,9 +76,7 @@ CB.VerticalSearchEditGrid = Ext.extend(CB.VerticalEditGrid, {
         var cond = [];
         switch(type) {
             case 'H':
-                e.cancel = true;
-                return;
-
+                break;
             case 'int':
             case 'float':
             case 'date':
