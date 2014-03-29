@@ -1,10 +1,11 @@
 <?php
 namespace CB\Browser;
 
-use CB\L as L;
-use CB\DB as DB;
-use CB\Util as Util;
-use CB\Solr as Solr;
+use CB\L;
+use CB\DB;
+use CB\Util;
+use CB\Solr;
+use CB\Security;
 
 /**
  * class designed for actions like:
@@ -241,16 +242,21 @@ class Actions
         $rez = array();
         // all the copy process will be made in a single transaction
         DB\startTransaction();
+
         //get security sets to which this user has
         //read access for copy or delete access for move
-        $this->access_security_sets = array();
-        switch ($action) {
-            case 'copy':
-                $this->access_security_sets = \CB\Security::getSecuritySets();
-                break;
-            case 'move':
-                $this->access_security_sets = \CB\Security::getSecuritySets(false, 8);
-                break;
+        $this->securitySetsFilter = '';
+        if (!Security::isAdmin()) {
+            $ss = array();
+            switch ($action) {
+                case 'copy':
+                    $ss = \CB\Security::getSecuritySets();
+                    break;
+                case 'move':
+                    $ss = \CB\Security::getSecuritySets(false, 8);
+                    break;
+            }
+            $this->securitySetsFilter = 'AND ti.security_set_id in (0'.implode(',', $ss).')';
         }
 
         /* select only objects that current user can delete */
@@ -260,8 +266,7 @@ class Actions
             'SELECT t.id
             FROM tree t
             JOIN tree_info ti ON
-                t.id = ti.id
-                AND ti.security_set_id in (0'.implode(',', $this->access_security_sets).')
+                t.id = ti.id '.$this->securitySetsFilter.'
             WHERE t.id in ('.implode(',', $objectIds).')
                 AND t.dstatus = 0'
         ) or die(DB\dbQueryError());
@@ -270,9 +275,12 @@ class Actions
             $accessibleIds[] = $r['id'];
         }
         $res->close();
+
         if (!empty($accessibleIds)) {
             $this->objectsClass = new \CB\Objects();
             $rez = $this->doRecursiveAction($action, $accessibleIds, $targetId);
+        } else {
+            throw new \Exception(L\Access_denied, 1);
         }
 
         DB\commitTransaction();
@@ -337,8 +345,7 @@ class Actions
                 'SELECT t.id
                 FROM tree t
                 JOIN tree_info ti ON
-                    t.id = ti.id
-                    AND ti.security_set_id in (0'.implode(',', $this->access_security_sets).')
+                    t.id = ti.id '.$this->securitySetsFilter.'
                 WHERE t.pid = $1 AND t.dstatus = 0',
                 $objectId
             ) or die(DB\dbQueryError());

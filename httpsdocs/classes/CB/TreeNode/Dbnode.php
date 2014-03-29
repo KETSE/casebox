@@ -28,6 +28,9 @@ class Dbnode extends Base
                 }
             }
         }
+        if (empty($pid)) {
+            return array();
+        }
         /* end of check */
 
         $p = &$requestParams;

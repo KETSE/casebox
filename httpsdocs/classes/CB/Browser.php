@@ -15,7 +15,7 @@ class Browser
 
         /* prepare params */
         $path = '/';
-        if (empty($p['path'])) {
+        if (!isset($p['path']) || (strlen($p['path']) < 1)) {
             if (!empty($p['pid'])) {
                 $path = $p['pid'];
             }
@@ -23,6 +23,7 @@ class Browser
             $path = $p['path'];
         }
         $p['path'] = $path;
+
         $this->showFoldersContent = isset($p['showFoldersContent'])
             ? $p['showFoldersContent']
             : false;
@@ -112,7 +113,7 @@ class Browser
             $nodeId = null;
 
             $el = array_shift($path);
-            if (empty($el)) {
+            if (strlen($el) < 1) {
                 continue;
             }
 

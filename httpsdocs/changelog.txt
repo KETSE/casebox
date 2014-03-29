@@ -1,10 +1,19 @@
-CaseBox 1.9.179 (2014-03-25)
+CaseBox 1.9.170 (2014-03-29)
+==============================
+New Features, Improvements
+--------------------------
+- plugins can be defined in config table of the core
+- check for admin on copy/move action
+- added CasesGrouped tree node plugin
+- check for variable scope in vertical edit grid
+
+CaseBox 1.9.169 (2014-03-25)
 ==============================
 New Features, Improvements
 --------------------------
 - move "more" button with export above grid
 
-CaseBox 1.9.178 (2014-03-25)
+CaseBox 1.9.168 (2014-03-25)
 ==============================
 New Features, Improvements
 --------------------------
@@ -15,7 +24,7 @@ Fixed Bugs:
 - corrected wrong method name in export plugin
 - char case syntactic bug
 
-CaseBox 1.9.177 (2014-03-24)
+CaseBox 1.9.167 (2014-03-24)
 ==============================
 New Features, Improvements
 --------------------------

@@ -53,10 +53,11 @@ class Tasks extends Base
             return;
         }
 
-        $this->createDefaultFilter();
+        $ourPid = @intval($this->config['pid']);
 
+        $this->createDefaultFilter();
         if (empty($this->lastNode) ||
-            (($this->lastNode->id == @$this->config['pid']) && (get_class($this->lastNode) != get_class($this))) ||
+            (($this->lastNode->id == $ourPid) && (get_class($this->lastNode) != get_class($this))) ||
             (\CB\Objects::getType($this->lastNode->id) == 'case')
         ) {
             $rez = $this->getRootNodes();
