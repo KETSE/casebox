@@ -1,3 +1,9 @@
+CaseBox 1.9.171 (2014-03-29)
+==============================
+New Features, Improvements
+--------------------------
+- remove type and subtype fields from indexing to solr. This fields are obsolete and cause other indexing problems.
+
 CaseBox 1.9.170 (2014-03-29)
 ==============================
 New Features, Improvements
