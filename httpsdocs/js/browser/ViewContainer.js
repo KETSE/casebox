@@ -646,7 +646,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
 
         if(this.store.load(this.params)) {
-            this.getEl().mask(L.Loading, 'x-mask-loading');
+            // this.getEl().mask(L.Loading, 'x-mask-loading');
         }
     }
 

@@ -30,6 +30,24 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,attachEvents: function(){
+        a = this.getEl().query('a.locate');
+        Ext.each(
+            a
+            ,function(t){
+                Ext.get(t).addListener(
+                    'click'
+                    ,function(ev, el){
+                        this.fireEvent('openproperties', {
+                            id: el.attributes.getNamedItem('nid').value
+                            ,path: el.attributes.getNamedItem('path').value
+                        });
+                    }
+                    ,this
+                );
+            }
+            ,this
+        );
+
         a = this.getEl().query('a.taskA');
         Ext.each(
             a

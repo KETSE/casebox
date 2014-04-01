@@ -1,3 +1,10 @@
+CaseBox 1.9.172 (2014-04-01)
+==============================
+New Features, Improvements
+--------------------------
+- open preview of the clickable items from preview
+- added onBeforeGeneratePreview event that gets as argument an array with properties "object" and "groupedFields"
+
 CaseBox 1.9.171 (2014-03-29)
 ==============================
 New Features, Improvements
