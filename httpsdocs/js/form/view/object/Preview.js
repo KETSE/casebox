@@ -54,7 +54,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
     }
     ,doLoad: function(id, vId) {
         this.load({
-            url: '/preview/'+ id +'_' + vId + '.html'
+            url: '/' + App.config.coreName + '/preview/'+ id +'_' + vId + '.html'
             ,callback: this.processLoad
             ,scope: this // optional scope for the callback
             ,discardUrl: false

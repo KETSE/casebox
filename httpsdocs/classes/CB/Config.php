@@ -36,9 +36,24 @@ class Config extends Singleton
         }
         $cfg['facet_configs'] = $dfd;
 
+        // detect core plugins (use defined or default if set)
+        $plugins = array();
+        if (!empty($cfg['default_plugins'])) {
+            $plugins = $cfg['default_plugins'];
+        }
+        if (!empty($cfg['plugins'])) {
+            $plugins = Util\toJSONArray($cfg['plugins']);
+        }
+        $cfg['plugins'] = $plugins;
+        // end of detect plugins
+
+        //decode properties of the core config that should be json
         $jsonProperties = array(
             'api'
+            ,'css'
             ,'js'
+            ,'plugins'
+            ,'listeners'
             ,'node_facets'
             ,'default_object_plugins'
             ,'object_type_plugins'

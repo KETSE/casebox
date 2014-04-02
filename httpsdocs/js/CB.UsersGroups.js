@@ -579,7 +579,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
             return '';
         }
         this.userInfo = new Ext.DataView({
-            tpl: ['<img class="fl user-photo-field click icon-user32-{sex}" src="/photo/{id}.png?{[ (new Date()).format("His") ]}">'
+            tpl: ['<img class="fl user-photo-field click icon-user32-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ (new Date()).format("His") ]}">'
                 ,'<span class="fwB click">{title}</span><br />'
                 ,'<span class="cG">'+L.User+':</span> {name}, <span class="cG">'+L.lastAction+':</span> {[ Ext.isEmpty(values.last_action_time) ? "" : values.last_action_time ]}<br />'
                 ,'<span class="cG">'+L.addedByUser+':</span> {owner}, {cdate}'
@@ -784,7 +784,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
     ,updatePhoto: function(name){
         if(Ext.isEmpty(name)) return;
             del = this.userInfo.getEl().query('img.user-photo-field')[0]
-            del.src = '/photo/' + name;
+            del.src = '/' + App.config.coreName + '/photo/' + name;
     }
     ,onEditUsernameClick: function(){
         Ext.Msg.prompt(L.ChangeUsername, L.ChangeUsernameMessage, function(btn, text){

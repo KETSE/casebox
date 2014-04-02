@@ -540,6 +540,22 @@ class Object extends OldObject
     }
 
     /**
+     * get template name of the object
+     * @return varchar | null
+     */
+    public function getTemplateName()
+    {
+        $template = $this->getTemplate();
+        if (empty($template)) {
+            return null;
+        }
+
+        $templateData = $template->getData();
+
+        return @$templateData['name'];
+    }
+
+    /**
      * get object type from template
      *
      * @return varchar

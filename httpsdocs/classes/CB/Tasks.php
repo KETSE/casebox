@@ -1179,7 +1179,6 @@ class Tasks
                 '<span class="dttm" title="{full_created_date_text}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
 
         $date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
-
         $d['datetime_period'] = ($d['allday'] == 1)
             ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
             : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['timezone']);

@@ -196,7 +196,8 @@ class User
         @$rez = array(
             'success' => true
             ,'config' => array(
-                'task_categories' => constant('CB\\CONFIG\\TASK_CATEGORIES')
+                'coreName' => CORE_NAME
+                ,'task_categories' => constant('CB\\CONFIG\\TASK_CATEGORIES')
                 ,'default_task_category' => constant('CB\\CONFIG\\DEFAULT_TASK_CATEGORY')
                 ,'folder_templates' => $GLOBALS['folder_templates']
                 ,'default_task_template' => constant('CB\\CONFIG\\DEFAULT_TASK_TEMPLATE')

@@ -279,14 +279,26 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             ,this
         );
 
-        if(!this.grid.editing) {
-            this.grid.getView().refresh();
+        // should rethink this refresh if other problems will appear
+        // because it makes the grid to loose focus after edit in objects form
+        // if(!this.grid.editing) {
+        //     //maintain selection before refreshing view
+        //     var sm = this.grid.getSelectionModel();
+        //     var lastSelection = null;
+        //     if(sm && sm.getSelectedCell) {
+        //         lastSelection = sm.getSelectedCell();
+        //     }
+        //     // this.grid.getView().refresh();
 
-            // focus only when object just loaded
-            if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
-                this.focusDefaultCell();
-            }
-        }
+        //     // focus only when object just loaded
+        //     if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
+        //         this.focusDefaultCell();
+        //     } else {
+        //         if(lastSelection) {
+        //             this.grid.getView().focusCell(lastSelection[0], lastSelection[1]);
+        //         }
+        //     }
+        // }
 
     }
 

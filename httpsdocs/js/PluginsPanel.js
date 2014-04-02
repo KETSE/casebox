@@ -54,24 +54,6 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
         var items = [];
         this.removeAll(true);
 
-        if((CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
-            !Ext.isEmpty(this.loadedParams.name)
-        ){
-            var titleView = new Ext.DataView({
-                autoHeight: true
-                ,cls: 'obj-plugin-title'
-                ,tpl: [
-                    '<tpl for=".">'
-                    ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(values.name) ]}</div>'
-                    ,'</tpl>'
-                ]
-                ,data: this.loadedParams
-                ,getContainerToolbarItems: function(){ return {};}
-            });
-
-            this.add(titleView);
-        }
-
         Ext.iterate(
             r.data
             ,function(k, v, o) {
@@ -91,6 +73,31 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
             }
             ,this
         );
+
+        /**
+         * we make this check for title after all plugins have been added
+         * because objectProperties plugin applies loaded data (including object name)
+         * to the params
+         */
+
+        if((CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
+            !Ext.isEmpty(this.loadedParams.name)
+        ){
+            var titleView = new Ext.DataView({
+                autoHeight: true
+                ,cls: 'obj-plugin-title'
+                ,tpl: [
+                    '<tpl for=".">'
+                    ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(values.name) ]}</div>'
+                    ,'</tpl>'
+                ]
+                ,data: this.loadedParams
+                ,getContainerToolbarItems: function(){ return {};}
+            });
+
+            this.insert(0, titleView);
+        }
+
         this.doLayout(true, true);
         this.fireEvent('loaded', this);
     }

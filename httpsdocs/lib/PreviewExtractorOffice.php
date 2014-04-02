@@ -70,7 +70,7 @@ class PreviewExtractorOffice extends PreviewExtractor
                     '<div style="padding: 5px">'.$this->purify(
                         file_get_contents($pfn),
                         array(
-                            'URI.Base' => '/preview/'
+                            'URI.Base' => '/' . CORE_NAME . '/preview/'
                             ,'URI.MakeAbsolute' => true
                         )
                     ).'</div>'

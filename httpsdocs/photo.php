@@ -10,7 +10,7 @@ $f = $_GET['f'];
 $f = explode('_', $f);
 $id = array_shift($f);
 
-$path = DOC_ROOT.'css/i/ico/32/';
+$path = CORE_URL.'css/i/ico/32/';
 $filename = 'user-male.png';
 
 require_once 'lib/DB.php';

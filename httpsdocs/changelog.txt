@@ -1,10 +1,49 @@
-CaseBox 1.9.179 (2014-03-25)
+CaseBox 1.9.173 (2014-04-02)
+==============================
+New Features, Improvements
+--------------------------
+- migrate from core subdomains to core subfolders. Example of mod_rewrite rules in install/httpd/ssl_casebox.conf
+- OSJI: "Manager's Calendar" should not be visible for non-managers
+- Left align in first column of the pivot table
+- Add "Reload Templates" button in "Settings" menu at the top for root user
+- "no name/Tree/" displayed in breadcrumbs
+
+Fixed Bugs:
+----------
+- Showing a date period for tasks with startDate only displays current date as end date
+- Pagination doesn't work in search results
+- After selecting users in 'Assigned' for a task, the grid loses focus
+- toolbar: adjustments to button position
+
+CaseBox 1.9.172 (2014-04-01)
+==============================
+New Features, Improvements
+--------------------------
+- open preview of the clickable items from preview
+- added onBeforeGeneratePreview event that gets as argument an array with properties "object" and "groupedFields"
+
+CaseBox 1.9.171 (2014-03-29)
+==============================
+New Features, Improvements
+--------------------------
+- remove type and subtype fields from indexing to solr. This fields are obsolete and cause other indexing problems.
+
+CaseBox 1.9.170 (2014-03-29)
+==============================
+New Features, Improvements
+--------------------------
+- plugins can be defined in config table of the core
+- check for admin on copy/move action
+- added CasesGrouped tree node plugin
+- check for variable scope in vertical edit grid
+
+CaseBox 1.9.169 (2014-03-25)
 ==============================
 New Features, Improvements
 --------------------------
 - move "more" button with export above grid
 
-CaseBox 1.9.178 (2014-03-25)
+CaseBox 1.9.168 (2014-03-25)
 ==============================
 New Features, Improvements
 --------------------------
@@ -15,7 +54,7 @@ Fixed Bugs:
 - corrected wrong method name in export plugin
 - char case syntactic bug
 
-CaseBox 1.9.177 (2014-03-24)
+CaseBox 1.9.167 (2014-03-24)
 ==============================
 New Features, Improvements
 --------------------------

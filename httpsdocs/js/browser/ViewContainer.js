@@ -11,6 +11,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
     ,initComponent: function(){
         var viewGroup = Ext.id();
+        this.viewGroup = viewGroup;
+
         this.history = [];
 
         this.actions = {
@@ -257,7 +259,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 scope: this
                 ,resize: function(c, adjWidth, adjHeight, rawWidth, rawHeight){
                     if(this.viewToolbar.rendered) {
-                        var cw = this.containerToolbar.items.getCount() * 48;
+                        var cw = 5;
+
+                        this.containerToolbar.items.each(
+                            function(b) {
+                                cw += b.getWidth();
+                            }
+                            ,this
+                        );
                         this.viewToolbar.setWidth(adjWidth - cw);
                         this.containerToolbar.setWidth(cw);
                     }
@@ -396,6 +405,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     options = {facets: 'general'};
                     Ext.apply(options, Ext.value(this.params, {}));
 
+                    //dont load calendar view when view bound are not set
                     var vp = this.cardContainer.getLayout().activeItem.getViewParams(options);
                     if( (vp === false) ||
                         (
@@ -564,7 +574,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
         }
 
-
         for (i = 0; i < buttonsArray.length; i++) {
             if((buttonsArray[i] == '-') || (buttonsArray[i] == '->')) {
                 this.viewToolbar.add(buttonsArray[i]);
@@ -643,7 +652,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
 
         if(this.store.load(this.params)) {
-            this.getEl().mask(L.Loading, 'x-mask-loading');
+            // this.getEl().mask(L.Loading, 'x-mask-loading');
         }
     }
 

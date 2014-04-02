@@ -657,9 +657,11 @@ function initApp(){
                                     this.grid.fireEvent('change', e);
                                 }
                             }, e);
+
                             if(w.setData) {
                                 w.setData(data);
                             }
+
                             w.show();
 
                             return w;

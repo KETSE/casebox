@@ -227,6 +227,13 @@ class Objects
             $gf[$group][] = $field;
         }
 
+        $params = array(
+            'object' => &$obj
+            ,'groupedFields' => &$gf
+        );
+
+        fireEvent('onBeforeGeneratePreview', $params);
+
         if (!empty($gf['top'])) {
             foreach ($gf['top'] as $f) {
                 if ($f['name'] == '_title') {

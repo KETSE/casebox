@@ -20,7 +20,7 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
                         ,'<tr><th colspan="2"><h3 style="padding: 35px 5px 10px 5px; font-size: 14px">'+L.RevisionHistory+'</h3></th></tr>'
                     ,'</tpl>'
                     ,'<tr class="item {cls}">'
-                        ,'<td class="user"><img class="photo50" src="/photo/{cid}.jpg"></td>'
+                        ,'<td class="user"><img class="photo50" src="/' + App.config.coreName + '/photo/{cid}.jpg"></td>'
                         ,'<td><b>{username}</b><br><span class="dttm" title="{ago_date}">{ago_text}, {size}</span>'
                         ,'<br /><p class="gr fn">{name}</p>'
                         ,'<p class="actions">'

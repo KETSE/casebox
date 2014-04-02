@@ -24,6 +24,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 iconCls: 'ib-edit-obj'
                 ,id: 'edit' + this.instanceId
                 ,scale: 'large'
+                ,text: L.Edit
                 ,disabled: true
                 ,scope: this
                 ,handler: this.onEditClick

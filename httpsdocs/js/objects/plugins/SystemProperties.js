@@ -51,7 +51,7 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
         }
 
         if(te.hasClass('path')) {
-            //opening path
+            App.openPath(this.params.path);
         }
 
     }

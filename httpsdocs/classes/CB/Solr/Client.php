@@ -48,7 +48,7 @@ class Client extends Service
      */
     private function getSolrData(&$objectRecord)
     {
-        switch ($objectRecord['template_type']) {
+        switch (@$objectRecord['template_type']) {
             case 'case':
             case 'object':
             case 'email':
@@ -137,8 +137,6 @@ class Client extends Service
                 ,ti.security_set_id
                 ,t.name
                 ,t.system
-                ,t.type
-                ,t.subtype
                 ,t.template_id
                 ,t.target_id
                 ,t.size
@@ -207,8 +205,6 @@ class Client extends Service
                     /* make some trivial type checks */
                     $r['ntsc'] = intval($r['ntsc']);
                     $r['system'] = @intval($r['system']);
-                    $r['type'] = @intval($r['type']);
-                    $r['subtype'] = @intval($r['subtype']);
 
                     $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
                     //exclude itself from pids
