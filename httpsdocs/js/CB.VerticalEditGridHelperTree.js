@@ -173,7 +173,6 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         if(Ext.isEmpty(this.templateStore)) {
             return;
         }
-
         this.templateStore.each(
             function(record) {
                 if(record.get('pid') == pid) {

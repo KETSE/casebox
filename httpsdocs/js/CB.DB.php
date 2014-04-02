@@ -222,10 +222,12 @@ reloadTemplates = function(){
             CB_Templates.getTemplatesStructure(function(r, e){
                 Ext.iterate(CB.DB, function(k, st){
                     if (k.substr(0, 8) == 'template') {
-                        tid = k.substr(8);
+                        var tid = k.substr(8);
                         if (!isNaN(tid)) {
                             st.removeAll();
-                            if(r.data[tid]) st.loadData(r.data[tid]);
+                            if (r.data[tid]) {
+                                st.loadData(r.data[tid]);
+                            }
                         }
                     }
                 })

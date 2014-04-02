@@ -357,7 +357,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         if(idx >= 0) {
             var cm = this.getColumnModel();
             var tc = CB.DB.templates.getAt(idx).get('cfg');//template config
-
             idx = cm.findColumnIndex('info');
             var colExists = (idx >=0 );
             var colRequired = (
@@ -560,7 +559,6 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
     }
 
     ,onAfterEditProperty: function(e){
-
         if(e.field == 'value'){
             if(e.value != e.originalValue){
                 this.helperTree.resetChildValues(e.record.get('id'));

@@ -20,9 +20,10 @@ namespace CB;
 */
 
 /* detecting core name (project name) from SERVER_NAME */
-if (isset($_GET['c'])) {
-    define('CB\\CORE_NAME', $_GET['c']);
-    define('CB\\URI_PREFIX', '/'.CORE_NAME.'/');
+
+if (isset($_GET['core'])) {
+    define('CB\\CORE_NAME', strtolower($_GET['core']));
+    define('CB\\CORE_URL', 'https://caseboy.org/'.CORE_NAME.'/');
 } else {
     $arr = explode('.', $_SERVER['SERVER_NAME']);
     // remove www, ww2 and take the next parameter as the $coreName
@@ -37,7 +38,6 @@ if (isset($_GET['c'])) {
     $arr = explode('_', $arr);
 
     define('CB\\CORE_NAME', $arr[0]);
-    define('CB\\URI_PREFIX', '/');
 }
 /* end of detecting core name (project name) from SERVER_NAME */
 
@@ -207,7 +207,7 @@ date_default_timezone_set('UTC');
 /* define other constants used in casebox */
 
 //relative path to ExtJs framework. Used in index.php
-const EXT_PATH = '/libx/ext';
+define('CB\\EXT_PATH', CORE_URL.'libx/ext');
 //templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
 define('CB\\TEMPLATES_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
 

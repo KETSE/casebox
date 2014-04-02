@@ -13,7 +13,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             ,'<tpl for="data">'
             ,'<tr>'
             ,'    <td class="obj">'
-            ,'        <img class="i32" src="/photo/{cid}.jpg" title="{user}">'
+            ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg" title="{user}">'
             ,'    </td>'
             ,'    <td>'
             ,'        {[ Ext.util.Format.nl2br(Ext.util.Format.htmlEncode(values.content))]}'
@@ -67,7 +67,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
                     ,items: [
                         {
                             xtype: 'label'
-                            ,html: '<img class="i32" src="/photo/' + App.loginData.id + '.jpg" title="' + getUserDisplayName(true) + '">'
+                            ,html: '<img class="i32" src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg" title="' + getUserDisplayName(true) + '">'
                         }
                         ,this.messageField
                         ,this.loadLabel

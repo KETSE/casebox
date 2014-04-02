@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\Util;
+
 class Templates
 {
     /**
@@ -61,6 +63,13 @@ class Templates
                 $r['type'] = 'varchar';
             }
             unset($r['has_title_template']);
+
+            if ($r['pid'] == $t) {
+                $r['pid'] = null;
+            }
+
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
+
             $data[$t][] = $r;
         }
         $res->close();

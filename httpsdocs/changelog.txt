@@ -1,3 +1,20 @@
+CaseBox 1.9.173 (2014-04-02)
+==============================
+New Features, Improvements
+--------------------------
+- migrate from core subdomains to core subfolders. Example of mod_rewrite rules in install/httpd/ssl_casebox.conf
+- OSJI: "Manager's Calendar" should not be visible for non-managers
+- Left align in first column of the pivot table
+- Add "Reload Templates" button in "Settings" menu at the top for root user
+- "no name/Tree/" displayed in breadcrumbs
+
+Fixed Bugs:
+----------
+- Showing a date period for tasks with startDate only displays current date as end date
+- Pagination doesn't work in search results
+- After selecting users in 'Assigned' for a task, the grid loses focus
+- toolbar: adjustments to button position
+
 CaseBox 1.9.172 (2014-04-01)
 ==============================
 New Features, Improvements

@@ -21,7 +21,7 @@ CB.objects.plugins.Tasks = Ext.extend(CB.objects.plugins.Base, {
             ,'<tpl for=".">'
             ,'<tr>'
             ,'    <td class="obj">'
-            ,'        <img class="i32" src="/photo/{cid}.jpg" title="{user}">'
+            ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg" title="{user}">'
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'

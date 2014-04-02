@@ -54,7 +54,7 @@ switch ($action) {
                     )
                 ) or die(DB\dbQueryError());
                 $_SESSION['msg'] = '<div class="alert alert-success">'.L\get('PasswordChangedMsg').
-                    '<br /> <br /><a href="/">'.L\get('Login').'</a></div>';
+                    '<br /> <br /><a href="'.CORE_URL.'">'.L\get('Login').'</a></div>';
                 break;
             }
 
@@ -70,7 +70,7 @@ switch ($action) {
         $u = mb_strtolower($u);
 
         if (!isset($_POST['s']) || (empty($e) && empty($u))) {
-            header('location: /login/forgot-password/');
+            header('location: '.CORE_URL.'login/forgot-password/');
             exit(0);
         }
         $user_id = null;
@@ -99,7 +99,7 @@ switch ($action) {
                 $res->close();
                 if (empty($user_id)) {
                     $_SESSION['e_msg'] = L\get('EmailNotFound');
-                    header('location: /login/forgot-password/');
+                    header('location: '.CORE_URL.'login/forgot-password/');
                     exit(0);
                 }
             } else {
@@ -122,11 +122,11 @@ switch ($action) {
             $res->close();
             if (empty($user_id)) {
                 $_SESSION['u_msg'] = L\get('UsernameNotFound');
-                header('location: /login/forgot-password/');
+                header('location: '.CORE_URL.'login/forgot-password/');
                 exit(0);
             } elseif (empty($user_mail)) {
                 $_SESSION['u_msg'] = L\get('UserHasNoMail');
-                header('location: /login/forgot-password/');
+                header('location: '.CORE_URL.'login/forgot-password/');
                 exit(0);
             }
         }
@@ -139,7 +139,7 @@ switch ($action) {
         if (!file_exists($template)) {
             mail(CONFIG\ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: ".CONFIG\SENDER_EMAIL."\r\n");
             $_SESSION['msg'] = '<div class="alert alert-error">Error occured. Administrator has been notified by mail. Please retry later.</div>';
-            header('location: /login/forgot-password/');
+            header('location: '.CORE_URL.'login/forgot-password/');
             exit(0);
         }
         $hash = md5($user_id.$user_mail.date(DATE_ISO8601));
@@ -168,7 +168,7 @@ switch ($action) {
         /* end of generating reset hash and sending mail */
         break;
     default:
-        header('location:/');
+        header('location: '.CORE_URL);
         exit(0);
 }
 ?>
@@ -177,9 +177,12 @@ switch ($action) {
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <title><?php echo constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE)) ?></title>
-<link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap.min.css" />
-<link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap-responsive.min.css" />
-<link type='text/css' rel="stylesheet" href="/css/login.css" />
+<?php
+echo '
+<link rel="stylesheet" type="text/css" href="'.CORE_URL.'/css/bs/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="'.CORE_URL.'/css/bs/css/bootstrap-responsive.min.css" />
+<link type="text/css" rel="stylesheet" href="'.CORE_URL.'/css/login.css" />';
+?>
 </head>
 <body onload="javascript: e = document.getElementById('e'); if(e) e.focus(); editChanged();">
 <script type="text/javascript">
@@ -201,10 +204,10 @@ setTimeout(editChanged, 500)
 </script>
 <div class="main">
 <div class="form_login tac">
-            <a href="/" class="dib"><img src="/css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
-        <form method="post" action="/login/reset-password/" class="standart_form tal" autocomplete="off">
         <?php
-        $homeLink = '<a href="/" class="btn btn-info">'.L\get('Login').'</a>';
+        echo '<a href="'.CORE_URL.'" class="dib"><img src="'.CORE_URL.'css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
+        <form method="post" action="'.CORE_URL.'login/reset-password/" class="standart_form tal" autocomplete="off">';
+        $homeLink = '<a href="'.CORE_URL.'" class="btn btn-info">'.L\get('Login').'</a>';
 
         if (!empty($_SESSION['msg'])) {
             echo $_SESSION['msg'].$homeLink;

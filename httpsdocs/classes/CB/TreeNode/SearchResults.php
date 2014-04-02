@@ -62,6 +62,8 @@ class SearchResults extends Dbnode
             $p = $class->{$a[1]}($so);
         }
 
+        $p = array_merge($requestParams, $p);
+
         $s = new \CB\Search();
         $rez = $s->query($p);
 

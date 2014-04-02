@@ -36,7 +36,7 @@ if (!in_array(
         )
 )) {
     if (($_SERVER['SCRIPT_NAME'] != '/auth.php') && !User::isLoged()) {
-        header('Location: /login.php');
+        header('Location: '.CORE_URL.'login.php');
         exit(0);
     }
 }

@@ -128,4 +128,4 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         exit(0);
     }
 }
-header('Location: /');
+header('Location: '.CORE_URL);

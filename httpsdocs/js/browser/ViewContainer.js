@@ -259,7 +259,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 scope: this
                 ,resize: function(c, adjWidth, adjHeight, rawWidth, rawHeight){
                     if(this.viewToolbar.rendered) {
-                        var cw = this.containerToolbar.items.getCount() * 48;
+                        var cw = 5;
+
+                        this.containerToolbar.items.each(
+                            function(b) {
+                                cw += b.getWidth();
+                            }
+                            ,this
+                        );
                         this.viewToolbar.setWidth(adjWidth - cw);
                         this.containerToolbar.setWidth(cw);
                     }
@@ -566,7 +573,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 buttonsArray.push(this.pluginButtons[i]);
             }
         }
-        clog('this.pluginButtons', this.pluginButtons);
 
         for (i = 0; i < buttonsArray.length; i++) {
             if((buttonsArray[i] == '-') || (buttonsArray[i] == '->')) {

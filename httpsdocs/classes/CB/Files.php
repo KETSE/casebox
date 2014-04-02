@@ -896,7 +896,7 @@ class Files
                 $content = $pe->purify(
                     $content,
                     array(
-                        'URI.Base' => '/preview/'
+                        'URI.Base' => '/' + CORE_NAME + '/preview/'
                         ,'URI.MakeAbsolute' => true
                     )
                 );
@@ -946,7 +946,7 @@ class Files
                 $image->writeImage(FILES_PREVIEW_DIR.$file['content_id'].'_.png');
                 file_put_contents(
                     $preview_filename,
-                    '<img src="/preview/'.$file['content_id'].
+                    '<img src="' + CORE_NAME + '/preview/'.$file['content_id'].
                     '_.png" style="max-width:90%;margin: auto" />'
                 );
                 break;

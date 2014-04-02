@@ -98,11 +98,13 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
             ,new Ext.form.Label({
                 id: 'rowsComboLabel' + this.instanceId
                 ,text: L.Rows + ': '
+                ,style: 'padding-left: 7px'
             })
             ,this.rowsCombo
             ,new Ext.form.Label({
                 id: 'colsComboLabel' + this.instanceId
                 ,text: L.Columns + ': '
+                ,style: 'padding-left: 7px'
             })
             ,this.colsCombo
         );
@@ -185,7 +187,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
         Ext.iterate(
             this.pivot.titles[0]
             ,function(k, v, o) {
-                var r = '<th>' + v + '</th>';
+                var r = '<th style="text-align:left">' + v + '</th>';
                 Ext.iterate(
                     this.pivot.titles[1]
                     ,function(q, z, y) {

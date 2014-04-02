@@ -224,7 +224,7 @@ function formatDatePeriod($fromDateTime, $toDateTime)
         $d2format = 'D';
     }
 
-    if (!empty($d2format)) {
+    if (!empty($toDateTime) && !empty($d2format)) {
         $rez .= ' - '.$d2->format($d2format);
     }
 
