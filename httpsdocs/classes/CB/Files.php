@@ -946,7 +946,7 @@ class Files
                 $image->writeImage(FILES_PREVIEW_DIR.$file['content_id'].'_.png');
                 file_put_contents(
                     $preview_filename,
-                    '<img src="' + CORE_NAME + '/preview/'.$file['content_id'].
+                    '<img src="/' + CORE_NAME + '/preview/'.$file['content_id'].
                     '_.png" style="max-width:90%;margin: auto" />'
                 );
                 break;
@@ -954,7 +954,7 @@ class Files
                 if (substr($file['type'], 0, 5) == 'image') {
                     file_put_contents(
                         $preview_filename,
-                        '<div style="padding: 5px 10px"><img src="/download.php?id='.
+                        '<div style="padding: 5px 10px"><img src="/'.CORE_NAME.'/download.php?id='.
                         $file['id'].
                         (empty($version_id) ? '' : '&v='.$version_id).
                         '" style="max-width:90%;margin: auto"></div>'

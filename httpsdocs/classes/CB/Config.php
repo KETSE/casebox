@@ -371,7 +371,7 @@ class Config extends Singleton
     public static function isInListValue($optionName, $value)
     {
         $v = static::get($optionName);
-        if (is_scalar($v)) {
+        if (is_scalar($v) || is_null($v)) {
             $v = explode(',', $v);
         }
 

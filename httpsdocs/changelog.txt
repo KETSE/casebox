@@ -1,3 +1,22 @@
+CaseBox 1.9.177 (2014-04-03)
+==============================
+New Features, Improvements
+--------------------------
+- set path of session cookies to core folder
+- solr schema status field change:
+    - task_status field has been added to solr, designed specially for tasks custom status
+    - status field from solr will be used for objects that have status values from tree (for ex.: case status)
+    Note: core should be reindexed after applying these changes
+
+Fixed Bugs:
+----------
+- Generate dinamic-height stacked barcharts for pivot table
+- Closed tasks not displayed with strike-through font and gray color
+- Breadcrumbs not working ok: clicking an item jumps to parent + other bugs
+- File preview doesn't work
+- Task email notification: links to user pictures not updated after https://CB/[core] change
+- First grid field doesn't enter Edit mode on new object
+
 CaseBox 1.9.173 (2014-04-02)
 ==============================
 New Features, Improvements

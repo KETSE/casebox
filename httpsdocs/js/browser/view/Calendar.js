@@ -48,7 +48,7 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
 
         fields = Ext.calendar.EventRecord.prototype.fields.getRange();
         fields.push({ name: 'template_id', type: 'int' });
-        fields.push('status');
+        fields.push('task_status');
         fields.push('iconCls');
         fields.push('cls');
         fields.push('category_id');
@@ -68,7 +68,7 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                         recs
                         , function(r){
                             cls = 'cal-cat-'+ Ext.value(r.get('cls'), 'default') +
-                                ( (r.get('status') == 3) ? ' cal-status-c' : '');
+                                ( (r.get('task_status') == 3) ? ' cal-status-c' : '');
                             if(r.get('template_id') == App.config.default_task_template) {
                                 r.set('iconCls', '');
                             } else {
@@ -369,7 +369,7 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
                         ,cid: 1 //that's calendar id
                         ,start: d.date
                         ,end: Ext.value(d.date_end, d.date)
-                        ,status: d.status
+                        ,task_status: d.task_status
                         ,template_id: d.template_id
                         ,title: d.name
                         ,cls: d.cls
@@ -468,7 +468,7 @@ CB.browser.view.CalendarPanel = Ext.extend(Ext.Panel, {
             path:'/'
             ,descendants: true
             ,filters: {
-                "status":[{
+                "task_status":[{
                     "mode":"OR"
                     ,"values":["1","2"]
                 }]

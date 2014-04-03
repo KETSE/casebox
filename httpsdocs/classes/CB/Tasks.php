@@ -1316,7 +1316,7 @@ class Tasks
         $linearData = $obj->getLinearData();
         $template = $obj->getTemplate();
 
-        $object_record['status'] = @$objData['status'];
+        $object_record['task_status'] = @$objData['status'];
         $object_record['importance'] = @$obj->getFieldValue('importance', 0)['value'];
         $object_record['category_id'] = @$obj->getFieldValue('category_id', 0)['value'];
         $user_ids = @$obj->getFieldValue('assigned', 0)['value'];

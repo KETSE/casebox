@@ -17,7 +17,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
 
         this.instanceId = Ext.id();
 
-        Ext.chart.Chart.CHART_URL = '/libx/ext/resources/charts.swf';
+        Ext.chart.Chart.CHART_URL = '/' + App.config.coreName + '/libx/ext/resources/charts.swf';
 
         this.seriesStyles = [];
         for (var i = 0; i < App.colors.length; i++) {
@@ -307,11 +307,10 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
                 }
                 ,this
             );
-
             var chartItems = [
                 {
                     xtype: this.activeChart
-                    ,height: 400
+                    ,height: Math.max(data1.length * 25, 400)
                     ,store: new Ext.data.JsonStore({
                         fields: fields1
                         ,data: data1
@@ -327,7 +326,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
                     ,series: series1
                 }, {
                     xtype: this.activeChart
-                    ,height: 400
+                    ,height: Math.max(data1.length * 25, 400)
                     ,store: new Ext.data.JsonStore({
                         fields: fields2
                         ,data: data2
@@ -376,7 +375,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
     ,loadChartData: function() {
         var data = {};
 
-        // loading facetsa list
+        // loading facets list
         Ext.iterate(
             this.data.facets
             ,function(key, val, o) {

@@ -357,6 +357,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,{name: 'pid', type: 'int'}
                 ,{name: 'system', type: 'int'}
                 ,{name: 'status', type: 'int'}
+                ,{name: 'task_status', type: 'int'}
                 ,{name: 'template_id', type: 'int'}
                 ,{name: 'category_id', type: 'int'}
                 ,'template_type'
@@ -667,7 +668,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.folderProperties.pathtext = o.result.pathtext;
 
         /* updating breadcrumb */
-        if(!Ext.isEmpty(o.result.pathtext)) {
+        if(Ext.isDefined(o.result.pathtext)) {
             var b = o.result.pathtext.split('/');
             if(Ext.isEmpty(b[0])) {
                 b.shift();
@@ -811,13 +812,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onBreadcrumbItemClick: function(el, idx, ev) {
-        var v = this.folderProperties.path.split('/');
-        v = v.slice(0, idx+2);
-        v = v.join('/');
-        if(v.substr(0, 1) !== '/') {
-            v = '/' + v;
+        var pt = this.folderProperties.pathtext.split('/');
+        var p = this.folderProperties.path.split('/');
+        p = p.slice(0, idx + 2 + p.length - pt.length);
+        p = p.join('/');
+        if(p.substr(0, 1) !== '/') {
+            p = '/' + p;
         }
-        this.changeSomeParams({'path': v});
+        this.changeSomeParams({'path': p});
     }
 
     ,onDescendantsClick: function(b, e) {

@@ -23,7 +23,6 @@ namespace CB;
 
 if (isset($_GET['core'])) {
     define('CB\\CORE_NAME', strtolower($_GET['core']));
-    define('CB\\CORE_URL', 'https://caseboy.org/'.CORE_NAME.'/');
 } else {
     $arr = explode('.', $_SERVER['SERVER_NAME']);
     // remove www, ww2 and take the next parameter as the $coreName
@@ -39,6 +38,7 @@ if (isset($_GET['core'])) {
 
     define('CB\\CORE_NAME', $arr[0]);
 }
+define('CB\\CORE_URL', 'https://'.$_SERVER['SERVER_NAME'].'/'.CORE_NAME.'/');
 /* end of detecting core name (project name) from SERVER_NAME */
 
 /* define main paths /**/
@@ -177,7 +177,7 @@ ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
 
-session_set_cookie_params($sessionLifetime, '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+session_set_cookie_params($sessionLifetime, '/' . CORE_NAME . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 session_name(
     str_replace(
         array(
@@ -187,7 +187,7 @@ session_name(
         ),
         '',
         $_SERVER['SERVER_NAME']
-    )
+    ).CORE_NAME
 );
 
 //error reporting params

@@ -112,7 +112,7 @@ class Tasks extends Base
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
         $p['fq'][] = '(user_ids:'.$_SESSION['user']['id'].' OR cid:'.$_SESSION['user']['id'].')';
-        $p['fq'][] = 'status:(1 OR 2)';
+        $p['fq'][] = 'task_status:(1 OR 2)';
         $p['rows'] = 0;
 
         $s = new \CB\Search();
@@ -139,7 +139,7 @@ class Tasks extends Base
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
         $p['fq'][] = '(user_ids:'.$_SESSION['user']['id'].' OR cid:'.$_SESSION['user']['id'].')';
-        $p['fq'][] = 'status:(1 OR 2)';
+        $p['fq'][] = 'task_status:(1 OR 2)';
 
         if (@$this->requestParams['from'] == 'tree') {
             $s = new \CB\Search();
@@ -200,28 +200,28 @@ class Tasks extends Base
                     ,'fq' => $p['fq']
                     ,'facet' => true
                     ,'facet.field' => array(
-                        '{!ex=status key=0status}status'
+                        '{!ex=task_status key=0task_status}task_status'
                     )
                 )
             );
             $rez = array('data' => array());
-            if (!empty($sr['facets']->facet_fields->{'0status'}->{'1'})) {
+            if (!empty($sr['facets']->facet_fields->{'0task_status'}->{'1'})) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\Overdue).' ('.$sr['facets']->facet_fields->{'0status'}->{'1'}.')'
+                    'name' => lcfirst(L\Overdue).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'1'}.')'
                     ,'id' => $this->getId(4)
                     ,'iconCls' => 'icon-task'
                 );
             }
-            if (!empty($sr['facets']->facet_fields->{'0status'}->{'2'})) {
+            if (!empty($sr['facets']->facet_fields->{'0task_status'}->{'2'})) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\Ongoing).' ('.$sr['facets']->facet_fields->{'0status'}->{'2'}.')'
+                    'name' => lcfirst(L\Ongoing).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'2'}.')'
                     ,'id' => $this->getId(5)
                     ,'iconCls' => 'icon-task'
                 );
             }
-            if (!empty($sr['facets']->facet_fields->{'0status'}->{'3'})) {
+            if (!empty($sr['facets']->facet_fields->{'0task_status'}->{'3'})) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\Closed).' ('.$sr['facets']->facet_fields->{'0status'}->{'3'}.')'
+                    'name' => lcfirst(L\Closed).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'3'}.')'
                     ,'id' => $this->getId(6)
                     ,'iconCls' => 'icon-task'
                 );
@@ -237,7 +237,7 @@ class Tasks extends Base
             }
         } else {
 
-            $p['fq'][] = 'status:(1 OR 2)';
+            $p['fq'][] = 'task_status:(1 OR 2)';
 
             $s = new \CB\Search();
             $rez = $s->query($p);
@@ -264,13 +264,13 @@ class Tasks extends Base
 
         switch ($this->lastNode->id) {
             case 4:
-                $p['fq'][] = 'status:1';
+                $p['fq'][] = 'task_status:1';
                 break;
             case 5:
-                $p['fq'][] = 'status:2';
+                $p['fq'][] = 'task_status:2';
                 break;
             case 6:
-                $p['fq'][] = 'status:3';
+                $p['fq'][] = 'task_status:3';
                 break;
             case 'assignee':
                 return $this->getAssigneeUsers();
@@ -293,7 +293,7 @@ class Tasks extends Base
         $p['fq'] = $this->fq;
 
         $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
-        $p['fq'][] = 'status:[1 TO 2]';
+        $p['fq'][] = 'task_status:[1 TO 2]';
 
         $p['rows'] = 0;
         $p['facet'] = true;
@@ -334,7 +334,7 @@ class Tasks extends Base
         $p['fq'] = $this->fq;
 
         $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
-        $p['fq'][] = 'status:[1 TO 2]';
+        $p['fq'][] = 'task_status:[1 TO 2]';
 
         $user_id = substr($this->lastNode->id, 3);
         $p['fq'][] = 'user_ids:'.$user_id;

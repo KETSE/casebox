@@ -19,6 +19,7 @@ class Search extends Solr\Client
          ,'completed'
          ,'category_id'
          ,'status'
+         ,'task_status'
          ,'oid'
          ,'cid'
          ,'uid'
@@ -66,7 +67,7 @@ class Search extends Solr\Client
             ,'tie' => '0.1'
             ,'fl' => "id, pid, path, name, template_type, subtype, system, ".
                 "size, date, date_end, oid, cid, cdate, uid, udate, case_id, acl_count, ".
-                "case, template_id, user_ids, status, category_id, importance, completed, versions"
+                "case, template_id, user_ids, status, task_status, category_id, importance, completed, versions"
             ,'sort' => 'ntsc asc'
         );
         /* initial parameters */

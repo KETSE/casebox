@@ -138,7 +138,7 @@ CB.FacetList = Ext.extend( CB.Facet, {
         );
         //'id', 'name', 'active', 'last', 'items', 'new_items'
         switch(facetField){
-            case 'status':
+            case 'task_status':
                 Ext.iterate(
                     serverData
                     ,function(k, v){
