@@ -179,9 +179,9 @@ switch ($action) {
 <title><?php echo constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE)) ?></title>
 <?php
 echo '
-<link rel="stylesheet" type="text/css" href="'.CORE_URL.'/css/bs/css/bootstrap.min.css" />
-<link rel="stylesheet" type="text/css" href="'.CORE_URL.'/css/bs/css/bootstrap-responsive.min.css" />
-<link type="text/css" rel="stylesheet" href="'.CORE_URL.'/css/login.css" />';
+<link rel="stylesheet" type="text/css" href="'.CORE_URL.'css/bs/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="'.CORE_URL.'css/bs/css/bootstrap-responsive.min.css" />
+<link type="text/css" rel="stylesheet" href="'.CORE_URL.'css/login.css" />';
 ?>
 </head>
 <body onload="javascript: e = document.getElementById('e'); if(e) e.focus(); editChanged();">

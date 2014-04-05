@@ -15,7 +15,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             listeners:{
                 scope: this
                 ,add: this.onObjectsStoreChange
-                ,load: this.onObjectsStoreChange
+                ,load: this.onObjectsStoreLoad
             }
         });
 
@@ -270,35 +270,28 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
 
     }
 
+    ,onObjectsStoreLoad: function(store, records, options) {
+        this.onObjectsStoreChange(store, records, options);
+        if(!this.grid.editing) {
+            this.grid.getView().refresh();
+        }
+    }
+
     ,onObjectsStoreChange: function(store, records, options){
         Ext.each(
             records
             ,function(r){
                 r.set('iconCls', getItemIcon(r.data));
+                clog(r.data, r.get('iconCls'));
             }
             ,this
         );
 
-        // should rethink this refresh if other problems will appear
-        // because it makes the grid to loose focus after edit in objects form
         if(!this.grid.editing) {
-        //     //maintain selection before refreshing view
-        //     var sm = this.grid.getSelectionModel();
-        //     var lastSelection = null;
-        //     if(sm && sm.getSelectedCell) {
-        //         lastSelection = sm.getSelectedCell();
-        //     }
-        //     // this.grid.getView().refresh();
-
             // focus only when object just loaded
             if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
                 this.focusDefaultCell();
             }
-        //      else {
-        //         if(lastSelection) {
-        //             this.grid.getView().focusCell(lastSelection[0], lastSelection[1]);
-        //         }
-        //     }
         }
 
     }

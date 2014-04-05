@@ -78,6 +78,9 @@ background-color: #FFFFCC;
     margin-bottom: 30px;
     background-color: #F1F1F1;
 }
+.block-plugin-comments b.user {
+    color: #3b5998;
+}
 
 .block-plugin-comments .obj-plugin-h label {
     padding: 0

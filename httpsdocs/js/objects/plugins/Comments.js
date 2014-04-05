@@ -16,6 +16,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg" title="{user}">'
             ,'    </td>'
             ,'    <td>'
+            ,'        <b class="user">{[ values.user.split("\n")[0]]}</b>'
             ,'        {[ Ext.util.Format.nl2br(Ext.util.Format.htmlEncode(values.content))]}'
             ,'        <div class="gr" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</div>'
             ,'    </td>'

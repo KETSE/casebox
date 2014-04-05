@@ -2,6 +2,19 @@ CaseBox 1.9.177 (2014-04-03)
 ==============================
 New Features, Improvements
 --------------------------
+- Add user name in front of the comment
+- created virtualhost config for webdav support
+- moved apache subdomains redirects apart from casebox host config
+
+Fixed Bugs:
+----------
+- "Forgot password" link doesn't work
+- Data in preview ok, but when editing node, no data is displayed
+
+CaseBox 1.9.177 (2014-04-03)
+==============================
+New Features, Improvements
+--------------------------
 - set path of session cookies to core folder
 - solr schema status field change:
     - task_status field has been added to solr, designed specially for tasks custom status
