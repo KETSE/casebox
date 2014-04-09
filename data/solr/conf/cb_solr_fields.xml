@@ -158,6 +158,8 @@ subtype: this field is dependent on type field value
 <field name="ntsc"          type="tint"     indexed="true" stored="true" />
 <!-- sort_name: designed to sort by name -->
 <field name="sort_name"     type="text_general_sort" indexed="true" stored="true" />
+<!-- order: custom ordering number -->
+<field name="order"     type="tint" indexed="true" stored="true" />
 <!-- sort_path: designed to sort by path -->
 <field name="sort_path"     type="text_general_sort" indexed="true" stored="true" />
 

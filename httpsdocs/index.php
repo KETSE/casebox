@@ -161,7 +161,7 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != 'en')) {
 
     // ExtJS locale
-    if (file_exists(DOC_ROOT.EXT_PATH . '/src/locale/ext-lang-' . $_SESSION['user']['language'] . '.js')) {
+    if (file_exists(DOC_ROOT.'libx/src/locale/ext-lang-' . $_SESSION['user']['language'] . '.js')) {
         echo '<script type="text/javascript" src="' . EXT_PATH . '/src/locale/ext-lang-' . $_SESSION['user']['language'] . '.js"></script>';
     }
 

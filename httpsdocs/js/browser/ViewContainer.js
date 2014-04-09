@@ -667,6 +667,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.folderProperties.subtype = parseInt(this.folderProperties.subtype, 10);
         this.folderProperties.pathtext = o.result.pathtext;
 
+        this.descendantsButton.toggle(options.params.descendants === true);
         /* updating breadcrumb */
         if(Ext.isDefined(o.result.pathtext)) {
             var b = o.result.pathtext.split('/');
@@ -724,6 +725,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,changeSomeParams: function(paramsSubset){
         var p = Ext.apply({}, this.params);
+
+        delete p.descendants;
+
         if(!Ext.isDefined(paramsSubset.start)) {
             paramsSubset.start = 0;
         }
@@ -814,7 +818,21 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     ,onBreadcrumbItemClick: function(el, idx, ev) {
         var pt = this.folderProperties.pathtext.split('/');
         var p = this.folderProperties.path.split('/');
-        p = p.slice(0, idx + 2 + p.length - pt.length);
+
+        if(Ext.isEmpty(pt[0])) {
+            pt.shift();
+        }
+        if((pt.length > 0) && Ext.isEmpty(pt[pt.length-1])) {
+            pt.pop();
+        }
+        if(Ext.isEmpty(p[0])) {
+            p.shift();
+        }
+        if((p.length > 0) && Ext.isEmpty(p[p.length-1])) {
+            p.pop();
+        }
+
+        p = p.slice(0, idx + 1 + p.length - pt.length);
         p = p.join('/');
         if(p.substr(0, 1) !== '/') {
             p = '/' + p;

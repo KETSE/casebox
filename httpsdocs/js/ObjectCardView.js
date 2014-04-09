@@ -278,7 +278,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         }
 
         this.getLayout().activeItem.clear();
+
         this.getLayout().setActiveItem(idx);
+
         if(!mb.pressed) {
             mb.toggle();
         }
@@ -298,7 +300,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             (CB.DB.templates.getType(d.template_id) == 'file')
         );
 
-        this.actions.edit.setDisabled(isNaN(d.template_id));
+        this.actions.edit.setDisabled(isNaN(d.id) || Ext.isEmpty(d.id));//template_id
     }
 
     /**
@@ -325,6 +327,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         // check  if a new load is waiting to be loaded
         if(Ext.isEmpty(this.requestedLoadData)) {
+            if(Ext.isEmpty(this.loadedData)) {
+                this.loadedData = {};
+            }
 
             //check if object data are identical to previous loaded object
             if((objectData.id == this.loadedData.id) &&
@@ -637,9 +642,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         if(cai > 0) {
             ai.clear();
-            this.requestedLoadData = Ext.apply({}, this.loadedData);
-            this.requestedLoadData.viewIndex = 0;
-            this.onViewChangeClick(0);
+            this.loadedData = {};
+            // this.requestedLoadData = Ext.apply({}, this.loadedData);
+            // this.requestedLoadData.viewIndex = 0;
+            this.onViewChangeClick(0);//
+            this.onCardItemLoaded(ai);
         }
 
         switch(CB.DB.templates.getType(d.template_id)) {

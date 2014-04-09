@@ -140,7 +140,7 @@ class Browser
                 $this->path,
                 $class
             );
-        };
+        }
     }
 
     protected function getPathText()
@@ -262,20 +262,67 @@ class Browser
         //,+query - user query
 
         if (!empty($p['source'])) {
+            if (is_array($p['source'])) { // a custom source
+                $rez = array();
+
+                if (empty($p['fieldId'])) {
+                    return $rez;
+                }
+
+                //get custom method from database
+                $cfg = [];
+                $res = DB\dbQuery(
+                    'SELECT cfg from templates_structure where id = $1',
+                    $p['fieldId']
+                ) or die(DB\dbQueryError());
+                if ($r = $res->fetch_assoc()) {
+                    $cfg = json_decode($r['cfg'], true);
+                }
+                $res->close();
+                if (empty($cfg['source']['fn'])) {
+                    return $rez;
+                }
+
+                $method = explode('.', $cfg['source']['fn']);
+                $class = new $method[0]();
+                $rez = $class->$method[1]($p);
+                if (!empty($rez)) {
+                    return $rez;
+                }
+            }
+
             switch ($p['source']) {
                 case 'field':
-                    if (empty($p['pidValue']) || empty($p['field'])) {
-                        break;
+
+                    $ids = array();
+
+                    switch ($p['scope']) {
+                        case 'project':
+                            $ids = $this->getCaseId(Path::detectRealTargetId($p['path']));
+                            break;
+
+                        case 'parent':
+                            $ids = Path::detectRealTargetId($p['path']);
+                            break;
+
+                        default:
+                            if (empty($p['pidValue']) || empty($p['field'])) {
+                                break 2;
+                            }
+                            $ids = $p['pidValue'];
+
                     }
-                    $ids = Util\toNumericArray($p['pidValue']);
+                    $ids = Util\toNumericArray($ids);
+
                     if (empty($ids)) {
                         break;
                     }
+
                     /*get distinct target field values for selected objects in parent field */
                     $obj = new Objects\Object();
                     $values = array();
                     foreach ($ids as $id) {
-                        $obj->load(array('id' => $id));
+                        $obj->load($id);
                         $fv = $obj->getFieldValue($p['field'], 0);
                         $fv = Util\toNumericArray(@$fv['value']);
                         $values = array_merge($values, $fv);
@@ -288,7 +335,6 @@ class Browser
 
                     $p['ids'] = $values;
                     break;
-
             }
         }
 
@@ -297,67 +343,29 @@ class Browser
             switch ($p['scope']) {
                 case 'project': /* limiting pid to project. If not in a project then to parent directory */
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
-                        $res = DB\dbQuery(
-                            'SELECT coalesce(ti.case_id, t.pid) `pid`
-                            FROM tree t
-                            JOIN tree_info ti ON t.id = ti.id
-                            WHERE t.id = $1',
-                            $p['objectId']
-                        ) or die(DB\dbQueryError());
-
-                        if ($r = $res->fetch_assoc()) {
-                            $p['pids'] = $r['pid'];
-                        }
-                        $res->close();
+                        $p['pids'] = $this->getCaseId($p['objectId']);
                     } elseif (!empty($p['path'])) {
-                        $v = explode('/', $p['path']);
-                        $pids = 0;
-                        while (!empty($v) && empty($pids)) {
-                            $pids = array_pop($v);
-                        }
+                        $pids = $this->getCaseId(Path::detectRealTargetId($p['path']));
                     }
                     break;
                 case 'parent':
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
-                        $res = DB\dbQuery(
-                            'SELECT pid FROM tree WHERE id = $1',
-                            $p['objectId']
-                        ) or die(DB\dbQueryError());
-
-                        if ($r = $res->fetch_assoc()) {
-                            $p['pids'] = $r['pid'];
-                        }
-                        $res->close();
+                        $p['pids'] = $this->getPid($p['objectId']);
                     } elseif (!empty($p['path'])) {
-                        $v = explode('/', $p['path']);
-                        $pids = 0;
-                        while (!empty($v) && empty($pids)) {
-                            $pids = array_pop($v);
-                        }
+                        $pids = Path::detectRealTargetId($p['path']);
                     }
 
                     break;
                 case 'self':
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
-                        $res = DB\dbQuery(
-                            'SELECT id FROM tree WHERE id = $1',
-                            $p['objectId']
-                        ) or die(DB\dbQueryError());
-                        if ($r = $res->fetch_assoc()) {
-                            $p['pids'] = $r['id'];
-                        }
-                        $res->close();
+                        $p['pids'] = $r['objectId'];
                     } elseif (!empty($p['path'])) {
-                        $v = explode('/', $p['path']);
-                        $pids = 0;
-                        while (!empty($v) && empty($pids)) {
-                            $pids = array_pop($v);
-                        }
+                        $pids = Path::detectRealTargetId($p['path']);
                     }
                     break;
                 case 'variable':
                     if (!empty($p['pidValue'])) {
-                        $pids = Util\toNumericArray($p['pidValue']);
+                        $pids = Path::detectRealTargetId($p['path']);
                     }
                     break;
                 default:
@@ -368,7 +376,7 @@ class Browser
         if (!empty($pids)) {
             if (empty($p['descendants'])) {
                 $p['pid'] = $pids;
-            } else {
+            } elseif (@$p['source'] !== 'field') {
                 $p['pids'] = $pids;
             }
         }
@@ -421,6 +429,43 @@ class Browser
             }
             $res->close();
         }
+
+        return $rez;
+    }
+
+    public static function getCaseId($objectId)
+    {
+        $rez = null;
+
+        $res = DB\dbQuery(
+            'SELECT coalesce(ti.case_id, t.pid) `pid`
+            FROM tree t
+            JOIN tree_info ti ON t.id = ti.id
+            WHERE t.id = $1',
+            $objectId
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['pid'];
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    public static function getPId($objectId)
+    {
+        $rez = null;
+
+        $res = DB\dbQuery(
+            'SELECT pid FROM tree WHERE id = $1',
+            $objectId
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['pid'];
+        }
+        $res->close();
 
         return $rez;
     }

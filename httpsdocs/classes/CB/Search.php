@@ -6,27 +6,7 @@ class Search extends Solr\Client
     /*when requested to sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
     public $replaceSortFields = array('nid' => 'id', 'name' => 'sort_name', 'path' => 'sort_path');
-    public $acceptableSortFields = array(
-         'id'
-         ,'name'
-         ,'sort_name'
-         ,'path'
-         ,'sort_path'
-         ,'size'
-         ,'date'
-         ,'date_end'
-         ,'importance'
-         ,'completed'
-         ,'category_id'
-         ,'status'
-         ,'task_status'
-         ,'oid'
-         ,'cid'
-         ,'uid'
-         ,'cdate'
-         ,'udate'
-         ,'case'
-     );
+
     protected $facetsSetManually = false;
 
     public function query($p)
@@ -68,7 +48,7 @@ class Search extends Solr\Client
             ,'fl' => "id, pid, path, name, template_type, subtype, system, ".
                 "size, date, date_end, oid, cid, cdate, uid, udate, case_id, acl_count, ".
                 "case, template_id, user_ids, status, task_status, category_id, importance, completed, versions"
-            ,'sort' => 'ntsc asc'
+            ,'sort' => 'ntsc asc,order asc'
         );
         /* initial parameters */
 
@@ -108,9 +88,6 @@ class Search extends Solr\Client
                 if (isset($this->replaceSortFields[$f])) {
                     // replace with convenient sorting fields if defined
                     $f = $this->replaceSortFields[$f];
-                }
-                if (!in_array($f, $this->acceptableSortFields)) {
-                    continue;
                 }
 
                 $this->params['sort'] .= ",$f $d";

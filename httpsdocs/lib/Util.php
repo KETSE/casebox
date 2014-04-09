@@ -467,7 +467,7 @@ function getCoreHost($db_name = false)
         $core = substr($db_name, 3);
     }
 
-    $server = 'https://'.
+    $server =
         (empty($_SERVER['SERVER_NAME'])
             ? 'casebox.org'
             : $_SERVER['SERVER_NAME']
@@ -480,13 +480,13 @@ function getCoreHost($db_name = false)
     return $core;
 }
 
-function toNumericArray($v)
+function toNumericArray($v, $delimiter = ',')
 {
     if (empty($v)) {
         return array();
     }
     if (!is_array($v)) {
-        $v = explode(',', $v);
+        $v = explode($delimiter, $v);
     }
     $v = array_filter($v, 'is_numeric');
     foreach ($v as $k => $w) {

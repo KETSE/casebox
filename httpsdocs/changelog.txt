@@ -1,4 +1,33 @@
-CaseBox 1.9.177 (2014-04-03)
+CaseBox 1.9.179 (2014-04-09)
+==============================
+New Features, Improvements
+--------------------------
+- Double clicking a node in search results, should remove ExpandFolders
+- not finished all changes for dislplay columns
+    in fields of Display Columns config we can specify "sort" property for default sorting ("asc"/"desc")
+- added order field in default solr_fields config
+    Templates (like field template) could have order column that will go to solr
+        if solr_column_name is set to "order", or custom listeners could set "order" on solr update.
+    Default sorting changed from ntsc,sort_name -> ntsc,order,sort_name.
+    On custom sort will be ntsc,<custom_column>
+- changed working behavior for "_objects.source": "field"
+- Custom Sources
+- Add datetime on error logs files
+- mod_rewrite: added rule for automatic slash add after core folder
+
+Fixed Bugs:
+----------
+- Breadcrumb doesn't function correctly
+- Right panel remains in edit mode and empty
+- File preview doesn't work for pdf
+- Column width not saved
+- Stratelit: Incorrect preview of Нарушение in Stratelit
+- Stratelit: Incorrect icon & graph for Нарушение
+- Can't edit objects opened fromm preview
+- deleted template fields become visible when reloading templates structure from menu.
+- user avatars not displayed in task notifications emails
+
+CaseBox 1.9.178 (2014-04-05)
 ==============================
 New Features, Improvements
 --------------------------
@@ -6,7 +35,7 @@ New Features, Improvements
 - created virtualhost config for webdav support
 - moved apache subdomains redirects apart from casebox host config
 
-Fixed Bugs:
+6Fixed Bugs:
 ----------
 - "Forgot password" link doesn't work
 - Data in preview ok, but when editing node, no data is displayed

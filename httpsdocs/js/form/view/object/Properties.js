@@ -14,13 +14,15 @@ CB.form.view.object.Properties = Ext.extend(CB.PluginsPanel, {
         rez.tbar['edit'] = {};
         rez.tbar['openInTabsheet'] = {};
 
-        switch(CB.DB.templates.getType(this.loadedParams.template_id)) {
-            case 'file':
-                rez.tbar['download'] = {};
-                break;
-            case 'search':
-                rez.tbar['search'] = {};
-                break;
+        if(!Ext.isEmpty(this.loadedParams)) {
+            switch(CB.DB.templates.getType(this.loadedParams.template_id)) {
+                case 'file':
+                    rez.tbar['download'] = {};
+                    break;
+                case 'search':
+                    rez.tbar['search'] = {};
+                    break;
+            }
         }
 
         this.items.each(

@@ -118,6 +118,8 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 }
             ]
         });
+
+
         this.addEvents('change', 'fileupload', 'filedownload', 'filesdelete', 'loaded', 'saveobject');
         this.enableBubble(['change', 'fileupload', 'filedownload', 'filesdelete', 'loaded', 'saveobject']);
         CB.VerticalEditGrid.superclass.initComponent.apply(this, arguments);
@@ -214,9 +216,24 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,hideable: false
             }
         ];
-
     }
 
+    ,applyState: function(state) {
+        //apply column widths to this.gridColumns array because
+        //column model is recreated automaticly when loading object
+        //and uses this.gridColumns array to create new column list
+
+        if(!Ext.isEmpty(state.columns)) {
+            var col, cm = this.getColumnModel();
+
+            for (var i = 0; i < state.columns.length; i++) {
+                col = cm.getColumnById(state.columns[i].id);
+                if(!Ext.isEmpty(state.columns[i].width) && !Ext.isEmpty(this.gridColumns[i])) {
+                    this.gridColumns[i].width = state.columns[i].width;
+                }
+            }
+        }
+    }
     ,onNodeDragOver: function (targetData, source, e, data){
         var rez = this.dropZone.dropNotAllowed;
         if(!targetData.record ||
@@ -509,6 +526,27 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             col.setEditor(new Ext.grid.GridEditor(this.editors[t](this)));
         }else{
             e.fieldRecord = this.helperTree.getNode(e.record.get('id')).attributes.templateRecord;
+
+            //check if custom source and send fields
+            if(Ext.isObject(e.fieldRecord.get('cfg')['source'])) {
+                var fields = e.fieldRecord.get('cfg')['source'].requiredFields;
+                if(!Ext.isEmpty(fields)) {
+                    if(!Ext.isArray(fields)) {
+                        fields = fields.split(',');
+                    }
+                    e.objFields = {};
+                    var currentData = this.helperTree.readValues();
+
+                    for (var i = 0; i < fields.length; i++) {
+                        var f = fields[i].trim();
+
+                        if(!Ext.isEmpty(currentData[f])) {
+                            e.objFields[f] = currentData[f];
+                        }
+                    }
+                }
+            }
+
             var te = App.getTypeEditor(t, e);
             if(e.cancel) {
                 return ;

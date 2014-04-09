@@ -282,7 +282,6 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             records
             ,function(r){
                 r.set('iconCls', getItemIcon(r.data));
-                clog(r.data, r.get('iconCls'));
             }
             ,this
         );

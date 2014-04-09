@@ -159,43 +159,17 @@ echo "\n".'CB.DB.menu = new Ext.data.ArrayStore({'.
 /* end of menu */
 
 /* templates */
-$res = DB\dbQuery(
-    'SELECT ts.id
-        ,ts.pid
-        ,t.id template_id
-        ,ts.`name`
-        ,ts.l'.USER_LANGUAGE_INDEX.' `title`
-        ,ts.`type`
-        ,ts.`order`
-        ,ts.cfg
-        ,(coalesce(t.title_template, \'\') <> \'\' ) `has_title_template`
-    FROM templates t
-    LEFT JOIN templates_structure ts
-        ON t.id = ts.template_id
-    ,tree tr
-    WHERE ts.id = tr.id and tr.dstatus = 0
-    ORDER BY template_id, `order`',
-    $_SESSION['user']['language_id']
-) or die( DB\dbQueryError() );
-
+$templatesClass = new Templates();
+$data = $templatesClass->getTemplatesStructure();
 $templates = array();
-while ($r = $res->fetch_assoc()) {
-    $t = $r['template_id'];
-    if ($r['pid'] == $t) {
-        $r['pid'] = null;
-    }
-    unset($r['template_id']);
-    if (($r['type'] == '_auto_title') && ($r['has_title_template'] == 0)) {
-        $r['type'] = 'varchar';
-    }
-    unset($r['has_title_template']);
-    $r['cfg'] = Util\toJSONArray($r['cfg']);
-    if (empty($r['id'])) {
-        $templates[$t] = '';
-    } else {
-        $templates[$t][$r['pid']][] = $r;
+
+foreach ($data['data'] as $t => $fields) {
+    $templates[$t] = array();
+    foreach ($fields as $f) {
+        $templates[$t][$f['pid']][] = $f;
     }
 }
+
 function sortTemplateRows(&$array, $pid, &$result)
 {
     if (empty($pid)) {
@@ -208,7 +182,7 @@ function sortTemplateRows(&$array, $pid, &$result)
         }
     }
 }
-$res->close();
+
 foreach ($templates as $t => $f) {
     $sf = array();
     sortTemplateRows($f, null, $sf);

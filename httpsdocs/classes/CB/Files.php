@@ -489,7 +489,12 @@ class Files
                 }
             }
             $f['type'] = 5;//file
-            // fireEvent('beforeNodeDbCreate', $f);
+
+            //create a dummy file object for sending to events
+            $fileObject = new Objects\File();
+            $fileObject->setData($f);
+
+            fireEvent('beforeNodeDbCreate', $fileObject);
             DB\dbQuery(
                 'INSERT INTO tree (
                     id
@@ -574,7 +579,7 @@ class Files
             $f['id'] = $file_id;
             // $p['files'][$fk]['id'] = $file_id;
             $this->updateFileProperties($f);
-            // fireEvent('nodeDbCreate', $f);
+            fireEvent('nodeDbCreate', $fileObject);
         }
 
         return true;
@@ -926,13 +931,13 @@ class Files
                             <script type="text/javascript" src="'.Minify_getUri('js_pdf').'"></script>
                             <script type="text/javascript">
                                   window.onload = function (){
-                                    var success = new PDFObject({ url: "/download.php?pw=&amp;id='.$file['id'].'" }).embed();
+                                    var success = new PDFObject({ url: "'.CORE_URL.'download.php?pw=&amp;id='.$file['id'].'" }).embed();
                                   };
                             </script>
                           </head>
                       <body>
                         <p>It appears you don\'t have Adobe Reader or PDF support in this web browser.
-                            <a href="/download.php?id='.$file['id'].'">Click here to download the PDF</a></p>
+                            <a href="'.CORE_URL.'download.php?id='.$file['id'].'">Click here to download the PDF</a></p>
                     </body>
                     </html>';
                 }

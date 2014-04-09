@@ -569,6 +569,7 @@ function initApp(){
             ownerCt: e.ownerCt
             ,record: e.record
             ,fieldRecord: e.fieldRecord
+            ,objFields: e.objFields
             ,grid: e.grid
             ,pidValue: e.pidValue
             ,objectId: e.objectId
