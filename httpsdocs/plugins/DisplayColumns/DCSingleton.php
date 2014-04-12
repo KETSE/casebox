@@ -113,6 +113,7 @@ class DCSingleton
         $rez = array();
         $template = Templates\SingletonCollection::getInstance()->getTemplate($templateId);
         $data = $template->getData();
+
         if (!empty($data['cfg']['DC'])) {
             $rez = $data['cfg']['DC'];
         }
@@ -128,12 +129,26 @@ class DCSingleton
     public static function getCustomDisplayColumns($nodeId = false, $templateId = false)
     {
         $rez = array();
-        if ($templateId !== false) {
-            $rez = static::getTemplateCustomDisplayColumns($templateId);
+
+        $eventParams = array(
+            'nodeId' => $nodeId
+            ,'templateId' => $templateId
+            ,'rez' => &$rez
+        );
+
+        \CB\fireEvent('beforeCustomDisplayColumns', $eventParams);
+
+        if (empty($rez)) {
+            if ($templateId !== false) {
+                $rez = static::getTemplateCustomDisplayColumns($templateId);
+            }
+
+            if (empty($rez) && ($nodeId !== false)) {
+                $rez = static::getNodeCustomDisplayColumns($nodeId);
+            }
         }
-        if (empty($rez) && ($nodeId !== false)) {
-            $rez = static::getNodeCustomDisplayColumns($nodeId);
-        }
+
+        \CB\fireEvent('customDisplayColumns', $eventParams);
 
         return $rez;
     }
@@ -146,16 +161,26 @@ class DCSingleton
      */
     public static function getSolrColumns($nodeId = false, $templateId = false)
     {
-        $rez = array();
+        $rez = array(
+            'fields' => array()
+            ,'sort' => array()
+        );
         $displayColumns = static::getCustomDisplayColumns($nodeId, $templateId);
         foreach ($displayColumns as $column) {
             if (is_array($column) && !empty($column['solr_column_name'])) {
-                $rez[$column['solr_column_name']] = 1;
+                $rez['fields'][$column['solr_column_name']] = 1;
+                if (!empty($column['sort'])) {
+                    $rez['sort'][] = $column['solr_column_name'] . ' ' . $column['sort'];
+                }
             }
         }
 
-        if (!empty($rez)) {
-            $rez = array_keys($rez);
+        if (!empty($rez['fields'])) {
+            $rez['fields'] = array_keys($rez['fields']);
+
+            if (!empty($rez['sort'])) {
+                $rez['sort'] = 'ntsc,'.implode(',', $rez['sort']);
+            }
         }
 
         return $rez;

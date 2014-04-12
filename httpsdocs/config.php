@@ -20,9 +20,9 @@ namespace CB;
 */
 
 /* detecting core name (project name) from SERVER_NAME */
-if (isset($_GET['c'])) {
-    define('CB\\CORE_NAME', $_GET['c']);
-    define('CB\\URI_PREFIX', '/'.CORE_NAME.'/');
+
+if (isset($_GET['core'])) {
+    define('CB\\CORE_NAME', strtolower($_GET['core']));
 } else {
     $arr = explode('.', $_SERVER['SERVER_NAME']);
     // remove www, ww2 and take the next parameter as the $coreName
@@ -37,8 +37,8 @@ if (isset($_GET['c'])) {
     $arr = explode('_', $arr);
 
     define('CB\\CORE_NAME', $arr[0]);
-    define('CB\\URI_PREFIX', '/');
 }
+define('CB\\CORE_URL', 'https://'.$_SERVER['SERVER_NAME'].'/'.CORE_NAME.'/');
 /* end of detecting core name (project name) from SERVER_NAME */
 
 /* define main paths /**/
@@ -177,7 +177,7 @@ ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
 
-session_set_cookie_params($sessionLifetime, '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+session_set_cookie_params($sessionLifetime, '/' . CORE_NAME . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 session_name(
     str_replace(
         array(
@@ -187,7 +187,7 @@ session_name(
         ),
         '',
         $_SERVER['SERVER_NAME']
-    )
+    ).CORE_NAME
 );
 
 //error reporting params
@@ -207,7 +207,7 @@ date_default_timezone_set('UTC');
 /* define other constants used in casebox */
 
 //relative path to ExtJs framework. Used in index.php
-const EXT_PATH = '/libx/ext';
+define('CB\\EXT_PATH', CORE_URL.'libx/ext');
 //templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
 define('CB\\TEMPLATES_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
 
@@ -221,8 +221,11 @@ if (!defined('CB\\CONFIG\\MAX_ROWS')) {
 
 // custom Error log per Core, use it for debug/reporting purposes
 define('DEBUG_LOG', LOGS_DIR.'cb_'.CORE_NAME.'_debug_log');
-//clear debug_log for each request
-// @unlink(DEBUG_LOG);
+
+//clear debug_log for each request when on debug host
+if (isDebugHost()) {
+    @unlink(DEBUG_LOG);
+}
 
 // define solr_core as db_name if none is specified in config
 if (!defined('CB\\CONFIG\\SOLR_CORE')) {
@@ -290,7 +293,7 @@ function debug($msg)
     if (!is_scalar($msg)) {
         $msg = var_export($msg, 1);
     }
-    error_log($msg."\n", 3, DEBUG_LOG);
+    error_log(date('Y-m-d H:i:s').': '.$msg."\n", 3, DEBUG_LOG);
 }
 
 /**

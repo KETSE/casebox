@@ -214,6 +214,12 @@ class Objects
         //group fields in display blocks
         foreach ($linearData as $field) {
             $tf = $template->getField($field['name']);
+
+            if (empty($tf)) {
+                //fantom data of deleted or moved fields
+                continue;
+            }
+
             if (empty($tf['cfg'])) {
                 $group = 'body';
             } elseif (@$tf['cfg']['showIn'] == 'top') {
@@ -226,6 +232,13 @@ class Objects
             $field['tf'] = $tf;
             $gf[$group][] = $field;
         }
+
+        $params = array(
+            'object' => &$obj
+            ,'groupedFields' => &$gf
+        );
+
+        fireEvent('onBeforeGeneratePreview', $params);
 
         if (!empty($gf['top'])) {
             foreach ($gf['top'] as $f) {
@@ -252,16 +265,26 @@ class Objects
                     $v = implode('<br />', $v);
                 }
 
-                if (empty($v) && empty($f['info']) && empty($f['files'])) {
+                if (!empty($f['tf']['cfg']['hidePreview']) ||
+                    (empty($v) && empty($f['info']))
+                ) {
                     continue;
                 }
                 $headerField = $template->getHeaderField($f['tf']['id']);
                 if (!empty($headerField) && ($previousHeader != $headerField)) {
-                    $body .= '<tr class="prop-header"><th colspan="3"'.(empty($headerField['level']) ? '' : ' style="padding-left: '.($headerField['level'] * 10).'px"').'>'.$headerField['title'].'</th></tr>';
+                    $body .= '<tr class="prop-header"><th colspan="3"'.(
+                        empty($headerField['level'])
+                        ? ''
+                        : ' style="padding-left: '.($headerField['level'] * 10).'px"'
+                    ).'>'.$headerField['title'].'</th></tr>';
                 }
                 $previousHeader = $headerField;
 
-                $body .= '<tr><td'.(empty($f['tf']['level']) ? '' : ' style="padding-left: '.($f['tf']['level'] * 10).'px"').
+                $body .= '<tr><td'.(
+                        empty($f['tf']['level'])
+                        ? ''
+                        : ' style="padding-left: '.($f['tf']['level'] * 10).'px"'
+                    ).
                     ' class="prop-key">'.$f['tf']['title'].'</td><td class="prop-val">'.$v.
                     (empty($f['info']) ? '' : '<p class="prop-info">'.$f['info'].'</p>').'</td></tr>';
             }

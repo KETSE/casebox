@@ -107,7 +107,7 @@ function getItemIcon(d){
         case 'file':
             return getFileIcon(d['name']);
         case 'task':
-            if(d['status'] == 3) {
+            if(d['task_status'] == 3) {
                 return 'icon-task-completed';
             }
         default:

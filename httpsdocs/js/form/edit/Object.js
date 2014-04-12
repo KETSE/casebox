@@ -15,7 +15,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             listeners:{
                 scope: this
                 ,add: this.onObjectsStoreChange
-                ,load: this.onObjectsStoreChange
+                ,load: this.onObjectsStoreLoad
             }
         });
 
@@ -270,6 +270,13 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
 
     }
 
+    ,onObjectsStoreLoad: function(store, records, options) {
+        this.onObjectsStoreChange(store, records, options);
+        if(!this.grid.editing) {
+            this.grid.getView().refresh();
+        }
+    }
+
     ,onObjectsStoreChange: function(store, records, options){
         Ext.each(
             records
@@ -280,8 +287,6 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
         );
 
         if(!this.grid.editing) {
-            this.grid.getView().refresh();
-
             // focus only when object just loaded
             if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
                 this.focusDefaultCell();

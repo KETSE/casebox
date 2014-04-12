@@ -224,7 +224,7 @@ function formatDatePeriod($fromDateTime, $toDateTime)
         $d2format = 'D';
     }
 
-    if (!empty($d2format)) {
+    if (!empty($toDateTime) && !empty($d2format)) {
         $rez .= ' - '.$d2->format($d2format);
     }
 
@@ -337,6 +337,9 @@ function formatMysqlDate($date, $format = false, $TZ = 'UTC')
     if (empty($date)) {
         return '';
     }
+    if (empty($TZ)) {
+        $TZ = 'UTC';
+    }
     if ($format == false) {
         $format = \CB\getOption('short_date_format');
     }
@@ -346,10 +349,9 @@ function formatMysqlDate($date, $format = false, $TZ = 'UTC')
     $d1->setTimezone(new \DateTimeZone($TZ));
 
 
-    $rez = $d1->format($format);
+    $rez = $d1->format(str_replace('%', '', $format));
 
     return $rez;
-    // return date(str_replace('%', '', $format), strtotime($date));
 }
 
 function formatMysqlTime($date, $format = false)
@@ -457,10 +459,6 @@ function dateMysqlToISO($date_string)
 
 function getCoreHost($db_name = false)
 {
-    if (!empty($_SERVER['SERVER_NAME'])) {
-        return 'https://'.$_SERVER['SERVER_NAME'].'/';
-    }
-
     if ($db_name == false) {
         $db_name = \CB\CONFIG\DB_NAME;
     }
@@ -468,19 +466,27 @@ function getCoreHost($db_name = false)
     if (substr($db_name, 0, 3) == 'cb_') {
         $core = substr($db_name, 3);
     }
-    $d = isDevelServer() ? '.d' : '';
-    $core = 'https://'.$core.$d.'.casebox.org/';
+
+    $server =
+        (empty($_SERVER['SERVER_NAME'])
+            ? 'casebox.org'
+            : $_SERVER['SERVER_NAME']
+        ).'/';
+
+    $dev = \CB\isDevelServer() ? 'dev.' : '';
+
+    $core = "https://$dev$server/$core/";
 
     return $core;
 }
 
-function toNumericArray($v)
+function toNumericArray($v, $delimiter = ',')
 {
     if (empty($v)) {
         return array();
     }
     if (!is_array($v)) {
-        $v = explode(',', $v);
+        $v = explode($delimiter, $v);
     }
     $v = array_filter($v, 'is_numeric');
     foreach ($v as $k => $w) {

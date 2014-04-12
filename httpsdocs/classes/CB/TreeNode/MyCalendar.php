@@ -16,7 +16,6 @@ class MyCalendar extends Base
         }
 
         $ourPid = @intval($this->config['pid']);
-
         if ($this->lastNode instanceof Dbnode) {
             if ($ourPid != $lastId) {
                 return false;
@@ -52,10 +51,12 @@ class MyCalendar extends Base
             return;
         }
 
+        $ourPid = @intval($this->config['pid']);
+
         $this->createDefaultFilter();
 
         if (empty($this->lastNode) ||
-            (($this->lastNode->id == @$this->config['pid']) && (get_class($this->lastNode) != get_class($this)))
+            (($this->lastNode->id == $ourPid) && (get_class($this->lastNode) != get_class($this)))
         ) {
             $rez = $this->getRootNodes();
         } else {

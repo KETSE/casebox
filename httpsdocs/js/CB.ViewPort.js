@@ -165,7 +165,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         /* adding menu items */
         var um = App.mainToolBar.find( 'name', 'userMenu')[0];
         if(um) {
-            um.update('<img src="/photo/' + App.loginData.id + '.jpg' + App.sid + '" ' +
+            um.update('<img src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg' + App.sid + '" ' +
                 'style="margin-top: 4px; width: 32px; height: 32px;" ' +
                 'title="'+
                     App.loginData['first_name']+' '+
@@ -177,8 +177,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         managementItems = [];
         if(App.loginData.manage) {
             managementItems.push(
-                '-'
-                ,{
+                {
                     text: L.Users
                     ,iconCls: 'icon-users'
                     ,handler: function(){
@@ -187,7 +186,22 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 }
             );
         }
-        if(managementItems.length > 0) App.mainToolBar.insert(3, {text: L.Settings, iconCls: 'icon-gear', hideOnClick: false, menu: managementItems});
+
+        if(App.loginData.admin) {
+            managementItems.push(
+                {
+                    text: 'Reload templates'
+                    ,iconCls: 'icon-templates'
+                    ,handler: function(){
+                        reloadTemplates();
+                    }
+                }
+            );
+        }
+
+        if(managementItems.length > 0) {
+            App.mainToolBar.insert(3, {text: L.Settings, iconCls: 'icon-gear', hideOnClick: false, menu: managementItems});
+        }
         App.mainToolBar.doLayout();
 
         langs = [];
@@ -320,7 +334,8 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             return;
         }
         params = {
-            view: Ext.isEmpty(node.attributes.view)
+            id: node.attributes.nid
+            ,view: Ext.isEmpty(node.attributes.view)
                 ? 'grid'
                 : node.attributes.view
         };

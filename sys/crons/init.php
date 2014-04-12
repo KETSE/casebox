@@ -19,6 +19,7 @@ ini_set('max_execution_time', 0);
 ini_set('allow_url_fopen', true);
 error_reporting(E_ALL);
 
+$_GET['core'] = $argv[1];
 $_SERVER['SERVER_NAME'] = $argv[1];
 $_SERVER['REMOTE_ADDR'] = 'localhost';
 

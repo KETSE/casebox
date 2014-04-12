@@ -17,7 +17,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
 
         this.instanceId = Ext.id();
 
-        Ext.chart.Chart.CHART_URL = '/libx/ext/resources/charts.swf';
+        Ext.chart.Chart.CHART_URL = '/' + App.config.coreName + '/libx/ext/resources/charts.swf';
 
         this.seriesStyles = [];
         for (var i = 0; i < App.colors.length; i++) {
@@ -98,11 +98,13 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
             ,new Ext.form.Label({
                 id: 'rowsComboLabel' + this.instanceId
                 ,text: L.Rows + ': '
+                ,style: 'padding-left: 7px'
             })
             ,this.rowsCombo
             ,new Ext.form.Label({
                 id: 'colsComboLabel' + this.instanceId
                 ,text: L.Columns + ': '
+                ,style: 'padding-left: 7px'
             })
             ,this.colsCombo
         );
@@ -185,7 +187,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
         Ext.iterate(
             this.pivot.titles[0]
             ,function(k, v, o) {
-                var r = '<th>' + v + '</th>';
+                var r = '<th style="text-align:left">' + v + '</th>';
                 Ext.iterate(
                     this.pivot.titles[1]
                     ,function(q, z, y) {
@@ -305,11 +307,10 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
                 }
                 ,this
             );
-
             var chartItems = [
                 {
                     xtype: this.activeChart
-                    ,height: 400
+                    ,height: Math.max(data1.length * 25, 400)
                     ,store: new Ext.data.JsonStore({
                         fields: fields1
                         ,data: data1
@@ -325,7 +326,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
                     ,series: series1
                 }, {
                     xtype: this.activeChart
-                    ,height: 400
+                    ,height: Math.max(data1.length * 25, 400)
                     ,store: new Ext.data.JsonStore({
                         fields: fields2
                         ,data: data2
@@ -374,7 +375,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
     ,loadChartData: function() {
         var data = {};
 
-        // loading facetsa list
+        // loading facets list
         Ext.iterate(
             this.data.facets
             ,function(key, val, o) {

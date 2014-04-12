@@ -27,6 +27,13 @@ class Log
     {
         // Available table fields: id, user_id, to_user_ids, case_id, object_id, file_id, office_index, action_type, result, info
         // id can be used to update an existing row
+
+        if (Cache::get('disable_logs', false) == true) {
+            \CB\debug('log disabled');
+
+            return;
+        }
+
         $id = null;
         $case = array();
         @$obj = array(
@@ -314,18 +321,23 @@ class Log
         /* setting remind_users field /**/
         if (isset($p['remind_users'])) {
             $p['remind_users'] = Util\toNumericArray($p['remind_users']);
+            $p['remind_users'] = array_unique($p['remind_users']);
+
             // $p['remind_users'] = array_diff($p['remind_users'], array($_SESSION['user']['id'])); //do not remind the user that have made changes
+
             if (empty($p['remind_users'])) {
                 unset($p['remind_users']);
             } else {
                 $p['remind_users'] = implode(',', $p['remind_users']);
             }
         }/**/
+
         $i = 1;
         $fn = array();
         $fv = array();
         $ufv = array();
         $values = array();
+
         foreach ($p as $k => $v) {
             if (in_array($k, $fields)) {
                 $fn[] = $k;
@@ -341,7 +353,7 @@ class Log
             VALUES ('.implode(',', $fv).')
             ON DUPLICATE KEY UPDATE '.implode(',', $ufv),
             $values
-        ) or die(DB\dbQueryError());
+        ); // or die(DB\dbQueryError());
 
         if (!empty($p['remind_users'])) {
             Log::addNotifications($p);

@@ -16,9 +16,9 @@ if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180))
 echo Config::get('project_name_'.USER_LANGUAGE, CORE_NAME);
 
 ?></title>
-    <link rel="stylesheet" type="text/css" href="<?php echo URI_PREFIX; ?>css/bs/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="<?php echo URI_PREFIX; ?>css/bs/css/bootstrap-responsive.min.css" />
-    <link type='text/css' rel="stylesheet" href="<?php echo URI_PREFIX; ?>css/login.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo CORE_URL; ?>css/bs/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo CORE_URL; ?>css/bs/css/bootstrap-responsive.min.css" />
+    <link type='text/css' rel="stylesheet" href="<?php echo CORE_URL; ?>css/login.css" />
 </head>
 <body onload="javascript: e = document.getElementById('u'); if(!e) e = document.getElementById('c'); e.focus(); editChanged();">
 <script type="text/javascript">
@@ -54,7 +54,7 @@ if (empty($_SESSION['check_TSV'])) {
 </script>
 <div class="main">
     <div class="form_login tac">
-        <a href="/" class="dib"><img src="<?php echo URI_PREFIX; ?>css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
+        <a href="/" class="dib"><img src="<?php echo CORE_URL; ?>css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
         <form method="post" action="auth.php" class="standart_form tal" autocomplete="off">
 <?php
 
@@ -70,7 +70,7 @@ if (empty($_SESSION['check_TSV'])) {
                 <?php echo isset($_SESSION['message']) ? '<div class="alert alert-error">'.$_SESSION['message'].'</div>' : '';?>
                 <span class="icon-lock"></span>
             </label>
-            <a style="margin-top: 30px;" class="pull-right" href="/login/forgot-password/"><?php echo L\get('ForgotPassword');?></a>
+            <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/'.CORE_NAME; ?>/login/forgot-password/"><?php echo L\get('ForgotPassword');?></a>
             <input type="submit" name="s" id="s" value="<?php echo L\get('Login');?>" class="btn btn-info" style="margin-top: 26px;" disabled>
     <?php
 

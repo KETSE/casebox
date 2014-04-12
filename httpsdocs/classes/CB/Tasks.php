@@ -765,7 +765,7 @@ class Tasks
             array(
                 'action_type' => 23
                 ,'task_id' => $p['id']
-                ,'remind_users' => $task['cid']
+                ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
                 ,'autoclosed' => $this->checkAutocloseTask($p['id'])
                 ,'info' => 'title: '.$task['title']
             )
@@ -1179,7 +1179,6 @@ class Tasks
                 '<span class="dttm" title="{full_created_date_text}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
 
         $date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
-
         $d['datetime_period'] = ($d['allday'] == 1)
             ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
             : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['timezone']);
@@ -1317,7 +1316,7 @@ class Tasks
         $linearData = $obj->getLinearData();
         $template = $obj->getTemplate();
 
-        $object_record['status'] = @$objData['status'];
+        $object_record['task_status'] = @$objData['status'];
         $object_record['importance'] = @$obj->getFieldValue('importance', 0)['value'];
         $object_record['category_id'] = @$obj->getFieldValue('category_id', 0)['value'];
         $user_ids = @$obj->getFieldValue('assigned', 0)['value'];

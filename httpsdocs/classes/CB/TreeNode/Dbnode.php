@@ -28,11 +28,14 @@ class Dbnode extends Base
                 }
             }
         }
+        if (empty($pid)) {
+            return array();
+        }
         /* end of check */
 
         $p = &$requestParams;
 
-        $p['fl'] = 'id,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls,status';
+        $p['fl'] = 'id,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls,status,task_status';
 
         if (empty($p['showFoldersContent'])) {
             $p['templates'] = $GLOBALS['folder_templates'];
@@ -89,19 +92,22 @@ class Dbnode extends Base
 
     public function getName($id = false)
     {
-        $rez = 'no name';
+        $rez = '';
+
         if ($id === false) {
             $id = $this->id;
         }
-        $res = DB\dbQuery(
-            'SELECT name FROM tree WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
+        if (!empty($id) && is_numeric($id)) {
+            $res = DB\dbQuery(
+                'SELECT name FROM tree WHERE id = $1',
+                $id
+            ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['name'];
+            if ($r = $res->fetch_assoc()) {
+                $rez = $r['name'];
+            }
+            $res->close();
         }
-        $res->close();
 
         return $rez;
     }

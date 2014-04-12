@@ -3,7 +3,7 @@ namespace CB\TreeNode;
 
 use CB\Util;
 
-class SearchResults extends DBNode
+class SearchResults extends Dbnode
 {
     protected function acceptedPath()
     {
@@ -47,9 +47,29 @@ class SearchResults extends DBNode
             $so->load($searchId);
         }
 
-        $p = $this->getSearchParams($so);
+        $t = $so->getTemplate();
+        $td = $t->getData();
+
+        $p = [];
+        // if we have a router defined in config of the search template then try to prepare search params wit it
+        // otherwise use default search method
+        if (empty($td['cfg']['router'])) {
+            $p = $this->getSearchParams($so);
+        } else {
+            $a = explode('.', $td['cfg']['router']);
+            $class = str_replace('_', '\\', $a[0]);
+            $class = new $class();
+            $p = $class->{$a[1]}($so);
+        }
+
+        $p = array_merge($requestParams, $p);
+
         $s = new \CB\Search();
         $rez = $s->query($p);
+
+        if (!empty($td['cfg']['DC'])) {
+            $rez['DC'] = $td['cfg']['DC'];
+        }
 
         return $rez;
     }
@@ -58,6 +78,8 @@ class SearchResults extends DBNode
     {
         $tpl = $searchObject->getTemplate();
         $rez = $tpl->getData()['cfg'];
+
+        @$rez['template_id'] = $searchObject->getData()['template_id'];
 
         if (empty($rez['fq'])) {
             $rez['fq'] = array();
@@ -77,11 +99,12 @@ class SearchResults extends DBNode
     protected function adjustCondition($templateField, $value)
     {
         $rez = '';
-        if (empty($value['value'])) {
+        if (empty($value['value']) || empty($templateField['solr_column_name'])) {
             return $rez;
         }
 
-        $f = $value['name'];
+        $f = $templateField['solr_column_name'];
+
         $v = $value['value'];
 
         switch ($templateField['type']) {
@@ -153,6 +176,11 @@ class SearchResults extends DBNode
             case '_objects':
             case 'combo':
                 $v = Util\toNumericArray($v);
+                if (!empty($templateField['solrValuePrefix'])) {
+                    for ($i = 0; $i < sizeof($v); $i++) {
+                        $v[$i] = $templateField['solrValuePrefix'].$v[$i];
+                    }
+                }
                 if (!empty($v)) {
                     switch ($value['cond']) {
                         case '<=':
@@ -167,7 +195,7 @@ class SearchResults extends DBNode
 
                         case '=':
                         default:
-                            $rez = $f.':('.implode(' AND ', $v).') AND -'.$f.':[* TO *]';
+                            $rez = $f.':('.implode(' AND ', $v).')'; // AND -'.$f.':[* TO *]
                             break;
                     }
                 }

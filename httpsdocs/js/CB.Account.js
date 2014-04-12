@@ -128,7 +128,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
             }
         });
         this.photoView = new Ext.DataView({
-            tpl: ['<tpl for="."><div><img width="70" class="user-photo-field2 click icon-user70-{sex}" src="/photo/{id}.png?{[ (new Date()).format("His") ]}"></div>'
+            tpl: ['<tpl for="."><div><img width="70" class="user-photo-field2 click icon-user70-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ (new Date()).format("His") ]}"></div>'
                 ,'<div><a href="#" name="change" class="click">'+L.Change+'</a> &nbsp; <a href="#" name="remove" class="click">'+L.Delete+'</a></div>'
                 ,'</tpl>'
             ]

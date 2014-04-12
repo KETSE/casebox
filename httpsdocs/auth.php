@@ -59,7 +59,7 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
 }
 
 if (!User::isLoged()) {
-    exit(header('Location: '.URI_PREFIX.'login.php'));
+    exit(header('Location: '.CORE_URL.'login.php'));
 }
 
-header('Location: '.URI_PREFIX.'index.php');
+header('Location: '.CORE_URL.'index.php');

@@ -77,8 +77,8 @@ CB.SearchPanel = Ext.extend(CB.form.edit.Object, {
 
     ,onSearchClick: function() {
         var p = Ext.copyTo({}, this.data, 'id,template_id');
-        p.data = this.readValues().data;
-        this.fireEvent('changeparams', {search: p});
+        p.data = Ext.apply({} , this.readValues().data);
+        this.fireEvent('changeparams',{search: p});
     }
 
     ,onClearClick: function (b, e)

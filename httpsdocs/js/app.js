@@ -552,7 +552,7 @@ function initApp(){
             fileId = fileId.id;
             zipped = false;
         }
-        url = 'download.php?id='+fileId;
+        url = '/' + App.config.coreName + '/download.php?id='+fileId;
         if(!Ext.isEmpty(versionId)) url += '&v='+versionId;
         if(zipped) {
             url += '&z=1';
@@ -569,6 +569,7 @@ function initApp(){
             ownerCt: e.ownerCt
             ,record: e.record
             ,fieldRecord: e.fieldRecord
+            ,objFields: e.objFields
             ,grid: e.grid
             ,pidValue: e.pidValue
             ,objectId: e.objectId
@@ -657,9 +658,11 @@ function initApp(){
                                     this.grid.fireEvent('change', e);
                                 }
                             }, e);
+
                             if(w.setData) {
                                 w.setData(data);
                             }
+
                             w.show();
 
                             return w;

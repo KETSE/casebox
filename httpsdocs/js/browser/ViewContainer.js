@@ -11,6 +11,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
     ,initComponent: function(){
         var viewGroup = Ext.id();
+        this.viewGroup = viewGroup;
+
         this.history = [];
 
         this.actions = {
@@ -173,8 +175,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,iconCls: 'ib-points'
                 ,iconAlign:'top'
                 ,scale: 'large'
-                ,menu: [
-                ]
+                ,scope: this
+                ,handler: function(b, e) {
+                    this.tbarMoreMenu.show(b.getEl());
+                }
             })
             ,new Ext.Button({
                 text: L.Filter
@@ -238,7 +242,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ,items: [
                 this.buttonCollection.get('filter')
                 ,this.buttonCollection.get('preview')
-                // ,this.buttonCollection.more
 
             ]
         });
@@ -256,7 +259,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 scope: this
                 ,resize: function(c, adjWidth, adjHeight, rawWidth, rawHeight){
                     if(this.viewToolbar.rendered) {
-                        var cw = this.containerToolbar.items.getCount() * 48;
+                        var cw = 5;
+
+                        this.containerToolbar.items.each(
+                            function(b) {
+                                cw += b.getWidth();
+                            }
+                            ,this
+                        );
                         this.viewToolbar.setWidth(adjWidth - cw);
                         this.containerToolbar.setWidth(cw);
                     }
@@ -300,6 +310,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,this.searchField
             ]
         });
+
+        this.tbarMoreMenu = new Ext.menu.Menu({items: []});
 
         this.objectPanel = new CB.ObjectCardView();
 
@@ -345,6 +357,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,{name: 'pid', type: 'int'}
                 ,{name: 'system', type: 'int'}
                 ,{name: 'status', type: 'int'}
+                ,{name: 'task_status', type: 'int'}
                 ,{name: 'template_id', type: 'int'}
                 ,{name: 'category_id', type: 'int'}
                 ,'template_type'
@@ -393,6 +406,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     options = {facets: 'general'};
                     Ext.apply(options, Ext.value(this.params, {}));
 
+                    //dont load calendar view when view bound are not set
                     var vp = this.cardContainer.getLayout().activeItem.getViewParams(options);
                     if( (vp === false) ||
                         (
@@ -463,6 +477,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,objectopen: this.onObjectsOpenEvent
             }
         });
+
+        this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
 
         App.fireEvent('browserinit', this);
 
@@ -548,6 +564,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(buttonsArray.indexOf('apps') < 0) {
             buttonsArray.unshift('apps');
         }
+
+        if(buttonsArray.indexOf('more') < 0) {
+            buttonsArray.push('more');
+        }
+
         //add plugin buttons if defined
         if(!Ext.isEmpty(this.pluginButtons)) {
             buttonsArray.push('->');
@@ -555,7 +576,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 buttonsArray.push(this.pluginButtons[i]);
             }
         }
-
 
         for (i = 0; i < buttonsArray.length; i++) {
             if((buttonsArray[i] == '-') || (buttonsArray[i] == '->')) {
@@ -633,9 +653,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,this
             );
         }
-
         if(this.store.load(this.params)) {
-            this.getEl().mask(L.Loading, 'x-mask-loading');
+            // this.getEl().mask(L.Loading, 'x-mask-loading');
         }
     }
 
@@ -649,8 +668,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.folderProperties.subtype = parseInt(this.folderProperties.subtype, 10);
         this.folderProperties.pathtext = o.result.pathtext;
 
+        this.descendantsButton.toggle(options.params.descendants === true);
         /* updating breadcrumb */
-        if(!Ext.isEmpty(o.result.pathtext)) {
+        if(Ext.isDefined(o.result.pathtext)) {
             var b = o.result.pathtext.split('/');
             if(Ext.isEmpty(b[0])) {
                 b.shift();
@@ -667,6 +687,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
         this.searchField.setValue(Ext.value(options.params.query, ''));
         this.filtersPanel.updateFacets(o.result.facets, options);
+
+        this.updatePreview();
     }
 
     ,onStoreLoad: function(store, recs, options) {
@@ -675,7 +697,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             var cfg = Ext.value(r.get('cfg'), {});
             r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
         }, this);
-        this.updatePreview();
     }
 
     ,sameParams: function(params1, params2){
@@ -706,6 +727,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,changeSomeParams: function(paramsSubset){
         var p = Ext.apply({}, this.params);
+
+        delete p.descendants;
+
         if(!Ext.isDefined(paramsSubset.start)) {
             paramsSubset.start = 0;
         }
@@ -724,13 +748,16 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(params.path)) {
             params.path = '/';
         }
-        var newParams = Ext.apply({}, params);//, this.params
+        var newParams = Ext.decode(Ext.encode(params));//, this.params
         var sameParams = this.sameParams(
             this.params
             ,newParams
         );
 
+        this.loadParamsTask.cancel();
+
         if(sameParams) {
+            this.updatePreview(newParams);
             return;
         }
 
@@ -738,9 +765,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
         this.spliceHistory();
 
-        if(Ext.isEmpty(this.loadParamsTask)) {
-            this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
-        }
         this.loadParamsTask.delay(500);
     }
 
@@ -794,13 +818,28 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onBreadcrumbItemClick: function(el, idx, ev) {
-        var v = this.folderProperties.path.split('/');
-        v = v.slice(0, idx+2);
-        v = v.join('/');
-        if(v.substr(0, 1) !== '/') {
-            v = '/' + v;
+        var pt = this.folderProperties.pathtext.split('/');
+        var p = this.folderProperties.path.split('/');
+
+        if(Ext.isEmpty(pt[0])) {
+            pt.shift();
         }
-        this.changeSomeParams({'path': v});
+        if((pt.length > 0) && Ext.isEmpty(pt[pt.length-1])) {
+            pt.pop();
+        }
+        if(Ext.isEmpty(p[0])) {
+            p.shift();
+        }
+        if((p.length > 0) && Ext.isEmpty(p[p.length-1])) {
+            p.pop();
+        }
+
+        p = p.slice(0, idx + 1 + p.length - pt.length);
+        p = p.join('/');
+        if(p.substr(0, 1) !== '/') {
+            p = '/' + p;
+        }
+        this.changeSomeParams({'path': p});
     }
 
     ,onDescendantsClick: function(b, e) {
@@ -856,12 +895,17 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.updatePreview();
     }
 
-    ,updatePreview: function() {
+    ,updatePreview: function(customParams) {
         if(Ext.isEmpty(this.folderProperties)) {
             return;
         }
-        var s = this.cardContainer.getLayout().activeItem.currentSelection;
-        var data = Ext.isEmpty(s)
+        var data = customParams;
+
+        //if custom params are empty then try to load current view selection
+        //or the currently opened object
+        if(Ext.isEmpty(data)) {
+            var s = this.cardContainer.getLayout().activeItem.currentSelection;
+            data = Ext.isEmpty(s)
                 ? {
                     id: this.folderProperties.id
                     ,name: this.folderProperties.name
@@ -873,7 +917,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,template_id: s[0].template_id
                     ,can: s[0].can
                 };
-
+        }
         this.objectPanel.load(data);
     }
 

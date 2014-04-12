@@ -16,7 +16,7 @@ class User
         $_SESSION['ips'] = $ips;
         $_SESSION['key'] = md5($ips.$login.$pass.time());
         $_COOKIE['key'] = $_SESSION['key'];
-        setcookie('key', $_SESSION['key'], 0, '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+        setcookie('key', $_SESSION['key'], 0, '/' . CORE_NAME . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 
         $rez = array('success' => false);
         $user_id = false;
@@ -196,7 +196,8 @@ class User
         @$rez = array(
             'success' => true
             ,'config' => array(
-                'task_categories' => constant('CB\\CONFIG\\TASK_CATEGORIES')
+                'coreName' => CORE_NAME
+                ,'task_categories' => constant('CB\\CONFIG\\TASK_CATEGORIES')
                 ,'default_task_category' => constant('CB\\CONFIG\\DEFAULT_TASK_CATEGORY')
                 ,'folder_templates' => $GLOBALS['folder_templates']
                 ,'default_task_template' => constant('CB\\CONFIG\\DEFAULT_TASK_TEMPLATE')

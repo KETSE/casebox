@@ -2,6 +2,19 @@
 
 namespace CB\Objects\Plugins;
 
-class Meta extends Base
+use CB\Objects;
+
+class Meta extends ObjectProperties
 {
+    public function getData($id = false)
+    {
+
+        $rez = parent::getData($id);
+
+        if (empty($rez['data']['html'])) {
+            // $rez['data']['html'] = 'No metadata';
+        }
+
+        return $rez;
+    }
 }

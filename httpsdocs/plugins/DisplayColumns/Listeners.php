@@ -1,6 +1,8 @@
 <?php
 namespace DisplayColumns;
 
+use CB\Cache;
+
 class Listeners
 {
     private $class = null;
@@ -18,24 +20,26 @@ class Listeners
         $pid = empty($ip['pid']) ? false : $ip['pid'];
         $pid = is_array($pid) ? $pid[0] : $pid;
 
-        $templateId = empty($ip['template_id']) ? false : $ip['template_id'];
+        $templateId = $this->findTemplate($p);
 
         if (empty($pid) && empty($templateId)) {
             return;
         }
 
-        $requiredSolrColumns = $this->class->getSolrColumns($pid, $templateId);
-        if (!empty($requiredSolrColumns)) {
+        $solrFields = $this->class->getSolrColumns($pid, $templateId);
+
+        if (!empty($solrFields['fields'])) {
             $fl = explode(',', $sp['fl']);
             foreach ($fl as $k => $f) {
                 $fl[$k] = trim($f);
             }
-            foreach ($requiredSolrColumns as $sc) {
+            foreach ($solrFields['fields'] as $sc) {
                 if (!in_array($sc, $fl)) {
                     $fl[] = $sc;
                 }
             }
             $sp['fl'] = implode(',', $fl);
+            // if(!empty())
         }
     }
 
@@ -48,7 +52,7 @@ class Listeners
         $pid = empty($ip['pid']) ? false : $ip['pid'];
         $pid = is_array($pid) ? $pid[0] : $pid;
 
-        $templateId = empty($ip['template_id']) ? false : $ip['template_id'];
+        $templateId = $this->findTemplate($p);
 
         if (empty($pid) && empty($templateId)) {
             return;
@@ -59,25 +63,32 @@ class Listeners
         if (!empty($displayColumns)) {
             //set custom display columns data
             $customColumns = array();
+
             foreach ($displayColumns as $k => $col) {
                 $fieldName = is_numeric($k) ? $col : $k;
                 $customColumns[$fieldName] = is_numeric($k) ? array() : $col;
             }
+
             // fill custom columns data
             foreach ($data as &$doc) {
                 $obj = \CB\Objects::getCachedObject($doc['id']);
                 $template = $obj->getTemplate();
+
                 foreach ($customColumns as $fieldName => &$col) {
                     $customField = $fieldName;
+
                     if (!empty($col['field_'.\CB\USER_LANGUAGE])) {
                         $customField = $col['field_'.\CB\USER_LANGUAGE];
                     } elseif (!empty($col['field'])) {
                         $customField = $col['field'];
                     }
+
                     $customField = explode(':', $customField);
                     $templateField = null;
                     $values = array();
+
                     switch ($customField[0]) {
+
                         case 'solr':
                             $templateField = $template->getField($customField[1]);
                             if (empty($templateField)) {
@@ -88,11 +99,13 @@ class Listeners
                             }
                             $values = array(@$doc[$customField[1]]);
                             break;
+
                         case 'calc':
                             //CustomMethod call;
                             // $templateField = $template->getField($fieldName);
                             // $values = array();
                             break;
+
                         default:
                             $templateField = $template->getField($customField[0]);
                             $values = $obj->getFieldValue($customField[0]);
@@ -113,5 +126,33 @@ class Listeners
             }
             $p['result']['DC'] = $customColumns;
         }
+    }
+
+    /**
+     * find the template id from input params or get it from last node in path
+     * @param  array $p
+     * @return int   | false
+     */
+    protected function findTemplate(&$p)
+    {
+        $rez = false;
+        $ip = &$p['inputParams'];
+
+        if (!empty($ip['template_id'])) {
+            $rez = $ip['template_id'];
+        } else {
+            $path = Cache::get('current_path');
+
+            if (!empty($path)) {
+                $node = $path[sizeof($path)-1];
+                $data = $node->getData();
+
+                if (!empty($data['template_id'])) {
+                    $rez = $data['template_id'];
+                }
+            }
+        }
+
+        return $rez;
     }
 }

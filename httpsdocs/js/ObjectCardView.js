@@ -24,6 +24,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 iconCls: 'ib-edit-obj'
                 ,id: 'edit' + this.instanceId
                 ,scale: 'large'
+                ,text: L.Edit
                 ,disabled: true
                 ,scope: this
                 ,handler: this.onEditClick
@@ -65,6 +66,16 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onCancelClick
+            })
+            ,fitImage: new Ext.Action({
+                iconCls: 'ib-fit'
+                ,id: 'fitImage' + this.instanceId
+                ,scale: 'large'
+                ,hidden: true
+                ,enableToggle: true
+                ,pressed: true
+                ,scope: this
+                ,handler: this.onFitImageClick
             })
             ,openInTabsheet: new Ext.Action({
                 iconCls: 'ib-external'
@@ -132,6 +143,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             }
             ,'new': {
                 text: L.New
+                ,name: 'newmenu'
                 ,menu: []
             }
         };
@@ -147,6 +159,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             ,new Ext.Button(this.actions.save)
             ,new Ext.Button(this.actions.cancel)
             ,new Ext.Button(this.actions.openInTabsheet)
+            ,new Ext.Button(this.actions.fitImage)
             ,new Ext.Button(this.actions.completeTask)
 
             ,new Ext.Button({
@@ -155,6 +168,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,scale: 'large'
                 ,scope: this
                 ,handler: function(b, e) {
+                    this.updateCreateMenu();
                     this.menu.show(b.getEl());
                 }
             })
@@ -166,6 +180,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 this.BC.get('back' + this.instanceId)
                 ,this.BC.get('search' + this.instanceId)
                 ,this.BC.get('edit' + this.instanceId)
+                ,this.BC.get('fitImage' + this.instanceId)
                 ,this.BC.get('download' + this.instanceId)
                 ,this.BC.get('save' + this.instanceId)
                 ,this.BC.get('cancel' + this.instanceId)
@@ -184,6 +199,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                         scope: this
                         ,openpreview: this.onOpenPreviewEvent
                         ,openproperties: this.onOpenPropertiesEvent
+                        ,editobject: this.onEditObjectEvent
                         ,loaded: this.onCardItemLoaded
                     }
                 },{
@@ -277,7 +293,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         }
 
         this.getLayout().activeItem.clear();
+
         this.getLayout().setActiveItem(idx);
+
         if(!mb.pressed) {
             mb.toggle();
         }
@@ -297,7 +315,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             (CB.DB.templates.getType(d.template_id) == 'file')
         );
 
-        this.actions.edit.setDisabled(isNaN(d.template_id));
+        this.actions.edit.setDisabled(isNaN(d.id) || Ext.isEmpty(d.id));//template_id
     }
 
     /**
@@ -306,7 +324,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
      * @return {[type]}            [description]
      */
     ,load: function(objectData) {
-
         if(this.locked) {
             delete this.requestedLoadData;
             return;
@@ -324,7 +341,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         // check  if a new load is waiting to be loaded
         if(Ext.isEmpty(this.requestedLoadData)) {
-
             //check if object data are identical to previous loaded object
             if((objectData.id == this.loadedData.id) &&
                 (Ext.value(objectData.viewIndex, cvi) == Ext.value(this.loadedData.viewIndex, cvi))
@@ -357,14 +373,14 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             //automatic switch to plugins panel
             this.onViewChangeClick(0);
 
-            if(this.skipNextPreviewLoadOnBrowserRefresh) {
-                delete this.skipNextPreviewLoadOnBrowserRefresh;
-            } else {
+            // if(this.skipNextPreviewLoadOnBrowserRefresh) {
+            //     delete this.skipNextPreviewLoadOnBrowserRefresh;
+            // } else {
                 this.items.itemAt(0).clear();
 
                 // instantiate a delay to exclude flood requests
                 this.delayedLoadTask.delay(60, this.doLoad, this);
-            }
+            // }
         }
     }
 
@@ -395,6 +411,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             case 'CBObjectPreview':
                 this.getTopToolbar().setVisible(!Ext.isEmpty(id));
                 this.doLayout();
+
+                //used params by preview component to detect wich buttons to display when asked
+                activeItem.params = this.loadedData;
+
                 activeItem.loadPreview(id);
                 break;
             case 'CBObjectProperties':
@@ -462,20 +482,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                         var cfg = Ext.apply({}, b);
                         var item = this.menu.add(cfg);
                         isFirstItem = false;
-
-                        if(k == 'new') {
-                            updateMenu(
-                                item
-                                ,getMenuConfig(
-                                    this.loadedData.id
-                                    ,this.loadedData.path
-                                    ,this.loadedData.template_id
-                                )
-                                ,this.onCreateObjectClick
-                                ,this
-                            );
-                            item.setDisabled(item.menu.items.getCount() < 1);
-                        }
                     }
                 }
             }
@@ -509,6 +515,23 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             }
             ,this
         );
+    }
+
+    ,updateCreateMenu: function() {
+        var nmb = this.menu.find('name', 'newmenu')[0];
+        if(nmb) {
+            updateMenu(
+                nmb
+                ,getMenuConfig(
+                    this.loadedData.id
+                    ,this.loadedData.path
+                    ,this.loadedData.template_id
+                )
+                ,this.onCreateObjectClick
+                ,this
+            );
+            nmb.setDisabled(nmb.menu.items.getCount() < 1);
+        }
     }
 
     ,addParamsToHistory: function(p) {
@@ -556,15 +579,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,onEditClick: function() {
-        if(App.isWebDavDocument(this.loadedData.name)) {
-            App.openWebdavDocument(this.loadedData);
-            return;
-        }
         var p = Ext.apply({}, this.loadedData);
-        p.viewIndex = 1;
-        this.delayedLoadTask.cancel();
-        this.requestedLoadData = p;
-        this.doLoad();
+        this.edit(p);
     }
 
     ,onReloadClick: function() {
@@ -596,7 +612,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                     p.viewIndex = 0;
                     this.requestedLoadData = p;
                     this.doLoad();
-                    this.skipNextPreviewLoadOnBrowserRefresh = true;
+                    // this.skipNextPreviewLoadOnBrowserRefresh = true;
                 }
                 delete this.goBackOnSave;
             }
@@ -622,6 +638,23 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         }
         delete this.goBackOnSave;
     }
+
+    /**
+     * toggle fit image preview
+     *
+     * This method actually should be managed by preview component
+     *
+     * @param  object b button
+     * @param  object e event
+     * @return void
+     */
+    ,onFitImageClick: function(b, e) {
+        var ai = this.getLayout().activeItem;
+        if(ai.onFitImageClick) {
+            ai.onFitImageClick(b, e);
+        }
+    }
+
     ,onOpenInTabsheetClick: function(b, e) {
         var ai = this.getLayout().activeItem;
         var cai = this.items.indexOf(ai);
@@ -636,9 +669,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         if(cai > 0) {
             ai.clear();
-            this.requestedLoadData = Ext.apply({}, this.loadedData);
-            this.requestedLoadData.viewIndex = 0;
-            this.onViewChangeClick(0);
+            this.loadedData = {};
+            this.onViewChangeClick(0, false);//
+            this.onCardItemLoaded(ai);
         }
 
         switch(CB.DB.templates.getType(d.template_id)) {
@@ -666,6 +699,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             data = this.loadedData;
         }
         this.load(data);
+    }
+
+    ,onEditObjectEvent: function(params) {
+        clog('onEditObjectEvent', params);
     }
 
     ,onDownloadClick: function(b, e) {

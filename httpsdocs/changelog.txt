@@ -1,3 +1,147 @@
+CaseBox 1.9.181 (2014-04-12)
+==============================
+New Features, Improvements
+--------------------------
+- added meta block for files in right panel 
+- Add "Fit" checkButton for picture previews
+- onTaskAccomplished, notify all Assigned users
+- OnClick in Tree should preview the node similar to OnSelect
+- added option to disable logs
+
+Fixed Bugs:
+----------
+- source field for an existing object (not new) - dont limit parent on search values
+- Preview shows non-existent (deleted) fields
+- "Add new" submenu showing incorect list
+- Selecting a node in tree and Preview doesn't work well
+
+CaseBox 1.9.179 (2014-04-09)
+==============================
+New Features, Improvements
+--------------------------
+- Double clicking a node in search results, should remove ExpandFolders
+- not finished all changes for dislplay columns
+    in fields of Display Columns config we can specify "sort" property for default sorting ("asc"/"desc")
+- added order field in default solr_fields config
+    Templates (like field template) could have order column that will go to solr
+        if solr_column_name is set to "order", or custom listeners could set "order" on solr update.
+    Default sorting changed from ntsc,sort_name -> ntsc,order,sort_name.
+    On custom sort will be ntsc,<custom_column>
+- changed working behavior for "_objects.source": "field"
+- Custom Sources
+- Add datetime on error logs files
+- mod_rewrite: added rule for automatic slash add after core folder
+
+Fixed Bugs:
+----------
+- Breadcrumb doesn't function correctly
+- Right panel remains in edit mode and empty
+- File preview doesn't work for pdf
+- Column width not saved
+- Stratelit: Incorrect preview of Нарушение in Stratelit
+- Stratelit: Incorrect icon & graph for Нарушение
+- Can't edit objects opened fromm preview
+- deleted template fields become visible when reloading templates structure from menu.
+- user avatars not displayed in task notifications emails
+
+CaseBox 1.9.178 (2014-04-05)
+==============================
+New Features, Improvements
+--------------------------
+- Add user name in front of the comment
+- created virtualhost config for webdav support
+- moved apache subdomains redirects apart from casebox host config
+
+6Fixed Bugs:
+----------
+- "Forgot password" link doesn't work
+- Data in preview ok, but when editing node, no data is displayed
+
+CaseBox 1.9.177 (2014-04-03)
+==============================
+New Features, Improvements
+--------------------------
+- set path of session cookies to core folder
+- solr schema status field change:
+    - task_status field has been added to solr, designed specially for tasks custom status
+    - status field from solr will be used for objects that have status values from tree (for ex.: case status)
+    Note: core should be reindexed after applying these changes
+
+Fixed Bugs:
+----------
+- Generate dinamic-height stacked barcharts for pivot table
+- Closed tasks not displayed with strike-through font and gray color
+- Breadcrumbs not working ok: clicking an item jumps to parent + other bugs
+- File preview doesn't work
+- Task email notification: links to user pictures not updated after https://CB/[core] change
+- First grid field doesn't enter Edit mode on new object
+
+CaseBox 1.9.173 (2014-04-02)
+==============================
+New Features, Improvements
+--------------------------
+- migrate from core subdomains to core subfolders. Example of mod_rewrite rules in install/httpd/ssl_casebox.conf
+- OSJI: "Manager's Calendar" should not be visible for non-managers
+- Left align in first column of the pivot table
+- Add "Reload Templates" button in "Settings" menu at the top for root user
+- "no name/Tree/" displayed in breadcrumbs
+
+Fixed Bugs:
+----------
+- Showing a date period for tasks with startDate only displays current date as end date
+- Pagination doesn't work in search results
+- After selecting users in 'Assigned' for a task, the grid loses focus
+- toolbar: adjustments to button position
+
+CaseBox 1.9.172 (2014-04-01)
+==============================
+New Features, Improvements
+--------------------------
+- open preview of the clickable items from preview
+- added onBeforeGeneratePreview event that gets as argument an array with properties "object" and "groupedFields"
+
+CaseBox 1.9.171 (2014-03-29)
+==============================
+New Features, Improvements
+--------------------------
+- remove type and subtype fields from indexing to solr. This fields are obsolete and cause other indexing problems.
+
+CaseBox 1.9.170 (2014-03-29)
+==============================
+New Features, Improvements
+--------------------------
+- plugins can be defined in config table of the core
+- check for admin on copy/move action
+- added CasesGrouped tree node plugin
+- check for variable scope in vertical edit grid
+
+CaseBox 1.9.169 (2014-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- move "more" button with export above grid
+
+CaseBox 1.9.168 (2014-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- moved export button under "more" button
+
+Fixed Bugs:
+----------
+- corrected wrong method name in export plugin
+- char case syntactic bug
+
+CaseBox 1.9.167 (2014-03-24)
+==============================
+New Features, Improvements
+--------------------------
+- search adjustments related to hcav
+
+Fixed Bugs:
+----------
+- Error appears on preview when user does not have timezone specified in its profile
+
 CaseBox 1.9.166 (2014-03-21)
 ==============================
 Fixed Bugs:

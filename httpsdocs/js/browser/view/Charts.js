@@ -11,7 +11,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
 
     ,initComponent: function(){
         var viewGroup = Ext.id();
-        Ext.chart.Chart.CHART_URL = '/libx/ext/resources/charts.swf';
+        Ext.chart.Chart.CHART_URL = '/' + App.config.coreName + '/libx/ext/resources/charts.swf';
 
         this.facetsCombo = new Ext.form.ComboBox({
             xtype: 'combo'
@@ -333,6 +333,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
             ,this
         );
         this.chartData = data;
+
         if(data[this.selectedFacets[0]]) {
             this.chartDataStore.loadData(data[this.selectedFacets[0]]);
         }

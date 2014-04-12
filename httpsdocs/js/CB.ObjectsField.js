@@ -67,9 +67,11 @@ CB.ObjectsFieldCommonFunctions = {
                         scope: this
                         ,beforeload: function(st, o ){
                             if(this.data){
+                                if(!Ext.isEmpty(this.data.fieldRecord)) o.params.fieldId = this.data.fieldRecord.get('id');
                                 if(!Ext.isEmpty(this.data.objectId)) o.params.objectId = this.data.objectId;
                                 if(!Ext.isEmpty(this.data.pidValue)) o.params.pidValue = this.data.pidValue;
                                 if(!Ext.isEmpty(this.data.path)) o.params.path = this.data.path;
+                                o.params.objFields = this.data.objFields;
                             }
                         }
                         ,load:  function(store, recs, options) {

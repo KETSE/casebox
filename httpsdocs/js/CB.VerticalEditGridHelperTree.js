@@ -173,7 +173,6 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         if(Ext.isEmpty(this.templateStore)) {
             return;
         }
-
         this.templateStore.each(
             function(record) {
                 if(record.get('pid') == pid) {
@@ -284,6 +283,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                 if( ( !Ext.isEmpty(v) &&
                     !setsHaveIntersection( va, parentNodeValue) ) //if not empty pidValues specified and parent value out of pidValues then hide the field
                     || ( (r.get('cfg').thesauriId == 'dependent') && Ext.isEmpty(parentNodeValue) ) // OR if the field is dinamic and parent has no selected value
+                    || ( (r.get('cfg').scope == 'variable') && Ext.isEmpty(parentNodeValue) ) // OR if the field is dinamic and parent has no selected value
                     || ( Ext.isDefined(r.get('cfg').dependency) && Ext.isEmpty(parentNodeValue) && !Ext.isEmpty(va) ) // OR if the field is dinamic and parent has no selected value
                 ) {
                     node.attributes.visible = false;
@@ -297,6 +297,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     ) || (
                     !Ext.isEmpty(parentNodeValue) && (Ext.isEmpty(v) || setsHaveIntersection( va, parentNodeValue ))
                     && ( (r.get('cfg').thesauriId !== 'dependent') ||  !Ext.isEmpty(parentNodeValue))
+                    && ( (r.get('cfg').scope !== 'variable') ||  !Ext.isEmpty(parentNodeValue))
                     && ( Ext.isDefined(r.get('cfg').dependency) ||  !Ext.isEmpty(parentNodeValue))
                     )
                 ) { //if no pidValues specified or pidValues contains the parent selected value then show the field

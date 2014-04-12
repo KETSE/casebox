@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\Util;
+
 class Templates
 {
     /**
@@ -27,6 +29,9 @@ class Templates
 
         while ($r = $res->fetch_assoc()) {
             $r['cfg'] = Util\toJSONArray($r['cfg']);
+            if (!empty($r['cfg']['source']['fn'])) {
+                unset($r['cfg']['source']['fn']);
+            }
             $data[] = $r;
         }
         $res->close();
@@ -41,7 +46,6 @@ class Templates
             'SELECT ts.id
                 ,ts.pid
                 ,t.id template_id
-                ,ts.`level`
                 ,ts.`name`
                 ,ts.l'.USER_LANGUAGE_INDEX.' `title`
                 ,ts.`type`
@@ -49,9 +53,11 @@ class Templates
                 ,ts.cfg
                 ,(coalesce(t.title_template,\'\') <> \'\' ) `has_title_template`
             FROM templates t
-            LEFT JOIN templates_structure ts
-                ON t.id = ts.template_id
-            ORDER BY template_id, `order`'
+                LEFT JOIN templates_structure ts
+                    ON t.id = ts.template_id
+                ,tree tr
+            WHERE ts.id = tr.id and tr.dstatus = 0
+            ORDER BY ts.template_id, ts.`order`'
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
@@ -61,6 +67,17 @@ class Templates
                 $r['type'] = 'varchar';
             }
             unset($r['has_title_template']);
+
+            if ($r['pid'] == $t) {
+                $r['pid'] = null;
+            }
+
+            $r['cfg'] = Util\toJSONArray($r['cfg']);
+
+            if (!empty($r['cfg']['source']['fn'])) {
+                unset($r['cfg']['source']['fn']);
+            }
+
             $data[$t][] = $r;
         }
         $res->close();
