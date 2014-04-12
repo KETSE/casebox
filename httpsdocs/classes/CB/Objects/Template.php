@@ -137,22 +137,22 @@ class Template extends Object
 
         $res = DB\dbQuery(
             'SELECT
-                id
-                ,pid
-                ,level
-                ,name
-                ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
-                ,l1
-                ,l2
-                ,l3
-                ,l4
-                ,`type`
-                ,`order`
-                ,cfg
-                ,solr_column_name
-            FROM templates_structure
-            WHERE template_id = $1
-            ORDER BY `order`',
+                ts.id
+                ,ts.pid
+                ,ts.name
+                ,ts.l'.\CB\USER_LANGUAGE_INDEX.' `title`
+                ,ts.l1
+                ,ts.l2
+                ,ts.l3
+                ,ts.l4
+                ,ts.`type`
+                ,ts.`order`
+                ,ts.cfg
+                ,ts.solr_column_name
+            FROM templates_structure ts
+                JOIN tree t on ts.id = t.id AND t.dstatus = 0
+            WHERE ts.template_id = $1
+            ORDER BY ts.`order`',
             $this->id
         ) or die(DB\dbQueryError());
 

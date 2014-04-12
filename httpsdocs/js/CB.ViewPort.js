@@ -334,7 +334,8 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             return;
         }
         params = {
-            view: Ext.isEmpty(node.attributes.view)
+            id: node.attributes.nid
+            ,view: Ext.isEmpty(node.attributes.view)
                 ? 'grid'
                 : node.attributes.view
         };

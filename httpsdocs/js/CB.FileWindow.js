@@ -122,7 +122,7 @@ CB.FileVersionsView = Ext.extend(Ext.DataView, {
  })
 
 CB.FileWindow = Ext.extend(Ext.Panel, {
-        closable: true
+    closable: true
     ,layout: 'fit'
     ,hideBorders: true
     ,initComponent: function() {
@@ -490,7 +490,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         //this.syncSize();
     }
     ,onNewWindowClick: function(b, e){
-        window.open('/preview/'+this.data.id+'_.html');
+        window.open('/' + App.config.coreName + '/preview/'+this.data.id+'_.html');
     }
     ,onPathClick: function(){
         App.locateObject( this.data.pid, this.data.path );

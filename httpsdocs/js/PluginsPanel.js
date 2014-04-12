@@ -46,7 +46,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
             return;
         }
 
-        this.loadedParams = Ext.apply({}, params);
+        this.loadedParams = params; //Ext.apply({}, params);
         this.api(params, this.onLoadData, this);
     }
 

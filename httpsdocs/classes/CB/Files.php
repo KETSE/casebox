@@ -952,7 +952,7 @@ class Files
                 file_put_contents(
                     $preview_filename,
                     '<img src="/' + CORE_NAME + '/preview/'.$file['content_id'].
-                    '_.png" style="max-width:90%;margin: auto" />'
+                    '_.png" class="fit-img" style="margin: auto" />'
                 );
                 break;
             default:
@@ -962,7 +962,7 @@ class Files
                         '<div style="padding: 5px 10px"><img src="/'.CORE_NAME.'/download.php?id='.
                         $file['id'].
                         (empty($version_id) ? '' : '&v='.$version_id).
-                        '" style="max-width:90%;margin: auto"></div>'
+                        '" class="fit-img" style="margin: auto"></div>'
                     );
                 }
         }

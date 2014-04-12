@@ -478,6 +478,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
         });
 
+        this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
+
         App.fireEvent('browserinit', this);
 
         Ext.apply(this, {
@@ -651,7 +653,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,this
             );
         }
-
         if(this.store.load(this.params)) {
             // this.getEl().mask(L.Loading, 'x-mask-loading');
         }
@@ -686,6 +687,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
         this.searchField.setValue(Ext.value(options.params.query, ''));
         this.filtersPanel.updateFacets(o.result.facets, options);
+
+        this.updatePreview();
     }
 
     ,onStoreLoad: function(store, recs, options) {
@@ -694,7 +697,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             var cfg = Ext.value(r.get('cfg'), {});
             r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
         }, this);
-        this.updatePreview();
     }
 
     ,sameParams: function(params1, params2){
@@ -752,7 +754,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ,newParams
         );
 
+        this.loadParamsTask.cancel();
+
         if(sameParams) {
+            this.updatePreview(newParams);
             return;
         }
 
@@ -760,9 +765,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
         this.spliceHistory();
 
-        if(Ext.isEmpty(this.loadParamsTask)) {
-            this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
-        }
         this.loadParamsTask.delay(500);
     }
 
@@ -893,12 +895,17 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.updatePreview();
     }
 
-    ,updatePreview: function() {
+    ,updatePreview: function(customParams) {
         if(Ext.isEmpty(this.folderProperties)) {
             return;
         }
-        var s = this.cardContainer.getLayout().activeItem.currentSelection;
-        var data = Ext.isEmpty(s)
+        var data = customParams;
+
+        //if custom params are empty then try to load current view selection
+        //or the currently opened object
+        if(Ext.isEmpty(data)) {
+            var s = this.cardContainer.getLayout().activeItem.currentSelection;
+            data = Ext.isEmpty(s)
                 ? {
                     id: this.folderProperties.id
                     ,name: this.folderProperties.name
@@ -910,7 +917,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,template_id: s[0].template_id
                     ,can: s[0].can
                 };
-
+        }
         this.objectPanel.load(data);
     }
 

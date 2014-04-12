@@ -214,6 +214,12 @@ class Objects
         //group fields in display blocks
         foreach ($linearData as $field) {
             $tf = $template->getField($field['name']);
+
+            if (empty($tf)) {
+                //fantom data of deleted or moved fields
+                continue;
+            }
+
             if (empty($tf['cfg'])) {
                 $group = 'body';
             } elseif (@$tf['cfg']['showIn'] == 'top') {

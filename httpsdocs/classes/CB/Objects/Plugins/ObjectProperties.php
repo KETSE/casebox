@@ -24,6 +24,10 @@ class ObjectProperties extends Base
         }
 
         if (!empty($data)) {
+            if (!empty($data['pids'])) {
+                $rez['data']['path'] = str_replace(',', '/', $data['pids']);
+            }
+
             foreach ($data as $k => $v) {
                 if (in_array(
                     $k,
@@ -31,7 +35,6 @@ class ObjectProperties extends Base
                         'id'
                         ,'name'
                         ,'template_id'
-                        ,'date'
                         ,'date_end'
                         ,'cid'
                         ,'cdate'

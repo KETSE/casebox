@@ -765,7 +765,7 @@ class Tasks
             array(
                 'action_type' => 23
                 ,'task_id' => $p['id']
-                ,'remind_users' => $task['cid']
+                ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
                 ,'autoclosed' => $this->checkAutocloseTask($p['id'])
                 ,'info' => 'title: '.$task['title']
             )

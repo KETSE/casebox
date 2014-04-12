@@ -343,7 +343,7 @@ class Browser
             switch ($p['scope']) {
                 case 'project': /* limiting pid to project. If not in a project then to parent directory */
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
-                        $p['pids'] = $this->getCaseId($p['objectId']);
+                        $pids = $this->getCaseId($p['objectId']);
                     } elseif (!empty($p['path'])) {
                         $pids = $this->getCaseId(Path::detectRealTargetId($p['path']));
                     }

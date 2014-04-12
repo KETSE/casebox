@@ -47,7 +47,6 @@ class CasesGrouped extends Base
 
     public function getChildren(&$pathArray, $requestParams)
     {
-
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
@@ -117,15 +116,16 @@ class CasesGrouped extends Base
                 ,'fq' => $fq
                 ,'facet' => true
                 ,'facet.field' => array(
-                    // '{!ex=role_ids1 key=manager}role_ids1'
-                    '{!ex=role_ids2 key=lead}role_ids2'
+                    '{!ex=role_ids1 key=manager}role_ids1'
+                    ,'{!ex=role_ids2 key=lead}role_ids2'
                     ,'{!ex=role_ids3 key=support}role_ids3'
                 )
             )
         );
 
         $rez = array('data' => array());
-        if (!empty($sr['facets']->facet_fields->{'lead'})) {
+
+        if (!empty($sr['facets']->facet_fields->{'lead'}->{$this->user_id})) {
             $rez['data'][] = array(
                 'name' => $this->getName(2)
                 ,'id' => $this->getId(2)
@@ -133,7 +133,7 @@ class CasesGrouped extends Base
                 ,'has_childs' => true
             );
         }
-        if (!empty($sr['facets']->facet_fields->{'support'})) {
+        if (!empty($sr['facets']->facet_fields->{'support'}->{$this->user_id})) {
             $rez['data'][] = array(
                 'name' => $this->getName(3)
                 ,'id' => $this->getId(3)
@@ -141,7 +141,7 @@ class CasesGrouped extends Base
                 ,'has_childs' => true
             );
         }
-        if (!empty($sr['facets']->facet_fields->{'manager'})) {
+        if (!empty($sr['facets']->facet_fields->{'manager'}->{$this->user_id})) {
             $rez['data'][] = array(
                 'name' => $this->getName(1)
                 ,'id' => $this->getId(1)

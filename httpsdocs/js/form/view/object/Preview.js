@@ -9,6 +9,8 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
     ,padding: 0
     ,width: 300
     ,layout: 'fit'
+    ,fitImagePreview: true
+
     ,initComponent: function(){
         Ext.apply(this, {
             listeners: {
@@ -258,6 +260,21 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             }
             ,this
         );
+
+        //detect if it's a image preview
+        this.viewingImage = null;
+        a = this.getEl().query('img.fit-img');
+        Ext.each(
+            a
+            ,function(t){
+                this.viewingImage = Ext.get(t);
+                if(!this.fitImagePreview) {
+                    this.viewingImage.dom.setAttribute('class', '');
+                }
+            }
+            ,this
+        );
+
     }
     ,onTaskChanged: function(r, e){
         this.getEl().unmask();
@@ -274,8 +291,28 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
     }
 
     ,getContainerToolbarItems: function() {
+        rez = {
+            tbar: {}
+            ,menu: {}
+        };
 
+        if(this.params) {
+            if(CB.DB.templates.getType(this.params.template_id) == 'file') {
+                if(this.viewingImage) {
+                    rez.tbar['fitImage']  = {
+                        allowToggle: true
+                        ,pressed: this.fitImagePreview
+                    };
+                }
+                rez.tbar['download']  = {};
+
+                rez.menu['webdavlink']  = {};
+            }
+        }
+
+        return rez;
     }
+
     ,onObjectChanged: function(data) {
         if(!isNaN(data)) {
             data = {id: data};
@@ -283,6 +320,18 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         if(!Ext.isEmpty(this.data)) {
             if(data.id == this.data.id) {
                 this.reload();
+            }
+        }
+    }
+
+    ,onFitImageClick: function(b, e) {
+        if(this.viewingImage) {
+            if(this.fitImagePreview) {
+                this.fitImagePreview = false;
+                this.viewingImage.dom.setAttribute('class', '');
+            } else {
+                this.fitImagePreview = true;
+                this.viewingImage.dom.setAttribute('class', 'fit-img');
             }
         }
     }
