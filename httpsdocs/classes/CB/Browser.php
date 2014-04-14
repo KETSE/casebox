@@ -364,9 +364,9 @@ class Browser
                     }
                     break;
                 case 'variable':
-                    if (!empty($p['pidValue'])) {
-                        $pids = Path::detectRealTargetId($p['path']);
-                    }
+                    $pids = empty($p['pidValue'])
+                        ? Path::detectRealTargetId($p['path'])
+                        : Util\toNumericArray($p['pidValue']);
                     break;
                 default:
                     $pids = Util\toNumericArray($p['scope']);
@@ -411,7 +411,7 @@ class Browser
         }
 
         $search = new Search();
-
+        \CB\debug($p);
         $rez = $search->query($p);
 
         foreach ($rez['data'] as &$doc) {

@@ -8,6 +8,8 @@ use CB\Templates;
 
 class CasesGrouped extends Base
 {
+    protected $fq;
+
     protected function acceptedPath()
     {
         $p = &$this->path;
@@ -165,7 +167,7 @@ class CasesGrouped extends Base
     {
         $fq = $this->fq;
         switch ($this->lastNode->id) {
-            case 4:
+            case 4: //all my cases
                 $fq[] = '(role_ids2:'.$this->user_id.' OR role_ids3:'.$this->user_id.')';
                 break;
             default:
@@ -214,7 +216,7 @@ class CasesGrouped extends Base
         $parent = $this->lastNode->parent;
 
         switch ($parent->id) {
-            case 4:
+            case 4: //all my cases
                 $fq[] = '(role_ids2:'.$this->user_id.' OR role_ids3:'.$this->user_id.')';
                 break;
             default:

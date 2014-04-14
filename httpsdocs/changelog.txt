@@ -1,8 +1,21 @@
+CaseBox 1.9.182 (2014-04-14)
+==============================
+New Features, Improvements
+--------------------------
+- Add Search template 'conditions' to casebox.translations
+
+Fixed Bugs:
+----------
+- Using filtering & ExpandFolders doesn't work
+- Indent subfields in preview. level field was accidentally removed from query.
+- Pagination & ExpandFolders bug
+- scope variable has changed after source "field" changes in previous commit
+
 CaseBox 1.9.181 (2014-04-12)
 ==============================
 New Features, Improvements
 --------------------------
-- added meta block for files in right panel 
+- added meta block for files in right panel
 - Add "Fit" checkButton for picture previews
 - onTaskAccomplished, notify all Assigned users
 - OnClick in Tree should preview the node similar to OnSelect
