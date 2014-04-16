@@ -61,6 +61,16 @@ class System
     }
 
     /**
+     * check a given timezon to be valid
+     * @param  varchar $timezone valid php timezone
+     * @return boolean
+     */
+    public static function isValidTimezone ($timezone)
+    {
+        return in_array($timezone, \DateTimeZone::listIdentifiers());
+    }
+
+    /**
      * get gmt offset in minutes
      * @param  varchar $timezone php compatible timezone
      * @return int
@@ -68,7 +78,9 @@ class System
     public static function getGmtOffset($timezone)
     {
         $now = new \DateTime();
-        $now->setTimezone(new \DateTimeZone($timezone));
+        if (System::isValidTimezone($timezone)) {
+            $now->setTimezone(new \DateTimeZone($timezone));
+        }
 
         return ($now->getOffset() / 60);
     }

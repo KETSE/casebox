@@ -93,7 +93,8 @@ class Base implements \CB\Interfaces\TreeNode
     {
         $rez = array();
         $nodesFacetsConfig = \CB\Config::get('node_facets');
-        if (empty($nodesFacetsConfig[$this->id])) {
+        // echo $this->getId($this->id)."\n";
+        if (empty($nodesFacetsConfig[$this->getId($this->id)])) {
             if (empty($this->parent)) {
                 return $rez;
             }

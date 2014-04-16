@@ -1,6 +1,8 @@
 <?php
 namespace AutoSetFields;
 
+use CB\Util;
+
 class Listeners
 {
     /**
@@ -32,12 +34,12 @@ class Listeners
 
         $date = @$o->getFieldValue('_date_start', 0)['value'];
         if (!empty($date)) {
-            $objData['date'] = $date;
+            $objData['date'] = Util\dateISOToMysql($date);
         }
 
         $date = @$o->getFieldValue('_date_end', 0)['value'];
         if (!empty($date)) {
-            $objData['date_end'] = $date;
+            $objData['date_end'] = Util\dateISOToMysql($date);
         }
         $o->setData($objData);
     }
@@ -69,24 +71,27 @@ class Listeners
             $templateData['title_template']
         );
 
-        $ld = $object->getLinearData();
-        /* replace field values */
-        foreach ($ld as $field) {
-            $tf = $template->getField($field['name']);
-            $v = $template->formatValueForDisplay($tf, @$field['value'], false);
-            if (is_array($v)) {
-                $v = implode(',', $v);
+        if (strpos($rez, '{') !== false) {
+            $ld = $object->getLinearData();
+            /* replace field values */
+            foreach ($ld as $field) {
+                $tf = $template->getField($field['name']);
+                $v = $template->formatValueForDisplay($tf, @$field['value'], false);
+                if (is_array($v)) {
+                    $v = implode(',', $v);
+                }
+                $v = addcslashes($v, '\'');
+                $rez = str_replace('{'.$field['name'].'}', $v, $rez);
+                $fields[$field['name']] = $v;
             }
-            $v = addcslashes($v, '\'');
-            $rez = str_replace('{'.$field['name'].'}', $v, $rez);
-            $fields[$field['name']] = $v;
+
+            //replacing field titles into object title variable
+            foreach ($templateData['fields'] as $fk => $fv) {
+                $rez = str_replace('{f'.$fv['name'].'t}', $fv['title'], $rez);
+
+            }
         }
 
-        //replacing field titles into object title variable
-        foreach ($templateData['fields'] as $fk => $fv) {
-            $rez = str_replace('{f'.$fv['name'].'t}', $fv['title'], $rez);
-
-        }
         // evaluating the title if contains php code
         if (strpos($rez, '<?php') !== false) {
             eval(' ?>'.$rez.'<?php ');

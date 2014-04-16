@@ -240,6 +240,12 @@ class Search extends Solr\Client
             if (!empty($this->inputParams['facet.query'])) {
                 $facetParams['facet.query'] = $this->inputParams['facet.query'];
             }
+            if (!empty($this->inputParams['facet.sort'])) {
+                $facetParams['facet.sort'] = $this->inputParams['facet.sort'];
+            }
+            if (!empty($this->inputParams['facet.missing'])) {
+                $facetParams['facet.missing'] = 'on';
+            }
         } else {
             foreach ($this->facets as $facet) {
                 $fp = $facet->getSolrParams();

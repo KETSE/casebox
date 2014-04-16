@@ -5,6 +5,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
     ,tbarCssClass: 'x-panel-white'
     ,layout: 'border'
     ,activeChart: 'table'
+    ,autoScroll: true
     ,initComponent: function(){
 
         this.params = Ext.apply(
@@ -116,7 +117,8 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
 
         this.chartContainer = new Ext.Panel({
             region: 'center'
-            ,autoScroll: 'true'
+            ,autoScroll: true
+            ,border: true
         });
 
         Ext.apply(this, {
@@ -224,6 +226,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
             ,border: false
             ,autoHeight: true
             ,padding: 10
+            ,autoScroll:true
             ,html: html
             ,listeners: {
                 scope: this

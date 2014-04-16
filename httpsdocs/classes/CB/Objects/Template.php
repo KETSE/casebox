@@ -146,6 +146,7 @@ class Template extends Object
                 ,ts.l3
                 ,ts.l4
                 ,ts.`type`
+                ,ts.`level`
                 ,ts.`order`
                 ,ts.cfg
                 ,ts.solr_column_name

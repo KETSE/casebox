@@ -82,10 +82,10 @@ CB.VerticalSearchEditGrid = Ext.extend(CB.VerticalEditGrid, {
             case 'date':
             case 'datetime':
                 cond = [
-                    {id: '=', name: '='}
-                    ,{id: '<=', name: '<='}
-                    ,{id: '>=', name: '>='}
-                    ,{id: '!=', name: '!='}
+                    {id: '=', name: L.condNumEq}
+                    ,{id: '<=', name: L.condNumLt}
+                    ,{id: '>=', name: L.condNumGt}
+                    ,{id: '!=', name: L.condNumNe}
                 ];
                 // custom value formats (date1 .. date2, )
                 break;
@@ -96,10 +96,10 @@ CB.VerticalSearchEditGrid = Ext.extend(CB.VerticalEditGrid, {
             case 'timeunits':
             case '_sex':
                 cond = [
-                    {id: '<=', name: 'contains any'}
-                    ,{id: '>=', name: 'contains all'}
-                    ,{id: '=', name: 'equal'}
-                    ,{id: '!=', name: 'not equal'}
+                    {id: '<=', name: L.condSetLt}
+                    ,{id: '>=', name: L.condSetGt}
+                    ,{id: '=', name: L.condSetEq}
+                    ,{id: '!=', name: L.condSetNe}
                 ];
                 //= (exact match), contains any, contains all, does not contain any, does not contain all
                 break;
@@ -110,19 +110,19 @@ CB.VerticalSearchEditGrid = Ext.extend(CB.VerticalEditGrid, {
             case 'memo':
             case 'html':
                 cond = [
-                    {id: 'contain', name: 'contain'}
-                    ,{id: 'start', name: 'start with'}
-                    ,{id: 'end', name: 'end with'}
-                    ,{id: 'not', name: 'does not contain'}
-                    ,{id: '=', name: 'equal'}
-                    ,{id: '!=', name: 'not equal'}
+                    {id: 'contain', name: L.condTxtContain}
+                    ,{id: 'start', name: L.condTxtBegin}
+                    ,{id: 'end', name: L.condTxtEnd}
+                    ,{id: 'not', name: L.condTxtNc}
+                    ,{id: '=', name: L.condTxtEq}
+                    ,{id: '!=', name: L.condTxtNe}
                 ];
                 break;
 
             case 'checkbox':
                 cond = [
-                    {id: '=', name: 'is'}
-                    ,{id: '!=', name: 'is not'}
+                    {id: '=', name: L.condCbEq}
+                    ,{id: '!=', name: l.condCbNe}
                 ];
                 break;
 

@@ -728,8 +728,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     ,changeSomeParams: function(paramsSubset){
         var p = Ext.apply({}, this.params);
 
-        delete p.descendants;
-
         if(!Ext.isDefined(paramsSubset.start)) {
             paramsSubset.start = 0;
         }
@@ -844,7 +842,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onDescendantsClick: function(b, e) {
         this.changeSomeParams({
-            'descendants': b.pressed
+            descendants: b.pressed
             ,start: 0
         });
     }
