@@ -1,3 +1,21 @@
+CaseBox 1.9.183 (2014-04-16)
+==============================
+New Features, Improvements
+--------------------------
+- add autoScrool to pivot table
+- added events beforeSolrUpdate & solrUpdate - the bounds of a solr update process
+
+Fixed Bugs:
+----------
+- Sorting by Name doesn't work in grid
+    following lines were not included in solr schema of the core:
+        <copyField source="name" dest="sort_name"/>
+        <copyField source="path" dest="sort_path"/>
+- Timezone adjustment bug in 'datetime' fields
+- wrong path for generic user icon.
+- error on update templates with date_start fields.
+    Plugin AutoSetFields should reformat date value.
+
 CaseBox 1.9.182 (2014-04-14)
 ==============================
 New Features, Improvements

@@ -1081,6 +1081,27 @@ class User
         return $rez;
     }
 
+    /**
+     * get timezone of a given user id
+     * @param  int     $userId
+     * @return varchar
+     */
+    public static function getTimezone($userId = false)
+    {
+        $rez = 'UTC';
+
+        $pref = $_SESSION['user'];
+        if ($userId !== false) {
+            $pref = User::getPreferences($userId);
+        }
+
+        if (!empty($pref['cfg']['timezone']) && System::isValidTimezone($pref['cfg']['timezone'])) {
+            $rez = $pref['cfg']['timezone'];
+        }
+
+        return $rez;
+    }
+
     private function getUserConfig()
     {
         $res = DB\dbQuery(

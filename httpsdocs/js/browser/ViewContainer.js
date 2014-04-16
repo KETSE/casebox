@@ -841,7 +841,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onDescendantsClick: function(b, e) {
-        clog('descendants clicked');
         this.changeSomeParams({
             descendants: b.pressed
             ,start: 0

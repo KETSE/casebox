@@ -110,8 +110,16 @@ class Client extends Service
      */
     public function updateTree($p = array())
     {
+
         /* connect to solr service */
         $this->connect();
+
+        $eventParams = array(
+            'class' => &$this
+            ,'params' => &$p
+        );
+
+        \CB\fireEvent('onBeforeSolrUpdate', $eventParams);
 
         /** @type int the last processed document id */
         $lastId = 0;
@@ -174,6 +182,7 @@ class Client extends Service
                     - if $all parameter is true
                 */
                 if (!empty($p['all']) || !empty($p['id']) || ($r['updated'] & 1)) {
+
                     /* set template data */
                     if (!empty($r['template_id'])) {
                         $template = $templatesCollection->getTemplate($r['template_id']);
@@ -261,6 +270,9 @@ class Client extends Service
         }
 
         $this->updateTreeInfo($p);
+
+        \CB\fireEvent('onSolrUpdate', $eventParams);
+
     }
 
     /**

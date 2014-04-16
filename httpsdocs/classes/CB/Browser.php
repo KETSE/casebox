@@ -411,7 +411,6 @@ class Browser
         }
 
         $search = new Search();
-        \CB\debug($p);
         $rez = $search->query($p);
 
         foreach ($rez['data'] as &$doc) {

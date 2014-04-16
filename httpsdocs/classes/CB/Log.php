@@ -29,8 +29,6 @@ class Log
         // id can be used to update an existing row
 
         if (Cache::get('disable_logs', false) == true) {
-            \CB\debug('log disabled');
-
             return;
         }
 
