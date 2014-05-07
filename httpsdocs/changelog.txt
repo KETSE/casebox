@@ -1,3 +1,22 @@
+CaseBox 1.9.184 (2014-05-07)
+==============================
+New Features, Improvements
+--------------------------
+- set max_execution_time for crons to 0. When full reindexing a core it can take longer.
+- added fieldchange (fieldName, newValue, oldValue) event for objects edit window.
+    This event is usefull for custom functionality, when custom logic or action is needed on field change.
+- trim spaces from search string. example "id: 100 " will not find anyting
+- moved field and field type definition for first letter in main solr config,
+    because it's used by more than one core.
+- Make sure CB provides a timezone if none specified or if it's wrong
+- PreviewPanel: RightAdd 'Delete' and 'Permissions' buttons in More submenu
+- Add '[CORE #ID]' in the title of Task notifications
+
+Fixed Bugs:
+----------
+- Using Cursor Up/Down in Grid frequently, gives JS Error
+- Reload /Tasks/assignee/[User] folder in Tree, and all tasks appear below
+
 CaseBox 1.9.183 (2014-04-16)
 ==============================
 New Features, Improvements
@@ -14,7 +33,7 @@ Fixed Bugs:
 - Timezone adjustment bug in 'datetime' fields
 - wrong path for generic user icon.
 - error on update templates with date_start fields.
-    Plugin AutoSetFields should reformat date value.
+    Plugin AutoSetFields should reformat date value.re
 
 CaseBox 1.9.182 (2014-04-14)
 ==============================

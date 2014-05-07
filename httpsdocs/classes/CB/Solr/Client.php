@@ -215,9 +215,13 @@ class Client extends Service
                     $r['ntsc'] = intval($r['ntsc']);
                     $r['system'] = @intval($r['system']);
 
-                    $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
-                    //exclude itself from pids
-                    array_pop($r['pids']);
+                    if (empty($r['pids'])) {
+                        $r['pids'] = null;
+                    } else {
+                        $r['pids'] = explode(',', $r['pids']);
+                        //exclude itself from pids
+                        array_pop($r['pids']);
+                    }
 
                     /* fill "ym" fields for date faceting by cdate, date, date_end */
                     $ym1 = str_replace('-', '', substr($r['cdate'], 2, 5));

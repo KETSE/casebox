@@ -163,6 +163,9 @@ subtype: this field is dependent on type field value
 <!-- sort_path: designed to sort by path -->
 <field name="sort_path"     type="text_general_sort" indexed="true" stored="true" />
 
+<!-- name_first_letter: first letter of the name -->
+<field name="name_first_letter" type="first_letter" indexed="true" stored="false" />
+
 <!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering. By default this field contains data from creation object date  -->
 <field name="ym1"     type="tint" indexed="true" stored="true" />
 

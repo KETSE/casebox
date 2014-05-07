@@ -7,6 +7,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
     ,autoScroll: true
     ,layout: 'anchor'
     ,data: {}
+
     ,initComponent: function(){
 
         this.data = Ext.apply({}, this.data);
@@ -69,11 +70,14 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
         });
         CB.form.edit.Object.superclass.initComponent.apply(this, arguments);
 
-        this.addEvents('saveobject');
+        this.addEvents('saveobject', 'fieldchange');
         this.enableBubble(['saveobject']);
     }
 
-    ,onChange: function(){
+    ,onChange: function(fieldName, newValue, oldValue){
+        if(!Ext.isEmpty(fieldName) && Ext.isString(fieldName)) {
+            this.fireEvent('fieldchange', fieldName, newValue, oldValue);
+        }
         this._isDirty = true;
     }
 
@@ -131,6 +135,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             );
         }
     }
+
     ,processLoadData: function(r, e) {
         this.getEl().unmask();
         if(r.success !== true) {
@@ -227,7 +232,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
                             ,fieldLabel: r.get('title')
                             ,listeners: {
                                 scope: this
-                                ,change: function(){ this.fireEvent('change'); }
+                                ,change: function(field, newValue, oldValue){ this.fireEvent('change', field.name, newValue, oldValue); }
                                 ,sync: function(){ this.fireEvent('change'); }
                             }
                             ,xtype: (r.get('type') == 'html')
@@ -325,11 +330,25 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             }
         });
     }
+
     ,readValues: function() {
         this.grid.readValues();
         this.data.data = Ext.apply(this.data.data, this.fieldsZone.getForm().getFieldValues());
         return this.data;
     }
+
+    /**
+     * set value for a field
+     *
+     * TODO: review for duplicated fields, and for fields outside of the grid
+     *
+     * @param varchar fieldName
+     * @param variant value
+     */
+    ,setFieldValue: function (fieldName, value) {
+        this.grid.setFieldValue(fieldName, value);
+    }
+
     ,save: function(callback, scope) {
         if(!this._isDirty) {
             return;
@@ -355,6 +374,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
         });
 
     }
+
     ,processSave: function(form, action) {
         this.getEl().unmask();
         var r = action.result;
@@ -370,6 +390,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
         App.fireEvent('objectchanged', r.data);
 
     }
+
     ,clear: function(){
         this.data = {};
         this.titleView.update(this.data);

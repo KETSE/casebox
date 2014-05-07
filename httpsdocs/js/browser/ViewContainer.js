@@ -353,7 +353,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ,root: 'data'
             ,messageProperty: 'msg'
             ,fields: [
-                {name: 'nid'}
+                {name: 'nid', type: 'string'}
                 ,{name: 'pid', type: 'int'}
                 ,{name: 'system', type: 'int'}
                 ,{name: 'status', type: 'int'}
@@ -1038,9 +1038,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onObjectsDeleted: function(ids, e) {
+        clog('vc onObjectsDeleted', arguments, this.store);
+
         var idx;
         for (var i = 0; i < ids.length; i++) {
-            idx = this.store.findExact('nid', ids[i]);
+            idx = this.store.findExact('nid', String(ids[i]));
             if(idx >= 0) {
                 this.store.removeAt(idx);
             }
@@ -1099,11 +1101,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         var id = Ext.isEmpty(selection)
             ? this.folderProperties.id
             : s[0].nid;
-
-        if(App.activateTab(null, id, CB.SecurityPanel)) {
-            return;
-        }
-        App.addTab(null, new CB.SecurityPanel({data: { id: id }}));
+        App.mainViewPort.openPermissions(id);
     }
 
     ,onMergeFilesClick: function(buttonOrKey, e) {

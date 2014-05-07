@@ -495,6 +495,15 @@ class Log
             $p['case_id'] = is_numeric($p['case_id']) ? $p['case_id'] : null;
             $p['object_id'] = is_numeric($p['object_id']) ? $p['object_id'] : null;
             $p['task_id'] = is_numeric($p['task_id']) ? $p['task_id'] : null;
+
+            $subject =  '['.\CB\CORE_NAME.' #'.
+                Util\coalesce(
+                    $p['task_id'],
+                    $p['object_id'],
+                    $p['case_id']
+                ).
+                '] '.$subject;
+
             DB\dbQuery(
                 'INSERT INTO notifications (
                     action_type

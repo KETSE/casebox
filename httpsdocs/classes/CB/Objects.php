@@ -425,8 +425,12 @@ class Objects
         //     $object_record['iconCls'] = $objData['cfg']['iconCls'];
         // }
 
+        $field = array();
         foreach ($linearData as $f) {
-            $field = $template->getField($f['name']);
+            if (is_object($template)) {
+                $field = $template->getField($f['name']);
+            }
+
             $processed_values = array();
             if (!empty($f['value'])) {
                 /* make changes to value if needed */

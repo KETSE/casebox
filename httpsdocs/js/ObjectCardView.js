@@ -104,6 +104,18 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onReloadClick
             }
+            ,'delete': {
+                id: 'delete' + this.instanceId
+                ,text: L.Delete
+                ,scope: this
+                ,handler: this.onDeleteClick
+            }
+            ,permissions: {
+                id: 'permissions' + this.instanceId
+                ,text: L.Permissions
+                ,scope: this
+                ,handler: this.onPermissionsClick
+            }
             ,addtask: {
                 text: L.AddTask
                 ,data: {
@@ -234,6 +246,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,afterrender: this.doLoad
                 ,lockpanel: this.onLockPanelEvent
                 ,saveobject: this.onSaveObjectEvent
+                ,beforedestroy: this.onBeforeDestroy
             }
         });
 
@@ -243,6 +256,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         this.addEvents('changeparams', 'filedownload', 'createobject');
         this.enableBubble(['changeparams', 'filedownload', 'createobject']);
+        App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
+    }
+
+    ,onBeforeDestroy: function(c) {
+        App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
     }
 
     ,getButton: function() {
@@ -342,7 +360,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         // check  if a new load is waiting to be loaded
         if(Ext.isEmpty(this.requestedLoadData)) {
             //check if object data are identical to previous loaded object
-            if((objectData.id == this.loadedData.id) &&
+            if(this.loadedData && objectData &&
+                (objectData.id == this.loadedData.id) &&
                 (Ext.value(objectData.viewIndex, cvi) == Ext.value(this.loadedData.viewIndex, cvi))
             ) {
                 return;
@@ -373,14 +392,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             //automatic switch to plugins panel
             this.onViewChangeClick(0);
 
-            // if(this.skipNextPreviewLoadOnBrowserRefresh) {
-            //     delete this.skipNextPreviewLoadOnBrowserRefresh;
-            // } else {
-                this.items.itemAt(0).clear();
+            this.items.itemAt(0).clear();
 
-                // instantiate a delay to exclude flood requests
-                this.delayedLoadTask.delay(60, this.doLoad, this);
-            // }
+            // instantiate a delay to exclude flood requests
+            this.delayedLoadTask.delay(60, this.doLoad, this);
         }
     }
 
@@ -585,6 +600,35 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
     ,onReloadClick: function() {
         this.getLayout().activeItem.reload();
+    }
+
+    ,onDeleteClick: function() {
+        if(this.loadedData && !isNaN(this.loadedData.id)) {
+            App.mainViewPort.fireEvent('deleteobject', this.loadedData);
+        }
+    }
+    ,onPermissionsClick: function(b, e) {
+        App.mainViewPort.openPermissions(this.loadedData.id);
+    }
+
+    /**
+     * actions to be made on objects deletion
+     *
+     * There is no need to reload this view because the grid will reload and change the selection,
+     * but need to cancel the edit
+     *
+     * @param  array ids
+     * @param  object e
+     * @return void
+     */
+    ,onObjectsDeleted: function(ids, e) {
+        clog('objectsdeleted', arguments, this.loadedData);
+        if(!Ext.isEmpty(this.loadedData) && setsHaveIntersection(ids, this.loadedData.id)) {
+            delete this.locked;
+            this.onViewChangeClick(0, false);
+            this.items.itemAt(0).clear();
+            this.updateToolbarAndMenuItems();
+        }
     }
 
     ,onSearchClick: function() {

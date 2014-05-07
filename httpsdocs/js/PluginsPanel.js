@@ -80,7 +80,8 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
          * to the params
          */
 
-        if((CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
+        if(this.loadedParams &&
+            (CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
             !Ext.isEmpty(this.loadedParams.name)
         ){
             var titleView = new Ext.DataView({

@@ -167,6 +167,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         }
         return value;
     }
+
     ,addNodes: function(parentNode, data, beforeNode){
         var pid = parentNode.attributes.nid;
         data = data || {};
@@ -210,6 +211,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
             ,this
         );
     }
+
     ,addNode: function(parentNode, templateRecord, beforeNode){
         return parentNode.insertBefore(
             {
@@ -321,8 +323,50 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
 
         return rez;
     }
+
     ,getNode: function(nodeId){
         return this.getRootNode().findChild('id', nodeId, true);
+    }
+
+    /**
+     * set value for first found node in tree wich has given name
+     * (i.e. duplications are not analyzed)
+     *
+     * TODO: review for duplicated fields
+     *
+     * @param varchar fieldName
+     * @param variant value
+     *
+     * @return treeNode | null  modified node
+     */
+
+    ,setFieldValue: function(fieldName, value) {
+        var v, rez = null;
+
+        if(Ext.isPrimitive(value) || Ext.isEmpty(value)) {
+            v = {value: value};
+        } else {
+            if(Ext.isDefined(value.value)) {
+                v = value;
+            } else {
+                v = {
+                    value: value
+                };
+            }
+        }
+
+        this.getRootNode().cascade(
+            function(node) {
+                if(node.attributes.templateRecord && (node.attributes.templateRecord.get('name') == fieldName)) {
+                    node.attributes.value = v;
+                    rez = node;
+                    return false;
+                }
+            }
+            ,this
+        );
+
+        return rez;
     }
 
     /**
@@ -475,6 +519,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         }
         return false;
     }
+
     ,isLastDuplicate: function(nodeId){
         var node = this.getNode(nodeId);
         if(node && node.attributes.templateRecord) {

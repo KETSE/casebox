@@ -24,12 +24,16 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                             scope: this
                             ,'search': function(query, editor, event){
                                 editor.clear();
+                                query = String(query).trim();
                                 if(Ext.isEmpty(query)) {
                                     return;
                                 }
-                                if((query.substr(0,3) == 'id:') && !isNaN(query.substr(3))) {
-                                    App.locateObject(query.substr(3));
-                                    return;
+                                if(query.substr(0,3) == 'id:') {
+                                    query = query.substr(3).trim();
+                                    if(!isNaN(query)) {
+                                        App.locateObject(query);
+                                        return;
+                                    }
                                 }
                                 App.activateBrowserTab().setParams({
                                     query: query
@@ -408,6 +412,17 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         return App.addTab(App.mainTabPanel, o);
     }
 
+    ,openPermissions: function(objectId) {
+        if(isNaN(objectId)) {
+            return;
+        }
+
+        if(App.activateTab(null, objectId, CB.SecurityPanel)) {
+            return;
+        }
+        App.addTab(null, new CB.SecurityPanel({data: { id: objectId }}));
+    }
+
     ,onFileOpen: function(data, e){
         if(e) e.stopEvent();
 
@@ -456,7 +471,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     ,onDeleteObject: function(data){
         Ext.Msg.confirm(
             L.DeleteConfirmation
-            ,L.DeleteConfirmationMessage + ' "' + data.title+'"?'
+            ,L.DeleteConfirmationMessage + ' "' + Ext.value(data.title, data.name) +'"?'
             ,function(btn){
                 if(btn == 'yes') {
                     CB_Browser['delete'](data.id, this.onProcessObjectsDeleted, this);
@@ -467,8 +482,12 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
     }
     ,onProcessObjectsDeleted: function(r, e){
-        if(r.success !== true) return;
-        if(!Ext.isEmpty(r.ids)) this.fireEvent('objectsdeleted', r.ids, e);
+        if(r.success !== true) {
+            return;
+        }
+        if(!Ext.isEmpty(r.ids)) {
+            this.fireEvent('objectsdeleted', r.ids, e);
+        }
     }
     ,onFileUpload: function(data, e){
         if(e) e.stopPropagation();

@@ -39,6 +39,8 @@ include DOC_ROOT.'global.php';
 
 $cfg = \CB\Config::loadConfigFile(DOC_ROOT.'config.ini');
 
+ini_set('max_execution_time', 0);
+
 require_once DOC_ROOT.'lib/DB.php';
 DB\connect($cfg);
 

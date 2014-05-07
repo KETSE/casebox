@@ -62,7 +62,7 @@
 	<types>
     		&cb_solr_types;
  	</types>
-	
+
 	<fields>
 		&cb_solr_fields;
  	</fields>
@@ -91,6 +91,7 @@
 	-->
 	<copyField source="name" dest="sort_name"/>
 	<copyField source="path" dest="sort_path"/>
+    <copyField source="name" dest="name_first_letter" maxChars="1"/>
 
 
 		<!-- Above, multiple source fields are copied to the [text] field.
