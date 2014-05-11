@@ -44,6 +44,12 @@ require_once(DOC_ROOT.'language.php');
 //--------------------------------------------------- functions
 function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
 {
+    global $argv;
+
+    if (@$argv[3] == 'force') {
+        return array('success' => true);
+    }
+
     $rez = array('success' => false);
     $res = DB\dbQuery(
         'SELECT id
@@ -100,6 +106,27 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
     ) or die('error');
 
     return $rez;
+}
+
+/**
+ * mark a cron as finished
+ * @param  varchar $cron_id cron name
+ * @return void
+ */
+function closeCron($cron_id, $info = 'ok')
+{
+    global $argv;
+
+    if (@$argv[3] == 'force') {
+        return;
+    }
+
+    DB\dbQuery(
+        'UPDATE crons
+        SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
+        WHERE cron_id = $1',
+        array($cron_id, $info)
+    ) or die( DB\dbQueryError() );
 }
 
 function notifyAdmin($subject, $message)

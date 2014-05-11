@@ -357,7 +357,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) {
             return;
         }
-        var idx = g.store.findExact('nid', parseInt(App.locateObjectId, 10));
+        var idx = g.store.findExact('nid', String(App.locateObjectId) );
         if(idx >=0){
             sm = g.getSelectionModel();
             if( (sm.getCount() > 1) ||

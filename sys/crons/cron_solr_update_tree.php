@@ -43,9 +43,4 @@ try {
 
 unset($solr);
 
-DB\dbQuery(
-    'UPDATE crons
-    SET last_end_time = CURRENT_TIMESTAMP, execution_info = \'ok\'
-    WHERE cron_id = $1',
-    $cron_id
-) or die( DB\dbQueryError() );
+closeCron($cron_id);

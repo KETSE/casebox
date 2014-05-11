@@ -24,6 +24,12 @@ class Browser
         }
         $p['path'] = $path;
 
+        //the navigation goes from search results. We should get the real path of the node
+        if (!empty($p['lastQuery']) && empty($p['query'])) {
+            $a = Util\toNumericArray($p['path'], '/');
+            $p['path'] = Path::getPath(array_pop($a))['path'];
+        }
+
         $this->showFoldersContent = isset($p['showFoldersContent'])
             ? $p['showFoldersContent']
             : false;

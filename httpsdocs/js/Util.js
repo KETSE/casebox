@@ -110,6 +110,7 @@ function getItemIcon(d){
             if(d['task_status'] == 3) {
                 return 'icon-task-completed';
             }
+
         default:
             tr = CB.DB.templates.getById(d.template_id);
             if(tr) return tr.get('iconCls');
@@ -254,14 +255,34 @@ function updateMenu(menuButton, menuConfig, handler, scope){
     for(i = 0; i < menu.length; i++) menuButton.menu.add(menu[i]);
 }
 
+/**
+ * get the menu config with highest weight for given params
+ *
+ * weight is higher if more specified (non empty) conditions are satisfied
+ *
+ * Example: node_id = 4, ids_path = /1/4, node_template_id = 42
+ *     this params could satisfy more than one rule:
+ *         node_ids     node_template_ids   user_group_ids
+ *         null         42                  null
+ *         4            40,41,42            1
+ *     Second rule has higher weight because it satisfies input params
+ *     by 3 non empty criteryas: node_ids, node_template_ids and user_group_ids
+ *     The first rule
+ * @param  int node_id          selected node id
+ * @param  varchar ids_path
+ * @param  int node_template_id
+ * @return varchar
+ */
 function getMenuConfig(node_id, ids_path, node_template_id){
-    lastWeight = 0;
-    menuConfig = '';
+    var lastWeight = 0;
+    var menuConfig = '';
     CB.DB.menu.each( function(r){
-        weight = 0;
+        var weight = 0;
 
-        /*check user_group ids */
-        ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(' ','') + ',';
+        /*check user_group ids
+          firstly select only rules that are available for current user id (user_group_ids containt current user id or group id)
+        */
+        var ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(' ','') + ',';
 
         if (ug_ids.indexOf(','+App.loginData.id+',') >=0) {
             weight += 100;
@@ -271,7 +292,9 @@ function getMenuConfig(node_id, ids_path, node_template_id){
         }
         /*end of check user_group ids */
 
-        /* check template_ids /**/
+        /* check template_ids
+           select only rules inth empty node_template_ids or that contain current selected node_template_id
+        /**/
         if(!Ext.isEmpty(node_template_id)){
             nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(' ','') + ',';
             if(nt_ids.indexOf(','+node_template_id+',') >=0) weight += 100;
@@ -285,7 +308,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
             }
         }
 
-        n_ids = ',' + String( Ext.value(r.get('node_ids'), '') ).replace(' ','') + ',';
+        var n_ids = ',' + String( Ext.value(r.get('node_ids'), '') ).replace(' ','') + ',';
         if( n_ids.indexOf(','+node_id+',') >= 0 ) {
             weight += 100;
         }else{

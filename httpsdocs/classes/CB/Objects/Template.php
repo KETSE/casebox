@@ -33,6 +33,31 @@ class Template extends Object
         ,'info_template'
     );
 
+    private static $fieldTypeNames =  array(
+        '_auto_title' => 'ftAutoTitle'
+        ,'checkbox' => 'ftCheckbox'
+        ,'combo' => 'ftCombo'
+        ,'date' => 'ftDate'
+        ,'datetime' => 'ftDatetime'
+        ,'float' => 'ftFloat'
+        ,'G' => 'ftGroup'
+        ,'H' => 'ftHeader'
+        ,'html' => 'ftHtml'
+        ,'iconcombo' => 'ftIconcombo'
+        ,'int' => 'ftInt'
+        ,'_language' => 'ftLanguage'
+        ,'memo' => 'ftMemo'
+        ,'_objects' => 'ftObjects'
+        ,'_sex' => 'ftSex'
+        ,'_short_date_format' => 'ftShortDateFormat'
+        ,'_fieldTypesCombo' => 'ftFieldTypesCombo'
+        ,'_templateTypesCombo' => 'ftTemplateTypesCombo'
+        ,'text' => 'ftText'
+        ,'time' => 'ftTime'
+        ,'timeunits' => 'ftTimeunits'
+        ,'varchar' => 'ftVarchar'
+    );
+
     /**
      * internal function used by create method for creating custom data
      * @return void
@@ -81,6 +106,19 @@ class Template extends Object
                 $saveValues[] = $value;
                 $params[] = $i;
                 $i++;
+            } else {
+                // this if should be removed after complete migration to language abreviation titles
+                if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
+                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    if (!empty($lang)) {
+                        $value = @$this->getFieldValue($lang, 0)['value'];
+
+                        $saveFields[] = $fieldName;
+                        $saveValues[] = $value;
+                        $params[] = "$i";
+                        $i++;
+                    }
+                }
             }
         }
         if (!empty($saveFields)) {
@@ -451,10 +489,22 @@ class Template extends Object
                 $ids = implode(',', $a);
 
                 switch (@$field['cfg']['source']) {
-                    case '':
-                    case 'tree':
-                    case 'related':
-                    case 'field':
+                    case 'users':
+                    case 'groups':
+                    case 'usersgroups':
+                        $value = 'users_groups';
+                        $sql = 'SELECT id
+                                ,name
+                                ,trim( CONCAT(coalesce(first_name, \'\'), \' \', coalesce(last_name, \'\')) ) `title`
+                                ,CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls`
+                            FROM users_groups
+                            WHERE id IN ('.$ids.')';
+                        break;
+                    // case '':
+                    // case 'tree':
+                    // case 'related':
+                    // case 'field':
+                    default:
                         $value = 'tree';
                         $sql = 'SELECT t.id
                                 ,t.name
@@ -467,19 +517,7 @@ class Template extends Object
                             JOIN tree_info ti ON t.id = ti.id
                             WHERE t.id IN ('.$ids.')';
                         break;
-                    case 'users':
-                    case 'groups':
-                    case 'usersgroups':
-                        $value = 'users_groups';
-                        $sql = 'SELECT id
-                                ,name
-                                ,trim( CONCAT(coalesce(first_name, \'\'), \' \', coalesce(last_name, \'\')) ) `title`
-                                ,CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls`
-                            FROM users_groups
-                            WHERE id IN ('.$ids.')';
-                        break;
-                    default:
-                        return $value;
+                        // return $value;
                 }
 
                 $res = DB\dbQuery($sql) or die(DB\dbQueryError());
@@ -505,18 +543,25 @@ class Template extends Object
                         default:
                             $r['cfg'] = Util\toJSONArray(@$r['cfg']);
 
-                            $icon = '';
-                            switch (@$field['cfg']['source']) {
-                                case '':
-                                case 'tree':
-                                case 'related':
-                                case 'field':
-                                    $icon = \CB\Browser::getIcon($r);
-                                    break;
-                                default:
-                                    $icon = Util\coalesce($r['iconCls'], 'icon-none');
-                                    break;
+                            $icon = empty($r['iconCls'])
+                                ? \CB\Browser::getIcon($r)
+                                : $r['iconCls'];
+
+                            if (empty($icon)) {
+                                $icon = 'icon-none';
                             }
+
+                            // switch (@$field['cfg']['source']) {
+                            //     case '':
+                            //     case 'tree':
+                            //     case 'related':
+                            //     case 'field':
+                            //         $icon = \CB\Browser::getIcon($r);
+                            //         break;
+                            //     default:
+                            //         $icon = Util\coalesce($r['iconCls'], 'icon-none');
+                            //         break;
+                            // }
 
                             $value[] = $html
                                 ? '<li class="icon-padding '.$icon.'">'.$label.'</li>'
@@ -528,6 +573,10 @@ class Template extends Object
                 $value = $html
                     ? '<ul class="clean">'.implode('', $value).'</ul>'
                     : implode(', ', $value);
+                break;
+
+            case '_fieldTypesCombo':
+                $value = L\get(static::$fieldTypeNames[$value]);
                 break;
 
             case 'date':

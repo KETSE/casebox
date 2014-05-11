@@ -54,6 +54,7 @@ CB.plugins.Search.Button =  Ext.extend(CB.plugins.customInterface, {
         var templates = CB.DB.templates.query('type', 'search');
         templates.each(
             function(t){
+                clog(t.data);
                 menu.add({
                     iconCls: t.data.iconCls
                     ,data: {template_id: t.data.id}

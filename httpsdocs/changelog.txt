@@ -1,3 +1,19 @@
+CaseBox 1.9.185 (2014-05-11)
+==============================
+New Features, Improvements
+--------------------------
+- ipc changes
+- Revise SOLR indexing script
+- changed security check on object move from delete + write to read + write
+
+Fixed Bugs:
+----------
+- Breadcrumbs incorrect & ExpandFolders=On
+- Path link doesn't work in Task preview and Obj properties block
+- Task.status == overdue doesn't change when update EndDate in the task
+- Forgot pass email contains '//' in url
+- default values appear in grid only after edit a cell
+
 CaseBox 1.9.184 (2014-05-07)
 ==============================
 New Features, Improvements

@@ -731,11 +731,16 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(!Ext.isDefined(paramsSubset.start)) {
             paramsSubset.start = 0;
         }
+        if(!Ext.isDefined(paramsSubset.descendants)) {
+            paramsSubset.descendants = false;
+        }
         Ext.apply(p, paramsSubset);
         this.setParams(p);
     }
 
     ,setParams: function(params){
+        clog(Ext.encode(this.params));
+        clog(Ext.encode(params));
         while(!Ext.isEmpty(params.path) && (params.path[0] == '/')) {
             params.path = params.path.substr(1);
         }
@@ -746,6 +751,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(params.path)) {
             params.path = '/';
         }
+
+        if(!Ext.isEmpty(this.params.query)) {
+            params.lastQuery = this.params.query;
+        }
+
         var newParams = Ext.decode(Ext.encode(params));//, this.params
         var sameParams = this.sameParams(
             this.params
@@ -933,6 +943,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
             return;
         }
+
         var path = this.folderProperties.path;
         if(path.substr(-1, 1) !== '/') {
             path += '/';

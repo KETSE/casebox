@@ -277,8 +277,14 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
 
     ,onObjectsStoreLoad: function(store, records, options) {
         this.onObjectsStoreChange(store, records, options);
+        clog('store loaded', arguments);
         if(!this.grid.editing) {
+            clog('refreshing view');
             this.grid.getView().refresh();
+            if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
+                clog('focud default cell');
+                this.focusDefaultCell();
+            }
         }
     }
 
@@ -290,14 +296,6 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             }
             ,this
         );
-
-        if(!this.grid.editing) {
-            // focus only when object just loaded
-            if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
-                this.focusDefaultCell();
-            }
-        }
-
     }
 
     ,confirmDiscardChanges: function(){

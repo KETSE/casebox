@@ -63,7 +63,7 @@ if (empty($cores)) {
 } else {
     foreach ($cores as $core) {
         echo "\nProcessing core $core ...";
-        echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3]);
+        echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3].' '.@$argv[4]);
     }
     echo "\nDone\n";
 }

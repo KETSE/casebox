@@ -107,12 +107,5 @@ foreach ($users as $u) {
         $cron_id
     ) or die('error updating crons last action');
 }
-DB\dbQuery(
-    'UPDATE crons
-    SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
-    WHERE cron_id = $1',
-    array(
-        $cron_id
-        ,'ok'
-    )
-) or die(DB\dbQueryError());
+
+closeCron($cron_id);

@@ -228,7 +228,7 @@ class Task extends Object
         $dateStart = empty($dateStart) ? null : Util\dateISOToMysql($dateStart);
         $dateEnd = empty($dateEnd) ? null : Util\dateISOToMysql($dateEnd);
 
-        if (empty($this->data['status'])) {
+        if (empty($this->data['status']) || in_array($this->data['status'], array(1, 2))) {
             $this->data['status'] = 2; // active
             if (!empty($dateEnd)) {
                 if (strtotime($dateEnd) < strtotime('now')) {

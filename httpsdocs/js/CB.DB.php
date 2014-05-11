@@ -26,33 +26,37 @@ Ext.namespace('CB.DB');
         ,data:  [[null, '-'], ['case', 'case'], ['comment', 'comment'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['object', 'object'], ['search', 'search'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
         ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
     });
+<?php
+$data = array(
+    array(null, '-')
+    ,array('_auto_title', L\get('ftAutoTitle')) //Auto title (uses title_template)
+    ,array('checkbox', L\get('ftCheckbox')) //CheckBox
+    ,array('combo', L\get('ftCombo')) //ComboBox
+    ,array('date', L\get('ftDate')) //Date
+    ,array('datetime', L\get('ftDatetime')) //Datetime
+    ,array('float', L\get('ftFloat')) //Float
+    ,array('G', L\get('ftGroup')) //Group
+    ,array('H', L\get('ftHeader')) //Header
+    ,array('html', L\get('ftHtml')) //Html
+    ,array('iconcombo', L\get('ftIconcombo')) //IconCombo
+    ,array('int', L\get('ftInt')) //Integer
+    ,array('_language', L\get('ftLanguage')) //Language
+    ,array('memo', L\get('ftMemo')) //Memo
+    ,array('_objects', L\get('ftObjects')) //Objects
+    ,array('_sex', L\get('ftSex')) //Sex
+    ,array('_short_date_format', L\get('ftShortDateFormat')) //Short date format combo
+    ,array('_fieldTypesCombo', L\get('ftFieldTypesCombo')) //Template field types combo
+    ,array('_templateTypesCombo', L\get('ftTemplateTypesCombo')) //Template types combo
+    ,array('text', L\get('ftText')) //Text
+    ,array('time', L\get('ftTime')) //Time
+    ,array('timeunits', L\get('ftTimeunits')) //Time units
+    ,array('varchar', L\get('ftVarchar')) //Varchar
+);
+?>
     CB.DB.fieldTypes = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: ['id', 'name']
-        ,data:  [[null, '-']
-            ,['_auto_title', 'Auto title (uses title_template)']
-            ,['checkbox', 'CheckBox']
-            ,['combo', 'ComboBox']
-            ,['date', 'Date']
-            ,['datetime', 'Datetime']
-            ,['float', 'Float']
-            ,['G', 'Group']
-            ,['H', 'Header']
-            ,['html', 'Html']
-            ,['iconcombo', 'IconCombo']
-            ,['int', 'Integer']
-            ,['_language', 'Language']
-            ,['memo', 'Memo']
-            ,['_objects', 'Objects']
-            ,['_sex', 'Sex']
-            ,['_short_date_format', 'Short date format combo']
-            ,['_fieldTypesCombo', 'Template field types combo']
-            ,['_templateTypesCombo', 'Template types combo']
-            ,['text', 'Text']
-            ,['time', 'Time']
-            ,['timeunits', 'Time units']
-            ,['varchar', 'Varchar']
-        ]
+        ,data: <?php echo json_encode($data, JSON_UNESCAPED_UNICODE); ?>
         ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
     });
     CB.DB.reminderTypes = new Ext.data.ArrayStore({

@@ -53,13 +53,7 @@ while ($r = $res->fetch_assoc()) {
 }
 $res->close();
 
-// writing cron execution info
-DB\dbQuery(
-    'UPDATE crons
-    SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
-    WHERE cron_id = $1',
-    array($cron_id, 'ok')
-) or die(DB\dbQueryError());
+closeCron($cron_id);
 
 //Starting reindexing cron to update changes into solr
 Solr\Client::runCron();

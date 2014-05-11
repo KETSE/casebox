@@ -48,6 +48,24 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
             ,this
         );
 
+        a = this.getEl().query('a.path');
+        Ext.each(
+            a
+            ,function(t){
+                Ext.get(t).addListener(
+                    'click'
+                    ,function(ev, el){
+                        App.locateObject(
+                            this.params.id
+                            ,el.attributes.getNamedItem('path').value
+                        );
+                    }
+                    ,this
+                );
+            }
+            ,this
+        );
+
         a = this.getEl().query('a.taskA');
         Ext.each(
             a
