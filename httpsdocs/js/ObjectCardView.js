@@ -243,7 +243,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             ,listeners: {
                 scope: this
                 ,add: this.onCardItemAdd
-                ,afterrender: this.doLoad
                 ,lockpanel: this.onLockPanelEvent
                 ,saveobject: this.onSaveObjectEvent
                 ,beforedestroy: this.onBeforeDestroy
@@ -445,6 +444,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
         this.updateToolbarAndMenuItems();
 
+        this.fireEvent('loaded', this, item);
+
         if(Ext.isEmpty(this.loadedData) || Ext.isEmpty(this.loadedData.scroll)) {
             return;
         }
@@ -622,7 +623,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
      * @return void
      */
     ,onObjectsDeleted: function(ids, e) {
-        clog('objectsdeleted', arguments, this.loadedData);
         if(!Ext.isEmpty(this.loadedData) && setsHaveIntersection(ids, this.loadedData.id)) {
             delete this.locked;
             this.onViewChangeClick(0, false);
@@ -808,6 +808,13 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
     ,onLockPanelEvent: function(status) {
         this.locked = status;
+    }
+
+    ,setSelectedVersion: function(params) {
+        var ai = this.getLayout().activeItem;
+        if(ai.isXType('CBObjectProperties')) {
+            ai.setSelectedVersion(params);
+        }
     }
 }
 );

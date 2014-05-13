@@ -252,15 +252,16 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         App.Favorites.load();
         this.populateMainMenu();
     }
+
     ,initCB: function(){
         if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){
             this.onLogin();
             App.DD = new CB.DD();
-
         }else {
             this.initCB.defer(500, this);
         }
     }
+
     ,logout: function(){
         return Ext.Msg.show({
             buttons: Ext.Msg.YESNO
@@ -426,9 +427,18 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     ,onFileOpen: function(data, e){
         if(e) e.stopEvent();
 
-        if(App.activateTab(App.mainTabPanel, data.id)) return true;
+        if(App.activateTab(App.mainTabPanel, data.id)) {
+            return true;
+        }
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');
+        var o = Ext.create(
+            {
+                data: data
+                ,iconCls: 'icon-loading'
+                ,title: L.LoadingData + ' ...'
+            }
+            ,'CBFileWindow'
+        );
         return App.addTab(App.mainTabPanel, o);
     }
 

@@ -739,11 +739,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,setParams: function(params){
-        clog(Ext.encode(this.params));
-        clog(Ext.encode(params));
         while(!Ext.isEmpty(params.path) && (params.path[0] == '/')) {
             params.path = params.path.substr(1);
         }
+
         while(!Ext.isEmpty(params.path) && (params.path[params.path.length -1] == '/')) {
             params.path = params.path.substr(0, params.path.length -1);
         }
@@ -754,6 +753,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
         if(!Ext.isEmpty(this.params.query)) {
             params.lastQuery = this.params.query;
+        } else if(!Ext.isEmpty(this.params.search)) {
+            params.lastQuery = this.params.search;
         }
 
         var newParams = Ext.decode(Ext.encode(params));//, this.params
@@ -952,6 +953,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.changeSomeParams({
             path: path
             ,query: null
+            ,search: null
         });
     }
 
@@ -1049,9 +1051,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onObjectsDeleted: function(ids, e) {
-        clog('vc onObjectsDeleted', arguments, this.store);
-
         var idx;
+
         for (var i = 0; i < ids.length; i++) {
             idx = this.store.findExact('nid', String(ids[i]));
             if(idx >= 0) {

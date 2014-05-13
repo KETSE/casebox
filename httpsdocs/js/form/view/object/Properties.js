@@ -4,6 +4,7 @@ CB.form.view.object.Properties = Ext.extend(CB.PluginsPanel, {
     initComponent: function(){
         CB.form.view.object.Properties.superclass.initComponent.apply(this, arguments);
     }
+
     ,getContainerToolbarItems: function() {
         var rez = {
             tbar: {}
@@ -58,6 +59,18 @@ CB.form.view.object.Properties = Ext.extend(CB.PluginsPanel, {
 
         return rez;
     }
+
+    ,setSelectedVersion: function(params) {
+        this.items.each(
+            function(i) {
+                if(i.setSelectedVersion) {
+                    i.setSelectedVersion(params);
+                }
+            }
+            ,this
+        );
+    }
+
 });
 
 Ext.reg('CBObjectProperties', CB.form.view.object.Properties);

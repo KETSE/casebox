@@ -254,6 +254,10 @@ class Config extends Singleton
         return $rez;
     }
 
+    /**
+     * get core plugins config
+     * @return array
+     */
     public static function getPlugins()
     {
         if (!empty(static::$plugins)) {
@@ -297,6 +301,10 @@ class Config extends Singleton
         return static::$plugins;
     }
 
+    /**
+     * get remote configuration for core plugins to be included in Ext.Direct api
+     * @return array
+     */
     public static function getPluginsRemoteConfig()
     {
         $rez = array();
@@ -304,6 +312,38 @@ class Config extends Singleton
         foreach ($plugins as $name => $cfg) {
             if (!empty($cfg['remote'])) {
                 $rez[$name] = $cfg['remote'];
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
+     * get defined plugins for right panel for given object type
+     * @param  varchar $objectType
+     * @param  string  $from       defines subgroup plugin definition (window - object edit window)
+     * @return array
+     */
+    public static function getObjectTypePluginsConfig($objectType, $from = '')
+    {
+        $rez = array();
+        $tmp = Config::get('object_type_plugins');
+
+        if (!empty($from)) {
+            $tmp = @$tmp[$from];
+        }
+
+        if (!empty($tmp[$objectType])) {
+            $rez = $tmp[$objectType];
+        } else {
+            $tmp = Config::get('default_object_plugins');
+
+            if (!empty($from)) {
+                $tmp = @$tmp[$from];
+            }
+
+            if (!empty($tmp)) {
+                $rez = $tmp;
             }
         }
 

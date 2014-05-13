@@ -648,13 +648,12 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
      */
     ,setFieldValue: function(fieldName, value) {
         var helperTreeNode = this.helperTree.setFieldValue(fieldName, value);
-        clog('helperTreeNode', helperTreeNode);
+
         if(Ext.isEmpty(helperTreeNode)) {
             return;
         }
 
         var recordIndex = this.store.findExact('id', helperTreeNode.attributes.id);
-        clog('recordIndex', recordIndex);
 
         if(recordIndex >= 0) {
             this.store.getAt(recordIndex).set('value', value);

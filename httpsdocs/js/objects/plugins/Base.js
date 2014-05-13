@@ -5,6 +5,7 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
     ,header: false
     ,tbarCssClass: 'obj-plugin-h'
     ,cls: 'obj-plugin'
+
     ,initComponent: function(){
         this.prepareToolbar();
 
@@ -22,6 +23,7 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
         }
         //overwrite this method and add your logic
     }
+
     ,prepareToolbar: function()
     {
         if(Ext.isEmpty(this.title) && Ext.isEmpty(this.actions)) {
@@ -48,6 +50,7 @@ CB.objects.plugins.Base = Ext.extend(Ext.Panel, {
 
         this.tbar = tbarItems;
     }
+
     ,getToolbarItems: function() {
         return [];
     }

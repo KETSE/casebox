@@ -277,12 +277,11 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
 
     ,onObjectsStoreLoad: function(store, records, options) {
         this.onObjectsStoreChange(store, records, options);
-        clog('store loaded', arguments);
+
         if(!this.grid.editing) {
-            clog('refreshing view');
             this.grid.getView().refresh();
+
             if(this.startEditAfterObjectsStoreLoadIfNewObject === true) {
-                clog('focud default cell');
                 this.focusDefaultCell();
             }
         }

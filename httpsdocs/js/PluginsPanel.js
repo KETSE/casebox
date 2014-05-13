@@ -3,6 +3,7 @@ Ext.namespace('CB');
 CB.PluginsPanel = Ext.extend(Ext.Panel, {
     autoScroll: true
     ,padding:0
+
     ,initComponent: function(){
         CB.PluginsPanel.superclass.initComponent.apply(this, arguments);
 
@@ -38,11 +39,15 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(this.api)) {
             return;
         }
+
         if(!isNaN(params)) {
             params = {id: params};
         }
+
         this.clear();
-        if(Ext.isEmpty(params)) {
+
+        if(Ext.isEmpty(params) || Ext.isEmpty(params.id)) {
+            this.fireEvent('loaded', this);
             return;
         }
 
@@ -64,6 +69,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
                     }
                     ,cl
                 );
+
                 this.add(c);
                 if(!Ext.isDefined(v.data)) {
                     c.setVisible(false);

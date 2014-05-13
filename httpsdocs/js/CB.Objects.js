@@ -39,6 +39,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ,add: function(f, c, i){ c.enableBubble('change'); }
             }
         });
+
         this.tabPanel = new Ext.TabPanel({
             xtype: 'tabpanel'
             ,region: 'center'
@@ -47,6 +48,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             ,enableTabScroll: true
             ,tabMargin: 120
         });
+
         this.actions = {
             save: new Ext.Action({
                 text: L.Save
@@ -57,15 +59,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ,scope: this
                 ,handler: this.onSaveClick
             })
-            ,'delete': new Ext.Action({
-                text: L.Delete
-                ,iconAlign:'top'
-                ,iconCls: 'ib-del'
-                ,scale: 'large'
-                ,disabled: true
-                ,scope: this
-                ,handler: this.onDeleteClick
-            })
+
             ,createTask: new Ext.Action({
                 text: L.NewTask
                 ,iconCls: 'ib-task-new'
@@ -90,6 +84,21 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ,scope: this
                 ,handler: this.onPasteClick.createInterceptor(this.autoSaveObjectInterceptor, this)
             })
+
+            ,'delete': new Ext.Action({
+                text: L.Delete
+                ,disabled: true
+                ,scope: this
+                ,handler: this.onDeleteClick
+            })
+
+            ,'security': new Ext.Action({
+                text: L.Security
+                ,disabled: true
+                ,scope: this
+                ,handler: this.onSecurityClick
+            })
+
         };
 
         Ext.apply(this, {
@@ -146,12 +155,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.filesDropPlugin.init(this);
 
         CB.Objects.superclass.initComponent.apply(this, arguments);
+
         this.addEvents('deleteobject', 'associateObject', 'deassociateObject', 'fileupload', 'filedownload');//, 'filesdelete'
         this.enableBubble(['deleteobject', 'fileupload', 'filedownload']);//, 'filesdelete'
+
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
         App.clipboard.on('change', this.onClipboardChange, this);
         App.fireEvent('objectinit', this);
     }
+
     ,getProperty: function(propertyName){
         if(this.data && this.data[propertyName]){
             if(propertyName == 'pathtext') return this.data[propertyName]+this.data.name+'/';
@@ -159,6 +171,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         }
         return null;
     }
+
     ,autoSaveObjectInterceptor: function(){
         if(isNaN(this.data.id)){
             this.interceptorArguments = arguments;
@@ -167,10 +180,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         }
         return true;
     }
+
     ,onFormLoaded: function(r, e){
         this.data.cdate = date_ISO_to_local_date(this.data.cdate);
         this.data.udate = date_ISO_to_local_date(this.data.udate);
     }
+
     ,onObjectsStoreChange: function(store, records, options){
         Ext.each(
             records
@@ -183,6 +198,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             this.grid.getView().refresh();
         }
     }
+
     ,prepareInterface: function(){
         toolbarItems = [];
 
@@ -202,7 +218,25 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         /**/
         toolbarItems.push(this.actions.save);
 
-        if(!this.hideDeleteButton) toolbarItems.push(this.actions['delete']);
+        var moreItems = [this.actions.security];
+        if(!this.hideDeleteButton) {
+            moreItems.unshift(this.actions['delete']);
+        }
+
+        var moreButton = new Ext.Button({
+            iconCls: 'ib-points'
+            ,iconAlign:'top'
+            ,scale: 'large'
+            ,scope: this
+            ,text: L.More
+            ,menu: new Ext.menu.Menu({items: moreItems})
+            ,handler: function(b, e) {
+                b.menu.show(b.getEl());
+            }
+        });
+
+        toolbarItems.push('->');
+        toolbarItems.push(moreButton);
 
         northRegionItems = [this.topFieldSet];
 
@@ -224,15 +258,30 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ,padding: 0
                 ,items: northRegionItems
         });
-        // this.childsPanel = new CB.ActionChildsPanel({style: 'margin-bottom: 25px', hidden: true});
-        // this.filesPanel = new CB.ActionFilesPanel({style: 'margin-bottom: 25px', hidden: true});
-        // this.tasksPanel = new CB.ActionTasksPanel({style: 'margin-bottom: 25px', hidden: true});
-        // this.propertiesPanel = new CB.ObjectsPropertiesPanel({
-        //     listeners:{
-        //         scope: this
-        //         ,pathclick: this.onPathClick
-        //     }
-        // });
+
+        this.objectPanel = new CB.ObjectCardView({
+            region: 'east'
+            ,width: 300
+            ,split: true
+            ,bodyStyle: 'background-color: #f4f4f4'
+
+            ,listeners: {
+                scope: this
+                ,loaded: function(objectPanel, activeViewItem) {
+                    if(Ext.isEmpty(objectPanel.loadedData) ||
+                        Ext.isEmpty(objectPanel.loadedData.id) ||
+                        (objectPanel.loadedData.id == this.data.id)
+                    ) {
+                        objectPanel.getTopToolbar().hide();
+                    } else {
+                        objectPanel.getTopToolbar().show();
+                    }
+                    objectPanel.syncSize();
+                    objectPanel.ownerCt.syncSize();
+                }
+            }
+        });
+
         this.add({
             xtype: 'panel'
             ,tbar: toolbarItems
@@ -240,29 +289,16 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             ,layout: 'border'
             ,border: false
             ,hideBorders: true
-            ,items: [{
+            ,items: [
+                {
                     layout: 'border'
                     ,region: 'center'
                     ,border: false
                     ,defaults: {border: false}
                     ,xtype: 'panel'
                     ,items: contentItems
-                },{
-                    xtype: 'panel'
-                    ,region: 'east'
-                    ,width:300
-                    ,split: true
-                    ,statefull: true
-                    ,stateId: 'coEP' //case object east panel
-                    ,bodyStyle: 'background-color: #F4F4F4'
-                    ,autoScroll: true
-                    ,items: [
-                        // this.childsPanel
-                        // ,this.filesPanel
-                        // ,this.tasksPanel
-                        // ,this.propertiesPanel
-                    ]
                 }
+                ,this.objectPanel
             ]
         });
         this.mainToolBar = this.items.first().getTopToolbar();
@@ -273,12 +309,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.enableBubble(['taskcreate']);
         this.fireEvent('objectopened', this);
     }
+
     ,onSaveClick: function(){
         this.saveForm();
     }
+
     ,hasMainFile: function(){
         return (this.data.mainFile && !isNaN(this.data.mainFile.id));
     }
+
     ,getObjectDate: function(){
         idx = this.templateStore.findExact('name', '_date_start');
         if(idx >=0) {
@@ -287,29 +326,36 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         }
         return null;
     }
+
     ,getFieldValue: function(fieldName, valueIndex) {
         // this.templateData
     }
+
     ,getCurrentFieldValue: function(field_id, duplication_id){
         ed = this.topFieldSet.find('name', 'f'+ field_id+'_0');
         if(!Ext.isEmpty(ed)) return ed[0].getValue();
         if(Ext.isEmpty(this.grid) || Ext.isEmpty(this.grid.getFieldValue)) return null;
         return this.grid.getFieldValue(field_id, duplication_id);
     }
+
     ,onDeleteClick: function(b){
         this.fireEvent('deleteobject', this.data);
     }
+
     ,onObjectsDeleted: function(ids){
         if(ids.indexOf(parseInt(this.data.id, 10)) >=0 ) {
             this.destroy();
         }
     }
+
     ,onClipboardChange: function(cb){
         this.actions.paste.setDisabled(cb.isEmpty());
     }
+
     ,getBubbleTarget: function(){
         return App.mainViewPort;
     }
+
     ,setFormValues: function(){
         var lastActiveTabIndex = this.tabPanel.items.indexOf(this.tabPanel.activeTab);
         if(Ext.isEmpty(this.data.data)) {
@@ -461,14 +507,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             this.getBubbleTarget().on('filesdeleted', this.onFilesDeleted, this);
             this.getBubbleTarget().on('fileuploaded', this.onFileUploaded, this);
             this.prepareInterface();
-            // this.childsPanel.reload();
-            // this.filesPanel.reload();
-            // this.tasksPanel.reload();
-            // this.propertiesPanel.data = this.data;
         // } else if(this.propertiesPanel && this.propertiesPanel.rendered) {
             // this.propertiesPanel.update(this.data);
         }
+
         this.grid.reload();
+
         if( (this.grid.store.getCount() > 0)
             && ( (this.tabPanel.items.getCount() === 0)
                 || (this.tabPanel.items.first().items.first() != this.grid)
@@ -498,13 +542,21 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 }
             });//this.tabPanel.items.removeAt(0);
         }
+
         if(this.topFieldSet){
             if(this.topFieldSet.isRendered){
                 this.topFieldSet.syncSize();
             }
         }
+
         this.doLayout();
+
         this.items.first().items.first().syncSize();
+
+        this.objectPanel.load({
+            id: this.data.id
+            ,from: 'window'
+        });
         //setting all form values, inclusive in the grid
 
        Ext.each(tabPanelFieldItems, function(i){this.tabPanel.insert(tpInsertIndex++, i);}, this);
@@ -524,9 +576,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.onObjectChanged();
         this.focusFirstField();
     }
+
     ,focusFirstField: function(){
         App.focusFirstField(this);
     }
+
     ,onCreateObjectClick: function(b, e) {
         data = Ext.apply({}, {
             pid: this.data.id
@@ -535,6 +589,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         }, b.data);
         App.mainViewPort.createObject(data, e);
     }
+
     ,onCreateTaskClick: function(o, e){
         this.fireEvent(
             'taskcreate'
@@ -548,6 +603,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             }
         );
     }
+
     ,getFormValues: function(){
         if(!Ext.isDefined(this.data.data)) {
             this.data.data = {};
@@ -575,6 +631,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             );
         }
     }
+
     ,getFileProperties: function(fileId){
         // return false or file properties if possible
         if((!this.filesGrid) || isNaN(fileId)) return false;
@@ -584,9 +641,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         if(ri < 0) return false;
         return fs.getAt(ri).data;
     }
+
     ,onFileUploaded: function(data){
         if(data.object_id != this.data.id) return;
     }
+
     ,onFilesDeleted: function(fileIds){
         st = this.grid.getStore();
         if(st) st.each(function(r){
@@ -596,28 +655,34 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             }
         }, this);
     }
+
     ,getIconClass: function(){
         if(Ext.isEmpty(this.data.template_id)) return;
         idx = CB.DB.templates.findExact('id', parseInt(this.data.template_id, 10));
         if(idx < 0) return;
         return CB.DB.templates.getAt(idx).get('iconCls');
     }
+
     ,onBeforeCloseObjectsPanel: function(p){
         p.hide();
         this.tabPanel.remove(p, false);
         return false;
+
     }
     ,onUploadClick: function(b, e) {
         this.fireEvent('fileupload', {pid: this.data.id, uploadType: 'single'}, e);
     }
+
     ,onPasteClick: function(b, e) {
         App.clipboard.paste(this.data.id, null, this.onPasteProcess, this);
     }
+
     ,onPasteProcess: function(pids){
         // this.childsPanel.reload();
         // this.filesPanel.reload();
         // this.tasksPanel.reload();
     }
+
 
     ,onObjectSaved: function(f, a){
         if(!Ext.isEmpty(this.interceptorArguments)){
@@ -631,16 +696,20 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         App.fireEvent('objectchanged', this);
         this.onObjectChanged();
     }
+
     ,onObjectChanged: function(){
         this.actions.save.setDisabled(!this._isDirty && !isNaN(this.data.id));
         this.actions['delete'].setDisabled(isNaN(this.data.id));
+        this.actions.security.setDisabled(isNaN(this.data.id));
         this.actions.paste.setDisabled(App.clipboard.isEmpty());
     }
+
     ,onFocusContactField: function(editor){
         if( Ext.isDefined(editor.dependency) || Ext.isEmpty(editor.pid)) return;
         f = editor.name.split('_');
         editor.pidValue = this.getCurrentFieldValue(editor.pid, f[1]);
     }
+
     ,updateDependentFields: function(fn, newValue){
         pid = fn.split('_')[0].substr(1);
         if(Ext.isDefined(this.topFieldSet)){
@@ -659,6 +728,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             }, this);
         }
     }
+
     ,onPathClick: function(){
         App.locateObject( this.data.id, this.data.path );
      }

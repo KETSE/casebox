@@ -56,12 +56,13 @@ $sql = 'SELECT f.id
         WHERE f.id IN ('.implode(', ', $ids).')';
 
 if (!empty($_GET['v']) && is_numeric($_GET['v'])) {
-    $sql = 'SELECT f.id
-             , f.content_id
-             , c.path
-             , f.name
-             , c.`type`
-             , c.size
+    $sql = 'SELECT '.intval($ids[0]).' `id`
+            ,f.id `version_id`
+            ,f.content_id
+            ,c.path
+            ,f.name
+            ,c.`type`
+            ,c.size
         FROM files_versions f
         LEFT JOIN files_content c ON f.content_id = c.id
         WHERE f.id ='.intval($_GET['v']);
@@ -73,7 +74,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
     if ($r = $res->fetch_assoc()) {
         //check if can download file
         if (!Security::canDownload($r['id'], $user['id'])) {
-            die( L\Access_denied);
+            die( L\Access_denied.'!!!'.$r['id']);
         }
 
         header('Content-Description: File Transfer');

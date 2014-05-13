@@ -482,6 +482,7 @@ function initApp(){
         var ext = name.split('.').pop();
         return (App.config.webdav_files.indexOf(ext) >= 0);
     };
+
     App.openWebdavDocument = function(data, checkCookie){
         if(Ext.isEmpty(App.config.webdav_url)) {
             return;

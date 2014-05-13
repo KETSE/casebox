@@ -1,3 +1,16 @@
+CaseBox 1.9.186 (2014-05-13)
+==============================
+New Features, Improvements
+--------------------------
+- files window update according to proto
+- objects window right panel change
+- added current version plugin to be displayed in right panel for files edit window
+- added versions plugin to be displayed in right panel for files
+
+Fixed Bugs:
+----------
+- preview versions bug
+
 CaseBox 1.9.185 (2014-05-11)
 ==============================
 New Features, Improvements

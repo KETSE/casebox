@@ -3,7 +3,7 @@ namespace CB;
 
 class Files
 {
-    public function getProperties($id)
+    public static function getProperties($id)
     {
         $rez = array('success' => true, 'data' => array());
 
@@ -36,6 +36,7 @@ class Files
 
         if (!empty($d['versions'])) {
             foreach ($d['versions'] as &$r) {
+                $r['template_id'] = $rez['data']['template_id'];
                 $r['ago_date'] = date(
                     str_replace(
                         '%',
@@ -792,11 +793,11 @@ class Files
         $rez = array();
         $file = array();
         $sql = 'SELECT f.id
-                 , f.content_id
-                 , f.name
-                 , c.path
-                 , c.`type`
-                 , p.status
+                ,f.content_id
+                ,f.name
+                ,c.path
+                ,c.`type`
+                ,p.status
             FROM files f
             LEFT JOIN files_content c ON f.content_id = c.id
             LEFT JOIN file_previews p ON c.id = p.id
@@ -804,12 +805,13 @@ class Files
                 AND c.size > 0';
 
         if (!empty($version_id)) {
-            $sql = 'SELECT f.id
-                     , f.content_id
-                     , f.name
-                     , c.path
-                     , c.`type`
-                     , p.status
+            $sql = 'SELECT $1 `id`
+                    ,f.id `version_id`
+                    ,f.content_id
+                    ,f.name
+                    ,c.path
+                    ,c.`type`
+                    ,p.status
                 FROM files_versions f
                 LEFT JOIN files_content c ON f.content_id = c.id
                 LEFT JOIN file_previews p ON c.id = p.id
