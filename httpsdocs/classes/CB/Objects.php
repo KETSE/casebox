@@ -238,7 +238,7 @@ class Objects
             ,'groupedFields' => &$gf
         );
 
-        fireEvent('onBeforeGeneratePreview', $params);
+        fireEvent('beforeGeneratePreview', $params);
 
         if (!empty($gf['top'])) {
             foreach ($gf['top'] as $f) {
@@ -310,10 +310,11 @@ class Objects
             $top = '<table class="obj-preview">'.$top.'</table><br />';
         }
 
-        return //'<div style="padding:10px">'.
-            $top.$bottom
-            // .'</div>'
-            ;
+        $params['result'] = $top.$bottom;
+        fireEvent('generatePreview', $params);
+
+        return $params['result'];
+
     }
 
     /**

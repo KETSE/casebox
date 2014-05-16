@@ -116,17 +116,26 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     if(this.loaded) return;
                     this.getEl().mask(L.Downloading + ' ...', 'x-mask-loading');
                 }}
+
                 ,activate: function(){
                     ep = this.find('region', 'center');
                     if(!Ext.isEmpty(ep)) ep[0].syncSize();
                 }
-                ,change: function(c, v){
+
+                ,change: function(fieldName, newValue, oldValue){
+
+                    if(!Ext.isEmpty(fieldName) && Ext.isString(fieldName)) {
+                        this.fireEvent('fieldchange', fieldName, newValue, oldValue);
+                    } else {
+                        if(fieldName && fieldName.isXType && (fieldName.isXType('combo')) ){
+                            this.updateDependentFields(fieldName.name, v);
+                        }
+                    }
+
                     this.setDirty(true);
                     this.onObjectChanged();
-                    if(c && c.isXType && (c.isXType('combo')) ){
-                        this.updateDependentFields(c.name, v);
-                    }
                 }
+
                 ,savesuccess: this.onObjectSaved
                 ,beforedestroy: {
                     scope: this
@@ -486,7 +495,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     ,value: v.value
                     ,listeners: {
                         scope: this
-                        ,change: function(){ this.fireEvent('change'); }
+                        ,change: function(field, newValue, oldValue){ this.fireEvent('change', field.name, newValue, oldValue); }
                         ,sync: function(){ this.fireEvent('change'); }
                     }
                 };
@@ -575,6 +584,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         this.setDirty(false);
         this.onObjectChanged();
         this.focusFirstField();
+        this.fireEvent('loaded', this);
     }
 
     ,focusFirstField: function(){
