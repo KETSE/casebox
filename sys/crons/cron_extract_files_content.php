@@ -111,15 +111,9 @@ while ($r = $res->fetch_assoc()) {
 }
 $res->close();
 $rez['Total'] = $rez['Processed'] + $rez['Not found'];
-DB\dbQuery(
-    'UPDATE crons
-    SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
-    WHERE cron_id = $1',
-    array(
-        $cron_id
-        ,json_encode($rez, JSON_UNESCAPED_UNICODE)
-    )
-) or die(DB\dbQueryError());
+
+
+closeCron($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE));
 
 Solr\Client::runCron();
 

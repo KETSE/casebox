@@ -39,6 +39,8 @@ include DOC_ROOT.'global.php';
 
 $cfg = \CB\Config::loadConfigFile(DOC_ROOT.'config.ini');
 
+ini_set('max_execution_time', 0);
+
 require_once DOC_ROOT.'lib/DB.php';
 DB\connect($cfg);
 
@@ -61,7 +63,7 @@ if (empty($cores)) {
 } else {
     foreach ($cores as $core) {
         echo "\nProcessing core $core ...";
-        echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3]);
+        echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3].' '.@$argv[4]);
     }
     echo "\nDone\n";
 }

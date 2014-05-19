@@ -156,7 +156,7 @@ if (defined('CB\\CONFIG\\MAX_FILES_VERSION_COUNT')) {
 /* So, we have defined main paths and loaded configs. Now define and configure all other options (for php, session, etc) */
 
 /* setting php configuration options, session lifetime and error_reporting level */
-ini_set('max_execution_time', 300);
+ini_set('max_execution_time', 000);
 ini_set('short_open_tag', 'off');
 
 // upload params
@@ -164,7 +164,7 @@ ini_set('upload_tmp_dir', UPLOAD_TEMP_DIR);
 ini_set('upload_max_filesize', '200M');
 ini_set('post_max_size', '200M');
 ini_set('max_file_uploads', '20');
-ini_set('memory_limit', '200M');
+ini_set('memory_limit', '400M');
 
 // session params
 

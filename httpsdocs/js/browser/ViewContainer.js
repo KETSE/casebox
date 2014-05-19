@@ -353,7 +353,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ,root: 'data'
             ,messageProperty: 'msg'
             ,fields: [
-                {name: 'nid'}
+                {name: 'nid', type: 'string'}
                 ,{name: 'pid', type: 'int'}
                 ,{name: 'system', type: 'int'}
                 ,{name: 'status', type: 'int'}
@@ -731,6 +731,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(!Ext.isDefined(paramsSubset.start)) {
             paramsSubset.start = 0;
         }
+        if(!Ext.isDefined(paramsSubset.descendants)) {
+            paramsSubset.descendants = false;
+        }
         Ext.apply(p, paramsSubset);
         this.setParams(p);
     }
@@ -739,6 +742,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         while(!Ext.isEmpty(params.path) && (params.path[0] == '/')) {
             params.path = params.path.substr(1);
         }
+
         while(!Ext.isEmpty(params.path) && (params.path[params.path.length -1] == '/')) {
             params.path = params.path.substr(0, params.path.length -1);
         }
@@ -746,6 +750,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(params.path)) {
             params.path = '/';
         }
+
+        if(!Ext.isEmpty(this.params.query)) {
+            params.lastQuery = this.params.query;
+        } else if(!Ext.isEmpty(this.params.search)) {
+            params.lastQuery = this.params.search;
+        }
+
         var newParams = Ext.decode(Ext.encode(params));//, this.params
         var sameParams = this.sameParams(
             this.params
@@ -933,6 +944,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
             return;
         }
+
         var path = this.folderProperties.path;
         if(path.substr(-1, 1) !== '/') {
             path += '/';
@@ -941,6 +953,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.changeSomeParams({
             path: path
             ,query: null
+            ,search: null
         });
     }
 
@@ -1039,8 +1052,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onObjectsDeleted: function(ids, e) {
         var idx;
+
         for (var i = 0; i < ids.length; i++) {
-            idx = this.store.findExact('nid', ids[i]);
+            idx = this.store.findExact('nid', String(ids[i]));
             if(idx >= 0) {
                 this.store.removeAt(idx);
             }
@@ -1099,11 +1113,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         var id = Ext.isEmpty(selection)
             ? this.folderProperties.id
             : s[0].nid;
-
-        if(App.activateTab(null, id, CB.SecurityPanel)) {
-            return;
-        }
-        App.addTab(null, new CB.SecurityPanel({data: { id: id }}));
+        App.mainViewPort.openPermissions(id);
     }
 
     ,onMergeFilesClick: function(buttonOrKey, e) {

@@ -25,7 +25,9 @@ class ObjectProperties extends Base
 
         if (!empty($data)) {
             if (!empty($data['pids'])) {
-                $rez['data']['path'] = str_replace(',', '/', $data['pids']);
+                $path = explode(',', $data['pids']);
+                array_pop($path);
+                $rez['data']['path'] = implode('/', $path);
             }
 
             foreach ($data as $k => $v) {

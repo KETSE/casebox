@@ -619,11 +619,14 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         App.clipboard.paste(n.attributes.nid, 'shortcut');
     }
     ,onPermissionsClick: function(b, e){
-        if(this.actions.permissions.isDisabled()) return;
+        if(this.actions.permissions.isDisabled()) {
+            return;
+        }
         n = this.selModel.getSelectedNode();
-        if(Ext.isEmpty(n)) return;
-        if(App.activateTab(null, n.attributes.nid, CB.SecurityPanel)) return;
-        App.addTab(null, new CB.SecurityPanel({data: { id: n.attributes.nid }}));
+        if(Ext.isEmpty(n)) {
+            return;
+        }
+        App.mainViewPort.openPermissions(n.attributes.nid);
     }
     ,onPropertiesClick: function(b, e){
         if(this.actions.properties.isDisabled()) return;

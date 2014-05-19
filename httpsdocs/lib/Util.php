@@ -475,7 +475,7 @@ function getCoreHost($db_name = false)
 
     $dev = \CB\isDevelServer() ? 'dev.' : '';
 
-    $core = "https://$dev$server/$core/";
+    $core = "https://$dev$server$core/";
 
     return $core;
 }

@@ -349,3 +349,17 @@ leading wildcard queries. -->
 <!-- since fields of this type are by default not stored or indexed,
 		 any data added to them will be ignored outright.  -->
 <fieldtype name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField" />
+
+
+<fieldType name="first_letter" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+    <analyzer type="index">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory" />
+        <!-- The TrimFilter removes any leading or trailing whitespace -->
+        <filter class="solr.TrimFilterFactory" />
+    </analyzer>
+
+    <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+    </analyzer>
+</fieldType>

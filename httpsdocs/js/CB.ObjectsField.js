@@ -448,7 +448,9 @@ CB.ObjectsSelectionForm = Ext.extend(Ext.Window, {
         ];
 
         if(!Ext.isEmpty(this.config.fields)){
-            if(!Ext.isArray(this.config.fields)) this.config.fields = this.config.fields.split(',');
+            if(!Ext.isArray(this.config.fields)) {
+                this.config.fields = this.config.fields.split(',');
+            }
             for (var i = 0; i < this.config.fields.length; i++) {
                 fieldName = this.config.fields[i].trim();
                 switch(fieldName){

@@ -28,6 +28,7 @@
 .ib-points{background-image: url(b/points.png); min-width: 20px}
 .ib-preview{background-image: url(b/preview.png); min-width: 38px}
 .ib-refresh{background-image: url(b/refresh.png); min-width: 38px}
+.ib-restore{background-image: url(b/restore.png); min-width: 38px}
 .ib-save{background-image: url(b/save.png); min-width: 38px}
 .ib-search{background-image: url(b/search.png); min-width: 38px}
 .ib-task-complete{background-image: url(b/task-complete.png); min-width: 38px}

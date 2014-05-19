@@ -24,12 +24,16 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                             scope: this
                             ,'search': function(query, editor, event){
                                 editor.clear();
+                                query = String(query).trim();
                                 if(Ext.isEmpty(query)) {
                                     return;
                                 }
-                                if((query.substr(0,3) == 'id:') && !isNaN(query.substr(3))) {
-                                    App.locateObject(query.substr(3));
-                                    return;
+                                if(query.substr(0,3) == 'id:') {
+                                    query = query.substr(3).trim();
+                                    if(!isNaN(query)) {
+                                        App.locateObject(query);
+                                        return;
+                                    }
                                 }
                                 App.activateBrowserTab().setParams({
                                     query: query
@@ -248,15 +252,16 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         App.Favorites.load();
         this.populateMainMenu();
     }
+
     ,initCB: function(){
         if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){
             this.onLogin();
             App.DD = new CB.DD();
-
         }else {
             this.initCB.defer(500, this);
         }
     }
+
     ,logout: function(){
         return Ext.Msg.show({
             buttons: Ext.Msg.YESNO
@@ -353,7 +358,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) {
             return;
         }
-        var idx = g.store.findExact('nid', parseInt(App.locateObjectId, 10));
+        var idx = g.store.findExact('nid', String(App.locateObjectId) );
         if(idx >=0){
             sm = g.getSelectionModel();
             if( (sm.getCount() > 1) ||
@@ -408,12 +413,32 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         return App.addTab(App.mainTabPanel, o);
     }
 
+    ,openPermissions: function(objectId) {
+        if(isNaN(objectId)) {
+            return;
+        }
+
+        if(App.activateTab(null, objectId, CB.SecurityPanel)) {
+            return;
+        }
+        App.addTab(null, new CB.SecurityPanel({data: { id: objectId }}));
+    }
+
     ,onFileOpen: function(data, e){
         if(e) e.stopEvent();
 
-        if(App.activateTab(App.mainTabPanel, data.id)) return true;
+        if(App.activateTab(App.mainTabPanel, data.id)) {
+            return true;
+        }
 
-        o = Ext.create({ data: data, iconCls: 'icon-loading', title: L.LoadingData + ' ...' }, 'CBFileWindow');
+        var o = Ext.create(
+            {
+                data: data
+                ,iconCls: 'icon-loading'
+                ,title: L.LoadingData + ' ...'
+            }
+            ,'CBFileWindow'
+        );
         return App.addTab(App.mainTabPanel, o);
     }
 
@@ -456,7 +481,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     ,onDeleteObject: function(data){
         Ext.Msg.confirm(
             L.DeleteConfirmation
-            ,L.DeleteConfirmationMessage + ' "' + data.title+'"?'
+            ,L.DeleteConfirmationMessage + ' "' + Ext.value(data.title, data.name) +'"?'
             ,function(btn){
                 if(btn == 'yes') {
                     CB_Browser['delete'](data.id, this.onProcessObjectsDeleted, this);
@@ -467,8 +492,12 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
     }
     ,onProcessObjectsDeleted: function(r, e){
-        if(r.success !== true) return;
-        if(!Ext.isEmpty(r.ids)) this.fireEvent('objectsdeleted', r.ids, e);
+        if(r.success !== true) {
+            return;
+        }
+        if(!Ext.isEmpty(r.ids)) {
+            this.fireEvent('objectsdeleted', r.ids, e);
+        }
     }
     ,onFileUpload: function(data, e){
         if(e) e.stopPropagation();

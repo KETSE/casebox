@@ -238,7 +238,7 @@ class Objects
             ,'groupedFields' => &$gf
         );
 
-        fireEvent('onBeforeGeneratePreview', $params);
+        fireEvent('beforeGeneratePreview', $params);
 
         if (!empty($gf['top'])) {
             foreach ($gf['top'] as $f) {
@@ -310,10 +310,11 @@ class Objects
             $top = '<table class="obj-preview">'.$top.'</table><br />';
         }
 
-        return //'<div style="padding:10px">'.
-            $top.$bottom
-            // .'</div>'
-            ;
+        $params['result'] = $top.$bottom;
+        fireEvent('generatePreview', $params);
+
+        return $params['result'];
+
     }
 
     /**
@@ -425,8 +426,12 @@ class Objects
         //     $object_record['iconCls'] = $objData['cfg']['iconCls'];
         // }
 
+        $field = array();
         foreach ($linearData as $f) {
-            $field = $template->getField($f['name']);
+            if (is_object($template)) {
+                $field = $template->getField($f['name']);
+            }
+
             $processed_values = array();
             if (!empty($f['value'])) {
                 /* make changes to value if needed */
@@ -774,17 +779,25 @@ class Objects
             $templateData = is_null($template)
                 ? null
                 : $template->getData();
-            if (!empty($templateData['cfg']['object_plugins'])) {
-                $objectPlugins = $templateData['cfg']['object_plugins'];
-            } else {
-                $tmp = Config::get('object_type_plugins');
-                if (!empty($tmp[$o->getType()])) {
-                    $objectPlugins = $tmp[$o->getType()];
+
+            $from = empty($p['from'])
+                ? ''
+                : $p['from'];
+
+            if (!empty($from)) {
+                if (!empty($templateData['cfg']['object_plugins'][$from])) {
+                    $objectPlugins = $templateData['cfg']['object_plugins'][$from];
                 } else {
-                    $tmp = Config::get('default_object_plugins');
-                    if (!empty($tmp)) {
-                        $objectPlugins = $tmp;
-                    }
+                    $objectPlugins = Config::getObjectTypePluginsConfig($o->getType(), $from);
+
+                }
+            }
+
+            if (empty($objectPlugins)) {
+                if (!empty($templateData['cfg']['object_plugins'])) {
+                    $objectPlugins = $templateData['cfg']['object_plugins'];
+                } else {
+                    $objectPlugins = Config::getObjectTypePluginsConfig($o->getType());
                 }
             }
         }

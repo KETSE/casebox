@@ -251,6 +251,8 @@ class Tasks extends Base
 
     protected function getChildrenTasks()
     {
+        $rez = array();
+
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
 
@@ -279,6 +281,10 @@ class Tasks extends Base
                 if (substr($this->lastNode->id, 0, 3) == 'au_') {
                     return $this->getAssigneeTasks();
                 }
+        }
+
+        if (@$this->requestParams['from'] == 'tree') {
+            return $rez;
         }
 
         $s = new \CB\Search();

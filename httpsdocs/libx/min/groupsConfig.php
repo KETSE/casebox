@@ -124,6 +124,7 @@ return array_merge(
             ,'//js/objects/plugins/Meta.js'
             ,'//js/objects/plugins/Tasks.js'
             ,'//js/objects/plugins/Versions.js'
+            ,'//js/objects/plugins/CurrentVersion.js'
             ,'//js/CB.WebdavWindow.js'
 
             ,'//js/SearchPanel.js'

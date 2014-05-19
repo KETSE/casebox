@@ -93,6 +93,13 @@ class Object extends OldObject
             $p['tag_id'] = null;
         }
 
+        if (empty($p['cid'])) {
+            $p['cid'] = $_SESSION['user']['id'];
+        }
+        if (empty($p['oid'])) {
+            $p['oid'] = $p['cid'];
+        }
+
         DB\dbQuery(
             'INSERT INTO tree (
                 id
@@ -137,7 +144,7 @@ class Object extends OldObject
                 ,@$p['date_end']
                 ,@$p['size']
                 ,@json_encode($p['cfg'], JSON_UNESCAPED_UNICODE)
-                ,$_SESSION['user']['id']
+                ,@$p['cid']
                 ,@$p['oid']
                 ,@intval($p['system'])
             )

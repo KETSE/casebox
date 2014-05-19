@@ -54,7 +54,9 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         }
         this.doLoad(this.newId, this.newVersionId);
     }
+
     ,doLoad: function(id, vId) {
+
         this.load({
             url: '/' + App.config.coreName + '/preview/'+ id +'_' + vId + '.html'
             ,callback: this.processLoad
@@ -292,11 +294,16 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
 
     ,getContainerToolbarItems: function() {
         rez = {
-            tbar: {}
-            ,menu: {}
+            tbar: {
+            }
+            ,menu: {
+                reload: {}
+            }
         };
 
         if(this.params) {
+            rez.tbar['openInTabsheet'] = {};
+
             if(CB.DB.templates.getType(this.params.template_id) == 'file') {
                 if(this.viewingImage) {
                     rez.tbar['fitImage']  = {
@@ -305,8 +312,10 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
                     };
                 }
                 rez.tbar['download']  = {};
+                rez.tbar['download']  = {};
 
-                rez.menu['webdavlink']  = {};
+                rez.menu['delete'] = { addDivider: 'top' };
+                rez.menu['webdavlink']  = { addDivider: 'top' };
             }
         }
 

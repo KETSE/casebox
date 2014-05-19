@@ -260,7 +260,8 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 var bt = this.getBubbleTarget();
                 var node = this.helperTree.getNode(targetData.record.get('id'));
                 var tr = node.attributes.templateRecord;
-                var v = toNumericArray(node.attributes.value.value);
+                var oldValue = node.attributes.value.value;
+                var v = toNumericArray(oldValue);
 
                 var idx = null;
 
@@ -276,9 +277,9 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                         }
                     }
                 }
-                v = v.join(',');
+                var newValue = v.join(',');
                 targetData.record.set('value', v);
-                this.fireEvent('change');
+                this.fireEvent('change', tr.get('name'), newValue, oldValue);
             }
             return true;
         }
@@ -591,6 +592,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
             ,this);
     }
+
     ,onSaveObjectEvent: function (key, event){
         if(this.editing) {
             this.stopEditing(false);
@@ -599,14 +601,20 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
     }
 
     ,onAfterEditProperty: function(e){
+        var nodeId = e.record.get('id');
         if(e.field == 'value'){
             if(e.value != e.originalValue){
-                this.helperTree.resetChildValues(e.record.get('id'));
+                this.helperTree.resetChildValues(nodeId);
             }
         }
 
         if(e.value != e.originalValue) {
-            this.fireEvent('change');
+            this.fireEvent(
+                'change'
+                ,this.helperTree.getNode(nodeId).attributes.templateRecord.get('name')
+                ,e.value
+                ,e.originalValue
+            );
         }
 
         this.syncRecordsWithHelper();
@@ -628,6 +636,28 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,this
         );
         return result;
+    }
+
+    /**
+     * set value for a field
+     *
+     * TODO: review for duplicated fields
+     *
+     * @param varchar fieldName
+     * @param variant value
+     */
+    ,setFieldValue: function(fieldName, value) {
+        var helperTreeNode = this.helperTree.setFieldValue(fieldName, value);
+
+        if(Ext.isEmpty(helperTreeNode)) {
+            return;
+        }
+
+        var recordIndex = this.store.findExact('id', helperTreeNode.attributes.id);
+
+        if(recordIndex >= 0) {
+            this.store.getAt(recordIndex).set('value', value);
+        }
     }
 
     ,onDuplicateFieldClick: function(b){

@@ -202,7 +202,7 @@ class Actions
 
         /* security checks */
         foreach ($p['sourceIds'] as $sourceId) {
-            if (!\CB\Security::canDelete($sourceId)) {
+            if (!\CB\Security::canRead($sourceId)) {
                 return array('success' => false, 'msg' => L\Access_denied);
             }
         }
