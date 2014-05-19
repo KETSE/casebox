@@ -5,6 +5,7 @@ Demosrc.view.Graph = Ext.extend(CB.browser.view.Interface,{
     ,hideBorders: true
     ,iconCls: 'icon-graph'
     ,padding: 0
+    ,autoScroll: true
     ,initComponent: function(){
 
         Ext.apply(this,{
@@ -47,7 +48,7 @@ Demosrc.view.Graph = Ext.extend(CB.browser.view.Interface,{
 
     }
     ,onDownloadClick: function(b, e){
-        //
+        // window.open('/get.php?graph='+this.params.caseId+'&d=1' + (this.params.titles ? '&titles=1' :''), 'downloadgraph');
     }
     ,attachClickEvents: function(){
         a = this.getEl().query('a');
