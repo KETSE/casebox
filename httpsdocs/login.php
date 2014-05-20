@@ -70,7 +70,7 @@ if (empty($_SESSION['check_TSV'])) {
                 <?php echo isset($_SESSION['message']) ? '<div class="alert alert-error">'.$_SESSION['message'].'</div>' : '';?>
                 <span class="icon-lock"></span>
             </label>
-            <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/'.CORE_NAME; ?>/login/forgot-password/"><?php echo L\get('ForgotPassword');?></a>
+            <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/' . CORE_NAME; ?>/login/forgot-password/"><?php echo L\get('ForgotPassword');?></a>
             <input type="submit" name="s" id="s" value="<?php echo L\get('Login');?>" class="btn btn-info" style="margin-top: 26px;" disabled>
     <?php
 
@@ -95,6 +95,16 @@ if (empty($_SESSION['check_TSV'])) {
         </form>
     </div>
 </div>
+
+<div class="footer">
+<?php echo Config::get('login_footer_text'); ?>
+</div>
+
+<div class="footer" style="right: 0px;">
+    <a href="https://www.casebox.org/">www.casebox.org</a> <span style="color: #AAA; padding-left: 2px; padding-right: 5px">&bull;</span>  <a href="http://forum.casebox.org/">Support forum</a>
+</div>
+
+
 </body>
 </html>
 <?php
