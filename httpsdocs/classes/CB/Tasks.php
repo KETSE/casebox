@@ -68,7 +68,7 @@ class Tasks
             $r['create_in'] = array_pop($c);
             $rez = array('success' => true, 'data' => $r);
         } else {
-            throw new \Exception(L\Object_not_found);
+            throw new \Exception(L\get('Object_not_found'));
         }
         $res->close();
 
@@ -94,7 +94,7 @@ class Tasks
             FROM tasks_responsible_users ru
             JOIN users_groups u ON ru.user_id = u.id
             WHERE ru.task_id = $1
-            ORDER BY u.l'.USER_LANGUAGE_INDEX,
+            ORDER BY u.l' . Config::get('user_language_index'),
             $id
         ) or die(DB\dbQueryError());
 
@@ -148,7 +148,7 @@ class Tasks
                 $p['allday'] = 0;
             }
 
-            if (($p['template_id'] !== CONFIG\DEFAULT_EVENT_TEMPLATE)) {
+            if ($p['template_id'] !== Config::get('default_event_template')) {
                 $p['date_end'] = empty($p['date_end']) ? null : Util\dateISOToMysql($p['date_end']);
             } else {
                 $p['date_end'] = null;
@@ -370,7 +370,7 @@ class Tasks
     {
         $rez = array('success' => true);
         if (!Security::canManageTask($p['id'])) {
-            throw new \Exception(L\Access_denied, 1);
+            throw new \Exception(L\get('Access_denied'), 1);
         }
         $res = DB\dbQuery(
             'SELECT
@@ -473,7 +473,7 @@ class Tasks
 
             $a = explode('-', $p['reminds']);
 
-            $subject = L\Reminder.': '.$p['title'].
+            $subject = L\get('Reminder').': '.$p['title'].
                 ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['timezone']).
                 ' ('.$p['path'].')';
 
@@ -591,10 +591,10 @@ class Tasks
 
         $responsible_users = explode(',', $task['responsible_user_ids']);
         if (($_SESSION['user']['id'] != $task['cid']) && !Security::isAdmin()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         if (!in_array($p['user_id'], $responsible_users)) {
-            throw new \Exception(L\Wrong_id);
+            throw new \Exception(L\get('Wrong_id'));
         }
         if (empty($p['status'])) {
             $p['status'] = 0;
@@ -718,7 +718,7 @@ class Tasks
 
         /* check if current user can manage this task */
         if (!Security::canManageTask($p['id'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         /* load task data */
@@ -743,7 +743,7 @@ class Tasks
 
         if ($r = $res->fetch_assoc()) {
             if ($r['user_status'] == 1) {
-                throw new \Exception(L\Task_already_completed);
+                throw new \Exception(L\get('Task_already_completed'));
             }
             $task = $r;
         }
@@ -804,7 +804,7 @@ class Tasks
         }
         $res->close();
         if (($_SESSION['user']['id'] !== $task['cid']) && !Security::isAdmin()) {
-            return  array('success' => false, 'msg' => L\No_access_to_close_task);
+            return  array('success' => false, 'msg' => L\get('No_access_to_close_task'));
         }
         DB\dbQuery(
             'UPDATE tasks SET status = 3 WHERE id = $1',
@@ -857,7 +857,7 @@ class Tasks
         }
         $res->close();
         if (($_SESSION['user']['id'] !== $task['cid']) && !Security::isAdmin()) {
-            return  array('success' => false, 'msg' => L\No_access_for_this_action);
+            return  array('success' => false, 'msg' => L\get('No_access_for_this_action'));
         }
         DB\dbQuery(
             'UPDATE tasks
@@ -964,7 +964,7 @@ class Tasks
                 ,cid
                 ,ti.path `path_text`
                 ,(SELECT name from tree where id = t.category_id) `category`
-                ,(SELECT l'.USER_LANGUAGE_INDEX.'
+                ,(SELECT l' . Config::get('user_language_index') . '
                     FROM users_groups
                     WHERE id = t.cid) owner_text
                 ,cdate
@@ -1156,13 +1156,13 @@ class Tasks
         $actions = array();
 
         if (!empty($d['can']['close'])) {
-            $actions[] = '<a action="close" class="taskA click">'.L\Close.'</a>';
+            $actions[] = '<a action="close" class="taskA click">'.L\get('Close').'</a>';
         }
         if (!empty($d['can']['reopen'])) {
-            $actions[] = '<a action="reopen" class="taskA click">'.L\Reopen.'</a>';
+            $actions[] = '<a action="reopen" class="taskA click">'.L\get('Reopen').'</a>';
         }
         if (empty($d['can']['close']) && !empty($d['can']['complete'])) {
-            $actions[] = '<a action="complete" class="taskA click">'.L\Complete.'</a>';
+            $actions[] = '<a action="complete" class="taskA click">'.L\get('Complete').'</a>';
         }
 
         $rez = '<div class="taskview">
@@ -1170,12 +1170,12 @@ class Tasks
             <div class="datetime">{datetime_period}</div>
             <div class="info">{description}</div>
             <table class="props"><tbody>
-            <tr><td class="k">'.L\Status.':</td><td><span class="status{status}">{status_text}</span></td></tr>
-            <tr><td class="k">'.L\Importance.':</td><td>{importance_text}</td></tr>
-            <tr><td class="k">'.L\Category.':</td><td>{category_text}</td></tr>
-            <tr><td class="k">'.L\Path.':</td><td><a class="path" path="{path}" href="#">{path_text}</a></td></tr>
-            <tr><td class="k">'.L\Owner.':</td><td><table class="people"><tbody>
-                <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg"></td><td><b>{creator_name}</b><p class="gr">'.L\Created.': '.
+            <tr><td class="k">'.L\get('Status').':</td><td><span class="status{status}">{status_text}</span></td></tr>
+            <tr><td class="k">'.L\get('Importance').':</td><td>{importance_text}</td></tr>
+            <tr><td class="k">'.L\get('Category').':</td><td>{category_text}</td></tr>
+            <tr><td class="k">'.L\get('Path').':</td><td><a class="path" path="{path}" href="#">{path_text}</a></td></tr>
+            <tr><td class="k">'.L\get('Owner').':</td><td><table class="people"><tbody>
+                <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg"></td><td><b>{creator_name}</b><p class="gr">'.L\get('Created').': '.
                 '<span class="dttm" title="{full_created_date_text}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
 
         $date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
@@ -1186,13 +1186,13 @@ class Tasks
         $d['importance_text'] = '';
         switch ($d['importance']) {
             case 1:
-                $d['importance_text'] = L\Low;
+                $d['importance_text'] = L\get('Low');
                 break;
             case 2:
-                $d['importance_text'] = L\Medium;
+                $d['importance_text'] = L\get('Medium');
                 break;
             case 3:
-                $d['importance_text'] = L\High;
+                $d['importance_text'] = L\get('High');
                 break;
         }
 
@@ -1223,7 +1223,7 @@ class Tasks
         $rez = str_replace(array_keys($params), array_values($params), $rez);
 
         if (!empty($d['users'])) {
-            $rez .= '<tr><td class="k">'.L\TaskAssigned.':</td><td><table class="people"><tbody>';
+            $rez .= '<tr><td class="k">'.L\get('TaskAssigned').':</td><td><table class="people"><tbody>';
             foreach ($d['users'] as $u) {
                 $un = User::getDisplayName($u['id']);
                 $rez .= '<tr><td class="user"><div style="position: relative"><img class="photo32" src="photo/'.$u['id'].'.jpg" alt="'.$un.'" title="'.$un.'">'.
@@ -1231,33 +1231,33 @@ class Tasks
                 '</div></td><td><b>'.$un.'</b>'.
                 '<p class="gr">'.(
                     ($u['status'] == 1)
-                    ? L\Completed.': '.date($date_format.' H:i', strtotime($u['time'])).
-                        ( (!empty($d['can']['edit'])) ? '<a class="bt taskA click" action="markincomplete" uid="'.$u['id'].'">'.L\revoke.'</a>' : '')
-                    : L\waitingForAction.
-                        ((!empty($d['can']['edit'])) ? '<a class="bt taskA click" action="markcomplete" uid="'.$u['id'].'">'.L\complete.'</a>' : '' )
+                    ? L\get('Completed').': '.date($date_format.' H:i', strtotime($u['time'])).
+                        ( (!empty($d['can']['edit'])) ? '<a class="bt taskA click" action="markincomplete" uid="'.$u['id'].'">'.L\get('revoke').'</a>' : '')
+                    : L\get('waitingForAction').
+                        ((!empty($d['can']['edit'])) ? '<a class="bt taskA click" action="markcomplete" uid="'.$u['id'].'">'.L\get('complete').'</a>' : '' )
                 ).'</p></td></tr>';
             }
             $rez .= '</tbody></table></td></tr>';
         }
 
         if (!empty($d['reminds'])) {
-            $rez .= '<tr><td class="k">'.L\Reminders.':</td><td><ul class="reminders">';
+            $rez .= '<tr><td class="k">'.L\get('Reminders').':</td><td><ul class="reminders">';
             $r = explode('-', $d['reminds']);
             foreach ($r as $rem) {
                 $rem = explode('|', $rem);
                 $units = '';
                 switch ($rem[2]) {
                     case 1:
-                        $units = L\ofMinutes;
+                        $units = L\get('ofMinutes');
                         break;
                     case 2:
-                        $units = L\ofHours;
+                        $units = L\get('ofHours');
                         break;
                     case 3:
-                        $units = L\ofDays;
+                        $units = L\get('ofDays');
                         break;
                     case 4:
-                        $units = L\ofWeeks;
+                        $units = L\get('ofWeeks');
                         break;
                 }
                 $rez .= '<li><a name="rem_edit" rid="1" href="#">'.$rem[1].' '.$units.'</a></li>';

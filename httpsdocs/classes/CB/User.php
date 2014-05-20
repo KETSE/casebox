@@ -13,10 +13,13 @@ class User
     {
         $ips = '|'.Util\getIPs().'|';
 
+        $coreName = Config::get('core_name');
+
         $_SESSION['ips'] = $ips;
         $_SESSION['key'] = md5($ips.$login.$pass.time());
         $_COOKIE['key'] = $_SESSION['key'];
-        setcookie('key', $_SESSION['key'], 0, '/' . CORE_NAME . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+
+        setcookie('key', $_SESSION['key'], 0, '/' . $coreName . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 
         $rez = array('success' => false);
         $user_id = false;
@@ -49,7 +52,7 @@ class User
                 $_SESSION['user']['groups'] = $rez['user']['groups'];
             }
         } else {
-            $rez['msg'] = L\Auth_fail;
+            $rez['msg'] = L\get('Auth_fail');
         }
         Log::add(
             array(
@@ -86,7 +89,7 @@ class User
             $rez['success'] = true;
             $_SESSION['verified'] = time();
         } else {
-            $rez['msg'] = L\Auth_fail;
+            $rez['msg'] = L\get('Auth_fail');
         }
         $res->close();
 
@@ -193,22 +196,22 @@ class User
         Browser::checkRootFolder();
         User::checkUserFolders();
 
+        $coreName = Config::get('core_name');
+
         @$rez = array(
             'success' => true
             ,'config' => array(
-                'coreName' => CORE_NAME
-                ,'task_categories' => constant('CB\\CONFIG\\TASK_CATEGORIES')
-                ,'default_task_category' => constant('CB\\CONFIG\\DEFAULT_TASK_CATEGORY')
-                ,'folder_templates' => $GLOBALS['folder_templates']
-                ,'default_task_template' => constant('CB\\CONFIG\\DEFAULT_TASK_TEMPLATE')
-                ,'default_event_template' => constant('CB\\CONFIG\\DEFAULT_EVENT_TEMPLATE')
+                'coreName' => $coreName
+                ,'folder_templates' => Config::get('folder_templates')
+                ,'default_task_template' => Config::get('default_task_template')
+                ,'default_event_template' => Config::get('default_event_template')
                 ,'webdav_url' => Config::get('webdav_url')
                 ,'webdav_files' => Config::get('webdav_files')
                 ,'template_info_column' => Config::get('template_info_column')
             )
             ,'user' => $_SESSION['user']
         );
-        $rez['config']['webdav_url'] = str_replace('{core_name}', \CB\CORE_NAME, $rez['config']['webdav_url']);
+        $rez['config']['webdav_url'] = str_replace('{core_name}', $coreName, $rez['config']['webdav_url']);
         $rez['config']['webdav_files'] = explode(',', $rez['config']['webdav_files']);
 
         $rez['user']['cfg']['short_date_format'] = str_replace('%', '', $rez['user']['cfg']['short_date_format']);
@@ -263,10 +266,11 @@ class User
             $user_id = $_SESSION['user']['id'];
         }
         if (!Security::canEditUser($user_id)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         $rez = array();
+        $languageSettings = Config::get('language_settings');
 
         $r = $this->getPreferences($user_id);
         if (!empty($r)) {
@@ -274,17 +278,17 @@ class User
             unset($r['cfg']);
 
             $language_index = empty($r['language_id'])
-                ? USER_LANGUAGE_INDEX -1
+                ? Config::get('user_language_index') -1
                 : $r['language_id'] - 1;
 
-            $r['language'] = $GLOBALS['languages'][$language_index];
+            $r['language'] = Config::get('languages')[$language_index];
 
             $r['long_date_format'] = empty($cfg['long_date_format']) ?
-                $GLOBALS['language_settings'][$r['language']]['long_date_format'] :
+                $languageSettings[$r['language']]['long_date_format'] :
                 $cfg['long_date_format'];
 
             $r['short_date_format'] = empty($cfg['short_date_format']) ?
-                $GLOBALS['language_settings'][$r['language']]['short_date_format'] :
+                $languageSettings[$r['language']]['short_date_format'] :
                 $cfg['short_date_format'];
 
             if (!empty($cfg['country_code'])) {
@@ -348,11 +352,12 @@ class User
     public function saveProfileData($p)
     {
         if (!Security::canEditUser($p['id'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         $rez = array();
         $cfg = $this->getUserConfig();
+        $languageSettings = Config::get('language_settings');
 
         if (isset($p['country_code'])) {
             $cfg['country_code'] = $p['country_code'];
@@ -420,8 +425,8 @@ class User
             $u['email'] = $p['email'];
             $u['language_id'] = $p['language_id'];
 
-            $u['language'] = $GLOBALS['languages'][$p['language_id']-1];
-            $u['locale'] =  $GLOBALS['language_settings'][$u['language']]['locale'];
+            $u['language'] = Config::get('languages')[$p['language_id']-1];
+            $u['locale'] =  $languageSettings[$u['language']]['locale'];
 
             $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
             $u['cfg']['gmt_offset'] = empty($cfg['timezone']) ? null :  System::getGmtOffset($cfg['timezone']);
@@ -432,7 +437,7 @@ class User
             if (!empty($cfg['short_date_format'])) {
                 $u['cfg']['short_date_format'] = $cfg['short_date_format'];
             }
-            $u['cfg']['time_format'] = $GLOBALS['language_settings'][$u['language']]['time_format'];
+            $u['cfg']['time_format'] = $languageSettings[$u['language']]['time_format'];
         }
 
         return array('success' => true);
@@ -578,10 +583,12 @@ class User
      */
     public function setLanguage($id)
     {
-        if (isset($GLOBALS['languages'][$id -1])) {
+        $coreLanguages = Config::get('languages');
+
+        if (isset($coreLanguages[$id -1])) {
             $_SESSION['user']['language_id'] = $id;
-            $_SESSION['user']['language'] = $GLOBALS['languages'][$id -1];
-            setcookie('L', $GLOBALS['languages'][$id -1]);
+            $_SESSION['user']['language'] = $coreLanguages[$id -1];
+            setcookie('L', $coreLanguages[$id -1]);
         } else {
             return array('success' => false);
         }
@@ -623,7 +630,7 @@ class User
         }
         $res->close();
         if (is_null($home_folder_id)) {
-            $cfg = defined('CB\\CONFIG\\DEFAULT_HOME_FOLDER_CFG') ? CONFIG\DEFAULT_HOME_FOLDER_CFG : null;
+            $cfg = Config::get('default_home_folder_cfg');
 
             DB\dbQuery(
                 'INSERT INTO tree (
@@ -644,7 +651,7 @@ class User
                     ,$3)',
                 array($user_id
                     ,$cfg
-                    ,CONFIG\DEFAULT_FOLDER_TEMPLATE
+                    ,Config::get('default_folder_template')
                 )
             ) or die( DB\dbQueryError() );
 
@@ -714,7 +721,7 @@ class User
                     ,$3)',
                 array($home_folder_id
                     ,$user_id
-                    ,CONFIG\DEFAULT_FOLDER_TEMPLATE
+                    ,Config::get('default_folder_template')
                 )
             ) or die( DB\dbQueryError() );
 
@@ -822,7 +829,7 @@ class User
                     $pid
                     ,$user_id
                     ,$_SESSION['user']['id']
-                    ,CONFIG\DEFAULT_FOLDER_TEMPLATE
+                    ,Config::get('default_folder_template')
                 )
             ) or die( DB\dbQueryError() );
             $rez = DB\dbLastInsertId();
@@ -840,11 +847,11 @@ class User
     public function uploadPhoto($p)
     {
         if (!is_numeric($p['id'])) {
-            return array('success' => false, 'msg' => L\Wrong_id);
+            return array('success' => false, 'msg' => L\get('Wrong_id'));
         }
         $f = &$_FILES['photo'];
         if (!in_array($f['error'], array(UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE))) {
-            return array('success' => false, 'msg' => L\Error_uploading_file .': '.$f['error']);
+            return array('success' => false, 'msg' => L\get('Error_uploading_file') .': '.$f['error']);
         }
         if (substr($f['type'], 0, 6) !== 'image/') {
             return array('success' => false, 'msg' => 'Not an image');
@@ -852,11 +859,12 @@ class User
 
         $photoName = $p['id'].'_'.$object_title = preg_replace('/[^a-z0-9\.]/i', '_', $f['name']);
 
-        if (!file_exists(PHOTOS_PATH)) {
-            @mkdir(PHOTOS_PATH, 0755, true);
+        $photosPath = Config::get('photos_path');
+        if (!file_exists($photosPath)) {
+            @mkdir($photosPath, 0755, true);
         }
 
-        move_uploaded_file($f['tmp_name'], PHOTOS_PATH.$photoName);
+        move_uploaded_file($f['tmp_name'], $photosPath.$photoName);
 
         $res = DB\dbQuery(
             'UPDATE users_groups SET photo = $2 WHERE id = $1',
@@ -874,11 +882,11 @@ class User
     public function removePhoto($p)
     {
         if (!is_numeric($p['id'])) {
-            return array('success' => false, 'msg' => L\Wrong_id);
+            return array('success' => false, 'msg' => L\get('Wrong_id'));
         }
 
         if (!Security::canEditUser($p['id'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         /* delete photo file*/
@@ -890,7 +898,7 @@ class User
         ) or die( DB\dbQueryError() );
 
         if ($r = $res->fetch_assoc()) {
-            @unlink(PHOTOS_PATH.$r['photo']);
+            @unlink(Config::get('photos_path').$r['photo']);
         }
         $res->close();
         /* enddelete photo file*/
@@ -1013,6 +1021,9 @@ class User
     public static function getPreferences($user_id)
     {
         $rez = array();
+        $coreLanguages = Config::get('languages');
+        $languageSettings = Config::get('language_settings');
+
         $res = DB\dbQuery(
             'SELECT id
                 ,name
@@ -1032,25 +1043,25 @@ class User
 
         if ($r = $res->fetch_assoc()) {
             $language_index = empty($r['language_id'])
-                ? USER_LANGUAGE_INDEX -1
+                ? Config::get('user_language_index') -1
                 : $r['language_id'] - 1;
 
-            if (empty($GLOBALS['languages'][$language_index])) {
-                $r['language_id'] = LANGUAGE_INDEX;
-                $language_index = LANGUAGE_INDEX -1;
+            if (empty($coreLanguages[$language_index])) {
+                $r['language_id'] = Config::get('language_index');
+                $language_index = $r['language_id'] -1;
             }
-            $r['language'] = $GLOBALS['languages'][$language_index];
-            $r['locale'] =  $GLOBALS['language_settings'][$r['language']]['locale'];
+            $r['language'] = $coreLanguages[$language_index];
+            $r['locale'] =  $languageSettings[$r['language']]['locale'];
 
             $r['cfg'] = Util\toJSONArray($r['cfg']);
 
             if (empty($r['cfg']['long_date_format'])) {
-                $r['cfg']['long_date_format'] = $GLOBALS['language_settings'][$r['language']]['long_date_format'];
+                $r['cfg']['long_date_format'] = $languageSettings[$r['language']]['long_date_format'];
             }
             if (empty($r['cfg']['short_date_format'])) {
-                $r['cfg']['short_date_format'] = $GLOBALS['language_settings'][$r['language']]['short_date_format'];
+                $r['cfg']['short_date_format'] = $languageSettings[$r['language']]['short_date_format'];
             }
-            $r['cfg']['time_format'] = $GLOBALS['language_settings'][$r['language']]['time_format'];
+            $r['cfg']['time_format'] = $languageSettings[$r['language']]['time_format'];
 
             //check for backward compatibility
             if (!empty($r['cfg']['TZ'])) {

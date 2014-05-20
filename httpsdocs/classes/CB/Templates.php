@@ -17,7 +17,7 @@ class Templates
             'SELECT t.id
                 ,t.pid
                 ,t.type
-                ,t.l'.USER_LANGUAGE_INDEX.' `title`
+                ,t.l' . Config::get('user_language_index') . ' `title`
                 ,t.iconCls
                 ,t.cfg
                 ,t.info_template
@@ -47,7 +47,7 @@ class Templates
                 ,ts.pid
                 ,t.id template_id
                 ,ts.`name`
-                ,ts.l'.USER_LANGUAGE_INDEX.' `title`
+                ,ts.l' . Config::get('user_language_index') . ' `title`
                 ,ts.`type`
                 ,ts.`order`
                 ,ts.cfg

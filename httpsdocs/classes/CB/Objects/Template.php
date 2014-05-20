@@ -92,7 +92,7 @@ class Template extends Object
 
                 // this if should be removed after complete migration to language abreviation titles
                 if (empty($value) && in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
                     if (!empty($lang)) {
                         $value = @$this->getFieldValue($lang, 0)['value'];
                     }
@@ -109,7 +109,7 @@ class Template extends Object
             } else {
                 // this if should be removed after complete migration to language abreviation titles
                 if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
                     if (!empty($lang)) {
                         $value = @$this->getFieldValue($lang, 0)['value'];
 
@@ -140,12 +140,14 @@ class Template extends Object
     {
         parent::loadCustomData();
 
+        $userLanguageIndex = \CB\Config::get('user_language_index');
+
         $res = DB\dbQuery(
             'SELECT id
                 ,is_folder
                 ,`type`
                 ,name
-                ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
+                ,l' . $userLanguageIndex . ' `title`
                 ,l1
                 ,l2
                 ,l3
@@ -178,7 +180,7 @@ class Template extends Object
                 ts.id
                 ,ts.pid
                 ,ts.name
-                ,ts.l'.\CB\USER_LANGUAGE_INDEX.' `title`
+                ,ts.l' . $userLanguageIndex . ' `title`
                 ,ts.l1
                 ,ts.l2
                 ,ts.l3
@@ -245,7 +247,7 @@ class Template extends Object
             } else {
                 // this if should be removed after complete migration to language abreviation titles
                 if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
                     if (!empty($lang)) {
                         $value = @$this->getFieldValue($lang, 0)['value'];
 
@@ -408,16 +410,16 @@ class Template extends Object
         switch ($field['type']) {
             case 'boolean':
             case 'checkbox':
-                $value = empty($value) ? L\no : L\yes;
+                $value = empty($value) ? L\get('no') : L\get('yes');
                 break;
 
             case '_sex':
                 switch ($value) {
                     case 'm':
-                        $value = L\male;
+                        $value = L\get('male');
                         break;
                     case 'f':
-                        $value = L\female;
+                        $value = L\get('female');
                         break;
                     default:
                         $value = '';
@@ -425,7 +427,7 @@ class Template extends Object
                 break;
 
             case '_language':
-                @$value = $GLOBALS['language_settings'][$GLOBALS['languages'][$value -1]][0];
+                @$value = @\CB\Config::get('language_settings')[\CB\Config::get('languages')[$value -1]][0];
                 break;
 
             case 'combo':

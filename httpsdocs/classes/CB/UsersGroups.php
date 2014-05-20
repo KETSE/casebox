@@ -11,7 +11,7 @@ class UsersGroups
     {
         $rez = array();
         if (!Security::canManage()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         $path = explode('/', $p['path']);
         $id = array_pop($path);
@@ -83,7 +83,7 @@ class UsersGroups
             }
             $res->close();
             $rez[] = array('nid' => -1
-                ,'title' => L\Users_without_group
+                ,'title' => L\get('Users_without_group')
                 ,'iconCls' => 'icon-users'
                 ,'type' => 1
                 ,'expanded' => true
@@ -138,7 +138,7 @@ class UsersGroups
     public function associate($user_id, $group_id)
     {
         if (!Security::canManage()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         $res = DB\dbQuery(
             'SELECT user_id
@@ -148,7 +148,7 @@ class UsersGroups
             array($user_id, $group_id)
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
-            throw new \Exception(L\UserAlreadyInOffice);
+            throw new \Exception(L\get('UserAlreadyInOffice'));
         }
         $res->close();
         DB\dbQuery(
@@ -172,7 +172,7 @@ class UsersGroups
     public function deassociate($user_id, $group_id)
     {
         if (!Security::canManage()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         $res = DB\dbQuery(
             'DELETE
@@ -207,10 +207,10 @@ class UsersGroups
     public function addUser($p)
     {
         if (!Security::canManage()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
-        $rez = array('success' => false, 'msg' => L\Missing_required_fields);
+        $rez = array('success' => false, 'msg' => L\get('Missing_required_fields'));
         $p['name'] = trim($p['name']);
         if (empty($p['name']) ||
             empty($p['password']) ||
@@ -229,7 +229,7 @@ class UsersGroups
             $p['name']
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
-            throw new \Exception(L\User_exists);
+            throw new \Exception(L\get('User_exists'));
         }
         $res->close();
         /*end of check user existance */
@@ -279,7 +279,7 @@ class UsersGroups
                 ,$p['last_name']
                 ,$_SESSION['user']['id']
                 ,$p['password']
-                ,LANGUAGE_INDEX
+                ,Config::get('language_index')
                 ,$p['email']
             )
         ) or die(DB\dbQueryError());
@@ -323,7 +323,7 @@ class UsersGroups
     public function deleteUser($user_id)
     {
         if (!Security::canManage()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         $res = DB\dbQuery(
             'UPDATE users_groups
@@ -349,7 +349,7 @@ class UsersGroups
     public function deleteGroup($group_id)
     {
         if (!Security::canEditUser($group_id)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         /* Delete group record. All security rules with this group wil be deleted by foreign key.
@@ -369,10 +369,10 @@ class UsersGroups
     public function getUserData($p)
     {
         if (($_SESSION['user']['id'] != $p['data']['id']) && !Security::canManage()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         $user_id = $p['data']['id'];
-        $rez = array('success' => false, 'msg' => L\Wrong_id);
+        $rez = array('success' => false, 'msg' => L\get('Wrong_id'));
 
         $res = DB\dbQuery(
             'SELECT id
@@ -406,7 +406,7 @@ class UsersGroups
         }
         $res->close();
         if ($rez['success'] == false) {
-            throw new \Exception(L\Wrong_id);
+            throw new \Exception(L\get('Wrong_id'));
         }
 
         $rez['data']['template_id'] = User::getTemplateId();
@@ -420,7 +420,7 @@ class UsersGroups
     public function getAccessData($user_id = false)
     {
         if (!Security::canManage()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         $user_id = $this->extractId($user_id);
         $rez = $this->getUserData(array( 'data' => array('id' => $user_id)));
@@ -449,7 +449,7 @@ class UsersGroups
     public function saveAccessData($p)
     {
         if (!Security::canManage()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         $p = (Array)$p;
         @$user_id = $this->extractId($p['id']);
@@ -528,7 +528,7 @@ class UsersGroups
     {
         /* passord could be changed by: admin, user owner, user himself */
         if (empty($p['password']) || ($p['password'] != $p['confirmpassword'])) {
-            throw new \Exception(L\Wrong_input_data);
+            throw new \Exception(L\get('Wrong_input_data'));
         }
         $user_id = $this->extractId($p['id']);
 
@@ -545,14 +545,14 @@ class UsersGroups
                 )
             ) or die(DB\dbQueryError());
             if (!$res->fetch_assoc()) {
-                throw new \Exception(L\WrongCurrentPassword);
+                throw new \Exception(L\get('WrongCurrentPassword'));
             }
             $res->close();
         }
         /* end of check for old password if users changes password for himself */
 
         if (!Security::canEditUser($user_id)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         DB\dbQuery(
@@ -581,13 +581,13 @@ class UsersGroups
         $name = trim(strtolower(strip_tags($p['name'])));
         $matches = preg_match('/^[a-z0-9\._]+$/', $name);
         if (empty($name) || empty($matches)) {
-            throw new \Exception(L\Wrong_input_data);
+            throw new \Exception(L\get('Wrong_input_data'));
         }
 
         $user_id = $this->extractId($p['id']);
 
         if (!Security::canEditUser($user_id)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         DB\dbQuery(
@@ -612,13 +612,13 @@ class UsersGroups
     {
         $title = trim(strip_tags($p['title']));
         if (empty($title)) {
-            throw new \Exception(L\Wrong_input_data);
+            throw new \Exception(L\get('Wrong_input_data'));
         }
 
         $id = $this->extractId($p['id']);
 
         if (!Security::canEditUser($id)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         DB\dbQuery(
@@ -647,7 +647,7 @@ class UsersGroups
         $a = explode('-', $id);
         $id = array_pop($a);
         if (!is_numeric($id) || ($id < 1)) {
-            throw new \Exception(L\Wrong_input_data);
+            throw new \Exception(L\get('Wrong_input_data'));
         }
 
         return $id;

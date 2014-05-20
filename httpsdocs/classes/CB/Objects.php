@@ -14,15 +14,15 @@ class Objects
 
         // check if object id is numeric
         if (!is_numeric($p['id'])) {
-            throw new \Exception(L\Wrong_input_data);
+            throw new \Exception(L\get('Wrong_input_data'));
         }
         $id = $p['id'];
 
         // Access check
         if (!Security::canRead($id)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
-        $object = $this->getCustomClassByObjectId($id) or die(L\Wrong_input_data);
+        $object = $this->getCustomClassByObjectId($id) or die(L\get('Wrong_input_data'));
 
         $object->load();
         $objectData = $object->getData();
@@ -91,13 +91,13 @@ class Objects
             ? @$p['path']
             : $p['pid'];
         if (empty($pid)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         $p['pid'] = Path::detectRealTargetId($pid);
 
         if (!Security::canCreateActions($p['pid'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         $template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($p['template_id']);
@@ -143,7 +143,7 @@ class Objects
 
         // SECURITY: check if current user has write access to this action
         if (!Security::canWrite($d['id'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         /* prepare params */
@@ -185,7 +185,7 @@ class Objects
 
         // SECURITY: check if current user has at least read access to this case
         if (!Security::canRead($id)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         $top = '';
@@ -303,7 +303,7 @@ class Objects
 
         Log::add(array('action_type' => 12, 'object_id' => $id ));
         if (!empty($top)) {
-            // $top = '<div class="obj-preview-h">'.L\Details.'</div>'.$top;
+            // $top = '<div class="obj-preview-h">'.L\get('Details').'</div>'.$top;
         }
         $top .= $body;
         if (!empty($top)) {
@@ -325,9 +325,11 @@ class Objects
     public static function getAssociatedObjects($p)
     {
         $data = array();
+
         if (is_numeric($p)) {
             $p = array('id' => $p);
         }
+
         if (empty($p['id']) && empty($p['template_id'])) {
             return array(
                 'success' => true
@@ -343,7 +345,7 @@ class Objects
         if (!empty($p['id'])) {
             // SECURITY: check if current user has at least read access to this case
             if (!Security::canRead($p['id'])) {
-                throw new \Exception(L\Access_denied);
+                throw new \Exception(L\get('Access_denied'));
             }
 
             /* select distinct associated case ids from the case */
@@ -361,6 +363,14 @@ class Objects
         } else {
             $template = new Objects\Template($p['template_id']);
             $template->load();
+
+        }
+
+        if (!empty($p['data']) && is_array($p['data'])) {
+            foreach ($p['data'] as $key => $value) {
+                $a = Util\toNumericArray($value);
+                $ids = array_merge($ids, $a);
+            }
         }
 
         if ($template) {
@@ -828,7 +838,7 @@ class Objects
     {
         $rez = array('success' => false);
         if (empty($p['id']) || !is_numeric($p['id']) || empty($p['msg'])) {
-            $rez['msg'] = L\Wrong_input_data;
+            $rez['msg'] = L\get('Wrong_input_data');
 
             return $rez;
         }

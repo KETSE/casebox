@@ -9,6 +9,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             baseParams: {
                 id: this.data.id
                 ,template_id: this.data.template_id
+                ,data: this.data.data
             }
             ,listeners:{
                 scope: this
@@ -568,9 +569,16 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         });
         //setting all form values, inclusive in the grid
 
-       Ext.each(tabPanelFieldItems, function(i){this.tabPanel.insert(tpInsertIndex++, i);}, this);
+        Ext.each(
+            tabPanelFieldItems
+            ,function(i){
+                this.tabPanel.insert(tpInsertIndex++, i);
+            }, this
+        );
+
         lastActiveTabIndex = (lastActiveTabIndex > 0) ? lastActiveTabIndex : 0;
         p = this.tabPanel.items.itemAt(lastActiveTabIndex);
+
         if(!p || !p.isVisible()) {
             p = this.tabPanel.items.itemAt(lastActiveTabIndex+1);
             if(!p || !p.isVisible()) {

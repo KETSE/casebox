@@ -3,14 +3,17 @@ namespace CB;
 
 require_once 'init.php';
 
+$coreName = Config::get('core_name');
+$coreUrl = Config::get('core_url');
+
 if (empty($_SESSION['user'])) {
-    exit(header('Location: '.CORE_URL.'login.php'));
+    exit(header('Location: ' . $coreUrl . 'login.php'));
 }
 
 L\checkTranslationsUpToDate();
 
-require_once(CONFIG\MINIFY_PATH . 'utils.php');
-$projectTitle = Config::get('project_name_'.USER_LANGUAGE, CORE_NAME);
+require_once(Config::get('MINIFY_PATH') . 'utils.php');
+$projectTitle = Config::get('project_name_' . Config::get('user_language'), $coreName);
 
 ?>
 <!DOCTYPE html>
@@ -23,13 +26,13 @@ $projectTitle = Config::get('project_name_'.USER_LANGUAGE, CORE_NAME);
     <link rel="shortcut icon" href="/i/casebox-logo.ico" type="image/x-icon">
 <?php
 
-echo '<link rel="stylesheet" type="text/css" href="'.CORE_URL.'libx/ext/resources/css/ext-all.css" />
-    <link rel="stylesheet" type="text/css" href="'. CORE_URL . substr(Minify_getUri('css'), 1) . '" />' . "\n";
+echo '<link rel="stylesheet" type="text/css" href="' . EXT_PATH. '/resources/css/ext-all.css" />
+    <link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(Minify_getUri('css'), 1) . '" />' . "\n";
 
 // Custom CSS for the core
 $css = Config::getCssList();
 if (!empty($css)) {
-    echo '<link rel="stylesheet" type="text/css" href="' . CORE_URL . substr(Minify_getUri(CORE_NAME . '_css'), 1) . '" />' . "\n";
+    echo '<link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(Minify_getUri($coreName . '_css'), 1) . '" />' . "\n";
 }
 
 echo '<title>' . $projectTitle . '</title>' . "\n";
@@ -166,10 +169,10 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
     }
 
     // Casebox locale
-    echo '<script type="text/javascript" src="' . CORE_URL . substr(Minify_getUri('lang-' . $_SESSION['user']['language']), 1) . '"></script>';
+    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('lang-' . $_SESSION['user']['language']), 1) . '"></script>';
 } else {
     // default Casebox locale
-    echo '<script type="text/javascript" src="' . CORE_URL . substr(Minify_getUri('lang-en'), 1).'"></script>';
+    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('lang-en'), 1).'"></script>';
 }
 
 ?>
@@ -177,20 +180,20 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
 <script type="text/javascript">setProgress('<?php echo L\get('Loading_ExtJS_UI')?>', '60%')</script>
 
 <?php
-echo '<script type="text/javascript" src="'. CORE_URL .'remote/api.php"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . 'remote/api.php"></script>';
 
-echo '<script type="text/javascript" src="' . CORE_URL . substr(Minify_getUri('js'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
-echo '<script type="text/javascript" src="' . CORE_URL . substr(Minify_getUri('jsdev'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('js'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('jsdev'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
 $js = Config::getJsList();
 if (!empty($js)) {
-    echo '<script type="text/javascript" src="' . CORE_URL . substr(Minify_getUri(CORE_NAME.'_js'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
+    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri($coreName.'_js'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
 }
 $prc = Config::getPluginsRemoteConfig();
 if (!empty($prc)) {
     echo '<script type="text/javascript">CB.plugins.config = '.json_encode($prc, JSON_UNESCAPED_UNICODE).';</script>';
 }
 
-echo '<script type="text/javascript" src="'. CORE_URL .'js/CB.DB.php"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . 'js/CB.DB.php"></script>';
 ?>
 
 <script type="text/javascript">setProgress('<?php echo L\get('Initialization')?>', '100%')</script>

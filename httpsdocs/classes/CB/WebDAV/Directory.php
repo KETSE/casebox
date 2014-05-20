@@ -52,7 +52,7 @@ class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection
         $path = $this->myPath . DIRECTORY_SEPARATOR . $name;
         foreach ($this->content as $item) {
             if ($item['name'] == $name) {
-                if ($item['template_id'] != \CB\CONFIG\DEFAULT_FILE_TEMPLATE) {
+                if ($item['template_id'] != Config::get('default_file_template')) {
                     return new Directory($path, $this, $this->onlyFileId, null, $item);
                 } else {
                     return new File($path, $item['id'], $this, $item);
@@ -92,7 +92,8 @@ class Directory extends \Sabre\DAV\FS\Node implements \Sabre\DAV\ICollection
         );
     }
 
-    public function getCreationDate(){
+    public function getCreationDate()
+    {
         return $this->objectData['cdate'];
     }
 

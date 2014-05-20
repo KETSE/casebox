@@ -1,11 +1,17 @@
 <?php
 namespace CB;
 
-$cron_id = 'check_core_email';
+/**
+ * this script is intended to be executed directly and it processes all cores at once
+ * retreiving all comment mails from common or particulat mail for each core
+ */
+
+$cron_id = 'check_comments_email';
 $execution_timeout = 60; //default is 60 seconds
 
 require_once 'init.php';
 
+// ~~~~~~~~~~~~~~~~~~~~~ ZEND INITIALIZATION BLOCK ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 require_once CONFIG\ZEND_PATH.'/Zend/Loader/StandardAutoloader.php';
 
 require_once 'mail_functions.php';
@@ -25,6 +31,7 @@ $loader->registerNamespace('Zend', CONFIG\ZEND_PATH.'/Zend');
 
 /** TO START AUTOLOADING */
 $loader->register();
+// ~~~~~~~~~~~~~~~~~~~~~ end of ZEND INITIALIZATION BLOCK ~~~~~~~~~~~~~~~~~~~~~
 
 $mail_requirements = "
 Mail requirements are:
@@ -35,17 +42,17 @@ Mail requirements are:
     If at least one condition is not satisfied then the email would not be processed and deleted automatically.
 ";
 
-// skip core if no email is set in config
-$email = Config::get('sender_email');
-$email_pass = Config::get('sender_email_passwd');
+// skip core if no comments config defined
+$cfg = Config::get('comments_config');
 
-if (empty($email)) {
+if (empty($cfg)) {
     exit();
 }
 
-echo " (".$email.") ...";
+echo " (".$cfg['email'].") ...";
 
 $cd = prepareCron($cron_id, $execution_timeout);
+
 if (!$cd['success']) {
     echo "\nFailed to prepare cron\n";
     exit(); //skip this core if cron preparation fails

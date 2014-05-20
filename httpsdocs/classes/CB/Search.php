@@ -35,7 +35,9 @@ class Search extends Solr\Client
             ? ''
             : $this->escapeLuceneChars($p['query']);
         $this->start = empty($p['start'])? 0 : intval($p['start']);
-        $this->rows = isset($p['rows']) ? intval($p['rows']) : \CB\CONFIG\MAX_ROWS;
+        $this->rows = isset($p['rows'])
+            ? intval($p['rows'])
+            : Config::get('max_rows');
 
         //by default filter not deleted nodes
         $fq = array('dstatus:0');
@@ -177,11 +179,12 @@ class Search extends Solr\Client
             }
         }
 
-        if (isset($p['folders']) && !empty($GLOBALS['folder_templates'])) {
+        $folderTemplates = Config::get('folder_templates');
+        if (isset($p['folders']) && !empty($folderTemplates)) {
             if ($p['folders']) {
-                $fq[] = 'template_type:("'.implode('" AND "', $GLOBALS['folder_templates']).'")';
+                $fq[] = 'template_type:("'.implode('" AND "', $folderTemplates).'")';
             } else {
-                $fq[] = '!template_id:('.implode(' OR ', $GLOBALS['folder_templates']).')';
+                $fq[] = '!template_id:('.implode(' OR ', $folderTemplates).')';
             }
         }
 

@@ -1,4 +1,12 @@
-CaseBox 1.9.18 (2014-05-714)
+CaseBox 1.9.188 (2014-05-20)
+==============================
+New Features, Improvements
+--------------------------
+- apache libx rule change for direct access to ext
+- recycleBin vfolder plugin
+- updated usage of core constants to Config class
+
+CaseBox 1.9.187 (2014-05-16)
 ==============================
 New Features, Improvements
 --------------------------

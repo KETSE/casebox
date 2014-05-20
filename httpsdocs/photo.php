@@ -12,6 +12,7 @@ $id = array_shift($f);
 
 $path = DOC_ROOT.'css/i/ico/32/';
 $filename = 'user-male.png';
+$photosPath = Config::get('photos_path');
 
 require_once 'lib/DB.php';
 DB\connect();
@@ -25,8 +26,8 @@ $res = DB\dbQuery(
 ) or die(DB\dbQueryError());
 
 if ($r = $res->fetch_assoc()) {
-    if (!empty($r['photo']) && file_exists(PHOTOS_PATH.$r['photo'])) {
-        $path = PHOTOS_PATH;
+    if (!empty($r['photo']) && file_exists($photosPath.$r['photo'])) {
+        $path = $photosPath;
         $filename = $r['photo'];
     } elseif ($r['sex'] == 'f') {
         $filename = 'user-female.png';

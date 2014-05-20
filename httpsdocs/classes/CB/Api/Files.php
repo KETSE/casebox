@@ -1,7 +1,7 @@
 <?php
 namespace CB\Api;
 
-use CB\CONFIG;
+use CB\Config;
 use CB\DB;
 use CB\L;
 
@@ -18,7 +18,11 @@ class Files
         $file = new Objects\File($id);
         $rez['data'] = $file->load();
 
-        $rez['data']['content'] = file_get_contents(\CB\FILES_DIR.$rez['data']['content_path'].DIRECTORY_SEPARATOR.$rez['data']['content_id']);
+        $rez['data']['content'] = file_get_contents(
+            \CB\Config::get('files_dir').
+            $rez['data']['content_path'].DIRECTORY_SEPARATOR.
+            $rez['data']['content_id']
+        );
         unset($rez['data']['content_id']);
         unset($rez['data']['content_path']);
 
@@ -51,7 +55,7 @@ class Files
         if ($r = $res->fetch_assoc()) {
             //check if can download file
             if (!\CB\Security::canDownload($r['id'])) {
-                throw new \Exception(L\Access_denied);
+                throw new \Exception(L\get('Access_denied'));
             }
 
             header('Content-Description: File Transfer');
@@ -64,9 +68,9 @@ class Files
             header('Cache-Control: must-revalidate');
             header('Pragma: public');
             header('Content-Length: '.$r['size']);
-            readfile(\CB\FILES_DIR.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
+            readfile(Config::get('files_dir') . $r['path'] . DIRECTORY_SEPARATOR . $r['content_id']);
         } else {
-            throw new \Exception(L\Object_not_found);
+            throw new \Exception(L\get('Object_not_found'));
         }
         $res->close();
     }
@@ -125,7 +129,7 @@ class Files
 
         if (!empty($p['localFile'])) {
             $file_name = basename($p['localFile']);
-            $tmp_name = \CB\INCOMMING_FILES_DIR.$file_name;
+            $tmp_name = Config::get('incomming_files_dir') . $file_name;
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             copy($p['localFile'], $tmp_name);
 
@@ -170,10 +174,11 @@ class Files
         if (empty($p['template_id']) && !empty($p['tmplId'])) {
             $p['template_id'] = $p['tmplId'];
         }
+
         if (empty($p['template_id'])) {
-            if (defined('\\CB\\CONFIG\\DEFAULT_FILE_TEMPLATE')) {
-                $p['template_id'] = CONFIG\DEFAULT_FILE_TEMPLATE;
-            } else {
+            $p['template_id'] = \CB\Config::get('default_file_template');
+
+            if (empty($p['template_id'])) {
                 return 'template not specified';
             }
         }

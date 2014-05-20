@@ -1,8 +1,6 @@
 <?php
 namespace CB\DB;
 
-use CB\CONFIG as CONFIG;
-
 function connect($p = array())
 {
     //check if not connected already
@@ -11,19 +9,19 @@ function connect($p = array())
     }
 
     if (empty($p['db_host'])) {
-        $p['db_host'] = CONFIG\DB_HOST;
+        $p['db_host'] = \CB\Config::get('db_host');
     }
     if (empty($p['db_user'])) {
-        $p['db_user'] = CONFIG\DB_USER;
+        $p['db_user'] = \CB\Config::get('db_user');
     }
     if (empty($p['db_pass'])) {
-        $p['db_pass'] = CONFIG\DB_PASS;
+        $p['db_pass'] = \CB\Config::get('db_pass');
     }
     if (empty($p['db_name'])) {
-        $p['db_name'] = '';//CONFIG\DB_NAME;
+        $p['db_name'] = \CB\Config::get('db_name');
     }
     if (empty($p['db_port'])) {
-        $p['db_port'] = CONFIG\DB_PORT;
+        $p['db_port'] = \CB\Config::get('db_port');
     }
 
     $dbh = connectWithParams($p);
@@ -154,7 +152,7 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
         if (!empty($GLOBALS['last_sql'])) {
             $rez = "\n\r<br /><hr />Query: ".$GLOBALS['last_sql'].$rez;
         }
-        error_log($rez, 3, ERROR_LOG);
+        error_log($rez, 3, \CB\Config::get('error_log', \CB\LOGS_DIR.'cb_error_log'));
 
         if (!\CB\isDebugHost()) {
             $rez ='Query error';

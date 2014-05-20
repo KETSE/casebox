@@ -9,6 +9,7 @@ use CB\DB as DB;
 class Config extends Singleton
 {
     protected static $config = array();
+    protected static $environmentVars = array();
     protected static $plugins = array();
 
     /**
@@ -20,53 +21,29 @@ class Config extends Singleton
     {
         $instance = static::getInstance();
 
+        // merging configs from platform, from casebox database and from core itself
         $cfg = array_merge($cfg, static::getPlatformDBConfig());
-        $cfg = array_merge($cfg, static::getPlatformConfigForCore());
+        $cfg = array_merge($cfg, static::getPlatformConfigForCore($cfg['core_name']));
         $cfg = array_merge($cfg, static::getCoreDBConfig());
 
-        $dfd = array();
-        //get facet definitions defined globally in casebox config
-        if (!empty($cfg['default_facets'])) {
-            $dfd = Util\toJSONArray($cfg['default_facets']);
-            unset($cfg['default_facets']);
-        }
-        //check if have defined facets in core config
-        if (!empty($cfg['facet_configs'])) {
-            $dfd = array_merge($dfd, Util\toJSONArray($cfg['facet_configs']));
-        }
-        $cfg['facet_configs'] = $dfd;
+        static::$config = static::adjustConfig($cfg);
+        static::$environmentVars = static::getEnvironmentVars(static::$config);
 
-        // detect core plugins (use defined or default if set)
-        $plugins = array();
-        if (!empty($cfg['default_plugins'])) {
-            $plugins = $cfg['default_plugins'];
-        }
-        if (!empty($cfg['plugins'])) {
-            $plugins = Util\toJSONArray($cfg['plugins']);
-        }
-        $cfg['plugins'] = $plugins;
-        // end of detect plugins
+        debug($cfg);
+        debug(static::$config);
+        // add core path to include path
+        set_include_path(INCLUDE_PATH . PATH_SEPARATOR . static::$environmentVars['core_dir']);
 
-        //decode properties of the core config that should be json
-        $jsonProperties = array(
-            'api'
-            ,'css'
-            ,'js'
-            ,'plugins'
-            ,'listeners'
-            ,'node_facets'
-            ,'default_object_plugins'
-            ,'object_type_plugins'
-            ,'treeNodes'
-        );
-
-        foreach ($jsonProperties as $property) {
-            if (!empty($cfg[$property])) {
-                $cfg[$property] = Util\toJSONArray($cfg[$property]);
-            }
+        // set max file version count
+        if (isset($config['max_files_version_count'])) {
+            __autoload('CB\\Files');
+            Files::setMFVC($config['max_files_version_count']);
         }
 
-        static::$config = static::adjustPaths($cfg);
+        // set temp upload directory
+        ini_set('upload_tmp_dir', static::$environmentVars['upload_temp_dir']);
+
+        ini_set('error_log', static::$environmentVars['error_log']);
 
         return static::$config;
     }
@@ -114,20 +91,20 @@ class Config extends Singleton
      *
      * @return array
      */
-    public static function getPlatformConfigForCore()
+    public static function getPlatformConfigForCore($coreName)
     {
         $rez = array();
         $res = DB\dbQuery(
             'SELECT cfg
             FROM casebox.cores
             WHERE name = $1',
-            CORE_NAME
+            $coreName
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
             $rez = json_decode($r['cfg'], true);
         } else {
-            throw new \Exception('Core not defined in cores table: '.CORE_NAME, 1);
+            throw new \Exception('Core not defined in cores table: '.$coreName, 1);
         }
         $res->close();
 
@@ -159,6 +136,120 @@ class Config extends Singleton
         $res->close();
 
         return $rez;
+    }
+
+    /**
+     * get environment variables from given config
+     * @return void
+     */
+    private static function getEnvironmentVars($config)
+    {
+        $coreName = $config['core_name'];
+
+        $rez = array(
+            'db_name' => empty($config['db_name'])
+                ? 'cb_'.$coreName
+                : $config['db_name']
+
+            ,'solr_core' => empty($config['solr_core'])
+                ? '/solr/cb_'.$coreName
+                : $config['solr_core']
+
+            ,'core_dir' => empty($config['core_dir'])
+                ? DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
+                : $config['core_dir']
+
+            // path to photos folder
+            ,'photos_path' => DOC_ROOT.'photos'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
+
+            // path to files folder
+            ,'files_dir' => DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
+
+            /* path to preview folder. Generated previews are stored for some filetypes */
+            ,'files_preview_dir', DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR.'preview'.DIRECTORY_SEPARATOR
+
+            ,'core_url' => 'https://'.$_SERVER['SERVER_NAME'].'/'.$coreName.'/'
+
+            ,'upload_temp_dir' => TEMP_DIR.$coreName.DIRECTORY_SEPARATOR
+
+            /* path to incomming folder. In this folder files are stored when just uploaded
+            and before checking existance in target.
+            If no user intervention is required then files are stored in db. */
+            ,'incomming_files_dir', TEMP_DIR.$coreName.DIRECTORY_SEPARATOR.'incomming'.DIRECTORY_SEPARATOR
+
+            ,'error_log' => LOGS_DIR.'cb_'.$coreName.'_error_log'
+
+            // custom Error log per Core, use it for debug/reporting purposes
+            ,'debug_log', LOGS_DIR.'cb_'.$coreName.'_debug_log'
+        );
+
+        /* Define folder templates */
+
+        $rez['folder_templates'] = empty($config['folder_templates'])
+            ? array()
+            : explode(',', $config['folder_templates']);
+
+        $rez['default_folder_template'] = empty($rez['folder_templates'])
+            ? 0
+            : $rez['folder_templates'][0];
+
+        if (!empty($config['default_file_template'])) {
+            $rez['default_file_template'] = $config['default_file_template'];
+        } else {
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM templates
+                WHERE `type` = $1',
+                'file'
+            ) or die( DB\dbQueryError() );
+
+            if ($r = $res->fetch_assoc()) {
+                $rez['default_file_template'] = $r['id'];
+            } else {
+                $rez['default_file_template'] = 0;
+            }
+
+            $res->close();
+        }
+
+        foreach ($config as $k => $v) {
+            if (( strlen($k) == 11 ) && ( substr($k, 0, 9) == 'language_')) {
+                $rez['language_settings'][substr($k, 9)] = Util\toJSONArray($v);
+            }
+        }
+
+        /* Define Core available languages */
+        $rez['languages'] = implode(',', array_keys($rez['language_settings']));
+
+        if (!empty($config['languages'])) {
+            $rez['languages'] = explode(',', $config['languages']);
+            for ($i=0; $i < sizeof($rez['languages']); $i++) {
+                $rez['languages'][$i] = trim($rez['languages'][$i]);
+            }
+
+            // define default core language
+            $rez['language'] = empty($config['default_language'])
+                ? $rez['languages'][0]
+                : $config['default_language'];
+        }
+
+        // Default row count limit used for solr results
+
+        $rez['max_rows'] = empty($config['max_rows'])
+            ? 50
+            : $config['max_rows'];
+
+        return $rez;
+    }
+
+    /**
+     * set an environment core varibale
+     * @param varchar $varName
+     * @param variant $value
+     */
+    public static function setEnvVar($varName, $value)
+    {
+        static::$environmentVars[$varName] = $value;
     }
 
     public static function getApiList()
@@ -200,9 +291,9 @@ class Config extends Singleton
     {
         $rez = empty(static::$config['css'])
             ? array()
-            : static::adjustPaths(static::$config['css'], CORE_DIR);
+            : static::adjustPaths(static::$config['css'], static::$environmentVars['core_dir']);
 
-        array_unshift($rez, DOC_ROOT.'/css/'.getOption('theme', 'default').'/theme.css');
+        array_unshift($rez, DOC_ROOT.'/css/'.static::get('theme', 'default').'/theme.css');
 
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
@@ -218,7 +309,7 @@ class Config extends Singleton
     {
         $rez = empty(static::$config['js'])
             ? array()
-            : static::adjustPaths(static::$config['js'], CORE_DIR);
+            : static::adjustPaths(static::$config['js'], static::$environmentVars['core_dir']);
 
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
@@ -234,19 +325,20 @@ class Config extends Singleton
     {
         $rez = array();
         $css = static::getCssList();
+        $coreName = static::$config['core_name'];
 
         if (!empty($css)) {
-            $rez[CORE_NAME.'_css'] = $css;
+            $rez[$coreName.'_css'] = $css;
         }
         $js = static::getJsList();
         if (!empty($js)) {
-            $rez[CORE_NAME.'_js'] = $js;
+            $rez[$coreName.'_js'] = $js;
         }
 
         // add available languages of the core to the minify groups
-        $languages = Config::get('languages', 'en');
-        $a = explode(',', $languages);
-        foreach ($a as $l) {
+        $languages = Config::get('languages', array('en'));
+
+        foreach ($languages as $l) {
             $k = mb_strtolower(trim($l));
             $rez['lang-'.$l] = array('//js/locale/'.$l.'.js');
         }
@@ -350,6 +442,56 @@ class Config extends Singleton
         return $rez;
     }
 
+    private static function adjustConfig($cfg)
+    {
+        /* post processing the obtained config */
+
+        $dfd = array();
+        //get facet definitions defined globally in casebox config
+        if (!empty($cfg['default_facets'])) {
+            $dfd = Util\toJSONArray($cfg['default_facets']);
+            unset($cfg['default_facets']);
+        }
+
+        //check if have defined facets in core config
+        if (!empty($cfg['facet_configs'])) {
+            $dfd = array_merge($dfd, Util\toJSONArray($cfg['facet_configs']));
+        }
+        $cfg['facet_configs'] = $dfd;
+
+        // detect core plugins (use defined or default if set)
+        $plugins = array();
+        if (!empty($cfg['default_plugins'])) {
+            $plugins = $cfg['default_plugins'];
+        }
+        if (!empty($cfg['plugins'])) {
+            $plugins = Util\toJSONArray($cfg['plugins']);
+        }
+        $cfg['plugins'] = $plugins;
+        // end of detect plugins
+
+        //decode properties of the core config that should be json
+        $jsonProperties = array(
+            'api'
+            ,'css'
+            ,'js'
+            ,'plugins'
+            ,'listeners'
+            ,'node_facets'
+            ,'default_object_plugins'
+            ,'object_type_plugins'
+            ,'treeNodes'
+        );
+
+        foreach ($jsonProperties as $property) {
+            if (!empty($cfg[$property])) {
+                $cfg[$property] = Util\toJSONArray($cfg[$property]);
+            }
+        }
+
+        return static::adjustPaths($cfg);
+    }
+
     /**
      * replace the begining double slash placeholder with document root path
      * or add main folder to begining
@@ -393,6 +535,10 @@ class Config extends Singleton
     */
     public static function get($optionName, $defaultValue = null)
     {
+        if (isset(static::$environmentVars[$optionName])) {
+            return static::$environmentVars[$optionName];
+        }
+
         if (isset(static::$config[$optionName])) {
             return static::$config[$optionName];
         }

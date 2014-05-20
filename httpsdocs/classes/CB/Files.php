@@ -21,7 +21,7 @@ class Files
             ),
             strtotime($d['cdate'])
         ).
-        ' '.L\at.' '.
+        ' '.L\get('at').' '.
         date(
             str_replace(
                 '%',
@@ -44,7 +44,7 @@ class Files
                         $_SESSION['user']['cfg']['long_date_format']
                     ),
                     strtotime($r['cdate'])
-                ).' '.L\at.' '.
+                ).' '.L\get('at').' '.
                 date(
                     str_replace(
                         '%',
@@ -67,7 +67,7 @@ class Files
 
         // SECURITY: check if current user has write access
         if (!Security::canWrite($p['id'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         $file = new Objects\File($d['id']);
         $file->setData($p);
@@ -82,6 +82,7 @@ class Files
         $archive = $file['name'];
         $ext = Files::getExtension($archive);
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $incommingFilesDir = Config::get('incomming_files_dir');
 
         switch ($ext) {
             case 'rar':
@@ -94,8 +95,8 @@ class Files
                 $entries = rar_list($archive);
                 foreach ($entries as $entry) {
                     if (!$entry->isDirectory()) { //we'll exclude empty directories
-                        $tmp_name = tempnam(INCOMMING_FILES_DIR, 'cb_arch');
-                        $entry->extract(INCOMMING_FILES_DIR, $tmp_name);
+                        $tmp_name = tempnam($incommingFilesDir, 'cb_arch');
+                        $entry->extract($incommingFilesDir, $tmp_name);
                         $file[] = array(
                             'dir' => dirname($entry->getName())
                             ,'name' => basename($entry->getName())
@@ -108,6 +109,7 @@ class Files
                 }
                 rar_close($archive);
                 break;
+
             case 'zip':
                 $zip = zip_open($file['tmp_name']);
 
@@ -120,7 +122,7 @@ class Files
                     if (substr($name, -1) == '/') {
                         continue; //exclude directories
                     }
-                    $tmp_name = tempnam(INCOMMING_FILES_DIR, 'cb_arch');
+                    $tmp_name = tempnam($incommingFilesDir, 'cb_arch');
                     $size = zip_entry_filesize($zip_entry);
                     if (zip_entry_open($zip, $zip_entry, "r")) {
                         file_put_contents($tmp_name, zip_entry_read($zip_entry, $size));
@@ -147,7 +149,7 @@ class Files
                 //file content was not uploaded. Its content_id were sent as header param
                 continue;
             }
-            $new_name = INCOMMING_FILES_DIR.basename($f['tmp_name']);
+            $new_name = Config::get('incomming_files_dir').basename($f['tmp_name']);
             if ($f['tmp_name'] == $new_name) {
                 continue;
             }
@@ -173,6 +175,8 @@ class Files
     {
         //if no filenames already exists in target then the result will be an empty array
         $rez = array();
+        $userLanguageIndex = Config::get('user_language_index');
+
         foreach ($F as $fk => $f) {
             if ($this->fileExists($pid, $f['name'], @$f['dir'])) {
                 $rez[] = $f;
@@ -188,7 +192,7 @@ class Files
                 $md5 = $this->getFileMD5($rez[0]);
                 $res = DB\dbQuery(
                     'SELECT
-                        (SELECT l'.USER_LANGUAGE_INDEX.'
+                        (SELECT l'.$userLanguageIndex.'
                             FROM users_groups
                             WHERE id = f.cid) `user`
                         , f.cdate
@@ -207,14 +211,14 @@ class Files
                     $rez[0]['msg'] = str_replace(
                         array('{timeAgo}', '{user}'),
                         array($agoTime,$r['user']),
-                        L\FileContentsIdentical
+                        L\get('FileContentsIdentical')
                     );
                 }
                 $res->close();
                 if (empty($rez[0]['msg'])) {
                     $res = DB\dbQuery(
                         'SELECT
-                            (SELECT l'.USER_LANGUAGE_INDEX.'
+                            (SELECT l'.$userLanguageIndex.'
                                 FROM users_groups
                                 WHERE id = f.cid) `user`
                             , f.cdate
@@ -233,7 +237,7 @@ class Files
                         $rez[0]['msg'] = str_replace(
                             array('{timeAgo}', '{user}'),
                             array($agoTime, $r['user']),
-                            L\FileContentsIdenticalToAVersion
+                            L\get('FileContentsIdenticalToAVersion')
                         );
 
                     }
@@ -292,7 +296,7 @@ class Files
                     }
                     $paths = array_unique($paths);
                     //msg: there are duplicates
-                    $msg  = str_replace('{paths}', "\n<br />".implode('<br />', $paths), L\UploadedFileExistsInFolders);
+                    $msg  = str_replace('{paths}', "\n<br />".implode('<br />', $paths), L\get('UploadedFileExistsInFolders'));
                     $prompt_to_open_file = true;
                     $result['data']['id'] = $f['id'];
                 }
@@ -307,7 +311,7 @@ class Files
                     }
                 }
                 if (!emtpy($filenames)) {
-                    $msg = L\FollowingFilesHaveDuplicates."\n<br />".implode('<br />', $filenames);
+                    $msg = L\get('FollowingFilesHaveDuplicates')."\n<br />".implode('<br />', $filenames);
                 }
                 break;
         }
@@ -393,14 +397,16 @@ class Files
 
     public function saveUploadParams($p)
     {
-        file_put_contents(INCOMMING_FILES_DIR.$_SESSION['key'], serialize($p));
+        file_put_contents(Config::get('incomming_files_dir') . $_SESSION['key'], serialize($p));
     }
 
     public function getUploadParams()
     {
         $rez = false;
-        if (file_exists(INCOMMING_FILES_DIR.$_SESSION['key'])) {
-            $rez = file_get_contents(INCOMMING_FILES_DIR.$_SESSION['key']);
+        $incommingFilesDir = Config::get('incomming_files_dir');
+
+        if (file_exists($incommingFilesDir . $_SESSION['key'])) {
+            $rez = file_get_contents($incommingFilesDir . $_SESSION['key']);
             $rez = unserialize($rez);
         }
 
@@ -532,7 +538,7 @@ class Files
                     ,$pid
                     ,$f['name']
                     ,$_SESSION['user']['id']
-                    ,CONFIG\DEFAULT_FILE_TEMPLATE
+                    ,Config::get('default_file_template')
                 )
             ) or die(DB\dbQueryError());
             $file_id = DB\dbLastInsertId();
@@ -650,7 +656,7 @@ class Files
                         $pid
                         ,$dir
                         ,$_SESSION['user']['id']
-                        ,CONFIG\DEFAULT_FOLDER_TEMPLATE
+                        ,Config::get('default_folder_template')
                     )
                 ) or die(DB\dbQueryError());
                 $pid = DB\dbLastInsertId();
@@ -672,7 +678,7 @@ class Files
     public function storeContent(&$f, $filePath = false)
     {
         if ($filePath == false) {
-            $filePath = FILES_DIR;
+            $filePath = Config::get('files_dir');
         }
         if (!empty($f['content_id']) && is_numeric($f['content_id'])) {
             return true; // content_id already defined
@@ -792,6 +798,12 @@ class Files
     {
         $rez = array();
         $file = array();
+        $coreName = Config::get('core_name');
+        $coreUrl = Config::get('core_url');
+
+        $filesDir = Config::get('files_dir');
+        $filesPreviewDir = Config::get('files_dir');
+
         $sql = 'SELECT f.id
                 ,f.content_id
                 ,f.name
@@ -840,14 +852,14 @@ class Files
 
         $rez['filename'] = $file['content_id'].'_.html';
 
-        if (!file_exists(FILES_PREVIEW_DIR)) {
-            @mkdir(FILES_PREVIEW_DIR, 0777, true);
+        if (!file_exists($filesPreviewDir)) {
+            @mkdir($filesPreviewDir, 0777, true);
         }
 
-        $preview_filename = FILES_PREVIEW_DIR.$rez['filename'];
+        $preview_filename = $filesPreviewDir.$rez['filename'];
 
-        $fn = FILES_DIR.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];
-        $nfn = FILES_PREVIEW_DIR.$file['content_id'].'_.'.$ext;
+        $fn = $filesDir.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];
+        $nfn = $filesPreviewDir.$file['content_id'].'_.'.$ext;
         if (!file_exists($fn)) {
             return false;
         }
@@ -883,9 +895,9 @@ class Files
                     Files::deletePreview($file['content_id']);
                 }
 
-                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php '.CORE_NAME.' > '.DEBUG_LOG.'_office &';
+                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php '.$coreName.' > '.Config::get('debug_log').'_office &';
                 if (isWindows()) {
-                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php '.CORE_NAME;
+                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php '.$coreName;
                 }
                 pclose(popen($cmd, "r"));
 
@@ -903,7 +915,7 @@ class Files
                 $content = $pe->purify(
                     $content,
                     array(
-                        'URI.Base' => '/' + CORE_NAME + '/preview/'
+                        'URI.Base' => '/' + $coreName + '/preview/'
                         ,'URI.MakeAbsolute' => true
                     )
                 );
@@ -927,19 +939,19 @@ class Files
             case 'pdf':
                 $html = 'PDF'; //Ext panel - PreviewPanel view
                 if (empty($_SERVER['HTTP_X_REQUESTED_WITH'])) { //full browser window view
-                    require_once(CONFIG\MINIFY_PATH.'utils.php');
+                    require_once(Config::get('MINIFY_PATH').'utils.php');
 
                     $html = '<html><head><title>'.$file['name'].'</title>
                             <script type="text/javascript" src="'.Minify_getUri('js_pdf').'"></script>
                             <script type="text/javascript">
                                   window.onload = function (){
-                                    var success = new PDFObject({ url: "'.CORE_URL.'download.php?pw=&amp;id='.$file['id'].'" }).embed();
+                                    var success = new PDFObject({ url: "' . $coreUrl . 'download.php?pw=&amp;id='.$file['id'].'" }).embed();
                                   };
                             </script>
                           </head>
                       <body>
                         <p>It appears you don\'t have Adobe Reader or PDF support in this web browser.
-                            <a href="'.CORE_URL.'download.php?id='.$file['id'].'">Click here to download the PDF</a></p>
+                            <a href="' . $coreUrl . 'download.php?id='.$file['id'].'">Click here to download the PDF</a></p>
                     </body>
                     </html>';
                 }
@@ -950,10 +962,10 @@ class Files
             case 'tiff':
                 $image = new \Imagick($fn);
                 $image->setImageFormat('png');
-                $image->writeImage(FILES_PREVIEW_DIR.$file['content_id'].'_.png');
+                $image->writeImage($filesPreviewDir.$file['content_id'].'_.png');
                 file_put_contents(
                     $preview_filename,
-                    '<img src="/' + CORE_NAME + '/preview/'.$file['content_id'].
+                    '<img src="/' + $coreName + '/preview/'.$file['content_id'].
                     '_.png" class="fit-img" style="margin: auto" />'
                 );
                 break;
@@ -961,7 +973,7 @@ class Files
                 if (substr($file['type'], 0, 5) == 'image') {
                     file_put_contents(
                         $preview_filename,
-                        '<div style="padding: 5px 10px"><img src="/'.CORE_NAME.'/download.php?id='.
+                        '<div style="padding: 5px 10px"><img src="/'.$coreName.'/download.php?id='.
                         $file['id'].
                         (empty($version_id) ? '' : '&v='.$version_id).
                         '" class="fit-img" style="margin: auto"></div>'
@@ -974,10 +986,12 @@ class Files
 
     public static function deletePreview($id)
     {
+        $filesPreviewDir = Config::get('files_preview_dir');
+
         if (isWindows()) {
-            $cmd = 'del '.FILES_PREVIEW_DIR.$id.'_*';
+            $cmd = 'del '.$filesPreviewDir.$id.'_*';
         } else {
-            $cmd = 'find '.FILES_PREVIEW_DIR.' -type f -name '.$id.'_* -print | xargs rm';
+            $cmd = 'find '.$filesPreviewDir.' -type f -name '.$id.'_* -print | xargs rm';
         }
         exec($cmd);
     }
@@ -986,14 +1000,10 @@ class Files
     {
         return; //TODO: refactor according to objectsRecord parametter and solr content search refactor
         $rez = array();
+
         //,parsed_content `content`'.
-        $filesPath = '';
-        if (defined('FILES_DIR')) {
-            $filesPath = FILES_DIR;
-        } else {
-            global $core;
-            $filesPath = FILES_DIR.$core['name'].DIRECTORY_SEPARATOR;
-        }
+        $filesPath = Config::get('files_dir');
+
         $res = DB\dbQuery(
             'SELECT f.id
             ,c.type
@@ -1348,8 +1358,8 @@ class Files
         //default is no versions if nothing specified in config
         $GLOBALS['mfvc'] = array('*' => 0);
 
-        $v = defined('CB\\CONFIG\\MAX_FILES_VERSION_COUNT') ?
-            CONFIG\MAX_FILES_VERSION_COUNT : null;
+        $v = Config::get('max_files_version_count');
+
         if (!empty($v)) {
             $v = explode(';', $v);
             foreach ($v as $vc) {

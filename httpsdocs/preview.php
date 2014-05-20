@@ -15,15 +15,18 @@ if (!User::isLoged()) {
     echo 'Session expired. Please login.';
     exit(0);
 }
+
 $f = $_GET['f'];
 $f = explode('.', $f);
 $a = array_shift($f);
 @list($id, $version_id) = explode('_', $a);
 $ext = array_pop($f);
 
+$filesPreviewDir = Config\get('files_preview_dir');
+
 //TODO: check access with security model
 if ($ext !== 'html') {//this will provide other files (images, swfs)
-    $f = realpath(FILES_PREVIEW_DIR.$_GET['f']);
+    $f = realpath($filesPreviewDir . $_GET['f']);
     if (file_exists($f)) {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         header('Content-type: '.finfo_file($finfo, $f));
@@ -81,7 +84,7 @@ switch ($f['type']) {
         }
         $res = DB\dbQuery($sql, array($id, $version_id)) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
-            if (!empty($r['filename']) && file_exists(FILES_PREVIEW_DIR.$r['filename'])) {
+            if (!empty($r['filename']) && file_exists($filesPreviewDir . $r['filename'])) {
                 $preview = $r;
             }
         }
@@ -96,7 +99,7 @@ switch ($f['type']) {
             $top = '';
             $tmp = Tasks::getActiveTasksBlockForPreview($id);
             if (!empty($tmp)) {
-                $top = '<div class="obj-preview-h pt10">'.L\ActiveTasks.'</div>'.$tmp;
+                $top = '<div class="obj-preview-h pt10">'.L\get('ActiveTasks').'</div>'.$tmp;
             }
             if (!empty($top)) {
                 echo //'<div class="p10">'.
@@ -106,7 +109,7 @@ switch ($f['type']) {
             }
 
             if (!empty($preview['filename'])) {
-                $fn = FILES_PREVIEW_DIR.$preview['filename'];
+                $fn = $filesPreviewDir . $preview['filename'];
                 if (file_exists($fn)) {
                     echo file_get_contents($fn);
                     $res = DB\dbQuery(

@@ -826,6 +826,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     }
 
+    /**
+     * return current vew selection
+     * @return array | null
+     */
+    ,getSelection: function() {
+        return this.cardContainer.getLayout().activeItem.currentSelection;
+    }
+
     ,onBreadcrumbItemClick: function(el, idx, ev) {
         var pt = this.folderProperties.pathtext.split('/');
         var p = this.folderProperties.path.split('/');
@@ -988,7 +996,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.buttonCollection.get('preview').toggle(true);
         b.data.pid = this.folderProperties.id;
         b.data.path = this.folderProperties.path;
-        this.objectPanel.edit(b.data);
+        this.fireEvent('createobject', Ext.apply({}, b.data));
+        // this.objectPanel.edit(b.data);
     }
 
     ,onUploadClick: function(b, e) {

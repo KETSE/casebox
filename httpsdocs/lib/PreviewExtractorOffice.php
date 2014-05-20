@@ -28,6 +28,8 @@ class PreviewExtractorOffice extends PreviewExtractor
             exit(0);
         }
 
+        $filesPreviewDir = Config::get('files_preview_dir');
+
         $sql = 'SELECT c.id `content_id`, c.path, p.status
                     ,(SELECT name
                         FROM files f
@@ -54,13 +56,13 @@ class PreviewExtractorOffice extends PreviewExtractor
             $ext = explode('.', $r['name']);
             $ext = array_pop($ext);
             $ext = strtolower($ext);
-            $fn = FILES_DIR.$r['path'].DIRECTORY_SEPARATOR.$r['content_id'];
-            $nfn = FILES_PREVIEW_DIR.$r['content_id'].'_.'.$ext;
-            $pfn = FILES_PREVIEW_DIR.$r['content_id'].'_.html';
+            $fn = Config::get('files_dir') . $r['path'].DIRECTORY_SEPARATOR.$r['content_id'];
+            $nfn = $filesPreviewDir . $r['content_id'] . '_.' . $ext;
+            $pfn = $filesPreviewDir . $r['content_id'] . '_.html';
 
             copy($fn, $nfn);
             file_put_contents($pfn, '');
-            $cmd = CONFIG\UNOCONV.' -v -f html -o '.$pfn.' '.$nfn; //.' >> '.DEBUG_LOG.' 2>&1';
+            $cmd = Config::get('UNOCONV') . ' -v -f html -o '.$pfn.' '.$nfn; //.' >> ' . Config::get('debug_log') . ' 2>&1';
             \CB\debug($cmd);
             exec($cmd);
             unlink($nfn);
@@ -70,7 +72,7 @@ class PreviewExtractorOffice extends PreviewExtractor
                     '<div style="padding: 5px">'.$this->purify(
                         file_get_contents($pfn),
                         array(
-                            'URI.Base' => '/' . CORE_NAME . '/preview/'
+                            'URI.Base' => '/' . Config::get('core_name') . '/preview/'
                             ,'URI.MakeAbsolute' => true
                         )
                     ).'</div>'

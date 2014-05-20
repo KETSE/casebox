@@ -56,6 +56,9 @@ class StringsFacet
     public function getTitle()
     {
         $rez = 'Facet';
+        $coreLanguage = \CB\Config::get('language');
+        $userLanguage = \CB\Config::get('user_language');
+
         if (!empty($this->config['title'])) {
             $t = &$this->config['title'];
             if (is_scalar($t)) {
@@ -66,10 +69,10 @@ class StringsFacet
                         $rez = $t;
                     }
                 }
-            } elseif (!empty($t[\CB\USER_LANGUAGE])) {
-                $rez = $t[\CB\USER_LANGUAGE];
-            } elseif (!empty($t[\CB\LANGUAGE])) {
-                $rez = $t[\CB\LANGUAGE];
+            } elseif (!empty($t[$userLanguage])) {
+                $rez = $t[$userLanguage];
+            } elseif (!empty($t[$coreLanguage])) {
+                $rez = $t[$coreLanguage];
             }
         }
 

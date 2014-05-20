@@ -12,6 +12,8 @@ if (empty($_GET['id'])) {
 require_once 'init.php';
 
 $user = array();
+$filesDir = Config::get('files_dir');
+
 /* check if public user is given */
 if (isset($_GET['u']) && is_numeric($_GET['u'])) {
     $res = DB\dbQuery(
@@ -74,7 +76,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
     if ($r = $res->fetch_assoc()) {
         //check if can download file
         if (!Security::canDownload($r['id'], $user['id'])) {
-            die( L\Access_denied.'!!!'.$r['id']);
+            die(L\get('Access_denied') . ', ' . $r['id']);
         }
 
         header('Content-Description: File Transfer');
@@ -87,7 +89,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
         header('Content-Length: '.$r['size']);
-        @readfile(FILES_DIR.$r['path'].DIRECTORY_SEPARATOR.$r['content_id']);
+        @readfile($filesDir . $r['path'] . DIRECTORY_SEPARATOR . $r['content_id']);
         Log::add(array('action_type' => 14, 'file_id' => $r['id']));
     }
     $res->close();
@@ -119,7 +121,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
             exit("cannot create archive\n");
         }
         foreach ($files as $f) {
-            $zip->addFile(FILES_DIR.$f['path'].DIRECTORY_SEPARATOR.$f['content_id'], $f['name']);
+            $zip->addFile($filesDir . $f['path'] . DIRECTORY_SEPARATOR . $f['content_id'], $f['name']);
         }
         $zip->close();
         header('Content-Type: application/zip; charset=UTF-8');
@@ -129,4 +131,4 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         exit(0);
     }
 }
-header('Location: '.CORE_URL);
+header('Location: ' . Config::get('core_url'));

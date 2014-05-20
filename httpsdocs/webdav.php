@@ -41,19 +41,22 @@ $rootDirectory = new \Sabre\DAV\SimpleCollection(
         )
     )
 );
+
 $server = new \Sabre\DAV\Server($rootDirectory);
 
+$coreName = Config::get('core_name');
+
 // if there is no locking file for this core, create one
-if (!is_file(TEMP_DIR . CORE_NAME . DIRECTORY_SEPARATOR.'locks')) {
-    file_put_contents(TEMP_DIR . CORE_NAME . DIRECTORY_SEPARATOR.'locks', '');
+if (!is_file(TEMP_DIR . $coreName . DIRECTORY_SEPARATOR.'locks')) {
+    file_put_contents(TEMP_DIR . $coreName . DIRECTORY_SEPARATOR.'locks', '');
 }
 
-$tempFilesPlugin = new \Sabre\DAV\TemporaryFileFilterPlugin(TEMP_DIR . CORE_NAME . DIRECTORY_SEPARATOR);
+$tempFilesPlugin = new \Sabre\DAV\TemporaryFileFilterPlugin(TEMP_DIR . $coreName . DIRECTORY_SEPARATOR);
 
 // todo Remove after LibreOffice fix bug with locking
 // LibreOffice dont remove lock when working with files, so disable locking with hope for the future
 if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice') {
-    $lockBackend = new \Sabre\DAV\Locks\Backend\File(TEMP_DIR . CORE_NAME . DIRECTORY_SEPARATOR.'locks');
+    $lockBackend = new \Sabre\DAV\Locks\Backend\File(TEMP_DIR . $coreName . DIRECTORY_SEPARATOR.'locks');
     $lockPlugin = new \Sabre\DAV\Locks\Plugin($lockBackend);
     $server->addPlugin($lockPlugin);
 }

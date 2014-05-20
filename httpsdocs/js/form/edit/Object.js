@@ -151,6 +151,7 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
         this.objectsStore.baseParams = {
             id: r.data.id
             ,template_id: r.data.template_id
+            ,data: r.data.data
         };
 
         this.startEditAfterObjectsStoreLoadIfNewObject = true;

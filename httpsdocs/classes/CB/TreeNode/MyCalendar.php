@@ -73,7 +73,7 @@ class MyCalendar extends Base
         }
         switch ($id) {
             case 1:
-                return L\MyCalendar;
+                return L\get('MyCalendar');
         }
 
         return 'none';
