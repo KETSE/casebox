@@ -57,10 +57,10 @@ border-radius: 3px;
 .form_login {width: 304px;min-height: 330px;position: absolute;top: 40%;margin-top: -195px;left: 50%;margin-left: -222px;background-color: #f5f5f5;-moz-border-radius: 6px;-webkit-border-radius: 6px;-moz-border-radius: 6px;border: 1px solid #dbe0e3;padding: 0 70px 20px;-moz-box-shadow: 0 0 20px rgba(0,0,0,0.05);-webkit-box-shadow: 0 0 20px rgba(0,0,0,0.05);box-shadow: 0 0 20px rgba(0,0,0,0.05);}
 
 .form_login input[type="text"], .form_login input[type="password"], .form_login input[type="email"]{
-    height: 38px !important;font-size: 18px !important; 
-    
+    height: 38px !important;font-size: 18px !important;
+
     color: #555 !important;  /* #c3c9ce */
-    
+
     -moz-box-shadow: 0 0 8px rgba(0,0,0,0.1);-webkit-box-shadow: 0 0 8px rgba(0,0,0,0.1);box-shadow: 0 0 8px rgba(0,0,0,0.1);padding-left: 43px;
     /* line-height: 38px; */
 }
@@ -109,3 +109,19 @@ white-space: normal;
 text-align: left !important;
 }
 
+
+.footer {
+    position: absolute;
+    /*right: 0;*/
+    font-size: 11px;
+    font-weight: normal;
+    color: #555;
+    /*background: #fff;*/
+    padding: 20px;
+    bottom: 10px;
+    /*width: 100%;*/
+}
+
+.footer a {
+    color: #777;
+}
