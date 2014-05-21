@@ -419,6 +419,43 @@ class Object extends OldObject
     }
 
     /**
+     * restore a deleted object
+     * @return void
+     */
+    public function restore()
+    {
+        \CB\fireEvent('beforeNodeDbRestore', $this);
+
+        DB\dbQuery(
+            'UPDATE tree
+            SET did = NULL
+                ,dstatus = 0
+                ,ddate = NULL
+                ,updated = (updated | 1)
+            WHERE id = $1',
+            $this->id
+        ) or die(DB\dbQueryError());
+
+        DB\dbQuery('CALL p_mark_all_childs_as_active($1)', $this->id) or die(DB\dbQueryError());
+
+        $this->restoreCustomData();
+
+        \CB\fireEvent('nodeDbRestore', $this);
+    }
+
+    /**
+     * restore custom data for an object
+     *
+     * use this method (overwrite it) for descendant classes
+     * when there is need to restore custom data on object restore
+     * @return coid
+     */
+    protected function restoreCustomData()
+    {
+
+    }
+
+    /**
      * get a field value from current objects data ($this->data)
      *
      * This function return an array of values for duplicate fields

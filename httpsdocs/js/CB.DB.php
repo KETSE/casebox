@@ -272,14 +272,19 @@ createDirectStores = function(){
         ,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
         ,getName: getStoreTitles
         ,getIcon: function(id){
-            idx = this.findExact('id', parseInt(id))
+            var idx = this.findExact('id', parseInt(id))
 
             return (idx >=0 ) ? this.getAt(idx).get('iconCls') : '';
         }
         ,getType: function(id){
-            idx = this.findExact('id', parseInt(id, 10))
+            var idx = this.findExact('id', parseInt(id, 10))
 
             return (idx >=0 ) ? this.getAt(idx).get('type') : '';
+        }
+        ,getProperty: function(templateId, propertyName) {
+            var idx = this.findExact('id', parseInt(templateId, 10))
+
+            return (idx >=0 ) ? this.getAt(idx).get(propertyName) : '';
         }
 
     });

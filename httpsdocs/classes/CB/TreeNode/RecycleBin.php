@@ -32,7 +32,7 @@ class RecycleBin extends Base
 
     protected function createDefaultFilter()
     {
-        $this->fq = array();
+        $this->fq = array('did:'.$_SESSION['user']['id']);
     }
 
     public function getChildren(&$pathArray, $requestParams)

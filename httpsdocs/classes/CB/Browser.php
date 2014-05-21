@@ -26,8 +26,13 @@ class Browser
 
         //the navigation goes from search results. We should get the real path of the node
         if (!empty($p['lastQuery']) && empty($p['query'])) {
-            $a = Util\toNumericArray($p['path'], '/');
-            $p['path'] = Path::getPath(array_pop($a))['path'];
+            while (substr($path, -1) == '/') {
+                $path = substr($path, 0, strlen($path) -1);
+            }
+            $a = explode('/', $path);
+            if (!empty($a) && is_numeric($a[sizeof($a)-1])) {
+                $p['path'] = Path::getPath(array_pop($a))['path'];
+            }
         }
 
         $this->showFoldersContent = isset($p['showFoldersContent'])
@@ -586,6 +591,43 @@ class Browser
         foreach ($ids as $id) {
             $obj = Objects::getCustomClassByObjectId($id);
             $obj->delete();
+        }
+
+        Solr\Client::runCron();
+
+        return array('success' => true, 'ids' => $ids);
+    }
+
+    public function restore($paths)
+    {
+        if (!is_array($paths)) {
+            $paths = array($paths);
+        }
+        /* collecting ids from paths */
+        $ids = array();
+        foreach ($paths as $path) {
+            $id = explode('/', $path);
+            $id = array_pop($id);
+            if (!is_numeric($id)) {
+                return array('success' => false);
+            }
+            if (!Security::canDelete($id)) {
+                throw new \Exception(L\get('Access_denied'));
+            }
+            $ids[] = intval($id);
+        }
+        if (empty($ids)) {
+            return array('success' => false);
+        }
+
+        /* before deleting we should check security for specified paths and all children */
+
+        /* if access is granted then setting dstatus=0 for specified ids
+        all their children /**/
+
+        foreach ($ids as $id) {
+            $obj = Objects::getCustomClassByObjectId($id);
+            $obj->restore();
         }
 
         Solr\Client::runCron();
