@@ -1,8 +1,6 @@
 <?php
 namespace CB;
 
-use CB\CONFIG as CONFIG;
-
 header('content-type: text/javascript; charset=utf-8');
 require_once '../init.php';
 DB\connect();
@@ -78,7 +76,7 @@ $data = array(
     CB.DB.roles = new Ext.data.ArrayStore({
         idIndex: 0
         ,fields: [{name: 'id', type: 'int'}, 'name']
-        ,data:  [<?php echo '[1, "'.L\Administrator.'"], [2, "'.L\Manager.'"], [3, "'.L\Lawyer.'"], [4, "'.L\User.'"]'; ?>]
+        ,data:  [<?php echo '[1, "'.L\get('Administrator').'"], [2, "'.L\get('Manager').'"], [3, "'.L\get('Lawyer').'"], [4, "'.L\get('User').'"]'; ?>]
     });
     CB.DB.importance = new Ext.data.ArrayStore({
         idIndex: 0
@@ -95,8 +93,9 @@ $data = array(
 <?php
 
 $data = array();
-if (defined('CB\\CONFIG\\TEMPLATEICONS')) {
-    $data = explode(',', CONFIG\TEMPLATEICONS);
+$templateIcons = Config::get('templateicons');
+if (!empty($templateIcons)) {
+    $data = explode(',', $templateIcons);
     $data = implode("\n", $data);
     $data = str_replace("\r\n", "\n", $data);
     $data = explode("\n", $data);
@@ -107,10 +106,13 @@ if (defined('CB\\CONFIG\\TEMPLATEICONS')) {
 echo 'CB.DB.templatesIconSet = new Ext.data.ArrayStore({ idIndex: 0,fields: ["id","name"], data: '. json_encode($data, JSON_UNESCAPED_UNICODE).'});';
 
 /* languages */
+$coreLanguages = Config::get('languages');
+$languageSettings = Config::get('language_settings');
+
 $arr = array();
-for ($i=0; $i < sizeof($GLOBALS['languages']); $i++) {
-    $lang = &$GLOBALS['language_settings'][$GLOBALS['languages'][$i]];
-    $lp = array($i+1, $GLOBALS['languages'][$i], $lang['name'], $lang['long_date_format'], $lang['short_date_format'], $lang['time_format'] );
+for ($i=0; $i < sizeof($coreLanguages); $i++) {
+    $lang = $languageSettings[$coreLanguages[$i]];
+    $lp = array($i+1, $coreLanguages[$i], $lang['name'], $lang['long_date_format'], $lang['short_date_format'], $lang['time_format'] );
     for ($j=0; $j < sizeof($lp); $j++) {
         $lp[$j] = str_replace(array('%', '\/'), array('', '/'), $lp[$j]);
     }
@@ -126,12 +128,14 @@ echo "\n".'CB.DB.languages = new Ext.data.ArrayStore({'.
 /* Security questions */
 $arr = array();
 for ($i=0; $i < 10; $i++) {
-    if (defined('CB\\L\\SecurityQuestion'.$i)) {
-        $arr[] = array($i, constant('CB\\L\\'.'SecurityQuestion'.$i));
+    $sq = L\get('SecurityQuestion' . $i);
+    if (!empty($sq)) {
+        $arr[] = array($i, $sq);
     }
 }
-if (defined('CB\\L\\OwnSecurityQuestion')) {
-    $arr[] = array( -1 , constant('CB\\L\\'.'OwnSecurityQuestion') );
+$osq = L\get('OwnSecurityQuestion');
+if (!empty($osq)) {
+    $arr[] = array( -1 , $osq);
 }
 echo "\n".'CB.DB.securityQuestions = new Ext.data.ArrayStore({'.
     'fields: [{name: "id", type: "int"}, "text"]'.
@@ -268,14 +272,19 @@ createDirectStores = function(){
         ,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
         ,getName: getStoreTitles
         ,getIcon: function(id){
-            idx = this.findExact('id', parseInt(id))
+            var idx = this.findExact('id', parseInt(id))
 
             return (idx >=0 ) ? this.getAt(idx).get('iconCls') : '';
         }
         ,getType: function(id){
-            idx = this.findExact('id', parseInt(id, 10))
+            var idx = this.findExact('id', parseInt(id, 10))
 
             return (idx >=0 ) ? this.getAt(idx).get('type') : '';
+        }
+        ,getProperty: function(templateId, propertyName) {
+            var idx = this.findExact('id', parseInt(templateId, 10))
+
+            return (idx >=0 ) ? this.getAt(idx).get(propertyName) : '';
         }
 
     });

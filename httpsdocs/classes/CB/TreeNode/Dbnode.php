@@ -35,10 +35,12 @@ class Dbnode extends Base
 
         $p = &$requestParams;
 
+        $folderTemplates = \CB\Config::get('folder_templates');
+
         $p['fl'] = 'id,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls,status,task_status';
 
         if (empty($p['showFoldersContent'])) {
-            $p['templates'] = $GLOBALS['folder_templates'];
+            $p['templates'] = $folderTemplates;
         }
 
         if (empty($p['descendants'])) {
@@ -60,7 +62,7 @@ class Dbnode extends Base
                          WHERE pid = $1
                              AND dstatus = 0'.
                     ( empty($p['showFoldersContent'])
-                        ? ' AND `template_id` IN (0'.implode(',', $GLOBALS['folder_templates']).')'
+                        ? ' AND `template_id` IN (0'.implode(',', $folderTemplates).')'
                         : ''
                     )
                     .' LIMIT 1) has_childs
@@ -121,6 +123,7 @@ class Dbnode extends Base
                 ,t.`system`
                 ,ti.`case_id`
                 ,t.`template_id`
+                ,t.`dstatus`
                 ,tt.`type` template_type
             FROM tree t
             JOIN tree_info ti on t.id = ti.id

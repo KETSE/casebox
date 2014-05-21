@@ -1,12 +1,37 @@
 <?php
 namespace CB;
 
-$cron_id = 'check_core_email';
-$execution_timeout = 60; //default is 60 seconds
+/**
+ * this script is intended to be executed directly and it processes all cores at once
+ * retreiving all comment mails from common or particulat mail for each core
+ */
 
-require_once 'init.php';
+//init
+ini_set('max_execution_time', 300);
 
+error_reporting(E_ALL);
+
+$_SERVER['REMOTE_ADDR'] = 'localhost';
+
+$_SESSION['user'] = array(
+    'id' => 1
+    ,'name' => 'system'
+);
+
+$site_path = realpath(
+    dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.
+    DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'httpsdocs'
+).DIRECTORY_SEPARATOR;
+
+include $site_path.DIRECTORY_SEPARATOR.'config.php';
+
+require_once LIB_DIR.'Util.php';
+
+require_once(DOC_ROOT.'language.php');
+
+// ~~~~~~~~~~~~~~~~~~~~~ ZEND INITIALIZATION BLOCK ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 $zendPath = Config::get('ZEND_PATH');
+
 require_once $zendPath.'/Zend/Loader/StandardAutoloader.php';
 
 require_once 'mail_functions.php';
@@ -26,24 +51,28 @@ $loader->registerNamespace('Zend', $zendPath.'/Zend');
 
 /** TO START AUTOLOADING */
 $loader->register();
+// ~~~~~~~~~~~~~~~~~~~~~ end of ZEND INITIALIZATION BLOCK ~~~~~~~~~~~~~~~~~~~~~
 
 $mail_requirements = "
 Mail requirements are:
-    1. Subject of email should contain target folder in the following format: <Message title> (/target/folder)
-    2. target folder should exist in the database.
-    3. Your email address should be specified in your casebox user profile.
+    1. Subject of email : [$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
+    2. target nodeId should exist in the database.
+    3. email address should be specified in casebox user profile.
 
-    If at least one condition is not satisfied then the email would not be processed and is deleted automatically.
+    If at least one condition is not satisfied then the email would not be processed and deleted automatically.
 ";
 
-// skip core if no email is set in config
-if (!defined('config\mail_user')) {
+// skip core if no comments config defined
+$cfg = Config::get('comments_config');
+
+if (empty($cfg)) {
     exit();
 }
 
-echo " (".config\mail_user.") ...";
+echo " (".$cfg['email'].") ...";
 
 $cd = prepareCron($cron_id, $execution_timeout);
+
 if (!$cd['success']) {
     echo "\nFailed to prepare cron\n";
     exit(); //skip this core if cron preparation fails
@@ -52,14 +81,14 @@ if (!$cd['success']) {
 /* check if this core has an email template defined */
 $email_template_id = false;
 
-$res = DB\dbQuery('SELECT id FROM templates WHERE `type` = \'email\'') or die(DB\dbQueryError());
+$res = DB\dbQuery('SELECT id FROM templates WHERE `type` = \'comment\'') or die(DB\dbQueryError());
 if ($r = $res->fetch_assoc()) {
     $email_template_id = $r['id'];
 }
 $res->close();
 
 if (!$email_template_id) {
-    echo " there is no Email template defined in this core.\n";
+    echo " there is no Comment template defined in this core.\n";
     continue;
 }
 /* end of check if this core has an email template defined */

@@ -3,6 +3,7 @@ Ext.namespace('CB');
 CB.ViewPort = Ext.extend(Ext.Viewport, {
     layout: 'border'
     ,hideBorders: true
+
     ,initComponent: function(){
         App.mainToolBar = new Ext.Toolbar({
                 region: 'north'
@@ -164,6 +165,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,'objectopened'
         );
         CB.ViewPort.superclass.initComponent.apply(this, arguments);
+
     }
     ,onLogin: function(){
         /* adding menu items */
@@ -278,6 +280,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             }
         });
     }
+
     ,populateMainMenu: function(){
         App.mainAccordion.add({
             xtype: 'CBBrowserTree'
@@ -314,6 +317,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
         App.mainTabPanel.setActiveTab(0);
     }
+
     ,selectTreeRootNode: function() {
         if(App.mainTree && App.explorer) {
             if(App.mainTree.rendered) {
@@ -322,6 +326,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             }
         }
     }
+
     ,onTreeNodeClick: function(node, e){
         if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) {
             return;
@@ -331,6 +336,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             this.onChangeActiveFolder(null, node);
         }
     }
+
     ,onChangeActiveFolder: function(sm, node){
         if( this.pathSelectionByViewport ||
             Ext.isEmpty(node) ||
@@ -344,8 +350,10 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                 ? 'grid'
                 : node.attributes.view
         };
-        App.openPath( '/' + node.getPath('nid'), params );
+
+        App.openPath( node.getPath('nid'), params );
     }
+
     ,onRenameTreeElement: function(tree, r, e){
         node = tree.getSelectionModel().getSelectedNode();
         if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
@@ -354,6 +362,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             tab.onReloadClick();
         }
     }
+
     ,selectGridObject: function(g){
         if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) {
             return;
@@ -372,14 +381,17 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             delete App.locateObjectId;
         }
     }
+
     ,onAccordionLinkClick: function(p, animate){
         p = App.openUniqueTabbedWidget(p.link, null, {iconCls: p.iconCls, title: p.title});
         return false;
     }
+
     ,openCalendar: function(ev){
         if(ev && ev. stopPropagation) ev.stopPropagation();
         App.openUniqueTabbedWidget('CBCalendarPanel');
     }
+
     ,openDefaultExplorer: function(rootId){
         if(Ext.isEmpty(rootId)) {
             rootId = Ext.value( App.mainTree.rootId, '/' );
@@ -456,6 +468,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             }
         }, this);
     }
+
     ,processSetUserLanguage: function(r, e){
         if(r.success === true) {
             document.location.reload();
@@ -463,21 +476,26 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             Ext.Msg.Alert(L.Error, L.ErrorOccured);
         }
     }
+
     ,toggleFavorite: function(p){
         CB_Browser.toggleFavorite(p, this.processToggleFavorite, this);
     }
+
     ,processToggleFavorite: function(r, e){
         this.fireEvent('favoritetoggled', r, e);
     }
+
 
     ,focusLastElement: function(){
         if(this.lastFocusedElement){
             this.lastFocusedElement.focus(500);
         }
     }
+
     ,onUsersChange: function(){
         CB.DB.usersStore.reload();
     }
+
     ,onDeleteObject: function(data){
         Ext.Msg.confirm(
             L.DeleteConfirmation
@@ -491,6 +509,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         );
 
     }
+
     ,onProcessObjectsDeleted: function(r, e){
         if(r.success !== true) {
             return;
@@ -499,6 +518,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             this.fireEvent('objectsdeleted', r.ids, e);
         }
     }
+
     ,onFileUpload: function(data, e){
         if(e) e.stopPropagation();
 
@@ -507,9 +527,11 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         w.on('hide', function(w){ w.un('submitsuccess', this.onFileUploaded, this); }, this);
         w.show();/**/
     }
+
     ,onFileUploaded: function(w, data){
         this.fireEvent('fileuploaded', {data: data});
     }
+
     ,onFilesDownload: function(ids, zipped, e){
         if(e) e.stopPropagation();
         if(zipped !== true){
@@ -520,10 +542,12 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             App.downloadFile(ids, true);
         }
     }
+
     ,toggleWestRegion: function(visible){
         App.mainAccordion.setVisible(visible === true);
         App.mainViewPort.syncSize();
     }
+
     ,onViewLoaded: function(proxy, action, options) {
         var trees  = App.mainAccordion.findByType(CB.browser.Tree);
         var activeTree = null;

@@ -21,10 +21,10 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
     $u = strtolower(trim($_POST['u']));
     $p = $_POST['p'];
     if (empty($u)) {
-        $errors[] = L\Specify_username;
+        $errors[] = L\get('Specify_username');
     }
     if (empty($p)) {
-        $errors[] = L\Specify_password;
+        $errors[] = L\get('Specify_password');
     }
 
     if (empty($errors)) {
@@ -32,7 +32,7 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
         $user = new User();
         $r = $user->Login($u, $p);
         if ($r['success'] == false) {
-            $errors[] = L\Auth_fail;
+            $errors[] = L\get('Auth_fail');
         } else {
             $cfg = $user->getTSVConfig();
             if (!empty($cfg['method'])) {
@@ -58,8 +58,10 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
     }
 }
 
+$coreUrl = Config::get('core_url');
+
 if (!User::isLoged()) {
-    exit(header('Location: '.CORE_URL.'login.php'));
+    exit(header('Location: '.$coreUrl.'login.php'));
 }
 
-header('Location: '.CORE_URL.'index.php');
+header('Location: '.$coreUrl.'index.php');

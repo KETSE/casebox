@@ -31,7 +31,7 @@ class Collection
                 ,pid
                 ,template_id
                 ,name
-                ,l'.\CB\USER_LANGUAGE_INDEX.' `title`
+                ,l' . \CB\Config::get('user_language_index') . ' `title`
                 ,`type`
                 ,cfg
                 ,solr_column_name

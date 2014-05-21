@@ -36,7 +36,7 @@ if (!in_array(
         )
 )) {
     if (($_SERVER['SCRIPT_NAME'] != '/auth.php') && !User::isLoged()) {
-        header('Location: '.CORE_URL.'login.php');
+        header('Location: ' . Config::get('core_url') . 'login.php');
         exit(0);
     }
 }
@@ -56,11 +56,13 @@ L\initTranslations();
 /* verify required CaseBox folder existance */
 $required_folders = array(
     MINIFY_CACHE_DIR
-    ,UPLOAD_TEMP_DIR
-    ,INCOMMING_FILES_DIR
-    ,FILES_PREVIEW_DIR
-    ,PHOTOS_PATH
+    ,Config::get('files_dir')
+    ,Config::get('files_preview_dir')
+    ,Config::get('incomming_files_dir')
+    ,Config::get('upload_temp_dir')
+    ,Config::get('photos_path')
 );
+
 foreach ($required_folders as $rfp) {
     if (!file_exists($rfp)) {
         @mkdir($rfp, 0750, true);

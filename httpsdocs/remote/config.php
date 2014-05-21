@@ -14,6 +14,7 @@ $API = array_merge(
                 ,'confirmUploadRequest' => array('len' => 1)
                 ,'uploadNewVersion'     => array('len' => 1, 'formHandler' => true)
                 ,'delete'               => array('len' => 1)
+                ,'restore'              => array('len' => 1)
                 ,'toggleFavorite'       => array('len' => 1)
                 ,'takeOwnership'        => array('len' => 1)
                 ,'getObjectsForField'   => array('len' => 1)

@@ -510,7 +510,9 @@ function initApp(){
     * this function will not reset explorer navigation params (filters, search query, descendants)
     */
     App.openPath = function(path, params){
-        if(Ext.isEmpty(path)) path = '/';
+        if(Ext.isEmpty(path)) {
+            path = '/';
+        }
         params = Ext.value(params, {});
         params.path = path;
         params.query = null;

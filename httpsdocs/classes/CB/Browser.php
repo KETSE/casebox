@@ -26,8 +26,13 @@ class Browser
 
         //the navigation goes from search results. We should get the real path of the node
         if (!empty($p['lastQuery']) && empty($p['query'])) {
-            $a = Util\toNumericArray($p['path'], '/');
-            $p['path'] = Path::getPath(array_pop($a))['path'];
+            while (substr($path, -1) == '/') {
+                $path = substr($path, 0, strlen($path) -1);
+            }
+            $a = explode('/', $path);
+            if (!empty($a) && is_numeric($a[sizeof($a)-1])) {
+                $p['path'] = Path::getPath(array_pop($a))['path'];
+            }
         }
 
         $this->showFoldersContent = isset($p['showFoldersContent'])
@@ -485,11 +490,11 @@ class Browser
 
         /* check security access */
         if (!Security::canCreateFolders($pid)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         /* find default folder name */
-        $newFolderName = L\NewFolder;
+        $newFolderName = L\get('NewFolder');
         $existing_names = array();
         $res = DB\dbQuery(
             'SELECT name
@@ -508,7 +513,7 @@ class Browser
         $res->close();
         $i = 1;
         while (in_array($newFolderName, $existing_names)) {
-            $newFolderName = L\NewFolder.' ('.$i.')';
+            $newFolderName = L\get('NewFolder').' ('.$i.')';
             $i++;
         }
         /* end of find default folder name */
@@ -534,7 +539,7 @@ class Browser
                 ,$_SESSION['user']['id']
                 ,1
                 ,$newFolderName
-                ,CONFIG\DEFAULT_FOLDER_TEMPLATE
+                ,Config::get('default_folder_template')
             )
         ) or die(DB\dbQueryError());
         $id = DB\dbLastInsertId();
@@ -570,7 +575,7 @@ class Browser
                 return array('success' => false);
             }
             if (!Security::canDelete($id)) {
-                throw new \Exception(L\Access_denied);
+                throw new \Exception(L\get('Access_denied'));
             }
             $ids[] = intval($id);
         }
@@ -593,6 +598,43 @@ class Browser
         return array('success' => true, 'ids' => $ids);
     }
 
+    public function restore($paths)
+    {
+        if (!is_array($paths)) {
+            $paths = array($paths);
+        }
+        /* collecting ids from paths */
+        $ids = array();
+        foreach ($paths as $path) {
+            $id = explode('/', $path);
+            $id = array_pop($id);
+            if (!is_numeric($id)) {
+                return array('success' => false);
+            }
+            if (!Security::canDelete($id)) {
+                throw new \Exception(L\get('Access_denied'));
+            }
+            $ids[] = intval($id);
+        }
+        if (empty($ids)) {
+            return array('success' => false);
+        }
+
+        /* before deleting we should check security for specified paths and all children */
+
+        /* if access is granted then setting dstatus=0 for specified ids
+        all their children /**/
+
+        foreach ($ids as $id) {
+            $obj = Objects::getCustomClassByObjectId($id);
+            $obj->restore();
+        }
+
+        Solr\Client::runCron();
+
+        return array('success' => true, 'ids' => $ids);
+    }
+
     public function rename($p)
     {
         $id = explode('/', $p['path']);
@@ -605,7 +647,7 @@ class Browser
 
         /* check security access */
         if (!Security::canWrite($id)) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         DB\dbQuery(
@@ -663,6 +705,7 @@ class Browser
     public function getNewCopyName($pid, $name, $excludeExtension = false)
     {
         $ext = '';
+
         if ($excludeExtension) {
             $a = explode('.', $name);
             if (sizeof($a) > 1) {
@@ -675,7 +718,7 @@ class Browser
         $i = 0;
         $newName = '';
         do {
-            $newName = L\CopyOf.' '.$name.( ($i > 0) ? ' ('.$i.')' : '').$ext;
+            $newName = L\get('CopyOf').' '.$name.( ($i > 0) ? ' ('.$i.')' : '').$ext;
             $res = DB\dbQuery(
                 'SELECT id
                 FROM tree
@@ -698,8 +741,10 @@ class Browser
 
     public function saveFile($p)
     {
-        if (!file_exists(INCOMMING_FILES_DIR)) {
-            @mkdir(INCOMMING_FILES_DIR, 0777, true);
+        $incommingFilesDir = Config::get('incomming_files_dir');
+
+        if (!file_exists($incommingFilesDir)) {
+            @mkdir($incommingFilesDir, 0777, true);
         }
 
         $files = new Files();
@@ -707,14 +752,14 @@ class Browser
         /* clean previous unhandled uploads if any */
         $a = $files->getUploadParams();
         if (($a !== false) && !empty( $a['files'] )) {
-            @unlink(INCOMMING_FILES_DIR.$_SESSION['key']);
+            @unlink($incommingFilesDir . $_SESSION['key']);
             $files->removeIncomingFiles($a['files']);
         }
         /* end of clean previous unhandled uploads if any */
 
         $F = &$_FILES;
         if (empty($p['pid'])) {
-            return array('success' => false, 'msg' => L\Error_uploading_file);
+            return array('success' => false, 'msg' => L\get('Error_uploading_file'));
         }
         $p['pid'] = Path::detectRealTargetId($p['pid']);
 
@@ -731,7 +776,7 @@ class Browser
         }
 
         //if ( !$files->fileExists($p['pid']) ) {
-        //  return array('success' => false, 'msg' => L\TargetFolderDoesNotExist);
+        //  return array('success' => false, 'msg' => L\get('TargetFolderDoesNotExist'));
         //  }
         $res = DB\dbQuery(
             'SELECT id FROM tree WHERE id = $1',
@@ -740,14 +785,14 @@ class Browser
         if ($r = $res->fetch_assoc()) {
 
         } else {
-            return array('success' => false, 'msg' => L\TargetFolderDoesNotExist);
+            return array('success' => false, 'msg' => L\get('TargetFolderDoesNotExist'));
         }
         $res->close();
 
         /*checking if there is no upload error (for any type of upload: single, multiple, archive) */
         foreach ($F as $fn => $f) {
             if (!in_array($f['error'], array(UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE))) {
-                return array('success' => false, 'msg' => L\Error_uploading_file .': '.$f['error']);
+                return array('success' => false, 'msg' => L\get('Error_uploading_file') .': '.$f['error']);
             }
         }
 
@@ -762,7 +807,7 @@ class Browser
                 $F = $archiveFiles;
                 break;
             default:
-                $files->moveUploadedFilesToIncomming($F) or die('cannot move file to incomming '.INCOMMING_FILES_DIR);
+                $files->moveUploadedFilesToIncomming($F) or die('cannot move file to incomming ' . $incommingFilesDir);
                 break;
         }
 
@@ -795,13 +840,13 @@ class Browser
                     str_replace(
                         '{filename}',
                         '"'.$p['existentFilenames'][0]['name'].'"',
-                        L\FilenameExistsInTarget
+                        L\get('FilenameExistsInTarget')
                     )
                     : $p['existentFilenames'][0]['msg'];
                 //$rez['filename'] = $p['existentFilenames'][0]['name'];
                 $rez['suggestedFilename'] = $p['existentFilenames'][0]['suggestedFilename'];
             } else {
-                $rez['msg'] = L\SomeFilenamesExistsInTarget;
+                $rez['msg'] = L\get('SomeFilenamesExistsInTarget');
             }
 
             return $rez;
@@ -826,7 +871,7 @@ class Browser
                 $a['newName'] = $p['newName'];
                 //check if the new name does not also exist
                 if (empty($a['response'])) {
-                    return array('success' => false, 'msg' => L\FilenameCannotBeEmpty);
+                    return array('success' => false, 'msg' => L\get('FilenameCannotBeEmpty'));
                 }
                 reset($a['files']);
                 $k = key($a['files']);
@@ -840,7 +885,7 @@ class Browser
                         //,'filename' => $a['newName']
                         ,'allow_new_version' => (Files::getMFVC($a['newName']) > 0)
                         ,'suggestedFilename' => Objects::getAvailableName($a['pid'], $a['newName'])
-                        ,'msg' => str_replace('{filename}', '"'.$a['newName'].'"', L\FilenameExistsInTarget)
+                        ,'msg' => str_replace('{filename}', '"'.$a['newName'].'"', L\get('FilenameExistsInTarget'))
                     );
                 }
                 // $files->storeFiles($a);
@@ -907,7 +952,7 @@ class Browser
         if ($f['error'] != UPLOAD_ERR_OK) {
             return array(
                 'success' => false
-                ,'msg' => L\Error_uploading_file .': '.$f['error']
+                ,'msg' => L\get('Error_uploading_file') .': '.$f['error']
             );
         }
 
@@ -1049,7 +1094,7 @@ class Browser
                     ,1
                     ,1
                     ,$1)',
-                CONFIG\DEFAULT_FOLDER_TEMPLATE
+                Config::get('default_folder_template')
             ) or die( DB\dbQueryError() );
 
             $id = DB\dbLastInsertId();
@@ -1171,7 +1216,7 @@ class Browser
             WHERE pid = $1
                 AND dstatus = 0'.
             ( empty($this->showFoldersContent) ?
-                ' AND `template_id` IN (0'.implode(',', $GLOBALS['folder_templates']).')'
+                ' AND `template_id` IN (0'.implode(',', Config::get('folder_templates')).')'
                 : ''
             );
 
@@ -1216,29 +1261,29 @@ class Browser
                             $d['name'] = L\getTranslationIfPseudoValue($d['name']);
                             break;
                         case 2:
-                            $d['name'] = L\MyCaseBox;
+                            $d['name'] = L\get('MyCaseBox');
                             break;
                         case 3:
-                            $d['name'] = L\MyDocuments;
+                            $d['name'] = L\get('MyDocuments');
                             break;
                         case 4:
-                            $d['name'] = L\Cases;
+                            $d['name'] = L\get('Cases');
                             break;
                         case 5:
-                            $d['name'] = L\Tasks;
+                            $d['name'] = L\get('Tasks');
                             break;
                         case 6:
-                            $d['name'] = L\Messages;
+                            $d['name'] = L\get('Messages');
                             break;
                         //case 7:
-                        //  $d['name'] = L\RecycleBin;
+                        //  $d['name'] = L\get('RecycleBin');
                         //  break;
                         case 8:
                             break;
                         case 9:
                             break;
                         case 10:
-                            $d['name'] = L\PublicFolder;
+                            $d['name'] = L\get('PublicFolder');
                             break;
                         default:
                             break;
@@ -1285,7 +1330,7 @@ class Browser
 
         switch ($templateData['type']) {
             case 'object':
-                if (in_array($data['template_id'], $GLOBALS['folder_templates'])) {
+                if (in_array($data['template_id'], Config::get('folder_templates'))) {
                     return 'icon-folder';
                 }
                 break;

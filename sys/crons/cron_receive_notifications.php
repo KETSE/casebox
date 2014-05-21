@@ -6,7 +6,9 @@ $execution_timeout = 60; //default is 60 seconds
 
 require_once 'init.php';
 
-require_once CONFIG\ZEND_PATH.'/Zend/Loader/StandardAutoloader.php';
+$zendPath = Config::get('ZEND_PATH');
+
+require_once $zendPath.'/Zend/Loader/StandardAutoloader.php';
 
 require_once 'mail_functions.php';
 
@@ -14,14 +16,14 @@ require_once 'mail_functions.php';
 $loader = new \Zend\Loader\StandardAutoloader(
     array(
         // absolute directory
-        'Zend' => CONFIG\ZEND_PATH.'/Zend'
+        'Zend' => $zendPath.'/Zend'
     )
 );
 /** AFTER INSTANTIATION **/
 $loader = new \Zend\Loader\StandardAutoloader();
 
 // the path can be absolute or relative below:
-$loader->registerNamespace('Zend', CONFIG\ZEND_PATH.'/Zend');
+$loader->registerNamespace('Zend', $zendPath.'/Zend');
 
 /** TO START AUTOLOADING */
 $loader->register();
@@ -36,8 +38,8 @@ Mail requirements are:
 ";
 
 // skip core if no email is set in config
-$email = Config::get('SENDER_EMAIL');
-$email_pass = Config::get('SENDER_EMAIL_PASSWD');
+$email = Config::get('sender_email');
+$email_pass = Config::get('sender_email_passwd');
 
 if (empty($email)) {
     exit();

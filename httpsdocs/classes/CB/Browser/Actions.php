@@ -59,14 +59,14 @@ class Actions
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            return L\CannotCopyObjectToItself;
+            return L\get('CannotCopyObjectToItself');
         }
         $res->close();
         /* end of dummy check if not pasting an object over itself */
 
         /* dummy check if not copying inside a child of sourceIds */
         if (in_array($p['targetId'], $p['sourceIds'])) {
-            return L\CannotCopyObjectInsideItself;
+            return L\get('CannotCopyObjectInsideItself');
         }
 
         $res = DB\dbQuery(
@@ -80,7 +80,7 @@ class Actions
             $pids = explode(',', $r['pids']);
             foreach ($p['sourceIds'] as $sourceId) {
                 if (in_array($sourceId, $pids)) {
-                    return L\CannotCopyObjectInsideItself;
+                    return L\get('CannotCopyObjectInsideItself');
                 }
             }
         }
@@ -141,7 +141,7 @@ class Actions
     public function copy($p)
     {
         if (!$this->validateParams($p)) {
-            return array('success' => false, 'msg' => L\ErroneousInputData);
+            return array('success' => false, 'msg' => L\get('ErroneousInputData'));
         }
 
         $msg = $this->trivialChecks($p);
@@ -152,7 +152,7 @@ class Actions
         /* security checks */
         foreach ($p['sourceIds'] as $sourceId) {
             if (!\CB\Security::canRead($sourceId)) {
-                return array('success' => false, 'msg' => L\Access_denied);
+                return array('success' => false, 'msg' => L\get('Access_denied'));
             }
         }
         /* there could be a situation when overwriting existing objects
@@ -160,7 +160,7 @@ class Actions
             those existing objects
         */
         if (!\CB\Security::canWrite($p['targetId'])) {
-            return array('success' => false, 'msg' => L\Access_denied);
+            return array('success' => false, 'msg' => L\get('Access_denied'));
         }
         /* end of security checks */
 
@@ -169,7 +169,7 @@ class Actions
                 return array(
                     'success' => false,
                     'confirm' => true,
-                    'msg' => L\ConfirmOverwriting
+                    'msg' => L\get('ConfirmOverwriting')
                 );
             }
         }
@@ -192,7 +192,7 @@ class Actions
     public function move($p)
     {
         if (!$this->validateParams($p)) {
-            return array('success' => false, 'msg' => L\ErroneousInputData);
+            return array('success' => false, 'msg' => L\get('ErroneousInputData'));
         }
 
         $msg = $this->trivialChecks($p);
@@ -203,11 +203,11 @@ class Actions
         /* security checks */
         foreach ($p['sourceIds'] as $sourceId) {
             if (!\CB\Security::canRead($sourceId)) {
-                return array('success' => false, 'msg' => L\Access_denied);
+                return array('success' => false, 'msg' => L\get('Access_denied'));
             }
         }
         if (!\CB\Security::canWrite($p['targetId'])) {
-            return array('success' => false, 'msg' => L\Access_denied);
+            return array('success' => false, 'msg' => L\get('Access_denied'));
         }
         /* end of security checks */
 
@@ -216,7 +216,7 @@ class Actions
                 return array(
                     'success' => false,
                     'confirm' => true,
-                    'msg' => L\ConfirmOverwriting
+                    'msg' => L\get('ConfirmOverwriting')
                 );
             }
         }
@@ -280,7 +280,7 @@ class Actions
             $this->objectsClass = new \CB\Objects();
             $rez = $this->doRecursiveAction($action, $accessibleIds, $targetId);
         } else {
-            throw new \Exception(L\Access_denied, 1);
+            throw new \Exception(L\get('Access_denied'), 1);
         }
 
         DB\commitTransaction();
@@ -369,16 +369,16 @@ class Actions
     public function shortcut($p)
     {
         if (!$this->validateParams($p)) {
-            return array('success' => false, 'msg' => L\ErroneousInputData);
+            return array('success' => false, 'msg' => L\get('ErroneousInputData'));
         }
         /* security checks */
         foreach ($p['sourceIds'] as $sourceId) {
             if (!\CB\Security::canRead($sourceId)) {
-                return array('success' => false, 'msg' => L\Access_denied);
+                return array('success' => false, 'msg' => L\get('Access_denied'));
             }
         }
         if (!\CB\Security::canWrite($p['targetId'])) {
-            return array('success' => false, 'msg' => L\Access_denied);
+            return array('success' => false, 'msg' => L\get('Access_denied'));
         }
         $rez = $this->doCreateShortcut($p);
 

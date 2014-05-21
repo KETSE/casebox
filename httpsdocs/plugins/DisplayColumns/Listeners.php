@@ -59,6 +59,7 @@ class Listeners
         }
 
         $displayColumns = $this->class->getCustomDisplayColumns($pid, $templateId);
+        $userLanguage = \CB\Config::get('user_language');
 
         if (!empty($displayColumns)) {
             //set custom display columns data
@@ -77,8 +78,8 @@ class Listeners
                 foreach ($customColumns as $fieldName => &$col) {
                     $customField = $fieldName;
 
-                    if (!empty($col['field_'.\CB\USER_LANGUAGE])) {
-                        $customField = $col['field_'.\CB\USER_LANGUAGE];
+                    if (!empty($col['field_' . $userLanguage])) {
+                        $customField = $col['field_' . $userLanguage];
                     } elseif (!empty($col['field'])) {
                         $customField = $col['field'];
                     }

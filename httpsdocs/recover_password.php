@@ -5,6 +5,10 @@ require_once 'init.php';
 $action = explode('/', @$_GET['f']);
 $action = array_shift($action);
 $prompt_for_new_password = false;
+
+$userLanguage = Config::get('user_language');
+$coreUrl = Config::get('core_url');
+
 switch ($action) {
     case 'forgot-password':
         break;
@@ -54,7 +58,7 @@ switch ($action) {
                     )
                 ) or die(DB\dbQueryError());
                 $_SESSION['msg'] = '<div class="alert alert-success">'.L\get('PasswordChangedMsg').
-                    '<br /> <br /><a href="'.CORE_URL.'">'.L\get('Login').'</a></div>';
+                    '<br /> <br /><a href="' . $coreUrl . '">'.L\get('Login').'</a></div>';
                 break;
             }
 
@@ -70,7 +74,7 @@ switch ($action) {
         $u = mb_strtolower($u);
 
         if (!isset($_POST['s']) || (empty($e) && empty($u))) {
-            header('location: '.CORE_URL.'login/forgot-password/');
+            header('location: ' . $coreUrl . 'login/forgot-password/');
             exit(0);
         }
         $user_id = null;
@@ -99,7 +103,7 @@ switch ($action) {
                 $res->close();
                 if (empty($user_id)) {
                     $_SESSION['e_msg'] = L\get('EmailNotFound');
-                    header('location: '.CORE_URL.'login/forgot-password/');
+                    header('location: ' . $coreUrl . 'login/forgot-password/');
                     exit(0);
                 }
             } else {
@@ -122,24 +126,30 @@ switch ($action) {
             $res->close();
             if (empty($user_id)) {
                 $_SESSION['u_msg'] = L\get('UsernameNotFound');
-                header('location: '.CORE_URL.'login/forgot-password/');
+                header('location: ' . $coreUrl . 'login/forgot-password/');
                 exit(0);
             } elseif (empty($user_mail)) {
                 $_SESSION['u_msg'] = L\get('UserHasNoMail');
-                header('location: '.CORE_URL.'login/forgot-password/');
+                header('location: ' . $coreUrl . 'login/forgot-password/');
                 exit(0);
             }
         }
 
         /* generating reset hash and sending mail */
-        $template = TEMPLATES_DIR.'password_recovery_email_'.USER_LANGUAGE.'.html';
+        $template = TEMPLATES_DIR.'password_recovery_email_' . $userLanguage . '.html';
         if (!file_exists($template)) {
             $template = TEMPLATES_DIR.'password_recovery_email_en.html';
         }
         if (!file_exists($template)) {
-            mail(CONFIG\ADMIN_EMAIL, 'Casebox template not found', $template, "Content-type: text/html; charset=utf-8\r\nFrom: ".CONFIG\SENDER_EMAIL."\r\n");
+            mail(
+                Config::get('admin_email'),
+                'Casebox template not found',
+                $template,
+                "Content-type: text/html; charset=utf-8\r\nFrom: " . Config::get('sender_email') . "\r\n"
+            );
+
             $_SESSION['msg'] = '<div class="alert alert-error">Error occured. Administrator has been notified by mail. Please retry later.</div>';
-            header('location: '.CORE_URL.'login/forgot-password/');
+            header('location: ' . $coreUrl . 'login/forgot-password/');
             exit(0);
         }
         $hash = md5($user_id.$user_mail.date(DATE_ISO8601));
@@ -163,12 +173,12 @@ switch ($action) {
         $mail = file_get_contents($template);
         $mail = str_replace(array('{name}', '{link}'), array($user_name, '<a href="'.$href.'" >'.$href.'</a>'), $mail);
 
-        @mail($user_mail, L\get('MailRecoverSubject'), $mail, "Content-type: text/html; charset=utf-8\r\nFrom: ".CONFIG\SENDER_EMAIL."\r\n");
+        @mail($user_mail, L\get('MailRecoverSubject'), $mail, "Content-type: text/html; charset=utf-8\r\nFrom: " . Config::get('sender_email') . "\r\n");
         $_SESSION['msg'] = '<div class="alert alert-success">'.L\get('RecoverMessageSent').'</div>';
         /* end of generating reset hash and sending mail */
         break;
     default:
-        header('location: '.CORE_URL);
+        header('location: ' . $coreUrl);
         exit(0);
 }
 ?>
@@ -176,12 +186,12 @@ switch ($action) {
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title><?php echo constant('CB\\CONFIG\\PROJECT_NAME_'.strtoupper(USER_LANGUAGE)) ?></title>
+<title><?php echo Config::get('project_name_'.strtoupper($userLanguage)) ?></title>
 <?php
 echo '
-<link rel="stylesheet" type="text/css" href="'.CORE_URL.'css/bs/css/bootstrap.min.css" />
-<link rel="stylesheet" type="text/css" href="'.CORE_URL.'css/bs/css/bootstrap-responsive.min.css" />
-<link type="text/css" rel="stylesheet" href="'.CORE_URL.'css/login.css" />';
+<link rel="stylesheet" type="text/css" href="' . $coreUrl . 'css/bs/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="' . $coreUrl . 'css/bs/css/bootstrap-responsive.min.css" />
+<link type="text/css" rel="stylesheet" href="' . $coreUrl . 'css/login.css" />';
 ?>
 </head>
 <body onload="javascript: e = document.getElementById('e'); if(e) e.focus(); editChanged();">
@@ -205,9 +215,9 @@ setTimeout(editChanged, 500)
 <div class="main">
 <div class="form_login tac">
         <?php
-        echo '<a href="'.CORE_URL.'" class="dib"><img src="'.CORE_URL.'css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
-        <form method="post" action="'.CORE_URL.'login/reset-password/" class="standart_form tal" autocomplete="off">';
-        $homeLink = '<a href="'.CORE_URL.'" class="btn btn-info">'.L\get('Login').'</a>';
+        echo '<a href="' . $coreUrl . '" class="dib"><img src="' . $coreUrl . 'css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
+        <form method="post" action="' . $coreUrl . 'login/reset-password/" class="standart_form tal" autocomplete="off">';
+        $homeLink = '<a href="' . $coreUrl . '" class="btn btn-info">'.L\get('Login').'</a>';
 
         if (!empty($_SESSION['msg'])) {
             echo $_SESSION['msg'].$homeLink;

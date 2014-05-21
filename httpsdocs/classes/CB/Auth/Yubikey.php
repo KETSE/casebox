@@ -92,7 +92,7 @@ class Yubikey implements \CB\Interfaces\Auth
 
         $rez = curl_exec($ch);
 
-        file_put_contents(DEBUG_LOG.'_yubikey', $rez);
+        file_put_contents(\CB\Config::get('debug_log').'_yubikey', $rez);
         if (curl_errno($ch)) {
             throw new \Exception("curl_error:" . curl_error($ch), 1);
         }

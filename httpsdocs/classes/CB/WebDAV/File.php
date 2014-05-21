@@ -42,7 +42,7 @@ class File extends \Sabre\DAV\FS\Node implements \Sabre\DAV\IFile
 
     public function get()
     {
-        return fopen(\CB\FILES_DIR.$this->objectData['content_path'], 'r');
+        return fopen(\CB\Config::get('files_dir') . $this->objectData['content_path'], 'r');
     }
 
     public function getSize()
@@ -63,7 +63,8 @@ class File extends \Sabre\DAV\FS\Node implements \Sabre\DAV\IFile
         );
     }
 
-    public function getCreationDate(){
+    public function getCreationDate()
+    {
         return $this->objectData['cdate'];
     }
 

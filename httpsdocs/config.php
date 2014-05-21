@@ -11,37 +11,15 @@ namespace CB;
 
 /*
     steps:
-    1. Detect core name
-    2. Define main paths (for configuration, files, data folder, sessions path)
-    3. Read platform config.ini file
-    4. read core config.ini & system.ini files
+    1. Define main paths (for configuration, files, data folder, sessions path)
+    2. Read platform config.ini file
+    3. read core config.ini & system.ini files
+    4. Detect core name and initialize by defining specific params
     5. based on loaded configs set casebox php options, session lifetime, error_reporting and define required casebox constants
 
 */
 
-/* detecting core name (project name) from SERVER_NAME */
-
-if (isset($_GET['core'])) {
-    define('CB\\CORE_NAME', strtolower($_GET['core']));
-} else {
-    $arr = explode('.', $_SERVER['SERVER_NAME']);
-    // remove www, ww2 and take the next parameter as the $coreName
-    if (in_array($arr[0], array( 'www', 'ww2' ))) {
-        array_shift($arr);
-    }
-    $arr = explode('-', $arr[0]);
-    if (in_array($arr[sizeof($arr)-1], array('local', 'd'))) {
-        array_pop($arr);
-    }
-    $arr = implode('-', $arr);
-    $arr = explode('_', $arr);
-
-    define('CB\\CORE_NAME', $arr[0]);
-}
-define('CB\\CORE_URL', 'https://'.$_SERVER['SERVER_NAME'].'/'.CORE_NAME.'/');
-/* end of detecting core name (project name) from SERVER_NAME */
-
-/* define main paths /**/
+/* define main paths/**/
 define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 define('CB\\APP_DIR', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
 define('CB\\PLUGINS_DIR', DOC_ROOT.'plugins'.DIRECTORY_SEPARATOR);
@@ -49,23 +27,29 @@ define('CB\\CRONS_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPA
 define('CB\\LOGS_DIR', APP_DIR.'logs'.DIRECTORY_SEPARATOR);
 define('CB\\DATA_DIR', APP_DIR.'data'.DIRECTORY_SEPARATOR);
 define('CB\\TEMP_DIR', DATA_DIR.'tmp'.DIRECTORY_SEPARATOR);
-define('CB\\UPLOAD_TEMP_DIR', TEMP_DIR.CORE_NAME.DIRECTORY_SEPARATOR);
 define('CB\\MINIFY_CACHE_DIR', TEMP_DIR.'minify'.DIRECTORY_SEPARATOR);
-define('ERROR_LOG', LOGS_DIR.'cb_'.CORE_NAME.'_error_log');
+//templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
+define('CB\\TEMPLATES_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
+//used to include DB.php into PreviewExtractor scripts and in Files.php to start the extractors.
+define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
 
-/* end of define main paths /**/
-
-/* update include_path and include global script */
-set_include_path(
+// define casebox include path
+// This path contains only CaseBox platform inclusion paths
+//  and do not contain core specific paths
+define(
+    'CB\\INCLUDE_PATH',
     DOC_ROOT.'libx'.PATH_SEPARATOR.
     DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
     DOC_ROOT.'classes'.PATH_SEPARATOR.
     PLUGINS_DIR.PATH_SEPARATOR.
     get_include_path()
 );
+/* end of define main paths /**/
+
+/* update include_path and include global script */
+set_include_path(INCLUDE_PATH);
 
 include 'global.php';
-
 /* end of update include_path and include global script */
 
 //load main config so that we can connect to casebox db and read configuration for core
@@ -77,12 +61,14 @@ DB\connect($cfg);
 //get platform default config
 $cfg = array_merge($cfg, Config::loadConfigFile(DOC_ROOT.'system.ini'));
 
-//define default values for some params
-$cfg['core_dir'] = DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.CORE_NAME.DIRECTORY_SEPARATOR;
-$cfg['db_name'] = 'cb_'.CORE_NAME;
+//detect core and define core specific params
+$cfg['core_name'] = detectCore() or die('Cannot detect core');
+
+//set default database name
+$cfg['db_name'] = 'cb_' . $cfg['core_name'];
 
 //loading core defined params
-$cfg = array_merge($cfg, Config::getPlatformConfigForCore());
+$cfg = array_merge($cfg, Config::getPlatformConfigForCore($cfg['core_name']));
 
 DB\connectWithParams($cfg);
 
@@ -90,94 +76,36 @@ DB\connectWithParams($cfg);
 require_once 'lib/Util.php';
 $config = Config::load($cfg);
 
-define('CB\\CORE_DIR', $config['core_dir']);
-set_include_path(
-    get_include_path().PATH_SEPARATOR.
-    CORE_DIR
-);
+//connect other database if specified in config for core
+DB\connectWithParams($config);
 
-/* Define folder templates */
-
-if (!empty($config['folder_templates'])) {
-    $GLOBALS['folder_templates'] = explode(',', $config['folder_templates']);
-    unset($config['folder_templates']);
-} else {
-    $GLOBALS['folder_templates'] = array();
-}
-
-if (empty($config['default_folder_template'])) {
-    $config['default_folder_template'] = empty($GLOBALS['folder_templates']) ? 0 : $GLOBALS['folder_templates'][0];
-}
-
-if (empty($config['default_file_template'])) {
-    $res = DB\dbQuery(
-        'SELECT id
-        FROM templates
-        WHERE `type` = $1',
-        'file'
-    ) or die( DB\dbQueryError() );
-
-    if ($r = $res->fetch_assoc()) {
-        $config['default_file_template'] = $r['id'];
-    } else {
-        $config['default_file_template'] = 0;
-    }
-
-    $res->close();
-}
-
-/*
-    store fetched config in CB\CONFIG namespace
-    TODO: remove constants declaration in CB namespace and migrate to Config class usage
-*/
-foreach ($config as $k => $v) {
-    if (( strlen($k) == 11 ) && ( substr($k, 0, 9) == 'language_')) {
-        $GLOBALS['language_settings'][substr($k, 9)] = Util\toJSONArray($v);
-    } elseif (is_scalar($v)) {
-        define('CB\\CONFIG\\'.strtoupper($k), $v);
-    }
-}
-define('CB\\LANGUAGES', implode(',', array_keys($GLOBALS['language_settings'])));
-
-/* Define Core available languages in $GLOBALS */
-if (defined('CB\\CONFIG\\LANGUAGES')) {
-    $GLOBALS['languages'] = explode(',', CONFIG\LANGUAGES);
-    for ($i=0; $i < sizeof($GLOBALS['languages']); $i++) {
-        $GLOBALS['languages'][$i] = trim($GLOBALS['languages'][$i]);
-    }
-}
-
-if (defined('CB\\CONFIG\\MAX_FILES_VERSION_COUNT')) {
-    __autoload('CB\\Files');
-    Files::setMFVC(CONFIG\MAX_FILES_VERSION_COUNT);
-}
-/* end of store fetched config in CB\CONFIG namespace /**/
-
-/* So, we have defined main paths and loaded configs. Now define and configure all other options (for php, session, etc) */
+/**
+*   So, we have defined main paths and loaded configs.
+*   Now define and configure all other options (for php, session, etc)
+**/
 
 /* setting php configuration options, session lifetime and error_reporting level */
-ini_set('max_execution_time', 000);
+ini_set('max_execution_time', 300);
 ini_set('short_open_tag', 'off');
 
 // upload params
-ini_set('upload_tmp_dir', UPLOAD_TEMP_DIR);
 ini_set('upload_max_filesize', '200M');
 ini_set('post_max_size', '200M');
 ini_set('max_file_uploads', '20');
 ini_set('memory_limit', '400M');
 
 // session params
-
-$sessionLifetime = (isDebugHost()
+$sessionLifetime = (
+    isDebugHost()
         ? 0
         : Config::get('session.lifetime', 180)
-    ) * 60;
+) * 60;
 
 ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
 
-session_set_cookie_params($sessionLifetime, '/' . CORE_NAME . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+session_set_cookie_params($sessionLifetime, '/' . $cfg['core_name'] . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 session_name(
     str_replace(
         array(
@@ -187,12 +115,11 @@ session_name(
         ),
         '',
         $_SERVER['SERVER_NAME']
-    ).CORE_NAME
+    ).$cfg['core_name']
 );
 
 //error reporting params
 error_reporting(isDebugHost() ? E_ALL : 0);
-ini_set('error_log', ERROR_LOG);
 
 // mb encoding config
 mb_internal_encoding("UTF-8");
@@ -207,52 +134,12 @@ date_default_timezone_set('UTC');
 /* define other constants used in casebox */
 
 //relative path to ExtJs framework. Used in index.php
-define('CB\\EXT_PATH', CORE_URL.'libx/ext');
-//templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
-define('CB\\TEMPLATES_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
-
-//used to include DB.php into PreviewExtractor scripts and in Files.php to start the extractors.
-define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
-
-// Default row count limit used for solr results
-if (!defined('CB\\CONFIG\\MAX_ROWS')) {
-    define('CB\\CONFIG\\MAX_ROWS', 50);
-}
-
-// custom Error log per Core, use it for debug/reporting purposes
-define('DEBUG_LOG', LOGS_DIR.'cb_'.CORE_NAME.'_debug_log');
+define('CB\\EXT_PATH', '/libx/ext');
 
 //clear debug_log for each request when on debug host
 if (isDebugHost()) {
-    @unlink(DEBUG_LOG);
+    @unlink(Config::get('debug_log'));
 }
-
-// define solr_core as db_name if none is specified in config
-if (!defined('CB\\CONFIG\\SOLR_CORE')) {
-    define('CB\\CONFIG\\SOLR_CORE', '/solr/'.CONFIG\DB_NAME);
-}
-
-// path to photos folder
-define('CB\\PHOTOS_PATH', DOC_ROOT.'photos'.DIRECTORY_SEPARATOR.CORE_NAME.DIRECTORY_SEPARATOR);
-// path to files folder
-define('CB\\FILES_DIR', DATA_DIR.'files'.DIRECTORY_SEPARATOR.CORE_NAME.DIRECTORY_SEPARATOR);
-
-/* path to incomming folder. In this folder files are stored when just uploaded
-and before checking existance in target.
-If no user intervention is required then files are stored in db. */
-define('CB\\INCOMMING_FILES_DIR', UPLOAD_TEMP_DIR.'incomming'.DIRECTORY_SEPARATOR);
-/* path to preview folder. Generated previews are stored for some filetypes */
-define('CB\\FILES_PREVIEW_DIR', FILES_DIR.'preview'.DIRECTORY_SEPARATOR);
-
-// define default core language constant
-define(
-    'CB\\LANGUAGE',
-    (defined('CB\\CONFIG\\DEFAULT_LANGUAGE')
-        ? CONFIG\DEFAULT_LANGUAGE
-        : $GLOBALS['languages'][0]
-    )
-);
-/* USER_LANGUAGE is defined after starting session */
 
 /* config functions section */
 
@@ -288,12 +175,53 @@ function isDebugHost()
     );
 }
 
+/**
+ * detect core from enviroment
+ * @return varchar | false
+ */
+function detectCore()
+{
+    $rez = false;
+
+    if (isset($_GET['core'])) {
+        $rez = $_GET['core'];
+    } else {
+        $arr = explode('.', $_SERVER['SERVER_NAME']);
+        // remove www, ww2 and take the next parameter as the $coreName
+        if (in_array($arr[0], array( 'www', 'ww2' ))) {
+            array_shift($arr);
+        }
+        $arr = explode('-', $arr[0]);
+        if (in_array($arr[sizeof($arr)-1], array('local', 'd'))) {
+            array_pop($arr);
+        }
+        $arr = implode('-', $arr);
+        $arr = explode('_', $arr);
+
+        $rez = $arr[0];
+    }
+
+    return $rez;
+}
+
+/**
+ * debug message to DBUG_LOG file
+ * @param  variant $msg
+ * @return void
+ */
 function debug($msg)
 {
     if (!is_scalar($msg)) {
         $msg = var_export($msg, 1);
     }
-    error_log(date('Y-m-d H:i:s').': '.$msg."\n", 3, DEBUG_LOG);
+
+    $debugFile = Config::get('debug_log');
+
+    if (empty($debugFile)) {
+        $debugFile = LOGS_DIR.'cb_debug_log';
+    }
+    // echo $debugFile;
+    error_log(date('Y-m-d H:i:s').': '.$msg."\n", 3, $debugFile);
 }
 
 /**
@@ -370,12 +298,6 @@ function getOption($optionName, $defaultValue = null)
     if (!empty($_SESSION['user']['cfg'][$optionName])) {
         return $_SESSION['user']['cfg'][$optionName];
     }
-    if (defined('CB\\CONFIG\\'.mb_strtoupper($optionName))) {
-        return constant('CB\\CONFIG\\'.mb_strtoupper($optionName));
-    }
-    if (!empty($GLOBALS[$optionName])) {
-        return $GLOBALS[$optionName];
-    }
 
-    return $defaultValue;
+    return Config::get($optionName, $defaultValue);
 }

@@ -73,13 +73,13 @@ function formatPastTime($mysqlTime)
     $time__ = date('j n Y', $time);
 
     if ($time__ == date('j n Y', time())) {
-        return L\todayAt.' '.date('H:i', $time);
+        return L\get('todayAt').' '.date('H:i', $time);
     } elseif ($time__ == date('j n Y', time()-3600 * 24)) {
-        return L\yesterdayAt.' '.date('H:i', $time);
+        return L\get('yesterdayAt').' '.date('H:i', $time);
     } elseif ($time__ == date('j n Y', time()-3600 * 24 * 2)) {
-        return L\beforeYesterdayAt.' '.date('H:i', $time);
+        return L\get('beforeYesterdayAt').' '.date('H:i', $time);
     } else {
-        return translateMonths(date('j M Y', $time).' '.L\at.' '.date(' H:i', $time));
+        return translateMonths(date('j M Y', $time).' '.L\get('at').' '.date(' H:i', $time));
     }
 }
 
@@ -107,33 +107,33 @@ function formatAgoTime($mysqlTime)
     $interval = strtotime('now') - $time;//11003
     if ($interval < 0) {
         //it's a future time
-        return L\fewSecondsAgo;
+        return L\get('fewSecondsAgo');
     }
 
     if ($interval < $AHOUR) {
         $m = intval($interval / 60);
         if ($m == 0) {
-            return L\fewSecondsAgo;
+            return L\get('fewSecondsAgo');
         }
         if ($m < 2) {
-            return $m.' '.L\minute.' '.L\ago;
+            return $m.' '.L\get('minute').' '.L\get('ago');
         }
 
-        return $m.' '.L\minutes.' '.L\ago;
+        return $m.' '.L\get('minutes').' '.L\get('ago');
     }
     if ($interval < ($time - $TODAY_START)) {
         $H = intval($interval/$AHOUR);
         if ($H < 2) {
-            return $H.' '.L\hour.' '.L\ago;
+            return $H.' '.L\get('hour').' '.L\get('ago');
         }
 
-        return $H.' '.L\ofHours.' '.L\ago;
+        return $H.' '.L\get('ofHours').' '.L\get('ago');
     }
     if ($interval < ($time - $YESTERDAY_START)) {
-        return L\Yesterday.' '.L\at.' '.date('H:i', $time);
+        return L\get('Yesterday').' '.L\get('at').' '.date('H:i', $time);
     }
     if ($interval < ($time - $WEEK_START)) {
-        return translateDays(date('l', $time)).' '.L\at.' '.date('H:i', $time);
+        return translateDays(date('l', $time)).' '.L\get('at').' '.date('H:i', $time);
     }
 
     if ($interval < ($time - $YEAR_START)) {
@@ -147,14 +147,14 @@ function translateDays($dateString)
 {
     /* replace long day names */
     $days_en = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
-    $days = explode(',', L\dayNames);
+    $days = explode(',', L\get('dayNames'));
     $days = array_combine($days_en, $days);
 
     $dateString = strtr($dateString, $days);
 
     /* replace short day names */
     $days_en = array('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun');
-    $days = explode(',', L\dayNamesShort);
+    $days = explode(',', L\get('dayNamesShort'));
     $days = array_combine($days_en, $days);
 
     $dateString = strtr($dateString, $days);
@@ -166,14 +166,14 @@ function translateMonths($dateString)
 {
     /* replace long month names */
     $months_en = array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
-    $months = explode(',', L\monthNames);
+    $months = explode(',', L\get('monthNames'));
     $months = array_combine($months_en, $months);
 
     $dateString = strtr($dateString, $months);
 
     /* replace short month names */
     $months_en = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-    $months = explode(',', L\monthNamesShort);
+    $months = explode(',', L\get('monthNamesShort'));
     $months = array_combine($months_en, $months);
 
     $dateString = strtr($dateString, $months);
@@ -189,12 +189,12 @@ function formatTaskTime($mysqlTime)
     $today = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
 
     if ($time == $today) {
-        return '<span class="cM fwB">'.L\today.'</span>';
+        return '<span class="cM fwB">'.L\get('today').'</span>';
     } elseif ($today - $time > 3600 * 24 * 2) return translateMonths(date('j M Y', $time));
-    elseif ($today - $time > 3600 * 24) return L\beforeYesterday;
-    elseif ($today - $time > 0) return L\yesterday;
-    elseif ($time - $today < 3600 * 24 * 2) return '<span class="cM fwB">'.L\tomorow.'</span>';
-    elseif ($time - $today < 3600 * 24 * 6) return '<span class="cM fwB">'.(($time - $today) / (3600 * 24) ).' '.L\ofDays.'</span>';
+    elseif ($today - $time > 3600 * 24) return L\get('beforeYesterday');
+    elseif ($today - $time > 0) return L\get('yesterday');
+    elseif ($time - $today < 3600 * 24 * 2) return '<span class="cM fwB">'.L\get('tomorow').'</span>';
+    elseif ($time - $today < 3600 * 24 * 6) return '<span class="cM fwB">'.(($time - $today) / (3600 * 24) ).' '.L\get('ofDays').'</span>';
     else{
         return translateMonths(date('j M Y', $time));
     }
@@ -319,14 +319,14 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 function formatLeftDays($days_difference)
 {
     if ($days_difference == 0) {
-        return L\today;
+        return L\get('today');
     }
     if ($days_difference < 0) {
         return '';
     } elseif ($days_difference == 1) {
-        return L\tomorow;
+        return L\get('tomorow');
     } elseif ($days_difference <21) {
-        return $days_difference.' '.L\ofDays;
+        return $days_difference.' '.L\get('ofDays');
     }
 
     return '';
@@ -341,7 +341,7 @@ function formatMysqlDate($date, $format = false, $TZ = 'UTC')
         $TZ = 'UTC';
     }
     if ($format == false) {
-        $format = \CB\getOption('short_date_format');
+        $format = \CB\Config::get('short_date_format');
     }
 
     $d1 = new \DateTime($date);
@@ -407,22 +407,6 @@ function validId($id = false)
     return (!empty($id) && is_numeric($id) && ($id > 0));
 }
 
-function getLanguagesParams($post_params, &$result_params_array, &$values_string, &$on_duplicate_string, $default_text_value = null)
-{
-    if (is_array($post_params)) {
-        $p = &$post_params;
-    } else {
-        $p = (array) $post_params;
-    }
-    $i = sizeof($result_params_array) + 1;
-    for ($lidx=0; $lidx < sizeof($GLOBALS['languages']); $lidx++) {
-        $l = 'l'.($lidx+1);
-        $values_string .= (empty($values_string) ? '' : ',').'$'.$i;
-        $on_duplicate_string .= (empty($on_duplicate_string) ? '' : ',').'`'.$l.'`=$'.$i++;
-        $result_params_array[$l] = empty($p[$l]) ? $default_text_value: $p[$l];
-    }
-}
-
 function adjustTextForDisplay($text)
 {
     return htmlentities($text, ENT_COMPAT, 'UTF-8');
@@ -460,7 +444,7 @@ function dateMysqlToISO($date_string)
 function getCoreHost($db_name = false)
 {
     if ($db_name == false) {
-        $db_name = \CB\CONFIG\DB_NAME;
+        $db_name = \CB\Config::get('db_name');
     }
     $core = $db_name;
     if (substr($db_name, 0, 3) == 'cb_') {

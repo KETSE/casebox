@@ -80,7 +80,7 @@ class TemplateField extends Object
                 $value = @$this->getFieldValue($fieldName, 0)['value'];
                 // this if should be removed after complete migration to language abreviation titles
                 if (empty($value) && in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
                     if (!empty($lang)) {
                         $value = @$this->getFieldValue($lang, 0)['value'];
                     }
@@ -97,7 +97,7 @@ class TemplateField extends Object
             } else {
                 // this if should be removed after complete migration to language abreviation titles
                 if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
                     if (!empty($lang)) {
                         $value = @$this->getFieldValue($lang, 0)['value'];
 
@@ -129,7 +129,7 @@ class TemplateField extends Object
 
         $res = DB\dbQuery(
             'SELECT
-                l'.\CB\USER_LANGUAGE_INDEX.' `title`
+                l' . \CB\Config::get('user_language_index').' `title`
                 ,`'.implode('`,`', $this->tableFields).'`
             FROM templates_structure
             WHERE id = $1',
@@ -189,7 +189,7 @@ class TemplateField extends Object
             } else {
                 // this if should be removed after complete migration to language abreviation titles
                 if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @$GLOBALS['languages'][$fieldName[1]-1];
+                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
                     if (!empty($lang)) {
                         $value = @$this->getFieldValue($lang, 0)['value'];
 

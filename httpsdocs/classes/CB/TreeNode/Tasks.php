@@ -85,19 +85,19 @@ class Tasks extends Base
         }
         switch ($id) {
             case 1:
-                return L\Tasks;
+                return L\get('Tasks');
             case 2:
-                return L\AssignedToMe;
+                return L\get('AssignedToMe');
             case 3:
-                return L\Created;
+                return L\get('Created');
             case 4:
-                return lcfirst(L\Overdue);
+                return lcfirst(L\get('Overdue'));
             case 5:
-                return lcfirst(L\Ongoing);
+                return lcfirst(L\get('Ongoing'));
             case 6:
-                return lcfirst(L\Closed);
+                return lcfirst(L\get('Closed'));
             case 'assignee':
-                return lcfirst(L\Assignee);
+                return lcfirst(L\get('Assignee'));
             default:
                 if (substr($id, 0, 3) == 'au_') {
                     return \CB\User::getDisplayName(substr($id, 3));
@@ -125,7 +125,7 @@ class Tasks extends Base
         return array(
             'data' => array(
                 array(
-                    'name' => L\Tasks.$count
+                    'name' => L\get('Tasks').$count
                     ,'id' => $this->getId(1)
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
@@ -153,7 +153,7 @@ class Tasks extends Base
             $rez = array('data' => array());
             if (!empty($sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']})) {
                 $rez['data'][] = array(
-                    'name' => L\AssignedToMe.' ('.$sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']}.')'
+                    'name' => L\get('AssignedToMe').' ('.$sr['facets']->facet_fields->{'1assigned'}->{$_SESSION['user']['id']}.')'
                     ,'id' => $this->getId(2)
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
@@ -161,7 +161,7 @@ class Tasks extends Base
             }
             if (!empty($sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']})) {
                 $rez['data'][] = array(
-                    'name' => L\Created.' ('.$sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']}.')'
+                    'name' => L\get('Created').' ('.$sr['facets']->facet_fields->{'2cid'}->{$_SESSION['user']['id']}.')'
                     ,'id' => $this->getId(3)
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
@@ -207,21 +207,21 @@ class Tasks extends Base
             $rez = array('data' => array());
             if (!empty($sr['facets']->facet_fields->{'0task_status'}->{'1'})) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\Overdue).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'1'}.')'
+                    'name' => lcfirst(L\get('Overdue')).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'1'}.')'
                     ,'id' => $this->getId(4)
                     ,'iconCls' => 'icon-task'
                 );
             }
             if (!empty($sr['facets']->facet_fields->{'0task_status'}->{'2'})) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\Ongoing).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'2'}.')'
+                    'name' => lcfirst(L\get('Ongoing')).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'2'}.')'
                     ,'id' => $this->getId(5)
                     ,'iconCls' => 'icon-task'
                 );
             }
             if (!empty($sr['facets']->facet_fields->{'0task_status'}->{'3'})) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\Closed).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'3'}.')'
+                    'name' => lcfirst(L\get('Closed')).' ('.$sr['facets']->facet_fields->{'0task_status'}->{'3'}.')'
                     ,'id' => $this->getId(6)
                     ,'iconCls' => 'icon-task'
                 );
@@ -229,7 +229,7 @@ class Tasks extends Base
             // Add assignee node if there are any created tasks already added to result
             if (($this->lastNode->id == 3) && !empty($rez['data'])) {
                 $rez['data'][] = array(
-                    'name' => lcfirst(L\Assignee)
+                    'name' => lcfirst(L\get('Assignee'))
                     ,'id' => $this->getId('assignee')
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true

@@ -59,7 +59,7 @@ class Instance
                 $record = array();
                 foreach ($this->columns as $colName => $colTitle) {
                     if (strpos($colName, 'date') === false) {
-                        if (in_array($colName, array('cid', 'uid'))) {
+                        if (in_array($colName, array('oid', 'cid', 'uid')) && !empty($r[$colName])) {
                             $record[] = User::getDisplayName($r[$colName]);
                         } else {
                             $record[] =  @$r[$colName];

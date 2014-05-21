@@ -6,6 +6,9 @@ if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180))
     unset($_SESSION['check_TSV']);
 }
 
+$coreName = Config::get('core_name');
+$coreUrl = Config::get('core_url');
+
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -13,12 +16,12 @@ if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180))
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title><?php
 
-echo Config::get('project_name_'.USER_LANGUAGE, CORE_NAME);
+echo Config::get('project_name_' . \CB\Config::get('user_language'), $coreName);
 
 ?></title>
-    <link rel="stylesheet" type="text/css" href="<?php echo CORE_URL; ?>css/bs/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="<?php echo CORE_URL; ?>css/bs/css/bootstrap-responsive.min.css" />
-    <link type='text/css' rel="stylesheet" href="<?php echo CORE_URL; ?>css/login.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo $coreUrl; ?>css/bs/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo $coreUrl; ?>css/bs/css/bootstrap-responsive.min.css" />
+    <link type='text/css' rel="stylesheet" href="<?php echo $coreUrl; ?>css/login.css" />
 </head>
 <body onload="javascript: e = document.getElementById('u'); if(!e) e = document.getElementById('c'); e.focus(); editChanged();">
 <script type="text/javascript">
@@ -54,7 +57,7 @@ if (empty($_SESSION['check_TSV'])) {
 </script>
 <div class="main">
     <div class="form_login tac">
-        <a href="/" class="dib"><img src="<?php echo CORE_URL; ?>css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
+        <a href="/" class="dib"><img src="<?php echo $coreUrl; ?>css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
         <form method="post" action="auth.php" class="standart_form tal" autocomplete="off">
 <?php
 
@@ -70,7 +73,7 @@ if (empty($_SESSION['check_TSV'])) {
                 <?php echo isset($_SESSION['message']) ? '<div class="alert alert-error">'.$_SESSION['message'].'</div>' : '';?>
                 <span class="icon-lock"></span>
             </label>
-            <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/' . CORE_NAME; ?>/login/forgot-password/"><?php echo L\get('ForgotPassword');?></a>
+            <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/'.$coreName; ?>/login/forgot-password/"><?php echo L\get('ForgotPassword');?></a>
             <input type="submit" name="s" id="s" value="<?php echo L\get('Login');?>" class="btn btn-info" style="margin-top: 26px;" disabled>
     <?php
 
@@ -103,7 +106,6 @@ if (empty($_SESSION['check_TSV'])) {
 <div class="footer" style="right: 0px;">
     <a href="https://www.casebox.org/">www.casebox.org</a> <span style="color: #AAA; padding-left: 2px; padding-right: 5px">&bull;</span>  <a href="http://forum.casebox.org/">Support forum</a>
 </div>
-
 
 </body>
 </html>

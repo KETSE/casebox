@@ -1,4 +1,25 @@
-CaseBox 1.9.18 (2014-05-714)
+CaseBox 1.9.202 (2014-05-21)
+==============================
+New Features, Improvements
+--------------------------
+- enable Export plugin by default for all cores
+- added procedure p_mark_all_childs_as_active for recursive update of childs as active
+  used for restore process
+- correction made for constants usage from system.ini
+
+Fixed Bugs:
+----------
+- vFolder node select bug after search
+
+CaseBox 1.9.188 (2014-05-20)
+==============================
+New Features, Improvements
+--------------------------
+- apache libx rule change for direct access to ext
+- recycleBin vfolder plugin
+- updated usage of core constants to Config class
+
+CaseBox 1.9.187 (2014-05-16)
 ==============================
 New Features, Improvements
 --------------------------

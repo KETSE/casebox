@@ -7,7 +7,7 @@ class Log
     {
         $data = array();
         $res = DB\dbQuery(
-            'SELECT l'.USER_LANGUAGE_INDEX.' html, date
+            'SELECT l'.Config::get('user_language_index').' html, date
             FROM actions_log
             WHERE pid IS NULL
             ORDER BY `date` DESC, id DESC LIMIT 50'
@@ -139,7 +139,7 @@ class Log
         if (!empty($to_user_ids)) {
             $p['to_user_ids'] = implode(',', $to_user_ids);
             $res = DB\dbQuery(
-                'SELECT name, '.CONFIG\LANGUAGE_FIELDS.', sex
+                'SELECT name, ' . Config::get('language_fields') . ', sex
                 FROM users_groups
                 WHERE id IN ('.$p['to_user_ids'].')'
             ) or die(DB\dbQueryError());
@@ -172,8 +172,9 @@ class Log
             ,'info'
         );
 
-        if (!empty($GLOBALS['languages'])) {
-            for ($lk=0; $lk < sizeof($GLOBALS['languages']); $lk++) {
+        $coreLanguages = Config::get('languages');
+        if (!empty($coreLanguages)) {
+            for ($lk=0; $lk < sizeof($coreLanguages); $lk++) {
                 $l = 'l'.($lk+1);
                 $fields[] = $l;
 
@@ -389,6 +390,8 @@ class Log
         ["l3"]=>'<i class=\"icon-user-m\">Виталий Цуркану</i> добавил задание \"<i class=\"task\">test3</i>\"  к делу <i class=\"case\" id=\"2\">A test case</i> для пользователей <i class=\"icon-user-m\">Виталий Цуркану</i>, <i class=\"icon-user-m\">Дмитрий Казаков</i>'
         }
         */
+        $coreName = Config::get('core_name');
+
         $to_user_ids = array();
         if (!empty($p['remind_users'])) {
             $to_user_ids = Util\toNumericArray($p['remind_users']);
@@ -397,7 +400,7 @@ class Log
             return ;
         }
 
-        $sender = User::getDisplayName(). " (".\CB\CORE_NAME.") <".Config::get('sender_email').'>';
+        $sender = User::getDisplayName(). " (".$coreName.") <".Config::get('sender_email').'>';
 
         foreach ($to_user_ids as $uid) {
             $u = User::getPreferences($uid);
@@ -496,7 +499,7 @@ class Log
             $p['object_id'] = is_numeric($p['object_id']) ? $p['object_id'] : null;
             $p['task_id'] = is_numeric($p['task_id']) ? $p['task_id'] : null;
 
-            $subject =  '['.\CB\CORE_NAME.' #'.
+            $subject =  '['.$coreName.' #'.
                 Util\coalesce(
                     $p['task_id'],
                     $p['object_id'],

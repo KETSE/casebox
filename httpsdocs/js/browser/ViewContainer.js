@@ -127,6 +127,19 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onDeleteClick
             })
+
+            ,restore: new Ext.Action({
+                text: L.Restore
+                ,id: 'restore'
+                ,iconAlign:'top'
+                ,iconCls: 'ib-restore'
+                ,scale: 'large'
+                ,hidden: true
+                ,disabled: true
+                ,hideParent: false
+                ,scope: this
+                ,handler: this.onRestoreClick
+            })
         };
 
         this.buttonCollection = new Ext.util.MixedCollection();
@@ -168,6 +181,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,this.actions.takeOwnership
                 ]
             })
+            ,new Ext.Button(this.actions.restore)
             ,new Ext.Button(this.actions['delete'])
             ,new Ext.Button({
                 text: L.More
@@ -561,9 +575,12 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             this.viewToolbar.remove(b, b.isXType('tbseparator'));
         }
 
+
         if(buttonsArray.indexOf('apps') < 0) {
             buttonsArray.unshift('apps');
         }
+
+        buttonsArray.splice(1, 0, 'restore');
 
         if(buttonsArray.indexOf('more') < 0) {
             buttonsArray.push('more');
@@ -682,6 +699,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
         /* end of updating breadcrumb */
 
+        this.onObjectsSelectionChange([]);
         this.fireEvent('viewloaded', proxy, o, options);
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
@@ -826,6 +844,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     }
 
+    /**
+     * return current vew selection
+     * @return array | null
+     */
+    ,getSelection: function() {
+        return this.cardContainer.getLayout().activeItem.currentSelection;
+    }
+
     ,onBreadcrumbItemClick: function(el, idx, ev) {
         var pt = this.folderProperties.pathtext.split('/');
         var p = this.folderProperties.path.split('/');
@@ -860,6 +886,12 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onObjectsSelectionChange: function(objectsDataArray){
         this.cardContainer.getLayout().activeItem.currentSelection = objectsDataArray;
+        var inRecycleBin = this.inRecycleBin();
+
+        this.actions.restore.setHidden(!inRecycleBin);
+        this.actions.restore.setDisabled(Ext.isEmpty(objectsDataArray));
+        this.actions.upload.setHidden(inRecycleBin);
+        this.buttonCollection.get('create').setVisible(!inRecycleBin);
 
         if(Ext.isEmpty(objectsDataArray)) {
             this.actions.cut.setDisabled(true);
@@ -873,6 +905,9 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
             this.actions['delete'].setDisabled(true);
             this.actions['delete'].hide();
+
+            this.actions.restore.setDisabled(true);
+            this.actions.restore.hide();
             // this.actions.rename.setDisabled(true);
         } else {
 
@@ -895,13 +930,23 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
             this.actions.mergeFiles.setDisabled(!canDownload || (objectsDataArray.length < 2));
 
-            this.actions['delete'].setDisabled(false);
-            if(this.cardContainer.getLayout().activeItem.isXType('CBBrowserViewGrid')) {
+
+            this.actions['delete'].setDisabled(inRecycleBin);
+
+            if(!inRecycleBin && this.cardContainer.getLayout().activeItem.isXType('CBBrowserViewGrid')) {
                 this.actions['delete'].show();
             }
         }
 
         this.updatePreview();
+    }
+
+    /**
+     * detect if current loaded path is in recycle bin
+     * @return boolean
+     */
+    ,inRecycleBin: function() {
+        return (String(Ext.value(this.folderProperties, {}).path).indexOf('-recycleBin') > -1);
     }
 
     ,updatePreview: function(customParams) {
@@ -972,8 +1017,14 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(objectData.path)) {
             objectData.path = this.folderProperties.path;
         }
-        this.buttonCollection.get('preview').toggle(true);
-        this.objectPanel.edit(objectData);
+
+        var templateCfg = CB.DB.templates.getProperty(objectData.template_id, 'cfg');
+        if(templateCfg && templateCfg.createMethod == 'tabsheet') {
+                App.mainViewPort.openObject(objectData, e);
+        } else {
+            this.buttonCollection.get('preview').toggle(true);
+            this.objectPanel.edit(objectData);
+        }
     }
 
     ,onCreateObjectClick: function(b, e) {
@@ -988,7 +1039,8 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.buttonCollection.get('preview').toggle(true);
         b.data.pid = this.folderProperties.id;
         b.data.path = this.folderProperties.path;
-        this.objectPanel.edit(b.data);
+        this.fireEvent('createobject', Ext.apply({}, b.data));
+        // this.objectPanel.edit(b.data);
     }
 
     ,onUploadClick: function(b, e) {
@@ -1059,6 +1111,34 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 this.store.removeAt(idx);
             }
         }
+    }
+
+    ,onRestoreClick: function() {
+        var s = this.getSelection();
+        var ids = [];
+
+        if(Ext.isEmpty(s)) {
+            return;
+        }
+
+        for (var i = 0; i < s.length; i++) {
+            ids.push(Ext.value(s[i].id, s[i].nid));
+        }
+
+        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+
+        CB_Browser.restore(ids, this.processRestore, this);
+    }
+
+    ,processRestore: function(r, e) {
+        this.getEl().unmask();
+
+        if(r.success !== true) {
+            Ext.Msg.alert(L.ErrorOccured);
+            return;
+        }
+
+        this.onReloadClick();
     }
 
     ,onCutClick: function(buttonOrKey, e) {

@@ -14,12 +14,12 @@ class Security
     {
         $rez = array( 'success' => true, 'data' => array() );
 
-        // if (!Security::isAdmin() ) throw new \Exception(L\Access_denied);
+        // if (!Security::isAdmin() ) throw new \Exception(L\get('Access_denied'));
 
         $res = DB\dbQuery(
             'SELECT id
                 ,name
-                ,l'.USER_LANGUAGE_INDEX.' `title`
+                ,l' . Config::get('user_language_index') . ' `title`
                 ,`system`
                 ,`enabled`
             FROM users_groups
@@ -47,7 +47,7 @@ class Security
         $p['success'] = true;
 
         if (!Security::isAdmin()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         $p['data']['name'] = trim(strip_tags($p['data']['name']));
 
@@ -61,7 +61,7 @@ class Security
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            throw new \Exception(L\Group_exists);
+            throw new \Exception(L\get('Group_exists'));
         }
         $res->close();
         // end of check if group with that name already exists
@@ -85,7 +85,7 @@ class Security
     public function updateUserGroup($p)
     {
         if (!Security::isAdmin()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         return array( 'success' => true, 'data' => array() );
@@ -97,7 +97,7 @@ class Security
     public function destroyUserGroup($p)
     {
         if (!Security::isAdmin()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         DB\dbQuery('delete from users_groups where id = $1', $p) or die(DB\dbQueryError());
@@ -184,7 +184,7 @@ class Security
         if (empty($this->internalAccessing)
             && !Security::canRead($p['id'])
         ) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         /* set object title, path and inheriting access ids path*/
@@ -212,7 +212,7 @@ class Security
         /* end of set object title and path*/
 
         /* get the full set of access credentials(users and/or groups) including inherited from parents */
-        $lid = defined('CB\\USER_LANGUAGE_INDEX') ? USER_LANGUAGE_INDEX: 1;
+        $lid =  Config::get('user_language_index', 1);
         $res = DB\dbQuery(
             'SELECT DISTINCT u.id
                     , u.l'.$lid.' `name`
@@ -494,7 +494,7 @@ class Security
             $ids = array_filter($ids, 'is_numeric');
             $is_owner = ($user_id == $r['oid']);
         } else {
-            throw new \Exception(L\Object_not_found, 1);
+            throw new \Exception(L\get('Object_not_found'), 1);
         }
         $res->close();
 
@@ -717,7 +717,7 @@ class Security
         }
 
         if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         DB\dbQuery(
@@ -745,7 +745,7 @@ class Security
     public function updateObjectAccess($p)
     {
         if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         $allow = explode(',', $p['data']['allow']);
@@ -794,7 +794,7 @@ class Security
             return;
         }
         if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
         DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p['id'], $p['data'])) or die(DB\dbQueryError());
 
@@ -824,12 +824,12 @@ class Security
             !is_numeric($p['id']) ||
             !is_bool($p['inherit'])
         ) {
-            throw new \Exception(L\Wrong_input_data);
+            throw new \Exception(L\get('Wrong_input_data'));
         }
         /* end of check input params */
 
         if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         /* checking if current inherit value is not already set to requested state */
@@ -838,7 +838,7 @@ class Security
         if ($r = $res->fetch_assoc()) {
             $inherit_acl = $r['inherit_acl'];
         } else {
-            throw new \Exception(L\Object_not_found);
+            throw new \Exception(L\get('Object_not_found'));
         }
         $res->close();
         if ($inherit_acl == $p['inherit']) {
@@ -928,7 +928,7 @@ class Security
     {
 
         if (!Security::isAdmin()) {
-            throw new \Exception(L\Access_denied);
+            throw new \Exception(L\get('Access_denied'));
         }
 
         $pids = null;
@@ -940,7 +940,7 @@ class Security
         if ($r = $res->fetch_assoc()) {
             $pids = $r['pids'];
         } else {
-            throw new \Exception(L\Object_not_found);
+            throw new \Exception(L\get('Object_not_found'));
         }
         $res->close();
 
@@ -1312,7 +1312,7 @@ class Security
         if ($r = $res->fetch_assoc()) {
             $rez = ($r['cid'] == $_SESSION['user']['id']);
         } else {
-            throw new \Exception(L\User_not_found);
+            throw new \Exception(L\get('User_not_found'));
         }
         $res->close();
 

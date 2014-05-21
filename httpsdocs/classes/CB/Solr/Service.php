@@ -29,9 +29,9 @@ class Service
      */
     public function __construct ($p = array())
     {
-        $this->host = empty($p['host']) ? \CB\CONFIG\SOLR_HOST : $p['host'];
-        $this->port = empty($p['port']) ? \CB\CONFIG\SOLR_PORT : $p['port'];
-        $this->core = empty($p['core']) ? \CB\CONFIG\SOLR_CORE : $p['core'];
+        $this->host = empty($p['host']) ? \CB\Config::get('solr_host', 'localhost') : $p['host'];
+        $this->port = empty($p['port']) ? \CB\Config::get('solr_port', 8983) : $p['port'];
+        $this->core = empty($p['core']) ? \CB\Config::get('solr_core') : $p['core'];
         $this->connect();
     }
 
@@ -47,7 +47,7 @@ class Service
         }
 
         if (!class_exists('\\Apache_Solr_Service', false)) {
-            require_once \CB\CONFIG\SOLR_CLIENT;
+            require_once \CB\Config::get('SOLR_CLIENT');
         }
 
         $this->solr_handler = new \Apache_Solr_Service(

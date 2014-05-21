@@ -22,17 +22,23 @@ class Listeners
             return;
         }
 
+        $coreName = Config::get('core_name');
+
         $objData = $o->getData();
 
         $notifiedUsers = $this->getNotifiedUsers($objData['pid']);
 
         if (!empty($notifiedUsers)) {
-            $sender = User::getDisplayName(). " (".\CB\CORE_NAME.") <".Config::get('sender_email').'>'; //<$UserName ($core)> $sender_email
+            $senderMail = Config::get('comments_email');
+            if (empty($senderMail)) {
+                $senderMail = Config::get('sender_email');
+            }
+            $sender = User::getDisplayName(). " (".$coreName.") <".$senderMail.'>'; //<$UserName ($core)> $sender_email
 
             $o = \CB\Objects::getCachedObject($objData['pid']);
             $d = $o->getData();
 
-            $subject = '['.\CB\CORE_NAME.' #'.$d['id'].'] '.$d['name'].' ('.$d['path'].')';//[$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
+            $subject = '['.$coreName.' #'.$d['id'].'] '.$d['name'].' ('.$d['path'].')';//[$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
             $body  = nl2br(Util\adjustTextForDisplay($objData['data']['_title'])).
                 '<br /><hr />'.
                 'To add a comment, reply to this email.<br />

@@ -29,14 +29,16 @@ class Client extends Service
      */
     public static function runBackgroundCron()
     {
+        $coreName = \CB\Config::get('core_name');
+
         if (isset($GLOBALS['running_trigger'])
             || isset($GLOBALS['solr_index_disable_by_custom_script'])
         ) {
             return;
         }
-        $cmd = 'php -f '.\CB\CRONS_DIR.'run_cron.php solr_update_tree '.\CB\CORE_NAME.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log &';
+        $cmd = 'php -f '.\CB\CRONS_DIR.'run_cron.php solr_update_tree '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log &';
         if (\CB\isWindows()) {
-            $cmd = 'start /D "'.\CB\CRONS_DIR.'" php -f run_cron.php solr_update_tree '.\CB\CORE_NAME.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log';
+            $cmd = 'start /D "'.\CB\CRONS_DIR.'" php -f run_cron.php solr_update_tree '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log';
         }
         pclose(popen($cmd, "r"));
     }
@@ -118,6 +120,7 @@ class Client extends Service
             'class' => &$this
             ,'params' => &$p
         );
+        $folderTemplates = \CB\Config::get('folder_templates');
 
         \CB\fireEvent('onBeforeSolrUpdate', $eventParams);
 
@@ -192,7 +195,7 @@ class Client extends Service
 
                     /* consider node type sort column (ntsc) equal to 1 unit more
                     than total count of folder templates */
-                    $r['ntsc'] = sizeof($GLOBALS['folder_templates']) + 100;
+                    $r['ntsc'] = sizeof($folderTemplates) + 100;
 
                     /* decrease ntsc (make 1 unit more important) in case of 'case' object types */
                     if (@$r['template_type'] == 'case') {
@@ -201,7 +204,7 @@ class Client extends Service
 
                     /* if there is a folder template then set its ntsc
                     equal to its index in folder_templates array */
-                    $folder_index = array_search($r['template_id'], $GLOBALS['folder_templates']);
+                    $folder_index = array_search($r['template_id'], $folderTemplates);
                     if ($folder_index !== false) {
                         $r['ntsc'] = $folder_index;
                     }

@@ -62,7 +62,7 @@ class Utils
                 ,'path' => $myPath . DIRECTORY_SEPARATOR . $item->name
             );
 
-            if ($item->template_id != \CB\CONFIG\DEFAULT_FILE_TEMPLATE) {
+            if ($item->template_id != \CB\Config::get('default_file_template')) {
                 $el['path'] = $myPath .DIRECTORY_SEPARATOR. $item->name;
             } else {
                 $fileIds[] = $el['id'];
@@ -131,7 +131,7 @@ class Utils
             ,'name' => $name
             // date column is not present in template for folders
             // ,'date' => date('Y-m-d')
-            ,'template_id' => \CB\CONFIG\DEFAULT_FOLDER_TEMPLATE
+            ,'template_id' => \CB\Config::get('default_folder_template')
             ,'data' => array('_title'=>$name)
         );
         $temp = new \CB\Objects\Object();
@@ -144,7 +144,7 @@ class Utils
 
     public static function createCaseboxFile($pid, $name, $data = null)
     {
-        $path = \CB\INCOMMING_FILES_DIR.$name;
+        $path = \CB\Config::get('incomming_files_dir') . $name;
         file_put_contents($path, $data);
 
         $param = array(
@@ -152,7 +152,7 @@ class Utils
             ,'title' => $name
             ,'localFile' => $path
             ,'owner' => $_SESSION['user']['id']
-            ,'tmplId' => \CB\CONFIG\DEFAULT_FILE_TEMPLATE
+            ,'tmplId' => \CB\Config::get('default_file_template')
             ,'fileExistAction' => 'newversion'
         );
         $fl = new \CB\Api\Files();

@@ -87,13 +87,13 @@ class CasesGrouped extends Base
 
         switch ($id) {
             case 1:
-                return L\Manager;
+                return L\get('Manager');
             case 2:
-                return L\Lead;
+                return L\get('Lead');
             case 3:
-                return L\Support;
+                return L\get('Support');
             case 4:
-                return L\AllMyCases;
+                return L\get('AllMyCases');
         }
 
         $res = DB\dbQuery('SELECT name FROM tree WHERE id = $1', $id) or die(DB\dbQueryError());

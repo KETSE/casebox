@@ -44,7 +44,7 @@ WHERE '.$where;
 $res = DB\dbQuery($sql) or die(DB\dbQueryError()); //and name like \'%.pdf\'
 
 while ($r = $res->fetch_assoc()) {
-    $filename = FILES_DIR.$r['path'].DIRECTORY_SEPARATOR.$r['id'];
+    $filename = Config::get('files_dir').$r['path'].DIRECTORY_SEPARATOR.$r['id'];
     echo "\nFile: $filename (".$r['type'].") ";
     if (file_exists($filename)) {
         $skip_parsing = 0;
@@ -141,7 +141,7 @@ function checkTikaService()
 
 function startTikaService()
 {
-    $cmd = 'java -Dfile.encoding=UTF8 -jar "'.CONFIG\TIKA_SERVER.'" --port 9998 &';
+    $cmd = 'java -Dfile.encoding=UTF8 -jar "'.Config::get('TIKA_SERVER').'" --port 9998 &';
     if (isWindows()) {
         $cmd = 'start /D "'.DOC_ROOT.'libx" tika_windows_service.bat';
     }
