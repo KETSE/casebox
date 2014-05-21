@@ -141,7 +141,7 @@ function checkTikaService()
 
 function startTikaService()
 {
-    $cmd = 'java -Dfile.encoding=UTF8 -jar "'.CONFIG\TIKA_SERVER.'" --port 9998 &';
+    $cmd = 'java -Dfile.encoding=UTF8 -jar "'.Config::get('TIKA_SERVER').'" --port 9998 &';
     if (isWindows()) {
         $cmd = 'start /D "'.DOC_ROOT.'libx" tika_windows_service.bat';
     }

@@ -29,8 +29,6 @@ class Config extends Singleton
         static::$config = static::adjustConfig($cfg);
         static::$environmentVars = static::getEnvironmentVars(static::$config);
 
-        debug($cfg);
-        debug(static::$config);
         // add core path to include path
         set_include_path(INCLUDE_PATH . PATH_SEPARATOR . static::$environmentVars['core_dir']);
 

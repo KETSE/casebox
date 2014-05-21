@@ -6,13 +6,33 @@ namespace CB;
  * retreiving all comment mails from common or particulat mail for each core
  */
 
-$cron_id = 'check_comments_email';
-$execution_timeout = 60; //default is 60 seconds
+//init
+ini_set('max_execution_time', 300);
 
-require_once 'init.php';
+error_reporting(E_ALL);
+
+$_SERVER['REMOTE_ADDR'] = 'localhost';
+
+$_SESSION['user'] = array(
+    'id' => 1
+    ,'name' => 'system'
+);
+
+$site_path = realpath(
+    dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.
+    DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'httpsdocs'
+).DIRECTORY_SEPARATOR;
+
+include $site_path.DIRECTORY_SEPARATOR.'config.php';
+
+require_once LIB_DIR.'Util.php';
+
+require_once(DOC_ROOT.'language.php');
 
 // ~~~~~~~~~~~~~~~~~~~~~ ZEND INITIALIZATION BLOCK ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-require_once CONFIG\ZEND_PATH.'/Zend/Loader/StandardAutoloader.php';
+$zendPath = Config::get('ZEND_PATH');
+
+require_once $zendPath.'/Zend/Loader/StandardAutoloader.php';
 
 require_once 'mail_functions.php';
 
@@ -20,14 +40,14 @@ require_once 'mail_functions.php';
 $loader = new \Zend\Loader\StandardAutoloader(
     array(
         // absolute directory
-        'Zend' => CONFIG\ZEND_PATH.'/Zend'
+        'Zend' => $zendPath.'/Zend'
     )
 );
 /** AFTER INSTANTIATION **/
 $loader = new \Zend\Loader\StandardAutoloader();
 
 // the path can be absolute or relative below:
-$loader->registerNamespace('Zend', CONFIG\ZEND_PATH.'/Zend');
+$loader->registerNamespace('Zend', $zendPath.'/Zend');
 
 /** TO START AUTOLOADING */
 $loader->register();
