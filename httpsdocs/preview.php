@@ -22,7 +22,7 @@ $a = array_shift($f);
 @list($id, $version_id) = explode('_', $a);
 $ext = array_pop($f);
 
-$filesPreviewDir = Config\get('files_preview_dir');
+$filesPreviewDir = Config::get('files_preview_dir');
 
 //TODO: check access with security model
 if ($ext !== 'html') {//this will provide other files (images, swfs)

@@ -463,9 +463,13 @@ class Objects
                 /* make changes to value if needed */
 
                 if (@$field['cfg']['faceting'] && in_array($field['type'], array('combo', 'int', '_objects'))) {
+
                     $solr_field = $field['solr_column_name'];
+
                     if (!empty($solr_field)) {
+
                         $arr = Util\toNumericArray($f['value']);
+
                         foreach ($arr as $v) {
                             if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
                                 $object_record[$solr_field][] = $v;

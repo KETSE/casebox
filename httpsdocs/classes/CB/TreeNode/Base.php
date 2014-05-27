@@ -22,11 +22,22 @@ class Base implements \CB\Interfaces\TreeNode
         $this->id = $id;
     }
 
+    /**
+     * return the children for for input params
+     * @param  array $pathArray
+     * @param  array $requestParams
+     * @return array
+     */
     public function getChildren(&$pathArray, $requestParams)
     {
         return array();
     }
 
+    /**
+     * the the formated id (with plugin guid prefix) for a given node id
+     * @param  varchar $id
+     * @return varchar
+     */
     public function getId($id = null)
     {
         if (is_null($id)) {
@@ -39,11 +50,20 @@ class Base implements \CB\Interfaces\TreeNode
         return $id;
     }
 
+    /**
+     * get the name for a given node id
+     * @param  variant $id
+     * @return varchar
+     */
     public function getName($id = false)
     {
         return 'no name';
     }
 
+    /**
+     * get data for current node instance, based on this->id
+     * @return array
+     */
     public function getData()
     {
         return array();
@@ -86,28 +106,22 @@ class Base implements \CB\Interfaces\TreeNode
     }
 
     /**
-     * get list of facets classses  that should be available for this node
+     * get list of facets classses that should be available for this node
      * @return array
      */
     public function getFacets()
     {
-        $rez = array();
-        $nodesFacetsConfig = \CB\Config::get('node_facets');
-        // echo $this->getId($this->id)."\n";
-        if (empty($nodesFacetsConfig[$this->getId($this->id)])) {
-            if (empty($this->parent)) {
-                return $rez;
-            }
+        $cfg = $this->getNodeParam('facets');
 
-            return $this->parent->getFacets();
+        if (empty($cfg['data'])) {
+            return;
         }
-
-        $cfg = $nodesFacetsConfig[$this->id];
 
         //creating facets
         $facetsDefinitions = \CB\Config::get('facet_configs');
         $facets = array();
-        foreach ($cfg as $k => $v) {
+
+        foreach ($cfg['data'] as $k => $v) {
             $name = $k;
             $config = null;
             if (is_scalar($v)) {
@@ -158,5 +172,51 @@ class Base implements \CB\Interfaces\TreeNode
         /* end of add pivot facet if we are in pivot view*/
 
         return $facets;
+    }
+
+    /**
+     * Get param for current node(considered last node in active path)
+     *
+     * @param  varchar $param for now using to get 'facets' or 'DC'
+     * @return array
+     */
+    public function getNodeParam($param = 'facets')
+    {
+        // check if directly set into node config
+        if (isset($this->config[$param])) {
+            return array(
+                'from' => $this->getId()
+                ,'data' => $this->config[$param]
+            );
+        }
+
+        //check in config
+        $paramConfigs = \CB\Config::get('node_'.$param);
+
+        if (empty($paramConfigs[$this->getId($this->id)])) {
+            if (empty($this->parent)) {
+                return array();
+            }
+
+            return $this->parent->getParentNodeParam($param);
+        }
+
+        return array(
+            'from' => $this->getId()
+            ,'data' => $paramConfigs[$this->id]
+        );
+    }
+
+    /**
+     * get params for parent nodes (not last node in active path)
+     *
+     * Generally this method should work as getNodeParam but for
+     * descendant class Dbnode this method should avoid checking templates config
+     * @param  varchar $param same as for getNodeParam
+     * @return variant
+     */
+    public function getParentNodeParam($param = 'facets')
+    {
+        return $this->getNodeParam($param);
     }
 }

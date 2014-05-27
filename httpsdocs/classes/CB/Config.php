@@ -444,11 +444,11 @@ class Config extends Singleton
     {
         /* post processing the obtained config */
 
+        //facet definitions defined globally in casebox config
         $dfd = array();
-        //get facet definitions defined globally in casebox config
-        if (!empty($cfg['default_facets'])) {
-            $dfd = Util\toJSONArray($cfg['default_facets']);
-            unset($cfg['default_facets']);
+        if (!empty($cfg['default_facet_configs'])) {
+            $dfd = Util\toJSONArray($cfg['default_facet_configs']);
+            unset($cfg['default_facet_configs']);
         }
 
         //check if have defined facets in core config
@@ -456,6 +456,19 @@ class Config extends Singleton
             $dfd = array_merge($dfd, Util\toJSONArray($cfg['facet_configs']));
         }
         $cfg['facet_configs'] = $dfd;
+
+        //detect Display Columns definitions in casebox config
+        $dcd = array();
+        if (!empty($cfg['default_DC'])) {
+            $dcd = Util\toJSONArray($cfg['default_DC']);
+            unset($cfg['default_DC']);
+        }
+
+        //check if have defined facets in core config
+        if (!empty($cfg['DC'])) {
+            $dcd = array_merge($dcd, Util\toJSONArray($cfg['DC']));
+        }
+        $cfg['DC'] = $dcd;
 
         // detect core plugins (use defined or default if set)
         $plugins = array();

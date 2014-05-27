@@ -24,13 +24,17 @@ Ext.onReady(function(){
         ,'objectsaction'
         ,'userprofileupdated'
     );
-    Ext.state.Manager.setProvider( new Ext.state.CookieProvider({
-        expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
-    }));
 
     initApp();
 
     Ext.Direct.addProvider(Ext.app.REMOTING_API);
+
+    Ext.state.Manager.setProvider(
+        new CB.state.DBProvider()
+        // new Ext.state.CookieProvider({
+        //     expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
+        // })
+    );
 
     Ext.Direct.on('login', function(r, e){
         /*if(r.method == 'logout') /**/

@@ -50,7 +50,7 @@ class Search extends Solr\Client
             ,'fl' => "id, pid, path, name, template_type, subtype, system, ".
                 "size, date, date_end, oid, cid, cdate, uid, udate, case_id, acl_count, ".
                 "case, template_id, user_ids, status, task_status, category_id, importance, completed, versions"
-            ,'sort' => 'ntsc asc,order asc'
+            ,'sort' => 'ntsc asc'
         );
         /* initial parameters */
 
@@ -76,10 +76,12 @@ class Search extends Solr\Client
         }
 
         /*analize sort parameter (ex: status asc,date_end asc)/**/
+        $sort = array('order' => 'asc');
         if (isset($p['sort'])) {
-            $sort = array();
             if (!is_array($p['sort'])) {
-                $sort = array($p['sort'] => empty($p['dir']) ? 'asc' : strtolower($p['dir']) );
+                $sort[$p['sort']] = empty($p['dir'])
+                    ? 'asc'
+                    : strtolower($p['dir']);
             } else {
                 foreach ($p['sort'] as $s) {
                     $s = explode(' ', $s);
@@ -92,10 +94,13 @@ class Search extends Solr\Client
                     $f = $this->replaceSortFields[$f];
                 }
 
-                $this->params['sort'] .= ",$f $d";
             }
         } else {
-            $this->params['sort'] .= ', sort_name asc';//, subtype asc
+            $sort['sort_name'] = 'asc';//, subtype asc
+        }
+
+        foreach ($sort as $k => $v) {
+            $this->params['sort'] .= ",$k $v";
         }
 
         /* adding additional query filters */

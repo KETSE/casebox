@@ -104,10 +104,7 @@ return array_merge(
             ,'//js/DB/TemplateStore.js'
 
             ,'//js/CB.ViewPort.js'
-        )
 
-        ,'jsdev' => array(
-            '//js/app.js'
             ,'//js/PluginPanel.js'
             ,'//js/PluginsPanel.js'
             ,'//js/form/view/object/Preview.js'
@@ -126,8 +123,13 @@ return array_merge(
             ,'//js/objects/plugins/Versions.js'
             ,'//js/objects/plugins/CurrentVersion.js'
             ,'//js/CB.WebdavWindow.js'
-
             ,'//js/SearchPanel.js'
+        )
+
+        ,'jsdev' => array(
+            '//js/app.js'
+
+            ,'//js/state/DBProvider.js'
         )
     )
 );

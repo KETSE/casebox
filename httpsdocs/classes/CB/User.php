@@ -1113,7 +1113,7 @@ class User
         return $rez;
     }
 
-    private function getUserConfig()
+    private static function getUserConfig()
     {
         $res = DB\dbQuery(
             'SELECT cfg
@@ -1132,7 +1132,7 @@ class User
         return $cfg;
     }
 
-    private function setUserConfig($cfg)
+    private static function setUserConfig($cfg)
     {
         DB\dbQuery(
             'UPDATE users_groups
@@ -1143,6 +1143,32 @@ class User
                 ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
             )
         ) or die(DB\dbQueryError());
+    }
+
+    /**
+     * get interface state array of the current user
+     * @return array
+     */
+    public static function getUserState()
+    {
+        $cfg = static::getUserConfig();
+
+        return empty($cfg['state'])
+            ? array()
+            : $cfg['state'];
+    }
+
+    /**
+     * set user state array
+     * @param array $state
+     */
+    public static function setUserState($state)
+    {
+        $cfg = static::getUserConfig();
+
+        $cfg['state'] = $state;
+
+        static::setUserConfig($cfg);
     }
 
     public function getTSVConfig()
