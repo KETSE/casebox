@@ -259,8 +259,19 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if( CB.DB && CB.DB.templates && (CB.DB.templates.getCount() > 0) ){
             this.onLogin();
             App.DD = new CB.DD();
+
+            this.checkUrlLocate.defer(1500);
         }else {
             this.initCB.defer(500, this);
+        }
+    }
+
+    //check if a locate id is specified in url
+    ,checkUrlLocate: function() {
+        var locateId = String(window.location.href.split('locate=')[1]).split('&')[0];
+
+        if(!Ext.isEmpty(locateId)) {
+            App.locateObject(locateId);
         }
     }
 

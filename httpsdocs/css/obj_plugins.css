@@ -162,7 +162,10 @@ background-color: #FFFFCC;
 }
 
 .block-plugin td.obj div {
-    margin: auto; width: 16px; height: 16px;
+    display: inline-block;
+    margin: auto;
+    width: 16px;
+    height: 16px;
 }
 .files-drop {
     display: block;

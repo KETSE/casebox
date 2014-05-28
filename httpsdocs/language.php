@@ -198,7 +198,7 @@ function updateTranslationsFiles()
 {
     $rez = array();
     $res = DB\dbQuery(
-        'SELECT name, '.\CB\Config::get('languages').'
+        'SELECT name, `'.implode('`,`', \CB\Config::get('languages')).'`
         FROM `casebox`.translations
         WHERE `type` in (0,2)'
     ) or die( DB\dbQueryError() );

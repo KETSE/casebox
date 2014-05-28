@@ -1,3 +1,20 @@
+CaseBox 1.9.2034 (2014-05-28)
+==============================
+New Features, Improvements
+--------------------------
+- added links to files in notification emails
+- added "Permalink" in submenu of the right panel for files
+- display deleted information in system properties plugin for deleted nodes
+- implemented direct links to files
+- changed preview url to /<core>/v-<id>[_version_id]/?
+    apache configuration changed
+
+Fixed Bugs:
+----------
+- Increase height of version item in VersionPlugin
+- After saving an object, the selected node in preview becomes the Parent
+- Tree state: saving the list of expanded nodes
+
 CaseBox 1.9.203 (2014-05-27)
 ==============================
 New Features, Improvements

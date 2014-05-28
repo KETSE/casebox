@@ -43,6 +43,7 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
         }
     }
     $_SESSION['message'] = array_shift($errors);
+
 } elseif (!empty($_SESSION['check_TSV']) && !empty($_POST['c'])) {
     $u = new User();
     $cfg = $u->getTSVConfig();
@@ -64,4 +65,11 @@ if (!User::isLoged()) {
     exit(header('Location: '.$coreUrl.'login.php'));
 }
 
-header('Location: '.$coreUrl.'index.php');
+if (!empty($_SESSION['redirect']['view'])) {
+    $viewId = $_SESSION['redirect']['view'];
+    unset($_SESSION['redirect']['view']);
+    header('Location: '.$coreUrl.'v-' . $viewId);
+
+} else {
+    header('Location: '.$coreUrl.'index.php');
+}

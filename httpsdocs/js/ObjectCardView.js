@@ -153,6 +153,12 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onWebDAVLinkClick
             }
+            ,permalink: {
+                text: 'Permalink'
+                ,id: 'permalink' + this.instanceId
+                ,scope: this
+                ,handler: this.onPermalinkClick
+            }
             ,'new': {
                 text: L.New
                 ,name: 'newmenu'
@@ -404,6 +410,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             return;
         }
 
+        var err = new Error();
+
+        // throw new Error('arrrgh');
         var id = this.requestedLoadData
             ? Ext.value(this.requestedLoadData.nid, this.requestedLoadData.id)
             : null;
@@ -580,6 +589,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(this.history)) {
             this.actions.back.setDisabled(true);
         }
+
         this.doLoad();
     }
 
@@ -591,6 +601,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         objectData.viewIndex = 1;
         this.delayedLoadTask.cancel();
         this.requestedLoadData = objectData;
+
         this.doLoad();
     }
 
@@ -652,9 +663,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 p.name = name;
                 if(this.goBackOnSave) {
                     this.onBackClick();
+
                 } else {
                     p.viewIndex = 0;
                     this.requestedLoadData = p;
+
                     this.doLoad();
                     // this.skipNextPreviewLoadOnBrowserRefresh = true;
                 }
@@ -678,6 +691,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             var p = Ext.apply({}, this.loadedData);
             p.viewIndex = 0;
             this.requestedLoadData = p;
+
             this.doLoad();
         }
         delete this.goBackOnSave;
@@ -735,6 +749,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         p.viewIndex = 2;
         this.delayedLoadTask.cancel();
         this.requestedLoadData = p;
+
         this.doLoad();
     }
 
@@ -742,6 +757,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         if(Ext.isEmpty(data)) {
             data = this.loadedData;
         }
+
         this.load(data);
     }
 
@@ -804,6 +820,12 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             this.loadedData
             ,false
         );
+    }
+
+    ,onPermalinkClick: function(b, e) {
+        window.prompt(
+            'Copy to clipboard: Ctrl+C, Enter'
+            , window.location.origin + '/' + App.config.coreName + '/v-' + this.loadedData.id + '/');
     }
 
     ,onLockPanelEvent: function(status) {

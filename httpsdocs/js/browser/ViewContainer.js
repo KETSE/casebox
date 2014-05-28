@@ -699,7 +699,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
         /* end of updating breadcrumb */
 
-        this.onObjectsSelectionChange([]);
+        // this.onObjectsSelectionChange([]);
         this.fireEvent('viewloaded', proxy, o, options);
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
@@ -972,6 +972,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     ,can: s[0].can
                 };
         }
+
         this.objectPanel.load(data);
     }
 

@@ -134,40 +134,6 @@ class Search extends Solr\Client
                 $fq[] = 'pids:('.implode(' OR ', $ids).')';
             }
         }
-        if (!empty($p['types'])) {
-            if (!is_array($p['types'])) {
-                $p['types'] = explode(',', $p['types']);
-            }
-            for ($i=0; $i < sizeof($p['types']); $i++) {
-                switch ($p['types'][$i]) {
-                    case 'folder':
-                        $p['types'][$i] = 1;
-                        break;
-                    case 'link':
-                        $p['types'][$i] = 2;
-                        break;
-                    case 'case':
-                        $p['types'][$i] = 3;
-                        break;
-                    case 'object':
-                        $p['types'][$i] = 4;
-                        break;
-                    case 'file':
-                        $p['types'][$i] = 5;
-                        break;
-                    case 'task':
-                        $p['types'][$i] = 6;
-                        break;
-                    case 'event':
-                        $p['types'][$i] = 7;
-                        break;
-                    default: $p['types'][$i] = intval($p['types'][$i]);
-                }
-            }
-            if (!empty($p['types'])) {
-                $fq[] = 'type:('.implode(' OR ', $p['types']).')';
-            }
-        }
 
         if (!empty($p['templates'])) {
             $ids = Util\toNumericArray($p['templates']);

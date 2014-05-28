@@ -568,7 +568,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         };
 
         var n = this.getSelectionModel().getSelectedNode();
-        if(n) {
+        if(n && Ext.get(n.getUI().getEl()).isVisible(true)) {
             rez.selected = n.getPath('nid');
         }
 

@@ -328,6 +328,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         for (var i = 0; i < s.length; i++) {
             s[i] = s[i].data;
         }
+
         this.fireEvent('selectionchange', s);
     }
 

@@ -27,6 +27,9 @@ class SystemProperties extends Base
                 ,t.cdate
                 ,t.uid
                 ,t.udate
+                ,t.dstatus
+                ,t.did
+                ,t.ddate
             FROM tree t
             JOIN tree_info ti on t.id = ti.id
             LEFT JOIN tree tt on t.template_id = tt.id
@@ -42,6 +45,12 @@ class SystemProperties extends Base
 
             $r['uid_text'] = User::getDisplayName($r['uid']);
             $r['udate_text'] = Util\formatAgoTime($r['udate']);
+
+            if (!empty($r['dstatus'])) {
+                $r['did_text'] = User::getDisplayName($r['did']);
+                $r['ddate_text'] = Util\formatAgoTime($r['ddate']);
+            }
+
             $rez['data'] = $r;
         }
         $res->close();
