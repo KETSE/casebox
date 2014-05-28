@@ -51,7 +51,7 @@ exportTranslation($dbh, $csv, $lg);
 function exportTranslation($dbh, $csv, $lg)
 {
 
-    $sql = "SELECT id, name, en, `$lg` as title, info FROM casebox.translations";
+    $sql = "SELECT id, name, en, `$lg` as title, info FROM casebox.translations WHERE deleted=0";
 
     if (($handle = fopen($csv, "w")) === false) {
         echo ("Can't open file for writing\n");
