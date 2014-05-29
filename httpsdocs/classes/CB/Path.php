@@ -204,6 +204,109 @@ class Path
         return $path;
     }
 
+    /**
+     * create node classes for given node configs
+     * @param  array $nodeConfigs
+     * @return array
+     */
+    public static function getNodeClasses($nodeConfigs)
+    {
+        $rez = array();
+
+        foreach ($nodeConfigs as $p => $cfg) {
+            $class = empty($cfg['class']) ? '\\CB\\TreeNode\\'.$p : $cfg['class'];
+            $cfg['guid'] = static::getGUID($p);
+            $cfg['class'] = $class;
+
+            try {
+                $class = new $class($cfg);
+                $rez[$cfg['guid']] = $class;
+            } catch (\Exception $e) {
+                debug('error creating class '.$class);
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
+     * create an array of node classes for given path and nodeConfigs
+     * @param  varchar $path
+     * @param  [type]  $treeNodeGUIDConfigs
+     * @return [type]
+     */
+    public static function createNodesPath($path, $treeNodeGUIDConfigs)
+    {
+
+        $rez = array();
+        $path = explode('/', $path);
+
+        while (!empty($path)) {
+            $npid = null;
+            $nodeId = null;
+
+            $el = array_shift($path);
+            if (strlen($el) < 1) {
+                continue;
+            }
+
+            $el = explode('-', $el);
+            if (sizeof($el) > 1) {
+                $npid = $el[0];
+                $nodeId = $el[1];
+            } else {
+                $npid = static::getGUID('Dbnode');
+                $nodeId = $el[0];
+            }
+
+            $cfg = empty($treeNodeGUIDConfigs[$npid])
+                ? array( 'class' => 'CB\TreeNode\\Dbnode', 'guid' => $npid)
+                : $treeNodeGUIDConfigs[$npid];
+
+            $class = new $cfg['class']($cfg, $nodeId);
+            //set parent node
+            if (!empty($rez)) {
+                $class->parent = $rez[sizeof($rez) - 1];
+            }
+
+            array_push(
+                $rez,
+                $class
+            );
+        }
+
+        return $rez;
+    }
+
+    /**
+     * get GUID for a given virtual tree node name
+     * @param  varchar $name
+     * @return int
+     */
+    public static function getGUID($name)
+    {
+        $rez = null;
+        $res = DB\dbQuery(
+            'SELECT id FROM `casebox`.guids WHERE name = $1',
+            $name
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['id'];
+        } else {
+            DB\dbQuery(
+                'INSERT INTO `casebox`.guids
+                (`name`)
+                VALUES ($1)',
+                $name
+            ) or die(DB\dbQueryError());
+            $rez = DB\dbLastInsertId();
+        }
+        $res->close();
+
+        return $rez;
+    }
+
     //------------------------------------------------------------------------
 
     /**
@@ -223,7 +326,7 @@ class Path
         $GUIDConfigs = array();
         foreach ($treeNodeConfigs as $plugin => $cfg) {
             $class = empty($cfg['class']) ? '\\CB\\TreeNode\\'.$plugin : $cfg['class'];
-            $cfg['guid'] = Browser::getGUID($plugin);
+            $cfg['guid'] = static::getGUID($plugin);
             $cfg['class'] = $class;
             $GUIDConfigs[$cfg['guid']] = $cfg;
         }

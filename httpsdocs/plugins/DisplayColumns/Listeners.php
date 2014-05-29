@@ -2,31 +2,18 @@
 namespace DisplayColumns;
 
 use CB\Cache;
+use CB\Util;
+use CB\State;
 
 class Listeners
 {
-    private $class = null;
-    public function __construct()
-    {
-        $this->class = DCSingleton::getInstance();
-    }
 
     public function onBeforeSolrQuery(&$p)
     {
-        $searchClass = &$p['class'];
         $sp = &$p['params'];
-        $ip = &$p['inputParams'];
+        $this->inputParams = &$p['inputParams'];
 
-        $pid = empty($ip['pid']) ? false : $ip['pid'];
-        $pid = is_array($pid) ? $pid[0] : $pid;
-
-        $templateId = $this->findTemplate($p);
-
-        if (empty($pid) && empty($templateId)) {
-            return;
-        }
-
-        $solrFields = $this->class->getSolrColumns($pid, $templateId);
+        $solrFields = $this->getSolrFields();
 
         if (!empty($solrFields['fields'])) {
             $fl = explode(',', $sp['fl']);
@@ -39,7 +26,6 @@ class Listeners
                 }
             }
             $sp['fl'] = implode(',', $fl);
-            // if(!empty())
         }
     }
 
@@ -49,23 +35,15 @@ class Listeners
         $ip = &$p['inputParams'];
         $data = &$p['result']['data'];
 
-        $pid = empty($ip['pid']) ? false : $ip['pid'];
-        $pid = is_array($pid) ? $pid[0] : $pid;
-
-        $templateId = $this->findTemplate($p);
-
-        if (empty($pid) && empty($templateId)) {
-            return;
-        }
-
-        $displayColumns = $this->class->getCustomDisplayColumns($pid, $templateId);
         $userLanguage = \CB\Config::get('user_language');
 
-        if (!empty($displayColumns)) {
+        $displayColumns = $this->getDC();
+
+        if (!empty($displayColumns['data'])) {
             //set custom display columns data
             $customColumns = array();
 
-            foreach ($displayColumns as $k => $col) {
+            foreach ($displayColumns['data'] as $k => $col) {
                 $fieldName = is_numeric($k) ? $col : $k;
                 $customColumns[$fieldName] = is_numeric($k) ? array() : $col;
             }
@@ -76,6 +54,7 @@ class Listeners
                 $template = $obj->getTemplate();
 
                 foreach ($customColumns as $fieldName => &$col) {
+                    //detect field name
                     $customField = $fieldName;
 
                     if (!empty($col['field_' . $userLanguage])) {
@@ -88,26 +67,39 @@ class Listeners
                     $templateField = null;
                     $values = array();
 
-                    switch ($customField[0]) {
+                    if (($customField[0] == 'solr') || (!empty($col['solr_column_name']))) {
+                        $solrFieldName = empty($col['solr_column_name'])
+                            ? $customField[1]
+                            : $col['solr_column_name'];
 
-                        case 'solr':
-                            $templateField = $template->getField($customField[1]);
-                            if (empty($templateField)) {
-                                $templateField = array(
-                                    'type' => 'varchar'
-                                    ,'title' => $customField[1]
-                                );
-                            }
-                            $values = array(@$doc[$customField[1]]);
-                            break;
+                        $customField = ($customField[0] == 'solr')
+                            ? $customField[1]
+                            : $customField[0];
 
-                        case 'calc':
+                        $values = array(@$doc[$solrFieldName]);
+
+                        $templateField = $template->getField($solrFieldName);
+                        if (empty($templateField)) {
+                            $templateField = array(
+                                'type' => 'varchar'
+                                ,'name' => $solrFieldName
+                                ,'title' => @Util\coalesce(
+                                    $col[$userLanguage],
+                                    $col['title_'.$userLanguage],
+                                    $col['title'],
+                                    $col['name'],
+                                    $customField
+                                )
+                            );
+                        }
+                        // $values = array(@$doc[$customField[1]]);
+
+                    } elseif ($customField[0] == 'calc') { //calculated field
                             //CustomMethod call;
                             // $templateField = $template->getField($fieldName);
                             // $values = array();
-                            break;
 
-                        default:
+                    } else { //default
                             $templateField = $template->getField($customField[0]);
                             $values = $obj->getFieldValue($customField[0]);
                     }
@@ -125,32 +117,99 @@ class Listeners
                     }
                 }
             }
-            $p['result']['DC'] = $customColumns;
+
+            $rez = $customColumns;
+        }
+
+        /* get user state and merge the state with display columns */
+
+        $stateFrom = empty($displayColumns['from'])
+            ? 'default'
+            : $displayColumns['from'];
+
+        $state = State\DBProvider::getGridViewState($stateFrom);
+        if (!empty($state['columns'])) {
+            $rez = array();
+            foreach ($state['columns'] as $k => $c) {
+                if (!empty($customColumns[$k])) {
+                    $c = array_merge($customColumns[$k], $c);
+                    unset($customColumns[$k]);
+                }
+                $rez[$k] = $c;
+            }
+
+            if (!empty($customColumns)) {
+                $rez = array_merge($rez, $customColumns);
+            }
+        }
+
+        /* end of get user state and merge the state with display columns */
+
+        if (!empty($rez)) {
+            $p['result']['DC'] = $rez;
         }
     }
 
     /**
-     * find the template id from input params or get it from last node in path
-     * @param  array $p
-     * @return int   | false
+     * get display columns for last node in active path
+     * @return array
      */
-    protected function findTemplate(&$p)
+    public static function getDC()
     {
-        $rez = false;
-        $ip = &$p['inputParams'];
+        $rez = array();
 
-        if (!empty($ip['template_id'])) {
-            $rez = $ip['template_id'];
-        } else {
-            $path = Cache::get('current_path');
+        $path = Cache::get('current_path');
 
-            if (!empty($path)) {
-                $node = $path[sizeof($path)-1];
-                $data = $node->getData();
+        if (!empty($path)) {
+            $node = $path[sizeof($path)-1];
+            $rez = $node->getNodeParam('DC');
+        }
 
-                if (!empty($data['template_id'])) {
-                    $rez = $data['template_id'];
+        return $rez;
+    }
+
+    /**
+     * get solr columns for a node based on display columns
+     * @return array
+     */
+    public function getSolrFields($nodeId = false, $templateId = false)
+    {
+        $rez = array(
+            'fields' => array()
+            ,'sort' => array()
+        );
+
+        $displayColumns = $this->getDC();
+
+        if (empty($displayColumns['data'])) {
+            return $rez;
+        }
+
+        foreach ($displayColumns['data'] as $column) {
+            if (is_array($column) && !empty($column['solr_column_name'])) {
+                $rez['fields'][$column['solr_column_name']] = 1;
+
+                if ((@$this->inputParams['sort'] == $column['solr_column_name']) &&
+                    !empty($this->inputParams['dir'])
+                ) {
+                    $rez['sort'][] = $column['solr_column_name'] . ' ' . strtolower($this->inputParams['dir']);
+                } elseif (!empty($column['sort'])) {
+                    $rez['sort'][] = $column['solr_column_name'] . ' ' . $column['sort'];
                 }
+
+            } elseif (is_scalar($column)) {
+                $a = explode(':', $column);
+                if ($a[0] == 'solr') {
+                    $rez['fields'][$a[1]] = 1;
+                }
+            }
+        }
+
+        if (!empty($rez['fields'])) {
+            $rez['fields'] = array_keys($rez['fields']);
+
+            if (!empty($rez['sort'])) {
+                $rez['sort'] = 'ntsc,'.implode(',', $rez['sort']);
             }
         }
 

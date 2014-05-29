@@ -1,9 +1,10 @@
 <?php
 namespace CB\Objects;
 
-use CB\DB as DB;
-use CB\Util as Util;
-use CB\L as L;
+use CB\DB;
+use CB\Util;
+use CB\User;
+use CB\L;
 
 /**
  * Template class
@@ -405,6 +406,17 @@ class Template extends Object
             } else {
                 $value = null;
             }
+        }
+
+        /*check if field is not reserved field for usernames (cid, oid, uid, did)*/
+        if (!empty($field['name']) && in_array($field['name'], array('cid', 'oid', 'uid', 'did'))) {
+            $value = Util\toNumericArray($value);
+            for ($i=0; $i < sizeof($value); $i++) {
+                $value[$i] = User::getDisplayName($value[$i]);
+            }
+            $value = implode(', ', $value);
+
+            return $condition.$value;
         }
 
         switch ($field['type']) {

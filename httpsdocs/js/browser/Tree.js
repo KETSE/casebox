@@ -13,6 +13,9 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     ,hideBorders: true
     ,border: false
     ,hideToolbar: true
+    ,stateful: true
+    ,stateId: 'btree' //brpwser tree
+    ,stateEvents: ['expandnode', 'collapsenode', 'beforedestroy']
     ,initComponent: function(){
         if(Ext.isEmpty(this.data)) {
             this.data = {};
@@ -163,6 +166,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             ,root: new Ext.tree.AsyncTreeNode(rootConfig)
             ,listeners:{
                 scope: this
+                ,afterrender: this.restoreTreeState
                 ,beforeappend: this.onBeforeNodeAppend
                 ,load: function(node){ this.sortNode(node); }
                 ,dblclick: this.onDblClick
@@ -533,6 +537,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             );
         }
     }
+
     ,onExpandClick: function (b, e) {
         n = this.getSelectionModel().getSelectedNode();
         n.expand(
@@ -544,48 +549,73 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             ,this
         );
     }
+
     ,onCollapseClick: function (b, e) {
         n = this.getSelectionModel().getSelectedNode();
         n.collapse();
         this.onSelectionChange(this.sm, n);
     }
+
     ,onShowFoldersChildsClick: function(b, e){
         this.showFoldersContent = !b.checked;
-        this.saveTreeState();
+        this.fireEvent('savestate');
         this.root.reload(this.restoreTreeState, this);
     }
-    ,saveTreeState: function () {
-        this.treeState = [];
-        this.lastSelectedPath = null;
-        n = this.getSelectionModel().getSelectedNode();
-        if(n) this.lastSelectedPath = n.getPath('nid');
+
+    ,getState: function () {
+        var rez = {
+            paths: []
+        };
+
+        var n = this.getSelectionModel().getSelectedNode();
+        if(n && Ext.get(n.getUI().getEl()).isVisible(true)) {
+            rez.selected = n.getPath('nid');
+        }
+
         this.root.cascade(
             function(n){
                 if(n.isExpanded()) {
-                    this.treeState.push(n.getPath('nid'));
+                    rez.paths.push(n.getPath('nid'));
                 }
             }
             ,this
         );
+
+        return rez;
     }
-    ,restoreTreeState: function () {
-        if(Ext.isEmpty(this.treeState)) {
+
+    ,restoreTreeState: function() {
+        var state = Ext.state.Manager.getProvider().get(this.stateId);
+        this.applyState(state);
+    }
+
+    ,applyState: function (state) {
+        if(!this.rendered){
             return;
         }
+
+        if(Ext.isEmpty(state)) {
+            return;
+        }
+
         var f = function(bSuccess, oLastNode){
             if(oLastNode) {
                 oLastNode.expand();
             }
         };
-
-        for (var i = 0; i < this.treeState.length; i++) {
-            this.expandPath(
-                this.treeState[i]
-                ,'nid'
-                ,f
-            );
+        if(!Ext.isEmpty(state.paths)) {
+            for (var i = 0; i < state.paths.length; i++) {
+                this.expandPath(
+                    state.paths[i]
+                    ,'nid'
+                    ,f
+                );
+            }
         }
-        if(!Ext.isEmpty(this.lastSelectedPath)) this.selectPath(this.lastSelectedPath, 'nid');
+
+        if(!Ext.isEmpty(state.selected)) {
+            this.selectPath(state.selected, 'nid');
+        }
     }
 
     ,onCutClick: function(b, e) {
@@ -593,6 +623,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         this.onCopyClick(b, e);
         App.clipboard.setAction('move');
     }
+
     ,onCopyClick: function(b, e) {
         if(this.actions.copy.isDisabled()) return;
         n = this.selModel.getSelectedNode();

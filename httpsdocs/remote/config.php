@@ -20,6 +20,7 @@ $API = array_merge(
                 ,'getObjectsForField'   => array('len' => 1)
             )
         )
+
         ,'CB_Browser_Actions' => array(
             'methods' => array(
                 'copy'          => array('len' => 1)
@@ -44,6 +45,7 @@ $API = array_merge(
                 ,'getRootProperties'=> array('len' => 1)
             )
         )
+
         ,'CB_BrowserView' => array(
             'methods' => array(
                 'getChildren'       => array('len' => 1)
@@ -53,6 +55,7 @@ $API = array_merge(
                 ,'rename'           => array('len' => 1)
             )
         )
+
         ,'CB_Favorites' => array(
             'methods'=>array(
                 'create'        =>  array('len' => 1)
@@ -147,6 +150,7 @@ $API = array_merge(
                 ,'renameGroup'          => array('len' => 1)
             )
         )
+
         ,'CB_Security' => array(
             'methods' => array(
                 'getUserGroups'         => array('len' => 1)
@@ -166,16 +170,26 @@ $API = array_merge(
                 ,'removeChildPermissions'=> array('len' => 1)
             )
         )
+
         ,'CB_System' => array(
             'methods' => array(
                 'getCountries'         => array('len' => 0)
-                ,'getTimezones'         => array('len' => 0)
+                ,'getTimezones'        => array('len' => 0)
             )
         )
+
         ,'CB_Search' => array(
             'methods' => array(
                 'load'       => array('len' => 1)
-                ,'query'       => array('len' => 1)
+                ,'query'     => array('len' => 1)
+            )
+        )
+
+        ,'CB_State_DBProvider' => array(
+            'methods' => array(
+                'read'               => array('len' => 0)
+                ,'set'               => array('len' => 1)
+                ,'saveGridViewState' => array('len' => 1)
             )
         )
     )

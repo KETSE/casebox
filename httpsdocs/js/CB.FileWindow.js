@@ -507,7 +507,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
      * @return void
      */
     ,onNewWindowClick: function(b, e){
-        window.open('/' + App.config.coreName + '/preview/'+this.data.id+'_.html');
+        window.open('/' + App.config.coreName + '/v-' + this.data.id + '/?e=1');
     }
 
     /**

@@ -53,8 +53,12 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 defaults: {
                     width: 120,
                     sortable: true
-                },
-                columns: columns
+                }
+                ,columns: columns
+                ,listeners: {
+                    scope: this
+                    ,hiddenchange: this.saveGridState
+                }
             })
             ,viewConfig: {
                 forceFit: false
@@ -146,6 +150,11 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                         // }
                     }
                 }
+
+                ,columnmove:    this.saveGridState
+                ,columnresize:  this.saveGridState
+                ,sortchange:    this.saveGridState
+                ,groupchange:   this.saveGridState
             }
             ,keys: [{
                     key: Ext.EventObject.DOWN //down arrow (select forst row in the greed if no row already selected)  - does not work
@@ -244,8 +253,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 }
             })
 
-            ,statefull: true
-            ,stateId: Ext.value(this.gridStateId, 'fvg')//folder view grid
             ,dropZoneConfig: {
                 text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
                 ,onScrollerDragDrop: this.onScrollerDragDrop
@@ -321,6 +328,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         for (var i = 0; i < s.length; i++) {
             s[i] = s[i].data;
         }
+
         this.fireEvent('selectionchange', s);
     }
 
@@ -354,6 +362,50 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
     }
     ,onReloadClick: function() {
         this.fireEvent('reload', this);
+    }
+
+    ,saveGridState: function() {
+        var rez = {columns: {}}
+            ,store = this.store
+            ,cm = this.grid.getColumnModel()
+            ,gs
+            ,di;
+
+        for(var i = 0, c; (c = cm.config[i]); i++){
+            di = cm.getDataIndex(i);
+            rez.columns[di] = {
+                idx: i
+                ,width: c.width
+            };
+            if(c.hidden){
+                rez.columns[di].hidden = true;
+            }
+            if(c.sortable){
+                rez.columns[di].sortable = true;
+            }
+        }
+
+        if(this.store){
+            ss = this.store.getSortState();
+            if(ss){
+                rez.sort = ss;
+            }
+            if(this.store.getGroupState){
+                gs = this.store.getGroupState();
+                if(gs){
+                    rez.group = gs;
+                }
+            }
+        }
+
+        CB_State_DBProvider.saveGridViewState(
+            {
+                params: this.refOwner.params
+                ,state: rez
+            }
+        );
+
+        return rez;
     }
 });
 

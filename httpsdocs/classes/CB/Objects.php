@@ -423,6 +423,11 @@ class Objects
     public static function getSolrData(&$object_record)
     {
         $obj = Objects::getCustomClassByObjectId($object_record['id']);
+
+        if (empty($obj)) {
+            return;
+        }
+
         $objData = $obj->load();
         $linearData = $obj->getLinearData();
         $template = $obj->getTemplate();
@@ -463,9 +468,13 @@ class Objects
                 /* make changes to value if needed */
 
                 if (@$field['cfg']['faceting'] && in_array($field['type'], array('combo', 'int', '_objects'))) {
+
                     $solr_field = $field['solr_column_name'];
+
                     if (!empty($solr_field)) {
+
                         $arr = Util\toNumericArray($f['value']);
+
                         foreach ($arr as $v) {
                             if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
                                 $object_record[$solr_field][] = $v;

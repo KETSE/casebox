@@ -802,7 +802,7 @@ class Files
         $coreUrl = Config::get('core_url');
 
         $filesDir = Config::get('files_dir');
-        $filesPreviewDir = Config::get('files_dir');
+        $filesPreviewDir = Config::get('files_preview_dir');
 
         $sql = 'SELECT f.id
                 ,f.content_id
@@ -915,7 +915,7 @@ class Files
                 $content = $pe->purify(
                     $content,
                     array(
-                        'URI.Base' => '/' + $coreName + '/preview/'
+                        'URI.Base' => '/' + $coreName + '/'
                         ,'URI.MakeAbsolute' => true
                     )
                 );
@@ -965,7 +965,7 @@ class Files
                 $image->writeImage($filesPreviewDir.$file['content_id'].'_.png');
                 file_put_contents(
                     $preview_filename,
-                    '<img src="/' + $coreName + '/preview/'.$file['content_id'].
+                    '<img src="/' + $coreName + '/v-'.$file['content_id'].
                     '_.png" class="fit-img" style="margin: auto" />'
                 );
                 break;

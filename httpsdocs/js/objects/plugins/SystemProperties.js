@@ -11,6 +11,7 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
             ,'<tr><td class="k">'+L.Template+'</td><td>{template_name} <span class="dttm">(id: {template_id})</span></td></tr>'
             ,'<tr><td class="k">'+L.Created+'</td><td>{cid_text}<br><span class="dttm" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</span></td></tr>'
             ,'<tr><td class="k">'+L.Modified+'</td><td>{uid_text}<br><span class="dttm" title="{[ displayDateTime(values.udate) ]}">{udate_text}</span></td></tr>'
+            ,'{[ Ext.isEmpty(values.did_text) ?\'\' : \'<tr><td class="k">\' + L.Deleted + \'</td><td>\' + values.did_text + \'<br><span class="dttm" title="\' + displayDateTime(values.ddate) + \'">\' + values.ddate_text + \'</span></td></tr>\']}'
             ,'</tbody></table>'
         );
 
@@ -65,6 +66,7 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
         if(this.params) {
             if(CB.DB.templates.getType(this.params.template_id) == 'file') {
                 rez.menu['webdavlink']  = {};
+                rez.menu['permalink']  = {};
             }
         }
 

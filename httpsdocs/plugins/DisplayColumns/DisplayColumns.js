@@ -38,9 +38,31 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
 
     ,getNewMetadata: function(){
         var rez = Ext.apply({}, this.defaultMeta);
+        var currentColumns = Ext.apply({}, this.currentColumns);
+
+        var key, fieldData;
+
+
+        for (var i = 0; i < rez.fields.length; i++) {
+            fieldData = rez.fields[i];
+
+            if(Ext.isString(rez.fields[i])) {
+                key = rez.fields[i];
+                fieldData = {
+                    name: key
+                };
+            } else {
+                key = rez.fields[i].name;
+            }
+
+            if(Ext.isDefined(currentColumns[key])) {
+                rez.fields[i] = Ext.copyTo(fieldData, currentColumns[key], ['type']);
+                delete currentColumns[key];
+            }
+        }
 
         Ext.iterate(
-            this.currentColumns
+            currentColumns
             ,function(key, value, obj){
                 var field = {
                     name: key
@@ -50,23 +72,64 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
             }
             ,this
         );
+
         return rez;
     }
 
     ,getNewColumns: function(){
         var rez = Ext.apply([], this.defaultColumns);
+        var currentColumns = Ext.apply({}, this.currentColumns);
+        var i;
+
+        for (i = 0; i < rez.length; i++) {
+            if(Ext.isDefined(currentColumns[rez[i].dataIndex])) {
+                var nd = currentColumns[rez[i].dataIndex];
+
+                rez[i] = Ext.apply(rez[i], nd);
+
+                if(nd.width && rez[i].setWidth) {
+                    rez[i].setWidth(nd.width);
+                }
+
+                delete currentColumns[rez[i].dataIndex];
+            }
+        }
+
 
         Ext.iterate(
-            this.currentColumns
+            currentColumns
             ,function(key, value, obj){
                 var column = value;
-                column.dataIndex = key;
-                column.header = Ext.value(column.header, column.title);
-                column.renderer = this.defaultColumnRenderer;
-                rez.push(column);
+                if(key !== 'remove') {
+                    column.dataIndex = key;
+                    column.header = Ext.value(column.header, column.title);
+                    column.renderer = this.defaultColumnRenderer;
+                    rez.push(column);
+                }
             }
             ,this
         );
+
+        /* sort columns */
+        var changed = true;
+        var t;
+
+        i = 0;
+        while(changed || (i < (rez.length - 1))) {
+            changed = false;
+
+            if(Ext.isDefined(rez[i].idx) && Ext.isDefined(rez[i+1].idx)) {
+                if(rez[i].idx > rez[i+1].idx) {
+                    changed = true;
+                    t = rez[i];
+                    rez[i] = rez[i+1];
+                    rez[i+1] = t;
+                    i = -1;
+                }
+            }
+            i++;
+        }
+
         return rez;
     }
 

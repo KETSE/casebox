@@ -72,20 +72,9 @@ class Tasks
         }
         $res->close();
 
-        $res = DB\dbQuery(
-            'SELECT id
-                 , name
-            FROM tree
-            WHERE pid = $1
-                AND `type` = 5
-            ORDER BY `name`',
-            $id
-        ) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-            $rez['data']['files'][] = $r;
-        }
-        $res->close();
+        $rez['data']['files'] = $this->getTaskFiles($id);
 
+        // get responsible users and their copletion status
         $res = DB\dbQuery(
             'SELECT u.id
                 ,ru.status
@@ -935,6 +924,31 @@ class Tasks
     }
 
     /**
+     * get task files
+     * @param  int   $taskId
+     * @return array
+     */
+    protected static function getTaskFiles($taskId)
+    {
+        $files = array();
+
+        $search = new Search();
+        $rez = $search->query(
+            array(
+                'pid' => $taskId
+                ,'fl' => 'id,name'
+                ,'template_types' => 'file'
+            )
+        );
+
+        foreach ($rez['data'] as $file) {
+            $files[] = $file;
+        }
+
+        return $files;
+    }
+
+    /**
      * get task html view for sending  to email
      * @param  int     $id            task id
      * @param  int     $user_id       destination user id
@@ -944,7 +958,10 @@ class Tasks
     public static function getTaskInfoForEmail($id, $user_id = false, $removed_users = false)
     {
         $rez = '';
+        $coreUrl = Config::get('core_url');
+
         $user = array();
+
         if ($user_id == false) {
             $user = &$_SESSION['user'];
         } else {
@@ -1055,7 +1072,7 @@ class Tasks
                         $name = $ur['name'];
                     }
                     $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
-                    "\n\r".'<img src="'.Util\getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$name.'" title="'.$name.'"/>'.
+                    "\n\r".'<img src="' . $coreUrl . 'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$name.'" title="'.$name.'"/>'.
                     "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b style="color: #777; text-decoration: line-through">'.$name.'</b>'.
                     "\n\r".'</td></tr>';
                 }
@@ -1067,6 +1084,23 @@ class Tasks
                 '<table style="font-family: \'lucida grande\',tahoma,verdana,arial,sans-serif; font-size: 11px; '.
                 'color: #333; width: 100%; display: table; border-collapse: separate; border-spacing: 0;"><tbody>'.
                 implode('', $users).'</tbody></table></td></tr>';
+
+            // create files block
+            $files_text = '';
+            $files = static::getTaskFiles($id);
+
+            if (!empty($files)) {
+                $files_text .= '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
+                    L\get('Files', $user['language_id']).':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
+
+                foreach ($files as $f) {
+                    $files_text .= '<li style="margin:0;padding: 3px 0"><a href="' . $coreUrl . 'v-' . $id . '/?e=1" name="file" fid="'.$f['id'].
+                        '" style="text-decoration: underline; color: #15C" taget="_blank"><img style="float:left;margin-right:5px" src="'.
+                        $coreUrl.'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
+                }
+
+                $files_text .= '</ul></td></tr>';
+            }
 
             $rez = file_get_contents(TEMPLATES_DIR.'task_notification_email.html');
 
@@ -1121,8 +1155,8 @@ class Tasks
                     ,Util\getCoreHost($r['db']).'photo/'.$r['cid'].'.jpg'
                     ,$r['owner_text']
                     ,$users
-                    ,''
-                    ,''
+                    ,L\get('Files')
+                    ,$files_text
                     ,''
                     ,''
                     ,''

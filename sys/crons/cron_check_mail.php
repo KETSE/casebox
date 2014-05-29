@@ -6,7 +6,9 @@ $execution_timeout = 60; //default is 60 seconds
 
 require_once 'init.php';
 
+$coreName = Config::get('core_name');
 $zendPath = Config::get('ZEND_PATH');
+
 require_once $zendPath.'/Zend/Loader/StandardAutoloader.php';
 
 require_once 'mail_functions.php';
@@ -75,7 +77,7 @@ try {
         )
     );
 } catch (\Exception $e) {
-    notifyAdmin('Casebox: check mail Exception for core'.CORE_NAME, $e->getMessage());
+    notifyAdmin('Casebox: check mail Exception for core' . $coreName , $e->getMessage());
     echo " Error connecting to email\n";
     exit(); // skip this core if mail cannot be accesed
 }

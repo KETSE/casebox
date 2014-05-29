@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\Path;
+
 class Browser
 {
 
@@ -31,7 +33,7 @@ class Browser
             }
             $a = explode('/', $path);
             if (!empty($a) && is_numeric($a[sizeof($a)-1])) {
-                $p['path'] = Path::getPath(array_pop($a))['path'];
+                $p['path'] = @Path::getPath(array_pop($a))['path'];
             }
         }
 
@@ -64,9 +66,16 @@ class Browser
 
         fireEvent('treeInitialize', $params);
 
-        $this->initNodeClasses();
-        $this->createNodesPath();
+        $this->treeNodeClasses = Path::getNodeClasses($this->treeNodeConfigs);
+        foreach ($this->treeNodeClasses as $nodeClass) {
+            $cfg = $nodeClass->getConfig();
+            $this->treeNodeGUIDConfigs[$cfg['guid']] = $cfg;
+        }
+
+        $this->path = Path::createNodesPath($path, $this->treeNodeGUIDConfigs);
+
         Cache::set('current_path', $this->path);
+
         $this->collectAllChildren();
 
         $this->prepareResults($this->data);
@@ -94,64 +103,6 @@ class Browser
 
         return $rez;
 
-    }
-
-    public function initNodeClasses()
-    {
-        $this->treeNodeClasses = array();
-        foreach ($this->treeNodeConfigs as $p => $cfg) {
-            $class = empty($cfg['class']) ? '\\CB\\TreeNode\\'.$p : $cfg['class'];
-            $cfg['guid'] = $this->getGUID($p);
-            $cfg['class'] = $class;
-
-            try {
-                $class = new $class($cfg);
-                $this->treeNodeGUIDConfigs[$cfg['guid']] = $cfg;
-                $this->treeNodeClasses[$cfg['guid']] = $class;
-            } catch (\Exception $e) {
-                debug('error creating class '.$class);
-            }
-        }
-    }
-
-    protected function createNodesPath()
-    {
-
-        $this->path = array();
-        $path = explode('/', @$this->requestParams['path']);
-        while (!empty($path)) {
-            $npid = null;
-            $nodeId = null;
-
-            $el = array_shift($path);
-            if (strlen($el) < 1) {
-                continue;
-            }
-
-            $el = explode('-', $el);
-            if (sizeof($el) > 1) {
-                $npid = $el[0];
-                $nodeId = $el[1];
-            } else {
-                $npid = $this->getGUID('Dbnode');
-                $nodeId = $el[0];
-            }
-
-            $cfg = empty($this->treeNodeGUIDConfigs[$npid])
-                ? array( 'class' => 'CB\TreeNode\\Dbnode', 'guid' => $npid)
-                : $this->treeNodeGUIDConfigs[$npid];
-
-            $class = new $cfg['class']($cfg, $nodeId);
-            //set parent node
-            if (!empty($this->path)) {
-                $class->parent = $this->path[sizeof($this->path) - 1];
-            }
-
-            array_push(
-                $this->path,
-                $class
-            );
-        }
     }
 
     protected function getPathText()
@@ -227,30 +178,6 @@ class Browser
     protected function sortResult()
     {
         //sorting nodes;
-    }
-
-    public static function getGUID($name)
-    {
-        $rez = null;
-        $res = DB\dbQuery(
-            'SELECT id FROM `casebox`.guids WHERE name = $1',
-            $name
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        } else {
-            DB\dbQuery(
-                'INSERT INTO `casebox`.guids
-                (`name`)
-                VALUES ($1)',
-                $name
-            ) or die(DB\dbQueryError());
-            $rez = DB\dbLastInsertId();
-        }
-        $res->close();
-
-        return $rez;
     }
 
     /**

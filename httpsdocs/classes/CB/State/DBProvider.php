@@ -1,0 +1,142 @@
+<?php
+
+namespace CB\State;
+
+use CB\Config;
+use CB\DB;
+use CB\Path;
+use CB\Util;
+use CB\User;
+
+/**
+ * class for saving/reading interface state for the current user
+ */
+class DBProvider
+{
+
+    /**
+     * read current user state
+     * @return Ext.Direct responce
+     */
+    public function read()
+    {
+        return array(
+            'success' => true
+            ,'data' => User::getUserState()
+        );
+
+    }
+
+    /**
+     * set state
+     * @param array $p
+     */
+    public function set($p)
+    {
+        $rez = array('success' => true);
+
+        $state = User::getUserState();
+
+        if (!empty($p['value']) || isset($state[$p['name']])) {
+            if (empty($p['value'])) {
+                unset($state[$p['name']]);
+            } else {
+                $state[$p['name']] = $p['value'];
+            }
+
+            User::setUserState($state);
+        }
+
+        return $rez;
+    }
+
+    /**
+     * save state for grid view of the browser
+     * @return Ext.Direct responce
+     */
+    public function saveGridViewState($p)
+    {
+        $rez = array('success' => true);
+        /* incomming params example
+        p: {params:{id:251, view:grid, path:1/114/101/251, query:null, start:0},…}
+            params: {id:251, view:grid, path:1/114/101/251, query:null, start:0}
+                id: 251
+                path: "1/114/101/251"
+                query: null
+                start: 0
+                view: "grid"
+            state: {columns:{nid:{id:0, width:80, hidden:true, sortable:true}, name:{id:1, width:160, sortable:true},…}}
+                columns: {nid:{id:0, width:80, hidden:true, sortable:true}, name:{id:1, width:160, sortable:true},…}
+                case: {id:3, width:150, sortable:true}
+                cdate: {id:8, width:120, hidden:true, sortable:true}
+                cid: {id:6, width:200, hidden:true, sortable:true}
+                date: {id:4, width:120, sortable:true}
+                name: {id:1, width:160, sortable:true}
+                nid: {id:0, width:80, hidden:true, sortable:true}
+                oid: {id:7, width:200, sortable:true}
+                path: {id:2, width:150, hidden:true, sortable:true}
+                size: {id:5, width:80, sortable:true}
+                udate: {id:9, width:120, hidden:true, sortable:true}
+         */
+        $path = empty($p['params']['path'])
+            ? $p['params']['id']
+            : $p['params']['path'];
+
+        if (!empty($path)) {
+            $treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
+
+            $treeNodeClasses = Path::getNodeClasses($treeNodeConfigs);
+            $treeNodeGUIDConfigs = array();
+            foreach ($treeNodeClasses as $nodeClass) {
+                $cfg = $nodeClass->getConfig();
+                $treeNodeGUIDConfigs[$cfg['guid']] = $cfg;
+            }
+            $nodesPath = Path::createNodesPath($path, $treeNodeGUIDConfigs);
+            if (!empty($nodesPath)) {
+                $lastNode = array_pop($nodesPath);
+
+                $DCConfig = $lastNode->getNodeParam('DC');
+
+                $guid = empty($DCConfig['from'])
+                    ? 'default'
+                    : $DCConfig['from'];
+
+                DB\dbQuery(
+                    'INSERT INTO tree_user_config
+                    (guid, user_id, cfg)
+                    VALUES($1, $2, $3)
+                    ON DUPLICATE KEY UPDATE cfg = $3',
+                    array(
+                        $guid
+                        ,$_SESSION['user']['id']
+                        ,json_encode($p['state'], JSON_UNESCAPED_UNICODE)
+                    )
+                ) or die(DB\dbQueryError());
+            }
+        }
+
+        return $rez;
+    }
+
+    public static function getGridViewState($guid)
+    {
+        $rez = array();
+
+        $res = DB\dbQuery(
+            'SELECT cfg
+            FROM tree_user_config
+            WHERE  user_id = $1 and guid = $2',
+            array(
+                $_SESSION['user']['id']
+                ,$guid
+            )
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = Util\toJSONArray($r['cfg']);
+        }
+        $res->close();
+
+        return $rez;
+    }
+}

@@ -9,6 +9,10 @@ if (!empty($_SESSION['check_TSV']) && ((time() - $_SESSION['check_TSV']) > 180))
 $coreName = Config::get('core_name');
 $coreUrl = Config::get('core_url');
 
+/* check if set an object id for view in url and store it in session for redirect after success login*/
+if (!empty($_GET['view']) && is_numeric($_GET['view'])) {
+    $_SESSION['redirect'] = array('view' => $_GET['view']);
+}
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>

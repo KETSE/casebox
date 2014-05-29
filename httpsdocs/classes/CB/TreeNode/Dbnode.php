@@ -139,4 +139,51 @@ class Dbnode extends Base
 
         return $rez;
     }
+
+    /**
+     * get param for this node
+     *
+     * @param  varchar $param for now using to get 'facets' or 'DC'
+     * @return array
+     */
+    public function getNodeParam($param = 'facets')
+    {
+        $rez = false;
+
+        $from = $this->getId();
+
+        //check node configuration and/or its template for fecets definitions
+        $res = DB\dbQuery(
+            'SELECT t.cfg, t.template_id, tt.cfg `templateCfg`
+            FROM tree t
+            JOIN templates tt
+                ON t.template_id = tt.id
+            WHERE t.id = $1',
+            $this->id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $cfg = Util\toJSONArray($r['cfg']);
+
+            if (isset($cfg[$param])) {
+                $rez = $cfg[$param];
+            } else {
+                $cfg = Util\toJSONArray($r['templateCfg']);
+                if (isset($cfg[$param])) {
+                    $rez = $cfg[$param];
+                    $from = 'template_'.$r['template_id'];
+                }
+            }
+        }
+        $res->close();
+
+        if ($rez === false) {
+            return parent::getNodeParam($param);
+        }
+
+        return array(
+            'from' => $from
+            ,'data' => $rez
+        );
+    }
 }

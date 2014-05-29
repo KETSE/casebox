@@ -1,3 +1,47 @@
+CaseBox 1.9.2035 (2014-05-29)
+==============================
+New Features, Improvements
+--------------------------
+- added some checks due to stratelit core reindeing problems
+
+Fixed Bugs:
+----------
+- some constant reference changes in cron files
+
+CaseBox 1.9.2034 (2014-05-28)
+==============================
+New Features, Improvements
+--------------------------
+- added links to files in notification emails
+- added "Permalink" in submenu of the right panel for files
+- display deleted information in system properties plugin for deleted nodes
+- implemented direct links to files
+- changed preview url to /<core>/v-<id>[_version_id]/?
+    apache configuration changed
+
+Fixed Bugs:
+----------
+- Increase height of version item in VersionPlugin
+- After saving an object, the selected node in preview becomes the Parent
+- Tree state: saving the list of expanded nodes
+
+CaseBox 1.9.203 (2014-05-27)
+==============================
+New Features, Improvements
+--------------------------
+- reviewed all DisplayColumns and Custom Faceting mechanism. The review cover following tasks:
+    - Faceting Sets & DC in json configs for VirtualFolder plugins
+    - DisplayColumns and Faceting in search template and saved searches
+    - Display Columns: custom columns, sorting, remember visible columns/order
+    - DC doesn't work in template Cfg + grid sorting
+
+    Uploaded "DC&facets_description.txt" to dev.casebox.org/dev/Home/Docs.
+
+- changed `tree_user_config` database table structure (apply v.1.9.203.sql from differential updates)
+- added database state provider to store user settings in database, not in cookies
+- solr core should be reindexed if there are order fields that goes to solr.order
+- renamed config option "default_facets" to "default_facet_configs" in casebox.config table.
+
 CaseBox 1.9.202 (2014-05-21)
 ==============================
 New Features, Improvements

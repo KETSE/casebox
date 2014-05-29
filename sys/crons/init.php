@@ -39,6 +39,8 @@ include $site_path.DIRECTORY_SEPARATOR.'config.php';
 require_once LIB_DIR.'Util.php';
 
 require_once(DOC_ROOT.'language.php');
+
+$coreName = Config::get('core_name');
 //L\initTranslations(); // would be called from inside crons that need translations
 
 //--------------------------------------------------- functions
@@ -71,7 +73,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
                 return $rez;
             } else { //timeout ocured of script cron execution
                 $title = 'CaseBox cron notification ('.$cron_id.'), timeout occured.';
-                $msg = $info."\n\rCore name: ".CORE_NAME.print_r($r, 1);
+                $msg = $info."\n\rCore name: ".$coreName.print_r($r, 1);
                 echo $title."\n".$msg;
                 notifyAdmin($title, $msg);
             }
@@ -131,6 +133,6 @@ function closeCron($cron_id, $info = 'ok')
 
 function notifyAdmin($subject, $message)
 {
-    echo 'Notifying admin: '.CONFIG\ADMIN_EMAIL;
-    mail(CONFIG\ADMIN_EMAIL, $subject, $message, 'From: '.CONFIG\SENDER_EMAIL. "\r\n");
+    echo 'Notifying admin: '.Config::get('ADMIN_EMAIL');
+    mail(Config::get('ADMIN_EMAIL'), $subject, $message, 'From: '.Config::get('SENDER_EMAIL'). "\r\n");
 }
