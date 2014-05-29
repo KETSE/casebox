@@ -30,6 +30,7 @@ require_once LIB_DIR.'Util.php';
 require_once(DOC_ROOT.'language.php');
 
 // ~~~~~~~~~~~~~~~~~~~~~ ZEND INITIALIZATION BLOCK ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$coreName = Config::get('core_name');
 $zendPath = Config::get('ZEND_PATH');
 
 require_once $zendPath.'/Zend/Loader/StandardAutoloader.php';
@@ -104,7 +105,7 @@ try {
         )
     );
 } catch (\Exception $e) {
-    notifyAdmin('Casebox: check mail Exception for core'.CORE_NAME, $e->getMessage());
+    notifyAdmin('Casebox: check mail Exception for core' . $coreName, $e->getMessage());
     echo " Error connecting to email\n";
     exit(); // skip this core if mail cannot be accesed
 }

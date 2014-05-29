@@ -111,15 +111,15 @@ class Base implements \CB\Interfaces\TreeNode
      */
     public function getFacets()
     {
+        $facets = array();
         $cfg = $this->getNodeParam('facets');
 
         if (empty($cfg['data'])) {
-            return;
+            return $facets;
         }
 
         //creating facets
         $facetsDefinitions = \CB\Config::get('facet_configs');
-        $facets = array();
 
         foreach ($cfg['data'] as $k => $v) {
             $name = $k;

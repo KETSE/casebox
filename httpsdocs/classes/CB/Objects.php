@@ -423,6 +423,11 @@ class Objects
     public static function getSolrData(&$object_record)
     {
         $obj = Objects::getCustomClassByObjectId($object_record['id']);
+
+        if (empty($obj)) {
+            return;
+        }
+
         $objData = $obj->load();
         $linearData = $obj->getLinearData();
         $template = $obj->getTemplate();

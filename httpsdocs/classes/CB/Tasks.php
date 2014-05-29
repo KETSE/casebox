@@ -958,7 +958,10 @@ class Tasks
     public static function getTaskInfoForEmail($id, $user_id = false, $removed_users = false)
     {
         $rez = '';
+        $coreUrl = Config::get('core_url');
+
         $user = array();
+
         if ($user_id == false) {
             $user = &$_SESSION['user'];
         } else {
@@ -1069,7 +1072,7 @@ class Tasks
                         $name = $ur['name'];
                     }
                     $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
-                    "\n\r".'<img src="'.Util\getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$name.'" title="'.$name.'"/>'.
+                    "\n\r".'<img src="' . $coreUrl . 'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$name.'" title="'.$name.'"/>'.
                     "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b style="color: #777; text-decoration: line-through">'.$name.'</b>'.
                     "\n\r".'</td></tr>';
                 }
@@ -1087,14 +1090,13 @@ class Tasks
             $files = static::getTaskFiles($id);
 
             if (!empty($files)) {
-                $coreUrl = Config::get('core_url');
                 $files_text .= '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
                     L\get('Files', $user['language_id']).':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
 
                 foreach ($files as $f) {
                     $files_text .= '<li style="margin:0;padding: 3px 0"><a href="' . $coreUrl . 'v-' . $id . '/?e=1" name="file" fid="'.$f['id'].
                         '" style="text-decoration: underline; color: #15C" taget="_blank"><img style="float:left;margin-right:5px" src="'.
-                        Util\getCoreHost($r['db']).'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
+                        $coreUrl.'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
                 }
 
                 $files_text .= '</ul></td></tr>';

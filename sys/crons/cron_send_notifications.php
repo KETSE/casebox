@@ -45,6 +45,10 @@ $users = array();
 
 L\initTranslations();
 
+$languages = Config::get('languages');
+$adminEmail = Config::get('ADMIN_EMAIL');
+$senderEmail = Config::get('SENDER_EMAIL');
+
 $sql = 'SELECT action_type
         ,task_id
         ,user_id
@@ -74,7 +78,7 @@ foreach ($users as $u) {
     if (empty($u['email'])) {
         continue;
     }
-    $lang = $GLOBALS['languages'][$u['language_id']-1];
+    $lang = $languages[$u['language_id']-1];
     if (filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {
         foreach ($u['mails'] as $m) {
             $message = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '.
@@ -83,7 +87,7 @@ foreach ($users as $u) {
                 '<head><title>CaseBox</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>'.
                 '<body style="font: normal 11px tahoma,arial,helvetica,sans-serif; line-height: 18px">'.$m[1].'</body></html>';
             //skip sending notifications from devel server to other emails than Admin
-            if (isDevelServer() && ($u['email'] !== CONFIG\ADMIN_EMAIL)) {
+            if (isDevelServer() && ($u['email'] !== $adminEmail)) {
                 echo 'Devel skip: '.$u['email'].': '.$m[0]."\n";
             } else {
                 echo $u['email'].': '.$m[0]."\n";
@@ -93,7 +97,7 @@ foreach ($users as $u) {
                     $message,
                     "Content-type: text/html; charset=utf-8\r\nFrom: ".
                     (empty($m[2])
-                        ? CONFIG\SENDER_EMAIL
+                        ? $senderEmail
                         : $m[2]
                     )."\r\n"
                 );

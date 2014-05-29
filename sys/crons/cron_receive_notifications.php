@@ -38,6 +38,7 @@ Mail requirements are:
 ";
 
 // skip core if no email is set in config
+$coreName = Config::get('core_name');
 $email = Config::get('sender_email');
 $email_pass = Config::get('sender_email_passwd');
 
@@ -79,7 +80,7 @@ try {
         )
     );
 } catch (\Exception $e) {
-    notifyAdmin('Casebox: check mail Exception for core'.CORE_NAME, $e->getMessage());
+    notifyAdmin('Casebox: check mail Exception for core'.$coreName, $e->getMessage());
     echo " Error connecting to email\n";
     exit(); // skip this core if mail cannot be accesed
 }
