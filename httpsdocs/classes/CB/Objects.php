@@ -270,6 +270,7 @@ class Objects
                 ) {
                     continue;
                 }
+
                 $headerField = $template->getHeaderField($f['tf']['id']);
                 if (!empty($headerField) && ($previousHeader != $headerField)) {
                     $body .= '<tr class="prop-header"><th colspan="3"'.(

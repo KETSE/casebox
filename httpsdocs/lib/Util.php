@@ -341,7 +341,7 @@ function formatMysqlDate($date, $format = false, $TZ = 'UTC')
         $TZ = 'UTC';
     }
     if ($format == false) {
-        $format = \CB\Config::get('short_date_format');
+        $format = \CB\getOption('short_date_format');
     }
 
     $d1 = new \DateTime($date);

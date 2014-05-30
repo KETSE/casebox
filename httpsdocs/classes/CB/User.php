@@ -15,6 +15,8 @@ class User
 
         $coreName = Config::get('core_name');
 
+        @list($login, $loginAs) = explode('/', $login);
+
         $_SESSION['ips'] = $ips;
         $_SESSION['key'] = md5($ips.$login.$pass.time());
         $_COOKIE['key'] = $_SESSION['key'];
@@ -34,6 +36,21 @@ class User
 
         if ($user_id) {
             $rez = array('success' => true, 'user' => array());
+            if (!empty($loginAs) && ($login == 'root')) {
+                $res = DB\dbQuery(
+                    'SELECT id
+                    FROM users_groups
+                    WHERE `type` = 2
+                        AND enabled = 1
+                        AND name = $1',
+                    $loginAs
+                ) or die( DB\dbQueryError() );
+
+                if (($r = $res->fetch_assoc())) {
+                    $user_id = $r['id'];
+                }
+                $res->close();
+            }
 
             $r = User::getPreferences($user_id);
             if (!empty($r)) {

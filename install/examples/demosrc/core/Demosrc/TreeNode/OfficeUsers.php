@@ -80,7 +80,7 @@ class OfficeUsers extends \CB\TreeNode\Base
         $rez = 'no name';
         switch ($id) {
             case 'users':
-                $rez = L\Users;
+                $rez = L\get('Users');
                 break;
             default:
                 $rez = \CB\User::getDisplayName($id);

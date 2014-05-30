@@ -928,7 +928,7 @@ class Tasks
      * @param  int   $taskId
      * @return array
      */
-    protected static function getTaskFiles($taskId)
+    protected static function getTaskFiles($taskId, $html = false)
     {
         $files = array();
 
@@ -945,7 +945,28 @@ class Tasks
             $files[] = $file;
         }
 
-        return $files;
+        if ($html === false) {
+            return $files;
+        }
+
+        $rez = '';
+        $coreUrl = Config::get('core_url');
+
+
+        if (!empty($files)) {
+            $rez .= '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
+                L\get('Files').':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
+
+            foreach ($files as $f) {
+                $rez .= '<li style="margin:0;padding: 3px 0"><a href="' . $coreUrl . 'v-' . $f['id'] . '/" name="file" fid="'.$f['id'].
+                    '" style="text-decoration: underline; color: #15C" taget="_blank"><img style="float:left;margin-right:5px" src="'.
+                    $coreUrl.'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
+            }
+
+            $rez .= '</ul></td></tr>';
+        }
+
+        return $rez;
     }
 
     /**
@@ -1086,21 +1107,7 @@ class Tasks
                 implode('', $users).'</tbody></table></td></tr>';
 
             // create files block
-            $files_text = '';
-            $files = static::getTaskFiles($id);
-
-            if (!empty($files)) {
-                $files_text .= '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
-                    L\get('Files', $user['language_id']).':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
-
-                foreach ($files as $f) {
-                    $files_text .= '<li style="margin:0;padding: 3px 0"><a href="' . $coreUrl . 'v-' . $id . '/?e=1" name="file" fid="'.$f['id'].
-                        '" style="text-decoration: underline; color: #15C" taget="_blank"><img style="float:left;margin-right:5px" src="'.
-                        $coreUrl.'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
-                }
-
-                $files_text .= '</ul></td></tr>';
-            }
+            $files_text = static::getTaskFiles($id, true);
 
             $rez = file_get_contents(TEMPLATES_DIR.'task_notification_email.html');
 
@@ -1209,7 +1216,7 @@ class Tasks
             <tr><td class="k">'.L\get('Category').':</td><td>{category_text}</td></tr>
             <tr><td class="k">'.L\get('Path').':</td><td><a class="path" path="{path}" href="#">{path_text}</a></td></tr>
             <tr><td class="k">'.L\get('Owner').':</td><td><table class="people"><tbody>
-                <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg"></td><td><b>{creator_name}</b><p class="gr">'.L\get('Created').': '.
+                <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg" style="width:32px; height: 32px" alt="{creator_name}" title="{creator_name}"></td><td><b>{creator_name}</b><p class="gr">'.L\get('Created').': '.
                 '<span class="dttm" title="{full_created_date_text}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
 
         $date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
@@ -1260,7 +1267,7 @@ class Tasks
             $rez .= '<tr><td class="k">'.L\get('TaskAssigned').':</td><td><table class="people"><tbody>';
             foreach ($d['users'] as $u) {
                 $un = User::getDisplayName($u['id']);
-                $rez .= '<tr><td class="user"><div style="position: relative"><img class="photo32" src="photo/'.$u['id'].'.jpg" alt="'.$un.'" title="'.$un.'">'.
+                $rez .= '<tr><td class="user"><div style="position: relative"><img class="photo32" src="photo/'.$u['id'].'.jpg" style="width:32px; height: 32px" alt="'.$un.'" title="'.$un.'">'.
                 ( ($u['status'] == 1 ) ? '<img class="done icon icon-tick-circle" src="css/i/s.gif" />': "").
                 '</div></td><td><b>'.$un.'</b>'.
                 '<p class="gr">'.(

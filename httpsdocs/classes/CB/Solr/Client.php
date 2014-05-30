@@ -51,6 +51,8 @@ class Client extends Service
     private function getSolrData(&$objectRecord)
     {
         switch (@$objectRecord['template_type']) {
+            case 'comment':
+                break;
             case 'file':
                 \CB\Files::getSolrData($objectRecord);
                 break;

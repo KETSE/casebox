@@ -59,7 +59,8 @@ $objData = $obj->getData();
 $objType = $obj->getType();
 
 // if external window then print the toolbar
-if (!empty($_GET['e'])) {
+if (empty($_GET['i'])) {
+    echo '<html><head><link rel="stylesheet" type="text/css" href="/css/tasks.css" /></head><body>';
     if ($objType == 'file') {
         $toolbarItems[] = '<a href="' . $coreUrl . 'download.php?id=' . $id . '">' . L\get('Download') .'</a>';
     }
@@ -73,7 +74,8 @@ switch ($obj->getType()) {
 
     case 'task':
         $o = new Tasks();
-        echo $o->getPreview($id);
+        echo $o->getTaskInfoForEmail($id);
+        // echo $o->getPreview($id);
         break;
 
     case 'file':

@@ -1,4 +1,18 @@
-CaseBox 1.9.2035 (2014-05-29)
+CaseBox 1.9.210 (2014-05-30)
+==============================
+New Features, Improvements
+--------------------------
+- added method to login as another user through root credenials (for debuging purpose).
+- direct tasks preview adjustments
+- updated demo core from install/examples and casebox database script
+
+Fixed Bugs:
+----------
+- Preview didn't show date fields
+- Extra 'Text' word appears in front of comments
+- Upload/Download buttons doesn't work in FileTabsheet
+
+CaseBox 1.9.205 (2014-05-29)
 ==============================
 New Features, Improvements
 --------------------------
@@ -8,7 +22,7 @@ Fixed Bugs:
 ----------
 - some constant reference changes in cron files
 
-CaseBox 1.9.2034 (2014-05-28)
+CaseBox 1.9.204 (2014-05-28)
 ==============================
 New Features, Improvements
 --------------------------
