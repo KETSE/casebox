@@ -18,8 +18,10 @@
 	margin:0;
 	padding:0;
 	list-style: none;
+	margin-left: 5px;
 }
-.filter_list li { line-height:16px; padding: 3px 10px 5px 20px; background: url(i/squares.png) 5px -151px no-repeat;}
+
+.filter_list li { line-height:16px; padding: 3px 10px 3px 24px; background: url(i/squares.png) 5px -151px no-repeat;}
 .filter_list .active { background-position: 5px -99px }
 .filter_list a {text-decoration: none; color: #555; }
 .filter_list a:hover {text-decoration: underline; color: #000; }
