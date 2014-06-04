@@ -30,11 +30,15 @@ class SystemProperties extends Base
                 ,t.dstatus
                 ,t.did
                 ,t.ddate
+                ,(SELECT 1 FROM user_subscriptions WHERE object_id = $1 AND user_id = $2) `subscribed`
             FROM tree t
             JOIN tree_info ti on t.id = ti.id
             LEFT JOIN tree tt on t.template_id = tt.id
             where t.id = $1',
-            $this->id
+            array(
+                $this->id
+                ,$_SESSION['user']['id']
+            )
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $r['cid_text'] = User::getDisplayName($r['cid']);

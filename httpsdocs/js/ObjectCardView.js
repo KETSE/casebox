@@ -142,6 +142,16 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onReopenTaskClick
             }
+            ,subscribe: {
+                text: L.Subscribe
+                ,scope: this
+                ,handler: this.onSubscribeClick
+            }
+            ,unsubscribe: {
+                text: L.Unsubscribe
+                ,scope: this
+                ,handler: this.onUnsubscribeClick
+            }
             ,attachfile: {
                 text: L.AttachFile
                 ,scope: this
@@ -451,6 +461,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     ,onCardItemLoaded: function(item) {
         this.locked = false;
 
+        clog('on card item loaded updating toolbar and menu items');
         this.updateToolbarAndMenuItems();
 
         this.fireEvent('loaded', this, item);
@@ -803,6 +814,51 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         App.fireEvent('objectchanged', this.loadedData);
     }
 
+
+    ,onSubscribeClick: function(b, e) {
+        Ext.Msg.show({
+            title: L.Subscribe
+            ,msg: L.SubscribeMsg
+            ,width: 300
+            ,buttons: {
+                yes: L.Subscribe
+                ,no: L.SubscribeRecursive
+                ,cancel: Ext.Msg.buttonText.cancel
+            }
+            ,scope: this
+            ,fn: function(b, t) {
+                if(b !== 'cancel') {
+                    CB_Browser.subscribe(
+                        {
+                            id: this.loadedData.id
+                            ,recursive: (b == 'no')
+                        }
+                        ,this.onSubscribeProcess
+                        ,this
+                    );
+                }
+            }
+            ,icon: Ext.MessageBox.QUESTION
+        });
+    }
+
+    ,onSubscribeProcess: function (r, e) {
+        if(r.success !== true) {
+            return;
+        }
+
+        this.onReloadClick();
+    }
+
+    ,onUnsubscribeClick: function () {
+        CB_Browser.unsubscribe(
+            {
+                id: this.loadedData.id
+            }
+            ,this.onSubscribeProcess
+            ,this
+        );
+    }
 
     ,onAttachFileClick: function(b, e) {
         this.onViewChangeClick(0);

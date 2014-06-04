@@ -18,6 +18,8 @@ $API = array_merge(
                 ,'toggleFavorite'       => array('len' => 1)
                 ,'takeOwnership'        => array('len' => 1)
                 ,'getObjectsForField'   => array('len' => 1)
+                ,'subscribe'            => array('len' => 1)
+                ,'unsubscribe'          => array('len' => 1)
             )
         )
 
@@ -110,11 +112,6 @@ $API = array_merge(
             )
         )
 
-        ,'CB_Log' => array(
-            'methods' => array(
-                'getLastLog' => array('len' => 0)
-            )
-        )
         ,'CB_User' => array(
             'methods' => array(
                 'getLoginInfo'        => array('len' => 0)

@@ -1,8 +1,9 @@
 <?php
 namespace CB\Objects;
 
-use CB\DB as DB;
-use CB\Util as Util;
+use CB\DB;
+use CB\Util;
+use CB\Log;
 
 /**
  * class for generic casebox objects
@@ -15,6 +16,12 @@ class Object extends OldObject
      * @var int
      */
     protected $id = null;
+
+    /**
+     * protected flag to check if object loaded where needed
+     * @var boolean
+     */
+    protected $loaded = false;
 
     /**
      * variable used to load template for this object
@@ -155,7 +162,16 @@ class Object extends OldObject
 
         $this->createCustomData();
 
+        //fire crate event
         \CB\fireEvent('nodeDbCreate', $this);
+
+        // log the action
+        $logParams = array(
+            'type' => 'create'
+            ,'new' => $this
+        );
+
+        Log::add($logParams);
 
         return $this->id;
     }
@@ -229,6 +245,8 @@ class Object extends OldObject
 
         $this->loadCustomData();
 
+        $this->loaded = true;
+
         return $this->data;
     }
 
@@ -278,6 +296,10 @@ class Object extends OldObject
             throw new \Exception("No object id specified for update", 1);
         }
 
+        //load current object from db into a variable to be passed to log and events
+        $oldObject = clone $this;
+        $oldObject->load($this->id);
+
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
         $p = &$this->data;
@@ -323,6 +345,15 @@ class Object extends OldObject
         $this->updateCustomData();
 
         \CB\fireEvent('nodeDbUpdate', $this);
+
+        // log the action
+        $logParams = array(
+            'type' => 'update'
+            ,'old' => $oldObject
+            ,'new' => $this
+        );
+
+        Log::add($logParams);
 
         return true;
     }
@@ -370,6 +401,12 @@ class Object extends OldObject
      */
     public function delete($permanent = false)
     {
+        // we need to load this object before delete
+        // for passing it to log and/or events
+        if (!$this->loaded) {
+            $this->load();
+        }
+
         \CB\fireEvent('beforeNodeDbDelete', $this);
 
         if ($permanent) {
@@ -404,6 +441,15 @@ class Object extends OldObject
         $this->deleteCustomData($permanent);
 
         \CB\fireEvent('nodeDbDelete', $this);
+
+        // log the action
+        $logParams = array(
+            'type' => 'delete'
+            ,'old' => $this
+        );
+
+        Log::add($logParams);
+
     }
 
     /**
@@ -441,6 +487,21 @@ class Object extends OldObject
         $this->restoreCustomData();
 
         \CB\fireEvent('nodeDbRestore', $this);
+
+        // we need to load this object on restore
+        // for passing it to log and/or events
+        if (!$this->loaded) {
+            $this->load();
+        }
+
+        // log the action
+        $logParams = array(
+            'type' => 'restore'
+            ,'new' => $this
+        );
+
+        Log::add($logParams);
+
     }
 
     /**
@@ -844,6 +905,10 @@ class Object extends OldObject
         }
         /* end of security check */
 
+        //load current object from db into a variable to be passed to log and events
+        $oldObject = clone $this;
+        $oldObject->load($this->id);
+
         if (is_numeric($targetId)) {
             /* target security check */
             if (!\CB\Security::canWrite($targetId)) {
@@ -898,6 +963,17 @@ class Object extends OldObject
                 array($targetId, $this->id)
             ) or die(DB\dbQueryError());
         }
+
+        $this->load();
+
+        // log the action
+        $logParams = array(
+            'type' => 'move'
+            ,'old' => $oldObject
+            ,'new' => $this
+        );
+
+        Log::add($logParams);
 
         return $this->id;
     }

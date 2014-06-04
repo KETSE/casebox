@@ -322,14 +322,14 @@ class Tasks
             }
         }
 
-        $logParams = array(
-            'action_type' => $log_action_type
-            ,'task_id' => $p['id']
-            ,'to_user_ids' => $p['responsible_user_ids']
-            ,'remind_users' => $remind_users
-            ,'removed_users' => $removed_responsible_users
-            ,'info' => 'title: '.$p['title']);
-        Log::add($logParams);
+        // $logParams = array(
+        //     'action_type' => $log_action_type
+        //     ,'task_id' => $p['id']
+        //     ,'to_user_ids' => $p['responsible_user_ids']
+        //     ,'remind_users' => $remind_users
+        //     ,'removed_users' => $removed_responsible_users
+        //     ,'info' => 'title: '.$p['title']);
+        // Log::add($logParams);
 
         $this->saveReminds($p);
 
@@ -421,135 +421,134 @@ class Tasks
         ) or die(DB\dbQueryError());
         /* end of save reminds for currents user /**/
 
-        /* create notifications for specified reminders */
-        /* if no deadline is set for the task then no notifications will be set */
-        $res = DB\dbQuery(
-            'SELECT
-                t.title
-                ,t.date_start
-                ,t.date_end
-                ,ti.path
-            FROM tasks t
-            JOIN tree_info ti on t.id = ti.id
-            WHERE t.id = $1',
-            $p['id']
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $p = array_merge($p, $r);
-        }
-        $res->close();
+        // /* create notifications for specified reminders */
+        // /* if no deadline is set for the task then no notifications will be set */
+        // $res = DB\dbQuery(
+        //     'SELECT
+        //         t.title
+        //         ,t.date_start
+        //         ,t.date_end
+        //         ,ti.path
+        //     FROM tasks t
+        //     JOIN tree_info ti on t.id = ti.id
+        //     WHERE t.id = $1',
+        //     $p['id']
+        // ) or die(DB\dbQueryError());
+        // if ($r = $res->fetch_assoc()) {
+        //     $p = array_merge($p, $r);
+        // }
+        // $res->close();
 
-        if (!empty($p['date_end'])) {
-            //selecting currently used notification ids to be updated with new data
-            $ids = array();
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM notifications
-                WHERE task_id = $1
-                    AND user_id = $2
-                    AND subtype = 1',
-                array(
-                    $p['id']
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
+        // if (!empty($p['date_end'])) {
+        //     //selecting currently used notification ids to be updated with new data
+        //     $ids = array();
+        //     $res = DB\dbQuery(
+        //         'SELECT id
+        //         FROM notifications
+        //         WHERE task_id = $1
+        //             AND user_id = $2
+        //             AND subtype = 1',
+        //         array(
+        //             $p['id']
+        //             ,$_SESSION['user']['id']
+        //         )
+        //     ) or die(DB\dbQueryError());
 
-            while ($r = $res->fetch_assoc()) {
-                $ids[] = $r['id'];
-            }
-            $res->close();
-            //end of selecting currently used notification ids to be updated with new data
+        //     while ($r = $res->fetch_assoc()) {
+        //         $ids[] = $r['id'];
+        //     }
+        //     $res->close();
+        //     //end of selecting currently used notification ids to be updated with new data
 
-            $a = explode('-', $p['reminds']);
+        //     $a = explode('-', $p['reminds']);
 
-            $subject = L\get('Reminder').': '.$p['title'].
-                ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['timezone']).
-                ' ('.$p['path'].')';
+        //     $subject = L\get('Reminder').': '.$p['title'].
+        //         ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['timezone']).
+        //         ' ('.$p['path'].')';
 
-            // user|remindType|remind delay|remindUnits
-            foreach ($a as $r) {
-                $rem = explode('|', $r);
-                if ($rem[0] != 1) {
-                    continue; // not by mail
-                }
-                $id = empty($ids) ? null : array_shift($ids);
-                $unit = 'HOUR';
-                switch ($rem[2]) {
-                    case 1:
-                        $unit = 'MINUTE';
-                        break;
-                    case 2:
-                        $unit = 'HOUR';
-                        break;
-                    case 3:
-                        $unit = 'DAY';
-                        break;
-                    case 4:
-                        $unit = 'WEEK';
-                        break;
-                }
-                DB\dbQuery(
-                    'INSERT INTO notifications (
-                        id
-                        ,action_type
-                        ,task_id
-                        ,subtype
-                        ,subject
-                        ,message
-                        ,time
-                        ,user_id)
-                    VALUES (
-                        $1
-                        ,$2
-                        ,$3
-                        ,1
-                        ,$4
-                        ,$5
-                        ,DATE_ADD($6, INTERVAL $7 '.$unit.')
-                        ,$8)
-                    ON DUPLICATE KEY
-                    UPDATE action_type = $2
-                        ,task_id = $3
-                        ,subtype = 1
-                        ,subject = $4
-                        ,message = $5
-                        ,time = DATE_ADD($6, INTERVAL $7 '.$unit.')
-                        ,user_id = $8',
-                    array(
-                        $id
-                        ,$log_action_type
-                        ,$p['id']
-                        ,$subject
-                        ,'<generateTaskViewOnSend>'
-                        ,$p['date_end']
-                        ,-$rem[1]
-                        ,$_SESSION['user']['id']
-                    )
-                ) or die(DB\dbQueryError());
-            }
-            if (!empty($ids)) {
-                DB\dbQuery(
-                    'DELETE
-                    FROM notifications
-                    WHERE task_id = $1
-                        AND id IN (0'.implode(', ', $ids).')',
-                    $p['id']
-                ) or die(DB\dbQueryError());
-            }
-        } else {
-            DB\dbQuery(
-                'DELETE
-                FROM notifications
-                WHERE task_id = $1
-                    AND user_id = $2
-                    AND subtype = 1',
-                array(
-                    $p['id']
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
-        }
-
+        //     // user|remindType|remind delay|remindUnits
+        //     foreach ($a as $r) {
+        //         $rem = explode('|', $r);
+        //         if ($rem[0] != 1) {
+        //             continue; // not by mail
+        //         }
+        //         $id = empty($ids) ? null : array_shift($ids);
+        //         $unit = 'HOUR';
+        //         switch ($rem[2]) {
+        //             case 1:
+        //                 $unit = 'MINUTE';
+        //                 break;
+        //             case 2:
+        //                 $unit = 'HOUR';
+        //                 break;
+        //             case 3:
+        //                 $unit = 'DAY';
+        //                 break;
+        //             case 4:
+        //                 $unit = 'WEEK';
+        //                 break;
+        //         }
+        //         DB\dbQuery(
+        //             'INSERT INTO notifications (
+        //                 id
+        //                 ,action_type
+        //                 ,task_id
+        //                 ,subtype
+        //                 ,subject
+        //                 ,message
+        //                 ,time
+        //                 ,user_id)
+        //             VALUES (
+        //                 $1
+        //                 ,$2
+        //                 ,$3
+        //                 ,1
+        //                 ,$4
+        //                 ,$5
+        //                 ,DATE_ADD($6, INTERVAL $7 '.$unit.')
+        //                 ,$8)
+        //             ON DUPLICATE KEY
+        //             UPDATE action_type = $2
+        //                 ,task_id = $3
+        //                 ,subtype = 1
+        //                 ,subject = $4
+        //                 ,message = $5
+        //                 ,time = DATE_ADD($6, INTERVAL $7 '.$unit.')
+        //                 ,user_id = $8',
+        //             array(
+        //                 $id
+        //                 ,$log_action_type
+        //                 ,$p['id']
+        //                 ,$subject
+        //                 ,'<generateTaskViewOnSend>'
+        //                 ,$p['date_end']
+        //                 ,-$rem[1]
+        //                 ,$_SESSION['user']['id']
+        //             )
+        //         ) or die(DB\dbQueryError());
+        //     }
+        //     if (!empty($ids)) {
+        //         DB\dbQuery(
+        //             'DELETE
+        //             FROM notifications
+        //             WHERE task_id = $1
+        //                 AND id IN (0'.implode(', ', $ids).')',
+        //             $p['id']
+        //         ) or die(DB\dbQueryError());
+        //     }
+        // } else {
+        //     DB\dbQuery(
+        //         'DELETE
+        //         FROM notifications
+        //         WHERE task_id = $1
+        //             AND user_id = $2
+        //             AND subtype = 1',
+        //         array(
+        //             $p['id']
+        //             ,$_SESSION['user']['id']
+        //         )
+        //     ) or die(DB\dbQueryError());
+        // }
         return array('success' => true, 'reminds' => $p['reminds']);
     }
 
@@ -614,16 +613,16 @@ class Tasks
             $action_type = 30; //aboutTaskCompletionOnBehalt
             $autoclosed = $this->checkAutocloseTask($p['id']);
         }
-        Log::add(
-            array(
-                'action_type' => $action_type
-                ,'task_id' => $p['id']
-                ,'to_user_ids' => $p['user_id']
-                ,'remind_users' => $task['cid'].','.$p['user_id']
-                ,'autoclosed' => $autoclosed
-                ,'info' => 'title: '.$task['title']
-            )
-        ); // TO REVIEW
+        // Log::add(
+        //     array(
+        //         'action_type' => $action_type
+        //         ,'task_id' => $p['id']
+        //         ,'to_user_ids' => $p['user_id']
+        //         ,'remind_users' => $task['cid'].','.$p['user_id']
+        //         ,'autoclosed' => $autoclosed
+        //         ,'info' => 'title: '.$task['title']
+        //     )
+        // ); // TO REVIEW
 
         DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $p['id']) or die(DB\dbQueryError());
 
@@ -750,15 +749,15 @@ class Tasks
             )
         ) or die(DB\dbQueryError());
 
-        Log::add(
-            array(
-                'action_type' => 23
-                ,'task_id' => $p['id']
-                ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'autoclosed' => $this->checkAutocloseTask($p['id'])
-                ,'info' => 'title: '.$task['title']
-            )
-        );
+        // Log::add(
+        //     array(
+        //         'action_type' => 23
+        //         ,'task_id' => $p['id']
+        //         ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
+        //         ,'autoclosed' => $this->checkAutocloseTask($p['id'])
+        //         ,'info' => 'title: '.$task['title']
+        //     )
+        // );
 
         DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $p['id']) or die(DB\dbQueryError());
 
@@ -801,14 +800,14 @@ class Tasks
         ) or die(DB\dbQueryError());
 
         /* log and notify all users about task closing */
-        Log::add(
-            array(
-                'action_type' => 27
-                ,'task_id' => $id
-                ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'info' => 'title: '.$task['name']
-            )
-        );
+        // Log::add(
+        //     array(
+        //         'action_type' => 27
+        //         ,'task_id' => $id
+        //         ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
+        //         ,'info' => 'title: '.$task['name']
+        //     )
+        // );
 
         DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $id) or die(DB\dbQueryError());
 
@@ -870,14 +869,14 @@ class Tasks
         /* end of update responsible user statuses to incomplete*/
 
         /* log and notify all users about task closing */
-        Log::add(
-            array(
-                'action_type' => 31
-                ,'task_id' => $id
-                ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'info' => 'title: '.$task['name']
-            )
-        );
+        // Log::add(
+        //     array(
+        //         'action_type' => 31
+        //         ,'task_id' => $id
+        //         ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
+        //         ,'info' => 'title: '.$task['name']
+        //     )
+        // );
 
         DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $id) or die(DB\dbQueryError());
 

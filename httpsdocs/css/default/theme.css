@@ -62,6 +62,7 @@
 .is-flag, .x-tree-node .is-flag{background-image: url(s/flag-small.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-magnifier, .x-tree-node .i-magnifier{background-image: url(s/magnifier.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-building, .x-tree-node .i-building{background-image: url(s/building.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-book-open, .x-tree-node .i-book-open{background-image: url(s/book-open.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-check-alt{background-image: url(s/check-alt.png)}
 .i-cancel{background-image: url(s/cancel.png)}
 .i-trash{background-image: url(s/trash.png)}

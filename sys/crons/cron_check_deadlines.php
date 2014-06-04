@@ -34,14 +34,14 @@ while ($r = $res->fetch_assoc()) {
     if ($r['expired'] == 1) {
         // update task as expired
         DB\dbQuery('UPDATE tasks SET status = 1 WHERE id = $1', $r['id']) or die(DB\dbQueryError());
-        Log::add(
-            array(
-                'action_type' => 28
-                ,'task_id' => $r['id']
-                ,'remind_users' => $r['cid'].','.$r['responsible_user_ids']
-                ,'info' => 'title: '.$r['title']
-            )
-        );
+        // Log::add(
+        //     array(
+        //         'action_type' => 28
+        //         ,'task_id' => $r['id']
+        //         ,'remind_users' => $r['cid'].','.$r['responsible_user_ids']
+        //         ,'info' => 'title: '.$r['title']
+        //     )
+        // );
     }
     //update cron last_action status
     DB\dbQuery(

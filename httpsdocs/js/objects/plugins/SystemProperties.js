@@ -38,6 +38,9 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
         if(Ext.isEmpty(r.data)) {
             return;
         }
+
+        this.data = r.data;
+
         if(this.rendered) {
             this.dataView.update(r.data);
         } else {
@@ -63,7 +66,17 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
             ,menu: {}
         };
 
+
+        if(this.data) {
+            if(this.data.subscribed == 1) {
+                rez.menu.unsubscribe = {addDivider: 'top'};
+            } else {
+                rez.menu.subscribe = {addDivider: 'top'};
+            }
+        }
+
         if(this.params) {
+
             if(CB.DB.templates.getType(this.params.template_id) == 'file') {
                 rez.menu['webdavlink']  = {};
                 rez.menu['permalink']  = {};

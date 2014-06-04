@@ -73,10 +73,9 @@ class Objects
         global $data;
         // this method is used also internally (by getInfo method),
         // so we skip logging for "load" method in this cases
-        if (is_array($data) && (@$data['method'] == 'load')) {
-            Log::add(array('action_type' => 11, 'object_id' => $id));
-        }
-
+        // if (is_array($data) && (@$data['method'] == 'load')) {
+        //     // Log::add(array('action_type' => 11, 'object_id' => $id));
+        // }
         return array('success' => true, 'data' => $resultData);
     }
 
@@ -112,12 +111,12 @@ class Objects
         $p['name'] = $this->getAvailableName($p['pid'], $p['name']);
 
         $id = $object->create($p);
-        Log::add(
-            array(
-                'action_type' => 8
-                ,'object_id' => $id
-            )
-        );
+        // Log::add(
+        //     array(
+        //         'action_type' => 8
+        //         ,'object_id' => $id
+        //     )
+        // );
 
         Solr\Client::runCron();
 
@@ -158,12 +157,12 @@ class Objects
 
         Objects::updateCaseUpdateInfo($d['id']);
 
-        Log::add(
-            array(
-                'action_type' => 9
-                ,'object_id' => $d['id']
-            )
-        );
+        // Log::add(
+        //     array(
+        //         'action_type' => 9
+        //         ,'object_id' => $d['id']
+        //     )
+        // );
 
         /*updating saved document into solr directly (before runing background cron)
             so that it'll be displayed with new name without delay*/
@@ -302,7 +301,13 @@ class Objects
             $bottom = '<div style="padding: 0 10px">'.$bottom.'</div>';
         }
 
-        Log::add(array('action_type' => 12, 'object_id' => $id ));
+        // $logParams = array(
+        //     'type' => '???',
+        //     'object_id' => $id
+        // );
+
+        // Log::add($logParams);
+
         if (!empty($top)) {
             // $top = '<div class="obj-preview-h">'.L\get('Details').'</div>'.$top;
         }
@@ -534,6 +539,35 @@ class Objects
     }
 
     //--------------------- new refactoring methods
+
+    /**
+     * get pids of a given object id
+     * @param  int   $objectId
+     * @return array
+     */
+    public static function getPids($objectId)
+    {
+        $rez = array();
+
+        if (!is_numeric($objectId)) {
+            return $rez;
+        }
+
+        $res = DB\dbQuery(
+            'SELECT pids FROM tree_info WHERE id = $1',
+            $objectId
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = Util\toNumericArray($r['pids']);
+
+            //exclude itself from pids
+            array_pop($rez);
+        }
+        $res->close();
+
+        return $rez;
+    }
 
     /**
      * get template type of an object

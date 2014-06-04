@@ -83,6 +83,46 @@ function formatPastTime($mysqlTime)
     }
 }
 
+function formatAgoDate($mysqlDate)
+{
+    if (empty($mysqlDate)) {
+        return '';
+    }
+    /*
+    same day: today
+    privous day: yesterday
+    same week: Tuesday
+    same year: November 8
+    else: 2011, august 5
+
+     */
+
+    $TODAY_START = strtotime('today');
+    $YESTERDAY_START = strtotime('yesterday');
+    $WEEK_START = strtotime('last Sunday');
+    $YEAR_START = strtotime('1 January');
+
+    $time = strtotime(substr($mysqlDate, 0, 10));
+
+    if ($TODAY_START <= $time) {
+        return L\get('Today');
+    }
+
+    if ($YESTERDAY_START <= $time) {
+        return L\get('Yesterday');
+    }
+
+    if ($WEEK_START <= $time) {
+        return translateDays(date('l', $time)).' '.L\get('at');
+    }
+
+    if ($YEAR_START <= $time) {
+        return translateMonths(date('d F', $time));
+    }
+
+    return translateMonths(date('Y, F d', $time));
+}
+
 function formatAgoTime($mysqlTime)
 {
     if (empty($mysqlTime)) {
@@ -121,6 +161,7 @@ function formatAgoTime($mysqlTime)
 
         return $m.' '.L\get('minutes').' '.L\get('ago');
     }
+    // echo "$interval <= ($time - $TODAY_START) = ".($time - $TODAY_START);
     if ($interval < ($time - $TODAY_START)) {
         $H = intval($interval/$AHOUR);
         if ($H < 2) {
@@ -129,7 +170,8 @@ function formatAgoTime($mysqlTime)
 
         return $H.' '.L\get('ofHours').' '.L\get('ago');
     }
-    if ($interval < ($time - $YESTERDAY_START)) {
+    // echo "\n$interval <= ($time - $YESTERDAY_START) = ".($time - $YESTERDAY_START);
+    if ($YESTERDAY_START <= $time) {
         return L\get('Yesterday').' '.L\get('at').' '.date('H:i', $time);
     }
     if ($interval < ($time - $WEEK_START)) {
@@ -280,7 +322,6 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
     }
     $d1->setTimezone(new \DateTimeZone($TZ));
 
-
     $rez = $d1->format('D M j, Y');
     $hourText = $d1->format('H:i');
     if ($hourText != '00:00') {
@@ -347,7 +388,6 @@ function formatMysqlDate($date, $format = false, $TZ = 'UTC')
     $d1 = new \DateTime($date);
 
     $d1->setTimezone(new \DateTimeZone($TZ));
-
 
     $rez = $d1->format(str_replace('%', '', $format));
 

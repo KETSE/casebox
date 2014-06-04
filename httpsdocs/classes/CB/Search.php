@@ -214,6 +214,20 @@ class Search extends Solr\Client
             if (!empty($this->inputParams['facet.query'])) {
                 $facetParams['facet.query'] = $this->inputParams['facet.query'];
             }
+
+            if (!empty($this->inputParams['facet.range'])) {
+                $facetParams['facet.range'] = $this->inputParams['facet.range'];
+            }
+            if (!empty($this->inputParams['facet.range.start'])) {
+                $facetParams['facet.range.start'] = $this->inputParams['facet.range.start'];
+            }
+            if (!empty($this->inputParams['facet.range.end'])) {
+                $facetParams['facet.range.end'] = $this->inputParams['facet.range.end'];
+            }
+            if (!empty($this->inputParams['facet.range.gap'])) {
+                $facetParams['facet.range.gap'] = $this->inputParams['facet.range.gap'];
+            }
+
             if (!empty($this->inputParams['facet.sort'])) {
                 $facetParams['facet.sort'] = $this->inputParams['facet.sort'];
             }
@@ -264,6 +278,7 @@ class Search extends Solr\Client
                 ,'inputParams' => &$this->inputParams
             );
             \CB\fireEvent('beforeSolrQuery', $eventParams);
+
             $this->results = $this->search(
                 $this->escapeLuceneChars($this->query),
                 $this->start,

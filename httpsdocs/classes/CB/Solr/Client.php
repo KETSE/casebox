@@ -229,15 +229,19 @@ class Client extends Service
                     $ym1 = str_replace('-', '', substr($r['cdate'], 2, 5));
                     $ym2 = str_replace('-', '', substr($r['date'], 2, 5));
                     $ym3 = str_replace('-', '', substr($r['date_end'], 2, 5));
+
                     if (empty($ym3)) {
                         $ym3 = $ym2;
                     }
+
                     if (!empty($ym1)) {
                         $r['ym1'] = $ym1;
                     }
+
                     if (!empty($ym2)) {
                         $r['ym2'] = $ym2;
                     }
+
                     if (!empty($ym3)) {
                         $r['ym3'] = $ym3;
                     }

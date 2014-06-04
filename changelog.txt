@@ -1,3 +1,32 @@
+CaseBox 1.9.211 (2014-06-04)
+==============================
+New Features, Improvements
+--------------------------
+- Action log & Notification modules implementation
+    - added solr core config for log (/data/solr/log)
+    - added subscribe/unsubscribe functionality for any item in the tree
+    - old logging mechanism completely removed
+
+Fixed Bugs:
+----------
+- file preview doesn't work
+- throw exception when config.ini doesn't exist
+- fixed some mistakes in Config.php
+- fixed bug for virtual nodes with ids that contain '-'
+
+Notes:
+----------
+- database structure has been changed, differential update added.
+- casebox translations has been updated
+- updated sqls for casebox and demo core from innstall folder
+- in order to set up common log solr core - you should set "action_log" param in casebox.config table:
+    Example:
+        {
+          "core": "cb_log"
+          ,"retention_days": 30
+        }
+        // "host" and "port" params are optional, defaults used if not specified
+
 CaseBox 1.9.210 (2014-05-30)
 ==============================
 New Features, Improvements
