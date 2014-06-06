@@ -91,6 +91,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,id: 'completetask' + this.instanceId
                 ,scale: 'large'
                 ,text: L.Done
+                ,hidden: true
                 ,scope: this
                 ,handler: this.onCompleteTaskClick
             })
@@ -461,7 +462,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     ,onCardItemLoaded: function(item) {
         this.locked = false;
 
-        clog('on card item loaded updating toolbar and menu items');
         this.updateToolbarAndMenuItems();
 
         this.fireEvent('loaded', this, item);
@@ -696,8 +696,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,onCancelClick: function() {
-        if(isNaN(this.loadedData.id)) {
+
+        if(isNaN(this.loadedData.id) && !Ext.isEmpty(this.history)) {
             this.onBackClick();
+
         } else {
             var p = Ext.apply({}, this.loadedData);
             p.viewIndex = 0;

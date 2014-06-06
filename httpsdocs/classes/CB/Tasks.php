@@ -613,6 +613,17 @@ class Tasks
             $action_type = 30; //aboutTaskCompletionOnBehalt
             $autoclosed = $this->checkAutocloseTask($p['id']);
         }
+
+        // log the action
+        $o = new Objects\Task($p['id']);
+
+        $logParams = array(
+            'type' => 'status_change'
+            ,'new' => $o
+        );
+
+        Log::add($logParams);
+
         // Log::add(
         //     array(
         //         'action_type' => $action_type
@@ -749,6 +760,16 @@ class Tasks
             )
         ) or die(DB\dbQueryError());
 
+        $this->checkAutocloseTask($p['id']);
+
+        // log the action
+        $o = new Objects\Task($p['id']);
+
+        $logParams = array(
+            'type' => 'complete'
+            ,'new' => $o
+        );
+
         // Log::add(
         //     array(
         //         'action_type' => 23
@@ -798,6 +819,17 @@ class Tasks
             'UPDATE tasks SET status = 3 WHERE id = $1',
             $id
         ) or die(DB\dbQueryError());
+
+
+        // log the action
+        $o = new Objects\Task($p['id']);
+
+        $logParams = array(
+            'type' => 'close'
+            ,'new' => $o
+        );
+
+        Log::add($logParams);
 
         /* log and notify all users about task closing */
         // Log::add(
@@ -868,6 +900,15 @@ class Tasks
         ) or die(DB\dbQueryError());
         /* end of update responsible user statuses to incomplete*/
 
+        // log the action
+        $o = new Objects\Task($id);
+
+        $logParams = array(
+            'type' => 'reopen'
+            ,'new' => $o
+        );
+
+        Log::add($logParams);
         /* log and notify all users about task closing */
         // Log::add(
         //     array(
@@ -1142,7 +1183,7 @@ class Tasks
                 array(
                     ''
                     ,'font-size: 1.5em; display: block;'.( ($r['status'] == 3 ) ? 'color: #555; text-decoration: line-through' : '')
-                    ,$r['title']
+                    ,'<a href="' . $coreUrl . 'v-' . $id . '/">' . $r['title'] . '</a>'
                     ,$datetime_period
                     ,nl2br(Util\adjustTextForDisplay($r['description']))
                     ,L\get('Status', $user['language_id'])

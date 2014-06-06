@@ -1,6 +1,6 @@
 /*
-SQLyog Ultimate v11.3 (64 bit)
-MySQL - 5.5.9 : Database - test
+SQLyog Ultimate v11.5 (64 bit)
+MySQL - 5.5.9 : Database - casebox
 *********************************************************************
 */
 
@@ -13,7 +13,7 @@ MySQL - 5.5.9 : Database - test
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`test` /*!40100 DEFAULT CHARACTER SET latin1 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/`casebox` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
 /*Table structure for table `config` */
 
@@ -120,11 +120,11 @@ CREATE TABLE `plugins` (
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `order` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`,`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 
 /*Data for the table `plugins` */
 
-insert  into `plugins`(`id`,`name`,`cfg`,`active`,`order`) values (1,'AutoSetFields','{\r\n\"listeners\": {\r\n  \"beforeNodeDbCreate\": {\r\n    \"AutoSetFields\\\\Listeners\": [\r\n      \"onNodeDbCreateOrUpdate\"\r\n    ]\r\n  }\r\n  ,\"beforeNodeDbUpdate\": {\r\n    \"AutoSetFields\\\\Listeners\": [\r\n      \"onNodeDbCreateOrUpdate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(2,'DisplayColumns','{\r\n\"js\": [\r\n  \"DisplayColumns.js\"\r\n]\r\n,\"listeners\": {\r\n  \"beforeSolrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onBeforeSolrQuery\"\r\n    ]\r\n  }\r\n  ,\"solrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onSolrQuery\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(3,'Export','{\r\n\r\n\"js\": [\r\n  \"Init.js\"\r\n  ,\"Button.js\"\r\n]\r\n,\"api\" : {\r\n  \"Export_Instance\": {\r\n    \"methods\": {\r\n      \"getCSV\": {\r\n        \"len\": 1\r\n      }\r\n    }\r\n  }\r\n\r\n}\r\n}',1,0),(4,'Search','{\r\n\r\n\"js\": [\r\n  \"Init.js\"\r\n  ,\"Button.js\"\r\n  ,\"Form.js\"\r\n  ,\"ResultForm.js\"\r\n]\r\n\r\n,\"remote\": {\r\n  \"handler\": \"CB_Browser_SearchRouter.search\"\r\n}\r\n\r\n}',1,0),(5,'SystemFolders','{\r\n\"listeners\": {\r\n  \"nodeDbCreate\": {\r\n    \"SystemFolders\\\\Listeners\": [\r\n      \"onNodeDbCreate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(6,'CommentNotifications','{\r\n\"listeners\": {\r\n  \"nodeDbCreate\": {\r\n    \"CommentNotifications\\\\Listeners\": [\r\n      \"onNodeDbCreate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0);
+insert  into `plugins`(`id`,`name`,`cfg`,`active`,`order`) values (1,'AutoSetFields','{\r\n\"listeners\": {\r\n  \"beforeNodeDbCreate\": {\r\n    \"AutoSetFields\\\\Listeners\": [\r\n      \"onNodeDbCreateOrUpdate\"\r\n    ]\r\n  }\r\n  ,\"beforeNodeDbUpdate\": {\r\n    \"AutoSetFields\\\\Listeners\": [\r\n      \"onNodeDbCreateOrUpdate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(2,'DisplayColumns','{\r\n\"js\": [\r\n  \"DisplayColumns.js\"\r\n]\r\n,\"listeners\": {\r\n  \"beforeSolrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onBeforeSolrQuery\"\r\n    ]\r\n  }\r\n  ,\"solrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onSolrQuery\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(3,'Export','{\r\n\r\n\"js\": [\r\n  \"Init.js\"\r\n  ,\"Button.js\"\r\n]\r\n,\"api\" : {\r\n  \"Export_Instance\": {\r\n    \"methods\": {\r\n      \"getCSV\": {\r\n        \"len\": 1\r\n      }\r\n    }\r\n  }\r\n\r\n}\r\n}',1,0),(4,'Search','{\r\n\r\n\"js\": [\r\n  \"Init.js\"\r\n  ,\"Button.js\"\r\n  ,\"Form.js\"\r\n  ,\"ResultForm.js\"\r\n]\r\n\r\n,\"remote\": {\r\n  \"handler\": \"CB_Browser_SearchRouter.search\"\r\n}\r\n\r\n}',1,0),(5,'SystemFolders','{\r\n\"listeners\": {\r\n  \"nodeDbCreate\": {\r\n    \"SystemFolders\\\\Listeners\": [\r\n      \"onNodeDbCreate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(6,'CommentNotifications','{\r\n\"listeners\": {\r\n  \"nodeDbCreate\": {\r\n    \"CommentNotifications\\\\Listeners\": [\r\n      \"onNodeDbCreate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(7,'Notifications','{\r\n\"listeners\": {\r\n  \"logadd\": {\r\n    \"Notifications\\\\Listeners\": [\r\n      \"onLogAdd\"\r\n    ]\r\n  }\r\n}\r\n}',1,0);
 
 /*Table structure for table `timezone` */
 

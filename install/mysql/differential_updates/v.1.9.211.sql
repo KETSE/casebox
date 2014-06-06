@@ -6,7 +6,7 @@ CREATE TABLE `action_log`(
 	`object_id` bigint(20) unsigned NOT NULL  ,
 	`object_pid` bigint(20) unsigned NULL  ,
 	`user_id` int(10) unsigned NOT NULL  ,
-	`action_type` enum('create','delete','comment','update','move','permissions','user_delete','user_create','login_fail','login') COLLATE utf8_general_ci NOT NULL  ,
+	`action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','reopen','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail') COLLATE utf8_general_ci NOT NULL  ,
 	`action_time` timestamp NOT NULL  DEFAULT CURRENT_TIMESTAMP ,
 	`data` mediumtext COLLATE utf8_general_ci NULL  ,
 	PRIMARY KEY (`id`) ,
@@ -26,7 +26,7 @@ TRUNCATE TABLE `notifications`;
 /* Alter table in target */
 ALTER TABLE `notifications`
 	CHANGE `id` `id` bigint(11) unsigned   NOT NULL auto_increment first ,
-	CHANGE `action_type` `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail','reopen')  COLLATE utf8_general_ci NOT NULL after `id` ,
+	CHANGE `action_type` `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','reopen','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail') COLLATE utf8_general_ci NOT NULL after `id` ,
 	ADD COLUMN `action_time` timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP after `action_type` ,
 	CHANGE `object_id` `object_id` bigint(20) unsigned   NOT NULL after `action_time` ,
 	ADD COLUMN `object_pid` bigint(20) unsigned   NULL after `object_id` ,

@@ -1,3 +1,17 @@
+CaseBox 1.9.216 (2014-06-06)
+==============================
+New Features, Improvements
+--------------------------
+- changed the security checks on item move from delete+write to read+write
+- Task title in email notifications should be a link
+
+Fixed Bugs:
+----------
+- modified commentsNotification plugin according to new structure.
+    It should be merged in future with main Notifications plugin.
+- Cancel button doesn't work when creating new object and history is empty
+- OnCaseboxLoad, the DoneTask button is visible
+
 CaseBox 1.9.211 (2014-06-04)
 ==============================
 New Features, Improvements
@@ -26,6 +40,21 @@ Notes:
           ,"retention_days": 30
         }
         // "host" and "port" params are optional, defaults used if not specified
+
+    - for ActionLog virtual folder to be available, add to config.treeNodes:
+        "ActionLog":{
+            "pid": 1
+        }
+- Notifications plugin should be added to casebox.plugins table:
+    it's config:    {
+        "listeners": {
+          "logadd": {
+            "Notifications\\Listeners": [
+              "onLogAdd"
+            ]
+          }
+        }
+        }
 
 CaseBox 1.9.210 (2014-05-30)
 ==============================

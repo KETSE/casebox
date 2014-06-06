@@ -153,8 +153,12 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
 
                 ,columnmove:    this.saveGridState
                 ,columnresize:  this.saveGridState
-                ,sortchange:    this.saveGridState
+                // ,sortchange:    this.saveGridState
                 ,groupchange:   this.saveGridState
+                ,sortchange: function() {
+                    clog('sorchange', arguments);
+                    this.saveGridState();
+                }
             }
             ,keys: [{
                     key: Ext.EventObject.DOWN //down arrow (select forst row in the greed if no row already selected)  - does not work

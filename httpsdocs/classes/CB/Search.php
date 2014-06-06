@@ -77,6 +77,7 @@ class Search extends Solr\Client
 
         /*analize sort parameter (ex: status asc,date_end asc)/**/
         $sort = array('order' => 'asc');
+
         if (isset($p['sort'])) {
             if (!is_array($p['sort'])) {
                 $sort[$p['sort']] = empty($p['dir'])

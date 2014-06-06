@@ -100,6 +100,9 @@ class Browser
         if (!empty($this->DC)) {
             $rez['DC'] = &$this->DC[0];
         }
+        if (!empty($this->sort)) {
+            $rez['sort'] = &$this->sort;
+        }
 
         return $rez;
 
@@ -171,6 +174,10 @@ class Browser
 
             if (isset($rez['DC'])) {
                 $this->DC[] = $rez['DC'];
+            }
+
+            if (isset($rez['sort'])) {
+                $this->sort = $rez['sort'];
             }
         }
     }

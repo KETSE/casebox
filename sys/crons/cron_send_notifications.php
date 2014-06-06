@@ -30,7 +30,7 @@ $sql = 'SELECT action_type
         AND user_id IS NOT NULL
     ORDER BY user_id
            , `action_time` DESC';
-echo $sql."\n";
+
 $res = DB\dbQuery($sql) or die(DB\dbQueryError());
 
 while ($r = $res->fetch_assoc()) {

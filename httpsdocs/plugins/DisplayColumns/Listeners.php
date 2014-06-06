@@ -27,6 +27,10 @@ class Listeners
             }
             $sp['fl'] = implode(',', $fl);
         }
+
+        if (!empty($solrFields['sort'])) {
+            $sp['sort'] = $solrFields['sort'];
+        }
     }
 
     public function onSolrQuery(&$p)
@@ -143,6 +147,9 @@ class Listeners
             }
         }
 
+        if (!empty($state['sort'])) {
+            $p['result']['sort'] = $state['sort'];
+        }
         /* end of get user state and merge the state with display columns */
 
         if (!empty($rez)) {
@@ -181,36 +188,52 @@ class Listeners
 
         $displayColumns = $this->getDC();
 
-        if (empty($displayColumns['data'])) {
-            return $rez;
-        }
+        if (!empty($displayColumns['data'])) {
+            foreach ($displayColumns['data'] as $column) {
+                if (is_array($column) && !empty($column['solr_column_name'])) {
+                    $rez['fields'][$column['solr_column_name']] = 1;
 
-        foreach ($displayColumns['data'] as $column) {
-            if (is_array($column) && !empty($column['solr_column_name'])) {
-                $rez['fields'][$column['solr_column_name']] = 1;
+                    if ((@$this->inputParams['sort'] == $column['solr_column_name']) &&
+                        !empty($this->inputParams['dir'])
+                    ) {
+                        $rez['sort'][] = $column['solr_column_name'] . ' ' . strtolower($this->inputParams['dir']);
+                    } elseif (!empty($column['sort'])) {
+                        $rez['sort'][] = $column['solr_column_name'] . ' ' . $column['sort'];
+                    }
 
-                if ((@$this->inputParams['sort'] == $column['solr_column_name']) &&
-                    !empty($this->inputParams['dir'])
-                ) {
-                    $rez['sort'][] = $column['solr_column_name'] . ' ' . strtolower($this->inputParams['dir']);
-                } elseif (!empty($column['sort'])) {
-                    $rez['sort'][] = $column['solr_column_name'] . ' ' . $column['sort'];
-                }
-
-            } elseif (is_scalar($column)) {
-                $a = explode(':', $column);
-                if ($a[0] == 'solr') {
-                    $rez['fields'][$a[1]] = 1;
+                } elseif (is_scalar($column)) {
+                    $a = explode(':', $column);
+                    if ($a[0] == 'solr') {
+                        $rez['fields'][$a[1]] = 1;
+                    }
                 }
             }
         }
+
+        /* get user state and check if user has a custom sorting */
+        if (empty($this->inputParams['sort'])) {
+            $stateFrom = empty($displayColumns['from'])
+                ? 'default'
+                : $displayColumns['from'];
+
+            $state = State\DBProvider::getGridViewState($stateFrom);
+
+            if (!empty($state['sort']['field'])) {
+                $rez['sort'] = array(
+                    $state['sort']['field']
+                    .' '
+                    .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
+                );
+            }
+
+            if (!empty($rez['sort'])) {
+                $rez['sort'] = 'ntsc asc,'.implode(',', $rez['sort']);
+            }
+        }
+        /* end of get user state and check if user has a custom sorting */
 
         if (!empty($rez['fields'])) {
             $rez['fields'] = array_keys($rez['fields']);
-
-            if (!empty($rez['sort'])) {
-                $rez['sort'] = 'ntsc,'.implode(',', $rez['sort']);
-            }
         }
 
         return $rez;

@@ -900,7 +900,7 @@ class Object extends OldObject
         }
 
         /* security check */
-        if (!\CB\Security::canDelete($this->id)) {
+        if (!\CB\Security::canRead($this->id)) {
             return false;
         }
         /* end of security check */
