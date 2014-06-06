@@ -13,35 +13,6 @@ if (!$cd['success']) {
 }
 
 $users = array();
-// $log_groups = array(
-// 		1 => 'activity' //login
-// 		,2 => 'activity' //logout
-// 		,3 => 'Cases'// Add case
-// 		,4 => 'Cases' // update case
-// 		,5 => 'Cases' // delete case
-// 		,6 => 'Cases'// open case
-// 		,7 => 'Cases'// close case
-// 		,8 => 'Cases objects'// add object
-// 		,9 => 'Cases objects'// update object
-// 		,10 => 'Cases objects'// delete object
-// 		,11 => 'Cases objects'// open object
-// 		,12 => 'Cases objects'// get objects info
-// 		,13 => 'Cases files'// add file
-// 		,14 => 'Cases files'// download file
-// 		,15 => 'Cases files'// delete file
-// 		,16 => 'Cases'// Update case security roghts
-// 		,17 => 'Cases access'// add access to case
-// 		,18 => 'Cases access'// remove access from case
-// 		,19 => 'Cases access'// grant access to case
-// 		,20 => 'Cases access'// close access to case
-// 		,21 => 'Deadlines'// add deadline
-// 		,22 => 'Deadlines'// update deadline
-// 		,23 => 'Deadlines'// complete deadline
-// 		,24 => 'Deadlines'// remove deadline
-// 		,25 => 'Deadlines'// remove deadline
-// 		,26 => 'Deadlines'// remove deadline
-// 		,27 => 'Deadlines'// remove deadline
-// );
 
 L\initTranslations();
 
@@ -50,30 +21,35 @@ $adminEmail = Config::get('ADMIN_EMAIL');
 $senderEmail = Config::get('SENDER_EMAIL');
 
 $sql = 'SELECT action_type
-        ,task_id
+        ,object_id
         ,user_id
-        ,sender
-        ,subject
-        ,message
+        ,data
     FROM notifications
-    WHERE `time` < CURRENT_TIMESTAMP '.(empty($cd['last_start_time']) ? '' : '
-        AND `time` > \''.$cd['last_start_time'].'\' ').'
+    WHERE `action_time` < CURRENT_TIMESTAMP '.(empty($cd['last_start_time']) ? '' : '
+        AND `action_time` > \''.$cd['last_start_time'].'\' ').'
         AND user_id IS NOT NULL
     ORDER BY user_id
-           , `time` DESC';
+           , `action_time` DESC';
+
 $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+
 while ($r = $res->fetch_assoc()) {
-    if ($r['message'] == '<generateTaskViewOnSend>') {
-        $r['message'] = Tasks::getTaskInfoForEmail($r['task_id'], $r['user_id']);
+    $data = json_decode($r['data'], true);
+
+    if ($data['body'] == '<generateTaskViewOnSend>') {
+        $data['body'] = Tasks::getTaskInfoForEmail($r['object_id'], $r['user_id']);
     } else {
-        $r['message'] = stripslashes($r['message']);
+        $data['body'] = stripslashes($data['body']);
     }
+
     if (!isset($users[$r['user_id']])) {
         $users[$r['user_id']] = User::getPreferences($r['user_id']);
     }
-    $users[$r['user_id']]['mails'][] = array($r['subject'], $r['message'], $r['sender']);
+
+    $users[$r['user_id']]['mails'][] = array($data['subject'], $data['body'], $data['sender']);
 }
 $res->close();
+
 foreach ($users as $u) {
     if (empty($u['email'])) {
         continue;

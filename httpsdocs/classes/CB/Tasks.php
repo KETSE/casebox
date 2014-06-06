@@ -322,14 +322,14 @@ class Tasks
             }
         }
 
-        $logParams = array(
-            'action_type' => $log_action_type
-            ,'task_id' => $p['id']
-            ,'to_user_ids' => $p['responsible_user_ids']
-            ,'remind_users' => $remind_users
-            ,'removed_users' => $removed_responsible_users
-            ,'info' => 'title: '.$p['title']);
-        Log::add($logParams);
+        // $logParams = array(
+        //     'action_type' => $log_action_type
+        //     ,'task_id' => $p['id']
+        //     ,'to_user_ids' => $p['responsible_user_ids']
+        //     ,'remind_users' => $remind_users
+        //     ,'removed_users' => $removed_responsible_users
+        //     ,'info' => 'title: '.$p['title']);
+        // Log::add($logParams);
 
         $this->saveReminds($p);
 
@@ -421,135 +421,134 @@ class Tasks
         ) or die(DB\dbQueryError());
         /* end of save reminds for currents user /**/
 
-        /* create notifications for specified reminders */
-        /* if no deadline is set for the task then no notifications will be set */
-        $res = DB\dbQuery(
-            'SELECT
-                t.title
-                ,t.date_start
-                ,t.date_end
-                ,ti.path
-            FROM tasks t
-            JOIN tree_info ti on t.id = ti.id
-            WHERE t.id = $1',
-            $p['id']
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $p = array_merge($p, $r);
-        }
-        $res->close();
+        // /* create notifications for specified reminders */
+        // /* if no deadline is set for the task then no notifications will be set */
+        // $res = DB\dbQuery(
+        //     'SELECT
+        //         t.title
+        //         ,t.date_start
+        //         ,t.date_end
+        //         ,ti.path
+        //     FROM tasks t
+        //     JOIN tree_info ti on t.id = ti.id
+        //     WHERE t.id = $1',
+        //     $p['id']
+        // ) or die(DB\dbQueryError());
+        // if ($r = $res->fetch_assoc()) {
+        //     $p = array_merge($p, $r);
+        // }
+        // $res->close();
 
-        if (!empty($p['date_end'])) {
-            //selecting currently used notification ids to be updated with new data
-            $ids = array();
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM notifications
-                WHERE task_id = $1
-                    AND user_id = $2
-                    AND subtype = 1',
-                array(
-                    $p['id']
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
+        // if (!empty($p['date_end'])) {
+        //     //selecting currently used notification ids to be updated with new data
+        //     $ids = array();
+        //     $res = DB\dbQuery(
+        //         'SELECT id
+        //         FROM notifications
+        //         WHERE task_id = $1
+        //             AND user_id = $2
+        //             AND subtype = 1',
+        //         array(
+        //             $p['id']
+        //             ,$_SESSION['user']['id']
+        //         )
+        //     ) or die(DB\dbQueryError());
 
-            while ($r = $res->fetch_assoc()) {
-                $ids[] = $r['id'];
-            }
-            $res->close();
-            //end of selecting currently used notification ids to be updated with new data
+        //     while ($r = $res->fetch_assoc()) {
+        //         $ids[] = $r['id'];
+        //     }
+        //     $res->close();
+        //     //end of selecting currently used notification ids to be updated with new data
 
-            $a = explode('-', $p['reminds']);
+        //     $a = explode('-', $p['reminds']);
 
-            $subject = L\get('Reminder').': '.$p['title'].
-                ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['timezone']).
-                ' ('.$p['path'].')';
+        //     $subject = L\get('Reminder').': '.$p['title'].
+        //         ' @ '.Util\formatDateTimePeriod($p['date_start'], $p['date_end'], @$_SESSION['user']['cfg']['timezone']).
+        //         ' ('.$p['path'].')';
 
-            // user|remindType|remind delay|remindUnits
-            foreach ($a as $r) {
-                $rem = explode('|', $r);
-                if ($rem[0] != 1) {
-                    continue; // not by mail
-                }
-                $id = empty($ids) ? null : array_shift($ids);
-                $unit = 'HOUR';
-                switch ($rem[2]) {
-                    case 1:
-                        $unit = 'MINUTE';
-                        break;
-                    case 2:
-                        $unit = 'HOUR';
-                        break;
-                    case 3:
-                        $unit = 'DAY';
-                        break;
-                    case 4:
-                        $unit = 'WEEK';
-                        break;
-                }
-                DB\dbQuery(
-                    'INSERT INTO notifications (
-                        id
-                        ,action_type
-                        ,task_id
-                        ,subtype
-                        ,subject
-                        ,message
-                        ,time
-                        ,user_id)
-                    VALUES (
-                        $1
-                        ,$2
-                        ,$3
-                        ,1
-                        ,$4
-                        ,$5
-                        ,DATE_ADD($6, INTERVAL $7 '.$unit.')
-                        ,$8)
-                    ON DUPLICATE KEY
-                    UPDATE action_type = $2
-                        ,task_id = $3
-                        ,subtype = 1
-                        ,subject = $4
-                        ,message = $5
-                        ,time = DATE_ADD($6, INTERVAL $7 '.$unit.')
-                        ,user_id = $8',
-                    array(
-                        $id
-                        ,$log_action_type
-                        ,$p['id']
-                        ,$subject
-                        ,'<generateTaskViewOnSend>'
-                        ,$p['date_end']
-                        ,-$rem[1]
-                        ,$_SESSION['user']['id']
-                    )
-                ) or die(DB\dbQueryError());
-            }
-            if (!empty($ids)) {
-                DB\dbQuery(
-                    'DELETE
-                    FROM notifications
-                    WHERE task_id = $1
-                        AND id IN (0'.implode(', ', $ids).')',
-                    $p['id']
-                ) or die(DB\dbQueryError());
-            }
-        } else {
-            DB\dbQuery(
-                'DELETE
-                FROM notifications
-                WHERE task_id = $1
-                    AND user_id = $2
-                    AND subtype = 1',
-                array(
-                    $p['id']
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
-        }
-
+        //     // user|remindType|remind delay|remindUnits
+        //     foreach ($a as $r) {
+        //         $rem = explode('|', $r);
+        //         if ($rem[0] != 1) {
+        //             continue; // not by mail
+        //         }
+        //         $id = empty($ids) ? null : array_shift($ids);
+        //         $unit = 'HOUR';
+        //         switch ($rem[2]) {
+        //             case 1:
+        //                 $unit = 'MINUTE';
+        //                 break;
+        //             case 2:
+        //                 $unit = 'HOUR';
+        //                 break;
+        //             case 3:
+        //                 $unit = 'DAY';
+        //                 break;
+        //             case 4:
+        //                 $unit = 'WEEK';
+        //                 break;
+        //         }
+        //         DB\dbQuery(
+        //             'INSERT INTO notifications (
+        //                 id
+        //                 ,action_type
+        //                 ,task_id
+        //                 ,subtype
+        //                 ,subject
+        //                 ,message
+        //                 ,time
+        //                 ,user_id)
+        //             VALUES (
+        //                 $1
+        //                 ,$2
+        //                 ,$3
+        //                 ,1
+        //                 ,$4
+        //                 ,$5
+        //                 ,DATE_ADD($6, INTERVAL $7 '.$unit.')
+        //                 ,$8)
+        //             ON DUPLICATE KEY
+        //             UPDATE action_type = $2
+        //                 ,task_id = $3
+        //                 ,subtype = 1
+        //                 ,subject = $4
+        //                 ,message = $5
+        //                 ,time = DATE_ADD($6, INTERVAL $7 '.$unit.')
+        //                 ,user_id = $8',
+        //             array(
+        //                 $id
+        //                 ,$log_action_type
+        //                 ,$p['id']
+        //                 ,$subject
+        //                 ,'<generateTaskViewOnSend>'
+        //                 ,$p['date_end']
+        //                 ,-$rem[1]
+        //                 ,$_SESSION['user']['id']
+        //             )
+        //         ) or die(DB\dbQueryError());
+        //     }
+        //     if (!empty($ids)) {
+        //         DB\dbQuery(
+        //             'DELETE
+        //             FROM notifications
+        //             WHERE task_id = $1
+        //                 AND id IN (0'.implode(', ', $ids).')',
+        //             $p['id']
+        //         ) or die(DB\dbQueryError());
+        //     }
+        // } else {
+        //     DB\dbQuery(
+        //         'DELETE
+        //         FROM notifications
+        //         WHERE task_id = $1
+        //             AND user_id = $2
+        //             AND subtype = 1',
+        //         array(
+        //             $p['id']
+        //             ,$_SESSION['user']['id']
+        //         )
+        //     ) or die(DB\dbQueryError());
+        // }
         return array('success' => true, 'reminds' => $p['reminds']);
     }
 
@@ -614,16 +613,27 @@ class Tasks
             $action_type = 30; //aboutTaskCompletionOnBehalt
             $autoclosed = $this->checkAutocloseTask($p['id']);
         }
-        Log::add(
-            array(
-                'action_type' => $action_type
-                ,'task_id' => $p['id']
-                ,'to_user_ids' => $p['user_id']
-                ,'remind_users' => $task['cid'].','.$p['user_id']
-                ,'autoclosed' => $autoclosed
-                ,'info' => 'title: '.$task['title']
-            )
-        ); // TO REVIEW
+
+        // log the action
+        $o = new Objects\Task($p['id']);
+
+        $logParams = array(
+            'type' => 'status_change'
+            ,'new' => $o
+        );
+
+        Log::add($logParams);
+
+        // Log::add(
+        //     array(
+        //         'action_type' => $action_type
+        //         ,'task_id' => $p['id']
+        //         ,'to_user_ids' => $p['user_id']
+        //         ,'remind_users' => $task['cid'].','.$p['user_id']
+        //         ,'autoclosed' => $autoclosed
+        //         ,'info' => 'title: '.$task['title']
+        //     )
+        // ); // TO REVIEW
 
         DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $p['id']) or die(DB\dbQueryError());
 
@@ -750,15 +760,25 @@ class Tasks
             )
         ) or die(DB\dbQueryError());
 
-        Log::add(
-            array(
-                'action_type' => 23
-                ,'task_id' => $p['id']
-                ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'autoclosed' => $this->checkAutocloseTask($p['id'])
-                ,'info' => 'title: '.$task['title']
-            )
+        $this->checkAutocloseTask($p['id']);
+
+        // log the action
+        $o = new Objects\Task($p['id']);
+
+        $logParams = array(
+            'type' => 'complete'
+            ,'new' => $o
         );
+
+        // Log::add(
+        //     array(
+        //         'action_type' => 23
+        //         ,'task_id' => $p['id']
+        //         ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
+        //         ,'autoclosed' => $this->checkAutocloseTask($p['id'])
+        //         ,'info' => 'title: '.$task['title']
+        //     )
+        // );
 
         DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $p['id']) or die(DB\dbQueryError());
 
@@ -800,15 +820,26 @@ class Tasks
             $id
         ) or die(DB\dbQueryError());
 
-        /* log and notify all users about task closing */
-        Log::add(
-            array(
-                'action_type' => 27
-                ,'task_id' => $id
-                ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'info' => 'title: '.$task['name']
-            )
+
+        // log the action
+        $o = new Objects\Task($p['id']);
+
+        $logParams = array(
+            'type' => 'close'
+            ,'new' => $o
         );
+
+        Log::add($logParams);
+
+        /* log and notify all users about task closing */
+        // Log::add(
+        //     array(
+        //         'action_type' => 27
+        //         ,'task_id' => $id
+        //         ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
+        //         ,'info' => 'title: '.$task['name']
+        //     )
+        // );
 
         DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $id) or die(DB\dbQueryError());
 
@@ -869,15 +900,24 @@ class Tasks
         ) or die(DB\dbQueryError());
         /* end of update responsible user statuses to incomplete*/
 
-        /* log and notify all users about task closing */
-        Log::add(
-            array(
-                'action_type' => 31
-                ,'task_id' => $id
-                ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
-                ,'info' => 'title: '.$task['name']
-            )
+        // log the action
+        $o = new Objects\Task($id);
+
+        $logParams = array(
+            'type' => 'reopen'
+            ,'new' => $o
         );
+
+        Log::add($logParams);
+        /* log and notify all users about task closing */
+        // Log::add(
+        //     array(
+        //         'action_type' => 31
+        //         ,'task_id' => $id
+        //         ,'remind_users' => $task['cid'].','.$task['responsible_user_ids']
+        //         ,'info' => 'title: '.$task['name']
+        //     )
+        // );
 
         DB\dbQuery('UPDATE tree set updated = 1 where id = $1', $id) or die(DB\dbQueryError());
 
@@ -928,7 +968,7 @@ class Tasks
      * @param  int   $taskId
      * @return array
      */
-    protected static function getTaskFiles($taskId)
+    protected static function getTaskFiles($taskId, $html = false)
     {
         $files = array();
 
@@ -945,7 +985,28 @@ class Tasks
             $files[] = $file;
         }
 
-        return $files;
+        if ($html === false) {
+            return $files;
+        }
+
+        $rez = '';
+        $coreUrl = Config::get('core_url');
+
+
+        if (!empty($files)) {
+            $rez .= '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
+                L\get('Files').':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
+
+            foreach ($files as $f) {
+                $rez .= '<li style="margin:0;padding: 3px 0"><a href="' . $coreUrl . 'v-' . $f['id'] . '/" name="file" fid="'.$f['id'].
+                    '" style="text-decoration: underline; color: #15C" taget="_blank"><img style="float:left;margin-right:5px" src="'.
+                    $coreUrl.'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
+            }
+
+            $rez .= '</ul></td></tr>';
+        }
+
+        return $rez;
     }
 
     /**
@@ -1086,21 +1147,7 @@ class Tasks
                 implode('', $users).'</tbody></table></td></tr>';
 
             // create files block
-            $files_text = '';
-            $files = static::getTaskFiles($id);
-
-            if (!empty($files)) {
-                $files_text .= '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
-                    L\get('Files', $user['language_id']).':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
-
-                foreach ($files as $f) {
-                    $files_text .= '<li style="margin:0;padding: 3px 0"><a href="' . $coreUrl . 'v-' . $id . '/?e=1" name="file" fid="'.$f['id'].
-                        '" style="text-decoration: underline; color: #15C" taget="_blank"><img style="float:left;margin-right:5px" src="'.
-                        $coreUrl.'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
-                }
-
-                $files_text .= '</ul></td></tr>';
-            }
+            $files_text = static::getTaskFiles($id, true);
 
             $rez = file_get_contents(TEMPLATES_DIR.'task_notification_email.html');
 
@@ -1136,7 +1183,7 @@ class Tasks
                 array(
                     ''
                     ,'font-size: 1.5em; display: block;'.( ($r['status'] == 3 ) ? 'color: #555; text-decoration: line-through' : '')
-                    ,$r['title']
+                    ,'<a href="' . $coreUrl . 'v-' . $id . '/">' . $r['title'] . '</a>'
                     ,$datetime_period
                     ,nl2br(Util\adjustTextForDisplay($r['description']))
                     ,L\get('Status', $user['language_id'])
@@ -1209,7 +1256,7 @@ class Tasks
             <tr><td class="k">'.L\get('Category').':</td><td>{category_text}</td></tr>
             <tr><td class="k">'.L\get('Path').':</td><td><a class="path" path="{path}" href="#">{path_text}</a></td></tr>
             <tr><td class="k">'.L\get('Owner').':</td><td><table class="people"><tbody>
-                <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg"></td><td><b>{creator_name}</b><p class="gr">'.L\get('Created').': '.
+                <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg" style="width:32px; height: 32px" alt="{creator_name}" title="{creator_name}"></td><td><b>{creator_name}</b><p class="gr">'.L\get('Created').': '.
                 '<span class="dttm" title="{full_created_date_text}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
 
         $date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
@@ -1260,7 +1307,7 @@ class Tasks
             $rez .= '<tr><td class="k">'.L\get('TaskAssigned').':</td><td><table class="people"><tbody>';
             foreach ($d['users'] as $u) {
                 $un = User::getDisplayName($u['id']);
-                $rez .= '<tr><td class="user"><div style="position: relative"><img class="photo32" src="photo/'.$u['id'].'.jpg" alt="'.$un.'" title="'.$un.'">'.
+                $rez .= '<tr><td class="user"><div style="position: relative"><img class="photo32" src="photo/'.$u['id'].'.jpg" style="width:32px; height: 32px" alt="'.$un.'" title="'.$un.'">'.
                 ( ($u['status'] == 1 ) ? '<img class="done icon icon-tick-circle" src="css/i/s.gif" />': "").
                 '</div></td><td><b>'.$un.'</b>'.
                 '<p class="gr">'.(

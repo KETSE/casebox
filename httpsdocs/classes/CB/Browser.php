@@ -100,6 +100,9 @@ class Browser
         if (!empty($this->DC)) {
             $rez['DC'] = &$this->DC[0];
         }
+        if (!empty($this->sort)) {
+            $rez['sort'] = &$this->sort;
+        }
 
         return $rez;
 
@@ -171,6 +174,10 @@ class Browser
 
             if (isset($rez['DC'])) {
                 $this->DC[] = $rez['DC'];
+            }
+
+            if (isset($rez['sort'])) {
+                $this->sort = $rez['sort'];
             }
         }
     }
@@ -782,6 +789,60 @@ class Browser
         Solr\Client::runCron();
         $rez = array('success' => true, 'data' => array('pid' => $p['pid']));
         $files->attachPostUploadInfo($F, $rez);
+
+        return $rez;
+    }
+
+    /**
+     * subscribe to notifications for a tree item
+     * @param  array      $p
+     * @return Ext.Direct responce
+     */
+    public function subscribe($p)
+    {
+        $rez = array('success' => true);
+
+        if (empty($p['id']) || !is_numeric($p['id'])) {
+            return array('success' => false);
+        }
+
+        DB\dbQuery(
+            'INSERT INTO user_subscriptions
+            (user_id, object_id, recursive)
+            VALUES ($1, $2, $3)
+            ON DUPLICATE KEY UPDATE
+            sdate = CURRENT_TIMESTAMP',
+            array(
+                $_SESSION['user']['id']
+                ,$p['id']
+                ,empty($p['recursive']) ? 0 : 1
+            )
+        ) or die(DB\dbQueryError());
+
+        return $rez;
+    }
+
+    /**
+     * unsubscribe from notifications for a tree item
+     * @param  array      $p
+     * @return Ext.Direct responce
+     */
+    public function unsubscribe($p)
+    {
+        $rez = array('success' => true);
+
+        if (empty($p['id']) || !is_numeric($p['id'])) {
+            return array('success' => false);
+        }
+
+        DB\dbQuery(
+            'DELETE FROM  user_subscriptions
+            WHERE user_id = $1 AND object_id = $2',
+            array(
+                $_SESSION['user']['id']
+                ,$p['id']
+            )
+        ) or die(DB\dbQueryError());
 
         return $rez;
     }

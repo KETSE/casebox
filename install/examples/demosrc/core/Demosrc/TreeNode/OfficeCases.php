@@ -108,7 +108,7 @@ class OfficeCases extends \CB\TreeNode\Base
         $rez = 'no name';
 
         if ($id == 'cases') {
-            return L\Cases;
+            return L\get('Cases');
         }
 
         $res = DB\dbQuery(

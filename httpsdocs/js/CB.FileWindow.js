@@ -118,6 +118,9 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 
         CB.FileWindow.superclass.initComponent.apply(this, arguments);
 
+        this.addEvents('fileupload', 'filedownload');
+        this.enableBubble(['fileupload', 'filedownload']);
+
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
         App.mainViewPort.on('fileuploaded', this.onFileUploaded, this);
     }
@@ -225,27 +228,24 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 
         var toolbarItems = [];
 
-        /* insert create menu if needed */
-        var menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
-
-        if( !Ext.isEmpty(menuConfig) ){
-            var createButton = new Ext.Button({
-                text: L.Create
-                ,iconCls: 'ib-create'
-                ,iconAlign:'top'
-                ,scale: 'large'
-                ,menu: []
-            });
-            updateMenu(createButton, menuConfig, this.onCreateObjectClick, this);
-            toolbarItems.push(createButton, '-');
-        }
-
         toolbarItems.push(this.separators.save);
         toolbarItems.push(this.actions.save);
 
         var moreItems = [this.actions.getEditLink];
         if(!this.hideDeleteButton) {
             moreItems.unshift(this.actions['delete']);
+        }
+
+        /* insert create menu if needed */
+        var menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
+
+        if( !Ext.isEmpty(menuConfig) ){
+            var createButton = new Ext.menu.Item({
+                text: L.Create
+                ,menu: []
+            });
+            updateMenu(createButton, menuConfig, this.onCreateObjectClick, this);
+            moreItems.push('-', createButton);
         }
 
         var moreButton = new Ext.Button({
@@ -507,7 +507,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
      * @return void
      */
     ,onNewWindowClick: function(b, e){
-        window.open('/' + App.config.coreName + '/v-' + this.data.id + '/?e=1');
+        window.open('/' + App.config.coreName + '/v-' + this.data.id + '/');
     }
 
     /**

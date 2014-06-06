@@ -13,10 +13,15 @@ class Service
 
     /** @type varchar solr host. */
     private $host = null;
+
     /** @type varchar solr port. */
     private $port = null;
+
     /** @type varchar solr core. */
     private $core = null;
+
+    /** @fireEvents */
+    private $fireEvents = true;
 
     /**
      * constructor
@@ -29,9 +34,24 @@ class Service
      */
     public function __construct ($p = array())
     {
-        $this->host = empty($p['host']) ? \CB\Config::get('solr_host', 'localhost') : $p['host'];
-        $this->port = empty($p['port']) ? \CB\Config::get('solr_port', 8983) : $p['port'];
-        $this->core = empty($p['core']) ? \CB\Config::get('solr_core') : $p['core'];
+        if (empty($p)) { // get params from core config
+            $this->host = \CB\Config::get('solr_host', 'localhost');
+            $this->port = \CB\Config::get('solr_port', 8983);
+            $this->core = \CB\Config::get('solr_core');
+
+        } else { //get params from specified arguments
+            $this->host = empty($p['host']) ? 'localhost' : $p['host'];
+            $this->port = empty($p['port']) ? 8983 : $p['port'];
+            $this->core = @$p['core'];
+            if (isset($p['fireEvents'])) {
+                $this->fireEvents = $p['fireEvents'];
+            }
+        }
+
+        if (substr($this->core, 0, 6) != '/solr/') {
+            $this->core = '/solr/'.$this->core;
+        }
+
         $this->connect();
     }
 
@@ -57,12 +77,24 @@ class Service
         );
 
         if (! $this->solr_handler->ping()) {
-            throw new \Exception('Solr_connection_error'.$this->debugInfo(), 1);
+            \CB\debug(
+                $this->host . ', ' .
+                $this->port . ', ' .
+                $this->core
+            );
+
+            throw new \Exception('Solr_connection_error' . $this->debugInfo(), 1);
         }
 
         return $this->solr_handler;
     }
 
+    protected function fireEvent($eventName, &$params)
+    {
+        if ($this->fireEvents) {
+            \CB\fireEvent($eventName, $params);
+        }
+    }
     /**
      * add/update a single document into solr
      *
@@ -76,9 +108,12 @@ class Service
         }
 
         try {
-            \CB\fireEvent('beforeNodeSolrUpdate', $doc);
+            $this->fireEvent('beforeNodeSolrUpdate', $doc);
+
             $this->solr_handler->addDocument($doc);
-            \CB\fireEvent('nodeSolrUpdate', $doc);
+
+            $this->fireEvent('nodeSolrUpdate', $doc);
+
         } catch (\SolrClientException $e) {
             $msg = "Error adding document to solr (id:".$d['id'].')'.$this->debugInfo();
             \CB\debug($msg);
@@ -131,7 +166,7 @@ class Service
                 foreach ($in_doc as $fn => $fv) {
                     $doc->$fn = $fv;
                 }
-                \CB\fireEvent('beforeNodeSolrUpdate', $doc);
+                $this->fireEvent('beforeNodeSolrUpdate', $doc);
                 $addDocs[] = $doc;
             } else {
                 $doc = array();
@@ -163,11 +198,11 @@ class Service
 
         /* fire after update events */
         for ($i=0; $i < sizeof($addDocs); $i++) {
-            \CB\fireEvent('nodeSolrUpdate', $addDocs[$i]);
+            $this->fireEvent('nodeSolrUpdate', $addDocs[$i]);
         }
 
         for ($i=0; $i < sizeof($updateDocs); $i++) {
-            \CB\fireEvent('nodeSolrUpdate', $updateDocs[$i]);
+            $this->fireEvent('nodeSolrUpdate', $updateDocs[$i]);
         }
 
         return true;
@@ -188,9 +223,9 @@ class Service
      */
     public function commit()
     {
-        \CB\fireEvent('onBeforeSolrCommit', $this->solr_handler);
+        $this->fireEvent('onBeforeSolrCommit', $this->solr_handler);
         $this->solr_handler->commit();
-        \CB\fireEvent('onSolrCommit', $this->solr_handler);
+        $this->fireEvent('onSolrCommit', $this->solr_handler);
     }
 
     /**

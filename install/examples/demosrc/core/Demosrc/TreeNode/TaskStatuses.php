@@ -96,11 +96,11 @@ class TaskStatuses extends \CB\TreeNode\Base
 
         switch ($id) {
             case 1:
-                return lcfirst(L\Overdue);
+                return lcfirst(L\get('Overdue'));
             case 2:
-                return lcfirst(L\Ongoing);
+                return lcfirst(L\get('Ongoing'));
             case 3:
-                return lcfirst(L\Closed);
+                return lcfirst(L\get('Closed'));
         }
 
         return 'none';

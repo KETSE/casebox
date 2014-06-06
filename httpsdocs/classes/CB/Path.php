@@ -252,8 +252,8 @@ class Path
 
             $el = explode('-', $el);
             if (sizeof($el) > 1) {
-                $npid = $el[0];
-                $nodeId = $el[1];
+                $npid = array_shift($el);
+                $nodeId = implode('-', $el);
             } else {
                 $npid = static::getGUID('Dbnode');
                 $nodeId = $el[0];

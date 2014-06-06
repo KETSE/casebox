@@ -61,6 +61,15 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 ,handler: this.onSaveClick
             })
 
+            ,cancel: new Ext.Action({
+                text: Ext.MessageBox.buttonText.cancel
+                ,iconAlign:'top'
+                ,iconCls: 'ib-cancel'
+                ,scale: 'large'
+                ,scope: this
+                ,handler: this.onCancelClick
+            })
+
             ,createTask: new Ext.Action({
                 text: L.NewTask
                 ,iconCls: 'ib-task-new'
@@ -226,7 +235,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             toolbarItems.push(createButton, '-');
         }
         /**/
-        toolbarItems.push(this.actions.save);
+        toolbarItems.push(this.actions.save, this.actions.cancel);
 
         var moreItems = [this.actions.security];
         if(!this.hideDeleteButton) {
@@ -322,6 +331,10 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
     ,onSaveClick: function(){
         this.saveForm();
+    }
+
+    ,onCancelClick: function(){
+        this.destroy();
     }
 
     ,hasMainFile: function(){

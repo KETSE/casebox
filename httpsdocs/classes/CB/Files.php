@@ -584,7 +584,9 @@ class Files
             ) or die(DB\dbQueryError());
 
             $f['id'] = $file_id;
-            // $p['files'][$fk]['id'] = $file_id;
+
+            $fileObject->setData($f);
+
             $this->updateFileProperties($f);
             fireEvent('nodeDbCreate', $fileObject);
         }

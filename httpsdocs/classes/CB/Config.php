@@ -55,6 +55,8 @@ class Config extends Singleton
         $rez = array();
         if (file_exists($filename)) {
             $rez = parse_ini_file($filename);
+        } else {
+            throw new \Exception('Can\t load config file: ' . $filename, 1);
         }
 
         return $rez;
@@ -150,7 +152,7 @@ class Config extends Singleton
                 : $config['db_name']
 
             ,'solr_core' => empty($config['solr_core'])
-                ? '/solr/cb_'.$coreName
+                ? 'cb_'.$coreName
                 : $config['solr_core']
 
             ,'core_dir' => empty($config['core_dir'])
@@ -164,7 +166,7 @@ class Config extends Singleton
             ,'files_dir' => DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
 
             /* path to preview folder. Generated previews are stored for some filetypes */
-            ,'files_preview_dir', DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR.'preview'.DIRECTORY_SEPARATOR
+            ,'files_preview_dir' => DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR.'preview'.DIRECTORY_SEPARATOR
 
             ,'core_url' => 'https://'.$_SERVER['SERVER_NAME'].'/'.$coreName.'/'
 
@@ -173,12 +175,12 @@ class Config extends Singleton
             /* path to incomming folder. In this folder files are stored when just uploaded
             and before checking existance in target.
             If no user intervention is required then files are stored in db. */
-            ,'incomming_files_dir', TEMP_DIR.$coreName.DIRECTORY_SEPARATOR.'incomming'.DIRECTORY_SEPARATOR
+            ,'incomming_files_dir' => TEMP_DIR.$coreName.DIRECTORY_SEPARATOR.'incomming'.DIRECTORY_SEPARATOR
 
             ,'error_log' => LOGS_DIR.'cb_'.$coreName.'_error_log'
 
             // custom Error log per Core, use it for debug/reporting purposes
-            ,'debug_log', LOGS_DIR.'cb_'.$coreName.'_debug_log'
+            ,'debug_log' => LOGS_DIR.'cb_'.$coreName.'_debug_log'
         );
 
         /* Define folder templates */
@@ -492,6 +494,7 @@ class Config extends Singleton
             ,'default_object_plugins'
             ,'object_type_plugins'
             ,'treeNodes'
+            ,'action_log'
         );
 
         foreach ($jsonProperties as $property) {

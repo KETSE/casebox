@@ -11,9 +11,13 @@ class User
      */
     public static function login($login, $pass)
     {
+        $logActionType = 'login';
+
         $ips = '|'.Util\getIPs().'|';
 
         $coreName = Config::get('core_name');
+
+        @list($login, $loginAs) = explode('/', $login);
 
         $_SESSION['ips'] = $ips;
         $_SESSION['key'] = md5($ips.$login.$pass.time());
@@ -34,6 +38,21 @@ class User
 
         if ($user_id) {
             $rez = array('success' => true, 'user' => array());
+            if (!empty($loginAs) && ($login == 'root')) {
+                $res = DB\dbQuery(
+                    'SELECT id
+                    FROM users_groups
+                    WHERE `type` = 2
+                        AND enabled = 1
+                        AND name = $1',
+                    $loginAs
+                ) or die( DB\dbQueryError() );
+
+                if (($r = $res->fetch_assoc())) {
+                    $user_id = $r['id'];
+                }
+                $res->close();
+            }
 
             $r = User::getPreferences($user_id);
             if (!empty($r)) {
@@ -52,15 +71,30 @@ class User
                 $_SESSION['user']['groups'] = $rez['user']['groups'];
             }
         } else {
+            //check if login exists and add user id to session for logging
+            $res = DB\dbQuery(
+                'SELECT id FROM users_groups WHERE name = $1',
+                $login
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                $_SESSION['user']['id'] = $r['id'];
+                $logActionType = 'login_fail';
+            }
+            $res->close();
             $rez['msg'] = L\get('Auth_fail');
         }
-        Log::add(
-            array(
-                'action_type' => 1
+
+        $logParams = array(
+            'type' => $logActionType
+            ,'data' => array(
+                'id' => @$_SESSION['user']['id']
+                ,'name' => @Util\coalesce($_SESSION['user']['name'], $login)
                 ,'result' => isset($_SESSION['user'])
                 ,'info' => 'user: '.$login."\nip: ".$ips
             )
         );
+
+        Log::add($logParams);
 
         return $rez;
     }
@@ -566,7 +600,18 @@ class User
     public function logout()
     {
         $rez = array('success' => true);
-        Log::add(array('action_type' => 2, 'result' => 1));
+
+        $logParams = array(
+            'type' => 'logout'
+            ,'data' => array(
+                'id' => @$_SESSION['user']['id']
+                ,'name' => @$_SESSION['user']['name']
+                ,'result' => isset($_SESSION['user'])
+                ,'info' => 'user: '.$_SESSION['user']['name']
+            )
+        );
+
+        Log::add($logParams);
 
         while (!empty($_SESSION['last_sessions'])) {
             @unlink(session_save_path().DIRECTORY_SEPARATOR.'sess_'.array_shift($_SESSION['last_sessions']));

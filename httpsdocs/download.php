@@ -90,7 +90,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         header('Pragma: public');
         header('Content-Length: '.$r['size']);
         @readfile($filesDir . $r['path'] . DIRECTORY_SEPARATOR . $r['content_id']);
-        Log::add(array('action_type' => 14, 'file_id' => $r['id']));
+        // Log::add(array('action_type' => 14, 'file_id' => $r['id']));
     }
     $res->close();
     exit(0);

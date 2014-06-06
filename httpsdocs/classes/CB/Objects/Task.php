@@ -76,15 +76,15 @@ class Task extends Object
         /* adding to log that will create notification */
         $remind_users = implode(',', Util\toNumericArray($this->getFieldValue('assigned', 0)['value']));
 
-        $logParams = array(
-            'action_type' => 21
-            ,'task_id' => $this->id
-            ,'to_user_ids' => $remind_users
-            ,'remind_users' => $remind_users
-            ,'info' => 'title: '.$this->data['name']
-        );
+        // $logParams = array(
+        //     'action_type' => 21
+        //     ,'task_id' => $this->id
+        //     ,'to_user_ids' => $remind_users
+        //     ,'remind_users' => $remind_users
+        //     ,'info' => 'title: '.$this->data['name']
+        // );
 
-        \CB\Log::add($logParams);
+        // \CB\Log::add($logParams);
         /***/
 
         // save reminds
@@ -288,15 +288,15 @@ class Task extends Object
         }
         $remindUsers = implode(',', $remindUsers);
 
-        $logParams = array(
-            'action_type' => 22
-            ,'task_id' => $this->id
-            ,'to_user_ids' => $toUserIds
-            ,'remind_users' => $remindUsers
-            ,'info' => 'title: '.$this->data['name']
-        );
+        // $logParams = array(
+        //     'action_type' => 22
+        //     ,'task_id' => $this->id
+        //     ,'to_user_ids' => $toUserIds
+        //     ,'remind_users' => $remindUsers
+        //     ,'info' => 'title: '.$this->data['name']
+        // );
 
-        \CB\Log::add($logParams);
+        // \CB\Log::add($logParams);
         /***/
 
         // save reminds

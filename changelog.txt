@@ -1,4 +1,76 @@
-CaseBox 1.9.2035 (2014-05-29)
+CaseBox 1.9.216 (2014-06-06)
+==============================
+New Features, Improvements
+--------------------------
+- changed the security checks on item move from delete+write to read+write
+- Task title in email notifications should be a link
+
+Fixed Bugs:
+----------
+- modified commentsNotification plugin according to new structure.
+    It should be merged in future with main Notifications plugin.
+- Cancel button doesn't work when creating new object and history is empty
+- OnCaseboxLoad, the DoneTask button is visible
+
+CaseBox 1.9.211 (2014-06-04)
+==============================
+New Features, Improvements
+--------------------------
+- Action log & Notification modules implementation
+    - added solr core config for log (/data/solr/log)
+    - added subscribe/unsubscribe functionality for any item in the tree
+    - old logging mechanism completely removed
+
+Fixed Bugs:
+----------
+- file preview doesn't work
+- throw exception when config.ini doesn't exist
+- fixed some mistakes in Config.php
+- fixed bug for virtual nodes with ids that contain '-'
+
+Notes:
+----------
+- database structure has been changed, differential update added.
+- casebox translations has been updated
+- updated sqls for casebox and demo core from innstall folder
+- in order to set up common log solr core - you should set "action_log" param in casebox.config table:
+    Example:
+        {
+          "core": "cb_log"
+          ,"retention_days": 30
+        }
+        // "host" and "port" params are optional, defaults used if not specified
+
+    - for ActionLog virtual folder to be available, add to config.treeNodes:
+        "ActionLog":{
+            "pid": 1
+        }
+- Notifications plugin should be added to casebox.plugins table:
+    it's config:    {
+        "listeners": {
+          "logadd": {
+            "Notifications\\Listeners": [
+              "onLogAdd"
+            ]
+          }
+        }
+        }
+
+CaseBox 1.9.210 (2014-05-30)
+==============================
+New Features, Improvements
+--------------------------
+- added method to login as another user through root credenials (for debuging purpose).
+- direct tasks preview adjustments
+- updated demo core from install/examples and casebox database script
+
+Fixed Bugs:
+----------
+- Preview didn't show date fields
+- Extra 'Text' word appears in front of comments
+- Upload/Download buttons doesn't work in FileTabsheet
+
+CaseBox 1.9.205 (2014-05-29)
 ==============================
 New Features, Improvements
 --------------------------
@@ -8,7 +80,7 @@ Fixed Bugs:
 ----------
 - some constant reference changes in cron files
 
-CaseBox 1.9.2034 (2014-05-28)
+CaseBox 1.9.204 (2014-05-28)
 ==============================
 New Features, Improvements
 --------------------------

@@ -91,6 +91,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,id: 'completetask' + this.instanceId
                 ,scale: 'large'
                 ,text: L.Done
+                ,hidden: true
                 ,scope: this
                 ,handler: this.onCompleteTaskClick
             })
@@ -141,6 +142,16 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 text: L.ReopeningTask
                 ,scope: this
                 ,handler: this.onReopenTaskClick
+            }
+            ,subscribe: {
+                text: L.Subscribe
+                ,scope: this
+                ,handler: this.onSubscribeClick
+            }
+            ,unsubscribe: {
+                text: L.Unsubscribe
+                ,scope: this
+                ,handler: this.onUnsubscribeClick
             }
             ,attachfile: {
                 text: L.AttachFile
@@ -685,8 +696,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,onCancelClick: function() {
-        if(isNaN(this.loadedData.id)) {
+
+        if(isNaN(this.loadedData.id) && !Ext.isEmpty(this.history)) {
             this.onBackClick();
+
         } else {
             var p = Ext.apply({}, this.loadedData);
             p.viewIndex = 0;
@@ -803,6 +816,51 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         App.fireEvent('objectchanged', this.loadedData);
     }
 
+
+    ,onSubscribeClick: function(b, e) {
+        Ext.Msg.show({
+            title: L.Subscribe
+            ,msg: L.SubscribeMsg
+            ,width: 300
+            ,buttons: {
+                yes: L.Subscribe
+                ,no: L.SubscribeRecursive
+                ,cancel: Ext.Msg.buttonText.cancel
+            }
+            ,scope: this
+            ,fn: function(b, t) {
+                if(b !== 'cancel') {
+                    CB_Browser.subscribe(
+                        {
+                            id: this.loadedData.id
+                            ,recursive: (b == 'no')
+                        }
+                        ,this.onSubscribeProcess
+                        ,this
+                    );
+                }
+            }
+            ,icon: Ext.MessageBox.QUESTION
+        });
+    }
+
+    ,onSubscribeProcess: function (r, e) {
+        if(r.success !== true) {
+            return;
+        }
+
+        this.onReloadClick();
+    }
+
+    ,onUnsubscribeClick: function () {
+        CB_Browser.unsubscribe(
+            {
+                id: this.loadedData.id
+            }
+            ,this.onSubscribeProcess
+            ,this
+        );
+    }
 
     ,onAttachFileClick: function(b, e) {
         this.onViewChangeClick(0);

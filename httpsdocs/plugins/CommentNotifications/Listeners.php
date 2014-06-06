@@ -48,30 +48,38 @@ class Listeners
                 if ($userId == $_SESSION['user']['id']) {
                     continue;
                 }
+
+                $notifyData = array(
+                    'sender' => $sender
+                    ,'subject' => $subject
+                    ,'body' => $body
+                );
+
                 DB\dbQuery(
                     'INSERT INTO notifications (
                         action_type
                         ,object_id
-                        ,sender
-                        ,subject
-                        ,message
-                        ,time
-                        ,user_id)
-                    VALUES ($1
+                        ,object_pid
+                        ,user_id
+                        ,data
+                    )
+                    VALUES (
+                        $1
                         ,$2
                         ,$3
                         ,$4
                         ,$5
-                        ,CURRENT_TIMESTAMP
-                        ,$6
-                        )',
+                    )
+                    ON DUPLICATE KEY UPDATE
+                    object_pid = $3
+                    ,data = $4
+                    ,action_time = CURRENT_TIMESTAMP',
                     array(
-                        111
+                        'comment'
                         ,$objData['id']
-                        ,$sender
-                        ,$subject
-                        ,$body
+                        ,@$objData['pid']
                         ,$userId
+                        ,json_encode($notifyData, JSON_UNESCAPED_UNICODE)
                     )
                 ) or die(DB\dbQueryError());
             }

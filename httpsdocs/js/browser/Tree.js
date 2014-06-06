@@ -575,7 +575,16 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         this.root.cascade(
             function(n){
                 if(n.isExpanded()) {
-                    rez.paths.push(n.getPath('nid'));
+                    //check if all parents are expanded
+                    var ok = true;
+                    var p = n.parentNode;
+                    while(!Ext.isEmpty(p) && ok) {
+                        ok = p.isExpanded();
+                        p = p.parentNode;
+                    }
+                    if(ok) {
+                        rez.paths.push(n.getPath('nid'));
+                    }
                 }
             }
             ,this

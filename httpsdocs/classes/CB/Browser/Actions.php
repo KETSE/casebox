@@ -253,7 +253,8 @@ class Actions
                     $ss = \CB\Security::getSecuritySets();
                     break;
                 case 'move':
-                    $ss = \CB\Security::getSecuritySets(false, 8);
+                    //check if the user can move, because it doesnt anctually delete the obj, but just move it
+                    $ss = \CB\Security::getSecuritySets(false, 5);
                     break;
             }
             $this->securitySetsFilter = 'AND ti.security_set_id in (0'.implode(',', $ss).')';

@@ -38,7 +38,7 @@ class ManagersCalendar extends \CB\TreeNode\MyCalendar
         }
         switch ($id) {
             case 1:
-                return L\ManagersCalendar;
+                return L\get('ManagersCalendar');
         }
 
         return 'none';

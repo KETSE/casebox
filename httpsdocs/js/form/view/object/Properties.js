@@ -10,8 +10,8 @@ CB.form.view.object.Properties = Ext.extend(CB.PluginsPanel, {
             tbar: {}
             ,menu: {
                 reload: {}
-                ,'delete': { addDivider: 'top' }
-                ,'permissions': { addDivider: 'top' }
+                ,'delete': {addDivider: 'top'}
+                ,permissions: {addDivider: 'top'}
             }
         };
         rez.tbar['edit'] = {};
