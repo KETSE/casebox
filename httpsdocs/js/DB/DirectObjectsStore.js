@@ -57,9 +57,15 @@ CB.DB.DirectObjectsStore = Ext.extend(Ext.data.DirectStore, {
         return data;
     }
     ,checkRecordExistance: function(data){
-        if(Ext.isEmpty(data)) return false;
-        idx = this.findExact('id', parseInt(data.id, 10));
-        if(idx< 0){
+        if(Ext.isEmpty(data) || isNaN(data.id)) {
+            return false;
+        }
+
+        data.id = parseInt(data.id, 10);
+
+        var idx = this.findExact('id', data.id, 10);
+
+        if(idx < 0){
             r = new this.recordType(data);
             var icon = null;
             if(!Ext.isEmpty(data.cfg)) {

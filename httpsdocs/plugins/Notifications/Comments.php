@@ -1,32 +1,32 @@
 <?php
-namespace CommentNotifications;
+namespace Notifications;
 
 use CB\Config;
 use CB\DB;
 use CB\Util;
 use CB\User;
 
-class Listeners
+class Comments
 {
     /**
-     * autoset fields
-     * @param  object $o
+     * add notifications for tasks
+     * @param  array $p params passed to log
      * @return void
      */
-    public function onNodeDbCreate($o)
+    public static function addNotifications(&$p)
     {
-        if (!is_object($o)) {
-            return;
-        }
-        if ($o->getType() != 'comment') {
-            return;
-        }
+
+        $o = empty($p['new'])
+            ? $p['old']
+            : $p['new'];
+
+        $p['type'] = 'comment';
 
         $coreName = Config::get('core_name');
 
         $objData = $o->getData();
 
-        $notifiedUsers = $this->getNotifiedUsers($objData['pid']);
+        $notifiedUsers = static::getNotifiedUsers($objData['pid']);
 
         if (!empty($notifiedUsers)) {
             $senderMail = Config::get('comments_email');
@@ -85,7 +85,7 @@ class Listeners
             }
         }
 
-        $this->addCurrentUserToNotifiedUsers($objData['pid']);
+        static::addCurrentUserToNotifiedUsers($objData['pid']);
     }
 
     /**
@@ -94,7 +94,7 @@ class Listeners
      * @param  int   $objectId the id of the parent object
      * @return array
      */
-    protected function getNotifiedUsers($objectId)
+    protected static function getNotifiedUsers($objectId)
     {
         $o = \CB\Objects::getCachedObject($objectId);
         $d = $o->getData();
@@ -120,7 +120,7 @@ class Listeners
         return $rez;
     }
 
-    protected function addCurrentUserToNotifiedUsers($objectId)
+    protected static function addCurrentUserToNotifiedUsers($objectId)
     {
         $o = \CB\Objects::getCachedObject($objectId);
         $d = $o->getData();

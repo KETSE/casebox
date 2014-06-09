@@ -33,6 +33,10 @@ class Listeners
                 Tasks::addNotifications($p);
                 break;
 
+            case 'comment':
+                Comments::addNotifications($p);
+                break;
+
             default:
                 Objects::addNotifications($p);
         }

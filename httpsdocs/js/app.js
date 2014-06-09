@@ -267,7 +267,7 @@ function initApp(){
             }
 
             rez = Ext.isPrimitive(v)
-                ? date_ISO_to_locale_date(v)
+                ? date_ISO_to_local_date(v)
                 : v;
 
             var s = date_local_to_ISO_string(rez);

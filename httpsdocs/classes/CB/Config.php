@@ -33,9 +33,9 @@ class Config extends Singleton
         set_include_path(INCLUDE_PATH . PATH_SEPARATOR . static::$environmentVars['core_dir']);
 
         // set max file version count
-        if (isset($config['max_files_version_count'])) {
+        if (isset(static::$config['max_files_version_count'])) {
             __autoload('CB\\Files');
-            Files::setMFVC($config['max_files_version_count']);
+            Files::setMFVC(static::$config['max_files_version_count']);
         }
 
         // set temp upload directory
@@ -95,7 +95,7 @@ class Config extends Singleton
     {
         $rez = array();
         $res = DB\dbQuery(
-            'SELECT cfg
+            'SELECT id, cfg
             FROM casebox.cores
             WHERE name = $1',
             $coreName
@@ -111,6 +111,8 @@ class Config extends Singleton
         if ($rez === false) {
             throw new \Exception('Error decoding core config', 1);
         }
+
+        $rez['core_id'] = $r['id'];
 
         return $rez;
     }

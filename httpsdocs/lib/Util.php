@@ -113,7 +113,7 @@ function formatAgoDate($mysqlDate)
     }
 
     if ($WEEK_START <= $time) {
-        return translateDays(date('l', $time)).' '.L\get('at');
+        return translateDays(date('l', $time));
     }
 
     if ($YEAR_START <= $time) {

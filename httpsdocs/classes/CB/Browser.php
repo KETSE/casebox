@@ -769,6 +769,7 @@ class Browser
                 ,'allow_new_version' => $allow_new_version
                 ,'count' => sizeof($p['existentFilenames'])
             );
+
             if ($rez['count'] == 1) {
                 $rez['msg'] = empty($p['existentFilenames'][0]['msg']) ?
                     str_replace(

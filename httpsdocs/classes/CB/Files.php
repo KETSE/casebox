@@ -1353,17 +1353,17 @@ class Files
         }
     }
 
+    /**
+     * storing max file versions count (mfvc)
+     *     *:1;doc,docx,xls,xlsx,pdf:5;
+     *     default is no versions if nothing specified in config
+     */
     public static function setMFVC($configurationString)
     {
-        /* storing max file versions count (mfvc)*/
-        //*:1;doc,docx,xls,xlsx,pdf:5;
-        //default is no versions if nothing specified in config
-        $GLOBALS['mfvc'] = array('*' => 0);
+        $rez = array('*' => 0);
 
-        $v = Config::get('max_files_version_count');
-
-        if (!empty($v)) {
-            $v = explode(';', $v);
+        if (!empty($configurationString)) {
+            $v = explode(';', $configurationString);
             foreach ($v as $vc) {
                 $vc = explode(':', $vc);
                 if (sizeof($vc) == 2) {
@@ -1374,13 +1374,16 @@ class Files
                         foreach ($ext as $e) {
                             $e = trim($e);
                             $e = mb_strtolower($e);
-                            $GLOBALS['mfvc'][$e] = $count;
+                            $rez[$e] = $count;
                         }
                     }
                 }
             }
         }
-        /* end of storing max file versions configuration fr core in session */
+
+        Config::setEnvVar('mfvc', $rez);
+
+        return $rez;
     }
 
     //get Max File Version Count for an extension
@@ -1389,15 +1392,19 @@ class Files
         $ext = Files::getExtension($filename) || mb_strtolower($filename);
         $ext = trim($ext);
         $rez = 0;
-        if (empty($GLOBALS['mfvc'])) {
+        $mfvc = Config::get('mfvc');
+
+        if (empty($mfvc)) {
             return $rez;
         }
+
         $ext = mb_strtolower($ext);
-        if (isset($GLOBALS['mfvc'][$ext])) {
-            return $GLOBALS['mfvc'][$ext];
+
+        if (isset($mfvc[$ext])) {
+            return $mfvc[$ext];
         }
-        if (isset($GLOBALS['mfvc']['*'])) {
-            return $GLOBALS['mfvc']['*'];
+        if (isset($mfvc['*'])) {
+            return $mfvc['*'];
         }
 
         return $rez;

@@ -618,7 +618,13 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
     ,onEditClick: function() {
         var p = Ext.apply({}, this.loadedData);
-        this.edit(p);
+
+        var templateCfg = CB.DB.templates.getProperty(p.template_id, 'cfg');
+        if(templateCfg && templateCfg.createMethod == 'tabsheet') {
+                App.mainViewPort.openObject(p);
+        } else {
+            this.edit(p);
+        }
     }
 
     ,onReloadClick: function() {
@@ -774,8 +780,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.load(data);
     }
 
-    ,onEditObjectEvent: function(params) {
-        clog('onEditObjectEvent', params);
+    ,onEditObjectEvent: function(params, e) {
+        e.stopPropagation();
+        this.onEditClick();
     }
 
     ,onDownloadClick: function(b, e) {

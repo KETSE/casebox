@@ -15,7 +15,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     ,hideToolbar: true
     ,stateful: true
     ,stateId: 'btree' //brpwser tree
-    ,stateEvents: ['expandnode', 'collapsenode', 'beforedestroy']
+    ,stateEvents: ['expandnode', 'collapsenode', 'beforedestroy', 'selectionchanged']
     ,initComponent: function(){
         if(Ext.isEmpty(this.data)) {
             this.data = {};
@@ -331,11 +331,14 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             );
         }
     }
+
     ,sortNode: function(node){
         sorterName = 'n'+node.attributes.type + node.attributes.subtype;
         if(Ext.isDefined(this.sorters[sorterName])) node.sort(this.sorters[sorterName]);
     }
+
     ,onSelectionChange: function (sm, node) {
+
         if(Ext.isEmpty(node)){
             this.actions.open.setHidden(true);
             this.actions.openInNewWindow.setHidden(true);
@@ -349,6 +352,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             this.actions.rename.setDisabled(true) ;
             this.actions.reload.setDisabled(true) ;
             this.actions.permissions.setDisabled(true) ;
+
         }else{
             canOpen = true;
             this.actions.open.setHidden(!canOpen);
@@ -358,7 +362,9 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             this.actions.expand.setHidden(!canExpand);
             canCollapse = node.isExpanded() && node.hasChildNodes();
             this.actions.collapse.setHidden(!canCollapse);
-            if(this.contextMenu) this.contextMenu.items.itemAt(3).setVisible(canOpen || canExpand || canCollapse);
+            if(this.contextMenu) {
+                this.contextMenu.items.itemAt(3).setVisible(canOpen || canExpand || canCollapse);
+            }
 
             canCopy = (node.attributes.system === 0);
             this.actions.cut.setDisabled(!canCopy);
@@ -380,11 +386,15 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             this.actions.reload.setDisabled(false) ;
             this.actions.permissions.setDisabled(false) ;
         }
+
+        this.fireEvent('selectionchanged')
     }
+
     ,isFavoriteNode: function(node){
         if(Ext.isEmpty(node)) return false;
         return ( (node.attributes.system == 1) && (node.attributes.type == 1) && (node.attributes.subtype == 2) );
     }
+
     ,inFavorites: function(node) {
         isFavoriteNode = false;
         do{

@@ -344,7 +344,9 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
      * @param variant value
      */
     ,setFieldValue: function (fieldName, value) {
-        this.grid.setFieldValue(fieldName, value);
+        if(this.grid) {
+            this.grid.setFieldValue(fieldName, value);
+        }
     }
 
     ,save: function(callback, scope) {

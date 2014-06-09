@@ -28,7 +28,7 @@ class Listeners
             $sp['fl'] = implode(',', $fl);
         }
 
-        if (!empty($solrFields['sort'])) {
+        if (empty($p['inputParams']['strictSort']) && !empty($solrFields['sort'])) {
             $sp['sort'] = $solrFields['sort'];
         }
     }
@@ -54,6 +54,10 @@ class Listeners
 
             // fill custom columns data
             foreach ($data as &$doc) {
+                if (!is_numeric($doc['id'])) {
+                    continue;
+                }
+
                 $obj = \CB\Objects::getCachedObject($doc['id']);
                 $template = $obj->getTemplate();
 

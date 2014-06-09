@@ -1,6 +1,9 @@
 <?php
 namespace CB;
 
+use \CB\Browser;
+use \CB\Util;
+
 class Log
 {
     /**
@@ -30,9 +33,22 @@ class Log
 
         fireEvent('beforelogadd', $p);
 
-        $p['logData'] = array(
+        $p['logData'] = @array(
             'name' => $data['name']
-            ,'pids' => Objects::getPids($data['id'])
+            ,'iconCls' => Browser::getIcon($data)
+            ,'pids' => empty($data['pids'])
+                ? Objects::getPids($data['id'])
+                : Util\toNumericArray($data['pids'])
+            ,'path' => Util\coalesce($data['pathtext'], $data['path'])
+            ,'template_id' => $data['template_id']
+            ,'case_id' => $data['case_id']
+            ,'date' => $data['date']
+            ,'size' => $data['size']
+            ,'cid' => $data['cid']
+            ,'oid' => $data['oid']
+            ,'uid' => @$data['uid']
+            ,'cdate' => $data['cdate']
+            ,'udate' => $data['udate']
         );
 
         DB\dbQuery(
@@ -81,6 +97,7 @@ class Log
 
         $record = array(
             'id' => Config::get('core_name') . '_' . $p['action_id']
+            ,'core_id' => Config::get('core_id')
             ,'action_id' => $p['action_id']
             ,'action_type' => $p['type']
             ,'action_date' => date('Y-m-d\TH:i:s\Z')
@@ -88,7 +105,7 @@ class Log
             ,'object_id' => $data['id']
             ,'object_pid' => empty($data['pid']) ? null : $data['pid']
             ,'object_pids' => $p['logData']['pids']
-            // ,'object_data' => $p['data']
+            ,'object_data' => json_encode($p['logData'], JSON_UNESCAPED_UNICODE)
         );
 
         //delete empty values because solr raises exception when sending empty values for ints
@@ -97,6 +114,9 @@ class Log
                 unset($record[$k]);
             }
         }
+
+        $record['dstatus'] = 0;
+        $record['system'] = 0;
 
         $rez = $solr->addDocument($record);
 
@@ -110,15 +130,11 @@ class Log
         if (empty($rez)) {
             $cfg = Config::get('action_log');
 
-            if (!isset($cfg['fireEvents'])) {
-                $cfg['fireEvents'] = false;
-            }
-
             if (empty($cfg['core'])) {
                 return;
             }
 
-            $rez = new \CB\Solr\Service($cfg);
+            $rez = new \CB\Search($cfg);
 
             Cache::set('solr_log_connection', $rez);
         }

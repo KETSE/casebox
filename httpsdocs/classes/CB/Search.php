@@ -76,34 +76,38 @@ class Search extends Solr\Client
         }
 
         /*analize sort parameter (ex: status asc,date_end asc)/**/
-        $sort = array('order' => 'asc');
+        if (!empty($p['strictSort'])) {
+            $this->params['sort'] = $p['strictSort'];
 
-        if (isset($p['sort'])) {
-            if (!is_array($p['sort'])) {
-                $sort[$p['sort']] = empty($p['dir'])
-                    ? 'asc'
-                    : strtolower($p['dir']);
-            } else {
-                foreach ($p['sort'] as $s) {
-                    $s = explode(' ', $s);
-                    $sort[$s[0]] = empty($s[1]) ? 'asc' : strtolower($s[1]);
-                }
-            }
-            foreach ($sort as $f => $d) {
-                if (isset($this->replaceSortFields[$f])) {
-                    // replace with convenient sorting fields if defined
-                    $f = $this->replaceSortFields[$f];
-                }
-
-            }
         } else {
-            $sort['sort_name'] = 'asc';//, subtype asc
-        }
+            $sort = array('order' => 'asc');
 
-        foreach ($sort as $k => $v) {
-            $this->params['sort'] .= ",$k $v";
-        }
+            if (isset($p['sort'])) {
+                if (!is_array($p['sort'])) {
+                    $sort[$p['sort']] = empty($p['dir'])
+                        ? 'asc'
+                        : strtolower($p['dir']);
+                } else {
+                    foreach ($p['sort'] as $s) {
+                        $s = explode(' ', $s);
+                        $sort[$s[0]] = empty($s[1]) ? 'asc' : strtolower($s[1]);
+                    }
+                }
+                foreach ($sort as $f => $d) {
+                    if (isset($this->replaceSortFields[$f])) {
+                        // replace with convenient sorting fields if defined
+                        $f = $this->replaceSortFields[$f];
+                    }
 
+                }
+            } else {
+                $sort['sort_name'] = 'asc';//, subtype asc
+            }
+
+            foreach ($sort as $k => $v) {
+                $this->params['sort'] .= ",$k $v";
+            }
+        }
         /* adding additional query filters */
 
         /* assign security sets to filters */
@@ -278,6 +282,7 @@ class Search extends Solr\Client
                 ,'params' => &$this->params
                 ,'inputParams' => &$this->inputParams
             );
+
             \CB\fireEvent('beforeSolrQuery', $eventParams);
 
             $this->results = $this->search(
