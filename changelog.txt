@@ -1,3 +1,26 @@
+CaseBox 1.9.217 (2014-06-09)
+==============================
+New Features, Improvements
+--------------------------
+- save tree state on node selection change
+- CommentNotifications plugin has been moved to global Notifications plugin
+  It should be removed or disactivated from casebox.plugins table
+- made changes config of the solr log core
+  - added core_id field
+  - added some dummy fields, for consistency, to avoid errors in search class when browsing logs
+  Note that sorting in log doesnt work because we dont have object fields stored/indexed in log core
+- Letter window: buttons in toolbar, file upload
+- for ipc "case_number_counter" should be set in db config
+- Edit button from right pannel will use createMethod specified in template config
+
+Fixed Bugs:
+----------
+- Versioning doesn't work
+- D&D doesn't work from Grid to Object
+- Charts swf file didn't load because of apache rules
+  modified config for apache
+- Icon class field in Template is empty, can't see list of icons
+
 CaseBox 1.9.216 (2014-06-06)
 ==============================
 New Features, Improvements

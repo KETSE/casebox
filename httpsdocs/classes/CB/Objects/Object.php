@@ -378,10 +378,12 @@ class Object extends OldObject
         }
 
         @DB\dbQuery(
-            'UPDATE objects
-            SET `data` = $2
-                ,sys_data = $3
-            WHERE id = $1',
+            'INSERT INTO objects
+            (id, `data`, sys_data)
+            VALUES ($1, $2, $3)
+            ON DUPLICATE KEY UPDATE
+                `data` = $2
+                ,sys_data = $3',
             array(
                 $d['id']
                 ,json_encode($d['data'], JSON_UNESCAPED_UNICODE)

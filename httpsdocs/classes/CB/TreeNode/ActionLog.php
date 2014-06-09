@@ -1,6 +1,7 @@
 <?php
 namespace CB\TreeNode;
 
+use CB\Config;
 use CB\DB;
 use CB\Util;
 use CB\L;
@@ -47,7 +48,7 @@ class ActionLog extends Base
 
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
-        $this->requestParams = $requestParams;
+        $this->requestParams = &$requestParams;
         $this->rootId = \CB\Browser::getRootFolderId();
 
         if (!$this->acceptedPath()) {
@@ -164,6 +165,7 @@ class ActionLog extends Base
             'rows' => 0
             ,'facet' => 'true'
             ,'facet.mincount' => 1
+            ,'facet.sort' => 'index'
             ,'facet.range' => 'action_date'
             ,'facet.range.start' => 'NOW/DAY-7DAY'
             ,'facet.range.end' => 'NOW/DAY+1DAY'
@@ -174,12 +176,12 @@ class ActionLog extends Base
             )
         );
 
-        $sr = $s->search('*:*', 0, 0, $p);
+        $sr = $s->query($p);
 
         if (!empty($sr->facet_counts->facet_ranges->action_date->counts)) {
             foreach ($sr->facet_counts->facet_ranges->action_date->counts as $k => $v) {
                 $k = 'd' . substr($k, 0, 10);
-                $rez['data'][] = array(
+                $rez['data'][$k] = array(
                     'name' => $this->getName($k) . ' (' . $v . ')'
                     ,'id' => $this->getId($k)
                     ,'iconCls' => 'icon-folder'
@@ -187,6 +189,8 @@ class ActionLog extends Base
                 );
             }
         }
+        krsort($rez['data']);
+        $rez['data'] = array_values($rez['data']);
 
         if (!empty($sr->facet_counts->facet_queries->action_date)) {
                 $k = 'month';
@@ -281,13 +285,17 @@ class ActionLog extends Base
 
     public function getLogRecords()
     {
-        $rez = array('data' => array());
         $s = Log::getSolrLogConnection();
+
+        $this->requestParams['sort'] = array('date desc');
 
         $p = array(
             'rows' => 50
-            ,'fl' => 'id,action_id,object_id,data'
-            ,'fq' => array()
+            ,'fl' => 'id,action_id,user_id,object_id,object_pid,object_data'
+            ,'fq' => array(
+                'core_id' => Config::get('core_id')
+            )
+            ,'strictSort' => 'action_date desc'
         );
 
         $id = substr($this->lastNode->id, 1);
@@ -315,19 +323,37 @@ class ActionLog extends Base
 
         }
 
-        $sr = $s->search('*:*', 0, 50, $p);
+        $rez = $s->query($p);
 
-        if (!empty($sr->response->docs)) {
-            foreach ($sr->response->docs as $doc) {
-                $k =  $doc->action_id;
-                $rez['data'][] = array(
-                    'name' => $this->getName($k)
-                    ,'id' => $this->getId($k)
-                    ,'iconCls' => 'icon-none'
-                    ,'has_childs' => false
-                );
-            }
+        foreach ($rez['data'] as &$doc) {
+            $k =  $doc['action_id'];
+            $data = Util\toJSONArray($doc['object_data']);
+
+            $doc['id']  = $this->getId($doc['action_id']);
+            $doc['pid'] = @$doc['object_pid'];
+            unset($doc['object_pid']);
+            $doc['name'] = Util\coalesce($data['name'], $doc['object_data']);
+            $doc['iconCls'] = $data['iconCls'];
+            $doc['path'] = $data['path'];
+            // $doc['template_id'] = $data['template_id'];
+            $doc['case_id'] = $data['case_id'];
+            $doc['date'] = $data['date'];
+            $doc['size'] = $data['size'];
+            $doc['cid'] = @$data['cid'];
+            $doc['oid'] = @$data['oid'];
+            $doc['uid'] = @$data['uid'];
+            $doc['cdate'] = $data['cdate'];
+            $doc['udate'] = $data['udate'];
+            $doc['user'] = User::getDisplayName($doc['user_id'], true);
+            $doc['has_childs'] = false;
         }
+
+        return $rez;
+    }
+
+    public function getFacets()
+    {
+        $rez = parent::getFacets();
 
         return $rez;
     }

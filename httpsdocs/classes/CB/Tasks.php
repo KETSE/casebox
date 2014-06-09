@@ -616,6 +616,7 @@ class Tasks
 
         // log the action
         $o = new Objects\Task($p['id']);
+        $o->load();
 
         $logParams = array(
             'type' => 'status_change'
@@ -764,11 +765,14 @@ class Tasks
 
         // log the action
         $o = new Objects\Task($p['id']);
+        $o->load();
 
         $logParams = array(
             'type' => 'complete'
             ,'new' => $o
         );
+
+        Log::add($logParams);
 
         // Log::add(
         //     array(
@@ -823,6 +827,7 @@ class Tasks
 
         // log the action
         $o = new Objects\Task($p['id']);
+        $o->load();
 
         $logParams = array(
             'type' => 'close'
@@ -902,6 +907,7 @@ class Tasks
 
         // log the action
         $o = new Objects\Task($id);
+        $o->load();
 
         $logParams = array(
             'type' => 'reopen'

@@ -28,6 +28,9 @@
 <!-- id: unique identifier field (agregation of core_id, action_id ) -->
 <field name="id"    type="string"        indexed="true" stored="true" required="true" />
 
+<!-- core_id: id of the core -->
+<field name="core_id"       type="tint"  indexed="true" stored="true" />
+
 <!-- action_id: id of the action from core log -->
 <field name="action_id"       type="tlong"  indexed="true" stored="true" />
 
@@ -53,3 +56,10 @@
 <field name="object_data"       type="text_general" indexed="false"  stored="true" />
 
 <field name="_version_"     type="tlong"    indexed="true" stored="true" multiValued="false" />
+
+<!-- dummy fields for search class consistency, just to search avoid errors -->
+<field name="ntsc"          type="tint"     indexed="true" stored="true" />
+<field name="sort_name"     type="text_general_sort" indexed="true" stored="true" />
+<field name="order"         type="tint" indexed="true" stored="true" />
+<field name="dstatus"   type="tint"     indexed="true" stored="true" required="true" />
+<field name="system"    type="tint"         indexed="true" stored="true" />

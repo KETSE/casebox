@@ -37,6 +37,7 @@ $data = array(
     ,array('H', L\get('ftHeader')) //Header
     ,array('html', L\get('ftHtml')) //Html
     ,array('iconcombo', L\get('ftIconcombo')) //IconCombo
+    ,array('importance', L\get('Importance')) //Importance
     ,array('int', L\get('ftInt')) //Integer
     ,array('_language', L\get('ftLanguage')) //Language
     ,array('memo', L\get('ftMemo')) //Memo
@@ -93,7 +94,8 @@ $data = array(
 <?php
 
 $data = array();
-$templateIcons = Config::get('templateicons');
+$templateIcons = Config::get('templateIcons');
+
 if (!empty($templateIcons)) {
     $data = explode(',', $templateIcons);
     $data = implode("\n", $data);

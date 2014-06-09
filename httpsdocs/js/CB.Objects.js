@@ -221,26 +221,30 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     ,prepareInterface: function(){
         toolbarItems = [];
 
-        /* insert create menu if needed */
-        menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
-        if( !Ext.isEmpty(menuConfig) ){
-            createButton = new Ext.Button({
-                text: L.Create
-                ,iconCls: 'ib-create'
-                ,iconAlign:'top'
-                ,scale: 'large'
-                ,menu: [ ]
-            });
-            updateMenu(createButton, menuConfig, this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this);
-            toolbarItems.push(createButton, '-');
-        }
-        /**/
         toolbarItems.push(this.actions.save, this.actions.cancel);
 
-        var moreItems = [this.actions.security];
+        var moreItems = [
+            this.actions.upload
+            ,'-'
+        ];
         if(!this.hideDeleteButton) {
-            moreItems.unshift(this.actions['delete']);
+            moreItems.push(this.actions['delete'], '-');
         }
+
+        moreItems.push(this.actions.security);
+
+
+        /* insert create menu if needed */
+        // menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
+        // if( !Ext.isEmpty(menuConfig) ){
+        //     createButton = new Ext.menu.Item({
+        //         text: L.Create
+        //         ,menu: [ ]
+        //     });
+        //     updateMenu(createButton, menuConfig, this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this);
+        //     moreItems.push('-', createButton);
+        // }
+        /**/
 
         var moreButton = new Ext.Button({
             iconCls: 'ib-points'
@@ -352,6 +356,18 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
     ,getFieldValue: function(fieldName, valueIndex) {
         // this.templateData
+    }
+
+    /**
+     * set a field value in the grid
+     * to fields are not processed for now
+     * @param varchar fieldName
+     * @param variant valueIndex
+     */
+    ,setFieldValue: function(fieldName, valueIndex) {
+        if(this.grid && this.grid.setFieldValue) {
+            this.grid.setFieldValue(fieldName, valueIndex);
+        }
     }
 
     ,getCurrentFieldValue: function(field_id, duplication_id){
@@ -869,6 +885,7 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
         if(isNaN(id)) return;
         return id;
     }
+
     ,reload: function(){
         if(this.rendered) {
             this.update([]);
@@ -893,6 +910,7 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
         }
         CB_BrowserView.getChildren(params, this.processLoad, this);
     }
+
     ,processLoad: function(r, e){
         /* add check for cases when objects window is closing but saved its changes.
             In this case, the delay that appears while this component load its remote data
@@ -908,6 +926,7 @@ CB.ActionChildsPanel = Ext.extend(Ext.Panel, {
         this.update(r.data);
         this.setVisible(r.data.length > 0);
     }
+
     ,onItemClick: function(ev, el){
         if(Ext.isEmpty(el) || Ext.isEmpty(el.attributes['nid']) || Ext.isEmpty(el.attributes['nid'].value)) return;
         App.mainViewPort.openObject({ id: el.attributes['nid'].value }, ev);

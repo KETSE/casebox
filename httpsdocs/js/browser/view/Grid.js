@@ -156,7 +156,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 // ,sortchange:    this.saveGridState
                 ,groupchange:   this.saveGridState
                 ,sortchange: function() {
-                    clog('sorchange', arguments);
                     this.saveGridState();
                 }
             }

@@ -57,6 +57,7 @@ class Template extends Object
         ,'time' => 'ftTime'
         ,'timeunits' => 'ftTimeunits'
         ,'varchar' => 'ftVarchar'
+        ,'importance' => 'Importance'
     );
 
     /**
@@ -73,6 +74,11 @@ class Template extends Object
         $saveValues = array();
         $params = array();
         $i = 1;
+
+        if (empty($p['visible'])) {
+            $p['visible'] = 0;
+        }
+
         foreach ($this->tableFields as $fieldName) {
             $field = null;
             if (!empty($this->template)) {

@@ -108,7 +108,14 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
                 if(key !== 'remove') {
                     column.dataIndex = key;
                     column.header = Ext.value(column.header, column.title);
-                    column.renderer = this.defaultColumnRenderer;
+                    switch(column.type) {
+                        case 'date':
+                            column.renderer = App.customRenderers.datetime;
+                            break;
+
+                        default:
+                            column.renderer = this.defaultColumnRenderer;
+                    }
                     rez.push(column);
                 }
             }

@@ -278,6 +278,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     }
                 }
                 var newValue = v.join(',');
+
                 targetData.record.set('value', v);
                 this.fireEvent('change', tr.get('name'), newValue, oldValue);
             }
