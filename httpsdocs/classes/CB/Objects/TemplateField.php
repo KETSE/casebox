@@ -109,14 +109,15 @@ class TemplateField extends Object
                 }
             }
         }
+
         if (!empty($saveFields)) {
             $params = '$'.implode(',$', $params);
-            DB\dbQuery(
-                'INSERT INTO templates_structure
+
+            $sql = 'INSERT INTO templates_structure
                 (`'.implode('`,`', $saveFields).'`)
-                VALUES('.$params.')',
-                $saveValues
-            ) or die(DB\dbQueryError());
+                VALUES('.$params.')';
+
+            DB\dbQuery($sql, $saveValues) or die(DB\dbQueryError());
         }
     }
 
@@ -140,7 +141,8 @@ class TemplateField extends Object
             $r['cfg'] = Util\toJSONArray($r['cfg']);
             $this->data = array_merge($this->data, $r);
         } else {
-            throw new \Exception("Template field load error: no field found with id = ".$this->id);
+            \CB\debug("Template field load error: no field found with id = ".$this->id);
+            // throw new \Exception("Template field load error: no field found with id = ".$this->id);
         }
         $res->close();
     }
@@ -237,6 +239,7 @@ class TemplateField extends Object
 
     protected function copyCustomDataTo($targetId)
     {
+        die('copy field');
         // copy data from templates structure table
         DB\dbQuery(
             'INSERT INTO `templates_structure`

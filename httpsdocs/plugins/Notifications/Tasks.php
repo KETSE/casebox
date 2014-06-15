@@ -50,6 +50,11 @@ class Tasks
                     break;
 
                 case 'delete':
+                    //skip notifying the user itself about task delete
+                    if ($userId == $_SESSION['user']['id']) {
+                        continue;
+                    }
+
                     $subject = L\get('aboutTaskDelete', $l);
                     break;
 
@@ -80,7 +85,7 @@ class Tasks
                 array(
                     User::getDisplayName($taskData['cid'])
                     ,$taskData['name']
-                    ,$taskData['path']
+                    ,\CB\Path::getPathText($taskData['path'])
                 ),
                 $subject
             );
@@ -121,7 +126,7 @@ class Tasks
                 )
                 ON DUPLICATE KEY UPDATE
                 object_pid = $3
-                ,data = $4
+                ,data = $5
                 ,action_time = CURRENT_TIMESTAMP',
                 array(
                     $p['type']

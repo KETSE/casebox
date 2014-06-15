@@ -296,9 +296,10 @@ function getMenuConfig(node_id, ids_path, node_template_id){
            select only rules inth empty node_template_ids or that contain current selected node_template_id
         /**/
         if(!Ext.isEmpty(node_template_id)){
-            nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(' ','') + ',';
-            if(nt_ids.indexOf(','+node_template_id+',') >=0) weight += 100;
-            else{
+            var nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(' ','') + ',';
+            if(nt_ids.indexOf(','+node_template_id+',') >=0) {
+                weight += 300; //increased weight for template match
+            } else {
                 if( nt_ids != ',,') return;
                 weight += 50;
             }

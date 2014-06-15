@@ -30,7 +30,11 @@ class Config extends Singleton
         static::$environmentVars = static::getEnvironmentVars(static::$config);
 
         // add core path to include path
-        set_include_path(INCLUDE_PATH . PATH_SEPARATOR . static::$environmentVars['core_dir']);
+        set_include_path(
+            INCLUDE_PATH . PATH_SEPARATOR .
+            static::$environmentVars['core_dir'] . PATH_SEPARATOR .
+            static::get('ZEND_PATH')
+        );
 
         // set max file version count
         if (isset(static::$config['max_files_version_count'])) {
@@ -489,6 +493,7 @@ class Config extends Singleton
         $jsonProperties = array(
             'api'
             ,'css'
+            ,'comments_config'
             ,'js'
             ,'plugins'
             ,'listeners'

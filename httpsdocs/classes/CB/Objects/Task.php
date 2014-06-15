@@ -34,6 +34,11 @@ class Task extends Object
 
         /* saving template data to templates and templates_structure tables */
         @$allday = $this->getFieldValue('allday', 0)['value'];
+
+        if (is_null($allday) || !is_numeric($allday)) {
+            $allday = 1;
+        }
+
         @$dateStart = ($allday == 1)
             ? $this->getFieldValue('date_start', 0)['value']
             : $this->getFieldValue('datetime_start', 0)['value'];

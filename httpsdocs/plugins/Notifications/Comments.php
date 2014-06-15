@@ -29,10 +29,12 @@ class Comments
         $notifiedUsers = static::getNotifiedUsers($objData['pid']);
 
         if (!empty($notifiedUsers)) {
-            $senderMail = Config::get('comments_email');
-            if (empty($senderMail)) {
-                $senderMail = Config::get('sender_email');
-            }
+            $commentsConfig = Config::get('comments_config');
+
+            $senderMail = empty($commentsConfig['email'])
+                ? Config::get('sender_email')
+                : $commentsConfig['email'];
+
             $sender = User::getDisplayName(). " (".$coreName.") <".$senderMail.'>'; //<$UserName ($core)> $sender_email
 
             $o = \CB\Objects::getCachedObject($objData['pid']);

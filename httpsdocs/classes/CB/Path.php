@@ -74,8 +74,8 @@ class Path
             if (isset($p['path'])) {
                 $path = $p['path'];
             }
-        } else {
-            $path = '';
+        } elseif (is_string($p)) {
+            $path = $p;
         }
 
         if (empty($path)) {

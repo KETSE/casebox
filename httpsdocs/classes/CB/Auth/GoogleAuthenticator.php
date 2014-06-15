@@ -103,7 +103,7 @@ class GoogleAuthenticator implements \CB\Interfaces\Auth
 
         $rez = array(
             'sd' => $spacedKey
-            ,'url' => $this->instance->getQRCodeGoogleUrl($_SERVER['SERVER_NAME'], $this->secretData['sk'])
+            ,'url' => $this->instance->getQRCodeGoogleUrl(\CB\Config::get('core_url'), $this->secretData['sk'])
         );
 
         return $rez;

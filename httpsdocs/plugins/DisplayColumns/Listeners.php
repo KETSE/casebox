@@ -13,6 +13,10 @@ class Listeners
         $sp = &$p['params'];
         $this->inputParams = &$p['inputParams'];
 
+        if (@$this->inputParams['from'] == 'tree') {
+            return;
+        }
+
         $solrFields = $this->getSolrFields();
 
         if (!empty($solrFields['fields'])) {
@@ -38,6 +42,10 @@ class Listeners
         $sp = &$p['params'];
         $ip = &$p['inputParams'];
         $data = &$p['result']['data'];
+
+        if (@$ip['from'] == 'tree') {
+            return;
+        }
 
         $userLanguage = \CB\Config::get('user_language');
 

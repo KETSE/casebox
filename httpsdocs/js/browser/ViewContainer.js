@@ -749,9 +749,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(!Ext.isDefined(paramsSubset.start)) {
             paramsSubset.start = 0;
         }
-        if(!Ext.isDefined(paramsSubset.descendants)) {
-            paramsSubset.descendants = false;
-        }
+
         Ext.apply(p, paramsSubset);
         this.setParams(p);
     }
@@ -999,6 +997,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.changeSomeParams({
             path: path
             ,query: null
+            ,descendants: false
             ,search: null
         });
     }
