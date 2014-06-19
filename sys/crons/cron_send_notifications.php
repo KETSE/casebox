@@ -61,7 +61,7 @@ foreach ($users as $u) {
                     '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'.
                 '<html xmlns="http://www.w3.org/1999/xhtml" lang="'.$lang.'" xml:lang="'.$lang.'">'.
                 '<head><title>CaseBox</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>'.
-                '<body style="font: normal 11px tahoma,arial,helvetica,sans-serif; line-height: 18px">'.$m[1].'</body></html>';
+                '<body>'.$m[1].'</body></html>';
             //skip sending notifications from devel server to other emails than Admin
             if (isDevelServer() && ($u['email'] !== $adminEmail)) {
                 echo 'Devel skip: '.$u['email'].': '.$m[0]."\n";

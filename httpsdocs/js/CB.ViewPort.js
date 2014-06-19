@@ -533,10 +533,23 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     ,onFileUpload: function(data, e){
         if(e) e.stopPropagation();
 
-        w = App.getFileUploadWindow({data: data });
-        w.on('submitsuccess', this.onFileUploaded, this);
-        w.on('hide', function(w){ w.un('submitsuccess', this.onFileUploaded, this); }, this);
-        w.show();/**/
+        if(!this.fileField) {
+            this.fileField = document.createElement("INPUT");
+            this.fileField.setAttribute("type", "file");
+            this.fileField.setAttribute("multiple", "true");
+
+            Ext.get(this.fileField).on(
+                'change'
+                ,function(ev, el, p){
+                    if(el.files.length > 0) {
+                        App.addFilesToUploadQueue(el.files, el.data);
+                    }
+                }
+                ,this
+            );
+        }
+        this.fileField.data = data;
+        this.fileField.click();
     }
 
     ,onFileUploaded: function(w, data){

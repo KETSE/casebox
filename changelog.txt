@@ -1,3 +1,17 @@
+CaseBox 1.9.219 (2014-06-19)
+==============================
+New Features, Improvements
+--------------------------
+- Remove fileUploadDlg and show System Dialog with multi-select files
+- Remove 'style' from body in notifications about new comments + add link to Object in <h3> for ex.
+- Remove 'www' check in apache conf
+
+Fixed Bugs:
+----------
+- Copy&Paste of files didn't create necessary content association for new item
+- Breadcrumb bug when '/' in object title
+- Memo field: use same font for Preview and Edit mode
+
 CaseBox 1.9.218 (2014-06-15)
 ==============================
 New Features, Improvements
@@ -11,7 +25,7 @@ New Features, Improvements
         ,"pass": "emailpassword"
         ,"host": "mail.server.com"
         ,"port": 143
-        ,"ssl": false
+        ,"ssl": true
         ,"common": true
     }
 

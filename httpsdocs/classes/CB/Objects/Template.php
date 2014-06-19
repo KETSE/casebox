@@ -277,6 +277,53 @@ class Template extends Object
         $this->saveFields();
     }
 
+    protected function copyCustomDataTo($targetId)
+    {
+        DB\dbQuery(
+            'INSERT INTO `templates`
+                (id,
+                pid,
+                `is_folder`,
+                `type`,
+                `name`,
+                `l1`,
+                `l2`,
+                `l3`,
+                `l4`,
+                `order`,
+                `visible`,
+                `iconCls`,
+                `default_field`,
+                `cfg`,
+                `title_template`,
+                `info_template`)
+            SELECT
+                $2,
+                $3,
+                `is_folder`,
+                `type`,
+                `name`,
+                `l1`,
+                `l2`,
+                `l3`,
+                `l4`,
+                `order`,
+                `visible`,
+                `iconCls`,
+                `default_field`,
+                `cfg`,
+                `title_template`,
+                `info_template`
+            FROM `templates`
+            WHERE id = $1',
+            array(
+                $this->id
+                ,$targetId
+                ,$this->data['pid']
+            )
+        ) or die(DB\dbQueryError());
+    }
+
     /**
      * save fields property from this->data
      * @return void

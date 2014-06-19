@@ -400,12 +400,14 @@ class Task extends Object
                 ,`time`)
             SELECT
                 $2
-                ,`user_id`
-                ,`status`
-                ,`thesauri_response_id`
-                ,`time`
-            FROM `tasks_responsible_users`
-            WHERE task_id = $1',
+                ,tr.`user_id`
+                ,tr.`status`
+                ,tr.`thesauri_response_id`
+                ,tr.`time`
+            FROM `tasks_responsible_users` tr
+            WHERE tr.task_id = $1
+            ON DUPLICATE KEY UPDATE
+            status = tr.status',
             array(
                 $this->id
                 ,$targetId

@@ -1,6 +1,8 @@
 body { font-family: "lucida grande",tahoma,verdana,arial,sans-serif; font-size: 11px }
 
-.x-grid3-row td pre, .x-grid3-row td, .x-grid3-summary-row td { font: 11px "lucida grande",tahoma,verdana,arial,sans-serif }
+.x-grid3-row td pre, .x-grid3-row td, .x-grid3-summary-row td, .x-form-text, textarea.x-form-field {
+font: 11px "lucida grande",tahoma,verdana,arial,sans-serif
+}
 a{ text-decoration: none; color: #333333 }
 a:hover{ text-decoration: underline }
 

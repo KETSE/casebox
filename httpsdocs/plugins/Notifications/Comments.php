@@ -3,6 +3,7 @@ namespace Notifications;
 
 use CB\Config;
 use CB\DB;
+use CB\Objects;
 use CB\Util;
 use CB\User;
 
@@ -23,6 +24,7 @@ class Comments
         $p['type'] = 'comment';
 
         $coreName = Config::get('core_name');
+        $coreUrl = Config::get('core_url');
 
         $objData = $o->getData();
 
@@ -41,7 +43,8 @@ class Comments
             $d = $o->getData();
 
             $subject = '['.$coreName.' #'.$d['id'].'] '.$d['name'].' ('.$d['path'].')';//[$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
-            $body  = nl2br(Util\adjustTextForDisplay($objData['data']['_title'])).
+            $body  = '<h3><a href="' . $coreUrl . 'v-' . $objData['pid'] . '/">' . Objects::getName($objData['pid']) . '</a></h3>'.
+                nl2br(Util\adjustTextForDisplay($objData['data']['_title'])).
                 '<br /><hr />'.
                 'To add a comment, reply to this email.<br />
                 <a href="#">Unsubscribe</a> (will not receive emails with new comments for “'.$d['name'].'”)';

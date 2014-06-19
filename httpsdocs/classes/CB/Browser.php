@@ -116,7 +116,7 @@ class Browser
         }
 
         foreach ($this->path as $n) {
-            $rez[] = $n->getName();
+            $rez[] = str_replace('/', '&#47;', $n->getName());
         }
 
         return implode('/', $rez);
@@ -303,7 +303,7 @@ class Browser
                     break;
                 case 'self':
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
-                        $p['pids'] = $r['objectId'];
+                        $p['pids'] = $p['objectId'];
                     } elseif (!empty($p['path'])) {
                         $pids = Path::detectRealTargetId($p['path']);
                     }

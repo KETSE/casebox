@@ -48,6 +48,7 @@ class TemplateField extends Object
 
         $saveFields = array('template_id');
         $saveValues = array($this->detectParentTemplate());
+
         $params = array('1');
         $i = 2;
         foreach ($this->tableFields as $fieldName) {
@@ -239,7 +240,6 @@ class TemplateField extends Object
 
     protected function copyCustomDataTo($targetId)
     {
-        die('copy field');
         // copy data from templates structure table
         DB\dbQuery(
             'INSERT INTO `templates_structure`
@@ -272,11 +272,23 @@ class TemplateField extends Object
             FROM `tree` t
                 ,templates_structure ts
             WHERE t.id = $2
-                AND ts.id = $1',
+                AND ts.id = $1
+            ON DUPLICATE KEY UPDATE
+                pid = t.pid
+                ,template_id = $3
+                ,name = ts.name
+                ,l1 = ts.l1
+                ,l2 = ts.l2
+                ,l3 = ts.l3
+                ,l4 = ts.l4
+                ,`type` = ts.type
+                ,`order` = ts.order
+                ,`cfg` = ts.cfg
+                ,solr_column_name = ts.solr_column_name',
             array(
                 $this->id
                 ,$targetId
-                ,$this->detectParentTemplate($targetId)
+                ,$this->detectParentTemplate($this->data['pid'])
             )
         ) or die(DB\dbQueryError());
     }

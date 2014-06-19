@@ -460,11 +460,6 @@ function initApp(){
         o.show();
         return c;
     };
-    App.getFileUploadWindow = function(config){
-        if(!App.thetFileUploadWindow) App.theFileUploadWindow = new CB.FileUploadWindow();
-        App.theFileUploadWindow = Ext.apply(App.theFileUploadWindow, config);
-        return App.theFileUploadWindow;
-    };
     App.getTextEditWindow = function(config){
         if(!App.textEditWindow) App.textEditWindow = new CB.TextEditWindow();
         App.textEditWindow = Ext.apply(App.textEditWindow, config);
