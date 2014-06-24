@@ -69,9 +69,43 @@ class Files
         if (!Security::canWrite($p['id'])) {
             throw new \Exception(L\get('Access_denied'));
         }
-        $file = new Objects\File($d['id']);
+        $file = new Objects\File($p['id']);
         $file->setData($p);
         $file->save();
+
+        return array('success' => true);
+    }
+
+    public static function getContent($id)
+    {
+        $rez = array('success' => true, 'data' => null);
+
+        $file = new Objects\File($id);
+
+        $data = $file->load();
+
+        $contentFile = Config::get('files_dir') . $data['content_path'] . '/'.$data['content_id'];
+
+        if (file_exists($contentFile)) {
+            $rez['data'] = file_get_contents($contentFile);
+        } else {
+            return array('success' => false);
+        }
+
+        return $rez;
+    }
+
+    public function saveContent($p)
+    {
+
+        if (!Security::canWrite($p['id'])) {
+            throw new \Exception(L\get('Access_denied'));
+        }
+        $file = new Objects\File($p['id']);
+        $data = $file->load();
+        $contentFile = Config::get('files_dir') . $data['content_path'] . '/'.$data['content_id'];
+
+        file_put_contents($contentFile, $p['data']);
 
         return array('success' => true);
     }

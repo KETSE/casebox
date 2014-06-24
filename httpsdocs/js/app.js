@@ -475,11 +475,11 @@ function initApp(){
         return (App.config.folder_templates.indexOf( String(template_id) ) >= 0);
     };
     App.isWebDavDocument = function(name){
-        if(!Ext.isPrimitive(name) || Ext.isEmpty(name) || Ext.isEmpty(App.config.webdav_files)) {
+        if(!Ext.isPrimitive(name) || Ext.isEmpty(name) || Ext.isEmpty(App.config['files.edit'].webdav)) {
             return false;
         }
         var ext = name.split('.').pop();
-        return (App.config.webdav_files.indexOf(ext) >= 0);
+        return (App.config['files.edit'].webdav.indexOf(ext) >= 0);
     };
 
     App.openWebdavDocument = function(data, checkCookie){

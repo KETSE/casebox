@@ -27,6 +27,7 @@ $projectTitle = Config::get('project_name_' . Config::get('user_language'), $cor
 <?php
 
 echo '<link rel="stylesheet" type="text/css" href="' . EXT_PATH. '/resources/css/ext-all.css" />
+    <link rel="stylesheet" type="text/css" href="/libx/extjs3-ace/styles.css" />
     <link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(Minify_getUri('css'), 1) . '" />' . "\n";
 
 // Custom CSS for the core
@@ -158,6 +159,13 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 <script type="text/javascript" src="<?php echo EXT_PATH ?>/adapter/ext/ext-base.js"></script>
 <script type="text/javascript">setProgress('<?php echo L\get('Loading_ExtJS_Core')?>', '30%')</script>
 <script type="text/javascript" src="<?php echo EXT_PATH ?>/ext-all<?php echo isDebugHost() ? '-debug' : ''; ?>.js"></script>
+
+<script type="text/javascript">
+    bravojs = {
+        url: window.location.protocol + "//" + window.location.host + "/libx/extjs3-ace/Component.js"
+    };
+    document.write('<script type="text/javascript" src="' + bravojs.url + '"><' + '/script>');
+</script>
 
 <?php
 

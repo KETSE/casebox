@@ -7,7 +7,7 @@ use CB\L;
 use CB\Util;
 use CB\User;
 
-class Tasks
+class Tasks extends Objects
 {
     /**
      * add notifications for tasks
@@ -25,7 +25,7 @@ class Tasks
         $taskId = $taskData['id'];
 
         $coreName = Config::get('core_name');
-        $sender = User::getDisplayName(). " (".$coreName.") <".Config::get('sender_email').'>';
+        $sender = static::getSender();
 
         $usersToNotify = static::getUsersToNotify($taskObject);
 

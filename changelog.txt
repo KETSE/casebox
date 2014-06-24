@@ -1,3 +1,50 @@
+CaseBox 1.9.219 (2014-06-24)
+==============================
+New Features, Improvements
+--------------------------
+- render #number as link in comments and subscribe @username to the object
+- Fix PopupMenu in Tree
+- modified file edit window, added html and Ace editors
+- changed apache config rules to allow loading of created images on preview generation
+- ace editor has been included in libx folder
+    made changes into apache config file to allow access to editor files
+
+- files configuration changes:
+    "webdav_files" moved to files.edit.webdav
+    we have also "webdav_url", "max_files_version_count"
+
+    Oleg suggested this config
+    "edit_files":
+        {“txt”: “txt, php, js, xml, csv“,
+          “html”: “html, htm”,
+          “webdav”: “doc, ppt, docx, odt”
+        }
+
+    I propose to merge all files related options into one config for them:
+    "files": {
+        "max_versions": <string or object>
+            // string example : *:1;doc,docx,xls,xlsx,pdf:5;png,gif,jpg,jpeg,tif,tiff:2;
+            // object example: {
+            //   "*": 1
+            //   ,"doc,docx,xls,xlsx,pdf": 5
+            //   ,"png,gif,jpg,jpeg,tif,tiff": 2
+            // }
+        ,"edit": { //type: "comma separated extensions string or an array of strings"
+            "text": "txt,php,js,xml,csv"
+            ,"html": "html,htm"
+            ,"webdav": "doc,docx,ppt,dot,dotx,xls,xlsm,xltx,ppt,pot,pps,pptx,odt,ott,odm,ods,odg,otg,odp,odf,odb"
+        }
+        ,"webdav_url": "https://..."
+    }
+
+    There could be general config for files in casebox.config table
+    and some properties (of "files") could be overwriten in core config table.
+
+    Added backward compatibility checks so that old configs still work.
+
+- Memo field: use same font for Preview and Edit mode
+- Use email sender from config.comments_config for all outgoing notification emails
+
 CaseBox 1.9.219 (2014-06-19)
 ==============================
 New Features, Improvements

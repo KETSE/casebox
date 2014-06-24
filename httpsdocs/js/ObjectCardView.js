@@ -229,6 +229,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                         ,openpreview: this.onOpenPreviewEvent
                         ,openproperties: this.onOpenPropertiesEvent
                         ,editobject: this.onEditObjectEvent
+                        ,editmeta: this.onEditMetaEvent
                         ,loaded: this.onCardItemLoaded
                     }
                 },{
@@ -609,10 +610,15 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             App.openWebdavDocument(objectData);
             return;
         }
-        objectData.viewIndex = 1;
-        this.delayedLoadTask.cancel();
-        this.requestedLoadData = objectData;
 
+        this.editObject(objectData);
+    }
+
+    ,editObject: function(objectData) {
+        data = Ext.apply({}, objectData);
+        data.viewIndex = 1;
+        this.delayedLoadTask.cancel();
+        this.requestedLoadData = data;
         this.doLoad();
     }
 
@@ -781,8 +787,18 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,onEditObjectEvent: function(params, e) {
-        e.stopPropagation();
+        if(e) {
+            e.stopPropagation();
+        }
         this.onEditClick();
+    }
+
+    ,onEditMetaEvent: function(params, e) {
+        if(e) {
+            e.stopPropagation();
+        }
+
+        this.editObject(params);
     }
 
     ,onDownloadClick: function(b, e) {
@@ -822,7 +838,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.getEl().unmask();
         App.fireEvent('objectchanged', this.loadedData);
     }
-
 
     ,onSubscribeClick: function(b, e) {
         Ext.Msg.show({

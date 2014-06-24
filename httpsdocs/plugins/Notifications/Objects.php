@@ -26,7 +26,7 @@ class Objects
         $coreName = Config::get('core_name');
         $coreUrl = Config::get('core_url');
 
-        $sender = User::getDisplayName(). " (".$coreName.") <".Config::get('sender_email').'>';
+        $sender = static::getSender();
 
         $usersToNotify = static::getUsersToNotify($id, $p['logData']['pids']);
 
@@ -71,6 +71,25 @@ class Objects
             ) or die(DB\dbQueryError());
         }
 
+    }
+
+    /**
+     * get the sender formated string
+     * @return varchar
+     */
+    protected static function getSender()
+    {
+        $coreName = Config::get('core_name');
+
+        $commentsConfig = Config::get('comments_config');
+
+        $senderMail = empty($commentsConfig['email'])
+            ? Config::get('sender_email')
+            : $commentsConfig['email'];
+
+        $rez = User::getDisplayName(). " (".$coreName.") <".$senderMail.'>';
+
+        return $rez;
     }
 
     /**

@@ -974,6 +974,10 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.objectPanel.load(data);
     }
 
+    ,editObject: function(objectData) {
+        this.objectPanel.edit(objectData);
+    }
+
     ,onObjectsOpenEvent: function(objData, e) {
         if(e && e.stopPropagation) {
             e.stopPropagation();

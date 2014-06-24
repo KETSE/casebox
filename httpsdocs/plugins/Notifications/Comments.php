@@ -3,11 +3,10 @@ namespace Notifications;
 
 use CB\Config;
 use CB\DB;
-use CB\Objects;
 use CB\Util;
 use CB\User;
 
-class Comments
+class Comments extends Objects
 {
     /**
      * add notifications for tasks
@@ -28,27 +27,26 @@ class Comments
 
         $objData = $o->getData();
 
+        $message  = nl2br(Util\adjustTextForDisplay($objData['data']['_title']));
+
+        static::subscribeMessageUsers($objData['pid'], $message);
+
+        $sender = static::getSender();
+
+        $o = \CB\Objects::getCachedObject($objData['pid']);
+        $d = $o->getData();
+
+        $subject = '['.$coreName.' #'.$d['id'].'] '.$d['name'].' ('.$d['path'].')';//[$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
+
+        $body  = '<h3><a href="' . $coreUrl . 'v-' . $objData['pid'] . '/">' . \CB\Objects::getName($objData['pid']) . '</a></h3>'.
+            $message.
+            '<br /><hr />'.
+            'To add a comment, reply to this email.<br />
+            <a href="#">Unsubscribe</a> (will not receive emails with new comments for “'.$d['name'].'”)';
+
         $notifiedUsers = static::getNotifiedUsers($objData['pid']);
 
         if (!empty($notifiedUsers)) {
-            $commentsConfig = Config::get('comments_config');
-
-            $senderMail = empty($commentsConfig['email'])
-                ? Config::get('sender_email')
-                : $commentsConfig['email'];
-
-            $sender = User::getDisplayName(). " (".$coreName.") <".$senderMail.'>'; //<$UserName ($core)> $sender_email
-
-            $o = \CB\Objects::getCachedObject($objData['pid']);
-            $d = $o->getData();
-
-            $subject = '['.$coreName.' #'.$d['id'].'] '.$d['name'].' ('.$d['path'].')';//[$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
-            $body  = '<h3><a href="' . $coreUrl . 'v-' . $objData['pid'] . '/">' . Objects::getName($objData['pid']) . '</a></h3>'.
-                nl2br(Util\adjustTextForDisplay($objData['data']['_title'])).
-                '<br /><hr />'.
-                'To add a comment, reply to this email.<br />
-                <a href="#">Unsubscribe</a> (will not receive emails with new comments for “'.$d['name'].'”)';
-
             foreach ($notifiedUsers as $userId) {
                 if ($userId == $_SESSION['user']['id']) {
                     continue;
@@ -90,7 +88,25 @@ class Comments
             }
         }
 
-        static::addCurrentUserToNotifiedUsers($objData['pid']);
+        //add current user to notified users for parent object
+        static::addUserToNotifiedUsers($objData['pid']);
+    }
+
+    /**
+     * subscribe users referred in message
+     * @param int     $objectId
+     * @param varchar $message
+     */
+    protected static function subscribeMessageUsers($objectId, $message)
+    {
+        if (preg_match_all('/@([^@\s]+)/', $message, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $userId = User::exists($match[1]);
+                if (is_numeric($userId)) {
+                    static::addUserToNotifiedUsers($objectId, $userId);
+                }
+            }
+        }
     }
 
     /**
@@ -125,23 +141,26 @@ class Comments
         return $rez;
     }
 
-    protected static function addCurrentUserToNotifiedUsers($objectId)
+    protected static function addUserToNotifiedUsers($objectId, $userId = false)
     {
+        if ($userId === false) {
+            $userId = $_SESSION['user']['id'];
+        }
         $o = \CB\Objects::getCachedObject($objectId);
         $d = $o->getData();
 
         $onUsers = @Util\toNumericArray($d['sys_data']['subscribers']['on']);
         $offUsers = @Util\toNumericArray($d['sys_data']['subscribers']['off']);
 
-        if (in_array($_SESSION['user']['id'], $offUsers)) {
+        if (in_array($userId, $offUsers)) {
             return;
         }
 
-        if (in_array($_SESSION['user']['id'], $onUsers)) {
+        if (in_array($userId, $onUsers)) {
             return;
         }
 
-        $onUsers[] = $_SESSION['user']['id'];
+        $onUsers[] = $userId;
 
         $d['sys_data']['subscribers'] = array(
             'on' => $onUsers

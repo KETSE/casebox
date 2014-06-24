@@ -680,6 +680,9 @@ class Objects
             case 'field':
                 return new Objects\TemplateField($objectId);
                 break;
+            case 'comment':
+                return new Objects\Comment($objectId);
+                break;
             default:
                 return new Objects\Object($objectId);
                 break;
@@ -919,7 +922,7 @@ class Objects
             return $rez;
         }
 
-        $co = new Objects\Object();
+        $co = new Objects\Comment();
 
         $data = array(
             'pid' => $p['id']

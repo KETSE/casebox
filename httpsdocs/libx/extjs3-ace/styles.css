@@ -1,0 +1,31 @@
+
+#ace-editor-tests {
+    font-family: Arial, Helvetica, sans-serif, Tahoma, Verdana, sans-serif;
+    font-size: 12px;
+    background: rgb(14, 98, 165);
+    color: white;
+}
+
+#ace-editor-tests TD {
+    padding: 3px;
+}
+
+#cockpitInput {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+
+    border: none; outline: none;
+    font-family: consolas, courier, monospace;
+    font-size: 120%;
+}
+
+#cockpitOutput {
+    padding: 10px;
+    margin: 0 15px;
+    border: 1px solid #AAA;
+    -moz-border-radius-topleft: 10px;
+    -moz-border-radius-topright: 10px;
+    border-top-left-radius: 4px; border-top-right-radius: 4px;
+    background: #DDD; color: #000;
+}

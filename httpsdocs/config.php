@@ -93,5 +93,5 @@ date_default_timezone_set('UTC');
 
 //clear debug_log for each request when on debug host
 if (isDebugHost()) {
-    @unlink(Config::get('debug_log'));
+    // @unlink(Config::get('debug_log'));
 }
