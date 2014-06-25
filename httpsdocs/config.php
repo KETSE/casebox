@@ -45,7 +45,7 @@ DB\connectWithParams($config);
 **/
 
 /* setting php configuration options, session lifetime and error_reporting level */
-ini_set('max_execution_time', 300);
+ini_set('max_execution_time', 500);
 ini_set('short_open_tag', 'off');
 
 // upload params

@@ -84,7 +84,7 @@ class Files
 
         $data = $file->load();
 
-        $contentFile = Config::get('files_dir') . $data['content_path'] . '/'.$data['content_id'];
+        $contentFile = Config::get('files_dir') . @$data['content_path'] . '/'.@$data['content_id'];
 
         if (file_exists($contentFile)) {
             $rez['data'] = file_get_contents($contentFile);

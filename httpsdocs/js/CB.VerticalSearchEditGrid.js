@@ -9,11 +9,11 @@ CB.VerticalSearchEditGrid = Ext.extend(CB.VerticalEditGrid, {
         this.oldOnBeforeEditProperty = this.onBeforeEditProperty;
         this.onBeforeEditProperty = this.newOnBeforeEditProperty;
 
-        Ext.apply(this, {
-            stateId: Ext.value(this.stateId, 'vseg')
-        });
-
         CB.VerticalSearchEditGrid.superclass.initComponent.apply(this, arguments);
+
+        Ext.apply(this, {
+            stateId: "vseg"
+        });
     }
 
     ,newInitRenderers: function () {
@@ -36,7 +36,7 @@ CB.VerticalSearchEditGrid = Ext.extend(CB.VerticalEditGrid, {
                 header: L.Condition
                 ,width: 50
                 ,dataIndex: 'cond'
-                ,resizable: false
+                // ,resizable: false
                 ,editable: true
                 ,scope: this
                 ,renderer: this.renderers.condition

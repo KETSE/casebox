@@ -232,8 +232,8 @@ class Path
     /**
      * create an array of node classes for given path and nodeConfigs
      * @param  varchar $path
-     * @param  [type]  $treeNodeGUIDConfigs
-     * @return [type]
+     * @param  array   $treeNodeGUIDConfigs
+     * @return array
      */
     public static function createNodesPath($path, $treeNodeGUIDConfigs)
     {

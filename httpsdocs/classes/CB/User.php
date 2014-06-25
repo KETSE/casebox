@@ -203,10 +203,12 @@ class User
     {
         return ( !empty($_COOKIE['key']) &&
             !empty($_SESSION['key']) &&
-            !empty($_SESSION['ips']) &&
             !empty($_SESSION['user']) &&
             ($_COOKIE['key'] == $_SESSION['key']) &&
-            ('|'.Util\getIPs().'|' == $_SESSION['ips']) &&
+
+            // ip check will be replaced with other mechanism because of dhcp networks
+            // !empty($_SESSION['ips']) &&
+            // ('|'.Util\getIPs().'|' == $_SESSION['ips']) &&
             !empty($_SESSION['user']['TSV_checked'])
             );
     }

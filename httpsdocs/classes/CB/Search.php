@@ -217,6 +217,7 @@ class Search extends Solr\Client
         $this->facets = array();
         if (!$this->facetsSetManually) {
             $path = Cache::get('current_path');
+
             if (!empty($path)) {
                 $lastNode = $path[sizeof($path) -1];
                 $this->facets = $lastNode->getFacets();
@@ -323,7 +324,6 @@ class Search extends Solr\Client
         }
 
         $this->params['sort'] = implode(', ', $sort);
-        // var_dump($this->params['sort']);
     }
 
     private function executeQuery()

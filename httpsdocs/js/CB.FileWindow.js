@@ -317,7 +317,8 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             ,width: 300
             ,split: true
             ,bodyStyle: 'background-color: #f4f4f4'
-
+            ,stateId: 'fwer' //file window east region
+            ,stateful: true
             ,listeners: {
                 scope: this
                 ,loaded: function(objectPanel, activeViewItem) {
@@ -380,7 +381,9 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             this.previewPanel.loadPreview(this.data.id);
         }
 
-        CB_Files.getContent(this.data.id, this.onLoadContent, this);
+        if(this.wysiwygEditor || this.sourceEditor) {
+            CB_Files.getContent(this.data.id, this.onLoadContent, this);
+        }
     }
 
     ,onLoadContent: function(r, e) {
@@ -400,9 +403,12 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
 
     ,onOpenVersionEvent: function(data, pluginComponent) {
         this.loadedVersionId = data.id;
+
         this.previewPanel.loadPreview(this.data.id, data.id);
+
         this.separators.restoreVersion.setVisible(!Ext.isEmpty(data.id));
         this.actions.restoreVersion.setHidden(Ext.isEmpty(data.id));
+
         this.objectPanel.setSelectedVersion({id: this.data.id, versionId: this.loadedVersionId});
     }
 

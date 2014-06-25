@@ -175,6 +175,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
     ,animate: false
     ,border: false
     ,enableDD: true
+    ,tbarCssClass: 'x-panel-white'
     ,initComponent: function(){
         this.actions = {
             addUser: new Ext.Action({
@@ -191,26 +192,33 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
             })
             ,del: new Ext.Action({
                 text: L.Delete
-                ,iconCls: 'icon-minus'
+                ,iconCls: 'ib-trash'
+                ,iconAlign:'top'
+                ,scale: 'large'
                 ,disabled: true
                 ,handler: this.delNode
                 ,scope: this
             })
             ,remove: new Ext.Action({
                 text: L.Remove
-                ,iconCls: 'icon-user-arrow'
+                ,iconCls: 'ib-cancel'
+                ,iconAlign:'top'
+                ,scale: 'large'
                 ,disabled: true
                 ,handler: this.deassociateNode
                 ,scope: this
             })
             ,reload: new Ext.Action({
-                iconCls: 'icon-reload'
+                text: L.Refresh
+                ,iconCls: 'ib-refresh'
+                ,iconAlign:'top'
+                ,scale: 'large'
                 ,qtip: L.Reload
                 ,scope:this
                 ,handler: function(){this.getRootNode().reload();}
             })
 
-        }
+        };
 
         this.editor = new Ext.tree.TreeEditor(this, {
             allowBlank: false
@@ -254,7 +262,9 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
             ,tbar: [
                 {
                     text: L.Add
-                    ,iconCls: 'icon-plus'
+                    ,iconCls: 'ib-create'
+                    ,iconAlign:'top'
+                    ,scale: 'large'
                     ,menu: [
                         this.actions.addUser
                         ,this.actions.addGroup
@@ -572,6 +582,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
     ,disabled: true
     ,fileUpload: true
     ,data: {}
+    ,tbarCssClass: 'x-panel-white'
     ,initComponent: function(){
         bulletRenderer = function(v, m){
             m.css = 'taC';
@@ -593,16 +604,48 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
             layout: 'border'
             ,api: {submit: CB_User.uploadPhoto }
             ,hideBorders: true
-            ,tbar:[{text: L.Save, iconCls: 'icon-save', disabled: true, handler: this.saveData, scope: this}
-                ,{text: Ext.MessageBox.buttonText.cancel, iconCls: 'icon-cancel', disabled: true, handler: function(b, e){e.stopPropagation();this.loadData();}, scope: this}
-                ,{xtype: 'tbseparator', hidden: true}
-                ,{text: L.Edit, iconCls: 'icon-pencil', handler: this.onEditUserDataClick, scope: this, hidden: true}
-                ,{xtype: 'tbseparator', hidden: true}
-                ,{text: L.Options, hidden: true, menu: [
-                    {text: L.ChangePassword, iconCls: 'icon-key', handler: this.onEditUserPasswordClick, scope: this}
-                    ,'-'
-                    ,{text: L.ChangeUsername, iconCls: 'icon-pencil', handler: this.onEditUsernameClick, scope: this}
-                ]}
+            ,tbar:[
+                {
+                    text: L.Save
+                    ,iconCls: 'ib-save'
+                    ,iconAlign:'top'
+                    ,scale: 'large'
+                    ,disabled: true
+                    ,handler: this.saveData
+                    ,scope: this
+                },{
+                    text: Ext.MessageBox.buttonText.cancel
+                    ,iconCls: 'ib-cancel'
+                    ,iconAlign:'top'
+                    ,scale: 'large'
+                    ,disabled: true
+                    ,handler: function(b, e){
+                        e.stopPropagation();
+                        this.loadData();
+                    }
+                    ,scope: this
+                },{xtype: 'tbseparator', hidden: true}
+                ,{
+                    text: L.Edit
+                    ,iconCls: 'ib-open'
+                    ,iconAlign:'top'
+                    ,scale: 'large'
+                    ,handler: this.onEditUserDataClick
+                    ,scope: this
+                    ,hidden: true
+                },{xtype: 'tbseparator', hidden: true}
+                ,{
+                    text: L.Options
+                    ,iconCls:'ib-apps'
+                    ,iconAlign:'top'
+                    ,scale: 'large'
+                    ,hidden: true
+                    ,menu: [
+                        {text: L.ChangePassword, iconCls: 'icon-key', handler: this.onEditUserPasswordClick, scope: this}
+                        ,'-'
+                        ,{text: L.ChangeUsername, iconCls: 'icon-pencil', handler: this.onEditUsernameClick, scope: this}
+                    ]
+                }
             ]
             ,items: [{
                     region: 'north'
@@ -725,7 +768,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
             this.grid.getStore().loadData(accessData, false);
 
             this.canEditUserData = ((App.loginData.admin) || (response.data.cid == App.loginData.id) || (response.data.id == App.loginData.id));
-            eb = this.getTopToolbar().find('iconCls', 'icon-pencil')[0];
+            eb = this.getTopToolbar().find('iconCls', 'ib-open')[0];
             eb.setVisible(this.canEditUserData); // edit button
             idx = this.getTopToolbar().items.indexOf(eb);
             this.getTopToolbar().items.itemAt(idx -1).setVisible(this.canEditUserData);// divider for edit button

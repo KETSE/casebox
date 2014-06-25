@@ -1,3 +1,19 @@
+CaseBox 1.9.220 (2014-06-25)
+==============================
+New Features, Improvements
+--------------------------
+- disabled ipcheck for now. It'll be replaced by other mechanism
+- width of right panel in FileTabSheet window should be remembered
+- Default search condition should be '=' in search templates
+- Can't resize the 2nd column in search template 'condition' and save grid state
+- Replace the toolbar in "User management" with 32x32 icons and white background as in Grid toolbar
+- made changes related to search by template
+- added Bcrypt class for generating password recovery hashes
+
+Fixed Bugs:
+----------
+- js error sometimes when opening file window
+
 CaseBox 1.9.219 (2014-06-24)
 ==============================
 New Features, Improvements
