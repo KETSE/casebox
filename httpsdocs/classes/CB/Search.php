@@ -108,6 +108,38 @@ class Search extends Solr\Client
                 $this->params['sort'] .= ",$k $v";
             }
         }
+
+        /*analize sort parameter (ex: status asc,date_end asc)/**/
+        if (!empty($p['strictSort'])) {
+            $this->params['sort'] = $p['strictSort'];
+
+        } else {
+            $sort = array(
+                'order' => 'asc'
+            );
+
+            if (isset($p['sort'])) {
+                //sort considered as a single field name and dir apart property
+                if (!is_array($p['sort'])) {
+                    $sort[$p['sort']] = empty($p['dir'])
+                        ? 'asc'
+                        : strtolower($p['dir']);
+                } else { //considered an array of sort fields
+                    foreach ($p['sort'] as $s) {
+                        $s = explode(' ', $s);
+                        $sort[$s[0]] = empty($s[1]) ? 'asc' : strtolower($s[1]);
+                    }
+                }
+
+            } else {
+                $sort['sort_name'] = 'asc';//, subtype asc
+            }
+
+            foreach ($sort as $k => $v) {
+                $this->params['sort'] .= ",$k $v";
+            }
+        }
+
         /* adding additional query filters */
 
         /* assign security sets to filters */
@@ -185,6 +217,7 @@ class Search extends Solr\Client
         $this->facets = array();
         if (!$this->facetsSetManually) {
             $path = Cache::get('current_path');
+
             if (!empty($path)) {
                 $lastNode = $path[sizeof($path) -1];
                 $this->facets = $lastNode->getFacets();
@@ -271,6 +304,28 @@ class Search extends Solr\Client
         $this->params = array_merge($this->params, $facetParams);
     }
 
+    /**
+     * analize sort param and replace sort fields if needed
+     * @return void
+     */
+    protected function replaceSortFields()
+    {
+        if (empty($this->params['sort'])) {
+            return;
+        }
+
+        $sort = explode(',', $this->params['sort']);
+        foreach ($sort as $k => $el) {
+            $el = trim($el);
+            list($f, $s) = explode(' ', $el);
+            if (!empty($this->replaceSortFields[$f])) {
+                $sort[$k] = $this->replaceSortFields[$f].' '.$s;
+            }
+        }
+
+        $this->params['sort'] = implode(', ', $sort);
+    }
+
     private function executeQuery()
     {
         try {
@@ -284,6 +339,8 @@ class Search extends Solr\Client
             );
 
             \CB\fireEvent('beforeSolrQuery', $eventParams);
+
+            $this->replaceSortFields();
 
             $this->results = $this->search(
                 $this->escapeLuceneChars($this->query),

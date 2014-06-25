@@ -69,9 +69,43 @@ class Files
         if (!Security::canWrite($p['id'])) {
             throw new \Exception(L\get('Access_denied'));
         }
-        $file = new Objects\File($d['id']);
+        $file = new Objects\File($p['id']);
         $file->setData($p);
         $file->save();
+
+        return array('success' => true);
+    }
+
+    public static function getContent($id)
+    {
+        $rez = array('success' => true, 'data' => null);
+
+        $file = new Objects\File($id);
+
+        $data = $file->load();
+
+        $contentFile = Config::get('files_dir') . @$data['content_path'] . '/'.@$data['content_id'];
+
+        if (file_exists($contentFile)) {
+            $rez['data'] = file_get_contents($contentFile);
+        } else {
+            return array('success' => false);
+        }
+
+        return $rez;
+    }
+
+    public function saveContent($p)
+    {
+
+        if (!Security::canWrite($p['id'])) {
+            throw new \Exception(L\get('Access_denied'));
+        }
+        $file = new Objects\File($p['id']);
+        $data = $file->load();
+        $contentFile = Config::get('files_dir') . $data['content_path'] . '/'.$data['content_id'];
+
+        file_put_contents($contentFile, $p['data']);
 
         return array('success' => true);
     }
@@ -944,7 +978,7 @@ class Files
                     require_once(Config::get('MINIFY_PATH').'utils.php');
 
                     $html = '<html><head><title>'.$file['name'].'</title>
-                            <script type="text/javascript" src="'.Minify_getUri('js_pdf').'"></script>
+                            <script type="text/javascript" src="/'.Config::get('core_name').Minify_getUri('js_pdf').'"></script>
                             <script type="text/javascript">
                                   window.onload = function (){
                                     var success = new PDFObject({ url: "' . $coreUrl . 'download.php?pw=&amp;id='.$file['id'].'" }).embed();
@@ -1000,10 +1034,6 @@ class Files
 
     public static function getSolrData(&$objectRecord)
     {
-        return; //TODO: refactor according to objectsRecord parametter and solr content search refactor
-        $rez = array();
-
-        //,parsed_content `content`'.
         $filesPath = Config::get('files_dir');
 
         $res = DB\dbQuery(
@@ -1017,32 +1047,36 @@ class Files
             ,f.cid
             ,f.content_id
             ,(select count(*) from files_versions where file_id = f.id) `versions`
-            FROM files f left join files_content c on f.content_id = c.id where f.id = $1',
-            $id
+            FROM files f
+            LEFT JOIN files_content c
+                ON f.content_id = c.id
+            WHERE f.id = $1',
+            $objectRecord['id']
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $rez['size'] = $r['size'];
-            $rez['versions'] = intval($r['versions']);
+            $objectRecord['size'] = $r['size'];
+            $objectRecord['versions'] = intval($r['versions']);
+
             $content = $filesPath.$r['path'].DIRECTORY_SEPARATOR.$r['content_id'].'.gz';
             if (file_exists($content)) {
-                $content =   file_get_contents($content);
+                $content = file_get_contents($content);
                 $content = gzuncompress($content);
             } else {
                 $content = '';
             }
-            $rez['content'] = Util\coalesce($r['title'], '')."\n".
+            $objectRecord['content'] = Util\coalesce($r['title'], '')."\n".
             Util\coalesce($r['type'], '')."\n".
             Util\coalesce($content, '');
         }
         $res->close();
-
-        return $rez;
     }
 
     public static function getBulkSolrData(&$objectRecords)
     {
-        return; //TODO: refactor according to objectsRecords parametter and solr content search refactor
+        foreach ($objectRecords as $id => &$objectRecord) {
+            static::getSolrData($objectRecord);
+        }
     }
 
     /* versions */

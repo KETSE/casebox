@@ -118,17 +118,60 @@ function getItemIcon(d){
     }
 
 }
+
+/**
+ * detect the editor group used for given filename from App.config['files.edit']
+ * @param  varchar filename
+ * @return varchar | false
+ */
+function detectFileEditor(filename) {
+    var rez = false;
+
+    if(Ext.isEmpty(App.config['files.edit'])) {
+        return rez;
+    }
+
+    var extension = getFileExtension(filename);
+
+    Ext.iterate(
+        App.config['files.edit']
+        ,function(k, v, o) {
+            if(v.indexOf(extension) > -1) {
+                rez = k;
+                return false;
+            }
+        }
+        ,this
+    );
+
+    return rez;
+}
+
+function getFileExtension(filename)
+{
+    var ext = String(filename).split('.');
+    if (ext.length < 2) {
+        return '';
+    }
+    ext = ext.pop();
+    ext = ext.trim();
+
+    return ext.toLowerCase();
+}
+
 function getFileIcon(filename){
     if(Ext.isEmpty(filename)) return 'file-';
     a = String(filename).split('.');
     if(a.length <2 ) return 'file-';
     return 'file- file-'+ Ext.util.Format.lowercase(a.pop());
 }
+
 function getVersionsIcon(versionsCount){
     if(isNaN(versionsCount)) return '';
     if(versionsCount > 20) return 'vc21';
     return 'vc'+versionsCount;
 }
+
 function getFileIcon32(filename){
     if(Ext.isEmpty(filename)) return 'file-unknown32';
     a = String(filename).split('.');
@@ -296,9 +339,10 @@ function getMenuConfig(node_id, ids_path, node_template_id){
            select only rules inth empty node_template_ids or that contain current selected node_template_id
         /**/
         if(!Ext.isEmpty(node_template_id)){
-            nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(' ','') + ',';
-            if(nt_ids.indexOf(','+node_template_id+',') >=0) weight += 100;
-            else{
+            var nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(' ','') + ',';
+            if(nt_ids.indexOf(','+node_template_id+',') >=0) {
+                weight += 300; //increased weight for template match
+            } else {
                 if( nt_ids != ',,') return;
                 weight += 50;
             }

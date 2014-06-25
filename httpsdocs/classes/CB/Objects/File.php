@@ -10,6 +10,40 @@ class File extends Object
 {
 
     /**
+     * internal function used by create method for creating custom data
+     * @return void
+     */
+    protected function createCustomData()
+    {
+        parent::createCustomData();
+
+        $res = DB\dbQuery(
+            'INSERT INTO files
+                (id
+                ,content_id
+                ,`date`
+                ,`name`
+                ,`cid`
+                )
+            VALUES (
+                $1
+                ,$2
+                ,$3
+                ,$4
+                ,$5
+            )',
+            array(
+                $this->id
+                ,@$this->data['content_id']
+                ,@$this->data['date']
+                ,@$this->data['name']
+                ,@$this->data['cid']
+            )
+        ) or die(DB\dbQueryError());
+
+    }
+
+    /**
      * load custom data for $this->id
      *
      * @return void
@@ -72,7 +106,6 @@ class File extends Object
     protected function copyCustomDataTo($targetId)
     {
         // - files data, but without versions. Should we copy versions also?
-
         // copy files data
         DB\dbQuery(
             'INSERT INTO `files`

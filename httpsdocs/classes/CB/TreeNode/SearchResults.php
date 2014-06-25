@@ -10,8 +10,7 @@ class SearchResults extends Dbnode
         $p = &$this->path;
 
         if ((!empty($this->lastNode) &&
-            ($this->lastNode instanceof Dbnode) &&
-            (get_class($this->lastNode) != get_class($this))
+            (get_class($this->lastNode) == get_class($this))
         )
         ) {
             $data = $this->lastNode->getData();
@@ -29,10 +28,10 @@ class SearchResults extends Dbnode
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
-
         if (!$this->acceptedPath()) {
             return;
         }
+
         // creating search object
         $so = new \CB\Objects\Object();
         if (!empty($requestParams['search']['data'])) {
@@ -61,7 +60,6 @@ class SearchResults extends Dbnode
             $class = new $class();
             $p = $class->{$a[1]}($so);
         }
-
         $p = array_merge($requestParams, $p);
 
         $s = new \CB\Search();
@@ -78,7 +76,6 @@ class SearchResults extends Dbnode
     {
         $tpl = $searchObject->getTemplate();
         $rez = $tpl->getData()['cfg'];
-
         @$rez['template_id'] = $searchObject->getData()['template_id'];
 
         if (empty($rez['fq'])) {

@@ -26,8 +26,8 @@ class Listeners
             case 'login':
             case 'logout':
             case 'login_fail':
-
                 break;
+
             case 'task':
             case 'event':
                 Tasks::addNotifications($p);

@@ -12,12 +12,12 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             edit: new Ext.Action({
                 text: L.Edit
                 ,iconAlign:'top'
-                ,iconCls: 'ib-edit'
+                ,iconCls: 'ib-edit-obj'
                 ,scale: 'large'
-                ,disabled: true
+                // ,disabled: true
                 ,scope: this
                 ,hidden: true
-                ,handler: this.onEditClick
+                ,handler: this.onDirectEditLinkClick
             })
 
             ,save: new Ext.Action({
@@ -103,11 +103,6 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             ,restoreVersion: new Ext.Toolbar.Separator({hidden: true})
         };
 
-        this.previewPanel = new CB.form.view.object.Preview({
-            region: 'center'
-            ,bodyStyle: 'padding: 5px'
-        });
-
         Ext.apply(this, {
             listeners: {
                 scope: this
@@ -187,7 +182,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         }
 
         //set default state for actions
-        this.actions.save.setDisabled(true);
+        this.actions.save.setDisabled(Ext.isEmpty(this.sourceEditor)); //will be replaced to true when clarify the editors events
 
         this.actions.download.setDisabled(false);
         this.actions.upload.setDisabled(false);
@@ -199,9 +194,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         this.actions.getEditLink.setHidden(!App.isWebDavDocument(this.data.name));
 
 
-        //load preview panel
-        this.previewPanel.clear();
-        this.previewPanel.loadPreview(this.data.id);
+        this.loadContent();
 
         this.objectPanel.load({
             id: this.data.id
@@ -214,24 +207,11 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
      * @return void
      */
     ,prepareInterface: function(){
-        /* find out if need to show properties panel */
-        this.showPropertiesPanel = false;
-        if( !Ext.isEmpty( this.data.template_id) ){
-            var templateStore = CB.DB['template'+this.data.template_id];
-            if(templateStore && (templateStore.getCount() > 0)) {
-                this.showPropertiesPanel = true;
-                this.actions.save.setHidden(false);
-                this.separators.save.setVisible(true);
-            }
-        }
-        /* end of find out if need to show properties panel */
 
-        var toolbarItems = [];
-
-        toolbarItems.push(this.separators.save);
-        toolbarItems.push(this.actions.save);
-
+        var contentItems = [];
         var moreItems = [this.actions.getEditLink];
+
+
         if(!this.hideDeleteButton) {
             moreItems.unshift(this.actions['delete']);
         }
@@ -260,8 +240,9 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             }
         });
 
-        toolbarItems.push(
-            this.actions.edit
+        var toolbarItems = [
+            this.actions.save
+            ,this.actions.edit
             ,this.separators.edit
             ,this.actions.upload
             ,this.actions.download
@@ -271,57 +252,93 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             ,this.actions.expand
             ,this.actions.newWindow
             ,moreButton
-        );
+        ];
         /* */
 
-        this.actions.save.setHidden(!this.showPropertiesPanel);
+        // detect needed editors for this file
+        var showSaveButton = true
+            ,showEditButton = false;
 
-        var contentItems = [ this.previewPanel ];
-        if(this.showPropertiesPanel){
-            this.previewPanel.title = L.Preview;
-            this.grid = new CB.VerticalEditGrid({
-                title: L.Properties
-                ,refOwner: this
-                ,autoHeight: true
-                ,viewConfig: {autoFill: true, forceFit: true}
-                ,listeners: {
-                    scope: this
-                    ,change: function(){
-                        this.actions.save.setDisabled(false);
+        this.editType = detectFileEditor(this.data.name);
+        switch(this.editType) {
+            case 'text':
+                this.sourceEditor = new Ext.ux.AceEditor({
+                    // mode: 'text'
+                    // ,listeners: {
+                    //     scope: this
+                    //     ,change: this.onEditorChangeEvent
+                    // }
+                });
+                contentItems.push(this.sourceEditor);
+                break;
+
+            case 'html':
+                this.wysiwygEditor = new Ext.ux.HtmlEditor({
+                    border: false
+                    ,hideBorders: true
+                    ,listeners: {
+                        scope: this
+                        ,change: this.onEditorChangeEvent
+                        ,sync: this.onEditorChangeEvent
                     }
-                }
-            });
+                });
 
-            contentItems = [{
-                xtype: 'tabpanel'
-                ,plain: true
-                ,headerCfg: {cls: 'mainTabPanel'}
-                ,bodyStyle: 'background-color: #FFF'
-                ,region: 'center'
-                ,activeItem: 0
-                ,items: [
-                    this.previewPanel
-                    ,this.grid
-                ]
-            }];
+                this.sourceEditor = new Ext.ux.AceEditor({
+                    // mode: 'html'
+                    // ,listeners: {
+                    //     scope: this
+                    //     ,change: this.onEditorChangeEvent
+                    // }
+                });
+
+                contentItems.push(this.wysiwygEditor, this.sourceEditor);
+                break;
+
+            case 'webdav':
+                showEditButton = true;
+
+            default:
+                showSaveButton = false;
+
+                this.previewPanel = new CB.form.view.object.Preview({
+                    bodyStyle: 'padding: 5px'
+                });
+
+                contentItems.push(this.previewPanel);
+                break;
         }
+
+        this.actions.save.setHidden(!showSaveButton);
+        this.actions.edit.setHidden(!showEditButton);
+        this.separators.edit.setVisible(showSaveButton || showEditButton);
 
         this.objectPanel = new CB.ObjectCardView({
             region: 'east'
             ,width: 300
             ,split: true
             ,bodyStyle: 'background-color: #f4f4f4'
-
+            ,stateId: 'fwer' //file window east region
+            ,stateful: true
             ,listeners: {
                 scope: this
                 ,loaded: function(objectPanel, activeViewItem) {
-                    if(Ext.isEmpty(objectPanel.loadedData) ||
-                        Ext.isEmpty(objectPanel.loadedData.id) ||
-                        (objectPanel.loadedData.id == this.data.id)
-                    ) {
-                        objectPanel.getTopToolbar().hide();
-                    } else {
-                        objectPanel.getTopToolbar().show();
+                    if(!objectPanel || !objectPanel.isXType(CB.ObjectCardView)) {
+                        return;
+                    }
+
+                    var tb = objectPanel.getTopToolbar();
+                    if(tb) {
+                        if(Ext.isEmpty(objectPanel.loadedData) ||
+                            Ext.isEmpty(objectPanel.loadedData.id) ||
+                            (
+                                (objectPanel.loadedData.id == this.data.id) &&
+                                (Ext.value(objectPanel.loadedData.viewIndex, 0) == 0)
+                            )
+                        ) {
+                            tb.hide();
+                        } else {
+                            tb.show();
+                        }
                     }
                     objectPanel.syncSize();
                     objectPanel.ownerCt.syncSize();
@@ -329,23 +346,69 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             }
         });
 
-        contentItems.push(this.objectPanel);
-
         this.add({
             layout: 'border'
             ,tbarCssClass: 'x-panel-white'
             ,hideBorders: true
             ,tbar: toolbarItems
-            ,items: contentItems
+            ,items: [
+                {
+                    xtype: 'panel'
+                    ,layout: 'card'
+                    ,activeItem: 0
+                    ,hideBorders: true
+                    ,bodyStyle: 'background-color: #FFF'
+                    ,region: 'center'
+                    ,items: contentItems
+                }
+                ,this.objectPanel
+            ]
         });
+
+        this.cardPanel = this.items.itemAt(0).items.itemAt(0);
+
         this.doLayout();
+    }
+
+    ,onEditorChangeEvent: function(ed) {
+        this.actions.save.setDisabled(false);
+    }
+
+    ,loadContent: function() {
+
+        if(this.previewPanel) {
+            this.previewPanel.clear();
+            this.previewPanel.loadPreview(this.data.id);
+        }
+
+        if(this.wysiwygEditor || this.sourceEditor) {
+            CB_Files.getContent(this.data.id, this.onLoadContent, this);
+        }
+    }
+
+    ,onLoadContent: function(r, e) {
+        if(r.success !== true) {
+            plog('Error loading file content ', this.data);
+            return;
+        }
+
+        if(this.wysiwygEditor) {
+            this.wysiwygEditor.setValue(r.data);
+        }
+
+        if(this.sourceEditor) {
+            this.sourceEditor.setValue(r.data);
+        }
     }
 
     ,onOpenVersionEvent: function(data, pluginComponent) {
         this.loadedVersionId = data.id;
+
         this.previewPanel.loadPreview(this.data.id, data.id);
+
         this.separators.restoreVersion.setVisible(!Ext.isEmpty(data.id));
         this.actions.restoreVersion.setHidden(Ext.isEmpty(data.id));
+
         this.objectPanel.setSelectedVersion({id: this.data.id, versionId: this.loadedVersionId});
     }
 
@@ -407,12 +470,16 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
      * @return void
      */
     ,onSaveClick: function(b, e){
-        if(Ext.isEmpty(this.grid)) {
-            return;
-        }
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        this.grid.readValues();
-        CB_Files.saveProperties(this.data, this.processSaveClick, this);
+
+        CB_Files.saveContent(
+            {
+                id: this.data.id
+                ,data: this.cardPanel.getLayout().activeItem.getSession().getValue()
+            }
+            ,this.processSaveClick
+            ,this
+        );
     }
 
     /**
@@ -423,7 +490,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
      */
     ,processSaveClick: function(r, e){
         this.getEl().unmask();
-        this.actions.save.setDisabled(true);
+        this.actions.save.setDisabled(Ext.isEmpty(this.sourceEditor));
     }
 
     /**

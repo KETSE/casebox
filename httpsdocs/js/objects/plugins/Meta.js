@@ -26,8 +26,8 @@ CB.objects.plugins.Meta = Ext.extend(CB.objects.plugins.ObjectProperties, {
             ,cls: 'obj-plugin'
         });
 
-        this.addEvents('editobject');
-        this.enableBubble(['editobject']);
+        this.addEvents('editmeta');
+        this.enableBubble(['editmeta']);
     }
 
     ,getToolbarItems: function () {
@@ -41,7 +41,7 @@ CB.objects.plugins.Meta = Ext.extend(CB.objects.plugins.ObjectProperties, {
     }
 
     ,onEditClick: function(b, e) {
-        this.fireEvent('editobject', this.params);
+        this.fireEvent('editmeta', this.params);
     }
 
     ,showMenu: function(b, e) {

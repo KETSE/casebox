@@ -111,7 +111,6 @@ class Client extends Service
      */
     public function updateTree($p = array())
     {
-
         /* connect to solr service */
         $this->connect();
 
@@ -129,10 +128,12 @@ class Client extends Service
         $templatesCollection = \CB\Templates\SingletonCollection::getInstance();
         /* prepeare where condition for sql depending on incomming params */
         $where = '(t.updated > 0) and (t.id > $1)';
+
         if (isset($p['all']) && ($p['all'] == true)) {
             $this->deleteByQuery('*:*');
             $where = '(t.id > $1)';
             $templatesCollection->loadAll();
+
         } elseif (!empty($p['id'])) {
             $ids = \CB\Util\toNumericArray($p['id']);
             $where = '(t.id in (0'.implode(',', $ids).') ) and (t.id > $1)';

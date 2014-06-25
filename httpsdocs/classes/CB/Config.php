@@ -24,16 +24,27 @@ class Config extends Singleton
         // merging configs from platform, from casebox database and from core itself
         $cfg = array_merge($cfg, static::getPlatformDBConfig());
         $cfg = array_merge($cfg, static::getPlatformConfigForCore($cfg['core_name']));
-        $cfg = array_merge($cfg, static::getCoreDBConfig());
+        $cfg = static::mergeConfigs(
+            $cfg,
+            static::getCoreDBConfig(),
+            array('files')
+        );
 
         static::$config = static::adjustConfig($cfg);
         static::$environmentVars = static::getEnvironmentVars(static::$config);
 
         // add core path to include path
-        set_include_path(INCLUDE_PATH . PATH_SEPARATOR . static::$environmentVars['core_dir']);
+        set_include_path(
+            INCLUDE_PATH . PATH_SEPARATOR .
+            static::$environmentVars['core_dir'] . PATH_SEPARATOR .
+            static::get('ZEND_PATH')
+        );
 
         // set max file version count
-        if (isset(static::$config['max_files_version_count'])) {
+        if (isset(static::$config['files']['max_versions'])) {
+            __autoload('CB\\Files');
+            Files::setMFVC(static::$config['files']['max_versions']);
+        } elseif (isset(static::$config['max_files_version_count'])) { //backward compatibility check
             __autoload('CB\\Files');
             Files::setMFVC(static::$config['max_files_version_count']);
         }
@@ -489,6 +500,8 @@ class Config extends Singleton
         $jsonProperties = array(
             'api'
             ,'css'
+            ,'comments_config'
+            ,'files'
             ,'js'
             ,'plugins'
             ,'listeners'
@@ -581,5 +594,30 @@ class Config extends Singleton
             $value,
             $v
         );
+    }
+
+    /**
+    * Custom function for merging two config arrays
+    * This function takes as third param an array of properties that should be merged separately
+    * It's evident that these properties should have array values in configs
+    * @param  array $cfg1
+    * @param  array $cfg2
+    * @param  array $properties
+    * @return array
+    */
+    public static function mergeConfigs($cfg1, $cfg2, $properties)
+    {
+        foreach ($cfg2 as $k => $v) {
+            if (in_array($k, $properties) && is_array($v)) {
+                if (empty($cfg1[$k])) {
+                    $cfg1[$k] = array();
+                }
+                $cfg1[$k] = array_merge($cfg1[$k], $cfg2[$k]);
+            } else {
+                $cfg1[$k] = $v;
+            }
+        }
+
+        return $cfg1;
     }
 }

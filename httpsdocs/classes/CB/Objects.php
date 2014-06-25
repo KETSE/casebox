@@ -598,6 +598,31 @@ class Objects
     }
 
     /**
+     * get name for an object id
+     * @param  int          $objectId
+     * @return varchar|null
+     */
+    public static function getName($objectId)
+    {
+        $rez = null;
+
+        if (!is_numeric($objectId)) {
+            return $rez;
+        }
+
+        $res = DB\dbQuery(
+            'SELECT name FROM tree WHERE id = $1',
+            $objectId
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['name'];
+        }
+
+        return $rez;
+    }
+
+    /**
      * get an object from cache or loads id and store in cache
      * @param  int    $id
      * @return object
@@ -654,6 +679,9 @@ class Objects
                 break;
             case 'field':
                 return new Objects\TemplateField($objectId);
+                break;
+            case 'comment':
+                return new Objects\Comment($objectId);
                 break;
             default:
                 return new Objects\Object($objectId);
@@ -894,7 +922,7 @@ class Objects
             return $rez;
         }
 
-        $co = new Objects\Object();
+        $co = new Objects\Comment();
 
         $data = array(
             'pid' => $p['id']

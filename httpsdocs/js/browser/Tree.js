@@ -36,10 +36,10 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         };
 
         this.actions = {
-            open: new Ext.Action({
-                text: L.Open
+            edit: new Ext.Action({
+                text: L.Edit
                 ,scope: this
-                ,handler: this.onOpenClick
+                ,handler: this.onEditClick
             })
             ,openInNewWindow: new Ext.Action({
                 text: L.OpenInNewWindow
@@ -340,7 +340,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     ,onSelectionChange: function (sm, node) {
 
         if(Ext.isEmpty(node)){
-            this.actions.open.setHidden(true);
+            this.actions.edit.setHidden(true);
             this.actions.openInNewWindow.setHidden(true);
             this.actions.cut.setDisabled(true) ;
             this.actions.copy.setDisabled(true) ;
@@ -355,7 +355,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
 
         }else{
             canOpen = true;
-            this.actions.open.setHidden(!canOpen);
+            this.actions.edit.setHidden(!canOpen);
             canOpenInNewWindow = true;
             this.actions.openInNewWindow.setHidden(!canOpenInNewWindow);
             canExpand = (!node.isExpanded() && ( (!node.loaded) || node.hasChildNodes() ));
@@ -412,10 +412,8 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             });
             this.contextMenu = new Ext.menu.Menu({
                 items: [
-                this.actions.open
+                this.actions.edit
                 ,this.actions.openInNewWindow
-                ,this.actions.expand
-                ,this.actions.collapse
                 ,'-'
                 ,{
                     text: L.View
@@ -522,11 +520,15 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         if( App.isFolder( n.attributes.template_id ) ) return;
         this.onOpenClick(b, e);
     }
-    ,onOpenClick: function (b, e) {
+    ,onEditClick: function (b, e) {
         var n = this.getSelectionModel().getSelectedNode();
-        if(Ext.isEmpty(n)) return;
+        if(Ext.isEmpty(n)) {
+            return;
+        }
+
         var tab = App.activateBrowserTab();
-        tab.onObjectsOpenEvent(
+
+        tab.editObject(
             {
                 nid: n.attributes.nid
                 ,template_id: n.attributes.template_id

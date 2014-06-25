@@ -460,11 +460,6 @@ function initApp(){
         o.show();
         return c;
     };
-    App.getFileUploadWindow = function(config){
-        if(!App.thetFileUploadWindow) App.theFileUploadWindow = new CB.FileUploadWindow();
-        App.theFileUploadWindow = Ext.apply(App.theFileUploadWindow, config);
-        return App.theFileUploadWindow;
-    };
     App.getTextEditWindow = function(config){
         if(!App.textEditWindow) App.textEditWindow = new CB.TextEditWindow();
         App.textEditWindow = Ext.apply(App.textEditWindow, config);
@@ -480,11 +475,11 @@ function initApp(){
         return (App.config.folder_templates.indexOf( String(template_id) ) >= 0);
     };
     App.isWebDavDocument = function(name){
-        if(!Ext.isPrimitive(name) || Ext.isEmpty(name) || Ext.isEmpty(App.config.webdav_files)) {
+        if(!Ext.isPrimitive(name) || Ext.isEmpty(name) || Ext.isEmpty(App.config['files.edit'].webdav)) {
             return false;
         }
         var ext = name.split('.').pop();
-        return (App.config.webdav_files.indexOf(ext) >= 0);
+        return (App.config['files.edit'].webdav.indexOf(ext) >= 0);
     };
 
     App.openWebdavDocument = function(data, checkCookie){

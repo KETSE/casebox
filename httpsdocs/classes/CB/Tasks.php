@@ -826,7 +826,7 @@ class Tasks
 
 
         // log the action
-        $o = new Objects\Task($p['id']);
+        $o = new Objects\Task($id);
         $o->load();
 
         $logParams = array(

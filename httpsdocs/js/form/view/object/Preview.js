@@ -316,6 +316,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
 
                 rez.menu['delete'] = { addDivider: 'top' };
                 rez.menu['webdavlink']  = { addDivider: 'top' };
+                rez.menu['permalink']  = {};
             }
         }
 

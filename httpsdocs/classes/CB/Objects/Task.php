@@ -34,6 +34,11 @@ class Task extends Object
 
         /* saving template data to templates and templates_structure tables */
         @$allday = $this->getFieldValue('allday', 0)['value'];
+
+        if (is_null($allday) || !is_numeric($allday)) {
+            $allday = 1;
+        }
+
         @$dateStart = ($allday == 1)
             ? $this->getFieldValue('date_start', 0)['value']
             : $this->getFieldValue('datetime_start', 0)['value'];
@@ -395,12 +400,14 @@ class Task extends Object
                 ,`time`)
             SELECT
                 $2
-                ,`user_id`
-                ,`status`
-                ,`thesauri_response_id`
-                ,`time`
-            FROM `tasks_responsible_users`
-            WHERE task_id = $1',
+                ,tr.`user_id`
+                ,tr.`status`
+                ,tr.`thesauri_response_id`
+                ,tr.`time`
+            FROM `tasks_responsible_users` tr
+            WHERE tr.task_id = $1
+            ON DUPLICATE KEY UPDATE
+            status = tr.status',
             array(
                 $this->id
                 ,$targetId

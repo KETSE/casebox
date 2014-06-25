@@ -203,10 +203,12 @@ class User
     {
         return ( !empty($_COOKIE['key']) &&
             !empty($_SESSION['key']) &&
-            !empty($_SESSION['ips']) &&
             !empty($_SESSION['user']) &&
             ($_COOKIE['key'] == $_SESSION['key']) &&
-            ('|'.Util\getIPs().'|' == $_SESSION['ips']) &&
+
+            // ip check will be replaced with other mechanism because of dhcp networks
+            // !empty($_SESSION['ips']) &&
+            // ('|'.Util\getIPs().'|' == $_SESSION['ips']) &&
             !empty($_SESSION['user']['TSV_checked'])
             );
     }
@@ -232,6 +234,27 @@ class User
 
         $coreName = Config::get('core_name');
 
+        $filesConfig = Config::get('files');
+
+        $webdavFiles = empty($filesConfig['edit']['webdav'])
+            ? Config::get('webdav_files') // backward compatibility
+            : $filesConfig['edit']['webdav'];
+
+        $filesEdit = empty($filesConfig['edit'])
+            ? array()
+            : $filesConfig['edit'];
+
+        $filesEdit['webdav'] = $webdavFiles;
+
+        //transform element values in array of file extensions
+        foreach ($filesEdit as $k => $v) {
+            $filesEdit[$k] = Util\toTrimmedArray($v);
+        }
+
+        $webdavUrl = empty($filesConfig['webdav_url'])
+            ? Config::get('webdav_url') // backward compatibility
+            : $filesConfig['webdav_url'];
+
         @$rez = array(
             'success' => true
             ,'config' => array(
@@ -239,14 +262,14 @@ class User
                 ,'folder_templates' => Config::get('folder_templates')
                 ,'default_task_template' => Config::get('default_task_template')
                 ,'default_event_template' => Config::get('default_event_template')
-                ,'webdav_url' => Config::get('webdav_url')
-                ,'webdav_files' => Config::get('webdav_files')
+                ,'files.edit' => $filesEdit
+                ,'webdav_url' => $webdavUrl
                 ,'template_info_column' => Config::get('template_info_column')
             )
             ,'user' => $_SESSION['user']
         );
-        $rez['config']['webdav_url'] = str_replace('{core_name}', $coreName, $rez['config']['webdav_url']);
-        $rez['config']['webdav_files'] = explode(',', $rez['config']['webdav_files']);
+        $rez['config']['webdav_url'] = str_replace('{core_name}', $coreName, $webdavUrl);
+        $rez['config']['files.edit'] = $filesEdit;
 
         $rez['user']['cfg']['short_date_format'] = str_replace('%', '', $rez['user']['cfg']['short_date_format']);
         $rez['user']['cfg']['long_date_format'] = str_replace('%', '', $rez['user']['cfg']['long_date_format']);

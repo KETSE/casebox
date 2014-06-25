@@ -96,6 +96,8 @@ $API = array_merge(
         ,'CB_Files' => array(
             'methods'=>array(
                 'getProperties'         =>  array('len'=>1)
+                ,'getContent'           =>  array('len'=>1)
+                ,'saveContent'          =>  array('len'=>1)
                 ,'restoreVersion'       =>  array('len'=>1)
                 ,'deleteVersion'        =>  array('len'=>1)
                 ,'merge'                =>  array('len'=>1)

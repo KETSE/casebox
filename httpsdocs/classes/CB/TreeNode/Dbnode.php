@@ -152,14 +152,26 @@ class Dbnode extends Base
 
         $from = $this->getId();
 
-        //check node configuration and/or its template for fecets definitions
-        $res = DB\dbQuery(
-            'SELECT t.cfg, t.template_id, tt.cfg `templateCfg`
+        $sql = 'SELECT t.cfg, t.template_id, tt.cfg `templateCfg`
             FROM tree t
-            JOIN templates tt
-                ON t.template_id = tt.id
-            WHERE t.id = $1',
-            $this->id
+            LEFT JOIN templates tt
+                ON (t.template_id = tt.id)
+                    OR ((tt.id = $2) AND (t.template_id IS NULL))
+            WHERE t.id = $1';
+
+        if (empty($from) && !empty($this->config['template_id'])) {
+            $sql = 'SELECT null `cfg`, t.id template_id, t.cfg `templateCfg`
+                FROM templates t
+                WHERE t.id = $2';
+        }
+
+        //check node configuration and/or its template for facets definitions
+        $res = DB\dbQuery(
+            $sql,
+            array(
+                $this->id
+                ,@$this->config['template_id']
+            )
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {

@@ -46,6 +46,7 @@ class Templates
             'SELECT ts.id
                 ,ts.pid
                 ,t.id template_id
+                ,t.type template_type
                 ,ts.`name`
                 ,ts.l' . Config::get('user_language_index') . ' `title`
                 ,ts.`type`
@@ -63,6 +64,7 @@ class Templates
         while ($r = $res->fetch_assoc()) {
             $t = $r['template_id'];
             unset($r['template_id']);
+
             if (($r['type'] == '_auto_title') && ($r['has_title_template'] == 0)) {
                 $r['type'] = 'varchar';
             }
@@ -77,6 +79,11 @@ class Templates
             if (!empty($r['cfg']['source']['fn'])) {
                 unset($r['cfg']['source']['fn']);
             }
+
+            if (($r['template_type'] == 'search') && empty($r['cfg']['cond'])) {
+                $r['cfg']['cond'] = '=';
+            }
+            unset($r['template_type']);
 
             $data[$t][] = $r;
         }

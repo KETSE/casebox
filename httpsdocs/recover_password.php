@@ -50,7 +50,7 @@ switch ($action) {
                 DB\dbQuery(
                     'UPDATE users_groups
                     SET `password` = md5($2)
-                                   , recover_hash = NULL
+                        ,recover_hash = NULL
                     WHERE recover_hash = $1',
                     array(
                         $hash
@@ -152,7 +152,11 @@ switch ($action) {
             header('location: ' . $coreUrl . 'login/forgot-password/');
             exit(0);
         }
-        $hash = md5($user_id.$user_mail.date(DATE_ISO8601));
+
+        $bcrypt = new Bcrypt(15);
+
+        $hash = $bcrypt->hash($user_id . $user_mail . date(DATE_ISO8601));
+
         DB\dbQuery(
             'UPDATE users_groups
             SET recover_hash = $2
