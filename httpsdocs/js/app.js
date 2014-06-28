@@ -359,8 +359,10 @@ function initApp(){
             return '<span class="taskStatus'+v+'">'+L['taskStatus'+parseInt(v, 10)]+'</span>';
         }
         ,text: function(v, m, r, ri, ci, s){
-            if(Ext.isEmpty(v)) return '';
-            return '<pre style="white-space: pre-wrap">'+Ext.util.Format.htmlEncode(v)+'</pre>';
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+            return '<pre style="white-space: pre-wrap">' + v + '</pre>';
         }
         ,titleAttribute: function(v, m, r, ri, ci, s){
             m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';

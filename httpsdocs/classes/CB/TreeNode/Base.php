@@ -88,12 +88,33 @@ class Base implements \CB\Interfaces\TreeNode
     }
 
     /**
-     * get depth
+     * get depth of the node
      * @return int
      */
     public function getDepth()
     {
+        $rez = 1;
 
+        if (empty($this->parent)) {
+            return $rez;
+        }
+
+        return ($this->parent->getDepth() + 1);
+    }
+
+    /**
+     * get depth of the node from same classes nodes branch
+     * @return int
+     */
+    public function getClassDepth()
+    {
+        $rez = 1;
+
+        if (empty($this->parent) || (get_class($this->parent) !== get_class($this))) {
+            return $rez;
+        }
+
+        return ($this->parent->getClassDepth() + 1);
     }
 
     /**

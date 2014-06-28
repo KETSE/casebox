@@ -13,6 +13,7 @@ afraid to cast your vote for the next feature to be implemented!
 
 Things to do as soon as possible:
 
+ - http://htmlpurifier.org/phorum/read.php?3,5560,6307#msg-6307
  - Think about allowing explicit order of operations hooks for transforms
  - Fix "<.<" bug (trailing < is removed if not EOD)
  - Build in better internal state dumps and debugging tools for remote
@@ -31,7 +32,7 @@ Things to do as soon as possible:
 FUTURE VERSIONS
 ---------------
 
-4.5 release [OMG CONFIG PONIES]
+4.6 release [OMG CONFIG PONIES]
  ! Fix Printer. It's from the old days when we didn't have decent XML classes
  ! Factor demo.php into a set of Printer classes, and then create a stub
    file for users here (inside the actual HTML Purifier library)

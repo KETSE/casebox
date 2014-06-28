@@ -9,7 +9,12 @@ class UsersGroups
      */
     public function getChildren($p)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         $rez = array();
+
         if (!Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
@@ -137,6 +142,10 @@ class UsersGroups
      */
     public function associate($user_id, $group_id)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (!Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
@@ -171,6 +180,10 @@ class UsersGroups
      */
     public function deassociate($user_id, $group_id)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (!Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
@@ -206,18 +219,43 @@ class UsersGroups
      */
     public function addUser($p)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (!Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
 
         $rez = array('success' => false, 'msg' => L\get('Missing_required_fields'));
+
+        $p['name'] = strip_tags($p['name']);
         $p['name'] = trim($p['name']);
+
         if (empty($p['name']) ||
             empty($p['password']) ||
             (empty($p['confirm_password']) ||
             ($p['password'] != $p['confirm_password']))) {
             return $rez;
         }
+
+        // validate input params
+        if (!preg_match('/^[a-z\.0-9_]+$/i', $p['name'])) {
+            return array('success' => false, 'msg' => 'Invalid username. Use only letters, digits, "dot" and/or "underscore".');
+        }
+
+        $p['first_name'] = strip_tags($p['first_name']);
+        $p['last_name'] = strip_tags($p['last_name']);
+
+        if (!empty($p['email'])) {
+            if (!filter_var(
+                $p['email'],
+                FILTER_VALIDATE_EMAIL
+            )) {
+                return array('success' => false, 'msg' => 'Invalid email address');
+            }
+        }
+
         $user_id = 0;
         /*check user existance, if user already exists but is deleted
         then its record will be used for new user */
@@ -322,6 +360,10 @@ class UsersGroups
      */
     public function deleteUser($user_id)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (!Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
@@ -368,6 +410,10 @@ class UsersGroups
      */
     public function getUserData($p)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (($_SESSION['user']['id'] != $p['data']['id']) && !Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
@@ -419,6 +465,10 @@ class UsersGroups
      */
     public function getAccessData($user_id = false)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (!Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
@@ -448,6 +498,10 @@ class UsersGroups
      */
     public function saveAccessData($p)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (!Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
@@ -526,6 +580,10 @@ class UsersGroups
      */
     public function changePassword($p)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         /* passord could be changed by: admin, user owner, user himself */
         if (empty($p['password']) || ($p['password'] != $p['confirmpassword'])) {
             throw new \Exception(L\get('Wrong_input_data'));
@@ -577,9 +635,14 @@ class UsersGroups
      */
     public function renameUser($p)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         /* username could be changed by: admin or user owner */
         $name = trim(strtolower(strip_tags($p['name'])));
-        $matches = preg_match('/^[a-z0-9\._]+$/', $name);
+        $matches = preg_match('/^[a-z0-9\._]+$/i', $name);
+
         if (empty($name) || empty($matches)) {
             throw new \Exception(L\get('Wrong_input_data'));
         }
@@ -610,7 +673,12 @@ class UsersGroups
      */
     public function renameGroup($p)
     {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         $title = trim(strip_tags($p['title']));
+
         if (empty($title)) {
             throw new \Exception(L\get('Wrong_input_data'));
         }

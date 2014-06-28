@@ -98,6 +98,7 @@ class User
 
         return $rez;
     }
+
     /**
      * password verification method used for accessing sensitive data (like profile form)
      * or for additional identity check
@@ -107,7 +108,9 @@ class User
     public static function verifyPassword($pass)
     {
         $rez = array( 'success' => false );
+
         unset($_SESSION['verified']);
+
         $res = DB\dbQuery(
             'SELECT id
             FROM users_groups
@@ -160,6 +163,10 @@ class User
      */
     public function enableTSV($p)
     {
+        if (!$this->isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         // validate TSV mechanism
         if (!in_array($p['method'], array('ga', 'sms', 'ybk'))) {
             return array('success' => false, 'msg' => 'Invalid authentication mechanism');
@@ -191,6 +198,10 @@ class User
 
     public function disableTSV()
     {
+        if (!$this->isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         $this->setTSVConfig(null);
 
         return array('success' => true);
@@ -315,10 +326,16 @@ class User
     }
 
     /**
-     * get profile data for a user. This function receives user_id as param because user profile data can be edited by another user (owner).
+     * get profile data for a user.
+     * This function receives user_id as param because
+     * user profile data can be edited by another user (owner).
      */
     public function getProfileData($user_id = false)
     {
+        if (!$this->isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if ($user_id === false) {
             $user_id = $_SESSION['user']['id'];
         }
@@ -368,6 +385,20 @@ class User
 
             $rez = $r;
         }
+
+        //get possible associated objects for display in grid
+        if (!empty($rez['data'])) {
+            $assocObjects = Objects::getAssociatedObjects(
+                array(
+                    'template_id' => $rez['template_id']
+                    ,'data' => $rez['data']
+                )
+            );
+            if (!empty($assocObjects['data'])) {
+                $rez['assocObjects'] = $assocObjects['data'];
+            }
+        }
+
         $rez['success'] = true;
 
         return $rez;
@@ -378,7 +409,7 @@ class User
         $rez = array();
         $res = DB\dbQuery(
             'SELECT password_change
-                 , cfg
+                ,cfg
             FROM users_groups
             WHERE enabled = 1
                 AND did IS NULL
@@ -408,6 +439,10 @@ class User
      */
     public function saveProfileData($p)
     {
+        if (!$this->isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (!Security::canEditUser($p['id'])) {
             throw new \Exception(L\get('Access_denied'));
         }
@@ -416,21 +451,92 @@ class User
         $cfg = $this->getUserConfig();
         $languageSettings = Config::get('language_settings');
 
+        $p['first_name'] = strip_tags($p['first_name']);
+        $p['last_name'] = strip_tags($p['last_name']);
+        $p['sex'] = (strlen($p['sex']) > 1)
+            ? null
+            : $p['sex'];
+
+        if (!empty($p['email'])) {
+            if (!filter_var(
+                $p['email'],
+                FILTER_VALIDATE_EMAIL
+            )) {
+                return array('success' => false, 'msg' => 'Invalid email address');
+            }
+        }
+
+        $p['language_id'] = intval($p['language_id']);
+
         if (isset($p['country_code'])) {
-            $cfg['country_code'] = $p['country_code'];
+            if (empty($p['country_code']) ||
+                filter_var(
+                    $p['country_code'],
+                    FILTER_VALIDATE_REGEXP,
+                    array(
+                        'options' => array(
+                            'regexp' => '/^\+?\d*$/'
+                        )
+                    )
+                )
+            ) {
+                $cfg['country_code'] = $p['country_code'];
+            } else {
+                return array('success' => false, 'msg' => 'Invalid country code');
+            }
         }
+
         if (isset($p['phone'])) {
-            $cfg['phone'] = $p['phone'];
+            if (empty($p['phone']) || is_numeric($p['phone'])) {
+                $cfg['phone'] = $p['phone'];
+            } else {
+                return array('success' => false, 'msg' => 'Invalid phone number');
+            }
         }
+
         if (isset($p['timezone'])) {
-            $cfg['timezone'] = $p['timezone'];
+             # list of (all) valid timezones
+            $zoneList = timezone_identifiers_list();
+            if (empty($p['timezone']) || in_array($p['timezone'], $zoneList)) {
+                $cfg['timezone'] = $p['timezone'];
+            } else {
+                return array('success' => false, 'msg' => 'Invalid timezone');
+            }
         }
+
         if (isset($p['short_date_format'])) {
-            $cfg['short_date_format'] = $p['short_date_format'];
+            if (filter_var(
+                $p['short_date_format'],
+                FILTER_VALIDATE_REGEXP,
+                array(
+                    'options' => array(
+                        'regexp' => '/^[\.,%a-z \/\-]*$/i'
+                    )
+                )
+            )) {
+                $cfg['short_date_format'] = $p['short_date_format'];
+            } else {
+                return array('success' => false, 'msg' => 'Invalid short date format');
+            }
+
         }
+
         if (isset($p['long_date_format'])) {
-            $cfg['long_date_format'] = $p['long_date_format'];
+            if (filter_var(
+                $p['long_date_format'],
+                FILTER_VALIDATE_REGEXP,
+                array(
+                    'options' => array(
+                        'regexp' => '/^[\.,%a-z \/\-]*$/i'
+                    )
+                )
+            )) {
+                $cfg['long_date_format'] = $p['long_date_format'];
+            } else {
+                return array('success' => false, 'msg' => 'Invalid long date format');
+            }
         }
+
         if (empty($p['data'])) {
             $p['data'] = array();
         }
@@ -439,13 +545,13 @@ class User
             if (Security::canAddUser()) {
                 unset($cfg['canAddUsers']);
                 if (isset($p['canAddUsers'])) {
-                    $cfg['canAddUsers'] = $p['canAddUsers'];
+                    $cfg['canAddUsers'] = 'true';
                 }
             }
             if (Security::canAddGroup()) {
                 unset($cfg['canAddGroups']);
                 if (isset($p['canAddGroups'])) {
-                    $cfg['canAddGroups'] = $p['canAddGroups'];
+                    $cfg['canAddGroups'] = 'true';
                 }
             }
         }
@@ -568,6 +674,10 @@ class User
      */
     public function getTSVTemplateData($p)
     {
+        if (!$this->isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         // validate TSV mechanism
         if (!in_array($p, array('ga', 'sms', 'ybk'))) {
             return array('success' => false, 'msg' => 'Invalid authentication mechanism');
@@ -914,6 +1024,10 @@ class User
      */
     public function uploadPhoto($p)
     {
+        if (!$this->isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (!is_numeric($p['id'])) {
             return array('success' => false, 'msg' => L\get('Wrong_id'));
         }
@@ -921,8 +1035,11 @@ class User
         if (!in_array($f['error'], array(UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE))) {
             return array('success' => false, 'msg' => L\get('Error_uploading_file') .': '.$f['error']);
         }
+
         if (substr($f['type'], 0, 6) !== 'image/') {
             return array('success' => false, 'msg' => 'Not an image');
+        } elseif ($f['type'] == 'image/svg+xml') {
+            return array('success' => false, 'msg' => 'Not allowed image format');
         }
 
         $photoName = $p['id'].'_'.$object_title = preg_replace('/[^a-z0-9\.]/i', '_', $f['name']);
@@ -949,6 +1066,10 @@ class User
      */
     public function removePhoto($p)
     {
+        if (!$this->isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
         if (!is_numeric($p['id'])) {
             return array('success' => false, 'msg' => L\get('Wrong_id'));
         }
@@ -1072,9 +1193,13 @@ class User
                 if (empty($name)) {
                     $name = $r['name'];
                 }
+
                 if (($withEmail == true) && (!empty($r['email']))) {
                     $name .= "\n(".$r['email'].")";
                 }
+
+                $name = htmlspecialchars($name, ENT_COMPAT);
+
                 Cache::set($var_name, $name);
             }
             $res->close();
@@ -1151,6 +1276,8 @@ class User
 
                 $oldObj->loadOldGridDataToNewFormat('users_groups');
                 $r['data'] = $oldObj->data['data'];
+            } else {
+                $r['data'] = Util\toJSONArray($r['data']);
             }
 
             $rez = $r;

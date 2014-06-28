@@ -133,13 +133,19 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
             ,title: function(v, meta, record, row_idx, col_idx, store){
                 var id = record.get('id');
-
                 var n = this.helperTree.getNode(id);
+
+                if(Ext.isString(v)) {
+                    v = Ext.util.Format.htmlEncode(v);
+                }
+
                 // temporary workaround for not found nodes
                 if(!n) {
                     return v;
                 }
+
                 var tr = n.attributes.templateRecord;
+
                 if(tr.get('type') == 'H'){
                     meta.css ='vgh';
                 }else{
@@ -149,6 +155,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 if(!Ext.isEmpty(tr.get('cfg').hint)) {
                     meta.attr += ' title="'+tr.get('cfg').hint+'"';
                 }
+
                 /* setting icon for duplicate fields /**/
                 if(this.helperTree.isDuplicate(id)){
                     //show duplicate index
@@ -160,11 +167,19 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                         v = '<img title="'+L.duplicate+' '+idx+'" class="fr duplicate'+idx+'" src="'+Ext.BLANK_IMAGE_URL + '" / >' + v;
                     }
                 }
+
                 return v;
             }
 
             ,value: function(v, meta, record, row_idx, col_idx, store){
                 var n = this.helperTree.getNode(record.get('id'));
+
+                if(Ext.isString(v)
+                    // && (Ext.util.Format.stripTags(v) !== v)
+                ) {
+                    v = Ext.util.Format.htmlEncode(v);
+                }
+
                 // temporary workaround for not found nodes
                 if(!n) {
                     return v;

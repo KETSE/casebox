@@ -136,7 +136,6 @@ $API = array_merge(
         ,'CB_UsersGroups' => array(
             'methods' => array(
                 'getChildren'           => array('len' => 1)
-                ,'getReadAccessChildren'=> array('len' => 1)
                 ,'getUserData'          => array('len' => 1)
                 ,'getAccessData'        => array('len' => 1)
                 ,'saveAccessData'       => array('len' => 1)

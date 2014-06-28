@@ -627,6 +627,8 @@ class Browser
         //running background cron to index other nodes
         $solrClient->runBackgroundCron();
 
+        $p['name'] = htmlspecialchars($p['name'], ENT_COMPAT);
+
         return array('success' => true, 'data' => array( 'id' => $id, 'newName' => $p['name']) );
     }
 

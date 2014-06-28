@@ -1,7 +1,31 @@
-CaseBox 1.9.220 (2014-06-25)
+CaseBox 1.9.242 (2014-06-28)
 ==============================
 New Features, Improvements
 --------------------------
+- added objectsStore to account edit form for displaying objects values in grid
+- updated HTMLPurifier to version 4.6.0
+- XSS changes:
+    - added check to deny uploading 'image/svg+xml' file types as user photo
+    - added password verification for current user when accessing users management form
+        Also added verifications in all user management methods if user has verified password
+        If users management window will stay open more than timeout defined (5 min by default)
+            then further actions in this window will return false.The user should reopen and reverify his password.
+    - todo: filter html fields from custom user template
+        The main idea is to crate a User class derived from \CB\Objects\Object
+        that would implement basic obect functionality (including data filtering methods)
+        Most methods from \CB\User class will be moved to the new one
+    - validated all incomming data in UserGroups.addUser and UserGroups.renameUser functions
+    - validated all incomming data in User.saveProfileData function
+        strip tags from user names and encode special chars in getDisplayName function
+    - apply htmlspecialchars to all string values that go to solr
+    - encode displayed values in vertical edit grid
+    - encode object title rendered in object edit window tabsheet
+    - in browsing grid the values are displayed from solr (already encoded),
+        but the value is decoded with Ext for editing
+    - filter html fields for objects using HTMLPurifier library.
+    - added check to show direct content in preview only for pdfs (Issue CB-01-006)
+
+
 - disabled ipcheck for now. It'll be replaced by other mechanism
 - width of right panel in FileTabSheet window should be remembered
 - Default search condition should be '=' in search templates
