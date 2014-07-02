@@ -85,9 +85,11 @@ class Path
         while ($path[0] == '/') {
             $path = substr($path, 1);
         }
+
         $path = explode('/', $path);
         $ids = array_filter($path, 'is_numeric');
         $id = array_pop($ids);
+
         $res = DB\dbQuery('SELECT pids from tree_info WHERE id = $1', $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $path = explode(',', $r['pids']);
@@ -118,7 +120,7 @@ class Path
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $names[$r['id']] = $r['name'];
+            $names[$r['id']] = htmlspecialchars($r['name'], ENT_COMPAT);
         }
         $res->close();
         $rez = array();

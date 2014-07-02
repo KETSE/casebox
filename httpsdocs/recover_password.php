@@ -153,9 +153,13 @@ switch ($action) {
             exit(0);
         }
 
-        $bcrypt = new Bcrypt(15);
-
-        $hash = $bcrypt->hash($user_id . $user_mail . date(DATE_ISO8601));
+        $hash = password_hash(
+            $user_id . $user_mail . date(DATE_ISO8601),
+            PASSWORD_BCRYPT,
+            array(
+                'cost' => 15,
+            )
+        );
 
         DB\dbQuery(
             'UPDATE users_groups

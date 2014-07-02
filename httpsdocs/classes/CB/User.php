@@ -1038,18 +1038,21 @@ class User
 
         if (substr($f['type'], 0, 6) !== 'image/') {
             return array('success' => false, 'msg' => 'Not an image');
-        } elseif ($f['type'] == 'image/svg+xml') {
-            return array('success' => false, 'msg' => 'Not allowed image format');
         }
 
-        $photoName = $p['id'].'_'.$object_title = preg_replace('/[^a-z0-9\.]/i', '_', $f['name']);
+        $image = new \Imagick($f['tmp_name']);
+        $image->setImageFormat('png');
+        $image->resizeImage(100, 100, imagick::FILTER_LANCZOS, 0.9, true);
+        $image->writeImage($f['tmp_name'].'.png');
+
+        $photoName = $p['id'] . '_' . preg_replace('/[^a-z0-9\.]/i', '_', $f['name']).'.png';
 
         $photosPath = Config::get('photos_path');
         if (!file_exists($photosPath)) {
             @mkdir($photosPath, 0755, true);
         }
 
-        move_uploaded_file($f['tmp_name'], $photosPath.$photoName);
+        move_uploaded_file($f['tmp_name'].'.png', $photosPath.$photoName);
 
         $res = DB\dbQuery(
             'UPDATE users_groups SET photo = $2 WHERE id = $1',

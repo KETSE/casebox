@@ -496,7 +496,6 @@ class Template extends Object
                 break;
 
             case 'combo':
-
             case '_case':
                 if (empty($value)) {
                     $value = '';
@@ -512,7 +511,7 @@ class Template extends Object
                 ) or die(DB\dbQueryError());
                 $value = array();
                 while ($r = $res->fetch_assoc()) {
-                    $value[] = $r['name'];
+                    $value[] = htmlspecialchars($r['name'], ENT_COMPAT);
                 }
                 $res->close();
                 if (sizeof($value) == 1) {
@@ -535,7 +534,7 @@ class Template extends Object
                 ) or die(DB\dbQueryError());
                 $value = array();
                 while ($r = $res->fetch_assoc()) {
-                    $value[] = $r['name'];
+                    $value[] = htmlspecialchars($r['name'], ENT_COMPAT);
                 }
                 $res->close();
                 if (sizeof($value) == 1) {
@@ -590,7 +589,7 @@ class Template extends Object
                 $res = DB\dbQuery($sql) or die(DB\dbQueryError());
                 $value = array();
                 while ($r = $res->fetch_assoc()) {
-                    @$label = Util\coalesce($r['title'], $r['name']);
+                    @$label = htmlspecialchars(Util\coalesce($r['title'], $r['name']), ENT_COMPAT);
                     if (!empty($r['path'])) {
                         $path = explode(',', $r['path']);
                         array_pop($path);
@@ -664,11 +663,13 @@ class Template extends Object
                 break;
             case 'memo':
             case 'text':
-                $value = nl2br(htmlspecialchars($value));
+                $value = nl2br(htmlspecialchars($value, ENT_COMPAT));
                 break;
             default:
                 if (is_array($value)) {
                     $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+                } else {
+                    $value = htmlspecialchars($value, ENT_COMPAT);
                 }
         }
 

@@ -181,7 +181,9 @@ foreach ($mailServers as $mailConf) {
         }
     }
 
-    deleteMails($mailConf['mailbox'], $deleteMailIds);
+    if (!empty($mailConf['mailbox'])) {
+        deleteMails($mailConf['mailbox'], $deleteMailIds);
+    }
 
     \CB\Solr\Client::runBackgroundCron();
 }

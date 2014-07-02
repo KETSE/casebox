@@ -1,4 +1,20 @@
-CaseBox 1.9.242 (2014-06-28)
+CaseBox 1.9.223 (2014-07-02)
+==============================
+New Features, Improvements
+--------------------------
+- changed config file for apache virtual host to improve SSL
+- weak fix. Issue CB-01-012: Persistent XSS via SVG Profile Photo Upload (High)
+    resize and convert uploaded profile photos to png
+- removed Bcrypt class, using native php password_hash function
+- convert svg files to png for preview using Imagic
+
+Fixed Bugs:
+----------
+- Drag&Drop objects from Grid to VerticalGrid fields creates dublicated fields
+- Graphs for PVF did not remove links from graph object links updated
+- CRITICAL: not fixed. Issue CB-01-004: XSS via unfiltered Folder- and Action-Name (High)
+
+CaseBox 1.9.222 (2014-06-28)
 ==============================
 New Features, Improvements
 --------------------------
