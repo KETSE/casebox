@@ -18,8 +18,9 @@ class Comment extends Object
         }
 
         if (!empty($p['data']['_title'])) {
-            $msg = Util\adjustTextForDisplay($p['data']['_title']);
-            $msg = $this->processAndFormatMessage($msg);
+            //all data is html escaped when indexed in solr
+            //so no need to encode it here
+            $msg = $this->processAndFormatMessage($p['data']['_title']);
             $p['name'] = $msg;
             $p['data']['_title'] = $msg;
         }

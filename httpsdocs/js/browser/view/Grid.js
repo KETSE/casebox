@@ -12,7 +12,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                         m.css += ' node-has-acl';
                     }
 
-                    v = Ext.util.Format.htmlEncode(v);
                     m.attr = Ext.isEmpty(v) ? '' : "title='"+v+"'";
                     rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
                     if( (this.hideArrows !== true) && r.get('has_childs')) {
@@ -88,17 +87,33 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     if(!this.allowRename) {
                         return false;
                     }
-                    e.grid.getColumnModel().setEditor(
-                        e.column
-                        ,new Ext.form.TextField({selectOnFocus: true})
-                    );
+
+                    //decode value to be  edited
+                    // clog(e.value);
+                    // e.value = Ext.util.Format.htmlDecode(e.value);
+                    // clog(e.value);
+
+                    var ed = new Ext.form.TextField({selectOnFocus: true});
+                    ed._setValue = ed.setValue;
+                    ed.setValue = function(v) {
+                        v = Ext.util.Format.htmlDecode(v);
+                        this._setValue(v);
+                    };
+
+                    e.grid.getColumnModel().setEditor(e.column ,ed);
+
                     delete this.allowRename;
                     return true;
                 }
+
                 ,afteredit: function(e){
-                    if(e.value == e.originalValue) {
+                    var encodedValue = Ext.util.Format.htmlEncode(e.value);
+                    e.record.set('name', encodedValue);
+
+                    if(encodedValue == e.originalValue) {
                         return;
                     }
+
                     this.renamedOriginalValue = e.originalValue;
                     this.renamedRecord = e.record;
                     CB_BrowserView.rename(
@@ -113,8 +128,13 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                                 delete this.renamedRecord;
                                 return;
                             }
+
+                            this.renamedRecord.set('name', r.data.newName);
+
                             delete this.renamedOriginalValue;
                             delete this.renamedRecord;
+
+
                             this.fireEvent(
                                 'objectupdated'
                                 ,{

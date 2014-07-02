@@ -187,6 +187,8 @@ class Object extends OldObject
         $p['data'] = Util\toJSONArray(@$p['data']);
         $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
 
+        $this->filterHTMLFields($p['data']);
+
         DB\dbQuery(
             'INSERT INTO objects (id ,`data`, `sys_data`)
             VALUES($1, $2, $3)
@@ -376,6 +378,8 @@ class Object extends OldObject
         if (empty($d['sys_data'])) {
             $d['sys_data'] = array();
         }
+
+        $this->filterHTMLFields($d['data']);
 
         @DB\dbQuery(
             'INSERT INTO objects
@@ -595,6 +599,7 @@ class Object extends OldObject
         if (empty($data)) {
             return $rez;
         }
+
         foreach ($data as $fieldName => $fieldValue) {
             if ($this->isFieldValue($fieldValue)) {
                 $fieldValue = array($fieldValue);
@@ -627,8 +632,13 @@ class Object extends OldObject
     public function setData($data)
     {
         $this->data = $data;
+
         if (array_key_exists('id', $data)) {
             $this->id = $data['id'];
+        }
+
+        if (!empty($this->data['data'])) {
+            $this->filterHTMLFields($this->data['data']);
         }
     }
 
@@ -987,5 +997,80 @@ class Object extends OldObject
     protected function moveCustomDataTo($targetId)
     {
 
+    }
+
+    /**
+     * filter html field with through purify library
+     *
+     * @param  array   $fieldsArray
+     * @param  boolean $htmlEncode  set true to encode all special chars from string fields
+     * @return void
+     */
+    protected function filterHTMLFields(&$fieldsArray, $htmlEncode = false)
+    {
+        $template = $this->getTemplate();
+
+        if (!is_array($fieldsArray) || !is_object($template)) {
+            return;
+        }
+
+        foreach ($fieldsArray as $fn => $fv) {
+
+            //if dont need to encode special chars then process only html fields
+            if ($htmlEncode == false) {
+                $templateField = $template->getField($fn);
+
+                if ($templateField['type'] !== 'html') {
+                    continue;
+                }
+            }
+
+            $purify = ($templateField['type'] == 'html');
+
+            // analize value
+            if ($this->isFieldValue($fv)) {
+                if (is_string($fv)) {
+                    $fieldsArray[$fn] = $this->filterFieldValue($fv, $purify, $htmlEncode);
+
+                } elseif (is_array($fv) && !empty($fv['value'])) {
+                    $fieldsArray[$fn]['value'] = $this->filterFieldValue($fv['value'], $purify, $htmlEncode);
+                    if (!empty($fv['childs'])) {
+                        $this->filterHTMLFields($fieldsArray[$fn]['childs']);
+                    }
+                }
+            } elseif (is_array($fv)) { //multivalued field
+                for ($i=0; $i < sizeof($fv); $i++) {
+                    if (is_string($fv[$i])) {
+                        $fieldsArray[$fn][$i] = $this->filterFieldValue($fv[$i], $purify, $htmlEncode);
+
+                    } elseif (is_array($fv[$i]) && !empty($fv[$i]['value'])) {
+                        $fieldsArray[$fn][$i]['value'] = $this->filterFieldValue($fv[$i]['value'], $purify, $htmlEncode);
+                        if (!empty($fv[$i]['childs'])) {
+                            $this->filterHTMLFields($fieldsArray[$fn][$i]['childs']);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * filter a given value
+     * @param  varchar $value
+     * @param  boolean $purify
+     * @param  boolean $htmlEncode
+     * @return varchar
+     */
+    protected function filterFieldValue($value, $purify = false, $htmlEncode = false)
+    {
+        if ($purify) {
+            $value = \CB\HtmlPurifier::purify($value);
+        }
+
+        if ($htmlEncode) {
+            $value = htmlspecialchars($value, ENT_COMPAT);
+        }
+
+        return $value;
     }
 }

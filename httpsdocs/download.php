@@ -81,7 +81,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
 
         header('Content-Description: File Transfer');
         header('Content-Type: '.$r['type'].'; charset=UTF-8');
-        if (!isset($_GET['pw'])) {
+        if (!isset($_GET['pw']) || ($r['type'] !== 'application/pdf')) {
             header('Content-Disposition: attachment; filename="'.$r['name'].'"');
         }
         header('Content-Transfer-Encoding: binary');

@@ -996,6 +996,7 @@ class Files
                 break;
             case 'tif':
             case 'tiff':
+            case 'svg':
                 $image = new \Imagick($fn);
                 $image->setImageFormat('png');
                 $image->writeImage($filesPreviewDir.$file['content_id'].'_.png');
@@ -1006,7 +1007,7 @@ class Files
                 );
                 break;
             default:
-                if (substr($file['type'], 0, 5) == 'image') {
+                if ((substr($file['type'], 0, 5) == 'image') && (substr($file['type'], 0, 9) !== 'image/svg')) {
                     file_put_contents(
                         $preview_filename,
                         '<div style="padding: 5px 10px"><img src="/'.$coreName.'/download.php?id='.

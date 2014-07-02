@@ -41,6 +41,8 @@ class SystemProperties extends Base
             )
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
+            $r['path'] = htmlspecialchars($r['path'], ENT_COMPAT);
+            $r['template_name'] = htmlspecialchars($r['template_name'], ENT_COMPAT);
             $r['cid_text'] = User::getDisplayName($r['cid']);
 
             $r['cdate_text'] = Util\formatAgoTime($r['cdate']);

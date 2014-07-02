@@ -249,6 +249,13 @@ class Client extends Service
 
                     // $this->filterSolrFields($r);
 
+                    //encode special chars for string values
+                    foreach ($r as $k => $v) {
+                        if (is_string($v)) {
+                            $r[$k] = htmlspecialchars($v, ENT_COMPAT);
+                        }
+                    }
+
                     /* append the obtained record to the result */
                     $docs[$r['id']] = $r;
                 }
@@ -330,6 +337,13 @@ class Client extends Service
                 $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
                 //exclude itself from pids
                 array_pop($r['pids']);
+
+                //encode special chars for string values
+                foreach ($r as $k => $v) {
+                    if (is_string($v)) {
+                        $r[$k] = htmlspecialchars($v, ENT_COMPAT);
+                    }
+                }
 
                 $docs[$r['id']] = $r;
 

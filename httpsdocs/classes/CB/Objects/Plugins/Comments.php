@@ -28,7 +28,7 @@ class Comments extends Base
             ,'fq' => array(
                 'template_id:('.implode(' OR ', $commentTemplateIds).')'
             )
-            ,'fl' => 'id,pid,name,template_id,cid,cdate,content'
+            ,'fl' => 'id,pid,template_id,cid,cdate,content'
             ,'sort' => 'cdate'
             ,'rows' => 10
             ,'dir' => 'desc'

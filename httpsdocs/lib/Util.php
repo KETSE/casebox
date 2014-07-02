@@ -610,7 +610,7 @@ function replaceUrlsWithLinks($text)
         list($url, $urlPosition) = $match[0];
 
         // Print the text leading up to the URL.
-        $rez .= htmlspecialchars(substr($text, $position, $urlPosition - $position));
+        $rez .= substr($text, $position, $urlPosition - $position);
 
         $domain = $match[2][0];
         $port   = $match[3][0];
@@ -634,7 +634,7 @@ function replaceUrlsWithLinks($text)
     }
 
     // Print the remainder of the text.
-    $rez .= htmlspecialchars(substr($text, $position));
+    $rez .= substr($text, $position);
 
     return $rez;
 }

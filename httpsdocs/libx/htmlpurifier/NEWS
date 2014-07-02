@@ -9,6 +9,52 @@ NEWS ( CHANGELOG and HISTORY )                                     HTMLPurifier
     . Internal change
 ==========================
 
+4.6.0, released 2013-11-30
+# Secure URI munge hashing algorithm has changed to hash_hmac("sha256", $url, $secret).
+  Please update any verification scripts you may have.
+# URI parsing algorithm was made more strict, so only prefixes which
+  looks like schemes will actually be schemes.  Thanks
+  Michael Gusev <mgusev@sugarcrm.com> for fixing.
+# %Core.EscapeInvalidChildren is no longer supported, and no longer does
+  anything.
+! New directive %Core.AllowHostnameUnderscore which allows underscores
+  in hostnames.
+- Eliminate quadratic behavior in DOMLex by using a proper queue.
+  Thanks Ole Laursen for noticing this.
+- Rewritten MakeWellFormed/FixNesting implementation eliminates quadratic
+  behavior in the rest of the purificaiton pipeline.  Thanks Chedburn
+  Networks for sponsoring this work.
+- Made Linkify URL parser a bit less permissive, so that non-breaking
+  spaces and commas are not included as part of URL.  Thanks nAS for fixing.
+- Fix some bad interactions with %HTML.Allowed and injectors.  Thanks
+  David Hirtz for reporting.
+- Fix infinite loop in DirectLex. Thanks Ashar Javed (@soaj1664ashar)
+  for reporting.
+
+4.5.0, released 2013-02-17
+# Fix bug where stacked attribute transforms clobber each other;
+  this also means it's no longer possible to override attribute
+  transforms in later modules.  No internal code was using this
+  but this may break some clients.
+# We now use SHA-1 to identify cached definitions, instead of MD5.
+! Support display:inline-block
+! Support for more white-space CSS values.
+! Permit underscores in font families
+! Support for page-break-* CSS3 properties when proprietary properties
+  are enabled.
+! New directive %Core.DisableExcludes; can be set to 'true' to turn off
+  SGML excludes checking.  If HTML Purifier is removing too much text
+  and you don't care about full standards compliance, try setting this to
+  'true'.
+- Use prepend for SPL autoloading on PHP 5.3 and later.
+- Fix bug with nofollow transform when pre-existing rel exists.
+- Fix bug where background:url() always gets lower-cased
+  (but not background-image:url())
+- Fix bug with non lower-case color names in HTML
+- Fix bug where data URI validation doesn't remove temporary files.
+  Thanks Javier Marín Ros <javiermarinros@gmail.com> for reporting.
+- Don't remove certain empty tags on RemoveEmpty.
+
 4.4.0, released 2012-01-18
 # Removed PEARSax3 handler.
 # URI.Munge now munges URIs inside the same host that go from https
@@ -21,7 +67,7 @@ NEWS ( CHANGELOG and HISTORY )                                     HTMLPurifier
   :lang pseudoselector, and anything not in CSS2.1.  Furthermore,
   ID and class selectors now work properly with the relevant
   configuration attributes.  Also, mute errors when parsing CSS
-  with CSS Tidy.
+  with CSS Tidy.  Reported by Mario Heiderich and Norman Hippert.
 ! Added support for 'scope' attribute on tables.
 ! Added %HTML.TargetBlank, which adds target="blank" to all outgoing links.
 ! Properly handle sub-lists directly nested inside of lists in

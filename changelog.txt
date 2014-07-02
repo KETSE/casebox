@@ -1,7 +1,59 @@
-CaseBox 1.9.220 (2014-06-25)
+CaseBox 1.9.225 (2014-07-02)
+==============================
+Fixed Bugs:
+----------
+- fix comments display and notifications sent
+
+CaseBox 1.9.224 (2014-07-02)
 ==============================
 New Features, Improvements
 --------------------------
+- profile photo upload adjustments
+
+CaseBox 1.9.223 (2014-07-02)
+==============================
+New Features, Improvements
+--------------------------
+- changed config file for apache virtual host to improve SSL
+- weak fix. Issue CB-01-012: Persistent XSS via SVG Profile Photo Upload (High)
+    resize and convert uploaded profile photos to png
+- removed Bcrypt class, using native php password_hash function
+- convert svg files to png for preview using Imagic
+
+Fixed Bugs:
+----------
+- Drag&Drop objects from Grid to VerticalGrid fields creates dublicated fields
+- Graphs for PVF did not remove links from graph object links updated
+- CRITICAL: not fixed. Issue CB-01-004: XSS via unfiltered Folder- and Action-Name (High)
+
+CaseBox 1.9.222 (2014-06-28)
+==============================
+New Features, Improvements
+--------------------------
+- added objectsStore to account edit form for displaying objects values in grid
+- updated HTMLPurifier to version 4.6.0
+- XSS changes:
+    - added check to deny uploading 'image/svg+xml' file types as user photo
+    - added password verification for current user when accessing users management form
+        Also added verifications in all user management methods if user has verified password
+        If users management window will stay open more than timeout defined (5 min by default)
+            then further actions in this window will return false.The user should reopen and reverify his password.
+    - todo: filter html fields from custom user template
+        The main idea is to crate a User class derived from \CB\Objects\Object
+        that would implement basic obect functionality (including data filtering methods)
+        Most methods from \CB\User class will be moved to the new one
+    - validated all incomming data in UserGroups.addUser and UserGroups.renameUser functions
+    - validated all incomming data in User.saveProfileData function
+        strip tags from user names and encode special chars in getDisplayName function
+    - apply htmlspecialchars to all string values that go to solr
+    - encode displayed values in vertical edit grid
+    - encode object title rendered in object edit window tabsheet
+    - in browsing grid the values are displayed from solr (already encoded),
+        but the value is decoded with Ext for editing
+    - filter html fields for objects using HTMLPurifier library.
+    - added check to show direct content in preview only for pdfs (Issue CB-01-006)
+
+
 - disabled ipcheck for now. It'll be replaced by other mechanism
 - width of right panel in FileTabSheet window should be remembered
 - Default search condition should be '=' in search templates

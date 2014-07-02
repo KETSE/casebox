@@ -81,24 +81,37 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
         });
     }
     ,getTitle: function(){
+        var rez = '<'+L.noName+'>';
         if(!Ext.isEmpty(this.data.name)) {
-            return this.data.name;
+            rez = this.data.name;
         } else if(!isNaN(this.data.id)) {
-            return '&lt;'+L.noName+'&gt; (id: '+this.data.id+')';
-        } else {
-            return '&lt;'+L.noName+'&gt;';
+            rez = '<'+L.noName+'> (id: ' + this.data.id + ')';
         }
+
+        return Ext.util.Format.htmlEncode(rez);
     }
     ,updateFormTitle: function(){
-        t = '';
-        if(this.data && !Ext.isEmpty(this.data.date_start)) t = Date.parseDate(this.data.date_start.substr(0, 10), 'Y-m-d').format(App.dateFormat) + '. ';
-        t += this.data.new_title ? this.data.new_title : this.getTitle();
+        var t = '';
+        if(this.data && !Ext.isEmpty(this.data.date_start)) {
+            t = Date.parseDate(this.data.date_start.substr(0, 10), 'Y-m-d').format(App.dateFormat) + '. ';
+        }
+        t += this.data.new_title
+            ? Ext.util.Format.htmlEncode(this.data.new_title)
+            : this.getTitle();
+
         this.setTitle(App.shortenString(t, 35));
-        i = Ext.value(this.data.iconCls, Ext.value(this.iconCls, ''));
-        if(i == 'icon-loading') i = '';
-        if(Ext.isEmpty(i) && this.getIconClass ) i = this.getIconClass();
+
+        var i = Ext.value(this.data.iconCls, Ext.value(this.iconCls, ''));
+        if(i == 'icon-loading') {
+            i = '';
+        }
+        if(Ext.isEmpty(i) && this.getIconClass ) {
+            i = this.getIconClass();
+        }
+
         this.setIconClass( i );
     }
+
     ,getIconClass: Ext.emptyFn // this function should be redefined for child classes to return a corresponding icon for the window
     ,processLoadResponse: function(f, e){
         this.getEl().unmask();

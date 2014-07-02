@@ -277,6 +277,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
         App.mainViewPort.on('objectupdated', this.onObjectsSaved, this);
     }
+
     ,onBeforeNodeAppend: function(tree, parent, node){
         node.setId(Ext.id());
 
@@ -284,8 +285,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         // node.attributes.nid = Ext.num(node.attributes.nid, null);
 
         node.attributes.system = Ext.num(node.attributes.system, 0);
-        var text = Ext.util.Format.htmlEncode(node.attributes.name);
-        node.setText(text);
+        node.setText(node.attributes.name);
 
         if(Ext.isEmpty(node.attributes.iconCls)) {
             if(node.attributes.cfg && node.attributes.cfg.iconCls){
@@ -301,10 +301,12 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             node.setCls('node-has-acl');
         }
     }
+
     ,onBeforeDestroy: function(p){
         App.clipboard.un('pasted', this.onClipboardAction, this);
         App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
     }
+
     ,onClipboardAction: function(pids){
         this.getRootNode().cascade(
             function(n){

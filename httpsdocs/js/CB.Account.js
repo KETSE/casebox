@@ -77,16 +77,20 @@ CB.Account = Ext.extend(Ext.Panel, {
         CB_User.getAccountData( this.onGetData, this);
 
     }
+
     ,onGetData: function(r, e){
         if(r.success !== true){
-            if(r.verify == true){
+            if(r.verify === true){
                 // show verification form
-                w = new CB.VerifyPassword({
+                var w = new CB.VerifyPassword({
                     listeners:{
                         scope: this
                         ,beforeclose: function(cmp){
-                            if(w.success !== true) this.destroy();
-                            else CB_User.getAccountData( this.onGetData, this);
+                            if(w.success !== true) {
+                                this.destroy();
+                            } else {
+                                CB_User.getAccountData( this.onGetData, this);
+                            }
                         }
                     }
                 });
@@ -99,6 +103,7 @@ CB.Account = Ext.extend(Ext.Panel, {
         this.cards.items.itemAt(0).loadData(r.profile);
         this.cards.items.itemAt(1).loadData(r.security);
     }
+
     ,onMenuButtonClick: function(b, e){
         this.cards.getLayout().setActiveItem(this.menu.items.indexOf(b));
         // this.autoCloseTask.delay(1000*60*5);
@@ -115,6 +120,8 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
     ,data: {}
     ,initComponent: function(){
 
+        this.objectsStore = new CB.DB.ObjectsStore();
+
         this.photoField = new Ext.form.TextField({
             cls: 'fl'
             ,style: 'position:absolute;width:1px;height:1px;opacity:0;top:-100px'
@@ -127,6 +134,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 }
             }
         });
+
         this.photoView = new Ext.DataView({
             tpl: ['<tpl for="."><div><img width="70" class="user-photo-field2 click icon-user70-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ (new Date()).format("His") ]}"></div>'
                 ,'<div><a href="#" name="change" class="click">'+L.Change+'</a> &nbsp; <a href="#" name="remove" class="click">'+L.Delete+'</a></div>'
@@ -319,13 +327,27 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
         CB.ProfileForm.superclass.initComponent.apply(this, arguments);
         this.grid = this.items.itemAt(1);
 
-        if(CB.DB.countries.getCount() == 0) CB.DB.countries.load();
-        if(CB.DB.timezones.getCount() == 0) CB.DB.timezones.load();
+        if(CB.DB.countries.getCount() === 0) {
+            CB.DB.countries.load();
+        }
+
+        if(CB.DB.timezones.getCount() === 0) {
+            CB.DB.timezones.load();
+        }
     }
     ,onAfterRender: function(cmp){
 
     }
+
     ,loadData: function(data){
+        if(!Ext.isEmpty(data.assocObjects) && Ext.isArray(data.assocObjects)) {
+            for (var i = 0; i < data.assocObjects.length; i++) {
+                data.assocObjects[i].iconCls = getItemIcon(data.assocObjects[i]);
+            }
+            this.objectsStore.loadData(data.assocObjects);
+            delete data.assocObjects;
+        }
+
         this.data = data;
         this.getForm().setValues(data);
         this.grid.reload();
@@ -333,6 +355,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
         this.syncSize();
         this.setDirty(false);
     }
+
     ,onPhotoClick: function(w, idx, el, ev){
         if(!ev) return;
         target = ev.getTarget();
@@ -342,6 +365,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
             return this.onPhotoRemoveClick();
         }
     }
+
     ,onPhotoChanged: function(ev, el, o){
         if(Ext.isEmpty(this.photoField.getValue())) return;
         form = this.getForm();
@@ -359,6 +383,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
             ,failure: App.formSubmitFailure
         });
     }
+
     ,onPhotoRemoveClick: function(){
         Ext.Msg.confirm(L.Confirm, L.RemovePhotoConfirm, function(b, e){
             if(b == 'yes'){
@@ -368,6 +393,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
             }
         }, this);
     }
+
     ,onSaveClick: function(){
         delete this.data.canAddUsers;
         delete this.data.canAddGroups;
@@ -376,25 +402,33 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
         this.grid.readValues();
         CB_User.saveProfileData(this.data, this.onSaveProcess, this);
     }
+
     ,onSaveProcess: function(r, e){
-        if(r.success !== true) return;
+        if(r.success !== true) {
+            if(!Ext.isEmpty(r.msg)) {
+                Ext.Msg.alert(L.Error, r.msg);
+            }
+            return;
+        }
         this.setDirty(false);
         this.fireEvent('savesuccess', this, e);
         App.fireEvent('userprofileupdated', this.data, e);
     }
+
     ,onResetClick: function(){
         this.getForm().reset();
         this.loadData(this.data);
     }
+
     ,onChange: function(){
         this.setDirty(true);
     }
+
     ,setDirty: function(dirty){
         this._isDirty = (dirty !== false);
         this.buttons[0].setDisabled(!this._isDirty);
         this.buttons[1].setDisabled(!this._isDirty);
     }
-
 });
 
 Ext.reg('CBProfileForm', CB.ProfileForm);
@@ -617,16 +651,16 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         if(!Ext.isEmpty(data.password_change)) this.find( 'name', 'passwordchanged' )[0].setValue(L.PasswordChanged+': '+data.password_change);
 
         cb = this.items.itemAt(1).items.first().items.first();
-        cb.setValue(data.recovery_mobile == true);
+        cb.setValue(data.recovery_mobile === true);
         this.find( 'name', 'country_code' )[0].setValue( Ext.value(data.country_code, null) );
         this.find( 'name', 'phone_number' )[0].setValue( Ext.value(data.phone_number, null) );
 
         cb = this.items.itemAt(1).items.itemAt(2).items.first();
-        cb.setValue(data.recovery_email == true);
+        cb.setValue(data.recovery_email === true);
         this.find( 'name', 'email' )[0].setValue( Ext.value(data.email, null) );
 
         cb = this.items.itemAt(1).items.itemAt(4).items.first();
-        cb.setValue(data.recovery_question == true);
+        cb.setValue(data.recovery_question === true);
         this.find( 'name', 'question_idx' )[0].setValue( Ext.value(data.question_idx, null) );
         this.find( 'name', 'answer' )[0].setValue( Ext.value(data.answer, null) );
 

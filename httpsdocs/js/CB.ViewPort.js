@@ -187,7 +187,20 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                     text: L.Users
                     ,iconCls: 'icon-users'
                     ,handler: function(){
-                        App.openUniqueTabbedWidget('CBUsersGroups');
+                        var w = new CB.VerifyPassword({
+                            listeners:{
+                                scope: this
+                                ,beforeclose: function(cmp){
+                                    if(cmp.success !== true) {
+                                        cmp.destroy();
+                                    } else {
+                                        App.openUniqueTabbedWidget('CBUsersGroups');
+                                    }
+                                }
+                            }
+                        });
+                        w.show();
+
                     }
                 }
             );

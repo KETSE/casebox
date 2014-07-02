@@ -947,7 +947,7 @@ class Objects
                 ,'cdate_text' => Util\formatAgoTime('now')
                 ,'cid' => $_SESSION['user']['id']
                 ,'user' => User::getDisplayName($_SESSION['user']['id'])
-                ,'content' => $p['msg']
+                ,'content' => htmlspecialchars($p['msg'], ENT_QUOTES)
             )
         );
     }
