@@ -1,3 +1,9 @@
+CaseBox 1.9.224 (2014-07-02)
+==============================
+New Features, Improvements
+--------------------------
+- profile photo upload adjustments
+
 CaseBox 1.9.223 (2014-07-02)
 ==============================
 New Features, Improvements

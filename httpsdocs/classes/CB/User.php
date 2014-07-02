@@ -1040,11 +1040,6 @@ class User
             return array('success' => false, 'msg' => 'Not an image');
         }
 
-        $image = new \Imagick($f['tmp_name']);
-        $image->setImageFormat('png');
-        $image->resizeImage(100, 100, imagick::FILTER_LANCZOS, 0.9, true);
-        $image->writeImage($f['tmp_name'].'.png');
-
         $photoName = $p['id'] . '_' . preg_replace('/[^a-z0-9\.]/i', '_', $f['name']).'.png';
 
         $photosPath = Config::get('photos_path');
@@ -1052,7 +1047,10 @@ class User
             @mkdir($photosPath, 0755, true);
         }
 
-        move_uploaded_file($f['tmp_name'].'.png', $photosPath.$photoName);
+        $image = new \Imagick($f['tmp_name']);
+        $image->resizeImage(100, 100, \imagick::FILTER_LANCZOS, 0.9, true);
+        $image->setImageFormat('png');
+        $image->writeImage($photosPath.$photoName);
 
         $res = DB\dbQuery(
             'UPDATE users_groups SET photo = $2 WHERE id = $1',
