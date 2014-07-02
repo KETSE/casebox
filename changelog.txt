@@ -1,3 +1,9 @@
+CaseBox 1.9.225 (2014-07-02)
+==============================
+Fixed Bugs:
+----------
+- fix comments display and notifications sent
+
 CaseBox 1.9.224 (2014-07-02)
 ==============================
 New Features, Improvements
