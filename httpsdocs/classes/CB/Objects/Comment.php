@@ -17,13 +17,13 @@ class Comment extends Object
             $p = &$this->data;
         }
 
-        if (!empty($p['data']['_title'])) {
-            //all data is html escaped when indexed in solr
-            //so no need to encode it here
-            $msg = $this->processAndFormatMessage($p['data']['_title']);
-            $p['name'] = $msg;
-            $p['data']['_title'] = $msg;
-        }
+        // if (!empty($p['data']['_title'])) {
+        //     //all data is html escaped when indexed in solr
+        //     //so no need to encode it here
+        //     $msg = $this->processAndFormatMessage($p['data']['_title']);
+        //     $p['name'] = $msg;
+        //     $p['data']['_title'] = $msg;
+        // }
 
         parent::create($p);
     }
@@ -34,7 +34,7 @@ class Comment extends Object
      *     - replace object references with links
      * @param varchar $message
      */
-    protected function processAndFormatMessage($message)
+    public static function processAndFormatMessage($message)
     {
         // replace urls with links
         $message = Util\replaceUrlsWithLinks($message);

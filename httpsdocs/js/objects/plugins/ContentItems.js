@@ -84,6 +84,7 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
         }
 
         if(te.hasClass('menu')) {
+            this.clickedItemData = this.store.getAt(index).data;
             this.showActionsMenu(e.getXY());
         } else if(te.hasClass('click')) {
             this.openObjectProperties(this.store.getAt(index).data);
@@ -94,20 +95,33 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
         if(Ext.isEmpty(this.puMenu)) {
             this.puMenu = new Ext.menu.Menu({
                 items: [
+                    // {
+                    //     text: 'Close'
+                    // },
                     {
-                        text: 'Close'
-                    },{
                         text: 'Delete'
                         ,iconCls: 'i-trash'
+                        ,scope: this
+                        ,handler: this.onDeleteItemClick
                     },'-',{
                         text: 'In new tab'
                         ,iconCls: 'icon-external'
+                        ,scope: this
+                        ,handler: this.onOpenInTabsheetClick
                     }
                 ]
             });
         }
 
         this.puMenu.showAt(coord);
+    }
+
+    ,onDeleteItemClick: function(b, e) {
+        App.mainViewPort.onDeleteObject(this.clickedItemData);
+    }
+
+    ,onOpenInTabsheetClick: function(b, e) {
+        App.mainViewPort.openObject(this.clickedItemData, e);
     }
 
     ,getToolbarItems: function() {
