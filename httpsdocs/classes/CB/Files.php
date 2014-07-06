@@ -1076,7 +1076,9 @@ class Files
     public static function getBulkSolrData(&$objectRecords)
     {
         foreach ($objectRecords as $id => &$objectRecord) {
-            static::getSolrData($objectRecord);
+            if ($objectRecord['template_type'] == 'file') {
+                static::getSolrData($objectRecord);
+            }
         }
     }
 

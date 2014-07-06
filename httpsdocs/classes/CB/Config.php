@@ -461,6 +461,7 @@ class Config extends Singleton
 
         //facet definitions defined globally in casebox config
         $dfd = array();
+
         if (!empty($cfg['default_facet_configs'])) {
             $dfd = Util\toJSONArray($cfg['default_facet_configs']);
             unset($cfg['default_facet_configs']);

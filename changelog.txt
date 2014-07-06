@@ -1,3 +1,18 @@
+CaseBox 1.9.226 (2014-07-06)
+==============================
+New Features, Improvements
+--------------------------
+- When #id, @user are rendered in comments, should be at render time
+- removed unique key `template_id__name` for templates_structure table
+- Delete button doesn't work in rightPanel Contents plugin
+- added strip_tags on confirmUploadRequest
+- Replace "id: nnnn" with "#nnnn" in search by ID
+
+Fixed Bugs:
+----------
+- Path incorrect & Records are treated as files
+- shashes in Breadcrumbs not rendering ok
+
 CaseBox 1.9.225 (2014-07-02)
 ==============================
 Fixed Bugs:

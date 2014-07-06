@@ -29,8 +29,8 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                                 if(Ext.isEmpty(query)) {
                                     return;
                                 }
-                                if(query.substr(0,3) == 'id:') {
-                                    query = query.substr(3).trim();
+                                if(query.substr(0,1) == '#') {
+                                    query = query.substr(1).trim();
                                     if(!isNaN(query)) {
                                         App.locateObject(query);
                                         return;

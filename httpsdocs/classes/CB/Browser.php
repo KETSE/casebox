@@ -864,7 +864,7 @@ class Browser
         $a['response'] = $p['response'];
         switch ($p['response']) {
             case 'rename':
-                $a['newName'] = $p['newName'];
+                $a['newName'] = strip_tags($p['newName']);
                 //check if the new name does not also exist
                 if (empty($a['response'])) {
                     return array('success' => false, 'msg' => L\get('FilenameCannotBeEmpty'));
