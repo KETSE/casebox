@@ -492,7 +492,7 @@ class Objects
             }
         }
 
-        \CB\debug("getSolrData: " . print_r($object_record, 1));
+        // \CB\debug("getSolrData: " . print_r($object_record, 1));
     }
 
 
