@@ -94,11 +94,15 @@ class Listeners
 
         // evaluating the title if contains php code
         if (strpos($rez, '<?php') !== false) {
-            eval(' ?>'.$rez.'<?php ');
+
+            // no more EVAL, use event handlers to automatially set Titles in complex situations
+            // eval(' ?__>'.$rez.'<?php ');   also added '__' between ? and >
+
             if (!empty($title)) {
                 $rez = $title;
             }
         }
+
         //replacing any remained field placeholder from the title
         $rez = preg_replace('/\{[^\}]+\}/', '', $rez);
         $rez = stripslashes($rez);

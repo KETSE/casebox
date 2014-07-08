@@ -372,6 +372,8 @@ class Client extends Service
     {
         $some_fields = array('iconCls', 'target_id', 'updated');
 
+        // \CB\debug("filterSolrFields: " . print_r($doc, 1));
+
         foreach ($doc as $fn => $fv) {
             if (in_array($fn, $some_fields)
                 || ( ($fv !== false)

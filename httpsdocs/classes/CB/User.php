@@ -451,8 +451,17 @@ class User
         $cfg = $this->getUserConfig();
         $languageSettings = Config::get('language_settings');
 
-        $p['first_name'] = strip_tags($p['first_name']);
-        $p['last_name'] = strip_tags($p['last_name']);
+        // the problem with this approach, in Comments for ex: when a user is shown with '"' in it's name
+        // it's shown as "name &quot; name"
+        $p['first_name'] = htmlentities($p['first_name'], ENT_QUOTES);
+        $p['last_name'] = htmlentities($p['last_name'], ENT_QUOTES);
+
+
+        // $p['first_name'] = strip_tags($p['first_name']);
+        // $p['last_name'] = strip_tags($p['last_name']);
+
+
+
         $p['sex'] = (strlen($p['sex']) > 1)
             ? null
             : $p['sex'];
@@ -486,12 +495,17 @@ class User
             }
         }
 
-        if (isset($p['phone'])) {
-            if (empty($p['phone']) || is_numeric($p['phone'])) {
-                $cfg['phone'] = $p['phone'];
-            } else {
-                return array('success' => false, 'msg' => 'Invalid phone number');
-            }
+        if (isset($p['phone']) && !empty($p['phone'])) {
+
+            // remove all symbols except 0-9, (, ), -, +
+            $phone = preg_replace("/[^0-9 \-\(\)\+]/", '', $p['phone']);
+            $cfg['phone'] = $phone;
+
+            // if (empty($p['phone']) || is_numeric($p['phone'])) {
+            //     $cfg['phone'] = $p['phone'];
+            // } else {
+            //    return array('success' => false, 'msg' => 'Invalid phone number');
+            // }
         }
 
         if (isset($p['timezone'])) {

@@ -189,7 +189,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,value: null
                 ,width: 250
             },{
-                xtype: 'numberfield'
+                xtype: 'textfield'
                 ,name: 'phone'
                 ,fieldLabel: L.Phone
                 ,allowDecimals: false

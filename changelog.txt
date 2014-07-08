@@ -1,3 +1,15 @@
+CaseBox 1.9.227 (2014-07-08)
+==============================
+Improvements
+--------------------------
+- added 'varchar' field types in getSolrData (todo: add other field types to be indexed in custom SOLR core)
+- changed Phone field to Text in JS, and removing all non-phone chars in PHP before saving
+- added strict checks in preview.php for the 'f' parameter, fix for CB-01-001
+- using htmlentities instead of striptags in user first/last names, fix for CB-01-010
+- removed index.php from /api/, REST API to be implemented with OAuth later. fix for CB-01-015
+- no more processing of PHP in AutoTitle templates. fix for CB-01-014
+
+
 CaseBox 1.9.226 (2014-07-06)
 ==============================
 New Features, Improvements
