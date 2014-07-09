@@ -409,10 +409,14 @@ class Object extends OldObject
     {
         // we need to load this object before delete
         // for passing it to log and/or events
+
+        if (!is_numeric($this->id)) {
+            return;
+        }
+
         if (!$this->loaded) {
             $this->load();
         }
-
         \CB\fireEvent('beforeNodeDbDelete', $this);
 
         if ($permanent) {
@@ -421,7 +425,7 @@ class Object extends OldObject
                 $this->id
             ) or die(DB\dbQueryError());
             $solrClient = new \CB\Solr\Client();
-            $solrClient->deleteByQuery('id:'.$this->id);
+            $solrClient->deleteByQuery('id:' . $this->id);
         } else {
             DB\dbQuery(
                 'UPDATE tree

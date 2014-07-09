@@ -15,6 +15,9 @@ class Browser
     {
         $rez = array();
 
+        //unset restricted query params from user input
+        unset($p['fq']);
+
         /* prepare params */
         $path = '/';
         if (!isset($p['path']) || (strlen($p['path']) < 1)) {
@@ -210,6 +213,9 @@ class Browser
         // ,"templateGroups": []
 
         //,+query - user query
+
+        //unset restricted query params from user input
+        unset($p['fq']);
 
         if (!empty($p['source'])) {
             if (is_array($p['source'])) { // a custom source

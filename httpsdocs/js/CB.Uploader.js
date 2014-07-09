@@ -216,16 +216,21 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
         }
         this.group++;
         Ext.each(FilesList, function(f){
-            dir = Ext.value(f.fullPath, f.mozFullPath);
+            var dir = Ext.value(f.fullPath, f.mozFullPath);
             if(!Ext.isEmpty(dir)){
                 dir = dir.split('/');
                 dir.pop();
                 dir = dir.join('/');
-            }else dir = '/';
+            }else {
+                dir = '/';
+            }
+
+            var name = Ext.util.Format.stripScripts(Ext.util.Format.stripTags(f.name));
+
             record = new this.store.recordType({
                 id: Ext.id()
                 ,group: this.group
-                ,name: f.name
+                ,name: name
                 ,type: f.type
                 ,size: f.size
                 ,pid: options.pid
@@ -500,6 +505,9 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
                     ,width: 150
                     ,sortable: false
                     ,dataIndex: 'name'
+                    ,renderer: function(v, meta, r){
+                        return Ext.util.Format.htmlEncode(v);
+                    }
                 },{
                     header: 'Size'
                     ,width: 90

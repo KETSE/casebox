@@ -59,6 +59,9 @@ class User
                 $r['admin'] = Security::isAdmin($user_id);
                 $r['manage'] = Security::canManage($user_id);
 
+                $r['first_name'] = htmlentities($r['first_name'], ENT_QUOTES, 'UTF-8');
+                $r['last_name'] = htmlentities($r['last_name'], ENT_QUOTES, 'UTF-8');
+
                 // do not expose security params
                 unset($r['cfg']['security']);
 
@@ -451,16 +454,8 @@ class User
         $cfg = $this->getUserConfig();
         $languageSettings = Config::get('language_settings');
 
-        // the problem with this approach, in Comments for ex: when a user is shown with '"' in it's name
-        // it's shown as "name &quot; name"
-        $p['first_name'] = htmlentities($p['first_name'], ENT_QUOTES);
-        $p['last_name'] = htmlentities($p['last_name'], ENT_QUOTES);
-
-
-        // $p['first_name'] = strip_tags($p['first_name']);
-        // $p['last_name'] = strip_tags($p['last_name']);
-
-
+        $p['first_name'] = strip_tags($p['first_name']);
+        $p['last_name'] = strip_tags($p['last_name']);
 
         $p['sex'] = (strlen($p['sex']) > 1)
             ? null
@@ -1061,10 +1056,14 @@ class User
             @mkdir($photosPath, 0755, true);
         }
 
-        $image = new \Imagick($f['tmp_name']);
-        $image->resizeImage(100, 100, \imagick::FILTER_LANCZOS, 0.9, true);
-        $image->setImageFormat('png');
-        $image->writeImage($photosPath.$photoName);
+        try {
+            $image = new \Imagick($f['tmp_name']);
+            $image->resizeImage(100, 100, \imagick::FILTER_LANCZOS, 0.9, true);
+            $image->setImageFormat('png');
+            $image->writeImage($photosPath.$photoName);
+        } catch (\Exception $e) {
+            return array('success' => false, 'msg' => 'This image format is not supported, please upload a PNG, JPG image.');
+        }
 
         $res = DB\dbQuery(
             'UPDATE users_groups SET photo = $2 WHERE id = $1',
@@ -1213,7 +1212,7 @@ class User
                     $name .= "\n(".$r['email'].")";
                 }
 
-                $name = htmlspecialchars($name, ENT_COMPAT);
+                $name = htmlentities($name, ENT_QUOTES, 'UTF-8');
 
                 Cache::set($var_name, $name);
             }
@@ -1258,6 +1257,7 @@ class User
                 $r['language_id'] = Config::get('language_index');
                 $language_index = $r['language_id'] -1;
             }
+
             $r['language'] = $coreLanguages[$language_index];
             $r['locale'] =  $languageSettings[$r['language']]['locale'];
 

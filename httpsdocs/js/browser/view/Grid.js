@@ -12,14 +12,15 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                         m.css += ' node-has-acl';
                     }
 
-                    m.attr = Ext.isEmpty(v) ? '' : "title='"+v+"'";
+                    m.attr = Ext.isEmpty(v) ? '' : "title=\"" + v + "\"";
                     rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
                     if( (this.hideArrows !== true) && r.get('has_childs')) {
                         rez += ' <span class="fs9">&hellip;</span>';
                         // rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />';
                     }
                     vi = getVersionsIcon(r.get('versions'));
-                    if(!Ext.isEmpty(vi)) rez = '<span class="ver_count '+vi+'" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
+                    if(!Ext.isEmpty(vi)) rez = '<span class="ver_count ' + vi + '" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
+
                     return rez;
                 },scope: this
                 ,editable: true

@@ -1,3 +1,18 @@
+CaseBox 1.9.228 (2014-07-09)
+==============================
+Security issues:
+----------
+- escaped params in Search class and removed 'fq' param from user input (it can only be specified by server side scripts) (CB-01-012)
+- Persistent XSS via File Name in Upload Queue (CB-01-025)
+- Apache SOLR Injection Deletes All Documents (CB-01-027)
+- Persistent Passive XSS in Item Title (High) (CB-01-024)
+- User profile first_name & last_name injection possible (CB-01-010)
+- Uploading wrong user profile picture exposes some sensitive server data (CB-01-011)
+
+Fixed Bugs:
+----------
+- SVG file preview doesn't work
+
 CaseBox 1.9.227 (2014-07-08)
 ==============================
 Improvements
