@@ -58,6 +58,9 @@ class Listeners
             foreach ($displayColumns['data'] as $k => $col) {
                 $fieldName = is_numeric($k) ? $col : $k;
                 $customColumns[$fieldName] = is_numeric($k) ? array() : $col;
+                if (empty($customColumns[$fieldName]['solr_column_name'])) {
+                    $customColumns[$fieldName]['localSort'] = true;
+                }
             }
 
             // fill custom columns data

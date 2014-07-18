@@ -79,7 +79,12 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
                 this.dataView
                 ,this.dragPanel
             ]
+            ,listeners: {
+                scope: this
+                ,beforedestroy: this.onBeforeDestroy
+            }
         });
+
         CB.objects.plugins.Files.superclass.initComponent.apply(this, arguments);
 
         this.addEvents('fileupload', 'lockpanel');
@@ -92,7 +97,17 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
         this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
         this.filesDropPlugin.init(this);
 
+        App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
     }
+
+    ,onBeforeDestroy: function(c) {
+        App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
+    }
+
+    ,onObjectsDeleted: function(ids) {
+        this.store.deleteIds(ids);
+    }
+
     ,onLoadData: function(r, e) {
         if(Ext.isEmpty(r.data)) {
             return;
@@ -111,6 +126,7 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
         }
 
         if(te.hasClass('menu')) {
+            this.clickedItemData = this.store.getAt(index).data;
             this.showActionsMenu(e.getXY());
         } else if(te.hasClass('click')) {
             this.openObjectProperties(this.store.getAt(index).data);
@@ -123,20 +139,44 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
                 items: [
                     {
                         text: 'Cut'
+                        ,scope: this
+                        ,handler: this.onCutItemClick
                     },{
                         text: 'Copy'
+                        ,scope: this
+                        ,handler: this.onCopyItemClick
                     },{
                         text: 'Delete'
                         ,iconCls: 'i-trash'
+                        ,scope: this
+                        ,handler: this.onDeleteItemClick
                     },'-',{
                         text: 'In new tab'
                         ,iconCls: 'icon-external'
+                        ,scope: this
+                        ,handler: this.onOpenInTabsheetClick
                     }
                 ]
             });
         }
 
         this.puMenu.showAt(coord);
+    }
+
+    ,onCutItemClick: function(b, e) {
+        App.clipboard.set([this.clickedItemData], 'move');
+    }
+
+    ,onCopyItemClick: function(b, e) {
+        App.clipboard.set([this.clickedItemData], 'copy');
+    }
+
+    ,onDeleteItemClick: function(b, e) {
+        App.mainViewPort.onDeleteObject(this.clickedItemData);
+    }
+
+    ,onOpenInTabsheetClick: function(b, e) {
+        App.mainViewPort.openObject(this.clickedItemData, e);
     }
 
     ,getToolbarItems: function() {

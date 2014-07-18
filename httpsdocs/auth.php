@@ -54,7 +54,7 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
         $_SESSION['user']['TSV_checked'] = true;
     } else {
         $_SESSION['message'] = is_string($verificationResult)
-            ? $verificationResult
+            ? htmlspecialchars($verificationResult, ENT_COMPAT)
             : 'Wrong verification code. Please try again.';
     }
 }

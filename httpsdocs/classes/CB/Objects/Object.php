@@ -1068,7 +1068,7 @@ class Object extends OldObject
     protected function filterFieldValue($value, $purify = false, $htmlEncode = false)
     {
         if ($purify) {
-            $value = \CB\HtmlPurifier::purify($value);
+            $value = \CB\Purify::html($value);
         }
 
         if ($htmlEncode) {

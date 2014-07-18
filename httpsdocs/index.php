@@ -105,6 +105,10 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 </style>
 
 <script type="text/javascript">
+    window.name = '<?php
+        echo substr(str_shuffle(MD5(tempnam(sys_get_temp_dir(), 'pre') . microtime())), 0, rand(15, 50));
+    ?>';
+
     function setProgress(label, percentage)
     {
         document.getElementById('loading-msg').innerHTML = label + '…';

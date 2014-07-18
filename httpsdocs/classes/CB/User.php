@@ -454,8 +454,8 @@ class User
         $cfg = $this->getUserConfig();
         $languageSettings = Config::get('language_settings');
 
-        $p['first_name'] = strip_tags($p['first_name']);
-        $p['last_name'] = strip_tags($p['last_name']);
+        $p['first_name'] = Purify::humanName($p['first_name']);
+        $p['last_name'] = Purify::humanName($p['last_name']);
 
         $p['sex'] = (strlen($p['sex']) > 1)
             ? null
@@ -591,8 +591,9 @@ class User
         if ($p['id'] == $_SESSION['user']['id']) {
             $u = &$_SESSION['user'];
 
-            $u['first_name'] = $p['first_name'];
-            $u['last_name'] = $p['last_name'];
+            $u['first_name'] = htmlentities($p['first_name'], ENT_QUOTES, 'UTF-8');
+            $u['last_name'] = htmlentities($p['last_name'], ENT_QUOTES, 'UTF-8');
+
             $u['sex'] = $p['sex'];
             $u['email'] = $p['email'];
             $u['language_id'] = $p['language_id'];
@@ -1177,46 +1178,62 @@ class User
 
     /**
      * get display name of a user
-     * @param  $id  id of the user
+     * @param  $idOrData  id or user data array
      * @return varchar
      */
-    public static function getDisplayName($id = false, $withEmail = false)
+    public static function getDisplayName($idOrData = false, $withEmail = false)
     {
-        if ($id === false) {
+        $data = array();
+
+        if ($idOrData === false) { //use current logged users
             $id = $_SESSION['user']['id'];
-        } elseif (!is_numeric($id)) {
+
+        } elseif (is_numeric($idOrData)) { //id specified
+            $id = $idOrData;
+
+        } elseif (is_array($idOrData) && !empty($idOrData['id']) && is_numeric($idOrData['id'])) {
+            $id = $idOrData['id'];
+            $data = $idOrData;
+
+        } else {
             return '';
         }
 
         $var_name = 'users['.$id."]['displayName$withEmail']";
 
         if (!Cache::exist($var_name)) {
-            $res = DB\dbQuery(
-                'SELECT
-                    name
-                    ,first_name
-                    ,last_name
-                    ,email
-                FROM users_groups
-                WHERE id = $1',
-                $id
-            ) or die(DB\dbQueryError());
+            if (empty($data)) {
+                $res = DB\dbQuery(
+                    'SELECT
+                        name
+                        ,first_name
+                        ,last_name
+                        ,email
+                    FROM users_groups
+                    WHERE id = $1',
+                    $id
+                ) or die(DB\dbQueryError());
 
-            if ($r = $res->fetch_assoc()) {
-                $name = trim($r['first_name'].' '.$r['last_name']);
-                if (empty($name)) {
-                    $name = $r['name'];
+                if ($r = $res->fetch_assoc()) {
+                    $data = $r;
                 }
-
-                if (($withEmail == true) && (!empty($r['email']))) {
-                    $name .= "\n(".$r['email'].")";
-                }
-
-                $name = htmlentities($name, ENT_QUOTES, 'UTF-8');
-
-                Cache::set($var_name, $name);
+                $res->close();
             }
-            $res->close();
+
+            $name = @Purify::humanName($data['first_name'].' '.$data['last_name']);
+
+            if (empty($name)) {
+                $name = @$data['name'];
+            }
+
+            if (($withEmail == true) && (!empty($r['email']))) {
+                $name .= "\n(" . $r['email'] . ")";
+            }
+
+            $name = htmlentities($name, ENT_QUOTES, 'UTF-8');
+
+            Cache::set($var_name, $name);
+
         }
 
         return Cache::get($var_name);

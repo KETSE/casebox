@@ -45,6 +45,9 @@ class ObjectProperties extends Base
                 )) {
                     if (in_array($k, array('date', 'date_end', 'cdate'))) {
                         $v = Util\dateMysqlToISO($v);
+
+                    } elseif ($k == 'name') {
+                        $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
                     }
 
                     $rez['data'][$k] = $v;

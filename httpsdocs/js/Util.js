@@ -61,13 +61,17 @@ function date_local_to_ISO_string(date) {
 
 function getUserDisplayName(withEmail) {
     var rez = App.loginData.first_name + ' ' + App.loginData.last_name;
+
     rez = rez.trim();
+
     if (Ext.isEmpty(rez)) {
-        rez = App.loginData.rez;
+        rez = App.loginData.name;
     }
+
     if ((withEmail === true) && (!Ext.isEmpty(App.loginData.email))) {
         rez += "\n(" + App.loginData.email + ")";
     }
+
     return rez;
 }
 
@@ -325,7 +329,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
         /*check user_group ids
           firstly select only rules that are available for current user id (user_group_ids containt current user id or group id)
         */
-        var ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(' ','') + ',';
+        var ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(/ /g, '') + ',';
 
         if (ug_ids.indexOf(','+App.loginData.id+',') >=0) {
             weight += 100;
@@ -339,7 +343,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
            select only rules inth empty node_template_ids or that contain current selected node_template_id
         /**/
         if(!Ext.isEmpty(node_template_id)){
-            var nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(' ','') + ',';
+            var nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(/ /g, '') + ',';
             if(nt_ids.indexOf(','+node_template_id+',') >=0) {
                 weight += 300; //increased weight for template match
             } else {
@@ -352,7 +356,7 @@ function getMenuConfig(node_id, ids_path, node_template_id){
             }
         }
 
-        var n_ids = ',' + String( Ext.value(r.get('node_ids'), '') ).replace(' ','') + ',';
+        var n_ids = ',' + String( Ext.value(r.get('node_ids'), '') ).replace(/ /g, '') + ',';
         if( n_ids.indexOf(','+node_id+',') >= 0 ) {
             weight += 100;
         }else{

@@ -77,6 +77,11 @@ class Listeners
             foreach ($ld as $field) {
                 $tf = $template->getField($field['name']);
                 $v = $template->formatValueForDisplay($tf, @$field['value'], false);
+
+                // decode special chars because formatValueForDisplay encodes textual values
+                // and we obtain double encoded values in solr
+                $v = htmlspecialchars_decode($v);
+
                 if (is_array($v)) {
                     $v = implode(',', $v);
                 }

@@ -87,7 +87,9 @@ class Objects
             ? Config::get('sender_email')
             : $commentsConfig['email'];
 
-        $rez = User::getDisplayName(). " (".$coreName.") <".$senderMail.'>';
+        $rez = mb_encode_mimeheader(User::getDisplayName(), 'UTF-8')
+            ." (" . mb_encode_mimeheader($coreName, 'UTF-8') . ")"
+            ." <" . $senderMail . '>';
 
         return $rez;
     }

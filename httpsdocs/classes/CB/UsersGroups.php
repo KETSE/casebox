@@ -40,7 +40,7 @@ class UsersGroups
         if ($id == -1) {
             $res = DB\dbQuery(
                 'SELECT
-                    id `nid`
+                    id
                     ,u.cid
                     ,name
                     ,first_name
@@ -60,10 +60,11 @@ class UsersGroups
                 $rez[] = $r;
             }
             $res->close();
+
         } elseif (is_null($node_type)) { /* root node childs*/
             $res = DB\dbQuery(
                 'SELECT
-                    id `nid`
+                    id
                     ,name
                     ,first_name
                     ,last_name
@@ -97,7 +98,7 @@ class UsersGroups
             // group users
             $res = DB\dbQuery(
                 'SELECT
-                    u.id `nid`
+                    u.id
                     ,u.cid
                     ,u.name
                     ,first_name
@@ -122,15 +123,15 @@ class UsersGroups
 
         /* collapse first and last names into title */
         for ($i=0; $i < sizeof($rez); $i++) {
-            if (!empty($rez[$i]['first_name']) && !empty($rez[$i]['last_name'])) {
-                $rez[$i]['title'] = trim(
-                    $rez[$i]['first_name'].
-                    ' '.
-                    $rez[$i]['last_name']
-                );
-            }
+            $rez[$i]['title'] = User::getDisplayName($rez[$i]);
+
             unset($rez[$i]['first_name']);
             unset($rez[$i]['last_name']);
+
+            if (isset($rez[$i]['id'])) {
+                $rez[$i]['nid'] = $rez[$i]['id'];
+                unset($rez[$i]['id']);
+            }
         }
         /* end of collapse first and last names into title */
 
@@ -244,8 +245,8 @@ class UsersGroups
             return array('success' => false, 'msg' => 'Invalid username. Use only letters, digits, "dot" and/or "underscore".');
         }
 
-        $p['first_name'] = strip_tags($p['first_name']);
-        $p['last_name'] = strip_tags($p['last_name']);
+        $p['first_name'] = Purify::humanName($p['first_name']);
+        $p['last_name'] = Purify::humanName($p['last_name']);
 
         if (!empty($p['email'])) {
             if (!filter_var(
@@ -440,7 +441,8 @@ class UsersGroups
             $user_id
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
-            $r['title'] = trim($r['first_name'].' '.$r['last_name']);
+            $r['title'] = User::getDisplayName($r);
+
             if (is_null($r['data'])) {
                 $oldObj = new Objects\OldObject();
                 $oldObj->id = $r['id'];

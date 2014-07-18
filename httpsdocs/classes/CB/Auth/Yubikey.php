@@ -82,7 +82,9 @@ class Yubikey implements \CB\Interfaces\Auth
         curl_setopt($ch, CURLOPT_FAILONERROR, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+
         curl_setopt($ch, CURLOPT_POST, 1);
         // curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -93,14 +95,19 @@ class Yubikey implements \CB\Interfaces\Auth
         $rez = curl_exec($ch);
 
         file_put_contents(\CB\Config::get('debug_log').'_yubikey', $rez);
+
         if (curl_errno($ch)) {
             throw new \Exception("curl_error:" . curl_error($ch), 1);
         }
+
         $rez = strip_tags($rez);
+
         preg_match_all('/client id:[\s]*([\d]+)\s+secret key:[\s]*([^\s]+)/i', $rez, $matches);
+
         if (empty($matches[1][0]) || empty($matches[2][0])) {
             throw new \Exception('Cannot find Client ID and Secret key on Yubiko response for getting api key.', 1);
         }
+
         $params['clientId'] = $matches[1][0];
         $params['sk'] = $matches[2][0];
 

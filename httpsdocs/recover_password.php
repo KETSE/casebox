@@ -173,13 +173,11 @@ switch ($action) {
         if (!empty($userData['cfg']['security']['recovery_email']) && !empty($userData['cfg']['security']['email'])) {
             $user_mail = $userData['cfg']['security']['email'];
         }
-        $user_name = trim($userData['first_name'].'_'.$userData['last_name']);
-        if (empty($user_name)) {
-            $user_name = $userData['name'];
-        }
+        $userName = User::getDisplayName($userData);
+
         $href = Util\getCoreHost().'login/reset-password/?h='.$hash;
         $mail = file_get_contents($template);
-        $mail = str_replace(array('{name}', '{link}'), array($user_name, '<a href="'.$href.'" >'.$href.'</a>'), $mail);
+        $mail = str_replace(array('{name}', '{link}'), array($userName, '<a href="'.$href.'" >'.$href.'</a>'), $mail);
 
         @mail($user_mail, L\get('MailRecoverSubject'), $mail, "Content-type: text/html; charset=utf-8\r\nFrom: " . Config::get('sender_email') . "\r\n");
         $_SESSION['msg'] = '<div class="alert alert-success">'.L\get('RecoverMessageSent').'</div>';

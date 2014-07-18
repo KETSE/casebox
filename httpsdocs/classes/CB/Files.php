@@ -745,9 +745,15 @@ class Files
 
         /* file date will be used from file variable (date parametter) if specified.
         If not specified then system file_date will be used */
-        $storage_subpath = empty($f['date']) ?
-            date('Y/m/d', filemtime($f['tmp_name'])) :
-            str_replace('-', '/', substr($f['date'], 0, 10));
+        $date = false;
+        if (!empty($f['date'])) {
+            $date = strtotime($f['date']);
+        }
+
+        $storage_subpath = ($date === false)
+            ? date('Y/m/d', filemtime($f['tmp_name']))
+            : date('Y/m/d', $date);
+
         DB\dbQuery(
             'INSERT INTO files_content (`size`, `type`, `path`, `md5`)
             VALUES($1
@@ -1044,6 +1050,9 @@ class Files
 
     public static function getSolrData(&$objectRecord)
     {
+        //make standart analysis of task object
+        Objects::getSolrData($objectRecord);
+
         $filesPath = Config::get('files_dir');
 
         $res = DB\dbQuery(
@@ -1075,9 +1084,11 @@ class Files
             } else {
                 $content = '';
             }
-            $objectRecord['content'] = Util\coalesce($r['title'], '')."\n".
-            Util\coalesce($r['type'], '')."\n".
-            Util\coalesce($content, '');
+            $objectRecord['content'] =
+                Util\coalesce($r['title'], '')."\n".
+                Util\coalesce($r['type'], '')."\n".
+                (empty($objectRecord['content']) ? '' : $objectRecord['content'] . "\n").
+                Util\coalesce($content, '');
         }
         $res->close();
     }

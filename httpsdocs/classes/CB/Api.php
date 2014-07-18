@@ -109,7 +109,7 @@ class Api
                     $message = 'You must be authorized to view this page.';
                     break;
                 case 404:
-                    $message = 'The requested URL '.$_SERVER['REQUEST_URI'].' was not found.';
+                    $message = 'The requested URL was not found.';
                     break;
                 case 500:
                     $message = 'The server encountered an error processing your request.';

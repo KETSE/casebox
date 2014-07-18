@@ -328,7 +328,7 @@ function initApp(){
             rez = [];
             Ext.each(v, function(i){rez.push(i.name);}, this);
             rez = rez.join(', ');
-            m.attr = 'name="' + rez.replace('"', '&quot;') + '"';
+            m.attr = 'name="' + rez.replace(/"/g, '&quot;') + '"';
             return rez;
         }
         ,tagIds: function(v){
@@ -365,7 +365,7 @@ function initApp(){
             return '<pre style="white-space: pre-wrap">' + v + '</pre>';
         }
         ,titleAttribute: function(v, m, r, ri, ci, s){
-            m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+            m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
             return v;
         }
         ,userName: function(v){ return CB.DB.usersStore.getName(v);}
@@ -376,6 +376,7 @@ function initApp(){
             return '<img src="css/i/s.gif" class="icon '+v+'" /> '+v;
         }
     };
+
     App.getCustomRenderer = function(fieldType){
         switch(fieldType){
             case 'checkbox':
@@ -424,6 +425,7 @@ function initApp(){
         }
         return App.xtemplates.object;
     };
+
     App.findTab = function(tabPanel, id, xtype){
         tabIdx = -1;
         if(Ext.isEmpty(id)) return tabIdx;
@@ -438,6 +440,7 @@ function initApp(){
         }
         return tabIdx;
     };
+
     App.findTabByType = function(tabPanel, type){
         tabIdx = -1;
         if(Ext.isEmpty(type)) return tabIdx;
@@ -449,6 +452,7 @@ function initApp(){
         }
         return tabIdx;
     };
+
     App.activateTab = function(tabPanel, id, xtype){
         if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
         tabIdx = App.findTab(tabPanel, id, xtype);
@@ -456,17 +460,20 @@ function initApp(){
         tabPanel.setActiveTab(tabIdx);
         return tabPanel.items.itemAt(tabIdx);
     };
+
     App.addTab = function(tabPanel, o){
         if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
         c = tabPanel.add(o);
         o.show();
         return c;
     };
+
     App.getTextEditWindow = function(config){
         if(!App.textEditWindow) App.textEditWindow = new CB.TextEditWindow();
         App.textEditWindow = Ext.apply(App.textEditWindow, config);
         return App.textEditWindow;
     };
+
     App.getHtmlEditWindow = function(config){
         if(!App.htmlEditWindow) App.htmlEditWindow = new CB.HtmlEditWindow();
         App.htmlEditWindow = Ext.apply(App.htmlEditWindow, config);
@@ -476,6 +483,7 @@ function initApp(){
     App.isFolder = function( template_id){
         return (App.config.folder_templates.indexOf( String(template_id) ) >= 0);
     };
+
     App.isWebDavDocument = function(name){
         if(!Ext.isPrimitive(name) || Ext.isEmpty(name) || Ext.isEmpty(App.config['files.edit'].webdav)) {
             return false;
@@ -1030,6 +1038,44 @@ function initApp(){
 }
 
 function overrides(){
+
+    Ext.util.Format.stripTags = function (str, allow) {
+        // making sure the allow arg is a string containing only tags in lowercase (<a><b><c>)
+        allow = (((allow || "") + "").toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join('');
+
+        var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi;
+        var commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
+        return str.replace(commentsAndPhpTags, '').replace(
+            tags
+            ,function ($0, $1) {
+                return allow.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : '';
+            }
+        );
+    };
+
+
+    Ext.override(Ext.data.Store, {
+        deleteIds: function(ids){
+            var idx
+                ,idProperty = Ext.value(this.reader.idProperty, 'id');
+            if(Ext.isPrimitive(ids)) {
+                ids = String(ids).split(',');
+            }
+
+            for (var i = 0; i < ids.length; i++) {
+                idx = this.findExact(idProperty, String(ids[i]));
+
+                if(idx < 0) {
+                    idx = this.findExact(idProperty, parseInt(ids[i], 10));
+                }
+
+                if(idx >= 0) {
+                    this.removeAt(idx);
+                }
+            }
+        }
+    });
+
     Ext.override(Ext.Window, {
         setIconCls: function(i){
             Ext.fly(this.ownerCt.getTabEl(this)).child('.x-tab-strip-text').replaceClass(this.iconCls, i);

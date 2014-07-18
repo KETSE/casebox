@@ -82,7 +82,10 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         header('Content-Description: File Transfer');
         header('Content-Type: '.$r['type'].'; charset=UTF-8');
         if (!isset($_GET['pw']) || ($r['type'] !== 'application/pdf')) {
-            header('Content-Disposition: attachment; filename="'.$r['name'].'"');
+            //purify filename for cases when we have a wrong filename in the system already
+            $filename = Purify::filename($r['name']);
+
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
         }
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
@@ -112,7 +115,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
             exit(0);
         }
         if (sizeof($files) == 1) {
-            $archive_name = $files[0]['name'].'_'.date('Y-m-d_Hi').'.zip';
+            $archive_name = $files[0]['name'] . '_' . date('Y-m-d_Hi') . '.zip';
         }
 
         $zip = new \ZipArchive();
@@ -125,7 +128,7 @@ if (empty($_GET['z']) || ($_GET['z'] != 1)) {
         }
         $zip->close();
         header('Content-Type: application/zip; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="'.$archive_name.'"');
+        header('Content-Disposition: attachment; filename="' . $archive_name . '"');
         header('Content-Length: '.filesize($tmp_name));
         @readfile($tmp_name);
         exit(0);

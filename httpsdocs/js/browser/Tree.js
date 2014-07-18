@@ -716,7 +716,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             function (n){
                 if(n.attributes.nid == r.data.id){
                     n.attributes.name = r.data.newName;
-                    n.setText(Ext.util.Format.htmlEncode(r.data.newName));
+                    n.setText(r.data.newName);
                 }
             }
             ,this

@@ -26,12 +26,12 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 ,editable: true
             }
             ,{header: L.Path, hidden:true, width: 150, dataIndex: 'path', renderer: function(v, m, r, ri, ci, s){
-                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
                 }
             }
             ,{header: L.Project, width: 150, dataIndex: 'case', renderer: function(v, m, r, ri, ci, s){
-                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
                 }
             }
@@ -88,11 +88,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     if(!this.allowRename) {
                         return false;
                     }
-
-                    //decode value to be  edited
-                    // clog(e.value);
-                    // e.value = Ext.util.Format.htmlDecode(e.value);
-                    // clog(e.value);
 
                     var ed = new Ext.form.TextField({selectOnFocus: true});
                     ed._setValue = ed.setValue;
@@ -172,9 +167,12 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     }
                 }
 
+                ,headerclick: function (g, ci, e) {
+                    this.store.remoteSort = (g.getColumnModel().config[ci].localSort !== true);
+                }
+
                 ,columnmove:    this.saveGridState
                 ,columnresize:  this.saveGridState
-                // ,sortchange:    this.saveGridState
                 ,groupchange:   this.saveGridState
                 ,sortchange: function() {
                     this.saveGridState();

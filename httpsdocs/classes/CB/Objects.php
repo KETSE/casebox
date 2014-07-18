@@ -428,13 +428,12 @@ class Objects
      */
     public static function getSolrData(&$object_record)
     {
-        $obj = Objects::getCustomClassByObjectId($object_record['id']);
+        $obj = Objects::getCachedObject($object_record['id']);
 
         if (empty($obj)) {
             return;
         }
 
-        $objData = $obj->load();
         $linearData = $obj->getLinearData();
         $template = $obj->getTemplate();
 
@@ -491,19 +490,17 @@ class Objects
                 }
             }
         }
-
-        // \CB\debug("getSolrData: " . print_r($object_record, 1));
     }
 
 
     /**
      * set custom SOLR columns
-     * @param  reference $object_records
+     * @param reference $object_records
      *         reference $field
      * @return void
      */
-    public static function setCustomSOLRfields(&$object_record, &$field, $value) {
-
+    public static function setCustomSOLRfields(&$object_record, &$field, $value)
+    {
         // is field stored in custom SOLR column?
         if (! @$field['cfg']['faceting']) {
             return;

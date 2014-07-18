@@ -1,4 +1,4 @@
-Ext.namespace('CB'); 
+Ext.namespace('CB');
 
 CB.PasteFromWord = Ext.extend(Ext.Window, {
      autoHeight: true
@@ -35,14 +35,17 @@ CB.PasteFromWord = Ext.extend(Ext.Window, {
         this.on('activate',    this.doShow);
     }
     ,doShow:   function(w) {
-       this.findByType('htmleditor')[0].setValue(''); 
+       this.findByType('htmleditor')[0].setValue('');
     }
     ,doSubmit: function(w) {
-        var text_source=Ext.util.Format.stripTags(this.opener.getValue());
-            text_source=text_source.replace(' ','');
-        if(!text_source)
+        var text_source = Ext.util.Format.stripTags(this.opener.getValue());
+        text_source = text_source.replace(/ /g, '');
+
+        if(!text_source) {
             this.opener.setValue(CleanWord(this.findByType('htmleditor')[0].getValue()));
-        else this.opener.insertAtCursor(CleanWord(this.findByType('htmleditor')[0].getValue()));
+        } else {
+            this.opener.insertAtCursor(CleanWord(this.findByType('htmleditor')[0].getValue()));
+        }
         this.hide();
     }
     ,doClose: function(w) {
@@ -50,13 +53,13 @@ CB.PasteFromWord = Ext.extend(Ext.Window, {
     }
 });
 
-Ext.reg('PasteFromWord', CB.PasteFromWord); // register xtype  
+Ext.reg('PasteFromWord', CB.PasteFromWord); // register xtype
 
 //________________________________________________________________________________________
 function CleanWord( html){
   var bIgnoreFont = true;
   var bRemoveStyles = true;
-  
+
     html = html.replace(/<o:p>\s*<\/o:p>/g, '') ;
     html = html.replace(/<o:p>[\s\S]*?<\/o:p>/g, '&nbsp;') ;
 
