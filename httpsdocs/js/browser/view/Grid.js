@@ -12,25 +12,26 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                         m.css += ' node-has-acl';
                     }
 
-                    m.attr = Ext.isEmpty(v) ? '' : "title='"+v+"'";
+                    m.attr = Ext.isEmpty(v) ? '' : "title=\"" + v + "\"";
                     rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
                     if( (this.hideArrows !== true) && r.get('has_childs')) {
                         rez += ' <span class="fs9">&hellip;</span>';
                         // rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />';
                     }
                     vi = getVersionsIcon(r.get('versions'));
-                    if(!Ext.isEmpty(vi)) rez = '<span class="ver_count '+vi+'" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
+                    if(!Ext.isEmpty(vi)) rez = '<span class="ver_count ' + vi + '" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
+
                     return rez;
                 },scope: this
                 ,editable: true
             }
             ,{header: L.Path, hidden:true, width: 150, dataIndex: 'path', renderer: function(v, m, r, ri, ci, s){
-                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
                 }
             }
             ,{header: L.Project, width: 150, dataIndex: 'case', renderer: function(v, m, r, ri, ci, s){
-                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace('"',"&quot;")+'"';
+                    m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
                 }
             }
@@ -87,11 +88,6 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     if(!this.allowRename) {
                         return false;
                     }
-
-                    //decode value to be  edited
-                    // clog(e.value);
-                    // e.value = Ext.util.Format.htmlDecode(e.value);
-                    // clog(e.value);
 
                     var ed = new Ext.form.TextField({selectOnFocus: true});
                     ed._setValue = ed.setValue;
@@ -171,9 +167,12 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     }
                 }
 
+                ,headerclick: function (g, ci, e) {
+                    this.store.remoteSort = (g.getColumnModel().config[ci].localSort !== true);
+                }
+
                 ,columnmove:    this.saveGridState
                 ,columnresize:  this.saveGridState
-                // ,sortchange:    this.saveGridState
                 ,groupchange:   this.saveGridState
                 ,sortchange: function() {
                     this.saveGridState();

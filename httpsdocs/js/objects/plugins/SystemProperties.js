@@ -8,6 +8,7 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
             '<table class="item-props">'
             ,'<tbody><tr><td class="k">Id</td><td>{id}</td></tr>'
             ,'<tr><td class="k">'+L.Path+'</td><td><a class="click path">{path}</a></td></tr>'
+            ,'{[ Ext.isEmpty(values.size) ?\'\' : \'<tr><td class="k">\' + L.Size + \'</td><td>\' + App.customRenderers.filesize(values.size) + \'</td></tr>\']}'
             ,'<tr><td class="k">'+L.Template+'</td><td>{template_name} <span class="dttm">(id: {template_id})</span></td></tr>'
             ,'<tr><td class="k">'+L.Created+'</td><td>{cid_text}<br><span class="dttm" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</span></td></tr>'
             ,'<tr><td class="k">'+L.Modified+'</td><td>{uid_text}<br><span class="dttm" title="{[ displayDateTime(values.udate) ]}">{udate_text}</span></td></tr>'

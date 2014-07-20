@@ -77,7 +77,7 @@ if (empty($_SESSION['check_TSV'])) {
                 <?php echo isset($_SESSION['message']) ? '<div class="alert alert-error">'.$_SESSION['message'].'</div>' : '';?>
                 <span class="icon-lock"></span>
             </label>
-            <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/'.$coreName; ?>/login/forgot-password/"><?php echo L\get('ForgotPassword');?></a>
+            <a style="margin-top: 30px;" class="pull-right" href="<?php echo '/'.$coreName; ?>/login/forgot-password/"><?php echo L\get('ForgotPassword'); ?></a>
             <input type="submit" name="s" id="s" value="<?php echo L\get('Login');?>" class="btn btn-info" style="margin-top: 26px;" disabled>
     <?php
 
@@ -85,7 +85,7 @@ if (empty($_SESSION['check_TSV'])) {
 
     ?>
             <label>
-                <?php echo L\get('TSV');//$_SESSION['user']['first_name'].' '.$_SESSION['user']['last_name'];
+                <?php echo L\get('TSV');
                 ?>
             </label>
             <label>

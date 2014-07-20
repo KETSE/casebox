@@ -1,3 +1,85 @@
+CaseBox 1.9.232 (2014-07-19)
+==============================
+New Features, Improvements
+--------------------------
+- CB-01-030 Missing HTTP Security Headers and Name-Randomization
+    added following headers in apache config:
+        X-Content-Type-Options: no-sniff
+        X-Download-Options: noopen
+        X-Frame-Options: deny
+        X-XSS-Protection: 1; mode=block
+
+- CB-01-028 Limited Path Traversal Vulnerability in CB\Files
+    filtered posted date field on file uploads
+
+- CB-01-026 Missing SSL Verification in Yubikey Secret Key Request
+    enabled ssl verification
+
+- CB-01-019 Unsanitized CORE_NAME could lead to Vulnerabilities
+    filtered core_name param
+
+- CB-01-016 Potential Second-Order Cross-Site Scripting in TSV Auth
+    applied htmlspecialchars to verificationResult
+
+- CB-01-008 Information Disclosure based on enabled PHP Error Display
+    added following line in apache config for virtual host: php_admin_value expose_php Off
+
+- XSS, AuditLog, default demo core
+    Note: Log solr core should be cleared
+
+- HtmlPurifier class from CB has been renamed to Purify
+    added method for filenames purify.
+
+- Custom file fields not indexed in SOLR
+
+- Sorting by solr/arbitrary columns. Sorting grid view locally for custom display columns
+    that do not have solr_column_name set.
+
+- Add 'Filesize' property in PropertiesPlugin for right panel for files
+
+- using mb_encode_mimeheader on user data used for sender in notifications (CB-01-010)
+
+- implemented functionality for items popupmenu of files plugin from right panel
+
+- added common function deleteIds for all stores
+
+- Task template class should save in SOLR custom fields
+
+- Improve content sanitizing in Javascript. Overwriten ext function for striping tags with other method
+
+Fixed Bugs:
+----------
+- date did not set for task templates without allday field
+- added htmlspecialchars_decode in AutSetFields plugin to skip double encoding for titles
+- upload didn't trigger when selecting same file(s) second time
+
+CaseBox 1.9.228 (2014-07-09)
+==============================
+Security issues:
+----------
+- escaped params in Search class and removed 'fq' param from user input (it can only be specified by server side scripts) (CB-01-012)
+- Persistent XSS via File Name in Upload Queue (CB-01-025)
+- Apache SOLR Injection Deletes All Documents (CB-01-027)
+- Persistent Passive XSS in Item Title (High) (CB-01-024)
+- User profile first_name & last_name injection possible (CB-01-010)
+- Uploading wrong user profile picture exposes some sensitive server data (CB-01-011)
+
+Fixed Bugs:
+----------
+- SVG file preview doesn't work
+
+CaseBox 1.9.227 (2014-07-08)
+==============================
+New Features, Improvements
+--------------------------
+- added 'varchar' field types in getSolrData (todo: add other field types to be indexed in custom SOLR core)
+- changed Phone field to Text in JS, and removing all non-phone chars in PHP before saving
+- added strict checks in preview.php for the 'f' parameter, fix for CB-01-001
+- using htmlentities instead of striptags in user first/last names, fix for CB-01-010
+- removed index.php from /api/, REST API to be implemented with OAuth later. fix for CB-01-015
+- no more processing of PHP in AutoTitle templates. fix for CB-01-014
+
+
 CaseBox 1.9.226 (2014-07-06)
 ==============================
 New Features, Improvements

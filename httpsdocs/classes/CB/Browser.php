@@ -15,6 +15,9 @@ class Browser
     {
         $rez = array();
 
+        //unset restricted query params from user input
+        unset($p['fq']);
+
         /* prepare params */
         $path = '/';
         if (!isset($p['path']) || (strlen($p['path']) < 1)) {
@@ -210,6 +213,9 @@ class Browser
         // ,"templateGroups": []
 
         //,+query - user query
+
+        //unset restricted query params from user input
+        unset($p['fq']);
 
         if (!empty($p['source'])) {
             if (is_array($p['source'])) { // a custom source
@@ -599,25 +605,35 @@ class Browser
             )
         ) or die(DB\dbQueryError());
 
-        DB\dbQuery(
-            'UPDATE files
-            SET name = $1
-            WHERE id = $2',
-            array(
-                $p['name']
-                ,$id
-            )
-        ) or die(DB\dbQueryError());
+        switch (Objects::getType($id)) {
+            case 'file':
+                $p['name']  = Purify::filename($p['name']);
 
-        DB\dbQuery(
-            'UPDATE tasks
-            SET title = $1
-            WHERE id = $2',
-            array(
-                $p['name']
-                ,$id
-            )
-        ) or die(DB\dbQueryError());
+                DB\dbQuery(
+                    'UPDATE files
+                    SET name = $1
+                    WHERE id = $2',
+                    array(
+                        $p['name']
+                        ,$id
+                    )
+                ) or die(DB\dbQueryError());
+
+                break;
+
+            case 'task':
+                DB\dbQuery(
+                    'UPDATE tasks
+                    SET title = $1
+                    WHERE id = $2',
+                    array(
+                        $p['name']
+                        ,$id
+                    )
+                ) or die(DB\dbQueryError());
+
+                break;
+        }
 
         /*updating renamed document into solr directly (before runing background cron)
             so that it'll be displayed with new name without delay*/
@@ -712,7 +728,7 @@ class Browser
             return array( 'success' => true );
         } else {
             foreach ($F as $k => $v) {
-                $F[$k]['name'] = strip_tags(@$F[$k]['name']);
+                $F[$k]['name'] = Purify::filename(@$F[$k]['name']);
             }
         }
 
@@ -748,7 +764,7 @@ class Browser
                 $F = $archiveFiles;
                 break;
             default:
-                $files->moveUploadedFilesToIncomming($F) or die('cannot move file to incomming ' . $incommingFilesDir);
+                $files->moveUploadedFilesToIncomming($F) or die('cannot move file to incomming dir');
                 break;
         }
 
@@ -864,7 +880,7 @@ class Browser
         $a['response'] = $p['response'];
         switch ($p['response']) {
             case 'rename':
-                $a['newName'] = strip_tags($p['newName']);
+                $a['newName'] = Purify::filename($p['newName']);
                 //check if the new name does not also exist
                 if (empty($a['response'])) {
                     return array('success' => false, 'msg' => L\get('FilenameCannotBeEmpty'));

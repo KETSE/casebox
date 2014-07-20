@@ -12,6 +12,7 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
                 ,afterrender: this.attachEvents
             }
         });
+
         CB.objects.plugins.ObjectProperties.superclass.initComponent.apply(this, arguments);
     }
 

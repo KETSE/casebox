@@ -428,13 +428,12 @@ class Objects
      */
     public static function getSolrData(&$object_record)
     {
-        $obj = Objects::getCustomClassByObjectId($object_record['id']);
+        $obj = Objects::getCachedObject($object_record['id']);
 
         if (empty($obj)) {
             return;
         }
 
-        $objData = $obj->load();
         $linearData = $obj->getLinearData();
         $template = $obj->getTemplate();
 
@@ -473,20 +472,9 @@ class Objects
                 }
                 /* make changes to value if needed */
 
-                if (@$field['cfg']['faceting'] && in_array($field['type'], array('combo', 'int', '_objects'))) {
 
-                    $solr_field = $field['solr_column_name'];
-
-                    if (!empty($solr_field)) {
-
-                        $arr = Util\toNumericArray($f['value']);
-
-                        foreach ($arr as $v) {
-                            if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
-                                $object_record[$solr_field][] = $v;
-                            }
-                        }
-                    }
+                if (@$field['cfg']['faceting']) {
+                    Objects::setCustomSOLRfields($object_record, $field, @$f['value']);
                 }
             }
 
@@ -503,6 +491,53 @@ class Objects
             }
         }
     }
+
+
+    /**
+     * set custom SOLR columns
+     * @param reference $object_records
+     *         reference $field
+     * @return void
+     */
+    public static function setCustomSOLRfields(&$object_record, &$field, $value)
+    {
+        // is field stored in custom SOLR column?
+        if (! @$field['cfg']['faceting']) {
+            return;
+        }
+
+        $solr_field = $field['solr_column_name'];
+
+        // is SOLR field specified?
+        if (empty($solr_field)) {
+            // warn that SOLR field is missing
+            \CB\debug("Field '" . $field['name'] . "' is faceted but solr_column_name is missing");
+
+            return;
+        }
+
+
+        # 'combo', 'int', 'objects' fields
+        if (in_array($field['type'], array('combo', 'int', '_objects'))) {
+            $arr = Util\toNumericArray($value);
+
+            foreach ($arr as $v) {
+                if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
+                    $object_record[$solr_field][] = $v;
+                }
+            }
+        }
+
+        if ($field['type'] === 'varchar') {
+            // storing value in SOLR without any changes (TODO: think if the value should be cleaned/transformed)
+            // we assume values are checked before inserted into DB.
+            // maybe to strip_tags at least?
+            $object_record[$solr_field] = $value;
+
+            // \CB\debug("varchar field: '" . $field['name'] . "', solr_column_name: '" . $solr_field .  "', value: '" . $value . "'");
+        }
+    }
+
 
     /**
      * set additional data to be saved in solr for multiple records

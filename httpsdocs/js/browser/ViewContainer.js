@@ -1107,14 +1107,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     }
 
     ,onObjectsDeleted: function(ids, e) {
-        var idx;
-
-        for (var i = 0; i < ids.length; i++) {
-            idx = this.store.findExact('nid', String(ids[i]));
-            if(idx >= 0) {
-                this.store.removeAt(idx);
-            }
-        }
+        this.store.deleteIds(ids);
     }
 
     ,onRestoreClick: function() {

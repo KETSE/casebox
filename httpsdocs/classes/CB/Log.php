@@ -34,12 +34,12 @@ class Log
         fireEvent('beforelogadd', $p);
 
         $p['logData'] = @array(
-            'name' => $data['name']
+            'name' => htmlspecialchars($data['name'], ENT_COMPAT)
             ,'iconCls' => Browser::getIcon($data)
             ,'pids' => empty($data['pids'])
                 ? Objects::getPids($data['id'])
                 : Util\toNumericArray($data['pids'])
-            ,'path' => Util\coalesce($data['pathtext'], $data['path'])
+            ,'path' => htmlspecialchars(Util\coalesce($data['pathtext'], $data['path']), ENT_COMPAT)
             ,'template_id' => $data['template_id']
             ,'case_id' => $data['case_id']
             ,'date' => $data['date']

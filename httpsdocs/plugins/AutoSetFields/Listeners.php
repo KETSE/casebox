@@ -77,6 +77,11 @@ class Listeners
             foreach ($ld as $field) {
                 $tf = $template->getField($field['name']);
                 $v = $template->formatValueForDisplay($tf, @$field['value'], false);
+
+                // decode special chars because formatValueForDisplay encodes textual values
+                // and we obtain double encoded values in solr
+                $v = htmlspecialchars_decode($v);
+
                 if (is_array($v)) {
                     $v = implode(',', $v);
                 }
@@ -94,11 +99,15 @@ class Listeners
 
         // evaluating the title if contains php code
         if (strpos($rez, '<?php') !== false) {
-            eval(' ?>'.$rez.'<?php ');
+
+            // no more EVAL, use event handlers to automatially set Titles in complex situations
+            // eval(' ?__>'.$rez.'<?php ');   also added '__' between ? and >
+
             if (!empty($title)) {
                 $rez = $title;
             }
         }
+
         //replacing any remained field placeholder from the title
         $rez = preg_replace('/\{[^\}]+\}/', '', $rez);
         $rez = stripslashes($rez);

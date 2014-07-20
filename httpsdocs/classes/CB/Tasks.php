@@ -1102,10 +1102,8 @@ class Tasks
             ) or die(DB\dbQueryError());
 
             while ($ur = $ures->fetch_assoc()) {
-                $name = trim($ur['first_name'].' '.$ur['last_name']);
-                if (empty($name)) {
-                    $name = $ur['name'];
-                }
+                $name = User::getDisplayName($ur);
+
                 $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
                 "\n\r".'<img src="'.Util\getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px" alt="'.$name.'" title="'.$name.'"/>'.
                 "\n\r".( ($ur['status'] == 1) ? '<img src="'.Util\getCoreHost($r['db']).'css/i/ico/tick-circle.png" style="width:16px;height:16px; margin-left: -16px"/>': '').
@@ -1134,10 +1132,8 @@ class Tasks
                     ORDER BY 1'
                 ) or die(DB\dbQueryError());
                 while ($ur = $ures->fetch_assoc()) {
-                    $name = trim($ur['first_name'].' '.$ur['last_name']);
-                    if (empty($name)) {
-                        $name = $ur['name'];
-                    }
+                    $name = User::getDisplayName($ur);
+
                     $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
                     "\n\r".'<img src="' . $coreUrl . 'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$name.'" title="'.$name.'"/>'.
                     "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b style="color: #777; text-decoration: line-through">'.$name.'</b>'.
@@ -1301,7 +1297,7 @@ class Tasks
                 $d['category_id']
             )
             ,'{path}' => $d['path']
-            ,'{path_text}' => $d['pathtext']
+            ,'{path_text}' => Util\adjustTextForDisplay($d['pathtext'])
             ,'{cid}' => $d['cid']
             ,'{creator_name}' => User::getDisplayName($d['cid'])
             ,'{full_created_date_text}' => Util\formatDateTimePeriod($d['cdate'], null, @$_SESSION['user']['cfg']['timezone'])
@@ -1392,31 +1388,37 @@ class Tasks
 
     /**
      * set additional data for storing into solr
-     * @param  reference $object_record
+     * @param  reference $objectRecord
      * @return void
      */
-    public static function getSolrData(&$object_record)
+    public static function getSolrData(&$objectRecord)
     {
+        //make standart analysis of task object
+        Objects::getSolrData($objectRecord);
 
-        $obj = Objects::getCustomClassByObjectId($object_record['id']);
-        $objData = $obj->load();
+        //make custom analysis for tasks
+        $obj = Objects::getCachedObject($objectRecord['id']);
+
+        $objData = $obj->getData();
         $linearData = $obj->getLinearData();
         $template = $obj->getTemplate();
 
-        $object_record['task_status'] = @$objData['status'];
-        $object_record['importance'] = @$obj->getFieldValue('importance', 0)['value'];
-        $object_record['category_id'] = @$obj->getFieldValue('category_id', 0)['value'];
+        $objectRecord['task_status'] = @$objData['status'];
+        $objectRecord['importance'] = @$obj->getFieldValue('importance', 0)['value'];
+        $objectRecord['category_id'] = @$obj->getFieldValue('category_id', 0)['value'];
+
         $user_ids = @$obj->getFieldValue('assigned', 0)['value'];
         if (!empty($user_ids)) {
-            $object_record['user_ids'] = Util\toNumericArray($user_ids);
+            $objectRecord['user_ids'] = Util\toNumericArray($user_ids);
         }
-        $object_record['content'] = @$obj->getFieldValue('description', 0)['value'];
+
+        $objectRecord['content'] = @$obj->getFieldValue('description', 0)['value'];
 
         if (!empty($objData['completed'])) {
-            $object_record['completed'] = $objData['completed'];
+            $objectRecord['completed'] = $objData['completed'];
         }
 
-        $object_record['cls'] = $template->formatValueForDisplay(
+        $objectRecord['cls'] = $template->formatValueForDisplay(
             $template->getField('color'),
             $obj->getFieldValue('color', 0)['value'],
             false

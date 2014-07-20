@@ -62,9 +62,22 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
         Ext.apply(this, {
             title: L.Contents
             ,items: this.dataView
+            ,listeners: {
+                scope: this
+                ,beforedestroy: this.onBeforeDestroy
+            }
         });
         CB.objects.plugins.ContentItems.superclass.initComponent.apply(this, arguments);
 
+        App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
+    }
+
+    ,onBeforeDestroy: function(c) {
+        App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
+    }
+
+    ,onObjectsDeleted: function(ids) {
+        this.store.deleteIds(ids);
     }
 
     ,onLoadData: function(r, e) {

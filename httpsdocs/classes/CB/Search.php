@@ -34,7 +34,11 @@ class Search extends Solr\Client
         $this->query = empty($p['query'])
             ? ''
             : $this->escapeLuceneChars($p['query']);
-        $this->start = empty($p['start'])? 0 : intval($p['start']);
+
+        $this->start = empty($p['start'])
+            ? 0
+            : intval($p['start']);
+
         $this->rows = isset($p['rows'])
             ? intval($p['rows'])
             : Config::get('max_rows');
@@ -57,6 +61,7 @@ class Search extends Solr\Client
         if (!empty($p['dstatus'])) {
             $fq = array('dstatus:'.intval($p['dstatus']));
         }
+
         if (!empty($p['fq'])) {
             if (!is_array($p['fq'])) {
                 $p['fq'] = array($p['fq']);
@@ -65,14 +70,27 @@ class Search extends Solr\Client
         }
 
         if (isset($p['system'])) {
-            $fq[] = 'system:'.$p['system'];
+            if (is_numeric($p['system']) || preg_match('/^\[\d+ TO \d+\]$/', $p['system'])) {
+                $fq[] = 'system:'.$p['system'];
+            }
         } else {
             $fq[] = 'system:[0 TO 1]';
         }
 
         /* set custom field list if specified */
         if (!empty($p['fl'])) {
-            $this->params['fl'] = $p['fl'];
+            //filter wrong fieldnames
+            $filteredNames = array();
+            $a = explode(',', $p['fl']);
+            foreach ($a as $fn) {
+                $fn = trim($fn);
+                if (!preg_match('/^[a-z_0-9]+$/i', $fn)) {
+                    continue;
+                }
+                $filteredNames[] = $fn;
+            }
+
+            $this->params['fl'] = implode(',', $filteredNames);
         }
 
         /*analize sort parameter (ex: status asc,date_end asc)/**/
@@ -109,36 +127,29 @@ class Search extends Solr\Client
             }
         }
 
-        /*analize sort parameter (ex: status asc,date_end asc)/**/
-        if (!empty($p['strictSort'])) {
-            $this->params['sort'] = $p['strictSort'];
+        //validate formed sort param
+        $sort = explode(',', $this->params['sort']);
+        $filteredSort = array();
+        foreach ($sort as $sf) {
+            $a = explode(' ', $sf);
 
-        } else {
-            $sort = array(
-                'order' => 'asc'
-            );
-
-            if (isset($p['sort'])) {
-                //sort considered as a single field name and dir apart property
-                if (!is_array($p['sort'])) {
-                    $sort[$p['sort']] = empty($p['dir'])
-                        ? 'asc'
-                        : strtolower($p['dir']);
-                } else { //considered an array of sort fields
-                    foreach ($p['sort'] as $s) {
-                        $s = explode(' ', $s);
-                        $sort[$s[0]] = empty($s[1]) ? 'asc' : strtolower($s[1]);
-                    }
-                }
-
-            } else {
-                $sort['sort_name'] = 'asc';//, subtype asc
+            //skip elements with more than one space
+            if (sizeof($a) !== 2) {
+                continue;
             }
 
-            foreach ($sort as $k => $v) {
-                $this->params['sort'] .= ",$k $v";
+            //skip elements with unknown sorting order string
+            if (!in_array($a[1], array('asc', 'desc'))) {
+                continue;
             }
+
+            //skip strange field_names
+            if (!preg_match('/^[a-z_0-9]+$/i', $a[0])) {
+                continue;
+            }
+            $filteredSort[] = implode(' ', $a);
         }
+        $this->params['sort'] = implode(', ', $filteredSort);
 
         /* adding additional query filters */
 
@@ -182,8 +193,18 @@ class Search extends Solr\Client
             if (!is_array($p['template_types'])) {
                 $p['template_types'] = explode(',', $p['template_types']);
             }
-            if (!empty($p['template_types'])) {
-                $fq[] = 'template_type:("'.implode('" OR "', $p['template_types']).'")';
+
+            $filteredNames = array();
+            foreach ($p['template_types'] as $tt) {
+                $tt = trim($tt);
+                if (!preg_match('/^[a-z]+$/i', $tt)) {
+                    continue;
+                }
+                $filteredNames[] = $tt;
+            }
+
+            if (!empty($filteredNames)) {
+                $fq[] = 'template_type:("'.implode('" OR "', $filteredNames).'")';
             }
         }
 
@@ -197,7 +218,7 @@ class Search extends Solr\Client
         }
 
         if (!empty($p['dateStart'])) {
-            $fq[] = 'date:['.$p['dateStart'].' TO '.$p['dateEnd'].']';
+            $fq[] = 'date:['.Util\dateMysqlToISO($p['dateStart']).' TO '.Util\dateMysqlToISO($p['dateEnd']).']';
         }
 
         $this->params['fq'] = $fq;

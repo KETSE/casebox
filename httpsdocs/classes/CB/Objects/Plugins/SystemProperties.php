@@ -30,6 +30,7 @@ class SystemProperties extends Base
                 ,t.dstatus
                 ,t.did
                 ,t.ddate
+                ,t.size
                 ,(SELECT 1 FROM user_subscriptions WHERE object_id = $1 AND user_id = $2) `subscribed`
             FROM tree t
             JOIN tree_info ti on t.id = ti.id

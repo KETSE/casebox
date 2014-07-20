@@ -59,6 +59,9 @@ class User
                 $r['admin'] = Security::isAdmin($user_id);
                 $r['manage'] = Security::canManage($user_id);
 
+                $r['first_name'] = htmlentities($r['first_name'], ENT_QUOTES, 'UTF-8');
+                $r['last_name'] = htmlentities($r['last_name'], ENT_QUOTES, 'UTF-8');
+
                 // do not expose security params
                 unset($r['cfg']['security']);
 
@@ -451,8 +454,9 @@ class User
         $cfg = $this->getUserConfig();
         $languageSettings = Config::get('language_settings');
 
-        $p['first_name'] = strip_tags($p['first_name']);
-        $p['last_name'] = strip_tags($p['last_name']);
+        $p['first_name'] = Purify::humanName($p['first_name']);
+        $p['last_name'] = Purify::humanName($p['last_name']);
+
         $p['sex'] = (strlen($p['sex']) > 1)
             ? null
             : $p['sex'];
@@ -486,12 +490,17 @@ class User
             }
         }
 
-        if (isset($p['phone'])) {
-            if (empty($p['phone']) || is_numeric($p['phone'])) {
-                $cfg['phone'] = $p['phone'];
-            } else {
-                return array('success' => false, 'msg' => 'Invalid phone number');
-            }
+        if (isset($p['phone']) && !empty($p['phone'])) {
+
+            // remove all symbols except 0-9, (, ), -, +
+            $phone = preg_replace("/[^0-9 \-\(\)\+]/", '', $p['phone']);
+            $cfg['phone'] = $phone;
+
+            // if (empty($p['phone']) || is_numeric($p['phone'])) {
+            //     $cfg['phone'] = $p['phone'];
+            // } else {
+            //    return array('success' => false, 'msg' => 'Invalid phone number');
+            // }
         }
 
         if (isset($p['timezone'])) {
@@ -582,8 +591,9 @@ class User
         if ($p['id'] == $_SESSION['user']['id']) {
             $u = &$_SESSION['user'];
 
-            $u['first_name'] = $p['first_name'];
-            $u['last_name'] = $p['last_name'];
+            $u['first_name'] = htmlentities($p['first_name'], ENT_QUOTES, 'UTF-8');
+            $u['last_name'] = htmlentities($p['last_name'], ENT_QUOTES, 'UTF-8');
+
             $u['sex'] = $p['sex'];
             $u['email'] = $p['email'];
             $u['language_id'] = $p['language_id'];
@@ -1047,10 +1057,14 @@ class User
             @mkdir($photosPath, 0755, true);
         }
 
-        $image = new \Imagick($f['tmp_name']);
-        $image->resizeImage(100, 100, \imagick::FILTER_LANCZOS, 0.9, true);
-        $image->setImageFormat('png');
-        $image->writeImage($photosPath.$photoName);
+        try {
+            $image = new \Imagick($f['tmp_name']);
+            $image->resizeImage(100, 100, \imagick::FILTER_LANCZOS, 0.9, true);
+            $image->setImageFormat('png');
+            $image->writeImage($photosPath.$photoName);
+        } catch (\Exception $e) {
+            return array('success' => false, 'msg' => 'This image format is not supported, please upload a PNG, JPG image.');
+        }
 
         $res = DB\dbQuery(
             'UPDATE users_groups SET photo = $2 WHERE id = $1',
@@ -1164,46 +1178,62 @@ class User
 
     /**
      * get display name of a user
-     * @param  $id  id of the user
+     * @param  $idOrData  id or user data array
      * @return varchar
      */
-    public static function getDisplayName($id = false, $withEmail = false)
+    public static function getDisplayName($idOrData = false, $withEmail = false)
     {
-        if ($id === false) {
+        $data = array();
+
+        if ($idOrData === false) { //use current logged users
             $id = $_SESSION['user']['id'];
-        } elseif (!is_numeric($id)) {
+
+        } elseif (is_numeric($idOrData)) { //id specified
+            $id = $idOrData;
+
+        } elseif (is_array($idOrData) && !empty($idOrData['id']) && is_numeric($idOrData['id'])) {
+            $id = $idOrData['id'];
+            $data = $idOrData;
+
+        } else {
             return '';
         }
 
         $var_name = 'users['.$id."]['displayName$withEmail']";
 
         if (!Cache::exist($var_name)) {
-            $res = DB\dbQuery(
-                'SELECT
-                    name
-                    ,first_name
-                    ,last_name
-                    ,email
-                FROM users_groups
-                WHERE id = $1',
-                $id
-            ) or die(DB\dbQueryError());
+            if (empty($data)) {
+                $res = DB\dbQuery(
+                    'SELECT
+                        name
+                        ,first_name
+                        ,last_name
+                        ,email
+                    FROM users_groups
+                    WHERE id = $1',
+                    $id
+                ) or die(DB\dbQueryError());
 
-            if ($r = $res->fetch_assoc()) {
-                $name = trim($r['first_name'].' '.$r['last_name']);
-                if (empty($name)) {
-                    $name = $r['name'];
+                if ($r = $res->fetch_assoc()) {
+                    $data = $r;
                 }
-
-                if (($withEmail == true) && (!empty($r['email']))) {
-                    $name .= "\n(".$r['email'].")";
-                }
-
-                $name = htmlspecialchars($name, ENT_COMPAT);
-
-                Cache::set($var_name, $name);
+                $res->close();
             }
-            $res->close();
+
+            $name = @Purify::humanName($data['first_name'].' '.$data['last_name']);
+
+            if (empty($name)) {
+                $name = @$data['name'];
+            }
+
+            if (($withEmail == true) && (!empty($r['email']))) {
+                $name .= "\n(" . $r['email'] . ")";
+            }
+
+            $name = htmlentities($name, ENT_QUOTES, 'UTF-8');
+
+            Cache::set($var_name, $name);
+
         }
 
         return Cache::get($var_name);
@@ -1244,6 +1274,7 @@ class User
                 $r['language_id'] = Config::get('language_index');
                 $language_index = $r['language_id'] -1;
             }
+
             $r['language'] = $coreLanguages[$language_index];
             $r['locale'] =  $languageSettings[$r['language']]['locale'];
 

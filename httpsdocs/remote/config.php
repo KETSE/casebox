@@ -51,7 +51,6 @@ $API = array_merge(
         ,'CB_BrowserView' => array(
             'methods' => array(
                 'getChildren'       => array('len' => 1)
-                ,'getSummaryData'   => array('len' => 1)
                 ,'createFolder'     => array('len' => 1)
                 ,'delete'           => array('len' => 1)
                 ,'rename'           => array('len' => 1)

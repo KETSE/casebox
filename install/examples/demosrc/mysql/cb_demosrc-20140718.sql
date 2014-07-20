@@ -23,7 +23,7 @@ CREATE TABLE `action_log` (
   `object_id` bigint(20) unsigned NOT NULL,
   `object_pid` bigint(20) unsigned DEFAULT NULL,
   `user_id` int(10) unsigned NOT NULL,
-  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','reopen','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail') NOT NULL,
+  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','reopen','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail') NOT NULL,
   `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `data` mediumtext,
   PRIMARY KEY (`id`),
@@ -244,7 +244,7 @@ DROP TABLE IF EXISTS `notifications`;
 
 CREATE TABLE `notifications` (
   `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
-  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','reopen','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail') NOT NULL,
+  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','reopen','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail') NOT NULL,
   `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `object_id` bigint(20) unsigned NOT NULL,
   `object_pid` bigint(20) unsigned DEFAULT NULL,
@@ -2285,7 +2285,13 @@ BEGIN
 		,tree_acl_security_sets
 		SET tree_acl_security_sets.`set` = CONCAT(
 			tmp_to_security_set
-			,SUBSTRING(tree_acl_security_sets.set, tmp_security_set_length)
+			,CASE WHEN tmp_security_set_length IS NULL
+			THEN
+			  CONCAT(',', tree_acl_security_sets.set)
+			ELSE
+			 SUBSTRING(tree_acl_security_sets.set, tmp_security_set_length)
+			END
+--			,SUBSTRING(tree_acl_security_sets.set, tmp_security_set_length)
 		)
 		,`tree_acl_security_sets`.updated = 1
 	WHERE tmp_update_child_sets_security_sets.id = tree_acl_security_sets.id;

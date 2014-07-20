@@ -38,7 +38,7 @@ CB.Login = Ext.extend(Ext.Window, {
                     ,items:[{
                             name: 'username'
                             ,fieldLabel: L.User
-                        },{ 
+                        },{
                             name: 'password'
                             ,fieldLabel: L.Password
                             ,inputType: 'password'
@@ -74,7 +74,7 @@ CB.Login = Ext.extend(Ext.Window, {
         pass = this.find('name', 'password')[0];
         if(!user.isValid() || !pass.isValid()) return false;
         //Ext.util.Cookies.set('lastUser', user.getValue());
-        
+
         CB_User.login(user.getValue(), pass.getValue(), this.processLoginResponse);
     }
     ,processLoginResponse: function(response, e){
@@ -89,7 +89,7 @@ CB.Login = Ext.extend(Ext.Window, {
             ip.body.update(response.msg);
         }
      }
-    
+
 });
 
 Ext.reg('CBLogin', CB.Login); // register xtype
@@ -126,8 +126,8 @@ CB.VerifyPassword = Ext.extend(Ext.Window, {
                             name: 'username'
                             ,fieldLabel: L.User
                             ,xtype: 'displayfield'
-                            ,value: App.loginData.first_name + ' ' + App.loginData.last_name
-                        },{ 
+                            ,value: getUserDisplayName()
+                        },{
                             name: 'password'
                             ,fieldLabel: L.Password
                             ,inputType: 'password'
@@ -159,22 +159,22 @@ CB.VerifyPassword = Ext.extend(Ext.Window, {
     ,doVerify: function(){
         pass = this.find('name', 'password')[0];
         if(!pass.isValid()) return false;
-        
+
         CB_User.verifyPassword( pass.getValue(), this.processVerifyResponse, this);
     }
     ,processVerifyResponse: function(response, e){
         if(e.result.success === true){
             this.success = true;
             this.close();
-        }else{
+        } else {
             ip = this.find('name', 'infoPanel')[0];
             ip.show();
             ip.body.update(response.msg);
-            this.syncSize()
+            this.syncSize();
             pass = this.find('name', 'password')[0];
             pass.reset();
             pass.focus(true, 550);
         }
      }
-    
+
 });

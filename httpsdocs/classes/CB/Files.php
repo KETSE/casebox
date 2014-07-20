@@ -478,7 +478,7 @@ class Files
 
             $file_id = empty($p['id'])
                 ? $this->getFileId($pid, $f['name'])
-                : $p['id'];
+                : intval($p['id']);
 
             if (!empty($file_id)) {
                 //newversion, replace, rename, autorename, cancel
@@ -517,7 +517,7 @@ class Files
                         /* TODO: only mark file as deleted but dont delte it */
                         DB\dbQuery('CALL p_delete_tree_node($1)', $file_id) or die(DB\dbQueryError());
                         $solr = new Solr\Client();
-                        $solr->deleteByQuery('id:'.$file_id.' OR pids:'.$file_id);
+                        $solr->deleteByQuery('id:' . $file_id . ' OR pids: ' . $file_id);
                         break;
                     case 'rename':
                         $file_id = null;
@@ -745,9 +745,15 @@ class Files
 
         /* file date will be used from file variable (date parametter) if specified.
         If not specified then system file_date will be used */
-        $storage_subpath = empty($f['date']) ?
-            date('Y/m/d', filemtime($f['tmp_name'])) :
-            str_replace('-', '/', substr($f['date'], 0, 10));
+        $date = false;
+        if (!empty($f['date'])) {
+            $date = strtotime($f['date']);
+        }
+
+        $storage_subpath = ($date === false)
+            ? date('Y/m/d', filemtime($f['tmp_name']))
+            : date('Y/m/d', $date);
+
         DB\dbQuery(
             'INSERT INTO files_content (`size`, `type`, `path`, `md5`)
             VALUES($1
@@ -997,15 +1003,24 @@ class Files
             case 'tif':
             case 'tiff':
             case 'svg':
-                $image = new \Imagick($fn);
-                $image->setImageFormat('png');
-                $image->writeImage($filesPreviewDir.$file['content_id'].'_.png');
+                $convertedImage = $filesPreviewDir.$file['content_id'].'_.png';
+                if (!file_exists($convertedImage)) {
+                    try {
+                        $image = new \Imagick($fn);
+                        $image->setImageFormat('png');
+                        $image->writeImage($convertedImage);
+                    } catch (\Exception $e) {
+                        return $rez;
+                    }
+                }
+
                 file_put_contents(
                     $preview_filename,
-                    '<img src="/' + $coreName + '/v-'.$file['content_id'].
+                    '<img src="/' . $coreName . '/v-'.$file['content_id'].
                     '_.png" class="fit-img" style="margin: auto" />'
                 );
                 break;
+
             default:
                 if ((substr($file['type'], 0, 5) == 'image') && (substr($file['type'], 0, 9) !== 'image/svg')) {
                     file_put_contents(
@@ -1035,6 +1050,9 @@ class Files
 
     public static function getSolrData(&$objectRecord)
     {
+        //make standart analysis of task object
+        Objects::getSolrData($objectRecord);
+
         $filesPath = Config::get('files_dir');
 
         $res = DB\dbQuery(
@@ -1066,9 +1084,11 @@ class Files
             } else {
                 $content = '';
             }
-            $objectRecord['content'] = Util\coalesce($r['title'], '')."\n".
-            Util\coalesce($r['type'], '')."\n".
-            Util\coalesce($content, '');
+            $objectRecord['content'] =
+                Util\coalesce($r['title'], '')."\n".
+                Util\coalesce($r['type'], '')."\n".
+                (empty($objectRecord['content']) ? '' : $objectRecord['content'] . "\n").
+                Util\coalesce($content, '');
         }
         $res->close();
     }

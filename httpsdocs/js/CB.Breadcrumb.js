@@ -33,7 +33,7 @@ CB.Breadcrumb = Ext.extend( Ext.DataView, {
             } else {
                 data.push({
                     id: Ext.id()
-                    ,name: Ext.util.Format.htmlEncode(dataArray[i]).replace('&amp;#47;', '&#47;')
+                    ,name: Ext.util.Format.htmlEncode(dataArray[i]).replace(/&amp;#47;/g, '&#47;')
                 });
             }
         }

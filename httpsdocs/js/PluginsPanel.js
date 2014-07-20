@@ -95,7 +95,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
                 ,cls: 'obj-plugin-title'
                 ,tpl: [
                     '<tpl for=".">'
-                    ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(values.name) ]}</div>'
+                    ,'<div class="obj-header">{[ values.name ]}</div>'
                     ,'</tpl>'
                 ]
                 ,data: this.loadedParams

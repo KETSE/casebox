@@ -173,10 +173,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if(um) {
             um.update('<img src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg' + App.sid + '" ' +
                 'style="margin-top: 4px; width: 32px; height: 32px;" ' +
-                'title="'+
-                    App.loginData['first_name']+' '+
-                    App.loginData['last_name']+ "\n" +
-                    '(' + App.loginData['email'] +')" />'
+                'title="'+ getUserDisplayName(true) + '" />'
             );
         }
 
@@ -562,6 +559,8 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             );
         }
         this.fileField.data = data;
+
+        this.fileField.value = null;
         this.fileField.click();
     }
 

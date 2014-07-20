@@ -156,10 +156,8 @@ class Security
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $title = trim($r['first_name'].' '.$r['last_name']);
-            if (!empty($title)) {
-                $r['name'] = $title;
-            }
+            $r['name'] = User::getDisplayName($r);
+
             unset($r['first_name']);
             unset($r['last_name']);
 
@@ -1244,8 +1242,12 @@ class Security
         $rez = array('success' => true, 'data' => array());
         $user_id = $_SESSION['user']['id'];
         $res = DB\dbQuery(
-            'SELECT id, name, first_name, last_name
-            , concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls`
+            'SELECT
+                id
+                ,name
+                ,first_name
+                ,last_name
+                ,concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls`
             FROM users_groups
             WHERE `type` = 2
                 AND did IS NULL
@@ -1256,8 +1258,9 @@ class Security
 
         while ($r = $res->fetch_assoc()) {
             if (!empty($r['first_name']) || !empty($r['last_name'])) {
-                $r['name'] = trim($r['first_name'].' '.$r['last_name']);
+                $r['name'] = Purify::humanName($r['first_name'].' '.$r['last_name']);
             }
+
             $rez['data'][] = $r;
         }
         $res->close();

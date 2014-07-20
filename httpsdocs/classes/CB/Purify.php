@@ -4,9 +4,9 @@ namespace CB;
 use CB\Config;
 
 /**
- * abstract class for singleton classes definition
+ * Class used to purify values
  */
-class HtmlPurifier
+class Purify
 {
     protected static $_instance = null;
 
@@ -57,29 +57,29 @@ class HtmlPurifier
     }
 
     /**
-     * purify given value
+     * purify given html value
      * @param  varchar $html
      * @param  array   $options associative array of purify library options
      * @return varchar
      */
-    final public static function purify($html, $options = array())
+    final public static function html($value, $options = array())
     {
-        if (empty($html)) {
+        if (empty($value)) {
             return '';
         }
 
         static::getInstance();
 
-        // detect html encoding
-        $cs = mb_detect_encoding($html);
+        // detect encoding
+        $cs = mb_detect_encoding($value);
 
         if (empty($cs)) {
             $cs = 'UTF-8';
         }
 
-        $cs = @iconv($cs, 'UTF-8', $html);
+        $cs = @iconv($cs, 'UTF-8', $value);
         if (empty($cs)) {
-            $cs = $html;
+            $cs = $value;
         }
 
         $config = null;
@@ -91,8 +91,42 @@ class HtmlPurifier
             }
         }
 
-        $html = static::$purifier->purify($cs, $config);
+        $value = static::$purifier->purify($cs, $config);
 
-        return $html;
+        return $value;
+    }
+
+    /**
+     * purify filename by removing unsuported filesistem chars: \ / : * ? " < > |
+     * @param  varchar $fielname
+     * @return varchar
+     */
+    final public static function filename($filename)
+    {
+        // replace not allowed chars
+        $filename = preg_replace('/[\\\\\/:\*\?"<>|\n\r\t]/', '', $filename);
+        // replace more spaces with one space
+        $filename = preg_replace('/\s+/', ' ', $filename);
+
+        $filename = trim($filename);
+
+        return $filename;
+    }
+
+    /**
+     * purify human name
+     * @param  varchar $fielname
+     * @return varchar
+     */
+    final public static function humanName($name)
+    {
+        // replace not allowed chars
+        $name = preg_replace('/[^\w\s\."\'`]/i', '', $name);
+        // replace more spaces with one space
+        $name = preg_replace('/\s+/', ' ', $name);
+
+        $name = trim($name);
+
+        return $name;
     }
 }
