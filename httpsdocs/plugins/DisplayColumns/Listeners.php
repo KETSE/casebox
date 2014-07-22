@@ -97,7 +97,7 @@ class Listeners
 
                         $values = array(@$doc[$solrFieldName]);
 
-                        $templateField = $template->getField($solrFieldName);
+                        $templateField = $template->getField($customField);
                         if (empty($templateField)) {
                             $templateField = array(
                                 'type' => 'varchar'
@@ -202,13 +202,12 @@ class Listeners
         );
 
         $displayColumns = $this->getDC();
-
         if (!empty($displayColumns['data'])) {
-            foreach ($displayColumns['data'] as $column) {
+            foreach ($displayColumns['data'] as $columnName => $column) {
                 if (is_array($column) && !empty($column['solr_column_name'])) {
                     $rez['fields'][$column['solr_column_name']] = 1;
 
-                    if ((@$this->inputParams['sort'] == $column['solr_column_name']) &&
+                    if ((@$this->inputParams['sort'] == $columnName) &&
                         !empty($this->inputParams['dir'])
                     ) {
                         $rez['sort'][] = $column['solr_column_name'] . ' ' . strtolower($this->inputParams['dir']);
@@ -235,7 +234,10 @@ class Listeners
 
             if (!empty($state['sort']['field'])) {
                 $rez['sort'] = array(
-                    $state['sort']['field']
+                    (empty($displayColumns['data'][$state['sort']['field']]['solr_column_name'])
+                        ? $state['sort']['field']
+                        : $displayColumns['data'][$state['sort']['field']]['solr_column_name']
+                    )
                     .' '
                     .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
                 );

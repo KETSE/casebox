@@ -335,7 +335,9 @@ class Search extends Solr\Client
             return;
         }
 
-        $sort = explode(',', $this->params['sort']);
+        $sort = is_array($this->params['sort'])
+            ? $this->params['sort']
+            : explode(',', $this->params['sort']);
         foreach ($sort as $k => $el) {
             $el = trim($el);
             list($f, $s) = explode(' ', $el);

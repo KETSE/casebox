@@ -45,6 +45,7 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
                 ,'ago_text'
                 ,'iconCls'
             ]
+            ,data: []
         });
 
         this.dataView = new Ext.DataView({

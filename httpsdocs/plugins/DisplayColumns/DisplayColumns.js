@@ -33,11 +33,13 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
 
         //add corresponding metadata to obj.result if DisplayColumns changed
         this.currentColumns = obj.result.DC || [];
+
         if(Ext.util.JSON.encode(this.lastColumns) !== Ext.util.JSON.encode(this.currentColumns)) {
             obj.result.metaData = this.getNewMetadata();
             this.lastColumns = this.currentColumns;
             this.store.loadData(obj.result);
-            this.cm.setConfig(this.getNewColumns());
+            var nc = this.getNewColumns();
+            this.cm.setConfig(nc);
         }
     }
 
@@ -61,7 +63,7 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
             }
 
             if(Ext.isDefined(currentColumns[key])) {
-                rez.fields[i] = Ext.copyTo(fieldData, currentColumns[key], ['type']);
+                rez.fields[i] = Ext.copyTo(fieldData, currentColumns[key], ['type', 'sortType']);
                 delete currentColumns[key];
             }
         }
@@ -89,6 +91,8 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
         for (i = 0; i < rez.length; i++) {
             if(Ext.isDefined(currentColumns[rez[i].dataIndex])) {
                 var nd = currentColumns[rez[i].dataIndex];
+
+                delete rez[i].hidden;
 
                 rez[i] = Ext.apply(rez[i], nd);
 

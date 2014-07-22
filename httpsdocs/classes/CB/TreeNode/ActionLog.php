@@ -40,7 +40,9 @@ class ActionLog extends Base
 
     protected function createDefaultFilter()
     {
-        $this->fq = array();
+        $this->fq = array(
+            'core_id' => Config::get('core_id')
+        );
     }
 
     public function getChildren(&$pathArray, $requestParams)
@@ -170,7 +172,7 @@ class ActionLog extends Base
             ,'facet.range.start' => 'NOW/DAY-7DAY'
             ,'facet.range.end' => 'NOW/DAY+1DAY'
             ,'facet.range.gap' => '+1DAY'
-
+            ,'fq' => $this->fq
             ,'facet.query' => array(
                 '{!ex=action_date key=action_date}action_date:["' . date('Y-m') . '-01T00:00:00Z" TO *]'
             )
@@ -228,7 +230,7 @@ class ActionLog extends Base
             'rows' => 0
             ,'facet' => 'true'
             ,'facet.mincount' => 1
-
+            ,'fq' => $this->fq
             ,'facet.field' => array(
                 '{!ex=user_id key=user_id}user_id'
             )
@@ -260,7 +262,7 @@ class ActionLog extends Base
             'rows' => 0
             ,'facet' => 'true'
             ,'facet.mincount' => 1
-
+            ,'fq' => $this->fq
             ,'facet.field' => array(
                 '{!ex=action_type key=action_type}action_type'
             )
@@ -292,9 +294,7 @@ class ActionLog extends Base
         $p = array(
             'rows' => 50
             ,'fl' => 'id,action_id,user_id,object_id,object_pid,object_data'
-            ,'fq' => array(
-                'core_id' => Config::get('core_id')
-            )
+            ,'fq' => $this->fq
             ,'strictSort' => 'action_date desc'
         );
 
@@ -302,23 +302,23 @@ class ActionLog extends Base
 
         switch (substr($this->lastNode->id, 0, 1)) {
             case 'd':
-                $p['fq'] = 'action_date:["' . $id . 'T00:00:00Z" TO "' . $id . 'T23:59:99Z"]';
+                $p['fq'][] = 'action_date:["' . $id . 'T00:00:00Z" TO "' . $id . 'T23:59:99Z"]';
                 break;
 
             case 'm':
-                $p['fq'] = 'action_date:["' . date('Y-m') . '-01T00:00:00Z" TO *]';
+                $p['fq'][] = 'action_date:["' . date('Y-m') . '-01T00:00:00Z" TO *]';
                 break;
 
             case 't':
-                $p['fq'] = 'action_type:'.$id;
+                $p['fq'][] = 'action_type:'.$id;
                 break;
 
             case 'u':
-                $p['fq'] = 'user_id:'.$id;
+                $p['fq'][] = 'user_id:'.$id;
                 break;
 
             case 't':
-                $p['fq'] = 'action_type:'.$id;
+                $p['fq'][] = 'action_type:'.$id;
                 break;
 
         }

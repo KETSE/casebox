@@ -1057,20 +1057,28 @@ function overrides(){
     Ext.override(Ext.data.Store, {
         deleteIds: function(ids){
             var idx
-                ,idProperty = Ext.value(this.reader.idProperty, 'id');
+                ,idProperty = Ext.isEmpty(this.reader)
+                    ? 'id'
+                    : Ext.value(
+                        this.reader.idProperty
+                        ,this.reader.meta.idProperty
+                        ,'id'
+                    );
+
             if(Ext.isPrimitive(ids)) {
                 ids = String(ids).split(',');
             }
 
-            for (var i = 0; i < ids.length; i++) {
-                idx = this.findExact(idProperty, String(ids[i]));
+            if(this.data) {
+                for (var i = 0; i < ids.length; i++) {
+                    idx = this.findExact(idProperty, String(ids[i]));
 
-                if(idx < 0) {
-                    idx = this.findExact(idProperty, parseInt(ids[i], 10));
-                }
-
-                if(idx >= 0) {
-                    this.removeAt(idx);
+                    if(idx < 0) {
+                        idx = this.findExact(idProperty, parseInt(ids[i], 10));
+                    }
+                    if(idx >= 0) {
+                        this.removeAt(idx);
+                    }
                 }
             }
         }

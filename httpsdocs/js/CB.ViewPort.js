@@ -104,13 +104,22 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             }
             ,stateful: true
             ,stateId: 'mAc'
-            ,stateEvents: ['resize']
+            ,stateEvents: ['resize', 'collapse', 'expand']
             ,getState: function(){
-                var rez = {collapsed: this.collapsed};
-                if(this.getWidth() > 0) {
-                    rez.width = this.getWidth();
-                }
+                var rez = {
+                    collapsed: this.collapsed
+                    ,width: this.width
+                };
+
                 return rez;
+            }
+            ,applyState: function(state) {
+                Ext.Panel.prototype.applyState.call(this, state);
+                if(state.collapsed) {
+                    this.setWidth(state.width);
+                } else {
+                    this.expand();
+                }
             }
         });
 

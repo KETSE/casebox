@@ -1,6 +1,7 @@
 Ext.namespace('CB.plugins');
 CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
     pidPropety: 'nid'
+
     ,constructor: function(config){
         Ext.apply(this, {
             dropZoneConfig:{
@@ -12,6 +13,7 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
             Ext.apply(this, config);
         }
     }
+
     ,init: function(owner) {
         this.owner = owner;
         owner.on('render', this.onRender, this);
@@ -30,6 +32,7 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
         App.on('dragfilesleave', this.hideDropZone, this);
         App.on('filesdrop', this.hideDropZone, this);
     }
+
     ,onBeforeDestroy: function(){
         App.un('dragfilesenter', this.showDropZone, this);
         App.un('dragfilesover', this.showDropZone, this);
@@ -42,53 +45,67 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
     }
 
     ,getTarget: function(e){
-        te = this.owner.getEl();
-        ce = e.getTarget('.x-grid3-row');
+        var te = this.owner.getEl();
+        var ce = e.getTarget('.x-grid3-row');
         if(!Ext.isEmpty(ce)){
              ce = Ext.get(ce);
-             if(te.contains(ce)) te = ce;
+             if(te.contains(ce)) {
+                te = ce;
+            }
         }
+
         return te;
     }
+
     ,getTargetData: function(e){
-        te = this.getTarget(e);
+        var te = this.getTarget(e);
         this.targetId = null;
         this.targetPath = null;
         if(te.hasClass('x-grid3-row')){
-            ridx = this.owner.getView().findRowIndex(te.dom);
-            if(ridx >=0 ){
-                r = this.owner.store.getAt(ridx);
+            var ridx = this.owner.getView().findRowIndex(te.dom);
+            if(ridx >= 0 ){
+                var r = this.owner.store.getAt(ridx);
                 this.targetId = r.get(this.pidPropety);
                 this.targetPath = r.get('path')+r.get('name')+'/';
             }
-        }else{
-            cmp = Ext.getCmp(te.id);
+        } else {
+            var cmp = Ext.getCmp(te.id);
             this.targetId = cmp.getProperty(this.pidPropety);
             this.targetPath = cmp.getProperty('pathtext');
         }
     }
+
     ,onDragEnter: function(e){ // dataTransfer info is not available on drag enter, it's only available on drop
         this.getTarget(e).addClass('drop-target');
     }
+
     ,onDragLeave: function(e){ // dataTransfer info is not available on drag enter, it's only available on drop
         te = this.getTarget(e);
         te.removeClass('drop-target');
     }
+
     ,onDragOver: function(e, el, o){
         e.browserEvent.dataTransfer.dropEffect = 'copy';
 
-        te = this.getTarget(e);
-        if(Ext.isEmpty(te)) return false;
+        var te = this.getTarget(e);
+        if(Ext.isEmpty(te)) {
+            return false;
+        }
         te.addClass('drop-target');
-        if(this.lastEl == te) return true;
 
-        if(!Ext.isEmpty(this.lastEl)) this.lastEl.removeClass('drop-target');
+        if(this.lastEl == te) {
+            return true;
+        }
 
+        if(!Ext.isEmpty(this.lastEl)) {
+            this.lastEl.removeClass('drop-target');
+        }
 
         this.lastEl = te;
 
         return true;
     }
+
     ,onDrop: function(e) {
         this.onDragLeave(e);
 
@@ -101,6 +118,7 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
         this.hideDropZone();
         this.getRecursiveFileList(e);
     }
+
     ,getRecursiveFileList: function(e){
         dt = e.browserEvent.dataTransfer;
 
@@ -114,6 +132,7 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
         Ext.ux.WebkitEntriesIterator.iterateEntries(entries, this.processGetRecursiveFileList, this);
         return 0;
     }
+
     ,processGetRecursiveFileList: function(filesArray){
         /* adding dorpped files to queue */
         App.addFilesToUploadQueue(filesArray, {
@@ -123,6 +142,7 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
         return true;
 
     }
+
     ,addFilesToQueue: function(e, targetPid){
 
     }
@@ -133,6 +153,7 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
         for (var i = 0, f; f = files[i]; i++){}
         return i;
     }
+
     ,showDropZone: function(e){
         el = this.owner.getEl();
         if( Ext.isEmpty(el.dom) ){
@@ -154,6 +175,7 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
         }
         this.dropZoneEl.applyStyles("display:block");
     }
+
     ,hideDropZone: function(e){
         var a = Ext.query('.desktop-drop-zone');
         if(!Ext.isEmpty(a)) {
@@ -161,7 +183,7 @@ CB.plugins.FilesDropZone =  Ext.extend(Ext.util.Observable, {
                 a = Ext.get(a);
                 a.applyStyles("display:none");
                 a.removeClass('grid-drop-zone-over');
-            };
+            }
         }
         // if(this.dropZoneEl){
         //     this.dropZoneEl.applyStyles("display:none");

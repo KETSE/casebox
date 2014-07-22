@@ -30,6 +30,9 @@ class Objects
 
         $usersToNotify = static::getUsersToNotify($id, $p['logData']['pids']);
 
+        //exclude current user from notified users
+        $notifiedUsers = array_diff($notifiedUsers, array($_SESSION['user']['id']));
+
         foreach ($usersToNotify as $userId) {
             $u = User::getPreferences($userId);
             $l = $u['language'];

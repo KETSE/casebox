@@ -323,6 +323,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         var idx = Ext.isNumber(buttonOrIndex)
             ? buttonOrIndex
             : mb.menu.items.indexOf(buttonOrIndex);
+
         if(currentItemIndex == idx) {
             return;
         }
@@ -334,7 +335,9 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         if(!mb.pressed) {
             mb.toggle();
         }
+
         this.onViewChange();
+
         if(autoLoad !== false) {
             this.load(this.requestedLoadData);
         }
@@ -355,8 +358,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
     /**
      * loading an object into the panel in a specific view
-     * @param  {[type]} objectData [description]
-     * @return {[type]}            [description]
+     * @param  {[type]} objectData
+     * @return {[type]}
      */
     ,load: function(objectData) {
         if(this.locked) {
@@ -369,6 +372,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 id: objectData
             };
         }
+
+        if(Ext.isEmpty(objectData.id)) {
+            return;
+        }
+
         var ai = this.getLayout().activeItem;
 
         //current view index

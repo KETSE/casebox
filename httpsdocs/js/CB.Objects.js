@@ -291,16 +291,23 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             ,listeners: {
                 scope: this
                 ,loaded: function(objectPanel, activeViewItem) {
-                    if(Ext.isEmpty(objectPanel.loadedData) ||
-                        Ext.isEmpty(objectPanel.loadedData.id) ||
-                        (objectPanel.loadedData.id == this.data.id)
-                    ) {
-                        objectPanel.getTopToolbar().hide();
-                    } else {
-                        objectPanel.getTopToolbar().show();
+                    var tb = objectPanel.getTopToolbar();
+
+                    if(tb) {
+                        if(Ext.isEmpty(objectPanel.loadedData) ||
+                            Ext.isEmpty(objectPanel.loadedData.id) ||
+                            (objectPanel.loadedData.id == this.data.id)
+                        ) {
+                            objectPanel.getTopToolbar().hide();
+                        } else {
+                            objectPanel.getTopToolbar().show();
+                        }
                     }
-                    objectPanel.syncSize();
-                    objectPanel.ownerCt.syncSize();
+
+                    if(objectPanel.rendered) {
+                        objectPanel.syncSize();
+                        objectPanel.ownerCt.syncSize();
+                    }
                 }
             }
         });

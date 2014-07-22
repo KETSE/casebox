@@ -217,6 +217,24 @@ class Browser
         //unset restricted query params from user input
         unset($p['fq']);
 
+        $fieldConfig = array();
+        // get field config from database
+        if (!empty($p['fieldId']) && is_numeric($p['fieldId'])) {
+            $res = DB\dbQuery(
+                'SELECT cfg from templates_structure where id = $1',
+                $p['fieldId']
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                $fieldConfig = json_decode($r['cfg'], true);
+
+                //set "fq" param from database (dont trust user imput)
+                if (!empty($fieldConfig['fq'])) {
+                    $p['fq'] = $fieldConfig['fq'];
+                }
+            }
+            $res->close();
+        }
+
         if (!empty($p['source'])) {
             if (is_array($p['source'])) { // a custom source
                 $rez = array();
@@ -225,21 +243,12 @@ class Browser
                     return $rez;
                 }
 
-                //get custom method from database
-                $cfg = [];
-                $res = DB\dbQuery(
-                    'SELECT cfg from templates_structure where id = $1',
-                    $p['fieldId']
-                ) or die(DB\dbQueryError());
-                if ($r = $res->fetch_assoc()) {
-                    $cfg = json_decode($r['cfg'], true);
-                }
-                $res->close();
-                if (empty($cfg['source']['fn'])) {
+                //get custom method from config
+                if (empty($fieldConfig['source']['fn'])) {
                     return $rez;
                 }
 
-                $method = explode('.', $cfg['source']['fn']);
+                $method = explode('.', $fieldConfig['source']['fn']);
                 $class = new $method[0]();
                 $rez = $class->$method[1]($p);
                 if (!empty($rez)) {

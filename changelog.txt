@@ -1,3 +1,20 @@
+CaseBox 1.9.233 (2014-07-22)
+==============================
+New Features, Improvements
+--------------------------
+- Column sorting should take into account field type
+- 'fq' parameter doesn't work in Objects fields
+    It was filtered from user input. Now it gets from db.
+- excluded action owners from notifications (even if subscribed).
+
+Fixed Bugs:
+----------
+- Clicking on Path in ObjProperties plugin doesn't work well
+- ActionLog from one core visible in another core
+- sorting problems for custom columns
+- Get JS error when deleting fields
+- User First/Last names stripped utf chars
+
 CaseBox 1.9.232 (2014-07-19)
 ==============================
 New Features, Improvements

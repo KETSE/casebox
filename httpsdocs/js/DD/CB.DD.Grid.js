@@ -251,7 +251,6 @@ CB.DD.GridDropZone =  Ext.extend(Ext.dd.DropZone, {
             return true;
         }
     }
-
 });
 
 Ext.ComponentMgr.registerPlugin('CBDDGridDropZone', CB.DD.GridDropZone);
