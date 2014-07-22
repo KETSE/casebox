@@ -47,6 +47,9 @@ class Comments extends Objects
 
         $notifiedUsers = static::getNotifiedUsers($objData['pid']);
 
+        //exclude the comment owner from nitified users
+        $notifiedUsers = array_diff($notifiedUsers, array($objData['cid']));
+
         if (!empty($notifiedUsers)) {
             foreach ($notifiedUsers as $userId) {
                 if ($userId == $_SESSION['user']['id']) {

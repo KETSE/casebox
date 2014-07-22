@@ -317,6 +317,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             ,this
         );
     }
+
     ,onObjectsSaved: function(form, e){
         if(!this.rendered) {
             return;
@@ -389,7 +390,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             this.actions.permissions.setDisabled(false) ;
         }
 
-        this.fireEvent('selectionchanged')
+        this.fireEvent('selectionchanged');
     }
 
     ,isFavoriteNode: function(node){
@@ -405,6 +406,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         }while(node && (node.getDepth() > 0) && !isFavoriteNode);
         return isFavoriteNode;
     }
+
     ,onContextMenu: function (node, e) {
         if(Ext.isEmpty(this.contextMenu)){/* create context menu if not aleready created */
             this.createItem = new Ext.menu.Item({
@@ -465,6 +467,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         );
         this.contextMenu.showAt(e.getXY());
     }
+
     ,onCreateObjectClick: function(b, e) {
         data = Ext.apply({}, b.data);
         data.pid = this.contextMenu.node.attributes.nid;
@@ -479,6 +482,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             this.fireEvent('createobject', data, e);
         }
     }
+
     ,processCreateInlineObject: function(r, e){
         this.getEl().unmask();
         if(r.success !== true) {
@@ -516,12 +520,14 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             ,this
         );
     }
+
     ,onDblClick: function(b, e){
         n = this.getSelectionModel().getSelectedNode();
         if(Ext.isEmpty(n)) return;
         if( App.isFolder( n.attributes.template_id ) ) return;
         this.onOpenClick(b, e);
     }
+
     ,onEditClick: function (b, e) {
         var n = this.getSelectionModel().getSelectedNode();
         if(Ext.isEmpty(n)) {
@@ -537,6 +543,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             }
         );
     }
+
     ,onOpenInNewWindowClick: function (b, e) {
         n = this.getSelectionModel().getSelectedNode();
         if(Ext.isEmpty(n)) return;
@@ -580,6 +587,12 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         var rez = {
             paths: []
         };
+
+        if(this.collapsed) {
+            rez.collapsed = true;
+        }
+
+        rez.width = this.getWidth();
 
         var n = this.getSelectionModel().getSelectedNode();
         if(n && Ext.get(n.getUI().getEl()).isVisible(true)) {
@@ -756,7 +769,6 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         }
         /* TODO: also delete all visible nodes(links) that are links to the deleted node or any its child */
     }
-
 });
 
 Ext.reg('CBBrowserTree', CB.browser.Tree);

@@ -439,13 +439,6 @@ class Objects
 
         $object_record['content'] = '';
 
-        /* possible to add collumn iconCls to solr fields */
-        // if (!empty($objData['data']['iconCls'])) {
-        //     $object_record['iconCls'] = $objData['data']['iconCls'];
-        // } elseif (!empty($objData['cfg']['iconCls'])) {
-        //     $object_record['iconCls'] = $objData['cfg']['iconCls'];
-        // }
-
         $field = array();
         foreach ($linearData as $f) {
             if (is_object($template)) {
@@ -460,12 +453,14 @@ class Objects
                     case 'checkbox':
                         $f['value'] = empty($f['value']) ? false : true;
                         break;
+
                     case 'date':
                         $f['value'] .= 'Z';
                         if (@$f['value'][10] == ' ') {
                             $f['value'][10] = 'T';
                         }
                         break;
+
                     case 'html':
                         $f['value'] = strip_tags($f['value']);
                         break;
@@ -478,16 +473,13 @@ class Objects
                 }
             }
 
+            // adding value to content field
             if (!empty($f['value'])) {
-                if (!empty($processed_values)) {
-                    foreach ($processed_values as $v) {
-                        $object_record['content'] .= $field['title'].' '.$v."\n";
-                    }
-                } elseif (!is_array($f['value'])) {
-                    $object_record['content'] .= $field['title'].' '.
-                        (in_array($field['solr_column_name'], array('date_start', 'date_end', 'dates')) ?
-                            substr($f['value'], 0, 10): $f['value'])."\n";
-                }
+                $object_record['content'] .= $field['title'].' '.
+                    (in_array($field['solr_column_name'], array('date_start', 'date_end', 'dates'))
+                        ? substr($f['value'], 0, 10)
+                        : $f['value']
+                    )."\n";
             }
         }
     }

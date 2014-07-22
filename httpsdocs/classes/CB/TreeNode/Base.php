@@ -118,6 +118,21 @@ class Base implements \CB\Interfaces\TreeNode
     }
 
     /**
+     * get root node of the same class branch
+     * @return object
+     */
+    public function getClassRoot()
+    {
+        $rez = &$this;
+
+        if (empty($this->parent) || (get_class($this->parent) !== get_class($this))) {
+            return $rez;
+        }
+
+        return ($this->parent->getClassRoot());
+    }
+
+    /**
      * check if a node has children
      * @return int
      */
@@ -206,7 +221,7 @@ class Base implements \CB\Interfaces\TreeNode
         // check if directly set into node config
         if (isset($this->config[$param])) {
             return array(
-                'from' => $this->getId()
+                'from' => $this->getClassRoot()->getId()
                 ,'data' => $this->config[$param]
             );
         }

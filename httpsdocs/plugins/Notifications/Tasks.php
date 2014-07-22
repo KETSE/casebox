@@ -153,7 +153,7 @@ class Tasks extends Objects
 
         $rez = Util\toNumericArray(@$data['data']['assigned']);
 
-        if (!empty($data['oid'])) {
+        if (!empty($data['oid']) && ($data['oid'] != $_SESSION['user']['id'])) {
             $rez[] = $data['oid'];
         }
         $rez = array_unique($rez);

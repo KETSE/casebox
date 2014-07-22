@@ -248,8 +248,10 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
          }
         this._isDirty = false;
 
-        this.doLayout();
-        this.syncSize();
+        if(!this.hasLayout && this.doLayout) {
+            this.doLayout();
+            this.syncSize();
+        }
 
         this.fireEvent('loaded', this);
     }

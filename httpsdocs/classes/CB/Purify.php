@@ -121,7 +121,7 @@ class Purify
     final public static function humanName($name)
     {
         // replace not allowed chars
-        $name = preg_replace('/[^\w\s\."\'`]/i', '', $name);
+        $name = preg_replace('/[^\w\s\."\'`]/iu', '', $name);
         // replace more spaces with one space
         $name = preg_replace('/\s+/', ' ', $name);
 

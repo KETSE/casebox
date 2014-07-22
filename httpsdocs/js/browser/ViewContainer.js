@@ -359,6 +359,19 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 this.filtersPanel
                 ,this.objectPanel
             ]
+            ,getState: function(p) {
+                var rez = {};
+                if(this.collapsed) {
+                    rez.collapsed = true;
+                }
+
+                rez.width = this.width;
+                if(Ext.isEmpty(rez.width)) {
+                    rez.width = rez.lastSize.width;
+                }
+
+                return rez;
+            }
         });
 
         var reader = new Ext.data.JsonReader({
@@ -828,8 +841,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onRightPanelViewChangeClick: function(b, e){
         this.rightPanel.getLayout().setActiveItem(b.itemIndex);
-        this.rightPanel.show();
-        this.rightPanel.syncSize();
+
+        if(this.rightPanel.collapsed) {
+            this.rightPanel.expand();
+        } else {
+            this.rightPanel.show();
+            this.rightPanel.syncSize();
+        }
 
         // loading last selected object into objects panel
         var s = this.cardContainer.getLayout().activeItem.currentSelection;
