@@ -10,7 +10,7 @@ Ext.onReady(function(){
 
 
 CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
-    lastColumns: []
+    lastColumns: ''
 
     ,init: function(owner) {
         this.owner = owner;
@@ -34,9 +34,9 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
         //add corresponding metadata to obj.result if DisplayColumns changed
         this.currentColumns = obj.result.DC || [];
 
-        if(Ext.util.JSON.encode(this.lastColumns) !== Ext.util.JSON.encode(this.currentColumns)) {
+        if(this.lastColumns !== Ext.util.JSON.encode(this.currentColumns)) {
             obj.result.metaData = this.getNewMetadata();
-            this.lastColumns = this.currentColumns;
+            this.lastColumns = Ext.util.JSON.encode(this.currentColumns);
             this.store.loadData(obj.result);
             var nc = this.getNewColumns();
             this.cm.setConfig(nc);
@@ -110,6 +110,7 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
             ,function(key, value, obj){
                 var column = value;
                 if(key !== 'remove') {
+                    column.id = rez.length;
                     column.dataIndex = key;
                     column.header = Ext.value(column.header, column.title);
                     switch(column.type) {

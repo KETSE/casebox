@@ -41,7 +41,7 @@ class ActionLog extends Base
     protected function createDefaultFilter()
     {
         $this->fq = array(
-            'core_id' => Config::get('core_id')
+            'core_id:' . Config::get('core_id')
         );
     }
 

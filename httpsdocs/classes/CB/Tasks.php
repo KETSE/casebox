@@ -1185,7 +1185,7 @@ class Tasks
                 array(
                     ''
                     ,'font-size: 1.5em; display: block;'.( ($r['status'] == 3 ) ? 'color: #555; text-decoration: line-through' : '')
-                    ,'<a href="' . $coreUrl . 'v-' . $id . '/">' . $r['title'] . '</a>'
+                    ,'<a href="' . $coreUrl . 'v-' . $id . '/">' . Util\adjustTextForDisplay($r['title']) . '</a>'
                     ,$datetime_period
                     ,nl2br(Util\adjustTextForDisplay($r['description']))
                     ,L\get('Status', $user['language_id'])
@@ -1199,10 +1199,10 @@ class Tasks
                     ,'category_style'
                     ,$r['category']
                     ,L\get('Path', $user['language_id'])
-                    ,$r['path_text']
+                    ,Util\adjustTextForDisplay($r['path_text'])
                     ,L\get('Owner', $user['language_id'])
                     ,Util\getCoreHost($r['db']).'photo/'.$r['cid'].'.jpg'
-                    ,$r['owner_text']
+                    ,Util\adjustTextForDisplay($r['owner_text'])
                     ,$users
                     ,L\get('Files')
                     ,$files_text

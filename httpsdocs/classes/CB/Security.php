@@ -156,14 +156,19 @@ class Security
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $r['name'] = User::getDisplayName($r);
+            if ($r['type'] == 1) {
+                $r['iconCls'] = 'icon-users';
+
+            } else {
+                $r['name'] = User::getDisplayName($r);
+                $r['iconCls'] = 'icon-user-'.$r['sex'];
+            }
 
             unset($r['first_name']);
             unset($r['last_name']);
-
-            $r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
             unset($r['type']);
             unset($r['sex']);
+
             $rez['data'][] = $r;
         }
         $res->close();
