@@ -66,8 +66,6 @@ class UsersGroups
                 'SELECT
                     id
                     ,name
-                    ,first_name
-                    ,last_name
                     ,`type`
                     ,`system`
                     ,(SELECT count(*)
@@ -89,7 +87,7 @@ class UsersGroups
             }
             $res->close();
             $rez[] = array('nid' => -1
-                ,'title' => L\get('Users_without_group')
+                ,'name' => L\get('Users_without_group')
                 ,'iconCls' => 'icon-users'
                 ,'type' => 1
                 ,'expanded' => true
@@ -679,7 +677,7 @@ class UsersGroups
             return array('success' => false, 'verify' => true);
         }
 
-        $title = trim(strip_tags($p['title']));
+        $title = Purify::humanName($p['title']);
 
         if (empty($title)) {
             throw new \Exception(L\get('Wrong_input_data'));

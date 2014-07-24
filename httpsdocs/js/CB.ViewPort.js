@@ -321,7 +321,9 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,rootVisible:true
         });
         // App.mainAccordion.getLayout().setActiveItem(0);
-        App.mainAccordion.syncSize();
+        if(!App.mainAccordion.collapsed) {
+            App.mainAccordion.syncSize();
+        }
 
         var trees = App.mainAccordion.findByType(CB.browser.Tree);
         if(!Ext.isEmpty(trees)){

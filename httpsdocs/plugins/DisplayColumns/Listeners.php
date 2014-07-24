@@ -18,7 +18,6 @@ class Listeners
         }
 
         $solrFields = $this->getSolrFields();
-
         if (!empty($solrFields['fields'])) {
             $fl = explode(',', $sp['fl']);
             foreach ($fl as $k => $f) {
@@ -34,6 +33,8 @@ class Listeners
 
         if (empty($p['inputParams']['strictSort']) && !empty($solrFields['sort'])) {
             $sp['sort'] = $solrFields['sort'];
+        } elseif (!empty($this->inputParams['sort']) && empty($solrFields['sort'])) {
+            $sp['sort'] = 'ntsc asc, order asc';
         }
     }
 
@@ -128,12 +129,43 @@ class Listeners
                         $col['title'] = $templateField['title'];
                     }
 
+                    if (empty($col['sortType']) && ($customField[0] != 'solr') && (empty($col['solr_column_name']))) {
+                        switch ($templateField['type']) {
+                            case 'date':
+                            case 'datetime':
+                                $col['sortType'] = 'asDate';
+                                break;
+
+                            case 'float':
+                                $col['sortType'] = 'asFloat';
+                                break;
+
+                            case '_objects':
+                            case 'checkbox':
+                            case 'int':
+                                $col['sortType'] = 'asInt';
+                                break;
+
+                            case 'html':
+                            case 'memo':
+                            case 'text':
+                                $col['sortType'] = 'asUCText';
+                                break;
+
+                            default:
+                                $col['sortType'] = 'asUCString';
+                                break;
+                        }
+                    }
+
                     foreach ($values as $value) {
                         $value = is_array($value)
                             ? @$value['value']
                             : $value;
                         $doc[$fieldName] = $template->formatValueForDisplay($templateField, $value, false);
                     }
+
+                    //
                 }
             }
 
@@ -202,6 +234,7 @@ class Listeners
         );
 
         $displayColumns = $this->getDC();
+
         if (!empty($displayColumns['data'])) {
             foreach ($displayColumns['data'] as $columnName => $column) {
                 if (is_array($column) && !empty($column['solr_column_name'])) {
@@ -232,12 +265,9 @@ class Listeners
 
             $state = State\DBProvider::getGridViewState($stateFrom);
 
-            if (!empty($state['sort']['field'])) {
+            if (!empty($state['sort']['field']) && !empty($displayColumns['data'][$state['sort']['field']]['solr_column_name'])) {
                 $rez['sort'] = array(
-                    (empty($displayColumns['data'][$state['sort']['field']]['solr_column_name'])
-                        ? $state['sort']['field']
-                        : $displayColumns['data'][$state['sort']['field']]['solr_column_name']
-                    )
+                    $displayColumns['data'][$state['sort']['field']]['solr_column_name']
                     .' '
                     .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
                 );

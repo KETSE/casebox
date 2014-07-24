@@ -1266,12 +1266,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                     this.onReloadClick();
                 } else {
                     // remove moved record
-                    for (var i = 0; i < r.processedIds.length; i++) {
-                        idx = this.store.findExact('nid', parseInt(r.processedIds[i], 10));
-                        if(idx > -1) {
-                            this.store.removeAt(idx);
-                        }
-                    }
+                    this.store.deleteIds(r.processedIds);
                 }
                 break;
             case 'create':

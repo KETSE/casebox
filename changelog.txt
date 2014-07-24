@@ -1,3 +1,19 @@
+CaseBox 1.9.234 (2014-07-24)
+==============================
+New Features, Improvements
+--------------------------
+- Column sorting should take into account field type
+- security groups will use  only their name field for display
+- D&D of a sibling node to another one should refresh the Grid
+
+Fixed Bugs:
+----------
+- Right panel width = 0 after collapsing and switching to another panel
+- ActionLog from one core visible in another core
+- grid sorting problems for custom display columns
+- CB tries to sort using SOLR instead of clientSide sorting
+- misspelled var in Notifications/Objects
+
 CaseBox 1.9.233 (2014-07-22)
 ==============================
 New Features, Improvements
