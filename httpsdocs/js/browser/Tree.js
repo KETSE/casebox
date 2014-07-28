@@ -16,6 +16,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     ,stateful: true
     ,stateId: 'btree' //brpwser tree
     ,stateEvents: ['expandnode', 'collapsenode', 'beforedestroy', 'selectionchanged']
+
     ,initComponent: function(){
         if(Ext.isEmpty(this.data)) {
             this.data = {};
@@ -132,6 +133,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         });
 
         this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
+
         var rootConfig = Ext.value(this.data.rootNode, {});
         rootConfig = Ext.apply(
             {
@@ -345,45 +347,51 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         if(Ext.isEmpty(node)){
             this.actions.edit.setHidden(true);
             this.actions.openInNewWindow.setHidden(true);
-            this.actions.cut.setDisabled(true) ;
-            this.actions.copy.setDisabled(true) ;
-            this.actions.paste.setDisabled(true) ;
-            this.actions.pasteShortcut.setDisabled(true) ;
-            this.actions.createShortcut.setDisabled(true) ;
-            this.actions.createShortcut.setDisabled(true) ;
-            this.actions['delete'].setDisabled(true) ;
-            this.actions.rename.setDisabled(true) ;
-            this.actions.reload.setDisabled(true) ;
-            this.actions.permissions.setDisabled(true) ;
+            this.actions.cut.setDisabled(true);
+            this.actions.copy.setDisabled(true);
+            this.actions.paste.setDisabled(true);
+            this.actions.pasteShortcut.setDisabled(true);
+            this.actions.createShortcut.setDisabled(true);
+            this.actions.createShortcut.setDisabled(true);
+            this.actions['delete'].setDisabled(true);
+            this.actions.rename.setDisabled(true);
+            this.actions.reload.setDisabled(true);
+            this.actions.permissions.setDisabled(true);
 
-        }else{
-            canOpen = true;
+        } else {
+            var canOpen = true;
             this.actions.edit.setHidden(!canOpen);
-            canOpenInNewWindow = true;
+
+            var canOpenInNewWindow = true;
             this.actions.openInNewWindow.setHidden(!canOpenInNewWindow);
-            canExpand = (!node.isExpanded() && ( (!node.loaded) || node.hasChildNodes() ));
+
+            var canExpand = (!node.isExpanded() && ((!node.loaded) || node.hasChildNodes()));
             this.actions.expand.setHidden(!canExpand);
-            canCollapse = node.isExpanded() && node.hasChildNodes();
+
+            var canCollapse = node.isExpanded() && node.hasChildNodes();
             this.actions.collapse.setHidden(!canCollapse);
             if(this.contextMenu) {
                 this.contextMenu.items.itemAt(3).setVisible(canOpen || canExpand || canCollapse);
             }
 
-            canCopy = (node.attributes.system === 0);
+            var canCopy = (node.attributes.system === 0);
             this.actions.cut.setDisabled(!canCopy);
             this.actions.copy.setDisabled(!canCopy);
-            canPaste = !App.clipboard.isEmpty()
+
+            var canPaste = !App.clipboard.isEmpty()
                 && ( !this.inFavorites(node) || App.clipboard.containShortcutsOnly() )
                 && ( node.attributes.system === 0 );
             this.actions.paste.setDisabled(!canPaste);
-            canPasteShortcut = !App.clipboard.isEmpty()
+
+            var canPasteShortcut = !App.clipboard.isEmpty()
                 && !App.clipboard.containShortcutsOnly()
                 && ( node.attributes.system === 0 );
             this.actions.pasteShortcut.setDisabled(!canPasteShortcut);
 
-            canDelete = (node.attributes.system === 0);
+            var canDelete = (node.attributes.system === 0);
             this.actions['delete'].setDisabled(!canDelete) ;
-            canRename = (node.attributes.system === 0);
+
+            var canRename = (node.attributes.system === 0);
             this.actions.rename.setDisabled(!canRename) ;
 
             this.actions.reload.setDisabled(false) ;
@@ -523,8 +531,15 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
 
     ,onDblClick: function(b, e){
         n = this.getSelectionModel().getSelectedNode();
-        if(Ext.isEmpty(n)) return;
-        if( App.isFolder( n.attributes.template_id ) ) return;
+
+        if(Ext.isEmpty(n)) {
+            return;
+        }
+
+        if(App.isFolder(n.attributes.template_id)) {
+            return;
+        }
+
         this.onOpenClick(b, e);
     }
 
@@ -545,9 +560,11 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     }
 
     ,onOpenInNewWindowClick: function (b, e) {
-        n = this.getSelectionModel().getSelectedNode();
-        if(Ext.isEmpty(n)) return;
-        id = 'view'+n.attributes.nid;
+        var n = this.getSelectionModel().getSelectedNode();
+        if(Ext.isEmpty(n)) {
+            return;
+        }
+        var id = 'view'+n.attributes.nid;
         if(!App.activateTab(App.mainTabPanel, id)) {
             App.addTab(
                 App.mainTabPanel
@@ -560,7 +577,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     }
 
     ,onExpandClick: function (b, e) {
-        n = this.getSelectionModel().getSelectedNode();
+        var n = this.getSelectionModel().getSelectedNode();
         n.expand(
             false
             ,false
@@ -572,7 +589,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     }
 
     ,onCollapseClick: function (b, e) {
-        n = this.getSelectionModel().getSelectedNode();
+        var n = this.getSelectionModel().getSelectedNode();
         n.collapse();
         this.onSelectionChange(this.sm, n);
     }
@@ -655,76 +672,102 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
     }
 
     ,onCutClick: function(b, e) {
-        if(this.actions.cut.isDisabled()) return;
+        if(this.actions.cut.isDisabled()) {
+            return;
+        }
         this.onCopyClick(b, e);
         App.clipboard.setAction('move');
     }
 
     ,onCopyClick: function(b, e) {
-        if(this.actions.copy.isDisabled()) return;
-        n = this.selModel.getSelectedNode();
-        if(Ext.isEmpty(n)) return;
-        App.clipboard.set({
-            id: n.attributes.nid
-            ,name: n.attributes.name
-            ,system: n.attributes.system
-            ,type: n.attributes.type
-            ,subtype: n.attributes.subtype
-            ,iconCls: n.attributes.iconCls
-        }, 'copy');
-    }
-    ,onPasteClick: function(b, e){
-        if(this.actions.paste.isDisabled()) return;
-        n = this.selModel.getSelectedNode();
-        if(Ext.isEmpty(n)) return;
-        App.clipboard.paste(n.attributes.nid);
-    }
-    ,onPasteShortcutClick: function(b, e){
-        if(this.actions.pasteShortcut.isDisabled()) return;
-        n = this.selModel.getSelectedNode();
-        if(Ext.isEmpty(n)) return;
-        App.clipboard.paste(n.attributes.nid, 'shortcut');
-    }
-    ,onPermissionsClick: function(b, e){
-        if(this.actions.permissions.isDisabled()) {
+        var n = this.selModel.getSelectedNode();
+        if(Ext.isEmpty(n) || this.actions.copy.isDisabled()) {
             return;
         }
-        n = this.selModel.getSelectedNode();
-        if(Ext.isEmpty(n)) {
+
+        App.clipboard.set(
+            {
+                id: n.attributes.nid
+                ,name: n.attributes.name
+                ,system: n.attributes.system
+                ,type: n.attributes.type
+                ,subtype: n.attributes.subtype
+                ,iconCls: n.attributes.iconCls
+            }
+            ,'copy'
+        );
+    }
+    ,onPasteClick: function(b, e){
+        var n = this.selModel.getSelectedNode();
+        if(Ext.isEmpty(n) || this.actions.paste.isDisabled()) {
+            return;
+        }
+        App.clipboard.paste(n.attributes.nid);
+    }
+
+    ,onPasteShortcutClick: function(b, e){
+        var n = this.selModel.getSelectedNode();
+        if(Ext.isEmpty(n) || this.actions.pasteShortcut.isDisabled()) {
+            return;
+        }
+        App.clipboard.paste(n.attributes.nid, 'shortcut');
+    }
+
+    ,onPermissionsClick: function(b, e){
+        var n = this.selModel.getSelectedNode();
+        if(Ext.isEmpty(n) || this.actions.permissions.isDisabled()) {
             return;
         }
         App.mainViewPort.openPermissions(n.attributes.nid);
     }
+
     ,onPropertiesClick: function(b, e){
-        if(this.actions.properties.isDisabled()) return;
-        // body...
+        if(this.actions.properties.isDisabled()) {
+            return;
+        }
     }
+
     ,onRenameClick: function(b, e){
         this.startEditing(this.getSelectionModel().getSelectedNode());
     }
+
     ,onReloadClick: function(b, e){
         this.getSelectionModel().getSelectedNode().reload();
     }
+
     ,startEditing: function(node) {
-        if(!node.isSelected()) node.select();
+        if(!node.isSelected()) {
+            node.select();
+        }
         var ge = this.editor;
-        setTimeout(function(){
-            ge.editNode = node;
-            ge.startEdit(node.ui.textNode, node.attributes.name);
-        }, 10);
+        setTimeout(
+            function(){
+                ge.editNode = node;
+                ge.startEdit(node.ui.textNode, node.attributes.name);
+            }
+            ,10
+        );
     }
+
     ,onBeforeEditComplete: function(editor, newVal, oldVal) {
         var n = editor.editNode;
         n.setText(Ext.util.Format.htmlEncode(newVal));
-        if(newVal === oldVal) return;
+        if(newVal === oldVal) {
+            return;
+        }
         editor.cancelEdit();
         this.getEl().mask(L.Processing, 'x-mask-loading');
+
         CB_BrowserTree.rename({path: n.getPath('nid'), name: newVal}, this.processRename, this);
+
         return false;
     }
+
     ,processRename: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) return;
+        if(r.success !== true) {
+            return;
+        }
         this.root.cascade(
             function (n){
                 if(n.attributes.nid == r.data.id){
@@ -736,6 +779,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         );
         this.fireEvent('afterrename', this, r, e);
     }
+
     ,onDeleteClick: function(b, e){
         Ext.Msg.confirm(
             L.DeleteConfirmation
@@ -744,26 +788,33 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             ,this
         );
     }
+
     ,onDelete: function (btn) {
         if(btn !== 'yes') return;
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
         CB_BrowserTree['delete'](this.getSelectionModel().getSelectedNode().getPath('nid'), this.processDelete, this);
     }
+
     ,processDelete: function(r, e){
         this.getEl().unmask();
         App.mainViewPort.onProcessObjectsDeleted(r, e);
     }
+
     ,onObjectsDeleted: function(ids){
-        deleteNodes = [];
-        this.getRootNode().cascade(function(n){
-            if(ids.indexOf(n.attributes.nid) >= 0){
-                if(n.isSelected()){
-                    nn = n.isLast() ? ( n.isFirst() ? n.parentNode : n.previousSibling) : n.nextSibling;
-                    nn.select();
+        var deleteNodes = [];
+        this.getRootNode().cascade(
+            function(n){
+                if(ids.indexOf(n.attributes.nid) >= 0){
+                    if(n.isSelected()){
+                        nn = n.isLast() ? ( n.isFirst() ? n.parentNode : n.previousSibling) : n.nextSibling;
+                        nn.select();
+                    }
+                    deleteNodes.push(n);
                 }
-                deleteNodes.push(n);
             }
-        }, this);
+            ,this
+        );
+
         for (var i = 0; i < deleteNodes.length; i++) {
             deleteNodes[i].remove(true);
         }

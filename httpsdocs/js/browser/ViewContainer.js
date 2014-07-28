@@ -719,7 +719,11 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.searchField.setValue(Ext.value(options.params.query, ''));
         this.filtersPanel.updateFacets(o.result.facets, options);
 
-        this.updatePreview();
+        var d = Ext.isEmpty(App.locateObjectId)
+            ? []
+            : {id: App.locateObjectId};
+
+        this.updatePreview(d);
     }
 
     ,onStoreLoad: function(store, recs, options) {
@@ -1240,9 +1244,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             this.onReloadClick();
         }
     }
-    ,onObjectChanged: function(objData){
+    ,onObjectChanged: function(objData, component){
+
+        var idx = this.store.findExact('nid', String(objData.id));
+
         if(
-            isNaN(this.folderProperties.id) ||
+            (idx >=0) ||
+            isNaN(this.folderProperties.id) || // virtual folders
             (objData.pid == this.folderProperties.id)
         ) {
             App.locateObjectId = objData.id;

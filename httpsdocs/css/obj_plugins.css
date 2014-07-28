@@ -70,12 +70,12 @@ background-color: #FFFFCC;
  /*cursor: pointer;*/
 }
 
-.block-plugin-comments td, .block-plugin-comments tr:last-child td{
+.block-plugin-comments .block-plugin td, .block-plugin-comments .block-plugin tr:last-child td{
     border-bottom: 1px solid #FFF;
 }
 
 .block-plugin-comments .x-panel-body {
-    margin-bottom: 30px;
+    /*margin-bottom: 30px;*/
     background-color: #F1F1F1;
 }
 .block-plugin-comments b.user {

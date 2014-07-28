@@ -97,7 +97,7 @@ function detectCore()
     $rez = false;
 
     if (isset($_GET['core'])) {
-        $rez = preg_replace('/[^\w]/i', '', $_GET['core']);
+        $rez = preg_replace('/[^\w]\-_/i', '', $_GET['core']);
     } else {
         $arr = explode('.', $_SERVER['SERVER_NAME']);
         // remove www, ww2 and take the next parameter as the $coreName

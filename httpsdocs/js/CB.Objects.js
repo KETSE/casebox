@@ -747,7 +747,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             );
             delete this.interceptorArguments;
         }
-        App.fireEvent('objectchanged', this);
+        App.fireEvent('objectchanged', this.data, this);
         this.onObjectChanged();
     }
 

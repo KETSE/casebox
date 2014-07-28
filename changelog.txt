@@ -1,3 +1,17 @@
+CaseBox 1.9.235 (2014-07-28)
+==============================
+New Features, Improvements
+--------------------------
+- Preview of object should not be strictly linked to the Grid + grid onClick
+- Small improvement to Comments
+
+Fixed Bugs:
+----------
+- Comments not sorted ok
+- reloading casebox didnt sort last selected folder according to last state
+- sorting by default solr columns was overwriten by DC plugin
+- minus sign was stripped from core names on init resulting in error
+
 CaseBox 1.9.234 (2014-07-24)
 ==============================
 New Features, Improvements

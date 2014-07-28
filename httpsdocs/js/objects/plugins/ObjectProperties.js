@@ -130,7 +130,7 @@ CB.objects.plugins.ObjectProperties = Ext.extend(CB.objects.plugins.Base, {
     }
     ,onTaskChanged: function(r, e){
         this.getEl().unmask();
-        App.fireEvent('objectchanged', this.params);
+        App.fireEvent('objectchanged', this.params, this);
     }
 
     ,getContainerToolbarItems: function() {

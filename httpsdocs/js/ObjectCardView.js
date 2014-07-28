@@ -382,7 +382,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         //current view index
         var cvi = this.items.indexOf(ai);
 
-        // check  if a new load is waiting to be loaded
+        // check  if a new request is waiting to be loaded
         if(Ext.isEmpty(this.requestedLoadData)) {
             //check if object data are identical to previous loaded object
             if(this.loadedData && objectData &&
@@ -400,7 +400,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             //check if object data are identical to previous load request
             if((objectData.id == this.requestedLoadData.id) &&
                 (Ext.value(objectData.viewIndex, cvi) == Ext.value(this.requestedLoadData.viewIndex, cvi))
-                ) {
+            ) {
                 return;
             }
         }
@@ -430,9 +430,8 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             return;
         }
 
-        var err = new Error();
+        // var err = new Error();
 
-        // throw new Error('arrrgh');
         var id = this.requestedLoadData
             ? Ext.value(this.requestedLoadData.nid, this.requestedLoadData.id)
             : null;
@@ -685,6 +684,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
     ,onSaveClick: function() {
         this.getLayout().activeItem.save(
+            //callback function
             function(component, form, action){
                 var id = Ext.value(action.result.data.id, this.loadedData.id);
                 var name = Ext.value(action.result.data.name, this.loadedData.name);
@@ -692,6 +692,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 var p = Ext.apply({}, this.loadedData);
                 p.id = id;
                 p.name = name;
+
                 if(this.goBackOnSave) {
                     this.onBackClick();
 
@@ -716,7 +717,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
     }
 
     ,onCancelClick: function() {
-
         if(isNaN(this.loadedData.id) && !Ext.isEmpty(this.history)) {
             this.onBackClick();
 
@@ -844,7 +844,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
     ,onTaskChanged: function(r, e){
         this.getEl().unmask();
-        App.fireEvent('objectchanged', this.loadedData);
+        App.fireEvent('objectchanged', this.loadedData, this);
     }
 
     ,onSubscribeClick: function(b, e) {

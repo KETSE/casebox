@@ -114,7 +114,7 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
         this.removeAll(true);
         delete this.loadedParams;
     }
-    ,onObjectChanged: function(data) {
+    ,onObjectChanged: function(data, component) {
         if(!isNaN(data)) {
             data = {id: data};
         }

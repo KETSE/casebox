@@ -79,7 +79,8 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 singleSelect: false
                 ,listeners: {
                     scope: this
-                    ,selectionchange: this.onSelectionChange
+                    ,rowselect: this.onRowSelect
+                    // ,selectionchange: this.onSelectionChange
                 }
             })
             ,listeners:{
@@ -145,6 +146,8 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                         ,this
                     );
                 }
+                ,keydown: this.onKeyDown
+                ,rowclick: this.onRowClick
                 ,rowdblclick: this.onRowDblClick
                 // ,contextmenu: this.onContextMenu
                 // ,rowcontextmenu: this.onRowContextMenu
@@ -335,6 +338,8 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         this.syncSize();
 
         App.mainViewPort.selectGridObject(this.grid);
+
+        this.fireSelectionChangeEvent();
     }
 
     ,onScrollerDragDrop: function(targetData, source, e, sourceData){
@@ -345,7 +350,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         });
     }
 
-    ,onSelectionChange: function() {
+    ,fireSelectionChangeEvent: function() {
         var s = this.grid.getSelectionModel().getSelections();
         for (var i = 0; i < s.length; i++) {
             s[i] = s[i].data;
@@ -354,8 +359,27 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         this.fireEvent('selectionchange', s);
     }
 
+    ,onKeyDown: function(e) {
+        if([9, 38, 40].indexOf(e.getKey()) > -1) {
+            this.userAction = true;
+        }
+    }
+
+    ,onRowClick: function(g, ri, e) {
+        this.userAction = true;
+        this.fireSelectionChangeEvent();
+    }
+
     ,onRowDblClick: function(g, ri, e) {
         this.fireEvent('objectopen', g.store.getAt(ri).data);
+    }
+
+    ,onRowSelect: function () {
+        if(this.userAction) {
+            this.fireSelectionChangeEvent();
+
+            delete this.userAction;
+        }
     }
 
     ,onEnterKeyPress: function(key, e) {
