@@ -175,7 +175,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         /* adding menu items */
         var um = App.mainToolBar.find( 'name', 'userMenu')[0];
         if(um) {
-            um.update('<img src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg' + App.sid + '" ' +
+            um.update('<img src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id) + '" ' +
                 'style="margin-top: 4px; width: 32px; height: 32px;" ' +
                 'title="'+ getUserDisplayName(true) + '" />'
             );
@@ -625,6 +625,8 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             action.result &&
             action.result.folderProperties
         ) {
+            activeTree.updateCreateMenu(action.result.folderProperties.menu);
+
             //check if rootnode id is set at the beginning of the path
             //its id could be missing if it's a virtual root node
             var p = String(action.result.folderProperties.path).split('/');

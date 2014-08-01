@@ -124,8 +124,14 @@ function detectCore()
  */
 function debug($msg)
 {
-    if (!is_scalar($msg)) {
-        $msg = var_export($msg, 1);
+    $msg = '';
+    $args = func_get_args();
+
+    foreach ($args as $arg) {
+        $msg .= is_scalar($arg)
+            ? $arg
+            : var_export($arg, 1);
+        $msg .= "\n";
     }
 
     $debugFile = Config::get('debug_log');
@@ -133,7 +139,7 @@ function debug($msg)
     if (empty($debugFile)) {
         $debugFile = LOGS_DIR.'cb_debug_log';
     }
-    // echo $debugFile;
+
     error_log(date('Y-m-d H:i:s').': '.$msg."\n", 3, $debugFile);
 }
 

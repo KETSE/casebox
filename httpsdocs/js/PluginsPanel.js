@@ -59,6 +59,8 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
         var items = [];
         this.removeAll(true);
 
+        this.createMenu = r.menu;
+
         Ext.iterate(
             r.data
             ,function(k, v, o) {
@@ -69,6 +71,8 @@ CB.PluginsPanel = Ext.extend(Ext.Panel, {
                     }
                     ,cl
                 );
+
+                c.createMenu = r.menu;
 
                 this.add(c);
                 if(!Ext.isDefined(v.data)) {

@@ -103,7 +103,7 @@ class Comments extends Objects
      */
     protected static function subscribeMessageUsers($objectId, $message)
     {
-        if (preg_match_all('/@([^@\s]+)/', $message, $matches, PREG_SET_ORDER)) {
+        if (preg_match_all('/@([^@\s,]+)/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $userId = User::exists($match[1]);
                 if (is_numeric($userId)) {

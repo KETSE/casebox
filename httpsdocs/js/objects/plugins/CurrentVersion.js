@@ -17,7 +17,7 @@ CB.objects.plugins.CurrentVersion = Ext.extend(CB.objects.plugins.Versions, {
             ,'<tpl for=".">'
             ,'<tr class="{cls}">'
             ,'    <td class="obj">'
-            ,'        <div><img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg" title="{user}"></div>'
+            ,'        <div><img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}"></div>'
             ,'    </td>'
             ,'    <td>'
             ,'        <span class="click">{name}</span><br />'

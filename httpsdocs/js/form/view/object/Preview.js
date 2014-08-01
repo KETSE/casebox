@@ -81,8 +81,11 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
                 this.delayReload();
                 break;
             case 'PDF':
-                elId = this.body.id;
-                success = new PDFObject({ url: '/' + App.config.coreName + "/download.php?pw=&amp;id="+this.data.id }).embed(elId);
+                var url = '/' + App.config.coreName + "/download.php?pw=&amp;id="+this.data.id;
+                this.update(
+                    '<object data="' + url + '" type="application/pdf" width="100%" height="100%">' +
+                    'alt : <a href="' + url + '">' + this.data.name + '</a></object>'
+                );
                 break;
         }
         this.attachEvents();

@@ -629,7 +629,7 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
         };
 
         this.userInfo = new Ext.DataView({
-            tpl: ['<img class="fl user-photo-field click icon-user32-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ (new Date()).format("His") ]}">'
+            tpl: ['<img class="fl user-photo-field click icon-user32-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?32={[ CB.DB.usersStore.getPhotoParam(values.id) ]}">'
                 ,'<span class="fwB click">{title}</span><br />'
                 ,'<span class="cG">'+L.User+':</span> {name}, <span class="cG">'+L.lastAction+':</span> {[ Ext.isEmpty(values.last_action_time) ? "" : values.last_action_time ]}<br />'
                 ,'<span class="cG">'+L.addedByUser+':</span> {owner}, {cdate}'
@@ -865,7 +865,9 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
         }else this.fireEvent('edit');
     }
     ,onPhotoChanged: function(ev, el, o){
-        if(!this.getForm().isValid()) return;
+        if(!this.getForm().isValid()) {
+            return;
+        }
         this.getForm().submit({
             clientValidation: true
             ,params: {

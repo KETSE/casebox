@@ -158,6 +158,12 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                 ,scope: this
                 ,handler: this.onAttachFileClick
             }
+            ,metadata: {
+                text: L.Metadata
+                ,id: 'metadata' + this.instanceId
+                ,scope: this
+                ,handler: this.onMetadataClick
+            }
             ,webdavlink: {
                 text: 'WebDAV Link'
                 ,id: 'webdavlink' + this.instanceId
@@ -563,14 +569,11 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
 
     ,updateCreateMenu: function() {
         var nmb = this.menu.find('name', 'newmenu')[0];
+
         if(nmb) {
             updateMenu(
                 nmb
-                ,getMenuConfig(
-                    this.loadedData.id
-                    ,this.loadedData.path
-                    ,this.loadedData.template_id
-                )
+                ,this.getLayout().activeItem.createMenu
                 ,this.onCreateObjectClick
                 ,this
             );
@@ -901,6 +904,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         fp = fp[0];
         fp.show();
         fp.onAddClick(b, e);
+    }
+
+    ,onMetadataClick: function(b, e) {
+        this.onEditMetaEvent(this.loadedData);
     }
 
     ,onWebDAVLinkClick: function(b, e) {

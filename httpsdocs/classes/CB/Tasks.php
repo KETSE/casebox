@@ -1048,9 +1048,6 @@ class Tasks
                 ,cid
                 ,ti.path `path_text`
                 ,(SELECT name from tree where id = t.category_id) `category`
-                ,(SELECT l' . Config::get('user_language_index') . '
-                    FROM users_groups
-                    WHERE id = t.cid) owner_text
                 ,cdate
                 ,responsible_user_ids
                 ,(SELECT reminds
@@ -1085,12 +1082,17 @@ class Tasks
                     $importance_text = L\get('High', $user['language_id']);
                     break;
             }
+
+            $tickImage = 'data:image/png;base64,'.base64_encode(file_get_contents(DOC_ROOT . 'css/i/ico/tick-circle.png'));
+
             $users = array();
             $ures = DB\dbQuery(
                 'SELECT u.id
                     ,u.`name`
                     ,first_name
                     ,last_name
+                    ,u.photo
+                    ,u.sex
                     ,ru.status
                     ,ru.time
                 FROM users_groups u
@@ -1104,9 +1106,12 @@ class Tasks
             while ($ur = $ures->fetch_assoc()) {
                 $name = User::getDisplayName($ur);
 
+                $photoFile = User::getPhotoFilename($ur, true);
+                $photo = 'data:image/png;base64,'.base64_encode(file_get_contents($photoFile));
+
                 $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
-                "\n\r".'<img src="'.Util\getCoreHost($r['db']).'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px" alt="'.$name.'" title="'.$name.'"/>'.
-                "\n\r".( ($ur['status'] == 1) ? '<img src="'.Util\getCoreHost($r['db']).'css/i/ico/tick-circle.png" style="width:16px;height:16px; margin-left: -16px"/>': '').
+                "\n\r".'<img src="' . $photo . '" style="width:32px; height: 32px" alt="'.$name.'" title="'.$name.'"/>'.
+                "\n\r".( ($ur['status'] == 1) ? '<img src="' . $tickImage . '" style="width:16px;height:16px; margin-left: -16px"/>': '').
                 "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b>'.$name.'</b>'.
                 "\n\r".'<p style="color:#777;margin:0;padding:0">'.
                 "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
@@ -1124,9 +1129,11 @@ class Tasks
             if (!empty($removed_users)) {
                 $ures = DB\dbQuery(
                     'SELECT u.id
-                         ,u.name
-                         ,u.first_name
-                         ,u.last_name
+                        ,u.name
+                        ,u.first_name
+                        ,u.last_name
+                        ,u.photo
+                        ,u.sex
                     FROM users_groups u
                     WHERE u.id IN (0'.implode(', ', $removed_users).')
                     ORDER BY 1'
@@ -1134,19 +1141,26 @@ class Tasks
                 while ($ur = $ures->fetch_assoc()) {
                     $name = User::getDisplayName($ur);
 
+                    $photoFile = User::getPhotoFilename($ur, true);
+                    $photo = 'data:image/png;base64,'.base64_encode(file_get_contents($photoFile));
+
                     $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
-                    "\n\r".'<img src="' . $coreUrl . 'photo/'.$ur['id'].'.jpg" style="width:32px; height: 32px; opacity: 0.6" alt="'.$name.'" title="'.$name.'"/>'.
+                    "\n\r".'<img src="' . $photo . '" style="width:32px; height: 32px; opacity: 0.6" alt="'.$name.'" title="'.$name.'"/>'.
                     "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b style="color: #777; text-decoration: line-through">'.$name.'</b>'.
                     "\n\r".'</td></tr>';
                 }
                 $ures->close();
             }
             /* end of add removed users */
+
             $users =  empty($users) ? '' : '<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">'.
                 L\get('TaskAssigned', $user['language_id']).':</td><td style="vertical-align:top">'.
                 '<table style="font-family: \'lucida grande\',tahoma,verdana,arial,sans-serif; font-size: 11px; '.
                 'color: #333; width: 100%; display: table; border-collapse: separate; border-spacing: 0;"><tbody>'.
                 implode('', $users).'</tbody></table></td></tr>';
+
+            $ownerName = User::getDisplayName($r['cid']);
+            $ownerPhoto = 'data:image/png;base64,'.base64_encode(file_get_contents(User::getPhotoFilename($r['cid'], true)));
 
             // create files block
             $files_text = static::getTaskFiles($id, true);
@@ -1173,8 +1187,8 @@ class Tasks
                     ,'{Path}'
                     ,'{path_text}'
                     ,'{Owner}'
-                    ,'{owner_image}'
                     ,'{owner_text}'
+                    ,'{owner_image}'
                     ,'{assigned_text}'
                     ,'{Files}'
                     ,'{files_text}'
@@ -1201,8 +1215,8 @@ class Tasks
                     ,L\get('Path', $user['language_id'])
                     ,Util\adjustTextForDisplay($r['path_text'])
                     ,L\get('Owner', $user['language_id'])
-                    ,Util\getCoreHost($r['db']).'photo/'.$r['cid'].'.jpg'
-                    ,Util\adjustTextForDisplay($r['owner_text'])
+                    ,$ownerName
+                    ,$ownerPhoto
                     ,$users
                     ,L\get('Files')
                     ,$files_text
@@ -1258,7 +1272,7 @@ class Tasks
             <tr><td class="k">'.L\get('Category').':</td><td>{category_text}</td></tr>
             <tr><td class="k">'.L\get('Path').':</td><td><a class="path" path="{path}" href="#">{path_text}</a></td></tr>
             <tr><td class="k">'.L\get('Owner').':</td><td><table class="people"><tbody>
-                <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg" style="width:32px; height: 32px" alt="{creator_name}" title="{creator_name}"></td><td><b>{creator_name}</b><p class="gr">'.L\get('Created').': '.
+                <tr><td class="user"><img class="photo32" src="photo/{cid}.jpg?32=' . User::getPhotoParam($d['cid']). '" style="width:32px; height: 32px" alt="{creator_name}" title="{creator_name}"></td><td><b>{creator_name}</b><p class="gr">'.L\get('Created').': '.
                 '<span class="dttm" title="{full_created_date_text}">{create_date}</span></p></td></tr></tbody></table></td></tr>';
 
         $date_format = str_replace('%', '', $_SESSION['user']['cfg']['short_date_format']);
@@ -1309,7 +1323,8 @@ class Tasks
             $rez .= '<tr><td class="k">'.L\get('TaskAssigned').':</td><td><table class="people"><tbody>';
             foreach ($d['users'] as $u) {
                 $un = User::getDisplayName($u['id']);
-                $rez .= '<tr><td class="user"><div style="position: relative"><img class="photo32" src="photo/'.$u['id'].'.jpg" style="width:32px; height: 32px" alt="'.$un.'" title="'.$un.'">'.
+                $rez .= '<tr><td class="user"><div style="position: relative">'.
+                '<img class="photo32" src="photo/'.$u['id'].'.jpg?32=' . User::getPhotoParam($u['id']). '" style="width:32px; height: 32px" alt="'.$un.'" title="'.$un.'">'.
                 ( ($u['status'] == 1 ) ? '<img class="done icon icon-tick-circle" src="css/i/s.gif" />': "").
                 '</div></td><td><b>'.$un.'</b>'.
                 '<p class="gr">'.(

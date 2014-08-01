@@ -13,7 +13,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             ,'<tpl for="data">'
             ,'<tr>'
             ,'    <td class="obj">'
-            ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg" title="{user}">'
+            ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}">'
             ,'    </td>'
             ,'    <td>'
             ,'        <b class="user">{[ values.user.split("\n")[0]]}</b>'
@@ -88,7 +88,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
                     xtype: 'label'
                     ,region: 'west'
                     ,width: 50
-                    ,html: '<img class="i32" src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg" title="' + getUserDisplayName(true) + '">'
+                    ,html: '<img class="i32" src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id) + '" title="' + getUserDisplayName(true) + '">'
                 }
                 ,{
                     xtype: 'panel'

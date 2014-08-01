@@ -212,10 +212,3 @@ echo '<script type="text/javascript" src="' . $coreUrl . 'js/CB.DB.php"></script
 
 </body>
 </html>
-
-<!-- #loading-mask{ position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 20000; background-color: white }
-#loading{ position: absolute; left: 45%; top: 40%; padding: 2px; z-index:20001; height:auto }
-#loading a{ color:#225588 }
-#loading .loading-indicator{ background-color: white; color: #444; font: bold 18px tahoma,arial,helvetica; padding: 10; margin: 0; height: auto }
-#loading-msg { font: normal 10 arial,tahoma,sans-serif }
- -->

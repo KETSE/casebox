@@ -159,7 +159,14 @@ class Search extends Solr\Client
         /* assign security sets to filters */
 
         if (!Security::isAdmin()) {
-            $sets = Security::getSecuritySets();
+            $pids = false;
+            if (!empty($p['pid'])) {
+                $pids = $p['pid'];
+            } elseif (!empty($p['pids'])) {
+                $pids = $p['pids'];
+            }
+
+            $sets = Security::getSecuritySets(false, 5, $pids);
             if (empty($sets)) {
                 $sets = array(0);
             }

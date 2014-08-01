@@ -712,18 +712,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
         /* end of updating breadcrumb */
 
-        // this.onObjectsSelectionChange([]);
         this.fireEvent('viewloaded', proxy, o, options);
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
         this.searchField.setValue(Ext.value(options.params.query, ''));
         this.filtersPanel.updateFacets(o.result.facets, options);
 
-        var d = Ext.isEmpty(App.locateObjectId)
-            ? []
-            : {id: App.locateObjectId};
-
-        this.updatePreview(d);
+        this.updatePreview();
     }
 
     ,onStoreLoad: function(store, recs, options) {
@@ -832,11 +827,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     ,updateCreateMenuItems: function(menuButton) {
         updateMenu(
             menuButton
-            ,getMenuConfig(
-                this.folderProperties.id
-                ,this.folderProperties.path
-                ,this.folderProperties.template_id
-            )
+            ,this.folderProperties.menu
             ,this.onCreateObjectClick
             ,this
         );
@@ -958,7 +949,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
         }
 
-        this.updatePreview();
+        var d = Ext.isEmpty(App.locateObjectId)
+            ? []
+            : {id: App.locateObjectId};
+
+        delete App.locateObjectId;
+
+        this.updatePreview(d);
     }
 
     /**

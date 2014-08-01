@@ -1,3 +1,31 @@
+CaseBox 1.9.236 (2014-08-01)
+==============================
+New Features, Improvements
+--------------------------
+- Removed PDFObject (security hole for IE), only native PDF preview will work
+- Dislpay pictures in PreviewPanel if filesize < 30KB
+- Add "Metadata" menu item to File preview toolbar menu
+- changed/moved create menu logic to server side, because it needs more details of the selected path
+- render #number as link and subscribe @username to the object
+- Long queries to SOLR due to security_set_id
+    Added logic to get only security sets related to a given id/pid
+- Embed user photos in emails & use "timestamp" in URL to photos inside CB
+- moved "X-Frame-Options" header option from apache config to router.php
+  because Ext.form.BasicForm internally use dynamic iframe for upload.
+
+Fixed Bugs:
+----------
+- How to fix corrupted Path field?
+    UPDATE tree_info SET path = f_get_tree_path(id);
+- replaced usage of LENGTH function to CHAR_LENGTH in mysql triggers.
+    This caused path problems for multibyte strings.
+- title of email notifications for tasks did not contain path
+
+Notes
+----------
+- update database structure with v.1.9.236.sql
+  Solr should be reindexed to update mailformed paths
+
 CaseBox 1.9.235 (2014-07-28)
 ==============================
 New Features, Improvements

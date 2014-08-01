@@ -73,6 +73,10 @@ class Tasks extends Objects
                 case 'reopen':
                     $subject = L\get('aboutTaskReopened', $l);
                     break;
+
+                case 'status_change':
+                    $subject = L\get('aboutUserTaskStatusChange', $l);
+                    break;
             }
 
             //replace possible placeholders in subj
@@ -85,7 +89,7 @@ class Tasks extends Objects
                 array(
                     User::getDisplayName($taskData['cid'])
                     ,$taskData['name']
-                    ,\CB\Path::getPathText($taskData['path'])
+                    ,$taskData['path']
                 ),
                 $subject
             );

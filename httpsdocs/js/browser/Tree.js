@@ -463,17 +463,16 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         e.preventDefault();
         this.contextMenu.node = node;
 
+        this.contextMenu.showAt(e.getXY());
+    }
+
+    ,updateCreateMenu: function (menuConfig) {
         updateMenu(
             this.createItem
-            ,getMenuConfig(
-                node.attributes.nid
-                ,node.getPath('nid')
-                ,node.attributes.template_id
-            )
+            ,menuConfig
             ,this.onCreateObjectClick
             ,this
         );
-        this.contextMenu.showAt(e.getXY());
     }
 
     ,onCreateObjectClick: function(b, e) {
