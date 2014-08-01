@@ -26,9 +26,7 @@ return array_merge(
             ,'//css/date-time-ux.css'
             ,'//css/spinner/Spinner.css'
         )
-        ,'js_pdf' => array(
-            '//js/pdfobject.js'
-            )
+
         ,'js' => array(
             '//js/iso8601.min.js'
             ,'//js/pdfobject.js'

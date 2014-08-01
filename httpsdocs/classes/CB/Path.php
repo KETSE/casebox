@@ -90,7 +90,7 @@ class Path
         $ids = array_filter($path, 'is_numeric');
         $id = array_pop($ids);
 
-        $res = DB\dbQuery('SELECT pids from tree_info WHERE id = $1', $id) or die(DB\dbQueryError());
+        $res = DB\dbQuery('SELECT pids FROM tree_info WHERE id = $1', $id) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $path = explode(',', $r['pids']);
             if (!empty($path) && empty($path[0])) {
@@ -163,6 +163,7 @@ class Path
             $ids = array(Browser::getRootFolderId());
             $path = $ids;
         }
+
         $rez = array();
         $lastId = array_pop($ids);
         $res = DB\dbQuery(
@@ -312,7 +313,7 @@ class Path
     //------------------------------------------------------------------------
 
     /**
-     * try to detect real target id from a ginven path/path element
+     * try to detect real target id from a given path/path element
      * $p  path or path element
      * @return int | null
      */

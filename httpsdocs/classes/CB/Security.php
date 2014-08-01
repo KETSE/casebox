@@ -1014,11 +1014,12 @@ class Security
 
     /**
      * return sets for a user that have access on specified bit
-     * @param  boolean $user_id          [description]
-     * @param  integer $access_bit_index 5 is read bit index
-     * @return array   security set ids
+     * @param  boolean         $user_id          [description]
+     * @param  integer         $access_bit_index 5 is read bit index
+     * @param  integer | array $pids
+     * @return array           security set ids
      */
-    public static function getSecuritySets ($user_id = false, $access_bit_index = 5)
+    public static function getSecuritySets ($user_id = false, $access_bit_index = 5, $pids = null)
     {
 
         $rez = array();
@@ -1043,12 +1044,78 @@ class Security
         }
         $res->close();
 
+        $rez = array();
         foreach ($sets as $set_id => $set) {
             if (!empty($set[$user_id])
                 || (!isset($set[$user_id]) && !empty($set[$everyoneGroupId]))
             ) {
                 $rez[] = $set_id;
             }
+        }
+
+        //filter sets if pids specified
+        if (!empty($pids)) {
+            $pids = Util\toNumericArray($pids);
+        }
+
+        if (!empty($rez) && !empty($pids)) {
+            //select all pids of given pid ids
+            $res = DB\dbQuery(
+                'SELECT pids
+                FROM tree_info
+                WHERE id in (' . implode(',', $pids) . ')',
+                array()
+            ) or die(DB\dbQueryError());
+            while ($r = $res->fetch_assoc()) {
+                $ids = explode(',', $r['pids']);
+                foreach ($ids as $id) {
+                    if (!in_array($id, $pids)) {
+                        $pids[] = $id;
+                    }
+                }
+            }
+            $res->close();
+
+            //select distinct set nodes
+            $nodes = array();
+            $res = DB\dbQuery(
+                'SELECT id, `set`
+                FROM tree_acl_security_sets
+                WHERE id in (' . implode(',', $rez) . ')'
+            ) or die(DB\dbQueryError());
+
+            while ($r = $res->fetch_assoc()) {
+                $ids = explode(',', $r['set']);
+
+                foreach ($ids as $id) {
+                    $nodes[$id][] = $r['id'];
+                }
+            }
+            $res->close();
+
+            $rez = array();
+
+            //now select pids of collected nodes and filter only sets
+            //that are for child nodes of the pids
+            $res = DB\dbQuery(
+                'SELECT id, pids
+                FROM tree_info
+                WHERE id in (' . implode(',', array_keys($nodes)) . ')'
+            ) or die(DB\dbQueryError());
+
+            while ($r = $res->fetch_assoc()) {
+                $ids = explode(',', $r['pids']);
+                $intersection = array_intersect($pids, $ids);
+
+                if (!empty($intersection)) {
+                    foreach ($nodes[$r['id']] as $setId) {
+                        $rez[$setId] = 1;
+                    }
+                }
+            }
+            $res->close();
+
+            $rez = array_keys($rez);
         }
 
         return $rez;
@@ -1245,7 +1312,9 @@ class Security
     public static function getActiveUsers()
     {
         $rez = array('success' => true, 'data' => array());
-        $user_id = $_SESSION['user']['id'];
+
+        $photosPath = Config::get('photos_path');
+
         $res = DB\dbQuery(
             'SELECT
                 id
@@ -1253,18 +1322,20 @@ class Security
                 ,first_name
                 ,last_name
                 ,concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls`
+                ,photo
             FROM users_groups
             WHERE `type` = 2
                 AND did IS NULL
                 AND enabled = 1
-            ORDER BY 2',
-            $user_id
+            ORDER BY 2'
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
             if (!empty($r['first_name']) || !empty($r['last_name'])) {
                 $r['name'] = Purify::humanName($r['first_name'].' '.$r['last_name']);
             }
+
+            $r['photo'] = User::getPhotoParam($r);
 
             $rez['data'][] = $r;
         }

@@ -233,19 +233,6 @@ CB.Objects = Ext.extend(CB.GenericForm, {
 
         moreItems.push(this.actions.security);
 
-
-        /* insert create menu if needed */
-        // menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
-        // if( !Ext.isEmpty(menuConfig) ){
-        //     createButton = new Ext.menu.Item({
-        //         text: L.Create
-        //         ,menu: [ ]
-        //     });
-        //     updateMenu(createButton, menuConfig, this.onCreateObjectClick.createInterceptor(this.autoSaveObjectInterceptor, this), this);
-        //     moreItems.push('-', createButton);
-        // }
-        /**/
-
         var moreButton = new Ext.Button({
             iconCls: 'ib-points'
             ,iconAlign:'top'
@@ -747,7 +734,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
             );
             delete this.interceptorArguments;
         }
-        App.fireEvent('objectchanged', this);
+        App.fireEvent('objectchanged', this.data, this);
         this.onObjectChanged();
     }
 

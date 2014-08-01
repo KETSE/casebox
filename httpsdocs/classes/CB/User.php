@@ -1061,9 +1061,16 @@ class User
             $image = new \Imagick($f['tmp_name']);
             $image->resizeImage(100, 100, \imagick::FILTER_LANCZOS, 0.9, true);
             $image->setImageFormat('png');
-            $image->writeImage($photosPath.$photoName);
+            $image->writeImage($photosPath . $photoName);
+
+            //create also a 32x32 photo file to embed in emails and other places
+            $image->resizeImage(32, 32, \imagick::FILTER_LANCZOS, 0.9, true);
+            $image->writeImage($photosPath . '32x32_' . $photoName);
         } catch (\Exception $e) {
-            return array('success' => false, 'msg' => 'This image format is not supported, please upload a PNG, JPG image.');
+            return array(
+                'success' => false
+                ,'msg' => 'This image format is not supported, please upload a PNG, JPG image.'
+            );
         }
 
         $res = DB\dbQuery(
@@ -1234,6 +1241,140 @@ class User
 
             Cache::set($var_name, $name);
 
+        }
+
+        return Cache::get($var_name);
+    }
+
+    /**
+     * get a user photo if set
+     * @param  $idOrData  id or user data array
+     * @param  $size32
+     * @return varchar
+     */
+    public static function getPhotoFilename($idOrData = false, $size32 = false)
+    {
+        $data = array();
+
+        if ($idOrData === false) { //use current logged users
+            $id = $_SESSION['user']['id'];
+
+        } elseif (is_numeric($idOrData)) { //id specified
+            $id = $idOrData;
+
+        } elseif (is_array($idOrData) && !empty($idOrData['id']) && is_numeric($idOrData['id'])) {
+            $id = $idOrData['id'];
+            $data = $idOrData;
+
+        } else {
+            return '';
+        }
+
+        $var_name = 'users['.$id."]['photoFilename$size32']";
+
+        if (!Cache::exist($var_name)) {
+            if (empty($data)) {
+                $res = DB\dbQuery(
+                    'SELECT
+                        photo
+                    FROM users_groups
+                    WHERE id = $1',
+                    $id
+                ) or die(DB\dbQueryError());
+
+                if ($r = $res->fetch_assoc()) {
+                    $data = $r;
+                }
+                $res->close();
+            }
+
+            //set result to default placeholder
+            $rez = DOC_ROOT.'css/i/ico/32/user-male.png';
+
+            $photosPath = Config::get('photos_path');
+            $photoFile = $photosPath . $data['photo'];
+
+            if (file_exists($photoFile)) {
+                if ($size32) {
+                    $photoFile32 = $photosPath . '32x32_' . $data['photo'];
+
+                    //create thumb photo if not exists
+                    if (!file_exists($photoFile32)) {
+                        try {
+                            $image = new \Imagick($photoFile);
+                            $image->resizeImage(32, 32, \imagick::FILTER_LANCZOS, 0.9, true);
+                            $image->writeImage($photoFile32);
+                            $rez = $photoFile32;
+                        } catch (\Exception $e) {
+
+                        }
+                    } else {
+                        $rez = $photoFile32;
+                    }
+                } else {
+                    $rez = $photoFile;
+                }
+            } elseif (@$data['sex'] == 'f') {
+                $rez = DOC_ROOT.'css/i/ico/32/user-female.png';
+            }
+
+            Cache::set($var_name, $rez);
+        }
+
+        return Cache::get($var_name);
+    }
+
+    /**
+     * get photo param to be added for photo urls
+     * @param  $idOrData
+     * @return varchar
+     */
+    public static function getPhotoParam($idOrData = false)
+    {
+        $data = array();
+
+        if ($idOrData === false) { //use current logged users
+            $id = $_SESSION['user']['id'];
+
+        } elseif (is_numeric($idOrData)) { //id specified
+            $id = $idOrData;
+
+        } elseif (is_array($idOrData) && !empty($idOrData['id']) && is_numeric($idOrData['id'])) {
+            $id = $idOrData['id'];
+            $data = $idOrData;
+
+        } else {
+            return '';
+        }
+
+        $var_name = 'users['.$id."]['photoParam']";
+
+        if (!Cache::exist($var_name)) {
+            if (empty($data)) {
+                $res = DB\dbQuery(
+                    'SELECT
+                        photo
+                    FROM users_groups
+                    WHERE id = $1',
+                    $id
+                ) or die(DB\dbQueryError());
+
+                if ($r = $res->fetch_assoc()) {
+                    $data = $r;
+                }
+                $res->close();
+            }
+
+            $rez = '';
+
+            $photosPath = Config::get('photos_path');
+            $photoFile = $photosPath . $data['photo'];
+
+            if (file_exists($photoFile)) {
+                $rez = date('ynjGis', filemtime($photoFile));
+            }
+
+            Cache::set($var_name, $rez);
         }
 
         return Cache::get($var_name);

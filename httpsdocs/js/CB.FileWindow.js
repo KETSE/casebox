@@ -163,6 +163,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         }
 
         //prepare object data
+        this.createMenu = r.menu;
         this.data = r.data;
         this.data.cdate = date_ISO_to_local_date(this.data.cdate);
         this.data.udate = date_ISO_to_local_date(this.data.udate);
@@ -217,14 +218,12 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         }
 
         /* insert create menu if needed */
-        var menuConfig = getMenuConfig(this.data.id, this.data.path, this.data.template_id);
-
-        if( !Ext.isEmpty(menuConfig) ){
+        if( !Ext.isEmpty(this.createMenu) ){
             var createButton = new Ext.menu.Item({
                 text: L.Create
                 ,menu: []
             });
-            updateMenu(createButton, menuConfig, this.onCreateObjectClick, this);
+            updateMenu(createButton, this.createMenu, this.onCreateObjectClick, this);
             moreItems.push('-', createButton);
         }
 

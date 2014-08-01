@@ -712,7 +712,6 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
         /* end of updating breadcrumb */
 
-        // this.onObjectsSelectionChange([]);
         this.fireEvent('viewloaded', proxy, o, options);
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
@@ -828,11 +827,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
     ,updateCreateMenuItems: function(menuButton) {
         updateMenu(
             menuButton
-            ,getMenuConfig(
-                this.folderProperties.id
-                ,this.folderProperties.path
-                ,this.folderProperties.template_id
-            )
+            ,this.folderProperties.menu
             ,this.onCreateObjectClick
             ,this
         );
@@ -954,7 +949,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             }
         }
 
-        this.updatePreview();
+        var d = Ext.isEmpty(App.locateObjectId)
+            ? []
+            : {id: App.locateObjectId};
+
+        delete App.locateObjectId;
+
+        this.updatePreview(d);
     }
 
     /**
@@ -1240,9 +1241,13 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             this.onReloadClick();
         }
     }
-    ,onObjectChanged: function(objData){
+    ,onObjectChanged: function(objData, component){
+
+        var idx = this.store.findExact('nid', String(objData.id));
+
         if(
-            isNaN(this.folderProperties.id) ||
+            (idx >=0) ||
+            isNaN(this.folderProperties.id) || // virtual folders
             (objData.pid == this.folderProperties.id)
         ) {
             App.locateObjectId = objData.id;

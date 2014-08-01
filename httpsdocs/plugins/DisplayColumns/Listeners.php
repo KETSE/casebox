@@ -33,7 +33,11 @@ class Listeners
 
         if (empty($p['inputParams']['strictSort']) && !empty($solrFields['sort'])) {
             $sp['sort'] = $solrFields['sort'];
-        } elseif (!empty($this->inputParams['sort']) && empty($solrFields['sort'])) {
+
+        } elseif (!empty($this->inputParams['sort']) &&
+            empty($solrFields['sort']) &&
+            !in_array($this->inputParams['sort'], \CB\Search::$defaultFields)
+        ) {
             $sp['sort'] = 'ntsc asc, order asc';
         }
     }
@@ -265,12 +269,20 @@ class Listeners
 
             $state = State\DBProvider::getGridViewState($stateFrom);
 
-            if (!empty($state['sort']['field']) && !empty($displayColumns['data'][$state['sort']['field']]['solr_column_name'])) {
-                $rez['sort'] = array(
-                    $displayColumns['data'][$state['sort']['field']]['solr_column_name']
-                    .' '
-                    .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
-                );
+            if (!empty($state['sort']['field'])) {
+                if (!empty($displayColumns['data'][$state['sort']['field']]['solr_column_name'])) {
+                    $rez['sort'] = array(
+                        $displayColumns['data'][$state['sort']['field']]['solr_column_name']
+                        .' '
+                        .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
+                    );
+                } elseif (in_array($state['sort']['field'], \CB\Search::$defaultFields)) {
+                    $rez['sort'] = array(
+                        $state['sort']['field']
+                        .' '
+                        .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
+                    );
+                }
             }
 
             if (!empty($rez['sort'])) {

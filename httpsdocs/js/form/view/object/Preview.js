@@ -81,8 +81,11 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
                 this.delayReload();
                 break;
             case 'PDF':
-                elId = this.body.id;
-                success = new PDFObject({ url: '/' + App.config.coreName + "/download.php?pw=&amp;id="+this.data.id }).embed(elId);
+                var url = '/' + App.config.coreName + "/download.php?pw=&amp;id="+this.data.id;
+                this.update(
+                    '<object data="' + url + '" type="application/pdf" width="100%" height="100%">' +
+                    'alt : <a href="' + url + '">' + this.data.name + '</a></object>'
+                );
                 break;
         }
         this.attachEvents();
@@ -281,7 +284,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
     ,onTaskChanged: function(r, e){
         this.getEl().unmask();
         this.reload();
-        App.fireEvent('objectchanged', this.data);
+        App.fireEvent('objectchanged', this.data, this);
         // App.mainViewPort.fireEvent('taskupdated', this, e);
     }
 
@@ -323,7 +326,7 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         return rez;
     }
 
-    ,onObjectChanged: function(data) {
+    ,onObjectChanged: function(data, component) {
         if(!isNaN(data)) {
             data = {id: data};
         }

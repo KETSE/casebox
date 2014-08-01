@@ -3,6 +3,7 @@ namespace CB\Objects;
 
 use CB\Config;
 use CB\Util;
+use CB\User;
 
 class Comment extends Object
 {
@@ -51,6 +52,20 @@ class Comment extends Object
                     '<a href="' . Config::get('core_url') . 'v-' . $match[1] . '" target="_blank">' . $name . '</a>' . substr($match[0], strlen($match[1]) + 1),
                     $message
                 );
+            }
+        }
+
+        //replace users ith their names
+        if (preg_match_all('/@([^@\s,]+)/', $message, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $userId = User::exists($match[1]);
+                if (is_numeric($userId)) {
+                    $message = str_replace(
+                        $match[0],
+                        '<span class="cDB">' . User::getDisplayName($userId) . '</span>',
+                        $message
+                    );
+                }
             }
         }
 

@@ -389,8 +389,8 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             this.saveCallback(this, form, action);
             delete this.saveCallback;
         }
-        App.fireEvent('objectchanged', r.data);
 
+        App.fireEvent('objectchanged', r.data, this);
     }
 
     ,clear: function(){

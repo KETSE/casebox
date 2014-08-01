@@ -108,10 +108,7 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
         if(Ext.isEmpty(this.puMenu)) {
             this.puMenu = new Ext.menu.Menu({
                 items: [
-                    // {
-                    //     text: 'Close'
-                    // },
-                    {
+                   {
                         text: 'Delete'
                         ,iconCls: 'i-trash'
                         ,scope: this
@@ -149,11 +146,7 @@ CB.objects.plugins.ContentItems = Ext.extend(CB.objects.plugins.Base, {
 
         updateMenu(
             {menu: this.pmenu}
-            ,getMenuConfig(
-                this.params.id
-                ,this.params.path
-                ,this.params.template_id
-            )
+            ,this.createMenu
             ,this.onCreateObjectClick
             ,this
         );

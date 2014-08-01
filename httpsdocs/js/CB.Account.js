@@ -367,7 +367,9 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
     }
 
     ,onPhotoChanged: function(ev, el, o){
-        if(Ext.isEmpty(this.photoField.getValue())) return;
+        if(Ext.isEmpty(this.photoField.getValue())) {
+            return;
+        }
         form = this.getForm();
         form.api = {submit: CB_User.uploadPhoto};
 

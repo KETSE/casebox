@@ -79,6 +79,7 @@ CB.objects.plugins.SystemProperties = Ext.extend(CB.objects.plugins.Base, {
         if(this.params) {
 
             if(CB.DB.templates.getType(this.params.template_id) == 'file') {
+                rez.menu['metadata']  = {};
                 rez.menu['webdavlink']  = {};
                 rez.menu['permalink']  = {};
             }

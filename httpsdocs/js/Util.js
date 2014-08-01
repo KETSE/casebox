@@ -203,6 +203,11 @@ function getStoreNames(v){
         ids
         ,function(id){
             var idx = this.findExact('id', parseInt(id, 10));
+
+            if(idx < 0) {
+                idx = this.findExact('id', String(id));
+            }
+
             if(idx >= 0) {
                 var d = this.getAt(idx).data;
                 texts.push(d.name);
@@ -300,90 +305,4 @@ function updateMenu(menuButton, menuConfig, handler, scope){
         }
 
     for(i = 0; i < menu.length; i++) menuButton.menu.add(menu[i]);
-}
-
-/**
- * get the menu config with highest weight for given params
- *
- * weight is higher if more specified (non empty) conditions are satisfied
- *
- * Example: node_id = 4, ids_path = /1/4, node_template_id = 42
- *     this params could satisfy more than one rule:
- *         node_ids     node_template_ids   user_group_ids
- *         null         42                  null
- *         4            40,41,42            1
- *     Second rule has higher weight because it satisfies input params
- *     by 3 non empty criteryas: node_ids, node_template_ids and user_group_ids
- *     The first rule
- * @param  int node_id          selected node id
- * @param  varchar ids_path
- * @param  int node_template_id
- * @return varchar
- */
-function getMenuConfig(node_id, ids_path, node_template_id){
-    var lastWeight = 0;
-    var menuConfig = '';
-    CB.DB.menu.each( function(r){
-        var weight = 0;
-
-        /*check user_group ids
-          firstly select only rules that are available for current user id (user_group_ids containt current user id or group id)
-        */
-        var ug_ids = ',' + String(Ext.value(r.get('user_group_ids'), '') ).replace(/ /g, '') + ',';
-
-        if (ug_ids.indexOf(','+App.loginData.id+',') >=0) {
-            weight += 100;
-        } else {
-            if( ( ug_ids != ',,' ) && ( !setsHaveIntersection(ug_ids, App.loginData.groups ) ) ) return;
-            weight += 50;
-        }
-        /*end of check user_group ids */
-
-        /* check template_ids
-           select only rules inth empty node_template_ids or that contain current selected node_template_id
-        /**/
-        if(!Ext.isEmpty(node_template_id)){
-            var nt_ids = ',' + String( Ext.value(r.get('node_template_ids'), '') ).replace(/ /g, '') + ',';
-            if(nt_ids.indexOf(','+node_template_id+',') >=0) {
-                weight += 300; //increased weight for template match
-            } else {
-                if( nt_ids != ',,') return;
-                weight += 50;
-            }
-        }else {
-            if(!Ext.isEmpty(r.get('node_template_ids'))){
-                return;
-            }
-        }
-
-        var n_ids = ',' + String( Ext.value(r.get('node_ids'), '') ).replace(/ /g, '') + ',';
-        if( n_ids.indexOf(','+node_id+',') >= 0 ) {
-            weight += 100;
-        }else{
-            if( n_ids == ',,') {
-                weight += 50;
-            }else{ /*check the nearest parents from path */
-                ids = String(ids_path).split('/');
-                for (var i = ids.length -1; i > 0; i--) {
-                    if(n_ids.indexOf(','+ids[i]+',') >=0){
-                        weight += 51 + i;
-                        if(weight >= lastWeight){
-                            lastWeight = weight;
-                            menuConfig = r.get('menu');
-                            return;
-                        }
-                        i = -1;
-                    }
-                }
-                return;
-            }
-        }
-
-        if(weight >= lastWeight){
-            lastWeight = weight;
-            menuConfig = r.get('menu');
-        }
-    }, this);
-
-    return menuConfig;
 }

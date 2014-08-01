@@ -126,5 +126,6 @@ if ($isForm && $isUpload) {
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
     echo '</textarea></body></html>';
 } else {
+    header('X-Frame-Options: deny');
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
 }

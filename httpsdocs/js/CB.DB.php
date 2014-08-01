@@ -22,7 +22,7 @@ Ext.namespace('CB.DB');
         idIndex: 0
         ,fields: ['id', 'name']
         ,data:  [[null, '-'], ['case', 'case'], ['comment', 'comment'], ['email', 'email'], ['field', 'field'], ['file', 'file'], ['object', 'object'], ['search', 'search'], ['task', 'task'], ['template', 'template'], ['user', 'user']]
-        ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
+        ,getName: getStoreNames
     });
 <?php
 $data = array(
@@ -56,7 +56,7 @@ $data = array(
         idIndex: 0
         ,fields: ['id', 'name']
         ,data: <?php echo json_encode($data, JSON_UNESCAPED_UNICODE); ?>
-        ,getName: function(id){ idx = this.findExact('id', String(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
+        ,getName: getStoreNames
     });
     CB.DB.reminderTypes = new Ext.data.ArrayStore({
         idIndex: 0
@@ -67,7 +67,7 @@ $data = array(
         idIndex: 0
         ,fields: [{name: 'id', type: 'int'}, 'name']
         ,data:  [[1, L.ofMinutes], [2, L.ofHours], [3, L.ofDays], [4, L.ofWeeks]]
-        ,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
+        ,getName: getStoreNames
     });
     CB.DB.shortDateFormats = new Ext.data.ArrayStore({
         idIndex: 0
@@ -83,7 +83,7 @@ $data = array(
         idIndex: 0
         ,fields: [{name: 'id', type: 'int'}, 'name']
         ,data:  [ [1, L.Low], [2, L.Medium], [3, L.High] ]
-        ,getName: function(id){ idx = this.findExact('id', parseInt(id)); return (idx >=0 ) ? this.getAt(idx).get('name') : ''; }
+        ,getName: getStoreNames
     })
     CB.DB.phone_codes = new Ext.data.ArrayStore({
         idIndex: 0
@@ -241,9 +241,11 @@ createDirectStores = function(){
         )
         ,getName: getStoreNames
         ,getIcon: function(id){
-            idx = this.findExact('id', parseInt(id))
+            var idx = this.findExact('id', parseInt(id));
 
-            return (idx >=0 ) ? this.getAt(idx).get('iconCls') : '';
+            return (idx >=0)
+                ? this.getAt(idx).get('iconCls')
+                : '';
         }
     });
 
@@ -276,17 +278,22 @@ createDirectStores = function(){
         ,getIcon: function(id){
             var idx = this.findExact('id', parseInt(id))
 
-            return (idx >=0 ) ? this.getAt(idx).get('iconCls') : '';
+            return (idx >= 0)
+                ? this.getAt(idx).get('iconCls')
+                : '';
         }
         ,getType: function(id){
             var idx = this.findExact('id', parseInt(id, 10))
 
-            return (idx >=0 ) ? this.getAt(idx).get('type') : '';
+            return (idx >=0)
+                ? this.getAt(idx).get('type') : '';
         }
         ,getProperty: function(templateId, propertyName) {
             var idx = this.findExact('id', parseInt(templateId, 10))
 
-            return (idx >=0 ) ? this.getAt(idx).get(propertyName) : '';
+            return (idx >= 0)
+                ? this.getAt(idx).get(propertyName)
+                : '';
         }
 
     });
@@ -302,9 +309,16 @@ createDirectStores = function(){
                 ,idProperty: 'id'
                 ,root: 'data'
                 ,messageProperty: 'msg'
-            },[ {name: 'id', type: 'int'}, 'name', 'iconCls' ]
+            },[ {name: 'id', type: 'int'}, 'name', 'iconCls', 'photo' ]
         )
         ,getName: getStoreNames
+        ,getPhotoParam: function(id) {
+            var idx = this.findExact('id', parseInt(id));
+
+            return (idx >= 0)
+                ? this.getAt(idx).get('photo')
+                : '';
+        }
     });
     App.on('userprofileupdated', function(userData, event){ CB.DB.usersStore.reload();});
 

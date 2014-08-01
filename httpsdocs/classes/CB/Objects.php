@@ -76,7 +76,11 @@ class Objects
         // if (is_array($data) && (@$data['method'] == 'load')) {
         //     // Log::add(array('action_type' => 11, 'object_id' => $id));
         // }
-        return array('success' => true, 'data' => $resultData);
+        return array(
+            'success' => true
+            ,'data' => $resultData
+            ,'menu' => Browser\CreateMenu::getMenuForPath($p['id'])
+        );
     }
 
     /**
@@ -445,7 +449,6 @@ class Objects
                 $field = $template->getField($f['name']);
             }
 
-            $processed_values = array();
             if (!empty($f['value'])) {
                 /* make changes to value if needed */
                 switch ($field['type']) {
@@ -874,6 +877,8 @@ class Objects
             return $rez;
         }
 
+        $rez['menu'] = Browser\CreateMenu::getMenuForPath($p['id']);
+
         $id = $p['id'];
         /* now we'll try to detect plugins config that could be found in following places:
             1. in config of the template for the given object, named object_plugins
@@ -974,7 +979,7 @@ class Objects
                 ,'cdate_text' => Util\formatAgoTime('now')
                 ,'cid' => $_SESSION['user']['id']
                 ,'user' => User::getDisplayName($_SESSION['user']['id'])
-                ,'content' => htmlspecialchars($p['msg'], ENT_QUOTES)
+                ,'content' => Objects\Comment::processAndFormatMessage($p['msg'])
             )
         );
     }

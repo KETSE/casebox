@@ -63,7 +63,11 @@ $objType = $obj->getType();
 
 // if external window then print the toolbar
 if (empty($_GET['i'])) {
-    echo '<html><head><link rel="stylesheet" type="text/css" href="/css/tasks.css" /></head><body>';
+    echo '<html><head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" href="/css/tasks.css" /></head>
+        <body>
+    ';
     if ($objType == 'file') {
         $toolbarItems[] = '<a href="' . $coreUrl . 'download.php?id=' . $id . '">' . L\get('Download') .'</a>';
     }
@@ -147,4 +151,8 @@ switch ($obj->getType()) {
         $o = new Objects();
         echo $o->getPreview($id);
         break;
+}
+
+if (empty($_GET['i'])) {
+    echo '</body></html>';
 }

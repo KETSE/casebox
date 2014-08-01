@@ -113,14 +113,6 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
                 return rez;
             }
-            ,applyState: function(state) {
-                Ext.Panel.prototype.applyState.call(this, state);
-                if(state.collapsed) {
-                    this.setWidth(state.width);
-                } else {
-                    this.expand();
-                }
-            }
         });
 
         App.mainStatusBar = new Ext.Toolbar({
@@ -135,6 +127,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
                     ,{xtype: 'tbspacer', width: 20}
                 ]
         });
+
         Ext.apply(this, {
             items: [ App.mainToolBar
                 ,App.mainTabPanel
@@ -158,6 +151,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
 
             }
         });
+
         this.addEvents(
             'login'
             ,'favoritetoggle'
@@ -173,20 +167,21 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,'objectsdeleted'
             ,'objectopened'
         );
-        CB.ViewPort.superclass.initComponent.apply(this, arguments);
 
+        CB.ViewPort.superclass.initComponent.apply(this, arguments);
     }
+
     ,onLogin: function(){
         /* adding menu items */
         var um = App.mainToolBar.find( 'name', 'userMenu')[0];
         if(um) {
-            um.update('<img src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg' + App.sid + '" ' +
+            um.update('<img src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id) + '" ' +
                 'style="margin-top: 4px; width: 32px; height: 32px;" ' +
                 'title="'+ getUserDisplayName(true) + '" />'
             );
         }
 
-        managementItems = [];
+        var managementItems = [];
         if(App.loginData.manage) {
             managementItems.push(
                 {
@@ -229,7 +224,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         }
         App.mainToolBar.doLayout();
 
-        langs = [];
+        var langs = [];
         CB.DB.languages.each(
             function(r){
                 langs.push({
@@ -280,7 +275,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             App.DD = new CB.DD();
 
             this.checkUrlLocate.defer(1500);
-        }else {
+        } else {
             this.initCB.defer(500, this);
         }
     }
@@ -320,7 +315,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             }
             ,rootVisible:true
         });
-        // App.mainAccordion.getLayout().setActiveItem(0);
+
         if(!App.mainAccordion.collapsed) {
             App.mainAccordion.syncSize();
         }
@@ -330,7 +325,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             App.mainTree = trees[0];
             var rn = App.mainTree.getRootNode();
             rn.attributes.name = 'My CaseBox';
-            App.mainTree.on('afterrender', this.selectTreeRootNode, this);
+            // App.mainTree.on('afterrender', this.selectTreeRootNode, this);
 
             for (i = 0; i < trees.length; i++) {
                 trees[i].getSelectionModel().on(
@@ -370,26 +365,36 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
     }
 
     ,onChangeActiveFolder: function(sm, node){
-        if( this.pathSelectionByViewport ||
+        if( this.syncingTreePathWithViewContainer ||
             Ext.isEmpty(node) ||
             Ext.isEmpty(node.getPath)
         ) {
             return;
         }
-        params = {
+
+        var params = {
             id: node.attributes.nid
             ,view: Ext.isEmpty(node.attributes.view)
                 ? 'grid'
                 : node.attributes.view
         };
 
-        App.openPath( node.getPath('nid'), params );
+        App.openPath(node.getPath('nid'), params);
     }
 
+    /**
+     * reload the viewcontainer when a tree node is renamed
+     * @return void
+     */
     ,onRenameTreeElement: function(tree, r, e){
-        node = tree.getSelectionModel().getSelectedNode();
-        if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) return;
-        tab = App.mainTabPanel.getActiveTab();
+        var node = tree.getSelectionModel().getSelectedNode();
+
+        if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) {
+            return;
+        }
+
+        var tab = App.mainTabPanel.getActiveTab();
+
         if(tab.isXType(CB.browser.ViewContainer)) {
             tab.onReloadClick();
         }
@@ -401,13 +406,13 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         }
         var idx = g.store.findExact('nid', String(App.locateObjectId) );
         if(idx >=0){
-            sm = g.getSelectionModel();
+            var sm = g.getSelectionModel();
             if( (sm.getCount() > 1) ||
                 !sm.isSelected(idx)
             ) {
-                // sm.clearSelections();
                 sm.selectRow(idx, false);
             }
+
             var view = g.getView();
             Ext.get(view.getRow(idx)).scrollIntoView(view.scroller);
             delete App.locateObjectId;
@@ -483,6 +488,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             }
             ,'CBFileWindow'
         );
+
         return App.addTab(App.mainTabPanel, o);
     }
 
@@ -584,7 +590,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
         if(zipped !== true){
             if(!Ext.isArray(ids)) ids = String(ids).split(',');
             Ext.each(ids, function(id){if(isNaN(id)) return false; App.downloadFile(id);}, this);
-        }else{
+        } else {
             if(Ext.isArray(ids)) ids = ids.join(',');
             App.downloadFile(ids, true);
         }
@@ -611,18 +617,32 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,this
         );
 
-        this.pathSelectionByViewport = true;
+        // add flag to avoid reloading viewport on node selection change
+        this.syncingTreePathWithViewContainer = true;
 
         if(activeTree &&
             action &&
             action.result &&
             action.result.folderProperties
         ) {
+            activeTree.updateCreateMenu(action.result.folderProperties.menu);
+
+            //check if rootnode id is set at the beginning of the path
+            //its id could be missing if it's a virtual root node
+            var p = String(action.result.folderProperties.path).split('/');
+            if(p.indexOf(App.config.rootNode.nid) < 0) {
+                if(Ext.isEmpty(p[0])) {
+                    p.splice(1, 0, App.config.rootNode.nid);
+                } else {
+                    p.unshift(App.config.rootNode.nid);
+                }
+            }
+            //select the path in tree
             activeTree.selectPath(
-                '/0' + action.result.folderProperties.path
+                p.join('/')
                 ,'nid'
                 ,function(){
-                    delete this.pathSelectionByViewport;
+                    delete this.syncingTreePathWithViewContainer;
                 }.createDelegate(this)
             );
         }

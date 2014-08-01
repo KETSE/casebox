@@ -6,7 +6,7 @@ CB.objects.plugins.Thumb = Ext.extend(CB.objects.plugins.Base, {
         var tpl = new Ext.XTemplate(
             '<tpl for=".">'
                 ,'<div style="width: 100%; text-align: center; margin: 30px 0">'
-                ,'<img class="click preview-thumb {cls}" src="'+Ext.BLANK_IMAGE_URL+'" alt="'+L.Preview +'" />'
+                ,'{[ Ext.isEmpty(values.html) ? "<img class=\\"click preview-thumb {cls}\\" src=\\"'+Ext.BLANK_IMAGE_URL+'\\" alt=\\"'+L.Preview +'\\" />" : values.html ]}'
                 ,'</div>'
             ,'</tpl>'
         );
@@ -42,7 +42,7 @@ CB.objects.plugins.Thumb = Ext.extend(CB.objects.plugins.Base, {
             return;
         }
 
-        if(te.hasClass('preview-thumb')) {
+        if(te.hasClass('click')) { //preview-thumb
             this.fireEvent('openpreview', this.params, e);
         }
     }

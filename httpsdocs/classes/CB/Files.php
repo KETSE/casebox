@@ -5,7 +5,16 @@ class Files
 {
     public static function getProperties($id)
     {
-        $rez = array('success' => true, 'data' => array());
+        $rez = array(
+            'success' => true
+            ,'data' => array()
+        );
+
+        if (!is_numeric($id)) {
+            return $rez;
+        }
+
+        $rez['menu'] = Browser\CreateMenu::getMenuForPath($id);
 
         $file = new Objects\File($id);
         $rez['data'] = $file->load();
@@ -981,21 +990,13 @@ class Files
             case 'pdf':
                 $html = 'PDF'; //Ext panel - PreviewPanel view
                 if (empty($_SERVER['HTTP_X_REQUESTED_WITH'])) { //full browser window view
-                    require_once(Config::get('MINIFY_PATH').'utils.php');
-
-                    $html = '<html><head><title>'.$file['name'].'</title>
-                            <script type="text/javascript" src="/'.Config::get('core_name').Minify_getUri('js_pdf').'"></script>
-                            <script type="text/javascript">
-                                  window.onload = function (){
-                                    var success = new PDFObject({ url: "' . $coreUrl . 'download.php?pw=&amp;id='.$file['id'].'" }).embed();
-                                  };
-                            </script>
-                          </head>
-                      <body>
-                        <p>It appears you don\'t have Adobe Reader or PDF support in this web browser.
-                            <a href="' . $coreUrl . 'download.php?id='.$file['id'].'">Click here to download the PDF</a></p>
-                    </body>
-                    </html>';
+                    $url = $coreUrl . 'download.php?id='.$file['id'];
+                    $html = '
+                        <object data="' . $url . '" type="application/pdf" width="100%" height="100%">
+                            It appears you don\'t have Adobe Reader or PDF support in this web browser.
+                            <a href="' . $url . '">Click here to download the file</a>
+                            <embed src="' . $url . '" type="application/pdf" />
+                        </object>';
                 }
 
                 return array('html' => $html);

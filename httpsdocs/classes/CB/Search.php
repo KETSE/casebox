@@ -3,6 +3,11 @@ namespace CB;
 
 class Search extends Solr\Client
 {
+    public static $defaultFields = array(
+        'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'system',
+        'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'case_id', 'acl_count',
+        'case', 'template_id', 'user_ids', 'status', 'task_status', 'category_id', 'importance', 'completed', 'versions'
+    );
     /*when requested to sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
     public $replaceSortFields = array('nid' => 'id', 'name' => 'sort_name', 'path' => 'sort_path');
@@ -51,9 +56,7 @@ class Search extends Solr\Client
             ,'q.alt' => '*:*'
             ,'qf' => "name content^0.5"
             ,'tie' => '0.1'
-            ,'fl' => "id, pid, path, name, template_type, subtype, system, ".
-                "size, date, date_end, oid, cid, cdate, uid, udate, case_id, acl_count, ".
-                "case, template_id, user_ids, status, task_status, category_id, importance, completed, versions"
+            ,'fl' => implode(',', static::$defaultFields)
             ,'sort' => 'ntsc asc'
         );
         /* initial parameters */
@@ -156,7 +159,14 @@ class Search extends Solr\Client
         /* assign security sets to filters */
 
         if (!Security::isAdmin()) {
-            $sets = Security::getSecuritySets();
+            $pids = false;
+            if (!empty($p['pid'])) {
+                $pids = $p['pid'];
+            } elseif (!empty($p['pids'])) {
+                $pids = $p['pids'];
+            }
+
+            $sets = Security::getSecuritySets(false, 5, $pids);
             if (empty($sets)) {
                 $sets = array(0);
             }
