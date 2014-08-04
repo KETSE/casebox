@@ -1,3 +1,16 @@
+CaseBox 1.9.237 (2014-08-04)
+==============================
+New Features, Improvements
+--------------------------
+- in config 'images_display_size' could be set for displaying images
+    lower or equal than specified size (in bytes), in preview panel, instead of their thumbnails.
+- added img.fit-300 in css for small images displayed instead of thumb
+- removed debug commands from CreateMenu.php
+
+Fixed Bugs:
+----------
+- notification appears in CreateMenu.php if in menu table there is an id that doent exist in tree
+
 CaseBox 1.9.236 (2014-08-01)
 ==============================
 New Features, Improvements

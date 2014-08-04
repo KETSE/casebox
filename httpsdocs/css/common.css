@@ -295,3 +295,8 @@ img.fit-img {
     max-width: 100%;
     max-height: 100%;
 }
+
+img.fit-300 {
+    max-width: 300px;
+    max-height: 300px;
+}
