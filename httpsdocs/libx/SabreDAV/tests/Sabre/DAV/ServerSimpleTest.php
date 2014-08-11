@@ -4,10 +4,6 @@ namespace Sabre\DAV;
 
 use Sabre\HTTP;
 
-require_once 'Sabre/HTTP/ResponseMock.php';
-require_once 'Sabre/DAV/AbstractServer.php';
-require_once 'Sabre/DAV/Exception.php';
-
 class ServerSimpleTest extends AbstractServer{
 
     function testConstructArray() {
@@ -51,7 +47,7 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'GET',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -63,7 +59,7 @@ class ServerSimpleTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
         $this->assertEquals('Test contents', stream_get_contents($this->response->body));
 
     }
@@ -75,7 +71,7 @@ class ServerSimpleTest extends AbstractServer{
             'SERVER_PROTOCOL' => 'HTTP/1.0',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -87,7 +83,8 @@ class ServerSimpleTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals('HTTP/1.0 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
+        $this->assertEquals('1.0', $this->response->getHttpVersion());
         $this->assertEquals('Test contents', stream_get_contents($this->response->body));
 
     }
@@ -99,10 +96,10 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'GET',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
-        $this->assertEquals('HTTP/1.1 404 Not Found',$this->response->status);
+        $this->assertEquals(404, $this->response->status);
 
     }
 
@@ -113,10 +110,10 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'GET',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
-        $this->assertEquals('HTTP/1.1 404 Not Found',$this->response->status);
+        $this->assertEquals(404, $this->response->status);
 
     }
 
@@ -133,7 +130,7 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'GET',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -145,7 +142,7 @@ class ServerSimpleTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
         $this->assertEquals('Test contents', stream_get_contents($this->response->body));
 
     }
@@ -158,7 +155,7 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'HEAD',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -170,162 +167,15 @@ class ServerSimpleTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
         $this->assertEquals('', $this->response->body);
-
-    }
-
-    function testPut() {
-
-        $serverVars = array(
-            'REQUEST_URI'    => '/testput.txt',
-            'REQUEST_METHOD' => 'PUT',
-        );
-
-        $request = new HTTP\Request($serverVars);
-        $request->setBody('Testing new file');
-        $this->server->httpRequest = ($request);
-        $this->server->exec();
-
-        $this->assertEquals('', $this->response->body);
-        $this->assertEquals('HTTP/1.1 201 Created',$this->response->status);
-        $this->assertEquals(array(
-            "Content-Length" => "0",
-        ), $this->response->headers);
-
-        $this->assertEquals('Testing new file',file_get_contents($this->tempDir . '/testput.txt'));
-
-    }
-
-    function testPutAlreadyExists() {
-
-        $serverVars = array(
-            'REQUEST_URI'    => '/test.txt',
-            'REQUEST_METHOD' => 'PUT',
-            'HTTP_IF_NONE_MATCH' => '*',
-        );
-
-        $request = new HTTP\Request($serverVars);
-        $request->setBody('Testing new file');
-        $this->server->httpRequest = ($request);
-        $this->server->exec();
-
-        $this->assertEquals(array(
-            'Content-Type' => 'application/xml; charset=utf-8',
-        ),$this->response->headers);
-
-        $this->assertEquals('HTTP/1.1 412 Precondition failed',$this->response->status);
-        $this->assertNotEquals('Testing new file',file_get_contents($this->tempDir . '/test.txt'));
-
-    }
-
-    function testPutUpdate() {
-
-        $serverVars = array(
-            'REQUEST_URI'    => '/test.txt',
-            'REQUEST_METHOD' => 'PUT',
-        );
-
-        $request = new HTTP\Request($serverVars);
-        $request->setBody('Testing updated file');
-        $this->server->httpRequest = ($request);
-        $this->server->exec();
-
-        $this->assertEquals('0', $this->response->headers['Content-Length']);
-
-        $this->assertEquals('HTTP/1.1 204 No Content',$this->response->status);
-        $this->assertEquals('', $this->response->body);
-        $this->assertEquals('Testing updated file',file_get_contents($this->tempDir . '/test.txt'));
-
-    }
-
-    function testPutNoParentCollection() {
-
-        $serverVars = array(
-            'REQUEST_URI'    => '/test.txt/item.txt',
-            'REQUEST_METHOD' => 'PUT',
-        );
-
-        $request = new HTTP\Request($serverVars);
-        $request->setBody('Testing updated file');
-        $this->server->httpRequest = ($request);
-        $this->server->exec();
-
-        $this->assertEquals('HTTP/1.1 409 Conflict',$this->response->status);
-
-    }
-
-    function testPutContentRange() {
-
-        $serverVars = array(
-            'REQUEST_URI'    => '/testput.txt',
-            'REQUEST_METHOD' => 'PUT',
-            'HTTP_CONTENT_RANGE' => 'bytes/100-200',
-        );
-
-        $request = new HTTP\Request($serverVars);
-        $request->setBody('Testing new file');
-        $this->server->httpRequest = ($request);
-        $this->server->exec();
-
-        $this->assertEquals('HTTP/1.1 501 Not Implemented',$this->response->status);
-
-    }
-
-
-    function testDelete() {
-
-        $serverVars = array(
-            'REQUEST_URI'    => '/test.txt',
-            'REQUEST_METHOD' => 'DELETE',
-        );
-
-        $request = new HTTP\Request($serverVars);
-        $this->server->httpRequest = ($request);
-        $this->server->exec();
-
-        $this->assertEquals(array(
-            'Content-Length' => '0',
-        ),$this->response->headers);
-
-        $this->assertEquals('HTTP/1.1 204 No Content',$this->response->status);
-        $this->assertEquals('', $this->response->body);
-        $this->assertFalse(file_exists($this->tempDir . '/test.txt'));
-
-    }
-
-    function testDeleteDirectory() {
-
-        $serverVars = array(
-            'REQUEST_URI'    => '/testcol',
-            'REQUEST_METHOD' => 'DELETE',
-        );
-
-        mkdir($this->tempDir.'/testcol');
-        file_put_contents($this->tempDir.'/testcol/test.txt','Hi! I\'m a file with a short lifespan');
-
-        $request = new HTTP\Request($serverVars);
-        $this->server->httpRequest = ($request);
-        $this->server->exec();
-
-        $this->assertEquals(array(
-            'Content-Length' => '0',
-        ),$this->response->headers);
-        $this->assertEquals('HTTP/1.1 204 No Content',$this->response->status);
-        $this->assertEquals('', $this->response->body);
-        $this->assertFalse(file_exists($this->tempDir . '/col'));
 
     }
 
     function testOptions() {
 
-        $serverVars = array(
-            'REQUEST_URI'    => '/',
-            'REQUEST_METHOD' => 'OPTIONS',
-        );
-
-        $request = new HTTP\Request($serverVars);
-        $this->server->httpRequest = ($request);
+        $request = new HTTP\Request('OPTIONS', '/');
+        $this->server->httpRequest = $request;
         $this->server->exec();
 
         $this->assertEquals(array(
@@ -337,11 +187,32 @@ class ServerSimpleTest extends AbstractServer{
             'X-Sabre-Version' => Version::VERSION,
         ),$this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
         $this->assertEquals('', $this->response->body);
 
+    }
+
+    function testOptionsUnmapped() {
+
+        $request = new HTTP\Request('OPTIONS', '/unmapped');
+        $this->server->httpRequest = $request;
+
+        $this->server->exec();
+
+        $this->assertEquals(array(
+            'DAV'            => '1, 3, extended-mkcol',
+            'MS-Author-Via'  => 'DAV',
+            'Allow'          => 'OPTIONS, GET, HEAD, DELETE, PROPFIND, PUT, PROPPATCH, COPY, MOVE, REPORT, MKCOL',
+            'Accept-Ranges'  => 'bytes',
+            'Content-Length' => '0',
+            'X-Sabre-Version' => Version::VERSION,
+        ),$this->response->headers);
+
+        $this->assertEquals(200, $this->response->status);
+        $this->assertEquals('', $this->response->body);
 
     }
+
     function testNonExistantMethod() {
 
         $serverVars = array(
@@ -349,7 +220,7 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'BLABLA',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -357,7 +228,7 @@ class ServerSimpleTest extends AbstractServer{
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 501 Not Implemented',$this->response->status);
+        $this->assertEquals(501, $this->response->status);
 
 
     }
@@ -369,7 +240,7 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'GET',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -377,7 +248,7 @@ class ServerSimpleTest extends AbstractServer{
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 501 Not Implemented',$this->response->status);
+        $this->assertEquals(501, $this->response->status);
 
     }
 
@@ -388,11 +259,11 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'HEAD',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
 
     }
 
@@ -403,7 +274,7 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'GET',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->setBaseUri('/blabla/');
         $this->assertEquals('/blabla/',$this->server->getBaseUri());
         $this->server->httpRequest = ($request);
@@ -417,7 +288,7 @@ class ServerSimpleTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
         $this->assertEquals('Test contents', stream_get_contents($this->response->body));
 
     }
@@ -503,6 +374,9 @@ class ServerSimpleTest extends AbstractServer{
 
     }
 
+    /**
+     * @expectedException \Sabre\DAV\Exception\Forbidden
+     */
     function testBaseUriCheck() {
 
         $uris = array(
@@ -511,23 +385,14 @@ class ServerSimpleTest extends AbstractServer{
             '/root/somepath/'
         );
 
-        try {
+        $this->server->setBaseUri('root/');
+        $this->server->calculateUri('/root/testuri');
 
-            $this->server->setBaseUri('root/');
-            $this->server->calculateUri('/root/testuri');
-
-            $this->fail('Expected an exception');
-
-        } catch (Exception\Forbidden $e) {
-
-            // This was expected
-
-        }
+        $this->fail('Expected an exception');
 
     }
 
     /**
-     * @covers \Sabre\DAV\Server::guessBaseUri
      */
     function testGuessBaseUri() {
 
@@ -536,7 +401,7 @@ class ServerSimpleTest extends AbstractServer{
             'PATH_INFO'   => '/root',
         );
 
-        $httpRequest = new HTTP\Request($serverVars);
+        $httpRequest = HTTP\Sapi::createFromServerArray($serverVars);
         $server = new Server();
         $server->httpRequest = $httpRequest;
 
@@ -546,7 +411,6 @@ class ServerSimpleTest extends AbstractServer{
 
     /**
      * @depends testGuessBaseUri
-     * @covers Sabre\DAV\Server::guessBaseUri
      */
     function testGuessBaseUriPercentEncoding() {
 
@@ -555,7 +419,7 @@ class ServerSimpleTest extends AbstractServer{
             'PATH_INFO'   => '/dir/path2/path with spaces',
         );
 
-        $httpRequest = new HTTP\Request($serverVars);
+        $httpRequest = HTTP\Sapi::createFromServerArray($serverVars);
         $server = new Server();
         $server->httpRequest = $httpRequest;
 
@@ -565,7 +429,6 @@ class ServerSimpleTest extends AbstractServer{
 
     /**
      * @depends testGuessBaseUri
-     * @covers \Sabre\DAV\Server::guessBaseUri
      */
     /*
     function testGuessBaseUriPercentEncoding2() {
@@ -576,7 +439,7 @@ class ServerSimpleTest extends AbstractServer{
             'PATH_INFO'   => '/dir/path2/path with spaces',
         );
 
-        $httpRequest = new HTTP\Request($serverVars);
+        $httpRequest = HTTP\Sapi::createFromServerArray($serverVars);
         $server = new Server();
         $server->httpRequest = $httpRequest;
 
@@ -591,7 +454,7 @@ class ServerSimpleTest extends AbstractServer{
             'PATH_INFO'   => '/root/',
         );
 
-        $httpRequest = new HTTP\Request($serverVars);
+        $httpRequest = HTTP\Sapi::createFromServerArray($serverVars);
         $server = new Server();
         $server->httpRequest = $httpRequest;
 
@@ -605,7 +468,7 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_URI' => '/index.php/root',
         );
 
-        $httpRequest = new HTTP\Request($serverVars);
+        $httpRequest = HTTP\Sapi::createFromServerArray($serverVars);
         $server = new Server();
         $server->httpRequest = $httpRequest;
 
@@ -619,7 +482,7 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_URI' => '/a/b/c/test.php',
         );
 
-        $httpRequest = new HTTP\Request($serverVars);
+        $httpRequest = HTTP\Sapi::createFromServerArray($serverVars);
         $server = new Server();
         $server->httpRequest = $httpRequest;
 
@@ -629,7 +492,6 @@ class ServerSimpleTest extends AbstractServer{
 
 
     /**
-     * @covers \Sabre\DAV\Server::guessBaseUri
      * @depends testGuessBaseUri
      */
     function testGuessBaseUriQueryString() {
@@ -639,7 +501,7 @@ class ServerSimpleTest extends AbstractServer{
             'PATH_INFO'   => '/root',
         );
 
-        $httpRequest = new HTTP\Request($serverVars);
+        $httpRequest = HTTP\Sapi::createFromServerArray($serverVars);
         $server = new Server();
         $server->httpRequest = $httpRequest;
 
@@ -648,7 +510,6 @@ class ServerSimpleTest extends AbstractServer{
     }
 
     /**
-     * @covers \Sabre\DAV\Server::guessBaseUri
      * @depends testGuessBaseUri
      * @expectedException \Sabre\DAV\Exception
      */
@@ -659,7 +520,7 @@ class ServerSimpleTest extends AbstractServer{
             'PATH_INFO'   => '/root',
         );
 
-        $httpRequest = new HTTP\Request($serverVars);
+        $httpRequest = HTTP\Sapi::createFromServerArray($serverVars);
         $server = new Server();
         $server->httpRequest = $httpRequest;
 
@@ -674,16 +535,16 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'FOO',
         );
 
-        $httpRequest = new HTTP\Request($serverVars);
+        $httpRequest = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = $httpRequest;
-        $this->server->subscribeEvent('beforeMethod',array($this,'exceptionTrigger'));
+        $this->server->on('beforeMethod', [$this,'exceptionTrigger']);
         $this->server->exec();
 
         $this->assertEquals(array(
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 500 Internal Server Error',$this->response->status);
+        $this->assertEquals(500, $this->response->status);
 
     }
 
@@ -700,7 +561,7 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'REPORT',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->httpRequest->setBody('<?xml version="1.0"?><bla:myreport xmlns:bla="http://www.rooftopsolutions.nl/NS"></bla:myreport>');
         $this->server->exec();
@@ -711,7 +572,7 @@ class ServerSimpleTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals('HTTP/1.1 403 Forbidden',$this->response->status,'We got an incorrect status back. Full response body follows: ' . $this->response->body);
+        $this->assertEquals(403, $this->response->status,'We got an incorrect status back. Full response body follows: ' . $this->response->body);
 
     }
 
@@ -722,10 +583,10 @@ class ServerSimpleTest extends AbstractServer{
             'REQUEST_METHOD' => 'REPORT',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->httpRequest->setBody('<?xml version="1.0"?><bla:myreport xmlns:bla="http://www.rooftopsolutions.nl/NS"></bla:myreport>');
-        $this->server->subscribeEvent('report',array($this,'reportHandler'));
+        $this->server->on('report', [$this,'reportHandler']);
         $this->server->exec();
 
         $this->assertEquals(array(
@@ -734,14 +595,14 @@ class ServerSimpleTest extends AbstractServer{
             $this->response->headers
         );
 
-        $this->assertEquals('HTTP/1.1 418 I\'m a teapot',$this->response->status,'We got an incorrect status back. Full response body follows: ' . $this->response->body);
+        $this->assertEquals(418, $this->response->status,'We got an incorrect status back. Full response body follows: ' . $this->response->body);
 
     }
 
     function reportHandler($reportName) {
 
         if ($reportName=='{http://www.rooftopsolutions.nl/NS}myreport') {
-            $this->server->httpResponse->sendStatus(418);
+            $this->server->httpResponse->setStatus(418);
             $this->server->httpResponse->setHeader('testheader','testvalue');
             return false;
         }

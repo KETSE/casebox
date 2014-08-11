@@ -7,10 +7,9 @@ use Sabre\VObject;
 /**
  * This unittest is created to find out why an overwritten DAILY event has wrong DTSTART, DTEND, SUMMARY and RECURRENCEID
  *
- *
- * @copyright Copyright (C) 2007-2013 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
- * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
+ * @copyright Copyright (C) 2007-2014 fruux GmbH. All rights reserved.
+ * @author Evert Pot (http://evertpot.com/)
+ * @license http://sabre.io/license/ Modified BSD License
  */
 class Issue203Test extends \Sabre\DAVServerTest {
 
@@ -58,7 +57,7 @@ END:VCALENDAR
 
     function testIssue203() {
 
-        $request = new HTTP\Request(array(
+        $request = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD' => 'REPORT',
             'HTTP_CONTENT_TYPE' => 'application/xml',
             'REQUEST_URI' => '/calendars/user1/calendar1',

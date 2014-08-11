@@ -43,7 +43,7 @@ class CalendarObjectTest extends \PHPUnit_Framework_TestCase {
         $this->assertInternalType('string',$children[0]->getName());
         $this->assertInternalType('string',$children[0]->get());
         $this->assertInternalType('string',$children[0]->getETag());
-        $this->assertEquals('text/calendar; charset=utf-8', $children[0]->getContentType());
+        $this->assertEquals('text/calendar; charset=utf-8; component=vevent', $children[0]->getContentType());
 
     }
 
@@ -206,6 +206,42 @@ class CalendarObjectTest extends \PHPUnit_Framework_TestCase {
 
         $obj = $children[0];
         $this->assertEquals($expected, $obj->getACL());
+
+    }
+
+    function testDefaultACL() {
+
+        $backend = new Backend\Mock([], []);
+        $calendarObject = new CalendarObject($backend, ['principaluri' => 'principals/user1'], ['calendarid' => 1, 'uri' => 'foo']);
+        $expected = array(
+            array(
+                'privilege' => '{DAV:}read',
+                'principal' => 'principals/user1',
+                'protected' => true,
+            ),
+            array(
+                'privilege' => '{DAV:}write',
+                'principal' => 'principals/user1',
+                'protected' => true,
+            ),
+            array(
+                'privilege' => '{DAV:}read',
+                'principal' => 'principals/user1/calendar-proxy-write',
+                'protected' => true,
+            ),
+            array(
+                'privilege' => '{DAV:}write',
+                'principal' => 'principals/user1/calendar-proxy-write',
+                'protected' => true,
+            ),
+            array(
+                'privilege' => '{DAV:}read',
+                'principal' => 'principals/user1/calendar-proxy-read',
+                'protected' => true,
+            ),
+        );
+        $this->assertEquals($expected, $calendarObject->getACL());
+
 
     }
 

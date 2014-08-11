@@ -60,7 +60,7 @@ class CreateMenu
         }
         $res->close();
 
-        $ugids = $_SESSION['user']['groups'];
+        $ugids = @$_SESSION['user']['groups'];
         $ugids[] = $_SESSION['user']['id'];
 
         // we have 3 main criterias for detecting needed menu:

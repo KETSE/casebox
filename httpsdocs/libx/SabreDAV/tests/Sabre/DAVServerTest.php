@@ -2,11 +2,10 @@
 
 namespace Sabre;
 
-require_once 'Sabre/HTTP/ResponseMock.php';
-require_once 'Sabre/CalDAV/Backend/Mock.php';
-require_once 'Sabre/CardDAV/Backend/Mock.php';
-require_once 'Sabre/DAVACL/PrincipalBackend/Mock.php';
-require_once 'Sabre/DAV/Auth/Backend/Mock.php';
+use
+    Sabre\HTTP\Request,
+    Sabre\HTTP\Response,
+    Sabre\HTTP\Sapi;
 
 /**
  * This class may be used as a basis for other webdav-related unittests.
@@ -14,10 +13,9 @@ require_once 'Sabre/DAV/Auth/Backend/Mock.php';
  * This class is supposed to provide a reasonably big framework to quickly get
  * a testing environment running.
  *
- * @package Sabre
- * @copyright Copyright (C) 2007-2013 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
- * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
+ * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
+ * @license http://sabre.io/license/ Modified BSD License
  */
 abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
 
@@ -25,6 +23,7 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
     protected $setupCardDAV = false;
     protected $setupACL = false;
     protected $setupCalDAVSharing = false;
+    protected $setupCalDAVSubscriptions = false;
 
     protected $caldavCalendars = array();
     protected $caldavCalendarObjects = array();
@@ -79,6 +78,7 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
         $this->setUpTree();
 
         $this->server = new DAV\Server($this->tree);
+        $this->server->sapi = new HTTP\SapiMock();
         $this->server->debugExceptions = true;
 
         if ($this->setupCalDAV) {
@@ -88,6 +88,9 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
         if ($this->setupCalDAVSharing) {
             $this->caldavSharingPlugin = new CalDAV\SharingPlugin();
             $this->server->addPlugin($this->caldavSharingPlugin);
+        }
+        if ($this->setupCalDAVSubscriptions) {
+            $this->server->addPlugin(new CalDAV\Subscriptions\Plugin());
         }
         if ($this->setupCardDAV) {
             $this->carddavPlugin = new CardDAV\Plugin();
@@ -104,7 +107,7 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
             $this->server->addPlugin($this->authPlugin);
 
             // This will trigger the actual login procedure
-            $this->authPlugin->beforeMethod('OPTIONS','/');
+            $this->authPlugin->beforeMethod(new Request(), new Response());
         }
 
     }
@@ -121,7 +124,7 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
     function request($request) {
 
         if (is_array($request)) {
-            $request = new HTTP\Request($request);
+            $request = HTTP\Request::createFromServerArray($request);
         }
         $this->server->httpRequest = $request;
         $this->server->httpResponse = new HTTP\ResponseMock();
@@ -131,6 +134,9 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    /**
+     * Override this to provide your own Tree for your test-case.
+     */
     function setUpTree() {
 
         if ($this->setupCalDAV) {
@@ -156,6 +162,9 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
 
     function setUpBackends() {
 
+        if ($this->setupCalDAVSubscriptions && is_null($this->caldavBackend)) {
+            $this->caldavBackend = new CalDAV\Backend\MockSubscriptionSupport($this->caldavCalendars, $this->caldavCalendarObjects);
+        }
         if ($this->setupCalDAV && is_null($this->caldavBackend)) {
             $this->caldavBackend = new CalDAV\Backend\Mock($this->caldavCalendars, $this->caldavCalendarObjects);
         }
@@ -172,7 +181,7 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
     function assertHTTPStatus($expectedStatus, HTTP\Request $req) {
 
         $resp = $this->request($req);
-        $this->assertEquals($resp->getStatusMessage($expectedStatus), $resp->status,'Incorrect HTTP status received: ' . $resp->body);
+        $this->assertEquals((int)$expectedStatus, (int)$resp->status,'Incorrect HTTP status received: ' . $resp->body);
 
     }
 

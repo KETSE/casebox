@@ -9,48 +9,84 @@ class Utils
 
     }
 
-    public static function getNodeById($id)
-    {
+    /**
+     *  loads CB Object by Id
+     *  @param  int $id nodeId
+     *  @return CBObject
+     */
+    public static function getNodeById($id)  {
         $o = new \CB\Objects\Object();
 
         return $o->load($id);
     }
 
-    public static function getFileById($id)
-    {
+
+    /**
+     *  similar to getNodeById, returns a CBFile
+     *  @param  int $id FileId
+     *  @return CBFile
+     */
+    public static function getFileById($id)   {
         $file = new \CB\Objects\File($id);
 
         return $file->load();
     }
 
-    public static function getNodeContent($id, $myPath, $onlyFileId = null)
-    {
+
+    /**
+     *  returns SOLR results: nodeId children
+     *  @param  [type] $id [description]
+     *  @return [type]     [description]
+     */
+    public static function solrGetChildren($id, $fileId = null) {
         $s = new \CB\Search();
 
-        $query = 'pid:'.$id;
+        $query = 'pid: ' . $id;
+
+        // fetch only a single file
+        if (@$fileId) {
+            $query = 'id: ' . $fileId;
+        }
 
         $params = array(
-            'fl' => 'id,name,template_id,date,cdate,udate,size'
+            'fl' => 'id, name, template_id, date, cdate, udate, size'
             ,'fq'=> array(
-                'dstatus:0'
-                ,'system:[0 TO 1]'
+                'dstatus: 0'
+                ,'system: [0 TO 1]'
             )
             ,'sort' => 'sort_name asc'
         );
 
-        if (is_array($onlyFileId)) {
-            $params['fq'][] = 'id:('.implode(' OR ', $onlyFileId).')';
-        }
-
         $data = $s->search(
             $query,
             0,
-            9999,
+            1000,      // return maximum 1000 nodes
             $params
         );
 
+        return $data;
+    }
+
+
+
+    /**
+     *  returns CB nodes as simple array
+     *  @param  int $id          [description]
+     *  @param  string $path     [description]
+     *  @param  string $level    depth
+     *  @param  ary $env
+     *  @return [type]           [description]
+     */
+    public static function getChildren($id, $path, $env, $fileId)
+    {
+        // error_log('WebDAV/Utils.getChildren(' . $id . ',' . $path . ')');
+        $defaultFileTemplate = \CB\Config::get('default_file_template');
+
+        $data = Utils::solrGetChildren($id, $fileId);
+
+        // process SOLR results into a simple array
         $fileIds = array();
-        $array = array();
+        $ary = array();
         foreach ($data->response->docs as $item) {
             $el = array(
                 'id' => $item->id
@@ -59,19 +95,29 @@ class Utils
                 ,'size' => $item->size
                 ,'cdate' => $item->cdate
                 ,'udate' => $item->udate
-                ,'path' => $myPath . DIRECTORY_SEPARATOR . $item->name
+                ,'path' => $path . DIRECTORY_SEPARATOR . $item->name
             );
 
-            if ($item->template_id != \CB\Config::get('default_file_template')) {
-                $el['path'] = $myPath .DIRECTORY_SEPARATOR. $item->name;
-            } else {
+            // PropertyStorage will use filename as path, without the 'edit-{nodeId}' folder
+            if ($env['mode'] == 'edit') {
+                $el['path'] = $item->name;
+            }
+
+            // remember Files: more properties will be fetched below
+            if ($item->template_id == $defaultFileTemplate) {
                 $fileIds[] = $el['id'];
             }
-            $array[$el['id']] = $el;
+
+
+            $ary[$el['id']] = $el;
         }
 
-        /* select additional info required for files */
-        if (!empty($fileIds)) {
+
+        // fetch additional info required for files
+        // !!! to be refactored using CB API
+
+        // are there any files in Directory?
+        if (! empty($fileIds)) {
             $res = \CB\DB\dbQuery(
                 'SELECT
                     f.id
@@ -83,46 +129,64 @@ class Utils
                 WHERE f.id in (' . implode(',', $fileIds) . ')'
             ) or die(DB\dbQueryError());
 
+            // append additional file info (content_path, MD5, type)
             while ($r = $res->fetch_assoc()) {
-                $array[$r['id']] = array_merge($array[$r['id']], $r);
+                $ary[$r['id']] = array_merge($ary[$r['id']], $r);
             }
             $res->close();
         }
 
-        return $array;
+        // save the nodes in Cache for later use in WebDAV\PropertyStorage (creationdate and other props)
+        Utils::cacheNodes($ary);
+
+        return $ary;
     }
 
-    public static function getPathFromId($id)
-    {
-        $object = Utils::getNodeById($id);
-        if (count($object) == 0) {
-            return null;
+    /**
+     *  stores loaded nodes in 'DAVNodes' ary,
+     *  later it's used in PropertyStoragePlugin to get 'creationdate'
+     *  @param  [type] $ary [description]
+     *  @return [type]      [description]
+     */
+    public static function cacheNodes($ary) {
+
+        // initialize DAVNodes cache
+        if (! \CB\Cache::exist('DAVNodes')) {
+            \CB\Cache::set('DAVNodes', []);
         }
-        if ($object['dstatus'] != 0) {
-            return null;
-        }
+        $cachedNodes = \CB\Cache::get('DAVNodes');
 
-        $pids = explode(',', $object['pids']);
+        // store nodes in cache
+        foreach ($ary as $id => $node) {
 
-        $array = array();
-        foreach ($pids as $pid) {
-            if ($id == $pid) {
-                continue;
-            }
+            // remove '/'
+            $path = str_replace('\\', '/', $node['path']);
+            $path = trim($path, '/');
+            //  use only '/' as separator
 
-            $temp = Utils::getNodeById($pid);
-            if ($temp['id'] != 1) {
-                $array[] = $temp['name'];
-            }
-        }
 
-        $result = "/";
-        foreach ($array as $item) {
-            $result .= $item.'/';
+            $cachedNodes[$path] = $node;
         }
 
-        return $result;
+        \CB\Cache::set('DAVNodes', $cachedNodes);
     }
+
+
+    public static function getParentNodeId($id) {
+        $node = Utils::getNodeById($id);
+
+        if ((count($node) == 0) or ($node['dstatus'] != 0)) {
+            return null;
+        }
+        $pids = explode(',', $node['pids']);
+
+        // error_log("getParentNodeId: " . print_r($pids, true));
+
+        $pid = array_pop($pids);  // pids contains the node itself
+        $pid = array_pop($pids);
+        return $pid;
+    }
+
 
     public static function createDirectory($pid, $name)
     {
@@ -161,13 +225,12 @@ class Utils
         \CB\Solr\Client::runCron();
     }
 
-    public static function log($name)
-    {
-        $f = fopen('webdav.log', 'a+');
-        fwrite($f, $name."\n");
-        fclose($f);
-    }
-
+    /**
+     *  updates the '_title' of a CB node
+     *  @param  int $id   nodeId
+     *  @param  string $name newTitle
+     *  @return bool    should return true on succes
+     */
     public static function renameObject($id, $name)
     {
         $file = new \CB\Objects\File();
@@ -182,11 +245,49 @@ class Utils
         \CB\Solr\Client::runCron();
     }
 
+
     public static function deleteObject($id)
     {
-        $file = new \CB\Objects\Object($id);
-        $file->delete();
+        $node = new \CB\Objects\Object($id);
+        $node->delete();
 
         \CB\Solr\Client::runCron();
     }
 }
+
+
+
+
+/*
+    public static function getPathFromId($id)
+    {
+        $object = Utils::getNodeById($id);
+        if (count($object) == 0) {
+            return null;
+        }
+        if ($object['dstatus'] != 0) {
+            return null;
+        }
+
+        $pids = explode(',', $object['pids']);
+
+        $array = array();
+        foreach ($pids as $pid) {
+            if ($id == $pid) {
+                continue;
+            }
+
+            $temp = Utils::getNodeById($pid);
+            if ($temp['id'] != 1) {
+                $array[] = $temp['name'];
+            }
+        }
+
+        $result = "/";
+        foreach ($array as $item) {
+            $result .= $item.'/';
+        }
+
+        return $result;
+    }
+*/

@@ -10,6 +10,7 @@ class ApacheTest extends \PHPUnit_Framework_TestCase {
     function testConstruct() {
 
         $backend = new Apache();
+        $this->assertInstanceOf('Sabre\DAV\Auth\Backend\Apache', $backend);
 
     }
 
@@ -29,7 +30,7 @@ class ApacheTest extends \PHPUnit_Framework_TestCase {
         $backend = new Apache();
 
         $server = new DAV\Server();
-        $request = new HTTP\Request(array(
+        $request = HTTP\Sapi::createFromServerArray(array(
             'REMOTE_USER' => 'username',
         ));
         $server->httpRequest = $request;

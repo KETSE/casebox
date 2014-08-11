@@ -8,9 +8,9 @@ use Sabre\VObject;
  * This unittests is created to find out why recurring events have wrong DTSTART value
  *
  *
- * @copyright Copyright (C) 2007-2013 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
- * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
+ * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
+ * @license http://sabre.io/license/ Modified BSD License
  */
 class ExpandEventsDTSTARTandDTENDTest extends \Sabre\DAVServerTest {
 
@@ -53,12 +53,12 @@ END:VCALENDAR
 
     function testExpand() {
 
-        $request = new HTTP\Request(array(
+        $request = HTTP\Sapi::createFromServerArray([
             'REQUEST_METHOD' => 'REPORT',
             'HTTP_CONTENT_TYPE' => 'application/xml',
             'REQUEST_URI' => '/calendars/user1/calendar1',
             'HTTP_DEPTH' => '1',
-        ));
+        ]);
 
         $request->setBody('<?xml version="1.0" encoding="utf-8" ?>
 <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
@@ -97,10 +97,10 @@ END:VCALENDAR
 
                 if ($child->name == 'DTSTART') {
                     // DTSTART has to be one of three valid values
-                    $this->assertContains($child->getValue(), array('20120207T171500Z', '20120208T171500Z', '20120209T171500Z'), 'DTSTART is not a valid value: '.$child->getValue());
+                    $this->assertContains($child->getValue(), ['20120207T171500Z', '20120208T171500Z', '20120209T171500Z'], 'DTSTART is not a valid value: '.$child->getValue());
                 } elseif ($child->name == 'DTEND') {
                     // DTEND has to be one of three valid values
-                    $this->assertContains($child->getValue(), array('20120207T181500Z', '20120208T181500Z', '20120209T181500Z'), 'DTEND is not a valid value: '.$child->getValue());
+                    $this->assertContains($child->getValue(), ['20120207T181500Z', '20120208T181500Z', '20120209T181500Z'], 'DTEND is not a valid value: '.$child->getValue());
                 }
             }
         }

@@ -1,22 +1,24 @@
 <?php
 
-define('SABRE_MYSQLDSN','mysql:host=127.0.0.1;dbname=sabredav');
-define('SABRE_MYSQLUSER','root');
-define('SABRE_MYSQLPASS','');
-
 set_include_path(__DIR__ . '/../lib/' . PATH_SEPARATOR . __DIR__ . PATH_SEPARATOR . get_include_path());
 
-include __DIR__ . '/../vendor/autoload.php';
-include 'Sabre/DAVServerTest.php';
+$autoLoader = include __DIR__ . '/../vendor/autoload.php';
+$autoLoader->add('Sabre\\', __DIR__);
 
-date_default_timezone_set('GMT');
+date_default_timezone_set('UTC');
 
-define("SABRE_TEMPDIR",dirname(__FILE__) . '/temp/');
+$config = [
+    'SABRE_TEMPDIR'   => dirname(__FILE__) . '/temp/',
+    'SABRE_HASSQLITE' => in_array('sqlite',PDO::getAvailableDrivers()),
+    'SABRE_HASMYSQL'  => in_array('mysql',PDO::getAvailableDrivers()),
+    'SABRE_MYSQLDSN'  => 'mysql:host=127.0.0.1;dbname=sabredav',
+    'SABRE_MYSQLUSER' => 'root',
+    'SABRE_MYSQLPASS' => '',
+];
 
-// If sqlite is not available, this constant is used to skip the relevant
-// tests
-define('SABRE_HASSQLITE',in_array('sqlite',PDO::getAvailableDrivers()));
-define('SABRE_HASMYSQL', in_array('mysql',PDO::getAvailableDrivers()) && defined('SABRE_MYSQLDSN') && defined('SABRE_MYSQLUSER') && defined('SABRE_MYSQLPASS'));
+foreach($config as $key=>$value) {
+    if (!defined($key)) define($key, $value);
+}
 
 if (!file_exists(SABRE_TEMPDIR)) mkdir(SABRE_TEMPDIR);
 if (file_exists('.sabredav')) unlink('.sabredav');

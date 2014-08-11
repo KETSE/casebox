@@ -115,7 +115,7 @@ class Config extends Singleton
         if ($r = $res->fetch_assoc()) {
             $rez = json_decode($r['cfg'], true);
         } else {
-            throw new \Exception('Core not defined in cores table: '.$coreName, 1);
+            throw new \Exception('Core not defined in cores table: '. $coreName, 1);
         }
         $res->close();
 
