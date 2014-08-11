@@ -94,11 +94,11 @@ class File extends Node implements DAV\IFile {
      */
     public function getETag() {
 
-        // NOTE: to check if this approach is ok
-        $etag = '"' . $this->cbNode['md5'] . '"';
-        return $etag;
+        // MD5: this approach doesn't work well with Word at least
+        // $etag = '"' . $this->cbNode['md5'] . '"';
+        // return $etag;
 
-        // return null;
+        return null;
     }
 
     public function setName($name) {
