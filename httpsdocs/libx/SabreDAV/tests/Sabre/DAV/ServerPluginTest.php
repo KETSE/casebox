@@ -24,7 +24,6 @@ class ServerPluginTest extends AbstractServer {
     }
 
     /**
-     * @covers \Sabre\DAV\ServerPlugin
      */
     function testBaseClass() {
 
@@ -41,7 +40,7 @@ class ServerPluginTest extends AbstractServer {
             'REQUEST_METHOD' => 'OPTIONS',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -54,7 +53,7 @@ class ServerPluginTest extends AbstractServer {
             'X-Sabre-Version' => Version::VERSION,
         ),$this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
         $this->assertEquals('', $this->response->body);
         $this->assertEquals('OPTIONS',$this->testPlugin->beforeMethod);
 
@@ -82,7 +81,10 @@ class ServerPluginTest extends AbstractServer {
     function testGetPlugins() {
 
         $this->assertEquals(
-            array(get_class($this->testPlugin) => $this->testPlugin),
+            array(
+                get_class($this->testPlugin) => $this->testPlugin,
+                'core' => $this->server->getPlugin('core'),
+            ),
             $this->server->getPlugins()
         );
 

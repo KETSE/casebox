@@ -17,15 +17,11 @@ class ServerTest extends DAV\AbstractServer{
 
     function testGet() {
 
-        $serverVars = array(
-            'REQUEST_URI'    => '/test.txt',
-            'REQUEST_METHOD' => 'GET',
-        );
-
-        $request = new HTTP\Request($serverVars);
-        $this->server->httpRequest = ($request);
+        $request = new HTTP\Request('GET', '/test.txt');
+        $this->server->httpRequest = $request;
         $this->server->exec();
 
+        $this->assertEquals(200, $this->response->getStatus(), 'Invalid status code received.');
         $this->assertEquals(array(
             'Content-Type' => 'application/octet-stream',
             'Content-Length' => 13,
@@ -35,7 +31,7 @@ class ServerTest extends DAV\AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+
         $this->assertEquals('Test contents', stream_get_contents($this->response->body));
 
     }
@@ -47,7 +43,7 @@ class ServerTest extends DAV\AbstractServer{
             'REQUEST_METHOD' => 'HEAD',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -60,7 +56,7 @@ class ServerTest extends DAV\AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200,$this->response->status);
         $this->assertEquals('', $this->response->body);
 
     }
@@ -72,7 +68,7 @@ class ServerTest extends DAV\AbstractServer{
             'REQUEST_METHOD' => 'PUT',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $request->setBody('Testing new file');
         $this->server->httpRequest = ($request);
         $this->server->exec();
@@ -82,7 +78,7 @@ class ServerTest extends DAV\AbstractServer{
             'ETag'           => '"' . md5('Testing new file') . '"',
         ), $this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 201 Created',$this->response->status);
+        $this->assertEquals(201, $this->response->status);
         $this->assertEquals('', $this->response->body);
         $this->assertEquals('Testing new file',file_get_contents($this->tempDir . '/testput.txt'));
 
@@ -96,7 +92,7 @@ class ServerTest extends DAV\AbstractServer{
             'HTTP_IF_NONE_MATCH' => '*',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $request->setBody('Testing new file');
         $this->server->httpRequest = ($request);
         $this->server->exec();
@@ -105,7 +101,7 @@ class ServerTest extends DAV\AbstractServer{
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 412 Precondition failed',$this->response->status);
+        $this->assertEquals(412, $this->response->status);
         $this->assertNotEquals('Testing new file',file_get_contents($this->tempDir . '/test.txt'));
 
     }
@@ -117,7 +113,7 @@ class ServerTest extends DAV\AbstractServer{
             'REQUEST_METHOD' => 'MKCOL',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $request->setBody("");
         $this->server->httpRequest = ($request);
         $this->server->exec();
@@ -126,7 +122,7 @@ class ServerTest extends DAV\AbstractServer{
             'Content-Length' => '0',
         ),$this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 201 Created',$this->response->status);
+        $this->assertEquals(201, $this->response->status);
         $this->assertEquals('', $this->response->body);
         $this->assertTrue(is_dir($this->tempDir . '/testcol'));
 
@@ -139,14 +135,14 @@ class ServerTest extends DAV\AbstractServer{
             'REQUEST_METHOD' => 'PUT',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $request->setBody('Testing updated file');
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
         $this->assertEquals('0', $this->response->headers['Content-Length']);
 
-        $this->assertEquals('HTTP/1.1 204 No Content',$this->response->status);
+        $this->assertEquals(204, $this->response->status);
         $this->assertEquals('', $this->response->body);
         $this->assertEquals('Testing updated file',file_get_contents($this->tempDir . '/test.txt'));
 
@@ -159,7 +155,7 @@ class ServerTest extends DAV\AbstractServer{
             'REQUEST_METHOD' => 'DELETE',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -167,7 +163,7 @@ class ServerTest extends DAV\AbstractServer{
             'Content-Length' => '0',
         ),$this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 204 No Content',$this->response->status);
+        $this->assertEquals(204, $this->response->status);
         $this->assertEquals('', $this->response->body);
         $this->assertFalse(file_exists($this->tempDir . '/test.txt'));
 
@@ -183,14 +179,14 @@ class ServerTest extends DAV\AbstractServer{
         mkdir($this->tempDir.'/testcol');
         file_put_contents($this->tempDir.'/testcol/test.txt','Hi! I\'m a file with a short lifespan');
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
         $this->assertEquals(array(
             'Content-Length' => '0',
         ),$this->response->headers);
-        $this->assertEquals('HTTP/1.1 204 No Content',$this->response->status);
+        $this->assertEquals(204, $this->response->status);
         $this->assertEquals('', $this->response->body);
         $this->assertFalse(file_exists($this->tempDir . '/col'));
 
@@ -203,7 +199,7 @@ class ServerTest extends DAV\AbstractServer{
             'REQUEST_METHOD' => 'OPTIONS',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -216,7 +212,7 @@ class ServerTest extends DAV\AbstractServer{
             'X-Sabre-Version'=> DAV\Version::VERSION,
         ),$this->response->headers);
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
         $this->assertEquals('', $this->response->body);
 
     }

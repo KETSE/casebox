@@ -5,9 +5,9 @@ namespace Sabre\VObject;
 /**
  * Useful utilities for working with various strings.
  *
- * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
- * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
+ * @license http://sabre.io/license/ Modified BSD License
  */
 class StringUtil {
 
@@ -17,7 +17,7 @@ class StringUtil {
      * @param string $str
      * @return bool
      */
-    static function isUTF8($str) {
+    static public function isUTF8($str) {
 
         // First check.. mb_check_encoding
         if (!mb_check_encoding($str, 'UTF-8')) {
@@ -42,14 +42,20 @@ class StringUtil {
      * @param string $str
      * @return string
      */
-    static function convertToUTF8($str) {
+    static public function convertToUTF8($str) {
 
-        $encoding = mb_detect_encoding($str , array('UTF-8','ISO-8859-1'), true);
+        $encoding = mb_detect_encoding($str , array('UTF-8','ISO-8859-1', 'WINDOWS-1252'), true);
 
-        if ($encoding === 'ISO-8859-1') {
-            $newStr = utf8_encode($str);
-        } else {
-            $newStr = $str;
+        switch($encoding) {
+            case 'ISO-8859-1' :
+                $newStr = utf8_encode($str);
+                break;
+            case 'WINDOWS-1252' :
+                $newStr = iconv('cp1252', 'UTF-8', $str);
+                break;
+            default :
+                 $newStr = $str;
+
         }
 
         // Removing any control characters

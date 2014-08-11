@@ -8,7 +8,7 @@
 **/
 namespace CB;
 
-require_once dirname(__FILE__).'/config.php';
+require_once dirname(__FILE__) . '/config.php';
 require_once 'lib/Util.php';
 require_once 'lib/DB.php';
 
@@ -23,18 +23,20 @@ session_start();
 /* check if loged in correctly, comparing with the key and ips */
 $arr = explode('/', $_SERVER['SCRIPT_NAME']);
 $script = array_pop($arr);
-if (!in_array(
-    $script,
-    array(
-        'login.php'
-        ,'router.php'
-        ,'preview.php'
-        ,'recover_password.php'
-        ,'download.php'
-        ,'api.php'
-        ,'webdav.php'
+
+if (! in_array(
+        $script,
+        array(
+            'login.php'
+            ,'router.php'
+            ,'preview.php'
+            ,'recover_password.php'
+            ,'download.php'
+            ,'api.php'
+            ,'webdav.php'
         )
-)) {
+      ) and (! @$webDAVMode)   # simple hack to call init.php from another script without a redirect to login.
+) {
     if (($_SERVER['SCRIPT_NAME'] != '/auth.php') && !User::isLoged()) {
         header('Location: ' . Config::get('core_url') . 'login.php');
         exit(0);

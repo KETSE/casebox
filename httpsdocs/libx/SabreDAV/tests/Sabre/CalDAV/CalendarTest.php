@@ -1,6 +1,8 @@
 <?php
 
 namespace Sabre\CalDAV;
+
+use Sabre\DAV\PropPatch;
 use Sabre\DAVACL;
 
 require_once 'Sabre/CalDAV/TestUtil.php';
@@ -51,9 +53,12 @@ class CalendarTest extends \PHPUnit_Framework_TestCase {
      */
     function testUpdateProperties() {
 
-        $result = $this->calendar->updateProperties(array(
+        $propPatch = new PropPatch([
             '{DAV:}displayname' => 'NewName',
-        ));
+        ]);
+
+        $result = $this->calendar->propPatch($propPatch);
+        $result = $propPatch->commit();
 
         $this->assertEquals(true, $result);
 
@@ -251,5 +256,34 @@ class CalendarTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    function testGetSyncToken() {
 
+        $this->assertEquals(2, $this->calendar->getSyncToken());
+
+    }
+
+    function testGetSyncTokenNoSyncSupport() {
+
+        $calendar = new Calendar(new Backend\Mock([],[]), []);
+        $this->assertNull($calendar->getSyncToken());
+
+    }
+
+    function testGetChanges() {
+
+        $this->assertEquals([
+            'syncToken' => 2,
+            'modified'  => [],
+            'deleted'   => [],
+            'added'     => ['UUID-2345'],
+        ], $this->calendar->getChanges(1, 1));
+
+    }
+
+    function testGetChangesNoSyncSupport() {
+
+        $calendar = new Calendar(new Backend\Mock([],[]), []);
+        $this->assertNull($calendar->getChanges(1,null));
+
+    }
 }

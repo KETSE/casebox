@@ -11,9 +11,9 @@ use Sabre\VObject;
  * Hopefully, by the time I'm done with this, I've both found the problem, and
  * fixed it :)
  *
- * @copyright Copyright (C) 2007-2013 Rooftop Solutions. All rights reserved.
- * @author Evert Pot (http://www.rooftopsolutions.nl/)
- * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
+ * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @author Evert Pot (http://evertpot.com/)
+ * @license http://sabre.io/license/ Modified BSD License
  */
 class ExpandEventsDoubleEventsTest extends \Sabre\DAVServerTest {
 
@@ -56,12 +56,12 @@ END:VCALENDAR
 
     function testExpand() {
 
-        $request = new HTTP\Request(array(
+        $request = HTTP\Sapi::createFromServerArray([
             'REQUEST_METHOD' => 'REPORT',
             'HTTP_CONTENT_TYPE' => 'application/xml',
             'REQUEST_URI' => '/calendars/user1/calendar1',
             'HTTP_DEPTH' => '1',
-        ));
+        ]);
 
         $request->setBody('<?xml version="1.0" encoding="utf-8" ?>
 <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">

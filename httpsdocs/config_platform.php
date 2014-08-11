@@ -26,7 +26,9 @@ define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
 define(
     'CB\\INCLUDE_PATH',
     DOC_ROOT.'libx'.PATH_SEPARATOR.
-    DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
+    DOC_ROOT.'libx'. DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
+    // DOC_ROOT.'libx/SabreDAV/lib' . PATH_SEPARATOR .  # DIRECTORY_SEPARATOR is not necessarily needed,
+    //                                                # PHP always converts / to the appropriate character in its file functions.
     DOC_ROOT.'classes'.PATH_SEPARATOR.
     PLUGINS_DIR.PATH_SEPARATOR.
     get_include_path()
@@ -95,7 +97,6 @@ function isDebugHost()
 function detectCore()
 {
     $rez = false;
-
     if (isset($_GET['core'])) {
         $rez = preg_replace('/[^\w]\-_/i', '', $_GET['core']);
     } else {
