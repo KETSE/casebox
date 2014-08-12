@@ -49,7 +49,7 @@ class Utils
         }
 
         $params = array(
-            'fl' => 'id, name, template_id, date, cdate, udate, size'
+            'fl' => 'id, name, template_id, date, cdate, uid, udate, size'
             ,'fq'=> array(
                 'dstatus: 0'
                 ,'system: [0 TO 1]'
@@ -94,6 +94,7 @@ class Utils
                 ,'template_id' => $item->template_id
                 ,'size' => $item->size
                 ,'cdate' => $item->cdate
+                ,'uid' => $item->uid     // the last user that updated node
                 ,'udate' => $item->udate
                 ,'path' => $path . DIRECTORY_SEPARATOR . $item->name
             );

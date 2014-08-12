@@ -72,27 +72,37 @@ subtype: this field is dependent on type field value
     This definition can be updated when needed
  -->
 <field name="subtype"   type="tint"         indexed="true" stored="true" />
+
 <!-- size: used for file sizes  -->
 <field name="size"      type="tlong"        indexed="true" stored="true" />
+
 <!-- date: date field for all objects  -->
 <field name="date"  type="tdate"        indexed="true" stored="true" />
+
 <!-- date_end: used for objects that have an end date (tasks)  -->
 <field name="date_end"  type="tdate"        indexed="true" stored="true" />
 
 <!-- oid: owner id. Owners have full access to their objects despite other security rules -->
 <field name="oid"   type="tint"     indexed="true" stored="true" />
+
 <!-- cid: creator id. User that created / uploaded this object  -->
 <field name="cid"   type="tint"     indexed="true" stored="true" />
+
 <!-- cdate: creation date  -->
 <field name="cdate"     type="tdate"        indexed="true" stored="true" />
+
 <!-- uid: updater id. Last user id that have updated this object  -->
 <field name="uid"   type="tint"     indexed="true" stored="true" />
+
 <!-- udate: last update date  -->
 <field name="udate" type="tdate"        indexed="true" stored="true" />
+
 <!-- did: deleter id. User id that have deleted this node  -->
 <field name="did"   type="tint"     indexed="true" stored="true" />
+
 <!-- ddate: delete date  -->
 <field name="ddate" type="tdate"        indexed="true" stored="true" />
+
 <!-- dstatus: indicates delete status of node
     0 - not deleted
     1 - deleted
@@ -102,8 +112,10 @@ subtype: this field is dependent on type field value
 
 <!-- case_id: indicates the id of the case if this node is in a case  -->
 <field name="case_id"       type="tint"         indexed="true" stored="true" />
+
 <!-- case: case name. Stored for display purposes  -->
 <field name="case"      type="text_general"     indexed="true" stored="true" />
+
 <!-- template_id: the themplate id of the object  -->
 <field name="template_id"   type="tint"         indexed="true" stored="true" />
 
@@ -152,14 +164,19 @@ subtype: this field is dependent on type field value
 
 <!-- metas: designed to contain metadata of the object for searching by medatada properties. Not used for now -->
 <field name="metas"         type="text_ws"      indexed="true" stored="true" />
+
 <!-- content: content of the objects for searching by content (including parsed files content). -->
 <field name="content"       type="text_general" indexed="true"  stored="true" />
+
 <!-- ntsc: node type sort coolumn. Used to sort Folders firstly -->
 <field name="ntsc"          type="tint"     indexed="true" stored="true" />
+
 <!-- sort_name: designed to sort by name -->
 <field name="sort_name"     type="text_general_sort" indexed="true" stored="true" />
+
 <!-- order: custom ordering number -->
 <field name="order"     type="tint" indexed="true" stored="true" />
+
 <!-- sort_path: designed to sort by path -->
 <field name="sort_path"     type="text_general_sort" indexed="true" stored="true" />
 

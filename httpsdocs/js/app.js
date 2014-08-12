@@ -504,6 +504,10 @@ function initApp(){
         if((checkCookie !== false) &&
             (Ext.util.Cookies.get('webdavHideDlg') == 1)
         ) {
+            // replacing whitespace with '==='
+            // external protocol request "cbdav:...." doesnt work in Safari if it has spaces
+            // url = url.replace(/ /g, '%20');
+            url = encodeURI(url);
             window.open('cbdav:' + url, '_self');
         } else {
             var w = new CB.WebdavWindow({
