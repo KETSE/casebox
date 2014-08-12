@@ -95,7 +95,10 @@ if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice')  {   // WORD requires locking.
 
     // http://sabre.io/dav/clients/msoffice/
     // certain versions of Office break if the {DAV:}lockdiscovery property
-    \Sabre\DAV\Property\LockDiscovery::$hideLockRoot = true;
+    // but Word 2013 doesn't like this setting, on save it shows:
+    // "Showing a dialog: files was changed by another author, combine results?"
+    //
+    // \Sabre\DAV\Property\LockDiscovery::$hideLockRoot = true;
 
     $server->addPlugin($lockPlugin);
 }
