@@ -24,6 +24,13 @@ CB.WebdavWindow = Ext.extend(Ext.Window, {
             ,boxLabel: 'Enable cbdav & don\'t show this dialog'
         });
 
+        if (navigator.appVersion.indexOf("Mac") != -1) {
+            cbdavLink = 'https://www.casebox.org/dl/macosx/cbdav.zip';
+        } else {
+            cbdavLink = 'http://www.casebox.org/dl/cbdav.exe';
+        }
+
+
         Ext.apply(this, {
             bodyStyle: 'margin: 0 15px 10px 15px'
             ,buttonAlign: 'center'
@@ -39,11 +46,15 @@ CB.WebdavWindow = Ext.extend(Ext.Window, {
             }
             ,{
                 xtype: 'displayfield'
-                ,value: '<br />Open this link in your editor (Word, LibreOffice).<br /> You\'ll be asked for your CaseBox username/password.'
+                ,value: '<br />Open this link in your editor (Word, LibreOffice).<br /> You\'ll be asked for your Casebox username/password.'
             }
             ,{
                 xtype: 'displayfield'
-                ,value: '<br />Install <a href="http://www.casebox.org/dl/cbdav.exe" class="click">cbdav.exe</a> to automatically open the document when you<br />double clicka file or use the edit button.<br /><br />'
+                ,value: '<br />Install <a href="' + cbdavLink + '" class="click"><b>cbdav</b></a>' +
+                        ' to automatically open the document when you<br />' +
+                        'double click a file or use the edit button.<br /><br />' +
+                        'See <a href="https://www.casebox.org/userguide/cbdav/">userguide</a> for details.' +
+                        '<br /><br />'
             }
             ,this.cbHideDialog
             ]

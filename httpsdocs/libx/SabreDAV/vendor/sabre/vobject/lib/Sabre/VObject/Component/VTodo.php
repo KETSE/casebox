@@ -9,9 +9,9 @@ use Sabre\VObject;
  *
  * This component contains some additional functionality specific for VTODOs.
  *
- * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
- * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
+ * @license http://sabre.io/license/ Modified BSD License
  */
 class VTodo extends VObject\Component {
 
@@ -62,6 +62,114 @@ class VTodo extends VObject\Component {
             return ($end > $created);
         }
         return true;
+
+    }
+
+    /**
+     * A simple list of validation rules.
+     *
+     * This is simply a list of properties, and how many times they either
+     * must or must not appear.
+     *
+     * Possible values per property:
+     *   * 0 - Must not appear.
+     *   * 1 - Must appear exactly once.
+     *   * + - Must appear at least once.
+     *   * * - Can appear any number of times.
+     *
+     * @var array
+     */
+    public function getValidationRules() {
+
+        return array(
+            'UID' => 1,
+            'DTSTAMP' => 1,
+
+            'CLASS' => '?',
+            'COMPLETED' => '?',
+            'CREATED' => '?',
+            'DESCRIPTION' => '?',
+            'DTSTART' => '?',
+            'GEO' => '?',
+            'LAST-MODIFICATION' => '?',
+            'LOCATION' => '?',
+            'ORGANIZER' => '?',
+            'PERCENT' => '?',
+            'PRIORITY' => '?',
+            'RECURRENCE-ID' => '?',
+            'SEQUENCE' => '?',
+            'STATUS' => '?',
+            'SUMMARY' => '?',
+            'URL' => '?',
+
+            'RRULE' => '?',
+            'DUE' => '?',
+            'DURATION' => '?',
+
+            'ATTACH' => '*',
+            'ATTENDEE' => '*',
+            'CATEGORIES' => '*',
+            'COMMENT' => '*',
+            'CONTACT' => '*',
+            'EXDATE' => '*',
+            'REQUEST-STATUS' => '*',
+            'RELATED' => '*',
+            'RESOURCES' => '*',
+            'RDATE' => '*',
+        );
+
+    }
+
+    /**
+     * Validates the node for correctness.
+     *
+     * The following options are supported:
+     *   Node::REPAIR - May attempt to automatically repair the problem.
+     *
+     * This method returns an array with detected problems.
+     * Every element has the following properties:
+     *
+     *  * level - problem level.
+     *  * message - A human-readable string describing the issue.
+     *  * node - A reference to the problematic node.
+     *
+     * The level means:
+     *   1 - The issue was repaired (only happens if REPAIR was turned on)
+     *   2 - An inconsequential issue
+     *   3 - A severe issue.
+     *
+     * @param int $options
+     * @return array
+     */
+    public function validate($options = 0) {
+
+        $result = parent::validate($options);
+        if (isset($this->DUE) && isset($this->DTSTART)) {
+
+            $due = $this->DUE;
+            $dtStart = $this->DTSTART;
+
+            if ($due->getValueType() !== $dtStart->getValueType()) {
+
+                $result[] = array(
+                    'level'   => 3,
+                    'message' => 'The value type (DATE or DATE-TIME) must be identical for DUE and DTSTART',
+                    'node' => $due,
+                );
+
+            } elseif ($due->getDateTime() < $dtStart->getDateTime()) {
+
+                $result[] = array(
+                    'level'   => 3,
+                    'message' => 'DUE must occur after DTSTART',
+                    'node' => $due,
+                );
+
+            }
+
+        }
+
+        return $result;
 
     }
 

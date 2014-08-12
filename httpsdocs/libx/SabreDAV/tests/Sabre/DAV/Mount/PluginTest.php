@@ -23,11 +23,11 @@ class PluginTest extends DAV\AbstractServer {
             'REQUEST_METHOD' => 'GET',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
-        $this->assertEquals('HTTP/1.1 501 Not Implemented',$this->response->status,'We expected GET to not be implemented for Directories. Response body: ' . $this->response->body);
+        $this->assertEquals(501, $this->response->status,'We expected GET to not be implemented for Directories. Response body: ' . $this->response->body);
 
     }
 
@@ -40,14 +40,14 @@ class PluginTest extends DAV\AbstractServer {
             'HTTP_HOST'      => 'example.org',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
-        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
+        $this->assertEquals(200, $this->response->status);
 
         $xml = simplexml_load_string($this->response->body);
-        $this->assertTrue($xml==true,'Response was not a valid xml document');
+        $this->assertInstanceOf('SimpleXMLElement',$xml, 'Response was not a valid xml document. The list of errors:' . print_r(libxml_get_errors(),true) . '. xml body: ' . $this->response->body . '. What type we got: ' . gettype($xml) . ' class, if object: ' . get_class($xml));
 
         $xml->registerXPathNamespace('dm','http://purl.org/NET/webdav/mount');
         $url = $xml->xpath('//dm:url');

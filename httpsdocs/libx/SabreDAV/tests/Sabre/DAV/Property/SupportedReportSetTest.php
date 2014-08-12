@@ -18,7 +18,7 @@ class SupportedReportSetTest extends DAV\AbstractServer {
             'HTTP_DEPTH'          => '0',
         );
 
-        $request = new HTTP\Request($serverVars);
+        $request = HTTP\Sapi::createFromServerArray($serverVars);
         $request->setBody($body);
 
         $this->server->httpRequest = ($request);
@@ -27,7 +27,6 @@ class SupportedReportSetTest extends DAV\AbstractServer {
     }
 
     /**
-     * @covers Sabre\DAV\Property\SupportedReportSet
      */
     function testNoReports() {
 
@@ -40,7 +39,7 @@ class SupportedReportSetTest extends DAV\AbstractServer {
 
         $this->sendPROPFIND($xml);
 
-        $this->assertEquals('HTTP/1.1 207 Multi-Status',$this->response->status,'We expected a multi-status response. Full response body: ' . $this->response->body);
+        $this->assertEquals(207, $this->response->status,'We expected a multi-status response. Full response body: ' . $this->response->body);
 
         $body = preg_replace("/xmlns(:[A-Za-z0-9_])?=(\"|\')DAV:(\"|\')/","xmlns\\1=\"urn:DAV\"",$this->response->body);
         $xml = simplexml_load_string($body);
@@ -60,13 +59,17 @@ class SupportedReportSetTest extends DAV\AbstractServer {
     }
 
     /**
-     * @covers Sabre\DAV\Property\SupportedReportSet
      * @depends testNoReports
      */
     function testCustomReport() {
 
         // Intercepting the report property
-        $this->server->subscribeEvent('afterGetProperties',array($this,'addProp'));
+        $this->server->on('propFind', function(DAV\PropFind $propFind, DAV\INode $node) {
+            if ($prop = $propFind->get('{DAV:}supported-report-set')) {
+                $prop->addReport('{http://www.rooftopsolutions.nl/testnamespace}myreport');
+                $prop->addReport('{DAV:}anotherreport');
+            }
+        },200);
 
         $xml = '<?xml version="1.0"?>
 <d:propfind xmlns:d="DAV:">
@@ -77,7 +80,7 @@ class SupportedReportSetTest extends DAV\AbstractServer {
 
         $this->sendPROPFIND($xml);
 
-        $this->assertEquals('HTTP/1.1 207 Multi-Status',$this->response->status,'We expected a multi-status response. Full response body: ' . $this->response->body);
+        $this->assertEquals(207, $this->response->status,'We expected a multi-status response. Full response body: ' . $this->response->body);
 
         $body = preg_replace("/xmlns(:[A-Za-z0-9_])?=(\"|\')DAV:(\"|\')/","xmlns\\1=\"urn:DAV\"",$this->response->body);
         $xml = simplexml_load_string($body);
@@ -109,20 +112,5 @@ class SupportedReportSetTest extends DAV\AbstractServer {
 
     }
 
-    /**
-     * This method is used as a callback for afterGetProperties
-     */
-    function addProp($path, &$properties) {
-
-        if (isset($properties[200]['{DAV:}supported-report-set'])) {
-            $properties[200]['{DAV:}supported-report-set']->addReport('{http://www.rooftopsolutions.nl/testnamespace}myreport');
-            $properties[200]['{DAV:}supported-report-set']->addReport('{DAV:}anotherreport');
-        }
-
-    }
-
-
-
 }
 
-?>

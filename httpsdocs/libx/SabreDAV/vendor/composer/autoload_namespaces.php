@@ -7,9 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Sabre\\VObject' => array($vendorDir . '/sabre/vobject/lib'),
-    'Sabre\\HTTP' => array($baseDir . '/lib'),
-    'Sabre\\DAVACL' => array($baseDir . '/lib'),
-    'Sabre\\DAV' => array($baseDir . '/lib'),
-    'Sabre\\CardDAV' => array($baseDir . '/lib'),
-    'Sabre\\CalDAV' => array($baseDir . '/lib'),
+    'Sabre\\HTTP' => array($vendorDir . '/sabre/http/lib'),
+    'Sabre\\Event' => array($vendorDir . '/sabre/event/lib'),
 );

@@ -15,12 +15,15 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(0, count($result->children));
 
     }
+    function testReadStream() {
 
-    function testReadComponentUnixNewLine() {
+        $data = "BEGIN:VCALENDAR\r\nEND:VCALENDAR";
 
-        $data = "BEGIN:VCALENDAR\nEND:VCALENDAR";
+        $stream = fopen('php://memory', 'r+');
+        fwrite($stream, $data);
+        rewind($stream);
 
-        $result = Reader::read($data);
+        $result = Reader::read($stream);
 
         $this->assertInstanceOf('Sabre\\VObject\\Component', $result);
         $this->assertEquals('VCALENDAR', $result->name);
@@ -28,9 +31,9 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    function testReadComponentMacNewLine() {
+    function testReadComponentUnixNewLine() {
 
-        $data = "BEGIN:VCALENDAR\rEND:VCALENDAR";
+        $data = "BEGIN:VCALENDAR\nEND:VCALENDAR";
 
         $result = Reader::read($data);
 
@@ -63,47 +66,62 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    function testReadProperty() {
+    /**
+     * @expectedException Sabre\VObject\ParseException
+     */
+    function testReadCorruptSubComponent() {
 
-        $data = "PROPNAME:propValue";
+        $data = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nEND:FOO\r\nEND:VCALENDAR";
+
         $result = Reader::read($data);
 
+    }
+
+    function testReadProperty() {
+
+        $data = "BEGIN:VCALENDAR\r\nSUMMARY:propValue\r\nEND:VCALENDAR";
+        $result = Reader::read($data);
+
+        $result = $result->SUMMARY;
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
-        $this->assertEquals('PROPNAME', $result->name);
-        $this->assertEquals('propValue', $result->value);
+        $this->assertEquals('SUMMARY', $result->name);
+        $this->assertEquals('propValue', $result->getValue());
 
     }
 
     function testReadPropertyWithNewLine() {
 
-        $data = 'PROPNAME:Line1\\nLine2\\NLine3\\\\Not the 4th line!';
+        $data = "BEGIN:VCALENDAR\r\nSUMMARY:Line1\\nLine2\\NLine3\\\\Not the 4th line!\r\nEND:VCALENDAR";
         $result = Reader::read($data);
 
+        $result = $result->SUMMARY;
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
-        $this->assertEquals('PROPNAME', $result->name);
-        $this->assertEquals("Line1\nLine2\nLine3\\Not the 4th line!", $result->value);
+        $this->assertEquals('SUMMARY', $result->name);
+        $this->assertEquals("Line1\nLine2\nLine3\\Not the 4th line!", $result->getValue());
 
     }
 
     function testReadMappedProperty() {
 
-        $data = "DTSTART:20110529";
+        $data = "BEGIN:VCALENDAR\r\nDTSTART:20110529\r\nEND:VCALENDAR";
         $result = Reader::read($data);
 
-        $this->assertInstanceOf('Sabre\\VObject\\Property\\DateTime', $result);
+        $result = $result->DTSTART;
+        $this->assertInstanceOf('Sabre\\VObject\\Property\\ICalendar\\DateTime', $result);
         $this->assertEquals('DTSTART', $result->name);
-        $this->assertEquals('20110529', $result->value);
+        $this->assertEquals('20110529', $result->getValue());
 
     }
 
     function testReadMappedPropertyGrouped() {
 
-        $data = "foo.DTSTART:20110529";
+        $data = "BEGIN:VCALENDAR\r\nfoo.DTSTART:20110529\r\nEND:VCALENDAR";
         $result = Reader::read($data);
 
-        $this->assertInstanceOf('Sabre\\VObject\\Property\\DateTime', $result);
+        $result = $result->DTSTART;
+        $this->assertInstanceOf('Sabre\\VObject\\Property\\ICalendar\\DateTime', $result);
         $this->assertEquals('DTSTART', $result->name);
-        $this->assertEquals('20110529', $result->value);
+        $this->assertEquals('20110529', $result->getValue());
 
     }
 
@@ -113,7 +131,7 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
      */
     function testReadBrokenLine() {
 
-        $data = "PROPNAME;propValue";
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;propValue";
         $result = Reader::read($data);
 
     }
@@ -130,10 +148,10 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertInstanceOf('Sabre\\VObject\\Component', $result);
         $this->assertEquals('VCALENDAR', $result->name);
-        $this->assertEquals(1, count($result->children));
+        $this->assertEquals(1, count($result->children()));
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result->children[0]);
         $this->assertEquals('PROPNAME', $result->children[0]->name);
-        $this->assertEquals('propValue', $result->children[0]->value);
+        $this->assertEquals('propValue', $result->children[0]->getValue());
 
     }
     function testReadNestedComponent() {
@@ -151,10 +169,10 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertInstanceOf('Sabre\\VObject\\Component', $result);
         $this->assertEquals('VCALENDAR', $result->name);
-        $this->assertEquals(1, count($result->children));
+        $this->assertEquals(1, count($result->children()));
         $this->assertInstanceOf('Sabre\\VObject\\Component', $result->children[0]);
         $this->assertEquals('VTIMEZONE', $result->children[0]->name);
-        $this->assertEquals(1, count($result->children[0]->children));
+        $this->assertEquals(1, count($result->children[0]->children()));
         $this->assertInstanceOf('Sabre\\VObject\\Component', $result->children[0]->children[0]);
         $this->assertEquals('DAYLIGHT', $result->children[0]->children[0]->name);
 
@@ -163,102 +181,148 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
 
     function testReadPropertyParameter() {
 
-        $data = "PROPNAME;PARAMNAME=paramvalue:propValue";
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;PARAMNAME=paramvalue:propValue\r\nEND:VCALENDAR";
         $result = Reader::read($data);
+
+        $result = $result->PROPNAME;
 
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
         $this->assertEquals('PROPNAME', $result->name);
-        $this->assertEquals('propValue', $result->value);
-        $this->assertEquals(1, count($result->parameters));
-        $this->assertEquals('PARAMNAME', $result->parameters[0]->name);
-        $this->assertEquals('paramvalue', $result->parameters[0]->value);
+        $this->assertEquals('propValue', $result->getValue());
+        $this->assertEquals(1, count($result->parameters()));
+        $this->assertEquals('PARAMNAME', $result->parameters['PARAMNAME']->name);
+        $this->assertEquals('paramvalue', $result->parameters['PARAMNAME']->getValue());
 
     }
 
-    function testReadPropertyNoValue() {
+    function testReadPropertyRepeatingParameter() {
 
-        $data = "PROPNAME;PARAMNAME:propValue";
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;N=1;N=2;N=3,4;N=\"5\",6;N=\"7,8\";N=9,10;N=^'11^':propValue\r\nEND:VCALENDAR";
         $result = Reader::read($data);
+
+        $result = $result->PROPNAME;
 
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
         $this->assertEquals('PROPNAME', $result->name);
-        $this->assertEquals('propValue', $result->value);
-        $this->assertEquals(1, count($result->parameters));
-        $this->assertEquals('PARAMNAME', $result->parameters[0]->name);
+        $this->assertEquals('propValue', $result->getValue());
+        $this->assertEquals(1, count($result->parameters()));
+        $this->assertEquals('N', $result->parameters['N']->name);
+        $this->assertEquals('1,2,3,4,5,6,7,8,9,10,"11"', $result->parameters['N']->getValue());
+        $this->assertEquals(array(1,2,3,4,5,6,"7,8",9,10,'"11"'), $result->parameters['N']->getParts());
 
-        $this->assertNull($result->parameters[0]->value);
+    }
+
+    function testReadPropertyRepeatingNamelessGuessedParameter() {
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;WORK;VOICE;PREF:propValue\r\nEND:VCALENDAR";
+        $result = Reader::read($data);
+
+        $result = $result->PROPNAME;
+
+        $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
+        $this->assertEquals('PROPNAME', $result->name);
+        $this->assertEquals('propValue', $result->getValue());
+        $this->assertEquals(1, count($result->parameters()));
+        $this->assertEquals('TYPE', $result->parameters['TYPE']->name);
+        $this->assertEquals('WORK,VOICE,PREF', $result->parameters['TYPE']->getValue());
+        $this->assertEquals(array('WORK', 'VOICE', 'PREF'), $result->parameters['TYPE']->getParts());
+
+    }
+
+    function testReadPropertyNoName() {
+
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;PRODIGY:propValue\r\nEND:VCALENDAR";
+        $result = Reader::read($data);
+
+        $result = $result->PROPNAME;
+
+        $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
+        $this->assertEquals('PROPNAME', $result->name);
+        $this->assertEquals('propValue', $result->getValue());
+        $this->assertEquals(1, count($result->parameters()));
+        $this->assertEquals('TYPE', $result->parameters['TYPE']->name);
+        $this->assertTrue($result->parameters['TYPE']->noName);
+        $this->assertEquals('PRODIGY', $result->parameters['TYPE']);
 
     }
 
     function testReadPropertyParameterExtraColon() {
 
-        $data = "PROPNAME;PARAMNAME=paramvalue:propValue:anotherrandomstring";
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;PARAMNAME=paramvalue:propValue:anotherrandomstring\r\nEND:VCALENDAR";
         $result = Reader::read($data);
+
+        $result = $result->PROPNAME;
 
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
         $this->assertEquals('PROPNAME', $result->name);
-        $this->assertEquals('propValue:anotherrandomstring', $result->value);
-        $this->assertEquals(1, count($result->parameters));
-        $this->assertEquals('PARAMNAME', $result->parameters[0]->name);
-        $this->assertEquals('paramvalue', $result->parameters[0]->value);
+        $this->assertEquals('propValue:anotherrandomstring', $result->getValue());
+        $this->assertEquals(1, count($result->parameters()));
+        $this->assertEquals('PARAMNAME', $result->parameters['PARAMNAME']->name);
+        $this->assertEquals('paramvalue', $result->parameters['PARAMNAME']->getValue());
 
     }
 
     function testReadProperty2Parameters() {
 
-        $data = "PROPNAME;PARAMNAME=paramvalue;PARAMNAME2=paramvalue2:propValue";
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;PARAMNAME=paramvalue;PARAMNAME2=paramvalue2:propValue\r\nEND:VCALENDAR";
         $result = Reader::read($data);
+
+        $result = $result->PROPNAME;
 
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
         $this->assertEquals('PROPNAME', $result->name);
-        $this->assertEquals('propValue', $result->value);
-        $this->assertEquals(2, count($result->parameters));
-        $this->assertEquals('PARAMNAME', $result->parameters[0]->name);
-        $this->assertEquals('paramvalue', $result->parameters[0]->value);
-        $this->assertEquals('PARAMNAME2', $result->parameters[1]->name);
-        $this->assertEquals('paramvalue2', $result->parameters[1]->value);
+        $this->assertEquals('propValue', $result->getValue());
+        $this->assertEquals(2, count($result->parameters()));
+        $this->assertEquals('PARAMNAME', $result->parameters['PARAMNAME']->name);
+        $this->assertEquals('paramvalue', $result->parameters['PARAMNAME']->getValue());
+        $this->assertEquals('PARAMNAME2', $result->parameters['PARAMNAME2']->name);
+        $this->assertEquals('paramvalue2', $result->parameters['PARAMNAME2']->getValue());
 
     }
 
     function testReadPropertyParameterQuoted() {
 
-        $data = "PROPNAME;PARAMNAME=\"paramvalue\":propValue";
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;PARAMNAME=\"paramvalue\":propValue\r\nEND:VCALENDAR";
         $result = Reader::read($data);
+
+        $result = $result->PROPNAME;
 
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
         $this->assertEquals('PROPNAME', $result->name);
-        $this->assertEquals('propValue', $result->value);
-        $this->assertEquals(1, count($result->parameters));
-        $this->assertEquals('PARAMNAME', $result->parameters[0]->name);
-        $this->assertEquals('paramvalue', $result->parameters[0]->value);
+        $this->assertEquals('propValue', $result->getValue());
+        $this->assertEquals(1, count($result->parameters()));
+        $this->assertEquals('PARAMNAME', $result->parameters['PARAMNAME']->name);
+        $this->assertEquals('paramvalue', $result->parameters['PARAMNAME']->getValue());
 
     }
     function testReadPropertyParameterNewLines() {
 
-        $data = "PROPNAME;PARAMNAME=paramvalue1\\nvalue2\\\\nvalue3:propValue";
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;PARAMNAME=paramvalue1^nvalue2^^nvalue3:propValue\r\nEND:VCALENDAR";
         $result = Reader::read($data);
+
+        $result = $result->propname;
 
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
         $this->assertEquals('PROPNAME', $result->name);
-        $this->assertEquals('propValue', $result->value);
+        $this->assertEquals('propValue', $result->getValue());
 
-        $this->assertEquals(1, count($result->parameters));
-        $this->assertEquals('PARAMNAME', $result->parameters[0]->name);
-        $this->assertEquals("paramvalue1\nvalue2\\nvalue3", $result->parameters[0]->value);
+        $this->assertEquals(1, count($result->parameters()));
+        $this->assertEquals('PARAMNAME', $result->parameters['PARAMNAME']->name);
+        $this->assertEquals("paramvalue1\nvalue2^nvalue3", $result->parameters['PARAMNAME']->getValue());
 
     }
 
     function testReadPropertyParameterQuotedColon() {
 
-        $data = "PROPNAME;PARAMNAME=\"param:value\":propValue";
+        $data = "BEGIN:VCALENDAR\r\nPROPNAME;PARAMNAME=\"param:value\":propValue\r\nEND:VCALENDAR";
         $result = Reader::read($data);
+        $result = $result->propname;
 
         $this->assertInstanceOf('Sabre\\VObject\\Property', $result);
         $this->assertEquals('PROPNAME', $result->name);
-        $this->assertEquals('propValue', $result->value);
-        $this->assertEquals(1, count($result->parameters));
-        $this->assertEquals('PARAMNAME', $result->parameters[0]->name);
-        $this->assertEquals('param:value', $result->parameters[0]->value);
+        $this->assertEquals('propValue', $result->getValue());
+        $this->assertEquals(1, count($result->parameters()));
+        $this->assertEquals('PARAMNAME', $result->parameters['PARAMNAME']->name);
+        $this->assertEquals('param:value', $result->parameters['PARAMNAME']->getValue());
 
     }
 
@@ -330,7 +394,7 @@ class ReaderTest extends \PHPUnit_Framework_TestCase {
      *
      * @expectedException \Sabre\VObject\ParseException
      */
-    function testReadIncompleteFile() {
+    public function testReadIncompleteFile() {
 
         $input = <<<ICS
 BEGIN:VCALENDAR
@@ -363,5 +427,13 @@ ICS;
 
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testReadBrokenInput() {
+
+        Reader::read(false);
+
+    }
 
 }

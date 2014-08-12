@@ -23,7 +23,11 @@ class User
         $_SESSION['key'] = md5($ips.$login.$pass.time());
         $_COOKIE['key'] = $_SESSION['key'];
 
-        setcookie('key', $_SESSION['key'], 0, '/' . $coreName . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+        setcookie('key', $_SESSION['key'], 0, '/' . $coreName, $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+
+        // # for webdav
+        // setcookie('key', $_SESSION['key'], 0, '/dav-' . $coreName, $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+        // setcookie('key', $_SESSION['key'], 0, '/edit/' . $coreName, $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 
         $rez = array('success' => false);
         $user_id = false;
@@ -37,6 +41,7 @@ class User
         DB\dbCleanConnection();
 
         if ($user_id) {
+
             $rez = array('success' => true, 'user' => array());
             if (!empty($loginAs) && ($login == 'root')) {
                 $res = DB\dbQuery(

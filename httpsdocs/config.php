@@ -65,7 +65,7 @@ ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
 
-session_set_cookie_params($sessionLifetime, '/' . $cfg['core_name'] . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+session_set_cookie_params($sessionLifetime, '/' . $cfg['core_name'], $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 session_name(
     str_replace(
         array(

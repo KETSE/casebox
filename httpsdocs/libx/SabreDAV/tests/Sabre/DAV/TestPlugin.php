@@ -2,31 +2,35 @@
 
 namespace Sabre\DAV;
 
+use
+    Sabre\HTTP\RequestInterface,
+    Sabre\HTTP\ResponseInterface;
+
 class TestPlugin extends ServerPlugin {
 
     public $beforeMethod;
 
     function getFeatures() {
 
-        return array('drinking');
+        return ['drinking'];
 
     }
 
     function getHTTPMethods($uri) {
 
-        return array('BEER','WINE');
+        return ['BEER','WINE'];
 
     }
 
     function initialize(Server $server) {
 
-        $server->subscribeEvent('beforeMethod',array($this,'beforeMethod'));
+        $server->on('beforeMethod', [$this,'beforeMethod']);
 
     }
 
-    function beforeMethod($method) {
+    function beforeMethod(RequestInterface $request, ResponseInterface $response) {
 
-        $this->beforeMethod = $method;
+        $this->beforeMethod = $request->getMethod();
         return true;
 
     }

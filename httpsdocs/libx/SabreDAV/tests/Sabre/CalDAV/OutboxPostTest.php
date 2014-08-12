@@ -11,10 +11,12 @@ require_once 'Sabre/CalDAV/Schedule/IMip/Mock.php';
 class OutboxPostTest extends \Sabre\DAVServerTest {
 
     protected $setupCalDAV = true;
+    protected $setupACL = true;
+    protected $autoLogin = 'user1';
 
     function testPostPassThruNotFound() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD' => 'POST',
             'REQUEST_URI' => '/notfound',
             'HTTP_CONTENT_TYPE' => 'text/calendar',
@@ -26,9 +28,9 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testPostPassThruNotTextCalendar() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/admin/outbox',
+            'REQUEST_URI' => '/calendars/user1/outbox',
         ));
 
         $this->assertHTTPStatus(501, $req);
@@ -37,7 +39,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testPostPassThruNoOutBox() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD' => 'POST',
             'REQUEST_URI' => '/calendars',
             'HTTP_CONTENT_TYPE' => 'text/calendar',
@@ -49,9 +51,9 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testNoOriginator() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/admin/outbox',
+            'REQUEST_URI' => '/calendars/user1/outbox',
             'HTTP_CONTENT_TYPE' => 'text/calendar',
         ));
         $body = array(
@@ -69,10 +71,10 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testNoRecipient() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
-            'REQUEST_URI'     => '/calendars/admin/outbox',
-            'HTTP_ORIGINATOR' => 'mailto:orig@example.org',
+            'REQUEST_URI'     => '/calendars/user1/outbox',
+            'HTTP_ORIGINATOR' => 'mailto:user1@example.org',
             'HTTP_CONTENT_TYPE' => 'text/calendar',
         ));
         $body = array(
@@ -90,7 +92,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testBadOriginator() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/admin/outbox',
             'HTTP_ORIGINATOR' => 'nomailto:orig@example.org',
@@ -110,12 +112,34 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     }
 
+    function testBadOriginator2() {
+
+        $req = HTTP\Sapi::createFromServerArray(array(
+            'REQUEST_METHOD'  => 'POST',
+            'REQUEST_URI'     => '/calendars/user1/outbox',
+            'HTTP_ORIGINATOR' => 'mailto:orig@example.org',
+            'HTTP_RECIPIENT'  => 'mailto:user1@example.org',
+            'HTTP_CONTENT_TYPE' => 'text/calendar',
+        ));
+        $body = array(
+            'BEGIN:VCALENDAR',
+            'METHOD:REQUEST',
+            'BEGIN:VEVENT',
+            'END:VEVENT',
+            'END:VCALENDAR',
+        );
+        $req->setBody(implode("\r\n",$body));
+
+        $this->assertHTTPStatus(403, $req);
+
+    }
+
     function testBadRecipient() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
-            'REQUEST_URI'     => '/calendars/admin/outbox',
-            'HTTP_ORIGINATOR' => 'mailto:orig@example.org',
+            'REQUEST_URI'     => '/calendars/user1/outbox',
+            'HTTP_ORIGINATOR' => 'mailto:user1@example.org',
             'HTTP_RECIPIENT'  => 'http://user1@example.org, mailto:user2@example.org',
             'HTTP_CONTENT_TYPE' => 'text/calendar',
         ));
@@ -134,7 +158,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testIncorrectOriginator() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/admin/outbox',
             'HTTP_ORIGINATOR' => 'mailto:orig@example.org',
@@ -156,7 +180,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testInvalidIcalBody() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => 'mailto:user1.sabredav@sabredav.org',
@@ -171,7 +195,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testNoVEVENT() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => 'mailto:user1.sabredav@sabredav.org',
@@ -194,7 +218,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testNoMETHOD() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => 'mailto:user1.sabredav@sabredav.org',
@@ -217,7 +241,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testUnsupportedMethod() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => 'mailto:user1.sabredav@sabredav.org',
@@ -241,7 +265,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testNoIMIPHandler() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => 'mailto:user1.sabredav@sabredav.org',
@@ -261,7 +285,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
 
         $response = $this->request($req);
-        $this->assertEquals('HTTP/1.1 200 OK', $response->status);
+        $this->assertEquals(200, $response->status);
         $this->assertEquals(array(
             'Content-Type' => 'application/xml',
         ), $response->headers);
@@ -275,7 +299,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testSuccessRequest() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => 'mailto:user1.sabredav@sabredav.org',
@@ -299,7 +323,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
         $this->caldavPlugin->setIMIPhandler($handler);
 
         $response = $this->request($req);
-        $this->assertEquals('HTTP/1.1 200 OK', $response->status);
+        $this->assertEquals(200, $response->status);
         $this->assertEquals(array(
             'Content-Type' => 'application/xml',
         ), $response->headers);
@@ -317,7 +341,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
                     'Reply-To: user1.sabredav@sabredav.org',
                     'From: server@example.org',
                     'Content-Type: text/calendar; method=REQUEST; charset=utf-8',
-                    'X-Sabre-Version: ' . DAV\Version::VERSION . '-' . DAV\Version::STABILITY,
+                    'X-Sabre-Version: ' . DAV\Version::VERSION,
                 ),
            )
         ), $handler->getSentEmails());
@@ -326,7 +350,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testSuccessRequestUseRelativePrincipal() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => '/principals/user1/',
@@ -351,7 +375,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
         $this->caldavPlugin->setIMIPhandler($handler);
 
         $response = $this->request($req);
-        $this->assertEquals('HTTP/1.1 200 OK', $response->status, 'Full body: ' . $response->body);
+        $this->assertEquals(200, $response->status, 'Full body: ' . $response->body);
         $this->assertEquals(array(
             'Content-Type' => 'application/xml',
         ), $response->headers);
@@ -369,7 +393,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
                     'Reply-To: user1.sabredav@sabredav.org',
                     'From: server@example.org',
                     'Content-Type: text/calendar; method=REQUEST; charset=utf-8',
-                    'X-Sabre-Version: ' . DAV\Version::VERSION . '-' . DAV\Version::STABILITY,
+                    'X-Sabre-Version: ' . DAV\Version::VERSION,
                 ),
            )
         ), $handler->getSentEmails());
@@ -378,7 +402,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testSuccessRequestUpperCased() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => 'MAILTO:user1.sabredav@sabredav.org',
@@ -402,7 +426,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
         $this->caldavPlugin->setIMIPhandler($handler);
 
         $response = $this->request($req);
-        $this->assertEquals('HTTP/1.1 200 OK', $response->status);
+        $this->assertEquals(200, $response->status);
         $this->assertEquals(array(
             'Content-Type' => 'application/xml',
         ), $response->headers);
@@ -420,7 +444,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
                     'Reply-To: user1.sabredav@sabredav.org',
                     'From: server@example.org',
                     'Content-Type: text/calendar; method=REQUEST; charset=utf-8',
-                    'X-Sabre-Version: ' . DAV\Version::VERSION . '-' . DAV\Version::STABILITY,
+                    'X-Sabre-Version: ' . DAV\Version::VERSION,
                 ),
            )
         ), $handler->getSentEmails());
@@ -429,7 +453,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testSuccessReply() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => 'mailto:user1.sabredav@sabredav.org',
@@ -462,7 +486,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
                     'Reply-To: user1.sabredav@sabredav.org',
                     'From: server@example.org',
                     'Content-Type: text/calendar; method=REPLY; charset=utf-8',
-                    'X-Sabre-Version: ' . DAV\Version::VERSION . '-' . DAV\Version::STABILITY,
+                    'X-Sabre-Version: ' . DAV\Version::VERSION,
                 ),
            )
         ), $handler->getSentEmails());
@@ -471,7 +495,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testSuccessCancel() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => 'mailto:user1.sabredav@sabredav.org',
@@ -504,7 +528,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
                     'Reply-To: user1.sabredav@sabredav.org',
                     'From: server@example.org',
                     'Content-Type: text/calendar; method=CANCEL; charset=utf-8',
-                    'X-Sabre-Version: ' . DAV\Version::VERSION . '-' . DAV\Version::STABILITY,
+                    'X-Sabre-Version: ' . DAV\Version::VERSION,
                 ),
            )
         ), $handler->getSentEmails());
@@ -514,7 +538,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
 
     function testUseRelativePrincipalNoFallback() {
 
-        $req = new HTTP\Request(array(
+        $req = HTTP\Sapi::createFromServerArray(array(
             'REQUEST_METHOD'  => 'POST',
             'REQUEST_URI'     => '/calendars/user1/outbox',
             'HTTP_ORIGINATOR' => '/principals/user1/',
@@ -539,7 +563,7 @@ class OutboxPostTest extends \Sabre\DAVServerTest {
         $this->caldavPlugin->setIMIPhandler($handler);
 
         $response = $this->request($req);
-        $this->assertEquals('HTTP/1.1 403 Forbidden', $response->status, 'Full body: ' . $response->body);
+        $this->assertEquals(403, $response->status, 'Full body: ' . $response->body);
 
     }
 }

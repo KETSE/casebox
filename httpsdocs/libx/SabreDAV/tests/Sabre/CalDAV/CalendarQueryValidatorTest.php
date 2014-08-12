@@ -6,6 +6,20 @@ use Sabre\DAV;
 
 class CalendarQueryValidatorTest extends \PHPUnit_Framework_TestCase {
 
+    function testTopLevelFail() {
+
+        $validator = new CalendarQueryValidator();
+        $vcal = <<<ICS
+BEGIN:VCALENDAR
+BEGIN:VEVENT
+END:VEVENT
+END:VCALENDAR
+ICS;
+        $vcal = VObject\Reader::read($vcal);
+        $this->assertFalse($validator->validate($vcal, ['name' => 'VFOO']));
+
+    }
+
     /**
      * @dataProvider provider
      */
@@ -35,10 +49,11 @@ class CalendarQueryValidatorTest extends \PHPUnit_Framework_TestCase {
             case -1 :
                 try {
                     $validator->validate($vObject, $filters);
-                } catch (DAV\Exception $e) {
-                    // Success
-                } catch (\LogicException $e) {
-                    // Success
+                    $this->fail('This test was supposed to fail');
+                } catch (\Exception $e) {
+                    // We need to test something to be valid for phpunit strict
+                    // mode.
+                    $this->assertTrue(true);
                 }
                 break;
 
@@ -687,7 +702,7 @@ yow;
             array($blob3, $filter14, 1),
 
             // Param + text
-            array($blob3, $filter15, 1),
+            array($blob3, $filter15, 1), // data set #15
             array($blob3, $filter16, 0),
             array($blob3, $filter17, 0),
             array($blob3, $filter18, 1),
@@ -696,7 +711,7 @@ yow;
             array($blob2, $filter19, 1),
 
             // Incorrect object (vcard)
-            array($blob4, $filter1, -1),
+            array($blob4, $filter1, -1), // data set #20
 
             // Time-range for event
             array($blob5, $filter20, 1),
