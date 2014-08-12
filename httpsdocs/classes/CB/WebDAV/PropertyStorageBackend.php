@@ -54,6 +54,9 @@ class PropertyStorageBackend implements \Sabre\DAV\PropertyStorage\Backend\Backe
 
                 // $dttm->getTimestamp()
                 $propFind->set($prop, \Sabre\HTTP\Util::toHTTPDate($dttm));
+            } elseif ($prop == '{urn:schemas-microsoft-com:office:office}modifiedby' or
+                      $prop == '{DAV:}getmodifiedby') {
+                $propFind->set($prop, \CB\User::getDisplayName($node['uid']));
             }
         }
     }
