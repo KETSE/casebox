@@ -1,2 +1,2 @@
-ALTER TABLE `cb_git`.`templates_structure`
+ALTER TABLE `templates_structure`
   DROP INDEX `template_id__name`;
