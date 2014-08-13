@@ -56,7 +56,10 @@ class PropertyStorageBackend implements \Sabre\DAV\PropertyStorage\Backend\Backe
                 $propFind->set($prop, \Sabre\HTTP\Util::toHTTPDate($dttm));
             } elseif ($prop == '{urn:schemas-microsoft-com:office:office}modifiedby' or
                       $prop == '{DAV:}getmodifiedby') {
-                $propFind->set($prop, \CB\User::getDisplayName($node['uid']));
+                // This has to be revised, because the User.login differs from User.DisplayName
+                // moreover, during an edit, Word will check for File Properties and we
+                // tell Word that the file is modified by another user
+                // $propFind->set($prop, \CB\User::getDisplayName($node['uid']));
             }
         }
     }
