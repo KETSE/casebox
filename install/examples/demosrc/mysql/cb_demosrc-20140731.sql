@@ -2,7 +2,8 @@
 SQLyog Ultimate v11.5 (64 bit)
 MySQL - 5.5.9 : Database - cb_demo
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -12,10 +13,6 @@ MySQL - 5.5.9 : Database - cb_demo
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`cb_demo` /*!40100 DEFAULT CHARACTER SET utf8 */;
-
-USE `cb_demo`;
-
 /*Table structure for table `action_log` */
 
 DROP TABLE IF EXISTS `action_log`;
@@ -933,9 +930,9 @@ DELIMITER $$
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_ai` */$$
 
 /*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `tasks_ai` AFTER INSERT ON `tasks` FOR EACH ROW BEGIN
- 	INSERT INTO tasks_responsible_users (task_id, user_id) 
-		SELECT new.id, id 
-		FROM users_groups 
+ 	INSERT INTO tasks_responsible_users (task_id, user_id)
+		SELECT new.id, id
+		FROM users_groups
 		WHERE CONCAT(',',new.responsible_user_ids,',') LIKE CONCAT('%,',id,',%');
     END */$$
 
@@ -967,11 +964,11 @@ DELIMITER $$
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_au` */$$
 
 /*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `tasks_au` AFTER UPDATE ON `tasks` FOR EACH ROW BEGIN
-	DELETE FROM tasks_responsible_users  
+	DELETE FROM tasks_responsible_users
 	WHERE task_id = old.id AND CONCAT(',', new.responsible_user_ids, ',') NOT LIKE CONCAT('%,',user_id,',%');
-	INSERT INTO tasks_responsible_users (task_id, user_id) 
-		SELECT new.id, u.id 
-		FROM users_groups u 
+	INSERT INTO tasks_responsible_users (task_id, user_id)
+		SELECT new.id, u.id
+		FROM users_groups u
 		WHERE CONCAT(',',new.responsible_user_ids,',') LIKE CONCAT('%,',u.id,',%')
 		ON DUPLICATE KEY UPDATE user_id = u.id;
     END */$$
@@ -2080,12 +2077,12 @@ BEGIN
 	DELETE FROM tmp_achild_ids2;
 	insert into tmp_achild_ids select id from tree where pid = in_id;
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_achild_ids 
+		update tree, tmp_achild_ids
 		  set tree.did = NULL
 		  ,tree.ddate = NULL
-		  ,tree.dstatus = 0 
+		  ,tree.dstatus = 0
 		where tmp_achild_ids.id = tree.id;
-		
+
 		DELETE FROM tmp_achild_ids2;
 		insert into tmp_achild_ids2 select id from tmp_achild_ids;
 		delete from tmp_achild_ids;
@@ -2286,8 +2283,8 @@ BEGIN
 		,tree_acl_security_sets
 		SET tree_acl_security_sets.`set` = CONCAT(
 			tmp_to_security_set
-			,CASE WHEN tmp_security_set_length IS NULL 
-			THEN 
+			,CASE WHEN tmp_security_set_length IS NULL
+			THEN
 			  CONCAT(',', tree_acl_security_sets.set)
 			ELSE
 			 SUBSTRING(tree_acl_security_sets.set, tmp_security_set_length)
