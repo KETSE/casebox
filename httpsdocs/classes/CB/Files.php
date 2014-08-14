@@ -225,20 +225,21 @@ class Files
                 $rez[] = $f;
             }
         }
+
         switch (sizeof($rez)) {
             case 0:
                 break;
             case 1:
                 //single match: retreive match info for content
                 //(if matches with current version or to an older version)
-                $existentFileId  = $this->getFileId($pid, $rez[0]['name'], @$rez[0]['dir']);
+                $existentFileId = $this->getFileId($pid, $rez[0]['name'], @$rez[0]['dir']);
+                $rez[0]['existentFileId'] = $existentFileId;
+
                 $md5 = $this->getFileMD5($rez[0]);
                 $res = DB\dbQuery(
                     'SELECT
-                        (SELECT l'.$userLanguageIndex.'
-                            FROM users_groups
-                            WHERE id = f.cid) `user`
-                        , f.cdate
+                        f.cid
+                        ,f.cdate
                     FROM files f
                     JOIN files_content c ON f.content_id = c.id
                     AND c.md5 = $2
@@ -250,7 +251,10 @@ class Files
                 ) or die(DB\dbQueryError());
 
                 if ($r = $res->fetch_assoc()) {
+                    $r['user'] = User::getDisplayName($r['cid']);
+
                     $agoTime = Util\formatAgoTime($r['cdate']);
+
                     $rez[0]['msg'] = str_replace(
                         array('{timeAgo}', '{user}'),
                         array($agoTime,$r['user']),
@@ -258,13 +262,12 @@ class Files
                     );
                 }
                 $res->close();
+
                 if (empty($rez[0]['msg'])) {
                     $res = DB\dbQuery(
                         'SELECT
-                            (SELECT l'.$userLanguageIndex.'
-                                FROM users_groups
-                                WHERE id = f.cid) `user`
-                            , f.cdate
+                            f.cid
+                            ,f.cdate
                         FROM files_versions f
                         JOIN files_content c ON f.content_id = c.id
                         AND c.md5 = $2
@@ -276,7 +279,10 @@ class Files
                     ) or die(DB\dbQueryError());
 
                     if ($r = $res->fetch_assoc()) {
+                        $r['user'] = User::getDisplayName($r['cid']);
+
                         $agoTime = Util\formatAgoTime($r['cdate']);
+
                         $rez[0]['msg'] = str_replace(
                             array('{timeAgo}', '{user}'),
                             array($agoTime, $r['user']),
@@ -294,6 +300,7 @@ class Files
                 $rez[0]['suggestedFilename'] = Objects::getAvailableName($subdirId, $rez[0]['name']);
                 /* end of suggested new filename */
                 break;
+
             default: // multiple files match
 
                 break;
@@ -640,8 +647,13 @@ class Files
     public function updateFileProperties($p)
     {
         if (empty($p['id'])) {
-            return false;
+            return array('success' => false, 'msg' => L\get('Wrong_input_data'));
         }
+
+        if (!Security::canWrite($p['id'])) {
+            return array('success' => false, 'msg' => L\get('Access_denied'));
+        }
+
         $p['title'] = strip_tags(@$p['title']);
         DB\dbQuery(
             'UPDATE files
@@ -660,7 +672,7 @@ class Files
 
         Objects::updateCaseUpdateInfo($p['id']);
 
-        return true;
+        return array('success' => true);
     }
 
     public function mkTreeDir($pid, $dir)
@@ -1097,7 +1109,7 @@ class Files
     public static function getBulkSolrData(&$objectRecords)
     {
         foreach ($objectRecords as $id => &$objectRecord) {
-            if ($objectRecord['template_type'] == 'file') {
+            if (@$objectRecord['template_type'] == 'file') {
                 static::getSolrData($objectRecord);
             }
         }

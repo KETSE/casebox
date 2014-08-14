@@ -1,3 +1,19 @@
+CaseBox 1.9.256 (2014-08-14)
+==============================
+New Features, Improvements
+--------------------------
+- removed old database tables:
+    actions_log
+    users_groups_data   - the old user properties could be missing
+        if user profile has not been resaved.
+    users_groups_duplicates
+- removed OlgObject class cript
+
+Fixed Bugs:
+----------
+- added security checks to upload files process
+- Username not shown correctly in security panel for an object
+
 CaseBox 1.9.238 (2014-08-11)
 ==============================
 New Features, Improvements
@@ -8,7 +24,6 @@ New Features, Improvements
   Mounting under MacOS works, but there are issues with file editing, working on this
 - upgraded ApacheTika from 1.4 to 1.5
 - added a small hack to init.php to allow loading without authentication ($webDAVMode = 1;)
-
 
 CaseBox 1.9.237 (2014-08-04)
 ==============================
