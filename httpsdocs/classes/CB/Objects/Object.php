@@ -9,7 +9,7 @@ use CB\Log;
  * class for generic casebox objects
  */
 
-class Object extends OldObject
+class Object
 {
     /**
      * object id

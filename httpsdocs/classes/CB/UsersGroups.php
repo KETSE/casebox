@@ -441,12 +441,7 @@ class UsersGroups
         if ($r = $res->fetch_assoc()) {
             $r['title'] = User::getDisplayName($r);
 
-            if (is_null($r['data'])) {
-                $oldObj = new Objects\OldObject();
-                $oldObj->id = $r['id'];
-                $oldObj->loadOldGridDataToNewFormat('users_groups');
-                $r['data'] = $oldObj->data['data'];
-            }
+            $r['data'] = Util\toJSONArray($r['data']);
 
             $rez = array('success' => true, 'data' => $r);
         }

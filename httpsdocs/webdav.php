@@ -17,7 +17,7 @@ $webDAVMode = 1;
 
 # set the CORE and check if it's Browse or Edit mode
 $env = initEnv();
-// echo(print_r($p, true));
+// error_log("ENV: " . print_r($env, true));
 
 require_once 'init.php';
 
@@ -130,6 +130,7 @@ $server->exec();
 //------------------------------------------------------------------------------
 function initEnv() {
     $ary = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
+    // error_log("initEnv: " . $_SERVER['REQUEST_URI']);
     // echo(print_r($ary, true));
 
     $r = [];
@@ -141,7 +142,9 @@ function initEnv() {
     #
     # version history
     # /{core}/edit-{nodeId}-{versionId}/{filename}
-    if ((count($ary) == 3) && (preg_match('/^edit-(\d+)/', $ary[1], $m))) {
+    # /{core}/edit-{nodeId}-{versionId}/
+    # also support a direct folder request /edit-{nodeId}
+    if (((count($ary) == 2) or (count($ary) == 3)) && (preg_match('/^edit-(\d+)/', $ary[1], $m))) {
         $r['mode'] = 'edit';
 
         $r['nodeId'] = $m[1];
@@ -154,7 +157,11 @@ function initEnv() {
             $r['versionId'] = $m[2];
         }
 
-        $r['filename'] = $ary[2];
+        // {core}/edit-{nodeId}-{versionId}/{filename}
+        // only if filesname is specified
+        if (count($ary) == 3) {
+            $r['filename'] = $ary[2];
+        }
 
         // root Sabredav folder, serve all requests from here
         $r['rootFolder'] = '/' . $r['editFolder'];
