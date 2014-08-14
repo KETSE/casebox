@@ -89,7 +89,7 @@ $server->addPlugin($tffp);
 
 // LibreOffice will NOT remove LOCK after closing the file
 // in EDIT mode disable locking, so everyone can save the file
-if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice')  {   // WORD requires locking. and ($env['mode'] != 'edit')
+//if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice')  {   // WORD requires locking. and ($env['mode'] != 'edit')
     $lockBackend = new \Sabre\DAV\Locks\Backend\File($lockFile);
     $lockPlugin = new \Sabre\DAV\Locks\Plugin($lockBackend);
 
@@ -101,7 +101,7 @@ if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice')  {   // WORD requires locking.
     // \Sabre\DAV\Property\LockDiscovery::$hideLockRoot = true;
 
     $server->addPlugin($lockPlugin);
-}
+//}
 
 // Adding 'creationdate' property
 $storageBackend = new WebDAV\PropertyStorageBackend();
@@ -158,7 +158,7 @@ function initEnv() {
         }
 
         // {core}/edit-{nodeId}-{versionId}/{filename}
-        // only if filesname is specified
+        // only if filename is specified
         if (count($ary) == 3) {
             $r['filename'] = $ary[2];
         }
