@@ -1444,19 +1444,7 @@ class User
                 $r['cfg']['gmt_offset'] = System::getGmtOffset($r['cfg']['timezone']);
             }
 
-            if (is_null($r['data'])) {
-                $oldObj = new Objects\OldObject();
-                $oldObj->id = $r['id'];
-                $oldObj->data = $r;
-                $oldObj->data['template_id'] = User::getTemplateId();
-                $oldObj->template = new Objects\Template($oldObj->data['template_id']);
-                $oldObj->template->load();
-
-                $oldObj->loadOldGridDataToNewFormat('users_groups');
-                $r['data'] = $oldObj->data['data'];
-            } else {
-                $r['data'] = Util\toJSONArray($r['data']);
-            }
+            $r['data'] = Util\toJSONArray($r['data']);
 
             $rez = $r;
         }

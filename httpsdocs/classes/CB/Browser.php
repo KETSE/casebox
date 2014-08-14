@@ -731,12 +731,9 @@ class Browser
         }
         $p['pid'] = Path::detectRealTargetId($p['pid']);
 
-        //TODO: SECURITY: check if current user has write access to folder
-
         if (empty($F)) { //update only file properties (no files were uploaded)
-            $files->updateFileProperties($p);
 
-            return array( 'success' => true );
+            return $files->updateFileProperties($p);
         } else {
             foreach ($F as $k => $v) {
                 $F[$k]['name'] = Purify::filename(@$F[$k]['name']);
@@ -783,6 +780,11 @@ class Browser
         $p['files'] = &$F;
 
         if (!empty($p['existentFilenames'])) {
+            //check if can write target file
+            if (!Security::canWrite($p['existentFilenames'][0]['existentFileId'])) {
+                return array('success' => false, 'msg' => L\get('Access_denied'));
+            }
+
             // store current state serialized in a local file in incomming folder
             $files->saveUploadParams($p);
             if (!empty($p['response'])) {
@@ -819,7 +821,14 @@ class Browser
             }
 
             return $rez;
+
+        } else {
+            //check if can write in target folder
+            if (!Security::canWrite($p['pid'])) {
+                return array('success' => false, 'msg' => L\get('Access_denied'));
+            }
         }
+
         $files->storeFiles($p); //if everithing is ok then store files
         Solr\Client::runCron();
         $rez = array('success' => true, 'data' => array('pid' => $p['pid']));

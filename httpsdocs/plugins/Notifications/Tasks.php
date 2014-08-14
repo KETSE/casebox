@@ -29,6 +29,15 @@ class Tasks extends Objects
 
         $usersToNotify = static::getUsersToNotify($taskObject);
 
+        $path = '/';
+        if (!empty($taskData['pids'])) {
+            $path = Util\toNumericArray($taskData['pids']);
+            array_pop($path);
+            $path = \CB\Path::getPathText(implode('/', $path));
+        } else {
+            $path = \CB\Path::getPathText($taskData['path']);
+        }
+
         foreach ($usersToNotify as $userId) {
             $u = User::getPreferences($userId);
             $l = $u['language'];
@@ -89,7 +98,7 @@ class Tasks extends Objects
                 array(
                     User::getDisplayName($taskData['cid'])
                     ,$taskData['name']
-                    ,$taskData['path']
+                    ,$path
                 ),
                 $subject
             );
