@@ -1,3 +1,10 @@
+CaseBox 1.9.258 (2014-08-19)
+==============================
+Fixed Bugs:
+----------
+- redeclaring lenguage functions error occurs when retreiving comment emails
+    for more than one core.
+
 CaseBox 1.9.256 (2014-08-14)
 ==============================
 New Features, Improvements

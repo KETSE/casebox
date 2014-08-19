@@ -317,7 +317,12 @@ function deleteMails(&$mailBox, $idsArray)
         try {
             $mailBox->removeMessage($id);
         } catch (\Exception $e) {
-            $mailBox->moveMessage($mailBox->getNumberByUniqueId($id), 'Trash');
+            try {
+                //$mailBox->getNumberByUniqueId()
+                $mailBox->moveMessage($id, 'Trash');
+            } catch (Exception $e) {
+                echo " cant delete message $id\n";
+            }
         }
     }
 }
