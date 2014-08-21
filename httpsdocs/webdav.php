@@ -17,7 +17,7 @@ $webDAVMode = 1;
 
 # set the CORE and check if it's Browse or Edit mode
 $env = initEnv();
-// echo(print_r($p, true));
+// error_log("ENV: " . print_r($env, true));
 
 require_once 'init.php';
 
@@ -89,7 +89,7 @@ $server->addPlugin($tffp);
 
 // LibreOffice will NOT remove LOCK after closing the file
 // in EDIT mode disable locking, so everyone can save the file
-if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice')  {   // WORD requires locking. and ($env['mode'] != 'edit')
+//if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice')  {   // WORD requires locking. and ($env['mode'] != 'edit')
     $lockBackend = new \Sabre\DAV\Locks\Backend\File($lockFile);
     $lockPlugin = new \Sabre\DAV\Locks\Plugin($lockBackend);
 
@@ -101,7 +101,7 @@ if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice')  {   // WORD requires locking.
     // \Sabre\DAV\Property\LockDiscovery::$hideLockRoot = true;
 
     $server->addPlugin($lockPlugin);
-}
+//}
 
 // Adding 'creationdate' property
 $storageBackend = new WebDAV\PropertyStorageBackend();
@@ -130,6 +130,7 @@ $server->exec();
 //------------------------------------------------------------------------------
 function initEnv() {
     $ary = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
+    // error_log("initEnv: " . $_SERVER['REQUEST_URI']);
     // echo(print_r($ary, true));
 
     $r = [];
@@ -141,7 +142,9 @@ function initEnv() {
     #
     # version history
     # /{core}/edit-{nodeId}-{versionId}/{filename}
-    if ((count($ary) == 3) && (preg_match('/^edit-(\d+)/', $ary[1], $m))) {
+    # /{core}/edit-{nodeId}-{versionId}/
+    # also support a direct folder request /edit-{nodeId}
+    if (((count($ary) == 2) or (count($ary) == 3)) && (preg_match('/^edit-(\d+)/', $ary[1], $m))) {
         $r['mode'] = 'edit';
 
         $r['nodeId'] = $m[1];
@@ -154,7 +157,11 @@ function initEnv() {
             $r['versionId'] = $m[2];
         }
 
-        $r['filename'] = $ary[2];
+        // {core}/edit-{nodeId}-{versionId}/{filename}
+        // only if filename is specified
+        if (count($ary) == 3) {
+            $r['filename'] = $ary[2];
+        }
 
         // root Sabredav folder, serve all requests from here
         $r['rootFolder'] = '/' . $r['editFolder'];

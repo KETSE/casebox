@@ -17,6 +17,15 @@ Fixed Bugs:
 - redeclaring lenguage functions error occurs when retreiving comment emails
     for more than one core.
 
+CaseBox 1.9.257 (2014-08-15)
+==============================
+New Features, Improvements
+--------------------------
+- support a direct folder request /edit-{nodeId}/
+- enabled webDav locking for LibreOffice
+  (issue with locking partially fixed in 4.3.0)
+  https://www.libreoffice.org/bugzilla/show_bug.cgi?id=72157
+
 CaseBox 1.9.256 (2014-08-14)
 ==============================
 New Features, Improvements
