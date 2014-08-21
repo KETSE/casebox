@@ -33,7 +33,7 @@ class CreateMenu
         $res = DB\dbQuery(
             'SELECT id, template_id
             FROM tree
-            WHERE id in (' . implode(',', $path) . ')'
+            WHERE id in (0' . implode(',', $path) . ')'
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {

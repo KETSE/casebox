@@ -250,8 +250,16 @@ function processMails(&$mailServer)
     deleteMails($mailServer['mailbox'], $dids);
 }
 
+/**
+ * remove "reply to" extra block from mail message
+ * as well al signature block delimited by /\n--\n/
+ * @param  varchar $content
+ * @param  varchar $mail
+ * @return varchar
+ */
 function removeContentExtraBlock($content, $mail)
 {
+    //remove block that starts with email (that replied to)
     $idx = strpos($content, $mail);
     if ($idx == false) {
         return $content;
@@ -267,6 +275,9 @@ function removeContentExtraBlock($content, $mail)
             $content = substr($content, 0, $idx);
         }
     }
+
+    //remove signature block
+    $content = preg_replace('/[\n\r]+--[\n\r]+.*/i', '', $content);
 
     return trim($content);
 }
@@ -317,7 +328,12 @@ function deleteMails(&$mailBox, $idsArray)
         try {
             $mailBox->removeMessage($id);
         } catch (\Exception $e) {
-            $mailBox->moveMessage($mailBox->getNumberByUniqueId($id), 'Trash');
+            try {
+                //$mailBox->getNumberByUniqueId()
+                $mailBox->moveMessage($id, 'Trash');
+            } catch (Exception $e) {
+                echo " cant delete message $id\n";
+            }
         }
     }
 }

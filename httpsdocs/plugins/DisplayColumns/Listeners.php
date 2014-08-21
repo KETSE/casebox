@@ -48,7 +48,7 @@ class Listeners
         $ip = &$p['inputParams'];
         $data = &$p['result']['data'];
 
-        if (@$ip['from'] == 'tree') {
+        if (@$ip['view'] !== 'grid') {
             return;
         }
 
@@ -56,9 +56,10 @@ class Listeners
 
         $displayColumns = $this->getDC();
 
+        $customColumns = array();
+
+        //set custom display columns data
         if (!empty($displayColumns['data'])) {
-            //set custom display columns data
-            $customColumns = array();
 
             foreach ($displayColumns['data'] as $k => $col) {
                 $fieldName = is_numeric($k) ? $col : $k;
@@ -119,13 +120,13 @@ class Listeners
                         // $values = array(@$doc[$customField[1]]);
 
                     } elseif ($customField[0] == 'calc') { //calculated field
-                            //CustomMethod call;
-                            // $templateField = $template->getField($fieldName);
-                            // $values = array();
+                        //CustomMethod call;
+                        // $templateField = $template->getField($fieldName);
+                        // $values = array();
 
                     } else { //default
-                            $templateField = $template->getField($customField[0]);
-                            $values = $obj->getFieldValue($customField[0]);
+                        $templateField = $template->getField($customField[0]);
+                        $values = $obj->getFieldValue($customField[0]);
                     }
 
                     //populate column properties if empty
@@ -183,6 +184,7 @@ class Listeners
             : $displayColumns['from'];
 
         $state = State\DBProvider::getGridViewState($stateFrom);
+
         if (!empty($state['columns'])) {
             $rez = array();
             foreach ($state['columns'] as $k => $c) {

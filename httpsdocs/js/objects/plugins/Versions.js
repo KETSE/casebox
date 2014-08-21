@@ -93,6 +93,7 @@ CB.objects.plugins.Versions = Ext.extend(CB.objects.plugins.Base, {
         }
 
         if(te.hasClass('menu')) {
+            this.selectedRecord = this.store.getAt(index);
             this.showActionsMenu(e.getXY());
         } else if(te.hasClass('click')) {
             this.fireEvent('openversion', this.store.getAt(index).data, this);
@@ -110,14 +111,13 @@ CB.objects.plugins.Versions = Ext.extend(CB.objects.plugins.Base, {
     }
 
     ,onRestoreClick: function(b, e) {
-        // CB_Files.restoreVersion(
-        //     this.loadedVersionId
-        //     ,function(r, e){
-        //         App.mainViewPort.fireEvent('fileuploaded', {data: r.data});
-        //     }
-        //     ,this
-        // );
-        clog('onRestoreClick', arguments);
+        CB_Files.restoreVersion(
+            this.selectedRecord.get('id')
+            ,function(r, e){
+                App.fireEvent('objectchanged', r.data, this);
+            }
+            ,this
+        );
     }
 
     ,setSelectedVersion: function(params) {
