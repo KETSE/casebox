@@ -1,3 +1,15 @@
+CaseBox 1.9.259 (2014-08-21)
+==============================
+New Features, Improvements
+--------------------------
+- Issues with uploading a file that existed before
+- Delete email footer when adding them as comments
+
+Fixed Bugs:
+----------
+- various versioning issues
+- Comments are not sent to "@username"
+
 CaseBox 1.9.258 (2014-08-19)
 ==============================
 Fixed Bugs:

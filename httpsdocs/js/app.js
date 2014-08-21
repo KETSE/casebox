@@ -311,11 +311,14 @@ function initApp(){
             return t;
         }
         ,filesize: function(v){
-            if(isNaN(v) || Ext.isEmpty(v) || (v == '0')) {
-                return '';
+            if(isNaN(v) || Ext.isEmpty(v) || (v == '0') || (v <= 0)) {
+                // return '';
+                return  '0 KB';
             }
 
-            if(v <= 0) return  '0 KB';
+            // if(v <= 0) {
+            //     return  '0 KB';
+            // }
             else if(v < 1024) return '1 KB';
             else if(v < 1024 * 1024) return (Math.round(v / 1024) + ' KB');
             else{

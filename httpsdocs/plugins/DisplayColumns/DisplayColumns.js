@@ -38,6 +38,7 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
             this.lastColumns = Ext.util.JSON.encode(this.currentColumns);
             this.store.loadData(obj.result);
             var nc = this.getNewColumns();
+
             this.cm.setConfig(nc);
         }
     }

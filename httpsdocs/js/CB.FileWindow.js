@@ -459,7 +459,8 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
      * @return void
      */
     ,onDownloadClick: function(b, e){
-        this.fireEvent('filedownload', this.data.id);
+        App.downloadFile(this.data.id, false, this.loadedVersionId);
+        // this.fireEvent('filedownload', this.data.id);
     }
 
     /**
@@ -550,6 +551,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             this.loadedVersionId
             ,function(r, e){
                 App.mainViewPort.fireEvent('fileuploaded', {data: r.data});
+                this.objectPanel.onReloadClick();
             }
             ,this
         );
