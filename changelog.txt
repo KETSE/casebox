@@ -1,3 +1,9 @@
+CaseBox 1.9.266 (2014-08-22)
+==============================
+New Features, Improvements
+--------------------------
+- update to solr 4.9.0
+
 CaseBox 1.9.259 (2014-08-21)
 ==============================
 New Features, Improvements
