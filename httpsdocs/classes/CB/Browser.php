@@ -143,9 +143,9 @@ class Browser
             }
 
             $rez['path'] = '/'.implode('/', $idsPath);
-        }
+            $rez['menu'] = $this->path[sizeof($this->path) - 1]->getCreateMenu();
 
-        $rez['menu'] = Browser\CreateMenu::getMenuForPath($this->requestParams['path']);
+        }
 
         return $rez;
     }

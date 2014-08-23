@@ -95,9 +95,11 @@ class Files
 
         $contentFile = Config::get('files_dir') . @$data['content_path'] . '/'.@$data['content_id'];
 
-        if (file_exists($contentFile)) {
+        if (file_exists($contentFile) && !is_dir($contentFile)) {
             $rez['data'] = file_get_contents($contentFile);
         } else {
+            \CB\debug('Error accessing file ('.$id.'). Its content (id: '.@$data['content_id'].') doesnt exist on the disk.');
+
             return array('success' => false);
         }
 
@@ -310,13 +312,23 @@ class Files
     }
     public function checkExistentContents($p)
     {
+
+        $filesDir = Config::get('files_dir');
+
         foreach ($p as $k => $v) {
             $res = DB\dbQuery(
-                'SELECT id FROM files_content WHERE `md5` = $1',
+                'SELECT id, `path`
+                FROM files_content
+                WHERE `md5` = $1',
                 $v
             ) or die(DB\dbQueryError());
 
-            $p[$k] = ($r = $res->fetch_assoc()) ?  $r['id'] : null;
+            if ($r = $res->fetch_assoc()) {
+                //give affirmative result only if the correspondig file content exists
+                $p[$k] = file_exists($filesDir.$r['path'].DIRECTORY_SEPARATOR.$r['id'])
+                    ? $r['id']
+                    : null;
+            }
             $res->close();
         }
 
@@ -781,7 +793,7 @@ class Files
                  , $2
                  , $3
                  , $4) ON duplicate KEY
-            UPDATE id =last_insert_id(id)
+            UPDATE id = last_insert_id(id)
             ,`size` = $1
             ,`type` = $2
             ,`path` = $3
@@ -902,6 +914,8 @@ class Files
         $res->close();
 
         if (empty($file)) {
+            \CB\debug('Error accessing file preview ('.$id.'). Record not found in DB.');
+
             return array('html' => '');
         }
         if ($file['status'] > 0) {
@@ -923,9 +937,13 @@ class Files
 
         $fn = $filesDir.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];
         $nfn = $filesPreviewDir.$file['content_id'].'_.'.$ext;
+
         if (!file_exists($fn)) {
+            \CB\debug('Error accessing file preview ('.$id.'). Its content (id: '.@$file['content_id'].') doesnt exist on the disk.');
+
             return false;
         }
+
         switch ($ext) {
             case 'rtf':
             case 'doc':

@@ -28,9 +28,10 @@ class Comments extends Objects
         $objData = $o->getData();
 
         $message  = nl2br(Util\adjustTextForDisplay($objData['data']['_title']));
-        $message = \CB\Objects\Comment::processAndFormatMessage($message);
 
         static::subscribeMessageUsers($objData['pid'], $message);
+
+        $message = \CB\Objects\Comment::processAndFormatMessage($message);
 
         $sender = static::getSender();
 
@@ -170,6 +171,9 @@ class Comments extends Objects
             'on' => $onUsers
             ,'off' => $offUsers
         );
+
+        $o->setData($d);
+
         DB\dbQuery(
             'INSERT INTO objects
             (id, sys_data)

@@ -1299,7 +1299,7 @@ class User
             $photosPath = Config::get('photos_path');
             $photoFile = $photosPath . $data['photo'];
 
-            if (file_exists($photoFile)) {
+            if (file_exists($photoFile) && !is_dir($photoFile)) {
                 if ($size32) {
                     $photoFile32 = $photosPath . '32x32_' . $data['photo'];
 

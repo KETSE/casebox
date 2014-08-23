@@ -147,7 +147,7 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
             $dbh = $GLOBALS['dbh'];
         }
 
-        $rez = "\n\r<br /><hr />Query error: ".mysqli_error($dbh).
+        $rez = date('Y-m-d H:i:s') . ": \n\r<br /><hr />Query error: ".mysqli_error($dbh).
             "<hr /><br />\n\r";
         if (!empty($GLOBALS['last_sql'])) {
             $rez = "\n\r<br /><hr />Query: ".$GLOBALS['last_sql'].$rez;

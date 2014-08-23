@@ -211,6 +211,24 @@ class Base implements \CB\Interfaces\TreeNode
     }
 
     /**
+     * get create menu for current node
+     * @return varchar menu config string
+     */
+    public function getCreateMenu()
+    {
+        $rez = '';
+        if (!empty($this->config['createMenu'])) {
+            $rez = $this->config['createMenu'];
+        } else {
+            if (!empty($this->parent)) {
+                $rez = $this->parent->getCreateMenu();
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
      * Get param for current node(considered last node in active path)
      *
      * @param  varchar $param for now using to get 'facets' or 'DC'
