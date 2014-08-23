@@ -17,7 +17,8 @@ class Dbnode extends Base
             }
         } else {
             $lastNode = @$pathArray[sizeof($pathArray)-1];
-            if (($lastNode instanceof Dbnode) || ($lastNode instanceof Base)) {
+
+            if (($lastNode instanceof Dbnode) || (get_class($lastNode) == 'CB\\TreeNode\\Base')) {
                 $pid = $lastNode->id;
             } else {
                 //we are under another node type

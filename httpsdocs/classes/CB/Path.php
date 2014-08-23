@@ -256,7 +256,7 @@ class Path
             }
 
             //analize virtual root node
-            if (($el == $rootNodeCfg['id']) && (intval($el) == 0)) {
+            if (!empty($rootNodeCfg) && ($el == $rootNodeCfg['id']) && (intval($el) == 0)) {
                 $rootNodeCfg['class'] = 'CB\\TreeNode\\Base';
                 $rootNodeCfg['guid'] = 0;
                 $class = new \CB\TreeNode\Base($rootNodeCfg, $el);
