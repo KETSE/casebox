@@ -1,3 +1,9 @@
+CaseBox 1.9.268 (2014-08-23)
+==============================
+Fixed Bugs:
+----------
+- fix virtual nodes issues related to virtual root node
+
 CaseBox 1.9.267 (2014-08-23)
 ==============================
 New Features, Improvements

@@ -268,7 +268,9 @@ setsHaveIntersection = function(set1, set2){
 };
 
 function updateMenu(menuButton, menuConfig, handler, scope){
-    if(Ext.isEmpty(menuButton) || Ext.isEmpty(menuConfig)) return;
+    if(Ext.isEmpty(menuButton)) {
+        return;
+    }
     menuButton.menu.removeAll();
     menuConfig = String(menuConfig).split(',');
     menu = [];
