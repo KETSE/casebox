@@ -378,6 +378,10 @@ class Browser
         }
 
         $search = new Search();
+
+        // temporary: Don't use permissions for Objects fields
+        // it can be later reinforced per field in config
+        $p['skipSecurity'] = true;
         $rez = $search->query($p);
 
         foreach ($rez['data'] as &$doc) {

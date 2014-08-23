@@ -156,9 +156,11 @@ class Search extends Solr\Client
 
         /* adding additional query filters */
 
-        /* assign security sets to filters */
-
-        if (!Security::isAdmin()) {
+        // assign security sets to filters
+        // dont check if 'skipSecurity = true'
+        // it's used in Objects fields where we show all nodes
+        // without permission filtering
+        if (!Security::isAdmin() and !@$p['skipSecurity'])  {
             $pids = false;
             if (!empty($p['pid'])) {
                 $pids = $p['pid'];
