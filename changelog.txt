@@ -1,3 +1,37 @@
+CaseBox 1.9.270 (2014-08-23)
+==============================
+Improvements
+----------
+- Permissions are not used for Object fields ('skipSecurity' parameter can be sent to Search.php)
+- Tasks, RecycleBin vFolder acceptedPath refactored
+  (acceptedPath for Tasks is common and should be implemented in a separate class
+   'BaseRestricted', then many vFolder plugins will use this Class, it ensures children are loaded only for
+   nodes of the same class)
+
+CaseBox 1.9.269 (2014-08-23)
+==============================
+Fixed Bugs:
+----------
+- DbNode issues
+
+CaseBox 1.9.268 (2014-08-23)
+==============================
+Fixed Bugs:
+----------
+- fix virtual nodes issues related to virtual root node
+
+CaseBox 1.9.267 (2014-08-23)
+==============================
+New Features, Improvements
+--------------------------
+- add possibility to set create menu from tree virtual nodes
+
+CaseBox 1.9.266 (2014-08-22)
+==============================
+New Features, Improvements
+--------------------------
+- update to solr 4.9.0
+
 CaseBox 1.9.259 (2014-08-21)
 ==============================
 New Features, Improvements

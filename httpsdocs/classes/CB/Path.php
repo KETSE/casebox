@@ -244,12 +244,26 @@ class Path
         $rez = array();
         $path = explode('/', $path);
 
+        $rootNodeCfg = Util\toJSONArray(Config::get('rootNode'));
+
         while (!empty($path)) {
             $npid = null;
             $nodeId = null;
 
             $el = array_shift($path);
             if (strlen($el) < 1) {
+                continue;
+            }
+
+            //analize virtual root node
+            if (!empty($rootNodeCfg) && ($el == $rootNodeCfg['id']) && (intval($el) == 0)) {
+                $rootNodeCfg['class'] = 'CB\\TreeNode\\Base';
+                $rootNodeCfg['guid'] = 0;
+                $class = new \CB\TreeNode\Base($rootNodeCfg, $el);
+                array_push(
+                    $rez,
+                    $class
+                );
                 continue;
             }
 

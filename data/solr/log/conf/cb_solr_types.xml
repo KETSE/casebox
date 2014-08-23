@@ -92,12 +92,6 @@
 	value verbatim (and hence don't support range queries, since the
 	lexicographic ordering isn't equal to the numeric ordering)
 -->
-<fieldType name="pint" class="solr.IntField" omitNorms="true"/>
-<fieldType name="plong" class="solr.LongField" omitNorms="true"/>
-<fieldType name="pfloat" class="solr.FloatField" omitNorms="true"/>
-<fieldType name="pdouble" class="solr.DoubleField" omitNorms="true"/>
-<fieldType name="pdate" class="solr.DateField" sortMissingLast="true" omitNorms="true"/>
-
 
 <!--
 	Note:
@@ -109,11 +103,6 @@
 	but with a lexicographic ordering the same as the numeric ordering,
 	so that range queries work correctly.
 -->
-<fieldType name="sint" class="solr.SortableIntField" sortMissingLast="true" omitNorms="true"/>
-<fieldType name="slong" class="solr.SortableLongField" sortMissingLast="true" omitNorms="true"/>
-<fieldType name="sfloat" class="solr.SortableFloatField" sortMissingLast="true" omitNorms="true"/>
-<fieldType name="sdouble" class="solr.SortableDoubleField" sortMissingLast="true" omitNorms="true"/>
-
 
 <!-- The "RandomSortField" is not used to store or search any
 		 data.  You can declare fields of this type it in your schema

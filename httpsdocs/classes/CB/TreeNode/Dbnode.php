@@ -3,6 +3,7 @@ namespace CB\TreeNode;
 
 use CB\DB;
 use CB\Util;
+use CB\Browser;
 
 class Dbnode extends Base
 {
@@ -16,12 +17,13 @@ class Dbnode extends Base
             }
         } else {
             $lastNode = @$pathArray[sizeof($pathArray)-1];
-            if ($lastNode instanceof Dbnode) {
+
+            if (($lastNode instanceof Dbnode) || (get_class($lastNode) == 'CB\\TreeNode\\Base')) {
                 $pid = $lastNode->id;
             } else {
                 //we are under another node type
                 $cfg = $lastNode->getConfig();
-                if (!empty($cfg['realNodeId'])) {
+                if (!empty($cfg['realNodeId']) && ($lastNode instanceof RealSubnode)) {
                     $pid = $cfg['realNodeId'];
                 } else {
                     return array();
@@ -138,6 +140,15 @@ class Dbnode extends Base
         $res->close();
 
         return $rez;
+    }
+
+    /**
+     * get create menu for current node
+     * @return varchar menu config string
+     */
+    public function getCreateMenu()
+    {
+        return Browser\CreateMenu::getMenuForPath($this->id);
     }
 
     /**
