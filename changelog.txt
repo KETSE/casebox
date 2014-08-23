@@ -1,3 +1,9 @@
+CaseBox 1.9.267 (2014-08-23)
+==============================
+New Features, Improvements
+--------------------------
+- add possibility to set create menu from tree virtual nodes
+
 CaseBox 1.9.266 (2014-08-22)
 ==============================
 New Features, Improvements
