@@ -76,7 +76,7 @@ class Tasks extends Base
             return;
         }
 
-        $ourPid = @intval($this->config['pid']);
+        $ourPid = @($this->config['pid']);
 
         $this->createDefaultFilter();
         if (empty($this->lastNode) ||
@@ -86,7 +86,7 @@ class Tasks extends Base
             $rez = $this->getRootNodes();
         } else {
             switch ($this->lastNode->id) {
-                case 1:
+                case 'tasks':
                     $rez = $this->getDepthChildren2();
                     break;
                 case 2:
@@ -107,7 +107,7 @@ class Tasks extends Base
             $id = $this->id;
         }
         switch ($id) {
-            case 1:
+            case 'tasks':
                 return L\get('Tasks');
             case 2:
                 return L\get('AssignedToMe');
@@ -148,8 +148,8 @@ class Tasks extends Base
         return array(
             'data' => array(
                 array(
-                    'name' => L\get('Tasks').$count
-                    ,'id' => $this->getId(1)
+                    'name' => L\get('Tasks') . $count
+                    ,'id' => $this->getId('tasks')
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
                 )
@@ -287,6 +287,7 @@ class Tasks extends Base
             $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
         }
 
+        // please don't use numeric IDs for named folders: "Assigned to me", "Overdue" etc
         switch ($this->lastNode->id) {
             case 4:
                 $p['fq'][] = 'task_status:1';
