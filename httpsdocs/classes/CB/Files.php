@@ -328,6 +328,8 @@ class Files
                 $p[$k] = file_exists($filesDir.$r['path'].DIRECTORY_SEPARATOR.$r['id'])
                     ? $r['id']
                     : null;
+            } else {
+                unset ($p[$k]);
             }
             $res->close();
         }
