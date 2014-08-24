@@ -19,6 +19,9 @@ class Tasks extends Base
         //default is 0
         //thats the parent node id where this class shold start to give result nodes
         $ourPid = @$this->config['pid'];
+        if ($ourPid == '') {
+            $ourPid = '0';
+        }
 
         // ROOT NODE: check if last node is the one we should attach to
         if ($this->lastNode->id == (String)$ourPid) {
@@ -77,8 +80,14 @@ class Tasks extends Base
         }
 
         $ourPid = @($this->config['pid']);
+        if ($ourPid == '') {
+            $ourPid = 0;
+        }
+
+        // \CB\debug("ourPid: " . $ourPid . ", lastNode.id: " . $this->lastNode->id);
 
         $this->createDefaultFilter();
+
         if (empty($this->lastNode) ||
             (($this->lastNode->id == $ourPid) && (get_class($this->lastNode) != get_class($this))) ||
             (\CB\Objects::getType($this->lastNode->id) == 'case')
