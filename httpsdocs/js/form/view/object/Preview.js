@@ -308,12 +308,16 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             rez.tbar['openInTabsheet'] = {};
 
             if(CB.DB.templates.getType(this.params.template_id) == 'file') {
+                clog('detectFileEditor(this.params.name)', detectFileEditor(this.params.name));
                 if(this.viewingImage) {
                     rez.tbar['fitImage']  = {
                         allowToggle: true
                         ,pressed: this.fitImagePreview
                     };
+                } else if(detectFileEditor(this.params.name)) {
+                    rez.tbar['edit']  = {};
                 }
+
                 rez.tbar['download']  = {};
                 rez.tbar['download']  = {};
 

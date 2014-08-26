@@ -14,11 +14,20 @@ CB.form.view.object.Properties = Ext.extend(CB.PluginsPanel, {
                 ,permissions: {addDivider: 'top'}
             }
         };
-        rez.tbar['edit'] = {};
+
+        var objType = '';
+        if(!Ext.isEmpty(this.loadedParams)) {
+            objType = CB.DB.templates.getType(this.loadedParams.template_id);
+            clog('objType', objType, this.loadedParams.name, detectFileEditor(this.loadedParams.name));
+            if((objType != 'file') || detectFileEditor(this.loadedParams.name)) {
+                clog('set');
+                rez.tbar['edit'] = {};
+            }
+        }
         rez.tbar['openInTabsheet'] = {};
 
         if(!Ext.isEmpty(this.loadedParams)) {
-            switch(CB.DB.templates.getType(this.loadedParams.template_id)) {
+            switch(objType) {
                 case 'file':
                     rez.tbar['download'] = {};
                     break;

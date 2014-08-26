@@ -328,6 +328,8 @@ class Files
                 $p[$k] = file_exists($filesDir.$r['path'].DIRECTORY_SEPARATOR.$r['id'])
                     ? $r['id']
                     : null;
+            } else {
+                unset($p[$k]);
             }
             $res->close();
         }
@@ -996,7 +998,7 @@ class Files
                 $content = $pe->purify(
                     $content,
                     array(
-                        'URI.Base' => '/' + $coreName + '/'
+                        'URI.Base' => '/' . $coreName . '/'
                         ,'URI.MakeAbsolute' => true
                     )
                 );
@@ -1012,9 +1014,10 @@ class Files
             case 'ini':
             case 'sys':
             case 'sql':
+
                 file_put_contents(
                     $preview_filename,
-                    '<pre>'.Util\adjustTextForDisplay(file_get_contents($fn)).'<pre>'
+                    '<pre>' .Util\adjustTextForDisplay(file_get_contents($fn)).'<pre>'
                 );
                 break;
             case 'pdf':

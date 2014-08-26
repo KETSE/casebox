@@ -396,7 +396,8 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         }
 
         if(this.sourceEditor) {
-            this.sourceEditor.setValue(r.data);
+            this.sourceEditor.setValue(r.data, {basename: this.data.name});
+            // this.sourceEditor.createEditSession(r.data, );
         }
     }
 

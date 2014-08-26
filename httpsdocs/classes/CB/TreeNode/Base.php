@@ -57,7 +57,10 @@ class Base implements \CB\Interfaces\TreeNode
      */
     public function getName($id = false)
     {
-        return 'no name';
+        $t = @$this->config['text'] ? @$this->config['text']
+                                    : 'Unamed';
+
+        return $t;
     }
 
     /**

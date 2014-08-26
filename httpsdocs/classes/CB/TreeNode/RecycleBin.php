@@ -12,22 +12,27 @@ class RecycleBin extends Base
     {
         $p = &$this->path;
 
-        $lastId = 0;
-        if (!empty($p)) {
-            $lastId = $this->lastNode->id;
-        }
-
-        $ourPid = @intval($this->config['pid']);
-
-        if ($this->lastNode instanceof Dbnode) {
-            if ($ourPid != $lastId) {
-                return false;
-            }
-        } elseif (get_class($this->lastNode) != get_class($this)) {
+        // Tasks can't be a root folder
+        if (sizeof($p) == 0) {
             return false;
         }
 
-        return true;
+        //get the configured 'pid' property for this tree plugin
+        //default is 0
+        //thats the parent node id where this class shold start to give result nodes
+        $ourPid = @$this->config['pid'];
+
+        // ROOT NODE: check if last node is the one we should attach to
+        if ($this->lastNode->id == (String)$ourPid) {
+            return true;
+        }
+
+        // CHILDREN NODES: accept if last node is an instance of this class
+        if (get_class($this->lastNode) == get_class($this)) {
+            return true;
+        }
+
+        return false;
     }
 
     protected function createDefaultFilter()

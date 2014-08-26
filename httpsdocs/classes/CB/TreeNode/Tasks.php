@@ -10,23 +10,34 @@ class Tasks extends Base
     {
         $p = &$this->path;
 
-        $lastId = 0;
-        if (!empty($p)) {
-            $lastId = $this->lastNode->id;
-        }
-
-        $ourPid = @intval($this->config['pid']);
-
-        if ($this->lastNode instanceof Dbnode) {
-            if ($ourPid != $lastId) {
-                return false;
-            }
-        } elseif (get_class($this->lastNode) != get_class($this)) {
+        // Tasks can't be a root folder
+        if (sizeof($p) == 0) {
             return false;
         }
 
-        return true;
+        //get the configured 'pid' property for this tree plugin
+        //default is 0
+        //thats the parent node id where this class shold start to give result nodes
+        $ourPid = @$this->config['pid'];
+        if ($ourPid == '') {
+            $ourPid = '0';
+        }
+    \CB\debug($this->lastNode->id, (String)$ourPid);
+        // ROOT NODE: check if last node is the one we should attach to
+        if ($this->lastNode->id == (String)$ourPid) {
+            \CB\debug('root NODE');
 
+            return true;
+        }
+
+        // CHILDREN NODES: accept if last node is an instance of this class
+        if (get_class($this->lastNode) ==  get_class($this)) {
+            \CB\debug('CHILDREN NODES');
+
+            return true;
+        }
+
+        return false;
     }
 
     protected function createDefaultFilter()
@@ -50,12 +61,21 @@ class Tasks extends Base
         $this->rootId = \CB\Browser::getRootFolderId();
 
         if (!$this->acceptedPath()) {
+        \CB\debug('deny', get_class($this));
+
             return;
         }
+        \CB\debug('allow', get_class($this));
 
-        $ourPid = @intval($this->config['pid']);
+        $ourPid = @($this->config['pid']);
+        if ($ourPid == '') {
+            $ourPid = 0;
+        }
+
+        // \CB\debug("ourPid: " . $ourPid . ", lastNode.id: " . $this->lastNode->id);
 
         $this->createDefaultFilter();
+
         if (empty($this->lastNode) ||
             (($this->lastNode->id == $ourPid) && (get_class($this->lastNode) != get_class($this))) ||
             (\CB\Objects::getType($this->lastNode->id) == 'case')
@@ -63,7 +83,7 @@ class Tasks extends Base
             $rez = $this->getRootNodes();
         } else {
             switch ($this->lastNode->id) {
-                case 1:
+                case 'tasks':
                     $rez = $this->getDepthChildren2();
                     break;
                 case 2:
@@ -84,7 +104,7 @@ class Tasks extends Base
             $id = $this->id;
         }
         switch ($id) {
-            case 1:
+            case 'tasks':
                 return L\get('Tasks');
             case 2:
                 return L\get('AssignedToMe');
@@ -125,8 +145,8 @@ class Tasks extends Base
         return array(
             'data' => array(
                 array(
-                    'name' => L\get('Tasks').$count
-                    ,'id' => $this->getId(1)
+                    'name' => L\get('Tasks') . $count
+                    ,'id' => $this->getId('tasks')
                     ,'iconCls' => 'icon-task'
                     ,'has_childs' => true
                 )
@@ -264,6 +284,7 @@ class Tasks extends Base
             $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
         }
 
+        // please don't use numeric IDs for named folders: "Assigned to me", "Overdue" etc
         switch ($this->lastNode->id) {
             case 4:
                 $p['fq'][] = 'task_status:1';

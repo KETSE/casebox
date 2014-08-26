@@ -138,21 +138,26 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
         if(Ext.isEmpty(this.puMenu)) {
             this.puMenu = new Ext.menu.Menu({
                 items: [
+
                     {
-                        text: 'Cut'
+                        text: L.Download
+                        ,scope: this
+                        ,handler: this.onDownloadClick
+                    },'-',{
+                        text: L.Cut
                         ,scope: this
                         ,handler: this.onCutItemClick
                     },{
-                        text: 'Copy'
+                        text: L.Copy
                         ,scope: this
                         ,handler: this.onCopyItemClick
                     },{
-                        text: 'Delete'
+                        text: L.Delete
                         ,iconCls: 'i-trash'
                         ,scope: this
                         ,handler: this.onDeleteItemClick
                     },'-',{
-                        text: 'In new tab'
+                        text: L.OpenInNewWindow
                         ,iconCls: 'icon-external'
                         ,scope: this
                         ,handler: this.onOpenInTabsheetClick
@@ -162,6 +167,10 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
         }
 
         this.puMenu.showAt(coord);
+    }
+
+    ,onDownloadClick: function(b, e) {
+        App.downloadFile(this.clickedItemData.id);
     }
 
     ,onCutItemClick: function(b, e) {

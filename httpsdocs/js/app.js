@@ -261,6 +261,7 @@ function initApp(){
             return rez;
         }
         ,datetime: function(v){
+            clog('datetime', v, arguments);
             var rez = '';
             if(Ext.isEmpty(v)) {
                 return rez;
@@ -483,7 +484,7 @@ function initApp(){
         return App.htmlEditWindow;
     };
 
-    App.isFolder = function( template_id){
+    App.isFolder = function(template_id){
         return (App.config.folder_templates.indexOf( String(template_id) ) >= 0);
     };
 
@@ -974,16 +975,32 @@ function initApp(){
     };
 
     App.showException = function(e){
+        clog('exception arguments', arguments);
         App.hideFailureAlerts = true;
-        msg = '';
-        if(e) msg = e.msg;
-        if(!msg && e.result) msg = e.result.msg;
-        if(!msg && e.result) msg = L.ErrorOccured;
+        var msg = '';
+
+        if(e) {
+            msg = e.msg;
+        }
+
+        if(Ext.isEmpty(msg) && e.message) {
+            msg = e.message;
+        }
+
+        if(Ext.isEmpty(msg) && e.result) {
+            msg = e.result.msg;
+        }
+
+        if(Ext.isEmpty(msg) && e.result) {
+            msg = L.ErrorOccured;
+        }
+
         Ext.Msg.alert(L.Error, msg);
 
         dhf = function(){
             delete App.hideFailureAlerts;
         };
+
         dhf.defer(1500);
     };
 

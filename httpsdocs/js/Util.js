@@ -42,6 +42,7 @@ function date_ISO_to_local_date(date_string){
 }
 
 function date_local_to_ISO_string(date) {
+    clog('in', date);
     if(!Ext.isDate(date)) {
         return null;
     }
@@ -55,7 +56,7 @@ function date_local_to_ISO_string(date) {
             date = date.add(Date.MINUTE, localOffset - userOffset);
         }
     }
-
+clog('date', date);
     return date.toISOString();
 }
 

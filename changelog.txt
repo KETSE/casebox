@@ -1,3 +1,15 @@
+CaseBox 1.9.270 (2014-08-26)
+==============================
+New Features, Improvements
+--------------------------
+- useless messages in debug_log
+- Include unoconv in CB
+- .php files are not highligted when editing
+- Review vFolders in Demo core (CaseTasks doesn't work for ex)
+- 'Edit' button should appear only for editable files
+- Field of type date not indexed in SOLR
+- Better error handling, messages. more user friendly
+
 CaseBox 1.9.269 (2014-08-23)
 ==============================
 Fixed Bugs:
