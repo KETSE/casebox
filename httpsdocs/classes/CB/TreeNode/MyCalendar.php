@@ -35,39 +35,6 @@ class MyCalendar extends Base
 
         return false;
 
-
-/*
-        $lastId = 0;
-        if (!empty($p)) {
-            $lastId = $this->lastNode->id;
->>>>>>> origin/devel
-        }
-
-        //get the configured 'pid' property for this tree plugin
-        //default is 0
-        //thats the parent node id where this class shold start to give result nodes
-        $ourPid = @$this->config['pid'];
-        if ($ourPid == '') {
-            $ourPid = '0';
-        }
-
-<<<<<<< HEAD
-        // ROOT NODE: check if last node is the one we should attach to
-        if ($this->lastNode->id == (String)$ourPid) {
-            return true;
-        }
-
-        // CHILDREN NODES: accept if last node is an instance of this class
-        if (get_class($this->lastNode) == get_class($this)) {
-            return true;
-        }
-
-        return false;
-=======
-
-        return true;
-*/
->>>>>>> origin/devel
     }
 
     protected function createDefaultFilter()
