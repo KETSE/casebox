@@ -458,9 +458,18 @@ class Objects
                         break;
 
                     case 'date':
-                        $f['value'] .= 'Z';
-                        if (@$f['value'][10] == ' ') {
-                            $f['value'][10] = 'T';
+                    case 'datetime':
+                        if (!empty($f['value'])) {
+                            //check if there is only date, without time
+                            if (strlen($f['value']) == 10) {
+                                $f['value'] .= 'T00:00:00';
+                            }
+
+                            $f['value'] .= 'Z';
+
+                            if (@$f['value'][10] == ' ') {
+                                $f['value'][10] = 'T';
+                            }
                         }
                         break;
 
@@ -497,7 +506,7 @@ class Objects
     public static function setCustomSOLRfields(&$object_record, &$field, $value)
     {
         // is field stored in custom SOLR column?
-        if (! @$field['cfg']['faceting']) {
+        if (!@$field['cfg']['faceting']) {
             return;
         }
 
@@ -512,25 +521,34 @@ class Objects
         }
 
 
-        # 'combo', 'int', 'objects' fields
-        if (in_array($field['type'], array('combo', 'int', '_objects'))) {
-            $arr = Util\toNumericArray($value);
+        switch ($field['type']) {
+            # 'combo', 'int', 'objects' fields
+            case 'combo':
+            case 'int':
+            case '_objects':
+                $arr = Util\toNumericArray($value);
 
-            foreach ($arr as $v) {
-                if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
-                    $object_record[$solr_field][] = $v;
+                foreach ($arr as $v) {
+                    if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
+                        $object_record[$solr_field][] = $v;
+                    }
                 }
-            }
+                break;
+            case 'varchar':
+                // storing value in SOLR without any changes (TODO: think if the value should be cleaned/transformed)
+                // we assume values are checked before inserted into DB.
+                // maybe to strip_tags at least?
+                $object_record[$solr_field] = $value;
+                break;
+
+            case 'date':
+            case 'datetime':
+                if (!empty($value)) {
+                    $object_record[$solr_field] = $value;
+                }
+                break;
         }
 
-        if ($field['type'] === 'varchar') {
-            // storing value in SOLR without any changes (TODO: think if the value should be cleaned/transformed)
-            // we assume values are checked before inserted into DB.
-            // maybe to strip_tags at least?
-            $object_record[$solr_field] = $value;
-
-            // \CB\debug("varchar field: '" . $field['name'] . "', solr_column_name: '" . $solr_field .  "', value: '" . $value . "'");
-        }
     }
 
 

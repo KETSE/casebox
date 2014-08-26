@@ -25,34 +25,19 @@ class Tasks extends Base
 
         // ROOT NODE: check if last node is the one we should attach to
         if ($this->lastNode->id == (String)$ourPid) {
+            \CB\debug('root NODE');
+
             return true;
         }
 
         // CHILDREN NODES: accept if last node is an instance of this class
-        if ($this->lastNode instanceof self) {
+        if (get_class($this->lastNode) ==  get_class($this)) {
+            \CB\debug('CHILDREN NODES');
+
             return true;
         }
 
         return false;
-
-/*
-        $lastId = 0;
-        if (!empty($p)) {
-            $lastId = $this->lastNode->id;
-        }
-
-        $ourPid = @intval($this->config['pid']);
-
-        if ($this->lastNode instanceof Dbnode) {
-            if ($ourPid != $lastId) {
-                return false;
-            }
-        } elseif (get_class($this->lastNode) != get_class($this)) {
-            return false;
-        }
-
-        return true;
-*/
     }
 
     protected function createDefaultFilter()

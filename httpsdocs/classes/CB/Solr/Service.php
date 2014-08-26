@@ -77,12 +77,6 @@ class Service
         );
 
         if (! $this->solr_handler->ping()) {
-            \CB\debug(
-                $this->host . ', ' .
-                $this->port . ', ' .
-                $this->core
-            );
-
             throw new \Exception('Solr_connection_error' . $this->debugInfo(), 1);
         }
 

@@ -28,31 +28,18 @@ class RecycleBin extends Base
         }
 
         // CHILDREN NODES: accept if last node is an instance of this class
-        if ($this->lastNode instanceof self) {
+        if (get_class($this->lastNode) == get_class($this)) {
             return true;
         }
 
+<<<<<<< HEAD
+
         return false;
-
-
-/*
-        $lastId = 0;
-        if (!empty($p)) {
-            $lastId = $this->lastNode->id;
-        }
-
-        $ourPid = @intval($this->config['pid']);
-
-        if ($this->lastNode instanceof Dbnode) {
-            if ($ourPid != $lastId) {
-                return false;
-            }
-        } elseif (get_class($this->lastNode) != get_class($this)) {
-            return false;
-        }
+=======
 
         return true;
 */
+>>>>>>> origin/devel
     }
 
     protected function createDefaultFilter()

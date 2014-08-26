@@ -449,7 +449,7 @@ function validId($id = false)
 
 function adjustTextForDisplay($text)
 {
-    return htmlentities($text, ENT_COMPAT, 'UTF-8');
+    return htmlentities($text, ENT_COMPAT | ENT_SUBSTITUTE, 'UTF-8');
 }
 
 function dateISOToMysql($date_string)

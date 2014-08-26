@@ -337,7 +337,9 @@ class ActionLog extends Base
             $doc['path'] = $data['path'];
             // $doc['template_id'] = $data['template_id'];
             $doc['case_id'] = $data['case_id'];
-            $doc['date'] = $data['date'];
+            if ($data['date']) {
+                $doc['date'] = $data['date'];
+            }
             $doc['size'] = $data['size'];
             $doc['cid'] = @$data['cid'];
             $doc['oid'] = @$data['oid'];

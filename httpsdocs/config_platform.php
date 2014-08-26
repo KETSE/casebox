@@ -51,6 +51,14 @@ $cfg = Config::loadConfigFile(DOC_ROOT.'config.ini');
 require_once 'lib/DB.php';
 DB\connect($cfg);
 
+//analize python option
+if (empty($cfg['PYTHON'])) {
+    $cfg['PYTHON'] = 'python';
+}
+
+//set unoconv path
+$cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . PATH_SEPARATOR . 'unoconv"';
+
 //get platform default config
 $cfg = array_merge($cfg, Config::loadConfigFile(DOC_ROOT.'system.ini'));
 

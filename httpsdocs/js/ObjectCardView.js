@@ -615,13 +615,19 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.doLoad();
     }
 
-    ,edit: function (objectData) {
-        if(App.isWebDavDocument(objectData.name)) {
-            App.openWebdavDocument(objectData);
-            return;
+    ,edit: function (objectData, e) {
+        switch(detectFileEditor(objectData.name)) {
+            case 'text':
+            case 'html':
+                App.mainViewPort.onFileOpen(objectData, e);
+                break;
+            case 'webdav':
+                App.openWebdavDocument(objectData);
+                break;
+            default:
+                this.editObject(objectData);
+                break;
         }
-
-        this.editObject(objectData);
     }
 
     ,editObject: function(objectData) {
