@@ -22,7 +22,7 @@ class Tasks extends Base
         if ($ourPid == '') {
             $ourPid = '0';
         }
-    \CB\debug($this->lastNode->id, (String)$ourPid);
+
         // ROOT NODE: check if last node is the one we should attach to
         if ($this->lastNode->id == (String)$ourPid) {
             \CB\debug('root NODE');
@@ -61,11 +61,8 @@ class Tasks extends Base
         $this->rootId = \CB\Browser::getRootFolderId();
 
         if (!$this->acceptedPath()) {
-        \CB\debug('deny', get_class($this));
-
             return;
         }
-        \CB\debug('allow', get_class($this));
 
         $ourPid = @($this->config['pid']);
         if ($ourPid == '') {

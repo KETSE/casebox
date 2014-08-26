@@ -1,4 +1,4 @@
-CaseBox 1.9.270 (2014-08-26)
+CaseBox 1.9.271 (2014-08-26)
 ==============================
 New Features, Improvements
 --------------------------
@@ -9,6 +9,16 @@ New Features, Improvements
 - 'Edit' button should appear only for editable files
 - Field of type date not indexed in SOLR
 - Better error handling, messages. more user friendly
+
+CaseBox 1.9.270 (2014-08-23)
+==============================
+Improvements
+----------
+- Permissions are not used for Object fields ('skipSecurity' parameter can be sent to Search.php)
+- Tasks, RecycleBin vFolder acceptedPath refactored
+  (acceptedPath for Tasks is common and should be implemented in a separate class
+   'BaseRestricted', then many vFolder plugins will use this Class, it ensures children are loaded only for
+   nodes of the same class)
 
 CaseBox 1.9.269 (2014-08-23)
 ==============================

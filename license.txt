@@ -1,7 +1,7 @@
 CaseBox 0.9 - Content Management Platform
 Copyright (c) 2011-2014, KETSE, HURIDOCS
 All rights reserved.
-info@ketse.com
+Email: info@ketse.com, info@huridocs.org
 
 https://www.casebox.org/license/
 
@@ -18,3 +18,4 @@ This library is distributed in the hope that it will be useful, but WITHOUT ANY 
 without even the implied warranty of MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
 AND NON-INFRINGEMENT OF THIRD-PARTY INTELLECTUAL PROPERTY RIGHTS.
 See the GNU General Public License for more details.
+

@@ -32,7 +32,14 @@ class RecycleBin extends Base
             return true;
         }
 
+<<<<<<< HEAD
+
         return false;
+=======
+
+        return true;
+*/
+>>>>>>> origin/devel
     }
 
     protected function createDefaultFilter()
