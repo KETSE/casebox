@@ -18,9 +18,7 @@ CB.form.view.object.Properties = Ext.extend(CB.PluginsPanel, {
         var objType = '';
         if(!Ext.isEmpty(this.loadedParams)) {
             objType = CB.DB.templates.getType(this.loadedParams.template_id);
-            clog('objType', objType, this.loadedParams.name, detectFileEditor(this.loadedParams.name));
             if((objType != 'file') || detectFileEditor(this.loadedParams.name)) {
-                clog('set');
                 rez.tbar['edit'] = {};
             }
         }

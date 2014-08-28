@@ -1,3 +1,33 @@
+CaseBox 1.9.319 (2014-08-28)
+==============================
+New Features, Improvements
+--------------------------
+- API method \CB\Api\Files->upload() creates zero sized version history
+- Add "editMethod" as a synonym for "createMethod" in tmpl config
+- If search conditions doesn't change, clicking Search in a search template has no effect
+- Field ordering in Preview and Edit mode not the same, bug in Preview mode
+- Links are not rendered ok in comments if they have '?'
+- Remember the state of FilePreview panel
+- Text files not versioned & dbClick should edit instead of download
+- Comments via email not sent to subscribers & Remove quoted text
+- User management timeout. Added a message on user management session expire.
+    Window is automaticly closed.
+
+Fixed Bugs:
+----------
+- Editing a node in separate tabsheet issues
+- Try to edit html and save not working
+- Creating a new Document Template in tabsheet gives error
+- BrowserGrid disappears when editing objects in TabSheet
+- Title inconsistency for CaseTasks + '0KB' now appears for all items
+- File big icons are not displayed in Preview panel
+- Objects field. source=users, search user by name
+- HTML fields not shown when editing a record
+
+Notes
+----------
+- update database structure with v.1.9.319.sql
+
 CaseBox 1.9.271 (2014-08-26)
 ==============================
 New Features, Improvements

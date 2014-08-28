@@ -86,7 +86,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,cellclick:  this.onCellClick
                 ,cellcontextmenu: this.onPopupMenu
             }
-            ,statefull: true
+            ,stateful: true
             ,stateId: Ext.value(this.stateId, 'veg')//vertical edit grid
             ,viewConfig: viewCfg
             ,editors: {

@@ -14,31 +14,32 @@ class Utils
      *  @param  int $id nodeId
      *  @return CBObject
      */
-    public static function getNodeById($id)  {
+    public static function getNodeById($id)
+    {
         $o = new \CB\Objects\Object();
 
         return $o->load($id);
     }
-
 
     /**
      *  similar to getNodeById, returns a CBFile
      *  @param  int $id FileId
      *  @return CBFile
      */
-    public static function getFileById($id)   {
+    public static function getFileById($id)
+    {
         $file = new \CB\Objects\File($id);
 
         return $file->load();
     }
-
 
     /**
      *  returns SOLR results: nodeId children
      *  @param  [type] $id [description]
      *  @return [type]     [description]
      */
-    public static function solrGetChildren($id, $fileId = null) {
+    public static function solrGetChildren($id, $fileId = null)
+    {
         $s = new \CB\Search();
 
         $query = 'pid: ' . $id;
@@ -66,8 +67,6 @@ class Utils
 
         return $data;
     }
-
-
 
     /**
      *  returns CB nodes as simple array
@@ -109,10 +108,8 @@ class Utils
                 $fileIds[] = $el['id'];
             }
 
-
             $ary[$el['id']] = $el;
         }
-
 
         // fetch additional info required for files
         // !!! to be refactored using CB API
@@ -149,8 +146,8 @@ class Utils
      *  @param  [type] $ary [description]
      *  @return [type]      [description]
      */
-    public static function cacheNodes($ary) {
-
+    public static function cacheNodes($ary)
+    {
         // initialize DAVNodes cache
         if (! \CB\Cache::exist('DAVNodes')) {
             \CB\Cache::set('DAVNodes', []);
@@ -173,7 +170,8 @@ class Utils
     }
 
 
-    public static function getParentNodeId($id) {
+    public static function getParentNodeId($id)
+    {
         $node = Utils::getNodeById($id);
 
         if ((count($node) == 0) or ($node['dstatus'] != 0)) {
@@ -185,6 +183,7 @@ class Utils
 
         $pid = array_pop($pids);  // pids contains the node itself
         $pid = array_pop($pids);
+
         return $pid;
     }
 
@@ -212,13 +211,22 @@ class Utils
         $path = \CB\Config::get('incomming_files_dir') . $name;
         file_put_contents($path, $data);
 
+        $action = 'newversion';
+        //check if file exists and its size is 0
+        $id = \CB\Files::getFileId($pid, $name);
+        if (!empty($id)) {
+            if (\CB\Files::getSize($id) == 0) {
+                $action = 'replace';
+            }
+        }
+
         $param = array(
             'pid' => $pid
             ,'title' => $name
             ,'localFile' => $path
             ,'owner' => $_SESSION['user']['id']
             ,'tmplId' => \CB\Config::get('default_file_template')
-            ,'fileExistAction' => 'newversion'
+            ,'fileExistAction' => $action
         );
         $fl = new \CB\Api\Files();
         $fl->upload($param);

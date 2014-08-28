@@ -31,6 +31,7 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
         DB\connect();
         $user = new User();
         $r = $user->Login($u, $p);
+
         if ($r['success'] == false) {
             $errors[] = L\get('Auth_fail');
         } else {

@@ -96,6 +96,10 @@ class Object
             $p['pid'] = null;
         }
 
+        if (empty($p['date_end'])) {
+            $p['date_end'] = null;
+        }
+
         if (empty($p['tag_id'])) {
             $p['tag_id'] = null;
         }
@@ -619,13 +623,39 @@ class Object
                     $value = array_merge($value, $fv);
                 }
                 $rez[] = $value;
-                if (!empty($fv['childs'])) {
-                    $rez = array_merge($rez, $this->getLinearNodesData($fv['childs']));
+            }
+        }
+
+        //sort result according to template fields order
+        if (sizeof($rez) > 1) {
+            $changed = true;
+            while ($changed) {
+                $changed = false;
+                $i = 1;
+                while ($i < sizeof($rez)) {
+                    $tf1 = $this->template->getField($rez[$i-1]['name']);
+                    $tf2 = $this->template->getField($rez[$i]['name']);
+                    if (!empty($tf1) && !empty($tf2) && ($tf1['order'] > $tf2['order'])) {
+                        $changed = true;
+                        $t = $rez[$i-1];
+                        $rez[$i-1] = $rez[$i];
+                        $rez[$i] = $t;
+                    }
+                    $i++;
                 }
             }
         }
 
-        return $rez;
+        $sortedRez = array();
+        //iterate fields and insert childs if present
+        foreach ($rez as $fv) {
+            $sortedRez[] = $fv;
+            if (!empty($fv['childs'])) {
+                $sortedRez = array_merge($sortedRez, $this->getLinearNodesData($fv['childs']));
+            }
+        }
+
+        return $sortedRez;
     }
 
     /**

@@ -308,7 +308,6 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
             rez.tbar['openInTabsheet'] = {};
 
             if(CB.DB.templates.getType(this.params.template_id) == 'file') {
-                clog('detectFileEditor(this.params.name)', detectFileEditor(this.params.name));
                 if(this.viewingImage) {
                     rez.tbar['fitImage']  = {
                         allowToggle: true

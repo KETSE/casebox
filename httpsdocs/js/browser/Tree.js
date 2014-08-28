@@ -483,7 +483,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
 
         var tr = CB.DB.templates.getById(data.template_id);
 
-        if(tr && (tr.get('cfg').createMethod == 'inline')) {
+        if(tr && (Ext.value(tr.get('cfg').editMethod, tr.get('cfg').createMethod) == 'inline')) {
             CB_Objects.create(data, this.processCreateInlineObject, this);
         } else {
             this.fireEvent('createobject', data, e);

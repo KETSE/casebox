@@ -42,7 +42,6 @@ function date_ISO_to_local_date(date_string){
 }
 
 function date_local_to_ISO_string(date) {
-    clog('in', date);
     if(!Ext.isDate(date)) {
         return null;
     }
@@ -56,7 +55,7 @@ function date_local_to_ISO_string(date) {
             date = date.add(Date.MINUTE, localOffset - userOffset);
         }
     }
-clog('date', date);
+
     return date.toISOString();
 }
 
@@ -243,8 +242,8 @@ function toNumericArray(v){
 setsGetIntersection = function(set1, set2){
     var i, rez = [];
     if(Ext.isEmpty(set1) || Ext.isEmpty(set2)) return rez;
-    if(Ext.isPrimitive(set1)) set1 = String(set1).split(',');
-    if(Ext.isPrimitive(set2)) set2 = String(set2).split(',');
+    if(!Ext.isArray(set1)) set1 = String(set1).split(',');
+    if(!Ext.isArray(set2)) set2 = String(set2).split(',');
     for (i = 0; i < set1.length; i++) {
         set1[i] = String(set1[i]);
     }

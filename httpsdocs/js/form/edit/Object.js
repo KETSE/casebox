@@ -245,11 +245,14 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
                 }
                 ,this
             );
-         }
+        }
         this._isDirty = false;
 
         if(!this.hasLayout && this.doLayout) {
             this.doLayout();
+        }
+
+        if(this.rendered) {
             this.syncSize();
         }
 

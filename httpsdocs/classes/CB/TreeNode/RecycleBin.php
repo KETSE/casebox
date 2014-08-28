@@ -81,15 +81,7 @@ class RecycleBin extends Base
                 return L\get('RecycleBin');
             default:
                 if (!empty($id) && is_numeric($id)) {
-                    $res = DB\dbQuery(
-                        'SELECT name FROM tree WHERE id = $1',
-                        $id
-                    ) or die(DB\dbQueryError());
-
-                    if ($r = $res->fetch_assoc()) {
-                        $rez = $r['name'];
-                    }
-                    $res->close();
+                    $rez = \CB\Objects::getName($id);
                 }
                 break;
         }

@@ -184,6 +184,7 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
     ,border: false
     ,enableDD: true
     ,tbarCssClass: 'x-panel-white'
+
     ,initComponent: function(){
         this.actions = {
             addUser: new Ext.Action({
@@ -250,6 +251,10 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
                         treeLoader.baseParams.path = node.getPath('nid');
                     }
                     ,load: function(o, n, r) {
+                        if(r.responseText.verify) {
+                            this.fireEvent('verify', this);
+                        }
+
                         if(n.attributes.kind > 1) {
                             n.sort(this.sortTree);
                         }
@@ -306,7 +311,12 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
                 ,dragdrop: {scope: this, fn: function( tree, node, dd, e ){
                         this.sourceNode = dd.dragOverData.dropNode;
                         this.targetNode = dd.dragOverData.target;
-                        CB_UsersGroups.associate(this.sourceNode.attributes.nid, this.targetNode.attributes.nid, this.processAssociate, this);
+                        CB_UsersGroups.associate(
+                            this.sourceNode.attributes.nid
+                            ,this.targetNode.attributes.nid
+                            ,this.processAssociate
+                            ,this
+                        );
                     }
                 }
                 ,beforeappend: { scope: this, fn: function(t, p, n){
@@ -359,6 +369,8 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
             }]
         });
         CB.UsersGroupsTree.superclass.initComponent.apply(this, arguments);
+
+        this.enableBubble(['verify']);
     }
     ,afterRender: function() {
         CB.UsersGroupsTree.superclass.afterRender.apply(this, arguments);
@@ -441,9 +453,14 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
     }
 
     ,processDeassociate: function(r, e){
-        if(r.success !== true) return false;
-        n = this.getSelectionModel().getSelectedNode();
-        attr = n.attributes;
+        if(r.success !== true) {
+            if(r.verify) {
+                this.fireEvent('verify', this);
+            }
+            return false;
+        }
+        var n = this.getSelectionModel().getSelectedNode();
+        var attr = n.attributes;
         attr.iconCls = 'icon-user-gray';
         n.remove(true);
         if(r.outOfGroup){
@@ -458,8 +475,13 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
         }
     }
     ,processAssociate: function(r, e){
-        if(r.success !== true) return false;
-        attr = Ext.apply({}, this.sourceNode.attributes);
+        if(r.success !== true) {
+            if(r.verify) {
+                this.fireEvent('verify', this);
+            }
+            return false;
+        }
+        var attr = Ext.apply({}, this.sourceNode.attributes);
         if(this.targetNode.loaded){
             attr.id = Ext.id();
             this.targetNode.appendChild(attr);
@@ -495,14 +517,24 @@ CB.UsersGroupsTree = Ext.extend(Ext.tree.TreePanel, {
         }
     }
     ,processDestroyUserGroup: function(r, e){
-        if(r.success !== true) return false;
+        if(r.success !== true) {
+            if(r.verify) {
+                this.fireEvent('verify', this);
+            }
+            return false;
+        }
         this.processDelNode(r, e);
         CB.DB.groupsStore.reload();
     }
     ,processDelNode: function(r, e){
-        if(r.success !== true) return false;
-        nid = this.getSelectionModel().getSelectedNode().attributes.nid;
-        deleteNodes = [];
+        if(r.success !== true) {
+            if(r.verify) {
+                this.fireEvent('verify', this);
+            }
+            return false;
+        }
+        var nid = this.getSelectionModel().getSelectedNode().attributes.nid;
+        var deleteNodes = [];
         this.getRootNode().cascade(
             function(n){
                 if(n.attributes.nid == nid) {
@@ -598,7 +630,10 @@ CB.UserEditWindow = Ext.extend(Ext.Window, {
                 ,afterrender: this.onAfterRender
             }
         });
+
         CB.UserEditWindow.superclass.initComponent.apply(this, arguments);
+
+        this.enableBubble(['verify']);
     }
     ,onAfterRender: function(){
         this.getEl().mask(L.LoadingData + ' ...');
@@ -607,6 +642,9 @@ CB.UserEditWindow = Ext.extend(Ext.Window, {
     ,onLoadProfileData: function(r, e){
         this.getEl().unmask();
         if(r.success !== true) {
+            if(r.verify) {
+                this.fireEvent('verify', this);
+            }
             this.destroy();
             return;
         }
@@ -779,8 +817,12 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
                 }
             }
         });
+
         CB.UsersGroupsForm.superclass.initComponent.apply(this, arguments);
+
         this.addEvents('beforesave', 'save');
+        this.enableBubble(['verify']);
+
         this.grid = this.findByType('grid')[0];
     }
     ,setDirty: function(value){
@@ -797,7 +839,11 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
         CB_UsersGroups.getAccessData(this.data.id, this.processLoadedData, this);
     }
     ,processLoadedData: function(response, e){
-        if(response.success === true){
+        if(response.success !== true) {
+            if(r.verify) {
+                this.fireEvent('verify', this);
+            }
+        } else {
             this.data.name = Ext.value(response.data.name);
             this.data.title = Ext.value(response.data.title, response.data.name);
             response.data.title = this.data.title;
@@ -851,6 +897,12 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
         CB_UsersGroups.saveAccessData(
             params,
             function(r, e){
+                if(r.success !== true) {
+                    if(r.verify) {
+                        this.fireEvent('verify', this);
+                    }
+                    return false;
+                }
                 this.setDirty(false);
                 this.getEl().unmask();
                 this.fireEvent('save');
@@ -892,7 +944,13 @@ CB.UsersGroupsForm = Ext.extend(Ext.form.FormPanel, {
                 CB_UsersGroups.renameUser(
                     {id: this.data.id, name: text},
                     function(r, e){
-                        if(r.success !== true) return Ext.Msg.alert(L.Error, Ext.value(e.msg, L.ErrorOccured) );
+                        if(r.success !== true) {
+                            if(r.verify) {
+                                this.fireEvent('verify', this);
+                            } else {
+                                return Ext.Msg.alert(L.Error, Ext.value(e.msg, L.ErrorOccured) );
+                            }
+                        }
                         this.data.name = r.name;
                         this.userInfo.data.name = r.name;
                         this.userInfo.update(this.userInfo.data);
@@ -943,17 +1001,26 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
             }
         });
 
-        Ext.apply(this, { items: [{
-            layout: 'border'
-            ,region: 'west'
-            ,width: 250
-            ,border: false
-            ,split: true
-            ,items: [
-                this.tree
-                ,this.searchField
+        Ext.apply(this, {
+            items: [
+                {
+                    layout: 'border'
+                    ,region: 'west'
+                    ,width: 250
+                    ,border: false
+                    ,split: true
+                    ,items: [
+                        this.tree
+                        ,this.searchField
+                    ]
+                }
+                ,this.form
             ]
-        }, this.form] });
+            ,listeners: {
+                scope: this
+                ,verify: this.onVerifyEvent
+            }
+        });
 
         CB.UsersGroups.superclass.initComponent.apply(this, arguments);
     }
@@ -1060,6 +1127,10 @@ CB.UsersGroups = Ext.extend(Ext.Panel, {
             }
         });
         w.show();
+    }
+    ,onVerifyEvent: function(cmp) {
+        this.destroy();
+        Ext.Msg.alert(L.Info, 'User management session has expired. Please access it and authenticate again.');
     }
 });
 Ext.reg('CBUsersGroups', CB.UsersGroups); // register xtype

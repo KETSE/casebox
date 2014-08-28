@@ -353,7 +353,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             ,width: 300
             ,layout: 'card'
             ,activeItem: 1
-            ,statefull: true
+            ,stateful: true
             ,stateId: 'vcrp'
             ,items: [
                 this.filtersPanel
@@ -530,6 +530,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
                 ,createobject: this.onCreateObjectEvent
                 ,reload: this.onReloadClick
                 ,activate: function() {
+                    this.cardContainer.syncSize();
                     this.updatePreview();
                 }
                 // ,objectopen: this.onObjectsOpenEvent
@@ -997,18 +998,31 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         this.objectPanel.edit(objectData);
     }
 
-    ,onObjectsOpenEvent: function(objData, e) {
+    ,onObjectsOpenEvent: function(objectData, e) {
         if(e && e.stopPropagation) {
             e.stopPropagation();
             e.stopEvent();
         }
 
-        if(CB.DB.templates.getType(objData.template_id) == 'file') {
-            if(App.isWebDavDocument(objData.name)) {
-                App.openWebdavDocument(objData);
-            } else {
-                this.onDownloadClick();
+        var data = Ext.apply({}, objectData);
+        if(!Ext.isEmpty(data.nid)) {
+            data.id = data.nid;
+        }
+
+        if(CB.DB.templates.getType(data.template_id) == 'file') {
+            switch(detectFileEditor(data.name)) {
+                case 'text':
+                case 'html':
+                    App.mainViewPort.onFileOpen(data, e);
+                    break;
+                case 'webdav':
+                    App.openWebdavDocument(data);
+                    break;
+                default:
+                    this.onDownloadClick();
+                    break;
             }
+
             return;
         }
 
@@ -1016,7 +1030,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         if(path.substr(-1, 1) !== '/') {
             path += '/';
         }
-        path += objData.nid;
+        path += data.nid;
         this.changeSomeParams({
             path: path
             ,query: null
@@ -1042,7 +1056,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
         }
 
         var templateCfg = CB.DB.templates.getProperty(objectData.template_id, 'cfg');
-        if(templateCfg && templateCfg.createMethod == 'tabsheet') {
+        if(templateCfg && (Ext.value(templateCfg.editMethod, templateCfg.createMethod) == 'tabsheet')) {
                 App.mainViewPort.openObject(objectData, e);
         } else {
             this.buttonCollection.get('preview').toggle(true);
