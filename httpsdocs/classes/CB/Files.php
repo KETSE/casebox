@@ -552,7 +552,7 @@ class Files
             'SELECT fc.size
             FROM files f
             JOIN files_content fc
-                ON f.id = fc.file_id
+                ON f.content_id = fc.id
             WHERE f.id = $1',
             $id
         ) or die(DB\dbQueryError());
@@ -604,6 +604,13 @@ class Files
                 continue;
             }
 
+            //apply general properties from $p to $f (file) variable
+            foreach ($p as $k => $v) {
+                if (in_array($k, array('id', 'pid', 'name', 'title', 'content_id', 'template_id', 'cid', 'oid', 'data'))) {
+                    $f[$k] = $v;
+                }
+            }
+
             @$f['date'] = Util\dateISOToMysql($p['date']);
 
             $this->storeContent($f);
@@ -613,153 +620,54 @@ class Files
                 $pid = $this->mkTreeDir($pid, $f['dir']);
             }
 
-            $file_id = empty($p['id'])
+            $fileId = empty($p['id'])
                 ? $this->getFileId($pid, $f['name'])
                 : intval($p['id']);
 
-            if (!empty($file_id)) {
+            if (!empty($fileId)) {
                 //newversion, replace, rename, autorename, cancel
                 switch (@$p['response']) {
                     case 'newversion':
                         // case 'overwrite':
                         // case 'overwriteall':
 
-                        //make the overwrite process: move record from files to files_versions,
-                        //delete oldest version if exeeds versions limit for file type, add new record to files
-                        $res = DB\dbQuery(
-                            'INSERT INTO files_versions (
-                                file_id
-                                ,content_id
-                                ,`date`
-                                ,name
-                                ,cid
-                                ,uid
-                                ,cdate
-                                ,udate)
-                                SELECT id
-                                     , content_id
-                                     , `date`
-                                     , name
-                                     , cid
-                                     , uid
-                                     , cdate
-                                     , udate
-                                FROM files
-                                WHERE id = $1',
-                            $file_id
-                        ) or die(DB\dbQueryError());
-
+                        $this->saveCurrentVersion($fileId);
                         break;
                     case 'replace':
-                        /* TODO: only mark file as deleted but dont delte it */
-                        DB\dbQuery('CALL p_delete_tree_node($1)', $file_id) or die(DB\dbQueryError());
+                        /* TODO: only mark file as deleted but dont delte it
+                            Note: we cant leae the previous file record if we have a given id for file
+
+                        */
+                        DB\dbQuery('CALL p_delete_tree_node($1)', $fileId) or die(DB\dbQueryError());
                         $solr = new Solr\Client();
-                        $solr->deleteByQuery('id:' . $file_id . ' OR pids: ' . $file_id);
+                        $solr->deleteByQuery('id:' . $fileId . ' OR pids: ' . $fileId);
                         break;
                     case 'rename':
-                        $file_id = null;
+                        $fileId = null;
                         $f['name'] = $p['newName']; //here is the new name
                         break;
                     case 'autorename':
-                        $file_id = null;
+                        $fileId = null;
                         $f['name'] = Objects::getAvailableName($pid, $f['name']);
                         break;
                 }
             }
             $f['type'] = 5;//file
 
-            //create a dummy file object for sending to events
+            //save file
             $fileObject = new Objects\File();
-            $fileObject->setData($f);
-
-            fireEvent('beforeNodeDbCreate', $fileObject);
-            DB\dbQuery(
-                'INSERT INTO tree (
-                    id
-                    ,pid
-                    ,`name`
-                    ,`type`
-                    ,cid
-                    ,uid
-                    ,cdate
-                    ,udate
-                    ,template_id)
-                VALUES(
-                    $1
-                    ,$2
-                    ,$3
-                    ,5
-                    ,$4
-                    ,$4
-                    ,CURRENT_TIMESTAMP
-                    ,CURRENT_TIMESTAMP
-                    ,$5)
-                ON DUPLICATE KEY
-                UPDATE id = last_insert_id($1)
-                    ,pid = $2
-                    ,`name` = $3
-                    ,`type` = 5
-                    ,cid = $4
-                    ,uid = $4
-                    ,cdate = CURRENT_TIMESTAMP
-                    ,udate = CURRENT_TIMESTAMP
-                    ,updated = (updated | 1)',
-                array(
-                    $file_id
-                    ,$pid
-                    ,$f['name']
-                    ,$_SESSION['user']['id']
-                    ,Config::get('default_file_template')
-                )
-            ) or die(DB\dbQueryError());
-            $file_id = DB\dbLastInsertId();
-
-            DB\dbQuery(
-                'INSERT INTO files (
-                    id
-                    ,content_id
-                    ,`date`
-                    ,`name`
-                    ,`title`
-                    ,cid
-                    ,uid
-                    ,cdate
-                    ,udate)
-                VALUES (
-                    $1
-                    ,$2
-                    ,$3
-                    ,$4
-                    ,$5
-                    ,$6
-                    ,$6
-                    ,CURRENT_TIMESTAMP
-                    ,CURRENT_TIMESTAMP)
-                ON duplicate KEY
-                UPDATE content_id = $2
-                    ,`date` = $3
-                    ,`name` = $4
-                    ,`title` = $5
-                    ,cid = $6
-                    ,uid = $6
-                    ,cdate = CURRENT_TIMESTAMP
-                    ,udate = CURRENT_TIMESTAMP',
-                array(
-                    $file_id
-                    ,$p['files'][$fk]['content_id']
-                    ,$p['files'][$fk]['date']
-                    ,$f['name']
-                    ,@$p['title']
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
-
-            $f['id'] = $file_id;
-
-            $fileObject->setData($f);
+            if (!empty($fileId)) {
+                $f['id'] = $fileId;
+                if (@$p['response'] == 'replace') {
+                    $fileObject->create($f);
+                } else {
+                    $fileObject->update($f);
+                }
+            } else {
+                $fileObject->create($f);
+            }
 
             $this->updateFileProperties($f);
-            fireEvent('nodeDbCreate', $fileObject);
         }
 
         return true;

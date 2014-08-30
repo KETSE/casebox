@@ -1,3 +1,16 @@
+CaseBox 1.9.320 (2014-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- added "default_facet_configs" & "images_display_size" options to default casebox db instance
+    (casebox/install/mysql/casebox-20140830.sql)
+
+Fixed Bugs:
+----------
+- can't add tasks in dev.casebox.org/dev & Demo core issues
+- DB Error on dblClick virtual node
+- API method \CB\Api\Files->upload() creates zero sized version history
+
 CaseBox 1.9.319 (2014-08-28)
 ==============================
 New Features, Improvements

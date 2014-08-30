@@ -627,7 +627,7 @@ class Object
         }
 
         //sort result according to template fields order
-        if (sizeof($rez) > 1) {
+        if ((sizeof($rez) > 1) && !empty($this->template)) {
             $changed = true;
             while ($changed) {
                 $changed = false;
@@ -635,7 +635,7 @@ class Object
                 while ($i < sizeof($rez)) {
                     $tf1 = $this->template->getField($rez[$i-1]['name']);
                     $tf2 = $this->template->getField($rez[$i]['name']);
-                    if (!empty($tf1) && !empty($tf2) && ($tf1['order'] > $tf2['order'])) {
+                    if (!empty($tf1) && !empty($tf2) && (@$tf1['order'] > @$tf2['order'])) {
                         $changed = true;
                         $t = $rez[$i-1];
                         $rez[$i-1] = $rez[$i];

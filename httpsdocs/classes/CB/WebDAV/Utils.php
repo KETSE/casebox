@@ -215,7 +215,7 @@ class Utils
         //check if file exists and its size is 0
         $id = \CB\Files::getFileId($pid, $name);
         if (!empty($id)) {
-            if (\CB\Files::getSize($id) == 0) {
+            if (\CB\Files::getSize($id) <= 1) {
                 $action = 'replace';
             }
         }
@@ -254,7 +254,6 @@ class Utils
         \CB\Solr\Client::runCron();
     }
 
-
     public static function deleteObject($id)
     {
         $node = new \CB\Objects\Object($id);
@@ -263,9 +262,6 @@ class Utils
         \CB\Solr\Client::runCron();
     }
 }
-
-
-
 
 /*
     public static function getPathFromId($id)

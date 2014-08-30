@@ -104,7 +104,7 @@ class File extends Object
      */
     protected function updateCustomData()
     {
-        parent::createCustomData();
+        parent::updateCustomData();
 
         $res = DB\dbQuery(
             'INSERT INTO files
