@@ -101,6 +101,8 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
                 }
 
                 delete currentColumns[rez[i].dataIndex];
+            } else {
+                rez[i].hidden = true;
             }
         }
 

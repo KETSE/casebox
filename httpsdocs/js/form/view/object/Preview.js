@@ -73,6 +73,9 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         this.loadedVersionId = this.newVersionId;
         this.body.scrollTo('top', 0);
         switch(r.responseText){
+            case '<authenticate />':
+                window.location.reload();
+                break;
             case '&#160':
                 this.update(
                     '<div style="margin-top: 40px; text-align:center; color: 555; font-weight: bold">'+
@@ -90,6 +93,12 @@ CB.form.view.object.Preview = Ext.extend(Ext.Panel, {
         }
         this.attachEvents();
         this.fireEvent('loaded', this);
+        switch(detectFileEditor(this.params.name)) {
+             // case 'html':
+             case 'text':
+                hljs.highlightBlock(this.body.dom);
+                break;
+        }
     }
 
     ,attachEvents: function(){

@@ -106,7 +106,7 @@ class Config extends Singleton
     {
         $rez = array();
         $res = DB\dbQuery(
-            'SELECT id, cfg
+            'SELECT id, cfg, active
             FROM casebox.cores
             WHERE name = $1',
             $coreName
@@ -124,6 +124,7 @@ class Config extends Singleton
         }
 
         $rez['core_id'] = $r['id'];
+        $rez['core_active'] = $r['active'];
 
         return $rez;
     }

@@ -1,3 +1,34 @@
+CaseBox 1.9.323 (2014-09-01)
+==============================
+New Features, Improvements
+--------------------------
+- added check and a display message for deactivated cores.
+- added validation mechanism for template fields. For now just json validato defined
+    to set json validator for a template field, add in its config:
+        "validator": "json"
+- exclude user who made the action on a task from notified users
+- Use http://highlightjs.org/ in RightPanel for preview of textual files
+- Grid DC: shows only the columns that are specified (hide sys_cols)
+- increase 'limit' in _objects field for editor=form
+- Pivot table onClick: activeFilters are reset
+
+Notes
+--------------------------
+- Apache config updated to load highlightjs script
+
+CaseBox 1.9.320 (2014-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- Button "Вставить" doesn't work in a newly added templates for ipc
+- Jump to login if preview required re-login
+
+Fixed Bugs:
+----------
+- Edit button for webDav files always show dlg
+- template_id not set for uploaded files.
+    Because of last refactoring changes related to Api File upload.
+
 CaseBox 1.9.320 (2014-08-30)
 ==============================
 New Features, Improvements

@@ -525,7 +525,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         //
         App.openWebdavDocument(
             this.data
-            ,false
+            ,(b.text != L.DirectEditLink)
         );
     }
 

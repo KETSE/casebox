@@ -250,10 +250,9 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
 
         if(!this.hasLayout && this.doLayout) {
             this.doLayout();
-        }
-
-        if(this.rendered) {
+        } else if(this.rendered) {
             this.syncSize();
+            this.doLayout();
         }
 
         this.fireEvent('loaded', this);

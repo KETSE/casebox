@@ -143,6 +143,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
 
     ,getViewParams: function() {
         this.params.selectedFacets = this.selectedFacets;
+
         return this.params;
     }
 
@@ -476,7 +477,7 @@ CB.browser.view.Pivot = Ext.extend(CB.browser.view.Interface,{
 
         var params = {
             view: 'grid'
-            ,filters: {}
+            ,filters: Ext.apply({}, this.store.baseParams.filters)
         };
         if(!Ext.isEmpty(f[0])) {
             params['filters'][this.selectedFacets[0]] = [{

@@ -45,13 +45,9 @@ Ext.onReady(function(){
     Ext.QuickTips.init();
     Ext.apply(Ext.QuickTips.getQuickTip(), {showDelay: 1500});
 
-
     setTimeout(function(){
         Ext.get('loading').remove();
     }, 10);
-
-
-
 
     CB_User.getLoginInfo( function(r, e){
         if(r.success !== true) {
@@ -72,6 +68,7 @@ Ext.onReady(function(){
         App.mainViewPort.doLayout();
         App.mainViewPort.initCB( r, e );
     });
+
 });
 
 //--------------------------------------------------------------------------- application initialization function

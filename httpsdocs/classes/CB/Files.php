@@ -613,6 +613,10 @@ class Files
 
             @$f['date'] = Util\dateISOToMysql($p['date']);
 
+            if (empty($f['template_id'])) {
+                $f['template_id'] = Config::get('default_file_template');
+            }
+
             $this->storeContent($f);
 
             $pid = $p['pid'];
@@ -664,7 +668,7 @@ class Files
                     $fileObject->update($f);
                 }
             } else {
-                $fileObject->create($f);
+                $f['id'] = $fileObject->create($f);
             }
 
             $this->updateFileProperties($f);

@@ -222,6 +222,7 @@ CB.objects.plugins.Files = Ext.extend(CB.objects.plugins.Base, {
             this.dragPanel.hide();
             this.lockPanel(false);
         }
+
         if(te.hasClass('upload')) {
             this.fireEvent(
                 'fileupload'

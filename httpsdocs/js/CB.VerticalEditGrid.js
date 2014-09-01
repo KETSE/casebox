@@ -16,6 +16,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,'info'
             ,'type'
             ,'cond' //condition used for search templates
+            ,'valid' //condition used for search templates
         ];
 
         // define helperTree if owner does not have already defined one
@@ -186,11 +187,21 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 }
                 var tr = n.attributes.templateRecord;
 
+                //check validation field
+                if (record.get('valid') === false) {
+                    meta.css = ' x-form-invalid';
+                    meta.attr = 'ext:qtip="Value did not pass validation"; ext:qclass="x-form-invalid-tip"';
+                } else {
+                    // Value is valid
+                    meta.css = '';
+                    meta.attr = 'ext:qtip=""';
+                }
+
                 if(this.renderers && this.renderers[tr.get('type')]) {
                     return this.renderers[tr.get('type')](v, this);
                 }
                 if(!Ext.isEmpty(tr.get('cfg').height)) {
-                    meta.attr = ' style="min-height:' + tr.get('cfg').height + 'px"';
+                    meta.attr += ' style="min-height:' + tr.get('cfg').height + 'px"';
                 }
 
                 if(Ext.isEmpty(v)) return '';
@@ -462,6 +473,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     ,info: attr.value.info
                     ,type: r.get('type')
                     ,cond: attr.value.cond
+                    ,valid: attr.valid
                 })
             );
         }
@@ -618,6 +630,18 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
     ,onAfterEditProperty: function(e){
         var nodeId = e.record.get('id');
+
+        //check if field has validator set and notify if validation not passed
+        var validator = e.fieldRecord.get('cfg').validator;
+        if(!Ext.isEmpty(validator)) {
+            if(!Ext.isDefined(CB.Validators[validator])) {
+                plog('Undefined field validator: ' + validator);
+            } else {
+                this.helperTree.getNode(nodeId).attributes.valid = CB.Validators[validator](e.value);
+            }
+        }
+
+
         if(e.field == 'value'){
             if(e.value != e.originalValue){
                 this.helperTree.resetChildValues(nodeId);

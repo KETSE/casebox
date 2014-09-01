@@ -27,7 +27,11 @@ $ext = array_pop($f);
 
 // check login
 if (!User::isLoged()) {
-    header('Location: ' . $coreUrl . 'login.php?view=' . $id);
+    if (!empty($_GET['i'])) { //internal request (user for previews)
+        echo "<authenticate />";
+    } else {
+        header('Location: ' . $coreUrl . 'login.php?view=' . $id);
+    }
     exit(0);
 }
 

@@ -18,10 +18,11 @@ CB.WebdavWindow = Ext.extend(Ext.Window, {
             ,selectOnFocus: true
             ,style: 'font-size: 10px'
             ,width: 320
-        })
+        });
         this.cbHideDialog = new Ext.form.Checkbox({
             xtype: 'checkbox'
             ,boxLabel: 'Enable cbdav & don\'t show this dialog'
+            ,checked: (Ext.util.Cookies.get('webdavHideDlg') == 1)
         });
 
         if (navigator.appVersion.indexOf("Mac") != -1) {
@@ -79,9 +80,8 @@ CB.WebdavWindow = Ext.extend(Ext.Window, {
         this.textField.focus(true, 100);
     }
     ,onOkClick: function(b, e) {
-        if(this.cbHideDialog.getValue()) {
-            Ext.util.Cookies.set('webdavHideDlg', 1);
-        }
+        Ext.util.Cookies.set('webdavHideDlg', this.cbHideDialog.getValue() ? 1 : 0);
+
         this.close();
     }
 }
