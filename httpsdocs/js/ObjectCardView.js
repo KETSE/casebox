@@ -246,10 +246,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                     ,listeners: {
                         scope: this
                         ,change: function(){
-                            this.actions.save.setDisabled(false);
+                            this.actions.save.setDisabled(!this.items.itemAt(1).isValid());
                         }
                         ,clear: function(){
-                            this.actions.save.setDisabled(true);
+                            this.actions.save.setDisabled(!this.items.itemAt(1).isValid());
                         }
                         ,loaded: this.onCardItemLoaded
                     }

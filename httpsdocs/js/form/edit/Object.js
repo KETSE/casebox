@@ -233,7 +233,9 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
                             ,fieldLabel: r.get('title')
                             ,listeners: {
                                 scope: this
-                                ,change: function(field, newValue, oldValue){ this.fireEvent('change', field.name, newValue, oldValue); }
+                                ,change: function(field, newValue, oldValue) {
+                                    this.fireEvent('change', field.name, newValue, oldValue);
+                                }
                                 ,sync: function(){ this.fireEvent('change'); }
                             }
                             ,xtype: (r.get('type') == 'html')
@@ -423,6 +425,22 @@ CB.form.edit.Object = Ext.extend(Ext.Panel, {
             rez.tbar['save'] = {};
             rez.tbar['cancel'] = {};
             rez.tbar['openInTabsheet'] = {};
+        }
+
+        return rez;
+    }
+
+    /**
+     * check if all fields are valid in current object form
+     * For now only return vertical grid status
+     * Later validation of separate fields should be made if needed
+     * @return bool
+     */
+    ,isValid: function() {
+        var rez = true;
+
+        if(this.grid && this.grid.isValid) {
+            rez = this.grid.isValid();
         }
 
         return rez;

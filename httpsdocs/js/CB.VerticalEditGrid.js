@@ -192,9 +192,15 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     meta.css = ' x-form-invalid';
                     meta.attr = 'ext:qtip="Value did not pass validation"; ext:qclass="x-form-invalid-tip"';
                 } else {
-                    // Value is valid
-                    meta.css = '';
-                    meta.attr = 'ext:qtip=""';
+                    //Check required field
+                    if(tr.get('cfg').required && Ext.isEmpty(v)) {
+                        meta.css = ' x-form-invalid';
+                        meta.attr = 'ext:qtip="' + Ext.form.TextField.prototype.blankText + '"; ext:qclass="x-form-invalid-tip"';
+                    } else {
+                        // Value is valid
+                        meta.css = '';
+                        meta.attr = 'ext:qtip=""';
+                    }
                 }
 
                 if(this.renderers && this.renderers[tr.get('type')]) {
@@ -260,6 +266,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
         }
     }
+
     ,onNodeDragOver: function (targetData, source, e, data){
         var rez = this.dropZone.dropNotAllowed;
         if(!targetData.record ||
@@ -555,7 +562,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         }
         if(this.editors && this.editors[t]) {
             col.setEditor(new Ext.grid.GridEditor(this.editors[t](this)));
-        }else{
+        } else {
             e.fieldRecord = this.helperTree.getNode(e.record.get('id')).attributes.templateRecord;
 
             //check if custom source and send fields
@@ -632,7 +639,8 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         var nodeId = e.record.get('id');
 
         //check if field has validator set and notify if validation not passed
-        var validator = e.fieldRecord.get('cfg').validator;
+        var tr = this.helperTree.getNode(e.record.get('id')).attributes.templateRecord;
+        var validator = tr.get('cfg').validator;
         if(!Ext.isEmpty(validator)) {
             if(!Ext.isDefined(CB.Validators[validator])) {
                 plog('Undefined field validator: ' + validator);
@@ -720,6 +728,31 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.helperTree.deleteDuplicate(r.get('id'));
         this.syncRecordsWithHelper();
         this.fireEvent('change');
+    }
+
+    /**
+     * check if every record meets required config option
+     * and is valid if validator set
+     * @return bool
+     */
+    ,isValid: function() {
+        var rez = true;
+        this.store.each(
+            function(r) {
+                var n = this.helperTree.getNode(r.get('id'));
+                if((r.get('valid') === false) ||
+                    (n.attributes.templateRecord.get('cfg').required &&
+                    Ext.isEmpty(r.get('value'))
+                    )
+                ) {
+                    rez = false;
+                }
+                return rez;
+            }
+            ,this
+        );
+
+        return rez;
     }
 });
 
