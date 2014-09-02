@@ -1,3 +1,10 @@
+CaseBox 1.9.325 (2014-09-02)
+==============================
+Fixed Bugs:
+----------
+- Search hides all default grid collumns because no DC(display columns) replied.
+    Changed to hide default columns only when responce returns any DC.
+
 CaseBox 1.9.324 (2014-09-01)
 ==============================
 New Features, Improvements

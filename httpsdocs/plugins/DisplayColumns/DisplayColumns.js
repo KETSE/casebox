@@ -87,6 +87,7 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
         var rez = Ext.apply([], this.defaultColumns);
         var currentColumns = Ext.apply({}, this.currentColumns);
         var i;
+        var emptyCurrentColumns = (Ext.encode(currentColumns) == '{}');
 
         for (i = 0; i < rez.length; i++) {
             if(Ext.isDefined(currentColumns[rez[i].dataIndex])) {
@@ -101,11 +102,11 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
                 }
 
                 delete currentColumns[rez[i].dataIndex];
-            } else {
+
+            } else if(!emptyCurrentColumns) {
                 rez[i].hidden = true;
             }
         }
-
 
         Ext.iterate(
             currentColumns
