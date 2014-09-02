@@ -29,6 +29,9 @@ class Tasks extends Objects
 
         $usersToNotify = static::getUsersToNotify($taskObject);
 
+        //exclude the current user from notified users
+        $usersToNotify = array_diff($usersToNotify, array($_SESSION['user']['id']));
+
         $path = '/';
         if (!empty($taskData['pids'])) {
             $path = Util\toNumericArray($taskData['pids']);

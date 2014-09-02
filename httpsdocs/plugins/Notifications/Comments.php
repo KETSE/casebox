@@ -48,14 +48,14 @@ class Comments extends Objects
 
         $notifiedUsers = static::getNotifiedUsers($objData['pid']);
 
-        //exclude the comment owner from nitified users
+        //exclude the comment owner from notified users
         $notifiedUsers = array_diff($notifiedUsers, array($objData['cid']));
 
         if (!empty($notifiedUsers)) {
             foreach ($notifiedUsers as $userId) {
-                if ($userId == $_SESSION['user']['id']) {
-                    continue;
-                }
+                // if ($userId == $_SESSION['user']['id']) {
+                //     continue;
+                // }
 
                 $notifyData = array(
                     'sender' => $sender
@@ -94,7 +94,7 @@ class Comments extends Objects
         }
 
         //add current user to notified users for parent object
-        static::addUserToNotifiedUsers($objData['pid']);
+        static::addUserToNotifiedUsers($objData['pid'], $objData['cid']);
     }
 
     /**

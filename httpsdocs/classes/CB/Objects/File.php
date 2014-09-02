@@ -99,6 +99,47 @@ class File extends Object
     }
 
     /**
+     * update objects custom data
+     * @return void
+     */
+    protected function updateCustomData()
+    {
+        parent::updateCustomData();
+
+        $res = DB\dbQuery(
+            'INSERT INTO files
+                (id
+                ,content_id
+                ,`date`
+                ,`name`
+                ,`cid`
+                )
+            VALUES (
+                $1
+                ,$2
+                ,$3
+                ,$4
+                ,$5
+            )
+            ON DUPLICATE KEY UPDATE
+            content_id = $2
+            ,`date` = $3
+            ,name = $4
+            ,cid = $5
+            ,uid = $6',
+            array(
+                $this->id
+                ,@$this->data['content_id']
+                ,@$this->data['date']
+                ,@$this->data['name']
+                ,@$this->data['cid']
+                ,$_SESSION['user']['id']
+            )
+        ) or die(DB\dbQueryError());
+
+    }
+
+    /**
      * copy costom files data to targetId
      * @param  int  $targetId
      * @return void

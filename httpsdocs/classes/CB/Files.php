@@ -108,17 +108,98 @@ class Files
 
     public function saveContent($p)
     {
-
         if (!Security::canWrite($p['id'])) {
             throw new \Exception(L\get('Access_denied'));
         }
+
+        $this->saveCurrentVersion($p['id']);
+
         $file = new Objects\File($p['id']);
         $data = $file->load();
-        $contentFile = Config::get('files_dir') . $data['content_path'] . '/'.$data['content_id'];
 
-        file_put_contents($contentFile, $p['data']);
+        $content = array(
+            'tmp_name' => tempnam(Config::get('incomming_files_dir'), 'cbup')
+            ,'date' => date('Y-m-d')
+            ,'name' => $data['name']
+            ,'type' => $data['type']
+        );
+        file_put_contents($content['tmp_name'], $p['data']);
+        $content['size'] = filesize($content['tmp_name']);
 
+        $this->storeContent($content);
+
+        $data['content_id'] = $content['content_id'];
+        $file->update($data);
+        // $contentFile = Config::get('files_dir') . $data['content_path'] . '/'.$data['content_id'];
+
+        // file_put_contents($contentFile, $p['data']);
         return array('success' => true);
+    }
+
+    /**
+     * save current file version into versions table
+     * and delete versions exceeding mfvc
+     * @param  int  $id   file id
+     * @param  int  $mfvc max file version count
+     * @return void
+     */
+    protected function saveCurrentVersion($id, $mfvc = false)
+    {
+        if ($mfvc === false) {
+            $mfvc = $this->getMFVC(Objects::getName($id));
+        }
+
+        if (empty($mfvc)) {
+            return false;
+        }
+
+        $res = DB\dbQuery(
+            'INSERT INTO files_versions (
+                file_id
+                ,content_id
+                ,`date`
+                ,name
+                ,cid
+                ,uid
+                ,cdate
+                ,udate)
+                SELECT id
+                    ,content_id
+                    ,`date`
+                    ,name
+                    ,cid
+                    ,uid
+                    ,cdate
+                    ,udate
+                FROM files
+                WHERE id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
+        //detect versions exceeding mfvc and delete them
+        $deleteVersionIds = array();
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM files_versions
+            WHERE file_id = $1
+            ORDER BY id DESC
+            LIMIT ' . $mfvc . ', 10',
+            $id
+        ) or die(DB\dbQueryError());
+        while ($r = $res->fetch_assoc()) {
+            $deleteVersionIds[] = $r['id'];
+        }
+        $res->close();
+
+        if (!empty($deleteVersionIds)) {
+            DB\dbQuery(
+                'DELETE
+                FROM files_versions
+                WHERE id in (' . implode(',', $deleteVersionIds) . ')'
+            ) or die(DB\dbQueryError());
+        }
+
+        return true;
     }
 
     //DONE: on archive extraction also to take directories into consideration
@@ -388,7 +469,7 @@ class Files
     }
     //checks if pid id exists in our tree or if filename exists under the pid.
     //$dir is an optional relative path under pid.
-    public function getFileId($pid, $name = '', $dir = '')
+    public static function getFileId($pid, $name = '', $dir = '')
     {
         $rez = null;
         /* check if pid exists /**/
@@ -452,12 +533,38 @@ class Files
 
     //checks if pid id exists in our tree or if filename exists under the pid.
     //$dir is an optional relative path under pid.
-    public function fileExists($pid, $name = '', $dir = '')
+    public static function fileExists($pid, $name = '', $dir = '')
     {
-        $file_id = $this->getFileId($pid, $name, $dir);
+        $file_id = static::getFileId($pid, $name, $dir);
 
         return !empty($file_id);
     }
+
+    /**
+     * get file size
+     * @param  int $id
+     * @return int
+     */
+    public static function getSize($id)
+    {
+        $rez = 0;
+        $res = DB\dbQuery(
+            'SELECT fc.size
+            FROM files f
+            JOIN files_content fc
+                ON f.content_id = fc.id
+            WHERE f.id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = intval($r['size']);
+        }
+        $res->close();
+
+        return $rez;
+    }
+
 
     public function saveUploadParams($p)
     {
@@ -497,7 +604,18 @@ class Files
                 continue;
             }
 
+            //apply general properties from $p to $f (file) variable
+            foreach ($p as $k => $v) {
+                if (in_array($k, array('id', 'pid', 'name', 'title', 'content_id', 'template_id', 'cid', 'oid', 'data'))) {
+                    $f[$k] = $v;
+                }
+            }
+
             @$f['date'] = Util\dateISOToMysql($p['date']);
+
+            if (empty($f['template_id'])) {
+                $f['template_id'] = Config::get('default_file_template');
+            }
 
             $this->storeContent($f);
 
@@ -506,153 +624,54 @@ class Files
                 $pid = $this->mkTreeDir($pid, $f['dir']);
             }
 
-            $file_id = empty($p['id'])
+            $fileId = empty($p['id'])
                 ? $this->getFileId($pid, $f['name'])
                 : intval($p['id']);
 
-            if (!empty($file_id)) {
+            if (!empty($fileId)) {
                 //newversion, replace, rename, autorename, cancel
                 switch (@$p['response']) {
                     case 'newversion':
                         // case 'overwrite':
                         // case 'overwriteall':
 
-                        //make the overwrite process: move record from files to files_versions,
-                        //delete oldest version if exeeds versions limit for file type, add new record to files
-                        $res = DB\dbQuery(
-                            'INSERT INTO files_versions (
-                                file_id
-                                ,content_id
-                                ,`date`
-                                ,name
-                                ,cid
-                                ,uid
-                                ,cdate
-                                ,udate)
-                                SELECT id
-                                     , content_id
-                                     , `date`
-                                     , name
-                                     , cid
-                                     , uid
-                                     , cdate
-                                     , udate
-                                FROM files
-                                WHERE id = $1',
-                            $file_id
-                        ) or die(DB\dbQueryError());
-
+                        $this->saveCurrentVersion($fileId);
                         break;
                     case 'replace':
-                        /* TODO: only mark file as deleted but dont delte it */
-                        DB\dbQuery('CALL p_delete_tree_node($1)', $file_id) or die(DB\dbQueryError());
+                        /* TODO: only mark file as deleted but dont delte it
+                            Note: we cant leae the previous file record if we have a given id for file
+
+                        */
+                        DB\dbQuery('CALL p_delete_tree_node($1)', $fileId) or die(DB\dbQueryError());
                         $solr = new Solr\Client();
-                        $solr->deleteByQuery('id:' . $file_id . ' OR pids: ' . $file_id);
+                        $solr->deleteByQuery('id:' . $fileId . ' OR pids: ' . $fileId);
                         break;
                     case 'rename':
-                        $file_id = null;
+                        $fileId = null;
                         $f['name'] = $p['newName']; //here is the new name
                         break;
                     case 'autorename':
-                        $file_id = null;
+                        $fileId = null;
                         $f['name'] = Objects::getAvailableName($pid, $f['name']);
                         break;
                 }
             }
             $f['type'] = 5;//file
 
-            //create a dummy file object for sending to events
+            //save file
             $fileObject = new Objects\File();
-            $fileObject->setData($f);
-
-            fireEvent('beforeNodeDbCreate', $fileObject);
-            DB\dbQuery(
-                'INSERT INTO tree (
-                    id
-                    ,pid
-                    ,`name`
-                    ,`type`
-                    ,cid
-                    ,uid
-                    ,cdate
-                    ,udate
-                    ,template_id)
-                VALUES(
-                    $1
-                    ,$2
-                    ,$3
-                    ,5
-                    ,$4
-                    ,$4
-                    ,CURRENT_TIMESTAMP
-                    ,CURRENT_TIMESTAMP
-                    ,$5)
-                ON DUPLICATE KEY
-                UPDATE id = last_insert_id($1)
-                    ,pid = $2
-                    ,`name` = $3
-                    ,`type` = 5
-                    ,cid = $4
-                    ,uid = $4
-                    ,cdate = CURRENT_TIMESTAMP
-                    ,udate = CURRENT_TIMESTAMP
-                    ,updated = (updated | 1)',
-                array(
-                    $file_id
-                    ,$pid
-                    ,$f['name']
-                    ,$_SESSION['user']['id']
-                    ,Config::get('default_file_template')
-                )
-            ) or die(DB\dbQueryError());
-            $file_id = DB\dbLastInsertId();
-
-            DB\dbQuery(
-                'INSERT INTO files (
-                    id
-                    ,content_id
-                    ,`date`
-                    ,`name`
-                    ,`title`
-                    ,cid
-                    ,uid
-                    ,cdate
-                    ,udate)
-                VALUES (
-                    $1
-                    ,$2
-                    ,$3
-                    ,$4
-                    ,$5
-                    ,$6
-                    ,$6
-                    ,CURRENT_TIMESTAMP
-                    ,CURRENT_TIMESTAMP)
-                ON duplicate KEY
-                UPDATE content_id = $2
-                    ,`date` = $3
-                    ,`name` = $4
-                    ,`title` = $5
-                    ,cid = $6
-                    ,uid = $6
-                    ,cdate = CURRENT_TIMESTAMP
-                    ,udate = CURRENT_TIMESTAMP',
-                array(
-                    $file_id
-                    ,$p['files'][$fk]['content_id']
-                    ,$p['files'][$fk]['date']
-                    ,$f['name']
-                    ,@$p['title']
-                    ,$_SESSION['user']['id']
-                )
-            ) or die(DB\dbQueryError());
-
-            $f['id'] = $file_id;
-
-            $fileObject->setData($f);
+            if (!empty($fileId)) {
+                $f['id'] = $fileId;
+                if (@$p['response'] == 'replace') {
+                    $fileObject->create($f);
+                } else {
+                    $fileObject->update($f);
+                }
+            } else {
+                $f['id'] = $fileObject->create($f);
+            }
 
             $this->updateFileProperties($f);
-            fireEvent('nodeDbCreate', $fileObject);
         }
 
         return true;
@@ -746,6 +765,7 @@ class Files
 
         return md5_file($file['tmp_name']).'s'.$file['size'];
     }
+
     public function storeContent(&$f, $filePath = false)
     {
         if ($filePath == false) {
@@ -858,6 +878,7 @@ class Files
 
         return $rez;
     }
+
     public static function minimizeUploadedFile(&$file)
     {
         switch ($file['type']) {
@@ -1148,6 +1169,7 @@ class Files
         );
         $file_id = 0;
 
+        //detect file id
         $res = DB\dbQuery(
             'SELECT file_id
             FROM files_versions
@@ -1173,28 +1195,20 @@ class Files
         }
         $res->close();
 
+        //get restored version data
+        $versionData = array();
         $res = DB\dbQuery(
-            'INSERT INTO files_versions (
-                file_id
-                ,content_id
-                ,`date`
-                ,name
-                ,cid
-                ,uid
-                ,cdate
-                ,udate)
-            SELECT id
-                ,content_id
-                ,`date`
-                ,name
-                ,cid
-                ,uid
-                ,cdate
-                ,udate
-            FROM files
+            'SELECT *
+            FROM files_versions v
             WHERE id = $1',
-            $file_id
+            $id
         ) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $versionData = $r;
+        }
+        $res->close();
+
+        $this->saveCurrentVersion($file_id);
 
         DB\dbQuery(
             'INSERT INTO files (
@@ -1206,25 +1220,23 @@ class Files
                 ,uid
                 ,cdate
                 ,udate)
-            SELECT file_id
-                ,content_id
-                ,`date`
-                ,`name`
-                ,cid
-                ,$2
-                ,CURRENT_TIMESTAMP
-                ,CURRENT_TIMESTAMP
-            FROM files_versions v
-            WHERE id = $1 ON duplicate KEY
-                UPDATE content_id = v.content_id
-                    ,`date` = v.date
-                    ,`name` = v.name
-                    ,cid = v.cid
-                    ,uid = $2
-                    ,cdate = CURRENT_TIMESTAMP
-                    ,udate = CURRENT_TIMESTAMP',
+                VALUES (
+                    $1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                )
+            ON DUPLICATE KEY UPDATE
+                content_id = $2
+                ,`date` = $3
+                ,`name` = $4
+                ,cid = $5
+                ,uid = $6
+                ,cdate = CURRENT_TIMESTAMP
+                ,udate = CURRENT_TIMESTAMP',
             array(
-                $id
+                $versionData['file_id']
+                ,$versionData['content_id']
+                ,$versionData['date']
+                ,$versionData['name']
+                ,$versionData['cid']
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
@@ -1235,6 +1247,7 @@ class Files
 
         return $rez;
     }
+
     public function deleteVersion($id)
     {
         $rez = array('success' => true, 'id' => $id);

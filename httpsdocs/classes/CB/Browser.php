@@ -377,6 +377,11 @@ class Browser
             }
         }
 
+        //increase number of returned items
+        if (empty($p['rows'])) {
+            $p['rows'] = 150;
+        }
+
         $search = new Search();
 
         // temporary: Don't use permissions for Objects fields

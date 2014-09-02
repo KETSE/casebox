@@ -45,13 +45,9 @@ Ext.onReady(function(){
     Ext.QuickTips.init();
     Ext.apply(Ext.QuickTips.getQuickTip(), {showDelay: 1500});
 
-
     setTimeout(function(){
         Ext.get('loading').remove();
     }, 10);
-
-
-
 
     CB_User.getLoginInfo( function(r, e){
         if(r.success !== true) {
@@ -72,6 +68,7 @@ Ext.onReady(function(){
         App.mainViewPort.doLayout();
         App.mainViewPort.initCB( r, e );
     });
+
 });
 
 //--------------------------------------------------------------------------- application initialization function
@@ -261,7 +258,6 @@ function initApp(){
             return rez;
         }
         ,datetime: function(v){
-            clog('datetime', v, arguments);
             var rez = '';
             if(Ext.isEmpty(v)) {
                 return rez;
@@ -313,13 +309,12 @@ function initApp(){
         }
         ,filesize: function(v){
             if(isNaN(v) || Ext.isEmpty(v) || (v == '0') || (v <= 0)) {
-                // return '';
-                return  '0 KB';
+                return '';
             }
 
-            // if(v <= 0) {
-            //     return  '0 KB';
-            // }
+            if(v <= 0) {
+                return  '0 KB';
+            }
             else if(v < 1024) return '1 KB';
             else if(v < 1024 * 1024) return (Math.round(v / 1024) + ' KB');
             else{
@@ -922,22 +917,40 @@ function initApp(){
     App.focusFirstField = function(scope){
         scope = Ext.value(scope, this);
         f = function(){
-            a = [];
-            if(scope.find) a = scope.find('isFormField', true);
+            var a = [];
+
+            if(scope.find) {
+                a = scope.find('isFormField', true);
+            }
+
             if(a.length < 1) {
                 return;
             }
-            found = false;
-            i = 0;
+
+            var found = false;
+            var i = 0;
             while( !found && (i<a.length) ){
                 found = ( !Ext.isEmpty(a[i]) && !Ext.isEmpty(a[i].isXType) && !a[i].isXType('radiogroup') && !a[i].isXType('displayfield') && (a[i].hidden !== true) );
                 i++;
             }
-            if(!found) return;
-            c = a[i-1];
-            if(c.isXType('compositefield'))  c = c.items.first();
-            c.focus();
+            if(!found) {
+                return;
+            }
+
+            var c = a[i-1];
+
+            if(c.isXType('compositefield')) {
+                c = c.items.first();
+            }
+
+            if(c && c.focus) {
+                var el = c.getEl();
+                if(el && el.isVisible(true)) {
+                    c.focus();
+                }
+            }
         };
+
         f.defer(500, scope);
     };
 
@@ -975,7 +988,6 @@ function initApp(){
     };
 
     App.showException = function(e){
-        clog('exception arguments', arguments);
         App.hideFailureAlerts = true;
         var msg = '';
 

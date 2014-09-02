@@ -152,15 +152,7 @@ class Files
         }
         $files->storeFiles($p);
 
-        $rez = array('success' => true, 'data' => array());
-        $objects = new Objects();
-        foreach ($p['files'] as $k => &$f) {
-            $p['id'] = $f['id'];
-            $file_rez = $objects->save($p);
-            if ($file_rez['success']) {
-                $rez['data'][] = $file_rez['data'];
-            }
-        }
+        $rez = array('success' => true, 'data' => $p['files']);
 
         return $rez;
     }
@@ -244,6 +236,8 @@ class Files
 
         if (!is_numeric($p['oid'])) {
             return 'invalid owner specified';
+        } elseif (empty($p['cid'])) {
+            $p['cid'] = $p['oid'];
         }
 
         return true;

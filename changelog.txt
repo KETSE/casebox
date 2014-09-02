@@ -1,3 +1,94 @@
+CaseBox 1.9.325 (2014-09-02)
+==============================
+Fixed Bugs:
+----------
+- Search hides all default grid collumns because no DC(display columns) replied.
+    Changed to hide default columns only when responce returns any DC.
+
+CaseBox 1.9.324 (2014-09-01)
+==============================
+New Features, Improvements
+--------------------------
+- Add "required: true/false" to template field config. Default: false.
+
+Fixed Bugs:
+----------
+- js error after inline editing in vertical grid
+
+CaseBox 1.9.323 (2014-09-01)
+==============================
+New Features, Improvements
+--------------------------
+- added check and a display message for deactivated cores.
+- added validation mechanism for template fields. For now just json validato defined
+    to set json validator for a template field, add in its config:
+        "validator": "json"
+- exclude user who made the action on a task from notified users
+- Use http://highlightjs.org/ in RightPanel for preview of textual files
+- Grid DC: shows only the columns that are specified (hide sys_cols)
+- increase 'limit' in _objects field for editor=form
+- Pivot table onClick: activeFilters are reset
+
+Notes
+--------------------------
+- Apache config updated to load highlightjs script
+
+CaseBox 1.9.320 (2014-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- Button "Вставить" doesn't work in a newly added templates for ipc
+- Jump to login if preview required re-login
+
+Fixed Bugs:
+----------
+- Edit button for webDav files always show dlg
+- template_id not set for uploaded files.
+    Because of last refactoring changes related to Api File upload.
+
+CaseBox 1.9.320 (2014-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- added "default_facet_configs" & "images_display_size" options to default casebox db instance
+    (casebox/install/mysql/casebox-20140830.sql)
+
+Fixed Bugs:
+----------
+- can't add tasks in dev.casebox.org/dev & Demo core issues
+- DB Error on dblClick virtual node
+- API method \CB\Api\Files->upload() creates zero sized version history
+
+CaseBox 1.9.319 (2014-08-28)
+==============================
+New Features, Improvements
+--------------------------
+- API method \CB\Api\Files->upload() creates zero sized version history
+- Add "editMethod" as a synonym for "createMethod" in tmpl config
+- If search conditions doesn't change, clicking Search in a search template has no effect
+- Field ordering in Preview and Edit mode not the same, bug in Preview mode
+- Links are not rendered ok in comments if they have '?'
+- Remember the state of FilePreview panel
+- Text files not versioned & dbClick should edit instead of download
+- Comments via email not sent to subscribers & Remove quoted text
+- User management timeout. Added a message on user management session expire.
+    Window is automaticly closed.
+
+Fixed Bugs:
+----------
+- Editing a node in separate tabsheet issues
+- Try to edit html and save not working
+- Creating a new Document Template in tabsheet gives error
+- BrowserGrid disappears when editing objects in TabSheet
+- Title inconsistency for CaseTasks + '0KB' now appears for all items
+- File big icons are not displayed in Preview panel
+- Objects field. source=users, search user by name
+- HTML fields not shown when editing a record
+
+Notes
+----------
+- update database structure with v.1.9.319.sql
+
 CaseBox 1.9.271 (2014-08-26)
 ==============================
 New Features, Improvements

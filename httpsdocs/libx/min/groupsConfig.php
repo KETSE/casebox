@@ -25,11 +25,11 @@ return array_merge(
             ,'//css/calendar.css'
             ,'//css/date-time-ux.css'
             ,'//css/spinner/Spinner.css'
+            ,'//libx/highlight/default.css'
         )
 
         ,'js' => array(
             '//js/iso8601.min.js'
-            ,'//js/pdfobject.js'
             ,'//js/ux/md5/spark-md5.min.js'
             ,'//js/ux/md5/Ext.ux.FileMD5.js'
             ,'//js/ux/Ext.ux.WebkitEntriesIterator.js'
@@ -89,6 +89,7 @@ return array_merge(
             ,'//js/CB.UsersGroups.js'
 
             ,'//js/CB.Account.js'
+            ,'//js/Validators.js'
             ,'//js/Util.js'
 
             ,'//js/CB.DD.js'

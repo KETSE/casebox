@@ -483,7 +483,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
 
         var tr = CB.DB.templates.getById(data.template_id);
 
-        if(tr && (tr.get('cfg').createMethod == 'inline')) {
+        if(tr && (Ext.value(tr.get('cfg').editMethod, tr.get('cfg').createMethod) == 'inline')) {
             CB_Objects.create(data, this.processCreateInlineObject, this);
         } else {
             this.fireEvent('createobject', data, e);
@@ -539,12 +539,12 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
             return;
         }
 
-        this.onOpenClick(b, e);
+        this.onEditClick(b, e);
     }
 
     ,onEditClick: function (b, e) {
         var n = this.getSelectionModel().getSelectedNode();
-        if(Ext.isEmpty(n)) {
+        if(Ext.isEmpty(n) || isNaN(n.attributes.nid)) {
             return;
         }
 
@@ -563,7 +563,7 @@ CB.browser.Tree = Ext.extend(Ext.tree.TreePanel,{
         if(Ext.isEmpty(n)) {
             return;
         }
-        var id = 'view'+n.attributes.nid;
+        var id = 'view' + n.attributes.nid;
         if(!App.activateTab(App.mainTabPanel, id)) {
             App.addTab(
                 App.mainTabPanel

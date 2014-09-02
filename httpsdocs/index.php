@@ -189,6 +189,8 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
 
 ?>
 
+<script type="text/javascript" src="/libx/highlight/highlight.pack.js"></script>
+
 <script type="text/javascript">setProgress('<?php echo L\get('Loading_ExtJS_UI')?>', '60%')</script>
 
 <?php

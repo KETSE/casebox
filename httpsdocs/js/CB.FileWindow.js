@@ -404,7 +404,11 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
     ,onOpenVersionEvent: function(data, pluginComponent) {
         this.loadedVersionId = data.id;
 
-        this.previewPanel.loadPreview(this.data.id, data.id);
+        if(this.previewPanel) {
+            this.previewPanel.loadPreview(this.data.id, data.id);
+        } else {
+            Ext.Msg.alert(L.Info, 'Editing file versions is not yet implemented.');
+        }
 
         this.separators.restoreVersion.setVisible(!Ext.isEmpty(data.id));
         this.actions.restoreVersion.setHidden(Ext.isEmpty(data.id));
@@ -473,10 +477,13 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
     ,onSaveClick: function(b, e){
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
 
+        var ai = this.cardPanel.getLayout().activeItem;
         CB_Files.saveContent(
             {
                 id: this.data.id
-                ,data: this.cardPanel.getLayout().activeItem.getSession().getValue()
+                ,data: ai.getSession
+                    ? ai.getSession().getValue()
+                    : ai.getValue()
             }
             ,this.processSaveClick
             ,this
@@ -492,6 +499,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
     ,processSaveClick: function(r, e){
         this.getEl().unmask();
         this.actions.save.setDisabled(Ext.isEmpty(this.sourceEditor));
+        this.objectPanel.onReloadClick();
     }
 
     /**
@@ -517,7 +525,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
         //
         App.openWebdavDocument(
             this.data
-            ,false
+            ,(b.text != L.DirectEditLink)
         );
     }
 
@@ -552,6 +560,7 @@ CB.FileWindow = Ext.extend(Ext.Panel, {
             this.loadedVersionId
             ,function(r, e){
                 App.mainViewPort.fireEvent('fileuploaded', {data: r.data});
+                this.loadContent();
                 this.objectPanel.onReloadClick();
             }
             ,this

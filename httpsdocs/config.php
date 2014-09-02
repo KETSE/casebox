@@ -36,6 +36,10 @@ DB\connectWithParams($cfg);
 require_once 'lib/Util.php';
 $config = Config::load($cfg);
 
+if (@$config['core_active'] != 1) {
+    die('Core is not active at te moment, please try again later.');
+}
+
 //connect other database if specified in config for core
 DB\connectWithParams($config);
 

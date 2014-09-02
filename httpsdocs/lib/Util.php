@@ -623,7 +623,12 @@ function replaceUrlsWithLinks($text)
             $completeUrl = $match[1][0] ? $url : "http://$url";
 
             // Print the hyperlink.
-            $rez .= '<a target="_blank" href="' . htmlspecialchars($completeUrl) . '">' . htmlspecialchars("$domain$port$path") . '</a>';
+            $rez .= '<a target="_blank" href="' .
+                htmlspecialchars($completeUrl) .
+                '">' .
+                // htmlspecialchars("$domain$port$path") .
+                htmlspecialchars("$completeUrl") .
+                '</a>';
         } else {
             // Not a valid URL.
             $rez .= htmlspecialchars($url);

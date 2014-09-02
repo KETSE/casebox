@@ -275,6 +275,8 @@ function removeContentExtraBlock($content, $mail)
             $content = substr($content, 0, $idx);
         }
     }
+    //remove quoted block
+    $content = preg_replace('/(^\w.+:[\r\n])?(^>.*(\n|\r|$)){2,}/miu', '', $content);
 
     //remove signature block
     $content = preg_replace('/[\n\r]+--[\n\r]+.*/i', '', $content);

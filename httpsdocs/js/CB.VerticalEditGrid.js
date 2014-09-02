@@ -16,6 +16,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             ,'info'
             ,'type'
             ,'cond' //condition used for search templates
+            ,'valid' //condition used for search templates
         ];
 
         // define helperTree if owner does not have already defined one
@@ -86,7 +87,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 ,cellclick:  this.onCellClick
                 ,cellcontextmenu: this.onPopupMenu
             }
-            ,statefull: true
+            ,stateful: true
             ,stateId: Ext.value(this.stateId, 'veg')//vertical edit grid
             ,viewConfig: viewCfg
             ,editors: {
@@ -186,11 +187,27 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                 }
                 var tr = n.attributes.templateRecord;
 
+                //check validation field
+                if (record.get('valid') === false) {
+                    meta.css = ' x-form-invalid';
+                    meta.attr = 'ext:qtip="Value did not pass validation"; ext:qclass="x-form-invalid-tip"';
+                } else {
+                    //Check required field
+                    if(tr.get('cfg').required && Ext.isEmpty(v)) {
+                        meta.css = ' x-form-invalid';
+                        meta.attr = 'ext:qtip="' + Ext.form.TextField.prototype.blankText + '"; ext:qclass="x-form-invalid-tip"';
+                    } else {
+                        // Value is valid
+                        meta.css = '';
+                        meta.attr = 'ext:qtip=""';
+                    }
+                }
+
                 if(this.renderers && this.renderers[tr.get('type')]) {
                     return this.renderers[tr.get('type')](v, this);
                 }
                 if(!Ext.isEmpty(tr.get('cfg').height)) {
-                    meta.attr = ' style="min-height:' + tr.get('cfg').height + 'px"';
+                    meta.attr += ' style="min-height:' + tr.get('cfg').height + 'px"';
                 }
 
                 if(Ext.isEmpty(v)) return '';
@@ -249,6 +266,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
             }
         }
     }
+
     ,onNodeDragOver: function (targetData, source, e, data){
         var rez = this.dropZone.dropNotAllowed;
         if(!targetData.record ||
@@ -462,6 +480,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
                     ,info: attr.value.info
                     ,type: r.get('type')
                     ,cond: attr.value.cond
+                    ,valid: attr.valid
                 })
             );
         }
@@ -543,7 +562,7 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         }
         if(this.editors && this.editors[t]) {
             col.setEditor(new Ext.grid.GridEditor(this.editors[t](this)));
-        }else{
+        } else {
             e.fieldRecord = this.helperTree.getNode(e.record.get('id')).attributes.templateRecord;
 
             //check if custom source and send fields
@@ -618,6 +637,19 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 
     ,onAfterEditProperty: function(e){
         var nodeId = e.record.get('id');
+
+        //check if field has validator set and notify if validation not passed
+        var tr = this.helperTree.getNode(e.record.get('id')).attributes.templateRecord;
+        var validator = tr.get('cfg').validator;
+        if(!Ext.isEmpty(validator)) {
+            if(!Ext.isDefined(CB.Validators[validator])) {
+                plog('Undefined field validator: ' + validator);
+            } else {
+                this.helperTree.getNode(nodeId).attributes.valid = CB.Validators[validator](e.value);
+            }
+        }
+
+
         if(e.field == 'value'){
             if(e.value != e.originalValue){
                 this.helperTree.resetChildValues(nodeId);
@@ -696,6 +728,31 @@ CB.VerticalEditGrid = Ext.extend(Ext.grid.EditorGridPanel, {
         this.helperTree.deleteDuplicate(r.get('id'));
         this.syncRecordsWithHelper();
         this.fireEvent('change');
+    }
+
+    /**
+     * check if every record meets required config option
+     * and is valid if validator set
+     * @return bool
+     */
+    ,isValid: function() {
+        var rez = true;
+        this.store.each(
+            function(r) {
+                var n = this.helperTree.getNode(r.get('id'));
+                if((r.get('valid') === false) ||
+                    (n.attributes.templateRecord.get('cfg').required &&
+                    Ext.isEmpty(r.get('value'))
+                    )
+                ) {
+                    rez = false;
+                }
+                return rez;
+            }
+            ,this
+        );
+
+        return rez;
     }
 });
 

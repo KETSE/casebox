@@ -150,7 +150,7 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
         $rez = date('Y-m-d H:i:s') . ": \n\r<br /><hr />Query error: ".mysqli_error($dbh).
             "<hr /><br />\n\r";
         if (!empty($GLOBALS['last_sql'])) {
-            $rez = "\n\r<br /><hr />Query: ".$GLOBALS['last_sql'].$rez;
+            $rez .= "\n\r<br /><hr />Query: ".$GLOBALS['last_sql'].$rez;
         }
         error_log($rez, 3, \CB\Config::get('error_log', \CB\LOGS_DIR.'cb_error_log'));
 

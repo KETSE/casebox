@@ -246,10 +246,10 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
                     ,listeners: {
                         scope: this
                         ,change: function(){
-                            this.actions.save.setDisabled(false);
+                            this.actions.save.setDisabled(!this.items.itemAt(1).isValid());
                         }
                         ,clear: function(){
-                            this.actions.save.setDisabled(true);
+                            this.actions.save.setDisabled(!this.items.itemAt(1).isValid());
                         }
                         ,loaded: this.onCardItemLoaded
                     }
@@ -420,8 +420,12 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         //check if we are not in edit mode
         if(this.getLayout().activeItem.getXType() !== 'CBEditObject') {
 
-            //automatic switch to plugins panel
-            this.onViewChangeClick(0);
+            //automatic switch to plugins panel if different object types
+            if(CB.DB.templates.getType(this.requestedLoadData.template_id) !=
+                CB.DB.templates.getType(this.loadedData.template_id)
+            ) {
+                this.onViewChangeClick(0);
+            }
 
             this.items.itemAt(0).clear();
 
@@ -445,7 +449,6 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         this.addParamsToHistory(this.loadedData);
 
         this.loadedData = Ext.apply({id: id}, this.requestedLoadData);
-
         if(Ext.isDefined(this.loadedData.viewIndex)) {
             this.onViewChangeClick(this.loadedData.viewIndex, false);
         }
@@ -642,7 +645,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
         var p = Ext.apply({}, this.loadedData);
 
         var templateCfg = CB.DB.templates.getProperty(p.template_id, 'cfg');
-        if(templateCfg && templateCfg.createMethod == 'tabsheet') {
+        if(templateCfg && (Ext.value(templateCfg.editMethod, templateCfg.createMethod) == 'tabsheet')) {
                 App.mainViewPort.openObject(p);
         } else {
             this.edit(p);

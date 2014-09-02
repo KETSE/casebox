@@ -6,7 +6,7 @@ CB.objects.plugins.Thumb = Ext.extend(CB.objects.plugins.Base, {
         var tpl = new Ext.XTemplate(
             '<tpl for=".">'
                 ,'<div style="width: 100%; text-align: center; margin: 30px 0">'
-                ,'{[ Ext.isEmpty(values.html) ? "<img class=\\"click preview-thumb {cls}\\" src=\\"'+Ext.BLANK_IMAGE_URL+'\\" alt=\\"'+L.Preview +'\\" />" : values.html ]}'
+                ,'{[ Ext.isEmpty(values.html) ? "<img class=\\"click preview-thumb " + values.cls + "\\" src=\\"'+Ext.BLANK_IMAGE_URL+'\\" alt=\\"'+L.Preview +'\\" />" : values.html ]}'
                 ,'</div>'
             ,'</tpl>'
         );
