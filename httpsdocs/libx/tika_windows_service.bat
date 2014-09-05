@@ -1,0 +1,1 @@
+java -Dfile.encoding=UTF8 -jar tika-server-1.4.jar --port 9998

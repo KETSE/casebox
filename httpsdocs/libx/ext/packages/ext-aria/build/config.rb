@@ -1,0 +1,1 @@
+require '../sass/config.rb'

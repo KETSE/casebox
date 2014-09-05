@@ -1,0 +1,37 @@
+.icon-template {background-image: url(i/ico/document-invoice.png) !important; background-position: 0 50%; background-repeat: no-repeat;}
+.icon-snippet {background-image: url(i/ico/document-snippet.png) !important; background-position: 0 50%; background-repeat: no-repeat;}
+
+.icon-arrow-left		{ background-image: url(i/ico/arrow-180-small.png) !important; background-position: 0 50%; background-repeat: no-repeat; padding-left: 16px }
+.icon-arrow-left-medium		{ background-image: url(i/ico/arrow-180-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
+.icon-arrow-left-medium-green	{ background-image: url(i/ico/arrow-180-medium-green.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
+.icon-arrow-right		{ background-image: url(i/ico/arrow-000-small.png) !important; background-position: 0 50%; background-repeat: no-repeat; padding-left: 16px }
+.icon-arrow-right-medium	{ background-image: url(i/ico/arrow-000-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat !important; padding-left: 16px }
+.icon-case_card			{ background-image:url(i/ico/card-address.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-complaint			{ background-image: url(i/ico/fire.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-complaint-subjects	{ background-image: url(i/ico/fire--exclamation.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-info-action		{ background-image:url(i/ico/infocard-small.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-decision			{ background-image:url(i/ico/auction-hammer.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-echr_complaint 		{ background-image:url(i/ico/bank.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-echr_decision		{ background-image:url(i/ico/balance.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-petition			{ background-image:url(i/ico/lightning.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-balloon			{ background-image: url(i/ico/balloon.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-bell			{ background-image:url(i/ico/bell.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-blog-blue			{ background-image: url(i/ico/blog-blue.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-blog-magenta		{ background-image: url(i/ico/blog-magenta.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-blue-document-small	{ background-image: url(i/ico/blue-document-small.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-committee-phase 		{ background-image: url(i/ico/document-horizontal-text.png) !important; background-position: 0 50%; background-repeat: no-repeat;}
+.icon-document-medium		{ background-image: url(i/ico/document-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-document-stamp		{ background-image: url(i/ico/document-stamp.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-document-text		{ background-image: url(i/ico/document-text.png) !important; background-position: 0% 50%; background-repeat: no-repeat }
+.icon-mail			{ background-image:url(i/ico/mail.png) !important; background-position: 0 50%; background-repeat: no-repeat }
+.icon-object1			{ background-image: url(i/ico/document.png) !important; background-position: 0 50%; background-repeat: no-repeat} /* case object */
+.icon-object2			{ background-image: url(i/ico/arrow-000-medium.png) !important; background-position: 0 50%; background-repeat: no-repeat} /* incomming action */
+.icon-object3			{ background-image: url(i/ico/arrow-180-medium-green.png) !important; background-position: 0 50%; background-repeat: no-repeat} /* outgoing action */
+.icon-object4			{ background-image: url(i/ico/user-yellow.png) !important; background-position: 0 50%; background-repeat: no-repeat} /* applicant */
+.icon-object5           { background-image: url(i/ico/user-thief-baldie.png) !important; background-position: 0 50%; background-repeat: no-repeat} /* subject */
+.icon-object6           { background-image: url(i/ico/user-gray.png) !important; background-position: 0 50%; background-repeat: no-repeat} /* user */
+.icon-object7           { background-image: url(i/ico/user-black.png) !important; background-position: 0 50%; background-repeat: no-repeat} /* contact */
+.icon-object8           { background-image: url(i/ico/building.png) !important; background-position: 0 50%; background-repeat: no-repeat} /* organization */
+.icon-zone          { background-image: url(i/ico/zone.png) !important; background-position: 0 50%; background-repeat: no-repeat}
+.icon-applicant         { background-image: url(i/ico/user-white.png) !important; background-position: 0 50%; background-repeat: no-repeat;}
+.icon-suspect			{ background-image: url(i/ico/user-thief-baldie.png) !important; background-position: 0 50%; background-repeat: no-repeat;}

@@ -1,0 +1,24 @@
+{top}
+<div style="max-width:600px;background-color: #FFF; font: 13px/normal Arial,sans-serif">
+<h2 style="{name_style}">{name}</h2>
+<div style="padding: 10px 0px">{datetime_period}</div>
+<div style="color: #777; padding-bottom: 10px; border-bottom: 1px solid #EEE;">{description}</div>
+<table style="width: 100%; margin-top: 10px; font: 13px/normal Arial,sans-serif;"><tbody>
+<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">{Status}:</td><td style="padding: 5px 0; vertical-align:top"><span class="{status_style}">{status_text}</span></td></tr>
+<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">{Importance}:</td><td style="padding: 5px 0; vertical-align:top">{importance_text}</td></tr>
+<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">{Category}:</td><td style="padding: 5px 0; vertical-align:top">{category_text}</td></tr>
+<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">{Path}:</td><td style="padding: 5px 0; color: #777; vertical-align:top">{path_text}</td></tr>
+<tr><td style="width: 1%; padding: 5px 15px 5px 0; color: #777; vertical-align:top">{Owner}:</td><td style="padding: 5px 0; vertical-align:top"><table style="font-family: 'lucida grande',tahoma,verdana,arial,sans-serif; font-size: 11px; color: #333; width: 100%; display: table; border-collapse: separate; border-spacing: 0;"><tbody>
+        <tr><td style="width: 1% !important; padding-right: 5px; vertical-align:top"><img style="width:32px;height:32px" src="{owner_image}"></td>
+            <td style="vertical-align:top"><b>{owner_text}</b><p style="color:#777;margin:0;padding:0">{Created}:
+               <span style="color: #777" title="{full_created_date_text}">{created_date_text}</span></p>
+           </td>
+        </tr>
+    </tbody>
+    </table>
+</td></tr>
+{assigned_text}
+{files_text}
+{reminders_text}
+</tbody></table></div>
+{bottom}

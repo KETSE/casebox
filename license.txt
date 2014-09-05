@@ -1,0 +1,21 @@
+CaseBox 0.9 - Content Management Platform
+Copyright (c) 2011-2014, KETSE, HURIDOCS
+All rights reserved.
+Email: info@ketse.com, info@huridocs.org
+
+https://www.casebox.org/license/
+
+Open Source License
+------------------------------------------------------------------------------------------
+This version of CaseBox is licensed under the terms of the Open Source AGPL 3.0 license.
+
+http://www.gnu.org/licenses/agpl-3.0.html
+
+
+--
+
+This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+AND NON-INFRINGEMENT OF THIRD-PARTY INTELLECTUAL PROPERTY RIGHTS.
+See the GNU General Public License for more details.
+

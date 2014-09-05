@@ -1,0 +1,2398 @@
+CaseBox 1.9.325 (2014-09-02)
+==============================
+Fixed Bugs:
+----------
+- Search hides all default grid collumns because no DC(display columns) replied.
+    Changed to hide default columns only when responce returns any DC.
+
+CaseBox 1.9.324 (2014-09-01)
+==============================
+New Features, Improvements
+--------------------------
+- Add "required: true/false" to template field config. Default: false.
+
+Fixed Bugs:
+----------
+- js error after inline editing in vertical grid
+
+CaseBox 1.9.323 (2014-09-01)
+==============================
+New Features, Improvements
+--------------------------
+- added check and a display message for deactivated cores.
+- added validation mechanism for template fields. For now just json validato defined
+    to set json validator for a template field, add in its config:
+        "validator": "json"
+- exclude user who made the action on a task from notified users
+- Use http://highlightjs.org/ in RightPanel for preview of textual files
+- Grid DC: shows only the columns that are specified (hide sys_cols)
+- increase 'limit' in _objects field for editor=form
+- Pivot table onClick: activeFilters are reset
+
+Notes
+--------------------------
+- Apache config updated to load highlightjs script
+
+CaseBox 1.9.320 (2014-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- Button "Вставить" doesn't work in a newly added templates for ipc
+- Jump to login if preview required re-login
+
+Fixed Bugs:
+----------
+- Edit button for webDav files always show dlg
+- template_id not set for uploaded files.
+    Because of last refactoring changes related to Api File upload.
+
+CaseBox 1.9.320 (2014-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- added "default_facet_configs" & "images_display_size" options to default casebox db instance
+    (casebox/install/mysql/casebox-20140830.sql)
+
+Fixed Bugs:
+----------
+- can't add tasks in dev.casebox.org/dev & Demo core issues
+- DB Error on dblClick virtual node
+- API method \CB\Api\Files->upload() creates zero sized version history
+
+CaseBox 1.9.319 (2014-08-28)
+==============================
+New Features, Improvements
+--------------------------
+- API method \CB\Api\Files->upload() creates zero sized version history
+- Add "editMethod" as a synonym for "createMethod" in tmpl config
+- If search conditions doesn't change, clicking Search in a search template has no effect
+- Field ordering in Preview and Edit mode not the same, bug in Preview mode
+- Links are not rendered ok in comments if they have '?'
+- Remember the state of FilePreview panel
+- Text files not versioned & dbClick should edit instead of download
+- Comments via email not sent to subscribers & Remove quoted text
+- User management timeout. Added a message on user management session expire.
+    Window is automaticly closed.
+
+Fixed Bugs:
+----------
+- Editing a node in separate tabsheet issues
+- Try to edit html and save not working
+- Creating a new Document Template in tabsheet gives error
+- BrowserGrid disappears when editing objects in TabSheet
+- Title inconsistency for CaseTasks + '0KB' now appears for all items
+- File big icons are not displayed in Preview panel
+- Objects field. source=users, search user by name
+- HTML fields not shown when editing a record
+
+Notes
+----------
+- update database structure with v.1.9.319.sql
+
+CaseBox 1.9.271 (2014-08-26)
+==============================
+New Features, Improvements
+--------------------------
+- useless messages in debug_log
+- Include unoconv in CB
+- .php files are not highligted when editing
+- Review vFolders in Demo core (CaseTasks doesn't work for ex)
+- 'Edit' button should appear only for editable files
+- Field of type date not indexed in SOLR
+- Better error handling, messages. more user friendly
+
+CaseBox 1.9.270 (2014-08-23)
+==============================
+Improvements
+----------
+- Permissions are not used for Object fields ('skipSecurity' parameter can be sent to Search.php)
+- Tasks, RecycleBin vFolder acceptedPath refactored
+  (acceptedPath for Tasks is common and should be implemented in a separate class
+   'BaseRestricted', then many vFolder plugins will use this Class, it ensures children are loaded only for
+   nodes of the same class)
+
+CaseBox 1.9.269 (2014-08-23)
+==============================
+Fixed Bugs:
+----------
+- DbNode issues
+
+CaseBox 1.9.268 (2014-08-23)
+==============================
+Fixed Bugs:
+----------
+- fix virtual nodes issues related to virtual root node
+
+CaseBox 1.9.267 (2014-08-23)
+==============================
+New Features, Improvements
+--------------------------
+- add possibility to set create menu from tree virtual nodes
+
+CaseBox 1.9.266 (2014-08-22)
+==============================
+New Features, Improvements
+--------------------------
+- update to solr 4.9.0
+
+CaseBox 1.9.259 (2014-08-21)
+==============================
+New Features, Improvements
+--------------------------
+- Issues with uploading a file that existed before
+- Delete email footer when adding them as comments
+
+Fixed Bugs:
+----------
+- various versioning issues
+- Comments are not sent to "@username"
+
+CaseBox 1.9.258 (2014-08-19)
+==============================
+Fixed Bugs:
+----------
+- redeclaring lenguage functions error occurs when retreiving comment emails
+    for more than one core.
+
+CaseBox 1.9.257 (2014-08-15)
+==============================
+New Features, Improvements
+--------------------------
+- support a direct folder request /edit-{nodeId}/
+- enabled webDav locking for LibreOffice
+  (issue with locking partially fixed in 4.3.0)
+  https://www.libreoffice.org/bugzilla/show_bug.cgi?id=72157
+
+CaseBox 1.9.256 (2014-08-14)
+==============================
+New Features, Improvements
+--------------------------
+- removed old database tables:
+    actions_log
+    users_groups_data   - the old user properties could be missing
+        if user profile has not been resaved.
+    users_groups_duplicates
+- removed OlgObject class cript
+
+Fixed Bugs:
+----------
+- added security checks to upload files process
+- Username not shown correctly in security panel for an object
+
+CaseBox 1.9.238 (2014-08-11)
+==============================
+New Features, Improvements
+--------------------------
+- upgraded SabreDAV from 1.8 to 2.0.3 (released: July 14th, 2014)
+  NOTICE: change webdav_url to "https://{davsubdomain}.caebox.org/{core_name}/edit-{node_id}/{name}"
+  Example: "https://davdev.casebox.org/{core_name}/edit-{node_id}/{name}"
+  Mounting under MacOS works, but there are issues with file editing, working on this
+- upgraded ApacheTika from 1.4 to 1.5
+- added a small hack to init.php to allow loading without authentication ($webDAVMode = 1;)
+
+CaseBox 1.9.237 (2014-08-04)
+==============================
+New Features, Improvements
+--------------------------
+- in config 'images_display_size' could be set for displaying images
+    lower or equal than specified size (in bytes), in preview panel, instead of their thumbnails.
+- added img.fit-300 in css for small images displayed instead of thumb
+- removed debug commands from CreateMenu.php
+
+Fixed Bugs:
+----------
+- notification appears in CreateMenu.php if in menu table there is an id that doent exist in tree
+
+CaseBox 1.9.236 (2014-08-01)
+==============================
+New Features, Improvements
+--------------------------
+- Removed PDFObject (security hole for IE), only native PDF preview will work
+- Dislpay pictures in PreviewPanel if filesize < 30KB
+- Add "Metadata" menu item to File preview toolbar menu
+- changed/moved create menu logic to server side, because it needs more details of the selected path
+- render #number as link and subscribe @username to the object
+- Long queries to SOLR due to security_set_id
+    Added logic to get only security sets related to a given id/pid
+- Embed user photos in emails & use "timestamp" in URL to photos inside CB
+- moved "X-Frame-Options" header option from apache config to router.php
+  because Ext.form.BasicForm internally use dynamic iframe for upload.
+
+Fixed Bugs:
+----------
+- How to fix corrupted Path field?
+    UPDATE tree_info SET path = f_get_tree_path(id);
+- replaced usage of LENGTH function to CHAR_LENGTH in mysql triggers.
+    This caused path problems for multibyte strings.
+- title of email notifications for tasks did not contain path
+
+Notes
+----------
+- update database structure with v.1.9.236.sql
+  Solr should be reindexed to update mailformed paths
+
+CaseBox 1.9.235 (2014-07-28)
+==============================
+New Features, Improvements
+--------------------------
+- Preview of object should not be strictly linked to the Grid + grid onClick
+- Small improvement to Comments
+
+Fixed Bugs:
+----------
+- Comments not sorted ok
+- reloading casebox didnt sort last selected folder according to last state
+- sorting by default solr columns was overwriten by DC plugin
+- minus sign was stripped from core names on init resulting in error
+
+CaseBox 1.9.234 (2014-07-24)
+==============================
+New Features, Improvements
+--------------------------
+- Column sorting should take into account field type
+- security groups will use  only their name field for display
+- D&D of a sibling node to another one should refresh the Grid
+
+Fixed Bugs:
+----------
+- Right panel width = 0 after collapsing and switching to another panel
+- ActionLog from one core visible in another core
+- grid sorting problems for custom display columns
+- CB tries to sort using SOLR instead of clientSide sorting
+- misspelled var in Notifications/Objects
+
+CaseBox 1.9.233 (2014-07-22)
+==============================
+New Features, Improvements
+--------------------------
+- Column sorting should take into account field type
+- 'fq' parameter doesn't work in Objects fields
+    It was filtered from user input. Now it gets from db.
+- excluded action owners from notifications (even if subscribed).
+
+Fixed Bugs:
+----------
+- Clicking on Path in ObjProperties plugin doesn't work well
+- ActionLog from one core visible in another core
+- sorting problems for custom columns
+- Get JS error when deleting fields
+- User First/Last names stripped utf chars
+
+CaseBox 1.9.232 (2014-07-19)
+==============================
+New Features, Improvements
+--------------------------
+- CB-01-030 Missing HTTP Security Headers and Name-Randomization
+    added following headers in apache config:
+        X-Content-Type-Options: no-sniff
+        X-Download-Options: noopen
+        X-Frame-Options: deny
+        X-XSS-Protection: 1; mode=block
+
+- CB-01-028 Limited Path Traversal Vulnerability in CB\Files
+    filtered posted date field on file uploads
+
+- CB-01-026 Missing SSL Verification in Yubikey Secret Key Request
+    enabled ssl verification
+
+- CB-01-019 Unsanitized CORE_NAME could lead to Vulnerabilities
+    filtered core_name param
+
+- CB-01-016 Potential Second-Order Cross-Site Scripting in TSV Auth
+    applied htmlspecialchars to verificationResult
+
+- CB-01-008 Information Disclosure based on enabled PHP Error Display
+    added following line in apache config for virtual host: php_admin_value expose_php Off
+
+- XSS, AuditLog, default demo core
+    Note: Log solr core should be cleared
+
+- HtmlPurifier class from CB has been renamed to Purify
+    added method for filenames purify.
+
+- Custom file fields not indexed in SOLR
+
+- Sorting by solr/arbitrary columns. Sorting grid view locally for custom display columns
+    that do not have solr_column_name set.
+
+- Add 'Filesize' property in PropertiesPlugin for right panel for files
+
+- using mb_encode_mimeheader on user data used for sender in notifications (CB-01-010)
+
+- implemented functionality for items popupmenu of files plugin from right panel
+
+- added common function deleteIds for all stores
+
+- Task template class should save in SOLR custom fields
+
+- Improve content sanitizing in Javascript. Overwriten ext function for striping tags with other method
+
+Fixed Bugs:
+----------
+- date did not set for task templates without allday field
+- added htmlspecialchars_decode in AutSetFields plugin to skip double encoding for titles
+- upload didn't trigger when selecting same file(s) second time
+
+CaseBox 1.9.228 (2014-07-09)
+==============================
+Security issues:
+----------
+- escaped params in Search class and removed 'fq' param from user input (it can only be specified by server side scripts) (CB-01-012)
+- Persistent XSS via File Name in Upload Queue (CB-01-025)
+- Apache SOLR Injection Deletes All Documents (CB-01-027)
+- Persistent Passive XSS in Item Title (High) (CB-01-024)
+- User profile first_name & last_name injection possible (CB-01-010)
+- Uploading wrong user profile picture exposes some sensitive server data (CB-01-011)
+
+Fixed Bugs:
+----------
+- SVG file preview doesn't work
+
+CaseBox 1.9.227 (2014-07-08)
+==============================
+New Features, Improvements
+--------------------------
+- added 'varchar' field types in getSolrData (todo: add other field types to be indexed in custom SOLR core)
+- changed Phone field to Text in JS, and removing all non-phone chars in PHP before saving
+- added strict checks in preview.php for the 'f' parameter, fix for CB-01-001
+- using htmlentities instead of striptags in user first/last names, fix for CB-01-010
+- removed index.php from /api/, REST API to be implemented with OAuth later. fix for CB-01-015
+- no more processing of PHP in AutoTitle templates. fix for CB-01-014
+
+
+CaseBox 1.9.226 (2014-07-06)
+==============================
+New Features, Improvements
+--------------------------
+- When #id, @user are rendered in comments, should be at render time
+- removed unique key `template_id__name` for templates_structure table
+- Delete button doesn't work in rightPanel Contents plugin
+- added strip_tags on confirmUploadRequest
+- Replace "id: nnnn" with "#nnnn" in search by ID
+
+Fixed Bugs:
+----------
+- Path incorrect & Records are treated as files
+- shashes in Breadcrumbs not rendering ok
+
+CaseBox 1.9.225 (2014-07-02)
+==============================
+Fixed Bugs:
+----------
+- fix comments display and notifications sent
+
+CaseBox 1.9.224 (2014-07-02)
+==============================
+New Features, Improvements
+--------------------------
+- profile photo upload adjustments
+
+CaseBox 1.9.223 (2014-07-02)
+==============================
+New Features, Improvements
+--------------------------
+- changed config file for apache virtual host to improve SSL
+- weak fix. Issue CB-01-012: Persistent XSS via SVG Profile Photo Upload (High)
+    resize and convert uploaded profile photos to png
+- removed Bcrypt class, using native php password_hash function
+- convert svg files to png for preview using Imagic
+
+Fixed Bugs:
+----------
+- Drag&Drop objects from Grid to VerticalGrid fields creates dublicated fields
+- Graphs for PVF did not remove links from graph object links updated
+- CRITICAL: not fixed. Issue CB-01-004: XSS via unfiltered Folder- and Action-Name (High)
+
+CaseBox 1.9.222 (2014-06-28)
+==============================
+New Features, Improvements
+--------------------------
+- added objectsStore to account edit form for displaying objects values in grid
+- updated HTMLPurifier to version 4.6.0
+- XSS changes:
+    - added check to deny uploading 'image/svg+xml' file types as user photo
+    - added password verification for current user when accessing users management form
+        Also added verifications in all user management methods if user has verified password
+        If users management window will stay open more than timeout defined (5 min by default)
+            then further actions in this window will return false.The user should reopen and reverify his password.
+    - todo: filter html fields from custom user template
+        The main idea is to crate a User class derived from \CB\Objects\Object
+        that would implement basic obect functionality (including data filtering methods)
+        Most methods from \CB\User class will be moved to the new one
+    - validated all incomming data in UserGroups.addUser and UserGroups.renameUser functions
+    - validated all incomming data in User.saveProfileData function
+        strip tags from user names and encode special chars in getDisplayName function
+    - apply htmlspecialchars to all string values that go to solr
+    - encode displayed values in vertical edit grid
+    - encode object title rendered in object edit window tabsheet
+    - in browsing grid the values are displayed from solr (already encoded),
+        but the value is decoded with Ext for editing
+    - filter html fields for objects using HTMLPurifier library.
+    - added check to show direct content in preview only for pdfs (Issue CB-01-006)
+
+
+- disabled ipcheck for now. It'll be replaced by other mechanism
+- width of right panel in FileTabSheet window should be remembered
+- Default search condition should be '=' in search templates
+- Can't resize the 2nd column in search template 'condition' and save grid state
+- Replace the toolbar in "User management" with 32x32 icons and white background as in Grid toolbar
+- made changes related to search by template
+- added Bcrypt class for generating password recovery hashes
+
+Fixed Bugs:
+----------
+- js error sometimes when opening file window
+
+CaseBox 1.9.219 (2014-06-24)
+==============================
+New Features, Improvements
+--------------------------
+- render #number as link in comments and subscribe @username to the object
+- Fix PopupMenu in Tree
+- modified file edit window, added html and Ace editors
+- changed apache config rules to allow loading of created images on preview generation
+- ace editor has been included in libx folder
+    made changes into apache config file to allow access to editor files
+
+- files configuration changes:
+    "webdav_files" moved to files.edit.webdav
+    we have also "webdav_url", "max_files_version_count"
+
+    Oleg suggested this config
+    "edit_files":
+        {“txt”: “txt, php, js, xml, csv“,
+          “html”: “html, htm”,
+          “webdav”: “doc, ppt, docx, odt”
+        }
+
+    I propose to merge all files related options into one config for them:
+    "files": {
+        "max_versions": <string or object>
+            // string example : *:1;doc,docx,xls,xlsx,pdf:5;png,gif,jpg,jpeg,tif,tiff:2;
+            // object example: {
+            //   "*": 1
+            //   ,"doc,docx,xls,xlsx,pdf": 5
+            //   ,"png,gif,jpg,jpeg,tif,tiff": 2
+            // }
+        ,"edit": { //type: "comma separated extensions string or an array of strings"
+            "text": "txt,php,js,xml,csv"
+            ,"html": "html,htm"
+            ,"webdav": "doc,docx,ppt,dot,dotx,xls,xlsm,xltx,ppt,pot,pps,pptx,odt,ott,odm,ods,odg,otg,odp,odf,odb"
+        }
+        ,"webdav_url": "https://..."
+    }
+
+    There could be general config for files in casebox.config table
+    and some properties (of "files") could be overwriten in core config table.
+
+    Added backward compatibility checks so that old configs still work.
+
+- Memo field: use same font for Preview and Edit mode
+- Use email sender from config.comments_config for all outgoing notification emails
+
+CaseBox 1.9.219 (2014-06-19)
+==============================
+New Features, Improvements
+--------------------------
+- Remove fileUploadDlg and show System Dialog with multi-select files
+- Remove 'style' from body in notifications about new comments + add link to Object in <h3> for ex.
+- Remove 'www' check in apache conf
+
+Fixed Bugs:
+----------
+- Copy&Paste of files didn't create necessary content association for new item
+- Breadcrumb bug when '/' in object title
+- Memo field: use same font for Preview and Edit mode
+
+CaseBox 1.9.218 (2014-06-15)
+==============================
+New Features, Improvements
+--------------------------
+- comments email integration
+    config for comments should pe added per core or in casebox.config table.
+    Example:
+    comments_config:
+    {
+        "email": "comments.email@server.com"
+        ,"pass": "emailpassword"
+        ,"host": "mail.server.com"
+        ,"port": 143
+        ,"ssl": true
+        ,"common": true
+    }
+
+    "common" make sense in global config and if it's set to true then
+    this email will be used for every defined core (cores will not be analized for comments email configuration).
+
+- added check to consider allday by default true in tasks templates that doesn't have allday field
+- GIT Cleanup: remove old branches
+- Show Permalink menuitem in Preview mode
+
+Fixed Bugs:
+----------
+- Pagination doesn't work in Search
+- Various errors with template & recycle bin
+- PDF preview doesn't show on direct file access
+- Display Columns: custom columns, sorting, remember visible columns/order
+- Fulltext search doesn't work
+- Error when trying to change permissions
+        updated database procedure p_update_child_security_sets
+- variable refference error in tasks
+
+CaseBox 1.9.217 (2014-06-09)
+==============================
+New Features, Improvements
+--------------------------
+- save tree state on node selection change
+- CommentNotifications plugin has been moved to global Notifications plugin
+    It should be removed or disactivated from casebox.plugins table
+- made changes config of the solr log core
+    - added core_id field
+    - added some dummy fields, for consistency, to avoid errors in search class when browsing logs
+    Note that sorting in log doesnt work because we dont have object fields stored/indexed in log core
+- Letter window: buttons in toolbar, file upload
+- for ipc "case_number_counter" should be set in db config
+- Edit button from right pannel will use createMethod specified in template config
+
+Fixed Bugs:
+----------
+- Versioning doesn't work
+- D&D doesn't work from Grid to Object
+- Charts swf file didn't load because of apache rules
+    modified config for apache
+- Icon class field in Template is empty, can't see list of icons
+
+CaseBox 1.9.216 (2014-06-06)
+==============================
+New Features, Improvements
+--------------------------
+- changed the security checks on item move from delete+write to read+write
+- Task title in email notifications should be a link
+
+Fixed Bugs:
+----------
+- modified commentsNotification plugin according to new structure.
+        It should be merged in future with main Notifications plugin.
+- Cancel button doesn't work when creating new object and history is empty
+- OnCaseboxLoad, the DoneTask button is visible
+
+CaseBox 1.9.211 (2014-06-04)
+==============================
+New Features, Improvements
+--------------------------
+- Action log & Notification modules implementation
+        - added solr core config for log (/data/solr/log)
+        - added subscribe/unsubscribe functionality for any item in the tree
+        - old logging mechanism completely removed
+
+Fixed Bugs:
+----------
+- file preview doesn't work
+- throw exception when config.ini doesn't exist
+- fixed some mistakes in Config.php
+- fixed bug for virtual nodes with ids that contain '-'
+
+Notes:
+----------
+- database structure has been changed, differential update added.
+- casebox translations has been updated
+- updated sqls for casebox and demo core from innstall folder
+- in order to set up common log solr core - you should set "action_log" param in casebox.config table:
+        Example:
+                {
+                    "core": "cb_log"
+                    ,"retention_days": 30
+                }
+                // "host" and "port" params are optional, defaults used if not specified
+
+        - for ActionLog virtual folder to be available, add to config.treeNodes:
+                "ActionLog":{
+                        "pid": 1
+                }
+- Notifications plugin should be added to casebox.plugins table:
+        it's config:    {
+                "listeners": {
+                    "logadd": {
+                        "Notifications\\Listeners": [
+                            "onLogAdd"
+                        ]
+                    }
+                }
+                }
+
+CaseBox 1.9.210 (2014-05-30)
+==============================
+New Features, Improvements
+--------------------------
+- added method to login as another user through root credenials (for debuging purpose).
+- direct tasks preview adjustments
+- updated demo core from install/examples and casebox database script
+
+Fixed Bugs:
+----------
+- Preview didn't show date fields
+- Extra 'Text' word appears in front of comments
+- Upload/Download buttons doesn't work in FileTabsheet
+
+CaseBox 1.9.205 (2014-05-29)
+==============================
+New Features, Improvements
+--------------------------
+- added some checks due to stratelit core reindeing problems
+
+Fixed Bugs:
+----------
+- some constant reference changes in cron files
+
+CaseBox 1.9.204 (2014-05-28)
+==============================
+New Features, Improvements
+--------------------------
+- added links to files in notification emails
+- added "Permalink" in submenu of the right panel for files
+- display deleted information in system properties plugin for deleted nodes
+- implemented direct links to files
+- changed preview url to /<core>/v-<id>[_version_id]/?
+        apache configuration changed
+
+Fixed Bugs:
+----------
+- Increase height of version item in VersionPlugin
+- After saving an object, the selected node in preview becomes the Parent
+- Tree state: saving the list of expanded nodes
+
+CaseBox 1.9.203 (2014-05-27)
+==============================
+New Features, Improvements
+--------------------------
+- reviewed all DisplayColumns and Custom Faceting mechanism. The review cover following tasks:
+        - Faceting Sets & DC in json configs for VirtualFolder plugins
+        - DisplayColumns and Faceting in search template and saved searches
+        - Display Columns: custom columns, sorting, remember visible columns/order
+        - DC doesn't work in template Cfg + grid sorting
+
+        Uploaded "DC&facets_description.txt" to dev.casebox.org/dev/Home/Docs.
+
+- changed `tree_user_config` database table structure (apply v.1.9.203.sql from differential updates)
+- added database state provider to store user settings in database, not in cookies
+- solr core should be reindexed if there are order fields that goes to solr.order
+- renamed config option "default_facets" to "default_facet_configs" in casebox.config table.
+
+CaseBox 1.9.202 (2014-05-21)
+==============================
+New Features, Improvements
+--------------------------
+- enable Export plugin by default for all cores
+- added procedure p_mark_all_childs_as_active for recursive update of childs as active
+    used for restore process
+- correction made for constants usage from system.ini
+
+Fixed Bugs:
+----------
+- vFolder node select bug after search
+
+CaseBox 1.9.188 (2014-05-20)
+==============================
+New Features, Improvements
+--------------------------
+- apache libx rule change for direct access to ext
+- recycleBin vfolder plugin
+- updated usage of core constants to Config class
+
+CaseBox 1.9.187 (2014-05-16)
+==============================
+New Features, Improvements
+--------------------------
+- added "loaded" event to object edit window on tabsheet
+    and made some changes to its "change" event
+- added event generatePreview
+- changed casebox apache conf to allow load of files from cores css folder
+- increased memory_limit to 400
+
+Fixed Bugs:
+----------
+- changed server side event name onBeforeGeneratePreview to beforeGeneratePreview
+
+CaseBox 1.9.186 (2014-05-13)
+==============================
+New Features, Improvements
+--------------------------
+- files window update according to proto
+- objects window right panel change
+- added current version plugin to be displayed in right panel for files edit window
+- added versions plugin to be displayed in right panel for files
+
+Fixed Bugs:
+----------
+- preview versions bug
+
+CaseBox 1.9.185 (2014-05-11)
+==============================
+New Features, Improvements
+--------------------------
+- ipc changes
+- Revise SOLR indexing script
+- changed security check on object move from delete + write to read + write
+
+Fixed Bugs:
+----------
+- Breadcrumbs incorrect & ExpandFolders=On
+- Path link doesn't work in Task preview and Obj properties block
+- Task.status == overdue doesn't change when update EndDate in the task
+- Forgot pass email contains '//' in url
+- default values appear in grid only after edit a cell
+
+CaseBox 1.9.184 (2014-05-07)
+==============================
+New Features, Improvements
+--------------------------
+- set max_execution_time for crons to 0. When full reindexing a core it can take longer.
+- added fieldchange (fieldName, newValue, oldValue) event for objects edit window.
+        This event is usefull for custom functionality, when custom logic or action is needed on field change.
+- trim spaces from search string. example "id: 100 " will not find anyting
+- moved field and field type definition for first letter in main solr config,
+        because it's used by more than one core.
+- Make sure CB provides a timezone if none specified or if it's wrong
+- PreviewPanel: RightAdd 'Delete' and 'Permissions' buttons in More submenu
+- Add '[CORE #ID]' in the title of Task notifications
+
+Fixed Bugs:
+----------
+- Using Cursor Up/Down in Grid frequently, gives JS Error
+- Reload /Tasks/assignee/[User] folder in Tree, and all tasks appear below
+
+CaseBox 1.9.183 (2014-04-16)
+==============================
+New Features, Improvements
+--------------------------
+- add autoScrool to pivot table
+- added events beforeSolrUpdate & solrUpdate - the bounds of a solr update process
+
+Fixed Bugs:
+----------
+- Sorting by Name doesn't work in grid
+        following lines were not included in solr schema of the core:
+                <copyField source="name" dest="sort_name"/>
+                <copyField source="path" dest="sort_path"/>
+- Timezone adjustment bug in 'datetime' fields
+- wrong path for generic user icon.
+- error on update templates with date_start fields.
+        Plugin AutoSetFields should reformat date value.re
+
+CaseBox 1.9.182 (2014-04-14)
+==============================
+New Features, Improvements
+--------------------------
+- Add Search template 'conditions' to casebox.translations
+
+Fixed Bugs:
+----------
+- Using filtering & ExpandFolders doesn't work
+- Indent subfields in preview. level field was accidentally removed from query.
+- Pagination & ExpandFolders bug
+- scope variable has changed after source "field" changes in previous commit
+
+CaseBox 1.9.181 (2014-04-12)
+==============================
+New Features, Improvements
+--------------------------
+- added meta block for files in right panel
+- Add "Fit" checkButton for picture previews
+- onTaskAccomplished, notify all Assigned users
+- OnClick in Tree should preview the node similar to OnSelect
+- added option to disable logs
+
+Fixed Bugs:
+----------
+- source field for an existing object (not new) - dont limit parent on search values
+- Preview shows non-existent (deleted) fields
+- "Add new" submenu showing incorect list
+- Selecting a node in tree and Preview doesn't work well
+
+CaseBox 1.9.179 (2014-04-09)
+==============================
+New Features, Improvements
+--------------------------
+- Double clicking a node in search results, should remove ExpandFolders
+- not finished all changes for dislplay columns
+        in fields of Display Columns config we can specify "sort" property for default sorting ("asc"/"desc")
+- added order field in default solr_fields config
+        Templates (like field template) could have order column that will go to solr
+                if solr_column_name is set to "order", or custom listeners could set "order" on solr update.
+        Default sorting changed from ntsc,sort_name -> ntsc,order,sort_name.
+        On custom sort will be ntsc,<custom_column>
+- changed working behavior for "_objects.source": "field"
+- Custom Sources
+- Add datetime on error logs files
+- mod_rewrite: added rule for automatic slash add after core folder
+
+Fixed Bugs:
+----------
+- Breadcrumb doesn't function correctly
+- Right panel remains in edit mode and empty
+- File preview doesn't work for pdf
+- Column width not saved
+- Stratelit: Incorrect preview of Нарушение in Stratelit
+- Stratelit: Incorrect icon & graph for Нарушение
+- Can't edit objects opened fromm preview
+- deleted template fields become visible when reloading templates structure from menu.
+- user avatars not displayed in task notifications emails
+
+CaseBox 1.9.178 (2014-04-05)
+==============================
+New Features, Improvements
+--------------------------
+- Add user name in front of the comment
+- created virtualhost config for webdav support
+- moved apache subdomains redirects apart from casebox host config
+
+6Fixed Bugs:
+----------
+- "Forgot password" link doesn't work
+- Data in preview ok, but when editing node, no data is displayed
+
+CaseBox 1.9.177 (2014-04-03)
+==============================
+New Features, Improvements
+--------------------------
+- set path of session cookies to core folder
+- solr schema status field change:
+        - task_status field has been added to solr, designed specially for tasks custom status
+        - status field from solr will be used for objects that have status values from tree (for ex.: case status)
+        Note: core should be reindexed after applying these changes
+
+Fixed Bugs:
+----------
+- Generate dinamic-height stacked barcharts for pivot table
+- Closed tasks not displayed with strike-through font and gray color
+- Breadcrumbs not working ok: clicking an item jumps to parent + other bugs
+- File preview doesn't work
+- Task email notification: links to user pictures not updated after https://CB/[core] change
+- First grid field doesn't enter Edit mode on new object
+
+CaseBox 1.9.173 (2014-04-02)
+==============================
+New Features, Improvements
+--------------------------
+- migrate from core subdomains to core subfolders. Example of mod_rewrite rules in install/httpd/ssl_casebox.conf
+- OSJI: "Manager's Calendar" should not be visible for non-managers
+- Left align in first column of the pivot table
+- Add "Reload Templates" button in "Settings" menu at the top for root user
+- "no name/Tree/" displayed in breadcrumbs
+
+Fixed Bugs:
+----------
+- Showing a date period for tasks with startDate only displays current date as end date
+- Pagination doesn't work in search results
+- After selecting users in 'Assigned' for a task, the grid loses focus
+- toolbar: adjustments to button position
+
+CaseBox 1.9.172 (2014-04-01)
+==============================
+New Features, Improvements
+--------------------------
+- open preview of the clickable items from preview
+- added onBeforeGeneratePreview event that gets as argument an array with properties "object" and "groupedFields"
+
+CaseBox 1.9.171 (2014-03-29)
+==============================
+New Features, Improvements
+--------------------------
+- remove type and subtype fields from indexing to solr. This fields are obsolete and cause other indexing problems.
+
+CaseBox 1.9.170 (2014-03-29)
+==============================
+New Features, Improvements
+--------------------------
+- plugins can be defined in config table of the core
+- check for admin on copy/move action
+- added CasesGrouped tree node plugin
+- check for variable scope in vertical edit grid
+
+CaseBox 1.9.169 (2014-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- move "more" button with export above grid
+
+CaseBox 1.9.168 (2014-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- moved export button under "more" button
+
+Fixed Bugs:
+----------
+- corrected wrong method name in export plugin
+- char case syntactic bug
+
+CaseBox 1.9.167 (2014-03-24)
+==============================
+New Features, Improvements
+--------------------------
+- search adjustments related to hcav
+
+Fixed Bugs:
+----------
+- Error appears on preview when user does not have timezone specified in its profile
+
+CaseBox 1.9.166 (2014-03-21)
+==============================
+Fixed Bugs:
+----------
+- timezone display bugfixes in right panel plugins and in email notification
+
+CaseBox 1.9.165 (2014-03-21)
+==============================
+New Features, Improvements
+--------------------------
+- When click "Edit Task", for a few miliseconds "undefined" is displayed
+- transfered timezones usage from mysql table to php
+        Tables related to timezones will be deleted from main casebox database
+- implemented search templates changes as in proto
+- made cleanup, removed obsolete js scripts
+
+Fixed Bugs:
+----------
+- missing template_id warning
+- After d&d files in right panel for a node the right panel is locked
+
+CaseBox 1.9.162 (2014-03-19)
+==============================
+New Features, Improvements
+--------------------------
+- all dates should be displayed timezone specified in profile of the user
+- removed language groups from groupsConfig of minify library.
+        These groups are added on the fly from the languages property of core config.
+
+CaseBox 1.9.162 (2014-03-18)
+==============================
+New Features, Improvements
+--------------------------
+- checked right panel plugins for displaying Datetime hint
+
+Fixed Bugs:
+----------
+- child values from vertical grid not saving
+
+CaseBox 1.9.162 (2014-03-18)
+==============================
+New Features, Improvements
+--------------------------
+- added validation function for dates validISO8601Date in Util.php
+- browsing the object of type "search" will display search results that are prepared by SearchResults treeNode plugin
+- added search templates
+- modified Object edit form to create different grid types. For search templates using VerticalSearchEditGrid
+- changed VerticalEditGrid.js for easier implementation of VerticalSearchEditGrid
+- removed demo1 from install\examples and updated sql for demosrc example
+- removed differential_db_structure_updates
+- removed Scripts related to casebox upgrade process.
+- use default scope "tree" in formatValueForDisplay method of templates class
+- added function plog = clog. plog will be used only for messajes that should remain in production version
+
+Fixed Bugs:
+----------
+- template titles did not save automaticly in templates table (switch between languages to l<index>)
+- values were not displayed in vertical grid for fields with no specified source
+
+CaseBox 1.9.161 (2014-03-06)
+==============================
+New Features, Improvements
+--------------------------
+- pivot table view: added clicks on table cells
+- Remove deprecated mysql tables and related code. For now removed:
+        messages
+        objects_data
+        objects_duplicates
+        tags
+- Refresh the preview panel for Task when user reopens it
+
+Fixed Bugs:
+----------
+- After _objects field is edited, grid focuses the first row
+- fixed some d&d issues related to vertical edit grid
+        (cells did not select with mouse and disabled drag from properties grid)
+- combo editors, value is deleted if working with keyboard
+- Opening a "field" template in new tab gives JS error
+- pid of template fields doesn't change when moving the element in tree
+
+Notes:
+----------
+- apply database update for core: 20140306_1626 db_update v1.9.161.sql
+
+CaseBox 1.9.160 (2014-03-04)
+==============================
+New Features, Improvements
+--------------------------
+- _objects field default: {"source": "tree"}
+- add scroller to graph
+
+Fixed Bugs:
+----------
+- VerticalEdit grid doesn't generate onChange event on D&D
+- one facet not shown in pivot table
+- Incorrect URL generated in recovery password emails
+- 'Undefined' appears in preview for virtual nodes
+
+CaseBox 1.9.159 (2014-03-03)
+==============================
+New Features, Improvements
+--------------------------
+- added demosrc as demo core
+- refresh right panel on files upload
+- don't hide pivot table when showing charts
+- added legend in pivoting charts and changed series colors
+- implemented graph view for demosrc core
+- Change active view to Grid when accessing folders
+- switch from Filter to Preview panel in right side, preview the selected node in Grid
+
+Fixed Bugs:
+----------
+- Ctrl + Enter did not send comments in other browsers
+
+CaseBox 1.9.153 (2014-03-01)
+==============================
+New Features, Improvements
+--------------------------
+- charts
+- Add object title in right panel
+
+Fixed Bugs:
+----------
+- If a core has no tasks, warnings appear
+- faceting doesn't work on fullText search when a virtual node selected
+- Chart not displayed due to JS error
+
+CaseBox 1.9.152 (2014-02-26)
+==============================
+New Features, Improvements
+--------------------------
+- Implemented D&D from casebox to objects edit window (in vertical grid) into objects fields
+- formated enter and special chars for description of tasks notifications
+- Added "Ctrl+S" shortcut for object save when in edit mode
+        A: Ex: "Ctrl+S" saves the edited node and focus back the grid
+        Q: focus which grid ? browsing or editing grid
+
+Fixed Bugs:
+----------
+- disable edit button from right panel for non real nodes
+- Photo not visible after uploading
+- Comments block disappeared from folders/tasks
+- Back button doesn't work ok for files
+
+CaseBox 1.9.151 (2014-02-24)
+==============================
+New Features, Improvements
+--------------------------
+- right panel implementation
+
+CaseBox 1.9.150 (2014-02-22)
+==============================
+New Features, Improvements
+--------------------------
+- right panel actions / buttons concept implementation
+
+Fixed Bugs:
+----------
+- uploading files with non asci symbols in name result in error
+        used encodeURIComponent on client side and urldecode on server.
+
+CaseBox 1.9.149 (2014-02-21)
+==============================
+New Features, Improvements
+--------------------------
+- If preview generation didn't succeed, don't "mark" the file as like having the preview generated
+
+Fixed Bugs:
+----------
+- Active facet displayed wrong titles sometimes
+
+CaseBox 1.9.148 (2014-02-21)
+==============================
+New Features, Improvements
+--------------------------
+- added functions to Util :
+        UTCTimeToUserTimezone
+        userTimeToUTCTimezone
+
+CaseBox 1.9.125 (2014-02-21)
+==============================
+New Features, Improvements
+--------------------------
+- set timezone for database connection to "+00:00"
+- removed devel server ip from config.php & added a new function in Config.php class
+        for easy check if a value is present in a config param of comma separated values
+
+Fixed Bugs:
+----------
+- Comments sending indicator doesn't look ok
+- no date/time title for just added comment
+
+CaseBox 1.9.124 (2014-02-20)
+==============================
+New Features, Improvements
+--------------------------
+- implemented search by id
+
+Fixed Bugs:
+----------
+- Preview not displayed for selected node in tree
+- comments view bug & some minor changes
+
+CaseBox 1.9.124 (2014-02-20)
+==============================
+New Features, Improvements
+--------------------------
+- added history & back button in right panel
+- Open newObj in new tabsheet should keep field values
+- Date rendering in TaskBlock not ok
+- Update the Filter panel to look as in proto, i.e css
+
+Fixed Bugs:
+----------
+- Navigation buttons back/forward doesn't work ok
+
+CaseBox 1.9.123 (2014-02-19)
+==============================
+New Features, Improvements
+--------------------------
+- add padding & space between obj.Content and other blocks
+- Escape tags in comments
+
+Fixed Bugs:
+----------
+- solr "commit" event error
+
+CaseBox 1.9.122 (2014-02-18)
+==============================
+New Features, Improvements
+--------------------------
+- modal window for WebDav files
+- Add eventHandler 'onSolrCommit'
+- Memo editor height/autoHeight
+- Adjusting notification email Sender & Subject
+- onLogout, don't show browser popup confirmation "Do you want to leave page"
+
+Fixed Bugs:
+----------
+- Download button appears while creating a task
+
+CaseBox 1.9.121 (2014-02-18)
+==============================
+New Features, Improvements
+--------------------------
+- DoubleClick enters object as folder, only files are downloaded/webDav_opened
+- added sending indicator on comment send
+- added email notifications when adding comments
+- added verification for fields with type date to be sent to server without time.
+
+Fixed Bugs:
+----------
+- Comments block breaks after I click "Edit in external"
+- visual bug for Comments block header
+- in object preview plugin new lines missing from Memo field type
+- Sorting not ok in Tasks folders
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+- apply database update for core: 20140217_1916 db_update v1.9.121.sql
+
+CaseBox 1.9.117 (2014-02-16)
+==============================
+New Features, Improvements
+--------------------------
+- Delete & Download buttons should be hidden when View==Calendar
+- User photos & hints
+- changed opening properties mechanism for an object from inside the right plugins panel
+- Hide separator after Clipboard button
+- overwrited x-mask-loading ext style for display another loading image
+
+Fixed Bugs:
+----------
+- JS Error when saving an item
+- double separator in calendar
+- Two previews bug
+- deleted fields from templates structure appear on new object creation
+
+CaseBox 1.9.116 (2014-02-16)
+==============================
+New Features, Improvements
+--------------------------
+- Task, Files and Contents plugins should have clickable items
+- OnTaskComplete, OnClose: don't show the popup for the message
+- replace loading.gif with loader.gif from proto & improve "processing" hint
+
+Fixed Bugs:
+----------
+- Filtering doesn't work in virtual folders for tasks
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
+CaseBox 1.9.115 (2014-02-15)
+==============================
+Fixed Bugs:
+----------
+- changes made before to solr_client inclusion does not allow normal execution of reindexing cron
+
+CaseBox 1.9.111 (2014-02-15)
+==============================
+New Features, Improvements
+--------------------------
+- Add 'Download' button for files in rightPanel
+- Remove 'Refresh' button in grid status bar, or make it work
+- _objects popupForm, add checkbox as a first column
+- _objects popupEditor: clear the values before showing the form & loading items
+- change padding for plugin titles as in proto
+- created virtual folder: 'Manager's Calendar' for osji.
+        This plugin has reference to programs template id inside.
+        It should be added config for display in tree.
+- created MyCalendar plugin
+        It should be added config for display in tree.
+- Add virtual folder /Tasks/created by me/Assigned/
+- Remove files list from Task preview html
+
+Fixed Bugs:
+----------
+- After saving an object, the Right panel is showing all blocks duplicated
+- 'Refresh' button in grid status bar did not it work
+- After FullText search, the 'ExpandFolders' is ON (Reset all filters on navigation)
+- Sorting doesn't work in VFolders (trying to sort tasks by date)
+
+CaseBox 1.9.110 (2014-02-14)
+==============================
+New Features, Improvements
+--------------------------
+- remove second date display for tasks plugin
+- Remove files block from Task preview
+- added listeners and handlers to action links for tasks in new preview plugin
+- treeNodes can also be defined in core.config table
+- changed treeNode Tasks plugin so it could be attached to a specific node id
+- global search should always search phisical tree
+
+Fixed Bugs:
+----------
+- 'Modified' datetime in 'Properties' plugin doesnt have the hint with date time
+- Preview not showing after edit and after switching to Filter and back
+- changing page on a Tasks virtual folder did not change page (displayed items)
+- download button do not show when selecting files
+- When you exit cellEdit mode, you don't see new lines
+- adding comment did not return creator id for correct icon display
+- updating closed tasks - automaticly change their status to active
+- mistake in SystemProperties plugin
+
+CaseBox 1.9.109 (2014-02-12)
+==============================
+New Features, Improvements
+--------------------------
+- removed obsolete scripts for old views
+
+Fixed Bugs:
+----------
+- Timezone & display format incorrect in Task notifications
+- Titles of custom facets not visible & long facet labels in charts
+
+CaseBox 1.9.108 (2014-02-12)
+==============================
+New Features, Improvements
+--------------------------
+- Implement plugins in right preview/edit panel:
+        -   thumb: Thumbnail
+        -   meta: Metadata
+        -   tasks
+        -   comments
+        -   objectProperties: Internal Object Properties preview
+        -   systemProperties: System/general properties preview
+        -   contentItems: Contents
+- changed root node concept in left tree, it is real root node by default if not configured to be another (virtual) node
+- Open "cbdav:" links in the same window
+- Enable notifications for task management
+- Add 'Login' button below the message at /login/reset-password/ after you click Reset password
+
+Fixed Bugs:
+----------
+- display columns data was not transmited by tree nodes plugins
+- Custom faceting doesn't work: custom fields were filtered when indexing in solr
+- "My CaseBox" displays the subfolders of "/Tree" in Grid
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+- apply database update for core: 20140123_1641 db_update v1.9.108.sql
+
+
+CaseBox 1.9.98 (2014-02-05)
+==============================
+New Features, Improvements
+--------------------------
+- "Tree" node should be real node, not virtual
+- checked password recovery process
+- session.lifetime, use minutes instead of seconds, default 180 minutes
+- Move ADMIN_EMAIL, SENDER_EMAIL to config.ini
+- clean "Recovery options", only email recovery is avaible for now
+- Remove SMS functionality
+- removed UserMenu classes
+- User picture in top-right corner should have the username/name as a hint
+- added verification, in solr Search class, for manually set facet params
+
+Fixed Bugs:
+----------
+- Task preview always show time for AllDayTasks
+- Calendar label (active month/period) doesn't work
+
+CaseBox 1.9.97 (2014-02-04)
+==============================
+New Features, Improvements
+--------------------------
+- Default facet config for root node should include tasks facets (Status, Category, Importance, Assigned)
+- Add a default class to nodes in calendar without explicit color ".cal-cat-default"
+- Remove 'cal-evt-bg-t[int]' classes
+- Add "icon-padding icon-task" classes only to nodes of type Task (in calendar view)
+- 'date' facet instead of 'create' + Custom date period
+- Changed Faceting mechaniscm
+- added possibility to open documents with a specific webdav url
+
+Fixed Bugs:
+----------
+- Add "cal-cat-task-closed" class to closed tasks
+- Right click grid to open popup menu blocks Grid.Selection
+
+CaseBox 1.9.95 (2014-01-30)
+==============================
+New Features, Improvements
+--------------------------
+- update search and Export plugins for hcav
+
+CaseBox 1.9.94 (2014-01-29)
+==============================
+New Features, Improvements
+--------------------------
+- added check for user language existance when getting user preferences
+- added action links for tasks preview
+
+Notes:
+----------
+- should update casebox.translations table from 20140123_1641 db_update v1.9.94.sql
+
+CaseBox 1.9.93 (2014-01-29)
+==============================
+New Features, Improvements
+--------------------------
+- Clear the search box (i.e. remove fulltext filter) when Path changes
+- Move (Day, Week, Month) toggle buttons in toolbar (as in proto)
+- Add 3 YM (YearMonth) columns for Object.cdate and Task.Start, Task.End
+- Task smart period rendering
+- the view for virtual nodes will always reload when saving/updating an object
+        We don't know what objects return a virtual node.
+
+Fixed Bugs:
+----------
+- modifying filtering options should reset result pageNumber to 1
+- Tasks did not display with color specified in its prperties
+- DateEnd ignored when a task is displayed in calendar
+- Creating tasks in calendar visual bugs with preview after save, and view reloading
+
+
+CaseBox 1.9.92 (2014-01-26)
+==============================
+New Features, Improvements
+--------------------------
+- removed old popuplist type and thesauri window
+- added cls field in default solr fields config, used now for task colors
+- verified tasks and calendar view
+
+Fixed Bugs:
+----------
+- Lead/Support/Manager Folders still not working
+- Case childs: case & owner is empty
+- Lead/Support/Manager Folders still not working
+
+Notes:
+----------
+- solr config changed
+
+CaseBox 1.9.91 (2014-01-23)
+==============================
+New Features, Improvements
+--------------------------
+- Implement virtual folder /Program/Cases/...
+- Implement virtual node /Program/Users/[user]/Cases
+
+Fixed Bugs:
+----------
+- New case doesnt appear in /Program/
+- Wrong owner for Task, Event, Milestone
+- Program virtual folder doesn't work
+- erratic value in Group field for Program content type
+- Milestone preview doesn't work
+- critical: can't focus 2nd column of VerticalGrid for editing
+- Creating system folders for Cases
+- Virtual folders: Lead, Support not working for user oburlaca
+
+Notes:
+----------
+- apply database update for core: 20140123_1641 db_update v1.9.91.sql
+
+CaseBox 1.9.90 (2014-01-22)
+==============================
+Fixed Bugs:
+----------
+- Virtual folders with tasks did not show all content folders
+- Saving an object gives a js error
+- Can't see icons for 'Program' when editing Category in a task
+- Trying to create a task in /Tree/Test Case N1, gives 'Access is denied'
+- Can't create a case in /Tree/ folder, access denied
+- Trying to create a task will show EditWindow with fields of the previous task
+- Can't upload a file to dev.casebox.org using D&D
+
+CaseBox 1.9.89 (2014-01-21)
+==============================
+New Features, Improvements
+--------------------------
+- added detection method for creating objects under virtual folders
+
+Fixed Bugs:
+----------
+- open files in window for files editing when clicking on "open in tabsheet"
+- right properties panels did not work after migrate to virtual tree
+- double clicking a virtual node tries to open it for editing
+
+
+CaseBox 1.9.88 (2014-01-21)
+==============================
+New Features, Improvements
+--------------------------
+- changes related to osji virtual tree creation
+- browser script update for correct child count detection/display
+
+Fixed Bugs:
+----------
+- default value displayed for empty fields on existing objects
+- sometimes error msg occures when clicking edit from item preview panel
+
+CaseBox 1.9.87 (2014-01-18)
+==============================
+New Features, Improvements
+--------------------------
+- custom changes for case templates
+
+Fixed Bugs:
+----------
+- fixed the upgrade process to update some specific field configs related to thesauri
+- upgrade script did overwrite new data for tasks on upgrade
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
+CaseBox 1.9.86 (2014-01-17)
+==============================
+New Features, Improvements
+--------------------------
+- some changes to task plugins
+
+CaseBox 1.9.85 (2014-01-16)
+==============================
+New Features, Improvements
+--------------------------
+- added new tree plugins
+
+Fixed Bugs:
+----------
+- Can't resize the 2nd column in Profile grid
+- grid 2nd column not resizable in EditMode
+- Improve UI experience when creating nodes (preview of other nodes showing)
+- incorrect default plugin definition for cores that don't have defined treePlugins
+
+CaseBox 1.9.84 (2014-01-15)
+==============================
+New Features, Improvements
+--------------------------
+- added opening old task window from new window, until all functionality is realized
+
+Fixed Bugs:
+----------
+- small fixes
+
+CaseBox 1.9.83 (2014-01-15)
+==============================
+New Features, Improvements
+--------------------------
+- Preview/Edit panels behavior
+- Clicking a task in Calendar should preview it on the right panel
+- transferred navigation to plugin system
+- onCreate, default Start date of task = now
+
+Fixed Bugs:
+----------
+- After changing view from Calendar to Explorer, toolbar buttons are hidden
+- some view buttons do not appear on view change
+- Can't resize the 2nd column in Profile grid
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
+CaseBox 1.9.79 (2014-01-11)
+==============================
+New Features, Improvements
+--------------------------
+- Display an empty gray panel if no row is selected
+- focus the grid in right panel when creating/editing a node
+- Creating a task, grid doesn't focus it
+
+Fixed Bugs:
+----------
+- Issues with right margin in preview panel
+- issues with created tasks
+- focus preview/edit panel when opening a node for editing
+- Pagination not visible
+- Saving a node will show "Undefined" text in progress panel
+- Can't D&D files in grid
+- Critical bug: Infinite loop, CPU at 100% = configuration problem
+- "Все дела" folder recursively shows only Case first letters
+
+Notes:
+----------
+- execute casebox.sql in casebox database, this script will only update translations table
+
+CaseBox 1.9.78 (2014-01-10)
+==============================
+New Features, Improvements
+--------------------------
+- Remove Title & Date fields in 'Upload' popup
+- htmlEditor.height = 200 in EditMode
+- Disabled events triggering from another event handler to avoid recursion,
+        should think on the model if this feature will be needed.
+
+Fixed Bugs:
+----------
+- after a node is created, the grid doesn't refresh, and the node doesn't appear in preview
+- PopupMenu: click Open, JS error.
+- Switching from Chart view to GridView will show Download&Delete buttons
+- Resize Tree (bigger/smaller panel width) and the buttons in toolbar are not right aligned
+- Clicking User photo / Account gives 'Access is denied' error
+- Charts doesn't work for _objects facets
+
+CaseBox 1.9.77 (2013-12-30)
+==============================
+New Features, Improvements
+--------------------------
+- enabled clipboard actions navigation views
+- some small interface adjustments according to proto
+- Enable 3 types of chart: hbar, vbar, pie + facet selector
+- Limit the length of one breadcrumb item
+
+Fixed Bugs:
+----------
+- Switching Apps to Charts then Calendar then back to Explorer, hides Apps button
+- Can't create a new task: Query error alert
+- duplicated Start field when changing allDay to 'no'
+
+CaseBox 1.9.76 (2013-12-30)
+==============================
+Fixed Bugs:
+----------
+- field names for task template are not displayed
+
+CaseBox 1.9.75 (2013-12-29)
+==============================
+New Features, Improvements
+--------------------------
+- edit/create tasks in right side
+        Note: cores that have task templates without fields defined should run
+        sys/utils/createTaskTemplatesFields.php <core_name>
+- added importance and timeunits field types
+- interface adjustments
+
+Fixed Bugs:
+----------
+- default value not set when creating objects
+
+CaseBox 1.9.74 (2013-12-28)
+==============================
+New Features, Improvements
+--------------------------
+- refactored browser view interface
+- added primary version of charts view in browser
+- renamed browser related js classes and scripts
+- prepared basic structure for css themes
+- Sync Tree with the active folder in the Grid
+
+Fixed Bugs:
+----------
+- letter case mistake in minify groupsConfig.php
+
+CaseBox 1.9.73 (2013-12-17)
+==============================
+New Features, Improvements
+--------------------------
+- Hide Export button for all cores except Hcav
+- Restore the 'Preview', 'Filter' buttons in the right side of toolbar
+        Filter button works like a shortcut for view change
+- Remove dropdown menus from Upload/Download buttons
+- Remove dashboard & Overview mode in grid
+- Preview panel visual changes for loading process
+- By default, 3rd column should be disabled
+- solr_reindex_core.php should give an error if core doesn't exists
+- Opening objects from Tree should also open in RightTab
+
+Fixed Bugs:
+----------
+- DateTime of uploaded file not visible in Obj Window
+- _objects fields shows all actions instead of only case actions
+- can't save new objects
+- creating an object from Grid.New menu, the menu will not close itself
+- reviewed custom code of stratelit for users assignement and security change
+- wrong check in AutoSetFields plugin that affected plugin work and resulted in "titles haven't been migrated properly"
+- After closing _objects field, the grid is not focused
+
+CaseBox 1.9.72 (2013-12-14)
+==============================
+New Features, Improvements
+--------------------------
+- Log query errors to [core]_log
+- Move the list of debug hosts to system.ini
+- render Headings in Preview
+
+Fixed Bugs:
+----------
+- Tried to upload the same file a second time, got stuck
+- Restore yellow color for Headings fields, now it's white
+- Titles of new template fields are not displayed in objects
+- Can't copy a field from one tmpl to another
+- onNewNode click: Object window open in the right panel, not a tabsheet
+
+CaseBox 1.9.71 (2013-12-13)
+==============================
+New Features, Improvements
+--------------------------
+- implemented primary version for editing objects into right panel by default
+- changed casebox plugins listeners to be executet before custom code listeners.
+        Also casebox plugins are loaded/executed according to their order field value.
+
+CaseBox 1.9.70 (2013-12-09)
+==============================
+New Features, Improvements
+--------------------------
+- removed all fields from objects and let only id, data, sys_data
+- moved automatic names generation for objects in a separate AutoSetFields plugin
+- removed old_id fields from database
+        Old ids should be keeped in special tables if needed or in sys_data of the object.
+- remove private_for_user functionality from casebox
+        This feature will be implemented later as a separated casebox plugin.
+
+Fixed Bugs:
+----------
+- Task responsible peson names missing from preview/notifications
+
+Notes:
+----------
+- update casebox database from casebox.sql (backup your current cores configuration)
+- apply database update for core: 20131209_2328 db_update v1.9.70.sql
+
+CaseBox 1.9.69 (2013-12-05)
+==============================
+New Features, Improvements
+--------------------------
+- system folders mechanism has been moved to a casebox plugin.
+        The essence of the plugin is to copy a structure, specified in the config of the created object template, to the created object.
+
+- adjustments for core upgrade process
+        Note: befre start process through 4_steps_core_upgrade.php you should check the following:
+                - if templates fields have names, if not then set names for fields that will result in a duplicate name from l1 field
+                - check template names and better set a name for empty names (names should be unique)
+                - check title_template field from templates, replace field ids with field names
+                - please make sure after core updgrades that templates do have correct sistem folders specified in config.
+
+CaseBox 1.9.68 (2013-12-04)
+==============================
+New Features, Improvements
+--------------------------
+- export results plugin. For now espors into html format as a table.
+- changed Objects.copy method to work as loading source object and save as a new target object.
+        We'll see if this method work without problems and will delete methods designed for copy.
+- added ID in properties panel of the object edit window
+- changed task categories to be displayed from tree
+        param names that could be set in config table of the core are:
+                task_categories: <id of the tags folder from tree>
+                default_task_category: <default value id>
+- changed DisplayColumns plugin config so it can load columns data differently for active language.
+
+Fixed Bugs:
+----------
+- sorting objects by id did not work
+- names with special chars did not show correctly on editing in grid
+- objects date not updated accordingly to internal object properties.
+- objects with createMethod = inline did not automatically appear in tree or browser in edit mode after clicking create.
+        This mostly refers to folders creation.
+- grid editor for name collumn was destroyed because of DisplayColumns plugin. It reconfigures column structure.
+
+CaseBox 1.9.67 (2013-11-30)
+==============================
+Fixed Bugs:
+----------
+- bug when loading duplicated values in Helper for VerticalEditGrid
+- exluded templates update from object data convertion script because the script will clear templates configurations.
+
+CaseBox 1.9.66 (2013-11-30)
+==============================
+Fixed Bugs:
+----------
+- fixed some bugs in cores upgrading process
+
+CaseBox 1.9.65 (2013-11-29)
+==============================
+Fixed Bugs:
+----------
+- crons not running due to configuration changes
+
+CaseBox 1.9.64 (2013-11-29)
+==============================
+New Features, Improvements
+--------------------------
+- modified Object.getFieldValue method to return a generic structured result depending on arguments
+- updated DisplayColumns plugin
+
+CaseBox 1.9.63 (2013-11-28)
+==============================
+New Features, Improvements
+--------------------------
+- improved plugins configuration structure and loading
+- updated class Browser\CreateMenu
+- refactored scripts for templates and tags synchronization into tree.
+- modified DisplayColumns plugin to read it's config from search templates on templated search
+- added CB_Browser_SearchRouter standard casebox class for templated searches
+- added Search plugin for templated searches
+- moved core configs into database (casebox.cores) as a json formated field
+        This implied refactoring of other units (lib/DB.php, Config.php, etc.)
+        Now the main config.ini file should contain a db_user and db_pass for connection to casebox database.
+        Configuration for cores is stored in casebox.cores table and could be absolutely different
+                from casebox db config (basic config from config.ini).
+        Example of core configuration:
+                {
+                        "core_dir": "//cores/test/"
+                        ,"db_host": "localhost"
+                        ,"db_name": "cb_hcav"
+                        ,"db_user": "username"
+                        ,"db_pass": "password"
+                        ,"db_port": 3306
+                        ,"listeners": {
+                            "beforeNodeSolrUpdate": {
+                                "test\\Search": [
+                                    "update"
+                                ]
+                            }
+                        }
+                        ,"includeDefaultPlugins": true
+                        ,"plugins": {
+                            "Search": {
+                                "api": {
+                                    "test_SearchRouter": {
+                                        "methods": {
+                                            "search": {"len": 1}
+                                        }
+                                    }
+                                }
+                                ,"remote": {
+                                    "handler": "test_SearchRouter.search"
+                                }
+                            }
+                        }
+                }
+
+- renamed constants:
+        CORE_ROOT -> CORE_DIR
+        APP_ROOT -> APP_DIR
+        PLUGINS_PATH -> PLUGINS_DIR
+        CORENAME -> CORE_NAME
+- added following scripts in sys/utils folder:
+        4_steps_core_upgrade.php - it has a description inside. Please read.
+        solr_reindex_document.php - reindex a single document (used for testing)
+        transform_objects_old_data.php - transform objects old data format into new json format and save into data field.
+        template_fields_cfg_sync.php - sync of config fields properties from templates_structure table with field objects stored in tree.
+
+Fixed Bugs:
+----------
+- other small bugfixes
+- TemplateField class did not correctly detect it's parent template
+- wrong reference to $config variable
+- check for array param received in DisplayColumns plugin
+
+Notes:
+----------
+- update casebox database from casebox.sql
+- apply database update for core: 20131128_1954 db_update v1.9.63.sql
+
+CaseBox 1.9.59 (2013-11-22)
+==============================
+New Features, Improvements
+--------------------------
+- implemented Custom Columns display in grid. This functionality is realized as an attachable plugin.
+     This implied changes in structure and configuration for comod plugins loading.
+     Prepared for migration of different configs to database.
+- changed field sizes for fields iof menu table
+- added JSON_UNESCAPED_UNICODE param for all json_encode calls.
+- added plugins folder in document root. This folder will contain subfolder for each plugin.
+- Moved IAuth and IUserMenu interfaces in CB\Interfaces (folder/namespace).
+        Basic CaseBox interfaces will be stored in this folder.
+
+Notes:
+----------
+- update casebox database from casebox.sql
+- apply database update for core: 20131122_2256 db_update v1.9.59.sql
+
+CaseBox 1.9.58 (2013-11-19)
+==============================
+New Features, Improvements
+--------------------------
+- added canAddUsers, canAddGroups in user config.
+
+CaseBox 1.9.57 (2013-11-17)
+==============================
+- created script for creating/sync old tags table into tree
+        and transfer all template fields config to _objects config refering to created tags in tree.
+        All complex scripts from sys/utils will be transferred into classes under Util namespace.
+        For now only Tags transfering uses script sys/utils/tags_tree_sync.php that uses class Util\Tags\TreeSync.
+        Other cripts are transferred to destination folders where will be refactored to use described scheme.
+- added CB\Browser\CreateMenu class that will be completed for simple management of create menu displayed on client side.
+- added User.exists method for checking if a given user id or name exists
+- added Security.copyNodeAcl for copying security rules between two nodes.
+- aded Objects.getChildId method for simple child existance verification by its name under specified $pid
+
+Fixed Bugs:
+----------
+- param index mistake in Files.updateFileProperties for update query.
+
+Notes:
+----------
+- apply database update for core: 20131117_1108 db_update v1.9.57.sql
+- run script, for transfering tags into tree, /sys/utils/tags_tree_sync.php <core_name>.
+    In future commits tags table will be deleted, including all other scripts that are working with tags.
+
+CaseBox 1.9.56 (2013-11-14)
+==============================
+- added statefull for verticalEditGrid columns and removed forceFit
+- added \CB\L\getTranslationIfPseudoValue($value) method (in language.php) for translation
+        of pseudo values to their translation. Pseudo values are considered translations names
+        enclosed in square brackets.
+
+Fixed Bugs:
+----------
+- child paths not updated correctly on object rename
+- case name not updated on case object rename
+Notes:
+----------
+- apply database update for core: 20131114_1425 db_update v1.9.56.sql
+
+CaseBox 1.9.55 (2013-11-13)
+==============================
+- Bugfixes during cores testing on devel server
+
+CaseBox 1.9.54 (2013-11-12)
+==============================
+New Features, Improvements
+--------------------------
+- added fieldTypes store and fieldTypes combo for comod field type editing in field templates.
+        Also tag was removed from template structure and introduced a new equivaent field value for `type` field -'Header'.
+        Tag field should be removed in future from templates_structure table
+- changed field type for data field from text to medium text in db/
+
+Fixed Bugs:
+----------
+- Object.delete method did inverse parameter meaning and added deletion from solr on permanent delete.
+- updated TemplateField class to change field name on save to internal "_title" field, if present.
+    The same check added for Object class on create new object.
+Notes:
+----------
+- apply database update for core: 20131112_2355 db_update v1.9.54.sql
+- Also menu table should be checked for template id changes.
+
+CaseBox 1.9.53 (2013-11-12)
+==============================
+New Features, Improvements
+--------------------------
+- modified params sent to javascript method App.getTypeEditor
+        for common usage from Objects.js form and from VerticalEditGrid.js
+- added isFieldValue method to Object class for comodity
+Fixed Bugs:
+----------
+- modified /sys/utils/create_templates_in_tree.php to work on new structure.
+        Can be used for update configurations into tree from database tables.
+- fixed infinite recursion appearing on updating fields visibility in greed
+- added pid field for loading templates from Templates\Collection.
+        It were causing Notices of undefined index "pid".
+-  in Template.formatValueForDisplay method there was a bug related to namespaces
+        and added verification for array values that are json encoded now for diplay
+- error appear on login in Log.php class because the event does not belong to an object
+Notes:
+----------
+- Template fields configuration should be reviewed and updated to new template ids.
+
+CaseBox 1.9.52 (2013-11-11)
+==============================
+New Features, Improvements
+--------------------------
+- server side events already will receive an instance of object class (no array params).
+        Params for Solr events remain unchanged for now.
+        Events from Tasks.php and Files.php scripts are disabled until methods will be refactored.
+- added delete method to Object class
+- removed methods:
+        - Objects.getFieldValue
+        - Objects.setFieldValue
+        - Objects.getCaseId
+        - Objects.getCaseName
+        - Objects.setCaseRolesFields
+- store objects data as JSON in a database field instead of distinct tables
+        - created convertor for updating existent objects and users to new data storing format
+        - tables with "_data" and "_duplicates" suffixes will be removed on next commit,
+                after successful cores conversion.
+        - many other dependend changes ...
+- definition of CB.DB.objectsStore moved to js/DB/ObjectsStore.js and renamed to CB.DB.ObjectsStore
+- prevent user from accessing "Back" browser button and lose its work.
+
+Fixed Bugs:
+----------
+- Preview does not show for templates
+
+Notes:
+----------
+- You should do the following steps for update:
+        - apply database update for core: 20131111_1057 db_update v1.9.52.sql
+        - run script, for updating objects data into json field, /sys/utils/update_objects_and_users_data_fields.php <core_name>.
+            Next commit will delete tables with '_data' and '_duplicates' suffixes
+
+CaseBox 1.9.51 (2013-11-02)
+==============================
+New Features, Improvements
+--------------------------
+- encoded html chars for rendering textual values in Vertical grid
+- Templates management in tree
+        - script casebox/sys/utils/create_templates_in_tree.php has been created
+                for templates migration to new model.
+                Firstly the database difference update should be applied.
+        - upgrade and migration process have been tested on all cores from devel
+
+        Note: Old interface is not removed until the new method is fully tested and functional
+
+- added new template types: field, search
+- removed methods:
+        UsersGroups.updateUserEmails
+        VerticalEditGrid.addFormData
+        Objects.getObjectIcon
+
+- Changed usage of fetch_row for fetch_assoc everywhere in CaseBox
+- moved methods:
+        Util\getUsername -> User::getDisplayName
+        Files::getAutoRenameFilename -> Objects::getAvailableName
+- removed following columns from objects table:
+        old_id
+        pid
+        template_id
+        is_active
+        author
+        details
+        files_count
+- removed acl_count column from tree table. This column were moved previously to tree_info.
+        in short future also will be deleted following columns from tree:
+                old_id - if necesar then will use another table for imports/associations
+                type -
+                subtype - we moved to templates mechanism
+                is_main - it's used for root folder only
+- changed everywhere json_decode to return associative arrays instead of objects
+        REMEMBER! : we will not use objects (like BogusAction from router).
+                                All params will be associative array. No more objects.
+                                Also custom code should be reviewed to make changes if necesary.
+- Moved Template.php class to CB\Objects and changed as inherited from Object
+- added a config function getOption($optionName)
+        this function is designed to be used in all cases and excep direct
+        accessing of configuration variables/constants.
+        It uses the priority to return requested param from available configs:
+                user config
+                core config
+                platform config
+- added config parameters:
+        session.lifetime
+        session.persistent
+
+        This params are defined in CaseBox platform (see config_sample.ini)
+        and can be overwriten by (importance low to high):
+                core config.ini
+                core database config
+                user config
+- Security issue: sessions must be destroyed when users password is changed
+
+Fixed Bugs:
+----------
+- recursive bug for custom node controllers because of non numeric ids
+- uploading new file version, from a file window, did overwrite target file
+- unexpected logout
+
+Notes:
+----------
+- apply database update for "casebox" database: casebox.sql
+- apply database update for core: 20131102_1839 db_update v1.9.51.sql
+
+CaseBox 1.9.50 (2013-10-21)
+==============================
+New Features, Improvements
+--------------------------
+- Removed Browser.paste method used by clipboard class.
+        Instead, new improved methods, are reused  from D&D
+- new server side methoods required for D&D were created in other scripts
+        that will be targed scripts for refactoring. All reviewed methods will be
+        moved from old common classes to separated new ones.
+- implemented Drag and Drop inside casebox
+        D&D is implemented by using plugins mechanism
+        D&D execution will generate common event 'objectsaction' for any component to listen to them
+        Server side actions for D&D are recursive (CB\Browser\Actions.php)
+        Everything works in concordance with security, but there are some moments to discuss
+
+        There are some problems with D&D on a field of Properties grid in Objects edit window.  Still working on it.
+        In future will be added more required/request drop zones
+
+- added CB\DB methods: startTransaction & commitTransaction
+- translations update
+
+Fixed Bugs:
+----------
+- cut/copy buttons not enabled for just created nodes, in popup menu of browser tree
+- processing message did not disapear when canceling a paste confirmation
+- wrong security sets detection when everyone group is present with another user group
+- child nodes not marked as updated in tree_info on adding new rule
+        for nodes that did not have any rule and security_set assigned.
+- UI gets locked when try to save an object on window close.
+- 'added by' empty in User info (Users window)
+
+Notes:
+----------
+- apply update for casebox database: casebox.sql
+- apply database update: 20131021_1605 db_update v1.9.50.sql
+
+CaseBox 1.9.49 (2013-10-15)
+==============================
+New Features, Improvements
+--------------------------
+- added check for FileReader browser support. Hide upload button for browser that do not support uploading from desktop.
+- changed Browser.getIcon method from types based to template based detection
+- Remove the "deadline" checkbox from Task Window, check if End date is empty
+- Refactor objectsStore and added CB.DB.objectsStore class
+- working on Drag and Drop inside CaseBox
+
+Fixed Bugs:
+----------
+- Renaming a group, in users administration window, has no effect
+- Creating a task from Object window shows the radio Task/Event
+
+Notes:
+----------
+- apply database update: 20131013_1717 db_update v1.9.49.sql
+
+CaseBox 1.9.48 (2013-10-08)
+==============================
+New Features, Improvements
+--------------------------
+- created Search model window with VerticalEditGrid.
+- Util\toNumericArray was changed to cast numeric types accordingly. Ints to int, nonints to float.
+- some language related changes
+- changed .gitignore
+
+Fixed Bugs:
+----------
+- added filter for faceted field types,
+        so that non integer fields woldn't try to be indexed as object tags,
+        that would result in solr indexing error.
+- return path changed for locating and object in CB\Path.getPidPath()
+- language guess fixes
+- bug on save object for duplicated fields related to pfu (private_for_user) field
+- User edit window disappears, in users management
+
+CaseBox 1.9.47 (2013-10-01)
+==============================
+New Features, Improvements
+--------------------------
+- Added revoke child permissions button, for system users, in permission window
+- removed legacy code for objects (violations, Decisions, Complaints, Appeals, pfu, Sentences)
+- implemented Task notifications new reminder format task
+- optimized some User class functions
+- renamed config constans from CaseBox:
+        CRONS_PATH -> CRONS_DIR
+        LOGS_PATH -> LOGS_DIR
+        DATA_PATH -> DATA_DIR
+        FILES_PATH -> FILES_DIR
+        FILES_INCOMMING_PATH -> INCOMMING_FILES_DIR
+        FILES_PREVIEW_PATH -> FILES_PREVIEW_DIR
+        TEMPLATES_PATH -> TEMPLATES_DIR
+        SOLR_DATA_PATH -> SOLR_DATA_DIR
+
+- defined casebox configuration constants in config.php:
+        TEMP_DIR - casebox temporary folder (data/tmp)
+        UPLOAD_TEMP_DIR - folder for uploaded files, separated per core (/data/tmp/<core_name>)
+        MINIFY_CACHE_DIR - common folder for all cores (data/tmp/minify)
+
+Notes:
+----------
+- apply update for casebox database: casebox.sql
+
+CaseBox 1.9.46 (2013-09-30)
+==============================
+New Features, Improvements
+--------------------------
+- excluded session_start from crons initialization. Will monitor if session is needed in some crons.
+- "fq" (filter query) param for search can be pased as string, when we have only a single rule to pass.
+- exclude objects with folder templates (defined in config) from objects list displayed case card block.
+- removed SESSION_PATH constant for sessions in config.php.
+        They are stored in database by CB\Session class.
+
+CaseBox 1.9.45 (2013-09-30)
+==============================
+New Features, Improvements
+--------------------------
+- implement CB\Session class for session handling.
+        Store the sessions in database.
+        Regenerate session id on each request for security reason.
+
+Fixed Bugs:
+----------
+- Closed tasks should be displayed with strike font in Calendar
+- Replace \n with <br> in {description} in task_notification_email.html template
+- Day & Week view doesn't work properly in Calendar
+
+Notes:
+----------
+- apply database update: 20130930_1308 db_update v1.9.45.sql
+
+CaseBox 1.9.44 (2013-09-26)
+==============================
+New Features, Improvements
+--------------------------
+- update task/event dates on drag or resize
+- quickfix for allday field in calendar view
+- replaced Type facet for filter panel in Calendar View with Template facet
+- removed responsible party from all tasks
+- send notification to assigned user of the task even if the user is creator of the task
+- moved Auth classes to libx/auth/
+- removed references to tika client
+
+Fixed Bugs:
+----------
+- The end date of a new event is not saved
+- Object not found error on remove security inheritance and clear security rules
+        Added check for owner in Security.getEstimatedUserAccessForObject
+
+Notes:
+----------
+- apply database update: 20130926_1835 db_update v1.9.44.sql
+
+CaseBox 1.9.43 (2013-09-25)
+==============================
+New Features, Improvements
+--------------------------
+- refactored Two Step Authentication mechanism
+- added IAuth interface that is used for Google and Yubikey Authentication clases
+
+Fixed Bugs:
+----------
+- removed strage characterss from mysql differential updates filenames
+Notes:
+----------
+- update casebox database
+
+CaseBox 1.9.42 (2013-09-23)
+==============================
+- implemented cb.files.upload in Api
+- implemented cb.objects.create and cb.objects.save in Api
+- updated Minify
+- added script sys/utils/reorder_template_stucture_cfg_properties.php
+        for ordering config properties of template fields
+- added reload button for global Tasks view
+- uncomented files content appending to solr data
+
+Fixed Bugs:
+----------
+- Old username is displayed for tree objects when a user is updated
+- prevent notice appearing in Solr\Client\filterSolrFields when processing array fields
+- excluded object id from pids when indexing into solr
+- server side: object title creation error on multivalued fields
+- client side: included name property for object title detection
+
+Notes:
+----------
+- database update should be applied: "20130923_1259 db_update v1.9.42.sql"
+- solr core should be reindexed
+
+CaseBox 1.9.41 (2013-09-09)
+==============================
+New Features, Improvements
+--------------------------
+- added search box near "dashboad" link at the top. Search box = search from "Home" & expandFolders=TRUE
+- added function \CB\Solr\Client.escapeLuceneChars() for escaping Lucene special chars
+
+Database updates:
+----------
+- install/mysql/casebox.sql (translation updates)
+
+CaseBox 1.9.40 (2013-09-06)
+==============================
+New Features, Improvements
+--------------------------
+- Changed users limit, displayed by default in form editor, from 50 to 100.
+- added flag $GLOBALS['solr_index_disable_by_custom_script'] for disabling solr indexing when runnig a custom script.
+- added default sorting by name for popup window of objects editor
+- reset search params when browsing an element from search results
+
+Fixed Bugs:
+----------
+- Corrections and Fixes implied by Stratelit requirements
+- fixed calls to Security::canEditUser without parameter
+- fixed some unprefixed ExtDirect method calls
+- fixed getMenuConfig javascript function
+- lowercase constant access from cron_send_notifications.php
+
+Database updates:
+----------
+- 20130903_2215 db_update v1.9.39.sql
+
+CaseBox 1.9.39 (2013-09-03)
+==============================
+New Features, Improvements
+--------------------------
+- removed database fields: actions_log.office_id, tasks.case_id, tasks.updated
+- removed old (not used) methods from Tasks: getUserTasks, getTasksByLawyer, browse
+- added complete message, to notification mail, on completing task
+
+Fixed Bugs:
+----------
+- sql error: ambiguous id column on task complete
+
+Notes: apply database update "20130903_2215 db_update v1.9.39.sql"
+
+CaseBox 1.9.38 (2013-09-02)
+==============================
+New Features, Improvements
+--------------------------
+- modified ssl_casebox.conf for apache
+
+Fixed Bugs:
+----------
+- sql error on task create
+
+CaseBox 1.9.37 (2013-08-31)
+==============================
+New Features, Improvements
+--------------------------
+- excluded running solr indexing, of updated tree objects, when a custom event handler is executing
+- added "remove" method for \CB\Cache class
+- case_id field removed from tree table, it is now into tree_info table
+- removed p_mark_all_childs_as_updated procedure from database
+
+Fixed Bugs:
+----------
+- can't delete objects from tree because of not prefixed class name.
+
+Notes: apply database update "20130831_1429 db_update v1.9.37.sql"
+
+CaseBox 1.9.31 (2013-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- delayed task update status to 20 seconds
+- optimized Templates\Collection
+
+CaseBox 1.9.30 (2013-08-30)
+==============================
+New Features, Improvements
+--------------------------
+- refactored solr reindexing process
+        and added bulk data reading of document properties
+        that should go to solr
+- added basic Template class, Templates\Collection, Templates\SingletonCollection
+
+CaseBox 1.9.28 (2013-08-29)
+==============================
+Fixed Bugs:
+----------
+- js error on saving object
+- misspelled variable in FolderViewGrid.js
+- missing namespace, in some places, when calling debug function
+
+CaseBox 1.9.17 (2013-08-23)
+==============================
+New Features, Improvements
+--------------------------
+- added icon in tree and folder view for nodes that have security rules associated.
+- added acl_count field to solr
+
+Fixed Bugs:
+----------
+- reanalyzed triggers and added additional processings for inherit_acl field
+- updating solr data for moved node instantly into solr
+
+Notes: update database (20130822_0014 mysql_database_structure_update.sql),
+                run solr_recreate_core.php,
+                run update_tree_info.php.
+
+CaseBox 1.9.16 (2013-08-22)
+==============================
+Fixed Bugs:
+----------
+- path calculation in trigger for moved nodes (20130822_0926 mysql_database_structure_update.sql)
+
+CaseBox 1.9.15 (2013-08-22)
+==============================
+New Features, Improvements
+--------------------------
+-   added security inheritance checkbox in interface
+        and modified database triggers to take this flag into account.
+
+Notes: You should only update database structure after switching to this release (20130822_0014 mysql_database_structure_update.sql).
+        Generally there is no need to run any other scripts,
+        because inheritance was enabled by default and checkbox was not available before.
+
+CaseBox 1.9.13 (2013-08-20)
+==============================
+New Features, Improvements
+--------------------------
+- refactored Solr class and added posibility to update an object by id into solr
+- added cache class and changed some places to use it instead of globals
+
+Fixed Bugs:
+----------
+- security interface checkbox sets
+- small fix for security calculations on nodes with everyone group and other groups specified
+- renaming an object did not display changes instantly in interface
+- display the correct username in main casebox menu
+
+CaseBox 1.9.8 (2013-08-15)
+==============================
+New Features, Improvements
+--------------------------
+- Basic Api model
+        apache config for host should be updated ( install/httpd/ssl_casebox.conf )
+- due to psr0 adjustments, for custom cores code, we advice to:
+        - define custom code classes into custom namespace (name of the core)
+        - place custom code classes under php/<custom namespace>/ forder of your core
+        - accessed casebox functions and constants should pe prefixed with \CB\
+        - classes defined in api, to be accessible in javascript,
+                should be prefixed with "<custom_namespace>_" (ex. sample_CustomClass)
+        - from custom javascript files api methods are also prefixed with namespace with underline after it
+                (ex. sample_CustomClass.customMethod(params, this.processResponse, this) ).
+
+
+Fixed Bugs:
+----------
+- small fixes
+
+CaseBox 1.9.1 (2013-08-12)
+==============================
+New Features, Improvements
+--------------------------
+- Updated security model
+
+Fixed Bugs:
+----------
+- Fixed security model bugs: updated triggers and modified procedure p_update_child_security_sets
+        Note: after applying this update and executing database update 20130812_1624 mysql_database_structure_update.sql
+                        you have to execute /sys/utils/update_tree_info.php <core_name>
