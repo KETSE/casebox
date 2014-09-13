@@ -1,3 +1,26 @@
+CaseBox 1.9.326 (2014-09-13)
+==============================
+New Features, Improvements
+--------------------------
+- in casebox.config, add 'default_DC' that specifies default grid columns to show when DC is empty
+- added functionality for required fields. In fields config could be set required: true
+- activate/deactivate cores
+    added value -1 for active column in casebox.cores
+    Now we have 3 states of the core:
+        1 - active
+        0 - totally inactive
+       -1 - inactive for http request but available for comandline scripts
+
+- CB-02-001 Missing Security Checks allow Privilege Escalation
+    - added security check to Browser->takeOwnership method
+    - for Browser::saveFile security checks were added in version 1.9.256 (2014-08-14)
+    - removed obsolete method Browser->uploadNewVersion
+    - added security check to Browser->subscribe method
+    - added security check to Objects->getPluginsData method
+    - added security check to Objects->addComment method
+- CB-02-002 Apache SOLR Exception Information Disclosure
+    added check for empty endDate
+
 CaseBox 1.9.325 (2014-09-02)
 ==============================
 Fixed Bugs:

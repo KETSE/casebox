@@ -475,17 +475,17 @@ class Config extends Singleton
         $cfg['facet_configs'] = $dfd;
 
         //detect Display Columns definitions in casebox config
-        $dcd = array();
-        if (!empty($cfg['default_DC'])) {
-            $dcd = Util\toJSONArray($cfg['default_DC']);
-            unset($cfg['default_DC']);
-        }
+        // $dcd = array();
+        // if (!empty($cfg['default_DC'])) {
+        //     $dcd = Util\toJSONArray($cfg['default_DC']);
+        //     // unset($cfg['default_DC']);
+        // }
 
-        //check if have defined facets in core config
-        if (!empty($cfg['DC'])) {
-            $dcd = array_merge($dcd, Util\toJSONArray($cfg['DC']));
-        }
-        $cfg['DC'] = $dcd;
+        // //check if have defined facets in core config
+        // if (!empty($cfg['DC'])) {
+        //     $dcd = array_merge($dcd, Util\toJSONArray($cfg['DC']));
+        // }
+        // $cfg['DC'] = $dcd;
 
         // detect core plugins (use defined or default if set)
         $plugins = array();
@@ -508,6 +508,8 @@ class Config extends Singleton
             ,'plugins'
             ,'listeners'
             ,'node_facets'
+            ,'node_DC'
+            ,'default_DC'
             ,'default_object_plugins'
             ,'object_type_plugins'
             ,'treeNodes'

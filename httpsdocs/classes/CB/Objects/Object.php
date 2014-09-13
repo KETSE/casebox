@@ -110,6 +110,9 @@ class Object
         if (empty($p['oid'])) {
             $p['oid'] = $p['cid'];
         }
+        if (empty($p['cdate'])) {
+            $p['cdate'] = null;
+        }
 
         DB\dbQuery(
             'INSERT INTO tree (
@@ -125,6 +128,7 @@ class Object
                 ,cfg
                 ,cid
                 ,oid
+                ,cdate
                 ,`system`
                 ,updated
             )
@@ -141,7 +145,8 @@ class Object
                 ,$10
                 ,$11
                 ,$12
-                ,$13
+                ,COALESCE($13, CURRENT_TIMESTAMP)
+                ,$14
                 ,1
             )',
             array(
@@ -157,6 +162,7 @@ class Object
                 ,@json_encode($p['cfg'], JSON_UNESCAPED_UNICODE)
                 ,@$p['cid']
                 ,@$p['oid']
+                ,@$p['cdate']
                 ,@intval($p['system'])
             )
         ) or die(DB\dbQueryError());
@@ -166,7 +172,7 @@ class Object
 
         $this->createCustomData();
 
-        //fire crate event
+        //fire create event
         \CB\fireEvent('nodeDbCreate', $this);
 
         // log the action

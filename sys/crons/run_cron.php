@@ -48,7 +48,7 @@ $cores = array();
 $res = DB\dbQuery(
     'SELECT name
     FROM casebox.cores
-    WHERE active = 1',
+    WHERE active <> 0',
     array()
 ) or die(DB\dbQueryError());
 while ($r = $res->fetch_assoc()) {
@@ -59,7 +59,7 @@ while ($r = $res->fetch_assoc()) {
 $res->close();
 
 if (empty($cores)) {
-    echo "Core not found.\n";
+    echo "Core not found or inactive.\n";
 } else {
     foreach ($cores as $core) {
         echo "\nProcessing core $core ...";

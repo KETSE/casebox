@@ -36,7 +36,9 @@ DB\connectWithParams($cfg);
 require_once 'lib/Util.php';
 $config = Config::load($cfg);
 
-if (@$config['core_active'] != 1) {
+if ((@$config['core_active'] != 1) && //not active
+    ((@$config['core_active'] != -1) || !isset($_SERVER['argc'])) //is apache request
+) {
     die('Core is not active at te moment, please try again later.');
 }
 
