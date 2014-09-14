@@ -394,6 +394,7 @@ class Browser
                 'SELECT cfg FROM tree WHERE id = $1 AND cfg IS NOT NULL',
                 $doc['id']
             ) or die(DB\dbQueryError());
+
             if ($r = $res->fetch_assoc()) {
                 if (!empty($r['cfg'])) {
                     $cfg = Util\toJSONArray($r['cfg']);
@@ -859,6 +860,10 @@ class Browser
             return array('success' => false);
         }
 
+        if (!Security::canRead($p['id'])) {
+            throw new \Exception(L\get('Access_denied'));
+        }
+
         DB\dbQuery(
             'INSERT INTO user_subscriptions
             (user_id, object_id, recursive)
@@ -949,65 +954,6 @@ class Browser
         return $rez;
     }
 
-    /**
-     * upload a new file version
-     * @param  array $p params
-     * @return json  responce
-     */
-    public function uploadNewVersion($p)
-    {
-        // get the pid and set it into params
-        $res = DB\dbQuery(
-            'SELECT pid FROM tree WHERE id = $1',
-            $p['id']
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $p['pid'] = $r['pid'];
-        }
-        $res->close();
-
-        $rez = array('success' => true
-            ,'data' => array('id' => $p['id']
-            ,'pid' => $p['pid'])
-        );
-
-        $f = &$_FILES['file'];
-        // if no file is uploaded then just update file properties
-        if ($f['error'] == UPLOAD_ERR_NO_FILE) {
-            DB\dbQuery(
-                'UPDATE files
-                SET `title` = $2
-                    ,`date` = $3
-                WHERE id = $1',
-                array(
-                    $p['id']
-                    ,$p['title']
-                    ,Util\dateISOToMysql($p['date'])
-                )
-            ) or die(DB\dbQueryError());
-
-            return $rez;
-        }
-
-        //check for upload error
-        if ($f['error'] != UPLOAD_ERR_OK) {
-            return array(
-                'success' => false
-                ,'msg' => L\get('Error_uploading_file') .': '.$f['error']
-            );
-        }
-
-        $p['files'] = &$_FILES;
-        $p['response'] = 'newversion';
-        $files = new Files();
-
-        $files->storeFiles($p);
-
-        Solr\Client::runCron();
-
-        return $rez;
-    }
-
     public function toggleFavorite($p)
     {
         $favoriteFolderId = $this->getFavoriteFolderId();
@@ -1069,20 +1015,27 @@ class Browser
 
     public function takeOwnership($ids)
     {
-        if (!is_array($ids)) {
-            $ids = explode(',', $ids);
-        }
-        $ids = array_filter($ids, 'is_numeric');
+        $ids = Util\toNumericArray($ids);
+
         $rez = array('success' => true, 'data' => $ids);
+
         if (empty($ids)) {
             return $rez;
         }
-        $ids = implode(',', $ids);
+
+        //check if user has rights to take ownership on each object
+        foreach ($ids as $id) {
+            if (!Security::canTakeOwnership($id)) {
+                throw new \Exception(L\get('Access_denied'));
+            }
+        }
+
+        //set the owner
         DB\dbQuery(
             'UPDATE tree
             SET oid = $1
-                    , uid = $1
-            WHERE id IN ('.$ids.')
+                ,uid = $1
+            WHERE id IN (' . implode(',', $ids) . ')
                 AND `system` = 0',
             $_SESSION['user']['id']
         ) or die(DB\dbQueryError());

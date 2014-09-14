@@ -145,6 +145,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     this.setDirty(true);
                     this.onObjectChanged();
                 }
+                ,clientvalidation: function(p, v) {
+                    if(!v) {
+                        this.actions.save.setDisabled(true);
+                    }
+                }
 
                 ,savesuccess: this.onObjectSaved
                 ,beforedestroy: {
@@ -365,9 +370,14 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     }
 
     ,getCurrentFieldValue: function(field_id, duplication_id){
-        ed = this.topFieldSet.find('name', 'f'+ field_id+'_0');
-        if(!Ext.isEmpty(ed)) return ed[0].getValue();
-        if(Ext.isEmpty(this.grid) || Ext.isEmpty(this.grid.getFieldValue)) return null;
+        var ed = this.topFieldSet.find('name', 'f'+ field_id+'_0');
+        if(!Ext.isEmpty(ed)) {
+            return ed[0].getValue();
+        }
+        if(Ext.isEmpty(this.grid) || Ext.isEmpty(this.grid.getFieldValue)) {
+            return null;
+        }
+
         return this.grid.getFieldValue(field_id, duplication_id);
     }
 
@@ -435,11 +445,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
         var tabPanelFieldItems = [];
         var v;
         this.templateStore.each(function(r){
-            if((r.get('cfg').showIn == 'top') && Ext.isDefined(this.topFieldSet)){
+            var cfg = r.get('cfg');
+            if((cfg.showIn == 'top') && Ext.isDefined(this.topFieldSet)){
                 v = this.data.data
                     ? this.data.data[r.get('name')]
-                    : (Ext.isDefined(r.get('cfg').value)
-                        ? r.get('cfg').value
+                    : (Ext.isDefined(cfg.value)
+                        ? cfg.value
                         : ''
                     );
 
@@ -462,7 +473,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 /* here we are adding fields to the top fieldSet */
                 var pidValue = null;
                 var disabled = false;
-                if( Ext.isDefined(r.get('cfg').dependency) && !Ext.isEmpty(r.get('pid'))){
+                if( Ext.isDefined(cfg.dependency) && !Ext.isEmpty(r.get('pid'))){
                     var pidRowIndex = this.templateStore.findExact('id', r.get('pid'));
                     var pidRow = this.templateStore.getAt(pidRowIndex);
 
@@ -474,20 +485,24 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     }
                     disabled = Ext.isEmpty(pidValue);
                 }
-                ed = App.getTypeEditor(r.get('type'), {
+                var ed = App.getTypeEditor(r.get('type'), {
                     ownerCt: this
                     ,fieldRecord: r
                     ,pidValue: pidValue
                     ,objectId: this.data.id
                     ,path: this.data.path
                 });
+
                 if(ed){
                     ed.fieldLabel = r.get('title');
                     ed.disabled = disabled;
-                    if(!Ext.isEmpty(r.get('cfg').hint)) {
-                        ed.fieldLabel = '<span title="'+r.get('cfg').hint+'">'+ed.fieldLabel+'</span>';
+                    if(!Ext.isEmpty(cfg.hint)) {
+                        ed.fieldLabel = '<span title="' + cfg.hint + '">' + ed.fieldLabel + '</span>';
                     }
                     ed.name = 'f' + r.get('name');
+
+                    ed.allowBlank = (cfg.required !== true);
+
                     //setting the automatic title of the object
                     if(ed.isXType(Ext.ux.TitleField)) {
                         ed.setValues(this.data.title, v.value);
@@ -496,13 +511,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                     }
 
                     this.topFieldSet.add(ed);
-                    //ed.enableBubble('change');
                 }
-            }else if(r.get('cfg').showIn == 'tabsheet'){
+            } else if(cfg.showIn == 'tabsheet'){
                 v = this.data.data
                     ? this.data.data[r.get('name')]
-                    : (Ext.isDefined(r.get('cfg').value)
-                        ? r.get('cfg').value
+                    : (Ext.isDefined(cfg.value)
+                        ? cfg.value
                         : {}
                     );
                 if(!v) {
@@ -510,7 +524,7 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                 } else if(!v.value) {
                     v = {value: v};
                 }
-                var cfg = {
+                var editorCfg = {
                     border: false
                     ,hideBorders: true
                     ,title: r.get('title')
@@ -523,10 +537,11 @@ CB.Objects = Ext.extend(CB.GenericForm, {
                         ,sync: function(){ this.fireEvent('change'); }
                     }
                 };
+
                 switch( r.get('type') ){
-                    case 'text': tabPanelFieldItems.push(new Ext.form.TextArea(cfg));
+                    case 'text': tabPanelFieldItems.push(new Ext.form.TextArea(editorCfg));
                         break;
-                    case 'html': tabPanelFieldItems.push(new Ext.ux.HtmlEditor(cfg));
+                    case 'html': tabPanelFieldItems.push(new Ext.ux.HtmlEditor(editorCfg));
                         break;
                 }
             }
@@ -739,7 +754,12 @@ CB.Objects = Ext.extend(CB.GenericForm, {
     }
 
     ,onObjectChanged: function(){
-        this.actions.save.setDisabled(!this._isDirty && !isNaN(this.data.id));
+        var isValid = (this.grid && this.grid.isValid)
+            ? this.grid.isValid()
+            : true;
+        isValid = isValid && this.getForm().isValid();
+
+        this.actions.save.setDisabled((!this._isDirty && !isNaN(this.data.id)) || !isValid);
         this.actions['delete'].setDisabled(isNaN(this.data.id));
         this.actions.security.setDisabled(isNaN(this.data.id));
         this.actions.paste.setDisabled(App.clipboard.isEmpty());

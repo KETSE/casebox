@@ -12,7 +12,6 @@ $API = array_merge(
                 ,'paste'                => array('len' => 1)
                 ,'saveFile'             => array('len' => 1, 'formHandler' => true)
                 ,'confirmUploadRequest' => array('len' => 1)
-                ,'uploadNewVersion'     => array('len' => 1, 'formHandler' => true)
                 ,'delete'               => array('len' => 1)
                 ,'restore'              => array('len' => 1)
                 ,'toggleFavorite'       => array('len' => 1)

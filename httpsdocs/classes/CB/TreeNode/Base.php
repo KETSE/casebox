@@ -252,7 +252,16 @@ class Base implements \CB\Interfaces\TreeNode
 
         if (empty($paramConfigs[$this->getId($this->id)])) {
             if (empty($this->parent)) {
-                return array();
+                $default = \CB\Config::get('default_' . $param);
+
+                if (empty($default)) {
+                    return array();
+                }
+
+                return array(
+                    'from' => 'default'
+                    ,'data' => $default
+                );
             }
 
             return $this->parent->getParentNodeParam($param);
