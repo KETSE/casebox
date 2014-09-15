@@ -58,6 +58,8 @@ class Listeners
 
         $customColumns = array();
 
+        $idx = 0;
+
         //set custom display columns data
         if (!empty($displayColumns['data'])) {
 
@@ -66,6 +68,9 @@ class Listeners
                 $customColumns[$fieldName] = is_numeric($k) ? array() : $col;
                 if (empty($customColumns[$fieldName]['solr_column_name'])) {
                     $customColumns[$fieldName]['localSort'] = true;
+                }
+                if (!isset($customColumns[$fieldName]['idx'])) {
+                    $customColumns[$fieldName]['idx'] = $idx++;
                 }
             }
 
@@ -163,11 +168,14 @@ class Listeners
                         }
                     }
 
-                    foreach ($values as $value) {
-                        $value = is_array($value)
-                            ? @$value['value']
-                            : $value;
-                        $doc[$fieldName] = $template->formatValueForDisplay($templateField, $value, false);
+                    //update value from document if empty from solr query
+                    if (empty($doc[$fieldName])) {
+                        foreach ($values as $value) {
+                            $value = is_array($value)
+                                ? @$value['value']
+                                : $value;
+                            $doc[$fieldName] = $template->formatValueForDisplay($templateField, $value, false);
+                        }
                     }
 
                     //

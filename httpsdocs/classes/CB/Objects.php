@@ -891,7 +891,7 @@ class Objects
             'success' => false
             ,'data' => array()
         );
-        if (empty($p['id'])) {
+        if (empty($p['id']) || !is_numeric($p['id'])) {
             return $rez;
         }
 
