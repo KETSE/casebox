@@ -39,6 +39,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
             ,{ header: L.Size, width: 80, dataIndex: 'size', renderer: App.customRenderers.filesize}
             ,{ header: L.Creator, hidden:true, width: 200, dataIndex: 'cid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
             ,{ header: L.Owner, width: 200, dataIndex: 'oid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
+            ,{ header: L.UpdatedBy, width: 200, dataIndex: 'uid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
             ,{ header: L.CreatedDate, hidden:true, width: 120, dataIndex: 'cdate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
             ,{ header: L.UpdatedDate, hidden:true, width: 120, dataIndex: 'udate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
         ];

@@ -379,7 +379,7 @@ CB.ObjectCardView = Ext.extend(Ext.Panel, {
             };
         }
 
-        if(Ext.isEmpty(objectData.id)) {
+        if(Ext.isEmpty(objectData.id) || isNaN(objectData.id)) {
             return;
         }
 

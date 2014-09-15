@@ -26,10 +26,6 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
     }
 
     ,onProxyLoad: function(proxy, obj, options) {
-        if(!Ext.isEmpty(obj.result.sort) && Ext.isEmpty(this.store.sortInfo)) {
-            this.store.sortInfo = obj.result.sort;
-        }
-
         //add corresponding metadata to obj.result if DisplayColumns changed
         this.currentColumns = obj.result.DC || [];
 
@@ -40,6 +36,10 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
             var nc = this.getNewColumns();
 
             this.cm.setConfig(nc);
+        }
+
+        if(!Ext.isEmpty(obj.result.sort) && Ext.isEmpty(this.store.sortInfo)) {
+            this.store.sortInfo = obj.result.sort;
         }
     }
 

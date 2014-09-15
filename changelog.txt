@@ -1,3 +1,15 @@
+CaseBox 1.9.327 (2014-09-16)
+==============================
+New Features, Improvements
+--------------------------
+- Add a new system column "Updated by"
+- added numeric id checks for Objects.getPluginsData
+
+Fixed Bugs:
+----------
+- sys_columns appear in grid due to wrong time event generation
+- quot appears in grid view
+
 CaseBox 1.9.326 (2014-09-13)
 ==============================
 New Features, Improvements
