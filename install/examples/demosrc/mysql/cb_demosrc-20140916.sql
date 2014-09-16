@@ -1,10 +1,3 @@
-/*
-SQLyog Ultimate v11.5 (64 bit)
-MySQL - 5.5.9 : Database - cb_demosrc
-*********************************************************************
-*/
-
-
 /*!40101 SET NAMES utf8 */;
 
 /*!40101 SET SQL_MODE=''*/;
@@ -13,7 +6,7 @@ MySQL - 5.5.9 : Database - cb_demosrc
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`cb_demosrc` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
 
 /*Table structure for table `action_log` */
 
@@ -217,11 +210,15 @@ CREATE TABLE `notifications` (
   `object_pid` bigint(20) unsigned DEFAULT NULL,
   `user_id` int(11) unsigned NOT NULL,
   `data` mediumtext NOT NULL,
+  `sent` tinyint(1) NOT NULL DEFAULT '0',
+  `viewed` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNQ_notifications__action_type__object_id__user_id` (`action_type`,`object_id`,`user_id`),
   KEY `FK_notifications__user_id` (`user_id`),
   KEY `FK_notifications__object_id` (`object_id`),
   KEY `FK_notifications__case_id` (`object_pid`),
+  KEY `FK_notifications__sent` (`sent`),
+  KEY `FK_notifications__viewed` (`viewed`),
   CONSTRAINT `FK_notifications__object_id` FOREIGN KEY (`object_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_notifications__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
