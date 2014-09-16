@@ -20,16 +20,17 @@ $languages = Config::get('languages');
 $adminEmail = Config::get('ADMIN_EMAIL');
 $senderEmail = Config::get('SENDER_EMAIL');
 
-$sql = 'SELECT action_type
+//collect notifications to be sent
+$sql = 'SELECT id
+        ,action_type
         ,object_id
         ,user_id
         ,data
     FROM notifications
-    WHERE `action_time` < CURRENT_TIMESTAMP '.(empty($cd['last_start_time']) ? '' : '
-        AND `action_time` > \''.$cd['last_start_time'].'\' ').'
+    WHERE `sent` = 0
         AND user_id IS NOT NULL
     ORDER BY user_id
-           , `action_time` DESC';
+           ,`action_time` DESC';
 
 $res = DB\dbQuery($sql) or die(DB\dbQueryError());
 
@@ -46,17 +47,22 @@ while ($r = $res->fetch_assoc()) {
         $users[$r['user_id']] = User::getPreferences($r['user_id']);
     }
 
-    $users[$r['user_id']]['mails'][] = array($data['subject'], $data['body'], $data['sender']);
+    $users[$r['user_id']]['mails'][$r['id']] = array(
+        $data['subject']
+        ,$data['body']
+        ,$data['sender']
+    );
 }
 $res->close();
 
+//iterate mails for each user and send them
 foreach ($users as $u) {
     if (empty($u['email'])) {
         continue;
     }
     $lang = $languages[$u['language_id']-1];
     if (filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {
-        foreach ($u['mails'] as $m) {
+        foreach ($u['mails'] as $notificationId => $m) {
             $message = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '.
                     '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'.
                 '<html xmlns="http://www.w3.org/1999/xhtml" lang="'.$lang.'" xml:lang="'.$lang.'">'.
@@ -67,7 +73,7 @@ foreach ($users as $u) {
                 echo 'Devel skip: '.$u['email'].': '.$m[0]."\n";
             } else {
                 echo $u['email'].': '.$m[0]."\n";
-                mail(
+                if (mail(
                     $u['email'],
                     $m[0],
                     $message,
@@ -76,7 +82,17 @@ foreach ($users as $u) {
                         ? $senderEmail
                         : $m[2]
                     )."\r\n"
-                );
+                )) {
+                    DB\dbQuery(
+                        'UPDATE notifications SET sent = 1 WHERE id = $1',
+                        $notificationId
+                    ) or die(DB\dbQueryError());
+                } else {
+                    notifyAdmin(
+                        'CaseBox cron notification: Cant send notification (' . $notificationId . ') mail to "'. $u['email'] . '"',
+                        var_export($m, 1)
+                    );
+                }
             }
         }
     }

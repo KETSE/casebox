@@ -1,4 +1,15 @@
-CaseBox 1.9.327 (2014-09-16)
+CaseBox 1.9.331 (2014-09-16)
+==============================
+New Features, Improvements
+--------------------------
+- changed email notifications to be sent using a "sent" flag
+    Note: differential db update "v.1.9.331.sql" should be applied.
+
+Notes
+--------------------------
+- updated casebox and demo databases from install folder
+
+CaseBox 1.9.330 (2014-09-16)
 ==============================
 New Features, Improvements
 --------------------------
