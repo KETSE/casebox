@@ -583,19 +583,22 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
             return;
         }
         var i, b;
+
+        //hide all buttons and remove separators
         while(this.viewToolbar.items.getCount() > 0) {
             b = this.viewToolbar.items.itemAt(0);
             b.hide();
             this.viewToolbar.remove(b, b.isXType('tbseparator'));
         }
 
-
+        //add apps button if not present
         if(buttonsArray.indexOf('apps') < 0) {
             buttonsArray.unshift('apps');
         }
 
         buttonsArray.splice(1, 0, 'restore');
 
+        //add more button
         if(buttonsArray.indexOf('more') < 0) {
             buttonsArray.push('more');
         }
@@ -898,12 +901,16 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
     ,onObjectsSelectionChange: function(objectsDataArray){
         this.cardContainer.getLayout().activeItem.currentSelection = objectsDataArray;
-        var inRecycleBin = this.inRecycleBin();
 
-        this.actions.restore.setHidden(!inRecycleBin);
+        var inRecycleBin = this.inRecycleBin();
+        var inGridView = this.cardContainer.getLayout().activeItem.isXType('CBBrowserViewGrid');
+
+        this.actions.restore.setHidden(!inRecycleBin || !inGridView);
         this.actions.restore.setDisabled(Ext.isEmpty(objectsDataArray));
-        this.actions.upload.setHidden(inRecycleBin);
-        this.buttonCollection.get('create').setVisible(!inRecycleBin);
+        this.actions.upload.setHidden(inRecycleBin || !inGridView);
+        this.buttonCollection.get('create').setVisible(!inRecycleBin && inGridView);
+
+        this.buttonCollection.get('more').setVisible(inGridView);
 
         if(Ext.isEmpty(objectsDataArray)) {
             this.actions.cut.setDisabled(true);
@@ -945,7 +952,7 @@ CB.browser.ViewContainer = Ext.extend(Ext.Panel, {
 
             this.actions['delete'].setDisabled(inRecycleBin);
 
-            if(!inRecycleBin && this.cardContainer.getLayout().activeItem.isXType('CBBrowserViewGrid')) {
+            if(!inRecycleBin && inGridView) {
                 this.actions['delete'].show();
             }
         }
