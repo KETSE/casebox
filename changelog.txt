@@ -1,3 +1,11 @@
+CaseBox 1.9.332 (2014-09-16)
+==============================
+Fixed Bugs:
+----------
+- the order of columns specified in DC is not the one shown in Grid
+- New & Upload buttons visible in PivotView
+- comments received by mail are sent to other subscribed users from root
+
 CaseBox 1.9.331 (2014-09-16)
 ==============================
 New Features, Improvements

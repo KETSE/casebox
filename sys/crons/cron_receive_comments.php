@@ -161,6 +161,7 @@ foreach ($mailServers as $mailConf) {
             }
 
             $userId = getCoreUserByMail($mail['from']);
+            $_SESSION['user'] = array('id' => $userId);
 
             $data = array(
                 'id' => null
@@ -175,7 +176,11 @@ foreach ($mailServers as $mailConf) {
                     'mailId' => $mail['id']
                 )
             );
-            $commentsObj->create($data);
+            try {
+                $commentsObj->create($data);
+            } catch (Exception $e) {
+                \CB\debug('Cannot create comment from ' . $mail['from'], $data);
+            }
 
             $deleteMailIds[] = $mail['id'];
         }
