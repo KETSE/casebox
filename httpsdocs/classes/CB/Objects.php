@@ -891,8 +891,12 @@ class Objects
             'success' => false
             ,'data' => array()
         );
-        if (empty($p['id'])) {
+        if (empty($p['id']) || !is_numeric($p['id'])) {
             return $rez;
+        }
+
+        if (!Security::canRead($p['id'])) {
+            throw new \Exception(L\get('Access_denied'));
         }
 
         $rez['menu'] = Browser\CreateMenu::getMenuForPath($p['id']);
@@ -963,6 +967,10 @@ class Objects
             $rez['msg'] = L\get('Wrong_input_data');
 
             return $rez;
+        }
+
+        if (!Security::canRead($p['id'])) {
+            throw new \Exception(L\get('Access_denied'));
         }
 
         $commentTemplates = Templates::getIdsByType('comment');

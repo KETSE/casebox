@@ -164,7 +164,7 @@ class Search extends Solr\Client
         // dont check if 'skipSecurity = true'
         // it's used in Objects fields where we show all nodes
         // without permission filtering
-        if (!Security::isAdmin() and !@$p['skipSecurity'])  {
+        if (!Security::isAdmin() and !@$p['skipSecurity']) {
             $pids = false;
             if (!empty($p['pid'])) {
                 $pids = $p['pid'];
@@ -234,7 +234,14 @@ class Search extends Solr\Client
         }
 
         if (!empty($p['dateStart'])) {
-            $fq[] = 'date:['.Util\dateMysqlToISO($p['dateStart']).' TO '.Util\dateMysqlToISO($p['dateEnd']).']';
+            $fq[] = 'date:[' .
+                Util\dateMysqlToISO($p['dateStart']) .
+                ' TO ' .
+                (empty($p['dateEnd'])
+                    ? '*'
+                    : Util\dateMysqlToISO($p['dateEnd'])
+                ) .
+                ']';
         }
 
         $this->params['fq'] = $fq;

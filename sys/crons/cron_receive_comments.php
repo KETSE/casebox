@@ -161,6 +161,7 @@ foreach ($mailServers as $mailConf) {
             }
 
             $userId = getCoreUserByMail($mail['from']);
+            $_SESSION['user'] = array('id' => $userId);
 
             $data = array(
                 'id' => null
@@ -175,7 +176,11 @@ foreach ($mailServers as $mailConf) {
                     'mailId' => $mail['id']
                 )
             );
-            $commentsObj->create($data);
+            try {
+                $commentsObj->create($data);
+            } catch (Exception $e) {
+                \CB\debug('Cannot create comment from ' . $mail['from'], $data);
+            }
 
             $deleteMailIds[] = $mail['id'];
         }
@@ -193,14 +198,18 @@ function processMails(&$mailServer)
     $dids = array (); //array for deleted ids
 
     $i = 0;
-
+    echo "process mail .. \n";
     //iterate and process each mail
     foreach ($mailServer['mailbox'] as $k => $mail) {
         $i++;
         echo $i.' ';
 
-        // skip already read mails
-        if ($mail->hasFlag(\Zend\Mail\Storage::FLAG_SEEN)) {
+        try {
+            if ($mail->hasFlag(\Zend\Mail\Storage::FLAG_SEEN) || empty($mail->subject)) {
+                continue;
+            }
+        } catch (\InvalidArgumentException $e) {
+            echo "Cant read this mail, probably empty subject.\n";
             continue;
         }
 
@@ -333,7 +342,7 @@ function deleteMails(&$mailBox, $idsArray)
             try {
                 //$mailBox->getNumberByUniqueId()
                 $mailBox->moveMessage($id, 'Trash');
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 echo " cant delete message $id\n";
             }
         }

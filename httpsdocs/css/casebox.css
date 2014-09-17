@@ -1,7 +1,9 @@
-body {font-family: "lucida grande",tahoma,verdana,arial,sans-serif; font-size: 11px}
+/*body {font-family: "lucida grande",tahoma,verdana,arial,sans-serif; font-size: 11px}*/
+body {font-family: arial, sans-serif; font-size: 12px}
 a {color: #15C}
 
-.x-grid3-row td, .x-grid3-summary-row td {font: 11px "lucida grande",tahoma,verdana,arial,sans-serif}
+/*.x-grid3-row td, .x-grid3-summary-row td {font: 13px "lucida grande",tahoma,verdana,arial,sans-serif}*/
+.x-grid3-row td, .x-grid3-summary-row td { font: 12px arial,sans-serif }
 
 .panel-header-nobg {background: none}
 .generic-object {padding: 0 5px 10px 5px; color: #555}
@@ -47,8 +49,8 @@ ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}
 .caselist2 li.old {color: #CCC}
 
 ul.action-list {
-font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
-font-size: 11px;
+/*font-family: "lucida grande",tahoma,verdana,arial,sans-serif;*/
+font-size: 12px;
 color: #333;
 list-style: none;
 margin-left: 10px;
@@ -541,8 +543,8 @@ background-color: #FFF;
 }
 
 .versions {
-    font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
-    font-size: 11px;
+    /*font-family: "lucida grande",tahoma,verdana,arial,sans-serif;*/
+    font-size: 12px;
     color: #333;
     width: 100%;
     display: table;
@@ -625,17 +627,17 @@ table.obj-preview  {
     /* border-left: 0; */
     border-top: 0;
     border-spacing: 0;
-    font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;
+    /*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;*/
 }
 
-table.obj-preview td, table.obj-preview th {vertical-align: top; padding: 5px 7px; border-top: 1px solid #DDD}
+table.obj-preview td, table.obj-preview th {vertical-align: top; padding: 6px 7px; border-top: 1px solid #DDD}
 table.obj-preview tr.prop-header th {font-weight: bold; background-color: #F9F7ED;}
 table.obj-preview td.prop-key {width: 40%; background-color: #F4F4F4}
 table.obj-preview td.prop-val {width: 60%}
 table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
 
 .obj-preview-h {
-    font: 13px "lucida grande",tahoma,verdana,arial,sans-serif;
+    /*font: 13px "lucida grande",tahoma,verdana,arial,sans-serif;*/
     font-weight: bold;
     margin-bottom: 7px;
 }
@@ -698,7 +700,7 @@ width: 100%;
 border: none;
 border-top: 0;
 border-spacing: 0;
-font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;
+/*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;*/
 }
 table.item-props td.k {
 width: 30%;
@@ -721,7 +723,7 @@ table.item-props, table.duplicates  {
     /* border-left: 0; */
     border-top: 0;
     border-spacing: 0;
-    font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;
+    /*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;*/
 }
 
 table.item-props  a.path, table.duplicates  a.path {

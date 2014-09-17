@@ -28,10 +28,6 @@ Ext.define('CB.plugins.DisplayColumns', {
     }
 
     ,onProxyLoad: function(proxy, obj, options) {
-        if(!Ext.isEmpty(obj.result.sort) && Ext.isEmpty(this.store.sortInfo)) {
-            this.store.sortInfo = obj.result.sort;
-        }
-
         //add corresponding metadata to obj.result if DisplayColumns changed
         this.currentColumns = obj.result.DC || [];
 
@@ -42,6 +38,10 @@ Ext.define('CB.plugins.DisplayColumns', {
             var nc = this.getNewColumns();
             this.grid.reconfigure(null, nc);
             // this.cm.setConfig(nc);
+        }
+
+        if(!Ext.isEmpty(obj.result.sort) && Ext.isEmpty(this.store.sortInfo)) {
+            this.store.sortInfo = obj.result.sort;
         }
     }
 
@@ -140,14 +140,14 @@ Ext.define('CB.plugins.DisplayColumns', {
         while(changed || (i < (rez.length - 1))) {
             changed = false;
 
-            if(Ext.isDefined(rez[i].idx) && Ext.isDefined(rez[i+1].idx)) {
-                if(rez[i].idx > rez[i+1].idx) {
-                    changed = true;
-                    t = rez[i];
-                    rez[i] = rez[i+1];
-                    rez[i+1] = t;
-                    i = -1;
-                }
+            if((!Ext.isDefined(rez[i].idx) && Ext.isDefined(rez[i+1].idx)) ||
+                (rez[i].idx > rez[i+1].idx)
+            ) {
+                changed = true;
+                t = rez[i];
+                rez[i] = rez[i+1];
+                rez[i+1] = t;
+                i = -1;
             }
             i++;
         }

@@ -1,13 +1,34 @@
-body { font-family: "lucida grande",tahoma,verdana,arial,sans-serif; font-size: 11px }
+body { font-family: arial,sans-serif; font-size: 12px }
 
 .x-grid3-row td pre
 ,.x-grid3-row td
-,.x-grid3-summary-row td
-,.x-form-text
+,.x-grid3-summary-row td {
+    font: 12px arial,sans-serif;
+}
+
+
+.x-form-text
 ,textarea.x-form-field
 ,.ext-webkit .x-small-editor .x-form-field {
-    font: 11px "lucida grande",tahoma,verdana,arial,sans-serif
+    /*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif*/
+    font: 12px arial,sans-serif;
+    padding: 3px 3px 4px 4px;
 }
+
+
+.x-grid3-cell-inner, .x-grid3-hd-inner {
+    padding: 4px 3px 4px 5px;
+}
+
+.x-tree-node {
+  font: normal 12px arial, tahoma, helvetica, sans-serif;
+  padding: 1px;
+}
+
+.x-small-editor .x-form-field-wrap .x-form-trigger {
+  height: 22px;
+}
+
 a{ text-decoration: none; color: #333333 }
 a:hover{ text-decoration: underline }
 

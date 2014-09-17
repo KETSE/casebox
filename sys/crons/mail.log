@@ -1,0 +1,7 @@
+dev-comments@casebox.org on mail.casebox.org. mail count: 3
+process mail .. 
+1 2 
+Notice: Undefined offset: 1 in D:\devel\www\casebox\httpsdocs\libx\ZendFramework-minimal-2.0.1\library\Zend\Mail\Header\Subject.php on line 35
+Cant read this mail, probably empty subject.
+3  cant delete message 61
+ cant delete message 63

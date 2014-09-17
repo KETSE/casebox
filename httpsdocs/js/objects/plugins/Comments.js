@@ -40,7 +40,7 @@ Ext.define('CB.objects.plugins.Comments', {
             ,grow: true
             ,growMin: 30
             ,enableKeyEvents: true
-            ,style: 'margin-top: 5px; font-family: \'lucida grande\',tahoma,verdana,arial,sans-serif; font-size: 11px'
+            ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
             ,listeners: {
                 scope: this
                 ,keypress: this.onMessageBoxKeyPress

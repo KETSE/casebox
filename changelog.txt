@@ -1,3 +1,57 @@
+CaseBox 1.9.332 (2014-09-16)
+==============================
+Fixed Bugs:
+----------
+- the order of columns specified in DC is not the one shown in Grid
+- New & Upload buttons visible in PivotView
+- comments received by mail are sent to other subscribed users from root
+
+CaseBox 1.9.331 (2014-09-16)
+==============================
+New Features, Improvements
+--------------------------
+- changed email notifications to be sent using a "sent" flag
+    Note: differential db update "v.1.9.331.sql" should be applied.
+
+Notes
+--------------------------
+- updated casebox and demo databases from install folder
+
+CaseBox 1.9.330 (2014-09-16)
+==============================
+New Features, Improvements
+--------------------------
+- Add a new system column "Updated by"
+- added numeric id checks for Objects.getPluginsData
+
+Fixed Bugs:
+----------
+- sys_columns appear in grid due to wrong time event generation
+- quot appears in grid view
+
+CaseBox 1.9.326 (2014-09-13)
+==============================
+New Features, Improvements
+--------------------------
+- in casebox.config, add 'default_DC' that specifies default grid columns to show when DC is empty
+- added functionality for required fields. In fields config could be set required: true
+- activate/deactivate cores
+    added value -1 for active column in casebox.cores
+    Now we have 3 states of the core:
+        1 - active
+        0 - totally inactive
+       -1 - inactive for http request but available for comandline scripts
+
+- CB-02-001 Missing Security Checks allow Privilege Escalation
+    - added security check to Browser->takeOwnership method
+    - for Browser::saveFile security checks were added in version 1.9.256 (2014-08-14)
+    - removed obsolete method Browser->uploadNewVersion
+    - added security check to Browser->subscribe method
+    - added security check to Objects->getPluginsData method
+    - added security check to Objects->addComment method
+- CB-02-002 Apache SOLR Exception Information Disclosure
+    added check for empty endDate
+
 CaseBox 1.9.325 (2014-09-02)
 ==============================
 Fixed Bugs:
@@ -37,7 +91,7 @@ CaseBox 1.9.320 (2014-08-30)
 ==============================
 New Features, Improvements
 --------------------------
-- Button "Вставить" doesn't work in a newly added templates for ipc
+- Button "В�?тавить" doesn't work in a newly added templates for ipc
 - Jump to login if preview required re-login
 
 Fixed Bugs:
@@ -832,8 +886,8 @@ Fixed Bugs:
 - Right panel remains in edit mode and empty
 - File preview doesn't work for pdf
 - Column width not saved
-- Stratelit: Incorrect preview of Нарушение in Stratelit
-- Stratelit: Incorrect icon & graph for Нарушение
+- Stratelit: Incorrect preview of Нар�?�?ение in Stratelit
+- Stratelit: Incorrect icon & graph for Нар�?�?ение
 - Can't edit objects opened fromm preview
 - deleted template fields become visible when reloading templates structure from menu.
 - user avatars not displayed in task notifications emails
@@ -1552,7 +1606,7 @@ Fixed Bugs:
 - Saving a node will show "Undefined" text in progress panel
 - Can't D&D files in grid
 - Critical bug: Infinite loop, CPU at 100% = configuration problem
-- "Все дела" folder recursively shows only Case first letters
+- "В�?е дела" folder recursively shows only Case first letters
 
 Notes:
 ----------

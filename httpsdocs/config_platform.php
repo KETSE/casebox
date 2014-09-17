@@ -178,6 +178,7 @@ function fireEvent($eventName, &$params)
             $GLOBALS['running_trigger'] = true;
             try {
                 $class->$method($params);
+
             } catch (\Exception $e) {
                 debug(
                     'Event Exception for '.$className.'->'.$method."\n".

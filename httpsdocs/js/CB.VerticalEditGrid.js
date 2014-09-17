@@ -209,6 +209,22 @@ Ext.define('CB.VerticalEditGrid', {
                     }
                 }
 
+                //check validation field
+                if (record.get('valid') === false) {
+                    meta.css = ' x-form-invalid';
+                    meta.attr = 'ext:qtip="Value did not pass validation"; ext:qclass="x-form-invalid-tip"';
+                } else {
+                    //Check required field
+                    if(tr.get('cfg').required && Ext.isEmpty(v)) {
+                        meta.css = ' x-form-invalid';
+                        meta.attr = 'ext:qtip="' + Ext.form.TextField.prototype.blankText + '"; ext:qclass="x-form-invalid-tip"';
+                    } else {
+                        // Value is valid
+                        meta.css = '';
+                        meta.attr = 'ext:qtip=""';
+                    }
+                }
+
                 if(this.renderers && this.renderers[tr.get('type')]) {
                     return this.renderers[tr.get('type')](v, this);
                 }

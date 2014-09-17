@@ -382,7 +382,7 @@ Ext.define('CB.ObjectCardView', {
             };
         }
 
-        if(Ext.isEmpty(objectData.id)) {
+        if(Ext.isEmpty(objectData.id) || isNaN(objectData.id)) {
             return;
         }
 
