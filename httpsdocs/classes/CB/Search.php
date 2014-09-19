@@ -5,8 +5,9 @@ class Search extends Solr\Client
 {
     public static $defaultFields = array(
         'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'system',
-        'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'case_id', 'acl_count',
-        'case', 'template_id', 'user_ids', 'status', 'task_status', 'category_id', 'importance', 'completed', 'versions'
+        'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate',
+        'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'status',
+        'task_status', 'category_id', 'importance', 'completed', 'versions', 'ntsc'
     );
     /*when requested to sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */

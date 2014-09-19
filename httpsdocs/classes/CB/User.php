@@ -190,7 +190,14 @@ class User
         $data = $authenticator->createSecretData($data);
         $authenticator->setSecretData($data);
 
-        if ($authenticator->verifyCode($data['code'])) {
+        if ($p['method'] == 'ybk') { //cant verify right after client creation, should pass some time
+            $this->setTSVConfig(
+                array(
+                    'method' => $p['method']
+                    ,'sd' => $data
+                )
+            );
+        } elseif ($authenticator->verifyCode($data['code'])) {
             $cfg = array(
                 'method' => $p['method']
                 ,'sd' => $data
@@ -1297,7 +1304,7 @@ class User
             $rez = DOC_ROOT.'css/i/ico/32/user-male.png';
 
             $photosPath = Config::get('photos_path');
-            $photoFile = $photosPath . $data['photo'];
+            $photoFile = $photosPath . @$data['photo'];
 
             if (file_exists($photoFile) && !is_dir($photoFile)) {
                 if ($size32) {

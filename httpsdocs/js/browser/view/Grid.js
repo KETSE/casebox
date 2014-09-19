@@ -173,6 +173,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
 
                 ,headerclick: function (g, ci, e) {
                     this.store.remoteSort = (g.getColumnModel().config[ci].localSort !== true);
+                    this.userSort = 1;
                 }
 
                 ,columnmove:    this.saveGridState
@@ -327,6 +328,8 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         );
     }
     ,onStoreLoad: function(store, recs, options) {
+        delete this.userSort;
+
         var pt = this.grid.getBottomToolbar();
         var pagingVisible = (store.reader.jsonData.total > pt.pageSize);
         if(pagingVisible) {
@@ -454,6 +457,17 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
 
         return rez;
     }
+
+    ,getViewParams: function() {
+        var rez = {};
+
+        if(this.userSort) {
+            rez.userSort = 1;
+        }
+
+        return rez;
+    }
+
 });
 
 Ext.reg('CBBrowserViewGrid', CB.browser.view.Grid);
