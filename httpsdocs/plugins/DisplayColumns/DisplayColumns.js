@@ -38,7 +38,7 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
             this.cm.setConfig(nc);
         }
 
-        if(!Ext.isEmpty(obj.result.sort) && Ext.isEmpty(this.store.sortInfo)) {
+        if(!Ext.isEmpty(obj.result.sort)) {// && Ext.isEmpty(this.store.sortInfo)
             this.store.sortInfo = obj.result.sort;
         }
     }

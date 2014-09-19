@@ -204,8 +204,12 @@ function processMails(&$mailServer)
         $i++;
         echo $i.' ';
 
-        // skip already read mails
-        if ($mail->hasFlag(\Zend\Mail\Storage::FLAG_SEEN)) {
+        try {
+            if ($mail->hasFlag(\Zend\Mail\Storage::FLAG_SEEN) || empty($mail->subject)) {
+                continue;
+            }
+        } catch (\InvalidArgumentException $e) {
+            echo "Cant read this mail, probably empty subject.\n";
             continue;
         }
 
@@ -338,7 +342,7 @@ function deleteMails(&$mailBox, $idsArray)
             try {
                 //$mailBox->getNumberByUniqueId()
                 $mailBox->moveMessage($id, 'Trash');
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 echo " cant delete message $id\n";
             }
         }

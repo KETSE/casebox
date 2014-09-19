@@ -1,3 +1,16 @@
+CaseBox 1.9.333 (2014-09-19)
+==============================
+New Features, Improvements
+--------------------------
+- disable PEAR depency for Yubico class
+- check and catch exception from Zend if email doent have subject
+
+Fixed Bugs:
+----------
+- Search by name problems after renaming an object in tree or grid
+- Sorting not remembered for template DC
+- DC in search template doesn't show field title
+
 CaseBox 1.9.332 (2014-09-16)
 ==============================
 Fixed Bugs:
