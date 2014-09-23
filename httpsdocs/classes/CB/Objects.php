@@ -99,9 +99,7 @@ class Objects
 
         $p['pid'] = Path::detectRealTargetId($pid);
 
-        if (!Security::canCreateActions($p['pid'])) {
-            throw new \Exception(L\get('Access_denied'));
-        }
+        //security check moved inside objects class
 
         $template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($p['template_id']);
         $templateData = $template->getData();
