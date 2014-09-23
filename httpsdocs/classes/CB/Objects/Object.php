@@ -78,6 +78,10 @@ class Object
 
         $p = &$this->data;
 
+        if (!Security::canCreateActions($p['pid'])) {
+            throw new \Exception(L\get('Access_denied'));
+        }
+
         // check input params
         if (!isset($p['pid'])) {
             throw new \Exception("No pid specified for object creation", 1);

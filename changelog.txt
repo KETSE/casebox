@@ -1,3 +1,9 @@
+CaseBox 1.9.334 (2014-09-23)
+==============================
+- moved security check on object create after firing onBeforeCreate event
+    because the triggers can change pid of the created object
+- limit DisplayColumns plugin to work only for grid view
+
 CaseBox 1.9.333 (2014-09-19)
 ==============================
 New Features, Improvements

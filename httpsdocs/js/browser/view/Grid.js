@@ -459,7 +459,9 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
     }
 
     ,getViewParams: function() {
-        var rez = {};
+        var rez = {
+            from: 'grid'
+        };
 
         if(this.userSort) {
             rez.userSort = 1;
