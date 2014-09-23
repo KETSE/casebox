@@ -4,6 +4,7 @@ namespace CB\Objects;
 use CB\DB;
 use CB\Util;
 use CB\Log;
+use CB\Security;
 
 /**
  * class for generic casebox objects
