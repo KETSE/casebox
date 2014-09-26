@@ -2,8 +2,8 @@
 body {font-family: arial, sans-serif; font-size: 12px}
 a {color: #15C}
 
-/*.x-grid3-row td, .x-grid3-summary-row td {font: 13px "lucida grande",tahoma,verdana,arial,sans-serif}*/
-.x-grid3-row td, .x-grid3-summary-row td { font: 12px arial,sans-serif }
+/*.x-grid-row td, .x-grid-summary-row td {font: 13px "lucida grande",tahoma,verdana,arial,sans-serif}*/
+.x-grid-row td, .x-grid-summary-row td { font: 12px arial,sans-serif }
 
 .panel-header-nobg {background: none}
 .generic-object {padding: 0 5px 10px 5px; color: #555}
@@ -133,7 +133,7 @@ span.updated {font-size: 9px; color: #999;
 
 
 span.info {color: #777 !important}
-.x-grid3-cell-inner, .x-grid3-hd-inner { white-space:normal !important}
+/*.x-grid-cell-inner, .x-grid-hd-inner { white-space:normal !important}*/
 
 
 
@@ -433,12 +433,12 @@ background-position: -48px 0
 color: black !important;
 }
 
-.x-grid3-row-body p {
+.x-grid-row-body p {
     margin:5px 20px 10px 5px !important;
     color:#555;
 }
 
-.x-grid3-row-body span {
+.x-grid-row-body span {
   color: black;
   padding-left: 3px;
   padding-right: 3px;
@@ -524,13 +524,13 @@ background-color: #FFF;
     line-height: 25px;
 }
 
-.task-grid .x-grid3-col {
+.task-grid .x-grid-col {
     padding-bottom: 15px;
 }
 .folder-grid .x-grid-header-ct {
     border-top: 0;
 }
-.task-grid .x-grid3-cell, .folder-grid .x-grid3-cell {
+.task-grid .x-grid-cell, .folder-grid .x-grid-cell {
     vertical-align: top;
 }
 .task-form label {
@@ -611,7 +611,7 @@ background-color: #FFF;
     padding-left: 18px;
 }
 /*.versions p.gr {margin-top: 6px;}/**/
-.gridView .x-grid3-row td {
+.gridView .x-grid-row td {
     line-height: 17px;
 }
 

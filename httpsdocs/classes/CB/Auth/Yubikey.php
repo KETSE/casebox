@@ -30,7 +30,12 @@ class Yubikey implements \CB\Interfaces\Auth
     public function __construct($p = array())
     {
         if (isset($p['clientId']) && isset($p['sk'])) {
-            $this->instance = new \Auth_Yubico($p['clientId'], $p['sk']);
+            $this->instance = new \Auth_Yubico(
+                $p['clientId'],
+                '', //$p['sk'],
+                1
+            );
+
             $this->secretData = $p;
         }
     }
@@ -125,7 +130,11 @@ class Yubikey implements \CB\Interfaces\Auth
             || ($secretData['clientId'] != $this->secretData['clientId'])
             || ($secretData['sk'] != $this->secretData['sk'])
         ) {
-            $this->instance = new \Auth_Yubico($secretData['clientId'], $secretData['sk']);
+            $this->instance = new \Auth_Yubico(
+                $secretData['clientId'],
+                '', //$secretData['sk'],
+                1
+            );
         }
         $this->secretData = $secretData;
     }
@@ -166,7 +175,13 @@ class Yubikey implements \CB\Interfaces\Auth
      */
     public function verifyCode($code)
     {
-        $rez = $this->instance->verify($code);
+        $rez = true;
+        try {
+            $auth = $this->instance->verify($code);
+        } catch (\Exception $e) {
+            $rez = false;
+            \CB\debug($e->getMessage());
+        }
 
         return $rez;
     }

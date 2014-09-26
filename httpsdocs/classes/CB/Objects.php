@@ -441,7 +441,11 @@ class Objects
         $linearData = $obj->getLinearData();
         $template = $obj->getTemplate();
 
-        $object_record['content'] = '';
+        $objData = $obj->getData();
+
+        $object_record['content'] = empty($objData['name'])
+            ? ''
+            : $objData['name']."\n";
 
         $field = array();
         foreach ($linearData as $f) {

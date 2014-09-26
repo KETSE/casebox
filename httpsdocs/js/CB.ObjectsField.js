@@ -4,7 +4,7 @@
     //ObjectsSelectionPopupList
 
 CB.ObjectsFieldCommonFunctions = {
-    getStore: function(){
+    detectStore: function(){
         var source = Ext.isEmpty(this.cfg.source) ? 'tree': this.cfg.source;
 
         switch(source){
@@ -154,15 +154,15 @@ Ext.define('CB.ObjectsComboField', {
 
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);
 
-        this.getStore();
+        this.detectStore();
 
         this.callParent(arguments);
     }
 
     ,initComponent: function(){
         //CB.ObjectsComboField.superclass.initComponent.call(this);
-
         var mode = 'local';
+
         if(this.store.proxy){
             mode = 'remote';
 
@@ -175,43 +175,52 @@ Ext.define('CB.ObjectsComboField', {
             this.store.on('load', this.onStoreLoad, this);
             this.store.load();
         }
-        customIcon = (this.cfg.renderer == 'listGreenIcons') ? 'icon-element' : '';
-        plugins = Ext.isEmpty(this.cfg.renderer) ? [] : [new Ext.ux.plugins.IconCombo()];
+        var customIcon = (this.cfg.renderer == 'listGreenIcons') ? 'icon-element' : '';
+        var plugins = Ext.isEmpty(this.cfg.renderer)
+            ? []
+            : []; //[new Ext.ux.plugins.IconCombo()];
         Ext.apply(this, {
             mode: mode
             ,store: this.store
             ,iconClsField: 'iconCls'
             ,customIcon: customIcon
-            ,plugins: plugins
+            // ,plugins: plugins
             ,listeners: {
                 scope: this
-                ,beforeselect: function( combo, record, index){
+                ,beforeselect: function(combo, record, index){
                     if(Ext.isEmpty(this.objectsStore)) {
                         return;
                     }
                     this.objectsStore.checkRecordExistance(record.data);
                 }
-                ,blur: function(field){
-                    this.setValue(this.getValue());
-                }
+                // ,blur: function(field){
+                //     this.setValue(this.value);
+                // }
                 ,beforedestroy: function(){
                     this.store.un('beforeload', this.onBeforeLoadStore, this);
                     this.store.un('load', this.onStoreLoad, this);
                 }
                 ,expand: function(c){
-                    var idx = c.store.findExact('id', c.getValue()) -1;
-                    c.select(idx, true);
+                    // var idx = c.store.findExact('id', c.getValue()) -1;
+                    // c.select(idx, true);
                 }
             }
         });
 
         this._setValue = this.setValue;
         this.setValue = function(v){
-            if(!Ext.isEmpty(v)) {
-                v = parseInt(v, 10);
+            var value, values = Ext.Array.from(v);
+            v = [];
+            for (var i = 0; i < values.length; i++) {
+                value = (values[i] && values[i].isModel)
+                    ? values[i].get(this.valueField)
+                    : values[i];
+                v.push(parseInt(value, 10));
             }
+
             this._setValue(v);
             var text = this.store.getTexts(v);
+
             //delete this.customIcon;
             if(Ext.isEmpty(text) && this.objectsStore){
                 var idx = this.objectsStore.findExact('id', v);
@@ -227,7 +236,10 @@ Ext.define('CB.ObjectsComboField', {
 
             this.setRawValue(text);
         };
-        CB.ObjectsComboField.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+
+        // CB.ObjectsComboField.superclass.initComponent.apply(this, arguments);
     }
 
     ,onBeforeLoadStore: function(st, options){
@@ -255,13 +267,13 @@ Ext.define('CB.ObjectsComboField', {
         );
 
         if(Ext.isEmpty(this.lastQuery)) {
-            this.setValue(this.getValue());
+            this.setValue(this.value);
         }
     }
 
     ,updateStore: function(){
         oldStore = this.store;
-        this.getStore();
+        this.detectStore();
         this.bindStore(this.store);
         if(oldStore && oldStore.autoDestroy) {
             oldStore.destroy();
@@ -333,7 +345,7 @@ Ext.define('CB.ObjectsTriggerField', {
     }
     ,setValue: function(v){
         this.value = [];
-        store = this.getObjectsStore();
+        var store = this.getObjectsStore();
         if(!Ext.isEmpty(v)){
             if(!Ext.isArray(v)) v = String(v).split(',');
             for(i = 0; i < v.length; i++) {
@@ -392,7 +404,9 @@ Ext.define('CB.ObjectsTriggerField', {
         }
 
         oldValue = this.getValue();
-        if(data == oldValue) return;
+        if(data == oldValue) {
+            return;
+        }
         this.setValue(data);
         this.fireEvent('change', data, oldValue);
     }
@@ -419,7 +433,7 @@ Ext.define('CB.ObjectsSelectionForm', {
     ,initComponent: function(){
 
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);
-        this.getStore();
+        this.detectStore();
 
         var sm = new Ext.selection.CheckboxModel({
             injectCheckbox: 'first'
@@ -826,8 +840,8 @@ Ext.define('CB.ObjectsSelectionForm', {
                 this.resultPanel.config.store.add(u);
             }
         }
-        newValue = this.getData();
-        objStore = this.getObjectsStore();
+        var newValue = this.getData();
+        var objStore = this.getObjectsStore();
         if(objStore) {
             Ext.each(
                 newValue
@@ -878,7 +892,7 @@ Ext.define('CB.ObjectsSelectionPopupList', {
             : this.config.config;
 
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);
-        this.getStore();
+        this.detectStore();
         this.cm = [{
                 header:' '
                 ,dataIndex: 'id'

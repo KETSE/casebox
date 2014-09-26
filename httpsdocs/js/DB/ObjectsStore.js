@@ -42,16 +42,21 @@ Ext.define('CB.DB.ObjectsStore', {
     //     return data;
     // }
     ,checkRecordExistance: function(data){
-        if(Ext.isEmpty(data) || isNaN(data.id)) {
+        if(Ext.isEmpty(data)) {
             return false;
         }
 
-        data.id = parseInt(data.id, 10);
+        var id = Ext.Number.from(data.nid, data.id);
+        if(isNaN(id)) {
+            return false;
+        }
 
-        var idx = this.findExact('id', parseInt(data.id, 10));
+        var idx = this.findExact('id', id);
 
         if (idx < 0) {
-            r = Ext.create(
+            data = Ext.apply({}, data);
+            data.id = id;
+            var r = Ext.create(
                 this.getModel().getName()
                 ,data
             );

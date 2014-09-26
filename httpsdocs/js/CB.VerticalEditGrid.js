@@ -40,6 +40,15 @@ Ext.define('CB.VerticalEditGrid', {
                 }
                 return rez;
             }
+            ,plugins: [{
+                ptype: 'CBDDGrid'
+                ,enableDrop: true
+                ,dropZoneConfig:  {
+                    onNodeOver: this.onNodeDragOver.bind(this)
+                    ,onNodeDrop: this.onNodeDrop.bind(this)
+                }
+            }]
+
         };
         if(this.viewConfig) {
             Ext.apply(viewCfg, this.viewConfig);
@@ -109,21 +118,13 @@ Ext.define('CB.VerticalEditGrid', {
                         ,iconClsField: 'name'
                         ,triggerAction: 'all'
                         ,mode: 'local'
-                        ,plugins: [new Ext.ux.plugins.IconCombo()]
+                        // ,plugins: [new Ext.ux.plugins.IconCombo()]
                     });
                 }
             }
 
             ,plugins: [
                 this.editPlugin
-                ,{
-                    ptype: 'CBDDGrid'
-                    ,enableDrop: true
-                    ,dropZoneConfig:  {
-                        onNodeOver: this.onNodeDragOver.bind(this)
-                        ,onNodeDrop: this.onNodeDrop.bind(this)
-                    }
-                }
             ]
         });
 
@@ -290,56 +291,58 @@ Ext.define('CB.VerticalEditGrid', {
         }
     }
 
-    ,onNodeDragOver: function (targetData, source, e, data){
-        var rez = this.dropZone.dropNotAllowed;
-        if(!targetData.record ||
-            Ext.isEmpty(data.data) ||
-            isNaN(data.data[0].id)
+    ,onNodeDragOver: function (targetEl, source, e, data){
+        var rez = source.dropNotAllowed;
+        var record = this.view.getRecord(targetEl);
+        var recs = data.records;
+
+        if(Ext.isEmpty(record) ||
+            Ext.isEmpty(recs) ||
+            isNaN(Ext.Number.from(recs[0].data.nid, recs[0].data.id))
         ) {
             return rez;
         }
 
-        var node = this.helperTree.getNode(targetData.record.get('id'));
-        var tr = node.data.templateRecord;
+        rez = (record.get('type') == '_objects')
+            ? source.dropAllowed
+            : source.dropNotAllowed;
 
-        return ((tr.get('type') == '_objects')
-            ? this.dropZone.dropAllowed
-            : this.dropZone.dropNotAllowed
-        );
+        return rez;
     }
 
-    ,onNodeDrop: function(targetData, source, e, sourceData){
-        var dz = this.dropZone;
-
-        if(this.onNodeDragOver(targetData, source, e, sourceData) == dz.dropAllowed){
-            if(targetData.record) {
-                var bt = this.getBubbleTarget();
-                var node = this.helperTree.getNode(targetData.record.get('id'));
+    ,onNodeDrop: function(targetEl, source, e, sourceData){
+        if(this.onNodeDragOver(targetEl, source, e, sourceData) == source.dropAllowed){
+            var record = this.view.getRecord(targetEl)
+                ,recs = sourceData.records;
+            if(record) {
+                var bt = this.view.grid.getBubbleTarget();
+                var node = this.helperTree.getNode(record.get('id'));
                 var tr = node.data.templateRecord;
                 var oldValue = node.data.value.value;
                 var v = toNumericArray(oldValue);
 
-                var idx = null;
+                var id, idx = null;
 
-
-                for (var i = 0; i < sourceData.data.length; i++) {
-                    idx = v.indexOf(sourceData.data[i].id);
+                for (var i = 0; i < recs.length; i++) {
+                    id = Ext.Number.from(recs[i].data.nid, recs[i].data.id);
+                    idx = v.indexOf(id);
                     if(idx >= 0) {
                         v.splice(idx, 1);
                     } else {
-                        v.push(sourceData.data[i].id);
+                        v.push(id);
                         if(bt.objectsStore) {
-                            bt.objectsStore.checkRecordExistance(sourceData.data[i]);
+                            bt.objectsStore.checkRecordExistance(recs[i].data);
                         }
                     }
                 }
                 var newValue = v.join(',');
 
-                targetData.record.set('value', newValue);
+                record.set('value', newValue);
                 this.fireEvent('change', tr.get('name'), newValue, oldValue);
             }
             return true;
         }
+        return false;
     }
 
     ,onCellClick: function( g, td, cellIndex, record, tr, rowIndex, e, eOpts){//g, r, c, e
@@ -353,11 +356,11 @@ Ext.define('CB.VerticalEditGrid', {
         }
     }
 
-    ,onPopupMenu: function(g, r, c, e){
-        e.preventDefault();
-        switch(g.getColumnModel().getDataIndex(c)){
+    ,onPopupMenu: function(gridView, el, colIndex, record, rowEl, rowIndex, ev, eOpts){
+        ev.preventDefault();
+        switch(this.columns[colIndex].dataIndex){
             case 'title':
-                this.showTitlePopupMenu(g, r, c, e);
+                this.showTitlePopupMenu(this, rowIndex, colIndex, ev);
                 break;
         }
     }
@@ -383,20 +386,21 @@ Ext.define('CB.VerticalEditGrid', {
         this.titlePopupMenu.showAt(e.getXY());
     }
 
-    ,onFieldTitleDblClick: function(){
+    ,onFieldTitleDblClick: function(gridView, td, cellIndex, record, tr, rowIndex, e, eOpts){
         var sm = this.getSelectionModel();
-        var cm = this.getColumnModel();
-        var s = sm.getSelectedCell();
-        var gv = this.getView();
+        // var cm = this.getColumnModel();
+        // var s = sm.getSelectedCell();
 
-        if(Ext.isEmpty(s)) return;
-        var fieldName = cm.getDataIndex(s[1]);
+        // if(Ext.isEmpty(s)) {
+        //     return;
+        // }
+        var fieldName = this.columns[cellIndex].dataIndex;
         if(fieldName == 'title'){
-            c = gv.getCell(s[0], s[1]);
-            c.className = c.className.replace( (c.className.indexOf(' x-grid3-cell-selected') >= 0 ? ' x-grid3-cell-selected' : 'x-grid3-cell-selected'), '');
-            s[1] = cm.findColumnIndex('value');
-            this.getView().focusCell(s[0], s[1], false, false);
-            this.startEditing(s[0], s[1]);//begin field edit
+            // c = gridView.getCell(s[0], s[1]);
+            // c.className = c.className.replace( (c.className.indexOf(' x-grid3-cell-selected') >= 0 ? ' x-grid3-cell-selected' : 'x-grid3-cell-selected'), '');
+            // s[1] = cm.findColumnIndex('value');
+            // this.getView().focusCell(s[0], s[1], false, false);
+            this.editPlugin.startEdit(record, 1);//begin field edit
         }
     }
 
@@ -614,7 +618,9 @@ Ext.define('CB.VerticalEditGrid', {
             var te = App.getTypeEditor(t, context);
 
             this.attachKeyListeners(te);
-            col.setEditor(te);
+            if(te) {
+                col.setEditor(te);
+            }
         }
     }
 
@@ -637,7 +643,7 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,attachKeyListeners: function(comp) {
-        if(Ext.isEmpty(comp)) {
+        if(Ext.isEmpty(comp) || !Ext.isObject(comp)) {
             return;
         }
         comp.on(
@@ -668,6 +674,7 @@ Ext.define('CB.VerticalEditGrid', {
     ,onAfterEditProperty: function(editor, context, eOpts){
         var nodeId = context.record.get('id');
         var node = this.helperTree.getNode(nodeId);
+
         if(context.field == 'value'){
             //check if field has validator set and notify if validation not passed
             var validator = node.data.templateRecord.get('cfg').validator;
@@ -675,7 +682,7 @@ Ext.define('CB.VerticalEditGrid', {
                 if(!Ext.isDefined(CB.Validators[validator])) {
                     plog('Undefined field validator: ' + validator);
                 } else {
-                    node.data.valid = CB.Validators[validator](e.value);
+                    node.data.valid = CB.Validators[validator](context.value);
                 }
             }
 
@@ -683,6 +690,7 @@ Ext.define('CB.VerticalEditGrid', {
                 this.helperTree.resetChildValues(nodeId);
             }
         }
+
         if(context.value != context.originalValue) {
             this.fireEvent(
                 'change'

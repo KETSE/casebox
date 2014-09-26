@@ -315,6 +315,15 @@ class Object
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
         $p = &$this->data;
+
+        if (empty($p['cid'])) {
+            $p['cid'] = $_SESSION['user']['id'];
+        }
+
+        if (empty($p['oid'])) {
+            $p['oid'] = $p['cid'];
+        }
+
         $tableFields = array(
             'pid'
             ,'user_id'

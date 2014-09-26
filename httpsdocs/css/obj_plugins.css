@@ -76,7 +76,6 @@ background-color: #FFFFCC;
 }
 
 .block-plugin-comments .x-panel-body {
-    /*margin-bottom: 30px;*/
     background-color: #F1F1F1;
 }
 .block-plugin-comments b.user {
@@ -188,6 +187,7 @@ background-color: #FFFFCC;
 }
 .obj-plugin {
     background-color: #fff;
+    margin-bottom: 20px;
 }
 .obj-plugin .grid-drop-zone {
     margin-left: -1000px;

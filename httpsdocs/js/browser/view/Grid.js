@@ -100,16 +100,21 @@ Ext.define('CB.browser.view.Grid', {
         this.pagingToolbar = new Ext.PagingToolbar({
             store: this.store
             ,displayInfo: true
-            ,pageSize: 50
             ,hidden: true
             ,doRefresh: this.onReloadClick.bind(this)
             ,listeners: {
                 scope: this
-                //prevent toolbar from changing store params and reloading the store
-                //we'll make this through viewContainer
+                // prevent toolbar from changing store params and reloading the store
+                // we'll make this through viewContainer
                 ,beforechange: function(pt, p) {
-                    this.fireEvent('changeparams', p);
-                    return false;
+                //     clog('firing change params', arguments);
+                //     this.fireEvent(
+                //         'changeparams'
+                //         ,{
+                //             page: p
+                //         }
+                //     );
+                    // return false;
                 }
             }
         });
@@ -147,6 +152,24 @@ Ext.define('CB.browser.view.Grid', {
                 //     }
                 //     return 'hasBody';
                 // }
+                ,plugins: [{
+                        ptype: 'CBPluginsFilesDropZone'
+                        ,pidPropety: 'nid'
+                        ,dropZoneConfig: {
+                            text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
+                            ,onScrollerDragDrop: this.onScrollerDragDrop
+                            ,scope: this
+                        }
+                    },{
+                        ptype: 'CBDDGrid'
+                        ,idProperty: 'nid'
+                        ,dropZoneConfig: {
+                            text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
+                            ,onScrollerDragDrop: this.onScrollerDragDrop
+                            ,scope: this
+                        }
+                    }
+                ]
                 ,listeners: {
                     scope: this
                     // ,rowselect: this.onRowSelect
@@ -253,7 +276,10 @@ Ext.define('CB.browser.view.Grid', {
                 }
 
                 ,headerclick: function (g, ci, e) {
+                    clog('grid header click encounted');
+                    return;
                     this.store.remoteSort = (g.getColumnModel().config[ci].localSort !== true);
+                    this.userSort = 1;
                 }
 
                 ,columnmove:    this.saveGridState
@@ -344,19 +370,6 @@ Ext.define('CB.browser.view.Grid', {
                 //     ,scope: this
             }]
             ,bbar: this.pagingToolbar
-
-            ,dropZoneConfig: {
-                text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
-                ,onScrollerDragDrop: this.onScrollerDragDrop
-                ,scope: this
-            }
-            ,plugins: [{
-                    ptype: 'CBPluginsFilesDropZone'
-                    ,pidPropety: 'nid'
-                },{
-                    ptype: 'CBDDGrid'
-                }
-            ]
         });
 
         Ext.apply(this, {
@@ -394,7 +407,10 @@ Ext.define('CB.browser.view.Grid', {
     ,onStoreLoad: function(store, recs, options) {
         var pt = this.pagingToolbar;
 
-        var pagingVisible = (store.proxy.reader.rawData.total > pt.pageSize);
+        var pagingVisible = (store.proxy.reader.rawData.total > store.pageSize);
+
+        delete this.userSort;
+
         if(pagingVisible) {
             pt.show();
         } else {
@@ -409,11 +425,22 @@ Ext.define('CB.browser.view.Grid', {
         this.fireSelectionChangeEvent();
     }
 
-    ,onScrollerDragDrop: function(targetData, source, e, sourceData){
+    ,onScrollerDragDrop: function(targetData, source, e, data){
+        var d, sourceData = [];
+        for (var i = 0; i < data.records.length; i++) {
+            d = data.records[i].data;
+            sourceData.push({
+                id: d['nid']
+                ,name: d['name']
+                ,path: d['path']
+                ,template_id: d['template_id']
+            });
+        }
+
         App.DD.execute({
             action: e
             ,targetData: this.refOwner.folderProperties
-            ,sourceData: sourceData.data
+            ,sourceData: sourceData
         });
     }
 
@@ -516,4 +543,15 @@ Ext.define('CB.browser.view.Grid', {
 
         return rez;
     }
+
+    ,getViewParams: function() {
+        var rez = {};
+
+        if(this.userSort) {
+            rez.userSort = 1;
+        }
+
+        return rez;
+    }
+
 });

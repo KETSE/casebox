@@ -50,6 +50,7 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
     $cfg = $u->getTSVConfig();
     $authenticator = $u->getTSVAuthenticator($cfg['method'], $cfg['sd']);
     $verificationResult = $authenticator->verifyCode($_POST['c']);
+
     if ($verificationResult === true) {
         unset($_SESSION['check_TSV']);
         $_SESSION['user']['TSV_checked'] = true;

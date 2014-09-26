@@ -149,7 +149,7 @@ Ext.define('CB.form.edit.Object', {
 
         this.titleView.update(this.data);
 
-        this.objectsStore.extraParams = {
+        this.objectsStore.proxy.extraParams = {
             id: r.data.id
             ,template_id: r.data.template_id
             ,data: r.data.data

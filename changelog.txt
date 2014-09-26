@@ -1,3 +1,41 @@
+CaseBox 1.9.334 (2014-09-26)
+==============================
+New Features, Improvements
+--------------------------
+- D&D in extjs 5, between tree, grid and object edit window
+
+Fixed Bugs:
+----------
+- Objects fields not working
+
+CaseBox 1.9.333 (2014-09-19)
+==============================
+New Features, Improvements
+--------------------------
+- Pivot view spacing
+- look&feel of object plugins
+- font too small & grid rowheight small
+- Add "ltr" support, enable for Arabic language
+
+Fixed Bugs:
+----------
+- Facets dropdown empty in "Charts" view
+- paging toolbar didnt work correctly in grid
+- Objects fields not working
+
+CaseBox 1.9.333 (2014-09-19)
+==============================
+New Features, Improvements
+--------------------------
+- disable PEAR depency for Yubico class
+- check and catch exception from Zend if email doent have subject
+
+Fixed Bugs:
+----------
+- Search by name problems after renaming an object in tree or grid
+- Sorting not remembered for template DC
+- DC in search template doesn't show field title
+
 CaseBox 1.9.332 (2014-09-16)
 ==============================
 Fixed Bugs:

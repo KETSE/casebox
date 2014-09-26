@@ -381,6 +381,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,autoDestroy: true
             ,remoteSort: true
             ,extraParams: {}
+            ,pageSize: 50
             ,model: 'Items'
             ,proxy: new  Ext.data.DirectProxy({
                 paramsAsHash: true
@@ -726,6 +727,7 @@ Ext.define('CB.browser.ViewContainer', {
         while( (path2.length > 0) && (path2[0] == '/') ) path2 = path2.substr(1);
         if ((params1.path != params2.path) || !Ext.isDefined(params1.path) ) return false;
         if ((Ext.Number.from(params1.start, 0) != Ext.Number.from(params2.start, 0))) return false;
+        if ((Ext.Number.from(params1.page, 0) != Ext.Number.from(params2.page, 0))) return false;
         if ((!Ext.isEmpty(params1.descendants) || !Ext.isEmpty(params2.descendants) ) && (params1.descendants != params2.descendants) ) return false;
         if ((!Ext.isEmpty(params1.query) || !Ext.isEmpty(params2.query) ) && (params1.query != params2.query) ) return false;
         if ((!Ext.isEmpty(params1.filters) || !Ext.isEmpty(params2.filters) ) && (params1.filters != params2.filters) ) return false;
@@ -745,7 +747,11 @@ Ext.define('CB.browser.ViewContainer', {
         var p = Ext.apply({}, this.params);
 
         if(!Ext.isDefined(paramsSubset.start)) {
-            paramsSubset.start = 0;
+            if(Ext.isDefined(paramsSubset.page)) {
+                paramsSubset.start = (paramsSubset.page -1) * this.store.pageSize;
+            } else {
+                paramsSubset.start = 0;
+            }
         }
 
         Ext.apply(p, paramsSubset);

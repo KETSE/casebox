@@ -37,17 +37,12 @@ Ext.define('CB.browser.view.Pivot',{
             ,editable: false
             ,triggerAction: 'all'
             ,lazyRender: true
-            ,mode: 'local'
+            ,queryMode: 'local'
             ,fieldLabel: L.Rows
-            ,labelWidth: 30
+            ,labelWidth: 'auto'
+            ,style: 'margin-right: 10px'
             ,store: new Ext.data.JsonStore({
                 model: 'Generic2'
-                ,proxy: {
-                    type: 'memory'
-                    ,reader: {
-                        type: 'json'
-                    }
-                }
             })
             ,displayField: 'name'
             ,valueField: 'id'
@@ -66,17 +61,11 @@ Ext.define('CB.browser.view.Pivot',{
             ,editable: false
             ,triggerAction: 'all'
             ,lazyRender: true
-            ,mode: 'local'
-            ,fieldLabel: L.Rows
-            ,labelWidth: 35
+            ,queryMode: 'local'
+            ,fieldLabel: L.Columns
+            ,labelWidth: 'auto'
             ,store: new Ext.data.JsonStore({
                 model: 'Generic2'
-                ,proxy: {
-                    type: 'memory'
-                    ,reader: {
-                        type: 'json'
-                    }
-                }
             })
             ,displayField: 'name'
             ,valueField: 'id'
@@ -509,7 +498,12 @@ Ext.define('CB.browser.view.Pivot',{
         if(Ext.isEmpty(el) || Ext.isEmpty(el.textContent)) {
             return;
         }
-        var f = el.attributes.getNamedItem('f').value.split('|');
+        var f = el.attributes.getNamedItem('f');
+        if(Ext.isEmpty(f)) {
+            return;
+        }
+
+        f = f.value.split('|');
 
         var params = {
             view: 'grid'

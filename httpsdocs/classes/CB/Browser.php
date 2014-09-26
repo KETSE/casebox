@@ -93,6 +93,7 @@ class Browser
             ,'folderProperties' => $this->getPathProperties($p)
             ,'data' => $this->data
             ,'total' => $this->total
+            ,'page' => @$p['page']
         );
 
         if (!empty($this->facets)) {
@@ -142,6 +143,7 @@ class Browser
                 $idsPath[] = $n->getId();
             }
 
+            $rez['name'] = Util\adjustTextForDisplay($rez['name']);
             $rez['path'] = '/'.implode('/', $idsPath);
             $rez['menu'] = $this->path[sizeof($this->path) - 1]->getCreateMenu();
 

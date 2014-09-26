@@ -24,7 +24,10 @@ Ext.define('CB.FilesConfirmationWindow', {
         ,autorenameButton: true
     }
     ,initComponent: function(){
+        this.data = this.config.data;
+
         var buttons = [];
+
         if(this.data.allow_new_version) buttons.push({
             text: L.NewVersion
             ,name: 'newversion'

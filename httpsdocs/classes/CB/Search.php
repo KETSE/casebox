@@ -5,8 +5,9 @@ class Search extends Solr\Client
 {
     public static $defaultFields = array(
         'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'system',
-        'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'case_id', 'acl_count',
-        'case', 'template_id', 'user_ids', 'status', 'task_status', 'category_id', 'importance', 'completed', 'versions'
+        'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate',
+        'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'status',
+        'task_status', 'category_id', 'importance', 'completed', 'versions', 'ntsc'
     );
     /*when requested to sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
@@ -40,13 +41,16 @@ class Search extends Solr\Client
             ? ''
             : $this->escapeLuceneChars($p['query']);
 
-        $this->start = empty($p['start'])
-            ? 0
-            : intval($p['start']);
-
         $this->rows = isset($p['rows'])
             ? intval($p['rows'])
             : Config::get('max_rows');
+
+        $this->start = empty($p['start'])
+            ? (empty($p['page'])
+                ? 0
+                : $this->rows * (intval($p['page']) -1)
+            )
+            : intval($p['start']);
 
         //by default filter not deleted nodes
         $fq = array('dstatus:0');

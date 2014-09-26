@@ -10,7 +10,7 @@ Ext.define('CB.TextEditWindow', {
     ,maximizable: false
     ,minimizable: false
     ,modal: true
-    ,plain: true
+    // ,plain: true
     ,resizable: true
     ,stateful: false
     ,data: { callback: Ext.emptyFn }
@@ -18,7 +18,12 @@ Ext.define('CB.TextEditWindow', {
     ,width: 600
     ,height: 400
     ,initComponent: function() {
-        this.editor = new Ext.form.TextArea({border: false});
+        this.data = this.config.data;
+
+        this.editor = new Ext.form.TextArea({
+            border: false
+        });
+
         Ext.apply(this, {
             layout: 'fit'
             ,items: [this.editor]
@@ -28,22 +33,28 @@ Ext.define('CB.TextEditWindow', {
                 scope: this
                 }
             ]
+            ,listeners: {
+                scope: this
+                ,show: this.onWindowsShow
+            }
             ,buttons: [ {text: Ext.MessageBox.buttonText.ok, handler: this.doSubmit, scope: this}
                         ,{text: Ext.MessageBox.buttonText.cancel, handler: this.doClose, scope: this}]
         });
 
-        CB.TextEditWindow.superclass.initComponent.apply(this, arguments);
-
-        this.on('show', this.onShow, this);
+        // CB.TextEditWindow.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
+        // this.on('show', this.onShow, this);
     }
-    ,onShow: function(){
+    ,onWindowsShow: function(){
         this.editor.setValue(Ext.valueFrom(this.data.value, ''));
         this.editor.focus(false, 350);
-    },doSubmit: function(){
+    }
+    ,doSubmit: function(){
         var f = this.data.callback.bind(Ext.valueFrom(this.data.scope, this), [this, this.editor.getValue()]);
         f();
         this.doClose();
-    },doClose: function(){
+    }
+    ,doClose: function(){
         this.hide();
     }
 });

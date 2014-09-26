@@ -63,15 +63,20 @@ Ext.define('CB.DB.DirectObjectsStore', {
     // }
 
     ,checkRecordExistance: function(data){
-        if(Ext.isEmpty(data) || isNaN(data.id)) {
+        if(Ext.isEmpty(data)) {
             return false;
         }
 
-        data.id = parseInt(data.id, 10);
+        var id = Ext.Number.from(data.nid, data.id);
+        if(isNaN(id)) {
+            return false;
+        }
 
-        var idx = this.findExact('id', data.id, 10);
+        var idx = this.findExact('id', id);
 
         if(idx < 0){
+            data = Ext.apply({}, data);
+            data.id = id;
             r = Ext.create(
                 this.getModel().getName()
                 ,data

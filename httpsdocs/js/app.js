@@ -69,7 +69,9 @@ Ext.onReady(function(){
         if(App.loginData.cfg.short_date_format) App.dateFormat = App.loginData.cfg.short_date_format;
         if(App.loginData.cfg.long_date_format) App.longDateFormat = App.loginData.cfg.long_date_format;
         if(App.loginData.cfg.time_format) App.timeFormat = App.loginData.cfg.time_format;
-        App.mainViewPort = new CB.ViewPort();
+        App.mainViewPort = new CB.ViewPort({
+            rtl: (App.config.rtl === true)
+        });
         App.mainViewPort.doLayout();
         App.mainViewPort.initCB( r, e );
     });
@@ -700,7 +702,6 @@ function initApp() {
 
                             w.show();
 
-                            return w;
                         } else {
                             return new CB.ObjectsTriggerField({
                                 enableKeyEvents: true
@@ -810,7 +811,7 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                     ,iconClsField: 'name'
-                    ,plugins: [new Ext.ux.plugins.IconCombo()]
+                    // ,plugins: [new Ext.ux.plugins.IconCombo()]
                 });
             case '_language':
                 return new Ext.form.ComboBox({
@@ -899,13 +900,16 @@ function initApp() {
                             this.originalValue = this.record.get('value');
                             this.value = v;
                             this.record.set('value', v);
-                            if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
+                            if(this.grid.onAfterEditProperty) {
+                                this.grid.onAfterEditProperty(this, this);
+                            }
                             this.grid.fireEvent('change');
                         }
                     }
                 });
                 w.on('hide', e.grid.gainFocus, e.grid);
                 w.show();
+                // return w;
                 break;
             case 'html':
                 e.cancel = true;
@@ -925,13 +929,14 @@ function initApp() {
                 });
                 if(!Ext.isEmpty(e.grid)) w.on('hide', e.grid.gainFocus, e.grid);
                 w.show();
+                return w;
                 break;
             default:
                 return new Ext.form.TextField({
                     enableKeyEvents: true
                 });
         }
-        return false;
+        // return false;
     };
 
     App.focusFirstField = function(scope){
@@ -1121,18 +1126,18 @@ function overrides(){
     Ext.override(Ext.data.Store, {
         deleteIds: function(ids){
             var idx
-                ,idProperty = Ext.isEmpty(this.reader)
+                ,idProperty = Ext.isEmpty(this.proxy.reader)
                     ? 'id'
                     : Ext.valueFrom(
-                        this.reader.idProperty
-                        ,this.reader.meta.idProperty
+                        this.proxy.reader.idProperty
+                        ,this.proxy.reader.config.idProperty
                         ,'id'
                     );
 
             if(Ext.isPrimitive(ids)) {
                 ids = String(ids).split(',');
             }
-
+            clog('delete', ids, idProperty);
             if(this.data) {
                 for (var i = 0; i < ids.length; i++) {
                     idx = this.findExact(idProperty, String(ids[i]));

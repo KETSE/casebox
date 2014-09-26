@@ -6,10 +6,11 @@ Ext.namespace('CB.DD');
  */
 
 Ext.define('CB.DD.Grid', {
-    extend: 'Ext.util.Observable'
+    extend: 'Ext.grid.plugin.DragDrop'
     ,alias: 'plugin.CBDDGrid'
 
     ,ddGroup: 'CBO'
+    ,idProperty: 'id'
 
     /**
      * pass another ddGroup if needed
@@ -17,9 +18,31 @@ Ext.define('CB.DD.Grid', {
      * @return void
      */
     ,constructor: function(config){
+        var idProperty = Ext.valueFrom(config.idProperty, this.idProperty);
+        var defaultConfig = {
+
+            dragZone: {
+
+            }
+            ,dropZone: {
+                idProperty: idProperty
+                ,onNodeEnter: this.onNodeEnter
+                ,onNodeOver: this.onNodeOver
+                ,onNodeOut: this.onNodeOut
+                ,onNodeDrop: this.onNodeDrop
+            }
+        };
+
         if(config) {
-            Ext.apply(this, config);
+            Ext.apply(defaultConfig, config);
+
+            if(config.dropZoneConfig) {
+                Ext.apply(defaultConfig.dropZone, config.dropZoneConfig);
+            }
         }
+        Ext.apply(this, defaultConfig);
+
+        this.callParent(defaultConfig);
     }
     /**
      * init method called by the grid when initializing plugins
@@ -50,36 +73,37 @@ Ext.define('CB.DD.Grid', {
         }
 
         Ext.apply(this, cfg);
-        Ext.apply(this.owner, cfg);
+        // Ext.apply(this.owner, cfg);
 
-        owner.on('render', this.onRender, this);
+        // owner.on('render', this.onRender, this);
         owner.on('beforedestroy', this.onBeforeDestroy, this);
 
+        this.callParent(arguments);
         // for general case we don't know there the grid stores its params
         // so listeners for actions on objects should be implemented by grid itself
     }
 
-    ,onRender: function(grid){
-        if(this.enableDrag) {
-            var dragZoneConfig = this.dragZoneConfig || {};
-            Ext.apply(dragZoneConfig, {
-                idProperty: this.idProperty
-                ,ddGroup: this.ddGroup
-                ,nodeToGenericData: this.nodeToGenericData
-            });
-            this.owner.getView().dragZone = new CB.DD.GridDragZone(this.owner, dragZoneConfig);
-        }
+    // ,onRender: function(grid){
+    //     if(this.enableDrag) {
+    //         var dragZoneConfig = this.dragZoneConfig || {};
+    //         Ext.apply(dragZoneConfig, {
+    //             idProperty: this.idProperty
+    //             ,ddGroup: this.ddGroup
+    //             ,nodeToGenericData: this.nodeToGenericData
+    //         });
+    //         this.owner.getView().dragZone = new CB.DD.GridDragZone(this.owner, dragZoneConfig);
+    //     }
 
-        if(this.enableDrop) {
-            var dropZoneConfig = this.dropZoneConfig || {};
-            Ext.apply(dropZoneConfig, {
-                idProperty: this.idProperty
-                ,ddGroup: this.ddGroup
-                ,nodeToGenericData: this.nodeToGenericData
-            });
-            this.owner.dropZone = new CB.DD.GridDropZone(this.owner, dropZoneConfig);
-        }
-    }
+    //     if(this.enableDrop) {
+    //         var dropZoneConfig = this.dropZoneConfig || {};
+    //         Ext.apply(dropZoneConfig, {
+    //             idProperty: this.idProperty
+    //             ,ddGroup: this.ddGroup
+    //             ,nodeToGenericData: this.nodeToGenericData
+    //         });
+    //         this.owner.dropZone = new CB.DD.GridDropZone(this.owner, dropZoneConfig);
+    //     }
+    // }
 
     /**
      * unset all assigned listeners
@@ -87,7 +111,7 @@ Ext.define('CB.DD.Grid', {
      */
     ,onBeforeDestroy: function()
     {
-        this.owner.un('render', this.onRender, this);
+        // this.owner.un('render', this.onRender, this);
         this.owner.un('beforedestroy', this.onBeforeDestroy, this);
     }
 
@@ -114,117 +138,35 @@ Ext.define('CB.DD.Grid', {
         };
         return data;
     }
-});
 
-/* custom grid dragZone for handling casebox D&D of objects */
-Ext.define('CB.DD.GridDragZone', {
-    // extend: 'Ext.grid.GridDragZone'
-    extend: 'Ext.dd.DragZone'
-    ,idProperty: 'id'
-
-    ,constructor: function(grid, config){
-        this.grid = grid;
-        this.view = grid.getView();
-        Ext.apply(this, config || {});
-        // CB.DD.GridDragZone.superclass.constructor.call(this, grid, config);
-    }
-    ,getDragData: function(e){
-        var rez = false;
-        var sourceEl = e.getTarget(this.view.itemSelector, 10);
-        if (sourceEl) {
-            var d = sourceEl.cloneNode(true);
-            d.id = Ext.id();
-
-            var data = [];
-            records = this.getSelections();
-            for (var i = 0; i < records.length; i++) {
-                data[i] = this.nodeToGenericData(records[i]);
-            }
-            rez = this.view.dragData = {
-                sourceEl: sourceEl
-                ,repairXY: Ext.fly(sourceEl).getXY()
-                ,ddel: d
-                ,data: data
-            };
-        }
-
-        return rez;
-    }
-    ,getSelections: function() {
-        var sm = this.grid.getSelectionModel();
-
-        if(sm.getSelections) {
-            return sm.getSelections();
-        } else if(sm.getSelectedCell){
-            var s = sm.getSelectedCell();
-            if(s) {
-                return [this.grid.store.getAt(s[0])];
-            }
-        }
-        return [];
-    }
-});
-
-/* custom grid dropZone for handling casebox D&D of objects */
-Ext.define('CB.DD.GridDropZone', {
-    extend: 'Ext.dd.DropZone'
-    ,idProperty: 'id'
-    ,appendOnly: true
-
-    ,constructor: function(grid, config){
-        this.grid = grid;
-        this.view = grid.getView();
-
-        Ext.apply(this, config || {});
-        // CB.DD.GridDropZone.superclass.constructor.call(this, grid.getView().scroller, config);
-    }
-    ,getTargetFromEvent: function(e) {
-        // check if over a row
-        var t = e.getTarget(this.view.rowSelector);
-        if (t) {
-            var rowIndex = this.view.findRowIndex(t);
-            if ((rowIndex !== false) ) {
-                return {
-                    node: t,
-                    record: this.grid.store.getAt(rowIndex)
-                };
-            }
-        }
-        // if owner has handler for dropping in grid's free space
-        // then analize for x-grid3-scroller target
-        if(this.onScrollerDragDrop){
-            t = e.getTarget('.x-grid3-scroller');
-            if (t) {
-                return { node: t};
-            }
-        }
+    ,onNodeEnter: function(el, source, ev, data){
+        Ext.get(el).addCls('drop-target');
     }
 
-    ,onNodeEnter: function(nodeData, source, e, data){
-        Ext.get(nodeData.node).addCls('drop-target');
-    }
-
-    ,onNodeOver: function (targetData, source, e, data){
+    ,onNodeOver: function (el, source, ev, data){
         /* deny drop on:
             - node itself
             - direct parent of dragged node
             - any descendant of dragged node
         */
+       var targetRecord = this.view.getRecord(el);
+
         var rez = this.dropAllowed;
-        if(!targetData.record ||
-            Ext.isEmpty(data.data) ||
-            isNaN(data.data[0].id)
+        if(Ext.isEmpty(targetRecord) ||
+            !data ||
+            Ext.isEmpty(data.records) ||
+            isNaN(data.records[0].id)
         ) {
             return this.dropNotAllowed;
         }
 
-        var sourceData = Ext.isArray(data.data)
-            ? data.data
-            : [data.data];
+        var sourceData = Ext.isArray(data.records)
+            ? data.records
+            : [data.records];
         var i = 0;
         while ((i < sourceData.length) && (rez == this.dropAllowed))  {
-            if( (targetData.record.data[this.idProperty] == sourceData[i].id)
-                || (targetData.record.data[this.idProperty] == sourceData[i].pid)
+            if( (targetRecord.data[this.idProperty] == sourceData[i].id)
+                || (targetRecord.data[this.idProperty] == sourceData[i].pid)
             ) {
                 rez = this.dropNotAllowed;
             }
@@ -233,26 +175,47 @@ Ext.define('CB.DD.GridDropZone', {
         return rez;
     }
 
-    ,onNodeOut: function(nodeData, source, e, data){
-        Ext.get(nodeData.node).removeCls('drop-target');
+    ,onNodeOut: function(el, source, ev, data){
+        Ext.get(el).removeCls('drop-target');
     }
 
-    ,onNodeDrop: function(targetData, source, e, sourceData){
-        if(this.onNodeOver(targetData, source, e, sourceData) == this.dropAllowed){
-            if(targetData.record) {
-                App.DD.execute({
-                    action: e
-                    ,targetData: this.nodeToGenericData(targetData.record)
-                    ,sourceData: sourceData.data
-                });
+    ,onNodeDrop: function(el, source, e, data){
+        if(Ext.isElement(el)) {
+            if(this.onNodeOver(el, source, e, data) == this.dropAllowed){
+                var targetRecord = this.view.getRecord(el);
+                if(targetRecord) {
+                    var d, sourceData = [];
+                    for (var i = 0; i < data.records.length; i++) {
+                        d = data.records[i].data;
+                        sourceData.push({
+                            id: d[this.idProperty]
+                            ,name: d['name']
+                            ,path: d['path']
+                            ,template_id: d['template_id']
+                        });
+                    }
 
-            } else { //drop over scroller area of the grid
-                callback = this.scope
-                    ? this.onScrollerDragDrop.bind(this.scope)
-                    : this.onScrollerDragDrop;
-                callback(targetData, source, e, sourceData);
+                    d = targetRecord.data;
+                    var targetData = {
+                        id: d[this.idProperty]
+                        ,name: d['name']
+                        ,path: d['path']
+                        ,template_id: d['template_id']
+                    };
+                    App.DD.execute({
+                        action: e
+                        ,targetData: targetData
+                        ,sourceData: sourceData
+                    });
+
+                }
             }
-            return true;
+        } else { //drop over scroller area of the grid
+            callback = this.scope
+                ? this.onScrollerDragDrop.bind(this.scope)
+                : this.onScrollerDragDrop;
+            callback(el, source, e, data);
         }
+        return false;
     }
 });

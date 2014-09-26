@@ -52,6 +52,8 @@ class Listeners
             return;
         }
 
+        $rez = array();
+
         $userLanguage = \CB\Config::get('user_language');
 
         $displayColumns = $this->getDC();
@@ -208,7 +210,14 @@ class Listeners
             }
         }
 
-        if (!empty($state['sort'])) {
+        /* user clicked a column to sort by */
+        if (!empty($ip['userSort'])) {
+            $p['result']['sort'] = array(
+                'field' => $ip['sort']
+                ,'direction' => $ip['dir']
+            );
+
+        } elseif (!empty($state['sort'])) {
             $p['result']['sort'] = $state['sort'];
         }
         /* end of get user state and merge the state with display columns */
@@ -271,8 +280,18 @@ class Listeners
             }
         }
 
-        /* get user state and check if user has a custom sorting */
-        if (empty($this->inputParams['sort'])) {
+        /* user clicked a column to sort by */
+        if (!empty($this->inputParams['userSort'])) {
+            $dir = strtolower($this->inputParams['dir']);
+
+            if (in_array($dir, array('asc', 'desc')) &&
+                preg_match('/^[a-z_0-9]+$/i', $this->inputParams['sort'])
+            ) {
+                $rez['sort'] = 'ntsc asc,' . $this->inputParams['sort'] . ' ' . $dir;
+            }
+
+        } else {
+            /* get user state and check if user has a custom sorting */
             $stateFrom = empty($displayColumns['from'])
                 ? 'default'
                 : $displayColumns['from'];

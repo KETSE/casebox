@@ -116,11 +116,12 @@ Ext.define('CB.DD', {
             } else {
                 Ext.Msg.alert(L.Error, Ext.valueFrom(r.msg, L.ErrorOccured));
             }
-        }else{
+        } else {
             Ext.copyTo(r, this.params, 'sourceData,targetData');
             r.targetId = r.targetData.id;
             App.fireEvent('objectsaction', this.params.action, r, e);
         }
+
         if(this.callback) {
             this.callback(r.pids);
             delete this.callback;

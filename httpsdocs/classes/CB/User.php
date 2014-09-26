@@ -185,7 +185,14 @@ class User
         $data = $authenticator->createSecretData($data);
         $authenticator->setSecretData($data);
 
-        if ($authenticator->verifyCode($data['code'])) {
+        if ($p['method'] == 'ybk') { //cant verify right after client creation, should pass some time
+            $this->setTSVConfig(
+                array(
+                    'method' => $p['method']
+                    ,'sd' => $data
+                )
+            );
+        } elseif ($authenticator->verifyCode($data['code'])) {
             $cfg = array(
                 'method' => $p['method']
                 ,'sd' => $data
@@ -273,6 +280,7 @@ class User
             'success' => true
             ,'config' => array(
                 'coreName' => $coreName
+                ,'rtl' => Config::get('rtl')
                 ,'folder_templates' => Config::get('folder_templates')
                 ,'default_task_template' => Config::get('default_task_template')
                 ,'default_event_template' => Config::get('default_event_template')

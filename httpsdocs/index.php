@@ -5,6 +5,9 @@ require_once 'init.php';
 
 $coreName = Config::get('core_name');
 $coreUrl = Config::get('core_url');
+$rtl = Config::get('rtl')
+    ? '-rtl'
+    : '';
 
 if (empty($_SESSION['user'])) {
     exit(header('Location: ' . $coreUrl . 'login.php'));
@@ -26,7 +29,7 @@ $projectTitle = Config::get('project_name_' . Config::get('user_language'), $cor
     <link rel="shortcut icon" href="/i/casebox-logo.ico" type="image/x-icon">
 <?php
 
-echo '<link rel="stylesheet" type="text/css" href="/libx/ext/packages/ext-theme-gray/build/resources/ext-theme-gray-all.css" />
+echo '<link rel="stylesheet" type="text/css" href="/libx/ext/packages/ext-theme-gray/build/resources/ext-theme-gray-all' . $rtl . '.css" />
     <link rel="stylesheet" type="text/css" href="/libx/extjs4-ace/styles.css" />
     <link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(Minify_getUri('css'), 1) . '" />' . "\n";
 
@@ -150,7 +153,7 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 </div>
 
 <script type="text/javascript">setProgress('<?php echo L\get('Loading_ExtJS_Core')?>', '30%')</script>
-<script type="text/javascript" src="<?php echo EXT_PATH ?>/ext-all<?php echo isDebugHost() ? '-debug' : ''; ?>.js"></script>
+<script type="text/javascript" src="<?php echo EXT_PATH ?>/ext-all<?php echo $rtl.(isDebugHost() ? '-debug' : ''); ?>.js"></script>
 <script type="text/javascript" src="<?php echo EXT_PATH ?>/packages/ext-charts/build/ext-charts<?php echo isDebugHost() ? '-debug' : ''; ?>.js"></script>
 <script type="text/javascript" src="<?php echo EXT_PATH ?>/packages/ext-theme-gray/build/ext-theme-gray<?php echo isDebugHost() ? '-debug' : ''; ?>.js"></script>
 

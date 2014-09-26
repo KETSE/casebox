@@ -21,18 +21,12 @@ Ext.define('CB.browser.view.Charts', {
             ,forceSelection: true
             ,triggerAction: 'all'
             ,lazyRender: true
-            ,mode: 'local'
+            ,queryMode: 'local'
             ,fieldLabel: 'Facets'
-            ,labelWidth: 40
+            ,labelWidth: 'auto'
             ,editable: false
             ,store: new Ext.data.JsonStore({
                 model: 'Generic2'
-                ,proxy: {
-                    type: 'memory'
-                    ,reader: {
-                        type: 'json'
-                    }
-                }
                 ,data: []
             })
             ,displayField: 'name'

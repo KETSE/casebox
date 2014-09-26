@@ -158,8 +158,12 @@ Ext.define('CB.browser.Tree', {
             ,listeners: {
                 scope: this
                 ,beforeload: function(store, record, eOpts) {
+                    var path = record.config.node
+                        ? record.config.node.getPath('nid')
+                        : '';
+
                     var p = {
-                        path: record.config.node.getPath('nid')
+                        path: path
                         ,showFoldersContent: this.showFoldersContent
                     };
                     Ext.apply(store.proxy.extraParams, p);
@@ -175,6 +179,11 @@ Ext.define('CB.browser.Tree', {
                 style: 'background: #ffffff'
                 ,border: false
                 ,autoScroll: true
+                ,idProperty: 'nid'
+                ,plugins: {
+                    ptype: 'CBDDTree'
+                    ,idProperty: 'nid'
+                }
             }
             ,columns: {
                 items: [
@@ -199,11 +208,6 @@ Ext.define('CB.browser.Tree', {
                 // ,load: function(node){ this.sortNode(node); }
                 ,dblclick: this.onDblClick
                 ,itemcontextmenu: this.onContextMenu
-                ,startdrag: function(tree, node, e){
-                    if(node.data.system == 1){
-                        e.cancel = true;
-                    }
-                }
                 ,beforedestroy: this.onBeforeDestroy
                 ,itemkeydown: this.onItemKeyDown
             }

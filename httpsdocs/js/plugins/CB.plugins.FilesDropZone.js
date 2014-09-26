@@ -7,7 +7,7 @@ Ext.define('CB.plugins.FilesDropZone', {
     ,constructor: function(config){
         Ext.apply(this, {
             dropZoneConfig:{
-                //text: 'Drop files here'
+                text: 'Drop files here'
             }
         });
 
@@ -48,7 +48,7 @@ Ext.define('CB.plugins.FilesDropZone', {
 
     ,getTarget: function(e){
         var te = this.owner.getEl();
-        var ce = e.getTarget('.x-grid3-row');
+        var ce = e.getTarget('.x-grid-row');
         if(!Ext.isEmpty(ce)){
              ce = Ext.get(ce);
              if(te.contains(ce)) {
@@ -63,17 +63,17 @@ Ext.define('CB.plugins.FilesDropZone', {
         var te = this.getTarget(e);
         this.targetId = null;
         this.targetPath = null;
-        if(te.hasCls('x-grid3-row')){
-            var ridx = this.owner.getView().findRowIndex(te.dom);
-            if(ridx >= 0 ){
-                var r = this.owner.store.getAt(ridx);
-                this.targetId = r.get(this.pidPropety);
-                this.targetPath = r.get('path')+r.get('name')+'/';
+        if(te.hasCls('x-grid-row')){
+            var rel = this.owner.findTargetByEvent(e);
+            var rec = this.owner.getRecord(rel);
+            if(rec){
+                this.targetId = rec.get(this.pidPropety);
+                this.targetPath = rec.get('path') + rec.get('name')+'/';
             }
         } else {
             var cmp = Ext.getCmp(te.id);
-            this.targetId = cmp.getProperty(this.pidPropety);
-            this.targetPath = cmp.getProperty('pathtext');
+            this.targetId = cmp.grid.getProperty(this.pidPropety);
+            this.targetPath = cmp.grid.getProperty('pathtext');
         }
     }
 
@@ -157,8 +157,9 @@ Ext.define('CB.plugins.FilesDropZone', {
     }
 
     ,showDropZone: function(e){
-        el = this.owner.getEl();
-        if( Ext.isEmpty(el.dom) ){
+        var el = this.owner.getEl();
+
+        if(Ext.isEmpty(el) || Ext.isEmpty(el.dom) ){
             this.onBeforeDestroy();
             return;
         }
