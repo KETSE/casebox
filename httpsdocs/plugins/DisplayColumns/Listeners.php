@@ -13,7 +13,7 @@ class Listeners
         $sp = &$p['params'];
         $this->inputParams = &$p['inputParams'];
 
-        if (@$this->inputParams['from'] == 'tree') {
+        if (@$this->inputParams['from'] !== 'grid') {
             return;
         }
 

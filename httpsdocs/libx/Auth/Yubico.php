@@ -335,7 +335,6 @@ class Auth_Yubico
             );
             $signature = preg_replace('/\+/', '%2B', $signature);
             $parameters .= '&h=' . $signature;
-            // \CB\debug('params', $parameters, $this->_key);
         }
 
         /* Generate and prepare request. */
@@ -356,7 +355,7 @@ class Auth_Yubico
                 $this->_lastquery .= " ";
             }
             $this->_lastquery .= $query;
-            // \CB\debug($query);
+
             $handle = curl_init($query);
             // curl_setopt($handle, CURLOPT_USERAGENT, "PEAR Auth_Yubico");
             curl_setopt($handle, CURLOPT_USERAGENT, "Auth_Yubico");
@@ -393,15 +392,15 @@ class Auth_Yubico
 
                     $str = curl_multi_getcontent($info['handle']);
                     $cinfo = curl_getinfo($info['handle']);
-                    // \CB\debug('content', $str, $cinfo);
+
                     if ($wait_for_all) { # Better debug info
                         $this->_response .= 'URL=' . $cinfo['url'] ."\n" . $str . "\n";
                     }
 
                     if (preg_match("/status=([a-zA-Z0-9_]+)/", $str, $out)) {
                         $status = $out[1];
-                        // \CB\debug('status', $status);
-                        /*
+
+                                                /*
                         * There are 3 cases.
                         *
                         * 1. OTP or Nonce values doesn't match - ignore

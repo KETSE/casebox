@@ -545,7 +545,9 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,getViewParams: function() {
-        var rez = {};
+        var rez = {
+            from: 'grid'
+        };
 
         if(this.userSort) {
             rez.userSort = 1;

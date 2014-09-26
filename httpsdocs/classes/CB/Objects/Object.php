@@ -4,6 +4,7 @@ namespace CB\Objects;
 use CB\DB;
 use CB\Util;
 use CB\Log;
+use CB\Security;
 
 /**
  * class for generic casebox objects
@@ -77,6 +78,10 @@ class Object
         \CB\fireEvent('beforeNodeDbCreate', $this);
 
         $p = &$this->data;
+
+        if (!Security::canCreateActions($p['pid'])) {
+            throw new \Exception(L\get('Access_denied'));
+        }
 
         // check input params
         if (!isset($p['pid'])) {
