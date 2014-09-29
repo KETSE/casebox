@@ -1,5 +1,21 @@
+CaseBox 1.9.336 (2014-09-29)
+==============================
+New Features, Improvements
+--------------------------
+- Remove menuItem "Edit / Merge files" from Grid top menu
+- If error occurs when sending a comments, the comment should remain in TextArea
+    Note: this will work only for hosts that are not in debug_hosts
+          (json response should be parsable).
+- Differentiate HTTP errors & connectivity errors
+
+Fixed Bugs:
+----------
+- any yubikey works when two factor auth is enabled
+
 CaseBox 1.9.334 (2014-09-23)
 ==============================
+New Features, Improvements
+--------------------------
 - moved security check on object create after firing onBeforeCreate event
     because the triggers can change pid of the created object
 - limit DisplayColumns plugin to work only for grid view

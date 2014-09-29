@@ -188,12 +188,15 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
 
     ,onAddCommentProcess: function(r, e) {
         this.loadLabel.hide();
-        this.messageField.reset();
-        this.messageField.show();
 
         if(r.success !== true) {
+            this.messageField.show();
             return;
+        } else {
+            this.messageField.reset();
+            this.messageField.show();
         }
+
 
         if(Ext.isEmpty(this.loadedData.data)) {
             this.loadedData.data = [];

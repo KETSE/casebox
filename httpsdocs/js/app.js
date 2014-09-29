@@ -31,9 +31,6 @@ Ext.onReady(function(){
 
     Ext.state.Manager.setProvider(
         new CB.state.DBProvider()
-        // new Ext.state.CookieProvider({
-        //     expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
-        // })
     );
 
     Ext.Direct.on('login', function(r, e){
