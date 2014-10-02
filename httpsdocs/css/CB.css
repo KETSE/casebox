@@ -1,5 +1,7 @@
 body { font-family: arial,sans-serif; font-size: 12px }
 
+/*
+
 .x-grid3-row td pre
 ,.x-grid3-row td
 ,.x-grid3-summary-row td {
@@ -10,7 +12,6 @@ body { font-family: arial,sans-serif; font-size: 12px }
 .x-form-text
 ,textarea.x-form-field
 ,.ext-webkit .x-small-editor .x-form-field {
-    /*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif*/
     font: 12px arial,sans-serif;
     padding: 3px 3px 4px 4px;
 }
@@ -28,6 +29,42 @@ body { font-family: arial,sans-serif; font-size: 12px }
 .x-small-editor .x-form-field-wrap .x-form-trigger {
   height: 22px;
 }
+
+.x-grid-row td, .x-grid-summary-row td { font: 12px arial,sans-serif }
+
+*/
+
+td.x-grid-cell {
+    font: 12px arial,sans-serif;
+}
+
+.icon-grid-column { background-position: 3px 50% !important; background-repeat: no-repeat; }
+.icon-grid-column-top { background-position: 3px 4px !important; background-repeat: no-repeat; }
+.icon-grid-column .x-grid-cell-inner, .icon-grid-column-top .x-grid-cell-inner {padding-left: 23px !important; min-height: 16px }
+
+.x-grid-cell-inner, .x-grid-hd-inner {
+    padding: 5px 6px 5px 6px;
+    /*padding: 3px 6px 4px 6px;*/
+}
+
+.x-grid-cell-inner-treecolumn {
+    padding: 3px 6px 4px 0;
+}
+
+
+.x-tree-node {
+  font: normal 12px arial, tahoma, helvetica, sans-serif;
+  padding: 1px;
+}
+
+
+
+
+
+
+
+
+
 
 a{ text-decoration: none; color: #333333 }
 a:hover{ text-decoration: underline }
@@ -167,9 +204,6 @@ span.icon-right{ float: right; width: 18px; display: inline-block !important }
 .hover{ color: #286bcc; text-decoration: underline !important }
 
 .icon-custom-status{ background-image: url(i/ico/user-thief.png) !important; background-position: 0 50%; background-repeat: no-repeat}
-.icon-grid-column { background-position: 3px 50% !important; background-repeat: no-repeat; }
-.icon-grid-column-top { background-position: 3px 2px !important; background-repeat: no-repeat; }
-.icon-grid-column .x-grid-cell-inner, .icon-grid-column-top .x-grid-cell-inner{padding-left: 23px !important; min-height: 16px }
 
 .icon-bullet_red 	{ background-image:url(i/ico/bullet_red.png) !important; background-repeat: no-repeat}
 .icon-bullet_green	{ background-image:url(i/ico/bullet_green.png) !important; background-repeat: no-repeat}
