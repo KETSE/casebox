@@ -370,6 +370,9 @@ class Object
 
         $this->updateCustomData();
 
+        // set/update this object to cache
+        \CB\Cache::set('Objects[' . $this->id . ']', $this);
+
         \CB\fireEvent('nodeDbUpdate', $this);
 
         // log the action

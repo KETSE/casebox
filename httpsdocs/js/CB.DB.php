@@ -309,8 +309,9 @@ createDirectStores = function(){
                 ,idProperty: 'id'
                 ,root: 'data'
                 ,messageProperty: 'msg'
-            },[ {name: 'id', type: 'int'}, 'name', 'iconCls', 'photo' ]
+            },[ {name: 'id', type: 'int'}, 'user', 'name', 'iconCls', 'photo' ]
         )
+
         ,getName: getStoreNames
         ,getPhotoParam: function(id) {
             var idx = this.findExact('id', parseInt(id));
@@ -318,6 +319,20 @@ createDirectStores = function(){
             return (idx >= 0)
                 ? this.getAt(idx).get('photo')
                 : '';
+        }
+        ,getUserById: function(id) {
+            var idx = this.findExact('id', parseInt(id));
+
+            return (idx >= 0)
+                ? this.getAt(idx).get('user')
+                : '';
+        }
+        ,getIdByUser: function(user) {
+            var idx = this.findExact('user', user);
+
+            return (idx >= 0)
+                ? this.getAt(idx).get('id')
+                : null;
         }
     });
     App.on('userprofileupdated', function(userData, event){ CB.DB.usersStore.reload();});

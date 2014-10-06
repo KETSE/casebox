@@ -685,6 +685,84 @@ function initApp(){
                             });
                         }
                         break;
+
+                    case 'text':
+                        var ed = new Ext.form.TextArea({
+                            data: objData
+                            ,allowBlur: false
+                            ,plugins: [{
+                                ptype: 'CBPluginsDropDownList'
+                                ,commands: [
+                                    {
+                                        prefix: ' '
+                                        ,regex: /^([\w\d_\.]+)/i
+
+                                        ,insertField: 'info'
+
+                                        ,handler: CB.plugins.DropDownList.prototype.onAtCommand
+                                    }
+                                ]
+                            }]
+                            // ,listeners: {
+                            //     render: function(ed) {
+                            //         // ed.purgeListeners();
+                            //         // var interceptorFn = function(field, e){
+                            //         //     clog('this.listSelection', arguments, field.listSelection);
+                            //         //     // return false; //!field.listSelection;
+                            //         // };
+
+                            //         // var i, newListners = [];
+
+                            //         // for (i = 0; i < ed.events.specialkey.listeners.length; i++) {
+                            //         //     var l = ed.events.specialkey.listeners[i];
+                            //         //     ed.un('specialkey', l.fn, l.scope);
+                            //         //     newListners.push({
+                            //         //         scope: l.scope
+                            //         //         ,fn: l.fn.createInterceptor(interceptorFn, l.scope)
+                            //         //     });
+                            //         // }
+                            //         // for (i = 0; i < newListners.length; i++) {
+                            //         //     ed.on('specialkey', newListners[i].fn, newListners[i].scope);
+                            //         // }
+                            //     }
+                            // }
+                        });
+
+                        //overwrite setValue and getValue function to transform ids to user names and back
+                        ed._setValue = ed.setValue;
+                        ed._getValue = ed.getValue;
+
+                        ed.setValue = function(value) {
+                            var v = toNumericArray(value);
+                            for (var i = 0; i < v.length; i++) {
+                                v[i] = CB.DB.usersStore.getUserById(v[i]);
+                            }
+
+                            this._setValue(v.join(' '));
+                        };
+
+                        ed.getValue = function() {
+                            var value = Ext.util.Format.trim(this._getValue());
+                            if(Ext.isEmpty(value)) {
+                                return '';
+                            }
+
+                            var rez = [];
+                            var v = value.split(' ');
+                            for (var i = 0; i < v.length; i++) {
+                                if(!Ext.isEmpty(v[i])) {
+                                    var id = CB.DB.usersStore.getIdByUser(v[i]);
+                                    if(!Ext.isEmpty(id)) {
+                                        rez.push(id);
+                                    }
+                                }
+                            }
+
+                            return rez.join(',');
+                        };
+
+                        return ed;
+
                     default:
                         return new CB.ObjectsComboField({
                             enableKeyEvents: true

@@ -39,6 +39,11 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             ,growMin: 30
             ,enableKeyEvents: true
             ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
+            ,plugins: [
+                {
+                    ptype: 'CBPluginsDropDownList'
+                }
+            ]
             ,listeners: {
                 scope: this
                 ,keypress: this.onMessageBoxKeyPress
@@ -217,6 +222,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
             this.messageToolbar.hide();
         }
     }
+
 });
 
 Ext.reg('CBObjectsPluginsComments', CB.objects.plugins.Comments);

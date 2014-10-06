@@ -287,7 +287,11 @@ class Listeners
             if (in_array($dir, array('asc', 'desc')) &&
                 preg_match('/^[a-z_0-9]+$/i', $this->inputParams['sort'])
             ) {
-                $rez['sort'] = 'ntsc asc,' . $this->inputParams['sort'] . ' ' . $dir;
+                $field = $this->inputParams['sort'];
+                if (!empty($displayColumns['data'][$field]['solr_column_name'])) {
+                    $field = $displayColumns['data'][$field]['solr_column_name'];
+                }
+                $rez['sort'] = 'ntsc asc,' . $field . ' ' . $dir;
             }
 
         } else {

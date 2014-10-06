@@ -2,6 +2,19 @@ CaseBox 1.9.336 (2014-09-29)
 ==============================
 New Features, Improvements
 --------------------------
+- created CB.plugins.DropDownList plugin for selecting users inline
+  This plugin is set to be used on adding comments and could be set for template fields.
+  In templates, the editor should be set to "text".
+
+Fixed Bugs:
+----------
+- update object from cache after object update
+- check if custom solr_column_name is set in field config when users sorts by a column
+
+CaseBox 1.9.336 (2014-09-29)
+==============================
+New Features, Improvements
+--------------------------
 - Remove menuItem "Edit / Merge files" from Grid top menu
 - If error occurs when sending a comments, the comment should remain in TextArea
     Note: this will work only for hosts that are not in debug_hosts
