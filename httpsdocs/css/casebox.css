@@ -3,7 +3,6 @@ body {font-family: arial, sans-serif; font-size: 12px}
 a {color: #15C}
 
 /*.x-grid-row td, .x-grid-summary-row td {font: 13px "lucida grande",tahoma,verdana,arial,sans-serif}*/
-.x-grid-row td, .x-grid-summary-row td { font: 12px arial,sans-serif }
 
 .panel-header-nobg {background: none}
 .generic-object {padding: 0 5px 10px 5px; color: #555}
