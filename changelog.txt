@@ -1,3 +1,49 @@
+CaseBox 1.9.337(ExtJS5) (2014-10-07)
+==============================
+New Features, Improvements
+--------------------------
+- Tree should have gray background as in ExtJS3 CB
+- Remove loading indicators for Tree & Grid
+- Remove zebra background from browser grid
+- Cherry-picked changes from devel branch:
+    Yubikey
+    differentiate HTTP and connectivity errors
+    Dropdown user list plugin (disabled for now until refactored)
+
+Fixed Bugs:
+----------
+- Pivot table appears in the middle (should be top&left)
+- Save with "Ctrl+S" save the obj but also shows browser default save dialog
+- can't attach a file in right panel
+- column "Additionally" appears for dev core & grid columns should have AutoWidth
+
+CaseBox 1.9.337 (2014-09-29)
+==============================
+New Features, Improvements
+--------------------------
+- created CB.plugins.DropDownList plugin for selecting users inline
+  This plugin is set to be used on adding comments and could be set for template fields.
+  In templates, the editor should be set to "text".
+
+Fixed Bugs:
+----------
+- update object from cache after object update
+- check if custom solr_column_name is set in field config when users sorts by a column
+
+CaseBox 1.9.336 (2014-09-29)
+==============================
+New Features, Improvements
+--------------------------
+- Remove menuItem "Edit / Merge files" from Grid top menu
+- If error occurs when sending a comments, the comment should remain in TextArea
+    Note: this will work only for hosts that are not in debug_hosts
+          (json response should be parsable).
+- Differentiate HTTP errors & connectivity errors
+
+Fixed Bugs:
+----------
+- any yubikey works when two factor auth is enabled
+
 CaseBox 1.9.334(ExtJS5) (2014-09-26)
 ==============================
 New Features, Improvements
@@ -10,6 +56,8 @@ Fixed Bugs:
 
 CaseBox 1.9.334 (2014-09-23)
 ==============================
+New Features, Improvements
+--------------------------
 - moved security check on object create after firing onBeforeCreate event
     because the triggers can change pid of the created object
 - limit DisplayColumns plugin to work only for grid view

@@ -72,8 +72,11 @@ Ext.define('CB.plugins.FilesDropZone', {
             }
         } else {
             var cmp = Ext.getCmp(te.id);
-            this.targetId = cmp.grid.getProperty(this.pidPropety);
-            this.targetPath = cmp.grid.getProperty('pathtext');
+            if(cmp.grid && !Ext.isDefined(cmp.getProperty)) {
+                cmp = cmp.grid;
+            }
+            this.targetId = cmp.getProperty(this.pidPropety);
+            this.targetPath = cmp.getProperty('pathtext');
         }
     }
 

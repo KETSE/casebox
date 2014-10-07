@@ -227,6 +227,7 @@ Ext.define('User', {
     extend: 'Ext.data.Model'
     ,fields: [
         {name: 'id', type: 'int'}
+        ,{name: 'user',  type: 'string'}
         ,{name: 'name',  type: 'string'}
         ,{name: 'iconCls',  type: 'string'}
         ,{name: 'photo',  type: 'string'}

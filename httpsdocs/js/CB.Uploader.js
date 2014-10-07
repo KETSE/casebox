@@ -546,7 +546,7 @@ Ext.define('CB.UploadWindow', {
                 }
             ]
             ,viewConfig: {
-                stripeRows: true
+                stripeRows: false
                 ,markDirty: false
             }
             ,tbar: new Ext.Toolbar({

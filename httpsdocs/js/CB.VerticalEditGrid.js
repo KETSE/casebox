@@ -29,6 +29,7 @@ Ext.define('CB.VerticalEditGrid', {
         var viewCfg = {
             autoFill: false
             ,deferInitialRefresh: false
+            ,stripeRows: false
             ,getRowClass: function( record, index, rowParams, store ){
                 var rez = '';
                 if(record.get('type') == 'H'){
@@ -88,8 +89,8 @@ Ext.define('CB.VerticalEditGrid', {
                 }
             })
             ,columns: Ext.apply([], this.gridColumns) //leave default column definitions intact
+            ,forceFit: true
             ,selType: 'cellmodel'
-            ,stripeRows: true
             ,header: false
             ,listeners: {
                 scope: this
@@ -437,9 +438,7 @@ Ext.define('CB.VerticalEditGrid', {
             // var cm = this.getColumnModel();
             var tc = CB.DB.templates.getAt(idx).get('cfg');//template config
 
-
             var infoCol = this.headerCt.child('[dataIndex="info"]'); //cm.findColumnIndex('info');
-
             var colRequired = (
                 (tc.infoColumn === true) ||
                 (
@@ -449,7 +448,7 @@ Ext.define('CB.VerticalEditGrid', {
             );
 
             var newConfig = Ext.apply([], this.gridColumns);
-            if(Ext.isEmpty(infoCol) !== colRequired) {
+            if(!Ext.isEmpty(infoCol) &&  !colRequired) {
                 if(!colRequired) {
                     newConfig.pop();
                 }
@@ -462,11 +461,12 @@ Ext.define('CB.VerticalEditGrid', {
                 //     ,renderer: Ext.emptyFn
                 // });
 
-                cm.setConfig(newConfig);
-                var el = this.getEl();
-                if(el && el.isVisible(true)) {
-                    this.getView().refresh(true);
-                }
+                // cm.setConfig(newConfig);
+                this.reconfigure(this.store, newConfig);
+                // var el = this.getEl();
+                // if(el && el.isVisible(true)) {
+                //     this.getView().refresh(true);
+                // }
             }
         }
         // if parent have a helperTree then it is responsible for helper reload
@@ -668,7 +668,7 @@ Ext.define('CB.VerticalEditGrid', {
         if(this.editing) {
             this.stopEditing(false);
         }
-        this.fireEvent('saveobject');
+        this.fireEvent('saveobject', this, event);
     }
 
     ,onAfterEditProperty: function(editor, context, eOpts){

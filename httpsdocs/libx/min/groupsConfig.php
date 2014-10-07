@@ -97,6 +97,7 @@ return array_merge(
             ,'//js/CB.FileUploadWindow.js'
 
             ,'//js/plugins/CB.plugins.customInterface.js'
+            ,'//js/plugins/CB.plugins.DropDownList.js'
             ,'//js/ux/Ext.ux.htmlEditor.js'
             ,'//js/ux/Ext.ux.plugins.defaultButton.js'
             ,'//js/ux/Ext.ux.plugins.IconCombo.js'

@@ -530,8 +530,7 @@ Ext.define('CB.ObjectsSelectionForm', {
         }
 
         this.grid = new Ext.grid.GridPanel({
-            stripeRows: true
-            ,region: 'center'
+            region: 'center'
             ,border: false
             ,store: this.store
             ,autoScroll: true
@@ -541,6 +540,7 @@ Ext.define('CB.ObjectsSelectionForm', {
             // })
             ,viewConfig: {
                 markDirty: false
+                ,stripeRows: false
             }
             ,selModel: sm
             ,listeners: {

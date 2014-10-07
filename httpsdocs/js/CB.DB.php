@@ -313,6 +313,20 @@ createDirectStores = function(){
 
             return rez;
         }
+        ,getUserById: function(id) {
+            var idx = this.findExact('id', parseInt(id));
+
+            return (idx >= 0)
+                ? this.getAt(idx).get('user')
+                : '';
+        }
+        ,getIdByUser: function(user) {
+            var idx = this.findExact('user', user);
+
+            return (idx >= 0)
+                ? this.getAt(idx).get('id')
+                : null;
+        }
     });
     App.on('userprofileupdated', function(userData, event){ CB.DB.usersStore.reload();});
 

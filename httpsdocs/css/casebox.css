@@ -830,3 +830,12 @@ text-align: center;
 vertical-align: middle;
 padding-top: 45%;
 }
+
+/* browser tree*/
+.browser-tree, .x-grid-item-gray {
+    background-color: #f4f4f4;
+}
+.browser-tree .x-grid-item-over .x-grid-item-gray,
+.browser-tree .x-grid-item-selected .x-grid-item-gray {
+    background-color: transparent;
+}

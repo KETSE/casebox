@@ -4,6 +4,8 @@ Ext.define('CB.objects.plugins.Files', {
     extend: 'CB.objects.plugins.Base'
     ,alias: 'CBObjectsPluginsFiles'
 
+    ,xtype: 'CBObjectsPluginsFiles'
+
     ,initComponent: function(){
 
         this.actions = {

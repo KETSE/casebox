@@ -1,6 +1,8 @@
 <?php
 namespace ExtDirect;
 
+register_shutdown_function('ExtDirect\\extDirectShutdownFunction');
+
 require_once '../init.php';
 require 'config.php';
 
@@ -128,4 +130,32 @@ if ($isForm && $isUpload) {
 } else {
     header('X-Frame-Options: deny');
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
+}
+
+/**
+ * catch server side errors and return json encoded exception
+ * @return void
+ */
+function extDirectShutdownFunction()
+{
+    global $data;
+
+    $error = error_get_last();
+
+    if (in_array($error['type'], array(1, 4))) {
+        $data['type'] = 'exception';
+        $data['result'] = array('success' => false);
+        $data['msg'] = 'Internal server error.';
+
+        if (\CB\isDebugHost()) {
+            $data['msg'] = $error['message'];
+            $data['where'] = print_r(debug_backtrace(false), true);
+        }
+
+        echo json_encode(
+            $data,
+            JSON_UNESCAPED_UNICODE
+        );
+
+    }
 }

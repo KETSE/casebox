@@ -98,15 +98,6 @@ Ext.define('CB.browser.ViewContainer', {
                 ,handler: this.onPasteShortcutClick
             })
 
-            ,mergeFiles: new Ext.Action({
-                text: L.MergeFiles
-                ,id: 'merge' + this.instanceId
-                ,iconCls: 'icon-merge'
-                ,scope: this
-                ,disabled: true
-                ,handler: this.onMergeFilesClick
-            })
-
             ,takeOwnership: new Ext.Action({
                 text: L.TakeOwnership
                 ,id: 'takeownership' + this.instanceId
@@ -176,8 +167,6 @@ Ext.define('CB.browser.ViewContainer', {
                     ,this.actions.copy
                     ,this.actions.paste
                     ,this.actions.pasteShortcut
-                    ,'-'
-                    ,this.actions.mergeFiles
                     ,'-'
                     ,this.actions.takeOwnership
                 ]
@@ -913,7 +902,6 @@ Ext.define('CB.browser.ViewContainer', {
             this.actions.cut.setDisabled(true);
             this.actions.copy.setDisabled(true);
             this.actions.takeOwnership.setDisabled(true);
-            this.actions.mergeFiles.setDisabled(true);
             // this.actions.createShortcut.setDisabled(true);
 
             this.actions.download.setDisabled(true);
@@ -944,8 +932,6 @@ Ext.define('CB.browser.ViewContainer', {
             } else {
                 this.actions.download.hide();
             }
-            this.actions.mergeFiles.setDisabled(!canDownload || (objectsDataArray.length < 2));
-
 
             this.actions['delete'].setDisabled(inRecycleBin);
 
@@ -1230,26 +1216,6 @@ Ext.define('CB.browser.ViewContainer', {
             ? this.folderProperties.id
             : s[0].nid;
         App.mainViewPort.openPermissions(id);
-    }
-
-    ,onMergeFilesClick: function(buttonOrKey, e) {
-        if(this.actions.mergeFiles.isDisabled()) {
-            return;
-        }
-        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
-        if(Ext.isEmpty(selection) || (selection.length <2) ) return;
-        rez = [];
-        for (var i = 0; i < s.length; i++) {
-            rez.push(selection[i].nid);
-        }
-        Ext.Msg.confirm( L.MergingFiles, L.MergeFilesConfirmation, function(b){
-            if(b == 'yes') CB_Files.merge(rez, this.processMergingFiles, this);
-        }, this );
-    }
-
-    ,processMergingFiles: function(r, e){
-        this.onReloadClick();
-        App.mainViewPort.onProcessObjectsDeleted(r, e);
     }
 
     ,onClipboardChange: function(cb){

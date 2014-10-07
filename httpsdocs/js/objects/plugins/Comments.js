@@ -41,6 +41,12 @@ Ext.define('CB.objects.plugins.Comments', {
             ,growMin: 30
             ,enableKeyEvents: true
             ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
+            // disable until prugin refactored for ExtJS 5
+            // ,plugins: [
+            //     {
+            //         ptype: 'CBPluginsDropDownList'
+            //     }
+            // ]
             ,listeners: {
                 scope: this
                 ,keypress: this.onMessageBoxKeyPress
@@ -200,12 +206,15 @@ Ext.define('CB.objects.plugins.Comments', {
 
     ,onAddCommentProcess: function(r, e) {
         this.loadLabel.hide();
-        this.messageField.reset();
-        this.messageField.show();
 
         if(r.success !== true) {
+            this.messageField.show();
             return;
+        } else {
+            this.messageField.reset();
+            this.messageField.show();
         }
+
 
         if(Ext.isEmpty(this.loadedData.data)) {
             this.loadedData.data = [];
@@ -226,4 +235,5 @@ Ext.define('CB.objects.plugins.Comments', {
             this.messageToolbar.hide();
         }
     }
+
 });

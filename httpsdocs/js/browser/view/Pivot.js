@@ -119,7 +119,7 @@ Ext.define('CB.browser.view.Pivot',{
             ,border: false
             ,layout: {
                 type: 'vbox'
-                ,pack: 'center'
+                ,pack: 'top'
             }
         });
 

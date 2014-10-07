@@ -139,6 +139,8 @@ Ext.define('CB.browser.view.Grid', {
             // })
             ,viewConfig: {
                 forceFit: false
+                ,loadMask: false
+                ,stripeRows: false
                 ,deferInitialRefresh: false
                 // ,enableRowBody: true
                 // ,getRowClass: function(r, rowIndex, rp, ds){
@@ -275,10 +277,8 @@ Ext.define('CB.browser.view.Grid', {
                     }
                 }
 
-                ,headerclick: function (g, ci, e) {
-                    clog('grid header click encounted');
-                    return;
-                    this.store.remoteSort = (g.getColumnModel().config[ci].localSort !== true);
+                ,headerclick: function (headerCt, col, ev, el, eOpts) {
+                    this.store.remoteSort = (col.config.localSort !== true);
                     this.userSort = 1;
                 }
 
@@ -503,12 +503,14 @@ Ext.define('CB.browser.view.Grid', {
     ,saveGridState: function() {
         var rez = {columns: {}}
             ,store = this.store
-            ,cm = this.grid.getColumnModel()
+            // ,cm = this.grid.getColumnModel()
+            ,cols = this.grid.columns
             ,gs
             ,di;
 
-        for(var i = 0, c; (c = cm.config[i]); i++){
-            di = cm.getDataIndex(i);
+        for(var i = 0; i < cols.length; i++){
+            c = cols[i];
+            di = c.dataIndex;
             rez.columns[di] = {
                 idx: i
                 ,width: c.width
@@ -522,14 +524,16 @@ Ext.define('CB.browser.view.Grid', {
         }
 
         if(this.store){
-            ss = this.store.getSortState();
+            var ss = this.store.getSorters().getAt(0);
+
             if(ss){
-                rez.sort = ss;
+                rez.sort = ss.config;
             }
-            if(this.store.getGroupState){
-                gs = this.store.getGroupState();
+
+            if(this.store.getGroups){
+                gs = this.store.getGroups();
                 if(gs){
-                    rez.group = gs;
+                    rez.grouper = gs.getGrouper();
                 }
             }
         }

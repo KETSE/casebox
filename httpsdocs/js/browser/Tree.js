@@ -12,7 +12,6 @@ Ext.define('CB.browser.Tree', {
     ,lines: false
     ,useArrows: true
     ,showFoldersContent: false
-    ,bodyStyle: 'background-color: #f4f4f4'
     ,border: false
     ,hideToolbar: true
     ,stateful: true
@@ -176,10 +175,11 @@ Ext.define('CB.browser.Tree', {
             header: false
             ,hideHeaders: true
             ,viewConfig: {
-                style: 'background: #ffffff'
+                cls: 'browser-tree'
                 ,border: false
                 ,autoScroll: true
                 ,idProperty: 'nid'
+                ,loadMask: false
                 ,plugins: {
                     ptype: 'CBDDTree'
                     ,idProperty: 'nid'
@@ -192,7 +192,7 @@ Ext.define('CB.browser.Tree', {
                         ,dataIndex: 'text'
 
                         ,renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
-                            metaData.tdCls = record.get('cls');
+                            metaData.tdCls = record.get('cls') + ' x-grid-item-gray';
                             return value;
                         }
                     }

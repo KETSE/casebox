@@ -50,7 +50,7 @@ Ext.define('CB.TextEditWindow', {
         this.editor.focus(false, 350);
     }
     ,doSubmit: function(){
-        var f = this.data.callback.bind(Ext.valueFrom(this.data.scope, this), [this, this.editor.getValue()]);
+        var f = this.data.callback.bind(Ext.valueFrom(this.data.scope, this), this, this.editor.getValue());
         f();
         this.doClose();
     }

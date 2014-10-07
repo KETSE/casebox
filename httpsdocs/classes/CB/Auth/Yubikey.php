@@ -176,11 +176,16 @@ class Yubikey implements \CB\Interfaces\Auth
     public function verifyCode($code)
     {
         $rez = true;
-        try {
-            $auth = $this->instance->verify($code);
-        } catch (\Exception $e) {
+
+        if (substr($this->secretData['code'], 0, 12) != substr($code, 0, 12)) {
             $rez = false;
-            \CB\debug($e->getMessage());
+        } else {
+            try {
+                $auth = $this->instance->verify($code);
+            } catch (\Exception $e) {
+                $rez = false;
+                \CB\debug($e->getMessage());
+            }
         }
 
         return $rez;

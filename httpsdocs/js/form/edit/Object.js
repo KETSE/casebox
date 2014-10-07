@@ -90,6 +90,7 @@ Ext.define('CB.form.edit.Object', {
                 key: "s"
                 ,ctrl:true
                 ,shift:false
+                ,stopEvent: true
                 ,scope: this
                 ,fn: this.onSaveObjectEvent
             }
@@ -411,8 +412,8 @@ Ext.define('CB.form.edit.Object', {
         this.fireEvent('clear', this);
     }
 
-    ,onSaveObjectEvent: function() {
-        this.fireEvent('saveobject', this);
+    ,onSaveObjectEvent: function(key, ev) {
+        this.fireEvent('saveobject', this, ev);
     }
 
     ,getContainerToolbarItems: function() {

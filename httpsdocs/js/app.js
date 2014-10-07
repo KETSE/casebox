@@ -36,9 +36,6 @@ Ext.onReady(function(){
 
     Ext.state.Manager.setProvider(
         new CB.state.DBProvider()
-        // new Ext.state.CookieProvider({
-        //     expires: new Date(new Date().getTime()+(1000*60*60*24*7)) //7 days from now
-        // })
     );
 
     Ext.Direct.on('login', function(r, e){
@@ -709,6 +706,84 @@ function initApp() {
                             });
                         }
                         break;
+
+                    case 'text':
+                        var ed = new Ext.form.TextArea({
+                            data: objData
+                            ,allowBlur: false
+                            ,plugins: [{
+                                ptype: 'CBPluginsDropDownList'
+                                ,commands: [
+                                    {
+                                        prefix: ' '
+                                        ,regex: /^([\w\d_\.]+)/i
+
+                                        ,insertField: 'info'
+
+                                        ,handler: CB.plugins.DropDownList.prototype.onAtCommand
+                                    }
+                                ]
+                            }]
+                            // ,listeners: {
+                            //     render: function(ed) {
+                            //         // ed.purgeListeners();
+                            //         // var interceptorFn = function(field, e){
+                            //         //     clog('this.listSelection', arguments, field.listSelection);
+                            //         //     // return false; //!field.listSelection;
+                            //         // };
+
+                            //         // var i, newListners = [];
+
+                            //         // for (i = 0; i < ed.events.specialkey.listeners.length; i++) {
+                            //         //     var l = ed.events.specialkey.listeners[i];
+                            //         //     ed.un('specialkey', l.fn, l.scope);
+                            //         //     newListners.push({
+                            //         //         scope: l.scope
+                            //         //         ,fn: l.fn.createInterceptor(interceptorFn, l.scope)
+                            //         //     });
+                            //         // }
+                            //         // for (i = 0; i < newListners.length; i++) {
+                            //         //     ed.on('specialkey', newListners[i].fn, newListners[i].scope);
+                            //         // }
+                            //     }
+                            // }
+                        });
+
+                        //overwrite setValue and getValue function to transform ids to user names and back
+                        ed._setValue = ed.setValue;
+                        ed._getValue = ed.getValue;
+
+                        ed.setValue = function(value) {
+                            var v = toNumericArray(value);
+                            for (var i = 0; i < v.length; i++) {
+                                v[i] = CB.DB.usersStore.getUserById(v[i]);
+                            }
+
+                            this._setValue(v.join(' '));
+                        };
+
+                        ed.getValue = function() {
+                            var value = Ext.util.Format.trim(this._getValue());
+                            if(Ext.isEmpty(value)) {
+                                return '';
+                            }
+
+                            var rez = [];
+                            var v = value.split(' ');
+                            for (var i = 0; i < v.length; i++) {
+                                if(!Ext.isEmpty(v[i])) {
+                                    var id = CB.DB.usersStore.getIdByUser(v[i]);
+                                    if(!Ext.isEmpty(id)) {
+                                        rez.push(id);
+                                    }
+                                }
+                            }
+
+                            return rez.join(',');
+                        };
+
+                        return ed;
+
                     default:
                         return new CB.ObjectsComboField({
                             enableKeyEvents: true
@@ -903,7 +978,7 @@ function initApp() {
                             if(this.grid.onAfterEditProperty) {
                                 this.grid.onAfterEditProperty(this, this);
                             }
-                            this.grid.fireEvent('change');
+                            // this.grid.fireEvent('change');
                         }
                     }
                 });
@@ -1137,7 +1212,7 @@ function overrides(){
             if(Ext.isPrimitive(ids)) {
                 ids = String(ids).split(',');
             }
-            clog('delete', ids, idProperty);
+
             if(this.data) {
                 for (var i = 0; i < ids.length; i++) {
                     idx = this.findExact(idProperty, String(ids[i]));

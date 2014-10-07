@@ -98,7 +98,6 @@ $API = array_merge(
                 ,'saveContent'          =>  array('len'=>1)
                 ,'restoreVersion'       =>  array('len'=>1)
                 ,'deleteVersion'        =>  array('len'=>1)
-                ,'merge'                =>  array('len'=>1)
                 ,'getDuplicates'        =>  array('len'=>1)
                 ,'checkExistentContents'=>  array('len'=>1)
                 ,'saveProperties'       =>  array('len'=>1)

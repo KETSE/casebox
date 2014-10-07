@@ -143,7 +143,7 @@ class Browser
                 $idsPath[] = $n->getId();
             }
 
-            $rez['name'] = Util\adjustTextForDisplay($rez['name']);
+            $rez['name'] = @Util\adjustTextForDisplay($rez['name']);
             $rez['path'] = '/'.implode('/', $idsPath);
             $rez['menu'] = $this->path[sizeof($this->path) - 1]->getCreateMenu();
 

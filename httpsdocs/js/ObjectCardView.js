@@ -722,7 +722,9 @@ Ext.define('CB.ObjectCardView', {
         );
     }
 
-    ,onSaveObjectEvent: function(objComp) {
+    ,onSaveObjectEvent: function(objComp, ev) {
+        ev.stopPropagation();
+        ev.preventDefault();
         if(this.actions.save.isDisabled()) {
             return false;
         }
@@ -908,10 +910,10 @@ Ext.define('CB.ObjectCardView', {
     ,onAttachFileClick: function(b, e) {
         this.onViewChangeClick(0);
         var fp = this.down('CBObjectsPluginsFiles');
+
         if(Ext.isEmpty(fp)) {
             return;
         }
-        fp = fp[0];
         fp.show();
         fp.onAddClick(b, e);
     }

@@ -146,6 +146,7 @@ class Security
                 ,`name`
                 ,`first_name`
                 ,`last_name`
+                ,`email`
                 ,`system`
                 ,`enabled`
                 ,`type`
@@ -161,6 +162,7 @@ class Security
                 $r['iconCls'] = 'icon-users';
 
             } else {
+                $r['user'] = $r['name'];
                 $r['name'] = User::getDisplayName($r);
                 $r['iconCls'] = 'icon-user-'.$r['sex'];
             }
@@ -1337,9 +1339,8 @@ class Security
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            if (!empty($r['first_name']) || !empty($r['last_name'])) {
-                $r['name'] = Purify::humanName($r['first_name'].' '.$r['last_name']);
-            }
+            $r['user'] = $r['name'];
+            $r['name'] = User::getDisplayName($r);
 
             $r['photo'] = User::getPhotoParam($r);
 

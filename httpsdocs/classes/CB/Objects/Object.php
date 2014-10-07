@@ -115,6 +115,7 @@ class Object
         if (empty($p['oid'])) {
             $p['oid'] = $p['cid'];
         }
+
         if (empty($p['cdate'])) {
             $p['cdate'] = null;
         }
@@ -369,6 +370,9 @@ class Object
         }
 
         $this->updateCustomData();
+
+        // set/update this object to cache
+        \CB\Cache::set('Objects[' . $this->id . ']', $this);
 
         \CB\fireEvent('nodeDbUpdate', $this);
 

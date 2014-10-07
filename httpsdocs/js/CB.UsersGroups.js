@@ -867,7 +867,6 @@ Ext.define('CB.UsersGroupsForm', {
                         ,autoHeight: true
                         ,xtype: 'grid'
                         ,style: 'margin-top: 15px'
-                        ,stripeRows: true
                         ,selType: 'cellmodel'
                         ,store: new Ext.data.JsonStore({
                             autoDestroy: true
@@ -894,6 +893,7 @@ Ext.define('CB.UsersGroupsForm', {
                         ]
                         ,viewConfig: {
                             forceFit: true
+                            ,stripeRows: false
                             ,markDirty: false
                             ,getRowClass: function(r, index) {
                                 return (r.get('active') != 1) ? '' : 'fwB';
