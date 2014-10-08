@@ -80,6 +80,7 @@ CB.objects.plugins.Comments = Ext.extend(CB.objects.plugins.Base, {
         this.loadLabel = new Ext.form.Label({
             height: 32
             ,cls: 'msg-load'
+            ,anchor: '100%'
             ,html: '<div class="d-loader">' + L.sending + ' ... </div>'
             ,hidden: true
         });

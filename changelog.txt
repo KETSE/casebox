@@ -1,4 +1,19 @@
-CaseBox 1.9.336 (2014-09-29)
+CaseBox 1.9.338 (2014-10-08)
+==============================
+New Features, Improvements
+--------------------------
+- @user plugin: Assignee.onChange remove duplicate users
+- @user plugin: the popup doesn't appear for Assignee when start typing in a new line.
+- merge top fields with grid fields and sort according their ordr on object preview
+- Replace "Settings" buttons with one single 32x32 icon
+- move "Language" submenu from User icon to Settings
+
+Fixed Bugs:
+----------
+- Datetime shown in preview doesn't have the same timezone as in Editmode
+- the "Sending" indicator when you Send the comment should be "align: center"
+
+CaseBox 1.9.337 (2014-10-06)
 ==============================
 New Features, Improvements
 --------------------------

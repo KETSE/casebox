@@ -187,6 +187,11 @@ CB.plugins.DropDownList =  Ext.extend(Ext.util.Observable, {
         for (var i = 0; i < this.commands.length; i++) {
             var cmd = this.commands[i];
 
+            //transform enters to spaces for "space" prefix
+            if(cmd.prefix == ' ') {
+                parts[0] = parts[0].replace(/[\n\r]/g, ' ');
+            }
+
             //split left part by command prefix
             var t = parts[0].split(cmd.prefix);
             //skip if no comand prefix found, but not for space

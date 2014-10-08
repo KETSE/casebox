@@ -31,6 +31,7 @@
 .ib-restore{background-image: url(b/restore.png); min-width: 38px}
 .ib-save{background-image: url(b/save.png); min-width: 38px}
 .ib-search{background-image: url(b/search.png); min-width: 38px}
+.ib-settings{background-image: url(b/settings.png); min-width: 38px}
 .ib-task-complete{background-image: url(b/task-complete.png); min-width: 38px}
 .ib-task-new{background-image: url(b/task-new.png); min-width: 38px}
 .ib-trash{background-image: url(b/trash.png); min-width: 38px}
@@ -113,6 +114,7 @@ border-radius: 4;
 .msg-load{
     vertical-align: middle;
     width: 100% !important;
+    display: block;
 }
 
 .msg-load div {

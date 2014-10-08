@@ -224,7 +224,7 @@ class Objects
             if (empty($tf['cfg'])) {
                 $group = 'body';
             } elseif (@$tf['cfg']['showIn'] == 'top') {
-                $group = 'top';
+                $group = 'body'; //top
             } elseif (@$tf['cfg']['showIn'] == 'tabsheet') {
                 $group = 'bottom';
             } else {
@@ -319,6 +319,7 @@ class Objects
         }
 
         $params['result'] = $top.$bottom;
+
         fireEvent('generatePreview', $params);
 
         return $params['result'];

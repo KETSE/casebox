@@ -181,6 +181,22 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             );
         }
 
+        um.menu.add(
+            {
+                text: L.Account
+                ,iconCls: 'icon-user-' + App.loginData.sex
+                ,handler: function(){
+                    App.openUniqueTabbedWidget( 'CBAccount' , null);
+                }
+            }
+            ,'-'
+            ,{
+                text: L.Exit
+                ,iconCls: 'icon-exit'
+                ,handler: this.logout, scope: this
+            }
+        );
+
         var managementItems = [];
         if(App.loginData.manage) {
             managementItems.push(
@@ -219,11 +235,7 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             );
         }
 
-        if(managementItems.length > 0) {
-            App.mainToolBar.insert(3, {text: L.Settings, iconCls: 'icon-gear', hideOnClick: false, menu: managementItems});
-        }
-        App.mainToolBar.doLayout();
-
+        // adding available languages to setting menu
         var langs = [];
         CB.DB.languages.each(
             function(r){
@@ -240,28 +252,34 @@ CB.ViewPort = Ext.extend(Ext.Viewport, {
             ,this
         );
 
-        um.menu.add(
+        if(!Ext.isEmpty(managementItems)) {
+            managementItems.unshift('-');
+        }
+
+        managementItems.unshift(
             {
                 text: L.Language
                 ,iconCls: 'icon-language'
                 ,hideOnClick: false
                 ,menu: langs
             }
-            ,'-'
+        );
+
+
+
+        App.mainToolBar.insert(
+            3
             ,{
-                text: L.Account
-                ,iconCls: 'icon-user-' + App.loginData.sex
-                ,handler: function(){
-                    App.openUniqueTabbedWidget( 'CBAccount' , null);
-                }
-            }
-            ,'-'
-            ,{
-                text: L.Exit
-                ,iconCls: 'icon-exit'
-                ,handler: this.logout, scope: this
+                qtip: L.Settings
+                ,iconCls: 'ib-settings'
+                ,hideOnClick: false
+                ,scale: 'large'
+                ,menu: managementItems
             }
         );
+
+        App.mainToolBar.doLayout();
+
         /* end of adding menu items */
 
         App.Favorites = new CB.Favorites();
