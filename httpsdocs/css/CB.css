@@ -669,3 +669,11 @@ border-top: 0;
     color: #777;
     padding: 5px 0 0 0;
 }
+
+/* hide glyph for toolbar large buttons */
+.btn-no-glyph .x-btn-wrap-default-toolbar-large.x-btn-arrow-right:after,
+.btn-no-glyph .x-btn-arrow:after,
+.btn-no-glyph .x-btn-split:after
+{
+  display: none;
+}

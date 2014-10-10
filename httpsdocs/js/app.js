@@ -763,7 +763,9 @@ function initApp() {
                         };
 
                         ed.getValue = function() {
-                            var value = Ext.util.Format.trim(this._getValue());
+                            var value = this._getValue();
+                            value = Ext.util.Format.trim(String(value).replace(/[\n\r]/g, ' '));
+
                             if(Ext.isEmpty(value)) {
                                 return '';
                             }
@@ -773,7 +775,7 @@ function initApp() {
                             for (var i = 0; i < v.length; i++) {
                                 if(!Ext.isEmpty(v[i])) {
                                     var id = CB.DB.usersStore.getIdByUser(v[i]);
-                                    if(!Ext.isEmpty(id)) {
+                                    if(!Ext.isEmpty(id) && (rez.indexOf(id) < 0)) {
                                         rez.push(id);
                                     }
                                 }

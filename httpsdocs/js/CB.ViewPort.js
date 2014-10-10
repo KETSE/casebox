@@ -175,6 +175,22 @@ Ext.define('CB.ViewPort', {
             );
         }
 
+        um.menu.add(
+            {
+                text: L.Account
+                ,iconCls: 'icon-user-' + App.loginData.sex
+                ,handler: function(){
+                    App.openUniqueTabbedWidget( 'CBAccount' , null);
+                }
+            }
+            ,'-'
+            ,{
+                text: L.Exit
+                ,iconCls: 'icon-exit'
+                ,handler: this.logout, scope: this
+            }
+        );
+
         var managementItems = [];
         if(App.loginData.manage) {
             managementItems.push(
@@ -213,11 +229,7 @@ Ext.define('CB.ViewPort', {
             );
         }
 
-        if(managementItems.length > 0) {
-            App.mainToolBar.insert(3, {text: L.Settings, iconCls: 'icon-gear', hideOnClick: false, menu: managementItems});
-        }
-        App.mainToolBar.doLayout();
-
+        // adding available languages to setting menu
         var langs = [];
         CB.DB.languages.each(
             function(r){
@@ -234,28 +246,56 @@ Ext.define('CB.ViewPort', {
             ,this
         );
 
-        um.menu.add(
-            {
-                text: L.Language
-                ,iconCls: 'icon-language'
+
+        // creating menu config for available themes
+        var themes = [];
+        CB.DB.themes.each(
+            function(r){
+                themes.push({
+                    text: r.get('name')
+                    ,xtype: 'menucheckitem'
+                    ,checked: (r.get('id') == App.loginData.theme)
+                    ,data:{id: r.get('id')}
+                    ,scope: this
+                    ,handler: this.setUserTheme
+                    ,group: 'theme'
+                });
+            }
+            ,this
+        );
+
+        if(!Ext.isEmpty(managementItems)) {
+            managementItems.unshift('-');
+        }
+
+        managementItems.unshift({
+            text: L.Theme
+            ,menu: themes
+        });
+
+        managementItems.unshift({
+            text: L.Language
+            ,iconCls: 'icon-language'
+            ,hideOnClick: false
+            ,menu: langs
+        });
+
+
+
+        App.mainToolBar.insert(
+            3
+            ,{
+                qtip: L.Settings
+                ,iconCls: 'ib-settings'
+                ,cls: 'btn-no-glyph'
                 ,hideOnClick: false
-                ,menu: langs
-            }
-            ,'-'
-            ,{
-                text: L.Account
-                ,iconCls: 'icon-user-' + App.loginData.sex
-                ,handler: function(){
-                    App.openUniqueTabbedWidget( 'CBAccount' , null);
-                }
-            }
-            ,'-'
-            ,{
-                text: L.Exit
-                ,iconCls: 'icon-exit'
-                ,handler: this.logout, scope: this
+                ,scale: 'large'
+                ,menu: managementItems
             }
         );
+
+        App.mainToolBar.doLayout();
+
         /* end of adding menu items */
 
         App.Favorites = new CB.Favorites();
@@ -512,7 +552,7 @@ Ext.define('CB.ViewPort', {
             ,L.LanguageChangeMessage
             ,function(pb){
                 if(pb == 'yes') {
-                    CB_User.setLanguage(d.id, this.processSetUserLanguage, this);
+                    CB_User.setLanguage(d.id, this.processSetUserOption, this);
                 }
                 if(d.ownerCt) {
                     d.ownerCt.items.each(
@@ -527,7 +567,34 @@ Ext.define('CB.ViewPort', {
         );
     }
 
-    ,processSetUserLanguage: function(r, e){
+    ,setUserTheme: function(b, e){
+        var d = b.config.data;
+
+        if(d.id == App.loginData.theme) {
+            return;
+        }
+
+        Ext.Msg.confirm(
+            L.Theme
+            ,L.ThemeChangeMessage
+            ,function(pb){
+                if(pb == 'yes') {
+                    CB_User.setTheme(d.id, this.processSetUserOption, this);
+                }
+                if(d.ownerCt) {
+                    d.ownerCt.items.each(
+                        function(i){
+                            i.setChecked(i.data.id == App.loginData.theme);
+                        }
+                        ,this
+                    );
+                }
+            }
+            ,this
+        );
+    }
+
+    ,processSetUserOption: function(r, e){
         if(r.success === true) {
             App.confirmLeave = false;
             document.location.reload();

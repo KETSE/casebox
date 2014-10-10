@@ -96,11 +96,13 @@ Ext.define('CB.form.view.object.Preview', {
         }
         this.attachEvents();
         this.fireEvent('loaded', this);
-        switch(detectFileEditor(this.params.name)) {
-             // case 'html':
-             case 'text':
-                hljs.highlightBlock(this.body.dom);
-                break;
+        if(this.params) {
+            switch(detectFileEditor(this.params.name)) {
+                 // case 'html':
+                 case 'text':
+                    hljs.highlightBlock(this.body.dom);
+                    break;
+            }
         }
     }
 
@@ -330,7 +332,7 @@ Ext.define('CB.form.view.object.Preview', {
                 }
 
                 rez.tbar['download']  = {};
-                rez.tbar['download']  = {};
+                rez.tbar['preview']  = {};
 
                 rez.menu['delete'] = { addDivider: 'top' };
                 rez.menu['webdavlink']  = { addDivider: 'top' };

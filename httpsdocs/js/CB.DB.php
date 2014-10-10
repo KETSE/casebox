@@ -8,6 +8,20 @@ DB\connect();
 ?>
 Ext.namespace('CB.DB');
 
+CB.DB.themes = new Ext.data.ArrayStore({
+    model: 'Generic2'
+    ,data: [
+        //['aria', 'Aria'] // loads data from http
+        ['classic', 'Classic']
+        //,['classic-sandbox', 'Classic Sandbox'] //bad
+        ,['crisp', 'Crisp']
+        ,['crisp-touch', 'Crisp Touch']
+        ,['gray', 'Gray']
+        ,['neptune', 'Neptune']
+        ,['neptune-touch', 'Neptune touch']
+    ]
+});
+
 CB.DB.yesno = new Ext.data.ArrayStore({
     idIndex: 0
     ,model: 'Generic'

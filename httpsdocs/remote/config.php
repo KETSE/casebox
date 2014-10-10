@@ -117,6 +117,7 @@ $API = array_merge(
                 ,'login'              => array('len' => 2)
                 ,'logout'             => array('len' => 0)
                 ,'setLanguage'        => array('len' => 1)
+                ,'setTheme'           => array('len' => 1)
                 ,'uploadPhoto'        => array('len' => 1, 'formHandler' => true)
                 ,'removePhoto'        => array('len' => 1)
                 ,'getAccountData'     => array('len' => 0)

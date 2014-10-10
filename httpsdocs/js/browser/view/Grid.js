@@ -5,6 +5,7 @@ Ext.define('CB.browser.view.Grid', {
     ,border: false
 
     ,xtype: 'CBBrowserViewGrid'
+
     ,initComponent: function(){
 
         var columns = [
@@ -96,28 +97,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,format: App.dateFormat + ' ' + App.timeFormat
             }
         ];
-
-        this.pagingToolbar = new Ext.PagingToolbar({
-            store: this.store
-            ,displayInfo: true
-            ,hidden: true
-            ,doRefresh: this.onReloadClick.bind(this)
-            ,listeners: {
-                scope: this
-                // prevent toolbar from changing store params and reloading the store
-                // we'll make this through viewContainer
-                ,beforechange: function(pt, p) {
-                //     clog('firing change params', arguments);
-                //     this.fireEvent(
-                //         'changeparams'
-                //         ,{
-                //             page: p
-                //         }
-                //     );
-                    // return false;
-                }
-            }
-        });
 
         this.grid = new Ext.grid.Panel({
             loadMask: false
@@ -369,7 +348,11 @@ Ext.define('CB.browser.view.Grid', {
                 //     ,fn: this.onPropertiesClick
                 //     ,scope: this
             }]
-            ,bbar: this.pagingToolbar
+            ,bbar: {
+                xtype: 'CBBrowserViewGridPagingToolbar'
+                ,store: this.store
+                ,doRefresh: this.onReloadClick.bind(this)
+            }
         });
 
         Ext.apply(this, {
@@ -405,20 +388,7 @@ Ext.define('CB.browser.view.Grid', {
         );
     }
     ,onStoreLoad: function(store, recs, options) {
-        var pt = this.pagingToolbar;
-
-        var pagingVisible = (store.proxy.reader.rawData.total > store.pageSize);
-
         delete this.userSort;
-
-        if(pagingVisible) {
-            pt.show();
-        } else {
-            pt.hide();
-        }
-
-        // this.grid.syncSize();
-        // this.syncSize();
 
         App.mainViewPort.selectGridObject(this.grid);
 

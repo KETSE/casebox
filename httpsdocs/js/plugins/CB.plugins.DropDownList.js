@@ -26,7 +26,7 @@ Ext.define('CB.plugins.DropDownList', {
                     //,scope: this
                 }
             ]
-            ,listTpl: new Ext.XTemplate(
+            ,displayTpl: new Ext.XTemplate(
                 '<tpl for=".">'
                     ,'<div class="x-combo-list-item users-list-item">'
                         ,'<div class="thumb">'
@@ -71,21 +71,91 @@ Ext.define('CB.plugins.DropDownList', {
             fields: ['id', 'text', 'info', 'descr']
         });
 
+        Ext.copyTo(
+            this.owner
+            ,Ext.form.field.Picker.prototype
+            ,[
+                'matchFieldWidth'
+                ,'pickerAlign'
+                ,'openCls'
+                // ,'applyTriggers'
+                // ,'initEvents' //overwriten in Casebox
+                // ,'onEsc'
+                // ,'onDownArrow'
+                ,'expand'
+                ,'onExpand'
+                ,'doAlign'
+                ,'collapse'
+                ,'collapseIf'
+                ,'getPicker'
+                ,'getRefItems'
+                // ,'onTriggerClick'
+                ,'onOtherFocus'
+                ,'alignPicker'
+                ,'beforeDestroy'
+            ]
+        );
+
+        Ext.copyTo(
+            this.owner
+            ,Ext.form.field.ComboBox.prototype
+            ,[
+                // 'mixins'
+                // ,'config'
+                // ,'publishes'
+                // ,'twoWayBindable'
+                // ,'triggerCls'
+                // 'hiddenName'
+                // ,'hiddenDataCls'
+                // ,'ariaRole'
+                ,'childEls'
+                // ,'filtered'
+                // ,'afterRender'
+                ,'delimiter'
+                // ,'triggerAction'
+                // ,'allQuery'
+                // ,'queryParam'
+                ,'getStore'
+                // ,'createPicker'
+                // ,'setHiddenValue'
+                ,'updateBindSelection'
+                ,'onPageChange'
+                ,'initEvents'
+                // ,'onAdded'
+                // ,'onPaste'
+                ,'onListRefresh'
+                ,'onBeforeSelect'
+                ,'onBeforeDeselect'
+                ,'onListSelectionChange'
+                // ,'onKeyUp'
+            ]
+        );
+
         Ext.apply(owner, {
             enableKeyEvents: true
             ,store: this.store
             ,valueField: 'id'
             ,displayField: 'text'
-            ,tpl: this.listTpl
+            ,displayTpl: this.displayTpl
 
             ,selectByValue: Ext.emptyFn
             ,onTriggerClick: Ext.emptyFn
-
+            ,onMouseDown: Ext.emptyFn
+            ,onBlur: Ext.emptyFn
+            ,onPaste: Ext.emptyFn
+            ,syncSelection: Ext.emptyFn
+            ,setSelection: Ext.emptyFn
+            ,onCollapse: Ext.emptyFn
+            // ,createPicker: Ext.emptyFn
+            // ,initEvents: Ext.emptyFn
+            // ,
             ,assertValue: function() {
+                clog('assertValue', this, arguments);
                 return '';
             }
 
-            ,onSelect : function(record, index){
+            ,select : function(record, index){
+                clog('select', this, arguments);
                 if(this.fireEvent('beforeselect', this, record, index) !== false){
                     // this.setSelectedValue(record);
                     this.collapse();
@@ -93,45 +163,48 @@ Ext.define('CB.plugins.DropDownList', {
                 }
             }
 
+            ,createPicker: function() {
+                var me = this,
+                    picker,
+                    pickerCfg = Ext.apply({
+                        xtype: 'boundlist',
+                        pickerField: me,
+                        selModel: {
+                            mode: me.multiSelect ? 'SIMPLE' : 'SINGLE',
+                            enableInitialSelection: false
+                        },
+                        floating: true,
+                        hidden: true,
+                        store: me.store,
+                        displayField: me.displayField,
+                        preserveScrollOnRefresh: true,
+                        pageSize: me.pageSize,
+                        tpl: me.tpl
+                    }, me.listConfig, me.defaultListConfig);
+
+                picker = me.picker = Ext.widget(pickerCfg);
+                if (me.pageSize) {
+                    picker.pagingToolbar.on('beforechange', me.onPageChange, me);
+                }
+
+                me.mon(picker, {
+                    refresh: me.onListRefresh,
+                    scope: me
+                });
+
+                me.mon(picker.getSelectionModel(), {
+                    beforeselect: me.onBeforeSelect,
+                    beforedeselect: me.onBeforeDeselect,
+                    selectionchange: me.onListSelectionChange,
+                    scope: me
+                });
+
+                return picker;
+            }
+
         });
 
-        Ext.copyTo(
-            this.owner
-            ,Ext.form.field.ComboBox.prototype
-            ,[
-                'createPicker'
-                ,'listAlign'
-                ,'minHeight'
-                ,'maxHeight'
-                ,'selectedClass'
-                ,'select'
-                ,'selectNext'
-                ,'selectPrev'
-                // ,'onSelect'
-                ,'initEvents'
-                ,'initQuery'
-                ,'doQuery'
-                ,'getListParent'
-                ,'getZIndex'
-                ,'getParentZIndex'
-                ,'bindStore'
-                ,'onBeforeLoad'
-                ,'validateBlur'
-                ,'beforeBlur'
-                ,'postBlur'
-                ,'onLoad'
-                ,'expand'
-                ,'collapse'
-                ,'collapseIf'
-                ,'isExpanded'
-                ,'restrictHeight'
-                ,'onViewOver'
-                ,'onViewMove'
-                ,'onViewClick'
-                ,'onKeyUp'
-                ,'dqTask'
-            ]
-        );
+        // owner.initEvents();
 
         owner.on('render', this.onRender, this);
         owner.on('afterrender', this.onAfterRender, this);
@@ -140,7 +213,7 @@ Ext.define('CB.plugins.DropDownList', {
 
     ,onRender: function(ed){
         this.owner.wrap = this.owner.getEl();
-        this.owner.createPicker();
+        // this.owner.createPicker();
 
         //add listeners
         ed.on('keyup', this.onKeyUp, this);
@@ -148,14 +221,14 @@ Ext.define('CB.plugins.DropDownList', {
 
     ,onAfterRender: function(ed){
 
-        ed.keyNav.down = function(e){
-            if(!this.isExpanded()){
-                return true;
-            } else {
-                this.inKeyMode = true;
-                this.selectNext();
-            }
-        };
+        // ed.keyNav.down = function(e){
+        //     if(!this.isExpanded()){
+        //         return true;
+        //     } else {
+        //         this.inKeyMode = true;
+        //         this.selectNext();
+        //     }
+        // };
         // ed.keyNav.enter = function(e){
         //     // add flag so that the grid doesnt complete the edit if list expanded
         //     this.listSelection = this.isExpanded() && (e.getKey() == e.ENTER);
@@ -171,6 +244,7 @@ Ext.define('CB.plugins.DropDownList', {
     ,onKeyUp: function(ed, e){
         var value = ed.getRawValue();
 
+        clog('onKeyUp', this, e, e.getKey());
         if(Ext.isEmpty(value)) {
             return;
         }
@@ -180,16 +254,21 @@ Ext.define('CB.plugins.DropDownList', {
                 return;
         }
 
-        var el = ed.getEl()
+        var el = ed.inputEl
             ,caretPosition = this.getCaretPosition(el.dom)
             ,parts = [
                 value.substring(0, caretPosition)
                 ,value.substring(caretPosition)
             ];
-
+        clog('!!', this.commands, arguments, caretPosition, parts);
         //iterate each command and check if matches any
         for (var i = 0; i < this.commands.length; i++) {
             var cmd = this.commands[i];
+
+            //transform enters to spaces for "space" prefix
+            if(cmd.prefix == ' ') {
+                parts[0] = parts[0].replace(/[\n\r]/g, ' ');
+            }
 
             //split left part by command prefix
             var t = parts[0].split(cmd.prefix);
@@ -209,7 +288,7 @@ Ext.define('CB.plugins.DropDownList', {
             }
 
             var handler = cmd.handler || Ext.emptyFn;
-            handler = handler.createDelegate(Ext.value(this.commands[i].scope, this));
+            handler = Ext.Function.bind(handler, Ext.valueFrom(this.commands[i].scope, this));
 
             cmd.caretPosition = caretPosition;
             cmd.query = rez[1];
@@ -229,7 +308,7 @@ Ext.define('CB.plugins.DropDownList', {
         }
 
         this.lastQuery = query;
-        this.owner.tpl.lastQuery = query;
+        this.owner.displayTpl.lastQuery = query;
 
         CB_Security.searchUserGroups(
             {
@@ -276,34 +355,33 @@ Ext.define('CB.plugins.DropDownList', {
         this.owner.expand();
     }
 
-    ,setSelectedValue: function(ed, record, index) {
+    ,setSelectedValue: function(ed, records, index) {
+        clog('setSelectedValue', arguments);
         var cmd = this.currentCommand
-            ,field = Ext.value(cmd.insertField, 'id');
+            ,field = Ext.valueFrom(cmd.insertField, 'id');
 
         var value = ed.getRawValue();
 
         var newValue = value.substring(0, cmd.queryStartIndex) +
-            record.get(field);
+            records[0].get(field);
             newCaretPosition = newValue.length;
         newValue += value.substring(cmd.queryStartIndex + cmd.query.length);
 
         ed.setRawValue(newValue);
-        this.setCaretPosition(ed.getEl().dom, newCaretPosition);
+        this.setCaretPosition(ed.inputEl.dom, newCaretPosition);
     }
 
-    ,getCaretPosition: function (el) {
-        var caretPos = 0;   // IE Support
-        if (document.selection) {
-            el.focus();
-            var sel = document.selection.createRange();
-            sel.moveStart ('character', -el.value.length);
-            caretPos = sel.text.length;
-        } else if (el.selectionStart || el.selectionStart == '0') {
-            // Firefox support
-            caretPos = el.selectionStart;
+    ,getCaretPosition: function(el) {
+        if (typeof(el.selectionStart) === "number") {
+            return el.selectionStart;
+        } else if (document.selection && el.createTextRange){
+            var range = document.selection.createRange();
+            range.collapse(true);
+            range.moveStart("character", -el.value.length);
+            return range.text.length;
+        } else {
+            throw 'getCaretPosition() not supported';
         }
-
-        return (caretPos);
     }
 
     ,setCaretPosition: function (el, pos){

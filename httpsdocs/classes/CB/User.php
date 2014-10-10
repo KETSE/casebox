@@ -62,6 +62,11 @@ class User
                 $r['first_name'] = htmlentities($r['first_name'], ENT_QUOTES, 'UTF-8');
                 $r['last_name'] = htmlentities($r['last_name'], ENT_QUOTES, 'UTF-8');
 
+                //set default theme
+                if (empty($r['theme'])) {
+                    $r['theme'] = 'gray';
+                }
+
                 // do not expose security params
                 unset($r['cfg']['security']);
 
@@ -789,6 +794,24 @@ class User
             return array('success' => false);
         }
         DB\dbQuery('UPDATE users_groups SET language_id = $2 WHERE id = $1', array($_SESSION['user']['id'], $id)) or die( DB\dbQueryError() );
+
+        return array('success' => true);
+    }
+
+    /**
+     * change theme for currently loged user
+     * @param  int   $id language id
+     * @return array json responce
+     */
+    public function setTheme($id)
+    {
+        $id = Purify::filename($id);
+
+        $_SESSION['user']['theme'] = $id;
+
+        $cfg = $this->getUserConfig();
+        $cfg['theme'] = $id;
+        $this->setUserConfig($cfg);
 
         return array('success' => true);
     }

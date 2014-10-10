@@ -95,6 +95,16 @@ Ext.define('CB.ObjectCardView', {
                 ,scope: this
                 ,handler: this.onCompleteTaskClick
             })
+            ,preview: new Ext.Action({
+                iconCls: 'ib-preview'
+                ,id: 'preview' + this.instanceId
+                ,enableToggle: true
+                ,scale: 'large'
+                ,qtip: L.Preview
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onPreviewClick
+            })
         };
 
         this.menuItemConfigs = {
@@ -196,6 +206,7 @@ Ext.define('CB.ObjectCardView', {
             ,new Ext.Button(this.actions.openInTabsheet)
             ,new Ext.Button(this.actions.fitImage)
             ,new Ext.Button(this.actions.completeTask)
+            ,new Ext.Button(this.actions.preview)
 
             ,new Ext.Button({
                 iconCls: 'ib-points'
@@ -221,6 +232,7 @@ Ext.define('CB.ObjectCardView', {
                 ,this.BC.get('cancel' + this.instanceId)
                 ,this.BC.get('completetask' + this.instanceId)
                 ,'->'
+                ,this.BC.get('preview' + this.instanceId)
                 ,this.BC.get('openInTabsheet' + this.instanceId)
                 ,this.BC.get('more' + this.instanceId)
             ]
@@ -353,16 +365,19 @@ Ext.define('CB.ObjectCardView', {
     }
 
     ,onViewChange: function() {
-        var activeItem = this.getLayout().activeItem;
-        var d = this.loadedData;
+        // var activeItem = this.getLayout().activeItem
+        //     ,d = this.loadedData
 
-        var canDownload = (
-            d &&
-            d.template_id &&
-            (CB.DB.templates.getType(d.template_id) == 'file')
-        );
+        //     ,templateType = CB.DB.templates.getType(d.template_id)
 
-        this.actions.edit.setDisabled(isNaN(d.id) || Ext.isEmpty(d.id));//template_id
+        //     ,canDownload = (
+        //         d &&
+        //         d.template_id &&
+        //         (templateType == 'file')
+        //     );
+
+        // this.actions.edit.setDisabled(isNaN(d.id) || Ext.isEmpty(d.id));//template_id
+        // this.actions.preview.setHidden(templateType !== 'file');
     }
 
     /**
@@ -662,6 +677,7 @@ Ext.define('CB.ObjectCardView', {
             App.mainViewPort.fireEvent('deleteobject', this.loadedData);
         }
     }
+
     ,onPermissionsClick: function(b, e) {
         App.mainViewPort.openPermissions(this.loadedData.id);
     }
@@ -758,6 +774,19 @@ Ext.define('CB.ObjectCardView', {
         var ai = this.getLayout().activeItem;
         if(ai.onFitImageClick) {
             ai.onFitImageClick(b, e);
+        }
+    }
+
+    ,onPreviewClick: function(b, e) {
+        if(b.pressed) {
+            this.onOpenPreviewEvent(this.loadedData, e);
+        } else { //load Properties
+            var p = Ext.apply({}, this.loadedData);
+            p.viewIndex = 0;
+            this.delayedLoadTask.cancel();
+            this.requestedLoadData = p;
+
+            this.doLoad();
         }
     }
 

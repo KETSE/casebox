@@ -646,15 +646,25 @@ class Template extends Object
                 break;
 
             case 'date':
-                $value = Util\formatMysqlDate($value, false, @$_SESSION['user']['cfg']['timezone']);
+                $value = Util\formatMysqlDate(
+                    $value,
+                    false,
+                    @$_SESSION['user']['cfg']['timezone']
+                );
                 break;
 
             case 'datetime':
-                $value = Util\formatMysqlTime($value);
-                $tmp = explode(' ', $value);
-                if (!empty($tmp[1]) && ($tmp[1] == '00:00')) {
-                    $value = $tmp[0];
-                }
+                // $value = Util\formatMysqlTime($value);
+                $value = Util\formatMysqlDate(
+                    $value,
+                    \CB\getOption('short_date_format'). ' ' . \CB\getOption('time_format'),
+                    @$_SESSION['user']['cfg']['timezone']
+                );
+
+                // $tmp = explode(' ', $value);
+                // if (!empty($tmp[1]) && ($tmp[1] == '00:00')) {
+                //     $value = $tmp[0];
+                // }
                 break;
 
             case 'html':

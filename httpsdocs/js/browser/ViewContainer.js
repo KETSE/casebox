@@ -199,10 +199,10 @@ Ext.define('CB.browser.ViewContainer', {
                 ,toggleHandler: this.onRightPanelViewChangeClick
             })
             ,new Ext.Button({
-                text: L.Preview
-                ,id: 'preview' + this.instanceId
+                text: L.Properties
+                ,id: 'properties' + this.instanceId
                 ,enableToggle: true
-                ,iconCls: 'ib-preview'
+                ,iconCls: 'ib-properties'
                 ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'fvgRB' + this.instanceId
@@ -248,7 +248,7 @@ Ext.define('CB.browser.ViewContainer', {
             }
             ,items: [
                 this.buttonCollection.get('filter' + this.instanceId)
-                ,this.buttonCollection.get('preview' + this.instanceId)
+                ,this.buttonCollection.get('properties' + this.instanceId)
 
             ]
         });
@@ -1051,7 +1051,7 @@ Ext.define('CB.browser.ViewContainer', {
         if(templateCfg && (Ext.valueFrom(templateCfg.editMethod, templateCfg.createMethod) == 'tabsheet')) {
                 App.mainViewPort.openObject(objectData, e);
         } else {
-            this.buttonCollection.get('preview' + this.instanceId).toggle(true);
+            this.buttonCollection.get('properties' + this.instanceId).toggle(true);
             this.objectPanel.edit(objectData);
         }
     }
@@ -1065,7 +1065,7 @@ Ext.define('CB.browser.ViewContainer', {
         //     // - on the right side panel as usual objects creations
         //     return;
         // }
-        this.buttonCollection.get('preview' + this.instanceId).toggle(true);
+        this.buttonCollection.get('properties' + this.instanceId).toggle(true);
         b.config.data.pid = this.folderProperties.id;
         b.config.data.path = this.folderProperties.path;
         this.fireEvent('createobject', Ext.apply({}, b.config.data));

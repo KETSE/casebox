@@ -31,6 +31,7 @@ Ext.define('CB.form.view.object.Properties', {
             switch(objType) {
                 case 'file':
                     rez.tbar['download'] = {};
+                    rez.tbar['preview'] = {};
                     break;
                 case 'search':
                     rez.tbar['search'] = {};
