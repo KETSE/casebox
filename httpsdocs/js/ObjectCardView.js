@@ -260,10 +260,12 @@ Ext.define('CB.ObjectCardView', {
                     ,listeners: {
                         scope: this
                         ,change: function(){
-                            this.actions.save.setDisabled(!this.items.getAt(1).isValid());
+                            var ef = this.items.getAt(1);
+                            this.actions.save.setDisabled(!ef.isValid() || !ef._isDirty);
                         }
                         ,clear: function(){
-                            this.actions.save.setDisabled(!this.items.getAt(1).isValid());
+                            var ef = this.items.getAt(1);
+                            this.actions.save.setDisabled(!ef.isValid() || !ef._isDirty);
                         }
                         ,loaded: this.onCardItemLoaded
                     }
@@ -365,19 +367,9 @@ Ext.define('CB.ObjectCardView', {
     }
 
     ,onViewChange: function() {
-        // var activeItem = this.getLayout().activeItem
-        //     ,d = this.loadedData
-
-        //     ,templateType = CB.DB.templates.getType(d.template_id)
-
-        //     ,canDownload = (
-        //         d &&
-        //         d.template_id &&
-        //         (templateType == 'file')
-        //     );
-
-        // this.actions.edit.setDisabled(isNaN(d.id) || Ext.isEmpty(d.id));//template_id
-        // this.actions.preview.setHidden(templateType !== 'file');
+        var d = this.loadedData;
+        this.actions.edit.setDisabled(isNaN(d.id) || Ext.isEmpty(d.id));
+        this.BC.get('preview' + this.instanceId).toggle(this.loadedData.viewIndex == 2, false);
     }
 
     /**
@@ -587,6 +579,10 @@ Ext.define('CB.ObjectCardView', {
     }
 
     ,updateCreateMenu: function() {
+        if(!this.menu) {
+            return;
+        }
+
         var nmb = this.menu.child('[name="newmenu"]');
 
         if(nmb) {
@@ -650,11 +646,16 @@ Ext.define('CB.ObjectCardView', {
     }
 
     ,editObject: function(objectData) {
-        data = Ext.apply({}, objectData);
-        data.viewIndex = 1;
-        this.delayedLoadTask.cancel();
-        this.requestedLoadData = data;
-        this.doLoad();
+        var data = Ext.apply({}, objectData);
+        //edit object in popup window
+        delete data.html;
+        App.openObjectWindow(data);
+
+        //edit object in current panel
+        // data.viewIndex = 1;
+        // this.delayedLoadTask.cancel();
+        // this.requestedLoadData = data;
+        // this.doLoad();
     }
 
     ,onEditClick: function() {

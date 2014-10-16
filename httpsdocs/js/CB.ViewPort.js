@@ -21,7 +21,7 @@ Ext.define('CB.ViewPort', {
                         xtype: 'ExtuxSearchField'
                         ,emptyText: L.Search + ' CaseBox'
                         ,minListWidth: 150
-                        ,height: 20
+                        ,height: 30
                         ,width: 300
                         ,style: 'font: 14px arial,sans-serif'
                         ,listeners: {
@@ -48,9 +48,11 @@ Ext.define('CB.ViewPort', {
                     }
                     ,'->'
                     ,{
-                        html: '&nbsp;'
+                        // html: '&nbsp;'
                         // ,xtype: 'tbtext'
                         // ,iconCls: App.loginData.iconCls
+                        scale: 'large'
+                        ,cls: 'btn-no-glyph'
                         ,menu: []
                         ,name: 'userMenu'
                     }
@@ -98,10 +100,17 @@ Ext.define('CB.ViewPort', {
             ,animCollapse: false
             ,fill: true
             ,plain: true
-            ,style: 'border-top: 1px solid #dfe8f6'
+            // ,style: 'border-top: 1px solid #dfe8f6'
+            ,style: {
+                border: 0
+            }
+            ,bodyStyle: {
+                border: 0
+            }
             ,bodyCls: 'main-nav'
             ,defaults: {
                 border: false
+                ,bodyBoder: false
                 ,bodyStyle: 'background-color: #F4F4F4'
                 ,lazyrender: true
                 ,autoScroll: true
@@ -123,16 +132,24 @@ Ext.define('CB.ViewPort', {
             }
         });
 
-        App.mainStatusBar = new Ext.Toolbar({
+        // App.mainStatusBar = new Ext.Toolbar({
+        //         region: 'south'
+        //         ,cls: 'x-panel-gray'
+        //         ,style:'border-top: 1px solid #aeaeae'
+        //         ,height: 25
+        //         ,items: [
+        //             {xtype: 'tbspacer', width: 610}
+        //             ,'->'
+        //             ,{xtype: 'uploadwindowbutton'}
+        //             ,{xtype: 'tbspacer', width: 20}
+        //         ]
+        // });
+        App.mainStatusBar = new CB.widget.TaskBar({
                 region: 'south'
-                ,cls: 'x-panel-gray'
                 ,style:'border-top: 1px solid #aeaeae'
                 ,height: 25
-                ,items: [
-                    {xtype: 'tbspacer', width: 610}
-                    ,'->'
-                    ,{xtype: 'uploadwindowbutton'}
-                    ,{xtype: 'tbspacer', width: 20}
+                ,trayItems: [
+                    {xtype: 'uploadwindowbutton'}
                 ]
         });
 
@@ -169,10 +186,11 @@ Ext.define('CB.ViewPort', {
         var um, umIdx = App.mainToolBar.items.findIndex( 'name', 'userMenu');
         if(umIdx > -1) {
             um = App.mainToolBar.items.getAt(umIdx);
-            um.update('<img src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id) + '" ' +
-                'style="margin-top: 4px; width: 32px; height: 32px;" ' +
-                'title="'+ getUserDisplayName(true) + '" />'
-            );
+            um.setIcon('/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id));
+            // um.update('<img src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id) + '" ' +
+            //     'style="margin-top: 4px; width: 32px; height: 32px;" ' +
+            //     'title="'+ getUserDisplayName(true) + '" />'
+            // );
         }
 
         um.menu.add(
@@ -343,7 +361,6 @@ Ext.define('CB.ViewPort', {
     ,populateMainMenu: function(){
         App.mainAccordion.add({
             xtype: 'CBBrowserTree'
-            ,border: false
             ,data: {
                 rootNode: App.config.rootNode
             }

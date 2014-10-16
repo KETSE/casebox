@@ -54,7 +54,7 @@ Ext.define('CB.objects.plugins.Files', {
             }
         });
 
-        this.dragPanel = new Ext.Panel({
+        this.dropPanel = new Ext.Panel({
             border: false
             ,padding: 0
             ,hidden: true
@@ -64,7 +64,15 @@ Ext.define('CB.objects.plugins.Files', {
             ,listeners: {
                 scope: this
                 ,afterrender: function(p) {
-                    p.getEl().on('click', this.onDragPanelClick, this);
+                    var el = this.getEl();
+                    el.on('click', this.onDropPanelClick, this);
+                    var ddp = new CB.DD.Panel(
+                        el
+                        ,{
+                            enableDrop: true
+                        }
+                    );
+                    ddp.init(this);
                 }
             }
         });
@@ -73,7 +81,7 @@ Ext.define('CB.objects.plugins.Files', {
             title: L.Files
             ,items: [
                 this.dataView
-                ,this.dragPanel
+                ,this.dropPanel
             ]
             ,listeners: {
                 scope: this
@@ -87,7 +95,7 @@ Ext.define('CB.objects.plugins.Files', {
 
         this.dropZoneConfig = {
             pidPropety: 'id'
-            ,dropZoneEl: this.dragPanel.getEl()
+            ,dropZoneEl: this.dropPanel.getEl()
         };
         this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
         this.filesDropPlugin.init(this);
@@ -203,17 +211,17 @@ Ext.define('CB.objects.plugins.Files', {
 
     ,onAddClick: function(b, e) {
         this.lockPanel(true);
-        this.dragPanel.show();
+        this.dropPanel.show();
     }
 
-    ,onDragPanelClick: function(ev, el) {
+    ,onDropPanelClick: function(ev, el) {
         var te = ev.getTarget();
         if(Ext.isEmpty(te)) {
             return;
         }
         te = Ext.get(te);
         if(te.hasCls('close')) {
-            this.dragPanel.hide();
+            this.dropPanel.hide();
             this.lockPanel(false);
         }
 
@@ -224,7 +232,7 @@ Ext.define('CB.objects.plugins.Files', {
                 ,ev
             );
 
-            this.dragPanel.hide();
+            this.dropPanel.hide();
             this.lockPanel(false);
         }
     }

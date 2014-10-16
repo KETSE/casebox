@@ -676,7 +676,7 @@ Ext.define('CB.UploadWindow', {
 Ext.define('CB.UploadWindowButton', {
     extend: 'Ext.Button'
     ,alias: ['widget.uploadwindowbutton']
-    ,cls: 'upload-btn'
+    // ,cls: 'upload-btn'
 
     ,initComponent: function(){
         this.uploader = App.getFileUploader();

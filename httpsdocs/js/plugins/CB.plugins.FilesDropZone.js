@@ -63,6 +63,7 @@ Ext.define('CB.plugins.FilesDropZone', {
         var te = this.getTarget(e);
         this.targetId = null;
         this.targetPath = null;
+
         if(te.hasCls('x-grid-row')){
             var rel = this.owner.findTargetByEvent(e);
             var rec = this.owner.getRecord(rel);
@@ -174,8 +175,18 @@ Ext.define('CB.plugins.FilesDropZone', {
             this.dropZoneEl = this.owner.getEl().appendChild(document.createElement('div'));
             this.dropZoneEl.addCls('desktop-drop-zone');
             this.dropZoneEl.update(this.dropZoneConfig.text);
-            this.dropZoneEl.on('dragenter', function(e, el){Ext.get(el).addCls('grid-drop-zone-over');});
-            this.dropZoneEl.on('dragleave', function(e, el){Ext.get(el).removeCls('grid-drop-zone-over');});
+            this.dropZoneEl.on(
+                'dragenter'
+                ,function(e, el){
+                    Ext.get(el).addCls('grid-drop-zone-over');
+                }
+            );
+            this.dropZoneEl.on(
+                'dragleave'
+                ,function(e, el){
+                    Ext.get(el).removeCls('grid-drop-zone-over');
+                }
+            );
 
             this.dropZoneEl.addCls('grid-drop-zone');
         }

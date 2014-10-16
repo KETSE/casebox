@@ -1,3 +1,24 @@
+CaseBox 1.9.340 (2014-10-16)
+==============================
+New Features, Improvements
+--------------------------
+- Use HTML5 header
+- Grid topToolbar: labelPosition: Right insted of Bottom
+- restore scrolling after editing a grid field
+- Remove separators in Grid navigation bottom toolbar
+- Edit objects in popup window, aligned to right-bottom corner
+- add stripeRows to to grid for objects edit window and add lines between rows
+- Remove Search box from top-right corner in breadcrumbs
+
+Fixed Bugs:
+----------
+- fixed htmleditor errors and paste from word functionality
+- Preview button toggle state doesn't change when I click on file 128x128 ico or Back buttons
+- Save/Cancel buttons enabled in ObjWnd even if obj not modified
+- Saving a node while in search mode, will not focus after save
+- Version number not shown in Grid for files
+- on edit object, comboboxes display empty value if the value is of type string
+
 CaseBox 1.9.339 (2014-10-10)
 ==============================
 New Features, Improvements

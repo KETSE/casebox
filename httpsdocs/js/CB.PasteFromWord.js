@@ -32,20 +32,23 @@ Ext.define('CB.PasteFromWord', {
             ]
         });
         CB.PasteFromWord.superclass.initComponent.apply(this, arguments);
+
+        this.editor = this.items.getAt(0);
+
         this.on('afterrender', this.doShow);
         this.on('activate',    this.doShow);
     }
     ,doShow:   function(w) {
-       this.queryById('htmleditor')[0].setValue('');
+       this.editor.setValue('');
     }
     ,doSubmit: function(w) {
         var text_source = Ext.util.Format.stripTags(this.opener.getValue());
         text_source = text_source.replace(/ /g, '');
 
         if(!text_source) {
-            this.opener.setValue(CleanWord(this.queryById('htmleditor')[0].getValue()));
+            this.opener.setValue(CleanWord(this.editor.getValue()));
         } else {
-            this.opener.insertAtCursor(CleanWord(this.queryById('htmleditor')[0].getValue()));
+            this.opener.insertAtCursor(CleanWord(this.editor.getValue()));
         }
         this.hide();
     }

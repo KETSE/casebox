@@ -117,6 +117,7 @@ Ext.define('CB.plugins.DisplayColumns', {
                 if(key !== 'remove') {
                     column.id = rez.length;
                     column.dataIndex = key;
+                    column.stateId = key;
                     column.header = Ext.valueFrom(column.header, column.title);
                     switch(column.type) {
                         case 'date':

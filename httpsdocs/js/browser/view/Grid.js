@@ -13,11 +13,13 @@ Ext.define('CB.browser.view.Grid', {
                 header: 'ID'
                 ,width: 80
                 ,dataIndex: 'nid'
+                ,stateId: 'nid'
                 ,hidden: true
             },{
                 header: L.Name
                 ,width: 300
                 ,dataIndex: 'name'
+                ,stateId: 'name'
                 ,renderer: function(v, m, r, ri, ci, s){
                     m.css = 'icon-grid-column-top '+ r.get('iconCls');
                     if(r.get('acl_count') > 0) {
@@ -42,6 +44,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,hidden:true
                 ,width: 150
                 ,dataIndex: 'path'
+                ,stateId: 'path'
                 ,renderer: function(v, m, r, ri, ci, s){
                     m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
@@ -50,6 +53,7 @@ Ext.define('CB.browser.view.Grid', {
                 header: L.Project
                 ,width: 150
                 ,dataIndex: 'case'
+                ,stateId: 'case'
                 ,renderer: function(v, m, r, ri, ci, s){
                     m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
@@ -58,6 +62,7 @@ Ext.define('CB.browser.view.Grid', {
                 header: L.Date
                 ,width: 120
                 ,dataIndex: 'date'
+                ,stateId: 'date'
                 // ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' ' + App.timeFormat
                 ,renderer: App.customRenderers.datetime
@@ -65,12 +70,14 @@ Ext.define('CB.browser.view.Grid', {
                 header: L.Size
                 ,width: 80
                 ,dataIndex: 'size'
+                ,stateId: 'size'
                 ,renderer: App.customRenderers.filesize
             },{
                 header: L.Creator
                 ,hidden: true
                 ,width: 200
                 ,dataIndex: 'cid'
+                ,stateId: 'cid'
                 ,renderer: function(v){
                     return CB.DB.usersStore.getName(v);
                 }
@@ -78,6 +85,7 @@ Ext.define('CB.browser.view.Grid', {
                 header: L.Owner
                 ,width: 200
                 ,dataIndex: 'oid'
+                ,stateId: 'oid'
                 ,renderer: function(v){
                     return CB.DB.usersStore.getName(v);
                 }
@@ -86,6 +94,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,hidden:true
                 ,width: 120
                 ,dataIndex: 'cdate'
+                ,stateId: 'cdate'
                 ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' '  +  App.timeFormat
             },{
@@ -93,6 +102,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,hidden:true
                 ,width: 120
                 ,dataIndex: 'udate'
+                ,stateId: 'udate'
                 ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' ' + App.timeFormat
             }
@@ -101,6 +111,11 @@ Ext.define('CB.browser.view.Grid', {
         this.grid = new Ext.grid.Panel({
             loadMask: false
             ,cls: 'folder-grid'
+            ,border: false
+            ,bodyStyle: {
+                border: 0
+            }
+
             ,autoRender: true
             ,store: this.store
             ,getProperty: this.getProperty // link to view container method
@@ -160,11 +175,11 @@ Ext.define('CB.browser.view.Grid', {
             // ,sm: new Ext.grid.RowSelectionModel({
             ,selModel: new Ext.selection.RowModel({
                 mode: 'MULTI'
-                // ,listeners: {
-                //     scope: this
-                //     // ,rowselect: this.onRowSelect
-                //     ,selectionchange: this.onSelectionChange
-                // }
+                ,listeners: {
+                    scope: this
+                    // ,rowselect: this.onRowSelect
+                    ,selectionchange: this.onSelectionChange
+                }
             })
             ,listeners:{
                 scope: this
@@ -367,6 +382,7 @@ Ext.define('CB.browser.view.Grid', {
         });
         CB.browser.view.Grid.superclass.initComponent.apply(this, arguments);
 
+        this.store.on('beforeload', this.onBeforeStoreLoad, this);
         this.store.on('load', this.onStoreLoad, this);
 
         this.enableBubble(['reload']);
@@ -387,12 +403,29 @@ Ext.define('CB.browser.view.Grid', {
             ]
         );
     }
+    ,onBeforeStoreLoad: function(store, operation, eOpts) {
+        this.savedSelection = this.getSelectedItems();
+        this.grid.getSelectionModel().suspendEvents();
+        // App.mainViewPort.selectGridObject(this.grid);
+
+    }
+
     ,onStoreLoad: function(store, recs, options) {
         delete this.userSort;
 
         App.mainViewPort.selectGridObject(this.grid);
 
-        this.fireSelectionChangeEvent();
+        var hadSelection = false;
+        if(this.savedSelection) {
+            hadSelection = true;
+            this.selectItems(this.savedSelection);
+        }
+
+        this.grid.getSelectionModel().resumeEvents(true);
+
+        if(hadSelection !== this.grid.getSelectionModel().hasSelection()) {
+            this.fireSelectionChangeEvent();
+        }
     }
 
     ,onScrollerDragDrop: function(targetData, source, e, data){
@@ -414,13 +447,38 @@ Ext.define('CB.browser.view.Grid', {
         });
     }
 
-    ,fireSelectionChangeEvent: function() {
+    ,getSelectedItems: function() {
         var s = this.grid.getSelectionModel().getSelection();
         for (var i = 0; i < s.length; i++) {
             s[i] = s[i].data;
         }
 
-        this.fireEvent('selectionchange', s);
+        return s;
+    }
+
+    ,selectItems: function(itemsArray) {
+        if (itemsArray && itemsArray.length) {
+            var rs = [],
+                r,
+                j = 0,
+                l = itemsArray.length;
+            for (; j < l; j++) {
+                r = this.store.findRecord('nid', itemsArray[j].nid);
+                if (r) {
+                    rs.push(r);
+                }
+            }
+            if (rs.length) {
+                // this.grid.setSelection(rs);
+                this.grid.getSelectionModel().select(rs, false, true);
+            }
+        }
+
+        delete this.savedSelection;
+    }
+
+    ,fireSelectionChangeEvent: function() {
+        this.fireEvent('selectionchange', this.getSelectedItems());
     }
 
     ,onKeyDown: function(e) {

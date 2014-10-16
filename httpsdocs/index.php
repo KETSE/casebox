@@ -26,7 +26,7 @@ $projectTitle = Config::get('project_name_' . Config::get('user_language'), $cor
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="author" content="KETSE">
     <meta name="description" content="Casebox">
     <meta name="robots" content="noindex">

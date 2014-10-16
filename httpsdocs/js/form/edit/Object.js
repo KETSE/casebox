@@ -5,7 +5,7 @@ Ext.define('CB.form.edit.Object', {
     ,alias: 'widget.CBEditObject'
     ,tbarCssClass: 'x-panel-white'
     ,padding: 0
-    ,autoScroll: true
+    ,autoScroll: false
     ,layout: 'anchor'
     ,data: {}
 
@@ -39,7 +39,7 @@ Ext.define('CB.form.edit.Object', {
             ,border: false
             ,autoHeight: true
             ,labelAlign: 'top'
-            ,bodyStyle: 'margin:0; padding:0'
+            ,bodyStyle: 'margin:0; padding: 0 7px'
             ,items: []
             ,api: {
                 submit: CB_Objects.save
@@ -75,11 +75,15 @@ Ext.define('CB.form.edit.Object', {
     }
 
     ,onChange: function(fieldName, newValue, oldValue){
+        this._isDirty = true;
+
         if(!Ext.isEmpty(fieldName) && Ext.isString(fieldName)) {
             this.fireEvent('fieldchange', fieldName, newValue, oldValue);
         }
-        this._isDirty = true;
         // this.updateLayout();
+
+        //fire event after change event process
+        this.fireEvent('changed', this);
     }
 
     ,onAfterRender: function(c) {
@@ -176,6 +180,7 @@ Ext.define('CB.form.edit.Object', {
                     ,includeTopFields: true
                     ,stateId: 'oevg' //object edit vertical grid
                     ,autoExpandColumn: 'value'
+                    ,autoScroll: false
                     ,keys: [{
                         key: "s"
                         ,ctrl:true
@@ -187,6 +192,16 @@ Ext.define('CB.form.edit.Object', {
                     ,viewConfig: {
                         forceFit: true
                         ,autoFill: true
+                    }
+                    ,listeners: {
+                        scope: this
+                        ,beforeedit: function() {
+                            this.lastScroll = this.body.getScroll();
+                        }
+                        ,edit: function() {
+                            this.body.setScrollLeft(this.lastScroll.left);
+                            this.body.setScrollTop(this.lastScroll.top);
+                        }
                     }
                 }
             );
@@ -232,7 +247,7 @@ Ext.define('CB.form.edit.Object', {
                             ,value: this.data.data[r.get('name')]
                             ,height: Ext.valueFrom(r.get('cfg').height, 200)
                             ,anchor: '100%'
-                            ,style: 'resize: vertical'
+                            // ,style: 'resize: vertical'
                             ,grow: true
                             ,fieldLabel: r.get('title')
                             ,listeners: {
@@ -240,7 +255,9 @@ Ext.define('CB.form.edit.Object', {
                                 ,change: function(field, newValue, oldValue) {
                                     this.fireEvent('change', field.name, newValue, oldValue);
                                 }
-                                ,sync: function(){ this.fireEvent('change'); }
+                                ,sync: function(){
+                                    this.fireEvent('change');
+                                }
                             }
                             ,xtype: (r.get('type') == 'html')
                                 ? 'CBHtmlEditor'
@@ -276,7 +293,7 @@ Ext.define('CB.form.edit.Object', {
             var colIdx = valueCol.getIndex();
 
             this.grid.getSelectionModel().select({row: 0, column: colIdx});
-            this.grid.getView().focusCell({row: 0, column: colIdx});
+            // this.grid.getView().focusCell({row: 0, column: colIdx});
 
             if(this.startEditAfterObjectsStoreLoadIfNewObject && isNaN(this.data.id)) {
                 this.grid.editPlugin.startEditByPosition({row: 0, column: colIdx});

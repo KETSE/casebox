@@ -84,7 +84,7 @@ Ext.define('CB.browser.view.Pivot',{
                 ,enableToggle: true
                 ,allowDepress: true
                 ,iconCls: 'ib-chart-bar'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'pv' + this.instanceId
                 ,scope: this
@@ -98,7 +98,7 @@ Ext.define('CB.browser.view.Pivot',{
                 ,enableToggle: true
                 ,allowDepress: true
                 ,iconCls: 'ib-chart-column'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'pv' + this.instanceId
                 ,scope: this

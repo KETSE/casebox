@@ -5,6 +5,7 @@ Ext.define('CB.browser.view.grid.toolbar.Paging', {
 
     ,xtype: 'CBBrowserViewGridPagingToolbar'
 
+    ,border: false
     ,displayInfo: true
     ,displayMsg: '{0} - {1} of {2}'
 
@@ -21,11 +22,11 @@ Ext.define('CB.browser.view.grid.toolbar.Paging', {
         //move display info and spacer before custom buttons
         var i = me.items.last();
         me.items.remove(i);
-        me.items.insert(7, i);
+        me.items.insert(5, i);
 
         i = me.items.last();
         me.items.remove(i);
-        me.items.insert(8, i);
+        me.items.insert(6, i);
 
 
         // enable bubble for event of export button
@@ -42,6 +43,8 @@ Ext.define('CB.browser.view.grid.toolbar.Paging', {
         rez.pop(); //remove reload button
         rez.pop(); //remove divider
         rez.pop(); //remove "last page" button
+        rez.splice(1, 1); // remove splitter
+        rez.splice(4, 1); // remove socond splitter
 
         return rez;
     }

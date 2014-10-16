@@ -13,6 +13,13 @@ Ext.define('CB.browser.Tree', {
     ,useArrows: true
     ,showFoldersContent: false
     ,border: false
+    ,bodyBoder: false
+    ,style: {
+        border: '0'
+    }
+    ,bodyStyle: {
+        border: '0'
+    }
     ,hideToolbar: true
     ,stateful: true
     ,stateId: 'btree' //browser tree
@@ -177,6 +184,7 @@ Ext.define('CB.browser.Tree', {
             ,viewConfig: {
                 cls: 'browser-tree'
                 ,border: false
+                ,bodyBoder: false
                 ,autoScroll: true
                 ,idProperty: 'nid'
                 ,loadMask: false

@@ -209,6 +209,7 @@ Ext.define('CB.ObjectsComboField', {
 
         this._setValue = this.setValue;
         this.setValue = function(v){
+            clog('setValue', v);
             var value, values = Ext.Array.from(v);
             v = [];
             for (var i = 0; i < values.length; i++) {

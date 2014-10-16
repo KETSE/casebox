@@ -45,7 +45,7 @@ Ext.define('CB.browser.view.Charts', {
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-chart-bar'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
@@ -58,7 +58,7 @@ Ext.define('CB.browser.view.Charts', {
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-chart-column'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
@@ -71,7 +71,7 @@ Ext.define('CB.browser.view.Charts', {
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-chart-pie'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this

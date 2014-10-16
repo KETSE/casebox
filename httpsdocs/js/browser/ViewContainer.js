@@ -46,7 +46,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,upload: new Ext.Action({
                 text: L.Upload
                 ,id: 'upload' + this.instanceId
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,iconCls: 'ib-upload'
                 ,scope: this
@@ -56,7 +56,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,download: new Ext.Action({
                 text: L.Download
                 ,id: 'download' + this.instanceId
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,iconCls: 'ib-download'
                 ,hidden: true
@@ -108,9 +108,10 @@ Ext.define('CB.browser.ViewContainer', {
             })
 
             ,'delete': new Ext.Action({
-                text: L.Delete
+                qtip: L.Delete
+                // text: L.Delete
                 ,id: 'delete' + this.instanceId
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,iconCls: 'ib-trash'
                 ,scale: 'large'
                 ,hidden: true
@@ -123,7 +124,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,restore: new Ext.Action({
                 text: L.Restore
                 ,id: 'restore' + this.instanceId
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,iconCls: 'ib-restore'
                 ,scale: 'large'
                 ,hidden: true
@@ -138,17 +139,19 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.buttonCollection.addAll([
             new Ext.Button({
-                text: L.Views
+                qtip: L.Views
+                // text: L.Views
                 ,id: 'apps' + this.instanceId
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,iconCls: 'ib-apps'
                 ,scale: 'large'
                 ,menu: []
             })
             ,new Ext.Button({
-                text: L.New
+                qtip: L.New
+                // text: L.New
                 ,id: 'create' + this.instanceId
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,iconCls: 'ib-create'
                 ,scale: 'large'
                 ,menu: [
@@ -160,7 +163,7 @@ Ext.define('CB.browser.ViewContainer', {
                 text: L.Edit
                 ,id: 'edit' + this.instanceId
                 ,iconCls: 'ib-edit'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,menu: [
                     this.actions.cut
@@ -174,10 +177,11 @@ Ext.define('CB.browser.ViewContainer', {
             ,new Ext.Button(this.actions.restore)
             ,new Ext.Button(this.actions['delete'])
             ,new Ext.Button({
-                text: L.More
+                qtip: L.More
+                // text: L.More
                 ,id: 'more' + this.instanceId
                 ,iconCls: 'ib-points'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,scope: this
                 ,handler: function(b, e) {
@@ -185,12 +189,13 @@ Ext.define('CB.browser.ViewContainer', {
                 }
             })
             ,new Ext.Button({
-                text: L.Filter
+                qtip: L.Filter
+                // text: L.Filter
                 ,id: 'filter' + this.instanceId
                 ,enableToggle: true
                 ,iconCls: 'ib-filter'
                 ,activeIconCls: 'ib-filter-on'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'fvgRB' + this.instanceId
                 ,allowDepress: false
@@ -199,11 +204,12 @@ Ext.define('CB.browser.ViewContainer', {
                 ,toggleHandler: this.onRightPanelViewChangeClick
             })
             ,new Ext.Button({
-                text: L.Properties
+                qtip: L.Properties
+                // text: L.Properties
                 ,id: 'properties' + this.instanceId
                 ,enableToggle: true
                 ,iconCls: 'ib-properties'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'fvgRB' + this.instanceId
                 ,allowDepress: false
@@ -219,8 +225,8 @@ Ext.define('CB.browser.ViewContainer', {
             ,border: false
             ,style: 'background: #ffffff'
             ,defaults: {
-                iconAlign:'top'
-                ,scale: 'large'
+                // iconAlign:'top'
+                scale: 'large'
             }
             //each view should define it's custom buttons in buttonCollection
             //and specify buttons for diplay
@@ -243,8 +249,8 @@ Ext.define('CB.browser.ViewContainer', {
             ,style: 'background: #ffffff'
             ,border: false
             ,defaults: {
-                iconAlign:'top'
-                ,scale: 'large'
+                // iconAlign:'top'
+                scale: 'large'
             }
             ,items: [
                 this.buttonCollection.get('filter' + this.instanceId)
@@ -254,9 +260,9 @@ Ext.define('CB.browser.ViewContainer', {
         });
 
         this.mainToolbar = new Ext.Panel({
-            layout: 'border'
+            layout: 'hbox'
             ,autoHeight: true
-            ,height: 65
+            // ,height: 65
             ,border: false
             ,items: [
                 this.viewToolbar
@@ -301,6 +307,7 @@ Ext.define('CB.browser.ViewContainer', {
         this.searchField = new Ext.ux.SearchField({
             width: 250
             ,minListWidth: 250
+            ,hidden: true
             ,listeners: {
                 scope: this
                 ,'search': this.onSearchQuery

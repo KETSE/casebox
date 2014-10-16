@@ -33,7 +33,7 @@ Ext.define('CB.objects.plugins.Base', {
         if(!Ext.isEmpty(this.title)) {
             tbarItems.push({
                 xtype: 'label'
-                ,cls: 'fwB'
+                ,cls: 'title'
                 ,text: this.title
             });
         }

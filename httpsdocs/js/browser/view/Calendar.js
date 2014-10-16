@@ -355,7 +355,7 @@ Ext.define('CB.browser.view.Calendar', {
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-cal-day'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'cv' + viewGroup
                 ,scope: this.calendar
@@ -368,7 +368,7 @@ Ext.define('CB.browser.view.Calendar', {
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-cal-week'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'cv' + viewGroup
                 ,scope: this.calendar
@@ -381,7 +381,7 @@ Ext.define('CB.browser.view.Calendar', {
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-cal-month'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,toggleGroup: 'cv' + viewGroup
                 ,pressed: true
@@ -392,7 +392,7 @@ Ext.define('CB.browser.view.Calendar', {
             ,new Ext.Button({
                 id: 'calprev' + instanceId
                 ,iconCls: 'ib-arr-l'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,scope: this.calendar
                 ,handler: this.calendar.onPrevClick
@@ -401,7 +401,7 @@ Ext.define('CB.browser.view.Calendar', {
             ,new Ext.Button({
                 id: 'calnext' + instanceId
                 ,iconCls: 'ib-arr-r'
-                ,iconAlign:'top'
+                // ,iconAlign:'top'
                 ,scale: 'large'
                 ,scope: this.calendar
                 ,handler: this.calendar.onNextClick

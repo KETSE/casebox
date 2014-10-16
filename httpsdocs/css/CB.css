@@ -34,7 +34,9 @@ body { font-family: arial,sans-serif; font-size: 12px }
 
 */
 
-td.x-grid-cell {
+td.x-grid-cell,
+.x-form-text-grid-cell
+{
     font: 12px arial,sans-serif;
 }
 
@@ -149,7 +151,7 @@ a:hover{ text-decoration: underline }
 .icon-cancel { background-image:url(i/ico/cancel.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-print{ background-image:url(i/ico/printer.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 
-.icon-paste-from-word-text{ background-image: url(i/ico/clipboard-paste-word.png) !important }
+.icon-paste-from-word-text{ background-image: url(i/ico/clipboard-paste-word.png) !important; background-repeat: no-repeat !important; }
 .icon-attachment{ background-image: url(i/ico/paper-clip.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-paper-clip-plus{ background-image: url(i/ico/paper-clip-plus.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-document-plus{ background-image: url(i/ico/document--plus.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -249,6 +251,8 @@ img.duplicate-plus {width:16px; height: 16px; background: url(i/duplication/ui-c
 .tabpanel-header-nobg ul.x-tab-strip-top{ background: transparent}
 
 .vgh .x-grid3-cell-inner{ font-weight:bold; white-space: nowrap !important; overflow: visible; }
+
+.remove-sprites .x-btn-text { background: none;}
 
 /** vim: ts=4:sw=4:nu:fdc=4:nospell
 *
@@ -373,7 +377,8 @@ padding: 0px 2px;
 .preview table.title th.file table{ border:0 }
 .preview table.title th.file td{ padding: 0;white-space: nowrap; vertical-align: top }
 .preview table.title td{ padding: 3px 10px }
-.spacy-rows .x-grid3-cell{padding: 1px 0 2px 0}
+.spacy-rows .x-grid-cell{padding: 1px 0 2px 0}
+.spacy-rows .x-grid-item{border-top: 1px solid #fff;}
 .spacy-fields .x-form-item {padding: 1px 1px 2px 1px}
 .icon-application-tree{ background-image: url(i/ico/application-tree.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag{ background-image: url(i/ico/tag.png) !important; background-position: 0 50%; background-repeat: no-repeat}

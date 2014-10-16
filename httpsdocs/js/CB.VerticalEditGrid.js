@@ -29,7 +29,7 @@ Ext.define('CB.VerticalEditGrid', {
         var viewCfg = {
             autoFill: false
             ,deferInitialRefresh: false
-            ,stripeRows: false
+            ,stripeRows: true
             ,getRowClass: function( record, index, rowParams, store ){
                 var rez = '';
                 if(record.get('type') == 'H'){
@@ -95,6 +95,7 @@ Ext.define('CB.VerticalEditGrid', {
             ,listeners: {
                 scope: this
                 ,keypress:  function(e){
+                    clog('onkeypress', this, arguments);
                     if( (e.getKey() == e.ENTER) && (!e.hasModifier())) {
                         this.onFieldTitleDblClick();
                     }
@@ -252,6 +253,7 @@ Ext.define('CB.VerticalEditGrid', {
                 header: L.Property
                 // ,width: 200
                 ,dataIndex: 'title'
+                ,stateId: 'title'
                 ,editable: false
                 ,scope: this
                 ,renderer: this.renderers.title
@@ -260,6 +262,7 @@ Ext.define('CB.VerticalEditGrid', {
                 ,itemId: 'value'
                 // ,width: 200
                 ,dataIndex: 'value'
+                ,stateId: 'value'
                 ,editor: new Ext.form.TextField()
                 ,scope: this
                 ,resizable: true
@@ -268,27 +271,49 @@ Ext.define('CB.VerticalEditGrid', {
                 header: L.Additionally
                 // ,width: 200
                 ,dataIndex: 'info'
+                ,stateId: 'info'
                 ,editor: new Ext.form.TextField()
                 ,hideable: false
             }
         ];
     }
 
+    ,getState: function() {
+        var rez = {
+                columns: {}
+            }
+            ,cols = this.columnManager.headerCt.gridDataColumns;
+        for (var i = 0; i < cols.length; i++) {
+            if(cols[i].getWidth) {
+                rez.columns[cols[i].dataIndex] = {
+                    width: cols[i].getWidth()
+                };
+            }
+        }
+
+        return rez;
+    }
+
     ,applyState: function(state) {
         //apply column widths to this.gridColumns array because
         //column model is recreated automaticly when loading object
         //and uses this.gridColumns array to create new column list
-
+        // clog('applyState', state);
         if(!Ext.isEmpty(state.columns)) {
-            clog('TODO: modify applyState in VerticalEditGrid');
-            // var col, cm = this.getColumnModel();
+            // clog('TODO: modify applyState in VerticalEditGrid', arguments);
+            var col
+                ,cols =  this.columnManager.headerCt.gridDataColumns;
 
-            // for (var i = 0; i < state.columns.length; i++) {
-            //     col = cm.getColumnById(state.columns[i].id);
-            //     if(!Ext.isEmpty(state.columns[i].width) && !Ext.isEmpty(this.gridColumns[i])) {
-            //         this.gridColumns[i].width = state.columns[i].width;
-            //     }
-            // }
+            for (var i = 0; i < cols.length; i++) {
+                var di = cols[i].dataIndex;
+                // clog('di', di);
+                if(state.columns[di] && !Ext.isEmpty(state.columns[di].width)) {
+                    var w = state.columns[di].width;
+                    // clog('setwidth', w);
+                    cols[i].setWidth(w);
+                    this.columns[i].setWidth(w);
+                }
+            }
         }
     }
 
@@ -388,6 +413,8 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,onFieldTitleDblClick: function(gridView, td, cellIndex, record, tr, rowIndex, e, eOpts){
+        clog('onFieldTitleDblClick', this, arguments);
+
         var sm = this.getSelectionModel();
         // var cm = this.getColumnModel();
         // var s = sm.getSelectedCell();
@@ -397,10 +424,6 @@ Ext.define('CB.VerticalEditGrid', {
         // }
         var fieldName = this.columns[cellIndex].dataIndex;
         if(fieldName == 'title'){
-            // c = gridView.getCell(s[0], s[1]);
-            // c.className = c.className.replace( (c.className.indexOf(' x-grid3-cell-selected') >= 0 ? ' x-grid3-cell-selected' : 'x-grid3-cell-selected'), '');
-            // s[1] = cm.findColumnIndex('value');
-            // this.getView().focusCell(s[0], s[1], false, false);
             this.editPlugin.startEdit(record, 1);//begin field edit
         }
     }
@@ -507,7 +530,9 @@ Ext.define('CB.VerticalEditGrid', {
                         id: attr.id
                         ,title: r.get('title')
                         ,readonly: ((r.get('type') == 'H') || (r.get('cfg').readOnly == 1))
-                        ,value: attr.value.value
+                        ,value: Ext.isNumeric(attr.value.value)
+                            ? parseInt(attr.value.value, 10)
+                            : attr.value.value
                         ,info: attr.value.info
                         ,type: r.get('type')
                         ,cond: attr.value.cond
@@ -522,6 +547,8 @@ Ext.define('CB.VerticalEditGrid', {
         if(lastCell && this.getEl().isVisible(true)){
             this.getSelectionModel().select(lastCell[0], lastCell[1]);
         }
+
+        this.updateLayout();
     }
 
     ,helperNodesFilter: function(node){
@@ -559,6 +586,7 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,onBeforeEditProperty: function(editor, context, eOpts){//grid, record, field, value, row, column, cancel
+        clog('beforeedit', this, arguments);
 
         var node = this.helperTree.getNode(context.record.get('id'));
         // temporary workaround for not found nodes
@@ -629,12 +657,9 @@ Ext.define('CB.VerticalEditGrid', {
         var sm = this.getSelectionModel();
         if(sm && sm.getLastSelected) {
             var lastRec = sm.getLastSelected();
+            clog('lastRec', lastRec);
             if(lastRec) {
                 sm.select({
-                    row: this.store.indexOf(lastRec)
-                    ,column: 1
-                });
-                this.getView().focusCell({
                     row: this.store.indexOf(lastRec)
                     ,column: 1
                 });
@@ -661,7 +686,8 @@ Ext.define('CB.VerticalEditGrid', {
                     }
                 ]);
             }
-            ,this);
+            ,this
+        );
     }
 
     ,onSaveObjectEvent: function (key, event){
@@ -702,7 +728,6 @@ Ext.define('CB.VerticalEditGrid', {
 
         this.syncRecordsWithHelper();
         this.gainFocus();
-
     }
 
     ,getFieldValue: function(field_id, duplication_id){

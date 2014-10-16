@@ -17,6 +17,7 @@ return array_merge(
             '//css/CB.css'
             ,'//css/template_icons.css'
             ,'//css/tasks.css'
+            ,'//css/taskbar.css'
             ,'//css/casebox.css'
             ,'//css/common.css'
             ,'//css/facets.css'
@@ -144,6 +145,7 @@ return array_merge(
             ,'//js/form/view/object/Preview.js'
             ,'//js/form/view/object/Properties.js'
             ,'//js/form/edit/Object.js'
+            ,'//js/window/edit/Object.js'
             ,'//js/ObjectCardView.js'
             ,'//js/objects/plugins/Base.js'
             ,'//js/objects/plugins/Thumb.js'
@@ -164,6 +166,7 @@ return array_merge(
 
         ,'jsdev' => array(
             '//js/app.js'
+            ,'//js/widget/TaskBar.js'
 
         )
     )

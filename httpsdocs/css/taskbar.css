@@ -1,0 +1,18 @@
+.cb-taskbar {
+  padding-left: 4px;
+  border-top: 1px solid #aeaeae;
+}
+
+/* Use high specificity selector to override default styling*/
+.cb-taskbar, .cb-taskbar .x-toolbar {
+  /*background: transparent none;*/
+  background-image: none !important;
+  background-color: #F4F4F4;
+  border: 0 none;
+  padding: 0;
+}
+
+.cb-windowbar .x-btn-inner,
+.x-nbr .cb-windowbar .x-btn-icon-text-left button {
+  text-align: left;
+}

@@ -500,6 +500,62 @@ function initApp() {
         return App.htmlEditWindow;
     };
 
+    App.openObjectWindow = function(config) {
+        //at least template should be defined in config
+        if(Ext.isEmpty(config)) {
+            return;
+        }
+
+        var wndCfg = {
+            data: config
+        };
+
+        wndCfg.id = 'oew-' +
+            (Ext.isEmpty(config.id)
+                ? Ext.id()
+                : config.id
+            );
+
+        var w = Ext.getCmp(wndCfg.id);
+        clog('w', w, wndCfg);
+        if(w) {
+            App.mainStatusBar.setActiveButton(w.taskButton);
+            App.mainStatusBar.restoreWindow(w);
+        } else {
+            var vpEl = App.mainViewPort.getEl();
+            w = new CB.window.edit.Object(wndCfg);
+            w.show();
+            w.alignTo(vpEl, 'br-br?');
+
+            //get anchored position
+            var pos = w.getXY();
+            //move above status bar and a bit from right side
+            pos[0] -= 15;
+            pos[1] -= 30;
+
+            //position to the left of an active window if any
+            var x = pos[0];
+            App.mainStatusBar.windowBar.items.each(
+                function(btn) {
+                    if(btn.win && btn.win.isVisible() && !btn.win.maximized) {
+                        var wx = btn.win.getX() - btn.win.el.getWidth() - 15;
+                        if(x > wx) {
+                            x = wx;
+                        }
+                    }
+                }
+                ,this
+            );
+            if(x < 15) {
+                x = 15;
+            }
+            pos[0] = x;
+
+            w.setXY(pos);
+            w.taskButton = App.mainStatusBar.addTaskButton(w);
+        }
+    };
+
     App.isFolder = function(template_id){
         return (App.config.folder_templates.indexOf( String(template_id) ) >= 0);
     };
@@ -594,6 +650,7 @@ function initApp() {
     };
 
     App.getTypeEditor = function(type, e){
+        clog('getTypeEditor', arguments);
         var editorCfg = {
             //enable key events by default
             enableKeyEvents: true
@@ -796,10 +853,10 @@ function initApp() {
                 break;
             case 'checkbox': return new Ext.form.ComboBox({
                         enableKeyEvents: true
-                        ,forceSelection: true
+                        // ,forceSelection: true
                         ,triggerAction: 'all'
-                        ,lazyRender: true
-                        ,mode: 'local'
+                        // ,lazyRender: true
+                        ,queryMode: 'local'
                         ,editable: false
                         ,store: CB.DB.yesno
                         ,displayField: 'name'
@@ -836,7 +893,7 @@ function initApp() {
             case 'datetime':
                 return new Ext.form.DateField({
                     enableKeyEvents: true
-                    ,format: App.dateFormat+' '+App.timeFormat
+                    ,format: App.dateFormat+' ' + App.timeFormat
                     ,width: 130
                 });
             case 'time':
@@ -1017,6 +1074,7 @@ function initApp() {
     };
 
     App.focusFirstField = function(scope){
+        return;
         scope = Ext.valueFrom(scope, this);
         f = function(){
             var a = [];
@@ -1173,6 +1231,12 @@ function initApp() {
 }
 
 function overrides(){
+    Ext.Function._defer = Ext.Function.defer;
+    Ext.Function.defer = function(fn, millis, scope, args, appendArgs) {
+        clog('deferring', arguments, this);
+        this._defer(fn, millis, scope, args, appendArgs);
+    };
+
     //there are some situations when mixed collection has null defined "items" property
     //and results in error
     Ext.util.Collection.prototype._getAt = Ext.util.Collection.prototype.getAt;
