@@ -1,6 +1,8 @@
-body { font-family: arial,sans-serif; font-size: 12px }
+/*  ExtJS5 adjustments: grid row height, font size, etc; */
+/*body { font-family: arial,sans-serif; font-size: 12px }*/
 
 /*
+ExtJS3
 
 .x-grid3-row td pre
 ,.x-grid3-row td
@@ -34,34 +36,60 @@ body { font-family: arial,sans-serif; font-size: 12px }
 
 */
 
-td.x-grid-cell,
-.x-form-text-grid-cell
-{
-    font: 12px arial,sans-serif;
-}
 
+/* indent rows with an icon
+question: why do we have "-top" class?
+*/
+.icon-grid-column .x-grid-cell-inner, .icon-grid-column-top .x-grid-cell-inner {padding-left: 22px !important; }
 .icon-grid-column { background-position: 3px 50% !important; background-repeat: no-repeat; }
-.icon-grid-column-top { background-position: 3px 4px !important; background-repeat: no-repeat; }
-.icon-grid-column .x-grid-cell-inner, .icon-grid-column-top .x-grid-cell-inner {padding-left: 23px !important; min-height: 16px }
 
-.x-grid-cell-inner, .x-grid-hd-inner {
-    padding: 5px 6px 5px 6px;
-    /*padding: 3px 6px 4px 6px;*/
-}
+/* space: big; */
+/*
+.icon-grid-column-top { background-position: 3px 10px !important; background-repeat: no-repeat; }
+.folder-grid .x-grid-cell-inner {font-size: 12px; padding: 9px 6px 10px 6px; line-height: 16px !important}
+*/
+
+/* space: medium; */
+.icon-grid-column-top { background-position: 3px 5px !important; background-repeat: no-repeat; }
+.folder-grid .x-grid-cell-inner {font-size: 12px; padding: 6px 6px 6px 6px; line-height: 16px !important}
+
+
+/*.folder-grid .icon-grid-column-top {background-position: 3px 8px !important;}*/
+
 
 .x-grid-cell-inner-treecolumn {
-    padding: 3px 6px 4px 0;
+padding: 4px 6px 4px 0;
+font-size: 12px;
+}
+
+.x-form-text-grid-cell {
+  font-size: 12px;
 }
 
 
-.x-tree-node {
-  font: normal 12px arial, tahoma, helvetica, sans-serif;
-  padding: 1px;
+
+
+.edit-grid .x-grid-item {
+  font-size: 12px;
 }
 
+.edit-grid .x-grid-cell-inner {
+  white-space: normal;
+}
+
+.icon-padding, .icon-padding .x-grid3-cell-inner { padding-left: 22px !important; min-height: 16px}
+.icon-padding2, .icon-padding2 .x-grid3-cell-inner { padding-left: 44px; background-position: 22px 50% !important }
+.icon-padding3, .icon-padding3 .x-grid3-cell-inner { padding-left: 44px; background-position: 44px 50% !important }
+
+.spacy-rows .x-grid-cell{padding: 1px 0 2px 0}
+.spacy-rows .x-grid-item{border-top: 1px solid #fff;}
+.spacy-fields .x-form-item {padding: 1px 1px 2px 1px}
 
 
+/*::-webkit-scrollbar{height:10px;overflow:visible;width:10px} ::-webkit-scrollbar-button{height:0;width:0} ::-webkit-scrollbar-track{background: #f2f2f2; border: none; opacity: 0} ::-webkit-scrollbar-track:hover{background-color: #f2f2f2;box-shadow:inset 1px 0 0 #d9d9d9} ::-webkit-scrollbar-track:active{background-color:rgba(0,0,0,.05);box-shadow:inset 1px 0 0 #c2c2c2; border-top: 1px solid #c2c2c2} ::-webkit-scrollbar-thumb{background-color: #c0c0c0;background-clip:padding-box;min-height:10px; max-height:10px; padding:100px 0 0; border-left: 1px solid #9a9a9a; border-top: 1px solid #acacac; border-bottom: 1px solid #acacac} ::-webkit-scrollbar-thumb:hover{background-color: #909090;box-shadow:inset 1px 0 0 #8a8a8a; border-left: 1px solid #666; border-top: 1px solid #727272; border-bottom: none} ::-webkit-scrollbar-thumb:active{background-color: #797979; box-shadow:inset 1px 1px 1px #696969} ::-webkit-scrollbar-corner{background:transparent} body::-webkit-scrollbar-track {opacity: 0} body::-webkit-scrollbar{height:12px;overflow:visible;width:12px} body::-webkit-scrollbar-track-piece{border: none; background: #f2f2f2} body::-webkit-scrollbar-thumb{border-width:1px 1px 1px 1px;margin:0 0 0 1px} body::-webkit-scrollbar-corner{background-color:#f5f5f5}*/
 
+
+/* End: ExtJS5 adjusments */
 
 
 
@@ -213,9 +241,6 @@ span.icon-right{ float: right; width: 18px; display: inline-block !important }
 .icon-bullet_gray	{ background-image:url(i/ico/bullet_gray.png) !important; background-repeat: no-repeat}
 
 .icon-padding16 { padding-left: 16px !important; min-height: 16px !important }
-.icon-padding, .icon-padding .x-grid3-cell-inner { padding-left: 22px !important; min-height: 16px}
-.icon-padding2, .icon-padding2 .x-grid3-cell-inner { padding-left: 44px; background-position: 22px 50% !important }
-.icon-padding3, .icon-padding3 .x-grid3-cell-inner { padding-left: 44px; background-position: 44px 50% !important }
 .icon-pin		{ background-image:url(i/ico/pin.png) !important; background-position: 0px 50%; background-repeat: no-repeat }
 
 .thesauri_set li{ padding-left: 20px }
@@ -223,11 +248,14 @@ span.icon-right{ float: right; width: 18px; display: inline-block !important }
 .icon-element-off { background-image: url(i/ico/element-off.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .group-titles-colbg{ background-color: #F9F7ED }
 
-img.duplicate-plus {width:16px; height: 16px; background: url(i/duplication/ui-check-box-plus.png) 0 0 no-repeat}
+img.duplicate-plus {width:11px; height: 11px; background: url(i/duplication/ui-check-box-plus.png) 0 0 no-repeat}
+/* to be removed, using 'vcN' now
 .duplicate1{ width:16px; height: 16px;background-image: url(i/duplication/number-one.png); background-position: 4px 3px; background-repeat: no-repeat }
 .duplicate2{ width:16px; height: 16px;background-image: url(i/duplication/number-two.png); background-position: 4px 3px; background-repeat: no-repeat }
 .duplicate3{ width:16px; height: 16px;background-image: url(i/duplication/number-three.png); background-position: 4px 3px; background-repeat: no-repeat }
 .duplicate4{ width:16px; height: 16px;background-image: url(i/duplication/number-4.png); background-position: 4px 3px; background-repeat: no-repeat }
+*/
+
 
 .icon-pencil{ background-image: url(i/ico/pencil-small.png) !important; background-position: 0 50%; background-repeat: no-repeat }
 .trigger-pencil-small{ background-image: url(i/ico/trigger-pencil-small.gif) !important; background-position: -97px 0; background-repeat: no-repeat}
@@ -377,9 +405,7 @@ padding: 0px 2px;
 .preview table.title th.file table{ border:0 }
 .preview table.title th.file td{ padding: 0;white-space: nowrap; vertical-align: top }
 .preview table.title td{ padding: 3px 10px }
-.spacy-rows .x-grid-cell{padding: 1px 0 2px 0}
-.spacy-rows .x-grid-item{border-top: 1px solid #fff;}
-.spacy-fields .x-form-item {padding: 1px 1px 2px 1px}
+
 .icon-application-tree{ background-image: url(i/ico/application-tree.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag{ background-image: url(i/ico/tag.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-tag-label{ background-image: url(i/ico/tag-label.png) !important; background-position: 0 50%; background-repeat: no-repeat}
@@ -479,27 +505,27 @@ table.qtip td{ font-weight: normal; padding: 3px; color: black}
 	background-position: 0 50%;
 	background-repeat: no-repeat;
 }
-.vc1{ background-image: url(i/ico/counter/gray-01.png) }
-.vc2{ background-image: url(i/ico/counter/gray-02.png) }
-.vc3{ background-image: url(i/ico/counter/gray-03.png) }
-.vc4{ background-image: url(i/ico/counter/gray-04.png) }
-.vc5{ background-image: url(i/ico/counter/gray-05.png) }
-.vc6{ background-image: url(i/ico/counter/gray-06.png) }
-.vc7{ background-image: url(i/ico/counter/gray-07.png) }
-.vc8{ background-image: url(i/ico/counter/gray-08.png) }
-.vc9{ background-image: url(i/ico/counter/gray-09.png) }
-.vc10{ background-image: url(i/ico/counter/gray-10.png) }
-.vc11{ background-image: url(i/ico/counter/gray-11.png) }
-.vc12{ background-image: url(i/ico/counter/gray-12.png) }
-.vc13{ background-image: url(i/ico/counter/gray-13.png) }
-.vc14{ background-image: url(i/ico/counter/gray-14.png) }
-.vc15{ background-image: url(i/ico/counter/gray-15.png) }
-.vc16{ background-image: url(i/ico/counter/gray-16.png) }
-.vc17{ background-image: url(i/ico/counter/gray-17.png) }
-.vc18{ background-image: url(i/ico/counter/gray-18.png) }
-.vc19{ background-image: url(i/ico/counter/gray-19.png) }
-.vc20{ background-image: url(i/ico/counter/gray-20.png) }
-.vc21{ background-image: url(i/ico/counter/gray-20-plus.png) }
+.vc1{width:9px; height: 9px; background-image: url(i/ico/counter/gray-01.png) }
+.vc2{width:9px; height: 9px; background-image: url(i/ico/counter/gray-02.png) }
+.vc3{width:9px; height: 9px; background-image: url(i/ico/counter/gray-03.png) }
+.vc4{width:9px; height: 9px; background-image: url(i/ico/counter/gray-04.png) }
+.vc5{width:9px; height: 9px; background-image: url(i/ico/counter/gray-05.png) }
+.vc6{width:9px; height: 9px; background-image: url(i/ico/counter/gray-06.png) }
+.vc7{width:9px; height: 9px; background-image: url(i/ico/counter/gray-07.png) }
+.vc8{width:9px; height: 9px; background-image: url(i/ico/counter/gray-08.png) }
+.vc9{width:9px; height: 9px; background-image: url(i/ico/counter/gray-09.png) }
+.vc10{width:11px; height: 9px; background-image: url(i/ico/counter/gray-10.png) }
+.vc11{width:11px; height: 9px; background-image: url(i/ico/counter/gray-11.png) }
+.vc12{width:11px; height: 9px; background-image: url(i/ico/counter/gray-12.png) }
+.vc13{width:11px; height: 9px; background-image: url(i/ico/counter/gray-13.png) }
+.vc14{width:11px; height: 9px; background-image: url(i/ico/counter/gray-14.png) }
+.vc15{width:11px; height: 9px; background-image: url(i/ico/counter/gray-15.png) }
+.vc16{width:11px; height: 9px; background-image: url(i/ico/counter/gray-16.png) }
+.vc17{width:11px; height: 9px; background-image: url(i/ico/counter/gray-17.png) }
+.vc18{width:11px; height: 9px; background-image: url(i/ico/counter/gray-18.png) }
+.vc19{width:11px; height: 9px; background-image: url(i/ico/counter/gray-19.png) }
+.vc20{width:11px; height: 9px; background-image: url(i/ico/counter/gray-20.png) }
+.vc21{width:15px; height: 9px; background-image: url(i/ico/counter/gray-20-plus.png) }
 
 .summary td.cell{width: 50%; vertical-align: top; border-bottom: 3px solid #EEE; padding: 15px;}
 .summary td.last{border-bottom: none;}
@@ -527,19 +553,7 @@ text-decoration: underline;}
 .node a text:hover{text-decoration: underline;}
 /* end of graphs */
 
-.x-plain .x-toolbar{
-	padding: 5px 10px;
-	background-color: none;
-	background: transparent;
-	border: 0;
-}
-.x-plain .x-plain-header{
-	padding: 5px 10px;
-	color: #15428b;
-	font-weight: bold;
-	font-size: 11px;
-	font-family: tahoma,arial,verdana,sans-serif;
-}
+
 .drop-target, .drop-target .x-grid3-viewport{background-color: rgb(234, 255, 234);}
 div.grid-drop-zone {
 	position: absolute;
@@ -675,10 +689,3 @@ border-top: 0;
     padding: 5px 0 0 0;
 }
 
-/* hide glyph for toolbar large buttons */
-.btn-no-glyph .x-btn-wrap-default-toolbar-large.x-btn-arrow-right:after,
-.btn-no-glyph .x-btn-arrow:after,
-.btn-no-glyph .x-btn-split:after
-{
-  display: none;
-}

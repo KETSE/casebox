@@ -40,7 +40,7 @@ Ext.define('CB.window.edit.Object', {
         Ext.apply(this, {
             cls: 'x-panel-white'
             ,bodyStyle: 'border: 0'
-            ,tbar: [
+            ,bbar: [
                 this.actions.save
                 ,this.actions.cancel
             ]

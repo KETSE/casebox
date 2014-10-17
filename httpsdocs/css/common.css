@@ -287,9 +287,12 @@ a.file{min-height: 16px; display: inline-block}
 .click, .header-click{ cursor: hand; cursor: pointer }
 .click:hover{ color: #286bcc !important; text-decoration: underline }
 .header-click:hover{ color: #286bcc !important; text-decoration: none }
-ul.clean{list-style: none; margin: 0; padding: 2px 0; }
-ul.clean li{ margin: 0; padding: 0; }
-ul.with-icons li{padding-left: 20px; white-space:nowrap}
+
+
+/* object field, renderer=listObjIcons */
+ul.clean {list-style: none; margin: 0; padding: 0; }
+ul.clean li { margin: 0; padding: 0; }
+ul.with-icons li {padding-left: 20px; white-space: nowrap}
 ol.ol {list-style: decimal inside !important;}
 img.fit-img {
     max-width: 100%;
