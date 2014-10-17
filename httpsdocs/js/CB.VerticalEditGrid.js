@@ -9,7 +9,7 @@ Ext.define('CB.VerticalEditGrid', {
 
     ,border: false
     ,root: 'data'
-    ,cls: 'spacy-rows'
+    ,cls: 'spacy-rows edit-grid'
     ,autoScroll: true
     ,autoHeight: true
 
@@ -174,7 +174,8 @@ Ext.define('CB.VerticalEditGrid', {
                         v = '<img name="add_duplicate" title="'+L.addDuplicateField+'" class="fr duplicate-plus" src="'+Ext.BLANK_IMAGE_URL + '" / >' + v;
                     } else {
                         idx = this.helperTree.getDuplicateIndex(id) +1;
-                        v = '<img title="'+L.duplicate+' '+idx+'" class="fr duplicate'+idx+'" src="'+Ext.BLANK_IMAGE_URL + '" / >' + v;
+                        v = '<img title="' + L.duplicate + ' ' + idx +
+                            '" class="fr vc' + idx + '" src="' + Ext.BLANK_IMAGE_URL + '" / >' + v;
                     }
                 }
 
