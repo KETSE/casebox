@@ -6,16 +6,17 @@ Ext.define('Ext.ux.SearchField', {
 
     ,emptyText: L.Search
     ,enableKeyEvents: true
+    ,style: 'background-color: #fff'
 
     ,triggers: {
         clear: {
-            cls: 'trigger-cross'
+            cls: 'x-form-clear-trigger'
             ,hidden: true
             ,scope: 'this'
             ,handler: 'onTrigger1Click'
         }
         ,search: {
-            cls: 'trigger-locate'
+            cls: 'x-form-search-trigger'
             ,scope: 'this'
             ,handler: 'onTrigger2Click'
         }

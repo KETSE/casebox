@@ -23,7 +23,7 @@ Ext.define('CB.ViewPort', {
                         ,minListWidth: 150
                         ,height: 30
                         ,width: 300
-                        ,style: 'font: 14px arial,sans-serif'
+                        ,style: 'font: 14px arial,sans-serif; background-color: #fff'
                         ,listeners: {
                             scope: this
                             ,'search': function(query, editor, event){
@@ -53,6 +53,7 @@ Ext.define('CB.ViewPort', {
                         // ,iconCls: App.loginData.iconCls
                         scale: 'large'
                         ,cls: 'btn-no-glyph'
+                        ,iconCls: 'bgs32'
                         ,menu: []
                         ,name: 'userMenu'
                     }
@@ -387,7 +388,7 @@ Ext.define('CB.ViewPort', {
                     ,this.onChangeActiveFolder
                     ,this
                 );
-                trees[i].on('click', this.onTreeNodeClick, this);
+                trees[i].on('itemclick', this.onTreeNodeClick, this);
                 trees[i].on('afterrename', this.onRenameTreeElement, this);
             }
         }
@@ -408,13 +409,13 @@ Ext.define('CB.ViewPort', {
         }
     }
 
-    ,onTreeNodeClick: function(node, e){
-        if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) {
+    ,onTreeNodeClick: function(tree, record, item, index, e, eOpts){
+        if(Ext.isEmpty(item) || Ext.isEmpty(record.getPath)) {
             return;
         }
 
-        if(node.isSelected()) {
-            this.onChangeActiveFolder(null, [node]);
+        if(tree.getSelectionModel().isSelected(record)) {
+            this.onChangeActiveFolder(null, [record]);
         }
     }
 
@@ -459,7 +460,7 @@ Ext.define('CB.ViewPort', {
 
     ,selectGridObject: function(g){
         if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) {
-            return;
+            return false;
         }
         var idx = g.store.findExact('nid', String(App.locateObjectId) );
         if(idx >=0){
@@ -473,7 +474,11 @@ Ext.define('CB.ViewPort', {
             var view = g.getView();
             Ext.get(view.getRow(idx)).scrollIntoView(view.scroller);
             delete App.locateObjectId;
+
+            return true;
         }
+
+        return false;
     }
 
     ,onAccordionLinkClick: function(p, animate){

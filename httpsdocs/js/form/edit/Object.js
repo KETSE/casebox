@@ -55,9 +55,7 @@ Ext.define('CB.form.edit.Object', {
                 this.titleView
                 ,{
                     xtype: 'panel'
-                    // ,layout: 'fit'
                     ,autoHeight: true
-                    // ,autoScroll: true
                     ,border: false
                     ,items: []
                 }
@@ -195,13 +193,12 @@ Ext.define('CB.form.edit.Object', {
                     }
                     ,listeners: {
                         scope: this
-                        ,beforeedit: function() {
-                            this.lastScroll = this.body.getScroll();
-                        }
-                        ,edit: function() {
-                            this.body.setScrollLeft(this.lastScroll.left);
-                            this.body.setScrollTop(this.lastScroll.top);
-                        }
+
+                        ,beforeedit: this.saveScroll
+                        ,edit: this.restoreScroll
+
+                        ,savescroll: this.saveScroll
+                        ,restorescroll: this.restoreScroll
                     }
                 }
             );
@@ -277,6 +274,17 @@ Ext.define('CB.form.edit.Object', {
         }
 
         this.fireEvent('loaded', this);
+    }
+
+    ,saveScroll: function() {
+        this.lastScroll = this.body.getScroll();
+
+        return this.lastScroll;
+    }
+
+    ,restoreScroll: function() {
+        this.body.setScrollLeft(this.lastScroll.left);
+        this.body.setScrollTop(this.lastScroll.top);
     }
 
     /**

@@ -143,6 +143,7 @@ Ext.define('CB.browser.ViewContainer', {
                 // text: L.Views
                 ,id: 'apps' + this.instanceId
                 // ,iconAlign:'top'
+                ,cls: 'btn-no-glyph'
                 ,iconCls: 'ib-apps'
                 ,scale: 'large'
                 ,menu: []
@@ -152,6 +153,7 @@ Ext.define('CB.browser.ViewContainer', {
                 // text: L.New
                 ,id: 'create' + this.instanceId
                 // ,iconAlign:'top'
+                ,cls: 'btn-no-glyph'
                 ,iconCls: 'ib-create'
                 ,scale: 'large'
                 ,menu: [
@@ -162,6 +164,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,new Ext.Button({
                 text: L.Edit
                 ,id: 'edit' + this.instanceId
+                ,cls: 'btn-no-glyph'
                 ,iconCls: 'ib-edit'
                 // ,iconAlign:'top'
                 ,scale: 'large'
@@ -695,7 +698,9 @@ Ext.define('CB.browser.ViewContainer', {
         this.searchField.setValue(Ext.valueFrom(ep.query, ''));
         this.filtersPanel.updateFacets(result.facets, ep);
 
-        this.updatePreview();
+        if(Ext.isEmpty(App.locateObjectId)) {
+            this.updatePreview();
+        }
     }
 
     ,onStoreLoad: function(store, recs, options) {
@@ -706,10 +711,14 @@ Ext.define('CB.browser.ViewContainer', {
         this.processLoadedParams();
 
         //set icons for all records
-        Ext.each(recs, function(r){
-            var cfg = Ext.valueFrom(r.get('cfg'), {});
-            r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
-        }, this);
+        Ext.each(
+            recs
+            ,function(r){
+                var cfg = Ext.valueFrom(r.get('cfg'), {});
+                r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
+            }
+            ,this
+        );
     }
 
     ,sameParams: function(params1, params2){
@@ -781,7 +790,15 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.loadParamsTask.cancel();
 
-        if(sameParams) {
+        if(!Ext.isEmpty(App.locateObjectId)) {
+            this.updatePreview({
+                id: App.locateObjectId
+            });
+
+            if(sameParams) {
+                return;
+            }
+        } else if(sameParams) {
             this.updatePreview(newParams);
             return;
         }
@@ -947,13 +964,7 @@ Ext.define('CB.browser.ViewContainer', {
             }
         }
 
-        var d = Ext.isEmpty(App.locateObjectId)
-            ? []
-            : {id: App.locateObjectId};
-
-        delete App.locateObjectId;
-
-        this.updatePreview(d);
+        this.updatePreview();
     }
 
     /**
@@ -981,7 +992,7 @@ Ext.define('CB.browser.ViewContainer', {
                     ,template_id: this.folderProperties.template_id
                 }
                 : {
-                    id: Ext.valueFrom(s[0].nid, s[0].id)
+                    id: Ext.valueFrom(s[0].target_id, s[0].nid, s[0].id)
                     ,name: s[0].name
                     ,template_id: s[0].template_id
                     ,can: s[0].can
@@ -1239,7 +1250,7 @@ Ext.define('CB.browser.ViewContainer', {
         var idx = this.store.findExact('nid', String(objData.id));
 
         if(
-            (idx >=0) ||
+            (idx >= 0) ||
             isNaN(this.folderProperties.id) || // virtual folders
             (objData.pid == this.folderProperties.id)
         ) {

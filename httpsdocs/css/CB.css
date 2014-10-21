@@ -548,11 +548,25 @@ text-decoration: underline;}
 .summary .block li{ margin-bottom: 5px }
 .summary .block li a{ cursor: pointer; color: #000 }
 .summary .block li a:hover{ text-decoration: underline }
+
 /* graphs */
 .node a{text-decoration: none}
 .node a text:hover{text-decoration: underline;}
 /* end of graphs */
 
+.x-plain .x-toolbar{
+  padding: 5px 10px;
+  background-color: none;
+  background: transparent;
+  border: 0;
+}
+.x-plain .x-plain-header{
+  padding: 5px 10px;
+  color: #15428b;
+  font-weight: bold;
+  font-size: 11px;
+  font-family: tahoma,arial,verdana,sans-serif;
+}
 
 .drop-target, .drop-target .x-grid3-viewport{background-color: rgb(234, 255, 234);}
 div.grid-drop-zone {
@@ -689,3 +703,18 @@ border-top: 0;
     padding: 5px 0 0 0;
 }
 
+/* hide glyph for toolbar large buttons */
+.btn-no-glyph .x-btn-wrap-default-toolbar-large.x-btn-arrow-right:after,
+.btn-no-glyph .x-btn-arrow:after,
+.btn-no-glyph .x-btn-split:after
+{
+  display: none;
+}
+.btn-no-glyph .x-btn-arrow-right>.x-btn-icon.x-btn-no-text.x-btn-button-default-toolbar-large {
+  padding-right: 0;
+}
+
+.x-mask-msg-text{
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}

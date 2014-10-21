@@ -166,20 +166,10 @@ Ext.define('CB.browser.view.Grid', {
                         }
                     }
                 ]
-                ,listeners: {
-                    scope: this
-                    // ,rowselect: this.onRowSelect
-                    ,selectionchange: this.onSelectionChange
-                }
             }
             // ,sm: new Ext.grid.RowSelectionModel({
             ,selModel: new Ext.selection.RowModel({
                 mode: 'MULTI'
-                ,listeners: {
-                    scope: this
-                    // ,rowselect: this.onRowSelect
-                    ,selectionchange: this.onSelectionChange
-                }
             })
             ,listeners:{
                 scope: this
@@ -413,18 +403,37 @@ Ext.define('CB.browser.view.Grid', {
     ,onStoreLoad: function(store, recs, options) {
         delete this.userSort;
 
-        App.mainViewPort.selectGridObject(this.grid);
-
         var hadSelection = false;
-        if(this.savedSelection) {
+        var prevSelectedId = 0;
+
+        if(!Ext.isEmpty(this.savedSelection)) {
             hadSelection = true;
+            prevSelectedId = this.savedSelection[0].nid;
+        }
+
+        // try to select the item, if set, from App.locateObjectId
+        var locatedAnItem = App.mainViewPort.selectGridObject(this.grid);
+
+        // otherwise select previous items, if any
+        if(!locatedAnItem &&
+            !Ext.isEmpty(this.savedSelection)
+        ) {
             this.selectItems(this.savedSelection);
         }
 
         this.grid.getSelectionModel().resumeEvents(true);
 
-        if(hadSelection !== this.grid.getSelectionModel().hasSelection()) {
-            this.fireSelectionChangeEvent();
+        if(!locatedAnItem) {
+            var haveSelection = this.grid.getSelectionModel().hasSelection()
+                ,currSelectedId = haveSelection
+                    ? this.grid.getSelection()[0].get('nid')
+                    : 0;
+
+            if((hadSelection !== haveSelection) || (prevSelectedId != currSelectedId)){
+                this.fireSelectionChangeEvent();
+            }
+        } else {
+            delete App.locateObjectId;
         }
     }
 

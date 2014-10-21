@@ -517,7 +517,7 @@ function initApp() {
             );
 
         var w = Ext.getCmp(wndCfg.id);
-        clog('w', w, wndCfg);
+
         if(w) {
             App.mainStatusBar.setActiveButton(w.taskButton);
             App.mainStatusBar.restoreWindow(w);
@@ -531,7 +531,8 @@ function initApp() {
             var pos = w.getXY();
             //move above status bar and a bit from right side
             pos[0] -= 15;
-            pos[1] -= 30;
+            // pos[1] -= 30; //above toolbar
+            pos[1] -= 5;
 
             //position to the left of an active window if any
             var x = pos[0];
@@ -650,7 +651,6 @@ function initApp() {
     };
 
     App.getTypeEditor = function(type, e){
-        clog('getTypeEditor', arguments);
         var editorCfg = {
             //enable key events by default
             enableKeyEvents: true
@@ -1231,12 +1231,6 @@ function initApp() {
 }
 
 function overrides(){
-    Ext.Function._defer = Ext.Function.defer;
-    Ext.Function.defer = function(fn, millis, scope, args, appendArgs) {
-        clog('deferring', arguments, this);
-        this._defer(fn, millis, scope, args, appendArgs);
-    };
-
     //there are some situations when mixed collection has null defined "items" property
     //and results in error
     Ext.util.Collection.prototype._getAt = Ext.util.Collection.prototype.getAt;

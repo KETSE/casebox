@@ -23,7 +23,15 @@ class User
         $_SESSION['key'] = md5($ips.$login.$pass.time());
         $_COOKIE['key'] = $_SESSION['key'];
 
-        setcookie('key', $_SESSION['key'], 0, '/' . $coreName . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+        setcookie(
+            'key',
+            $_SESSION['key'],
+            0,
+            '/' . $coreName . '/',
+            $_SERVER['SERVER_NAME'],
+            !empty($_SERVER['HTTPS']),
+            true
+        );
 
         $rez = array('success' => false);
         $user_id = false;

@@ -207,23 +207,19 @@ class Config extends Singleton
             ? 0
             : $rez['folder_templates'][0];
 
-        if (!empty($config['default_file_template'])) {
-            $rez['default_file_template'] = $config['default_file_template'];
+        if (empty($config['default_file_template'])) {
+            $a = Templates::getIdsByType('file');
+            $rez['default_file_template'] = array_shift($a);
         } else {
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM templates
-                WHERE `type` = $1',
-                'file'
-            ) or die( DB\dbQueryError() );
+            $rez['default_file_template'] = $config['default_file_template'];
 
-            if ($r = $res->fetch_assoc()) {
-                $rez['default_file_template'] = $r['id'];
-            } else {
-                $rez['default_file_template'] = 0;
-            }
+        }
 
-            $res->close();
+        if (empty($config['default_shortcut_template'])) {
+            $a = Templates::getIdsByType('shortcut');
+            $rez['default_shortcut_template'] = array_shift($a);
+        } else {
+            $rez['default_shortcut_template'] = $config['default_shortcut_template'];
         }
 
         foreach ($config as $k => $v) {

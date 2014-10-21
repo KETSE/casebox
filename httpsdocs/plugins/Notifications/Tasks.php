@@ -101,7 +101,7 @@ class Tasks extends Objects
                 array(
                     User::getDisplayName($taskData['cid'])
                     ,$taskData['name']
-                    ,$taskData['path']
+                    ,$path
                 ),
                 $subject
             );

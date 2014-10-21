@@ -209,7 +209,6 @@ Ext.define('CB.ObjectsComboField', {
 
         this._setValue = this.setValue;
         this.setValue = function(v){
-            clog('setValue', v);
             var value, values = Ext.Array.from(v);
             v = [];
             for (var i = 0; i < values.length; i++) {
@@ -436,6 +435,14 @@ Ext.define('CB.ObjectsSelectionForm', {
         Ext.apply(this, CB.ObjectsFieldCommonFunctions);
         this.detectStore();
 
+        //set title
+        if(this.data.fieldRecord) {
+            this.title = Ext.valueFrom(
+                this.data.fieldRecord.get('title')
+                ,this.title
+            );
+        }
+
         var sm = new Ext.selection.CheckboxModel({
             injectCheckbox: 'first'
             ,checkOnly: true
@@ -661,7 +668,6 @@ Ext.define('CB.ObjectsSelectionForm', {
     ,onBeforeLoad: function(store, records, options){
         // options = this.getSearchParams();
         // store.extraParams = options
-        this.getEl().mask(L.searching);
     }
 
     ,getSearchParams: function(){
@@ -675,10 +681,6 @@ Ext.define('CB.ObjectsSelectionForm', {
 
     ,onLoad: function(store, records, options){
         var el = this.getEl();
-
-        if(el) {
-            el.unmask();
-        }
 
         if(Ext.isEmpty(records)) {
             this.grid.getEl().mask(L.noData);
@@ -739,7 +741,7 @@ Ext.define('CB.ObjectsSelectionForm', {
                     ,style:'height:20px'
                 }
                 ,title: r.get('name')
-                ,html: '<span class="icon-padding icon-loading">'+L.LoadingData+'</span>'
+                ,html: '<span class="icon-padding icon-loading">' + L.LoadingData + '</span>'
             });
         else {
             this.qt.hide();

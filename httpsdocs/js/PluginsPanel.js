@@ -128,6 +128,12 @@ Ext.define('CB.PluginsPanel', {
         if(!isNaN(data)) {
             data = {id: data};
         }
+
+        if(!Ext.isEmpty(data.isNew)) {
+            this.doLoad(data);
+            return;
+        }
+
         if(!Ext.isEmpty(this.loadedParams)) {
             if((data.pid == this.loadedParams.id) || (data.id == this.loadedParams.id)) {
                 this.reload();
