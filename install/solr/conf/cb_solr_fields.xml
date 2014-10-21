@@ -37,6 +37,10 @@
 <field name="name"      type="text_general"     indexed="true" stored="true" />
 <!-- system: field for delimiting system elements from tree, like some folders, system messages etc -->
 <field name="system"    type="tint"         indexed="true" stored="true" />
+
+<!-- target_id: target_id for shortcuts -->
+<field name="target_id"    type="tlong"    indexed="true" stored="true" />
+
 <!--
 Note: This field is obsolete, we rely on templates and template_types.
 Should be removed on cleanup if wouldn't be used for other purposes.

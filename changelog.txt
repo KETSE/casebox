@@ -6,6 +6,7 @@ New Features, Improvements
   Requirements:
     - database should be updated with "v.1.9.341.sql" file
     - New template of type shortcut should be created from interface
+    - Solr core should contain field "target_id" in its field definition
 
 - adjusted search field icons and style
 - adjust user icon in top menu to 32x32 px
