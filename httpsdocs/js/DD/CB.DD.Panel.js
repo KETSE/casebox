@@ -11,6 +11,17 @@ Ext.define('CB.DD.Panel', {
 
     ,ddGroup: 'CBO'
     ,selector: '.files-drop'
+
+
+    //,defaultAction: 'move'
+
+    // ,dropAllowed:
+    // ,dropNotAllowed:
+    ,dropCopy: 'drag-drop-copy'
+    ,dropMove: 'drag-drop-move'
+    ,dropShortcut: 'drag-drop-shortcut'
+
+    ,showPopup: false
     /**
      * pass another ddGroup if needed
      * @param  json config
@@ -78,6 +89,14 @@ Ext.define('CB.DD.Panel', {
         // Ext.get(el).addCls('drop-target');
     }
 
+    ,getActionFromEvent: function(ev) {
+        var rez = (ev.ctrlKey || ev.altKey || ev.shiftKey)
+            ? App.DD.detectActionFromEvent(ev)
+            : Ext.valueFrom(this.defaultAction, 'move');
+
+        return rez;
+    }
+
     ,onNodeOver: function (el, source, ev, data){
         /* deny drop on:
             - node itself
@@ -86,7 +105,9 @@ Ext.define('CB.DD.Panel', {
        var targetData = this.owner.params || {}
             ,targetId = Ext.valueFrom(targetData.nid, targetData.id);
 
-        var rez = this.dropAllowed;
+        var action = this.getActionFromEvent(ev)
+            ,rez = this['drop' + action.charAt(0).toUpperCase() + action.slice(1)];
+
         if(Ext.isEmpty(targetId) ||
             !data ||
             Ext.isEmpty(data.records)
@@ -104,10 +125,11 @@ Ext.define('CB.DD.Panel', {
             ? data.records
             : [data.records];
         var i = 0;
-        while ((i < sourceData.length) && (rez == this.dropAllowed))  {
+        while ((i < sourceData.length) && (rez != this.dropNotAllowed))  {
             var id = Ext.valueFrom(sourceData[i].data.nid, sourceData[i].data.id);
+
             if( (targetId == id)
-                || (targetId == sourceData[i].pid)
+                || (targetId == sourceData[i].data.pid)
             ) {
                 rez = this.dropNotAllowed;
             }
@@ -123,33 +145,33 @@ Ext.define('CB.DD.Panel', {
     }
 
     ,onNodeDrop: function(el, source, e, data){
-        return clog('dropped', arguments);
-
         if(Ext.isElement(el)) {
-            if(this.onNodeOver(el, source, e, data) == this.dropAllowed){
-                var targetRecord = this.view.getRecord(el);
-                if(targetRecord) {
+            if(this.onNodeOver(el, source, e, data) != this.dropNotAllowed){
+                var targetData = this.owner.params || {}
+                    ,targetId = Ext.valueFrom(targetData.nid, targetData.id);
+
+                if(!isNaN(targetId)) {
                     var d, sourceData = [];
                     for (var i = 0; i < data.records.length; i++) {
                         d = data.records[i].data;
                         sourceData.push({
-                            id: d[this.idProperty]
+                            id: Ext.valueFrom(d.nid, d.id)
                             ,name: d['name']
                             ,path: d['path']
                             ,template_id: d['template_id']
                         });
                     }
 
-                    d = targetRecord.data;
-                    var targetData = {
-                        id: d[this.idProperty]
-                        ,name: d['name']
-                        ,path: d['path']
-                        ,template_id: d['template_id']
+                    d = {
+                        id: targetId
+                        ,name: targetData['name']
+                        ,path: targetData['path']
+                        ,template_id: targetData['template_id']
                     };
+
                     App.DD.execute({
-                        action: e
-                        ,targetData: targetData
+                        action: this.getActionFromEvent(e)
+                        ,targetData: d
                         ,sourceData: sourceData
                     });
 

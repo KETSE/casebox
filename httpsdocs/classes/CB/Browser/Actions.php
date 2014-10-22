@@ -6,6 +6,7 @@ use CB\DB;
 use CB\Util;
 use CB\Solr;
 use CB\Security;
+use CB\Objects;
 
 /**
  * class designed for actions like:
@@ -381,7 +382,24 @@ class Actions
         if (!\CB\Security::canWrite($p['targetId'])) {
             return array('success' => false, 'msg' => L\get('Access_denied'));
         }
-        $rez = $this->doCreateShortcut($p);
+
+        $rez = array(
+            'success' => true
+            ,'processedIds' => array()
+        );
+
+        $shortcutObject = new Objects\Shortcut();
+
+        foreach ($p['sourceIds'] as $id) {
+            $rez['processedIds'] = $shortcutObject->create(
+                array(
+                    'pid' => $p['targetId']
+                    ,'target_id' => $id
+                )
+            );
+        }
+
+        Solr\Client::runCron();
 
         return $rez;
     }

@@ -122,7 +122,10 @@ class Objects
 
         Solr\Client::runCron();
 
-        return $this->load(array('id' => $id));
+        $rez = $this->load(array('id' => $id));
+        $rez['data']['isNew'] = true;
+
+        return $rez;
     }
 
     /**
@@ -137,9 +140,7 @@ class Objects
 
         // check if need to create object instead of update
         if (empty($d['id']) || !is_numeric($d['id'])) {
-            return $createData = $this->create($d);
-            //$d['id'] = $createData['data']['nid'];
-            //return if create method is completed
+            return $this->create($d);
         }
 
         // SECURITY: check if current user has write access to this action
@@ -733,6 +734,9 @@ class Objects
                 break;
             case 'comment':
                 return new Objects\Comment($objectId);
+                break;
+            case 'shortcut':
+                return new Objects\Shortcut($objectId);
                 break;
             default:
                 return new Objects\Object($objectId);

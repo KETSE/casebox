@@ -95,7 +95,6 @@ Ext.define('CB.VerticalEditGrid', {
             ,listeners: {
                 scope: this
                 ,keypress:  function(e){
-                    clog('onkeypress', this, arguments);
                     if( (e.getKey() == e.ENTER) && (!e.hasModifier())) {
                         this.onFieldTitleDblClick();
                     }
@@ -252,7 +251,7 @@ Ext.define('CB.VerticalEditGrid', {
         this.gridColumns = [
             {
                 header: L.Property
-                // ,width: 200
+                ,sortable: false
                 ,dataIndex: 'title'
                 ,stateId: 'title'
                 ,editable: false
@@ -261,7 +260,7 @@ Ext.define('CB.VerticalEditGrid', {
             },{
                 header: L.Value
                 ,itemId: 'value'
-                // ,width: 200
+                ,sortable: false
                 ,dataIndex: 'value'
                 ,stateId: 'value'
                 ,editor: new Ext.form.TextField()
@@ -270,7 +269,7 @@ Ext.define('CB.VerticalEditGrid', {
                 ,renderer: this.renderers.value
             },{
                 header: L.Additionally
-                // ,width: 200
+                ,sortable: false
                 ,dataIndex: 'info'
                 ,stateId: 'info'
                 ,editor: new Ext.form.TextField()
@@ -587,8 +586,6 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,onBeforeEditProperty: function(editor, context, eOpts){//grid, record, field, value, row, column, cancel
-        clog('beforeedit', this, arguments);
-
         var node = this.helperTree.getNode(context.record.get('id'));
         // temporary workaround for not found nodes
         if(!node) {
@@ -728,6 +725,7 @@ Ext.define('CB.VerticalEditGrid', {
         }
 
         this.syncRecordsWithHelper();
+
         this.gainFocus();
     }
 
@@ -774,8 +772,14 @@ Ext.define('CB.VerticalEditGrid', {
         if(Ext.isEmpty(r)) {
             return;
         }
+
+        this.fireEvent('savescroll', this);
+
         this.helperTree.duplicate(r.get('id'));
         this.syncRecordsWithHelper();
+
+        this.fireEvent('restorescroll', this);
+
         this.fireEvent('change');
     }
 
@@ -784,8 +788,14 @@ Ext.define('CB.VerticalEditGrid', {
         if(Ext.isEmpty(r)) {
             return;
         }
+
+        this.fireEvent('savescroll', this);
+
         this.helperTree.deleteDuplicate(r.get('id'));
         this.syncRecordsWithHelper();
+
+        this.fireEvent('restorescroll', this);
+
         this.fireEvent('change');
     }
 

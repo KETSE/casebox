@@ -4,7 +4,7 @@ namespace CB;
 class Search extends Solr\Client
 {
     public static $defaultFields = array(
-        'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'system',
+        'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'target_id', 'system',
         'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate',
         'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'status',
         'task_status', 'category_id', 'importance', 'completed', 'versions', 'ntsc'
@@ -95,6 +95,11 @@ class Search extends Solr\Client
                     continue;
                 }
                 $filteredNames[] = $fn;
+            }
+
+            //add target_id field
+            if (!in_array('target_id', $filteredNames)) {
+                $filteredNames[] = 'target_id';
             }
 
             $this->params['fl'] = implode(',', $filteredNames);
@@ -415,22 +420,43 @@ class Search extends Solr\Client
                 ,'inputParams' => $this->inputParams
             );
         }
+
         $sr = &$this->results;
+        $shortcuts = array();
+
         foreach ($sr->response->docs as $d) {
             $rd = array();
             foreach ($d as $fn => $fv) {
                 $rd[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
             }
-            if (!empty($sr->highlighting)) {
-                if (!empty($sr->highlighting->{$rd['id']}->{'name'})) {
-                    $rd['hl'] = $sr->highlighting->{$rd['id']}->{'name'}[0];
+
+            $rez['data'][] = &$rd;
+
+            //check if shortcut
+            if (!empty($rd['target_id'])) {
+                $shortcuts[$rd['target_id']] = &$rd;
+            }
+            unset($rd);
+        }
+
+        $this->updateShortcutsData($shortcuts);
+
+        //add highlights
+        if (!empty($sr->highlighting)) {
+            foreach ($rez['data'] as &$d) {
+                $id = empty($d['target_id'])
+                    ? $d['id']
+                    : $d['target_id'];
+
+                if (!empty($sr->highlighting->{$id}->{'name'})) {
+                    $d['hl'] = $sr->highlighting->{$id}->{'name'}[0];
                 }
-                if (!empty($sr->highlighting->{$rd['id']}->{'content'})) {
-                    $rd['content'] = $sr->highlighting->{$rd['id']}->{'content'}[0];
+                if (!empty($sr->highlighting->{$id}->{'content'})) {
+                    $d['content'] = $sr->highlighting->{$id}->{'content'}[0];
                 }
             }
-            $rez['data'][] = $rd;
         }
+
         $rez = array_merge($rez, $this->processResultFacets());
 
         $eventParams = array(
@@ -466,5 +492,48 @@ class Search extends Solr\Client
         }
 
         return $rez;
+    }
+
+    private function updateShortcutsData($shortcutsArray)
+    {
+        if (empty($shortcutsArray)) {
+            return;
+        }
+
+        $p = &$this->params;
+        $ids = array_keys($shortcutsArray);
+
+        $sr = $this->search(
+            $this->escapeLuceneChars(''),
+            0,
+            1000,
+            array(
+                'defType' => $p['defType']
+                ,'fl' => $p['fl']
+                ,'q.alt' => $p['q.alt']
+                ,'fq' => array(
+                    'id:(' . implode(' OR ', $ids) . ')'
+                )
+            )
+        );
+
+        $shortcuts = array();
+
+        foreach ($sr->response->docs as $d) {
+            $rd = array();
+            foreach ($d as $fn => $fv) {
+                $rd[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
+            }
+            $d = $shortcutsArray[$rd['id']];
+            $rd['target_id'] = $rd['id'];
+            $rd['pid'] = $d['pid'];
+            $rd['id'] = $d['id'];
+            $rd['template_id'] = $d['template_id'];
+            if (!empty($d['template_type'])) {
+                $rd['template_type'] = $d['template_type'];
+            }
+
+            $shortcutsArray[$rd['target_id']] = $rd;
+        }
     }
 }

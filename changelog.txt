@@ -1,3 +1,29 @@
+CaseBox 1.9.341 (2014-10-21)
+==============================
+New Features, Improvements
+--------------------------
+- shortcuts functionality
+  Requirements:
+    - database should be updated with "v.1.9.341.sql" file
+    - New template of type shortcut should be created from interface
+    - Solr core should contain field "target_id" in its field definition
+
+- adjusted search field icons and style
+- adjust user icon in top menu to 32x32 px
+- Hide dropdown icons from View, New, Edit buttons
+- Clicking on Property/Value grid headers shouldnt sort it
+- set Asociate window title to field name
+- moved Edit Wnd default position over taskbar
+
+Fixed Bugs:
+----------
+- can't login to CB due to dual cookies when accessing site without ending slash
+- D&D doesn work from Grid to Grid (not allowed icon shown)
+- Saving/Loading indicator doesn't look ok in some themes
+- can't change Theme: missing translations for Russian
+- Adding a new multiInstance field scrolls the grid to the top
+- Search by ID sometimes doesn't focus the node
+
 CaseBox 1.9.340 (2014-10-16)
 ==============================
 New Features, Improvements

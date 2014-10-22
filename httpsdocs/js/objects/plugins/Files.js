@@ -70,8 +70,19 @@ Ext.define('CB.objects.plugins.Files', {
                         el
                         ,{
                             enableDrop: true
+                            ,defaultAction: 'shortcut'
                         }
                     );
+
+                    ddp.onNodeDrop = Ext.Function.createInterceptor(
+                        ddp.onNodeDrop,
+                        function() {
+                            this.dropPanel.hide();
+                            this.lockPanel(false);
+                        }
+                        ,this
+                    );
+
                     ddp.init(this);
                 }
             }

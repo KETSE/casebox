@@ -155,7 +155,7 @@ Ext.define('CB.DD.Grid', {
         if(Ext.isEmpty(targetRecord) ||
             !data ||
             Ext.isEmpty(data.records) ||
-            isNaN(data.records[0].id)
+            isNaN(data.records[0].get(this.idProperty))
         ) {
             return this.dropNotAllowed;
         }
@@ -165,8 +165,8 @@ Ext.define('CB.DD.Grid', {
             : [data.records];
         var i = 0;
         while ((i < sourceData.length) && (rez == this.dropAllowed))  {
-            if( (targetRecord.data[this.idProperty] == sourceData[i].id)
-                || (targetRecord.data[this.idProperty] == sourceData[i].pid)
+            if( (targetRecord.data[this.idProperty] == sourceData[i].get(this.idProperty))
+                || (targetRecord.data[this.idProperty] == sourceData[i].get('pid'))
             ) {
                 rez = this.dropNotAllowed;
             }
