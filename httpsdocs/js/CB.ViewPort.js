@@ -8,7 +8,7 @@ Ext.define('CB.ViewPort', {
     ,initComponent: function(){
         App.mainToolBar = new Ext.Toolbar({
                 region: 'north'
-                ,style:'background: #F0F0F0; border: 0; padding-top: 10px'
+                ,style:'background: #F0F0F0; border: 0; ' // padding-top: 10px
                 ,height: 53
                 ,items: [
                     {
@@ -19,11 +19,11 @@ Ext.define('CB.ViewPort', {
                     }
                     ,{
                         xtype: 'ExtuxSearchField'
-                        ,emptyText: L.Search + ' CaseBox'
+                        ,emptyText: L.Search + ' Casebox'
                         ,minListWidth: 150
-                        ,height: 30
+                        // ,height: 30
                         ,width: 300
-                        ,style: 'font: 14px arial,sans-serif; background-color: #fff'
+                        // ,style: 'font: 14px arial,sans-serif; background-color: #fff'
                         ,listeners: {
                             scope: this
                             ,'search': function(query, editor, event){

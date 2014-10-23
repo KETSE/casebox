@@ -1,5 +1,5 @@
 /*  ExtJS5 adjustments: grid row height, font size, etc; */
-/*body { font-family: arial,sans-serif; font-size: 12px }*/
+
 
 /*
 ExtJS3
@@ -37,10 +37,16 @@ ExtJS3
 */
 
 
+
+body { font-family: arial,sans-serif; font-size: 12px }
+select { font-family: arial,sans-serif; font-size: 13px }
+
+
+
 /* indent rows with an icon
 question: why do we have "-top" class?
 */
-.icon-grid-column .x-grid-cell-inner, .icon-grid-column-top .x-grid-cell-inner {padding-left: 22px !important; }
+.icon-grid-column .x-grid-cell-inner, .icon-grid-column-top .x-grid-cell-inner {padding-left: 32px !important; }
 .icon-grid-column { background-position: 3px 50% !important; background-repeat: no-repeat; }
 
 /* space: big; */
@@ -50,32 +56,168 @@ question: why do we have "-top" class?
 */
 
 /* space: medium; */
-.icon-grid-column-top { background-position: 3px 5px !important; background-repeat: no-repeat; }
-.folder-grid .x-grid-cell-inner {font-size: 12px; padding: 6px 6px 6px 6px; line-height: 16px !important}
+.icon-grid-column-top { background-position: 10px 8px !important; background-repeat: no-repeat; }
+
+.x-grid-cell-inner {
+  font-size: 13px;
+  /*min-height: 24px;*/
+  padding: 9px 6px 9px 6px;
+  /*line-height: 16px !important*/
+}
+
+.folder-grid .x-grid-cell-inner {
+  font-size: 13px;
+  /*min-height: 24px;*/
+  padding: 9px 6px 9px 6px;
+  /*line-height: 16px !important*/
+}
 
 
+.x-grid-header-ct {
+  background: none;
+  background-color: #FFF;
+}
+
+.x-column-header {
+  background: none;
+  background-color: rgba(243,243,243,.85);
+}
+
+
+.x-btn-inner-default-small, .x-btn-inner-default-toolbar-small {
+  font: 12px/16px arial, verdana, sans-serif;
+}
+
+.x-btn-default-small {
+  background-image: none;
+}
+
+.x-panel-body-default {
+  font-family: arial, verdana, sans-serif;
+  font-size: 13px;
+}
+
+
+
+.x-btn-inner-default-toolbar-large {
+  font: normal 12px/16px arial, verdana, sans-serif;
+}
+
+
+/*search input box*/
+.x-form-text-toolbar {
+    font: normal 16px/19px arial,verdana,sans-serif;
+}
+
+.x-form-text-default {
+  font: normal 13px/17px arial,verdana,sans-serif;
+}
+
+.x-menu-item-default.x-menu-item-active {
+  background: none;
+  background-color: #e7f0fc;
+}
+
+.x-btn-over.x-btn-default-toolbar-large, .x-btn-over.x-btn-default-toolbar-small, .x-btn-over.x-btn-default-small {
+  background: none;
+  background-color: #e4f3ff;
+}
+
+.x-btn.x-btn-pressed.x-btn-default-small, .x-btn.x-btn-pressed.x-btn-default-toolbar-small, .x-btn.x-btn-pressed.x-btn-default-toolbar-large {
+  background: none;
+  background-color: #b6cbe4;
+}
 /*.folder-grid .icon-grid-column-top {background-position: 3px 8px !important;}*/
 
+.x-btn.x-btn-menu-active.x-btn-default-small,
+.x-btn.x-btn-pressed.x-btn-default-small {
+  background: none;
+  background-color: #b6cbe4;
+}
+
+.x-btn.x-btn-menu-active.x-btn-default-toolbar-large,
+.x-btn.x-btn-pressed.x-btn-default-toolbar-large {
+  background: none;
+  background-color: #bccfe5;
+}
+
+.x-tab.x-tab-active.x-tab-default-top, .x-tab.x-tab-active.x-tab-default-left, .x-tab.x-tab-active.x-tab-default-right {
+    background-image: none;
+    background-color: #deecfd;
+}
+
+/*Grid column header*/
+.x-column-header {
+  font: normal 12px arial,verdana,sans-serif
+}
+
+/*no gradient for grid.column onHover*/
+.x-column-header-over {
+  background-image: none;
+  background-color: #ebf3fd
+}
+
+/*Menu item*/
+.x-menu-item-text-default {
+  font: normal 12px arial, verdana, sans-serif;
+  /*min-height: 14px;*/
+  line-height: 21px;
+}
+
+
+.x-grid-cell-inner pre {
+  font: normal 13px arial, verdana, sans-serif;
+  margin: 0;
+}
 
 .x-grid-cell-inner-treecolumn {
-padding: 4px 6px 4px 0;
-font-size: 12px;
+padding: 5px 6px 5px 0;
+font-size: 13px;
 }
 
-.x-form-text-grid-cell {
-  font-size: 12px;
+.x-btn.x-btn-disabled.x-btn-default-toolbar-large {
+border-color: transparent;
+}
+.x-btn.x-btn-disabled.x-btn-default-toolbar-small {
+border-color: transparent;
 }
 
 
+.x-grid-item {
+  font: normal 13px arial, verdana, sans-serif;
+}
 
+
+/*EDIT GRID*/
+
+/*default grid cell height/font*/
+.edit-grid .x-grid-cell-inner {
+padding: 6px 6px 4px 6px;
+min-height: 25px;
+font-size: 13px;
+}
 
 .edit-grid .x-grid-item {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .edit-grid .x-grid-cell-inner {
   white-space: normal;
 }
+
+.edit-grid .x-form-text-grid-cell {
+  /*padding: 4px 4px;*/
+}
+
+.x-form-text-grid-cell {
+  font: normal 13px arial verdana, sans-serif;
+  line-height: 15px;
+  min-height: 25px;
+  padding-top: 3px;
+}
+
+
+
 
 .icon-padding, .icon-padding .x-grid3-cell-inner { padding-left: 22px !important; min-height: 16px}
 .icon-padding2, .icon-padding2 .x-grid3-cell-inner { padding-left: 44px; background-position: 22px 50% !important }
@@ -208,7 +350,7 @@ a:hover{ text-decoration: underline }
 
 .icon-open{ background-image:url(i/ico/_external.png) !important; background-position: 0 50%; background-repeat: no-repeat; padding-left: 16px}
 .icon-locate{ background-image:url(i/ico/locate.gif) !important; background-position: 0 50%}
-.icon-save { background-image:url(i/ico/save.png) !important }
+.icon-save { background-image:url(i/ico/check-alt.png) !important }
 .icon-cancel { background-image:url(i/ico/cancel.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-print{ background-image:url(i/ico/printer.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 
@@ -750,4 +892,14 @@ border-top: 0;
 .x-mask-msg-text{
   padding-top: 10px !important;
   padding-bottom: 10px !important;
+}
+
+
+.user-ref:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.obj-ref {
+
 }

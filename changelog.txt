@@ -1,3 +1,9 @@
+CaseBox 1.9.342 (2014-10-23)
+==============================
+UI Improvements
+----------------
+- font-size, grid cell height, menu background color, comment font
+
 CaseBox 1.9.341 (2014-10-21)
 ==============================
 New Features, Improvements

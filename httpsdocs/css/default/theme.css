@@ -112,7 +112,7 @@ border-radius: 4;
 .d-loader {
     background-image: url(d/loader.gif);
     background-position: 0 50%;
-    background-repeat: no-repeat
+    background-repeat: no-repeat;
 }
 .x-mask-loading, .x-mask-loading div {
     background-image: url(d/loader.gif);
