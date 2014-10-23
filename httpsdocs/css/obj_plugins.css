@@ -111,7 +111,7 @@ background-color: #FFFFCC;
     color: #333;
     padding: 0 5px 0 8px;
 }
-.obj-plugin > .x-panel-bwrap > .x-panel-body-noborder{
+.obj-plugin > .x-panel-body-default {
     border-top: 2px solid #CCC;
     margin-bottom: 30px;
 }
@@ -119,10 +119,23 @@ background-color: #FFFFCC;
 .obj-plugin-h .x-toolbar-left{
     vertical-align: bottom;
 }
-.obj-plugin-h label{
+.obj-plugin label {
     /*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;*/
     font-weight: bold;
+    font-size: 12px;
     text-transform: uppercase;
+    padding: 5px 0 5px 5px;
+}
+
+
+
+.obj-plugin .x-form-text-wrap {
+    display: block; /* table-cell; */
+}
+
+textarea {
+    padding: 3px 4px !important;
+    font: normal 12px/16px arial, verdana, sans-serif !important;
 }
 
 .obj-plugin-h .x-toolbar-right {
@@ -189,10 +202,6 @@ background-color: #FFFFCC;
     margin-bottom: 20px;
 }
 
-.obj-plugin label.title{
-    font-weight: bold;
-    padding: 5px 0 5px 10px;
-}
 
 .obj-plugin .grid-drop-zone {
     margin-left: -1000px;

@@ -509,6 +509,10 @@ background-color: #FFF;
 }
 
 
+.x-menu-body-default {
+    background: #FFF;
+}
+
 .x-panel-blue .x-toolbar{
     background-image: none !important;
     /* background-color: #FFF; */
@@ -632,7 +636,7 @@ table.obj-preview  {
     /*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;*/
 }
 
-table.obj-preview td, table.obj-preview th {vertical-align: top; padding: 6px 7px; border-top: 1px solid #DDD}
+table.obj-preview td, table.obj-preview th {vertical-align: top; padding: 8px 7px; border-top: 1px solid #DDD}
 table.obj-preview tr.prop-header th {font-weight: bold; background-color: #F9F7ED;}
 table.obj-preview td.prop-key {width: 30%; background-color: #F4F4F4}
 table.obj-preview td.prop-val {width: 70%}
@@ -671,6 +675,10 @@ table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
 
 .gr {
     color: #777;
+}
+
+p.gr {
+    margin-top: 3px;
 }
 
 .obj-files p.gr {
