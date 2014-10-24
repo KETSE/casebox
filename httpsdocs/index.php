@@ -9,9 +9,9 @@ $rtl = Config::get('rtl')
     ? '-rtl'
     : '';
 
-$theme = empty($_SESSION['user']['theme'])
-    ? 'gray'
-    : $_SESSION['user']['theme'];
+$theme = empty($_SESSION['user']['cfg']['theme'])
+    ? 'classic'
+    : $_SESSION['user']['cfg']['theme'];
 
 if (empty($_SESSION['user'])) {
     exit(header('Location: ' . $coreUrl . 'login.php'));

@@ -18,7 +18,7 @@ class ContentItems extends Base
         $params = array(
             'pid' => $this->id
             ,'fq' => array(
-                'template_type:object'
+                '(template_type:object) OR (target_type:object)'
             )
             ,'fl' => 'id,pid,name,template_id,cdate,cid'
             ,'sort' => 'cdate'

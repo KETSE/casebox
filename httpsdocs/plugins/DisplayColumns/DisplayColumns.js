@@ -21,51 +21,62 @@ Ext.define('CB.plugins.DisplayColumns', {
         // this.cm = owner.grid.getColumnModel();
         this.defaultColumns = owner.grid.defaultColumns;
         this.reader = this.store.proxy.reader;
-        this.defaultMeta = Ext.apply({}, this.reader.meta);
-        this.defaultFieldNames = this.extractFieldNames(this.defaultMeta.fields);
+        this.model = this.store.getModel();
+        this.defaultFieldNames = this.extractFieldNames(this.model.fields);
         this.proxy = this.store.proxy;
-        this.proxy.on('load', this.onProxyLoad, this);
+        // this.store.on('load', this.onStoreLoad, this);
     }
 
-    ,onProxyLoad: function(proxy, obj, options) {
+    ,onStoreLoad: function(store, records, successful, eOpts) {//proxy, obj, options
+        var rez = store.proxy.reader.rawData;
+
         //add corresponding metadata to obj.result if DisplayColumns changed
-        this.currentColumns = obj.result.DC || [];
+        this.currentColumns = rez.DC || [];
 
         if(this.lastColumns !== Ext.util.JSON.encode(this.currentColumns)) {
-            obj.result.metaData = this.getNewMetadata();
+            var modelFields = this.getNewMetadata();
+            this.model.addFields(modelFields);
+
             this.lastColumns = Ext.util.JSON.encode(this.currentColumns);
-            this.store.loadData(obj.result);
+            Ext.suspendLayouts();
+
+            this.reader.read(rez);
+            // this.store.loadData(rez.data);
             var nc = this.getNewColumns();
-            this.grid.reconfigure(null, nc);
-            // this.cm.setConfig(nc);
+
+            this.grid.reconfigure(this.store, nc);
+
+            Ext.resumeLayouts(false);
         }
 
-        if(!Ext.isEmpty(obj.result.sort)) {// && Ext.isEmpty(this.store.sortInfo)
-            this.store.sortInfo = obj.result.sort;
+        if(!Ext.isEmpty(rez.sort)) {// && Ext.isEmpty(this.store.sortInfo)
+            this.store.sortInfo = rez.sort;
         }
     }
 
     ,getNewMetadata: function(){
-        var rez = Ext.apply({}, this.defaultMeta);
-        var currentColumns = Ext.apply({}, this.currentColumns);
+        var i
+            ,key
+            ,fieldData
+            ,rez = Ext.apply([], CB.DB.defaultItemFields)
+            ,currentColumns = Ext.apply({}, this.currentColumns);
 
-        var key, fieldData;
+        for (i = 0; i < rez.length; i++) {
+            fieldData = rez[i];
 
-
-        for (var i = 0; i < rez.fields.length; i++) {
-            fieldData = rez.fields[i];
-
-            if(Ext.isString(rez.fields[i])) {
-                key = rez.fields[i];
+            if(Ext.isString(fieldData)) {
+                key = fieldData;
                 fieldData = {
                     name: key
                 };
             } else {
-                key = rez.fields[i].name;
+                key = rez[i].name;
             }
 
             if(Ext.isDefined(currentColumns[key])) {
-                rez.fields[i] = Ext.copyTo(fieldData, currentColumns[key], ['type', 'sortType']);
+                rez[i] = Ext.copyTo(fieldData, currentColumns[key], ['type', 'sortType']);
+                rez[i].convert = null;
+
                 delete currentColumns[key];
             }
         }
@@ -77,7 +88,7 @@ Ext.define('CB.plugins.DisplayColumns', {
                     name: key
                     ,title: Ext.valueFrom(value.title, 'No title')
                 };
-                rez.fields.push(field);
+                rez.push(field);
             }
             ,this
         );
@@ -115,7 +126,7 @@ Ext.define('CB.plugins.DisplayColumns', {
             ,function(key, value, obj){
                 var column = value;
                 if(key !== 'remove') {
-                    column.id = rez.length;
+                    // column.id = rez.length;
                     column.dataIndex = key;
                     column.stateId = key;
                     column.header = Ext.valueFrom(column.header, column.title);

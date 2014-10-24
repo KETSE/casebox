@@ -70,48 +70,35 @@ class CreateMenu
         //
         // we'll iterate the path from the end and detect the menu
 
-        // var_dump($path);
-        // var_dump($menu);
         $lastWeight = 0;
         for ($i=0; $i < sizeof($path); $i++) {
             //firstly we'll check if we find a menu row with id or template of the node
-            \CB\debug('Analize path element: ' . $path[$i]);
             foreach ($menu as $m) {
                 $weight = 0;
 
-                \CB\debug('check nids: ', $m['nids']);
                 if (in_array($path[$i], $m['nids'])) {
-                    \CB\debug(' added 50 to weight');
                     $weight += 50;
                 } elseif (empty($m['nids'])) {
-                    \CB\debug(' added 1 to weight');
                     $weight += 1;
                 } else {
-                    \CB\debug(' skipping rule');
                     //skip this record because it contain nids and not contain this node id
                     continue;
                 }
 
-                \CB\debug('check nids: ', $m['nids']);
                 if (in_array($nodeTemplate[$path[$i]], $m['ntids'])) {
-                    \CB\debug(' added 50 to weight');
                     $weight += 50;
                 } elseif (empty($m['ntids'])) {
-                    \CB\debug(' added 1 to weight');
                     $weight += 1;
                 } else {
-                    \CB\debug(' skipping rule');
                     //skip this record because it has ntids specified and not contain this node template id
                     continue;
                 }
 
                 if (empty($m['ugids'])) {
-                    \CB\debug(' added 1 to weight');
                     $weight += 1;
                 } else {
                     $int = array_intersect($ugids, $m['ugids']);
                     if (empty($int)) {
-                        \CB\debug(' skipping rule');
                         continue;
                     } else {
                         $weight += 10;
@@ -121,13 +108,10 @@ class CreateMenu
                 if ($weight > $lastWeight) {
                     $lastWeight = $weight;
                     $rez = $m['menu'];
-                    \CB\debug(' updating result to '.$m['menu']." ($weight)");
                 }
             }
             //if nid matched or template matched then dont iterate further
             if ($lastWeight > 50) {
-                \CB\debug(' returning hard weight rule');
-
                 return $rez;
             }
         }

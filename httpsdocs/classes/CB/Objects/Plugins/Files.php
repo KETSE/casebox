@@ -18,7 +18,7 @@ class Files extends Base
         $params = array(
             'pid' => $this->id
             ,'fq' => array(
-                'template_type:file'
+                '(template_type:file) OR (target_type:file)'
             )
             ,'fl' => 'id,pid,name,template_id,size,cdate'
             ,'sort' => 'cdate'

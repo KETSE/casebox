@@ -76,14 +76,26 @@ class Templates
 
             $r['cfg'] = Util\toJSONArray($r['cfg']);
 
+            //unset server side functions to not be visible on lcient
             if (!empty($r['cfg']['source']['fn'])) {
                 unset($r['cfg']['source']['fn']);
             }
 
+            //set default "equal" condition for search templates
             if (($r['template_type'] == 'search') && empty($r['cfg']['cond'])) {
                 $r['cfg']['cond'] = '=';
             }
             unset($r['template_type']);
+
+            // If multiValued=True for Objects field, the default editor=form + default: "renderer": "listObjIcons"
+            if (!empty($cfg['multiValued'])) {
+                if (!isset($cfg['editor'])) {
+                    $cfg['editor'] = 'form';
+                }
+                if (!isset($cfg['renderer'])) {
+                    $cfg['renderer'] = 'listObjIcons';
+                }
+            }
 
             $data[$t][] = $r;
         }

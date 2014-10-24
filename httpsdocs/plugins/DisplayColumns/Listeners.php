@@ -1,6 +1,7 @@
 <?php
 namespace DisplayColumns;
 
+use CB\User;
 use CB\Cache;
 use CB\Util;
 use CB\State;
@@ -34,9 +35,9 @@ class Listeners
         if (empty($p['inputParams']['strictSort']) && !empty($solrFields['sort'])) {
             $sp['sort'] = $solrFields['sort'];
 
-        } elseif (!empty($this->inputParams['sort']) &&
+        } elseif (!empty($this->inputParams['sort'][0]['property']) &&
             empty($solrFields['sort']) &&
-            !in_array($this->inputParams['sort'], \CB\Search::$defaultFields)
+            !in_array($this->inputParams['sort'][0]['property'], \CB\Search::$defaultFields)
         ) {
             $sp['sort'] = 'ntsc asc, order asc';
         }
@@ -213,8 +214,8 @@ class Listeners
         /* user clicked a column to sort by */
         if (!empty($ip['userSort'])) {
             $p['result']['sort'] = array(
-                'field' => $ip['sort']
-                ,'direction' => $ip['dir']
+                'field' => $ip['sort'][0]['property']
+                ,'direction' => $ip['sort'][0]['direction']
             );
 
         } elseif (!empty($state['sort'])) {
@@ -224,6 +225,85 @@ class Listeners
 
         if (!empty($rez)) {
             $p['result']['DC'] = $rez;
+        }
+
+        //analize grouping
+        if (!empty($ip['userGroup']) && !empty($ip['group'])) {
+            $p['result']['group'] = array(
+                'property' => $ip['sourceGroupField']
+                ,'direction' => $ip['group']['direction']
+            );
+
+        } elseif (!empty($state['group'])) {
+            $p['result']['group'] = $state['group'];
+        }
+
+        $this->analizeGrouping($p);
+    }
+
+    protected function analizeGrouping(&$p)
+    {
+        if (empty($p['result']['group']['property'])) {
+            return;
+        }
+
+        $field = $p['result']['group']['property'];
+        $data = &$p['result']['data'];
+
+        foreach ($data as &$d) {
+            $v = @$d[$field];
+            switch ($field) {
+                case 'cid':
+                case 'uid':
+                case 'oid':
+                    $d['group'] = empty($v)
+                        ? 'none'
+                        : User::getDisplayName($d[$field]);
+                    break;
+
+                case 'date':
+                case 'date_end':
+                case 'cdate':
+                case 'udate':
+                case 'ddate':
+                    $d['group'] = empty($v)
+                        ? 'empty'
+                        : Util\formatMysqlDate(
+                            $v,
+                            'Y, F',
+                            @$_SESSION['user']['cfg']['timezone']
+                        );
+                    break;
+
+                case 'size':
+                    if (empty($v)) {
+                        $d['group'] = 'up to 1 MB';
+                    } else {
+                        $t = Util\formatFileSize($v);
+                        $d['size'] .= ' - '.$t;
+                        $t = explode(' ', $t);
+
+                        if ((@$t[1] == 'KB') || ($t[0] <= 1)) {
+                            $t = 1;
+                        } else {
+                            $i = floor($t[0] / 10) * 10;
+                            $t =  ($t[0] > $i)
+                                ? $i + 10
+                                : $i;
+                        }
+
+                        $d['size'] .= ' - '.$t;
+                        $d['group'] = ($t < 1)
+                            ? 'up to 1 MB'
+                            : 'up to ' . $t . ' MB';
+                    }
+                    break;
+
+                default:
+                    $d['group'] = empty($d[$field])
+                        ? 'empty'
+                        : $d[$field];
+            }
         }
     }
 
@@ -263,10 +343,10 @@ class Listeners
                 if (is_array($column) && !empty($column['solr_column_name'])) {
                     $rez['fields'][$column['solr_column_name']] = 1;
 
-                    if ((@$this->inputParams['sort'] == $columnName) &&
-                        !empty($this->inputParams['dir'])
+                    if ((@$this->inputParams['sort'][0]['property'] == $columnName) &&
+                        !empty($this->inputParams['sort'][0]['direction'])
                     ) {
-                        $rez['sort'][] = $column['solr_column_name'] . ' ' . strtolower($this->inputParams['dir']);
+                        $rez['sort'][] = $column['solr_column_name'] . ' ' . strtolower($this->inputParams['sort'][0]['direction']);
                     } elseif (!empty($column['sort'])) {
                         $rez['sort'][] = $column['solr_column_name'] . ' ' . $column['sort'];
                     }
@@ -282,12 +362,12 @@ class Listeners
 
         /* user clicked a column to sort by */
         if (!empty($this->inputParams['userSort'])) {
-            $dir = strtolower($this->inputParams['dir']);
+            $dir = strtolower($this->inputParams['sort'][0]['direction']);
 
             if (in_array($dir, array('asc', 'desc')) &&
-                preg_match('/^[a-z_0-9]+$/i', $this->inputParams['sort'])
+                preg_match('/^[a-z_0-9]+$/i', $this->inputParams['sort'][0]['property'])
             ) {
-                $field = $this->inputParams['sort'];
+                $field = $this->inputParams['sort'][0]['property'];
                 if (!empty($displayColumns['data'][$field]['solr_column_name'])) {
                     $field = $displayColumns['data'][$field]['solr_column_name'];
                 }

@@ -30,8 +30,14 @@ Ext.define('CB.DD.Tree', {
             }
             ,dropZone: {
                 idProperty: idProperty
+
+                ,dropCopy: 'drag-drop-copy'
+                ,dropMove: 'drag-drop-move'
+                ,dropShortcut: 'drag-drop-shortcut'
+
                 ,onNodeOver: this.onNodeOver
                 ,onNodeDrop: this.onNodeDrop
+                ,getActionFromEvent: this.getActionFromEvent
             }
         };
 
@@ -108,19 +114,29 @@ Ext.define('CB.DD.Tree', {
         return (data.records[0].data.system != 1);
     }
 
+    ,getActionFromEvent: function(ev) {
+        var rez = (ev.ctrlKey || ev.altKey || ev.shiftKey)
+            ? App.DD.detectActionFromEvent(ev)
+            : Ext.valueFrom(this.defaultAction, 'move');
+
+        return rez;
+    }
+
     ,onNodeOver: function (node, dragZone, e, data){
         /* deny drop on:
             - node itself
             - direct parent of dragged node
             - any descendant of dragged node
         */
-        var rez = this.dropAllowed;
+
+        var action = this.getActionFromEvent(e)
+            ,rez = this['drop' + action.charAt(0).toUpperCase() + action.slice(1)];
 
         var i = 0;
 
         var targetRecord = this.view.getRecord(node);
 
-        while ((i < data.records.length) && (rez == this.dropAllowed))  {
+        while ((i < data.records.length) && (rez != this.dropNotAllowed))  {
             var r = data.records[i];
 
             if(isNaN(r.data[this.idProperty]) ||
@@ -133,11 +149,12 @@ Ext.define('CB.DD.Tree', {
             }
             i++;
         }
+
         return rez;
     }
 
     ,onNodeDrop: function(node, dragZone, e, data){//targetData, source, e, sourceData
-        if(this.onNodeOver(node, dragZone, e, data) == this.dropAllowed){
+        if(this.onNodeOver(node, dragZone, e, data) != this.dropNotAllowed){
 
             var d, sourceData = [];
             for (var i = 0; i < data.records.length; i++) {

@@ -15,6 +15,8 @@ Ext.define('CB.browser.view.Grid', {
                 ,dataIndex: 'nid'
                 ,stateId: 'nid'
                 ,hidden: true
+                ,sort: this.columnSortOverride
+                ,groupable: false
             },{
                 header: L.Name
                 ,width: 300
@@ -37,8 +39,10 @@ Ext.define('CB.browser.view.Grid', {
 
                     return rez;
                 }
-                ,scope: this
+                // ,scope: this
                 ,editable: true
+                ,sort: this.columnSortOverride
+                ,groupable: false
             },{
                 header: L.Path
                 ,hidden:true
@@ -49,6 +53,7 @@ Ext.define('CB.browser.view.Grid', {
                     m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
                 }
+                ,sort: this.columnSortOverride
             },{
                 header: L.Project
                 ,width: 150
@@ -58,6 +63,7 @@ Ext.define('CB.browser.view.Grid', {
                     m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
                 }
+                ,sort: this.columnSortOverride
             },{
                 header: L.Date
                 ,width: 120
@@ -66,12 +72,14 @@ Ext.define('CB.browser.view.Grid', {
                 // ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' ' + App.timeFormat
                 ,renderer: App.customRenderers.datetime
+                ,sort: this.columnSortOverride
             },{
                 header: L.Size
                 ,width: 80
                 ,dataIndex: 'size'
                 ,stateId: 'size'
                 ,renderer: App.customRenderers.filesize
+                ,sort: this.columnSortOverride
             },{
                 header: L.Creator
                 ,hidden: true
@@ -81,6 +89,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,renderer: function(v){
                     return CB.DB.usersStore.getName(v);
                 }
+                ,sort: this.columnSortOverride
             },{
                 header: L.Owner
                 ,width: 200
@@ -89,6 +98,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,renderer: function(v){
                     return CB.DB.usersStore.getName(v);
                 }
+                ,sort: this.columnSortOverride
             },{
                 header: L.CreatedDate
                 ,hidden:true
@@ -97,6 +107,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,stateId: 'cdate'
                 ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' '  +  App.timeFormat
+                ,sort: this.columnSortOverride
             },{
                 header: L.UpdatedDate
                 ,hidden:true
@@ -105,6 +116,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,stateId: 'udate'
                 ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' ' + App.timeFormat
+                ,sort: this.columnSortOverride
             }
         ];
 
@@ -121,16 +133,11 @@ Ext.define('CB.browser.view.Grid', {
             ,getProperty: this.getProperty // link to view container method
             ,defaultColumns: Ext.apply([], columns)
             ,columns: columns
-
-            // ,colModel: new Ext.grid.ColumnModel({
-            //     defaults: {
-            //         width: 120,
-            //         sortable: true
-            //     }
-                // ,listeners: {
-                //     scope: this
-                // }
-            // })
+            ,features: [{
+                ftype:'cbGridViewGrouping'
+                ,disabled: true
+                // ,showSummaryRow: true
+            }]
             ,viewConfig: {
                 forceFit: false
                 ,loadMask: false
@@ -261,11 +268,6 @@ Ext.define('CB.browser.view.Grid', {
                     }
                 }
 
-                ,headerclick: function (headerCt, col, ev, el, eOpts) {
-                    this.store.remoteSort = (col.config.localSort !== true);
-                    this.userSort = 1;
-                }
-
                 ,columnmove:    this.saveGridState
                 ,columnresize:  this.saveGridState
                 ,groupchange:   this.saveGridState
@@ -378,6 +380,22 @@ Ext.define('CB.browser.view.Grid', {
         this.enableBubble(['reload']);
 
     }
+    /**
+     * override sort method for columns
+     * used to set userSort flag
+     * @param  string direction
+     * @return void
+     */
+    ,columnSortOverride: function(direction) {
+        var me = this,
+            grid = me.up('tablepanel'),
+            store = grid.store;
+
+        store.remoteSort = (this.config.localSort !== true);
+        grid.userSort = 1;
+
+        Ext.grid.column.Column.prototype.sort.apply(this, arguments);
+    }
 
     ,onActivate: function() {
         this.fireEvent(
@@ -393,6 +411,7 @@ Ext.define('CB.browser.view.Grid', {
             ]
         );
     }
+
     ,onBeforeStoreLoad: function(store, operation, eOpts) {
         this.savedSelection = this.getSelectedItems();
         this.grid.getSelectionModel().suspendEvents();
@@ -401,7 +420,7 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,onStoreLoad: function(store, recs, options) {
-        delete this.userSort;
+        delete this.grid.userSort;
 
         var hadSelection = false;
         var prevSelectedId = 0;
@@ -560,17 +579,18 @@ Ext.define('CB.browser.view.Grid', {
             }
         }
 
-        if(this.store){
-            var ss = this.store.getSorters().getAt(0);
+        if(store){
+            var ss = store.getSorters().getAt(0);
 
             if(ss){
-                rez.sort = ss.config;
+                rez.sort = ss.getState();
             }
 
-            if(this.store.getGroups){
-                gs = this.store.getGroups();
-                if(gs){
-                    rez.grouper = gs.getGrouper();
+            if(store.getGrouper){
+                rez.group = store.getGrouper();
+                if(rez.group) {
+                    rez.group = rez.group.config;
+                    rez.group.property = store.proxy.extraParams.sourceGroupField;
                 }
             }
         }
@@ -590,7 +610,7 @@ Ext.define('CB.browser.view.Grid', {
             from: 'grid'
         };
 
-        if(this.userSort) {
+        if(this.grid.userSort) {
             rez.userSort = 1;
         }
 

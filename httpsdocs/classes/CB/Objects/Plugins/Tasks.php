@@ -19,7 +19,7 @@ class Tasks extends Base
         $params = array(
             'pid' => $this->id
             ,'fq' => array(
-                'template_type:task'
+                '(template_type:task) OR (target_type:task)'
             )
             ,'fl' => 'id,pid,name,template_id,date,date_end,cid,cdate,status'
             ,'sort' => 'cdate'

@@ -286,6 +286,7 @@ Ext.define('CB.ProfileForm', {
                             ,labelWidth: 140
                             ,defaults:{
                                 width: 250
+                                ,matchFieldWidth: false
                                 ,listeners: {
                                     scope: this
                                     ,change: this.onChange

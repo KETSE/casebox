@@ -861,9 +861,10 @@ Ext.define('CB.ObjectCardView', {
     ,onCreateObjectClick: function(b, e) {
         this.goBackOnSave = true;
 
-        b.data.pid = this.loadedData.id;
-        b.data.path = this.loadedData.path;
-        this.fireEvent('createobject', b.data, e);
+        var d = b.config.data;
+        d.pid = this.loadedData.id;
+        d.path = this.loadedData.path;
+        this.fireEvent('createobject', d, e);
     }
 
     ,onCloseTaskClick: function(b, e) {

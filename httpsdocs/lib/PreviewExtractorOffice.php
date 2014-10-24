@@ -63,7 +63,7 @@ class PreviewExtractorOffice extends PreviewExtractor
             copy($fn, $nfn);
             file_put_contents($pfn, '');
             $cmd = Config::get('UNOCONV') . ' -v -f html -o '.$pfn.' '.$nfn; //.' >> ' . Config::get('debug_log') . ' 2>&1';
-            // \CB\debug($cmd);
+
             exec($cmd);
             unlink($nfn);
             if (file_exists($pfn)) {

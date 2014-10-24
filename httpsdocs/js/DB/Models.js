@@ -1,37 +1,40 @@
 Ext.namespace('CB.DB');
 
+CB.DB.defaultItemFields = [
+    {name: 'nid', type: 'string'}
+    ,{name: 'pid', type: 'int'}
+    ,{name: 'system', type: 'int'}
+    ,{name: 'status', type: 'int'}
+    ,{name: 'task_status', type: 'int'}
+    ,{name: 'template_id', type: 'int'}
+    ,{name: 'category_id', type: 'int'}
+    ,'template_type'
+    ,'path'
+    ,'name'
+    ,'hl'
+    ,'iconCls'
+    ,{name: 'date', type: 'date'}
+    ,{name: 'date_end', type: 'date'}
+    ,{name: 'size', type: 'int'}
+    ,{name: 'oid', type: 'int'}
+    ,{name: 'cid', type: 'int'}
+    ,{name: 'versions', type: 'int'}
+    ,{name: 'cdate', type: 'date'}
+    ,{name: 'udate', type: 'date'}
+    ,'case'
+    ,'content'
+    ,{name: 'has_childs', type: 'bool'}
+    ,{name: 'acl_count', type: 'int'}
+    ,'cfg'
+    ,'cls'
+    ,'can'
+    ,'group'
+];
+
 Ext.define('Items', {
     extend: 'Ext.data.Model'
     ,alias: 'model.Items'
-    ,fields: [
-        {name: 'nid', type: 'string'}
-        ,{name: 'pid', type: 'int'}
-        ,{name: 'system', type: 'int'}
-        ,{name: 'status', type: 'int'}
-        ,{name: 'task_status', type: 'int'}
-        ,{name: 'template_id', type: 'int'}
-        ,{name: 'category_id', type: 'int'}
-        ,'template_type'
-        ,'path'
-        ,'name'
-        ,'hl'
-        ,'iconCls'
-        ,{name: 'date', type: 'date'}
-        ,{name: 'date_end', type: 'date'}
-        ,{name: 'size', type: 'int'}
-        ,{name: 'oid', type: 'int'}
-        ,{name: 'cid', type: 'int'}
-        ,{name: 'versions', type: 'int'}
-        ,{name: 'cdate', type: 'date'}
-        ,{name: 'udate', type: 'date'}
-        ,'case'
-        ,'content'
-        ,{name: 'has_childs', type: 'bool'}
-        ,{name: 'acl_count', type: 'int'}
-        ,'cfg'
-        ,'cls'
-        ,'can'
-    ]
+    ,fields: Ext.apply([], CB.DB.defaultItemFields)
 });
 
 Ext.define('ContentItem', {

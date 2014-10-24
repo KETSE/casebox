@@ -983,7 +983,10 @@ class Tasks
             array(
                 'pid' => $taskId
                 ,'fl' => 'id,name'
-                ,'template_types' => 'file'
+                // ,'template_types' => 'file'
+                ,'fq' => array(
+                    '(template_type:file) OR (target_type:file)'
+                )
             )
         );
 

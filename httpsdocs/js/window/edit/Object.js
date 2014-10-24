@@ -142,7 +142,7 @@ Ext.define('CB.window.edit.Object', {
                     break;
                 }
             }
-        });
+        }).getEl().center(this);
 
         return false;
     }

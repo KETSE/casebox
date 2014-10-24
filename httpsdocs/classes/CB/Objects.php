@@ -447,6 +447,11 @@ class Objects
             ? ''
             : $objData['name']."\n";
 
+        // add target type for shortcut items
+        if (!empty($objData['target_type'])) {
+            $object_record['target_type'] = $objData['target_type'];
+        }
+
         $field = array();
         foreach ($linearData as $f) {
             if (is_object($template)) {

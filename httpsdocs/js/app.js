@@ -1273,7 +1273,7 @@ function overrides(){
                 ids = String(ids).split(',');
             }
 
-            if(this.data) {
+            if((this.getCount() > 0) && this.data) {
                 for (var i = 0; i < ids.length; i++) {
                     idx = this.findExact(idProperty, String(ids[i]));
 

@@ -71,8 +71,8 @@ class User
                 $r['last_name'] = htmlentities($r['last_name'], ENT_QUOTES, 'UTF-8');
 
                 //set default theme
-                if (empty($r['theme'])) {
-                    $r['theme'] = 'gray';
+                if (empty($r['cfg']['theme'])) {
+                    $r['cfg']['theme'] = 'gray';
                 }
 
                 // do not expose security params
@@ -619,7 +619,7 @@ class User
             $u['email'] = $p['email'];
             $u['language_id'] = $p['language_id'];
 
-            $u['language'] = Config::get('languages')[$p['language_id']-1];
+            $u['language'] = @Config::get('languages')[$p['language_id']-1];
             $u['locale'] =  $languageSettings[$u['language']]['locale'];
 
             $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
@@ -815,7 +815,7 @@ class User
     {
         $id = Purify::filename($id);
 
-        $_SESSION['user']['theme'] = $id;
+        $_SESSION['user']['cfg']['theme'] = $id;
 
         $cfg = $this->getUserConfig();
         $cfg['theme'] = $id;

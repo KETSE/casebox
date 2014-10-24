@@ -87,6 +87,7 @@ return array_merge(
             ,'//js/browser/view/Interface.js'
             ,'//js/browser/view/Grid.js'
             ,'//js/browser/view/grid/toolbar/Paging.js'
+            ,'//js/browser/view/grid/feature/Grouping.js'
             ,'//js/browser/view/Calendar.js'
             ,'//js/browser/view/Charts.js'
             ,'//js/browser/view/Pivot.js'
