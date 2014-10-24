@@ -45,13 +45,13 @@ class Listeners
 
     public function onSolrQuery(&$p)
     {
-        $sp = &$p['params'];
-        $ip = &$p['inputParams'];
-        $data = &$p['result']['data'];
-
         if (@$ip['view'] !== 'grid') {
             return;
         }
+
+        $sp = &$p['params'];
+        $ip = &$p['inputParams'];
+        $data = &$p['result']['data'];
 
         $rez = array();
 

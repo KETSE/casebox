@@ -655,7 +655,8 @@ class Objects
     }
 
     /**
-     * get name for an object id
+     * get name for an object id from database
+     * Note: for multilanguage to work Search::getObjectNames() should be used
      * @param  int          $objectId
      * @return varchar|null
      */

@@ -3,8 +3,8 @@ namespace CB\TreeNode;
 
 // - Cases by role / status  (update all cases, case.status = Active)
 use CB\L;
-use CB\DB;
 use CB\Templates;
+use CB\Search;
 
 class CasesGrouped extends Base
 {
@@ -96,16 +96,7 @@ class CasesGrouped extends Base
                 return L\get('AllMyCases');
         }
 
-        $res = DB\dbQuery('SELECT name FROM tree WHERE id = $1', $id) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $res->close();
-
-            return $r['name'];
-        }
-        $res->close();
-
-        return 'none';
+        return @Search::getObjectNames($id)[$id];
     }
 
     protected function getRootNodes()

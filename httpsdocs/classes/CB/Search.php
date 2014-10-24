@@ -1,6 +1,9 @@
 <?php
 namespace CB;
 
+use CB\Cache;
+use CB\Util;
+
 class Search extends Solr\Client
 {
     public static $defaultFields = array(
@@ -535,5 +538,99 @@ class Search extends Solr\Client
 
             $shortcutsArray[$rd['target_id']] = $rd;
         }
+    }
+
+    /**
+     * method to get object names from solr
+     * Multilanguage plugin works also
+     *
+     * @param  array | string $ids
+     * @return array          associative array of names per id
+     */
+    public static function getObjectNames($ids)
+    {
+        $rez = static::getObjects($ids);
+
+        foreach ($rez as $k => $v) {
+            $rez[$k] = $v['name'];
+        }
+
+        return $rez;
+    }
+
+    /**
+     * method to get multiple object properties from solr
+     * Multilanguage plugin works also
+     *
+     * @param  array | string $ids
+     * @param  string         $fieldList
+     * @return array          associative array of properties per id
+     */
+    public static function getObjects($ids, $fieldList = 'id,name')
+    {
+        $rez = array();
+        $ids = Util\toNumericArray($ids);
+        if (empty($ids)) {
+            return $rez;
+        }
+
+        //connect or get solr service connection
+        $conn = Cache::get('solr_service');
+
+        if (empty($conn)) {
+            $conn = new Solr\Service();
+
+            Cache::set('solr_service', $conn);
+        }
+
+        //execute search
+        try {
+            $params = array(
+                'defType' => 'dismax'
+                ,'q.alt' => '*:*'
+                ,'fl' => $fieldList
+                ,'fq' => array(
+                    'id:(' . implode(' OR ', $ids). ')'
+                )
+            );
+
+            $inputParams = array(
+                'ids' => $ids
+            );
+
+            $eventParams = array(
+                'params' => &$params
+                ,'inputParams' => &$inputParams
+            );
+
+            \CB\fireEvent('beforeSolrQuery', $eventParams);
+
+            $searchRez = $conn->search(
+                '',
+                0,
+                100,
+                $params
+            );
+
+            if (!empty($searchRez->response->docs)) {
+                foreach ($searchRez->response->docs as $d) {
+                    $rd = array();
+                    foreach ($d as $fn => $fv) {
+                        $rd[$fn] = $fv;
+                    }
+                    $rez[$d->id] = $rd;
+                }
+            }
+
+            $eventParams['result'] = array(
+                'data' => &$rez
+            );
+            \CB\fireEvent('solrQuery', $eventParams);
+
+        } catch ( \Exception $e ) {
+            throw new \Exception("An error occured in getObjectNames: \n\n {$e->__toString()}");
+        }
+
+        return $rez;
     }
 }

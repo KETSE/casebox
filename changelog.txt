@@ -1,3 +1,9 @@
+CaseBox 1.9.344 (2014-10-24)
+==============================
+New Features, Improvements
+--------------------------
+- task #3647: Multilanguage Tree, Grid fields, Object fields (see #3638)
+
 CaseBox 1.9.343 (2014-10-24)
 ==============================
 New Features, Improvements

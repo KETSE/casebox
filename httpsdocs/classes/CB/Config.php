@@ -24,10 +24,33 @@ class Config extends Singleton
         // merging configs from platform, from casebox database and from core itself
         $cfg = array_merge($cfg, static::getPlatformDBConfig());
         $cfg = array_merge($cfg, static::getPlatformConfigForCore($cfg['core_name']));
+
+        $coreDBConfig = static::getCoreDBConfig();
+
+        $propertiesToMerge = array('files');
+
+        //detect available languages
+        $languages = empty($coreDBConfig['languages'])
+            ? $cfg['languages']
+            : $coreDBConfig['languages'];
+
+        //prepare language properties to be decoded and merged
+        $languages = explode(',', $languages);
+        foreach ($languages as $l) {
+            $l = 'language_' . $l;
+            if (isset($cfg[$l])) {
+                $cfg[$l] = Util\toJSONArray($cfg[$l]);
+            }
+            if (isset($coreDBConfig[$l])) {
+                $coreDBConfig[$l] = Util\toJSONArray($coreDBConfig[$l]);
+            }
+            $propertiesToMerge[] = $l;
+        }
+
         $cfg = static::mergeConfigs(
             $cfg,
-            static::getCoreDBConfig(),
-            array('files')
+            $coreDBConfig,
+            $propertiesToMerge
         );
 
         static::$config = static::adjustConfig($cfg);

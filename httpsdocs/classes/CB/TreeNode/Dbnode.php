@@ -4,6 +4,7 @@ namespace CB\TreeNode;
 use CB\DB;
 use CB\Util;
 use CB\Browser;
+use CB\Search;
 
 class Dbnode extends Base
 {
@@ -102,15 +103,7 @@ class Dbnode extends Base
             $id = $this->id;
         }
         if (!empty($id) && is_numeric($id)) {
-            $res = DB\dbQuery(
-                'SELECT name FROM tree WHERE id = $1',
-                $id
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $rez = $r['name'];
-            }
-            $res->close();
+            $rez = @Search::getObjectNames($id)[$id];
         }
 
         return $rez;

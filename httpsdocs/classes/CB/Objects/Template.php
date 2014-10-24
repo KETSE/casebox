@@ -5,6 +5,7 @@ use CB\DB;
 use CB\Util;
 use CB\User;
 use CB\L;
+use CB\Search;
 
 /**
  * Template class
@@ -529,16 +530,14 @@ class Template extends Object
                     $value = '';
                     break;
                 }
-                $res = DB\dbQuery(
-                    'SELECT name FROM tree WHERE id IN ('.implode(',', $a).') ORDER BY 1'
-                ) or die(DB\dbQueryError());
-                $value = array();
-                while ($r = $res->fetch_assoc()) {
-                    $value[] = htmlspecialchars($r['name'], ENT_COMPAT);
-                }
-                $res->close();
-                if (sizeof($value) == 1) {
-                    $value = $value[0];
+                $value = Search::getObjectNames($a);
+                if (empty($value)) {
+                    $value = '';
+                } else {
+                    $value = array_values($value);
+                    if (sizeof($value) == 1) {
+                        $value = $value[0];
+                    }
                 }
                 break;
 
@@ -552,90 +551,86 @@ class Template extends Object
                     $value = '';
                     break;
                 }
+
                 $ids = implode(',', $a);
-
-                switch (@$field['cfg']['source']) {
-                    case 'users':
-                    case 'groups':
-                    case 'usersgroups':
-                        $value = 'users_groups';
-                        $sql = 'SELECT id
-                                ,name
-                                ,trim( CONCAT(coalesce(first_name, \'\'), \' \', coalesce(last_name, \'\')) ) `title`
-                                ,CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls`
-                            FROM users_groups
-                            WHERE id IN ('.$ids.')';
-                        break;
-                    // case '':
-                    // case 'tree':
-                    // case 'related':
-                    // case 'field':
-                    default:
-                        $value = 'tree';
-                        $sql = 'SELECT t.id
-                                ,t.name
-                                ,t.template_id
-                                ,t.`type`
-                                ,t.`subtype`
-                                ,t.cfg
-                                ,ti.pids `path`
-                            FROM tree t
-                            JOIN tree_info ti ON t.id = ti.id
-                            WHERE t.id IN ('.$ids.')';
-                        break;
-                        // return $value;
-                }
-
-                $res = DB\dbQuery($sql) or die(DB\dbQueryError());
                 $value = array();
-                while ($r = $res->fetch_assoc()) {
-                    @$label = htmlspecialchars(Util\coalesce($r['title'], $r['name']), ENT_COMPAT);
-                    if (!empty($r['path'])) {
-                        $path = explode(',', $r['path']);
-                        array_pop($path);
-                        $r['path'] = implode('/', $path);
-                        $label = $html
-                            ? '<a class="locate click" path="'.$r['path'].'" nid="'.$r['id'].'">'.$label.'</a>'
-                            : $label;
+
+                if (in_array(
+                    @$field['cfg']['source'],
+                    array(
+                        'users'
+                        ,'groups'
+                        ,'usersgroups'
+                    )
+                )) {
+                    $sql = 'SELECT id
+                            ,name
+                            ,trim( CONCAT(coalesce(first_name, \'\'), \' \', coalesce(last_name, \'\')) ) `title`
+                            ,CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls`
+                        FROM users_groups
+                        WHERE id IN ('.$ids.')';
+
+                    $res = DB\dbQuery($sql) or die(DB\dbQueryError());
+                    while ($r = $res->fetch_assoc()) {
+                        @$label = htmlspecialchars($r['name'], ENT_COMPAT);
+
+                        switch (@$field['cfg']['renderer']) {
+                            case 'listGreenIcons':
+                                $value[] =  $html
+                                    ? '<li class="icon-padding icon-element">'.$label.'</li>'
+                                    : $label;
+                                break;
+                            // case 'listObjIcons':
+                            default:
+                                $r['cfg'] = Util\toJSONArray(@$r['cfg']);
+
+                                $icon = empty($r['iconCls'])
+                                    ? \CB\Browser::getIcon($r)
+                                    : $r['iconCls'];
+
+                                if (empty($icon)) {
+                                    $icon = 'icon-none';
+                                }
+
+                                $value[] = $html
+                                    ? '<li class="icon-padding '.$icon.'">'.$label.'</li>'
+                                    : $label;
+                                break;
+                        }
                     }
+                    $res->close();
+                } else {
+                    $objects = Search::getObjects($ids, 'id,name,template_id,pids');
+                    \CB\debug($objects);
+                    foreach ($objects as $r) {
+                        @$label = $r['name'];
+                        if ($html && !empty($r['pids'])) {
+                            $r['pids'] = implode('/', $r['pids']);
+                            $label = '<a class="locate click" path="'.$r['pids'].'" nid="'.$r['id'].'">'.$label.'</a>';
+                        }
 
-                    switch (@$field['cfg']['renderer']) {
-                        case 'listGreenIcons':
-                            $value[] =  $html
-                                ? '<li class="icon-padding icon-element">'.$label.'</li>'
-                                : $label;
-                            break;
-                        // case 'listObjIcons':
-                        default:
-                            $r['cfg'] = Util\toJSONArray(@$r['cfg']);
+                        switch (@$field['cfg']['renderer']) {
+                            case 'listGreenIcons':
+                                $value[] =  $html
+                                    ? '<li class="icon-padding icon-element">'.$label.'</li>'
+                                    : $label;
+                                break;
+                            // case 'listObjIcons':
+                            default:
+                                $icon = \CB\Browser::getIcon($r);
 
-                            $icon = empty($r['iconCls'])
-                                ? \CB\Browser::getIcon($r)
-                                : $r['iconCls'];
+                                if (empty($icon)) {
+                                    $icon = 'icon-none';
+                                }
 
-                            if (empty($icon)) {
-                                $icon = 'icon-none';
-                            }
-
-                            // switch (@$field['cfg']['source']) {
-                            //     case '':
-                            //     case 'tree':
-                            //     case 'related':
-                            //     case 'field':
-                            //         $icon = \CB\Browser::getIcon($r);
-                            //         break;
-                            //     default:
-                            //         $icon = Util\coalesce($r['iconCls'], 'icon-none');
-                            //         break;
-                            // }
-
-                            $value[] = $html
-                                ? '<li class="icon-padding '.$icon.'">'.$label.'</li>'
-                                : $label;
-                            break;
+                                $value[] = $html
+                                    ? '<li class="icon-padding '.$icon.'">'.$label.'</li>'
+                                    : $label;
+                                break;
+                        }
                     }
                 }
-                $res->close();
+
                 $value = $html
                     ? '<ul class="clean">'.implode('', $value).'</ul>'
                     : implode(', ', $value);

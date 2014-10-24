@@ -979,16 +979,10 @@ class Browser
         } else {
             $res->close();
             /* get objects name */
-            $name = 'Llink';
-            $res = DB\dbQuery(
-                'SELECT name FROM tree WHERE id = $1',
-                $p['id']
-            ) or die(DB\dbQueryError());
+            $name = 'Link';
 
-            if ($r = $res->fetch_assoc()) {
-                $name = $r['name'];
-            }
-            $res->close();
+            $name = @Search::getObjectNames($p['id'])[$p['id']];
+
             /* end of get objects name */
             DB\dbQuery(
                 'INSERT INTO tree
