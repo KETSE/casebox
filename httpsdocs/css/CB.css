@@ -56,21 +56,7 @@ question: why do we have "-top" class?
 */
 
 /* space: medium; */
-.icon-grid-column-top { background-position: 10px 8px !important; background-repeat: no-repeat; }
 
-.x-grid-cell-inner {
-  font-size: 13px;
-  /*min-height: 24px;*/
-  padding: 9px 6px 9px 6px;
-  /*line-height: 16px !important*/
-}
-
-.folder-grid .x-grid-cell-inner {
-  font-size: 13px;
-  /*min-height: 24px;*/
-  padding: 8px 6px 8px 6px;
-  /*line-height: 16px !important*/
-}
 
 
 .x-grid-header-ct {
@@ -98,7 +84,6 @@ question: why do we have "-top" class?
 }
 
 
-
 .x-btn-inner-default-toolbar-large {
   font: normal 12px/16px arial, verdana, sans-serif;
 }
@@ -109,9 +94,7 @@ question: why do we have "-top" class?
     font: normal 16px/19px arial,verdana,sans-serif;
 }
 
-.x-form-text-default {
-  font: normal 13px/17px arial,verdana,sans-serif;
-}
+
 
 .x-menu-item-default.x-menu-item-active {
   background: none;
@@ -165,6 +148,39 @@ question: why do we have "-top" class?
 }
 
 
+.x-btn.x-btn-disabled.x-btn-default-toolbar-large {
+border-color: transparent;
+}
+.x-btn.x-btn-disabled.x-btn-default-toolbar-small {
+border-color: transparent;
+}
+
+
+
+
+
+/* COMFORTABLE VIEW -------------------------------------------------------------------------------------- */
+
+.icon-grid-column-top { background-position: 10px 8px !important; background-repeat: no-repeat; }
+
+.x-grid-cell-inner {
+  font-size: 13px;
+  /*min-height: 24px;*/
+  padding: 9px 6px 9px 6px;
+  /*line-height: 16px !important*/
+}
+
+.folder-grid .x-grid-cell-inner {
+  font-size: 13px;
+  /*min-height: 24px;*/
+  padding: 8px 6px 8px 6px;
+  /*line-height: 16px !important*/
+}
+
+.x-form-text-default {
+  font: normal 13px/17px arial,verdana,sans-serif;
+}
+
 .x-grid-cell-inner pre {
   font: normal 13px arial, verdana, sans-serif;
   margin: 0;
@@ -174,19 +190,6 @@ question: why do we have "-top" class?
 padding: 5px 6px 5px 0;
 font-size: 13px;
 }
-
-.x-btn.x-btn-disabled.x-btn-default-toolbar-large {
-border-color: transparent;
-}
-.x-btn.x-btn-disabled.x-btn-default-toolbar-small {
-border-color: transparent;
-}
-
-
-.x-grid-item {
-  font: normal 13px arial, verdana, sans-serif;
-}
-
 
 /*EDIT GRID*/
 
@@ -216,6 +219,85 @@ font-size: 13px;
   padding-top: 3px;
 }
 
+.x-grid-item {
+  font: normal 13px arial, verdana, sans-serif;
+}
+
+.spacy-rows .x-grid-cell {padding: 1px 0 2px 0}
+.spacy-rows .x-grid-item {border-top: 1px solid #fff;}
+.spacy-fields .x-form-item {padding: 1px 1px 2px 1px}
+/* end of COMFORTABLE VIEW ----------------------------------------------------------------------------- */
+
+
+
+/* COMPACT VIEW ---------------------------------------------------------------------------------------- */
+
+.icon-grid-column-top { background-position: 8px 4px !important; background-repeat: no-repeat; }
+
+.x-grid-cell-inner {
+  font-size: 12px;
+  /*min-height: 24px;*/
+  padding: 7px 6px 7px 6px;
+  /*line-height: 16px !important*/
+}
+
+.folder-grid .x-grid-cell-inner {
+  font-size: 12px;
+  line-height: 16px;
+  /*min-height: 24px;*/
+
+  padding: 5px 6px 5px 6px;
+  /*line-height: 16px !important*/
+}
+
+
+.x-form-text-default {
+  font: normal 12px/16px arial,verdana,sans-serif;
+}
+
+.x-grid-cell-inner pre {
+  font: normal 12px arial, verdana, sans-serif;
+  margin: 0;
+}
+
+.x-grid-cell-inner-treecolumn {
+padding: 3px 6px 3px 0;
+font-size: 12px;
+}
+
+.edit-grid .x-grid-cell-inner {
+padding: 4px 6px 4px 6px;
+min-height: 14px;
+line-height: 14px;
+font-size: 12px;
+}
+
+
+
+.x-form-text-grid-cell {
+  font: normal 12px arial verdana, sans-serif;
+  line-height: 16px;
+  min-height: 16px;
+  padding-top: 2px;
+}
+
+.x-grid-item {
+  font: normal 12px arial, verdana, sans-serif;
+}
+
+.spacy-rows .x-grid-cell {padding: 0}
+.spacy-rows .x-grid-item {border-top: 1px solid #fff;}
+.spacy-fields .x-form-item {padding: 0}
+
+table.obj-preview td, table.obj-preview th {padding: 6px 7px !important}
+
+/* end of COMPACT GRID --------------------------------------------------------------------------------------------  */
+
+
+
+
+
+
 
 
 
@@ -223,9 +305,7 @@ font-size: 13px;
 .icon-padding2, .icon-padding2 .x-grid3-cell-inner { padding-left: 44px; background-position: 22px 50% !important }
 .icon-padding3, .icon-padding3 .x-grid3-cell-inner { padding-left: 44px; background-position: 44px 50% !important }
 
-.spacy-rows .x-grid-cell{padding: 1px 0 2px 0}
-.spacy-rows .x-grid-item{border-top: 1px solid #fff;}
-.spacy-fields .x-form-item {padding: 1px 1px 2px 1px}
+
 
 
 
