@@ -45,11 +45,14 @@ class Comment extends Object
             foreach ($matches as $match) {
                 $name = \CB\Objects::getName($match[1]);
                 $name = (strlen($name) > 30)
-                    ? substr($name, 0, 30).'&hellip;'
+                    ? substr($name, 0, 30) . '&hellip;'
                     : $name;
                 $message = str_replace(
                     $match[0],
-                    '<a href="' . Config::get('core_url') . 'v-' . $match[1] . '" target="_blank">' . $name . '</a>' . substr($match[0], strlen($match[1]) + 1),
+                    '<a class="cDB obj-ref" href="' . Config::get('core_url') . 'v-' . $match[1] .
+                    '" target="_blank" ' .
+                    'title="' . $name . '"' .
+                    '>#' . $match[1] . '</a>',  //  . substr($match[0], strlen($match[1]) + 1),
                     $message
                 );
             }
@@ -60,9 +63,10 @@ class Comment extends Object
             foreach ($matches as $match) {
                 $userId = User::exists($match[1]);
                 if (is_numeric($userId)) {
+                    $userName = $match[1];
                     $message = str_replace(
                         $match[0],
-                        '<span class="cDB">' . User::getDisplayName($userId) . '</span>',
+                        '<span class="cDB user-ref" title="' . User::getDisplayName($userId) . '">@' . $userName . '</span>',
                         $message
                     );
                 }

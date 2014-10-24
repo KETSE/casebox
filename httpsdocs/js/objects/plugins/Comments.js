@@ -38,8 +38,9 @@ Ext.define('CB.objects.plugins.Comments', {
             // ,height: 30
             ,anchor: '100%'
             ,grow: true
-            ,growMin: 30
+            ,growMin: 10
             ,enableKeyEvents: true
+            //,baseBodyCls: "comment-input"
             ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
             // disable until prugin refactored for ExtJS 5
             // ,plugins: [
@@ -54,13 +55,13 @@ Ext.define('CB.objects.plugins.Comments', {
                 ,focus: function(field) {
                     // field.grow = true;
                     field.focused = true;
-                    this.messageToolbar.show();
+                    // this.messageToolbar.show();
                 }
                 ,blur: function(field) {
                     // field.grow = false;
                     delete field.focused;
                     if(!this.mouseOver) {
-                        this.messageToolbar.hide();
+                        // this.messageToolbar.hide();
                     }
                 }
             }
@@ -68,12 +69,12 @@ Ext.define('CB.objects.plugins.Comments', {
 
         this.messageToolbar = new Ext.Toolbar({
             height: 24
-            ,hidden: true
-            ,style: 'background-color: transparent; padding: 0; border: 0'
+            ,hidden: false
+            ,style: 'padding: 0; border: 0; background-color:  #f1f1f1;' // background-color: transparent;
             ,items: [
                 '->'
                 ,{
-                    text: 'Send'
+                    text: 'Reply'
                     ,scope: this
                     ,handler: this.onAddCommentClick
                 }
@@ -109,7 +110,7 @@ Ext.define('CB.objects.plugins.Comments', {
                     xtype: 'panel'
                     ,region: 'center'
                     ,layout: 'anchor'
-                    ,padding: '0 3px 0 5px'
+                    ,padding: '0px 3px 0px 5px'
                     ,autoHeight: true
                     ,boder: false
                     ,bodyCls: 'x-panel-white'
@@ -174,7 +175,7 @@ Ext.define('CB.objects.plugins.Comments', {
         if(!field.isVisible()) {
             return;
         }
-        this.addCommentPanel.setHeight(field.getHeight() + 35);
+        this.addCommentPanel.setHeight(field.getHeight() + 36);
     }
 
     ,onAddCommentClick: function(b, e) {
@@ -190,7 +191,7 @@ Ext.define('CB.objects.plugins.Comments', {
         this.messageField.autoSize();
         // this.onMessageBoxAutoSize(this.messageField);
         this.messageField.hide();
-        this.messageToolbar.hide();
+        // this.messageToolbar.hide();
 
         this.loadLabel.show();
 
@@ -232,7 +233,7 @@ Ext.define('CB.objects.plugins.Comments', {
     ,onCommentPanelMouseLeave: function(e, el, o) {
         delete this.mouseOver;
         if(this.messageField.focused !== true) {
-            this.messageToolbar.hide();
+            // this.messageToolbar.hide();
         }
     }
 
