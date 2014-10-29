@@ -347,6 +347,8 @@ Ext.define('CB.ProfileForm', {
         if(CB.DB.timezones.getCount() === 0) {
             CB.DB.timezones.load();
         }
+
+        this.enableBubble(['verify']);
     }
     ,onAfterRender: function(cmp){
 
@@ -359,6 +361,10 @@ Ext.define('CB.ProfileForm', {
             }
             this.objectsStore.loadData(data.assocObjects);
             delete data.assocObjects;
+        }
+
+        if(Ext.isDefined(data.language_id)) {
+            data.language_id = parseInt(data.language_id, 10);
         }
 
         this.data = data;
@@ -423,7 +429,9 @@ Ext.define('CB.ProfileForm', {
 
     ,onSaveProcess: function(r, e){
         if(r.success !== true) {
-            if(!Ext.isEmpty(r.msg)) {
+            if(r.verify) {
+                this.fireEvent('verify', this);
+            } else if(!Ext.isEmpty(r.msg)) {
                 Ext.Msg.alert(L.Error, r.msg);
             }
             return;

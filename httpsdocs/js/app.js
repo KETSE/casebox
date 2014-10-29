@@ -603,6 +603,7 @@ function initApp() {
         params.path = path;
         params.query = null;
         params.start = 0;
+        params.page = 1;
 
         App.activateBrowserTab().setParams(params);
     };
@@ -687,75 +688,51 @@ function initApp() {
                     case 'form':
                         if(e && e.grid){
                             e.cancel = true;
-                            /* prepeare data to set to popup windows */
-                            var store = false;
-                            var source = Ext.isEmpty(cfg.source) ? 'tree' : cfg.source;
-                            switch(source){
-                                case 'thesauri':
-                                    store = getThesauriStore(cfg.thesauriId);
-                                    break;
-                                case 'users':
-                                    store = CB.DB.usersStore;
-                                    break;
-                                case 'groups':
-                                    store = CB.DB.groupsStore;
-                                    break;
-                                case 'usersgroups':
-                                    break;
-                                default:
-                                    if(objectWindow && objectWindow.objectsStore)  {
-                                        store = objectWindow.objectsStore;
-                                    }
-                            }
-                            var data = [];
-                            var value = e.record
-                                ? e.record.get('value')
-                                : null;
-                            if(store){
-                                value = Ext.isEmpty(value) ? [] : String(value).split(',');
-                                for(i=0; i < value.length; i++){
-                                    ri = store.findExact('id', parseInt(value[i], 10));
-                                    if(ri >-1) {
-                                        data.push(store.getAt(ri).data);
-                                    }
-                                }
-                            }
+                            e.value = e.record.get('value');
 
-                            w = (source == 'thesauri')
-                                ? new CB.ObjectsSelectionPopupList({data: objData, value: value})
-                                : new CB.ObjectsSelectionForm({data: objData, value: value});
+                            var formEditor = new CB.objects.field.editor.Form({
+                                data: objData
+                                ,value: e.record
+                                    ? e.value
+                                    : Ext.valueFrom(e.value, null)
+                                ,listeners: {
+                                    scope: e
+                                    ,setvalue: function(value, editor) {
+                                        var objStore = (this.grid)
+                                            ? this.grid.refOwner.objectsStore
+                                            : null;
 
-                            w.on('setvalue', function(data, ed){
-                                var value = [];
-                                if(Ext.isArray(data)){
-                                    Ext.each(
-                                        data
-                                        ,function(d){
-                                            value.push( d.id ? d.id : d);
+                                        if(objStore && editor.selectedRecordsData) {
+                                            Ext.each(
+                                                editor.selectedRecordsData
+                                                ,function(d){
+                                                    objStore.checkRecordExistance(d);
+                                                }
+                                                ,this
+                                            );
                                         }
-                                        ,this
-                                    );
-                                    value = value.join(',');
-                                } else {
-                                    value = data;
+
+                                        this.originalValue = this.value;
+                                        this.value = editor.getValue().join(',');
+
+                                        this.record.set('value', this.value);
+
+                                        if(this.grid.onAfterEditProperty) {
+                                            this.grid.onAfterEditProperty(editor, this);
+                                        } else {
+                                            this.grid.fireEvent('change', this);
+                                        }
+                                    }
+
+                                    ,destroy: function(ed) {
+                                        if(this.grid) {
+                                            this.grid.focus(false);
+                                        }
+                                    }
                                 }
-                                this.record.set('value', value);
+                            });
 
-                                this.originalValue = this.value;
-                                this.value = value;
-                                if(this.grid.onAfterEditProperty) {
-                                    this.grid.onAfterEditProperty(ed, this);
-                                } else {
-                                    this.grid.fireEvent('change', this);
-                                }
-                            }, e);
-
-                            if(w.setData) {
-                                w.setData(data);
-                            }
-
-                            w.show();
-
+                            formEditor.show();
                         } else {
                             return new CB.ObjectsTriggerField({
                                 enableKeyEvents: true

@@ -1,4 +1,17 @@
-CaseBox 1.9.344 (2014-10-24)
+CaseBox 1.9.345 (2014-10-29)
+==============================
+New Features, Improvements
+--------------------------
+- Objects ‘form’ editor (use Grid & DC)
+- added comment_user_id and comment_date fields to solr
+  this fields are updated when new comment added
+- updated translations in casebox intall sql, added multilanguage plugin
+
+Fixed Bugs:
+----------
+- reset page in grid on tree
+
+CaseBox 1.9.344 (2014-10-25)
 ==============================
 New Features, Improvements
 --------------------------

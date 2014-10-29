@@ -120,6 +120,12 @@ Ext.define('CB.browser.view.Grid', {
             }
         ];
 
+        var sm = (this.config.selModel)
+            ? this.config.selModel
+            : new Ext.selection.RowModel({
+               mode: 'MULTI'
+            });
+
         this.grid = new Ext.grid.Panel({
             loadMask: false
             ,cls: 'folder-grid'
@@ -175,9 +181,7 @@ Ext.define('CB.browser.view.Grid', {
                 ]
             }
             // ,sm: new Ext.grid.RowSelectionModel({
-            ,selModel: new Ext.selection.RowModel({
-                mode: 'MULTI'
-            })
+            ,selModel: sm
             ,listeners:{
                 scope: this
                 ,columnhide: this.saveGridState

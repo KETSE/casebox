@@ -141,6 +141,13 @@ class Security
             $params[] = ' %'.trim($p['query']).'% ';
         }
 
+        if (!empty($p['ids'])) {
+            $ids = Util\toNumericArray($p['ids']);
+            if (!empty($ids)) {
+                $where[] = 'id in (' . implode(',', $ids) . ')';
+            }
+        }
+
         $res = DB\dbQuery(
             'SELECT id
                 ,`name`

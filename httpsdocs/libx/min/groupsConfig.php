@@ -81,6 +81,8 @@ return array_merge(
             ,'//js/CB.Login.js'
             ,'//js/CB.GenericForm.js'
 
+            ,'//js/CB.ObjectsField.js'
+
             ,'//js/CB.Breadcrumb.js'
             ,'//js/browser/Tree.js'
             ,'//js/browser/ViewContainer.js'
@@ -95,7 +97,6 @@ return array_merge(
             ,'//js/CB.VerticalEditGrid.js'
             ,'//js/CB.VerticalSearchEditGrid.js'
             ,'//js/CB.Objects.js'
-            ,'//js/CB.ObjectsField.js'
             ,'//js/CB.PasteFromWord.js'
             ,'//js/CB.FileUploadWindow.js'
 
@@ -163,11 +164,13 @@ return array_merge(
             ,'//js/SearchPanel.js'
 
             ,'//js/state/DBProvider.js'
+
+            ,'//js/widget/TaskBar.js'
         )
 
         ,'jsdev' => array(
             '//js/app.js'
-            ,'//js/widget/TaskBar.js'
+            ,'//js/objects/field/editor/Form.js '
 
         )
     )

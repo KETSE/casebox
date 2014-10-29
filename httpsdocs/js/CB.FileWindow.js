@@ -233,6 +233,7 @@ Ext.define('CB.FileWindow', {
 
         var moreButton = new Ext.Button({
             iconCls: 'ib-points'
+            ,cls: 'btn-no-glyph'
             ,iconAlign:'top'
             ,scale: 'large'
             ,scope: this

@@ -527,6 +527,7 @@ class User
         if (isset($p['timezone'])) {
              # list of (all) valid timezones
             $zoneList = timezone_identifiers_list();
+
             if (empty($p['timezone']) || in_array($p['timezone'], $zoneList)) {
                 $cfg['timezone'] = $p['timezone'];
             } else {
@@ -606,7 +607,7 @@ class User
                 ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
                 ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
             )
-        ) or die( DB\dbQueryError() );
+        ) or die(DB\dbQueryError());
 
         /* updating session params if the updated user profile is currently logged user*/
         if ($p['id'] == $_SESSION['user']['id']) {
@@ -620,7 +621,7 @@ class User
             $u['language_id'] = $p['language_id'];
 
             $u['language'] = @Config::get('languages')[$p['language_id']-1];
-            $u['locale'] =  $languageSettings[$u['language']]['locale'];
+            $u['locale'] =  @$languageSettings[$u['language']]['locale'];
 
             $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
             $u['cfg']['gmt_offset'] = empty($cfg['timezone']) ? null :  System::getGmtOffset($cfg['timezone']);
@@ -631,7 +632,7 @@ class User
             if (!empty($cfg['short_date_format'])) {
                 $u['cfg']['short_date_format'] = $cfg['short_date_format'];
             }
-            $u['cfg']['time_format'] = $languageSettings[$u['language']]['time_format'];
+            $u['cfg']['time_format'] = @$languageSettings[$u['language']]['time_format'];
         }
 
         return array('success' => true);

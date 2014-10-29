@@ -170,6 +170,12 @@ subtype: this field is dependent on type field value
 <!-- sort_path: designed to sort by path -->
 <field name="sort_path"     type="text_general_sort" indexed="true" stored="true" />
 
+<!-- comment_user_id: id of last user that commented the object -->
+<field name="comment_user_id"   type="tint"     indexed="true" stored="true" />
+
+<!-- comment_date: timestamp of the last comment  -->
+<field name="comment_date"  type="tdate"        indexed="true" stored="true" />
+
 <!-- name_first_letter: first letter of the name -->
 <field name="name_first_letter" type="first_letter" indexed="true" stored="false" />
 

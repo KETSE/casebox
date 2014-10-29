@@ -451,6 +451,12 @@ class Objects
         if (!empty($objData['target_type'])) {
             $object_record['target_type'] = $objData['target_type'];
         }
+        // add last comment info if present
+        if (!empty($objData['sys_data']['lastComment'])) {
+            $object_record['comment_user_id'] = $objData['sys_data']['lastComment']['user_id'];
+            $object_record['comment_date'] = $objData['sys_data']['lastComment']['date'];
+        }
+
 
         $field = array();
         foreach ($linearData as $f) {

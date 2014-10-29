@@ -178,6 +178,9 @@ class Object
 
         $this->createCustomData();
 
+        //load the object from db to have all its created data
+        $this->load();
+
         //fire create event
         \CB\fireEvent('nodeDbCreate', $this);
 

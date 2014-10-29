@@ -298,7 +298,6 @@ Ext.define('CB.VerticalEditGrid', {
         //apply column widths to this.gridColumns array because
         //column model is recreated automaticly when loading object
         //and uses this.gridColumns array to create new column list
-        // clog('applyState', state);
         if(!Ext.isEmpty(state.columns)) {
             // clog('TODO: modify applyState in VerticalEditGrid', arguments);
             var col
@@ -306,10 +305,8 @@ Ext.define('CB.VerticalEditGrid', {
 
             for (var i = 0; i < cols.length; i++) {
                 var di = cols[i].dataIndex;
-                // clog('di', di);
                 if(state.columns[di] && !Ext.isEmpty(state.columns[di].width)) {
                     var w = state.columns[di].width;
-                    // clog('setwidth', w);
                     cols[i].setWidth(w);
                     this.columns[i].setWidth(w);
                 }
@@ -413,8 +410,6 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,onFieldTitleDblClick: function(gridView, td, cellIndex, record, tr, rowIndex, e, eOpts){
-        clog('onFieldTitleDblClick', this, arguments);
-
         var sm = this.getSelectionModel();
         // var cm = this.getColumnModel();
         // var s = sm.getSelectedCell();
@@ -655,7 +650,6 @@ Ext.define('CB.VerticalEditGrid', {
         var sm = this.getSelectionModel();
         if(sm && sm.getLastSelected) {
             var lastRec = sm.getLastSelected();
-            clog('lastRec', lastRec);
             if(lastRec) {
                 sm.select({
                     row: this.store.indexOf(lastRec)
