@@ -12,6 +12,7 @@ Ext.define('CB.objects.field.editor.Form', {
     ,layout: 'border'
     ,title: L.Associate
     ,closeAction: 'destroy'
+    ,selectedRecordsData: []
 
     ,constructor: function(config) {
         this.data = config.data;
@@ -346,6 +347,7 @@ Ext.define('CB.objects.field.editor.Form', {
             params = this.getSearchParams();
         }
 
+        params.from = 'formEditor';
         this.store.proxy.extraParams = params;
         this.store.reload(params);
     }

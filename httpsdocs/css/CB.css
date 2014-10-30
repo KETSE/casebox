@@ -826,9 +826,10 @@ text-decoration: underline;}
 .drop-target, .drop-target .x-grid3-viewport{background-color: rgb(234, 255, 234);}
 div.grid-drop-zone {
 	position: absolute;
-	top: 55%;
+	bottom: 4%;
 	left: 25%;
 	width: 50%;
+  max-height:100%;
 	border: 2px dashed #bbb;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;

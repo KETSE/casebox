@@ -133,7 +133,7 @@ subtype: this field is dependent on type field value
 <field name="user_ids"      type="tint"         indexed="true" stored="true" multiValued="true" />
 <!-- status: used for objects that have status values specified from tree thesauri -->
 <field name="status"        type="tlong" indexed="true" stored="true" multiValued="true" />
-<!-- status: the tasks status (1 Overdue, 2 Active, 3 Closed, 4 Pending)
+<!-- task_status: the tasks status (1 Overdue, 2 Active, 3 Closed, 4 Pending)
     can also be used, when needed, for other objects to specify their status -->
 <field name="task_status"        type="tint" indexed="true" stored="true" />
 <!-- category_id: tasks category (a thesaury defined set of values) -->

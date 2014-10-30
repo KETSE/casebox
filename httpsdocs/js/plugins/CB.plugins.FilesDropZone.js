@@ -41,7 +41,7 @@ Ext.define('CB.plugins.FilesDropZone', {
         App.un('dragfilesleave', this.hideDropZone, this);
         App.un('filesdrop', this.hideDropZone, this);
         if(this.dropZoneEl){
-            this.dropZoneEl.removeAllListeners();
+            this.dropZoneEl.clearListeners();
             this.dropZoneEl.remove();
         }
     }

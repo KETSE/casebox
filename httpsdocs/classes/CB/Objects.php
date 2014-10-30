@@ -399,28 +399,9 @@ class Objects
         }
 
         /* end of select distinct case ids from the case */
-        $res = DB\dbQuery(
-            'SELECT DISTINCT t.id
-                ,t.`name`
-                ,t.date
-                ,t.cfg
-                ,t.template_id
-                ,t2.status
-            FROM tree t
-            LEFT JOIN tasks t2 ON t.id = t2.id
-            WHERE t.id IN ('.implode(', ', $ids).')
-            ORDER BY 2'
-        ) or die(DB\dbQueryError());
 
-        while ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
-            if (!empty($r['date'])) {
-                $r['date'][10] = 'T';
-                $r['date'] .= 'Z';
-            }
-            $data[] = $r;
-        }
-        $res->close();
+        $data = Search::getObjects($ids, 'id,name,date,status:task_status');
+        $data = array_values($data);
 
         return array('success' => true, 'data' => $data);
     }

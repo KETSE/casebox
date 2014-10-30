@@ -564,7 +564,7 @@ Ext.define('CB.browser.view.Grid', {
         var rez = {columns: {}}
             ,store = this.store
             // ,cm = this.grid.getColumnModel()
-            ,cols = this.grid.columns
+            ,cols = this.grid.headerCt.getGridColumns() //columnManager.columns
             ,gs
             ,di;
 

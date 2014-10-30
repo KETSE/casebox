@@ -5,6 +5,7 @@ Ext.define('CB.objects.plugins.Files', {
     ,alias: 'CBObjectsPluginsFiles'
 
     ,xtype: 'CBObjectsPluginsFiles'
+    ,cls: 'drag-over-highlight'
 
     ,initComponent: function(){
 

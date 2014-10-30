@@ -1,3 +1,16 @@
+CaseBox 1.9.346 (2014-10-30)
+==============================
+New Features, Improvements
+--------------------------
+- review DisplayColumns plugin
+
+Fixed Bugs:
+----------
+- D&D a file in "Files" block in Preview, should somehow show that it's a dropzone
+- modified Objects.getAssociatedObjects method to return multilingual object names
+- initialize selectedRecordsData in fields form editor
+- removed extra space from libx/min/groupsCounfig.php
+
 CaseBox 1.9.345 (2014-10-29)
 ==============================
 New Features, Improvements

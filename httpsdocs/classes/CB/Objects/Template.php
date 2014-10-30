@@ -601,7 +601,7 @@ class Template extends Object
                     $res->close();
                 } else {
                     $objects = Search::getObjects($ids, 'id,name,template_id,pids');
-                    \CB\debug($objects);
+
                     foreach ($objects as $r) {
                         @$label = $r['name'];
                         if ($html && !empty($r['pids'])) {

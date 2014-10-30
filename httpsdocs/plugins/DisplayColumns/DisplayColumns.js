@@ -24,33 +24,32 @@ Ext.define('CB.plugins.DisplayColumns', {
         this.model = this.store.getModel();
         this.defaultFieldNames = this.extractFieldNames(this.model.fields);
         this.proxy = this.store.proxy;
-        // this.store.on('load', this.onStoreLoad, this);
+        this.store.on('load', this.onStoreLoad, this);
     }
 
     ,onStoreLoad: function(store, records, successful, eOpts) {//proxy, obj, options
         var rez = store.proxy.reader.rawData;
 
+        if(!Ext.isEmpty(rez.sort)) {// && Ext.isEmpty(this.store.sortInfo)
+            var sorters = this.store.getSorters();
+            sorters.suspendEvents();
+            sorters.clear();
+
+            sorters.addSort(rez.sort.property, rez.sort.direction);
+            sorters.resumeEvents(true);
+        }
+
         //add corresponding metadata to obj.result if DisplayColumns changed
         this.currentColumns = rez.DC || [];
 
         if(this.lastColumns !== Ext.util.JSON.encode(this.currentColumns)) {
-            var modelFields = this.getNewMetadata();
-            this.model.addFields(modelFields);
+            var storeFields = this.getNewMetadata();
+            store.setFields(storeFields);
 
             this.lastColumns = Ext.util.JSON.encode(this.currentColumns);
-            Ext.suspendLayouts();
 
-            this.reader.read(rez);
-            // this.store.loadData(rez.data);
             var nc = this.getNewColumns();
-
-            this.grid.reconfigure(this.store, nc);
-
-            Ext.resumeLayouts(false);
-        }
-
-        if(!Ext.isEmpty(rez.sort)) {// && Ext.isEmpty(this.store.sortInfo)
-            this.store.sortInfo = rez.sort;
+            this.grid.reconfigure(null, nc);
         }
     }
 
@@ -128,7 +127,7 @@ Ext.define('CB.plugins.DisplayColumns', {
                 if(key !== 'remove') {
                     // column.id = rez.length;
                     column.dataIndex = key;
-                    column.stateId = key;
+                    // column.stateId = key;
                     column.header = Ext.valueFrom(column.header, column.title);
                     switch(column.type) {
                         case 'date':
@@ -136,7 +135,7 @@ Ext.define('CB.plugins.DisplayColumns', {
                             break;
 
                         default:
-                            column.renderer = this.defaultColumnRenderer;
+                            // column.renderer = this.defaultColumnRenderer;
                     }
                     rez.push(column);
                 }

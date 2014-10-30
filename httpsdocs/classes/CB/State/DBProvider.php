@@ -137,6 +137,11 @@ class DBProvider
         }
         $res->close();
 
+        //backward compatibility to extjs3
+        if (!empty($rez['sort']['field']) && empty($rez['sort']['property'])) {
+            $rez['sort']['property'] = $rez['sort']['field'];
+        }
+
         return $rez;
     }
 }

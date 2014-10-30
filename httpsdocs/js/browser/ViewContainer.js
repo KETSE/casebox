@@ -379,6 +379,7 @@ Ext.define('CB.browser.ViewContainer', {
             autoLoad: false
             ,autoDestroy: true
             ,remoteSort: true
+            ,sortOnLoad: false
             ,extraParams: {}
             ,pageSize: 50
             ,model: 'Items'
