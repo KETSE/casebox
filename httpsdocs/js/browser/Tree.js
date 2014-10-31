@@ -596,7 +596,7 @@ Ext.define('CB.browser.Tree', {
 
         tab.editObject(
             {
-                nid: n.data.nid
+                id: n.data.nid
                 ,template_id: n.data.template_id
             }
         );

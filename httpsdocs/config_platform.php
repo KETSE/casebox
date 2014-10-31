@@ -159,7 +159,12 @@ function debug($msg)
 function fireEvent($eventName, &$params)
 {
     //skip trigering events from other triggers
-    if (!empty($GLOBALS['running_trigger'])) {
+    if (empty($GLOBALS['running_trigger'])) {
+        $GLOBALS['running_trigger'] = 0;
+    }
+
+    // dont allow triggers run deeper then 3rd level
+    if ($GLOBALS['running_trigger'] > 3) {
         return;
     }
 
@@ -175,7 +180,7 @@ function fireEvent($eventName, &$params)
             $methods = array($methods);
         }
         foreach ($methods as $method) {
-            $GLOBALS['running_trigger'] = true;
+            $GLOBALS['running_trigger']++;
             try {
                 $class->$method($params);
 
@@ -186,7 +191,7 @@ function fireEvent($eventName, &$params)
                     $e->getTraceAsString()
                 );
             }
-            unset($GLOBALS['running_trigger']);
+            $GLOBALS['running_trigger']--;
         }
         unset($class);
     }

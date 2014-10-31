@@ -40,7 +40,10 @@ class Listeners
         $date = @$o->getFieldValue('_date_end', 0)['value'];
         if (!empty($date)) {
             $objData['date_end'] = Util\dateISOToMysql($date);
+        } else {
+            $objData['date_end'] = null;
         }
+
         $o->setData($objData);
     }
 

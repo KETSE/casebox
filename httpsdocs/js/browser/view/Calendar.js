@@ -205,13 +205,6 @@ Ext.define('CB.Calendar', {
                     this.showEditWindow({ StartDate: dt, IsAllDay: ad }, el);
                     this.clearMsg();
                 }
-                //,rangeselect: this.onRangeSelect
-                ,eventmove: function(vw, rec){
-                    this.updateRecordDatesRemotely(rec);
-                }
-                ,eventresize: function(vw, rec){
-                    this.updateRecordDatesRemotely(rec);
-                }
                 ,initdrag: function(vw){
                     // return false;
                     // if(this.editWin && this.editWin.isVisible()) this.editWin.hide();
@@ -222,23 +215,7 @@ Ext.define('CB.Calendar', {
 
         this.enableBubble(['objectopen', 'changeparams', 'reload']);
     }
-    ,updateRecordDatesRemotely: function(record){
-        CB_Tasks.updateDates(
-            {
-                id: record.get('EventId')
-                ,date_start: date_local_to_ISO_string(record.get('StartDate'))
-                ,date_end: date_local_to_ISO_string(record.get('EndDate'))
-            }
-            ,function(r, e){
-                if(r.success === true) {
-                    this.commit();
-                } else {
-                    this.reject();
-                }
-            }
-            ,record
-        );
-    }
+
     ,doReloadEventsStore: function(){
         this.allowedReload = true;
         if(Ext.isEmpty(this.getLayout().activeItem)) return;
@@ -264,7 +241,8 @@ Ext.define('CB.Calendar', {
         // Note that this function is called from various event handlers in the CalendarPanel above.
     ,showEditWindow : function(rec, animateTarget){
             if(Ext.isEmpty(rec.data)) {
-                rec = new Ext.calendar.EventRecord(rec);
+                return;
+                // rec = new Ext.calendar.EventRecord(rec);
             }
 
             var s = [
@@ -321,6 +299,7 @@ Ext.define('CB.browser.view.Calendar', {
     ,border: false
     ,tbarCssClass: 'x-panel-white'
     ,folderProperties: {}
+
     ,initComponent: function(){
 
         this.titleItem = new Ext.toolbar.TextItem({
@@ -339,6 +318,15 @@ Ext.define('CB.browser.view.Calendar', {
                 ,rangeselect: this.onRangeSelect
                 ,dayclick: this.onDayClick
                 ,selectionchange: this.onSelectionChange
+
+                //,rangeselect: this.onRangeSelect
+                ,eventmove: function(vw, rec){
+                    this.updateRecordDatesRemotely(rec);
+                }
+                ,eventresize: function(vw, rec){
+                    this.updateRecordDatesRemotely(rec);
+                }
+
             }
         });
 
@@ -527,6 +515,35 @@ Ext.define('CB.browser.view.Calendar', {
 
     ,onSelectionChange: function(selection) {
         this.fireEvent('selectionchange', selection);
+    }
+
+    ,updateRecordDatesRemotely: function(record){
+        var dateEnd = date_local_to_ISO_string(record.get('EndDate'));
+
+        if(this.store) {
+            var r = this.store.findRecord('nid', record.get('EventId'), 0, false, true, true);
+            if(r) {
+                if(Ext.isEmpty(r.get('date_end'))) {
+                    dateEnd = null;
+                }
+            }
+        }
+
+        CB_Tasks.updateDates(
+            {
+                id: record.get('EventId')
+                ,date_start: date_local_to_ISO_string(record.get('StartDate'))
+                ,date_end: date_local_to_ISO_string(dateEnd)
+            }
+            ,function(r, e){
+                if(r.success === true) {
+                    this.commit();
+                } else {
+                    this.reject();
+                }
+            }
+            ,record
+        );
     }
 });
 

@@ -75,7 +75,6 @@ class Base
         $userLanguage = \CB\Config::get('user_language');
 
         $displayColumns = $this->getDC();
-        // var_dump($displayColumns);
 
         $customColumns = array();
 

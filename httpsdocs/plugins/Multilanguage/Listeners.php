@@ -30,6 +30,7 @@ class Listeners
     public function onSolrQuery(&$p)
     {
         $nameField = $this->getNameField();
+
         if (empty($nameField)) {
             return;
         }

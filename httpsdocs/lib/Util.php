@@ -454,7 +454,7 @@ function adjustTextForDisplay($text)
 
 function dateISOToMysql($date_string)
 {
-    if (empty($date_string)) {
+    if (empty($date_string) || (substr($date_string, 0, 10) == '0000-00-00')) {
         return null;
     }
     $d = strtotime($date_string);

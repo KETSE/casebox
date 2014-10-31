@@ -296,7 +296,9 @@ Ext.define('CB.ObjectCardView', {
         this.delayedLoadTask = new Ext.util.DelayedTask(this.doLoad, this);
 
         this.enableBubble(['changeparams', 'filedownload', 'createobject']);
+
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
+        App.on('objectchanged', this.onObjectChanged, this);
     }
 
     ,onBeforeDestroy: function(c) {
@@ -458,6 +460,7 @@ Ext.define('CB.ObjectCardView', {
         this.addParamsToHistory(this.loadedData);
 
         this.loadedData = Ext.apply({id: id}, this.requestedLoadData);
+
         if(Ext.isDefined(this.loadedData.viewIndex)) {
             this.onViewChangeClick(this.loadedData.viewIndex, false);
         }
@@ -974,6 +977,24 @@ Ext.define('CB.ObjectCardView', {
         var ai = this.getLayout().activeItem;
         if(ai.isXType('CBObjectProperties')) {
             ai.setSelectedVersion(params);
+        }
+    }
+
+    ,onObjectChanged: function(data, component) {
+        if(!isNaN(data)) {
+            data = {id: data};
+        }
+
+        if(!Ext.isEmpty(data.isNew)) {
+            this.requestedLoadData = data;
+            this.doLoad();
+            return;
+        }
+
+        if(!Ext.isEmpty(this.loadedData)) {
+            if((data.pid == this.loadedData.id) || (data.id == this.loadedData.id)) {
+                this.onReloadClick();
+            }
         }
     }
 }

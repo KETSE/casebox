@@ -8,7 +8,6 @@ Ext.define('CB.PluginsPanel', {
     ,initComponent: function(){
         CB.PluginsPanel.superclass.initComponent.apply(this, arguments);
 
-        App.on('objectchanged', this.onObjectChanged, this);
         App.on('filesuploaded', this.onFilesUploaded, this);
 
         this.delayLoadTask = new Ext.util.DelayedTask(this.doLoad, this);
@@ -124,22 +123,7 @@ Ext.define('CB.PluginsPanel', {
         this.removeAll(true);
         delete this.loadedParams;
     }
-    ,onObjectChanged: function(data, component) {
-        if(!isNaN(data)) {
-            data = {id: data};
-        }
 
-        if(!Ext.isEmpty(data.isNew)) {
-            this.doLoad(data);
-            return;
-        }
-
-        if(!Ext.isEmpty(this.loadedParams)) {
-            if((data.pid == this.loadedParams.id) || (data.id == this.loadedParams.id)) {
-                this.reload();
-            }
-        }
-    }
     ,onFilesUploaded: function(pids) {
         if(!Ext.isEmpty(this.loadedParams)) {
             if(pids.indexOf(String(this.loadedParams.id)) >=0 ) {

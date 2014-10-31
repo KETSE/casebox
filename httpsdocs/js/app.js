@@ -726,7 +726,7 @@ function initApp() {
 
                                     ,destroy: function(ed) {
                                         if(this.grid) {
-                                            this.grid.focus(false);
+                                            this.grid.focus(false, 100);
                                         }
                                     }
                                 }

@@ -651,12 +651,18 @@ Ext.define('CB.VerticalEditGrid', {
         if(sm && sm.getLastSelected) {
             var lastRec = sm.getLastSelected();
             if(lastRec) {
-                sm.select({
-                    row: this.store.indexOf(lastRec)
-                    ,column: 1
-                });
+                var rowIndex = this.store.indexOf(lastRec)
+                    ,pos = {
+                        row: rowIndex
+                        ,column: 1
+                    };
+
+                sm.select(pos);
+                sm.setCurrentPosition(pos);
+                // this.getView().focusCell(pos, true);
             }
         }
+        // this.getView().focus(false, true);
     }
 
     ,attachKeyListeners: function(comp) {

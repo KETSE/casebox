@@ -497,49 +497,6 @@ class Template extends Object
                 break;
 
             case 'combo':
-            case '_case':
-                if (empty($value)) {
-                    $value = '';
-                    break;
-                }
-                $a = Util\toNumericArray($value);
-                if (empty($a)) {
-                    $value = '';
-                    break;
-                }
-                $res = DB\dbQuery(
-                    'SELECT name FROM tree WHERE id IN ('.implode(',', $a).') ORDER BY 1'
-                ) or die(DB\dbQueryError());
-                $value = array();
-                while ($r = $res->fetch_assoc()) {
-                    $value[] = htmlspecialchars($r['name'], ENT_COMPAT);
-                }
-                $res->close();
-                if (sizeof($value) == 1) {
-                    $value = $value[0];
-                }
-                break;
-
-            case '_case_object':
-                if (empty($value)) {
-                    $value = '';
-                    break;
-                }
-                $a = Util\toNumericArray($value);
-                if (empty($a)) {
-                    $value = '';
-                    break;
-                }
-                $value = Search::getObjectNames($a);
-                if (empty($value)) {
-                    $value = '';
-                } else {
-                    $value = array_values($value);
-                    if (sizeof($value) == 1) {
-                        $value = $value[0];
-                    }
-                }
-                break;
 
             case '_objects':
                 if (empty($value)) {
@@ -601,7 +558,6 @@ class Template extends Object
                     $res->close();
                 } else {
                     $objects = Search::getObjects($ids, 'id,name,template_id,pids');
-
                     foreach ($objects as $r) {
                         @$label = $r['name'];
                         if ($html && !empty($r['pids'])) {
