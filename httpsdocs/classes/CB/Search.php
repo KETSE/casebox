@@ -8,7 +8,7 @@ class Search extends Solr\Client
 {
     public static $defaultFields = array(
         'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'target_id', 'system',
-        'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate',
+        'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'comment_user_id', 'comment_date',
         'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'status',
         'task_status', 'category_id', 'importance', 'completed', 'versions', 'ntsc'
     );

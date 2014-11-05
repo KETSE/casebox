@@ -1,3 +1,16 @@
+CaseBox 1.9.348 (2014-11-05)
+==============================
+New Features, Improvements
+--------------------------
+- recent activity vfolders
+- made changes to Tasks and AutoSetFields plugin related to setting dateEnd for an object
+
+Fixed Bugs:
+----------
+- Newly created nodes doesn't appear in tree/grid
+- pagination bug related to paging toolbar
+- Can't create task using calendar view: Access denied
+
 CaseBox 1.9.347 (2014-10-31)
 ==============================
 Fixed Bugs:

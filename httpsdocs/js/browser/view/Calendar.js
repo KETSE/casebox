@@ -462,7 +462,8 @@ Ext.define('CB.browser.view.Calendar', {
         var allday = ((Ext.Date.format(range.StartDate, 'H:i:s') == '00:00:00') && (Ext.Date.format(range.EndDate, 'H:i:s') == '23:59:59') ) ? 1 : -1;
         var prefix = (allday == 1) ? 'date' : 'datetime';
         var data = {
-            template_id: App.config.default_task_template
+            pid: this.refOwner.folderProperties.id
+            ,template_id: App.config.default_task_template
             ,data: {
                 allday: {
                     value: allday
@@ -481,7 +482,8 @@ Ext.define('CB.browser.view.Calendar', {
         var allday = (Ext.Date.format(date, 'H:i:s') == '00:00:00') ? 1 : -1;
         var prefix = (allday == 1) ? 'date' : 'datetime';
         var data = {
-            template_id: App.config.default_task_template
+            pid: this.refOwner.folderProperties.id
+            ,template_id: App.config.default_task_template
             ,data: {
                 allday: {
                     value: allday

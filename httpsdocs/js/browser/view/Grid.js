@@ -13,7 +13,6 @@ Ext.define('CB.browser.view.Grid', {
                 header: 'ID'
                 ,width: 80
                 ,dataIndex: 'nid'
-                ,stateId: 'nid'
                 ,hidden: true
                 ,sort: this.columnSortOverride
                 ,groupable: false
@@ -21,7 +20,6 @@ Ext.define('CB.browser.view.Grid', {
                 header: L.Name
                 ,width: 300
                 ,dataIndex: 'name'
-                ,stateId: 'name'
                 ,renderer: function(v, m, r, ri, ci, s){
                     m.css = 'icon-grid-column-top '+ r.get('iconCls');
                     if(r.get('acl_count') > 0) {
@@ -48,7 +46,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,hidden:true
                 ,width: 150
                 ,dataIndex: 'path'
-                ,stateId: 'path'
                 ,renderer: function(v, m, r, ri, ci, s){
                     m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
@@ -58,7 +55,6 @@ Ext.define('CB.browser.view.Grid', {
                 header: L.Project
                 ,width: 150
                 ,dataIndex: 'case'
-                ,stateId: 'case'
                 ,renderer: function(v, m, r, ri, ci, s){
                     m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
@@ -68,7 +64,6 @@ Ext.define('CB.browser.view.Grid', {
                 header: L.Date
                 ,width: 120
                 ,dataIndex: 'date'
-                ,stateId: 'date'
                 // ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' ' + App.timeFormat
                 ,renderer: App.customRenderers.datetime
@@ -77,7 +72,6 @@ Ext.define('CB.browser.view.Grid', {
                 header: L.Size
                 ,width: 80
                 ,dataIndex: 'size'
-                ,stateId: 'size'
                 ,renderer: App.customRenderers.filesize
                 ,sort: this.columnSortOverride
             },{
@@ -85,7 +79,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,hidden: true
                 ,width: 200
                 ,dataIndex: 'cid'
-                ,stateId: 'cid'
                 ,renderer: function(v){
                     return CB.DB.usersStore.getName(v);
                 }
@@ -94,7 +87,22 @@ Ext.define('CB.browser.view.Grid', {
                 header: L.Owner
                 ,width: 200
                 ,dataIndex: 'oid'
-                ,stateId: 'oid'
+                ,renderer: function(v){
+                    return CB.DB.usersStore.getName(v);
+                }
+                ,sort: this.columnSortOverride
+            },{
+                header: L.UpdatedBy
+                ,width: 200
+                ,dataIndex: 'uid'
+                ,renderer: function(v){
+                    return CB.DB.usersStore.getName(v);
+                }
+                ,sort: this.columnSortOverride
+            },{
+                header: L.CommentedBy
+                ,width: 200
+                ,dataIndex: 'comment_user_id'
                 ,renderer: function(v){
                     return CB.DB.usersStore.getName(v);
                 }
@@ -104,7 +112,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,hidden:true
                 ,width: 120
                 ,dataIndex: 'cdate'
-                ,stateId: 'cdate'
                 ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' '  +  App.timeFormat
                 ,sort: this.columnSortOverride
@@ -113,7 +120,14 @@ Ext.define('CB.browser.view.Grid', {
                 ,hidden:true
                 ,width: 120
                 ,dataIndex: 'udate'
-                ,stateId: 'udate'
+                ,xtype: 'datecolumn'
+                ,format: App.dateFormat + ' ' + App.timeFormat
+                ,sort: this.columnSortOverride
+            },{
+                header: L.CommentedDate
+                ,hidden:true
+                ,width: 120
+                ,dataIndex: 'comment_date'
                 ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' ' + App.timeFormat
                 ,sort: this.columnSortOverride

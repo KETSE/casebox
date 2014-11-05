@@ -72,6 +72,9 @@ class Browser
 
         fireEvent('treeInitialize', $params);
 
+        // array of all available classes defined in treeNodes
+        // used to check if any class should add its nodes based
+        // on last node from current path
         $this->treeNodeClasses = Path::getNodeClasses($this->treeNodeConfigs);
 
         foreach ($this->treeNodeClasses as $nodeClass) {
@@ -80,6 +83,15 @@ class Browser
         }
 
         $this->path = Path::createNodesPath($path, $this->treeNodeGUIDConfigs);
+
+        //set path and input params for last node
+        //because iterating each class and requesting children can
+        //invoke a search that will use last node to get facets and DC
+        if (!empty($this->path)) {
+            $lastNode = $this->path[sizeof($path) - 1];
+            $lastNode->path = $this->path;
+            $lastNode->requestParams = $this->requestParams;
+        }
 
         Cache::set('current_path', $this->path);
 

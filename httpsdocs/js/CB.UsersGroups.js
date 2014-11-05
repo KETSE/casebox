@@ -682,7 +682,7 @@ Ext.define('CB.UsersGroupsTree', {
 
     }
     ,clearFilter: function(){
-        clog('TODO: refactor filtering nodes through store');
+        plog('TODO: refactor filtering nodes through store');
         rn = this.getRootNode();
         // rn.cascadeBy({
         //     before:function(n){
@@ -782,11 +782,11 @@ Ext.define('CB.UsersGroupsForm', {
                 ,'<span class="cG">'+L.User+':</span> {name}, <span class="cG">'+L.lastAction+':</span> {[ Ext.isEmpty(values.last_action_time) ? "" : values.last_action_time ]}<br />'
                 ,'<span class="cG">'+L.addedByUser+':</span> {owner}, {cdate}'
             ]
-            ,itemSelector:'.click'
+            ,itemSelector:'.none'
             ,autoHeight: true
             ,listeners:{
                 scope: this
-                ,itemclick: this.onEditUserDataClick
+                ,containerclick: this.onUserInfoContainerCLick
             }
         });
 
@@ -851,7 +851,7 @@ Ext.define('CB.UsersGroupsForm', {
                         ,listeners:{
                             scope: this
                             ,afterrender: function(c){
-                                c.getEl().on('change', this.onPhotoChanged, this);
+                                c.inputEl.on('change', this.onPhotoChanged, this);
                             }
                         }
                     }, this.userInfo ]
@@ -1033,13 +1033,20 @@ Ext.define('CB.UsersGroupsForm', {
         );
     }
 
-    ,onEditUserDataClick: function(cmp, record, item, index, e, eOpts){//w, idx, el, ev
-        if(e && (e.getTarget().localName == "img") ) {
-            el = this.down('[name="photo"]').getEl();
-            el.dom.click();
-        } else {
-            this.fireEvent('edit');
+    ,onUserInfoContainerCLick: function(cmp, e, eOpts){//w, idx, el, ev
+        if(e) {
+            var target = e.getTarget();
+            if(target.localName == "img") {
+                var el = this.down('[name="photo"]').inputEl;
+                el.dom.click();
+            } else if(target.classList.contains('click')) {
+                this.onEditUserDataClick();
+            }
         }
+    }
+
+    ,onEditUserDataClick: function(cmp, e, eOpts){//w, idx, el, ev
+        this.fireEvent('edit');
     }
 
     ,onPhotoChanged: function(ev, el, o){

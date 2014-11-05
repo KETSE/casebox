@@ -399,10 +399,27 @@ Ext.define('CB.browser.ViewContainer', {
                 // }
             })
 
+            ,loadPage: function(page, options) {
+                var store = this.store,
+                size = store.getPageSize();
+
+                store.currentPage = page;
+
+                // Copy options into a new object so as not to mutate passed in objects
+                options = Ext.apply({
+                    page: page,
+                    start: (page - 1) * size,
+                    limit: size,
+                }, options);
+
+                this.changeSomeParams(options);
+            }.bind(this)
+
             ,listeners: {
                 scope: this
-                ,beforeload: function(store, options2) {
+                ,beforeload: function(store, operation, eOpts) {
                     var options = {facets: 'general'};
+
                     Ext.apply(options, Ext.valueFrom(this.params, {}));
 
                     //dont load calendar view when view bound are not set
@@ -418,6 +435,7 @@ Ext.define('CB.browser.ViewContainer', {
 
                     Ext.apply(options, vp);
                     store.proxy.extraParams = options;
+                    store.currentPage = Ext.valueFrom(options.page, 1);
                 }
                 ,load: this.onStoreLoad
             }
@@ -757,6 +775,7 @@ Ext.define('CB.browser.ViewContainer', {
             if(Ext.isDefined(paramsSubset.page)) {
                 paramsSubset.start = (paramsSubset.page -1) * this.store.pageSize;
             } else {
+                paramsSubset.page = 1;
                 paramsSubset.start = 0;
             }
         }

@@ -76,6 +76,10 @@ class Base
 
         $displayColumns = $this->getDC();
 
+        if (!empty($displayColumns['sort'])) {
+            $p['result']['sort'] = $displayColumns['sort'];
+        }
+
         $customColumns = array();
 
         $idx = 0;
@@ -204,7 +208,6 @@ class Base
 
             $rez = $customColumns;
         }
-
         /* get user state and merge the state with display columns */
 
         $stateFrom = empty($displayColumns['from'])

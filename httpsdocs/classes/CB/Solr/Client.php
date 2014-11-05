@@ -14,7 +14,7 @@ class Client extends Service
      */
     public static function runCron()
     {
-        if (isset($GLOBALS['running_trigger'])
+        if (!empty($GLOBALS['running_trigger'])
             || isset($GLOBALS['solr_index_disable_by_custom_script'])
         ) {
             return;

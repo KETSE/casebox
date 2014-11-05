@@ -130,31 +130,38 @@ Ext.define('CB.ProfileForm', {
 
         this.objectsStore = new CB.DB.ObjectsStore();
 
+        // this.inputElId = Ext.id();
+
         this.photoField = new Ext.form.TextField({
             cls: 'fl'
             ,style: 'position:absolute;width:1px;height:1px;opacity:0;top:-100px'
+            // ,inputId: this.inputElId
             ,inputType: 'file'
             ,name: 'photo'
             ,border: false
             ,listeners:{
                 scope: this
                 ,afterrender: function(c){
-                    c.getEl().on('click', this.onPhotoChanged, this);
+                    c.inputEl.on('change', this.onPhotoChanged, this);
                 }
             }
         });
 
         this.photoView = new Ext.DataView({
-            tpl: ['<tpl for="."><div><img width="70" height="70" class="user-photo-field2 click icon-user70-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ Ext.Date.format(new Date(), "His") ]}"></div>'
+            tpl: ['<tpl for="."><div>'
+                //,'<label for="' + this.inputElId + '">'
+                ,'<img width="70" height="70" class="user-photo-field2 click icon-user70-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ Ext.Date.format(new Date(), "His") ]}">'
+                // ,'</label>'
+                ,'</div>'
                 ,'<div><a href="#" name="change" class="click">'+L.Change+'</a> &nbsp; <a href="#" name="remove" class="click">'+L.Delete+'</a></div>'
                 ,'</tpl>'
             ]
             ,data: [{}]
-            ,itemSelector:'.click'
+            ,itemSelector:'.none'
             ,autoHeight: true
             ,listeners:{
                 scope: this
-                ,itemclick: this.onPhotoClick
+                ,containerclick: this.onPhotoContainerClick
             }
         });
 
@@ -375,14 +382,16 @@ Ext.define('CB.ProfileForm', {
         this.setDirty(false);
     }
 
-    ,onPhotoClick: function(cmp, record, item, index, e, eOpts){ //w, idx, el, ev
+    ,onPhotoContainerClick: function(cmp, e, eOpts){ //w, idx, el, ev
         if(!e) {
             return;
         }
         var target = e.getTarget();
 
-        if( (target.localName == "img") || (target.name == 'change') )
-            return this.photoField.getEl().dom.click();
+        if((target.localName == "img") || (target.name == 'change')) {
+            return this.photoField.inputEl.dom.click();
+        }
+
         if (target.name == 'remove') {
             return this.onPhotoRemoveClick();
         }

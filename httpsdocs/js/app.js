@@ -31,6 +31,8 @@ Ext.onReady(function(){
 
     initApp();
 
+    Ext.Date.use24HourTime = true;
+
     // Ext.Direct.addProvider(Ext.app.REMOTING_API);
     Ext.direct.Manager.addProvider(Ext.app.REMOTING_API);
 
@@ -666,7 +668,7 @@ function initApp() {
             ,objectId: e.objectId
             ,path: e.path
         };
-        var w, th;
+        var w, th, ed;
         var tr = e.fieldRecord;
         var cfg = tr.get('cfg');
         var objectWindow = e.ownerCt
@@ -742,7 +744,7 @@ function initApp() {
                         break;
 
                     case 'text':
-                        var ed = new Ext.form.TextArea({
+                        ed = new Ext.form.TextArea({
                             data: objData
                             ,allowBlur: false
                             ,plugins: [{
@@ -820,6 +822,27 @@ function initApp() {
 
                         return ed;
 
+                    case 'tagField':
+                        ed = new CB.objects.field.editor.Tag({
+                            // enableKeyEvents: true
+                            data: objData
+                            ,valueField: 'id'
+                            ,displayField: 'name'
+                            ,forceSelection: true
+                            ,store: CB.DB.usersStore
+                            ,queryMode: 'remote'
+                            ,autoLoadOnValue: true
+                            // ,multiSelect: true
+                            // ,hideTrigger: true
+                            ,stacked: true
+                            // ,queryMode: 'remote'
+                            // ,checkChange: Ext.emptyFn
+                            ,pinList: false
+                            ,filterPickList: true
+                        });
+
+                        return ed;
+                        // break;
                     default:
                         return new CB.ObjectsComboField({
                             enableKeyEvents: true
@@ -1214,7 +1237,7 @@ function overrides(){
     Ext.util.Collection.prototype.getAt = function(index){
         if(Ext.isEmpty(this.items)){
             clog('Found MixedCollextion with empty "items" property', this);
-            return null;
+            return 'null';
         }
         return this._getAt(index);
     };

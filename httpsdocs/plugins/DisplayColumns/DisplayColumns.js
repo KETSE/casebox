@@ -137,6 +137,11 @@ Ext.define('CB.plugins.DisplayColumns', {
                         default:
                             // column.renderer = this.defaultColumnRenderer;
                     }
+
+                    if(this.owner.columnSortOverride) {
+                        column.sort = this.owner.columnSortOverride;
+                    }
+
                     rez.push(column);
                 }
             }
@@ -181,7 +186,7 @@ Ext.define('CB.plugins.DisplayColumns', {
         );
         return rez;
     }
-    ,defaultColumnRenderer: function (v, meta, record, row_idx, col_idx, store) {
-        return record.json[this.dataIndex];
-    }
+    // ,defaultColumnRenderer: function (v, meta, record, row_idx, col_idx, store) {
+    //     return record.json[this.dataIndex];
+    // }
 });

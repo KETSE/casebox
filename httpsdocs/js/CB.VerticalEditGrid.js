@@ -299,7 +299,7 @@ Ext.define('CB.VerticalEditGrid', {
         //column model is recreated automaticly when loading object
         //and uses this.gridColumns array to create new column list
         if(!Ext.isEmpty(state.columns)) {
-            // clog('TODO: modify applyState in VerticalEditGrid', arguments);
+            // plog('TODO: modify applyState in VerticalEditGrid', arguments);
             var col
                 ,cols =  this.columnManager.headerCt.gridDataColumns;
 
