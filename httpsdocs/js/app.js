@@ -744,9 +744,9 @@ function initApp() {
                         break;
 
                     case 'text':
-                        ed = new Ext.form.TextArea({
+                        ed = new Ext.form.Text({
                             data: objData
-                            ,allowBlur: false
+
                             ,plugins: [{
                                 ptype: 'CBPluginsDropDownList'
                                 ,commands: [
@@ -829,13 +829,11 @@ function initApp() {
                             ,valueField: 'id'
                             ,displayField: 'name'
                             ,forceSelection: true
-                            ,store: CB.DB.usersStore
                             ,queryMode: 'remote'
                             ,autoLoadOnValue: true
-                            // ,multiSelect: true
+                            ,multiSelect: true
                             // ,hideTrigger: true
                             ,stacked: true
-                            // ,queryMode: 'remote'
                             // ,checkChange: Ext.emptyFn
                             ,pinList: false
                             ,filterPickList: true
@@ -1009,11 +1007,11 @@ function initApp() {
                 });
             case 'memo':
                 var height = Ext.valueFrom(cfg.height, 50);
-                height = parseInt(height, 10) + 7;
+                height = parseInt(height, 10);
                 if(e.grid) {
                     var rowEl = e.grid.getView().getRow(e.row);
                     if(rowEl) {
-                        var rowHeight = Ext.get(rowEl).getHeight() - 2;
+                        var rowHeight = Ext.get(rowEl).getHeight() - 12;
                         if(height < rowHeight) {
                             height = rowHeight;
                         }
@@ -1231,6 +1229,95 @@ function initApp() {
 }
 
 function overrides(){
+    //override Ext.form.field.Tag
+    Ext.override(
+        Ext.form.field.Tag
+        ,{
+            setValue: function(value, doSelect, skipLoad) {
+                clog('OVERRIDEN', this.value, this.rawValue, arguments);
+                var me = this,
+                    valueStore = me.valueStore,
+                    valueField = me.valueField,
+                    unknownValues = [],
+                    record, len, i, valueRecord, cls
+
+                    ,originalValue;
+
+
+                if (Ext.isEmpty(value)) {
+                    value = null;
+                }
+                if (Ext.isString(value) && me.multiSelect) {
+                    value = value.split(me.delimiter);
+                }
+                value = Ext.Array.from(value, true);
+
+                originalValue = Ext.Array.clone(value);
+
+                for (i = 0, len = value.length; i < len; i++) {
+                    record = value[i];
+                    if (!record || !record.isModel) {
+                        valueRecord = valueStore.findExact(valueField, record);
+                        if (valueRecord >= 0) {
+                            value[i] = valueStore.getAt(valueRecord);
+                        } else {
+                            valueRecord = me.findRecord(valueField, record);
+                            if (!valueRecord) {
+                                if (me.forceSelection) {
+                                    unknownValues.push(record);
+                                } else {
+                                    valueRecord = {};
+                                    valueRecord[me.valueField] = record;
+                                    valueRecord[me.displayField] = record;
+
+                                    cls = me.valueStore.getModel();
+                                    valueRecord = new cls(valueRecord);
+                                }
+                            }
+                            if (valueRecord) {
+                                value[i] = valueRecord;
+                            }
+                        }
+                    }
+                }
+
+                if ((skipLoad !== true) && (unknownValues.length > 0) && (me.queryMode === 'remote')) {
+                    var params = {};
+                    params[me.valueParam || me.valueField] = unknownValues.join(me.delimiter);
+                    me.store.load({
+                        params: params,
+                        callback: function() {
+                            if (me.itemList) {
+                                me.itemList.unmask();
+                            }
+                            me.setValue(originalValue, doSelect, true);
+                            me.autoSize();
+                            me.lastQuery = false;
+                        }
+                    });
+                    return false;
+                }
+
+                // For single-select boxes, use the last good (formal record) value if possible
+                if (!me.multiSelect && (value.length > 0)) {
+                    for (i = value.length - 1; i >= 0; i--) {
+                        if (value[i].isModel) {
+                            value = value[i];
+                            break;
+                        }
+                    }
+                    if (Ext.isArray(value)) {
+                        value = value[value.length - 1];
+                    }
+                }
+
+                return me.callParent([value, doSelect]);
+            }
+        }
+    );
+
+
+
     //there are some situations when mixed collection has null defined "items" property
     //and results in error
     Ext.util.Collection.prototype._getAt = Ext.util.Collection.prototype.getAt;

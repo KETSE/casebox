@@ -131,7 +131,7 @@ Ext.define('CB.VerticalEditGrid', {
 
 
         this.enableBubble(['change', 'fileupload', 'filedownload', 'filesdelete', 'loaded', 'saveobject']);
-        CB.VerticalEditGrid.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
 
     ,initRenderers: function () {
@@ -232,7 +232,7 @@ Ext.define('CB.VerticalEditGrid', {
                     return this.renderers[tr.get('type')](v, this);
                 }
                 if(!Ext.isEmpty(tr.get('cfg').height)) {
-                    meta.attr += ' style="min-height:' + tr.get('cfg').height + 'px"';
+                    meta.style += 'min-height:' + tr.get('cfg').height + 'px';
                 }
 
                 if(Ext.isEmpty(v)) return '';

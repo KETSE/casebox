@@ -16,21 +16,20 @@ Ext.define('CB.objects.field.editor.Tag', {
                 ,{multiValued: false}
             );
 
+        this.detectStore();
         this.callParent(arguments);
 
         // this.setValue(config.value);
     }
 
     ,initComponent: function(){
-        // this.detectStore();
-
         Ext.apply(this, {
             listeners: {
                 scope: this
             }
         });
         this.callParent(arguments);
-
+        clog('this.selectionModel', this.selectionModel);
         // this.store.on('load', this.onLoad, this);
     }
 
@@ -143,15 +142,31 @@ Ext.define('CB.objects.field.editor.Tag', {
         return this.store;
     }
 
-    ,setValue: function(value) {
-        if(Ext.isEmpty(value)) {
+    ,setValue: function(value, doSelect, skipLoad) {
+        if(Ext.isPrimitive(value) && (Ext.isEmpty(value) || isNaN(value))) {
             value = null;
-        } else {
-            value = {id: value, name: value};
+        } else if(Ext.isNumeric(value)) {
+            value = Ext.Array.from(String(value), true);
         }
-        clog('setting value', value, this.store.getCount());
 
-        this.callParent([value]);
+        clog('encode', this.value, (Ext.isObject(value) || (Ext.isArray(value) && Ext.isObject(value[0]))) ? 'object' : Ext.encode(value));
+        // else {
+        //     value = {id: value, name: value};
+        // }
+        clog(
+            'setting value'
+            , value
+            , this.store.getCount()
+            , arguments
+            ,Ext.Array.from(value, true)
+        );
+
+        clog('before call parent', this.value);
+        returnedValue = this.callParent([value, doSelect, skipLoad]);
+
+        clog('after call parent', this.value, value);
+
+        return this;
 
         // this.fireEvent('change', this, value);
     }
@@ -163,6 +178,17 @@ Ext.define('CB.objects.field.editor.Tag', {
         }
 
         this.callParent();
+    }
+
+    ,onKeyDown: function(e) {
+        var me = this,
+            selModel = me.selectionModel;
+
+        //workaround: there is a js error on keydown in sources of tag field
+        if(!selModel.setLastFocused) {
+            selModel.setLastFocused = Ext.emptyFn;
+        }
+        this.callParent(arguments);
     }
 
     // ,getValue: function() {

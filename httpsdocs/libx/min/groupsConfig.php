@@ -170,8 +170,9 @@ return array_merge(
 
         ,'jsdev' => array(
             '//js/app.js'
-            ,'//js/objects/field/editor/Form.js '
-            ,'//js/objects/field/editor/Tag.js '
+            ,'//js/objects/field/editor/Form.js'
+            ,'//js/objects/field/editor/Tag.js'
+            ,'//js/view/BoundListKeyNav.js'
 
         )
     )

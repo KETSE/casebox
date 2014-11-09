@@ -37,6 +37,17 @@ Ext.define('Items', {
     ,fields: Ext.apply([], CB.DB.defaultItemFields)
 });
 
+
+Ext.define('DropDownListItems', {
+    extend: 'Ext.data.Model'
+    ,fields: [
+        {name: 'id', type: 'int'}
+        ,{name: 'text',  type: 'string'}
+        ,{name: 'info',  type: 'string'}
+        ,{name: 'descr',  type: 'string'}
+    ]
+});
+
 Ext.define('ContentItem', {
     extend: 'Ext.data.Model'
     ,fields: [

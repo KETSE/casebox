@@ -43,11 +43,11 @@ Ext.define('CB.objects.plugins.Comments', {
             //,baseBodyCls: "comment-input"
             ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
             // disable until prugin refactored for ExtJS 5
-            // ,plugins: [
-            //     {
-            //         ptype: 'CBPluginsDropDownList'
-            //     }
-            // ]
+            ,plugins: [
+                {
+                    ptype: 'CBPluginsDropDownList'
+                }
+            ]
             ,listeners: {
                 scope: this
                 ,keypress: this.onMessageBoxKeyPress

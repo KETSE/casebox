@@ -3,6 +3,7 @@ namespace CB\Objects;
 
 use CB\DB;
 use CB\Util;
+use CB\L;
 use CB\Log;
 use CB\Security;
 

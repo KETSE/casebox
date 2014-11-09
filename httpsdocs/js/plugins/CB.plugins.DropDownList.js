@@ -28,7 +28,7 @@ Ext.define('CB.plugins.DropDownList', {
             ]
             ,displayTpl: new Ext.XTemplate(
                 '<tpl for=".">'
-                    ,'<div class="x-combo-list-item users-list-item">'
+                    ,'<li role="option" class="x-boundlist-item users-list-item">'
                         ,'<div class="thumb">'
                             ,'<img class="i32" src="/' + App.config.coreName + '/photo/{id}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.id) ]}" title="{text}">'
                         ,'</div>'
@@ -37,7 +37,7 @@ Ext.define('CB.plugins.DropDownList', {
                             ,'{[this.replaceLastQuery(values.text)]}'
                             ,'<div class="descr">{[this.replaceLastQuery(values.descr)]}</div>'
                         ,'</div>'
-                    ,'</div>'
+                    ,'</li>'
                 ,'</tpl>'
                 ,'<div class="x-clear"></div>'
                 ,{
@@ -68,7 +68,7 @@ Ext.define('CB.plugins.DropDownList', {
         this.owner = owner;
 
         this.store = new Ext.data.JsonStore({
-            fields: ['id', 'text', 'info', 'descr']
+            model: 'DropDownListItems'
         });
 
         Ext.copyTo(
@@ -78,10 +78,7 @@ Ext.define('CB.plugins.DropDownList', {
                 'matchFieldWidth'
                 ,'pickerAlign'
                 ,'openCls'
-                // ,'applyTriggers'
-                // ,'initEvents' //overwriten in Casebox
-                // ,'onEsc'
-                // ,'onDownArrow'
+                ,'initEvents' //overwriten in Casebox
                 ,'expand'
                 ,'onExpand'
                 ,'doAlign'
@@ -89,7 +86,6 @@ Ext.define('CB.plugins.DropDownList', {
                 ,'collapseIf'
                 ,'getPicker'
                 ,'getRefItems'
-                // ,'onTriggerClick'
                 ,'onOtherFocus'
                 ,'alignPicker'
                 ,'beforeDestroy'
@@ -100,34 +96,16 @@ Ext.define('CB.plugins.DropDownList', {
             this.owner
             ,Ext.form.field.ComboBox.prototype
             ,[
-                // 'mixins'
-                // ,'config'
-                // ,'publishes'
-                // ,'twoWayBindable'
-                // ,'triggerCls'
-                // 'hiddenName'
-                // ,'hiddenDataCls'
-                // ,'ariaRole'
+                ,'defaultListConfig'
+                ,'listConfig'
                 ,'childEls'
-                // ,'filtered'
-                // ,'afterRender'
                 ,'delimiter'
-                // ,'triggerAction'
-                // ,'allQuery'
-                // ,'queryParam'
                 ,'getStore'
-                // ,'createPicker'
-                // ,'setHiddenValue'
                 ,'updateBindSelection'
                 ,'onPageChange'
-                ,'initEvents'
-                // ,'onAdded'
-                // ,'onPaste'
                 ,'onListRefresh'
                 ,'onBeforeSelect'
                 ,'onBeforeDeselect'
-                ,'onListSelectionChange'
-                // ,'onKeyUp'
             ]
         );
 
@@ -146,16 +124,13 @@ Ext.define('CB.plugins.DropDownList', {
             ,syncSelection: Ext.emptyFn
             ,setSelection: Ext.emptyFn
             ,onCollapse: Ext.emptyFn
-            // ,createPicker: Ext.emptyFn
-            // ,initEvents: Ext.emptyFn
-            // ,
+            ,onEsc: Ext.emptyFn
+
             ,assertValue: function() {
-                clog('assertValue', this, arguments);
                 return '';
             }
 
             ,select : function(record, index){
-                clog('select', this, arguments);
                 if(this.fireEvent('beforeselect', this, record, index) !== false){
                     // this.setSelectedValue(record);
                     this.collapse();
@@ -166,21 +141,26 @@ Ext.define('CB.plugins.DropDownList', {
             ,createPicker: function() {
                 var me = this,
                     picker,
-                    pickerCfg = Ext.apply({
-                        xtype: 'boundlist',
-                        pickerField: me,
-                        selModel: {
-                            mode: me.multiSelect ? 'SIMPLE' : 'SINGLE',
-                            enableInitialSelection: false
-                        },
-                        floating: true,
-                        hidden: true,
-                        store: me.store,
-                        displayField: me.displayField,
-                        preserveScrollOnRefresh: true,
-                        pageSize: me.pageSize,
-                        tpl: me.tpl
-                    }, me.listConfig, me.defaultListConfig);
+                    pickerCfg = Ext.apply(
+                        {
+                            xtype: 'boundlist'
+                            ,pickerField: me
+                            ,selModel: {
+                                mode: me.multiSelect ? 'SIMPLE' : 'SINGLE'
+                                // ,enableInitialSelection: true
+                            }
+                            ,floating: true
+                            ,hidden: true
+                            ,store: me.store
+                            ,displayField: me.displayField
+                            ,preserveScrollOnRefresh: true
+                            ,pageSize: me.pageSize
+                            ,tpl: me.displayTpl
+                            ,navigationModel: 'CBboundlist'
+                        }
+                        ,me.listConfig
+                        ,me.defaultListConfig
+                    );
 
                 picker = me.picker = Ext.widget(pickerCfg);
                 if (me.pageSize) {
@@ -195,7 +175,6 @@ Ext.define('CB.plugins.DropDownList', {
                 me.mon(picker.getSelectionModel(), {
                     beforeselect: me.onBeforeSelect,
                     beforedeselect: me.onBeforeDeselect,
-                    selectionchange: me.onListSelectionChange,
                     scope: me
                 });
 
@@ -204,54 +183,77 @@ Ext.define('CB.plugins.DropDownList', {
 
         });
 
-        // owner.initEvents();
-
         owner.on('render', this.onRender, this);
-        owner.on('afterrender', this.onAfterRender, this);
-        owner.on('select', this.setSelectedValue, this);
+        owner.on('beforeselect', this.setSelectedValue, this);
     }
+
 
     ,onRender: function(ed){
         this.owner.wrap = this.owner.getEl();
-        // this.owner.createPicker();
 
         //add listeners
+        ed.on('keydown', this.onKeyDown, this);
         ed.on('keyup', this.onKeyUp, this);
     }
 
-    ,onAfterRender: function(ed){
-
-        // ed.keyNav.down = function(e){
-        //     if(!this.isExpanded()){
-        //         return true;
-        //     } else {
-        //         this.inKeyMode = true;
-        //         this.selectNext();
-        //     }
-        // };
-        // ed.keyNav.enter = function(e){
-        //     // add flag so that the grid doesnt complete the edit if list expanded
-        //     this.listSelection = this.isExpanded() && (e.getKey() == e.ENTER);
-        //     clog('enter', this.listSelection, arguments);
-        //     this.onViewClick();
-        // };
+    ,onBeforeDestroy: function(ed){
+        ed.un('keydown', this.onKeyDown, this);
+        ed.un('keyup', this.onKeyUp, this);
     }
 
-    ,onBeforeDestroy: function(){
-        App.un('keyup', this.onKeyUp, this);
+    ,onKeyDown: function(ed, e){
+        if(!ed.picker) {
+            return;
+        }
+
+        var me = this
+            ,picker = ed.picker
+            ,allItems = picker.all
+            ,oldItem = picker.highlightedItem
+            ,oldItemIdx
+            ,newItemIdx;
+
+        switch(e.getKey()) {
+            case e.ENTER:
+                if(ed.isExpanded) {
+                    e.stopEvent();
+                    ed.onKeyEnter(e);
+                }
+                break;
+
+            case e.ESC:
+                if(ed.isExpanded) {
+                    e.stopEvent();
+                    ed.collapse();
+                }
+                break;
+
+            case e.UP:
+                if(ed.isExpanded) {
+                    e.stopEvent();
+                    ed.onKeyUp(e);
+                }
+                break;
+
+            case e.DOWN:
+                if(ed.isExpanded) {
+                    e.stopEvent();
+                    ed.onKeyDown(e);
+                }
+                break;
+
+            case e.LEFT:
+            case e.RIGHT:
+                // do nothing and let the event propagate
+                break;
+        }
     }
 
     ,onKeyUp: function(ed, e){
         var value = ed.getRawValue();
 
-        clog('onKeyUp', this, e, e.getKey());
         if(Ext.isEmpty(value)) {
             return;
-        }
-
-        switch(e.getKey()) {
-            case e.ENTER:
-                return;
         }
 
         var el = ed.inputEl
@@ -260,7 +262,7 @@ Ext.define('CB.plugins.DropDownList', {
                 value.substring(0, caretPosition)
                 ,value.substring(caretPosition)
             ];
-        clog('!!', this.commands, arguments, caretPosition, parts);
+
         //iterate each command and check if matches any
         for (var i = 0; i < this.commands.length; i++) {
             var cmd = this.commands[i];
@@ -355,18 +357,16 @@ Ext.define('CB.plugins.DropDownList', {
         this.owner.expand();
     }
 
-    ,setSelectedValue: function(ed, records, index) {
-        clog('setSelectedValue', arguments);
+    ,setSelectedValue: function(ed, record, index) {
         var cmd = this.currentCommand
-            ,field = Ext.valueFrom(cmd.insertField, 'id');
+            ,field = Ext.valueFrom(cmd.insertField, 'id')
+            ,value = ed.getRawValue()
+            ,newValue = value.substring(0, cmd.queryStartIndex) + record.get(field)
+            ,newCaretPosition = newValue.length;
 
-        var value = ed.getRawValue();
-
-        var newValue = value.substring(0, cmd.queryStartIndex) +
-            records[0].get(field);
-            newCaretPosition = newValue.length;
         newValue += value.substring(cmd.queryStartIndex + cmd.query.length);
 
+        ed.collapse();
         ed.setRawValue(newValue);
         this.setCaretPosition(ed.inputEl.dom, newCaretPosition);
     }
