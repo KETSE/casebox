@@ -502,6 +502,7 @@ span.icon-right{ float: right; width: 18px; display: inline-block !important }
 .icon-element, .thesauri_set li { background-image: url(i/ico/element.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .icon-element-off { background-image: url(i/ico/element-off.png) !important; background-position: 0 50%; background-repeat: no-repeat}
 .group-titles-colbg{ background-color: #F9F7ED }
+.group-titles-colbg .x-grid-cell-inner {font-weight: bold}
 
 img.duplicate-plus {width:11px; height: 11px; background: url(i/duplication/ui-check-box-plus.png) 0 0 no-repeat}
 /* to be removed, using 'vcN' now

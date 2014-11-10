@@ -1,3 +1,9 @@
+CaseBox 1.9.351 (2014-11-10)
+==============================
+New Features, Improvements
+--------------------------
+- Header fields should have "bold" in Grid.Edit mode & LeftAligned in Preview mode.
+
 CaseBox 1.9.350 (2014-11-10)
 ==============================
 New Features, Improvements
