@@ -202,12 +202,6 @@ textarea {
     margin-bottom: 20px;
 }
 
-
-.obj-plugin .grid-drop-zone {
-    margin-left: -1000px;
-    width:0;
-    height:0;
-}
 .obj-plugin-title {
     margin: 0 !important;
 }

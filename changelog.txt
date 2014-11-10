@@ -1,3 +1,24 @@
+CaseBox 1.9.350 (2014-11-10)
+==============================
+New Features, Improvements
+--------------------------
+- fixed some right panel issues
+  - showing drop zone on d&d from desktop
+  - add button displayed with bigger width on tasks plugin
+  - addding items from content items plugin had js error
+- Time format in calendar changed to use App.timeFormat
+
+Fixed Bugs:
+----------
+- creating shortcut to shortcut should be equivalent to copying the shortcut
+- Double loading indicator
+- Can't upload a photo for user in User management Wnd
+- Can't D&D from Tree to Grid, automatically entering selected node onStartDrag
+
+Notes:
+----------
+- Moved and separated overrides to js/override folder
+
 CaseBox 1.9.349 (2014-11-09)
 ==============================
 New Features, Improvements

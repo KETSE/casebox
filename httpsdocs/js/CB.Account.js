@@ -130,28 +130,23 @@ Ext.define('CB.ProfileForm', {
 
         this.objectsStore = new CB.DB.ObjectsStore();
 
-        // this.inputElId = Ext.id();
-
-        this.photoField = new Ext.form.TextField({
+        this.photoField = new Ext.form.field.File({
             cls: 'fl'
             ,style: 'position:absolute;width:1px;height:1px;opacity:0;top:-100px'
-            // ,inputId: this.inputElId
-            ,inputType: 'file'
+            ,buttonOnly: true
             ,name: 'photo'
             ,border: false
             ,listeners:{
                 scope: this
                 ,afterrender: function(c){
-                    c.inputEl.on('change', this.onPhotoChanged, this);
+                    c.button.fileInputEl.on('change', this.onPhotoChanged, this);
                 }
             }
         });
 
         this.photoView = new Ext.DataView({
             tpl: ['<tpl for="."><div>'
-                //,'<label for="' + this.inputElId + '">'
                 ,'<img width="70" height="70" class="user-photo-field2 click icon-user70-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ Ext.Date.format(new Date(), "His") ]}">'
-                // ,'</label>'
                 ,'</div>'
                 ,'<div><a href="#" name="change" class="click">'+L.Change+'</a> &nbsp; <a href="#" name="remove" class="click">'+L.Delete+'</a></div>'
                 ,'</tpl>'
@@ -389,7 +384,7 @@ Ext.define('CB.ProfileForm', {
         var target = e.getTarget();
 
         if((target.localName == "img") || (target.name == 'change')) {
-            return this.photoField.inputEl.dom.click();
+            return this.photoField.button.fileInputEl.dom.click();
         }
 
         if (target.name == 'remove') {
@@ -418,13 +413,18 @@ Ext.define('CB.ProfileForm', {
     }
 
     ,onPhotoRemoveClick: function(){
-        Ext.Msg.confirm(L.Confirm, L.RemovePhotoConfirm, function(b, e){
-            if(b == 'yes'){
-                CB_User.removePhoto( { id: this.data.id }, function(){
-                    this.photoView.update([{id: this.data.id }]);
-                }, this);
+        Ext.Msg.confirm(
+            L.Confirmation
+            ,L.RemovePhotoConfirm
+            ,function(b, e){
+                if(b == 'yes'){
+                    CB_User.removePhoto( { id: this.data.id }, function(){
+                        this.photoView.update([{id: this.data.id }]);
+                    }, this);
+                }
             }
-        }, this);
+            ,this
+        );
     }
 
     ,onSaveClick: function(){

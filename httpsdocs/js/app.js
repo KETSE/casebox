@@ -65,12 +65,23 @@ Ext.onReady(function(){
         App.config = r.config;
         App.loginData = r.user;
         App.loginData.iconCls = 'icon-user-' + Ext.valueFrom(r.user.sex, '');
-        if(App.loginData.cfg.short_date_format) App.dateFormat = App.loginData.cfg.short_date_format;
-        if(App.loginData.cfg.long_date_format) App.longDateFormat = App.loginData.cfg.long_date_format;
-        if(App.loginData.cfg.time_format) App.timeFormat = App.loginData.cfg.time_format;
+
+        if(App.loginData.cfg.short_date_format) {
+            App.dateFormat = App.loginData.cfg.short_date_format;
+        }
+
+        if(App.loginData.cfg.long_date_format) {
+            App.longDateFormat = App.loginData.cfg.long_date_format;
+        }
+
+        if(App.loginData.cfg.time_format) {
+            App.timeFormat = App.loginData.cfg.time_format;
+        }
+
         App.mainViewPort = new CB.ViewPort({
             rtl: (App.config.rtl === true)
         });
+
         App.mainViewPort.doLayout();
         App.mainViewPort.initCB( r, e );
     });
@@ -79,7 +90,6 @@ Ext.onReady(function(){
 
 //--------------------------------------------------------------------------- application initialization function
 function initApp() {
-    overrides();
     App.dateFormat = 'd.m.Y';
     App.longDateFormat = 'j F Y';
     App.timeFormat = 'H:i';
@@ -1226,275 +1236,6 @@ function initApp() {
         plog('component activated', arguments, this);
     };
 
-}
-
-function overrides(){
-    //override Ext.form.field.Tag
-    Ext.override(
-        Ext.form.field.Tag
-        ,{
-            setValue: function(value, doSelect, skipLoad) {
-                clog('OVERRIDEN', this.value, this.rawValue, arguments);
-                var me = this,
-                    valueStore = me.valueStore,
-                    valueField = me.valueField,
-                    unknownValues = [],
-                    record, len, i, valueRecord, cls
-
-                    ,originalValue;
-
-
-                if (Ext.isEmpty(value)) {
-                    value = null;
-                }
-                if (Ext.isString(value) && me.multiSelect) {
-                    value = value.split(me.delimiter);
-                }
-                value = Ext.Array.from(value, true);
-
-                originalValue = Ext.Array.clone(value);
-
-                for (i = 0, len = value.length; i < len; i++) {
-                    record = value[i];
-                    if (!record || !record.isModel) {
-                        valueRecord = valueStore.findExact(valueField, record);
-                        if (valueRecord >= 0) {
-                            value[i] = valueStore.getAt(valueRecord);
-                        } else {
-                            valueRecord = me.findRecord(valueField, record);
-                            if (!valueRecord) {
-                                if (me.forceSelection) {
-                                    unknownValues.push(record);
-                                } else {
-                                    valueRecord = {};
-                                    valueRecord[me.valueField] = record;
-                                    valueRecord[me.displayField] = record;
-
-                                    cls = me.valueStore.getModel();
-                                    valueRecord = new cls(valueRecord);
-                                }
-                            }
-                            if (valueRecord) {
-                                value[i] = valueRecord;
-                            }
-                        }
-                    }
-                }
-
-                if ((skipLoad !== true) && (unknownValues.length > 0) && (me.queryMode === 'remote')) {
-                    var params = {};
-                    params[me.valueParam || me.valueField] = unknownValues.join(me.delimiter);
-                    me.store.load({
-                        params: params,
-                        callback: function() {
-                            if (me.itemList) {
-                                me.itemList.unmask();
-                            }
-                            me.setValue(originalValue, doSelect, true);
-                            me.autoSize();
-                            me.lastQuery = false;
-                        }
-                    });
-                    return false;
-                }
-
-                // For single-select boxes, use the last good (formal record) value if possible
-                if (!me.multiSelect && (value.length > 0)) {
-                    for (i = value.length - 1; i >= 0; i--) {
-                        if (value[i].isModel) {
-                            value = value[i];
-                            break;
-                        }
-                    }
-                    if (Ext.isArray(value)) {
-                        value = value[value.length - 1];
-                    }
-                }
-
-                return me.callParent([value, doSelect]);
-            }
-        }
-    );
-
-
-
-    //there are some situations when mixed collection has null defined "items" property
-    //and results in error
-    Ext.util.Collection.prototype._getAt = Ext.util.Collection.prototype.getAt;
-    Ext.util.Collection.prototype.getAt = function(index){
-        if(Ext.isEmpty(this.items)){
-            clog('Found MixedCollextion with empty "items" property', this);
-            return 'null';
-        }
-        return this._getAt(index);
-    };
-
-    //improve stripTags function
-    Ext.util.Format.stripTags = function (str, allow) {
-        // making sure the allow arg is a string containing only tags in lowercase (<a><b><c>)
-        allow = (((allow || "") + "").toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join('');
-
-        var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi;
-        var commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
-        return str.replace(commentsAndPhpTags, '').replace(
-            tags
-            ,function ($0, $1) {
-                return allow.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : '';
-            }
-        );
-    };
-
-
-    Ext.override(Ext.data.Store, {
-        deleteIds: function(ids){
-            var idx
-                ,idProperty = Ext.isEmpty(this.proxy.reader)
-                    ? 'id'
-                    : Ext.valueFrom(
-                        this.proxy.reader.idProperty
-                        ,this.proxy.reader.config.idProperty
-                        ,'id'
-                    );
-
-            if(Ext.isPrimitive(ids)) {
-                ids = String(ids).split(',');
-            }
-
-            if((this.getCount() > 0) && this.data) {
-                for (var i = 0; i < ids.length; i++) {
-                    idx = this.findExact(idProperty, String(ids[i]));
-
-                    if(idx < 0) {
-                        idx = this.findExact(idProperty, parseInt(ids[i], 10));
-                    }
-                    if(idx >= 0) {
-                        this.removeAt(idx);
-                    }
-                }
-            }
-        }
-    });
-
-    // Ext.override(Ext.Window, {
-    //     setIconCls: function(i){
-    //         Ext.fly(this.ownerCt.getTabEl(this)).child('.x-tab-strip-text').replaceClass(this.iconCls, i);
-    //         this.setIconCls(i);
-    //     }
-    // });
-
-    /* Overrides for preventing nodes selection when start dragging node  */
-    // Ext.override(Ext.tree.TreeDragZone, {
-    //     lastClickAt: null,
-    //     b4MouseDown : function(e){
-    //         var sm = this.tree.getSelectionModel();
-    //         this.lastClickAt = e.getXY();
-    //         if(sm)
-    //             sm.suspendEvents(true);
-    //         Ext.tree.TreeDragZone.superclass.b4MouseDown.apply(this, arguments);
-    //     }
-    // });
-
-    // Ext.override(Ext.tree.TreeDragZone, {
-    //     onMouseUp : function(e){
-    //         var sm = this.tree.getSelectionModel();
-    //         var loc = e.getXY();
-    //         if(sm && (Ext.isEmpty(this.lastClickAt) || (this.lastClickAt[0] == loc[0] && this.lastClickAt[1] == loc[1])) )
-    //             sm.resumeEvents();
-    //         else{
-    //             sm.clearEventQueue();
-    //             sm.resumeEvents();
-    //         }
-    //         Ext.tree.TreeDragZone.superclass.onMouseUp.apply(this, arguments);
-    //     }
-    // });
-
-    // Ext.override(Ext.tree.DefaultSelectionModel, {
-    //     clearEventQueue : function() {
-    //         var me = this;
-    //         delete me.eventQueue;
-    //     }
-    // });
-
-    /* prevend deselecting of selected when rightClicking in a RowSelectionModel*/
-    // Ext.grid.RowSelectionModel.prototype.selectRow = function(index, keepExisting, preventViewNotify){
-    //         if(this.isLocked() || (index < 0 || index >= this.grid.store.getCount()) || (keepExisting && this.isSelected(index))){
-    //             return;
-    //         }
-    //         var r = this.grid.store.getAt(index);
-    //         if(r && this.fireEvent('beforerowselect', this, index, keepExisting, r) !== false){
-    //             if(!keepExisting || this.singleSelect){
-    //                 this.clearSelections();
-    //             }
-    //             this.selections.add(r);
-    //             this.last = this.lastActive = index;
-    //             if(!preventViewNotify){
-    //                 this.grid.getView().onRowSelect(index);
-    //             }
-    //             if(!this.silent){
-    //                 this.fireEvent('rowselect', this, index, r);
-    //                 this.fireEvent('selectionchange', this);
-    //             }
-    //         }
-    //     };
-
-    // Ext.grid.RowSelectionModel.prototype.handleMouseDown = function(g, rowIndex, e){
-    //     if(e.button !== 0 || this.isLocked()) return;
-    //     var view = this.grid.getView();
-    //     if(e.shiftKey && !this.singleSelect && this.last !== false){
-    //         var last = this.last;
-    //         this.selectRange(last, rowIndex, e.ctrlKey);
-    //         this.last = last; // reset the last
-    //         view.focusRow(rowIndex);
-    //     }else{
-    //         var isSelected = this.isSelected(rowIndex);
-    //         if(e.ctrlKey && isSelected){
-    //             this.deselectRow(rowIndex);
-    //         }else if(!isSelected || this.getCount() > 1){
-    //             this.selectRow(rowIndex, e.ctrlKey || e.shiftKey);
-    //             view.focusRow(rowIndex);
-    //         }
-    //     }
-    // };
-
-    // Ext.calendar.CalendarPanel.prototype.todayText = L.Today;
-    // Ext.calendar.CalendarPanel.prototype.dayText = L.Day;
-    // Ext.calendar.CalendarPanel.prototype.weekText = L.Week;
-    // Ext.calendar.CalendarPanel.prototype.monthText = L.Month;
-    // Ext.calendar.MonthView.prototype.todayText = L.Today;
-    // Ext.calendar.DayView.prototype.todayText = L.Today;
-    // Ext.calendar.DateRangeField.prototype.toText = L.to;
-    // Ext.calendar.DateRangeField.prototype.allDayText = L.AllDay;
-
-    /* avoid errors for grid dragZone when using cell selection model */
-    // Ext.grid.GridDragZone.prototype._getDragData = Ext.grid.GridDragZone.prototype.getDragData;
-    // Ext.grid.GridDragZone.prototype.getDragData = function(e) {
-    //     var t = Ext.lib.Event.getTarget(e);
-    //     var rowIndex = this.view.findRowIndex(t);
-    //     if(rowIndex !== false){
-    //         var sm = this.grid.selModel;
-    //         // return default method result if selection model has isSelected method
-    //         if(sm.isSelected) {
-    //             return this._getDragData(e);
-    //         }
-
-    //         // process in the scope of cell selection model
-    //         sm.getCount = function() {return 1;};
-    //         var selections = [];
-    //         var sc = sm.getSelectedCell();
-    //         if(Ext.isEmpty(sc)) {
-    //             if((sc[0] != rowIndex) || e.hasModifier()){
-    //                 sm.handleMouseDown(this.grid, rowIndex, e);
-    //             }
-    //             selections = [this.grid.store.getAt(rowIndex)];
-    //         }
-    //         return {
-    //             grid: this.grid
-    //             ,ddel: this.ddel
-    //             ,rowIndex: rowIndex
-    //             ,selections: selections
-    //         };
-    //     }
-    // };
 }
 
 window.onbeforeunload = function() {

@@ -2,6 +2,7 @@
 namespace CB\Objects;
 
 use CB\DB;
+use CB\Objects;
 
 class Shortcut extends Object
 {
@@ -36,6 +37,20 @@ class Shortcut extends Object
             throw new \Exception("No target id specified for shortcut creation", 1);
         }
 
+        //check if target is also shortuc and replace with its target
+        if (Objects::getType($p['target_id']) == 'shortcut') {
+            $res = DB\dbQuery(
+                'SELECT target_id
+                FROM tree
+                WHERE id = $1',
+                $p['target_id']
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                $p['target_id'] = $r['target_id'];
+            }
+            $res->close();
+        }
+
         $p['name'] = 'link to #' . $p['target_id'];
 
         if (empty($p['template_id'])) {
@@ -64,18 +79,7 @@ class Shortcut extends Object
             $d['data'] = array();
         }
 
-        $res = DB\dbQuery(
-            'SELECT tt.type
-            FROM tree t
-            JOIN templates tt
-                ON t.template_id = tt.id
-            WHERE t.id = $1',
-            $d['target_id']
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $d['target_type'] = $r['type'];
-        }
+        $d['target_type'] = Objects::getType($d['target_id']);
     }
 
     /**

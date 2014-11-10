@@ -12,9 +12,6 @@ Ext.define('CB.objects.plugins.Tasks', {
                 iconCls: 'i-plus'
                 ,scope: this
                 ,handler: this.onAddClick
-                ,data: {
-                    template_id: App.config.default_task_template
-                }
             })
         };
 
@@ -128,6 +125,12 @@ Ext.define('CB.objects.plugins.Tasks', {
     }
 
     ,onAddClick: function(b, e) {
-        this.fireEvent('createobject', b.config.data, e);
+        this.fireEvent(
+            'createobject'
+            ,{
+                template_id: App.config.default_task_template
+            }
+            ,e
+        );
     }
 });

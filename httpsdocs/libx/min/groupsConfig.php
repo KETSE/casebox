@@ -173,7 +173,27 @@ return array_merge(
             ,'//js/objects/field/editor/Form.js'
             ,'//js/objects/field/editor/Tag.js'
             ,'//js/view/BoundListKeyNav.js'
+            // ,'//js/overrides/form/action/Submit.js'
 
+        )
+
+        ,'jsoverrides' => array(
+            '//js/overrides/calendar/dd/DayDropZone.js'
+            ,'//js/overrides/calendar/form/field/DateRange.js'
+            ,'//js/overrides/calendar/template/BoxLayout.js'
+            ,'//js/overrides/calendar/view/Day.js'
+            ,'//js/overrides/calendar/view/DayBody.js'
+            ,'//js/overrides/calendar/view/Month.js'
+            ,'//js/overrides/calendar/CalendarPanel.js'
+
+            ,'//js/overrides/data/Store.js'
+
+            ,'//js/overrides/form/field/Tag.js'
+
+            ,'//js/overrides/tree/ViewDragZone.js'
+
+            ,'//js/overrides/util/Collection.js'
+            ,'//js/overrides/util/Format.js'
         )
     )
 );

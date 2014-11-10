@@ -842,16 +842,17 @@ Ext.define('CB.UsersGroupsForm', {
                     ,height: 60
                     ,bodyStyle: 'padding: 10px'
                     ,items: [{
-                        xtype: 'textfield'
+                        xtype: 'filefield'
                         ,name: 'photo'
                         ,cls: 'fl'
                         ,style: 'position:absolute;width:1px;height:1px;opacity:0;top:-100px'
-                        ,inputType: 'file'
+                        ,buttonOnly: true
                         ,allowBlank: false
+                        ,clearOnSubmit: false
                         ,listeners:{
                             scope: this
                             ,afterrender: function(c){
-                                c.inputEl.on('change', this.onPhotoChanged, this);
+                                c.button.fileInputEl.on('change', this.onPhotoChanged, this);
                             }
                         }
                     }, this.userInfo ]
@@ -1037,7 +1038,7 @@ Ext.define('CB.UsersGroupsForm', {
         if(e) {
             var target = e.getTarget();
             if(target.localName == "img") {
-                var el = this.down('[name="photo"]').inputEl;
+                var el = this.down('[name="photo"]').button.fileInputEl;
                 el.dom.click();
             } else if(target.classList.contains('click')) {
                 this.onEditUserDataClick();

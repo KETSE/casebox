@@ -1287,6 +1287,7 @@ Ext.define('CB.browser.ViewContainer', {
 
         switch(action){
             case 'copy':
+            case 'shortcut':
                 if(r.targetId == this.folderProperties.id){
                     this.onReloadClick();
                 }

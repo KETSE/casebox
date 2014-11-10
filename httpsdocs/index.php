@@ -5,6 +5,11 @@ require_once 'init.php';
 
 $coreName = Config::get('core_name');
 $coreUrl = Config::get('core_url');
+
+$debugSuffix = isDebugHost()
+  ? '&debug=1'
+  : '';
+
 $rtl = Config::get('rtl')
     ? '-rtl'
     : '';
@@ -196,11 +201,13 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
 <?php
 echo '<script type="text/javascript" src="' . $coreUrl . 'remote/api.php"></script>';
 
-echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('js'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
-echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('jsdev'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('js'), 1) . $debugSuffix . '"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('jsdev'), 1) . $debugSuffix . '"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('jsoverrides'), 1) . $debugSuffix . '"></script>';
+
 $js = Config::getJsList();
 if (!empty($js)) {
-    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri($coreName.'_js'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
+    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri($coreName.'_js'), 1) . $debugSuffix . '"></script>';
 }
 $prc = Config::getPluginsRemoteConfig();
 if (!empty($prc)) {

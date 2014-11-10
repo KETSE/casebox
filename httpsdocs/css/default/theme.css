@@ -114,7 +114,7 @@ border-radius: 4;
     background-position: 0 50%;
     background-repeat: no-repeat;
 }
-.x-mask-loading, .x-mask-loading div {
+.x-mask-loading .x-mask-msg-text {
     background-image: url(d/loader.gif);
     background-position: 6px 50%;
     background-repeat: no-repeat;

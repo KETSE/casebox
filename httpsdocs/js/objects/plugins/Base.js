@@ -4,7 +4,6 @@ Ext.define('CB.objects.plugins.Base', {
     extend: 'Ext.Panel'
     ,border: false
     ,header: false
-    ,tbarCssClass: 'obj-plugin-h'
     ,cls: 'obj-plugin'
 
     ,initComponent: function(){

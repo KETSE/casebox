@@ -146,9 +146,10 @@ Ext.define('CB.objects.plugins.ContentItems', {
     }
 
     ,onCreateObjectClick: function(b, e) {
-        b.data.pid = this.params.id;
-        b.data.path = this.params.path;
-        this.fireEvent('createobject', b.data, e);
+        var d = b.config.data;
+        d.pid = this.params.id;
+        d.path = this.params.path;
+        this.fireEvent('createobject', d, e);
     }
 
 });
