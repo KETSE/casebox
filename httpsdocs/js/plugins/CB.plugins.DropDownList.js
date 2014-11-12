@@ -23,7 +23,6 @@ Ext.define('CB.plugins.DropDownList', {
                     ,regex: /^(\d+)/i
 
                     ,handler: this.onDiezCommand
-                    //,scope: this
                 }
             ]
             ,displayTpl: new Ext.XTemplate(
@@ -118,9 +117,6 @@ Ext.define('CB.plugins.DropDownList', {
 
             ,selectByValue: Ext.emptyFn
             ,onTriggerClick: Ext.emptyFn
-            ,onMouseDown: Ext.emptyFn
-            ,onBlur: Ext.emptyFn
-            ,onPaste: Ext.emptyFn
             ,syncSelection: Ext.emptyFn
             ,setSelection: Ext.emptyFn
             ,onCollapse: Ext.emptyFn

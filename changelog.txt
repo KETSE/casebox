@@ -1,5 +1,11 @@
 CaseBox 1.9.352 (2014-11-12)
 ==============================
+Fixed Bugs:
+----------
+- bluring editor with DropDownList plugin, by selecting other cell with mouse, result in js error
+
+CaseBox 1.9.352 (2014-11-12)
+==============================
 New Features, Improvements
 --------------------------
 - reanalized key events for @user edit fiels in grid

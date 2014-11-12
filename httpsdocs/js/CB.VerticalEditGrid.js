@@ -608,7 +608,7 @@ Ext.define('CB.VerticalEditGrid', {
 
         var col = context.column;
         var ed = col.getEditor();
-        if(ed) {
+        if(ed && !ed.destroying) {
             ed.destroy();
         }
         if(this.editors && this.editors[t]) {
