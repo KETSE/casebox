@@ -133,6 +133,7 @@ Ext.define('CB.plugins.DropDownList', {
             ,select : function(record, index){
                 if(this.fireEvent('beforeselect', this, record, index) !== false){
                     // this.setSelectedValue(record);
+                    ed.preventEditComplete = true;
                     this.collapse();
                     this.fireEvent('select', this, record, index);
                 }
@@ -224,6 +225,7 @@ Ext.define('CB.plugins.DropDownList', {
             case e.ESC:
                 if(ed.isExpanded) {
                     e.stopEvent();
+                    ed.preventEditComplete = true;
                     ed.collapse();
                 }
                 break;
@@ -252,7 +254,7 @@ Ext.define('CB.plugins.DropDownList', {
     ,onKeyUp: function(ed, e){
         var value = ed.getRawValue();
 
-        if(Ext.isEmpty(value)) {
+        if(Ext.isEmpty(value) || e.isSpecialKey()) {
             return;
         }
 
@@ -355,6 +357,7 @@ Ext.define('CB.plugins.DropDownList', {
     ,showItems: function(itemsArray){
         this.store.loadData(itemsArray);
         this.owner.expand();
+        this.owner.setPosition();
     }
 
     ,setSelectedValue: function(ed, record, index) {
@@ -366,6 +369,7 @@ Ext.define('CB.plugins.DropDownList', {
 
         newValue += value.substring(cmd.queryStartIndex + cmd.query.length);
 
+        ed.preventEditComplete = true;
         ed.collapse();
         ed.setRawValue(newValue);
         this.setCaretPosition(ed.inputEl.dom, newCaretPosition);

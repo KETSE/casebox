@@ -1,3 +1,16 @@
+CaseBox 1.9.352 (2014-11-12)
+==============================
+New Features, Improvements
+--------------------------
+- reanalized key events for @user edit fiels in grid
+  now the Enter and Esc keys doesnt cancel edit mode when popup list visible
+- added methods to object class for updating sysData, because some times we need
+   to update sysData witout triggering object update events (last comment date and user)
+
+Fixed Bugs:
+----------
+- @user popuplist down arrow desnt select on second popup
+
 CaseBox 1.9.351 (2014-11-10)
 ==============================
 New Features, Improvements

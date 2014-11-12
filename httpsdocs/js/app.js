@@ -770,29 +770,6 @@ function initApp() {
                                     }
                                 ]
                             }]
-                            // ,listeners: {
-                            //     render: function(ed) {
-                            //         // ed.purgeListeners();
-                            //         // var interceptorFn = function(field, e){
-                            //         //     clog('this.listSelection', arguments, field.listSelection);
-                            //         //     // return false; //!field.listSelection;
-                            //         // };
-
-                            //         // var i, newListners = [];
-
-                            //         // for (i = 0; i < ed.events.specialkey.listeners.length; i++) {
-                            //         //     var l = ed.events.specialkey.listeners[i];
-                            //         //     ed.un('specialkey', l.fn, l.scope);
-                            //         //     newListners.push({
-                            //         //         scope: l.scope
-                            //         //         ,fn: l.fn.createInterceptor(interceptorFn, l.scope)
-                            //         //     });
-                            //         // }
-                            //         // for (i = 0; i < newListners.length; i++) {
-                            //         //     ed.on('specialkey', newListners[i].fn, newListners[i].scope);
-                            //         // }
-                            //     }
-                            // }
                         });
 
                         //overwrite setValue and getValue function to transform ids to user names and back

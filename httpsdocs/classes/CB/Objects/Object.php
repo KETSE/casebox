@@ -432,6 +432,118 @@ class Object
     }
 
     /**
+     * get objects system data (sysData field)
+     * return sysData form this class if loaded or reads directly from db
+     *
+     * @return array
+     */
+    public function getSysData()
+    {
+        $rez = array();
+
+        if ($this->loaded) {
+            $rez = Util\toJSONArray(@$this->data['sys_data']);
+        } else {
+            $res = DB\dbQuery(
+                'SELECT sys_data
+                FROM objects
+                WHER id = $1',
+                $this->data['id']
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                $rez = Util\toJSONArray($r['sys_data']);
+            }
+            $res->close();
+        }
+
+        return $rez;
+    }
+
+    /**
+     * update objects system data (sysData field)
+     * this method updates data directly and desnt fire update events
+     * @param variant $sysData array or json encoded string
+     *        if not specified then sysTada from current class will be used for update
+     * @return boolean
+     */
+    public function updateSysData($sysData = false)
+    {
+        $d = &$this->data;
+
+        $sysData = ($sysData === false)
+            ? Util\toJSONArray(@$d['sys_data'])
+            : Util\toJSONArray($sysData);
+
+        @DB\dbQuery(
+            'INSERT INTO objects
+            (id, sys_data)
+            VALUES ($1, $2)
+            ON DUPLICATE KEY UPDATE
+                sys_data = $2',
+            array(
+                $d['id']
+                ,json_encode($sysData, JSON_UNESCAPED_UNICODE)
+            )
+        ) or die(DB\dbQueryError());
+
+        $this->data['sys_data'] = $sysData;
+
+        return true;
+    }
+
+    /**
+     * get a property from system data of the object (sysData field)
+     *
+     * @param varchar $propertyName
+     *
+     * @return variant | null
+     */
+    public function getSysDataProperty($propertyName)
+    {
+        $rez = null;
+
+        if (empty($propertyName) || !is_scalar($propertyName)) {
+            return $rez;
+        }
+
+        $d = $this->getSysData();
+
+        if (isset($d[$propertyName])) {
+            $rez = $d[$propertyName];
+        }
+
+        return $rez;
+    }
+
+    /**
+     * update a property system data of the object (sysData field)
+     * if value is null the property is unset from sys_data
+     *
+     * @param varchar $propertyName
+     * @param variant $propertyValue
+     *
+     * @return boolean
+     */
+    public function setSysDataProperty($propertyName, $propertyValue = null)
+    {
+        if (empty($propertyName) || !is_scalar($propertyName)) {
+            return false;
+        }
+
+        $d = $this->getSysData();
+
+        if (is_null($propertyValue)) {
+            unset($d[$propertyName]);
+        } else {
+            $d[$propertyName] = $propertyValue;
+        }
+
+        $this->updateSysData($d);
+
+        return true;
+    }
+
+    /**
      * delete an object from tree or marks it as deleted
      * @param boolean $permanent Specify true to delete the object permanently.
      *                            Default to false.

@@ -40,6 +40,7 @@ Ext.define('CB.view.BoundListKeyNav', {
                 ,onKeyEnter: Ext.Function.bind(this.onKeyEnter, this)
                 ,onKeyTab: Ext.Function.bind(this.onKeyTab, this)
                 ,onKeyEsc: Ext.Function.bind(this.onKeyEsc, this)
+                ,setPosition: Ext.Function.bind(this.setPosition, this)
             }
         );
     }

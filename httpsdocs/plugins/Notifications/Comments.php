@@ -25,18 +25,18 @@ class Comments extends Objects
         $objData = $o->getData();
 
         $o = \CB\Objects::getCachedObject($objData['pid']);
-        $d = $o->getData();
+        $sysData = $o->getSysData();
 
         $date = $objData['cdate'].'Z';
         $date[10] = 'T';
 
-        $d['sys_data']['lastComment'] = array(
+        $sysData['lastComment'] = array(
             'id' => $objData['id']
             ,'user_id' => $objData['cid']
             ,'date' => $date
         );
 
-        $o->update($d);
+        $o->updateSysData($sysData);
     }
 
     /**
