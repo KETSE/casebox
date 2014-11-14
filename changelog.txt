@@ -1,4 +1,25 @@
-CaseBox 1.9.352 (2014-11-12)
+CaseBox 1.9.354 (2014-11-14)
+==============================
+New Features, Improvements
+--------------------------
+- Implement FacetedNav described in 24.1 in CB architecture doc
+- created special plugin to help on dates sync in tasks
+  this.plugin (TaskDateChangeSync) should be added to casebox.plugins table with config:
+    {
+      "js": [
+        "//js/plugin/task/DateChangeSync.js"
+      ]
+    }
+
+Fixed Bugs:
+----------
+- When creating a task, the Start date will be empty
+- Defaults for Objects field when multiValued=true
+- Files not versioned more than 1
+- replaced "mode" property in Combobox definitions to "queryMode" for TypeAhead to work
+- Recent/Commented folder didnt show last commented items
+
+CaseBox 1.9.353 (2014-11-12)
 ==============================
 Fixed Bugs:
 ----------

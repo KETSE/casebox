@@ -211,7 +211,7 @@ if (!empty($js)) {
 }
 $prc = Config::getPluginsRemoteConfig();
 if (!empty($prc)) {
-    echo '<script type="text/javascript">CB.plugins.config = '.json_encode($prc, JSON_UNESCAPED_UNICODE).';</script>';
+    echo '<script type="text/javascript">CB.plugin.config = '.json_encode($prc, JSON_UNESCAPED_UNICODE).';</script>';
 }
 
 echo '<script type="text/javascript" src="' . $coreUrl . 'js/CB.DB.php"></script>';

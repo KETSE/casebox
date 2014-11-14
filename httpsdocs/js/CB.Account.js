@@ -176,7 +176,7 @@ Ext.define('CB.ProfileForm', {
                 ,name: 'sex'
                 ,hiddenName: 'sex'
                 ,fieldLabel: L.Gender
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: false
                 ,store: CB.DB.sex
@@ -192,7 +192,7 @@ Ext.define('CB.ProfileForm', {
                 ,name: 'country_code'
                 ,hiddenName: 'country_code'
                 ,fieldLabel: L.Country
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: true
                 ,forceSelection: true
@@ -217,7 +217,7 @@ Ext.define('CB.ProfileForm', {
                 ,name: 'language_id'
                 ,hiddenName: 'language_id'
                 ,fieldLabel: L.Language
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: true
                 ,forceSelection: true
@@ -230,7 +230,7 @@ Ext.define('CB.ProfileForm', {
                 ,name: 'timezone'
                 ,hiddenName: 'timezone'
                 ,fieldLabel: L.Timezone
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: false
                 ,store: CB.DB.timezones
@@ -242,7 +242,7 @@ Ext.define('CB.ProfileForm', {
                 ,name: 'short_date_format'
                 ,hiddenName: 'short_date_format'
                 ,fieldLabel: L.DateFormat
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: false
                 ,store: CB.DB.shortDateFormats
@@ -541,7 +541,7 @@ Ext.define('CB.SecurityForm', {
                             ,name: 'country_code'
                             ,hiddenName: 'country_code'
                             ,fieldLabel: L.Country
-                            ,mode: 'local'
+                            ,queryMode: 'local'
                             ,triggerAction: 'all'
                             ,editable: true
                             ,forceSelection: true
@@ -623,7 +623,7 @@ Ext.define('CB.SecurityForm', {
                             ,name: 'question_idx'
                             ,hiddenName: 'question_idx'
                             ,fieldLabel: L.Question
-                            ,mode: 'local'
+                            ,queryMode: 'local'
                             ,triggerAction: 'all'
                             ,editable: false
                             ,forceSelection: true
@@ -1111,7 +1111,7 @@ Ext.define('CB.TSVsmsForm', {
                 ,name: 'country_code'
                 ,hiddenName: 'country_code'
                 ,fieldLabel: L.Country
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: true
                 ,forceSelection: true

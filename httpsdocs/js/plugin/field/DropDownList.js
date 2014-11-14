@@ -1,10 +1,10 @@
-Ext.namespace('CB.plugins');
+Ext.namespace('CB.plugin.field');
 
-Ext.define('CB.plugins.DropDownList', {
+Ext.define('CB.plugin.field.DropDownList', {
     extends: 'Ext.extend(Ext.util.Observable'
 
-    ,alias: 'plugin.CBPluginsDropDownList'
-    ,xtype: 'CB.plugins.DropDownList'
+    ,alias: 'plugin.CBPluginFieldDropDownList'
+    ,xtype: 'CB.plugin.field.DropDownList'
 
     ,constructor: function(config) {
         var defaultConfig = {
@@ -60,7 +60,7 @@ Ext.define('CB.plugins.DropDownList', {
 
         Ext.apply(this, defaultConfig);
 
-        CB.plugins.DropDownList.superclass.constructor.call(defaultConfig);
+        CB.plugin.field.DropDownList.superclass.constructor.call(defaultConfig);
     }
 
     ,init: function(owner) {

@@ -352,7 +352,11 @@ class Object
         );
         $saveFields = array();
         $saveValues = array($this->id, $_SESSION['user']['id']);
-        $params = array('`uid` = $2', '`udate` = CURRENT_TIMESTAMP', 'updated = 1');
+        $params = array(
+            '`uid` = $2'
+            ,'`udate` = CURRENT_TIMESTAMP'
+            ,'updated = 1'
+        );
         $i = 3;
         foreach ($tableFields as $fieldName) {
             if (array_key_exists($fieldName, $p) && ($p[$fieldName] !== 'id')) {
@@ -487,6 +491,14 @@ class Object
         ) or die(DB\dbQueryError());
 
         $this->data['sys_data'] = $sysData;
+
+        //mark the item as updated so that it would be reindexed to solr
+        DB\dbQuery(
+            'UPDATE tree
+            SET updated = (updated | 1)
+            WHERE id = $1',
+            $d['id']
+        ) or die(DB\dbQueryError());
 
         return true;
     }
@@ -928,8 +940,15 @@ class Object
             /* end of target security check */
             // marking overwriten object with dstatus = 3
             DB\dbQuery(
-                'UPDATE tree SET updated = 1, dstatus = 3, did = $2 WHERE id = $1',
-                array($targetId, $_SESSION['user']['id'])
+                'UPDATE tree
+                SET  updated = 1
+                    ,dstatus = 3
+                    ,did = $2
+                WHERE id = $1',
+                array(
+                    $targetId
+                    ,$_SESSION['user']['id']
+                )
             ) or die(DB\dbQueryError());
 
             //get pid from target if not specified
@@ -1038,8 +1057,15 @@ class Object
         // to newly copied object
         if (is_numeric($targetId)) {
             DB\dbQuery(
-                'UPDATE tree SET updated = 1, pid = $2 WHERE pid = $1 AND dstatus = 0',
-                array($targetId, $this->id)
+                'UPDATE tree
+                SET updated = 1
+                    ,pid = $2
+                WHERE pid = $1 AND
+                    dstatus = 0',
+                array(
+                    $targetId
+                    ,$this->id
+                )
             ) or die(DB\dbQueryError());
         }
 
@@ -1103,8 +1129,15 @@ class Object
             /* end of target security check */
             // marking overwriten object with dstatus = 3
             DB\dbQuery(
-                'UPDATE tree SET updated = 1, dstatus = 3, did = $2 WHERE id = $1',
-                array($targetId, $_SESSION['user']['id'])
+                'UPDATE tree
+                SET updated = 1
+                    ,dstatus = 3
+                    ,did = $2
+                WHERE id = $1',
+                array(
+                    $targetId
+                    ,$_SESSION['user']['id']
+                )
             ) or die(DB\dbQueryError());
 
             //get pid from target if not specified
@@ -1135,7 +1168,10 @@ class Object
         // moving the object to $pid
 
         DB\dbQuery(
-            'UPDATE tree set updated = 1, pid = $2 where id = $1',
+            'UPDATE tree
+            SET updated = 1
+                ,pid = $2
+            WHERE id = $1',
             array($this->id, $pid)
         ) or die(DB\dbQueryError());
 
@@ -1145,8 +1181,15 @@ class Object
         // to newly copied object
         if (is_numeric($targetId)) {
             DB\dbQuery(
-                'UPDATE tree SET updated = 1, pid = $2 WHERE pid = $1 AND dstatus = 0',
-                array($targetId, $this->id)
+                'UPDATE tree
+                SET updated = 1
+                    ,pid = $2
+                WHERE pid = $1 AND
+                    dstatus = 0',
+                array(
+                    $targetId
+                    ,$this->id
+                )
             ) or die(DB\dbQueryError());
         }
 

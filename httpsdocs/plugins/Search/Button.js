@@ -1,11 +1,11 @@
-Ext.namespace('CB.plugins.Search');
+Ext.namespace('CB.plugin.Search');
 
-Ext.define('CB.plugins.Search.Button', {
-    extend: 'CB.plugins.customInterface'
+Ext.define('CB.plugin.Search.Button', {
+    extend: 'CB.plugin.CustomInterface'
 
     ,init: function(owner) {
         this.historyData = {};
-        CB.plugins.Search.Button.superclass.init.call(this, arguments);
+        CB.plugin.Search.Button.superclass.init.call(this, arguments);
         this.owner = owner;
 
         // get filter button from the collection to detect its toggle group

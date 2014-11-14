@@ -1,17 +1,17 @@
-Ext.namespace('CB.plugins');
+Ext.namespace('CB.plugin');
 
 Ext.onReady(function(){
     var plugins = CB.browser.view.Grid.prototype.plugins || [];
     plugins.push({
-        ptype: 'CBPluginsDisplayColumns'
+        ptype: 'CBPluginDisplayColumns'
     });
     CB.browser.view.Grid.prototype.plugins = plugins;
 });
 
 
-Ext.define('CB.plugins.DisplayColumns', {
+Ext.define('CB.plugin.DisplayColumns', {
     extend: 'Ext.util.Observable'
-    ,alias: 'plugin.CBPluginsDisplayColumns'
+    ,alias: 'plugin.CBPluginDisplayColumns'
     ,lastColumns: ''
 
     ,init: function(owner) {

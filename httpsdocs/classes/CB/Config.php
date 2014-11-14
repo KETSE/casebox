@@ -347,7 +347,13 @@ class Config extends Singleton
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
             if (!empty($data['js'])) {
-                $rez = array_merge($rez, static::adjustPaths($data['js'], PLUGINS_DIR.$name.DIRECTORY_SEPARATOR));
+                $rez = array_merge(
+                    $rez,
+                    static::adjustPaths(
+                        $data['js'],
+                        PLUGINS_DIR.$name.DIRECTORY_SEPARATOR
+                    )
+                );
             }
         }
 

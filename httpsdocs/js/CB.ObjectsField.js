@@ -137,7 +137,7 @@ Ext.define('CB.ObjectsComboField', {
     ,forceSelection: true
     ,triggerAction: 'all'
     ,lazyRender: true
-    ,mode: 'remote'
+    ,queryMode: 'remote'
     ,editable: true
     ,displayField: 'name'
     ,valueField: 'id'

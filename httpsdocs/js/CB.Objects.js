@@ -179,7 +179,7 @@ Ext.namespace('CB');
         });
 
         this.dropZoneConfig = {};//text: 'Drop files here'
-        this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
+        this.filesDropPlugin = new CB.plugin.dd.FilesDropZone({pidPropety: 'id'});
         this.filesDropPlugin.init(this);
 
         CB.Objects.superclass.initComponent.apply(this, arguments);

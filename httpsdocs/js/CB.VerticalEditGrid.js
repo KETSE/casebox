@@ -12,6 +12,7 @@ Ext.define('CB.VerticalEditGrid', {
     ,cls: 'spacy-rows edit-grid'
     ,autoScroll: true
     ,autoHeight: true
+    ,plugins: []
 
     ,initComponent: function() {
 
@@ -55,14 +56,18 @@ Ext.define('CB.VerticalEditGrid', {
             Ext.apply(viewCfg, this.viewConfig);
         }
 
-        this.editPlugin = new Ext.grid.plugin.CellEditing({
-            clicksToEdit: 1
-            ,listeners: {
-                scope: this
-                ,beforeedit: this.onBeforeEditProperty
-                ,edit: this.onAfterEditProperty
+        var plugins = Ext.valueFrom(this.plugins, []);
+        plugins.push(
+            {
+                ptype: 'cellediting'
+                ,clicksToEdit: 1
+                ,listeners: {
+                    scope: this
+                    ,beforeedit: this.onBeforeEditProperty
+                    ,edit: this.onAfterEditProperty
+                }
             }
-        });
+        );
 
         Ext.apply(this, {
             store:  new Ext.data.JsonStore({
@@ -118,15 +123,13 @@ Ext.define('CB.VerticalEditGrid', {
                         ,displayField: 'name'
                         ,iconClsField: 'name'
                         ,triggerAction: 'all'
-                        ,mode: 'local'
+                        ,queryMode: 'local'
                         // ,plugins: [new Ext.ux.plugins.IconCombo()]
                     });
                 }
             }
 
-            ,plugins: [
-                this.editPlugin
-            ]
+            ,plugins: plugins
         });
 
 
@@ -419,7 +422,7 @@ Ext.define('CB.VerticalEditGrid', {
         // }
         var fieldName = this.columns[cellIndex].dataIndex;
         if(fieldName == 'title'){
-            this.editPlugin.startEdit(record, 1);//begin field edit
+            this.editingPlugin.startEdit(record, 1);//begin field edit
         }
     }
 

@@ -77,7 +77,7 @@ class Browser
         // on last node from current path
         $this->treeNodeClasses = Path::getNodeClasses($this->treeNodeConfigs);
 
-        foreach ($this->treeNodeClasses as $nodeClass) {
+        foreach ($this->treeNodeClasses as &$nodeClass) {
             $cfg = $nodeClass->getConfig();
             $this->treeNodeGUIDConfigs[$cfg['guid']] = $cfg;
         }
@@ -393,7 +393,7 @@ class Browser
 
         //increase number of returned items
         if (empty($p['rows'])) {
-            $p['rows'] = 150;
+            $p['rows'] = 50;
         }
 
         $search = new Search();
@@ -405,7 +405,10 @@ class Browser
 
         foreach ($rez['data'] as &$doc) {
             $res = DB\dbQuery(
-                'SELECT cfg FROM tree WHERE id = $1 AND cfg IS NOT NULL',
+                'SELECT cfg
+                FROM tree
+                WHERE id = $1 AND
+                    cfg IS NOT NULL',
                 $doc['id']
             ) or die(DB\dbQueryError());
 

@@ -1493,9 +1493,15 @@ class Files
     //get Max File Version Count for an extension
     public static function getMFVC($filename)
     {
-        $ext = Files::getExtension($filename) || mb_strtolower($filename);
+        $ext = Files::getExtension($filename);
+        if (empty($ext)) {
+            $ext = mb_strtolower($filename);
+        }
+
         $ext = trim($ext);
+
         $rez = 0;
+
         $mfvc = Config::get('mfvc');
 
         if (empty($mfvc)) {

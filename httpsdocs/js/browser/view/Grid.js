@@ -176,7 +176,7 @@ Ext.define('CB.browser.view.Grid', {
                 //     return 'hasBody';
                 // }
                 ,plugins: [{
-                        ptype: 'CBPluginsFilesDropZone'
+                        ptype: 'CBPluginDDFilesDropZone'
                         ,pidPropety: 'nid'
                         ,dropZoneConfig: {
                             text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
@@ -410,7 +410,11 @@ Ext.define('CB.browser.view.Grid', {
             store = grid.store;
 
         store.remoteSort = (this.config.localSort !== true);
-        grid.userSort = 1;
+        if(store.remoteSort) {
+            grid.userSort = 1;
+        } else {
+            // store.sort()
+        }
 
         Ext.grid.column.Column.prototype.sort.apply(this, arguments);
     }

@@ -1,13 +1,12 @@
 Ext.namespace('CB');
 
-Ext.define('CB.PluginPanel', {
+Ext.define('CB.plugin.Panel', {
     extend: 'Ext.Panel'
     ,autoHeight: true
     ,padding:0
     ,initComponent: function(){
 
-        CB.PluginPanel.superclass.initComponent.apply(this, arguments);
-
+        this.callParent(arguments);
     }
 
 });

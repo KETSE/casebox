@@ -45,7 +45,7 @@ Ext.define('CB.objects.plugins.Comments', {
             // disable until prugin refactored for ExtJS 5
             ,plugins: [
                 {
-                    ptype: 'CBPluginsDropDownList'
+                    ptype: 'CBPluginFieldDropDownList'
                 }
             ]
             ,listeners: {

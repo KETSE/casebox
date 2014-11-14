@@ -6,7 +6,7 @@ Ext.define('CB.PluginsPanel', {
     ,padding:0
 
     ,initComponent: function(){
-        CB.PluginsPanel.superclass.initComponent.apply(this, arguments);
+        CB.plugin.Panel.superclass.initComponent.apply(this, arguments);
 
         App.on('filesuploaded', this.onFilesUploaded, this);
 

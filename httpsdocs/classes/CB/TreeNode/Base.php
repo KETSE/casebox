@@ -113,7 +113,7 @@ class Base implements \CB\Interfaces\TreeNode
     {
         $rez = 1;
 
-        if (empty($this->parent) || (get_class($this->parent) !== get_class($this))) {
+        if (empty($this->parent) || ($this->parent->guid !== $this->guid)) {
             return $rez;
         }
 

@@ -1,7 +1,7 @@
-Ext.namespace('CB.plugins');
-Ext.define('CB.plugins.FilesDropZone', {
+Ext.namespace('CB.plugin.dd');
+Ext.define('CB.plugin.dd.FilesDropZone', {
     extend: 'Ext.util.Observable'
-    ,alias: 'plugin.CBPluginsFilesDropZone'
+    ,alias: 'plugin.CBPluginDDFilesDropZone'
     ,pidPropety: 'nid'
 
     ,constructor: function(config){

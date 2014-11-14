@@ -88,12 +88,12 @@ class Templates
             unset($r['template_type']);
 
             // If multiValued=True for Objects field, the default editor=form + default: "renderer": "listObjIcons"
-            if (!empty($cfg['multiValued'])) {
-                if (!isset($cfg['editor'])) {
-                    $cfg['editor'] = 'form';
+            if (!empty($r['cfg']['multiValued'])) {
+                if (!isset($r['cfg']['editor'])) {
+                    $r['cfg']['editor'] = 'form';
                 }
-                if (!isset($cfg['renderer'])) {
-                    $cfg['renderer'] = 'listObjIcons';
+                if (!isset($r['cfg']['renderer'])) {
+                    $r['cfg']['renderer'] = 'listObjIcons';
                 }
             }
 

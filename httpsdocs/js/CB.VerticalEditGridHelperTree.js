@@ -329,6 +329,17 @@ Ext.define('CB.VerticalEditGridHelperTree', {
         return this.getRootNode().findChild('id', nodeId, true);
     }
 
+    ,getNodesByFieldName: function(fieldName){
+        return this.queryNodeListBy(
+            function(n) {
+                return (
+                    n.data.templateRecord &&
+                    (n.data.templateRecord.get('name') == fieldName)
+                );
+            }
+        );
+    }
+
     /**
      * set value for first found node in tree wich has given name
      * (i.e. duplications are not analyzed)
@@ -404,15 +415,17 @@ Ext.define('CB.VerticalEditGridHelperTree', {
         if(node && node.data.templateRecord) {
             node.cascadeBy({
                 before: function(n) {
-                    var tr = n.data.templateRecord;
+                    var tr = n.data.templateRecord
+                        ,cfg = tr.get('cfg');
                     if( tr &&
                         n.isAncestor(node) &&
                         (
-                            tr.get('cfg').thesauriId == 'dependent' ||
-                            Ext.isDefined(tr.get('cfg').dependency)
+                            cfg.thesauriId == 'dependent' ||
+                            Ext.isDefined(cfg.dependency)
                         ) &&
                         (tr.get('pid') == node.data.templateRecord.get('id')) &&
-                        (tr.get('cfg').readOnly !==true)
+                        (cfg.readOnly !==true) &&
+                        (cfg.type == '_objects') //resetting only object fields
                     ){
                         n.data.value.value = null;
                     }

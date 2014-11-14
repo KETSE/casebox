@@ -74,7 +74,6 @@ Ext.override(Ext.form.action.Submit, {
 
         for (i = 0; i < len; ++i) {
             el = uploadFields[i].extractFileInput();
-            clog('cicle', uploadFields[i], el, uploadFields[i].rendered);
             formEl.appendChild(el);
             uploadEls.push(el);
         }

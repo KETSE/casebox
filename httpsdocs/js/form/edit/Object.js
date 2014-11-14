@@ -304,7 +304,7 @@ Ext.define('CB.form.edit.Object', {
             // this.grid.getView().focusCell({row: 0, column: colIdx});
 
             if(this.startEditAfterObjectsStoreLoadIfNewObject && isNaN(this.data.id)) {
-                this.grid.editPlugin.startEditByPosition({row: 0, column: colIdx});
+                this.grid.editingPlugin.startEditByPosition({row: 0, column: colIdx});
             }
             delete this.startEditAfterObjectsStoreLoadIfNewObject;
         }

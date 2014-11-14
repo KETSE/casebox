@@ -1,6 +1,6 @@
-Ext.namespace('CB.plugins.Search');
+Ext.namespace('CB.plugin.Search');
 
-Ext.define('CB.plugins.Search.ResultForm', {
+Ext.define('CB.plugin.Search.ResultForm', {
     extend: 'CB.browser.ViewContainer'
     ,title: L.SearchResults
     ,iconCls: 'icon-search'
@@ -8,11 +8,11 @@ Ext.define('CB.plugins.Search.ResultForm', {
 
     ,initComponent: function(){
         var config = {};
-        if(CB.plugins.config && CB.plugins.config.Search) {
-            config = CB.plugins.config.Search;
+        if(CB.plugin.config && CB.plugin.config.Search) {
+            config = CB.plugin.config.Search;
         }
         Ext.apply(this, config);
-        CB.plugins.Search.ResultForm.superclass.initComponent.apply(this, arguments);
+        CB.plugin.Search.ResultForm.superclass.initComponent.apply(this, arguments);
         if(!Ext.isEmpty(this.handler)) {
             var a = this.handler.split('.');
             this.store.proxy.setApi(

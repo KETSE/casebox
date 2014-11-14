@@ -62,7 +62,7 @@ Ext.define('CB.VerticalSearchEditGrid', {
             ,forceSelection: true
             ,triggerAction: 'all'
             ,lazyRender: true
-            ,mode: 'local'
+            ,queryMode: 'local'
             ,displayField: 'name'
             ,valueField: 'id'
             ,store: this.getConditionsStore(e.record.get('type'))

@@ -109,7 +109,7 @@ Ext.define('CB.objects.plugins.Files', {
             pidPropety: 'id'
             ,dropZoneEl: this.dropPanel.getEl()
         };
-        this.filesDropPlugin = new CB.plugins.FilesDropZone({pidPropety: 'id'});
+        this.filesDropPlugin = new CB.plugin.dd.FilesDropZone({pidPropety: 'id'});
         this.filesDropPlugin.init(this);
 
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);

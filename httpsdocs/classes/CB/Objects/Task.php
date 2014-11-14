@@ -35,7 +35,7 @@ class Task extends Object
         $d = &$this->data;
 
         /* saving template data to templates and templates_structure tables */
-        $dateStart = empty($d['date_start']) ? null : Util\dateISOToMysql($d['date_start']);
+        $dateStart = empty($d['date']) ? null : Util\dateISOToMysql($d['date']);
         $dateEnd = empty($d['date_end']) ? null : Util\dateISOToMysql($d['date_end']);
 
         $status = 2; // active
@@ -61,9 +61,19 @@ class Task extends Object
         );
 
         DB\dbQuery(
-            'INSERT into tasks
-            (id, title, allday, date_start, date_end, importance, category_id, responsible_user_ids, description, status, cid)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11)',
+            'INSERT INTO tasks (
+                id
+                ,title
+                ,allday
+                ,date_start
+                ,date_end
+                ,importance
+                ,category_id
+                ,responsible_user_ids
+                ,description
+                ,status
+                ,cid
+            ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11)',
             $params
         ) or die(DB\dbQueryError());
 
@@ -150,16 +160,20 @@ class Task extends Object
             unset($r['user_status']);
             unset($r['completed']);
 
-            $r['allday'] = array(
-                'value' => $r['allday']
-            );
-            if ($r['allday']['value'] == 1) {
-                $r['allday']['childs']['date_start'] = Util\dateMysqlToISO($r['date_start']);
-                $r['allday']['childs']['date_end'] = Util\dateMysqlToISO($r['date_end']);
-            } else {
-                $r['allday']['childs']['datetime_start'] = Util\dateMysqlToISO($r['date_start']);
-                $r['allday']['childs']['datetime_end'] = Util\dateMysqlToISO($r['date_end']);
+            if (empty($d['data']['allday'])) {
+                $r['allday'] = array(
+                    'value' => $r['allday']
+                );
+                if ($r['allday']['value'] == 1) {
+                    $r['allday']['childs']['date_start'] = Util\dateMysqlToISO($r['date_start']);
+                    $r['allday']['childs']['date_end'] = Util\dateMysqlToISO($r['date_end']);
+                } else {
+                    $r['allday']['childs']['datetime_start'] = Util\dateMysqlToISO($r['date_start']);
+                    $r['allday']['childs']['datetime_end'] = Util\dateMysqlToISO($r['date_end']);
+                }
             }
+
+            unset($r['allday']);
             unset($r['date_start']);
             unset($r['date_end']);
 
@@ -214,7 +228,7 @@ class Task extends Object
 
         /* saving template data to templates and templates_structure tables */
 
-        $dateStart = empty($d['date_start']) ? null : Util\dateISOToMysql($d['date_start']);
+        $dateStart = empty($d['date']) ? null : Util\dateISOToMysql($d['date']);
         $dateEnd = empty($d['date_end']) ? null : Util\dateISOToMysql($d['date_end']);
 
         if (empty($d['status']) || in_array($d['status'], array(1, 2))) {

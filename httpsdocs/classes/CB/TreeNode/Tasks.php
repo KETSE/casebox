@@ -24,7 +24,7 @@ class Tasks extends Base
         }
 
         // ROOT NODE: check if last node is the one we should attach to
-        if ($this->lastNode->id == (String)$ourPid) {
+        if ($this->lastNode->getId() == (String)$ourPid) {
             return true;
         }
 

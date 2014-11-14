@@ -1,6 +1,6 @@
-Ext.namespace('CB.plugins.Search');
+Ext.namespace('CB.plugin.Search');
 
-Ext.define('CB.plugins.Search.Form', {
+Ext.define('CB.plugin.Search.Form', {
     extend: 'Ext.Panel'
     ,title: L.Search
     ,id: 'SearchTab'
@@ -46,7 +46,7 @@ Ext.define('CB.plugins.Search.Form', {
             }
         });
 
-        CB.plugins.Search.Form.superclass.initComponent.apply(this, arguments);
+        CB.plugin.Search.Form.superclass.initComponent.apply(this, arguments);
     },
 
     onSearchButtonClick: function(){
@@ -56,7 +56,7 @@ Ext.define('CB.plugins.Search.Form', {
 
         this.grid.readValues();
         var t = App.openUniqueTabbedWidget(
-            'CBPluginsSearchResultForm'
+            'CBPluginSearchResultForm'
             ,null
             ,{data: this.data}
         );

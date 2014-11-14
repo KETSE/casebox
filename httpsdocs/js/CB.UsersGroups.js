@@ -95,7 +95,7 @@ Ext.define('CB.AddUserForm', {
                 ,displayField: 'title'
                 ,triggerAction: 'all'
                 ,value: null
-                ,mode: 'local'
+                ,queryMode: 'local'
             },{
                 xtype: 'label'
                 ,name: 'E'

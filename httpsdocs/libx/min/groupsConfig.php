@@ -100,8 +100,8 @@ return array_merge(
             ,'//js/CB.PasteFromWord.js'
             ,'//js/CB.FileUploadWindow.js'
 
-            ,'//js/plugins/CB.plugins.customInterface.js'
-            ,'//js/plugins/CB.plugins.DropDownList.js'
+            ,'//js/plugin/CustomInterface.js'
+            ,'//js/plugin/field/DropDownList.js'
             ,'//js/ux/Ext.ux.htmlEditor.js'
             ,'//js/ux/Ext.ux.plugins.defaultButton.js'
             ,'//js/ux/Ext.ux.plugins.IconCombo.js'
@@ -119,7 +119,7 @@ return array_merge(
 
             ,'//js/CB.Favorites.js'
 
-            ,'//js/plugins/CB.plugins.FilesDropZone.js'
+            ,'//js/plugin/dd/FilesDropZone.js'
             ,'//js/CB.Uploader.js'
 
             ,'//js/CB.Security.js'
@@ -142,7 +142,7 @@ return array_merge(
 
             ,'//js/CB.ViewPort.js'
 
-            ,'//js/PluginPanel.js'
+            ,'//js/plugin/Panel.js'
             ,'//js/PluginsPanel.js'
             ,'//js/form/view/object/Preview.js'
             ,'//js/form/view/object/Properties.js'

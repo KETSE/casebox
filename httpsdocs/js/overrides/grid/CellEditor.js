@@ -5,7 +5,7 @@
 Ext.override(Ext.grid.CellEditor, {
 
     //overriding onEditComplete method
-    //used for CB.plugins.DropDownList to avoid canceling edit when popup list visible
+    //used for CB.plugin.field.DropDownList to avoid canceling edit when popup list visible
 
     onEditComplete: function(remainVisible) {
         if(this.field) {

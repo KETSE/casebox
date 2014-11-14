@@ -758,7 +758,7 @@ function initApp() {
                             data: objData
 
                             ,plugins: [{
-                                ptype: 'CBPluginsDropDownList'
+                                ptype: 'CBPluginFieldDropDownList'
                                 ,commands: [
                                     {
                                         prefix: ' '
@@ -766,7 +766,7 @@ function initApp() {
 
                                         ,insertField: 'info'
 
-                                        ,handler: CB.plugins.DropDownList.prototype.onAtCommand
+                                        ,handler: CB.plugin.DropDownList.prototype.onAtCommand
                                     }
                                 ]
                             }]
@@ -852,7 +852,7 @@ function initApp() {
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
-                        ,mode: 'local'
+                        ,queryMode: 'local'
                         ,editable: false
                         ,store: CB.DB.timeUnits
                         ,displayField: 'name'
@@ -863,7 +863,7 @@ function initApp() {
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
-                        ,mode: 'local'
+                        ,queryMode: 'local'
                         ,editable: false
                         ,store: CB.DB.importance
                         ,displayField: 'name'
@@ -909,7 +909,7 @@ function initApp() {
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: getThesauriStore(th)
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -925,7 +925,7 @@ function initApp() {
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: getThesauriStore(th)
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -939,7 +939,7 @@ function initApp() {
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.languages
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -951,7 +951,7 @@ function initApp() {
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.sex
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -963,7 +963,7 @@ function initApp() {
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.templateTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -971,11 +971,12 @@ function initApp() {
             case '_fieldTypesCombo':
                 return new Ext.form.ComboBox({
                     enableKeyEvents: true
+                    ,autoSelect: true
                     ,forceSelection: true
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.fieldTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -987,7 +988,7 @@ function initApp() {
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.shortDateFormats
                     ,displayField: 'name'
                     ,valueField: 'id'

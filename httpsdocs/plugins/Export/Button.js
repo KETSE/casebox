@@ -1,11 +1,11 @@
-Ext.namespace('CB.plugins.Export');
+Ext.namespace('CB.plugin.Export');
 
-Ext.define('CB.plugins.Export.Button', {
-    extend: 'CB.plugins.customInterface'
-    ,alias: 'plugin.CBPluginsExportButton'
+Ext.define('CB.plugin.Export.Button', {
+    extend: 'CB.plugin.CustomInterface'
+    ,alias: 'plugin.CBPluginExportButton'
 
     ,init: function(owner) {
-        CB.plugins.Export.Button.superclass.init.call(this, arguments);
+        CB.plugin.Export.Button.superclass.init.call(this, arguments);
         this.owner = owner;
 
         /*this.button = new Ext.menu.Item({
