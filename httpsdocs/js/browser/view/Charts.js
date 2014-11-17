@@ -8,8 +8,9 @@ Ext.define('CB.browser.view.Charts', {
     ,tbarCssClass: 'x-panel-white'
     ,layout: 'border'
     ,params: {
-        rows:0
+        from: 'charts'
         ,facets: 'general'
+        // ,rows: 0
     }
 
     ,initComponent: function(){
@@ -218,6 +219,8 @@ Ext.define('CB.browser.view.Charts', {
     }
 
     ,onActivate: function() {
+        this.selectedFacets = [];
+
         this.fireEvent(
             'settoolbaritems'
             ,[
@@ -274,11 +277,19 @@ Ext.define('CB.browser.view.Charts', {
     }
 
     ,loadChartData: function() {
-        var data = {};
+        var data = {}
+            ,sorter = null;
+
+        /* find sorter if set in viewParams */
+        if(this.viewParams){
+            sorter = this.detectSorter(this.viewParams);
+        }
+
         Ext.iterate(
             this.data
             ,function(key, val, o) {
                 data[key] = CB.FacetList.prototype.getFacetData(key, val.items);
+
                 for (var i = 0; i < data[key].length; i++) {
                     if(Ext.isObject(data[key][i].items)) {
                         data[key][i].name = data[key][i].items.name;
@@ -287,6 +298,10 @@ Ext.define('CB.browser.view.Charts', {
                         data[key][i].count = data[key][i].items;
                     }
                     data[key][i].name = App.shortenString(data[key][i].name, 30);
+                }
+
+                if(sorter) {
+                    data[key] = Ext.Array.sort(data[key], sorter);
                 }
             }
             ,this
@@ -306,7 +321,22 @@ Ext.define('CB.browser.view.Charts', {
         ) {
             return;
         }
+
         this.data = store.proxy.reader.rawData.facets;
+
+        if(this.viewParams) {
+            var vp = this.viewParams;
+            if(!Ext.isEmpty(vp.facet)) {
+                this.selectedFacets = [vp.facet];
+            }
+            if(!Ext.isEmpty(vp.chart_type)) {
+                var b = this.refOwner.buttonCollection.get(vp.chart_type + 'chart' + this.instanceId);
+                if(b) {
+                    this.currentButton = b;
+                }
+            }
+        }
+
         this.loadAvailableFacets();
         this.onChangeChartClick(this.currentButton);
     }

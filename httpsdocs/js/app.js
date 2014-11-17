@@ -766,7 +766,7 @@ function initApp() {
 
                                         ,insertField: 'info'
 
-                                        ,handler: CB.plugin.DropDownList.prototype.onAtCommand
+                                        ,handler: CB.plugin.field.DropDownList.prototype.onAtCommand
                                     }
                                 ]
                             }]

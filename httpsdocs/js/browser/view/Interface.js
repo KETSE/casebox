@@ -24,4 +24,27 @@ Ext.define('CB.browser.view.Interface', {
     ,getViewParams: function() {
         return {};
     }
+
+    /**
+     * detect sorter to be used according to given params
+     *
+     * @param  object params
+     * @return function | null
+     */
+    ,detectSorter: function(params) {
+        var rez = null;
+
+        if(params && params.sort) {
+            var sortersGroup = CB.FacetList.prototype.sorters[params.sort];
+            if(sortersGroup) {
+                var dir = Ext.valueFrom(params.direction, 'asc');
+
+                if(dir) {
+                    rez = sortersGroup[dir];
+                }
+            }
+        }
+
+        return rez;
+    }
 });

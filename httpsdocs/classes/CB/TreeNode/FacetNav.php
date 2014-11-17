@@ -39,17 +39,23 @@ class FacetNav extends Base
         $rez = array();
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
-        $this->lastNodeDepth = $this->lastNode->getClassDepth();
         $this->requestParams = $requestParams;
 
         if (!$this->acceptedPath()) {
             return;
         }
 
+        $this->lastNodeDepth = $this->lastNode->getClassDepth();
+
         if (empty($this->lastNode) || ($this->lastNode->guid != $this->guid)) {
             $rez = $this->getRootNode();
         } else {
             $rez = $this->getChildNodes();
+        }
+
+        //set view if set in config
+        if (!empty($this->config['view'])) {
+            $rez['view'] = $this->config['view'];
         }
 
         return $rez;
@@ -146,7 +152,7 @@ class FacetNav extends Base
         $lfc = $this->getLevelFieldConfigs();
         $isLastFacetField = ($this->lastNodeDepth >= sizeOf($lfc));
 
-        if (empty($currentFacetFieldConfig) || ($this->requestParams['from'] == 'grid')) {
+        if (empty($currentFacetFieldConfig) || in_array(@$this->requestParams['from'], array('grid', 'charts', 'pivot'))) {
             return $this->getItems();
         }
 

@@ -441,7 +441,14 @@ Ext.define('CB.browser.view.Grid', {
 
     }
 
-    ,onStoreLoad: function(store, recs, options) {
+    ,onStoreLoad: function(store, recs, successful, options) {
+        if(!this.rendered ||
+            !this.getEl().isVisible(true) ||
+            (successful !== true)
+        ) {
+            return;
+        }
+
         delete this.grid.userSort;
 
         var hadSelection = false;

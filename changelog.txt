@@ -1,3 +1,9 @@
+CaseBox 1.9.355 (2014-11-17)
+==============================
+New Features, Improvements
+--------------------------
+- FacetNav tree node adjustmets to be able to config the view from remote side
+
 CaseBox 1.9.354 (2014-11-14)
 ==============================
 New Features, Improvements

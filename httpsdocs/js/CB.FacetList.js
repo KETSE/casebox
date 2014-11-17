@@ -18,6 +18,55 @@ Ext.define('CB.FacetList', {
     ,layout: 'fit'
     ,listMode: 'checklist' //radio
 
+    ,sorters: {
+        name: {
+            asc: function(o1, o2) {
+                var a = o1.name
+                    ,b = o2.name;
+
+                if(a < b) {
+                    return -1;
+                }
+
+                if(a > b) {
+                    return 1;
+                }
+
+                return 0;
+            }
+
+            ,desc: function(o1, o2) {
+                var a = o1.name
+                    ,b = o2.name;
+
+                if(a < b) {
+                    return 1;
+                }
+
+                if(a > b) {
+                    return -1;
+                }
+
+                return 0;
+            }
+        }
+
+        ,count: {
+            asc: function(o1, o2) {
+                var a = o1.count
+                    ,b = o2.count;
+
+                return a - b;
+            }
+            ,desc: function(o1, o2) {
+                var a = o1.count
+                    ,b = o2.count;
+
+                return b - a;
+            }
+        }
+    }
+
     ,initComponent: function(){
         this.store = new Ext.data.JsonStore({
             autoDestroy: true

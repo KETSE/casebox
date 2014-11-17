@@ -2,19 +2,20 @@ Ext.namespace('CB.browser.view');
 
 Ext.define('CB.browser.view.Pivot',{
     extend: 'CB.browser.view.Interface'
-    ,xtype: 'CBBrowserViewPivod'
+    ,xtype: 'CBBrowserViewPivot'
 
     ,border: false
     ,tbarCssClass: 'x-panel-white'
     ,layout: 'border'
-    ,activeChart: 'table'
+    ,activeCharts: ['table']
     ,autoScroll: true
+
     ,initComponent: function(){
 
         this.params = Ext.apply(
             {
                 from: 'pivot'
-                ,rows: 0
+                // ,rows: 0
             }
             ,this.params || {}
         );
@@ -80,7 +81,7 @@ Ext.define('CB.browser.view.Pivot',{
                 text: L.ChartArea
                 ,id: 'PVbarchart' + this.instanceId
                 ,itemId: 'PVbarchart'
-                ,chart: 'bar'
+                ,chart: 'stackedBars'
                 ,enableToggle: true
                 ,allowDepress: true
                 ,iconCls: 'ib-chart-bar'
@@ -88,13 +89,13 @@ Ext.define('CB.browser.view.Pivot',{
                 ,scale: 'large'
                 ,toggleGroup: 'pv' + this.instanceId
                 ,scope: this
-                ,handler: this.onChangeChartClick
+                ,handler: this.onChangeChartButtonClick
             })
             ,new Ext.Button({
                 text: L.ChartArea
                 ,id: 'PVcolumnchart' + this.instanceId
                 ,itemId: 'PVcolumnchart'
-                ,chart: 'column'
+                ,chart: 'stackedColumns'
                 ,enableToggle: true
                 ,allowDepress: true
                 ,iconCls: 'ib-chart-column'
@@ -102,7 +103,7 @@ Ext.define('CB.browser.view.Pivot',{
                 ,scale: 'large'
                 ,toggleGroup: 'pv' + this.instanceId
                 ,scope: this
-                ,handler: this.onChangeChartClick
+                ,handler: this.onChangeChartButtonClick
             })
             ,this.rowsCombo
             ,this.colsCombo
@@ -149,6 +150,8 @@ Ext.define('CB.browser.view.Pivot',{
     }
 
     ,onActivate: function() {
+        this.selectedFacets = [];
+
         this.fireEvent(
             'settoolbaritems'
             ,[
@@ -160,85 +163,107 @@ Ext.define('CB.browser.view.Pivot',{
         );
     }
 
-    ,onChangeChartClick: function(b, e) {
-        var i, j;
+    ,onChangeChartButtonClick: function(b, e) {
+        removeType = (b.config.chart == 'stackedBars')
+            ? 'stackedColumns'
+            : 'stackedBars';
 
-        if(!Ext.isEmpty(b)) {
-            this.activeChart = !b.pressed
-                ? 'table'
-                : b.config.chart;
+        if(b.pressed) {
+            this.activeCharts.push(b.config.chart);
+            Ext.Array.remove(this.activeCharts, removeType);
+        } else {
+            Ext.Array.remove(this.activeCharts, b.config.chart);
         }
+
+        this.onChangeChart();
+    }
+
+    ,onChangeChart: function() {
+        var i, j;
 
         this.loadChartData();
 
         this.chartContainer.removeAll(true);
 
-        var html = '';
+        if(this.activeCharts.indexOf('table') > -1) {
+            var html = '';
 
-        var hr = '<th> &nbsp; </th>';
-        Ext.iterate(
-            this.pivot.titles[1]
-            ,function(k, v, o) {
-                hr += '<th>' + v + '</th>';
-            }
-            ,this
-        );
-        html += '<tr>' + hr + '<th>' + L.Total + '</th></tr>';
-
-        Ext.iterate(
-            this.pivot.titles[0]
-            ,function(k, v, o) {
-                var r = '<th style="text-align:left">' + v + '</th>';
-                Ext.iterate(
-                    this.pivot.titles[1]
-                    ,function(q, z, y) {
-                        r += '<td f="' + k + '|' + q + '">' + Ext.valueFrom(this.refs[k + '_' + q], '') + '</td>';
-                    }
-                    ,this
-                );
-
-                html += '<tr>' + r + '<td class="total" f="'+ k +'|">' + Ext.valueFrom(this.refs[k + '_t'], '') + '</td></tr>';
-            }
-            ,this
-        );
-
-        var total = 0;
-        var r = '<th>' + L.Total + '</th>';
-        Ext.iterate(
-            this.pivot.titles[1]
-            ,function(q, z, y) {
-                var nr = Ext.valueFrom(this.refs['t_' + q], '');
-                r += '<td class="total" f="|'+ q +'">' + nr + '</td>';
-                if(!isNaN(nr)) {
-                    total += nr;
+            var hr = '<th> &nbsp; </th>';
+            Ext.iterate(
+                this.pivot.titles[1]
+                ,function(k, v, o) {
+                    hr += '<th>' + v + '</th>';
                 }
-            }
-            ,this
-        );
+                ,this
+            );
+            html += '<tr>' + hr + '<th>' + L.Total + '</th></tr>';
 
-        html += '<tr>' + r + '<td class="total">' + total + '</td></tr>';
+            Ext.iterate(
+                this.pivot.titles[0]
+                ,function(k, v, o) {
+                    var r = '<th style="text-align:left">' + v + '</th>';
+                    Ext.iterate(
+                        this.pivot.titles[1]
+                        ,function(q, z, y) {
+                            r += '<td f="' + k + '|' + q + '">' + Ext.valueFrom(this.refs[k + '_' + q], '') + '</td>';
+                        }
+                        ,this
+                    );
 
-        html = '<table class="pivot">' + html + '</table>';
+                    html += '<tr>' + r + '<td class="total" f="'+ k +'|">' + Ext.valueFrom(this.refs[k + '_t'], '') + '</td></tr>';
+                }
+                ,this
+            );
 
-        var table = this.chartContainer.add({
-            xtype: 'panel'
-            ,border: false
-            ,autoHeight: true
-            ,padding: 10
-            ,autoScroll:true
-            ,html: html
-            ,listeners: {
-                scope: this
-                ,afterrender: function(p) {
-                    var a = p.getEl().query('td');
-                    for (i = 0; i < a.length; i++) {
-                        Ext.get(a[i]).on('click', this.onTableCellClick, this);
+            var total = 0;
+            var r = '<th>' + L.Total + '</th>';
+            Ext.iterate(
+                this.pivot.titles[1]
+                ,function(q, z, y) {
+                    var nr = Ext.valueFrom(this.refs['t_' + q], '');
+                    r += '<td class="total" f="|'+ q +'">' + nr + '</td>';
+                    if(!isNaN(nr)) {
+                        total += nr;
                     }
                 }
-            }
-        });
+                ,this
+            );
 
-        if(this.activeChart != 'table') {
+            html += '<tr>' + r + '<td class="total">' + total + '</td></tr>';
+
+            html = '<table class="pivot">' + html + '</table>';
+
+            var table = this.chartContainer.add({
+                xtype: 'panel'
+                ,border: false
+                ,autoHeight: true
+                ,padding: 10
+                ,autoScroll:true
+                ,html: html
+                ,listeners: {
+                    scope: this
+                    ,afterrender: function(p) {
+                        var a = p.getEl().query('td');
+                        for (i = 0; i < a.length; i++) {
+                            Ext.get(a[i]).on('click', this.onTableCellClick, this);
+                        }
+                    }
+                }
+            });
+        }
+
+        var chartType = false;
+        if(this.activeCharts.indexOf('stackedBars') > -1) {
+            chartType = 'bar';
+            this.refOwner.buttonCollection.get('PVbarchart' + this.instanceId).toggle(true, true);
+            this.refOwner.buttonCollection.get('PVcolumnchart' + this.instanceId).toggle(false, true);
+        } else if(this.activeCharts.indexOf('stackedColumns') > -1) {
+            chartType = 'column';
+            this.refOwner.buttonCollection.get('PVbarchart' + this.instanceId).toggle(false, true);
+            this.refOwner.buttonCollection.get('PVcolumnchart' + this.instanceId).toggle(true, true);
+        }
+
+        if(chartType) {
 
             /* create data, stores and charts on the fly */
             var series = [
@@ -302,7 +327,8 @@ Ext.define('CB.browser.view.Pivot',{
 
             var chartItems = [];
 
-            for (i = 0; i < series.length; i++) {
+            i = 0;
+            // for (i = 0; i < series.length; i++) {
                 var serie = series[i];
 
                 var cfg = {
@@ -326,13 +352,13 @@ Ext.define('CB.browser.view.Pivot',{
                     }]
                     ,axes: [{
                         type: 'category'
-                        ,position: (this.activeChart == 'bar') ? 'left' : 'bottom'
+                        ,position: (chartType == 'bar') ? 'left' : 'bottom'
                         ,fields: serie.xField
                         ,grid: true
                         ,minimum: 0
                     }, {
                         type: 'numeric'
-                        ,position: (this.activeChart == 'column') ? 'left' : 'bottom'
+                        ,position: (chartType == 'column') ? 'left' : 'bottom'
                         ,fields: serie.yField
                         ,grid: true
                     }]
@@ -347,7 +373,7 @@ Ext.define('CB.browser.view.Pivot',{
                         Ext.apply(
                             serie
                             ,{
-                                type: this.activeChart
+                                type: chartType
                                 // ,axis: 'bottom'
                                 ,stacked: true
                                 ,style: {
@@ -371,7 +397,7 @@ Ext.define('CB.browser.view.Pivot',{
                         ,cfg
                     )
                 );
-            }
+            // }
 
 
             this.chartContainer.add(chartItems);
@@ -421,7 +447,7 @@ Ext.define('CB.browser.view.Pivot',{
             ,this
         );
 
-        // create refs object for commot usage
+        // create refs object for common usage
         this.refs = {};
         if(!Ext.isEmpty(this.data.pivot)) {
             data = this.data.pivot[this.selectedFacets.join(',')];
@@ -473,14 +499,33 @@ Ext.define('CB.browser.view.Pivot',{
                 );
                 this.selectedFacets = key.split(',');
             }
-            if(this.data.pivot[this.selectedFacets.join(',')]) {
-                this.pivot.data = this.data.pivot[this.selectedFacets.join(',')].data;
-                this.pivot.titles = this.data.pivot[this.selectedFacets.join(',')].titles;
+
+            var selectedFacets = this.selectedFacets.join(',');
+            if(this.data.pivot[selectedFacets]) {
+                this.pivot.data = this.data.pivot[selectedFacets].data;
+                this.pivot.titles = this.data.pivot[selectedFacets].titles;
+            }
+        }
+
+        if(this.viewParams) {
+            var vp = this.viewParams;
+
+            if(vp.pivot_type) {
+                this.activeCharts = Ext.isString(vp.pivot_type)
+                    ? [vp.pivot_type]
+                    : vp.pivot_type;
+            }
+
+            if(vp.rows && !Ext.isEmpty(vp.rows.facet)) {
+                this.selectedFacets[0] = vp.rows.facet;
+            }
+            if(vp.cols && !Ext.isEmpty(vp.cols.facet)) {
+                this.selectedFacets[1] = vp.cols.facet;
             }
         }
 
         this.loadAvailableFacets();
-        this.onChangeChartClick();
+        this.onChangeChart();
     }
 
     ,onChartItemClick: function(o){

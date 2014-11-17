@@ -181,21 +181,50 @@ class Base implements \CB\Interfaces\TreeNode
 
         /* add pivot facet if we are in pivot view*/
         $rp = \CB\Cache::get('requestParams');
-        if (!empty($rp['from']) && ($rp['from'] == 'pivot') && (sizeof($facets) > 1)) {
-            reset($facets);
-            $facet1 = current($facets);
-            next($facets);
-            $facet2 = current($facets);
+        $cfg = $this->config;
+        $pivot = false;
+        $rows = false;
+        $cols = false;
+
+        if (!empty($cfg['view'])) {
+            $v = $cfg['view'];
+            if (is_scalar($v)) {
+                $pivot = ($v == 'pivot');
+            } else {
+                $pivot = (@$v['type'] == 'pivot');
+                if (!empty($v['rows']['facet'])) {
+                    $rows = $v['rows']['facet'];
+                }
+                if (!empty($v['cols']['facet'])) {
+                    $cols = $v['cols']['facet'];
+                }
+            }
+        } elseif (!empty($rp['from'])) {
+            $pivot = ($rp['from'] == 'pivot');
 
             if (!empty($rp['selectedFacets']) && (is_array($rp['selectedFacets'])) && sizeof($rp['selectedFacets'] > 1)) {
-                $facet1 = $rp['selectedFacets'][0];
-                $facet2 = $rp['selectedFacets'][1];
+                $rows = $rp['selectedFacets'][0];
+                $cols = $rp['selectedFacets'][1];
+            }
+        }
+
+        if ($pivot && (sizeof($facets) > 1)) {
+            reset($facets);
+            if (empty($rows)) {
+                $rows = current($facets);
+                next($facets);
+            }
+            if (empty($cols)) {
+                $facet2 = current($facets);
+            }
+
+            if (is_scalar($rows) || is_scalar($cols)) {
                 foreach ($facets as $facet) {
-                    if ($facet->field == $facet1) {
-                        $facet1 = $facet;
+                    if ((is_scalar($rows)) && ($facet->field == $rows)) {
+                        $rows = $facet;
                     }
-                    if ($facet->field == $facet2) {
-                        $facet2 = $facet;
+                    if ((is_scalar($cols)) && ($facet->field == $cols)) {
+                        $cols = $facet;
                     }
                 }
             }
@@ -203,8 +232,8 @@ class Base implements \CB\Interfaces\TreeNode
             $config = array(
                 'type' => 'pivot'
                 ,'name' => 'pivot'
-                ,'facet1' => $facet1
-                ,'facet2' => $facet2
+                ,'facet1' => $rows
+                ,'facet2' => $cols
             );
             $facets[] = \CB\Facets::getFacetObject($config);
         }
@@ -241,10 +270,18 @@ class Base implements \CB\Interfaces\TreeNode
     {
         // check if directly set into node config
         if (isset($this->config[$param])) {
-            return array(
+            $rez = array(
                 'from' => $this->getClassRoot()->getId()
                 ,'data' => $this->config[$param]
             );
+
+            //add sorting if set in config
+            if (!empty($this->config['sort'])) {
+                $rez['sort'] = $this->config['sort'];
+
+            }
+
+            return $rez;
         }
 
         //check in config

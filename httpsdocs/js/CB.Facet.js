@@ -12,6 +12,7 @@ Ext.define('CB.Facet', {
     ,mode: 'OR'
     ,modeToggle: false
     ,bodyStyle: 'background: none'
+
     ,initComponent: function(config){
         Ext.apply(this, config);
         var tools = [];

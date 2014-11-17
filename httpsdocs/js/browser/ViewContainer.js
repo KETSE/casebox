@@ -11,6 +11,7 @@ Ext.define('CB.browser.ViewContainer', {
     ,params: {
         descendants: false
     }
+
     ,initComponent: function(){
         this.instanceId = Ext.id();
 
@@ -434,6 +435,12 @@ Ext.define('CB.browser.ViewContainer', {
                     }
 
                     Ext.apply(options, vp);
+
+                    //reset userViewSet flag if loaded id changed
+                    if(store.proxy.extraParams.id != options.id) {
+                        delete this.userViewSet;
+                    }
+
                     store.proxy.extraParams = options;
                     store.currentPage = Ext.valueFrom(options.page, 1);
                 }
@@ -621,7 +628,11 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onCardItemChangeClick: function(b, e) {
         delete this.params.view;
-        this.cardContainer.getLayout().setActiveItem(b.viewIndex);
+
+        this.setActiveView(b.viewIndex);
+        //set a flag that user have set the view and dont change the view on store load
+        this.userViewSet = true;
+
         this.onReloadClick();
     }
 
@@ -667,18 +678,47 @@ Ext.define('CB.browser.ViewContainer', {
         this.reloadTask.delay(500);
     }
 
-    ,reloadView: function(){
-        if(this.params && this.params.view) {
-            var viewName = 'CBBrowserView' + Ext.util.Format.capitalize(this.params.view);
+    /**
+     * change active view
+     * @param variant indexOrName
+     *
+     * @return activated component
+     */
+    ,setActiveView: function(indexOrName, viewParams) {
+        var layout = this.cardContainer.getLayout()
+            ,rez = null;
+
+        if(Ext.isNumeric(indexOrName)) {
+            rez = this.cardContainer.items.getAt(indexOrName);
+        } else {
+            var viewName = 'CBBrowserView' + Ext.util.Format.capitalize(indexOrName);
             this.cardContainer.items.each(
                 function(i, idx) {
                     if(i.getXType() == viewName) {
-                        this.cardContainer.getLayout().setActiveItem(idx);
+                        rez = i;
                     }
                 }
                 ,this
             );
         }
+
+        if(!Ext.isEmpty(rez) && (rez !== layout.activeItem)) {
+            if(viewParams) {
+                rez.viewParams = viewParams;
+            }
+
+            rez = layout.setActiveItem(rez);
+        }
+
+        return rez;
+    }
+
+    ,reloadView: function(){
+        //view will be changed on store load
+        // if(this.params && this.params.view) {
+        //     this.setActiveView(this.params.view);
+        // }
+
         if(this.store.load(this.params)) {
             // this.getEl().mask(L.Loading, 'x-mask-loading');
         }
@@ -711,6 +751,22 @@ Ext.define('CB.browser.ViewContainer', {
             this.breadcrumb.setValue(b);
         }
         /* end of updating breadcrumb */
+
+        /* change view if set in params */
+        if(!this.userViewSet) {
+            if(!Ext.isEmpty(result.view)) { //view came from laoded data
+                if(Ext.isPrimitive(result.view)) {
+                    result.view = {type: result.view};
+                }
+                this.setActiveView(result.view.type, result.view);
+            } else { // check if view not set on client params
+                if(this.params && this.params.view) {
+                    this.setActiveView(this.params.view);
+                }
+            }
+        }
+
+        /* end of change view if set in loaded params */
 
         this.fireEvent('viewloaded', this.store.proxy, result, ep);
 
@@ -882,7 +938,6 @@ Ext.define('CB.browser.ViewContainer', {
                 this.objectPanel.doLoad();
             }
         }
-
     }
 
     /**

@@ -117,6 +117,9 @@ class Browser
         if (!empty($this->search)) {
             $rez['search'] = &$this->search;
         }
+        if (!empty($this->view)) {
+            $rez['view'] = &$this->view;
+        }
         if (!empty($this->DC)) {
             $rez['DC'] = &$this->DC[0];
         }
@@ -176,9 +179,19 @@ class Browser
 
         foreach ($this->treeNodeClasses as $class) {
             $rez = $class->getChildren($this->path, $this->requestParams);
+            //merging all returned records into a single array
             if (!empty($rez['data'])) {
                 $this->data = array_merge($this->data, $rez['data']);
             }
+
+            //calc totals accordingly
+            if (isset($rez['total'])) {
+                $this->total += $rez['total'];
+            } elseif (!empty($rez['data'])) {
+                $this->total += sizeof($rez['data']);
+            }
+
+            //return last facets and pivot if present
             if (!empty($rez['facets'])) {
                 $this->facets = $rez['facets'];
             }
@@ -186,14 +199,9 @@ class Browser
                 $this->pivot = $rez['pivot'];
             }
 
-            if (isset($rez['total'])) {
-                $this->total += $rez['total'];
-            } elseif (!empty($rez['data'])) {
-                $this->total += sizeof($rez['data']);
-            }
-
-            if (isset($rez['search'])) {
-                $this->search[] = $rez['search'];
+            //set view, display columns and sorting if present
+            if (isset($rez['view'])) {
+                $this->view = $rez['view'];
             }
 
             if (isset($rez['DC'])) {
@@ -202,6 +210,11 @@ class Browser
 
             if (isset($rez['sort'])) {
                 $this->sort = $rez['sort'];
+            }
+
+            //if its debug host - search params will be also returned
+            if (isset($rez['search'])) {
+                $this->search[] = $rez['search'];
             }
         }
     }
