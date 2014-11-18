@@ -56,7 +56,7 @@ Ext.define('CB.VerticalEditGrid', {
             Ext.apply(viewCfg, this.viewConfig);
         }
 
-        var plugins = Ext.valueFrom(this.plugins, []);
+        var plugins = Ext.apply([], Ext.valueFrom(this.plugins, []));
         plugins.push(
             {
                 ptype: 'cellediting'
@@ -107,6 +107,7 @@ Ext.define('CB.VerticalEditGrid', {
                 ,celldblclick:  this.onFieldTitleDblClick
                 ,cellclick:  this.onCellClick
                 ,cellcontextmenu: this.onPopupMenu
+                ,destroy: this.onDestroy
             }
             ,stateful: true
             ,stateId: Ext.valueFrom(this.stateId, 'veg')//vertical edit grid
@@ -611,9 +612,9 @@ Ext.define('CB.VerticalEditGrid', {
 
         var col = context.column;
         var ed = col.getEditor();
-        if(ed && !ed.destroying) {
-            ed.destroy();
-        }
+
+        Ext.destroy(ed);
+
         if(this.editors && this.editors[t]) {
             col.setEditor(this.editors[t](this));
         } else {
@@ -668,25 +669,26 @@ Ext.define('CB.VerticalEditGrid', {
         // this.getView().focus(false, true);
     }
 
+    ,addKeyMaps: function(c) {
+        var map = new Ext.KeyMap(c.getEl(), [
+            {
+                key: "s"
+                ,ctrl: true
+                ,shift: false
+                ,scope: this
+                ,stopEvent: true
+                ,fn: this.onSaveObjectEvent
+            }
+        ]);
+    }
+
     ,attachKeyListeners: function(comp) {
         if(Ext.isEmpty(comp) || !Ext.isObject(comp)) {
             return;
         }
         comp.on(
             'afterrender'
-            ,function(c)
-            {
-                var map = new Ext.KeyMap(c.getEl(), [
-                    {
-                        key: "s"
-                        ,ctrl: true
-                        ,shift: false
-                        ,scope: this
-                        ,stopEvent: true
-                        ,fn: this.onSaveObjectEvent
-                    }
-                ]);
-            }
+            ,this.addKeyMaps
             ,this
         );
     }
@@ -701,6 +703,12 @@ Ext.define('CB.VerticalEditGrid', {
     ,onAfterEditProperty: function(editor, context, eOpts){
         var nodeId = context.record.get('id');
         var node = this.helperTree.getNode(nodeId);
+
+        editor.un(
+            'afterrender'
+            ,this.addKeyMaps
+            ,this
+        );
 
         if(context.field == 'value'){
             //check if field has validator set and notify if validation not passed
@@ -825,5 +833,15 @@ Ext.define('CB.VerticalEditGrid', {
         );
 
         return rez;
+    }
+
+    ,onDestroy: function() {
+
+        if(!Ext.isEmpty(this.plugins)) {
+            for (var i = this.plugins.length - 1; i >= 0; i--) {
+                this.plugins[i].clearListeners();
+                Ext.destroy(this.plugins[i]);
+            }
+        }
     }
 });

@@ -1,3 +1,15 @@
+CaseBox 1.9.356 (2014-11-18)
+==============================
+New Features, Improvements
+--------------------------
+- Sorting should always be server side
+- core.translations table should have columns as lang codes, not l1, l2, l3...
+  Note: update sql script included for <core>.translations table update
+
+Fixed Bugs:
+----------
+- CRITICAL: CB UI blocked after adding a task
+
 CaseBox 1.9.355 (2014-11-17)
 ==============================
 New Features, Improvements

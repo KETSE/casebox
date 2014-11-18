@@ -409,7 +409,7 @@ Ext.define('CB.browser.view.Grid', {
             grid = me.up('tablepanel'),
             store = grid.store;
 
-        store.remoteSort = (this.config.localSort !== true);
+        // store.remoteSort = (this.config.localSort !== true);
         if(store.remoteSort) {
             grid.userSort = 1;
         } else {

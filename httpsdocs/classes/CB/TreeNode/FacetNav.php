@@ -76,7 +76,7 @@ class FacetNav extends Base
                 if (empty($cfg['title_'.$l])) {
                     $l = Config::get('language');
                     if (empty($cfg['title_'.$l])) {
-                        if ($cfg['title']) {
+                        if (!empty($cfg['title'])) {
                             $rez = $cfg['title'];
                         }
                     } else {

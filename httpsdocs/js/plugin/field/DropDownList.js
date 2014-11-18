@@ -105,6 +105,7 @@ Ext.define('CB.plugin.field.DropDownList', {
                 ,'onListRefresh'
                 ,'onBeforeSelect'
                 ,'onBeforeDeselect'
+                ,'onDestroy'
             ]
         );
 
@@ -121,6 +122,7 @@ Ext.define('CB.plugin.field.DropDownList', {
             ,setSelection: Ext.emptyFn
             ,onCollapse: Ext.emptyFn
             ,onEsc: Ext.emptyFn
+            ,bindStore: Ext.emptyFn
 
             ,assertValue: function() {
                 return '';
@@ -182,6 +184,7 @@ Ext.define('CB.plugin.field.DropDownList', {
 
         owner.on('render', this.onRender, this);
         owner.on('beforeselect', this.setSelectedValue, this);
+        owner.on('beforedestroy', this.onBeforeDestroy, this);
     }
 
 
@@ -196,6 +199,7 @@ Ext.define('CB.plugin.field.DropDownList', {
     ,onBeforeDestroy: function(ed){
         ed.un('keydown', this.onKeyDown, this);
         ed.un('keyup', this.onKeyUp, this);
+        this.owner.un('beforeselect', this.setSelectedValue, this);
     }
 
     ,onKeyDown: function(ed, e){

@@ -5,6 +5,7 @@ use CB\User;
 use CB\Cache;
 use CB\Util;
 use CB\State;
+use CB\data;
 
 class Base
 {
@@ -247,6 +248,13 @@ class Base
             $p['result']['DC'] = $rez;
         }
 
+        /* check if we need to sort records using php (in case sort field is not from solr)*/
+        if (!empty($p['result']['sort']) &&
+            !empty($rez[$p['result']['sort']['property']]['localSort'])
+        ) {
+            $this->sortRecords($data, $p['result']['sort'], $rez[$p['result']['sort']['property']]);
+        }
+
         //analize grouping
         if (!empty($ip['userGroup']) && !empty($ip['group'])) {
             $p['result']['group'] = array(
@@ -444,5 +452,22 @@ class Base
         }
 
         return $rez;
+    }
+
+    protected function sortRecords(&$data, $sortOptions, $fieldConfig)
+    {
+        \CB\debug('sortRecords using php', $sortOptions, $fieldConfig, $data);
+
+        $sortType = empty($fieldConfig['sortType'])
+            ? 'asString'
+            : $fieldConfig['sortType'];
+
+        $sortDir = strtolower($sortOptions['direction']);
+
+        data\Sorter::$sortField = $sortOptions['property'];
+
+        $sorter = 'CB\\data\\Sorter::' . $sortType . ucfirst($sortDir);
+        \CB\debug('sorter', $sorter);
+        usort($data, $sorter);
     }
 }
