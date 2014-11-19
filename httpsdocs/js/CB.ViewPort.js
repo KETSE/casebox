@@ -540,7 +540,17 @@ Ext.define('CB.ViewPort', {
         if(App.activateTab(null, objectId, CB.SecurityPanel)) {
             return;
         }
-        App.addTab(null, new CB.SecurityPanel({data: { id: objectId }}));
+        App.addTab(
+            null
+            ,Ext.create(
+                'CB.SecurityPanel'
+                ,{
+                    data: {
+                        id: objectId
+                    }
+                }
+            )
+        );
     }
 
     ,onFileOpen: function(data, e){

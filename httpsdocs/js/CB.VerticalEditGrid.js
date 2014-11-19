@@ -107,7 +107,6 @@ Ext.define('CB.VerticalEditGrid', {
                 ,celldblclick:  this.onFieldTitleDblClick
                 ,cellclick:  this.onCellClick
                 ,cellcontextmenu: this.onPopupMenu
-                ,destroy: this.onDestroy
             }
             ,stateful: true
             ,stateId: Ext.valueFrom(this.stateId, 'veg')//vertical edit grid
@@ -833,15 +832,5 @@ Ext.define('CB.VerticalEditGrid', {
         );
 
         return rez;
-    }
-
-    ,onDestroy: function() {
-
-        if(!Ext.isEmpty(this.plugins)) {
-            for (var i = this.plugins.length - 1; i >= 0; i--) {
-                this.plugins[i].clearListeners();
-                Ext.destroy(this.plugins[i]);
-            }
-        }
     }
 });

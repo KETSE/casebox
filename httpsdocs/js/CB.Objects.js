@@ -6,6 +6,8 @@ Ext.namespace('CB');
 
     ,title: L.NewObject
     ,padding: 0
+    ,bodyStyle: 'padding: 0'
+
     ,initComponent: function(config){
         Ext.apply(this, this.config);
 
@@ -31,6 +33,7 @@ Ext.namespace('CB');
             ,border: false
             ,labelWidth: 130
             ,bodyStyle: 'padding: 10px'
+            ,padding: 10
             ,cls: 'spacy-fields'
             ,defaults:{
                 minWidth: 90
@@ -117,19 +120,23 @@ Ext.namespace('CB');
 
         Ext.apply(this, {
             layout: 'fit'
-            ,initialConfig:{
-                api: {
-                    load: CB_Objects.load
-                    ,submit: CB_Objects.save
-                    ,waitMsg: L.LoadingData + ' ...'
-                }
-                ,paramsAsHash: true
+            ,api: {
+                load: CB_Objects.load
+                ,submit: CB_Objects.save
+                ,waitMsg: L.LoadingData + ' ...'
             }
+            ,paramsAsHash: true
+
             ,listeners:{
-                afterlayout: {scope: this, fn: function(){
-                    if(this.loaded) return;
-                    this.getEl().mask(L.Downloading + ' ...', 'x-mask-loading');
-                }}
+                afterlayout: {
+                    scope: this
+                    ,fn: function(){
+                        if(this.loaded) {
+                            return;
+                        }
+                        this.getEl().mask(L.Downloading + ' ...', 'x-mask-loading');
+                    }
+                }
 
                 ,activate: function(){
                     // ep = this.child('[region="center"]');
@@ -577,7 +584,7 @@ Ext.namespace('CB');
                 ,bodyStyle:'margin:0; padding: 0'
                 ,listeners: {
                     scope: this
-                    ,afterlayout: function(p){
+                    ,afterrender: function(p){
                         w = p.getWidth();
                         this.grid.setWidth(w-9);
                         this.grid.getEl().setWidth(w);
@@ -795,107 +802,4 @@ Ext.namespace('CB');
     ,onPathClick: function(){
         App.locateObject( this.data.id, this.data.path );
      }
-});
-
-
-Ext.define('CB.ActionChildsPanel', {
-    extend: 'Ext.Panel'
-    ,border: false
-    ,autoHeight: true
-    ,bodyStyle: 'background-color: #F4F4F4'
-    ,initComponent: function(){
-        Ext.apply(this, {
-            tpl: new Ext.XTemplate(
-                '<h3 style="padding: 5px 5px 10px 5px; font-size: 14px">'+L.Actions+'</h3>'
-                ,'<ul class="action-list"><tpl for=".">'
-                ,'<li><a href="#" nid="{nid}" class="dIB lh16 icon-padding {iconCls}">{name}</a></li>'
-                ,'</tpl></ul>'
-                ,{compiled: true}
-            )
-            ,data: []
-            ,listeners: {
-                scope: this
-                ,afterlayout: this.attachListeners
-                ,afterrender: this.attachListeners
-                ,beforedestroy: function(){
-                    App.mainViewPort.un('objectsdeleted', this.onObjectsChange, this);
-                    App.un('objectchanged', this.onObjectsChange, this);
-                }
-            }
-        });
-        CB.ActionChildsPanel.superclass.initComponent.apply(this, arguments);
-        this._update= this.update;
-        this.update = function(data){
-            this._update(data);
-            this.attachListeners();
-        };
-
-        App.mainViewPort.on('objectsdeleted', this.onObjectsChange, this);
-        App.on('objectchanged', this.onObjectsChange, this);
-    }
-    ,onObjectsChange: function(){
-        this.reload();
-    }
-    ,attachListeners: function(){
-        p = this.getEl().query('a');
-        if(Ext.isEmpty(p)) return;
-        for (var i = 0; i < p.length; i++) {
-            el = Ext.get(p[i]);
-            el.un('click', this.onItemClick, this);
-            el.on('click', this.onItemClick, this);
-        }
-    }
-    ,getCaseObjectId: function(){
-        p = this.findParentByType(CB.Objects);
-        if(Ext.isEmpty(p)) return;
-        id = p.data.id;
-        if(isNaN(id)) return;
-        return id;
-    }
-
-    ,reload: function(){
-        if(this.rendered) {
-            this.update([]);
-        } else {
-            this.data = [];
-        }
-
-        id = this.getCaseObjectId();
-        if(Ext.isEmpty(id)) return;
-        params = {pid: id
-            ,template_types: 'object'
-            ,folders: false
-            ,sort: 'udate'
-            ,dir: 'desc'
-        };
-        p = this.findParentByType(CB.Objects);
-        if(!Ext.isEmpty(p)
-            && !Ext.isEmpty(p.data.cfg)
-            && !Ext.isEmpty(p.data.cfg.templates)
-        ) {
-            params.templates = p.data.cfg.templates;
-        }
-        CB_BrowserView.getChildren(params, this.processLoad, this);
-    }
-
-    ,processLoad: function(r, e){
-        /* add check for cases when objects window is closing but saved its changes.
-            In this case, the delay that appears while this component load its remote data
-            and tries to render them could result in a js error.
-            This is because objects window gets destroyed before this component tries to render.
-        */
-        if(this.isDestroyed) {
-            return;
-        }
-        if(r.success !== true) return;
-        for (var i = 0; i < r.data.length; i++)
-            r.data[i].iconCls = getItemIcon(r.data[i]);
-        this.update(r.data);
-        this.setVisible(r.data.length > 0);
-    }
-
-    ,onItemClick: function(ev, el){
-        if(Ext.isEmpty(el) || Ext.isEmpty(el.attributes['nid']) || Ext.isEmpty(el.attributes['nid'].value)) return;
-        App.mainViewPort.openObject({ id: el.attributes['nid'].value }, ev);
-    }
 });

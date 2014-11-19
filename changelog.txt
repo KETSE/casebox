@@ -1,3 +1,9 @@
+CaseBox 1.9.357 (2014-11-19)
+==============================
+Fixed Bugs:
+----------
+- edit in tabsheet for had some js issues on open/close
+
 CaseBox 1.9.356 (2014-11-18)
 ==============================
 New Features, Improvements

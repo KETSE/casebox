@@ -34,8 +34,8 @@ DELIMITER $$
 
 CREATE
     DEFINER = 'local'@'localhost'
-    TRIGGER `cb_git`.`translation_bu` BEFORE UPDATE
-    ON `cb_git`.`translations`
+    TRIGGER `translation_bu` BEFORE UPDATE
+    ON `translations`
     FOR EACH ROW BEGIN
 	SET new.udate = CURRENT_TIMESTAMP;
     END$$

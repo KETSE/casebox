@@ -14,8 +14,9 @@ Ext.define('CB.GenericForm', {
     ,title: 'Generic window'
     ,monitorValid: true
     ,data: {}
+
     ,initComponent: function(){
-        CB.GenericForm.superclass.initComponent.apply(  this, arguments );
+        this.callParent(arguments);
 
         this.enableBubble('savesuccess');
 
@@ -23,16 +24,20 @@ Ext.define('CB.GenericForm', {
         this.on('afterrender', this.loadData, this);
         this.on('change', this.setDirty, this);
     }
+
     ,setDirty: function(isDirty){
         this._isDirty = (isDirty !== false);
     }
+
     ,_lockEdit: function(){
         if(this.lockEdit) return this.lockEdit();
     }
+
     ,_unlockEdit: function(){
         if(this.unlockEdit) return this.unlockEdit();
         this.doClose();
     }
+
     ,onBeforeClose: function(){
         if(this._confirmedClosing || !this._isDirty){
             this.getEl().mask(L.Closing + ' ...', 'x-mask-loading');
@@ -60,10 +65,13 @@ Ext.define('CB.GenericForm', {
         });
         return false;
     }
+
     ,doClose: function(){
-        this.suspendEvents(false);
-        this.destroy();
+        // this.clearListeners();
+        // this.suspendEvents(false);
+        Ext.destroy(this);
     }
+
     ,loadData: function(){
         if(isNaN(this.data.id)){
             this.data.id = Ext.isEmpty(this.data.id) ? Ext.id(): this.data.id;
@@ -82,6 +90,7 @@ Ext.define('CB.GenericForm', {
             ,failure: this.processLoadResponse.bind(this)
         });
     }
+
     ,getTitle: function(){
         var rez = '<'+L.noName+'>';
         if(!Ext.isEmpty(this.data.name)) {
@@ -92,6 +101,7 @@ Ext.define('CB.GenericForm', {
 
         return Ext.util.Format.htmlEncode(rez);
     }
+
     ,updateFormTitle: function(){
         var t = '';
         if(this.data && !Ext.isEmpty(this.data.date_start)) {
@@ -115,6 +125,7 @@ Ext.define('CB.GenericForm', {
     }
 
     ,getIconClass: Ext.emptyFn // this function should be redefined for child classes to return a corresponding icon for the window
+
     ,processLoadResponse: function(f, e){
         this.getEl().unmask();
         r = e.result;
@@ -144,14 +155,17 @@ Ext.define('CB.GenericForm', {
         }
         this._setFormValues();
     }
+
     ,_setFormValues: function(){
         this.updateFormTitle();
         if(this.setFormValues) this.setFormValues();
         this.setDirty(false);
     }
+
     ,_getFormValues: function(){
         if(this.getFormValues) this.getFormValues();
     }
+
     ,saveForm: function(){
         if(!this.getForm().isValid()) return ;
         this.getEl().mask(L.SavingChanges + ' ...', 'x-mask-loading');
@@ -168,6 +182,7 @@ Ext.define('CB.GenericForm', {
             ,failure: this.onSaveFailure
         });
     }
+
     ,onSaveSuccess: function(f, a){
         if(Ext.isDefined(a.result.data)) this.data = a.result.data;
         if(this.onFormLoaded) this.onFormLoaded(f, a);
@@ -177,6 +192,7 @@ Ext.define('CB.GenericForm', {
         if(this._confirmedClosing) return this.doClose();
         this.getEl().unmask();
     }
+
     ,onSaveFailure: function(form, action){
         this.getEl().unmask();
         if(Ext.isDefined(action.result.already_opened_by)){

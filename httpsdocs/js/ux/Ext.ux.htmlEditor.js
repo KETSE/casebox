@@ -4,6 +4,8 @@ Ext.define('Ext.ux.HtmlEditor', {
     extend: 'Ext.form.field.HtmlEditor'
     ,alias: 'widget.CBHtmlEditor'
 
+    ,xtype: 'ExtUxHtmlEditor'
+
     ,itemId: 'htmleditor'
     ,baseUri: ''
     ,border: false

@@ -475,28 +475,46 @@ function initApp() {
 
     App.findTabByType = function(tabPanel, type){
         tabIdx = -1;
-        if(Ext.isEmpty(type)) return tabIdx;
+        if(Ext.isEmpty(type)) {
+            return tabIdx;
+        }
+
         i= 0;
         while((tabIdx == -1) && (i < tabPanel.items.getCount())){
             o = tabPanel.items.get(i);
-            if(Ext.isDefined(o.isXType) && o.isXType(type)) tabIdx = i;
+            if(Ext.isDefined(o.isXType) && o.isXType(type)) {
+                tabIdx = i;
+            }
             i++;
         }
+
         return tabIdx;
     };
 
     App.activateTab = function(tabPanel, id, xtype){
-        if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
-        tabIdx = App.findTab(tabPanel, id, xtype);
-        if(tabIdx < 0) return false;
+        if(Ext.isEmpty(tabPanel)) {
+            tabPanel = App.mainTabPanel;
+        }
+
+        var tabIdx = App.findTab(tabPanel, id, xtype);
+
+        if(tabIdx < 0) {
+            return false;
+        }
         tabPanel.setActiveTab(tabIdx);
+
         return tabPanel.items.getAt(tabIdx);
     };
 
     App.addTab = function(tabPanel, o){
-        if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
+        if(Ext.isEmpty(tabPanel)) {
+            tabPanel = App.mainTabPanel;
+        }
+
+        clog('adding', o, 'to', tabPanel);
         c = tabPanel.add(o);
         o.show();
+
         return c;
     };
 

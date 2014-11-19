@@ -531,7 +531,6 @@ Ext.define('CB.browser.ViewContainer', {
                 scope: this
                 ,changeparams: this.changeSomeParams
                 ,settoolbaritems: this.onSetToolbarItems
-                // ,createobject: this.onCreateObjectEvent
                 ,reload: this.onReloadClick
                 ,activate: function() {
                     // this.cardContainer.syncSize();
@@ -1130,25 +1129,6 @@ Ext.define('CB.browser.ViewContainer', {
     ,onSearchQuery: function(query, e){
         this.changeSomeParams({query: query});
     }
-
-    // ,onCreateObjectEvent: function(objectData, e) {
-    //     if(Ext.isEmpty(objectData.pid)) {
-    //         objectData.pid = this.folderProperties.id;
-    //     }
-
-    //     if(Ext.isEmpty(objectData.path)) {
-    //         objectData.path = this.folderProperties.path;
-    //     }
-
-    //     var templateCfg = CB.DB.templates.getProperty(objectData.template_id, 'cfg');
-
-    //     if(templateCfg && (Ext.valueFrom(templateCfg.editMethod, templateCfg.createMethod) == 'tabsheet')) {
-    //             App.mainViewPort.openObject(objectData, e);
-    //     } else {
-    //         this.buttonCollection.get('properties' + this.instanceId).toggle(true);
-    //         this.objectPanel.edit(objectData);
-    //     }
-    // }
 
     ,onCreateObjectClick: function(b, e) {
         // var tplRec = CB.DB.templates.getById(b.data.template_id);

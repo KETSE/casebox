@@ -456,8 +456,6 @@ class Base
 
     protected function sortRecords(&$data, $sortOptions, $fieldConfig)
     {
-        \CB\debug('sortRecords using php', $sortOptions, $fieldConfig, $data);
-
         $sortType = empty($fieldConfig['sortType'])
             ? 'asString'
             : $fieldConfig['sortType'];
@@ -467,7 +465,7 @@ class Base
         data\Sorter::$sortField = $sortOptions['property'];
 
         $sorter = 'CB\\data\\Sorter::' . $sortType . ucfirst($sortDir);
-        \CB\debug('sorter', $sorter);
+
         usort($data, $sorter);
     }
 }

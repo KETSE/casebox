@@ -1,12 +1,14 @@
 Ext.namespace('CB');
 
 Ext.define('CB.SecurityPanel', {
-    exend: 'Ext.Panel'
-    ,title: L.Security
+    exend: 'Ext.panel.Panel'
+
+    ,xtype: 'CBSecurityPanel'
+
     ,closable: true
-    ,iconCls: 'icon-key'
-    // ,layout: 'border'
+
     ,initComponent: function(){
+        this.data = Ext.valueFrom(this.config.data, {});
 
         this.actions = {
             edit: new Ext.Action({
@@ -79,7 +81,8 @@ Ext.define('CB.SecurityPanel', {
                 ,destroy: CB_Security.destroyObjectAccess
             }
             ,proxy: {
-                reader: {
+                type: 'direct'
+                ,reader: {
                     type: 'json'
                 }
             }
@@ -193,7 +196,9 @@ Ext.define('CB.SecurityPanel', {
             topToolbar = [ this.actions.removeChildPermissions ];
         }
         Ext.apply(this, {
-            autoHeight: true
+            title: L.Security
+            ,iconCls: 'icon-key'
+            ,autoHeight: true
             ,tbarCssClass: 'x-panel-gray'
             ,tbar: topToolbar
             ,items: [
@@ -275,7 +280,8 @@ Ext.define('CB.SecurityPanel', {
             }
         });
 
-        CB.SecurityPanel.superclass.initComponent.apply(this, arguments);
+        // CB.SecurityPanel.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
     ,onAfterRender: function(){
         this.getEl().mask(L.loading, 'x-mask-loading');
