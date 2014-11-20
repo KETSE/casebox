@@ -1,3 +1,13 @@
+CaseBox 1.9.358 (2014-11-20)
+==============================
+New Features, Improvements
+--------------------------
+- allow FacetNav class to work without level_fields config param
+
+Fixed Bugs:
+----------
+- detect hasChilds for FacetNav root node when no level_fields defined
+
 CaseBox 1.9.357 (2014-11-19)
 ==============================
 Fixed Bugs:

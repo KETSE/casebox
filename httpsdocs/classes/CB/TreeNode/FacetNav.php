@@ -100,7 +100,7 @@ class FacetNav extends Base
                     'name' => $this->getName('root')
                     ,'id' => $this->getId('root')
                     ,'iconCls' => Util\coalesce(@$this->config['iconCls'], 'icon-folder')
-                    ,'has_childs' => true
+                    ,'has_childs' => (!empty($this->config['facet_fields']) || !empty($this->config['show_in_tree']))
                 )
             )
         );
@@ -237,40 +237,39 @@ class FacetNav extends Base
      */
     protected function getLevelFieldConfigs()
     {
+        $rez = array();
+
         if (isset($this->LevelFieldConfigs)) {
             return $this->LevelFieldConfigs;
         }
 
         $facetsDefinitions = \CB\Config::get('facet_configs');
 
-        if (empty($this->config['level_fields'])) {
-            throw new Exception('"level_fields" not specified for FacetNav class.', 1);
-        }
+        if (!empty($this->config['level_fields'])) {
+            $fields = $this->config['level_fields'];
 
-        $fields = $this->config['level_fields'];
-
-        if (is_string($fields)) {
-            $fields = explode(',', $fields);
-        }
-
-        $rez = array();
-        foreach ($fields as $key => $value) {
-            if (is_scalar($value)) {
-                $key = trim($value);
-                $value = array();
+            if (is_string($fields)) {
+                $fields = explode(',', $fields);
             }
 
-            if (!empty($facetsDefinitions[$key])) {
-                $value = $facetsDefinitions[$key];
-
-                $value['name'] = $key;
-
-                if (empty($value['field'])) {
-                    $value['field'] = $key;
+            foreach ($fields as $key => $value) {
+                if (is_scalar($value)) {
+                    $key = trim($value);
+                    $value = array();
                 }
-            }
 
-            $rez[$key] = $value;
+                if (!empty($facetsDefinitions[$key])) {
+                    $value = $facetsDefinitions[$key];
+
+                    $value['name'] = $key;
+
+                    if (empty($value['field'])) {
+                        $value['field'] = $key;
+                    }
+                }
+
+                $rez[$key] = $value;
+            }
         }
 
         $this->LevelFieldConfigs = $rez;
