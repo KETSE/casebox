@@ -1,3 +1,13 @@
+CaseBox 1.9.359 (2014-11-21)
+==============================
+New Features, Improvements
+--------------------------
+- updates to Pivot view
+
+Fixed Bugs:
+----------
+- misspelled variable for pivot facets generation
+
 CaseBox 1.9.358 (2014-11-20)
 ==============================
 New Features, Improvements

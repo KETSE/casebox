@@ -1,9 +1,11 @@
 Ext.namespace('CB');
 
-Ext.define('CB.SecurityPanel', {
-    exend: 'Ext.panel.Panel'
+Ext.define('CB.SecurityWindow', {
+    exend: 'Ext.window.Window'
 
-    ,xtype: 'CBSecurityPanel'
+    ,alias: 'CBSecurityWindow'
+
+    ,xtype: 'CBSecurityWindow'
 
     ,closable: true
 
@@ -280,15 +282,17 @@ Ext.define('CB.SecurityPanel', {
             }
         });
 
-        // CB.SecurityPanel.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
     }
+
     ,onAfterRender: function(){
         this.getEl().mask(L.loading, 'x-mask-loading');
         this.aclStore.load();
     }
+
     ,onAclStoreLoad: function(store, records, options){
     }
+
     ,onAclProxyLoad: function(proxy, object, options){
         this.getEl().unmask();
         this.objectLabel.setValue('Object name: ' + Ext.valueFrom(object.result.path, '') + object.result.name);
@@ -301,6 +305,7 @@ Ext.define('CB.SecurityPanel', {
     ,onEditClick: function(b, e){
         this.setReadOnly(false);
     }
+
     ,setReadOnly: function(readOnly){
         this.editLabel.setVisible(readOnly);
         this.actions.edit.setHidden(!readOnly);
@@ -319,6 +324,7 @@ Ext.define('CB.SecurityPanel', {
         this.actions.apply.setHidden(readOnly);
         this.actions.cancel.setHidden(readOnly);
     }
+
     ,updateDeleteAction: function(){
         canDelete = true;
         sr = this.aclList.getSelectedRecords();
@@ -328,6 +334,7 @@ Ext.define('CB.SecurityPanel', {
         }
         this.actions.del.setDisabled(!canDelete);
     }
+
     ,onAddClick: function(b, e){
         w = new CB.ObjectsSelectionForm({
             config: {
@@ -363,6 +370,7 @@ Ext.define('CB.SecurityPanel', {
         }, this);
         w.show();
     }
+
     ,onDeleteClick: function(b, e){
         ra = this.aclList.getSelectedRecords();
         if(Ext.isEmpty(ra)) return;
@@ -373,11 +381,13 @@ Ext.define('CB.SecurityPanel', {
             }
         }, this);
     }
+
     ,onAclListSelectionChange: function(listView, selections){
         this.permissionsStore.removeAll();
         if(!Ext.isEmpty(selections)) this.reloadPermissionsStore();
         this.updateDeleteAction();
     }
+
     ,onPermissionNodeClick: function(dataView, index, node, e){
         r = dataView.getRecord(node);
         cb = e.getTarget('input');
@@ -388,6 +398,7 @@ Ext.define('CB.SecurityPanel', {
         this.actions.apply.setDisabled(false);
         this.actions.cancel.setDisabled(false);
     }
+
     ,accessToGroupsData: function(accessRecord, groups){
         rez = [];
         allow = accessRecord.get('allow');
@@ -399,6 +410,7 @@ Ext.define('CB.SecurityPanel', {
         }, this);
         return rez;
     }
+
     ,accessToGroupValue: function(accessArray, groupBitsArray){
         lastBit = null;
         bitsMatch = true;
@@ -422,6 +434,7 @@ Ext.define('CB.SecurityPanel', {
               )
             : 0;
     }
+
     ,changeAccesses: function(groupRecord, newValue){
         r = this.aclList.getSelectedRecords()[0]; //user or group record
         if(Ext.isEmpty(r)) return;
@@ -445,6 +458,7 @@ Ext.define('CB.SecurityPanel', {
         r.set('deny', deny.join(','));
         this.reloadPermissionsStore();
     }
+
     ,reloadPermissionsStore: function(){
         data = [];
         sr = this.aclList.getSelectedRecords();
@@ -453,15 +467,19 @@ Ext.define('CB.SecurityPanel', {
         }
         this.permissionsStore.loadData( data );
     }
+
     ,onSavePermissionsClick: function(){
         this.aclStore.save();
         this.setReadOnly(true);
-    },onApplyPermissionsClick: function(){
+    }
+
+    ,onApplyPermissionsClick: function(){
         this.aclStore.save();
         this.actions.save.setDisabled(true);
         this.actions.apply.setDisabled(true);
         this.actions.cancel.setDisabled(true);
     }
+
     ,onCancelPermissionsChangeClick: function(b, e){
         this.aclStore.rejectChanges();
         this.reloadPermissionsStore();
@@ -469,6 +487,7 @@ Ext.define('CB.SecurityPanel', {
         this.actions.apply.setDisabled(true);
         this.actions.cancel.setDisabled(true);
     }
+
     ,onRemoveChildPermissionsClick: function(b, e){
         Ext.Msg.confirm(
             L.Confirmation
@@ -487,9 +506,11 @@ Ext.define('CB.SecurityPanel', {
         );
 
     }
+
     ,onCbInheritLabelClick: function(){
         cb.setValue(!cb.getValue());
     }
+
     ,onCbInheritClick: function(cb, checked){
         if(cb.settingValue) {
             return;
@@ -521,6 +542,7 @@ Ext.define('CB.SecurityPanel', {
             });
         }
     }
+
     ,onCbInheritSet: function(button){
         if(button == 'yes'){
             this.getEl().mask(L.loading, 'x-mask-loading');
@@ -538,6 +560,7 @@ Ext.define('CB.SecurityPanel', {
             delete this.cbInherit.settingValue;
         }
     }
+
     ,onCbInheritRemove: function(button, text, cfg){
         if( (button == 'yes') || (button == 'no') ){
             this.getEl().mask(L.loading, 'x-mask-loading');
@@ -556,6 +579,7 @@ Ext.define('CB.SecurityPanel', {
             delete this.cbInherit.settingValue;
         }
     }
+
     ,onSetInheritanceProcess: function(r, e){
         this.getEl().unmask();
         this.aclStore.load();

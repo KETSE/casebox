@@ -78,30 +78,41 @@ Ext.define('CB.browser.view.Pivot',{
 
         this.refOwner.buttonCollection.addAll(
             new Ext.Button({
-                text: L.ChartArea
+                qtip: L.Pivot
+                ,id: 'PVtable' + this.instanceId
+                ,itemId: 'PVtable'
+                ,chart: 'table'
+                ,enableToggle: true
+                ,allowDepress: true
+                ,iconCls: 'ib-table'
+                ,scale: 'large'
+                // ,toggleGroup: 'pv' + this.instanceId
+                ,scope: this
+                ,handler: this.onChangeChartButtonClick
+            })
+            ,new Ext.Button({
+                qtip: L.ChartArea
                 ,id: 'PVbarchart' + this.instanceId
                 ,itemId: 'PVbarchart'
                 ,chart: 'stackedBars'
                 ,enableToggle: true
                 ,allowDepress: true
                 ,iconCls: 'ib-chart-bar'
-                // ,iconAlign:'top'
                 ,scale: 'large'
-                ,toggleGroup: 'pv' + this.instanceId
+                // ,toggleGroup: 'pv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
             ,new Ext.Button({
-                text: L.ChartArea
+                qtip: L.ChartArea
                 ,id: 'PVcolumnchart' + this.instanceId
                 ,itemId: 'PVcolumnchart'
                 ,chart: 'stackedColumns'
                 ,enableToggle: true
                 ,allowDepress: true
                 ,iconCls: 'ib-chart-column'
-                // ,iconAlign:'top'
                 ,scale: 'large'
-                ,toggleGroup: 'pv' + this.instanceId
+                // ,toggleGroup: 'pv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
@@ -134,7 +145,7 @@ Ext.define('CB.browser.view.Pivot',{
             }
         });
 
-        CB.browser.view.Pivot.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         this.enableBubble(['reload']);
 
@@ -155,7 +166,8 @@ Ext.define('CB.browser.view.Pivot',{
         this.fireEvent(
             'settoolbaritems'
             ,[
-                'PVbarchart'
+                'PVtable'
+                ,'PVbarchart'
                 ,'PVcolumnchart'
                 ,'PVrowsCombo'
                 ,'PVcolsCombo'
@@ -164,13 +176,8 @@ Ext.define('CB.browser.view.Pivot',{
     }
 
     ,onChangeChartButtonClick: function(b, e) {
-        removeType = (b.config.chart == 'stackedBars')
-            ? 'stackedColumns'
-            : 'stackedBars';
-
         if(b.pressed) {
             this.activeCharts.push(b.config.chart);
-            Ext.Array.remove(this.activeCharts, removeType);
         } else {
             Ext.Array.remove(this.activeCharts, b.config.chart);
         }
@@ -179,13 +186,21 @@ Ext.define('CB.browser.view.Pivot',{
     }
 
     ,onChangeChart: function() {
-        var i, j;
+        var i, j
+            ,BC = this.refOwner.buttonCollection
+            ,showTable = (this.activeCharts.indexOf('table') > -1)
+            ,showBarChart = (this.activeCharts.indexOf('stackedBars') > -1)
+            ,showColumnChart = (this.activeCharts.indexOf('stackedColumns') > -1);
+
+        BC.get('PVtable' + this.instanceId).toggle(showTable, true);
+        BC.get('PVbarchart' + this.instanceId).toggle(showBarChart, true);
+        BC.get('PVcolumnchart' + this.instanceId).toggle(showColumnChart, true);
 
         this.loadChartData();
 
         this.chartContainer.removeAll(true);
 
-        if(this.activeCharts.indexOf('table') > -1) {
+        if(showTable) {
             var html = '';
 
             var hr = '<th> &nbsp; </th>';
@@ -252,157 +267,152 @@ Ext.define('CB.browser.view.Pivot',{
             });
         }
 
-        var chartType = false;
-        if(this.activeCharts.indexOf('stackedBars') > -1) {
-            chartType = 'bar';
-            this.refOwner.buttonCollection.get('PVbarchart' + this.instanceId).toggle(true, true);
-            this.refOwner.buttonCollection.get('PVcolumnchart' + this.instanceId).toggle(false, true);
-        } else if(this.activeCharts.indexOf('stackedColumns') > -1) {
-            chartType = 'column';
-            this.refOwner.buttonCollection.get('PVbarchart' + this.instanceId).toggle(false, true);
-            this.refOwner.buttonCollection.get('PVcolumnchart' + this.instanceId).toggle(true, true);
+        if(showBarChart) {
+            this.addChart('bar');
+        }
+        if(showColumnChart) {
+            this.addChart('column');
         }
 
-        if(chartType) {
-
-            /* create data, stores and charts on the fly */
-            var series = [
-                    {
-                        xField: this.selectedFacets[0]
-                        ,yField: []
-                        ,title: []
-                    },{
-                        xField: this.selectedFacets[1]
-                        ,yField: []
-                        ,title: []
-                    }
-                ]
-                ,data = [[], []];
-
-            Ext.iterate(
-                this.pivot.titles[0]
-                ,function(k, v, o) {
-                    //add fields and titles
-                    series[1].yField.push('f' + k);
-                    series[1].title.push(v);
-
-                    //add data
-                    var r = {};
-                    r[this.selectedFacets[0]] = '"' + v + '"';
-                    Ext.iterate(
-                        this.pivot.titles[1]
-                        ,function(q, z, y) {
-                            var w = Ext.valueFrom(this.refs[k + '_' + q], '');
-                            r['f' + q] = Ext.isEmpty(w) ? 0 : w;
-                        }
-                        ,this
-                    );
-                    data[0].push(r);
-                }
-                ,this
-            );
-
-            Ext.iterate(
-                this.pivot.titles[1]
-                ,function(k, v, o) {
-                    //add fields and titles
-                    series[0].yField.push('f' + k);
-                    series[0].title.push(v);
-
-                    //add data
-                    var r = {};
-                    r[this.selectedFacets[1]] = '"' + v + '"';
-                    Ext.iterate(
-                        this.pivot.titles[0]
-                        ,function(q, z, y) {
-                            var w = Ext.valueFrom(this.refs[q + '_' + k], '');
-                            r['f' + q] = Ext.isEmpty(w) ? 0 : w;
-                        }
-                        ,this
-                    );
-                    data[1].push(r);
-                }
-                ,this
-            );
-
-            var chartItems = [];
-
-            i = 0;
-            // for (i = 0; i < series.length; i++) {
-                var serie = series[i];
-
-                var cfg = {
-                    height: Math.max(data[i].length * 25, 400)
-                    ,width: '100%'
-                    ,store: new Ext.data.JsonStore({
-                        fields: [serie.xField].concat(serie.yField)
-                        ,proxy: {
-                            type: 'memory'
-                            ,reader: {
-                                type: 'json'
-                            }
-                        }
-                        ,data: data[i]
-                    })
-                    ,items: [{
-                        type  : 'text',
-                        text  : ' ',
-                        x : 40, //the sprite x position
-                        y : 12  //the sprite y position
-                    }]
-                    ,axes: [{
-                        type: 'category'
-                        ,position: (chartType == 'bar') ? 'left' : 'bottom'
-                        ,fields: serie.xField
-                        ,grid: true
-                        ,minimum: 0
-                    }, {
-                        type: 'numeric'
-                        ,position: (chartType == 'column') ? 'left' : 'bottom'
-                        ,fields: serie.yField
-                        ,grid: true
-                    }]
-
-                    ,legend: {
-                        position: 'right'
-                        ,boxStrokeWidth: 0
-                        // ,labelFont: '12px Helvetica'
-                    }
-                    ,seriesStyles: this.seriesStyles
-                    ,series: [
-                        Ext.apply(
-                            serie
-                            ,{
-                                type: chartType
-                                // ,axis: 'bottom'
-                                ,stacked: true
-                                ,style: {
-                                    opacity: 0.80
-                                }
-                                ,highlight: {
-                                    'stroke-width': 2
-                                    ,stroke: '#fff'
-                                }
-                                // ,label: {
-                                //     display: 'insideEnd'
-                                // }
-                            }
-                        )
-                    ]
-                };
-
-                chartItems.push(
-                    Ext.create(
-                        'Ext.chart.Chart'
-                        ,cfg
-                    )
-                );
-            // }
-
-
-            this.chartContainer.add(chartItems);
-        }
         this.chartContainer.updateLayout();
+    }
+
+    ,addChart: function(chartType) {
+        /* create data, stores and charts on the fly */
+        var series = [
+                {
+                    xField: this.selectedFacets[0]
+                    ,yField: []
+                    ,title: []
+                },{
+                    xField: this.selectedFacets[1]
+                    ,yField: []
+                    ,title: []
+                }
+            ]
+            ,data = [[], []];
+
+        Ext.iterate(
+            this.pivot.titles[0]
+            ,function(k, v, o) {
+                //add fields and titles
+                series[1].yField.push('f' + k);
+                series[1].title.push(v);
+
+                //add data
+                var r = {};
+                r[this.selectedFacets[0]] = '"' + v + '"';
+                Ext.iterate(
+                    this.pivot.titles[1]
+                    ,function(q, z, y) {
+                        var w = Ext.valueFrom(this.refs[k + '_' + q], '');
+                        r['f' + q] = Ext.isEmpty(w) ? 0 : w;
+                    }
+                    ,this
+                );
+                data[0].push(r);
+            }
+            ,this
+        );
+
+        Ext.iterate(
+            this.pivot.titles[1]
+            ,function(k, v, o) {
+                //add fields and titles
+                series[0].yField.push('f' + k);
+                series[0].title.push(v);
+
+                //add data
+                var r = {};
+                r[this.selectedFacets[1]] = '"' + v + '"';
+                Ext.iterate(
+                    this.pivot.titles[0]
+                    ,function(q, z, y) {
+                        var w = Ext.valueFrom(this.refs[q + '_' + k], '');
+                        r['f' + q] = Ext.isEmpty(w) ? 0 : w;
+                    }
+                    ,this
+                );
+                data[1].push(r);
+            }
+            ,this
+        );
+
+        var chartItems = [];
+
+        i = 0;
+        // for (i = 0; i < series.length; i++) {
+            var serie = series[i];
+
+            var cfg = {
+                height: Math.max(data[i].length * 25, 400)
+                ,width: '100%'
+                ,store: new Ext.data.JsonStore({
+                    fields: [serie.xField].concat(serie.yField)
+                    ,proxy: {
+                        type: 'memory'
+                        ,reader: {
+                            type: 'json'
+                        }
+                    }
+                    ,data: data[i]
+                })
+                ,items: [{
+                    type  : 'text',
+                    text  : ' ',
+                    x : 40, //the sprite x position
+                    y : 12  //the sprite y position
+                }]
+                ,axes: [{
+                    type: 'category'
+                    ,position: (chartType == 'bar') ? 'left' : 'bottom'
+                    ,fields: serie.xField
+                    ,grid: true
+                    ,minimum: 0
+                }, {
+                    type: 'numeric'
+                    ,position: (chartType == 'column') ? 'left' : 'bottom'
+                    ,fields: serie.yField
+                    ,grid: true
+                }]
+
+                ,legend: {
+                    position: 'right'
+                    ,boxStrokeWidth: 0
+                    // ,labelFont: '12px Helvetica'
+                }
+                ,seriesStyles: this.seriesStyles
+                ,series: [
+                    Ext.apply(
+                        serie
+                        ,{
+                            type: chartType
+                            // ,axis: 'bottom'
+                            ,stacked: true
+                            ,style: {
+                                opacity: 0.80
+                            }
+                            ,highlight: {
+                                'stroke-width': 2
+                                ,stroke: '#fff'
+                            }
+                            // ,label: {
+                            //     display: 'insideEnd'
+                            // }
+                        }
+                    )
+                ]
+            };
+
+            chartItems.push(
+                Ext.create(
+                    'Ext.chart.Chart'
+                    ,cfg
+                )
+            );
+        // }
+
+        this.chartContainer.add(chartItems);
     }
 
     ,loadAvailableFacets: function() {

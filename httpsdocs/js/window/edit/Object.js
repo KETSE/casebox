@@ -4,6 +4,8 @@ Ext.define('CB.window.edit.Object', {
     extend: 'Ext.Window'
     ,alias: 'CBObjectEditWindow'
 
+    ,xtype: 'CBObjectEditWindow'
+
     ,closable: true
     ,minimizable: true
     ,maximizable: true

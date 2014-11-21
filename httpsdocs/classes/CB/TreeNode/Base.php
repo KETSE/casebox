@@ -215,7 +215,7 @@ class Base implements \CB\Interfaces\TreeNode
                 next($facets);
             }
             if (empty($cols)) {
-                $facet2 = current($facets);
+                $cols = current($facets);
             }
 
             if (is_scalar($rows) || is_scalar($cols)) {

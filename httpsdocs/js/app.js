@@ -537,7 +537,8 @@ function initApp() {
         }
 
         var wndCfg = {
-            data: config
+            xtype: 'CBObjectEditWindow'
+            ,data: config
         };
 
         wndCfg.id = 'oew-' +
@@ -546,45 +547,67 @@ function initApp() {
                 : config.id
             );
 
+        w = App.openWindow(wndCfg);
+
+        if(!w.existing) {
+            App.alignWindowNext(w);
+        }
+
+        delete w.existing;
+    };
+
+    App.openWindow = function(wndCfg) {
+
         var w = Ext.getCmp(wndCfg.id);
 
         if(w) {
             App.mainStatusBar.setActiveButton(w.taskButton);
             App.mainStatusBar.restoreWindow(w);
+            //set a flag that this was an existing window
+            w.existing = true;
+
         } else {
-            var vpEl = App.mainViewPort.getEl();
-            w = new CB.window.edit.Object(wndCfg);
+            clog('cnf', wndCfg);
+            w = Ext.create(wndCfg);
+            clog('w', w);
             w.show();
-            w.alignTo(vpEl, 'br-br?');
 
-            //get anchored position
-            var pos = w.getXY();
-            //move above status bar and a bit from right side
-            pos[0] -= 15;
-            // pos[1] -= 30; //above toolbar
-            pos[1] -= 5;
-
-            //position to the left of an active window if any
-            var x = pos[0];
-            App.mainStatusBar.windowBar.items.each(
-                function(btn) {
-                    if(btn.win && btn.win.isVisible() && !btn.win.maximized) {
-                        var wx = btn.win.getX() - btn.win.el.getWidth() - 15;
-                        if(x > wx) {
-                            x = wx;
-                        }
-                    }
-                }
-                ,this
-            );
-            if(x < 15) {
-                x = 15;
-            }
-            pos[0] = x;
-
-            w.setXY(pos);
             w.taskButton = App.mainStatusBar.addTaskButton(w);
         }
+
+        return w;
+    };
+
+
+    App.alignWindowNext = function (w) {
+        w.alignTo(App.mainViewPort.getEl(), 'br-br?');
+
+        //get anchored position
+        var pos = w.getXY();
+        //move above status bar and a bit from right side
+        pos[0] -= 15;
+        // pos[1] -= 30; //above toolbar
+        pos[1] -= 5;
+
+        //position to the left of an active window if any
+        var x = pos[0];
+        App.mainStatusBar.windowBar.items.each(
+            function(btn) {
+                if(btn.win && (btn.win != w) && btn.win.isVisible() && !btn.win.maximized) {
+                    var wx = btn.win.getX() - btn.win.el.getWidth() - 15;
+                    if(x > wx) {
+                        x = wx;
+                    }
+                }
+            }
+            ,this
+        );
+        if(x < 15) {
+            x = 15;
+        }
+        pos[0] = x;
+
+        w.setXY(pos);
     };
 
     App.isFolder = function(template_id){

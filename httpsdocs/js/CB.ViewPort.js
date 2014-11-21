@@ -537,20 +537,28 @@ Ext.define('CB.ViewPort', {
             return;
         }
 
-        if(App.activateTab(null, objectId, CB.SecurityPanel)) {
-            return;
-        }
-        App.addTab(
-            null
-            ,Ext.create(
-                'CB.SecurityPanel'
-                ,{
-                    data: {
-                        id: objectId
-                    }
-                }
-            )
-        );
+        App.openWindow({
+            xtype: 'CBSecurityWindow'
+            ,id: 'opw' + objectId //objects permission window
+            ,data: {
+                id: objectId
+            }
+        });
+
+        // if(App.activateTab(null, objectId, CB.SecurityPanel)) {
+        //     return;
+        // }
+        // App.addTab(
+        //     null
+        //     ,Ext.create(
+        //         'CB.SecurityPanel'
+        //         ,{
+        //             data: {
+        //                 id: objectId
+        //             }
+        //         }
+        //     )
+        // );
     }
 
     ,onFileOpen: function(data, e){
