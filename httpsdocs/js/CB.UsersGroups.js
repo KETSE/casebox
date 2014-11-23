@@ -1104,14 +1104,21 @@ Ext.define('CB.UsersGroupsForm', {
 
 // ---------------------------------------------- Main panel
 Ext.define('CB.UsersGroups', {
-    extend: 'Ext.Panel'
+    extend: 'Ext.Window'
+
     ,alias: 'CBUsersGroups'
+    ,xtype: 'CBUsersGroups'
 
     ,layout: 'border'
     ,border: false
     ,closable: true
+    ,minimizable: true
+
     ,iconCls: 'icon-users'
     ,title: L.UserManagement
+    ,width: 850
+    ,height: 600
+
     ,initComponent: function(){
         this.tree = new CB.UsersGroupsTree({
             region: 'center'

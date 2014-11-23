@@ -71,6 +71,7 @@ Ext.define('CB.ViewPort', {
             ,enableTabScroll: true
             ,resizeTabs: true
             ,activeTab: 0
+            ,header: false
             ,region: 'center'
             ,plain: true
             ,bodyStyle: 'background-color: #FFF'
@@ -199,7 +200,11 @@ Ext.define('CB.ViewPort', {
                 text: L.Account
                 ,iconCls: 'icon-user-' + App.loginData.sex
                 ,handler: function(){
-                    App.openUniqueTabbedWidget( 'CBAccount' , null);
+                    // App.openUniqueTabbedWidget( 'CBAccount' , null);
+                    App.openWindow({
+                        xtype: 'CBAccount'
+                        ,id: 'accountWnd'
+                    });
                 }
             }
             ,'-'
@@ -224,7 +229,11 @@ Ext.define('CB.ViewPort', {
                                     if(cmp.success !== true) {
                                         cmp.destroy();
                                     } else {
-                                        App.openUniqueTabbedWidget('CBUsersGroups');
+                                        // App.openUniqueTabbedWidget('CBUsersGroups');
+                                        App.openWindow({
+                                            xtype: 'CBUsersGroups'
+                                            ,id: 'usersGroupsWnd'
+                                        });
                                     }
                                 }
                             }

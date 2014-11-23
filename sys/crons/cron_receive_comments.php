@@ -112,7 +112,7 @@ foreach ($mailServers as &$cfg) {
         $mailbox = new \Zend\Mail\Storage\Imap($mailConf);
 
         $mailCount = $mailbox->countMessages();
-        echo $user . ' on ' . $mailConf['host'] . '. mail count: '.$mailCount."\n";
+        echo $user . ' on ' . $mailConf['host'] . '. mail count: ' . $mailCount;
 
         if ($mailCount > 0) {
             $cfg['mailbox'] = &$mailbox;
@@ -198,11 +198,12 @@ function processMails(&$mailServer)
     $dids = array (); //array for deleted ids
 
     $i = 0;
-    echo "process mail .. \n";
+    $newMails = 0;
+    // echo "process mail .. \n";
     //iterate and process each mail
     foreach ($mailServer['mailbox'] as $k => $mail) {
         $i++;
-        echo $i.' ';
+        // echo $i.' ';
 
         try {
             if ($mail->hasFlag(\Zend\Mail\Storage::FLAG_SEEN) || empty($mail->subject)) {
@@ -212,6 +213,8 @@ function processMails(&$mailServer)
             echo "Cant read this mail, probably empty subject.\n";
             continue;
         }
+
+        $newMails++;
 
         //Re: [dev #2841] New task: listeners when eupload file on casebox (/1/3-1/3-3/3-assignee/3-au_3)
         $subject = decodeSubject($mail->subject);
@@ -255,6 +258,11 @@ function processMails(&$mailServer)
             $dids[] = $mailServer['mailbox']->getUniqueId($k);
         }
     }
+    echo (
+        ($newMails > 0)
+        ? ("\nnew mails: " . $newMails)
+        : ' - no new mail.'
+    ). "\n";
 
     deleteMails($mailServer['mailbox'], $dids);
 }

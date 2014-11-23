@@ -12,6 +12,7 @@ class Files extends Base
 
         $rez = array(
             'success' => true
+            ,'data' => array()
         );
         parent::getData($id);
 

@@ -83,7 +83,7 @@ Ext.define('CB.browser.view.Pivot',{
                 ,itemId: 'PVtable'
                 ,chart: 'table'
                 ,enableToggle: true
-                ,allowDepress: true
+                ,allowDepress: false
                 ,iconCls: 'ib-table'
                 ,scale: 'large'
                 // ,toggleGroup: 'pv' + this.instanceId
@@ -96,7 +96,7 @@ Ext.define('CB.browser.view.Pivot',{
                 ,itemId: 'PVbarchart'
                 ,chart: 'stackedBars'
                 ,enableToggle: true
-                ,allowDepress: true
+                ,allowDepress: false
                 ,iconCls: 'ib-chart-bar'
                 ,scale: 'large'
                 // ,toggleGroup: 'pv' + this.instanceId
@@ -109,7 +109,7 @@ Ext.define('CB.browser.view.Pivot',{
                 ,itemId: 'PVcolumnchart'
                 ,chart: 'stackedColumns'
                 ,enableToggle: true
-                ,allowDepress: true
+                ,allowDepress: false
                 ,iconCls: 'ib-chart-column'
                 ,scale: 'large'
                 // ,toggleGroup: 'pv' + this.instanceId
@@ -176,11 +176,12 @@ Ext.define('CB.browser.view.Pivot',{
     }
 
     ,onChangeChartButtonClick: function(b, e) {
-        if(b.pressed) {
-            this.activeCharts.push(b.config.chart);
-        } else {
-            Ext.Array.remove(this.activeCharts, b.config.chart);
-        }
+        this.activeCharts = [b.config.chart];
+        // if(b.pressed) {
+        //     this.activeCharts.push(b.config.chart);
+        // } else {
+        //     Ext.Array.remove(this.activeCharts, b.config.chart);
+        // }
 
         this.onChangeChart();
     }

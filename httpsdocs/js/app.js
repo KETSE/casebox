@@ -511,7 +511,6 @@ function initApp() {
             tabPanel = App.mainTabPanel;
         }
 
-        clog('adding', o, 'to', tabPanel);
         c = tabPanel.add(o);
         o.show();
 
@@ -567,9 +566,7 @@ function initApp() {
             w.existing = true;
 
         } else {
-            clog('cnf', wndCfg);
             w = Ext.create(wndCfg);
-            clog('w', w);
             w.show();
 
             w.taskButton = App.mainStatusBar.addTaskButton(w);

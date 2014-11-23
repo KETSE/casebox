@@ -162,6 +162,7 @@ return array_merge(
             ,'//js/objects/plugins/CurrentVersion.js'
             ,'//js/CB.WebdavWindow.js'
             ,'//js/SearchPanel.js'
+            ,'//js/search/edit/Window.js'
 
             ,'//js/state/DBProvider.js'
 

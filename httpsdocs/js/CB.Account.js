@@ -1,12 +1,18 @@
 Ext.namespace('CB');
 
 Ext.define('CB.Account', {
-    extend: 'Ext.Panel'
+    extend: 'Ext.Window'
+
     ,alias: 'CBAccount'
+
+    ,xtype: 'CBAccount'
 
     ,title: L.Account
     ,border: false
     ,closable: true
+    ,minimizable: true
+    ,width: 850
+    ,height: 600
 
     ,initComponent: function() {
 
@@ -63,15 +69,18 @@ Ext.define('CB.Account', {
             ,deferredRender: true
         });
 
-        Ext.apply(this, {
-            iconCls: 'icon-user-' + App.loginData.sex
-            ,layout: 'border'
-            ,items:[
-                this.menu
-                ,this.cards
+        Ext.apply(
+            this
+            ,{
+                iconCls: 'icon-user-' + App.loginData.sex
+                ,layout: 'border'
+                ,items:[
+                    this.menu
+                    ,this.cards
 
-            ]
-        });
+                ]
+            }
+        );
         CB.Account.superclass.initComponent.apply(this, arguments);
 
         /* autoclose form if no activity in 5 minutes */
@@ -251,6 +260,7 @@ Ext.define('CB.ProfileForm', {
                 ,value: null
             }
         ];
+
         if(App.loginData.id != this.data.id) {
             if(App.loginData.admin || App.loginData.cfg.canAddUsers) {
                 fields.push({
@@ -311,7 +321,7 @@ Ext.define('CB.ProfileForm', {
             },{
                 xtype: 'CBVerticalEditGrid'
                 ,refOwner: this
-                ,width: 800
+                ,width: 500
                 ,style: 'margin-bottom: 50px'
                 ,autoHeight: true
                 ,viewConfig: {

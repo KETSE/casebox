@@ -2,7 +2,9 @@ Ext.namespace('CB.browser');
 
 Ext.define('CB.browser.ViewContainer', {
     extend: 'Ext.Panel'
+
     ,xtype: 'CBBrowserViewContainer'
+
     ,title: 'Browser'
     ,iconCls: 'icon-folder'
     ,closable: true
@@ -818,7 +820,7 @@ Ext.define('CB.browser.ViewContainer', {
         return true;
     }
 
-    ,onChangeParams: function(params, e){// fired by internal view
+    ,changeParams: function(params, e){// fired by internal view
         if(e && e.stopPropagation) e.stopPropagation();
         this.setParams(params);
     }

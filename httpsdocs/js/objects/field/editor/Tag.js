@@ -29,7 +29,6 @@ Ext.define('CB.objects.field.editor.Tag', {
             }
         });
         this.callParent(arguments);
-        clog('this.selectionModel', this.selectionModel);
         // this.store.on('load', this.onLoad, this);
     }
 

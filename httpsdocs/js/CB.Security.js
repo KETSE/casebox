@@ -1,7 +1,7 @@
 Ext.namespace('CB');
 
 Ext.define('CB.SecurityWindow', {
-    exend: 'Ext.window.Window'
+    extend: 'Ext.Window'
 
     ,alias: 'CBSecurityWindow'
 
@@ -67,34 +67,53 @@ Ext.define('CB.SecurityWindow', {
             })
         };
 
-        this.objectLabel = new Ext.form.DisplayField({value: 'Object name: ', style:'padding: 10px; background-color: #fff', reg_ion: 'north'});
-        this.editLabel = new Ext.form.DisplayField( {value: 'To change permissions, click Edit'});
+        this.objectLabel = new Ext.form.DisplayField({
+            value: 'Object name: '
+            ,style:'padding: 10px; background-color: #fff'
+            ,reg_ion: 'north'
+        });
+
+        this.editLabel = new Ext.form.DisplayField({
+            value: 'To change permissions, click Edit'
+        });
 
         this.aclStore = new Ext.data.DirectStore({
-            extraParams:{ id: this.data.id }
-            ,autoSave: false
+            autoSave: false
             ,restful: true
-            ,rootProperty: 'data'
             ,model: 'AclRecord'
-            ,api:{
-                read: CB_Security.getObjectAcl
-                ,create: CB_Security.addObjectAccess
-                ,update: CB_Security.updateObjectAccess
-                ,destroy: CB_Security.destroyObjectAccess
-            }
             ,proxy: {
                 type: 'direct'
+                ,paramsAsHash: true
+                ,extraParams:{ id: this.data.id }
+                ,api:{
+                    read: CB_Security.getObjectAcl
+                    ,create: CB_Security.addObjectAccess
+                    ,update: CB_Security.updateObjectAccess
+                    ,destroy: CB_Security.destroyObjectAccess
+                }
                 ,reader: {
                     type: 'json'
+                    ,rootProperty: 'data'
                 }
+                ,writer: new Ext.data.JsonWriter({
+                    encode: false
+                    ,writeAllFields: true
+                    ,transform: Ext.Function.bind(
+                        function(data, request) {
+                            return {
+                                id: this.data.id
+                                ,data: data
+                            };
+                        }
+                        ,this
+                    )
+                })
             }
-            ,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
             ,listeners: {
                 scope: this
                 ,load: this.onAclStoreLoad
             }
         });
-        this.aclStore.proxy.on('load', this.onAclProxyLoad, this);
 
         this.aclList = new Ext.list.ListView({
             store: this.aclStore
@@ -105,10 +124,15 @@ Ext.define('CB.SecurityWindow', {
             ,boxMinHeight: 100
             ,height: 300
             ,style: 'border: 1px solid #aeaeae'
+            ,forceFit: true
             ,columns: [{
                 header: 'Group or user'
                 ,dataIndex: 'name'
-                ,tpl: '<span class="icon-padding dIB lh16 {iconCls}">{name}</span>'
+                ,renderer: function(v, m, r, ri, ci, s){
+                    m.css = 'icon-grid-column-top '+ r.get('iconCls');
+
+                    return v;
+                }
             }]
             ,listeners: {
                 scope: this
@@ -119,7 +143,13 @@ Ext.define('CB.SecurityWindow', {
         this.specialPermissionsLabel = new Ext.form.DisplayField({value: 'For special permissions or advanced settings,<br /> click Advanced.'});
 
         this.permissionsStore = new Ext.data.ArrayStore({
-            model: 'AclRecord'
+            fields: [
+                {name:'id', type: 'int'}
+                ,'name'
+                ,'allow'
+                ,'deny'
+            ]
+
             ,accessGroups: {
                 'FullControl':  [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
                 ,'Modify':  [ 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1 ]
@@ -127,31 +157,6 @@ Ext.define('CB.SecurityWindow', {
                 ,'Write':   [ 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0 ]
             }
         });
-        this.permissionsAllowTpl = new Ext.XTemplate(
-            '<tpl for=".">'
-            ,'{[ (this.readOnly ? '
-                ,'( (values.allow > 0) ? \'<input type="checkbox" disabled="disabled" checked="checked" value="\'+values.allow+\'">\' : "") '
-                ,': \'<input type="checkbox" \' + ( (values.allow == 2) ? \'disabled="disabled" value="2" \': \'value="1" \')+ ( (values.allow > 0) ? \'checked="checked" \': "")+" />"'
-            ,')]}'
-            ,'</tpl>'
-            ,{
-                compiled: true
-                ,readOnly: true
-            }
-        );
-
-        this.permissionsDenyTpl = new Ext.XTemplate(
-            '<tpl for=".">'
-            ,'{[ (this.readOnly ? '
-                ,'( (values.deny < 0) ? \'<input type="checkbox" disabled="disabled" checked="checked" value="\'+values.deny+\'">\' : "") '
-                ,': \'<input type="checkbox" \' + ( (values.deny == -2) ? \'disabled="disabled" value="-2" \': \'value="-1" \')+ ( (values.deny < 0) ? \'checked="checked" \': "")+" />"'
-            ,')]}'
-            ,'</tpl>'
-            ,{
-                compiled: true
-                ,readOnly: true
-            }
-        );
 
         this.permissionsList = new Ext.list.ListView({
             store: this.permissionsStore
@@ -162,25 +167,52 @@ Ext.define('CB.SecurityWindow', {
             ,height: 300
             ,style: 'border: 1px solid #aeaeae'
             ,columnSort: false
-            ,columns: [{
-                header: 'Permission'
-                ,width: 0.5
-                ,dataIndex: 'name'
-            },{
-                header: 'Allow'
-                ,width: 0.25
-                ,dataIndex: 'allow'
-                ,tpl: this.permissionsAllowTpl
-                ,align: 'center'
-            },{
-                header: 'Deny'
-                ,dataIndex: 'deny'
-                ,tpl: this.permissionsDenyTpl
-                ,align: 'center'
-            }]
+            ,forceFit:true
+            ,readOnly: true
+            ,columns: [
+                {
+                    header: 'Permission'
+                    ,width: 100
+                    ,dataIndex: 'name'
+                },{
+                    header: 'Allow'
+                    ,width: 50
+                    ,dataIndex: 'allow'
+                    ,renderer: function(v, m, r, ri, ci, s){
+                        return (this.readOnly
+                            ? ( (v > 0)
+                                ? '<input type="checkbox" disabled="disabled" checked="checked" value="'+v+'">'
+                                : ""
+                            )
+                            : '<input type="checkbox" ' + (
+                                (v == 2)
+                                ? 'disabled="disabled" value="2" '
+                                : 'value="1" '
+                            ) + ((v > 0) ? 'checked="checked" ': "")+" />"
+                        );
+                    }
+                    ,align: 'center'
+                },{
+                    header: 'Deny'
+                    ,dataIndex: 'deny'
+                    ,renderer: function(v, m, r, ri, ci, s){
+                        return (this.readOnly ?
+                            ((v < 0)
+                                ? '<input type="checkbox" disabled="disabled" checked="checked" value="' + v + '">'
+                                : ""
+                            )
+                            : '<input type="checkbox" ' +
+                                ((v == -2)
+                                    ? 'disabled="disabled" value="-2" ': 'value="-1" '
+                                )+ ((v < 0) ? 'checked="checked" ': "")+" />"
+                        );
+                    }
+                    ,align: 'center'
+                }
+            ]
             ,listeners:{
                 scope: this
-                ,click: this.onPermissionNodeClick
+                ,itemclick: this.onPermissionNodeClick
             }
         });
         this.cbInherit = new Ext.form.Checkbox({
@@ -188,7 +220,7 @@ Ext.define('CB.SecurityWindow', {
             ,id: 'cb_inherit' + this.data.id
             ,listeners: {
                 scope: this
-                ,check: this.onCbInheritClick
+                ,change: this.onCbInheritClick
             }
         });
 
@@ -197,12 +229,14 @@ Ext.define('CB.SecurityWindow', {
         if(App.loginData.admin){
             topToolbar = [ this.actions.removeChildPermissions ];
         }
+
         Ext.apply(this, {
             title: L.Security
             ,iconCls: 'icon-key'
             ,autoHeight: true
             ,tbarCssClass: 'x-panel-gray'
             ,tbar: topToolbar
+
             ,items: [
                 this.objectLabel
                 ,{
@@ -291,17 +325,19 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,onAclStoreLoad: function(store, records, options){
-    }
-
-    ,onAclProxyLoad: function(proxy, object, options){
         this.getEl().unmask();
-        this.objectLabel.setValue('Object name: ' + Ext.valueFrom(object.result.path, '') + object.result.name);
-        this.setTitle(object.result.name);
+
+        var rawData = store.proxy.reader.rawData;
+
+        this.objectLabel.setValue('Object name: ' + Ext.valueFrom(rawData.path, '') + rawData.name);
+        this.setTitle(rawData.name);
 
         this.cbInherit.settingValue = true;
-        this.cbInherit.setValue(object.result.inherit_acl == 1);
+        this.cbInherit.setValue(rawData.inherit_acl == 1);
+
         delete this.cbInherit.settingValue;
     }
+
     ,onEditClick: function(b, e){
         this.setReadOnly(false);
     }
@@ -314,9 +350,9 @@ Ext.define('CB.SecurityWindow', {
 
         this.updateDeleteAction();
 
-        this.permissionsAllowTpl.readOnly = readOnly;
-        this.permissionsDenyTpl.readOnly = readOnly;
-        this.permissionsList.refresh();
+        this.permissionsList.readOnly = readOnly;
+
+        this.permissionsList.getView().refresh();
 
         this.specialPermissionsLabel.setVisible(readOnly);
         this.actions.advanced.setHidden(!readOnly);
@@ -327,7 +363,7 @@ Ext.define('CB.SecurityWindow', {
 
     ,updateDeleteAction: function(){
         canDelete = true;
-        sr = this.aclList.getSelectedRecords();
+        sr = this.aclList.getSelectionModel().getSelection();
         if(!Ext.isEmpty(sr)){
             r = sr[0];
             canDelete = ( ( r.get('allow').indexOf('2') < 0 ) && ( r.get('deny').indexOf('-2') < 0 ));
@@ -372,27 +408,36 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,onDeleteClick: function(b, e){
-        ra = this.aclList.getSelectedRecords();
+        ra = this.aclList.getSelectionModel().getSelection();
         if(Ext.isEmpty(ra)) return;
-        Ext.Msg.confirm(L.Delete, L.DeleteSelectedConfirmationMessage, function(b){
-            if(b == 'yes'){
-                this.aclStore.remove(ra);
-                this.aclStore.save();
+        Ext.Msg.confirm(
+            L.Delete
+            ,L.DeleteSelectedConfirmationMessage
+            ,function(b){
+                if(b == 'yes'){
+                    this.aclStore.remove(ra);
+                    this.aclStore.save();
+                }
             }
-        }, this);
+            ,this
+        );
     }
 
     ,onAclListSelectionChange: function(listView, selections){
         this.permissionsStore.removeAll();
-        if(!Ext.isEmpty(selections)) this.reloadPermissionsStore();
+        if(!Ext.isEmpty(selections)) {
+            this.reloadPermissionsStore();
+        }
+
         this.updateDeleteAction();
     }
 
-    ,onPermissionNodeClick: function(dataView, index, node, e){
-        r = dataView.getRecord(node);
+    ,onPermissionNodeClick: function(list, record, item, index, e, eOpts) { //dataView, index, node, e
         cb = e.getTarget('input');
-        if(Ext.isEmpty(r) || Ext.isEmpty(cb) || cb.disabled ) return;
-        this.changeAccesses(r, cb.checked ? cb.value: 0);
+        if(Ext.isEmpty(record) || Ext.isEmpty(cb) || cb.disabled ) {
+            return;
+        }
+        this.changeAccesses(record, cb.checked ? cb.value : 0);
 
         this.actions.save.setDisabled(false);
         this.actions.apply.setDisabled(false);
@@ -436,13 +481,19 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,changeAccesses: function(groupRecord, newValue){
-        r = this.aclList.getSelectedRecords()[0]; //user or group record
-        if(Ext.isEmpty(r)) return;
+        var r = this.aclList.getSelectionModel().getSelection()[0]; //user or group record
+        if(Ext.isEmpty(r)) {
+            return;
+        }
         allow = r.get('allow').split(',');
         deny = r.get('deny').split(',');
-        group = this.permissionsStore.accessGroups[groupRecord.get('id')];
-        if(Ext.isEmpty(group)) return;
+        group = this.permissionsStore.accessGroups[groupRecord.get('name')];
+        if(Ext.isEmpty(group)) {
+            return;
+        }
+
         newValue = parseInt(newValue, 10);
+
         for (var i = 0; i < group.length; i++)
             if(group[i] == 1){
                 if( newValue > -1 ){
@@ -456,25 +507,29 @@ Ext.define('CB.SecurityWindow', {
             }
         r.set('allow', allow.join(','));
         r.set('deny', deny.join(','));
+
         this.reloadPermissionsStore();
     }
 
     ,reloadPermissionsStore: function(){
         data = [];
-        sr = this.aclList.getSelectedRecords();
+        sr = this.aclList.getSelectionModel().getSelection();
+
         if(!Ext.isEmpty(sr)) {
             data = this.accessToGroupsData(sr[0], this.permissionsStore.accessGroups);
         }
-        this.permissionsStore.loadData( data );
+
+        this.permissionsStore.loadData(data);
     }
 
     ,onSavePermissionsClick: function(){
-        this.aclStore.save();
+        this.aclStore.sync();
+
         this.setReadOnly(true);
     }
 
     ,onApplyPermissionsClick: function(){
-        this.aclStore.save();
+        this.aclStore.sync();
         this.actions.save.setDisabled(true);
         this.actions.apply.setDisabled(true);
         this.actions.cancel.setDisabled(true);
@@ -504,7 +559,6 @@ Ext.define('CB.SecurityWindow', {
             }
             ,this
         );
-
     }
 
     ,onCbInheritLabelClick: function(){
@@ -531,10 +585,10 @@ Ext.define('CB.SecurityWindow', {
                     '- Click Remove to remove inherited parent permissions from this object.<br />'+
                     '- Click Cancel if you do not want to modify inheritance settings at this time.<br />'
 
-                ,buttons: {
+                ,buttons: Ext.MessageBox.YESNOCANCEL
+                ,buttonText: {
                     yes: L.Add
                     ,no: L.Remove
-                    ,cancel: true
                 }
                 ,scope: this
                 ,fn: this.onCbInheritRemove

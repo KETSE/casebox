@@ -62,10 +62,10 @@ if (empty($cores)) {
     echo "Core not found or inactive.\n";
 } else {
     foreach ($cores as $core) {
-        echo "\nProcessing core $core ...";
+        // echo "\nProcessing core $core ...";
         echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3].' '.@$argv[4]);
     }
-    echo "\nDone\n";
+    // echo "\nDone\n";
 }
 
 function isDebugHost()

@@ -163,11 +163,11 @@ Ext.define('CB.ObjectCardView', {
                 ,scope: this
                 ,handler: this.onUnsubscribeClick
             }
-            ,attachfile: {
-                text: L.AttachFile
-                ,scope: this
-                ,handler: this.onAttachFileClick
-            }
+            // ,attachfile: {
+            //     text: L.AttachFile
+            //     ,scope: this
+            //     ,handler: this.onAttachFileClick
+            // }
             ,metadata: {
                 text: L.Metadata
                 ,id: 'metadata' + this.instanceId
@@ -941,16 +941,16 @@ Ext.define('CB.ObjectCardView', {
         );
     }
 
-    ,onAttachFileClick: function(b, e) {
-        this.onViewChangeClick(0);
-        var fp = this.down('CBObjectsPluginsFiles');
+    // ,onAttachFileClick: function(b, e) {
+    //     this.onViewChangeClick(0);
+    //     var fp = this.down('CBObjectsPluginsFiles');
 
-        if(Ext.isEmpty(fp)) {
-            return;
-        }
-        fp.show();
-        fp.onAddClick(b, e);
-    }
+    //     if(Ext.isEmpty(fp)) {
+    //         return;
+    //     }
+    //     fp.show();
+    //     fp.onAddClick(b, e);
+    // }
 
     ,onMetadataClick: function(b, e) {
         this.onEditMetaEvent(this.loadedData);

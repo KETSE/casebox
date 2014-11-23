@@ -2,6 +2,7 @@ Ext.namespace('CB.form.view.object');
 
 Ext.define('CB.form.view.object.Properties', {
     extend: 'CB.PluginsPanel'
+
     ,alias: 'widget.CBObjectProperties'
 
     ,initComponent: function(){

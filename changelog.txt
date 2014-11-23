@@ -1,3 +1,22 @@
+CaseBox 1.9.360 (2014-11-23)
+==============================
+New Features, Improvements
+--------------------------
+- Facet types: missing Integer type
+- hide tab bar for main view container
+- transform Account and users management panels to windows
+- Make Search forms as windows in left-bottom corner
+- Add 'defaultPid: int' support in template
+- update Permissions tabSheet + make it as Wnd
+- changed buttons from pivot view to work as radio buttons
+- Files block in ObjPanel: should be always visible
+- Do not log "Processing core xxx ..."
+- minimize log for cron_receive_comments
+
+Fixed Bugs:
+----------
+- Search dropdown button not visible
+
 CaseBox 1.9.359 (2014-11-21)
 ==============================
 New Features, Improvements

@@ -2,7 +2,9 @@ Ext.namespace('CB.form.edit');
 
 Ext.define('CB.form.edit.Object', {
     extend: 'Ext.Panel'
+
     ,alias: 'widget.CBEditObject'
+
     ,tbarCssClass: 'x-panel-white'
     ,padding: 0
     ,autoScroll: false

@@ -39,6 +39,14 @@ a {color: #15C}
 /* . {margin-top: 2px} */
 .mainTabPanel  {background-color: #F0F0F0 !important; border: 0}
 
+/* hide tab bar */
+.mainTabPanel > div.x-tab-bar {
+    display: none;
+}
+.mainTabPanel > div.x-panel-body {
+    top: 0px !important;
+}
+
 ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}
 .caselist2  li {margin-left: 20px; color: #555}
 

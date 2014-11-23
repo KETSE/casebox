@@ -2,6 +2,9 @@ Ext.namespace('CB');
 
 Ext.define('CB.SearchPanel', {
     extend: 'CB.form.edit.Object'
+
+    ,xtype: 'CBSearchPanel'
+
     ,hideTitle: true
 
     ,initComponent: function(){
@@ -40,7 +43,7 @@ Ext.define('CB.SearchPanel', {
         ]});
 
         Ext.apply(this, {
-            tbar: [
+            bbar: [
                 this.actions.search
                 ,this.actions.clear
                 ,'->'
@@ -73,13 +76,16 @@ Ext.define('CB.SearchPanel', {
 
         this.enableBubble(['changeparams']);
 
-        CB.SearchPanel.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
 
     ,onSearchClick: function() {
         var p = Ext.copyTo({}, this.data, 'id,template_id');
         p.data = Ext.apply({} , this.readValues().data);
-        this.fireEvent('changeparams',{search: p});
+
+        var browser = App.activateBrowserTab();
+        browser.changeSomeParams({search: p});
+        // this.fireEvent('changeparams',{search: p});
     }
 
     ,onClearClick: function (b, e)

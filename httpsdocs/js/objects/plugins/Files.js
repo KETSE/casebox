@@ -213,11 +213,11 @@ Ext.define('CB.objects.plugins.Files', {
             ,menu: {}
         };
 
-        if(this.params) {
-            if(!this.isVisible()) {
-                rez.menu['attachfile'] = {};
-            }
-        }
+        // if(this.params) {
+        //     if(!this.isVisible()) {
+        //         rez.menu['attachfile'] = {};
+        //     }
+        // }
         return rez;
     }
 

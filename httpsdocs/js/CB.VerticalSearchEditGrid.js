@@ -3,29 +3,37 @@ Ext.namespace('CB');
 Ext.define('CB.VerticalSearchEditGrid', {
     extend: 'CB.VerticalEditGrid'
 
+    ,alias: 'CBVerticalSearchEditGrid'
+
+    ,xtype: 'CBVerticalSearchEditGrid'
+
     ,initComponent: function() {
-        this.initRenderers = this.initRenderers.createSequence(this.newInitRenderers, this);
-        this.initColumns = this.initColumns.createSequence(this.newInitColumns, this);
+        this.initRenderers = Ext.Function.createSequence(this.initRenderers, this.newInitRenderers, this);
+        this.initColumns = Ext.Function.createSequence(this.initColumns, this.newInitColumns, this);
 
         this.oldOnBeforeEditProperty = this.onBeforeEditProperty;
         this.onBeforeEditProperty = this.newOnBeforeEditProperty;
 
-        CB.VerticalSearchEditGrid.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         Ext.apply(this, {
-            stateId: "vseg"
+            stateId: 'vseg'
         });
     }
 
     ,newInitRenderers: function () {
-        this.renderers.condition = function(v, meta, record, row_idx, col_idx, store){
-            var st = this.getConditionsStore(record.get('type'));
-            var idx = st.findExact('id', v);
-            if(idx >= 0) {
-                return st.getAt(idx).get('name');
+        this.renderers.condition = Ext.Function.bind(
+            function(v, meta, record, row_idx, col_idx, store){
+                var st = this.getConditionsStore(record.get('type'));
+                var idx = st.findExact('id', v);
+
+                if(idx >= 0) {
+                    return st.getAt(idx).get('name');
+                }
+                return '';
             }
-            return '';
-        }.bind(this);
+            ,this
+        );
     }
 
     ,newInitColumns: function() {
@@ -37,23 +45,23 @@ Ext.define('CB.VerticalSearchEditGrid', {
                 header: L.Condition
                 ,width: 50
                 ,dataIndex: 'cond'
+                ,editor: new Ext.form.TextField()
                 // ,resizable: false
                 ,editable: true
                 ,scope: this
                 ,renderer: this.renderers.condition
             }
         );
-
     }
 
     //grid, record, field, value, row, column, cancel
-    ,newOnBeforeEditProperty: function(e){
-        if(e.field != 'cond') {
-            return this.oldOnBeforeEditProperty(e);
+    ,newOnBeforeEditProperty: function(editor, context, eOpts){ //e
+        if(context.field != 'cond') {
+            return this.oldOnBeforeEditProperty(editor, context, eOpts);
         }
 
-        if(e.record.get('type') == 'H') {
-            e.cancel = true;
+        if(context.record.get('type') == 'H') {
+            context.cancel = true;
             return;
         }
 
@@ -65,12 +73,15 @@ Ext.define('CB.VerticalSearchEditGrid', {
             ,queryMode: 'local'
             ,displayField: 'name'
             ,valueField: 'id'
-            ,store: this.getConditionsStore(e.record.get('type'))
+            ,store: this.getConditionsStore(context.record.get('type'))
+            ,listConfig: {
+                minWidth: 130
+                // width: 'auto'
+            }
         });
         this.attachKeyListeners(ed);
 
-        var col = e.grid.colModel.getColumnAt(e.column);
-        col.setEditor(new Ext.grid.GridEditor(ed));
+        context.column.setEditor(ed);
     }
 
     ,getConditionsStore: function(type) {
@@ -132,8 +143,14 @@ Ext.define('CB.VerticalSearchEditGrid', {
         return new Ext.data.JsonStore({
             autoLoad: true
             ,autoDestroy: true
-            ,model: 'Generic'
+            ,model: 'Generic2'
             ,data: cond
+            ,proxy: {
+                type: 'memory'
+                ,reader: {
+                    type: 'json'
+                }
+            }
         });
     }
 });
