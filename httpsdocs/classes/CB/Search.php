@@ -413,7 +413,11 @@ class Search extends Solr\Client
 
     private function processResult()
     {
-        $rez = array( 'total' => $this->results->response->numFound, 'data' => array() );
+        $rez = array(
+            'total' => $this->results->response->numFound,
+            'data' => array()
+        );
+
         if (isDebugHost()) {
             $rez['search'] = array(
                 'query' => $this->query

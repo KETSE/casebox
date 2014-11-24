@@ -420,16 +420,19 @@ class Template extends Object
         if (!empty($rez) && ($rez['type'] == 'H')) {
             return $rez;
         }
+
+        // get closest top header
         $rez = null;
         foreach ($this->data['fields'] as $fid => $fv) {
             if (($fv['id'] == $field['id'])) {
-                if ($rez['type'] !== 'H') {
-                    $rez = null;
-                }
-
+                // if ($rez['type'] !== 'H') {
+                //     $rez = null;
+                // }
                 return $rez;
             }
-            $rez = $fv;
+            if (($fv['pid'] == $field['pid']) && ($fv['type'] == 'H')) {
+                $rez = $fv;
+            }
         }
 
         return null;

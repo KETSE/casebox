@@ -249,6 +249,8 @@ Ext.define('CB.form.edit.Object', {
                             // ,style: 'resize: vertical'
                             ,grow: true
                             ,fieldLabel: r.get('title')
+                            ,labelAlign: 'top'
+                            ,labelCls: 'fwB ttU'
                             ,listeners: {
                                 scope: this
                                 ,change: function(field, newValue, oldValue) {

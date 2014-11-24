@@ -296,7 +296,7 @@ function removeContentExtraBlock($content, $mail)
     $content = preg_replace('/(^\w.+:[\r\n])?(^>.*(\n|\r|$)){2,}/miu', '', $content);
 
     //remove signature block
-    $content = preg_replace('/[\n\r]+--[\n\r]+.*/i', '', $content);
+    $content = preg_replace('/[\n\r]+--[\n\r]+.*/miu', '', $content);
 
     return trim($content);
 }

@@ -703,11 +703,11 @@ Ext.define('CB.VerticalEditGrid', {
         var nodeId = context.record.get('id');
         var node = this.helperTree.getNode(nodeId);
 
-        editor.un(
-            'afterrender'
-            ,this.addKeyMaps
-            ,this
-        );
+        // editor.un(
+        //     'afterrender'
+        //     ,this.addKeyMaps
+        //     ,this
+        // );
 
         if(context.field == 'value'){
             //check if field has validator set and notify if validation not passed

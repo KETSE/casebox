@@ -194,7 +194,10 @@ class Base
                     }
 
                     //update value from document if empty from solr query
-                    if (empty($doc[$fieldName])) {
+                    if (empty($doc[$fieldName]) ||
+                        // temporary check, this should be reanalised
+                        ($templateField['type'] == '_objects')
+                    ) {
                         foreach ($values as $value) {
                             $value = is_array($value)
                                 ? @$value['value']
@@ -209,6 +212,7 @@ class Base
 
             $rez = $customColumns;
         }
+
         /* get user state and merge the state with display columns */
 
         $stateFrom = empty($displayColumns['from'])

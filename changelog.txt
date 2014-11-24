@@ -1,3 +1,21 @@
+CaseBox 1.9.361 (2014-11-24)
+==============================
+New Features, Improvements
+--------------------------
+- changed layout of Html/text editors in obj window
+- A non existing core should return 404 Not Found
+- add modifiers for regexp on signature remove of comments received by mail
+- cache getLinearData for Object class
+- reuse solr connection by any Search classes
+
+Fixed Bugs:
+----------
+- display images smaller than "images_display_size" param from config (default 30KB)
+- Editing a "Text" fieldtype will open a popup wnd, but clicking "OK" will not close it
+- Dependent fields are not rendered indented
+  Added p_update_template_structure_levels method in DB
+- error on create task
+
 CaseBox 1.9.360 (2014-11-23)
 ==============================
 New Features, Improvements

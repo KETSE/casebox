@@ -179,6 +179,7 @@ class Browser
 
         foreach ($this->treeNodeClasses as $class) {
             $rez = $class->getChildren($this->path, $this->requestParams);
+
             //merging all returned records into a single array
             if (!empty($rez['data'])) {
                 $this->data = array_merge($this->data, $rez['data']);

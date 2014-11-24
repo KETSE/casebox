@@ -54,6 +54,7 @@ class Dbnode extends Base
 
         $s = new \CB\Search();
         $rez = $s->query($p);
+
         if (!empty($rez['data'])) {
             for ($i=0; $i < sizeof($rez['data']); $i++) {
                 $d = &$rez['data'][$i];

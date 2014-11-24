@@ -69,13 +69,14 @@ class Object
             }
 
             $this->data = $p;
+            unset($this->linearData);
 
             $this->template = null;
             if (!empty($this->data['template_id']) && $this->loadTemplate) {
                 $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
 
-                //check if object has mo pid and there is defaultPid specified in template config
-                if (empty($p['pid']) || !is_numeric($p['id'])) {
+                //check if object has no pid and there is defaultPid specified in template config
+                if (empty($p['pid']) || !is_numeric($p['pid'])) {
                     $templateData = $template->getData();
 
                     if (!empty($templateData['cfg']['defaultPid'])) {
@@ -250,6 +251,7 @@ class Object
 
         $this->data = array();
         $this->template = null;
+        unset($this->linearData);
 
         $res = DB\dbQuery(
             'SELECT t.*
@@ -301,7 +303,7 @@ class Object
         if ($r = $res->fetch_assoc()) {
             $this->data['data'] = Util\toJSONArray($r['data']);
             $this->data['sys_data'] = Util\toJSONArray($r['sys_data']);
-
+            unset($this->linearData);
         }
         $res->close();
     }
@@ -315,6 +317,8 @@ class Object
     {
         if ($p !== false) {
             $this->data = $p;
+            unset($this->linearData);
+
             if (array_key_exists('id', $p)) {
                 $this->id = $p['id'];
             }
@@ -425,6 +429,7 @@ class Object
         }
 
         $this->filterHTMLFields($d['data']);
+        unset($this->linearData);
 
         @DB\dbQuery(
             'INSERT INTO objects
@@ -731,9 +736,13 @@ class Object
      */
     public function getLinearData()
     {
-        $rez = $this->getLinearNodesData($this->data['data']);
+        if (!empty($this->linearData)) {
+            return $this->linearData;
+        }
 
-        return $rez;
+        $this->linearData = $this->getLinearNodesData($this->data['data']);
+
+        return $this->linearData;
     }
 
     /**
@@ -827,6 +836,7 @@ class Object
     public function setData($data)
     {
         $this->data = $data;
+        unset($this->linearData);
 
         if (array_key_exists('id', $data)) {
             $this->id = $data['id'];
