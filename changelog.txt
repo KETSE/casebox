@@ -1,3 +1,9 @@
+CaseBox 1.9.335 (2014-11-24)
+==============================
+Fixed Bugs:
+----------
+- error on uploading new file version on production server
+
 CaseBox 1.9.334 (2014-09-23)
 ==============================
 - moved security check on object create after firing onBeforeCreate event
