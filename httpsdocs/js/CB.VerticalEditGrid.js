@@ -281,42 +281,6 @@ Ext.define('CB.VerticalEditGrid', {
         ];
     }
 
-    ,getState: function() {
-        var rez = {
-                columns: {}
-            }
-            ,cols = this.columnManager.headerCt.gridDataColumns;
-        for (var i = 0; i < cols.length; i++) {
-            if(cols[i].getWidth) {
-                rez.columns[cols[i].dataIndex] = {
-                    width: cols[i].getWidth()
-                };
-            }
-        }
-
-        return rez;
-    }
-
-    ,applyState: function(state) {
-        //apply column widths to this.gridColumns array because
-        //column model is recreated automaticly when loading object
-        //and uses this.gridColumns array to create new column list
-        if(!Ext.isEmpty(state.columns)) {
-            // plog('TODO: modify applyState in VerticalEditGrid', arguments);
-            var col
-                ,cols =  this.columnManager.headerCt.gridDataColumns;
-
-            for (var i = 0; i < cols.length; i++) {
-                var di = cols[i].dataIndex;
-                if(state.columns[di] && !Ext.isEmpty(state.columns[di].width)) {
-                    var w = state.columns[di].width;
-                    cols[i].setWidth(w);
-                    this.columns[i].setWidth(w);
-                }
-            }
-        }
-    }
-
     ,onNodeDragOver: function (targetEl, source, e, data){
         var rez = source.dropNotAllowed;
         var record = this.view.getRecord(targetEl);

@@ -219,13 +219,13 @@ class User
         return $rez;
     }
 
-    public function disableTSV()
+    public static function disableTSV($userId = false)
     {
-        if (!$this->isVerified()) {
+        if (!static::isVerified()) {
             return array('success' => false, 'verify' => true);
         }
 
-        $this->setTSVConfig(null);
+        static::setTSVConfig(null, $userId);
 
         return array('success' => true);
     }
@@ -1509,33 +1509,44 @@ class User
         return $rez;
     }
 
-    private static function getUserConfig()
+    private static function getUserConfig($userId = false)
     {
+        if ($userId === false) {
+            $userId = $_SESSION['user']['id'];
+        }
+
         $res = DB\dbQuery(
             'SELECT cfg
             FROM users_groups
             WHERE enabled = 1
                 AND did IS NULL
                 AND id = $1',
-            $_SESSION['user']['id']
+            $userId
         ) or die(DB\dbQueryError());
+
         $cfg = array();
+
         if ($r = $res->fetch_assoc()) {
             $cfg = Util\toJSONArray($r['cfg']);
         }
+
         $res->close();
 
         return $cfg;
     }
 
-    private static function setUserConfig($cfg)
+    private static function setUserConfig($cfg, $userId = false)
     {
+        if ($userId === false) {
+            $userId = $_SESSION['user']['id'];
+        }
+
         DB\dbQuery(
             'UPDATE users_groups
             SET cfg = $2
             WHERE id = $1',
             array(
-                $_SESSION['user']['id']
+                $userId
                 ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
             )
         ) or die(DB\dbQueryError());
@@ -1567,10 +1578,10 @@ class User
         static::setUserConfig($cfg);
     }
 
-    public function getTSVConfig()
+    public static function getTSVConfig($userId = false)
     {
         $rez = array();
-        $cfg = $this->getUserConfig();
+        $cfg = static::getUserConfig($userId);
         if (!empty($cfg['security']['TSV'])) {
             $rez = $cfg['security']['TSV'];
         }
@@ -1578,10 +1589,10 @@ class User
         return $rez;
     }
 
-    private function setTSVConfig($TSVConfig)
+    private static function setTSVConfig($TSVConfig, $userId = false)
     {
-        $cfg = $this->getUserConfig();
+        $cfg = static::getUserConfig($userId);
         $cfg['security']['TSV'] = $TSVConfig;
-        $cfg = $this->setUserConfig($cfg);
+        $cfg = static::setUserConfig($cfg, $userId);
     }
 }

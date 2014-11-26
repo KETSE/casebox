@@ -90,7 +90,7 @@ Ext.define('CB.browser.view.Charts', {
 
         this.chartDataStore = new Ext.data.JsonStore({
             autoDestroy: false
-            ,fields: ['id', 'name', {name: 'count', type: 'int'}]
+            // ,fields: ['id', 'name', {name: 'count', type: 'int'}]
             ,model: 'GenericCount'
         });
 
@@ -247,6 +247,7 @@ Ext.define('CB.browser.view.Charts', {
             'Ext.chart.Chart'
             ,this.chartConfigs[b.itemId]
         );
+
         this.chartContainer.add(this.chart);
     }
 
@@ -273,6 +274,7 @@ Ext.define('CB.browser.view.Charts', {
         var st = this.facetsCombo.store;
         st.removeAll();
         st.loadData(data);
+
         this.facetsCombo.setValue(this.selectedFacets[0]);
     }
 
@@ -307,6 +309,7 @@ Ext.define('CB.browser.view.Charts', {
             ,this
         );
         this.chartData = data;
+
         if(data[this.selectedFacets[0]]) {
             this.chartDataStore.loadData(data[this.selectedFacets[0]]);
         } else {

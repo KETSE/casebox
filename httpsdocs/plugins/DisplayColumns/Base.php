@@ -430,18 +430,26 @@ class Base
             $state = $this->getState($stateFrom);
 
             if (!empty($state['sort']['property'])) {
-                if (!empty($displayColumns['data'][$state['sort']['property']]['solr_column_name'])) {
+                $property =$state['sort']['property'];
+
+                if (!empty($displayColumns['data'][$property]['solr_column_name'])) {
                     $rez['sort'] = array(
-                        $displayColumns['data'][$state['sort']['property']]['solr_column_name']
+                        $displayColumns['data'][$property]['solr_column_name']
                         .' '
                         .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
                     );
-                } elseif (in_array($state['sort']['property'], \CB\Search::$defaultFields)) {
-                    $rez['sort'] = array(
-                        $state['sort']['property']
-                        .' '
-                        .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
-                    );
+                } else {
+                    if (isset(\CB\Search::$replaceSortFields[$property])) {
+                        $property = \CB\Search::$replaceSortFields[$property];
+                    }
+
+                    if (in_array($property, \CB\Search::$defaultFields)) {
+                        $rez['sort'] = array(
+                            $property
+                            .' '
+                            .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
+                        );
+                    }
                 }
             }
 

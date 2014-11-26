@@ -522,14 +522,28 @@ class Objects
             case 'combo':
             case 'int':
             case '_objects':
+
                 $arr = Util\toNumericArray($value);
+                $val = @$object_record[$solr_field];
 
                 foreach ($arr as $v) {
-                    if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
-                        $object_record[$solr_field][] = $v;
+                    if (empty($val) || !in_array($v, $val)) {
+                        $val[] = $v;
                     }
                 }
+
+                if (empty($val)) {
+                    unset($object_record[$solr_field]);
+
+                } elseif (is_array($val) && (sizeof($val) < 2)) {//set just value if 1 element array
+                    $object_record[$solr_field] = array_shift($object_record[$solr_field]);
+
+                } else {
+                    $object_record[$solr_field] = $val;
+                }
+
                 break;
+
             case 'varchar':
                 // storing value in SOLR without any changes (TODO: think if the value should be cleaned/transformed)
                 // we assume values are checked before inserted into DB.

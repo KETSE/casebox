@@ -69,7 +69,7 @@ class Service
         }
 
         //check cache
-        $this->solr_handler = Cache::get('solr_service');
+        // $this->solr_handler = Cache::get('solr_service');
 
         if (empty($this->solr_handler)) {
             if (!class_exists('\\Apache_Solr_Service', false)) {
@@ -86,7 +86,8 @@ class Service
                 throw new \Exception('Solr_connection_error' . $this->debugInfo(), 1);
             }
 
-            Cache::set('solr_service', $this->solr_handler);
+            //setting handler in cache raise errors for atomic updates
+            // Cache::set('solr_service', $this->solr_handler);
         }
 
         return $this->solr_handler;

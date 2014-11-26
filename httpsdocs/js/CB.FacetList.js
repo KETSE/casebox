@@ -161,6 +161,7 @@ Ext.define('CB.FacetList', {
         var data = [];
         var values = [];
         var facetField = Ext.valueFrom(this.f, fid);
+
         if(options && options.params && options.params.filters && options.params.filters[fid]){
             Ext.each(
                 options.params.filters[fid]
@@ -175,19 +176,6 @@ Ext.define('CB.FacetList', {
         }
         this.serverValues = values;
 
-        Ext.iterate(
-            serverData
-            ,function(k, v){
-                // this.cachedNames[k] =
-                data.push({
-                    id: k
-                    ,name: L['taskStatus' + k]
-                    ,active: (values.indexOf(k+'') >=0) ? 1 : 0
-                    ,items: v
-                });
-            }
-            ,this
-        );
         //'id', 'name', 'active', 'last', 'items', 'new_items'
         switch(facetField){
             case 'task_status':

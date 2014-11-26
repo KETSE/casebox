@@ -144,6 +144,7 @@ $API = array_merge(
                 ,'changePassword'       => array('len' => 1, 'formHandler' => true)
                 ,'renameUser'           => array('len' => 1)
                 ,'renameGroup'          => array('len' => 1)
+                ,'disableTSV'           => array('len' => 1)
             )
         )
 

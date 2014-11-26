@@ -299,10 +299,13 @@ Ext.define('CB.ObjectCardView', {
 
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
         App.on('objectchanged', this.onObjectChanged, this);
+        App.on('objectsaction', this.onObjectsAction, this);
     }
 
     ,onBeforeDestroy: function(c) {
         App.mainViewPort.un('objectsdeleted', this.onObjectsDeleted, this);
+        App.un('objectchanged', this.onObjectChanged, this);
+        App.un('objectsaction', this.onObjectsAction, this);
     }
 
     ,getButton: function() {
@@ -995,6 +998,20 @@ Ext.define('CB.ObjectCardView', {
             if((data.pid == this.loadedData.id) || (data.id == this.loadedData.id)) {
                 this.onReloadClick();
             }
+        }
+    }
+
+    /**
+     * objects action listener
+     *
+     * @param  object r responce
+     * @param  event e
+     * @return void
+     */
+    ,onObjectsAction: function(action, r, e){
+        clog('onObjectsAction', this, arguments);
+        if(this.loadedData.id == r.targetId) {
+            this.onReloadClick();
         }
     }
 }

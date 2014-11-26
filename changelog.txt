@@ -1,3 +1,18 @@
+CaseBox 1.9.362 (2014-11-26)
+==============================
+New Features, Improvements
+--------------------------
+- Disabling 2-factor authentication by user owner (admin user)
+- Index correctly Integer fields (set to single value, not array, if just one element)
+- Don't show the "Login" button for Yubikey authentication
+
+Fixed Bugs:
+----------
+- DC order not saved for search templates
+- Order breaks after reloading grid when sorted by replaceable solr fields (nid, name, path) (20m)
+- Shortcut functionality d&d issues
+- showing a Chart with an Integer facet doesn't have titles
+
 CaseBox 1.9.361 (2014-11-24)
 ==============================
 New Features, Improvements

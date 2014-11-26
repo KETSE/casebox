@@ -768,7 +768,9 @@ Ext.define('CB.UsersGroupsForm', {
     ,fileUpload: true
     ,data: {}
     ,tbarCssClass: 'x-panel-white'
+
     ,initComponent: function(){
+
         var bulletRenderer = function(v, m){
             m.css = 'taC';
             return (v == 1)
@@ -776,11 +778,22 @@ Ext.define('CB.UsersGroupsForm', {
                 : '';
         };
 
+        this.actions = {
+            disableTSV: new Ext.Action({
+                text: L.Disable + ' ' + L.TSV
+                ,scope: this
+                ,disabled: true
+                ,handler: this.onDisableTSVClick
+            })
+        };
+
         this.userInfo = new Ext.DataView({
             tpl: ['<img class="fl user-photo-field click icon-user32-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?32={[ CB.DB.usersStore.getPhotoParam(values.id) ]}">'
                 ,'<span class="fwB click">{title}</span><br />'
-                ,'<span class="cG">'+L.User+':</span> {name}, <span class="cG">'+L.lastAction+':</span> {[ Ext.isEmpty(values.last_action_time) ? "" : values.last_action_time ]}<br />'
-                ,'<span class="cG">'+L.addedByUser+':</span> {owner}, {cdate}'
+                ,'<span class="cG">'+L.User+':</span> {name}, <span class="cG">'+L.lastAction+':</span> '
+                  ,'{[ Ext.isEmpty(values.last_action_time) ? "" : values.last_action_time ]}<br />'
+                ,'<span class="cG">'+L.addedByUser+':</span> {owner}, {cdate}<br />'
+                ,'<span class="cG">'+L.TSV+':</span> {tsv}<br />'
             ]
             ,itemSelector:'.none'
             ,autoHeight: true
@@ -834,12 +847,14 @@ Ext.define('CB.UsersGroupsForm', {
                         {text: L.ChangePassword, iconCls: 'icon-key', handler: this.onEditUserPasswordClick, scope: this}
                         ,'-'
                         ,{text: L.ChangeUsername, iconCls: 'icon-pencil', handler: this.onEditUsernameClick, scope: this}
+                        ,'-'
+                        ,this.actions.disableTSV
                     ]
                 }
             ]
             ,items: [{
                     region: 'north'
-                    ,height: 60
+                    ,height: 75
                     ,bodyStyle: 'padding: 10px'
                     ,items: [{
                         xtype: 'filefield'
@@ -971,6 +986,7 @@ Ext.define('CB.UsersGroupsForm', {
             this.data.template_id = response.data.template_id;
             this.userInfo.data = response.data;
             this.userInfo.update(response.data);
+
             this.grid.setDisabled(response.data.id == App.loginData.id);//disable editing access for self
 
             accessData = [];
@@ -997,6 +1013,8 @@ Ext.define('CB.UsersGroupsForm', {
             ttb.items.getAt(idx + 2).setVisible(visible); // options button
             this.updatePhoto(response.data.photo);
             this.setDisabled(false);
+
+            this.actions.disableTSV.setDisabled(!this.canEditUserData || (response.data.tsv == 'none'));
 
             this.fireEvent('loaded', this.data);
         }
@@ -1098,6 +1116,29 @@ Ext.define('CB.UsersGroupsForm', {
     ,onEditUserPasswordClick: function(){
         w = new CB.ChangePasswordWindow({data: this.data});
         w.show();
+    }
+
+    ,onDisableTSVClick: function(){
+        Ext.Msg.confirm(
+            L.Disable + ' ' + L.TSV
+            ,L.DisableTSVConfirmation
+            ,function(b){
+                if(b == 'yes') {
+                    CB_UsersGroups.disableTSV(
+                        this.data.id
+                        ,this.processDisableTSV
+                        ,this
+                    );
+                }
+            }
+            ,this
+        );
+    }
+    ,processDisableTSV: function(r, e) {
+        if(r.success !== true) {
+            return;
+        }
+        this.loadData(this.data.id);
     }
 });
 // ----------------------------------------------------------- end of form

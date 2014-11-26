@@ -586,52 +586,16 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,saveGridState: function() {
-        var rez = {columns: {}}
-            ,store = this.store
-            // ,cm = this.grid.getColumnModel()
-            ,cols = this.grid.headerCt.getGridColumns() //columnManager.columns
-            ,gs
-            ,di;
-
-        for(var i = 0; i < cols.length; i++){
-            c = cols[i];
-            di = c.dataIndex;
-            rez.columns[di] = {
-                idx: i
-                ,width: c.width
-            };
-            if(c.hidden){
-                rez.columns[di].hidden = true;
-            }
-            if(c.sortable){
-                rez.columns[di].sortable = true;
-            }
-        }
-
-        if(store){
-            var ss = store.getSorters().getAt(0);
-
-            if(ss){
-                rez.sort = ss.getState();
-            }
-
-            if(store.getGrouper){
-                rez.group = store.getGrouper();
-                if(rez.group) {
-                    rez.group = rez.group.config;
-                    rez.group.property = store.proxy.extraParams.sourceGroupField;
-                }
-            }
-        }
+        var state = this.grid.getState();
 
         CB_State_DBProvider.saveGridViewState(
             {
                 params: this.refOwner.params
-                ,state: rez
+                ,state: state
             }
         );
 
-        return rez;
+        return state;
     }
 
     ,getViewParams: function() {

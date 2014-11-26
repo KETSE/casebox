@@ -14,7 +14,7 @@ class Search extends Solr\Client
     );
     /*when requested to sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
-    public $replaceSortFields = array('nid' => 'id', 'name' => 'sort_name', 'path' => 'sort_path');
+    public static $replaceSortFields = array('nid' => 'id', 'name' => 'sort_name', 'path' => 'sort_path');
 
     protected $facetsSetManually = false;
 
@@ -103,6 +103,14 @@ class Search extends Solr\Client
             //add target_id field
             if (!in_array('target_id', $filteredNames)) {
                 $filteredNames[] = 'target_id';
+            }
+
+            //pid & template_id are also needed for shortcuts
+            if (!in_array('pid', $filteredNames)) {
+                $filteredNames[] = 'pid';
+            }
+            if (!in_array('template_id', $filteredNames)) {
+                $filteredNames[] = 'template_id';
             }
 
             $this->params['fl'] = implode(',', $filteredNames);
@@ -528,14 +536,18 @@ class Search extends Solr\Client
 
         foreach ($sr->response->docs as $d) {
             $rd = array();
+
             foreach ($d as $fn => $fv) {
                 $rd[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
             }
+
             $d = $shortcutsArray[$rd['id']];
+
             $rd['target_id'] = $rd['id'];
             $rd['pid'] = $d['pid'];
             $rd['id'] = $d['id'];
             $rd['template_id'] = $d['template_id'];
+
             if (!empty($d['template_type'])) {
                 $rd['template_type'] = $d['template_type'];
             }

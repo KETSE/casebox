@@ -165,6 +165,8 @@ class Dbnode extends Base
             WHERE t.id = $1';
 
         if (empty($from) && !empty($this->config['template_id'])) {
+            $from = 'template_' . $this->config['template_id'];
+
             $sql = 'SELECT null `cfg`, t.id template_id, t.cfg `templateCfg`
                 FROM templates t
                 WHERE t.id = $2';

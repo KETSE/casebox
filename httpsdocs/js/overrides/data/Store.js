@@ -6,8 +6,10 @@ Ext.override(Ext.data.Store, {
             ,idProperty = Ext.isEmpty(this.proxy.reader)
                 ? 'id'
                 : Ext.valueFrom(
-                    this.proxy.reader.idProperty
-                    ,this.proxy.reader.config.idProperty
+                    Ext.valueFrom(
+                        this.proxy.reader.idProperty
+                        ,this.proxy.reader.config.idProperty
+                    )
                     ,'id'
                 );
 
@@ -22,6 +24,7 @@ Ext.override(Ext.data.Store, {
                 if(idx < 0) {
                     idx = this.findExact(idProperty, parseInt(ids[i], 10));
                 }
+
                 if(idx >= 0) {
                     this.removeAt(idx);
                 }

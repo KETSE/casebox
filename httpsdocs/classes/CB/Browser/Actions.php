@@ -385,15 +385,17 @@ class Actions
 
         $rez = array(
             'success' => true
+            ,'targetId' => $p['targetId']
             ,'processedIds' => array()
         );
 
         $shortcutObject = new Objects\Shortcut();
 
         foreach ($p['sourceIds'] as $id) {
-            $rez['processedIds'] = $shortcutObject->create(
+            $rez['processedIds'][] = $shortcutObject->create(
                 array(
-                    'pid' => $p['targetId']
+                    'id' => null
+                    ,'pid' => $p['targetId']
                     ,'target_id' => $id
                 )
             );

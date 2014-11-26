@@ -483,6 +483,12 @@ class UsersGroups
         }
         $res->close();
 
+        //set tsv status
+        $tsv = User::getTSVConfig($user_id);
+        $rez['data']['tsv'] = empty($tsv['method'])
+            ? 'none'
+            : L\get('TSV_' . $tsv['method']);
+
         return $rez;
     }
 
@@ -623,6 +629,23 @@ class UsersGroups
         Session::clearUserSessions($user_id);
 
         return array('success' => true);
+    }
+
+    public function disableTSV($userId)
+    {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
+        if (is_nan($userId)) {
+            throw new \Exception(L\get('Wrong_input_data'));
+        }
+
+        if (!Security::canEditUser($userId)) {
+            throw new \Exception(L\get('Access_denied'));
+        }
+
+        return User::disableTSV($userId);
     }
 
     /**

@@ -57,6 +57,7 @@ class DBProvider
     public function saveGridViewState($p)
     {
         $rez = array('success' => true);
+        $guid = false;
         /* incomming params example
         p: {params:{id:251, view:grid, path:1/114/101/251, query:null, start:0},…}
             params: {id:251, view:grid, path:1/114/101/251, query:null, start:0}
@@ -78,41 +79,48 @@ class DBProvider
                 size: {id:5, width:80, sortable:true}
                 udate: {id:9, width:120, hidden:true, sortable:true}
          */
-        $path = empty($p['params']['path'])
-            ? $p['params']['id']
-            : $p['params']['path'];
 
-        if (!empty($path)) {
-            $treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
+        if (!empty($p['params']['search']['template_id'])) {
+            $guid = 'template_' . $p['params']['search']['template_id'];
+        } else {
+            $path = empty($p['params']['path'])
+                ? $p['params']['id']
+                : $p['params']['path'];
 
-            $treeNodeClasses = Path::getNodeClasses($treeNodeConfigs);
-            $treeNodeGUIDConfigs = array();
-            foreach ($treeNodeClasses as $nodeClass) {
-                $cfg = $nodeClass->getConfig();
-                $treeNodeGUIDConfigs[$cfg['guid']] = $cfg;
+            if (!empty($path)) {
+                $treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
+
+                $treeNodeClasses = Path::getNodeClasses($treeNodeConfigs);
+                $treeNodeGUIDConfigs = array();
+                foreach ($treeNodeClasses as $nodeClass) {
+                    $cfg = $nodeClass->getConfig();
+                    $treeNodeGUIDConfigs[$cfg['guid']] = $cfg;
+                }
+                $nodesPath = Path::createNodesPath($path, $treeNodeGUIDConfigs);
+                if (!empty($nodesPath)) {
+                    $lastNode = array_pop($nodesPath);
+
+                    $DCConfig = $lastNode->getNodeParam('DC');
+
+                    $guid = empty($DCConfig['from'])
+                        ? 'default'
+                        : $DCConfig['from'];
+                }
             }
-            $nodesPath = Path::createNodesPath($path, $treeNodeGUIDConfigs);
-            if (!empty($nodesPath)) {
-                $lastNode = array_pop($nodesPath);
+        }
 
-                $DCConfig = $lastNode->getNodeParam('DC');
-
-                $guid = empty($DCConfig['from'])
-                    ? 'default'
-                    : $DCConfig['from'];
-
-                DB\dbQuery(
-                    'INSERT INTO tree_user_config
-                    (guid, user_id, cfg)
-                    VALUES($1, $2, $3)
-                    ON DUPLICATE KEY UPDATE cfg = $3',
-                    array(
-                        $guid
-                        ,$_SESSION['user']['id']
-                        ,json_encode($p['state'], JSON_UNESCAPED_UNICODE)
-                    )
-                ) or die(DB\dbQueryError());
-            }
+        if ($guid) {
+            DB\dbQuery(
+                'INSERT INTO tree_user_config
+                (guid, user_id, cfg)
+                VALUES($1, $2, $3)
+                ON DUPLICATE KEY UPDATE cfg = $3',
+                array(
+                    $guid
+                    ,$_SESSION['user']['id']
+                    ,json_encode($p['state'], JSON_UNESCAPED_UNICODE)
+                )
+            ) or die(DB\dbQueryError());
         }
 
         return $rez;

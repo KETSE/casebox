@@ -193,6 +193,7 @@ return array_merge(
 
             ,'//js/overrides/grid/plugin/CellEditing.js'
             ,'//js/overrides/grid/CellEditor.js'
+            ,'//js/overrides/grid/GridPanel.js'
 
             ,'//js/overrides/tree/ViewDragZone.js'
 
