@@ -47,8 +47,8 @@ Ext.onReady(function() {
 
     if (Ext.util && Ext.util.Format) {
         Ext.apply(Ext.util.Format, {
-            thousandSeparator: '.',
-            decimalSeparator: ',',
+            thousandSeparator: ',',
+            decimalSeparator: '.',
             currencySign: '\u20aa',
             // Iraeli Shekel
             dateFormat: 'd/m/Y'
@@ -141,6 +141,11 @@ Ext.define("Ext.locale.he.form.field.Date", {
     invalidText: "{1} הוא לא תאריך תקני - חייב להיות בפורמט {0}",
     format: "m/d/y",
     altFormats: "m/d/Y|m-d-y|m-d-Y|m/d|m-d|md|mdy|mdY|d|Y-m-d"
+});
+
+Ext.define("Ext.locale.he.form.field.File", {
+    override: "Ext.form.field.File",
+    buttonText: "עיון ..."
 });
 
 Ext.define("Ext.locale.he.form.field.ComboBox", {

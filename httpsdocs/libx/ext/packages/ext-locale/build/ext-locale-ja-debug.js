@@ -68,6 +68,11 @@ Ext.onReady(function() {
     }
 });
 
+Ext.define("Ext.locale.ja.LoadMask", {
+    override: "Ext.LoadMask",
+    msg: "読み込み中..."
+});
+
 Ext.define("Ext.locale.ja.view.View", {
     override: "Ext.view.View",
     emptyText: ""
@@ -136,12 +141,18 @@ Ext.define("Ext.locale.ja.form.field.Text", {
     emptyText: null
 });
 
+Ext.define("Ext.locale.ja.form.field.File", {
+    override: "Ext.form.field.File",
+    buttonText: "参照..."
+});
+
 Ext.define("Ext.locale.ja.form.field.Number", {
     override: "Ext.form.field.Number",
     decimalPrecision: 2,
     minText: "このフィールドの最小値は {0} です。",
     maxText: "このフィールドの最大値は {0} です。",
-    nanText: "{0} は数値ではありません。"
+    nanText: "{0} は数値ではありません。",
+    negativeText: "負の値は無効です。"
 });
 
 Ext.define("Ext.locale.ja.form.field.Date", {
@@ -257,6 +268,11 @@ Ext.define("Ext.locale.ja.grid.header.Container", {
     sortAscText: "昇順",
     sortDescText: "降順",
     columnsText: "カラム"
+});
+
+Ext.define("Ext.locale.ja.grid.column.Date", {
+    override: "Ext.grid.column.Date",
+    format: "Y/m/d"
 });
 
 Ext.define("Ext.locale.ja.grid.GroupingFeature", {

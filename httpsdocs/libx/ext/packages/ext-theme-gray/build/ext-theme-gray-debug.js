@@ -5,7 +5,6 @@ Ext.define('Ext.classic.toolbar.Toolbar', {
 
 Ext.define('Ext.theme.classic.grid.column.Widget', {
     override: 'Ext.grid.column.Widget',
-
     config: {
         /**
          * @cfg defaultCellUI {Object}
@@ -32,7 +31,6 @@ Ext.define('Ext.theme.classic.grid.column.Widget', {
 
 Ext.define('Ext.theme.classic.grid.plugin.Editing', {
     override: 'Ext.grid.plugin.Editing',
-
     defaultFieldUI: 'grid-cell'
 });
 

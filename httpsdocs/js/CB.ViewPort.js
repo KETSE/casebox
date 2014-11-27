@@ -82,6 +82,7 @@ Ext.define('CB.ViewPort', {
                     textAlign: 'left'
                 }
             }
+            ,items: []
             // ,listeners: {
             //     tabchange: function(tp, p){
             //         tp.syncSize();
@@ -403,8 +404,6 @@ Ext.define('CB.ViewPort', {
         }
 
         this.openDefaultExplorer();
-
-        this.selectTreeRootNode();
 
         App.mainTabPanel.setActiveTab(0);
     }

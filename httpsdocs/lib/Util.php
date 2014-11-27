@@ -316,6 +316,8 @@ function userTimeToUTCTimezone($dateTime)
  */
 function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 {
+    // echo "input params: $fromDateTime, $toDateTime, $TZ\n";
+
     $d1 = new \DateTime($fromDateTime);
     if (empty($TZ)) {
         $TZ = 'UTC';

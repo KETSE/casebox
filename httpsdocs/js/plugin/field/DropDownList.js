@@ -105,7 +105,7 @@ Ext.define('CB.plugin.field.DropDownList', {
                 ,'onListRefresh'
                 ,'onBeforeSelect'
                 ,'onBeforeDeselect'
-                ,'onDestroy'
+                // ,'onDestroy'
             ]
         );
 
@@ -166,10 +166,10 @@ Ext.define('CB.plugin.field.DropDownList', {
                     picker.pagingToolbar.on('beforechange', me.onPageChange, me);
                 }
 
-                me.mon(picker, {
-                    refresh: me.onListRefresh,
-                    scope: me
-                });
+                // me.mon(picker, {
+                //     refresh: me.onListRefresh,
+                //     scope: me
+                // });
 
                 me.mon(picker.getSelectionModel(), {
                     beforeselect: me.onBeforeSelect,

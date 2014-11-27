@@ -42,6 +42,19 @@ Ext.onReady(function() {
             return Ext.Date.dayNames[day].substring(0, 3);
         };
 
+        Ext.Date.formatCodes.a = "(this.getHours() < 12 ? 'a.m.' : 'p.m.')";
+        Ext.Date.formatCodes.A = "(this.getHours() < 12 ? 'A.M.' : 'P.M.')";
+
+        // This will match am or a.m.
+        Ext.Date.parseCodes.a = Ext.Date.parseCodes.A = {
+            g:1,
+            c:"if (/(a\\.?m\\.?)/i.test(results[{0}])) {\n"
+                + "if (!h || h == 12) { h = 0; }\n"
+                + "} else { if (!h || h < 12) { h = (h || 0) + 12; }}",
+            s:"(A\\.?M\\.?|P\\.?M\\.?|a\\.?m\\.?|p\\.?m\\.?)",
+            calcAtEnd: true
+        };
+
         Ext.Date.parseCodes.S.s = "(?:st|nd|rd|th)";
     }
 

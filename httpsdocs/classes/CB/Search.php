@@ -6,15 +6,20 @@ use CB\Util;
 
 class Search extends Solr\Client
 {
-    public static $defaultFields = array(
+    protected $defaultFields = array(
         'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'target_id', 'system',
         'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'comment_user_id', 'comment_date',
         'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'status',
         'task_status', 'category_id', 'importance', 'completed', 'versions', 'ntsc'
     );
+
     /*when requested to sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
-    public static $replaceSortFields = array('nid' => 'id', 'name' => 'sort_name', 'path' => 'sort_path');
+    protected $replaceSortFields = array(
+        'nid' => 'id'
+        ,'name' => 'sort_name'
+        ,'path' => 'sort_path'
+    );
 
     protected $facetsSetManually = false;
 
@@ -63,7 +68,7 @@ class Search extends Solr\Client
             ,'q.alt' => '*:*'
             ,'qf' => "name content^0.5"
             ,'tie' => '0.1'
-            ,'fl' => implode(',', static::$defaultFields)
+            ,'fl' => implode(',', $this->defaultFields)
             ,'sort' => 'ntsc asc'
         );
         /* initial parameters */
@@ -131,19 +136,16 @@ class Search extends Solr\Client
                 } else {
                     foreach ($p['sort'] as $s) {
                         if (is_array($s)) {
-                            $sort[$s['property']] = empty($s['direction']) ? 'asc' : strtolower($s['direction']);
+                            $sort[$s['property']] = empty($s['direction'])
+                                ? 'asc'
+                                : strtolower($s['direction']);
                         } else {
                             $s = explode(' ', $s);
-                            $sort[$s[0]] = empty($s[1]) ? 'asc' : strtolower($s[1]);
+                            $sort[$s[0]] = empty($s[1])
+                                ? 'asc'
+                                : strtolower($s[1]);
                         }
                     }
-                }
-                foreach ($sort as $f => $d) {
-                    if (isset($this->replaceSortFields[$f])) {
-                        // replace with convenient sorting fields if defined
-                        $f = $this->replaceSortFields[$f];
-                    }
-
                 }
             } else {
                 $sort['sort_name'] = 'asc';//, subtype asc

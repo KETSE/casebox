@@ -471,7 +471,7 @@ Ext.define('CB.VerticalEditGrid', {
         }
 
         // remember last selected cell
-        var lastCell = this.getSelectionModel().getSelection()[0];
+        // var lastCell = this.getSelectionModel().getSelection()[0];
 
         var nodesList = this.helperTree.queryNodeListBy(this.helperNodesFilter.bind(this));
 
@@ -506,9 +506,9 @@ Ext.define('CB.VerticalEditGrid', {
         this.store.resumeEvents();
         this.store.add(records);
 
-        if(lastCell && this.getEl().isVisible(true)){
-            this.getSelectionModel().select(lastCell[0], lastCell[1]);
-        }
+        // if(lastCell && this.getEl().isVisible(true)){
+        //     this.getSelectionModel().select(lastCell[0], lastCell[1]);
+        // }
 
         this.updateLayout();
     }
@@ -612,23 +612,32 @@ Ext.define('CB.VerticalEditGrid', {
         }
     }
 
-    ,gainFocus: function(){
-        this.focus(false);
+    ,gainFocus: function(position){
         var sm = this.getSelectionModel();
-        if(sm && sm.getLastSelected) {
-            var lastRec = sm.getLastSelected();
-            if(lastRec) {
-                var rowIndex = this.store.indexOf(lastRec)
-                    ,pos = {
-                        row: rowIndex
-                        ,column: 1
-                    };
 
-                sm.select(pos);
-                sm.setCurrentPosition(pos);
-                // this.getView().focusCell(pos, true);
+        clog('gainFocus');
+        // this.focus(false);
+
+        if(Ext.isEmpty(position)) {
+            position = {
+                row: 0
+                ,column: 1
+            };
+
+            if(sm && sm.getLastSelected) {
+                var lastRec = sm.getLastSelected();
+
+                if(lastRec) {
+                    var rowIndex = this.store.indexOf(lastRec);
+                    position.row = rowIndex;
+                }
             }
         }
+        clog('pos', position);
+        sm.select(position);
+        // sm.setCurrentPosition(position);
+        this.getView().focusCell(position, 30);
+
         // this.getView().focus(false, true);
     }
 
@@ -700,7 +709,10 @@ Ext.define('CB.VerticalEditGrid', {
 
         this.syncRecordsWithHelper();
 
-        this.gainFocus();
+        this.gainFocus({
+            row: context.rowIdx
+            ,column: context.colIdx
+        });
     }
 
     ,getFieldValue: function(field_id, duplication_id){

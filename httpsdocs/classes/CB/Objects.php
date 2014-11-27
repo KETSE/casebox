@@ -524,7 +524,7 @@ class Objects
             case '_objects':
 
                 $arr = Util\toNumericArray($value);
-                $val = @$object_record[$solr_field];
+                $val = Util\toNumericArray(@$object_record[$solr_field]);
 
                 foreach ($arr as $v) {
                     if (empty($val) || !in_array($v, $val)) {
@@ -536,7 +536,7 @@ class Objects
                     unset($object_record[$solr_field]);
 
                 } elseif (is_array($val) && (sizeof($val) < 2)) {//set just value if 1 element array
-                    $object_record[$solr_field] = array_shift($object_record[$solr_field]);
+                    $object_record[$solr_field] = array_shift($val);
 
                 } else {
                     $object_record[$solr_field] = $val;

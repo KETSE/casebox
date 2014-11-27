@@ -66,6 +66,7 @@
 .i-magnifier, .x-grid-tree-node-expanded .i-magnifier{background-image: url(s/magnifier.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-building, .x-grid-tree-node-expanded .i-building{background-image: url(s/building.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-book-open, .x-grid-tree-node-expanded .i-book-open{background-image: url(s/book-open.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-bullet-arrow-down{background-image: url(s/bullet_arrow_down.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-check-alt{background-image: url(s/check-alt.png)}
 .i-cancel{background-image: url(s/cancel.png)}
 .i-trash{background-image: url(s/trash.png)}

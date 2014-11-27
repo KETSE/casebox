@@ -983,3 +983,15 @@ border-top: 0;
 .obj-ref {
 
 }
+
+.comment-actions-button {
+display: block;
+float: right;
+width: 13px;
+opacity: 0.3;
+}
+.comment-actions-button:hover {
+opacity: 1;
+cursor: pointer;
+cursor: hand;
+}

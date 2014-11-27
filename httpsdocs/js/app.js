@@ -513,6 +513,7 @@ function initApp() {
 
         c = tabPanel.add(o);
         o.show();
+        tabPanel.setActiveTab(c);
 
         return c;
     };

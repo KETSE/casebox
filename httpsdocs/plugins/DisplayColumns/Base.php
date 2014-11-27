@@ -46,8 +46,8 @@ class Base
             $sp['sort'] = $solrFields['sort'];
 
         } elseif (!empty($this->inputParams['sort'][0]['property']) &&
-            empty($solrFields['sort']) &&
-            !in_array($this->inputParams['sort'][0]['property'], \CB\Search::$defaultFields)
+            empty($solrFields['sort'])
+            // && !in_array($this->inputParams['sort'][0]['property'], \CB\Search::$defaultFields)
         ) {
             $sp['sort'] = 'ntsc asc, order asc';
         }
@@ -408,17 +408,19 @@ class Base
         }
 
         /* user clicked a column to sort by */
+        $property = null;
+        $dir = 'asc';
+
         if (!empty($this->inputParams['userSort'])) {
             $dir = strtolower($this->inputParams['sort'][0]['direction']);
 
             if (in_array($dir, array('asc', 'desc')) &&
                 preg_match('/^[a-z_0-9]+$/i', $this->inputParams['sort'][0]['property'])
             ) {
-                $field = $this->inputParams['sort'][0]['property'];
-                if (!empty($displayColumns['data'][$field]['solr_column_name'])) {
-                    $field = $displayColumns['data'][$field]['solr_column_name'];
+                $property = $this->inputParams['sort'][0]['property'];
+                if (!empty($displayColumns['data'][$property]['solr_column_name'])) {
+                    $property = $displayColumns['data'][$property]['solr_column_name'];
                 }
-                $rez['sort'] = 'ntsc asc,' . $field . ' ' . $dir;
             }
 
         } else {
@@ -430,33 +432,19 @@ class Base
             $state = $this->getState($stateFrom);
 
             if (!empty($state['sort']['property'])) {
-                $property =$state['sort']['property'];
+                $property = $state['sort']['property'];
+                $dir = strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'));
 
                 if (!empty($displayColumns['data'][$property]['solr_column_name'])) {
-                    $rez['sort'] = array(
-                        $displayColumns['data'][$property]['solr_column_name']
-                        .' '
-                        .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
-                    );
-                } else {
-                    if (isset(\CB\Search::$replaceSortFields[$property])) {
-                        $property = \CB\Search::$replaceSortFields[$property];
-                    }
-
-                    if (in_array($property, \CB\Search::$defaultFields)) {
-                        $rez['sort'] = array(
-                            $property
-                            .' '
-                            .strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'))
-                        );
-                    }
+                    $property = $displayColumns['data'][$property]['solr_column_name'];
                 }
             }
-
-            if (!empty($rez['sort'])) {
-                $rez['sort'] = 'ntsc asc,'.implode(',', $rez['sort']);
-            }
         }
+
+        if (!empty($property)) {
+            $rez['sort'] = 'ntsc asc,' . $property . ' ' . $dir;
+        }
+
         /* end of get user state and check if user has a custom sorting */
 
         if (!empty($rez['fields'])) {

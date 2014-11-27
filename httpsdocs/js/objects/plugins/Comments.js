@@ -18,6 +18,9 @@ Ext.define('CB.objects.plugins.Comments', {
             ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}">'
             ,'    </td>'
             ,'    <td>'
+            ,'      <tpl if="cid == App.loginData.id">'
+            ,'          <span class="i-bullet-arrow-down comment-actions-button">&nbsp;</span>'
+            ,'      </tpl>'
             ,'        <b class="user">{[ values.user.split("\\n")[0]]}</b>'
             ,'        {[ Ext.util.Format.nl2br(values.content)]}'
             ,'        <div class="gr" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</div>'
@@ -31,6 +34,10 @@ Ext.define('CB.objects.plugins.Comments', {
             tpl: tpl
             ,region: 'center'
             ,itemSelector:'tr'
+            ,listeners: {
+                scope: this
+                ,itemclick: this.onItemClick
+            }
         });
 
         this.messageField = new Ext.form.TextArea({
@@ -235,6 +242,10 @@ Ext.define('CB.objects.plugins.Comments', {
         if(this.messageField.focused !== true) {
             // this.messageToolbar.hide();
         }
+    }
+
+    ,onItemClick: function() {
+        clog('onItemClick', this, arguments);
     }
 
 });

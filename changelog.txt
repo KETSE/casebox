@@ -1,3 +1,22 @@
+CaseBox 1.9.363 (2014-11-27)
+==============================
+New Features, Improvements
+--------------------------
+- not finished edit/delete comments feature
+- upgraded ExtJS to latest version and corrected appeared issues
+  but still there are focusing problems in VerticalEditGrid
+  need continuous testing to see if any no other issues
+
+Fixed Bugs:
+----------
+- Datetime shown in preview doesn't have the same timezone as in Editmode
+  Notes:
+    - should pe tested and with different timezones
+    - Possible to have issues related to daylight savings time
+- corrected custom object fields indexing
+- Memo grid.editor blocks UI
+- adjusted DisplayColumns plugin sorting
+
 CaseBox 1.9.362 (2014-11-26)
 ==============================
 New Features, Improvements
