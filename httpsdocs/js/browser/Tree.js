@@ -503,8 +503,7 @@ Ext.define('CB.browser.Tree', {
 
         }
         // node.select();
-        e.stopPropagation();
-        e.preventDefault();
+        e.stopEvent();
         this.contextMenu.node = record;
 
         this.contextMenu.showAt(e.getXY());

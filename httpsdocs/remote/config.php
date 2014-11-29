@@ -88,6 +88,8 @@ $API = array_merge(
                 ,'getAssociatedObjects' =>  array('len'=>1)
                 ,'getPluginsData'       =>  array('len'=>1)
                 ,'addComment'           =>  array('len'=>1)
+                ,'updateComment'        =>  array('len'=>1)
+                ,'removeComment'        =>  array('len'=>1)
             )
         )
 

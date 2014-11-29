@@ -6,7 +6,7 @@ use CB\Util;
 
 class Search extends Solr\Client
 {
-    protected $defaultFields = array(
+    public static $defaultFields = array(
         'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'target_id', 'system',
         'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'comment_user_id', 'comment_date',
         'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'status',
@@ -68,7 +68,7 @@ class Search extends Solr\Client
             ,'q.alt' => '*:*'
             ,'qf' => "name content^0.5"
             ,'tie' => '0.1'
-            ,'fl' => implode(',', $this->defaultFields)
+            ,'fl' => implode(',', static::$defaultFields)
             ,'sort' => 'ntsc asc'
         );
         /* initial parameters */

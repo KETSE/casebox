@@ -60,8 +60,8 @@ function getTranslationIfPseudoValue($value)
         $varName = substr($value, 1, strlen($value) - 2);
         $userLanguage = \CB\Config::get('user_language');
 
-        if (isset($GLOBALS['TRANSLATIONS'][$user_language][$varName])) {
-            $value = @$GLOBALS['TRANSLATIONS'][$user_language][$varName];
+        if (isset($GLOBALS['TRANSLATIONS'][$userLanguage][$varName])) {
+            $value = @$GLOBALS['TRANSLATIONS'][$userLanguage][$varName];
         }
     }
 

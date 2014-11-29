@@ -6,6 +6,7 @@ use CB\Cache;
 use CB\Util;
 use CB\State;
 use CB\data;
+use CB\Search;
 
 class Base
 {
@@ -91,9 +92,13 @@ class Base
             foreach ($displayColumns['data'] as $k => $col) {
                 $fieldName = is_numeric($k) ? $col : $k;
                 $customColumns[$fieldName] = is_numeric($k) ? array() : $col;
-                if (empty($customColumns[$fieldName]['solr_column_name'])) {
+
+                if (empty($customColumns[$fieldName]['solr_column_name']) &&
+                    !in_array($fieldName, Search::$defaultFields)
+                ) {
                     $customColumns[$fieldName]['localSort'] = true;
                 }
+
                 if (!isset($customColumns[$fieldName]['idx'])) {
                     $customColumns[$fieldName]['idx'] = $idx++;
                 }

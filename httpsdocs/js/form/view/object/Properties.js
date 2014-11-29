@@ -5,9 +5,9 @@ Ext.define('CB.form.view.object.Properties', {
 
     ,alias: 'widget.CBObjectProperties'
 
-    ,initComponent: function(){
-        CB.form.view.object.Properties.superclass.initComponent.apply(this, arguments);
-    }
+    // ,initComponent: function(){
+    //     CB.form.view.object.Properties.superclass.initComponent.apply(this, arguments);
+    // }
 
     ,getContainerToolbarItems: function() {
         var rez = {

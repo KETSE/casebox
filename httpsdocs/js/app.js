@@ -519,8 +519,12 @@ function initApp() {
     };
 
     App.getTextEditWindow = function(config){
-        if(!App.textEditWindow) App.textEditWindow = new CB.TextEditWindow();
+        if(!App.textEditWindow) {
+            App.textEditWindow = new CB.TextEditWindow();
+        }
+
         App.textEditWindow = Ext.apply(App.textEditWindow, config);
+
         return App.textEditWindow;
     };
 
@@ -655,6 +659,8 @@ function initApp() {
         params.query = null;
         params.start = 0;
         params.page = 1;
+
+        delete App.locateObjectId;
 
         App.activateBrowserTab().setParams(params);
     };

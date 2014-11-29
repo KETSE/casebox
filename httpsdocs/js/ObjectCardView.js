@@ -1009,7 +1009,6 @@ Ext.define('CB.ObjectCardView', {
      * @return void
      */
     ,onObjectsAction: function(action, r, e){
-        clog('onObjectsAction', this, arguments);
         if(this.loadedData.id == r.targetId) {
             this.onReloadClick();
         }

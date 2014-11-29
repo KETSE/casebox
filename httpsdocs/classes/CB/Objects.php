@@ -1023,4 +1023,67 @@ class Objects
             )
         );
     }
+
+    /**
+     * update own comment
+     * @param array $p input params (id, msg)
+     */
+    public function updateComment($p)
+    {
+        $rez = array('success' => false);
+
+        if (empty($p['id']) || !is_numeric($p['id']) || empty($p['msg'])) {
+            $rez['msg'] = L\get('Wrong_input_data');
+
+            return $rez;
+        }
+
+        $comment = static::getCustomClassByObjectId($p['id']);
+        $commentData = $comment->load();
+        if ($commentData['cid'] == $_SESSION['user']['id']) {
+            $commentData['data']['_title'] = $p['msg'];
+            $comment->update($commentData);
+
+            Solr\Client::runCron();
+
+            $rez = array(
+                'success' => true
+                ,'data' => array(
+                    'id' => $commentData['id']
+                    ,'pid' => $commentData['pid']
+                )
+            );
+
+        }
+
+        return $rez;
+    }
+
+    /**
+     * remove own comment
+     * @param array $p input params (id)
+     */
+    public function removeComment($p)
+    {
+        $rez = array('success' => false);
+
+        if (empty($p['id']) || !is_numeric($p['id'])) {
+            $rez['msg'] = L\get('Wrong_input_data');
+
+            return $rez;
+        }
+
+        $comment = static::getCustomClassByObjectId($p['id']);
+        $commentData = $comment->load();
+
+        if ($commentData['cid'] == $_SESSION['user']['id']) {
+            $comment->delete();
+
+            Solr\Client::runCron();
+
+            $rez['success'] = true;
+        }
+
+        return $rez;
+    }
 }

@@ -615,7 +615,6 @@ Ext.define('CB.VerticalEditGrid', {
     ,gainFocus: function(position){
         var sm = this.getSelectionModel();
 
-        clog('gainFocus');
         // this.focus(false);
 
         if(Ext.isEmpty(position)) {
@@ -633,7 +632,6 @@ Ext.define('CB.VerticalEditGrid', {
                 }
             }
         }
-        clog('pos', position);
         sm.select(position);
         // sm.setCurrentPosition(position);
         this.getView().focusCell(position, 30);

@@ -6,13 +6,27 @@ Ext.define('CB.objects.plugins.Comments', {
 
     ,initComponent: function(){
 
+        this.actions = {
+            edit: new Ext.Action({
+                text: L.Edit
+                ,scope: this
+                ,handler: this.onEditClick
+            })
+            ,remove: new Ext.Action({
+                text: L.Delete
+                ,iconCls: 'i-trash'
+                ,scope: this
+                ,handler: this.onRemoveClick
+            })
+        };
+
         var tpl = new Ext.XTemplate(
             // <div>
             //     View 12 more comments
             // </div>
 
             '<table class="block-plugin" style="margin:0">'
-            ,'<tpl for="data">'
+            ,'<tpl for=".">'
             ,'<tr>'
             ,'    <td class="obj">'
             ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}">'
@@ -32,6 +46,24 @@ Ext.define('CB.objects.plugins.Comments', {
 
         this.dataView = new Ext.DataView({
             tpl: tpl
+            ,store: Ext.create('Ext.data.JsonStore', {
+                fields: [
+                   {name: 'id', type: 'int'}
+                   ,{name: 'pid', type: 'int'}
+                   ,{name: 'template_id', type: 'int'}
+                   ,{name: 'cid', type: 'int'}
+                   ,'user'
+                   ,'cdate'
+                   ,'cdate_text'
+                   ,'content'
+                ]
+                ,proxy: {
+                    type: 'memory'
+                    ,reader: {
+                        type: 'json'
+                    }
+                }
+            })
             ,region: 'center'
             ,itemSelector:'tr'
             ,listeners: {
@@ -158,18 +190,12 @@ Ext.define('CB.objects.plugins.Comments', {
             ]
         });
 
-        CB.objects.plugins.Comments.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
 
     ,onLoadData: function(r, e) {
         this.loadedData = r;
-        if(this.rendered) {
-            this.dataView.update(r);
-
-        } else {
-            this.dataView.data = r;
-            this.doLayout();
-        }
+        this.dataView.store.loadData(r.data);
     }
 
     ,onMessageBoxKeyPress: function(tf, e) {
@@ -244,8 +270,104 @@ Ext.define('CB.objects.plugins.Comments', {
         }
     }
 
-    ,onItemClick: function() {
-        clog('onItemClick', this, arguments);
+    ,onItemClick: function(dataView, record, item, index, e, eOpts) {
+        var el = e.getTarget('.comment-actions-button');
+
+        if(el) {
+            e.stopEvent();
+            this.showActionsMenu(e);
+        }
     }
 
+    ,showActionsMenu: function(e) {
+        if(!this.actionsMenu) {
+            this.actionsMenu = Ext.create(
+                'Ext.menu.Menu'
+                ,{
+                    items: [
+                        this.actions.edit
+                        ,this.actions.remove
+                    ]
+                }
+            );
+        }
+
+        this.actionsMenu.showAt(e.getXY());
+        // very strange .. the menu desnt show automaticly (maybe because its beta Ext)
+        Ext.defer(this.actionsMenu.show, 10, this.actionsMenu);
+    }
+
+    ,onEditClick: function(b, e) {
+        var rec = this.dataView.getSelection()[0];
+
+        if(!rec || (rec.get('cid') != App.loginData.id)) {
+            return;
+        }
+
+        CB_Objects.load({id: rec.get('id')}, this.processEditComment, this);
+    }
+
+    ,processEditComment: function(r, e) {
+        if(r.success !== true) {
+            return;
+        }
+
+        this.editingCommentId = r.data.id;
+
+        var ed = App.getTextEditWindow({
+            data: {
+                value: r.data.name
+                ,callback: this.onSubmitEditedComment
+                ,scope: this
+            }
+        });
+
+        ed.show();
+    }
+
+    ,onSubmitEditedComment: function(editor, value) {
+        CB_Objects.updateComment(
+            {
+                id: this.editingCommentId
+                ,msg: value
+            }
+            ,this.onEditCommentProcess
+            ,this
+        );
+
+        delete this.editingCommentId;
+    }
+
+    ,onEditCommentProcess: function(r, e) {
+        if(r.success !== true) {
+            return;
+        }
+
+        App.fireEvent('objectchanged', r.data, this);
+    }
+
+    ,onRemoveClick: function(b, e) {
+        var rec = this.dataView.getSelection()[0];
+
+        if(!rec || (rec.get('cid') != App.loginData.id)) {
+            return;
+        }
+
+        CB_Objects.removeComment(
+            {id: rec.get('id')}
+            ,this.processRemoveComment
+            ,this
+        );
+    }
+
+    ,processRemoveComment: function(r, e) {
+        if(r.success !== true) {
+            return;
+        }
+
+        var rec = this.dataView.getSelection()[0];
+        if(rec) {
+            this.dataView.store.remove(rec);
+        }
+    }
 });

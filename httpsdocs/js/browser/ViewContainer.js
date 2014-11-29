@@ -22,7 +22,7 @@ Ext.define('CB.browser.ViewContainer', {
         this.actions = {
             back: new Ext.Action({
                 tooltip: L.Back
-                ,id: 'back' + this.instanceId
+                ,itemId: 'back' + this.instanceId
                 ,iconCls: 'icon-back'
                 ,disabled: true
                 ,scope: this
@@ -31,24 +31,38 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,forward: new Ext.Action({
                 tooltip: L.Forward
-                ,id: 'forward' + this.instanceId
+                ,itemId: 'forward' + this.instanceId
                 ,iconCls: 'icon-forward'
                 ,disabled: true
                 ,scope: this
                 ,handler: this.onForwardClick
             })
 
+            ,edit: new Ext.Action({
+                text: L.Edit
+                ,itemId: 'edit' + this.instanceId
+                ,scope: this
+                ,handler: this.onEditClick
+            })
+
             ,reload: new Ext.Action({
                 iconCls: 'icon-refresh'
-                ,id: 'reload' + this.instanceId
+                ,itemId: 'reload' + this.instanceId
                 ,tooltip: L.Refresh
+                ,scope: this
+                ,handler: this.onReloadClick
+            })
+
+            ,contextReload: new Ext.Action({
+                iconCls: 'icon-refresh'
+                ,text: L.Refresh
                 ,scope: this
                 ,handler: this.onReloadClick
             })
 
             ,upload: new Ext.Action({
                 text: L.Upload
-                ,id: 'upload' + this.instanceId
+                ,itemId: 'upload' + this.instanceId
                 // ,iconAlign:'top'
                 ,scale: 'large'
                 ,iconCls: 'ib-upload'
@@ -58,7 +72,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,download: new Ext.Action({
                 text: L.Download
-                ,id: 'download' + this.instanceId
+                ,itemId: 'download' + this.instanceId
                 // ,iconAlign:'top'
                 ,scale: 'large'
                 ,iconCls: 'ib-download'
@@ -71,7 +85,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,cut: new Ext.Action({
                 text: L.Cut
-                ,id: 'cut' + this.instanceId
+                ,itemId: 'cut' + this.instanceId
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onCutClick
@@ -79,7 +93,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,copy: new Ext.Action({
                 text: L.Copy
-                ,id: 'copy' + this.instanceId
+                ,itemId: 'copy' + this.instanceId
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onCopyClick
@@ -87,7 +101,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,paste: new Ext.Action({
                 text: L.Paste
-                ,id: 'paste' + this.instanceId
+                ,itemId: 'paste' + this.instanceId
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onPasteClick
@@ -95,7 +109,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,pasteShortcut: new Ext.Action({
                 text: L.PasteShortcut
-                ,id: 'pasteshortcut' + this.instanceId
+                ,itemId: 'pasteshortcut' + this.instanceId
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onPasteShortcutClick
@@ -103,7 +117,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,takeOwnership: new Ext.Action({
                 text: L.TakeOwnership
-                ,id: 'takeownership' + this.instanceId
+                ,itemId: 'takeownership' + this.instanceId
                 ,iconCls: 'icon-user-gray'
                 ,disabled: true
                 ,scope: this
@@ -113,7 +127,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,'delete': new Ext.Action({
                 qtip: L.Delete
                 // text: L.Delete
-                ,id: 'delete' + this.instanceId
+                ,itemId: 'delete' + this.instanceId
                 // ,iconAlign:'top'
                 ,iconCls: 'ib-trash'
                 ,scale: 'large'
@@ -124,9 +138,18 @@ Ext.define('CB.browser.ViewContainer', {
                 ,handler: this.onDeleteClick
             })
 
+            ,contextDelete: new Ext.Action({
+                text: L.Delete
+                ,iconCls: 'i-trash'
+                ,disabled: true
+                ,hideParent: false
+                ,scope: this
+                ,handler: this.onDeleteClick
+            })
+
             ,restore: new Ext.Action({
                 text: L.Restore
-                ,id: 'restore' + this.instanceId
+                ,itemId: 'restore' + this.instanceId
                 // ,iconAlign:'top'
                 ,iconCls: 'ib-restore'
                 ,scale: 'large'
@@ -135,6 +158,15 @@ Ext.define('CB.browser.ViewContainer', {
                 ,hideParent: false
                 ,scope: this
                 ,handler: this.onRestoreClick
+            })
+
+            ,permissions: new Ext.Action({
+                text: L.Permissions
+                ,itemId: 'permissions' + this.instanceId
+                ,iconCls: 'icon-key'
+                ,scope: this
+                ,disabled: true
+                ,handler: this.onPermissionsClick
             })
         };
 
@@ -518,7 +550,8 @@ Ext.define('CB.browser.ViewContainer', {
         Ext.apply(this, {
             bodyCls: 'x-panel-white'
             ,tbar: this.mainToolbar
-            ,items: [ {
+
+            ,items: [{
                 layout: 'border'
                 ,border: false
                 ,tbarCssClass: 'x-panel-gray'
@@ -527,8 +560,8 @@ Ext.define('CB.browser.ViewContainer', {
                     this.cardContainer
                     ,this.rightPanel
                 ]
-            }
-            ]
+            }]
+
             ,listeners: {
                 scope: this
                 ,changeparams: this.changeSomeParams
@@ -538,6 +571,7 @@ Ext.define('CB.browser.ViewContainer', {
                     // this.cardContainer.syncSize();
                     this.updatePreview();
                 }
+                ,itemcontextmenu: this.onItemContextMenu
                 // ,objectopen: this.onObjectsOpenEvent
             }
         });
@@ -1010,11 +1044,13 @@ Ext.define('CB.browser.ViewContainer', {
 
             this.actions['delete'].setDisabled(true);
             this.actions['delete'].hide();
+            this.actions.contextDelete.setDisabled(true);
 
             this.actions.restore.setDisabled(true);
             this.actions.restore.hide();
-            // this.actions.rename.setDisabled(true);
+            this.actions.permissions.setDisabled(isNaN(this.folderProperties.id));
         } else {
+            var firstObjId = Ext.valueFrom(objectsDataArray[0].nid, objectsDataArray[0].id);
 
             this.actions.cut.setDisabled(false);
             this.actions.copy.setDisabled(false);
@@ -1035,10 +1071,13 @@ Ext.define('CB.browser.ViewContainer', {
             }
 
             this.actions['delete'].setDisabled(inRecycleBin);
+            this.actions.contextDelete.setDisabled(inRecycleBin);
 
             if(!inRecycleBin && inGridView) {
                 this.actions['delete'].show();
             }
+
+            this.actions.permissions.setDisabled(isNaN(firstObjId));
         }
 
         this.updatePreview();
@@ -1290,7 +1329,7 @@ Ext.define('CB.browser.ViewContainer', {
         var selection = this.cardContainer.getLayout().activeItem.currentSelection;
         var id = Ext.isEmpty(selection)
             ? this.folderProperties.id
-            : s[0].nid;
+            : Ext.valueFrom(selection[0].nid, selection[0].id);
         App.mainViewPort.openPermissions(id);
     }
 
@@ -1344,5 +1383,67 @@ Ext.define('CB.browser.ViewContainer', {
             case 'delete':
                 break;
         }
+    }
+
+    ,onItemContextMenu: function(e) {
+        e.stopEvent();
+        if(!this.contextMenu) {
+            this.createItem = new Ext.menu.Item({
+                text: L.Create
+                ,hideOnClick: false
+                ,menu:[]
+            });
+
+            this.contextMenu = new Ext.menu.Menu({
+                items: [
+                this.actions.edit
+                ,this.actions.download
+                ,'-'
+                ,{
+                    text: L.View
+                    ,hideOnClick: false
+                    ,menu: [{
+                        xtype: 'menucheckitem'
+                        ,text: L.Descendants
+                        ,checked: (this.params.descendants === true)
+                        ,listeners: {
+                            scope: this
+                            ,checkchange: this.onShowDescendantsCheckChange
+                        }
+                    }
+                    ]
+                }
+                ,'-'
+                ,this.actions.cut
+                ,this.actions.copy
+                ,this.actions.paste
+                ,this.actions.pasteShortcut
+                ,'-'
+                ,this.actions.createShortcut
+                ,this.actions.contextDelete
+                // ,this.actions.rename
+                ,this.actions.contextReload
+                ,'-'
+                ,this.createItem
+                ,'-'
+                ,this.actions.permissions
+                // ,this.actions.properties
+                ]
+            });
+        }
+
+        updateMenu(
+            this.createItem
+            ,this.folderProperties.menu
+            ,this.onCreateObjectClick
+            ,this
+        );
+        this.createItem.setDisabled(this.createItem.menu.items.getCount() < 1);
+
+        this.contextMenu.showAt(e.getXY());
+    }
+
+    ,onShowDescendantsCheckChange: function(cb, checked, eOpts) {
+        this.onDescendantsClick({pressed: checked}, eOpts);
     }
 });

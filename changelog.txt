@@ -1,3 +1,17 @@
+CaseBox 1.9.364 (2014-11-29)
+==============================
+New Features, Improvements
+--------------------------
+- popupMenu in grid
+- Node preview jumps to parent folder after save
+- Allow to Edit & Delete my own comments
+
+Fixed Bugs:
+----------
+- misspelled variable name in language_function.php
+- adjustments for sorting in DisplayColumns Plugin
+  detected that records were sorted also by php when not needed
+
 CaseBox 1.9.363 (2014-11-27)
 ==============================
 New Features, Improvements

@@ -200,6 +200,7 @@ Ext.define('CB.browser.view.Grid', {
                 scope: this
                 ,columnhide: this.saveGridState
                 ,columnshow: this.saveGridState
+
                 ,beforeedit: function(e){
                     if(!this.allowRename) {
                         return false;
@@ -292,6 +293,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sortchange: function() {
                     this.saveGridState();
                 }
+                ,itemcontextmenu: this.onItemContextMenu
             }
             ,keys: [{
                     key: Ext.event.Event.DOWN //down arrow (select forst row in the greed if no row already selected)  - does not work
@@ -395,7 +397,7 @@ Ext.define('CB.browser.view.Grid', {
         this.store.on('beforeload', this.onBeforeStoreLoad, this);
         this.store.on('load', this.onStoreLoad, this);
 
-        this.enableBubble(['reload']);
+        this.enableBubble(['reload', 'itemcontextmenu']);
 
     }
     /**
@@ -453,10 +455,12 @@ Ext.define('CB.browser.view.Grid', {
 
         var hadSelection = false;
         var prevSelectedId = 0;
+        var prevSelectedPid = 0;
 
         if(!Ext.isEmpty(this.savedSelection)) {
             hadSelection = true;
             prevSelectedId = this.savedSelection[0].nid;
+            prevSelectedPid = this.savedSelection[0].pid;
         }
 
         // try to select the item, if set, from App.locateObjectId
@@ -475,9 +479,13 @@ Ext.define('CB.browser.view.Grid', {
             var haveSelection = this.grid.getSelectionModel().hasSelection()
                 ,currSelectedId = haveSelection
                     ? this.grid.getSelection()[0].get('nid')
-                    : 0;
+                    : 0
+                ,currSelectedPid = this.refOwner.folderProperties.id;
 
-            if((hadSelection !== haveSelection) || (prevSelectedId != currSelectedId)){
+            if(
+                // (hadSelection !== haveSelection) || (prevSelectedId != currSelectedId)
+                (prevSelectedPid != currSelectedPid) || (haveSelection && (prevSelectedId != currSelectedId))
+            ){
                 this.fireSelectionChangeEvent();
             }
         } else {
@@ -608,6 +616,10 @@ Ext.define('CB.browser.view.Grid', {
         }
 
         return rez;
+    }
+
+    ,onItemContextMenu: function(grid, record, item, index, e, eOpts) {
+        this.fireEvent('itemcontextmenu', e);
     }
 
 });

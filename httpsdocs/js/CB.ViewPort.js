@@ -470,6 +470,7 @@ Ext.define('CB.ViewPort', {
         if(Ext.isEmpty(g) || Ext.isEmpty(App.locateObjectId)) {
             return false;
         }
+
         var idx = g.store.findExact('nid', String(App.locateObjectId) );
         if(idx >=0){
             var sm = g.getSelectionModel();
