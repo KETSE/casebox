@@ -1333,6 +1333,20 @@ Ext.define('CB.browser.ViewContainer', {
         App.mainViewPort.openPermissions(id);
     }
 
+    ,onEditClick: function (b, e) {
+        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+        var id = Ext.isEmpty(selection)
+            ? this.folderProperties.id
+            : Ext.valueFrom(selection[0].nid, selection[0].id);
+
+        this.editObject(
+            {
+                id: id
+                ,template_id: selection[0].template_id
+            }
+        );
+    }
+
     ,onClipboardChange: function(cb){
         this.actions.paste.setDisabled( App.clipboard.isEmpty() );
         this.actions.pasteShortcut.setDisabled( App.clipboard.isEmpty() );
