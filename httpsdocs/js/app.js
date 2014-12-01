@@ -660,7 +660,7 @@ function initApp() {
         params.start = 0;
         params.page = 1;
 
-        delete App.locateObjectId;
+        // delete App.locateObjectId;
 
         App.activateBrowserTab().setParams(params);
     };

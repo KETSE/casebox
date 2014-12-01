@@ -1,3 +1,10 @@
+CaseBox 1.9.365 (2014-12-01)
+==============================
+Fixed Bugs:
+----------
+- locate object by id didnt work well
+- Notifications from users with special chars in name not ok
+
 CaseBox 1.9.364 (2014-11-29)
 ==============================
 New Features, Improvements
