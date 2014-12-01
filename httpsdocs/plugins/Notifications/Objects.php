@@ -63,7 +63,8 @@ class Objects
                 ON DUPLICATE KEY UPDATE
                 object_pid = $3
                 ,data = $4
-                ,action_time = CURRENT_TIMESTAMP',
+                ,action_time = CURRENT_TIMESTAMP
+                ,sent = 0',
                 array(
                     $p['type']
                     ,$id
@@ -90,9 +91,21 @@ class Objects
             ? Config::get('sender_email')
             : $commentsConfig['email'];
 
-        $rez = mb_encode_mimeheader(User::getDisplayName(), 'UTF-8')
-            ." (" . mb_encode_mimeheader($coreName, 'UTF-8') . ")"
-            ." <" . $senderMail . '>';
+        $rez = '"' .
+            mb_encode_mimeheader(
+                str_replace(
+                    '"',
+                    '\'\'',
+                    html_entity_decode(
+                        User::getDisplayName() . " (" . $coreName . ")",
+                        ENT_QUOTES,
+                        'UTF-8'
+                    )
+                ),
+                'UTF-8',
+                'B'
+            )
+            ."\" <" . $senderMail . '>';
 
         return $rez;
     }

@@ -1,3 +1,9 @@
+CaseBox 1.9.336 (2014-12-01)
+==============================
+Fixed Bugs:
+----------
+- Notifications from users with special chars in name not ok
+
 CaseBox 1.9.335 (2014-11-24)
 ==============================
 Fixed Bugs:

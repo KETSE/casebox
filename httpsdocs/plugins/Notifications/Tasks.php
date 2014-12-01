@@ -143,7 +143,8 @@ class Tasks extends Objects
                 ON DUPLICATE KEY UPDATE
                 object_pid = $3
                 ,data = $5
-                ,action_time = CURRENT_TIMESTAMP',
+                ,action_time = CURRENT_TIMESTAMP
+                ,sent = 0',
                 array(
                     $p['type']
                     ,$taskId
