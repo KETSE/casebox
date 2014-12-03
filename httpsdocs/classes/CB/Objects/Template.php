@@ -596,7 +596,7 @@ class Template extends Object
                 break;
 
             case '_fieldTypesCombo':
-                $value = L\get(static::$fieldTypeNames[$value]);
+                $value = L\get(@static::$fieldTypeNames[$value]);
                 break;
 
             case 'date':

@@ -7,7 +7,7 @@ use CB\Util;
 class Search extends Solr\Client
 {
     public static $defaultFields = array(
-        'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'target_id', 'system',
+        'id', 'pid', 'name', 'path', 'template_type', 'subtype', 'target_id', 'system',
         'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'comment_user_id', 'comment_date',
         'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'status',
         'task_status', 'category_id', 'importance', 'completed', 'versions', 'ntsc'
@@ -18,7 +18,7 @@ class Search extends Solr\Client
     protected $replaceSortFields = array(
         'nid' => 'id'
         ,'name' => 'sort_name'
-        ,'path' => 'sort_path'
+        // ,'path' => 'pid'
     );
 
     protected $facetsSetManually = false;
@@ -458,6 +458,8 @@ class Search extends Solr\Client
 
         $this->updateShortcutsData($shortcuts);
 
+        $this->setPaths($rez['data']);
+
         //add highlights
         if (!empty($sr->highlighting)) {
             foreach ($rez['data'] as &$d) {
@@ -559,6 +561,55 @@ class Search extends Solr\Client
     }
 
     /**
+     * update path property for an items array
+     * @param array $dataArray
+     */
+    public static function setPaths(&$dataArray)
+    {
+        if (!is_array($dataArray)) {
+            return;
+        }
+
+        //collect distinct paths and ids
+        $paths = array();
+        $distinctIds = array();
+
+        foreach ($dataArray as &$item) {
+            if (isset($item['path']) && !isset($paths[$item['path']])) {
+                $path = Util\toNumericArray($item['path'], '/');
+                if (!empty($path)) {
+                    $paths[$item['path']] = $path;
+                    $distinctIds = array_merge($distinctIds, $path);
+                }
+            }
+        }
+
+        //get names for distinct ids
+        if (!empty($distinctIds)) {
+            $names = static::getObjectNames($distinctIds);
+
+            //replace ids with names
+            foreach ($paths as $path => $elements) {
+                for ($i=0; $i < sizeof($elements); $i++) {
+                    if (isset($names[$elements[$i]])) {
+                        $elements[$i] = $names[$elements[$i]];
+                    }
+                }
+                array_unshift($elements, '');
+                array_push($elements, '');
+                $paths[$path] = implode('/', $elements);
+            }
+
+            //replace paths in objects data
+            foreach ($dataArray as &$item) {
+                if (isset($item['path'])) {
+                    $item['path'] = $paths[$item['path']];
+                }
+            }
+        }
+    }
+
+    /**
      * method to get object names from solr
      * Multilanguage plugin works also
      *
@@ -567,10 +618,30 @@ class Search extends Solr\Client
      */
     public static function getObjectNames($ids)
     {
-        $rez = static::getObjects($ids);
+        $objectNames = Cache::get('objectNames');
 
-        foreach ($rez as $k => $v) {
-            $rez[$k] = $v['name'];
+        $rez = array();
+        $getIds = array();
+
+        $ids = Util\toNumericArray($ids);
+
+        foreach ($ids as $id) {
+            if (isset($objectNames[$id])) {
+                $rez[$id] = $objectNames[$id];
+            } else {
+                $getIds[] = $id;
+            }
+        }
+
+        if (!empty($getIds)) {
+            $newData = static::getObjects($getIds);
+
+            foreach ($newData as $k => $v) {
+                $objectNames[$k] = $v['name'];
+                $rez[$k] = $v['name'];
+            }
+
+            Cache::set('objectNames', $objectNames);
         }
 
         return $rez;

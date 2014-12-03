@@ -856,7 +856,6 @@ function initApp() {
 
                     case 'tagField':
                         ed = new CB.objects.field.editor.Tag({
-                            // enableKeyEvents: true
                             data: objData
                             ,valueField: 'id'
                             ,displayField: 'name'

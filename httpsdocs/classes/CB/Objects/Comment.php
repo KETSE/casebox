@@ -25,8 +25,7 @@ class Comment extends Object
         //     $p['name'] = $msg;
         //     $p['data']['_title'] = $msg;
         // }
-
-        parent::create($p);
+        return parent::create($p);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace CB\Objects\Plugins;
 use CB\DB;
 use CB\User;
 use CB\Util;
+use CB\Search;
 
 class SystemProperties extends Base
 {
@@ -20,7 +21,7 @@ class SystemProperties extends Base
         $res = DB\dbQuery(
             'SELECT
                 t.id
-                ,ti.path
+                ,ti.pids `path`
                 ,t.template_id
                 ,tt.name `template_name`
                 ,t.cid
@@ -42,7 +43,15 @@ class SystemProperties extends Base
             )
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
+            $pids = explode(',', $r['path']);
+            array_pop($pids);
+            $r['path'] = implode('/', $pids);
+
+            $arr = array(&$r);
+            Search::setPaths($arr);
+
             $r['path'] = htmlspecialchars($r['path'], ENT_COMPAT);
+
             $r['template_name'] = htmlspecialchars($r['template_name'], ENT_COMPAT);
             $r['cid_text'] = User::getDisplayName($r['cid']);
 

@@ -61,10 +61,17 @@ class Objects
         $resultData['date_start'] = @$resultData['date'];
         unset($resultData['date']);
 
+        $arr = array(&$resultData);
+
+        $pids = explode(',', $resultData['pids']);
+        array_pop($pids);
+        $resultData['path'] = implode('/', $pids);
+
+        Search::setPaths($arr);
         $resultData['pathtext'] = $resultData['path'];
-        unset($resultData['path']);
 
         $resultData['path'] = str_replace(',', '/', $resultData['pids']);
+
         unset($resultData['pids']);
 
         // set type property from template

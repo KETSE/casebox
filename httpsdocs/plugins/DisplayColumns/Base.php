@@ -82,6 +82,24 @@ class Base
             $p['result']['sort'] = $displayColumns['sort'];
         }
 
+        //get state
+        $stateFrom = empty($displayColumns['from'])
+            ? 'default'
+            : $displayColumns['from'];
+
+        $state = $this->getState($stateFrom);
+
+        //check grouping params
+        if (!empty($ip['userGroup']) && !empty($ip['group'])) {
+            $p['result']['group'] = array(
+                'property' => $ip['sourceGroupField']
+                ,'direction' => $ip['group']['direction']
+            );
+
+        } elseif (!empty($state['group'])) {
+            $p['result']['group'] = $state['group'];
+        }
+
         $customColumns = array();
 
         $idx = 0;
@@ -201,7 +219,7 @@ class Base
                     //update value from document if empty from solr query
                     if (empty($doc[$fieldName]) ||
                         // temporary check, this should be reanalised
-                        ($templateField['type'] == '_objects')
+                        in_array($templateField['type'], array('_objects', 'importance'))
                     ) {
                         foreach ($values as $value) {
                             $value = is_array($value)
@@ -218,13 +236,7 @@ class Base
             $rez = $customColumns;
         }
 
-        /* get user state and merge the state with display columns */
-
-        $stateFrom = empty($displayColumns['from'])
-            ? 'default'
-            : $displayColumns['from'];
-
-        $state = $this->getState($stateFrom);
+        /* merge the state with display columns */
 
         if (!empty($state['columns'])) {
             $rez = array();
@@ -240,6 +252,9 @@ class Base
                 $rez = array_merge($rez, $customColumns);
             }
         }
+
+        //analize grouping
+        $this->analizeGrouping($p);
 
         /* user clicked a column to sort by */
         if (!empty($ip['userSort'])) {
@@ -263,19 +278,6 @@ class Base
         ) {
             $this->sortRecords($data, $p['result']['sort'], $rez[$p['result']['sort']['property']]);
         }
-
-        //analize grouping
-        if (!empty($ip['userGroup']) && !empty($ip['group'])) {
-            $p['result']['group'] = array(
-                'property' => $ip['sourceGroupField']
-                ,'direction' => $ip['group']['direction']
-            );
-
-        } elseif (!empty($state['group'])) {
-            $p['result']['group'] = $state['group'];
-        }
-
-        $this->analizeGrouping($p);
     }
 
     /**
@@ -292,15 +294,24 @@ class Base
         $field = $p['result']['group']['property'];
         $data = &$p['result']['data'];
 
-        foreach ($data as &$d) {
+        $count = sizeof($data);
+        for ($i=0; $i < $count; $i++) {
+            $d = &$data[$i];
+
             $v = @$d[$field];
+
             switch ($field) {
                 case 'cid':
                 case 'uid':
                 case 'oid':
-                    $d['group'] = empty($v)
-                        ? 'none'
-                        : User::getDisplayName($d[$field]);
+                    if (empty($v)) {
+                        $d['group'] = '';
+                        $d['groupText'] = 'none';
+
+                    } else {
+                        $d['group'] = $v;
+                        $d['groupText'] = User::getDisplayName($d[$field]);
+                    }
                     break;
 
                 case 'date':
@@ -308,13 +319,17 @@ class Base
                 case 'cdate':
                 case 'udate':
                 case 'ddate':
-                    $d['group'] = empty($v)
-                        ? 'empty'
-                        : Util\formatMysqlDate(
-                            $v,
-                            'Y, F',
-                            @$_SESSION['user']['cfg']['timezone']
+                    if (empty($v)) {
+                        $d['group'] = 'empty';
+                        $d['groupText'] = 'empty';
+                    } else {
+                        $d['group'] = substr($v, 0, 7) . '-01T00:00:00Z';
+                        $d['groupText'] = Util\formatMysqlDate(
+                            $d['group'],
+                            'Y, F'
                         );
+                    }
+
                     break;
 
                 case 'size':
@@ -328,10 +343,10 @@ class Base
                         if ((@$t[1] == 'KB') || ($t[0] <= 1)) {
                             $t = 1;
                         } else {
-                            $i = floor($t[0] / 10) * 10;
-                            $t =  ($t[0] > $i)
-                                ? $i + 10
-                                : $i;
+                            $q = floor($t[0] / 10) * 10;
+                            $t =  ($t[0] > $q)
+                                ? $q + 10
+                                : $q;
                         }
 
                         $d['size'] .= ' - '.$t;
@@ -342,9 +357,22 @@ class Base
                     break;
 
                 default:
-                    $d['group'] = empty($d[$field])
-                        ? 'empty'
-                        : $d[$field];
+                    if (empty($d[$field])) {
+                        $d['group'] = 'empty';
+                    } else {
+                        //split values by comma and duplicate records if multivalued
+                        $values = is_array($d[$field])
+                            ? $d[$field]
+                            : explode(',', $d[$field]);
+
+                        $d['group'] = trim(array_shift($values));
+
+                        for ($j=0; $j < sizeof($values); $j++) {
+                            $newRecord = $d;
+                            $newRecord['group'] = trim($values[$j]);
+                            array_push($data, $newRecord);
+                        }
+                    }
             }
         }
     }

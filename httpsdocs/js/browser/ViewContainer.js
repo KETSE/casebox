@@ -62,6 +62,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,upload: new Ext.Action({
                 text: L.Upload
+                ,id: 'upload' + this.instanceId
                 ,itemId: 'upload' + this.instanceId
                 // ,iconAlign:'top'
                 ,scale: 'large'
@@ -71,7 +72,8 @@ Ext.define('CB.browser.ViewContainer', {
             })
 
             ,download: new Ext.Action({
-                text: L.Download
+                qtip: L.Download
+                ,id: 'download' + this.instanceId
                 ,itemId: 'download' + this.instanceId
                 // ,iconAlign:'top'
                 ,scale: 'large'
@@ -79,6 +81,14 @@ Ext.define('CB.browser.ViewContainer', {
                 ,hidden: true
                 ,disabled: true
                 ,hideParent: false
+                ,scope: this
+                ,handler: this.onDownloadClick
+            })
+
+            ,contextDownload: new Ext.Action({
+                text: L.Download
+                ,iconCls: 'i-download'
+                ,hidden: true
                 ,scope: this
                 ,handler: this.onDownloadClick
             })
@@ -127,6 +137,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,'delete': new Ext.Action({
                 qtip: L.Delete
                 // text: L.Delete
+                ,id: 'delete' + this.instanceId
                 ,itemId: 'delete' + this.instanceId
                 // ,iconAlign:'top'
                 ,iconCls: 'ib-trash'
@@ -1041,6 +1052,8 @@ Ext.define('CB.browser.ViewContainer', {
 
             this.actions.download.setDisabled(true);
             this.actions.download.hide();
+            this.actions.contextDownload.setDisabled(true);
+            this.actions.contextDownload.hide();
 
             this.actions['delete'].setDisabled(true);
             this.actions['delete'].hide();
@@ -1063,11 +1076,14 @@ Ext.define('CB.browser.ViewContainer', {
             }
 
             this.actions.download.setDisabled(!canDownload);
+            this.actions.contextDownload.setDisabled(!canDownload);
 
             if(canDownload) {
                 this.actions.download.show();
+                this.actions.contextDownload.show();
             } else {
                 this.actions.download.hide();
+                this.actions.contextDownload.hide();
             }
 
             this.actions['delete'].setDisabled(inRecycleBin);
@@ -1411,7 +1427,7 @@ Ext.define('CB.browser.ViewContainer', {
             this.contextMenu = new Ext.menu.Menu({
                 items: [
                 this.actions.edit
-                ,this.actions.download
+                ,this.actions.contextDownload
                 ,'-'
                 ,{
                     text: L.View

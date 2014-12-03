@@ -471,7 +471,8 @@ Ext.define('CB.VerticalEditGrid', {
         }
 
         // remember last selected cell
-        // var lastCell = this.getSelectionModel().getSelection()[0];
+        var lastCell = this.getSelectionModel().getSelection()[0];
+        clog('last cell', lastCell);
 
         var nodesList = this.helperTree.queryNodeListBy(this.helperNodesFilter.bind(this));
 
@@ -614,7 +615,7 @@ Ext.define('CB.VerticalEditGrid', {
 
     ,gainFocus: function(position){
         var sm = this.getSelectionModel();
-
+        clog('gainFocus', this, arguments);
         // this.focus(false);
 
         if(Ext.isEmpty(position)) {
@@ -625,7 +626,7 @@ Ext.define('CB.VerticalEditGrid', {
 
             if(sm && sm.getLastSelected) {
                 var lastRec = sm.getLastSelected();
-
+                clog('lastRec', lastRec);
                 if(lastRec) {
                     var rowIndex = this.store.indexOf(lastRec);
                     position.row = rowIndex;

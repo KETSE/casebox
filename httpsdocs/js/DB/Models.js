@@ -29,6 +29,7 @@ CB.DB.defaultItemFields = [
     ,'cls'
     ,'can'
     ,'group'
+    ,'groupText'
 ];
 
 Ext.define('Items', {

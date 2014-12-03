@@ -22,15 +22,15 @@ Ext.define('CB.objects.field.editor.Tag', {
         // this.setValue(config.value);
     }
 
-    ,initComponent: function(){
-        Ext.apply(this, {
-            listeners: {
-                scope: this
-            }
-        });
-        this.callParent(arguments);
-        // this.store.on('load', this.onLoad, this);
-    }
+    // ,initComponent: function(){
+    //     Ext.apply(this, {
+    //         listeners: {
+    //             scope: this
+    //         }
+    //     });
+    //     this.callParent(arguments);
+    //     // this.store.on('load', this.onLoad, this);
+    // }
 
     /**
      * detect store used, based on configuration
@@ -142,9 +142,10 @@ Ext.define('CB.objects.field.editor.Tag', {
     }
 
     ,setValue: function(value, doSelect, skipLoad) {
-        if(Ext.isPrimitive(value) && (Ext.isEmpty(value) || isNaN(value))) {
-            value = null;
-        } else if(Ext.isNumeric(value)) {
+        // if(Ext.isPrimitive(value) && (Ext.isEmpty(value) || isNaN(value))) {
+        //     value = null;
+        // } else
+        if(Ext.isNumeric(value)) {
             value = Ext.Array.from(String(value), true);
         }
 
@@ -179,16 +180,37 @@ Ext.define('CB.objects.field.editor.Tag', {
         this.callParent();
     }
 
-    ,onKeyDown: function(e) {
+    ,onItemListClick: function(e) {
         var me = this,
-            selModel = me.selectionModel;
+            itemEl = e.getTarget(me.tagItemSelector),
+            closeEl = itemEl
+                ? e.getTarget(me.tagItemCloseSelector)
+                : false;
 
-        //workaround: there is a js error on keydown in sources of tag field
-        if(!selModel.setLastFocused) {
-            selModel.setLastFocused = Ext.emptyFn;
+        clog('itemEl && closeEl', itemEl, closeEl);
+        if (itemEl && closeEl) {
+            clog('set preventEditComplete');
+            me.preventEditComplete = true;
         }
+
         this.callParent(arguments);
     }
+
+    ,onBlur: function(e) {
+        e.stopEvent();
+        clog('onBlur', this, arguments);
+    }
+
+    // ,onKeyDown: function(e) {
+    //     var me = this,
+    //         selModel = me.selectionModel;
+
+    //     //workaround: there is a js error on keydown in sources of tag field
+    //     if(!selModel.setLastFocused) {
+    //         selModel.setLastFocused = Ext.emptyFn;
+    //     }
+    //     this.callParent(arguments);
+    // }
 
     // ,getValue: function() {
     //     return this.value;

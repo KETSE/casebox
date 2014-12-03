@@ -1,3 +1,21 @@
+CaseBox 1.9.366 (2014-12-03)
+==============================
+New Features, Improvements
+--------------------------
+- path solr column already contains slash separated pids
+  Textual representation is generated on the fly for dispaly
+  Removed server side logic that was setting this path in tree_info table
+- grid grouping adjustments, duplication of records on grouping a multivalued field
+
+Fixed Bugs:
+----------
+- trying to edit a newly added comment result in JS Error
+- delete and download buttons didnt show up in top toolbar
+
+Notes:
+----------
+- DB structure changed, use v.1.9.366.sql to update
+
 CaseBox 1.9.365 (2014-12-01)
 ==============================
 Fixed Bugs:

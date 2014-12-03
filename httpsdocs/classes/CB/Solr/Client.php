@@ -142,7 +142,6 @@ class Client extends Service
         $sql = 'SELECT t.id
                 ,t.pid
                 ,ti.pids
-                ,ti.path
                 ,ti.case_id
                 ,ti.acl_count
                 ,ti.security_set_id
@@ -220,10 +219,12 @@ class Client extends Service
 
                     if (empty($r['pids'])) {
                         $r['pids'] = null;
+                        $r['path'] = null;
                     } else {
                         $r['pids'] = explode(',', $r['pids']);
                         //exclude itself from pids
                         array_pop($r['pids']);
+                        $r['path'] = implode('/', $r['pids']);
                     }
 
                     /* fill "ym" fields for date faceting by cdate, date, date_end */
@@ -313,7 +314,6 @@ class Client extends Service
 
         $sql = 'SELECT ti.id
                     ,ti.pids
-                    ,ti.`path`
                     ,ti.case_id
                     ,ti.acl_count
                     ,ti.security_set_id
@@ -334,9 +334,16 @@ class Client extends Service
             while ($r = $res->fetch_assoc()) {
                 $lastId = $r['id'];
                 $r['update'] = true;
-                $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
-                //exclude itself from pids
-                array_pop($r['pids']);
+
+                if (empty($r['pids'])) {
+                    $r['pids'] = null;
+                    $r['path'] = null;
+                } else {
+                    $r['pids'] = explode(',', $r['pids']);
+                    //exclude itself from pids
+                    array_pop($r['pids']);
+                    $r['path'] = implode('/', $r['pids']);
+                }
 
                 //encode special chars for string values
                 foreach ($r as $k => $v) {

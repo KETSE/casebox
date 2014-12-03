@@ -156,6 +156,9 @@ Ext.define('CB.browser.view.Grid', {
             ,features: [{
                 ftype:'cbGridViewGrouping'
                 ,disabled: true
+                ,groupHeaderTpl: [
+                    '{columnName}: {[Ext.valueFrom(values.children[0].get(\'groupText\'), values.children[0].get(\'group\'))]}'
+                ]
                 // ,showSummaryRow: true
             }]
             ,viewConfig: {
