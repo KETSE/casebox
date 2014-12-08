@@ -295,7 +295,7 @@ function removeContentExtraBlock($content, $emailFrom, $emailTo)
     $content = preg_replace('/^(.+)\<' . preg_quote($emailTo) . '\>/m', $marker, $content);
 
     // signature block
-    $content = preg_replace('/^-- $/m', $marker, $content);
+    $content = preg_replace('/^--(\s+)?$/m', $marker, $content);
 
     // remove everything starting with $marker
     $content = preg_replace('/' . $marker . '(.*)/s', '', $content);
