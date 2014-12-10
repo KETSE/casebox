@@ -212,6 +212,12 @@ textarea {
     overflow: hidden;
 }
 
+.obj-header > div.info {
+    font-size: 11px;
+    color: #7d7d7d;
+    padding: 2px 1px;
+}
+
 .taskview h2 {
     font-size: 14px;
     overflow: hidden;

@@ -115,5 +115,4 @@ Ext.define('CB.search.edit.Window', {
 
         return false;
     }
-
 });

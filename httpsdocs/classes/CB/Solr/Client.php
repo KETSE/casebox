@@ -171,6 +171,7 @@ class Client extends Service
             LIMIT 500';
 
         $docs = true;
+
         while (!empty($docs)) {
             $docs = array();
 

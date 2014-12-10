@@ -179,6 +179,15 @@ Ext.define('CB.browser.ViewContainer', {
                 ,disabled: true
                 ,handler: this.onPermissionsClick
             })
+
+            ,preview: new Ext.Action({
+                itemId: 'preview' + this.instanceId
+                ,scale: 'large'
+                ,iconCls: 'ib-preview'
+                ,scope: this
+                ,hidden: true
+                ,handler: this.onPreviewClick
+            })
         };
 
         this.buttonCollection = new Ext.util.MixedCollection();
@@ -302,7 +311,9 @@ Ext.define('CB.browser.ViewContainer', {
                 scale: 'large'
             }
             ,items: [
-                this.buttonCollection.get('filter' + this.instanceId)
+                '->'
+                ,this.actions.preview
+                ,this.buttonCollection.get('filter' + this.instanceId)
                 ,this.buttonCollection.get('properties' + this.instanceId)
 
             ]
@@ -377,7 +388,9 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.tbarMoreMenu = new Ext.menu.Menu({items: []});
 
-        this.objectPanel = new CB.ObjectCardView();
+        this.objectPanel = new CB.object.ViewContainer({
+            onCloseClick: Ext.Function.bind(this.onCloseRightPanelClick, this)
+        });
 
         this.filtersPanel = new CB.FilterPanel({
             title: L.Filter
@@ -587,7 +600,7 @@ Ext.define('CB.browser.ViewContainer', {
             }
         });
 
-        CB.browser.ViewContainer.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         this.enableBubble([
             'viewloaded'
@@ -1475,5 +1488,31 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onShowDescendantsCheckChange: function(cb, checked, eOpts) {
         this.onDescendantsClick({pressed: checked}, eOpts);
+    }
+
+    /**
+     * handler for close right panel button
+     * @param  button b
+     * @param  event e
+     * @return void
+     */
+    ,onCloseRightPanelClick: function(b, e) {
+        this.rightPanel.collapse();
+        this.buttonCollection.get('filter' + this.instanceId).hide();
+        this.buttonCollection.get('properties' + this.instanceId).hide();
+        this.actions.preview.show();
+    }
+
+    /**
+     * handler for preview toolbar button
+     * @param  button b
+     * @param  evente
+     * @return void
+     */
+    ,onPreviewClick: function(b, e) {
+        this.rightPanel.expand();
+        this.actions.preview.hide();
+        this.buttonCollection.get('filter' + this.instanceId).show();
+        this.buttonCollection.get('properties' + this.instanceId).show();
     }
 });

@@ -165,11 +165,9 @@ Ext.define('CB.ViewPort', {
             ,listeners: {
                 scope: this
                 ,login: this.onLogin
-                ,fileopen: this.onFileOpen
                 ,fileupload: this.onFileUpload
                 ,filedownload: this.onFilesDownload
                 ,createobject: this.createObject
-                ,openobject: this.openObject
                 ,deleteobject: this.onDeleteObject
                 ,opencalendar: this.openCalendar
                 ,favoritetoggle: this.toggleFavorite
@@ -516,31 +514,6 @@ Ext.define('CB.ViewPort', {
         }
     }
 
-    ,openObject: function(data, e){
-        if(e){
-            if(e.stopEvent) e.stopEvent();
-            if(e.processed === true) {
-                return;
-            }
-        }
-
-        if(App.activateTab(App.mainTabPanel, data.id, CB.Objects)) {
-            return true;
-        }
-
-        var o = Ext.create(
-            'CBObjects'
-            ,{
-                data: data
-                ,iconCls: 'icon-loading'
-                ,title: L.LoadingData + ' ...'
-            }
-        );
-
-        this.fireEvent('objectopened', o);
-        return App.addTab(App.mainTabPanel, o);
-    }
-
     ,openPermissions: function(objectId) {
         if(isNaN(objectId)) {
             return;
@@ -553,40 +526,6 @@ Ext.define('CB.ViewPort', {
                 id: objectId
             }
         });
-
-        // if(App.activateTab(null, objectId, CB.SecurityPanel)) {
-        //     return;
-        // }
-        // App.addTab(
-        //     null
-        //     ,Ext.create(
-        //         'CB.SecurityPanel'
-        //         ,{
-        //             data: {
-        //                 id: objectId
-        //             }
-        //         }
-        //     )
-        // );
-    }
-
-    ,onFileOpen: function(data, e){
-        if(e) e.stopEvent();
-
-        if(App.activateTab(App.mainTabPanel, data.id)) {
-            return true;
-        }
-
-        var o = Ext.create(
-            'CBFileWindow'
-            ,{
-                data: data
-                ,iconCls: 'icon-loading'
-                ,title: L.LoadingData + ' ...'
-            }
-        );
-
-        return App.addTab(App.mainTabPanel, o);
     }
 
     ,setUserLanguage: function(b, e){

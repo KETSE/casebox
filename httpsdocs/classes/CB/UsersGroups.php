@@ -172,6 +172,8 @@ class UsersGroups
 
         Security::calculateUpdatedSecuritySets();
 
+        Solr\Client::runBackgroundCron();
+
         return array('success' => true);
     }
 
@@ -196,6 +198,8 @@ class UsersGroups
         ) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
+
+        Solr\Client::runBackgroundCron();
 
         //return if the user is associated to another office,
         //otherwise it shoul be added to Users out of office folder
@@ -350,6 +354,7 @@ class UsersGroups
         }
 
         Security::calculateUpdatedSecuritySets();
+
         Solr\Client::runBackgroundCron();
 
         return $rez;
@@ -401,6 +406,8 @@ class UsersGroups
         DB\dbQuery('DELETE FROM users_groups WHERE id = $1 AND `type` = 1', $group_id) or die(DB\dbQueryError());
         /* call the recalculation method for security sets. */
         Security::calculateUpdatedSecuritySets();
+
+        Solr\Client::runBackgroundCron();
 
         return array('success' => true);
     }
@@ -545,6 +552,8 @@ class UsersGroups
         }
 
         Security::calculateUpdatedSecuritySets();
+
+        Solr\Client::runBackgroundCron();
 
         return array('success' => true);
     }

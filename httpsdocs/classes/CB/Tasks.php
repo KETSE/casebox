@@ -1265,8 +1265,8 @@ class Tasks
             $actions[] = '<a action="complete" class="taskA click">'.L\get('Complete').'</a>';
         }
 
+        //<h2 '.( ($d['status'] == 3) ? 'class=\'completed\'"' : '' ).'>{name}</h2>
         $rez = '<div class="taskview">
-            <h2 '.( ($d['status'] == 3) ? 'class=\'completed\'"' : '' ).'>{name}</h2>
             <div class="datetime">{datetime_period}</div>
             <div class="info">{description}</div>
             <table class="props"><tbody>
@@ -1367,7 +1367,7 @@ class Tasks
         }
         $rez .= '</tbody></table></div>';
 
-        return $rez;
+        return array($rez);
     }
 
     /**

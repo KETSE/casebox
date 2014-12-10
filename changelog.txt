@@ -1,3 +1,20 @@
+CaseBox 1.9.367 (2014-12-10)
+==============================
+New Features, Improvements
+--------------------------
+- Preview & Editing as popup windows
+- adjusted shown WebDav link window
+- rearanged structure of some js components
+- updated tika server to version 1.6
+
+Fixed Bugs:
+----------
+- grid doesnt display icons for some field of type "_objects"
+- current value from grid not set in popuped editor form of that field
+- After adding a user to a group, he is not able to see a folder where the Group has read access
+- Deleting a group from permissions gives Error
+- CRITICAL: can't navigate with cursors keys in VGrid after editing a field
+
 CaseBox 1.9.366 (2014-12-03)
 ==============================
 New Features, Improvements

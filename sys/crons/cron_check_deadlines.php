@@ -17,13 +17,13 @@ L\initTranslations();
 
 /* iterate through active tasks with deadlines and check each task on expiration */
 $sql = 'SELECT id
-     , `title`
-     , cid
-     , responsible_user_ids
-     , CASE
-           WHEN allday=1 THEN date_end < CURRENT_DATE
-           ELSE date_end <= date_end
-       END `expired`
+    ,`title`
+    ,cid
+    ,responsible_user_ids
+    ,CASE
+        WHEN allday=1 THEN date_end < CURRENT_DATE
+        ELSE date_end <= date_end
+    END `expired`
 FROM tasks
 WHERE `status` IN (2, 4)
     AND (date_end IS NOT NULL)';

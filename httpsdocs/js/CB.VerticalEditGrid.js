@@ -378,13 +378,9 @@ Ext.define('CB.VerticalEditGrid', {
 
     ,onFieldTitleDblClick: function(gridView, td, cellIndex, record, tr, rowIndex, e, eOpts){
         var sm = this.getSelectionModel();
-        // var cm = this.getColumnModel();
-        // var s = sm.getSelectedCell();
 
-        // if(Ext.isEmpty(s)) {
-        //     return;
-        // }
         var fieldName = this.columns[cellIndex].dataIndex;
+
         if(fieldName == 'title'){
             this.editingPlugin.startEdit(record, 1);//begin field edit
         }
@@ -470,10 +466,6 @@ Ext.define('CB.VerticalEditGrid', {
             return;
         }
 
-        // remember last selected cell
-        var lastCell = this.getSelectionModel().getSelection()[0];
-        clog('last cell', lastCell);
-
         var nodesList = this.helperTree.queryNodeListBy(this.helperNodesFilter.bind(this));
 
         if(this.store && this.store.suspendEvents) {
@@ -507,11 +499,7 @@ Ext.define('CB.VerticalEditGrid', {
         this.store.resumeEvents();
         this.store.add(records);
 
-        // if(lastCell && this.getEl().isVisible(true)){
-        //     this.getSelectionModel().select(lastCell[0], lastCell[1]);
-        // }
-
-        this.updateLayout();
+        // this.updateLayout();
     }
 
     ,helperNodesFilter: function(node){
@@ -614,30 +602,21 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,gainFocus: function(position){
-        var sm = this.getSelectionModel();
-        clog('gainFocus', this, arguments);
-        // this.focus(false);
+        var sm = this.getSelectionModel()
+            ,navModel = this.getNavigationModel()
+            ,lastFocused = navModel.getLastFocused();
 
-        if(Ext.isEmpty(position)) {
-            position = {
-                row: 0
-                ,column: 1
-            };
 
-            if(sm && sm.getLastSelected) {
-                var lastRec = sm.getLastSelected();
-                clog('lastRec', lastRec);
-                if(lastRec) {
-                    var rowIndex = this.store.indexOf(lastRec);
-                    position.row = rowIndex;
-                }
-            }
+        if(lastFocused && !isNaN(lastFocused.rowIdx)){
+            sm.select({
+                row: lastFocused.rowIdx
+                ,column: lastFocused.colIdx
+            });
+
+            navModel.setPosition(lastFocused.rowIdx, lastFocused.colIdx);
+
+            navModel.focusPosition(lastFocused);
         }
-        sm.select(position);
-        // sm.setCurrentPosition(position);
-        this.getView().focusCell(position, 30);
-
-        // this.getView().focus(false, true);
     }
 
     ,addKeyMaps: function(c) {
@@ -708,10 +687,7 @@ Ext.define('CB.VerticalEditGrid', {
 
         this.syncRecordsWithHelper();
 
-        this.gainFocus({
-            row: context.rowIdx
-            ,column: context.colIdx
-        });
+        this.gainFocus();
     }
 
     ,getFieldValue: function(field_id, duplication_id){

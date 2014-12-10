@@ -172,6 +172,7 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 <script type="text/javascript">
     bravojs = {
         url: window.location.protocol + "//" + window.location.host + "/libx/extjs4-ace/Component.js"
+        //url: window.location.protocol + "//" + window.location.host + "/libx/extjs4-ace/AceEditor.js"
     };
     document.write('<script type="text/javascript" src="' + bravojs.url + '"><' + '/script>');
 </script>

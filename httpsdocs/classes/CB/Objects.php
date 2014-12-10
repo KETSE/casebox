@@ -185,9 +185,15 @@ class Objects
         return $this->load($d);
     }
 
+    /**
+     * getting preview for an item
+     * @param  int id
+     * @return array array of divided preview per common and complex fields
+     */
     public static function getPreview($id)
     {
         $rez = array();
+
         if (!is_numeric($id)) {
             return;
         }
@@ -326,11 +332,13 @@ class Objects
             $top = '<table class="obj-preview">'.$top.'</table><br />';
         }
 
-        $params['result'] = $top.$bottom;
+        $rez = array($top, $bottom);
+
+        $params['result'] = &$rez;
 
         fireEvent('generatePreview', $params);
 
-        return $params['result'];
+        return $rez;
 
     }
 
@@ -407,7 +415,7 @@ class Objects
 
         /* end of select distinct case ids from the case */
 
-        $data = Search::getObjects($ids, 'id,name,date,status:task_status');
+        $data = Search::getObjects($ids, 'id,template_id,name,date,status:task_status');
         $data = array_values($data);
 
         return array('success' => true, 'data' => $data);

@@ -40,7 +40,7 @@ function dump() { (bravojs.dump || bravojs.print).apply(null, arguments); };
 // =====
 //
 
-// ES5 15.4.3.2 
+// ES5 15.4.3.2
 if (!Array.isArray) {
     Array.isArray = function(obj) {
         return Object.prototype.toString.call(obj) == "[object Array]";
@@ -230,7 +230,7 @@ if (!Array.prototype.lastIndexOf) {
 //
 // Object
 // ======
-// 
+//
 
 // ES5 15.2.3.2
 if (!Object.getPrototypeOf) {
@@ -254,7 +254,7 @@ if (!Object.getOwnPropertyNames) {
     };
 }
 
-// ES5 15.2.3.5 
+// ES5 15.2.3.5
 if (!Object.create) {
     Object.create = function(prototype, properties) {
         if (typeof prototype != "object" || prototype === null)
@@ -387,7 +387,7 @@ if (!Date.prototype.toISOString) {
             this.getHours() + ":" +
             this.getMinutes() + ":" +
             this.getSeconds() + "Z"
-        ); 
+        );
     }
 }
 
@@ -477,7 +477,7 @@ if (isNaN(Date.parse("T00:00"))) {
                         "(\\d\\d)" + // day capture
                     ")?" +
                 ")?" +
-            ")?" + 
+            ")?" +
             "(?:T" + // hour:minute:second.subsecond
                 "(\\d\\d)" + // hour capture
                 ":(\\d\\d)" + // minute capture
@@ -547,10 +547,10 @@ if (isNaN(Date.parse("T00:00"))) {
     })(Date);
 }
 
-// 
+//
 // Function
 // ========
-// 
+//
 
 // ES-5 15.3.4.5
 // http://www.ecma-international.org/publications/files/drafts/tc39-2009-025.pdf
@@ -560,7 +560,7 @@ if (!Function.prototype.bind) {
         // 1. Let Target be the this value.
         var target = this;
         // 2. If IsCallable(Target) is false, throw a TypeError exception.
-        // XXX this gets pretty close, for all intents and purposes, letting 
+        // XXX this gets pretty close, for all intents and purposes, letting
         // some duck-types slide
         if (typeof target.apply != "function" || typeof target.call != "function")
             return new TypeError();
@@ -916,7 +916,7 @@ bravojs.URL_toId = function URL_toId(moduleURL, relaxValidation)
   var i;
 
   /* Treat the whole web as our module repository.
-   * 'http://www.page.ca/a/b/module.js' has id '/www.page.ca/a/b/module'. 
+   * 'http://www.page.ca/a/b/module.js' has id '/www.page.ca/a/b/module'.
    */
   i = moduleURL.indexOf("://");
   if (i == -1)
@@ -936,7 +936,7 @@ bravojs.URL_toId = function URL_toId(moduleURL, relaxValidation)
   return id;
 }
 
-/** Normalize a dependency array so that only unique and previously unprovided 
+/** Normalize a dependency array so that only unique and previously unprovided
  *  dependencies appear in the output list. The output list also canonicalizes
  *  the module names relative to the current require. Labeled dependencies are
  *  unboxed.
@@ -1042,7 +1042,7 @@ bravojs.Context.prototype.resolveId = function bravojs_Context_resolveId(moduleI
   return bravojs.realpath(id);
 }
 
-/** Provide a module to the environment 
+/** Provide a module to the environment
  *  @param	dependencies		A dependency array
  *  @param	moduleFactoryFunction	The function which will eventually be invoked
  *					to decorate the module's exports. If not specified,
@@ -1052,7 +1052,7 @@ bravojs.Context.prototype.resolveId = function bravojs_Context_resolveId(moduleI
  *  @param	callback		Optional function to run after the module has been
  *					provided to the environment
  */
-bravojs.provideModule = function bravojs_provideModule(dependencies, moduleFactory, 
+bravojs.provideModule = function bravojs_provideModule(dependencies, moduleFactory,
 						       id, callback)
 {
   /* Memoize the the factory, satistfy the dependencies, and invoke the callback */
@@ -1147,8 +1147,8 @@ bravojs.requireFactory = function bravojs_requireFactory(moduleDir, dependencies
 
   function addLabeledDep(moduleIdentifier)
   {
-    deps[label] = function bravojs_labeled_dependency() 
-    { 
+    deps[label] = function bravojs_labeled_dependency()
+    {
       return bravojs.requireModule(getContextSensitiveModuleDir(), moduleIdentifier);
     }
   }
@@ -1172,7 +1172,7 @@ bravojs.requireFactory = function bravojs_requireFactory(moduleDir, dependencies
     }
   }
 
-  var newRequire = function require(moduleIdentifier) 
+  var newRequire = function require(moduleIdentifier)
   {
     if (deps && deps[moduleIdentifier])
       return deps[moduleIdentifier]();
@@ -1245,7 +1245,7 @@ bravojs.requireFactory = function bravojs_requireFactory(moduleDir, dependencies
   return newRequire;
 }
 
-/** Module object constructor 
+/** Module object constructor
  *
  *  @param	id		The canonical module id
  *  @param	dependencies	The dependency list passed to module.declare
@@ -1276,7 +1276,7 @@ bravojs.Module = function bravojs_Module(id, dependencies)
     {
       if (dependencies[i].hasOwnProperty(label))
       {
-        this.deps[label] = function bravojs_lambda_module_deps() 
+        this.deps[label] = function bravojs_lambda_module_deps()
         {
           bravojs.requireModule(bravojs.dirname(id), dependencies[i][label]);
         };
@@ -1286,27 +1286,27 @@ bravojs.Module = function bravojs_Module(id, dependencies)
 }
 
 /** A module.declare suitable for use during DOM SCRIPT-tag insertion.
- * 
+ *
  *  The general technique described below was invented by Kris Zyp.
  *
- *  In non-IE browsers, the script's onload event fires as soon as the 
+ *  In non-IE browsers, the script's onload event fires as soon as the
  *  script finishes running, so we just memoize the declaration without
  *  doing anything. After the script is loaded, we do the "real" work
  *  as the onload event also supplies the script's URI, which we use
  *  to generate the canonical module id.
- * 
+ *
  *  In IE browsers, the event can fire when the tag is being inserted
- *  in the DOM, or sometime thereafter. In the first case, we read a 
+ *  in the DOM, or sometime thereafter. In the first case, we read a
  *  memo we left behind when we started inserting the tag; in the latter,
  *  we look for interactive scripts.
  *
- *  Event			Action		
+ *  Event			Action
  *  -------------------------   ------------------------------------------------------------------------------------
  *  Inject Script Tag		onload event populated with URI
  *				scriptTagMemo populated with URI
  *  IE pulls from cache		cname derived in module.declare from scriptTagMemo, invoke provideModule
  *  IE pulls from http		cname derived in module.declare from script.src, invoke provideModule
- *  Non-IE loads script		onload event triggered, most recent incomplete module.declare is completed, 
+ *  Non-IE loads script		onload event triggered, most recent incomplete module.declare is completed,
  *				deriving the cname from the onload event.
  */
 bravojs.Module.prototype.declare = function bravojs_Module_declare(dependencies, moduleFactory)
@@ -1323,7 +1323,7 @@ bravojs.Module.prototype.declare = function bravojs_Module_declare(dependencies,
   if (stm && stm.id === '')		/* Static HTML module */
   {
     delete bravojs.scriptTagMemo;
-    bravojs.provideModule(dependencies, moduleFactory, stm.id, stm.callback);    
+    bravojs.provideModule(dependencies, moduleFactory, stm.id, stm.callback);
     return;
   }
 
@@ -1363,7 +1363,7 @@ bravojs.Module.prototype.declare = function bravojs_Module_declare(dependencies,
 
 /** A module.provide suitable for a generic web-server back end.  Loads one module at
  *  a time in continuation-passing style, eventually invoking the passed callback.
- * 
+ *
  *  A more effecient function could be written to take advantage of a web server
  *  which might aggregate and transport more than one module per HTTP request.
  *
@@ -1438,8 +1438,8 @@ bravojs.Module.prototype.load = function bravojs_Module_load(moduleIdentifier, c
       bravojs.activeContexts.pop();
     }
 
-    script.onerror = function bravojs_lambda_script_onerror() 
-    { 
+    script.onerror = function bravojs_lambda_script_onerror()
+    {
       var id = bravojs.require.id(moduleIdentifier, true);
       bravojs.pendingModuleDeclarations[id] = null;	/* Mark null so we don't try to run, but also don't try to reload */
       callback();
@@ -1486,7 +1486,7 @@ bravojs.es5_shim_then = function bravojs_es5_shim_then(callback)
       script.onload = callback;
     else
     {
-      script.onreadystatechange = function() 
+      script.onreadystatechange = function()
       {
 	if (this.readyState === "loaded")
 	  callback();
@@ -1524,11 +1524,11 @@ bravojs.initializeMainModule = function bravojs_initializeMainModule(dependencie
 
   bravojs.es5_shim_then
   (
-    (function() 
+    (function()
      {
        bravojs.provideModule(dependencies, moduleFactory, moduleIdentifier, function bravojs_lambda_requireMain() { bravojs.module.constructor.prototype.main = bravojs.require(moduleIdentifier); })
      })
-  ); 
+  );
 }
 
 /** Run a module which is not declared in the HTML document and make it the program module.
@@ -1558,11 +1558,11 @@ bravojs.runExternalMainModule = function bravojs_runExternalProgram(dependencies
 
   bravojs.es5_shim_then(
       function() {
-	bravojs.module.provide(dependencies.concat([moduleIdentifier]), 
+	bravojs.module.provide(dependencies.concat([moduleIdentifier]),
 		       function bravojs_runMainModule() {
 			 bravojs.initializeMainModule(dependencies, '', moduleIdentifier);
 			 if (callback)
-			   callback(); 
+			   callback();
 		       })
 	    });
 }
@@ -1575,7 +1575,7 @@ if (typeof bravojs.url === "undefined")
  *  relative to its install dir.  The HTML script element that
  *  loads BravoJS must either have the ID BravoJS, or be the
  *  very first script in the document.
- */ 
+ */
 (function bravojs_setURL()
 {
   var i;
@@ -1606,13 +1606,13 @@ if (typeof bravojs.url === "undefined")
 var print   = bravojs.print;
 if (!window.onerror)
 {
-  window.onerror = function window_onerror(message, url, line) 
-  { 
+  window.onerror = function window_onerror(message, url, line)
+  {
     var scripts, i;
 
-    print("\n * Error: " + message + "\n" + 
-          "      in: " + url + "\n" + 
-          "    line: " + line);  
+    print("\n * Error: " + message + "\n" +
+          "      in: " + url + "\n" +
+          "    line: " + line);
   }
 }
 
@@ -1762,7 +1762,7 @@ Plugin.prototype.init = function()
         this.libDir = this.descriptor.directories && this.descriptor.directories.lib;
         if (typeof this.libDir != "string")
             this.libDir = "lib";
-    
+
         this.uid = this.descriptor.uid || void 0;
         if (typeof this.uid != "undefined")
         {
@@ -1778,7 +1778,7 @@ Plugin.prototype.init = function()
     {
         if (this.id == "_")
             throw new Error("Cannot get mappings for default context");
-    
+
         if (typeof this.normalizedMappings != "undefined")
             return this.normalizedMappings;
 
@@ -1810,17 +1810,17 @@ Plugin.prototype.init = function()
 
         try {
             var ret = bravojs.callPlugins("normalizeModuleIdentifier", [moduleIdentifier, relativeModuleDir, descriptor, this]);
-            
+
             // happens if mapping is ignored
             if (ret === false)
                 return false;
-            
+
             if (typeof ret != "undefined")
                 moduleIdentifier = ret;
         }
         catch(e)
         {
-            var mappings = (typeof this.descriptor != "undefined" && typeof this.descriptor.mappings != "undefined")?JSON.stringify(this.descriptor.mappings):"{}";            
+            var mappings = (typeof this.descriptor != "undefined" && typeof this.descriptor.mappings != "undefined")?JSON.stringify(this.descriptor.mappings):"{}";
             throw new Error(e + " => " + e.stack + "\nUnable to resolve moduleIdentifier '" + JSON.stringify(moduleIdentifier) + "' against context '" + this.id + "' (mappings: " + mappings + ") and relativeModuleDir '" + relativeModuleDir + "'.");
         }
 
@@ -1844,7 +1844,7 @@ Plugin.prototype.init = function()
     {
         if (this._id === "")
             return;
-    
+
         var context = bravojs.contextForId(this._id, true);
         /* Only add extra module properties if context represents a package (i.e. not default '_' context) */
         if (context.id == "_")
@@ -1852,7 +1852,7 @@ Plugin.prototype.init = function()
 
         /* If context supplies a UID use it over the path-based ID for the package ID */
         this.pkgId = context.id;
-    
+
         /* Normalized mappings are simply a map where labels point to package IDs */
         this.mappings = context.getNormalizedMappings();
 
@@ -1867,7 +1867,7 @@ Plugin.prototype.requireModule = function(id)
 {
     if (!id)
         return;
-    
+
     // The text plugins need special handeling
     if (id.match(/^text!/))
     {
@@ -1885,7 +1885,7 @@ Plugin.prototype.newRequire = function(helpers)
 {
     var bravojs = this.bravojs;
 
-    var newRequire = function packages_require(moduleIdentifier) 
+    var newRequire = function packages_require(moduleIdentifier)
     {
         // RequireJS compatibility. Convert require([], callback) to module.load([], callback).
         if (Object.prototype.toString.call(moduleIdentifier) == "[object Array]" && arguments.length == 2)
@@ -1983,7 +1983,7 @@ Plugin.prototype.sanitizeId = function(id)
 
 /**
  * Load a package descriptor from the server.
- * 
+ *
  * NOTE: This function will block until the server returns the response!
  *       Package descriptors should be memoized before booting the program
  *       for better loading performance.
@@ -2288,7 +2288,7 @@ function str2blks_MD5(str)
 }
 
 /*
- * Add integers, wrapping at 2^32. This uses 16-bit operations internally 
+ * Add integers, wrapping at 2^32. This uses 16-bit operations internally
  * to work around bugs in some JS interpreters.
  */
 function add(x, y)
@@ -2364,7 +2364,7 @@ return function calcMD5(str)
     a = ff(a, b, c, d, x[i+12], 7 ,  1804603682);
     d = ff(d, a, b, c, x[i+13], 12, -40341101);
     c = ff(c, d, a, b, x[i+14], 17, -1502002290);
-    b = ff(b, c, d, a, x[i+15], 22,  1236535329);    
+    b = ff(b, c, d, a, x[i+15], 22,  1236535329);
 
     a = gg(a, b, c, d, x[i+ 1], 5 , -165796510);
     d = gg(d, a, b, c, x[i+ 6], 9 , -1069501632);
@@ -2382,7 +2382,7 @@ return function calcMD5(str)
     d = gg(d, a, b, c, x[i+ 2], 9 , -51403784);
     c = gg(c, d, a, b, x[i+ 7], 14,  1735328473);
     b = gg(b, c, d, a, x[i+12], 20, -1926607734);
-    
+
     a = hh(a, b, c, d, x[i+ 5], 4 , -378558);
     d = hh(d, a, b, c, x[i+ 8], 11, -2022574463);
     c = hh(c, d, a, b, x[i+11], 16,  1839030562);
@@ -2449,7 +2449,7 @@ return function calcMD5(str)
 bravojs.module.constructor.prototype.load = function packages_loader_load(moduleIdentifier, callback)
 {
     var uri;
-    
+
     if (typeof moduleIdentifier == "object")
     {
         if (typeof moduleIdentifier.id != "undefined")
@@ -2504,7 +2504,7 @@ bravojs.module.constructor.prototype.load = function packages_loader_load(module
         uri = uri.replace(/^\/[^\/]*\//, "/");
 
         importScripts(uri);
-        
+
         if (typeof __bravojs_loaded_moduleIdentifier == "undefined")
             throw new Error("__bravojs_loaded_moduleIdentifier not set by server!");
 
@@ -2529,7 +2529,7 @@ bravojs.module.constructor.prototype.load = function packages_loader_load(module
     /* Fake script.onload for IE6-8 */
     script.onreadystatechange = function()
     {
-        var cb;        
+        var cb;
         if (this.readyState === "loaded")
         {
             cb = this.onload;
@@ -2541,18 +2541,18 @@ bravojs.module.constructor.prototype.load = function packages_loader_load(module
     script.onload = function packages_loader_onload()
     {
         this.onreadystatechange = null;
-        
+
         if (typeof window.__bravojs_loaded_moduleIdentifier == "undefined")
             throw new Error("__bravojs_loaded_moduleIdentifier not set by server!");
-        
+
         var id = window.__bravojs_loaded_moduleIdentifier;
-        
+
         delete window.__bravojs_loaded_moduleIdentifierl
 
         // all modules are memoized now so we can continue
         callback(id);
     }
-    
+
     /* Supply errors on browsers that can */
     script.onerror = function fastload_script_error()
     {
@@ -2575,7 +2575,7 @@ require.memoize(bravojs.realpath(bravojs.mainModuleDir + '/c371cd05c8df40c0af3b1
     exports.main = function()
     {
         COMPONENT.init();
-        
+
         var component = COMPONENT.getComponent();
 
         component.extend = "Ext.panel.Panel";
@@ -2598,7 +2598,7 @@ require.memoize(bravojs.realpath(bravojs.mainModuleDir + '/aae9e0c4eed45f3c888f8
         return {
 
             baseCls: "x-ux-ace-editor-panel",
-            
+
             initComponent: function()
             {
                 Ext.ux.AceEditor.superclass.initComponent.call(this);
@@ -2611,7 +2611,7 @@ require.memoize(bravojs.realpath(bravojs.mainModuleDir + '/aae9e0c4eed45f3c888f8
 
                 self.value = null;
                 self.editor = null;
-                
+
                 self.session = null;
 
                 // async load editor
@@ -2624,10 +2624,10 @@ require.memoize(bravojs.realpath(bravojs.mainModuleDir + '/aae9e0c4eed45f3c888f8
                     {
                         var CANON = self.editorClass.module("pilot/canon");
 
-                        self.addEvents(
-                            "editor-save",
-                            "editor-saveas"
-                        );
+                        // self.addEvents(
+                        //     "editor-save",
+                        //     "editor-saveas"
+                        // );
 
                         CANON.addCommand({
                             name: "save",
@@ -2672,7 +2672,7 @@ require.memoize(bravojs.realpath(bravojs.mainModuleDir + '/aae9e0c4eed45f3c888f8
 //                    var EVENT = self.editorClass.module("pilot/event");
 
                 self.el.dom.innerHTML = "";
-                
+
                 self.renderer = new RENDERER(self.el.dom, THEME);
                 self.editor = new EDITOR(self.renderer);
                 self.editor.resize();
@@ -2829,7 +2829,7 @@ require.memoize(bravojs.realpath(bravojs.mainModuleDir + '/aae9e0c4eed45f3c888f8
                     {
                         options.callback(session);
                     }
-                });                
+                });
             },
 
             setTheme: function(name)

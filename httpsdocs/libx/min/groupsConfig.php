@@ -96,7 +96,6 @@ return array_merge(
 
             ,'//js/CB.VerticalEditGrid.js'
             ,'//js/CB.VerticalSearchEditGrid.js'
-            ,'//js/CB.Objects.js'
             ,'//js/CB.PasteFromWord.js'
             ,'//js/CB.FileUploadWindow.js'
 
@@ -115,7 +114,6 @@ return array_merge(
             ,'//js/CB.FacetList.js'
             ,'//js/CB.Clipboard.js'
             ,'//js/CB.FilterPanel.js'
-            ,'//js/CB.FileWindow.js'
 
             ,'//js/CB.Favorites.js'
 
@@ -143,26 +141,27 @@ return array_merge(
             ,'//js/CB.ViewPort.js'
 
             ,'//js/plugin/Panel.js'
-            ,'//js/PluginsPanel.js'
-            ,'//js/form/view/object/Preview.js'
-            ,'//js/form/view/object/Properties.js'
-            ,'//js/form/edit/Object.js'
-            ,'//js/window/edit/Object.js'
-            ,'//js/ObjectCardView.js'
-            ,'//js/objects/plugins/Base.js'
-            ,'//js/objects/plugins/Thumb.js'
-            ,'//js/objects/plugins/Comments.js'
-            ,'//js/objects/plugins/ContentItems.js'
-            ,'//js/objects/plugins/Files.js'
-            ,'//js/objects/plugins/ObjectProperties.js'
-            ,'//js/objects/plugins/SystemProperties.js'
-            ,'//js/objects/plugins/Meta.js'
-            ,'//js/objects/plugins/Tasks.js'
-            ,'//js/objects/plugins/Versions.js'
-            ,'//js/objects/plugins/CurrentVersion.js'
-            ,'//js/CB.WebdavWindow.js'
-            ,'//js/SearchPanel.js'
+            ,'//js/object/view/Preview.js'
+            ,'//js/object/view/Properties.js'
+            ,'//js/object/edit/Form.js'
+            ,'//js/object/edit/Window.js'
+            ,'//js/object/widget/TitleView.js'
+            ,'//js/object/ViewContainer.js'
+            ,'//js/search/edit/Panel.js'
             ,'//js/search/edit/Window.js'
+            ,'//js/object/plugin/Base.js'
+            ,'//js/object/plugin/Thumb.js'
+            ,'//js/object/plugin/Comments.js'
+            ,'//js/object/plugin/ContentItems.js'
+            ,'//js/object/plugin/Files.js'
+            ,'//js/object/plugin/ObjectProperties.js'
+            ,'//js/object/plugin/SystemProperties.js'
+            ,'//js/object/plugin/Meta.js'
+            ,'//js/object/plugin/Tasks.js'
+            ,'//js/object/plugin/Versions.js'
+            ,'//js/object/plugin/CurrentVersion.js'
+            ,'//js/file/edit/Window.js'
+            ,'//js/CB.WebdavWindow.js'
 
             ,'//js/state/DBProvider.js'
 
@@ -171,8 +170,8 @@ return array_merge(
 
         ,'jsdev' => array(
             '//js/app.js'
-            ,'//js/objects/field/editor/Form.js'
-            ,'//js/objects/field/editor/Tag.js'
+            ,'//js/object/field/editor/Form.js'
+            ,'//js/object/field/editor/Tag.js'
             ,'//js/view/BoundListKeyNav.js'
             // ,'//js/overrides/form/action/Submit.js'
 
@@ -198,6 +197,7 @@ return array_merge(
             ,'//js/overrides/tree/ViewDragZone.js'
 
             ,'//js/overrides/util/Collection.js'
+            ,'//js/overrides/util/AbstractMixedCollection.js'
             ,'//js/overrides/util/Format.js'
         )
     )

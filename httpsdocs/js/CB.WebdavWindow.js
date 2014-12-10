@@ -1,63 +1,64 @@
 Ext.namespace('CB');
 
 Ext.define('CB.WebdavWindow', {
-    extend: 'Ext.Window'
-    ,modal: true
-    ,width: 400
-    ,autoHeight: true
-    ,border: false
-    ,plain: true
-    ,cls: 'webdav'
+    extend: 'Ext.window.Window'
+
     ,initComponent: function() {
+        this.data = this.config.data;
+
         if(Ext.isEmpty(this.data)) {
             this.data = {};
         }
 
         this.textField = new Ext.form.TextField({
            value: this.data.link
+            ,fieldLabel: 'Link'
+            ,labelWidth: 25
             ,selectOnFocus: true
             ,style: 'font-size: 10px'
-            ,width: 320
+            ,width: '100%'
         });
 
         this.cbHideDialog = new Ext.form.Checkbox({
             xtype: 'checkbox'
+            ,height: 20
             ,boxLabel: 'Enable cbdav & don\'t show this dialog'
             ,checked: (Ext.util.Cookies.get('webdavHideDlg') == 1)
         });
 
         Ext.apply(this, {
-            bodyStyle: 'margin: 0 15px 10px 15px'
+            modal: true
+            ,width: 400
+            ,autoHeight: true
+            ,border: true
+            ,closable: true
+            ,cls: 'webdav'
+            ,title: 'WebDAV'
+            ,padding: 10
+            ,bodyStyle: 'padding:10px'
             ,buttonAlign: 'center'
-            ,items: [ {
-                xtype: 'fieldcontainer'
-                ,layout: 'hbox'
-                ,items: [
-                    {
-                        xtype: 'displayfield'
-                        ,value: 'Link:'
-                    }
-                    ,this.textField
-                ]
-            }
-            ,{
-                xtype: 'displayfield'
-                ,value: '<br />Open this link in your editor (Word, LibreOffice).<br /> You\'ll be asked for your CaseBox username/password.'
-            }
-            ,{
-                xtype: 'displayfield'
-                ,value: '<br />Install <a href="http://www.casebox.org/dl/cbdav.exe" class="click">cbdav.exe</a> to automatically open the document when you<br />double clicka file or use the edit button.<br /><br />'
-            }
-            ,this.cbHideDialog
+            ,items: [
+                this.textField
+                ,{
+                    xtype: 'displayfield'
+                    ,value: '<br />Open this link in your editor (Word, LibreOffice).<br /> You\'ll be asked for your CaseBox username/password.'
+                }
+                ,{
+                    xtype: 'displayfield'
+                    ,value: '<br />Install <a href="http://www.casebox.org/dl/cbdav.exe" class="click">cbdav.exe</a> to automatically open the document when you<br />double clicka file or use the edit button.<br /><br />'
+                }
+                ,this.cbHideDialog
+                ,{
+                    xtype: 'button'
+                    ,style: 'margin: auto'
+                    ,scope: this
+                    ,value: 'Ok'
+                    ,text: 'Ok'
+                    ,label: 'Ok'
+                    ,handler: this.onOkClick
+                }
             ]
-            ,buttons: [{
-                xtype: 'button'
-                ,html: '<a>Ok</a>'
-                ,style: 'padding: 2px 10px; border: 1px solid gray '
-                ,scope: this
-                ,handler: this.onOkClick
-            }
-            ]
+
             ,listeners: {
                 scope: this
                 ,afterrender: this.onShow

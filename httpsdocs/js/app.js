@@ -540,10 +540,14 @@ function initApp() {
             return;
         }
 
-        var wndCfg = {
-            xtype: 'CBObjectEditWindow'
-            ,data: config
-        };
+        var templateType = CB.DB.templates.getType(config.template_id)
+            ,wndCfg = {
+                xtype: (templateType == 'file'
+                    ? 'CBFileEditWindow'
+                    : 'CBObjectEditWindow'
+                )
+                ,data: config
+            };
 
         wndCfg.id = 'oew-' +
             (Ext.isEmpty(config.id)
@@ -553,7 +557,13 @@ function initApp() {
 
         w = App.openWindow(wndCfg);
 
-        if(!w.existing) {
+        if(templateType == 'file') {
+            w.center();
+
+            if(config.name && (detectFileEditor(config.name) !== false)) {
+                w.maximize();
+            }
+        } else if(!w.existing) {
             App.alignWindowNext(w);
         }
 
@@ -561,7 +571,6 @@ function initApp() {
     };
 
     App.openWindow = function(wndCfg) {
-
         var w = Ext.getCmp(wndCfg.id);
 
         if(w) {
@@ -642,6 +651,7 @@ function initApp() {
                 data: {link: url}
             });
             w.show();
+            w.center();
         }
     };
 
@@ -747,7 +757,7 @@ function initApp() {
                             e.cancel = true;
                             e.value = e.record.get('value');
 
-                            var formEditor = new CB.objects.field.editor.Form({
+                            var formEditor = new CB.object.field.editor.Form({
                                 data: objData
                                 ,value: e.record
                                     ? e.value
@@ -855,7 +865,7 @@ function initApp() {
                         return ed;
 
                     case 'tagField':
-                        ed = new CB.objects.field.editor.Tag({
+                        ed = new CB.object.field.editor.Tag({
                             data: objData
                             ,valueField: 'id'
                             ,displayField: 'name'
@@ -1191,25 +1201,6 @@ function initApp() {
             delete App.hideFailureAlerts;
         };
         Ext.Function.defer(dhf, 1500);
-    };
-
-    App.openObject = function(template_id, id, e){
-        switch( CB.DB.templates.getType(template_id) ){
-            case 'case':
-            case 'object':
-            case 'template':
-            case 'field':
-            case 'email':
-            case 'task':
-                App.mainViewPort.fireEvent('openobject', {id: id, template_id: template_id}, e);
-                break;
-            case 'file':
-                App.mainViewPort.fireEvent('fileopen', {id: id}, e);
-                break;
-            default:
-                return false;
-        }
-        return true;
     };
 
     App.clipboard = new CB.Clipboard();

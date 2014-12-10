@@ -46,7 +46,7 @@ $coreName = Config::get('core_name');
 //--------------------------------------------------- functions
 function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
 {
-    global $argv;
+    global $argv, $coreName;
 
     if (@$argv[3] == 'force') {
         return array('success' => true);

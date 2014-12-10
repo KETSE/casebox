@@ -814,7 +814,7 @@ class Security
         if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
             throw new \Exception(L\get('Access_denied'));
         }
-        DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p['id'], $p['data'])) or die(DB\dbQueryError());
+        DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p['id'], $p['data']['id'])) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();

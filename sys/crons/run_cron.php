@@ -46,13 +46,16 @@ DB\connect($cfg);
 
 $cores = array();
 $res = DB\dbQuery(
-    'SELECT name
+    'SELECT name, active
     FROM casebox.cores
-    WHERE active <> 0',
-    array()
+    WHERE active <> 0'
 ) or die(DB\dbQueryError());
+
 while ($r = $res->fetch_assoc()) {
-    if (empty($argv[2]) || ($argv[2] == $r['name']) || ($argv[2] == 'all')) {
+    if (empty($argv[2]) ||
+        ($argv[2] == $r['name']) ||
+        (($argv[2] == 'all') && ($r['active'] > 0))
+    ) {
         $cores[] = $r['name'];
     }
 }
