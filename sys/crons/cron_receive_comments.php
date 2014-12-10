@@ -160,7 +160,10 @@ foreach ($mailServers as $mailConf) {
                 continue;
             }
 
-            $userId = getCoreUserByMail($mail['from']);
+            $emailFrom = extractEmailFromText($mail['from']);   // user email
+            $emailTo = extractEmailFromText($mail['to']);  // <comments@casebox.org>
+
+            $userId = getCoreUserByMail($emailFrom);
             $_SESSION['user'] = array('id' => $userId);
 
             $data = array(
@@ -170,7 +173,7 @@ foreach ($mailServers as $mailConf) {
                 ,'cid' => $userId
                 ,'template_id' => $templateId
                 ,'data' => array(
-                    '_title' => removeContentExtraBlock($mail['content'], $mail['to'])
+                    '_title' => removeContentExtraBlock($mail['content'], $emailFrom, $emailTo)
                 )
                 ,'sys_data' => array(
                     'mailId' => $mail['id']
@@ -271,45 +274,48 @@ function processMails(&$mailServer)
  * remove "reply to" extra block from mail message
  * as well al signature block delimited by /\n--\n/
  * @param  varchar $content
- * @param  varchar $mail
+ * @param  varchar $mailFrom  user email
+ * @param  varchar $mailTo   CB comments email <comments@casebox.org>
  * @return varchar
  */
-function removeContentExtraBlock($content, $mail)
+function removeContentExtraBlock($content, $emailFrom, $emailTo)
 {
-    //remove block that starts with email (that replied to)
-    $idx = strpos($content, $mail);
-    if ($idx == false) {
-        return $content;
-    }
+    $marker = 'W3HK8jpPmwaGCv';
 
-    $content = substr($content, 0, $idx);
-    $idx = strrpos($content, "\n");
-    if ($idx !== false) {
-        $content = substr($content, 0, $idx);
-    } else {
-        $idx = strrpos($content, "\r");
-        if ($idx !== false) {
-            $content = substr($content, 0, $idx);
-        }
-    }
-    //remove quoted block
-    $content = preg_replace('/(^\w.+:[\r\n])?(^>.*(\n|\r|$)){2,}/miu', '', $content);
+    // quotation: > ...
+    $content = preg_replace('/(^\w.+:\n)?(^>.*(\n|$))+/mi', '', $content);
 
-    //remove signature block
-    $content = preg_replace('/[\n\r]+--[\n\r]+.*/miu', '', $content);
+    // quotation: "On Dec 5, 2014 2:06 AM, "John Doe" <comments@casebox.org> wrote:"
+    // remove all starting with th line that contains the email in '<' '>'
+    // Do this for both emails: From & To
+    // because the user may hit "Reply" to his own email that he just sent
+    // Example: he replies to <comments@casebox.org> and then again
+    // hits reply to his own email, it will have <user@domain.com> in the reply text
+    $content = preg_replace('/^(.+)\<' . preg_quote($emailFrom) . '\>/m', $marker, $content);
+    $content = preg_replace('/^(.+)\<' . preg_quote($emailTo) . '\>/m', $marker, $content);
+
+    // signature block
+    $content = preg_replace('/^--(\s+)?$/m', $marker, $content);
+
+    // remove everything starting with $marker
+    $content = preg_replace('/' . $marker . '(.*)/s', '', $content);
 
     return trim($content);
 }
 
-function getCoreUserByMail($email)
-{
-    /* try to find user from database that corresponds to given mail.
-    Ex: Kell <kellaagnya@gmail.com> */
-
+// email: John Doe <user@domain.com>
+// @return varchar; // just email
+function extractEmailFromText($email) {
     if (preg_match_all('/^[^<]*<?([^>]+)>?/i', $email, $results)) {
         $email = $results[1][0];
     }
+    return $email;
+}
 
+
+// Expects a valid email
+function getCoreUserByMail($email)
+{
     $rez = false;
 
     $res = DB\dbQuery(
