@@ -44,7 +44,7 @@ class OfficeUsers extends \CB\TreeNode\Base
             $this->office_id = $this->lastNode->id;
         }
 
-        $this->fq[] = 'category_id:'.$this->office_id;
+        // $this->fq[] = 'category_id:'.$this->office_id;
 
         $this->user_id = $_SESSION['user']['id'];
     }

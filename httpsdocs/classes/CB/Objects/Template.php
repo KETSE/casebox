@@ -58,7 +58,6 @@ class Template extends Object
         ,'time' => 'ftTime'
         ,'timeunits' => 'ftTimeunits'
         ,'varchar' => 'ftVarchar'
-        ,'importance' => 'Importance'
     );
 
     /**

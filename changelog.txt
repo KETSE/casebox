@@ -1,3 +1,10 @@
+CaseBox 1.9.368 (2014-12-11)
+==============================
+New Features, Improvements
+--------------------------
+- #4031 Open tasks assigned to several persons should appear as closed for me if I completed it
+- #4205 Task related SOLR columns
+
 CaseBox 1.9.367 (2014-12-10)
 ==============================
 New Features, Improvements

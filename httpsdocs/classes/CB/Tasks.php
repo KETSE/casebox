@@ -38,9 +38,7 @@ class Tasks
                 ,(SELECT name FROM tree WHERE id = ti.case_id) `case`
                 ,(SELECT name FROM tree WHERE id = t.object_id) `object`
                 ,t.status
-                ,t.completed
-                ,t.importance
-                ,t.category_id
+                ,t.completed `task_d_closed`
                 ,t.allday
                 ,ti.pids `path`
                 ,ti.path `pathtext`
@@ -60,7 +58,7 @@ class Tasks
             $r['date_start'] = Util\dateMysqlToISO($r['date_start']);
             $r['date_end'] = Util\dateMysqlToISO($r['date_end']);
             $r['cdate'] = Util\dateMysqlToISO($r['cdate']);
-            $r['completed'] = Util\dateMysqlToISO($r['completed']);
+            $r['task_d_closed'] = Util\dateMysqlToISO($r['task_d_closed']);
             $r['path'] = explode(',', $r['path']);
             array_pop($r['path']);
             $r['path'] = implode('/', $r['path']);
@@ -74,7 +72,7 @@ class Tasks
 
         $rez['data']['files'] = $this->getTaskFiles($id);
 
-        // get responsible users and their copletion status
+        // get responsible users and their completion status
         $res = DB\dbQuery(
             'SELECT u.id
                 ,ru.status
@@ -235,8 +233,6 @@ class Tasks
                     ,cid
                     ,status
                     ,autoclose
-                    ,importance
-                    ,category_id
                     ,allday
                     ,uid
                     ,udate)
@@ -256,8 +252,6 @@ class Tasks
                     ,$13
                     ,$14
                     ,$15
-                    ,$16
-                    ,$17
                     ,NULL
                     ,NULL)
                 ON DUPLICATE KEY
@@ -275,9 +269,7 @@ class Tasks
                     ,udate = CURRENT_TIMESTAMP
                     ,status = CASE status WHEN 2 THEN 2 ELSE $13 END
                     ,autoclose = $14
-                    ,importance = $15
-                    ,category_id = $16
-                    ,allday = $17',
+                    ,allday = $15',
                 @array(
                     $p['id']
                     ,$p['title']
@@ -293,8 +285,6 @@ class Tasks
                     ,$_SESSION['user']['id']
                     ,$status
                     ,$p['autoclose']
-                    ,$p['importance']
-                    ,$p['category_id']
                     ,$p['allday']
                 )
             ) or die(DB\dbQueryError());
@@ -958,7 +948,7 @@ class Tasks
         if (!empty($task['missed'])) {
 
         }
-        if (!empty($task['completed'])) {
+        if (!empty($task['task_d_closed'])) {
             $cls = ($task['status'] != 3) ? 'cGR' : 'cG';
         }
         if (!empty($cls)) {
@@ -1044,13 +1034,10 @@ class Tasks
                 ,date_end
                 ,description
                 ,status
-                ,category_id
-                ,importance
                 ,`type`
                 ,allday
                 ,cid
                 ,ti.path `path_text`
-                ,(SELECT name from tree where id = t.category_id) `category`
                 ,cdate
                 ,responsible_user_ids
                 ,(SELECT reminds
@@ -1073,18 +1060,6 @@ class Tasks
                 : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['timezone']);
 
             $created_date_text = Util\formatMysqlDate($r['cdate'], 'Y, F j H:i', @$user['cfg']['timezone']);
-            $importance_text = '';
-            switch ($r['importance']) {
-                case 1:
-                    $importance_text = L\get('Low', $user['language_id']);
-                    break;
-                case 2:
-                    $importance_text = L\get('Medium', $user['language_id']);
-                    break;
-                case 3:
-                    $importance_text = L\get('High', $user['language_id']);
-                    break;
-            }
 
             $tickImage = 'data:image/png;base64,'.base64_encode(file_get_contents(DOC_ROOT . 'css/i/ico/tick-circle.png'));
 
@@ -1210,8 +1185,8 @@ class Tasks
                     ,L\get('taskStatus'.$r['status'], $user['language_id'])
                     ,L\get('Created', $user['language_id'])
                     ,$created_date_text
-                    ,L\get('Importance', $user['language_id'])
-                    ,$importance_text
+                    ,''
+                    ,''
                     ,L\get('Category', $user['language_id'])
                     ,'category_style'
                     ,$r['category']
@@ -1283,36 +1258,13 @@ class Tasks
             ? Util\formatDatePeriod($d['date_start'], $d['date_end'])
             : Util\formatDateTimePeriod($d['date_start'], $d['date_end'], @$_SESSION['user']['cfg']['timezone']);
 
-        $d['importance_text'] = '';
-        switch ($d['importance']) {
-            case 1:
-                $d['importance_text'] = L\get('Low');
-                break;
-            case 2:
-                $d['importance_text'] = L\get('Medium');
-                break;
-            case 3:
-                $d['importance_text'] = L\get('High');
-                break;
-        }
-
         $params = array( '{name}' => Util\adjustTextForDisplay($d['title'])
             ,'{datetime_period}' => $d['datetime_period']
             ,'{description}' => nl2br(Util\adjustTextForDisplay($d['description']))
             ,'{status}' => $d['status']
             ,'{status_text}' => L\get('taskStatus'.$d['status'])
-            ,'{importance_text}' => $d['importance_text']
-            ,'{category_text}' => Objects\Template::formatValueForDisplay(
-                array(
-                    'type' => '_objects'
-                    ,'cfg' => array(
-                        'source' => 'tree'
-                        ,'renderer' => 'listObjIcons'
-                    )
-
-                ),
-                $d['category_id']
-            )
+            ,'{importance_text}' => ''
+            ,'{category_text}' => ''
             ,'{path}' => $d['path']
             ,'{path_text}' => Util\adjustTextForDisplay($d['pathtext'])
             ,'{cid}' => $d['cid']
@@ -1422,20 +1374,41 @@ class Tasks
         $template = $obj->getTemplate();
 
         $objectRecord['task_status'] = @$objData['status'];
-        $objectRecord['importance'] = @$obj->getFieldValue('importance', 0)['value'];
-        $objectRecord['category_id'] = @$obj->getFieldValue('category_id', 0)['value'];
 
         $user_ids = @$obj->getFieldValue('assigned', 0)['value'];
         if (!empty($user_ids)) {
-            $objectRecord['user_ids'] = Util\toNumericArray($user_ids);
+            $user_ids = Util\toNumericArray($user_ids);
+            $objectRecord['task_u_assignee'] = $user_ids;
+        } else {
+            $user_ids = array();
         }
+
+        $user_ids[] = @Util\coalesce($objData['oid'], $objData['cid']);
+
+        $objectRecord['task_u_all'] = array_unique($user_ids);
 
         $objectRecord['content'] = @$obj->getFieldValue('description', 0)['value'];
 
-        if (!empty($objData['completed'])) {
-            $objectRecord['completed'] = $objData['completed'];
+        if (!empty($objData['task_d_closed'])) {
+            $objectRecord['task_d_closed'] = $objData['task_d_closed'];
         }
 
+        //get users that didnt complete the task yet
+        $objectRecord['task_u_ongoing'] = array();
+
+        $res = DB\dbQuery(
+            'SELECT user_id
+            FROM tasks_responsible_users
+            WHERE task_id = $1 and status = 0',
+            $objectRecord['id']
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $objectRecord['task_u_ongoing'][] = $r['user_id'];
+        }
+        $res->close();
+
+        //set class
         $objectRecord['cls'] = $template->formatValueForDisplay(
             $template->getField('color'),
             $obj->getFieldValue('color', 0)['value'],

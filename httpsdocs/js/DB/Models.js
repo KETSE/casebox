@@ -7,7 +7,6 @@ CB.DB.defaultItemFields = [
     ,{name: 'status', type: 'int'}
     ,{name: 'task_status', type: 'int'}
     ,{name: 'template_id', type: 'int'}
-    ,{name: 'category_id', type: 'int'}
     ,'template_type'
     ,'path'
     ,'name'

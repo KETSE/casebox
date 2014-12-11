@@ -143,29 +143,38 @@ subtype: this field is dependent on type field value
 <!-- security_set_id: security set id -->
 <field name="security_set_id"  type="tint"          indexed="true" stored="true" />
 
-
-<!-- TASKS SPECIFIC FIELDS ------------------------------------------------------------------- -->
-
-<!-- user_ids: this field is used now for assigned users in tasks  -->
-<field name="user_ids"         type="tint"          indexed="true" stored="true" multiValued="true" />
-
 <!-- status: used for objects that have status values specified from tree thesauri -->
 <field name="status"           type="tlong"         indexed="true" stored="true" multiValued="true" />
 
+<!-- user_ids: this field can be used now for assigned users in tasks  -->
+<field name="user_ids"         type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<!-- TASKS SPECIFIC FIELDS -->
+
+
+<field name="task_u_assignee"  type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_started"   type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_ongoing"   type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_done"      type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_blocker"   type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<field name="task_u_all"       type="tint"          indexed="true" stored="true" multiValued="true" />
+
+<!-- task_d_closed: completed date of the task. It can be completed automaticly (when all reponsible users mark the task as completed ) or the owner can close it manually   -->
+<field name="task_d_closed"        type="tdate"         indexed="true" stored="true" />
+
+<!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering. -->
+<field name="task_ym_closed"   type="tint"          indexed="true" stored="true" />
+
 <!-- task_status: the tasks status (1 Overdue, 2 Active, 3 Closed, 4 Pending)
     can also be used, when needed, for other objects to specify their status -->
-<field name="task_status"      type="tint"          indexed="true" stored="true" />
+<field name="task_status"      type="tint"          indexed="true" stored="true" multiValued="true" />
 
-<!-- category_id: tasks category (a thesaury defined set of values) -->
-<field name="category_id"      type="tint"          indexed="true" stored="true" multiValued="true" />
-
-<!-- importance: tasks importance (1  low, 2 medium, 3 high) -->
-<field name="importance"       type="tint"          indexed="true" stored="true" />
-
-<!-- ccompleted: completed date of the task. It can be completed automaticly (when all reponsible users mark the task as completed ) or the owner can close it manually   -->
-<field name="completed"        type="tdate"         indexed="true" stored="true" />
-
-<!-- END OF TASKS SPECIFIC FIELDS ---------------------------------------------------------- -->
+<!-- END OF TASKS SPECIFIC FIELDS -->
 
 
 <!-- versions: versions count. Used for files -->
@@ -218,7 +227,6 @@ subtype: this field is dependent on type field value
 <!-- YearMonth field stored as an int (2014.01 -> 1401). Used for faceting filtering.
 By default this field contains end date for tasks or creation date if end date is empty -->
 <field name="ym3"              type="tint"          indexed="true" stored="true" />
-
 
 
 <!-- role_ids: these columns can be used by object templates to store specific values and later to be able to filter or search by them.

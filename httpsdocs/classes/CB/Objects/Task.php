@@ -52,8 +52,6 @@ class Task extends Object
             ,$this->getFieldValue('allday', 0)['value'].''
             ,$dateStart
             ,$dateEnd
-            ,$this->getFieldValue('importance', 0)['value']
-            ,$this->getFieldValue('category', 0)['value']
             ,$this->getFieldValue('assigned', 0)['value'].''
             ,$this->getFieldValue('description', 0)['value']
             ,$status
@@ -67,13 +65,11 @@ class Task extends Object
                 ,allday
                 ,date_start
                 ,date_end
-                ,importance
-                ,category_id
                 ,responsible_user_ids
                 ,description
                 ,status
                 ,cid
-            ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11)',
+            ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)',
             $params
         ) or die(DB\dbQueryError());
 
@@ -131,13 +127,11 @@ class Task extends Object
                 ,t.date_start
                 ,t.date_end
                 ,t.allday
-                ,t.importance
-                ,t.category_id
                 ,t.responsible_user_ids `assigned`
                 ,t.description
                 ,t.status
                 ,(SELECT reminds FROM tasks_reminders WHERE task_id = $1 AND user_id = $2) reminds
-                ,DATE_FORMAT(t.completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
+                ,DATE_FORMAT(t.completed, \'%Y-%m-%dT%H:%i:%sZ\') `task_d_closed`
             FROM tasks t
             WHERE t.id = $1',
             array(
@@ -153,12 +147,12 @@ class Task extends Object
             if (!empty($r['user_status'])) {
                 $d['user_status'] = $r['user_status'];
             }
-            if (!empty($r['completed'])) {
-                $d['completed'] = $r['completed'];
+            if (!empty($r['task_d_closed'])) {
+                $d['task_d_closed'] = $r['task_d_closed'];
             }
             unset($r['status']);
             unset($r['user_status']);
-            unset($r['completed']);
+            unset($r['task_d_closed']);
 
             if (empty($d['data']['allday'])) {
                 $r['allday'] = array(
@@ -259,8 +253,6 @@ class Task extends Object
             ,$this->getFieldValue('allday', 0)['value']
             ,$dateStart
             ,$dateEnd
-            ,$this->getFieldValue('importance', 0)['value']
-            ,$this->getFieldValue('category', 0)['value']
             ,$this->getFieldValue('assigned', 0)['value']
             ,$this->getFieldValue('description', 0)['value']
             ,$d['status']
@@ -273,11 +265,9 @@ class Task extends Object
                 ,allday = $3
                 ,date_start = $4
                 ,date_end = $5
-                ,importance = $6
-                ,category_id = $7
-                ,responsible_user_ids = $8
-                ,description = $9
-                ,status = $10
+                ,responsible_user_ids = $6
+                ,description = $7
+                ,status = $8
             WHERE id = $1',
             $params
         ) or die(DB\dbQueryError());
@@ -339,8 +329,6 @@ class Task extends Object
                 ,`date_start`
                 ,`date_end`
                 ,`allday`
-                ,`importance`
-                ,`category_id`
                 ,`privacy`
                 ,`responsible_user_ids`
                 ,`autoclose`
@@ -362,8 +350,6 @@ class Task extends Object
                 ,`date_start`
                 ,`date_end`
                 ,`allday`
-                ,`importance`
-                ,`category_id`
                 ,`privacy`
                 ,`responsible_user_ids`
                 ,`autoclose`

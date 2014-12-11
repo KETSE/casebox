@@ -219,7 +219,7 @@ class Base
                     //update value from document if empty from solr query
                     if (empty($doc[$fieldName]) ||
                         // temporary check, this should be reanalised
-                        in_array($templateField['type'], array('_objects', 'importance'))
+                        in_array($templateField['type'], array('_objects'))
                     ) {
                         foreach ($values as $value) {
                             $value = is_array($value)

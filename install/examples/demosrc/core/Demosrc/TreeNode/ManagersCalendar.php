@@ -27,7 +27,7 @@ class ManagersCalendar extends \CB\TreeNode\MyCalendar
             foreach ($sr['data'] as $pr) {
                 $programs[] = $pr['id'];
             }
-            $this->fq[] = 'category_id:('.implode(' OR ', $programs).')';
+            // $this->fq[] = 'category_id:('.implode(' OR ', $programs).')';
         }
     }
 

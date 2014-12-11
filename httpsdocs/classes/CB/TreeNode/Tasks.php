@@ -122,7 +122,7 @@ class Tasks extends Base
     {
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
-        $p['fq'][] = '(user_ids:'.$_SESSION['user']['id'].' OR cid:'.$_SESSION['user']['id'].')';
+        $p['fq'][] = 'task_u_all:' . $_SESSION['user']['id'];
         $p['fq'][] = 'task_status:(1 OR 2)';
         $p['rows'] = 0;
 
@@ -149,7 +149,7 @@ class Tasks extends Base
     {
         $p = $this->requestParams;
         $p['fq'] = $this->fq;
-        $p['fq'][] = '(user_ids:'.$_SESSION['user']['id'].' OR cid:'.$_SESSION['user']['id'].')';
+        $p['fq'][] = 'task_u_all:' . $_SESSION['user']['id'];
         $p['fq'][] = 'task_status:(1 OR 2)';
 
         if (@$this->requestParams['from'] == 'tree') {
@@ -157,7 +157,7 @@ class Tasks extends Base
             $p['rows'] = 0;
             $p['facet'] = true;
             $p['facet.field'] = array(
-                '{!ex=user_ids key=1assigned}user_ids'
+                '{!ex=task_u_assignee key=1assigned}task_u_assignee'
                 ,'{!ex=cid key=2cid}cid'
             );
             $sr = $s->query($p);
@@ -195,9 +195,9 @@ class Tasks extends Base
         $p['fq'] = $this->fq;
 
         if ($this->lastNode->id == 2) {
-            $p['fq'][] = 'user_ids:'.$_SESSION['user']['id'];
+            $p['fq'][] = 'task_u_ongoing:' . $_SESSION['user']['id'];
         } else {
-            $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
+            $p['fq'][] = 'cid:' . $_SESSION['user']['id'];
         }
 
         $rez = array();
@@ -270,7 +270,7 @@ class Tasks extends Base
         $parent = $this->lastNode->parent;
 
         if ($parent->id == 2) {
-            $p['fq'][] = 'user_ids:'.$_SESSION['user']['id'];
+            $p['fq'][] = 'task_u_ongoing:' . $_SESSION['user']['id'];
         } else {
             $p['fq'][] = 'cid:'.$_SESSION['user']['id'];
         }
@@ -316,7 +316,7 @@ class Tasks extends Base
         $p['rows'] = 0;
         $p['facet'] = true;
         $p['facet.field'] = array(
-            '{!ex=user_ids key=user_ids}user_ids'
+            '{!ex=task_u_ongoing key=task_u_ongoing}task_u_ongoing'
         );
         $rez = array();
 
@@ -325,8 +325,8 @@ class Tasks extends Base
         $sr = $s->query($p);
 
         $rez = array('data' => array());
-        if (!empty($sr['facets']->facet_fields->{'user_ids'})) {
-            foreach ($sr['facets']->facet_fields->{'user_ids'} as $k => $v) {
+        if (!empty($sr['facets']->facet_fields->{'task_u_ongoing'})) {
+            foreach ($sr['facets']->facet_fields->{'task_u_ongoing'} as $k => $v) {
                 $k = 'au_'.$k;
                 $r = array(
                     'name' => $this->getName($k).' ('.$v.')'
@@ -355,7 +355,7 @@ class Tasks extends Base
         $p['fq'][] = 'task_status:[1 TO 2]';
 
         $user_id = substr($this->lastNode->id, 3);
-        $p['fq'][] = 'user_ids:'.$user_id;
+        $p['fq'][] = 'task_u_ongoing:' . $user_id;
 
         $s = new \CB\Search();
 

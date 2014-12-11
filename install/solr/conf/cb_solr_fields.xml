@@ -136,10 +136,7 @@ subtype: this field is dependent on type field value
 <!-- task_status: the tasks status (1 Overdue, 2 Active, 3 Closed, 4 Pending)
     can also be used, when needed, for other objects to specify their status -->
 <field name="task_status"        type="tint" indexed="true" stored="true" />
-<!-- category_id: tasks category (a thesaury defined set of values) -->
-<field name="category_id"   type="tint" indexed="true" stored="true" multiValued="true" />
-<!-- importance: tasks importance (1  low, 2 medium, 3 high) -->
-<field name="importance"    type="tint" indexed="true" stored="true"/>
+
 <!-- ccompleted: completed date of the task. It can be completed automaticly (when all reponsible users mark the task as completed ) or the owner can close it manually   -->
 <field name="completed"     type="tdate"        indexed="true" stored="true" />
 

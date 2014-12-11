@@ -54,7 +54,6 @@ $data = array(
     ,array('H', L\get('ftHeader')) //Header
     ,array('html', L\get('ftHtml')) //Html
     ,array('iconcombo', L\get('ftIconcombo')) //IconCombo
-    ,array('importance', L\get('Importance')) //Importance
     ,array('int', L\get('ftInt')) //Integer
     ,array('_language', L\get('ftLanguage')) //Language
     ,array('memo', L\get('ftMemo')) //Memo
@@ -101,13 +100,7 @@ $data = array(
         //,fields: [{name: 'id', type: 'int'}, 'name']
         ,data:  [<?php echo '[1, "'.L\get('Administrator').'"], [2, "'.L\get('Manager').'"], [3, "'.L\get('Lawyer').'"], [4, "'.L\get('User').'"]'; ?>]
     });
-    CB.DB.importance = new Ext.data.ArrayStore({
-        idIndex: 0
-        ,model: 'Generic'
-        //,fields: [{name: 'id', type: 'int'}, 'name']
-        ,data:  [ [1, L.Low], [2, L.Medium], [3, L.High] ]
-        ,getName: getStoreNames
-    })
+
     CB.DB.phone_codes = new Ext.data.ArrayStore({
         idIndex: 0
         ,model: 'PhoneCode'

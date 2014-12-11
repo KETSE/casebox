@@ -249,6 +249,10 @@ class Client extends Service
                         $r['ym3'] = $ym3;
                     }
 
+                    if (!empty($r['task_d_closed'])) {
+                        $r['task_ym_closed'] = str_replace('-', '', substr($r['task_d_closed'], 2, 5));
+                    }
+
                     // $this->filterSolrFields($r);
 
                     //encode special chars for string values

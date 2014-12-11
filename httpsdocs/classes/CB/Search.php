@@ -9,8 +9,8 @@ class Search extends Solr\Client
     public static $defaultFields = array(
         'id', 'pid', 'name', 'path', 'template_type', 'subtype', 'target_id', 'system',
         'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'comment_user_id', 'comment_date',
-        'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'status',
-        'task_status', 'category_id', 'importance', 'completed', 'versions', 'ntsc'
+        'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'task_u_assignee', 'status',
+        'task_status', 'task_d_closed', 'versions', 'ntsc'
     );
 
     /*when requested to sort by a field the other convenient sorting field

@@ -96,33 +96,32 @@ class Offices extends \CB\TreeNode\Base
             foreach ($sr['data'] as $pr) {
                 $programs[] = $pr['id'];
             }
-            $fq = 'category_id:('.implode(' OR ', $programs).')';
+            // $fq = 'category_id:('.implode(' OR ', $programs).')';
         }
 
-        $sr = $s->query(
-            array(
-                'rows' => 0
-                ,'fq' => $fq
-                ,'facet' => true
-                ,'facet.field' => array(
-                    '{!ex=category_id key=category_id}category_id'
-                )
-            )
-        );
-        if (!empty($sr['facets']->facet_fields->{'category_id'})) {
-            foreach ($sr['facets']->facet_fields->{'category_id'} as $program_id => $count) {
-                if (!in_array($program_id, $programs)) {
-                    continue;
-                }
-                $rez['data'][] = array(
-                    'name' => $this->getName($program_id)
-                    ,'id' => $this->getId($program_id)
-                    ,'iconCls' => 'i-building'
-                    ,'has_childs' => true
-                );
-            }
-        }
-
+        // $sr = $s->query(
+        //     array(
+        //         'rows' => 0
+        //         ,'fq' => $fq
+        //         ,'facet' => true
+        //         ,'facet.field' => array(
+        //             '{!ex=category_id key=category_id}category_id'
+        //         )
+        //     )
+        // );
+        // if (!empty($sr['facets']->facet_fields->{'category_id'})) {
+        //     foreach ($sr['facets']->facet_fields->{'category_id'} as $program_id => $count) {
+        //         if (!in_array($program_id, $programs)) {
+        //             continue;
+        //         }
+        //         $rez['data'][] = array(
+        //             'name' => $this->getName($program_id)
+        //             ,'id' => $this->getId($program_id)
+        //             ,'iconCls' => 'i-building'
+        //             ,'has_childs' => true
+        //         );
+        //     }
+        // }
         return $rez;
     }
 }
