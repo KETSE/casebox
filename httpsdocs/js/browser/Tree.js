@@ -370,13 +370,6 @@ Ext.define('CB.browser.Tree', {
         }
     }
 
-    // ,sortNode: function(node){
-    //     sorterName = 'n'+node.data.type + node.data.subtype;
-    //     if(Ext.isDefined(this.sorters[sorterName])) {
-    //         node.sort(this.sorters[sorterName]);
-    //     }
-    // }
-
     ,onNodeFocusChange: function (sm, oldR, newR, eOpts) {
         this.lastFocusedRecord = Ext.valueFrom(newR, oldR);
     }
@@ -447,7 +440,7 @@ Ext.define('CB.browser.Tree', {
         if(Ext.isEmpty(node)) {
             return false;
         }
-        return ((node.data.system == 1) && (node.data.type == 1) && (node.data.subtype == 2));
+        return ((node.data.system == 1) && (node.data.type == 1));
     }
 
     ,inFavorites: function(node) {
@@ -743,7 +736,6 @@ Ext.define('CB.browser.Tree', {
                 ,name: n.data.name
                 ,system: n.data.system
                 ,type: n.data.type
-                ,subtype: n.data.subtype
                 ,iconCls: n.data.iconCls
             }
             ,'copy'
@@ -798,7 +790,10 @@ Ext.define('CB.browser.Tree', {
         Ext.Function.defer(
             function(){
                 this.editor.editNode = node;
-                this.editor.startEdit(this.getView().getNode(node), node.data.name);
+                this.editor.startEdit(
+                    this.getView().getNode(node)
+                    ,Ext.util.Format.htmlDecode(node.data.name)
+                );
             }
             ,10
             ,this
@@ -865,13 +860,15 @@ Ext.define('CB.browser.Tree', {
     }
 
     ,onObjectsDeleted: function(ids){
-        var deleteNodes = [];
+        var sm = this.getSelectionModel()
+            ,deleteNodes = [];
+
         this.getRootNode().cascadeBy({
             before: function(n){
                 if(ids.indexOf(n.data.nid) >= 0){
-                    if(n.isSelected()){
+                    if(sm.isSelected(n)){
                         nn = n.isLast() ? ( n.isFirst() ? n.parentNode : n.previousSibling) : n.nextSibling;
-                        nn.select();
+                        sm.select([nn]);
                     }
                     deleteNodes.push(n);
                 }

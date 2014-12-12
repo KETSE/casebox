@@ -23,7 +23,7 @@ Ext.define('CB.object.plugin.Meta', {
         });
 
         this.prepareToolbar();
-        // CB.object.plugin.Meta.superclass.initComponent.apply(this, arguments);
+
         this.callParent(arguments);
 
         Ext.apply(this, {
@@ -38,7 +38,6 @@ Ext.define('CB.object.plugin.Meta', {
 
         return [{
             iconCls: 'i-points'
-            // ,html:'<b class="icon-padding16 i-points"></b>'
             ,scope: this
             ,handler: this.showMenu
         }];

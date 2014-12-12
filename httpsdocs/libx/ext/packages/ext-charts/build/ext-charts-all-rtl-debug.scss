@@ -1,4 +1,4 @@
-$image-search-path: '/home/teamcity/buildAgent/work/2f38b4615807107b/staging/packages/ext-charts/build/resources' !default;
+$image-search-path: '/home/teamcity/buildAgent/work/3cebfbfc7c03d949/sencha/ext/packages/ext-charts/build/resources' !default;
 $theme-name:  'ext-charts' !default;
 $include-ext-abstractmanager: false;
 $include-ext-action: false;
@@ -165,7 +165,6 @@ $include-ext-data-proxy-proxy: false;
 $include-ext-data-proxy-rest: false;
 $include-ext-data-proxy-server: false;
 $include-ext-data-proxy-sessionstorage: false;
-$include-ext-data-proxy-sql: false;
 $include-ext-data-proxy-webstorage: false;
 $include-ext-data-reader-array: false;
 $include-ext-data-reader-json: false;

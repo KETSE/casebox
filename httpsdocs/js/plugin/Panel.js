@@ -65,7 +65,7 @@ Ext.define('CB.plugin.Panel', {
 
         this.clear();
 
-        if(Ext.isEmpty(params) || Ext.isEmpty(params.id)) {
+        if(Ext.isEmpty(params) || (Ext.isEmpty(params.id) && Ext.isEmpty(params.template_id))) {
             this.fireEvent('loaded', this);
             return;
         }

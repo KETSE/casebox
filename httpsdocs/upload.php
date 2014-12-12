@@ -19,7 +19,7 @@ if (isset($_SERVER['HTTP_X_FILE_OPTIONS'])) {
     $browser = new Browser();
     $result = $browser->saveFile(
         array(
-            'pid' => $file['pid']
+            'pid' => @$file['pid']
             ,'response' => @$file['response']
         )
     );

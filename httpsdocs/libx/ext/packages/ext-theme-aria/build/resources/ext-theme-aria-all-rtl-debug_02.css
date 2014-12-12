@@ -1,16 +1,3 @@
-/* line 1, ../../../ext-theme-neutral/sass/src/window/Toast.scss */
-.x-toast-icon-information {
-  background-image: url(images/window/toast/icon16_info.png); }
-
-/* line 5, ../../../ext-theme-neutral/sass/src/window/Toast.scss */
-.x-toast-icon-error {
-  background-image: url(images/window/toast/icon16_error.png); }
-
-/* Using standard theme */
-/* line 11, ../../../ext-theme-neutral/sass/src/window/Toast.scss */
-.x-toast-window .x-window-body {
-  padding: 15px 5px 15px 5px; }
-
 /* Custom styling */
 /* line 17, ../../../ext-theme-neutral/sass/src/window/Toast.scss */
 .x-toast-light .x-window-header {
@@ -180,17 +167,6 @@ tr.x-grid-subtable-row {
   .x-panel-header-title-light > .x-title-text-light {
     text-transform: none;
     padding: 0; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light > .x-title-text-light:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #b1b1b2; }
-    /* line 403, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light > .x-title-text-light.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-panel-header-title-light > .x-title-icon-wrap-light.x-title-icon-top {
     height: 22px;
@@ -515,17 +491,6 @@ tr.x-grid-subtable-row {
   .x-panel-header-title-light-framed > .x-title-text-light-framed {
     text-transform: none;
     padding: 0; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light-framed > .x-title-text-light-framed:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #b1b1b2; }
-    /* line 403, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light-framed > .x-title-text-light-framed.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-panel-header-title-light-framed > .x-title-icon-wrap-light-framed.x-title-icon-top {
     height: 22px;

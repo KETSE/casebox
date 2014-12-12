@@ -11,8 +11,13 @@ class Meta extends ObjectProperties
 
         $rez = parent::getData($id);
 
-        if (empty($rez['data']['html'])) {
-            // $rez['data']['html'] = 'No metadata';
+        if (empty($rez['data']['preview'])) {
+            unset($rez['data']);
+        } else {
+            $preview = implode('', $rez['data']['preview']);
+            if (empty($preview)) {
+                unset($rez['data']);
+            }
         }
 
         return $rez;

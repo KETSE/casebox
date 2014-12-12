@@ -37,7 +37,7 @@ Ext.define('CB.Breadcrumb', {
             } else {
                 data.push({
                     id: Ext.id()
-                    ,name: Ext.util.Format.htmlEncode(dataArray[i]).replace(/&amp;#47;/g, '&#47;')
+                    ,name: dataArray[i].replace(/&amp;#47;/g, '&#47;')
                 });
             }
         }

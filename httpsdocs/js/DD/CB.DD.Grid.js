@@ -149,7 +149,15 @@ Ext.define('CB.DD.Grid', {
             - direct parent of dragged node
             - any descendant of dragged node
         */
-       var targetRecord = this.view.getRecord(el);
+       var targetRecord = this.view.getRecord(el)
+            ,templateId = targetRecord.data.template_id
+            ,acceptChildren = isNaN(templateId)
+                ? false
+                : (Ext.valueFrom(
+                    CB.DB.templates.getProperty(templateId, 'cfg')
+                    ,''
+                    ).acceptChildren !== false
+                );
 
         var rez = this.dropAllowed;
         if(Ext.isEmpty(targetRecord) ||
@@ -165,13 +173,15 @@ Ext.define('CB.DD.Grid', {
             : [data.records];
         var i = 0;
         while ((i < sourceData.length) && (rez == this.dropAllowed))  {
-            if( (targetRecord.data[this.idProperty] == sourceData[i].get(this.idProperty))
+            if( !acceptChildren ||
+                (targetRecord.data[this.idProperty] == sourceData[i].get(this.idProperty))
                 || (targetRecord.data[this.idProperty] == sourceData[i].get('pid'))
             ) {
                 rez = this.dropNotAllowed;
             }
             i++;
         }
+
         return rez;
     }
 

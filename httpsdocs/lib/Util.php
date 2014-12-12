@@ -326,9 +326,8 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 
     $rez = $d1->format('D M j, Y');
     $hourText = $d1->format('H:i');
-    if ($hourText != '00:00') {
-        $rez .= ' '.$hourText;
-    }
+
+    $rez .= ' '.$hourText;
 
     if (empty($toDateTime)) {
         return $rez;
@@ -349,9 +348,7 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 
     $hourText = $d2->format('H:i');
 
-    if (($hourText != '00:00') || empty($d2format)) {
-        $d2format .= (empty($d2format) ? '' : ', ').'H:i';
-    }
+    $d2format .= (empty($d2format) ? '' : ', ').'H:i';
 
     if (!empty($d2format)) {
         $rez .= ' - '.$d2->format($d2format);

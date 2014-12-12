@@ -916,54 +916,68 @@ class Objects
      */
     public function getPluginsData($p)
     {
+        $id = @$p['id'];
+        $templateId = @$p['template_id'];
+        $template = null;
+        $templateData = null;
+        $objectPlugins = null;
+
         $rez = array(
             'success' => false
             ,'data' => array()
         );
-        if (empty($p['id']) || !is_numeric($p['id'])) {
+        if ((empty($id) && empty($templateId)) ||
+            (!is_numeric($id) && !is_numeric($templateId))
+        ) {
             return $rez;
         }
 
-        if (!Security::canRead($p['id'])) {
-            throw new \Exception(L\get('Access_denied'));
-        }
-
-        $rez['menu'] = Browser\CreateMenu::getMenuForPath($p['id']);
-
-        $id = $p['id'];
-        /* now we'll try to detect plugins config that could be found in following places:
-            1. in config of the template for the given object, named object_plugins
-            2. in core config, property object_type_plugins (config definitions per available template type values: object, case, task etc)
-            3. a generic config,  named default_object_plugins, could be defined in core config
-        */
-
-        $objectPlugins = null;
-        $o = $this->getCachedObject($id);
-        if (!empty($o)) {
-            $template = $o->getTemplate();
-            $templateData = is_null($template)
-                ? null
-                : $template->getData();
-
-            $from = empty($p['from'])
-                ? ''
-                : $p['from'];
-
-            if (!empty($from)) {
-                if (!empty($templateData['cfg']['object_plugins'][$from])) {
-                    $objectPlugins = $templateData['cfg']['object_plugins'][$from];
-                } else {
-                    $objectPlugins = Config::getObjectTypePluginsConfig($o->getType(), $from);
-
-                }
+        if (is_numeric($id)) {
+            if (!Security::canRead($id)) {
+                throw new \Exception(L\get('Access_denied'));
             }
 
-            if (empty($objectPlugins)) {
-                if (!empty($templateData['cfg']['object_plugins'])) {
-                    $objectPlugins = $templateData['cfg']['object_plugins'];
-                } else {
-                    $objectPlugins = Config::getObjectTypePluginsConfig($o->getType());
+            $rez['menu'] = Browser\CreateMenu::getMenuForPath($id);
+
+            /* now we'll try to detect plugins config that could be found in following places:
+                1. in config of the template for the given object, named object_plugins
+                2. in core config, property object_type_plugins (config definitions per available template type values: object, case, task etc)
+                3. a generic config,  named default_object_plugins, could be defined in core config
+            */
+
+            $o = $this->getCachedObject($id);
+
+            if (!empty($o)) {
+                $template = $o->getTemplate();
+                if (!empty($template)) {
+                    $templateData = $template->getData();
                 }
+            }
+        } else {
+            $id = null;
+            $templates = Templates\SingletonCollection::getInstance();
+            $templateData = $templates->getTemplate($templateId)->getData();
+        }
+
+
+        $from = empty($p['from'])
+            ? ''
+            : $p['from'];
+
+        if (!empty($from)) {
+            if (!empty($templateData['cfg']['object_plugins'][$from])) {
+                $objectPlugins = $templateData['cfg']['object_plugins'][$from];
+            } else {
+                $objectPlugins = Config::getObjectTypePluginsConfig(@$templateData['type'], $from);
+
+            }
+        }
+
+        if (empty($objectPlugins)) {
+            if (!empty($templateData['cfg']['object_plugins'])) {
+                $objectPlugins = $templateData['cfg']['object_plugins'];
+            } else {
+                $objectPlugins = Config::getObjectTypePluginsConfig($o->getType());
             }
         }
 
@@ -977,9 +991,8 @@ class Objects
             $class = '\\CB\\Objects\\Plugins\\'.ucfirst($pluginName);
             $pClass = new $class($id);
             $prez = $pClass->getData();
-            // if (!empty($prez) && isset($prez['data'])) {
+
             $rez['data'][$pluginName] = $prez;
-            //}
         }
 
         return $rez;

@@ -848,7 +848,6 @@ class User
             WHERE (user_id = $1)
                     AND (`system` = 1)
                     AND (`type` = 1)
-                    AND (`subtype` = 2)
                     AND (pid IS NULL)',
             $user_id
         ) or die( DB\dbQueryError() );
@@ -866,7 +865,6 @@ class User
                     ,user_id
                     ,`system`
                     ,`type`
-                    ,`subtype`
                     ,cfg
                     ,template_id)
                 VALUES(
@@ -874,7 +872,6 @@ class User
                     ,$1
                     ,1
                     ,1
-                    ,2
                     ,$2
                     ,$3)',
                 array($user_id
@@ -918,7 +915,6 @@ class User
             WHERE (user_id = $1)
                     AND (`system` = 1)
                     AND (`type` = 1)
-                    AND (`subtype` = 3)
                     AND (pid = $2)',
             array($user_id
                 , $home_folder_id
@@ -937,7 +933,6 @@ class User
                     ,user_id
                     ,`system`
                     ,`type`
-                    ,`subtype`
                     ,template_id)
                 VALUES(
                     $1
@@ -945,7 +940,6 @@ class User
                     ,$2
                     ,1
                     ,1
-                    ,3
                     ,$3)',
                 array($home_folder_id
                     ,$user_id
@@ -986,8 +980,7 @@ class User
             WHERE user_id = $1
                     AND SYSTEM = 1
                     AND (pid IS NULL)
-                    AND TYPE = 1
-                    AND subtype = 2',
+                    AND TYPE = 1',
             $_SESSION['user']['id']
         ) or die( DB\dbQueryError() );
 
@@ -1019,8 +1012,7 @@ class User
             WHERE user_id = $1
                 AND SYSTEM = 1
                 AND pid =$2
-                AND TYPE = 1
-                AND subtype = 6',
+                AND type = 1',
             array(
                 $_SESSION['user']['id']
                 ,$pid
@@ -1038,7 +1030,6 @@ class User
                     ,user_id
                     ,`system`
                     ,`type`
-                    ,`subtype`
                     ,`name`
                     ,cid
                     ,uid
@@ -1048,7 +1039,6 @@ class User
                     ,$2
                     ,1
                     ,1
-                    ,6
                     ,\'[Emails]\'
                     ,$3
                     ,$3

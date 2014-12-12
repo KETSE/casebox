@@ -75,13 +75,11 @@ class Object
             if (!empty($this->data['template_id']) && $this->loadTemplate) {
                 $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
 
-                //check if object has no pid and there is defaultPid specified in template config
-                if (empty($p['pid']) || !is_numeric($p['pid'])) {
-                    $templateData = $template->getData();
+                //check if there is defaultPid specified in template config
+                $templateData = $this->template->getData();
 
-                    if (!empty($templateData['cfg']['defaultPid'])) {
-                        $p['pid'] = $templateData['cfg']['defaultPid'];
-                    }
+                if (!empty($templateData['cfg']['defaultPid'])) {
+                    $p['pid'] = $templateData['cfg']['defaultPid'];
                 }
             }
         }
@@ -147,6 +145,7 @@ class Object
                 ,oid
                 ,cdate
                 ,`system`
+                ,`draft`
                 ,updated
             )
             VALUES (
@@ -164,6 +163,7 @@ class Object
                 ,$12
                 ,COALESCE($13, CURRENT_TIMESTAMP)
                 ,$14
+                ,$15
                 ,1
             )',
             array(
@@ -181,6 +181,7 @@ class Object
                 ,@$p['oid']
                 ,@$p['cdate']
                 ,@intval($p['system'])
+                ,@intval($p['draft'])
             )
         ) or die(DB\dbQueryError());
 
@@ -368,6 +369,7 @@ class Object
         $params = array(
             '`uid` = $2'
             ,'`udate` = CURRENT_TIMESTAMP'
+            ,'`draft` = 0'
             ,'updated = 1'
         );
         $i = 3;
@@ -389,6 +391,11 @@ class Object
                 $saveValues
             ) or die(DB\dbQueryError());
         }
+
+        DB\dbQuery(
+            'call `p_mark_all_child_drafts_as_active`($1)',
+            $this->id
+        ) or die(DB\dbQueryError());
 
         $this->updateCustomData();
 
@@ -1004,7 +1011,6 @@ class Object
                 ,`user_id`
                 ,`system`
                 ,`type`
-                ,`subtype`
                 ,`template_id`
                 ,`tag_id`
                 ,`target_id`
@@ -1030,7 +1036,6 @@ class Object
                 ,`user_id`
                 ,`system`
                 ,`type`
-                ,`subtype`
                 ,`template_id`
                 ,`tag_id`
                 ,`target_id`

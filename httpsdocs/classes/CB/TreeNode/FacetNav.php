@@ -100,7 +100,7 @@ class FacetNav extends Base
                     'name' => $this->getName('root')
                     ,'id' => $this->getId('root')
                     ,'iconCls' => Util\coalesce(@$this->config['iconCls'], 'icon-folder')
-                    ,'has_childs' => (!empty($this->config['facet_fields']) || !empty($this->config['show_in_tree']))
+                    ,'has_childs' => (!empty($this->config['level_fields']) || !empty($this->config['show_in_tree']))
                 )
             )
         );

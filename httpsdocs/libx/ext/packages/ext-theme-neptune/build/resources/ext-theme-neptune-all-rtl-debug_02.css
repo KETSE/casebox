@@ -1,26 +1,3 @@
-.x-panel .x-panel-header-light-collapsed-border-right {
-  border-left-width: 1px !important; }
-/* line 713, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-.x-panel .x-panel-header-light-collapsed-border-bottom {
-  border-top-width: 1px !important; }
-/* line 717, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-.x-panel .x-panel-header-light-collapsed-border-left {
-  border-right-width: 1px !important; }
-
-/*<if slicer>*/
-/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
-.x-cmd-slicer.x-panel-header-light-top:before {
-  display: none;
-  content: "x-slicer:stretch:bottom" !important; }
-
-/*</if slicer>*/
-/* */
-/*<if slicer>*/
-/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
-.x-cmd-slicer.x-panel-header-light-bottom:before {
-  display: none;
-  content: "x-slicer:stretch:top" !important; }
-
 /*</if slicer>*/
 /* */
 /*<if slicer>*/
@@ -253,17 +230,6 @@
   .x-panel-header-title-light-framed > .x-title-text-light-framed {
     text-transform: none;
     padding: 0; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light-framed > .x-title-text-light-framed:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #aeb5ba; }
-    /* line 403, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light-framed > .x-title-text-light-framed.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-panel-header-title-light-framed > .x-title-icon-wrap-light-framed.x-title-icon-top {
     height: 22px;

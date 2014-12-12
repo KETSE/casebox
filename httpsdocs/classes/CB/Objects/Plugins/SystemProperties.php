@@ -50,7 +50,7 @@ class SystemProperties extends Base
             $arr = array(&$r);
             Search::setPaths($arr);
 
-            $r['path'] = htmlspecialchars($r['path'], ENT_COMPAT);
+            // $r['path'] = htmlspecialchars($r['path'], ENT_COMPAT);
 
             $r['template_name'] = htmlspecialchars($r['template_name'], ENT_COMPAT);
             $r['cid_text'] = User::getDisplayName($r['cid']);

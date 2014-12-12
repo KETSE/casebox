@@ -14,7 +14,10 @@ class Files extends Base
             'success' => true
             ,'data' => array()
         );
-        parent::getData($id);
+
+        if (empty(parent::getData($id))) {
+            return $rez;
+        }
 
         $params = array(
             'pid' => $this->id

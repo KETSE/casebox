@@ -80,6 +80,8 @@ Ext.define('CB.object.edit.Window', {
 
                 ,'editobject': this.onEditObjectEvent
                 ,'editmeta': this.onEditObjectEvent
+
+                ,'getdraftid': this.onGetDraftId
             }
         });
 
@@ -320,11 +322,14 @@ Ext.define('CB.object.edit.Window', {
                 ,this.processLoadEditData
                 ,this
             );
-            this.pluginsContainer.doLoad({
-                id: this.data.id
-                ,from: 'window'
-            });
         }
+
+        this.pluginsContainer.doLoad({
+            id: this.data.id
+            ,template_id: this.data.template_id
+            ,from: 'window'
+        });
+
         this.updateButtons();
     }
 
@@ -565,7 +570,7 @@ Ext.define('CB.object.edit.Window', {
         }
         this.setTitle(title);
 
-        this.setIconCls(templatesStore.getIcon(templateId));
+        this.setIconCls(getItemIcon(this.data));
     }
 
     ,updateButtons: function() {
@@ -756,11 +761,6 @@ Ext.define('CB.object.edit.Window', {
         }
     }
 
-    //TO REVIEW
-    ,onIconChange: function(f, newIconCls, oldIconCls, eOpts) {
-        this.setIconCls(newIconCls);
-    }
-
     ,onBeforeClose: function(){
         if(this._confirmedClosing || !this._isDirty){
             return true;
@@ -864,7 +864,8 @@ Ext.define('CB.object.edit.Window', {
      * @return variant cusrrent scroll position
      */
     ,saveScroll: function() {
-        this.lastScroll = this.body.getScroll();
+        var gc = this.gridContainer.ownerCt;
+        this.lastScroll = gc.body.getScroll();
 
         return this.lastScroll;
     }
@@ -874,8 +875,50 @@ Ext.define('CB.object.edit.Window', {
      * @return void
      */
     ,restoreScroll: function() {
-        this.body.setScrollLeft(this.lastScroll.left);
-        this.body.setScrollTop(this.lastScroll.top);
+        var gc = this.gridContainer.ownerCt;
+        gc.body.setScrollLeft(this.lastScroll.left);
+        gc.body.setScrollTop(this.lastScroll.top);
+    }
+
+    ,onGetDraftId: function(callback, scope) {
+        this.getDraftIdCallback = scope
+            ? Ext.Function.bind(callback, scope)
+            : callback;
+
+        if(!isNaN(this.data.id)) {
+            this.getDraftIdCallback(this.data.id);
+
+        } else {
+            this.readValues();
+
+            var data = Ext.apply({}, this.data);
+            data.draft = true;
+
+            CB_Objects.create(
+                data
+                ,this.processSaveDraft
+                ,this
+            );
+        }
+    }
+
+    ,processSaveDraft: function(r, e) {
+        if(r.success !== true) {
+            return;
+        }
+
+        var id = r.data.id;
+        this.data.id = id;
+
+        //update loadedData.id of the plugins container so it will reload automaticly
+        //on fileuploaded event
+        this.pluginsContainer.loadedParams = {
+            id: id
+            ,template_id: this.data.template_id
+            ,from: 'window'
+        };
+
+        this.getDraftIdCallback(id);
     }
 
 });

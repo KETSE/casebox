@@ -118,7 +118,9 @@ Ext.define('CB.Uploader', {
                 this.fireEvent('fileuploadend', this.uploadingFile);
                 delete this.uploadingFile;
                 this.uploadNextFile();
-            }else this.onUploadFailure(r, e);
+            } else {
+                this.onUploadFailure(r, e);
+            }
         }
     }
     /* end of XHR listeners */
@@ -311,7 +313,8 @@ Ext.define('CB.Uploader', {
             }
             return;
         }
-        r = this.store.getAt(idx);
+
+        var r = this.store.getAt(idx);
         this.uploadingFile = r;
 
         this.stats.currentFileSize = r.get('size');

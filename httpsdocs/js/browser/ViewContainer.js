@@ -793,7 +793,6 @@ Ext.define('CB.browser.ViewContainer', {
         // this.folderProperties.id = this.folderProperties.id;
         this.folderProperties.system = parseInt(this.folderProperties.system, 10);
         this.folderProperties.type = parseInt(this.folderProperties.type, 10);
-        this.folderProperties.subtype = parseInt(this.folderProperties.subtype, 10);
         this.folderProperties.pathtext = result.pathtext;
 
         this.descendantsButton.toggle(ep.descendants === true);
@@ -1152,8 +1151,7 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onObjectsOpenEvent: function(objectData, e) {
-        if(e && e.stopPropagation) {
-            e.stopPropagation();
+        if(e && e.stopEvent) {
             e.stopEvent();
         }
 
@@ -1166,19 +1164,28 @@ Ext.define('CB.browser.ViewContainer', {
             switch(detectFileEditor(data.name)) {
                 case 'text':
                 case 'html':
-                    App.mainViewPort.onFileOpen(data, e);
-                    break;
-                case 'webdav':
-                    App.openWebdavDocument(data);
-                    break;
+                    // open directly in edit mode
+                    data.view = 'edit';
+
                 default:
-                    this.onDownloadClick();
+                    App.openObjectWindow(data);
                     break;
             }
 
             return;
+        } else {
+            //check if leaf set in template config and open edit if so
+            var cfg = CB.DB.templates.getProperty(data.template_id, 'cfg');
+
+            if(cfg && (cfg.leaf === true)) {
+                data.view = 'edit';
+                App.openObjectWindow(data);
+
+                return;
+            }
         }
 
+        // if not opened object window then browse inside the item
         var path = this.folderProperties.path;
         if(path.substr(-1, 1) !== '/') {
             path += '/';
@@ -1330,7 +1337,6 @@ Ext.define('CB.browser.ViewContainer', {
                 ,name: selection[i].name
                 ,system: selection[i].system
                 ,type: selection[i].type
-                ,subtype: selection[i].subtype
                 ,iconCls: selection[i].iconCls
             });
         }

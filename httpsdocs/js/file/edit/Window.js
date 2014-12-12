@@ -32,11 +32,12 @@ Ext.define('CB.file.edit.Window', {
      * @return array
      */
     ,getToolbarButtons: function() {
+        this.downloadSeparator = Ext.create({xtype: 'tbseparator'});
         return [
             this.actions.edit
             ,this.actions.save
             ,this.actions.cancel
-            ,'-'
+            ,this.downloadSeparator
             ,this.actions.download
             ,'->'
             ,this.actions.showInfoPanel
@@ -102,48 +103,17 @@ Ext.define('CB.file.edit.Window', {
     }
 
     /**
-     * method for loading data into edit mode
-     * @return void
-     */
-    ,loadEditData: function() {
-
-        var data = this.data;
-
-        // for a new object we just load template locally
-        if(isNaN(data.id)) {
-            if(Ext.isEmpty(data.name)) {
-                data.name = L.New + ' ' + CB.DB.templates.getName(data.template_id);
-            }
-
-            this.processLoadEditData({
-                    success: true
-                    ,data: data
-                }
-            );
-        } else {
-            CB_Objects.load(
-                {id: this.data.id}
-                ,this.processLoadEditData
-                ,this
-            );
-            this.pluginsContainer.doLoad({
-                id: this.data.id
-                ,from: 'window'
-            });
-        }
-
-        this.updateButtons();
-    }
-
-    /**
      * loading preview panel of the file
      * @return void
      */
     ,processLoadPreviewData: function(r, e) {
         this.callParent(arguments);
 
+        var autoScroll = (getFileExtension(this.data.name) !== 'pdf');
+
         this.previewPanel = new CB.object.view.Preview({
             border: false
+            ,autoScroll: autoScroll
             ,bodyStyle: 'padding: 5px'
         });
 
@@ -213,6 +183,7 @@ Ext.define('CB.file.edit.Window', {
 
         this.callParent(arguments);
 
+        this.downloadSeparator.setHidden(this.actions.cancel.isHidden());
         this.actions.edit.setHidden((this.viewMode == 'edit') || (this.editType === false));
         this.actions.save.setDisabled(false);
     }
@@ -263,7 +234,7 @@ Ext.define('CB.file.edit.Window', {
 
     ,saveContent: function() {
         var ed = this.contentEditor
-            session = ed.getSession
+            ,session = ed.getSession
                 ? ed.getSession()
                 : null;
 

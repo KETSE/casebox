@@ -9392,6 +9392,18 @@ ul.x5-tagfield-list.x5-tagfield-singleselect {
   font-size: 0;
   line-height: 0; }
 
+/* line 1, ../../../ext-theme-base/sass/src/grid/selection/SpreadsheetModel.scss */
+.x5-ssm-row-numberer-hd {
+  cursor: se-resize!important; }
+
+/* line 6, ../../../ext-theme-base/sass/src/grid/selection/SpreadsheetModel.scss */
+.x5-ssm-row-numberer-cell {
+  cursor: e-resize; }
+
+/* line 11, ../../../ext-theme-base/sass/src/grid/selection/SpreadsheetModel.scss */
+.x5-ssm-column-select .x5-column-header {
+  cursor: s-resize; }
+
 /* line 1, ../../../ext-theme-base/sass/src/layout/container/Absolute.scss */
 .x5-abs-layout-ct {
   position: relative; }
@@ -10736,13 +10748,6 @@ ul.x5-tagfield-list.x5-tagfield-singleselect {
   .x5-panel-header-title-default > .x5-title-text-default {
     text-transform: none;
     padding: 0 2px 1px; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x5-panel-header-title-default > .x5-title-text-default:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #7b9ec9; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x5-panel-header-title-default > .x5-title-icon-wrap-default.x5-title-icon-top {
     height: 18px;
@@ -10961,13 +10966,6 @@ ul.x5-tagfield-list.x5-tagfield-singleselect {
   .x5-panel-header-title-default-framed > .x5-title-text-default-framed {
     text-transform: none;
     padding: 0 2px 1px; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x5-panel-header-title-default-framed > .x5-title-text-default-framed:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #7b9ec9; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x5-panel-header-title-default-framed > .x5-title-icon-wrap-default-framed.x5-title-icon-top {
     height: 18px;
@@ -21269,13 +21267,6 @@ div.x5-border-layout-ct {
   .x5-window-header-title-default > .x5-title-text-default {
     padding: 0 2px 1px;
     text-transform: none; }
-    /* line 321, ../../../ext-theme-neutral/sass/src/window/Window.scss */
-    .x5-window-header-title-default > .x5-title-text-default:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #7d9ec2; }
   /* line 341, ../../../ext-theme-neutral/sass/src/window/Window.scss */
   .x5-window-header-title-default > .x5-title-icon-wrap-default.x5-title-icon-top {
     height: 18px;

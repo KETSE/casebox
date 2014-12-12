@@ -376,7 +376,7 @@ class Browser
             }
         }
 
-        $p['fl'] = 'id,name,type,subtype,template_id,status';
+        $p['fl'] = 'id,name,type,template_id,status';
         if (!empty($p['fields'])) {
             if (!is_array($p['fields'])) {
                 $p['fields'] = explode(',', $p['fields']);
@@ -551,7 +551,6 @@ class Browser
                 ,'name' => $newFolderName
                 ,'system' => 0
                 ,'type' => 1
-                ,'subtype' => 0
                 ,'iconCls' => 'icon-folder'
                 ,'cid' => $_SESSION['user']['id']
             )
@@ -1180,7 +1179,6 @@ class Browser
             'SELECT t.id `nid`
                 ,t.`system`
                 ,t.`type`
-                ,t.`subtype`
                 ,t.`name`
                 ,t.`cfg`
                 ,ti.acl_count
@@ -1210,7 +1208,6 @@ class Browser
             WHERE pid IS NULL
                 AND `system` = 1
                 AND `type` = 1
-                AND subtype = 2
                 AND user_id = $1',
             $_SESSION['user']['id']
         ) or die(DB\dbQueryError());
@@ -1265,55 +1262,9 @@ class Browser
             //@$d['nid'] = intval($d['nid']);
             @$d['system'] = intval($d['system']);
             @$d['type'] = intval($d['type']);
-            @$d['subtype'] = intval($d['subtype']);
 
             if ($d['system']) {
                 $d['name'] = L\getTranslationIfPseudoValue($d['name']);
-            }
-            /* next switch should/will be excluded: */
-            switch ($d['type']) {
-                case 0:
-                    break;
-                case 1:
-                    switch ($d['subtype']) {
-                        case 1:
-                            $d['name'] = L\getTranslationIfPseudoValue($d['name']);
-                            break;
-                        case 2:
-                            $d['name'] = L\get('MyCaseBox');
-                            break;
-                        case 3:
-                            $d['name'] = L\get('MyDocuments');
-                            break;
-                        case 4:
-                            $d['name'] = L\get('Cases');
-                            break;
-                        case 5:
-                            $d['name'] = L\get('Tasks');
-                            break;
-                        case 6:
-                            $d['name'] = L\get('Messages');
-                            break;
-                        //case 7:
-                        //  $d['name'] = L\get('RecycleBin');
-                        //  break;
-                        case 8:
-                            break;
-                        case 9:
-                            break;
-                        case 10:
-                            $d['name'] = L\get('PublicFolder');
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
             }
         }
 

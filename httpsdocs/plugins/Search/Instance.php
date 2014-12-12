@@ -77,7 +77,7 @@ class Instance extends CB\Plugin
          // skip grid params
         unset($p->grid);
 
-        $p->fl = 'id, pid, path, name, template_type, subtype, system, '.
+        $p->fl = 'id, pid, path, name, template_type, system, '.
             'size, date, date_end, oid, cid, cdate, uid, udate, case_id, acl_count, '.
             'case, template_id, task_u_assignee, status, task_d_closed, versions, '.
             'case_violation_resolved, case_violation_unresolved, cfg, type, nid, '.

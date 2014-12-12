@@ -7,6 +7,8 @@ Ext.define('CB.object.plugin.Files', {
     ,xtype: 'CBObjectPluginFiles'
     ,cls: 'obj-plugin'
 
+    ,bodyStyle: 'min-height: 50px; margin-bottom:0; padding-bottom:30px'
+
     ,initComponent: function(){
 
         this.actions = {
@@ -101,7 +103,6 @@ Ext.define('CB.object.plugin.Files', {
             }
         });
 
-        // CB.object.plugin.Files.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
 
         this.enableBubble(['fileupload', 'lockpanel']);
@@ -110,7 +111,10 @@ Ext.define('CB.object.plugin.Files', {
             pidPropety: 'id'
             ,dropZoneEl: this.dropPanel.getEl()
         };
-        this.filesDropPlugin = new CB.plugin.dd.FilesDropZone({pidPropety: 'id'});
+        this.filesDropPlugin = new CB.plugin.dd.FilesDropZone({
+            pidPropety: 'id'
+        });
+
         this.filesDropPlugin.init(this);
 
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);

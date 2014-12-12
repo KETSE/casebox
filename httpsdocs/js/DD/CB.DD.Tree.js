@@ -134,12 +134,21 @@ Ext.define('CB.DD.Tree', {
 
         var i = 0;
 
-        var targetRecord = this.view.getRecord(node);
+        var targetRecord = this.view.getRecord(node)
+            ,templateId = targetRecord.data.template_id
+            ,acceptChildren = isNaN(templateId)
+                ? false
+                : (Ext.valueFrom(
+                    CB.DB.templates.getProperty(templateId, 'cfg')
+                    ,''
+                    ).acceptChildren !== false
+                );
 
         while ((i < data.records.length) && (rez != this.dropNotAllowed))  {
             var r = data.records[i];
 
-            if(isNaN(r.data[this.idProperty]) ||
+            if(!acceptChildren ||
+                isNaN(r.data[this.idProperty]) ||
                 isNaN(targetRecord.data[this.idProperty]) ||
                 (targetRecord.data[this.idProperty] == r.data[this.idProperty]) ||
                 (targetRecord.data[this.idProperty] == r.data.pid) ||

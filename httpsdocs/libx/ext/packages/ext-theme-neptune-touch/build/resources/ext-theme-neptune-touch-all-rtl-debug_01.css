@@ -9600,6 +9600,18 @@ ul.x-tagfield-list.x-tagfield-singleselect {
   font-size: 0;
   line-height: 0; }
 
+/* line 1, ../../../ext-theme-base/sass/src/grid/selection/SpreadsheetModel.scss */
+.x-ssm-row-numberer-hd {
+  cursor: se-resize!important; }
+
+/* line 6, ../../../ext-theme-base/sass/src/grid/selection/SpreadsheetModel.scss */
+.x-ssm-row-numberer-cell {
+  cursor: e-resize; }
+
+/* line 11, ../../../ext-theme-base/sass/src/grid/selection/SpreadsheetModel.scss */
+.x-ssm-column-select .x-column-header {
+  cursor: s-resize; }
+
 /* line 1, ../../../ext-theme-base/sass/src/layout/container/Absolute.scss */
 .x-abs-layout-ct {
   position: relative; }
@@ -10899,17 +10911,6 @@ ul.x-tagfield-list.x-tagfield-singleselect {
   .x-panel-header-title-default > .x-title-text-default {
     text-transform: none;
     padding: 0; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-default > .x-title-text-default:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #72b2e0; }
-    /* line 403, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-default > .x-title-text-default.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-panel-header-title-default > .x-title-icon-wrap-default.x-title-icon-top {
     height: 22px;
@@ -11233,17 +11234,6 @@ ul.x-tagfield-list.x-tagfield-singleselect {
   .x-panel-header-title-default-framed > .x-title-text-default-framed {
     text-transform: none;
     padding: 0; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-default-framed > .x-title-text-default-framed:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #72b2e0; }
-    /* line 403, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-default-framed > .x-title-text-default-framed.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-panel-header-title-default-framed > .x-title-icon-wrap-default-framed.x-title-icon-top {
     height: 22px;
@@ -21611,17 +21601,6 @@ div.x-border-layout-ct {
   .x-window-header-title-default > .x-title-text-default {
     padding: 0;
     text-transform: none; }
-    /* line 321, ../../../ext-theme-neutral/sass/src/window/Window.scss */
-    .x-window-header-title-default > .x-title-text-default:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #87bde4; }
-    /* line 332, ../../../ext-theme-neutral/sass/src/window/Window.scss */
-    .x-window-header-title-default > .x-title-text-default.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 341, ../../../ext-theme-neutral/sass/src/window/Window.scss */
   .x-window-header-title-default > .x-title-icon-wrap-default.x-title-icon-top {
     height: 22px;
@@ -26991,17 +26970,6 @@ a.x-color-picker-item:hover {
   .x-panel-header-title-light > .x-title-text-light {
     text-transform: none;
     padding: 0; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light > .x-title-text-light:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #aeb5ba; }
-    /* line 403, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light > .x-title-text-light.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-panel-header-title-light > .x-title-icon-wrap-light.x-title-icon-top {
     height: 22px;
@@ -27076,3 +27044,36 @@ a.x-color-picker-item:hover {
 /* line 713, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
 .x-panel .x-panel-header-light-collapsed-border-bottom {
   border-top-width: 1px !important; }
+/* line 717, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel .x-panel-header-light-collapsed-border-left {
+  border-right-width: 1px !important; }
+
+/*<if slicer>*/
+/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
+.x-cmd-slicer.x-panel-header-light-top:before {
+  display: none;
+  content: "x-slicer:stretch:bottom" !important; }
+
+/*</if slicer>*/
+/* */
+/*<if slicer>*/
+/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
+.x-cmd-slicer.x-panel-header-light-bottom:before {
+  display: none;
+  content: "x-slicer:stretch:top" !important; }
+
+/*</if slicer>*/
+/* */
+/*<if slicer>*/
+/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
+.x-cmd-slicer.x-panel-header-light-left:before {
+  display: none;
+  content: "x-slicer:stretch:right" !important; }
+
+/*</if slicer>*/
+/* */
+/*<if slicer>*/
+/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
+.x-cmd-slicer.x-panel-header-light-right:before {
+  display: none;
+  content: "x-slicer:stretch:left" !important; }

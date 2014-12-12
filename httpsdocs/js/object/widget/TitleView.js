@@ -6,7 +6,7 @@ Ext.define('CB.object.TitleView', {
     ,initComponent: function() {
         this.tpl = new Ext.XTemplate(
             '<tpl for=".">'
-            ,'<div class="obj-header">{[ Ext.util.Format.htmlEncode(Ext.valueFrom(values.name, \'\')) ]} &nbsp;'
+            ,'<div class="obj-header">{[ Ext.valueFrom(values.name, \'\') ]} &nbsp;'
                 ,'<div class="info">'
                     ,'{[ this.getTitleInfo(values) ]}'
                 ,'</div>'

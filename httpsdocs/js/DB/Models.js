@@ -70,7 +70,6 @@ Ext.define('FieldObjects', {
         ,'name'
         ,{name: 'date', type: 'date'}
         ,{name: 'type', type: 'int'}
-        ,{name: 'subtype', type: 'int'}
         ,{name: 'template_id', type: 'int'}
         ,{name: 'status', type: 'int'}
         ,'iconCls'

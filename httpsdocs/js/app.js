@@ -295,9 +295,9 @@ function initApp() {
             if(Ext.isEmpty(rez)) {
                 return '';
             }
-            if(rez.substr(-5) == '00:00') {
-                rez = rez.substr(0,10);
-            }
+            // if(rez.substr(-5) == '00:00') {
+            //     rez = rez.substr(0,10);
+            // }
 
             return rez;
         }

@@ -60,25 +60,7 @@ type: node type
     This definition can be updated when needed
  -->
 <field name="type"      type="tint"         indexed="true" stored="true" />
-<!--
-Note: fis field will be removed on cleanup.
 
-subtype: this field is dependent on type field value
-    for field "type" = 1 (Folder) there are defined following values for subtype:
-        1 - query. This type will be probably replaced by controller property in cfg field
-        2 – My Casebox (users home folder)
-        3 – My documents (users My Docuemnts folder)
-        4 .. 8 - have been removed and are not used now
-        9 – Tag folder. Autocreated folders that were specified in tags administration for cases system folders.
-        10 - Public case folder. It’ll be created by system for any case.
-
-    for field "type" = 4 (Case object)  this field uses already defined types from templates structure (1-case object, 2-in action, 3-out action, 4-case template)
-
-    for other values in field "type" his field (subtype) is not used for now
-
-    This definition can be updated when needed
- -->
-<field name="subtype"   type="tint"         indexed="true" stored="true" />
 <!-- size: used for file sizes  -->
 <field name="size"      type="tlong"        indexed="true" stored="true" />
 <!-- date: date field for all objects  -->
@@ -145,14 +127,6 @@ subtype: this field is dependent on type field value
 
 <!-- versions: versions count. Used for files -->
 <field name="versions"      type="tint" indexed="true" stored="true"/>
-
-<!-- sys_tags: system tags specified for the object -->
-<field name="sys_tags"      type="int"  indexed="true" stored="true" multiValued="true" />
-<!-- tree_tags: tags specified for object, that are actually also elements of the tree (not elements from thesauri)  -->
-<field name="tree_tags"     type="int"  indexed="true" stored="true" multiValued="true" />
-<!-- user_tags: user defined tags specified for the object -->
-<field name="user_tags"     type="int"  indexed="true" stored="true" multiValued="true" />
-
 
 <!-- metas: designed to contain metadata of the object for searching by medatada properties. Not used for now -->
 <field name="metas"         type="text_ws"      indexed="true" stored="true" />

@@ -18,7 +18,11 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
 
     ,init: function(owner) {
         this.owner = owner;
+
+        owner.enableBubble(['getdraftid']);
+
         owner.on('render', this.onRender, this);
+
         if(owner.dropZoneConfig) {
             Ext.apply(this.dropZoneConfig, owner.dropZoneConfig);
         }
@@ -49,10 +53,19 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
     ,getTarget: function(e){
         var te = this.owner.getEl();
         var ce = e.getTarget('.x-grid-row');
+
         if(!Ext.isEmpty(ce)){
-             ce = Ext.get(ce);
-             if(te.contains(ce)) {
-                te = ce;
+            var rel = this.owner.findTargetByEvent(e)
+                ,rec = this.owner.getRecord(rel)
+                ,templateId = rec.data.template_id
+                ,templateCfg = CB.DB.templates.getProperty(templateId, 'cfg')
+                ,acceptChildren = (Ext.valueFrom(templateCfg, {}).acceptChildren !== false);
+
+            if(acceptChildren) {
+                ce = Ext.get(ce);
+                 if(te.contains(ce)) {
+                    te = ce;
+                }
             }
         }
 
@@ -115,38 +128,70 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
     ,onDrop: function(e) {
         this.onDragLeave(e);
 
-        if(this.filesCount(e) < 1) return false;
+        if(this.filesCount(e) < 1) {
+            return false;
+        }
 
         this.getTargetData(e);
 
-        e.stopPropagation();
-        e.preventDefault();
+        e.stopEvent();
+
         this.hideDropZone();
+
         this.getRecursiveFileList(e);
     }
 
     ,getRecursiveFileList: function(e){
-        dt = e.browserEvent.dataTransfer;
+        var dt = e.browserEvent.dataTransfer;
 
-        if( Ext.isEmpty(dt.items) ) return this.processGetRecursiveFileList(dt.files);
+        if(Ext.isEmpty(dt.items)) {
+            return this.processGetRecursiveFileList(dt.files);
+        }
 
         var length = dt.items.length;
         var entries = [];
         for (var i = 0; i < length; i++) {
             entries.push( dt.items[i].webkitGetAsEntry() );
         }
-        Ext.ux.WebkitEntriesIterator.iterateEntries(entries, this.processGetRecursiveFileList, this);
+
+        Ext.ux.WebkitEntriesIterator.iterateEntries(
+            entries
+            ,this.processGetRecursiveFileList
+            ,this
+        );
+
         return 0;
     }
 
     ,processGetRecursiveFileList: function(filesArray){
         /* adding dorpped files to queue */
-        App.addFilesToUploadQueue(filesArray, {
-            pid: this.targetId
-            ,pathtext: this.targetPath
-        });
-        return true;
 
+        if(isNaN(this.targetId)) {
+            this.filesArray = filesArray;
+            this.owner.fireEvent('getdraftid', this.onGetDraftIdCallback, this);
+
+            return false;
+        }
+
+        App.addFilesToUploadQueue(
+            filesArray
+            ,{
+                pid: this.targetId
+                ,pathtext: this.targetPath
+            }
+        );
+
+        return true;
+    }
+
+    ,onGetDraftIdCallback: function(draftId) {
+        if(isNaN(draftId)) {
+            return;
+        }
+
+        this.targetId = draftId;
+
+        this.processGetRecursiveFileList(this.filesArray);
     }
 
     ,addFilesToQueue: function(e, targetPid){
@@ -156,7 +201,8 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
     ,filesCount: function(e){
         var files = e.browserEvent.dataTransfer.files; // FileList object.
         if(Ext.isEmpty(files)) return 0;
-        for (var i = 0, f; f = files[i]; i++){}
+        for (var i = 0, f; f = files[i]; i++) {
+        }
         return i;
     }
 

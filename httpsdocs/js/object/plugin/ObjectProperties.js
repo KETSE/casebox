@@ -15,7 +15,6 @@ Ext.define('CB.object.plugin.ObjectProperties', {
             }
         });
 
-        // CB.object.plugin.ObjectProperties.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
     }
 

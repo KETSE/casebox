@@ -1,3 +1,26 @@
+CaseBox 1.9.369 (2014-12-13)
+==============================
+New Features, Improvements
+--------------------------
+- #4203 Editing fields in vGrid: scrolling jumps to beginning of window
+- #4094 Node drafts: allow to attach files to an item when it's created
+- #4194 UI issues in file preview window
+- #4095 Implement "plugins", "layout", "leaf" and "acceptChildren" features for templates
+- #3901 changed defaultPid from template config to overwrite pid from client side
+- #3602 Always show Date + Time if it's a dateTime field
+- #4204 removed solr fields: subtype, sys_tags, tree_tags, user_tags
+- updated Ext to version 5.1
+
+Fixed Bugs:
+----------
+- #4159 misspelled param name "level_fields"
+- #4132 Deleting a folder in Tree gives JS error
+- #4219 special chars rendered as html codes in preview title & breadcrumbs
+
+Notes:
+----------
+- DB structure changed, use v.1.9.369.sql to update
+
 CaseBox 1.9.368 (2014-12-11)
 ==============================
 New Features, Improvements

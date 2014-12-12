@@ -16,31 +16,11 @@ Ext.define('CB.DB.ObjectsStore', {
                     type: 'json'
                 }
             }
-            // fields: [
-            //     {name: 'id', type: 'int'}
-            //     ,'name'
-            //     ,{name: 'date', type: 'date'}
-            //     ,{name: 'type', type: 'int'}
-            //     ,{name: 'subtype', type: 'int'}
-            //     ,{name: 'template_id', type: 'int'}
-            //     ,{name: 'status', type: 'int'}
-            //     ,'iconCls'
-            // ]
         }]);
 
         this.getTexts = getStoreNames;
     }
-    // ,getData: function(v){  // this function conflicts with new getData method of stores
-    //     if(Ext.isEmpty(v)) return [];
-    //     ids = String(v).split(',');
-    //     data = [];
-    //     Ext.each(ids, function(id){
-    //          idx = this.findExact('id', parseInt(id, 10));
-    //         if(idx >= 0) data.push(this.getAt(idx).data);
-    //     }, this);
 
-    //     return data;
-    // }
     ,checkRecordExistance: function(data){
         if(Ext.isEmpty(data)) {
             return false;

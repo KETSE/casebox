@@ -9604,6 +9604,18 @@ ul.x-tagfield-list.x-tagfield-singleselect {
   font-size: 0;
   line-height: 0; }
 
+/* line 1, ../../../ext-theme-base/sass/src/grid/selection/SpreadsheetModel.scss */
+.x-ssm-row-numberer-hd {
+  cursor: se-resize!important; }
+
+/* line 6, ../../../ext-theme-base/sass/src/grid/selection/SpreadsheetModel.scss */
+.x-ssm-row-numberer-cell {
+  cursor: e-resize; }
+
+/* line 11, ../../../ext-theme-base/sass/src/grid/selection/SpreadsheetModel.scss */
+.x-ssm-column-select .x-column-header {
+  cursor: s-resize; }
+
 /* line 1, ../../../ext-theme-base/sass/src/layout/container/Absolute.scss */
 .x-abs-layout-ct {
   position: relative; }
@@ -10906,17 +10918,6 @@ ul.x-tagfield-list.x-tagfield-singleselect {
   .x-panel-header-title-default > .x-title-text-default {
     text-transform: none;
     padding: 0; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-default > .x-title-text-default:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #9bc5e4; }
-    /* line 403, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-default > .x-title-text-default.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-panel-header-title-default > .x-title-icon-wrap-default.x-title-icon-top {
     height: 22px;
@@ -11240,17 +11241,6 @@ ul.x-tagfield-list.x-tagfield-singleselect {
   .x-panel-header-title-default-framed > .x-title-text-default-framed {
     text-transform: none;
     padding: 0; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-default-framed > .x-title-text-default-framed:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #9bc5e4; }
-    /* line 403, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-default-framed > .x-title-text-default-framed.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-panel-header-title-default-framed > .x-title-icon-wrap-default-framed.x-title-icon-top {
     height: 22px;
@@ -21275,17 +21265,6 @@ div.x-border-layout-ct {
   .x-window-header-title-default > .x-title-text-default {
     padding: 0;
     text-transform: none; }
-    /* line 321, ../../../ext-theme-neutral/sass/src/window/Window.scss */
-    .x-window-header-title-default > .x-title-text-default:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #9bc5e4; }
-    /* line 332, ../../../ext-theme-neutral/sass/src/window/Window.scss */
-    .x-window-header-title-default > .x-title-text-default.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 341, ../../../ext-theme-neutral/sass/src/window/Window.scss */
   .x-window-header-title-default > .x-title-icon-wrap-default.x-title-icon-top {
     height: 22px;
@@ -26575,17 +26554,6 @@ a.x-color-picker-item:hover {
   .x-panel-header-title-light > .x-title-text-light {
     text-transform: none;
     padding: 0; }
-    /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light > .x-title-text-light:after {
-      content: 'Ext JS Beta';
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: #999999; }
-    /* line 403, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
-    .x-panel-header-title-light > .x-title-text-light.x-rtl:after {
-      right: auto;
-      left: 0; }
   /* line 412, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-panel-header-title-light > .x-title-icon-wrap-light.x-title-icon-top {
     height: 22px;
@@ -26866,3 +26834,23 @@ a.x-color-picker-item:hover {
   .x-panel-header-light-framed-horizontal.x-header-noborder .x-panel-header-light-framed-tab-bar {
     margin-top: -6px;
     margin-bottom: -5px; }
+
+/* line 306, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-vertical {
+  padding: 15px 5px 15px 5px; }
+  /* line 310, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+  .x-panel-header-light-framed-vertical .x-panel-header-light-framed-tab-bar {
+    margin-right: -5px;
+    margin-left: -5px; }
+
+/* line 318, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-vertical.x-header-noborder {
+  padding: 16px 6px 16px 5px; }
+  /* line 322, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+  .x-panel-header-light-framed-vertical.x-header-noborder .x-panel-header-light-framed-tab-bar {
+    margin-right: -6px;
+    margin-left: -5px; }
+
+/* line 331, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-rtl.x-panel-header-light-framed-vertical {
+  padding: 15px 5px 15px 5px; }

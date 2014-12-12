@@ -1,15 +1,3 @@
-/* line 21, ../../../ext-theme-neutral/sass/src/resizer/Resizer.scss */
-.x5-resizable-handle-north {
-  cursor: n-resize; }
-
-/* line 24, ../../../ext-theme-neutral/sass/src/resizer/Resizer.scss */
-.x5-resizable-handle-south {
-  cursor: s-resize; }
-
-/* line 27, ../../../ext-theme-neutral/sass/src/resizer/Resizer.scss */
-.x5-resizable-handle-east {
-  cursor: e-resize; }
-
 /* line 30, ../../../ext-theme-neutral/sass/src/resizer/Resizer.scss */
 .x5-resizable-handle-west {
   cursor: w-resize; }
