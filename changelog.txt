@@ -1,3 +1,9 @@
+CaseBox 1.9.370 (2014-12-13)
+==============================
+New Features, Improvements
+--------------------------
+- revert to ExtJS 5.1 beta because of navigation problems when editing grid fields
+
 CaseBox 1.9.369 (2014-12-13)
 ==============================
 New Features, Improvements
