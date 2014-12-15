@@ -141,6 +141,7 @@ Ext.define('CB.object.plugin.Files', {
 
     ,onItemClick: function (cmp, record, item, index, e, eOpts) {//dv, index, el, e
         var te = Ext.get(e.getTarget());
+
         if(!te) {
             return;
         }
@@ -185,6 +186,8 @@ Ext.define('CB.object.plugin.Files', {
         }
 
         this.puMenu.showAt(coord);
+
+        Ext.defer(this.puMenu.show, 10, this.puMenu);
     }
 
     ,onDownloadClick: function(b, e) {

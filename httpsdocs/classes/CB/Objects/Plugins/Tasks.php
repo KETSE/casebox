@@ -14,7 +14,10 @@ class Tasks extends Base
         $rez = array(
             'success' => true
         );
-        parent::getData($id);
+
+        if (empty(parent::getData($id))) {
+            return $rez;
+        }
 
         $params = array(
             'pid' => $this->id

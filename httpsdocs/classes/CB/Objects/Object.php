@@ -74,13 +74,15 @@ class Object
             $this->template = null;
             if (!empty($this->data['template_id']) && $this->loadTemplate) {
                 $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
+            }
+        }
 
-                //check if there is defaultPid specified in template config
-                $templateData = $this->template->getData();
+        //check if there is defaultPid specified in template config
+        if (!empty($this->template)) {
+            $templateData = $this->template->getData();
 
-                if (!empty($templateData['cfg']['defaultPid'])) {
-                    $p['pid'] = $templateData['cfg']['defaultPid'];
-                }
+            if (!empty($templateData['cfg']['defaultPid'])) {
+                $this->data['pid'] = $templateData['cfg']['defaultPid'];
             }
         }
 

@@ -13,7 +13,7 @@ Ext.define('CB.object.edit.Window', {
     ,border: false
     ,minWidth: 200
     ,minHeight: 200
-    ,width: 400
+    ,width: 600
     ,height: 450
     ,iconCls: 'icon-none'
     ,autoScroll: false
@@ -80,6 +80,8 @@ Ext.define('CB.object.edit.Window', {
 
                 ,'editobject': this.onEditObjectEvent
                 ,'editmeta': this.onEditObjectEvent
+
+                ,'fileupload': this.onFileUploadEvent
 
                 ,'getdraftid': this.onGetDraftId
             }
@@ -211,11 +213,19 @@ Ext.define('CB.object.edit.Window', {
         ];
 
         if((this.templateCfg.layout === 'horizontal') || (this.templateType == 'file')) {
+            this.complexFieldContainer.flex = 1;
+            this.complexFieldContainer.layout = 'fit';
+
             rez = [
                 {
                     region: 'center'
                     ,border: true
-                    ,autoScroll: true
+                    ,bodyStyle: 'border-bottom:0; border-left: 0'
+                    ,autoScroll: false
+                    ,layout: {
+                        type: 'vbox'
+                        ,align: 'stretch'
+                    }
                     ,items: [
                         this.titleContainer
                         ,this.complexFieldContainer
@@ -228,7 +238,7 @@ Ext.define('CB.object.edit.Window', {
                     ,autoScroll: true
                     ,collapsible: true
                     ,collapseMode: 'mini'
-                    ,width: 200
+                    ,width: 300
                     ,items: [
                         ,this.gridContainer
                         ,this.pluginsContainer
@@ -466,24 +476,10 @@ Ext.define('CB.object.edit.Window', {
         this.grid.reload();
 
         if(this.grid.store.getCount() > 0) {
-            // var cm = this.grid.getColumnModel();
-
-            var c = this.grid.headerCt.child('[dataIndex="title"]');//cm.findColumnIndex('title');
-            var c2 = this.grid.headerCt.child('[dataIndex="value"]');//cm.findColumnIndex('value');
-
-            if(CB.DB.templates.getType(r.data.template_id) == 'case') {
-                c.setText('Case Card');
-                c2.setText('Details');
-            } else {
-                c.setText(L.Property);
-                c2.setText(L.Value);
-            }
-
             this.grid.show();
 
             if(this.grid.rendered) {
                 this.grid.getView().refresh(true);
-                // this.grid.doLayout();
             }
         }
 
@@ -881,6 +877,12 @@ Ext.define('CB.object.edit.Window', {
     }
 
     ,onGetDraftId: function(callback, scope) {
+        delete this.getDraftIdCallback;
+
+        if(Ext.isEmpty(callback)) {
+            callback = Ext.emptyFn;
+        }
+
         this.getDraftIdCallback = scope
             ? Ext.Function.bind(callback, scope)
             : callback;
@@ -918,7 +920,21 @@ Ext.define('CB.object.edit.Window', {
             ,from: 'window'
         };
 
-        this.getDraftIdCallback(id);
+        this.getDraftIdCallback(id, e);
+    }
+
+    ,onFileUploadEvent: function(p, e) {
+        if(isNaN(this.data.id)) {
+            this.onGetDraftId(onFileUploadEvent, this);
+            return;
+        }
+
+        App.mainViewPort.onFileUpload(
+            {
+                pid: this.data.id
+            }
+            ,e
+        );
     }
 
 });

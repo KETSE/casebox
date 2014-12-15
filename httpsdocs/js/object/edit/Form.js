@@ -214,24 +214,10 @@ Ext.define('CB.object.edit.Form', {
         this.grid.reload();
 
         if(this.grid.store.getCount() > 0) {
-            // var cm = this.grid.getColumnModel();
-
-            var c = this.grid.headerCt.child('[dataIndex="title"]');//cm.findColumnIndex('title');
-            var c2 = this.grid.headerCt.child('[dataIndex="value"]');//cm.findColumnIndex('value');
-
-            if(CB.DB.templates.getType(r.data.template_id) == 'case') {
-                c.setText('Case Card');
-                c2.setText('Details');
-            } else {
-                c.setText(L.Property);
-                c2.setText(L.Value);
-            }
-
             this.grid.show();
 
             if(this.grid.rendered) {
                 this.grid.getView().refresh(true);
-                this.grid.doLayout();
             }
         }
 

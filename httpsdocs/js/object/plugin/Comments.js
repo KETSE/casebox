@@ -191,6 +191,8 @@ Ext.define('CB.object.plugin.Comments', {
         });
 
         this.callParent(arguments);
+
+        this.enableBubble(['getdraftid']);
     }
 
     ,onLoadData: function(r, e) {
@@ -211,7 +213,26 @@ Ext.define('CB.object.plugin.Comments', {
         this.addCommentPanel.setHeight(field.getHeight() + 36);
     }
 
+    ,onGetDraftIdCallback: function(draftId) {
+        if(isNaN(draftId)) {
+            return;
+        }
+
+        this.params.id = draftId;
+
+        this.onAddCommentClick();
+    }
+
     ,onAddCommentClick: function(b, e) {
+        if(isNaN(this.params.id)) {
+            this.fireEvent(
+                'getdraftid'
+                ,this.onGetDraftIdCallback
+                ,this
+            );
+            return ;
+        }
+
         var msg = this.messageField.getValue().trim();
 
         if(Ext.isEmpty(msg)) {

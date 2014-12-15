@@ -77,7 +77,6 @@ Ext.define('CB.file.edit.Window', {
                 ,layout: {
                     type: 'vbox'
                     ,align: 'stretch'
-
                 }
                 ,items: [
                     this.titleContainer
@@ -87,11 +86,10 @@ Ext.define('CB.file.edit.Window', {
                 region: 'east'
                 ,itemId: 'infoPanel'
                 ,header: false
-                // ,border: false
                 ,autoScroll: true
                 ,collapsible: true
                 ,collapseMode: 'mini'
-                ,width: 200
+                ,width: 300
                 ,items: [
                     ,this.gridContainer
                     ,this.pluginsContainer

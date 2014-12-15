@@ -168,7 +168,11 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
 
         if(isNaN(this.targetId)) {
             this.filesArray = filesArray;
-            this.owner.fireEvent('getdraftid', this.onGetDraftIdCallback, this);
+            this.owner.fireEvent(
+                'getdraftid'
+                ,this.onGetDraftIdCallback
+                ,this
+            );
 
             return false;
         }

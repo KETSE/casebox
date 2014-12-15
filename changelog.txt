@@ -1,3 +1,20 @@
+CaseBox 1.9.371 (2014-12-15)
+==============================
+New Features, Improvements
+--------------------------
+- #4255 HTML editor in horizontal layout should be 100%
+- #4259 Remove custom "Case card" & "Details" vGrid headers for 'case' tmpl type
+- #4260 Use objPlugin header for HTML fields
+- IPC custom code adjustments
+
+Fixed Bugs:
+----------
+- #4247 Uploading files in objEdit popupWnd doesn't work
+- #4251 Can't add a comment when creating an object
+- #4252 set default theme to classic
+- #4257 Files plugin in ObjPreview in right panel: Popup menu for files doesn't appear
+- #3901 Add 'defaultPid: int' support in template
+
 CaseBox 1.9.370 (2014-12-13)
 ==============================
 New Features, Improvements

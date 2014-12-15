@@ -651,10 +651,13 @@ table.obj-preview td.prop-val {width: 70%}
 table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
 
 .obj-preview-h {
-    /*font: 13px "lucida grande",tahoma,verdana,arial,sans-serif;*/
     font-weight: bold;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 5px 0 5px 5px;
     margin-bottom: 7px;
 }
+
 .obj-preview ol{list-style: decimal outside }
 .obj-preview ol li{margin-left:20px; }
 .obj-preview ul{list-style: square outside }

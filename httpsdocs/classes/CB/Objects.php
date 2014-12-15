@@ -312,9 +312,9 @@ class Objects
                 if (empty($v)) {
                     continue;
                 }
-                $bottom .=  '<div class="obj-preview-h">'.$f['tf']['title'].'</div>'.$v.'<br />';
+                $bottom .=  '<div class="obj-preview-h">'.$f['tf']['title'].'</div><div style="padding: 0 5px">'.$v.'</div><br />';
             }
-            $bottom = '<div style="padding: 0 10px">'.$bottom.'</div>';
+            // $bottom = '<div style="padding: 0 10px">'.$bottom.'</div>';
         }
 
         // $logParams = array(

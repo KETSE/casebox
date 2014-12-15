@@ -72,7 +72,7 @@ class User
 
                 //set default theme
                 if (empty($r['cfg']['theme'])) {
-                    $r['cfg']['theme'] = 'gray';
+                    $r['cfg']['theme'] = 'classic';
                 }
 
                 // do not expose security params

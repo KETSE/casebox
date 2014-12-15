@@ -429,6 +429,7 @@ Ext.define('CB.VerticalEditGrid', {
             );
 
             var newConfig = Ext.apply([], this.gridColumns);
+
             if(!Ext.isEmpty(infoCol) &&  !colRequired) {
                 if(!colRequired) {
                     newConfig.pop();
