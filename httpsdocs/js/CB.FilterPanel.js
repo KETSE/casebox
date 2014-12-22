@@ -2,6 +2,11 @@ Ext.namespace('CB');
 
 Ext.define('CB.FilterPanel', {
     extend: 'Ext.Panel'
+
+    ,alias: 'widget.CBFilterPanel'
+
+    ,xtype: 'CBFilterPanel'
+
     ,autoScroll: true
     ,bodyStyle: 'padding: 10px 0'
     ,padding:0

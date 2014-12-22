@@ -176,9 +176,8 @@ Ext.define('CB.ObjectsComboField', {
             this.store.load();
         }
         var customIcon = (this.cfg.renderer == 'listGreenIcons') ? 'icon-element' : '';
-        var plugins = Ext.isEmpty(this.cfg.renderer)
-            ? []
-            : []; //[new Ext.ux.plugins.IconCombo()];
+        var plugins = [];
+
         Ext.apply(this, {
             mode: mode
             ,store: this.store

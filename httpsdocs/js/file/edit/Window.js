@@ -87,8 +87,11 @@ Ext.define('CB.file.edit.Window', {
                 ,itemId: 'infoPanel'
                 ,header: false
                 ,autoScroll: true
+
+                ,split: true
                 ,collapsible: true
                 ,collapseMode: 'mini'
+
                 ,width: 300
                 ,items: [
                     ,this.gridContainer

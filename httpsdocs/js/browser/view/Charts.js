@@ -18,7 +18,7 @@ Ext.define('CB.browser.view.Charts', {
 
         this.facetsCombo = new Ext.form.ComboBox({
             xtype: 'combo'
-            ,id: 'facetscombo' + this.instanceId
+            ,itemId: 'facetscombo'
             ,forceSelection: true
             ,triggerAction: 'all'
             ,lazyRender: true
@@ -41,39 +41,32 @@ Ext.define('CB.browser.view.Charts', {
         this.refOwner.buttonCollection.addAll(
             new Ext.Button({
                 text: L.ChartArea
-                ,id: 'barchart' + this.instanceId
                 ,itemId: 'barchart'
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-chart-bar'
-                // ,iconAlign:'top'
-                ,scale: 'large'
                 ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartClick
             })
             ,new Ext.Button({
                 text: L.ChartArea
-                ,id: 'columnchart' + this.instanceId
                 ,itemId: 'columnchart'
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-chart-column'
                 // ,iconAlign:'top'
-                ,scale: 'large'
                 ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartClick
             })
             ,new Ext.Button({
                 text: L.ChartPie
-                ,id: 'piechart' + this.instanceId
                 ,itemId: 'piechart'
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-chart-pie'
                 // ,iconAlign:'top'
-                ,scale: 'large'
                 ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartClick
@@ -208,7 +201,7 @@ Ext.define('CB.browser.view.Charts', {
             }
         });
         CB.browser.view.Charts.superclass.initComponent.apply(this, arguments);
-        this.currentButton = this.refOwner.buttonCollection.get('barchart' + this.instanceId);
+        this.currentButton = this.refOwner.buttonCollection.get('barchart');
 
         this.selectedFacets = [];
         this.store.on('load', this.onStoreLoad, this);
@@ -232,6 +225,11 @@ Ext.define('CB.browser.view.Charts', {
                 ,'piechart'
                 ,'-'
                 ,'facetscombo'
+                ,'->'
+                ,'reload'
+                ,'more'
+                ,'-'
+                ,'apps'
             ]
         );
     }
@@ -333,7 +331,7 @@ Ext.define('CB.browser.view.Charts', {
                 this.selectedFacets = [vp.facet];
             }
             if(!Ext.isEmpty(vp.chart_type)) {
-                var b = this.refOwner.buttonCollection.get(vp.chart_type + 'chart' + this.instanceId);
+                var b = this.refOwner.buttonCollection.get(vp.chart_type + 'chart');
                 if(b) {
                     this.currentButton = b;
                 }

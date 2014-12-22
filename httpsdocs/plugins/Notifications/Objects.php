@@ -106,7 +106,6 @@ class Objects
                 'B'
             )
             ."\" <" . $senderMail . '>';
-        \CB\debug($rez);
 
         return $rez;
     }

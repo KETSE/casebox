@@ -969,7 +969,6 @@ class Objects
                 $objectPlugins = $templateData['cfg']['object_plugins'][$from];
             } else {
                 $objectPlugins = Config::getObjectTypePluginsConfig(@$templateData['type'], $from);
-
             }
         }
 

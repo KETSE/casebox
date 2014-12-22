@@ -2,67 +2,189 @@ Ext.namespace('CB');
 
 Ext.define('CB.ViewPort', {
     extend: 'Ext.Viewport'
-    ,layout: 'border'
+
+    ,layout: 'fit'
     ,border: false
 
     ,initComponent: function(){
-        App.mainToolBar = new Ext.Toolbar({
-                region: 'north'
-                ,style:'background: #F0F0F0; border: 0; ' // padding-top: 10px
-                ,height: 53
+
+        this.initComponents();
+
+        Ext.apply(this, {
+            items: {
+                lbar: App.mainLBar
+                ,layout: 'fit'
                 ,items: [
                     {
-                        xtype: 'tbitem'
-                        ,width: 212
-                        ,height: 30
-                        ,html: '<img src="/css/i/casebox-logo-small.png" style="padding: 0 15px; margin-top: -3px" height="30" width="192" />'
+                        region: 'center'
+                        ,layout: 'border'
+                        ,border: false
+                        ,bbar: App.mainStatusBar
+                        ,items: [
+                            App.mainLPanel
+                            ,{
+                                layout: 'fit'
+                                ,region: 'center'
+                                ,bodyStyle: 'border: 0'
+                                ,tbar: App.mainTBar
+                                ,items: [App.mainTabPanel]
+                            }
+                        ]
                     }
-                    ,{
-                        xtype: 'ExtuxSearchField'
-                        ,emptyText: L.Search + ' Casebox'
-                        ,minListWidth: 150
-                        // ,height: 30
-                        ,width: 300
-                        // ,style: 'font: 14px arial,sans-serif; background-color: #fff'
-                        ,listeners: {
-                            scope: this
-                            ,'search': function(query, editor, event){
-                                editor.clear();
-                                query = String(query).trim();
-                                if(Ext.isEmpty(query)) {
-                                    return;
-                                }
-                                if(query.substr(0,1) == '#') {
-                                    query = query.substr(1).trim();
-                                    if(!isNaN(query)) {
-                                        App.locateObject(query);
-                                        return;
-                                    }
-                                }
-                                App.activateBrowserTab().setParams({
-                                    query: query
-                                    ,descendants: !Ext.isEmpty(query)
-                                });
+                ]
+            }
+            ,listeners: {
+                scope: this
+                ,login: this.onLogin
+                ,fileupload: this.onFileUpload
+                ,filedownload: this.onFilesDownload
+                ,createobject: this.createObject
+                ,deleteobject: this.onDeleteObject
+                ,opencalendar: this.openCalendar
+                ,favoritetoggle: this.toggleFavorite
+                ,useradded: this.onUsersChange
+                ,userdeleted: this.onUsersChange
+                ,viewloaded: this.onViewLoaded
+
+            }
+        });
+
+        this.callParent(arguments);
+    }
+
+    /**
+     * init main components for this viewport
+     * @return void
+     */
+    ,initComponents: function() {
+
+        this.initButtons();
+
+        //application main left bar (left docked)
+        App.mainLBar = new Ext.Toolbar({
+            style:'background: #ffffff; border: 0; '
+            ,autoWidth: true
+            ,dock: 'left'
+            ,items: [ {
+                    xtype: 'panel'
+                    ,border: false
+                    ,style: 'border-bottom: 1px solid #d0d0d0'
+                    ,height: 50
+                    ,items: [
+                        this.buttons.toggleLeftRegion
+                    ]
+                }
+                ,this.buttons.create
+                ,this.buttons.toggleFilterPanel
+                ,'->'
+                ,{
+                    scale: 'large'
+                    ,arrowVisible: false
+                    ,iconCls: 'bgs32'
+                    ,menu: []
+                    ,name: 'userMenu'
+                }
+                ,{
+                    text: '<span style="margin-right: 10px">&nbsp;</span>'
+                    ,xtype: 'tbtext'
+                }
+
+            ]
+            ,plugins: [{
+                ptype: 'CBPluginSearchButton'
+            }]
+        });
+
+        //main left panel where the tree is added
+        App.mainLPanel = new Ext.Panel({
+            region: 'west'
+            ,layout: 'card'
+            ,width: 250
+            ,split: true
+            ,collapsible: true
+            ,collapseMode: 'mini'
+            ,header: false
+            ,animCollapse: false
+            ,plain: true
+            ,style: {
+                border: 0
+            }
+            ,bodyStyle: {
+                border: 0
+            }
+            ,bodyCls: 'main-nav'
+            ,defaults: {
+                border: false
+                ,bodyBoder: false
+                ,bodyStyle: 'background-color: #F4F4F4'
+                ,lazyrender: true
+                ,autoScroll: true
+            }
+            ,stateful: true
+            ,stateId: 'mAc'
+            ,stateEvents: ['resize', 'collapse', 'expand']
+            ,tbar: Ext.create({
+                xtype: 'panel'
+                ,height: 51
+                ,border: false
+                ,style: 'text-align: center; border-bottom: 1px solid #d0d0d0 !important'
+                ,html: '<img src="/css/i/casebox-logo-small.png" style="padding: 9px" />'
+            })
+            ,getState: function(){
+                var rez = {
+                    collapsed: this.collapsed
+                    ,width: this.width
+                };
+
+                return rez;
+            }
+        });
+
+        // prepare components for main top toolbar
+        this.breadcrumb = Ext.create({
+            xtype: 'CBBreadcrumb'
+            ,cls: 'fs18'
+            ,arrowAlign: 'bottom'
+            ,onItemClick: this.onBreadcrumbItemClick
+        });
+
+        this.searchField = Ext.create({
+                xtype: 'CBSearchField'
+                ,emptyText: L.Search + ' Casebox'
+                ,minListWidth: 150
+                ,width: 300
+                ,listeners: {
+                    scope: this
+                    ,'search': function(query, editor, event){
+                        editor.clear();
+                        query = String(query).trim();
+                        if(Ext.isEmpty(query)) {
+                            return;
+                        }
+                        if(query.substr(0,1) == '#') {
+                            query = query.substr(1).trim();
+                            if(!isNaN(query)) {
+                                App.locateObject(query);
+                                return;
                             }
                         }
+                        App.activateBrowserTab().setParams({
+                            query: query
+                            ,descendants: !Ext.isEmpty(query)
+                        });
                     }
-                    ,'->'
-                    ,{
-                        // html: '&nbsp;'
-                        // ,xtype: 'tbtext'
-                        // ,iconCls: App.loginData.iconCls
-                        scale: 'large'
-                        ,cls: 'btn-no-glyph'
-                        ,iconCls: 'bgs32'
-                        ,menu: []
-                        ,name: 'userMenu'
-                    }
-                    ,{
-                        text: '<span style="margin-right: 10px">&nbsp;</span>'
-                        ,xtype: 'tbtext'
-                    }
+                }
+            }
+        );
 
-                ]
+        App.mainTBar = new Ext.Toolbar({
+            height: 50
+            ,style:'background: white; border: 0;'
+            ,items: [
+                this.breadcrumb
+                ,'->'
+                ,this.searchField
+            ]
         });
 
         App.mainTabPanel = new Ext.TabPanel({
@@ -83,115 +205,96 @@ Ext.define('CB.ViewPort', {
                 }
             }
             ,items: []
-            // ,listeners: {
-            //     tabchange: function(tp, p){
-            //         tp.syncSize();
-            //         p.syncSize();
-            //     }
-            // }
         });
 
-        App.mainAccordion = new Ext.Panel({
-            region: 'west'
-            // ,layout: 'accordion'
-            ,layout: 'fit'
-            ,width: 250
-            ,split: true
-            ,collapsible: true
-            ,collapseMode: 'mini'
-            ,header: false
-            ,animCollapse: false
-            ,fill: true
-            ,plain: true
-            // ,style: 'border-top: 1px solid #dfe8f6'
-            ,style: {
-                border: 0
-            }
-            ,bodyStyle: {
-                border: 0
-            }
-            ,bodyCls: 'main-nav'
-            ,defaults: {
-                border: false
-                ,bodyBoder: false
-                ,bodyStyle: 'background-color: #F4F4F4'
-                ,lazyrender: true
-                ,autoScroll: true
-            }
-            ,layoutConfig: {
-                hideCollapseTool: true
-                ,titleCollapse: true
-            }
-            ,stateful: true
-            ,stateId: 'mAc'
-            ,stateEvents: ['resize', 'collapse', 'expand']
-            ,getState: function(){
-                var rez = {
-                    collapsed: this.collapsed
-                    ,width: this.width
-                };
-
-                return rez;
-            }
-        });
-
-        // App.mainStatusBar = new Ext.Toolbar({
-        //         region: 'south'
-        //         ,cls: 'x-panel-gray'
-        //         ,style:'border-top: 1px solid #aeaeae'
-        //         ,height: 25
-        //         ,items: [
-        //             {xtype: 'tbspacer', width: 610}
-        //             ,'->'
-        //             ,{xtype: 'uploadwindowbutton'}
-        //             ,{xtype: 'tbspacer', width: 20}
-        //         ]
-        // });
         App.mainStatusBar = new CB.widget.TaskBar({
-                region: 'south'
-                ,style:'border-top: 1px solid #aeaeae'
+                style:'border-top: 1px solid #aeaeae'
                 ,height: 25
                 ,trayItems: [
                     {xtype: 'uploadwindowbutton'}
                 ]
         });
+    }
 
-        Ext.apply(this, {
-            items: [ App.mainToolBar
-                ,App.mainTabPanel
-                ,App.mainAccordion
-                ,App.mainStatusBar
-            ]
-            ,listeners: {
-                scope: this
-                ,login: this.onLogin
-                ,fileupload: this.onFileUpload
-                ,filedownload: this.onFilesDownload
-                ,createobject: this.createObject
-                ,deleteobject: this.onDeleteObject
-                ,opencalendar: this.openCalendar
-                ,favoritetoggle: this.toggleFavorite
-                ,useradded: this.onUsersChange
-                ,userdeleted: this.onUsersChange
-                ,viewloaded: this.onViewLoaded
+    /**
+     * define main actions used in viewport
+     * @return object
+     */
+    ,initActions: function() {
+        this.actions = {
+            toggleLeftRegion: new Ext.Action({
+                tooltip: L.Back
+                ,itemId: 'togglelr'
+                ,pressed: true
+                ,enableToggle: true
+                ,iconCls: 'ib-reorder'
+                ,scale: 'large'
+                ,scope: this
+                ,handler: this.toggleLeftRegion
+            })
 
-            }
-        });
+            ,toggleFilterPanel: new Ext.Action({
+                tooltip: L.Filter
+                ,itemId: 'togglefp'
+                ,enableToggle: true
+                ,iconCls: 'ib-filter'
+                ,scale: 'large'
+                ,scope: this
+                ,handler: this.onToggleFilterPanelClick
+            })
+        };
 
-        CB.ViewPort.superclass.initComponent.apply(this, arguments);
+        return this.actions;
+    }
+
+    /**
+     * define main buttons
+     * @return object
+     */
+    ,initButtons: function() {
+        this.initActions();
+
+        this.buttons = {
+            toggleLeftRegion: new Ext.button.Button(this.actions.toggleLeftRegion)
+            ,toggleFilterPanel: new Ext.button.Button(this.actions.toggleFilterPanel)
+            ,create: new Ext.Button({
+                qtip: L.New
+                ,itemId: 'create'
+                ,arrowVisible: false
+                ,iconCls: 'ib-create'
+                ,disabled: true
+                ,scale: 'large'
+                ,menu: [
+                ]
+            })
+        };
+
+        return this.actions;
+    }
+
+    ,toggleLeftRegion: function(b, e) {
+        if(b.pressed) {
+            App.mainLPanel.expand();
+        } else {
+            App.mainLPanel.collapse();
+        }
+    }
+
+    ,onToggleFilterPanelClick: function(b, e) {
+        App.mainLPanel.getLayout().setActiveItem(
+            b.pressed
+                ? 1
+                : 0
+        );
     }
 
     ,onLogin: function(){
         /* adding menu items */
 
-        var um, umIdx = App.mainToolBar.items.findIndex( 'name', 'userMenu');
+        var um, umIdx = App.mainLBar.items.findIndex( 'name', 'userMenu');
         if(umIdx > -1) {
-            um = App.mainToolBar.items.getAt(umIdx);
+            um = App.mainLBar.items.getAt(umIdx);
             um.setIcon('/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id));
-            // um.update('<img src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id) + '" ' +
-            //     'style="margin-top: 4px; width: 32px; height: 32px;" ' +
-            //     'title="'+ getUserDisplayName(true) + '" />'
-            // );
         }
 
         um.menu.add(
@@ -199,7 +302,6 @@ Ext.define('CB.ViewPort', {
                 text: L.Account
                 ,iconCls: 'icon-user-' + App.loginData.sex
                 ,handler: function(){
-                    // App.openUniqueTabbedWidget( 'CBAccount' , null);
                     App.openWindow({
                         xtype: 'CBAccount'
                         ,id: 'accountWnd'
@@ -228,7 +330,6 @@ Ext.define('CB.ViewPort', {
                                     if(cmp.success !== true) {
                                         cmp.destroy();
                                     } else {
-                                        // App.openUniqueTabbedWidget('CBUsersGroups');
                                         App.openWindow({
                                             xtype: 'CBUsersGroups'
                                             ,id: 'usersGroupsWnd'
@@ -309,19 +410,19 @@ Ext.define('CB.ViewPort', {
 
 
 
-        App.mainToolBar.insert(
-            3
+        App.mainLBar.insert(
+            App.mainLBar.items.getCount() - 2
             ,{
                 qtip: L.Settings
                 ,iconCls: 'ib-settings'
-                ,cls: 'btn-no-glyph'
+                ,arrowVisible: false
                 ,hideOnClick: false
                 ,scale: 'large'
                 ,menu: managementItems
             }
         );
 
-        App.mainToolBar.doLayout();
+        App.mainLBar.doLayout();
 
         /* end of adding menu items */
 
@@ -336,6 +437,9 @@ Ext.define('CB.ViewPort', {
             App.DD = new CB.DD();
 
             Ext.Function.defer(this.checkUrlLocate, 1500);
+
+            App.initialized = true;
+            App.fireEvent('cbinit', this);
         } else {
             Ext.Function.defer(this.initCB, 500, this);
         }
@@ -368,37 +472,40 @@ Ext.define('CB.ViewPort', {
     }
 
     ,populateMainMenu: function(){
-        App.mainAccordion.add({
+        App.mainTree = App.mainLPanel.add({
             xtype: 'CBBrowserTree'
+            ,border: false
+            ,bodyStyle: 'border: 0'
             ,data: {
                 rootNode: App.config.rootNode
             }
             ,rootVisible:true
         });
 
-        // if(!App.mainAccordion.collapsed) {
-        //     App.mainAccordion.syncSize();
-        // }
+        App.mainLPanel.getLayout().setActiveItem(0);
 
-        var trees = App.mainAccordion.query('treepanel');
+        App.mainFilterPanel = App.mainLPanel.add({
+            xtype: 'CBFilterPanel'
+            ,header: false
+            ,border: false
+            ,listeners:{
+                scope: this
+                ,change: this.onFiltersChange
+            }
+        });
 
-        if(!Ext.isEmpty(trees)){
-            App.mainTree = trees[0];
+        if(App.mainTree){
             var rn = App.mainTree.getRootNode();
 
             rn.data.name = 'My CaseBox';
-            // rn.data.name = 'My CaseBox';
-            // App.mainTree.on('afterrender', this.selectTreeRootNode, this);
 
-            for (i = 0; i < trees.length; i++) {
-                trees[i].getSelectionModel().on(
-                    'selectionchange'
-                    ,this.onChangeActiveFolder
-                    ,this
-                );
-                trees[i].on('itemclick', this.onTreeNodeClick, this);
-                trees[i].on('afterrename', this.onRenameTreeElement, this);
-            }
+            App.mainTree.getSelectionModel().on(
+                'selectionchange'
+                ,this.onChangeActiveFolder
+                ,this
+            );
+            App.mainTree.on('itemclick', this.onTreeNodeClick, this);
+            App.mainTree.on('afterrename', this.onRenameTreeElement, this);
         }
 
         this.openDefaultExplorer();
@@ -673,35 +780,20 @@ Ext.define('CB.ViewPort', {
         }
     }
 
-    ,toggleWestRegion: function(visible){
-        App.mainAccordion.setVisible(visible === true);
-        // App.mainViewPort.syncSize();
-    }
-
     ,onViewLoaded: function(proxy, action, options) {
-        var trees  = App.mainAccordion.query('treepanel');
-        var activeTree = null;
-        Ext.each(
-            trees
-            ,function(t){
-                if(t && t.getEl) {
-                    var el = t.getEl();
-                    if(el && el.isVisible(true)) {
-                        activeTree = t;
-                    }
-                }
-            }
-            ,this
-        );
+
+        this.breadcrumb.setValue(action.pathtext);
+
+        App.explorer.updateCreateMenuItems(this.buttons.create);
 
         // add flag to avoid reloading viewport on node selection change
         this.syncingTreePathWithViewContainer = true;
 
-        if(activeTree &&
+        if(App.mainTree &&
             action &&
             action.folderProperties
         ) {
-            activeTree.updateCreateMenu(action.folderProperties.menu);
+            App.mainTree.updateCreateMenu(action.folderProperties.menu);
 
             //check if rootnode id is set at the beginning of the path
             //its id could be missing if it's a virtual root node
@@ -714,7 +806,7 @@ Ext.define('CB.ViewPort', {
                 }
             }
             //select the path in tree
-            activeTree.selectPath(
+            App.mainTree.selectPath(
                 p.join('/')
                 ,'nid'
                 ,'/'
@@ -724,5 +816,31 @@ Ext.define('CB.ViewPort', {
                 ,this
             );
         }
+
+    }
+
+    ,onFiltersChange: function(filters){
+        App.explorer.changeSomeParams({filters: filters});
+    }
+
+    ,onBreadcrumbItemClick: function(b, e) {
+        var idx = this.menu.items.indexOf(b)
+            ,p = String(App.explorer.folderProperties.path).split('/');
+
+        if(Ext.isEmpty(p[0])) {
+            p.shift();
+        }
+
+        if((p.length > 0) && Ext.isEmpty(p[p.length-1])) {
+            p.pop();
+        }
+
+        p = p.slice(0, p.length - idx - 1);
+        p = p.join('/');
+        if(p.substr(0, 1) !== '/') {
+            p = '/' + p;
+        }
+
+        App.explorer.changeSomeParams({'path': p});
     }
 });

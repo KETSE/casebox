@@ -163,6 +163,7 @@ Ext.define('CB.object.edit.Window', {
             xtype: 'form'
             ,border: false
             ,autoHeight: true
+            ,autoScroll: true
             ,labelAlign: 'top'
             ,bodyStyle: 'margin:0; padding: 0 7px'
             ,api: {
@@ -236,8 +237,11 @@ Ext.define('CB.object.edit.Window', {
                     ,header: false
                     ,border: false
                     ,autoScroll: true
+
+                    ,split: true
                     ,collapsible: true
                     ,collapseMode: 'mini'
+
                     ,width: 300
                     ,items: [
                         ,this.gridContainer
@@ -509,7 +513,6 @@ Ext.define('CB.object.edit.Window', {
                             ,value: this.data.data[r.get('name')]
                             ,height: Ext.valueFrom(r.get('cfg').height, 200)
                             ,anchor: '100%'
-                            // ,style: 'resize: vertical'
                             ,grow: true
                             ,fieldLabel: r.get('title')
                             ,labelAlign: 'top'
@@ -816,7 +819,7 @@ Ext.define('CB.object.edit.Window', {
         }
 
         var p = Ext.apply({}, data);
-        // p.view = 'preview'; //default is preview
+        Ext.applyIf(p, this.loadedData);
 
         App.openObjectWindow(p, e);
     }

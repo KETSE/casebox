@@ -17,37 +17,17 @@ Ext.define('CB.browser.ViewContainer', {
     ,initComponent: function(){
         this.instanceId = Ext.id();
 
-        this.history = [];
-
         this.actions = {
-            back: new Ext.Action({
-                tooltip: L.Back
-                ,itemId: 'back' + this.instanceId
-                ,iconCls: 'icon-back'
-                ,disabled: true
-                ,scope: this
-                ,handler: this.onBackClick
-            })
-
-            ,forward: new Ext.Action({
-                tooltip: L.Forward
-                ,itemId: 'forward' + this.instanceId
-                ,iconCls: 'icon-forward'
-                ,disabled: true
-                ,scope: this
-                ,handler: this.onForwardClick
-            })
-
-            ,edit: new Ext.Action({
+            edit: new Ext.Action({
                 text: L.Edit
-                ,itemId: 'edit' + this.instanceId
+                ,itemId: 'edit'
                 ,scope: this
                 ,handler: this.onEditClick
             })
 
             ,reload: new Ext.Action({
-                iconCls: 'icon-refresh'
-                ,itemId: 'reload' + this.instanceId
+                iconCls: 'im-refresh'
+                ,itemId: 'reload'
                 ,tooltip: L.Refresh
                 ,scope: this
                 ,handler: this.onReloadClick
@@ -62,22 +42,18 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,upload: new Ext.Action({
                 text: L.Upload
-                ,id: 'upload' + this.instanceId
-                ,itemId: 'upload' + this.instanceId
-                // ,iconAlign:'top'
-                ,scale: 'large'
-                ,iconCls: 'ib-upload'
+                ,itemId: 'upload'
+                ,scale: 'medium'
+                ,iconCls: 'im-upload'
                 ,scope: this
                 ,handler: this.onUploadClick
             })
 
             ,download: new Ext.Action({
                 qtip: L.Download
-                ,id: 'download' + this.instanceId
-                ,itemId: 'download' + this.instanceId
-                // ,iconAlign:'top'
-                ,scale: 'large'
-                ,iconCls: 'ib-download'
+                ,itemId: 'download'
+                ,scale: 'medium'
+                ,iconCls: 'im-download'
                 ,hidden: true
                 ,disabled: true
                 ,hideParent: false
@@ -95,7 +71,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,cut: new Ext.Action({
                 text: L.Cut
-                ,itemId: 'cut' + this.instanceId
+                ,itemId: 'cut'
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onCutClick
@@ -103,7 +79,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,copy: new Ext.Action({
                 text: L.Copy
-                ,itemId: 'copy' + this.instanceId
+                ,itemId: 'copy'
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onCopyClick
@@ -111,7 +87,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,paste: new Ext.Action({
                 text: L.Paste
-                ,itemId: 'paste' + this.instanceId
+                ,itemId: 'paste'
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onPasteClick
@@ -119,7 +95,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,pasteShortcut: new Ext.Action({
                 text: L.PasteShortcut
-                ,itemId: 'pasteshortcut' + this.instanceId
+                ,itemId: 'pasteshortcut'
                 ,scope: this
                 ,disabled: true
                 ,handler: this.onPasteShortcutClick
@@ -127,7 +103,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,takeOwnership: new Ext.Action({
                 text: L.TakeOwnership
-                ,itemId: 'takeownership' + this.instanceId
+                ,itemId: 'takeownership'
                 ,iconCls: 'icon-user-gray'
                 ,disabled: true
                 ,scope: this
@@ -136,12 +112,10 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,'delete': new Ext.Action({
                 qtip: L.Delete
-                // text: L.Delete
-                ,id: 'delete' + this.instanceId
-                ,itemId: 'delete' + this.instanceId
-                // ,iconAlign:'top'
-                ,iconCls: 'ib-trash'
-                ,scale: 'large'
+                ,text: L.Delete
+                ,itemId: 'delete'
+                ,iconCls: 'im-trash'
+                ,scale: 'medium'
                 ,hidden: true
                 ,disabled: true
                 ,hideParent: false
@@ -160,10 +134,9 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,restore: new Ext.Action({
                 text: L.Restore
-                ,itemId: 'restore' + this.instanceId
-                // ,iconAlign:'top'
+                ,itemId: 'restore'
                 ,iconCls: 'ib-restore'
-                ,scale: 'large'
+                ,scale: 'medium'
                 ,hidden: true
                 ,disabled: true
                 ,hideParent: false
@@ -173,7 +146,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,permissions: new Ext.Action({
                 text: L.Permissions
-                ,itemId: 'permissions' + this.instanceId
+                ,itemId: 'permissions'
                 ,iconCls: 'icon-key'
                 ,scope: this
                 ,disabled: true
@@ -181,48 +154,48 @@ Ext.define('CB.browser.ViewContainer', {
             })
 
             ,preview: new Ext.Action({
-                itemId: 'preview' + this.instanceId
-                ,scale: 'large'
-                ,iconCls: 'ib-preview'
+                itemId: 'preview'
+                ,scale: 'medium'
+                ,iconCls: 'im-preview'
                 ,scope: this
                 ,hidden: true
+                ,disabled: true
                 ,handler: this.onPreviewClick
             })
         };
+
+        this.tbarMoreMenu = new Ext.menu.Menu({items: []});
 
         this.buttonCollection = new Ext.util.MixedCollection();
 
         this.buttonCollection.addAll([
             new Ext.Button({
                 qtip: L.Views
-                // text: L.Views
-                ,id: 'apps' + this.instanceId
-                // ,iconAlign:'top'
-                ,cls: 'btn-no-glyph'
-                ,iconCls: 'ib-apps'
-                ,scale: 'large'
+                ,itemId: 'apps'
+                ,arrowVisible: false
+                ,iconCls: 'im-apps'
+                ,scale: 'medium'
                 ,menu: []
             })
             ,new Ext.Button({
                 qtip: L.New
-                // text: L.New
-                ,id: 'create' + this.instanceId
-                // ,iconAlign:'top'
-                ,cls: 'btn-no-glyph'
-                ,iconCls: 'ib-create'
-                ,scale: 'large'
+                ,text: L.New
+                ,itemId: 'create'
+                ,arrowVisible: false
+                ,iconCls: 'im-create'
+                ,scale: 'medium'
                 ,menu: [
                 ]
             })
+            ,new Ext.Button(this.actions.reload)
             ,new Ext.Button(this.actions.upload)
             ,new Ext.Button(this.actions.download)
             ,new Ext.Button({
                 text: L.Edit
-                ,id: 'edit' + this.instanceId
-                ,cls: 'btn-no-glyph'
-                ,iconCls: 'ib-edit'
-                // ,iconAlign:'top'
-                ,scale: 'large'
+                ,itemId: 'edit'
+                ,arrowVisible: false
+                ,iconCls: 'im-assignment'
+                ,scale: 'medium'
                 ,menu: [
                     this.actions.cut
                     ,this.actions.copy
@@ -232,59 +205,24 @@ Ext.define('CB.browser.ViewContainer', {
                     ,this.actions.takeOwnership
                 ]
             })
+            ,new Ext.Button(this.actions.preview)
             ,new Ext.Button(this.actions.restore)
             ,new Ext.Button(this.actions['delete'])
             ,new Ext.Button({
                 qtip: L.More
-                // text: L.More
-                ,id: 'more' + this.instanceId
-                ,iconCls: 'ib-points'
-                // ,iconAlign:'top'
-                ,scale: 'large'
-                ,scope: this
-                ,handler: function(b, e) {
-                    this.tbarMoreMenu.showBy(b.getEl());
-                }
-            })
-            ,new Ext.Button({
-                qtip: L.Filter
-                // text: L.Filter
-                ,id: 'filter' + this.instanceId
-                ,enableToggle: true
-                ,iconCls: 'ib-filter'
-                ,activeIconCls: 'ib-filter-on'
-                // ,iconAlign:'top'
-                ,scale: 'large'
-                ,toggleGroup: 'fvgRB' + this.instanceId
-                ,allowDepress: false
-                ,itemIndex: 0
-                ,scope: this
-                ,toggleHandler: this.onRightPanelViewChangeClick
-            })
-            ,new Ext.Button({
-                qtip: L.Properties
-                // text: L.Properties
-                ,id: 'properties' + this.instanceId
-                ,enableToggle: true
-                ,iconCls: 'ib-properties'
-                // ,iconAlign:'top'
-                ,scale: 'large'
-                ,toggleGroup: 'fvgRB' + this.instanceId
-                ,allowDepress: false
-                ,pressed: true
-                ,itemIndex: 1
-                ,scope: this
-                ,toggleHandler: this.onRightPanelViewChangeClick
+                ,itemId: 'more'
+                ,arrowVisible: false
+                ,iconCls: 'im-points'
+                ,scale: 'medium'
+                ,menu: this.tbarMoreMenu
             })
         ]);
 
         this.viewToolbar = new Ext.Toolbar({
-            region: 'center'
-            ,border: false
+            border: false
             ,style: 'background: #ffffff'
             ,defaults: {
-                // iconAlign:'top'
-                scale: 'large'
+                scale: 'medium'
             }
             //each view should define it's custom buttons in buttonCollection
             //and specify buttons for diplay
@@ -302,58 +240,6 @@ Ext.define('CB.browser.ViewContainer', {
             }
         });
 
-        this.containerToolbar = new Ext.Toolbar({
-            region: 'east'
-            ,style: 'background: #ffffff'
-            ,border: false
-            ,defaults: {
-                // iconAlign:'top'
-                scale: 'large'
-            }
-            ,items: [
-                '->'
-                ,this.actions.preview
-                ,this.buttonCollection.get('filter' + this.instanceId)
-                ,this.buttonCollection.get('properties' + this.instanceId)
-
-            ]
-        });
-
-        this.mainToolbar = new Ext.Panel({
-            layout: 'hbox'
-            ,autoHeight: true
-            // ,height: 65
-            ,border: false
-            ,items: [
-                this.viewToolbar
-                ,this.containerToolbar
-
-            ]
-            ,listeners: {
-                scope: this
-                ,resize: function(c, adjWidth, adjHeight, rawWidth, rawHeight){
-                    if(this.viewToolbar.rendered) {
-                        var cw = 5;
-
-                        this.containerToolbar.items.each(
-                            function(b) {
-                                cw += b.getWidth();
-                            }
-                            ,this
-                        );
-                        this.viewToolbar.setWidth(adjWidth - cw);
-                        this.containerToolbar.setWidth(cw);
-                    }
-                }
-            }
-        });
-        this.breadcrumb = new CB.Breadcrumb({
-            listeners: {
-                scope: this
-                ,itemclick: this.onBreadcrumbItemClick
-            }
-        });
-
         this.descendantsButton = new Ext.Button({
             text: ' ... '
             ,tooltip: L.Descendants
@@ -364,74 +250,34 @@ Ext.define('CB.browser.ViewContainer', {
             ,handler: this.onDescendantsClick
         });
 
-        this.searchField = new Ext.ux.SearchField({
-            width: 250
-            ,minListWidth: 250
-            ,hidden: true
-            ,listeners: {
-                scope: this
-                ,'search': this.onSearchQuery
-            }
-        });
-
-        this.navToolbar = new Ext.Toolbar({
-            items: [
-                this.actions.back
-                ,this.actions.forward
-                ,this.actions.reload
-                ,this.breadcrumb
-                ,this.descendantsButton
-                ,'->'
-                ,this.searchField
-            ]
-        });
-
-        this.tbarMoreMenu = new Ext.menu.Menu({items: []});
-
         this.objectPanel = new CB.object.ViewContainer({
-            onCloseClick: Ext.Function.bind(this.onCloseRightPanelClick, this)
-        });
-
-        this.filtersPanel = new CB.FilterPanel({
-            title: L.Filter
+            region: 'east'
             ,header: false
-            ,collapsible: true
-            ,collapseMode: 'mini'
-            ,region: 'west'
-            ,border: false
-            ,width: 300
-            ,listeners:{
-                scope: this
-                ,change: this.onFiltersChange
-            }
-        });
+            ,width: 250
 
-        this.rightPanel = new Ext.Panel({
-            header: false
             ,split: true
             ,collapsible: true
             ,collapseMode: 'mini'
-            ,animCollapse: false
-            ,border: false
-            ,region: 'east'
-            ,width: 300
-            ,layout: 'card'
-            ,activeItem: 1
+
             ,stateful: true
-            ,stateId: 'vcrp'
-            ,items: [
-                this.filtersPanel
-                ,this.objectPanel
-            ]
+            ,stateId: 'mopp' //main object properties panel
+
             ,listeners: {
                 scope: this
-
                 // update right panel view on expand
                 // because it doesnt load anything when collapsed
                 ,expand: function() {
+                    this.actions.preview.setDisabled(true);
+                    this.actions.preview.setHidden(true);
                     this.updatePreview();
                 }
+                ,collapse: function() {
+                    this.actions.preview.setDisabled(false);
+                    this.actions.preview.setHidden(false);
+                }
             }
+
+            ,onCloseClick: Ext.Function.bind(this.onCloseRightPanelClick, this)
         });
 
         this.store = new Ext.data.DirectStore({
@@ -452,10 +298,6 @@ Ext.define('CB.browser.ViewContainer', {
                     ,rootProperty: 'data'
                     ,messageProperty: 'msg'
                 }
-                // ,listeners:{
-                //     scope: this
-                //     ,load: this.onProxyLoad
-                // }
             })
 
             ,loadPage: function(page, options) {
@@ -515,12 +357,14 @@ Ext.define('CB.browser.ViewContainer', {
             ,activeItem: 0
             ,border: false
             ,region: 'center'
+            ,tbar: this.viewToolbar
             ,items: [
                 new CB.browser.view.Grid({
                     iconCls: 'icon-grid-view'
                     ,border: false
                     ,refOwner: this
                     ,store: this.store
+                    ,showObjectPropertiesPanel: true
                     ,getProperty: getPropertyHandler
                 })
                 ,new CB.browser.view.Calendar({
@@ -549,7 +393,7 @@ Ext.define('CB.browser.ViewContainer', {
                 scope: this
                 ,add: function(o, c, idx) {
                     if(c.isXType('CBBrowserViewInterface')) {
-                        var b = this.buttonCollection.get('apps' + this.instanceId);
+                        var b = this.buttonCollection.get('apps');
                         if(c.addDivider === true) {
                             b.menu.add('-');
                         }
@@ -573,16 +417,14 @@ Ext.define('CB.browser.ViewContainer', {
 
         Ext.apply(this, {
             bodyCls: 'x-panel-white'
-            ,tbar: this.mainToolbar
 
             ,items: [{
                 layout: 'border'
                 ,border: false
                 ,tbarCssClass: 'x-panel-gray'
-                ,tbar: this.navToolbar
                 ,items: [
                     this.cardContainer
-                    ,this.rightPanel
+                    ,this.objectPanel
                 ]
             }]
 
@@ -592,11 +434,9 @@ Ext.define('CB.browser.ViewContainer', {
                 ,settoolbaritems: this.onSetToolbarItems
                 ,reload: this.onReloadClick
                 ,activate: function() {
-                    // this.cardContainer.syncSize();
                     this.updatePreview();
                 }
                 ,itemcontextmenu: this.onItemContextMenu
-                // ,objectopen: this.onObjectsOpenEvent
             }
         });
 
@@ -636,7 +476,6 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onSetToolbarItems: function(buttonsArray) {
-        // this.viewToolbar.removeAll(false); // this method does not work as expected
         if(!this.getEl().isVisible(true)) {
             return;
         }
@@ -649,17 +488,22 @@ Ext.define('CB.browser.ViewContainer', {
             this.viewToolbar.remove(b, b.isXType('tbseparator'));
         }
 
-        //add apps button if not present
-        if(buttonsArray.indexOf('apps') < 0) {
-            buttonsArray.unshift('apps');
-        }
-
-        buttonsArray.splice(1, 0, 'restore');
-
         //add more button
         if(buttonsArray.indexOf('more') < 0) {
             buttonsArray.push('more');
         }
+
+        //add apps button if not present
+        if(buttonsArray.indexOf('apps') < 0) {
+            buttonsArray.push('apps');
+        }
+
+        //add preview button if not present
+        if(buttonsArray.indexOf('preview') < 0) {
+            buttonsArray.push('preview');
+        }
+
+        buttonsArray.splice(1, 0, 'restore');
 
         //add plugin buttons if defined
         if(!Ext.isEmpty(this.pluginButtons)) {
@@ -673,7 +517,7 @@ Ext.define('CB.browser.ViewContainer', {
             if((buttonsArray[i] == '-') || (buttonsArray[i] == '->')) {
                 this.viewToolbar.add(buttonsArray[i]);
             } else {
-                b = this.buttonCollection.get(buttonsArray[i] + this.instanceId);
+                b = this.buttonCollection.get(buttonsArray[i]);
                 if(b) {
                     this.viewToolbar.add(b);
                     if(!b.disabled) {
@@ -689,45 +533,11 @@ Ext.define('CB.browser.ViewContainer', {
         delete this.params.view;
 
         this.setActiveView(b.viewIndex);
+
         //set a flag that user have set the view and dont change the view on store load
         this.userViewSet = true;
 
         this.onReloadClick();
-    }
-
-    ,onBackClick: function(b, e) {
-        if(this.actions.back.isDisabled()) {
-            return;
-        }
-        this.historyIndex = (!Ext.isDefined(this.historyIndex))
-            ? this.history.length - 2
-            : this.historyIndex - 1;
-        this.isHistoryAction = true;
-        this.setParams(this.history[this.historyIndex]);
-        this.actions.back.setDisabled(this.historyIndex <= 0);
-        this.actions.forward.setDisabled(false);
-    }
-
-    ,onForwardClick: function(b, e) {
-        if(this.actions.forward.isDisabled()) {
-            return;
-        }
-        this.historyIndex = this.historyIndex + 1;
-        this.isHistoryAction = true;
-        this.setParams(this.history[this.historyIndex]);
-        this.actions.back.setDisabled(false);
-        this.actions.forward.setDisabled(this.historyIndex >= (this.history.length -1));
-    }
-
-    ,spliceHistory: function() {
-        if(this.isHistoryAction) {
-            delete this.isHistoryAction;
-            return;
-        }
-        if(Ext.isDefined(this.historyIndex)){
-            this.history.splice(this.historyIndex + 1, this.history.length - this.historyIndex);
-            delete this.historyIndex;
-        }
     }
 
     ,onReloadClick: function(){
@@ -767,20 +577,19 @@ Ext.define('CB.browser.ViewContainer', {
             }
 
             rez = layout.setActiveItem(rez);
+
+            //check if need to show objectPanel for selected view
+            var showObjPanel = (rez && (rez.showObjectPropertiesPanel === true));
+
+            this.actions.preview.setHidden(!showObjPanel);
+            this.objectPanel.setVisible(showObjPanel);
         }
 
         return rez;
     }
 
     ,reloadView: function(){
-        //view will be changed on store load
-        // if(this.params && this.params.view) {
-        //     this.setActiveView(this.params.view);
-        // }
-
-        if(this.store.load(this.params)) {
-            // this.getEl().mask(L.Loading, 'x-mask-loading');
-        }
+        this.store.load(this.params);
     }
 
     ,processLoadedParams: function () {
@@ -790,34 +599,22 @@ Ext.define('CB.browser.ViewContainer', {
         this.path = ep.path;
         this.folderProperties = Ext.apply({}, result.folderProperties);
 
-        // this.folderProperties.id = this.folderProperties.id;
         this.folderProperties.system = parseInt(this.folderProperties.system, 10);
         this.folderProperties.type = parseInt(this.folderProperties.type, 10);
         this.folderProperties.pathtext = result.pathtext;
 
         this.descendantsButton.toggle(ep.descendants === true);
 
-        /* updating breadcrumb */
-        if(Ext.isDefined(result.pathtext)) {
-            var b = result.pathtext.split('/');
-            if(Ext.isEmpty(b[0])) {
-                b.shift();
-            }
-            if((b.length > 0) && Ext.isEmpty(b[b.length-1])) {
-                b.pop();
-            }
-            this.breadcrumb.setValue(b);
-        }
-        /* end of updating breadcrumb */
-
         /* change view if set in params */
         if(!this.userViewSet) {
-            if(!Ext.isEmpty(result.view)) { //view came from laoded data
+            //view came from laoded data
+            if(!Ext.isEmpty(result.view)) {
                 if(Ext.isPrimitive(result.view)) {
                     result.view = {type: result.view};
                 }
                 this.setActiveView(result.view.type, result.view);
-            } else { // check if view not set on client params
+            } else {
+                // check if view not set on client params
                 if(this.params && this.params.view) {
                     this.setActiveView(this.params.view);
                 }
@@ -828,9 +625,16 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.fireEvent('viewloaded', this.store.proxy, result, ep);
 
-        this.updateCreateMenuItems(this.buttonCollection.get('create' + this.instanceId));
-        this.searchField.setValue(Ext.valueFrom(ep.query, ''));
-        this.filtersPanel.updateFacets(result.facets, ep);
+        this.updateCreateMenuItems(this.buttonCollection.get('create'));
+
+        var showPreviewButton = (this.objectPanel.getCollapsed() !== false)
+            ,pa = this.actions.preview;
+        pa.setDisabled(!showPreviewButton);
+        pa.setHidden(!showPreviewButton);
+
+        if(App.mainFilterPanel) {
+            App.mainFilterPanel.updateFacets(result.facets, ep);
+        }
 
         if(Ext.isEmpty(App.locateObjectId)) {
             this.updatePreview();
@@ -841,7 +645,6 @@ Ext.define('CB.browser.ViewContainer', {
         this.getEl().unmask();
 
         //update interface according to loaded params
-
         this.processLoadedParams();
 
         //set icons for all records
@@ -877,7 +680,8 @@ Ext.define('CB.browser.ViewContainer', {
         return true;
     }
 
-    ,changeParams: function(params, e){// fired by internal view
+    // fired by internal view
+    ,changeParams: function(params, e){
         if(e && e.stopPropagation) e.stopPropagation();
         this.setParams(params);
     }
@@ -917,7 +721,7 @@ Ext.define('CB.browser.ViewContainer', {
             params.lastQuery = this.params.search;
         }
 
-        var newParams = Ext.decode(Ext.encode(params));//, this.params
+        var newParams = Ext.decode(Ext.encode(params));
         var sameParams = this.sameParams(
             this.params
             ,newParams
@@ -940,8 +744,6 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.requestParams = newParams;
 
-        this.spliceHistory();
-
         this.loadParamsTask.delay(500);
     }
 
@@ -950,16 +752,6 @@ Ext.define('CB.browser.ViewContainer', {
             return;
         }
 
-        if(!Ext.isDefined(this.historyIndex)){
-            if(!Ext.isEmpty(this.requestParams)){
-                this.history.push(Ext.apply({}, this.requestParams));
-                if(this.history.length > 99) {
-                    this.history.shift();
-                }
-                this.actions.back.setDisabled(this.history.length < 2);
-                this.actions.forward.setDisabled(true);
-            }
-        }
         this.params = Ext.apply({}, this.requestParams);
         this.reloadView();
     }
@@ -974,65 +766,12 @@ Ext.define('CB.browser.ViewContainer', {
         menuButton.setDisabled(menuButton.menu.items.getCount() < 1);
     }
 
-    ,onRightPanelViewChangeClick: function(b, e){
-        this.rightPanel.getLayout().setActiveItem(b.config.itemIndex);
-
-        if(this.rightPanel.collapsed) {
-            this.rightPanel.expand();
-        } else {
-            this.rightPanel.show();
-            // this.rightPanel.syncSize();
-        }
-
-        // loading last selected object into objects panel
-        var s = this.cardContainer.getLayout().activeItem.currentSelection;
-        if(!Ext.isEmpty(s)) {
-            if(this.rightPanel.getLayout().activeItem == this.objectPanel){
-                if(!Ext.isEmpty(s[0].nid)) {
-                    s[0].id = s[0].nid;
-                }
-
-                this.objectPanel.requestedLoadData = s[0];
-                this.objectPanel.doLoad();
-            }
-        }
-    }
-
     /**
      * return current vew selection
      * @return array | null
      */
     ,getSelection: function() {
         return this.cardContainer.getLayout().activeItem.currentSelection;
-    }
-
-    ,onBreadcrumbItemClick: function(cmp, record, item, index, e, eOpts) {//el, idx, ev
-        var pt = this.folderProperties.pathtext.split('/');
-        var p = this.folderProperties.path.split('/');
-
-        if(Ext.isEmpty(pt[0])) {
-            pt.shift();
-        }
-
-        if((pt.length > 0) && Ext.isEmpty(pt[pt.length-1])) {
-            pt.pop();
-        }
-
-        if(Ext.isEmpty(p[0])) {
-            p.shift();
-        }
-
-        if((p.length > 0) && Ext.isEmpty(p[p.length-1])) {
-            p.pop();
-        }
-
-        p = p.slice(0, index + 1 + p.length - pt.length);
-        p = p.join('/');
-        if(p.substr(0, 1) !== '/') {
-            p = '/' + p;
-        }
-
-        this.changeSomeParams({'path': p});
     }
 
     ,onDescendantsClick: function(b, e) {
@@ -1049,18 +788,21 @@ Ext.define('CB.browser.ViewContainer', {
         var inGridView = this.cardContainer.getLayout().activeItem.isXType('CBBrowserViewGrid');
 
         this.actions.restore.setHidden(!inRecycleBin || !inGridView);
-        this.actions.restore.setDisabled(Ext.isEmpty(objectsDataArray));
+        this.actions.restore.setDisabled(!inRecycleBin || !inGridView || Ext.isEmpty(objectsDataArray));
 
         this.actions.upload.setHidden(inRecycleBin || !inGridView);
-        this.buttonCollection.get('create' + this.instanceId).setVisible(!inRecycleBin && inGridView);
+        this.buttonCollection.get(
+            'create'
+        ).setVisible(!inRecycleBin && inGridView);
 
-        this.buttonCollection.get('more' + this.instanceId).setVisible(inGridView);
+        this.buttonCollection.get(
+            'more'
+        ).setVisible(inGridView);
 
         if(Ext.isEmpty(objectsDataArray)) {
             this.actions.cut.setDisabled(true);
             this.actions.copy.setDisabled(true);
             this.actions.takeOwnership.setDisabled(true);
-            // this.actions.createShortcut.setDisabled(true);
 
             this.actions.download.setDisabled(true);
             this.actions.download.hide();
@@ -1208,19 +950,9 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onCreateObjectClick: function(b, e) {
-        // var tplRec = CB.DB.templates.getById(b.data.template_id);
-        // if(tplRec && tplRec.data && tplRec.data.cfg && (tplRec.data.cfg.createMethod == 'inline')) {
-        //     //to decide what's the best method for creating inline objects:
-        //     // - in modal window
-        //     // - inside active view or let the view decide the creation method
-        //     // - on the right side panel as usual objects creations
-        //     return;
-        // }
-        this.buttonCollection.get('properties' + this.instanceId).toggle(true);
         b.config.data.pid = this.folderProperties.id;
         b.config.data.path = this.folderProperties.path;
         this.fireEvent('createobject', Ext.apply({}, b.config.data));
-        // this.objectPanel.edit(b.data);
     }
 
     ,onUploadClick: function(b, e) {
@@ -1408,7 +1140,6 @@ Ext.define('CB.browser.ViewContainer', {
         if(Ext.isEmpty(r.processedIds)) {
             return;
         }
-        // if(pids.indexOf(this.folderProperties.id) >=0 ) this.onReloadClick();
 
         switch(action){
             case 'copy':
@@ -1470,13 +1201,11 @@ Ext.define('CB.browser.ViewContainer', {
                 ,'-'
                 ,this.actions.createShortcut
                 ,this.actions.contextDelete
-                // ,this.actions.rename
                 ,this.actions.contextReload
                 ,'-'
                 ,this.createItem
                 ,'-'
                 ,this.actions.permissions
-                // ,this.actions.properties
                 ]
             });
         }
@@ -1503,9 +1232,7 @@ Ext.define('CB.browser.ViewContainer', {
      * @return void
      */
     ,onCloseRightPanelClick: function(b, e) {
-        this.rightPanel.collapse();
-        this.buttonCollection.get('filter' + this.instanceId).hide();
-        this.buttonCollection.get('properties' + this.instanceId).hide();
+        this.objectPanel.collapse();
         this.actions.preview.show();
     }
 
@@ -1516,9 +1243,7 @@ Ext.define('CB.browser.ViewContainer', {
      * @return void
      */
     ,onPreviewClick: function(b, e) {
-        this.rightPanel.expand();
+        this.objectPanel.expand();
         this.actions.preview.hide();
-        this.buttonCollection.get('filter' + this.instanceId).show();
-        this.buttonCollection.get('properties' + this.instanceId).show();
     }
 });

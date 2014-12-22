@@ -1,3 +1,19 @@
+CaseBox 1.9.372 (2014-12-22)
+==============================
+New Features, Improvements
+--------------------------
+- UI changes
+- Search form title "Search $tmplTitle" instead of "New $tmplTitle"
+- removed TitleField component
+- removed IconCombo plugin
+
+Fixed Bugs:
+----------
+- fixed icon selection when editing templates
+- #4198 Editing a large TXT file doesn't work
+- #4268 SOLR error when browsing templates
+- #4226 usernames not rendered ok in comments
+
 CaseBox 1.9.371 (2014-12-15)
 ==============================
 New Features, Improvements

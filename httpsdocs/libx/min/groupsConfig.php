@@ -22,7 +22,6 @@ return array_merge(
             ,'//css/common.css'
             ,'//css/facets.css'
             ,'//css/obj_plugins.css'
-            ,'//css/Ext.ux.plugins.IconCombo.css'
 
             ,'//css/extensible-all.css'
             ,'//css/calendar.css'
@@ -83,7 +82,6 @@ return array_merge(
 
             ,'//js/CB.ObjectsField.js'
 
-            ,'//js/CB.Breadcrumb.js'
             ,'//js/browser/Tree.js'
             ,'//js/browser/ViewContainer.js'
             ,'//js/browser/view/Interface.js'
@@ -104,8 +102,6 @@ return array_merge(
             ,'//js/ux/Ext.ux.htmlEditor.js'
             ,'//js/ux/Ext.ux.plugins.defaultButton.js'
             ,'//js/ux/Ext.ux.plugins.IconCombo.js'
-            ,'//js/ux/Ext.ux.TitleField.js'
-            ,'//js/ux/Ext.ux.SearchField.js'
 
             ,'//js/CB.TextEditWindow.js'
             ,'//js/CB.HtmlEditWindow.js'
@@ -138,7 +134,7 @@ return array_merge(
             ,'//js/DB/DirectObjectsStore.js'
             ,'//js/DB/TemplateStore.js'
 
-            ,'//js/CB.ViewPort.js'
+            ,'//js/ViewPort.js'
 
             ,'//js/plugin/Panel.js'
             ,'//js/object/view/Preview.js'
@@ -149,6 +145,7 @@ return array_merge(
             ,'//js/object/ViewContainer.js'
             ,'//js/search/edit/Panel.js'
             ,'//js/search/edit/Window.js'
+            ,'//js/search/Field.js'
             ,'//js/object/plugin/Base.js'
             ,'//js/object/plugin/Thumb.js'
             ,'//js/object/plugin/Comments.js'
@@ -165,6 +162,7 @@ return array_merge(
 
             ,'//js/state/DBProvider.js'
 
+            ,'//js/widget/Breadcrumb.js'
             ,'//js/widget/TaskBar.js'
         )
 

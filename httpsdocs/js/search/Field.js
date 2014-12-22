@@ -1,8 +1,11 @@
 Ext.ns('CB');
 
-Ext.define('Ext.ux.SearchField', {
+Ext.define('CB.search.Field', {
+
     extend: 'Ext.form.field.Text'
-    ,alias: ['widget.ExtuxSearchField']
+
+    ,xtype: 'CBSearchField'
+    ,alias: 'widget.CBSearchField'
 
     ,emptyText: L.Search
     ,enableKeyEvents: true
@@ -44,19 +47,20 @@ Ext.define('Ext.ux.SearchField', {
         });
 
         this.callParent(arguments);
-        // Ext.ux.SearchField.superclass.initComponent.apply(this);
-        this._setValue = this.setValue;
-        this.setValue = function(value){
-            this._setValue(value);
-            if(Ext.isEmpty(value)){
-                this.triggers.clear.hide();
-            }else{
-                this.triggers.clear.show();
-            }
-        };
     }
+
     ,afterRender: function() {
-        Ext.ux.SearchField.superclass.afterRender.apply(this, arguments);
+        this.callParent(arguments);
+    }
+
+    ,setValue: function(value) {
+        this.callParent(arguments);
+
+        if(Ext.isEmpty(value)){
+            this.triggers.clear.hide();
+        }else{
+            this.triggers.clear.show();
+        }
     }
 
     ,onTrigger1Click : function(e){

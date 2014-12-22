@@ -11,29 +11,16 @@ plog = clog;
 
 // application main entry point
 Ext.onReady(function(){
-    // Ext.Function._bind = Ext.Function.bind;
-    // Ext.Function.bind = function(fn, scope, args, appendArgs) {
-    //     return Ext.Function._bind(fn, scope, args, appendArgs);
-    // };
+
     App = new Ext.util.Observable();
 
     // used for charts
     App.colors = [ "#3A84CB", "#94ae0a", "#115fa6","#a61120", "#ff8809", "#ffd13e", "#a61187", "#24ad9a", "#7c7474", "#a66111"];
 
-    // App.addEvents(
-    //     'dragfilesenter'
-    //     ,'dragfilesover'
-    //     ,'dragfilesleave'
-    //     ,'filesdrop'
-    //     ,'objectsaction'
-    //     ,'userprofileupdated'
-    // );
-
     initApp();
 
     Ext.Date.use24HourTime = true;
 
-    // Ext.Direct.addProvider(Ext.app.REMOTING_API);
     Ext.direct.Manager.addProvider(Ext.app.REMOTING_API);
 
     Ext.state.Manager.setProvider(
@@ -83,7 +70,7 @@ Ext.onReady(function(){
         });
 
         App.mainViewPort.doLayout();
-        App.mainViewPort.initCB( r, e );
+        App.mainViewPort.initCB(r, e);
     });
 
 });
@@ -285,7 +272,6 @@ function initApp() {
                 ? date_ISO_to_local_date(v)
                 : v;
 
-            // var s = date_local_to_ISO_string(rez);
             var s = rez.toISOString();
             if(s.substr(-14) == 'T00:00:00.000Z') {
                 rez = Ext.Date.clearTime(rez, true);
@@ -295,9 +281,6 @@ function initApp() {
             if(Ext.isEmpty(rez)) {
                 return '';
             }
-            // if(rez.substr(-5) == '00:00') {
-            //     rez = rez.substr(0,10);
-            // }
 
             return rez;
         }
@@ -597,7 +580,6 @@ function initApp() {
         var pos = w.getXY();
         //move above status bar and a bit from right side
         pos[0] -= 15;
-        // pos[1] -= 30; //above toolbar
         pos[1] -= 5;
 
         //position to the left of an active window if any
@@ -669,8 +651,6 @@ function initApp() {
         params.query = null;
         params.start = 0;
         params.page = 1;
-
-        // delete App.locateObjectId;
 
         App.activateBrowserTab().setParams(params);
     };
@@ -747,8 +727,6 @@ function initApp() {
                 : null
             );
         switch(type){
-            case '_auto_title':
-                return new Ext.ux.TitleField(editorCfg);
             case '_objects':
                 //e should contain all necessary info
                 switch(cfg.editor){
@@ -873,15 +851,12 @@ function initApp() {
                             ,queryMode: 'remote'
                             ,autoLoadOnValue: true
                             ,multiSelect: true
-                            // ,hideTrigger: true
                             ,stacked: true
-                            // ,checkChange: Ext.emptyFn
                             ,pinList: false
                             ,filterPickList: true
                         });
 
                         return ed;
-                        // break;
                     default:
                         return new CB.ObjectsComboField({
                             enableKeyEvents: true
@@ -892,9 +867,7 @@ function initApp() {
                 break;
             case 'checkbox': return new Ext.form.ComboBox({
                         enableKeyEvents: true
-                        // ,forceSelection: true
                         ,triggerAction: 'all'
-                        // ,lazyRender: true
                         ,queryMode: 'local'
                         ,editable: false
                         ,store: CB.DB.yesno
@@ -984,7 +957,6 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                     ,iconClsField: 'name'
-                    // ,plugins: [new Ext.ux.plugins.IconCombo()]
                 });
             case '_language':
                 return new Ext.form.ComboBox({
@@ -1077,14 +1049,13 @@ function initApp() {
                             if(this.grid.onAfterEditProperty) {
                                 this.grid.onAfterEditProperty(this, this);
                             }
-                            // this.grid.fireEvent('change');
                         }
                     }
                 });
                 w.on('hide', e.grid.gainFocus, e.grid);
                 w.show();
-                // return w;
                 break;
+
             case 'html':
                 e.cancel = true;
                 w = App.getHtmlEditWindow({
@@ -1110,7 +1081,6 @@ function initApp() {
                     enableKeyEvents: true
                 });
         }
-        // return false;
     };
 
     App.focusFirstField = function(scope){

@@ -20,8 +20,6 @@ Ext.define('CB.browser.view.Pivot',{
             ,this.params || {}
         );
 
-        this.instanceId = this.refOwner.instanceId;
-
         this.seriesStyles = [];
         for (var i = 0; i < App.colors.length; i++) {
             this.seriesStyles.push({
@@ -31,7 +29,6 @@ Ext.define('CB.browser.view.Pivot',{
 
         this.rowsCombo = new Ext.form.ComboBox({
             xtype: 'combo'
-            ,id: 'PVrowsCombo' + this.instanceId
             ,itemId: 'PVrowsCombo'
             ,selectedFacetIndex: 0
             ,forceSelection: true
@@ -55,7 +52,6 @@ Ext.define('CB.browser.view.Pivot',{
 
         this.colsCombo = new Ext.form.ComboBox({
             xtype: 'combo'
-            ,id: 'PVcolsCombo' + this.instanceId
             ,itemId: 'PVcolsCombo'
             ,selectedFacetIndex: 1
             ,forceSelection: true
@@ -79,40 +75,31 @@ Ext.define('CB.browser.view.Pivot',{
         this.refOwner.buttonCollection.addAll(
             new Ext.Button({
                 qtip: L.Pivot
-                ,id: 'PVtable' + this.instanceId
                 ,itemId: 'PVtable'
                 ,chart: 'table'
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-table'
-                ,scale: 'large'
-                // ,toggleGroup: 'pv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
             ,new Ext.Button({
                 qtip: L.ChartArea
-                ,id: 'PVbarchart' + this.instanceId
                 ,itemId: 'PVbarchart'
                 ,chart: 'stackedBars'
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-chart-bar'
-                ,scale: 'large'
-                // ,toggleGroup: 'pv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
             ,new Ext.Button({
                 qtip: L.ChartArea
-                ,id: 'PVcolumnchart' + this.instanceId
                 ,itemId: 'PVcolumnchart'
                 ,chart: 'stackedColumns'
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-chart-column'
-                ,scale: 'large'
-                // ,toggleGroup: 'pv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
@@ -171,6 +158,11 @@ Ext.define('CB.browser.view.Pivot',{
                 ,'PVcolumnchart'
                 ,'PVrowsCombo'
                 ,'PVcolsCombo'
+                ,'->'
+                ,'reload'
+                ,'more'
+                ,'-'
+                ,'apps'
             ]
         );
     }
@@ -193,9 +185,9 @@ Ext.define('CB.browser.view.Pivot',{
             ,showBarChart = (this.activeCharts.indexOf('stackedBars') > -1)
             ,showColumnChart = (this.activeCharts.indexOf('stackedColumns') > -1);
 
-        BC.get('PVtable' + this.instanceId).toggle(showTable, true);
-        BC.get('PVbarchart' + this.instanceId).toggle(showBarChart, true);
-        BC.get('PVcolumnchart' + this.instanceId).toggle(showColumnChart, true);
+        BC.get('PVtable').toggle(showTable, true);
+        BC.get('PVbarchart').toggle(showBarChart, true);
+        BC.get('PVcolumnchart').toggle(showColumnChart, true);
 
         this.loadChartData();
 

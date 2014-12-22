@@ -4,7 +4,7 @@ CB.DB.defaultItemFields = [
     {name: 'nid', type: 'string'}
     ,{name: 'pid', type: 'int'}
     ,{name: 'system', type: 'int'}
-    ,{name: 'status', type: 'int'}
+    ,{name: 'status'}
     ,{name: 'task_status', type: 'int'}
     ,{name: 'template_id', type: 'int'}
     ,'template_type'

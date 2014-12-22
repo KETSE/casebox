@@ -9,29 +9,28 @@ Ext.define('CB.search.edit.Panel', {
     ,hideTitle: true
 
     ,initComponent: function(){
-        this.instanceId = Ext.id();
-
         this.actions = {
             search: new Ext.Action({
-                iconCls: 'ib-search'
-                ,id: 'search' + this.instanceId
-                ,scale: 'large'
+                iconCls: 'im-search'
+                ,itemId: 'search'
+                ,scale: 'medium'
                 ,tooltip: L.Search
                 ,scope: this
                 ,handler: this.onSearchClick
             })
             ,clear: new Ext.Action({
-                iconCls: 'ib-refresh'
-                ,id: 'clear' + this.instanceId
-                ,scale: 'large'
+                iconCls: 'im-refresh'
+                ,itemId: 'clear'
+                ,scale: 'medium'
                 ,qtip: L.Clear
                 ,scope: this
                 ,handler: this.onClearClick
             })
 
             ,save: new Ext.Action({
-                iconCls: 'icon-tick'
-                ,id: 'save' + this.instanceId
+                iconCls: 'is-tick'
+                ,itemId: 'save'
+                ,scale: 'medium'
                 ,text: L.Save
                 ,disabled: true
                 ,scope: this
@@ -49,9 +48,9 @@ Ext.define('CB.search.edit.Panel', {
                 ,this.actions.clear
                 ,'->'
                 ,{
-                    iconCls: 'ib-points'
-                    ,id: 'more' + this.instanceId
-                    ,scale: 'large'
+                    iconCls: 'im-points'
+                    ,itemId: 'more'
+                    ,scale: 'medium'
                     ,scope: this
                     ,handler: function(b, e) {
                         this.moreMenu.showBy(b.getEl());
@@ -86,9 +85,15 @@ Ext.define('CB.search.edit.Panel', {
 
         var browser = App.activateBrowserTab();
         browser.changeSomeParams({search: p});
-        // this.fireEvent('changeparams',{search: p});
     }
 
+    ,processLoadData: function(r, e) {
+        if(isNaN(r.data.id)) {
+            r.data.name = L.Search + ' ' + CB.DB.templates.getName(r.data.template_id);
+        }
+
+        this.callParent(arguments);
+    }
     ,onClearClick: function (b, e)
     {
         var data = {template_id: this.data.template_id};

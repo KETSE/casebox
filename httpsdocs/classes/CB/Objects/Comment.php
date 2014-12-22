@@ -58,7 +58,7 @@ class Comment extends Object
         }
 
         //replace users ith their names
-        if (preg_match_all('/@([^@\s,]+)/', $message, $matches, PREG_SET_ORDER)) {
+        if (preg_match_all('/@([\w\.\-]+[\w])/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $userId = User::exists($match[1]);
                 if (is_numeric($userId)) {

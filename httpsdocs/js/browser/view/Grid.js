@@ -142,6 +142,7 @@ Ext.define('CB.browser.view.Grid', {
 
         this.grid = new Ext.grid.Panel({
             loadMask: false
+            ,region: 'center'
             ,cls: 'folder-grid'
             ,border: false
             ,bodyStyle: {
@@ -166,18 +167,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,loadMask: false
                 ,stripeRows: false
                 ,deferInitialRefresh: false
-                // ,enableRowBody: true
-                // ,getRowClass: function(r, rowIndex, rp, ds){
-                //     rp.body = '';
-                //     if(!Ext.isEmpty(r.get('content'))) {
-                //         rp.body += r.get('content');
-                //     }
 
-                //     if(Ext.isEmpty(rp.body)) {
-                //         return '';
-                //     }
-                //     return 'hasBody';
-                // }
                 ,plugins: [{
                         ptype: 'CBPluginDDFilesDropZone'
                         ,pidPropety: 'nid'
@@ -385,11 +375,29 @@ Ext.define('CB.browser.view.Grid', {
             }
         });
 
+        // this.objectPanel = new CB.object.ViewContainer({
+        //     region: 'east'
+        //     ,width: 250
+
+        //     ,collapsible: true
+        //     ,collapseMode: 'mini'
+
+        //     ,stateful: true
+        //     ,stateId: 'gvop' //grid view object panel
+
+        //     ,onCloseClick: Ext.Function.bind(this.onCloseObjectPanelClick, this)
+        // });
+
         Ext.apply(this, {
             title: L.Explorer
             ,header: false
-            ,layout: 'fit'
-            ,items: this.grid
+            ,layout: 'border'
+            ,items:
+                this.grid
+            // [
+            //     this.grid
+            //     ,this.objectPanel
+            // ]
             ,listeners: {
                 scope: this
                 ,activate: this.onActivate
@@ -428,13 +436,17 @@ Ext.define('CB.browser.view.Grid', {
         this.fireEvent(
             'settoolbaritems'
             ,[
-                'apps'
-                ,'create'
+                'create'
                 ,'upload'
                 ,'download'
                 ,'-'
                 ,'edit'
                 ,'delete'
+                ,'->'
+                ,'reload'
+                ,'more'
+                ,'-'
+                ,'apps'
             ]
         );
     }
@@ -624,5 +636,18 @@ Ext.define('CB.browser.view.Grid', {
     ,onItemContextMenu: function(grid, record, item, index, e, eOpts) {
         this.fireEvent('itemcontextmenu', e);
     }
+
+    // /**
+    //  * handler for close right panel button
+    //  * @param  button b
+    //  * @param  event e
+    //  * @return void
+    //  */
+    // ,onCloseObjectPanelClick: function(b, e) {
+    //     this.objectPanel.collapse();
+    //     this.buttonCollection.get('filter').hide();
+    //     this.buttonCollection.get('properties').hide();
+    //     this.actions.preview.show();
+    // }
 
 });

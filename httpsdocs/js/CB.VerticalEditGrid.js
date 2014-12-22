@@ -117,14 +117,13 @@ Ext.define('CB.VerticalEditGrid', {
                         editable: true
                         ,name: 'iconCls'
                         ,hiddenName: 'iconCls'
-                        ,tpl: '<tpl for="."><div class="x-combo-list-item icon-padding16 {name}">{name}</div></tpl>'
+                        ,tpl: '<tpl for="."><div class="x-boundlist-item icon-padding16 {name}">{name}</div></tpl>'
                         ,store: CB.DB.templatesIconSet
                         ,valueField: 'name'
                         ,displayField: 'name'
                         ,iconClsField: 'name'
                         ,triggerAction: 'all'
                         ,queryMode: 'local'
-                        // ,plugins: [new Ext.ux.plugins.IconCombo()]
                     });
                 }
             }

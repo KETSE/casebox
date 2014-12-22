@@ -15,35 +15,40 @@ Ext.define('CB.object.ViewContainer', {
         });
 
         this.callParent(arguments);
-
     }
 
     ,initComponent: function() {
 
-        this.initActions();
-
         this.initButtons();
 
         Ext.apply(this, {
-            hideMode: 'offsets'
-            ,tbar: [
-                this.BC.get('edit')
-                ,this.BC.get('fitImage')
-                ,this.BC.get('download')
-                ,this.BC.get('completetask')
-                ,'->'
-                ,this.BC.get('preview')
-                ,this.BC.get('more')
-                ,'-'
-                ,this.BC.get('openExternal')
-                ,this.BC.get('close')
-            ]
+            tbar: new Ext.Toolbar({
+                border: false
+                ,style: 'background: #ffffff'
+                ,defaults: {
+                    scale: 'medium'
+                }
+                ,items: [
+                    this.BC.get('edit')
+                    ,this.BC.get('fitImage')
+                    ,this.BC.get('download')
+                    ,this.BC.get('completetask')
+                    ,'->'
+                    ,this.BC.get('preview')
+                    ,this.BC.get('more')
+                    ,'-'
+                    ,this.BC.get('openExternal')
+                    ,this.BC.get('close')
+                ]
+            })
+
             ,defaults: {
                 border: false
                 ,header: false
             }
             ,items: [{
                     xtype: 'CBObjectProperties'
+
                     ,api: CB_Objects.getPluginsData
                     ,listeners: {
                         scope: this
@@ -93,9 +98,8 @@ Ext.define('CB.object.ViewContainer', {
         this.actions = {
 
             edit: new Ext.Action({
-                iconCls: 'ib-edit-obj'
+                iconCls: 'im-edit-obj'
                 ,itemId: 'edit'
-                ,scale: 'large'
                 ,text: L.Edit
                 ,disabled: true
                 ,scope: this
@@ -106,17 +110,15 @@ Ext.define('CB.object.ViewContainer', {
                 qtip: L.Download
                 ,itemId: 'download'
                 ,iconAlign:'top'
-                ,scale: 'large'
-                ,iconCls: 'ib-download'
+                ,iconCls: 'im-download'
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onDownloadClick
             })
 
             ,fitImage: new Ext.Action({
-                iconCls: 'ib-fit'
+                iconCls: 'im-fit'
                 ,itemId: 'fitImage'
-                ,scale: 'large'
                 ,hidden: true
                 ,enableToggle: true
                 ,pressed: true
@@ -125,9 +127,8 @@ Ext.define('CB.object.ViewContainer', {
             })
 
             ,completeTask: new Ext.Action({
-                iconCls: 'ib-task-complete'
+                iconCls: 'im-task-complete'
                 ,itemId: 'completetask'
-                ,scale: 'large'
                 ,text: L.Done
                 ,hidden: true
                 ,scope: this
@@ -135,10 +136,9 @@ Ext.define('CB.object.ViewContainer', {
             })
 
             ,preview: new Ext.Action({
-                iconCls: 'ib-preview'
+                iconCls: 'im-preview'
                 ,itemId: 'preview'
                 ,enableToggle: true
-                ,scale: 'large'
                 ,qtip: L.Preview
                 ,hidden: true
                 ,scope: this
@@ -146,18 +146,18 @@ Ext.define('CB.object.ViewContainer', {
             })
 
             ,openExternal: new Ext.Action({
-                iconCls: 'ib-external'
+                iconCls: 'im-external'
                 ,itemId: 'openExternal'
-                ,scale: 'large'
+                ,scale: 'medium'
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onOpenExternalClick
             })
 
             ,close: new Ext.Action({
-                iconCls: 'ib-cancel'
+                iconCls: 'im-cancel'
                 ,itemId: 'close'
-                ,scale: 'large'
+                ,scale: 'medium'
                 ,scope: this
                 ,handler: this.onCloseClick
             })
@@ -170,10 +170,12 @@ Ext.define('CB.object.ViewContainer', {
      * @return void
      */
     ,initButtons: function() {
+        this.initActions();
+
         //define button configs
         this.menuItemConfigs = {
             reload: {
-                iconCls: 'i-refresh'
+                iconCls: 'im-refresh'
                 ,itemId: 'reload'
                 ,text: L.Refresh
                 ,scope: this
@@ -181,9 +183,9 @@ Ext.define('CB.object.ViewContainer', {
             }
 
             ,completetask: {
-                iconCls: 'ib-task-complete'
+                iconCls: 'im-task-complete'
                 ,itemId: 'completetask'
-                ,scale: 'large'
+                ,scale: 'medium'
                 ,text: L.Done
                 ,scope: this
                 ,handler: this.onCompleteTaskClick
@@ -266,14 +268,11 @@ Ext.define('CB.object.ViewContainer', {
             ,new Ext.Button(this.actions.preview)
 
             ,new Ext.Button({
-                iconCls: 'ib-points'
-                ,itemId: 'more'
-                ,scale: 'large'
-                ,scope: this
-                ,handler: function(b, e) {
-                    this.updateCreateMenu();
-                    this.menu.showBy(b.getEl());
-                }
+                itemId: 'more'
+                ,arrowVisible: false
+                ,iconCls: 'im-points'
+                ,scale: 'medium'
+                ,menu: []
             })
         ]);
     }
@@ -399,8 +398,6 @@ Ext.define('CB.object.ViewContainer', {
             return;
         }
 
-        // var err = new Error();
-
         var id = this.requestedLoadData
             ? Ext.valueFrom(this.requestedLoadData.nid, this.requestedLoadData.id)
             : null;
@@ -469,6 +466,8 @@ Ext.define('CB.object.ViewContainer', {
         }
         this.menu = new Ext.menu.Menu({items:[]});
 
+        this.BC.get('more').setMenu(this.menu, true);
+
         if(Ext.isEmpty(ti)) {
             return;
         }
@@ -510,11 +509,6 @@ Ext.define('CB.object.ViewContainer', {
         //add "more" button to toolbar config if menu is not empty
         if(this.menu.items.getCount() > 0) {
             ti.tbar['more'] = {};
-        }
-
-        // add back button to config (always visible)
-        if(!Ext.isDefined(ti.tbar['back'])) {
-            ti.tbar['back'] = {};
         }
 
         // hide all bottons from toolbar
@@ -573,10 +567,7 @@ Ext.define('CB.object.ViewContainer', {
             case 'webdav':
                 App.openWebdavDocument(objectData);
                 break;
-            // case 'text':
-            // case 'html':
-            //     App.mainViewPort.onFileOpen(objectData, e);
-            //     break;
+
             default:
                 this.openObjectWindow(objectData);
                 break;
@@ -714,7 +705,7 @@ Ext.define('CB.object.ViewContainer', {
         }
 
         var p = Ext.apply({}, data);
-        // p.view = 'preview'; //default is preview
+        Ext.applyIf(p, this.loadedData);
 
         this.openObjectWindow(p, e);
     }

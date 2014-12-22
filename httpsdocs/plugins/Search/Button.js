@@ -5,39 +5,40 @@ Ext.define('CB.plugin.Search.Button', {
 
     ,alias: 'plugin.CBPluginSearchButton'
 
-    ,xtype: 'CBPluginSearchButton'
+    ,ptype: 'CBPluginSearchButton'
 
     ,init: function(owner) {
+
         this.historyData = {};
 
         this.callParent(arguments);
 
         this.owner = owner;
-        var instanceId = owner.instanceId;
-
-        // get filter button from the collection to detect its toggle group
-        var fb = owner.buttonCollection.get('filter' + instanceId);
-        if(Ext.isEmpty(fb)) {
-            return;
-        }
 
         this.button = new Ext.SplitButton({
-            text: L.Search
-            ,id: 'pluginsearchbutton' + instanceId
+            qtip: L.Search
+            ,itemId: 'pluginsearchbutton'
+            ,arrowAlign: 'bottom'
             ,iconCls: 'ib-search'
             ,scale: 'large'
             ,allowDepress: false
-            ,itemIndex: 2
+            ,hidden: true
             ,menu: []
             ,scope: owner
             ,handler: this.onButtonClick
         });
 
-        this.loadSearchTemplates();
+        owner.insert(3, this.button);
 
-        owner.buttonCollection.add(this.button);
-
-        owner.containerToolbar.insert(0, this.button);
+        if(App.initialized) {
+            this.loadSearchTemplates();
+        } else {
+            App.on(
+                'cbinit'
+                ,this.loadSearchTemplates
+                ,this
+            );
+        }
     }
 
     ,onButtonClick: function(b, e) {
@@ -62,8 +63,14 @@ Ext.define('CB.plugin.Search.Button', {
     }
 
     ,loadSearchTemplates: function(){
+        if(Ext.isEmpty(CB.DB.templates)) {
+            return;
+        }
+
         var menu = this.button.menu;
+            menu.removeAll(true);
         var templates = CB.DB.templates.query('type', 'search');
+
         templates.each(
             function(t){
                 menu.add({
@@ -76,5 +83,7 @@ Ext.define('CB.plugin.Search.Button', {
             }
             ,this
         );
+
+        this.button.setVisible(menu.items.getCount() > 0);
     }
 });

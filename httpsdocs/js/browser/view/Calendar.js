@@ -61,32 +61,6 @@ Ext.define('CB.Calendar', {
     // Once this component inits it will set a reference to itself as an application
     // member property for easy reference in other functions within App.
     ,initComponent: function(){
-        // App.calendarPanel = this;
-
-/*        // This is an example calendar store that enables the events to have
-                // different colors based on CalendarId. This is not a fully-implmented
-                // multi-calendar implementation, which is beyond the scope of this sample app
-        this.calendarStore = new Ext.data.JsonStore({
-            rootProperty: 'calendars'
-            ,idProperty: 'id'
-            ,data: { "calendars":[{ id:1, title:"CaseBox" }] } // defined in calendar-list.js
-            ,proxy: {
-                type: 'memory'
-                ,reader: {
-                    type: 'json'
-                }
-            }
-            ,autoLoad: true
-            ,fields: [
-                {name:'CalendarId', mapping: 'id', type: 'int'}
-                ,{name:'Title', mapping: 'title', type: 'string'}
-            ]
-            ,sortInfo: {
-                field: 'CalendarId'
-                ,direction: 'ASC'
-            }
-        });/**/
-
         // This is an example calendar store that enables event color-coding
         this.calendarStore = Ext.create('Ext.calendar.data.MemoryCalendarStore', {
             data: { "calendars":[{ id:1, title:"CaseBox" }] } // defined in calendar-list.js
@@ -125,46 +99,6 @@ Ext.define('CB.Calendar', {
         });
 
         this.eventsReloadTask = new Ext.util.DelayedTask( this.doReloadEventsStore, this);
-
-/*        // fields = Ext.calendar.EventRecord.prototype.fields.getRange();
-        // fields.push({ name: 'template_id', type: 'int' });
-        // fields.push('task_status');
-        // fields.push('iconCls');
-        // fields.push('cls');
-        // fields.push('category_id');
-        // A sample event store that loads static JSON from a local file. Obviously a real
-        // implementation would likely be loading remote data via an HttpProxy, but the
-        // underlying store functionality is the same.  Note that if you would like to
-        // provide custom data mappings for events, see EventRecord.js.
-        this.eventStore = new Ext.calendar.data.MemoryCalendarStore({
-            autoLoad: false
-            ,autoDestroy: true
-            // ,fields: fields
-            ,listeners: {
-                scope: this
-                ,l_oad: function(st, recs, opt){
-                    Ext.each(
-                        recs
-                        , function(r){
-                            cls = 'cal-cat-'+ Ext.valueFrom(r.get('cls'), 'default') +
-                                ( (r.get('task_status') == 3) ? ' cal-status-c' : '');
-                            if(r.get('template_id') == App.config.default_task_template) {
-                                r.set('iconCls', '');
-                            } else {
-                                r.set('iconCls', getItemIcon(r.data));
-                            }
-                            if(!Ext.isEmpty(r.get('iconCls'))) {
-                                cls = cls + ' icon-padding '+ r.get('iconCls');
-                            }
-                            r.set('cls', cls);
-                            r.commit();
-                        }
-                        ,this
-                    );
-                    // this.getLayout().activeItem.syncSize();
-                }
-            }
-        });/**/
 
         Ext.apply(this, {
             listeners: {
@@ -334,17 +268,14 @@ Ext.define('CB.browser.view.Calendar', {
             this.store.on('load', this.onMainStoreLoad, this);
         }
 
-        var instanceId = this.refOwner.instanceId;
-
         this.refOwner.buttonCollection.addAll(
             new Ext.Button({
                 text: L.Day
-                ,id: 'dayview' + instanceId
+                ,itemId: 'dayview'
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-cal-day'
-                // ,iconAlign:'top'
-                ,scale: 'large'
+                ,scale: 'medium'
                 ,toggleGroup: 'cv' + viewGroup
                 ,scope: this.calendar
                 ,handler: this.calendar.onDayClick
@@ -352,12 +283,11 @@ Ext.define('CB.browser.view.Calendar', {
 
             ,new Ext.Button({
                 text: L.Week
-                ,id: 'weekview' + instanceId
+                ,itemId: 'weekview'
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-cal-week'
-                // ,iconAlign:'top'
-                ,scale: 'large'
+                ,scale: 'medium'
                 ,toggleGroup: 'cv' + viewGroup
                 ,scope: this.calendar
                 ,handler: this.calendar.onWeekClick
@@ -365,12 +295,11 @@ Ext.define('CB.browser.view.Calendar', {
 
             ,new Ext.Button({
                 text: L.Month
-                ,id: 'monthview' + instanceId
+                ,itemId: 'monthview'
                 ,enableToggle: true
                 ,allowDepress: false
                 ,iconCls: 'ib-cal-month'
-                // ,iconAlign:'top'
-                ,scale: 'large'
+                ,scale: 'medium'
                 ,toggleGroup: 'cv' + viewGroup
                 ,pressed: true
                 ,scope: this.calendar
@@ -378,19 +307,17 @@ Ext.define('CB.browser.view.Calendar', {
             })
 
             ,new Ext.Button({
-                id: 'calprev' + instanceId
-                ,iconCls: 'ib-arr-l'
-                // ,iconAlign:'top'
-                ,scale: 'large'
+                itemId: 'calprev'
+                ,iconCls: 'im-arr-l'
+                ,scale: 'medium'
                 ,scope: this.calendar
                 ,handler: this.calendar.onPrevClick
             })
 
             ,new Ext.Button({
-                id: 'calnext' + instanceId
-                ,iconCls: 'ib-arr-r'
-                // ,iconAlign:'top'
-                ,scale: 'large'
+                itemId: 'calnext'
+                ,iconCls: 'im-arr-r'
+                ,scale: 'medium'
                 ,scope: this.calendar
                 ,handler: this.calendar.onNextClick
             })
@@ -502,15 +429,17 @@ Ext.define('CB.browser.view.Calendar', {
         this.fireEvent(
             'settoolbaritems'
             ,[
-                'apps'
-                ,'create'
-                ,'-'
                 ,'dayview'
                 ,'weekview'
                 ,'monthview'
                 ,'calprev'
                 ,'calnext'
                 ,'caltitle'
+                ,'->'
+                ,'reload'
+                ,'more'
+                ,'-'
+                ,'apps'
             ]
         );
     }
@@ -548,15 +477,3 @@ Ext.define('CB.browser.view.Calendar', {
         );
     }
 });
-
-
-/* calendar component overrides */
-// Ext.calendar.CalendarView.prototype.setStartDate = function(start, refresh) {
-//     this.startDate = start.clearTime();
-//     this.setViewBounds(start);
-
-//     if (refresh === true) {
-//         this.refresh();
-//     }
-//     this.fireEvent('datechange', this, this.startDate, this.viewStart, this.viewEnd);
-// };

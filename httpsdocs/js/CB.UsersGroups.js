@@ -17,7 +17,7 @@ Ext.define('CB.AddUserForm', {
                     (App.loginData.manage || (r.get('id') !=2))
                 );
             }
-        );//&& (App.loginData.admin || (r.get('id') !=1))
+        );
 
         var data = [];
         recs.each(function(r){data.push(r.data);}, this);
@@ -140,7 +140,6 @@ Ext.define('CB.AddUserForm', {
                     this.setDirty(true);
                 }
                 ,show: function(){
-                    // this.syncSize();
                     this.center();
                 }
             }
@@ -293,28 +292,6 @@ Ext.define('CB.UsersGroupsTree', {
                 }
             })
 
-            // ,loader: new Ext.tree.TreeLoader({
-            //     directFn: CB_UsersGroups.getChildren
-            //     ,paramsAsHash: true
-            //     ,preloadChildren: true
-            //     ,listeners:{
-            //         scope: this
-            //         ,beforeload: function(treeLoader, node) {
-            //             // Add NodePath to the params
-            //             treeLoader.extraParams.path = node.getPath('nid');
-            //         }
-            //         ,load: function(o, n, r) {
-            //             if(n.data.kind > 1) {
-            //                 n.sort(this.sortTree);
-            //             }
-            //         }
-            //         ,loadexception: function(loader, node, response) {
-            //             node.leaf = false; //force it to folder?
-            //             node.loaded = false;
-            //         }
-            //     }
-            // })
-
             ,tbar: [
                 {
                     text: L.Add
@@ -340,7 +317,7 @@ Ext.define('CB.UsersGroupsTree', {
                     if( (o.point != 'append')
                         || (o.target == o.dropNode.parentNode)
                         || (o.target.getDepth() != 1)
-                        || (o.target.data.nid < 1) // || (o.target.data.role_id > 2)
+                        || (o.target.data.nid < 1)
                         ){
                         o.cancel = true;
                         return;
@@ -366,7 +343,7 @@ Ext.define('CB.UsersGroupsTree', {
                     var text = Ext.valueFrom(n.data.title, n.data.name);
                     n.data.title = text;
 
-                    if( parent.getDepth() == 1 ){ //n.data.role_id > 0 &&
+                    if( parent.getDepth() == 1 ){
                         text += ' <span class="cG">(id:' + n.data.nid + ')</span>';
                         if(n.data.enabled != 1){
                             text += ' <span class="cG">' + L.inactive + '</span>';
@@ -538,7 +515,7 @@ Ext.define('CB.UsersGroupsTree', {
 
         attr.iconCls = 'icon-user-gray';
         this.store.remove(n);
-        // n.remove(true);
+
         if(r.outOfGroup){
             p = this.getRootNode().findChild( 'nid', '-1');
             if(p.loaded){
@@ -684,12 +661,6 @@ Ext.define('CB.UsersGroupsTree', {
     ,clearFilter: function(){
         plog('TODO: refactor filtering nodes through store');
         rn = this.getRootNode();
-        // rn.cascadeBy({
-        //     before:function(n){
-        //         n.ui.show();
-        //     }
-        //     ,scope: this
-        // });
     }
 });
 // ----------------------------------------------------------- edit user form
@@ -724,9 +695,6 @@ Ext.define('CB.UserEditWindow', {
                     this.destroy();
                 }
                 ,cancel: this.destroy
-                // ,change: function(){
-                //     this.syncSize();
-                // }
             }
         });
 
@@ -887,14 +855,8 @@ Ext.define('CB.UsersGroupsForm', {
                         ,store: new Ext.data.JsonStore({
                             autoDestroy: true
                             ,model: 'Facet'
-                            // ,fields: [{name: 'id', type: 'int'}, 'name', {name: 'active', type: 'int'}]
                         })
-                        // ,colModel: new Ext.grid.ColumnModel({
-                        //     defaults: {
-                        //         width: 120
-                        //         ,sortable: true
-                        //     }
-                        // })
+
                         ,columns: [
                             {
                                 header: L.Groups
@@ -917,7 +879,7 @@ Ext.define('CB.UsersGroupsForm', {
                         }
                         ,listeners:{
                             scope: this
-                            ,celldblclick: function(cmp, td, cellIndex, record, tr, rowIndex, e, eOpts){//g, ri, ci, e
+                            ,celldblclick: function(cmp, td, cellIndex, record, tr, rowIndex, e, eOpts){
                                 switch(cmp.headerCt.columnManager.columns[cellIndex].dataIndex){
                                     case 'active':
                                         record.set('active', (record.get('active') == 1) ? null : 1);
@@ -1052,7 +1014,7 @@ Ext.define('CB.UsersGroupsForm', {
         );
     }
 
-    ,onUserInfoContainerCLick: function(cmp, e, eOpts){//w, idx, el, ev
+    ,onUserInfoContainerCLick: function(cmp, e, eOpts){
         if(e) {
             var target = e.getTarget();
             if(target.localName == "img") {
@@ -1064,7 +1026,7 @@ Ext.define('CB.UsersGroupsForm', {
         }
     }
 
-    ,onEditUserDataClick: function(cmp, e, eOpts){//w, idx, el, ev
+    ,onEditUserDataClick: function(cmp, e, eOpts){
         this.fireEvent('edit');
     }
 
@@ -1166,7 +1128,8 @@ Ext.define('CB.UsersGroups', {
             ,width: 250
             ,split: true
             ,collapseMode: 'mini'
-        });//west region
+        });
+
         this.tree.getSelectionModel().on( 'selectionchange', this.onTreeSelectionChange, this );
         this.tree.getSelectionModel().on( 'beforeselect', this.onTreeBeforeSelect, this );
 
@@ -1180,8 +1143,9 @@ Ext.define('CB.UsersGroups', {
                 ,loaded: this.onLoadFormData
                 ,edit: this.onEditUserData
             }
-        } );//center region
-        this.searchField = new Ext.ux.SearchField({
+        } );
+
+        this.searchField = new CB.search.Field({
             region: 'south'
             ,listeners: {
                 scope: this
@@ -1454,7 +1418,6 @@ Ext.define('CB.ChangePasswordWindow', {
             ,listeners: {
                 afterrender: function(){
                     f = this.down('form');
-                    // f.syncSize();
                     App.focusFirstField(f);
                 }
             }
