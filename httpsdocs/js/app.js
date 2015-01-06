@@ -540,6 +540,11 @@ function initApp() {
 
         w = App.openWindow(wndCfg);
 
+        var winHeight = window.innerHeight;
+        if((winHeight > 0) && (w.getHeight() > winHeight)) {
+            w.setHeight(winHeight - 20);
+        }
+
         if(templateType == 'file') {
             w.center();
 

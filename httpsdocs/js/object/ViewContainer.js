@@ -102,16 +102,17 @@ Ext.define('CB.object.ViewContainer', {
                 ,itemId: 'edit'
                 ,text: L.Edit
                 ,disabled: true
+                ,scale: 'medium'
                 ,scope: this
                 ,handler: this.onEditClick
             })
 
             ,download: new Ext.Action({
-                qtip: L.Download
+                text: L.Download
                 ,itemId: 'download'
-                ,iconAlign:'top'
                 ,iconCls: 'im-download'
                 ,hidden: true
+                ,scale: 'medium'
                 ,scope: this
                 ,handler: this.onDownloadClick
             })
@@ -122,6 +123,7 @@ Ext.define('CB.object.ViewContainer', {
                 ,hidden: true
                 ,enableToggle: true
                 ,pressed: true
+                ,scale: 'medium'
                 ,scope: this
                 ,handler: this.onFitImageClick
             })
@@ -131,6 +133,7 @@ Ext.define('CB.object.ViewContainer', {
                 ,itemId: 'completetask'
                 ,text: L.Done
                 ,hidden: true
+                ,scale: 'medium'
                 ,scope: this
                 ,handler: this.onCompleteTaskClick
             })
@@ -141,6 +144,7 @@ Ext.define('CB.object.ViewContainer', {
                 ,enableToggle: true
                 ,qtip: L.Preview
                 ,hidden: true
+                ,scale: 'medium'
                 ,scope: this
                 ,handler: this.onPreviewClick
             })

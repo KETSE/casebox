@@ -9,11 +9,12 @@ Ext.define('Ext.ux.HtmlEditor', {
     ,itemId: 'htmleditor'
     ,baseUri: ''
     ,border: false
+    ,bodyStyle: 'border: 0'
     ,headerInclude: ''
 
     ,initComponent: function() {
         this.on('render', this.onRenderEvent, this);
-        Ext.ux.HtmlEditor.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
     ,onRenderEvent: function(){
         this.addPasteFromWordButton();

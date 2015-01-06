@@ -10,6 +10,12 @@ Ext.define('CB.file.edit.Window', {
     ,width: 600
     ,height: 550
 
+    ,initComponent: function() {
+        this.callParent(arguments);
+
+        this.on('openversion', this.onOpenVersionEvent, this);
+    }
+
     /**
      * init this component actions
      * @return void
@@ -24,6 +30,14 @@ Ext.define('CB.file.edit.Window', {
                 ,scope: this
                 ,handler: this.onDownloadClick
             })
+
+            ,restoreVersion: new Ext.Action({
+                text: L.Restore
+                ,iconCls: 'i-restore'
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onRestoreVersionClick
+            })
         });
     }
 
@@ -35,6 +49,7 @@ Ext.define('CB.file.edit.Window', {
         this.downloadSeparator = Ext.create({xtype: 'tbseparator'});
         return [
             this.actions.edit
+            ,this.actions.restoreVersion
             ,this.actions.save
             ,this.actions.cancel
             ,this.downloadSeparator
@@ -51,13 +66,19 @@ Ext.define('CB.file.edit.Window', {
     ,initContainerItems: function() {
         this.callParent(arguments);
 
+        // this.gridContainer.title = 'text';
+        // this.gridContainer.header = true;
+
         Ext.destroy(this.complexFieldContainer);
 
         this.complexFieldContainer = Ext.create({
-            xtype: 'panel'
+            xtype: 'form'
             ,border: false
             ,layout: 'fit'
             ,flex: 1
+            ,api: {
+                submit: CB_Objects.save
+            }
             ,items: []
         });
     }
@@ -69,28 +90,29 @@ Ext.define('CB.file.edit.Window', {
     ,getLayoutItems: function() {
         this.templateCfg.layout = 'horizontal';
 
-        rez = [
+        var rez = [
             {
                 region: 'center'
-                ,border: true
+                ,border: false
                 ,autoScroll: true
                 ,layout: {
                     type: 'vbox'
                     ,align: 'stretch'
                 }
                 ,items: [
-                    this.titleContainer
-                    ,this.complexFieldContainer
+                    // this.titleContainer
+                    this.complexFieldContainer
                 ]
             }, {
                 region: 'east'
                 ,itemId: 'infoPanel'
                 ,header: false
+                ,border: false
                 ,autoScroll: true
 
                 ,split: true
-                ,collapsible: true
-                ,collapseMode: 'mini'
+                // ,collapsible: true
+                // ,collapseMode: 'mini'
 
                 ,width: 300
                 ,items: [
@@ -124,30 +146,21 @@ Ext.define('CB.file.edit.Window', {
             this.previewPanel
         );
 
-
-        this.previewPanel.loadPreview(this.data.id);
+        this.previewPanel.loadPreview(this.data.id, this.loadedVersionId);
     }
-
-    /**
-     * method for processing server data on editing item
-     * @return void
-     */
-    // ,processLoadEditData: function(r, e) {
-    //     this.callParent(arguments);
-
-    // }
 
     ,updateComplexFieldContainer: function() {
         this.editType = detectFileEditor(this.data.name);
 
         switch(this.editType) {
             case 'text':
-                this.contentEditor = new Ext.ux.AceEditor();
+                this.contentEditor = new Ext.ux.AceEditor({border: false});
                 break;
 
             case 'html':
                 this.contentEditor = new Ext.ux.HtmlEditor({
                     border: false
+                    ,cls: 'editor-no-border'
                     ,listeners: {
                         scope: this
                         ,change: this.onEditorChangeEvent
@@ -185,8 +198,21 @@ Ext.define('CB.file.edit.Window', {
         this.callParent(arguments);
 
         this.downloadSeparator.setHidden(this.actions.cancel.isHidden());
-        this.actions.edit.setHidden((this.viewMode == 'edit') || (this.editType === false));
+
+        this.actions.edit.setHidden(
+            (this.viewMode == 'edit') ||
+            (this.editType === false) ||
+            !Ext.isEmpty(this.loadedVersionId)
+        );
+
         this.actions.save.setDisabled(false);
+
+        this.actions.restoreVersion.setHidden(Ext.isEmpty(this.loadedVersionId));
+
+        this.pluginsContainer.setSelectedVersion({
+            id: this.data.id
+            ,versionId: this.loadedVersionId
+        });
     }
 
     /**
@@ -214,27 +240,31 @@ Ext.define('CB.file.edit.Window', {
         this.saveContent();
 
         if(!this._isDirty) {
-            return;
+            this.closeOnSaveContent = true;
+
+        } else {
+            this.readValues();
+
+            this.getEl().mask(L.Saving + ' ...', 'x-mask-loading');
+
+            this.complexFieldContainer.getForm().submit({
+                clientValidation: true
+                ,loadMask: false
+                ,params: {
+                    data: Ext.encode(this.data)
+                }
+                ,scope: this
+                ,success: this.processSave
+                ,failure: this.processSave
+            });
         }
-
-        this.readValues();
-
-        this.getEl().mask(L.Saving + ' ...', 'x-mask-loading');
-
-        this.complexFieldContainer.getForm().submit({
-            clientValidation: true
-            ,loadMask: false
-            ,params: {
-                data: Ext.encode(this.data)
-            }
-            ,scope: this
-            ,success: this.processSave
-            ,failure: this.processSave
-        });
     }
 
     ,saveContent: function() {
-        var ed = this.contentEditor
+        var ed = this.contentEditor.editor
+            ? this.contentEditor.editor
+            : this.contentEditor
+
             ,session = ed.getSession
                 ? ed.getSession()
                 : null;
@@ -256,6 +286,9 @@ Ext.define('CB.file.edit.Window', {
     ,processSaveContent: function(r, e){
         this.getEl().unmask();
         this.actions.save.setDisabled(Ext.isEmpty(this.contentEditor));
+        if(this.closeOnSaveContent) {
+            this.close();
+        }
     }
 
     /**
@@ -306,6 +339,34 @@ Ext.define('CB.file.edit.Window', {
      */
     ,onDownloadClick: function(b, e){
         App.downloadFile(this.data.id, false, this.loadedVersionId);
+    }
+
+    ,onOpenVersionEvent: function(data, pluginComponent) {
+        this.loadedVersionId = data.id;
+
+        if(!Ext.isEmpty(this.loadedVersionId)) {
+            this.viewMode = 'preview';
+        }
+
+        this.doLoad();
+    }
+
+    ,onRestoreVersionClick: function(){
+        if(Ext.isEmpty(this.loadedVersionId)) {
+            return;
+        }
+
+        CB_Files.restoreVersion(
+            this.loadedVersionId
+            ,function(r, e){
+                App.mainViewPort.fireEvent('fileuploaded', {data: r.data});
+
+                delete this.loadedVersionId;
+
+                this.doLoad();
+            }
+            ,this
+        );
     }
 
 });

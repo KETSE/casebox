@@ -62,13 +62,14 @@ Ext.define('CB.ViewPort', {
 
         //application main left bar (left docked)
         App.mainLBar = new Ext.Toolbar({
-            style:'background: #ffffff; border: 0; '
+            style:'background: #f4f4f4; border: 0; '
             ,autoWidth: true
             ,dock: 'left'
             ,items: [ {
                     xtype: 'panel'
                     ,border: false
-                    ,style: 'border-bottom: 1px solid #d0d0d0'
+                    ,style: 'border-bottom: 1px solid #99bce8'
+                    ,bodyStyle: 'background: #f4f4f4'
                     ,height: 50
                     ,items: [
                         this.buttons.toggleLeftRegion
@@ -127,7 +128,8 @@ Ext.define('CB.ViewPort', {
                 xtype: 'panel'
                 ,height: 51
                 ,border: false
-                ,style: 'text-align: center; border-bottom: 1px solid #d0d0d0 !important'
+                ,style: 'background: #f4f4f4; text-align: center; border-bottom: 1px solid #99bce8 !important'
+                ,bodyStyle: 'background: #f4f4f4'
                 ,html: '<img src="/css/i/casebox-logo-small.png" style="padding: 9px" />'
             })
             ,getState: function(){
@@ -144,7 +146,7 @@ Ext.define('CB.ViewPort', {
         this.breadcrumb = Ext.create({
             xtype: 'CBBreadcrumb'
             ,cls: 'fs18'
-            ,arrowAlign: 'bottom'
+            // ,arrowAlign: 'left'
             ,onItemClick: this.onBreadcrumbItemClick
         });
 
@@ -179,7 +181,7 @@ Ext.define('CB.ViewPort', {
 
         App.mainTBar = new Ext.Toolbar({
             height: 50
-            ,style:'background: white; border: 0;'
+            ,style:'background: #f4f4f4; border: 0;'
             ,items: [
                 this.breadcrumb
                 ,'->'
@@ -741,8 +743,8 @@ Ext.define('CB.ViewPort', {
     }
 
     ,onFileUpload: function(data, e){
-        if(e) {
-            e.stopPropagation();
+        if(e && e.stopEvent) {
+            e.stopEvent();
         }
 
         if(!this.fileField) {

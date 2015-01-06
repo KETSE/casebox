@@ -60,7 +60,7 @@ Ext.define('CB.object.edit.Window', {
 
         Ext.apply(this, {
             cls: 'x-panel-white'
-            ,bodyStyle: 'border: 0; padding: 0'
+            ,bodyStyle: 'border: 0; padding: 0; border-top: 1px solid #99bce8'
 
             ,tbar: this.getToolbarButtons()
 
@@ -196,6 +196,7 @@ Ext.define('CB.object.edit.Window', {
             {
                 region: 'center'
                 ,autoScroll: true
+                ,border: false
                 ,items: [
                     this.titleContainer
                     ,this.gridContainer
@@ -220,7 +221,7 @@ Ext.define('CB.object.edit.Window', {
             rez = [
                 {
                     region: 'center'
-                    ,border: true
+                    ,border: false
                     ,bodyStyle: 'border-bottom:0; border-left: 0'
                     ,autoScroll: false
                     ,layout: {
@@ -238,7 +239,7 @@ Ext.define('CB.object.edit.Window', {
                     ,border: false
                     ,autoScroll: true
 
-                    ,split: true
+                    // ,split: true
                     ,collapsible: true
                     ,collapseMode: 'mini'
 
@@ -280,7 +281,7 @@ Ext.define('CB.object.edit.Window', {
         this.complexFieldContainer.removeAll(true);
         this.complexFieldContainer.update('');
 
-        this.gridContainer.removeAll();
+        this.gridContainer.removeAll(false);
         this.gridContainer.update('');
     }
 
@@ -308,7 +309,7 @@ Ext.define('CB.object.edit.Window', {
             ,this.processLoadPreviewData
             ,this
         );
-        this.updateButtons();
+        // this.updateButtons();
     }
 
     /**
@@ -343,8 +344,6 @@ Ext.define('CB.object.edit.Window', {
             ,template_id: this.data.template_id
             ,from: 'window'
         });
-
-        this.updateButtons();
     }
 
     /**
@@ -473,8 +472,8 @@ Ext.define('CB.object.edit.Window', {
             );
             this.lastgGridType = gridType;
 
-            this.gridContainer.add(this.grid);
         }
+        this.gridContainer.add(this.grid);
 
         this.gridContainer.show();
         this.grid.reload();
@@ -550,6 +549,8 @@ Ext.define('CB.object.edit.Window', {
         }
 
         this.updateWindowTitle();
+
+        this.updateButtons();
 
         this.fireEvent('loaded', this);
     }
@@ -927,17 +928,21 @@ Ext.define('CB.object.edit.Window', {
     }
 
     ,onFileUploadEvent: function(p, e) {
-        if(isNaN(this.data.id)) {
-            this.onGetDraftId(onFileUploadEvent, this);
-            return;
+        this.uploadFieldData = {
+            pid: this.data.id
+        };
+
+        if(isNaN(this.uploadFieldData.pid)) {
+            this.onGetDraftId(
+                function(id, e) {
+                    this.uploadFieldData.pid = id;
+                }
+                ,this
+            );
+
         }
 
-        App.mainViewPort.onFileUpload(
-            {
-                pid: this.data.id
-            }
-            ,e
-        );
+        App.mainViewPort.onFileUpload(this.uploadFieldData, e);
     }
 
 });

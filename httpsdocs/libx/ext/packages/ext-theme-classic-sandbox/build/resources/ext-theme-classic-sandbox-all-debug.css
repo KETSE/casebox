@@ -10738,7 +10738,7 @@ ul.x5-tagfield-list.x5-tagfield-singleselect {
     padding: 0 2px 1px; }
     /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
     .x5-panel-header-title-default > .x5-title-text-default:after {
-      content: 'Ext JS Beta';
+      content: '';
       position: absolute;
       top: 0;
       right: 0;
@@ -10963,7 +10963,7 @@ ul.x5-tagfield-list.x5-tagfield-singleselect {
     padding: 0 2px 1px; }
     /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
     .x5-panel-header-title-default-framed > .x5-title-text-default-framed:after {
-      content: 'Ext JS Beta';
+      content: '';
       position: absolute;
       top: 0;
       right: 0;
@@ -21271,7 +21271,7 @@ div.x5-border-layout-ct {
     text-transform: none; }
     /* line 321, ../../../ext-theme-neutral/sass/src/window/Window.scss */
     .x5-window-header-title-default > .x5-title-text-default:after {
-      content: 'Ext JS Beta';
+      content: '';
       position: absolute;
       top: 0;
       right: 0;

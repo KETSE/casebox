@@ -201,6 +201,7 @@ class Browser
             }
 
             //set view, display columns and sorting if present
+            // echo get_class($class).' -> '. $rez['view']."\n";
             if (isset($rez['view'])) {
                 $this->view = $rez['view'];
             }

@@ -127,6 +127,8 @@ class Files
         file_put_contents($content['tmp_name'], $p['data']);
         $content['size'] = filesize($content['tmp_name']);
 
+        // var_dump($content);
+        // die();
         $this->storeContent($content);
 
         $data['content_id'] = $content['content_id'];

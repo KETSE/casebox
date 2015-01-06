@@ -20,7 +20,7 @@ Ext.define('CB.object.field.editor.Form', {
 
         //make shortcut, because grid view tries to acces folderProperties of refOwner
         //shold be refactored
-        this.folderProperties = this.data
+        this.folderProperties = this.data;
 
         this.cfg = this.data.fieldRecord
             ? Ext.apply({}, Ext.valueFrom(this.data.fieldRecord.data.cfg, {}))
@@ -308,6 +308,11 @@ Ext.define('CB.object.field.editor.Form', {
      */
     ,onRowSelect: function(selModel, record, index, eOpts) {
         var id = record.get('id');
+
+        if(this.cfg.multiValued !== true) {
+            this.value = [];
+            this.selectedRecordsData = [];
+        }
 
         if(this.value.indexOf(id) < 0) {
             this.value.push(id);

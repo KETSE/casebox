@@ -75,7 +75,11 @@ Ext.define('CB.FacetList', {
                 type: 'memory'
             }
         });
-        if( !Ext.isEmpty( this.data ) ) this.store.loadData( this.data, false );
+
+        if(!Ext.isEmpty(this.data)) {
+            this.store.loadData(this.data, false);
+        }
+
         var items = [
             new Ext.DataView({
                     autoHeight: true
@@ -140,31 +144,39 @@ Ext.define('CB.FacetList', {
         });
         CB.FacetList.superclass.initComponent.apply(this, arguments);
     }
+
     ,onModeChange: function(o, ev){
-        i = this.store.query('active', 1);
-        if(i.getCount() < 2) ev.stopPropagation();
-        else this.fireEvent('facetchange', this, ev);
+        var i = this.store.query('active', 1);
+        if(i.getCount() < 2) {
+            ev.stopPropagation();
+        } else {
+            this.fireEvent('facetchange', this, ev);
+        }
     }
+
     ,loadData: function(data){
         for (var i = 0; i < data.length; i++) {
             this.cachedNames[data[i].id] = data[i].name;
         }
+
         this.store.loadData(data, false);
         this.setLastField();
         this.setModeVisible(this.getValue().values.length > 1);
         this.doLayout();
     }
+
     ,processServerData: function(serverData, options){
         this.loadData(this.getFacetData(this.facetId, serverData, options));
     }
+
     ,getFacetData: function(fid, serverData, options){
         var data = [];
         var values = [];
         var facetField = Ext.valueFrom(this.f, fid);
 
-        if(options && options.params && options.params.filters && options.params.filters[fid]){
+        if(options && options.filters && options.filters[fid]){
             Ext.each(
-                options.params.filters[fid]
+                options.filters[fid]
                 ,function(f){
                     if(!Ext.isEmpty(f.f)) facetField = f.f;
                     for(i = 0; i < f.values.length; i++) {
@@ -186,7 +198,7 @@ Ext.define('CB.FacetList', {
                             data.push({
                                 id: k
                                 ,name: L['taskStatus' + k]
-                                ,active: (values.indexOf(k+'') >=0) ? 1 : 0
+                                ,active: (values.indexOf(k + '') >= 0) ? 1 : 0
                                 ,items: v
                             });
                         }
@@ -202,7 +214,7 @@ Ext.define('CB.FacetList', {
                         data.push({
                             id: k
                             ,name: Ext.valueFrom(CB.DB.importance.getName(k), L.noStatus)
-                            ,active: (values.indexOf(k+'') >=0)
+                            ,active: (values.indexOf(k + '') >=0)
                                 ? 1
                                 : 0
                             ,items: v
@@ -211,9 +223,20 @@ Ext.define('CB.FacetList', {
                     ,this
                 );
                 break;
+
             case 'template_type':
-                Ext.iterate(serverData, function(k, v){ data.push({id: k, name: L['tt_'+k], active: (values.indexOf(k+'') >=0) ? 1 : 0, items: v }); }, this);
+                Ext.iterate(
+                    serverData
+                    ,function(k, v){
+                        data.push({
+                            id: k
+                            ,name: L['tt_'+k]
+                            ,active: (values.indexOf(k+'') >=0) ? 1 : 0
+                            ,items: v
+                        });
+                    }, this);
                 break;
+
             default:
                 Ext.iterate(
                     serverData
@@ -221,34 +244,42 @@ Ext.define('CB.FacetList', {
                         data.push({
                             id: k
                             ,name: Ext.isPrimitive(v) ? k : v['name']
-                            ,active: (values.indexOf(k+'') >=0) ? 1 : 0
+                            ,active: (values.indexOf(k + '') >= 0) ? 1 : 0
                             ,items: Ext.isPrimitive(v) ? v : v.count
                         });
                     }
                     ,this
                 );
         }
+
         return data;
     }
+
     ,setLastField: function(){
         // lr = false;
         // this.store.each(function(r){r.set('last', 0); if(r.get('active') == 1) lr = r }, this);
         // if(lr) lr.set('last', 1);
     }
+
     ,getValue: function(){
         var r = [];
         var si = -1;
         do {
             si = this.store.findExact('active', 1, si + 1);
-            if(si >=0) r.push(this.store.getAt(si).get('id'));
+            if(si >=0) {
+                r.push(this.store.getAt(si).get('id'));
+            }
         } while (si > -1);
 
         if(!Ext.isEmpty(this.serverValues))
         for (var i = 0; i < this.serverValues.length; i++) {
             si = this.store.findExact('id', this.serverValues[i]);
-            if(si < 0) r.push(this.serverValues[i]);
+            if(si < 0) {
+                r.push(this.serverValues[i]);
+            }
         }
-        return { f: this.f, mode: this.mode, values: r };
+
+        return {f: this.f, mode: this.mode, values: r};
     }
 
     ,onItemClick: function(cmp, record, item, index, e, eOpts){//dv, idx, el, ev
@@ -263,6 +294,7 @@ Ext.define('CB.FacetList', {
                 }
 
                 break;
+
             default:
                 r = this.store.getAt(index);
                 r.set('active', (r.get('active') == 1) ? 0 : 1);
@@ -282,6 +314,7 @@ Ext.define('CB.FacetList', {
             }
         }
     }
+
     ,reset: function(){
         this.store.each(
             function(r){
@@ -290,15 +323,18 @@ Ext.define('CB.FacetList', {
             ,this
         );
     }
+
     ,onPeriodAddClick: function() {
         this.addPeriodPanel.items.getAt(0).setValue(new Date());
         this.addPeriodPanel.show();
     }
+
     ,onAddPeriodClick: function(b, e) {
         var from = this.addPeriodPanel.items.getAt(0).getValue();
         var to = this.addPeriodPanel.items.getAt(1).getValue();
         var id = '';
         var name = '';
+
         if(!Ext.isEmpty(from)) {
             id = date_local_to_ISO_string(from);
             name = Ext.Date.format(from, App.dateFormat);

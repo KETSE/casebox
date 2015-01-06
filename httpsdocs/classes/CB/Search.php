@@ -603,7 +603,7 @@ class Search extends Solr\Client
             //replace paths in objects data
             foreach ($dataArray as &$item) {
                 if (isset($item['path'])) {
-                    $item['path'] = $paths[$item['path']];
+                    $item['path'] = @$paths[$item['path']];
                 }
             }
         }

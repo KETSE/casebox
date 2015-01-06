@@ -1,3 +1,20 @@
+CaseBox 1.9.373 (2015-01-06)
+==============================
+New Features, Improvements
+--------------------------
+- #4287 Remove borders
+- toolbar buttons adjustments
+- file window adjustments relates to file versions and restoring
+- #4271 Check browser height/width when showing popup wnd
+
+Fixed Bugs:
+----------
+- #4295 Can't select several facets & active facets not shown as selected
+- #4296 Bugs in Calendar view
+- #4300 Charts & PivotTable: selecting fields from dropdown have no effect
+- #4276 added check for single valued field in form editor
+- #4275 Clicking upload link on a new object window doesnt show upload prompt
+
 CaseBox 1.9.372 (2014-12-22)
 ==============================
 New Features, Improvements

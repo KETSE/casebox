@@ -127,7 +127,10 @@ Ext.define('CB.Calendar', {
                     // edit canceled
                 }
                 ,viewchange: function(p, vw, dateInfo){
-                    if(this.editWin) this.editWin.hide();
+                    if(this.editWin) {
+                        this.editWin.hide();
+                    }
+
                     if(dateInfo !== null){
                         // will be null when switching to the event edit form so ignore
                         //Ext.getCmp('app-nav-picker').setValue(dateInfo.activeDate);
@@ -205,21 +208,40 @@ Ext.define('CB.Calendar', {
     // we added a title to the layout's outer center region that is app-specific. This code
     // updates that outer title based on the currently-selected view range anytime the view changes.
     ,updateTitle: function(dateInfo, view){
-        if(Ext.isEmpty(this.titleItem)) return ;
-            sd = dateInfo.viewStart;
-            ed = dateInfo.viewEnd;
-            ad = dateInfo.activeDate;
-            switch(view.xtype){
-                case 'dayview':  this.titleItem.setText(Ext.Date.format(ad, 'F j, Y')); break;
-                case 'weekview':
-            if(sd.getFullYear() == ed.getFullYear()){
-                        if(sd.getMonth() == ed.getMonth()) this.titleItem.setText(Ext.Date.format(sd, 'F j') + ' - ' + Ext.Date.format(ed, 'j, Y'));
-                        else this.titleItem.setText( Ext.Date.format(sd, 'F j') + ' - ' + Ext.Date.format(ed, 'F j, Y') );
-                    }else this.titleItem.setText( Ext.Date.format(sd, 'F j, Y') + ' - ' + Ext.Date.format(ed, 'F j, Y') );
+        if(Ext.isEmpty(this.titleItem)) {
+            return;
+        }
 
-                    break;
-                case 'monthview': this.titleItem.setText(Ext.Date.format(ad, 'F Y')); break;
-            }
+        var sd = dateInfo.viewStart
+            ,ed = dateInfo.viewEnd
+            ,ad = dateInfo.activeDate
+            ,text = '';
+
+        switch(view.xtype){
+            case 'dayview':
+                title = Ext.Date.format(ad, 'F j, Y');
+                break;
+
+            case 'weekview':
+                if(sd.getFullYear() == ed.getFullYear()) {
+                    if(sd.getMonth() == ed.getMonth()) {
+                        text = Ext.Date.format(sd, 'F j') + ' - ' + Ext.Date.format(ed, 'j, Y');
+                    } else {
+                        text = Ext.Date.format(sd, 'F j') + ' - ' + Ext.Date.format(ed, 'F j, Y');
+                    }
+                } else {
+                    text = Ext.Date.format(sd, 'F j, Y') + ' - ' + Ext.Date.format(ed, 'F j, Y');
+                }
+
+                break;
+
+            case 'monthview':
+                text = Ext.Date.format(ad, 'F Y');
+                break;
+        }
+
+        this.titleItem.text = text;
+        this.titleItem.setText(text);
     }
 });
 
@@ -239,13 +261,14 @@ Ext.define('CB.browser.view.Calendar', {
         this.titleItem = new Ext.toolbar.TextItem({
             id: 'caltitle'
             ,cls: 'calendar-title'
-            ,text: '<span style="font-size: 16px; font-weight: bold; color: #333">December 2012</span>'
+            ,text: '<span style="font-size: 16px; font-weight: bold; color: #333"> &nbsp; </span>'
         });
         var viewGroup = Ext.id();
 
         this.calendar = new CB.Calendar({
             titleItem: this.titleItem
             ,region: 'center'
+            ,border: false
             ,showNavBar: false
             ,listeners:{
                 scope: this
@@ -274,7 +297,7 @@ Ext.define('CB.browser.view.Calendar', {
                 ,itemId: 'dayview'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-cal-day'
+                // ,iconCls: 'ib-cal-day'
                 ,scale: 'medium'
                 ,toggleGroup: 'cv' + viewGroup
                 ,scope: this.calendar
@@ -286,7 +309,7 @@ Ext.define('CB.browser.view.Calendar', {
                 ,itemId: 'weekview'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-cal-week'
+                // ,iconCls: 'ib-cal-week'
                 ,scale: 'medium'
                 ,toggleGroup: 'cv' + viewGroup
                 ,scope: this.calendar
@@ -298,7 +321,7 @@ Ext.define('CB.browser.view.Calendar', {
                 ,itemId: 'monthview'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-cal-month'
+                // ,iconCls: 'ib-cal-month'
                 ,scale: 'medium'
                 ,toggleGroup: 'cv' + viewGroup
                 ,pressed: true
@@ -333,7 +356,8 @@ Ext.define('CB.browser.view.Calendar', {
                 ,activate: this.onActivate
             }
         });
-        CB.browser.view.Calendar.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
 
         this.enableBubble(['createobject']);
     }
@@ -429,13 +453,14 @@ Ext.define('CB.browser.view.Calendar', {
         this.fireEvent(
             'settoolbaritems'
             ,[
-                ,'dayview'
-                ,'weekview'
-                ,'monthview'
                 ,'calprev'
                 ,'calnext'
                 ,'caltitle'
                 ,'->'
+                ,'dayview'
+                ,'weekview'
+                ,'monthview'
+                ,'-'
                 ,'reload'
                 ,'more'
                 ,'-'

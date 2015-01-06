@@ -75,31 +75,34 @@ Ext.define('CB.browser.view.Pivot',{
         this.refOwner.buttonCollection.addAll(
             new Ext.Button({
                 qtip: L.Pivot
+                ,text: L.Pivot
                 ,itemId: 'PVtable'
                 ,chart: 'table'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-table'
+                // ,iconCls: 'ib-table'
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
             ,new Ext.Button({
                 qtip: L.ChartArea
+                ,text: 'Bar'
                 ,itemId: 'PVbarchart'
                 ,chart: 'stackedBars'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-chart-bar'
+                // ,iconCls: 'ib-chart-bar'
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
             ,new Ext.Button({
                 qtip: L.ChartArea
+                ,text: 'Column'
                 ,itemId: 'PVcolumnchart'
                 ,chart: 'stackedColumns'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-chart-column'
+                // ,iconCls: 'ib-chart-column'
                 ,scope: this
                 ,handler: this.onChangeChartButtonClick
             })
@@ -153,12 +156,13 @@ Ext.define('CB.browser.view.Pivot',{
         this.fireEvent(
             'settoolbaritems'
             ,[
-                'PVtable'
-                ,'PVbarchart'
-                ,'PVcolumnchart'
-                ,'PVrowsCombo'
+                'PVrowsCombo'
                 ,'PVcolsCombo'
                 ,'->'
+                ,'PVtable'
+                ,'PVbarchart'
+                ,'PVcolumnchart'
+                ,'-'
                 ,'reload'
                 ,'more'
                 ,'-'
@@ -537,9 +541,12 @@ Ext.define('CB.browser.view.Pivot',{
     }
 
     ,onFacetChange: function(combo, records, index) {
-        this.selectedFacets[combo.selectedFacetIndex] = records[0].get('id');
+        var record = Ext.isArray(records)
+            ? records[0]
+            : records;
+
+        this.selectedFacets[combo.selectedFacetIndex] = record.get('id');
         this.fireEvent('reload', this);
-        // this.loadChartData();
     }
 
     ,onTableCellClick: function(ev, el, p) {

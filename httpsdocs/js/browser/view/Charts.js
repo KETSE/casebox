@@ -40,32 +40,32 @@ Ext.define('CB.browser.view.Charts', {
 
         this.refOwner.buttonCollection.addAll(
             new Ext.Button({
-                text: L.ChartArea
+                text: 'Bar' //L.ChartArea
                 ,itemId: 'barchart'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-chart-bar'
+                // ,iconCls: 'ib-chart-bar'
                 ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartClick
             })
             ,new Ext.Button({
-                text: L.ChartArea
+                text: 'Column' //L.ChartArea
                 ,itemId: 'columnchart'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-chart-column'
+                // ,iconCls: 'ib-chart-column'
                 // ,iconAlign:'top'
                 ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartClick
             })
             ,new Ext.Button({
-                text: L.ChartPie
+                text: 'Pie' //L.ChartPie
                 ,itemId: 'piechart'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-chart-pie'
+                // ,iconCls: 'ib-chart-pie'
                 // ,iconAlign:'top'
                 ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
@@ -189,6 +189,7 @@ Ext.define('CB.browser.view.Charts', {
         this.chartContainer = new Ext.Panel({
             region: 'center'
             ,layout: 'fit'
+            ,border: false
         });
 
         Ext.apply(this, {
@@ -217,15 +218,15 @@ Ext.define('CB.browser.view.Charts', {
         this.fireEvent(
             'settoolbaritems'
             ,[
-                ,'linechart'
+                'facetscombo'
+                ,'->'
+                // ,'linechart'
                 ,'barchart'
-                ,'stackedbarchart'
+                // ,'stackedbarchart'
                 ,'columnchart'
-                ,'stackedcolumnchart'
+                // ,'stackedcolumnchart'
                 ,'piechart'
                 ,'-'
-                ,'facetscombo'
-                ,'->'
                 ,'reload'
                 ,'more'
                 ,'-'
@@ -358,7 +359,11 @@ Ext.define('CB.browser.view.Charts', {
     }
 
     ,onFacetChange: function(combo, records, index) {
-        this.selectedFacets[0] = records[0].get('id');
+        var record = Ext.isArray(records)
+            ? records[0]
+            : records;
+
+        this.selectedFacets[0] = record.get('id');
         this.onChangeChartClick(this.currentButton);
     }
 });

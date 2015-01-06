@@ -38,22 +38,27 @@ Ext.define('CB.FilterPanel', {
         );
 
         this.facetIndex = 1;
-        Ext.iterate(data, function(key, value, obj){
-            var facet = this.query('panel[facetId="' + key + '"]')[0];
-            if(Ext.isEmpty(facet)){
-                facet = new CB.FacetList({
-                    modeToggle: Ext.valueFrom(value.boolMode, true)
-                    ,facetId: key
-                    ,title: value.title
-                    ,f: Ext.isEmpty(value.f) ? key: value.f
-                    ,manualPeriod: value.manualPeriod
-                });
-                this.insert(this.facetIndex, facet);
+        Ext.iterate(
+            data
+            ,function(key, value, obj){
+                var facet = this.query('panel[facetId="' + key + '"]')[0];
+                if(Ext.isEmpty(facet)){
+                    facet = new CB.FacetList({
+                        modeToggle: Ext.valueFrom(value.boolMode, true)
+                        ,facetId: key
+                        ,title: value.title
+                        ,f: Ext.isEmpty(value.f) ? key: value.f
+                        ,manualPeriod: value.manualPeriod
+                    });
+                    this.insert(this.facetIndex, facet);
+                }
+                facet.processServerData(value.items, options);
+                facet.setVisible(facet.store.getCount() > 0) ;
+                this.facetIndex++;
             }
-            facet.processServerData(value.items, options);
-            facet.setVisible(facet.store.getCount() > 0) ;
-            this.facetIndex++;
-        }, this);
+            ,this
+        );
+
         this.updateActiveFiltersFacet(options);
 
         // if(this.rendered) {
@@ -117,15 +122,21 @@ Ext.define('CB.FilterPanel', {
     }
 
     ,getFacetsValues: function(){
-        result = {};
-        this.items.each(function(fe){
-            if(!Ext.isEmpty(fe.facetId)){
-                fid = Ext.valueFrom(fe.facetId, fe.f);
-                if(Ext.isEmpty(result[fid])) result[fid] = [];
-                result[fid].push(fe.getValue());
+        var rez = {};
+        this.items.each(
+            function(fe){
+                if(!Ext.isEmpty(fe.facetId)){
+                    var fid = Ext.valueFrom(fe.facetId, fe.f);
+                    if(Ext.isEmpty(rez[fid])) {
+                        rez[fid] = [];
+                    }
+                    rez[fid].push(fe.getValue());
+                }
             }
-        }, this);
-        return result;
+            ,this
+        );
+
+        return rez;
     }
 
     ,onActiveFiltersItemClick: function(idx, data, e){

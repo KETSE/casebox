@@ -28,6 +28,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,reload: new Ext.Action({
                 iconCls: 'im-refresh'
                 ,itemId: 'reload'
+                ,scale: 'medium'
                 ,tooltip: L.Refresh
                 ,scope: this
                 ,handler: this.onReloadClick
@@ -50,7 +51,7 @@ Ext.define('CB.browser.ViewContainer', {
             })
 
             ,download: new Ext.Action({
-                qtip: L.Download
+                text: L.Download
                 ,itemId: 'download'
                 ,scale: 'medium'
                 ,iconCls: 'im-download'

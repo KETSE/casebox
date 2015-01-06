@@ -1896,7 +1896,7 @@
  * The width of the tree folder/leaf icons
  */
 /**
- * @var {number} $tree-elbow-spacing 
+ * @var {number} $tree-elbow-spacing
  * The amount of spacing between the tree elbows or arrows, and the checkbox or icon.
  */
 /**
@@ -3515,7 +3515,7 @@
 /**
  * @var {string/list}
  * The background-gradient for Tabs. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  */
 /**
@@ -3527,13 +3527,13 @@
 /**
  * @var {string/list}
  * The background-gradient for hovered Tabs. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  */
 /**
  * @var {string/list}
  * The background-gradient for the active Tab. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  */
 /**
@@ -3551,7 +3551,7 @@
 /**
  * @var {string/list}
  * The background-gradient for disabled Tabs. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  */
 /**
@@ -3856,7 +3856,7 @@
 /**
  * @var {string/list}
  * The background-gradient of the Tab Bar. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  */
 /**
@@ -4871,23 +4871,23 @@
  */
 /**
  * @var {number}
- * The height of the Month Picker year navigation buttons 
+ * The height of the Month Picker year navigation buttons
  */
 /**
  * @var {number}
- * The width of the Month Picker year navigation buttons 
+ * The width of the Month Picker year navigation buttons
  */
 /**
  * @var {string}
- * The type of cursor to display when the cursor is over a Month Picker year navigation button 
+ * The type of cursor to display when the cursor is over a Month Picker year navigation button
  */
 /**
  * @var {number}
- * The opacity of the Month Picker year navigation buttons 
+ * The opacity of the Month Picker year navigation buttons
  */
 /**
  * @var {number}
- * The opacity of hovered Month Picker year navigation buttons 
+ * The opacity of hovered Month Picker year navigation buttons
  */
 /**
  * @var {string}
@@ -10495,7 +10495,7 @@ ul.x-tagfield-list.x-tagfield-singleselect {
  * @param {string} $ui
  * The name of the UI being created. Can not included spaces or special punctuation
  * (used in CSS class names).
- * 
+ *
  * @param {color} [$ui-border-color=$panel-border-color]
  * The border-color of the Panel
  *
@@ -10709,7 +10709,7 @@ ul.x-tagfield-list.x-tagfield-singleselect {
     padding: 0; }
     /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
     .x-panel-header-title-default > .x-title-text-default:after {
-      content: 'Ext JS Beta';
+      content: '';
       position: absolute;
       top: 0;
       right: 0;
@@ -10991,7 +10991,7 @@ ul.x-tagfield-list.x-tagfield-singleselect {
     padding: 0; }
     /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
     .x-panel-header-title-default-framed > .x-title-text-default-framed:after {
-      content: 'Ext JS Beta';
+      content: '';
       position: absolute;
       top: 0;
       right: 0;
@@ -13378,7 +13378,7 @@ div.x-border-layout-ct {
  * arrow icon. Set this to false to share the same arrow bewteen multiple UIs.
  *
  * @param {boolean} [$include-split-noline-arrows=$button-include-split-noline-arrows]
- * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s 
+ * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s
  * arrow icon.  Used for hiding the split line when toolbar buttons are in their default
  * state.
  *
@@ -13391,7 +13391,7 @@ div.x-border-layout-ct {
  *
  * @param {number} [$inner-opacity-disabled=1]
  * The opacity of the button's text and icon elements when when the button is disabled
- * 
+ *
  * @member Ext.button.Button
  */
 /**
@@ -13667,7 +13667,7 @@ div.x-border-layout-ct {
  * arrow icon. Set this to false to share the same arrow bewteen multiple UIs.
  *
  * @param {boolean} [$include-split-noline-arrows=$button-include-split-noline-arrows]
- * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s 
+ * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s
  * arrow icon.  Used for hiding the split line when toolbar buttons are in their default
  * state.
  *
@@ -13680,7 +13680,7 @@ div.x-border-layout-ct {
  *
  * @param {number} [$inner-opacity-disabled=$button-inner-opacity-disabled]
  * The opacity of the button's text and icon elements when when the button is disabled
- * 
+ *
  * @member Ext.button.Button
  */
 /**
@@ -13956,7 +13956,7 @@ div.x-border-layout-ct {
  * arrow icon. Set this to false to share the same arrow bewteen multiple UIs.
  *
  * @param {boolean} [$include-split-noline-arrows=$button-toolbar-include-split-noline-arrows]
- * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s 
+ * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s
  * arrow icon.  Used for hiding the split line when toolbar buttons are in their default
  * state.
  *
@@ -13969,7 +13969,7 @@ div.x-border-layout-ct {
  *
  * @param {number} [$inner-opacity-disabled=$button-toolbar-inner-opacity-disabled]
  * The opacity of the button's text and icon elements when when the button is disabled
- * 
+ *
  * @member Ext.button.Button
  */
 /**
@@ -14245,7 +14245,7 @@ div.x-border-layout-ct {
  * arrow icon. Set this to false to share the same arrow bewteen multiple UIs.
  *
  * @param {boolean} [$include-split-noline-arrows=$button-include-split-noline-arrows]
- * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s 
+ * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s
  * arrow icon.  Used for hiding the split line when toolbar buttons are in their default
  * state.
  *
@@ -14258,7 +14258,7 @@ div.x-border-layout-ct {
  *
  * @param {number} [$inner-opacity-disabled=$button-inner-opacity-disabled]
  * The opacity of the button's text and icon elements when when the button is disabled
- * 
+ *
  * @member Ext.button.Button
  */
 /**
@@ -14534,7 +14534,7 @@ div.x-border-layout-ct {
  * arrow icon. Set this to false to share the same arrow bewteen multiple UIs.
  *
  * @param {boolean} [$include-split-noline-arrows=$button-toolbar-include-split-noline-arrows]
- * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s 
+ * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s
  * arrow icon.  Used for hiding the split line when toolbar buttons are in their default
  * state.
  *
@@ -14547,7 +14547,7 @@ div.x-border-layout-ct {
  *
  * @param {number} [$inner-opacity-disabled=$button-toolbar-inner-opacity-disabled]
  * The opacity of the button's text and icon elements when when the button is disabled
- * 
+ *
  * @member Ext.button.Button
  */
 /**
@@ -14823,7 +14823,7 @@ div.x-border-layout-ct {
  * arrow icon. Set this to false to share the same arrow bewteen multiple UIs.
  *
  * @param {boolean} [$include-split-noline-arrows=$button-include-split-noline-arrows]
- * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s 
+ * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s
  * arrow icon.  Used for hiding the split line when toolbar buttons are in their default
  * state.
  *
@@ -14836,7 +14836,7 @@ div.x-border-layout-ct {
  *
  * @param {number} [$inner-opacity-disabled=$button-inner-opacity-disabled]
  * The opacity of the button's text and icon elements when when the button is disabled
- * 
+ *
  * @member Ext.button.Button
  */
 /**
@@ -15112,7 +15112,7 @@ div.x-border-layout-ct {
  * arrow icon. Set this to false to share the same arrow bewteen multiple UIs.
  *
  * @param {boolean} [$include-split-noline-arrows=$button-toolbar-include-split-noline-arrows]
- * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s 
+ * True to add a "-noline" suffix to the file name of the {@link Ext.button.Split Split Button}'s
  * arrow icon.  Used for hiding the split line when toolbar buttons are in their default
  * state.
  *
@@ -15125,7 +15125,7 @@ div.x-border-layout-ct {
  *
  * @param {number} [$inner-opacity-disabled=$button-toolbar-inner-opacity-disabled]
  * The opacity of the button's text and icon elements when when the button is disabled
- * 
+ *
  * @member Ext.button.Button
  */
 /* line 187, ../../../ext-theme-base/sass/etc/mixins/frame.scss */
@@ -18509,7 +18509,7 @@ div.x-border-layout-ct {
  *
  * @param {string/list} [$ui-background-gradient=$tab-background-gradient]
  * The background-gradient for Tabs. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {string/list} [$ui-background-gradient-focus=$tab-background-gradient-focus]
@@ -18519,12 +18519,12 @@ div.x-border-layout-ct {
  *
  * @param {string/list} [$ui-background-gradient-over=$tab-background-gradient-over]
  * The background-gradient for hovered Tabs. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {string/list} [$ui-background-gradient-active=$tab-background-gradient-active]
  * The background-gradient for the active Tab. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {string/list} [$ui-background-gradient-focus-over=$tab-background-gradient-focus-over]
@@ -18539,7 +18539,7 @@ div.x-border-layout-ct {
  *
  * @param {string/list} [$ui-background-gradient-disabled=$tab-background-gradient-disabled]
  * The background-gradient for disabled Tabs. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {number} [$ui-inner-border-width=$tab-inner-border-width]
@@ -18688,14 +18688,14 @@ div.x-border-layout-ct {
 /**
  * Creates a visual theme for a Tab Bar
  *
- * Note: When creating a tab bar UI with the extjs-tab-bar-ui mixin, 
- * you will need to create a corresponding tab-ui of the same name.  
- * This will ensure that the tabs render properly in your theme. 
- * Not creating a matching tab theme may result in unpredictable 
+ * Note: When creating a tab bar UI with the extjs-tab-bar-ui mixin,
+ * you will need to create a corresponding tab-ui of the same name.
+ * This will ensure that the tabs render properly in your theme.
+ * Not creating a matching tab theme may result in unpredictable
  * tab rendering.
  *
  * See `Ext.tab.Tab-css_mixin-extjs-tab-ui`
- * 
+ *
  * @param {string} $ui
  * The name of the UI being created. Can not included spaces or special punctuation
  * (used in CSS class names).
@@ -18726,7 +18726,7 @@ div.x-border-layout-ct {
  *
  * @param {string/list} [$ui-background-gradient=$tabbar-background-gradient]
  * The background-gradient of the Tab Bar. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {number} [$ui-scroller-width=$tabbar-scroller-width]
@@ -18955,7 +18955,7 @@ div.x-border-layout-ct {
  *
  * @param {string/list} [$ui-tab-background-gradient=$tab-background-gradient]
  * The background-gradient for Tabs. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {string/list} [$ui-tab-background-gradient-focus=$tab-background-gradient-focus]
@@ -18965,12 +18965,12 @@ div.x-border-layout-ct {
  *
  * @param {string/list} [$ui-tab-background-gradient-over=$tab-background-gradient-over]
  * The background-gradient for hovered Tabs. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {string/list} [$ui-tab-background-gradient-active=$tab-background-gradient-active]
  * The background-gradient for the active Tab. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {string/list} [$ui-tab-background-gradient-focus-over=$tab-background-gradient-focus-over]
@@ -18985,7 +18985,7 @@ div.x-border-layout-ct {
  *
  * @param {string/list} [$ui-tab-background-gradient-disabled=$tab-background-gradient-disabled]
  * The background-gradient for disabled Tabs. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {number} [$ui-tab-inner-border-width=$tab-inner-border-width]
@@ -19140,7 +19140,7 @@ div.x-border-layout-ct {
  *
  * @param {string/list} [$ui-bar-background-gradient=$tabbar-background-gradient]
  * The background-gradient of the Tab Bar. Can be either the name of a predefined gradient
- * or a list of color stops. Used as the `$type` parameter for 
+ * or a list of color stops. Used as the `$type` parameter for
  * {@link Global_CSS#background-gradient}.
  *
  * @param {number} [$ui-bar-scroller-width=$tabbar-scroller-width]
@@ -21030,7 +21030,7 @@ div.x-border-layout-ct {
     text-transform: none; }
     /* line 321, ../../../ext-theme-neutral/sass/src/window/Window.scss */
     .x-window-header-title-default > .x-title-text-default:after {
-      content: 'Ext JS Beta';
+      content: '';
       position: absolute;
       top: 0;
       right: 0;
@@ -26255,7 +26255,7 @@ tr.x-grid-subtable-row {
     padding: 0; }
     /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
     .x-panel-header-title-light > .x-title-text-light:after {
-      content: 'Ext JS Beta';
+      content: '';
       position: absolute;
       top: 0;
       right: 0;
@@ -26538,7 +26538,7 @@ tr.x-grid-subtable-row {
     padding: 0; }
     /* line 392, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
     .x-panel-header-title-light-framed > .x-title-text-light-framed:after {
-      content: 'Ext JS Beta';
+      content: '';
       position: absolute;
       top: 0;
       right: 0;

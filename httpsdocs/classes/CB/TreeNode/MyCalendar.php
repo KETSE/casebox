@@ -116,6 +116,8 @@ class MyCalendar extends Base
         $s = new \CB\Search();
         $rez = $s->query($p);
 
+        $rez['view'] = 'calendar';
+
         return $rez;
     }
 }
