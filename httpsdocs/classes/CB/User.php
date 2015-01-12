@@ -472,7 +472,7 @@ class User
         }
 
         $rez = array();
-        $cfg = $this->getUserConfig();
+        $cfg = $this->getUserConfig($p['id']);
         $languageSettings = Config::get('language_settings');
 
         $p['first_name'] = Purify::humanName($p['first_name']);

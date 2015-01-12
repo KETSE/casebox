@@ -151,13 +151,7 @@ Ext.define('CB.DD.Grid', {
         */
        var targetRecord = this.view.getRecord(el)
             ,templateId = targetRecord.data.template_id
-            ,acceptChildren = isNaN(templateId)
-                ? false
-                : (Ext.valueFrom(
-                    CB.DB.templates.getProperty(templateId, 'cfg')
-                    ,''
-                    ).acceptChildren !== false
-                );
+            ,acceptChildren = CB.DB.templates.acceptChildren(templateId);
 
         var rez = this.dropAllowed;
         if(Ext.isEmpty(targetRecord) ||

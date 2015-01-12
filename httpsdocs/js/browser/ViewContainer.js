@@ -133,6 +133,13 @@ Ext.define('CB.browser.ViewContainer', {
                 ,handler: this.onDeleteClick
             })
 
+            ,contextExport: new Ext.Action({
+                iconCls: 'i-table-export'
+                ,text: L.Export
+                ,scope: this
+                ,handler: this.onExportClick
+            })
+
             ,restore: new Ext.Action({
                 text: L.Restore
                 ,itemId: 'restore'
@@ -165,7 +172,11 @@ Ext.define('CB.browser.ViewContainer', {
             })
         };
 
-        this.tbarMoreMenu = new Ext.menu.Menu({items: []});
+        this.tbarMoreMenu = new Ext.menu.Menu({
+            items: [
+                this.actions.contextExport
+            ]
+        });
 
         this.buttonCollection = new Ext.util.MixedCollection();
 
@@ -256,7 +267,10 @@ Ext.define('CB.browser.ViewContainer', {
             ,header: false
             ,width: 250
 
-            ,split: true
+            ,split: {
+                size: 2
+                ,collapsible: false
+            }
             ,collapsible: true
             ,collapseMode: 'mini'
 
@@ -340,6 +354,8 @@ Ext.define('CB.browser.ViewContainer', {
                     //reset userViewSet flag if loaded id changed
                     if(store.proxy.extraParams.id != options.id) {
                         delete this.userViewSet;
+                    } else if(this.userViewSet) {
+                        options.userViewChange = true;
                     }
 
                     store.proxy.extraParams = options;
@@ -374,6 +390,10 @@ Ext.define('CB.browser.ViewContainer', {
                     ,refOwner: this
                     ,store: this.store
                     ,getProperty: getPropertyHandler
+                    ,listeners: {
+                        scope: this
+                        ,openobject: this.onObjectsOpenEvent
+                    }
                 })
                 ,new CB.browser.view.Charts({
                     iconCls: 'icon-chart'
@@ -572,17 +592,24 @@ Ext.define('CB.browser.ViewContainer', {
             );
         }
 
-        if(!Ext.isEmpty(rez) && (rez !== layout.activeItem)) {
-            if(viewParams) {
-                rez.viewParams = viewParams;
+        if(!Ext.isEmpty(rez)) {
+            if(rez !== layout.activeItem) {
+                if(viewParams) {
+                    rez.viewParams = viewParams;
+                }
+
+                rez = layout.setActiveItem(rez);
             }
 
-            rez = layout.setActiveItem(rez);
-
             //check if need to show objectPanel for selected view
-            var showObjPanel = (rez && (rez.showObjectPropertiesPanel === true));
+            var showObjPanel = (
+                    rez &&
+                    (rez.showObjectPropertiesPanel === true)
+                )
+                ,showPreviewButton = showObjPanel && (this.objectPanel.getCollapsed() !== false);
 
-            this.actions.preview.setHidden(!showObjPanel);
+            this.actions.preview.setDisabled(!showPreviewButton);
+            this.actions.preview.setHidden(!showPreviewButton);
             this.objectPanel.setVisible(showObjPanel);
         }
 
@@ -628,8 +655,12 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
 
-        var showPreviewButton = (this.objectPanel.getCollapsed() !== false)
+        var showPreviewButton = (
+                (this.objectPanel.getCollapsed() !== false) &&
+                (this.cardContainer.getLayout().activeItem.showObjectPropertiesPanel ===true)
+            )
             ,pa = this.actions.preview;
+
         pa.setDisabled(!showPreviewButton);
         pa.setHidden(!showPreviewButton);
 
@@ -785,13 +816,14 @@ Ext.define('CB.browser.ViewContainer', {
     ,onObjectsSelectionChange: function(objectsDataArray){
         this.cardContainer.getLayout().activeItem.currentSelection = objectsDataArray;
 
-        var inRecycleBin = this.inRecycleBin();
-        var inGridView = this.cardContainer.getLayout().activeItem.isXType('CBBrowserViewGrid');
+        var acceptChildren = CB.DB.templates.acceptChildren(this.folderProperties.template_id)
+            ,inRecycleBin = this.inRecycleBin()
+            ,inGridView = this.cardContainer.getLayout().activeItem.isXType('CBBrowserViewGrid');
 
         this.actions.restore.setHidden(!inRecycleBin || !inGridView);
         this.actions.restore.setDisabled(!inRecycleBin || !inGridView || Ext.isEmpty(objectsDataArray));
 
-        this.actions.upload.setHidden(inRecycleBin || !inGridView);
+        this.actions.upload.setHidden(!acceptChildren || inRecycleBin || !inGridView);
         this.buttonCollection.get(
             'create'
         ).setVisible(!inRecycleBin && inGridView);
@@ -1220,6 +1252,10 @@ Ext.define('CB.browser.ViewContainer', {
         this.createItem.setDisabled(this.createItem.menu.items.getCount() < 1);
 
         this.contextMenu.showAt(e.getXY());
+    }
+
+    ,onExportClick: function(b, e) {
+        this.fireEvent('exportrecords', this, e);
     }
 
     ,onShowDescendantsCheckChange: function(cb, checked, eOpts) {

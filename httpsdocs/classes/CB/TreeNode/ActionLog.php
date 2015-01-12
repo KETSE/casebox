@@ -163,6 +163,10 @@ class ActionLog extends Base
         $rez = array('data' => array());
         $s = Log::getSolrLogConnection();
 
+        if (empty($s)) {
+            return $rez;
+        }
+
         $p = array(
             'rows' => 0
             ,'facet' => 'true'

@@ -58,8 +58,7 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
             var rel = this.owner.findTargetByEvent(e)
                 ,rec = this.owner.getRecord(rel)
                 ,templateId = rec.data.template_id
-                ,templateCfg = CB.DB.templates.getProperty(templateId, 'cfg')
-                ,acceptChildren = (Ext.valueFrom(templateCfg, {}).acceptChildren !== false);
+                ,acceptChildren = CB.DB.templates.acceptChildren(templateId);
 
             if(acceptChildren) {
                 ce = Ext.get(ce);

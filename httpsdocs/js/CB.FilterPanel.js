@@ -126,11 +126,15 @@ Ext.define('CB.FilterPanel', {
         this.items.each(
             function(fe){
                 if(!Ext.isEmpty(fe.facetId)){
-                    var fid = Ext.valueFrom(fe.facetId, fe.f);
-                    if(Ext.isEmpty(rez[fid])) {
-                        rez[fid] = [];
+                    var value = fe.getValue();
+                    //add only if no empty selected values
+                    if(value && !Ext.isEmpty(value.values)) {
+                        var fid = Ext.valueFrom(fe.facetId, fe.f);
+                        if(Ext.isEmpty(rez[fid])) {
+                            rez[fid] = [];
+                        }
+                        rez[fid].push(value);
                     }
-                    rez[fid].push(fe.getValue());
                 }
             }
             ,this

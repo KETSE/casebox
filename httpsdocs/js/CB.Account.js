@@ -19,11 +19,12 @@ Ext.define('CB.Account', {
         this.menu = new Ext.Panel({
             region: 'west'
             ,collapsible: false
-            ,width: 150
+            ,width: 130
             ,animCollapse: false
             ,plain: true
             ,cls: 'account-menu'
-            ,bodyStyle: 'border-right: 1px solid #eaeaea'
+            ,style: 'border-right: 1px solid #cacaca'
+            ,border: false
             ,layout: 'anchor'
             ,defaults: {
                 enableToggle: true
@@ -294,6 +295,7 @@ Ext.define('CB.ProfileForm', {
                     ,width: 500
                     ,items: {
                             xtype: 'fieldset'
+                            ,padding: 10
                             ,autoHeight: true
                             ,labelWidth: 140
                             ,defaults:{
@@ -311,6 +313,7 @@ Ext.define('CB.ProfileForm', {
                     xtype: 'panel'
                     ,width: 300
                     ,padding: 45
+                    ,border: false
                     ,items: [
                         this.photoField
                         ,this.photoView
@@ -493,6 +496,7 @@ Ext.define('CB.SecurityForm', {
             ,items: [{
                 title: L.Password
                 ,componentCls: 'x-panel-header panel-header-nobg block-header'
+                ,border: false
                 ,defaults: {style: 'padding: 5px 25px'}
                 ,items: [
                     {
@@ -514,6 +518,7 @@ Ext.define('CB.SecurityForm', {
             },{
                 title: L.RecoveryOptions
                 ,componentCls: 'x-panel-header panel-header-nobg block-header'
+                ,border: false
                 ,style: 'margin-top: 20px'
                 ,defaults: {style: 'padding: 5px 0 15px 25px', border: false}
                 ,items: [
@@ -670,6 +675,7 @@ Ext.define('CB.SecurityForm', {
             },{
                 title: L.TSV
                 ,componentCls: 'x-panel-header panel-header-nobg block-header'
+                ,border: false
                 ,style: 'margin-top: 20px'
                 ,defaults: {style: 'padding: 5px 25px', border: false}
                 ,buttonAlign: 'left'

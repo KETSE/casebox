@@ -136,13 +136,7 @@ Ext.define('CB.DD.Tree', {
 
         var targetRecord = this.view.getRecord(node)
             ,templateId = targetRecord.data.template_id
-            ,acceptChildren = isNaN(templateId)
-                ? false
-                : (Ext.valueFrom(
-                    CB.DB.templates.getProperty(templateId, 'cfg')
-                    ,''
-                    ).acceptChildren !== false
-                );
+            ,acceptChildren = CB.DB.templates.acceptChildren(templateId);
 
         while ((i < data.records.length) && (rez != this.dropNotAllowed))  {
             var r = data.records[i];

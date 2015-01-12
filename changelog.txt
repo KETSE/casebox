@@ -1,3 +1,22 @@
+CaseBox 1.9.374 (2015-01-12)
+==============================
+New Features, Improvements
+--------------------------
+- adjustments to user account and users management windows
+- exclude processing of other virtual node classes when query searching
+- #2360 Export button should work for all cores, and any results in grid
+- #4284 Cosmetic changes to UI
+- #4303 Memo UI fix
+
+Fixed Bugs:
+----------
+- #4280 Showing Preview panel doesn't load preview of active item
+- #4323 Pivot table not working for vFolder
+- comments display in preview were cutted after an object id (ex: #123)
+- #4321 Changing properties of another user breaks his settings
+- #4320 "No name" displayed in breadcrumbs for vFolders
+- #4296 Bugs in Calendar view
+
 CaseBox 1.9.373 (2015-01-06)
 ==============================
 New Features, Improvements
@@ -9,7 +28,7 @@ New Features, Improvements
 
 Fixed Bugs:
 ----------
-- #4295 Can't select several facets & active facets not shown as selected
+- #4295 Can't select several fac0020ts & active facets not shown as selected
 - #4296 Bugs in Calendar view
 - #4300 Charts & PivotTable: selecting fields from dropdown have no effect
 - #4276 added check for single valued field in form editor

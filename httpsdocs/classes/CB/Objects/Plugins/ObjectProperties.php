@@ -15,7 +15,13 @@ class ObjectProperties extends Base
         parent::getData($id);
 
         $preview = Objects::getPreview($this->id);
-        $data = Objects::getCachedObject($this->id)->getData();
+        $obj = Objects::getCachedObject($this->id);
+
+        if (empty($obj)) {
+            return $rez;
+        }
+
+        $data = $obj->getData();
 
         if (!empty($preview)) {
             $rez['data'] = array(

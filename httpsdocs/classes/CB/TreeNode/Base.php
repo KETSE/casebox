@@ -186,7 +186,7 @@ class Base implements \CB\Interfaces\TreeNode
         $rows = false;
         $cols = false;
 
-        if (!empty($cfg['view'])) {
+        if (empty($rp['userViewChange']) && !empty($cfg['view'])) {
             $v = $cfg['view'];
             if (is_scalar($v)) {
                 $pivot = ($v == 'pivot');

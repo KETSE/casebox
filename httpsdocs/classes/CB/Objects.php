@@ -976,7 +976,7 @@ class Objects
             if (!empty($templateData['cfg']['object_plugins'])) {
                 $objectPlugins = $templateData['cfg']['object_plugins'];
             } else {
-                $objectPlugins = Config::getObjectTypePluginsConfig($o->getType());
+                $objectPlugins = Config::getObjectTypePluginsConfig($templateData['type']);
             }
         }
 

@@ -166,6 +166,7 @@ Ext.define('CB.browser.view.Grid', {
                 forceFit: false
                 ,loadMask: false
                 ,stripeRows: false
+                ,emptyText: 'No Data'
                 ,deferInitialRefresh: false
 
                 ,plugins: [{
@@ -506,6 +507,23 @@ Ext.define('CB.browser.view.Grid', {
         } else {
             delete App.locateObjectId;
         }
+
+        //WORKING
+        // update empty text
+        // this.updateEmtyText(
+        //     recs
+        //     ,options.request.config.params.filters
+        //     ,
+        // );
+
+        var noRecords = Ext.isEmpty(recs)
+            ,filters = options.request.config.params.filters
+            ,emptyFilters = Ext.isEmpty(filters) || Ext.Object.isEmpty(filters)
+            ,emptyText = emptyFilters
+                ? 'Drop files here or use "New" button'
+                : 'No results found';
+
+        this.grid.view. emptyText = emptyText;
     }
 
     ,onScrollerDragDrop: function(targetData, source, e, data){

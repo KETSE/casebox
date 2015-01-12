@@ -66,7 +66,7 @@
 .im-preview{background-image: url(m/ic_visibility_black_24dp.png); min-width: 24px}
 .im-refresh{background-image: url(m/ic_refresh_black_24dp.png); min-width: 24px}
 .im-search{background-image: url(m/ic_search_black_24dp.png); min-width: 24px}
-.im-task-complete{background-image: url(m/ic_done_black_24dp.png); min-width: 24px}
+.im-save, .im-task-complete{background-image: url(m/ic_done_black_24dp.png); min-width: 24px}
 .im-upload{background-image: url(m/ic_file_upload_black_24dp.png); min-width: 24px}
 .im-trash{background-image: url(m/ic_delete_black_24dp.png); min-width: 24px}
 

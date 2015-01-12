@@ -12,7 +12,7 @@ class Files extends Base
 
         $rez = array(
             'success' => true
-            ,'data' => array()
+            // ,'data' => array()
         );
 
         if (empty(parent::getData($id))) {

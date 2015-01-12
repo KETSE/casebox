@@ -267,8 +267,11 @@ createDirectStores = function(){
                 ,messageProperty: 'msg'
             }
         }
+
         ,writer: new Ext.data.JsonWriter({encode: false, writeAllFields: true})
+
         ,getName: getStoreTitles
+
         ,getIcon: function(id){
             var idx = this.findExact('id', parseInt(id))
 
@@ -278,17 +281,36 @@ createDirectStores = function(){
 
             return rez;
         }
+
         ,getType: function(id){
             var rec = this.findRecord('id', parseInt(id, 10))
 
             return rec ? rec.get('type') : '';
         }
+
         ,getProperty: function(templateId, propertyName) {
             var idx = this.findExact('id', parseInt(templateId, 10))
 
             var rez = (idx >= 0)
                 ? this.getAt(idx).get(propertyName)
                 : '';
+
+            return rez;
+        }
+
+        //check if children are accepted by config of the given template id
+        //by default all templates accept children except for templates of type 'file'
+        ,acceptChildren: function(templateId) {
+            if (isNaN(templateId)) {
+                return false;
+            }
+
+            var cfg = Ext.valueFrom(this.getProperty(templateId, 'cfg'), {})
+                ,rez = (cfg.acceptChildren !== false);
+
+            if (!Ext.isDefined(cfg.acceptChildren)) {
+                rez = (this.getType(templateId) !== 'file');
+            }
 
             return rez;
         }

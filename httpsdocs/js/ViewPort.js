@@ -14,6 +14,7 @@ Ext.define('CB.ViewPort', {
             items: {
                 lbar: App.mainLBar
                 ,layout: 'fit'
+                ,border: false
                 ,items: [
                     {
                         region: 'center'
@@ -70,7 +71,7 @@ Ext.define('CB.ViewPort', {
                     ,border: false
                     ,style: 'border-bottom: 1px solid #99bce8'
                     ,bodyStyle: 'background: #f4f4f4'
-                    ,height: 50
+                    ,height: 49
                     ,items: [
                         this.buttons.toggleLeftRegion
                     ]
@@ -101,9 +102,13 @@ Ext.define('CB.ViewPort', {
             region: 'west'
             ,layout: 'card'
             ,width: 250
-            ,split: true
+            ,split: {
+                size: 2
+                ,collapsible: false
+            }
             ,collapsible: true
             ,collapseMode: 'mini'
+            ,hideCollapseTool: true
             ,header: false
             ,animCollapse: false
             ,plain: true

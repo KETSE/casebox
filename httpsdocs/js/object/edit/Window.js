@@ -163,9 +163,10 @@ Ext.define('CB.object.edit.Window', {
             xtype: 'form'
             ,border: false
             ,autoHeight: true
-            ,autoScroll: true
+            ,autoScroll: false
             ,labelAlign: 'top'
-            ,bodyStyle: 'margin:0; padding: 0 7px'
+            ,cls: 'complex-fieldcontainer'
+            ,bodyStyle: 'margin: 0; padding: 0'
             ,api: {
                 submit: CB_Objects.save
             }
@@ -506,16 +507,17 @@ Ext.define('CB.object.edit.Window', {
                     if(r.get('cfg').showIn == 'tabsheet') {
                         var cfg = {
                             border: false
-                            ,title: r.get('title')
                             ,isTemplateField: true
                             ,name: r.get('name')
                             ,value: this.data.data[r.get('name')]
                             ,height: Ext.valueFrom(r.get('cfg').height, 200)
                             ,anchor: '100%'
                             ,grow: true
+                            ,title: r.get('title')
                             ,fieldLabel: r.get('title')
                             ,labelAlign: 'top'
                             ,labelCls: 'fwB ttU'
+                            ,labelSeparator: ''
                             ,listeners: {
                                 scope: this
                                 ,change: function(field, newValue, oldValue) {

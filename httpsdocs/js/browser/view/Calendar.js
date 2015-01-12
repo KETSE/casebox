@@ -177,20 +177,18 @@ Ext.define('CB.Calendar', {
         // it altogether. Because of this, it's up to the application code to tie the pieces together.
         // Note that this function is called from various event handlers in the CalendarPanel above.
     ,showEditWindow : function(rec, animateTarget){
-            if(Ext.isEmpty(rec.data)) {
-                return;
-                // rec = new Ext.calendar.EventRecord(rec);
-            }
+        if(Ext.isEmpty(rec.data)) {
+            return;
+            // rec = new Ext.calendar.EventRecord(rec);
+        }
 
-            var s = [
-                {
-                    nid: rec.data.EventId
-                    ,template_id: rec.data.template_id
-                    ,name: rec.data.Title
-                }
-            ];
+        var s = [{
+            nid: rec.data.EventId
+            ,template_id: rec.data.template_id
+            ,name: rec.data.Title
+        }];
 
-            this.fireEvent('selectionchange', s);
+        this.fireEvent('selectionchange', s);
     }
 
     // This is an application-specific way to communicate CalendarPanel event messages back to the user.
@@ -219,7 +217,7 @@ Ext.define('CB.Calendar', {
 
         switch(view.xtype){
             case 'dayview':
-                title = Ext.Date.format(ad, 'F j, Y');
+                text = Ext.Date.format(ad, 'F j, Y');
                 break;
 
             case 'weekview':
@@ -470,7 +468,14 @@ Ext.define('CB.browser.view.Calendar', {
     }
 
     ,onSelectionChange: function(selection) {
-        this.fireEvent('selectionchange', selection);
+        // this.fireEvent('selectionchange', selection);
+        if(selection) {
+            var data = Ext.isArray(selection)
+                ? data = selection[0]
+                : selection;
+
+            this.fireEvent('openobject', data);
+        }
     }
 
     ,updateRecordDatesRemotely: function(record){

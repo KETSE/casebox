@@ -303,6 +303,7 @@ Ext.define('CB.object.ViewContainer', {
         if(currentItemIndex == index) {
             return;
         }
+        this.loadedData = {};
         this.getLayout().activeItem.clear();
 
         this.getLayout().setActiveItem(index);
@@ -330,6 +331,12 @@ Ext.define('CB.object.ViewContainer', {
      * @return {[type]}
      */
     ,load: function(objectData) {
+        var el = this.getLayout().activeItem.getEl();
+
+        if(!el || !el.isVisible(true)) {
+            return;
+        }
+
         if(this.locked) {
             delete this.requestedLoadData;
             return;
@@ -386,6 +393,7 @@ Ext.define('CB.object.ViewContainer', {
             this.setActiveView(0);
         }
 
+        this.loadedData = {};
         this.items.getAt(0).clear();
 
         // instantiate a delay to exclude flood requests
@@ -640,6 +648,7 @@ Ext.define('CB.object.ViewContainer', {
         if(!Ext.isEmpty(this.loadedData) && setsHaveIntersection(ids, this.loadedData.id)) {
             delete this.locked;
             this.setActiveView(0, false);
+            this.loadedData = {};
             this.items.getAt(0).clear();
             this.updateToolbarAndMenuItems();
         }

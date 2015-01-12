@@ -4,7 +4,6 @@ a {color: #15C}
 
 /*.x-grid-row td, .x-grid-summary-row td {font: 13px "lucida grande",tahoma,verdana,arial,sans-serif}*/
 
-.panel-header-nobg {background: none}
 .generic-object {padding: 0 5px 10px 5px; color: #555}
 
 .generic-object a, .generic-object a:link, .generic-object a:visited, .generic-object a:hover{ color: #333; text-decoration: none}
@@ -868,4 +867,17 @@ padding-top: 45%;
 }
 .editor-no-border .x-html-editor-input {
     border-width: 0;
+}
+
+.complex-fieldcontainer .x-form-item {
+    margin-top: 20px;
+}
+
+.complex-fieldcontainer .x-form-item .x-form-item-label-top .x-form-item-label-inner {
+    padding-left: 7px
+}
+
+.complex-fieldcontainer .x-form-item .x-form-item-body {
+    padding: 7px;
+    border-top: 2px solid #cccccc
 }

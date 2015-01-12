@@ -212,27 +212,23 @@ Ext.define('CB.UsersGroupsTree', {
             })
             ,del: new Ext.Action({
                 text: L.Delete
-                ,iconCls: 'ib-trash'
-                ,iconAlign:'top'
-                ,scale: 'large'
+                ,iconCls: 'im-trash'
+                ,scale: 'medium'
                 ,disabled: true
                 ,handler: this.delNode
                 ,scope: this
             })
             ,remove: new Ext.Action({
                 text: L.Remove
-                ,iconCls: 'ib-cancel'
-                ,iconAlign:'top'
-                ,scale: 'large'
+                ,iconCls: 'im-cancel'
+                ,scale: 'medium'
                 ,disabled: true
                 ,handler: this.deassociateNode
                 ,scope: this
             })
             ,reload: new Ext.Action({
-                text: L.Refresh
-                ,iconCls: 'ib-refresh'
-                ,iconAlign:'top'
-                ,scale: 'large'
+                iconCls: 'im-refresh'
+                ,scale: 'medium'
                 ,qtip: L.Reload
                 ,scope:this
                 ,handler: function(){
@@ -257,7 +253,8 @@ Ext.define('CB.UsersGroupsTree', {
         this.editor.on('beforecomplete', this.onBeforeEditComplete, this);
 
         Ext.apply(this, {
-            store: Ext.create('Ext.data.TreeStore', {
+            cls: 'x-panel-white'
+            ,store: Ext.create('Ext.data.TreeStore', {
                 root:  {
                     expanded: false
                     ,expandable: true
@@ -295,9 +292,8 @@ Ext.define('CB.UsersGroupsTree', {
             ,tbar: [
                 {
                     text: L.Add
-                    ,iconCls: 'ib-create'
-                    ,iconAlign:'top'
-                    ,scale: 'large'
+                    ,iconCls: 'im-create'
+                    ,scale: 'medium'
                     ,menu: [
                         this.actions.addUser
                         ,this.actions.addGroup
@@ -389,12 +385,9 @@ Ext.define('CB.UsersGroupsTree', {
                 ,scope: this
             }]
         });
-        CB.UsersGroupsTree.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         this.enableBubble(['verify']);
-    }
-    ,afterRender: function() {
-        CB.UsersGroupsTree.superclass.afterRender.apply(this, arguments);
     }
     ,onRenameClick: function(b, e){
         var n = this.getSelectionModel().getSelection()[0];
@@ -735,7 +728,6 @@ Ext.define('CB.UsersGroupsForm', {
     ,disabled: true
     ,fileUpload: true
     ,data: {}
-    ,tbarCssClass: 'x-panel-white'
 
     ,initComponent: function(){
 
@@ -775,20 +767,19 @@ Ext.define('CB.UsersGroupsForm', {
             layout: 'border'
             ,api: {submit: CB_User.uploadPhoto }
             ,border: false
+            ,cls: 'x-panel-white'
             ,tbar:[
                 {
                     text: L.Save
-                    ,iconCls: 'ib-save'
-                    ,iconAlign:'top'
-                    ,scale: 'large'
+                    ,iconCls: 'im-save'
+                    ,scale: 'medium'
                     ,disabled: true
                     ,handler: this.saveData
                     ,scope: this
                 },{
                     text: Ext.MessageBox.buttonText.cancel
-                    ,iconCls: 'ib-cancel'
-                    ,iconAlign:'top'
-                    ,scale: 'large'
+                    ,iconCls: 'im-cancel'
+                    ,scale: 'medium'
                     ,disabled: true
                     ,handler: function(b, e){
                         e.stopPropagation();
@@ -798,18 +789,16 @@ Ext.define('CB.UsersGroupsForm', {
                 },{xtype: 'tbseparator', hidden: true}
                 ,{
                     text: L.Edit
-                    ,iconCls: 'ib-open'
-                    ,iconAlign:'top'
-                    ,scale: 'large'
+                    ,iconCls: 'im-edit-obj'
+                    ,scale: 'medium'
                     ,handler: this.onEditUserDataClick
                     ,scope: this
                     ,hidden: true
                 },{xtype: 'tbseparator', hidden: true}
                 ,{
                     text: L.Options
-                    ,iconCls:'ib-apps'
-                    ,iconAlign:'top'
-                    ,scale: 'large'
+                    ,iconCls:'im-apps'
+                    ,scale: 'medium'
                     ,hidden: true
                     ,menu: [
                         {text: L.ChangePassword, iconCls: 'icon-key', handler: this.onEditUserPasswordClick, scope: this}
@@ -824,6 +813,7 @@ Ext.define('CB.UsersGroupsForm', {
                     region: 'north'
                     ,height: 75
                     ,bodyStyle: 'padding: 10px'
+                    ,border: false
                     ,items: [{
                         xtype: 'filefield'
                         ,name: 'photo'
@@ -938,7 +928,7 @@ Ext.define('CB.UsersGroupsForm', {
 
     ,processLoadedData: function(response, e){
         if(response.success !== true) {
-            if(r.verify) {
+            if(response.verify) {
                 this.fireEvent('verify', this);
             }
         } else {
@@ -966,7 +956,7 @@ Ext.define('CB.UsersGroupsForm', {
 
             this.canEditUserData = ((App.loginData.admin) || (response.data.cid == App.loginData.id) || (response.data.id == App.loginData.id));
             var ttb = this.dockedItems.getAt(0);
-            eb = ttb.down('[iconCls="ib-open"]');
+            eb = ttb.down('[iconCls="im-edit-obj"]');
             eb.setVisible(this.canEditUserData); // edit button
             idx = ttb.items.indexOf(eb);
             ttb.items.getAt(idx -1).setVisible(this.canEditUserData);// divider for edit button
@@ -1125,7 +1115,6 @@ Ext.define('CB.UsersGroups', {
     ,initComponent: function(){
         this.tree = new CB.UsersGroupsTree({
             region: 'center'
-            ,width: 250
             ,split: true
             ,collapseMode: 'mini'
         });
@@ -1158,7 +1147,7 @@ Ext.define('CB.UsersGroups', {
                 {
                     layout: 'border'
                     ,region: 'west'
-                    ,width: 250
+                    ,width: 265
                     ,border: false
                     ,split: true
                     ,items: [

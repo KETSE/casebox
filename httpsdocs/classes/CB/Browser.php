@@ -59,7 +59,13 @@ class Browser
         //detect tree nodes config,
         //but leave only SearchResults plugin when searching
         if (empty($p['search'])) {
-            $this->treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
+            if (empty($p['query'])) {
+                $this->treeNodeConfigs = Config::get('treeNodes');
+            }
+            if (empty($this->treeNodeConfigs)) {
+                $this->treeNodeConfigs = array('Dbnode' => array());
+            }
+
         } else {
             $this->treeNodeConfigs = array('SearchResults' => $p['search']);
             $path = Path::getGUID('SearchResults').'-';

@@ -4,6 +4,7 @@ namespace CB\TreeNode;
 use CB\Config;
 use CB\Util;
 use CB\Facets;
+use CB\Search;
 
 class FacetNav extends Base
 {
@@ -68,25 +69,30 @@ class FacetNav extends Base
             $id = $this->id;
         }
 
-        switch ($id) {
-            case 'root':
-                $cfg = &$this->config;
-                $l = Config::get('user_language');
+        if (!empty($id) && is_numeric($id)) {
+            $rez = @Search::getObjectNames($id)[$id];
 
-                if (empty($cfg['title_'.$l])) {
-                    $l = Config::get('language');
+        } else {
+            switch ($id) {
+                case 'root':
+                    $cfg = &$this->config;
+                    $l = Config::get('user_language');
+
                     if (empty($cfg['title_'.$l])) {
-                        if (!empty($cfg['title'])) {
-                            $rez = $cfg['title'];
+                        $l = Config::get('language');
+                        if (empty($cfg['title_'.$l])) {
+                            if (!empty($cfg['title'])) {
+                                $rez = $cfg['title'];
+                            }
+                        } else {
+                            $rez = $cfg['title_' . $l];
                         }
                     } else {
                         $rez = $cfg['title_' . $l];
                     }
-                } else {
-                    $rez = $cfg['title_' . $l];
-                }
 
-                break;
+                    break;
+            }
         }
 
         return $rez;

@@ -40,18 +40,19 @@ class Comment extends Object
         $message = Util\replaceUrlsWithLinks($message);
 
         //replace object references with links
-        if (preg_match_all('/#(\d+)[^#\d]*/', $message, $matches, PREG_SET_ORDER)) {
+        if (preg_match_all('/#(\d+)/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $name = \CB\Objects::getName($match[1]);
                 $name = (strlen($name) > 30)
                     ? substr($name, 0, 30) . '&hellip;'
                     : $name;
+
                 $message = str_replace(
                     $match[0],
                     '<a class="cDB obj-ref" href="' . Config::get('core_url') . 'v-' . $match[1] .
                     '" target="_blank" ' .
                     'title="' . $name . '"' .
-                    '>#' . $match[1] . '</a>',  //  . substr($match[0], strlen($match[1]) + 1),
+                    '>#' . $match[1] . '</a>', //  . substr($match[0], strlen($match[1]) + 1),
                     $message
                 );
             }

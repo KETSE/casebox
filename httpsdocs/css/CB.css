@@ -519,6 +519,7 @@ img.duplicate-plus {width:11px; height: 11px; background: url(i/duplication/ui-c
 .trigger-auto .x-form-trigger-over{ background-position: -64px 0 !important }
 .title-readonly{ color: gray }
 .panel-header-nobg{ background: none; border: 0px !important/*; border-bottom: 1px solid #EEE !important/**/}
+.panel-header-nobg .x-panel-header{ background: none; border: 0px}
 .panel-header-nobg1{ background: none; border-bottom: 1px solid #DFE8F6 !important }
 .panel-header-nobg1 * { text-decoration: none !important}
 .panel-header-nobg1 .x-tool{ display: none}

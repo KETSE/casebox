@@ -15,6 +15,7 @@ Ext.define('CB.Login', {
     ,border: false
     ,resizable: false
     ,buttonAlign: 'center'
+
     ,initComponent: function() {
         Ext.apply(this,{
             items : [{
@@ -62,6 +63,7 @@ Ext.define('CB.Login', {
         this.on('afterrender', this.doShow);
         CB.Login.superclass.initComponent.apply(this, arguments);
     }
+
     ,doShow: function(w) {
         var lku = Ext.util.Cookies.get('lastUser');
         var user = w.down('[name="username"]');
@@ -76,6 +78,7 @@ Ext.define('CB.Login', {
             pass.focus(true, 550);
         }
     }
+
     ,doLogin: function(){
         user = this.child('[name="username"]');
         pass = this.child('[name="password"]');
@@ -84,6 +87,7 @@ Ext.define('CB.Login', {
 
         CB_User.login(user.getValue(), pass.getValue(), this.processLoginResponse);
     }
+
     ,processLoginResponse: function(response, e){
         lw = Ext.getCmp('CBLoginWindow');
         if(e.result.success === true){
@@ -102,9 +106,9 @@ Ext.define('CB.Login', {
 
 Ext.define('CB.VerifyPassword', {
     extend: 'Ext.Window'
+
     ,title: L.Verify
     ,plain: true
-    // ,closable: false
     ,iconCls: 'icon-key'
     ,modal: true
     ,frame: true
@@ -139,6 +143,8 @@ Ext.define('CB.VerifyPassword', {
                             name: 'password'
                             ,fieldLabel: L.Password
                             ,inputType: 'password'
+                            ,enableKeyEvents: true
+                            ,keys: [{key: 13, fn: this.doVerify, scope: this}]
                             ,listeners: {
                                 afterrender: function() {
                                     this.focus();
@@ -148,7 +154,7 @@ Ext.define('CB.VerifyPassword', {
                     ]
                 },{
                     border: false
-                    ,cls: 'taC fwB cR'
+                    ,bodyCls: 'taC fwB cR'
                     ,html:'&nbsp;'
                     ,name: 'infoPanel'
                     ,xtype: 'panel'
@@ -156,10 +162,25 @@ Ext.define('CB.VerifyPassword', {
                     ,bodyStyle: 'padding:5px'
                 }
                 ]
-                ,buttons: [{text: L.Verify, handler: this.doVerify, scope: this, formBind: true} ]
+                ,buttons: [{
+                    text: L.Verify
+                    ,handler: this.doVerify
+                    ,scope: this
+                    ,formBind: true
+                }]
             }
             ]
-            ,keys: [{key: 13, fn: this.doVerify, scope: this}]
+
+            ,listeners: {
+                scope: this
+                ,afterrender: function() {
+                    var nav = Ext.create('Ext.util.KeyNav', this.getEl(), {
+                        scope: this,
+                        enter: this.doVerify
+                    });
+
+                }
+            }
         });
 
         this.on('show', this.doShow, this);
@@ -170,7 +191,7 @@ Ext.define('CB.VerifyPassword', {
     ,doShow: function(w) {
         var pass = this.down('[name="password"]');
         pass.reset();
-        pass.focus(true, 1850);
+        // pass.focus(true, 1850);
     }
 
     ,doVerify: function(){
