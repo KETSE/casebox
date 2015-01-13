@@ -460,9 +460,9 @@ Ext.define('CB.browser.view.Calendar', {
                 ,'monthview'
                 ,'-'
                 ,'reload'
-                ,'more'
-                ,'-'
                 ,'apps'
+                ,'-'
+                ,'more'
             ]
         );
     }

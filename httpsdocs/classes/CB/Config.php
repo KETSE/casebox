@@ -326,7 +326,10 @@ class Config extends Singleton
             ? array()
             : static::adjustPaths(static::$config['css'], static::$environmentVars['core_dir']);
 
-        array_unshift($rez, DOC_ROOT.'/css/'.static::get('theme', 'default').'/theme.css');
+        $path = DOC_ROOT.'/css/'.static::get('theme', 'default') . '/';
+
+        array_unshift($rez, $path . 'ribbon.css');
+        array_unshift($rez, $path . 'theme.css');
 
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {

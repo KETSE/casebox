@@ -55,6 +55,9 @@ Ext.define('CB.TextEditWindow', {
     }
 
     ,onWindowsShow: function(){
+        //update title if set
+        this.setTitle(Ext.valueFrom(this.data.title, this.title));
+
         this.editor.setValue(Ext.valueFrom(this.data.value, ''));
         this.editor.focus(false, 350);
     }

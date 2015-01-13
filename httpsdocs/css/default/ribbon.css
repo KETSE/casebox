@@ -1,0 +1,51 @@
+/* buttons general changes */
+.x-btn-icon > .x-btn-icon-el {
+    opacity: .55;
+}
+.x-btn-over .x-btn-icon > .x-btn-icon-el {
+    opacity: 1;
+}
+
+.x-btn-over.x-btn-default-toolbar-medium,
+.x-btn-over.x-btn-default-toolbar-large,
+.x-btn-over.x-btn-default-large,
+.x-btn.x-btn-pressed.x-btn-default-large {
+    background-image: none;
+    border-color: #2f2f2f;
+}
+/* end of buttons general changes */
+
+.ribbon-black {
+    background: #151515;
+}
+
+.ribbon-black .x-btn.x-btn-default-large,
+.ribbon-black .x-btn.x-btn-pressed.x-btn-default-large{
+    background-image: none;
+    background-color: transparent;
+    border-color: transparent;
+}
+.ribbon-black .x-btn.x-btn-over.x-btn-default-large{
+    background-color: #2f2f2f;
+    border-color: #2f2f2f;
+}
+
+.ribbon-black .x-btn-icon > .x-btn-icon-el {
+    -webkit-filter: invert(100%);
+}
+
+.ribbon-black .user-menu-button .x-btn-icon > .x-btn-icon-el {
+    -webkit-filter: none
+}
+
+.ribbon-black .x-btn-over.x-btn-default-toolbar-large,
+.ribbon-black .x-btn-over.x-btn-default-large{
+    background-color: #2f2f2f;
+    transition: all .3s ease-out 0s;
+}
+
+.ribbon-black .x-btn-default-toolbar-large,
+.ribbon-black .x-btn-default-large {
+    border-radius: 0;
+    webkit-border-radius: 0
+}

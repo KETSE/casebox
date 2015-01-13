@@ -1,9 +1,3 @@
-/* line 390, ../../../ext-theme-base/sass/etc/mixins/frame.scss */
-.x-panel-header-light-framed-collapsed-bottom-tr,
-.x-panel-header-light-framed-collapsed-bottom-br,
-.x-panel-header-light-framed-collapsed-bottom-mr {
-  padding-right: 5px; }
-
 /* line 396, ../../../ext-theme-base/sass/etc/mixins/frame.scss */
 .x-panel-header-light-framed-collapsed-bottom-tl,
 .x-panel-header-light-framed-collapsed-bottom-bl,

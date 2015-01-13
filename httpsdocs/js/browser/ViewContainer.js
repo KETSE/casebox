@@ -193,7 +193,6 @@ Ext.define('CB.browser.ViewContainer', {
                 qtip: L.New
                 ,text: L.New
                 ,itemId: 'create'
-                ,arrowVisible: false
                 ,iconCls: 'im-create'
                 ,scale: 'medium'
                 ,menu: [

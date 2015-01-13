@@ -63,14 +63,14 @@ Ext.define('CB.ViewPort', {
 
         //application main left bar (left docked)
         App.mainLBar = new Ext.Toolbar({
-            style:'background: #f4f4f4; border: 0; '
+            cls: 'ribbon-black'
             ,autoWidth: true
             ,dock: 'left'
             ,items: [ {
                     xtype: 'panel'
                     ,border: false
                     ,style: 'border-bottom: 1px solid #99bce8'
-                    ,bodyStyle: 'background: #f4f4f4'
+                    ,bodyStyle: 'background: transparent'
                     ,height: 49
                     ,items: [
                         this.buttons.toggleLeftRegion
@@ -82,6 +82,7 @@ Ext.define('CB.ViewPort', {
                 ,{
                     scale: 'large'
                     ,arrowVisible: false
+                    ,cls: 'user-menu-button'
                     ,iconCls: 'bgs32'
                     ,menu: []
                     ,name: 'userMenu'
@@ -159,7 +160,7 @@ Ext.define('CB.ViewPort', {
                 xtype: 'CBSearchField'
                 ,emptyText: L.Search + ' Casebox'
                 ,minListWidth: 150
-                ,width: 300
+                ,width: 350
                 ,listeners: {
                     scope: this
                     ,'search': function(query, editor, event){
@@ -191,6 +192,10 @@ Ext.define('CB.ViewPort', {
                 this.breadcrumb
                 ,'->'
                 ,this.searchField
+                ,{
+                    xtype: 'tbspacer'
+                    ,width: 10
+                }
             ]
         });
 
@@ -234,7 +239,7 @@ Ext.define('CB.ViewPort', {
                 ,itemId: 'togglelr'
                 ,pressed: true
                 ,enableToggle: true
-                ,iconCls: 'ib-reorder'
+                ,iconCls: 'im-reorder'
                 ,scale: 'large'
                 ,scope: this
                 ,handler: this.toggleLeftRegion
@@ -244,7 +249,7 @@ Ext.define('CB.ViewPort', {
                 tooltip: L.Filter
                 ,itemId: 'togglefp'
                 ,enableToggle: true
-                ,iconCls: 'ib-filter'
+                ,iconCls: 'im-filter'
                 ,scale: 'large'
                 ,scope: this
                 ,handler: this.onToggleFilterPanelClick
@@ -262,13 +267,13 @@ Ext.define('CB.ViewPort', {
         this.initActions();
 
         this.buttons = {
-            toggleLeftRegion: new Ext.button.Button(this.actions.toggleLeftRegion)
-            ,toggleFilterPanel: new Ext.button.Button(this.actions.toggleFilterPanel)
+            toggleLeftRegion: new Ext.Button(this.actions.toggleLeftRegion)
+            ,toggleFilterPanel: new Ext.Button(this.actions.toggleFilterPanel)
             ,create: new Ext.Button({
                 qtip: L.New
                 ,itemId: 'create'
                 ,arrowVisible: false
-                ,iconCls: 'ib-create'
+                ,iconCls: 'im-create'
                 ,disabled: true
                 ,scale: 'large'
                 ,menu: [
@@ -421,7 +426,7 @@ Ext.define('CB.ViewPort', {
             App.mainLBar.items.getCount() - 2
             ,{
                 qtip: L.Settings
-                ,iconCls: 'ib-settings'
+                ,iconCls: 'im-settings'
                 ,arrowVisible: false
                 ,hideOnClick: false
                 ,scale: 'large'

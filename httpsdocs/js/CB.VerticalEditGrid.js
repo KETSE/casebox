@@ -159,12 +159,13 @@ Ext.define('CB.VerticalEditGrid', {
 
                 if(tr.get('type') == 'H'){
                     meta.css ='vgh';
-                }else{
+                } else {
                     meta.css = 'bgcLG vaT';
-                    meta.attr = 'style="margin-left: '+(n.getDepth()-1)+'0px"';
+                    meta.style = 'margin-left: ' + (n.getDepth()-1)+'0px';
                 }
+
                 if(!Ext.isEmpty(tr.get('cfg').hint)) {
-                    meta.attr += ' title="'+tr.get('cfg').hint+'"';
+                    meta.tdAttr = ' title="'+tr.get('cfg').hint+'"';
                 }
 
                 /* setting icon for duplicate fields /**/

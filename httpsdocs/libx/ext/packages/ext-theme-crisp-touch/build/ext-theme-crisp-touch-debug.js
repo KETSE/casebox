@@ -388,6 +388,11 @@ Ext.define('ExtThemeNeptune.grid.column.RowNumberer', {
     width: 25
 });
 
+Ext.define('Ext.touch.sizing.grid.column.RowNumberer', {
+    override: 'Ext.grid.column.RowNumberer',
+    width: 50
+});
+
 Ext.define('ExtThemeNeptune.menu.Separator', {
     override: 'Ext.menu.Separator',
     border: true
@@ -401,6 +406,11 @@ Ext.define('ExtThemeNeptune.menu.Menu', {
 Ext.define('Ext.touch.sizing.grid.plugin.RowExpander', {
     override: 'Ext.grid.plugin.RowExpander',
     headerWidth: 32
+});
+
+Ext.define('Ext.touch.sizing.grid.selection.SpreadsheetModel', {
+    override: 'Ext.grid.selection.SpreadsheetModel',
+    checkboxHeaderWidth: 32
 });
 
 Ext.define('Ext.touch.sizing.selection.CheckboxModel', {

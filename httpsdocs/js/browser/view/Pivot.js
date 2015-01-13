@@ -164,9 +164,9 @@ Ext.define('CB.browser.view.Pivot',{
                 ,'PVcolumnchart'
                 ,'-'
                 ,'reload'
-                ,'more'
-                ,'-'
                 ,'apps'
+                ,'-'
+                ,'more'
             ]
         );
     }

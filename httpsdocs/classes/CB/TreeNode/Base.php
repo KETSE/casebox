@@ -172,7 +172,7 @@ class Base implements \CB\Interfaces\TreeNode
                 $config = $v;
             }
             if (is_null($config)) {
-                \CB\debug('Cannot find facet config:'.var_export($name, 1).var_export($v, 1));
+                \CB\debug('Cannot find facet config:' . var_export($name, 1) . var_export($v, 1));
             } else {
                 $config['name'] = $name;
                 $facets[$name] = \CB\Facets::getFacetObject($config);
@@ -186,7 +186,14 @@ class Base implements \CB\Interfaces\TreeNode
         $rows = false;
         $cols = false;
 
-        if (empty($rp['userViewChange']) && !empty($cfg['view'])) {
+        if (!empty($rp['userViewChange']) && !empty($rp['from'])) {
+            $pivot = ($rp['from'] == 'pivot');
+
+            if (!empty($rp['selectedFacets']) && (is_array($rp['selectedFacets'])) && sizeof($rp['selectedFacets'] > 1)) {
+                $rows = $rp['selectedFacets'][0];
+                $cols = $rp['selectedFacets'][1];
+            }
+        } elseif (!empty($cfg['view'])) {
             $v = $cfg['view'];
             if (is_scalar($v)) {
                 $pivot = ($v == 'pivot');
@@ -198,13 +205,6 @@ class Base implements \CB\Interfaces\TreeNode
                 if (!empty($v['cols']['facet'])) {
                     $cols = $v['cols']['facet'];
                 }
-            }
-        } elseif (!empty($rp['from'])) {
-            $pivot = ($rp['from'] == 'pivot');
-
-            if (!empty($rp['selectedFacets']) && (is_array($rp['selectedFacets'])) && sizeof($rp['selectedFacets'] > 1)) {
-                $rows = $rp['selectedFacets'][0];
-                $cols = $rp['selectedFacets'][1];
             }
         }
 

@@ -11727,7 +11727,7 @@ Ext.define('Ext.chart.series.Bar', {
             axis = chart.axes.get(boundAxes.xAxis);
             if (axis) {
                 inflections = axis.inflections;
-                if (axis.isCategoryAxis || inflections.length == data.length) {
+                if (axis.isCategoryAxis || inflections.length >= data.length) {
                     barsLoc = [];
                     for (i = 0 , ln = data.length; i < ln; i++) {
                         tick = inflections[i];
@@ -17781,7 +17781,7 @@ Ext.define('Ext.rtl.draw.Sprite', {
     // This character is the right to left mark
     // http://en.wikipedia.org/wiki/Right-to-left_mark
     // It is used to group characters in an RTL manner
-    RLM: '‏',
+    RLM: '\u200f',
     // A simple regex to match most strong RTL characters. Indicates that
     // the string contains RTL characters
     rtlRe: /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/,

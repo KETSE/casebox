@@ -14,6 +14,7 @@ Ext.define('CB.object.view.Preview', {
     ,loader: {
         autoLoad: false
     }
+
     ,initComponent: function(){
         Ext.apply(this, {
             listeners: {
@@ -306,8 +307,12 @@ Ext.define('CB.object.view.Preview', {
     ,clear: function(){
         delete this.data;
         delete this.loadedVersionId;
+
         this.update('<div class="x-preview-mask">Select an item for preview</div>');
-        if(this.getEl().isVisible(true)) this.body.scrollTo('top', 0);
+
+        if(this.getEl().isVisible(true)) {
+            this.body.scrollTo('top', 0);
+        }
     }
 
     ,getContainerToolbarItems: function() {

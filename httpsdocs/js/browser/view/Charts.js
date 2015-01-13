@@ -228,9 +228,9 @@ Ext.define('CB.browser.view.Charts', {
                 ,'piechart'
                 ,'-'
                 ,'reload'
-                ,'more'
-                ,'-'
                 ,'apps'
+                ,'-'
+                ,'more'
             ]
         );
     }

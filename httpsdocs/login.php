@@ -99,6 +99,7 @@ if (empty($_SESSION['check_TSV'])) {
     if ($cfg['method'] !== 'ybk') {
         echo '<input type="submit" name="s" id="s" value="'. L\get('Verify') .'" class="btn btn-info" style="margin-top: 26px;" disabled>';
     }
+    echo '<a href="auth.php?l=1" style="margin-top: 30px;"  class="pull-right">'. L\get('Exit') .'</a>';
 }
 
 ?>

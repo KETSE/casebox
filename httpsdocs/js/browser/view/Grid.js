@@ -445,9 +445,9 @@ Ext.define('CB.browser.view.Grid', {
                 ,'delete'
                 ,'->'
                 ,'reload'
-                ,'more'
-                ,'-'
                 ,'apps'
+                ,'-'
+                ,'more'
             ]
         );
     }

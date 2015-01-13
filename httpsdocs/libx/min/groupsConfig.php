@@ -176,7 +176,9 @@ return array_merge(
         )
 
         ,'jsoverrides' => array(
-            '//js/overrides/calendar/dd/DayDropZone.js'
+            '//js/overrides/Patches.js'
+
+            ,'//js/overrides/calendar/dd/DayDropZone.js'
             ,'//js/overrides/calendar/form/field/DateRange.js'
             ,'//js/overrides/calendar/template/BoxLayout.js'
             ,'//js/overrides/calendar/view/Day.js'

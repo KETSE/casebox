@@ -52,6 +52,17 @@ class Dbnode extends Base
             $p['pids'] = $pid;
         }
 
+        if (empty($p['userViewChange'])) {
+
+            if (!empty($this->config['view'])) {
+                $p['from'] = $this->config['view'];
+            } elseif (empty($p['from']) || ($p['from'] !== 'tree')) {
+                $p['from'] = 'grid';
+            }
+        }
+        // if (\CB\isDebugHost()) {
+        //     var_dump($p);
+        // }
         $s = new \CB\Search();
         $rez = $s->query($p);
 

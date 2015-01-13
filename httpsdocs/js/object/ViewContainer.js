@@ -349,6 +349,7 @@ Ext.define('CB.object.ViewContainer', {
         }
 
         if(Ext.isEmpty(objectData.id) || isNaN(objectData.id)) {
+            this.items.getAt(0).clear();
             return;
         }
 
