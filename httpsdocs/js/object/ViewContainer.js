@@ -223,12 +223,12 @@ Ext.define('CB.object.ViewContainer', {
                 ,handler: this.onUnsubscribeClick
             }
 
-            ,metadata: {
-                text: L.Metadata
-                ,itemId: 'metadata'
-                ,scope: this
-                ,handler: this.onOpenExternalClick
-            }
+            // ,metadata: {
+            //     text: L.Metadata
+            //     ,itemId: 'metadata'
+            //     ,scope: this
+            //     ,handler: this.onOpenExternalClick
+            // }
 
             ,permissions: {
                 itemId: 'permissions'

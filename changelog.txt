@@ -1,3 +1,16 @@
+CaseBox 1.9.376 (2015-01-15)
+==============================
+New Features, Improvements
+--------------------------
+- #4342 Metadata of files can't be edited
+- main menu changes
+- review graphs functionality
+- verified security window rules management
+
+Fixed Bugs:
+----------
+- sometimes on casebox load the tree doesnt display due to an js error
+
 CaseBox 1.9.375 (2015-01-13)
 ==============================
 New Features, Improvements

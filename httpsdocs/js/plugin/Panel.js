@@ -115,6 +115,7 @@ Ext.define('CB.plugin.Panel', {
 
         if(this.loadedParams &&
             // (CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
+            (this.loadedParams.from !== 'window') &&
             !Ext.isEmpty(this.loadedParams.name)
         ){
             var titleView = new CB.object.TitleView({

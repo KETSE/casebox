@@ -261,6 +261,10 @@ Ext.define('CB.file.edit.Window', {
     }
 
     ,saveContent: function() {
+        if(Ext.isEmpty(this.contentEditor)) {
+            return;
+        }
+
         var ed = this.contentEditor.editor
             ? this.contentEditor.editor
             : this.contentEditor

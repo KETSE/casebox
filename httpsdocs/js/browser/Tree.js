@@ -23,7 +23,13 @@ Ext.define('CB.browser.Tree', {
     ,hideToolbar: true
     ,stateful: true
     ,stateId: 'btree' //browser tree
-    ,stateEvents: ['itemexpand', 'itemcollapse', 'beforedestroy', 'selectionchange', 'savestate']
+    ,stateEvents: [
+        'itemexpand'
+        ,'itemcollapse'
+        ,'beforedestroy'
+        ,'selectionchange'
+        ,'savestate'
+    ]
 
     ,initComponent: function(){
         if(Ext.isEmpty(this.data)) {
@@ -632,6 +638,7 @@ Ext.define('CB.browser.Tree', {
 
     ,onShowFoldersChildsClick: function(b, e){
         this.showFoldersContent = !b.checked;
+
         this.fireEvent('savestate');
 
         this.store.reload({
@@ -683,8 +690,19 @@ Ext.define('CB.browser.Tree', {
     }
 
     ,restoreTreeState: function() {
-        var state = Ext.state.Manager.getProvider().get(this.stateId);
-        this.applyState(state);
+        var state = this.deferredState
+            ? this.deferredState
+            : Ext.state.Manager.getProvider().get(this.stateId);
+
+        //check if nodeContainer ready
+        if(this.getView().getNodeContainer()) {
+            this.applyState(state);
+            delete this.deferredState;
+        } else {
+            //delay by one sec
+            this.deferredState = state;
+            Ext.Function.defer(this.restoreTreeState, 1000, this);
+        }
     }
 
     ,applyState: function (state) {

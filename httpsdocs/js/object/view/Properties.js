@@ -79,6 +79,11 @@ Ext.define('CB.object.view.Properties', {
         );
     }
 
+    ,onLoadData: function(r, e) {
+        this.update('');
+        this.callParent(arguments);
+    }
+
     ,clear: function(){
         this.callParent(arguments);
         this.update('<div class="x-preview-mask">Select an item for preview</div>');

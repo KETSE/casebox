@@ -69,7 +69,7 @@ Ext.define('CB.ViewPort', {
             ,items: [ {
                     xtype: 'panel'
                     ,border: false
-                    ,style: 'border-bottom: 1px solid #99bce8'
+                    ,style: 'border-bottom: 1px solid #5f5f5f'
                     ,bodyStyle: 'background: transparent'
                     ,height: 49
                     ,items: [
@@ -239,7 +239,7 @@ Ext.define('CB.ViewPort', {
                 ,itemId: 'togglelr'
                 ,pressed: true
                 ,enableToggle: true
-                ,iconCls: 'im-reorder'
+                ,iconCls: 'im-menu'
                 ,scale: 'large'
                 ,scope: this
                 ,handler: this.toggleLeftRegion
@@ -309,6 +309,41 @@ Ext.define('CB.ViewPort', {
             um.setIcon('/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id));
         }
 
+        // adding available languages to setting menu
+        var langs = [];
+        CB.DB.languages.each(
+            function(r){
+                langs.push({
+                    text: r.get('name')
+                    ,xtype: 'menucheckitem'
+                    ,checked: (r.get('id') == App.loginData.language_id)
+                    ,data:{id: r.get('id')}
+                    ,scope: this
+                    ,handler: this.setUserLanguage
+                    ,group: 'language'
+                });
+            }
+            ,this
+        );
+
+
+        // creating menu config for available themes
+        var themes = [];
+        CB.DB.themes.each(
+            function(r){
+                themes.push({
+                    text: r.get('name')
+                    ,xtype: 'menucheckitem'
+                    ,checked: (r.get('id') == App.loginData.theme)
+                    ,data:{id: r.get('id')}
+                    ,scope: this
+                    ,handler: this.setUserTheme
+                    ,group: 'theme'
+                });
+            }
+            ,this
+        );
+
         um.menu.add(
             {
                 text: L.Account
@@ -319,6 +354,17 @@ Ext.define('CB.ViewPort', {
                         ,id: 'accountWnd'
                     });
                 }
+            }
+            ,'-'
+            ,{
+                text: L.Theme
+                ,menu: themes
+            }
+            ,{
+                text: L.Language
+                ,iconCls: 'icon-language'
+                ,hideOnClick: false
+                ,menu: langs
             }
             ,'-'
             ,{
@@ -369,70 +415,19 @@ Ext.define('CB.ViewPort', {
             );
         }
 
-        // adding available languages to setting menu
-        var langs = [];
-        CB.DB.languages.each(
-            function(r){
-                langs.push({
-                    text: r.get('name')
-                    ,xtype: 'menucheckitem'
-                    ,checked: (r.get('id') == App.loginData.language_id)
-                    ,data:{id: r.get('id')}
-                    ,scope: this
-                    ,handler: this.setUserLanguage
-                    ,group: 'language'
-                });
-            }
-            ,this
-        );
-
-
-        // creating menu config for available themes
-        var themes = [];
-        CB.DB.themes.each(
-            function(r){
-                themes.push({
-                    text: r.get('name')
-                    ,xtype: 'menucheckitem'
-                    ,checked: (r.get('id') == App.loginData.theme)
-                    ,data:{id: r.get('id')}
-                    ,scope: this
-                    ,handler: this.setUserTheme
-                    ,group: 'theme'
-                });
-            }
-            ,this
-        );
-
         if(!Ext.isEmpty(managementItems)) {
-            managementItems.unshift('-');
+            App.mainLBar.insert(
+                App.mainLBar.items.getCount() - 2
+                ,{
+                    qtip: L.Settings
+                    ,iconCls: 'im-settings'
+                    ,arrowVisible: false
+                    ,hideOnClick: false
+                    ,scale: 'large'
+                    ,menu: managementItems
+                }
+            );
         }
-
-        managementItems.unshift({
-            text: L.Theme
-            ,menu: themes
-        });
-
-        managementItems.unshift({
-            text: L.Language
-            ,iconCls: 'icon-language'
-            ,hideOnClick: false
-            ,menu: langs
-        });
-
-
-
-        App.mainLBar.insert(
-            App.mainLBar.items.getCount() - 2
-            ,{
-                qtip: L.Settings
-                ,iconCls: 'im-settings'
-                ,arrowVisible: false
-                ,hideOnClick: false
-                ,scale: 'large'
-                ,menu: managementItems
-            }
-        );
 
         App.mainLBar.doLayout();
 

@@ -23,6 +23,7 @@ Ext.define('CB.plugin.Search.Button', {
             ,scale: 'large'
             ,allowDepress: false
             ,hidden: true
+            ,width: 20
             ,menu: []
             ,scope: owner
             ,handler: this.onButtonClick

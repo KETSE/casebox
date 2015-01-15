@@ -362,10 +362,10 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,updateDeleteAction: function(){
-        canDelete = true;
-        sr = this.aclList.getSelectionModel().getSelection();
+        var canDelete = true
+            ,sr = this.aclList.getSelectionModel().getSelection();
         if(!Ext.isEmpty(sr)){
-            r = sr[0];
+            var r = sr[0];
             canDelete = ( ( r.get('allow').indexOf('2') < 0 ) && ( r.get('deny').indexOf('-2') < 0 ));
         }
         this.actions.del.setDisabled(!canDelete);
@@ -381,29 +381,42 @@ Ext.define('CB.SecurityWindow', {
             ,data: {}
         });
 
-        w.on('setvalue', function(data){
-            if(Ext.isEmpty(data)) return;
-            d = data[0];
-            idx = this.aclStore.findExact('id', parseInt(d.id, 10) );
-            if(idx >= 0 ){
-                this.aclList.select(idx);
-                return;
+        w.on(
+            'setvalue'
+            ,function(data){
+                if(Ext.isEmpty(data)) {
+                    return;
+                }
+
+                var sm = this.aclList.getSelectionModel()
+                    ,d = data[0]
+                    ,rec = this.aclStore.findRecord('id', parseInt(d.id, 10));
+
+                if(rec){
+                    sm.select([rec]);
+                    return;
+                }
+
+                var rd = {
+                    id: d.id
+                    ,name: d.name
+                    ,iconCls: d.iconCls
+                    ,allow: '0,0,0,0,0,0,0,0,0,0,0,0'
+                    ,deny: '0,0,0,0,0,0,0,0,0,0,0,0'
+                };
+
+                this.aclStore.add([
+                    Ext.create(
+                        this.aclStore.getModel().getName()
+                        ,rd
+                    )
+                ]);
+
+                this.aclStore.save();
+                sm.select(this.aclStore.getCount()-1);
             }
-            rd = {  id: d.id
-                ,name: d.name
-                ,iconCls: d.iconCls
-                ,allow: '0,0,0,0,0,0,0,0,0,0,0,0'
-                ,deny: '0,0,0,0,0,0,0,0,0,0,0,0'
-            };
-            this.aclStore.add([
-                Ext.create(
-                    this.aclStore.getModel().getName()
-                    ,rd
-                )
-            ]);
-            this.aclStore.save();
-            this.aclList.select(this.aclStore.getCount()-1);
-        }, this);
+            ,this
+        );
         w.show();
     }
 

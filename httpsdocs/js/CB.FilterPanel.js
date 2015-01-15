@@ -18,8 +18,14 @@ Ext.define('CB.FilterPanel', {
                 ,itemclick: this.onActiveFiltersItemClick
             }
         });
+
         Ext.apply(this, {
             items: [this.activeFileterFacet]
+            ,layout: {
+                type: 'vbox'
+                ,align: 'stretch'
+            }
+
             ,listeners:{
                 scope: this
                 ,facetchange: this.onFacetChange

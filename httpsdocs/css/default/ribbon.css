@@ -9,9 +9,10 @@
 .x-btn-over.x-btn-default-toolbar-medium,
 .x-btn-over.x-btn-default-toolbar-large,
 .x-btn-over.x-btn-default-large,
+.x-btn.x-btn-menu-active.x-btn-default-toolbar-large,
 .x-btn.x-btn-pressed.x-btn-default-large {
     background-image: none;
-    border-color: #2f2f2f;
+    /*border-color: #2f2f2f;*/
 }
 /* end of buttons general changes */
 
@@ -20,12 +21,23 @@
 }
 
 .ribbon-black .x-btn.x-btn-default-large,
-.ribbon-black .x-btn.x-btn-pressed.x-btn-default-large{
+.ribbon-black .x-btn.x-btn-pressed.x-btn-default-large {
     background-image: none;
     background-color: transparent;
     border-color: transparent;
 }
-.ribbon-black .x-btn.x-btn-over.x-btn-default-large{
+
+.ribbon-black .x-btn.x-btn-pressed.x-btn-default-toolbar-large {
+    background-color: #5f5f5f;
+    border-color: #5f5f5f;
+}
+
+.ribbon-black .x-btn-over.x-btn-default-toolbar-medium,
+.ribbon-black .x-btn-over.x-btn-default-toolbar-large,
+.ribbon-black .x-btn-over.x-btn-default-large,
+.ribbon-black .x-btn.x-btn-menu-active.x-btn-default-toolbar-large,
+.ribbon-black .x-btn.x-btn-over.x-btn-default-large,
+.ribbon-black .x-btn.x-btn-pressed.x-btn-default-large {
     background-color: #2f2f2f;
     border-color: #2f2f2f;
 }

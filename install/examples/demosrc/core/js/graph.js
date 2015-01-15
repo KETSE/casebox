@@ -1,40 +1,76 @@
 Ext.namespace('Demosrc.view');
 
-Demosrc.view.Graph = Ext.extend(CB.browser.view.Interface,{
-    title: L.Graph
+Ext.define('Demosrc.view.Graph', {
+    extend: 'CB.browser.view.Interface'
+
+    ,xtype: 'DemosrcViewGraph'
+
+    ,title: L.Graph
     ,hideBorders: true
     ,iconCls: 'icon-graph'
     ,padding: 0
     ,autoScroll: true
+
     ,initComponent: function(){
 
         Ext.apply(this,{
             html: '...'
             ,listeners: {
                 scope: this
-                ,afterrender: this.onAfterRender
+                ,activate: this.onActivate
             }
         });
 
-        Demosrc.view.Graph.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
-        this.addEvents('selectionchange');
+        this.owner.buttonCollection.addAll([
+            new Ext.Button({
+                text: L.Download
+                ,itemId: 'graphdownload'
+                ,scale: 'medium'
+                ,iconCls: 'im-download'
+                ,scope: this
+                ,handler: this.onDownloadClick
+            }),
+            new Ext.Button({
+                text: L.showNames
+                ,itemId: 'graphshowlabels'
+                ,enableToggle: true
+                // ,pressed: this.params.titles
+                ,scope: this
+                ,handler: this.onShowNamesClick
+            })
+        ]);
+
         this.enableBubble(['selectionchange']);
-
     }
+
+    ,onActivate: function() {
+        this.fireEvent(
+            'settoolbaritems'
+            ,[
+                'graphdownload'
+                ,'graphshowlabels'
+                ,'->'
+                ,'reload'
+                ,'apps'
+                ,'-'
+                ,'more'
+            ]
+        );
+    }
+
     ,getViewParams: function(loadingParams) {
         this.params = Ext.apply({}, loadingParams);
         this.reload();
         return false;
     }
-    ,onAfterRender: function(){
-        // this.params.caseId = this.data.caseId
-        // this.reload();
-    }
+
     ,reload: function(){
         this.getEl().mask(L.Processing, 'x-mask-loading');
         Demosrc_Graph.load(this.params, this.onGraphLoad, this);
     }
+
     ,onGraphLoad: function(r, e){
         this.getEl().unmask();
         if(r.success !== true) {
@@ -47,19 +83,27 @@ Demosrc.view.Graph = Ext.extend(CB.browser.view.Interface,{
         this.attachClickEvents();
 
     }
+
     ,onDownloadClick: function(b, e){
-        // window.open('/get.php?graph='+this.params.caseId+'&d=1' + (this.params.titles ? '&titles=1' :''), 'downloadgraph');
+        window.open('/' + App.config.coreName + '/get.php?graph='+this.params.id+'&d=1' + (this.params.titles ? '&titles=1' :''), 'downloadgraph');
     }
+
+    ,onShowNamesClick: function(b, e){
+        this.params.titles = b.pressed;
+        this.reload();
+    }
+
     ,attachClickEvents: function(){
-        a = this.getEl().query('a');
+        var a = this.getEl().query('a');
         for (var i = 0; i < a.length; i++) {
-         el = Ext.get(a[i]);
-         el.un('click', this.onLinkClick, this);
-         el.on('click', this.onLinkClick, this);
+            var el = Ext.get(a[i]);
+            el.un('click', this.onLinkClick, this);
+            el.on('click', this.onLinkClick, this);
         }
     }
+
     ,onLinkClick: function(e, el, o){
-        ael = e.getTarget('a');
+        var ael = e.getTarget('a');
         if(ael && ael.href && ael.href.baseVal){
             this.clickedObjectId = String(ael.href.baseVal).substr(1);
             /* locate object */
@@ -74,5 +118,3 @@ Demosrc.view.Graph = Ext.extend(CB.browser.view.Interface,{
         }
     }
 });
-
-Ext.reg('DemosrcViewGraph', Demosrc.view.Graph);

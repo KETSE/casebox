@@ -589,6 +589,7 @@ a.user-f { background-image: url(i/ico/user-small-female.png); background-positi
 
  span.grid-btn{ display: inline-block; width: 16px; height: 16px; margin: 0 1px; cursor: hand; cursor: pointer }
 .icon-graph{ background-image: url(i/graph.png); background-position: 0 0; background-repeat: no-repeat;}
+.icon-graph24{ background-image: url(i/graph24.png); background-position: 0 0; background-repeat: no-repeat; min-width: 35px;}
 .icon-graph32{ background-image: url(i/graph32.png); background-position: 0 0; background-repeat: no-repeat; min-width: 35px;}
 .icon-graphviz{ background-image: url(i/graphviz.png); background-position: 0 0; background-repeat: no-repeat;}
 .icon-sitemap-image{ background-image: url(i/ico/sitemap-image.png); background-position: 0 0; background-repeat: no-repeat;}

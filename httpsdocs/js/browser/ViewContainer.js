@@ -525,12 +525,14 @@ Ext.define('CB.browser.ViewContainer', {
 
         buttonsArray.splice(1, 0, 'restore');
 
-        //add plugin buttons if defined
+        //add plugin buttons if defined right after spacer
+        var idx = buttonsArray.indexOf('->');
         if(!Ext.isEmpty(this.pluginButtons)) {
-            buttonsArray.push('->');
             for (i = 0; i < this.pluginButtons.length; i++) {
-                buttonsArray.push(this.pluginButtons[i]);
+                buttonsArray.splice(++idx, 0, this.pluginButtons[i]);
             }
+            //add a divider
+            buttonsArray.splice(++idx, 0, '-');
         }
 
         for (i = 0; i < buttonsArray.length; i++) {
