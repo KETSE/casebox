@@ -10,7 +10,6 @@ class AllowedSharingModesTest extends \PHPUnit_Framework_TestCase {
     function testSimple() {
 
         $sccs = new AllowedSharingModes(true,true);
-        $this->assertInstanceOf('Sabre\CalDAV\Property\AllowedSharingModes', $sccs);
 
     }
 

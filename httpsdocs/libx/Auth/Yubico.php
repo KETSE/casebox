@@ -400,7 +400,7 @@ class Auth_Yubico
                     if (preg_match("/status=([a-zA-Z0-9_]+)/", $str, $out)) {
                         $status = $out[1];
 
-                        /*
+                                                /*
                         * There are 3 cases.
                         *
                         * 1. OTP or Nonce values doesn't match - ignore

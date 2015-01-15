@@ -1,7 +1,8 @@
 Ext.namespace('CB');
 
-CB.Login = Ext.extend(Ext.Window, {
-    title: L.Authorization
+Ext.define('CB.Login', {
+    extend: 'Ext.Window'
+    ,title: L.Authorization
     ,plain: true
     ,closable: false
     ,iconCls: 'icon-key'
@@ -14,6 +15,7 @@ CB.Login = Ext.extend(Ext.Window, {
     ,border: false
     ,resizable: false
     ,buttonAlign: 'center'
+
     ,initComponent: function() {
         Ext.apply(this,{
             items : [{
@@ -61,22 +63,31 @@ CB.Login = Ext.extend(Ext.Window, {
         this.on('afterrender', this.doShow);
         CB.Login.superclass.initComponent.apply(this, arguments);
     }
+
     ,doShow: function(w) {
-        lku = Ext.util.Cookies.get('lastUser');
-        user = w.find('name', 'username')[0];
-        pass = w.find('name', 'password')[0];
+        var lku = Ext.util.Cookies.get('lastUser');
+        var user = w.down('[name="username"]');
+        var pass = w.down('[name="password"]');
+
         user.setValue(lku);
         pass.reset();
-        if(Ext.isEmpty(lku)) user.focus(true, 550); else pass.focus(true, 550);
+
+        if(Ext.isEmpty(lku)) {
+            user.focus(true, 550);
+        } else {
+            pass.focus(true, 550);
+        }
     }
+
     ,doLogin: function(){
-        user = this.find('name', 'username')[0];
-        pass = this.find('name', 'password')[0];
+        user = this.child('[name="username"]');
+        pass = this.child('[name="password"]');
         if(!user.isValid() || !pass.isValid()) return false;
         //Ext.util.Cookies.set('lastUser', user.getValue());
 
         CB_User.login(user.getValue(), pass.getValue(), this.processLoginResponse);
     }
+
     ,processLoginResponse: function(response, e){
         lw = Ext.getCmp('CBLoginWindow');
         if(e.result.success === true){
@@ -85,19 +96,19 @@ CB.Login = Ext.extend(Ext.Window, {
             App.loginData = response.user;
             lw.close();
         }else{
-            ip = lw.find('name', 'infoPanel')[0];
+            ip = lw.child('[name="infoPanel"]');
             ip.body.update(response.msg);
         }
      }
 
 });
 
-Ext.reg('CBLogin', CB.Login); // register xtype
 
-CB.VerifyPassword = Ext.extend(Ext.Window, {
-    title: L.Verify
+Ext.define('CB.VerifyPassword', {
+    extend: 'Ext.Window'
+
+    ,title: L.Verify
     ,plain: true
-    // ,closable: false
     ,iconCls: 'icon-key'
     ,modal: true
     ,frame: true
@@ -107,6 +118,7 @@ CB.VerifyPassword = Ext.extend(Ext.Window, {
     ,border: false
     ,resizable: false
     ,buttonAlign: 'center'
+
     ,initComponent: function() {
         Ext.apply(this,{
             items : [{
@@ -117,8 +129,8 @@ CB.VerifyPassword = Ext.extend(Ext.Window, {
                 ,items: [{
                     xtype: 'fieldset'
                     ,border: false
-                    ,defaults:{ width: 150 }
-                    ,padding: 0
+                    ,defaults: {anchor: '100%'}
+                    ,layout: 'anchor'
                     ,defaultType: 'textfield'
                     ,labelAlign: 'left'
                     ,bodyStyle: 'padding: 10px 5px 0 5px'
@@ -131,11 +143,18 @@ CB.VerifyPassword = Ext.extend(Ext.Window, {
                             name: 'password'
                             ,fieldLabel: L.Password
                             ,inputType: 'password'
+                            ,enableKeyEvents: true
+                            ,keys: [{key: 13, fn: this.doVerify, scope: this}]
+                            ,listeners: {
+                                afterrender: function() {
+                                    this.focus();
+                                }
+                            }
                         }
                     ]
                 },{
                     border: false
-                    ,cls: 'taC fwB cR'
+                    ,bodyCls: 'taC fwB cR'
                     ,html:'&nbsp;'
                     ,name: 'infoPanel'
                     ,xtype: 'panel'
@@ -143,35 +162,58 @@ CB.VerifyPassword = Ext.extend(Ext.Window, {
                     ,bodyStyle: 'padding:5px'
                 }
                 ]
-                ,buttons: [{text: L.Verify, handler: this.doVerify, scope: this, formBind: true} ]
+                ,buttons: [{
+                    text: L.Verify
+                    ,handler: this.doVerify
+                    ,scope: this
+                    ,formBind: true
+                }]
             }
             ]
-            ,keys: [{key: 13, fn: this.doVerify, scope: this}]
+
+            ,listeners: {
+                scope: this
+                ,afterrender: function() {
+                    var nav = Ext.create('Ext.util.KeyNav', this.getEl(), {
+                        scope: this,
+                        enter: this.doVerify
+                    });
+
+                }
+            }
         });
-        this.on('afterrender', this.doShow, this);
+
+        this.on('show', this.doShow, this);
+
         CB.VerifyPassword.superclass.initComponent.apply(this, arguments);
     }
+
     ,doShow: function(w) {
-        pass = this.find('name', 'password')[0];
+        var pass = this.down('[name="password"]');
         pass.reset();
-        pass.focus(true, 550);
+        // pass.focus(true, 1850);
     }
+
     ,doVerify: function(){
-        pass = this.find('name', 'password')[0];
-        if(!pass.isValid()) return false;
+        var pass = this.down('[name="password"]');
+
+        if(!pass.isValid()) {
+            return false;
+        }
 
         CB_User.verifyPassword( pass.getValue(), this.processVerifyResponse, this);
     }
+
     ,processVerifyResponse: function(response, e){
         if(e.result.success === true){
             this.success = true;
             this.close();
         } else {
-            ip = this.find('name', 'infoPanel')[0];
+            ip = this.down('[name="infoPanel"]');
             ip.show();
             ip.body.update(response.msg);
-            this.syncSize();
-            pass = this.find('name', 'password')[0];
+            // this.syncSize();
+            pass = this.down('[name="password"]');
             pass.reset();
             pass.focus(true, 550);
         }

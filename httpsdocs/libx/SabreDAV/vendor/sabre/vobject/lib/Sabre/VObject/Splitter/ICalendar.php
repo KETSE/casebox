@@ -2,9 +2,7 @@
 
 namespace Sabre\VObject\Splitter;
 
-use
-    Sabre\VObject,
-    Sabre\VObject\Component\VCalendar;
+use Sabre\VObject;
 
 /**
  * Splitter
@@ -15,10 +13,10 @@ use
  * calendar-objects inside. Objects with identical UID's will be combined into
  * a single object.
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
  * @author Dominik Tobschall
  * @author Armin Hackmann
- * @license http://sabre.io/license/ Modified BSD License
+ * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
 class ICalendar implements SplitterInterface {
 
@@ -42,15 +40,14 @@ class ICalendar implements SplitterInterface {
      * The splitter should receive an readable file stream as it's input.
      *
      * @param resource $input
-     * @param int $options Parser options, see the OPTIONS constants.
      */
-    public function __construct($input, $options = 0) {
+    public function __construct($input) {
 
-        $data = VObject\Reader::read($input, $options);
+        $data = VObject\Reader::read(stream_get_contents($input));
         $vtimezones = array();
         $components = array();
 
-        foreach($data->children() as $component) {
+        foreach($data->children as $component) {
             if (!$component instanceof VObject\Component) {
                 continue;
             }
@@ -62,14 +59,16 @@ class ICalendar implements SplitterInterface {
             }
 
             // Get component UID for recurring Events search
-            if(!$component->UID) {
-                $component->UID = sha1(microtime()) . '-vobjectimport';
+            if($component->UID) {
+                $uid = (string)$component->UID;
+            } else {
+                // Generating a random UID
+                $uid = sha1(microtime()) . '-vobjectimport';
             }
-            $uid = (string)$component->UID;
 
             // Take care of recurring events
             if (!array_key_exists($uid, $this->objects)) {
-                $this->objects[$uid] = new VCalendar();
+                $this->objects[$uid] = VObject\Component::create('VCALENDAR');
             }
 
             $this->objects[$uid]->add(clone $component);
@@ -107,6 +106,6 @@ class ICalendar implements SplitterInterface {
 
         }
 
-    }
+   }
 
 }

@@ -9,12 +9,10 @@ require_once 'Sabre/DAV/AbstractServer.php';
 
 class PluginTest extends DAV\AbstractServer{
 
-    protected $plugin;
-
     function setUp() {
 
         parent::setUp();
-        $this->server->addPlugin($this->plugin = new Plugin());
+        $this->server->addPlugin(new Plugin());
 
     }
 
@@ -25,54 +23,34 @@ class PluginTest extends DAV\AbstractServer{
             'REQUEST_METHOD' => 'GET',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
-        $this->assertEquals(200, $this->response->status, "Incorrect status received. Full response body: " . $this->response->getBodyAsString());
+        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
         $this->assertEquals(array(
             'Content-Type' => 'text/html; charset=utf-8',
-            'Content-Security-Policy' => "img-src 'self'; style-src 'self';"
             ),
             $this->response->headers
         );
 
-        $this->assertTrue(strpos($this->response->body, '<title>dir/') !== false);
-        $this->assertTrue(strpos($this->response->body, '<a href="/dir/child.txt">')!==false);
+        $this->assertTrue(strpos($this->response->body, 'Index for dir/') !== false);
+        $this->assertTrue(strpos($this->response->body, '<a href="/dir/child.txt"><img src="/?sabreAction=asset&assetName=icons%2Ffile.png" alt="" width="24" />')!==false);
 
     }
-    function testCollectionGetRoot() {
+
+    function testNotFound() {
 
         $serverVars = array(
-            'REQUEST_URI'    => '/',
+            'REQUEST_URI'    => '/random',
             'REQUEST_METHOD' => 'GET',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
-        $this->assertEquals(200, $this->response->status, "Incorrect status received. Full response body: " . $this->response->getBodyAsString());
-        $this->assertEquals(array(
-            'Content-Type' => 'text/html; charset=utf-8',
-            'Content-Security-Policy' => "img-src 'self'; style-src 'self';"
-            ),
-            $this->response->headers
-        );
-
-        $this->assertTrue(strpos($this->response->body, '<title>/') !== false);
-        $this->assertTrue(strpos($this->response->body, '<a href="/dir/">')!==false);
-        $this->assertTrue(strpos($this->response->body, '<span class="btn disabled">')!==false);
-
-    }
-
-    function testGETPassthru() {
-
-        $request = new HTTP\Request('GET', '/random');
-        $response = new HTTP\Response();
-        $this->assertNull(
-            $this->plugin->httpGet($request, $response)
-        );
+        $this->assertEquals('HTTP/1.1 404 Not Found',$this->response->status);
 
     }
 
@@ -83,11 +61,11 @@ class PluginTest extends DAV\AbstractServer{
             'REQUEST_METHOD' => 'POST',
             'CONTENT_TYPE' => 'text/xml',
         );
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = $request;
         $this->server->exec();
 
-        $this->assertEquals(501, $this->response->status);
+        $this->assertEquals('HTTP/1.1 501 Not Implemented', $this->response->status);
 
     }
 
@@ -100,11 +78,11 @@ class PluginTest extends DAV\AbstractServer{
         );
         $postVars = array();
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars,$postVars);
+        $request = new HTTP\Request($serverVars,$postVars);
         $this->server->httpRequest = $request;
         $this->server->exec();
 
-        $this->assertEquals(501, $this->response->status);
+        $this->assertEquals('HTTP/1.1 501 Not Implemented', $this->response->status);
 
     }
 
@@ -120,12 +98,11 @@ class PluginTest extends DAV\AbstractServer{
             'name' => 'new_collection',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
-        $request->setPostData($postVars);
+        $request = new HTTP\Request($serverVars,$postVars);
         $this->server->httpRequest = $request;
         $this->server->exec();
 
-        $this->assertEquals(302, $this->response->status);
+        $this->assertEquals('HTTP/1.1 302 Found', $this->response->status);
         $this->assertEquals(array(
             'Location' => '/',
         ), $this->response->headers);
@@ -134,28 +111,4 @@ class PluginTest extends DAV\AbstractServer{
 
     }
 
-    function testGetAsset() {
-
-        $request = new HTTP\Request('GET', '/?sabreAction=asset&assetName=favicon.ico');
-        $this->server->httpRequest = $request;
-        $this->server->exec();
-
-        $this->assertEquals(200, $this->response->getStatus(), 'Error: ' . $this->response->body);
-        $this->assertEquals([
-            'Content-Type' => 'image/vnd.microsoft.icon',
-            'Content-Length' => '4286',
-            'Cache-Control' => 'public, max-age=1209600',
-        ], $this->response->getHeaders());
-
-    }
-
-    function testGetAsset404() {
-
-        $request = new HTTP\Request('GET', '/?sabreAction=asset&assetName=flavicon.ico');
-        $this->server->httpRequest = $request;
-        $this->server->exec();
-
-        $this->assertEquals(404, $this->response->getStatus(), 'Error: ' . $this->response->body);
-
-    }
 }

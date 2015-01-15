@@ -88,6 +88,8 @@ $API = array_merge(
                 ,'getAssociatedObjects' =>  array('len'=>1)
                 ,'getPluginsData'       =>  array('len'=>1)
                 ,'addComment'           =>  array('len'=>1)
+                ,'updateComment'        =>  array('len'=>1)
+                ,'removeComment'        =>  array('len'=>1)
             )
         )
 
@@ -98,7 +100,6 @@ $API = array_merge(
                 ,'saveContent'          =>  array('len'=>1)
                 ,'restoreVersion'       =>  array('len'=>1)
                 ,'deleteVersion'        =>  array('len'=>1)
-                ,'merge'                =>  array('len'=>1)
                 ,'getDuplicates'        =>  array('len'=>1)
                 ,'checkExistentContents'=>  array('len'=>1)
                 ,'saveProperties'       =>  array('len'=>1)
@@ -118,6 +119,7 @@ $API = array_merge(
                 ,'login'              => array('len' => 2)
                 ,'logout'             => array('len' => 0)
                 ,'setLanguage'        => array('len' => 1)
+                ,'setTheme'           => array('len' => 1)
                 ,'uploadPhoto'        => array('len' => 1, 'formHandler' => true)
                 ,'removePhoto'        => array('len' => 1)
                 ,'getAccountData'     => array('len' => 0)
@@ -144,6 +146,7 @@ $API = array_merge(
                 ,'changePassword'       => array('len' => 1, 'formHandler' => true)
                 ,'renameUser'           => array('len' => 1)
                 ,'renameGroup'          => array('len' => 1)
+                ,'disableTSV'           => array('len' => 1)
             )
         )
 

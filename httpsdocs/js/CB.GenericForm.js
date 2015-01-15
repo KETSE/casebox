@@ -5,33 +5,39 @@ Ext.namespace('CB');
     unlockEdit should call doClose or destroy the form at the end of unlock process
 
 */
-CB.GenericForm = Ext.extend(Ext.FormPanel, {
-    autoScroll: false
+Ext.define('CB.GenericForm', {
+    extend: 'Ext.FormPanel'
+    ,autoScroll: false
     ,closable: true
     ,border: false
     ,bodyStyle: 'padding: 10px'
     ,title: 'Generic window'
     ,monitorValid: true
     ,data: {}
+
     ,initComponent: function(){
-        CB.GenericForm.superclass.initComponent.apply(  this, arguments );
-        this.addEvents('savesuccess', 'savefail', 'change');
+        this.callParent(arguments);
+
         this.enableBubble('savesuccess');
 
         this.on('beforeclose', this.onBeforeClose, this);
         this.on('afterrender', this.loadData, this);
         this.on('change', this.setDirty, this);
     }
+
     ,setDirty: function(isDirty){
         this._isDirty = (isDirty !== false);
     }
+
     ,_lockEdit: function(){
         if(this.lockEdit) return this.lockEdit();
     }
+
     ,_unlockEdit: function(){
         if(this.unlockEdit) return this.unlockEdit();
         this.doClose();
     }
+
     ,onBeforeClose: function(){
         if(this._confirmedClosing || !this._isDirty){
             this.getEl().mask(L.Closing + ' ...', 'x-mask-loading');
@@ -59,10 +65,13 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
         });
         return false;
     }
+
     ,doClose: function(){
-        this.suspendEvents(false);
-        this.destroy();
+        // this.clearListeners();
+        // this.suspendEvents(false);
+        Ext.destroy(this);
     }
+
     ,loadData: function(){
         if(isNaN(this.data.id)){
             this.data.id = Ext.isEmpty(this.data.id) ? Ext.id(): this.data.id;
@@ -71,15 +80,17 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
             this.getEl().unmask();
             return;
         }
+
         this.getForm().load({
             params: {
                 id: this.data.id
             }
             ,scope: this
             ,success: this.processLoadResponse
-            ,failure: this.processLoadResponse.createDelegate(this)
+            ,failure: this.processLoadResponse.bind(this)
         });
     }
+
     ,getTitle: function(){
         var rez = '<'+L.noName+'>';
         if(!Ext.isEmpty(this.data.name)) {
@@ -90,10 +101,11 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 
         return Ext.util.Format.htmlEncode(rez);
     }
+
     ,updateFormTitle: function(){
         var t = '';
         if(this.data && !Ext.isEmpty(this.data.date_start)) {
-            t = Date.parseDate(this.data.date_start.substr(0, 10), 'Y-m-d').format(App.dateFormat) + '. ';
+            t = Ext.Date.format(Date.parse(this.data.date_start.substr(0, 10), 'Y-m-d'), App.dateFormat) + '. ';
         }
         t += this.data.new_title
             ? Ext.util.Format.htmlEncode(this.data.new_title)
@@ -101,7 +113,7 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
 
         this.setTitle(App.shortenString(t, 35));
 
-        var i = Ext.value(this.data.iconCls, Ext.value(this.iconCls, ''));
+        var i = Ext.valueFrom(this.data.iconCls, Ext.valueFrom(this.iconCls, ''));
         if(i == 'icon-loading') {
             i = '';
         }
@@ -109,10 +121,11 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
             i = this.getIconClass();
         }
 
-        this.setIconClass( i );
+        this.setIconCls(i);
     }
 
     ,getIconClass: Ext.emptyFn // this function should be redefined for child classes to return a corresponding icon for the window
+
     ,processLoadResponse: function(f, e){
         this.getEl().unmask();
         r = e.result;
@@ -121,7 +134,7 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
                 this.doClose();
                 return;
             }
-            Ext.Msg.confirm( L.Error, Ext.value(e.msg, L.readDataErrorMessage), function(b){ if(b == 'yes') this.loadData(); else this.doClose(); }, this );
+            Ext.Msg.confirm( L.Error, Ext.valueFrom(e.msg, L.readDataErrorMessage), function(b){ if(b == 'yes') this.loadData(); else this.doClose(); }, this );
             return;
         }
         if(!Ext.isDefined(r.data)) return;
@@ -142,14 +155,17 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
         }
         this._setFormValues();
     }
+
     ,_setFormValues: function(){
         this.updateFormTitle();
         if(this.setFormValues) this.setFormValues();
         this.setDirty(false);
     }
+
     ,_getFormValues: function(){
         if(this.getFormValues) this.getFormValues();
     }
+
     ,saveForm: function(){
         if(!this.getForm().isValid()) return ;
         this.getEl().mask(L.SavingChanges + ' ...', 'x-mask-loading');
@@ -166,6 +182,7 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
             ,failure: this.onSaveFailure
         });
     }
+
     ,onSaveSuccess: function(f, a){
         if(Ext.isDefined(a.result.data)) this.data = a.result.data;
         if(this.onFormLoaded) this.onFormLoaded(f, a);
@@ -175,6 +192,7 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
         if(this._confirmedClosing) return this.doClose();
         this.getEl().unmask();
     }
+
     ,onSaveFailure: function(form, action){
         this.getEl().unmask();
         if(Ext.isDefined(action.result.already_opened_by)){
@@ -201,5 +219,3 @@ CB.GenericForm = Ext.extend(Ext.FormPanel, {
         }
     }
 });
-
-Ext.reg('CBGenericForm', CB.GenericForm);

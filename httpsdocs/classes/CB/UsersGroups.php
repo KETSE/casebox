@@ -82,6 +82,7 @@ class UsersGroups
             while ($r = $res->fetch_assoc()) {
                 $r['iconCls'] = 'icon-users';
                 $r['expanded'] = true;
+                $r['loaded'] = empty($r['loaded']);
 
                 $rez[] = $r;
             }
@@ -171,6 +172,8 @@ class UsersGroups
 
         Security::calculateUpdatedSecuritySets();
 
+        Solr\Client::runBackgroundCron();
+
         return array('success' => true);
     }
 
@@ -195,6 +198,8 @@ class UsersGroups
         ) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
+
+        Solr\Client::runBackgroundCron();
 
         //return if the user is associated to another office,
         //otherwise it shoul be added to Users out of office folder
@@ -349,6 +354,7 @@ class UsersGroups
         }
 
         Security::calculateUpdatedSecuritySets();
+
         Solr\Client::runBackgroundCron();
 
         return $rez;
@@ -401,6 +407,8 @@ class UsersGroups
         /* call the recalculation method for security sets. */
         Security::calculateUpdatedSecuritySets();
 
+        Solr\Client::runBackgroundCron();
+
         return array('success' => true);
     }
 
@@ -440,7 +448,6 @@ class UsersGroups
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             $r['title'] = User::getDisplayName($r);
-
             $r['data'] = Util\toJSONArray($r['data']);
 
             $rez = array('success' => true, 'data' => $r);
@@ -482,6 +489,12 @@ class UsersGroups
             $rez['data']['groups'][] = $r['group_id'];
         }
         $res->close();
+
+        //set tsv status
+        $tsv = User::getTSVConfig($user_id);
+        $rez['data']['tsv'] = empty($tsv['method'])
+            ? 'none'
+            : L\get('TSV_' . $tsv['method']);
 
         return $rez;
     }
@@ -539,6 +552,8 @@ class UsersGroups
         }
 
         Security::calculateUpdatedSecuritySets();
+
+        Solr\Client::runBackgroundCron();
 
         return array('success' => true);
     }
@@ -623,6 +638,23 @@ class UsersGroups
         Session::clearUserSessions($user_id);
 
         return array('success' => true);
+    }
+
+    public function disableTSV($userId)
+    {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
+        if (is_nan($userId)) {
+            throw new \Exception(L\get('Wrong_input_data'));
+        }
+
+        if (!Security::canEditUser($userId)) {
+            throw new \Exception(L\get('Access_denied'));
+        }
+
+        return User::disableTSV($userId);
     }
 
     /**

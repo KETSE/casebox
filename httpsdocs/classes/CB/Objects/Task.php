@@ -32,22 +32,11 @@ class Task extends Object
     {
         parent::createCustomData();
 
+        $d = &$this->data;
+
         /* saving template data to templates and templates_structure tables */
-        @$allday = $this->getFieldValue('allday', 0)['value'];
-
-        if (is_null($allday) || !is_numeric($allday)) {
-            $allday = 1;
-        }
-
-        @$dateStart = ($allday == 1)
-            ? $this->getFieldValue('date_start', 0)['value']
-            : $this->getFieldValue('datetime_start', 0)['value'];
-        @$dateEnd = ($allday == 1)
-            ? $this->getFieldValue('date_end', 0)['value']
-            : $this->getFieldValue('datetime_end', 0)['value'];
-
-        $dateStart = empty($dateStart) ? null : Util\dateISOToMysql($dateStart);
-        $dateEnd = empty($dateEnd) ? null : Util\dateISOToMysql($dateEnd);
+        $dateStart = empty($d['date']) ? null : Util\dateISOToMysql($d['date']);
+        $dateEnd = empty($d['date_end']) ? null : Util\dateISOToMysql($d['date_end']);
 
         $status = 2; // active
         if (!empty($dateEnd)) {
@@ -60,11 +49,9 @@ class Task extends Object
         @$params = array(
             $this->id
             ,$this->getFieldValue('_title', 0)['value'].''
-            ,$allday
+            ,$this->getFieldValue('allday', 0)['value'].''
             ,$dateStart
             ,$dateEnd
-            ,$this->getFieldValue('importance', 0)['value']
-            ,$this->getFieldValue('category', 0)['value']
             ,$this->getFieldValue('assigned', 0)['value'].''
             ,$this->getFieldValue('description', 0)['value']
             ,$status
@@ -72,9 +59,17 @@ class Task extends Object
         );
 
         DB\dbQuery(
-            'INSERT into tasks
-            (id, title, allday, date_start, date_end, importance, category_id, responsible_user_ids, description, status, cid)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11)',
+            'INSERT INTO tasks (
+                id
+                ,title
+                ,allday
+                ,date_start
+                ,date_end
+                ,responsible_user_ids
+                ,description
+                ,status
+                ,cid
+            ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)',
             $params
         ) or die(DB\dbQueryError());
 
@@ -132,13 +127,11 @@ class Task extends Object
                 ,t.date_start
                 ,t.date_end
                 ,t.allday
-                ,t.importance
-                ,t.category_id
                 ,t.responsible_user_ids `assigned`
                 ,t.description
                 ,t.status
                 ,(SELECT reminds FROM tasks_reminders WHERE task_id = $1 AND user_id = $2) reminds
-                ,DATE_FORMAT(t.completed, \'%Y-%m-%dT%H:%i:%sZ\') `completed`
+                ,DATE_FORMAT(t.completed, \'%Y-%m-%dT%H:%i:%sZ\') `task_d_closed`
             FROM tasks t
             WHERE t.id = $1',
             array(
@@ -154,23 +147,27 @@ class Task extends Object
             if (!empty($r['user_status'])) {
                 $d['user_status'] = $r['user_status'];
             }
-            if (!empty($r['completed'])) {
-                $d['completed'] = $r['completed'];
+            if (!empty($r['task_d_closed'])) {
+                $d['task_d_closed'] = $r['task_d_closed'];
             }
             unset($r['status']);
             unset($r['user_status']);
-            unset($r['completed']);
+            unset($r['task_d_closed']);
 
-            $r['allday'] = array(
-                'value' => $r['allday']
-            );
-            if ($r['allday']['value'] == 1) {
-                $r['allday']['childs']['date_start'] = Util\dateMysqlToISO($r['date_start']);
-                $r['allday']['childs']['date_end'] = Util\dateMysqlToISO($r['date_end']);
-            } else {
-                $r['allday']['childs']['datetime_start'] = Util\dateMysqlToISO($r['date_start']);
-                $r['allday']['childs']['datetime_end'] = Util\dateMysqlToISO($r['date_end']);
+            if (empty($d['data']['allday'])) {
+                $r['allday'] = array(
+                    'value' => $r['allday']
+                );
+                if ($r['allday']['value'] == 1) {
+                    $r['allday']['childs']['date_start'] = Util\dateMysqlToISO($r['date_start']);
+                    $r['allday']['childs']['date_end'] = Util\dateMysqlToISO($r['date_end']);
+                } else {
+                    $r['allday']['childs']['datetime_start'] = Util\dateMysqlToISO($r['date_start']);
+                    $r['allday']['childs']['datetime_end'] = Util\dateMysqlToISO($r['date_end']);
+                }
             }
+
+            unset($r['allday']);
             unset($r['date_start']);
             unset($r['date_end']);
 
@@ -221,23 +218,18 @@ class Task extends Object
     {
         parent::updateCustomData();
 
+        $d = &$this->data;
+
         /* saving template data to templates and templates_structure tables */
-        @$allday = $this->getFieldValue('allday', 0)['value'];
-        @$dateStart = ($allday == 1)
-            ? $this->getFieldValue('date_start', 0)['value']
-            : $this->getFieldValue('datetime_start', 0)['value'];
-        @$dateEnd = ($allday == 1)
-            ? $this->getFieldValue('date_end', 0)['value']
-            : $this->getFieldValue('datetime_end', 0)['value'];
 
-        $dateStart = empty($dateStart) ? null : Util\dateISOToMysql($dateStart);
-        $dateEnd = empty($dateEnd) ? null : Util\dateISOToMysql($dateEnd);
+        $dateStart = empty($d['date']) ? null : Util\dateISOToMysql($d['date']);
+        $dateEnd = empty($d['date_end']) ? null : Util\dateISOToMysql($d['date_end']);
 
-        if (empty($this->data['status']) || in_array($this->data['status'], array(1, 2))) {
-            $this->data['status'] = 2; // active
+        if (empty($d['status']) || in_array($d['status'], array(1, 2))) {
+            $d['status'] = 2; // active
             if (!empty($dateEnd)) {
                 if (strtotime($dateEnd) < strtotime('now')) {
-                    $this->data['status'] = 1;
+                    $d['status'] = 1;
                 }
             }
         }
@@ -258,14 +250,12 @@ class Task extends Object
         @$params = array(
             $this->id
             ,$this->getFieldValue('_title', 0)['value']
-            ,$allday
+            ,$this->getFieldValue('allday', 0)['value']
             ,$dateStart
             ,$dateEnd
-            ,$this->getFieldValue('importance', 0)['value']
-            ,$this->getFieldValue('category', 0)['value']
             ,$this->getFieldValue('assigned', 0)['value']
             ,$this->getFieldValue('description', 0)['value']
-            ,$this->data['status']
+            ,$d['status']
         );
 
         DB\dbQuery(
@@ -275,11 +265,9 @@ class Task extends Object
                 ,allday = $3
                 ,date_start = $4
                 ,date_end = $5
-                ,importance = $6
-                ,category_id = $7
-                ,responsible_user_ids = $8
-                ,description = $9
-                ,status = $10
+                ,responsible_user_ids = $6
+                ,description = $7
+                ,status = $8
             WHERE id = $1',
             $params
         ) or die(DB\dbQueryError());
@@ -341,8 +329,6 @@ class Task extends Object
                 ,`date_start`
                 ,`date_end`
                 ,`allday`
-                ,`importance`
-                ,`category_id`
                 ,`privacy`
                 ,`responsible_user_ids`
                 ,`autoclose`
@@ -364,8 +350,6 @@ class Task extends Object
                 ,`date_start`
                 ,`date_end`
                 ,`allday`
-                ,`importance`
-                ,`category_id`
                 ,`privacy`
                 ,`responsible_user_ids`
                 ,`autoclose`
@@ -436,7 +420,7 @@ class Task extends Object
     protected function setDateParamsFromData(&$p)
     {
         /* analize if task dates are set */
-        switch ($this->getFieldValue('allday', 0)['value']) {
+        switch (@$this->getFieldValue('allday', 0)['value']) {
             case -1: //allday = false
                 $p['date'] = $this->getFieldValue('datetime_start', 0)['value'];
                 $p['date_end'] = $this->getFieldValue('datetime_end', 0)['value'];

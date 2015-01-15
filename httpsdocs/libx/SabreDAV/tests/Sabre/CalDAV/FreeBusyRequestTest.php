@@ -47,9 +47,9 @@ END:VCALENDAR',
             new CalendarRootNode($principalBackend, $caldavBackend),
         );
 
-        $this->request = HTTP\Sapi::createFromServerArray([
+        $this->request = new HTTP\Request(array(
             'CONTENT_TYPE' => 'text/calendar',
-        ]);
+        ));
         $this->response = new HTTP\ResponseMock();
 
         $this->server = new DAV\Server($tree);
@@ -69,44 +69,38 @@ END:VCALENDAR',
 
     }
 
+    function testWrongMethod() {
+
+        $this->assertNull(
+            $this->plugin->unknownMethod('PUT','calendars/user1/outbox')
+        );
+
+    }
+
     function testWrongContentType() {
 
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
+        $this->server->httpRequest = new HTTP\Request(array(
             'CONTENT_TYPE' => 'text/plain',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/outbox',
         ));
 
         $this->assertNull(
-            $this->plugin->httpPost($this->server->httpRequest, $this->server->httpResponse)
+            $this->plugin->unknownMethod('POST','calendars/user1/outbox')
         );
 
     }
 
     function testNotFound() {
 
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
-            'CONTENT_TYPE' => 'text/calendar',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/blabla',
-        ));
-
         $this->assertNull(
-            $this->plugin->httpPost($this->server->httpRequest, $this->server->httpResponse)
+            $this->plugin->unknownMethod('POST','calendars/user1/blabla')
         );
 
     }
 
     function testNotOutbox() {
 
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
-            'CONTENT_TYPE' => 'text/calendar',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/inbox',
-        ));
-
         $this->assertNull(
-            $this->plugin->httpPost($this->server->httpRequest, $this->server->httpResponse)
+            $this->plugin->unknownMethod('POST','calendars/user1/inbox')
         );
 
     }
@@ -116,12 +110,6 @@ END:VCALENDAR',
      */
     function testNoItipMethod() {
 
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
-            'CONTENT_TYPE' => 'text/calendar',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/outbox',
-        ));
-
         $body = <<<ICS
 BEGIN:VCALENDAR
 BEGIN:VFREEBUSY
@@ -129,8 +117,8 @@ END:VFREEBUSY
 END:VCALENDAR
 ICS;
 
-        $this->server->httpRequest->setBody($body);
-        $this->plugin->httpPost($this->server->httpRequest, $this->server->httpResponse);
+        $this->request->setBody($body);
+        $this->plugin->unknownMethod('POST','calendars/user1/outbox');
 
     }
 
@@ -138,12 +126,6 @@ ICS;
      * @expectedException Sabre\DAV\Exception\BadRequest
      */
     function testNoVFreeBusy() {
-
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
-            'CONTENT_TYPE' => 'text/calendar',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/outbox',
-        ));
 
         $body = <<<ICS
 BEGIN:VCALENDAR
@@ -153,8 +135,8 @@ END:VEVENT
 END:VCALENDAR
 ICS;
 
-        $this->server->httpRequest->setBody($body);
-        $this->plugin->httpPost($this->server->httpRequest, $this->server->httpResponse);
+        $this->request->setBody($body);
+        $this->plugin->unknownMethod('POST','calendars/user1/outbox');
 
     }
 
@@ -162,12 +144,6 @@ ICS;
      * @expectedException Sabre\DAV\Exception\Forbidden
      */
     function testIncorrectOrganizer() {
-
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
-            'CONTENT_TYPE' => 'text/calendar',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/outbox',
-        ));
 
         $body = <<<ICS
 BEGIN:VCALENDAR
@@ -178,8 +154,8 @@ END:VFREEBUSY
 END:VCALENDAR
 ICS;
 
-        $this->server->httpRequest->setBody($body);
-        $this->plugin->httpPost($this->server->httpRequest, $this->server->httpResponse);
+        $this->request->setBody($body);
+        $this->plugin->unknownMethod('POST','calendars/user1/outbox');
 
     }
 
@@ -187,12 +163,6 @@ ICS;
      * @expectedException Sabre\DAV\Exception\BadRequest
      */
     function testNoAttendees() {
-
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
-            'CONTENT_TYPE' => 'text/calendar',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/outbox',
-        ));
 
         $body = <<<ICS
 BEGIN:VCALENDAR
@@ -203,8 +173,8 @@ END:VFREEBUSY
 END:VCALENDAR
 ICS;
 
-        $this->server->httpRequest->setBody($body);
-        $this->plugin->httpPost($this->server->httpRequest, $this->server->httpResponse);
+        $this->request->setBody($body);
+        $this->plugin->unknownMethod('POST','calendars/user1/outbox');
 
     }
 
@@ -212,12 +182,6 @@ ICS;
      * @expectedException Sabre\DAV\Exception\BadRequest
      */
     function testNoDTStart() {
-
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
-            'CONTENT_TYPE' => 'text/calendar',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/outbox',
-        ));
 
         $body = <<<ICS
 BEGIN:VCALENDAR
@@ -229,18 +193,12 @@ END:VFREEBUSY
 END:VCALENDAR
 ICS;
 
-        $this->server->httpRequest->setBody($body);
-        $this->plugin->httpPost($this->server->httpRequest, $this->server->httpResponse);
+        $this->request->setBody($body);
+        $this->plugin->unknownMethod('POST','calendars/user1/outbox');
 
     }
 
     function testSucceed() {
-
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
-            'CONTENT_TYPE' => 'text/calendar',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/outbox',
-        ));
 
         $body = <<<ICS
 BEGIN:VCALENDAR
@@ -255,16 +213,13 @@ END:VFREEBUSY
 END:VCALENDAR
 ICS;
 
-        $this->server->httpRequest->setBody($body);
-
         // Lazily making the current principal an admin.
         $this->aclPlugin->adminPrincipals[] = 'principals/user1';
 
-        $this->assertFalse(
-            $this->plugin->httpPost($this->server->httpRequest, $this->response)
-        );
+        $this->request->setBody($body);
+        $this->assertFalse($this->plugin->unknownMethod('POST','calendars/user1/outbox'));
 
-        $this->assertEquals(200, $this->response->status);
+        $this->assertEquals('HTTP/1.1 200 OK' , $this->response->status);
         $this->assertEquals(array(
             'Content-Type' => 'application/xml',
         ), $this->response->headers);
@@ -289,12 +244,6 @@ ICS;
 
     function testNoPrivilege() {
 
-        $this->server->httpRequest = HTTP\Sapi::createFromServerArray(array(
-            'CONTENT_TYPE' => 'text/calendar',
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/calendars/user1/outbox',
-        ));
-
         $body = <<<ICS
 BEGIN:VCALENDAR
 METHOD:REQUEST
@@ -307,21 +256,18 @@ END:VFREEBUSY
 END:VCALENDAR
 ICS;
 
-        $this->server->httpRequest->setBody($body);
+        $this->request->setBody($body);
+        $this->assertFalse($this->plugin->unknownMethod('POST','calendars/user1/outbox'));
 
-        $this->assertFalse(
-            $this->plugin->httpPost($this->server->httpRequest, $this->response)
-        );
-
-        $this->assertEquals(200, $this->response->status);
-        $this->assertEquals([
+        $this->assertEquals('HTTP/1.1 200 OK' , $this->response->status);
+        $this->assertEquals(array(
             'Content-Type' => 'application/xml',
-        ], $this->response->headers);
+        ), $this->response->headers);
 
-        $strings = [
+        $strings = array(
             '<d:href>mailto:user2.sabredav@sabredav.org</d:href>',
             '<cal:request-status>3.7;No calendar-home-set property found</cal:request-status>',
-        ];
+        );
 
         foreach($strings as $string) {
             $this->assertTrue(

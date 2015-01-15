@@ -59,10 +59,10 @@ class OfficeCases extends \CB\TreeNode\Base
         switch (get_class($parentNode)) {
             case 'Demosrc\\TreeNode\\OfficeUsers':
                 $this->fq[] = '(role_ids2:'.$parentNode->id.' OR role_ids3:'.$parentNode->id.')';
-                $this->fq[] = 'category_id:'.$parentNode->parent->parent->id;
+                // $this->fq[] = 'category_id:'.$parentNode->parent->parent->id;
                 break;
             case 'Demosrc\\TreeNode\\Offices':
-                $this->fq[] = 'category_id:'.$parentNode->id;
+                // $this->fq[] = 'category_id:'.$parentNode->id;
                 break;
         }
 

@@ -55,15 +55,15 @@ class SimplePluginTest extends \PHPUnit_Framework_TestCase {
             ),
             '{DAV:}read-acl' => array(
                 'privilege' => '{DAV:}read-acl',
-                'abstract' => false,
+                'abstract' => true,
                 'aggregates' => array(),
-                'concrete' => '{DAV:}read-acl',
+                'concrete' => '{DAV:}read',
             ),
             '{DAV:}read-current-user-privilege-set' => array(
                 'privilege' => '{DAV:}read-current-user-privilege-set',
-                'abstract' => false,
+                'abstract' => true,
                 'aggregates' => array(),
-                'concrete' => '{DAV:}read-current-user-privilege-set',
+                'concrete' => '{DAV:}read',
             ),
             '{DAV:}write' => array(
                 'privilege' => '{DAV:}write',
@@ -80,39 +80,39 @@ class SimplePluginTest extends \PHPUnit_Framework_TestCase {
             ),
             '{DAV:}write-acl' => array(
                 'privilege' => '{DAV:}write-acl',
-                'abstract' => false,
+                'abstract' => true,
                 'aggregates' => array(),
-                'concrete' => '{DAV:}write-acl',
+                'concrete' => '{DAV:}write',
             ),
             '{DAV:}write-properties' => array(
                 'privilege' => '{DAV:}write-properties',
-                'abstract' => false,
+                'abstract' => true,
                 'aggregates' => array(),
-                'concrete' => '{DAV:}write-properties',
+                'concrete' => '{DAV:}write',
             ),
             '{DAV:}write-content' => array(
                 'privilege' => '{DAV:}write-content',
-                'abstract' => false,
+                'abstract' => true,
                 'aggregates' => array(),
-                'concrete' => '{DAV:}write-content',
+                'concrete' => '{DAV:}write',
             ),
             '{DAV:}unlock' => array(
                 'privilege' => '{DAV:}unlock',
-                'abstract' => false,
+                'abstract' => true,
                 'aggregates' => array(),
-                'concrete' => '{DAV:}unlock',
+                'concrete' => '{DAV:}write',
             ),
             '{DAV:}bind' => array(
                 'privilege' => '{DAV:}bind',
-                'abstract' => false,
+                'abstract' => true,
                 'aggregates' => array(),
-                'concrete' => '{DAV:}bind',
+                'concrete' => '{DAV:}write',
             ),
             '{DAV:}unbind' => array(
                 'privilege' => '{DAV:}unbind',
-                'abstract' => false,
+                'abstract' => true,
                 'aggregates' => array(),
-                'concrete' => '{DAV:}unbind',
+                'concrete' => '{DAV:}write',
             ),
 
         );
@@ -152,7 +152,7 @@ class SimplePluginTest extends \PHPUnit_Framework_TestCase {
         $server->addPlugin($auth);
 
         //forcing login
-        $auth->beforeMethod(new HTTP\Request(), new HTTP\Response());
+        $auth->beforeMethod('GET','/');
 
         $this->assertEquals(array('principals/admin'),$acl->getCurrentUserPrincipals());
 
@@ -179,7 +179,7 @@ class SimplePluginTest extends \PHPUnit_Framework_TestCase {
         $server->addPlugin($auth);
 
         //forcing login
-        $auth->beforeMethod(new HTTP\Request(), new HTTP\Response());
+        $auth->beforeMethod('GET','/');
 
         $expected = array(
             'principals/admin',
@@ -256,7 +256,7 @@ class SimplePluginTest extends \PHPUnit_Framework_TestCase {
         $server->addPlugin($auth);
 
         //forcing login
-        $auth->beforeMethod(new HTTP\Request(), new HTTP\Response());
+        $auth->beforeMethod('GET','/');
 
         $expected = array(
             '{DAV:}write',

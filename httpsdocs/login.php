@@ -93,9 +93,13 @@ if (empty($_SESSION['check_TSV'])) {
                 <?php echo isset($_SESSION['message']) ? '<div class="alert alert-error">'.$_SESSION['message'].'</div>' : '';?>
                 <span class="icon-lock"></span>
             </label>
-            <input type="submit" name="s" id="s" value="<?php echo L\get('Verify');?>" class="btn btn-info" style="margin-top: 26px;" disabled>
     <?php
-
+    //dont show login button for yubikey authentication
+    $cfg = User::getTSVConfig();
+    if ($cfg['method'] !== 'ybk') {
+        echo '<input type="submit" name="s" id="s" value="'. L\get('Verify') .'" class="btn btn-info" style="margin-top: 26px;" disabled>';
+    }
+    echo '<a href="auth.php?l=1" style="margin-top: 30px;"  class="pull-right">'. L\get('Exit') .'</a>';
 }
 
 ?>

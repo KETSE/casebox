@@ -26,9 +26,7 @@ define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
 define(
     'CB\\INCLUDE_PATH',
     DOC_ROOT.'libx'.PATH_SEPARATOR.
-    DOC_ROOT.'libx'. DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
-    // DOC_ROOT.'libx/SabreDAV/lib' . PATH_SEPARATOR .  # DIRECTORY_SEPARATOR is not necessarily needed,
-    //                                                # PHP always converts / to the appropriate character in its file functions.
+    DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
     DOC_ROOT.'classes'.PATH_SEPARATOR.
     PLUGINS_DIR.PATH_SEPARATOR.
     get_include_path()
@@ -105,6 +103,7 @@ function isDebugHost()
 function detectCore()
 {
     $rez = false;
+
     if (isset($_GET['core'])) {
         $rez = preg_replace('/[^\w]\-_/i', '', $_GET['core']);
     } else {
@@ -160,7 +159,12 @@ function debug($msg)
 function fireEvent($eventName, &$params)
 {
     //skip trigering events from other triggers
-    if (!empty($GLOBALS['running_trigger'])) {
+    if (empty($GLOBALS['running_trigger'])) {
+        $GLOBALS['running_trigger'] = 0;
+    }
+
+    // dont allow triggers run deeper then 3rd level
+    if ($GLOBALS['running_trigger'] > 3) {
         return;
     }
 
@@ -176,7 +180,7 @@ function fireEvent($eventName, &$params)
             $methods = array($methods);
         }
         foreach ($methods as $method) {
-            $GLOBALS['running_trigger'] = true;
+            $GLOBALS['running_trigger']++;
             try {
                 $class->$method($params);
 
@@ -187,7 +191,7 @@ function fireEvent($eventName, &$params)
                     $e->getTraceAsString()
                 );
             }
-            unset($GLOBALS['running_trigger']);
+            $GLOBALS['running_trigger']--;
         }
         unset($class);
     }

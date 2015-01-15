@@ -1,28 +1,30 @@
 <?php
 namespace CB\WebDAV;
 
+use Sabre\DAV\Exception;
+use Sabre\HTTP;
 
-class Auth extends \Sabre\DAV\Auth\Backend\AbstractBasic {
-
-    protected function validateUserPass($username, $password) {
-
+class Auth{
+    function __construct(){
         $auth_flag = false;
-
-        // error_log('webDAV/Auth: validateUserPass');
+        $auth = new HTTP\BasicAuth();
+        $auth_params = $auth->getUserPass();
 
         $user = new \CB\User();
-        if (!$user->isLoged()) {
-            $r = $user->Login(strtolower(trim($username)), $password);
-            if ($r['success'] == true) {
+        if(!$user->isLoged()){
+            if($auth_params){
+                $r = $user->Login(strtolower(trim($auth_params[0])), $auth_params[1]);
+                if ($r['success'] == true) {
                     $auth_flag = true;
-                    $_SESSION['user']['TSV_checked'] = true;
+                }
             }
-        } else {
+        }else{
             $auth_flag = true;
-            $_SESSION['user']['TSV_checked'] = true;
         }
 
-        return $auth_flag;
+        if(!$auth_flag){
+            $auth->requireLogin();
+            die();
+        }
     }
-
 }

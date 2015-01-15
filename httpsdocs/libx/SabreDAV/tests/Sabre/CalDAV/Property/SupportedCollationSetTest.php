@@ -10,7 +10,6 @@ class SupportedCollationSetTest extends \PHPUnit_Framework_TestCase {
     function testSimple() {
 
         $scs = new SupportedCollationSet();
-        $this->assertInstanceOf('Sabre\CalDAV\Property\SupportedCollationSet', $scs);
 
     }
 

@@ -7,7 +7,7 @@ Ext.ux.WebkitEntriesIterator = {
     iterateEntries: function(entries, callback, scope){
         this.direcotoriesCount = 0;
         this.result = [];
-        this.callback = scope ?  callback.createDelegate(scope) : callback;
+        this.callback = scope ?  callback.bind(scope) : callback;
         this.readEntries(entries);
 
     }
@@ -22,7 +22,7 @@ Ext.ux.WebkitEntriesIterator = {
                     this.direcotoriesCount++;
                     // appendItem(entries[i].name, 'folder', parentNode);
                     var directoryReader = entries[i].createReader();
-                    this.getAllEntries( directoryReader, this.readEntries.createDelegate(this) );
+                    this.getAllEntries( directoryReader, this.readEntries.bind(this) );
                 } else {
                     this.result.push(entries[i]);
                     // appendItem(entries[i].name, 'file', parentNode);
@@ -71,7 +71,7 @@ Ext.ux.WebkitEntriesIterator = {
                 this.convertedFiles++;
                 if(this.convertedFiles == this.result.length)
                     this.callback(this.result);
-            }.createDelegate(this));
+            }.bind(this));
         }
     }
 

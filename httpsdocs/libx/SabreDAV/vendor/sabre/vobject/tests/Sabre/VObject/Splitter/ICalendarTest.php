@@ -4,11 +4,11 @@ namespace Sabre\VObject\Splitter;
 
 use Sabre\VObject;
 
-class ICalendarTest extends \PHPUnit_Framework_TestCase {
+class ICalendarSplitterTest extends \PHPUnit_Framework_TestCase {
 
     protected $version;
 
-    function setUp() {
+    function setup() {
         $this->version = VObject\Version::VERSION;
     }
 
@@ -27,8 +27,6 @@ class ICalendarTest extends \PHPUnit_Framework_TestCase {
 BEGIN:VCALENDAR
 BEGIN:VEVENT
 UID:foo
-DTSTAMP:20140122T233226Z
-DTSTART:20140101T070000Z
 END:VEVENT
 END:VCALENDAR
 EOT;
@@ -48,7 +46,6 @@ EOT;
 BEGIN:VCALENDAR
 BEGIN:VEVENT
 UID:foo
-DTSTAMP:20140122T233226Z
 END:VEVENT
 END:VCALENDAR
 EOT;
@@ -64,14 +61,14 @@ EOT;
     }
 
     /**
-     * @expectedException Sabre\VObject\ParseException
+     * @expectedException        Sabre\VObject\ParseException
      */
     function testICalendarImportInvalidEvent() {
         $data = <<<EOT
 EOT;
         $tempFile = $this->createStream($data);
-        $objects = new ICalendar($tempFile);
 
+        $objects = new ICalendar($tempFile);
     }
 
     function testICalendarImportMultipleValidEvents() {
@@ -79,16 +76,12 @@ EOT;
         $event[] = <<<EOT
 BEGIN:VEVENT
 UID:foo1
-DTSTAMP:20140122T233226Z
-DTSTART:20140101T050000Z
 END:VEVENT
 EOT;
 
 $event[] = <<<EOT
 BEGIN:VEVENT
 UID:foo2
-DTSTAMP:20140122T233226Z
-DTSTART:20140101T060000Z
 END:VEVENT
 EOT;
 
@@ -133,8 +126,6 @@ VERSION:2.0
 PRODID:-//Sabre//Sabre VObject $this->version//EN
 CALSCALE:GREGORIAN
 BEGIN:VEVENT
-DTSTART:20140101T040000Z
-DTSTAMP:20140122T233226Z
 END:VEVENT
 END:VCALENDAR
 
@@ -145,20 +136,12 @@ EOT;
 
         $return = "";
         while($object=$objects->getNext()) {
+            $expected = str_replace("\n", "\r\n", $data);
+            $this->assertEquals($expected, $object->serialize());
             $return .= $object->serialize();
         }
 
-        $messages = VObject\Reader::read($return)->validate();
-
-        if ($messages) {
-            $messages = array_map(
-                function($item) { return $item['message']; },
-                $messages
-            );
-            $this->fail('Validation errors: ' . implode("\n", $messages));
-        } else {
-            $this->assertEquals(array(), $messages);
-        }
+        $this->assertEquals(array(), VObject\Reader::read($return)->validate());
     }
 
     function testICalendarImportMultipleVTIMEZONESAndMultipleValidEvents() {
@@ -203,24 +186,18 @@ EOT;
         $event[] = <<<EOT
 BEGIN:VEVENT
 UID:foo1
-DTSTAMP:20140122T232710Z
-DTSTART:20140101T010000Z
 END:VEVENT
 EOT;
 
         $event[] = <<<EOT
 BEGIN:VEVENT
 UID:foo2
-DTSTAMP:20140122T232710Z
-DTSTART:20140101T020000Z
 END:VEVENT
 EOT;
 
         $event[] = <<<EOT
 BEGIN:VEVENT
 UID:foo3
-DTSTAMP:20140122T232710Z
-DTSTART:20140101T030000Z
 END:VEVENT
 EOT;
 
@@ -259,6 +236,7 @@ EOT;
 
         }
 
+        $this->assertEquals(array(), VObject\Reader::read($return)->validate());
         $this->assertEquals(array(), VObject\Reader::read($return)->validate());
     }
 
@@ -299,8 +277,7 @@ EOT;
             $return .= $object->serialize();
         }
 
-        $messages = VObject\Reader::read($return)->validate();
-        $this->assertEquals(array(), $messages);
+        $this->assertEquals(array(), VObject\Reader::read($return)->validate());
     }
 
 }

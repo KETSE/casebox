@@ -64,7 +64,7 @@ HTTP\Util::toHTTPDate($dt) .
 
         $ok = false;
         try {
-            GetLastModified::unserialize(DAV\XMLUtil::loadDOMDocument($xml)->firstChild, array());
+            GetLastModified::unserialize(DAV\XMLUtil::loadDOMDocument($xml)->firstChild);
         } catch (DAV\Exception $e) {
             $ok = true;
         }

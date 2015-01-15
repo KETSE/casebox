@@ -76,7 +76,6 @@ background-color: #FFFFCC;
 }
 
 .block-plugin-comments .x-panel-body {
-    /*margin-bottom: 30px;*/
     background-color: #F1F1F1;
 }
 .block-plugin-comments b.user {
@@ -89,7 +88,6 @@ background-color: #FFFFCC;
 .block-plugin-comments label {
     width: 42px;
     text-align: center;
-    padding: 5px 0 5px 10px;
 }
 .block-plugin-comments .msg-box {
     margin: 4px 10px 4px 0;
@@ -113,7 +111,7 @@ background-color: #FFFFCC;
     color: #333;
     padding: 0 5px 0 8px;
 }
-.obj-plugin > .x-panel-bwrap > .x-panel-body-noborder{
+.obj-plugin > .x-panel-body-default {
     border-top: 2px solid #CCC;
     margin-bottom: 30px;
 }
@@ -121,10 +119,23 @@ background-color: #FFFFCC;
 .obj-plugin-h .x-toolbar-left{
     vertical-align: bottom;
 }
-.obj-plugin-h label{
+.obj-plugin label {
     /*font: 11px "lucida grande",tahoma,verdana,arial,sans-serif;*/
     font-weight: bold;
+    font-size: 12px;
     text-transform: uppercase;
+    padding: 5px 0 5px 5px;
+}
+
+
+
+.obj-plugin .x-form-text-wrap {
+    display: block; /* table-cell; */
+}
+
+textarea {
+    padding: 3px 4px !important;
+    font: normal 12px/16px arial, verdana, sans-serif !important;
 }
 
 .obj-plugin-h .x-toolbar-right {
@@ -188,12 +199,9 @@ background-color: #FFFFCC;
 }
 .obj-plugin {
     background-color: #fff;
+    margin-bottom: 20px;
 }
-.obj-plugin .grid-drop-zone {
-    margin-left: -1000px;
-    width:0;
-    height:0;
-}
+
 .obj-plugin-title {
     margin: 0 !important;
 }
@@ -202,6 +210,12 @@ background-color: #FFFFCC;
     font-size: 14px;
     font-weight: bold;
     overflow: hidden;
+}
+
+.obj-header > div.info {
+    font-size: 11px;
+    color: #7d7d7d;
+    padding: 2px 1px;
 }
 
 .taskview h2 {

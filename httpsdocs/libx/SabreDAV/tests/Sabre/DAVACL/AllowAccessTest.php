@@ -27,104 +27,112 @@ class AllowAccessTest extends \PHPUnit_Framework_TestCase {
 
     function testGet() {
 
-        $this->server->httpRequest->setMethod('GET');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $this->assertTrue($this->server->broadcastEvent('beforeMethod',array('GET','testdir')));
 
     }
 
     function testGetDoesntExist() {
 
-        $this->server->httpRequest->setMethod('GET');
-        $this->server->httpRequest->setUrl('/foo');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $r = $this->server->broadcastEvent('beforeMethod',array('GET','foo'));
+        $this->assertTrue($r);
 
     }
 
     function testHEAD() {
 
-        $this->server->httpRequest->setMethod('HEAD');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $this->assertTrue($this->server->broadcastEvent('beforeMethod',array('HEAD','testdir')));
 
     }
 
     function testOPTIONS() {
 
-        $this->server->httpRequest->setMethod('OPTIONS');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $this->assertTrue($this->server->broadcastEvent('beforeMethod',array('OPTIONS','testdir')));
 
     }
 
     function testPUT() {
 
-        $this->server->httpRequest->setMethod('PUT');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $this->assertTrue($this->server->broadcastEvent('beforeMethod',array('PUT','testdir')));
 
     }
 
     function testACL() {
 
-        $this->server->httpRequest->setMethod('ACL');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $this->assertTrue($this->server->broadcastEvent('beforeMethod',array('ACL','testdir')));
 
     }
 
     function testPROPPATCH() {
 
-        $this->server->httpRequest->setMethod('PROPPATCH');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $this->assertTrue($this->server->broadcastEvent('beforeMethod',array('PROPPATCH','testdir')));
 
     }
 
     function testCOPY() {
 
-        $this->server->httpRequest->setMethod('COPY');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $this->assertTrue($this->server->broadcastEvent('beforeMethod',array('COPY','testdir')));
 
     }
 
     function testMOVE() {
 
-        $this->server->httpRequest->setMethod('MOVE');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $this->assertTrue($this->server->broadcastEvent('beforeMethod',array('MOVE','testdir')));
 
     }
 
     function testLOCK() {
 
-        $this->server->httpRequest->setMethod('LOCK');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->assertTrue($this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]));
+        $this->assertTrue($this->server->broadcastEvent('beforeMethod',array('LOCK','testdir')));
 
     }
 
     function testBeforeBind() {
 
-        $this->assertTrue($this->server->emit('beforeBind', ['testdir/file']));
+        $this->assertTrue($this->server->broadcastEvent('beforeBind',array('testdir/file')));
 
     }
 
 
     function testBeforeUnbind() {
 
-        $this->assertTrue($this->server->emit('beforeUnbind', ['testdir']));
+        $this->assertTrue($this->server->broadcastEvent('beforeUnbind',array('testdir')));
+
+    }
+
+    function testAfterGetProperties() {
+
+        $properties = array(
+            'href' => 'foo',
+            '200' => array(
+                '{DAV:}displayname' => 'foo',
+                '{DAV:}getcontentlength' => 500,
+            ),
+            '404' => array(
+                '{DAV:}bar' => null,
+            ),
+            '403' => array(
+                '{DAV:}owner' => null,
+            ),
+        );
+
+        $expected = array(
+            'href' => 'foo',
+            '200' => array(
+                '{DAV:}displayname' => 'foo',
+                '{DAV:}getcontentlength' => 500,
+            ),
+            '404' => array(
+                '{DAV:}bar' => null,
+            ),
+            '403' => array(
+                '{DAV:}owner' => null,
+            ),
+        );
+
+        $r = $this->server->broadcastEvent('afterGetProperties',array('testdir',&$properties));
+        $this->assertTrue($r);
+
+        $this->assertEquals($expected, $properties);
 
     }
 

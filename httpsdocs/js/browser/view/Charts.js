@@ -1,29 +1,34 @@
 Ext.namespace('CB.browser.view');
 
-CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
-    hideBorders: true
+Ext.define('CB.browser.view.Charts', {
+    extend: 'CB.browser.view.Interface'
+    ,xtype: 'CBBrowserViewCharts'
+
+    ,border: false
     ,tbarCssClass: 'x-panel-white'
     ,layout: 'border'
     ,params: {
-        rows:0
+        from: 'charts'
         ,facets: 'general'
+        // ,rows: 0
     }
 
     ,initComponent: function(){
-        var viewGroup = Ext.id();
-        Ext.chart.Chart.CHART_URL = '/' + App.config.coreName + '/libx/ext/resources/charts.swf';
+        this.instanceId = this.refOwner.instanceId;
 
         this.facetsCombo = new Ext.form.ComboBox({
             xtype: 'combo'
-            ,id: 'facetscombo'
+            ,itemId: 'facetscombo'
             ,forceSelection: true
             ,triggerAction: 'all'
             ,lazyRender: true
-            ,mode: 'local'
+            ,queryMode: 'local'
             ,fieldLabel: 'Facets'
+            ,labelWidth: 'auto'
             ,editable: false
             ,store: new Ext.data.JsonStore({
-                fields:['id', 'name']
+                model: 'Generic2'
+                ,data: []
             })
             ,displayField: 'name'
             ,valueField: 'id'
@@ -34,93 +39,37 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
         });
 
         this.refOwner.buttonCollection.addAll(
-            // new Ext.Button({
-            //     text: L.ChartLine
-            //     ,id: 'linechart'
-            //     ,enableToggle: true
-            //     ,allowDepress: false
-            //     ,iconCls: 'ib-chart-line'
-            //     ,iconAlign:'top'
-            //     ,scale: 'large'
-            //     ,toggleGroup: 'cv' + viewGroup
-            //     ,scope: this
-            //     ,handler: this.onChangeChartClick
-            // })
             new Ext.Button({
-                text: L.ChartArea
-                ,id: 'barchart'
+                text: 'Bar' //L.ChartArea
+                ,itemId: 'barchart'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-chart-bar'
-                ,iconAlign:'top'
-                ,scale: 'large'
-                ,toggleGroup: 'cv' + viewGroup
+                // ,iconCls: 'ib-chart-bar'
+                ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartClick
             })
-            // ,new Ext.Button({
-            //     text: L.ChartArea
-            //     ,id: 'stackedbarchart'
-            //     ,enableToggle: true
-            //     ,allowDepress: false
-            //     ,iconCls: 'ib-chart-bar-stacked'
-            //     ,iconAlign:'top'
-            //     ,scale: 'large'
-            //     ,toggleGroup: 'cv' + viewGroup
-            //     ,scope: this
-            //     ,handler: this.onChangeChartClick
-            // })
             ,new Ext.Button({
-                text: L.ChartArea
-                ,id: 'columnchart'
+                text: 'Column' //L.ChartArea
+                ,itemId: 'columnchart'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-chart-column'
-                ,iconAlign:'top'
-                ,scale: 'large'
-                ,toggleGroup: 'cv' + viewGroup
+                // ,iconCls: 'ib-chart-column'
+                // ,iconAlign:'top'
+                ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartClick
             })
-            // ,new Ext.Button({
-            //     text: L.ChartBar
-            //     ,id: 'stackedcolumnchart'
-            //     ,enableToggle: true
-            //     ,allowDepress: false
-            //     ,iconCls: 'ib-chart-column-stacked'
-            //     ,iconAlign:'top'
-            //     ,scale: 'large'
-            //     ,toggleGroup: 'cv' + viewGroup
-            //     ,scope: this
-            //     ,handler: this.onChangeChartClick
-            // })
             ,new Ext.Button({
-                text: L.ChartPie
-                ,id: 'piechart'
+                text: 'Pie' //L.ChartPie
+                ,itemId: 'piechart'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-chart-pie'
-                ,iconAlign:'top'
-                ,scale: 'large'
-                ,toggleGroup: 'cv' + viewGroup
+                // ,iconCls: 'ib-chart-pie'
+                // ,iconAlign:'top'
+                ,toggleGroup: 'cv' + this.instanceId
                 ,scope: this
                 ,handler: this.onChangeChartClick
-            })
-            // ,new Ext.Button({
-            //     text: L.ChartTable
-            //     ,id: 'pivotgrid'
-            //     ,enableToggle: true
-            //     ,allowDepress: false
-            //     ,iconCls: 'ib-chart-table'
-            //     ,iconAlign:'top'
-            //     ,scale: 'large'
-            //     ,toggleGroup: 'cv' + viewGroup
-            //     ,scope: this
-            //     ,handler: this.onChangeChartClick
-            // })
-            ,new Ext.form.Label({
-                id: 'facetslabel'
-                ,text: 'Facets: '
             })
             ,this.facetsCombo
         );
@@ -133,117 +82,114 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
         }
 
         this.chartDataStore = new Ext.data.JsonStore({
-            fields:['id', 'name', {name:'items', type: 'int'}],
-            data: []
+            autoDestroy: false
+            // ,fields: ['id', 'name', {name: 'count', type: 'int'}]
+            ,model: 'GenericCount'
         });
 
         this.chartConfigs = {
-            'linechart': {
-                xtype: 'linechart'
-                ,store: this.chartDataStore
-                ,xField: 'name'
-                ,yField: 'items'
-                ,seriesStyles: this.seriesStyles
-                ,listeners: {
-                    scope: this
-                    ,itemclick: this.onChartItemClick
-                }
-            }
-            ,'barchart': {
-                xtype: 'barchart'
-                ,store: this.chartDataStore
-                ,yField: 'name'
-                ,seriesStyles: this.seriesStyles
-                ,xAxis: new Ext.chart.NumericAxis({
-                    stackingEnabled: true
-                })
+            'barchart': {
+                store: this.chartDataStore
+                ,colors: App.colors
+                ,flipXY: true
+                ,axes: [
+                    {
+                        type: 'category'
+                        ,position: 'left'
+                        ,fields: 'name'
+                        ,grid: true
+                    }, {
+                        type: 'numeric'
+                        ,position: 'bottom'
+                        ,fields: 'count'
+                        ,grid: true
+                    }
+                ]
                 ,series: [{
-                    xField: 'items'
-                    ,displayName: 'Items'
-                }]
-            }
-            ,'stackedbarchart': {
-                xtype: 'barchart'
-                ,store: this.chartDataStore
-                ,yField: 'name'
-                ,seriesStyles: this.seriesStyles
-                ,xAxis: new Ext.chart.NumericAxis({
-                    stackingEnabled: true
-                })
-                ,series: [{
-                    xField: 'items'
-                    ,displayName: 'Items'
+                    type: 'bar'
+                    ,xField: 'name'
+                    ,yField: 'count'
+                    ,style: {
+                        opacity: 0.80
+                        ,minGapWidth: 10
+                    }
+                    ,highlight: {
+                        fillStyle: 'rgba(249, 204, 157, 1.0)'
+                        ,strokeStyle: 'black'
+                        ,radius: 10
+                    }
+                    ,label: {
+                        field: 'count'
+                        ,display: 'insideEnd'
+                    }
+                    ,listeners: {
+                        scope: this
+                        ,itemclick: this.onChartItemClick
+                    }
                 }]
             }
             ,'columnchart': {
-                xtype: 'columnchart'
-                ,store: this.chartDataStore
-                ,xField: 'name'
-                ,yField: 'items'
-                ,seriesStyles: this.seriesStyles
-                ,listeners: {
-                    scope: this
-                    ,itemclick: this.onChartItemClick
-                }
-            }
-            ,'stackedcolumnchart': {
-                xtype: 'columnchart'
-                ,store: this.chartDataStore
-                ,xField: 'name'
-                ,yField: 'items'
-                ,seriesStyles: this.seriesStyles
+                store: this.chartDataStore
+                ,colors: App.colors
+                ,axes: [{
+                        type: 'numeric'
+                        ,position: 'left'
+                        ,adjustByMajorUnit: true
+                        ,fields: ['count']
+                        ,grid: true
+                    }, {
+                        type: 'category'
+                        ,position: 'bottom'
+                        ,fields: ['name']
+                        ,grid: true
+                    }
+                ]
                 ,series: [{
-                    yField: 'items'
-                    ,displayName: 'Items'
+                    type: 'column'
+                    ,xField: 'name'
+                    ,yField: ['count']
+                    ,stacked: true
+                    ,highlight: {
+                        fillStyle: 'yellow'
+                    }
+                    ,label: {
+                        field: 'count'
+                        ,display: 'insideEnd'
+                    }
+                    ,listeners: {
+                        scope: this
+                        ,itemclick: this.onChartItemClick
+                    }
                 }]
-                ,listeners: {
-                    scope: this
-                    ,itemclick: this.onChartItemClick
-                }
             }
             ,'piechart': {
-                xtype: 'piechart'
-                ,store: this.chartDataStore
-                ,dataField: 'items'
-                ,categoryField: 'name'
-                ,listeners: {
-                    scope: this
-                    ,itemclick: this.onChartItemClick
-                }
-            }
-            ,'pivotgrid': {
-                xtype: 'pivotgrid'
-                ,border: false
-                ,autoScroll: true
-                ,store: this.chartDataStore
-                ,aggregator: 'sum'
-                ,measure   : 'items'
-                ,leftAxis: [
-                    {
-                        width: 60
-                        ,dataIndex: 'name'
-                        ,direction: 'ASC'
+                store: this.chartDataStore
+                ,series: [{
+                    type: 'pie',
+                    angleField: 'count',
+                    label: {
+                        field: 'name',
+                        display: 'outside',
+                        calloutLine: true
+                    },
+                    showInLegend: true,
+                    highlight: true,
+                    highlightCfg: {
+                        'stroke-width': 20,
+                        stroke: '#fff'
                     }
-                ]
-                ,topAxis: [
-                    {
-                        dataIndex: 'items'
-                        ,direction: 'ASC'
+                    ,listeners: {
+                        scope: this
+                        ,itemclick: this.onChartItemClick
                     }
-                ]
-                ,listeners: {
-                    scope: this
-                    ,itemclick: this.onChartItemClick
-                    ,afterrender: function(c){
-                        c.view.refresh(true);
-                    }
-                }
+                }]
             }
         };
 
         this.chartContainer = new Ext.Panel({
             region: 'center'
             ,layout: 'fit'
+            ,border: false
         });
 
         Ext.apply(this, {
@@ -259,8 +205,7 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
         this.currentButton = this.refOwner.buttonCollection.get('barchart');
 
         this.selectedFacets = [];
-
-        this.store.proxy.on('load', this.onProxyLoad, this);
+        this.store.on('load', this.onStoreLoad, this);
     }
 
     ,getViewParams: function() {
@@ -268,37 +213,46 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
     }
 
     ,onActivate: function() {
+        this.selectedFacets = [];
+
         this.fireEvent(
             'settoolbaritems'
             ,[
-                ,'linechart'
+                'facetscombo'
+                ,'->'
+                // ,'linechart'
                 ,'barchart'
-                ,'stackedbarchart'
+                // ,'stackedbarchart'
                 ,'columnchart'
-                ,'stackedcolumnchart'
+                // ,'stackedcolumnchart'
                 ,'piechart'
-                ,'pivotgrid'
                 ,'-'
-                ,'facetslabel'
-                ,'facetscombo'
+                ,'reload'
+                ,'apps'
+                ,'-'
+                ,'more'
             ]
         );
     }
 
     ,onChangeChartClick: function(b, e) {
         b.toggle(true);
+        this.currentButton = b;
         this.loadChartData();
-        if(Ext.isEmpty(this.chart) || (this.currentChartType != b.id)) {
-            this.chartContainer.removeAll(true);
-            this.currentChartType = b.id;
-            this.chart = new Ext.create(this.chartConfigs[b.id]);
-            this.chartContainer.add(this.chart);
-        }
-        this.chartContainer.syncSize();
+
+        this.chartContainer.removeAll(true);
+
+        this.chart = Ext.create(
+            'Ext.chart.Chart'
+            ,this.chartConfigs[b.itemId]
+        );
+
+        this.chartContainer.add(this.chart);
     }
 
     ,loadAvailableFacets: function() {
         var data = [];
+
         Ext.iterate(
             this.data
             ,function(key, val, o) {
@@ -307,27 +261,48 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
                 }
                 data.push({
                     id: key
-                    ,name: Ext.value(val['title'], L['facet_'+key])
+                    ,name: Ext.valueFrom(val['title'], L['facet_'+key])
                 });
             }
             ,this
         );
-        this.facetsCombo.store.loadData(data);
+
+        /* there is some Ext bug on first combobox display
+            When expanding it - it has no data
+        */
+        var st = this.facetsCombo.store;
+        st.removeAll();
+        st.loadData(data);
+
         this.facetsCombo.setValue(this.selectedFacets[0]);
     }
 
     ,loadChartData: function() {
-        var data = {};
+        var data = {}
+            ,sorter = null;
+
+        /* find sorter if set in viewParams */
+        if(this.viewParams){
+            sorter = this.detectSorter(this.viewParams);
+        }
+
         Ext.iterate(
             this.data
             ,function(key, val, o) {
                 data[key] = CB.FacetList.prototype.getFacetData(key, val.items);
+
                 for (var i = 0; i < data[key].length; i++) {
                     if(Ext.isObject(data[key][i].items)) {
                         data[key][i].name = data[key][i].items.name;
-                        data[key][i].items = data[key][i].items.count;
+                        data[key][i].count = data[key][i].items.count;
+                    } else {
+                        data[key][i].count = data[key][i].items;
                     }
                     data[key][i].name = App.shortenString(data[key][i].name, 30);
+                }
+
+                if(sorter) {
+                    data[key] = Ext.Array.sort(data[key], sorter);
                 }
             }
             ,this
@@ -336,30 +311,59 @@ CB.browser.view.Charts = Ext.extend(CB.browser.view.Interface,{
 
         if(data[this.selectedFacets[0]]) {
             this.chartDataStore.loadData(data[this.selectedFacets[0]]);
+        } else {
+            this.chartDataStore.removeAll();
         }
     }
 
-    ,onProxyLoad: function(proxy, o, options) {
+    ,onStoreLoad: function(store, recs, successful, eOpts) {
         if(!this.rendered ||
             !this.getEl().isVisible(true) ||
-            (o.result.success !== true)
+            (successful !== true)
         ) {
             return;
         }
-        this.data = o.result.facets;
+
+        this.data = store.proxy.reader.rawData.facets;
+
+        if(this.viewParams) {
+            var vp = this.viewParams;
+            if(!Ext.isEmpty(vp.facet)) {
+                this.selectedFacets = [vp.facet];
+            }
+            if(!Ext.isEmpty(vp.chart_type)) {
+                var b = this.refOwner.buttonCollection.get(vp.chart_type + 'chart');
+                if(b) {
+                    this.currentButton = b;
+                }
+            }
+        }
+
         this.loadAvailableFacets();
         this.onChangeChartClick(this.currentButton);
     }
 
-    ,onChartItemClick: function(o){
-        var rec = this.chartDataStore.getAt(o.index);
-        Ext.example.msg('Item Selected', 'You chose {0}.', rec.get('name'));
+    ,onChartItemClick: function(o, event){
+        var params = {
+            view: 'grid'
+            ,filters: Ext.apply({}, this.store.extraParams.filters)
+        };
+        var filterBy = this.facetsCombo.getValue();
+        params['filters'][filterBy] = [{
+            f: filterBy
+            ,mode: 'OR'
+            ,values: [o.storeItem.get('id')]
+        }];
+
+        this.fireEvent('changeparams', params);
     }
 
-    ,onFacetChange: function(combo, record, index) {
+    ,onFacetChange: function(combo, records, index) {
+        var record = Ext.isArray(records)
+            ? records[0]
+            : records;
+
         this.selectedFacets[0] = record.get('id');
-        this.loadChartData();
+        this.onChangeChartClick(this.currentButton);
     }
 });
-
-Ext.reg('CBBrowserViewCharts', CB.browser.view.Charts);

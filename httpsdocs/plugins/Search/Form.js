@@ -1,7 +1,8 @@
-Ext.namespace('CB.plugins.Search');
+Ext.namespace('CB.plugin.Search');
 
-CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
-    title: L.Search
+Ext.define('CB.plugin.Search.Form', {
+    extend: 'Ext.Panel'
+    ,title: L.Search
     ,id: 'SearchTab'
     ,iconCls: 'icon-search'
     ,closable: true
@@ -26,10 +27,13 @@ CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
         this.objectsStore = new CB.DB.ObjectsStore();
 
         // Properties grid
-        this.grid = Ext.create({
-            refOwner: this
-            ,autoHeight: true
-        }, 'CBVerticalEditGrid');
+        this.grid = Ext.create(
+            'CBVerticalEditGrid'
+            ,{
+                refOwner: this
+                ,autoHeight: true
+            }
+        );
 
         // Init
         Ext.apply(this,{
@@ -42,7 +46,7 @@ CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
             }
         });
 
-        CB.plugins.Search.Form.superclass.initComponent.apply(this, arguments);
+        CB.plugin.Search.Form.superclass.initComponent.apply(this, arguments);
     },
 
     onSearchButtonClick: function(){
@@ -52,7 +56,7 @@ CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
 
         this.grid.readValues();
         var t = App.openUniqueTabbedWidget(
-            'CBPluginsSearchResultForm'
+            'CBPluginSearchResultForm'
             ,null
             ,{data: this.data}
         );
@@ -80,5 +84,3 @@ CB.plugins.Search.Form = Ext.extend(Ext.Panel, {
         this.grid.reload();
     }
 });
-
-Ext.reg('CBPluginsSearchForm', CB.plugins.Search.Form);

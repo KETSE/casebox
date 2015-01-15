@@ -3,92 +3,152 @@
 namespace Sabre\VObject;
 
 /**
- * Property
+ * VObject Property
  *
- * A property is always in a KEY:VALUE structure, and may optionally contain
- * parameters.
+ * A property in VObject is usually in the form PARAMNAME:paramValue.
+ * An example is : SUMMARY:Weekly meeting
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH. All rights reserved.
+ * Properties can also have parameters:
+ * SUMMARY;LANG=en:Weekly meeting.
+ *
+ * Parameters can be accessed using the ArrayAccess interface.
+ *
+ * @copyright Copyright (C) 2007-2013 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
- * @license http://sabre.io/license/ Modified BSD License
+ * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
-abstract class Property extends Node {
+class Property extends Node {
 
     /**
-     * Property name.
-     *
-     * This will contain a string such as DTSTART, SUMMARY, FN.
+     * Propertyname
      *
      * @var string
      */
     public $name;
 
     /**
-     * Property group.
+     * Group name
      *
-     * This is only used in vcards
+     * This may be something like 'HOME' for vcards.
      *
      * @var string
      */
     public $group;
 
     /**
-     * List of parameters
+     * Property parameters
      *
      * @var array
      */
     public $parameters = array();
 
     /**
-     * Current value
+     * Property value
      *
-     * @var mixed
+     * @var string
      */
-    protected $value;
+    public $value;
 
     /**
-     * In case this is a multi-value property. This string will be used as a
-     * delimiter.
+     * If properties are added to this map, they will be automatically mapped
+     * to their respective classes, if parsed by the reader or constructed with
+     * the 'create' method.
      *
-     * @var string|null
+     * @var array
      */
-    public $delimiter = ';';
+    static public $classMap = array(
+        'COMPLETED'     => 'Sabre\\VObject\\Property\\DateTime',
+        'CREATED'       => 'Sabre\\VObject\\Property\\DateTime',
+        'DTEND'         => 'Sabre\\VObject\\Property\\DateTime',
+        'DTSTAMP'       => 'Sabre\\VObject\\Property\\DateTime',
+        'DTSTART'       => 'Sabre\\VObject\\Property\\DateTime',
+        'DUE'           => 'Sabre\\VObject\\Property\\DateTime',
+        'EXDATE'        => 'Sabre\\VObject\\Property\\MultiDateTime',
+        'LAST-MODIFIED' => 'Sabre\\VObject\\Property\\DateTime',
+        'RECURRENCE-ID' => 'Sabre\\VObject\\Property\\DateTime',
+        'TRIGGER'       => 'Sabre\\VObject\\Property\\DateTime',
+        'N'             => 'Sabre\\VObject\\Property\\Compound',
+        'ORG'           => 'Sabre\\VObject\\Property\\Compound',
+        'ADR'           => 'Sabre\\VObject\\Property\\Compound',
+        'CATEGORIES'    => 'Sabre\\VObject\\Property\\Compound',
+    );
 
     /**
-     * Creates the generic property.
+     * Creates the new property by name, but in addition will also see if
+     * there's a class mapped to the property name.
      *
-     * Parameters must be specified in key=>value syntax.
+     * Parameters can be specified with the optional third argument. Parameters
+     * must be a key->value map of the parameter name, and value. If the value
+     * is specified as an array, it is assumed that multiple parameters with
+     * the same name should be added.
      *
-     * @param Component $root The root document
      * @param string $name
-     * @param string|array|null $value
-     * @param array $parameters List of parameters
-     * @param string $group The vcard property group
-     * @return void
+     * @param string $value
+     * @param array $parameters
+     * @return Property
      */
-    public function __construct(Component $root, $name, $value = null, array $parameters = array(), $group = null) {
+    static public function create($name, $value = null, array $parameters = array()) {
 
-        $this->name = $name;
-        $this->group = $group;
-
-        $this->root = $root;
-
-        foreach($parameters as $k=>$v) {
-            $this->add($k, $v);
+        $name = strtoupper($name);
+        $shortName = $name;
+        $group = null;
+        if (strpos($shortName,'.')!==false) {
+            list($group, $shortName) = explode('.', $shortName);
         }
 
-        if (!is_null($value)) {
-            $this->setValue($value);
+        if (isset(self::$classMap[$shortName])) {
+            return new self::$classMap[$shortName]($name, $value, $parameters);
+        } else {
+            return new self($name, $value, $parameters);
         }
 
     }
 
     /**
-     * Updates the current value.
+     * Creates a new property object
      *
-     * This may be either a single, or multiple strings in an array.
+     * Parameters can be specified with the optional third argument. Parameters
+     * must be a key->value map of the parameter name, and value. If the value
+     * is specified as an array, it is assumed that multiple parameters with
+     * the same name should be added.
      *
-     * @param string|array $value
+     * @param string $name
+     * @param string $value
+     * @param array $parameters
+     */
+    public function __construct($name, $value = null, array $parameters = array()) {
+
+        if (!is_scalar($value) && !is_null($value)) {
+            throw new \InvalidArgumentException('The value argument must be scalar or null');
+        }
+
+        $name = strtoupper($name);
+        $group = null;
+        if (strpos($name,'.')!==false) {
+            list($group, $name) = explode('.', $name);
+        }
+        $this->name = $name;
+        $this->group = $group;
+        $this->setValue($value);
+
+        foreach($parameters as $paramName => $paramValues) {
+
+            if (!is_array($paramValues)) {
+                $paramValues = array($paramValues);
+            }
+
+            foreach($paramValues as $paramValue) {
+                $this->add($paramName, $paramValue);
+            }
+
+        }
+
+    }
+
+    /**
+     * Updates the internal value
+     *
+     * @param string $value
      * @return void
      */
     public function setValue($value) {
@@ -98,130 +158,16 @@ abstract class Property extends Node {
     }
 
     /**
-     * Returns the current value.
+     * Returns the internal value
      *
-     * This method will always return a singular value. If this was a
-     * multi-value object, some decision will be made first on how to represent
-     * it as a string.
-     *
-     * To get the correct multi-value version, use getParts.
-     *
+     * @param string $value
      * @return string
      */
     public function getValue() {
 
-        if (is_array($this->value)) {
-            if (count($this->value)==0) {
-                return null;
-            } elseif (count($this->value)===1) {
-                return $this->value[0];
-            } else {
-                return $this->getRawMimeDirValue($this->value);
-            }
-        } else {
-            return $this->value;
-        }
+        return $this->value;
 
     }
-
-    /**
-     * Sets a multi-valued property.
-     *
-     * @param array $parts
-     * @return void
-     */
-    public function setParts(array $parts) {
-
-        $this->value = $parts;
-
-    }
-
-    /**
-     * Returns a multi-valued property.
-     *
-     * This method always returns an array, if there was only a single value,
-     * it will still be wrapped in an array.
-     *
-     * @return array
-     */
-    public function getParts() {
-
-        if (is_null($this->value)) {
-            return array();
-        } elseif (is_array($this->value)) {
-            return $this->value;
-        } else {
-            return array($this->value);
-        }
-
-    }
-
-    /**
-     * Adds a new parameter, and returns the new item.
-     *
-     * If a parameter with same name already existed, the values will be
-     * combined.
-     * If nameless parameter is added, we try to guess it's name.
-     *
-     * @param string $name
-     * @param string|null|array $value
-     * @return Node
-     */
-    public function add($name, $value = null) {
-        $noName = false;
-        if ($name === null) {
-            $name = Parameter::guessParameterNameByValue($value);
-            $noName = true;
-        }
-
-        if (isset($this->parameters[strtoupper($name)])) {
-            $this->parameters[strtoupper($name)]->addValue($value);
-        }
-        else {
-            $param = new Parameter($this->root, $name, $value);
-            $param->noName = $noName;
-            $this->parameters[$param->name] = $param;
-        }
-    }
-
-    /**
-     * Returns an iterable list of children
-     *
-     * @return array
-     */
-    public function parameters() {
-
-        return $this->parameters;
-
-    }
-
-    /**
-     * Returns the type of value.
-     *
-     * This corresponds to the VALUE= parameter. Every property also has a
-     * 'default' valueType.
-     *
-     * @return string
-     */
-    abstract public function getValueType();
-
-    /**
-     * Sets a raw value coming from a mimedir (iCalendar/vCard) file.
-     *
-     * This has been 'unfolded', so only 1 line will be passed. Unescaping is
-     * not yet done, but parameters are not included.
-     *
-     * @param string $val
-     * @return void
-     */
-    abstract public function setRawMimeDirValue($val);
-
-    /**
-     * Returns a raw mime-dir representation of the value.
-     *
-     * @return string
-     */
-    abstract public function getRawMimeDirValue();
 
     /**
      * Turns the object back into a serialized blob.
@@ -239,7 +185,17 @@ abstract class Property extends Node {
 
         }
 
-        $str.=':' . $this->getRawMimeDirValue();
+        $src = array(
+            '\\',
+            "\n",
+            "\r",
+        );
+        $out = array(
+            '\\\\',
+            '\n',
+            '',
+        );
+        $str.=':' . str_replace($src, $out, $this->value);
 
         $out = '';
         while(strlen($str)>0) {
@@ -258,81 +214,39 @@ abstract class Property extends Node {
     }
 
     /**
-     * Returns the value, in the format it should be encoded for json.
+     * Adds a new componenten or element
      *
-     * This method must always return an array.
+     * You can call this method with the following syntaxes:
      *
-     * @return array
-     */
-    public function getJsonValue() {
-
-        return $this->getParts();
-
-    }
-
-    /**
-     * Sets the json value, as it would appear in a jCard or jCal object.
+     * add(Parameter $element)
+     * add(string $name, $value)
      *
-     * The value must always be an array.
+     * The first version adds an Parameter
+     * The second adds a property as a string.
      *
-     * @param array $value
+     * @param mixed $item
+     * @param mixed $itemValue
      * @return void
      */
-    public function setJsonValue(array $value) {
+    public function add($item, $itemValue = null) {
 
-        if (count($value)===1) {
-            $this->setValue(reset($value));
-        } else {
-            $this->setValue($value);
-        }
-
-    }
-
-    /**
-     * This method returns an array, with the representation as it should be
-     * encoded in json. This is used to create jCard or jCal documents.
-     *
-     * @return array
-     */
-    public function jsonSerialize() {
-
-        $parameters = array();
-
-        foreach($this->parameters as $parameter) {
-            if ($parameter->name === 'VALUE') {
-                continue;
+        if ($item instanceof Parameter) {
+            if (!is_null($itemValue)) {
+                throw new \InvalidArgumentException('The second argument must not be specified, when passing a VObject');
             }
-            $parameters[strtolower($parameter->name)] = $parameter->jsonSerialize();
+            $item->parent = $this;
+            $this->parameters[] = $item;
+        } elseif(is_string($item)) {
+
+            $parameter = new Parameter($item,$itemValue);
+            $parameter->parent = $this;
+            $this->parameters[] = $parameter;
+
+        } else {
+
+            throw new \InvalidArgumentException('The first argument must either be a Node a string');
+
         }
-        // In jCard, we need to encode the property-group as a separate 'group'
-        // parameter.
-        if ($this->group) {
-            $parameters['group'] = $this->group;
-        }
-
-        return array_merge(
-            array(
-                strtolower($this->name),
-                (object)$parameters,
-                strtolower($this->getValueType()),
-            ),
-            $this->getJsonValue()
-        );
-    }
-
-
-    /**
-     * Called when this object is being cast to a string.
-     *
-     * If the property only had a single value, you will get just that. In the
-     * case the property had multiple values, the contents will be escaped and
-     * combined with ,.
-     *
-     * @return string
-     */
-    public function __toString() {
-
-        return (string)$this->getValue();
 
     }
 
@@ -358,9 +272,7 @@ abstract class Property extends Node {
     }
 
     /**
-     * Returns a parameter.
-     *
-     * If the parameter does not exist, null is returned.
+     * Returns a parameter, or parameter list.
      *
      * @param string $name
      * @return Node
@@ -370,11 +282,20 @@ abstract class Property extends Node {
         if (is_int($name)) return parent::offsetGet($name);
         $name = strtoupper($name);
 
-        if (!isset($this->parameters[$name])) {
-            return null;
+        $result = array();
+        foreach($this->parameters as $parameter) {
+            if ($parameter->name == $name)
+                $result[] = $parameter;
         }
 
-        return $this->parameters[$name];
+        if (count($result)===0) {
+            return null;
+        } elseif (count($result)===1) {
+            return $result[0];
+        } else {
+            $result[0]->setIterator(new ElementList($result));
+            return $result[0];
+        }
 
     }
 
@@ -387,17 +308,26 @@ abstract class Property extends Node {
      */
     public function offsetSet($name, $value) {
 
-        if (is_int($name)) {
-            parent::offsetSet($name, $value);
-            // @codeCoverageIgnoreStart
-            // This will never be reached, because an exception is always
-            // thrown.
-            return;
-            // @codeCoverageIgnoreEnd
-        }
+        if (is_int($name)) parent::offsetSet($name, $value);
 
-        $param = new Parameter($this->root, $name, $value);
-        $this->parameters[$param->name] = $param;
+        if (is_scalar($value)) {
+            if (!is_string($name))
+                throw new \InvalidArgumentException('A parameter name must be specified. This means you cannot use the $array[]="string" to add parameters.');
+
+            $this->offsetUnset($name);
+            $parameter = new Parameter($name, $value);
+            $parameter->parent = $this;
+            $this->parameters[] = $parameter;
+
+        } elseif ($value instanceof Parameter) {
+            if (!is_null($name))
+                throw new \InvalidArgumentException('Don\'t specify a parameter name if you\'re passing a \\Sabre\\VObject\\Parameter. Add using $array[]=$parameterObject.');
+
+            $value->parent = $this;
+            $this->parameters[] = $value;
+        } else {
+            throw new \InvalidArgumentException('You can only add parameters to the property object');
+        }
 
     }
 
@@ -409,19 +339,31 @@ abstract class Property extends Node {
      */
     public function offsetUnset($name) {
 
-        if (is_int($name)) {
-            parent::offsetUnset($name);
-            // @codeCoverageIgnoreStart
-            // This will never be reached, because an exception is always
-            // thrown.
-            return;
-            // @codeCoverageIgnoreEnd
+        if (is_int($name)) parent::offsetUnset($name);
+        $name = strtoupper($name);
+
+        foreach($this->parameters as $key=>$parameter) {
+            if ($parameter->name == $name) {
+                $parameter->parent = null;
+                unset($this->parameters[$key]);
+            }
+
         }
 
-        unset($this->parameters[strtoupper($name)]);
+    }
+
+    /* }}} */
+
+    /**
+     * Called when this object is being cast to a string
+     *
+     * @return string
+     */
+    public function __toString() {
+
+        return (string)$this->value;
 
     }
-    /* }}} */
 
     /**
      * This method is automatically called when the object is cloned.
@@ -460,31 +402,15 @@ abstract class Property extends Node {
         $warnings = array();
 
         // Checking if our value is UTF-8
-        if (!StringUtil::isUTF8($this->getRawMimeDirValue())) {
-
-            $oldValue = $this->getRawMimeDirValue();
-            $level = 3;
-            if ($options & self::REPAIR) {
-                $newValue = StringUtil::convertToUTF8($oldValue);
-                if (true || StringUtil::isUTF8($newValue)) {
-                    $this->setRawMimeDirValue($newValue);
-                    $level = 1;
-                }
-
-            }
-
-
-            if (preg_match('%([\x00-\x08\x0B-\x0C\x0E\x0F])%', $oldValue, $matches)) {
-                $message = 'Property contained a control character (0x' . bin2hex($matches[1]) . ')';
-            } else {
-                $message = 'Property is not valid UTF-8! ' . $oldValue;
-            }
-
+        if (!StringUtil::isUTF8($this->value)) {
             $warnings[] = array(
-                'level' => $level,
-                'message' => $message,
+                'level' => 1,
+                'message' => 'Property is not valid UTF-8!',
                 'node' => $this,
             );
+            if ($options & self::REPAIR) {
+                $this->value = StringUtil::convertToUTF8($this->value);
+            }
         }
 
         // Checking if the propertyname does not contain any invalid bytes.

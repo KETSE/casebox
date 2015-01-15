@@ -16,6 +16,11 @@ namespace CB;
 
 require_once 'init.php';
 
+//reset if sign out clicked on check tsv
+if (!empty($_GET['l'])) {
+    unset($_SESSION['check_TSV']);
+}
+
 if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
     $errors = array();
     $u = strtolower(trim($_POST['u']));

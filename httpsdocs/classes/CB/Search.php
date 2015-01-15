@@ -1,17 +1,25 @@
 <?php
 namespace CB;
 
+use CB\Cache;
+use CB\Util;
+
 class Search extends Solr\Client
 {
     public static $defaultFields = array(
-        'id', 'pid', 'path', 'name', 'template_type', 'subtype', 'system',
-        'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate',
-        'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'status',
-        'task_status', 'category_id', 'importance', 'completed', 'versions', 'ntsc'
+        'id', 'pid', 'name', 'path', 'template_type', 'target_id', 'system',
+        'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'comment_user_id', 'comment_date',
+        'case_id', 'acl_count', 'case', 'template_id', 'user_ids', 'task_u_assignee', 'status',
+        'task_status', 'task_d_closed', 'versions', 'ntsc'
     );
+
     /*when requested to sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
-    public $replaceSortFields = array('nid' => 'id', 'name' => 'sort_name', 'path' => 'sort_path');
+    protected $replaceSortFields = array(
+        'nid' => 'id'
+        ,'name' => 'sort_name'
+        // ,'path' => 'pid'
+    );
 
     protected $facetsSetManually = false;
 
@@ -41,13 +49,16 @@ class Search extends Solr\Client
             ? ''
             : $this->escapeLuceneChars($p['query']);
 
-        $this->start = empty($p['start'])
-            ? 0
-            : intval($p['start']);
-
         $this->rows = isset($p['rows'])
             ? intval($p['rows'])
             : Config::get('max_rows');
+
+        $this->start = empty($p['start'])
+            ? (empty($p['page'])
+                ? 0
+                : $this->rows * (intval($p['page']) -1)
+            )
+            : intval($p['start']);
 
         //by default filter not deleted nodes
         $fq = array('dstatus:0');
@@ -94,6 +105,19 @@ class Search extends Solr\Client
                 $filteredNames[] = $fn;
             }
 
+            //add target_id field
+            if (!in_array('target_id', $filteredNames)) {
+                $filteredNames[] = 'target_id';
+            }
+
+            //pid & template_id are also needed for shortcuts
+            if (!in_array('pid', $filteredNames)) {
+                $filteredNames[] = 'pid';
+            }
+            if (!in_array('template_id', $filteredNames)) {
+                $filteredNames[] = 'template_id';
+            }
+
             $this->params['fl'] = implode(',', $filteredNames);
         }
 
@@ -111,19 +135,20 @@ class Search extends Solr\Client
                         : strtolower($p['dir']);
                 } else {
                     foreach ($p['sort'] as $s) {
-                        $s = explode(' ', $s);
-                        $sort[$s[0]] = empty($s[1]) ? 'asc' : strtolower($s[1]);
+                        if (is_array($s)) {
+                            $sort[$s['property']] = empty($s['direction'])
+                                ? 'asc'
+                                : strtolower($s['direction']);
+                        } else {
+                            $s = explode(' ', $s);
+                            $sort[$s[0]] = empty($s[1])
+                                ? 'asc'
+                                : strtolower($s[1]);
+                        }
                     }
-                }
-                foreach ($sort as $f => $d) {
-                    if (isset($this->replaceSortFields[$f])) {
-                        // replace with convenient sorting fields if defined
-                        $f = $this->replaceSortFields[$f];
-                    }
-
                 }
             } else {
-                $sort['sort_name'] = 'asc';//, subtype asc
+                $sort['sort_name'] = 'asc';
             }
 
             foreach ($sort as $k => $v) {
@@ -398,7 +423,11 @@ class Search extends Solr\Client
 
     private function processResult()
     {
-        $rez = array( 'total' => $this->results->response->numFound, 'data' => array() );
+        $rez = array(
+            'total' => $this->results->response->numFound,
+            'data' => array()
+        );
+
         if (isDebugHost()) {
             $rez['search'] = array(
                 'query' => $this->query
@@ -408,22 +437,45 @@ class Search extends Solr\Client
                 ,'inputParams' => $this->inputParams
             );
         }
+
         $sr = &$this->results;
+        $shortcuts = array();
+
         foreach ($sr->response->docs as $d) {
             $rd = array();
             foreach ($d as $fn => $fv) {
                 $rd[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
             }
-            if (!empty($sr->highlighting)) {
-                if (!empty($sr->highlighting->{$rd['id']}->{'name'})) {
-                    $rd['hl'] = $sr->highlighting->{$rd['id']}->{'name'}[0];
+
+            $rez['data'][] = &$rd;
+
+            //check if shortcut
+            if (!empty($rd['target_id'])) {
+                $shortcuts[$rd['target_id']] = &$rd;
+            }
+            unset($rd);
+        }
+
+        $this->updateShortcutsData($shortcuts);
+
+        $this->setPaths($rez['data']);
+
+        //add highlights
+        if (!empty($sr->highlighting)) {
+            foreach ($rez['data'] as &$d) {
+                $id = empty($d['target_id'])
+                    ? $d['id']
+                    : $d['target_id'];
+
+                if (!empty($sr->highlighting->{$id}->{'name'})) {
+                    $d['hl'] = $sr->highlighting->{$id}->{'name'}[0];
                 }
-                if (!empty($sr->highlighting->{$rd['id']}->{'content'})) {
-                    $rd['content'] = $sr->highlighting->{$rd['id']}->{'content'}[0];
+                if (!empty($sr->highlighting->{$id}->{'content'})) {
+                    $d['content'] = $sr->highlighting->{$id}->{'content'}[0];
                 }
             }
-            $rez['data'][] = $rd;
         }
+
         $rez = array_merge($rez, $this->processResultFacets());
 
         $eventParams = array(
@@ -456,6 +508,216 @@ class Search extends Solr\Client
 
                 $rez[$idx][$fr['f']] = $fr;
             }
+        }
+
+        return $rez;
+    }
+
+    private function updateShortcutsData($shortcutsArray)
+    {
+        if (empty($shortcutsArray)) {
+            return;
+        }
+
+        $p = &$this->params;
+        $ids = array_keys($shortcutsArray);
+
+        $sr = $this->search(
+            $this->escapeLuceneChars(''),
+            0,
+            1000,
+            array(
+                'defType' => $p['defType']
+                ,'fl' => $p['fl']
+                ,'q.alt' => $p['q.alt']
+                ,'fq' => array(
+                    'id:(' . implode(' OR ', $ids) . ')'
+                )
+            )
+        );
+
+        $shortcuts = array();
+
+        foreach ($sr->response->docs as $d) {
+            $rd = array();
+
+            foreach ($d as $fn => $fv) {
+                $rd[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
+            }
+
+            $d = $shortcutsArray[$rd['id']];
+
+            $rd['target_id'] = $rd['id'];
+            $rd['pid'] = $d['pid'];
+            $rd['id'] = $d['id'];
+            $rd['template_id'] = $d['template_id'];
+
+            if (!empty($d['template_type'])) {
+                $rd['template_type'] = $d['template_type'];
+            }
+
+            $shortcutsArray[$rd['target_id']] = $rd;
+        }
+    }
+
+    /**
+     * update path property for an items array
+     * @param array $dataArray
+     */
+    public static function setPaths(&$dataArray)
+    {
+        if (!is_array($dataArray)) {
+            return;
+        }
+
+        //collect distinct paths and ids
+        $paths = array();
+        $distinctIds = array();
+
+        foreach ($dataArray as &$item) {
+            if (isset($item['path']) && !isset($paths[$item['path']])) {
+                $path = Util\toNumericArray($item['path'], '/');
+                if (!empty($path)) {
+                    $paths[$item['path']] = $path;
+                    $distinctIds = array_merge($distinctIds, $path);
+                }
+            }
+        }
+
+        //get names for distinct ids
+        if (!empty($distinctIds)) {
+            $names = static::getObjectNames($distinctIds);
+
+            //replace ids with names
+            foreach ($paths as $path => $elements) {
+                for ($i=0; $i < sizeof($elements); $i++) {
+                    if (isset($names[$elements[$i]])) {
+                        $elements[$i] = $names[$elements[$i]];
+                    }
+                }
+                array_unshift($elements, '');
+                array_push($elements, '');
+                $paths[$path] = implode('/', $elements);
+            }
+
+            //replace paths in objects data
+            foreach ($dataArray as &$item) {
+                if (isset($item['path'])) {
+                    $item['path'] = @$paths[$item['path']];
+                }
+            }
+        }
+    }
+
+    /**
+     * method to get object names from solr
+     * Multilanguage plugin works also
+     *
+     * @param  array | string $ids
+     * @return array          associative array of names per id
+     */
+    public static function getObjectNames($ids)
+    {
+        $objectNames = Cache::get('objectNames');
+
+        $rez = array();
+        $getIds = array();
+
+        $ids = Util\toNumericArray($ids);
+
+        foreach ($ids as $id) {
+            if (isset($objectNames[$id])) {
+                $rez[$id] = $objectNames[$id];
+            } else {
+                $getIds[] = $id;
+            }
+        }
+
+        if (!empty($getIds)) {
+            $newData = static::getObjects($getIds);
+
+            foreach ($newData as $k => $v) {
+                $objectNames[$k] = $v['name'];
+                $rez[$k] = $v['name'];
+            }
+
+            Cache::set('objectNames', $objectNames);
+        }
+
+        return $rez;
+    }
+
+    /**
+     * method to get multiple object properties from solr
+     * Multilanguage plugin works also
+     *
+     * @param  array | string $ids
+     * @param  string         $fieldList
+     * @return array          associative array of properties per id
+     */
+    public static function getObjects($ids, $fieldList = 'id,name')
+    {
+        $rez = array();
+        $ids = Util\toNumericArray($ids);
+        if (empty($ids)) {
+            return $rez;
+        }
+
+        //connect or get solr service connection
+        $conn = Cache::get('solr_service');
+
+        if (empty($conn)) {
+            $conn = new Solr\Service();
+
+            Cache::set('solr_service', $conn);
+        }
+
+        //execute search
+        try {
+            $params = array(
+                'defType' => 'dismax'
+                ,'q.alt' => '*:*'
+                ,'fl' => $fieldList
+                ,'fq' => array(
+                    'id:(' . implode(' OR ', $ids). ')'
+                )
+            );
+
+            $inputParams = array(
+                'ids' => $ids
+            );
+
+            $eventParams = array(
+                'params' => &$params
+                ,'inputParams' => &$inputParams
+            );
+
+            \CB\fireEvent('beforeSolrQuery', $eventParams);
+
+            $searchRez = $conn->search(
+                '',
+                0,
+                100,
+                $params
+            );
+
+            if (!empty($searchRez->response->docs)) {
+                foreach ($searchRez->response->docs as $d) {
+                    $rd = array();
+                    foreach ($d as $fn => $fv) {
+                        $rd[$fn] = $fv;
+                    }
+                    $rez[$d->id] = $rd;
+                }
+            }
+
+            $eventParams['result'] = array(
+                'data' => &$rez
+            );
+            \CB\fireEvent('solrQuery', $eventParams);
+
+        } catch ( \Exception $e ) {
+            throw new \Exception("An error occured in getObjectNames: \n\n {$e->__toString()}");
         }
 
         return $rez;

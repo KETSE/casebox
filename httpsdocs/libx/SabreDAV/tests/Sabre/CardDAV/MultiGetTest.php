@@ -11,7 +11,7 @@ class MultiGetTest extends AbstractPluginTest {
 
     function testMultiGet() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'REPORT',
             'REQUEST_URI' => '/addressbooks/user1/book1',
         ));
@@ -34,7 +34,7 @@ class MultiGetTest extends AbstractPluginTest {
 
         $this->server->exec();
 
-        $this->assertEquals(207, $response->status, 'Incorrect status code. Full response body:' . $response->body);
+        $this->assertEquals('HTTP/1.1 207 Multi-Status', $response->status, 'Incorrect status code. Full response body:' . $response->body);
 
         // using the client for parsing
         $client = new DAV\Client(array('baseUri'=>'/'));

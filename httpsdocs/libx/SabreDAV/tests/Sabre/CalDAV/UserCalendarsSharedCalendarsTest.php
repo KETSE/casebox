@@ -7,6 +7,7 @@ use Sabre\DAVACL;
 require_once 'Sabre/CalDAV/TestUtil.php';
 
 /**
+ * @covers Sabre\CalDAV\UserCalendars
  */
 class UserCalendarsSharedCalendarsTest extends \PHPUnit_Framework_TestCase {
 
@@ -85,8 +86,7 @@ class UserCalendarsSharedCalendarsTest extends \PHPUnit_Framework_TestCase {
     function testShareReply() {
 
         $instance = $this->getInstance();
-        $result = $instance->shareReply('uri', SharingPlugin::STATUS_DECLINED, 'curi', '1');
-        $this->assertNull($result);
+        $instance->shareReply('uri', SharingPlugin::STATUS_DECLINED, 'curi', '1');
 
     }
 

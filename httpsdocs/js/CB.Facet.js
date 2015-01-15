@@ -1,7 +1,9 @@
 Ext.namespace('CB');
-CB.Facet = Ext.extend( Ext.Panel, {
-    title: 'facet'
-    ,height: 100
+Ext.define('CB.Facet', {
+    extend: 'Ext.Panel'
+    ,title: 'facet'
+    ,autoHeight: true
+    ,closable: false
     ,collapsible: true
     ,titleCollapse: true
     ,hideCollapseTool: true
@@ -10,8 +12,11 @@ CB.Facet = Ext.extend( Ext.Panel, {
     ,mode: 'OR'
     ,modeToggle: false
     ,bodyStyle: 'background: none'
-    ,initComponent: function(){
+
+    ,initComponent: function(config){
+        Ext.apply(this, config);
         var tools = [];
+
         if(this.manualPeriod) {
             tools.push({
                 id: 'period'
@@ -27,8 +32,8 @@ CB.Facet = Ext.extend( Ext.Panel, {
 
         if(this.modeToggle) {
             tools.push({
-                id: 'unchain'
-                ,name: 'unchain'
+                name: 'unchain'
+                ,cls: 'x-tool-unchain'
                 ,handler: this.onModeToggle
                 ,scope: this
                 ,qtip: L.searchSwitchModeMessage
@@ -44,20 +49,20 @@ CB.Facet = Ext.extend( Ext.Panel, {
         );
 
         CB.Facet.superclass.initComponent.apply(this, arguments);
-        this.addEvents('facetchange', 'modechange');
+
         this.enableBubble(['facetchange', 'modechange']);
     }
     ,setModeVisible: function(visible){
         if(!this.rendered) {
             return;
         }
-        this.getEl().removeClass('multivalued');
+        this.getEl().removeCls('multivalued');
         if(visible) {
-            this.getEl().addClass('multivalued');
+            this.getEl().addCls('multivalued');
         }
     }
     ,onModeToggle: function(ev, toolEl, panel, tc){
-        if (toolEl.hasClass('x-tool-chain')) {
+        if (toolEl.hasCls('x-tool-chain')) {
             toolEl.replaceClass('x-tool-chain', 'x-tool-unchain');
             this.mode = 'OR';
         } else {
@@ -85,5 +90,3 @@ CB.Facet = Ext.extend( Ext.Panel, {
     // }
 }
 );
-
-Ext.reg('CBFacet', CB.Facet);

@@ -2,6 +2,9 @@
 
 namespace Sabre\DAV;
 
+/**
+ * @covers \Sabre\DAV\Tree
+ */
 class TreeTest extends \PHPUnit_Framework_TestCase {
 
     function testNodeExists() {
@@ -58,18 +61,6 @@ class TreeTest extends \PHPUnit_Framework_TestCase {
         $children = $tree->getChildren('');
         $this->assertEquals(1,count($children));
         $this->assertEquals('hi', $children[0]->getName());
-
-    }
-
-    function testGetMultipleNodes() {
-
-        $tree = new TreeMock();
-        $result = $tree->getMultipleNodes(['hi/sub', 'hi/file']);
-        $this->assertArrayHasKey('hi/sub', $result);
-        $this->assertArrayHasKey('hi/file', $result);
-
-        $this->assertEquals('sub',  $result['hi/sub']->getName());
-        $this->assertEquals('file', $result['hi/file']->getName());
 
     }
 
@@ -173,22 +164,10 @@ class TreeFileTester extends File implements IProperties {
 
     }
 
-    /**
-     * Updates properties on this node.
-     *
-     * This method received a PropPatch object, which contains all the 
-     * information about the update.
-     *
-     * To update specific properties, call the 'handle' method on this object. 
-     * Read the PropPatch documentation for more information.
-     *
-     * @param array $mutations
-     * @return bool|array
-     */
-    public function propPatch(PropPatch $propPatch) {
+    function updateProperties($properties) {
 
-        $this->properties = $propPatch->getMutations();
-        $propPatch->setRemainingResultCode(200);
+        $this->properties = $properties;
+        return true;
 
     }
 

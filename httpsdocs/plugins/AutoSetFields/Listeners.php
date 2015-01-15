@@ -17,10 +17,10 @@ class Listeners
         }
 
         $objData = $o->getData();
+        $template = $o->getTemplate();
 
         $title = @$o->getFieldValue('_title', 0)['value'];
         if (empty($title)) {
-            $template = $o->getTemplate();
             if (!empty($template)) {
                 $templateData = $template->getData();
                 if (!empty($templateData['title_template'])) {
@@ -37,10 +37,16 @@ class Listeners
             $objData['date'] = Util\dateISOToMysql($date);
         }
 
-        $date = @$o->getFieldValue('_date_end', 0)['value'];
-        if (!empty($date)) {
-            $objData['date_end'] = Util\dateISOToMysql($date);
+        $dateEndField = $template->getField('_date_end');
+        if (!empty($dateEndField)) {
+            $date = @$o->getFieldValue('_date_end', 0)['value'];
+            if (!empty($date)) {
+                $objData['date_end'] = Util\dateISOToMysql($date);
+            } else {
+                $objData['date_end'] = null;
+            }
         }
+
         $o->setData($objData);
     }
 

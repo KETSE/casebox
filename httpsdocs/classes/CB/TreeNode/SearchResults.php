@@ -72,6 +72,16 @@ class SearchResults extends Dbnode
         return $rez;
     }
 
+    public function getNodeParam($param = 'facets')
+    {
+        $rez = parent::getNodeParam($param);
+        if (!empty($this->config['template_id'])) {
+            $rez['from'] = 'template_' . $this->config['template_id'];
+        }
+
+        return $rez;
+    }
+
     protected function getSearchParams(&$searchObject)
     {
         $tpl = $searchObject->getTemplate();

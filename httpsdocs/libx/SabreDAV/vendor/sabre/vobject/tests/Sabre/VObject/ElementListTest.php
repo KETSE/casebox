@@ -6,8 +6,7 @@ class ElementListTest extends \PHPUnit_Framework_TestCase {
 
     function testIterate() {
 
-        $cal = new Component\VCalendar();
-        $sub = $cal->createComponent('VEVENT');
+        $sub = new Component('VEVENT');
 
         $elems = array(
             $sub,

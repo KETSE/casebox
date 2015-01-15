@@ -4,26 +4,16 @@ namespace Sabre\VObject;
 
 class TimezoneUtilTest extends \PHPUnit_Framework_TestCase {
 
-    function setUp() {
-
-        // clearning the tz cache
-        TimezoneUtil::$map = null;
-
-    }
-
     /**
      * @dataProvider getMapping
      */
     function testCorrectTZ($timezoneName) {
 
         $tz = new \DateTimeZone($timezoneName);
-        $this->assertInstanceOf('DateTimeZone', $tz);
 
     }
 
     function getMapping() {
-
-        TimeZoneUtil::loadTzMaps();
 
         // PHPUNit requires an array of arrays
         return array_map(
@@ -154,12 +144,7 @@ HI;
     function testTimezoneOffset() {
 
         $tz = TimeZoneUtil::getTimeZone('GMT-0400', null, true);
-
-        if (version_compare(PHP_VERSION, '5.5.10', '>=') && !defined('HHVM_VERSION')) {
-            $ex = new \DateTimeZone('-04:00');
-        } else {
-            $ex = new \DateTimeZone('Etc/GMT-4');
-        }
+        $ex = new \DateTimeZone('Etc/GMT-4');
         $this->assertEquals($ex->getName(), $tz->getName());
 
     }
@@ -304,11 +289,7 @@ END:VCALENDAR
 HI;
 
         $tz = TimeZoneUtil::getTimeZone('/freeassociation.sourceforge.net/Tzfile/SystemV/EST5EDT', Reader::read($vobj), true);
-        if (version_compare(PHP_VERSION, '5.5.10', '>=') && !defined('HHVM_VERSION')) {
-            $ex = new \DateTimeZone('America/New_York');
-        } else {
-            $ex = new \DateTimeZone('EST5EDT');
-        }
+        $ex = new \DateTimeZone('EST5EDT');
         $this->assertEquals($ex->getName(), $tz->getName());
 
     }

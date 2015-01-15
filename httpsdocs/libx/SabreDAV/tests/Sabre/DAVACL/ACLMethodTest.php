@@ -16,7 +16,17 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $server = new DAV\Server();
         $server->addPlugin($acl);
 
-        $acl->httpAcl($server->httpRequest, $server->httpResponse);
+        $acl->unknownMethod('ACL','test');
+
+    }
+
+    function testCallbackPassthru() {
+
+        $acl = new Plugin();
+        $server = new DAV\Server();
+        $server->addPlugin($acl);
+
+        $this->assertNull($acl->unknownMethod('FOO','test'));
 
     }
 
@@ -39,7 +49,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-        $acl->httpACL($server->httpRequest, $server->httpResponse);
+        $acl->httpACL('test');
 
     }
 
@@ -51,15 +61,13 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $acl = new Plugin();
         $server = new DAV\Server($tree);
         $server->httpRequest = new HTTP\Request();
-        $server->httpRequest->setUrl('/test');
-
         $body = '<?xml version="1.0"?>
 <d:acl xmlns:d="DAV:">
 </d:acl>';
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-        $this->assertFalse($acl->httpACL($server->httpRequest, $server->httpResponse));
+        $this->assertNull($acl->httpACL('test'));
 
     }
 
@@ -73,7 +81,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         );
         $acl = new Plugin();
         $server = new DAV\Server($tree);
-        $server->httpRequest = new HTTP\Request('ACL','/test');
+        $server->httpRequest = new HTTP\Request();
         $body = '<?xml version="1.0"?>
 <d:acl xmlns:d="DAV:">
     <d:ace>
@@ -84,7 +92,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-        $acl->httpACL($server->httpRequest, $server->httpResponse);
+        $acl->httpACL('test');
 
     }
 
@@ -101,7 +109,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         );
         $acl = new Plugin();
         $server = new DAV\Server($tree);
-        $server->httpRequest = new HTTP\Request('ACL','/test');
+        $server->httpRequest = new HTTP\Request();
         $body = '<?xml version="1.0"?>
 <d:acl xmlns:d="DAV:">
     <d:ace>
@@ -112,7 +120,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-        $acl->httpACL($server->httpRequest, $server->httpResponse);
+        $acl->httpACL('test');
 
     }
 
@@ -126,7 +134,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         );
         $acl = new Plugin();
         $server = new DAV\Server($tree);
-        $server->httpRequest = new HTTP\Request('ACL','/test');
+        $server->httpRequest = new HTTP\Request();
         $body = '<?xml version="1.0"?>
 <d:acl xmlns:d="DAV:">
     <d:ace>
@@ -137,7 +145,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-        $acl->httpACL($server->httpRequest, $server->httpResponse);
+        $acl->httpACL('test');
 
     }
 
@@ -151,18 +159,18 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         );
         $acl = new Plugin();
         $server = new DAV\Server($tree);
-        $server->httpRequest = new HTTP\Request('ACL','/test');
+        $server->httpRequest = new HTTP\Request();
         $body = '<?xml version="1.0"?>
 <d:acl xmlns:d="DAV:">
     <d:ace>
-        <d:grant><d:privilege><d:all /></d:privilege></d:grant>
+        <d:grant><d:privilege><d:read-acl /></d:privilege></d:grant>
         <d:principal><d:href>/principals/notfound</d:href></d:principal>
     </d:ace>
 </d:acl>';
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-        $acl->httpACL($server->httpRequest, $server->httpResponse);
+        $acl->httpACL('test');
 
     }
 
@@ -184,7 +192,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         );
         $acl = new Plugin();
         $server = new DAV\Server($tree);
-        $server->httpRequest = new HTTP\Request('ACL','/test');
+        $server->httpRequest = new HTTP\Request();
         $body = '<?xml version="1.0"?>
 <d:acl xmlns:d="DAV:">
     <d:ace>
@@ -195,7 +203,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-        $acl->httpACL($server->httpRequest, $server->httpResponse);
+        $acl->httpACL('test');
 
     }
 
@@ -217,7 +225,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         );
         $acl = new Plugin();
         $server = new DAV\Server($tree);
-        $server->httpRequest = new HTTP\Request('ACL','/test');
+        $server->httpRequest = new HTTP\Request();
         $body = '<?xml version="1.0"?>
 <d:acl xmlns:d="DAV:">
     <d:ace>
@@ -228,7 +236,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-        $acl->httpACL($server->httpRequest, $server->httpResponse);
+        $acl->httpACL('test');
 
     }
 
@@ -250,7 +258,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         );
         $acl = new Plugin();
         $server = new DAV\Server($tree);
-        $server->httpRequest = new HTTP\Request('ACL','/test');
+        $server->httpRequest = new HTTP\Request();
         $body = '<?xml version="1.0"?>
 <d:acl xmlns:d="DAV:">
     <d:ace>
@@ -261,11 +269,11 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-        $acl->httpACL($server->httpRequest, $server->httpResponse);
+        $acl->httpACL('test');
 
     }
 
-    function testSuccessComplex() {
+    function testSuccessComplex () {
 
         $oldACL = array(
             array(
@@ -288,7 +296,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         );
         $acl = new Plugin();
         $server = new DAV\Server($tree);
-        $server->httpRequest = new HTTP\Request('ACL','/test');
+        $server->httpRequest = new HTTP\Request();
         $body = '<?xml version="1.0"?>
 <d:acl xmlns:d="DAV:">
     <d:ace>
@@ -304,8 +312,7 @@ class ACLMethodTest extends \PHPUnit_Framework_TestCase {
         $server->httpRequest->setBody($body);
         $server->addPlugin($acl);
 
-
-        $this->assertFalse($acl->httpAcl($server->httpRequest, $server->httpResponse));
+        $this->assertFalse($acl->unknownMethod('ACL','test'));
 
         $this->assertEquals(array(
             array(

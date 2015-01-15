@@ -1,7 +1,5 @@
 <?php
 
-#return;
-
 spl_autoload_register('__autoload', true, true);
 
 /**

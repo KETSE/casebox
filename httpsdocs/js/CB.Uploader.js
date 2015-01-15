@@ -1,8 +1,9 @@
 Ext.namespace('CB');
 
-CB.Uploader = Ext.extend(Ext.util.Observable, {
+Ext.define('CB.Uploader', {
+    extend: 'Ext.util.Observable'
 
-    defaultConfig: {
+    ,defaultConfig: {
         autoStart: true
         // ,autoRemoveUploaded: false
         ,autoShowWindow: true
@@ -33,56 +34,34 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
             return false;
         }
         this.store = new Ext.data.JsonStore({
-            fields:['id'
-                ,{name:'group', type: 'int'}
-                ,'name'
-                ,'type'
-                ,{name:'size', type: 'int'}
-                ,{name:'loaded', type: 'int'}
-                ,'pid'
-                ,'dir'
-                ,'pathtext'
-                ,'file'
-                ,{name: 'status', type: 'int'}
-                    /* 0 - ready to upload */
-                    /* 1 - uploading */
-                    /* 2 - upload error */
-                    /* 3 - upload timeout */
-                    /* 4 - upload abort */
-                    /* 5 - uploaded */
-                    /* 6 - skipped */
-                ,'msg'
-                ,'md5'
-                ,{name: 'md5_verified', type: 'int'}
-                ,'content_id'
-                ,'response'
-                ]
+            model: 'UploadRecord'
+            ,proxy: {
+                type: 'memory'
+                ,reader: {
+                    type: 'json'
+                }
+            }
         });
 
         this.xhr = new XMLHttpRequest();
         if(this.xhr.addEventListener){
-            this.xhr.addEventListener("loadstart",      this.onFileUploadStart.createDelegate(this), false);
-            this.xhr.upload.addEventListener("progress",    this.onFileUploadProgress.createDelegate(this), false);
-            this.xhr.addEventListener("abort",      this.onFileUploadAbort.createDelegate(this), false);
-            this.xhr.addEventListener("error",      this.onFileUploadError.createDelegate(this), false);
-            this.xhr.addEventListener("load",       this.onFileUploadLoad.createDelegate(this), false);
-            this.xhr.addEventListener("timeout",    this.onFileUploadTimeout.createDelegate(this), false);
-            this.xhr.addEventListener("loadend",    this.onFileUploadLoadEnd.createDelegate(this), false);
+            this.xhr.addEventListener("loadstart",      this.onFileUploadStart.bind(this), false);
+            this.xhr.upload.addEventListener("progress",    this.onFileUploadProgress.bind(this), false);
+            this.xhr.addEventListener("abort",      this.onFileUploadAbort.bind(this), false);
+            this.xhr.addEventListener("error",      this.onFileUploadError.bind(this), false);
+            this.xhr.addEventListener("load",       this.onFileUploadLoad.bind(this), false);
+            this.xhr.addEventListener("timeout",    this.onFileUploadTimeout.bind(this), false);
+            this.xhr.addEventListener("loadend",    this.onFileUploadLoadEnd.bind(this), false);
         }else if(this.xhr.attachEvent){
-            this.xhr.attachEvent("loadstart",       this.onFileUploadStart.createDelegate(this), false);
-            this.xhr.upload.attachEvent("progress", this.onFileUploadProgress.createDelegate(this), false);
-            this.xhr.attachEvent("abort",           this.onFileUploadAbort.createDelegate(this), false);
-            this.xhr.attachEvent("error",           this.onFileUploadError.createDelegate(this), false);
-            this.xhr.attachEvent("load",            this.onFileUploadLoad.createDelegate(this), false);
-            this.xhr.attachEvent("timeout",         this.onFileUploadTimeout.createDelegate(this), false);
-            this.xhr.attachEvent("loadend",         this.onFileUploadLoadEnd.createDelegate(this), false);
+            this.xhr.attachEvent("loadstart",       this.onFileUploadStart.bind(this), false);
+            this.xhr.upload.attachEvent("progress", this.onFileUploadProgress.bind(this), false);
+            this.xhr.attachEvent("abort",           this.onFileUploadAbort.bind(this), false);
+            this.xhr.attachEvent("error",           this.onFileUploadError.bind(this), false);
+            this.xhr.attachEvent("load",            this.onFileUploadLoad.bind(this), false);
+            this.xhr.attachEvent("timeout",         this.onFileUploadTimeout.bind(this), false);
+            this.xhr.attachEvent("loadend",         this.onFileUploadLoadEnd.bind(this), false);
         }
-        this.addEvents({
-            'progresschange': true
-            // ,'complete': true
-            // ,'error': true
-            // ,'abort': true
-        });
+
         this.fileMD5 = new Ext.ux.fileMD5();
         this.fileMD5.on('done', this.onFileMD5Calculated, this);
         return true;
@@ -139,7 +118,9 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
                 this.fireEvent('fileuploadend', this.uploadingFile);
                 delete this.uploadingFile;
                 this.uploadNextFile();
-            }else this.onUploadFailure(r, e);
+            } else {
+                this.onUploadFailure(r, e);
+            }
         }
     }
     /* end of XHR listeners */
@@ -216,7 +197,7 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
         }
         this.group++;
         Ext.each(FilesList, function(f){
-            var dir = Ext.value(f.fullPath, f.mozFullPath);
+            var dir = Ext.valueFrom(f.fullPath, f.mozFullPath);
             if(!Ext.isEmpty(dir)){
                 dir = dir.split('/');
                 dir.pop();
@@ -227,22 +208,27 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
 
             var name = Ext.util.Format.stripScripts(Ext.util.Format.stripTags(f.name));
 
-            record = new this.store.recordType({
-                id: Ext.id()
-                ,group: this.group
-                ,name: name
-                ,type: f.type
-                ,size: f.size
-                ,pid: options.pid
-                ,dir: dir
-                ,pathtext: options.pathtext
-                ,file: f
-                ,status: 0
-                ,loaded: 0
-                ,msg:''
-                ,md5: false
-                ,md5_verified: 0
-            });
+            record =
+                Ext.create(
+                    this.store.getModel().getName()
+                    ,{
+                        id: Ext.id()
+                        ,group: this.group
+                        ,name: name
+                        ,type: f.type
+                        ,size: f.size
+                        ,pid: options.pid
+                        ,dir: dir
+                        ,pathtext: options.pathtext
+                        ,file: f
+                        ,status: 0
+                        ,loaded: 0
+                        ,msg:''
+                        ,md5: false
+                        ,md5_verified: 0
+                    }
+                );
+
             // this.fileMD5.getMD5(f, record);
             this.store.add([record]);
             this.stats.totalSize += record.get('size');
@@ -252,16 +238,18 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
         this.progressChange();
         this.calculateFilesMd5();
     }
+
     ,calculateFilesMd5: function(){
         idx = this.store.findExact('md5', false);
         if(idx >= 0){
             this.md5FileRecord = this.store.getAt(idx);
             this.fileMD5.getMD5(this.md5FileRecord.get('file'));
-        }else{
+        } else {
             delete this.md5FileRecord;
             this.checkExistentContents();
         }
     }
+
     ,onFileMD5Calculated: function(fileMD5, result){
         this.md5FileRecord.set('md5', result);
         this.calculateFilesMd5();
@@ -282,6 +270,7 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
             CB_Files.checkExistentContents(md5array, this.processCheckExistentContents, this);
         }else if(this.config.autoStart) this.start();
     }
+
     ,processCheckExistentContents: function(r, e){
         if(r.success !== true) return;
         Ext.iterate(r.data, function(k, v, o){
@@ -294,6 +283,7 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
         }, this);
         if(this.config.autoStart) this.start();
     }
+
     ,start: function(){
         if(this.status == 1) return; //alreaty uploading
         idx = this.store.findExact('status', 0);
@@ -323,7 +313,8 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
             }
             return;
         }
-        r = this.store.getAt(idx);
+
+        var r = this.store.getAt(idx);
         this.uploadingFile = r;
 
         this.stats.currentFileSize = r.get('size');
@@ -347,6 +338,7 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
         else this.xhr.send(r.get('file'));
         this.progressChange();
     }
+
     ,abort: function(){
         if(this.status != 1) return;
         this.status = 3; //upload canceled
@@ -362,8 +354,9 @@ CB.Uploader = Ext.extend(Ext.util.Observable, {
 });
 
 /* Uploader window */
-CB.UploadWindow = Ext.extend(Ext.Window, {
-    title: L.UploadQueue
+Ext.define('CB.UploadWindow', {
+    extend: 'Ext.Window'
+    ,title: L.UploadQueue
     ,closeAction: 'destroy'
     ,width: 640
     ,height: 380
@@ -522,7 +515,7 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
                     ,sortable: true
                     ,dataIndex: 'status'
                     ,renderer: function(v, meta, r){
-                        return Ext.value(L['fileUploadStatus' + v], '');
+                        return Ext.valueFrom(L['fileUploadStatus' + v], '');
                         // 0 - ready to upload
                         // /* 1 - uploading */
                         // /* 2 - upload error */
@@ -556,7 +549,7 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
                 }
             ]
             ,viewConfig: {
-                stripeRows: true
+                stripeRows: false
                 ,markDirty: false
             }
             ,tbar: new Ext.Toolbar({
@@ -625,23 +618,23 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
         this.actions.start.setDisabled( status == 1 );
         switch(status){
             case 0:
-                this.statusLabel.setValue(Ext.value(L.ReadyToUpload, 'Ready to upload'));
+                this.statusLabel.setValue(Ext.valueFrom(L.ReadyToUpload, 'Ready to upload'));
                 break;
             case 1:
-                this.statusLabel.setValue(Ext.value(L.UploadCompleted, 'Uploading ... '));
+                this.statusLabel.setValue(Ext.valueFrom(L.UploadCompleted, 'Uploading ... '));
                 if(stats.currentLoaded < 0){//unable to compute
 
                 }else{
                     percent = stats.totalLoadedSize + stats.currentLoaded;
                     if(percent > 0) percent = Math.round(percent * 100 / stats.totalSize);
-                    this.statusLabel.setValue( String.format( Ext.value(L.UploadCompleted, 'Uploading {0}% ({1} out of {2})'), percent, (stats.totalLoadedCount + 1), stats.totalCount) );
+                    this.statusLabel.setValue( String.format( Ext.valueFrom(L.UploadCompleted, 'Uploading {0}% ({1} out of {2})'), percent, (stats.totalLoadedCount + 1), stats.totalCount) );
                 }
                 break;
             case 2:
-                this.statusLabel.setValue(Ext.value(L.UploadCompleted, 'Upload completed'));
+                this.statusLabel.setValue(Ext.valueFrom(L.UploadCompleted, 'Upload completed'));
                 break;
             case 3:
-                this.statusLabel.setValue(Ext.value(L.UploadCanceled, 'Upload canceled'));
+                this.statusLabel.setValue(Ext.valueFrom(L.UploadCanceled, 'Upload canceled'));
                 break;
         }
 
@@ -664,7 +657,7 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
         this.uploader.store.each(function(r){if(r.get('status') > 1) this.store.remove(r);});
     }
     ,onChangeViewClick: function(b, e){
-        // this.viewButton.setIconClass(b.iconCls)
+        // this.viewButton.setIconCls(b.iconCls)
         this.viewButton.setText(b.text);
         this.filterView(b.filterIndex);
         this.actions.clear.setHidden(b.filterIndex == 0);
@@ -683,8 +676,11 @@ CB.UploadWindow = Ext.extend(Ext.Window, {
     }
 });
 
-CB.UploadWindowButton = Ext.extend(Ext.Button, {
-    cls: 'upload-btn'
+Ext.define('CB.UploadWindowButton', {
+    extend: 'Ext.Button'
+    ,alias: ['widget.uploadwindowbutton']
+    // ,cls: 'upload-btn'
+
     ,initComponent: function(){
         this.uploader = App.getFileUploader();
         // if cant create an uploader then hide/destroy the button
@@ -736,5 +732,3 @@ CB.UploadWindowButton = Ext.extend(Ext.Button, {
         this.setText(L.UploadQueue);
     }
 });
-
-Ext.reg('uploadwindowbutton', CB.UploadWindowButton);

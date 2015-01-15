@@ -1,9 +1,7 @@
 <?php
 
 namespace Sabre\VObject\Component;
-
 use Sabre\VObject;
-use Sabre\VObject\Reader;
 
 class VFreeBusyTest extends \PHPUnit_Framework_TestCase {
 
@@ -35,31 +33,6 @@ BLA;
         $this->assertTrue($vfb->isFree(new \DateTime('2012-09-12 09:00:00', $tz), new \DateTime('2012-09-12 09:15:00', $tz)));
         $this->assertTrue($vfb->isFree(new \DateTime('2012-09-12 09:45:00', $tz), new \DateTime('2012-09-12 10:00:00', $tz)));
         $this->assertTrue($vfb->isFree(new \DateTime('2012-09-12 11:00:00', $tz), new \DateTime('2012-09-12 12:00:00', $tz)));
-
-    }
-
-    public function testValidate() {
-
-        $input = <<<HI
-BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:YoYo
-BEGIN:VFREEBUSY
-UID:some-random-id
-DTSTAMP:20140402T180200Z
-END:VFREEBUSY
-END:VCALENDAR
-HI;
-
-        $obj = Reader::read($input);
-
-        $warnings = $obj->validate();
-        $messages = array();
-        foreach($warnings as $warning) {
-            $messages[] = $warning['message'];
-        }
-
-        $this->assertEquals(array(), $messages);
 
     }
 

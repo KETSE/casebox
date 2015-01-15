@@ -44,7 +44,6 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
         );
 
         $this->server = new DAV\Server($tree);
-        $this->server->sapi = new HTTP\SapiMock();
         $this->server->debugExceptions = true;
 
         $plugin = new Plugin();
@@ -66,20 +65,20 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
     function testCreateFile() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
 
         $response = $this->request($request);
 
-        $this->assertEquals(415, $response->status);
+        $this->assertEquals('HTTP/1.1 415 Unsupported Media Type', $response->status);
 
     }
 
     function testCreateFileValid() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
@@ -87,11 +86,7 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(201, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
-        $this->assertEquals(array(
-            'Content-Length' => '0',
-            'ETag' => '"' . md5("BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:foo\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n") . '"',
-        ), $response->headers);
+        $this->assertEquals('HTTP/1.1 201 Created', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
         $expected = array(
             'uri'          => 'blabla.ics',
             'calendardata' => "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:foo\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n",
@@ -104,7 +99,7 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
     function testCreateFileNoComponents() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
@@ -112,13 +107,13 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(400, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 400 Bad request', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
     }
 
     function testCreateFileNoUID() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
@@ -126,13 +121,13 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(400, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 400 Bad request', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
     }
 
     function testCreateFileVCard() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
@@ -140,13 +135,13 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(415, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 415 Unsupported Media Type', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
     }
 
     function testCreateFile2Components() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
@@ -154,13 +149,13 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(400, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 400 Bad request', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
     }
 
     function testCreateFile2UIDS() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
@@ -168,13 +163,13 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(400, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 400 Bad request', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
     }
 
     function testCreateFileWrongComponent() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
@@ -182,28 +177,28 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(400, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 400 Bad request', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
     }
 
     function testUpdateFile() {
 
         $this->calBackend->createCalendarObject('calendar1','blabla.ics','foo');
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
 
         $response = $this->request($request);
 
-        $this->assertEquals(415, $response->status);
+        $this->assertEquals('HTTP/1.1 415 Unsupported Media Type', $response->status);
 
     }
 
     function testUpdateFileParsableBody() {
 
         $this->calBackend->createCalendarObject('calendar1','blabla.ics','foo');
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
         ));
@@ -212,7 +207,7 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(204, $response->status);
+        $this->assertEquals('HTTP/1.1 204 No Content', $response->status);
 
         $expected = array(
             'uri'          => 'blabla.ics',
@@ -226,7 +221,7 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
     function testCreateFileInvalidComponent() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar2/blabla.ics',
         ));
@@ -234,14 +229,14 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(403, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 403 Forbidden', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
     }
 
     function testUpdateFileInvalidComponent() {
 
         $this->calBackend->createCalendarObject('calendar2','blabla.ics','foo');
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/calendars/admin/calendar2/blabla.ics',
         ));
@@ -249,29 +244,7 @@ class ValidateICalTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(403, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
-
-    }
-
-    /**
-     * What we are testing here, is if we send in a latin1 character, the
-     * server should automatically transform this into UTF-8.
-     *
-     * More importantly. If any transformation happens, the etag must no longer
-     * be returned by the server.
-     */
-    function testCreateFileModified() {
-
-        $request = HTTP\Sapi::createFromServerArray(array(
-            'REQUEST_METHOD' => 'PUT',
-            'REQUEST_URI' => '/calendars/admin/calendar1/blabla.ics',
-        ));
-        $request->setBody("BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:foo\r\nSUMMARY:Meeting in M\xfcnster\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n");
-
-        $response = $this->request($request);
-
-        $this->assertEquals(201, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
-        $this->assertFalse(isset($response->headers['ETag']));
+        $this->assertEquals('HTTP/1.1 403 Forbidden', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
     }
 }

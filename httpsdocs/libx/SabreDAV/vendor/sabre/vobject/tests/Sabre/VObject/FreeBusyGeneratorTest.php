@@ -90,16 +90,14 @@ END:VEVENT
 END:VCALENDAR
 ICS;
 
-
     // Day-long event, shows up
 $blob9 = <<<ICS
 BEGIN:VCALENDAR
 BEGIN:VEVENT
-DTSTART;VALUE=DATE:20110102
+DTSTART;TYPE=DATE:20110102
 END:VEVENT
 END:VCALENDAR
 ICS;
-
 
 // No duration, does not show up
 $blob10 = <<<ICS
@@ -219,7 +217,7 @@ ICS;
 
     function testGeneratorBaseObject() {
 
-        $obj = new Component\VCalendar();
+        $obj = new Component('VCALENDAR');
         $obj->METHOD = 'PUBLISH';
 
         $gen = new FreeBusyGenerator();
@@ -228,7 +226,7 @@ ICS;
 
         $result = $gen->getResult();
 
-        $this->assertEquals('PUBLISH', $result->METHOD->getValue());
+        $this->assertEquals('PUBLISH', $result->METHOD->value);
 
     }
 

@@ -11,6 +11,12 @@ class ResourceTypeTest extends \PHPUnit_Framework_TestCase {
         $resourceType = new ResourceType(array('{DAV:}collection'));
         $this->assertEquals(array('{DAV:}collection'),$resourceType->getValue());
 
+        $resourceType = new ResourceType(DAV\Server::NODE_FILE);
+        $this->assertEquals(array(),$resourceType->getValue());
+
+        $resourceType = new ResourceType(DAV\Server::NODE_DIRECTORY);
+        $this->assertEquals(array('{DAV:}collection'),$resourceType->getValue());
+
         $resourceType = new ResourceType('{DAV:}principal');
         $this->assertEquals(array('{DAV:}principal'),$resourceType->getValue());
 
@@ -97,7 +103,7 @@ class ResourceTypeTest extends \PHPUnit_Framework_TestCase {
 
         $dom = DAV\XMLUtil::loadDOMDocument($xml);
 
-        $resourceType = ResourceType::unserialize($dom->firstChild, array());
+        $resourceType = ResourceType::unserialize($dom->firstChild);
         $this->assertEquals(array('{DAV:}collection','{DAV:}principal'),$resourceType->getValue());
 
     }

@@ -53,7 +53,7 @@ class SupportedCalendarComponentSetTest extends \PHPUnit_Framework_TestCase {
 
         $dom = \Sabre\DAV\XMLUtil::loadDOMDocument($xml);
 
-        $property = SupportedCalendarComponentSet::unserialize($dom->firstChild, array());
+        $property = SupportedCalendarComponentSet::unserialize($dom->firstChild);
 
         $this->assertTrue($property instanceof SupportedCalendarComponentSet);
         $this->assertEquals(array(

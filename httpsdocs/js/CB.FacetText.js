@@ -1,12 +1,14 @@
 Ext.namespace('CB');
 
-CB.FacetText = Ext.extend( CB.Facet, {
-    autoHeight: true
+Ext.define('CB.FacetText', {
+    extend: 'CB.Facet'
+    ,autoHeight: true
     ,layout: 'fit'
     ,bodyStyle: 'padding: 5px 5px 0px 5px'
+
     ,initComponent: function(){
-        this.editor = new Ext.form.TriggerField({   xtype: 'trigger'
-            ,emptyText: L.searchText
+        this.editor = new Ext.form.field.Text({
+            emptyText: L.searchText
             ,triggerClass: 'x-form-search-trigger'
             ,name: 'queryText'
             ,enableKeyEvents: true
@@ -16,18 +18,19 @@ CB.FacetText = Ext.extend( CB.Facet, {
             ,listeners: {
                 specialkey: {scope: this, fn: function(ed, ev){ if(ev.getKey() == ev.ENTER) ed.onTriggerClick(ev); } }
             }
-        })
-        
-        Ext.apply(this, { items: this.editor })
+        });
+
+        Ext.apply(this, { items: this.editor });
+
         CB.FacetText.superclass.initComponent.apply(this, arguments);
     }
+
     ,setValue: function(value){
         this.editor.setValue(value);
     }
+
     ,getValue: function(){
-        return this.editor.getValue()
+        return this.editor.getValue();
     }
 }
-)
-
-Ext.reg('CBFacetText', CB.FacetText);
+);

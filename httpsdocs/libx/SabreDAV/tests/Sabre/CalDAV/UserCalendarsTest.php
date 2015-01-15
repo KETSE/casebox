@@ -7,6 +7,7 @@ use Sabre\DAV;
 require_once 'Sabre/CalDAV/TestUtil.php';
 
 /**
+ * @covers Sabre\CalDAV\UserCalendars
  */
 class UserCalendarsTest extends \PHPUnit_Framework_TestCase {
 

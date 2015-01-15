@@ -27,11 +27,11 @@ class PluginTest extends \PHPUnit_Framework_TestCase {
         $fakeServer = new DAV\Server( new DAV\SimpleCollection('bla'));
         $plugin = new Plugin(new Backend\Mock(),'realm');
         $fakeServer->addPlugin($plugin);
-        $this->assertTrue(
-            $fakeServer->emit('beforeMethod', [new HTTP\Request(), new HTTP\Response()])
-        );
+        $fakeServer->broadCastEvent('beforeMethod',array('GET','/'));
 
     }
+
+
 
     /**
      * @depends testInit
@@ -42,7 +42,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase {
         $fakeServer = new DAV\Server( new DAV\SimpleCollection('bla'));
         $plugin = new Plugin(new Backend\Mock(),'failme');
         $fakeServer->addPlugin($plugin);
-        $fakeServer->emit('beforeMethod', [new HTTP\Request(), new HTTP\Response()]);
+        $fakeServer->broadCastEvent('beforeMethod',array('GET','/'));
 
     }
 
@@ -52,7 +52,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase {
         $plugin = new Plugin(new Backend\Mock(),'realm');
         $fakeServer->addPlugin($plugin);
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'REPORT',
             'HTTP_CONTENT_TYPE' => 'application/xml',
             'REQUEST_URI' => '/',
@@ -60,11 +60,10 @@ class PluginTest extends \PHPUnit_Framework_TestCase {
         $request->setBody('<?xml version="1.0"?><s:somereport xmlns:s="http://www.rooftopsolutions.nl/NS/example" />');
 
         $fakeServer->httpRequest = $request;
-        $fakeServer->sapi = new HTTP\SapiMock();
         $fakeServer->httpResponse = new HTTP\ResponseMock();
         $fakeServer->exec();
 
-        $this->assertEquals(403, $fakeServer->httpResponse->status);
+        $this->assertEquals('HTTP/1.1 403 Forbidden', $fakeServer->httpResponse->status);
 
     }
 
@@ -76,18 +75,9 @@ class PluginTest extends \PHPUnit_Framework_TestCase {
         $fakeServer = new DAV\Server( new DAV\SimpleCollection('bla'));
         $plugin = new Plugin(new Backend\Mock(),'realm');
         $fakeServer->addPlugin($plugin);
-        $fakeServer->emit('beforeMethod', [new HTTP\Request(), new HTTP\Response()]);
+        $fakeServer->broadCastEvent('beforeMethod',array('GET','/'));
         $this->assertEquals('admin', $plugin->getCurrentUser());
 
-    }
-
-    /**
-     * @depends testInit
-     */
-    function testPlugin() {
-        $myRealmName = 'some_realm';
-        $plugin = new Plugin(new Backend\Mock(),$myRealmName);
-        $this->assertEquals($myRealmName, $plugin->getRealm());
     }
 
 }

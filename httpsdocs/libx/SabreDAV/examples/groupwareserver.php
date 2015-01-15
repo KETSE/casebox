@@ -24,7 +24,7 @@ date_default_timezone_set('UTC');
  *
  * This can be for example the root / or a complete path to your server script.
  */
-// $baseUri = '/';
+$baseUri = '/';
 
 /**
  * Database
@@ -67,18 +67,18 @@ $caldavBackend    = new \Sabre\CalDAV\Backend\PDO($pdo);
  * Basically this is an array which contains the 'top-level' directories in the
  * WebDAV server.
  */
-$nodes = [
+$nodes = array(
     // /principals
     new \Sabre\CalDAV\Principal\Collection($principalBackend),
     // /calendars
     new \Sabre\CalDAV\CalendarRootNode($principalBackend, $caldavBackend),
     // /addressbook
     new \Sabre\CardDAV\AddressBookRoot($principalBackend, $carddavBackend),
-];
+);
 
 // The object tree needs in turn to be passed to the server class
 $server = new \Sabre\DAV\Server($nodes);
-if (isset($baseUri)) $server->setBaseUri($baseUri);
+$server->setBaseUri($baseUri);
 
 // Plugins
 $server->addPlugin(new \Sabre\DAV\Auth\Plugin($authBackend,'SabreDAV'));
@@ -86,7 +86,6 @@ $server->addPlugin(new \Sabre\DAV\Browser\Plugin());
 $server->addPlugin(new \Sabre\CalDAV\Plugin());
 $server->addPlugin(new \Sabre\CardDAV\Plugin());
 $server->addPlugin(new \Sabre\DAVACL\Plugin());
-$server->addPlugin(new \Sabre\DAV\Sync\Plugin());
 
 // And off we go!
 $server->exec();

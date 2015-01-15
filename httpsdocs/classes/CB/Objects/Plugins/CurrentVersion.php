@@ -21,11 +21,14 @@ class CurrentVersion extends Base
         $o = Objects::getCachedObject($this->id);
         $data = $o->getData();
 
-        $data['ago_text'] = Util\formatAgoTime($data['cdate']);
-        $data['user'] = User::getDisplayName($data['oid'], true);
-        $data['cls'] = 'sel';
+        //show current version only if have more other versions
+        if (!empty($data['versions'])) {
+            $data['ago_text'] = Util\formatAgoTime($data['cdate']);
+            $data['user'] = User::getDisplayName($data['oid'], true);
+            $data['cls'] = 'sel';
 
-        $rez['data'] = array($data);
+            $rez['data'] = array($data);
+        }
 
         return $rez;
     }

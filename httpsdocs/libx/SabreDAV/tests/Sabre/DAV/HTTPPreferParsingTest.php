@@ -8,7 +8,7 @@ class HTTPPReferParsingTest extends \Sabre\DAVServerTest {
 
     function testParseSimple() {
 
-        $httpRequest = HTTP\Sapi::createFromServerArray(array(
+        $httpRequest = new HTTP\Request(array(
             'HTTP_PREFER' => 'return-asynch',
         ));
 
@@ -28,7 +28,7 @@ class HTTPPReferParsingTest extends \Sabre\DAVServerTest {
 
     function testParseValue() {
 
-        $httpRequest = HTTP\Sapi::createFromServerArray(array(
+        $httpRequest = new HTTP\Request(array(
             'HTTP_PREFER' => 'wait=10',
         ));
 
@@ -48,7 +48,7 @@ class HTTPPReferParsingTest extends \Sabre\DAVServerTest {
 
     function testParseMultiple() {
 
-        $httpRequest = HTTP\Sapi::createFromServerArray(array(
+        $httpRequest = new HTTP\Request(array(
             'HTTP_PREFER' => 'return-minimal, strict,lenient',
         ));
 
@@ -68,7 +68,7 @@ class HTTPPReferParsingTest extends \Sabre\DAVServerTest {
 
     function testParseWeirdValue() {
 
-        $httpRequest = HTTP\Sapi::createFromServerArray(array(
+        $httpRequest = new HTTP\Request(array(
             'HTTP_PREFER' => 'BOOOH',
         ));
 
@@ -88,7 +88,7 @@ class HTTPPReferParsingTest extends \Sabre\DAVServerTest {
 
     function testBrief() {
 
-        $httpRequest = HTTP\Sapi::createFromServerArray(array(
+        $httpRequest = new HTTP\Request(array(
             'HTTP_BRIEF' => 't',
         ));
 
@@ -113,7 +113,7 @@ class HTTPPReferParsingTest extends \Sabre\DAVServerTest {
      */
     function testpropfindMinimal() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PROPFIND',
             'REQUEST_URI'    => '/',
             'HTTP_PREFER' => 'return-minimal',
@@ -138,7 +138,7 @@ BLA
 
     function testproppatchMinimal() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PROPPATCH',
             'REQUEST_URI'    => '/',
             'HTTP_PREFER' => 'return-minimal',
@@ -155,24 +155,25 @@ BLA
 BLA
         );
 
-        $this->server->on('propPatch', function($path, PropPatch $propPatch) {
+        $this->server->subscribeEvent('updateProperties', function(&$props, &$result) {
 
-            $propPatch->handle('{DAV:}something', function($props) {
-                return true; 
-            });
+            if (isset($props['{DAV:}something'])) {
+                unset($props['{DAV:}something']);
+                $result[200]['{DAV:}something'] = null;
+            }
 
         });
 
         $response = $this->request($request);
 
         $this->assertEquals(0, strlen($response->body), 'Expected empty body: ' . $response->body);
-        $this->assertEquals(204, $response->status);
+        $this->assertEquals('HTTP/1.1 204 No Content', $response->status);
 
     }
 
     function testproppatchMinimalError() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PROPPATCH',
             'REQUEST_URI'    => '/',
             'HTTP_PREFER' => 'return-minimal',
@@ -191,9 +192,9 @@ BLA
 
         $response = $this->request($request);
 
-        $this->assertEquals(207, $response->status);
+        $this->assertEquals('HTTP/1.1 207 Multi-Status', $response->status);
         $this->assertTrue(strpos($response->body, 'something')!==false);
-        $this->assertTrue(strpos($response->body, '403 Forbidden')!==false);
+        $this->assertTrue(strpos($response->body, 'HTTP/1.1 403 Forbidden')!==false);
 
     }
 }

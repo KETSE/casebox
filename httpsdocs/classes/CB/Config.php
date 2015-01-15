@@ -24,10 +24,33 @@ class Config extends Singleton
         // merging configs from platform, from casebox database and from core itself
         $cfg = array_merge($cfg, static::getPlatformDBConfig());
         $cfg = array_merge($cfg, static::getPlatformConfigForCore($cfg['core_name']));
+
+        $coreDBConfig = static::getCoreDBConfig();
+
+        $propertiesToMerge = array('files');
+
+        //detect available languages
+        $languages = empty($coreDBConfig['languages'])
+            ? $cfg['languages']
+            : $coreDBConfig['languages'];
+
+        //prepare language properties to be decoded and merged
+        $languages = explode(',', $languages);
+        foreach ($languages as $l) {
+            $l = 'language_' . $l;
+            if (isset($cfg[$l])) {
+                $cfg[$l] = Util\toJSONArray($cfg[$l]);
+            }
+            if (isset($coreDBConfig[$l])) {
+                $coreDBConfig[$l] = Util\toJSONArray($coreDBConfig[$l]);
+            }
+            $propertiesToMerge[] = $l;
+        }
+
         $cfg = static::mergeConfigs(
             $cfg,
-            static::getCoreDBConfig(),
-            array('files')
+            $coreDBConfig,
+            $propertiesToMerge
         );
 
         static::$config = static::adjustConfig($cfg);
@@ -115,7 +138,7 @@ class Config extends Singleton
         if ($r = $res->fetch_assoc()) {
             $rez = json_decode($r['cfg'], true);
         } else {
-            throw new \Exception('Core not defined in cores table: '. $coreName, 1);
+            throw new \Exception('Core not defined in cores table: '.$coreName, 1);
         }
         $res->close();
 
@@ -207,23 +230,19 @@ class Config extends Singleton
             ? 0
             : $rez['folder_templates'][0];
 
-        if (!empty($config['default_file_template'])) {
-            $rez['default_file_template'] = $config['default_file_template'];
+        if (empty($config['default_file_template'])) {
+            $a = Templates::getIdsByType('file');
+            $rez['default_file_template'] = array_shift($a);
         } else {
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM templates
-                WHERE `type` = $1',
-                'file'
-            ) or die( DB\dbQueryError() );
+            $rez['default_file_template'] = $config['default_file_template'];
 
-            if ($r = $res->fetch_assoc()) {
-                $rez['default_file_template'] = $r['id'];
-            } else {
-                $rez['default_file_template'] = 0;
-            }
+        }
 
-            $res->close();
+        if (empty($config['default_shortcut_template'])) {
+            $a = Templates::getIdsByType('shortcut');
+            $rez['default_shortcut_template'] = array_shift($a);
+        } else {
+            $rez['default_shortcut_template'] = $config['default_shortcut_template'];
         }
 
         foreach ($config as $k => $v) {
@@ -307,7 +326,10 @@ class Config extends Singleton
             ? array()
             : static::adjustPaths(static::$config['css'], static::$environmentVars['core_dir']);
 
-        array_unshift($rez, DOC_ROOT.'/css/'.static::get('theme', 'default').'/theme.css');
+        $path = DOC_ROOT.'/css/'.static::get('theme', 'default') . '/';
+
+        array_unshift($rez, $path . 'ribbon.css');
+        array_unshift($rez, $path . 'theme.css');
 
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
@@ -328,7 +350,13 @@ class Config extends Singleton
         $plugins = static::getPlugins();
         foreach ($plugins as $name => $data) {
             if (!empty($data['js'])) {
-                $rez = array_merge($rez, static::adjustPaths($data['js'], PLUGINS_DIR.$name.DIRECTORY_SEPARATOR));
+                $rez = array_merge(
+                    $rez,
+                    static::adjustPaths(
+                        $data['js'],
+                        PLUGINS_DIR.$name.DIRECTORY_SEPARATOR
+                    )
+                );
             }
         }
 

@@ -25,10 +25,6 @@ class FSTest extends AbstractTest {
 
         // We're skipping this test. This doesn't work, and it will
         // never. The class is deprecated anyway.
-        //
-        // We need to assert something though, so phpunit won't fail in strict
-        // mode.
-        $this->assertTrue(true);
 
     }
 

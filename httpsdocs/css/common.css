@@ -20,6 +20,7 @@
 .taC{ text-align: center }
 .taJ{ text-align: justify }
 .taR{ text-align: right }
+.ttU{ text-transform: uppercase }
 .vaT, .vaT td{ vertical-align: top !important}
 .dIB{display: inline-block !important}
 .dn{display: none}
@@ -283,20 +284,19 @@ a.file{min-height: 16px; display: inline-block}
 .i16{width: 16px; height: 16px}
 .i16u{width: 16px; height: 16px; background-image:url(/css/i/ext/.png)}
 .i32{width: 32px; height: 32px}
+.bgs32{background-size: 32px 32px}
 .wsNW {white-space: nowrap}
 .click, .header-click{ cursor: hand; cursor: pointer }
 .click:hover{ color: #286bcc !important; text-decoration: underline }
 .header-click:hover{ color: #286bcc !important; text-decoration: none }
-ul.clean{list-style: none; margin: 0; padding: 2px 0; }
-ul.clean li{ margin: 0; padding: 0; }
-ul.with-icons li{padding-left: 20px; white-space:nowrap}
+
+
+/* object field, renderer=listObjIcons */
+ul.clean {list-style: none; margin: 0; padding: 0; }
+ul.clean li { margin: 0; padding: 0; }
+ul.with-icons li {padding-left: 20px; white-space: nowrap}
 ol.ol {list-style: decimal inside !important;}
 img.fit-img {
     max-width: 100%;
     max-height: 100%;
-}
-
-img.fit-300 {
-    max-width: 300px;
-    max-height: 300px;
 }

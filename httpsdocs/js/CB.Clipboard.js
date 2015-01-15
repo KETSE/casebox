@@ -1,20 +1,16 @@
 Ext.namespace('CB');
-CB.Clipboard =  Ext.extend(Ext.util.Observable, {
-    data: []
+Ext.define('CB.Clipboard', {
+    extend: 'Ext.util.Observable'
+    ,data: []
     ,action: 'copy' // copy / move / shortcut
 
     ,constructor: function(config){
-        this.addEvents({
-            'pasted': true
-            ,'change': true
-        });
-
         CB.Clipboard.superclass.constructor.call(this, config);
     }
 
     ,set:function(data, action) {
         this.data = Ext.isArray(data) ? data : [data];
-        this.action = Ext.value(action, 'copy');
+        this.action = Ext.valueFrom(action, 'copy');
         this.fireEvent('change', this);
     }
 
@@ -50,7 +46,7 @@ CB.Clipboard =  Ext.extend(Ext.util.Observable, {
 
     ,paste: function(pid, action, callback, scope){
         App.DD.execute({
-            action: Ext.value(action, this.action)
+            action: Ext.valueFrom(action, this.action)
             ,confirm: false
             ,targetData: {id: pid}
             ,sourceData: this.data
@@ -60,5 +56,3 @@ CB.Clipboard =  Ext.extend(Ext.util.Observable, {
         );
     }
 });
-
-Ext.reg('CBClipboard', CB.Clipboard);

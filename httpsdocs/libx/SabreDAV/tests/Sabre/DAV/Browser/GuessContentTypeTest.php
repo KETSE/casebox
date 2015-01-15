@@ -10,7 +10,6 @@ class GuessContentTypeTest extends DAV\AbstractServer {
     function setUp() {
 
         parent::setUp();
-        \Sabre\TestUtil::clearTempDir();
         file_put_contents(SABRE_TEMPDIR . '/somefile.jpg','blabla');
         file_put_contents(SABRE_TEMPDIR . '/somefile.hoi','blabla');
 
@@ -18,7 +17,7 @@ class GuessContentTypeTest extends DAV\AbstractServer {
 
     function tearDown() {
 
-        \Sabre\TestUtil::clearTempDir();
+        unlink(SABRE_TEMPDIR . '/somefile.jpg');
         parent::tearDown();
     }
 
@@ -45,7 +44,7 @@ class GuessContentTypeTest extends DAV\AbstractServer {
         );
         $result = $this->server->getPropertiesForPath('/somefile.jpg',$properties);
         $this->assertArrayHasKey(0,$result);
-        $this->assertArrayHasKey(200,$result[0], 'We received: ' . print_r($result,true));
+        $this->assertArrayHasKey(200,$result[0]);
         $this->assertArrayHasKey('{DAV:}getcontenttype',$result[0][200]);
         $this->assertEquals('image/jpeg',$result[0][200]['{DAV:}getcontenttype']);
 

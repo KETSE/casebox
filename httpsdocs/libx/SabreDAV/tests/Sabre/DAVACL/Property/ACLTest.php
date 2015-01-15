@@ -11,7 +11,6 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
     function testConstruct() {
 
         $acl = new Acl(array());
-        $this->assertInstanceOf('Sabre\DAVACL\Property\ACL', $acl);
 
     }
 
@@ -188,7 +187,7 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 ';
 
         $dom = DAV\XMLUtil::loadDOMDocument($source);
-        $result = Acl::unserialize($dom->firstChild, array());
+        $result = Acl::unserialize($dom->firstChild);
 
         $this->assertInstanceOf('Sabre\\DAVACL\\Property\\ACL', $result);
 
@@ -228,7 +227,7 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 ';
 
         $dom = DAV\XMLUtil::loadDOMDocument($source);
-        Acl::unserialize($dom->firstChild, array());
+        Acl::unserialize($dom->firstChild);
 
     }
 
@@ -264,7 +263,7 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 ';
 
         $dom = DAV\XMLUtil::loadDOMDocument($source);
-        $result = Acl::unserialize($dom->firstChild, array());
+        $result = Acl::unserialize($dom->firstChild);
 
         $this->assertInstanceOf('Sabre\\DAVACL\\Property\\Acl', $result);
 
@@ -310,7 +309,7 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 ';
 
         $dom = DAV\XMLUtil::loadDOMDocument($source);
-        Acl::unserialize($dom->firstChild, array());
+        Acl::unserialize($dom->firstChild);
     }
 
     /**
@@ -330,7 +329,7 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 ';
 
         $dom = DAV\XMLUtil::loadDOMDocument($source);
-        Acl::unserialize($dom->firstChild, array());
+        Acl::unserialize($dom->firstChild);
 
     }
 }

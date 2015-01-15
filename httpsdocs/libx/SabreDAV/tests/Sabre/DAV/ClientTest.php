@@ -2,9 +2,6 @@
 
 namespace Sabre\DAV;
 
-use Sabre\HTTP\Request;
-use Sabre\HTTP\Response;
-
 require_once 'Sabre/DAV/ClientMock.php';
 
 class ClientTest extends \PHPUnit_Framework_TestCase {
@@ -14,7 +11,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         $client = new ClientMock(array(
             'baseUri' => '/',
         ));
-        $this->assertInstanceOf('Sabre\DAV\ClientMock', $client);
 
     }
 
@@ -27,235 +23,927 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    function testAuth() {
+    function testRequest() {
 
-        $client = new ClientMock([
-            'baseUri' => '/',
-            'userName' => 'foo',
-            'password' => 'bar',
-        ]);
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
 
-        $this->assertEquals("foo:bar", $client->curlSettings[CURLOPT_USERPWD]);
-        $this->assertEquals(CURLAUTH_BASIC | CURLAUTH_DIGEST, $client->curlSettings[CURLOPT_HTTPAUTH]);
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
 
-    }
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
 
-    function testBasicAuth() {
+        $result = $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
 
-        $client = new ClientMock([
-            'baseUri' => '/',
-            'userName' => 'foo',
-            'password' => 'bar',
-            'authType' => Client::AUTH_BASIC
-        ]);
+        $this->assertEquals('http://example.org/foo/bar/baz', $client->url);
+        $this->assertEquals(array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => 'sillybody',
+            CURLOPT_HEADER => true,
+            CURLOPT_HTTPHEADER => array('Content-Type: text/plain'),
+        ), $client->curlSettings);
 
-        $this->assertEquals("foo:bar", $client->curlSettings[CURLOPT_USERPWD]);
-        $this->assertEquals(CURLAUTH_BASIC, $client->curlSettings[CURLOPT_HTTPAUTH]);
+        $this->assertEquals(array(
+            'statusCode' => 200,
+            'headers' => array(
+                'content-type' => 'text/plain',
+            ),
+            'body' => 'Hello there!'
+        ), $result);
 
-    }
-
-    function testDigestAuth() {
-
-        $client = new ClientMock([
-            'baseUri' => '/',
-            'userName' => 'foo',
-            'password' => 'bar',
-            'authType' => Client::AUTH_DIGEST
-        ]);
-
-        $this->assertEquals("foo:bar", $client->curlSettings[CURLOPT_USERPWD]);
-        $this->assertEquals(CURLAUTH_DIGEST, $client->curlSettings[CURLOPT_HTTPAUTH]);
-
-    }
-
-
-    function testProxy() {
-
-        $client = new ClientMock([
-            'baseUri' => '/',
-            'proxy' => 'localhost:8888',
-        ]);
-
-        $this->assertEquals("localhost:8888", $client->curlSettings[CURLOPT_PROXY]);
-
-    }
-
-    function testEncoding() {
-
-        $client = new ClientMock([
-            'baseUri' => '/',
-            'encoding' => Client::ENCODING_IDENTITY | Client::ENCODING_GZIP | Client::ENCODING_DEFLATE,
-        ]);
-
-        $this->assertEquals("identity,deflate,gzip", $client->curlSettings[CURLOPT_ENCODING]);
 
     }
 
 
-    function testCAInfo() {
+    function testRequestProxy() {
 
-        $client = new ClientMock([
-            'baseUri' => '/',
-        ]);
-        $client->addTrustedCertificates('foo.txt');
-        $this->assertEquals("foo.txt", $client->curlSettings[CURLOPT_CAINFO]);
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+            'proxy' => 'http://localhost:8000/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $result = $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+
+        $this->assertEquals('http://example.org/foo/bar/baz', $client->url);
+        $this->assertEquals(array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => 'sillybody',
+            CURLOPT_HEADER => true,
+            CURLOPT_HTTPHEADER => array('Content-Type: text/plain'),
+            CURLOPT_PROXY => 'http://localhost:8000/',
+        ), $client->curlSettings);
+
+        $this->assertEquals(array(
+            'statusCode' => 200,
+            'headers' => array(
+                'content-type' => 'text/plain',
+            ),
+            'body' => 'Hello there!'
+        ), $result);
 
     }
 
+    function testRequestCAInfo() {
 
-    function testSetVerifyPeer() {
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
 
-        $client = new ClientMock([
-            'baseUri' => '/',
-        ]);
-        $client->setVerifyPeer(false);
-        $this->assertEquals(false, $client->curlSettings[CURLOPT_SSL_VERIFYPEER]);
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $client->addTrustedCertificates('bla');
+
+        $result = $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+
+        $this->assertEquals('http://example.org/foo/bar/baz', $client->url);
+        $this->assertEquals(array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => 'sillybody',
+            CURLOPT_HEADER => true,
+            CURLOPT_CAINFO => 'bla',
+            CURLOPT_HTTPHEADER => array('Content-Type: text/plain'),
+        ), $client->curlSettings);
+
+    }
+
+    function testRequestSslPeer() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $client->setVerifyPeer(true);
+
+        $result = $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+
+        $this->assertEquals('http://example.org/foo/bar/baz', $client->url);
+        $this->assertEquals(array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => 'sillybody',
+            CURLOPT_HEADER => true,
+            CURLOPT_HTTPHEADER => array('Content-Type: text/plain'),
+            CURLOPT_SSL_VERIFYPEER => true
+        ), $client->curlSettings);
+
+    }
+
+    function testRequestAuth() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+            'userName' => 'user',
+            'password' => 'password',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $result = $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+
+        $this->assertEquals('http://example.org/foo/bar/baz', $client->url);
+        $this->assertEquals(array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => 'sillybody',
+            CURLOPT_HEADER => true,
+            CURLOPT_HTTPHEADER => array('Content-Type: text/plain'),
+            CURLOPT_HTTPAUTH => CURLAUTH_BASIC | CURLAUTH_DIGEST,
+            CURLOPT_USERPWD => 'user:password'
+        ), $client->curlSettings);
+
+        $this->assertEquals(array(
+            'statusCode' => 200,
+            'headers' => array(
+                'content-type' => 'text/plain',
+            ),
+            'body' => 'Hello there!'
+        ), $result);
+
+    }
+
+    function testRequestAuthBasic() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+            'userName' => 'user',
+            'password' => 'password',
+            'authType' => Client::AUTH_BASIC,
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $result = $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+
+        $this->assertEquals('http://example.org/foo/bar/baz', $client->url);
+        $this->assertEquals(array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => 'sillybody',
+            CURLOPT_HEADER => true,
+            CURLOPT_HTTPHEADER => array('Content-Type: text/plain'),
+            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+            CURLOPT_USERPWD => 'user:password'
+        ), $client->curlSettings);
+
+        $this->assertEquals(array(
+            'statusCode' => 200,
+            'headers' => array(
+                'content-type' => 'text/plain',
+            ),
+            'body' => 'Hello there!'
+        ), $result);
+
+    }
+
+    function testRequestAuthDigest() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+            'userName' => 'user',
+            'password' => 'password',
+            'authType' => Client::AUTH_DIGEST,
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $result = $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+
+        $this->assertEquals('http://example.org/foo/bar/baz', $client->url);
+        $this->assertEquals(array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => 'sillybody',
+            CURLOPT_HEADER => true,
+            CURLOPT_HTTPHEADER => array('Content-Type: text/plain'),
+            CURLOPT_HTTPAUTH => CURLAUTH_DIGEST,
+            CURLOPT_USERPWD => 'user:password'
+        ), $client->curlSettings);
+
+        $this->assertEquals(array(
+            'statusCode' => 200,
+            'headers' => array(
+                'content-type' => 'text/plain',
+            ),
+            'body' => 'Hello there!'
+        ), $result);
+
+    }
+    function testRequestError() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            CURLE_COULDNT_CONNECT,
+            "Could not connect, or something"
+        );
+
+        $caught = false;
+        try {
+            $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+        } catch (Exception $e) {
+            $caught = true;
+        }
+        if (!$caught) {
+            $this->markTestFailed('Exception was not thrown');
+        }
+
+    }
+
+    function testRequestHTTPError() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 400 Bad Request",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 400,
+            ),
+            0,
+            ""
+        );
+
+        $caught = false;
+        try {
+            $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+        } catch (Exception $e) {
+            $caught = true;
+        }
+        if (!$caught) {
+            $this->fail('Exception was not thrown');
+        }
+
+    }
+
+    function testRequestHTTP404() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 404 Not Found",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 404,
+            ),
+            0,
+            ""
+        );
+
+        $caught = false;
+        try {
+            $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+        } catch (Exception\NotFound $e) {
+            $caught = true;
+        }
+        if (!$caught) {
+            $this->fail('Exception was not thrown');
+        }
+
+    }
+
+    /**
+     * @dataProvider supportedHTTPCodes
+     */
+    function testSpecificHTTPErrors($error) {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 $error blabla",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 42,
+                'http_code' => $error,
+            ),
+            0,
+            ""
+        );
+
+        try {
+            $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+            $this->fail('Exception was not thrown');
+        } catch (Exception $e) {
+            $this->assertEquals($e->getHTTPCode(), $error);
+        }
+
+
+    }
+
+    public function supportedHTTPCodes() {
+
+        return array(
+            array(400),
+            array(401),
+            array(402),
+            array(403),
+            array(404),
+            array(405),
+            array(409),
+            array(412),
+            array(416),
+            array(500),
+            array(501),
+            array(507),
+        );
+
+    }
+
+    function testUnsupportedHTTPError() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 580 blabla",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 42,
+                'http_code' => "580"
+            ),
+            0,
+            ""
+        );
+
+        try {
+            $client->request('POST', 'baz', 'sillybody', array('Content-Type' => 'text/plain'));
+            $this->fail('Exception was not thrown');
+        } catch (Exception $e) {
+            $this->assertEquals(500, $e->getHTTPCode());
+        }
+
+
+    }
+
+    function testGetAbsoluteUrl() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/',
+        ));
+
+        $this->assertEquals(
+            'http://example.org/foo/bar',
+            $client->getAbsoluteUrl('bar')
+        );
+
+        $this->assertEquals(
+            'http://example.org/bar',
+            $client->getAbsoluteUrl('/bar')
+        );
+
+        $this->assertEquals(
+            'http://example.com/bar',
+            $client->getAbsoluteUrl('http://example.com/bar')
+        );
+
+    }
+
+    function testOptions() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "DAV: feature1, feature2",
+            "",
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 40,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $result = $client->options();
+        $this->assertEquals(
+            array('feature1', 'feature2'),
+            $result
+        );
+
+    }
+
+    function testOptionsNoDav() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "",
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 20,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $result = $client->options();
+        $this->assertEquals(
+            array(),
+            $result
+        );
+
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    function testPropFindNoXML() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "",
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 20,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $client->propfind('', array('{DAV:}foo','{DAV:}bar'));
 
     }
 
     function testPropFind() {
 
-        $client = new ClientMock([
-            'baseUri' => '/',
-        ]);
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
 
-        $responseBody = <<<XML
-<?xml version="1.0"?>
-<multistatus xmlns="DAV:">
-<response>
-  <href>/foo</href>
-  <propstat>
-    <prop>
-      <displayname>bar</displayname>
-    </prop>
-    <status>HTTP/1.1 200 OK</status>
-  </propstat>
-</response>
-</multistatus>
-XML;
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "",
+            "<?xml version=\"1.0\"?>",
+            "<d:multistatus xmlns:d=\"DAV:\">",
+            "  <d:response>",
+            "    <d:href>/foo/bar/</d:href>",
+            "    <d:propstat>",
+            "      <d:prop>",
+            "         <d:foo>hello</d:foo>",
+            "      </d:prop>",
+            "      <d:status>HTTP/1.1 200 OK</d:status>",
+            "    </d:propstat>",
+            "    <d:propstat>",
+            "      <d:prop>",
+            "         <d:bar />",
+            "      </d:prop>",
+            "      <d:status>HTTP/1.1 404 Not Found</d:status>",
+            "    </d:propstat>",
+            "  </d:response>",
+            "</d:multistatus>",
+        );
 
-        $client->response = new Response(207, [], $responseBody);
-        $result = $client->propfind('foo', ['{DAV:}displayname', '{urn:zim}gir']);
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 19,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
 
-        $this->assertEquals(['{DAV:}displayname' => 'bar'], $result);
+        $result = $client->propfind('', array('{DAV:}foo','{DAV:}bar'));
 
-        $request = $client->request;
-        $this->assertEquals('PROPFIND', $request->getMethod());
-        $this->assertEquals('/foo', $request->getUrl());
-        $this->assertEquals([
-            'Depth' => '0',
-            'Content-Type' => 'application/xml',
-        ], $request->getHeaders());
+        $this->assertEquals(array(
+            '{DAV:}foo' => 'hello',
+        ), $result);
+
+        $requestBody = array(
+            '<?xml version="1.0"?>',
+            '<d:propfind xmlns:d="DAV:">',
+            '  <d:prop>',
+            '    <d:foo />',
+            '    <d:bar />',
+            '  </d:prop>',
+            '</d:propfind>'
+        );
+        $requestBody = implode("\n", $requestBody);
+
+        $this->assertEquals($requestBody, $client->curlSettings[CURLOPT_POSTFIELDS]);
 
     }
 
     /**
-     * @expectedException \Sabre\DAV\Exception
+     * This was reported in Issue 235.
+     *
+     * If no '200 Ok' properties are returned, the client will throw an
+     * E_NOTICE.
      */
-    function testPropFindError() {
+    function testPropFindNo200s() {
 
-        $client = new ClientMock([
-            'baseUri' => '/',
-        ]);
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
 
-        $client->response = new Response(405, []);
-        $client->propfind('foo', ['{DAV:}displayname', '{urn:zim}gir']);
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "",
+            "<?xml version=\"1.0\"?>",
+            "<d:multistatus xmlns:d=\"DAV:\">",
+            "  <d:response>",
+            "    <d:href>/foo/bar/</d:href>",
+            "    <d:propstat>",
+            "      <d:prop>",
+            "         <d:bar />",
+            "      </d:prop>",
+            "      <d:status>HTTP/1.1 404 Not Found</d:status>",
+            "    </d:propstat>",
+            "  </d:response>",
+            "</d:multistatus>",
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 19,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $result = $client->propfind('', array('{DAV:}foo','{DAV:}bar'));
+
+        $this->assertEquals(array(
+        ), $result);
 
     }
 
-    function testPropFindDepth1() {
+    function testPropFindDepth1CustomProp() {
 
-        $client = new ClientMock([
-            'baseUri' => '/',
-        ]);
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
 
-        $responseBody = <<<XML
-<?xml version="1.0"?>
-<multistatus xmlns="DAV:">
-<response>
-  <href>/foo</href>
-  <propstat>
-    <prop>
-      <displayname>bar</displayname>
-    </prop>
-    <status>HTTP/1.1 200 OK</status>
-  </propstat>
-</response>
-</multistatus>
-XML;
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "",
+            "<?xml version=\"1.0\"?>",
+            "<d:multistatus xmlns:d=\"DAV:\" xmlns:x=\"urn:custom\">",
+            "  <d:response>",
+            "    <d:href>/foo/bar/</d:href>",
+            "    <d:propstat>",
+            "      <d:prop>",
+            "         <d:foo>hello</d:foo>",
+            "         <x:bar>world</x:bar>",
+            "      </d:prop>",
+            "      <d:status>HTTP/1.1 200 OK</d:status>",
+            "    </d:propstat>",
+            "  </d:response>",
+            "</d:multistatus>",
+        );
 
-        $client->response = new Response(207, [], $responseBody);
-        $result = $client->propfind('foo', ['{DAV:}displayname', '{urn:zim}gir'], 1);
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 19,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
 
-        $this->assertEquals([
-            '/foo' => [
-            '{DAV:}displayname' => 'bar'
-            ],
-        ], $result);
+        $result = $client->propfind('', array('{DAV:}foo','{urn:custom}bar'),1);
 
-        $request = $client->request;
-        $this->assertEquals('PROPFIND', $request->getMethod());
-        $this->assertEquals('/foo', $request->getUrl());
-        $this->assertEquals([
-            'Depth' => '1',
-            'Content-Type' => 'application/xml',
-        ], $request->getHeaders());
+        $this->assertEquals(array(
+            "/foo/bar/" => array(
+                '{DAV:}foo' => 'hello',
+                '{urn:custom}bar' => 'world',
+            ),
+        ), $result);
+
+        $requestBody = array(
+            '<?xml version="1.0"?>',
+            '<d:propfind xmlns:d="DAV:">',
+            '  <d:prop>',
+            '    <d:foo />',
+            '    <x:bar xmlns:x="urn:custom"/>',
+            '  </d:prop>',
+            '</d:propfind>'
+        );
+        $requestBody = implode("\n", $requestBody);
+
+        $this->assertEquals($requestBody, $client->curlSettings[CURLOPT_POSTFIELDS]);
 
     }
 
     function testPropPatch() {
 
-        $client = new ClientMock([
-            'baseUri' => '/',
-        ]);
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
 
-        $responseBody = <<<XML
-<?xml version="1.0"?>
-<multistatus xmlns="DAV:">
-<response>
-  <href>/foo</href>
-  <propstat>
-    <prop>
-      <displayname>bar</displayname>
-    </prop>
-    <status>HTTP/1.1 200 OK</status>
-  </propstat>
-</response>
-</multistatus>
-XML;
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "",
+        );
 
-        $client->response = new Response(207, [], $responseBody);
-        $result = $client->propPatch('foo', ['{DAV:}displayname' => 'hi', '{urn:zim}gir' => null], 1);
-        $request = $client->request;
-        $this->assertEquals('PROPPATCH', $request->getMethod());
-        $this->assertEquals('/foo', $request->getUrl());
-        $this->assertEquals([
-            'Content-Type' => 'application/xml',
-        ], $request->getHeaders());
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 20,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $client->proppatch('', array(
+            '{DAV:}foo' => 'newvalue',
+            '{urn:custom}foo' => 'newvalue2',
+            '{DAV:}bar' => null,
+            '{urn:custom}bar' => null,
+        ));
+
+        $requestBody = array(
+            '<?xml version="1.0"?>',
+            '<d:propertyupdate xmlns:d="DAV:">',
+            '<d:set><d:prop>',
+            '    <d:foo>newvalue</d:foo>',
+            '</d:prop></d:set>',
+            '<d:set><d:prop>',
+            '    <x:foo xmlns:x="urn:custom">newvalue2</x:foo>',
+            '</d:prop></d:set>',
+            '<d:remove><d:prop>',
+            '    <d:bar />',
+            '</d:prop></d:remove>',
+            '<d:remove><d:prop>',
+            '    <x:bar xmlns:x="urn:custom"/>',
+            '</d:prop></d:remove>',
+            '</d:propertyupdate>'
+        );
+        $requestBody = implode("\n", $requestBody);
+
+        $this->assertEquals($requestBody, $client->curlSettings[CURLOPT_POSTFIELDS]);
 
     }
 
-    function testOPTIONS() {
+    function testHEADRequest() {
 
-        $client = new ClientMock([
-            'baseUri' => '/',
-        ]);
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
 
-        $client->response = new Response(207, [
-            'DAV' => 'calendar-access, extended-mkcol',
-        ]);
-        $result = $client->options();
-
-        $this->assertEquals(
-            ['calendar-access', 'extended-mkcol'],
-            $result
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
         );
 
-        $request = $client->request;
-        $this->assertEquals('OPTIONS', $request->getMethod());
-        $this->assertEquals('/', $request->getUrl());
-        $this->assertEquals([
-        ], $request->getHeaders());
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $result = $client->request('HEAD', 'baz');
+
+        $this->assertEquals('http://example.org/foo/bar/baz', $client->url);
+        $this->assertEquals(array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CUSTOMREQUEST => 'HEAD',
+            CURLOPT_NOBODY => true,
+            CURLOPT_HEADER => true,
+            CURLOPT_HTTPHEADER => array(),
+            CURLOPT_POSTFIELDS => null,
+        ), $client->curlSettings);
+
+    }
+
+    function testPUTRequest() {
+
+        $client = new ClientMock(array(
+            'baseUri' => 'http://example.org/foo/bar/',
+        ));
+
+        $responseBlob = array(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/plain",
+            "",
+            "Hello there!"
+        );
+
+        $client->response = array(
+            implode("\r\n", $responseBlob),
+            array(
+                'header_size' => 45,
+                'http_code' => 200,
+            ),
+            0,
+            ""
+        );
+
+        $result = $client->request('PUT', 'bar','newcontent');
+
+        $this->assertEquals('http://example.org/foo/bar/bar', $client->url);
+        $this->assertEquals(array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CUSTOMREQUEST => "PUT",
+            CURLOPT_POSTFIELDS => 'newcontent',
+            CURLOPT_HEADER => true,
+            CURLOPT_HTTPHEADER => array(),
+        ), $client->curlSettings);
 
     }
 }

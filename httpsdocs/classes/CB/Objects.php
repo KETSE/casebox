@@ -61,10 +61,17 @@ class Objects
         $resultData['date_start'] = @$resultData['date'];
         unset($resultData['date']);
 
+        $arr = array(&$resultData);
+
+        $pids = explode(',', $resultData['pids']);
+        array_pop($pids);
+        $resultData['path'] = implode('/', $pids);
+
+        Search::setPaths($arr);
         $resultData['pathtext'] = $resultData['path'];
-        unset($resultData['path']);
 
         $resultData['path'] = str_replace(',', '/', $resultData['pids']);
+
         unset($resultData['pids']);
 
         // set type property from template
@@ -122,7 +129,10 @@ class Objects
 
         Solr\Client::runCron();
 
-        return $this->load(array('id' => $id));
+        $rez = $this->load(array('id' => $id));
+        $rez['data']['isNew'] = true;
+
+        return $rez;
     }
 
     /**
@@ -137,9 +147,7 @@ class Objects
 
         // check if need to create object instead of update
         if (empty($d['id']) || !is_numeric($d['id'])) {
-            return $createData = $this->create($d);
-            //$d['id'] = $createData['data']['nid'];
-            //return if create method is completed
+            return $this->create($d);
         }
 
         // SECURITY: check if current user has write access to this action
@@ -177,9 +185,15 @@ class Objects
         return $this->load($d);
     }
 
+    /**
+     * getting preview for an item
+     * @param  int id
+     * @return array array of divided preview per common and complex fields
+     */
     public static function getPreview($id)
     {
         $rez = array();
+
         if (!is_numeric($id)) {
             return;
         }
@@ -224,7 +238,7 @@ class Objects
             if (empty($tf['cfg'])) {
                 $group = 'body';
             } elseif (@$tf['cfg']['showIn'] == 'top') {
-                $group = 'top';
+                $group = 'body'; //top
             } elseif (@$tf['cfg']['showIn'] == 'tabsheet') {
                 $group = 'bottom';
             } else {
@@ -298,9 +312,9 @@ class Objects
                 if (empty($v)) {
                     continue;
                 }
-                $bottom .=  '<div class="obj-preview-h">'.$f['tf']['title'].'</div>'.$v.'<br />';
+                $bottom .=  '<div class="obj-preview-h">'.$f['tf']['title'].'</div><div style="padding: 0 5px">'.$v.'</div><br />';
             }
-            $bottom = '<div style="padding: 0 10px">'.$bottom.'</div>';
+            // $bottom = '<div style="padding: 0 10px">'.$bottom.'</div>';
         }
 
         // $logParams = array(
@@ -318,10 +332,13 @@ class Objects
             $top = '<table class="obj-preview">'.$top.'</table><br />';
         }
 
-        $params['result'] = $top.$bottom;
+        $rez = array($top, $bottom);
+
+        $params['result'] = &$rez;
+
         fireEvent('generatePreview', $params);
 
-        return $params['result'];
+        return $rez;
 
     }
 
@@ -397,28 +414,9 @@ class Objects
         }
 
         /* end of select distinct case ids from the case */
-        $res = DB\dbQuery(
-            'SELECT DISTINCT t.id
-                ,t.`name`
-                ,t.date
-                ,t.cfg
-                ,t.template_id
-                ,t2.status
-            FROM tree t
-            LEFT JOIN tasks t2 ON t.id = t2.id
-            WHERE t.id IN ('.implode(', ', $ids).')
-            ORDER BY 2'
-        ) or die(DB\dbQueryError());
 
-        while ($r = $res->fetch_assoc()) {
-            $r['cfg'] = Util\toJSONArray($r['cfg']);
-            if (!empty($r['date'])) {
-                $r['date'][10] = 'T';
-                $r['date'] .= 'Z';
-            }
-            $data[] = $r;
-        }
-        $res->close();
+        $data = Search::getObjects($ids, 'id,template_id,name,date,status:task_status');
+        $data = array_values($data);
 
         return array('success' => true, 'data' => $data);
     }
@@ -444,6 +442,17 @@ class Objects
         $object_record['content'] = empty($objData['name'])
             ? ''
             : $objData['name']."\n";
+
+        // add target type for shortcut items
+        if (!empty($objData['target_type'])) {
+            $object_record['target_type'] = $objData['target_type'];
+        }
+        // add last comment info if present
+        if (!empty($objData['sys_data']['lastComment'])) {
+            $object_record['comment_user_id'] = $objData['sys_data']['lastComment']['user_id'];
+            $object_record['comment_date'] = $objData['sys_data']['lastComment']['date'];
+        }
+
 
         $field = array();
         foreach ($linearData as $f) {
@@ -528,14 +537,28 @@ class Objects
             case 'combo':
             case 'int':
             case '_objects':
+
                 $arr = Util\toNumericArray($value);
+                $val = Util\toNumericArray(@$object_record[$solr_field]);
 
                 foreach ($arr as $v) {
-                    if (empty($object_record[$solr_field]) || !in_array($v, $object_record[$solr_field])) {
-                        $object_record[$solr_field][] = $v;
+                    if (empty($val) || !in_array($v, $val)) {
+                        $val[] = $v;
                     }
                 }
+
+                if (empty($val)) {
+                    unset($object_record[$solr_field]);
+
+                } elseif (is_array($val) && (sizeof($val) < 2)) {//set just value if 1 element array
+                    $object_record[$solr_field] = array_shift($val);
+
+                } else {
+                    $object_record[$solr_field] = $val;
+                }
+
                 break;
+
             case 'varchar':
                 // storing value in SOLR without any changes (TODO: think if the value should be cleaned/transformed)
                 // we assume values are checked before inserted into DB.
@@ -648,7 +671,8 @@ class Objects
     }
 
     /**
-     * get name for an object id
+     * get name for an object id from database
+     * Note: for multilanguage to work Search::getObjectNames() should be used
      * @param  int          $objectId
      * @return varchar|null
      */
@@ -732,6 +756,9 @@ class Objects
                 break;
             case 'comment':
                 return new Objects\Comment($objectId);
+                break;
+            case 'shortcut':
+                return new Objects\Shortcut($objectId);
                 break;
             default:
                 return new Objects\Object($objectId);
@@ -889,54 +916,67 @@ class Objects
      */
     public function getPluginsData($p)
     {
+        $id = @$p['id'];
+        $templateId = @$p['template_id'];
+        $template = null;
+        $templateData = null;
+        $objectPlugins = null;
+
         $rez = array(
             'success' => false
             ,'data' => array()
         );
-        if (empty($p['id']) || !is_numeric($p['id'])) {
+        if ((empty($id) && empty($templateId)) ||
+            (!is_numeric($id) && !is_numeric($templateId))
+        ) {
             return $rez;
         }
 
-        if (!Security::canRead($p['id'])) {
-            throw new \Exception(L\get('Access_denied'));
-        }
-
-        $rez['menu'] = Browser\CreateMenu::getMenuForPath($p['id']);
-
-        $id = $p['id'];
-        /* now we'll try to detect plugins config that could be found in following places:
-            1. in config of the template for the given object, named object_plugins
-            2. in core config, property object_type_plugins (config definitions per available template type values: object, case, task etc)
-            3. a generic config,  named default_object_plugins, could be defined in core config
-        */
-
-        $objectPlugins = null;
-        $o = $this->getCachedObject($id);
-        if (!empty($o)) {
-            $template = $o->getTemplate();
-            $templateData = is_null($template)
-                ? null
-                : $template->getData();
-
-            $from = empty($p['from'])
-                ? ''
-                : $p['from'];
-
-            if (!empty($from)) {
-                if (!empty($templateData['cfg']['object_plugins'][$from])) {
-                    $objectPlugins = $templateData['cfg']['object_plugins'][$from];
-                } else {
-                    $objectPlugins = Config::getObjectTypePluginsConfig($o->getType(), $from);
-
-                }
+        if (is_numeric($id)) {
+            if (!Security::canRead($id)) {
+                throw new \Exception(L\get('Access_denied'));
             }
 
-            if (empty($objectPlugins)) {
-                if (!empty($templateData['cfg']['object_plugins'])) {
-                    $objectPlugins = $templateData['cfg']['object_plugins'];
-                } else {
-                    $objectPlugins = Config::getObjectTypePluginsConfig($o->getType());
+            $rez['menu'] = Browser\CreateMenu::getMenuForPath($id);
+
+            /* now we'll try to detect plugins config that could be found in following places:
+                1. in config of the template for the given object, named object_plugins
+                2. in core config, property object_type_plugins (config definitions per available template type values: object, case, task etc)
+                3. a generic config,  named default_object_plugins, could be defined in core config
+            */
+
+            $o = $this->getCachedObject($id);
+
+            if (!empty($o)) {
+                $template = $o->getTemplate();
+                if (!empty($template)) {
+                    $templateData = $template->getData();
                 }
+            }
+        } else {
+            $id = null;
+            $templates = Templates\SingletonCollection::getInstance();
+            $templateData = $templates->getTemplate($templateId)->getData();
+        }
+
+
+        $from = empty($p['from'])
+            ? ''
+            : $p['from'];
+
+        if (!empty($from)) {
+            if (!empty($templateData['cfg']['object_plugins'][$from])) {
+                $objectPlugins = $templateData['cfg']['object_plugins'][$from];
+            } else {
+                $objectPlugins = Config::getObjectTypePluginsConfig(@$templateData['type'], $from);
+            }
+        }
+
+        if (empty($objectPlugins)) {
+            if (!empty($templateData['cfg']['object_plugins'])) {
+                $objectPlugins = $templateData['cfg']['object_plugins'];
+            } else {
+                $objectPlugins = Config::getObjectTypePluginsConfig($templateData['type']);
             }
         }
 
@@ -950,9 +990,8 @@ class Objects
             $class = '\\CB\\Objects\\Plugins\\'.ucfirst($pluginName);
             $pClass = new $class($id);
             $prez = $pClass->getData();
-            // if (!empty($prez) && isset($prez['data'])) {
+
             $rez['data'][$pluginName] = $prez;
-            //}
         }
 
         return $rez;
@@ -1010,5 +1049,68 @@ class Objects
                 ,'content' => Objects\Comment::processAndFormatMessage($p['msg'])
             )
         );
+    }
+
+    /**
+     * update own comment
+     * @param array $p input params (id, msg)
+     */
+    public function updateComment($p)
+    {
+        $rez = array('success' => false);
+
+        if (empty($p['id']) || !is_numeric($p['id']) || empty($p['msg'])) {
+            $rez['msg'] = L\get('Wrong_input_data');
+
+            return $rez;
+        }
+
+        $comment = static::getCustomClassByObjectId($p['id']);
+        $commentData = $comment->load();
+        if ($commentData['cid'] == $_SESSION['user']['id']) {
+            $commentData['data']['_title'] = $p['msg'];
+            $comment->update($commentData);
+
+            Solr\Client::runCron();
+
+            $rez = array(
+                'success' => true
+                ,'data' => array(
+                    'id' => $commentData['id']
+                    ,'pid' => $commentData['pid']
+                )
+            );
+
+        }
+
+        return $rez;
+    }
+
+    /**
+     * remove own comment
+     * @param array $p input params (id)
+     */
+    public function removeComment($p)
+    {
+        $rez = array('success' => false);
+
+        if (empty($p['id']) || !is_numeric($p['id'])) {
+            $rez['msg'] = L\get('Wrong_input_data');
+
+            return $rez;
+        }
+
+        $comment = static::getCustomClassByObjectId($p['id']);
+        $commentData = $comment->load();
+
+        if ($commentData['cid'] == $_SESSION['user']['id']) {
+            $comment->delete();
+
+            Solr\Client::runCron();
+
+            $rez['success'] = true;
+        }
+
+        return $rez;
     }
 }

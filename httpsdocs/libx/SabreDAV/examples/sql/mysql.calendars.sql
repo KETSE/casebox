@@ -1,12 +1,12 @@
 CREATE TABLE calendarobjects (
-    id INT(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    id INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     calendardata MEDIUMBLOB,
-    uri VARBINARY(200),
+    uri VARCHAR(200),
     calendarid INTEGER UNSIGNED NOT NULL,
     lastmodified INT(11) UNSIGNED,
-    etag VARBINARY(32),
+    etag VARCHAR(32),
     size INT(11) UNSIGNED NOT NULL,
-    componenttype VARBINARY(8),
+    componenttype VARCHAR(8),
     firstoccurence INT(11) UNSIGNED,
     lastoccurence INT(11) UNSIGNED,
     UNIQUE(calendarid, uri)
@@ -14,40 +14,15 @@ CREATE TABLE calendarobjects (
 
 CREATE TABLE calendars (
     id INTEGER UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    principaluri VARBINARY(100),
+    principaluri VARCHAR(100),
     displayname VARCHAR(100),
-    uri VARBINARY(200),
-    synctoken INTEGER UNSIGNED NOT NULL DEFAULT '0',
+    uri VARCHAR(200),
+    ctag INTEGER UNSIGNED NOT NULL DEFAULT '0',
     description TEXT,
-    calendarorder INT(11) UNSIGNED NOT NULL DEFAULT '0',
-    calendarcolor VARBINARY(10),
+    calendarorder INTEGER UNSIGNED NOT NULL DEFAULT '0',
+    calendarcolor VARCHAR(10),
     timezone TEXT,
-    components VARBINARY(20),
+    components VARCHAR(20),
     transparent TINYINT(1) NOT NULL DEFAULT '0',
     UNIQUE(principaluri, uri)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE calendarchanges (
-    id INT(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    uri VARCHAR(200) NOT NULL,
-    synctoken INT(11) UNSIGNED NOT NULL,
-    calendarid INT(11) UNSIGNED NOT NULL,
-    operation TINYINT(1) NOT NULL,
-    INDEX calendarid_synctoken (calendarid, synctoken)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE calendarsubscriptions (
-    id INT(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    uri VARCHAR(200) NOT NULL,
-    principaluri VARCHAR(100) NOT NULL,
-    source TEXT,
-    displayname VARCHAR(100),
-    refreshrate VARCHAR(10),
-    calendarorder INT(11) UNSIGNED NOT NULL DEFAULT '0',
-    calendarcolor VARCHAR(10),
-    striptodos TINYINT(1) NULL,
-    stripalarms TINYINT(1) NULL,
-    stripattachments TINYINT(1) NULL,
-    lastmodified INT(11) UNSIGNED,
-    UNIQUE(principaluri, uri)
-);

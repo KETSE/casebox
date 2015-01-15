@@ -316,6 +316,8 @@ function userTimeToUTCTimezone($dateTime)
  */
 function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 {
+    // echo "input params: $fromDateTime, $toDateTime, $TZ\n";
+
     $d1 = new \DateTime($fromDateTime);
     if (empty($TZ)) {
         $TZ = 'UTC';
@@ -324,9 +326,8 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 
     $rez = $d1->format('D M j, Y');
     $hourText = $d1->format('H:i');
-    if ($hourText != '00:00') {
-        $rez .= ' '.$hourText;
-    }
+
+    $rez .= ' '.$hourText;
 
     if (empty($toDateTime)) {
         return $rez;
@@ -347,9 +348,7 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 
     $hourText = $d2->format('H:i');
 
-    if (($hourText != '00:00') || empty($d2format)) {
-        $d2format .= (empty($d2format) ? '' : ', ').'H:i';
-    }
+    $d2format .= (empty($d2format) ? '' : ', ').'H:i';
 
     if (!empty($d2format)) {
         $rez .= ' - '.$d2->format($d2format);
@@ -454,7 +453,7 @@ function adjustTextForDisplay($text)
 
 function dateISOToMysql($date_string)
 {
-    if (empty($date_string)) {
+    if (empty($date_string) || (substr($date_string, 0, 10) == '0000-00-00')) {
         return null;
     }
     $d = strtotime($date_string);

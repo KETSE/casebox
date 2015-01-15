@@ -1,7 +1,9 @@
-Ext.namespace('CB'); 
+Ext.namespace('CB');
 
-CB.TextEditWindow = Ext.extend(Ext.Window, {
-    bodyBorder: false
+Ext.define('CB.TextEditWindow', {
+    extend: 'Ext.Window'
+    ,border: false
+    ,bodyBorder: false
     ,closable: true
     ,closeAction: 'hide'
     ,hideCollapseTool: true
@@ -9,41 +11,68 @@ CB.TextEditWindow = Ext.extend(Ext.Window, {
     ,maximizable: false
     ,minimizable: false
     ,modal: true
-    ,plain: true
     ,resizable: true
     ,stateful: false
     ,data: { callback: Ext.emptyFn }
     ,title: L.EditingValue
     ,width: 600
     ,height: 400
+
     ,initComponent: function() {
-        this.editor = new Ext.form.TextArea({border: false});
+        this.data = this.config.data;
+
+        this.editor = new Ext.form.TextArea({
+            border: false
+        });
+
         Ext.apply(this, {
             layout: 'fit'
             ,items: [this.editor]
             ,keys:[{
-                key: Ext.EventObject.ESC,
+                key: Ext.event.Event.ESC,
                 fn: this.doClose,
                 scope: this
                 }
             ]
-            ,buttons: [ {text: Ext.MessageBox.buttonText.ok, handler: this.doSubmit, scope: this}
-                        ,{text: Ext.MessageBox.buttonText.cancel, handler: this.doClose, scope: this}]
-        })
-        CB.TextEditWindow.superclass.initComponent.apply(this, arguments);
-        
-        this.on('show', this.onShow, this);
+            ,listeners: {
+                scope: this
+                ,show: this.onWindowsShow
+            }
+            ,buttons: [
+                {
+                    text: Ext.MessageBox.buttonText.ok
+                    ,handler: this.doSubmit
+                    ,scope: this
+                },{
+                    text: Ext.MessageBox.buttonText.cancel
+                    ,handler: this.doClose
+                    ,scope: this
+                }
+            ]
+        });
+
+        this.callParent(arguments);
     }
-    ,onShow: function(){
-        this.editor.setValue(Ext.value(this.data.value, ''));
+
+    ,onWindowsShow: function(){
+        //update title if set
+        this.setTitle(Ext.valueFrom(this.data.title, this.title));
+
+        this.editor.setValue(Ext.valueFrom(this.data.value, ''));
         this.editor.focus(false, 350);
-    },doSubmit: function(){
-        f = this.data.callback.createDelegate(Ext.value(this.data.scope, this), [this, this.editor.getValue()]);
+    }
+
+    ,doSubmit: function(){
+        var f = Ext.Function.bind(
+            this.data.callback
+            ,Ext.valueFrom(this.data.scope, this)
+            ,[this, this.editor.getValue()]
+        );
         f();
         this.doClose();
-    },doClose: function(){
+    }
+
+    ,doClose: function(){
         this.hide();
     }
-})
-
-Ext.reg('CBTextEditWindow', CB.TextEditWindow); // register xtype                                                   
+});

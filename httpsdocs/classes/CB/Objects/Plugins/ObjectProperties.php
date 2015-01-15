@@ -15,11 +15,17 @@ class ObjectProperties extends Base
         parent::getData($id);
 
         $preview = Objects::getPreview($this->id);
-        $data = Objects::getCachedObject($this->id)->getData();
+        $obj = Objects::getCachedObject($this->id);
+
+        if (empty($obj)) {
+            return $rez;
+        }
+
+        $data = $obj->getData();
 
         if (!empty($preview)) {
             $rez['data'] = array(
-                'html' => $preview
+                'preview' => $preview
             );
         }
 
@@ -39,18 +45,25 @@ class ObjectProperties extends Base
                         ,'template_id'
                         ,'date_end'
                         ,'cid'
+                        ,'uid'
                         ,'cdate'
+                        ,'udate'
                         ,'can'
                     )
                 )) {
-                    if (in_array($k, array('date', 'date_end', 'cdate'))) {
+                    if (in_array($k, array('date', 'date_end', 'cdate', 'udate'))) {
                         $v = Util\dateMysqlToISO($v);
-
                     } elseif ($k == 'name') {
                         $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
                     }
 
                     $rez['data'][$k] = $v;
+
+                    //add ago udate text
+                    if ($k == 'udate') {
+                        $rez['data'][$k . '_ago_text'] = Util\formatAgoTime($v);
+                    }
+
                 }
             }
         }

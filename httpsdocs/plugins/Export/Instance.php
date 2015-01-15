@@ -7,11 +7,31 @@ use CB\User;
 
 class Instance
 {
-    public $columns = array();
+    public $defaultColumns = array();
 
     public function install()
     {
 
+    }
+
+    public function __construct ()
+    {
+        $this->defaultColumns = array(
+            'nid' => 'ID'
+            ,'name' => L\get('Name')
+            ,'path' => L\get('Path')
+            ,'case' => L\get('Project')
+            ,'date' => L\get('Date')
+            ,'size' => L\get('Size')
+            ,'cid' => L\get('Creator')
+            ,'oid' => L\get('Owner')
+            ,'uid' => L\get('UpdatedBy')
+            ,'comment_user_id' => L\get('CommentedBy')
+            ,'cdate' => L\get('CreatedDate')
+            ,'udate' => L\get('UpdatedDate')
+            ,'comment_date' => L\get('CommentedDate')
+            ,'date_end' => 'End date'
+        );
     }
 
     public function init()
@@ -27,37 +47,35 @@ class Instance
 
         // form columns
         L\initTranslations();
-        $this->columns = array(
-            'nid' => 'ID'
-            ,'name' => L\get('Name')
-            ,'path' => L\get('Path')
-            ,'date' => L\get('Date')
-            ,'date_end' => 'End date'
-            ,'oid' => L\get('Owner')
-            ,'cid' => L\get('CreatedBy')
-            ,'cdate' => L\get('Created')
-            ,'uid' => L\get('heUpdated')
-            ,'udate' => L\get('UpdatedDate')
-        );
+
+        $columns = $this->defaultColumns;
 
         // retreive data
         $p['start'] = 0;
         $p['rows'] = 500;
 
-        $sr = new \CB\Browser();
+        $sr = new \CB\BrowserView();
         $results = $sr->getChildren($p);
+
         if (!empty($results['DC'])) {
+            $columns = array();
+
             foreach ($results['DC'] as $colName => $col) {
-                $this->columns[$colName] = @$col['title'];
+                if (@$col['hidden'] !== true) {
+                    $columns[$colName] = empty($this->defaultColumns[$colName])
+                        ? @Util\coalesce($col['title'], $colName)
+                        : $this->defaultColumns[$colName];
+                }
             }
         }
+
         //insert header
-        $rez[] = array_values($this->columns);
+        $rez[] = array_values($columns);
 
         while (!empty($results['data'])) {
             foreach ($results['data'] as $r) {
                 $record = array();
-                foreach ($this->columns as $colName => $colTitle) {
+                foreach ($columns as $colName => $colTitle) {
                     if (strpos($colName, 'date') === false) {
                         if (in_array($colName, array('oid', 'cid', 'uid')) && !empty($r[$colName])) {
                             $record[] = User::getDisplayName($r[$colName]);
@@ -137,7 +155,11 @@ class Instance
     public function getHTML($p)
     {
         $rez = array();
+        // echo "Get data for: <br />\n";
+        // var_dump($p);
         $records = $this->getData($p);
+        // echo "records: <br />\n";
+        // var_dump($records);
 
         $rez[] = '<th>'.implode('</th><th>', array_shift($records)).'</th>';
 

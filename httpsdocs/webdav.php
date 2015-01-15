@@ -1,180 +1,111 @@
 <?php
-
 namespace CB;
 
-/**
- * webdav router
- *
- * @copyright Copyright (C) 2014 KETSE (https://www.ketse.com/).
- * @author Oleg Burlaca (http://www.burlaca.com/)
- * @license https://www.casebox.org/license/ AGPLv3
- */
+use CB\WebDAV\Utils;
 
-
-
-// small hack for init.php: allowing it to work without being authenticated
-$webDAVMode = 1;
-
-# set the CORE and check if it's Browse or Edit mode
-$env = initEnv();
-// error_log("ENV: " . print_r($env, true));
+$env = prepareEnvironment();
 
 require_once 'init.php';
-
-// NOTE: should change it later
-error_reporting(E_ALL & ~E_WARNING);
-// error_reporting(E_ERROR | E_PARSE);
-
 require_once 'libx/SabreDAV/vendor/autoload.php';
 
-date_default_timezone_set('UTC');
+error_reporting(0);
 
+$auth = new WebDAV\Auth();
 
+// check direct link edit
+if ($env['action'] == 'edit') {
+    // get path to requested object ID
+    $path = WebDAV\Utils::getPathFromId($env['id']);
+    $path = ($path == '') ? DIRECTORY_SEPARATOR : $path;
 
+    // patch request for sabredav
+    $_SERVER['REQUEST_URI'] = '/'.
+        'dav-' . $env['core'] . DIRECTORY_SEPARATOR.
+        $env['core'] . DIRECTORY_SEPARATOR.
+        $path . $env['request'];
 
-// error_log("env: " . print_r($env, true));
-
-// Make sure there is a directory in your current directory named 'public'. We will be exposing that directory to WebDAV
-$p = [
-    'nodeId' => 1,
-    'parentDir' => null,
-];
-
-// the root folder = parentNode fo the file, if mode == 'edit'
-if ($env['mode'] == 'edit') {
-    $p['nodeId'] = WebDAV\Utils::getParentNodeId($env['nodeId']);
+    // prepare only needed objects
+    $object = WebDAV\Utils::getNodeById($env['id']);
+    $env['onlyFile'] = array_slice(explode(',', $object['pids']), 1);
+    Utils::log(json_encode($env['onlyFile']));
 }
 
-$rootNode = new WebDAV\Directory($env['rootFolder'], $p, $env);
-// error_log('webdav.php: ' . print_r($p, true));
+$rootDirectory = new \Sabre\DAV\SimpleCollection(
+    'root',
+    array(
+        new \Sabre\DAV\SimpleCollection(
+            'dav-'.$env['core'],
+            array(
+                new WebDAV\Directory($env['core'], null, $env['onlyFile'], $env['core'])
+            )
+        )
+    )
+);
 
-// The rootNode needs to be passed to the server object.
-$server = new \Sabre\DAV\Server($rootNode);
+$server = new \Sabre\DAV\Server($rootDirectory);
 
-
-// If you want to run the SabreDAV server in a custom location (using mod_rewrite for instance)
-// You can override the baseUri here.
-$baseUri = '/' . $env['core'];
-
-// for EDIT mode, the root will start directly on /cihrs/edit-{nodeId}/
-if ($env['mode'] == 'edit') {
-    $baseUri .= '/' . $env['editFolder'];
-}
-
-$server->setBaseUri($baseUri);
-
-
-// Authentication
-$authBackend = new WebDAV\Auth();
-$authPlugin = new \Sabre\DAV\Auth\Plugin($authBackend, 'SabreDAV');
-
-
-$server->addPlugin($authPlugin);
-
-
-// where to store temp files: LOCK files and files created by TemporaryFileFilterPlugin
-$tmpDir = TEMP_DIR . Config::get('core_name') . '/';
-$lockFile = $tmpDir . 'locks';
+$coreName = Config::get('core_name');
 
 // if there is no locking file for this core, create one
-if (! is_file($lockFile)) {
-    file_put_contents($lockFile, '');
+if (!is_file(TEMP_DIR . $coreName . DIRECTORY_SEPARATOR.'locks')) {
+    file_put_contents(TEMP_DIR . $coreName . DIRECTORY_SEPARATOR.'locks', '');
 }
 
+$tempFilesPlugin = new \Sabre\DAV\TemporaryFileFilterPlugin(TEMP_DIR . $coreName . DIRECTORY_SEPARATOR);
 
-// this plugin filters temp files
-$tffp = new \Sabre\DAV\TemporaryFileFilterPlugin($tmpDir);
-$server->addPlugin($tffp);
-
-
-// LibreOffice will NOT remove LOCK after closing the file
-// in EDIT mode disable locking, so everyone can save the file
-//if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice')  {   // WORD requires locking. and ($env['mode'] != 'edit')
-    $lockBackend = new \Sabre\DAV\Locks\Backend\File($lockFile);
+// todo Remove after LibreOffice fix bug with locking
+// LibreOffice dont remove lock when working with files, so disable locking with hope for the future
+if ($_SERVER['HTTP_USER_AGENT'] != 'LibreOffice') {
+    $lockBackend = new \Sabre\DAV\Locks\Backend\File(TEMP_DIR . $coreName . DIRECTORY_SEPARATOR.'locks');
     $lockPlugin = new \Sabre\DAV\Locks\Plugin($lockBackend);
-
-    // http://sabre.io/dav/clients/msoffice/
-    // certain versions of Office break if the {DAV:}lockdiscovery property
-    // but Word 2013 doesn't like this setting, on save it shows:
-    // "Showing a dialog: files was changed by another author, combine results?"
-    //
-    // \Sabre\DAV\Property\LockDiscovery::$hideLockRoot = true;
-
     $server->addPlugin($lockPlugin);
-//}
+}
 
-// Adding 'creationdate' property
-$storageBackend = new WebDAV\PropertyStorageBackend();
-$propertyStorage = new \Sabre\DAV\PropertyStorage\Plugin($storageBackend);
-$server->addPlugin($propertyStorage);
-
-
-$cbLockPlugin = new WebDAV\LockPlugin();
-$server->addPlugin($cbLockPlugin);
-
-
-
-
-
-// And off we go!
+$server->addPlugin($tempFilesPlugin);
+$server->addPlugin(new WebDAV\CustomPropertiesPlugin());
+$server->setBaseUri('/');
 $server->exec();
 
+// --- Additional ---
 
+function prepareEnvironment()
+{
+    $result = array('onlyFile' => null);
+    $url_parts = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
 
-
-
-
-
-
-
-//------------------------------------------------------------------------------
-function initEnv() {
-    $ary = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
-    // error_log("initEnv: " . $_SERVER['REQUEST_URI']);
-    // echo(print_r($ary, true));
-
-    $r = [];
-
-    $r['core'] = $ary[0];
-
-    # current version
-    # /edit/{core}/{nodeId}/{filename}
-    #
-    # version history
-    # /{core}/edit-{nodeId}-{versionId}/{filename}
-    # /{core}/edit-{nodeId}-{versionId}/
-    # also support a direct folder request /edit-{nodeId}
-    if (((count($ary) == 2) or (count($ary) == 3)) && (preg_match('/^edit-(\d+)/', $ary[1], $m))) {
-        $r['mode'] = 'edit';
-
-        $r['nodeId'] = $m[1];
-
-        // {core}/edit-{nodeId}-{versionId}/
-        $r['editFolder'] = $ary[1];
-
-        # /edit-{nodeId}-{versionId}  ?
-        if (preg_match('/^edit-(\d+)-(\d+)\//', $ary[1], $m)) {
-            $r['versionId'] = $m[2];
-        }
-
-        // {core}/edit-{nodeId}-{versionId}/{filename}
-        // only if filename is specified
-        if (count($ary) == 3) {
-            $r['filename'] = $ary[2];
-        }
-
-        // root Sabredav folder, serve all requests from here
-        $r['rootFolder'] = '/' . $r['editFolder'];
-
-    // } elseif (preg_match('/^dav-(.*)$/', $ary[0], $m)) {    # /dav-{core}/
-    } else {
-        // $r['core'] = $m[1];
-        $r['mode'] = 'browse';
-        $r['rootFolder'] = '';
+    if (count($url_parts)<1) {
+        return;
     }
 
-    $_GET['core'] = $r['core'];
+    // prepare env
+    if (preg_match('#^/?dav-(.*)$#', $url_parts[0], $matches)) {
+        // ordinary webdav request
+        $result['core'] = $matches[1];
+        $result['action'] = 'request';
+    } elseif ($url_parts[0] =='edit') {
+        // direct link webdav request
+        $result['core'] = $url_parts[1];
+        $result['action'] = 'edit';
+        $result['request'] = implode('/', array_slice($url_parts, 3));
 
-    return $r;
+        // get object id
+        if (isset($url_parts[2])) {
+            if (preg_match('@(\d{1,})@', $url_parts[2], $matches)) {
+                $result['id'] = $matches[1];
+            }
+        }
+    }
+
+    // core defined, bring it to casebox
+    if (isset($result['core'])) {
+        $_GET['core'] = $result['core'];
+        // $sn = explode('.', $_SERVER['SERVER_NAME']);
+        // $index = in_array($sn[0], array('www','ww2')) ? 1 : 0;
+        // $sn[$index] = $result['core'];
+
+        // // bring
+        // $_SERVER['SERVER_NAME'] = implode('.',$sn);
+    }
+
+    return $result;
 }
-

@@ -31,7 +31,6 @@ class ValidateVCardTest extends \PHPUnit_Framework_TestCase {
         );
 
         $this->server = new DAV\Server($tree);
-        $this->server->sapi = new HTTP\SapiMock();
         $this->server->debugExceptions = true;
 
         $plugin = new Plugin();
@@ -53,20 +52,20 @@ class ValidateVCardTest extends \PHPUnit_Framework_TestCase {
 
     function testCreateFile() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/addressbooks/admin/addressbook1/blabla.vcf',
         ));
 
         $response = $this->request($request);
 
-        $this->assertEquals(415, $response->status);
+        $this->assertEquals('HTTP/1.1 415 Unsupported Media Type', $response->status);
 
     }
 
     function testCreateFileValid() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/addressbooks/admin/addressbook1/blabla.vcf',
         ));
@@ -74,7 +73,7 @@ class ValidateVCardTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(201, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 201 Created', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
         $expected = array(
             'uri'          => 'blabla.vcf',
             'carddata' => "BEGIN:VCARD\r\nUID:foo\r\nEND:VCARD\r\n",
@@ -86,7 +85,7 @@ class ValidateVCardTest extends \PHPUnit_Framework_TestCase {
 
     function testCreateFileNoUID() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/addressbooks/admin/addressbook1/blabla.vcf',
         ));
@@ -94,7 +93,7 @@ class ValidateVCardTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(201, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 201 Created', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
         $foo = $this->cardBackend->getCard('addressbook1','blabla.vcf');
         $this->assertTrue(strpos($foo['carddata'],'UID')!==false);
@@ -103,7 +102,7 @@ class ValidateVCardTest extends \PHPUnit_Framework_TestCase {
 
     function testCreateFileVCalendar() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/addressbooks/admin/addressbook1/blabla.vcf',
         ));
@@ -111,28 +110,28 @@ class ValidateVCardTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(415, $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
+        $this->assertEquals('HTTP/1.1 415 Unsupported Media Type', $response->status, 'Incorrect status returned! Full response body: ' . $response->body);
 
     }
 
     function testUpdateFile() {
 
         $this->cardBackend->createCard('addressbook1','blabla.vcf','foo');
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/addressbooks/admin/addressbook1/blabla.vcf',
         ));
 
         $response = $this->request($request);
 
-        $this->assertEquals(415, $response->status);
+        $this->assertEquals('HTTP/1.1 415 Unsupported Media Type', $response->status);
 
     }
 
     function testUpdateFileParsableBody() {
 
         $this->cardBackend->createCard('addressbook1','blabla.vcf','foo');
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/addressbooks/admin/addressbook1/blabla.vcf',
         ));
@@ -141,7 +140,7 @@ class ValidateVCardTest extends \PHPUnit_Framework_TestCase {
 
         $response = $this->request($request);
 
-        $this->assertEquals(204, $response->status);
+        $this->assertEquals('HTTP/1.1 204 No Content', $response->status);
 
         $expected = array(
             'uri'          => 'blabla.vcf',

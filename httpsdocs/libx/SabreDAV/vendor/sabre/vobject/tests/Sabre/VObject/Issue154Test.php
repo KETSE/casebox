@@ -6,9 +6,9 @@ class Issue154Test extends \PHPUnit_Framework_TestCase {
 
     function testStuff() {
 
-        $vcard = new Component\VCard(array(), false);
+        $vcard = new Component('VCARD');
         $vcard->VERSION = '3.0';
-        $vcard->PHOTO = 'random_stuff';
+        $vcard->PHOTO = base64_encode('random_stuff');
         $vcard->PHOTO->add('BASE64',null);
         $vcard->UID = 'foo-bar';
 

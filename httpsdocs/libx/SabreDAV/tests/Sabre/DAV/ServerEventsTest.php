@@ -13,7 +13,7 @@ class ServerEventsTest extends AbstractServer {
 
     function testAfterBind() {
 
-        $this->server->on('afterBind', [$this,'afterBindHandler']);
+        $this->server->subscribeEvent('afterBind',array($this,'afterBindHandler'));
         $newPath = 'afterBind';
 
         $this->tempPath = '';
@@ -30,11 +30,11 @@ class ServerEventsTest extends AbstractServer {
 
     function testBeforeBindCancel() {
 
-        $this->server->on('beforeBind', [$this,'beforeBindCancelHandler']);
+        $this->server->subscribeEvent('beforeBind', array($this,'beforeBindCancelHandler'));
         $this->assertFalse($this->server->createFile('bla','body'));
 
         // Also testing put()
-        $req = HTTP\Sapi::createFromServerArray(array(
+        $req = new HTTP\Request(array(
             'REQUEST_METHOD' => 'PUT',
             'REQUEST_URI' => '/barbar',
         ));
@@ -54,9 +54,9 @@ class ServerEventsTest extends AbstractServer {
 
     function testException() {
 
-        $this->server->on('exception', [$this, 'exceptionHandler']);
+        $this->server->subscribeEvent('exception', array($this, 'exceptionHandler'));
 
-        $req = HTTP\Sapi::createFromServerArray(array(
+        $req = new HTTP\Request(array(
             'REQUEST_METHOD' => 'GET',
             'REQUEST_URI' => '/not/exisitng',
         ));

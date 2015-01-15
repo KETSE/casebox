@@ -49,6 +49,7 @@ class Security
         if (!Security::isAdmin()) {
             throw new \Exception(L\get('Access_denied'));
         }
+
         $p['data']['name'] = trim(strip_tags($p['data']['name']));
 
         // check if group with that name already exists
@@ -140,11 +141,19 @@ class Security
             $params[] = ' %'.trim($p['query']).'% ';
         }
 
+        if (!empty($p['ids'])) {
+            $ids = Util\toNumericArray($p['ids']);
+            if (!empty($ids)) {
+                $where[] = 'id in (' . implode(',', $ids) . ')';
+            }
+        }
+
         $res = DB\dbQuery(
             'SELECT id
                 ,`name`
                 ,`first_name`
                 ,`last_name`
+                ,`email`
                 ,`system`
                 ,`enabled`
                 ,`type`
@@ -160,6 +169,7 @@ class Security
                 $r['iconCls'] = 'icon-users';
 
             } else {
+                $r['user'] = $r['name'];
                 $r['name'] = User::getDisplayName($r);
                 $r['iconCls'] = 'icon-user-'.$r['sex'];
             }
@@ -179,7 +189,12 @@ class Security
     /* get objects acl list*/
     public function getObjectAcl($p, $inherited = true)
     {
-        $rez = array( 'success' => true, 'data' => array(), 'name' => '');
+        $rez = array(
+            'success' => true
+            ,'data' => array()
+            ,'name' => ''
+        );
+
         if (!is_numeric($p['id'])) {
             return $rez;
         }
@@ -218,13 +233,11 @@ class Security
         $lid =  Config::get('user_language_index', 1);
         $res = DB\dbQuery(
             'SELECT DISTINCT u.id
-                    ,u.`name`
-                    ,u.`first_name`
-                    ,u.`last_name`
-                    ,u.`system`
-                    ,u.`enabled`
-                    ,u.`type`
-                    ,u.`sex`
+                    , u.l'.$lid.' `name`
+                    , u.`system`
+                    , u.`enabled`
+                    , u.`type`
+                    , u.`sex`
                 FROM tree_acl a
                 JOIN users_groups u ON a.user_group_id = u.id
                 WHERE a.node_id '.(
@@ -236,11 +249,6 @@ class Security
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $r['name'] = User::getDisplayName($r);
-
-            unset($r['first_name']);
-            unset($r['last_name']);
-
             $r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
 
             unset($r['sex']);
@@ -806,7 +814,7 @@ class Security
         if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
             throw new \Exception(L\get('Access_denied'));
         }
-        DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p['id'], $p['data'])) or die(DB\dbQueryError());
+        DB\dbQuery('delete from tree_acl where node_id = $1 and user_group_id = $2', array($p['id'], $p['data']['id'])) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();
@@ -1338,9 +1346,8 @@ class Security
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            if (!empty($r['first_name']) || !empty($r['last_name'])) {
-                $r['name'] = Purify::humanName($r['first_name'].' '.$r['last_name']);
-            }
+            $r['user'] = $r['name'];
+            $r['name'] = User::getDisplayName($r);
 
             $r['photo'] = User::getPhotoParam($r);
 

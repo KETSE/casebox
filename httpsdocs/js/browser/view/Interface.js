@@ -1,16 +1,14 @@
 Ext.namespace('CB.browser.view');
 
-CB.browser.view.Interface = Ext.extend(Ext.Container, {
-    hideBorders: true
+Ext.define('CB.browser.view.Interface', {
+    extend: 'Ext.Container'
+    ,border: false
+
+    ,xtype: 'CBBrowserViewInterface'
 
     ,initComponent: function(){
         CB.browser.view.Interface.superclass.initComponent.apply(this, arguments);
-        this.addEvents(
-                'changeparams'
-                ,'selectionchange'
-                ,'objectopen'
-                ,'settoolbaritems'
-        );
+
         this.enableBubble([
             'changeparams'
             ,'selectionchange'
@@ -26,6 +24,27 @@ CB.browser.view.Interface = Ext.extend(Ext.Container, {
     ,getViewParams: function() {
         return {};
     }
-});
 
-Ext.reg('CBBrowserViewInterface', CB.browser.view.Interface);
+    /**
+     * detect sorter to be used according to given params
+     *
+     * @param  object params
+     * @return function | null
+     */
+    ,detectSorter: function(params) {
+        var rez = null;
+
+        if(params && params.sort) {
+            var sortersGroup = CB.FacetList.prototype.sorters[params.sort];
+            if(sortersGroup) {
+                var dir = Ext.valueFrom(params.direction, 'asc');
+
+                if(dir) {
+                    rez = sortersGroup[dir];
+                }
+            }
+        }
+
+        return rez;
+    }
+});

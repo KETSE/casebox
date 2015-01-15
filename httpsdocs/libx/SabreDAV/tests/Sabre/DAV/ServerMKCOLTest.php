@@ -4,6 +4,10 @@ namespace Sabre\DAV;
 
 use Sabre\HTTP;
 
+require_once 'Sabre/HTTP/ResponseMock.php';
+require_once 'Sabre/DAV/AbstractServer.php';
+require_once 'Sabre/DAV/Exception.php';
+
 class ServerMKCOLTest extends AbstractServer {
 
     function testMkcol() {
@@ -13,7 +17,7 @@ class ServerMKCOLTest extends AbstractServer {
             'REQUEST_METHOD' => 'MKCOL',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody("");
         $this->server->httpRequest = ($request);
         $this->server->exec();
@@ -22,7 +26,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Length' => '0',
         ),$this->response->headers);
 
-        $this->assertEquals(201, $this->response->status);
+        $this->assertEquals('HTTP/1.1 201 Created',$this->response->status);
         $this->assertEquals('', $this->response->body);
         $this->assertTrue(is_dir($this->tempDir . '/testcol'));
 
@@ -38,7 +42,7 @@ class ServerMKCOLTest extends AbstractServer {
             'REQUEST_METHOD' => 'MKCOL',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody("Hello");
         $this->server->httpRequest = ($request);
         $this->server->exec();
@@ -47,7 +51,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals(415, $this->response->status);
+        $this->assertEquals('HTTP/1.1 415 Unsupported Media Type',$this->response->status);
 
     }
 
@@ -62,7 +66,7 @@ class ServerMKCOLTest extends AbstractServer {
             'HTTP_CONTENT_TYPE' => 'application/xml',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody("Hello");
         $this->server->httpRequest = ($request);
         $this->server->exec();
@@ -71,7 +75,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals(400, $this->response->status);
+        $this->assertEquals('HTTP/1.1 400 Bad request',$this->response->status);
 
     }
 
@@ -86,7 +90,7 @@ class ServerMKCOLTest extends AbstractServer {
             'HTTP_CONTENT_TYPE' => 'application/xml',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('<?xml version="1.0"?><html></html>');
         $this->server->httpRequest = ($request);
         $this->server->exec();
@@ -95,7 +99,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals(415, $this->response->status);
+        $this->assertEquals('HTTP/1.1 415 Unsupported Media Type',$this->response->status);
 
     }
 
@@ -110,7 +114,7 @@ class ServerMKCOLTest extends AbstractServer {
             'HTTP_CONTENT_TYPE' => 'application/xml',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('<?xml version="1.0"?>
 <mkcol xmlns="DAV:">
   <set>
@@ -126,7 +130,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals(400, $this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
+        $this->assertEquals('HTTP/1.1 400 Bad request',$this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
 
     }
 
@@ -141,7 +145,7 @@ class ServerMKCOLTest extends AbstractServer {
             'HTTP_CONTENT_TYPE' => 'application/xml',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('<?xml version="1.0"?>
 <mkcol xmlns="DAV:">
   <set>
@@ -157,7 +161,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals(403, $this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
+        $this->assertEquals('HTTP/1.1 403 Forbidden',$this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
 
     }
 
@@ -172,7 +176,7 @@ class ServerMKCOLTest extends AbstractServer {
             'HTTP_CONTENT_TYPE' => 'application/xml',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('<?xml version="1.0"?>
 <mkcol xmlns="DAV:">
   <set>
@@ -188,7 +192,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals(403, $this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
+        $this->assertEquals('HTTP/1.1 403 Forbidden',$this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
 
     }
 
@@ -203,7 +207,7 @@ class ServerMKCOLTest extends AbstractServer {
             'HTTP_CONTENT_TYPE' => 'application/xml',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('<?xml version="1.0"?>
 <mkcol xmlns="DAV:">
   <set>
@@ -219,7 +223,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Length' => '0',
         ),$this->response->headers);
 
-        $this->assertEquals(201, $this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
+        $this->assertEquals('HTTP/1.1 201 Created',$this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
 
     }
 
@@ -234,7 +238,7 @@ class ServerMKCOLTest extends AbstractServer {
             'HTTP_CONTENT_TYPE' => 'application/xml',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('<?xml version="1.0"?>
 <mkcol xmlns="DAV:">
   <set>
@@ -252,7 +256,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Length' => '0',
         ),$this->response->headers);
 
-        $this->assertEquals(201, $this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
+        $this->assertEquals('HTTP/1.1 201 Created',$this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
 
     }
 
@@ -266,7 +270,7 @@ class ServerMKCOLTest extends AbstractServer {
             'REQUEST_METHOD' => 'MKCOL',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('');
 
         $this->server->httpRequest = ($request);
@@ -276,7 +280,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals(409, $this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
+        $this->assertEquals('HTTP/1.1 409 Conflict',$this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
 
     }
 
@@ -290,7 +294,7 @@ class ServerMKCOLTest extends AbstractServer {
             'REQUEST_METHOD' => 'MKCOL',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('');
 
         $this->server->httpRequest = ($request);
@@ -300,7 +304,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Content-Type' => 'application/xml; charset=utf-8',
         ),$this->response->headers);
 
-        $this->assertEquals(409, $this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
+        $this->assertEquals('HTTP/1.1 409 Conflict',$this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
 
     }
 
@@ -314,7 +318,7 @@ class ServerMKCOLTest extends AbstractServer {
             'REQUEST_METHOD' => 'MKCOL',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('');
 
         $this->server->httpRequest = ($request);
@@ -325,7 +329,7 @@ class ServerMKCOLTest extends AbstractServer {
             'Allow'        => 'OPTIONS, GET, HEAD, DELETE, PROPFIND, PUT, PROPPATCH, COPY, MOVE, REPORT',
         ),$this->response->headers);
 
-        $this->assertEquals(405, $this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
+        $this->assertEquals('HTTP/1.1 405 Method Not Allowed',$this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
 
     }
 
@@ -341,7 +345,7 @@ class ServerMKCOLTest extends AbstractServer {
             'HTTP_CONTENT_TYPE' => 'application/xml',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('<?xml version="1.0"?>
 <mkcol xmlns="DAV:">
   <set>
@@ -354,7 +358,7 @@ class ServerMKCOLTest extends AbstractServer {
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
-        $this->assertEquals(207, $this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
+        $this->assertEquals('HTTP/1.1 207 Multi-Status',$this->response->status,'Wrong statuscode received. Full response body: ' .$this->response->body);
 
         $this->assertEquals(array(
             'Content-Type' => 'application/xml; charset=utf-8',

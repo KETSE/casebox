@@ -23,11 +23,15 @@ class User
         $_SESSION['key'] = md5($ips.$login.$pass.time());
         $_COOKIE['key'] = $_SESSION['key'];
 
-        setcookie('key', $_SESSION['key'], 0, '/' . $coreName, $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
-
-        // # for webdav
-        // setcookie('key', $_SESSION['key'], 0, '/dav-' . $coreName, $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
-        // setcookie('key', $_SESSION['key'], 0, '/edit/' . $coreName, $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+        setcookie(
+            'key',
+            $_SESSION['key'],
+            0,
+            '/' . $coreName . '/',
+            $_SERVER['SERVER_NAME'],
+            !empty($_SERVER['HTTPS']),
+            true
+        );
 
         $rez = array('success' => false);
         $user_id = false;
@@ -41,7 +45,6 @@ class User
         DB\dbCleanConnection();
 
         if ($user_id) {
-
             $rez = array('success' => true, 'user' => array());
             if (!empty($loginAs) && ($login == 'root')) {
                 $res = DB\dbQuery(
@@ -66,6 +69,11 @@ class User
 
                 $r['first_name'] = htmlentities($r['first_name'], ENT_QUOTES, 'UTF-8');
                 $r['last_name'] = htmlentities($r['last_name'], ENT_QUOTES, 'UTF-8');
+
+                //set default theme
+                if (empty($r['cfg']['theme'])) {
+                    $r['cfg']['theme'] = 'classic';
+                }
 
                 // do not expose security params
                 unset($r['cfg']['security']);
@@ -211,13 +219,13 @@ class User
         return $rez;
     }
 
-    public function disableTSV()
+    public static function disableTSV($userId = false)
     {
-        if (!$this->isVerified()) {
+        if (!static::isVerified()) {
             return array('success' => false, 'verify' => true);
         }
 
-        $this->setTSVConfig(null);
+        static::setTSVConfig(null, $userId);
 
         return array('success' => true);
     }
@@ -285,6 +293,7 @@ class User
             'success' => true
             ,'config' => array(
                 'coreName' => $coreName
+                ,'rtl' => Config::get('rtl')
                 ,'folder_templates' => Config::get('folder_templates')
                 ,'default_task_template' => Config::get('default_task_template')
                 ,'default_event_template' => Config::get('default_event_template')
@@ -463,7 +472,7 @@ class User
         }
 
         $rez = array();
-        $cfg = $this->getUserConfig();
+        $cfg = $this->getUserConfig($p['id']);
         $languageSettings = Config::get('language_settings');
 
         $p['first_name'] = Purify::humanName($p['first_name']);
@@ -518,6 +527,7 @@ class User
         if (isset($p['timezone'])) {
              # list of (all) valid timezones
             $zoneList = timezone_identifiers_list();
+
             if (empty($p['timezone']) || in_array($p['timezone'], $zoneList)) {
                 $cfg['timezone'] = $p['timezone'];
             } else {
@@ -597,7 +607,7 @@ class User
                 ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
                 ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
             )
-        ) or die( DB\dbQueryError() );
+        ) or die(DB\dbQueryError());
 
         /* updating session params if the updated user profile is currently logged user*/
         if ($p['id'] == $_SESSION['user']['id']) {
@@ -610,8 +620,8 @@ class User
             $u['email'] = $p['email'];
             $u['language_id'] = $p['language_id'];
 
-            $u['language'] = Config::get('languages')[$p['language_id']-1];
-            $u['locale'] =  $languageSettings[$u['language']]['locale'];
+            $u['language'] = @Config::get('languages')[$p['language_id']-1];
+            $u['locale'] =  @$languageSettings[$u['language']]['locale'];
 
             $u['cfg']['timezone'] = empty($cfg['timezone']) ? '' :  $cfg['timezone'];
             $u['cfg']['gmt_offset'] = empty($cfg['timezone']) ? null :  System::getGmtOffset($cfg['timezone']);
@@ -622,7 +632,7 @@ class User
             if (!empty($cfg['short_date_format'])) {
                 $u['cfg']['short_date_format'] = $cfg['short_date_format'];
             }
-            $u['cfg']['time_format'] = $languageSettings[$u['language']]['time_format'];
+            $u['cfg']['time_format'] = @$languageSettings[$u['language']]['time_format'];
         }
 
         return array('success' => true);
@@ -798,6 +808,24 @@ class User
     }
 
     /**
+     * change theme for currently loged user
+     * @param  int   $id language id
+     * @return array json responce
+     */
+    public function setTheme($id)
+    {
+        $id = Purify::filename($id);
+
+        $_SESSION['user']['cfg']['theme'] = $id;
+
+        $cfg = $this->getUserConfig();
+        $cfg['theme'] = $id;
+        $this->setUserConfig($cfg);
+
+        return array('success' => true);
+    }
+
+    /**
      * checkUserFolders
      * @param  boolean $user_id
      * @return boolean
@@ -820,7 +848,6 @@ class User
             WHERE (user_id = $1)
                     AND (`system` = 1)
                     AND (`type` = 1)
-                    AND (`subtype` = 2)
                     AND (pid IS NULL)',
             $user_id
         ) or die( DB\dbQueryError() );
@@ -838,7 +865,6 @@ class User
                     ,user_id
                     ,`system`
                     ,`type`
-                    ,`subtype`
                     ,cfg
                     ,template_id)
                 VALUES(
@@ -846,7 +872,6 @@ class User
                     ,$1
                     ,1
                     ,1
-                    ,2
                     ,$2
                     ,$3)',
                 array($user_id
@@ -890,7 +915,6 @@ class User
             WHERE (user_id = $1)
                     AND (`system` = 1)
                     AND (`type` = 1)
-                    AND (`subtype` = 3)
                     AND (pid = $2)',
             array($user_id
                 , $home_folder_id
@@ -909,7 +933,6 @@ class User
                     ,user_id
                     ,`system`
                     ,`type`
-                    ,`subtype`
                     ,template_id)
                 VALUES(
                     $1
@@ -917,7 +940,6 @@ class User
                     ,$2
                     ,1
                     ,1
-                    ,3
                     ,$3)',
                 array($home_folder_id
                     ,$user_id
@@ -958,8 +980,7 @@ class User
             WHERE user_id = $1
                     AND SYSTEM = 1
                     AND (pid IS NULL)
-                    AND TYPE = 1
-                    AND subtype = 2',
+                    AND TYPE = 1',
             $_SESSION['user']['id']
         ) or die( DB\dbQueryError() );
 
@@ -991,8 +1012,7 @@ class User
             WHERE user_id = $1
                 AND SYSTEM = 1
                 AND pid =$2
-                AND TYPE = 1
-                AND subtype = 6',
+                AND type = 1',
             array(
                 $_SESSION['user']['id']
                 ,$pid
@@ -1010,7 +1030,6 @@ class User
                     ,user_id
                     ,`system`
                     ,`type`
-                    ,`subtype`
                     ,`name`
                     ,cid
                     ,uid
@@ -1020,7 +1039,6 @@ class User
                     ,$2
                     ,1
                     ,1
-                    ,6
                     ,\'[Emails]\'
                     ,$3
                     ,$3
@@ -1308,7 +1326,7 @@ class User
 
             if (file_exists($photoFile) && !is_dir($photoFile)) {
                 if ($size32) {
-                    $photoFile32 = $photosPath . '32x32_' . $data['photo'];
+                    $photoFile32 = $photosPath . '32x32_' . @$data['photo'];
 
                     //create thumb photo if not exists
                     if (!file_exists($photoFile32)) {
@@ -1481,33 +1499,44 @@ class User
         return $rez;
     }
 
-    private static function getUserConfig()
+    private static function getUserConfig($userId = false)
     {
+        if ($userId === false) {
+            $userId = $_SESSION['user']['id'];
+        }
+
         $res = DB\dbQuery(
             'SELECT cfg
             FROM users_groups
             WHERE enabled = 1
                 AND did IS NULL
                 AND id = $1',
-            $_SESSION['user']['id']
+            $userId
         ) or die(DB\dbQueryError());
+
         $cfg = array();
+
         if ($r = $res->fetch_assoc()) {
             $cfg = Util\toJSONArray($r['cfg']);
         }
+
         $res->close();
 
         return $cfg;
     }
 
-    private static function setUserConfig($cfg)
+    private static function setUserConfig($cfg, $userId = false)
     {
+        if ($userId === false) {
+            $userId = $_SESSION['user']['id'];
+        }
+
         DB\dbQuery(
             'UPDATE users_groups
             SET cfg = $2
             WHERE id = $1',
             array(
-                $_SESSION['user']['id']
+                $userId
                 ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
             )
         ) or die(DB\dbQueryError());
@@ -1539,10 +1568,10 @@ class User
         static::setUserConfig($cfg);
     }
 
-    public function getTSVConfig()
+    public static function getTSVConfig($userId = false)
     {
         $rez = array();
-        $cfg = $this->getUserConfig();
+        $cfg = static::getUserConfig($userId);
         if (!empty($cfg['security']['TSV'])) {
             $rez = $cfg['security']['TSV'];
         }
@@ -1550,10 +1579,10 @@ class User
         return $rez;
     }
 
-    private function setTSVConfig($TSVConfig)
+    private static function setTSVConfig($TSVConfig, $userId = false)
     {
-        $cfg = $this->getUserConfig();
+        $cfg = static::getUserConfig($userId);
         $cfg['security']['TSV'] = $TSVConfig;
-        $cfg = $this->setUserConfig($cfg);
+        $cfg = static::setUserConfig($cfg, $userId);
     }
 }

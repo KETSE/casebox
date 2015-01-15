@@ -32,7 +32,7 @@ class Yubikey implements \CB\Interfaces\Auth
         if (isset($p['clientId']) && isset($p['sk'])) {
             $this->instance = new \Auth_Yubico(
                 $p['clientId'],
-                '', // $p['sk'],
+                '', //$p['sk'],
                 1
             );
 

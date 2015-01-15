@@ -3,11 +3,11 @@ CREATE TABLE locks (
     owner VARCHAR(100),
     timeout INTEGER UNSIGNED,
     created INTEGER,
-    token VARBINARY(100),
+    token VARCHAR(100),
     scope TINYINT,
     depth TINYINT,
-    uri VARBINARY(1000),
+    uri VARCHAR(1000),
     INDEX(token),
-    INDEX(uri(100))
+    INDEX(uri)
 );
 

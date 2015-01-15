@@ -1,7 +1,8 @@
 CREATE TABLE users (
     id SERIAL NOT NULL,
     username VARCHAR(50),
-    digesta1 VARCHAR(32)
+    digesta1 VARCHAR(32),
+    UNIQUE(username)
 );
 
 ALTER TABLE ONLY users

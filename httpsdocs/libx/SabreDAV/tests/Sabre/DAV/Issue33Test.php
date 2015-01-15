@@ -28,11 +28,11 @@ class Issue33Test extends \PHPUnit_Framework_TestCase {
             'HTTP_OVERWRITE' => 'F',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
 
         $server->httpRequest = $request;
 
-        $info = $server->getCopyAndMoveInfo($request);
+        $info = $server->getCopyAndMoveInfo();
 
         $this->assertEquals('%C3%A0fo%C3%B3', urlencode($info['destination']));
         $this->assertFalse($info['destinationExists']);
@@ -78,7 +78,7 @@ class Issue33Test extends \PHPUnit_Framework_TestCase {
             'HTTP_OVERWRITE' => 'F',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $request->setBody('');
 
         $response = new HTTP\ResponseMock();
@@ -96,7 +96,6 @@ class Issue33Test extends \PHPUnit_Framework_TestCase {
 
         $server->httpRequest = $request;
         $server->httpResponse = $response;
-        $server->sapi = new HTTP\SapiMock();
         $server->exec();
 
         $this->assertTrue(file_exists(SABRE_TEMPDIR  . '/issue33/' . urldecode('%C3%A0fo%C3%B3')));

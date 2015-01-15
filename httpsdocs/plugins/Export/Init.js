@@ -1,11 +1,11 @@
-Ext.namespace('CB.plugins.Export');
+Ext.namespace('CB.plugin.Export');
 
-CB.plugins.Export.init = function(){
+CB.plugin.Export.init = function(){
     App.on('browserinit', function(c){
-        var p = Ext.apply([], Ext.value(c.plugins, []));
-        p.push({ptype: 'CBPluginsExportButton'});
+        var p = Ext.apply([], Ext.valueFrom(c.plugins, []));
+        p.push({ptype: 'CBPluginExportButton'});
         c.plugins = p;
     });
 };
 
-Ext.onReady(CB.plugins.Export.init);
+Ext.onReady(CB.plugin.Export.init);

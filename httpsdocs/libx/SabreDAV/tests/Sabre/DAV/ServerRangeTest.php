@@ -21,7 +21,7 @@ class ServerRangeTest extends AbstractServer{
             'HTTP_RANGE'     => 'bytes=2-5',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -35,7 +35,7 @@ class ServerRangeTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals(206, $this->response->status);
+        $this->assertEquals('HTTP/1.1 206 Partial Content',$this->response->status);
         $this->assertEquals('st c', stream_get_contents($this->response->body));
 
     }
@@ -51,7 +51,7 @@ class ServerRangeTest extends AbstractServer{
             'HTTP_RANGE'     => 'bytes=2-',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -65,7 +65,7 @@ class ServerRangeTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals(206, $this->response->status);
+        $this->assertEquals('HTTP/1.1 206 Partial Content',$this->response->status);
         $this->assertEquals('st contents', stream_get_contents($this->response->body));
 
     }
@@ -81,7 +81,7 @@ class ServerRangeTest extends AbstractServer{
             'HTTP_RANGE'     => 'bytes=-8',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -95,7 +95,7 @@ class ServerRangeTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals(206, $this->response->status);
+        $this->assertEquals('HTTP/1.1 206 Partial Content',$this->response->status);
         $this->assertEquals('contents', stream_get_contents($this->response->body));
 
     }
@@ -111,11 +111,11 @@ class ServerRangeTest extends AbstractServer{
             'HTTP_RANGE'     => 'bytes=100-200',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
-        $this->assertEquals(416, $this->response->status);
+        $this->assertEquals('HTTP/1.1 416 Requested Range Not Satisfiable',$this->response->status);
 
     }
 
@@ -130,16 +130,17 @@ class ServerRangeTest extends AbstractServer{
             'HTTP_RANGE'     => 'bytes=8-4',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
-        $this->assertEquals(416, $this->response->status);
+        $this->assertEquals('HTTP/1.1 416 Requested Range Not Satisfiable',$this->response->status);
 
     }
 
     /**
      * @depends testRange
+     * @covers \Sabre\DAV\Server::httpGet
      */
     function testIfRangeEtag() {
 
@@ -152,7 +153,7 @@ class ServerRangeTest extends AbstractServer{
             'HTTP_IF_RANGE'  => $node->getETag(),
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -166,13 +167,14 @@ class ServerRangeTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals(206, $this->response->status);
+        $this->assertEquals('HTTP/1.1 206 Partial Content',$this->response->status);
         $this->assertEquals('st c', stream_get_contents($this->response->body));
 
     }
 
     /**
      * @depends testRange
+     * @covers \Sabre\DAV\Server::httpGet
      */
     function testIfRangeEtagIncorrect() {
 
@@ -185,7 +187,7 @@ class ServerRangeTest extends AbstractServer{
             'HTTP_IF_RANGE'  => $node->getETag() . 'blabla',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -198,13 +200,14 @@ class ServerRangeTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals(200, $this->response->status);
+        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
         $this->assertEquals('Test contents', stream_get_contents($this->response->body));
 
     }
 
     /**
      * @depends testRange
+     * @covers \Sabre\DAV\Server::httpGet
      */
     function testIfRangeModificationDate() {
 
@@ -217,7 +220,7 @@ class ServerRangeTest extends AbstractServer{
             'HTTP_IF_RANGE'  => 'tomorrow',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -231,13 +234,14 @@ class ServerRangeTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals(206, $this->response->status);
+        $this->assertEquals('HTTP/1.1 206 Partial Content',$this->response->status);
         $this->assertEquals('st c', stream_get_contents($this->response->body));
 
     }
 
     /**
      * @depends testRange
+     * @covers \Sabre\DAV\Server::httpGet
      */
     function testIfRangeModificationDateModified() {
 
@@ -250,7 +254,7 @@ class ServerRangeTest extends AbstractServer{
             'HTTP_IF_RANGE'  => '-2 years',
         );
 
-        $request = HTTP\Sapi::createFromServerArray($serverVars);
+        $request = new HTTP\Request($serverVars);
         $this->server->httpRequest = ($request);
         $this->server->exec();
 
@@ -263,7 +267,7 @@ class ServerRangeTest extends AbstractServer{
             $this->response->headers
          );
 
-        $this->assertEquals(200, $this->response->status);
+        $this->assertEquals('HTTP/1.1 200 OK',$this->response->status);
         $this->assertEquals('Test contents', stream_get_contents($this->response->body));
 
     }

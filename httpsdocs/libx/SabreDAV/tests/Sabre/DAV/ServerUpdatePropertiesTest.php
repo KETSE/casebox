@@ -17,7 +17,10 @@ class ServerUpdatePropertiesTest extends \PHPUnit_Framework_TestCase {
         ));
 
         $expected = array(
-            '{DAV:}foo' => 403,
+            'href' => 'foo',
+            '403' => array(
+                '{DAV:}foo' => null,
+            ),
         );
         $this->assertEquals($expected, $result);
 
@@ -30,17 +33,19 @@ class ServerUpdatePropertiesTest extends \PHPUnit_Framework_TestCase {
         );
         $server = new Server($tree);
 
-        $server->on('propPatch', function($path, PropPatch $propPatch) {
-            $propPatch->handleRemaining(function() { return true; });
-        });
         $result = $server->updateProperties('foo', array(
             '{DAV:}getetag' => 'bla',
             '{DAV:}foo' => 'bar'
         ));
 
         $expected = array(
-            '{DAV:}getetag' => 403,
-            '{DAV:}foo' => 424,
+            'href' => 'foo',
+            '403' => array(
+                '{DAV:}getetag' => null,
+            ),
+            '424' => array(
+                '{DAV:}foo' => null,
+            ),
         );
         $this->assertEquals($expected, $result);
 
@@ -52,10 +57,7 @@ class ServerUpdatePropertiesTest extends \PHPUnit_Framework_TestCase {
             new SimpleCollection('foo'),
         );
         $server = new Server($tree);
-        $server->on('propPatch', function($path, PropPatch $propPatch) {
-            $propPatch->setResultCode('{DAV:}foo', 404);
-            $propPatch->handleRemaining(function() { return true; });
-        });
+        $server->subscribeEvent('updateProperties', array($this,'updatepropfail'));
 
         $result = $server->updateProperties('foo', array(
             '{DAV:}foo' => 'bar',
@@ -63,8 +65,13 @@ class ServerUpdatePropertiesTest extends \PHPUnit_Framework_TestCase {
         ));
 
         $expected = array(
-            '{DAV:}foo' => 404,
-            '{DAV:}foo2' => 424,
+            'href' => 'foo',
+            '404' => array(
+                '{DAV:}foo' => null,
+            ),
+            '424' => array(
+                '{DAV:}foo2' => null,
+            ),
         );
         $this->assertEquals($expected, $result);
 
@@ -87,16 +94,7 @@ class ServerUpdatePropertiesTest extends \PHPUnit_Framework_TestCase {
             new SimpleCollection('foo'),
         );
         $server = new Server($tree);
-        $server->on('propPatch', function($path, PropPatch $propPatch) {
-
-            $propPatch->handle(['{DAV:}foo', '{DAV:}foo2'], function() {
-                return [
-                    '{DAV:}foo' => 200,
-                    '{DAV:}foo2' => 201,
-                ];
-            });
-
-        });
+        $server->subscribeEvent('updateProperties', array($this,'updatepropsuccess'));
 
         $result = $server->updateProperties('foo', array(
             '{DAV:}foo' => 'bar',
@@ -104,8 +102,13 @@ class ServerUpdatePropertiesTest extends \PHPUnit_Framework_TestCase {
         ));
 
         $expected = array(
-            '{DAV:}foo' => 200,
-            '{DAV:}foo2' => 201,
+            'href' => 'foo',
+            '200' => array(
+                '{DAV:}foo' => null,
+            ),
+            '201' => array(
+                '{DAV:}foo2' => null,
+            ),
         );
         $this->assertEquals($expected, $result);
 

@@ -15,9 +15,9 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
 
     function setUp() {
 
-        $nodes = [
+        $nodes = array(
             new DAV\SimpleCollection('testdir'),
-        ];
+        );
 
         $this->server = new DAV\Server($nodes);
         $this->plugin = new Plugin();
@@ -31,19 +31,13 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testGet() {
 
-        $this->server->httpRequest->setMethod('GET');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $this->server->broadcastEvent('beforeMethod',array('GET','testdir'));
 
     }
 
     function testGetDoesntExist() {
 
-        $this->server->httpRequest->setMethod('GET');
-        $this->server->httpRequest->setUrl('/foo');
-
-        $r = $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $r = $this->server->broadcastEvent('beforeMethod',array('GET','foo'));
         $this->assertTrue($r);
 
     }
@@ -53,10 +47,7 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testHEAD() {
 
-        $this->server->httpRequest->setMethod('HEAD');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $this->server->broadcastEvent('beforeMethod',array('HEAD','testdir'));
 
     }
 
@@ -65,10 +56,7 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testOPTIONS() {
 
-        $this->server->httpRequest->setMethod('OPTIONS');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $this->server->broadcastEvent('beforeMethod',array('OPTIONS','testdir'));
 
     }
 
@@ -77,10 +65,7 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testPUT() {
 
-        $this->server->httpRequest->setMethod('PUT');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $this->server->broadcastEvent('beforeMethod',array('PUT','testdir'));
 
     }
 
@@ -89,10 +74,7 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testPROPPATCH() {
 
-        $this->server->httpRequest->setMethod('PROPPATCH');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $this->server->broadcastEvent('beforeMethod',array('PROPPATCH','testdir'));
 
     }
 
@@ -101,10 +83,7 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testCOPY() {
 
-        $this->server->httpRequest->setMethod('COPY');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $this->server->broadcastEvent('beforeMethod',array('COPY','testdir'));
 
     }
 
@@ -113,10 +92,7 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testMOVE() {
 
-        $this->server->httpRequest->setMethod('MOVE');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $this->server->broadcastEvent('beforeMethod',array('MOVE','testdir'));
 
     }
 
@@ -125,10 +101,7 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testACL() {
 
-        $this->server->httpRequest->setMethod('ACL');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $this->server->broadcastEvent('beforeMethod',array('ACL','testdir'));
 
     }
 
@@ -137,10 +110,7 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testLOCK() {
 
-        $this->server->httpRequest->setMethod('LOCK');
-        $this->server->httpRequest->setUrl('/testdir');
-
-        $this->server->emit('beforeMethod', [$this->server->httpRequest, $this->server->httpResponse]);
+        $this->server->broadcastEvent('beforeMethod',array('LOCK','testdir'));
 
     }
 
@@ -149,7 +119,7 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testBeforeBind() {
 
-        $this->server->emit('beforeBind', ['testdir/file']);
+        $this->server->broadcastEvent('beforeBind',array('testdir/file'));
 
     }
 
@@ -158,48 +128,62 @@ class BlockAccessTest extends \PHPUnit_Framework_TestCase {
      */
     function testBeforeUnbind() {
 
-        $this->server->emit('beforeUnbind', ['testdir']);
+        $this->server->broadcastEvent('beforeUnbind',array('testdir'));
 
     }
 
-    function testPropFind() {
+    function testBeforeGetProperties() {
 
-        $propFind = new DAV\PropFind('testdir', [
+        $requestedProperties = array(
             '{DAV:}displayname',
             '{DAV:}getcontentlength',
             '{DAV:}bar',
             '{DAV:}owner',
-        ]);
+        );
+        $returnedProperties = array();
 
-        $r = $this->server->emit('propFind', [$propFind, new DAV\SimpleCollection('testdir')]);
+        $arguments = array(
+            'testdir',
+            new DAV\SimpleCollection('testdir'),
+            &$requestedProperties,
+            &$returnedProperties
+        );
+        $r = $this->server->broadcastEvent('beforeGetProperties',$arguments);
         $this->assertTrue($r);
 
-        $expected = [
-            200 => [],
-            404 => [],
-            403 => [
+        $expected = array(
+            '403' => array(
                 '{DAV:}displayname' => null,
                 '{DAV:}getcontentlength' => null,
                 '{DAV:}bar' => null,
                 '{DAV:}owner' => null,
-            ],
-        ];
+            ),
+        );
 
-        $this->assertEquals($expected, $propFind->getResultForMultiStatus());
+        $this->assertEquals($expected, $returnedProperties);
+        $this->assertEquals(array(), $requestedProperties);
 
     }
 
     function testBeforeGetPropertiesNoListing() {
 
         $this->plugin->hideNodesFromListings = true;
-        $propFind = new DAV\PropFind('testdir', [
+
+        $requestedProperties = array(
             '{DAV:}displayname',
             '{DAV:}getcontentlength',
             '{DAV:}bar',
             '{DAV:}owner',
-        ]);
+        );
+        $returnedProperties = array();
 
-        $r = $this->server->emit('propFind', [$propFind, new DAV\SimpleCollection('testdir')]);
+        $arguments = array(
+            'testdir',
+            new DAV\SimpleCollection('testdir'),
+            &$requestedProperties,
+            &$returnedProperties
+        );
+        $r = $this->server->broadcastEvent('beforeGetProperties',$arguments);
         $this->assertFalse($r);
 
     }

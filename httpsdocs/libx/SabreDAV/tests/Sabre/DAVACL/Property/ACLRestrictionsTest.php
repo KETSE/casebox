@@ -10,7 +10,6 @@ class ACLRestrictionsTest extends \PHPUnit_Framework_TestCase {
     function testConstruct() {
 
         $prop = new AclRestrictions();
-        $this->assertInstanceOf('Sabre\DAVACL\Property\ACLRestrictions', $prop);
 
     }
 

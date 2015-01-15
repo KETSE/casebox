@@ -4,14 +4,11 @@ namespace CB;
 require_once 'init.php';
 
 if (isset($_SERVER['HTTP_X_FILE_OPTIONS'])) {
-
     // AJAX call
     $file = json_decode($_SERVER['HTTP_X_FILE_OPTIONS'], true);
     $file['error'] = UPLOAD_ERR_OK;
     $file['tmp_name'] = tempnam(Config::get('incomming_files_dir'), 'cbup');
     $file['name'] = urldecode($file['name']);
-
-
     if (empty($file['content_id'])) {
         file_put_contents(
             $file['tmp_name'],
@@ -22,7 +19,7 @@ if (isset($_SERVER['HTTP_X_FILE_OPTIONS'])) {
     $browser = new Browser();
     $result = $browser->saveFile(
         array(
-            'pid' => $file['pid']
+            'pid' => @$file['pid']
             ,'response' => @$file['response']
         )
     );

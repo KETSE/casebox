@@ -42,35 +42,35 @@ ics
         );
         rewind($obj2);
 
-        $calendarData = [
-            1 => [ 
-                'obj1' => [
+        $calendarData = array(
+            1 => array(
+                'obj1' => array(
                     'calendarid' => 1,
                     'uri' => 'event1.ics',
                     'calendardata' => $obj1,
-                ],
-                'obj2' => [ 
+                 ),
+                'obj2' => array(
                     'calendarid' => 1,
                     'uri' => 'event2.ics',
                     'calendardata' => $obj2
-                ] 
-            ],
-        ];
+                )
+            ),
+        );
 
 
-        $caldavBackend = new Backend\Mock([], $calendarData);
+        $caldavBackend = new Backend\Mock(array(), $calendarData);
 
-        $calendar = new Calendar($caldavBackend, [ 
+        $calendar = new Calendar($caldavBackend, array(
             'id' => 1,
             'uri' => 'calendar',
             'principaluri' => 'principals/user1',
-        ]);
+        ));
 
-        $this->server = new DAV\Server([$calendar]);
+        $this->server = new DAV\Server(array($calendar));
 
-        $request = HTTP\Sapi::createFromServerArray([
+        $request = new HTTP\Request(array(
             'REQUEST_URI' => '/calendar',
-        ]);
+        ));
         $this->server->httpRequest = $request;
         $this->server->httpResponse = new HTTP\ResponseMock();
 
@@ -92,7 +92,7 @@ XML;
         $dom = DAV\XMLUtil::loadDOMDocument($reportXML);
         $this->plugin->report('{urn:ietf:params:xml:ns:caldav}free-busy-query', $dom);
 
-        $this->assertEquals(200, $this->server->httpResponse->status);
+        $this->assertEquals('HTTP/1.1 200 OK', $this->server->httpResponse->status);
         $this->assertEquals('text/calendar', $this->server->httpResponse->headers['Content-Type']);
         $this->assertTrue(strpos($this->server->httpResponse->body,'BEGIN:VFREEBUSY')!==false);
 
@@ -119,7 +119,7 @@ XML;
      */
     function testFreeBusyReportWrongNode() {
 
-        $request = HTTP\Sapi::createFromServerArray(array(
+        $request = new HTTP\Request(array(
             'REQUEST_URI' => '/',
         ));
         $this->server->httpRequest = $request;

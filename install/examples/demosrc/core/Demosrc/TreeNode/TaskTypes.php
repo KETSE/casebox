@@ -44,14 +44,14 @@ class TaskTypes extends \CB\TreeNode\Base
                 $this->fq[] = 'user_ids:'.$this->lastNode->id;
                 break;
             case 'Demosrc\\TreeNode\\Offices':
-                $this->fq[] = 'category_id:'.$this->lastNode->id;
+                // $this->fq[] = 'category_id:'.$this->lastNode->id;
                 break;
         }
         if (get_class($this->lastNode) == 'Demosrc\\TreeNode\\OfficeUsers') {
-            $this->fq[] = 'category_id:'.$this->lastNode->parent->parent->id;
+            // $this->fq[] = 'category_id:'.$this->lastNode->parent->parent->id;
             $this->fq[] = 'user_ids:'.$this->lastNode->id;
         } else {
-            $this->fq[] = 'category_id:'.$this->lastNode->id;
+            // $this->fq[] = 'category_id:'.$this->lastNode->id;
         }
 
         $this->user_id = $_SESSION['user']['id'];
