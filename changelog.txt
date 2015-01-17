@@ -1,3 +1,14 @@
+CaseBox 1.9.377 (2015-01-17)
+==============================
+New Features, Improvements
+--------------------------
+- Upgraded SabreDAV to 2.1.2
+
+Fixed Bugs:
+----------
+- extjs5 branch had very outdated CB_WebDav & SabreDAV classes, used correct ones from 'devel' branch
+
+
 CaseBox 1.9.376 (2015-01-15)
 ==============================
 New Features, Improvements
