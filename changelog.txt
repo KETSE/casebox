@@ -1,5 +1,8 @@
 CaseBox 1.9.377 (2015-01-17)
 ==============================
+WARNING:
+- a commit from msater to extjs5 branch added old files, @oburlaca made a forced commit later to fix this
+
 New Features, Improvements
 --------------------------
 - Upgraded SabreDAV to 2.1.2
