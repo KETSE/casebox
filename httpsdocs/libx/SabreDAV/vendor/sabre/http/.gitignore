@@ -8,3 +8,6 @@ tests/cov/
 # Composer binaries
 bin/phpunit
 bin/phpcs
+
+# Vim
+.*.swp

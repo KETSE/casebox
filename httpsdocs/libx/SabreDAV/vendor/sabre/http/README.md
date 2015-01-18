@@ -12,15 +12,15 @@ effectively a wrapper around the following PHP constructs:
 
 For Input:
 
-* `$_GET`
-* `$_POST`
-* `$_SERVER`
+* `$_GET`,
+* `$_POST`,
+* `$_SERVER`,
 * `php://input` or `$HTTP_RAW_POST_DATA`.
 
 For output:
 
-* `php://output` or `echo`.
-* `header()`
+* `php://output` or `echo`,
+* `header()`.
 
 What this library provides, is a `Request` object, and a `Response` object.
 
@@ -39,11 +39,10 @@ Installation
 Make sure you have [composer][1] installed. In your project directory, create,
 or edit a `composer.json` file, and make sure it contains something like this:
 
-
 ```json
 {
     "require" : {
-        "sabre/http" : "~2.0.0"
+        "sabre/http" : "~3.0.0"
     }
 }
 ```
@@ -53,18 +52,18 @@ After that, just hit `composer install` and you should be rolling.
 Quick history
 -------------
 
-This library came to existence in 2009, as a part of the [SabreDAV][2]
+This library came to existence in 2009, as a part of the [`sabre/dav`][2]
 project, which uses it heavily.
 
 It got split off into a separate library to make it easier to manage
-releases and hopefully giving it use outside of the scope of just SabreDAV.
+releases and hopefully giving it use outside of the scope of just `sabre/dav`.
 
 Although completely independently developed, this library has a LOT of
-overlap with [symfony's HttpFoundation][3].
+overlap with [Symfony's `HttpFoundation`][3].
 
 Said library does a lot more stuff and is significantly more popular,
 so if you are looking for something to fulfill this particular requirement,
-I'd recommend also considering [HttpFoundation][3].
+I'd recommend also considering [`HttpFoundation`][3].
 
 
 Getting started
@@ -96,7 +95,6 @@ function handleRequest(HTTP\RequestInterface $request) {
 
 A response object you can just create as such:
 
-
 ```php
 use Sabre\HTTP;
 
@@ -120,29 +118,28 @@ HTTP\Sapi::sendResponse($response);
 This line should generally also appear once in your application (at the very
 end).
 
-
 Decorators
 ----------
 
-It may be useful to extend the Request and Response objects in your
+It may be useful to extend the `Request` and `Response` objects in your
 application, if you for example would like them to carry a bit more
 information about the current request.
 
-For instance, you may want to add an `isLoggedIn()` method to the Request
+For instance, you may want to add an `isLoggedIn` method to the Request
 object.
 
 Simply extending Request and Response may pose some problems:
 
-1. You may want to extend the objects with new behavior differently, in
-   different subsystems of your application.
+1. You may want to extend the objects with new behaviors differently, in
+   different subsystems of your application,
 2. The `Sapi::getRequest` factory always returns a instance of
-   `Request` so you would have to override the factory method as well.
+   `Request` so you would have to override the factory method as well,
 3. By controlling the instantation and depend on specific `Request` and
    `Response` instances in your library or application, you make it harder to
    work with other applications which also use `sabre/http`.
 
 In short: it would be bad design. Instead, it's recommended to use the
-[decorator pattern][6] to add new behavior where you need it. sabre/http
+[decorator pattern][6] to add new behavior where you need it. `sabre/http`
 provides helper classes to quickly do this.
 
 Example:
@@ -185,8 +182,8 @@ This package also contains a simple wrapper around [cURL][4], which will allow
 you to write simple clients, using the `Request` and `Response` objects you're
 already familiar with.
 
-It's by no means a replacement for something like [guzzle][7], but it provides
-a simple and lightweight api for making the occasional API call.
+It's by no means a replacement for something like [Guzzle][7], but it provides
+a simple and lightweight API for making the occasional API call.
 
 ### Usage
 
@@ -202,7 +199,7 @@ $response = $client->send($request);
 echo $response->getBodyAsString();
 ```
 
-The client emits 3 event using [sabre/event][5]. `beforeRequest`,
+The client emits 3 event using [`sabre/event`][5]. `beforeRequest`,
 `afterRequest` and `error`.
 
 ```php
@@ -245,11 +242,11 @@ $client->on('error:401', function($request, $response, &$retry, $retryCount) {
 
 ### Asynchronous requests
 
-The Client also supports doing asynchronous requests. This is especially handy
+The `Client` also supports doing asynchronous requests. This is especially handy
 if you need to perform a number of requests, that are allowed to be executed
 in parallel.
 
-The underlying system for this is simply [curl's multi request handler][8],
+The underlying system for this is simply [cURL's multi request handler][8],
 but this provides a much nicer API to handle this.
 
 Sample usage:
@@ -279,7 +276,7 @@ $client->wait();
 
 ```
 
-Check out examples/asyncclient.php for more information.
+Check out `examples/asyncclient.php` for more information.
 
 Writing a reverse proxy
 -----------------------
@@ -322,7 +319,6 @@ $response = $client->send($subRequest);
 // Sends the response back to the client that connected to the proxy.
 Sapi::sendResponse($response);
 ```
-
 
 The Request and Response API's
 ------------------------------
@@ -741,10 +737,10 @@ Made at fruux
 This library is being developed by [fruux](https://fruux.com/). Drop us a line for commercial services or enterprise support.
 
 [1]: http://getcomposer.org/
-[2]: http://code.google.com/p/sabredav
+[2]: http://sabre.io/
 [3]: https://github.com/symfony/HttpFoundation
-[4]: http://uk3.php.net/curl
+[4]: http://php.net/curl
 [5]: https://github.com/fruux/sabre-event
 [6]: http://en.wikipedia.org/wiki/Decorator_pattern
 [7]: http://guzzlephp.org/
-[8]: http://www.php.net/manual/en/function.curl-multi-init.php
+[8]: http://php.net/curl_multi_init

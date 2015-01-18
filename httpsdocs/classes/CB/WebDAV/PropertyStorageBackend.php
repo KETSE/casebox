@@ -92,4 +92,17 @@ class PropertyStorageBackend implements \Sabre\DAV\PropertyStorage\Backend\Backe
     public function delete($path) {
     }
 
+
+
+     /**
+     * This method is called after a successful MOVE
+     *
+     * This should be used to migrate all properties from one path to another.
+     * Note that entire collections may be moved, so ensure that all properties
+     * for children are also moved along.
+     */
+    function move($source, $destination) {
+
+    }
+
 }

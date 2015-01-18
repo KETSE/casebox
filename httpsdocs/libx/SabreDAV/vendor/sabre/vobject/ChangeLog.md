@@ -1,6 +1,95 @@
 ChangeLog
 =========
 
+3.3.4 (2014-11-19)
+------------------
+
+* #154: Converting `ANNIVERSARY` to `X-ANNIVERSARY` and `X-ABDATE` and
+  vice-versa when converting to/from vCard 4.
+* #154: It's now possible to easily select all vCard properties belonging to
+  a single group with `$vcard->{'ITEM1.'}` syntax. (@armin-hackmann)
+* #156: Simpler way to check if a string is UTF-8. (@Hywan)
+* Unittest improvements.
+* #159: The recurrence iterator, freebusy generator and iCalendar DATE and
+  DATE-TIME properties can now all accept a reference timezone when working
+  floating times or all-day events.
+* #159: Master events will no longer get a `RECURRENCE-ID` when expanding.
+* #159: `RECURRENCE-ID` for all-day events will now be correct when expanding.
+* #163: Added a `getTimeZone()` method to `VTIMEZONE` components.
+
+
+3.3.3 (2014-10-09)
+------------------
+
+* #142: `CANCEL` and `REPLY` messages now include the `DTSTART` from the
+  original event.
+* #143: `SCHEDULE-AGENT` on the `ORGANIZER` property is respected.
+* #144: `PARTSTAT=NEEDS-ACTION` is now set for new invites, if no `PARTSTAT` is
+  set to support the inbox feature of iOS.
+* #147: Bugs related to scheduling all-day events.
+* #148: Ignore events that have attendees but no organizer.
+* #149: Avoiding logging errors during timezone detection. This is a workaround
+  for a PHP bug.
+* Support for "Line Islands Standard Time" windows timezone.
+* #154: Correctly work around vCard parameters that have a value but no name.
+
+3.3.2 (2014-09-19)
+------------------
+
+* Changed: iTip broker now sets RSVP status to false when replies are received.
+* #118: iTip Message now has a `getScheduleStatus()` method.
+* #119: Support for detecting 'significant changes'.
+* #120: Support for `SCHEDULE-FORCE-SEND`.
+* #121: iCal demands parameters containing the + sign to be quoted.
+* #122: Don't generate REPLY messages for events that have been cancelled.
+* #123: Added `SUMMARY` to iTip messages.
+* #130: Incorrect validation rules for `RELATED` (should be `RELATED-TO`).
+* #128: `ATTACH` in iCalendar is `URI` by default, not `BINARY`.
+* #131: RRULE that doesn't provide a single valid instance now throws an
+  exception.
+* #136: Validator rejects *all* control characters. We were missing a few.
+* #133: Splitter objects will throw exceptions when receiving incompatible
+  objects.
+* #127: Attendees who delete recurring event instances events they had already
+  declined earlier will no longer generate another reply.
+* #125: Send CANCEL messages when ORGANIZER property gets deleted.
+
+3.3.1 (2014-08-18)
+------------------
+
+* Changed: It's now possible to pass DateTime objects when using the magic
+  setters on properties. (`$event->DTSTART = new DateTime('now')`).
+* #111: iTip Broker does not process attendee adding events to EXDATE.
+* #112: EventIterator now sets TZID on RECURRENCE-ID.
+* #113: Timezone support during creation of iTip REPLY messages.
+* #114: VTIMEZONE is retained when generating new REQUEST objects.
+* #114: Support for 'MAILTO:' style email addresses (in uppercase) in the iTip
+  broker. This improves evolution support.
+* #115: Using REQUEST-STATUS from REPLY messages and now propegating that into
+  SCHEDULE-STATUS.
+
+
+3.3.0 (2014-08-07)
+------------------
+
+* We now use PSR-4 for the directory structure. This means that everything
+  that was used to be in the `lib/Sabre/VObject` directory is now moved to
+  `lib/`. If you use composer to load this library, you shouldn't have to do
+  anything about that though.
+* VEVENT now get populated with a DTSTAMP and UID property by default.
+* BC Break: Removed the 'includes.php' file. Use composer instead.
+* #103: Added support for processing [iTip][iTip] messages. This allows a user
+  to parse incoming iTip messages and apply the result on existing calendars,
+  or automatically generate invites/replies/cancellations based on changes that
+  a user made on objects.
+* #75, #58, #18: Fixes related to overriding the first event in recurrences.
+* Added: VCalendar::getBaseComponent to find the 'master' component in a
+  calendar.
+* #51: Support for iterating RDATE properties.
+* Fixed: Issue #101: RecurrenceIterator::nextMonthly() shows events that are
+  excluded events with wrong time
+
+
 3.2.4 (2014-07-14)
 ------------------
 
@@ -383,3 +472,5 @@ ChangeLog
 * New: It's possible to specify lists of parameters when constructing
   properties.
 * New: made it easier to construct the FreeBusyGenerator.
+
+[iTip]: http://tools.ietf.org/html/rfc5546
