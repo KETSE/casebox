@@ -692,7 +692,7 @@ Ext.define('CB.UploadWindowButton', {
 
         this.resetLabelTask = new Ext.util.DelayedTask( this.resetLabel, this );
         Ext.apply(this, {
-            text: 'Upload window'
+            text: L.UploadWindow
             ,handler: this.showUploadWindow
             ,scope: this
         });

@@ -118,13 +118,16 @@ CB.ObjectsFieldCommonFunctions = {
         }
     }
     ,getThesauriStore: function(){
-        thesauriId = this.cfg.thesauriId;
+        var thesauriId = this.cfg.thesauriId;
         if(this.cfg.thesauriId == 'dependent'){
             fieldName = this.data.record.store.fields.findIndex('name', 'field_id');
             fieldName = (fieldName < 0) ? 'id': 'field_id';
-            pri = this.data.record.store.findBy(function(r){
-                return ( (r.get(fieldName) == this.data.record.get('pid')) && (r.get('duplicate_id') == this.data.record.get('duplicate_id')) );
-            }, this);
+            var pri = this.data.record.store.findBy(
+                function(r){
+                    return ( (r.get(fieldName) == this.data.record.get('pid')) && (r.get('duplicate_id') == this.data.record.get('duplicate_id')) );
+                }
+                ,this
+            );
             if(pri > -1) thesauriId = this.data.pidValue;
         }
         if(!isNaN(thesauriId)) return getThesauriStore(thesauriId);
@@ -183,7 +186,7 @@ Ext.define('CB.ObjectsComboField', {
             ,store: this.store
             ,iconClsField: 'iconCls'
             ,customIcon: customIcon
-            // ,plugins: plugins
+
             ,listeners: {
                 scope: this
                 ,beforeselect: function(combo, record, index){
@@ -214,7 +217,7 @@ Ext.define('CB.ObjectsComboField', {
                 value = (values[i] && values[i].isModel)
                     ? values[i].get(this.valueField)
                     : values[i];
-                v.push(parseInt(value, 10));
+                v.push(value);
             }
 
             this._setValue(v);
@@ -222,10 +225,9 @@ Ext.define('CB.ObjectsComboField', {
 
             //delete this.customIcon;
             if(Ext.isEmpty(text) && this.objectsStore){
-                var idx = this.objectsStore.findExact('id', v);
+                var r = this.objectsStore.findRecord('id', v, 0, false, false, true);
 
-                if(idx > 0){
-                    r = this.objectsStore.getAt(idx);
+                if(r){
                     if(this.icon) {
                         this.icon.className = 'ux-icon-combo-icon ' + r.get('iconCls');
                     }
@@ -271,7 +273,7 @@ Ext.define('CB.ObjectsComboField', {
     }
 
     ,updateStore: function(){
-        oldStore = this.store;
+        var oldStore = this.store;
         this.detectStore();
         this.bindStore(this.store);
         if(oldStore && oldStore.autoDestroy) {
@@ -348,15 +350,14 @@ Ext.define('CB.ObjectsTriggerField', {
         if(!Ext.isEmpty(v)){
             if(!Ext.isArray(v)) v = String(v).split(',');
             for(i = 0; i < v.length; i++) {
-                this.value.push(parseInt(v[i], 10));
+                this.value.push(v[i]);
             }
         }
         data = [];
         if(store) //check if store is set cause it could not be determined due to field configuration errors
         for (var i = 0; i < this.value.length; i++) {
-            idx = store.findExact('id', this.value[i]);
-            if(idx >=0){
-                r = store.getAt(idx);
+            var r = store.findRecord('id', this.value[i], 0, false, false, true);
+            if(r){
                 data.push(r.data);
             }
         }
@@ -459,14 +460,18 @@ Ext.define('CB.ObjectsSelectionForm', {
                 ,header: L.Name
                 ,width: 300
                 ,scope: this
+
                 ,renderer: function(v, m, r, ri, ci, s){
-                    var selected = (this.resultPanel.config.store.findExact('id', r.get('id')) >= 0);
+                    var selected = !Ext.isEmpty(this.resultPanel.config.store.findRecord('id', r.get('id'), 0, false, false, true));
                     switch(this.cfg.renderer){
                         case 'listGreenIcons':
-                            m.css = 'icon-grid-column ' +( (!selected) ? 'icon-element-off' : 'icon-element' );
+                            m.css = 'icon-grid-column ' + ((!selected) ? 'icon-element-off' : 'icon-element');
                             break;
-                        case 'listObjIcons': m.css = 'icon-grid-column '+r.get('iconCls'); break;
+                        case 'listObjIcons':
+                            m.css = 'icon-grid-column ' + r.get('iconCls');
+                            break;
                     }
+
                     return v;
                 }
             }
@@ -767,10 +772,10 @@ Ext.define('CB.ObjectsSelectionForm', {
         }
     }
     ,onRowDeselect: function (sm, record, index, eOpts) {//sm, ri, r
-        var idx = this.resultPanel.config.store.findExact('id', record.get('id'));
+        var r = this.resultPanel.config.store.findRecord('id', record.get('id'), 0, false, false, true);
 
-        if(idx >= 0 ) {
-            this.resultPanel.config.store.removeAt(idx);
+        if(r) {
+            this.resultPanel.config.store.remove(r);
         }
     }
 
@@ -780,11 +785,11 @@ Ext.define('CB.ObjectsSelectionForm', {
             return;
         }
         var r = this.resultPanel.config.store.getAt(index)
-            ,gridIdx = this.grid.store.findExact('id', r.get('id'));
+            ,gridRecord = this.grid.store.findRecord('id', r.get('id'), 0, false, false, true);
 
         this.resultPanel.config.store.removeAt(index);
-        if(gridIdx >=0) {
-            this.grid.getSelectionModel().deselect(gridIdx);
+        if(gridRecord) {
+            this.grid.getSelectionModel().deselect([gridRecord]);
         }
     }
 
@@ -891,6 +896,7 @@ Ext.define('CB.ObjectsSelectionPopupList', {
     ,minWidth: 350
     ,minHeight: 250
     ,height: 350
+
     ,initComponent: function(){
         if(Ext.isEmpty(this.config.config)) {
             this.config.config = {};
@@ -1016,6 +1022,7 @@ Ext.define('CB.ObjectsSelectionPopupList', {
         this.on('beforeshow', this.onBeforeShowEvent, this);
         this.on('resize', function(win, w, h){this.trigger.setWidth(w - 17);});
     }
+
     ,focusGrid: function(){
         this.grid.focus();
         if(this.grid.getStore().getCount() > 0){
@@ -1025,6 +1032,7 @@ Ext.define('CB.ObjectsSelectionPopupList', {
             this.grid.getView().focusRow(this.grid.getStore().indexOf(r));
         }
     }
+
     ,toggleElementSelection: function(g, ri, e){
         r = this.grid.getSelectionModel().getSelected();
         if(!r || (r.get('header_row') == 1)) return;
@@ -1034,6 +1042,7 @@ Ext.define('CB.ObjectsSelectionPopupList', {
         this.grid.getView().refresh(false);
         this.grid.getView().focusRow(this.grid.getStore().indexOf(r));
     }
+
     ,onBeforeShowEvent: function(){
         this.trigger.setValue('');
         this.trigger.focus(true, 350);
@@ -1043,19 +1052,39 @@ Ext.define('CB.ObjectsSelectionPopupList', {
         if(this.iconCls)  this.setIconCls(this.iconCls);
         this.width = 350 + (this.grid.getColumnModel().getColumnCount() - 2) * 100;
         this.setWidth(this.width);
-    },doFilter: function(e){
-        criterias = [{fn: function(rec){return !Ext.isEmpty(rec.get('id'));}, scope: this}];
-        v = this.trigger.getValue();
-        if(!Ext.isEmpty(v)) criterias.push({ property: 'name', value: v, anyMatch: true, caseSensitive: false });
-        if(Ext.isEmpty(criterias)) this.grid.store.clearFilter(); else this.grid.store.filter(criterias);
-    },doClearSelection: function(){
+    }
+
+    ,doFilter: function(e){
+        var criterias = [
+            {
+                fn: function(rec){
+                    return !Ext.isEmpty(rec.get('id'));
+                }
+                ,scope: this
+            }
+        ]
+        ,v = this.trigger.getValue();
+
+        if(!Ext.isEmpty(v)) {
+            criterias.push({ property: 'name', value: v, anyMatch: true, caseSensitive: false });
+        }
+
+        if(Ext.isEmpty(criterias)) {
+            this.grid.store.clearFilter();
+        } else {
+            this.grid.store.filter(criterias);
+        }
+    }
+
+    ,doClearSelection: function(){
         this.value = [];
         this.grid.getView().refresh(false);
-    },doSubmit: function(){
+    }
+
+    ,doSubmit: function(){
         this.grid.store.clearFilter();
-        newValue = this.value.join(',');
+        var newValue = this.value.join(',');
         this.fireEvent('setvalue', newValue, this);
         this.close();
     }
-
 });

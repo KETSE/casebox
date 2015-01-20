@@ -40,7 +40,7 @@ Ext.define('CB.browser.view.Charts', {
 
         this.refOwner.buttonCollection.addAll(
             new Ext.Button({
-                text: 'Bar' //L.ChartArea
+                text: L.Bar //L.ChartArea
                 ,itemId: 'barchart'
                 ,enableToggle: true
                 ,allowDepress: false
@@ -50,7 +50,7 @@ Ext.define('CB.browser.view.Charts', {
                 ,handler: this.onChangeChartClick
             })
             ,new Ext.Button({
-                text: 'Column' //L.ChartArea
+                text: L.Column //L.ChartArea
                 ,itemId: 'columnchart'
                 ,enableToggle: true
                 ,allowDepress: false
@@ -61,7 +61,7 @@ Ext.define('CB.browser.view.Charts', {
                 ,handler: this.onChangeChartClick
             })
             ,new Ext.Button({
-                text: 'Pie' //L.ChartPie
+                text: L.Pie //L.ChartPie
                 ,itemId: 'piechart'
                 ,enableToggle: true
                 ,allowDepress: false

@@ -1,6 +1,7 @@
 <?php
 namespace DisplayColumns;
 
+use CB\Config;
 use CB\User;
 use CB\Cache;
 use CB\Util;
@@ -237,15 +238,19 @@ class Base
         }
 
         /* merge the state with display columns */
-
         if (!empty($state['columns'])) {
             $rez = array();
+
+            $defaultColumns = array_keys(Config::getDefaultGridViewColumns());
+
             foreach ($state['columns'] as $k => $c) {
                 if (!empty($customColumns[$k])) {
                     $c = array_merge($customColumns[$k], $c);
                     unset($customColumns[$k]);
+                    $rez[$k] = $c;
+                } elseif (in_array($k, $defaultColumns)) {
+                    $rez[$k] = $c;
                 }
-                $rez[$k] = $c;
             }
 
             if (!empty($customColumns)) {

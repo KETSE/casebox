@@ -154,6 +154,7 @@ class Browser
     protected function getPathProperties()
     {
         $rez = array();
+
         if (empty($this->path)) {
             $rez['path'] = '/';
         } else {
@@ -258,7 +259,7 @@ class Browser
         // get field config from database
         if (!empty($p['fieldId']) && is_numeric($p['fieldId'])) {
             $res = DB\dbQuery(
-                'SELECT cfg from templates_structure where id = $1',
+                'SELECT cfg FROM templates_structure WHERE id = $1',
                 $p['fieldId']
             ) or die(DB\dbQueryError());
             if ($r = $res->fetch_assoc()) {
@@ -703,7 +704,25 @@ class Browser
 
         $p['name'] = htmlspecialchars($p['name'], ENT_COMPAT);
 
-        return array('success' => true, 'data' => array( 'id' => $id, 'newName' => $p['name']) );
+        //get pid
+        $pid = null;
+        $res = DB\dbQuery(
+            'SELECT pid FROM tree WHERE id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $pid = $r['pid'];
+        }
+        $res->close();
+
+        return array(
+            'success' => true
+            ,'data' => array(
+                'id' => $id
+                ,'pid' => $pid
+                ,'newName' => $p['name']
+            )
+        );
     }
 
     /**

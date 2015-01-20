@@ -107,7 +107,8 @@ class UsersGroups
                 FROM users_groups_association a
                 JOIN users_groups u ON a.user_id = u.id
                 WHERE a.group_id = $1
-                    AND u.did IS NULL',
+                    AND u.did IS NULL
+                ORDER BY 4, 5, 3',
                 $id
             ) or die(DB\dbQueryError());
 

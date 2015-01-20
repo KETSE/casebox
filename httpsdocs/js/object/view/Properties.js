@@ -10,6 +10,7 @@ Ext.define('CB.object.view.Properties', {
             tbar: {}
             ,menu: {
                 reload: {}
+                ,rename: {addDivider: 'top'}
                 ,'delete': {addDivider: 'top'}
                 ,permissions: {addDivider: 'top'}
             }
@@ -86,7 +87,7 @@ Ext.define('CB.object.view.Properties', {
 
     ,clear: function(){
         this.callParent(arguments);
-        this.update('<div class="x-preview-mask">Select an item for preview</div>');
+        this.update('<div class="x-preview-mask">' + L.SelectPreviewItem + '</div>');
     }
 
 });

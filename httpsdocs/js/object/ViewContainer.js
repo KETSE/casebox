@@ -179,7 +179,7 @@ Ext.define('CB.object.ViewContainer', {
         //define button configs
         this.menuItemConfigs = {
             reload: {
-                iconCls: 'im-refresh'
+                iconCls: 'i-refresh'
                 ,itemId: 'reload'
                 ,text: L.Refresh
                 ,scope: this
@@ -230,6 +230,13 @@ Ext.define('CB.object.ViewContainer', {
             //     ,handler: this.onOpenExternalClick
             // }
 
+            ,rename: {
+                itemId: 'rename'
+                ,text: L.Rename
+                ,scope: this
+                ,handler: this.onRenameClick
+            }
+
             ,permissions: {
                 itemId: 'permissions'
                 ,text: L.Permissions
@@ -238,14 +245,14 @@ Ext.define('CB.object.ViewContainer', {
             }
 
             ,webdavlink: {
-                text: 'WebDAV Link'
+                text: L.WebDAVLink
                 ,itemId: 'webdavlink'
                 ,scope: this
                 ,handler: this.onWebDAVLinkClick
             }
 
             ,permalink: {
-                text: 'Permalink'
+                text: L.Permalink
                 ,itemId: 'permalink'
                 ,scope: this
                 ,handler: this.onPermalinkClick
@@ -398,7 +405,7 @@ Ext.define('CB.object.ViewContainer', {
         this.items.getAt(0).clear();
 
         // instantiate a delay to exclude flood requests
-        this.delayedLoadTask.delay(60, this.doLoad, this);
+        this.delayedLoadTask.delay(3, this.doLoad, this);
     }
 
     /**
@@ -625,7 +632,53 @@ Ext.define('CB.object.ViewContainer', {
     }
 
     /**
-     * hadler for permissions button
+     * handler for rename button
+     * Open permissions window for loaded item by calling viewport method
+     * @param  button b
+     * @param  event e
+     * @return void
+     */
+    ,onRenameClick: function(b, e) {
+        Ext.Msg.prompt(
+            L.Rename
+            ,L.NewFileName
+            ,function(btn, text, opt) {
+                if(btn !== 'ok') {
+                    return;
+                }
+
+                CB_BrowserView.rename(
+                    {
+                        path: this.loadedData.id
+                        ,name: text
+                    }
+                    ,function(r, e){
+                        if(r.success !== true){
+                            return;
+                        }
+
+                        this.loadedData.name = r.data.newName;
+
+                        App.fireEvent(
+                            'objectchanged'
+                            ,{
+                                id: parseInt(r.data.id, 10)
+                                ,pid: r.data.pid
+                            }
+                            ,e
+                        );
+                    }
+                    ,this
+                );
+            }
+            ,this
+            ,false
+            ,this.loadedData.name
+        );
+    }
+
+    /**
+     * handler for permissions button
      * Open permissions window for loaded item by calling viewport method
      * @param  button b
      * @param  event e

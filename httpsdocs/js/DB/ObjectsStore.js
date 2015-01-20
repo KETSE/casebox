@@ -26,14 +26,14 @@ Ext.define('CB.DB.ObjectsStore', {
             return false;
         }
 
-        var id = Ext.Number.from(data.nid, data.id);
-        if(isNaN(id)) {
+        var id = Ext.valueFrom(data.nid, data.id);
+        if(Ext.isEmpty(id)) {
             return false;
         }
 
-        var idx = this.findExact('id', id);
+        var rec = this.findRecord('id', id, 0, false, false, true);
 
-        if (idx < 0) {
+        if (!rec) {
             data = Ext.apply({}, data);
             data.id = id;
             var r = Ext.create(

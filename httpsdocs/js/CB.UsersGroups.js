@@ -243,7 +243,7 @@ Ext.define('CB.UsersGroupsTree', {
                 xtype: 'textfield'
             }
             ,allowBlank: false
-            ,blankText: 'A name is required'
+            ,blankText: L.NameRequired
             ,selectOnFocus: true
             ,ignoreNoChange: true
         });
@@ -625,35 +625,26 @@ Ext.define('CB.UsersGroupsTree', {
         );
     }
     ,filter: function(text, property){
+        var store = this.store;
+
         if(Ext.isEmpty(text)){
-            this.clearFilter();
+            store.clearFilter();
              return;
         }
         text = text.toLowerCase();
-        rn = this.getRootNode();
-        visibleNodes = [];
-        rn.cascadeBy({
-            before: function(n){
-                var visible = (n.data[property].toLowerCase().indexOf(text) >=0 );
-                if(visible){
-                    n.ui.show();
-                    p = n.parentNode;
-                    while(p){
-                        p.ui.show();
-                        p.expand();
-                        p = p.parentNode;
-                    }
-                } else {
-                    n.ui.hide();
-                }
-            }
-            ,scope: this
-        });
 
+        store.filterBy(
+            function(record, id){
+                return ( (record.data.depth < 2) ||
+                    (record.data[property].toLowerCase().indexOf(text) >= 0)
+                );
+            }
+            ,this
+        );
     }
+
     ,clearFilter: function(){
-        plog('TODO: refactor filtering nodes through store');
-        rn = this.getRootNode();
+        this.store.clearFilter();
     }
 });
 // ----------------------------------------------------------- edit user form
@@ -1166,7 +1157,7 @@ Ext.define('CB.UsersGroups', {
         CB.UsersGroups.superclass.initComponent.apply(this, arguments);
     }
     ,onSearchQuery: function(text, e){
-        this.tree.filter(text, 'text');
+        this.tree.filter(text, 'title');
     }
     ,onBeforeFormSave: function(){
         this.lastPath = '';

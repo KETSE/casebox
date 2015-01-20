@@ -308,7 +308,7 @@ Ext.define('CB.object.view.Preview', {
         delete this.data;
         delete this.loadedVersionId;
 
-        this.update('<div class="x-preview-mask">Select an item for preview</div>');
+        this.update('<div class="x-preview-mask">' + L.SelectPreviewItem + '</div>');
 
         if(this.getEl().isVisible(true)) {
             this.body.scrollTo('top', 0);

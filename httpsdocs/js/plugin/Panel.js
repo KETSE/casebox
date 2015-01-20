@@ -103,6 +103,7 @@ Ext.define('CB.plugin.Panel', {
             }
             ,this
         );
+
         if(!Ext.isEmpty(items)) {
             this.add(items);
         }

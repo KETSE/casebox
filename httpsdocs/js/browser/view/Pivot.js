@@ -86,7 +86,7 @@ Ext.define('CB.browser.view.Pivot',{
             })
             ,new Ext.Button({
                 qtip: L.ChartArea
-                ,text: 'Bar'
+                ,text: L.Bar
                 ,itemId: 'PVbarchart'
                 ,chart: 'stackedBars'
                 ,enableToggle: true
@@ -97,7 +97,7 @@ Ext.define('CB.browser.view.Pivot',{
             })
             ,new Ext.Button({
                 qtip: L.ChartArea
-                ,text: 'Column'
+                ,text: L.Column
                 ,itemId: 'PVcolumnchart'
                 ,chart: 'stackedColumns'
                 ,enableToggle: true

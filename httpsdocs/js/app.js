@@ -149,24 +149,38 @@ function initApp() {
         }
         ,relatedCell: function(v, metaData, record, rowIndex, colIndex, store) { }
         ,combo: function(v, metaData, record, rowIndex, colIndex, store) {
-            if(Ext.isEmpty(v)) return '';
-            ed = this.editor;
-            ri = ed.store.findExact(ed.valueField, v);
-            if(ri < 0) return '';
-            return ed.store.getAt(ri).get(ed.displayField);
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+
+            var ed = this.editor
+                ,r = ed.store.findRecord(ed.valueField, v, 0, false, false, true);
+
+            if(!r) {
+                return '';
+            }
+
+            return r.get(ed.displayField);
         }
 
         ,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) {
                 return '';
             }
-            var r = [];
+
             store = null;
-            v = toNumericArray(v);
-            var cfg = grid.helperTree.getNode(record.get('id')).data.templateRecord.get('cfg');
-            var source = (Ext.isEmpty(cfg.source))
-                ? 'tree'
-                : cfg.source;
+
+            var rec
+                ,r = []
+                ,va = toNumericArray(v)
+                ,cfg = grid.helperTree.getNode(record.get('id')).data.templateRecord.get('cfg')
+                ,source = (Ext.isEmpty(cfg.source))
+                    ? 'tree'
+                    : cfg.source;
+            if(Ext.isEmpty(va) && Ext.isPrimitive(v)) {
+                va = [v];
+            }
+            clog('va', va);
             switch(source){
                 case 'thesauri':
                     store = isNaN(cfg.thesauriId) ? CB.DB.thesauri : getThesauriStore(cfg.thesauriId);
@@ -185,17 +199,18 @@ function initApp() {
                     if(!cw || !cw.objectsStore) return '';
                     store = cw.objectsStore;
             }
+
             switch(cfg.renderer){
                 case 'listGreenIcons':
-                    for(i=0; i < v.length; i++){
-                        ri = store.findExact('id', parseInt(v[i], 10));
+                    for(i=0; i < va.length; i++){
+                        ri = store.findExact('id', parseInt(va[i], 10));
                         row = store.getAt(ri);
                         if(ri >-1) r.push('<li class="lh16 icon-padding icon-element">'+row.get('name')+'</li>');
                     }
                     return '<ul class="clean">'+r.join('')+'</ul>';
                 case 'listObjIcons':
-                    for(i=0; i < v.length; i++){
-                        ri = store.findExact('id', parseInt(v[i], 10));
+                    for(i=0; i < va.length; i++){
+                        ri = store.findExact('id', parseInt(va[i], 10));
                         row = store.getAt(ri);
                         if(ri >-1) {
                             var icon = row.get('cfg');
@@ -209,10 +224,15 @@ function initApp() {
                         }
                     }
                     return '<ul class="clean">'+r.join('')+'</ul>';
+
                 default:
-                    for(i=0; i < v.length; i++){
-                        ri = store.findExact('id', parseInt(v[i], 10));
-                        if(ri >-1) r.push(store.getAt(ri).get('name'));
+                    for(i=0; i < va.length; i++){
+                        rec = store.findRecord('id', va[i], 0, false, false, true);
+                        if(rec) {
+                            r.push(rec.get('name'));
+                        } else {
+                            r.push(va[i]); //display id if nothing found (eseful for custom sources)
+                        }
                     }
                     return r.join(', ');
             }

@@ -789,7 +789,16 @@ Ext.define('CB.ViewPort', {
 
     ,onViewLoaded: function(proxy, action, options) {
 
-        this.breadcrumb.setValue(action.pathtext);
+        //change breadcrumb value for search template restults
+        var bvalue = action.pathtext;
+
+        if(options.search && !isNaN(options.search.template_id)) {
+            bvalue = L.SearchResultsTitleTemplate;
+            bvalue = bvalue.replace('{name}', CB.DB.templates.getName(options.search.template_id));
+            bvalue = bvalue.replace('{count}', parseInt(action.total, 10));
+        }
+
+        this.breadcrumb.setValue(bvalue);
 
         App.explorer.updateCreateMenuItems(this.buttons.create);
 

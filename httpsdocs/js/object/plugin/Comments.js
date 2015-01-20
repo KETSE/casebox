@@ -73,7 +73,7 @@ Ext.define('CB.object.plugin.Comments', {
         });
 
         this.messageField = new Ext.form.TextArea({
-            emptyText: 'Write a comment...'
+            emptyText: L.WriteComment + '...'
             // ,height: 30
             ,anchor: '100%'
             ,grow: true
@@ -113,7 +113,7 @@ Ext.define('CB.object.plugin.Comments', {
             ,items: [
                 '->'
                 ,{
-                    text: 'Reply'
+                    text: L.Reply
                     ,scope: this
                     ,handler: this.onAddCommentClick
                 }

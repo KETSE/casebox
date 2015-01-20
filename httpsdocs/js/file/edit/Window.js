@@ -110,9 +110,9 @@ Ext.define('CB.file.edit.Window', {
                 ,border: false
                 ,autoScroll: true
 
-                ,split: true
-                // ,collapsible: true
-                // ,collapseMode: 'mini'
+                ,split: {
+                    size: 2
+                }
 
                 ,width: 300
                 ,items: [

@@ -484,6 +484,36 @@ class Config extends Singleton
         return $rez;
     }
 
+    /**
+     * return default columns available for griv view
+     * @return array
+     */
+    public static function getDefaultGridViewColumns()
+    {
+        $instance = static::getInstance();
+
+        if (empty($instance->defaultGridViewColumns)) {
+            $instance->defaultGridViewColumns = array(
+                'nid' => 'ID'
+                ,'name' => L\get('Name')
+                ,'path' => L\get('Path')
+                ,'case' => L\get('Project')
+                ,'date' => L\get('Date')
+                ,'size' => L\get('Size')
+                ,'cid' => L\get('Creator')
+                ,'oid' => L\get('Owner')
+                ,'uid' => L\get('UpdatedBy')
+                ,'comment_user_id' => L\get('CommentedBy')
+                ,'cdate' => L\get('CreatedDate')
+                ,'udate' => L\get('UpdatedDate')
+                ,'comment_date' => L\get('CommentedDate')
+                ,'date_end' => L\get('EndDate')
+            );
+        }
+
+        return $instance->defaultGridViewColumns;
+    }
+
     private static function adjustConfig($cfg)
     {
         /* post processing the obtained config */

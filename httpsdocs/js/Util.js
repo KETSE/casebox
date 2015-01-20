@@ -234,16 +234,20 @@ function toNumericArray(v){
         v = String(v).split(',');
     }
 
+    var rez = [];
+
     for (var i = v.length - 1; i >= 0; i--) {
-        w = String(v[i]).trim();
-        iw = parseInt(w, 10);
+        var w = String(v[i]).trim()
+            ,iw = parseInt(w, 10);
+
         if (iw == w) {
-            v[i] = iw;
-        } else {
-            v[i] = parseFloat(w);
+            rez.push(iw);
+        } else if(!isNaN(w)){
+            rez.push(parseFloat(w));
         }
     }
-    return v;
+
+    return rez;
 }
 
 setsGetIntersection = function(set1, set2){
