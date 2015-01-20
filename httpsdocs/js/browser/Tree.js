@@ -255,7 +255,7 @@ Ext.define('CB.browser.Tree', {
         App.mainViewPort.on('taskcreated', this.onObjectsSaved, this);
         App.mainViewPort.on('favoritetoggled', this.onObjectsSaved, this);
         App.mainViewPort.on('objectsdeleted', this.onObjectsDeleted, this);
-        App.mainViewPort.on('objectupdated', this.onObjectsSaved, this);
+        App.on('objectchanged', this.onObjectsSaved, this);
     }
 
     ,onItemKeyDown: function(tree, record, item, index, e, eOpts){
@@ -362,11 +362,15 @@ Ext.define('CB.browser.Tree', {
         if(!this.rendered) {
             return;
         }
-        var n = this.getRootNode();
+
+        var n = this.getRootNode()
+            ,data = form.data
+                ? form.data
+                : form;
         if(n) {
             n.cascadeBy({
                 before: function(n){
-                    if(n.data.nid == form.data.pid) {
+                    if(n.data.nid == data.pid) {
                         this.store.reload({node: n});
                         // n.reload();
                     }
@@ -706,32 +710,48 @@ Ext.define('CB.browser.Tree', {
     }
 
     ,applyState: function (state) {
-        if(!this.rendered){
+        if(!this.rendered || Ext.isEmpty(state)){
             return;
         }
 
-        if(Ext.isEmpty(state)) {
-            return;
-        }
-
-        var f = function(bSuccess, oLastNode){
-            if(oLastNode) {
-                oLastNode.expand();
-            }
-        };
         if(!Ext.isEmpty(state.paths)) {
-            for (var i = 0; i < state.paths.length; i++) {
-                this.expandPath(
-                    state.paths[i]
-                    ,'nid'
-                    ,f
-                );
-            }
+            this.expandPaths(state.paths);
         }
 
         if(!Ext.isEmpty(state.selected)) {
             this.selectPath(state.selected, 'nid', '/');
         }
+    }
+
+    ,expandPaths: function(paths) {
+        var expandIds = [];
+        for (var i = 0; i < paths.length; i++) {
+            var ids = paths[i].split('/');
+            for (var j = 0; j < ids.length; j++) {
+                if(!Ext.isEmpty(ids[j]) && (expandIds.indexOf(ids[j]) < 0)) {
+                    expandIds.push(ids[j]);
+                }
+            }
+        }
+
+        if(!Ext.isEmpty(expandIds)) {
+            this.expandingIds = expandIds;
+            this.recursiveExpandIds();
+        }
+    }
+
+    ,recursiveExpandIds: function() {
+        if(Ext.isEmpty(this.expandingIds)) {
+            return;
+        }
+        var id = this.expandingIds.shift()
+            ,rec = this.store.findRecord('nid', id, 0, false, false, true);
+            node = this.store.getNodeById(rec.get('id'));
+        node.expand(
+            false
+            ,this.recursiveExpandIds
+            ,this
+        );
     }
 
     ,onCutClick: function(b, e) {

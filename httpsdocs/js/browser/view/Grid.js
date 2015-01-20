@@ -8,6 +8,14 @@ Ext.define('CB.browser.view.Grid', {
 
     ,initComponent: function(){
 
+        var editor = new Ext.form.TextField({selectOnFocus: true});
+        editor._setValue = editor.setValue;
+        editor.setValue = function(v) {
+            v = Ext.util.Format.htmlDecode(v);
+            this._setValue(v);
+        };
+
+
         var columns = [
             {
                 header: 'ID'
@@ -38,7 +46,7 @@ Ext.define('CB.browser.view.Grid', {
                     return rez;
                 }
                 // ,scope: this
-                ,editable: true
+                ,editor: editor
                 ,sort: this.columnSortOverride
                 ,groupable: false
             },{
@@ -166,14 +174,14 @@ Ext.define('CB.browser.view.Grid', {
                 forceFit: false
                 ,loadMask: false
                 ,stripeRows: false
-                ,emptyText: 'No Data'
+                ,emptyText: L.NoData
                 ,deferInitialRefresh: false
 
                 ,plugins: [{
                         ptype: 'CBPluginDDFilesDropZone'
                         ,pidPropety: 'nid'
                         ,dropZoneConfig: {
-                            text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
+                            text: L.GridDDMgs
                             ,onScrollerDragDrop: this.onScrollerDragDrop
                             ,scope: this
                         }
@@ -181,7 +189,7 @@ Ext.define('CB.browser.view.Grid', {
                         ptype: 'CBDDGrid'
                         ,idProperty: 'nid'
                         ,dropZoneConfig: {
-                            text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
+                            text: L.GridDDMgs
                             ,onScrollerDragDrop: this.onScrollerDragDrop
                             ,scope: this
                         }
@@ -195,67 +203,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,columnhide: this.saveGridState
                 ,columnshow: this.saveGridState
 
-                ,beforeedit: function(e){
-                    if(!this.allowRename) {
-                        return false;
-                    }
-
-                    var ed = new Ext.form.TextField({selectOnFocus: true});
-                    ed._setValue = ed.setValue;
-                    ed.setValue = function(v) {
-                        v = Ext.util.Format.htmlDecode(v);
-                        this._setValue(v);
-                    };
-
-                    e.grid.getColumnModel().setEditor(e.column ,ed);
-
-                    delete this.allowRename;
-                    return true;
-                }
-
-                ,afteredit: function(e){
-                    var encodedValue = Ext.util.Format.htmlEncode(e.value);
-                    e.record.set('name', encodedValue);
-
-                    if(encodedValue == e.originalValue) {
-                        return;
-                    }
-
-                    this.renamedOriginalValue = e.originalValue;
-                    this.renamedRecord = e.record;
-                    CB_BrowserView.rename(
-                        {
-                            path: e.record.get('nid')
-                            ,name: e.value
-                        }
-                        ,function(r, e){
-                            if(r.success !== true){
-                                this.renamedRecord.set('name', this.renamedOriginalValue);
-                                delete this.renamedOriginalValue;
-                                delete this.renamedRecord;
-                                return;
-                            }
-
-                            this.renamedRecord.set('name', r.data.newName);
-
-                            delete this.renamedOriginalValue;
-                            delete this.renamedRecord;
-
-
-                            this.fireEvent(
-                                'objectupdated'
-                                ,{
-                                    data: {
-                                        id: parseInt(r.data.id, 10)
-                                        ,pid: this.refOwner.folderProperties.id
-                                    }
-                                }
-                                ,e
-                            );
-                        }
-                        ,this
-                    );
-                }
                 ,keydown: this.onKeyDown
                 ,rowclick: this.onRowClick
                 ,rowdblclick: this.onRowDblClick
@@ -374,6 +321,62 @@ Ext.define('CB.browser.view.Grid', {
                 ,store: this.store
                 ,doRefresh: this.onReloadClick.bind(this)
             }
+            ,plugins: [{
+                ptype: 'cellediting'
+                ,clicksToEdit: 1
+                ,listeners: {
+                    scope: this
+                    ,beforeedit: function(e){
+                        if(!this.allowRename) {
+                            return false;
+                        }
+
+                        delete this.allowRename;
+                        return true;
+                    }
+
+                    ,edit: function(editor, context, eOpts){
+                        var encodedValue = Ext.util.Format.htmlEncode(context.value);
+                        context.record.set('name', encodedValue);
+
+                        if(encodedValue == context.originalValue) {
+                            return;
+                        }
+
+                        this.renamedOriginalValue = context.originalValue;
+                        this.renamedRecord = context.record;
+                        CB_BrowserView.rename(
+                            {
+                                path: context.record.get('nid')
+                                ,name: context.value
+                            }
+                            ,function(r, e){
+                                if(r.success !== true){
+                                    this.renamedRecord.set('name', this.renamedOriginalValue);
+                                    delete this.renamedOriginalValue;
+                                    delete this.renamedRecord;
+                                    return;
+                                }
+
+                                this.renamedRecord.set('name', r.data.newName);
+
+                                delete this.renamedOriginalValue;
+                                delete this.renamedRecord;
+
+                                App.fireEvent(
+                                    'objectchanged'
+                                    ,{
+                                        id: parseInt(r.data.id, 10)
+                                        ,pid: this.refOwner.folderProperties.id
+                                    }
+                                    ,e
+                                );
+                            }
+                            ,this
+                        );
+                    }
+                }
+            }]
         });
 
         // this.objectPanel = new CB.object.ViewContainer({
@@ -404,12 +407,15 @@ Ext.define('CB.browser.view.Grid', {
                 ,activate: this.onActivate
             }
         });
-        CB.browser.view.Grid.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         this.store.on('beforeload', this.onBeforeStoreLoad, this);
         this.store.on('load', this.onStoreLoad, this);
 
-        this.enableBubble(['reload', 'itemcontextmenu']);
+        this.enableBubble([
+            'reload'
+            ,'itemcontextmenu'
+        ]);
 
     }
     /**
@@ -617,10 +623,19 @@ Ext.define('CB.browser.view.Grid', {
         if(!this.grid.selModel.hasSelection()) {
             return;
         }
-        this.grid.stopEditing(true);
-        var idx = this.grid.store.indexOf(this.grid.selModel.getSelected());
+        this.grid.editingPlugin.cancelEdit();
         this.allowRename = true;
-        this.grid.startEditing(idx, this.grid.getColumnModel().findColumnIndex('name'));
+
+        var selection = this.grid.selModel.getSelection()
+            ,valueCol = this.grid.headerCt.child('[dataIndex="name"]')
+            ,colIdx = valueCol.getIndex();
+
+        if(!Ext.isEmpty(selection)) {
+            this.grid.editingPlugin.startEdit(
+                selection[0]
+                ,colIdx
+            );
+        }
     }
     ,onReloadClick: function() {
         this.fireEvent('reload', this);

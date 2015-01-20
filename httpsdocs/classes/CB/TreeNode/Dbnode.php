@@ -60,9 +60,7 @@ class Dbnode extends Base
                 $p['from'] = 'grid';
             }
         }
-        // if (\CB\isDebugHost()) {
-        //     var_dump($p);
-        // }
+
         $s = new \CB\Search();
         $rez = $s->query($p);
 

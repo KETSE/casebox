@@ -296,7 +296,7 @@ Ext.define('CB.SecurityWindow', {
                                 this.cbInherit
                                 ,{
                                     xtype: 'label'
-                                    ,text: 'Include inheritable permissions from this object\'s parent'
+                                    ,text: L.InheritPermissionsMgs
                                     ,style: 'margin-top:3px'
                                     ,forId: 'cb_inherit' + this.data.id
                                     ,listeners: {

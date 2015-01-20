@@ -29,11 +29,11 @@ Ext.define('CB.widget.TaskBar', {
         me.windowMenu = new Ext.menu.Menu({
             defaultAlign: 'br-tr'
             ,items: [
-                {text: 'Restore', handler: me.onWindowMenuRestore, scope: me}
-                ,{text: 'Minimize', handler: me.onWindowMenuMinimize, scope: me}
-                ,{text: 'Maximize', handler: me.onWindowMenuMaximize, scope: me}
+                {text: L.Restore, handler: me.onWindowMenuRestore, scope: me}
+                ,{text: L.Minimize, handler: me.onWindowMenuMinimize, scope: me}
+                ,{text: L.Maximize, handler: me.onWindowMenuMaximize, scope: me}
                 ,'-'
-                ,{text: 'Close', handler: me.onWindowMenuClose, scope: me}
+                ,{text: L.Close, handler: me.onWindowMenuClose, scope: me}
             ]
             ,listeners: {
                 scope: me

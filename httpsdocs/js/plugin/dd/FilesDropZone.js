@@ -7,7 +7,7 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
     ,constructor: function(config){
         Ext.apply(this, {
             dropZoneConfig:{
-                text: 'Drop files here'
+                text: L.DropFilesHere
             }
         });
 

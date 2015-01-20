@@ -1055,7 +1055,7 @@ Ext.define('CB.TSVgaForm', {
                     }
                 },{
                     xtype: 'button'
-                    ,text: 'Verify and Save'
+                    ,text: L.VerifyAndSave
                     ,name: 'btnVS'
                     ,disabled: true
                     ,scope: this

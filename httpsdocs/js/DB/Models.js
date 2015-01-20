@@ -66,7 +66,7 @@ Ext.define('ContentItem', {
 Ext.define('FieldObjects', {
     extend: 'Ext.data.Model'
     ,fields: [
-        {name: 'id', type: 'int'}
+        {name: 'id'} //, type: 'int' // let it be string, custom sources could return a non int id
         ,'name'
         ,{name: 'date', type: 'date'}
         ,{name: 'type', type: 'int'}
@@ -86,7 +86,7 @@ Ext.define('FieldObjects', {
 Ext.define('ObjectsRecord', {
     extend: 'Ext.data.Model'
     ,fields: [
-        {name: 'id', type: 'int'}
+        {name: 'id'} // , type: 'int'
         ,'name'
         ,{name: 'date', type: 'date'}
         ,{name: 'template_id', type: 'int'}

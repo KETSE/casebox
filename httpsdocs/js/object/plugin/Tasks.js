@@ -8,7 +8,6 @@ Ext.define('CB.object.plugin.Tasks', {
 
         this.actions = {
            add: new Ext.Action({
-                // ,text: L.Add
                 iconCls: 'i-plus'
                 ,scope: this
                 ,handler: this.onAddClick
@@ -88,13 +87,10 @@ Ext.define('CB.object.plugin.Tasks', {
             this.puMenu = new Ext.menu.Menu({
                 items: [
                     {
-                        text: 'Close'
+                        text: L.Close
                     },{
-                        text: 'Delete'
+                        text: L.Delete
                         ,iconCls: 'i-trash'
-                    },'-',{
-                        text: 'In new tab'
-                        ,iconCls: 'icon-external'
                     }
                 ]
             });

@@ -1,3 +1,27 @@
+CaseBox 1.9.378 (2015-01-20)
+==============================
+New Features, Improvements
+--------------------------
+- #4348 Show "Search results: Cases (35)" when using search tmpl
+- #4371 IPC: Show addresses linked to a postal code
+- #4369 IPC: lowercase & word form for month name not ok
+- #4365 Sort users by name in users management window
+- #4355 Add "Rename" for menuItem in Grid and Preview Panel '...' submenu
+- Use white background for window with graphs
+- #4357 Use 16x16 Refresh icon in '...' menu in Preview Panel
+- #4349 Vertical spliter in File preview window should have smaller width
+- #4350 add UI strings directly to L translation in mysql
+- #4351 splitter not set for horizontal layout
+
+Fixed Bugs:
+----------
+- #4346 Tree doesn't expand previously opened folder onCBLoad
+  Ext bug: TreePanel.expandPath doesnt work. Made an workaround.
+- #4384 CB SOLR error if user settings contains a sorted SOLR field that no longer exists
+- #4368 IPC: не работает функция разделения страниц
+- #4364 Search not working in User Management window
+- #4370 Can't add a comment if Obj in popup window
+
 CaseBox 1.9.377 (2015-01-17)
 ==============================
 WARNING:
@@ -438,7 +462,7 @@ CaseBox 1.9.345 (2014-10-29)
 ==============================
 New Features, Improvements
 --------------------------
-- Objects �form� editor (use Grid & DC)
+- Objects ‘form’ editor (use Grid & DC)
 - added comment_user_id and comment_date fields to solr
   this fields are updated when new comment added
 - updated translations in casebox intall sql, added multilanguage plugin
@@ -746,7 +770,7 @@ CaseBox 1.9.320 (2014-08-30)
 ==============================
 New Features, Improvements
 --------------------------
-- Button "В�?тавить" doesn't work in a newly added templates for ipc
+- Button "Ð’Ñ?Ñ‚Ð°Ð²Ð¸Ñ‚ÑŒ" doesn't work in a newly added templates for ipc
 - Jump to login if preview required re-login
 
 Fixed Bugs:
@@ -1169,9 +1193,9 @@ New Features, Improvements
 
     Oleg suggested this config
     "edit_files":
-        {“txt”: “txt, php, js, xml, csv“,
-          “html”: “html, htm”,
-          “webdav”: “doc, ppt, docx, odt”
+        {â€œtxtâ€: â€œtxt, php, js, xml, csvâ€œ,
+          â€œhtmlâ€: â€œhtml, htmâ€,
+          â€œwebdavâ€: â€œdoc, ppt, docx, odtâ€
         }
 
     I propose to merge all files related options into one config for them:
@@ -1541,8 +1565,8 @@ Fixed Bugs:
 - Right panel remains in edit mode and empty
 - File preview doesn't work for pdf
 - Column width not saved
-- Stratelit: Incorrect preview of Нар�?�?ение in Stratelit
-- Stratelit: Incorrect icon & graph for Нар�?�?ение
+- Stratelit: Incorrect preview of ÐÐ°Ñ€Ñ?Ñ?ÐµÐ½Ð¸Ðµ in Stratelit
+- Stratelit: Incorrect icon & graph for ÐÐ°Ñ€Ñ?Ñ?ÐµÐ½Ð¸Ðµ
 - Can't edit objects opened fromm preview
 - deleted template fields become visible when reloading templates structure from menu.
 - user avatars not displayed in task notifications emails
@@ -2261,7 +2285,7 @@ Fixed Bugs:
 - Saving a node will show "Undefined" text in progress panel
 - Can't D&D files in grid
 - Critical bug: Infinite loop, CPU at 100% = configuration problem
-- "В�?е дела" folder recursively shows only Case first letters
+- "Ð’Ñ?Ðµ Ð´ÐµÐ»Ð°" folder recursively shows only Case first letters
 
 Notes:
 ----------

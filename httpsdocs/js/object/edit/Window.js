@@ -240,7 +240,9 @@ Ext.define('CB.object.edit.Window', {
                     ,border: false
                     ,autoScroll: true
 
-                    // ,split: true
+                    ,split: {
+                        size: 2
+                    }
                     ,collapsible: true
                     ,collapseMode: 'mini'
 
@@ -393,6 +395,7 @@ Ext.define('CB.object.edit.Window', {
             }
         }
 
+        this.pluginsContainer.loadedParams = r.data;
         this.pluginsContainer.onLoadData(r, e);
 
         this.postLoadProcess();

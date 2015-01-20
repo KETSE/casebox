@@ -1,37 +1,16 @@
 <?php
 namespace Export;
 
+use CB\Config;
 use CB\L;
 use CB\Util;
 use CB\User;
 
 class Instance
 {
-    public $defaultColumns = array();
-
     public function install()
     {
 
-    }
-
-    public function __construct ()
-    {
-        $this->defaultColumns = array(
-            'nid' => 'ID'
-            ,'name' => L\get('Name')
-            ,'path' => L\get('Path')
-            ,'case' => L\get('Project')
-            ,'date' => L\get('Date')
-            ,'size' => L\get('Size')
-            ,'cid' => L\get('Creator')
-            ,'oid' => L\get('Owner')
-            ,'uid' => L\get('UpdatedBy')
-            ,'comment_user_id' => L\get('CommentedBy')
-            ,'cdate' => L\get('CreatedDate')
-            ,'udate' => L\get('UpdatedDate')
-            ,'comment_date' => L\get('CommentedDate')
-            ,'date_end' => 'End date'
-        );
     }
 
     public function init()
@@ -48,7 +27,8 @@ class Instance
         // form columns
         L\initTranslations();
 
-        $columns = $this->defaultColumns;
+        $defaultColumns = Config::getDefaultGridViewColumns();
+        $columns = $defaultColumns;
 
         // retreive data
         $p['start'] = 0;
@@ -62,9 +42,9 @@ class Instance
 
             foreach ($results['DC'] as $colName => $col) {
                 if (@$col['hidden'] !== true) {
-                    $columns[$colName] = empty($this->defaultColumns[$colName])
+                    $columns[$colName] = empty($defaultColumns[$colName])
                         ? @Util\coalesce($col['title'], $colName)
-                        : $this->defaultColumns[$colName];
+                        : $defaultColumns[$colName];
                 }
             }
         }
@@ -155,11 +135,7 @@ class Instance
     public function getHTML($p)
     {
         $rez = array();
-        // echo "Get data for: <br />\n";
-        // var_dump($p);
         $records = $this->getData($p);
-        // echo "records: <br />\n";
-        // var_dump($records);
 
         $rez[] = '<th>'.implode('</th><th>', array_shift($records)).'</th>';
 

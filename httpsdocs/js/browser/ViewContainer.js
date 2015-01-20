@@ -133,6 +133,13 @@ Ext.define('CB.browser.ViewContainer', {
                 ,handler: this.onDeleteClick
             })
 
+            ,contextRename: new Ext.Action({
+                text: L.Rename
+                ,iconCls: 'i-rename'
+                ,scope: this
+                ,handler: this.onRenameClick
+            })
+
             ,contextExport: new Ext.Action({
                 iconCls: 'i-table-export'
                 ,text: L.Export
@@ -1052,6 +1059,10 @@ Ext.define('CB.browser.ViewContainer', {
         this.store.deleteIds(ids);
     }
 
+    ,onRenameClick: function(b, e) {
+        this.cardContainer.getLayout().activeItem.onRenameClick(b, e);
+    }
+
     ,onRestoreClick: function() {
         var s = this.getSelection();
         var ids = [];
@@ -1158,7 +1169,6 @@ Ext.define('CB.browser.ViewContainer', {
         }
     }
     ,onObjectChanged: function(objData, component){
-
         var idx = this.store.findExact('nid', String(objData.id));
 
         if(
@@ -1233,9 +1243,10 @@ Ext.define('CB.browser.ViewContainer', {
                 ,this.actions.paste
                 ,this.actions.pasteShortcut
                 ,'-'
+                ,this.actions.contextReload
                 ,this.actions.createShortcut
                 ,this.actions.contextDelete
-                ,this.actions.contextReload
+                ,this.actions.contextRename
                 ,'-'
                 ,this.createItem
                 ,'-'
