@@ -3,6 +3,7 @@ namespace CB\Objects;
 
 use CB\DB;
 use CB\Util;
+use CB\L;
 use CB\Log;
 use CB\Security;
 
@@ -68,10 +69,20 @@ class Object
             }
 
             $this->data = $p;
+            unset($this->linearData);
 
             $this->template = null;
             if (!empty($this->data['template_id']) && $this->loadTemplate) {
                 $this->template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($this->data['template_id']);
+            }
+        }
+
+        //check if there is defaultPid specified in template config
+        if (!empty($this->template)) {
+            $templateData = $this->template->getData();
+
+            if (!empty($templateData['cfg']['defaultPid'])) {
+                $this->data['pid'] = $templateData['cfg']['defaultPid'];
             }
         }
 
@@ -136,6 +147,7 @@ class Object
                 ,oid
                 ,cdate
                 ,`system`
+                ,`draft`
                 ,updated
             )
             VALUES (
@@ -153,6 +165,7 @@ class Object
                 ,$12
                 ,COALESCE($13, CURRENT_TIMESTAMP)
                 ,$14
+                ,$15
                 ,1
             )',
             array(
@@ -170,6 +183,7 @@ class Object
                 ,@$p['oid']
                 ,@$p['cdate']
                 ,@intval($p['system'])
+                ,@intval($p['draft'])
             )
         ) or die(DB\dbQueryError());
 
@@ -177,6 +191,9 @@ class Object
         $p['id'] = $this->id;
 
         $this->createCustomData();
+
+        //load the object from db to have all its created data
+        $this->load();
 
         //fire create event
         \CB\fireEvent('nodeDbCreate', $this);
@@ -237,6 +254,7 @@ class Object
 
         $this->data = array();
         $this->template = null;
+        unset($this->linearData);
 
         $res = DB\dbQuery(
             'SELECT t.*
@@ -288,7 +306,7 @@ class Object
         if ($r = $res->fetch_assoc()) {
             $this->data['data'] = Util\toJSONArray($r['data']);
             $this->data['sys_data'] = Util\toJSONArray($r['sys_data']);
-
+            unset($this->linearData);
         }
         $res->close();
     }
@@ -302,6 +320,8 @@ class Object
     {
         if ($p !== false) {
             $this->data = $p;
+            unset($this->linearData);
+
             if (array_key_exists('id', $p)) {
                 $this->id = $p['id'];
             }
@@ -325,6 +345,7 @@ class Object
         if (empty($p['cid'])) {
             $p['cid'] = $_SESSION['user']['id'];
         }
+
         if (empty($p['oid'])) {
             $p['oid'] = $p['cid'];
         }
@@ -347,7 +368,12 @@ class Object
         );
         $saveFields = array();
         $saveValues = array($this->id, $_SESSION['user']['id']);
-        $params = array('`uid` = $2', '`udate` = CURRENT_TIMESTAMP', 'updated = 1');
+        $params = array(
+            '`uid` = $2'
+            ,'`udate` = CURRENT_TIMESTAMP'
+            ,'`draft` = 0'
+            ,'updated = 1'
+        );
         $i = 3;
         foreach ($tableFields as $fieldName) {
             if (array_key_exists($fieldName, $p) && ($p[$fieldName] !== 'id')) {
@@ -367,6 +393,11 @@ class Object
                 $saveValues
             ) or die(DB\dbQueryError());
         }
+
+        DB\dbQuery(
+            'call `p_mark_all_child_drafts_as_active`($1)',
+            $this->id
+        ) or die(DB\dbQueryError());
 
         $this->updateCustomData();
 
@@ -407,6 +438,7 @@ class Object
         }
 
         $this->filterHTMLFields($d['data']);
+        unset($this->linearData);
 
         @DB\dbQuery(
             'INSERT INTO objects
@@ -422,6 +454,126 @@ class Object
             )
         ) or die(DB\dbQueryError());
         /* end of updating object properties into the db */
+
+        return true;
+    }
+
+    /**
+     * get objects system data (sysData field)
+     * return sysData form this class if loaded or reads directly from db
+     *
+     * @return array
+     */
+    public function getSysData()
+    {
+        $rez = array();
+
+        if ($this->loaded) {
+            $rez = Util\toJSONArray(@$this->data['sys_data']);
+        } else {
+            $res = DB\dbQuery(
+                'SELECT sys_data
+                FROM objects
+                WHER id = $1',
+                $this->data['id']
+            ) or die(DB\dbQueryError());
+            if ($r = $res->fetch_assoc()) {
+                $rez = Util\toJSONArray($r['sys_data']);
+            }
+            $res->close();
+        }
+
+        return $rez;
+    }
+
+    /**
+     * update objects system data (sysData field)
+     * this method updates data directly and desnt fire update events
+     * @param variant $sysData array or json encoded string
+     *        if not specified then sysTada from current class will be used for update
+     * @return boolean
+     */
+    public function updateSysData($sysData = false)
+    {
+        $d = &$this->data;
+
+        $sysData = ($sysData === false)
+            ? Util\toJSONArray(@$d['sys_data'])
+            : Util\toJSONArray($sysData);
+
+        @DB\dbQuery(
+            'INSERT INTO objects
+            (id, sys_data)
+            VALUES ($1, $2)
+            ON DUPLICATE KEY UPDATE
+                sys_data = $2',
+            array(
+                $d['id']
+                ,json_encode($sysData, JSON_UNESCAPED_UNICODE)
+            )
+        ) or die(DB\dbQueryError());
+
+        $this->data['sys_data'] = $sysData;
+
+        //mark the item as updated so that it would be reindexed to solr
+        DB\dbQuery(
+            'UPDATE tree
+            SET updated = (updated | 1)
+            WHERE id = $1',
+            $d['id']
+        ) or die(DB\dbQueryError());
+
+        return true;
+    }
+
+    /**
+     * get a property from system data of the object (sysData field)
+     *
+     * @param varchar $propertyName
+     *
+     * @return variant | null
+     */
+    public function getSysDataProperty($propertyName)
+    {
+        $rez = null;
+
+        if (empty($propertyName) || !is_scalar($propertyName)) {
+            return $rez;
+        }
+
+        $d = $this->getSysData();
+
+        if (isset($d[$propertyName])) {
+            $rez = $d[$propertyName];
+        }
+
+        return $rez;
+    }
+
+    /**
+     * update a property system data of the object (sysData field)
+     * if value is null the property is unset from sys_data
+     *
+     * @param varchar $propertyName
+     * @param variant $propertyValue
+     *
+     * @return boolean
+     */
+    public function setSysDataProperty($propertyName, $propertyValue = null)
+    {
+        if (empty($propertyName) || !is_scalar($propertyName)) {
+            return false;
+        }
+
+        $d = $this->getSysData();
+
+        if (is_null($propertyValue)) {
+            unset($d[$propertyName]);
+        } else {
+            $d[$propertyName] = $propertyValue;
+        }
+
+        $this->updateSysData($d);
 
         return true;
     }
@@ -593,9 +745,13 @@ class Object
      */
     public function getLinearData()
     {
-        $rez = $this->getLinearNodesData($this->data['data']);
+        if (!empty($this->linearData)) {
+            return $this->linearData;
+        }
 
-        return $rez;
+        $this->linearData = $this->getLinearNodesData($this->data['data']);
+
+        return $this->linearData;
     }
 
     /**
@@ -689,6 +845,7 @@ class Object
     public function setData($data)
     {
         $this->data = $data;
+        unset($this->linearData);
 
         if (array_key_exists('id', $data)) {
             $this->id = $data['id'];
@@ -811,8 +968,15 @@ class Object
             /* end of target security check */
             // marking overwriten object with dstatus = 3
             DB\dbQuery(
-                'UPDATE tree SET updated = 1, dstatus = 3, did = $2 WHERE id = $1',
-                array($targetId, $_SESSION['user']['id'])
+                'UPDATE tree
+                SET  updated = 1
+                    ,dstatus = 3
+                    ,did = $2
+                WHERE id = $1',
+                array(
+                    $targetId
+                    ,$_SESSION['user']['id']
+                )
             ) or die(DB\dbQueryError());
 
             //get pid from target if not specified
@@ -849,7 +1013,6 @@ class Object
                 ,`user_id`
                 ,`system`
                 ,`type`
-                ,`subtype`
                 ,`template_id`
                 ,`tag_id`
                 ,`target_id`
@@ -875,7 +1038,6 @@ class Object
                 ,`user_id`
                 ,`system`
                 ,`type`
-                ,`subtype`
                 ,`template_id`
                 ,`tag_id`
                 ,`target_id`
@@ -921,8 +1083,15 @@ class Object
         // to newly copied object
         if (is_numeric($targetId)) {
             DB\dbQuery(
-                'UPDATE tree SET updated = 1, pid = $2 WHERE pid = $1 AND dstatus = 0',
-                array($targetId, $this->id)
+                'UPDATE tree
+                SET updated = 1
+                    ,pid = $2
+                WHERE pid = $1 AND
+                    dstatus = 0',
+                array(
+                    $targetId
+                    ,$this->id
+                )
             ) or die(DB\dbQueryError());
         }
 
@@ -986,8 +1155,15 @@ class Object
             /* end of target security check */
             // marking overwriten object with dstatus = 3
             DB\dbQuery(
-                'UPDATE tree SET updated = 1, dstatus = 3, did = $2 WHERE id = $1',
-                array($targetId, $_SESSION['user']['id'])
+                'UPDATE tree
+                SET updated = 1
+                    ,dstatus = 3
+                    ,did = $2
+                WHERE id = $1',
+                array(
+                    $targetId
+                    ,$_SESSION['user']['id']
+                )
             ) or die(DB\dbQueryError());
 
             //get pid from target if not specified
@@ -1018,7 +1194,10 @@ class Object
         // moving the object to $pid
 
         DB\dbQuery(
-            'UPDATE tree set updated = 1, pid = $2 where id = $1',
+            'UPDATE tree
+            SET updated = 1
+                ,pid = $2
+            WHERE id = $1',
             array($this->id, $pid)
         ) or die(DB\dbQueryError());
 
@@ -1028,8 +1207,15 @@ class Object
         // to newly copied object
         if (is_numeric($targetId)) {
             DB\dbQuery(
-                'UPDATE tree SET updated = 1, pid = $2 WHERE pid = $1 AND dstatus = 0',
-                array($targetId, $this->id)
+                'UPDATE tree
+                SET updated = 1
+                    ,pid = $2
+                WHERE pid = $1 AND
+                    dstatus = 0',
+                array(
+                    $targetId
+                    ,$this->id
+                )
             ) or die(DB\dbQueryError());
         }
 

@@ -1,45 +1,46 @@
 
 Ext.namespace('CB');
 
-CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
-    initComponent: function(){
+Ext.define('CB.VerticalEditGridHelperTree', {
+    extend: 'Ext.tree.TreePanel'
 
-        Ext.apply(this, {
-            loader: new Ext.tree.TreeLoader({
-                // listeners: {
-                //     scope: this
-                //     ,beforeload: function(treeloader, node, callback) {
-                //         treeloader.baseParams.path = node.getPath('nid');
-                //         treeloader.baseParams.showFoldersContent = this.showFoldersContent;
-                //     }
-                // }
-            })
-            ,root: new Ext.tree.TreeNode({
+    ,initComponent: function(){
+
+        this.store = Ext.create('Ext.data.TreeStore', {
+            root: {
                 text: 'root'
                 ,nid: 0
                 ,expanded: true
                 ,leaf: false
                 ,value: {}
-            })
-            ,listeners:{
+            }
+            ,proxy: {
+                type: 'memory'
+                ,paramsAsHash: true
+            }
+        });
+
+        Ext.apply(this, {
+            listeners:{
                 scope: this
-                ,beforeappend: this.onBeforeNodeAppend
+                ,beforeitemappend: this.onBeforeNodeAppend
             }
         });
 
         CB.VerticalEditGridHelperTree.superclass.initComponent.apply(this, arguments);
     }
-    ,onBeforeNodeAppend: function(tree, parent, node){
-        node.setId(Ext.id());
+    ,onBeforeNodeAppend: function(parent, node){
+        node.set('id', Ext.id());
     }
 
     ,loadData: function (data, templateStore){
         this.data = data;
         this.templateStore = templateStore;
 
-        this.getRootNode().removeAll(true);
+        var rn = this.getRootNode();
+        rn.removeAll();
 
-        this.addNodes(this.getRootNode(), this.data);
+        this.addNodes(rn, this.data);
 
         this.updateVisibility();
     }
@@ -55,12 +56,12 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         var rez = {};
         parentNode.eachChild(
             function(node){
-                var fieldName = node.attributes.templateRecord.get('name');
+                var fieldName = node.data.templateRecord.get('name');
                 if(Ext.isEmpty(rez[fieldName])) {
                     rez[fieldName] = [];
                 }
-                var value = node.attributes.value;
-                switch (node.attributes.templateRecord.get('type')) {
+                var value = node.data.value;
+                switch (node.data.templateRecord.get('type')) {
                     case 'datetime':
                         if(Ext.isDate(value.value)) {
                             value.value = date_local_to_ISO_string(value.value);
@@ -158,7 +159,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         switch(type){
             case 'date':
                 if(Ext.isString(value)) {
-                    value = Date.parseDate(value.substr(0,10), 'Y-m-d');
+                    value = Ext.Date.parse(value.substr(0,10), 'Y-m-d');
                 }
                 break;
             case 'datetime':
@@ -169,7 +170,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
     }
 
     ,addNodes: function(parentNode, data, beforeNode){
-        var pid = parentNode.attributes.nid;
+        var pid = parentNode.data.nid;
         data = data || {};
         if(Ext.isEmpty(this.templateStore)) {
             return;
@@ -203,7 +204,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     for (var i = 0; i < nodeValues.length; i++) {
                         var node = this.addNode(parentNode, record, beforeNode);
                         nodeValues[i].value = this.adjustValueToType(nodeValues[i].value, record.get('type'));
-                        node.attributes.value = nodeValues[i];
+                        node.data.value = nodeValues[i];
                         this.addNodes(node, nodeValues[i].childs);
                     }
                 }
@@ -232,10 +233,10 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         var rez = false;
         do{
             this.visibilityUpdated = false;
-            this.getRootNode().cascade(
-                this.updateNodeVisibility
-                ,this
-            );
+            this.getRootNode().cascadeBy({
+                before: this.updateNodeVisibility
+                ,scope: this
+            });
             if(this.visibilityUpdated) {
                 rez = true;
             }
@@ -256,46 +257,46 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         }
         // if the node isn't a subnode then it's always visible
 
-        if(Ext.isEmpty(node.attributes.templateRecord.get('pid'))){
-            if(node.attributes.visible === false) {
+        if(Ext.isEmpty(node.data.templateRecord.get('pid'))){
+            if(node.data.visible === false) {
                 this.visibilityUpdated = true;
             }
-            node.attributes.visible = true;
+            node.data.visible = true;
             return true;
         }
 
 
-        var r = node.attributes.templateRecord;
-        var pr = node.parentNode.attributes.templateRecord;
-        if(node.parentNode.attributes.visible === false) {
-            if(node.attributes.visible !== false) {
+        var r = node.data.templateRecord;
+        var pr = node.parentNode.data.templateRecord;
+        if(node.parentNode.data.visible === false) {
+            if(node.data.visible !== false) {
                 this.visibilityUpdated = true;
-                node.attributes.visible = false;
+                node.data.visible = false;
             }
         } else { // if parent node is visible
             var v = ''; //dependency value
             var va = []; //dependency array value
-            var parentNodeValue = node.parentNode.attributes.value.value;
+            var parentNodeValue = node.parentNode.data.value.value;
             if(Ext.isDefined(r.get('cfg').dependency) && !Ext.isEmpty(r.get('cfg').dependency.pidValues)){
                 v = r.get('cfg').dependency.pidValues;
                 va = toNumericArray(v);
             }
 
-            if( node.attributes.visible !== false ){
+            if( node.data.visible !== false ){
                 if( ( !Ext.isEmpty(v) &&
                     !setsHaveIntersection( va, parentNodeValue) ) //if not empty pidValues specified and parent value out of pidValues then hide the field
                     || ( (r.get('cfg').thesauriId == 'dependent') && Ext.isEmpty(parentNodeValue) ) // OR if the field is dinamic and parent has no selected value
                     || ( (r.get('cfg').scope == 'variable') && Ext.isEmpty(parentNodeValue) ) // OR if the field is dinamic and parent has no selected value
                     || ( Ext.isDefined(r.get('cfg').dependency) && Ext.isEmpty(parentNodeValue) && !Ext.isEmpty(va) ) // OR if the field is dinamic and parent has no selected value
                 ) {
-                    node.attributes.visible = false;
+                    node.data.visible = false;
                     this.visibilityUpdated = true;
                 }
             }else{ //when record is not visible
                 if( (pr &&
                         (pr.get('type') == 'G') &&
                         (pr.get('type') == 'G')
-                        // (node.parentNode.attributes.visible !==
+                        // (node.parentNode.data.visible !==
                     ) || (
                     !Ext.isEmpty(parentNodeValue) && (Ext.isEmpty(v) || setsHaveIntersection( va, parentNodeValue ))
                     && ( (r.get('cfg').thesauriId !== 'dependent') ||  !Ext.isEmpty(parentNodeValue))
@@ -303,7 +304,7 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
                     && ( Ext.isDefined(r.get('cfg').dependency) ||  !Ext.isEmpty(parentNodeValue))
                     )
                 ) { //if no pidValues specified or pidValues contains the parent selected value then show the field
-                    node.attributes.visible = true;
+                    node.data.visible = true;
                     this.visibilityUpdated = true;
                 }
             }
@@ -311,21 +312,32 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
     }
 
     ,queryNodeListBy: function(filterFunction){
-        rez = [];
-        this.getRootNode().cascade(
-            function(node){
+        var rez = [];
+        this.getRootNode().cascadeBy({
+            before: function(node){
                 if(filterFunction(node)) {
                     rez.push(node);
                 }
             }
-            ,this
-        );
+            ,scope: this
+        });
 
         return rez;
     }
 
     ,getNode: function(nodeId){
         return this.getRootNode().findChild('id', nodeId, true);
+    }
+
+    ,getNodesByFieldName: function(fieldName){
+        return this.queryNodeListBy(
+            function(n) {
+                return (
+                    n.data.templateRecord &&
+                    (n.data.templateRecord.get('name') == fieldName)
+                );
+            }
+        );
     }
 
     /**
@@ -355,16 +367,16 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
             }
         }
 
-        this.getRootNode().cascade(
-            function(node) {
-                if(node.attributes.templateRecord && (node.attributes.templateRecord.get('name') == fieldName)) {
-                    node.attributes.value = v;
+        this.getRootNode().cascadeBy({
+            before: function(node) {
+                if(node.data.templateRecord && (node.data.templateRecord.get('name') == fieldName)) {
+                    node.data.value = v;
                     rez = node;
                     return false;
                 }
             }
-            ,this
-        );
+            ,scope: this
+        });
 
         return rez;
     }
@@ -377,20 +389,20 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
      */
     ,getParentValue: function (nodeId, field_id){
         var node = this.getNode(nodeId);
-        if(node && node.attributes.templateRecord) {
+        if(node && node.data.templateRecord) {
             pn = node.parentNode;
             while(pn &&
-                pn.attributes.templateRecord &&
-                (pn.attributes.templateRecord.get('id') != field_id)
+                pn.data.templateRecord &&
+                (pn.data.templateRecord.get('id') != field_id)
             ) {
                 pn = pn.parentNode;
             }
 
             if (pn &&
-                pn.attributes.templateRecord &&
-                (pn.attributes.templateRecord.get('id') == field_id)
+                pn.data.templateRecord &&
+                (pn.data.templateRecord.get('id') == field_id)
             ) {
-                return pn.attributes.value.value;
+                return pn.data.value.value;
             }
         }
 
@@ -400,46 +412,49 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
     ,resetChildValues: function(nodeId) {
 
         var node = this.getNode(nodeId);
-        if(node && node.attributes.templateRecord) {
-            node.cascade(
-                function(n) {
-                    var tr = n.attributes.templateRecord;
+        if(node && node.data.templateRecord) {
+            node.cascadeBy({
+                before: function(n) {
+                    var tr = n.data.templateRecord
+                        ,cfg = tr.get('cfg');
                     if( tr &&
                         n.isAncestor(node) &&
                         (
-                            tr.get('cfg').thesauriId == 'dependent' ||
-                            Ext.isDefined(tr.get('cfg').dependency)
+                            cfg.thesauriId == 'dependent' ||
+                            Ext.isDefined(cfg.dependency)
                         ) &&
-                        (tr.get('pid') == node.attributes.templateRecord.get('id')) &&
-                        (tr.get('cfg').readOnly !==true)
+                        (tr.get('pid') == node.data.templateRecord.get('id')) &&
+                        (cfg.readOnly !==true) &&
+                        (cfg.type == '_objects') //resetting only object fields
                     ){
-                        n.attributes.value.value = null;
+                        n.data.value.value = null;
                     }
                 }
-                ,this
-            );
+                ,scope: this
+            });
+
             this.updateVisibility();
         }
     }
 
     ,duplicate: function(nodeId){
         var node = this.getNode(nodeId);
-        if(!node || !node.attributes.templateRecord) {
+        if(!node || !node.data.templateRecord) {
             return false;
         }
 
 
-        var dn = this.addNode(node.parentNode, node.attributes.templateRecord, node.nextSibling);
+        var dn = this.addNode(node.parentNode, node.data.templateRecord, node.nextSibling);
         this.addNodes(dn);
-        node.attributes.templateRecord.get('cfg').maxInstances--;
+        node.data.templateRecord.get('cfg').maxInstances--;
     }
 
     ,deleteDuplicate: function(nodeId){
         var node = this.getNode(nodeId);
-        if(!node || !node.attributes.templateRecord) {
+        if(!node || !node.data.templateRecord) {
             return false;
         }
-        node.attributes.templateRecord.get('cfg').maxInstances++;
+        node.data.templateRecord.get('cfg').maxInstances++;
 
         node.remove(true);
     }
@@ -456,8 +471,8 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         var node = this.getNode(nodeId);
         if(node) {
             var ps = node.previousSibling;
-            if(ps && ps.attributes.templateRecord) {
-                if(ps.attributes.templateRecord.get('id') == node.attributes.templateRecord.get('id')) {
+            if(ps && ps.data.templateRecord) {
+                if(ps.data.templateRecord.get('id') == node.data.templateRecord.get('id')) {
                     return true;
                 }
             } else {
@@ -474,8 +489,8 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
      */
     ,canDuplicate: function(nodeId){
         var node = this.getNode(nodeId);
-        if(node && node.attributes.templateRecord) {
-            return (node.attributes.templateRecord.get('cfg').maxInstances > 1);
+        if(node && node.data.templateRecord) {
+            return (node.data.templateRecord.get('cfg').maxInstances > 1);
         }
         return false;
     }
@@ -487,12 +502,12 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
         }
 
         var node = this.getNode(nodeId);
-        if(node && node.attributes.templateRecord) {
+        if(node && node.data.templateRecord) {
             index = 0;
             var pn = node.previousSibling;
             while(pn &&
-                pn.attributes.templateRecord &&
-                pn.attributes.templateRecord.get('id') == node.attributes.templateRecord.get('id')
+                pn.data.templateRecord &&
+                pn.data.templateRecord.get('id') == node.data.templateRecord.get('id')
             ) {
                 index++;
                 pn = pn.previousSibling;
@@ -508,11 +523,11 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
             return false;
         }
         var node = this.getNode(nodeId);
-        if(node && node.attributes.templateRecord) {
+        if(node && node.data.templateRecord) {
             var pn = node.previousSibling;
             if(pn &&
-                pn.attributes.templateRecord
-                && pn.attributes.templateRecord.get('id') !== node.attributes.templateRecord.get('id')
+                pn.data.templateRecord
+                && pn.data.templateRecord.get('id') !== node.data.templateRecord.get('id')
             ) {
                 return true;
             }
@@ -522,17 +537,15 @@ CB.VerticalEditGridHelperTree = Ext.extend(Ext.tree.TreePanel, {
 
     ,isLastDuplicate: function(nodeId){
         var node = this.getNode(nodeId);
-        if(node && node.attributes.templateRecord) {
+        if(node && node.data.templateRecord) {
             var s = node.nextSibling;
             return (
                 !s ||
-                !s.attributes.templateRecord ||
-                (s.attributes.templateRecord.get('id') !== node.attributes.templateRecord.get('id'))
+                !s.data.templateRecord ||
+                (s.data.templateRecord.get('id') !== node.data.templateRecord.get('id'))
             );
         }
         return null;
     }
 
 });
-
-Ext.reg('CBVerticalEditGridHelperTree', CB.VerticalEditGridHelperTree);

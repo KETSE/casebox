@@ -33,6 +33,7 @@ if (isset($_SESSION['user']['language']) &&
     isset($languageSettings[$_SESSION['user']['language']])
     ) {
     $user_language = $_SESSION['user']['language'];
+
 } elseif (!isset($languageSettings[@$_SESSION['user']['language']])) {
     $user_language = $coreLanguage;
 }
@@ -41,5 +42,7 @@ if (isset($_SESSION['user']['language']) &&
 
 // index for default user language
 \CB\Config::setEnvVar('user_language_index', getIndex($user_language));
+
+\CB\Config::setEnvVar('rtl', !empty($languageSettings[$user_language]['rtl']));
 
 /* end of define user_language constant /**/

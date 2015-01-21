@@ -11,23 +11,17 @@ plog = clog;
 
 // application main entry point
 Ext.onReady(function(){
+
     App = new Ext.util.Observable();
 
     // used for charts
     App.colors = [ "#3A84CB", "#94ae0a", "#115fa6","#a61120", "#ff8809", "#ffd13e", "#a61187", "#24ad9a", "#7c7474", "#a66111"];
 
-    App.addEvents(
-        'dragfilesenter'
-        ,'dragfilesover'
-        ,'dragfilesleave'
-        ,'filesdrop'
-        ,'objectsaction'
-        ,'userprofileupdated'
-    );
-
     initApp();
 
-    Ext.Direct.addProvider(Ext.app.REMOTING_API);
+    Ext.Date.use24HourTime = true;
+
+    Ext.direct.Manager.addProvider(Ext.app.REMOTING_API);
 
     Ext.state.Manager.setProvider(
         new CB.state.DBProvider()
@@ -54,23 +48,35 @@ Ext.onReady(function(){
         /* use this session id as appended query string for images that reload form session to session
             Such kind of images are user photos that could be updated.
         */
-        App.sid = '&qq=' + Date.parse(Date());
+        App.sid = '&qq=' + Date.parse(new Date());
         App.config = r.config;
         App.loginData = r.user;
-        App.loginData.iconCls = 'icon-user-' + Ext.value(r.user.sex, '');
-        if(App.loginData.cfg.short_date_format) App.dateFormat = App.loginData.cfg.short_date_format;
-        if(App.loginData.cfg.long_date_format) App.longDateFormat = App.loginData.cfg.long_date_format;
-        if(App.loginData.cfg.time_format) App.timeFormat = App.loginData.cfg.time_format;
-        App.mainViewPort = new CB.ViewPort();
+        App.loginData.iconCls = 'icon-user-' + Ext.valueFrom(r.user.sex, '');
+
+        if(App.loginData.cfg.short_date_format) {
+            App.dateFormat = App.loginData.cfg.short_date_format;
+        }
+
+        if(App.loginData.cfg.long_date_format) {
+            App.longDateFormat = App.loginData.cfg.long_date_format;
+        }
+
+        if(App.loginData.cfg.time_format) {
+            App.timeFormat = App.loginData.cfg.time_format;
+        }
+
+        App.mainViewPort = new CB.ViewPort({
+            rtl: (App.config.rtl === true)
+        });
+
         App.mainViewPort.doLayout();
-        App.mainViewPort.initCB( r, e );
+        App.mainViewPort.initCB(r, e);
     });
 
 });
 
 //--------------------------------------------------------------------------- application initialization function
-function initApp(){
-    overrides();
+function initApp() {
     App.dateFormat = 'd.m.Y';
     App.longDateFormat = 'j F Y';
     App.timeFormat = 'H:i';
@@ -94,8 +100,8 @@ function initApp(){
             case Ext.form.Action.CONNECT_FAILURE:
             Ext.Msg.alert(L.Error, 'Ajax communication failed'); break;
             case Ext.form.Action.SERVER_INVALID:
-               msg = Ext.value(action.msg, action.result.msg);
-               msg = Ext.value(msg, L.ErrorOccured);
+               msg = Ext.valueFrom(action.msg, action.result.msg);
+               msg = Ext.valueFrom(msg, L.ErrorOccured);
                Ext.Msg.alert(L.Error, msg);
            }
     };
@@ -116,17 +122,19 @@ function initApp(){
 
     App.xtemplates = {
         cell: new Ext.XTemplate( '<ul class="thesauri_set"><tpl for="."><li>{.}</li></tpl></ul>' )
-        ,object: new Ext.XTemplate( '<ul><tpl for="."><li class="case_object" object_id="{id}">{[Ext.isEmpty(values.name) ? \'&lt;'+L.noName+'&gt; (id: \'+values.id+\')\' : values.name]}</li></tpl></ul>' )
+        ,object: new Ext.XTemplate( '<ul class="clean"><tpl for="."><li class="case_object" object_id="{id}">{[Ext.isEmpty(values.name) ? \'&lt;'+L.noName+'&gt; (id: \'+values.id+\')\' : values.name]}</li></tpl></ul>' )
     };
     App.xtemplates.cell.compile();
     App.xtemplates.object.compile();
 
     App.customRenderers = {
         thesauriCell: function(v, metaData, record, rowIndex, colIndex, store, grid) {
-            if(Ext.isEmpty(v)) return '';
-            va = v.split(',');
-            vt = [];
-            thesauriId = grid.helperTree.getNode(record.get('id')).attributes.templateRecord.get('cfg').thesauriId;
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+            var va = v.split(',');
+            var vt = [];
+            thesauriId = grid.helperTree.getNode(record.get('id')).data.templateRecord.get('cfg').thesauriId;
             if(Ext.isEmpty(thesauriId) && store.thesauriIds) {
                 thesauriId = store.thesauriIds[record.id];
             }
@@ -141,24 +149,38 @@ function initApp(){
         }
         ,relatedCell: function(v, metaData, record, rowIndex, colIndex, store) { }
         ,combo: function(v, metaData, record, rowIndex, colIndex, store) {
-            if(Ext.isEmpty(v)) return '';
-            ed = this.editor;
-            ri = ed.store.findExact(ed.valueField, v);
-            if(ri < 0) return '';
-            return ed.store.getAt(ri).get(ed.displayField);
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+
+            var ed = this.editor
+                ,r = ed.store.findRecord(ed.valueField, v, 0, false, false, true);
+
+            if(!r) {
+                return '';
+            }
+
+            return r.get(ed.displayField);
         }
 
         ,objectsField: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) {
                 return '';
             }
-            var r = [];
+
             store = null;
-            v = toNumericArray(v);
-            var cfg = grid.helperTree.getNode(record.get('id')).attributes.templateRecord.get('cfg');
-            var source = (Ext.isEmpty(cfg.source))
-                ? 'tree'
-                : cfg.source;
+
+            var rec
+                ,r = []
+                ,va = toNumericArray(v)
+                ,cfg = grid.helperTree.getNode(record.get('id')).data.templateRecord.get('cfg')
+                ,source = (Ext.isEmpty(cfg.source))
+                    ? 'tree'
+                    : cfg.source;
+            if(Ext.isEmpty(va) && Ext.isPrimitive(v)) {
+                va = [v];
+            }
+            clog('va', va);
             switch(source){
                 case 'thesauri':
                     store = isNaN(cfg.thesauriId) ? CB.DB.thesauri : getThesauriStore(cfg.thesauriId);
@@ -177,17 +199,18 @@ function initApp(){
                     if(!cw || !cw.objectsStore) return '';
                     store = cw.objectsStore;
             }
+
             switch(cfg.renderer){
                 case 'listGreenIcons':
-                    for(i=0; i < v.length; i++){
-                        ri = store.findExact('id', parseInt(v[i], 10));
+                    for(i=0; i < va.length; i++){
+                        ri = store.findExact('id', parseInt(va[i], 10));
                         row = store.getAt(ri);
                         if(ri >-1) r.push('<li class="lh16 icon-padding icon-element">'+row.get('name')+'</li>');
                     }
-                    return '<ul>'+r.join('')+'</ul>';
+                    return '<ul class="clean">'+r.join('')+'</ul>';
                 case 'listObjIcons':
-                    for(i=0; i < v.length; i++){
-                        ri = store.findExact('id', parseInt(v[i], 10));
+                    for(i=0; i < va.length; i++){
+                        ri = store.findExact('id', parseInt(va[i], 10));
                         row = store.getAt(ri);
                         if(ri >-1) {
                             var icon = row.get('cfg');
@@ -200,11 +223,16 @@ function initApp(){
                             r.push('<li class="lh16 icon-padding '+icon+'">'+row.get('name')+'</li>');
                         }
                     }
-                    return '<ul>'+r.join('')+'</ul>';
+                    return '<ul class="clean">'+r.join('')+'</ul>';
+
                 default:
-                    for(i=0; i < v.length; i++){
-                        ri = store.findExact('id', parseInt(v[i], 10));
-                        if(ri >-1) r.push(store.getAt(ri).get('name'));
+                    for(i=0; i < va.length; i++){
+                        rec = store.findRecord('id', va[i], 0, false, false, true);
+                        if(rec) {
+                            r.push(rec.get('name'));
+                        } else {
+                            r.push(va[i]); //display id if nothing found (eseful for custom sources)
+                        }
                     }
                     return r.join(', ');
             }
@@ -231,7 +259,7 @@ function initApp(){
         ,thesauriCombo: function(v, metaData, record, rowIndex, colIndex, store, grid) {
             if(Ext.isEmpty(v)) return '';
             var node = grid.helperTree.getNode(record.get('id'));
-            var tr = node.attributes.templateRecord;
+            var tr = node.data.templateRecord;
             var th = tr.get('cfg').thesauriId;
             if(th == 'dependent'){
                 th = grid.helperTree.getParentValue(node, tr.get('pid'));
@@ -251,7 +279,7 @@ function initApp(){
             if(Ext.isEmpty(v)) {
                 return rez;
             }
-            rez = (v.format ? v.format(App.dateFormat) : Date.parseDate(v.substr(0,10), 'Y-m-d').format(App.dateFormat));
+            rez = Ext.Date.format(Ext.isPrimitive(v) ? Ext.Date.parse(v.substr(0,10), 'Y-m-d') : v, App.dateFormat);
             return rez;
         }
         ,datetime: function(v){
@@ -264,17 +292,14 @@ function initApp(){
                 ? date_ISO_to_local_date(v)
                 : v;
 
-            var s = date_local_to_ISO_string(rez);
+            var s = rez.toISOString();
             if(s.substr(-14) == 'T00:00:00.000Z') {
-                rez = rez.clearTime(true);
+                rez = Ext.Date.clearTime(rez, true);
             }
 
-            rez = rez.format(App.dateFormat+' '+App.timeFormat);
+            rez = Ext.Date.format(rez, App.dateFormat+' '+App.timeFormat);
             if(Ext.isEmpty(rez)) {
                 return '';
-            }
-            if(rez.substr(-5) == '00:00') {
-                rez = rez.substr(0,10);
             }
 
             return rez;
@@ -393,9 +418,9 @@ function initApp(){
             case 'timeunits':
                 return App.customRenderers.timeUnits;
             case '_templateTypesCombo':
-                return CB.DB.templateTypes.getName.createDelegate(CB.DB.templateTypes);
+                return Ext.Function.bind(CB.DB.templateTypes.getName, CB.DB.templateTypes);
             case '_fieldTypesCombo':
-                return CB.DB.fieldTypes.getName.createDelegate(CB.DB.fieldTypes);
+                return Ext.Function.bind(CB.DB.fieldTypes.getName, CB.DB.fieldTypes);
             case '_short_date_format':
                 return App.customRenderers.shortDateFormatCombo;
             case 'memo':
@@ -406,9 +431,17 @@ function initApp(){
     };
 
     App.getTemplatesXTemplate = function(template_id){
+
         template_id = String(template_id);
-        if(!Ext.isDefined(App.templatesXTemplate)) App.templatesXTemplate = {};
-        if(App.templatesXTemplate[template_id]) return App.templatesXTemplate[template_id];
+
+        if(!Ext.isDefined(App.templatesXTemplate)) {
+            App.templatesXTemplate = {};
+        }
+
+        if(App.templatesXTemplate[template_id]) {
+            return App.templatesXTemplate[template_id];
+        }
+
         idx = CB.DB.templates.findExact('id', template_id);
         if(idx >= 0){
             r = CB.DB.templates.getAt(idx);
@@ -419,6 +452,7 @@ function initApp(){
                 return App.templatesXTemplate[template_id];
             }
         }
+
         return App.xtemplates.object;
     };
 
@@ -429,8 +463,13 @@ function initApp(){
         while((tabIdx == -1) && (i < tabPanel.items.getCount())){
             o = tabPanel.items.get(i);
             if(Ext.isEmpty(xtype) || ( o.isXType && o.isXType(xtype) ) ){
-                if(Ext.isDefined(o.params) && Ext.isDefined(o.params.id) && (o.params.id == id)) tabIdx = i;
-                else if(Ext.isDefined(o.data) && Ext.isDefined(o.data.id) && (o.data.id == id)) tabIdx = i;
+                if(Ext.isDefined(o.params) && Ext.isDefined(o.params.id) && (o.params.id == id)) {
+                    tabIdx = i;
+                } else {
+                    if(!Ext.isEmpty(o.data) && !Ext.isEmpty(o.data.id) && (o.data.id == id)) {
+                        tabIdx = i;
+                    }
+                }
             }
             i++;
         }
@@ -439,34 +478,56 @@ function initApp(){
 
     App.findTabByType = function(tabPanel, type){
         tabIdx = -1;
-        if(Ext.isEmpty(type)) return tabIdx;
+        if(Ext.isEmpty(type)) {
+            return tabIdx;
+        }
+
         i= 0;
         while((tabIdx == -1) && (i < tabPanel.items.getCount())){
             o = tabPanel.items.get(i);
-            if(Ext.isDefined(o.isXType) && o.isXType(type)) tabIdx = i;
+            if(Ext.isDefined(o.isXType) && o.isXType(type)) {
+                tabIdx = i;
+            }
             i++;
         }
+
         return tabIdx;
     };
 
     App.activateTab = function(tabPanel, id, xtype){
-        if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
-        tabIdx = App.findTab(tabPanel, id, xtype);
-        if(tabIdx < 0) return false;
+        if(Ext.isEmpty(tabPanel)) {
+            tabPanel = App.mainTabPanel;
+        }
+
+        var tabIdx = App.findTab(tabPanel, id, xtype);
+
+        if(tabIdx < 0) {
+            return false;
+        }
         tabPanel.setActiveTab(tabIdx);
-        return tabPanel.items.itemAt(tabIdx);
+
+        return tabPanel.items.getAt(tabIdx);
     };
 
     App.addTab = function(tabPanel, o){
-        if(Ext.isEmpty(tabPanel)) tabPanel = App.mainTabPanel;
+        if(Ext.isEmpty(tabPanel)) {
+            tabPanel = App.mainTabPanel;
+        }
+
         c = tabPanel.add(o);
         o.show();
+        tabPanel.setActiveTab(c);
+
         return c;
     };
 
     App.getTextEditWindow = function(config){
-        if(!App.textEditWindow) App.textEditWindow = new CB.TextEditWindow();
+        if(!App.textEditWindow) {
+            App.textEditWindow = new CB.TextEditWindow();
+        }
+
         App.textEditWindow = Ext.apply(App.textEditWindow, config);
+
         return App.textEditWindow;
     };
 
@@ -474,6 +535,97 @@ function initApp(){
         if(!App.htmlEditWindow) App.htmlEditWindow = new CB.HtmlEditWindow();
         App.htmlEditWindow = Ext.apply(App.htmlEditWindow, config);
         return App.htmlEditWindow;
+    };
+
+    App.openObjectWindow = function(config) {
+        //at least template should be defined in config
+        if(Ext.isEmpty(config)) {
+            return;
+        }
+
+        var templateType = CB.DB.templates.getType(config.template_id)
+            ,wndCfg = {
+                xtype: (templateType == 'file'
+                    ? 'CBFileEditWindow'
+                    : 'CBObjectEditWindow'
+                )
+                ,data: config
+            };
+
+        wndCfg.id = 'oew-' +
+            (Ext.isEmpty(config.id)
+                ? Ext.id()
+                : config.id
+            );
+
+        w = App.openWindow(wndCfg);
+
+        var winHeight = window.innerHeight;
+        if((winHeight > 0) && (w.getHeight() > winHeight)) {
+            w.setHeight(winHeight - 20);
+        }
+
+        if(templateType == 'file') {
+            w.center();
+
+            if(config.name && (detectFileEditor(config.name) !== false)) {
+                w.maximize();
+            }
+        } else if(!w.existing) {
+            App.alignWindowNext(w);
+        }
+
+        delete w.existing;
+    };
+
+    App.openWindow = function(wndCfg) {
+        var w = Ext.getCmp(wndCfg.id);
+
+        if(w) {
+            App.mainStatusBar.setActiveButton(w.taskButton);
+            App.mainStatusBar.restoreWindow(w);
+            //set a flag that this was an existing window
+            w.existing = true;
+
+        } else {
+            w = Ext.create(wndCfg);
+            w.show();
+
+            w.taskButton = App.mainStatusBar.addTaskButton(w);
+        }
+
+        return w;
+    };
+
+
+    App.alignWindowNext = function (w) {
+        w.alignTo(App.mainViewPort.getEl(), 'br-br?');
+
+        //get anchored position
+        var pos = w.getXY();
+        //move above status bar and a bit from right side
+        pos[0] -= 15;
+        pos[1] -= 5;
+
+        //position to the left of an active window if any
+        var x = pos[0];
+        App.mainStatusBar.windowBar.items.each(
+            function(btn) {
+                if(btn.win && (btn.win != w) && btn.win.isVisible() && !btn.win.maximized) {
+                    var wx = btn.win.getX() - btn.win.el.getWidth() - 15;
+                    if(x > wx) {
+                        x = wx;
+                    }
+                }
+            }
+            ,this
+        );
+        if(x < 15) {
+            x = 15;
+        }
+        pos[0] = x;
+
+        w.setXY(pos);
     };
 
     App.isFolder = function(template_id){
@@ -493,23 +645,20 @@ function initApp(){
             return;
         }
         var url = App.config.webdav_url;
-        url = url.replace('{node_id}', Ext.value(data.id, data.nid));
+        url = url.replace('{node_id}', Ext.valueFrom(data.id, data.nid));
         url = url.replace('{name}', data.name);
         App.confirmLeave = false;
 
         if((checkCookie !== false) &&
             (Ext.util.Cookies.get('webdavHideDlg') == 1)
         ) {
-            // replacing whitespace with '==='
-            // external protocol request "cbdav:...." doesnt work in Safari if it has spaces
-            // url = url.replace(/ /g, '%20');
-            url = encodeURI(url);
             window.open('cbdav:' + url, '_self');
         } else {
             var w = new CB.WebdavWindow({
                 data: {link: url}
             });
             w.show();
+            w.center();
         }
     };
 
@@ -522,17 +671,19 @@ function initApp(){
         if(Ext.isEmpty(path)) {
             path = '/';
         }
-        params = Ext.value(params, {});
+        params = Ext.valueFrom(params, {});
         params.path = path;
         params.query = null;
         params.start = 0;
+        params.page = 1;
 
         App.activateBrowserTab().setParams(params);
     };
 
     App.activateBrowserTab = function(){
-        tab = App.mainTabPanel.getActiveTab();
-        if(tab.isXType(CB.FolderView)) {
+        var tab = App.mainTabPanel.getActiveTab();
+
+        if(tab.isXType('CBBrowserViewContainer')) {
             return tab;
         }
         App.mainTabPanel.setActiveTab(App.explorer);
@@ -587,7 +738,7 @@ function initApp(){
             ,objectId: e.objectId
             ,path: e.path
         };
-        var w, th;
+        var w, th, ed;
         var tr = e.fieldRecord;
         var cfg = tr.get('cfg');
         var objectWindow = e.ownerCt
@@ -601,83 +752,57 @@ function initApp(){
                 : null
             );
         switch(type){
-            case '_auto_title':
-                return new Ext.ux.TitleField(editorCfg);
             case '_objects':
                 //e should contain all necessary info
                 switch(cfg.editor){
                     case 'form':
                         if(e && e.grid){
                             e.cancel = true;
-                            /* prepeare data to set to popup windows */
-                            var store = false;
-                            var source = Ext.isEmpty(cfg.source) ? 'tree' : cfg.source;
-                            switch(source){
-                                case 'thesauri':
-                                    store = getThesauriStore(cfg.thesauriId);
-                                    break;
-                                case 'users':
-                                    store = CB.DB.usersStore;
-                                    break;
-                                case 'groups':
-                                    store = CB.DB.groupsStore;
-                                    break;
-                                case 'usersgroups':
-                                    break;
-                                default:
-                                    if(objectWindow && objectWindow.objectsStore)  {
-                                        store = objectWindow.objectsStore;
-                                    }
-                            }
-                            var data = [];
-                            var value = e.record
-                                ? e.record.get('value')
-                                : null;
-                            if(store){
-                                value = Ext.isEmpty(value) ? [] : String(value).split(',');
-                                for(i=0; i < value.length; i++){
-                                    ri = store.findExact('id', parseInt(value[i], 10));
-                                    if(ri >-1) {
-                                        data.push(store.getAt(ri).data);
-                                    }
-                                }
-                            }
+                            e.value = e.record.get('value');
 
-                            w = (source == 'thesauri')
-                                ? new CB.ObjectsSelectionPopupList({data: objData, value: value})
-                                : new CB.ObjectsSelectionForm({data: objData, value: value});
+                            var formEditor = new CB.object.field.editor.Form({
+                                data: objData
+                                ,value: e.record
+                                    ? e.value
+                                    : Ext.valueFrom(e.value, null)
+                                ,listeners: {
+                                    scope: e
+                                    ,setvalue: function(value, editor) {
+                                        var objStore = (this.grid)
+                                            ? this.grid.refOwner.objectsStore
+                                            : null;
 
-                            w.on('setvalue', function(data){
-                                var value = [];
-                                if(Ext.isArray(data)){
-                                    Ext.each(
-                                        data
-                                        ,function(d){
-                                            value.push( d.id ? d.id : d);
+                                        if(objStore && editor.selectedRecordsData) {
+                                            Ext.each(
+                                                editor.selectedRecordsData
+                                                ,function(d){
+                                                    objStore.checkRecordExistance(d);
+                                                }
+                                                ,this
+                                            );
                                         }
-                                        ,this
-                                    );
-                                    value = value.join(',');
-                                } else {
-                                    value = data;
+
+                                        this.originalValue = this.value;
+                                        this.value = editor.getValue().join(',');
+
+                                        this.record.set('value', this.value);
+
+                                        if(this.grid.onAfterEditProperty) {
+                                            this.grid.onAfterEditProperty(editor, this);
+                                        } else {
+                                            this.grid.fireEvent('change', this);
+                                        }
+                                    }
+
+                                    ,destroy: function(ed) {
+                                        if(this.grid) {
+                                            this.grid.focus(false, 100);
+                                        }
+                                    }
                                 }
-                                this.record.set('value', value);
-                                this.originalValue = this.value;
-                                this.value = value;
-                                if(this.grid.onAfterEditProperty) {
-                                    this.grid.onAfterEditProperty(this);
-                                } else {
-                                    this.grid.fireEvent('change', e);
-                                }
-                            }, e);
+                            });
 
-                            if(w.setData) {
-                                w.setData(data);
-                            }
-
-                            w.show();
-
-                            return w;
+                            formEditor.show();
                         } else {
                             return new CB.ObjectsTriggerField({
                                 enableKeyEvents: true
@@ -687,11 +812,11 @@ function initApp(){
                         break;
 
                     case 'text':
-                        var ed = new Ext.form.TextArea({
+                        ed = new Ext.form.Text({
                             data: objData
-                            ,allowBlur: false
+
                             ,plugins: [{
-                                ptype: 'CBPluginsDropDownList'
+                                ptype: 'CBPluginFieldDropDownList'
                                 ,commands: [
                                     {
                                         prefix: ' '
@@ -699,33 +824,10 @@ function initApp(){
 
                                         ,insertField: 'info'
 
-                                        ,handler: CB.plugins.DropDownList.prototype.onAtCommand
+                                        ,handler: CB.plugin.field.DropDownList.prototype.onAtCommand
                                     }
                                 ]
                             }]
-                            // ,listeners: {
-                            //     render: function(ed) {
-                            //         // ed.purgeListeners();
-                            //         // var interceptorFn = function(field, e){
-                            //         //     clog('this.listSelection', arguments, field.listSelection);
-                            //         //     // return false; //!field.listSelection;
-                            //         // };
-
-                            //         // var i, newListners = [];
-
-                            //         // for (i = 0; i < ed.events.specialkey.listeners.length; i++) {
-                            //         //     var l = ed.events.specialkey.listeners[i];
-                            //         //     ed.un('specialkey', l.fn, l.scope);
-                            //         //     newListners.push({
-                            //         //         scope: l.scope
-                            //         //         ,fn: l.fn.createInterceptor(interceptorFn, l.scope)
-                            //         //     });
-                            //         // }
-                            //         // for (i = 0; i < newListners.length; i++) {
-                            //         //     ed.on('specialkey', newListners[i].fn, newListners[i].scope);
-                            //         // }
-                            //     }
-                            // }
                         });
 
                         //overwrite setValue and getValue function to transform ids to user names and back
@@ -765,6 +867,21 @@ function initApp(){
 
                         return ed;
 
+                    case 'tagField':
+                        ed = new CB.object.field.editor.Tag({
+                            data: objData
+                            ,valueField: 'id'
+                            ,displayField: 'name'
+                            ,forceSelection: true
+                            ,queryMode: 'remote'
+                            ,autoLoadOnValue: true
+                            ,multiSelect: true
+                            ,stacked: true
+                            ,pinList: false
+                            ,filterPickList: true
+                        });
+
+                        return ed;
                     default:
                         return new CB.ObjectsComboField({
                             enableKeyEvents: true
@@ -775,10 +892,8 @@ function initApp(){
                 break;
             case 'checkbox': return new Ext.form.ComboBox({
                         enableKeyEvents: true
-                        ,forceSelection: true
                         ,triggerAction: 'all'
-                        ,lazyRender: true
-                        ,mode: 'local'
+                        ,queryMode: 'local'
                         ,editable: false
                         ,store: CB.DB.yesno
                         ,displayField: 'name'
@@ -789,7 +904,7 @@ function initApp(){
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
-                        ,mode: 'local'
+                        ,queryMode: 'local'
                         ,editable: false
                         ,store: CB.DB.timeUnits
                         ,displayField: 'name'
@@ -800,7 +915,7 @@ function initApp(){
                         ,forceSelection: true
                         ,triggerAction: 'all'
                         ,lazyRender: true
-                        ,mode: 'local'
+                        ,queryMode: 'local'
                         ,editable: false
                         ,store: CB.DB.importance
                         ,displayField: 'name'
@@ -815,7 +930,7 @@ function initApp(){
             case 'datetime':
                 return new Ext.form.DateField({
                     enableKeyEvents: true
-                    ,format: App.dateFormat+' '+App.timeFormat
+                    ,format: App.dateFormat+' ' + App.timeFormat
                     ,width: 130
                 });
             case 'time':
@@ -846,7 +961,7 @@ function initApp(){
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: getThesauriStore(th)
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -862,12 +977,11 @@ function initApp(){
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: getThesauriStore(th)
                     ,displayField: 'name'
                     ,valueField: 'id'
                     ,iconClsField: 'name'
-                    ,plugins: [new Ext.ux.plugins.IconCombo()]
                 });
             case '_language':
                 return new Ext.form.ComboBox({
@@ -876,7 +990,7 @@ function initApp(){
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.languages
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -888,7 +1002,7 @@ function initApp(){
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.sex
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -900,7 +1014,7 @@ function initApp(){
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.templateTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -908,11 +1022,12 @@ function initApp(){
             case '_fieldTypesCombo':
                 return new Ext.form.ComboBox({
                     enableKeyEvents: true
+                    ,autoSelect: true
                     ,forceSelection: true
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.fieldTypes
                     ,displayField: 'name'
                     ,valueField: 'id'
@@ -924,18 +1039,18 @@ function initApp(){
                     ,typeAhead: true
                     ,triggerAction: 'all'
                     ,lazyRender: true
-                    ,mode: 'local'
+                    ,queryMode: 'local'
                     ,store: CB.DB.shortDateFormats
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
             case 'memo':
-                var height = Ext.value(cfg.height, 50);
-                height = parseInt(height, 10) + 7;
+                var height = Ext.valueFrom(cfg.height, 50);
+                height = parseInt(height, 10);
                 if(e.grid) {
                     var rowEl = e.grid.getView().getRow(e.row);
                     if(rowEl) {
-                        var rowHeight = Ext.get(rowEl).getHeight() - 2;
+                        var rowHeight = Ext.get(rowEl).getHeight() - 12;
                         if(height < rowHeight) {
                             height = rowHeight;
                         }
@@ -956,14 +1071,16 @@ function initApp(){
                             this.originalValue = this.record.get('value');
                             this.value = v;
                             this.record.set('value', v);
-                            if(this.grid.onAfterEditProperty) this.grid.onAfterEditProperty(this);
-                            this.grid.fireEvent('change');
+                            if(this.grid.onAfterEditProperty) {
+                                this.grid.onAfterEditProperty(this, this);
+                            }
                         }
                     }
                 });
                 w.on('hide', e.grid.gainFocus, e.grid);
                 w.show();
                 break;
+
             case 'html':
                 e.cancel = true;
                 w = App.getHtmlEditWindow({
@@ -982,17 +1099,18 @@ function initApp(){
                 });
                 if(!Ext.isEmpty(e.grid)) w.on('hide', e.grid.gainFocus, e.grid);
                 w.show();
+                return w;
                 break;
             default:
                 return new Ext.form.TextField({
                     enableKeyEvents: true
                 });
         }
-        return false;
     };
 
     App.focusFirstField = function(scope){
-        scope = Ext.value(scope, this);
+        return;
+        scope = Ext.valueFrom(scope, this);
         f = function(){
             var a = [];
 
@@ -1010,32 +1128,20 @@ function initApp(){
                 found = ( !Ext.isEmpty(a[i]) && !Ext.isEmpty(a[i].isXType) && !a[i].isXType('radiogroup') && !a[i].isXType('displayfield') && (a[i].hidden !== true) );
                 i++;
             }
-            if(!found) {
-                return;
-            }
-
-            var c = a[i-1];
-
-            if(c.isXType('compositefield')) {
-                c = c.items.first();
-            }
-
-            if(c && c.focus) {
-                var el = c.getEl();
-                if(el && el.isVisible(true)) {
-                    c.focus();
-                }
-            }
+            if(!found) return;
+            c = a[i-1];
+            if(c.isXType('fieldcontainer'))  c = c.items.first();
+            c.focus();
         };
 
-        f.defer(500, scope);
+        Ext.Function.defer(f, 500, scope);
     };
 
     App.successResponse = function(r){
         if(r.success === true) {
             return true;
         }
-        Ext.Msg.alert(L.Error, Ext.value(r.msg, L.ErrorOccured));
+        Ext.Msg.alert(L.Error, Ext.valueFrom(r.msg, L.ErrorOccured));
         return false;
     };
 
@@ -1055,7 +1161,7 @@ function initApp(){
         }
         var rez = null;
         if(tabIdx < 0) {
-            rez = Ext.create(options, type);
+            rez = Ext.create(type, options);
             App.addTab(tabPanel, rez);
         } else {
             rez = tabPanel.get(tabIdx);
@@ -1089,36 +1195,26 @@ function initApp(){
         dhf = function(){
             delete App.hideFailureAlerts;
         };
-
-        dhf.defer(1500);
-    };
-
-    App.openObject = function(template_id, id, e){
-        switch( CB.DB.templates.getType(template_id) ){
-            case 'case':
-            case 'object':
-            case 'template':
-            case 'field':
-            case 'email':
-            case 'task':
-                App.mainViewPort.fireEvent('openobject', {id: id, template_id: template_id}, e);
-                break;
-            case 'file':
-                App.mainViewPort.fireEvent('fileopen', {id: id}, e);
-                break;
-            default:
-                return false;
-        }
-        return true;
+        Ext.Function.defer(dhf, 1500);
     };
 
     App.clipboard = new CB.Clipboard();
+
     /* disable back button */
-    Ext.EventManager.on(Ext.isIE ? document : window, 'keydown', function(e, t) {
-        if (e.getKey() == e.BACKSPACE && ((!/^input$/i.test(t.tagName) && !/^textarea$/i.test(t.tagName)) || t.disabled || t.readOnly)) {
+    var o = Ext.isIE ? document : window;
+    o.onkeydown = function(e, t) {
+        if(Ext.isEmpty(t)) {
+            t = e.target;
+        }
+        if ((e.keyCode == Ext.event.Event.BACKSPACE) &&
+                (
+                    (!/^input$/i.test(t.tagName) &&
+                    !/^textarea$/i.test(t.tagName)
+                ) || t.disabled || t.readOnly)) {
             e.stopEvent();
         }
-    });
+    };
+
     /* disable back button */
 
     /* upload files methods*/
@@ -1148,175 +1244,6 @@ function initApp(){
         plog('component activated', arguments, this);
     };
 
-}
-
-function overrides(){
-
-    Ext.util.Format.stripTags = function (str, allow) {
-        // making sure the allow arg is a string containing only tags in lowercase (<a><b><c>)
-        allow = (((allow || "") + "").toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join('');
-
-        var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi;
-        var commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
-        return str.replace(commentsAndPhpTags, '').replace(
-            tags
-            ,function ($0, $1) {
-                return allow.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : '';
-            }
-        );
-    };
-
-
-    Ext.override(Ext.data.Store, {
-        deleteIds: function(ids){
-            var idx
-                ,idProperty = Ext.isEmpty(this.reader)
-                    ? 'id'
-                    : Ext.value(
-                        this.reader.idProperty
-                        ,this.reader.meta.idProperty
-                        ,'id'
-                    );
-
-            if(Ext.isPrimitive(ids)) {
-                ids = String(ids).split(',');
-            }
-
-            if(this.data) {
-                for (var i = 0; i < ids.length; i++) {
-                    idx = this.findExact(idProperty, String(ids[i]));
-
-                    if(idx < 0) {
-                        idx = this.findExact(idProperty, parseInt(ids[i], 10));
-                    }
-                    if(idx >= 0) {
-                        this.removeAt(idx);
-                    }
-                }
-            }
-        }
-    });
-
-    Ext.override(Ext.Window, {
-        setIconCls: function(i){
-            Ext.fly(this.ownerCt.getTabEl(this)).child('.x-tab-strip-text').replaceClass(this.iconCls, i);
-            this.setIconClass(i);
-        }
-    });
-
-    /* Overrides for preventing nodes selection when start dragging node  */
-    Ext.override(Ext.tree.TreeDragZone, {
-        lastClickAt: null,
-        b4MouseDown : function(e){
-            var sm = this.tree.getSelectionModel();
-            this.lastClickAt = e.getXY();
-            if(sm)
-                sm.suspendEvents(true);
-            Ext.tree.TreeDragZone.superclass.b4MouseDown.apply(this, arguments);
-        }
-    });
-
-    Ext.override(Ext.tree.TreeDragZone, {
-        onMouseUp : function(e){
-            var sm = this.tree.getSelectionModel();
-            var loc = e.getXY();
-            if(sm && (Ext.isEmpty(this.lastClickAt) || (this.lastClickAt[0] == loc[0] && this.lastClickAt[1] == loc[1])) )
-                sm.resumeEvents();
-            else{
-                sm.clearEventQueue();
-                sm.resumeEvents();
-            }
-            Ext.tree.TreeDragZone.superclass.onMouseUp.apply(this, arguments);
-        }
-    });
-
-    Ext.override(Ext.tree.DefaultSelectionModel, {
-        clearEventQueue : function() {
-            var me = this;
-            delete me.eventQueue;
-        }
-    });
-
-    /* prevend deselecting of selected when rightClicking in a RowSelectionModel*/
-    Ext.grid.RowSelectionModel.prototype.selectRow = function(index, keepExisting, preventViewNotify){
-            if(this.isLocked() || (index < 0 || index >= this.grid.store.getCount()) || (keepExisting && this.isSelected(index))){
-                return;
-            }
-            var r = this.grid.store.getAt(index);
-            if(r && this.fireEvent('beforerowselect', this, index, keepExisting, r) !== false){
-                if(!keepExisting || this.singleSelect){
-                    this.clearSelections();
-                }
-                this.selections.add(r);
-                this.last = this.lastActive = index;
-                if(!preventViewNotify){
-                    this.grid.getView().onRowSelect(index);
-                }
-                if(!this.silent){
-                    this.fireEvent('rowselect', this, index, r);
-                    this.fireEvent('selectionchange', this);
-                }
-            }
-        };
-
-    Ext.grid.RowSelectionModel.prototype.handleMouseDown = function(g, rowIndex, e){
-        if(e.button !== 0 || this.isLocked()) return;
-        var view = this.grid.getView();
-        if(e.shiftKey && !this.singleSelect && this.last !== false){
-            var last = this.last;
-            this.selectRange(last, rowIndex, e.ctrlKey);
-            this.last = last; // reset the last
-            view.focusRow(rowIndex);
-        }else{
-            var isSelected = this.isSelected(rowIndex);
-            if(e.ctrlKey && isSelected){
-                this.deselectRow(rowIndex);
-            }else if(!isSelected || this.getCount() > 1){
-                this.selectRow(rowIndex, e.ctrlKey || e.shiftKey);
-                view.focusRow(rowIndex);
-            }
-        }
-    };
-
-    Ext.calendar.CalendarPanel.prototype.todayText = L.Today;
-    Ext.calendar.CalendarPanel.prototype.dayText = L.Day;
-    Ext.calendar.CalendarPanel.prototype.weekText = L.Week;
-    Ext.calendar.CalendarPanel.prototype.monthText = L.Month;
-    Ext.calendar.MonthView.prototype.todayText = L.Today;
-    Ext.calendar.DayView.prototype.todayText = L.Today;
-    Ext.calendar.DateRangeField.prototype.toText = L.to;
-    Ext.calendar.DateRangeField.prototype.allDayText = L.AllDay;
-
-    /* avoid errors for grid dragZone when using cell selection model */
-    Ext.grid.GridDragZone.prototype._getDragData = Ext.grid.GridDragZone.prototype.getDragData;
-    Ext.grid.GridDragZone.prototype.getDragData = function(e) {
-        var t = Ext.lib.Event.getTarget(e);
-        var rowIndex = this.view.findRowIndex(t);
-        if(rowIndex !== false){
-            var sm = this.grid.selModel;
-            // return default method result if selection model has isSelected method
-            if(sm.isSelected) {
-                return this._getDragData(e);
-            }
-
-            // process in the scope of cell selection model
-            sm.getCount = function() {return 1;};
-            var selections = [];
-            var sc = sm.getSelectedCell();
-            if(Ext.isEmpty(sc)) {
-                if((sc[0] != rowIndex) || e.hasModifier()){
-                    sm.handleMouseDown(this.grid, rowIndex, e);
-                }
-                selections = [this.grid.store.getAt(rowIndex)];
-            }
-            return {
-                grid: this.grid
-                ,ddel: this.ddel
-                ,rowIndex: rowIndex
-                ,selections: selections
-            };
-        }
-    };
 }
 
 window.onbeforeunload = function() {

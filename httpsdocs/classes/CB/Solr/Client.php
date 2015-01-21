@@ -14,7 +14,7 @@ class Client extends Service
      */
     public static function runCron()
     {
-        if (isset($GLOBALS['running_trigger'])
+        if (!empty($GLOBALS['running_trigger'])
             || isset($GLOBALS['solr_index_disable_by_custom_script'])
         ) {
             return;
@@ -127,11 +127,11 @@ class Client extends Service
 
         $templatesCollection = \CB\Templates\SingletonCollection::getInstance();
         /* prepeare where condition for sql depending on incomming params */
-        $where = '(t.updated > 0) and (t.id > $1)';
+        $where = '(t.updated > 0) AND (t.draft = 0) AND (t.id > $1)';
 
         if (isset($p['all']) && ($p['all'] == true)) {
             $this->deleteByQuery('*:*');
-            $where = '(t.id > $1)';
+            $where = '(t.id > $1) AND (t.draft = 0) ';
             $templatesCollection->loadAll();
 
         } elseif (!empty($p['id'])) {
@@ -142,7 +142,6 @@ class Client extends Service
         $sql = 'SELECT t.id
                 ,t.pid
                 ,ti.pids
-                ,ti.path
                 ,ti.case_id
                 ,ti.acl_count
                 ,ti.security_set_id
@@ -172,6 +171,7 @@ class Client extends Service
             LIMIT 500';
 
         $docs = true;
+
         while (!empty($docs)) {
             $docs = array();
 
@@ -220,10 +220,12 @@ class Client extends Service
 
                     if (empty($r['pids'])) {
                         $r['pids'] = null;
+                        $r['path'] = null;
                     } else {
                         $r['pids'] = explode(',', $r['pids']);
                         //exclude itself from pids
                         array_pop($r['pids']);
+                        $r['path'] = implode('/', $r['pids']);
                     }
 
                     /* fill "ym" fields for date faceting by cdate, date, date_end */
@@ -245,6 +247,10 @@ class Client extends Service
 
                     if (!empty($ym3)) {
                         $r['ym3'] = $ym3;
+                    }
+
+                    if (!empty($r['task_d_closed'])) {
+                        $r['task_ym_closed'] = str_replace('-', '', substr($r['task_d_closed'], 2, 5));
                     }
 
                     // $this->filterSolrFields($r);
@@ -313,7 +319,6 @@ class Client extends Service
 
         $sql = 'SELECT ti.id
                     ,ti.pids
-                    ,ti.`path`
                     ,ti.case_id
                     ,ti.acl_count
                     ,ti.security_set_id
@@ -334,9 +339,16 @@ class Client extends Service
             while ($r = $res->fetch_assoc()) {
                 $lastId = $r['id'];
                 $r['update'] = true;
-                $r['pids'] = empty($r['pids']) ? null : explode(',', $r['pids']);
-                //exclude itself from pids
-                array_pop($r['pids']);
+
+                if (empty($r['pids'])) {
+                    $r['pids'] = null;
+                    $r['path'] = null;
+                } else {
+                    $r['pids'] = explode(',', $r['pids']);
+                    //exclude itself from pids
+                    array_pop($r['pids']);
+                    $r['path'] = implode('/', $r['pids']);
+                }
 
                 //encode special chars for string values
                 foreach ($r as $k => $v) {
@@ -370,7 +382,7 @@ class Client extends Service
     }
     private function filterSolrFields(&$doc)
     {
-        $some_fields = array('iconCls', 'target_id', 'updated');
+        $some_fields = array('iconCls', 'updated');
 
         foreach ($doc as $fn => $fv) {
             if (in_array($fn, $some_fields)

@@ -1,19 +1,41 @@
 Ext.namespace('CB.browser.view');
 
-CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
-    hideBorders: true
+Ext.define('CB.browser.view.Grid', {
+    extend: 'CB.browser.view.Interface'
+    ,border: false
+
+    ,xtype: 'CBBrowserViewGrid'
+
     ,initComponent: function(){
 
+        var editor = new Ext.form.TextField({selectOnFocus: true});
+        editor._setValue = editor.setValue;
+        editor.setValue = function(v) {
+            v = Ext.util.Format.htmlDecode(v);
+            this._setValue(v);
+        };
+
+
         var columns = [
-            { header: 'ID', width: 80, dataIndex: 'nid', hidden: true}
-            ,{header: L.Name, width: 300, dataIndex: 'name', renderer: function(v, m, r, ri, ci, s){
+            {
+                header: 'ID'
+                ,width: 80
+                ,dataIndex: 'nid'
+                ,hidden: true
+                ,sort: this.columnSortOverride
+                ,groupable: false
+            },{
+                header: L.Name
+                ,width: 300
+                ,dataIndex: 'name'
+                ,renderer: function(v, m, r, ri, ci, s){
                     m.css = 'icon-grid-column-top '+ r.get('iconCls');
                     if(r.get('acl_count') > 0) {
                         m.css += ' node-has-acl';
                     }
 
                     m.attr = Ext.isEmpty(v) ? '' : "title=\"" + v + "\"";
-                    rez = '<span class="n">' + Ext.value(r.get('hl'), v) + '</span>';
+                    rez = '<span class="n">' + Ext.valueFrom(r.get('hl'), v) + '</span>';
                     if( (this.hideArrows !== true) && r.get('has_childs')) {
                         rez += ' <span class="fs9">&hellip;</span>';
                         // rez += '<img class="click icon-arrow3" src="'+Ext.BLANK_IMAGE_URL+'" />';
@@ -22,134 +44,169 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     if(!Ext.isEmpty(vi)) rez = '<span class="ver_count ' + vi + '" title="'+L.FileVersionsCount+'">&nbsp;</span>'+ rez;
 
                     return rez;
-                },scope: this
-                ,editable: true
-            }
-            ,{header: L.Path, hidden:true, width: 150, dataIndex: 'path', renderer: function(v, m, r, ri, ci, s){
+                }
+                // ,scope: this
+                ,editor: editor
+                ,sort: this.columnSortOverride
+                ,groupable: false
+            },{
+                header: L.Path
+                ,hidden:true
+                ,width: 150
+                ,dataIndex: 'path'
+                ,renderer: function(v, m, r, ri, ci, s){
                     m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
                 }
-            }
-            ,{header: L.Project, width: 150, dataIndex: 'case', renderer: function(v, m, r, ri, ci, s){
+                ,sort: this.columnSortOverride
+            },{
+                header: L.Project
+                ,width: 150
+                ,dataIndex: 'case'
+                ,renderer: function(v, m, r, ri, ci, s){
                     m.attr = Ext.isEmpty(v) ? '' : 'title="'+Ext.util.Format.stripTags(v).replace(/"/g,"&quot;")+'"';
                     return v;
                 }
+                ,sort: this.columnSortOverride
+            },{
+                header: L.Date
+                ,width: 120
+                ,dataIndex: 'date'
+                // ,xtype: 'datecolumn'
+                ,format: App.dateFormat + ' ' + App.timeFormat
+                ,renderer: App.customRenderers.datetime
+                ,sort: this.columnSortOverride
+            },{
+                header: L.Size
+                ,width: 80
+                ,dataIndex: 'size'
+                ,renderer: App.customRenderers.filesize
+                ,sort: this.columnSortOverride
+            },{
+                header: L.Creator
+                ,hidden: true
+                ,width: 200
+                ,dataIndex: 'cid'
+                ,renderer: function(v){
+                    return CB.DB.usersStore.getName(v);
+                }
+                ,sort: this.columnSortOverride
+            },{
+                header: L.Owner
+                ,width: 200
+                ,dataIndex: 'oid'
+                ,renderer: function(v){
+                    return CB.DB.usersStore.getName(v);
+                }
+                ,sort: this.columnSortOverride
+            },{
+                header: L.UpdatedBy
+                ,width: 200
+                ,dataIndex: 'uid'
+                ,renderer: function(v){
+                    return CB.DB.usersStore.getName(v);
+                }
+                ,sort: this.columnSortOverride
+            },{
+                header: L.CommentedBy
+                ,width: 200
+                ,dataIndex: 'comment_user_id'
+                ,renderer: function(v){
+                    return CB.DB.usersStore.getName(v);
+                }
+                ,sort: this.columnSortOverride
+            },{
+                header: L.CreatedDate
+                ,hidden:true
+                ,width: 120
+                ,dataIndex: 'cdate'
+                ,xtype: 'datecolumn'
+                ,format: App.dateFormat + ' '  +  App.timeFormat
+                ,sort: this.columnSortOverride
+            },{
+                header: L.UpdatedDate
+                ,hidden:true
+                ,width: 120
+                ,dataIndex: 'udate'
+                ,xtype: 'datecolumn'
+                ,format: App.dateFormat + ' ' + App.timeFormat
+                ,sort: this.columnSortOverride
+            },{
+                header: L.CommentedDate
+                ,hidden:true
+                ,width: 120
+                ,dataIndex: 'comment_date'
+                ,xtype: 'datecolumn'
+                ,format: App.dateFormat + ' ' + App.timeFormat
+                ,sort: this.columnSortOverride
             }
-            ,{ header: L.Date, width: 120, dataIndex: 'date',/* xtype: 'datecolumn',/**/ format: App.dateFormat + ' ' + App.timeFormat, renderer: App.customRenderers.datetime}
-            ,{ header: L.Size, width: 80, dataIndex: 'size', renderer: App.customRenderers.filesize}
-            ,{ header: L.Creator, hidden:true, width: 200, dataIndex: 'cid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
-            ,{ header: L.Owner, width: 200, dataIndex: 'oid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
-            ,{ header: L.UpdatedBy, width: 200, dataIndex: 'uid', renderer: function(v){ return CB.DB.usersStore.getName(v);}}
-            ,{ header: L.CreatedDate, hidden:true, width: 120, dataIndex: 'cdate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
-            ,{ header: L.UpdatedDate, hidden:true, width: 120, dataIndex: 'udate', xtype: 'datecolumn', format: App.dateFormat+' '+App.timeFormat}
         ];
 
-        this.grid = new Ext.grid.EditorGridPanel({
+        var sm = (this.config.selModel)
+            ? this.config.selModel
+            : new Ext.selection.RowModel({
+               mode: 'MULTI'
+            });
+
+        this.grid = new Ext.grid.Panel({
             loadMask: false
+            ,region: 'center'
             ,cls: 'folder-grid'
+            ,border: false
+            ,bodyStyle: {
+                border: 0
+            }
+
+            ,autoRender: true
             ,store: this.store
             ,getProperty: this.getProperty // link to view container method
             ,defaultColumns: Ext.apply([], columns)
-            ,colModel: new Ext.grid.ColumnModel({
-                defaults: {
-                    width: 120,
-                    sortable: true
-                }
-                ,columns: columns
-                ,listeners: {
-                    scope: this
-                    ,hiddenchange: this.saveGridState
-                }
-            })
+            ,columns: columns
+            ,features: [{
+                ftype:'cbGridViewGrouping'
+                ,disabled: true
+                ,groupHeaderTpl: [
+                    '{columnName}: {[Ext.valueFrom(values.children[0].get(\'groupText\'), values.children[0].get(\'group\'))]}'
+                ]
+                // ,showSummaryRow: true
+            }]
             ,viewConfig: {
                 forceFit: false
-                ,enableRowBody: true
-                ,getRowClass: function(r, rowIndex, rp, ds){
-                    rp.body = '';
-                    if(!Ext.isEmpty(r.get('content'))) {
-                        rp.body += r.get('content');
-                    }
+                ,loadMask: false
+                ,stripeRows: false
+                ,emptyText: L.NoData
+                ,deferInitialRefresh: false
 
-                    if(Ext.isEmpty(rp.body)) {
-                        return '';
+                ,plugins: [{
+                        ptype: 'CBPluginDDFilesDropZone'
+                        ,pidPropety: 'nid'
+                        ,dropZoneConfig: {
+                            text: L.GridDDMgs
+                            ,onScrollerDragDrop: this.onScrollerDragDrop
+                            ,scope: this
+                        }
+                    },{
+                        ptype: 'CBDDGrid'
+                        ,idProperty: 'nid'
+                        ,dropZoneConfig: {
+                            text: L.GridDDMgs
+                            ,onScrollerDragDrop: this.onScrollerDragDrop
+                            ,scope: this
+                        }
                     }
-                    return 'hasBody';
-                }
+                ]
             }
-            ,sm: new Ext.grid.RowSelectionModel({
-                singleSelect: false
-                ,listeners: {
-                    scope: this
-                    ,rowselect: this.onRowSelect
-                    // ,selectionchange: this.onSelectionChange
-                }
-            })
+            // ,sm: new Ext.grid.RowSelectionModel({
+            ,selModel: sm
             ,listeners:{
                 scope: this
-                ,beforeedit: function(e){
-                    if(!this.allowRename) {
-                        return false;
-                    }
+                ,columnhide: this.saveGridState
+                ,columnshow: this.saveGridState
 
-                    var ed = new Ext.form.TextField({selectOnFocus: true});
-                    ed._setValue = ed.setValue;
-                    ed.setValue = function(v) {
-                        v = Ext.util.Format.htmlDecode(v);
-                        this._setValue(v);
-                    };
-
-                    e.grid.getColumnModel().setEditor(e.column ,ed);
-
-                    delete this.allowRename;
-                    return true;
-                }
-
-                ,afteredit: function(e){
-                    var encodedValue = Ext.util.Format.htmlEncode(e.value);
-                    e.record.set('name', encodedValue);
-
-                    if(encodedValue == e.originalValue) {
-                        return;
-                    }
-
-                    this.renamedOriginalValue = e.originalValue;
-                    this.renamedRecord = e.record;
-                    CB_BrowserView.rename(
-                        {
-                            path: e.record.get('nid')
-                            ,name: e.value
-                        }
-                        ,function(r, e){
-                            if(r.success !== true){
-                                this.renamedRecord.set('name', this.renamedOriginalValue);
-                                delete this.renamedOriginalValue;
-                                delete this.renamedRecord;
-                                return;
-                            }
-
-                            this.renamedRecord.set('name', r.data.newName);
-
-                            delete this.renamedOriginalValue;
-                            delete this.renamedRecord;
-
-
-                            this.fireEvent(
-                                'objectupdated'
-                                ,{
-                                    data: {
-                                        id: parseInt(r.data.id, 10)
-                                        ,pid: this.refOwner.folderProperties.id
-                                    }
-                                }
-                                ,e
-                            );
-                        }
-                        ,this
-                    );
-                }
                 ,keydown: this.onKeyDown
                 ,rowclick: this.onRowClick
                 ,rowdblclick: this.onRowDblClick
+                ,selectionchange: this.onSelectionChange
                 // ,contextmenu: this.onContextMenu
                 // ,rowcontextmenu: this.onRowContextMenu
                 // ,beforedestroy: this.onBeforeDestroy
@@ -171,20 +228,16 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     }
                 }
 
-                ,headerclick: function (g, ci, e) {
-                    this.store.remoteSort = (g.getColumnModel().config[ci].localSort !== true);
-                    this.userSort = 1;
-                }
-
                 ,columnmove:    this.saveGridState
                 ,columnresize:  this.saveGridState
                 ,groupchange:   this.saveGridState
                 ,sortchange: function() {
                     this.saveGridState();
                 }
+                ,itemcontextmenu: this.onItemContextMenu
             }
             ,keys: [{
-                    key: Ext.EventObject.DOWN //down arrow (select forst row in the greed if no row already selected)  - does not work
+                    key: Ext.event.Event.DOWN //down arrow (select forst row in the greed if no row already selected)  - does not work
                     ,ctrl: false
                     ,shift: false
                     ,stopEvent: true
@@ -199,7 +252,7 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                     ,fn: this.onEnterKeyPress
                     ,scope: this
                 },{
-                    key: Ext.EventObject.F2
+                    key: Ext.event.Event.F2
                     ,alt: false
                     ,ctrl: false
                     ,stopEvent: true
@@ -234,14 +287,14 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 //     ,fn: this.onPasteShortcutClick
                 //     ,scope: this
                 // },{
-                //     key: Ext.EventObject.DELETE
+                //     key: Ext.event.Event.DELETE
                 //     ,alt: false
                 //     ,ctrl: false
                 //     ,stopEvent: true
                 //     ,fn: this.onDeleteClick
                 //     ,scope: this
                 // },{
-                //     key: Ext.EventObject.F5
+                //     key: Ext.event.Event.F5
                 //     ,alt: false
                 //     ,ctrl: false
                 //     ,stopEvent: true
@@ -263,104 +316,273 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
                 //     ,fn: this.onPropertiesClick
                 //     ,scope: this
             }]
-            ,bbar: new Ext.PagingToolbar({
-                store: this.store
-                ,displayInfo: true
-                ,pageSize: 50
-                ,hidden: true
-                ,doRefresh: this.onReloadClick.createDelegate(this)
-                ,listeners: {
-                    scope: this
-                    //prevent toolbar from changing store params and reloading the store
-                    //we'll make this through viewContainer
-                    ,beforechange: function(pt, p) {
-                        this.fireEvent('changeparams', p);
-                        return false;
-                    }
-                }
-            })
-
-            ,dropZoneConfig: {
-                text: 'Drop files here to upload to current folder<br />or drop over a row to upload into that element'
-                ,onScrollerDragDrop: this.onScrollerDragDrop
-                ,scope: this
+            ,bbar: {
+                xtype: 'CBBrowserViewGridPagingToolbar'
+                ,store: this.store
+                ,doRefresh: this.onReloadClick.bind(this)
             }
             ,plugins: [{
-                    ptype: 'CBPluginsFilesDropZone'
-                    ,pidPropety: 'nid'
-                },{
-                    ptype: 'CBDDGrid'
+                ptype: 'cellediting'
+                ,clicksToEdit: 1
+                ,listeners: {
+                    scope: this
+                    ,beforeedit: function(e){
+                        if(!this.allowRename) {
+                            return false;
+                        }
+
+                        delete this.allowRename;
+                        return true;
+                    }
+
+                    ,edit: function(editor, context, eOpts){
+                        var encodedValue = Ext.util.Format.htmlEncode(context.value);
+                        context.record.set('name', encodedValue);
+
+                        if(encodedValue == context.originalValue) {
+                            return;
+                        }
+
+                        this.renamedOriginalValue = context.originalValue;
+                        this.renamedRecord = context.record;
+                        CB_BrowserView.rename(
+                            {
+                                path: context.record.get('nid')
+                                ,name: context.value
+                            }
+                            ,function(r, e){
+                                if(r.success !== true){
+                                    this.renamedRecord.set('name', this.renamedOriginalValue);
+                                    delete this.renamedOriginalValue;
+                                    delete this.renamedRecord;
+                                    return;
+                                }
+
+                                this.renamedRecord.set('name', r.data.newName);
+
+                                delete this.renamedOriginalValue;
+                                delete this.renamedRecord;
+
+                                App.fireEvent(
+                                    'objectchanged'
+                                    ,{
+                                        id: parseInt(r.data.id, 10)
+                                        ,pid: this.refOwner.folderProperties.id
+                                    }
+                                    ,e
+                                );
+                            }
+                            ,this
+                        );
+                    }
                 }
-            ]
+            }]
         });
+
+        // this.objectPanel = new CB.object.ViewContainer({
+        //     region: 'east'
+        //     ,width: 250
+
+        //     ,collapsible: true
+        //     ,collapseMode: 'mini'
+
+        //     ,stateful: true
+        //     ,stateId: 'gvop' //grid view object panel
+
+        //     ,onCloseClick: Ext.Function.bind(this.onCloseObjectPanelClick, this)
+        // });
 
         Ext.apply(this, {
             title: L.Explorer
             ,header: false
-            ,layout: 'fit'
-            ,items: this.grid
+            ,layout: 'border'
+            ,items:
+                this.grid
+            // [
+            //     this.grid
+            //     ,this.objectPanel
+            // ]
             ,listeners: {
                 scope: this
                 ,activate: this.onActivate
             }
         });
-        CB.browser.view.Grid.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
+        this.store.on('beforeload', this.onBeforeStoreLoad, this);
         this.store.on('load', this.onStoreLoad, this);
 
-        this.addEvents('reload');
-        this.enableBubble(['reload']);
+        this.enableBubble([
+            'reload'
+            ,'itemcontextmenu'
+        ]);
 
+    }
+    /**
+     * override sort method for columns
+     * used to set userSort flag
+     * @param  string direction
+     * @return void
+     */
+    ,columnSortOverride: function(direction) {
+        var me = this,
+            grid = me.up('tablepanel'),
+            store = grid.store;
+
+        // store.remoteSort = (this.config.localSort !== true);
+        if(store.remoteSort) {
+            grid.userSort = 1;
+        } else {
+            // store.sort()
+        }
+
+        Ext.grid.column.Column.prototype.sort.apply(this, arguments);
     }
 
     ,onActivate: function() {
         this.fireEvent(
             'settoolbaritems'
             ,[
-                'apps'
-                ,'create'
+                'create'
                 ,'upload'
                 ,'download'
                 ,'-'
                 ,'edit'
                 ,'delete'
+                ,'->'
+                ,'reload'
+                ,'apps'
+                ,'-'
+                ,'more'
             ]
         );
     }
-    ,onStoreLoad: function(store, recs, options) {
-        delete this.userSort;
 
-        var pt = this.grid.getBottomToolbar();
-        var pagingVisible = (store.reader.jsonData.total > pt.pageSize);
-        if(pagingVisible) {
-            pt.show();
-        } else {
-            pt.hide();
-        }
+    ,onBeforeStoreLoad: function(store, operation, eOpts) {
+        this.savedSelection = this.getSelectedItems();
+        this.grid.getSelectionModel().suspendEvents();
+        // App.mainViewPort.selectGridObject(this.grid);
 
-        this.grid.syncSize();
-        this.syncSize();
-
-        App.mainViewPort.selectGridObject(this.grid);
-
-        this.fireSelectionChangeEvent();
     }
 
-    ,onScrollerDragDrop: function(targetData, source, e, sourceData){
+    ,onStoreLoad: function(store, recs, successful, options) {
+        if(!this.rendered ||
+            !this.getEl().isVisible(true) ||
+            (successful !== true)
+        ) {
+            return;
+        }
+
+        delete this.grid.userSort;
+
+        var hadSelection = false;
+        var prevSelectedId = 0;
+        var prevSelectedPid = 0;
+
+        if(!Ext.isEmpty(this.savedSelection)) {
+            hadSelection = true;
+            prevSelectedId = this.savedSelection[0].nid;
+            prevSelectedPid = this.savedSelection[0].pid;
+        }
+
+        // try to select the item, if set, from App.locateObjectId
+        var locatedAnItem = App.mainViewPort.selectGridObject(this.grid);
+
+        // otherwise select previous items, if any
+        if(!locatedAnItem &&
+            !Ext.isEmpty(this.savedSelection)
+        ) {
+            this.selectItems(this.savedSelection);
+        }
+
+        this.grid.getSelectionModel().resumeEvents(true);
+
+        if(!locatedAnItem) {
+            var haveSelection = this.grid.getSelectionModel().hasSelection()
+                ,currSelectedId = haveSelection
+                    ? this.grid.getSelection()[0].get('nid')
+                    : 0
+                ,currSelectedPid = this.refOwner.folderProperties.id;
+
+            if(
+                // (hadSelection !== haveSelection) || (prevSelectedId != currSelectedId)
+                (prevSelectedPid != currSelectedPid) || (haveSelection && (prevSelectedId != currSelectedId))
+            ){
+                this.fireSelectionChangeEvent();
+            }
+        } else {
+            delete App.locateObjectId;
+        }
+
+        //WORKING
+        // update empty text
+        // this.updateEmtyText(
+        //     recs
+        //     ,options.request.config.params.filters
+        //     ,
+        // );
+
+        var noRecords = Ext.isEmpty(recs)
+            ,filters = options.request.config.params.filters
+            ,emptyFilters = Ext.isEmpty(filters) || Ext.Object.isEmpty(filters)
+            ,emptyText = emptyFilters
+                ? 'Drop files here or use "New" button'
+                : 'No results found';
+
+        this.grid.view. emptyText = emptyText;
+    }
+
+    ,onScrollerDragDrop: function(targetData, source, e, data){
+        var d, sourceData = [];
+        for (var i = 0; i < data.records.length; i++) {
+            d = data.records[i].data;
+            sourceData.push({
+                id: d['nid']
+                ,name: d['name']
+                ,path: d['path']
+                ,template_id: d['template_id']
+            });
+        }
+
         App.DD.execute({
             action: e
             ,targetData: this.refOwner.folderProperties
-            ,sourceData: sourceData.data
+            ,sourceData: sourceData
         });
     }
 
-    ,fireSelectionChangeEvent: function() {
-        var s = this.grid.getSelectionModel().getSelections();
+    ,getSelectedItems: function() {
+        var s = this.grid.getSelectionModel().getSelection();
         for (var i = 0; i < s.length; i++) {
             s[i] = s[i].data;
         }
 
-        this.fireEvent('selectionchange', s);
+        return s;
+    }
+
+    ,selectItems: function(itemsArray) {
+        if (itemsArray && itemsArray.length) {
+            var rs = [],
+                r,
+                j = 0,
+                l = itemsArray.length;
+            for (; j < l; j++) {
+                r = this.store.findRecord('nid', itemsArray[j].nid);
+                if (r) {
+                    rs.push(r);
+                }
+            }
+            if (rs.length) {
+                // this.grid.setSelection(rs);
+                this.grid.getSelectionModel().select(rs, false, true);
+            }
+        }
+
+        delete this.savedSelection;
+    }
+
+    ,fireSelectionChangeEvent: function() {
+        this.fireEvent('selectionchange', this.getSelectedItems());
     }
 
     ,onKeyDown: function(e) {
@@ -374,16 +596,12 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
         this.fireSelectionChangeEvent();
     }
 
-    ,onRowDblClick: function(g, ri, e) {
-        this.fireEvent('objectopen', g.store.getAt(ri).data);
+    ,onRowDblClick: function(g, record, tr, rowIndex, e, eOpts) {
+        this.fireEvent('objectopen', g.store.getAt(rowIndex).data);
     }
 
-    ,onRowSelect: function () {
-        if(this.userAction) {
-            this.fireSelectionChangeEvent();
-
-            delete this.userAction;
-        }
+    ,onSelectionChange: function () {
+        this.fireSelectionChangeEvent();
     }
 
     ,onEnterKeyPress: function(key, e) {
@@ -398,64 +616,42 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
             return false;
         }
 
-        this.grid.selModel.selectRow(0);
+        this.grid.selModel.select(0);
     }
 
     ,onRenameClick: function(b, e){
         if(!this.grid.selModel.hasSelection()) {
             return;
         }
-        this.grid.stopEditing(true);
-        var idx = this.grid.store.indexOf(this.grid.selModel.getSelected());
+        this.grid.editingPlugin.cancelEdit();
         this.allowRename = true;
-        this.grid.startEditing(idx, this.grid.getColumnModel().findColumnIndex('name'));
+
+        var selection = this.grid.selModel.getSelection()
+            ,valueCol = this.grid.headerCt.child('[dataIndex="name"]')
+            ,colIdx = valueCol.getIndex();
+
+        if(!Ext.isEmpty(selection)) {
+            this.grid.editingPlugin.startEdit(
+                selection[0]
+                ,colIdx
+            );
+        }
     }
     ,onReloadClick: function() {
         this.fireEvent('reload', this);
     }
 
     ,saveGridState: function() {
-        var rez = {columns: {}}
-            ,store = this.store
-            ,cm = this.grid.getColumnModel()
-            ,gs
-            ,di;
-
-        for(var i = 0, c; (c = cm.config[i]); i++){
-            di = cm.getDataIndex(i);
-            rez.columns[di] = {
-                idx: i
-                ,width: c.width
-            };
-            if(c.hidden){
-                rez.columns[di].hidden = true;
-            }
-            if(c.sortable){
-                rez.columns[di].sortable = true;
-            }
-        }
-
-        if(this.store){
-            ss = this.store.getSortState();
-            if(ss){
-                rez.sort = ss;
-            }
-            if(this.store.getGroupState){
-                gs = this.store.getGroupState();
-                if(gs){
-                    rez.group = gs;
-                }
-            }
-        }
+        var state = this.grid.getState();
 
         CB_State_DBProvider.saveGridViewState(
             {
                 params: this.refOwner.params
-                ,state: rez
+                ,state: state
             }
         );
 
-        return rez;
+        return state;
     }
 
     ,getViewParams: function() {
@@ -463,13 +659,28 @@ CB.browser.view.Grid = Ext.extend(CB.browser.view.Interface,{
             from: 'grid'
         };
 
-        if(this.userSort) {
+        if(this.grid.userSort) {
             rez.userSort = 1;
         }
 
         return rez;
     }
 
-});
+    ,onItemContextMenu: function(grid, record, item, index, e, eOpts) {
+        this.fireEvent('itemcontextmenu', e);
+    }
 
-Ext.reg('CBBrowserViewGrid', CB.browser.view.Grid);
+    // /**
+    //  * handler for close right panel button
+    //  * @param  button b
+    //  * @param  event e
+    //  * @return void
+    //  */
+    // ,onCloseObjectPanelClick: function(b, e) {
+    //     this.objectPanel.collapse();
+    //     this.buttonCollection.get('filter').hide();
+    //     this.buttonCollection.get('properties').hide();
+    //     this.actions.preview.show();
+    // }
+
+});

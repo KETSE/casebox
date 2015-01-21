@@ -15,7 +15,10 @@ class Comments extends Base
             'success' => true
             ,'data' => array()
         );
-        parent::getData($id);
+
+        if (empty(parent::getData($id))) {
+            return $rez;
+        }
 
         $commentTemplateIds = \CB\Templates::getIdsByType('comment');
         if (empty($commentTemplateIds)) {

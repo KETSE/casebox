@@ -60,8 +60,8 @@ function getTranslationIfPseudoValue($value)
         $varName = substr($value, 1, strlen($value) - 2);
         $userLanguage = \CB\Config::get('user_language');
 
-        if (isset($GLOBALS['TRANSLATIONS'][$user_language][$varName])) {
-            $value = @$GLOBALS['TRANSLATIONS'][$user_language][$varName];
+        if (isset($GLOBALS['TRANSLATIONS'][$userLanguage][$varName])) {
+            $value = @$GLOBALS['TRANSLATIONS'][$userLanguage][$varName];
         }
     }
 
@@ -98,24 +98,19 @@ function initTranslations()
 
     /* reading specific translations of core */
     $res = DB\dbQuery(
-        'SELECT name, '.\CB\Config::get('language_fields').'
+        'SELECT *
         FROM translations
         WHERE `type` < 2'
     ) or die( DB\dbQueryError() );
 
     while ($r = $res->fetch_assoc()) {
-        reset($r);
-        $name = current($r);
-        while (($v = next($r)) !== false) {
-            $l = substr(key($r), 1);
-            $GLOBALS['TRANSLATIONS'][$languages[$l-1]][$name] = $v;
+        foreach ($languages as $l) {
+            if (!empty($r[$l])) {
+                $GLOBALS['TRANSLATIONS'][$l][$r['name']] = $r[$l];
+            }
         }
     }
     $res->close();
-
-    // foreach ($GLOBALS['TRANSLATIONS'][\CB\USER_LANGUAGE] as $k => $v) {
-    //     define('CB\\L\\'.$k, $v);
-    // }
 }
 
 function checkTranslationsUpToDate()
@@ -147,9 +142,9 @@ function checkTranslationsUpToDate()
             ? (filemtime($locale_filename) < $last_translations_update_date)
             : true;
 
-        if ($create_locale_files) {
+        // if ($create_locale_files) {
             updateTranslationsFiles();
-        }
+        // }
     }
     /* end of verifying if localization JS file for current user language is up to date */
 }
@@ -157,8 +152,10 @@ function checkTranslationsUpToDate()
 function updateTranslationsFiles()
 {
     $rez = array();
+    $languages = \CB\Config::get('languages');
+
     $res = DB\dbQuery(
-        'SELECT name, `'.implode('`,`', \CB\Config::get('languages')).'`
+        'SELECT name, `'.implode('`,`', $languages).'`
         FROM `casebox`.translations
         WHERE `type` in (0,2)'
     ) or die( DB\dbQueryError() );
@@ -171,6 +168,22 @@ function updateTranslationsFiles()
         }
     }
     $res->close();
+
+    /* reading specific translations of core */
+    $res = DB\dbQuery(
+        'SELECT *
+        FROM translations
+        WHERE `type` in (0,2)'
+    ) or die( DB\dbQueryError() );
+
+    while ($r = $res->fetch_assoc()) {
+        foreach ($languages as $l) {
+            if (!empty($r[$l])) {
+                $rez[$l][] = "'".$r['name']."':'".addcslashes($r[$l], "'")."'";
+            }
+        }
+    }
+
     foreach ($rez as $l => $v) {
         $filename = \CB\DOC_ROOT . DIRECTORY_SEPARATOR .
             'js' . DIRECTORY_SEPARATOR .

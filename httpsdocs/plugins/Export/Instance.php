@@ -1,14 +1,13 @@
 <?php
 namespace Export;
 
+use CB\Config;
 use CB\L;
 use CB\Util;
 use CB\User;
 
 class Instance
 {
-    public $columns = array();
-
     public function install()
     {
 
@@ -27,37 +26,36 @@ class Instance
 
         // form columns
         L\initTranslations();
-        $this->columns = array(
-            'nid' => 'ID'
-            ,'name' => L\get('Name')
-            ,'path' => L\get('Path')
-            ,'date' => L\get('Date')
-            ,'date_end' => 'End date'
-            ,'oid' => L\get('Owner')
-            ,'cid' => L\get('CreatedBy')
-            ,'cdate' => L\get('Created')
-            ,'uid' => L\get('heUpdated')
-            ,'udate' => L\get('UpdatedDate')
-        );
+
+        $defaultColumns = Config::getDefaultGridViewColumns();
+        $columns = $defaultColumns;
 
         // retreive data
         $p['start'] = 0;
         $p['rows'] = 500;
 
-        $sr = new \CB\Browser();
+        $sr = new \CB\BrowserView();
         $results = $sr->getChildren($p);
+
         if (!empty($results['DC'])) {
+            $columns = array();
+
             foreach ($results['DC'] as $colName => $col) {
-                $this->columns[$colName] = @$col['title'];
+                if (@$col['hidden'] !== true) {
+                    $columns[$colName] = empty($defaultColumns[$colName])
+                        ? @Util\coalesce($col['title'], $colName)
+                        : $defaultColumns[$colName];
+                }
             }
         }
+
         //insert header
-        $rez[] = array_values($this->columns);
+        $rez[] = array_values($columns);
 
         while (!empty($results['data'])) {
             foreach ($results['data'] as $r) {
                 $record = array();
-                foreach ($this->columns as $colName => $colTitle) {
+                foreach ($columns as $colName => $colTitle) {
                     if (strpos($colName, 'date') === false) {
                         if (in_array($colName, array('oid', 'cid', 'uid')) && !empty($r[$colName])) {
                             $record[] = User::getDisplayName($r[$colName]);

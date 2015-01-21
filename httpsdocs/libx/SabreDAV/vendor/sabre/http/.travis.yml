@@ -7,6 +7,6 @@ php:
 
 script:
   - ./bin/phpunit --configuration tests/phpunit.xml
-  - ./bin/phpcs  -v --standard=tests/phpcs/ruleset.xml lib/
+  - ./bin/phpcs  -p --standard=tests/phpcs/ruleset.xml lib/
 
 before_script: composer install --dev

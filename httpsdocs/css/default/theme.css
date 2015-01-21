@@ -12,7 +12,7 @@
 .ib-cal-prev,.ib-prev{background-image: url(b/prev.png); min-width: 38px}
 .ib-cal-next, .ib-next{background-image: url(b/next.png); min-width: 38px}
 .ib-cancel{background-image: url(b/cancel.png); min-width: 38px}
-.ib-create{background-image: url(b/plus-circle.png); min-width: 38px}
+.ib-create{background-image: url(b/ic_add_circle_black_36dp.png); min-width: 38px}
 .ib-del{background-image: url(b/delete.png); min-width: 38px}
 .ib-download{background-image: url(b/download.png); min-width: 38px}
 .ib-edit{background-image: url(b/clipboard.png); min-width: 38px}
@@ -21,17 +21,20 @@
 .ib-expand{background-image: url(b/expand.png); min-width: 38px}
 .ib-export{background-image: url(b/export.png); min-width: 38px}
 .ib-external{background-image: url(b/external.png); min-width: 38px}
-.ib-filter{background-image: url(b/filter.png); min-width: 38px}
+.ib-filter{background-image: url(b/ic_filter_list_black_36dp.png); min-width: 38px}
 .ib-filter-on{background-image: url(b/filter-on.png); min-width: 38px}
 .ib-fit{background-image: url(b/fit.png); min-width: 38px}
 .ib-open{background-image: url(b/open.png); min-width: 38px}
 .ib-points{background-image: url(b/points.png); min-width: 20px}
 .ib-preview{background-image: url(b/preview.png); min-width: 38px}
+.ib-properties{background-image: url(b/properties.png); min-width: 38px}
 .ib-refresh{background-image: url(b/refresh.png); min-width: 38px}
 .ib-restore{background-image: url(b/restore.png); min-width: 38px}
+.ib-reorder{background-image: url(b/ic_reorder_black_36dp.png); min-width: 38px}
 .ib-save{background-image: url(b/save.png); min-width: 38px}
-.ib-search{background-image: url(b/search.png); min-width: 38px}
-.ib-settings{background-image: url(b/settings.png); min-width: 38px}
+.ib-search{background-image: url(b/ic_search_black_36dp.png); min-width: 38px}
+.ib-settings{background-image: url(b/ic_settings_applications_grey600_36dp.png); min-width: 38px}
+.ib-table{background-image: url(b/table.png); min-width: 38px}
 .ib-task-complete{background-image: url(b/task-complete.png); min-width: 38px}
 .ib-task-new{background-image: url(b/task-new.png); min-width: 38px}
 .ib-trash{background-image: url(b/trash.png); min-width: 38px}
@@ -49,6 +52,28 @@
 .ib-chart-pie{background-image: url(b/chart-pie.png); min-width: 38px}
 .ib-chart-table{background-image: url(b/chart-table.png); min-width: 38px}
 
+.im-apps{background-image: url(m/ic_apps_black_24dp.png); min-width: 24px}
+.im-arr-l{background-image: url(m/ic_chevron_left_black_24dp.png); min-width: 24px}
+.im-arr-r{background-image: url(m/ic_chevron_right_black_24dp.png); min-width: 24px}
+.im-assignment{background-image: url(m/ic_assignment_black_24dp.png); min-width: 24px}
+.im-cancel{background-image: url(m/ic_clear_black_24dp.png); min-width: 24px}
+.im-create{background-image: url(m/ic_add_circle_black_24dp.png); min-width: 24px}
+.im-download{background-image: url(m/ic_file_download_black_24dp.png); min-width: 24px}
+.im-edit-obj{background-image: url(m/ic_edit_black_24dp.png); min-width: 24px}
+.im-external{background-image: url(m/ic_launch_black_24dp.png); min-width: 24px}
+.im-fit{background-image: url(m/ic_open_with_black_24dp.png); min-width: 24px}
+.im-filter{background-image: url(m/ic_filter_list_black_24dp.png); min-width: 24px}
+.im-menu{background-image: url(m/ic_menu_black_24dp.png); min-width: 24px}
+.im-points{background-image: url(m/ic_more_vert_black_24dp.png); min-width: 24px}
+.im-preview{background-image: url(m/ic_visibility_black_24dp.png); min-width: 24px}
+.im-refresh{background-image: url(m/ic_refresh_black_24dp.png); min-width: 24px}
+.im-reorder{background-image: url(m/ic_reorder_black_24dp.png); min-width: 24px}
+.im-search{background-image: url(m/ic_search_black_24dp.png); min-width: 24px}
+.im-save, .im-task-complete{background-image: url(m/ic_done_black_24dp.png); min-width: 24px}
+.im-settings{background-image: url(m/ic_settings_applications_black_24dp.png); min-width: 24px}
+.im-upload{background-image: url(m/ic_file_upload_black_24dp.png); min-width: 24px}
+.im-trash{background-image: url(m/ic_delete_black_24dp.png); min-width: 24px}
+
 .x-menu-item .ib-browse{background-image: url(s/folder-horizontal-open.png); background-position: 0 50%; background-repeat: no-repeat}
 .x-menu-item .ib-del{background-image: url(s/cross-script.png); background-position: 0 50%; background-repeat: no-repeat}
 .x-menu-item .ib-event-new{background-image: url(s/calendar-blue.png); background-position: 0 50%; background-repeat: no-repeat}
@@ -59,19 +84,29 @@
 .i-refresh {background-image: url(s/refresh.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-points {background-image: url(s/points-gray.png); background-position: 0 50%; background-repeat: no-repeat}
 
-.i-flag, .x-tree-node .i-flag{background-image: url(s/flag.png); background-position: 0 50%; background-repeat: no-repeat}
-.is-flag, .x-tree-node .is-flag{background-image: url(s/flag-small.png); background-position: 0 50%; background-repeat: no-repeat}
-.i-magnifier, .x-tree-node .i-magnifier{background-image: url(s/magnifier.png); background-position: 0 50%; background-repeat: no-repeat}
-.i-building, .x-tree-node .i-building{background-image: url(s/building.png); background-position: 0 50%; background-repeat: no-repeat}
-.i-book-open, .x-tree-node .i-book-open{background-image: url(s/book-open.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-flag, .x-grid-tree-node-expanded .i-flag{background-image: url(s/flag.png); background-position: 0 50%; background-repeat: no-repeat}
+.is-flag, .x-grid-tree-node-expanded .is-flag{background-image: url(s/flag-small.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-magnifier, .x-grid-tree-node-expanded .i-magnifier{background-image: url(s/magnifier.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-building, .x-grid-tree-node-expanded .i-building{background-image: url(s/building.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-book-open, .x-grid-tree-node-expanded .i-book-open{background-image: url(s/book-open.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-bullet-arrow-down{background-image: url(s/bullet_arrow_down.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-check-alt{background-image: url(s/check-alt.png)}
 .i-cancel{background-image: url(s/cancel.png)}
+.i-info{background-image: url(s/ic_info_black_18dp.png)}
 .i-trash{background-image: url(s/trash.png)}
+.i-table-export{background-image: url(s/table-export-gray.png)}
 .i-cross{background-image: url(s/cross.png)}
 .i-plus{background-image: url(s/plus.png)}
+.i-restore{background-image: url(s/ic_reply_black_18dp.png)}
+.i-shortcut{background-image: url(s/shortcut-overlay.png)}
 
 .calendar-mono, .x-tool-period {background-image: url(s/calendar-mono.png); background-position: 0 50%; background-repeat: no-repeat}
+/* drag drop classes */
+.drag-drop-copy .x-dd-drop-icon{background-image:url(s/document-copy.png)}
+.drag-drop-move .x-dd-drop-icon{background-image:url(s/document--arrow.png)}
+.drag-drop-shortcut .x-dd-drop-icon{background-image:url(s/external.png)}
 
+/* preview */
 .preview-thumb {
 /*    opacity: 1;
     transition: opacity .25s ease-in-out;
@@ -93,9 +128,9 @@
 
 .preview-thumb:hover {
     /*opacity: 0.5*/
-border: 1px solid #BBB;
-background-color: #edeff4;
-border-radius: 4;
+    border: 1px solid #BBB;
+    background-color: #edeff4;
+    border-radius: 4;
 }
 
 .pr-th-doc, .pr-th-docx {background-image: url(l/word.png) }
@@ -104,12 +139,15 @@ border-radius: 4;
 .d-loader {
     background-image: url(d/loader.gif);
     background-position: 0 50%;
-    background-repeat: no-repeat
-}
-.x-mask-loading, .x-mask-loading div {
-    background-image: url(d/loader.gif);
-    background-position: 4px 50%;
     background-repeat: no-repeat;
+}
+.x-mask-loading .x-mask-msg-text {
+    background-image: url(d/loader.gif);
+    background-position: 6px 50%;
+    background-repeat: no-repeat;
+}
+.x-mask-loading .x-mask-msg-text{
+    padding-left: 30px;
 }
 .msg-load{
     vertical-align: middle;
@@ -119,6 +157,6 @@ border-radius: 4;
 
 .msg-load div {
     display: inline-block;
-    padding: 4px 22px;
+    padding: 4px 28px;
 }
-.webdav * {background: white !important;}
+.webdav .x-window-body {background: white}

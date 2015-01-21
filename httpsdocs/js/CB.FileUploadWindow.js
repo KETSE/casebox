@@ -1,7 +1,8 @@
 Ext.namespace('CB');
 
-CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
-    autoShow: true
+Ext.define('CB.FilesConfirmationWindow', {
+    extend: 'Ext.Window'
+    ,autoShow: true
     ,border: false
     ,bodyBorder: false
     ,closable: true
@@ -23,7 +24,10 @@ CB.FilesConfirmationWindow = Ext.extend(Ext.Window, {
         ,autorenameButton: true
     }
     ,initComponent: function(){
+        this.data = this.config.data;
+
         var buttons = [];
+
         if(this.data.allow_new_version) buttons.push({
             text: L.NewVersion
             ,name: 'newversion'

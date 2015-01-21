@@ -14,10 +14,15 @@ function date_ISO_to_date(date_string){
         return null;
     }
 
+    if(Ext.isDate(date_string)) {
+        return date_string;
+    }
+
     var d = Date.parse(date_string);
     if(Ext.isEmpty(d)) {
         return null;
     }
+
     return new Date(d);
 }
 
@@ -34,7 +39,7 @@ function date_ISO_to_local_date(date_string){
 
         if(localOffset != userOffset) {
             // decrease date with local offset and encrease with user offset
-            d = d.add(Date.MINUTE, -localOffset + userOffset);
+            d = Ext.Date.add(d, Ext.Date.MINUTE, -localOffset + userOffset);
         }
     }
 
@@ -48,11 +53,11 @@ function date_local_to_ISO_string(date) {
 
     if(!isNaN(App.loginData.cfg.gmt_offset)) {
         var localOffset = - date.getTimezoneOffset();
-        var userOffset = Ext.num(App.loginData.cfg.gmt_offset, 0);
+        var userOffset = Ext.Number.from(App.loginData.cfg.gmt_offset, 0);
 
         if(localOffset != userOffset) {
             // decrease date with user offset and encrease with local offset
-            date = date.add(Date.MINUTE, localOffset - userOffset);
+            date = Ext.Date.add(date, Ext.Date.MINUTE, localOffset - userOffset);
         }
     }
 
@@ -78,7 +83,7 @@ function getUserDisplayName(withEmail) {
 function displayDateTime(date){
     var d = date_ISO_to_local_date(date);
     if(Ext.isDate(d)) {
-        return d.format(App.longDateFormat + ' ' + App.timeFormat);
+        return Ext.Date.format(d, App.longDateFormat + ' ' + App.timeFormat);
     }
     return '';
 }
@@ -93,7 +98,7 @@ function dateToDateString(date) {
     if(Ext.isPrimitive(date)) {
         rez = date;
     } else if(Ext.isDate(date)) {
-        rez = date.format('Y-m-d') + 'T00:00:00Z';
+        rez = Ext.Date.format(date, 'Y-m-d') + 'T00:00:00Z';
     }
     return rez;
 }
@@ -107,6 +112,7 @@ function getItemIcon(d){
         if(d['type'] == 2) return 'icon-shortcut';
         return d.iconCls;
     }
+
     switch( CB.DB.templates.getType(d.template_id) ){
         case 'file':
             return getFileIcon(d['name']);
@@ -197,6 +203,7 @@ function getStoreNames(v){
     if(Ext.isEmpty(v)) {
         return '';
     }
+
     var ids = String(v).split(',');
     var texts = [];
     Ext.each(
@@ -227,16 +234,20 @@ function toNumericArray(v){
         v = String(v).split(',');
     }
 
+    var rez = [];
+
     for (var i = v.length - 1; i >= 0; i--) {
-        w = String(v[i]).trim();
-        iw = parseInt(w, 10);
+        var w = String(v[i]).trim()
+            ,iw = parseInt(w, 10);
+
         if (iw == w) {
-            v[i] = iw;
-        } else {
-            v[i] = parseFloat(w);
+            rez.push(iw);
+        } else if(!isNaN(w)){
+            rez.push(parseFloat(w));
         }
     }
-    return v;
+
+    return rez;
 }
 
 setsGetIntersection = function(set1, set2){

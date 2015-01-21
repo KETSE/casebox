@@ -130,11 +130,7 @@ class Files
         if (!empty($p['localFile'])) {
             $file_name = basename($p['localFile']);
             $tmp_name = Config::get('incomming_files_dir') . $file_name;
-
-            // old, procedural style
-            // $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $finfo = new \finfo(FILEINFO_MIME_TYPE);
-
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
             copy($p['localFile'], $tmp_name);
 
             $p['files']['file'] = array(
@@ -142,7 +138,7 @@ class Files
                 ,'tmp_name' => $tmp_name
                 ,'error' => 0
                 ,'size' => filesize($p['localFile'])
-                ,'type' => $finfo->file($tmp_name)
+                ,'type' => finfo_file($finfo, $tmp_name)
             );
         } else {
             $p['files'] = &$_FILES;

@@ -2,10 +2,8 @@
 body {font-family: arial, sans-serif; font-size: 12px}
 a {color: #15C}
 
-/*.x-grid3-row td, .x-grid3-summary-row td {font: 13px "lucida grande",tahoma,verdana,arial,sans-serif}*/
-.x-grid3-row td, .x-grid3-summary-row td { font: 12px arial,sans-serif }
+/*.x-grid-row td, .x-grid-summary-row td {font: 13px "lucida grande",tahoma,verdana,arial,sans-serif}*/
 
-.panel-header-nobg {background: none}
 .generic-object {padding: 0 5px 10px 5px; color: #555}
 
 .generic-object a, .generic-object a:link, .generic-object a:visited, .generic-object a:hover{ color: #333; text-decoration: none}
@@ -39,6 +37,14 @@ a {color: #15C}
 
 /* . {margin-top: 2px} */
 .mainTabPanel  {background-color: #F0F0F0 !important; border: 0}
+
+/* hide tab bar */
+.mainTabPanel > div.x-tab-bar {
+    display: none;
+}
+.mainTabPanel > div.x-panel-body {
+    top: 0px !important;
+}
 
 ul.caselist2 {margin-top: 3px; list-style: disc outside none !important}
 .caselist2  li {margin-left: 20px; color: #555}
@@ -133,7 +139,7 @@ span.updated {font-size: 9px; color: #999;
 
 
 span.info {color: #777 !important}
-.x-grid3-cell-inner, .x-grid3-hd-inner { white-space:normal !important}
+/*.x-grid-cell-inner, .x-grid-hd-inner { white-space:normal !important}*/
 
 
 
@@ -433,12 +439,12 @@ background-position: -48px 0
 color: black !important;
 }
 
-.x-grid3-row-body p {
+.x-grid-row-body p {
     margin:5px 20px 10px 5px !important;
     color:#555;
 }
 
-.x-grid3-row-body span {
+.x-grid-row-body span {
   color: black;
   padding-left: 3px;
   padding-right: 3px;
@@ -510,6 +516,10 @@ background-color: #FFF;
 }
 
 
+.x-menu-body-default {
+    background: #FFF;
+}
+
 .x-panel-blue .x-toolbar{
     background-image: none !important;
     /* background-color: #FFF; */
@@ -524,12 +534,19 @@ background-color: #FFF;
     line-height: 25px;
 }
 
-.task-grid .x-grid3-col {
+.task-grid .x-grid-col {
     padding-bottom: 15px;
 }
-.task-grid .x-grid3-cell, .folder-grid .x-grid3-cell {
+.folder-grid .x-grid-header-ct {
+    border-top: 0;
+}
+
+/*
+.task-grid .x-grid-cell, .folder-grid .x-grid-cell {
     vertical-align: top;
 }
+
+*/
 .task-form label {
     color: #333;
 }
@@ -571,7 +588,7 @@ background-color: #FFF;
 .versions a {color: #333; text-decoration: none; }
 .versions a:hover {color: #000; text-decoration: underline; }
 .trash {background-image: url(i/ico/_trash.png); }
-.icon-trash {background-image: url(i/ico/bin.png) !important; }
+/*.icon-trash {background-image: url(i/ico/bin.png) !important; }*/
 
 .dttm {color: #777; }
 
@@ -608,11 +625,10 @@ background-color: #FFF;
     padding-left: 18px;
 }
 /*.versions p.gr {margin-top: 6px;}/**/
-.gridView .x-grid3-row td {
+.gridView .x-grid-row td {
     line-height: 17px;
 }
 
-::-webkit-scrollbar{height:10px;overflow:visible;width:10px} ::-webkit-scrollbar-button{height:0;width:0} ::-webkit-scrollbar-track{background: #f2f2f2; border: none; opacity: 0} ::-webkit-scrollbar-track:hover{background-color: #f2f2f2;box-shadow:inset 1px 0 0 #d9d9d9} ::-webkit-scrollbar-track:active{background-color:rgba(0,0,0,.05);box-shadow:inset 1px 0 0 #c2c2c2; border-top: 1px solid #c2c2c2} ::-webkit-scrollbar-thumb{background-color: #c0c0c0;background-clip:padding-box;min-height:10px; max-height:10px; padding:100px 0 0; border-left: 1px solid #9a9a9a; border-top: 1px solid #acacac; border-bottom: 1px solid #acacac} ::-webkit-scrollbar-thumb:hover{background-color: #909090;box-shadow:inset 1px 0 0 #8a8a8a; border-left: 1px solid #666; border-top: 1px solid #727272; border-bottom: none} ::-webkit-scrollbar-thumb:active{background-color: #797979; box-shadow:inset 1px 1px 1px #696969} ::-webkit-scrollbar-corner{background:transparent} body::-webkit-scrollbar-track {opacity: 0} body::-webkit-scrollbar{height:12px;overflow:visible;width:12px} body::-webkit-scrollbar-track-piece{border: none; background: #f2f2f2} body::-webkit-scrollbar-thumb{border-width:1px 1px 1px 1px;margin:0 0 0 1px} body::-webkit-scrollbar-corner{background-color:#f5f5f5}
 
 
 
@@ -628,16 +644,19 @@ table.obj-preview  {
 }
 
 table.obj-preview td, table.obj-preview th {vertical-align: top; padding: 6px 7px; border-top: 1px solid #DDD}
-table.obj-preview tr.prop-header th {font-weight: bold; background-color: #F9F7ED;}
-table.obj-preview td.prop-key {width: 40%; background-color: #F4F4F4}
-table.obj-preview td.prop-val {width: 60%}
+table.obj-preview tr.prop-header th {font-weight: bold; background-color: #F9F7ED; text-align: left;}
+table.obj-preview td.prop-key {width: 30%; background-color: #F4F4F4}
+table.obj-preview td.prop-val {width: 70%}
 table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
 
 .obj-preview-h {
-    /*font: 13px "lucida grande",tahoma,verdana,arial,sans-serif;*/
     font-weight: bold;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 5px 0 5px 5px;
     margin-bottom: 7px;
 }
+
 .obj-preview ol{list-style: decimal outside }
 .obj-preview ol li{margin-left:20px; }
 .obj-preview ul{list-style: square outside }
@@ -666,6 +685,10 @@ table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
 
 .gr {
     color: #777;
+}
+
+p.gr {
+    margin-top: 3px;
 }
 
 .obj-files p.gr {
@@ -820,10 +843,41 @@ border: 1px solid #7195A3;
 }
 
 div.x-preview-mask{
-background: #eaeaea;
+/*background: #eaeaea;*/
 border: 0;
 height: 100%;
 text-align: center;
 vertical-align: middle;
 padding-top: 45%;
+}
+
+/* browser tree*/
+/*.browser-tree, .x-grid-item-gray {
+    background-color: #f4f4f4;
+}
+*/
+.browser-tree .x-grid-item-over .x-grid-item-gray,
+.browser-tree .x-grid-item-selected .x-grid-item-gray {
+    background-color: transparent;
+}
+
+.editor-no-border .x-html-editor-tb {
+    border-width: 0;
+    border-bottom-width: 1px;
+}
+.editor-no-border .x-html-editor-input {
+    border-width: 0;
+}
+
+.complex-fieldcontainer .x-form-item {
+    margin-top: 20px;
+}
+
+.complex-fieldcontainer .x-form-item .x-form-item-label-top .x-form-item-label-inner {
+    padding-left: 7px
+}
+
+.complex-fieldcontainer .x-form-item .x-form-item-body {
+    padding: 7px;
+    border-top: 2px solid #cccccc
 }

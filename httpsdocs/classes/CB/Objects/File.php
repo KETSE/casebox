@@ -122,7 +122,7 @@ class File extends Object
                 ,$5
             )
             ON DUPLICATE KEY UPDATE
-            content_id = $2
+            content_id = COALESCE($2, content_id)
             ,`date` = $3
             ,name = $4
             ,cid = $5

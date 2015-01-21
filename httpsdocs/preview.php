@@ -153,7 +153,8 @@ switch ($obj->getType()) {
 
     default:
         $o = new Objects();
-        echo $o->getPreview($id);
+        $preview = $o->getPreview($id);
+        echo implode("\n", $preview);
         break;
 }
 

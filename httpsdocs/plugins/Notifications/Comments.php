@@ -9,13 +9,43 @@ use CB\User;
 class Comments extends Objects
 {
     /**
+     * set last comment id, user_id and date in in sys_data of the parent object
+     * @param  array $p params passed to log
+     * @return void
+     */
+    public static function setParentLastCommentData(&$p)
+    {
+        $o = empty($p['new'])
+            ? $p['old']
+            : $p['new'];
+
+        $coreName = Config::get('core_name');
+        $coreUrl = Config::get('core_url');
+
+        $objData = $o->getData();
+
+        $o = \CB\Objects::getCachedObject($objData['pid']);
+        $sysData = $o->getSysData();
+
+        $date = $objData['cdate'].'Z';
+        $date[10] = 'T';
+
+        $sysData['lastComment'] = array(
+            'id' => $objData['id']
+            ,'user_id' => $objData['cid']
+            ,'date' => $date
+        );
+
+        $o->updateSysData($sysData);
+    }
+
+    /**
      * add notifications for tasks
      * @param  array $p params passed to log
      * @return void
      */
     public static function addNotifications(&$p)
     {
-
         $o = empty($p['new'])
             ? $p['old']
             : $p['new'];

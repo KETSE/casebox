@@ -59,7 +59,13 @@ class Browser
         //detect tree nodes config,
         //but leave only SearchResults plugin when searching
         if (empty($p['search'])) {
-            $this->treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
+            if (empty($p['query'])) {
+                $this->treeNodeConfigs = Config::get('treeNodes');
+            }
+            if (empty($this->treeNodeConfigs)) {
+                $this->treeNodeConfigs = array('Dbnode' => array());
+            }
+
         } else {
             $this->treeNodeConfigs = array('SearchResults' => $p['search']);
             $path = Path::getGUID('SearchResults').'-';
@@ -72,14 +78,26 @@ class Browser
 
         fireEvent('treeInitialize', $params);
 
+        // array of all available classes defined in treeNodes
+        // used to check if any class should add its nodes based
+        // on last node from current path
         $this->treeNodeClasses = Path::getNodeClasses($this->treeNodeConfigs);
 
-        foreach ($this->treeNodeClasses as $nodeClass) {
+        foreach ($this->treeNodeClasses as &$nodeClass) {
             $cfg = $nodeClass->getConfig();
             $this->treeNodeGUIDConfigs[$cfg['guid']] = $cfg;
         }
 
         $this->path = Path::createNodesPath($path, $this->treeNodeGUIDConfigs);
+
+        //set path and input params for last node
+        //because iterating each class and requesting children can
+        //invoke a search that will use last node to get facets and DC
+        if (!empty($this->path)) {
+            $lastNode = $this->path[sizeof($path) - 1];
+            $lastNode->path = $this->path;
+            $lastNode->requestParams = $this->requestParams;
+        }
 
         Cache::set('current_path', $this->path);
 
@@ -93,6 +111,7 @@ class Browser
             ,'folderProperties' => $this->getPathProperties($p)
             ,'data' => $this->data
             ,'total' => $this->total
+            ,'page' => @$p['page']
         );
 
         if (!empty($this->facets)) {
@@ -103,6 +122,9 @@ class Browser
         }
         if (!empty($this->search)) {
             $rez['search'] = &$this->search;
+        }
+        if (!empty($this->view)) {
+            $rez['view'] = &$this->view;
         }
         if (!empty($this->DC)) {
             $rez['DC'] = &$this->DC[0];
@@ -132,6 +154,7 @@ class Browser
     protected function getPathProperties()
     {
         $rez = array();
+
         if (empty($this->path)) {
             $rez['path'] = '/';
         } else {
@@ -163,9 +186,20 @@ class Browser
 
         foreach ($this->treeNodeClasses as $class) {
             $rez = $class->getChildren($this->path, $this->requestParams);
+
+            //merging all returned records into a single array
             if (!empty($rez['data'])) {
                 $this->data = array_merge($this->data, $rez['data']);
             }
+
+            //calc totals accordingly
+            if (isset($rez['total'])) {
+                $this->total += $rez['total'];
+            } elseif (!empty($rez['data'])) {
+                $this->total += sizeof($rez['data']);
+            }
+
+            //return last facets and pivot if present
             if (!empty($rez['facets'])) {
                 $this->facets = $rez['facets'];
             }
@@ -173,14 +207,10 @@ class Browser
                 $this->pivot = $rez['pivot'];
             }
 
-            if (isset($rez['total'])) {
-                $this->total += $rez['total'];
-            } elseif (!empty($rez['data'])) {
-                $this->total += sizeof($rez['data']);
-            }
-
-            if (isset($rez['search'])) {
-                $this->search[] = $rez['search'];
+            //set view, display columns and sorting if present
+            // echo get_class($class).' -> '. $rez['view']."\n";
+            if (isset($rez['view'])) {
+                $this->view = $rez['view'];
             }
 
             if (isset($rez['DC'])) {
@@ -189,6 +219,11 @@ class Browser
 
             if (isset($rez['sort'])) {
                 $this->sort = $rez['sort'];
+            }
+
+            //if its debug host - search params will be also returned
+            if (isset($rez['search'])) {
+                $this->search[] = $rez['search'];
             }
         }
     }
@@ -224,7 +259,7 @@ class Browser
         // get field config from database
         if (!empty($p['fieldId']) && is_numeric($p['fieldId'])) {
             $res = DB\dbQuery(
-                'SELECT cfg from templates_structure where id = $1',
+                'SELECT cfg FROM templates_structure WHERE id = $1',
                 $p['fieldId']
             ) or die(DB\dbQueryError());
             if ($r = $res->fetch_assoc()) {
@@ -349,7 +384,7 @@ class Browser
             }
         }
 
-        $p['fl'] = 'id,name,type,subtype,template_id,status';
+        $p['fl'] = 'id,name,type,template_id,status';
         if (!empty($p['fields'])) {
             if (!is_array($p['fields'])) {
                 $p['fields'] = explode(',', $p['fields']);
@@ -380,7 +415,7 @@ class Browser
 
         //increase number of returned items
         if (empty($p['rows'])) {
-            $p['rows'] = 150;
+            $p['rows'] = 50;
         }
 
         $search = new Search();
@@ -392,7 +427,10 @@ class Browser
 
         foreach ($rez['data'] as &$doc) {
             $res = DB\dbQuery(
-                'SELECT cfg FROM tree WHERE id = $1 AND cfg IS NOT NULL',
+                'SELECT cfg
+                FROM tree
+                WHERE id = $1 AND
+                    cfg IS NOT NULL',
                 $doc['id']
             ) or die(DB\dbQueryError());
 
@@ -521,7 +559,6 @@ class Browser
                 ,'name' => $newFolderName
                 ,'system' => 0
                 ,'type' => 1
-                ,'subtype' => 0
                 ,'iconCls' => 'icon-folder'
                 ,'cid' => $_SESSION['user']['id']
             )
@@ -667,7 +704,25 @@ class Browser
 
         $p['name'] = htmlspecialchars($p['name'], ENT_COMPAT);
 
-        return array('success' => true, 'data' => array( 'id' => $id, 'newName' => $p['name']) );
+        //get pid
+        $pid = null;
+        $res = DB\dbQuery(
+            'SELECT pid FROM tree WHERE id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $pid = $r['pid'];
+        }
+        $res->close();
+
+        return array(
+            'success' => true
+            ,'data' => array(
+                'id' => $id
+                ,'pid' => $pid
+                ,'newName' => $p['name']
+            )
+        );
     }
 
     /**
@@ -978,16 +1033,10 @@ class Browser
         } else {
             $res->close();
             /* get objects name */
-            $name = 'Llink';
-            $res = DB\dbQuery(
-                'SELECT name FROM tree WHERE id = $1',
-                $p['id']
-            ) or die(DB\dbQueryError());
+            $name = 'Link';
 
-            if ($r = $res->fetch_assoc()) {
-                $name = $r['name'];
-            }
-            $res->close();
+            $name = @Search::getObjectNames($p['id'])[$p['id']];
+
             /* end of get objects name */
             DB\dbQuery(
                 'INSERT INTO tree
@@ -1156,7 +1205,6 @@ class Browser
             'SELECT t.id `nid`
                 ,t.`system`
                 ,t.`type`
-                ,t.`subtype`
                 ,t.`name`
                 ,t.`cfg`
                 ,ti.acl_count
@@ -1186,7 +1234,6 @@ class Browser
             WHERE pid IS NULL
                 AND `system` = 1
                 AND `type` = 1
-                AND subtype = 2
                 AND user_id = $1',
             $_SESSION['user']['id']
         ) or die(DB\dbQueryError());
@@ -1241,55 +1288,9 @@ class Browser
             //@$d['nid'] = intval($d['nid']);
             @$d['system'] = intval($d['system']);
             @$d['type'] = intval($d['type']);
-            @$d['subtype'] = intval($d['subtype']);
 
             if ($d['system']) {
                 $d['name'] = L\getTranslationIfPseudoValue($d['name']);
-            }
-            /* next switch should/will be excluded: */
-            switch ($d['type']) {
-                case 0:
-                    break;
-                case 1:
-                    switch ($d['subtype']) {
-                        case 1:
-                            $d['name'] = L\getTranslationIfPseudoValue($d['name']);
-                            break;
-                        case 2:
-                            $d['name'] = L\get('MyCaseBox');
-                            break;
-                        case 3:
-                            $d['name'] = L\get('MyDocuments');
-                            break;
-                        case 4:
-                            $d['name'] = L\get('Cases');
-                            break;
-                        case 5:
-                            $d['name'] = L\get('Tasks');
-                            break;
-                        case 6:
-                            $d['name'] = L\get('Messages');
-                            break;
-                        //case 7:
-                        //  $d['name'] = L\get('RecycleBin');
-                        //  break;
-                        case 8:
-                            break;
-                        case 9:
-                            break;
-                        case 10:
-                            $d['name'] = L\get('PublicFolder');
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
             }
         }
 

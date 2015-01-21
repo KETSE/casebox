@@ -4,6 +4,7 @@ namespace CB\TreeNode;
 use CB\DB;
 use CB\Util;
 use CB\Browser;
+use CB\Search;
 
 class Dbnode extends Base
 {
@@ -39,7 +40,7 @@ class Dbnode extends Base
 
         $folderTemplates = \CB\Config::get('folder_templates');
 
-        $p['fl'] = 'id,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls,status,task_status';
+        $p['fl'] = 'id,pid,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls,status,task_status,versions';
 
         if (empty($p['showFoldersContent'])) {
             $p['templates'] = $folderTemplates;
@@ -51,8 +52,18 @@ class Dbnode extends Base
             $p['pids'] = $pid;
         }
 
+        if (empty($p['userViewChange'])) {
+
+            if (!empty($this->config['view'])) {
+                $p['from'] = $this->config['view'];
+            } elseif (empty($p['from']) || ($p['from'] !== 'tree')) {
+                $p['from'] = 'grid';
+            }
+        }
+
         $s = new \CB\Search();
         $rez = $s->query($p);
+
         if (!empty($rez['data'])) {
             for ($i=0; $i < sizeof($rez['data']); $i++) {
                 $d = &$rez['data'][$i];
@@ -82,6 +93,11 @@ class Dbnode extends Base
             \CB\Tasks::setTasksActionFlags($rez['data']);
         }
 
+        //set view if set in config
+        if (!empty($this->config['view'])) {
+            $rez['view'] = $this->config['view'];
+        }
+
         return $rez;
     }
 
@@ -102,15 +118,7 @@ class Dbnode extends Base
             $id = $this->id;
         }
         if (!empty($id) && is_numeric($id)) {
-            $res = DB\dbQuery(
-                'SELECT name FROM tree WHERE id = $1',
-                $id
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $rez = $r['name'];
-            }
-            $res->close();
+            $rez = @Search::getObjectNames($id)[$id];
         }
 
         return $rez;
@@ -171,6 +179,8 @@ class Dbnode extends Base
             WHERE t.id = $1';
 
         if (empty($from) && !empty($this->config['template_id'])) {
+            $from = 'template_' . $this->config['template_id'];
+
             $sql = 'SELECT null `cfg`, t.id template_id, t.cfg `templateCfg`
                 FROM templates t
                 WHERE t.id = $2';

@@ -3,12 +3,13 @@ CREATE TABLE calendars (
     principaluri VARCHAR(100),
     displayname VARCHAR(100),
     uri VARCHAR(200),
-    synctoken INTEGER NOT NULL DEFAULT 0,
+    synctoken INTEGER NOT NULL DEFAULT 1,
     description TEXT,
     calendarorder INTEGER NOT NULL DEFAULT 0,
     calendarcolor VARCHAR(10),
     timezone TEXT,
     components VARCHAR(20),
+    uid VARCHAR(200),
     transparent SMALLINT NOT NULL DEFAULT '0'
 );
 
@@ -77,5 +78,15 @@ CREATE INDEX calendarchanges_calendarid_synctoken_ix
     ON calendarchanges USING btree (calendarid, synctoken);
 
 ALTER TABLE ONLY calendarchanges
-    ADD CONSTRAINT calendarchanges_calendar_fk FOREIGN KEY (calendarid) REFERENCES calendards(id)
+    ADD CONSTRAINT calendarchanges_calendar_fk FOREIGN KEY (calendarid) REFERENCES calendars(id)
         ON DELETE CASCADE;
+
+CREATE TABLE schedulingobjects (
+    id SERIAL NOT NULL,
+    principaluri VARCHAR(255),
+    calendardata BYTEA,
+    uri VARCHAR(200),
+    lastmodified INTEGER,
+    etag VARCHAR(32),
+    size INTEGER NOT NULL
+);

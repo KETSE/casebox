@@ -1,6 +1,171 @@
 ChangeLog
 =========
 
+2.1.2 (2014-12-10)
+------------------
+
+* #566: Another issue related to the migration script, which would cause
+  scheduling to not work well for events that were already added before the
+  migration.
+* #567: Doing freebusy requests on accounts that had 0 calendars would throw
+  a `E_NOTICE`.
+* #579: Browser plugin can throw exception for a few resourcetypes that didn't
+  have an icon defined.
+* The zip release ships with [sabre/vobject 3.3.4][vobj],
+  [sabre/http 3.0.4][http], and [sabre/event 2.0.1][evnt].
+
+
+2.1.1 (2014-11-22)
+------------------
+
+* #561: IMip Plugin didn't strip mailto: from email addresses.
+* #566: Migration process had 2 problems related to adding the `uid` field
+  to the `calendarobjects` table.
+* The zip release ships with [sabre/vobject 3.3.4][vobj],
+  [sabre/http 3.0.2][http], and [sabre/event 2.0.1][evnt].
+
+
+2.1.0 (2014-11-19)
+------------------
+
+* #541: CalDAV PDO backend didn't respect overridden PDO table names.
+* #550: Scheduling invites are no longer delivered into shared calendars.
+* #554: `calendar-multiget` `REPORT` did not work on inbox items.
+* #555: The `calendar-timezone` property is now respected for floating times
+  and all-day events in the `calendar-query`, `calendar-multiget` and
+  `free-busy-query` REPORTs.
+* #555: The `calendar-timezone` property is also respected for scheduling
+  free-busy requests.
+* #547: CalDAV system too aggressively 'corrects' incoming iCalendar data, and
+  as a result doesn't return an etag for common cases.
+* The zip release ships with [sabre/vobject 3.3.4][vobj],
+  [sabre/http 3.0.2][http], and [sabre/event 2.0.1][evnt].
+
+
+2.1.0-alpha2 (2014-10-23)
+-------------------------
+
+* Added: calendar-user-address-set to default principal search properties
+  list. This should fix iOS attendee autocomplete support.
+* Changed: Moved all 'notifications' functionality from `Sabre\CalDAV\Plugin`
+  to a new plugin: `Sabre\CalDAV\Notifications\Plugin`. If you want to use
+  notifications-related functionality, just add this plugin.
+* Changed: Accessing the caldav inbox, outbox or notification collection no
+  longer triggers getCalendarsForUser() on backends.
+* #533: New invites are no longer delivered to taks-only calendars.
+* #538: Added `calendarObjectChange` event.
+* Scheduling speedups.
+* #539: added `afterResponse` event. (@joserobleda)
+* Deprecated: All the "tableName" constructor arguments for all the PDO
+  backends are now deprecated. They still work, but will be removed in the
+  next major sabredav version. Every argument that is now deprecated can now
+  be accessed as a public property on the respective backends.
+* #529: Added getCalendarObjectByUID to PDO backend, speeding up scheduling
+  operations on large calendars.
+* The zip release ships with [sabre/vobject 3.3.3][vobj],
+  [sabre/http 3.0.2][http], and [sabre/event 2.0.1][evnt].
+
+
+2.1.0-alpha1 (2014-09-23)
+-------------------------
+
+* Added: Support for [rfc6638][rfc6638], also known as CalDAV Scheduling.
+* Added: Automatically converting between vCard 3, 4 and jCard using the
+  `Accept:` header, in CardDAV reports, and automatically converting from
+  jCard to vCard upon `PUT`. It's important to note that your backends _may_
+  now recieve both vCard 3.0 and 4.0.
+* Added: #444. Collections can now opt-in to support high-speed `MOVE`.
+* Changed: PropertyStorage backends now have a `move` method.
+* Added: `beforeMove`, and `afterMove` events.
+* Changed: A few database changes for the CalDAV PDO backend. Make sure you
+  run `bin/migrate21.php` to upgrade your database schema.
+* Changed: CalDAV backends have a new method: `getCalendarObjectByUID`. This
+  method MUST be implemented by all backends, but the `AbstractBackend` has a
+  simple default implementation for this.
+* Changed: `Sabre\CalDAV\UserCalendars` has been renamed to
+  `Sabre\CalDAV\CalendarHome`.
+* Changed: `Sabre\CalDAV\CalendarRootNode` has been renamed to
+  `Sabre\CalDAV\CalendarRoot`.
+* Changed: The IMipHandler has been completely removed. With CalDAV scheduling
+  support, it is no longer needed. It's functionality has been replaced by
+  `Sabre\CalDAV\Schedule\IMipPlugin`, which can now send emails for clients
+  other than iCal.
+* Removed: `Sabre\DAV\ObjectTree` and `Sabre\DAV\Tree\FileSystem`. All this
+  functionality has been merged into `Sabre\DAV\Tree`.
+* Changed: PrincipalBackend now has a findByUri method.
+* Changed: `PrincipalBackend::searchPrincipals` has a new optional `test`
+  argument.
+* Added: Support for the `{http://calendarserver.org/ns/}email-address-set`
+  property.
+* #460: PropertyStorage must move properties during `MOVE` requests.
+* Changed: Restructured the zip distribution to be a little bit more lean
+  and consistent.
+* #524: Full support for the `test="anyof"` attribute in principal-search
+  `REPORT`.
+* #472: Always returning lock tokens in the lockdiscovery property.
+* Directory entries in the Browser plugin are sorted by type and name.
+  (@aklomp)
+* #486: It's now possible to return additional properties when an 'allprop'
+  PROPFIND request is being done. (@aklomp)
+* Changed: Now return HTTP errors when an addressbook-query REPORT is done
+  on a uri that's not a vcard. This should help with debugging this common
+  mistake.
+* Changed: `PUT` requests with a `Content-Range` header now emit a 400 status
+  instead of 501, as per RFC7231.
+* Added: Browser plugin can now display the contents of the
+  `{DAV:}supported-privilege-set` property.
+* Added: Now reporting `CALDAV:max-resource-size`, but we're not actively
+  restricting it yet.
+* Changed: CalDAV plugin is now responsible for reporting
+  `CALDAV:supported-collation-set` and `CALDAV:supported-calendar-data`
+  properties.
+* Added: Now reporting `CARDDAV:max-resource-size`, but we're not actively
+  restricting it yet.
+* Added: Support for `CARDDAV:supported-collation-set`.
+* Changed: CardDAV plugin is now responsible for reporting
+  `CARDDAV:supported-address-data`. This functionality has been removed from
+  the CardDAV PDO backend.
+* When a REPORT is not supported, we now emit HTTP error 415, instead of 403.
+* #348: `HEAD` requests now work wherever `GET` also works.
+* Changed: Lower priority for the iMip plugins `schedule` event listener.
+* Added: #523 Custom CalDAV backends can now mark any calendar as read-only.
+* The zip release ships with [sabre/vobject 3.3.3][vobj],
+  [sabre/http 3.0.0][http], and [sabre/event 2.0.0][evnt].
+
+
+2.0.6 (2014-12-10)
+------------------
+
+* Added `Sabre\CalDAV\CalendarRoot` as an alias for
+  `Sabre\CalDAV\CalendarRootNode`. The latter is going to be deprecated in 2.1,
+  so this makes it slightly easier to write code that works in both branches.
+* #497: Making sure we're initializing the sync-token field with a value after
+  migration.
+* The zip release ships with [sabre/vobject 3.3.4][vobj],
+  [sabre/http 2.0.4][http], and [sabre/event 1.0.1][evnt].
+
+
+2.0.5 (2014-10-14)
+------------------
+
+* #514: CalDAV PDO backend didn't work when overriding the 'calendar changes'
+  database table name.
+* #515: 304 status code was not being sent when checking preconditions.
+* The zip release ships with [sabre/vobject 3.3.3][vobj],
+  [sabre/http 2.0.4][http], and [sabre/event 1.0.1][evnt].
+
+
+2.0.4 (2014-08-27)
+------------------
+
+* #483: typo in calendars creation for PostgreSQL.
+* #487: Locks are now automatically removed after a node has been deleted.
+* #496: Improve CalDAV and CardDAV sync when there is no webdav-sync support.
+* Added: Automatically mapping internal sync-tokens to getctag.
+* The zip release ships with [sabre/vobject 3.3.1][vobj],
+  [sabre/http 2.0.4][http], and [sabre/event 1.0.1][evnt].
+
+
 2.0.3 (2014-07-14)
 ------------------
 
@@ -12,6 +177,7 @@ ChangeLog
   took this opportunity to rename it to `TooManyMatches`.
 * The zip release ships with [sabre/vobject 3.2.4][vobj],
   [sabre/http 2.0.4][http], and [sabre/event 1.0.1][evnt].
+
 
 2.0.2 (2014-06-12)
 ------------------
@@ -169,16 +335,20 @@ ChangeLog
 * Added: Issue #358, adding a component=vevent parameter to the content-types
   for calendar objects, if the caldav backend provides this info.
 
-1.8.11 (2014-??-??)
+1.8.11 (2014-12-10)
 -------------------
 
+* The zip release ships with sabre/vobject 2.1.6.
 * Updated: MySQL database schema optimized by using more efficient column types.
+* #516: The DAV client will now only redirect to HTTP and HTTPS urls.
+
 
 1.8.10 (2014-05-15)
 -------------------
 
 * The zip release ships with sabre/vobject 2.1.4.
 * includes changes from version 1.7.12.
+
 
 1.8.9 (2014-02-26)
 ------------------
@@ -266,12 +436,17 @@ ChangeLog
 * Added: The Proxy principal classes now both implement an interface, for
   greater flexiblity.
 
-1.7.13 (????-??-??)
+
+1.7.13 (2014-07-28)
 -------------------
+
+* The zip release ships with sabre/vobject 2.1.4.
 * Changed: Removed phing and went with a custom build script for now.
+
 
 1.7.12 (2014-05-15)
 -------------------
+
 * The zip release ships with sabre/vobject 2.1.4.
 * Updated: Issue #439. Lots of updates in PATCH support. The
   Sabre_DAV_PartialUpdate_IFile interface is now deprecated and will be removed
@@ -1569,3 +1744,4 @@ ChangeLog
 [evnt]: http://sabre.io/event/
 [http]: http://sabre.io/http/
 [mi20]: http://sabre.io/dav/upgrade/1.8-to-2.0/
+[rfc6638]: http://tools.ietf.org/html/rfc6638 "CalDAV Scheduling"

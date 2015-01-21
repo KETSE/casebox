@@ -6,6 +6,18 @@ require_once 'init.php';
 $coreName = Config::get('core_name');
 $coreUrl = Config::get('core_url');
 
+$debugSuffix = isDebugHost()
+  ? '&debug=1'
+  : '';
+
+$rtl = Config::get('rtl')
+    ? '-rtl'
+    : '';
+
+$theme = empty($_SESSION['user']['cfg']['theme'])
+    ? 'classic'
+    : $_SESSION['user']['cfg']['theme'];
+
 if (empty($_SESSION['user'])) {
     exit(header('Location: ' . $coreUrl . 'login.php'));
 }
@@ -19,15 +31,16 @@ $projectTitle = Config::get('project_name_' . Config::get('user_language'), $cor
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="UTF-8">
     <meta name="author" content="KETSE">
     <meta name="description" content="Casebox">
     <meta name="robots" content="noindex">
     <link rel="shortcut icon" href="/i/casebox-logo.ico" type="image/x-icon">
 <?php
 
-echo '<link rel="stylesheet" type="text/css" href="' . EXT_PATH. '/resources/css/ext-all.css" />
-    <link rel="stylesheet" type="text/css" href="/libx/extjs3-ace/styles.css" />
+echo '<link rel="stylesheet" type="text/css" href="/libx/ext/packages/ext-theme-' . $theme . '/build/resources/ext-theme-' . $theme . '-all' . $rtl . '.css" />
+    <link rel="stylesheet" type="text/css" href="/libx/extjs4-ace/styles.css" />
     <link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(Minify_getUri('css'), 1) . '" />' . "\n";
 
 // Custom CSS for the core
@@ -61,6 +74,7 @@ margin: 1em;
     text-align: center;
     font-weight: bold;
     margin-bottom: 5px;
+    color: #000
 }
 
 .lpb {
@@ -148,25 +162,17 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
     </div>
 </div>
 
-<!--
-
-<div id="loading-mask"></div>
-<div id="loading" style="width: 250px">
-        <div>
-        <img src="/css/default/d/loader.gif" width="32" height="32" style="margin-right:10px;float:left;vertical-align:top; margin-top: -5px" alt="Loading ..." />
-        <span style="color: #003399; padding-right: 2px">Case</span><span style="color: #3AAF00;">Box</span><br /><span id="loading-msg"><?php echo L\get('Loading_CSS')?> ...</span>
-        </div>
-</div>
--->
-
-<script type="text/javascript">setProgress('<?php echo L\get('Loading_ExtJS_Core')?>', '20%')</script>
-<script type="text/javascript" src="<?php echo EXT_PATH ?>/adapter/ext/ext-base.js"></script>
 <script type="text/javascript">setProgress('<?php echo L\get('Loading_ExtJS_Core')?>', '30%')</script>
-<script type="text/javascript" src="<?php echo EXT_PATH ?>/ext-all<?php echo isDebugHost() ? '-debug' : ''; ?>.js"></script>
+<script type="text/javascript" src="<?php echo EXT_PATH ?>/ext-all<?php echo $rtl.(isDebugHost() ? '-debug' : ''); ?>.js"></script>
+<script type="text/javascript" src="<?php echo EXT_PATH ?>/packages/ext-charts/build/ext-charts<?php echo isDebugHost() ? '-debug' : ''; ?>.js"></script>
+<script type="text/javascript" src="<?php echo EXT_PATH ?>/packages/ext-theme-<?php
+    echo $theme . '/build/ext-theme-' . $theme . (isDebugHost() ? '-debug' : '');
+?>.js"></script>
 
 <script type="text/javascript">
     bravojs = {
-        url: window.location.protocol + "//" + window.location.host + "/libx/extjs3-ace/Component.js"
+        url: window.location.protocol + "//" + window.location.host + "/libx/extjs4-ace/Component.js"
+        //url: window.location.protocol + "//" + window.location.host + "/libx/extjs4-ace/AceEditor.js"
     };
     document.write('<script type="text/javascript" src="' + bravojs.url + '"><' + '/script>');
 </script>
@@ -176,8 +182,8 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != 'en')) {
 
     // ExtJS locale
-    if (file_exists(DOC_ROOT.'libx/src/locale/ext-lang-' . $_SESSION['user']['language'] . '.js')) {
-        echo '<script type="text/javascript" src="' . EXT_PATH . '/src/locale/ext-lang-' . $_SESSION['user']['language'] . '.js"></script>';
+    if (file_exists(DOC_ROOT.EXT_PATH.'/packages/ext-locale/build/ext-locale-' . $_SESSION['user']['language'] . '.js')) {
+        echo '<script type="text/javascript" src="' . EXT_PATH . '/packages/ext-locale/build/ext-locale-' . $_SESSION['user']['language'] . '.js"></script>';
     }
 
     // Casebox locale
@@ -196,15 +202,17 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
 <?php
 echo '<script type="text/javascript" src="' . $coreUrl . 'remote/api.php"></script>';
 
-echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('js'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
-echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('jsdev'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('js'), 1) . $debugSuffix . '"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('jsdev'), 1) . $debugSuffix . '"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('jsoverrides'), 1) . $debugSuffix . '"></script>';
+
 $js = Config::getJsList();
 if (!empty($js)) {
-    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri($coreName.'_js'), 1).(isDebugHost() ? '&debug=1': '').'"></script>';
+    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri($coreName.'_js'), 1) . $debugSuffix . '"></script>';
 }
 $prc = Config::getPluginsRemoteConfig();
 if (!empty($prc)) {
-    echo '<script type="text/javascript">CB.plugins.config = '.json_encode($prc, JSON_UNESCAPED_UNICODE).';</script>';
+    echo '<script type="text/javascript">CB.plugin.config = '.json_encode($prc, JSON_UNESCAPED_UNICODE).';</script>';
 }
 
 echo '<script type="text/javascript" src="' . $coreUrl . 'js/CB.DB.php"></script>';

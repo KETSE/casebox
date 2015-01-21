@@ -138,7 +138,7 @@ function initEnv() {
     $r['core'] = $ary[0];
 
     # current version
-    # /edit/{core}/{nodeId}/{filename}
+    # /{core}/edit-{nodeId}/{filename}
     #
     # version history
     # /{core}/edit-{nodeId}-{versionId}/{filename}

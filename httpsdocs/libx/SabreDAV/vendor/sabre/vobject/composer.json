@@ -15,8 +15,14 @@
     "authors" : [
         {
             "name" : "Evert Pot",
-            "email" : "evert@rooftopsolutions.nl",
+            "email" : "me@evertpot.com",
             "homepage" : "http://evertpot.com/",
+            "role" : "Developer"
+        },
+        {
+            "name" : "Dominik Tobschall",
+            "email" : "dominik@fruux.com",
+            "homepage" : "http://tobschall.de/",
             "role" : "Developer"
         }
     ],
@@ -25,8 +31,8 @@
         "source" : "https://github.com/fruux/sabre-vobject"
     },
     "autoload" : {
-        "psr-0" : {
-            "Sabre\\VObject" : "lib/"
+        "psr-4" : {
+            "Sabre\\VObject\\" : "lib/"
         }
     },
     "bin" : [

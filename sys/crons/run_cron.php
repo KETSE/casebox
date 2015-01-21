@@ -46,13 +46,16 @@ DB\connect($cfg);
 
 $cores = array();
 $res = DB\dbQuery(
-    'SELECT name
+    'SELECT name, active
     FROM casebox.cores
-    WHERE active <> 0',
-    array()
+    WHERE active <> 0'
 ) or die(DB\dbQueryError());
+
 while ($r = $res->fetch_assoc()) {
-    if (empty($argv[2]) || ($argv[2] == $r['name']) || ($argv[2] == 'all')) {
+    if (empty($argv[2]) ||
+        ($argv[2] == $r['name']) ||
+        (($argv[2] == 'all') && ($r['active'] > 0))
+    ) {
         $cores[] = $r['name'];
     }
 }
@@ -62,10 +65,10 @@ if (empty($cores)) {
     echo "Core not found or inactive.\n";
 } else {
     foreach ($cores as $core) {
-        echo "\nProcessing core $core ...";
+        // echo "\nProcessing core $core ...";
         echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3].' '.@$argv[4]);
     }
-    echo "\nDone\n";
+    // echo "\nDone\n";
 }
 
 function isDebugHost()

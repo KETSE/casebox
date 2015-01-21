@@ -8,18 +8,12 @@ Ext.namespace('CB');
  *     and any component would be able to listen to DD events through this instance.
  */
 
-CB.DD = Ext.extend(Ext.util.Observable, {
-    data: []
+Ext.define('CB.DD', {
+    extend: 'Ext.util.Observable'
+    ,data: []
     ,action: 'copy' // copy / move / shortcut
 
     ,constructor: function(config){
-        this.addEvents({
-            'beforeexecute': true
-            ,'execute': true
-            ,'copied': true
-            ,'moved': true
-            ,'shortcuted': true
-        });
         CB.DD.superclass.constructor.call(this, config);
     }
     /**
@@ -44,7 +38,7 @@ CB.DD = Ext.extend(Ext.util.Observable, {
             params.action = this.detectActionFromEvent(params.action);
         }
         if(callback) {
-            this.callback = scope ? callback.createDelegate(scope) : callback;
+            this.callback = scope ? callback.bind(scope) : callback;
         }
         switch(params.action){
             case 'copy':
@@ -120,13 +114,14 @@ CB.DD = Ext.extend(Ext.util.Observable, {
                     }
                 }, this);
             } else {
-                Ext.Msg.alert(L.Error, Ext.value(r.msg, L.ErrorOccured));
+                Ext.Msg.alert(L.Error, Ext.valueFrom(r.msg, L.ErrorOccured));
             }
-        }else{
+        } else {
             Ext.copyTo(r, this.params, 'sourceData,targetData');
             r.targetId = r.targetData.id;
             App.fireEvent('objectsaction', this.params.action, r, e);
         }
+
         if(this.callback) {
             this.callback(r.pids);
             delete this.callback;
@@ -134,5 +129,3 @@ CB.DD = Ext.extend(Ext.util.Observable, {
     }
 }
 );
-
-Ext.reg('CBDD', CB.DD);

@@ -1,69 +1,81 @@
-Ext.namespace('CB.plugins');
+Ext.namespace('CB.plugin');
 
 Ext.onReady(function(){
     var plugins = CB.browser.view.Grid.prototype.plugins || [];
     plugins.push({
-        ptype: 'CBPluginsDisplayColumns'
+        ptype: 'CBPluginDisplayColumns'
     });
     CB.browser.view.Grid.prototype.plugins = plugins;
 });
 
 
-CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
-    lastColumns: ''
+Ext.define('CB.plugin.DisplayColumns', {
+    extend: 'Ext.util.Observable'
+    ,alias: 'plugin.CBPluginDisplayColumns'
+    ,lastColumns: ''
 
     ,init: function(owner) {
         this.owner = owner;
         this.grid = owner.grid;
         this.store = owner.grid.store;
-        this.cm = owner.grid.getColumnModel();
+        // this.cm = owner.grid.getColumnModel();
         this.defaultColumns = owner.grid.defaultColumns;
-        this.reader = this.store.reader;
-        this.defaultMeta = Ext.apply({}, this.reader.meta);
-        this.defaultFieldNames = this.extractFieldNames(this.defaultMeta.fields);
+        this.reader = this.store.proxy.reader;
+        this.model = this.store.getModel();
+        this.defaultFieldNames = this.extractFieldNames(this.model.fields);
         this.proxy = this.store.proxy;
-        this.proxy.on('load', this.onProxyLoad, this);
+        this.store.on('load', this.onStoreLoad, this);
     }
 
-    ,onProxyLoad: function(proxy, obj, options) {
-        //add corresponding metadata to obj.result if DisplayColumns changed
-        this.currentColumns = obj.result.DC || [];
+    ,onStoreLoad: function(store, records, successful, eOpts) {//proxy, obj, options
+        var rez = store.proxy.reader.rawData;
 
-        if(this.lastColumns !== Ext.util.JSON.encode(this.currentColumns)) {
-            obj.result.metaData = this.getNewMetadata();
-            this.lastColumns = Ext.util.JSON.encode(this.currentColumns);
-            this.store.loadData(obj.result);
-            var nc = this.getNewColumns();
+        if(!Ext.isEmpty(rez.sort)) {// && Ext.isEmpty(this.store.sortInfo)
+            var sorters = this.store.getSorters();
+            sorters.suspendEvents();
+            sorters.clear();
 
-            this.cm.setConfig(nc);
+            sorters.addSort(rez.sort.property, rez.sort.direction);
+            sorters.resumeEvents(true);
         }
 
-        if(!Ext.isEmpty(obj.result.sort)) {// && Ext.isEmpty(this.store.sortInfo)
-            this.store.sortInfo = obj.result.sort;
+        //add corresponding metadata to obj.result if DisplayColumns changed
+        this.currentColumns = rez.DC || [];
+
+        if(this.lastColumns !== Ext.util.JSON.encode(this.currentColumns)) {
+            var storeFields = this.getNewMetadata();
+            store.setFields(storeFields);
+
+            this.lastColumns = Ext.util.JSON.encode(this.currentColumns);
+
+            var nc = this.getNewColumns();
+            this.grid.reconfigure(null, nc);
         }
     }
 
     ,getNewMetadata: function(){
-        var rez = Ext.apply({}, this.defaultMeta);
-        var currentColumns = Ext.apply({}, this.currentColumns);
+        var i
+            ,key
+            ,fieldData
+            ,rez = Ext.apply([], CB.DB.defaultItemFields)
+            ,currentColumns = Ext.apply({}, this.currentColumns);
 
-        var key, fieldData;
+        for (i = 0; i < rez.length; i++) {
+            fieldData = rez[i];
 
-
-        for (var i = 0; i < rez.fields.length; i++) {
-            fieldData = rez.fields[i];
-
-            if(Ext.isString(rez.fields[i])) {
-                key = rez.fields[i];
+            if(Ext.isString(fieldData)) {
+                key = fieldData;
                 fieldData = {
                     name: key
                 };
             } else {
-                key = rez.fields[i].name;
+                key = rez[i].name;
             }
 
             if(Ext.isDefined(currentColumns[key])) {
-                rez.fields[i] = Ext.copyTo(fieldData, currentColumns[key], ['type', 'sortType']);
+                rez[i] = Ext.copyTo(fieldData, currentColumns[key], ['type', 'sortType']);
+                rez[i].convert = null;
+
                 delete currentColumns[key];
             }
         }
@@ -73,9 +85,9 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
             ,function(key, value, obj){
                 var field = {
                     name: key
-                    ,title: Ext.value(value.title, 'No title')
+                    ,title: Ext.valueFrom(value.title, 'No title')
                 };
-                rez.fields.push(field);
+                rez.push(field);
             }
             ,this
         );
@@ -113,17 +125,23 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
             ,function(key, value, obj){
                 var column = value;
                 if(key !== 'remove') {
-                    column.id = rez.length;
+                    // column.id = rez.length;
                     column.dataIndex = key;
-                    column.header = Ext.value(column.header, column.title);
+                    // column.stateId = key;
+                    column.header = Ext.valueFrom(column.header, column.title);
                     switch(column.type) {
                         case 'date':
                             column.renderer = App.customRenderers.datetime;
                             break;
 
                         default:
-                            column.renderer = this.defaultColumnRenderer;
+                            // column.renderer = this.defaultColumnRenderer;
                     }
+
+                    if(this.owner.columnSortOverride) {
+                        column.sort = this.owner.columnSortOverride;
+                    }
+
                     rez.push(column);
                 }
             }
@@ -168,9 +186,7 @@ CB.plugins.DisplayColumns = Ext.extend(Ext.util.Observable, {
         );
         return rez;
     }
-    ,defaultColumnRenderer: function (v, meta, record, row_idx, col_idx, store) {
-        return record.json[this.dataIndex];
-    }
+    // ,defaultColumnRenderer: function (v, meta, record, row_idx, col_idx, store) {
+    //     return record.json[this.dataIndex];
+    // }
 });
-
-Ext.ComponentMgr.registerPlugin('CBPluginsDisplayColumns', CB.plugins.DisplayColumns);

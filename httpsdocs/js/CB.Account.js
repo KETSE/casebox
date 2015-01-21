@@ -1,19 +1,30 @@
 Ext.namespace('CB');
 
-CB.Account = Ext.extend(Ext.Panel, {
-    title: L.Account
-    ,hideBorders: true
+Ext.define('CB.Account', {
+    extend: 'Ext.Window'
+
+    ,alias: 'CBAccount'
+
+    ,xtype: 'CBAccount'
+
+    ,title: L.Account
+    ,border: false
     ,closable: true
+    ,minimizable: true
+    ,width: 850
+    ,height: 600
+
     ,initComponent: function() {
 
         this.menu = new Ext.Panel({
             region: 'west'
             ,collapsible: false
-            ,width: 150
+            ,width: 130
             ,animCollapse: false
             ,plain: true
             ,cls: 'account-menu'
-            ,bodyStyle: 'border-right: 1px solid #eaeaea'
+            ,style: 'border-right: 1px solid #cacaca'
+            ,border: false
             ,layout: 'anchor'
             ,defaults: {
                 enableToggle: true
@@ -38,7 +49,7 @@ CB.Account = Ext.extend(Ext.Panel, {
 
         this.cards = new Ext.Panel({
             region: 'center'
-            ,hideBorders: true
+            ,border: false
             ,tbarCssClass: 'x-panel-gray'
             ,layout:'card'
             ,activeItem: 0
@@ -59,15 +70,18 @@ CB.Account = Ext.extend(Ext.Panel, {
             ,deferredRender: true
         });
 
-        Ext.apply(this, {
-            iconCls: 'icon-user-' + App.loginData.sex
-            ,layout: 'border'
-            ,items:[
-                this.menu
-                ,this.cards
+        Ext.apply(
+            this
+            ,{
+                iconCls: 'icon-user-' + App.loginData.sex
+                ,layout: 'border'
+                ,items:[
+                    this.menu
+                    ,this.cards
 
-            ]
-        });
+                ]
+            }
+        );
         CB.Account.superclass.initComponent.apply(this, arguments);
 
         /* autoclose form if no activity in 5 minutes */
@@ -100,8 +114,8 @@ CB.Account = Ext.extend(Ext.Panel, {
             }
             return;
         }
-        this.cards.items.itemAt(0).loadData(r.profile);
-        this.cards.items.itemAt(1).loadData(r.security);
+        this.cards.items.getAt(0).loadData(r.profile);
+        this.cards.items.getAt(1).loadData(r.security);
     }
 
     ,onMenuButtonClick: function(b, e){
@@ -111,39 +125,49 @@ CB.Account = Ext.extend(Ext.Panel, {
 }
 );
 
-Ext.reg('CBAccount', CB.Account);
+Ext.define('CB.ProfileForm', {
+    extend: 'Ext.form.FormPanel'
+    ,alias: 'widget.CBProfileForm'
 
-CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
-    hideBorders: true
+    ,border: false
     ,fileUpload: true
     ,autoScroll: true
+    ,bodyPadding: 10
     ,data: {}
     ,initComponent: function(){
 
+        this.data = this.config.data;
+
         this.objectsStore = new CB.DB.ObjectsStore();
 
-        this.photoField = new Ext.form.TextField({
+        this.photoField = new Ext.form.field.File({
             cls: 'fl'
             ,style: 'position:absolute;width:1px;height:1px;opacity:0;top:-100px'
-            ,inputType: 'file'
+            ,buttonOnly: true
             ,name: 'photo'
+            ,border: false
             ,listeners:{
                 scope: this
                 ,afterrender: function(c){
-                    c.getEl().on('change', this.onPhotoChanged, this);
+                    c.button.fileInputEl.on('change', this.onPhotoChanged, this);
                 }
             }
         });
 
         this.photoView = new Ext.DataView({
-            tpl: ['<tpl for="."><div><img width="70" class="user-photo-field2 click icon-user70-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ (new Date()).format("His") ]}"></div>'
+            tpl: ['<tpl for="."><div>'
+                ,'<img width="70" height="70" class="user-photo-field2 click icon-user70-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?{[ Ext.Date.format(new Date(), "His") ]}">'
+                ,'</div>'
                 ,'<div><a href="#" name="change" class="click">'+L.Change+'</a> &nbsp; <a href="#" name="remove" class="click">'+L.Delete+'</a></div>'
                 ,'</tpl>'
             ]
             ,data: [{}]
-            ,itemSelector:'.click'
+            ,itemSelector:'.none'
             ,autoHeight: true
-            ,listeners:{ scope: this, click: this.onPhotoClick }
+            ,listeners:{
+                scope: this
+                ,containerclick: this.onPhotoContainerClick
+            }
         });
 
         var fields = [
@@ -162,7 +186,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,name: 'sex'
                 ,hiddenName: 'sex'
                 ,fieldLabel: L.Gender
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: false
                 ,store: CB.DB.sex
@@ -178,7 +202,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,name: 'country_code'
                 ,hiddenName: 'country_code'
                 ,fieldLabel: L.Country
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: true
                 ,forceSelection: true
@@ -203,7 +227,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,name: 'language_id'
                 ,hiddenName: 'language_id'
                 ,fieldLabel: L.Language
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: true
                 ,forceSelection: true
@@ -216,7 +240,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,name: 'timezone'
                 ,hiddenName: 'timezone'
                 ,fieldLabel: L.Timezone
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: false
                 ,store: CB.DB.timezones
@@ -228,7 +252,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,name: 'short_date_format'
                 ,hiddenName: 'short_date_format'
                 ,fieldLabel: L.DateFormat
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: false
                 ,store: CB.DB.shortDateFormats
@@ -237,12 +261,13 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,value: null
             }
         ];
+
         if(App.loginData.id != this.data.id) {
             if(App.loginData.admin || App.loginData.cfg.canAddUsers) {
                 fields.push({
                     xtype: 'checkbox'
                     ,name: 'canAddUsers'
-                    ,fieldLabel: Ext.value(L.CanAddUsers, 'Can add users')
+                    ,fieldLabel: Ext.valueFrom(L.CanAddUsers, 'Can add users')
                     ,inputValue: true
                 });
             }
@@ -250,7 +275,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 fields.push({
                     xtype: 'checkbox'
                     ,name: 'canAddGroups'
-                    ,fieldLabel: Ext.value(L.CanAddGroups, 'Can add groups')
+                    ,fieldLabel: Ext.valueFrom(L.CanAddGroups, 'Can add groups')
                     ,inputValue: true
                 });
             }
@@ -258,7 +283,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 
         Ext.apply(this,{
             items:[{
-                hideBorders: true
+                border: false
                 ,layout: 'hbox'
                 ,layoutConfig: {
                     align: 'stretchmax'
@@ -266,14 +291,16 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                 ,autoHeight: true
                 ,items: [{
                     autoHeight: true
-                    ,hideBorders: true
+                    ,border: false
                     ,width: 500
                     ,items: {
                             xtype: 'fieldset'
+                            ,padding: 10
                             ,autoHeight: true
                             ,labelWidth: 140
                             ,defaults:{
                                 width: 250
+                                ,matchFieldWidth: false
                                 ,listeners: {
                                     scope: this
                                     ,change: this.onChange
@@ -286,6 +313,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
                     xtype: 'panel'
                     ,width: 300
                     ,padding: 45
+                    ,border: false
                     ,items: [
                         this.photoField
                         ,this.photoView
@@ -296,7 +324,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
             },{
                 xtype: 'CBVerticalEditGrid'
                 ,refOwner: this
-                ,width: 800
+                ,width: 500
                 ,style: 'margin-bottom: 50px'
                 ,autoHeight: true
                 ,viewConfig: {
@@ -325,7 +353,7 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
             }
         });
         CB.ProfileForm.superclass.initComponent.apply(this, arguments);
-        this.grid = this.items.itemAt(1);
+        this.grid = this.items.getAt(1);
 
         if(CB.DB.countries.getCount() === 0) {
             CB.DB.countries.load();
@@ -334,6 +362,8 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
         if(CB.DB.timezones.getCount() === 0) {
             CB.DB.timezones.load();
         }
+
+        this.enableBubble(['verify']);
     }
     ,onAfterRender: function(cmp){
 
@@ -348,19 +378,28 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
             delete data.assocObjects;
         }
 
+        if(Ext.isDefined(data.language_id)) {
+            data.language_id = parseInt(data.language_id, 10);
+        }
+
         this.data = data;
         this.getForm().setValues(data);
         this.grid.reload();
         this.photoView.update([{id: this.data.id }]);
-        this.syncSize();
+        // this.syncSize();
         this.setDirty(false);
     }
 
-    ,onPhotoClick: function(w, idx, el, ev){
-        if(!ev) return;
-        target = ev.getTarget();
-        if( (target.localName == "img") || (target.name == 'change') )
-            return this.photoField.getEl().dom.click();
+    ,onPhotoContainerClick: function(cmp, e, eOpts){ //w, idx, el, ev
+        if(!e) {
+            return;
+        }
+        var target = e.getTarget();
+
+        if((target.localName == "img") || (target.name == 'change')) {
+            return this.photoField.button.fileInputEl.dom.click();
+        }
+
         if (target.name == 'remove') {
             return this.onPhotoRemoveClick();
         }
@@ -387,27 +426,34 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
     }
 
     ,onPhotoRemoveClick: function(){
-        Ext.Msg.confirm(L.Confirm, L.RemovePhotoConfirm, function(b, e){
-            if(b == 'yes'){
-                CB_User.removePhoto( { id: this.data.id }, function(){
-                    this.photoView.update([{id: this.data.id }]);
-                }, this);
+        Ext.Msg.confirm(
+            L.Confirmation
+            ,L.RemovePhotoConfirm
+            ,function(b, e){
+                if(b == 'yes'){
+                    CB_User.removePhoto( { id: this.data.id }, function(){
+                        this.photoView.update([{id: this.data.id }]);
+                    }, this);
+                }
             }
-        }, this);
+            ,this
+        );
     }
 
     ,onSaveClick: function(){
         delete this.data.canAddUsers;
         delete this.data.canAddGroups;
         Ext.apply(this.data, this.getForm().getValues());
-        if(this.data.phone == this.find('name', 'phone')[0].emptyText) this.data.phone = null;
+        if(this.data.phone == this.down('[name="phone"]').emptyText) this.data.phone = null;
         this.grid.readValues();
         CB_User.saveProfileData(this.data, this.onSaveProcess, this);
     }
 
     ,onSaveProcess: function(r, e){
         if(r.success !== true) {
-            if(!Ext.isEmpty(r.msg)) {
+            if(r.verify) {
+                this.fireEvent('verify', this);
+            } else if(!Ext.isEmpty(r.msg)) {
                 Ext.Msg.alert(L.Error, r.msg);
             }
             return;
@@ -428,23 +474,29 @@ CB.ProfileForm = Ext.extend(Ext.form.FormPanel, {
 
     ,setDirty: function(dirty){
         this._isDirty = (dirty !== false);
-        this.buttons[0].setDisabled(!this._isDirty);
-        this.buttons[1].setDisabled(!this._isDirty);
+
+        var bbar = this.dockedItems.getAt(0);
+        bbar.items.getAt(0).setDisabled(!this._isDirty);
+        bbar.items.getAt(1).setDisabled(!this._isDirty);
     }
 });
 
-Ext.reg('CBProfileForm', CB.ProfileForm);
 
-CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
-    hideBorders: true
+Ext.define('CB.SecurityForm', {
+    extend: 'Ext.form.FormPanel'
+    ,alias: 'widget.CBSecurityForm'
+
+    ,border: false
     ,autoScroll: true
+
     ,initComponent: function(){
 
         Ext.apply(this,{
             padding: 10
             ,items: [{
                 title: L.Password
-                ,headerCfg: { cls: 'x-panel-header panel-header-nobg block-header' }
+                ,componentCls: 'x-panel-header panel-header-nobg block-header'
+                ,border: false
                 ,defaults: {style: 'padding: 5px 25px'}
                 ,items: [
                     {
@@ -452,20 +504,27 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                         ,name: 'passwordchanged'
                         ,value: L.PasswordNeverChanged
                     },{
-                        xtype: 'button'
-                        ,html: '<a href="">'+L.ChangePassword+'</a>'
-                        ,scope: this
-                        ,handler: this.onChangePasswordClick
+                        xtype: 'displayfield'
+                        ,frame: false
+                        ,value: '<a href="#">'+L.ChangePassword+'</a>'
+                        ,listeners: {
+                            scope: this
+                            ,afterrender: function(cmp, eOpts) {
+                                cmp.getEl().on('click', this.onChangePasswordClick, this);
+                            }
+                        }
                     }
                 ]
             },{
                 title: L.RecoveryOptions
-                ,headerCfg: { cls: 'x-panel-header panel-header-nobg block-header' }
+                ,componentCls: 'x-panel-header panel-header-nobg block-header'
+                ,border: false
                 ,style: 'margin-top: 20px'
                 ,defaults: {style: 'padding: 5px 0 15px 25px', border: false}
                 ,items: [
                     {
-                        xtype: 'compositefield'
+                        xtype: 'fieldcontainer'
+                        ,layout: 'hbox'
                         ,hidden: true
                         ,items: [{
                             xtype: 'checkbox'
@@ -497,7 +556,7 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                             ,name: 'country_code'
                             ,hiddenName: 'country_code'
                             ,fieldLabel: L.Country
-                            ,mode: 'local'
+                            ,queryMode: 'local'
                             ,triggerAction: 'all'
                             ,editable: true
                             ,forceSelection: true
@@ -514,25 +573,24 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                         }
                         ]
                     },{
-                        xtype: 'compositefield'
+                        xtype: 'fieldcontainer'
+                        ,layout: 'hbox'
                         ,items: [{
                             xtype: 'checkbox'
                             ,name: 'recovery_email'
+                            ,boxLabel: L.Email
                             ,inputValue: 1
                             ,listeners: {
                                 scope: this
-                                ,check: this.onCheckboxCheck
+                                ,change: this.onCheckboxCheck
                             }
-                        },{
-                            xtype: 'displayfield'
-                            ,cls: 'fwB'
-                            ,value: L.Email
                         }
                         ]
                     },{
                         hidden: true
                         ,name: 'recovery_email_panel'
                         ,layout: 'form'
+                        ,width: 350
                         ,items: [{
                             xtype: 'textfield'
                             ,fieldLabel: 'Email'
@@ -546,7 +604,8 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                         }
                         ]
                     },{
-                        xtype: 'compositefield'
+                        xtype: 'fieldcontainer'
+                        ,layout: 'hbox'
                         ,hidden: true
                         ,items: [{
                             xtype: 'checkbox'
@@ -579,11 +638,11 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                             ,name: 'question_idx'
                             ,hiddenName: 'question_idx'
                             ,fieldLabel: L.Question
-                            ,mode: 'local'
+                            ,queryMode: 'local'
                             ,triggerAction: 'all'
                             ,editable: false
                             ,forceSelection: true
-                            ,typeAhead: true
+                            //,typeAhead: true
                             ,valueField: 'id'
                             ,displayField: 'text'
                             ,width: 400
@@ -599,12 +658,14 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                 ,buttonAlign: 'left'
                 ,buttons: [{
                     text: L.Save
+                    ,itemId: 'saveButton'
                     ,style: 'margin-left: 18px'
                     ,disabled: true
                     ,scope: this
                     ,handler: this.onSaveClick
                 },{
                     text: L.Reset
+                    ,itemId: 'resetButton'
                     ,disabled: true
                     ,scope: this
                     ,handler: this.onResetClick
@@ -613,69 +674,107 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                 ]
             },{
                 title: L.TSV
-                ,headerCfg: { cls: 'x-panel-header panel-header-nobg block-header' }
+                ,componentCls: 'x-panel-header panel-header-nobg block-header'
+                ,border: false
                 ,style: 'margin-top: 20px'
                 ,defaults: {style: 'padding: 5px 25px', border: false}
                 ,buttonAlign: 'left'
                 ,items: [{
                     xtype: 'displayfield'
+                    ,itemId: 'tsvStatusText'
                     ,value: L.Status +': <span class="cG">'+ L.Disabled + '</span>'
                 }]
-                ,buttons: [{
-                    xtype: 'displayfield'
-                    ,width: 12
-                },{
-                    html: '<a>'+L.Enable+'</a>'
-                    ,scope: this
-                    ,handler: this.enableTSV
-                },{
-                    html: '<a>'+L.Disable+'</a>'
-                    ,scope: this
-                    ,handler: this.disableTSV
-                    ,hidden: true
-                },{
-                    html: '<a>'+L.Change+'</a>'
-                    ,scope: this
-                    ,handler: this.enableTSV
-                    ,hidden: true
-                }
+
+                ,dockedItems: [
+                    {
+                        xtype: 'toolbar'
+                        ,dock: 'bottom'
+                        ,ui: 'footer'
+                        ,layout: {
+                            type: 'hbox'
+                            ,pack: 'left'
+                        }
+                        //,defaults: {minWidth: minButtonWidth}
+                        ,items: [
+                            {
+                                xtype: 'displayfield'
+                                ,value: '<a>'+L.Enable+'</a>'
+                                ,itemId: 'btnEnableTsv'
+                                ,width: 50
+                                ,listeners:{
+                                    scope: this
+                                    ,afterrender: function(c){
+                                        c.getEl().on('click', this.enableTSV, this);
+                                    }
+                                }
+                            },{
+                                xtype: 'displayfield'
+                                ,value: '<a>'+L.Disable+'</a>'
+                                ,itemId: 'btnDisableTsv'
+                                ,width: 50
+                                ,listeners:{
+                                    scope: this
+                                    ,afterrender: function(c){
+                                        c.getEl().on('click', this.disableTSV, this);
+                                    }
+                                }
+                                ,hidden: true
+                            },{
+                                xtype: 'displayfield'
+                                ,value: '<a>'+L.Change+'</a>'
+                                ,itemId: 'btnChangeTsv'
+                                ,width: 50
+                                ,listeners:{
+                                    scope: this
+                                    ,afterrender: function(c){
+                                        c.getEl().on('click', this.enableTSV, this);
+                                    }
+                                }
+                                ,hidden: true
+                            }
+                       ]
+                    }
                 ]
             }
             ]
         });
         CB.SecurityForm.superclass.initComponent.apply(this, arguments);
-        this.saveButton = this.items.itemAt(1).buttons[0];
-        this.resetButton = this.items.itemAt(1).buttons[1];
+
+        this.saveButton = this.down('#saveButton');
+        this.resetButton = this.down('#resetButton');
     }
+
     ,loadData: function( data ){
-        // this.items.itemAt(0).update(data)
+        // this.items.getAt(0).update(data)
         this.data = data;
-        if(!Ext.isEmpty(data.password_change)) this.find( 'name', 'passwordchanged' )[0].setValue(L.PasswordChanged+': '+data.password_change);
+        if(!Ext.isEmpty(data.password_change)) this.down('[name="passwordchanged"]').setValue(L.PasswordChanged+': '+data.password_change);
 
-        cb = this.items.itemAt(1).items.first().items.first();
+        cb = this.items.getAt(1).items.first().items.first();
         cb.setValue(data.recovery_mobile === true);
-        this.find( 'name', 'country_code' )[0].setValue( Ext.value(data.country_code, null) );
-        this.find( 'name', 'phone_number' )[0].setValue( Ext.value(data.phone_number, null) );
+        this.down('[name="country_code"]').setValue( Ext.valueFrom(data.country_code, null) );
+        this.down('[name="phone_number"]').setValue( Ext.valueFrom(data.phone_number, null) );
 
-        cb = this.items.itemAt(1).items.itemAt(2).items.first();
+        cb = this.items.getAt(1).items.getAt(2).items.first();
         cb.setValue(data.recovery_email === true);
-        this.find( 'name', 'email' )[0].setValue( Ext.value(data.email, null) );
+        this.down('[name="email"]').setValue( Ext.valueFrom(data.email, null) );
 
-        cb = this.items.itemAt(1).items.itemAt(4).items.first();
+        cb = this.items.getAt(1).items.getAt(4).items.first();
         cb.setValue(data.recovery_question === true);
-        this.find( 'name', 'question_idx' )[0].setValue( Ext.value(data.question_idx, null) );
-        this.find( 'name', 'answer' )[0].setValue( Ext.value(data.answer, null) );
+        this.down('[name="question_idx"]').setValue( Ext.valueFrom(data.question_idx, null) );
+        this.down('[name="answer"]').setValue( Ext.valueFrom(data.answer, null) );
 
         this.updateTSVStatus();
 
         this.setDirty(false);
     }
+
     ,onCheckboxCheck: function(cb){
-        p = this.find('name', cb.name+'_panel')[0];
+        var p = this.down('[name="' + cb.name + '_panel"]');
         p.setVisible(cb.checked);
         //this.data[cb.name] = cb.checked;
         this.setDirty();
     }
+
     ,onChangePasswordClick: function(b){
         pw = new CB.ChangePasswordWindow({
             data: {id: App.loginData.id}
@@ -686,45 +785,52 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         });
         pw.show();
     }
+
     ,onPasswordChanged: function(w){
-        this.find('name', 'passwordchanged')[0].setValue(L.PasswordChanged+': '+L.today);
+        this.down('[name="passwordchanged"]').setValue(L.PasswordChanged+': '+L.today);
     }
+
     ,onSaveClick: function(){
-        cb = this.items.itemAt(1).items.first().items.first();
+        cb = this.items.getAt(1).items.first().items.first();
         this.data.recovery_mobile = cb.getValue();
-        this.data.country_code = this.find( 'name', 'country_code' )[0].getValue();
-        this.data.phone_number = this.find( 'name', 'phone_number' )[0].getValue();
+        this.data.country_code = this.down('[name="country_code"]').getValue();
+        this.data.phone_number = this.down('[name="phone_number"]').getValue();
 
-        cb = this.items.itemAt(1).items.itemAt(2).items.first();
+        cb = this.items.getAt(1).items.getAt(2).items.first();
         this.data.recovery_email = cb.getValue();
-        this.data.email = this.find( 'name', 'email' )[0].getValue();
+        this.data.email = this.down('[name="email"]').getValue();
 
-        cb = this.items.itemAt(1).items.itemAt(4).items.first();
+        cb = this.items.getAt(1).items.getAt(4).items.first();
         this.data.recovery_question = cb.getValue();
-        this.data.question_idx = this.find( 'name', 'question_idx' )[0].getValue();
-        this.data.answer = this.find( 'name', 'answer' )[0].getValue();
+        this.data.question_idx = this.down('[name="question_idx"]').getValue();
+        this.data.answer = this.down('[name="answer"]').getValue();
 
         CB_User.saveSecurityData(this.data, this.onSaveProcess, this);
     }
+
     ,onSaveProcess: function(r, e){
         if(r.success !== true) return;
         this.setDirty(false);
     }
+
     ,onResetClick: function(){
         this.loadData(this.data);
     }
+
     ,onChange: function(){
         this.setDirty(true);
     }
+
     ,setDirty: function(dirty){
         this._isDirty = (dirty !== false);
         this.saveButton.setDisabled(!this._isDirty);
         this.resetButton.setDisabled(!this._isDirty);
     }
+
     ,enableTSV: function(b, e){
-        data = Ext.value(this.data.TSV, {});
-        data.country_code = Ext.value(data.country_code, this.data.country_code );
-        data.phone_number = Ext.value(data.phone_number, this.data.phone_number );
+        data = Ext.valueFrom(this.data.TSV, {});
+        data.country_code = Ext.valueFrom(data.country_code, this.data.country_code );
+        data.phone_number = Ext.valueFrom(data.phone_number, this.data.phone_number );
         w = new CB.TSVWindow({
             data: data
             ,listeners:{
@@ -734,11 +840,13 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
         });
         w.show();
     }
+
     ,onTSVChange: function(w, tsv){
         if(Ext.isEmpty(this.data['TSV'])) this.data.TSV = {};
         this.data.TSV.method = tsv;
         this.updateTSVStatus();
     }
+
     ,updateTSVStatus: function(){
         text = '<span class="cG">'+ L.Disabled + '</span>';
 
@@ -755,43 +863,53 @@ CB.SecurityForm = Ext.extend(Ext.form.FormPanel, {
                 text = 'Yubikey';
                 break;
         }
-        this.items.itemAt(2).items.itemAt(0).setValue(L.Status+': ' + text);
-        this.items.itemAt(2).buttons[1].setVisible(Ext.isEmpty(this.data.TSV.method));
-        this.items.itemAt(2).buttons[2].setVisible(!Ext.isEmpty(this.data.TSV.method));
-        this.items.itemAt(2).buttons[3].setVisible(!Ext.isEmpty(this.data.TSV.method));
+        this.down('#tsvStatusText').setValue(L.Status+': ' + text);
+        this.down('#btnEnableTsv').setVisible(Ext.isEmpty(this.data.TSV.method));
+        this.down('#btnDisableTsv').setVisible(!Ext.isEmpty(this.data.TSV.method));
+        this.down('#btnChangeTsv').setVisible(!Ext.isEmpty(this.data.TSV.method));
     }
+
     ,disableTSV: function(){
-        Ext.Msg.confirm(L.Confirm, 'Are you sure you want to disable '+L.TSV, function(b, e){
-            if(b == 'yes'){
-                CB_User.disableTSV( function(r, e){
-                    if(r.success === true){
-                        delete this.data.TSV.method;
-                        this.updateTSVStatus();
-                    }
-                }, this);
+        Ext.Msg.show({
+            title: L.Confirm
+            ,message: 'Are you sure you want to disable ' + L.TSV
+            ,buttons: Ext.Msg.YESNO
+            ,icon: Ext.window.MessageBox.INFO
+            ,scope: this
+            ,fn: function(b, e){
+                if(b == 'yes'){
+                    CB_User.disableTSV( function(r, e){
+                        if(r.success === true){
+                            delete this.data.TSV.method;
+                            this.updateTSVStatus();
+                        }
+                    }, this);
+                }
             }
-        }, this);
+        });
     }
 });
-Ext.reg('CBSecurityForm', CB.SecurityForm);
 
 
 /*
 2-step verification
 Keep the bad guys out of your account by using both your password and your phone.
  */
-CB.TSVWindow = Ext.extend(Ext.Window, {
-    modal: true
+Ext.define('CB.TSVWindow', {
+    extend: 'Ext.Window'
+    ,modal: true
     ,title: L.TSV
     ,autoWidth: true
     ,autoHeight: true
-    ,hideBorders: true
+    ,border: false
     ,iconCls: 'icon-key'
     ,layout: 'card'
+
     ,initComponent: function() {
         Ext.apply(this, {
             activeItem: 0
-            ,bodyStyle: 'border: 20px solid white'
+            // ,bodyStyle: 'padding: 15px; background-color: #fff'
+            ,bodyBorder: false
             ,defaults: {
                 listeners: {
                     scope: this
@@ -802,15 +920,19 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
             ,items: [{
                 items: [{
                     xtype: 'displayfield'
-                    ,style: 'font-size: 20px'
+                    ,style: 'padding: 10px; font-size: 20px;'
                     ,value: 'Select authentication method'
                 },{
-                    xtype: 'button'
-                    ,html: '<a>Google Authenticator</a>'
+                    xtype: 'displayfield'
+                    ,value: '<a class="click" name="ga">Google Authenticator</a>'
                     ,style: 'padding:10px'
                     ,name: 'ga'
-                    ,scope: this
-                    ,handler: this.onTSVMechanismClick
+                    ,listeners:{
+                        scope: this
+                        ,afterrender: function(c){
+                            c.getEl().on('click', this.onTSVMechanismClick, this);
+                        }
+                    }
                 // },{
                 //     xtype: 'button'
                 //     ,html: '<a>Sms message</a>'
@@ -819,28 +941,35 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
                 //     ,scope: this
                 //     ,handler: this.onTSVMechanismClick
                 },{
-                    xtype: 'button'
-                    ,html: '<a>Yubikey</a>'
+                    xtype: 'displayfield'
+                    ,value: '<a class="click" name="ybk">Yubikey</a>'
                     ,style: 'padding:10px'
                     ,name: 'ybk'
-                    ,scope: this
-                    ,handler: this.onTSVMechanismClick
+                    ,listeners:{
+                        scope: this
+                        ,afterrender: function(c){
+                            c.getEl().on('click', this.onTSVMechanismClick, this);
+                        }
+                    }
                 }
                 ]
             },{
                 xtype: 'TSVgaForm'
+                ,itemId: 'ga'
             // },{
             //     xtype: 'TSVsmsForm'
             },{
                 xtype: 'TSVybkForm'
+                ,itemId: 'ybk'
             }]
         });
         CB.TSVWindow.superclass.initComponent.apply(this, arguments);
-        this.form = this.findByType('form')[0];
+        this.form = this.down('form');
     }
-    ,onTSVMechanismClick: function(b, e){
-        this.TSVmethod = b.name;
-        this.getLayout().setActiveItem(b.ownerCt.items.indexOf(b));
+    ,onTSVMechanismClick: function(ev, el){
+        this.TSVmethod = el.name;
+
+        this.getLayout().setActiveItem(el.name);
         this.getLayout().activeItem.prepareInterface(this.data);
         this.center();
     }
@@ -862,19 +991,23 @@ CB.TSVWindow = Ext.extend(Ext.Window, {
             this.destroy();
         } else {
             this.getLayout().activeItem.showError(r.msg);
-            this.syncSize();
+            // this.syncSize();
         }
     }
 }
 );
 
 
-CB.TSVgaForm = Ext.extend(Ext.Panel, {
-    style: 'background-color: #fff'
+Ext.define('CB.TSVgaForm', {
+    extend: 'Ext.Panel'
+    ,alias: 'widget.TSVgaForm'
+
+    ,style: 'background-color: #fff'
     ,width:500
     ,initComponent: function(){
         Ext.apply(this, {
-            items: [{
+            bodyStyle: 'padding: 10px'
+            ,items: [{
                 xtype: 'displayfield'
                 ,style: 'font-size: 20px; padding-bottom:15px'
                 ,value: 'Set up Google Authenticator'
@@ -917,18 +1050,20 @@ CB.TSVgaForm = Ext.extend(Ext.Panel, {
                     ,listeners: {
                         scope: this
                         ,keyup: function(field, e){
-                            this.buttons[2].setDisabled(Ext.isEmpty(field.getValue()));
+                            this.down('[name="btnVS"]').setDisabled(Ext.isEmpty(field.getValue()));
                         }
                     }
                 },{
                     xtype: 'button'
-                    ,text: 'Verify and Save'
+                    ,text: L.VerifyAndSave
+                    ,name: 'btnVS'
                     ,disabled: true
                     ,scope: this
                     ,handler: this.onVerifyAndSaveClick
                 },{
                     xtype: 'displayfield'
                     ,style: 'padding: 0 0 0 20px'
+                    ,name: 'errorMsg'
                     ,cls: 'cR'
                     ,value: ''
                     ,hidden: true
@@ -944,14 +1079,14 @@ CB.TSVgaForm = Ext.extend(Ext.Panel, {
     ,processGetTSVTemplateData: function(r, e){
         this.getEl().unmask();
         if(r.success !== true) return;
-        p = this.items.itemAt(1);
+        p = this.items.getAt(1);
         p.data = r;
         p.update(r);
-        this.buttons[1].focus();
+        this.down('[name="code"]').focus();
     }
     ,onVerifyAndSaveClick: function(){
         this.fireEvent('verifyandsave', {
-            code: this.buttons[1].getValue()
+            code: this.down('[name="code"]').getValue()
         });
     }
     ,showError: function(msg){
@@ -959,19 +1094,22 @@ CB.TSVgaForm = Ext.extend(Ext.Panel, {
             msg = 'The code is incorrect. Try again';
         }
         msg = '<img class="icon icon-exclamation fl" style="margin-right: 15px" src="/css/i/s.gif">'+ msg;
-        this.buttons[3].setValue(msg);
-        this.buttons[3].setVisible(true);
+
+        var t = this.down('[name="errorMsg"]');
+        t.setValue(msg);
+        t.setVisible(true);
     }
 });
-Ext.reg('TSVgaForm', CB.TSVgaForm);
 
-CB.TSVsmsForm = Ext.extend(Ext.form.FormPanel, {
-    monitorValid: true
+Ext.define('CB.TSVsmsForm', {
+    extend: 'Ext.form.FormPanel'
+    ,monitorValid: true
     ,autoWidth: true
     ,autoHeight: true
     ,labelWidth: 120
     ,buttonAlign: 'left'
     ,cls: 'bgcW'
+
     ,initComponent: function(){
         Ext.apply(this, {
             items: [{
@@ -989,7 +1127,7 @@ CB.TSVsmsForm = Ext.extend(Ext.form.FormPanel, {
                 ,name: 'country_code'
                 ,hiddenName: 'country_code'
                 ,fieldLabel: L.Country
-                ,mode: 'local'
+                ,queryMode: 'local'
                 ,triggerAction: 'all'
                 ,editable: true
                 ,forceSelection: true
@@ -1027,7 +1165,7 @@ CB.TSVsmsForm = Ext.extend(Ext.form.FormPanel, {
     }
     ,prepareInterface: function(data){
         this.getForm().setValues(data);
-        this.syncSize();
+        // this.syncSize();
         App.focusFirstField(this);
     }
     ,onVerifyPhoneClick: function(){
@@ -1048,18 +1186,23 @@ CB.TSVsmsForm = Ext.extend(Ext.form.FormPanel, {
     ,showError: function(msg){}
 
 });
-Ext.reg('TSVsmsForm', CB.TSVsmsForm);
 
-CB.TSVybkForm = Ext.extend(Ext.form.FormPanel, {
-    monitorValid: true
+Ext.define('CB.TSVybkForm', {
+    extend: 'Ext.form.FormPanel'
+    ,alias: 'widget.TSVybkForm'
+    ,xtype: 'CBTSVybkForm'
+
+    ,monitorValid: true
     ,autoWidth: true
     ,autoHeight: true
     ,labelWidth: 70
     ,buttonAlign: 'left'
     ,cls: 'bgcW'
+
     ,initComponent: function(){
         Ext.apply(this, {
-            items: [{
+            bodyStyle: 'padding: 10px'
+            ,items: [{
                 xtype: 'displayfield'
                 ,hideLabel: true
                 ,style: 'font-size: 20px; padding-bottom:15px'
@@ -1118,7 +1261,7 @@ CB.TSVybkForm = Ext.extend(Ext.form.FormPanel, {
     }
     ,prepareInterface: function(data){
         this.getForm().setValues(data);
-        this.syncSize();
+        // this.syncSize();
         App.focusFirstField(this);
     }
     ,onSaveClick: function(){
@@ -1129,8 +1272,7 @@ CB.TSVybkForm = Ext.extend(Ext.form.FormPanel, {
             msg = 'The code is incorrect. Try again';
         }
         msg = '<img class="icon icon-exclamation fl" style="margin-right: 15px" src="/css/i/s.gif">'+ msg;
-        this.items.itemAt(4).setValue(msg);
-        this.items.itemAt(4).setVisible(true);
+        this.items.getAt(4).setValue(msg);
+        this.items.getAt(4).setVisible(true);
     }
 });
-Ext.reg('TSVybkForm', CB.TSVybkForm);

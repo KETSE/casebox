@@ -35,6 +35,8 @@ class Listeners
 
             case 'comment':
                 Comments::addNotifications($p);
+
+                Comments::setParentLastCommentData($p);
                 break;
 
             default:

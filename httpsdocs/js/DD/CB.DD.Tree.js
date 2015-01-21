@@ -4,18 +4,50 @@ Ext.namespace('CB.DD');
  *
  */
 
-CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
-    idProperty: 'id'
+Ext.define('CB.DD.Tree', {
+    extend: 'Ext.tree.plugin.TreeViewDragDrop'
+    ,alias: 'plugin.CBDDTree'
+
+    ,idProperty: 'id'
+    ,enableDrag: true
+    ,enableDrop: true
+    ,appendOnly: true
+    ,containerScroll: true
     ,ddGroup: 'CBO'
+    // ,displayField: 'name'
+
     /**
      * just pass the idProperty used in tree for nodes.
      * @param  json config
      * @return void
      */
     ,constructor: function(config){
+        var idProperty = Ext.valueFrom(config.idProperty, this.idProperty);
+        var defaultConfig = {
+            dragZone: {
+                idProperty: idProperty
+                ,onBeforeDrag: this.onBeforeDrag
+            }
+            ,dropZone: {
+                idProperty: idProperty
+
+                ,dropCopy: 'drag-drop-copy'
+                ,dropMove: 'drag-drop-move'
+                ,dropShortcut: 'drag-drop-shortcut'
+
+                ,onNodeOver: this.onNodeOver
+                ,onNodeDrop: this.onNodeDrop
+                ,getActionFromEvent: this.getActionFromEvent
+            }
+        };
+
         if(config) {
-            Ext.apply(this, config);
+            Ext.apply(defaultConfig, config);
         }
+
+        Ext.apply(this, defaultConfig);
+
+        this.callParent(defaultConfig);
     }
     /**
      * init method called by the tree when initializing plugins
@@ -25,33 +57,13 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
      * @param  Ext.tree.TreePanel owner
      * @return void
      */
-    ,init: function(owner) {
-        this.owner = owner;
-        owner.on('render', this.onRender, this);
-        owner.on('beforedestroy', this.onBeforeDestroy, this);
+    ,init: function(treeView) {
+        this.treeView = treeView;
+
+        treeView.on('beforedestroy', this.onBeforeDestroy, this);
         App.on('objectsaction', this.onObjectsAction, this);
-    }
 
-    /**
-     * apply config to tree
-     * @param  Ext.tree.TreePanel tree
-     * @return void
-     */
-    ,onRender: function(tree){
-        Ext.apply(this.owner, {
-            enableDD: true
-            ,dragZone: new CB.DD.TreeDragZone(this.owner, {
-                idProperty: this.idProperty
-                ,ddGroup: this.ddGroup
-                ,nodeToGenericData: this.nodeToGenericData
-            })
-            ,dropZone: new CB.DD.TreeDropZone(this.owner, {
-                idProperty: this.idProperty
-                ,ddGroup: this.ddGroup
-                ,nodeToGenericData: this.nodeToGenericData
-            })
-        });
-
+        this.callParent(arguments);
     }
 
     /**
@@ -60,33 +72,8 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
      */
     ,onBeforeDestroy: function()
     {
-        this.owner.un('render', this.onRender, this);
-        this.owner.un('beforedestroy', this.onBeforeDestroy, this);
+        this.treeView.un('beforedestroy', this.onBeforeDestroy, this);
         App.un('objectsaction', this.onObjectsAction, this);
-    }
-
-    /**
-     * transfers tree node data to generic structured object for D&D
-     * @param  node/atributtes node node object or its attributes
-     * @return object
-     */
-    ,nodeToGenericData: function(node){
-        if(Ext.isEmpty(node)){
-            return {};
-        }
-        na = node.attributes ? node.attributes : node;
-        pid = node.parentNode
-            ? node.parentNode.attributes[this.idProperty]
-            : null;
-
-        data = {
-            id: na[this.idProperty]
-            ,pid: pid
-            ,name: na.name
-            ,path: na.path
-            ,template_id: na.template_id
-        };
-        return data;
     }
 
     /**
@@ -119,17 +106,101 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
         }
     }
 
+    ,onBeforeDrag: function(data, e){
+        if(Ext.isEmpty(data.records)) {
+            return;
+        }
+
+        return (data.records[0].data.system != 1);
+    }
+
+    ,getActionFromEvent: function(ev) {
+        var rez = (ev.ctrlKey || ev.altKey || ev.shiftKey)
+            ? App.DD.detectActionFromEvent(ev)
+            : Ext.valueFrom(this.defaultAction, 'move');
+
+        return rez;
+    }
+
+    ,onNodeOver: function (node, dragZone, e, data){
+        /* deny drop on:
+            - node itself
+            - direct parent of dragged node
+            - any descendant of dragged node
+        */
+
+        var action = this.getActionFromEvent(e)
+            ,rez = this['drop' + action.charAt(0).toUpperCase() + action.slice(1)];
+
+        var i = 0;
+
+        var targetRecord = this.view.getRecord(node)
+            ,templateId = targetRecord.data.template_id
+            ,acceptChildren = CB.DB.templates.acceptChildren(templateId);
+
+        while ((i < data.records.length) && (rez != this.dropNotAllowed))  {
+            var r = data.records[i];
+
+            if(!acceptChildren ||
+                isNaN(r.data[this.idProperty]) ||
+                isNaN(targetRecord.data[this.idProperty]) ||
+                (targetRecord.data[this.idProperty] == r.data[this.idProperty]) ||
+                (targetRecord.data[this.idProperty] == r.data.pid) ||
+                targetRecord.isAncestor(r)
+            ) {
+                rez = this.dropNotAllowed;
+            }
+            i++;
+        }
+
+        return rez;
+    }
+
+    ,onNodeDrop: function(node, dragZone, e, data){//targetData, source, e, sourceData
+        if(this.onNodeOver(node, dragZone, e, data) != this.dropNotAllowed){
+
+            var d, sourceData = [];
+            for (var i = 0; i < data.records.length; i++) {
+                d = data.records[i].data;
+                sourceData.push({
+                    id: d[this.idProperty]
+                    ,name: d['name']
+                    ,path: d['path']
+                    ,template_id: d['template_id']
+                });
+            }
+
+            d = this.view.getRecord(node).data;
+            var targetData = {
+                id: d[this.idProperty]
+                ,name: d['name']
+                ,path: d['path']
+                ,template_id: d['template_id']
+            };
+
+            App.DD.execute({
+                action: e
+                ,targetData: targetData
+                ,sourceData: sourceData
+            });
+
+            return true;
+        }
+    }
+
     /**
      * remove a node by its id
      * @param  int nodeId
      * @return boolean
      */
     ,removeNode: function(nodeId){
-        var rootNode = this.owner.getRootNode();
-        var node = rootNode.findChild(this.idProperty, nodeId, true);
-        while(node){
-            node.remove(true);
-            node = rootNode.findChild(this.idProperty, nodeId, true);
+        var st = this.treeView.ownerGrid.store;
+        var recs = st.query(this.idProperty, nodeId, false, false, true);
+
+        if(recs.getCount() > 0) {
+            for (var i = 0; i < recs.getCount(); i++) {
+                st.remove(recs.getAt(i));
+            }
         }
     }
 
@@ -139,87 +210,20 @@ CB.DD.Tree =  Ext.extend(Ext.util.Observable, {
      * @return boolean
      */
     ,reloadNode: function(nodeId){
-        var rootNode = this.owner.getRootNode();
-        var node = (rootNode.attributes[this.idProperty] == nodeId)
-            ? rootNode
-            : rootNode.findChild(this.idProperty, nodeId, true);
-        if(node) {
-            if(node.isLoaded()) {
-                node.reload();
-            } else {
-                node.expand();
-            }
-            return true;
+        var st = this.treeView.ownerGrid.store;
+        var recs = st.query(this.idProperty, nodeId, false, false, true);
+
+        if(Ext.isEmpty(recs)) {
+            return false;
         }
-        return false;
-    }
-});
 
-Ext.ComponentMgr.registerPlugin('CBDDTree', CB.DD.Tree);
-
-/* custom tree dragZone for handling casebox D&D of objects */
-CB.DD.TreeDragZone =  Ext.extend(Ext.tree.TreeDragZone, {
-    idProperty: 'id'
-    ,constructor: function(tree, config){
-        Ext.apply(this, config || {});
-        CB.DD.TreeDragZone.superclass.constructor.call(this, tree, config);
-    }
-    ,getDragData: function(e){
-        rez = Ext.dd.Registry.getHandleFromEvent(e);
-        // set generic object data from Tree node
-        if(rez && rez.node) {
-            rez.data = [this.nodeToGenericData(rez.node)];
-        }
-        return rez;
-    }
-});
-
-Ext.reg('CBDDTreeDragZone', CB.DD.TreeDragZone);
-
-/* custom tree dropZone for handling casebox D&D of objects */
-CB.DD.TreeDropZone =  Ext.extend(Ext.tree.TreeDropZone, {
-    idProperty: 'id'
-    ,appendOnly: true
-    ,constructor: function(tree, config){
-        Ext.apply(this, config || {});
-        CB.DD.TreeDropZone.superclass.constructor.call(this, tree, config);
-    }
-    ,onNodeOver: function (targetData, source, e, data){
-        /* deny drop on:
-            - node itself
-            - direct parent of dragged node
-            - any descendant of dragged node
-        */
-        var rez = this.dropAllowed;
-        var sourceData = Ext.isArray(data.data)
-            ? data.data
-            : [data.data];
-        var i = 0;
-        while ((i < sourceData.length) && (rez == this.dropAllowed))  {
-            var sourceNode = this.tree.getRootNode().findChild(this.idProperty, sourceData[i].id);
-            if(isNaN(sourceData[i].id) ||
-                (targetData.node.attributes[this.idProperty] == sourceData[i].id) ||
-                (targetData.node.attributes[this.idProperty] == sourceData[i].pid) ||
-                targetData.node.isAncestor(sourceNode)
-            ) {
-                rez = this.dropNotAllowed;
-            }
-            i++;
-        }
-        return rez;
-    }
-    ,onNodeDrop: function(targetData, source, e, sourceData){
-
-        if(this.onNodeOver(targetData, source, e, sourceData) == this.dropAllowed){
-            App.DD.execute({
-                action: e
-                ,targetData: this.nodeToGenericData(targetData.node)
-                ,sourceData: sourceData.data
+        var node = recs.getAt(0);
+        if(node && !node.isExpanded()) {
+            node.expand();
+        } else {
+            st.reload({
+                node: node
             });
-            return true;
         }
     }
-
 });
-
-Ext.reg('CBDDTreeDropZone', CB.DD.TreeDropZone);

@@ -28,7 +28,12 @@ $cfg['core_name'] = detectCore() or die('Cannot detect core');
 $cfg['db_name'] = 'cb_' . $cfg['core_name'];
 
 //loading core defined params
-$cfg = array_merge($cfg, Config::getPlatformConfigForCore($cfg['core_name']));
+try {
+    $cfg = array_merge($cfg, Config::getPlatformConfigForCore($cfg['core_name']));
+} catch (\Exception $e) { //return http "not found" if cant load core config
+    header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
+    exit();
+}
 
 DB\connectWithParams($cfg);
 
@@ -71,7 +76,7 @@ ini_set("session.gc_maxlifetime", $sessionLifetime);
 ini_set("session.gc_divisor", "100");
 ini_set("session.gc_probability", "1");
 
-session_set_cookie_params($sessionLifetime, '/' . $cfg['core_name'], $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
+session_set_cookie_params($sessionLifetime, '/' . $cfg['core_name'] . '/', $_SERVER['SERVER_NAME'], !empty($_SERVER['HTTPS']), true);
 session_name(
     str_replace(
         array(

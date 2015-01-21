@@ -1,8 +1,9 @@
 Ext.namespace('CB.state');
 
-CB.state.DBProvider = Ext.extend(Ext.state.Provider, {
+Ext.define('CB.state.DBProvider', {
+    extend: 'Ext.state.Provider'
 
-    constructor: function(config){
+    ,constructor: function(config){
         CB.state.DBProvider.superclass.constructor.call(this, arguments);
 
         Ext.apply(

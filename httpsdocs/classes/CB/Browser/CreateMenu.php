@@ -60,7 +60,7 @@ class CreateMenu
         }
         $res->close();
 
-        $ugids = @$_SESSION['user']['groups'];
+        $ugids = $_SESSION['user']['groups'];
         $ugids[] = $_SESSION['user']['id'];
 
         // we have 3 main criterias for detecting needed menu:
@@ -70,12 +70,9 @@ class CreateMenu
         //
         // we'll iterate the path from the end and detect the menu
 
-        // var_dump($path);
-        // var_dump($menu);
         $lastWeight = 0;
         for ($i=0; $i < sizeof($path); $i++) {
             //firstly we'll check if we find a menu row with id or template of the node
-
             foreach ($menu as $m) {
                 $weight = 0;
 
@@ -88,7 +85,7 @@ class CreateMenu
                     continue;
                 }
 
-                if (@in_array($nodeTemplate[$path[$i]], $m['ntids'])) {
+                if (in_array($nodeTemplate[$path[$i]], $m['ntids'])) {
                     $weight += 50;
                 } elseif (empty($m['ntids'])) {
                     $weight += 1;

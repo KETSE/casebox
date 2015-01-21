@@ -53,7 +53,7 @@ class TaskStatuses extends \CB\TreeNode\Base
             $pnode = @$pnode->parent;
         }
         if ((!empty($pnode) && (get_class($pnode) == 'Demosrc\\TreeNode\\Offices'))) {
-            $this->fq[] = 'category_id:'.$pnode->id;
+            // $this->fq[] = 'category_id:'.$pnode->id;
         }
         // if (get_class($this->lastNode) == 'Demosrc\\TreeNode\\OfficeUsers') {
         //     $this->fq[] = 'category_id:'.$this->lastNode->parent->parent->id;

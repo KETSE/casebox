@@ -7,7 +7,7 @@
   strict="true"
   >
   <testsuite name="Sabre_HTTP">
-    <directory>Sabre/</directory>
+      <directory>HTTP/</directory>
   </testsuite>
 
   <filter>

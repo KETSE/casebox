@@ -96,7 +96,8 @@ class Files
         $contentFile = Config::get('files_dir') . @$data['content_path'] . '/'.@$data['content_id'];
 
         if (file_exists($contentFile) && !is_dir($contentFile)) {
-            $rez['data'] = file_get_contents($contentFile);
+            $rez['data'] = utf8_encode(file_get_contents($contentFile));
+
         } else {
             \CB\debug('Error accessing file ('.$id.'). Its content (id: '.@$data['content_id'].') doesnt exist on the disk.');
 
@@ -1493,9 +1494,15 @@ class Files
     //get Max File Version Count for an extension
     public static function getMFVC($filename)
     {
-        $ext = Files::getExtension($filename) || mb_strtolower($filename);
+        $ext = Files::getExtension($filename);
+        if (empty($ext)) {
+            $ext = mb_strtolower($filename);
+        }
+
         $ext = trim($ext);
+
         $rez = 0;
+
         $mfvc = Config::get('mfvc');
 
         if (empty($mfvc)) {

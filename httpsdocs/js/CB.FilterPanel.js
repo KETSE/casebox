@@ -1,7 +1,12 @@
 Ext.namespace('CB');
 
-CB.FilterPanel = Ext.extend(Ext.Panel, {
-    xtype: 'panel'
+Ext.define('CB.FilterPanel', {
+    extend: 'Ext.Panel'
+
+    ,alias: 'widget.CBFilterPanel'
+
+    ,xtype: 'CBFilterPanel'
+
     ,autoScroll: true
     ,bodyStyle: 'padding: 10px 0'
     ,padding:0
@@ -13,15 +18,20 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
                 ,itemclick: this.onActiveFiltersItemClick
             }
         });
+
         Ext.apply(this, {
             items: [this.activeFileterFacet]
+            ,layout: {
+                type: 'vbox'
+                ,align: 'stretch'
+            }
+
             ,listeners:{
                 scope: this
                 ,facetchange: this.onFacetChange
             }
         });
         CB.FilterPanel.superclass.initComponent.apply(this, arguments);
-        this.addEvents('change');
     }
 
     ,updateFacets: function(data, options){
@@ -34,27 +44,32 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
         );
 
         this.facetIndex = 1;
-        Ext.iterate(data, function(key, value, obj){
-            facet = this.find('facetId', key)[0];
-            if(Ext.isEmpty(facet)){
-                facet = new CB.FacetList({
-                    modeToggle: Ext.value(value.boolMode, true)
-                    ,facetId: key
-                    ,title: value.title
-                    ,f: Ext.isEmpty(value.f) ? key: value.f
-                    ,manualPeriod: value.manualPeriod
-                });
-                this.insert(this.facetIndex, facet);
+        Ext.iterate(
+            data
+            ,function(key, value, obj){
+                var facet = this.query('panel[facetId="' + key + '"]')[0];
+                if(Ext.isEmpty(facet)){
+                    facet = new CB.FacetList({
+                        modeToggle: Ext.valueFrom(value.boolMode, true)
+                        ,facetId: key
+                        ,title: value.title
+                        ,f: Ext.isEmpty(value.f) ? key: value.f
+                        ,manualPeriod: value.manualPeriod
+                    });
+                    this.insert(this.facetIndex, facet);
+                }
+                facet.processServerData(value.items, options);
+                facet.setVisible(facet.store.getCount() > 0) ;
+                this.facetIndex++;
             }
-            facet.processServerData(value.items, options);
-            facet.setVisible(facet.store.getCount() > 0) ;
-            this.facetIndex++;
-        }, this);
+            ,this
+        );
+
         this.updateActiveFiltersFacet(options);
 
-        if(this.rendered) {
-            this.syncSize();
-        }
+        // if(this.rendered) {
+            // this.syncSize();
+        // }
 
     }
 
@@ -65,9 +80,9 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
 
         var af_data = [];
         Ext.iterate(
-            options.params.filters
+            options.filters
             ,function(key, val, obj){
-                var facet = this.find('facetId', key)[0];
+                var facet = this.child('[facetId="'+ key + '"]');
                 if(!Ext.isEmpty(facet)){
                     var vals = [];
                     Ext.each(
@@ -97,11 +112,11 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
             this.activeFileterFacet.store.loadData([{id: -1, value: -1, name: L.ResetAll}], true);
             this.activeFileterFacet.setVisible(true);
             if(this.bindButton) {
-                this.bindButton.setIconClass(this.bindButton.initialConfig.activeIconCls);
+                this.bindButton.setIconCls(this.bindButton.initialConfig.activeIconCls);
             }
         }else {
             if(this.bindButton) {
-                this.bindButton.setIconClass(this.bindButton.initialConfig.iconCls);
+                this.bindButton.setIconCls(this.bindButton.initialConfig.iconCls);
             }
         }
     }
@@ -113,20 +128,32 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
     }
 
     ,getFacetsValues: function(){
-        result = {};
-        this.items.each(function(fe){
-            if(!Ext.isEmpty(fe.facetId)){
-                fid = Ext.value(fe.facetId, fe.f);
-                if(Ext.isEmpty(result[fid])) result[fid] = [];
-                result[fid].push(fe.getValue());
+        var rez = {};
+        this.items.each(
+            function(fe){
+                if(!Ext.isEmpty(fe.facetId)){
+                    var value = fe.getValue();
+                    //add only if no empty selected values
+                    if(value && !Ext.isEmpty(value.values)) {
+                        var fid = Ext.valueFrom(fe.facetId, fe.f);
+                        if(Ext.isEmpty(rez[fid])) {
+                            rez[fid] = [];
+                        }
+                        rez[fid].push(value);
+                    }
+                }
             }
-        }, this);
-        return result;
+            ,this
+        );
+
+        return rez;
     }
 
     ,onActiveFiltersItemClick: function(idx, data, e){
-        if(data.id == -1) return this.fireEvent('change', {} );
-        i = this.find('facetId', data.facetId)[0];
+        if(data.id == -1) {
+            return this.fireEvent('change', {});
+        }
+        var i = this.child('[facetId="' + data.facetId + '"]');
         if(i){
             i.uncheck(data.value);
             fv = this.getFacetsValues();
@@ -135,11 +162,10 @@ CB.FilterPanel = Ext.extend(Ext.Panel, {
     }
 });
 
-Ext.reg('CBFilterPanel', CB.FilterPanel);
 
-
-CB.FacetActiveFilters = Ext.extend( Ext.Panel, {
-    title: L.ActiveFilters
+Ext.define('CB.FacetActiveFilters', {
+    extend: 'Ext.Panel'
+    ,title: L.ActiveFilters
     ,cls: 'facet activeFilters'
     ,autoHeight: true
     ,layout: 'fit'
@@ -150,8 +176,10 @@ CB.FacetActiveFilters = Ext.extend( Ext.Panel, {
     ,initComponent: function(){
         this.store = new Ext.data.JsonStore({
             autoDestroy: true
-            ,proxy: new  Ext.data.MemoryProxy()
-            ,fields: [ 'id', 'facetId', 'value', 'name' ]
+            ,model: 'Filter'
+            ,proxy: {
+                type: 'memory'
+            }
         });
         if( !Ext.isEmpty( this.data ) ) this.store.loadData( this.data, false );
 
@@ -164,22 +192,20 @@ CB.FacetActiveFilters = Ext.extend( Ext.Panel, {
                     '<ul class="filter_list">'
                         ,'<tpl for=".">'
                         ,'<li{[ (values.id == -1) ? \' class="reset"\' : ""]}>'
-                        ,   '<a href="#">{[Ext.value(values.name, "-")]}</a>'
+                        ,   '<a href="#">{[Ext.valueFrom(values.name, "-")]}</a>'
                         ,'</li>'
                     ,'</tpl></ul>'
                 ]
                 ,listeners: {
-                    click: {scope: this,
-                        fn: function(dv, idx, el, ev){
-                            r = this.store.getAt(idx);
-                            this.fireEvent('itemclick', idx, r.data, ev);
-                        }
+                    scope: this
+                    ,itemclick: function(cmp, record, item, index, e, eOpts){//dv, idx, el, ev
+                        r = this.store.getAt(index);
+                        this.fireEvent('itemclick', index, r.data, e);
                     }
                 }
             })
         });
         CB.FacetActiveFilters.superclass.initComponent.apply(this, arguments);
-        this.addEvents('itemclick');
     }
 
     ,loadData: function(data){
@@ -188,5 +214,3 @@ CB.FacetActiveFilters = Ext.extend( Ext.Panel, {
     }
 }
 );
-
-Ext.reg('CBFacetActiveFilters', CB.FacetActiveFilters);

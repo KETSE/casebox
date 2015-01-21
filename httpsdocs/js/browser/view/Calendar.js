@@ -1,7 +1,43 @@
 Ext.namespace('CB.browser.view');
 
-CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
-    activeItem: 2 // month view
+
+Ext.define('CB.browser.view.CalendarPanel', {
+    extend: 'CB.browser.view.Interface'
+    ,border: false
+    ,closable: true
+    ,layout: 'fit'
+    ,iconCls: 'icon-calendarView'
+
+    ,initComponent: function(){
+        this.view = new CB.browser.view.Calendar();
+
+        Ext.apply(this,{
+            iconCls: Ext.valueFrom(this.iconCls, 'icon-calendarView')
+            ,items: this.view
+        });
+
+        CB.browser.view.CalendarPanel.superclass.initComponent.apply(this, arguments);
+        this.view.setParams({
+            path:'/'
+            ,descendants: true
+            ,filters: {
+                "task_status":[{
+                    "mode":"OR"
+                    ,"values":["1","2"]
+                }]
+                ,"assigned":[{
+                    "mode":"OR"
+                    ,"values":[App.loginData.id]
+                }]
+            }
+        });
+    }
+});
+
+
+Ext.define('CB.Calendar', {
+    extend: 'Ext.calendar.CalendarPanel'
+    ,activeItem: 2 // month view
     ,border: false
     // CalendarPanel supports view-specific configs that are passed through to the
     // underlying views to make configuration possible without explicitly having to
@@ -25,49 +61,24 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
     // Once this component inits it will set a reference to itself as an application
     // member property for easy reference in other functions within App.
     ,initComponent: function(){
-        App.calendarPanel = this;
-
-        // This is an example calendar store that enables the events to have
-                // different colors based on CalendarId. This is not a fully-implmented
-                // multi-calendar implementation, which is beyond the scope of this sample app
-        this.calendarStore = new Ext.data.JsonStore({
-            root: 'calendars'
-            ,idProperty: 'id'
-            ,data: { "calendars":[{ id:1, title:"CaseBox" }] } // defined in calendar-list.js
-            ,proxy: new Ext.data.MemoryProxy()
-            ,autoLoad: true
-            ,fields: [
-                {name:'CalendarId', mapping: 'id', type: 'int'}
-                ,{name:'Title', mapping: 'title', type: 'string'}
-            ]
-            ,sortInfo: {
-                field: 'CalendarId'
-                ,direction: 'ASC'
-            }
+        // This is an example calendar store that enables event color-coding
+        this.calendarStore = Ext.create('Ext.calendar.data.MemoryCalendarStore', {
+            data: { "calendars":[{ id:1, title:"CaseBox" }] } // defined in calendar-list.js
         });
 
-        fields = Ext.calendar.EventRecord.prototype.fields.getRange();
-        fields.push({ name: 'template_id', type: 'int' });
-        fields.push('task_status');
-        fields.push('iconCls');
-        fields.push('cls');
-        fields.push('category_id');
-        this.eventsReloadTask = new Ext.util.DelayedTask( this.doReloadEventsStore, this);
         // A sample event store that loads static JSON from a local file. Obviously a real
         // implementation would likely be loading remote data via an HttpProxy, but the
-        // underlying store functionality is the same.  Note that if you would like to
-        // provide custom data mappings for events, see EventRecord.js.
-        this.eventStore = new Ext.data.JsonStore({
+        // underlying store functionality is the same.
+        this.eventStore = Ext.create('Ext.calendar.data.MemoryEventStore', {
             autoLoad: false
             ,autoDestroy: true
-            ,fields: fields
             ,listeners: {
                 scope: this
                 ,load: function(st, recs, opt){
                     Ext.each(
                         recs
                         , function(r){
-                            cls = 'cal-cat-'+ Ext.value(r.get('cls'), 'default') +
+                            cls = 'cal-cat-'+ Ext.valueFrom(r.get('cls'), 'default') +
                                 ( (r.get('task_status') == 3) ? ' cal-status-c' : '');
                             if(r.get('template_id') == App.config.default_task_template) {
                                 r.set('iconCls', '');
@@ -82,10 +93,12 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                         }
                         ,this
                     );
-                    this.getLayout().activeItem.syncSize();
+                    // this.getLayout().activeItem.syncSize();
                 }
             }
         });
+
+        this.eventsReloadTask = new Ext.util.DelayedTask( this.doReloadEventsStore, this);
 
         Ext.apply(this, {
             listeners: {
@@ -114,7 +127,10 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                     // edit canceled
                 }
                 ,viewchange: function(p, vw, dateInfo){
-                    if(this.editWin) this.editWin.hide();
+                    if(this.editWin) {
+                        this.editWin.hide();
+                    }
+
                     if(dateInfo !== null){
                         // will be null when switching to the event edit form so ignore
                         //Ext.getCmp('app-nav-picker').setValue(dateInfo.activeDate);
@@ -126,13 +142,6 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
                     this.showEditWindow({ StartDate: dt, IsAllDay: ad }, el);
                     this.clearMsg();
                 }
-                //,rangeselect: this.onRangeSelect
-                ,eventmove: function(vw, rec){
-                    this.updateRecordDatesRemotely(rec);
-                }
-                ,eventresize: function(vw, rec){
-                    this.updateRecordDatesRemotely(rec);
-                }
                 ,initdrag: function(vw){
                     // return false;
                     // if(this.editWin && this.editWin.isVisible()) this.editWin.hide();
@@ -141,26 +150,9 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         });
         CB.Calendar.superclass.initComponent.apply(this, arguments);
 
-        this.addEvents('objectopen', 'changeparams', 'reload');
         this.enableBubble(['objectopen', 'changeparams', 'reload']);
     }
-    ,updateRecordDatesRemotely: function(record){
-        CB_Tasks.updateDates(
-            {
-                id: record.get('EventId')
-                ,date_start: date_local_to_ISO_string(record.get('StartDate'))
-                ,date_end: date_local_to_ISO_string(record.get('EndDate'))
-            }
-            ,function(r, e){
-                if(r.success === true) {
-                    this.commit();
-                } else {
-                    this.reject();
-                }
-            }
-            ,record
-        );
-    }
+
     ,doReloadEventsStore: function(){
         this.allowedReload = true;
         if(Ext.isEmpty(this.getLayout().activeItem)) return;
@@ -171,8 +163,10 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         bounds.end.setMinutes(59);
         bounds.end.setSeconds(59);
         bounds.end.setMilliseconds(999);
-        p.dateStart = date_local_to_ISO_string(bounds.start);
-        p.dateEnd = date_local_to_ISO_string(bounds.end);
+        // p.dateStart = date_local_to_ISO_string(bounds.start);
+        // p.dateEnd = date_local_to_ISO_string(bounds.end);
+        p.dateStart = Ext.Date.format(bounds.start, 'Y-m-d') + 'T00:00:00.000Z';
+        p.dateEnd = Ext.Date.format(bounds.end, 'Y-m-d') + 'T23:59:59.999Z';
         Ext.apply(this.params, p);
 
         this.fireEvent('reload', this);
@@ -183,80 +177,111 @@ CB.Calendar = Ext.extend(Ext.calendar.CalendarPanel, {
         // it altogether. Because of this, it's up to the application code to tie the pieces together.
         // Note that this function is called from various event handlers in the CalendarPanel above.
     ,showEditWindow : function(rec, animateTarget){
-            if(Ext.isEmpty(rec.data)) {
-                rec = new Ext.calendar.EventRecord(rec);
-            }
+        if(Ext.isEmpty(rec.data)) {
+            return;
+            // rec = new Ext.calendar.EventRecord(rec);
+        }
 
-            var s = [
-                {
-                    nid: rec.data.EventId
-                    ,template_id: rec.data.template_id
-                    ,name: rec.data.Title
-                }
-            ];
+        var s = [{
+            nid: rec.data.EventId
+            ,template_id: rec.data.template_id
+            ,name: rec.data.Title
+        }];
 
-            this.fireEvent('selectionchange', s);
+        this.fireEvent('selectionchange', s);
     }
 
-        // This is an application-specific way to communicate CalendarPanel event messages back to the user.
-        // This could be replaced with a function to do "toast" style messages, growl messages, etc. This will
-        // vary based on application requirements, which is why it's not baked into the CalendarPanel.
-        ,showMsg: function(msg){
-            //Ext.fly('app-msg').update(msg).removeClass('x-hidden');
+    // This is an application-specific way to communicate CalendarPanel event messages back to the user.
+    // This could be replaced with a function to do "toast" style messages, growl messages, etc. This will
+    // vary based on application requirements, which is why it's not baked into the CalendarPanel.
+    ,showMsg: function(msg){
+        //Ext.fly('app-msg').update(msg).removeClass('x-hidden');
+    }
+
+    ,clearMsg: function(){
+        //Ext.fly('app-msg').update('').addClass('x-hidden');
+    }
+    // The CalendarPanel itself supports the standard Panel title config, but that title
+    // only spans the calendar views.  For a title that spans the entire width of the app
+    // we added a title to the layout's outer center region that is app-specific. This code
+    // updates that outer title based on the currently-selected view range anytime the view changes.
+    ,updateTitle: function(dateInfo, view){
+        if(Ext.isEmpty(this.titleItem)) {
+            return;
         }
 
-        ,clearMsg: function(){
-            //Ext.fly('app-msg').update('').addClass('x-hidden');
-        }
-        // The CalendarPanel itself supports the standard Panel title config, but that title
-        // only spans the calendar views.  For a title that spans the entire width of the app
-        // we added a title to the layout's outer center region that is app-specific. This code
-        // updates that outer title based on the currently-selected view range anytime the view changes.
-        ,updateTitle: function(dateInfo, view){
-            if(Ext.isEmpty(this.titleItem)) return ;
-                sd = dateInfo.viewStart;
-                ed = dateInfo.viewEnd;
-                ad = dateInfo.activeDate;
-                switch(view.xtype){
-                    case 'dayview':  this.titleItem.setText(ad.format('F j, Y')); break;
-                    case 'weekview':
-                if(sd.getFullYear() == ed.getFullYear()){
-                            if(sd.getMonth() == ed.getMonth()) this.titleItem.setText(sd.format('F j') + ' - ' + ed.format('j, Y'));
-                            else this.titleItem.setText( sd.format('F j') + ' - ' + ed.format('F j, Y') );
-                        }else this.titleItem.setText( sd.format('F j, Y') + ' - ' + ed.format('F j, Y') );
+        var sd = dateInfo.viewStart
+            ,ed = dateInfo.viewEnd
+            ,ad = dateInfo.activeDate
+            ,text = '';
 
-                        break;
-                    case 'monthview': this.titleItem.setText(ad.format('F Y')); break;
+        switch(view.xtype){
+            case 'dayview':
+                text = Ext.Date.format(ad, 'F j, Y');
+                break;
+
+            case 'weekview':
+                if(sd.getFullYear() == ed.getFullYear()) {
+                    if(sd.getMonth() == ed.getMonth()) {
+                        text = Ext.Date.format(sd, 'F j') + ' - ' + Ext.Date.format(ed, 'j, Y');
+                    } else {
+                        text = Ext.Date.format(sd, 'F j') + ' - ' + Ext.Date.format(ed, 'F j, Y');
+                    }
+                } else {
+                    text = Ext.Date.format(sd, 'F j, Y') + ' - ' + Ext.Date.format(ed, 'F j, Y');
                 }
-        }
-});
-Ext.reg('CBCalendar', CB.Calendar);
 
-CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
-    iconCls: 'icon-calendar'
+                break;
+
+            case 'monthview':
+                text = Ext.Date.format(ad, 'F Y');
+                break;
+        }
+
+        this.titleItem.text = text;
+        this.titleItem.setText(text);
+    }
+});
+
+Ext.define('CB.browser.view.Calendar', {
+    extend: 'CB.browser.view.Interface'
+    ,xtype: 'CBBrowserViewCalendar'
+
+    ,iconCls: 'icon-calendar'
     ,layout: 'border'
     ,closable: true
-    ,hideBorders: true
+    ,border: false
     ,tbarCssClass: 'x-panel-white'
     ,folderProperties: {}
+
     ,initComponent: function(){
 
-        this.titleItem = new Ext.Toolbar.TextItem({
+        this.titleItem = new Ext.toolbar.TextItem({
             id: 'caltitle'
             ,cls: 'calendar-title'
-            ,text: '<span style="font-size: 16px; font-weight: bold; color: #333">December 2012</span>'
+            ,text: '<span style="font-size: 16px; font-weight: bold; color: #333"> &nbsp; </span>'
         });
         var viewGroup = Ext.id();
 
         this.calendar = new CB.Calendar({
             titleItem: this.titleItem
             ,region: 'center'
+            ,border: false
             ,showNavBar: false
             ,listeners:{
                 scope: this
                 ,rangeselect: this.onRangeSelect
                 ,dayclick: this.onDayClick
                 ,selectionchange: this.onSelectionChange
+
+                //,rangeselect: this.onRangeSelect
+                ,eventmove: function(vw, rec){
+                    this.updateRecordDatesRemotely(rec);
+                }
+                ,eventresize: function(vw, rec){
+                    this.updateRecordDatesRemotely(rec);
+                }
+
             }
         });
 
@@ -267,12 +292,11 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
         this.refOwner.buttonCollection.addAll(
             new Ext.Button({
                 text: L.Day
-                ,id: 'dayview'
+                ,itemId: 'dayview'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-cal-day'
-                ,iconAlign:'top'
-                ,scale: 'large'
+                // ,iconCls: 'ib-cal-day'
+                ,scale: 'medium'
                 ,toggleGroup: 'cv' + viewGroup
                 ,scope: this.calendar
                 ,handler: this.calendar.onDayClick
@@ -280,12 +304,11 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
 
             ,new Ext.Button({
                 text: L.Week
-                ,id: 'weekview'
+                ,itemId: 'weekview'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-cal-week'
-                ,iconAlign:'top'
-                ,scale: 'large'
+                // ,iconCls: 'ib-cal-week'
+                ,scale: 'medium'
                 ,toggleGroup: 'cv' + viewGroup
                 ,scope: this.calendar
                 ,handler: this.calendar.onWeekClick
@@ -293,12 +316,11 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
 
             ,new Ext.Button({
                 text: L.Month
-                ,id: 'monthview'
+                ,itemId: 'monthview'
                 ,enableToggle: true
                 ,allowDepress: false
-                ,iconCls: 'ib-cal-month'
-                ,iconAlign:'top'
-                ,scale: 'large'
+                // ,iconCls: 'ib-cal-month'
+                ,scale: 'medium'
                 ,toggleGroup: 'cv' + viewGroup
                 ,pressed: true
                 ,scope: this.calendar
@@ -306,19 +328,17 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
             })
 
             ,new Ext.Button({
-                id: 'calprev'
-                ,iconCls: 'ib-arr-l'
-                ,iconAlign:'top'
-                ,scale: 'large'
+                itemId: 'calprev'
+                ,iconCls: 'im-arr-l'
+                ,scale: 'medium'
                 ,scope: this.calendar
                 ,handler: this.calendar.onPrevClick
             })
 
             ,new Ext.Button({
-                id: 'calnext'
-                ,iconCls: 'ib-arr-r'
-                ,iconAlign:'top'
-                ,scale: 'large'
+                itemId: 'calnext'
+                ,iconCls: 'im-arr-r'
+                ,scale: 'medium'
                 ,scope: this.calendar
                 ,handler: this.calendar.onNextClick
             })
@@ -334,9 +354,9 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
                 ,activate: this.onActivate
             }
         });
-        CB.browser.view.Calendar.superclass.initComponent.apply(this, arguments);
 
-        this.addEvents('createobject');
+        this.callParent(arguments);
+
         this.enableBubble(['createobject']);
     }
 
@@ -350,8 +370,9 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
 
     ,onMainStoreLoad: function(store, records, options) {
         var el = this.getEl();
+
         if(Ext.isEmpty(el) || !el.isVisible(true)) {
-            return false;
+            return;
         }
 
         var data = [];
@@ -360,24 +381,25 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
                 var d = r.data;
                 var sd = App.customRenderers.datetime(d.date);
                 var ed = App.customRenderers.datetime(d.date_end);
-                var ad = ((sd.length < 11) && (sd.length < 11));
+                var ad = ((sd.length < 11) && (ed.length < 11));
                 if(!Ext.isEmpty(d.date)) {
                     data.push({
-                        id: d.nid
-                        ,ad: ad
+                        EventId: d.nid //id
+                        ,IsAllDay: ad //ad
                         ,category_id: d.category_id
-                        ,cid: 1 //that's calendar id
-                        ,start: d.date
-                        ,end: Ext.value(d.date_end, d.date)
+                        ,CalendarId: 1 //that's calendar id (cid)
+                        ,StartDate: d.date //start
+                        ,EndDate: Ext.valueFrom(d.date_end, d.date) //end
                         ,task_status: d.task_status
                         ,template_id: d.template_id
-                        ,title: d.name
+                        ,Title: d.name //title
                         ,cls: d.cls
                     });
                 }
             }
             ,this
         );
+
         this.calendar.eventStore.loadData(data);
     }
 
@@ -386,10 +408,11 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
     }
 
     ,onRangeSelect: function(c, range, callback){
-        var allday = ((range.StartDate.format('H:i:s') == '00:00:00') && (range.EndDate.format('H:i:s') == '23:59:59') ) ? 1 : -1;
+        var allday = ((Ext.Date.format(range.StartDate, 'H:i:s') == '00:00:00') && (Ext.Date.format(range.EndDate, 'H:i:s') == '23:59:59') ) ? 1 : -1;
         var prefix = (allday == 1) ? 'date' : 'datetime';
         var data = {
-            template_id: App.config.default_task_template
+            pid: this.refOwner.folderProperties.id
+            ,template_id: App.config.default_task_template
             ,data: {
                 allday: {
                     value: allday
@@ -405,10 +428,11 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
     }
 
     ,onDayClick: function(c, date, ad, el){
-        var allday = (date.format('H:i:s') == '00:00:00') ? 1 : -1;
+        var allday = (Ext.Date.format(date, 'H:i:s') == '00:00:00') ? 1 : -1;
         var prefix = (allday == 1) ? 'date' : 'datetime';
         var data = {
-            template_id: App.config.default_task_template
+            pid: this.refOwner.folderProperties.id
+            ,template_id: App.config.default_task_template
             ,data: {
                 allday: {
                     value: allday
@@ -427,69 +451,59 @@ CB.browser.view.Calendar = Ext.extend(CB.browser.view.Interface, {
         this.fireEvent(
             'settoolbaritems'
             ,[
-                'apps'
-                ,'create'
-                ,'-'
-                ,'dayview'
-                ,'weekview'
-                ,'monthview'
                 ,'calprev'
                 ,'calnext'
                 ,'caltitle'
+                ,'->'
+                ,'dayview'
+                ,'weekview'
+                ,'monthview'
+                ,'-'
+                ,'reload'
+                ,'apps'
+                ,'-'
+                ,'more'
             ]
         );
     }
 
     ,onSelectionChange: function(selection) {
-        this.fireEvent('selectionchange', selection);
+        // this.fireEvent('selectionchange', selection);
+        if(selection) {
+            var data = Ext.isArray(selection)
+                ? data = selection[0]
+                : selection;
+
+            this.fireEvent('openobject', data);
+        }
     }
-});
 
-Ext.reg('CBBrowserViewCalendar', CB.browser.view.Calendar);
+    ,updateRecordDatesRemotely: function(record){
+        var dateEnd = date_local_to_ISO_string(record.get('EndDate'));
 
-
-CB.browser.view.CalendarPanel = Ext.extend(Ext.Panel, {
-    hideBorders: true
-    ,borders: false
-    ,closable: true
-    ,layout: 'fit'
-    ,iconCls: 'icon-calendarView'
-
-    ,initComponent: function(){
-        this.view = new CB.browser.view.Calendar();
-
-        Ext.apply(this,{
-            iconCls: Ext.value(this.iconCls, 'icon-calendarView')
-            ,items: this.view
-        });
-
-        CB.browser.view.CalendarPanel.superclass.initComponent.apply(this, arguments);
-        this.view.setParams({
-            path:'/'
-            ,descendants: true
-            ,filters: {
-                "task_status":[{
-                    "mode":"OR"
-                    ,"values":["1","2"]
-                }]
-                ,"assigned":[{
-                    "mode":"OR"
-                    ,"values":[App.loginData.id]
-                }]
+        if(this.store) {
+            var r = this.store.findRecord('nid', record.get('EventId'), 0, false, true, true);
+            if(r) {
+                if(Ext.isEmpty(r.get('date_end'))) {
+                    dateEnd = null;
+                }
             }
-        });
+        }
+
+        CB_Tasks.updateDates(
+            {
+                id: record.get('EventId')
+                ,date_start: date_local_to_ISO_string(record.get('StartDate'))
+                ,date_end: date_local_to_ISO_string(dateEnd)
+            }
+            ,function(r, e){
+                if(r.success === true) {
+                    this.commit();
+                } else {
+                    this.reject();
+                }
+            }
+            ,record
+        );
     }
 });
-Ext.reg('CBBrowserViewCalendarPanel', CB.browser.view.CalendarPanel);
-
-
-/* calendar component overrides */
-Ext.calendar.CalendarView.prototype.setStartDate = function(start, refresh) {
-    this.startDate = start.clearTime();
-    this.setViewBounds(start);
-
-    if (refresh === true) {
-        this.refresh();
-    }
-    this.fireEvent('datechange', this, this.startDate, this.viewStart, this.viewEnd);
-};

@@ -24,17 +24,16 @@ class MyCalendar extends Base
         }
 
         // ROOT NODE: check if last node is the one we should attach to
-        if ($this->lastNode->id == (String)$ourPid) {
+        if ($this->lastNode->getId() == (String)$ourPid) {
             return true;
         }
 
         // CHILDREN NODES: accept if last node is an instance of this class
-        if ($this->lastNode instanceof self) {
+        if (get_class($this->lastNode) == get_class($this)) {
             return true;
         }
 
         return false;
-
     }
 
     protected function createDefaultFilter()
@@ -111,11 +110,13 @@ class MyCalendar extends Base
         }
 
         $p['fq'] = $this->fq;
-        $p['fq'][] = 'user_ids:'.$_SESSION['user']['id'];
+        $p['fq'][] = 'task_u_assignee:'.$_SESSION['user']['id'];
         $p['fq'][] = 'task_status:[0 TO 2]';
 
         $s = new \CB\Search();
         $rez = $s->query($p);
+
+        $rez['view'] = 'calendar';
 
         return $rez;
     }
