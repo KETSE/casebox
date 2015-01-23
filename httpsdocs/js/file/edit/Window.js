@@ -109,6 +109,10 @@ Ext.define('CB.file.edit.Window', {
                 ,header: false
                 ,border: false
                 ,autoScroll: true
+                ,layout: {
+                    type: 'vbox'
+                    ,align: 'stretch'
+                }
 
                 ,split: {
                     size: 2

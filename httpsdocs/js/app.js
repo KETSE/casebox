@@ -180,7 +180,7 @@ function initApp() {
             if(Ext.isEmpty(va) && Ext.isPrimitive(v)) {
                 va = [v];
             }
-            clog('va', va);
+
             switch(source){
                 case 'thesauri':
                     store = isNaN(cfg.thesauriId) ? CB.DB.thesauri : getThesauriStore(cfg.thesauriId);
@@ -558,9 +558,9 @@ function initApp() {
                 : config.id
             );
 
-        w = App.openWindow(wndCfg);
+        var w = App.openWindow(wndCfg)
+            ,winHeight = window.innerHeight;
 
-        var winHeight = window.innerHeight;
         if((winHeight > 0) && (w.getHeight() > winHeight)) {
             w.setHeight(winHeight - 20);
         }
@@ -611,7 +611,7 @@ function initApp() {
         var x = pos[0];
         App.mainStatusBar.windowBar.items.each(
             function(btn) {
-                if(btn.win && (btn.win != w) && btn.win.isVisible() && !btn.win.maximized) {
+                if(btn.win && (btn.win != w) && btn.win.isVisible() && !btn.win.maximized && (btn.win.xtype !== 'CBSearchEditWindow')) {
                     var wx = btn.win.getX() - btn.win.el.getWidth() - 15;
                     if(x > wx) {
                         x = wx;

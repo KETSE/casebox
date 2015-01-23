@@ -908,15 +908,7 @@ Ext.define('CB.TSVWindow', {
     ,initComponent: function() {
         Ext.apply(this, {
             activeItem: 0
-            // ,bodyStyle: 'padding: 15px; background-color: #fff'
             ,bodyBorder: false
-            ,defaults: {
-                listeners: {
-                    scope: this
-                    ,verifyandsave: this.onVerifyAndSave
-                }
-
-            }
             ,items: [{
                 items: [{
                     xtype: 'displayfield'
@@ -950,12 +942,19 @@ Ext.define('CB.TSVWindow', {
                         ,afterrender: function(c){
                             c.getEl().on('click', this.onTSVMechanismClick, this);
                         }
+                        ,loaded: this.onViewLoaded
+                        ,verifyandsave: this.onVerifyAndSave
                     }
                 }
                 ]
             },{
                 xtype: 'TSVgaForm'
                 ,itemId: 'ga'
+                ,listeners: {
+                    scope: this
+                    ,loaded: this.onViewLoaded
+                    ,verifyandsave: this.onVerifyAndSave
+                }
             // },{
             //     xtype: 'TSVsmsForm'
             },{
@@ -966,13 +965,14 @@ Ext.define('CB.TSVWindow', {
         CB.TSVWindow.superclass.initComponent.apply(this, arguments);
         this.form = this.down('form');
     }
+
     ,onTSVMechanismClick: function(ev, el){
         this.TSVmethod = el.name;
 
         this.getLayout().setActiveItem(el.name);
         this.getLayout().activeItem.prepareInterface(this.data);
-        this.center();
     }
+
     ,onVerifyAndSave: function(data){
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
         CB_User.enableTSV({
@@ -980,10 +980,12 @@ Ext.define('CB.TSVWindow', {
             ,data: data
         }, this.processEnableTSV, this);
     }
+
     ,onYubikeySaveClick: function(){
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
         CB_User.TSVSaveYubikey( { code: this.getLayout().activeItem.buttons[1].getValue() }, this.processEnableTSV, this);
     }
+
     ,processEnableTSV: function(r, e){
         this.getEl().unmask();
         if(r.success === true){
@@ -993,6 +995,12 @@ Ext.define('CB.TSVWindow', {
             this.getLayout().activeItem.showError(r.msg);
             // this.syncSize();
         }
+    }
+
+    ,onViewLoaded: function() {
+        this.center();
+        this.center();
+
     }
 }
 );
@@ -1004,6 +1012,7 @@ Ext.define('CB.TSVgaForm', {
 
     ,style: 'background-color: #fff'
     ,width:500
+
     ,initComponent: function(){
         Ext.apply(this, {
             bodyStyle: 'padding: 10px'
@@ -1015,8 +1024,9 @@ Ext.define('CB.TSVgaForm', {
                 autoHeight: true
                 ,autoWidth:true
                 ,border: false
-                ,tpl: ['<tpl for="data">'
-                    ,'<p class="fwB"> Install the Google Authenticator app for your phone</p>'
+                ,tpl: [
+                    '<tpl for="data">'
+                    ,'<p class="fwB">Install the Google Authenticator app for your phone</p>'
                     ,'<ol class="ol p10">'
                     ,'<li> On your phone, open a web browser. </li>'
                     ,'<li> Go to <span class="fwB">m.google.com/authenticator</span>. </li>'
@@ -1070,12 +1080,16 @@ Ext.define('CB.TSVgaForm', {
                 }
             ]
         });
-        CB.TSVgaForm.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+        // this.enableBubble(['verifyandsave']);
     }
+
     ,prepareInterface: function(data){
         this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
         CB_User.getTSVTemplateData('ga', this.processGetTSVTemplateData, this);
     }
+
     ,processGetTSVTemplateData: function(r, e){
         this.getEl().unmask();
         if(r.success !== true) return;
@@ -1083,12 +1097,15 @@ Ext.define('CB.TSVgaForm', {
         p.data = r;
         p.update(r);
         this.down('[name="code"]').focus();
+        this.fireEvent('loaded', this, e);
     }
+
     ,onVerifyAndSaveClick: function(){
         this.fireEvent('verifyandsave', {
             code: this.down('[name="code"]').getValue()
         });
     }
+
     ,showError: function(msg){
         if(Ext.isEmpty(msg)) {
             msg = 'The code is incorrect. Try again';
@@ -1257,11 +1274,12 @@ Ext.define('CB.TSVybkForm', {
                 }
             ]
         });
-        CB.TSVybkForm.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
+        // this.enableBubble(['verifyandsave']);
     }
     ,prepareInterface: function(data){
         this.getForm().setValues(data);
-        // this.syncSize();
         App.focusFirstField(this);
     }
     ,onSaveClick: function(){

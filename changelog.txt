@@ -1,3 +1,19 @@
+CaseBox 1.9.379 (2015-01-24)
+==============================
+New Features, Improvements
+--------------------------
+- #4355 Add "Rename" for menuItem in Grid and Preview Panel '...' submenu
+- #4415 Search button in left ribbon should show popup as the New button
+- #4407 Creating new records after opening a search tmpl shows the window in the left part of screen
+- #4408 search forms: use top toolbar
+
+Fixed Bugs:
+----------
+- #4347 Can't upload files if an upload failed
+- #4348 Show "Search results: Cases (35)" when using search tmpl
+- #4400 UI issue when resizing right panel in File wnd
+- #4402 The code in two-factor auth to enable Google Authenticator doesn't work
+
 CaseBox 1.9.378 (2015-01-20)
 ==============================
 New Features, Improvements

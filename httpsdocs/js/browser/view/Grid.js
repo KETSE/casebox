@@ -30,6 +30,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,dataIndex: 'name'
                 ,renderer: function(v, m, r, ri, ci, s){
                     m.css = 'icon-grid-column-top '+ r.get('iconCls');
+
                     if(r.get('acl_count') > 0) {
                         m.css += ' node-has-acl';
                     }

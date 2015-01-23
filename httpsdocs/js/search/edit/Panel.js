@@ -11,7 +11,8 @@ Ext.define('CB.search.edit.Panel', {
     ,initComponent: function(){
         this.actions = {
             search: new Ext.Action({
-                iconCls: 'im-search'
+                text: L.Search
+                ,iconCls: 'im-search'
                 ,itemId: 'search'
                 ,scale: 'medium'
                 ,tooltip: L.Search
@@ -43,10 +44,10 @@ Ext.define('CB.search.edit.Panel', {
         ]});
 
         Ext.apply(this, {
-            bbar: [
+            tbar: [
                 this.actions.search
-                ,this.actions.clear
                 ,'->'
+                ,this.actions.clear
                 ,{
                     iconCls: 'im-points'
                     ,itemId: 'more'

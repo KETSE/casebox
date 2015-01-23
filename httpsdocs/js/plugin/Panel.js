@@ -17,7 +17,11 @@ Ext.define('CB.plugin.Panel', {
     ,initComponent: function(){
 
         Ext.apply(this, {
-            listeners: {
+            layout: {
+                type: 'vbox'
+                ,align: 'stretch'
+            }
+            ,listeners: {
                 scope: this
                 ,resize: function() {
                     this.updateLayout();

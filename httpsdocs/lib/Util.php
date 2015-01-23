@@ -511,19 +511,22 @@ function toNumericArray($v, $delimiter = ',')
     if (!is_array($v)) {
         $v = explode($delimiter, $v);
     }
+
+    $rez = array();
+
     $v = array_filter($v, 'is_numeric');
+
     foreach ($v as $k => $w) {
         $w = trim($w);
         $iw = intval($w);
         if ($iw == $w) {
-            $v[$k] = $iw;
+            $rez[] = $iw;
         } else {
-            $v[$k] = $w;
-            settype($v[$k], 'float');
+            $rez[] = floatval($v[$k]);
         }
     }
 
-    return $v;
+    return $rez;
 }
 
 function toTrimmedArray($v, $delimiter = ',')

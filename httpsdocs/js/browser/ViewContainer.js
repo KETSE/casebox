@@ -692,7 +692,7 @@ Ext.define('CB.browser.ViewContainer', {
             recs
             ,function(r){
                 var cfg = Ext.valueFrom(r.get('cfg'), {});
-                r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls );
+                r.set('iconCls', Ext.isEmpty(cfg.iconCls) ? getItemIcon(r.data) : cfg.iconCls);
             }
             ,this
         );

@@ -44,7 +44,7 @@ Ext.define('Ext.ux.HtmlEditor', {
         if(this.iframe) {
             var inc = (this.baseUri ? '<base href="' + this.baseUri + '" />' : '') + this.headerInclude;
             var h = Ext.fly(this.iframe).getHeight() - this.iframePad * 2;
-            return String.format(
+            return Ext.String.format(
                 '<html><head>' +
                 inc +
                 '<style type="text/css">body{border: 0; margin: 0; padding: {0}px; height: {1}px; cursor: text}</style></head>' +
