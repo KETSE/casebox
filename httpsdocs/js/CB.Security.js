@@ -234,27 +234,28 @@ Ext.define('CB.SecurityWindow', {
             title: L.Security
             ,iconCls: 'icon-key'
             ,autoHeight: true
-            ,tbarCssClass: 'x-panel-gray'
+            ,cls: 'x-panel-white'
+            ,bodyStyle: 'background-color: white'
             ,tbar: topToolbar
 
             ,items: [
                 this.objectLabel
                 ,{
                     layout: 'hbox'
-                    // ,region: 'center'
                     ,border: false
                     ,autoHeight: true
                     ,autoScroll: true
                     ,items: [{
-                        title: 'Group or user names:'
+                        title: L.GroupOrUserNames
                         ,layout: 'fit'
                         ,items: this.aclList
                         ,unstyled: true
-                        //,flex: 1
                         ,width: 400
                         ,padding: 10
+                        ,border: 0
                         ,buttonAlign: 'left'
-                        ,buttons: [this.editLabel
+                        ,buttons: [
+                            this.editLabel
                             ,'->'
                             ,this.actions.edit
                             ,this.actions.add
@@ -262,13 +263,13 @@ Ext.define('CB.SecurityWindow', {
                         ]
 
                     },{
-                        title: 'Permissions for selected user/group:'
+                        title: L.PermissionsForItem
                         ,layout: 'fit'
                         ,items: this.permissionsList
                         ,unstyled: true
-                        //,flex: 1
                         ,width: 400
                         ,padding: 10
+                        ,border: 0
                         ,style: 'margin-left: 50px'
                         ,buttonAlign: 'left'
                         ,buttons: [this.specialPermissionsLabel
@@ -296,7 +297,7 @@ Ext.define('CB.SecurityWindow', {
                                 this.cbInherit
                                 ,{
                                     xtype: 'label'
-                                    ,text: L.InheritPermissionsMgs
+                                    ,text: ' ' + L.InheritPermissionsMsg
                                     ,style: 'margin-top:3px'
                                     ,forId: 'cb_inherit' + this.data.id
                                     ,listeners: {

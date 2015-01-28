@@ -1,7 +1,7 @@
 Ext.namespace('CB');
 
 Ext.define('CB.WebdavWindow', {
-    extend: 'Ext.window.Window'
+    extend: 'Ext.Window'
 
     ,initComponent: function() {
         this.data = this.config.data;
@@ -36,7 +36,7 @@ Ext.define('CB.WebdavWindow', {
             ,title: 'WebDAV'
             ,padding: 10
             ,bodyStyle: 'padding:10px'
-            ,buttonAlign: 'center'
+
             ,items: [
                 this.textField
                 ,{
@@ -64,13 +64,17 @@ Ext.define('CB.WebdavWindow', {
                 ,afterrender: this.onShow
             }
         });
-        CB.WebdavWindow.superclass.initComponent.apply(this, arguments);
-        this.form = this.down('form');
+
+        this.callParent(arguments);
+
+        // this.form = this.down('form');
     }
 
     ,onShow: function() {
         this.textField.focus(true, 100);
+        this.updateLayout();
     }
+
     ,onOkClick: function(b, e) {
         Ext.util.Cookies.set('webdavHideDlg', this.cbHideDialog.getValue() ? 1 : 0);
 

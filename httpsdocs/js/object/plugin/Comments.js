@@ -277,7 +277,6 @@ Ext.define('CB.object.plugin.Comments', {
         this.loadedData.data.push(r.data);
         this.onLoadData(this.loadedData);
         this.messageField.focus();
-        // this.addCommentPanel.syncSize();
     }
 
     ,onCommentPanelMouseEnter: function(e, el, o) {

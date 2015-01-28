@@ -744,14 +744,17 @@ Ext.define('CB.browser.Tree', {
         if(Ext.isEmpty(this.expandingIds)) {
             return;
         }
+
         var id = this.expandingIds.shift()
             ,rec = this.store.findRecord('nid', id, 0, false, false, true);
-            node = this.store.getNodeById(rec.get('id'));
-        node.expand(
-            false
-            ,this.recursiveExpandIds
-            ,this
-        );
+            node = rec ? this.store.getNodeById(rec.get('id')) : null;
+        if(node) {
+            node.expand(
+                false
+                ,this.recursiveExpandIds
+                ,this
+            );
+        }
     }
 
     ,onCutClick: function(b, e) {

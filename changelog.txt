@@ -1,3 +1,22 @@
+CaseBox 1.9.380 (2015-01-28)
+==============================
+New Features, Improvements
+--------------------------
+- #4443 Use white background for Permissions system & check "Use inherit' missing label
+- #4444 Disable '...' after node title if it contains children nodes
+- #4445 Pagination in Form editor for object should have white background, not blue
+- #4457 Rename 'Edit' in grid toolbar into "Clipboard" and add dropdown arrow
+- #4448 Move in translations table
+
+Fixed Bugs:
+----------
+- #4439 check css for Save confirmation dialog in ObjWnd, question icon not displayed
+- #4450 Drag&Drop from Grid to Objects field doesn't work
+- #4459 SQL Errors for Pytkam
+- #4430 Combo field not showing selected value onStartEdit
+- #4452 User management wnd, when "session" expires, clicking Edit user have no effect
+- WebDav window broken
+
 CaseBox 1.9.379 (2015-01-24)
 ==============================
 New Features, Improvements

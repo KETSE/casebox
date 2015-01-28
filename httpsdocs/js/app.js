@@ -171,6 +171,8 @@ function initApp() {
             store = null;
 
             var rec
+                ,row
+                ,ri
                 ,r = []
                 ,va = toNumericArray(v)
                 ,cfg = grid.helperTree.getNode(record.get('id')).data.templateRecord.get('cfg')
@@ -196,23 +198,25 @@ function initApp() {
                     if(grid && grid.findParentByType) {
                         cw = grid.refOwner || grid.findParentByType(CB.Objects);
                     }
-                    if(!cw || !cw.objectsStore) return '';
+                    if(!cw || !cw.objectsStore) {
+                        return '';
+                    }
                     store = cw.objectsStore;
             }
 
             switch(cfg.renderer){
                 case 'listGreenIcons':
                     for(i=0; i < va.length; i++){
-                        ri = store.findExact('id', parseInt(va[i], 10));
-                        row = store.getAt(ri);
-                        if(ri >-1) r.push('<li class="lh16 icon-padding icon-element">'+row.get('name')+'</li>');
+                        row = store.findRecord('id', va[i], 0, false, false, true);
+                        if(row) {
+                            r.push('<li class="lh16 icon-padding icon-element">'+row.get('name')+'</li>');
+                        }
                     }
                     return '<ul class="clean">'+r.join('')+'</ul>';
                 case 'listObjIcons':
                     for(i=0; i < va.length; i++){
-                        ri = store.findExact('id', parseInt(va[i], 10));
-                        row = store.getAt(ri);
-                        if(ri >-1) {
+                        row = store.findRecord('id', va[i], 0, false, false, true);
+                        if(row) {
                             var icon = row.get('cfg');
                             if(!Ext.isEmpty(icon)) {
                                 icon = icon.iconCls;
@@ -228,10 +232,11 @@ function initApp() {
                 default:
                     for(i=0; i < va.length; i++){
                         rec = store.findRecord('id', va[i], 0, false, false, true);
+
                         if(rec) {
                             r.push(rec.get('name'));
                         } else {
-                            r.push(va[i]); //display id if nothing found (eseful for custom sources)
+                            r.push(va[i]); //display id if nothing found (useful for custom sources)
                         }
                     }
                     return r.join(', ');
@@ -282,7 +287,13 @@ function initApp() {
             rez = Ext.Date.format(Ext.isPrimitive(v) ? Ext.Date.parse(v.substr(0,10), 'Y-m-d') : v, App.dateFormat);
             return rez;
         }
-        ,datetime: function(v){
+        /**
+         * [datetime description]
+         * @param  varchar v
+         * @param  {[type]} showZeroTime [description]
+         * @return {[type]}              [description]
+         */
+        ,datetime: function(v, showZeroTime){
             var rez = '';
             if(Ext.isEmpty(v)) {
                 return rez;
@@ -297,9 +308,15 @@ function initApp() {
                 rez = Ext.Date.clearTime(rez, true);
             }
 
-            rez = Ext.Date.format(rez, App.dateFormat+' '+App.timeFormat);
+            rez = Ext.Date.format(rez, App.dateFormat + ' ' + App.timeFormat);
             if(Ext.isEmpty(rez)) {
                 return '';
+            }
+
+            if(showZeroTime === false) {
+                if(rez.substr(-5, 5) == '00:00') {
+                    rez = rez.substr(0, rez.length - 6);
+                }
             }
 
             return rez;

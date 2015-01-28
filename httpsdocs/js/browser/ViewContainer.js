@@ -201,6 +201,7 @@ Ext.define('CB.browser.ViewContainer', {
                 ,text: L.New
                 ,itemId: 'create'
                 ,iconCls: 'im-create'
+                ,disabled: true
                 ,scale: 'medium'
                 ,menu: [
                 ]
@@ -209,9 +210,8 @@ Ext.define('CB.browser.ViewContainer', {
             ,new Ext.Button(this.actions.upload)
             ,new Ext.Button(this.actions.download)
             ,new Ext.Button({
-                text: L.Edit
+                text: L.Clipboard
                 ,itemId: 'edit'
-                ,arrowVisible: false
                 ,iconCls: 'im-assignment'
                 ,scale: 'medium'
                 ,menu: [
@@ -791,8 +791,8 @@ Ext.define('CB.browser.ViewContainer', {
         if(this.sameParams(this.params, this.requestParams)) {
             return;
         }
-
         this.params = Ext.apply({}, this.requestParams);
+
         this.reloadView();
     }
 

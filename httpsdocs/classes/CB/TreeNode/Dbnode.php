@@ -70,7 +70,7 @@ class Dbnode extends Base
 
                 $res = DB\dbQuery(
                     'SELECT cfg
-                      , (SELECT 1
+                      /*, (SELECT 1
                          FROM tree
                          WHERE pid = $1
                              AND dstatus = 0'.
@@ -78,7 +78,7 @@ class Dbnode extends Base
                         ? ' AND `template_id` IN (0'.implode(',', $folderTemplates).')'
                         : ''
                     )
-                    .' LIMIT 1) has_childs
+                    .' LIMIT 1) has_childs/**/
                     FROM tree
                     WHERE id = $1',
                     $d['id']
@@ -86,7 +86,7 @@ class Dbnode extends Base
 
                 if ($r = $res->fetch_assoc()) {
                     $d['cfg'] = Util\toJSONArray($r['cfg']);
-                    $d['has_childs'] = !empty($r['has_childs']);
+                    // $d['has_childs'] = !empty($r['has_childs']);
                 }
                 $res->close();
             }
