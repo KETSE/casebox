@@ -802,6 +802,7 @@ class Security
         ) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
+
         Solr\Client::runBackgroundCron();
 
         return array('succes' => true, 'data' => $p['data'] );
@@ -925,6 +926,7 @@ class Security
         ) or die(DB\dbQueryError());
 
         Security::calculateUpdatedSecuritySets();
+
         Solr\Client::runBackgroundCron();
 
         return array('success' => true, 'data'=> array());
@@ -1136,26 +1138,49 @@ class Security
         return $rez;
     }
 
-    public static function calculateUpdatedSecuritySets()
+    /**
+     * recalculates security sets marked as updated in db
+     * @param  boolean $onlyForUserId specific user or all if false
+     * @return void
+     */
+    public static function calculateUpdatedSecuritySets($onlyForUserId = false)
     {
-        $res = DB\dbQuery(
-            'SELECT id FROM tree_acl_security_sets WHERE updated = 1'
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            Security::updateSecuritySet($r['id']);
+        if (!empty($_SESSION['calculatingSecuritySets'])) {
+            return;
         }
-        $res->close();
+
+        //set a flag to avoid double call to this function
+        $_SESSION['calculatingSecuritySets'] = true;
+
+        try {
+            DB\startTransaction();
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM tree_acl_security_sets
+                WHERE updated = 1'
+            ) or die(DB\dbQueryError());
+
+            while ($r = $res->fetch_assoc()) {
+                Security::updateSecuritySet($r['id'], $onlyForUserId);
+            }
+            $res->close();
+            DB\commitTransaction();
+
+        } catch (\Exception $e) {
+        }
+        unset($_SESSION['calculatingSecuritySets']);
     }
 
-    public static function updateSecuritySet($set_id)
+    public static function updateSecuritySet($set_id, $onlyForUserId = false)
     {
         $acl = array();
 
         /* get set */
         $set = '';
         $res = DB\dbQuery(
-            'SELECT `set` FROM tree_acl_security_sets WHERE id = $1',
+            'SELECT `set`
+            FROM tree_acl_security_sets
+            WHERE id = $1',
             $set_id
         ) or die(DB\dbQueryError());
 
@@ -1175,29 +1200,35 @@ class Security
         if (!empty($set)) {
             $object_id = $obj_ids[sizeof($obj_ids) -1];
 
-            $res = DB\dbQuery(
-                'SELECT DISTINCT
-                    u.id
-                    ,u.`type`
-                FROM tree_acl a
-                JOIN users_groups u on a.user_group_id = u.id
-                WHERE a.node_id in(0'.implode(',', $obj_ids).')
-                ORDER BY u.`type`'
-            ) or die(DB\dbQueryError());
-            while ($r = $res->fetch_assoc()) {
-                $group_users = array();
-                if (($r['id'] == $everyoneGroupId) || ($r['type'] == 2)) {
-                    $group_users[] = $r['id'];
-                } else {
-                    $group_users = Security::getGroupUserIds($r['id']);
-                }
-                foreach ($group_users as $user_id) {
-                    if (empty($users[$user_id])) {
-                        $users[$user_id] = Security::getEstimatedUserAccessForObject($object_id, $user_id);
+            if (!empty($onlyForUserId)) {
+                $users[$onlyForUserId] = Security::getEstimatedUserAccessForObject($object_id, $onlyForUserId);
+
+            } else {
+                $res = DB\dbQuery(
+                    'SELECT DISTINCT
+                        u.id
+                        ,u.`type`
+                    FROM tree_acl a
+                    JOIN users_groups u on a.user_group_id = u.id
+                    WHERE a.node_id in(0'.implode(',', $obj_ids).')
+                    ORDER BY u.`type`'
+                ) or die(DB\dbQueryError());
+
+                while ($r = $res->fetch_assoc()) {
+                    $group_users = array();
+                    if (($r['id'] == $everyoneGroupId) || ($r['type'] == 2)) {
+                        $group_users[] = $r['id'];
+                    } else {
+                        $group_users = Security::getGroupUserIds($r['id']);
+                    }
+                    foreach ($group_users as $user_id) {
+                        if (empty($users[$user_id])) {
+                            $users[$user_id] = Security::getEstimatedUserAccessForObject($object_id, $user_id);
+                        }
                     }
                 }
+                $res->close();
             }
-            $res->close();
         }
         /* end of iterate the full set of access credentials(users and/or groups) and estimate access for every user including everyone group */
 
@@ -1206,8 +1237,12 @@ class Security
         $res = DB\dbQuery(
             'DELETE
             FROM tree_acl_security_sets_result
-            WHERE security_set_id = $1',
-            $set_id
+            WHERE security_set_id = $1
+                and (ISNULL($2) OR ($2 = user_id))',
+            array(
+                $set_id
+                ,$onlyForUserId
+            )
         ) or die(DB\dbQueryError());
 
         $sql = 'INSERT INTO tree_acl_security_sets_result

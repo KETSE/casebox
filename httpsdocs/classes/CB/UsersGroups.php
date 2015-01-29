@@ -552,7 +552,7 @@ class UsersGroups
             ) or die(DB\dbQueryError());
         }
 
-        Security::calculateUpdatedSecuritySets();
+        Security::calculateUpdatedSecuritySets($user_id);
 
         Solr\Client::runBackgroundCron();
 

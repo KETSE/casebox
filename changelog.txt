@@ -1,3 +1,9 @@
+CaseBox 1.9.381 (2015-01-29)
+==============================
+New Features, Improvements
+--------------------------
+- optimization for security changes
+
 CaseBox 1.9.380 (2015-01-28)
 ==============================
 New Features, Improvements
