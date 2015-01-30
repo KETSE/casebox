@@ -1,3 +1,16 @@
+CaseBox 1.9.382 (2015-01-30)
+==============================
+New Features, Improvements
+--------------------------
+- set default sorting to asUCString for objects fields that are sorted by server (not in solr)
+  because these fields are processed by DC and replaced from ids to their values
+
+Fixed Bugs:
+----------
+- #4490 Can't add a new group in permissions for a folder
+- tree doesnt show expand icon for folders with subfolders
+- #4483 user with AddUser,AddGroups permissions can't add a group
+
 CaseBox 1.9.381 (2015-01-29)
 ==============================
 New Features, Improvements

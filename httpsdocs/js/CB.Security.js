@@ -79,7 +79,8 @@ Ext.define('CB.SecurityWindow', {
 
         this.aclStore = new Ext.data.DirectStore({
             autoSave: false
-            ,restful: true
+            ,autoSync: false
+            // ,restful: true
             ,model: 'AclRecord'
             ,proxy: {
                 type: 'direct'
@@ -144,7 +145,7 @@ Ext.define('CB.SecurityWindow', {
 
         this.permissionsStore = new Ext.data.ArrayStore({
             fields: [
-                {name:'id', type: 'int'}
+                'id'
                 ,'name'
                 ,'allow'
                 ,'deny'
@@ -373,7 +374,7 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,onAddClick: function(b, e){
-        w = new CB.ObjectsSelectionForm({
+        var w = new CB.ObjectsSelectionForm({
             config: {
                 autoLoad: true
                 ,source: 'usersgroups'
@@ -391,7 +392,7 @@ Ext.define('CB.SecurityWindow', {
 
                 var sm = this.aclList.getSelectionModel()
                     ,d = data[0]
-                    ,rec = this.aclStore.findRecord('id', parseInt(d.id, 10));
+                    ,rec = this.aclStore.findRecord('user_group_id', d.id, 0, false, false, true);
 
                 if(rec){
                     sm.select([rec]);
@@ -399,21 +400,27 @@ Ext.define('CB.SecurityWindow', {
                 }
 
                 var rd = {
-                    id: d.id
+                    id: null
+                    ,user_group_id: d.id
                     ,name: d.name
                     ,iconCls: d.iconCls
                     ,allow: '0,0,0,0,0,0,0,0,0,0,0,0'
                     ,deny: '0,0,0,0,0,0,0,0,0,0,0,0'
+                    ,phantom: true
                 };
 
-                this.aclStore.add([
-                    Ext.create(
-                        this.aclStore.getModel().getName()
-                        ,rd
-                    )
-                ]);
+                this.aclStore.beginUpdate();
 
-                this.aclStore.save();
+                rec = Ext.create(
+                    this.aclStore.getModel().getName()
+                    ,rd
+                );
+
+                this.aclStore.add([rec]);
+
+                this.aclStore.endUpdate();
+
+                this.aclStore.sync();
                 sm.select(this.aclStore.getCount()-1);
             }
             ,this
@@ -447,7 +454,8 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,onPermissionNodeClick: function(list, record, item, index, e, eOpts) { //dataView, index, node, e
-        cb = e.getTarget('input');
+        var cb = e.getTarget('input');
+
         if(Ext.isEmpty(record) || Ext.isEmpty(cb) || cb.disabled ) {
             return;
         }
@@ -459,14 +467,26 @@ Ext.define('CB.SecurityWindow', {
     }
 
     ,accessToGroupsData: function(accessRecord, groups){
-        rez = [];
-        allow = accessRecord.get('allow');
-        if(!Ext.isArray(allow)) allow = allow.split(',');
-        deny = accessRecord.get('deny');
-        if(!Ext.isArray(deny)) deny = deny.split(',');
-        Ext.iterate(groups, function(g, gv, obj){
-            rez.push( [g, L[g], this.accessToGroupValue(allow, gv), this.accessToGroupValue(deny, gv) ]);
-        }, this);
+        var rez = []
+            ,allow = accessRecord.get('allow')
+            ,deny = accessRecord.get('deny');
+
+        if(!Ext.isArray(allow)) {
+            allow = allow.split(',');
+        }
+
+        if(!Ext.isArray(deny)) {
+            deny = deny.split(',');
+        }
+
+        Ext.iterate(
+            groups
+            ,function(g, gv, obj){
+                rez.push( [g, L[g], this.accessToGroupValue(allow, gv), this.accessToGroupValue(deny, gv) ]);
+            }
+            ,this
+        );
+
         return rez;
     }
 
@@ -496,12 +516,15 @@ Ext.define('CB.SecurityWindow', {
 
     ,changeAccesses: function(groupRecord, newValue){
         var r = this.aclList.getSelectionModel().getSelection()[0]; //user or group record
+
         if(Ext.isEmpty(r)) {
             return;
         }
-        allow = r.get('allow').split(',');
-        deny = r.get('deny').split(',');
-        group = this.permissionsStore.accessGroups[groupRecord.get('name')];
+
+        var allow = r.get('allow').split(',')
+            ,deny = r.get('deny').split(',')
+            ,group = this.permissionsStore.accessGroups[groupRecord.get('id')];
+
         if(Ext.isEmpty(group)) {
             return;
         }

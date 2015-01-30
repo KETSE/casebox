@@ -159,6 +159,7 @@ Ext.define('AclRecord', {
     extend: 'Ext.data.Model'
     ,fields: [
         {name:'id', type: 'int'}
+        ,{name:'user_group_id', type: 'int'}
         ,'name'
         ,'iconCls'
         ,'allow'

@@ -122,7 +122,16 @@ class Sorter
         $a = @mb_strtoupper($a[Sorter::$sortField]);
         $b = @mb_strtoupper($b[Sorter::$sortField]);
 
-        return Sorter::asStringAsc($a, $b);
+        $rez = Sorter::asStringAsc(
+            array(
+                Sorter::$sortField => $a
+            ),
+            array(
+                Sorter::$sortField => $b
+            )
+        );
+
+        return $rez;
     }
 
     public static function asUCStringDesc($a, $b)

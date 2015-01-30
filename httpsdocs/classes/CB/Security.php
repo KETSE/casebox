@@ -46,7 +46,7 @@ class Security
     {
         $p['success'] = true;
 
-        if (!Security::isAdmin()) {
+        if (!Security::canAddGroup()) {
             throw new \Exception(L\get('Access_denied'));
         }
 
@@ -249,6 +249,7 @@ class Security
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
+            $r['user_group_id'] = $r['id'];
             $r['iconCls'] = ($r['type'] == 1) ? 'icon-users' : 'icon-user-'.$r['sex'];
 
             unset($r['sex']);
@@ -741,18 +742,19 @@ class Security
         DB\dbQuery(
             'INSERT INTO tree_acl (node_id, user_group_id, cid, uid)
             VALUES ($1
-                  , $2
-                  , $3
-                  , $3) ON duplicate KEY
+                    ,$2
+                    ,$3
+                    ,$3) ON duplicate KEY
             UPDATE id = last_insert_id(id)
                     , uid = $3',
             array(
                 $p['id']
-                ,$p['data']['id']
+                ,$p['data']['user_group_id']
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
 
+        $p['data']['id'] = $p['data']['user_group_id'];
         $rez['data'][] = $p['data'];
         Security::calculateUpdatedSecuritySets();
         Solr\Client::runBackgroundCron();
@@ -787,14 +789,14 @@ class Security
                  ,$2
                  ,$3
                  ,$4
-                 ,$5) ON duplicate KEY
+                 ,$5) ON DUPLICATE KEY
             UPDATE allow = $3
                     ,deny = $4
                     ,uid = $5
                     ,udate = CURRENT_TIMESTAMP',
             array(
                 $p['id']
-                ,$p['data']['id']
+                ,$p['data']['user_group_id']
                 ,$allow
                 ,$deny
                 ,$_SESSION['user']['id']
@@ -804,6 +806,8 @@ class Security
         Security::calculateUpdatedSecuritySets();
 
         Solr\Client::runBackgroundCron();
+
+        $p['data']['id'] = $p['data']['user_group_id'];
 
         return array('succes' => true, 'data' => $p['data'] );
     }

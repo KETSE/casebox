@@ -54,6 +54,7 @@ class Security
                 'id' => $p['node_id']
                 ,'data' => array(
                     'id' => $p['user_group_id']
+                    ,'user_group_id' => $p['user_group_id']
                     ,'allow' => $p['allow']
                     ,'deny' => $p['deny']
                 )
