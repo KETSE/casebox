@@ -198,6 +198,10 @@ Ext.define('CB.object.edit.Window', {
                 region: 'center'
                 ,autoScroll: true
                 ,border: false
+                ,layout: {
+                    type: 'vbox'
+                    ,align: 'stretch'
+                }
                 ,items: [
                     this.titleContainer
                     ,this.gridContainer
@@ -239,12 +243,14 @@ Ext.define('CB.object.edit.Window', {
                     ,header: false
                     ,border: false
                     ,autoScroll: true
+                    ,layout: {
+                        type: 'vbox'
+                        ,align: 'stretch'
+                    }
 
                     ,split: {
                         size: 2
                     }
-                    ,collapsible: true
-                    ,collapseMode: 'mini'
 
                     ,width: 300
                     ,items: [
@@ -774,7 +780,7 @@ Ext.define('CB.object.edit.Window', {
         Ext.Msg.show({
             title:  L.Confirmation
             ,msg:   L.SavingChangedDataMessage
-            ,icon:  'ext-mb-question'
+            ,icon:  Ext.Msg.QUESTION
             ,buttons: Ext.Msg.YESNOCANCEL
             ,scope: this
             ,fn: function(b, text, opt){

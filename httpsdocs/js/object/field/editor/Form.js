@@ -88,6 +88,7 @@ Ext.define('CB.object.field.editor.Form', {
                     xtype: 'panel'
                     ,region: 'center'
                     ,layout: 'border'
+                    ,bodyCls: 'x-panel-white'
                     ,items: [
                         {
                             xtype: 'panel'

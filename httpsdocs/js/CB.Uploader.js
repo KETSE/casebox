@@ -627,7 +627,7 @@ Ext.define('CB.UploadWindow', {
                 }else{
                     percent = stats.totalLoadedSize + stats.currentLoaded;
                     if(percent > 0) percent = Math.round(percent * 100 / stats.totalSize);
-                    this.statusLabel.setValue( String.format( Ext.valueFrom(L.UploadCompleted, 'Uploading {0}% ({1} out of {2})'), percent, (stats.totalLoadedCount + 1), stats.totalCount) );
+                    this.statusLabel.setValue( Ext.String.format( Ext.valueFrom(L.UploadCompleted, 'Uploading {0}% ({1} out of {2})'), percent, (stats.totalLoadedCount + 1), stats.totalCount) );
                 }
                 break;
             case 2:

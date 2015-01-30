@@ -424,9 +424,6 @@ class Template extends Object
         $rez = null;
         foreach ($this->data['fields'] as $fid => $fv) {
             if (($fv['id'] == $field['id'])) {
-                // if ($rez['type'] !== 'H') {
-                //     $rez = null;
-                // }
                 return $rez;
             }
             if (($fv['pid'] == $field['pid']) && ($fv['type'] == 'H')) {
@@ -507,7 +504,9 @@ class Template extends Object
                 }
                 $a = Util\toNumericArray($value);
                 if (empty($a)) {
-                    $value = '';
+                    if (empty($field['cfg']['source']) || !is_array($field['cfg']['source'])) {
+                        $value = '';
+                    }
                     break;
                 }
 

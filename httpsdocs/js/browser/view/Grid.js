@@ -30,6 +30,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,dataIndex: 'name'
                 ,renderer: function(v, m, r, ri, ci, s){
                     m.css = 'icon-grid-column-top '+ r.get('iconCls');
+
                     if(r.get('acl_count') > 0) {
                         m.css += ' node-has-acl';
                     }
@@ -74,7 +75,9 @@ Ext.define('CB.browser.view.Grid', {
                 ,dataIndex: 'date'
                 // ,xtype: 'datecolumn'
                 ,format: App.dateFormat + ' ' + App.timeFormat
-                ,renderer: App.customRenderers.datetime
+                ,renderer: function(v, m, r, ri, ci, s){
+                    return App.customRenderers.datetime(v, false);
+                }
                 ,sort: this.columnSortOverride
             },{
                 header: L.Size
@@ -526,8 +529,8 @@ Ext.define('CB.browser.view.Grid', {
             ,filters = options.request.config.params.filters
             ,emptyFilters = Ext.isEmpty(filters) || Ext.Object.isEmpty(filters)
             ,emptyText = emptyFilters
-                ? 'Drop files here or use "New" button'
-                : 'No results found';
+                ? L.GridEmptyText
+                : L.NoResultsFound;
 
         this.grid.view. emptyText = emptyText;
     }

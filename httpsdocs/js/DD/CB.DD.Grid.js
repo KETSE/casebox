@@ -124,10 +124,12 @@ Ext.define('CB.DD.Grid', {
         if(Ext.isEmpty(record)){
             return {};
         }
-        na = record.data ? record.data : record;
-        pid = record.pid
-            ? record.pid
-            : null;
+        var na = record.data
+                ? record.data
+                : record
+            ,pid = record.pid
+                ? record.pid
+                : null;
 
         var data = {
             id: na[this.idProperty]
@@ -136,6 +138,7 @@ Ext.define('CB.DD.Grid', {
             ,path: na.path
             ,template_id: na.template_id
         };
+
         return data;
     }
 

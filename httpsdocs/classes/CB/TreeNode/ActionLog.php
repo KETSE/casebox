@@ -14,10 +14,10 @@ class ActionLog extends Base
 
     protected function acceptedPath()
     {
-        $p = &$this->path;
-
         $lastId = 0;
-        if (!empty($p)) {
+        if (empty($this->lastNode)) {
+            return false;
+        } else {
             $lastId = $this->lastNode->id;
         }
 

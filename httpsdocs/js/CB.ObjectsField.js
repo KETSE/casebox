@@ -209,42 +209,47 @@ Ext.define('CB.ObjectsComboField', {
             }
         });
 
-        this._setValue = this.setValue;
-        this.setValue = function(v){
-            var value, values = Ext.Array.from(v);
-            v = [];
-            for (var i = 0; i < values.length; i++) {
+        this.callParent(arguments);
+    }
+
+    ,onBeforeLoadStore: function(st, options){
+        options.params = Ext.apply({}, this.cfg, options.params);
+    }
+
+    ,setValue: function(v){
+        var value, values = Ext.Array.from(v);
+
+        if(v == this.nullRecord) {
+            this.callParent([null]);
+            return;
+        }
+
+        v = [];
+        for (var i = 0; i < values.length; i++) {
+            if(!Ext.isEmpty(values[i])) {
                 value = (values[i] && values[i].isModel)
                     ? values[i].get(this.valueField)
                     : values[i];
                 v.push(value);
             }
+        }
 
-            this._setValue(v);
-            var text = this.store.getTexts(v);
+        this.callParent([v]);
+        var text = this.store.getTexts(v);
 
-            //delete this.customIcon;
-            if(Ext.isEmpty(text) && this.objectsStore){
-                var r = this.objectsStore.findRecord('id', v, 0, false, false, true);
+        //delete this.customIcon;
+        if(Ext.isEmpty(text) && this.objectsStore){
+            var r = this.objectsStore.findRecord('id', v, 0, false, false, true);
 
-                if(r){
-                    if(this.icon) {
-                        this.icon.className = 'ux-icon-combo-icon ' + r.get('iconCls');
-                    }
-                    text = this.objectsStore.getTexts(v);
+            if(r){
+                if(this.icon) {
+                    this.icon.className = 'ux-icon-combo-icon ' + r.get('iconCls');
                 }
+                text = this.objectsStore.getTexts(v);
             }
+        }
 
-            this.setRawValue(text);
-        };
-
-        this.callParent(arguments);
-
-        // CB.ObjectsComboField.superclass.initComponent.apply(this, arguments);
-    }
-
-    ,onBeforeLoadStore: function(st, options){
-        options.params = Ext.apply({}, this.cfg, options.params);
+        this.setRawValue(text);
     }
 
     ,onStoreLoad: function(store, recs, options) {
@@ -256,18 +261,20 @@ Ext.define('CB.ObjectsComboField', {
             ,this
         );
 
-        store.insert(
-            0
-            ,Ext.create(
-                store.getModel().getName()
-                ,{
-                    id: null
-                    ,name:''
-                }
-            )
+        this.nullRecord = Ext.create(
+            store.getModel().getName()
+            ,{
+                id: 0
+                ,name: ''
+            }
         );
 
-        if(Ext.isEmpty(this.lastQuery)) {
+        store.insert(
+            0
+            ,this.nullRecord
+        );
+
+        if(Ext.isEmpty(this.lastQuery) && !Ext.isEmpty(this.value)) {
             this.setValue(this.value);
         }
     }

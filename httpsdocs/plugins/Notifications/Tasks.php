@@ -91,6 +91,18 @@ class Tasks extends Objects
                     break;
             }
 
+            // temporary block for testing task notifications without prefix in title
+            // so that all notifications related to the task would be grouped in email by title
+            if ((Config::get('core_name') == 'dev') && ($userId == 3)) {
+                $subject = explode(': ', $subject);
+                if (sizeof($subject) > 1) {
+                    array_shift($subject);
+                    $subject = implode(': ', $subject);
+                } else {
+                    $subject = $subject[0];
+                }
+            }
+
             //replace possible placeholders in subj
             $subject = str_replace(
                 array(

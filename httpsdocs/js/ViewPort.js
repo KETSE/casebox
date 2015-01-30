@@ -796,6 +796,10 @@ Ext.define('CB.ViewPort', {
             bvalue = L.SearchResultsTitleTemplate;
             bvalue = bvalue.replace('{name}', CB.DB.templates.getName(options.search.template_id));
             bvalue = bvalue.replace('{count}', parseInt(action.total, 10));
+        } else if(!Ext.isEmpty(options.query)) {
+            bvalue = L.SearchResultsTitleTemplate;
+            bvalue = bvalue.replace('{name}', options.query);
+            bvalue = bvalue.replace('{count}', parseInt(action.total, 10));
         }
 
         this.breadcrumb.setValue(bvalue);

@@ -1,3 +1,68 @@
+CaseBox 1.9.383 (2015-01-30)
+==============================
+New Features, Improvements
+--------------------------
+- #4491 Preview not showing fields fith custom source
+
+Fixed Bugs:
+----------
+- #4455 Preview panel scrolled to Top when writing a comment
+
+CaseBox 1.9.382 (2015-01-30)
+==============================
+New Features, Improvements
+--------------------------
+- set default sorting to asUCString for objects fields that are sorted by server (not in solr)
+  because these fields are processed by DC and replaced from ids to their values
+
+Fixed Bugs:
+----------
+- #4467 Sorting by a non-indexed field gives SOLR error
+- #4490 Can't add a new group in permissions for a folder
+- tree doesnt show expand icon for folders with subfolders
+- #4483 user with AddUser,AddGroups permissions can't add a group
+
+CaseBox 1.9.381 (2015-01-29)
+==============================
+New Features, Improvements
+--------------------------
+- optimization for security changes
+
+CaseBox 1.9.380 (2015-01-28)
+==============================
+New Features, Improvements
+--------------------------
+- #4443 Use white background for Permissions system & check "Use inherit' missing label
+- #4444 Disable '...' after node title if it contains children nodes
+- #4445 Pagination in Form editor for object should have white background, not blue
+- #4457 Rename 'Edit' in grid toolbar into "Clipboard" and add dropdown arrow
+- #4448 Move in translations table
+
+Fixed Bugs:
+----------
+- #4439 check css for Save confirmation dialog in ObjWnd, question icon not displayed
+- #4450 Drag&Drop from Grid to Objects field doesn't work
+- #4459 SQL Errors for Pytkam
+- #4430 Combo field not showing selected value onStartEdit
+- #4452 User management wnd, when "session" expires, clicking Edit user have no effect
+- WebDav window broken
+
+CaseBox 1.9.379 (2015-01-24)
+==============================
+New Features, Improvements
+--------------------------
+- #4355 Add "Rename" for menuItem in Grid and Preview Panel '...' submenu
+- #4415 Search button in left ribbon should show popup as the New button
+- #4407 Creating new records after opening a search tmpl shows the window in the left part of screen
+- #4408 search forms: use top toolbar
+
+Fixed Bugs:
+----------
+- #4347 Can't upload files if an upload failed
+- #4348 Show "Search results: Cases (35)" when using search tmpl
+- #4400 UI issue when resizing right panel in File wnd
+- #4402 The code in two-factor auth to enable Google Authenticator doesn't work
+
 CaseBox 1.9.378 (2015-01-20)
 ==============================
 New Features, Improvements
@@ -644,7 +709,10 @@ CaseBox 1.9.334 (2014-09-23)
 ==============================
 New Features, Improvements
 --------------------------
+<<<<<<< HEAD
 
+=======
+>>>>>>> devel
 - moved security check on object create after firing onBeforeCreate event
     because the triggers can change pid of the created object
 - limit DisplayColumns plugin to work only for grid view

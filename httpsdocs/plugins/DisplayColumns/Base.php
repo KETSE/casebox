@@ -199,7 +199,6 @@ class Base
                                 $col['sortType'] = 'asFloat';
                                 break;
 
-                            case '_objects':
                             case 'checkbox':
                             case 'int':
                                 $col['sortType'] = 'asInt';
@@ -211,6 +210,7 @@ class Base
                                 $col['sortType'] = 'asUCText';
                                 break;
 
+                            case '_objects':
                             default:
                                 $col['sortType'] = 'asUCString';
                                 break;
@@ -421,6 +421,7 @@ class Base
             ,'sort' => array()
         );
 
+        $defaultColumns = array_keys(Config::getDefaultGridViewColumns());
         $displayColumns = $this->getDC();
 
         if (!empty($displayColumns['data'])) {
@@ -455,9 +456,11 @@ class Base
             if (in_array($dir, array('asc', 'desc')) &&
                 preg_match('/^[a-z_0-9]+$/i', $this->inputParams['sort'][0]['property'])
             ) {
-                $property = $this->inputParams['sort'][0]['property'];
                 if (!empty($displayColumns['data'][$property]['solr_column_name'])) {
                     $property = $displayColumns['data'][$property]['solr_column_name'];
+
+                } elseif (in_array($this->inputParams['sort'][0]['property'], $defaultColumns)) {
+                    $property = $this->inputParams['sort'][0]['property'];
                 }
             }
 
@@ -470,11 +473,12 @@ class Base
             $state = $this->getState($stateFrom);
 
             if (!empty($state['sort']['property'])) {
-                $property = $state['sort']['property'];
                 $dir = strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'));
 
                 if (!empty($displayColumns['data'][$property]['solr_column_name'])) {
                     $property = $displayColumns['data'][$property]['solr_column_name'];
+                } elseif (in_array($state['sort']['property'], $defaultColumns)) {
+                    $property = $state['sort']['property'];
                 }
             }
         }
@@ -494,6 +498,7 @@ class Base
 
     protected function sortRecords(&$data, $sortOptions, $fieldConfig)
     {
+        // var_dump($fieldConfig);
         $sortType = empty($fieldConfig['sortType'])
             ? 'asString'
             : $fieldConfig['sortType'];
@@ -502,8 +507,13 @@ class Base
 
         data\Sorter::$sortField = $sortOptions['property'];
 
-        $sorter = 'CB\\data\\Sorter::' . $sortType . ucfirst($sortDir);
+        $sorter = '\\CB\\data\\Sorter::' . $sortType . ucfirst($sortDir);
+        // die($sortType . ucfirst($sortDir));
 
+        // echo "$sorter \n";
+        // var_dump($data);
         usort($data, $sorter);
+        // var_dump($data);
+
     }
 }

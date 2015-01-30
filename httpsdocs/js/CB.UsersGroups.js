@@ -690,7 +690,7 @@ Ext.define('CB.UserEditWindow', {
             }
         });
 
-        CB.UserEditWindow.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         this.enableBubble(['verify']);
     }
@@ -897,7 +897,7 @@ Ext.define('CB.UsersGroupsForm', {
             }
         });
 
-        CB.UsersGroupsForm.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         this.grid = this.down('grid');
     }
@@ -1122,6 +1122,7 @@ Ext.define('CB.UsersGroups', {
                 ,save: this.onFormSave
                 ,loaded: this.onLoadFormData
                 ,edit: this.onEditUserData
+                ,verify: this.onVerifyEvent
             }
         } );
 
@@ -1154,7 +1155,7 @@ Ext.define('CB.UsersGroups', {
             }
         });
 
-        CB.UsersGroups.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
     }
     ,onSearchQuery: function(text, e){
         this.tree.filter(text, 'title');
@@ -1266,6 +1267,7 @@ Ext.define('CB.UsersGroups', {
                 ,savesuccess: function(){
                     this.form.loadData();
                 }
+                ,verify: this.onVerifyEvent
             }
         });
         w.show();

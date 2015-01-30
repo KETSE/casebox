@@ -47,7 +47,7 @@ Ext.define('CB.GenericForm', {
         Ext.Msg.show({
             title:  L.Confirmation
             ,msg:   L.SavingChangedDataMessage
-            ,icon:  'ext-mb-question'
+            ,icon:  Ext.Msg.QUESTION
             ,buttons: Ext.Msg.YESNOCANCEL
             ,scope: this
             ,fn: function(b, text, opt){

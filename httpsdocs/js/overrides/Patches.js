@@ -92,3 +92,22 @@ Ext.define('Ext.overrides.util.Collection', {
         }
     }
 });
+
+//VBox layout scroll restore issue
+Ext.define('My.override.VBoxLayoutFix', {
+    override: 'Ext.layout.container.VBox',
+    beginLayout: function(ownerContext) {
+        var scrollable = this.owner.getScrollable();
+        if (scrollable) {
+            this.lastScrollPosition = scrollable.getPosition();
+        }
+        this.callParent(arguments);
+    },
+    completeLayout: function(ownerContext) {
+        var scrollable = this.owner.getScrollable();
+        this.callParent(arguments);
+        if (scrollable) {
+            scrollable.scrollTo(this.lastScrollPosition);
+        }
+    }
+});

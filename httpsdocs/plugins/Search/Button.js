@@ -15,18 +15,19 @@ Ext.define('CB.plugin.Search.Button', {
 
         this.owner = owner;
 
-        this.button = new Ext.SplitButton({
+        this.button = new Ext.Button({
             qtip: L.Search
             ,itemId: 'pluginsearchbutton'
-            ,arrowAlign: 'bottom'
+            ,arrowVisible: false
+            // ,arrowAlign: 'bottom'
             ,iconCls: 'ib-search'
             ,scale: 'large'
             ,allowDepress: false
             ,hidden: true
             ,width: 20
             ,menu: []
-            ,scope: owner
-            ,handler: this.onButtonClick
+            // ,scope: owner
+            // ,handler: this.onButtonClick
         });
 
         owner.insert(3, this.button);

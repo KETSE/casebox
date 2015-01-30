@@ -641,7 +641,7 @@ Ext.define('CB.object.ViewContainer', {
     ,onRenameClick: function(b, e) {
         Ext.Msg.prompt(
             L.Rename
-            ,L.NewFileName
+            ,L.Name
             ,function(btn, text, opt) {
                 if(btn !== 'ok') {
                     return;
@@ -673,8 +673,8 @@ Ext.define('CB.object.ViewContainer', {
             }
             ,this
             ,false
-            ,this.loadedData.name
-        );
+            ,Ext.util.Format.htmlDecode(this.loadedData.name)
+        ).setWidth(400).center();
     }
 
     /**
