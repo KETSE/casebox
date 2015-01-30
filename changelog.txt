@@ -1,3 +1,13 @@
+CaseBox 1.9.383 (2015-01-30)
+==============================
+New Features, Improvements
+--------------------------
+- #4491 Preview not showing fields fith custom source
+
+Fixed Bugs:
+----------
+- #4455 Preview panel scrolled to Top when writing a comment
+
 CaseBox 1.9.382 (2015-01-30)
 ==============================
 New Features, Improvements
@@ -7,6 +17,7 @@ New Features, Improvements
 
 Fixed Bugs:
 ----------
+- #4467 Sorting by a non-indexed field gives SOLR error
 - #4490 Can't add a new group in permissions for a folder
 - tree doesnt show expand icon for folders with subfolders
 - #4483 user with AddUser,AddGroups permissions can't add a group

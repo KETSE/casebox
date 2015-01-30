@@ -135,19 +135,22 @@ Ext.define('CB.object.plugin.Comments', {
         });
 
         this.addCommentPanel = new Ext.Panel({
-            layout: 'border'
-            ,height: 65
+            layout: {
+                type: 'hbox'
+                ,align: 'stretch'
+            }
+            // ,height: 65
+            ,autoHeight: true
             ,border: false
             ,items: [
                 {
                     xtype: 'label'
-                    ,region: 'west'
                     ,width: 50
                     ,html: '<img class="i32" src="/' + App.config.coreName + '/photo/' + App.loginData.id + '.jpg?32=' + CB.DB.usersStore.getPhotoParam(App.loginData.id) + '" title="' + getUserDisplayName(true) + '">'
                 }
                 ,{
                     xtype: 'panel'
-                    ,region: 'center'
+                    ,flex: 1
                     ,layout: 'anchor'
                     ,padding: '0px 3px 0px 5px'
                     ,autoHeight: true
@@ -210,7 +213,6 @@ Ext.define('CB.object.plugin.Comments', {
         if(!field.isVisible()) {
             return;
         }
-        this.addCommentPanel.setHeight(field.getHeight() + 36);
     }
 
     ,onGetDraftIdCallback: function(draftId) {

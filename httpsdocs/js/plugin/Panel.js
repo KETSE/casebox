@@ -21,12 +21,6 @@ Ext.define('CB.plugin.Panel', {
                 type: 'vbox'
                 ,align: 'stretch'
             }
-            ,listeners: {
-                scope: this
-                ,resize: function() {
-                    this.updateLayout();
-                }
-            }
         });
 
         this.callParent(arguments);
