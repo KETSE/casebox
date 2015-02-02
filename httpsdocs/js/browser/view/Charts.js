@@ -261,7 +261,7 @@ Ext.define('CB.browser.view.Charts', {
                 }
                 data.push({
                     id: key
-                    ,name: Ext.valueFrom(val['title'], L['facet_'+key])
+                    ,name: Ext.htmlDecode(Ext.valueFrom(val['title'], L['facet_'+key]))
                 });
             }
             ,this
@@ -298,7 +298,7 @@ Ext.define('CB.browser.view.Charts', {
                     } else {
                         data[key][i].count = data[key][i].items;
                     }
-                    data[key][i].name = App.shortenString(data[key][i].name, 30);
+                    data[key][i].name = Ext.htmlDecode(App.shortenString(data[key][i].name, 30));
                 }
 
                 if(sorter) {

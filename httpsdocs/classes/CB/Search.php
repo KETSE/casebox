@@ -667,6 +667,7 @@ class Search extends Solr\Client
         $conn = Cache::get('solr_service');
 
         if (empty($conn)) {
+            \CB\debug('new Solr service from search');
             $conn = new Solr\Service();
 
             Cache::set('solr_service', $conn);

@@ -88,7 +88,7 @@ class Task extends Object
         /***/
 
         // save reminds
-        $reminds = @$this->data['data']['reminders'];
+        /*$reminds = @$this->data['data']['reminders'];
         if (isset($reminds['childs'])) {
             $reminds = array($reminds);
         }
@@ -106,7 +106,7 @@ class Task extends Object
                 'id' => $this->id
                 ,'reminds' => implode('-', $p)
             )
-        );
+        );/**/
 
     }
 

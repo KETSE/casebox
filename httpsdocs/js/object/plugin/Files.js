@@ -80,6 +80,8 @@ Ext.define('CB.object.plugin.Files', {
                     ddp.onNodeDrop = Ext.Function.createInterceptor(
                         ddp.onNodeDrop,
                         function() {
+                            Ext.apply(this.params, this.getLoadedObjectProperties());
+
                             this.dropPanel.hide();
                             this.lockPanel(false);
                         }

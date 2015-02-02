@@ -530,7 +530,7 @@ class Template extends Object
 
                     $res = DB\dbQuery($sql) or die(DB\dbQueryError());
                     while ($r = $res->fetch_assoc()) {
-                        @$label = htmlspecialchars($r['name'], ENT_COMPAT);
+                        @$label = htmlspecialchars(Util\coalesce($r['title'], $r['name']), ENT_COMPAT);
 
                         switch (@$field['cfg']['renderer']) {
                             case 'listGreenIcons':

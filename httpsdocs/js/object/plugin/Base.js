@@ -23,6 +23,14 @@ Ext.define('CB.object.plugin.Base', {
         //overwrite this method and add your logic
     }
 
+    ,getLoadedObjectProperties: function() {
+        var pluginsPanel = this.up('panel');
+
+        return pluginsPanel
+            ? pluginsPanel.loadedData
+            : {};
+    }
+
     ,prepareToolbar: function()
     {
         if(Ext.isEmpty(this.title) && Ext.isEmpty(this.actions)) {

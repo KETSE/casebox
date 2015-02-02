@@ -6,14 +6,12 @@ Ext.define('CB.browser.view.CalendarPanel', {
     ,border: false
     ,closable: true
     ,layout: 'fit'
-    ,iconCls: 'icon-calendarView'
 
     ,initComponent: function(){
         this.view = new CB.browser.view.Calendar();
 
         Ext.apply(this,{
-            iconCls: Ext.valueFrom(this.iconCls, 'icon-calendarView')
-            ,items: this.view
+            items: this.view
         });
 
         CB.browser.view.CalendarPanel.superclass.initComponent.apply(this, arguments);
@@ -247,7 +245,6 @@ Ext.define('CB.browser.view.Calendar', {
     extend: 'CB.browser.view.Interface'
     ,xtype: 'CBBrowserViewCalendar'
 
-    ,iconCls: 'icon-calendar'
     ,layout: 'border'
     ,closable: true
     ,border: false

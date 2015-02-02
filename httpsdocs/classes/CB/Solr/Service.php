@@ -69,13 +69,13 @@ class Service
         }
 
         //check cache
-        // $this->solr_handler = Cache::get('solr_service');
+        $this->solr_handler = Cache::get('solr_service');
 
         if (empty($this->solr_handler)) {
             if (!class_exists('\\Apache_Solr_Service', false)) {
                 require_once \CB\Config::get('SOLR_CLIENT');
             }
-
+            // \CB\debug('connecting', debug_backtrace());
             $this->solr_handler = new \Apache_Solr_Service(
                 $this->host,
                 $this->port,
@@ -87,7 +87,7 @@ class Service
             }
 
             //setting handler in cache raise errors for atomic updates
-            // Cache::set('solr_service', $this->solr_handler);
+            Cache::set('solr_service', $this->solr_handler);
         }
 
         return $this->solr_handler;
@@ -154,7 +154,7 @@ class Service
      * adding/updating multiple documents to solr.
      *
      * This function will divide received documents array into two sets of documents
-     * thouse that should be updated via by adding them again into solr
+     * those that should be updated by adding them again into solr
      * and other that should be updated via atomic update (if update property is set)
      *
      * @param array $docs array of documents to be indexed into solr
