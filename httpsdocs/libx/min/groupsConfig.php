@@ -125,9 +125,9 @@ return array_merge(
             ,'//js/Util.js'
 
             ,'//js/CB.DD.js'
-            ,'//js/DD/CB.DD.Tree.js'
-            ,'//js/DD/CB.DD.Grid.js'
-            ,'//js/DD/CB.DD.Panel.js'
+            ,'//js/DD/Tree.js'
+            ,'//js/DD/Grid.js'
+            ,'//js/DD/Panel.js'
 
             ,'//js/CB.VerticalEditGridHelperTree.js'
             ,'//js/DB/ObjectsStore.js'

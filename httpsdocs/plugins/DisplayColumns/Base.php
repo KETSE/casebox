@@ -238,10 +238,10 @@ class Base
         }
 
         /* merge the state with display columns */
+        $defaultColumns = array_keys(Config::getDefaultGridViewColumns());
+
         if (!empty($state['columns'])) {
             $rez = array();
-
-            $defaultColumns = array_keys(Config::getDefaultGridViewColumns());
 
             foreach ($state['columns'] as $k => $c) {
                 if (!empty($customColumns[$k])) {
@@ -279,7 +279,9 @@ class Base
 
         /* check if we need to sort records using php (in case sort field is not from solr)*/
         if (!empty($p['result']['sort']) &&
-            !empty($rez[$p['result']['sort']['property']]['localSort'])
+            !empty($rez[$p['result']['sort']['property']]['localSort']) &&
+            !in_array($p['result']['sort']['property'], $defaultColumns)
+
         ) {
             $this->sortRecords($data, $p['result']['sort'], $rez[$p['result']['sort']['property']]);
         }
@@ -498,7 +500,6 @@ class Base
 
     protected function sortRecords(&$data, $sortOptions, $fieldConfig)
     {
-        // var_dump($fieldConfig);
         $sortType = empty($fieldConfig['sortType'])
             ? 'asString'
             : $fieldConfig['sortType'];

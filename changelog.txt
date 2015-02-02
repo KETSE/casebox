@@ -1,3 +1,21 @@
+CaseBox 1.9.384 (2015-02-02)
+==============================
+New Features, Improvements
+--------------------------
+- #4505 Time fields: JSON, SOLR, Rendering
+- #4528 Render fullnames for Assigned field in Grid
+- #4529 Hide task reminders functionality
+- #4530 Remove icons in View submenu, rename and rearange a bit
+- #4531 customVars in 'fq' for FacetedNav
+- #3626 Tree should have gray background
+
+Fixed Bugs:
+----------
+- #4477 Time field not rendered ok
+- #4498 Can't attach files from CB to Tasks
+- sorting default columns mixes with server side sort
+- path not added in title for comments notifications
+
 CaseBox 1.9.383 (2015-01-30)
 ==============================
 New Features, Improvements

@@ -238,11 +238,19 @@ Ext.define('CB.VerticalEditGrid', {
                     meta.style += 'min-height:' + tr.get('cfg').height + 'px';
                 }
 
-                if(Ext.isEmpty(v)) return '';
+                if(Ext.isEmpty(v)) {
+                    return '';
+                }
+
                 var renderer = App.getCustomRenderer(tr.get('type'));
+
                 if(Ext.isEmpty(renderer)) {
                     return v;
                 }
+
+                //set field config into meta so that renderers could access necesary params
+                meta.fieldConfig = tr.get('cfg');
+
                 return renderer(v, meta, record, row_idx, col_idx, store, this);
             }
 
@@ -479,6 +487,7 @@ Ext.define('CB.VerticalEditGrid', {
         for (var i = 0; i < nodesList.length; i++) {
             var attr = nodesList[i].data;
             var r  = attr.templateRecord;
+
             records.push(
                 Ext.create(
                     this.store.getModel().getName()
@@ -499,8 +508,6 @@ Ext.define('CB.VerticalEditGrid', {
         }
         this.store.resumeEvents();
         this.store.add(records);
-
-        // this.updateLayout();
     }
 
     ,helperNodesFilter: function(node){
@@ -652,18 +659,23 @@ Ext.define('CB.VerticalEditGrid', {
     }
 
     ,onAfterEditProperty: function(editor, context, eOpts){
-        var nodeId = context.record.get('id');
-        var node = this.helperTree.getNode(nodeId);
+        var nodeId = context.record.get('id')
+            ,node = this.helperTree.getNode(nodeId)
+            ,tr = node.data.templateRecord;
 
-        // editor.un(
-        //     'afterrender'
-        //     ,this.addKeyMaps
-        //     ,this
-        // );
+        if((context.fieldRecord.get('type') == 'time') && !Ext.isEmpty(context.value)){
+            if(Ext.isPrimitive(context.value)) {
+                var format = Ext.valueFrom(tr.get('cfg').format, App.timeFormat);
+                context.value = Ext.Date.parse(context.value, format);
+            }
+
+            context.value = Ext.Date.format(context.value, 'H:i:s');
+            context.record.set('value', context.value);
+        }
 
         if(context.field == 'value'){
             //check if field has validator set and notify if validation not passed
-            var validator = node.data.templateRecord.get('cfg').validator;
+            var validator = tr.get('cfg').validator;
             if(!Ext.isEmpty(validator)) {
                 if(!Ext.isDefined(CB.Validators[validator])) {
                     plog('Undefined field validator: ' + validator);
@@ -680,7 +692,7 @@ Ext.define('CB.VerticalEditGrid', {
         if(context.value != context.originalValue) {
             this.fireEvent(
                 'change'
-                ,node.data.templateRecord.get('name')
+                ,tr.get('name')
                 ,context.value
                 ,context.originalValue
             );

@@ -170,6 +170,11 @@ class FacetNav extends Base
             $this->getParentNodeFilters()
         );
 
+        // replace possible variables in fq
+        foreach ($fq as $key => $value) {
+            $fq[$key] = str_replace('$activeUserId', $_SESSION['user']['id'], $value);
+        }
+
         $s = new \CB\Search();
         $sr = $s->query(
             array(
@@ -224,6 +229,7 @@ class FacetNav extends Base
         $rez = array('data' => array());
 
         $p = $this->requestParams;
+        // var_dump($p);
         $p['fq'] = array_merge(
             $this->config['fq'],
             $this->getParentNodeFilters()

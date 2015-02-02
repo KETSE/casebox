@@ -188,8 +188,6 @@ Ext.define('CB.UsersGroupsTree', {
     extend: 'Ext.tree.TreePanel'
     ,autoScroll: true
     ,containerScroll: true
-    ,stateId: 'CB_UsersGroupsState'
-    ,stateful: true
     ,rootVisible: false
     ,animate: false
     ,border: false
@@ -627,10 +625,11 @@ Ext.define('CB.UsersGroupsTree', {
     ,filter: function(text, property){
         var store = this.store;
 
+        store.clearFilter();
         if(Ext.isEmpty(text)){
-            store.clearFilter();
-             return;
+            return;
         }
+
         text = text.toLowerCase();
 
         store.filterBy(

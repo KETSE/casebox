@@ -9,6 +9,7 @@ Ext.namespace('CB');
 
 Ext.define('CB.plugin.Panel', {
     extend: 'Ext.Panel'
+    ,alias: 'CBPluginPanel'
 
     ,autoHeight: true
     ,autoScroll: true
@@ -26,6 +27,7 @@ Ext.define('CB.plugin.Panel', {
         this.callParent(arguments);
 
         App.on('filesuploaded', this.onFilesUploaded, this);
+        App.on('objectsaction', this.onObjectsAction, this);
 
         this.delayLoadTask = new Ext.util.DelayedTask(this.doLoad, this);
     }
@@ -142,6 +144,12 @@ Ext.define('CB.plugin.Panel', {
             if(pids.indexOf(String(this.loadedParams.id)) >=0 ) {
                 this.reload();
             }
+        }
+    }
+
+    ,onObjectsAction: function(action, data, e) {
+        if(data.targetId == this.loadedParams.id) {
+            this.reload();
         }
     }
 

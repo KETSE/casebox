@@ -321,31 +321,23 @@ function initApp() {
 
             return rez;
         }
-        ,time: function(v){
-            if(v && Ext.isPrimitive(v)) return v;
-            t = '';
-            if(!Ext.isEmpty(v.hours)){
-                t = v.hours;
-                switch(v.hours){
-                    case 1: t = t + ' '+L.hour; break;
-                    case 2:
-                    case 3:
-                    case 4: t = t + ' '+L.ofHour; break;
-                    case 5: t = t + ' '+L.ofHours; break;
-                }
+
+        ,time: function(v, meta){
+            if(Ext.isEmpty(v)) {
+                return '';
             }
-            if(!Ext.isEmpty(v.minutes)){
-                t = t + ' ' + v.minutes;
-                switch(v.minutes){
-                    case 1: t = t + ' ' + L.minute; break;
-                    case 2:
-                    case 3:
-                    case 4: t = t + ' ' + L.ofMinute; break;
-                    case 5: t = t + ' ' + L.ofMinutes; break;
-                }
+
+            if(Ext.isPrimitive(v)) {
+                v = Ext.Date.parse(v, 'H:i:s');
             }
-            return t;
+
+            var format = (meta.fieldConfig && meta.fieldConfig.format)
+                ? meta.fieldConfig.format
+                : App.timeFormat;
+
+            return Ext.Date.format(v, format);
         }
+
         ,filesize: function(v){
             if(isNaN(v) || Ext.isEmpty(v) || (v == '0') || (v <= 0)) {
                 return '';
@@ -389,7 +381,10 @@ function initApp() {
             return CB.DB.importance.getName(v);
         }
         ,timeUnits: function(v){
-            if(Ext.isEmpty(v)) return '';
+            if(Ext.isEmpty(v)) {
+                return '';
+            }
+
             return CB.DB.timeUnits.getName(v);
         }
         ,taskStatus: function(v, m, r, ri, ci, s){
@@ -423,6 +418,8 @@ function initApp() {
                 return App.customRenderers.date;
             case 'datetime':
                 return App.customRenderers.datetime;
+            case 'time':
+                return App.customRenderers.time;
             case '_objects':
                 return App.customRenderers.objectsField;
             case 'combo':
@@ -951,7 +948,7 @@ function initApp() {
                     ,width: 130
                 });
             case 'time':
-                return new Ext.form.TimeField({
+                return new Ext.form.field.Time({
                     enableKeyEvents: true
                     ,format: App.timeFormat
                 });
@@ -1310,19 +1307,19 @@ window.ondragend = function(e){
     delete window.dragFromWindow;
 };
 
-window.onerror = function(message, url, linenumber)
-{
-   var errors = {};
-   errors.message    = message;
-   errors.url        = url;
-   errors.linenumber = linenumber;
-   clog('ERROR:', errors);
-  // jQuery.ajax({
-  //     type: "POST",
-  //     url: "/scripts/error_report.php",
-  //     dataType: "json",
-  //     data: errors
-  //  });
+// window.onerror = function(message, url, linenumber)
+// {
+//    var errors = {};
+//    errors.message    = message;
+//    errors.url        = url;
+//    errors.linenumber = linenumber;
+//    clog('ERROR:', errors);
+//   // jQuery.ajax({
+//   //     type: "POST",
+//   //     url: "/scripts/error_report.php",
+//   //     dataType: "json",
+//   //     data: errors
+//   //  });
 
-  return true;
-};
+//   return true;
+// };

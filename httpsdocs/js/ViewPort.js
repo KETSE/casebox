@@ -113,12 +113,9 @@ Ext.define('CB.ViewPort', {
             ,header: false
             ,animCollapse: false
             ,plain: true
-            ,style: {
-                border: 0
-            }
-            ,bodyStyle: {
-                border: 0
-            }
+            ,border: false
+            ,bodyBorder: false
+            ,bodyStyle: 'background-color: #F4F4F4'
             ,bodyCls: 'main-nav'
             ,defaults: {
                 border: false

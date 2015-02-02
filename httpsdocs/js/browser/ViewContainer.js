@@ -383,16 +383,14 @@ Ext.define('CB.browser.ViewContainer', {
             ,tbar: this.viewToolbar
             ,items: [
                 new CB.browser.view.Grid({
-                    iconCls: 'icon-grid-view'
-                    ,border: false
+                    border: false
                     ,refOwner: this
                     ,store: this.store
                     ,showObjectPropertiesPanel: true
                     ,getProperty: getPropertyHandler
                 })
                 ,new CB.browser.view.Calendar({
-                    iconCls: 'icon-calendar-view'
-                    ,border: false
+                    border: false
                     ,refOwner: this
                     ,store: this.store
                     ,getProperty: getPropertyHandler
@@ -402,8 +400,7 @@ Ext.define('CB.browser.ViewContainer', {
                     }
                 })
                 ,new CB.browser.view.Charts({
-                    iconCls: 'icon-chart'
-                    ,border: false
+                    border: false
                     ,refOwner: this
                     ,addDivider: true // forr atdding a divider in menu before this view element
                     ,store: this.store
@@ -738,6 +735,11 @@ Ext.define('CB.browser.ViewContainer', {
             }
         }
 
+        //reset userViewSet flag if a view is given
+        if(!Ext.isEmpty(paramsSubset.view)) {
+            delete this.userViewSet;
+        }
+
         Ext.apply(p, paramsSubset);
         this.setParams(p);
     }
@@ -784,7 +786,7 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.requestParams = newParams;
 
-        this.loadParamsTask.delay(500);
+        this.loadParamsTask.delay(200);
     }
 
     ,loadParams: function(){

@@ -68,7 +68,16 @@ class Comments extends Objects
         $o = \CB\Objects::getCachedObject($objData['pid']);
         $d = $o->getData();
 
-        $subject = '['.$coreName.' #'.$d['id'].'] '.$d['name'].' ('.$d['path'].')';//[$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
+        $path = '/';
+        if (!empty($d['pids'])) {
+            $path = Util\toNumericArray($d['pids']);
+            array_pop($path);
+            $path = \CB\Path::getPathText(implode('/', $path));
+        } else {
+            $path = \CB\Path::getPathText($d['path']);
+        }
+
+        $subject = '['.$coreName.' #'.$d['id'].'] '.$d['name'].' ('.$path.')';//[$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
 
         $body  = '<h3><a href="' . $coreUrl . 'v-' . $objData['pid'] . '/">' . \CB\Objects::getName($objData['pid']) . '</a></h3>'.
             $message.
