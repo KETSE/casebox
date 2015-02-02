@@ -486,7 +486,7 @@ class Objects
 
                     case 'time':
                         if (!empty($f['value'])) {
-                            $a = expode(':', $f['value']);
+                            $a = explode(':', $f['value']);
                             @$f['value'] = $a[0] * 3600 + $a[1] * 60 + $a[2];
                         }
                         break;
