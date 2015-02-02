@@ -554,7 +554,9 @@ Ext.define('CB.VerticalEditGrid', {
         if((tr.get('type') == 'H') || (tr.get('cfg').readOnly == 1) ){
             return false;
         }
-        if(context.field != 'value') return;
+        if(context.field != 'value') {
+            return;
+        }
 
         var pw = this.findParentByType(CB.GenericForm, false)
             || this.refOwner
@@ -568,6 +570,13 @@ Ext.define('CB.VerticalEditGrid', {
         /* get and set pidValue if dependent */
         if( (Ext.isDefined(tr.get('cfg').dependency) ) && !Ext.isEmpty(tr.get('pid')) ) {
                 context.pidValue = this.helperTree.getParentValue(context.record.get('id'), tr.get('pid'));
+        }
+
+        /* prepare time fields */
+        if((t == 'time') && !Ext.isEmpty(context.value)) {
+            var a = context.value.split(':');
+            a.pop();
+            context.value = a.join(':');
         }
 
         var col = context.column;
@@ -663,6 +672,7 @@ Ext.define('CB.VerticalEditGrid', {
             ,node = this.helperTree.getNode(nodeId)
             ,tr = node.data.templateRecord;
 
+        /* process time fields */
         if((context.fieldRecord.get('type') == 'time') && !Ext.isEmpty(context.value)){
             if(Ext.isPrimitive(context.value)) {
                 var format = Ext.valueFrom(tr.get('cfg').format, App.timeFormat);
