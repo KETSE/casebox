@@ -2,6 +2,17 @@ CaseBox 1.9.384 (2015-02-02)
 ==============================
 New Features, Improvements
 --------------------------
+- #4505 Time fields: JSON, SOLR, Rendering. Time rendered in grid and on edit as "01:45:00".
+
+Fixed Bugs:
+----------
+- issues with cached solr connections
+- #4429 UI blocked after using Task.Assigned field
+
+CaseBox 1.9.384 (2015-02-02)
+==============================
+New Features, Improvements
+--------------------------
 - #4505 Time fields: JSON, SOLR, Rendering
 - #4528 Render fullnames for Assigned field in Grid
 - #4529 Hide task reminders functionality

@@ -120,7 +120,9 @@ Ext.define('CB.plugin.field.DropDownList', {
             ,onTriggerClick: Ext.emptyFn
             ,syncSelection: Ext.emptyFn
             ,setSelection: Ext.emptyFn
-            ,onCollapse: Ext.emptyFn
+            ,onCollapse: function() {
+                delete this.preventEditComplete;
+            }
             ,onEsc: Ext.emptyFn
             ,bindStore: Ext.emptyFn
 
@@ -130,7 +132,6 @@ Ext.define('CB.plugin.field.DropDownList', {
 
             ,select : function(record, index){
                 if(this.fireEvent('beforeselect', this, record, index) !== false){
-                    // this.setSelectedValue(record);
                     ed.preventEditComplete = true;
                     this.collapse();
                     this.fireEvent('select', this, record, index);

@@ -613,10 +613,21 @@ class Template extends Object
                     @$_SESSION['user']['cfg']['timezone']
                 );
 
-                // $tmp = explode(' ', $value);
-                // if (!empty($tmp[1]) && ($tmp[1] == '00:00')) {
-                //     $value = $tmp[0];
-                // }
+                break;
+
+            case 'time':
+                if (empty($value)) {
+                    continue;
+                }
+
+                $format = empty($field['format'])
+                    ? 'H:i'
+                    : $field['format'];
+
+                $date = \DateTime::createFromFormat('H:i:s', $value);
+
+                $value = $date->format($format);
+
                 break;
 
             case 'html':

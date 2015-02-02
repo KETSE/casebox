@@ -68,8 +68,9 @@ class Service
             return $this->solr_handler;
         }
 
+        $cacheCoreName = 'solr_service_' . $this->core;
         //check cache
-        $this->solr_handler = Cache::get('solr_service');
+        $this->solr_handler = Cache::get($cacheCoreName);
 
         if (empty($this->solr_handler)) {
             if (!class_exists('\\Apache_Solr_Service', false)) {
@@ -87,7 +88,7 @@ class Service
             }
 
             //setting handler in cache raise errors for atomic updates
-            Cache::set('solr_service', $this->solr_handler);
+            Cache::set($cacheCoreName, $this->solr_handler);
         }
 
         return $this->solr_handler;
