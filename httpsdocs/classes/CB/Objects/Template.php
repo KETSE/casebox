@@ -626,7 +626,9 @@ class Template extends Object
 
                 $date = \DateTime::createFromFormat('H:i:s', $value);
 
-                $value = $date->format($format);
+                if (is_object($date)) {
+                    $value = $date->format($format);
+                }
 
                 break;
 
