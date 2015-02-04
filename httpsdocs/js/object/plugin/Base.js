@@ -9,7 +9,7 @@ Ext.define('CB.object.plugin.Base', {
     ,initComponent: function(){
         this.prepareToolbar();
 
-        this.enableBubble(['openproperties', 'createobject']);
+        this.enableBubble(['openproperties', 'createobject', 'objectopen']);
 
         // CB.object.plugin.Base.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
@@ -67,6 +67,7 @@ Ext.define('CB.object.plugin.Base', {
     }
 
     ,openObjectProperties: function(data) {
+        clog('openObjectProperties', data);
         this.fireEvent('openproperties', data);
     }
 

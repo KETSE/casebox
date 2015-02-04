@@ -71,6 +71,10 @@ class MyCalendar extends Base
             $rez = $this->getChildrenTasks();
         }
 
+        if (!empty($this->config['view'])) {
+            $rez['view'] = $this->config['view'];
+        }
+
         return $rez;
     }
 

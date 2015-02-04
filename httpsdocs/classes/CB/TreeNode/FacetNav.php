@@ -23,7 +23,7 @@ class FacetNav extends Base
         $ourPid = @$this->config['pid'];
 
         // ROOT NODE: check if last node is the one we should attach to
-        if ($this->lastNode->id == (String)$ourPid) {
+        if ($this->lastNode->guid == (String)$ourPid) {
             return true;
         }
 
@@ -149,6 +149,10 @@ class FacetNav extends Base
         return $rez;
     }
 
+    /**
+     * getChildNodes description
+     * @return json responce
+     */
     protected function getChildNodes()
     {
         $rez = array('data' => array());
@@ -170,10 +174,7 @@ class FacetNav extends Base
             $this->getParentNodeFilters()
         );
 
-        // replace possible variables in fq
-        foreach ($fq as $key => $value) {
-            $fq[$key] = str_replace('$activeUserId', $_SESSION['user']['id'], $value);
-        }
+        $this->replaceFilterVars($fq);
 
         $s = new \CB\Search();
         $sr = $s->query(
@@ -224,16 +225,22 @@ class FacetNav extends Base
         return $rez;
     }
 
+    /**
+     * get items
+     * @return json responce
+     */
     protected function getItems()
     {
         $rez = array('data' => array());
 
         $p = $this->requestParams;
-        // var_dump($p);
+
         $p['fq'] = array_merge(
             $this->config['fq'],
             $this->getParentNodeFilters()
         );
+
+        $this->replaceFilterVars($p['fq']);
 
         $s = new \CB\Search();
         $rez = $s->query($p);
@@ -287,5 +294,18 @@ class FacetNav extends Base
         $this->LevelFieldConfigs = $rez;
 
         return $rez;
+    }
+
+    /**
+     * replace possible variables in a filter array for solr query
+     * @param  array reference &$filterArray
+     * @return void
+     */
+    protected function replaceFilterVars(&$filterArray)
+    {
+        //
+        foreach ($filterArray as $key => $value) {
+            $filterArray[$key] = str_replace('$activeUserId', $_SESSION['user']['id'], $value);
+        }
     }
 }

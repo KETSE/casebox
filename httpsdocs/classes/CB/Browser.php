@@ -190,6 +190,19 @@ class Browser
             //merging all returned records into a single array
             if (!empty($rez['data'])) {
                 $this->data = array_merge($this->data, $rez['data']);
+
+                //set view, display columns and sorting if present
+                if (isset($rez['view'])) {
+                    $this->view = $rez['view'];
+                }
+
+                if (isset($rez['DC'])) {
+                    $this->DC[] = $rez['DC'];
+                }
+
+                if (isset($rez['sort'])) {
+                    $this->sort = $rez['sort'];
+                }
             }
 
             //calc totals accordingly
@@ -205,20 +218,6 @@ class Browser
             }
             if (!empty($rez['pivot'])) {
                 $this->pivot = $rez['pivot'];
-            }
-
-            //set view, display columns and sorting if present
-            // echo get_class($class).' -> '. $rez['view']."\n";
-            if (isset($rez['view'])) {
-                $this->view = $rez['view'];
-            }
-
-            if (isset($rez['DC'])) {
-                $this->DC[] = $rez['DC'];
-            }
-
-            if (isset($rez['sort'])) {
-                $this->sort = $rez['sort'];
             }
 
             //if its debug host - search params will be also returned
