@@ -832,10 +832,11 @@ Ext.define('CB.object.edit.Window', {
             data = this.loadedData;
         }
 
-        var p = Ext.apply({}, data);
-        Ext.applyIf(p, this.loadedData);
+        if(this.loadedData && (data.id == this.loadedData.id)) {
+            Ext.applyIf(data, this.loadedData);
+        }
 
-        App.openObjectWindow(p, e);
+        App.openObjectWindow(Ext.clone(data), e);
     }
 
     /**

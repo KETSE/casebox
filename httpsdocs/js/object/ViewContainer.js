@@ -771,15 +771,11 @@ Ext.define('CB.object.ViewContainer', {
             data = this.loadedData;
         }
 
-        var p = Ext.apply({}, data);
-
-        p.id = Ext.valueFrom(p.target_id, p.id);
-
-        if(p.id == this.loadedData.id) {
-            Ext.applyIf(p, this.loadedData);
+        if(this.loadedData && (data.id == this.loadedData.id)) {
+            Ext.applyIf(data, this.loadedData);
         }
 
-        this.openObjectWindow(p, e);
+        App.openObjectWindow(Ext.clone(data), e);
     }
 
     /**

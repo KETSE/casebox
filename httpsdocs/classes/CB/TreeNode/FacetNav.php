@@ -23,7 +23,7 @@ class FacetNav extends Base
         $ourPid = @$this->config['pid'];
 
         // ROOT NODE: check if last node is the one we should attach to
-        if ($this->lastNode->guid == (String)$ourPid) {
+        if ($this->lastNode->getId() == (String)$ourPid) {
             return true;
         }
 

@@ -1198,16 +1198,25 @@ class Security
         $obj_ids = explode(',', $set);
         $everyoneGroupId = Security::EveryoneGroupId();
         $users = array();
+        $updatingUser = false;
 
         /* iterate the full set of access credentials(users and/or groups)
         and estimate access for every user including everyone group */
         if (!empty($set)) {
             $object_id = $obj_ids[sizeof($obj_ids) -1];
 
+            $groupUsers = array();
             if (!empty($onlyForUserId)) {
-                $users[$onlyForUserId] = Security::getEstimatedUserAccessForObject($object_id, $onlyForUserId);
+                $groupUsers = static::getGroupUserIds($onlyForUserId);
 
-            } else {
+                if (empty($groupUsers)) {
+                    $updatingUser = true;
+                    $users[$onlyForUserId] = Security::getEstimatedUserAccessForObject($object_id, $onlyForUserId);
+                }
+
+            }
+
+            if (!$updatingUser) {
                 $res = DB\dbQuery(
                     'SELECT DISTINCT
                         u.id
@@ -1245,7 +1254,7 @@ class Security
                 and (ISNULL($2) OR ($2 = user_id))',
             array(
                 $set_id
-                ,$onlyForUserId
+                ,$updatingUser ? $onlyForUserId : null
             )
         ) or die(DB\dbQueryError());
 
@@ -1283,6 +1292,7 @@ class Security
             for ($i=0; $i < sizeof($access[0]); $i++) {
                 $params[] = ( empty($access[1][$i]) && ( $access[0][$i] >0 ) ) ? 1 : 0;
             }
+
             $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
         }
 

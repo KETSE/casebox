@@ -557,6 +557,8 @@ function initApp() {
             return;
         }
 
+        config.id = Ext.valueFrom(config.target_id, config.id);
+
         var templateType = CB.DB.templates.getType(config.template_id)
             ,wndCfg = {
                 xtype: (templateType == 'file'
