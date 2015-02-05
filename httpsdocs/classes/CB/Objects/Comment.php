@@ -1,9 +1,9 @@
 <?php
 namespace CB\Objects;
 
-use CB\Config;
 use CB\Util;
 use CB\User;
+use CB\Objects;
 
 class Comment extends Object
 {
@@ -42,16 +42,17 @@ class Comment extends Object
         //replace object references with links
         if (preg_match_all('/#(\d+)/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $name = \CB\Objects::getName($match[1]);
+                $templateId = Objects::getTemplateId($match[1]);
+                $name = Objects::getName($match[1]);
                 $name = (strlen($name) > 30)
                     ? substr($name, 0, 30) . '&hellip;'
                     : $name;
 
                 $message = str_replace(
                     $match[0],
-                    '<a class="cDB obj-ref" href="' . Config::get('core_url') . 'v-' . $match[1] .
-                    '" target="_blank" ' .
-                    'title="' . $name . '"' .
+                    '<a class="cDB obj-ref" href="#' . $match[1] .
+                    '" templateId= "' . $templateId .
+                    '" title="' . $name . '"' .
                     '>#' . $match[1] . '</a>', //  . substr($match[0], strlen($match[1]) + 1),
                     $message
                 );

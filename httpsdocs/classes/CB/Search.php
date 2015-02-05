@@ -513,7 +513,7 @@ class Search extends Solr\Client
         return $rez;
     }
 
-    private function updateShortcutsData($shortcutsArray)
+    private function updateShortcutsData(&$shortcutsArray)
     {
         if (empty($shortcutsArray)) {
             return;
@@ -539,24 +539,15 @@ class Search extends Solr\Client
         $shortcuts = array();
 
         foreach ($sr->response->docs as $d) {
-            $rd = array();
+            $oldProps = $shortcutsArray[$d->id];
+            $ref = &$shortcutsArray[$d->id];
 
             foreach ($d as $fn => $fv) {
-                $rd[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
+                $ref[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
             }
-
-            $d = $shortcutsArray[$rd['id']];
-
-            $rd['target_id'] = $rd['id'];
-            $rd['pid'] = $d['pid'];
-            $rd['id'] = $d['id'];
-            $rd['template_id'] = $d['template_id'];
-
-            if (!empty($d['template_type'])) {
-                $rd['template_type'] = $d['template_type'];
-            }
-
-            $shortcutsArray[$rd['target_id']] = $rd;
+            //set element id to original so all actions will be made on shortcut by default
+            //only opening will check if this object data has a target id
+            $ref['id'] = $oldProps['id'];
         }
     }
 
@@ -667,7 +658,6 @@ class Search extends Solr\Client
         $conn = Cache::get('solr_service');
 
         if (empty($conn)) {
-            \CB\debug('new Solr service from search');
             $conn = new Solr\Service();
 
             Cache::set('solr_service', $conn);

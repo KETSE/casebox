@@ -298,7 +298,20 @@ Ext.define('CB.object.plugin.Comments', {
         if(el) {
             e.stopEvent();
             this.showActionsMenu(e);
+            return;
         }
+
+        el = e.getTarget('.obj-ref');
+        if(el) {
+            e.stopEvent();
+            this.openObjectProperties({
+                id: el.attributes.href.value.substr(1)
+                ,template_id: el.attributes.templateid.value
+            });
+
+            return;
+        }
+
     }
 
     ,showActionsMenu: function(e) {

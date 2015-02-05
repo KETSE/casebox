@@ -650,6 +650,29 @@ class Objects
     }
 
     /**
+     * get template id of an object
+     * @param  int      $objectId
+     * @return int|null
+     */
+    public static function getTemplateId($objectId)
+    {
+        $rez = null;
+        if (!is_numeric($objectId)) {
+            return $rez;
+        }
+
+        $res = DB\dbQuery(
+            'SELECT template_id FROM tree WHERE id = $1',
+            $objectId
+        ) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['template_id'];
+        }
+        $res->close();
+
+        return $rez;
+    }
+    /**
      * get template type of an object
      * @param  int          $objectId
      * @return varchar|null
@@ -663,15 +686,8 @@ class Objects
         $var_name = 'obj_template_type'.$objectId;
 
         if (!Cache::exist($var_name)) {
-            $res = DB\dbQuery(
-                'SELECT template_id FROM tree WHERE id = $1',
-                $objectId
-            ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
-                $tc = Templates\SingletonCollection::getInstance();
-                Cache::set($var_name, $tc->getType($r['template_id']));
-            }
-            $res->close();
+            $tc = Templates\SingletonCollection::getInstance();
+            Cache::set($var_name, $tc->getType(self::getTemplateId($objectId)));
         }
 
         return Cache::get($var_name);

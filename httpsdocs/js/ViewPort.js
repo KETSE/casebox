@@ -278,6 +278,14 @@ Ext.define('CB.ViewPort', {
             })
         };
 
+        this.buttons.toggleLeftRegion.on(
+            'afterrender'
+            ,function(b, e) {
+                b.toggle(App.mainLPanel.getCollapsed() === false);
+            }
+            ,this
+        );
+
         return this.actions;
     }
 
@@ -492,6 +500,20 @@ Ext.define('CB.ViewPort', {
             xtype: 'CBFilterPanel'
             ,header: false
             ,border: false
+            ,cls: 'x-panel-gray'
+            ,tbar: [
+                '->'
+                ,{
+                    iconCls: 'im-cancel'
+                    ,itemId: 'close'
+                    ,scale: 'medium'
+                    ,scope: this
+                    ,handler: function(b, e){
+                        this.buttons.toggleFilterPanel.toggle(false);
+                        this.onToggleFilterPanelClick(this.buttons.toggleFilterPanel, e);
+                    }
+                }
+            ]
             ,listeners:{
                 scope: this
                 ,change: this.onFiltersChange

@@ -1,3 +1,25 @@
+CaseBox 1.9.386 (2015-02-05)
+==============================
+Fixed Bugs:
+----------
+- #4600 Permission issues
+- #4592 Clicking a shortcut in ObjWND show preview of the Link, not the obj
+
+CaseBox 1.9.385 (2015-02-04)
+==============================
+New Features, Improvements
+--------------------------
+- #4531 10m customVars in 'fq' for FacetedNav
+- #4563 45m Clicking a #ID reference in comments should open the preview WND in Casebox, not in a new tab
+- #4488 Add Toolbar in Filter panel with a "Close" button at the right
+
+Fixed Bugs:
+----------
+- #4296 1h "My Calendar" should be in Calendar view
+- #4537 20m UserManagement wnd: After user save, the groups appears duplicated
+- #3642 45m (6) CRITICAL: Shortcut functionality (d&d file creates shortcuts)
+- #4565 Can't restore Tree panel if it was hidden and Browser refreshed
+
 CaseBox 1.9.384 (2015-02-02)
 ==============================
 New Features, Improvements

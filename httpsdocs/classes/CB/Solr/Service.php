@@ -76,7 +76,7 @@ class Service
             if (!class_exists('\\Apache_Solr_Service', false)) {
                 require_once \CB\Config::get('SOLR_CLIENT');
             }
-            // \CB\debug('connecting', debug_backtrace());
+
             $this->solr_handler = new \Apache_Solr_Service(
                 $this->host,
                 $this->port,

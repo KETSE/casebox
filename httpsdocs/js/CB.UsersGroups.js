@@ -304,9 +304,6 @@ Ext.define('CB.UsersGroupsTree', {
             ]
             ,listeners:{
                 scope: this
-                ,afterlayout: function(){
-                    this.getRootNode().expand();
-                }
                 ,nodedragover: function(o){
                     if( (o.point != 'append')
                         || (o.target == o.dropNode.parentNode)
