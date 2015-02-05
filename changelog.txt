@@ -1,3 +1,11 @@
+CaseBox 1.9.387 (2015-02-05)
+==============================
+Fixed Bugs:
+----------
+- #4602 JS Error, UI blocked on AddUser
+- #4601 UI & Browser blocked when setting adding a user to a group
+
+
 CaseBox 1.9.386 (2015-02-05)
 ==============================
 Fixed Bugs:
