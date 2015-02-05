@@ -144,7 +144,7 @@ Ext.define('CB.AddUserForm', {
                 }
             }
         });
-        CB.AddUserForm.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
 
         this.on('show', App.focusFirstField, this);
         this.on('close', function(){CB.DB.roles.clearFilter();}, this);
@@ -422,7 +422,14 @@ Ext.define('CB.UsersGroupsTree', {
     }
 
     ,onAddUserClick: function(b, e){
-        w = new CB.AddUserForm({modal: true, ownerCt: this, data: {callback: this.addUser}});
+        var w = new CB.AddUserForm({
+            modal: true
+            ,ownerCt: this
+            ,data: {
+                callback: this.addUser
+            }
+        });
+
         w.show();
     }
 
@@ -441,6 +448,9 @@ Ext.define('CB.UsersGroupsTree', {
 
         this.lastPath = '/root/'+r.data.group_id+'/'+r.data.nid;
 
+        this.store.clearFilter();
+
+        this.ownerCt.container.component.searchField.clear();
         this.store.reload({node: this.getRootNode()});
 
         App.mainViewPort.fireEvent('useradded', r.data);
@@ -1162,10 +1172,16 @@ Ext.define('CB.UsersGroups', {
         if(n) this.lastPath = n.getPath('nid');
     }
     ,onFormSave: function(){
+        this.tree.store.clearFilter();
+
         this.tree.store.reload({
             node: this.tree.getRootNode()
             ,scope: this
             ,callback: function(){
+                //restore tree filter
+                this.tree.filter(this.searchField.getValue(), 'title');
+
+                //select same user
                 this.tree.selectPath(
                     this.lastPath
                     ,'nid'
@@ -1211,8 +1227,9 @@ Ext.define('CB.UsersGroups', {
                 ,msg: L.SaveChangesConfirmationMessage
                 ,scope: this
                 ,fn: function(btn, text){
-                    if (btn == 'yes') this.form.saveData();
-                    else{
+                    if (btn == 'yes') {
+                        this.form.saveData();
+                    } else{
                         this._forceSelection = 1;
                         this.tree.getSelectionModel().select(this.newNode);
                         this.form.setDirty(false);
