@@ -14,7 +14,8 @@ Ext.define('CB.browser.view.CalendarPanel', {
             items: this.view
         });
 
-        CB.browser.view.CalendarPanel.superclass.initComponent.apply(this, arguments);
+        this.callParent(arguments);
+
         this.view.setParams({
             path:'/'
             ,descendants: true
@@ -101,30 +102,42 @@ Ext.define('CB.Calendar', {
         Ext.apply(this, {
             listeners: {
                 scope: this
+
                 ,eventclick: function(vw, rec, el){
                     this.showEditWindow(rec, el);
                     this.clearMsg();
                 }
+
                 ,eventover: function(vw, rec, el){
                     //console.log('Entered evt rec='+rec.data.Title+', view='+ vw.id +', el='+el.id);
                 }
+
                 ,eventout: function(vw, rec, el){
                     //console.log('Leaving evt rec='+rec.data.Title+', view='+ vw.id +', el='+el.id);
                 }
+
                 ,eventadd: function(cp, rec){
                     this.showMsg('Event '+ rec.data.Title +' was added');
                 }
+
                 ,eventupdate: function(cp, rec){
                     this.showMsg('Event '+ rec.data.Title +' was updated');
                 }
+
                 ,eventdelete: function(cp, rec){
                     this.eventStore.remove(rec);
                     this.showMsg('Event '+ rec.data.Title +' was deleted');
                 }
+
                 ,eventcancel: function(cp, rec){
                     // edit canceled
                 }
+
                 ,viewchange: function(p, vw, dateInfo){
+                    if(this.getEl().isVisible(true) !== true) {
+                        return;
+                    }
+
                     if(this.editWin) {
                         this.editWin.hide();
                     }
@@ -136,10 +149,12 @@ Ext.define('CB.Calendar', {
                         this.eventsReloadTask.delay(200);
                     }
                 }
+
                 ,dayclick: function(vw, dt, ad, el){
                     this.showEditWindow({ StartDate: dt, IsAllDay: ad }, el);
                     this.clearMsg();
                 }
+
                 ,initdrag: function(vw){
                     // return false;
                     // if(this.editWin && this.editWin.isVisible()) this.editWin.hide();
@@ -206,6 +221,13 @@ Ext.define('CB.Calendar', {
     ,updateTitle: function(dateInfo, view){
         if(Ext.isEmpty(this.titleItem)) {
             return;
+        }
+
+        if(Ext.isEmpty(view)) {
+            view = this.getLayout().activeItem;
+            dateInfo = view.getViewBounds();
+        } else if(Ext.isEmpty(dateInfo)) {
+            dateInfo = view.getViewBounds();
         }
 
         var sd = dateInfo.viewStart
@@ -462,6 +484,8 @@ Ext.define('CB.browser.view.Calendar', {
                 ,'more'
             ]
         );
+
+        this.calendar.fireViewChange();
     }
 
     ,onSelectionChange: function(selection) {

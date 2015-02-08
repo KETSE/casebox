@@ -724,6 +724,7 @@ Ext.define('CB.browser.Tree', {
     }
 
     ,expandPaths: function(paths) {
+        this.expandingPath = true;
         var expandIds = [];
         for (var i = 0; i < paths.length; i++) {
             var ids = paths[i].split('/');
@@ -737,11 +738,14 @@ Ext.define('CB.browser.Tree', {
         if(!Ext.isEmpty(expandIds)) {
             this.expandingIds = expandIds;
             this.recursiveExpandIds();
+        } else {
+            delete this.expandingPath;
         }
     }
 
     ,recursiveExpandIds: function() {
         if(Ext.isEmpty(this.expandingIds)) {
+            delete this.expandingPath;
             return;
         }
 

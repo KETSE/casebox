@@ -5,22 +5,22 @@
  * http://ext.ensible.com
  */
 /*******************************************
- * 
+ *
  * Calendar event colors
- * 
+ *
  ******************************************/
 /*
  * This is the text color for all-day and span events.
  * Changing this will affect all events across all calendars.
  */
-.ext-cal-evr,
+/*.ext-cal-evr,
 .ext-cal-evi,
 .ext-cal-evt dl {
     color: #fff;
 }
-
+*/
 /*========================================================
- * The following block defines the default event styles 
+ * The following block defines the default event styles
  * used when no calendar info is available. It includes all
  * of the rules necessary to style a specific calendar.
  */
@@ -31,7 +31,7 @@
 .ext-opera .x-cal-default-ad {
     color: #668CB3;
 }
-/* 
+/*
  * The background color for all-day and span events.  Sorry for all the rules,
  * they are mostly to accommodate browsers that do not handle border-radius.
  */
@@ -57,12 +57,12 @@
 
 /*
  * The block above defines the 3 rules required to style one calendar.
- * The following blocks are the exact same rules, but with different 
+ * The following blocks are the exact same rules, but with different
  * color definitions for each unique calendar.  Each specific calendar
  * has the default class name prefix "x-cal-" plus the calendar's unique class
  * id. To customize these colors you can simply alter the colors of existing
  * calendars, or you can create new style definitions as below, just making
- * sure that the class name you choose matches the StyleClass defined in your 
+ * sure that the class name you choose matches the StyleClass defined in your
  * calendar store.
  */
 /* ===== x-cal-1 ===== */

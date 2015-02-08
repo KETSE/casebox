@@ -31,6 +31,7 @@ class Base
         }
 
         $solrFields = $this->getSolrFields();
+
         if (!empty($solrFields['fields'])) {
             $fl = explode(',', $sp['fl']);
             foreach ($fl as $k => $f) {
@@ -475,12 +476,13 @@ class Base
             $state = $this->getState($stateFrom);
 
             if (!empty($state['sort']['property'])) {
+                $property = $state['sort']['property'];
                 $dir = strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'));
 
                 if (!empty($displayColumns['data'][$property]['solr_column_name'])) {
                     $property = $displayColumns['data'][$property]['solr_column_name'];
-                } elseif (in_array($state['sort']['property'], $defaultColumns)) {
-                    $property = $state['sort']['property'];
+                } elseif (!in_array($property, $defaultColumns)) {
+                    $property = null;
                 }
             }
         }

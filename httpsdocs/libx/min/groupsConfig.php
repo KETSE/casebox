@@ -168,11 +168,12 @@ return array_merge(
 
         ,'jsdev' => array(
             '//js/app.js'
+            ,'//js/controller/Browsing.js'
+
             ,'//js/object/field/editor/Form.js'
             ,'//js/object/field/editor/Tag.js'
             ,'//js/view/BoundListKeyNav.js'
             // ,'//js/overrides/form/action/Submit.js'
-
         )
 
         ,'jsoverrides' => array(

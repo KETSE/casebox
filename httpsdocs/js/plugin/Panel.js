@@ -76,6 +76,13 @@ Ext.define('CB.plugin.Panel', {
 
     ,onLoadData: function(r, e) {
         var items = [];
+
+        //check if object was found (success = true)
+        if(!r.success === true) {
+            this.update('<div class="x-preview-mask">' + L.RecordIdNotFound.replace('{id}', '#' + this.loadedParams.id) + '</div>');
+            return;
+        }
+
         this.removeAll(true);
 
         this.createMenu = r.menu;

@@ -40,11 +40,14 @@ class Path
     public static function getPidPath($id)
     {
         $rez = array('success' => false);
+
         if (!is_numeric($id)) {
             return $rez;
         }
+
         $res = DB\dbQuery(
-            'SELECT ti.pids
+            'SELECT t.name
+                    ,ti.pids
             FROM tree t
             JOIN tree_info ti ON t.id = ti.id
             WHERE t.id = $1',
@@ -55,7 +58,13 @@ class Path
             $r['pids'] = explode(',', $r['pids']);
             array_pop($r['pids']);
             $r['pids'] = implode('/', $r['pids']);
-            $rez = array('success' => true, 'id' => $id, 'path' => $r['pids']);
+
+            $rez = array(
+                'success' => true
+                ,'id' => $id
+                ,'name' => $r['name']
+                ,'path' => $r['pids']
+            );
         }
         $res->close();
 

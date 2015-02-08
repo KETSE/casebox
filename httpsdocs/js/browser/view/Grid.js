@@ -149,6 +149,7 @@ Ext.define('CB.browser.view.Grid', {
             ? this.config.selModel
             : new Ext.selection.RowModel({
                mode: 'MULTI'
+               ,allowDeselect: true
             });
 
         this.grid = new Ext.grid.Panel({
@@ -180,6 +181,13 @@ Ext.define('CB.browser.view.Grid', {
                 ,emptyText: L.NoData
                 ,deferInitialRefresh: false
 
+                ,listeners: {
+                    scope: this
+                    ,containermousedown: function(view, e, eOpts) {
+                        //deselect all selected records when clicking on empty area of the grid
+                        this.grid.getSelectionModel().deselectAll();
+                    }
+                }
                 ,plugins: [{
                         ptype: 'CBPluginDDFilesDropZone'
                         ,pidPropety: 'nid'
@@ -405,10 +413,10 @@ Ext.define('CB.browser.view.Grid', {
             //     this.grid
             //     ,this.objectPanel
             // ]
-            ,listeners: {
-                scope: this
-                ,activate: this.onActivate
-            }
+            // ,listeners: {
+            //     scope: this
+            //     ,activate: this.onActivate
+            // }
         });
         this.callParent(arguments);
 
@@ -442,7 +450,11 @@ Ext.define('CB.browser.view.Grid', {
         Ext.grid.column.Column.prototype.sort.apply(this, arguments);
     }
 
-    ,onActivate: function() {
+    /**
+     * fire the venet for main browser view to update its buttons
+     * @return void
+     */
+    ,updateToolbarButtons: function() {
         this.fireEvent(
             'settoolbaritems'
             ,[
@@ -478,9 +490,11 @@ Ext.define('CB.browser.view.Grid', {
 
         delete this.grid.userSort;
 
-        var hadSelection = false;
-        var prevSelectedId = 0;
-        var prevSelectedPid = 0;
+        //grid selection logic
+        var hadSelection = false
+            ,prevSelectedId = 0
+            ,prevSelectedPid = 0
+            ,locateId = this.refOwner.params.locatingObject;
 
         if(!Ext.isEmpty(this.savedSelection)) {
             hadSelection = true;
@@ -488,19 +502,18 @@ Ext.define('CB.browser.view.Grid', {
             prevSelectedPid = this.savedSelection[0].pid;
         }
 
-        // try to select the item, if set, from App.locateObjectId
-        var locatedAnItem = App.mainViewPort.selectGridObject(this.grid);
-
         // otherwise select previous items, if any
-        if(!locatedAnItem &&
-            !Ext.isEmpty(this.savedSelection)
-        ) {
+        if(!Ext.isEmpty(locateId)) {
+            this.savedSelection = [{nid: locateId}];
+        }
+
+        if(!Ext.isEmpty(this.savedSelection)) {
             this.selectItems(this.savedSelection);
         }
 
         this.grid.getSelectionModel().resumeEvents(true);
 
-        if(!locatedAnItem) {
+        if(Ext.isEmpty(locateId)) {
             var haveSelection = this.grid.getSelectionModel().hasSelection()
                 ,currSelectedId = haveSelection
                     ? this.grid.getSelection()[0].get('nid')
@@ -514,8 +527,11 @@ Ext.define('CB.browser.view.Grid', {
                 this.fireSelectionChangeEvent();
             }
         } else {
-            delete App.locateObjectId;
+            delete this.refOwner.params.locatingObject;
         }
+        //end of grid selection logic
+
+        this.updateToolbarButtons();
 
         //WORKING
         // update empty text
@@ -532,7 +548,7 @@ Ext.define('CB.browser.view.Grid', {
                 ? L.GridEmptyText
                 : L.NoResultsFound;
 
-        this.grid.view. emptyText = emptyText;
+        this.grid.view.emptyText = emptyText;
     }
 
     ,onScrollerDragDrop: function(targetData, source, e, data){

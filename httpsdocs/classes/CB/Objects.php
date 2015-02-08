@@ -956,6 +956,10 @@ class Objects
         }
 
         if (is_numeric($id)) {
+            if (!$this->idExists($id)) {
+                return $rez;
+            }
+
             if (!Security::canRead($id)) {
                 throw new \Exception(L\get('Access_denied'));
             }

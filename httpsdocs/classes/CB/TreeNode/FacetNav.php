@@ -162,7 +162,7 @@ class FacetNav extends Base
         $lfc = $this->getLevelFieldConfigs();
         $isLastFacetField = ($this->lastNodeDepth >= sizeOf($lfc));
 
-        if (empty($currentFacetFieldConfig) || in_array(@$this->requestParams['from'], array('grid', 'charts', 'pivot'))) {
+        if (empty($currentFacetFieldConfig) || (@$this->requestParams['from'] !== 'tree')) {
             return $this->getItems();
         }
 

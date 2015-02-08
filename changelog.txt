@@ -1,3 +1,16 @@
+CaseBox 1.9.388 (2015-02-07)
+==============================
+New Features, Improvements
+--------------------------
+- #4489 Improvements: Search, Preview after save, findById
+- #4525 Grid DC and toolbar changes after switching from a view to Grid view
+- #4546 Buttons in Grid Toolbar "flickering" onCaseboxLoad
+- #4282 Clicking empty area in Grid should load preview of parent node
+
+Fixed Bugs:
+----------
+- #4572 Grid not sorted ok by SOLR field: task_d_closed
+
 CaseBox 1.9.387 (2015-02-05)
 ==============================
 Fixed Bugs:

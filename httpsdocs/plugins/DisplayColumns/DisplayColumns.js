@@ -28,6 +28,11 @@ Ext.define('CB.plugin.DisplayColumns', {
     }
 
     ,onStoreLoad: function(store, records, successful, eOpts) {//proxy, obj, options
+        //dont do anything if view not visible
+        if(this.owner.getEl().isVisible(true) !== true) {
+            return;
+        }
+
         var rez = store.proxy.reader.rawData;
 
         if(!Ext.isEmpty(rez.sort)) {// && Ext.isEmpty(this.store.sortInfo)
