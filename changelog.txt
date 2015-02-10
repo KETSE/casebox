@@ -1,3 +1,16 @@
+CaseBox 1.9.390 (2015-02-10)
+==============================
+New Features, Improvements
+--------------------------
+- updated to tika-server 1.7
+- #4438 Use CB prefix for Mysql platform & SOLR & other stuff
+- #4436 Move user photos to /data/files/[core]/_photo/...
+  Note: current photos should be mooved manually.
+- #4435 Replace devel_hosts with _dev_mode=0,1 & additional _dev_* settings
+- #4433 Move UNOCONV from system.ini to config.ini and remove system.ini
+- #4432 Remove versioning in folder names of libx libraries (ZF, Tika, extjs-ace)
+- #4431 Update ZF to latest 2.4.x, folder name /libx/ZF/
+
 CaseBox 1.9.389 (2015-02-10)
 ==============================
 New Features, Improvements

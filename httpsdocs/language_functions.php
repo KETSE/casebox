@@ -83,7 +83,7 @@ function initTranslations()
     /* reading global translations table from casebox database*/
     $res = DB\dbQuery(
         'SELECT name, ' . implode(',', $languages) . '
-        FROM `casebox`.translations
+        FROM ' . \CB\PREFIX . '_casebox.translations
         WHERE `type` < 2'
     ) or die( DB\dbQueryError() );
 
@@ -121,7 +121,7 @@ function checkTranslationsUpToDate()
         'SELECT MAX(udate) `max_date`
         FROM
             (SELECT MAX(udate) `udate`
-             FROM casebox.translations
+             FROM ' . \CB\PREFIX . '_casebox.translations
              UNION SELECT MAX(udate)
              FROM translations) t'
     ) or die( DB\dbQueryError() );
@@ -156,7 +156,7 @@ function updateTranslationsFiles()
 
     $res = DB\dbQuery(
         'SELECT name, `'.implode('`,`', $languages).'`
-        FROM `casebox`.translations
+        FROM ' . \CB\PREFIX . '_casebox.translations
         WHERE `type` in (0,2)'
     ) or die( DB\dbQueryError() );
 

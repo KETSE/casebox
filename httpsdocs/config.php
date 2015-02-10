@@ -25,7 +25,7 @@ $cfg = Cache::get('platformConfig');
 $cfg['core_name'] = detectCore() or die('Cannot detect core');
 
 //set default database name
-$cfg['db_name'] = 'cb_' . $cfg['core_name'];
+$cfg['db_name'] = PREFIX . $cfg['core_name'];
 
 //loading core defined params
 try {

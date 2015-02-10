@@ -34,7 +34,7 @@ class Collection
                 ,cfg
                 ,`active`
                 ,`order`
-            FROM casebox.plugins
+            FROM ' . \CB\PREFIX . '_casebox.plugins
             ORDER BY `order`'
         ) or die(DB\dbQueryError());
 

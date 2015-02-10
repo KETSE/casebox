@@ -313,7 +313,7 @@ class Path
     {
         $rez = null;
         $res = DB\dbQuery(
-            'SELECT id FROM `casebox`.guids WHERE name = $1',
+            'SELECT id FROM ' . PREFIX . '_casebox.guids WHERE name = $1',
             $name
         ) or die(DB\dbQueryError());
 
@@ -321,7 +321,7 @@ class Path
             $rez = $r['id'];
         } else {
             DB\dbQuery(
-                'INSERT INTO `casebox`.guids
+                'INSERT INTO ' . PREFIX . '_casebox.guids
                 (`name`)
                 VALUES ($1)',
                 $name

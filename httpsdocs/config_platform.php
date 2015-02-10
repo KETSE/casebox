@@ -46,6 +46,17 @@ include 'global.php';
 //load main config so that we can connect to casebox db and read configuration for core
 $cfg = Config::loadConfigFile(DOC_ROOT.'config.ini');
 
+//define global prefix used
+define(
+    'CB\\PREFIX',
+    (
+        empty($cfg['prefix'])
+            ? 'cb'
+            : $cfg['prefix']
+    ) . '_'
+);
+
+//conect to db using global params from config.ini
 require_once 'lib/DB.php';
 DB\connect($cfg);
 
@@ -57,8 +68,11 @@ if (empty($cfg['PYTHON'])) {
 //set unoconv path
 $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . PATH_SEPARATOR . 'unoconv"';
 
-//get platform default config
-$cfg = array_merge($cfg, Config::loadConfigFile(DOC_ROOT.'system.ini'));
+$cfg['HTML_PURIFIER'] = '/libx/htmlpurifier/library/HTMLPurifier.auto.php';
+$cfg['SOLR_CLIENT'] = '/Solr/Service.php';
+$cfg['MINIFY_PATH'] = '/libx/min/';
+$cfg['ZEND_PATH'] = '/libx/ZF/library';
+$cfg['TIKA_SERVER'] = '/libx/tika-server.jar';
 
 Cache::set('platformConfig', $cfg);
 
@@ -79,8 +93,11 @@ function isWindows()
 function isDevelServer()
 {
     return (
-        (strpos($_SERVER['SERVER_NAME'], '.d.') !== false) ||
-        Config::isInListValue('devel_hosts', $_SERVER['REMOTE_ADDR'])
+        (Config::get('_dev_mode') == 1) &&
+        (
+            (strpos($_SERVER['SERVER_NAME'], '.d.') !== false) ||
+            Config::isInListValue('_dev_hosts', $_SERVER['REMOTE_ADDR'])
+        )
     );
 }
 

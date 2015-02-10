@@ -20,7 +20,7 @@ class System
                 id
                 ,name
                 ,phone_codes
-            FROM casebox.country_phone_codes
+            FROM ' . PREFIX . '_casebox.country_phone_codes
             ORDER BY name'
         ) or die(DB\dbQueryError());
 

@@ -40,7 +40,7 @@ $projectTitle = Config::get('project_name_' . Config::get('user_language'), $cor
 <?php
 
 echo '<link rel="stylesheet" type="text/css" href="/libx/ext/packages/ext-theme-' . $theme . '/build/resources/ext-theme-' . $theme . '-all' . $rtl . '.css" />
-    <link rel="stylesheet" type="text/css" href="/libx/extjs4-ace/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/libx/extjs-ace/styles.css" />
     <link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(Minify_getUri('css'), 1) . '" />' . "\n";
 
 // Custom CSS for the core
@@ -171,8 +171,7 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 
 <script type="text/javascript">
     bravojs = {
-        url: window.location.protocol + "//" + window.location.host + "/libx/extjs4-ace/Component.js"
-        //url: window.location.protocol + "//" + window.location.host + "/libx/extjs4-ace/AceEditor.js"
+        url: window.location.protocol + "//" + window.location.host + "/libx/extjs-ace/Component.js"
     };
     document.write('<script type="text/javascript" src="' + bravojs.url + '"><' + '/script>');
 </script>

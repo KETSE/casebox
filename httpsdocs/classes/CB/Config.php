@@ -81,7 +81,7 @@ class Config extends Singleton
     }
 
     /**
-     * Reading platform system.ini file
+     * Reading configuration file
      * @return array
      */
     public static function loadConfigFile($filename)
@@ -108,7 +108,7 @@ class Config extends Singleton
         $res = DB\dbQuery(
             'SELECT param
                 ,`value`
-            FROM casebox.config
+            FROM ' . PREFIX . '_casebox.config
             WHERE pid IS NOT NULL'
         ) or die( DB\dbQueryError() );
 
@@ -130,7 +130,7 @@ class Config extends Singleton
         $rez = array();
         $res = DB\dbQuery(
             'SELECT id, cfg, active
-            FROM casebox.cores
+            FROM ' . PREFIX . '_casebox.cores
             WHERE name = $1',
             $coreName
         ) or die(DB\dbQueryError());
@@ -182,28 +182,29 @@ class Config extends Singleton
     private static function getEnvironmentVars($config)
     {
         $coreName = $config['core_name'];
+        $filesDir = DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR;
 
         $rez = array(
             'db_name' => empty($config['db_name'])
-                ? 'cb_'.$coreName
+                ? PREFIX . $coreName
                 : $config['db_name']
 
             ,'solr_core' => empty($config['solr_core'])
-                ? 'cb_'.$coreName
+                ? PREFIX . $coreName
                 : $config['solr_core']
 
             ,'core_dir' => empty($config['core_dir'])
                 ? DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
                 : $config['core_dir']
 
-            // path to photos folder
-            ,'photos_path' => DOC_ROOT.'photos'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
-
             // path to files folder
-            ,'files_dir' => DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
+            ,'files_dir' => $filesDir
 
             /* path to preview folder. Generated previews are stored for some filetypes */
-            ,'files_preview_dir' => DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR.'preview'.DIRECTORY_SEPARATOR
+            ,'files_preview_dir' => $filesDir.'preview'.DIRECTORY_SEPARATOR
+
+            // path to photos folder
+            ,'photos_path' => $filesDir.'_photo'.DIRECTORY_SEPARATOR
 
             ,'core_url' => 'https://'.$_SERVER['SERVER_NAME'].'/'.$coreName.'/'
 
@@ -214,10 +215,10 @@ class Config extends Singleton
             If no user intervention is required then files are stored in db. */
             ,'incomming_files_dir' => TEMP_DIR.$coreName.DIRECTORY_SEPARATOR.'incomming'.DIRECTORY_SEPARATOR
 
-            ,'error_log' => LOGS_DIR.'cb_'.$coreName.'_error_log'
+            ,'error_log' => LOGS_DIR . PREFIX . $coreName.'_error_log'
 
             // custom Error log per Core, use it for debug/reporting purposes
-            ,'debug_log' => LOGS_DIR.'cb_'.$coreName.'_debug_log'
+            ,'debug_log' => LOGS_DIR . PREFIX . $coreName.'_debug_log'
         );
 
         /* Define folder templates */
