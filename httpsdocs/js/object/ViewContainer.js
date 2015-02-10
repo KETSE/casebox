@@ -585,15 +585,7 @@ Ext.define('CB.object.ViewContainer', {
     ,edit: function (objectData, e) {
         objectData.view = 'edit';
 
-        switch(detectFileEditor(objectData.name)) {
-            case 'webdav':
-                App.openWebdavDocument(objectData);
-                break;
-
-            default:
-                this.openObjectWindow(objectData);
-                break;
-        }
+        this.openObjectWindow(objectData);
     }
 
     /**
@@ -618,7 +610,15 @@ Ext.define('CB.object.ViewContainer', {
     ,onEditClick: function(b, e) {
         var p = Ext.apply({}, this.loadedData);
 
-        this.edit(p);
+        switch(detectFileEditor(p.name)) {
+            case 'webdav':
+                App.openWebdavDocument(p);
+                break;
+
+            default:
+                this.edit(p, e);
+                break;
+        }
     }
 
     /**
@@ -800,7 +800,7 @@ Ext.define('CB.object.ViewContainer', {
             data = this.loadedData;
         }
 
-        var p = Ext.apply({}, data);
+        var p = Ext.clone(data);
 
         this.edit(p, e);
     }

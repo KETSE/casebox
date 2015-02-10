@@ -1,4 +1,16 @@
-CaseBox 1.9.388 (2015-02-07)
+CaseBox 1.9.389 (2015-02-10)
+==============================
+New Features, Improvements
+--------------------------
+- #4342 Metadata of files can't be edited
+- #4527 CB sys_columns (from SOLR) should be correctly rendered/processed
+
+Fixed Bugs:
+----------
+- #4660 Unable to set project in task list
+- #4577 Obj title shown below vGrid in EditMode
+
+CaseBox 1.9.388 (2015-02-09)
 ==============================
 New Features, Improvements
 --------------------------

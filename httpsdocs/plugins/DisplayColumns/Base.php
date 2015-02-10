@@ -327,6 +327,7 @@ class Base
                 case 'cdate':
                 case 'udate':
                 case 'ddate':
+                case 'task_d_closed':
                     if (empty($v)) {
                         $d['group'] = 'empty';
                         $d['groupText'] = 'empty';
@@ -398,6 +399,16 @@ class Base
         if (!empty($path)) {
             $node = $path[sizeof($path)-1];
             $rez = $node->getNodeParam('DC');
+        }
+
+        //apply properties for default  casebox columns
+        if (!empty($rez['data'])) {
+            $defaults = Config::getDefaultGridColumnConfigs();
+            foreach ($rez['data'] as $k => $v) {
+                if (!empty($defaults[$k])) {
+                    $rez['data'][$k] = array_merge($defaults[$k], $v);
+                }
+            }
         }
 
         return $rez;

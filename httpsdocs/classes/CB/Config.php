@@ -514,6 +514,149 @@ class Config extends Singleton
         return $instance->defaultGridViewColumns;
     }
 
+    /**
+     * return default configs for known grid columns
+     * @return array
+     */
+    public static function getDefaultGridColumnConfigs()
+    {
+        $instance = static::getInstance();
+
+        if (empty($instance->defaultGridColumnConfigs)) {
+            $userConfig = &$_SESSION['user']['cfg'];
+            $dateFormat = str_replace('%', '', $userConfig['short_date_format']);
+            $dateTimeFormat = str_replace('%', '', $dateFormat . ' ' . $userConfig['time_format']);
+
+            $instance->defaultGridColumnConfigs = array(
+                'nid' => array(
+                    'title' => 'ID'
+                    ,'width' => 80
+                )
+                ,'name' => array(
+                    'title' => L\get('Name')
+                    ,'width' => 300
+                )
+                ,'path' => array(
+                    'title' => L\get('Path')
+                    ,'width' => 150
+                )
+                ,'case' => array(
+                    'title' => L\get('Project')
+                    ,'width' => 150
+                )
+                ,'date' => array(
+                    'title' => L\get('Date')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'size' => array(
+                    'title' => L\get('Size')
+                    ,'width' => 80
+                )
+
+                ,'cid' => array(
+                    'title' => L\get('Creator')
+                    ,'width' => 200
+                )
+                ,'oid' => array(
+                    'title' => L\get('Owner')
+                    ,'width' => 200
+                )
+                ,'uid' => array(
+                    'title' => L\get('UpdatedBy')
+                    ,'width' => 200
+                )
+                ,'did' => array(
+                    'title' => L\get('UpdatedBy')
+                    ,'width' => 200
+                )
+                ,'comment_user_id' => array(
+                    'title' => L\get('CommentedBy')
+                    ,'width' => 200
+                )
+
+                ,'cdate' => array(
+                    'title' => L\get('CreatedDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'udate' => array(
+                    'title' => L\get('UpdatedDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'ddate' => array(
+                    'title' => L\get('DeletedDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'comment_date' => array(
+                    'title' => L\get('CommentedDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'date_end' => array(
+                    'title' => L\get('EndDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'order' => array(
+                    'title' => L\get('Order')
+                    ,'solr_column_name' => 'order'
+                    ,"align" => "center"
+                    ,"width" => 10
+                    ,"columnWidth" => 10
+
+                )
+
+                ,'task_u_assignee' => array(
+                    'title' => L\get('Assignee')
+                    ,'width' => 200
+                )
+                ,'task_u_started' => array(
+                    'title' => L\get('StartedBy')
+                    ,'width' => 200
+                )
+                ,'task_u_ongoing' => array(
+                    'title' => L\get('Ongoing')
+                    ,'width' => 200
+                )
+                ,'task_u_done' => array(
+                    'title' => L\get('DoneBy')
+                    ,'width' => 200
+                )
+                ,'task_u_blocker' => array(
+                    'title' => L\get('Blocker')
+                    ,'width' => 200
+                )
+                ,'task_u_all' => array(
+                    'title' => L\get('All')
+                    ,'width' => 200
+                )
+
+                ,'task_d_closed' => array(
+                    'title' => L\get('ClosedDate')
+                    ,"solr_column_name" => "task_d_closed"
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'task_status' => array(
+                    'title' => L\get('Status')
+                    ,'width' => 70
+                )
+            );
+        }
+
+        return $instance->defaultGridColumnConfigs;
+    }
+
     private static function adjustConfig($cfg)
     {
         /* post processing the obtained config */

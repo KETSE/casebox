@@ -52,7 +52,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,groupable: false
             },{
                 header: L.Path
-                ,hidden:true
+                ,hidden: true
                 ,width: 150
                 ,dataIndex: 'path'
                 ,renderer: function(v, m, r, ri, ci, s){
@@ -120,7 +120,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.CreatedDate
-                ,hidden:true
+                ,hidden: true
                 ,width: 120
                 ,dataIndex: 'cdate'
                 ,xtype: 'datecolumn'
@@ -128,7 +128,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.UpdatedDate
-                ,hidden:true
+                ,hidden: true
                 ,width: 120
                 ,dataIndex: 'udate'
                 ,xtype: 'datecolumn'
@@ -136,7 +136,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.CommentedDate
-                ,hidden:true
+                ,hidden: true
                 ,width: 120
                 ,dataIndex: 'comment_date'
                 ,xtype: 'datecolumn'
@@ -494,7 +494,7 @@ Ext.define('CB.browser.view.Grid', {
         var hadSelection = false
             ,prevSelectedId = 0
             ,prevSelectedPid = 0
-            ,locateId = this.refOwner.params.locatingObject;
+            ,locateId = Ext.valueFrom(this.refOwner.params, {}).locatingObject;
 
         if(!Ext.isEmpty(this.savedSelection)) {
             hadSelection = true;

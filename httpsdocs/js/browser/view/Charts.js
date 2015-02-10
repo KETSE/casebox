@@ -95,13 +95,16 @@ Ext.define('CB.browser.view.Charts', {
                 ,axes: [
                     {
                         type: 'category'
+                        ,labelInSpan: true
                         ,position: 'left'
-                        ,fields: 'name'
+                        ,fields: ['name']
                         ,grid: true
                     }, {
                         type: 'numeric'
                         ,position: 'bottom'
-                        ,fields: 'count'
+                        ,adjustByMajorUnit: true
+                        ,fields: ['count']
+                        ,display: 'middle'
                         ,grid: true
                     }
                 ]

@@ -1479,7 +1479,7 @@ class User
     }
 
     /**
-     * get timezone of a given user id
+     * get timezone for a given user id
      * @param  int     $userId
      * @return varchar
      */

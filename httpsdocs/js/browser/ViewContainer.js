@@ -835,7 +835,9 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,updateToolbarButtons: function() {
         var ai = this.cardContainer.getLayout().activeItem
-            ,selection = ai.getSelectedItems()
+            ,selection = ai.getSelectedItems
+                ? ai.getSelectedItems()
+                : []
             ,fp = Ext.valueFrom(this.folderProperties, {})
             ,acceptChildren = CB.DB.templates.acceptChildren(fp.template_id)
             ,inRecycleBin = this.inRecycleBin()

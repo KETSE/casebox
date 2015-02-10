@@ -265,8 +265,6 @@ Ext.define('CB.object.edit.Window', {
     }
 
     ,onAfterRender: function(c) {
-        // this.editForm.load(this.data);
-
         // map multiple keys to multiple actions by strings and array of codes
         var map = new Ext.KeyMap(
             c.getEl()
@@ -373,6 +371,7 @@ Ext.define('CB.object.edit.Window', {
         }
 
         Ext.apply(this.data, objProperties);
+        this.data.from = 'window';
 
         this.titleView.update(this.data);
 
@@ -392,6 +391,7 @@ Ext.define('CB.object.edit.Window', {
             } else {
                 this.complexFieldContainer.html = cfp;
             }
+
         } else {
             this.gridContainer.hide();
             if(this.complexFieldContainer.rendered) {
@@ -401,7 +401,8 @@ Ext.define('CB.object.edit.Window', {
             }
         }
 
-        this.pluginsContainer.loadedParams = r.data;
+        this.pluginsContainer.loadedParams = this.data;
+
         this.pluginsContainer.onLoadData(r, e);
 
         this.postLoadProcess();
@@ -424,6 +425,7 @@ Ext.define('CB.object.edit.Window', {
         this.titleView.update(this.data);
 
         this.pluginsContainer.loadedParams = r.data;
+        this.pluginsContainer.loadedParams.from = 'window';
 
         this.objectsStore.proxy.extraParams = {
             id: r.data.id
@@ -665,20 +667,6 @@ Ext.define('CB.object.edit.Window', {
             ,success: this.processSave
             ,failure: this.processSave
         });
-
-
-        // this.editForm.save(
-        //     //callback function
-        //     function(component, form, action){
-        //         if(action.result.success !== true) {
-        //             App.showException(action.result);
-        //         } else {
-        //             this.actions.save.setDisabled(true);
-        //             this.close();
-        //         }
-        //     }
-        //     ,this
-        // );
     }
 
     /**
@@ -829,11 +817,11 @@ Ext.define('CB.object.edit.Window', {
      */
     ,onOpenPreviewEvent: function(data, e) {
         if(Ext.isEmpty(data)) {
-            data = this.loadedData;
+            data = Ext.clone(this.data);
         }
 
-        if(this.loadedData && (data.id == this.loadedData.id)) {
-            Ext.applyIf(data, this.loadedData);
+        if(this.data && (data.id == this.data.id)) {
+            Ext.applyIf(data, this.data);
         }
 
         App.openObjectWindow(Ext.clone(data), e);
@@ -856,20 +844,18 @@ Ext.define('CB.object.edit.Window', {
         }
 
         if(Ext.isEmpty(data)) {
-            data = this.loadedData;
+            data = this.data;
         }
 
-        var p = Ext.apply({}, data);
+        var p = Ext.clone(data);
 
         p.view = 'edit';
 
-        switch(detectFileEditor(p.name)) {
-            case 'webdav':
-                App.openWebdavDocument(p);
-                break;
-            default:
-                App.openObjectWindow(p);
-                break;
+        if(p.id == this.data.id) {
+            this.viewMode = 'edit';
+            this.doLoad();
+        } else {
+            App.openObjectWindow(p);
         }
     }
 

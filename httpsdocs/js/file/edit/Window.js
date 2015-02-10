@@ -66,8 +66,21 @@ Ext.define('CB.file.edit.Window', {
     ,initContainerItems: function() {
         this.callParent(arguments);
 
-        // this.gridContainer.title = 'text';
-        // this.gridContainer.header = true;
+        // add title for gird container in edit mode
+        this.gridContainer.cls = 'obj-plugin';
+        this.gridContainer.addDocked(
+            [{
+                xtype: 'toolbar'
+                ,hidden: true
+                ,border: false
+                ,items: [{
+                    xtype: 'label'
+                    ,cls: 'title'
+                    ,text: L.Metadata
+                }]
+            }]
+            ,'top'
+        );
 
         Ext.destroy(this.complexFieldContainer);
 
@@ -81,6 +94,13 @@ Ext.define('CB.file.edit.Window', {
             }
             ,items: []
         });
+
+        Ext.override(
+            this.pluginsContainer
+            ,{
+                onLoadData: this.onPluginContainerLoadData
+            }
+        );
     }
 
     /**
@@ -100,8 +120,8 @@ Ext.define('CB.file.edit.Window', {
                     ,align: 'stretch'
                 }
                 ,items: [
-                    // this.titleContainer
-                    this.complexFieldContainer
+                    this.titleContainer
+                    ,this.complexFieldContainer
                 ]
             }, {
                 region: 'east'
@@ -153,6 +173,15 @@ Ext.define('CB.file.edit.Window', {
         this.previewPanel.loadPreview(this.data.id, this.loadedVersionId);
     }
 
+    /**
+     * method for processing server data on editing item
+     * @return void
+     */
+    ,processLoadEditData: function(r, e) {
+        this.gridContainer.getDockedComponent(0).setHidden(false);
+        this.callParent(arguments);
+    }
+
     ,updateComplexFieldContainer: function() {
         this.editType = detectFileEditor(this.data.name);
 
@@ -194,6 +223,15 @@ Ext.define('CB.file.edit.Window', {
         if(this.contentEditor) {
             this.contentEditor.setValue(r.data);
         }
+    }
+
+    ,onPluginContainerLoadData: function(r, e) {
+        var w = this.up('window');
+        if(w && w.viewMode == 'edit') {
+            delete r.data.meta;
+        }
+
+        this.callParent(arguments);
     }
 
     ,updateButtons: function() {
