@@ -1,3 +1,9 @@
+CaseBox 1.9.391 (2015-02-10)
+==============================
+Fixed Bugs:
+----------
+- path adjustments for linux
+
 CaseBox 1.9.390 (2015-02-10)
 ==============================
 New Features, Improvements

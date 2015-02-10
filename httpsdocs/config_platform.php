@@ -68,11 +68,11 @@ if (empty($cfg['PYTHON'])) {
 //set unoconv path
 $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . PATH_SEPARATOR . 'unoconv"';
 
-$cfg['HTML_PURIFIER'] = '/libx/htmlpurifier/library/HTMLPurifier.auto.php';
-$cfg['SOLR_CLIENT'] = '/Solr/Service.php';
-$cfg['MINIFY_PATH'] = '/libx/min/';
-$cfg['ZEND_PATH'] = '/libx/ZF/library';
-$cfg['TIKA_SERVER'] = '/libx/tika-server.jar';
+$cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
+$cfg['SOLR_CLIENT'] = 'Solr/Service.php';
+$cfg['MINIFY_PATH'] = 'libx/min/';
+$cfg['ZEND_PATH'] = 'libx/ZF/library';
+$cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
 Cache::set('platformConfig', $cfg);
 
