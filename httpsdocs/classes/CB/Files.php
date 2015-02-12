@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\Util;
+
 class Files
 {
     public static function getProperties($id)
@@ -135,6 +137,66 @@ class Files
 
         // file_put_contents($contentFile, $p['data']);
         return array('success' => true);
+    }
+
+    /**
+     * download files
+     *
+     * outputs file content and set corresponding header params
+     *
+     * @param  int  $id file id
+     * @return void
+     */
+    public static function download($id, $versionId = null, $asAttachment = true, $forUseId = false)
+    {
+
+        $sql = empty($versionId)
+            ? 'SELECT f.id
+                ,f.content_id
+                ,c.path
+                ,f.name
+                ,c.`type`
+                ,c.size
+            FROM files f
+            LEFT JOIN files_content c ON f.content_id = c.id
+            WHERE f.id = $1'
+
+            : 'SELECT f.file_id `id`
+                ,f.id `version_id`
+                ,f.content_id
+                ,c.path
+                ,f.name
+                ,c.`type`
+                ,c.size
+            FROM files_versions f
+            LEFT JOIN files_content c ON f.content_id = c.id
+            WHERE f.id = $1';
+
+        $res = DB\dbQuery($sql, Util\coalesce($versionId, $id)) or die( DB\dbQueryError() );
+
+        if ($r = $res->fetch_assoc()) {
+            //check if can download file
+            if (!Security::canDownload($r['id'], $forUseId)) {
+                throw new \Exception(L\get('Access_denied'));
+            }
+
+            header('Content-Description: File Transfer');
+            header('Content-Type: '.$r['type'].'; charset=UTF-8');
+            if ($asAttachment || ($r['type'] !== 'application/pdf')) {
+                //purify filename for cases when we have a wrong filename in the system already
+                header('Content-Disposition: attachment; filename="'.Purify::filename($r['name']).'"');
+            }
+
+            header('Content-Transfer-Encoding: binary');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: '.$r['size']);
+            readfile(Config::get('files_dir') . $r['path'] . DIRECTORY_SEPARATOR . $r['content_id']);
+        } else {
+            throw new \Exception(L\get('Object_not_found'));
+        }
+        $res->close();
     }
 
     /**
@@ -1045,7 +1107,7 @@ class Files
             case 'pdf':
                 $html = 'PDF'; //Ext panel - PreviewPanel view
                 if (empty($_SERVER['HTTP_X_REQUESTED_WITH'])) { //full browser window view
-                    $url = $coreUrl . 'download.php?id='.$file['id'];
+                    $url = $coreUrl . 'download/' . $file['id'] . '/';
                     $html = '
                         <object data="' . $url . '" type="application/pdf" width="100%" height="100%">
                             It appears you don\'t have Adobe Reader or PDF support in this web browser.
@@ -1072,7 +1134,7 @@ class Files
 
                 file_put_contents(
                     $preview_filename,
-                    '<img src="/' . $coreName . '/v-'.$file['content_id'].
+                    '<img src="/' . $coreName . '/view/'.$file['content_id'].
                     '_.png" class="fit-img" style="margin: auto" />'
                 );
                 break;
@@ -1081,10 +1143,10 @@ class Files
                 if ((substr($file['type'], 0, 5) == 'image') && (substr($file['type'], 0, 9) !== 'image/svg')) {
                     file_put_contents(
                         $preview_filename,
-                        '<div style="padding: 5px 10px"><img src="/'.$coreName.'/download.php?id='.
-                        $file['id'].
-                        (empty($version_id) ? '' : '&v='.$version_id).
-                        '" class="fit-img" style="margin: auto"></div>'
+                        '<div style="padding: 5px 10px"><img src="/'.$coreName.'/download/'.
+                        $file['id'] .
+                        (empty($version_id) ? '' : '/' . $version_id) .
+                        '/" class="fit-img" style="margin: auto"></div>'
                     );
                 }
         }

@@ -422,26 +422,28 @@ Ext.define('CB.object.ViewContainer', {
 
         var id = this.requestedLoadData
             ? Ext.valueFrom(this.requestedLoadData.nid, this.requestedLoadData.id)
-            : null;
-
-        this.loadedData = Ext.apply({id: id}, this.requestedLoadData);
-
-        if(Ext.isDefined(this.loadedData.viewIndex)) {
-            this.setActiveView(this.loadedData.viewIndex, false);
-        }
+            : null
+            ,params = Ext.apply({id: id}, this.requestedLoadData);
 
         delete this.requestedLoadData;
 
+        if(Ext.isDefined(params.viewIndex)) {
+            this.setActiveView(params.viewIndex, false);
+        }
+
         var activeItem = this.getLayout().activeItem;
 
-        this.loadedData.viewIndex = this.items.indexOf(activeItem);
+        params.viewIndex = this.items.indexOf(activeItem);
+
+        this.loadedData = params;
+
         switch(activeItem.getXType()) {
             case 'CBObjectPreview':
                 this.topToolbar.setVisible(!Ext.isEmpty(id));
                 this.doLayout();
 
                 //used params by preview component to detect wich buttons to display when asked
-                activeItem.params = this.loadedData;
+                activeItem.params = params;
 
                 activeItem.loadPreview(id);
                 break;
@@ -481,7 +483,7 @@ Ext.define('CB.object.ViewContainer', {
     ,updateToolbarAndMenuItems: function() {
         var ai = this.getLayout().activeItem;
         var ti = ai.getContainerToolbarItems();
-
+        clog('ti', ti);
         if(this.menu) {
             this.menu.removeAll(true);
             this.menu.destroy();
@@ -734,7 +736,7 @@ Ext.define('CB.object.ViewContainer', {
      * @return void
      */
     ,onPreviewClick: function(b, e) {
-        var p = Ext.apply({}, this.loadedData);
+        var p = Ext.clone(this.loadedData);
 
         p.viewIndex = b.pressed
             ? 1
@@ -982,7 +984,7 @@ Ext.define('CB.object.ViewContainer', {
     ,onPermalinkClick: function(b, e) {
         window.prompt(
             'Copy to clipboard: Ctrl+C, Enter'
-            , window.location.origin + '/' + App.config.coreName + '/v-' + this.loadedData.id + '/');
+            , window.location.origin + '/' + App.config.coreName + '/view/' + this.loadedData.id + '/');
     }
 
     /**

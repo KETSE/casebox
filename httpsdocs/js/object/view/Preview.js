@@ -63,7 +63,7 @@ Ext.define('CB.object.view.Preview', {
     ,doLoad: function(id, vId) {
 
         this.loader.load({
-            url: '/' + App.config.coreName + '/v-'+ id +'_' + vId + '/?i=1'
+            url: '/' + App.config.coreName + '/view/'+ id +'_' + vId + '/?i=1'
             ,callback: this.processLoad
             ,scope: this // optional scope for the callback
             ,discardUrl: false
@@ -89,7 +89,7 @@ Ext.define('CB.object.view.Preview', {
                 this.delayReload();
                 break;
             case 'PDF':
-                var url = '/' + App.config.coreName + "/download.php?pw=&amp;id="+this.data.id;
+                var url = '/' + App.config.coreName + "/download/" + this.data.id + "/?pw=";
                 this.update(
                     '<object data="' + url + '" type="application/pdf" width="100%" height="100%">' +
                     'alt : <a href="' + url + '">' + this.data.name + '</a></object>'
@@ -324,6 +324,7 @@ Ext.define('CB.object.view.Preview', {
             }
         };
 
+        clog('this.params', this.params);
         if(this.params) {
             rez.tbar['openExternal'] = {};
 

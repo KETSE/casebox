@@ -40,7 +40,7 @@ define('CB\\EXT_PATH', '/libx/ext');
 /* update include_path and include global script */
 set_include_path(INCLUDE_PATH);
 
-include 'global.php';
+include 'lib/global.php';
 /* end of update include_path and include global script */
 
 //load main config so that we can connect to casebox db and read configuration for core

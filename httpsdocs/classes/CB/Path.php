@@ -175,25 +175,13 @@ class Path
 
         $rez = array();
         $lastId = array_pop($ids);
-        $res = DB\dbQuery(
-            'SELECT t.id
-                ,t.name
-                ,t.`system`
-                ,t.`type`
-                ,ti.pids `path`
-                ,ti.`case_id`
-                ,t.`template_id`
-                ,tt.`type` template_type
-            FROM tree t
-            JOIN tree_info ti on t.id = ti.id
-            LEFT JOIN templates tt ON t.template_id = tt.id
-            WHERE t.id = $1',
-            $lastId
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $r['path'] = str_replace(',', '/', $r['path']);
-            $rez = $r;
+        $r = Objects::getBasicInfoForId($lastId);
+        if ($r['success']) {
+            $d = &$r['data'];
+            $d['path'] = str_replace(',', '/', $d['pids']);
+            unset($d['pids']);
+            $rez = $d;
         }
         $res->close();
 

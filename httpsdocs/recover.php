@@ -1,9 +1,12 @@
 <?php
 namespace CB;
 
+use \CB\User;
+
 require_once 'init.php';
-$action = explode('/', @$_GET['f']);
-$action = array_shift($action);
+
+$action = @$_GET['subcommand'];
+
 $prompt_for_new_password = false;
 
 $userLanguage = Config::get('user_language');
@@ -12,7 +15,9 @@ $coreUrl = Config::get('core_url');
 switch ($action) {
     case 'forgot-password':
         break;
+
     case 'reset-password':
+        //check if recover hash is given
         $hash = '';
         if (!empty($_GET['h'])) {
             $hash = $_GET['h'];
@@ -21,24 +26,15 @@ switch ($action) {
             $hash = $_POST['h'];
         }
         if (!empty($hash)) {
-            //process hash from get and check it https://osji.casebox.org/login/reset-password/?h=a9199d0152081ca667f07fbfd684ad9a
-            $user_id = null;
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM users_groups
-                WHERE recover_hash = $1',
-                $hash
-            ) or die(DB\dbQueryError());
+            //process hash from get and check it
+            $user_id = User::getIdByRecoveryHash($hash);
 
-            if ($r = $res->fetch_assoc()) {
-                $user_id = $r['id'];
-            }
-            $res->close();
             if (empty($user_id)) {
                 $_SESSION['msg'] = '<div class="alert alert-error">'.L\get('RecoverHashNotFound').(isDebugHost() ? $hash: '').'</div>';
                 break;
             }
 
+            //if recovery hash check passed - check and set new password if specified
             if (isset($_POST['p']) && isset($_POST['p2'])) {
                 $p = $_POST['p'];
                 $p2 = $_POST['p2'];
@@ -46,17 +42,8 @@ switch ($action) {
                     $_SESSION['p_msg'] = L\get('PasswordMissmatch');
                     break;
                 }
+                User::setNewPasswordByRecoveryHash($hash, $p);
 
-                DB\dbQuery(
-                    'UPDATE users_groups
-                    SET `password` = md5($2)
-                        ,recover_hash = NULL
-                    WHERE recover_hash = $1',
-                    array(
-                        $hash
-                        ,'aero'.$p
-                    )
-                ) or die(DB\dbQueryError());
                 $_SESSION['msg'] = '<div class="alert alert-success">'.L\get('PasswordChangedMsg').
                     '<br /> <br /><a href="' . $coreUrl . '">'.L\get('Login').'</a></div>';
                 break;
@@ -73,65 +60,45 @@ switch ($action) {
         $e = mb_strtolower($e);
         $u = mb_strtolower($u);
 
+        //redirect to recovery form if not submited or empty user and email
         if (!isset($_POST['s']) || (empty($e) && empty($u))) {
-            header('location: ' . $coreUrl . 'login/forgot-password/');
+            header('location: ' . $coreUrl . 'recover/forgot-password/');
             exit(0);
         }
+
         $user_id = null;
         $user_mail = null;
         if (!empty($e)) {
             if ($e = filter_var($e, FILTER_VALIDATE_EMAIL)) {
-                $res = DB\dbQuery(
-                    'SELECT id
-                         , email
-                    FROM users_groups
-                    WHERE email LIKE $1
-                        AND enabled = 1',
-                    "%$e%"
-                ) or die(DB\dbQueryError());
+                $user_id = User::getIdByEmail($e);
 
-                while (($r = $res->fetch_assoc() ) && empty($user_id)) {
-                    $mails = explode(',', $r['email']);
-                    for ($i=0; $i < sizeof($mails); $i++) {
-                        $mails[$i] = trim($mails[$i]);
-                        if (mb_strtolower($mails[$i]) == $e) {
-                            $user_id = $r['id'];
-                            $user_mail = $e;
-                        }
-                    }
-                }
-                $res->close();
                 if (empty($user_id)) {
                     $_SESSION['e_msg'] = L\get('EmailNotFound');
-                    header('location: ' . $coreUrl . 'login/forgot-password/');
+                    header('location: ' . $coreUrl . 'recover/forgot-password/');
                     exit(0);
                 }
             } else {
                 $_SESSION['e_msg'] = L\get('InvalidEmail');
             }
         } elseif (!empty($u)) {
-            $user_id = null;
-            $res = DB\dbQuery(
-                'SELECT id
-                    ,email
-                FROM users_groups
-                WHERE name = $1',
-                $u
-            ) or die(DB\dbQueryError());
+            $user_id = User::getIdByUsername($u);
 
-            if ($r = $res->fetch_assoc()) {
-                $user_id = $r['id'];
-                $user_mail = $r['email'];
-            }
-            $res->close();
             if (empty($user_id)) {
                 $_SESSION['u_msg'] = L\get('UsernameNotFound');
-                header('location: ' . $coreUrl . 'login/forgot-password/');
+                header('location: ' . $coreUrl . 'recover/forgot-password/');
                 exit(0);
-            } elseif (empty($user_mail)) {
-                $_SESSION['u_msg'] = L\get('UserHasNoMail');
-                header('location: ' . $coreUrl . 'login/forgot-password/');
-                exit(0);
+            } else {
+                $user = User::getPreferences($user_id);
+
+                $user_mail = empty($user['cfg']['security']['recovery_email'])
+                    ? $user['email']
+                    : $user['cfg']['security']['recovery_email'];
+
+                if (empty($user_mail)) {
+                    $_SESSION['u_msg'] = L\get('UserHasNoMail');
+                    header('location: ' . $coreUrl . 'recover/forgot-password/');
+                    exit(0);
+                }
             }
         }
 
@@ -149,33 +116,23 @@ switch ($action) {
             );
 
             $_SESSION['msg'] = '<div class="alert alert-error">Error occured. Administrator has been notified by mail. Please retry later.</div>';
-            header('location: ' . $coreUrl . 'login/forgot-password/');
+            header('location: ' . $coreUrl . 'recover/forgot-password/');
             exit(0);
         }
 
-        $hash = password_hash(
-            $user_id . $user_mail . date(DATE_ISO8601),
-            PASSWORD_BCRYPT,
-            array(
-                'cost' => 15,
-            )
+        $hash = User::generateRecoveryHash(
+            $user_id,
+            $user_id . $user_mail . date(DATE_ISO8601)
         );
 
-        DB\dbQuery(
-            'UPDATE users_groups
-            SET recover_hash = $2
-            WHERE id = $1',
-            array(
-                $user_id
-                ,$hash)
-        ) or die(DB\dbQueryError());
         $userData = User::getPreferences($user_id);
+
         if (!empty($userData['cfg']['security']['recovery_email']) && !empty($userData['cfg']['security']['email'])) {
             $user_mail = $userData['cfg']['security']['email'];
         }
         $userName = User::getDisplayName($userData);
 
-        $href = Util\getCoreHost().'login/reset-password/?h='.$hash;
+        $href = Util\getCoreHost().'recover/reset-password/?h='.$hash;
         $mail = file_get_contents($template);
         $mail = str_replace(array('{name}', '{link}'), array($userName, '<a href="'.$href.'" >'.$href.'</a>'), $mail);
 
@@ -183,6 +140,7 @@ switch ($action) {
         $_SESSION['msg'] = '<div class="alert alert-success">'.L\get('RecoverMessageSent').'</div>';
         /* end of generating reset hash and sending mail */
         break;
+
     default:
         header('location: ' . $coreUrl);
         exit(0);
@@ -195,9 +153,9 @@ switch ($action) {
 <title><?php echo Config::get('project_name_'.strtoupper($userLanguage)) ?></title>
 <?php
 echo '
-<link rel="stylesheet" type="text/css" href="' . $coreUrl . 'css/bs/css/bootstrap.min.css" />
-<link rel="stylesheet" type="text/css" href="' . $coreUrl . 'css/bs/css/bootstrap-responsive.min.css" />
-<link type="text/css" rel="stylesheet" href="' . $coreUrl . 'css/login.css" />';
+<link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap-responsive.min.css" />
+<link type="text/css" rel="stylesheet" href="/css/login.css" />';
 ?>
 </head>
 <body onload="javascript: e = document.getElementById('e'); if(e) e.focus(); editChanged();">
@@ -206,23 +164,29 @@ echo '
 String.prototype.trim = function() {return this.replace(/^\s+|\s+$/g,"");}
 function editChanged()
 {
-s = document.getElementById('s');
-if(!s) return;
-e = document.getElementById('e');
-u = document.getElementById('u');
-p = document.getElementById('p');
-p2 = document.getElementById('p2');
-if(e && u) s.disabled = ((e && (e.value.trim() == '') ) && (u && (u.value.trim() == '') ));
-if(p && p2) s.disabled = ((p.value.trim() == '') || (p.value != p2.value));
-setTimeout(editChanged, 500)
+    var s = document.getElementById('s');
+    if (!s) {
+        return;
+    }
+    var e = document.getElementById('e')
+        ,u = document.getElementById('u')
+        ,p = document.getElementById('p')
+        ,p2 = document.getElementById('p2');
+    if (e && u) {
+        s.disabled = ((e && (e.value.trim() == '') ) && (u && (u.value.trim() == '') ));
+    }
+    if (p && p2) {
+        s.disabled = ((p.value.trim() == '') || (p.value != p2.value));
+    }
+    setTimeout(editChanged, 500)
 }
 //-->
 </script>
 <div class="main">
 <div class="form_login tac">
         <?php
-        echo '<a href="' . $coreUrl . '" class="dib"><img src="' . $coreUrl . 'css/i/CaseBox-Logo-medium.png" style="width: 300px"></a><br>
-        <form method="post" action="' . $coreUrl . 'login/reset-password/" class="standart_form tal" autocomplete="off">';
+        echo '<a href="' . $coreUrl . '" class="dib"><img src="' . $coreUrl . '/logo.png" style="width: 300px"></a><br>
+        <form method="post" action="' . $coreUrl . 'recover/reset-password/" class="standart_form tal" autocomplete="off">';
         $homeLink = '<a href="' . $coreUrl . '" class="btn btn-info">'.L\get('Login').'</a>';
 
         if (!empty($_SESSION['msg'])) {

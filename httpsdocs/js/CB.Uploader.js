@@ -7,7 +7,7 @@ Ext.define('CB.Uploader', {
         autoStart: true
         // ,autoRemoveUploaded: false
         ,autoShowWindow: true
-        ,url: 'upload.php'
+        ,url: 'upload/'
     }
     ,group: 0 // files grouping id
     ,status: 0 // Ready to upload
@@ -331,7 +331,7 @@ Ext.define('CB.Uploader', {
             ,content_id: r.get('content_id')
             ,response: r.get('response')
         };
-        this.xhr.open("POST", 'upload.php', true);
+        this.xhr.open("POST", 'upload/', true);
 
         this.xhr.setRequestHeader("X_FILE_OPTIONS", Ext.util.JSON.encode(params));
         if(r.get('content_id') > 0) this.xhr.send('');

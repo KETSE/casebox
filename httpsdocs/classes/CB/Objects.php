@@ -904,6 +904,47 @@ class Objects
     }
 
     /**
+     * get basic info for a given object id
+     * @param  int  $id
+     * @return json responce
+     */
+    public static function getBasicInfoForId($id)
+    {
+        $rez = array(
+            'success' => false
+            ,'id' => $id
+            ,'data' => array()
+        );
+
+        if (empty($id) || !is_numeric($id)) {
+            return $rez;
+        }
+
+        $res = DB\dbQuery(
+            'SELECT t.id
+                ,t.name
+                ,t.`system`
+                ,t.`type`
+                ,ti.pids
+                ,t.`template_id`
+                ,tt.`type` template_type
+            FROM tree t
+            JOIN tree_info ti on t.id = ti.id
+            LEFT JOIN templates tt ON t.template_id = tt.id
+            WHERE t.id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez['success'] = true;
+            $rez['data'] = $r;
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
      * get a child node id by its name under specified $pid
      * @param  int      $id
      * @param  varchar  $name

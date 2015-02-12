@@ -236,7 +236,8 @@ Ext.define('CB.controller.Browsing', {
         if(query.substr(0,1) == '#') {
             query = query.substr(1).trim();
             if(!isNaN(query)) {
-                this.locateObject(query);
+                // this.locateObject(query);
+                this.openObjectWindowById(query);
                 return;
             }
         }
@@ -372,6 +373,32 @@ Ext.define('CB.controller.Browsing', {
         );
 
         this.openPath(params);
+    }
+
+    /**
+     * loads basic data for given object id and try to open its window if found
+     * @param  int id
+     * @return void
+     */
+    ,openObjectWindowById: function (id) {
+        if(!Ext.isNumeric(id)) {
+            return;
+        }
+
+        CB_Objects.getBasicInfoForId(
+            id
+            ,function(r, e) {
+                if(r.success !== true) {
+                    Ext.Msg.alert(
+                        L.Error
+                        ,L.RecordIdNotFound.replace('{id}', '#' + r.id)
+                    );
+                    return;
+                }
+                App.openObjectWindow(r.data);
+            }
+            ,this
+        );
     }
 
     /**

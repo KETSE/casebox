@@ -704,7 +704,7 @@ function initApp() {
             fileId = fileId.id;
             zipped = false;
         }
-        url = '/' + App.config.coreName + '/download.php?id='+fileId;
+        url = '/' + App.config.coreName + '/download/'+fileId;
         if(!Ext.isEmpty(versionId)) url += '&v='+versionId;
         if(zipped) {
             url += '&z=1';

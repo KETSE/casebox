@@ -41,7 +41,7 @@ class Objects
             $notifyData = array(
                 'sender' => $sender
                 ,'subject' => $subject
-                ,'body' => 'Item <a href="' . $coreUrl . 'v-' . $id . '">' . $data['name'] . ' suffered following action: ' . $p['type'] . '.'
+                ,'body' => 'Item <a href="' . $coreUrl . 'view/' . $id . '/">' . $data['name'] . ' suffered following action: ' . $p['type'] . '.'
             );
 
             // insert notification into myslq

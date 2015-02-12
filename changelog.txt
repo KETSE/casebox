@@ -1,3 +1,10 @@
+CaseBox 1.9.392 (2015-02-12)
+==============================
+New Features, Improvements
+--------------------------
+- #4437 URL router
+- #4489 Improvements: Search, Preview after save, findById
+
 CaseBox 1.9.391 (2015-02-10)
 ==============================
 Fixed Bugs:

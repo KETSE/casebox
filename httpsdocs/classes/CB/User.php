@@ -1179,6 +1179,152 @@ class User
         return $rez;
     }
 
+    /**
+     * get user id by his username
+     * @param  varchar $username
+     * @return int     | null
+     */
+    public static function getIdByUsername($username)
+    {
+        $rez = null;
+
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM users_groups
+            WHERE name = $1',
+            $username
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['id'];
+        }
+
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get user id by email
+     * @param  varchar $email
+     * @return int     | null
+     */
+    public static function getIdByEmail($email)
+    {
+        $rez = null;
+
+        $res = DB\dbQuery(
+            'SELECT id
+                ,email
+            FROM users_groups
+            WHERE email LIKE $1
+                AND enabled = 1',
+            "%$email%"
+        ) or die(DB\dbQueryError());
+
+        while (($r = $res->fetch_assoc()) && empty($rez)) {
+            $mails = explode(',', $r['email']);
+            for ($i=0; $i < sizeof($mails); $i++) {
+                $mails[$i] = trim($mails[$i]);
+                if (mb_strtolower($mails[$i]) == $email) {
+                    $rez = $r['id'];
+                }
+            }
+        }
+
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get user id by recovery hash
+     * @param  varchar $hash
+     * @return int     | null
+     */
+    public static function getIdByRecoveryHash($hash)
+    {
+        $rez = null;
+
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM users_groups
+            WHERE recover_hash = $1',
+            $hash
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r['id'];
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * generate recovery hash for a given user
+     * @param  int     $userId
+     * @param  varchar $random
+     * @return varchar
+     */
+    public static function generateRecoveryHash($userId, $random)
+    {
+        $hash = password_hash(
+            $random,
+            PASSWORD_BCRYPT,
+            array(
+                'cost' => 15,
+            )
+        );
+
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET recover_hash = $2
+            WHERE id = $1',
+            array(
+                $userId
+                ,$hash)
+        ) or die(DB\dbQueryError());
+
+        return $hash;
+    }
+
+    /**
+     * set new password for a user by his recovery hash
+     * @param varchar $hash
+     * @param varchar $password
+     */
+    public static function setNewPasswordByRecoveryHash($hash, $password)
+    {
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET `password` = md5($2)
+                ,recover_hash = NULL
+            WHERE recover_hash = $1',
+            array(
+                $hash
+                ,'aero'.$password
+            )
+        ) or die(DB\dbQueryError());
+    }
+
+    /**
+     * check if a given user is public
+     * @param  int     $userId
+     * @return boolean
+     */
+    public static function isPublic($userId = false)
+    {
+        $rez = false;
+
+        $config = static::getUserConfig($userId);
+        if (!empty($config['public_access'])) {
+            $rez = true;
+        }
+
+        return $rez;
+    }
+
     public static function getTemplateId()
     {
         $rez = null;
@@ -1408,6 +1554,26 @@ class User
         }
 
         return Cache::get($var_name);
+    }
+
+    /**
+     * outputs user photo directly to output
+     * @param  int     $userId
+     * @param  boolean $size32
+     * @return void
+     */
+    public static function outputPhoto($userId, $size32 = false)
+    {
+        $photoFile = static::getPhotoFilename($userId, $size32);
+
+        $expires = 60*60*24*14;
+        header('Content-Type: image; charset=UTF-8');
+        header('Content-Transfer-Encoding: binary');
+        header("Cache-Control: maxage=" . $expires);
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time()+$expires) . ' GMT');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        readfile($photoFile);
     }
 
     /**

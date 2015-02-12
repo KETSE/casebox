@@ -522,12 +522,7 @@ class Base
         data\Sorter::$sortField = $sortOptions['property'];
 
         $sorter = '\\CB\\data\\Sorter::' . $sortType . ucfirst($sortDir);
-        // die($sortType . ucfirst($sortDir));
 
-        // echo "$sorter \n";
-        // var_dump($data);
         usort($data, $sorter);
-        // var_dump($data);
-
     }
 }
