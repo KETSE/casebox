@@ -1,3 +1,9 @@
+CaseBox 1.9.393 (2015-02-13)
+==============================
+Fixed Bugs:
+----------
+- inclusion path corrections
+
 CaseBox 1.9.392 (2015-02-12)
 ==============================
 New Features, Improvements

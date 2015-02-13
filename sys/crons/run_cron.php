@@ -35,7 +35,7 @@ set_include_path(
     get_include_path()
 );
 
-include DOC_ROOT.'global.php';
+include DOC_ROOT.'lib/global.php';
 
 $cfg = \CB\Config::loadConfigFile(DOC_ROOT.'config.ini');
 

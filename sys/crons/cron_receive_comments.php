@@ -141,7 +141,7 @@ foreach ($mailServers as $mailConf) {
         $_SERVER['SERVER_NAME'] = $coreName.'.casebox.org';
 
         include $site_path.DIRECTORY_SEPARATOR.'config.php';
-        include $site_path.DIRECTORY_SEPARATOR.'language.php';
+        include $site_path.DIRECTORY_SEPARATOR.'lib/language.php';
 
         $templateIds = Templates::getIdsByType('comment');
 
@@ -305,13 +305,14 @@ function removeContentExtraBlock($content, $emailFrom, $emailTo)
 
 // email: John Doe <user@domain.com>
 // @return varchar; // just email
-function extractEmailFromText($email) {
+function extractEmailFromText($email)
+{
     if (preg_match_all('/^[^<]*<?([^>]+)>?/i', $email, $results)) {
         $email = $results[1][0];
     }
+
     return $email;
 }
-
 
 // Expects a valid email
 function getCoreUserByMail($email)

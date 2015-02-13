@@ -38,7 +38,7 @@ include $site_path.DIRECTORY_SEPARATOR.'config.php';
 
 require_once LIB_DIR.'Util.php';
 
-require_once(DOC_ROOT.'language.php');
+require_once(LIB_DIR.'language.php');
 
 $coreName = Config::get('core_name');
 //L\initTranslations(); // would be called from inside crons that need translations

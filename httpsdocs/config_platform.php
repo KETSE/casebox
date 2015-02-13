@@ -25,6 +25,7 @@ define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
 //  and do not contain core specific paths
 define(
     'CB\\INCLUDE_PATH',
+    // DOC_ROOT.PATH_SEPARATOR.
     DOC_ROOT.'libx'.PATH_SEPARATOR.
     DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
     DOC_ROOT.'classes'.PATH_SEPARATOR.
@@ -70,8 +71,8 @@ $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . PATH_SEPARA
 
 $cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
 $cfg['SOLR_CLIENT'] = 'Solr/Service.php';
-$cfg['MINIFY_PATH'] = 'libx/min/';
-$cfg['ZEND_PATH'] = 'libx/ZF/library';
+$cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
+$cfg['ZEND_PATH'] = DOC_ROOT . 'libx/ZF/library';
 $cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
 Cache::set('platformConfig', $cfg);
