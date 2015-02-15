@@ -18,7 +18,7 @@ session_set_save_handler($sessionHandler, true);
 session_start();
 
 // check if loged in
-if (!@$webDAVMode) {   # simple hack to call init.php from another script without a redirect to login.
+if (!@$webDAVMode && !(php_sapi_name() == "cli") ) {   # simple hack to call init.php from another script without a redirect to login.
     if (!in_array(@$_GET['command'], array('login', 'recover')) && !User::isLoged()) {
         header('Location: ' . Config::get('core_url') . 'login/');
         exit(0);
