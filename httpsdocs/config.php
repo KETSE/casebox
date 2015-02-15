@@ -31,7 +31,7 @@ $cfg['db_name'] = PREFIX . $cfg['core_name'];
 try {
     $cfg = array_merge($cfg, Config::getPlatformConfigForCore($cfg['core_name']));
 } catch (\Exception $e) { //return http "not found" if cant load core config
-    header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
+    header(@$_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
     exit();
 }
 
