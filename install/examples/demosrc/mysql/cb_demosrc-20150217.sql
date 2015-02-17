@@ -1,3 +1,9 @@
+/*
+SQLyog Ultimate v11.5 (64 bit)
+MySQL - 5.5.9 : Database - cb_demosrc
+*********************************************************************
+*/
+
 /*!40101 SET NAMES utf8 */;
 
 /*!40101 SET SQL_MODE=''*/;
@@ -25,11 +31,11 @@ CREATE TABLE `action_log` (
   CONSTRAINT `FK_action_log__object_id` FOREIGN KEY (`object_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_action_log__object_pid` FOREIGN KEY (`object_pid`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_action_log__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 /*Data for the table `action_log` */
 
-insert  into `action_log`(`id`,`object_id`,`object_pid`,`user_id`,`action_type`,`action_time`,`data`) values (1,1,NULL,1,'login_fail','2015-01-12 16:32:45','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(2,1,NULL,1,'login_fail','2015-01-12 16:32:48','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(3,1,NULL,1,'login_fail','2015-01-12 16:32:52','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(4,1,NULL,1,'login','2015-01-12 16:32:57','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}');
+insert  into `action_log`(`id`,`object_id`,`object_pid`,`user_id`,`action_type`,`action_time`,`data`) values (1,1,NULL,1,'login_fail','2015-01-12 16:32:45','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(2,1,NULL,1,'login_fail','2015-01-12 16:32:48','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(3,1,NULL,1,'login_fail','2015-01-12 16:32:52','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(4,1,NULL,1,'login','2015-01-12 16:32:57','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(5,1,NULL,1,'login_fail','2015-02-17 09:18:16','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(6,1,NULL,1,'login_fail','2015-02-17 09:18:20','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(7,1,NULL,1,'login_fail','2015-02-17 09:18:30','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(8,1,NULL,1,'login','2015-02-17 09:18:34','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(9,1,NULL,1,'','2015-02-17 09:19:36','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}');
 
 /*Table structure for table `config` */
 
@@ -65,7 +71,7 @@ CREATE TABLE `crons` (
 
 /*Data for the table `crons` */
 
-insert  into `crons`(`id`,`cron_id`,`cron_file`,`last_start_time`,`last_end_time`,`execution_info`,`last_action`) values (1,'solr_update_tree','D:\\devel\\www\\cb2\\casebox\\crons\\cron_solr_update_tree.php','2014-04-03 06:20:15','2014-04-03 06:20:17','ok','2015-01-12 16:32:03'),(2,'send_log_notifications','/var/www/casebox/casebox/crons/cron_send_log_notifications.php','2013-04-22 09:14:31','2013-04-22 09:14:31','ok','0000-00-00 00:00:00'),(3,'extract_file_contents','/var/www/casebox/casebox/crons/cron_extracting_file_contents.php','2013-07-12 10:54:03','2013-07-12 10:54:03','{\"Total\":0,\"Processed\":0,\"Not found\":0,\"Processed List\":[],\"Not found List\":[]}','0000-00-00 00:00:00'),(4,'check_core_email','/var/www/casebox/casebox/crons/cron_check_cores_mail.php','2013-04-20 18:20:01','2013-04-20 18:20:02','ok','0000-00-00 00:00:00'),(5,'check_deadlines','/var/www/casebox/casebox/crons/cron_check_deadlines.php','2014-05-19 15:39:13','2014-05-19 15:39:13','ok','2014-05-19 15:39:13'),(6,'test','/var/www/casebox/casebox/crons/test_mail_format.php','2013-01-24 09:14:53','2013-01-24 09:14:53','ok','0000-00-00 00:00:00'),(7,'send_notifications','/var/www/casebox/sys/crons/cron_send_notifications.php','2014-05-19 15:40:23','2014-05-19 15:40:23','ok','2014-05-19 15:40:23'),(8,'extract_files_content','/var/www/casebox/sys/crons/cron_extract_files_content.php','2014-05-19 15:40:35','2014-05-19 15:40:35','{\"Total\":0,\"Processed\":0,\"Not found\":0,\"Processed List\":[],\"Not found List\":[]}','2014-05-19 15:40:35');
+insert  into `crons`(`id`,`cron_id`,`cron_file`,`last_start_time`,`last_end_time`,`execution_info`,`last_action`) values (1,'solr_update_tree','D:\\devel\\www\\cb2\\casebox\\crons\\cron_solr_update_tree.php','2015-02-17 09:17:54','2015-02-17 09:17:54','ok','2015-02-17 09:17:59'),(2,'send_log_notifications','/var/www/casebox/casebox/crons/cron_send_log_notifications.php','2013-04-22 09:14:31','2013-04-22 09:14:31','ok','0000-00-00 00:00:00'),(3,'extract_file_contents','/var/www/casebox/casebox/crons/cron_extracting_file_contents.php','2013-07-12 10:54:03','2013-07-12 10:54:03','{\"Total\":0,\"Processed\":0,\"Not found\":0,\"Processed List\":[],\"Not found List\":[]}','0000-00-00 00:00:00'),(4,'check_core_email','/var/www/casebox/casebox/crons/cron_check_cores_mail.php','2013-04-20 18:20:01','2013-04-20 18:20:02','ok','0000-00-00 00:00:00'),(5,'check_deadlines','/var/www/casebox/casebox/crons/cron_check_deadlines.php','2014-05-19 15:39:13','2014-05-19 15:39:13','ok','2014-05-19 15:39:13'),(6,'test','/var/www/casebox/casebox/crons/test_mail_format.php','2013-01-24 09:14:53','2013-01-24 09:14:53','ok','0000-00-00 00:00:00'),(7,'send_notifications','/var/www/casebox/sys/crons/cron_send_notifications.php','2014-05-19 15:40:23','2014-05-19 15:40:23','ok','2014-05-19 15:40:23'),(8,'extract_files_content','/var/www/casebox/sys/crons/cron_extract_files_content.php','2014-05-19 15:40:35','2014-05-19 15:40:35','{\"Total\":0,\"Processed\":0,\"Not found\":0,\"Processed List\":[],\"Not found List\":[]}','2014-05-19 15:40:35');
 
 /*Table structure for table `favorites` */
 
@@ -257,7 +263,7 @@ CREATE TABLE `sessions` (
 
 /*Data for the table `sessions` */
 
-insert  into `sessions`(`id`,`pid`,`last_action`,`expires`,`user_id`,`data`) values ('1ad4i3ealop7tptdpfam7lbfb3','1ad4i3ealop7tptdpfam7lbfb3','2015-01-12 16:54:43',NULL,1,'ips|s:11:\"|127.0.0.1|\";key|s:32:\"777f9d97b9feda9df70b3e66937d3f44\";user|a:15:{s:2:\"id\";s:1:\"1\";s:4:\"name\";s:4:\"root\";s:10:\"first_name\";s:13:\"Administrator\";s:9:\"last_name\";s:0:\"\";s:3:\"sex\";s:1:\"m\";s:5:\"email\";s:18:\"oburlaca@gmail.com\";s:11:\"language_id\";s:1:\"1\";s:3:\"cfg\";a:8:{s:17:\"short_date_format\";s:8:\"%m/%d/%Y\";s:16:\"long_date_format\";s:9:\"%F %j, %Y\";s:12:\"country_code\";s:0:\"\";s:5:\"phone\";s:0:\"\";s:8:\"timezone\";s:0:\"\";s:5:\"state\";a:2:{s:3:\"mAc\";a:2:{s:9:\"collapsed\";b:0;s:5:\"width\";i:250;}s:5:\"btree\";a:3:{s:5:\"paths\";a:5:{i:0;s:2:\"/0\";i:1;s:4:\"/0/1\";i:2;s:10:\"/0/1/25114\";i:3;s:16:\"/0/1/25114/25139\";i:4;s:24:\"/0/1/25114/25139/8-tasks\";}s:5:\"width\";i:250;s:8:\"selected\";s:24:\"/0/1/25114/25139/8-tasks\";}}s:11:\"time_format\";s:5:\"%H:%i\";s:5:\"theme\";s:7:\"classic\";}s:4:\"data\";a:0:{}s:8:\"language\";s:2:\"en\";s:6:\"locale\";s:5:\"en_US\";s:5:\"admin\";b:1;s:6:\"manage\";b:1;s:6:\"groups\";a:1:{i:0;s:3:\"233\";}s:11:\"TSV_checked\";b:1;}message|N;');
+insert  into `sessions`(`id`,`pid`,`last_action`,`expires`,`user_id`,`data`) values ('lrasd5lddkuh0s62ck3di9a180','lrasd5lddkuh0s62ck3di9a180','2015-02-17 09:19:36',NULL,0,'');
 
 /*Table structure for table `tasks` */
 
@@ -656,7 +662,7 @@ CREATE TABLE `users_groups` (
 
 /*Data for the table `users_groups` */
 
-insert  into `users_groups`(`id`,`type`,`system`,`name`,`first_name`,`last_name`,`l1`,`l2`,`l3`,`l4`,`sex`,`email`,`photo`,`password`,`password_change`,`recover_hash`,`language_id`,`cfg`,`data`,`last_login`,`login_successful`,`login_from_ip`,`last_logout`,`last_action_time`,`enabled`,`cid`,`cdate`,`uid`,`udate`,`did`,`ddate`,`searchField`) values (1,2,0,'root','Administrator','','Administrator','Administrator','Administrator','Administrator','m','oburlaca@gmail.com','1_m6.png','46ae99bd879ff123b64793b8ce986137','2014-02-28',NULL,1,'{\"short_date_format\":\"%m\\/%d\\/%Y\",\"long_date_format\":\"%F %j, %Y\",\"country_code\":\"\",\"phone\":\"\",\"timezone\":\"\",\"security\":{\"recovery_email\":true,\"email\":\"oburlaca@gmail.com\"},\"state\":{\"mAc\":{\"collapsed\":false,\"width\":250,\"weight\":-10},\"btree\":{\"paths\":[\"\\/0\",\"\\/0\\/3-tasks\",\"\\/0\\/1\",\"\\/0\\/1\\/24042\",\"\\/0\\/1\\/24042\\/24052\",\"\\/0\\/27-recycleBin\"],\"width\":250,\"selected\":\"\\/0\\/1\\/24042\\/24052\\/24074\"},\"mopp\":{\"weight\":-20},\"oevg\":{\"columns\":{\"title\":{\"idx\":0,\"flex\":290},\"value\":{\"idx\":1,\"flex\":290}},\"group\":null},\"oew24072\":{\"width\":600,\"height\":450,\"maximized\":false,\"size\":{\"width\":600,\"height\":450},\"pos\":[924,182]}}}','[]','2015-01-12 16:32:57',1,'|127.0.0.1|',NULL,'2014-05-19 19:30:36',1,1,NULL,1,'2013-03-20 12:57:29',NULL,NULL,' root Administrator Administrator Administrator Administrator oburlaca@gmail.com '),(233,1,1,'system','SYSTEM','','SYSTEM','SYSTÈME','СИСТЕМА',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:08:09',NULL,NULL,' system SYSTEM SYSTÈME СИСТЕМА   '),(234,1,1,'everyone','Everyone','','Everyone','Tous','Все',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:08:10',NULL,NULL,' everyone Everyone Tous Все   '),(235,1,0,'Administrators','Administrators','','Administrators','Administrateurs','Администраторы',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:08:10',NULL,NULL,' Administrators Administrators Administrateurs Администраторы   '),(236,1,0,'Berlin','Managers','','Managers','Gestionnaires','Менеджеры',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',1,'2013-03-20 13:08:10',NULL,NULL,' Berlin Managers Gestionnaires Менеджеры   '),(238,1,0,'Users','Users','','Users','Users','Пользователи',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:08:11',NULL,NULL,' Users Users Users Пользователи   '),(240,2,0,'enorman','Erik','Norman','Erik Norman','Erik Norman','Erik Norman',NULL,'m','oburlaca@gmail.com','240_m1.jpg','8fe8b64432d3b41f7dbc5d8024337e04','2014-03-31',NULL,1,'{\"short_date_format\":\"%d\\/%m\\/%Y\",\"long_date_format\":\"%F %j, %Y\",\"country_code\":\"+32\",\"phone\":\"\",\"timezone\":\"Cairo\",\"security\":{\"recovery_email\":true,\"email\":\"oburlaca@gmail.com\"},\"TZ\":\"Africa\\/Cairo\",\"canAddUsers\":\"true\",\"canAddGroups\":\"true\"}','[]','2014-04-01 09:23:27',1,'|109.185.172.18|',NULL,'2014-04-01 20:39:15',1,232,'2013-05-24 14:05:01',1,'0000-00-00 00:00:00',NULL,NULL,' enorman Erik Norman Erik Norman Erik Norman  oburlaca@gmail.com '),(242,1,0,'Moscow','Moscow','','Moscow','Moscow','Moscow','Moscow',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:03',1,'0000-00-00 00:00:00',NULL,NULL,' Moscow Moscow Moscow Moscow Moscow  '),(243,1,0,'New York','New York','','New York','New York','New York','New York',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:10',1,'0000-00-00 00:00:00',NULL,NULL,' New York New York New York New York New York  '),(244,1,0,'Paris','Paris','','Paris','Paris','Paris','Paris',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:20',1,'0000-00-00 00:00:00',NULL,NULL,' Paris Paris Paris Paris Paris  '),(245,1,0,'London','London','','London','London','London','London',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:28',1,'0000-00-00 00:00:00',NULL,NULL,' London London London London London  '),(246,1,0,'Buenos Aires','Buenos Aires','','Buenos Aires','Buenos Aires','Buenos Aires','Buenos Aires',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:38',1,'0000-00-00 00:00:00',NULL,NULL,' Buenos Aires Buenos Aires Buenos Aires Buenos Aires Buenos Aires  '),(247,1,0,'Tokyo','Tokyo','','Tokyo','Tokyo','Tokyo','Tokyo',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:48',1,'0000-00-00 00:00:00',NULL,NULL,' Tokyo Tokyo Tokyo Tokyo Tokyo  '),(248,1,0,'San Francisco','San Francisco','','San Francisco','San Francisco','San Francisco','San Francisco',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:57',1,'0000-00-00 00:00:00',NULL,NULL,' San Francisco San Francisco San Francisco San Francisco San Francisco  '),(249,1,0,'Lima','Lima','','Lima','Lima','Lima','Lima',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:54:06',1,'0000-00-00 00:00:00',NULL,NULL,' Lima Lima Lima Lima Lima  '),(266,2,0,'rstone','Robin','Stone',NULL,NULL,NULL,NULL,NULL,'danieldesposito@huridocs.org','266_m5.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,NULL,NULL,'2014-08-28 16:00:49',-1,'|127.0.0.1|',NULL,'2014-03-03 03:53:26',1,1,'2014-02-28 15:55:43',1,'0000-00-00 00:00:00',NULL,NULL,' rstone     danieldesposito@huridocs.org '),(267,2,0,'ladkins','Lorraine','Adkins',NULL,NULL,NULL,NULL,'','test@test.com','267_f2.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,'{\"country_code\":\"\",\"phone\":\"\",\"timezone\":\"\",\"short_date_format\":\"%m\\/%d\\/%Y\",\"long_date_format\":\"%F %j, %Y\"}','{\"position\":24348,\"language_id\":1}','2014-05-19 07:35:55',1,'|109.185.172.18|',NULL,'2014-05-19 07:36:22',1,240,'2014-02-28 19:55:37',240,'0000-00-00 00:00:00',NULL,NULL,' ladkins     test@test.com '),(268,2,0,'mcrawford','Marc','Crawford',NULL,NULL,NULL,NULL,NULL,'test@test.com','268_m3.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,NULL,NULL,'2014-04-01 09:55:12',1,'|109.185.172.18|',NULL,'2014-04-01 10:59:18',1,240,'2014-02-28 20:05:10',240,'0000-00-00 00:00:00',NULL,NULL,' mcrawford     test@test.com '),(269,2,0,'rmack','Ray','Mack',NULL,NULL,NULL,NULL,NULL,'ray@test.com','269_m4.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,NULL,NULL,'2014-04-22 12:41:20',1,'|109.185.172.18|',NULL,'2014-04-22 12:41:20',1,240,'2014-02-28 20:06:32',240,'0000-00-00 00:00:00',NULL,NULL,' rmack     ray@test.com '),(270,2,0,'ctorres','Cecil','Torres',NULL,NULL,NULL,NULL,NULL,'cecil@test.com','270_f3.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,240,'2014-02-28 20:07:50',240,'0000-00-00 00:00:00',NULL,NULL,' ctorres     cecil@test.com ');
+insert  into `users_groups`(`id`,`type`,`system`,`name`,`first_name`,`last_name`,`l1`,`l2`,`l3`,`l4`,`sex`,`email`,`photo`,`password`,`password_change`,`recover_hash`,`language_id`,`cfg`,`data`,`last_login`,`login_successful`,`login_from_ip`,`last_logout`,`last_action_time`,`enabled`,`cid`,`cdate`,`uid`,`udate`,`did`,`ddate`,`searchField`) values (1,2,0,'root','Administrator','','Administrator','Administrator','Administrator','Administrator','m','oburlaca@gmail.com','1_m6.png','46ae99bd879ff123b64793b8ce986137','2014-02-28',NULL,1,'{\"short_date_format\":\"%m\\/%d\\/%Y\",\"long_date_format\":\"%F %j, %Y\",\"country_code\":\"\",\"phone\":\"\",\"timezone\":\"\",\"security\":{\"recovery_email\":true,\"email\":\"oburlaca@gmail.com\"},\"state\":{\"mAc\":{\"collapsed\":false,\"width\":250,\"weight\":-10},\"btree\":{\"paths\":[\"\\/0\",\"\\/0\\/3-tasks\",\"\\/0\\/1\",\"\\/0\\/1\\/24042\",\"\\/0\\/1\\/24042\\/24052\"],\"width\":250,\"selected\":\"\\/0\\/1\\/24042\\/24052\\/24075\"},\"mopp\":{\"weight\":-20},\"oevg\":{\"columns\":{\"title\":{\"idx\":0,\"flex\":290},\"value\":{\"idx\":1,\"flex\":290}},\"group\":null},\"oew24072\":{\"width\":600,\"height\":450,\"maximized\":false,\"size\":{\"width\":600,\"height\":450},\"pos\":[924,182]}}}','[]','2015-02-17 09:18:34',1,'|127.0.0.1|',NULL,'2014-05-19 19:30:36',1,1,NULL,1,'2013-03-20 12:57:29',NULL,NULL,' root Administrator Administrator Administrator Administrator oburlaca@gmail.com '),(233,1,1,'system','SYSTEM','','SYSTEM','SYSTÈME','СИСТЕМА',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:08:09',NULL,NULL,' system SYSTEM SYSTÈME СИСТЕМА   '),(234,1,1,'everyone','Everyone','','Everyone','Tous','Все',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:08:10',NULL,NULL,' everyone Everyone Tous Все   '),(235,1,0,'Administrators','Administrators','','Administrators','Administrateurs','Администраторы',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:08:10',NULL,NULL,' Administrators Administrators Administrateurs Администраторы   '),(236,1,0,'Berlin','Managers','','Managers','Gestionnaires','Менеджеры',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',1,'2013-03-20 13:08:10',NULL,NULL,' Berlin Managers Gestionnaires Менеджеры   '),(238,1,0,'Users','Users','','Users','Users','Пользователи',NULL,NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-03-17 09:35:11',NULL,'2013-03-20 13:08:11',NULL,NULL,' Users Users Users Пользователи   '),(240,2,0,'enorman','Erik','Norman','Erik Norman','Erik Norman','Erik Norman',NULL,'m','oburlaca@gmail.com','240_m1.jpg','8fe8b64432d3b41f7dbc5d8024337e04','2014-03-31',NULL,1,'{\"short_date_format\":\"%d\\/%m\\/%Y\",\"long_date_format\":\"%F %j, %Y\",\"country_code\":\"+32\",\"phone\":\"\",\"timezone\":\"Cairo\",\"security\":{\"recovery_email\":true,\"email\":\"oburlaca@gmail.com\"},\"TZ\":\"Africa\\/Cairo\",\"canAddUsers\":\"true\",\"canAddGroups\":\"true\"}','[]','2014-04-01 09:23:27',1,'|109.185.172.18|',NULL,'2014-04-01 20:39:15',1,232,'2013-05-24 14:05:01',1,'0000-00-00 00:00:00',NULL,NULL,' enorman Erik Norman Erik Norman Erik Norman  oburlaca@gmail.com '),(242,1,0,'Moscow','Moscow','','Moscow','Moscow','Moscow','Moscow',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:03',1,'0000-00-00 00:00:00',NULL,NULL,' Moscow Moscow Moscow Moscow Moscow  '),(243,1,0,'New York','New York','','New York','New York','New York','New York',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:10',1,'0000-00-00 00:00:00',NULL,NULL,' New York New York New York New York New York  '),(244,1,0,'Paris','Paris','','Paris','Paris','Paris','Paris',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:20',1,'0000-00-00 00:00:00',NULL,NULL,' Paris Paris Paris Paris Paris  '),(245,1,0,'London','London','','London','London','London','London',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:28',1,'0000-00-00 00:00:00',NULL,NULL,' London London London London London  '),(246,1,0,'Buenos Aires','Buenos Aires','','Buenos Aires','Buenos Aires','Buenos Aires','Buenos Aires',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:38',1,'0000-00-00 00:00:00',NULL,NULL,' Buenos Aires Buenos Aires Buenos Aires Buenos Aires Buenos Aires  '),(247,1,0,'Tokyo','Tokyo','','Tokyo','Tokyo','Tokyo','Tokyo',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:48',1,'0000-00-00 00:00:00',NULL,NULL,' Tokyo Tokyo Tokyo Tokyo Tokyo  '),(248,1,0,'San Francisco','San Francisco','','San Francisco','San Francisco','San Francisco','San Francisco',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:53:57',1,'0000-00-00 00:00:00',NULL,NULL,' San Francisco San Francisco San Francisco San Francisco San Francisco  '),(249,1,0,'Lima','Lima','','Lima','Lima','Lima','Lima',NULL,'',NULL,NULL,NULL,NULL,1,'{}',NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2013-05-29 09:54:06',1,'0000-00-00 00:00:00',NULL,NULL,' Lima Lima Lima Lima Lima  '),(266,2,0,'rstone','Robin','Stone',NULL,NULL,NULL,NULL,NULL,'danieldesposito@huridocs.org','266_m5.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,NULL,NULL,'2014-08-28 16:00:49',-1,'|127.0.0.1|',NULL,'2014-03-03 03:53:26',1,1,'2014-02-28 15:55:43',1,'0000-00-00 00:00:00',NULL,NULL,' rstone     danieldesposito@huridocs.org '),(267,2,0,'ladkins','Lorraine','Adkins',NULL,NULL,NULL,NULL,'','test@test.com','267_f2.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,'{\"country_code\":\"\",\"phone\":\"\",\"timezone\":\"\",\"short_date_format\":\"%m\\/%d\\/%Y\",\"long_date_format\":\"%F %j, %Y\"}','{\"position\":24348,\"language_id\":1}','2014-05-19 07:35:55',1,'|109.185.172.18|',NULL,'2014-05-19 07:36:22',1,240,'2014-02-28 19:55:37',240,'0000-00-00 00:00:00',NULL,NULL,' ladkins     test@test.com '),(268,2,0,'mcrawford','Marc','Crawford',NULL,NULL,NULL,NULL,NULL,'test@test.com','268_m3.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,NULL,NULL,'2014-04-01 09:55:12',1,'|109.185.172.18|',NULL,'2014-04-01 10:59:18',1,240,'2014-02-28 20:05:10',240,'0000-00-00 00:00:00',NULL,NULL,' mcrawford     test@test.com '),(269,2,0,'rmack','Ray','Mack',NULL,NULL,NULL,NULL,NULL,'ray@test.com','269_m4.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,NULL,NULL,'2014-04-22 12:41:20',1,'|109.185.172.18|',NULL,'2014-04-22 12:41:20',1,240,'2014-02-28 20:06:32',240,'0000-00-00 00:00:00',NULL,NULL,' rmack     ray@test.com '),(270,2,0,'ctorres','Cecil','Torres',NULL,NULL,NULL,NULL,NULL,'cecil@test.com','270_f3.jpg','8fe8b64432d3b41f7dbc5d8024337e04',NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,240,'2014-02-28 20:07:50',240,'0000-00-00 00:00:00',NULL,NULL,' ctorres     cecil@test.com ');
 
 /*Table structure for table `users_groups_association` */
 
@@ -851,9 +857,9 @@ DELIMITER $$
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_ai` */$$
 
 /*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `tasks_ai` AFTER INSERT ON `tasks` FOR EACH ROW BEGIN
- 	INSERT INTO tasks_responsible_users (task_id, user_id)
-		SELECT new.id, id
-		FROM users_groups
+ 	INSERT INTO tasks_responsible_users (task_id, user_id) 
+		SELECT new.id, id 
+		FROM users_groups 
 		WHERE CONCAT(',',new.responsible_user_ids,',') LIKE CONCAT('%,',id,',%');
     END */$$
 
@@ -885,11 +891,11 @@ DELIMITER $$
 /*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_au` */$$
 
 /*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `tasks_au` AFTER UPDATE ON `tasks` FOR EACH ROW BEGIN
-	DELETE FROM tasks_responsible_users
+	DELETE FROM tasks_responsible_users  
 	WHERE task_id = old.id AND CONCAT(',', new.responsible_user_ids, ',') NOT LIKE CONCAT('%,',user_id,',%');
-	INSERT INTO tasks_responsible_users (task_id, user_id)
-		SELECT new.id, u.id
-		FROM users_groups u
+	INSERT INTO tasks_responsible_users (task_id, user_id) 
+		SELECT new.id, u.id 
+		FROM users_groups u 
 		WHERE CONCAT(',',new.responsible_user_ids,',') LIKE CONCAT('%,',u.id,',%')
 		ON DUPLICATE KEY UPDATE user_id = u.id;
     END */$$
@@ -1034,7 +1040,7 @@ DELIMITER $$
 /*!50003 CREATE */ /*!50017 DEFINER = 'local'@'localhost' */ /*!50003 TRIGGER `tree_au` AFTER UPDATE ON `tree` FOR EACH ROW BEGIN
 	DECLARE tmp_old_pids
 		,tmp_new_pids TEXT DEFAULT '';
-
+	
 	DECLARE tmp_old_case_id
 		,tmp_new_case_id
 		,tmp_old_security_set_id
@@ -1044,7 +1050,7 @@ DELIMITER $$
 	DECLARE tmp_old_pids_length
 		,tmp_old_security_set_length
 		,tmp_acl_count INT UNSIGNED DEFAULT 0;
-
+	
 	/* get pids path, case_id and store them in tree_info table*/
 	IF( (COALESCE(old.pid, 0) <> COALESCE(new.pid, 0) )
 	    OR ( old.inherit_acl <> new.inherit_acl )
@@ -1065,12 +1071,12 @@ DELIMITER $$
 		FROM tree_info ti
 		LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 		WHERE ti.id = new.id;
-
+		
 		/* check if updated node is a case */
 		IF(tmp_old_case_id = old.id) THEN
 			SET tmp_new_case_id = new.id;
 		END IF;
-
+		
 		/* form new data based on new parent
 		*/
 		if(new.pid is null) THEN
@@ -1093,7 +1099,7 @@ DELIMITER $$
 			LEFT JOIN tree_info ti ON t.id = ti.id
 			LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 			WHERE t.id = new.pid;
-
+			
 			SET tmp_new_pids = TRIM( ',' FROM CONCAT( tmp_new_pids, ',', new.id) );
 		END IF;
 		/* end of form new data based on new parent */
@@ -1105,7 +1111,7 @@ DELIMITER $$
 			else
 				SET tmp_new_security_set = TRIM( ',' FROM CONCAT(tmp_new_security_set, ',', new.id ) );
 			END IF;
-
+			
 			UPDATE tree_acl_security_sets
 			SET `set` = tmp_new_security_set
 				,updated = 1
@@ -1949,8 +1955,8 @@ DELIMITER $$
     SQL SECURITY INVOKER
     COMMENT 'string'
 BEGIN
-	delete from objects_data where field_id = in_field_id;
-	DELETE FROM users_data WHERE field_id = in_field_id;
+	delete from objects where id = in_field_id;
+	DELETE FROM tree WHERE id = in_field_id;
 	delete from templates_structure where id = in_field_id;
     END */$$
 DELIMITER ;
@@ -1988,13 +1994,13 @@ BEGIN
 	DELETE FROM tmp_achild_ids2;
 	insert into tmp_achild_ids select id from tree where pid = in_id;
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_achild_ids
+		update tree, tmp_achild_ids 
 		  set tree.did = NULL
 		  ,tree.ddate = NULL
-		  ,tree.dstatus = 0
+		  ,tree.dstatus = 0 
 		  , tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
-
+		
 		DELETE FROM tmp_achild_ids2;
 		insert into tmp_achild_ids2 select id from tmp_achild_ids;
 		delete from tmp_achild_ids;
@@ -2019,13 +2025,13 @@ BEGIN
 	DELETE FROM tmp_dchild_ids2;
 	insert into tmp_dchild_ids select id from tree where pid = in_id;
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_dchild_ids
+		update tree, tmp_dchild_ids 
 		    set tree.did = in_did
 			,tree.ddate = CURRENT_TIMESTAMP
 			,tree.dstatus = 2
 			,tree.updated = 1
 		    where tmp_dchild_ids.id = tree.id;
-
+		    
 		DELETE FROM tmp_dchild_ids2;
 		insert into tmp_dchild_ids2 select id from tmp_dchild_ids;
 		delete from tmp_dchild_ids;
@@ -2046,31 +2052,31 @@ DELIMITER $$
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids(id bigint UNSIGNED);
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids2(id BIGINT UNSIGNED);
-
+	
 	delete from tmp_achild_ids;
 	DELETE FROM tmp_achild_ids2;
-	insert into tmp_achild_ids
-		select id
-		from tree
+	insert into tmp_achild_ids 
+		select id 
+		from tree 
 		where pid = in_id and draft = 1;
-
+	
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_achild_ids
+		update tree, tmp_achild_ids 
 		  set 	tree.draft = 0
 			,tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
-
+		
 		DELETE FROM tmp_achild_ids2;
-
-		insert into tmp_achild_ids2
-			select id
+		
+		insert into tmp_achild_ids2 
+			select id 
 			from tmp_achild_ids;
 		delete from tmp_achild_ids;
-
-		INSERT INTO tmp_achild_ids
-			SELECT t.id
-			FROM tree t
-			join tmp_achild_ids2 c
+		
+		INSERT INTO tmp_achild_ids 
+			SELECT t.id 
+			FROM tree t 
+			join tmp_achild_ids2 c 
 			  on t.pid = c.id and t.draft = 1;
 	END WHILE;
     END */$$
@@ -2243,8 +2249,8 @@ BEGIN
 		,tree_acl_security_sets
 		SET tree_acl_security_sets.`set` = CONCAT(
 			tmp_to_security_set
-			,CASE WHEN tmp_security_set_length IS NULL
-			THEN
+			,CASE WHEN tmp_security_set_length IS NULL 
+			THEN 
 			  CONCAT(',', tree_acl_security_sets.set)
 			ELSE
 			 SUBSTRING(tree_acl_security_sets.set, tmp_security_set_length)
@@ -2282,38 +2288,38 @@ DELIMITER $$
     SQL SECURITY INVOKER
 BEGIN
 	DECLARE `tmp_level` INT DEFAULT 0;
-
+	
 	CREATE TABLE IF NOT EXISTS tmp_level_id (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
 	CREATE TABLE IF NOT EXISTS tmp_level_pid (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
-
+	
 	INSERT INTO tmp_level_id
 	  SELECT ts1.id
 	  FROM templates_structure ts1
 	  LEFT JOIN templates_structure ts2 ON ts1.pid = ts2.id
 	  WHERE ts2.id IS NULL;
-
+	  
 	WHILE (ROW_COUNT() > 0) DO
 	  UPDATE templates_structure, tmp_level_id
-	  SET templates_structure.`level` = tmp_level
+	  SET templates_structure.`level` = tmp_level 
 	  WHERE templates_structure.id = tmp_level_id.id;
-
+	
 	  DELETE FROM tmp_level_pid;
-
+	  
 	  INSERT INTO tmp_level_pid
 		SELECT id FROM tmp_level_id;
-
+	  
 	  DELETE FROM tmp_level_id;
 	  INSERT INTO tmp_level_id
 	    SELECT ts1.id
 	    FROM templates_structure ts1
 	    JOIN tmp_level_pid ts2 ON ts1.pid = ts2.id;
-
+	    
 	  SET tmp_level = tmp_level + 1;
 	END WHILE;
-
+	
 	DROP TABLE tmp_level_id;
 	DROP TABLE tmp_level_pid;
-
+	
     END */$$
 DELIMITER ;
 

@@ -1153,7 +1153,7 @@ class Tasks
                 $un = User::getDisplayName($u['id']);
                 $rez .= '<tr><td class="user"><div style="position: relative">'.
                 '<img class="photo32" src="photo/'.$u['id'].'.jpg?32=' . User::getPhotoParam($u['id']). '" style="width:32px; height: 32px" alt="'.$un.'" title="'.$un.'">'.
-                ( ($u['status'] == 1 ) ? '<img class="done icon icon-tick-circle" src="css/i/s.gif" />': "").
+                ( ($u['status'] == 1 ) ? '<img class="done icon icon-tick-circle" src="/css/i/s.gif" />': "").
                 '</div></td><td><b>'.$un.'</b>'.
                 '<p class="gr">'.(
                     ($u['status'] == 1)

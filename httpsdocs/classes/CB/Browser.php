@@ -341,8 +341,9 @@ class Browser
         }
 
         $pids = false;
-        if (!empty($p['scope'])) {
-            switch ($p['scope']) {
+        if (!empty($fieldConfig['scope'])) {
+            $scope = $fieldConfig['scope'];
+            switch ($scope) {
                 case 'project': /* limiting pid to project. If not in a project then to parent directory */
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
                         $pids = $this->getCaseId($p['objectId']);
@@ -371,7 +372,7 @@ class Browser
                         : Util\toNumericArray($p['pidValue']);
                     break;
                 default:
-                    $pids = Util\toNumericArray($p['scope']);
+                    $pids = Util\toNumericArray($scope);
                     break;
             }
         }

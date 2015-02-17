@@ -10,7 +10,7 @@ for both config to work correctly.
 But take into account that apache warns in logs:
 [warn] Init: Name-based SSL virtual hosts only work for clients with TLS server name indication support (RFC 4366)
 
-Also another victual host config is used for webdav support (ssl_casebox_webdav.conf)
+Also another virtual host config is used for webdav support (ssl_casebox_webdav.conf)
 
 == hosts file ==
 If you plan to run CaseBox on a local/development server, then add this line to your hosts file:

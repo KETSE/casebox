@@ -189,8 +189,6 @@ return array_merge(
 
             ,'//js/overrides/data/Store.js'
 
-            ,'//js/overrides/form/field/Tag.js'
-
             ,'//js/overrides/grid/plugin/CellEditing.js'
             ,'//js/overrides/grid/CellEditor.js'
             ,'//js/overrides/grid/GridPanel.js'
