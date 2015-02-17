@@ -15,9 +15,6 @@ logs/
 # ignore 'cores' configuration
 httpsdocs/cores/
 
-# ignore language files
-httpsdocs/js/locale/
-
 # exclude system.ini
 httpsdocs/system.ini
 

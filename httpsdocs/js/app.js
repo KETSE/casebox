@@ -415,7 +415,7 @@ function initApp() {
             if(Ext.isEmpty(v)) {
                 return '';
             }
-            return '<img src="css/i/s.gif" class="icon '+v+'" /> '+v;
+            return '<img src="/css/i/s.gif" class="icon '+v+'" /> '+v;
         }
     };
 
@@ -858,14 +858,15 @@ function initApp() {
 
                     case 'tagField':
                         ed = new CB.object.field.editor.Tag({
-                            data: objData
+                            objData: objData
                             ,valueField: 'id'
                             ,displayField: 'name'
                             ,forceSelection: true
+                            ,typeAhead: true
                             ,queryMode: 'remote'
                             ,autoLoadOnValue: true
                             ,multiSelect: true
-                            ,stacked: true
+                            // ,stacked: true
                             ,pinList: false
                             ,filterPickList: true
                         });

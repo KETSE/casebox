@@ -1,3 +1,13 @@
+CaseBox 1.9.394 (2015-02-17)
+==============================
+New Features, Improvements
+--------------------------
+- #4422 Does TagField work in Ext5.1?
+- #4447 Dates treated as URL links in comments
+
+Fixed Bugs:
+----------
+
 CaseBox 1.9.393 (2015-02-13)
 ==============================
 Fixed Bugs:

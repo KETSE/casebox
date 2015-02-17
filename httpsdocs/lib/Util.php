@@ -620,7 +620,7 @@ function replaceUrlsWithLinks($text)
 
         // Check if the TLD is valid - or that $domain is an IP address.
         $tld = strtolower(strrchr($domain, '.'));
-        if (preg_match('{\.[0-9]{1,3}}', $tld) || isset($validTlds[$tld])) {
+        if (preg_match('{\.[0-9]{1,3}$}', $tld) || isset($validTlds[$tld])) {
             // Prepend http:// if no protocol specified
             $completeUrl = $match[1][0] ? $url : "http://$url";
 

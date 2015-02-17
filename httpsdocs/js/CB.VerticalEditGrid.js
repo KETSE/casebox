@@ -580,9 +580,8 @@ Ext.define('CB.VerticalEditGrid', {
         }
 
         var col = context.column;
-        var ed = col.getEditor();
+        var previousEditor = col.getEditor();
 
-        Ext.destroy(ed);
 
         if(this.editors && this.editors[t]) {
             col.setEditor(this.editors[t](this));
@@ -615,6 +614,12 @@ Ext.define('CB.VerticalEditGrid', {
             if(te) {
                 col.setEditor(te);
             }
+        }
+
+        // destroy previous editor if changed
+        var currentEditor = col.getEditor();
+        if(previousEditor && (previousEditor != currentEditor)) {
+            Ext.destroy(previousEditor);
         }
     }
 
@@ -672,18 +677,29 @@ Ext.define('CB.VerticalEditGrid', {
             ,node = this.helperTree.getNode(nodeId)
             ,tr = node.data.templateRecord;
 
-        /* process time fields */
-        if((context.fieldRecord.get('type') == 'time') && !Ext.isEmpty(context.value)){
-            if(Ext.isPrimitive(context.value)) {
-                var format = Ext.valueFrom(tr.get('cfg').format, App.timeFormat);
-                context.value = Ext.Date.parse(context.value, format);
+        if(context.field == 'value'){
+            /* post process value */
+            if(!Ext.isEmpty(context.value)) {
+                switch(context.fieldRecord.get('type')) {
+                    case 'time':
+                        if(Ext.isPrimitive(context.value)) {
+                            var format = Ext.valueFrom(tr.get('cfg').format, App.timeFormat);
+                            context.value = Ext.Date.parse(context.value, format);
+                        }
+
+                        context.value = Ext.Date.format(context.value, 'H:i:s');
+                        context.record.set('value', context.value);
+                        break;
+
+                    case '_objects':
+                        if(Ext.isArray(context.value)) {
+                            context.value = context.value.join(',');
+                            context.record.set('value', context.value);
+                        }
+                        break;
+                }
             }
 
-            context.value = Ext.Date.format(context.value, 'H:i:s');
-            context.record.set('value', context.value);
-        }
-
-        if(context.field == 'value'){
             //check if field has validator set and notify if validation not passed
             var validator = tr.get('cfg').validator;
             if(!Ext.isEmpty(validator)) {
@@ -697,8 +713,18 @@ Ext.define('CB.VerticalEditGrid', {
             if(context.value != context.originalValue){
                 this.helperTree.resetChildValues(nodeId);
             }
+
+            //check if editor field has getValueRecords (tag field) method and check records existance
+            var fe = context.column.field;
+            if(fe.getValueRecords) {
+                var records = fe.getValueRecords();
+                for (var i = 0; i < records.length; i++) {
+                    this.refOwner.objectsStore.checkRecordExistance(records[i].data);
+                }
+            }
         }
 
+        //fire change event if value changed
         if(context.value != context.originalValue) {
             this.fireEvent(
                 'change'
