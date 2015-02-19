@@ -158,7 +158,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,restore: new Ext.Action({
                 text: L.Restore
                 ,itemId: 'restore'
-                ,iconCls: 'ib-restore'
+                ,iconCls: 'im-restore'
                 ,scale: 'medium'
                 ,hidden: true
                 ,disabled: true
@@ -553,6 +553,7 @@ Ext.define('CB.browser.ViewContainer', {
         }
 
         this.updateToolbarButtons();
+        this.viewToolbar.hideInutilSeparators();
         this.viewToolbar.doLayout();
     }
 
@@ -858,6 +859,10 @@ Ext.define('CB.browser.ViewContainer', {
         ).setVisible(!inRecycleBin && inGridView);
 
         this.buttonCollection.get(
+            'edit'
+        ).setVisible(!inRecycleBin && inGridView);
+
+        this.buttonCollection.get(
             'more'
         ).setVisible(inGridView);
 
@@ -911,6 +916,8 @@ Ext.define('CB.browser.ViewContainer', {
 
             this.actions.permissions.setDisabled(isNaN(firstObjId));
         }
+
+        this.viewToolbar.hideInutilSeparators();
     }
 
     /**
@@ -1033,38 +1040,22 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onDeleteClick: function(b, e) {
         var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+
         if(Ext.isEmpty(selection)) {
             return;
         }
-        Ext.Msg.confirm(
-            L.DeleteConfirmation
-            ,(selection.length == 1)
-                ? L.DeleteConfirmationMessage + ' "' + selection[0].name + '"?'
-                : L.DeleteSelectedConfirmationMessage
-            ,this.onDelete
+
+        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+
+        CB.browser.Actions.deleteSelection(
+            selection
+            ,this.processDelete
             ,this
         );
     }
 
-    ,onDelete: function (btn) {
-        if(btn !== 'yes') {
-            return;
-        }
-        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
-        if(Ext.isEmpty(selection)) {
-            return;
-        }
-        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        var ids = [];
-        for (var i = 0; i < selection.length; i++) {
-            ids.push(selection[i].nid);
-        }
-        CB_BrowserView['delete'](ids, this.processDelete, this);
-    }
-
-    ,processDelete: function(r, e){
+   ,processDelete: function(r, e){
         this.getEl().unmask();
-        App.mainViewPort.fireEvent('objectsdeleted', r.ids, e);
     }
 
     ,onObjectsDeleted: function(ids, e) {

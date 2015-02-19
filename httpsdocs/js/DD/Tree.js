@@ -213,11 +213,12 @@ Ext.define('CB.DD.Tree', {
         var st = this.treeView.ownerGrid.store;
         var recs = st.query(this.idProperty, nodeId, false, false, true);
 
-        if(Ext.isEmpty(recs)) {
+        if(Ext.isEmpty(recs) || (recs.getCount() < 1)) {
             return false;
         }
 
         var node = recs.getAt(0);
+
         if(node && !node.isExpanded()) {
             node.expand();
         } else {

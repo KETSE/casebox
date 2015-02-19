@@ -3,7 +3,7 @@ Ext.namespace('CB.form.view.object');
 Ext.define('CB.object.view.Preview', {
     extend: 'Ext.Panel'
     ,alias: 'widget.CBObjectPreview'
-    ,autoScroll: true
+    ,scrollable: true
     ,html: ''
     ,tbarCssClass: 'x-panel-white'
     ,loadMask: false
@@ -324,7 +324,6 @@ Ext.define('CB.object.view.Preview', {
             }
         };
 
-        clog('this.params', this.params);
         if(this.params) {
             rez.tbar['openExternal'] = {};
 

@@ -16,7 +16,7 @@ Ext.define('CB.search.edit.Window', {
     ,width: 400
     ,height: 450
     ,iconCls: 'icon-none'
-    ,autoScroll: true
+    ,scrollable: true
 
     ,initComponent: function() {
         this.data = Ext.apply({}, this.config.data);
@@ -29,7 +29,7 @@ Ext.define('CB.search.edit.Window', {
                 {
                     xtype: 'CBSearchPanel'
                     ,hideTitle: true
-                    ,autoScroll: true
+                    ,scrollable: true
                     ,listeners: {
                         scope: this
                         ,loaded: this.onLoaded

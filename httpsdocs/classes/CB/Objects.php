@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\Util;
+
 class Objects
 {
     /**
@@ -1033,10 +1035,19 @@ class Objects
             : $p['from'];
 
         if (!empty($from)) {
-            if (!empty($templateData['cfg']['object_plugins'][$from])) {
-                $objectPlugins = $templateData['cfg']['object_plugins'][$from];
-            } else {
-                $objectPlugins = Config::getObjectTypePluginsConfig(@$templateData['type'], $from);
+            if (isset($templateData['cfg']['object_plugins'])) {
+                $op = $templateData['cfg']['object_plugins'];
+
+                if (!empty($op[$from])) {
+                    $objectPlugins = $op[$from];
+                } else {
+                    //check if config has only numeric keys, i.e. plugins specified directly (without a category)
+                    if (!Util\isAssocArray($op)) {
+                        $objectPlugins = $op;
+                    } else {
+                        $objectPlugins = Config::getObjectTypePluginsConfig(@$templateData['type'], $from);
+                    }
+                }
             }
         }
 
@@ -1127,7 +1138,7 @@ class Objects
     {
         $rez = array('success' => false);
 
-        if (empty($p['id']) || !is_numeric($p['id']) || empty($p['msg'])) {
+        if (empty($p['id']) || !is_numeric($p['id']) || empty($p['text'])) {
             $rez['msg'] = L\get('Wrong_input_data');
 
             return $rez;
@@ -1136,7 +1147,7 @@ class Objects
         $comment = static::getCustomClassByObjectId($p['id']);
         $commentData = $comment->load();
         if ($commentData['cid'] == $_SESSION['user']['id']) {
-            $commentData['data']['_title'] = $p['msg'];
+            $commentData['data']['_title'] = $p['text'];
             $comment->update($commentData);
 
             Solr\Client::runCron();
@@ -1146,6 +1157,7 @@ class Objects
                 ,'data' => array(
                     'id' => $commentData['id']
                     ,'pid' => $commentData['pid']
+                    ,'text' => Objects\Comment::processAndFormatMessage($p['text'])
                 )
             );
 

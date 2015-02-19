@@ -24,10 +24,7 @@ Ext.define('CB.object.field.editor.Tag', {
 
     ,initComponent: function(){
         Ext.apply(this, {
-            completeOnEnter: false
-            ,cancelOnEsc: false
-            ,allowBlur: false
-            ,listeners: {
+            listeners: {
                 scope: this
                 ,destroy: function() {
                     Ext.destroy(this.store);
@@ -148,48 +145,42 @@ Ext.define('CB.object.field.editor.Tag', {
     }
 
     ,collapse: function() {
-        var eventTime = Ext.EventObject.getTime();
+        var ev = Ext.EventObject
+            ,eventTime = ev.getTime();
 
-        this.lastCollapseCheck = eventTime;
-        if(this.isExpanded) {
-            this.preventEditComplete = true;
-            this.collapsedTime = eventTime;
-        } else {
-            if(this.collapsedTime != eventTime) {
-                delete this.preventEditComplete;
-            }
+        switch(ev.type) {
+            case 'mousedown':
+                //check if clicked inside the editor or picker
+                if(
+                    !ev.within(this.getEl(), false, true) &&
+                    (!this.picker  || (this.picker && !ev.within(this.picker.getEl(), false, true)))
+                ) {
+                    delete this.preventEditComplete;
+                } else {
+                    this.preventEditComplete = true;
+                }
+                break;
+
+            case 'keydown':
+                switch(ev.getKey()) {
+
+                    case ev.ESC: // doesnt work ok for esc (looses focus)
+                                // will investigate later, maybe dig into keyNav direction
+                    case ev.ENTER:
+                        if(this.isExpanded) {
+                            this.collapsedTime = eventTime;
+                            this.preventEditComplete = true;
+
+                        } else {
+                            if(this.collapsedTime !== eventTime) {
+                                delete this.preventEditComplete;
+                            }
+                        }
+                }
+
+                break;
         }
 
         this.callParent(arguments);
-    }
-
-    ,onItemListClick: function(e) {
-        var me = this,
-            itemEl = e.getTarget(me.tagItemSelector),
-            closeEl = itemEl
-                ? e.getTarget(me.tagItemCloseSelector)
-                : false;
-
-        if (itemEl && closeEl) {
-            me.preventEditComplete = true;
-        }
-
-        this.callParent(arguments);
-    }
-
-    ,onBlur: function(e) {
-
-        var me = this
-            ,eventTime = Ext.EventObject.getTime() //e.getTime()
-            ,el = e.getTarget('.x-tagfield-input-field');//me.tagItemSelector
-
-        //check if clicked inside the editor
-        //and if there was already a complete edit prevention check
-        if(el && (this.lastCollapseCheck == this.collapsedTime) && (this.collapsedTime != eventTime)) {
-            this.collapsedTime = eventTime;
-            me.preventEditComplete = true;
-        }
-
-        me.callParent(arguments);
     }
 });

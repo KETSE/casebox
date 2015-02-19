@@ -131,7 +131,7 @@ Ext.define('CB.ProfileForm', {
 
     ,border: false
     ,fileUpload: true
-    ,autoScroll: true
+    ,scrollable: true
     ,bodyPadding: 10
     ,data: {}
     ,initComponent: function(){
@@ -487,7 +487,7 @@ Ext.define('CB.SecurityForm', {
     ,alias: 'widget.CBSecurityForm'
 
     ,border: false
-    ,autoScroll: true
+    ,scrollable: true
 
     ,initComponent: function(){
 

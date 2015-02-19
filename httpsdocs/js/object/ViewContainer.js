@@ -223,13 +223,6 @@ Ext.define('CB.object.ViewContainer', {
                 ,handler: this.onUnsubscribeClick
             }
 
-            // ,metadata: {
-            //     text: L.Metadata
-            //     ,itemId: 'metadata'
-            //     ,scope: this
-            //     ,handler: this.onOpenExternalClick
-            // }
-
             ,rename: {
                 itemId: 'rename'
                 ,text: L.Rename
@@ -483,7 +476,7 @@ Ext.define('CB.object.ViewContainer', {
     ,updateToolbarAndMenuItems: function() {
         var ai = this.getLayout().activeItem;
         var ti = ai.getContainerToolbarItems();
-        clog('ti', ti);
+
         if(this.menu) {
             this.menu.removeAll(true);
             this.menu.destroy();

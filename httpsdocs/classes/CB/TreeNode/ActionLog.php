@@ -293,7 +293,7 @@ class ActionLog extends Base
     {
         $s = Log::getSolrLogConnection();
 
-        $this->requestParams['sort'] = array('date desc');
+        $this->requestParams['sort'] = array('action_date desc');
 
         $p = array(
             'rows' => 50
@@ -330,10 +330,10 @@ class ActionLog extends Base
         $rez = $s->query($p);
 
         foreach ($rez['data'] as &$doc) {
-            $k =  $doc['action_id'];
+            $k =  @$doc['action_id'];
             $data = Util\toJSONArray($doc['object_data']);
 
-            $doc['id']  = $this->getId($doc['action_id']);
+            $doc['id']  = $this->getId($k);
             $doc['pid'] = @$doc['object_pid'];
             unset($doc['object_pid']);
             $doc['name'] = Util\coalesce($data['name'], $doc['object_data']);

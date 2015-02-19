@@ -75,18 +75,18 @@ Ext.define('CB.object.plugin.SystemProperties', {
 
         if(this.data) {
             if(this.data.subscribed == 1) {
-                rez.menu.unsubscribe = {addDivider: 'top'};
+                rez.menu.unsubscribe = {order: 15};
             } else {
-                rez.menu.subscribe = {addDivider: 'top'};
+                rez.menu.subscribe = {order: 16};
             }
         }
 
         if(this.params) {
 
             if(CB.DB.templates.getType(this.params.template_id) == 'file') {
-                rez.menu['metadata']  = {};
-                rez.menu['webdavlink']  = {};
-                rez.menu['permalink']  = {};
+                rez.menu['metadata']  = {order: 17};
+                rez.menu['webdavlink']  = {order: 18};
+                rez.menu['permalink']  = {order: 19};
             }
         }
 

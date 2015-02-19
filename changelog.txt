@@ -1,12 +1,31 @@
+CaseBox 1.9.395 (2015-02-19)
+==============================
+New Features, Improvements
+--------------------------
+- #4539 Grid should be scrolled to TopLeft when navigating to another folder/PageNR/Search etc
+- #4514 Add '...' submenu in ObjWnd just before "I" button
+- #1010 Add "required: true/false" to template field config
+- #4535 names of system vFolders, how it works, ActionLog vFolder
+- #4541 First objPlugin scrolled a few pixels
+- #4521 While sending a comment, the Reply button moves to the top of DIV
+  Changed the mechanism of updating comment on edit (instantly without reloading right panel)
+- #4504 Disable permissions in popupMenu for vFolders (Tree & Grid popupMenus)
+- #4495 Change icon of Restore button in RecycleBin & remove Clipboard button
+- added mehod for toolbars (hideInutilSeparators) to automaticly hide unnecessary tbseparators
+
+Fixed Bugs:
+----------
+- #4540 object_plugins doesn't work ok in Template
+- #4517 Refresh Grid if D&D into/out of Grid
+- reviewed TagField, there were some bugs when working with mouse
+- #4492 Extra space in "Content" header in preview
+
 CaseBox 1.9.394 (2015-02-17)
 ==============================
 New Features, Improvements
 --------------------------
 - #4422 Does TagField work in Ext5.1?
 - #4447 Dates treated as URL links in comments
-
-Fixed Bugs:
-----------
 
 CaseBox 1.9.393 (2015-02-13)
 ==============================

@@ -38,7 +38,7 @@ Ext.define('CB.DD', {
             params.action = this.detectActionFromEvent(params.action);
         }
         if(callback) {
-            this.callback = scope ? callback.bind(scope) : callback;
+            this.callback = scope ? Ext.Function.bind(callback, scope) : callback;
         }
         switch(params.action){
             case 'copy':

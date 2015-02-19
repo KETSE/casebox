@@ -7,7 +7,7 @@ Ext.define('CB.object.edit.Form', {
 
     ,tbarCssClass: 'x-panel-white'
     ,padding: 0
-    ,autoScroll: false
+    ,scrollable: false
     ,layout: 'anchor'
     ,data: {}
 
@@ -182,7 +182,7 @@ Ext.define('CB.object.edit.Form', {
                     ,includeTopFields: true
                     ,stateId: 'oevg' //object edit vertical grid
                     ,autoExpandColumn: 'value'
-                    ,autoScroll: false
+                    ,scrollable: false
                     ,keys: [{
                         key: "s"
                         ,ctrl:true

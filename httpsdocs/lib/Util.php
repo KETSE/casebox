@@ -574,6 +574,15 @@ function toJSONArray($v)
     return $v;
 }
 
+function isAssocArray($a)
+{
+    if (!is_array($a)) {
+        return false;
+    }
+
+    return array_keys($a) !== range(0, count($a) - 1);
+}
+
 function validISO8601Date($value)
 {
     try {

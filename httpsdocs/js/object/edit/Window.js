@@ -16,7 +16,7 @@ Ext.define('CB.object.edit.Window', {
     ,width: 600
     ,height: 450
     ,iconCls: 'icon-none'
-    ,autoScroll: false
+    ,scrollable: false
 
     ,initComponent: function() {
 
@@ -123,6 +123,13 @@ Ext.define('CB.object.edit.Window', {
                 ,handler: this.close
             })
 
+            ,'delete': new Ext.Action({
+                text: L.Delete
+                ,scope: this
+                ,disabled: !Ext.isNumeric(this.data.id)
+                ,handler: this.onDeleteClick
+            })
+
             ,showInfoPanel: new Ext.Action({
                 iconCls: 'i-info'
                 ,enableToggle: true
@@ -143,6 +150,15 @@ Ext.define('CB.object.edit.Window', {
             ,this.actions.save
             ,this.actions.cancel
             ,'->'
+            ,new Ext.Button({
+                qtip: L.More
+                ,itemId: 'more'
+                ,arrowVisible: false
+                ,iconCls: 'i-points'
+                ,menu: [
+                    this.actions['delete']
+                ]
+            })
             ,this.actions.showInfoPanel
         ];
     }
@@ -163,7 +179,7 @@ Ext.define('CB.object.edit.Window', {
             xtype: 'form'
             ,border: false
             ,autoHeight: true
-            ,autoScroll: false
+            ,scrollable: false
             ,labelAlign: 'top'
             ,cls: 'complex-fieldcontainer'
             ,bodyStyle: 'margin: 0; padding: 0'
@@ -185,6 +201,7 @@ Ext.define('CB.object.edit.Window', {
             ,api: CB_Objects.getPluginsData
             ,border: false
             ,autoHeight: true
+            ,scrollable: false
         });
     }
 
@@ -196,7 +213,7 @@ Ext.define('CB.object.edit.Window', {
         var rez = [
             {
                 region: 'center'
-                ,autoScroll: true
+                ,scrollable: true
                 ,border: false
                 ,layout: {
                     type: 'vbox'
@@ -228,7 +245,7 @@ Ext.define('CB.object.edit.Window', {
                     region: 'center'
                     ,border: false
                     ,bodyStyle: 'border-bottom:0; border-left: 0'
-                    ,autoScroll: false
+                    ,scrollable: false
                     ,layout: {
                         type: 'vbox'
                         ,align: 'stretch'
@@ -242,7 +259,7 @@ Ext.define('CB.object.edit.Window', {
                     ,itemId: 'infoPanel'
                     ,header: false
                     ,border: false
-                    ,autoScroll: true
+                    ,scrollable: true
                     ,layout: {
                         type: 'vbox'
                         ,align: 'stretch'
@@ -453,7 +470,7 @@ Ext.define('CB.object.edit.Window', {
                     ,includeTopFields: true
                     ,stateId: 'oevg' //object edit vertical grid
                     ,autoExpandColumn: 'value'
-                    ,autoScroll: false
+                    ,scrollable: false
                     ,keys: [{
                         key: "s"
                         ,ctrl:true
@@ -610,7 +627,8 @@ Ext.define('CB.object.edit.Window', {
      */
     ,onChange: function(fieldName, newValue, oldValue){
         this._isDirty = true;
-        this.actions.save.setDisabled(false);
+
+        this.actions.save.setDisabled(!this.isValid());
 
         if(!Ext.isEmpty(fieldName) && Ext.isString(fieldName)) {
             this.fireEvent('fieldchange', fieldName, newValue, oldValue);
@@ -767,25 +785,44 @@ Ext.define('CB.object.edit.Window', {
             return true;
         }
 
-        Ext.Msg.show({
-            title:  L.Confirmation
-            ,msg:   L.SavingChangedDataMessage
-            ,icon:  Ext.Msg.QUESTION
-            ,buttons: Ext.Msg.YESNOCANCEL
-            ,scope: this
-            ,fn: function(b, text, opt){
-                switch(b){
-                case 'yes':
-                    this._confirmedClosing = true;
-                    this.onSaveClick();
-                    break;
-                case 'no':
-                    this._confirmedClosing = true;
-                    this.close();
-                    break;
+        if(this.isValid()) {
+            Ext.Msg.show({
+                title:  L.Confirmation
+                ,msg:   L.SavingChangedDataMessage
+                ,icon:  Ext.Msg.QUESTION
+                ,buttons: Ext.Msg.YESNOCANCEL
+                ,scope: this
+                ,fn: function(b, text, opt){
+                    switch(b){
+                    case 'yes':
+                        this._confirmedClosing = true;
+                        this.onSaveClick();
+                        break;
+                    case 'no':
+                        this._confirmedClosing = true;
+                        this.close();
+                        break;
+                    }
                 }
-            }
-        }).getEl().center(this);
+            }).getEl().center(this);
+
+        } else {
+            Ext.Msg.show({
+                title:  L.Confirmation
+                ,msg:   L.CloseWithChangesConfirmation
+                ,icon:  Ext.Msg.QUESTION
+                ,buttons: Ext.Msg.YESNO
+                ,scope: this
+                ,fn: function(b, text, opt){
+                    switch(b){
+                    case 'yes':
+                        this._confirmedClosing = true;
+                        this.close();
+                        break;
+                    }
+                }
+            }).getEl().center(this);
+        }
 
         return false;
     }
@@ -856,6 +893,26 @@ Ext.define('CB.object.edit.Window', {
             this.doLoad();
         } else {
             App.openObjectWindow(p);
+        }
+    }
+
+    ,onDeleteClick: function(b, e) {
+        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+
+        CB.browser.Actions.deleteSelection(
+            [this.data]
+            ,this.processDelete
+            ,this
+        );
+
+    }
+
+    ,processDelete: function(r, e) {
+        this.getEl().unmask();
+
+        if(r && (r.success === true)) {
+            this._confirmedClosing = true;
+            this.close();
         }
     }
 
@@ -945,4 +1002,16 @@ Ext.define('CB.object.edit.Window', {
         App.mainViewPort.onFileUpload(this.uploadFieldData, e);
     }
 
+    /**
+     * validation check
+     * @return Boolean
+     */
+    ,isValid: function(){
+        var rez = true;
+        if(this.grid && this.grid.isValid) {
+            rez = this.grid.isValid();
+        }
+
+        return rez;
+    }
 });

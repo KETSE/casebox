@@ -110,10 +110,10 @@ Ext.define('CB.object.plugin.Tasks', {
         };
 
         if(this.params) {
-            rez['menu']['addtask'] = {};
+            rez['menu']['addtask'] = {order: 10};
 
             if(CB.DB.templates.getType(this.params.template_id) !== 'file') {
-                rez['menu']['new'] = {};
+                rez['menu']['new'] = {order: 11};
             }
         }
 

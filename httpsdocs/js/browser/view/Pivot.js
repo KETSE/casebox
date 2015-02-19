@@ -8,7 +8,7 @@ Ext.define('CB.browser.view.Pivot',{
     ,tbarCssClass: 'x-panel-white'
     ,layout: 'border'
     ,activeCharts: ['table']
-    ,autoScroll: true
+    ,scrollable: true
 
     ,initComponent: function(){
 
@@ -117,7 +117,7 @@ Ext.define('CB.browser.view.Pivot',{
 
         this.chartContainer = new Ext.Panel({
             region: 'center'
-            ,autoScroll: true
+            ,scrollable: true
             ,border: false
             ,layout: {
                 type: 'vbox'
@@ -250,7 +250,7 @@ Ext.define('CB.browser.view.Pivot',{
                 ,border: false
                 ,autoHeight: true
                 ,padding: 10
-                ,autoScroll:true
+                ,scrollable:true
                 ,html: html
                 ,listeners: {
                     scope: this

@@ -10,7 +10,7 @@ Ext.define('CB.VerticalEditGrid', {
     ,border: false
     ,root: 'data'
     ,cls: 'spacy-rows edit-grid'
-    ,autoScroll: true
+    ,scrollable: true
     ,autoHeight: true
     ,plugins: []
 
@@ -201,33 +201,17 @@ Ext.define('CB.VerticalEditGrid', {
 
                 //check validation field
                 if (record.get('valid') === false) {
-                    meta.css = ' x-form-invalid';
-                    meta.attr = 'ext:qtip="Value did not pass validation"; ext:qclass="x-form-invalid-tip"';
+                    meta.css = ' x-form-invalid-field-default';
+                    meta.tdAttr = 'data-errorqtip="<ul class=\'x-list-plain\'><li>' + Ext.form.field.Base.prototype.invalidText + '</li></ul>"';
                 } else {
                     //Check required field
                     if(tr.get('cfg').required && Ext.isEmpty(v)) {
-                        meta.css = ' x-form-invalid';
-                        meta.attr = 'ext:qtip="' + Ext.form.TextField.prototype.blankText + '"; ext:qclass="x-form-invalid-tip"';
+                        meta.css = ' x-form-invalid-field-default';
+                        meta.tdAttr = 'data-errorqtip="<ul class=\'x-list-plain\'><li>' + Ext.form.TextField.prototype.blankText + '</li></ul>"';
                     } else {
                         // Value is valid
                         meta.css = '';
-                        meta.attr = 'ext:qtip=""';
-                    }
-                }
-
-                //check validation field
-                if (record.get('valid') === false) {
-                    meta.css = ' x-form-invalid';
-                    meta.attr = 'ext:qtip="Value did not pass validation"; ext:qclass="x-form-invalid-tip"';
-                } else {
-                    //Check required field
-                    if(tr.get('cfg').required && Ext.isEmpty(v)) {
-                        meta.css = ' x-form-invalid';
-                        meta.attr = 'ext:qtip="' + Ext.form.TextField.prototype.blankText + '"; ext:qclass="x-form-invalid-tip"';
-                    } else {
-                        // Value is valid
-                        meta.css = '';
-                        meta.attr = 'ext:qtip=""';
+                        meta.tdAttr = 'data-errorqtip=""';
                     }
                 }
 
@@ -236,10 +220,6 @@ Ext.define('CB.VerticalEditGrid', {
                 }
                 if(!Ext.isEmpty(tr.get('cfg').height)) {
                     meta.style += 'min-height:' + tr.get('cfg').height + 'px';
-                }
-
-                if(Ext.isEmpty(v)) {
-                    return '';
                 }
 
                 var renderer = App.getCustomRenderer(tr.get('type'));

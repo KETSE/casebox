@@ -6,7 +6,7 @@ Ext.define('CB.browser.Tree', {
     ,alias: 'widget.CBBrowserTree'
 
     ,rootVisible: false
-    ,autoScroll: true
+    ,scrollable: true
     ,containerScroll: true
     ,animate: false
     ,lines: false
@@ -191,7 +191,7 @@ Ext.define('CB.browser.Tree', {
                 cls: 'browser-tree'
                 ,border: false
                 ,bodyBoder: false
-                ,autoScroll: true
+                ,scrollable: true
                 ,idProperty: 'nid'
                 ,loadMask: false
                 ,plugins: {
@@ -440,7 +440,7 @@ Ext.define('CB.browser.Tree', {
             this.actions.rename.setDisabled(!canRename) ;
 
             this.actions.reload.setDisabled(false) ;
-            this.actions.permissions.setDisabled(false) ;
+            this.actions.permissions.setDisabled(!Ext.isNumeric(node.data.nid));
         }
 
         this.fireEvent('selectionchanged');

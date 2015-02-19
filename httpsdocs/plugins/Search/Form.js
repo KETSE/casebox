@@ -6,7 +6,7 @@ Ext.define('CB.plugin.Search.Form', {
     ,id: 'SearchTab'
     ,iconCls: 'icon-search'
     ,closable: true
-    ,autoScroll: true
+    ,scrollable: true
     ,tbarCssClass: 'x-panel-white'
     ,params: {}
 

@@ -552,7 +552,7 @@ Ext.define('CB.ObjectsSelectionForm', {
             region: 'center'
             ,border: false
             ,store: this.store
-            ,autoScroll: true
+            ,scrollable: true
             ,columns: columns
             // ,colModel: new Ext.grid.ColumnModel({
             //     defaults: { sortable: true }

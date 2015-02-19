@@ -207,7 +207,6 @@ Ext.define('CB.browser.view.Grid', {
                     }
                 ]
             }
-            // ,sm: new Ext.grid.RowSelectionModel({
             ,selModel: sm
             ,listeners:{
                 scope: this
@@ -218,26 +217,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,rowclick: this.onRowClick
                 ,rowdblclick: this.onRowDblClick
                 ,selectionchange: this.onSelectionChange
-                // ,contextmenu: this.onContextMenu
-                // ,rowcontextmenu: this.onRowContextMenu
-                // ,beforedestroy: this.onBeforeDestroy
-                // ,activate: App.onComponentActivated
-                ,mousedown: function(e){
-                    if(e.button == 2){ //rightclick
-                        /* lock selection if rightclicking on a selected row. Unlock should be called after corresponding actions (usually called with defer).*/
-                        //TO REENABLE THE CODE AFTER POPUP MENU REVIEW
-                        // sm = this.grid.getSelectionModel();
-                        // s = sm.getSelections();
-                        // target = e.getTarget('.x-grid3-row');
-                        // for (var i = 0; i < s.length; i++) {
-                        //     el = this.grid.getView().getRow(this.grid.store.indexOf(s[i]));
-                        //     if( el == target ){
-                        //         sm.lock();
-                        //         return;
-                        //     }
-                        // }
-                    }
-                }
 
                 ,columnmove:    this.saveGridState
                 ,columnresize:  this.saveGridState
@@ -390,18 +369,14 @@ Ext.define('CB.browser.view.Grid', {
             }]
         });
 
-        // this.objectPanel = new CB.object.ViewContainer({
-        //     region: 'east'
-        //     ,width: 250
-
-        //     ,collapsible: true
-        //     ,collapseMode: 'mini'
-
-        //     ,stateful: true
-        //     ,stateId: 'gvop' //grid view object panel
-
-        //     ,onCloseClick: Ext.Function.bind(this.onCloseObjectPanelClick, this)
-        // });
+        //reset scroll on veiew refresh
+        this.grid.view.on(
+            'refresh'
+            ,function(view){
+                view.scrollTo(0, 0, false);
+            }
+            ,this
+        );
 
         Ext.apply(this, {
             title: L.Explorer

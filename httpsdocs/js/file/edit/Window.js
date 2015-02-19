@@ -55,6 +55,15 @@ Ext.define('CB.file.edit.Window', {
             ,this.downloadSeparator
             ,this.actions.download
             ,'->'
+            ,new Ext.Button({
+                qtip: L.More
+                ,itemId: 'more'
+                ,arrowVisible: false
+                ,iconCls: 'i-points'
+                ,menu: [
+                    this.actions['delete']
+                ]
+            })
             ,this.actions.showInfoPanel
         ];
     }
@@ -114,7 +123,7 @@ Ext.define('CB.file.edit.Window', {
             {
                 region: 'center'
                 ,border: false
-                ,autoScroll: true
+                ,scrollable: true
                 ,layout: {
                     type: 'vbox'
                     ,align: 'stretch'
@@ -128,7 +137,7 @@ Ext.define('CB.file.edit.Window', {
                 ,itemId: 'infoPanel'
                 ,header: false
                 ,border: false
-                ,autoScroll: true
+                ,scrollable: true
                 ,layout: {
                     type: 'vbox'
                     ,align: 'stretch'
@@ -156,11 +165,11 @@ Ext.define('CB.file.edit.Window', {
     ,processLoadPreviewData: function(r, e) {
         this.callParent(arguments);
 
-        var autoScroll = (getFileExtension(this.data.name) !== 'pdf');
+        var scrollable = (getFileExtension(this.data.name) !== 'pdf');
 
         this.previewPanel = new CB.object.view.Preview({
             border: false
-            ,autoScroll: autoScroll
+            ,scrollable: scrollable
             ,bodyStyle: 'padding: 5px'
         });
 

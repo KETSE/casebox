@@ -120,7 +120,7 @@ Ext.define('CB.ViewPort', {
                 ,bodyBoder: false
                 ,bodyStyle: 'background-color: #F4F4F4'
                 ,lazyrender: true
-                ,autoScroll: true
+                ,scrollable: true
             }
             ,stateful: true
             ,stateId: 'mAc'

@@ -19,7 +19,7 @@ Ext.define('CB.plugin.Export.Button', {
             ,this.owner.params
         );
 
-        window.open('get.php?export=' + Ext.encode(params));
+        window.open('/' + App.config.coreName + '/get/?export=' + Ext.encode(params));
     }
 
     ,onExportRecordsEvent: function(cmp, e) {

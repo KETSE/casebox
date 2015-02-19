@@ -82,6 +82,7 @@ return array_merge(
 
             ,'//js/CB.ObjectsField.js'
 
+            ,'//js/browser/Actions.js'
             ,'//js/browser/Tree.js'
             ,'//js/browser/ViewContainer.js'
             ,'//js/browser/view/Interface.js'
@@ -194,6 +195,8 @@ return array_merge(
             ,'//js/overrides/grid/GridPanel.js'
 
             ,'//js/overrides/tree/ViewDragZone.js'
+
+            ,'//js/overrides/toolbar/Toolbar.js'
 
             ,'//js/overrides/util/Collection.js'
             ,'//js/overrides/util/AbstractMixedCollection.js'

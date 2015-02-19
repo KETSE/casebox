@@ -7,7 +7,7 @@ Ext.define('CB.FilterPanel', {
 
     ,xtype: 'CBFilterPanel'
 
-    ,autoScroll: true
+    ,scrollable: true
     ,bodyStyle: 'padding: 10px 0'
     ,padding:0
 

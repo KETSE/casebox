@@ -653,8 +653,9 @@ table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
     font-weight: bold;
     font-size: 12px;
     text-transform: uppercase;
-    padding: 5px 0 5px 5px;
+    padding: 5px;
     margin-bottom: 7px;
+    border-bottom: 2px solid #CCC;
 }
 
 .obj-preview ol{list-style: decimal outside }
@@ -662,7 +663,6 @@ table.obj-preview p.prop-info {margin-top: 3px; color: #777; font-size: 11px}
 .obj-preview ul{list-style: square outside }
 .obj-preview ul li{margin-left:20px; }
 
-.obj-preview-h{ padding: 10px 10px 10px 10px; border-bottom: 2px solid #CCC; margin-bottom: 0; }
 .obj-files li{ border-top: 1px solid #EEE; padding: 10px 10px 10px 35px !important; background-position: 10px; }
 
 .obj-files li {
