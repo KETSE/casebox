@@ -3,10 +3,13 @@ Ext.namespace('CB');
 xtemplate_facetList = new Ext.XTemplate(
     '<ul class="filter_list">'
         ,'<tpl for=".">'
-        ,'<li{[ (values.active == 1) ? \' class="active"\' : ""]}>'
+        ,'<li class="item {[ (values.active == 1) ? \'active\' : ""]} {[ (xindex > 10) ? \'more\' : ""]}">'
         ,   '<span class="{[ (values.active == 1) ? "b" : "t"]}">{items}</span>'
         ,   '<a href="#">{[Ext.valueFrom(values.name, "-")]}</a>'
         ,'</li>'
+        ,'<tpl if="xcount &gt; 10 && xindex == xcount">'
+        ,'<li class="toggle"><u class="click">' + L.ShowAll + '</u></li>'
+        ,'</tpl>'
     ,'</tpl></ul>'
 );
 xtemplate_facetList.compile();
@@ -17,55 +20,6 @@ Ext.define('CB.FacetList', {
     ,autoHeight: true
     ,layout: 'fit'
     ,listMode: 'checklist' //radio
-
-    ,sorters: {
-        name: {
-            asc: function(o1, o2) {
-                var a = o1.name
-                    ,b = o2.name;
-
-                if(a < b) {
-                    return -1;
-                }
-
-                if(a > b) {
-                    return 1;
-                }
-
-                return 0;
-            }
-
-            ,desc: function(o1, o2) {
-                var a = o1.name
-                    ,b = o2.name;
-
-                if(a < b) {
-                    return 1;
-                }
-
-                if(a > b) {
-                    return -1;
-                }
-
-                return 0;
-            }
-        }
-
-        ,count: {
-            asc: function(o1, o2) {
-                var a = o1.count
-                    ,b = o2.count;
-
-                return a - b;
-            }
-            ,desc: function(o1, o2) {
-                var a = o1.count
-                    ,b = o2.count;
-
-                return b - a;
-            }
-        }
-    }
 
     ,initComponent: function(){
         this.store = new Ext.data.JsonStore({
@@ -82,18 +36,19 @@ Ext.define('CB.FacetList', {
 
         var items = [
             new Ext.DataView({
-                    autoHeight: true
-                    ,store: this.store
-                    ,itemSelector: 'li'
-                    ,tpl: xtemplate_facetList
-                    ,listeners: {
-                        scope: this
-                        ,itemclick: this.onItemClick
-                    }
-                })
+                autoHeight: true
+                ,store: this.store
+                ,itemSelector: 'li.item'
+                ,tpl: xtemplate_facetList
+                ,listeners: {
+                    scope: this
+                    ,itemclick: this.onItemClick
+                    ,containerclick: this.onContainerClick
+                }
+            })
         ];
 
-        if(this.manualPeriod === true) {
+        if (this.config.manualPeriod === true) {
             this.addPeriodPanel = new Ext.form.FieldContainer({
                 height: 'auto'
                 ,hidden: true
@@ -142,7 +97,8 @@ Ext.define('CB.FacetList', {
                 }
             }
         });
-        CB.FacetList.superclass.initComponent.apply(this, arguments);
+
+        this.callParent(arguments);
     }
 
     ,onModeChange: function(o, ev){
@@ -155,6 +111,10 @@ Ext.define('CB.FacetList', {
     }
 
     ,loadData: function(data){
+        this.removeCls('facet-expanded');
+
+        this.callParent(arguments);
+
         for (var i = 0; i < data.length; i++) {
             this.cachedNames[data[i].id] = data[i].name;
         }
@@ -162,7 +122,6 @@ Ext.define('CB.FacetList', {
         this.store.loadData(data, false);
         this.setLastField();
         this.setModeVisible(this.getValue().values.length > 1);
-        this.doLayout();
     }
 
     ,processServerData: function(serverData, options){
@@ -207,23 +166,6 @@ Ext.define('CB.FacetList', {
                 );
                 break;
 
-            case 'importance':
-                Ext.iterate(
-                    serverData
-                    ,function(k, v){
-                        data.push({
-                            id: k
-                            ,name: Ext.valueFrom(CB.DB.importance.getName(k), L.noStatus)
-                            ,active: (values.indexOf(k + '') >=0)
-                                ? 1
-                                : 0
-                            ,items: v
-                        });
-                    }
-                    ,this
-                );
-                break;
-
             case 'template_type':
                 Ext.iterate(
                     serverData
@@ -256,9 +198,20 @@ Ext.define('CB.FacetList', {
     }
 
     ,setLastField: function(){
-        // lr = false;
-        // this.store.each(function(r){r.set('last', 0); if(r.get('active') == 1) lr = r }, this);
-        // if(lr) lr.set('last', 1);
+        var lr = false;
+        this.store.each(
+            function(r){
+                r.set('last', 0);
+                if(r.get('active') == 1) {
+                    lr = r;
+                }
+            }
+            ,this
+        );
+
+        if(lr) {
+            lr.set('last', 1);
+        }
     }
 
     ,getValue: function(){
@@ -283,6 +236,8 @@ Ext.define('CB.FacetList', {
     }
 
     ,onItemClick: function(cmp, record, item, index, e, eOpts){//dv, idx, el, ev
+        var r;
+
         switch(this.listMode) {
             case 'radio':
                 r = this.store.getAt(index);
@@ -303,9 +258,22 @@ Ext.define('CB.FacetList', {
         }
     }
 
+    ,onContainerClick: function(view, e, eOpts) {
+        var el = e.getTarget();
+
+        if(el) {
+            //check Show all click
+            if(el.className == 'click') {
+                this.addCls('facet-expanded');
+                this.updateLayout();
+            }
+        }
+    }
+
     ,uncheck: function(value){
         value = String(value);
-        idx = this.store.findExact('id', value );
+        var idx = this.store.findExact('id', value );
+
         if(idx >= 0) {
             this.store.getAt(idx).set('active', 0);
         } else {

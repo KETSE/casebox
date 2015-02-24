@@ -1,4 +1,5 @@
 Ext.namespace('CB.plugin.dd');
+
 Ext.define('CB.plugin.dd.FilesDropZone', {
     extend: 'Ext.util.Observable'
     ,alias: 'plugin.CBPluginDDFilesDropZone'
@@ -81,7 +82,7 @@ Ext.define('CB.plugin.dd.FilesDropZone', {
             var rec = this.owner.getRecord(rel);
             if(rec){
                 this.targetId = rec.get(this.pidPropety);
-                this.targetPath = rec.get('path') + rec.get('name')+'/';
+                this.targetPath = rec.get('path') + rec.get('name') + '/';
             }
         } else {
             var cmp = Ext.getCmp(te.id);

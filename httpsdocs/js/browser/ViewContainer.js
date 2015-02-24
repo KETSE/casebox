@@ -23,6 +23,7 @@ Ext.define('CB.browser.ViewContainer', {
     ]
 
     ,initComponent: function(){
+        var pageSize = Ext.valueFrom(App.loginData.cfg.max_rows, 50);
         this.instanceId = Ext.id();
 
         this.actions = {
@@ -189,7 +190,41 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.tbarMoreMenu = new Ext.menu.Menu({
             items: [
-                this.actions.contextExport
+                {
+                    text: L.Rows
+                    ,menu: [
+                        {
+                            xtype: 'menucheckitem'
+                            ,text: 25
+                            ,group: 'gvrc' //grid view row count
+                            ,checked: (pageSize == 25)
+                            ,scope: this
+                            ,handler: this.onRowCountChangeClick
+                        },{
+                            xtype: 'menucheckitem'
+                            ,text: 50
+                            ,group: 'gvrc'
+                            ,checked: (pageSize == 50)
+                            ,scope: this
+                            ,handler: this.onRowCountChangeClick
+                        },{
+                            xtype: 'menucheckitem'
+                            ,text: 100
+                            ,group: 'gvrc'
+                            ,checked: (pageSize == 100)
+                            ,scope: this
+                            ,handler: this.onRowCountChangeClick
+                        },{
+                            xtype: 'menucheckitem'
+                            ,text: 200
+                            ,group: 'gvrc'
+                            ,checked: (pageSize == 200)
+                            ,scope: this
+                            ,handler: this.onRowCountChangeClick
+                        }
+                    ]
+                }
+                ,this.actions.contextExport
             ]
         });
 
@@ -309,13 +344,14 @@ Ext.define('CB.browser.ViewContainer', {
             ,onCloseClick: Ext.Function.bind(this.onCloseRightPanelClick, this)
         });
 
+
         this.store = new Ext.data.DirectStore({
             autoLoad: false
             ,autoDestroy: true
             ,remoteSort: true
             ,sortOnLoad: false
             ,extraParams: {}
-            ,pageSize: 50
+            ,pageSize: pageSize
             ,model: 'Items'
             ,proxy: new  Ext.data.DirectProxy({
                 paramsAsHash: true
@@ -339,7 +375,7 @@ Ext.define('CB.browser.ViewContainer', {
                 options = Ext.apply({
                     page: page,
                     start: (page - 1) * size,
-                    limit: size,
+                    rows: size,
                 }, options);
 
                 this.changeSomeParams(options);
@@ -720,6 +756,8 @@ Ext.define('CB.browser.ViewContainer', {
     ,onStoreLoad: function(store, recs, options) {
         this.getEl().unmask();
 
+        delete this.params.setMaxRows;
+
         //update interface according to loaded params
         this.processLoadedParams();
 
@@ -920,6 +958,15 @@ Ext.define('CB.browser.ViewContainer', {
         this.viewToolbar.hideInutilSeparators();
     }
 
+    ,onRowCountChangeClick: function(b, e) {
+        // b.setChecked(true);
+
+        this.params.setMaxRows = true;
+        this.params.rows = b.text;
+        this.store.setPageSize(b.text);
+        this.store.reload();
+    }
+
     /**
      * return current vew selection
      * @return array | null
@@ -1054,7 +1101,7 @@ Ext.define('CB.browser.ViewContainer', {
         );
     }
 
-   ,processDelete: function(r, e){
+    ,processDelete: function(r, e){
         this.getEl().unmask();
     }
 

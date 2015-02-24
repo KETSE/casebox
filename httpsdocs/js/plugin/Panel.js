@@ -155,7 +155,7 @@ Ext.define('CB.plugin.Panel', {
     }
 
     ,onObjectsAction: function(action, data, e) {
-        if(data.targetId == this.loadedParams.id) {
+        if(this.loadedParams && (data.targetId == this.loadedParams.id)) {
             this.reload();
         }
     }

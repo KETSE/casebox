@@ -1,3 +1,17 @@
+CaseBox 1.9.396 (2015-02-24)
+==============================
+New Features, Improvements
+--------------------------
+- #4338 Improve UI for Faceting panel
+- #4508 Don't process D&D from to the same folder in Grid
+- #4548 Improve Search Template UI: default Conditions per fieldType & Condition column hidden by default
+- #4480 Add "Rows" submenu in '...' for Grid toolbar to select number of rows in Grid
+
+Fixed Bugs:
+----------
+- selecting an item from breadcrumb doesnt change path
+- #4532 Visual issues after D&D from Tree to Tree
+
 CaseBox 1.9.395 (2015-02-19)
 ==============================
 New Features, Improvements

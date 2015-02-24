@@ -3,7 +3,7 @@
 }
 .facet .x-panel-header, .activeFilters .x-panel-header{
 	background: none;
-	border-bottom: 2px solid #CCC;
+	border-bottom: 1px solid #99bce8 !important;
 	color: #333;
 	text-transform: uppercase;
 	padding: 0 5px 4px 4px;
@@ -12,6 +12,11 @@
 	font-weight: bold;
 	box-shadow: none;
 }
+.facet .x-panel-body {
+	border: none;
+}
+
+/*x-panel-body-default*/
 .facet .x-tool-chain, .facet .x-tool-unchain{display: none}
 .multivalued .x-tool-chain, .multivalued .x-tool-unchain{display: inline-block}
 
@@ -23,6 +28,18 @@
 }
 
 .filter_list li { line-height:16px; padding: 3px 10px 3px 24px; background: url(i/squares.png) 5px -151px no-repeat;}
+.filter_list li.toggle {
+	padding: 3px 10px 0 0;
+	text-align: right;
+	background: none;
+	font-size: 9pt;
+	color: #333;
+}
+
+.filter_list .more { display: none }
+.facet-expanded .filter_list .more { display: block;}
+.facet-expanded .filter_list .toggle {display: none;}
+
 .filter_list .active { background-position: 5px -99px }
 .filter_list a {text-decoration: none; color: #555; }
 .filter_list a:hover {text-decoration: underline; color: #000; }

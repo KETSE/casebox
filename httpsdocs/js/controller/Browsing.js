@@ -60,7 +60,7 @@ Ext.define('CB.controller.Browsing', {
         sf.on('search', this.onSFSearch, this);
 
         //breadcumb listeners
-        bc.onItemClick =- this.onBreadcrumbItemClick;
+        bc.onItemClick = Ext.Function.bind(this.onBreadcrumbItemClick, this);
 
 
         //add view container listeners
@@ -260,7 +260,7 @@ Ext.define('CB.controller.Browsing', {
      * @return void
      */
     ,onBreadcrumbItemClick: function(b, e) {
-        var idx = this.menu.items.indexOf(b)
+        var idx = this.breadcrumb.menu.items.indexOf(b)
             ,p = String(this.VC.folderProperties.path).split('/');
 
         if(Ext.isEmpty(p[0])) {

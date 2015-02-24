@@ -46,7 +46,7 @@ Ext.define('CB.VerticalSearchEditGrid', {
                 ,width: 50
                 ,dataIndex: 'cond'
                 ,editor: new Ext.form.TextField()
-                // ,resizable: false
+                ,hidden: true
                 ,editable: true
                 ,scope: this
                 ,renderer: this.renderers.condition

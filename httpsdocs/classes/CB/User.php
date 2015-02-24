@@ -75,6 +75,11 @@ class User
                     $r['cfg']['theme'] = 'classic';
                 }
 
+                //set max_rows if present
+                if (empty($r['cfg']['max_rows'])) {
+                    Config::setEnvVar('max_rows', $r['cfg']['max_rows']);
+                }
+
                 // do not expose security params
                 unset($r['cfg']['security']);
 
@@ -823,6 +828,45 @@ class User
         $this->setUserConfig($cfg);
 
         return array('success' => true);
+    }
+
+    /**
+     * get the maximum rows displayed in grid
+     * @return int
+     */
+    public static function getGridMaxRows()
+    {
+        if (!empty($_SESSION['user']['cfg']['max_rows'])) {
+            return $_SESSION['user']['cfg']['max_rows'];
+        }
+
+        return Config::get('max_rows');
+    }
+
+    /**
+     * set the maximum rows displayed in grid
+     * @param  int     $rows
+     * @return boolean
+     */
+    public static function setGridMaxRows($rows)
+    {
+        if (!is_numeric($rows)) {
+            return false;
+        }
+
+        if ($rows < 25) {
+            $rows = 25;
+        } elseif ($rows > 200) {
+            $rows = 200;
+        }
+
+        $_SESSION['user']['cfg']['max_rows'] = $rows;
+
+        $cfg = static::getUserConfig();
+        $cfg['max_rows'] = $rows;
+        static::setUserConfig($cfg);
+
+        return true;
     }
 
     /**

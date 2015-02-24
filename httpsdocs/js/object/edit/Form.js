@@ -290,7 +290,7 @@ Ext.define('CB.object.edit.Form', {
             (this.grid.store.getCount() > 0)
         ) {
             var valueCol = this.grid.headerCt.child('[dataIndex="value"]');
-            var colIdx = valueCol.getIndex();
+            var colIdx = valueCol.getVisibleIndex();
 
             this.grid.getSelectionModel().select({row: 0, column: colIdx});
             this.grid.getNavigationModel().setPosition(0, colIdx);

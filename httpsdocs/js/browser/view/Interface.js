@@ -35,7 +35,7 @@ Ext.define('CB.browser.view.Interface', {
         var rez = null;
 
         if(params && params.sort) {
-            var sortersGroup = CB.FacetList.prototype.sorters[params.sort];
+            var sortersGroup = CB.Facet.prototype.sorters[params.sort];
             if(sortersGroup) {
                 var dir = Ext.valueFrom(params.direction, 'asc');
 

@@ -201,8 +201,10 @@ Ext.define('CB.browser.view.Grid', {
                         ,idProperty: 'nid'
                         ,dropZoneConfig: {
                             text: L.GridDDMgs
-                            ,onScrollerDragDrop: this.onScrollerDragDrop
-                            ,scope: this
+                            // ,onScrollerDragDrop: this.onScrollerDragDrop
+                            // ,scope: this
+                            ,onContainerOver: Ext.Function.bind(this.ddOnContainerOver, this)
+                            ,onContainerDrop: Ext.Function.bind(this.ddOnContainerDrop, this)
                         }
                     }
                 ]
@@ -525,6 +527,33 @@ Ext.define('CB.browser.view.Grid', {
 
         this.grid.view.emptyText = emptyText;
     }
+
+    ,ddOnContainerOver: function(source, e, data) {
+        var d
+            ,currentPid = this.refOwner.folderProperties.id
+            ,rez = source.dropAllowed;
+
+        for (var i = 0; i < data.records.length; i++) {
+            d = data.records[i].data;
+            if(d['pid'] == currentPid) {
+                rez = source.dropNotAllowed;
+            }
+        }
+
+        return rez;
+    }
+
+    ,ddOnContainerDrop: function(source, e, data) {
+        if(this.ddOnContainerOver(source, e, data) == source.dropAllowed) {
+            this.onScrollerDragDrop(
+                this.refOwner.folderProperties
+                ,source
+                ,e
+                ,data
+            );
+        }
+    }
+
 
     ,onScrollerDragDrop: function(targetData, source, e, data){
         var d, sourceData = [];

@@ -158,17 +158,7 @@ Ext.define('CB.DD.Tree', {
 
     ,onNodeDrop: function(node, dragZone, e, data){//targetData, source, e, sourceData
         if(this.onNodeOver(node, dragZone, e, data) != this.dropNotAllowed){
-
             var d, sourceData = [];
-            for (var i = 0; i < data.records.length; i++) {
-                d = data.records[i].data;
-                sourceData.push({
-                    id: d[this.idProperty]
-                    ,name: d['name']
-                    ,path: d['path']
-                    ,template_id: d['template_id']
-                });
-            }
 
             d = this.view.getRecord(node).data;
             var targetData = {
@@ -177,6 +167,18 @@ Ext.define('CB.DD.Tree', {
                 ,path: d['path']
                 ,template_id: d['template_id']
             };
+
+            for (var i = 0; i < data.records.length; i++) {
+                data.records[i].collapse();
+
+                d = data.records[i].data;
+                sourceData.push({
+                    id: d[this.idProperty]
+                    ,name: d['name']
+                    ,path: d['path']
+                    ,template_id: d['template_id']
+                });
+            }
 
             App.DD.execute({
                 action: e

@@ -29,6 +29,11 @@ class Browser
         }
         $p['path'] = $path;
 
+        //check if user have changed the row limit in grid
+        if (!empty($p['setMaxRows']) && !empty($p['rows'])) {
+            User::setGridMaxRows($p['rows']);
+        }
+
         //the navigation goes from search results. We should get the real path of the node
         if (!empty($p['lastQuery']) && empty($p['query'])) {
             while (substr($path, -1) == '/') {

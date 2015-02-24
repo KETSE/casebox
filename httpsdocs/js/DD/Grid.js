@@ -169,6 +169,7 @@ Ext.define('CB.DD.Grid', {
             ? data.records
             : [data.records];
         var i = 0;
+
         while ((i < sourceData.length) && (rez == this.dropAllowed))  {
             if( !acceptChildren ||
                 (targetRecord.data[this.idProperty] == sourceData[i].get(this.idProperty))
@@ -214,15 +215,16 @@ Ext.define('CB.DD.Grid', {
                         ,targetData: targetData
                         ,sourceData: sourceData
                     });
-
                 }
             }
+
         } else { //drop over scroller area of the grid
             callback = this.scope
                 ? this.onScrollerDragDrop.bind(this.scope)
                 : this.onScrollerDragDrop;
             callback(el, source, e, data);
         }
-        return false;
+
+        return true;
     }
 });
