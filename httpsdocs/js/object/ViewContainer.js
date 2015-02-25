@@ -6,7 +6,6 @@ Ext.define('CB.object.ViewContainer', {
     ,border: false
     ,layout: 'card'
     ,activeItem: 0
-    ,tbarCssClass: 'x-panel-white'
 
     ,constructor: function() {
 

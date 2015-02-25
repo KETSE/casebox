@@ -194,6 +194,10 @@ font-size: 13px;
 /*EDIT GRID*/
 
 /*default grid cell height/font*/
+.edit-grid.loading, .view-loading {
+  opacity: 0.01;
+}
+
 .edit-grid .x-grid-cell-inner {
 padding: 6px 6px 4px 6px;
 min-height: 25px;

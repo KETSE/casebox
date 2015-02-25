@@ -319,6 +319,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,split: {
                 size: 2
                 ,collapsible: false
+                ,style: 'background-color: #dfe8f6'
             }
             ,collapsible: true
             ,collapseMode: 'mini'
@@ -457,8 +458,7 @@ Ext.define('CB.browser.ViewContainer', {
         App.fireEvent('browserinit', this);
 
         Ext.apply(this, {
-            bodyCls: 'x-panel-white'
-
+            cls: 'x-panel-white'
             ,items: [{
                 layout: 'border'
                 ,border: false

@@ -1,3 +1,12 @@
+CaseBox 1.9.397 (2015-02-25)
+==============================
+New Features, Improvements
+--------------------------
+- #4623 WordWrapping in DropDownList and item icons
+- #4579 vGrid shows objectIDs for a second onLoad
+- #4626 task_u_done always empty in SOLR
+- #4582 form for multiValued showing default DC and then custom DC
+
 CaseBox 1.9.396 (2015-02-24)
 ==============================
 New Features, Improvements

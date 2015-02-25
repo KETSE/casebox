@@ -510,7 +510,7 @@ background-color: #FFF;
     background-color: #F4F4F4;
 }
 
-.x-panel-white .x-toolbar{
+.x-panel-white .x-toolbar, .x-panel-white .x-panel-body{
     background-image: none !important;
     background-color: #FFF;
 }

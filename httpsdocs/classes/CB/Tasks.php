@@ -1268,16 +1268,21 @@ class Tasks
 
         //get users that didnt complete the task yet
         $objectRecord['task_u_ongoing'] = array();
+        $objectRecord['task_u_done'] = array();
 
         $res = DB\dbQuery(
-            'SELECT user_id
+            'SELECT user_id, `status`
             FROM tasks_responsible_users
-            WHERE task_id = $1 and status = 0',
+            WHERE task_id = $1',
             $objectRecord['id']
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $objectRecord['task_u_ongoing'][] = $r['user_id'];
+            if ($r['status'] == 1) {
+                $objectRecord['task_u_done'][] = $r['user_id'];
+            } else {
+                $objectRecord['task_u_ongoing'][] = $r['user_id'];
+            }
         }
         $res->close();
 

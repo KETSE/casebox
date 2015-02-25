@@ -507,6 +507,11 @@ Ext.define('CB.object.edit.Window', {
         this.gridContainer.add(this.grid);
 
         this.gridContainer.show();
+        //add loading class that will hide the grid while objectsStore loads
+        if(!this.objectsStore.isLoaded()) {
+            this.grid.addCls('loading');
+        }
+
         this.grid.reload();
 
         if(this.grid.store.getCount() > 0) {
@@ -711,6 +716,7 @@ Ext.define('CB.object.edit.Window', {
     ,onObjectsStoreLoad: function(store, records, options) {
         this.onObjectsStoreChange(store, records, options);
 
+
         if(!this.grid.editing) {
             this.grid.getView().refresh();
 
@@ -718,6 +724,8 @@ Ext.define('CB.object.edit.Window', {
                 this.focusDefaultCell();
             }
         }
+
+        this.grid.removeCls('loading');
     }
 
     ,onObjectsStoreChange: function(store, records, options){

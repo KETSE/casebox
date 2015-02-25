@@ -23,31 +23,22 @@ $cron_file = array_pop($cron_file);
 $cron_file = explode('\\', $cron_file);
 $cron_file = 'cron_'.array_pop($cron_file).'.php';
 $cron_path = dirname(__FILE__).DIRECTORY_SEPARATOR;
+$docRootPath = realpath($cron_path.'../../httpsdocs/') . DIRECTORY_SEPARATOR;
 
 if (!file_exists($cron_path.$cron_file)) {
     die('cannot find cron '.$cron_path.$cron_file);
 }
 
-/* update include_path and include global script */
-define('DOC_ROOT', realpath($cron_path.'../../httpsdocs/').DIRECTORY_SEPARATOR);
-set_include_path(
-    DOC_ROOT.'classes'.PATH_SEPARATOR.
-    get_include_path()
-);
-
-include DOC_ROOT.'lib/global.php';
-
-$cfg = \CB\Config::loadConfigFile(DOC_ROOT.'config.ini');
+require_once $docRootPath . 'config_platform.php';
 
 ini_set('max_execution_time', 0);
 
-require_once DOC_ROOT.'lib/DB.php';
 DB\connect($cfg);
 
 $cores = array();
 $res = DB\dbQuery(
     'SELECT name, active
-    FROM casebox.cores
+    FROM ' . PREFIX . '_casebox.cores
     WHERE active <> 0'
 ) or die(DB\dbQueryError());
 
@@ -69,9 +60,4 @@ if (empty($cores)) {
         echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3].' '.@$argv[4]);
     }
     // echo "\nDone\n";
-}
-
-function isDebugHost()
-{
-    return true;
 }

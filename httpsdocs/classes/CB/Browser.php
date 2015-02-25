@@ -450,6 +450,15 @@ class Browser
             $res->close();
         }
 
+        if (empty($rez['DC'])) {
+            $rez['DC'] = array(
+                'name' => array(
+                    'solr_column_name' => "name"
+                    ,'idx' => 0
+                )
+            );
+        }
+
         return $rez;
     }
 
