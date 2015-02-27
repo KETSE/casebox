@@ -5,7 +5,6 @@ use CB\Path;
 
 class Browser
 {
-
     protected $path = [];
     protected $treeNodeConfigs = array();
     protected $treeNodeGUIDConfigs = array();

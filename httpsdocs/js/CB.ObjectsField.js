@@ -164,7 +164,7 @@ Ext.define('CB.ObjectsComboField', {
             case 'listObjIcons':
                 this.tpl = Ext.create('Ext.XTemplate',
                     '<tpl for=".">'
-                    ,'<div class="x-boundlist-item icon-padding {iconCls}">{name}</div>'
+                    ,'<div class="x-boundlist-item icon-padding {iconCls} bgpLT">{name}</div>'
                     ,'</tpl>'
                 );
 
@@ -173,7 +173,7 @@ Ext.define('CB.ObjectsComboField', {
             case 'listGreenIcons':
                 this.tpl = Ext.create('Ext.XTemplate',
                     '<tpl for=".">'
-                    ,'<div class="x-boundlist-item icon-padding icon-element">{name}</div>'
+                    ,'<div class="x-boundlist-item icon-padding {[ values.id ? \'icon-element\': \'\' ]}">{name}</div>'
                     ,'</tpl>'
                 );
 

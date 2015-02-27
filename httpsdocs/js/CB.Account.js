@@ -872,7 +872,7 @@ Ext.define('CB.SecurityForm', {
     ,disableTSV: function(){
         Ext.Msg.show({
             title: L.Confirm
-            ,message: 'Are you sure you want to disable ' + L.TSV
+            ,message: L.DisableTSVConfirmation
             ,buttons: Ext.Msg.YESNO
             ,icon: Ext.window.MessageBox.INFO
             ,scope: this

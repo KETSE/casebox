@@ -75,11 +75,6 @@ class User
                     $r['cfg']['theme'] = 'classic';
                 }
 
-                //set max_rows if present
-                if (empty($r['cfg']['max_rows'])) {
-                    Config::setEnvVar('max_rows', $r['cfg']['max_rows']);
-                }
-
                 // do not expose security params
                 unset($r['cfg']['security']);
 

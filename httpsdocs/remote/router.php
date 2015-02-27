@@ -1,6 +1,8 @@
 <?php
 namespace ExtDirect;
 
+use CB\Config;
+
 register_shutdown_function('ExtDirect\\extDirectShutdownFunction');
 
 require_once '../init.php';
@@ -85,6 +87,15 @@ function doRpc($cdata)
         if (\CB\isDebugHost()) {
             $r['where'] = $e->getTraceAsString();
         }
+
+        //notify admin
+        @mail(
+            Config::get('ADMIN_EMAIL'),
+            'Remote router exception on ' . Config::get('core_url'),
+            var_export($r, true),
+            'From: '.Config::get('SENDER_EMAIL'). "\r\n"
+        );
+
     }
 
     return $r;
@@ -152,6 +163,14 @@ function extDirectShutdownFunction()
             $data['msg'] = $error['message'];
             $data['where'] = print_r(debug_backtrace(false), true);
         }
+
+        //notify admin
+        @mail(
+            Config::get('ADMIN_EMAIL'),
+            'Remote router error on ' . Config::get('core_url'),
+            var_export($data, true),
+            'From: '.Config::get('SENDER_EMAIL'). "\r\n"
+        );
 
         echo json_encode(
             $data,

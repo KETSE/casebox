@@ -441,8 +441,8 @@ Ext.define('CB.object.edit.Window', {
 
         this.titleView.update(this.data);
 
+        r.data.from = 'window';
         this.pluginsContainer.loadedParams = r.data;
-        this.pluginsContainer.loadedParams.from = 'window';
 
         this.objectsStore.proxy.extraParams = {
             id: r.data.id

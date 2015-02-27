@@ -91,6 +91,11 @@ Ext.define('CB.controller.Browsing', {
             return;
         }
 
+        if(!this.isCommentInputEmpty()) {
+            this.confirmDiscardComent(this.onTreeSelectionChange, arguments);
+            return;
+        }
+
         var node = selection[0];
         var params = {
             id: node.get('nid')
@@ -118,6 +123,11 @@ Ext.define('CB.controller.Browsing', {
             return;
         }
 
+        if(!this.isCommentInputEmpty()) {
+            this.confirmDiscardComent(this.onTreeItemClick, arguments);
+            return;
+        }
+
         if(tree.getSelectionModel().isSelected(record)) {
             this.onTreeSelectionChange(null, [record]);
         }
@@ -133,6 +143,11 @@ Ext.define('CB.controller.Browsing', {
         var node = tree.getSelectionModel().getSelection()[0];
 
         if(Ext.isEmpty(node) || Ext.isEmpty(node.getPath)) {
+            return;
+        }
+
+        if(!this.isCommentInputEmpty()) {
+            this.confirmDiscardComent(this.onTreeRenameItem, arguments);
             return;
         }
 
@@ -202,6 +217,11 @@ Ext.define('CB.controller.Browsing', {
     }
 
     ,onVCSelectionChange: function(objectsDataArray) {
+        if(!this.isCommentInputEmpty()) {
+            this.confirmDiscardComent(this.onVCSelectionChange, arguments);
+            return;
+        }
+
         if(!Ext.isEmpty(this.VC.params.query) && Ext.isEmpty(objectsDataArray)) {
             this.updatePreview({});
             return;
@@ -226,6 +246,11 @@ Ext.define('CB.controller.Browsing', {
 
     //Search field methods
     ,onSFSearch: function(query, editor, event){
+        if(!this.isCommentInputEmpty()) {
+            this.confirmDiscardComent(this.onSFSearch, arguments);
+            return;
+        }
+
         editor.clear();
         query = String(query).trim();
 
@@ -329,6 +354,8 @@ Ext.define('CB.controller.Browsing', {
     /**
      * locate object method that will retreive object path if not given in params
      * For backward compatibility params could also be specified as (id, path)
+     *
+     * This method became outdated while we are opening located objects in its own window
      * @param  object params
      * @return
      */
@@ -426,4 +453,47 @@ Ext.define('CB.controller.Browsing', {
 
         this.VC.setParams(params);
     }
+
+    /**
+     * check if comment input from objects panel is empty
+     * @return Boolean
+     */
+    ,isCommentInputEmpty: function(){
+        var ci = this.OP.down('textarea[cls=comment-input]');
+        if(Ext.isEmpty(ci)) {
+            return true;
+        }
+
+        var v = Ext.valueFrom(ci.getValue(), '');
+
+        if(Ext.isEmpty(v)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * method to confirm comment discard and call callback function if yes
+     * @param  {Function} callback
+     * @param  array   arguments
+     * @return void
+     */
+    ,confirmDiscardComent: function(callback, args) {
+        Ext.Msg.show({
+            title: L.Confirm
+            ,message: L.DiscardCommentConfirmation
+            ,buttons: Ext.Msg.YESNO
+            ,icon: Ext.window.MessageBox.INFO
+            ,scope: this
+            ,fn: function(b, e){
+                if(b == 'yes'){
+                    this.OP.down('textarea[cls=comment-input]').reset();
+                    callback.apply(this, args);
+                }
+            }
+        });
+
+    }
+
 });

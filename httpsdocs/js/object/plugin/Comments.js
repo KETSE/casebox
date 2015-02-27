@@ -79,7 +79,7 @@ Ext.define('CB.object.plugin.Comments', {
             ,grow: true
             ,growMin: 10
             ,enableKeyEvents: true
-            //,baseBodyCls: "comment-input"
+            ,cls: "comment-input"
             ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
             // disable until prugin refactored for ExtJS 5
             ,plugins: [

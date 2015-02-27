@@ -90,7 +90,7 @@ session_name(
 );
 
 //error reporting params
-error_reporting(isDebugHost() ? E_ALL : 0);
+error_reporting(isDebugHost() ? E_ALL : E_ERROR);
 
 // mb encoding config
 mb_internal_encoding("UTF-8");

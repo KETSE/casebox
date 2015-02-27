@@ -1,3 +1,15 @@
+CaseBox 1.9.398 (2015-02-27)
+==============================
+New Features, Improvements
+--------------------------
+- #4465 All errors should be logged in $cbPrefix_$core_error_log
+- #4496 Ask the user if he wants to navigate to another folder/record while adding a comment
+- #4500 The blue Upload zone should be always visible when editing a record
+
+Fixed Bugs:
+----------
+- objects combo editor display fixes
+
 CaseBox 1.9.397 (2015-02-25)
 ==============================
 New Features, Improvements
