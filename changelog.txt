@@ -1,3 +1,9 @@
+CaseBox 1.9.399 (2015-03-04)
+==============================
+New Features, Improvements
+--------------------------
+- installation script for casebox (sys/install.php)
+
 CaseBox 1.9.398 (2015-02-27)
 ==============================
 New Features, Improvements

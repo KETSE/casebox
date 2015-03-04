@@ -45,9 +45,18 @@ class Service
             $this->host = empty($p['host']) ? 'localhost' : $p['host'];
             $this->port = empty($p['port']) ? 8983 : $p['port'];
             $this->core = @$p['core'];
+
+            if (isset($p['SOLR_CLIENT'])) {
+                $this->client = $p['SOLR_CLIENT'];
+            }
+
             if (isset($p['fireEvents'])) {
                 $this->fireEvents = $p['fireEvents'];
             }
+        }
+
+        if (empty($this->client)) {
+            $this->client = \CB\Config::get('SOLR_CLIENT');
         }
 
         if (substr($this->core, 0, 6) != '/solr/') {
@@ -74,7 +83,7 @@ class Service
 
         if (empty($this->solr_handler)) {
             if (!class_exists('\\Apache_Solr_Service', false)) {
-                require_once \CB\Config::get('SOLR_CLIENT');
+                require_once $this->client;
             }
 
             $this->solr_handler = new \Apache_Solr_Service(
