@@ -440,7 +440,8 @@ Ext.define('CB.browser.Tree', {
             this.actions.rename.setDisabled(!canRename) ;
 
             this.actions.reload.setDisabled(false) ;
-            this.actions.permissions.setDisabled(!Ext.isNumeric(node.data.nid));
+
+            this.actions.permissions.setDisabled(!Ext.isNumeric(node.data.nid) || (node.data.nid < 1));
         }
 
         this.fireEvent('selectionchanged');
@@ -719,7 +720,22 @@ Ext.define('CB.browser.Tree', {
         }
 
         if(!Ext.isEmpty(state.selected)) {
-            this.selectPath(state.selected, 'nid', '/');
+            this.selectPath(
+                state.selected
+                ,'nid'
+                ,'/'
+                ,function(success, lastNode) {
+                    //sometimes the path selection desnt succeed, probably because of non numeric ids
+                    if(!success) {
+                        var nid = state.selected.split('/').pop()
+                            ,r = this.store.findRecord('nid', nid, 0, false, false, true);
+                        if(r) {
+                            this.getSelectionModel().select([r]);
+                        }
+                    }
+                }
+                ,this
+            );
         }
     }
 

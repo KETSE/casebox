@@ -24,6 +24,7 @@ Ext.define('CB.DD.Grid', {
             dragZone: {
 
             }
+
             ,dropZone: {
                 idProperty: idProperty
                 ,onNodeEnter: this.onNodeEnter

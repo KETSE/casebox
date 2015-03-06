@@ -82,6 +82,17 @@ Ext.onReady(function(){
         App.mainViewPort.initCB(r, e);
     });
 
+
+    //Monitor mouse down/up for grid view to avoid selection change when dragging
+    App.mouseDown = 0;
+    document.body.onmousedown = function() {
+        ++App.mouseDown;
+    };
+
+    document.body.onmouseup = function() {
+        --App.mouseDown;
+    };
+
 });
 
 //-------------------------------------------- application initialization function

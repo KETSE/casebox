@@ -1,3 +1,18 @@
+CaseBox 1.9.400 (2015-03-06)
+==============================
+New Features, Improvements
+--------------------------
+- #4509 onStartDrag should not trigger onChange
+
+Fixed Bugs:
+----------
+- #4703 Error message doesnt display
+- bugfix receive comments cron script
+- on load, sometimes, the restore state of the tree doesnt succeed,
+  probably because of non numeric ids.
+- #4522 Various charts issues: label position, onClick
+
+
 CaseBox 1.9.399 (2015-03-04)
 ==============================
 New Features, Improvements

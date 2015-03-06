@@ -91,25 +91,22 @@ Ext.define('CB.browser.view.Charts', {
             'barchart': {
                 store: this.chartDataStore
                 ,colors: App.colors
-                ,flipXY: true
                 ,axes: [
                     {
-                        type: 'category'
-                        ,labelInSpan: true
-                        ,position: 'left'
-                        ,fields: ['name']
-                        ,grid: true
-                    }, {
                         type: 'numeric'
                         ,position: 'bottom'
-                        ,adjustByMajorUnit: true
-                        ,fields: ['count']
-                        ,display: 'middle'
+                        ,fields: 'count'
+                        ,grid: true
+                    },{
+                        type: 'category'
+                        ,position: 'left'
+                        ,fields: 'name'
                         ,grid: true
                     }
                 ]
                 ,series: [{
                     type: 'bar'
+                    ,axis: 'bottom'
                     ,xField: 'name'
                     ,yField: 'count'
                     ,style: {
@@ -301,7 +298,7 @@ Ext.define('CB.browser.view.Charts', {
                     } else {
                         data[key][i].count = data[key][i].items;
                     }
-                    data[key][i].name = Ext.htmlDecode(App.shortenString(data[key][i].name, 30));
+                    data[key][i].name = htmlEntityDecode(App.shortenString(data[key][i].name, 30));
                 }
 
                 if(sorter) {
@@ -313,7 +310,8 @@ Ext.define('CB.browser.view.Charts', {
         this.chartData = data;
 
         if(data[this.selectedFacets[0]]) {
-            this.chartDataStore.loadData(data[this.selectedFacets[0]]);
+            var d = Ext.clone(data[this.selectedFacets[0]]);
+            this.chartDataStore.loadData(d);
         } else {
             this.chartDataStore.removeAll();
         }

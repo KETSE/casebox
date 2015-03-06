@@ -624,7 +624,9 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,onSelectionChange: function () {
-        this.fireSelectionChangeEvent();
+        if(!App.mouseDown) {
+            this.fireSelectionChangeEvent();
+        }
     }
 
     ,onEnterKeyPress: function(key, e) {

@@ -82,8 +82,11 @@ function doRpc($cdata)
 
     } catch (\Exception $e) {
         $r['type'] = 'exception';
-        $r['result'] = array('success' => false);
-        $r['msg'] = $e->getMessage();
+        $r['result'] = array(
+            'success' => false,
+            'msg' => $e->getMessage()
+        );
+
         if (\CB\isDebugHost()) {
             $r['where'] = $e->getTraceAsString();
         }

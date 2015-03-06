@@ -50,7 +50,7 @@ $res = DB\dbQuery(
 ) or die(DB\dbQueryError());
 if ($r = $res->fetch_assoc()) {
     $cfg = json_decode($r['value']);
-    if (!empty($t['common'])) {
+    if (!empty($r['common'])) {
         $commonEmail = $true;
 
         $mailServerId = $cfg['host'] . ' / ' . $cfg['email'];
@@ -63,7 +63,7 @@ $res->close();
 
 $res = DB\dbQuery(
     'SELECT id, name
-    FROM `casebox`.cores
+    FROM `' . PREFIX . '_casebox`.cores
     WHERE `active` = 1',
     array()
 ) or die(DB\dbQueryError());
