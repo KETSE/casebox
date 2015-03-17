@@ -372,7 +372,7 @@ Ext.define('CB.browser.ViewContainer', {
 
                 store.currentPage = page;
 
-                // Copy options into a new object so as not to mutate passed in objects
+                // Clon options
                 options = Ext.apply({
                     page: page,
                     start: (page - 1) * size,
@@ -429,7 +429,7 @@ Ext.define('CB.browser.ViewContainer', {
                     ,border: false
                     ,store: this.store
                     ,getProperty: getPropertyHandler
-                })/**/
+                })
             ]
             ,listeners: {
                 scope: this
@@ -537,6 +537,9 @@ Ext.define('CB.browser.ViewContainer', {
         }
         var i, b;
 
+        //suspend toolbar layout
+        this.viewToolbar.suspendLayout = true;
+
         //hide all buttons and remove separators
         while(this.viewToolbar.items.getCount() > 0) {
             b = this.viewToolbar.items.getAt(0);
@@ -590,6 +593,10 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.updateToolbarButtons();
         this.viewToolbar.hideInutilSeparators();
+
+        //resume toolbar layout
+        this.viewToolbar.suspendLayout = false;
+
         this.viewToolbar.doLayout();
     }
 
@@ -604,7 +611,6 @@ Ext.define('CB.browser.ViewContainer', {
         this.userViewSet = true;
 
         this.store.removeAll();
-
 
         this.onReloadClick();
     }

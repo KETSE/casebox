@@ -1,3 +1,18 @@
+CaseBox 1.9.401 (2015-03-17)
+==============================
+New Features, Improvements
+--------------------------
+- #4813 write more user friendly errors notifications
+- #3643 Grouping in Grid
+- #4510 group_field for FacetedNav & grouping in general
+- slow rendering of grid on folder load
+- #4283 Display "Drop files here or use the "New" button" message if grid is empty
+
+Fixed Bugs:
+----------
+- #4814 solr not proper indexing for field of type date
+- #4795 Can't upload files for tasks
+
 CaseBox 1.9.400 (2015-03-06)
 ==============================
 New Features, Improvements

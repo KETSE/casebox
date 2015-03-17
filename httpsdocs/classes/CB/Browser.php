@@ -136,6 +136,9 @@ class Browser
         if (!empty($this->sort)) {
             $rez['sort'] = &$this->sort;
         }
+        if (!empty($this->group)) {
+            $rez['group'] = &$this->group;
+        }
 
         return $rez;
 
@@ -206,6 +209,10 @@ class Browser
 
                 if (isset($rez['sort'])) {
                     $this->sort = $rez['sort'];
+                }
+
+                if (isset($rez['group'])) {
+                    $this->group = $rez['group'];
                 }
             }
 

@@ -95,7 +95,10 @@ Ext.define('CB.search.edit.Panel', {
         p.data = Ext.apply({} , this.readValues().data);
 
         var browser = App.activateBrowserTab();
-        browser.changeSomeParams({search: p});
+        browser.changeSomeParams({
+            query: ''
+            ,search: p
+        });
     }
 
     ,processLoadData: function(r, e) {

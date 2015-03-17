@@ -130,6 +130,11 @@ class Search extends Solr\Client
             $sort = array('order' => 'asc');
 
             if (isset($p['sort'])) {
+                //clear sorting array if sorting not empty
+                if (!empty($p['sort'])) {
+                    $sort = array();
+                }
+
                 if (!is_array($p['sort'])) {
                     $sort[$p['sort']] = empty($p['dir'])
                         ? 'asc'

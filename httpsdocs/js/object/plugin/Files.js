@@ -130,15 +130,6 @@ Ext.define('CB.object.plugin.Files', {
     }
 
     ,onLoadData: function(r, e) {
-        if(Ext.isEmpty(r.data)) {
-            return;
-        }
-
-        for (var i = 0; i < r.data.length; i++) {
-            r.data[i].iconCls = getItemIcon(r.data[i]);
-        }
-        this.store.loadData(r.data);
-
         var dropZoneHtml = L.DropZoneMsg;
 
         //show upload zone by default when in window
@@ -155,6 +146,13 @@ Ext.define('CB.object.plugin.Files', {
             this.dropPanel.update(dropZoneHtml);
         } else {
             this.dropPanel.html = dropZoneHtml;
+        }
+
+        if(!Ext.isEmpty(r.data)) {
+            for (var i = 0; i < r.data.length; i++) {
+                r.data[i].iconCls = getItemIcon(r.data[i]);
+            }
+            this.store.loadData(r.data);
         }
     }
 

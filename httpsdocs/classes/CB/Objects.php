@@ -478,7 +478,9 @@ class Objects
                                 $f['value'] .= 'T00:00:00';
                             }
 
-                            $f['value'] .= 'Z';
+                            if (substr($f['value'], -1) != 'Z') {
+                                $f['value'] .= 'Z';
+                            }
 
                             if (@$f['value'][10] == ' ') {
                                 $f['value'][10] = 'T';

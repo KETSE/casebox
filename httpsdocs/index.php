@@ -2,7 +2,7 @@
 namespace CB;
 
 if (empty($_GET['uri'])) {
-    die('Error');
+    die('Error, invalid url.');
 }
 
 $uri = explode('/', $_GET['uri']);

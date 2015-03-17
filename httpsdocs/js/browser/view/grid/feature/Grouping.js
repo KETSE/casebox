@@ -15,6 +15,12 @@ Ext.define('CB.browser.view.grid.feature.Grouping', {
             ,store = view.store;
 
         store.on('beforeload', this.onBeforeStoreLoad, this);
+        store.on('load', this.onStoreLoad, this, {delay: 200});
+    }
+
+    ,onStoreLoad: function(store, operation, eOpts) {
+        delete store.proxy.extraParams.userGroup;
+        delete this.storeExtraParams.userGroup;
     }
 
     ,onBeforeStoreLoad: function(store, operation, eOpts) {
@@ -29,38 +35,33 @@ Ext.define('CB.browser.view.grid.feature.Grouping', {
             ,view = me.view
             ,store = view.store;
 
-        this.storeExtraParams = {
-            userGroup: 1
-            ,sourceGroupField: sgf
-        };
+        if(store.remoteSort) {
+            this.storeExtraParams = {
+                userGroup: 1
+                ,sourceGroupField: sgf
+            };
 
-        hdr.dataIndex = 'group';
+            hdr.dataIndex = 'group';
+        }
 
         this.callParent(arguments);
 
         hdr.dataIndex = sgf;
-
-        // if (me.disabled) {
-        //     me.lastGrouper = null;
-        //     me.block();
-        //     me.enable();
-        //     me.unblock();
-        // }
-
-        // store.group(hdr.dataIndex);
-        // me.pruneGroupedHeader();
-
-    }
-
-    ,onGroupToggleMenuItemClick: function(menuItem, checked) {
-        this.callParent(arguments);
-    }
-
-    ,enable: function() {
-        this.callParent(arguments);
     }
 
     ,getGroupedHeader: function(groupField) {
         return this.callParent([Ext.valueFrom(this.storeExtraParams.sourceGroupField, groupField)]);
+    }
+
+    ,disable: function() {
+        var me = this
+            ,view = me.view
+            ,store = view.store;
+
+        store.remoteSort = false;
+
+        this.callParent(arguments);
+
+        store.remoteSort = true;
     }
 });

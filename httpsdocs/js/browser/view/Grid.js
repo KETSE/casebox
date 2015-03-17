@@ -432,7 +432,7 @@ Ext.define('CB.browser.view.Grid', {
      * @return void
      */
     ,updateToolbarButtons: function() {
-        this.fireEvent(
+        this.refOwner.fireEvent(
             'settoolbaritems'
             ,[
                 'create'
@@ -510,18 +510,13 @@ Ext.define('CB.browser.view.Grid', {
 
         this.updateToolbarButtons();
 
-        //WORKING
         // update empty text
-        // this.updateEmtyText(
-        //     recs
-        //     ,options.request.config.params.filters
-        //     ,
-        // );
 
         var noRecords = Ext.isEmpty(recs)
-            ,filters = options.request.config.params.filters
+            ,params = options.request.config.params
+            ,filters = params.filters
             ,emptyFilters = Ext.isEmpty(filters) || Ext.Object.isEmpty(filters)
-            ,emptyText = emptyFilters
+            ,emptyText = (emptyFilters && Ext.isEmpty(params.query) && Ext.isEmpty(params.search))
                 ? L.GridEmptyText
                 : L.NoResultsFound;
 
@@ -667,7 +662,18 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,saveGridState: function() {
+        if(this.grid.disableStateSave && Ext.isEmpty(this.store.proxy.extraParams.userGroup)) {
+            return false;
+        }
+
         var state = this.grid.getState();
+
+        //sometimes grid state doesnt return group property
+        if(!Ext.isEmpty(state.group)) {
+            if(Ext.isEmpty(state.group.property)) {
+                state.group.property = this.store.getGroupField();
+            }
+        }
 
         CB_State_DBProvider.saveGridViewState(
             {

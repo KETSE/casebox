@@ -72,7 +72,8 @@ class Base
         }
 
         $sp = &$p['params'];
-        $data = &$p['result']['data'];
+        $result = &$p['result'];
+        $data = &$result['data'];
 
         $rez = array();
 
@@ -90,17 +91,6 @@ class Base
             : $displayColumns['from'];
 
         $state = $this->getState($stateFrom);
-
-        //check grouping params
-        if (!empty($ip['userGroup']) && !empty($ip['group'])) {
-            $p['result']['group'] = array(
-                'property' => $ip['sourceGroupField']
-                ,'direction' => $ip['group']['direction']
-            );
-
-        } elseif (!empty($state['group'])) {
-            $p['result']['group'] = $state['group'];
-        }
 
         $customColumns = array();
 
@@ -259,9 +249,6 @@ class Base
             }
         }
 
-        //analize grouping
-        $this->analizeGrouping($p);
-
         /* user clicked a column to sort by */
         if (!empty($ip['userSort'])) {
             $p['result']['sort'] = array(
@@ -273,6 +260,23 @@ class Base
             $p['result']['sort'] = $state['sort'];
         }
         /* end of get user state and merge the state with display columns */
+
+        //check grouping params
+        if (!empty($ip['userGroup']) && !empty($ip['group'])) {
+            $p['result']['group'] = array(
+                'property' => $ip['sourceGroupField']
+                ,'direction' => $ip['group']['direction']
+            );
+
+        } elseif (isset($state['group'])) {
+            $p['result']['group'] = $state['group'];
+
+        } elseif (isset($displayColumns['group'])) {
+            $p['result']['group'] = $displayColumns['group'];
+        }
+
+        //analize grouping
+        $this->analizeGrouping($p);
 
         if (!empty($rez)) {
             $p['result']['DC'] = $rez;
@@ -298,6 +302,18 @@ class Base
         if (empty($p['result']['group']['property'])) {
             return;
         }
+
+        //sync grouping sort direction with sorting if same column
+        $result = &$p['result'];
+        if (!empty($result['group']) && !empty($result['sort'])) {
+            if (@$result['group']['property'] == $result['sort']['property']) {
+                $result['group']['direction'] = $result['sort']['direction'];
+            } else {
+                $result['group']['direction'] = 'ASC';
+            }
+            // var_dump()
+        }
+        //end of sync
 
         $field = $p['result']['group']['property'];
         $data = &$p['result']['data'];
@@ -401,7 +417,7 @@ class Base
             $rez = $node->getNodeParam('DC');
         }
 
-        //apply properties for default  casebox columns
+        //apply properties for default casebox columns
         if (!empty($rez['data'])) {
             $defaults = Config::getDefaultGridColumnConfigs();
             foreach ($rez['data'] as $k => $v) {
