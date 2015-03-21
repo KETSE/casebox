@@ -162,6 +162,9 @@ Ext.define('CB.VerticalEditGrid', {
                 } else {
                     meta.css = 'bgcLG vaT';
                     meta.style = 'margin-left: ' + (n.getDepth()-1)+'0px';
+                    if(tr.get('cfg').readOnly === true) {
+                        meta.css += ' cG';
+                    }
                 }
 
                 if(!Ext.isEmpty(tr.get('cfg').hint)) {

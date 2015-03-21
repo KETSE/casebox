@@ -40,7 +40,9 @@ class Dbnode extends Base
 
         $folderTemplates = \CB\Config::get('folder_templates');
 
-        $p['fl'] = 'id,pid,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls,status,task_status,versions';
+        $p['fl'] = 'id,pid,system,path,name,case,date,date_end,size,cid,'.
+            'oid,cdate,uid,udate,template_id,acl_count,cls,status,task_status,versions,'.
+            'comment_user_id,comment_date';
 
         if (empty($p['showFoldersContent'])) {
             $p['templates'] = $folderTemplates;

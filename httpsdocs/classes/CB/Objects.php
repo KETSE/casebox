@@ -455,7 +455,6 @@ class Objects
             $object_record['comment_date'] = $objData['sys_data']['lastComment']['date'];
         }
 
-
         $field = array();
         foreach ($linearData as $f) {
             if (is_object($template)) {

@@ -1,3 +1,16 @@
+CaseBox 1.9.403 (2015-03-21)
+==============================
+New Features, Improvements
+--------------------------
+- #4866 Implement custom permissions func for Stratelit
+- #1093 Display readonly fields with gray text color
+
+Fixed Bugs:
+----------
+- #4794 Commented date not updated for a task
+  Commented data was not displayed (selected from solr) by default for DBNode class
+- fix background cron run from solr client
+
 CaseBox 1.9.402 (2015-03-21)
 ==============================
 New Features, Improvements

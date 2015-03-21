@@ -179,7 +179,7 @@ foreach ($mailServers as $mailConf) {
         deleteMails($mailConf['mailbox'], $deleteMailIds);
     }
 
-    \CB\Solr\Client::runBackgroundCron();
+    // \CB\Solr\Client::runBackgroundCron();
 }
 
 function processMails(&$mailServer)
