@@ -311,7 +311,6 @@ class Base
             } else {
                 $result['group']['direction'] = 'ASC';
             }
-            // var_dump()
         }
         //end of sync
 

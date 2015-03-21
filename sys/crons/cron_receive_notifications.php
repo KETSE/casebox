@@ -6,9 +6,10 @@ $execution_timeout = 60; //default is 60 seconds
 
 require_once 'init.php';
 
-$zendPath = Config::get('ZEND_PATH');
+// $zendPath = Config::get('ZEND_PATH');
 
-require_once $zendPath.'/Zend/Loader/StandardAutoloader.php';
+// require_once $zendPath.'/Zend/Loader/StandardAutoloader.php';
+require_once 'Zend/Loader/StandardAutoloader.php';
 
 require_once 'mail_functions.php';
 
@@ -16,26 +17,26 @@ require_once 'mail_functions.php';
 $loader = new \Zend\Loader\StandardAutoloader(
     array(
         // absolute directory
-        'Zend' => $zendPath.'/Zend'
+        'Zend' => ZEND_PATH.'Zend'
     )
 );
 /** AFTER INSTANTIATION **/
 $loader = new \Zend\Loader\StandardAutoloader();
 
 // the path can be absolute or relative below:
-$loader->registerNamespace('Zend', $zendPath.'/Zend');
+$loader->registerNamespace('Zend', ZEND_PATH.'Zend');
 
 /** TO START AUTOLOADING */
 $loader->register();
 
-$mail_requirements = "
+$mail_requirements = '
 Mail requirements are:
     1. Subject of email : [$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
     2. target nodeId should exist in the database.
     3. email address should be specified in casebox user profile.
 
     If at least one condition is not satisfied then the email would not be processed and deleted automatically.
-";
+';
 
 // skip core if no email is set in config
 $coreName = Config::get('core_name');
@@ -57,7 +58,12 @@ if (!$cd['success']) {
 /* check if this core has an email template defined */
 $email_template_id = false;
 
-$res = DB\dbQuery('SELECT id FROM templates WHERE `type` = \'comment\'') or die(DB\dbQueryError());
+$res = DB\dbQuery(
+    'SELECT id
+    FROM templates
+    WHERE `type` = \'comment\''
+) or die(DB\dbQueryError());
+
 if ($r = $res->fetch_assoc()) {
     $email_template_id = $r['id'];
 }
@@ -70,7 +76,7 @@ if (!$email_template_id) {
 /* end of check if this core has an email template defined */
 
 try {
-    $mailbox = new Zend\Mail\Storage\Imap(
+    $mailbox = new \Zend\Mail\Storage\Imap(
         array(
             'host' => config\mail_host
             ,'port' => Util\coalesce(config\mail_port, 993)
@@ -413,9 +419,9 @@ foreach ($processed_ids as $uniq_id) {
     ) or die('error updating crons last action');
 }
 
-if ($i > 0) {
-    Solr\Client::runCron();
-}
+// if ($i > 0) {
+//     Solr\Client::runCron();
+// }
 /* end of moving read messages from inbox to All Mail folder*/
 
 /* deleting unprocessed messages from inbox*/

@@ -85,11 +85,11 @@ class Objects
     {
         $coreName = Config::get('core_name');
 
-        $commentsConfig = Config::get('comments_config');
+        $commentsEmail = Config::get('comments_email');
 
-        $senderMail = empty($commentsConfig['email'])
+        $senderMail = empty($commentsEmail)
             ? Config::get('sender_email')
-            : $commentsConfig['email'];
+            : $commentsEmail;
 
         $rez = '"' .
             mb_encode_mimeheader(

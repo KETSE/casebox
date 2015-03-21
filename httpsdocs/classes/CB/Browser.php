@@ -1178,7 +1178,7 @@ class Browser
                      , deny = 0',
                 array(
                     $id
-                    ,Security::SystemGroupId()
+                    ,Security::getSystemGroupId('system')
                 )
             ) or die( DB\dbQueryError() );
 

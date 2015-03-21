@@ -36,31 +36,37 @@ $mail_requirements = 'Mail requirements are:
 
     If at least one condition is not satisfied then the email would not be processed and deleted automatically.';
 
-$mailServers = array();
+$mailServer = array();
+$cfg = array();
 $commonEmail = false;
 
 // check if we have a common email server defined for all cores on this host
-// i.e. casebox.config table should contain comments_config with "common": true
 
-$res = DB\dbQuery(
-    'SELECT `value`
-    FROM casebox.config
-    WHERE param = $1',
-    'comments_config'
-) or die(DB\dbQueryError());
-if ($r = $res->fetch_assoc()) {
-    $cfg = json_decode($r['value']);
-    if (!empty($r['common'])) {
-        $commonEmail = $true;
-
-        $mailServerId = $cfg['host'] . ' / ' . $cfg['email'];
-        $mailServers[$mailServerId] = $cfg;
+$platformConfig =  Cache::get('platformConfig');
+if (!empty($platformConfig['comments_email'])) {
+    $mailServer = array(
+        'email' => $platformConfig['comments_email']
+        ,'host' => $platformConfig['comments_host']
+        ,'port' => $platformConfig['comments_port']
+        ,'ssl' =>  in_array($platformConfig['comments_ssl'], array(true, 'true', 1, 'y', 'yes'), true)
+        ,'user' => @$platformConfig['comments_user']
+        ,'pass' => $platformConfig['comments_pass']
+        // ,'common' => $platformConfig['comments_common'] // if we moved it to config.ini then its common by default
+    );
+} else { //backward compatibile check
+    $res = DB\dbQuery(
+        'SELECT `value`
+        FROM casebox.config
+        WHERE param = $1',
+        'comments_config'
+    ) or die(DB\dbQueryError());
+    if ($r = $res->fetch_assoc()) {
+        $mailServer = json_decode($r['value'], true);
     }
+    $res->close();
 }
-$res->close();
 
-// iterate cores and group cores by mail server
-
+// select active cores
 $res = DB\dbQuery(
     'SELECT id, name
     FROM `' . PREFIX . '_casebox`.cores
@@ -69,43 +75,23 @@ $res = DB\dbQuery(
 ) or die(DB\dbQueryError());
 
 while ($r = $res->fetch_assoc()) {
-    if (!$commonEmail) {
-        $_GET['core'] = $r['name'];
-
-        $_SERVER['SERVER_NAME'] = $r['name'].'.casebox.org';
-
-        include $site_path.DIRECTORY_SEPARATOR.'config.php';
-
-        $cfg = Config::get('comments_config');
-
-        if (empty($cfg)) {
-            continue;
-        }
-    }
-
-    $mailServerId = $cfg['host'] . ' / ' . $cfg['email'];
-    if (empty($mailServers[$mailServerId])) {
-        $mailServers[$mailServerId] = $cfg;
-    }
-
-    $mailServers[$mailServerId]['cores'][$r['name']] = array();
+    $mailServer['cores'][$r['name']] = array();
 }
 $res->close();
 
+$mailServers = array($mailServer);
 // collect all new mails per each core
-
 foreach ($mailServers as &$cfg) {
     try {
         $user = empty($cfg['user'])
-            // ? array_shift($user)
             ? $cfg['email']
             : $cfg['user'];
 
         $mailConf = array(
             'host' => $cfg['host']
-            ,'port' => Util\coalesce(@$cfg['port'], 993)
+            ,'port' => $cfg['port']//Util\coalesce(@$cfg['port'], 993)
             ,'ssl' =>  (@$cfg['ssl'] == true)
-            ,'user' => $cfg['email']
+            ,'user' => $user
             ,'password' => $cfg['pass']
         );
 

@@ -1,8 +1,40 @@
 <?php
 namespace CB;
 
+/**
+ * Security class
+ *
+ * This class works user acceses that are divided into bits.
+ * There are following user access bits defined, wich are defined as static constants of this class:
+ *       0 List Folder/Read Data
+ *       1 Create Folders
+ *       2 Create Files
+ *       3 Create Actions
+ *       4 Create Tasks
+ *       5 Read
+ *       6 Write
+ *       7 Delete child nodes
+ *       8 Delete
+ *       9 Change permissions
+ *       10 Take Ownership
+ *       11 Download
+ */
+
 class Security
 {
+    /* static constants */
+    public static $CAN_LIST_FOLDERS = 0;
+    public static $CAN_CREATE_FOLDERS = 1;
+    public static $CAN_CREATE_FILES = 2;
+    public static $CAN_CREATE_ACTIONS = 3;
+    public static $CAN_CREATE_TASKS = 4;
+    public static $CAN_READ = 5;
+    public static $CAN_WRITE = 6;
+    public static $CAN_DELETE_CHILDS = 7;
+    public static $CAN_DELETE = 8;
+    public static $CAN_CHANGE_PERMISSIONS = 9;
+    public static $CAN_TAKE_OWNERSHIP = 10;
+    public static $CAN_DOWNLOAD = 11;
     /* groups methods */
 
     /**
@@ -36,8 +68,6 @@ class Security
     }
 
     /**
-     * Create group
-     *
      * Create a security group
      *
      * @returns group properties
@@ -81,7 +111,7 @@ class Security
     }
 
     /**
-     * Update a group
+     * Update group name (placeholder)
      */
     public function updateUserGroup($p)
     {
@@ -89,7 +119,7 @@ class Security
             throw new \Exception(L\get('Access_denied'));
         }
 
-        return array( 'success' => true, 'data' => array() );
+        return array( 'success' => true, 'data' => array());
     }
 
     /**
@@ -108,7 +138,9 @@ class Security
     /* end of groups methods */
 
     /**
-     * search users or groups for fields of type "objects"
+     * Search users and/or groups
+     *
+     * Used from fields of type "objects" with source "users"/"groups"/"usergroups"
      *
      * This function receives field config as parameter (inluding text query) and returns the matched results.
      */
@@ -186,7 +218,12 @@ class Security
         return $rez;
     }
 
-    /* get objects acl list*/
+    /**
+     * get objects acl list
+     * @param  $p       client side request params with field config
+     * @param  boolean $inherited flag to include inherited rules also
+     * @return array   json responce
+     */
     public function getObjectAcl($p, $inherited = true)
     {
         $rez = array(
@@ -286,19 +323,6 @@ class Security
     */
     private static function getUserGroupAccessForObject($object_id, $user_group_id = false)
     {
-        //0 List Folder/Read Data
-        //1 Create Folders
-        //2 Create Files
-        //3 Create Actions
-        //4 Create Tasks
-        //5 Read
-        //6 Write
-        //7 Delete child nodes
-        //8 Delete
-        //9 Change permissions
-        //10 Take Ownership
-        //11 Download
-
         /* if no user is specified as parameter then calculating for current loged user */
 
         if ($user_group_id === false) {
@@ -306,10 +330,10 @@ class Security
         }
 
         /* prepearing result array (filling it with zeroes)*/
-        $rez = array( array_fill(0, 12, 0), array_fill(0, 12, 0) );
+        $rez = array(array_fill(0, 12, 0), array_fill(0, 12, 0));
 
         $user_group_ids = array($user_group_id);
-        $everyoneGroupId = Security::EveryoneGroupId();
+        $everyoneGroupId = static::getSystemGroupId('everyone');
         if ($user_group_id !== $everyoneGroupId) {
             $user_group_ids[] = $everyoneGroupId;
         }
@@ -334,7 +358,9 @@ class Security
 
         /* getting group ids where passed $user_group_id is a member*/
         $res = DB\dbQuery(
-            'SELECT DISTINCT group_id FROM users_groups_association WHERE user_id = $1',
+            'SELECT DISTINCT group_id
+            FROM users_groups_association
+            WHERE user_id = $1',
             $user_group_id
         ) or die(DB\dbQueryError());
 
@@ -466,21 +492,19 @@ class Security
         return $rez;
     }
 
+    /**
+     * estimate user access for an object
+     * @param  int   $object_id
+     * @param  int   $user_id   if not specified - estimating for current loged in user
+     * @return array bidimentional array of bit accesses with 2 levels
+     *               first level (index 0) - allow access bits
+     *               second level (index 1) - deny access bits
+     *
+     * Bits can have values from 0 to 2 (0 - not set, 1 - direct set, 2 - inherited)
+     * For deny values are negative
+     */
     private static function getEstimatedUserAccessForObject($object_id, $user_id = false)
     {
-        //0 List Folder/Read Data
-        //1 Create Folders
-        //2 Create Files
-        //3 Create Actions
-        //4 Create Tasks
-        //5 Read
-        //6 Write
-        //7 Delete child nodes
-        //8 Delete
-        //9 Change permissions
-        //10 Take Ownership
-        //11 Download
-
         $is_owner = false;
 
         /* if no user is specified as parameter then calculating for current loged user */
@@ -492,7 +516,7 @@ class Security
         $rez = array( array_fill(0, 12, 0), array_fill(0, 12, 0) );
 
         $user_group_ids = array($user_id);
-        $everyoneGroupId = Security::EveryoneGroupId();
+        $everyoneGroupId = static::getSystemGroupId('everyone');
         if ($user_id !== $everyoneGroupId) {
             $user_group_ids[] = $everyoneGroupId;
         }
@@ -522,7 +546,9 @@ class Security
 
         /* getting group ids where passed $user_id is a member*/
         $res = DB\dbQuery(
-            'SELECT DISTINCT group_id FROM users_groups_association WHERE user_id = $1',
+            'SELECT DISTINCT group_id
+            FROM users_groups_association
+            WHERE user_id = $1',
             $user_id
         ) or die(DB\dbQueryError());
 
@@ -553,11 +579,14 @@ class Security
             $acl[$acl_order[$r['node_id']]][$r['user_group_id']] = array($r['allow'], $r['deny']);
         }
         $res->close();
+
         /* now iterating the $acl table and determine final set of bits/**/
         $set_bits = 0;
         $i=0;
+
         ksort($acl, SORT_NUMERIC);
         reset($acl);
+
         while (( current($acl) !== false ) && ($set_bits < 12)) {
             $i = key($acl);
             $inherited = ($i > 0);
@@ -617,7 +646,7 @@ class Security
                 }
             }
 
-            // now analize for everyone group id if set, but only for higher levels (inherited parents)
+            // analize for everyone group id if set, but only for higher levels (inherited parents)
             if (!empty($acl[$i][$everyoneGroupId])) {
                 $value = $acl[$i][$everyoneGroupId];
                 $deny = intval($value[1]);
@@ -642,85 +671,235 @@ class Security
             next($acl);
         }
         if ($is_owner) {
-            $rez[0][0] = 1;
-            $rez[0][5] = 1;
-            $rez[0][9] = 1;
-            $rez[0][10] = 1;
+            $rez[0][static::$CAN_LIST_FOLDERS] = 1;
+            $rez[0][static::$CAN_READ] = 1;
+            $rez[0][static::$CAN_CHANGE_PERMISSIONS] = 1;
+            $rez[0][static::$CAN_TAKE_OWNERSHIP] = 1;
 
-            $rez[1][0] = 0;
-            $rez[1][5] = 0;
-            $rez[1][9] = 0;
-            $rez[1][10] = 0;
+            $rez[1][static::$CAN_LIST_FOLDERS] = 0;
+            $rez[1][static::$CAN_READ] = 0;
+            $rez[1][static::$CAN_CHANGE_PERMISSIONS] = 0;
+            $rez[1][static::$CAN_TAKE_OWNERSHIP] = 0;
         }
 
         return $rez;
     }
 
+    /**
+     * get specific access for an object
+     * @param  int $object_id
+     * @param  int $access_bit_index access bits are defined at the top of this class
+     * @param  int $user_id
+     * @return int -2 inherited deny, -1 - deny, 0 - not set, 1 - allow, 2 - inherited allow
+     */
     public static function getAccessBitForObject($object_id, $access_bit_index, $user_id = false)
     {
+        $rez = null;
+
         if ($user_id === false) {
             $user_id = $_SESSION['user']['id'];
         }
-        $accessArray = Security::getEstimatedUserAccessForObject($object_id, $user_id);
-        if (!empty($accessArray[0][$access_bit_index])) {
-            return $accessArray[0][$access_bit_index];
-        }
-        if (!empty($accessArray[1][$access_bit_index])) {
-            return $accessArray[1][$access_bit_index];
+
+        $eventParams = array(
+            'object_id' => $object_id
+            ,'access_bit' => $access_bit_index
+            ,'user_id' => $user_id
+            ,'result' => &$rez
+        );
+        fireEvent('beforeGetAccessForObject', $eventParams);
+
+        if (is_null($rez)) {
+            $accessArray = Security::getEstimatedUserAccessForObject($object_id, $user_id);
+
+            if (!empty($accessArray[0][$access_bit_index])) {
+                $rez = $accessArray[0][$access_bit_index];
+            } elseif (!empty($accessArray[1][$access_bit_index])) {
+                $rez = $accessArray[1][$access_bit_index];
+            }
         }
 
-        return 0;
+        fireEvent('getAccessForObject', $eventParams);
+
+        if (is_null($rez)) {
+            $rez = 0;
+        }
+
+        return $rez;
     }
 
+    /**
+     * Shortcut function for checking list folders access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
     public static function canListFolderOrReadData($object_id, $user_group_id = false)
     {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 0, $user_group_id) > 0));
-    }
-    public static function canCreateFolders($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 1, $user_group_id) > 0));
-    }
-    public static function canCreateFiles($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 2, $user_group_id) > 0));
-    }
-    public static function canCreateActions($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 3, $user_group_id) > 0));
-    }
-    public static function canCreateTasks($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 4, $user_group_id) > 0));
-    }
-    public static function canRead($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 5, $user_group_id) > 0));
-    }
-    public static function canWrite($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 6, $user_group_id) > 0));
-    }
-    public static function canDeleteChilds($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 7, $user_group_id) > 0));
-    }
-    public static function canDelete($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 8, $user_group_id) > 0));
-    }
-    public static function canChangePermissions($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 9, $user_group_id) > 0));
-    }
-    public static function canTakeOwnership($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 10, $user_group_id) > 0));
-    }
-    public static function canDownload($object_id, $user_group_id = false)
-    {
-        return (Security::isAdmin() || (Security::getAccessBitForObject($object_id, 11, $user_group_id) > 0));
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_LIST_FOLDERS, $user_group_id) > 0)
+        );
     }
 
+    /**
+     * Shortcut function for checking create folders access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canCreateFolders($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_CREATE_FOLDERS, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking create files access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canCreateFiles($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_CREATE_FILES, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking create actions access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canCreateActions($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_CREATE_ACTIONS, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking create tasks access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canCreateTasks($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_CREATE_TASKS, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking read access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canRead($object_id, $user_group_id = false)
+    {
+        return (
+            // Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_READ, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking write access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canWrite($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_WRITE, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking delete childs access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canDeleteChilds($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_DELETE_CHILDS, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking delete access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canDelete($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_DELETE, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking change permissions access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canChangePermissions($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_CHANGE_PERMISSIONS, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking take ownership access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canTakeOwnership($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_TAKE_OWNERSHIP, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for checking download access
+     * @param  int     $object_id
+     * @param  int     $user_group_id
+     * @return boolean
+     */
+    public static function canDownload($object_id, $user_group_id = false)
+    {
+        return (
+            Security::isAdmin() ||
+            (Security::getAccessBitForObject($object_id, static::$CAN_DOWNLOAD, $user_group_id) > 0)
+        );
+    }
+
+    /**
+     * Shortcut function for getting the list of direct access rules (not inherited) set for an item
+     * @param  array     client side json request
+     * @return json response
+     */
     public function getObjectDirectAcl($p)
     {
         $rez = $this->getObjectAcl($p, false);
@@ -728,6 +907,11 @@ class Security
         return $rez;
     }
 
+    /**
+     * add a security rule for an item
+     * @param  array $p json request
+     * @return json  response
+     */
     public function addObjectAccess($p)
     {
         $rez = array('success' => true, 'data' => array());
@@ -741,12 +925,10 @@ class Security
 
         DB\dbQuery(
             'INSERT INTO tree_acl (node_id, user_group_id, cid, uid)
-            VALUES ($1
-                    ,$2
-                    ,$3
-                    ,$3) ON duplicate KEY
+            VALUES ($1, $2, $3, $3)
+            ON DUPLICATE KEY
             UPDATE id = last_insert_id(id)
-                    , uid = $3',
+                ,uid = $3',
             array(
                 $p['id']
                 ,$p['data']['user_group_id']
@@ -762,6 +944,11 @@ class Security
         return $rez;
     }
 
+    /**
+     * update a security rule for an item
+     * @param  array $p json request
+     * @return json  response
+     */
     public function updateObjectAccess($p)
     {
         if (!Security::isAdmin() && !Security::canChangePermissions($p['id'])) {
@@ -811,6 +998,12 @@ class Security
 
         return array('succes' => true, 'data' => $p['data'] );
     }
+
+    /**
+     * remove a security rule for an item
+     * @param  array $p json request
+     * @return array json  response
+     */
     public function destroyObjectAccess($p)
     {
         if (empty($p['data'])) {
@@ -828,7 +1021,7 @@ class Security
     }
 
     /**
-     * setting security inheritance flag for a tree node
+     * setting security inheritance flag for an item
      *
      * @param array $p {
      *     @type int      $id    id of tree node
@@ -937,16 +1130,10 @@ class Security
     }
 
     /**
-     * setting security inheritance flag for a tree node
+     * remove security rules from child items
      *
-     * @param array $p {
-     *     @type int      $id    id of tree node
-     *     @type boolean  $inherit    set inherit to true or false
-     *     @type string   $copyRules   when removing inheritance ($inherit = false)
-     *                                 then this value could be set to 'yes' or 'no'
-     *                                 for copying inherited rules to current node
-     * }
-     *
+     * @param array json request
+     * @return array json  response
      */
     public function removeChildPermissions($p)
     {
@@ -1034,21 +1221,26 @@ class Security
     /* end of objects acl methods*/
 
     /**
-     * return sets for a user that have access on specified bit
-     * @param  boolean         $user_id          [description]
-     * @param  integer         $access_bit_index 5 is read bit index
+     * return set ids for a user that have access on specified bit
+     * @param  boolean         $user_id
+     * @param  integer         $access_bit_index default static::$CAN_READ
      * @param  integer | array $pids
      * @return array           security set ids
      */
-    public static function getSecuritySets ($user_id = false, $access_bit_index = 5, $pids = null)
+    public static function getSecuritySets ($user_id = false, $access_bit_index = null, $pids = null)
     {
-
         $rez = array();
         $sets = array();
+
+        if (empty($access_bit_index)) {
+            $access_bit_index = static::$CAN_READ;
+        }
+
         if (empty($user_id)) {
             $user_id = $_SESSION['user']['id'];
         }
-        $everyoneGroupId = Security::EveryoneGroupId();
+
+        $everyoneGroupId = static::getSystemGroupId('everyone');
 
         $res = DB\dbQuery(
             'SELECT security_set_id, user_id, bit'.$access_bit_index.' `access`
@@ -1143,7 +1335,7 @@ class Security
     }
 
     /**
-     * recalculates security sets marked as updated in db
+     * recalculate security sets marked as updated in db
      * @param  boolean $onlyForUserId specific user or all if false
      * @return void
      */
@@ -1175,6 +1367,12 @@ class Security
         unset($_SESSION['calculatingSecuritySets']);
     }
 
+    /**
+     * update a security set
+     * @param  int  $set_id
+     * @param  int  $onlyForUserId
+     * @return void
+     */
     public static function updateSecuritySet($set_id, $onlyForUserId = false)
     {
         $acl = array();
@@ -1196,7 +1394,7 @@ class Security
         /* end of get set*/
 
         $obj_ids = explode(',', $set);
-        $everyoneGroupId = Security::EveryoneGroupId();
+        $everyoneGroupId = static::getSystemGroupId('everyone');
         $users = array();
         $updatingUser = false;
 
@@ -1304,55 +1502,60 @@ class Security
         ) or die(DB\dbQueryError());
         /* end of update set in database */
     }
+
     /**
-     * Retreive everyone group id
+     * Retreive a system group id by its name
+     *
+     * @return int
      */
-    public static function everyoneGroupId()
+    public static function getSystemGroupId($groupName)
     {
-        if (!Cache::exist('everyone_group_id')) {
+        if (!Cache::exist('group_id_' . $groupName)) {
             $res = DB\dbQuery(
                 'SELECT id
                 FROM users_groups
                 WHERE `type` = 1
-                        AND `system` = 1
-                        AND name = $1',
-                'everyone'
+                    AND `system` = 1
+                    AND name = $1',
+                $groupName
             ) or die(DB\dbQueryError());
 
             if ($r = $res->fetch_assoc()) {
-                Cache::set('everyone_group_id', $r['id']);
+                Cache::set('group_id_' . $groupName, $r['id']);
             }
             $res->close();
         }
 
-        return Cache::get('everyone_group_id');
+        return Cache::get('group_id_' . $groupName);
+    }
+
+    /**
+     * Retreive everyone group id
+     * Last as placeholder for backward compatibility
+     * Should be removed in future releases
+     * @return int
+     */
+    public static function everyoneGroupId()
+    {
+        return static::getSystemGroupId('everyone');
     }
 
     /**
      * Retreive system group id
+     * Last as placeholder for backward compatibility
+     * Should be removed in future releases
+     * @return void
      */
     public static function systemGroupId()
     {
-        if (!Cache::exist('system_group_id')) {
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM users_groups
-                WHERE system = 1
-                        AND name = $1',
-                'system'
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                Cache::set('system_group_id', $r['id']);
-            }
-            $res->close();
-        }
-
-        return Cache::get('system_group_id');
+        return static::getSystemGroupId('system');
     }
 
     /**
      * Get an array of user ids associated to the given group
+     *
+     * @param  int   $group_id
+     * @return array
      */
     public static function getGroupUserIds($group_id)
     {
@@ -1372,6 +1575,7 @@ class Security
 
     /**
      * Get the list of active users with basic data
+     * @return array
      */
     public static function getActiveUsers()
     {
@@ -1409,7 +1613,10 @@ class Security
     /* ----------------------------------------------------  OLD METHODS ------------------------------------------ */
 
     /**
-     * Check if user_id (or current loged user) is an administrator
+     * Check if user_id (or current loged user) is an administrator (member of "system" group)
+     *
+     * @param  int     $user_id
+     * @return boolean
      */
     public static function isAdmin($user_id = false)
     {
@@ -1443,14 +1650,32 @@ class Security
         return Cache::get($var_name);
     }
 
+    /**
+     * Check if user_id (or current loged user) can manage users or groups
+     *
+     * @param  int     $user_id
+     * @return boolean
+     */
     public static function canManage($userId = false)
     {
         return (Security::canAddUser($userId) || Security::canAddGroup($userId));
     }
 
+    /**
+     * Check if current loged user is owner for given user id
+     *
+     * @param  int     $user_id
+     * @return boolean
+     */
     public static function isUsersOwner($user_id)
     {
-        $res = DB\dbQuery('SELECT cid FROM users_groups WHERE id = $1', $user_id) or die(DB\dbQueryError());
+        $res = DB\dbQuery(
+            'SELECT cid
+            FROM users_groups
+            WHERE id = $1',
+            $user_id
+        ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $rez = ($r['cid'] == $_SESSION['user']['id']);
         } else {
@@ -1461,6 +1686,12 @@ class Security
         return $rez;
     }
 
+    /**
+     * Check if user_id (or current loged user) can add users
+     *
+     * @param  int     $userId
+     * @return boolean
+     */
     public static function canAddUser($userId = false)
     {
         if (Security::isAdmin($userId)) {
@@ -1474,6 +1705,12 @@ class Security
         return !empty($userData['cfg']['canAddUsers']);
     }
 
+    /**
+     * Check if user_id (or current loged user) can add groups
+     *
+     * @param  int     $userId
+     * @return boolean
+     */
     public static function canAddGroup($userId = false)
     {
         if (Security::isAdmin($userId)) {
@@ -1487,6 +1724,12 @@ class Security
         return !empty($userData['cfg']['canAddGroups']);
     }
 
+    /**
+     * Check if current loged user can edit another user
+     *
+     * @param  int     $userId
+     * @return boolean
+     */
     public static function canEditUser($user_id)
     {
         return (Security::isAdmin() || Security::isUsersOwner($user_id) || ($_SESSION['user']['id'] == $user_id));

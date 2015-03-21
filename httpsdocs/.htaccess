@@ -38,7 +38,7 @@
     # redirect remote XHR requests
     RewriteCond %{REQUEST_URI} ^/?[^/]+/remote/(api|router).php$ [OR]
     RewriteCond %{REQUEST_URI} ^/?[^/]+/js/CB.DB.php$
-    RewriteRule /?([^/]+)/(.*) $2?core=$1 [L,NC,QSA]
+    RewriteRule ^([^/]+)/(.*)$ $2?core=$1 [L,NC,QSA]
 
     #redirect all other requests to index.php
     RewriteRule ^index\.php$ - [L]
@@ -47,6 +47,10 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php?uri=$1 [L,QSA]
     # RewriteRule . /index.php [L]
+
+    #deny direct access to other files
+    RewriteCond %{REQUEST_URI} !^.+\.(js|php|css|ico|png|bmp|jpg|gif)$
+    RewriteRule ^(.*)$ - [F,L]
 
 </IfModule>
 

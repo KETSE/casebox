@@ -36,7 +36,15 @@ $defaultValues = array(
     //;SENDER_EMAIL: email adress placed in header for sent mails
     ,'sender_email' => 'emails.sender@server.com'
 
-    ,'webdav_url' => 'https://sss.davdev.casebox.org/edit/{core_name}/{node_id}/{name}'
+    ,'webdav_domain' => 'https://subdomain.domain.org/'
+
+    ,'comments_email' => 'comments@subdomain.domain.com'
+    ,'comments_host' => '127.0.0.1'
+    ,'comments_port' => 993
+    ,'comments_ssl' => true
+    ,'comments_user' => ''
+    ,'comments_pass' => ''
+
     ,'PYTHON' => 'python'
 );
 
@@ -55,9 +63,6 @@ do {
 
 //init solr connection
 initSolrConfig();
-// do {
-//     $cfg['core'] = 'cb_dev';
-// } while (!verifySolrConfig());
 
 $l = readALine('Specify administrator email address (default "' . $cfg['admin_email'] . '"):' . "\n");
 if (!empty($l)) {
@@ -67,6 +72,44 @@ if (!empty($l)) {
 $l = readALine('Specify sender email address, placed in header for sent mails (default "' . $cfg['sender_email'] . '"):' . "\n");
 if (!empty($l)) {
     $cfg['sender_email'] = $l;
+}
+//check webdav domain
+$l = readALine('Specify WebDav domain, including protocol (default "' . $cfg['webdav_domain'] . '"):' . "\n");
+if (!empty($l)) {
+    $cfg['webdav_domain'] = $l;
+}
+
+//define comments email params
+if (confirm('Would you like to define comments email parametters? (y/n)')) {
+    $l = readALine('Specify comments email address, used to receive replies for Casebox comment notifications (default "' . $cfg['comments_email'] . '"):' . "\n");
+    if (!empty($l)) {
+        $cfg['comments_email'] = $l;
+    }
+
+    $l = readALine('Specify comments email server host (default "' . $cfg['comments_host'] . '"):' . "\n");
+    if (!empty($l)) {
+        $cfg['comments_host'] = $l;
+    }
+
+    $l = readALine('Specify comments email server port (default "' . $cfg['comments_port'] . '"):' . "\n");
+    if (!empty($l)) {
+        $cfg['comments_port'] = $l;
+    }
+
+    $l = readALine('Specify if ssl connection is used for comments email server (y/n):' . "\n");
+    if (!empty($l)) {
+        $cfg['comments_ssl'] = $l;
+    }
+
+    $l = readALine('Specify username for comments email server connection (can be left blank if email could be used as username):' . "\n");
+    if (!empty($l)) {
+        $cfg['comments_user'] = $l;
+    }
+
+    $l = readALine('Specify password for comments email server connection:' . "\n");
+    if (!empty($l)) {
+        $cfg['comments_pass'] = $l;
+    }
 }
 
 $l = readALine('Specify python path (default "' . $cfg['PYTHON'] . '"):' . "\n");

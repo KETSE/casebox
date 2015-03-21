@@ -18,7 +18,8 @@ define('CB\\MINIFY_CACHE_DIR', TEMP_DIR.'minify'.DIRECTORY_SEPARATOR);
 //templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
 define('CB\\TEMPLATES_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
 //used to include DB.php into PreviewExtractor scripts and in Files.php to start the extractors.
-define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
+define('CB\\LIB_DIR', DOC_ROOT.'lib'.DIRECTORY_SEPARATOR);
+define('CB\\ZEND_PATH', DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'ZF'.DIRECTORY_SEPARATOR.'library'.DIRECTORY_SEPARATOR);
 
 // define casebox include path
 // This path contains only CaseBox platform inclusion paths
@@ -28,6 +29,7 @@ define(
     // DOC_ROOT.PATH_SEPARATOR.
     DOC_ROOT.'libx'.PATH_SEPARATOR.
     DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
+    ZEND_PATH. PATH_SEPARATOR.
     DOC_ROOT.'classes'.PATH_SEPARATOR.
     PLUGINS_DIR.PATH_SEPARATOR.
     get_include_path()
@@ -72,7 +74,6 @@ $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . PATH_SEPARA
 $cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
 $cfg['SOLR_CLIENT'] = 'Solr/Service.php';
 $cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
-$cfg['ZEND_PATH'] = DOC_ROOT . 'libx/ZF/library';
 $cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
 Cache::set('platformConfig', $cfg);

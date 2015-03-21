@@ -1,3 +1,27 @@
+CaseBox 1.9.402 (2015-03-21)
+==============================
+New Features, Improvements
+--------------------------
+- solr_reindex_core.php and scripts from crons changed
+  to receive params compatible with php "getopt" function
+  acceptable common params are:
+    -n, --name      cron name to run, applicable for run_cron.php
+    -c, --core      core name or "all"
+    -a, --all       all records
+    -l, --nolimit   skip items limit on indexing core
+    -f, --force     skip other same cron running check
+
+- removed solr_recreate_core.php and solr_reindex_document.php from utils
+- #4855 Add suppport for "allow_duplicates: true/false" default: false in core config
+- #4434 Move webdav_url, comments_config, debug_hosts from 'casebox' to config.ini
+- modified .htaccess to deny access to other files than php, js and images
+- concatenated everyoneGroupId and systemGroupId into getSystemGroupId in Security class
+- #4829 Custom function to calculate Node permissions
+
+Fixed Bugs:
+----------
+- #4836 TIKA issues on dev server
+
 CaseBox 1.9.401 (2015-03-17)
 ==============================
 New Features, Improvements

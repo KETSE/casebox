@@ -9,15 +9,44 @@ use CB\DB;
  * All crons can be started through this script only.
  * This script will parse input params and start corresponding cron for each requested core.
  *
+ * acceptable common params are:
+ * -n, --name      cron name to run, applicable for run_cron.php
+ * -c, --core      core name or "all"
+ * -a, --all       all records
+ * -l, --nolimit   skip items limit on indexing core
+ * -f, --force     skip other same cron running check*
+ *
  * @author Turcanu Vitalie, 22 april, 2013
  *
  */
 
-if (sizeof($argv) < 3) {
-    die('Not enough parameters specified. Use run_cron.php <cron_name> <core_name>|all ');
+//check script options
+$options = getopt('n:c:alf', array('name', 'core', 'all', 'nolimit', 'force'));
+
+$cronName = empty($options['n'])
+    ? @$options['name']
+    : $options['n'];
+
+if (empty($cronName)) {
+    die('no cron name specified or invalid options set.');
 }
 
-$cron_file = explode('/', $argv[1]);
+$core = empty($options['c'])
+    ? @$options['core']
+    : $options['c'];
+
+if (empty($core)) {
+    die('no core specified or invalid options set.');
+}
+
+$all = isset($options['a']) || isset($options['all']);
+
+$nolimit = isset($options['l']) || isset($options['nolimit']);
+
+$force = isset($options['f']) || isset($options['force']);
+//end of check script options
+
+$cron_file = explode('/', $cronName);
 $cron_file = array_pop($cron_file);
 
 $cron_file = explode('\\', $cron_file);
@@ -44,8 +73,8 @@ $res = DB\dbQuery(
 
 while ($r = $res->fetch_assoc()) {
     if (empty($argv[2]) ||
-        ($argv[2] == $r['name']) ||
-        (($argv[2] == 'all') && ($r['active'] > 0))
+        ($core == $r['name']) ||
+        (($core == 'all') && ($r['active'] > 0))
     ) {
         $cores[] = $r['name'];
     }
@@ -56,8 +85,23 @@ if (empty($cores)) {
     echo "Core not found or inactive.\n";
 } else {
     foreach ($cores as $core) {
-        // echo "\nProcessing core $core ...";
-        echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3].' '.@$argv[4]);
+        echo "\nProcessing core $core ...";
+
+        $cmd = 'php -f '.$cron_path.$cron_file.' -- -c '.$core;
+
+        if ($all) {
+            $cmd .= ' -a';
+        }
+
+        if ($nolimit) {
+            $cmd .= ' -l';
+        }
+
+        if ($force) {
+            $cmd .= ' -f';
+        }
+
+        echo shell_exec($cmd);
     }
-    // echo "\nDone\n";
+    echo "\nDone\n";
 }

@@ -285,9 +285,21 @@ class User
             $filesEdit[$k] = Util\toTrimmedArray($v);
         }
 
-        $webdavUrl = empty($filesConfig['webdav_url'])
-            ? Config::get('webdav_url') // backward compatibility
-            : $filesConfig['webdav_url'];
+        //detect webdav url
+        $webdavUrl = '';
+        $webdavDomain = Config::get('webdav_domain');
+        if (!empty($webdavDomain)) {
+            if (substr($webdavDomain, -1) != '/') {
+                $webdavDomain .= '/';
+            }
+            $webdavUrl = $webdavDomain . '{core_name}/edit-{node_id}/{name}"';
+
+        } else { //backward compatible check
+            $webdavUrl = empty($filesConfig['webdav_url'])
+                ? Config::get('webdav_url') // backward compatibility
+                : $filesConfig['webdav_url'];
+        }
+        //end of detect webdav url
 
         @$rez = array(
             'success' => true

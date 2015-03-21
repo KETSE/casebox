@@ -59,8 +59,7 @@ class Config extends Singleton
         // add core path to include path
         set_include_path(
             INCLUDE_PATH . PATH_SEPARATOR .
-            static::$environmentVars['core_dir'] . PATH_SEPARATOR .
-            static::get('ZEND_PATH')
+            static::$environmentVars['core_dir']
         );
 
         // set max file version count
@@ -676,18 +675,17 @@ class Config extends Singleton
         }
         $cfg['facet_configs'] = $dfd;
 
-        //detect Display Columns definitions in casebox config
-        // $dcd = array();
-        // if (!empty($cfg['default_DC'])) {
-        //     $dcd = Util\toJSONArray($cfg['default_DC']);
-        //     // unset($cfg['default_DC']);
-        // }
+        //transform boolean properties to boolean
+        $boolProperties = array(
+            'allow_duplicates'
+        );
 
-        // //check if have defined facets in core config
-        // if (!empty($cfg['DC'])) {
-        //     $dcd = array_merge($dcd, Util\toJSONArray($cfg['DC']));
-        // }
-        // $cfg['DC'] = $dcd;
+        foreach ($boolProperties as $property) {
+            if (isset($cfg[$property])) {
+                $cfg[$property] = in_array($cfg[$property], array('true', true, 'y', 1, '1'), true);
+            }
+        }
+        //end of transform boolean properties to boolean
 
         // detect core plugins (use defined or default if set)
         $plugins = array();

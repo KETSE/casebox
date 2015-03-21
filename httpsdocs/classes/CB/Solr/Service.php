@@ -103,6 +103,13 @@ class Service
         return $this->solr_handler;
     }
 
+    public function reconnect()
+    {
+        unset($this->solr_handler);
+
+        return $this->connect();
+    }
+
     protected function fireEvent($eventName, &$params)
     {
         if ($this->fireEvents) {
