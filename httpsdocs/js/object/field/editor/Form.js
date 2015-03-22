@@ -61,6 +61,7 @@ Ext.define('CB.object.field.editor.Form', {
             ,refOwner: this
             ,store: this.store
             ,getProperty: this.getProperty.bind(this)
+            ,saveGridState: Ext.emptyFn
 
             ,selModel: {
                 selType: 'checkboxmodel'
@@ -88,7 +89,7 @@ Ext.define('CB.object.field.editor.Form', {
                     xtype: 'panel'
                     ,region: 'center'
                     ,layout: 'border'
-                    ,bodyCls: 'x-panel-white'
+                    ,cls: 'x-panel-white'
                     ,items: [
                         {
                             xtype: 'panel'
@@ -157,6 +158,8 @@ Ext.define('CB.object.field.editor.Form', {
             ]
         });
         this.callParent(arguments);
+
+        this.gridView.addCls('view-loading');
 
         this.store.on('load', this.onLoad, this);
 
@@ -417,6 +420,8 @@ Ext.define('CB.object.field.editor.Form', {
             }
         }
         // this.triggerField.setValue(options.params.query);
+
+        this.gridView.removeCls('view-loading');
     }
 
     ,onShowSelectionClick: function(b, e) {

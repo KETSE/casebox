@@ -9,10 +9,10 @@ Ext.define('CB.object.view.Properties', {
         var rez = {
             tbar: {}
             ,menu: {
-                reload: {}
-                ,rename: {addDivider: 'top'}
-                ,'delete': {addDivider: 'top'}
-                ,permissions: {addDivider: 'top'}
+                reload: {order: 12, addDivider: 'top'}
+                ,rename: {order: 13}
+                ,permissions: {order: 14}
+                ,'delete': {order: 20, addDivider: 'top'}
             }
         };
 
@@ -65,6 +65,28 @@ Ext.define('CB.object.view.Properties', {
             }
             ,this
         );
+
+        // sort menu elements by order property
+        var a = []
+            ,sortedMenu = {};
+
+        Ext.iterate(
+            rez.menu
+            ,function(k, v, o) {
+                var order = Ext.valueFrom(v.order, 0);
+                if(!Ext.isDefined(a[order])) {
+                    a[order] = {};
+                }
+                a[order][k] = v;
+            }
+            ,this
+        );
+
+        for (var i = 0; i < a.length; i++) {
+            Ext.apply(sortedMenu, a[i]);
+        }
+
+        rez.menu = sortedMenu;
 
         return rez;
     }

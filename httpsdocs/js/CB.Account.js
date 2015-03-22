@@ -131,7 +131,7 @@ Ext.define('CB.ProfileForm', {
 
     ,border: false
     ,fileUpload: true
-    ,autoScroll: true
+    ,scrollable: true
     ,bodyPadding: 10
     ,data: {}
     ,initComponent: function(){
@@ -487,7 +487,7 @@ Ext.define('CB.SecurityForm', {
     ,alias: 'widget.CBSecurityForm'
 
     ,border: false
-    ,autoScroll: true
+    ,scrollable: true
 
     ,initComponent: function(){
 
@@ -872,7 +872,7 @@ Ext.define('CB.SecurityForm', {
     ,disableTSV: function(){
         Ext.Msg.show({
             title: L.Confirm
-            ,message: 'Are you sure you want to disable ' + L.TSV
+            ,message: L.DisableTSVConfirmation
             ,buttons: Ext.Msg.YESNO
             ,icon: Ext.window.MessageBox.INFO
             ,scope: this
@@ -960,6 +960,11 @@ Ext.define('CB.TSVWindow', {
             },{
                 xtype: 'TSVybkForm'
                 ,itemId: 'ybk'
+                ,listeners: {
+                    scope: this
+                    ,loaded: this.onViewLoaded
+                    ,verifyandsave: this.onVerifyAndSave
+                }
             }]
         });
         CB.TSVWindow.superclass.initComponent.apply(this, arguments);

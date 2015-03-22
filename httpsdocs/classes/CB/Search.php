@@ -3,6 +3,7 @@ namespace CB;
 
 use CB\Cache;
 use CB\Util;
+use CB\User;
 
 class Search extends Solr\Client
 {
@@ -51,7 +52,7 @@ class Search extends Solr\Client
 
         $this->rows = isset($p['rows'])
             ? intval($p['rows'])
-            : Config::get('max_rows');
+            : User::getGridMaxRows();
 
         $this->start = empty($p['start'])
             ? (empty($p['page'])
@@ -129,6 +130,11 @@ class Search extends Solr\Client
             $sort = array('order' => 'asc');
 
             if (isset($p['sort'])) {
+                //clear sorting array if sorting not empty
+                if (!empty($p['sort'])) {
+                    $sort = array();
+                }
+
                 if (!is_array($p['sort'])) {
                     $sort[$p['sort']] = empty($p['dir'])
                         ? 'asc'

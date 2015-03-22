@@ -14,25 +14,43 @@ if (!$cd['success']) {
     exit(1);
 }
 
-$last_action_sql = 'UPDATE crons
-SET last_action = CURRENT_TIMESTAMP
-WHERE cron_id = $1';
+$last_action_sql =
+    'UPDATE crons
+    SET last_action = CURRENT_TIMESTAMP
+    WHERE cron_id = $1';
 
 $solr = new Solr\Client;
 
 try {
-    if (@$argv[2] == 'all') {
-        echo "deleting all\n";
-        $solr->deleteByQuery('*:*');
+    $all = !empty($scriptOptions['all']);
+    $nolimit = !empty($scriptOptions['nolimit']);
+
+    if ($all) {
+        //mark all tree nodes as updated
+        DB\dbQuery('UPDATE tree SET updated = 1', $cron_id) or die('error updating tree nodes');
+
         DB\dbQuery($last_action_sql, $cron_id) or die('error updating crons last action');
+
         echo "updating tree\n";
-        $solr->updateTree(array( 'all' => true, 'cron_id' => $cron_id));
+        $solr->updateTree(
+            array(
+                'all' => true
+                ,'cron_id' => $cron_id
+                ,'nolimit' => $nolimit
+            )
+        );
         DB\dbQuery($last_action_sql, $cron_id) or die('error updating crons last action');
+
         echo "optimizing\n";
         $solr->optimize();
         DB\dbQuery($last_action_sql, $cron_id) or die('error updating crons last action');
     } else {
-        $solr->updateTree();
+        $solr->updateTree(
+            array(
+                'cron_id' => $cron_id
+                ,'nolimit' => $nolimit
+            )
+        );
     }
 
 } catch (\Exception $e) {

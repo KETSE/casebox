@@ -18,17 +18,27 @@ Ext.define('CB.plugin.DisplayColumns', {
         this.owner = owner;
         this.grid = owner.grid;
         this.store = owner.grid.store;
-        // this.cm = owner.grid.getColumnModel();
+
         this.defaultColumns = owner.grid.defaultColumns;
         this.reader = this.store.proxy.reader;
         this.model = this.store.getModel();
         this.defaultFieldNames = this.extractFieldNames(this.model.fields);
         this.proxy = this.store.proxy;
+
         this.store.on('load', this.onStoreLoad, this);
+        this.store.on('load', this.clearDisableStateSaveFlag, this, {defer: 1000});
     }
 
     ,onStoreLoad: function(store, records, successful, eOpts) {//proxy, obj, options
+        //dont do anything if view not visible
+        if(this.owner.getEl().isVisible(true) !== true) {
+            return;
+        }
+
         var rez = store.proxy.reader.rawData;
+
+        //set flag to avoid saving grid state while restoring remote config
+        this.grid.disableStateSave = true;
 
         if(!Ext.isEmpty(rez.sort)) {// && Ext.isEmpty(this.store.sortInfo)
             var sorters = this.store.getSorters();
@@ -51,8 +61,52 @@ Ext.define('CB.plugin.DisplayColumns', {
             var nc = this.getNewColumns();
             this.grid.reconfigure(null, nc);
         }
+
+        //restore or disable grouping state
+        var groupFeature = this.grid.view.features[0];
+        if(!Ext.isEmpty(rez.group) && !Ext.isEmpty(rez.group.property)) {
+            store.remoteSort = false;
+
+            if(groupFeature.disabled) {
+                var menuItem = groupFeature.getMenuItem(rez.group.property);
+                if(Ext.isEmpty(menuItem)) {
+                    menuItem = {
+                        parentMenu: this.grid.view.headerCt.getMenu()
+                    };
+                }
+
+                if(Ext.isEmpty(menuItem.parentMenu.activeHeader)) {
+                    menuItem.parentMenu.activeHeader = this.grid.getVisibleColumnManager().getHeaderByDataIndex(rez.group.property);
+                }
+
+                groupFeature.onGroupMenuItemClick(menuItem, eOpts);
+            }
+
+            var groupDir = Ext.valueFrom(rez.group.direction, 'ASC');
+            if(store.getGroupDir != groupDir) {
+                store.group(rez.group.property, groupDir);
+            }
+
+        } else if(Ext.isEmpty(rez.group) && !groupFeature.disabled) {
+            store.remoteSort = false;
+            groupFeature.disable();
+        }
     }
 
+    /**
+     * disableStateSave flag is set during state restore received from server
+     * It should be removed at the end of the process
+     * @return void
+     */
+    ,clearDisableStateSaveFlag: function() {
+        delete this.grid.disableStateSave;
+        this.store.remoteSort = true;
+    }
+
+    /**
+     * get new fields metadata for the store by analyzing DC config received from server
+     * @return array
+     */
     ,getNewMetadata: function(){
         var i
             ,key
@@ -95,6 +149,10 @@ Ext.define('CB.plugin.DisplayColumns', {
         return rez;
     }
 
+    /**
+     * get new collumns config for the grid panel
+     * @return array
+     */
     ,getNewColumns: function(){
         var rez = Ext.apply([], this.defaultColumns);
         var currentColumns = Ext.apply({}, this.currentColumns);
@@ -171,6 +229,11 @@ Ext.define('CB.plugin.DisplayColumns', {
         return rez;
     }
 
+    /**
+     * extract field names array from a fields config array
+     * @param  array fieldsArray
+     * @return array
+     */
     ,extractFieldNames: function(fieldsArray){
         var rez = [];
         Ext.each(

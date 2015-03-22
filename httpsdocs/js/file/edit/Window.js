@@ -55,6 +55,15 @@ Ext.define('CB.file.edit.Window', {
             ,this.downloadSeparator
             ,this.actions.download
             ,'->'
+            ,new Ext.Button({
+                qtip: L.More
+                ,itemId: 'more'
+                ,arrowVisible: false
+                ,iconCls: 'i-points'
+                ,menu: [
+                    this.actions['delete']
+                ]
+            })
             ,this.actions.showInfoPanel
         ];
     }
@@ -66,8 +75,21 @@ Ext.define('CB.file.edit.Window', {
     ,initContainerItems: function() {
         this.callParent(arguments);
 
-        // this.gridContainer.title = 'text';
-        // this.gridContainer.header = true;
+        // add title for gird container in edit mode
+        this.gridContainer.cls = 'obj-plugin';
+        this.gridContainer.addDocked(
+            [{
+                xtype: 'toolbar'
+                ,hidden: true
+                ,border: false
+                ,items: [{
+                    xtype: 'label'
+                    ,cls: 'title'
+                    ,text: L.Metadata
+                }]
+            }]
+            ,'top'
+        );
 
         Ext.destroy(this.complexFieldContainer);
 
@@ -81,6 +103,13 @@ Ext.define('CB.file.edit.Window', {
             }
             ,items: []
         });
+
+        Ext.override(
+            this.pluginsContainer
+            ,{
+                onLoadData: this.onPluginContainerLoadData
+            }
+        );
     }
 
     /**
@@ -94,21 +123,21 @@ Ext.define('CB.file.edit.Window', {
             {
                 region: 'center'
                 ,border: false
-                ,autoScroll: true
+                ,scrollable: true
                 ,layout: {
                     type: 'vbox'
                     ,align: 'stretch'
                 }
                 ,items: [
-                    // this.titleContainer
-                    this.complexFieldContainer
+                    this.titleContainer
+                    ,this.complexFieldContainer
                 ]
             }, {
                 region: 'east'
                 ,itemId: 'infoPanel'
                 ,header: false
                 ,border: false
-                ,autoScroll: true
+                ,scrollable: true
                 ,layout: {
                     type: 'vbox'
                     ,align: 'stretch'
@@ -136,11 +165,11 @@ Ext.define('CB.file.edit.Window', {
     ,processLoadPreviewData: function(r, e) {
         this.callParent(arguments);
 
-        var autoScroll = (getFileExtension(this.data.name) !== 'pdf');
+        var scrollable = (getFileExtension(this.data.name) !== 'pdf');
 
         this.previewPanel = new CB.object.view.Preview({
             border: false
-            ,autoScroll: autoScroll
+            ,scrollable: scrollable
             ,bodyStyle: 'padding: 5px'
         });
 
@@ -151,6 +180,15 @@ Ext.define('CB.file.edit.Window', {
         );
 
         this.previewPanel.loadPreview(this.data.id, this.loadedVersionId);
+    }
+
+    /**
+     * method for processing server data on editing item
+     * @return void
+     */
+    ,processLoadEditData: function(r, e) {
+        this.gridContainer.getDockedComponent(0).setHidden(false);
+        this.callParent(arguments);
     }
 
     ,updateComplexFieldContainer: function() {
@@ -194,6 +232,15 @@ Ext.define('CB.file.edit.Window', {
         if(this.contentEditor) {
             this.contentEditor.setValue(r.data);
         }
+    }
+
+    ,onPluginContainerLoadData: function(r, e) {
+        var w = this.up('window');
+        if(w && w.viewMode == 'edit') {
+            delete r.data.meta;
+        }
+
+        this.callParent(arguments);
     }
 
     ,updateButtons: function() {

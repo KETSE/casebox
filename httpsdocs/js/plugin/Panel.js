@@ -12,7 +12,7 @@ Ext.define('CB.plugin.Panel', {
     ,alias: 'CBPluginPanel'
 
     ,autoHeight: true
-    ,autoScroll: true
+    ,scrollable: true
     ,padding:0
 
     ,initComponent: function(){
@@ -76,6 +76,13 @@ Ext.define('CB.plugin.Panel', {
 
     ,onLoadData: function(r, e) {
         var items = [];
+
+        //check if object was found (success = true)
+        if(r.success !== true) {
+            this.update('<div class="x-preview-mask">' + L.RecordIdNotFound.replace('{id}', '#' + this.loadedParams.id) + '</div>');
+            return;
+        }
+
         this.removeAll(true);
 
         this.createMenu = r.menu;
@@ -148,7 +155,7 @@ Ext.define('CB.plugin.Panel', {
     }
 
     ,onObjectsAction: function(action, data, e) {
-        if(data.targetId == this.loadedParams.id) {
+        if(this.loadedParams && (data.targetId == this.loadedParams.id)) {
             this.reload();
         }
     }

@@ -14,7 +14,16 @@ Ext.define('CB.browser.ViewContainer', {
         descendants: false
     }
 
+    ,defaultToolbarItems: [
+        '->'
+        ,'reload'
+        ,'apps'
+        ,'-'
+        ,'more'
+    ]
+
     ,initComponent: function(){
+        var pageSize = Ext.valueFrom(App.loginData.cfg.max_rows, 50);
         this.instanceId = Ext.id();
 
         this.actions = {
@@ -150,7 +159,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,restore: new Ext.Action({
                 text: L.Restore
                 ,itemId: 'restore'
-                ,iconCls: 'ib-restore'
+                ,iconCls: 'im-restore'
                 ,scale: 'medium'
                 ,hidden: true
                 ,disabled: true
@@ -181,7 +190,41 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.tbarMoreMenu = new Ext.menu.Menu({
             items: [
-                this.actions.contextExport
+                {
+                    text: L.Rows
+                    ,menu: [
+                        {
+                            xtype: 'menucheckitem'
+                            ,text: 25
+                            ,group: 'gvrc' //grid view row count
+                            ,checked: (pageSize == 25)
+                            ,scope: this
+                            ,handler: this.onRowCountChangeClick
+                        },{
+                            xtype: 'menucheckitem'
+                            ,text: 50
+                            ,group: 'gvrc'
+                            ,checked: (pageSize == 50)
+                            ,scope: this
+                            ,handler: this.onRowCountChangeClick
+                        },{
+                            xtype: 'menucheckitem'
+                            ,text: 100
+                            ,group: 'gvrc'
+                            ,checked: (pageSize == 100)
+                            ,scope: this
+                            ,handler: this.onRowCountChangeClick
+                        },{
+                            xtype: 'menucheckitem'
+                            ,text: 200
+                            ,group: 'gvrc'
+                            ,checked: (pageSize == 200)
+                            ,scope: this
+                            ,handler: this.onRowCountChangeClick
+                        }
+                    ]
+                }
+                ,this.actions.contextExport
             ]
         });
 
@@ -276,6 +319,7 @@ Ext.define('CB.browser.ViewContainer', {
             ,split: {
                 size: 2
                 ,collapsible: false
+                ,style: 'background-color: #dfe8f6'
             }
             ,collapsible: true
             ,collapseMode: 'mini'
@@ -290,7 +334,7 @@ Ext.define('CB.browser.ViewContainer', {
                 ,expand: function() {
                     this.actions.preview.setDisabled(true);
                     this.actions.preview.setHidden(true);
-                    this.updatePreview();
+                    // this.updatePreview();
                 }
                 ,collapse: function() {
                     this.actions.preview.setDisabled(false);
@@ -301,13 +345,14 @@ Ext.define('CB.browser.ViewContainer', {
             ,onCloseClick: Ext.Function.bind(this.onCloseRightPanelClick, this)
         });
 
+
         this.store = new Ext.data.DirectStore({
             autoLoad: false
             ,autoDestroy: true
             ,remoteSort: true
             ,sortOnLoad: false
             ,extraParams: {}
-            ,pageSize: 50
+            ,pageSize: pageSize
             ,model: 'Items'
             ,proxy: new  Ext.data.DirectProxy({
                 paramsAsHash: true
@@ -327,11 +372,11 @@ Ext.define('CB.browser.ViewContainer', {
 
                 store.currentPage = page;
 
-                // Copy options into a new object so as not to mutate passed in objects
+                // Clon options
                 options = Ext.apply({
                     page: page,
                     start: (page - 1) * size,
-                    limit: size,
+                    rows: size,
                 }, options);
 
                 this.changeSomeParams(options);
@@ -339,34 +384,7 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,listeners: {
                 scope: this
-                ,beforeload: function(store, operation, eOpts) {
-                    var options = {facets: 'general'};
-
-                    Ext.apply(options, Ext.valueFrom(this.params, {}));
-
-                    //dont load calendar view when view bound are not set
-                    var vp = this.cardContainer.getLayout().activeItem.getViewParams(options);
-                    if( (vp === false) ||
-                        (
-                            !Ext.isEmpty(vp) && (vp.from == 'calendar') &&
-                            (Ext.isEmpty(vp.dateStart) || Ext.isEmpty(vp.dateEnd))
-                        )
-                    ) {
-                        return false;
-                    }
-
-                    Ext.apply(options, vp);
-
-                    //reset userViewSet flag if loaded id changed
-                    if(store.proxy.extraParams.id != options.id) {
-                        delete this.userViewSet;
-                    } else if(this.userViewSet) {
-                        options.userViewChange = true;
-                    }
-
-                    store.proxy.extraParams = options;
-                    store.currentPage = Ext.valueFrom(options.page, 1);
-                }
+                ,beforeload: this.onBeforeStoreLoad
                 ,load: this.onStoreLoad
             }
         });
@@ -440,8 +458,7 @@ Ext.define('CB.browser.ViewContainer', {
         App.fireEvent('browserinit', this);
 
         Ext.apply(this, {
-            bodyCls: 'x-panel-white'
-
+            cls: 'x-panel-white'
             ,items: [{
                 layout: 'border'
                 ,border: false
@@ -454,12 +471,21 @@ Ext.define('CB.browser.ViewContainer', {
 
             ,listeners: {
                 scope: this
-                ,changeparams: this.changeSomeParams
-                ,settoolbaritems: this.onSetToolbarItems
-                ,reload: this.onReloadClick
-                ,activate: function() {
-                    this.updatePreview();
+
+                ,render: function() {
+                    this.onSetToolbarItems(null);
                 }
+
+                ,changeparams: this.changeSomeParams
+
+                ,settoolbaritems: this.onSetToolbarItems
+
+                ,reload: this.onReloadClick
+
+                // ,activate: function() {
+                //     this.updatePreview();
+                // }
+
                 ,itemcontextmenu: this.onItemContextMenu
             }
         });
@@ -499,11 +525,20 @@ Ext.define('CB.browser.ViewContainer', {
         return null;
     }
 
+    /**
+     * set tollbar items
+     * @param  array|null buttonsArray array of button ids, separator or spacer.
+     *                                 Set to null to just hide all buttons in toolbar.
+     * @return void
+     */
     ,onSetToolbarItems: function(buttonsArray) {
         if(!this.getEl().isVisible(true)) {
             return;
         }
         var i, b;
+
+        //suspend toolbar layout
+        this.viewToolbar.suspendLayout = true;
 
         //hide all buttons and remove separators
         while(this.viewToolbar.items.getCount() > 0) {
@@ -512,6 +547,9 @@ Ext.define('CB.browser.ViewContainer', {
             this.viewToolbar.remove(b, b.isXType('tbseparator'));
         }
 
+        if(buttonsArray === null) {
+            buttonsArray = this.defaultToolbarItems;
+        }
         //add more button
         if(buttonsArray.indexOf('more') < 0) {
             buttonsArray.push('more');
@@ -552,16 +590,27 @@ Ext.define('CB.browser.ViewContainer', {
                 }
             }
         }
+
+        this.updateToolbarButtons();
+        this.viewToolbar.hideInutilSeparators();
+
+        //resume toolbar layout
+        this.viewToolbar.suspendLayout = false;
+
         this.viewToolbar.doLayout();
     }
 
     ,onCardItemChangeClick: function(b, e) {
         delete this.params.view;
 
+        this.onSetToolbarItems(null);
+
         this.setActiveView(b.viewIndex);
 
         //set a flag that user have set the view and dont change the view on store load
         this.userViewSet = true;
+
+        this.store.removeAll();
 
         this.onReloadClick();
     }
@@ -570,7 +619,7 @@ Ext.define('CB.browser.ViewContainer', {
         if(Ext.isEmpty(this.reloadTask)) {
             this.reloadTask = new Ext.util.DelayedTask(this.reloadView, this);
         }
-        this.reloadTask.delay(500);
+        this.reloadTask.delay(100);
     }
 
     /**
@@ -660,9 +709,11 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.updateCreateMenuItems(this.buttonCollection.get('create'));
 
+        this.updateToolbarButtons();
+
         var showPreviewButton = (
                 (this.objectPanel.getCollapsed() !== false) &&
-                (this.cardContainer.getLayout().activeItem.showObjectPropertiesPanel ===true)
+                (this.cardContainer.getLayout().activeItem.showObjectPropertiesPanel === true)
             )
             ,pa = this.actions.preview;
 
@@ -672,14 +723,46 @@ Ext.define('CB.browser.ViewContainer', {
         if(App.mainFilterPanel) {
             App.mainFilterPanel.updateFacets(result.facets, ep);
         }
+    }
 
-        if(Ext.isEmpty(App.locateObjectId)) {
-            this.updatePreview();
+    ,onBeforeStoreLoad: function(store, operation, eOpts) {
+        var options = {facets: 'general'};
+
+        Ext.apply(options, Ext.valueFrom(this.params, {}));
+
+        //dont load calendar view when view bound are not set
+        var vp = this.cardContainer.getLayout().activeItem.getViewParams(options);
+        if( (vp === false) ||
+            (
+                !Ext.isEmpty(vp) && (vp.from == 'calendar') &&
+                (Ext.isEmpty(vp.dateStart) || Ext.isEmpty(vp.dateEnd))
+            )
+        ) {
+            return false;
         }
+
+        Ext.apply(options, vp);
+
+        //reset userViewSet flag if loaded id changed
+        if(store.proxy.extraParams.id != options.id) {
+            delete this.userViewSet;
+
+            //delete also calendar view bounds
+            delete options.dateStart;
+            delete options.dateEnd;
+
+        } else if(this.userViewSet) {
+            options.userViewChange = true;
+        }
+
+        store.proxy.extraParams = options;
+        store.currentPage = Ext.valueFrom(options.page, 1);
     }
 
     ,onStoreLoad: function(store, recs, options) {
         this.getEl().unmask();
+
+        delete this.params.setMaxRows;
 
         //update interface according to loaded params
         this.processLoadedParams();
@@ -771,22 +854,9 @@ Ext.define('CB.browser.ViewContainer', {
 
         this.loadParamsTask.cancel();
 
-        if(!Ext.isEmpty(App.locateObjectId)) {
-            this.updatePreview({
-                id: App.locateObjectId
-            });
-
-            if(sameParams) {
-                return;
-            }
-        } else if(sameParams) {
-            this.updatePreview(newParams);
-            return;
-        }
-
         this.requestParams = newParams;
 
-        this.loadParamsTask.delay(200);
+        this.loadParamsTask.delay(100);
     }
 
     ,loadParams: function(){
@@ -795,7 +865,6 @@ Ext.define('CB.browser.ViewContainer', {
         }
 
         this.params = Ext.apply({}, this.requestParams);
-
         this.reloadView();
     }
 
@@ -809,41 +878,39 @@ Ext.define('CB.browser.ViewContainer', {
         menuButton.setDisabled(menuButton.menu.items.getCount() < 1);
     }
 
-    /**
-     * return current vew selection
-     * @return array | null
-     */
-    ,getSelection: function() {
-        return this.cardContainer.getLayout().activeItem.currentSelection;
-    }
-
-    ,onDescendantsClick: function(b, e) {
-        this.changeSomeParams({
-            descendants: b.pressed
-            ,start: 0
-        });
-    }
-
-    ,onObjectsSelectionChange: function(objectsDataArray){
-        this.cardContainer.getLayout().activeItem.currentSelection = objectsDataArray;
-
-        var acceptChildren = CB.DB.templates.acceptChildren(this.folderProperties.template_id)
+    ,updateToolbarButtons: function() {
+        var ai = this.cardContainer.getLayout().activeItem
+            ,selection = ai.getSelectedItems
+                ? ai.getSelectedItems()
+                : []
+            ,fp = Ext.valueFrom(this.folderProperties, {})
+            ,acceptChildren = CB.DB.templates.acceptChildren(fp.template_id)
             ,inRecycleBin = this.inRecycleBin()
-            ,inGridView = this.cardContainer.getLayout().activeItem.isXType('CBBrowserViewGrid');
+            ,inGridView = ai.isXType('CBBrowserViewGrid')
+            ,inSearchMode = !Ext.isEmpty(this.params.query);
 
         this.actions.restore.setHidden(!inRecycleBin || !inGridView);
-        this.actions.restore.setDisabled(!inRecycleBin || !inGridView || Ext.isEmpty(objectsDataArray));
+        this.actions.restore.setDisabled(!inRecycleBin || !inGridView || Ext.isEmpty(selection));
 
-        this.actions.upload.setHidden(!acceptChildren || inRecycleBin || !inGridView);
+        this.actions.upload.setHidden(
+            !acceptChildren ||
+            inRecycleBin ||
+            !inGridView ||
+            inSearchMode
+        );
         this.buttonCollection.get(
             'create'
+        ).setVisible(!inRecycleBin && inGridView);
+
+        this.buttonCollection.get(
+            'edit'
         ).setVisible(!inRecycleBin && inGridView);
 
         this.buttonCollection.get(
             'more'
         ).setVisible(inGridView);
 
-        if(Ext.isEmpty(objectsDataArray)) {
+        if(Ext.isEmpty(selection)) {
             this.actions.cut.setDisabled(true);
             this.actions.copy.setDisabled(true);
             this.actions.takeOwnership.setDisabled(true);
@@ -859,16 +926,16 @@ Ext.define('CB.browser.ViewContainer', {
 
             this.actions.restore.setDisabled(true);
             this.actions.restore.hide();
-            this.actions.permissions.setDisabled(isNaN(this.folderProperties.id));
+            this.actions.permissions.setDisabled(isNaN(fp.id));
         } else {
-            var firstObjId = Ext.valueFrom(objectsDataArray[0].nid, objectsDataArray[0].id);
+            var firstObjId = Ext.valueFrom(selection[0].nid, selection[0].id);
 
             this.actions.cut.setDisabled(false);
             this.actions.copy.setDisabled(false);
 
             var canDownload = true;
-            for (var i = 0; i < objectsDataArray.length; i++) {
-                if(CB.DB.templates.getType(objectsDataArray[i].template_id) !== 'file') {
+            for (var i = 0; i < selection.length; i++) {
+                if(CB.DB.templates.getType(selection[i].template_id) !== 'file') {
                     canDownload = false;
                 }
             }
@@ -894,7 +961,36 @@ Ext.define('CB.browser.ViewContainer', {
             this.actions.permissions.setDisabled(isNaN(firstObjId));
         }
 
-        this.updatePreview();
+        this.viewToolbar.hideInutilSeparators();
+    }
+
+    ,onRowCountChangeClick: function(b, e) {
+        // b.setChecked(true);
+
+        this.params.setMaxRows = true;
+        this.params.rows = b.text;
+        this.store.setPageSize(b.text);
+        this.store.reload();
+    }
+
+    /**
+     * return current vew selection
+     * @return array | null
+     */
+    ,getSelection: function() {
+        return this.cardContainer.getLayout().activeItem.currentSelection;
+    }
+
+    ,onDescendantsClick: function(b, e) {
+        this.changeSomeParams({
+            descendants: b.pressed
+            ,start: 0
+        });
+    }
+
+    ,onObjectsSelectionChange: function(objectsDataArray){
+        this.cardContainer.getLayout().activeItem.currentSelection = objectsDataArray;
+        this.updateToolbarButtons();
     }
 
     /**
@@ -903,33 +999,6 @@ Ext.define('CB.browser.ViewContainer', {
      */
     ,inRecycleBin: function() {
         return (String(Ext.valueFrom(this.folderProperties, {}).path).indexOf('-recycleBin') > -1);
-    }
-
-    ,updatePreview: function(customParams) {
-        if(Ext.isEmpty(this.folderProperties)) {
-            return;
-        }
-        var data = customParams;
-
-        //if custom params are empty then try to load current view selection
-        //or the currently opened object
-        if(Ext.isEmpty(data)) {
-            var s = this.cardContainer.getLayout().activeItem.currentSelection;
-            data = Ext.isEmpty(s)
-                ? {
-                    id: this.folderProperties.id
-                    ,name: this.folderProperties.name
-                    ,template_id: this.folderProperties.template_id
-                }
-                : {
-                    id: Ext.valueFrom(s[0].target_id, s[0].nid, s[0].id)
-                    ,name: s[0].name
-                    ,template_id: s[0].template_id
-                    ,can: s[0].can
-                };
-        }
-
-        this.objectPanel.load(data);
     }
 
     ,editObject: function(objectData) {
@@ -1024,38 +1093,22 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,onDeleteClick: function(b, e) {
         var selection = this.cardContainer.getLayout().activeItem.currentSelection;
+
         if(Ext.isEmpty(selection)) {
             return;
         }
-        Ext.Msg.confirm(
-            L.DeleteConfirmation
-            ,(selection.length == 1)
-                ? L.DeleteConfirmationMessage + ' "' + selection[0].name + '"?'
-                : L.DeleteSelectedConfirmationMessage
-            ,this.onDelete
+
+        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
+
+        CB.browser.Actions.deleteSelection(
+            selection
+            ,this.processDelete
             ,this
         );
     }
 
-    ,onDelete: function (btn) {
-        if(btn !== 'yes') {
-            return;
-        }
-        var selection = this.cardContainer.getLayout().activeItem.currentSelection;
-        if(Ext.isEmpty(selection)) {
-            return;
-        }
-        this.getEl().mask(L.Processing + ' ...', 'x-mask-loading');
-        var ids = [];
-        for (var i = 0; i < selection.length; i++) {
-            ids.push(selection[i].nid);
-        }
-        CB_BrowserView['delete'](ids, this.processDelete, this);
-    }
-
     ,processDelete: function(r, e){
         this.getEl().unmask();
-        App.mainViewPort.fireEvent('objectsdeleted', r.ids, e);
     }
 
     ,onObjectsDeleted: function(ids, e) {
@@ -1166,11 +1219,13 @@ Ext.define('CB.browser.ViewContainer', {
         this.actions.paste.setDisabled( App.clipboard.isEmpty() );
         this.actions.pasteShortcut.setDisabled( App.clipboard.isEmpty() );
     }
+
     ,onClipboardAction: function(pids){
         if(pids.indexOf(this.folderProperties.id) >=0 ) {
             this.onReloadClick();
         }
     }
+
     ,onObjectChanged: function(objData, component){
         var idx = this.store.findExact('nid', String(objData.id));
 
@@ -1179,10 +1234,11 @@ Ext.define('CB.browser.ViewContainer', {
             isNaN(this.folderProperties.id) || // virtual folders
             (objData.pid == this.folderProperties.id)
         ) {
-            App.locateObjectId = objData.id;
+            // App.locateObject(objData);
             this.onReloadClick();
         }
     }
+
     ,onObjectsAction: function(action, r, e){
         if(Ext.isEmpty(r.processedIds)) {
             return;

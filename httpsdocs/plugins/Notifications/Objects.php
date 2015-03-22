@@ -41,7 +41,7 @@ class Objects
             $notifyData = array(
                 'sender' => $sender
                 ,'subject' => $subject
-                ,'body' => 'Item <a href="' . $coreUrl . 'v-' . $id . '">' . $data['name'] . ' suffered following action: ' . $p['type'] . '.'
+                ,'body' => 'Item <a href="' . $coreUrl . 'view/' . $id . '/">' . $data['name'] . ' suffered following action: ' . $p['type'] . '.'
             );
 
             // insert notification into myslq
@@ -85,11 +85,11 @@ class Objects
     {
         $coreName = Config::get('core_name');
 
-        $commentsConfig = Config::get('comments_config');
+        $commentsEmail = Config::get('comments_email');
 
-        $senderMail = empty($commentsConfig['email'])
+        $senderMail = empty($commentsEmail)
             ? Config::get('sender_email')
-            : $commentsConfig['email'];
+            : $commentsEmail;
 
         $rez = '"' .
             mb_encode_mimeheader(

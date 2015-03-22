@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\Util;
+
 class Objects
 {
     /**
@@ -453,7 +455,6 @@ class Objects
             $object_record['comment_date'] = $objData['sys_data']['lastComment']['date'];
         }
 
-
         $field = array();
         foreach ($linearData as $f) {
             if (is_object($template)) {
@@ -476,7 +477,9 @@ class Objects
                                 $f['value'] .= 'T00:00:00';
                             }
 
-                            $f['value'] .= 'Z';
+                            if (substr($f['value'], -1) != 'Z') {
+                                $f['value'] .= 'Z';
+                            }
 
                             if (@$f['value'][10] == ' ') {
                                 $f['value'][10] = 'T';
@@ -904,6 +907,47 @@ class Objects
     }
 
     /**
+     * get basic info for a given object id
+     * @param  int  $id
+     * @return json responce
+     */
+    public static function getBasicInfoForId($id)
+    {
+        $rez = array(
+            'success' => false
+            ,'id' => $id
+            ,'data' => array()
+        );
+
+        if (empty($id) || !is_numeric($id)) {
+            return $rez;
+        }
+
+        $res = DB\dbQuery(
+            'SELECT t.id
+                ,t.name
+                ,t.`system`
+                ,t.`type`
+                ,ti.pids
+                ,t.`template_id`
+                ,tt.`type` template_type
+            FROM tree t
+            JOIN tree_info ti on t.id = ti.id
+            LEFT JOIN templates tt ON t.template_id = tt.id
+            WHERE t.id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez['success'] = true;
+            $rez['data'] = $r;
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
      * get a child node id by its name under specified $pid
      * @param  int      $id
      * @param  varchar  $name
@@ -956,6 +1000,10 @@ class Objects
         }
 
         if (is_numeric($id)) {
+            if (!$this->idExists($id)) {
+                return $rez;
+            }
+
             if (!Security::canRead($id)) {
                 throw new \Exception(L\get('Access_denied'));
             }
@@ -988,10 +1036,19 @@ class Objects
             : $p['from'];
 
         if (!empty($from)) {
-            if (!empty($templateData['cfg']['object_plugins'][$from])) {
-                $objectPlugins = $templateData['cfg']['object_plugins'][$from];
-            } else {
-                $objectPlugins = Config::getObjectTypePluginsConfig(@$templateData['type'], $from);
+            if (isset($templateData['cfg']['object_plugins'])) {
+                $op = $templateData['cfg']['object_plugins'];
+
+                if (!empty($op[$from])) {
+                    $objectPlugins = $op[$from];
+                } else {
+                    //check if config has only numeric keys, i.e. plugins specified directly (without a category)
+                    if (!Util\isAssocArray($op)) {
+                        $objectPlugins = $op;
+                    } else {
+                        $objectPlugins = Config::getObjectTypePluginsConfig(@$templateData['type'], $from);
+                    }
+                }
             }
         }
 
@@ -999,7 +1056,7 @@ class Objects
             if (!empty($templateData['cfg']['object_plugins'])) {
                 $objectPlugins = $templateData['cfg']['object_plugins'];
             } else {
-                $objectPlugins = Config::getObjectTypePluginsConfig($templateData['type']);
+                $objectPlugins = Config::getObjectTypePluginsConfig($templateData['type'], $from);
             }
         }
 
@@ -1082,7 +1139,7 @@ class Objects
     {
         $rez = array('success' => false);
 
-        if (empty($p['id']) || !is_numeric($p['id']) || empty($p['msg'])) {
+        if (empty($p['id']) || !is_numeric($p['id']) || empty($p['text'])) {
             $rez['msg'] = L\get('Wrong_input_data');
 
             return $rez;
@@ -1091,7 +1148,7 @@ class Objects
         $comment = static::getCustomClassByObjectId($p['id']);
         $commentData = $comment->load();
         if ($commentData['cid'] == $_SESSION['user']['id']) {
-            $commentData['data']['_title'] = $p['msg'];
+            $commentData['data']['_title'] = $p['text'];
             $comment->update($commentData);
 
             Solr\Client::runCron();
@@ -1101,6 +1158,7 @@ class Objects
                 ,'data' => array(
                     'id' => $commentData['id']
                     ,'pid' => $commentData['pid']
+                    ,'text' => Objects\Comment::processAndFormatMessage($p['text'])
                 )
             );
 

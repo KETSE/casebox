@@ -684,12 +684,12 @@ td.ext-cal-dtitle-today div {
 /*
  * Calendar event colors
  */
-.ext-cal-evr,
+/*.ext-cal-evr,
 .ext-cal-evi,
 .ext-cal-evt dl {
 	color: #fff;
 }
-
+*/
 .ext-color-1,
 .x-ie .ext-color-1-ad,
 .x-opera .ext-operaLT11.ext-color-1-ad {

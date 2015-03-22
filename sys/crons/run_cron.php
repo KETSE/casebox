@@ -9,52 +9,72 @@ use CB\DB;
  * All crons can be started through this script only.
  * This script will parse input params and start corresponding cron for each requested core.
  *
+ * acceptable common params are:
+ * -n, --name      cron name to run, applicable for run_cron.php
+ * -c, --core      core name or "all"
+ * -a, --all       all records
+ * -l, --nolimit   skip items limit on indexing core
+ * -f, --force     skip other same cron running check*
+ *
  * @author Turcanu Vitalie, 22 april, 2013
  *
  */
 
-if (sizeof($argv) < 3) {
-    die('Not enough parameters specified. Use run_cron.php <cron_name> <core_name>|all ');
+//check script options
+$options = getopt('n:c:alf', array('name', 'core', 'all', 'nolimit', 'force'));
+
+$cronName = empty($options['n'])
+    ? @$options['name']
+    : $options['n'];
+
+if (empty($cronName)) {
+    die('no cron name specified or invalid options set.');
 }
 
-$cron_file = explode('/', $argv[1]);
+$core = empty($options['c'])
+    ? @$options['core']
+    : $options['c'];
+
+if (empty($core)) {
+    die('no core specified or invalid options set.');
+}
+
+$all = isset($options['a']) || isset($options['all']);
+
+$nolimit = isset($options['l']) || isset($options['nolimit']);
+
+$force = isset($options['f']) || isset($options['force']);
+//end of check script options
+
+$cron_file = explode('/', $cronName);
 $cron_file = array_pop($cron_file);
 
 $cron_file = explode('\\', $cron_file);
 $cron_file = 'cron_'.array_pop($cron_file).'.php';
 $cron_path = dirname(__FILE__).DIRECTORY_SEPARATOR;
+$docRootPath = realpath($cron_path.'../../httpsdocs/') . DIRECTORY_SEPARATOR;
 
 if (!file_exists($cron_path.$cron_file)) {
     die('cannot find cron '.$cron_path.$cron_file);
 }
 
-/* update include_path and include global script */
-define('DOC_ROOT', realpath($cron_path.'../../httpsdocs/').DIRECTORY_SEPARATOR);
-set_include_path(
-    DOC_ROOT.'classes'.PATH_SEPARATOR.
-    get_include_path()
-);
-
-include DOC_ROOT.'global.php';
-
-$cfg = \CB\Config::loadConfigFile(DOC_ROOT.'config.ini');
+require_once $docRootPath . 'config_platform.php';
 
 ini_set('max_execution_time', 0);
 
-require_once DOC_ROOT.'lib/DB.php';
 DB\connect($cfg);
 
 $cores = array();
 $res = DB\dbQuery(
     'SELECT name, active
-    FROM casebox.cores
+    FROM ' . PREFIX . '_casebox.cores
     WHERE active <> 0'
 ) or die(DB\dbQueryError());
 
 while ($r = $res->fetch_assoc()) {
     if (empty($argv[2]) ||
-        ($argv[2] == $r['name']) ||
-        (($argv[2] == 'all') && ($r['active'] > 0))
+        ($core == $r['name']) ||
+        (($core == 'all') && ($r['active'] > 0))
     ) {
         $cores[] = $r['name'];
     }
@@ -65,13 +85,23 @@ if (empty($cores)) {
     echo "Core not found or inactive.\n";
 } else {
     foreach ($cores as $core) {
-        // echo "\nProcessing core $core ...";
-        echo shell_exec('php -f '.$cron_path.$cron_file.' '.$core.' '.@$argv[3].' '.@$argv[4]);
-    }
-    // echo "\nDone\n";
-}
+        echo "\nProcessing core $core ...";
 
-function isDebugHost()
-{
-    return true;
+        $cmd = 'php -f '.$cron_path.$cron_file.' -- -c '.$core;
+
+        if ($all) {
+            $cmd .= ' -a';
+        }
+
+        if ($nolimit) {
+            $cmd .= ' -l';
+        }
+
+        if ($force) {
+            $cmd .= ' -f';
+        }
+
+        echo shell_exec($cmd);
+    }
+    echo "\nDone\n";
 }

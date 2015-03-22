@@ -69,14 +69,14 @@ if (!empty($_POST['s']) && !empty($_POST['p']) && !empty($_POST['u'])) {
 $coreUrl = Config::get('core_url');
 
 if (!User::isLoged()) {
-    exit(header('Location: '.$coreUrl.'login.php'));
+    exit(header('Location: '.$coreUrl.'login/'));
 }
 
 if (!empty($_SESSION['redirect']['view'])) {
     $viewId = $_SESSION['redirect']['view'];
     unset($_SESSION['redirect']['view']);
-    header('Location: '.$coreUrl.'v-' . $viewId);
+    header('Location: '.$coreUrl.'view/' . $viewId . '/');
 
 } else {
-    header('Location: '.$coreUrl.'index.php');
+    header('Location: '.$coreUrl);
 }

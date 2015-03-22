@@ -79,7 +79,7 @@ class Comments extends Objects
 
         $subject = '['.$coreName.' #'.$d['id'].'] '.$d['name'].' ('.$path.')';//[$coreName #$nodeId] Comment: $nodeTitle ($nodePath)
 
-        $body  = '<h3><a href="' . $coreUrl . 'v-' . $objData['pid'] . '/">' . \CB\Objects::getName($objData['pid']) . '</a></h3>'.
+        $body  = '<h3><a href="' . $coreUrl . 'view/' . $objData['pid'] . '/">' . \CB\Objects::getName($objData['pid']) . '</a></h3>'.
             $message.
             '<br /><hr />'.
             'To add a comment, reply to this email.<br />

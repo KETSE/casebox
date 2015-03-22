@@ -39,6 +39,9 @@
 .bgcW{ background-color: #FFF !important }
 .bgcY{ background-color: #FFFF88 !important } /*Interactive action yellow*/
 .bgcLR{ background-color: #FFCCCC !important }
+
+.bgpLT{ background-position: 0 2px}
+
 .p2{ padding: 2px }
 .p5{ padding: 5px }
 .p10{ padding: 10px }
@@ -286,7 +289,7 @@ a.file{min-height: 16px; display: inline-block}
 .i32{width: 32px; height: 32px}
 .bgs32{background-size: 32px 32px}
 .wsNW {white-space: nowrap}
-.click, .header-click{ cursor: hand; cursor: pointer }
+.click, .header-click{ cursor: hand; cursor: pointer; text-decoration: none }
 .click:hover{ color: #286bcc !important; text-decoration: underline }
 .header-click:hover{ color: #286bcc !important; text-decoration: none }
 

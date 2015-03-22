@@ -25,13 +25,13 @@ $cfg = Cache::get('platformConfig');
 $cfg['core_name'] = detectCore() or die('Cannot detect core');
 
 //set default database name
-$cfg['db_name'] = 'cb_' . $cfg['core_name'];
+$cfg['db_name'] = PREFIX . $cfg['core_name'];
 
 //loading core defined params
 try {
     $cfg = array_merge($cfg, Config::getPlatformConfigForCore($cfg['core_name']));
 } catch (\Exception $e) { //return http "not found" if cant load core config
-    header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
+    header(@$_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
     exit();
 }
 
@@ -90,7 +90,7 @@ session_name(
 );
 
 //error reporting params
-error_reporting(isDebugHost() ? E_ALL : 0);
+error_reporting(isDebugHost() ? E_ALL : E_ERROR);
 
 // mb encoding config
 mb_internal_encoding("UTF-8");

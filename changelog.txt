@@ -1,3 +1,197 @@
+CaseBox 1.9.403 (2015-03-21)
+==============================
+New Features, Improvements
+--------------------------
+- #4866 Implement custom permissions func for Stratelit
+- #1093 Display readonly fields with gray text color
+
+Fixed Bugs:
+----------
+- #4794 Commented date not updated for a task
+  Commented data was not displayed (selected from solr) by default for DBNode class
+- fix background cron run from solr client
+
+CaseBox 1.9.402 (2015-03-21)
+==============================
+New Features, Improvements
+--------------------------
+- solr_reindex_core.php and scripts from crons changed
+  to receive params compatible with php "getopt" function
+  acceptable common params are:
+    -n, --name      cron name to run, applicable for run_cron.php
+    -c, --core      core name or "all"
+    -a, --all       all records
+    -l, --nolimit   skip items limit on indexing core
+    -f, --force     skip other same cron running check
+
+- removed solr_recreate_core.php and solr_reindex_document.php from utils
+- #4855 Add suppport for "allow_duplicates: true/false" default: false in core config
+- #4434 Move webdav_url, comments_config, debug_hosts from 'casebox' to config.ini
+- modified .htaccess to deny access to other files than php, js and images
+- concatenated everyoneGroupId and systemGroupId into getSystemGroupId in Security class
+- #4829 Custom function to calculate Node permissions
+
+Fixed Bugs:
+----------
+- #4836 TIKA issues on dev server
+
+CaseBox 1.9.401 (2015-03-17)
+==============================
+New Features, Improvements
+--------------------------
+- #4813 write more user friendly errors notifications
+- #3643 Grouping in Grid
+- #4510 group_field for FacetedNav & grouping in general
+- slow rendering of grid on folder load
+- #4283 Display "Drop files here or use the "New" button" message if grid is empty
+
+Fixed Bugs:
+----------
+- #4814 solr not proper indexing for field of type date
+- #4795 Can't upload files for tasks
+
+CaseBox 1.9.400 (2015-03-06)
+==============================
+New Features, Improvements
+--------------------------
+- #4509 onStartDrag should not trigger onChange
+
+Fixed Bugs:
+----------
+- #4703 Error message doesnt display
+- bugfix receive comments cron script
+- on load, sometimes, the restore state of the tree doesnt succeed,
+  probably because of non numeric ids.
+- #4522 Various charts issues: label position, onClick
+
+
+CaseBox 1.9.399 (2015-03-04)
+==============================
+New Features, Improvements
+--------------------------
+- installation script for casebox (sys/install.php)
+
+CaseBox 1.9.398 (2015-02-27)
+==============================
+New Features, Improvements
+--------------------------
+- #4465 All errors should be logged in $cbPrefix_$core_error_log
+- #4496 Ask the user if he wants to navigate to another folder/record while adding a comment
+- #4500 The blue Upload zone should be always visible when editing a record
+
+Fixed Bugs:
+----------
+- objects combo editor display fixes
+
+CaseBox 1.9.397 (2015-02-25)
+==============================
+New Features, Improvements
+--------------------------
+- #4623 WordWrapping in DropDownList and item icons
+- #4579 vGrid shows objectIDs for a second onLoad
+- #4626 task_u_done always empty in SOLR
+- #4582 form for multiValued showing default DC and then custom DC
+
+CaseBox 1.9.396 (2015-02-24)
+==============================
+New Features, Improvements
+--------------------------
+- #4338 Improve UI for Faceting panel
+- #4508 Don't process D&D from to the same folder in Grid
+- #4548 Improve Search Template UI: default Conditions per fieldType & Condition column hidden by default
+- #4480 Add "Rows" submenu in '...' for Grid toolbar to select number of rows in Grid
+
+Fixed Bugs:
+----------
+- selecting an item from breadcrumb doesnt change path
+- #4532 Visual issues after D&D from Tree to Tree
+
+CaseBox 1.9.395 (2015-02-19)
+==============================
+New Features, Improvements
+--------------------------
+- #4539 Grid should be scrolled to TopLeft when navigating to another folder/PageNR/Search etc
+- #4514 Add '...' submenu in ObjWnd just before "I" button
+- #1010 Add "required: true/false" to template field config
+- #4535 names of system vFolders, how it works, ActionLog vFolder
+- #4541 First objPlugin scrolled a few pixels
+- #4521 While sending a comment, the Reply button moves to the top of DIV
+  Changed the mechanism of updating comment on edit (instantly without reloading right panel)
+- #4504 Disable permissions in popupMenu for vFolders (Tree & Grid popupMenus)
+- #4495 Change icon of Restore button in RecycleBin & remove Clipboard button
+- added mehod for toolbars (hideInutilSeparators) to automaticly hide unnecessary tbseparators
+
+Fixed Bugs:
+----------
+- #4540 object_plugins doesn't work ok in Template
+- #4517 Refresh Grid if D&D into/out of Grid
+- reviewed TagField, there were some bugs when working with mouse
+- #4492 Extra space in "Content" header in preview
+
+CaseBox 1.9.394 (2015-02-17)
+==============================
+New Features, Improvements
+--------------------------
+- #4422 Does TagField work in Ext5.1?
+- #4447 Dates treated as URL links in comments
+
+CaseBox 1.9.393 (2015-02-13)
+==============================
+Fixed Bugs:
+----------
+- inclusion path corrections
+
+CaseBox 1.9.392 (2015-02-12)
+==============================
+New Features, Improvements
+--------------------------
+- #4437 URL router
+- #4489 Improvements: Search, Preview after save, findById
+
+CaseBox 1.9.391 (2015-02-10)
+==============================
+Fixed Bugs:
+----------
+- path adjustments for linux
+
+CaseBox 1.9.390 (2015-02-10)
+==============================
+New Features, Improvements
+--------------------------
+- updated to tika-server 1.7
+- #4438 Use CB prefix for Mysql platform & SOLR & other stuff
+- #4436 Move user photos to /data/files/[core]/_photo/...
+  Note: current photos should be mooved manually.
+- #4435 Replace devel_hosts with _dev_mode=0,1 & additional _dev_* settings
+- #4433 Move UNOCONV from system.ini to config.ini and remove system.ini
+- #4432 Remove versioning in folder names of libx libraries (ZF, Tika, extjs-ace)
+- #4431 Update ZF to latest 2.4.x, folder name /libx/ZF/
+
+CaseBox 1.9.389 (2015-02-10)
+==============================
+New Features, Improvements
+--------------------------
+- #4342 Metadata of files can't be edited
+- #4527 CB sys_columns (from SOLR) should be correctly rendered/processed
+
+Fixed Bugs:
+----------
+- #4660 Unable to set project in task list
+- #4577 Obj title shown below vGrid in EditMode
+
+CaseBox 1.9.388 (2015-02-09)
+==============================
+New Features, Improvements
+--------------------------
+- #4489 Improvements: Search, Preview after save, findById
+- #4525 Grid DC and toolbar changes after switching from a view to Grid view
+- #4546 Buttons in Grid Toolbar "flickering" onCaseboxLoad
+- #4282 Clicking empty area in Grid should load preview of parent node
+
+Fixed Bugs:
+----------
+- #4572 Grid not sorted ok by SOLR field: task_d_closed
+
 CaseBox 1.9.387 (2015-02-05)
 ==============================
 Fixed Bugs:

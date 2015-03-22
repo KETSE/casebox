@@ -12,7 +12,6 @@ class SystemProperties extends Base
 
     public function getData($id = false)
     {
-
         $rez = array(
             'success' => true
         );

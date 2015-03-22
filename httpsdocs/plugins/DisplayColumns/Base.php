@@ -31,6 +31,7 @@ class Base
         }
 
         $solrFields = $this->getSolrFields();
+
         if (!empty($solrFields['fields'])) {
             $fl = explode(',', $sp['fl']);
             foreach ($fl as $k => $f) {
@@ -71,7 +72,8 @@ class Base
         }
 
         $sp = &$p['params'];
-        $data = &$p['result']['data'];
+        $result = &$p['result'];
+        $data = &$result['data'];
 
         $rez = array();
 
@@ -89,17 +91,6 @@ class Base
             : $displayColumns['from'];
 
         $state = $this->getState($stateFrom);
-
-        //check grouping params
-        if (!empty($ip['userGroup']) && !empty($ip['group'])) {
-            $p['result']['group'] = array(
-                'property' => $ip['sourceGroupField']
-                ,'direction' => $ip['group']['direction']
-            );
-
-        } elseif (!empty($state['group'])) {
-            $p['result']['group'] = $state['group'];
-        }
 
         $customColumns = array();
 
@@ -258,9 +249,6 @@ class Base
             }
         }
 
-        //analize grouping
-        $this->analizeGrouping($p);
-
         /* user clicked a column to sort by */
         if (!empty($ip['userSort'])) {
             $p['result']['sort'] = array(
@@ -272,6 +260,23 @@ class Base
             $p['result']['sort'] = $state['sort'];
         }
         /* end of get user state and merge the state with display columns */
+
+        //check grouping params
+        if (!empty($ip['userGroup']) && !empty($ip['group'])) {
+            $p['result']['group'] = array(
+                'property' => $ip['sourceGroupField']
+                ,'direction' => $ip['group']['direction']
+            );
+
+        } elseif (isset($state['group'])) {
+            $p['result']['group'] = $state['group'];
+
+        } elseif (isset($displayColumns['group'])) {
+            $p['result']['group'] = $displayColumns['group'];
+        }
+
+        //analize grouping
+        $this->analizeGrouping($p);
 
         if (!empty($rez)) {
             $p['result']['DC'] = $rez;
@@ -297,6 +302,17 @@ class Base
         if (empty($p['result']['group']['property'])) {
             return;
         }
+
+        //sync grouping sort direction with sorting if same column
+        $result = &$p['result'];
+        if (!empty($result['group']) && !empty($result['sort'])) {
+            if (@$result['group']['property'] == $result['sort']['property']) {
+                $result['group']['direction'] = $result['sort']['direction'];
+            } else {
+                $result['group']['direction'] = 'ASC';
+            }
+        }
+        //end of sync
 
         $field = $p['result']['group']['property'];
         $data = &$p['result']['data'];
@@ -326,6 +342,7 @@ class Base
                 case 'cdate':
                 case 'udate':
                 case 'ddate':
+                case 'task_d_closed':
                     if (empty($v)) {
                         $d['group'] = 'empty';
                         $d['groupText'] = 'empty';
@@ -397,6 +414,16 @@ class Base
         if (!empty($path)) {
             $node = $path[sizeof($path)-1];
             $rez = $node->getNodeParam('DC');
+        }
+
+        //apply properties for default casebox columns
+        if (!empty($rez['data'])) {
+            $defaults = Config::getDefaultGridColumnConfigs();
+            foreach ($rez['data'] as $k => $v) {
+                if (!empty($defaults[$k])) {
+                    $rez['data'][$k] = array_merge($defaults[$k], $v);
+                }
+            }
         }
 
         return $rez;
@@ -475,12 +502,13 @@ class Base
             $state = $this->getState($stateFrom);
 
             if (!empty($state['sort']['property'])) {
+                $property = $state['sort']['property'];
                 $dir = strtolower(Util\coalesce(@$state['sort']['direction'], 'asc'));
 
                 if (!empty($displayColumns['data'][$property]['solr_column_name'])) {
                     $property = $displayColumns['data'][$property]['solr_column_name'];
-                } elseif (in_array($state['sort']['property'], $defaultColumns)) {
-                    $property = $state['sort']['property'];
+                } elseif (!in_array($property, $defaultColumns)) {
+                    $property = null;
                 }
             }
         }
@@ -509,12 +537,7 @@ class Base
         data\Sorter::$sortField = $sortOptions['property'];
 
         $sorter = '\\CB\\data\\Sorter::' . $sortType . ucfirst($sortDir);
-        // die($sortType . ucfirst($sortDir));
 
-        // echo "$sorter \n";
-        // var_dump($data);
         usort($data, $sorter);
-        // var_dump($data);
-
     }
 }

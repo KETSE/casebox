@@ -1,7 +1,7 @@
 Ext.namespace('CB.plugin.field');
 
 Ext.define('CB.plugin.field.DropDownList', {
-    extends: 'Ext.extend(Ext.util.Observable'
+    extends: 'Ext.util.Observable'
 
     ,alias: 'plugin.CBPluginFieldDropDownList'
     ,xtype: 'CB.plugin.field.DropDownList'

@@ -82,6 +82,7 @@ return array_merge(
 
             ,'//js/CB.ObjectsField.js'
 
+            ,'//js/browser/Actions.js'
             ,'//js/browser/Tree.js'
             ,'//js/browser/ViewContainer.js'
             ,'//js/browser/view/Interface.js'
@@ -168,11 +169,12 @@ return array_merge(
 
         ,'jsdev' => array(
             '//js/app.js'
+            ,'//js/controller/Browsing.js'
+
             ,'//js/object/field/editor/Form.js'
             ,'//js/object/field/editor/Tag.js'
             ,'//js/view/BoundListKeyNav.js'
             // ,'//js/overrides/form/action/Submit.js'
-
         )
 
         ,'jsoverrides' => array(
@@ -188,13 +190,13 @@ return array_merge(
 
             ,'//js/overrides/data/Store.js'
 
-            ,'//js/overrides/form/field/Tag.js'
-
             ,'//js/overrides/grid/plugin/CellEditing.js'
             ,'//js/overrides/grid/CellEditor.js'
             ,'//js/overrides/grid/GridPanel.js'
 
             ,'//js/overrides/tree/ViewDragZone.js'
+
+            ,'//js/overrides/toolbar/Toolbar.js'
 
             ,'//js/overrides/util/Collection.js'
             ,'//js/overrides/util/AbstractMixedCollection.js'

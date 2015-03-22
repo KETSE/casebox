@@ -281,6 +281,16 @@ class Base implements \CB\Interfaces\TreeNode
 
             }
 
+            //add grouping param for DC
+            if (($param == 'DC')) {
+                if (!empty($this->config['view']['group'])) {
+                    $rez['group'] = $this->config['view']['group'];
+
+                } elseif (!empty($this->config['group'])) {
+                    $rez['group'] = $this->config['group'];
+                }
+            }
+
             return $rez;
         }
 

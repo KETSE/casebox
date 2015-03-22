@@ -2,7 +2,7 @@
 namespace CB;
 
 $cron_id = 'extract_files_content';
-$execution_timeout = 60; //default is 60 seconds
+$execution_timeout = 2 * 60; //default is 60 seconds
 
 require_once 'init.php';
 
@@ -31,7 +31,7 @@ if (checkTikaService() == false) {
 }
 
 $where = 'skip_parsing = 0 and (parse_status is null)';
-if (@$argv[2] == 'all') {
+if (!empty($scriptOptions['all'])) {
     $where =  'skip_parsing = 0';
 }
 
@@ -83,8 +83,8 @@ while ($r = $res->fetch_assoc()) {
         DB\dbQuery(
             'UPDATE files_content
             SET parse_status = 1
-              , pages = $2
-                      , skip_parsing = $3
+                ,pages = $2
+                ,skip_parsing = $3
             WHERE id = $1',
             array(
                 $r['id']
@@ -115,14 +115,14 @@ $rez['Total'] = $rez['Processed'] + $rez['Not found'];
 
 closeCron($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE));
 
-Solr\Client::runCron();
+// Solr\Client::runCron();
 
 function checkTikaService()
 {
     $rez = true;
 
     // Create a curl handle to a non-existing location
-    $ch = curl_init('http://127.0.0.1:9998/tika');
+    $ch = curl_init('http://localhost:9998/tika');
 
     // Execute
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

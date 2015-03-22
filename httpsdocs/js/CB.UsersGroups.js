@@ -186,7 +186,7 @@ Ext.define('CB.AddUserForm', {
 // ----------------------------------------------------------- end of add user form
 Ext.define('CB.UsersGroupsTree', {
     extend: 'Ext.tree.TreePanel'
-    ,autoScroll: true
+    ,scrollable: true
     ,containerScroll: true
     ,rootVisible: false
     ,animate: false
@@ -829,7 +829,7 @@ Ext.define('CB.UsersGroupsForm', {
                 },{
                 region: 'center'
                 ,border: false
-                ,autoScroll: true
+                ,scrollable: true
                 ,bodyStyle: 'padding: 0 20px'
                 ,items: [{
                         border: false

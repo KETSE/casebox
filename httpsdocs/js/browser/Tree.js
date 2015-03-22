@@ -6,7 +6,7 @@ Ext.define('CB.browser.Tree', {
     ,alias: 'widget.CBBrowserTree'
 
     ,rootVisible: false
-    ,autoScroll: true
+    ,scrollable: true
     ,containerScroll: true
     ,animate: false
     ,lines: false
@@ -191,7 +191,7 @@ Ext.define('CB.browser.Tree', {
                 cls: 'browser-tree'
                 ,border: false
                 ,bodyBoder: false
-                ,autoScroll: true
+                ,scrollable: true
                 ,idProperty: 'nid'
                 ,loadMask: false
                 ,plugins: {
@@ -440,7 +440,8 @@ Ext.define('CB.browser.Tree', {
             this.actions.rename.setDisabled(!canRename) ;
 
             this.actions.reload.setDisabled(false) ;
-            this.actions.permissions.setDisabled(false) ;
+
+            this.actions.permissions.setDisabled(!Ext.isNumeric(node.data.nid) || (node.data.nid < 1));
         }
 
         this.fireEvent('selectionchanged');
@@ -719,11 +720,27 @@ Ext.define('CB.browser.Tree', {
         }
 
         if(!Ext.isEmpty(state.selected)) {
-            this.selectPath(state.selected, 'nid', '/');
+            this.selectPath(
+                state.selected
+                ,'nid'
+                ,'/'
+                ,function(success, lastNode) {
+                    //sometimes the path selection desnt succeed, probably because of non numeric ids
+                    if(!success) {
+                        var nid = state.selected.split('/').pop()
+                            ,r = this.store.findRecord('nid', nid, 0, false, false, true);
+                        if(r) {
+                            this.getSelectionModel().select([r]);
+                        }
+                    }
+                }
+                ,this
+            );
         }
     }
 
     ,expandPaths: function(paths) {
+        this.expandingPath = true;
         var expandIds = [];
         for (var i = 0; i < paths.length; i++) {
             var ids = paths[i].split('/');
@@ -737,11 +754,14 @@ Ext.define('CB.browser.Tree', {
         if(!Ext.isEmpty(expandIds)) {
             this.expandingIds = expandIds;
             this.recursiveExpandIds();
+        } else {
+            delete this.expandingPath;
         }
     }
 
     ,recursiveExpandIds: function() {
         if(Ext.isEmpty(this.expandingIds)) {
+            delete this.expandingPath;
             return;
         }
 

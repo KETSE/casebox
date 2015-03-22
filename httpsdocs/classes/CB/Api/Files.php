@@ -3,7 +3,6 @@ namespace CB\Api;
 
 use CB\Config;
 use CB\DB;
-use CB\L;
 
 class Files
 {
@@ -37,42 +36,9 @@ class Files
      * @param  int  $id file id
      * @return void
      */
-    public function download($id, $attachment = true)
+    public function download($id, $asAttachment = true)
     {
-        $res = DB\dbQuery(
-            'SELECT f.id
-                ,f.content_id
-                ,c.path
-                ,f.name
-                ,c.`type`
-                ,c.size
-            FROM files f
-            LEFT JOIN files_content c ON f.content_id = c.id
-            WHERE f.id = $1',
-            $id
-        ) or die( DB\dbQueryError() );
-
-        if ($r = $res->fetch_assoc()) {
-            //check if can download file
-            if (!\CB\Security::canDownload($r['id'])) {
-                throw new \Exception(L\get('Access_denied'));
-            }
-
-            header('Content-Description: File Transfer');
-            header('Content-Type: '.$r['type'].'; charset=UTF-8');
-            if ($attachment) {
-                header('Content-Disposition: attachment; filename="'.$r['name'].'"');
-            }
-            header('Content-Transfer-Encoding: binary');
-            header('Expires: 0');
-            header('Cache-Control: must-revalidate');
-            header('Pragma: public');
-            header('Content-Length: '.$r['size']);
-            readfile(Config::get('files_dir') . $r['path'] . DIRECTORY_SEPARATOR . $r['content_id']);
-        } else {
-            throw new \Exception(L\get('Object_not_found'));
-        }
-        $res->close();
+        \CB\Files::download($id, null, $asAttachment);
     }
 
     /**

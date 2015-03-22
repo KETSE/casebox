@@ -3,7 +3,7 @@ Ext.namespace('Ext.data');
 Ext.override(Ext.data.Store, {
     deleteIds: function(ids){
         var idx
-            ,idProperty = Ext.isEmpty(this.proxy.reader)
+            ,idProperty = (Ext.isEmpty(this.proxy) || Ext.isEmpty(this.proxy.reader))
                 ? 'id'
                 : Ext.valueFrom(
                     Ext.valueFrom(

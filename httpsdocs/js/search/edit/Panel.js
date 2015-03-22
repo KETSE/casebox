@@ -19,6 +19,15 @@ Ext.define('CB.search.edit.Panel', {
                 ,scope: this
                 ,handler: this.onSearchClick
             })
+            ,tune: new Ext.Action({
+                iconCls: 'im-tune'
+                ,itemId: 'tune'
+                ,scale: 'medium'
+                ,qtip: L.Tune
+                ,scope: this
+                ,enableToggle: true
+                ,handler: this.onTuneClick
+            })
             ,clear: new Ext.Action({
                 iconCls: 'im-refresh'
                 ,itemId: 'clear'
@@ -47,6 +56,7 @@ Ext.define('CB.search.edit.Panel', {
             tbar: [
                 this.actions.search
                 ,'->'
+                ,this.actions.tune
                 ,this.actions.clear
                 ,{
                     iconCls: 'im-points'
@@ -85,7 +95,10 @@ Ext.define('CB.search.edit.Panel', {
         p.data = Ext.apply({} , this.readValues().data);
 
         var browser = App.activateBrowserTab();
-        browser.changeSomeParams({search: p});
+        browser.changeSomeParams({
+            query: ''
+            ,search: p
+        });
     }
 
     ,processLoadData: function(r, e) {
@@ -95,8 +108,12 @@ Ext.define('CB.search.edit.Panel', {
 
         this.callParent(arguments);
     }
-    ,onClearClick: function (b, e)
-    {
+
+    ,onTuneClick: function (b, e) {
+        this.grid.headerCt.child('[dataIndex="cond"]').setHidden(!b.pressed);
+    }
+
+    ,onClearClick: function (b, e) {
         var data = {template_id: this.data.template_id};
         this.clear();
         this.loadData(data);

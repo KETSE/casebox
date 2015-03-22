@@ -869,7 +869,7 @@ class Tasks
                 L\get('Files').':</td><td style="vertical-align:top"><ul style="list-style: none; padding:0;margin:0">';
 
             foreach ($files as $f) {
-                $rez .= '<li style="margin:0;padding: 3px 0"><a href="' . $coreUrl . 'v-' . $f['id'] . '/" name="file" fid="'.$f['id'].
+                $rez .= '<li style="margin:0;padding: 3px 0"><a href="' . $coreUrl . 'view/' . $f['id'] . '/" name="file" fid="'.$f['id'].
                     '" style="text-decoration: underline; color: #15C" taget="_blank"><img style="float:left;margin-right:5px" src="'.
                     $coreUrl.'css/i/ext/'.Files::getIconFileName($f['name']).'"> '.$f['name'].'</a></li>';
             }
@@ -1049,7 +1049,7 @@ class Tasks
                 array(
                     ''
                     ,'font-size: 1.5em; display: block;'.( ($r['status'] == 3 ) ? 'color: #555; text-decoration: line-through' : '')
-                    ,'<a href="' . $coreUrl . 'v-' . $id . '/">' . Util\adjustTextForDisplay($r['title']) . '</a>'
+                    ,'<a href="' . $coreUrl . 'view/' . $id . '/">' . Util\adjustTextForDisplay($r['title']) . '</a>'
                     ,$datetime_period
                     ,nl2br(Util\adjustTextForDisplay($r['description']))
                     ,L\get('Status', $user['language_id'])
@@ -1153,7 +1153,7 @@ class Tasks
                 $un = User::getDisplayName($u['id']);
                 $rez .= '<tr><td class="user"><div style="position: relative">'.
                 '<img class="photo32" src="photo/'.$u['id'].'.jpg?32=' . User::getPhotoParam($u['id']). '" style="width:32px; height: 32px" alt="'.$un.'" title="'.$un.'">'.
-                ( ($u['status'] == 1 ) ? '<img class="done icon icon-tick-circle" src="css/i/s.gif" />': "").
+                ( ($u['status'] == 1 ) ? '<img class="done icon icon-tick-circle" src="/css/i/s.gif" />': "").
                 '</div></td><td><b>'.$un.'</b>'.
                 '<p class="gr">'.(
                     ($u['status'] == 1)
@@ -1268,16 +1268,21 @@ class Tasks
 
         //get users that didnt complete the task yet
         $objectRecord['task_u_ongoing'] = array();
+        $objectRecord['task_u_done'] = array();
 
         $res = DB\dbQuery(
-            'SELECT user_id
+            'SELECT user_id, `status`
             FROM tasks_responsible_users
-            WHERE task_id = $1 and status = 0',
+            WHERE task_id = $1',
             $objectRecord['id']
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
-            $objectRecord['task_u_ongoing'][] = $r['user_id'];
+            if ($r['status'] == 1) {
+                $objectRecord['task_u_done'][] = $r['user_id'];
+            } else {
+                $objectRecord['task_u_ongoing'][] = $r['user_id'];
+            }
         }
         $res->close();
 

@@ -7,7 +7,7 @@ comparing last preview access time with node update time. Generate preview if ne
 checking if preview is available and return it
  */
 
-if (empty($_GET['f'])) {
+if (empty($_GET['subcommand'])) {
     exit(0);
 }
 
@@ -18,7 +18,7 @@ $coreUrl = Config::get('core_url');
 $filesPreviewDir = Config::get('files_preview_dir');
 
 // get requested filename
-$filename = basename($_GET['f']);
+$filename = basename($_GET['subcommand']);
 
 $f = explode('.', $filename);
 $a = array_shift($f);
@@ -73,7 +73,7 @@ if (empty($_GET['i'])) {
         <body>
     ';
     if ($objType == 'file') {
-        $toolbarItems[] = '<a href="' . $coreUrl . 'download.php?id=' . $id . '">' . L\get('Download') .'</a>';
+        $toolbarItems[] = '<a href="' . $coreUrl . 'download/' . $id . '/">' . L\get('Download') .'</a>';
     }
 
     echo '<table border="0" cellspacing="12" cellpading="12"><tr><td>'.implode('</td><td>', $toolbarItems).'</td></tr></table>';

@@ -7,7 +7,7 @@ Ext.namespace('CB');
 */
 Ext.define('CB.GenericForm', {
     extend: 'Ext.FormPanel'
-    ,autoScroll: false
+    ,scrollable: false
     ,closable: true
     ,border: false
     ,bodyStyle: 'padding: 10px'

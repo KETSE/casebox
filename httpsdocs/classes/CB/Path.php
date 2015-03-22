@@ -40,11 +40,14 @@ class Path
     public static function getPidPath($id)
     {
         $rez = array('success' => false);
+
         if (!is_numeric($id)) {
             return $rez;
         }
+
         $res = DB\dbQuery(
-            'SELECT ti.pids
+            'SELECT t.name
+                    ,ti.pids
             FROM tree t
             JOIN tree_info ti ON t.id = ti.id
             WHERE t.id = $1',
@@ -55,7 +58,13 @@ class Path
             $r['pids'] = explode(',', $r['pids']);
             array_pop($r['pids']);
             $r['pids'] = implode('/', $r['pids']);
-            $rez = array('success' => true, 'id' => $id, 'path' => $r['pids']);
+
+            $rez = array(
+                'success' => true
+                ,'id' => $id
+                ,'name' => $r['name']
+                ,'path' => $r['pids']
+            );
         }
         $res->close();
 
@@ -166,25 +175,13 @@ class Path
 
         $rez = array();
         $lastId = array_pop($ids);
-        $res = DB\dbQuery(
-            'SELECT t.id
-                ,t.name
-                ,t.`system`
-                ,t.`type`
-                ,ti.pids `path`
-                ,ti.`case_id`
-                ,t.`template_id`
-                ,tt.`type` template_type
-            FROM tree t
-            JOIN tree_info ti on t.id = ti.id
-            LEFT JOIN templates tt ON t.template_id = tt.id
-            WHERE t.id = $1',
-            $lastId
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $r['path'] = str_replace(',', '/', $r['path']);
-            $rez = $r;
+        $r = Objects::getBasicInfoForId($lastId);
+        if ($r['success']) {
+            $d = &$r['data'];
+            $d['path'] = str_replace(',', '/', $d['pids']);
+            unset($d['pids']);
+            $rez = $d;
         }
         $res->close();
 
@@ -304,7 +301,7 @@ class Path
     {
         $rez = null;
         $res = DB\dbQuery(
-            'SELECT id FROM `casebox`.guids WHERE name = $1',
+            'SELECT id FROM ' . PREFIX . '_casebox.guids WHERE name = $1',
             $name
         ) or die(DB\dbQueryError());
 
@@ -312,7 +309,7 @@ class Path
             $rez = $r['id'];
         } else {
             DB\dbQuery(
-                'INSERT INTO `casebox`.guids
+                'INSERT INTO ' . PREFIX . '_casebox.guids
                 (`name`)
                 VALUES ($1)',
                 $name

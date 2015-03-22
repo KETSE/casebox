@@ -5,7 +5,6 @@ use CB\Path;
 
 class Browser
 {
-
     protected $path = [];
     protected $treeNodeConfigs = array();
     protected $treeNodeGUIDConfigs = array();
@@ -28,6 +27,11 @@ class Browser
             $path = $p['path'];
         }
         $p['path'] = $path;
+
+        //check if user have changed the row limit in grid
+        if (!empty($p['setMaxRows']) && !empty($p['rows'])) {
+            User::setGridMaxRows($p['rows']);
+        }
 
         //the navigation goes from search results. We should get the real path of the node
         if (!empty($p['lastQuery']) && empty($p['query'])) {
@@ -132,6 +136,9 @@ class Browser
         if (!empty($this->sort)) {
             $rez['sort'] = &$this->sort;
         }
+        if (!empty($this->group)) {
+            $rez['group'] = &$this->group;
+        }
 
         return $rez;
 
@@ -202,6 +209,10 @@ class Browser
 
                 if (isset($rez['sort'])) {
                     $this->sort = $rez['sort'];
+                }
+
+                if (isset($rez['group'])) {
+                    $this->group = $rez['group'];
                 }
             }
 
@@ -341,8 +352,9 @@ class Browser
         }
 
         $pids = false;
-        if (!empty($p['scope'])) {
-            switch ($p['scope']) {
+        if (!empty($fieldConfig['scope'])) {
+            $scope = $fieldConfig['scope'];
+            switch ($scope) {
                 case 'project': /* limiting pid to project. If not in a project then to parent directory */
                     if (!empty($p['objectId']) && is_numeric($p['objectId'])) {
                         $pids = $this->getCaseId($p['objectId']);
@@ -371,7 +383,7 @@ class Browser
                         : Util\toNumericArray($p['pidValue']);
                     break;
                 default:
-                    $pids = Util\toNumericArray($p['scope']);
+                    $pids = Util\toNumericArray($scope);
                     break;
             }
         }
@@ -442,6 +454,15 @@ class Browser
                 }
             }
             $res->close();
+        }
+
+        if (empty($rez['DC'])) {
+            $rez['DC'] = array(
+                'name' => array(
+                    'solr_column_name' => "name"
+                    ,'idx' => 0
+                )
+            );
         }
 
         return $rez;
@@ -1157,7 +1178,7 @@ class Browser
                      , deny = 0',
                 array(
                     $id
-                    ,Security::SystemGroupId()
+                    ,Security::getSystemGroupId('system')
                 )
             ) or die( DB\dbQueryError() );
 

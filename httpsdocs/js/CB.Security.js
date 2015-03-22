@@ -245,7 +245,7 @@ Ext.define('CB.SecurityWindow', {
                     layout: 'hbox'
                     ,border: false
                     ,autoHeight: true
-                    ,autoScroll: true
+                    ,scrollable: true
                     ,items: [{
                         title: L.GroupOrUserNames
                         ,layout: 'fit'

@@ -41,7 +41,13 @@ class Templates
 
     public function getTemplatesStructure()
     {
-        $rez = array('success' => true, 'data' => array());
+        $rez = array(
+            'success' => true
+            ,'data' => array()
+        );
+
+        $data = array();
+
         $res = DB\dbQuery(
             'SELECT ts.id
                 ,ts.pid
@@ -81,9 +87,26 @@ class Templates
                 unset($r['cfg']['source']['fn']);
             }
 
-            //set default "equal" condition for search templates
+            //set default search conditions:
+            // - varchar: contains
+            // - objects & multiValued: Contains Any
+            // - object & singleValued: Equal
+            // - other fieldTypes: equal
             if (($r['template_type'] == 'search') && empty($r['cfg']['cond'])) {
-                $r['cfg']['cond'] = '=';
+                switch ($r['type']) {
+                    case 'varchar':
+                        $r['cfg']['cond'] = 'contain';
+                        break;
+
+                    case '_objects':
+                        $r['cfg']['cond'] = empty($r['cfg']['multiValued'])
+                            ? '='
+                            : '<=';
+                        break;
+
+                    default:
+                        $r['cfg']['cond'] = '=';
+                }
             }
             unset($r['template_type']);
 

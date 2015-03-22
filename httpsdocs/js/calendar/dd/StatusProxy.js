@@ -1,6 +1,6 @@
 /*
  * @class Ext.calendar.dd.StatusProxy
- * A specialized drag proxy that supports a drop status icon, {@link Ext.Layer} styles and auto-repair. It also
+ * A specialized drag proxy that supports a drop status icon and auto-repair. It also
  * contains a calendar-specific drag status message containing details about the dragged event's target drop date range.  
  * This is the default drag proxy used by all calendar views.
  * @constructor

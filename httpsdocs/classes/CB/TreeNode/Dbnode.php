@@ -40,7 +40,9 @@ class Dbnode extends Base
 
         $folderTemplates = \CB\Config::get('folder_templates');
 
-        $p['fl'] = 'id,pid,system,path,name,case,date,date_end,size,cid,oid,cdate,uid,udate,template_id,acl_count,cls,status,task_status,versions';
+        $p['fl'] = 'id,pid,system,path,name,case,date,date_end,size,cid,'.
+            'oid,cdate,uid,udate,template_id,acl_count,cls,status,task_status,versions,'.
+            'comment_user_id,comment_date';
 
         if (empty($p['showFoldersContent'])) {
             $p['templates'] = $folderTemplates;
@@ -70,15 +72,6 @@ class Dbnode extends Base
 
                 $res = DB\dbQuery(
                     'SELECT cfg
-                      /*, (SELECT 1
-                         FROM tree
-                         WHERE pid = $1
-                             AND dstatus = 0'.
-                    ( empty($p['showFoldersContent'])
-                        ? ' AND `template_id` IN (0'.implode(',', $folderTemplates).')'
-                        : ''
-                    )
-                    .' LIMIT 1) has_childs/**/
                     FROM tree
                     WHERE id = $1',
                     $d['id']
@@ -86,7 +79,6 @@ class Dbnode extends Base
 
                 if ($r = $res->fetch_assoc()) {
                     $d['cfg'] = Util\toJSONArray($r['cfg']);
-                    // $d['has_childs'] = !empty($r['has_childs']);
                 }
                 $res->close();
             }
@@ -171,6 +163,7 @@ class Dbnode extends Base
 
         $from = $this->getId();
 
+        //select configs from tree and template of the current node
         $sql = 'SELECT t.cfg, t.template_id, tt.cfg `templateCfg`
             FROM tree t
             LEFT JOIN templates tt
@@ -178,6 +171,7 @@ class Dbnode extends Base
                     OR ((tt.id = $2) AND (t.template_id IS NULL))
             WHERE t.id = $1';
 
+        //if template_id specified in config then select directly from templates table
         if (empty($from) && !empty($this->config['template_id'])) {
             $from = 'template_' . $this->config['template_id'];
 
@@ -205,6 +199,16 @@ class Dbnode extends Base
                 if (isset($cfg[$param])) {
                     $rez = $cfg[$param];
                     $from = 'template_'.$r['template_id'];
+                }
+            }
+
+            //add grouping param for DC
+            if (($param == 'DC') && ($rez !== false)) {
+                if (!empty($cfg['view']['group'])) {
+                    $rez['group'] = $cfg['view']['group'];
+
+                } elseif (!empty($cfg['group'])) {
+                    $rez['group'] = $cfg['group'];
                 }
             }
         }

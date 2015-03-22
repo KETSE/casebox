@@ -61,11 +61,11 @@ Ext.define('CB.object.plugin.Files', {
             border: false
             ,padding: 0
             ,hidden: true
-            ,html: '<div class="files-drop">'+
-                'Drag files here, or <a class="click upload">'+L.Upload+'</a> <span class="i-cross click close" style="float: right; display: inline-block; height: 16px; width: 16px;"></span>'+
-            '</div>'
+            ,html: ''
+
             ,listeners: {
                 scope: this
+
                 ,afterrender: function(p) {
                     var el = this.getEl();
                     el.on('click', this.onDropPanelClick, this);
@@ -82,8 +82,7 @@ Ext.define('CB.object.plugin.Files', {
                         function() {
                             Ext.apply(this.params, this.getLoadedObjectProperties());
 
-                            this.dropPanel.hide();
-                            this.lockPanel(false);
+                            this.hideDropPanel();
                         }
                         ,this
                     );
@@ -131,14 +130,30 @@ Ext.define('CB.object.plugin.Files', {
     }
 
     ,onLoadData: function(r, e) {
-        if(Ext.isEmpty(r.data)) {
-            return;
+        var dropZoneHtml = L.DropZoneMsg;
+
+        //show upload zone by default when in window
+        if(this.params && (this.params.from == 'window')) {
+            this.dropPanel.show();
+            this.actions.add.setHidden(true);
+        } else {
+            dropZoneHtml += ' <span class="i-cross click close" style="float: right; display: inline-block; height: 16px; width: 16px;"></span>';
         }
 
-        for (var i = 0; i < r.data.length; i++) {
-            r.data[i].iconCls = getItemIcon(r.data[i]);
+        dropZoneHtml = '<div class="files-drop">'+ dropZoneHtml +'</div>';
+
+        if(this.dropPanel.rendered) {
+            this.dropPanel.update(dropZoneHtml);
+        } else {
+            this.dropPanel.html = dropZoneHtml;
         }
-        this.store.loadData(r.data);
+
+        if(!Ext.isEmpty(r.data)) {
+            for (var i = 0; i < r.data.length; i++) {
+                r.data[i].iconCls = getItemIcon(r.data[i]);
+            }
+            this.store.loadData(r.data);
+        }
     }
 
     ,onItemClick: function (cmp, record, item, index, e, eOpts) {//dv, index, el, e
@@ -242,8 +257,7 @@ Ext.define('CB.object.plugin.Files', {
         }
         te = Ext.get(te);
         if(te.hasCls('close')) {
-            this.dropPanel.hide();
-            this.lockPanel(false);
+            this.hideDropPanel();
         }
 
         if(te.hasCls('upload')) {
@@ -253,6 +267,16 @@ Ext.define('CB.object.plugin.Files', {
                 ,ev
             );
 
+            this.hideDropPanel();
+        }
+    }
+
+    /**
+     * conditionally hides drop panel if not inside object window
+     * @return void
+     */
+    ,hideDropPanel: function() {
+        if(Ext.isEmpty(this.params) || (this.params.from !== 'window')) {
             this.dropPanel.hide();
             this.lockPanel(false);
         }

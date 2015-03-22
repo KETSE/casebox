@@ -67,7 +67,6 @@ Ext.define('CB.object.plugin.Base', {
     }
 
     ,openObjectProperties: function(data) {
-        clog('openObjectProperties', data);
         this.fireEvent('openproperties', data);
     }
 

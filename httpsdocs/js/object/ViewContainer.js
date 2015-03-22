@@ -6,7 +6,6 @@ Ext.define('CB.object.ViewContainer', {
     ,border: false
     ,layout: 'card'
     ,activeItem: 0
-    ,tbarCssClass: 'x-panel-white'
 
     ,constructor: function() {
 
@@ -223,13 +222,6 @@ Ext.define('CB.object.ViewContainer', {
                 ,handler: this.onUnsubscribeClick
             }
 
-            // ,metadata: {
-            //     text: L.Metadata
-            //     ,itemId: 'metadata'
-            //     ,scope: this
-            //     ,handler: this.onOpenExternalClick
-            // }
-
             ,rename: {
                 itemId: 'rename'
                 ,text: L.Rename
@@ -357,6 +349,8 @@ Ext.define('CB.object.ViewContainer', {
 
         if(Ext.isEmpty(objectData.id) || isNaN(objectData.id)) {
             this.items.getAt(0).clear();
+            delete this.requestedLoadData;
+            this.loadedData = {};
             return;
         }
 
@@ -420,26 +414,28 @@ Ext.define('CB.object.ViewContainer', {
 
         var id = this.requestedLoadData
             ? Ext.valueFrom(this.requestedLoadData.nid, this.requestedLoadData.id)
-            : null;
-
-        this.loadedData = Ext.apply({id: id}, this.requestedLoadData);
-
-        if(Ext.isDefined(this.loadedData.viewIndex)) {
-            this.setActiveView(this.loadedData.viewIndex, false);
-        }
+            : null
+            ,params = Ext.apply({id: id}, this.requestedLoadData);
 
         delete this.requestedLoadData;
 
+        if(Ext.isDefined(params.viewIndex)) {
+            this.setActiveView(params.viewIndex, false);
+        }
+
         var activeItem = this.getLayout().activeItem;
 
-        this.loadedData.viewIndex = this.items.indexOf(activeItem);
+        params.viewIndex = this.items.indexOf(activeItem);
+
+        this.loadedData = params;
+
         switch(activeItem.getXType()) {
             case 'CBObjectPreview':
                 this.topToolbar.setVisible(!Ext.isEmpty(id));
                 this.doLayout();
 
                 //used params by preview component to detect wich buttons to display when asked
-                activeItem.params = this.loadedData;
+                activeItem.params = params;
 
                 activeItem.loadPreview(id);
                 break;
@@ -583,15 +579,7 @@ Ext.define('CB.object.ViewContainer', {
     ,edit: function (objectData, e) {
         objectData.view = 'edit';
 
-        switch(detectFileEditor(objectData.name)) {
-            case 'webdav':
-                App.openWebdavDocument(objectData);
-                break;
-
-            default:
-                this.openObjectWindow(objectData);
-                break;
-        }
+        this.openObjectWindow(objectData);
     }
 
     /**
@@ -616,7 +604,15 @@ Ext.define('CB.object.ViewContainer', {
     ,onEditClick: function(b, e) {
         var p = Ext.apply({}, this.loadedData);
 
-        this.edit(p);
+        switch(detectFileEditor(p.name)) {
+            case 'webdav':
+                App.openWebdavDocument(p);
+                break;
+
+            default:
+                this.edit(p, e);
+                break;
+        }
     }
 
     /**
@@ -732,7 +728,7 @@ Ext.define('CB.object.ViewContainer', {
      * @return void
      */
     ,onPreviewClick: function(b, e) {
-        var p = Ext.apply({}, this.loadedData);
+        var p = Ext.clone(this.loadedData);
 
         p.viewIndex = b.pressed
             ? 1
@@ -798,7 +794,7 @@ Ext.define('CB.object.ViewContainer', {
             data = this.loadedData;
         }
 
-        var p = Ext.apply({}, data);
+        var p = Ext.clone(data);
 
         this.edit(p, e);
     }
@@ -980,7 +976,7 @@ Ext.define('CB.object.ViewContainer', {
     ,onPermalinkClick: function(b, e) {
         window.prompt(
             'Copy to clipboard: Ctrl+C, Enter'
-            , window.location.origin + '/' + App.config.coreName + '/v-' + this.loadedData.id + '/');
+            , window.location.origin + '/' + App.config.coreName + '/view/' + this.loadedData.id + '/');
     }
 
     /**

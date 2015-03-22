@@ -59,8 +59,7 @@ class Config extends Singleton
         // add core path to include path
         set_include_path(
             INCLUDE_PATH . PATH_SEPARATOR .
-            static::$environmentVars['core_dir'] . PATH_SEPARATOR .
-            static::get('ZEND_PATH')
+            static::$environmentVars['core_dir']
         );
 
         // set max file version count
@@ -81,7 +80,7 @@ class Config extends Singleton
     }
 
     /**
-     * Reading platform system.ini file
+     * Reading configuration file
      * @return array
      */
     public static function loadConfigFile($filename)
@@ -108,7 +107,7 @@ class Config extends Singleton
         $res = DB\dbQuery(
             'SELECT param
                 ,`value`
-            FROM casebox.config
+            FROM ' . PREFIX . '_casebox.config
             WHERE pid IS NOT NULL'
         ) or die( DB\dbQueryError() );
 
@@ -130,7 +129,7 @@ class Config extends Singleton
         $rez = array();
         $res = DB\dbQuery(
             'SELECT id, cfg, active
-            FROM casebox.cores
+            FROM ' . PREFIX . '_casebox.cores
             WHERE name = $1',
             $coreName
         ) or die(DB\dbQueryError());
@@ -182,28 +181,29 @@ class Config extends Singleton
     private static function getEnvironmentVars($config)
     {
         $coreName = $config['core_name'];
+        $filesDir = DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR;
 
         $rez = array(
             'db_name' => empty($config['db_name'])
-                ? 'cb_'.$coreName
+                ? PREFIX . $coreName
                 : $config['db_name']
 
             ,'solr_core' => empty($config['solr_core'])
-                ? 'cb_'.$coreName
+                ? PREFIX . $coreName
                 : $config['solr_core']
 
             ,'core_dir' => empty($config['core_dir'])
                 ? DOC_ROOT.'cores'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
                 : $config['core_dir']
 
-            // path to photos folder
-            ,'photos_path' => DOC_ROOT.'photos'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
-
             // path to files folder
-            ,'files_dir' => DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR
+            ,'files_dir' => $filesDir
 
             /* path to preview folder. Generated previews are stored for some filetypes */
-            ,'files_preview_dir' => DATA_DIR.'files'.DIRECTORY_SEPARATOR.$coreName.DIRECTORY_SEPARATOR.'preview'.DIRECTORY_SEPARATOR
+            ,'files_preview_dir' => $filesDir.'preview'.DIRECTORY_SEPARATOR
+
+            // path to photos folder
+            ,'photos_path' => $filesDir.'_photo'.DIRECTORY_SEPARATOR
 
             ,'core_url' => 'https://'.$_SERVER['SERVER_NAME'].'/'.$coreName.'/'
 
@@ -214,10 +214,10 @@ class Config extends Singleton
             If no user intervention is required then files are stored in db. */
             ,'incomming_files_dir' => TEMP_DIR.$coreName.DIRECTORY_SEPARATOR.'incomming'.DIRECTORY_SEPARATOR
 
-            ,'error_log' => LOGS_DIR.'cb_'.$coreName.'_error_log'
+            ,'error_log' => LOGS_DIR . PREFIX . $coreName.'_error_log'
 
             // custom Error log per Core, use it for debug/reporting purposes
-            ,'debug_log' => LOGS_DIR.'cb_'.$coreName.'_debug_log'
+            ,'debug_log' => LOGS_DIR . PREFIX . $coreName.'_debug_log'
         );
 
         /* Define folder templates */
@@ -514,6 +514,149 @@ class Config extends Singleton
         return $instance->defaultGridViewColumns;
     }
 
+    /**
+     * return default configs for known grid columns
+     * @return array
+     */
+    public static function getDefaultGridColumnConfigs()
+    {
+        $instance = static::getInstance();
+
+        if (empty($instance->defaultGridColumnConfigs)) {
+            $userConfig = &$_SESSION['user']['cfg'];
+            $dateFormat = str_replace('%', '', $userConfig['short_date_format']);
+            $dateTimeFormat = str_replace('%', '', $dateFormat . ' ' . $userConfig['time_format']);
+
+            $instance->defaultGridColumnConfigs = array(
+                'nid' => array(
+                    'title' => 'ID'
+                    ,'width' => 80
+                )
+                ,'name' => array(
+                    'title' => L\get('Name')
+                    ,'width' => 300
+                )
+                ,'path' => array(
+                    'title' => L\get('Path')
+                    ,'width' => 150
+                )
+                ,'case' => array(
+                    'title' => L\get('Project')
+                    ,'width' => 150
+                )
+                ,'date' => array(
+                    'title' => L\get('Date')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'size' => array(
+                    'title' => L\get('Size')
+                    ,'width' => 80
+                )
+
+                ,'cid' => array(
+                    'title' => L\get('Creator')
+                    ,'width' => 200
+                )
+                ,'oid' => array(
+                    'title' => L\get('Owner')
+                    ,'width' => 200
+                )
+                ,'uid' => array(
+                    'title' => L\get('UpdatedBy')
+                    ,'width' => 200
+                )
+                ,'did' => array(
+                    'title' => L\get('UpdatedBy')
+                    ,'width' => 200
+                )
+                ,'comment_user_id' => array(
+                    'title' => L\get('CommentedBy')
+                    ,'width' => 200
+                )
+
+                ,'cdate' => array(
+                    'title' => L\get('CreatedDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'udate' => array(
+                    'title' => L\get('UpdatedDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'ddate' => array(
+                    'title' => L\get('DeletedDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'comment_date' => array(
+                    'title' => L\get('CommentedDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'date_end' => array(
+                    'title' => L\get('EndDate')
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'order' => array(
+                    'title' => L\get('Order')
+                    ,'solr_column_name' => 'order'
+                    ,"align" => "center"
+                    ,"width" => 10
+                    ,"columnWidth" => 10
+
+                )
+
+                ,'task_u_assignee' => array(
+                    'title' => L\get('Assignee')
+                    ,'width' => 200
+                )
+                ,'task_u_started' => array(
+                    'title' => L\get('StartedBy')
+                    ,'width' => 200
+                )
+                ,'task_u_ongoing' => array(
+                    'title' => L\get('Ongoing')
+                    ,'width' => 200
+                )
+                ,'task_u_done' => array(
+                    'title' => L\get('DoneBy')
+                    ,'width' => 200
+                )
+                ,'task_u_blocker' => array(
+                    'title' => L\get('Blocker')
+                    ,'width' => 200
+                )
+                ,'task_u_all' => array(
+                    'title' => L\get('All')
+                    ,'width' => 200
+                )
+
+                ,'task_d_closed' => array(
+                    'title' => L\get('ClosedDate')
+                    ,"solr_column_name" => "task_d_closed"
+                    ,'width' => 130
+                    ,'xtype' => 'datecolumn'
+                    ,'format' => $dateTimeFormat
+                )
+                ,'task_status' => array(
+                    'title' => L\get('Status')
+                    ,'width' => 70
+                )
+            );
+        }
+
+        return $instance->defaultGridColumnConfigs;
+    }
+
     private static function adjustConfig($cfg)
     {
         /* post processing the obtained config */
@@ -532,18 +675,17 @@ class Config extends Singleton
         }
         $cfg['facet_configs'] = $dfd;
 
-        //detect Display Columns definitions in casebox config
-        // $dcd = array();
-        // if (!empty($cfg['default_DC'])) {
-        //     $dcd = Util\toJSONArray($cfg['default_DC']);
-        //     // unset($cfg['default_DC']);
-        // }
+        //transform boolean properties to boolean
+        $boolProperties = array(
+            'allow_duplicates'
+        );
 
-        // //check if have defined facets in core config
-        // if (!empty($cfg['DC'])) {
-        //     $dcd = array_merge($dcd, Util\toJSONArray($cfg['DC']));
-        // }
-        // $cfg['DC'] = $dcd;
+        foreach ($boolProperties as $property) {
+            if (isset($cfg[$property])) {
+                $cfg[$property] = in_array($cfg[$property], array('true', true, 'y', 1, '1'), true);
+            }
+        }
+        //end of transform boolean properties to boolean
 
         // detect core plugins (use defined or default if set)
         $plugins = array();

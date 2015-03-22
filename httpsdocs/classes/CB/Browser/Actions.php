@@ -100,6 +100,12 @@ class Actions
      */
     private function overwriteCheck($sourceIds, $targetId)
     {
+        $rez = false;
+
+        if (\CB\Config::get('allow_duplicates', false)) {
+            return $rez;
+        }
+
         $sourceIds = Util\toNumericArray($sourceIds);
         $res = DB\dbQuery(
             'SELECT t2.id
@@ -113,7 +119,6 @@ class Actions
             $targetId
         ) or die(DB\dbQueryError());
 
-        $rez = false;
         if ($r = $res->fetch_assoc()) {
             $rez = $r['id'];
         }

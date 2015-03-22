@@ -79,7 +79,7 @@ Ext.define('CB.object.plugin.Comments', {
             ,grow: true
             ,growMin: 10
             ,enableKeyEvents: true
-            //,baseBodyCls: "comment-input"
+            ,cls: "comment-input"
             ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
             // disable until prugin refactored for ExtJS 5
             ,plugins: [
@@ -120,20 +120,6 @@ Ext.define('CB.object.plugin.Comments', {
             ]
         });
 
-        this.loadLabel = new Ext.panel.Panel({
-            height: 40
-            ,anchor: '100%'
-            ,padding: 0
-            ,bodyPadding: 0
-            ,boder: false
-            ,bodyBoder: false
-            ,bodyStyle: 'border: 0'
-            ,header: false
-            ,cls: 'msg-load'
-            ,html: '<div class="d-loader">' + L.sending + ' ... </div>'
-            ,hidden: true
-        });
-
         this.addCommentPanel = new Ext.Panel({
             layout: {
                 type: 'hbox'
@@ -160,7 +146,6 @@ Ext.define('CB.object.plugin.Comments', {
                     ,items: [
                         this.messageField
                         ,this.messageToolbar
-                        ,this.loadLabel
                     ]
                 }
             ]
@@ -241,15 +226,7 @@ Ext.define('CB.object.plugin.Comments', {
             return;
         }
 
-        // this.messageField.grow = false;
-        // this.messageField.setHeight(30);
-        this.messageField.reset();
-        this.messageField.autoSize();
-        // this.onMessageBoxAutoSize(this.messageField);
-        this.messageField.hide();
-        // this.messageToolbar.hide();
-
-        this.loadLabel.show();
+        this.addCommentPanel.disable();
 
         CB_Objects.addComment(
             {
@@ -262,16 +239,18 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,onAddCommentProcess: function(r, e) {
-        this.loadLabel.hide();
+        this.addCommentPanel.enable();
 
         if(r.success !== true) {
-            this.messageField.show();
+            // show error
+            Ext.Msg.alert(L.Error, L.AddCommentError);
+
             return;
         } else {
             this.messageField.reset();
-            this.messageField.show();
+            this.messageField.autoSize();
+            // this.messageField.show();
         }
-
 
         if(Ext.isEmpty(this.loadedData.data)) {
             this.loadedData.data = [];
@@ -364,7 +343,7 @@ Ext.define('CB.object.plugin.Comments', {
         CB_Objects.updateComment(
             {
                 id: this.editingCommentId
-                ,msg: value
+                ,text: value
             }
             ,this.onEditCommentProcess
             ,this
@@ -378,7 +357,31 @@ Ext.define('CB.object.plugin.Comments', {
             return;
         }
 
-        App.fireEvent('objectchanged', r.data, this);
+        //App.fireEvent('objectchanged', r.data, this);
+
+        //replace processed text into loaded data
+        var rec = this.dataView.store.findRecord('id', r.data.id, 0, false, false, true);
+
+        if(rec) {
+            //remove item from loadedData
+            if(Ext.isArray(this.loadedData.data)) {
+                var item = Ext.Array.findBy(
+                    this.loadedData.data
+                    ,function(i) {
+                        return (i.id == rec.data.id);
+                    }
+                    ,this
+                );
+                if(item) {
+                    item.content = r.data.text;
+                }
+            }
+
+            //remove record from view store
+            rec.set('content', r.data.text);
+
+            this.dataView.refresh();
+        }
     }
 
     ,onRemoveClick: function(b, e) {
@@ -402,6 +405,21 @@ Ext.define('CB.object.plugin.Comments', {
 
         var rec = this.dataView.getSelection()[0];
         if(rec) {
+            //remove item from loadedData
+            if(Ext.isArray(this.loadedData.data)) {
+                var item = Ext.Array.findBy(
+                    this.loadedData.data
+                    ,function(i) {
+                        return (i.id == rec.data.id);
+                    }
+                    ,this
+                );
+                if(item) {
+                    Ext.Array.remove(this.loadedData.data, item);
+                }
+            }
+
+            //remove record from view store
             this.dataView.store.remove(rec);
         }
     }

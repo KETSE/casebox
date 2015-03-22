@@ -68,9 +68,11 @@
 .im-preview{background-image: url(m/ic_visibility_black_24dp.png); min-width: 24px}
 .im-refresh{background-image: url(m/ic_refresh_black_24dp.png); min-width: 24px}
 .im-reorder{background-image: url(m/ic_reorder_black_24dp.png); min-width: 24px}
+.im-restore{background-image: url(m/ic_undo_black_24dp.png); min-width: 24px}
 .im-search{background-image: url(m/ic_search_black_24dp.png); min-width: 24px}
 .im-save, .im-task-complete{background-image: url(m/ic_done_black_24dp.png); min-width: 24px}
 .im-settings{background-image: url(m/ic_settings_applications_black_24dp.png); min-width: 24px}
+.im-tune{background-image: url(m/ic_tune_black_24dp.png); min-width: 24px}
 .im-upload{background-image: url(m/ic_file_upload_black_24dp.png); min-width: 24px}
 .im-trash{background-image: url(m/ic_delete_black_24dp.png); min-width: 24px}
 
@@ -82,7 +84,7 @@
 
 
 .i-refresh {background-image: url(s/refresh.png); background-position: 0 50%; background-repeat: no-repeat}
-.i-points {background-image: url(s/points-gray.png); background-position: 0 50%; background-repeat: no-repeat}
+.i-points, .x-tool-points {background-image: url(s/points-gray.png); background-position: 0 50%; background-repeat: no-repeat}
 
 .i-flag, .x-grid-tree-node-expanded .i-flag{background-image: url(s/flag.png); background-position: 0 50%; background-repeat: no-repeat}
 .is-flag, .x-grid-tree-node-expanded .is-flag{background-image: url(s/flag-small.png); background-position: 0 50%; background-repeat: no-repeat}
@@ -99,6 +101,7 @@
 .i-plus{background-image: url(s/plus.png)}
 .i-restore{background-image: url(s/ic_reply_black_18dp.png)}
 .i-shortcut{background-image: url(s/shortcut-overlay.png)}
+
 
 .calendar-mono, .x-tool-period {background-image: url(s/calendar-mono.png); background-position: 0 50%; background-repeat: no-repeat}
 /* drag drop classes */

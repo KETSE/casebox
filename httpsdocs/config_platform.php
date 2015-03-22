@@ -18,15 +18,18 @@ define('CB\\MINIFY_CACHE_DIR', TEMP_DIR.'minify'.DIRECTORY_SEPARATOR);
 //templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
 define('CB\\TEMPLATES_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
 //used to include DB.php into PreviewExtractor scripts and in Files.php to start the extractors.
-define('CB\\LIB_DIR', DOC_ROOT.DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR);
+define('CB\\LIB_DIR', DOC_ROOT.'lib'.DIRECTORY_SEPARATOR);
+define('CB\\ZEND_PATH', DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'ZF'.DIRECTORY_SEPARATOR.'library'.DIRECTORY_SEPARATOR);
 
 // define casebox include path
 // This path contains only CaseBox platform inclusion paths
 //  and do not contain core specific paths
 define(
     'CB\\INCLUDE_PATH',
+    // DOC_ROOT.PATH_SEPARATOR.
     DOC_ROOT.'libx'.PATH_SEPARATOR.
     DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'min'.DIRECTORY_SEPARATOR.'lib'. PATH_SEPARATOR.
+    ZEND_PATH. PATH_SEPARATOR.
     DOC_ROOT.'classes'.PATH_SEPARATOR.
     PLUGINS_DIR.PATH_SEPARATOR.
     get_include_path()
@@ -40,12 +43,23 @@ define('CB\\EXT_PATH', '/libx/ext');
 /* update include_path and include global script */
 set_include_path(INCLUDE_PATH);
 
-include 'global.php';
+include 'lib/global.php';
 /* end of update include_path and include global script */
 
 //load main config so that we can connect to casebox db and read configuration for core
 $cfg = Config::loadConfigFile(DOC_ROOT.'config.ini');
 
+//define global prefix used
+define(
+    'CB\\PREFIX',
+    (
+        empty($cfg['prefix'])
+            ? 'cb'
+            : $cfg['prefix']
+    ) . '_'
+);
+
+//conect to db using global params from config.ini
 require_once 'lib/DB.php';
 DB\connect($cfg);
 
@@ -57,8 +71,10 @@ if (empty($cfg['PYTHON'])) {
 //set unoconv path
 $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . PATH_SEPARATOR . 'unoconv"';
 
-//get platform default config
-$cfg = array_merge($cfg, Config::loadConfigFile(DOC_ROOT.'system.ini'));
+$cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
+$cfg['SOLR_CLIENT'] = 'Solr/Service.php';
+$cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
+$cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
 Cache::set('platformConfig', $cfg);
 
@@ -79,8 +95,11 @@ function isWindows()
 function isDevelServer()
 {
     return (
-        (strpos($_SERVER['SERVER_NAME'], '.d.') !== false) ||
-        Config::isInListValue('devel_hosts', $_SERVER['REMOTE_ADDR'])
+        (Config::get('_dev_mode') == 1) &&
+        (
+            (strpos($_SERVER['SERVER_NAME'], '.d.') !== false) ||
+            Config::isInListValue('_dev_hosts', $_SERVER['REMOTE_ADDR'])
+        )
     );
 }
 

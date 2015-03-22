@@ -159,17 +159,37 @@ Ext.define('CB.ObjectsComboField', {
 
         this.detectStore();
 
+        //set template for item list
+        switch(this.cfg.renderer) {
+            case 'listObjIcons':
+                this.tpl = Ext.create('Ext.XTemplate',
+                    '<tpl for=".">'
+                    ,'<div class="x-boundlist-item icon-padding {iconCls} bgpLT">{name}</div>'
+                    ,'</tpl>'
+                );
+
+                break;
+
+            case 'listGreenIcons':
+                this.tpl = Ext.create('Ext.XTemplate',
+                    '<tpl for=".">'
+                    ,'<div class="x-boundlist-item icon-padding {[ values.id ? \'icon-element\': \'\' ]}">{name}</div>'
+                    ,'</tpl>'
+                );
+
+                break;
+        }
+
         this.callParent(arguments);
     }
 
     ,initComponent: function(){
-        //CB.ObjectsComboField.superclass.initComponent.call(this);
         var mode = 'local';
 
         if(this.store.proxy){
             mode = 'remote';
 
-            this.store.proxy.extraParams = Ext.apply({}, this.cfg);
+            this.store.proxy.extraParams = Ext.clone(this.cfg);
             if(!Ext.isEmpty(this.data.objectId)) this.store.proxy.extraParams.objectId = this.data.objectId;
             if(!Ext.isEmpty(this.data.pidValue)) this.store.proxy.extraParams.pidValue = this.data.pidValue;
             if(!Ext.isEmpty(this.data.path)) this.store.proxy.extraParams.path = this.data.path;
@@ -552,7 +572,7 @@ Ext.define('CB.ObjectsSelectionForm', {
             region: 'center'
             ,border: false
             ,store: this.store
-            ,autoScroll: true
+            ,scrollable: true
             ,columns: columns
             // ,colModel: new Ext.grid.ColumnModel({
             //     defaults: { sortable: true }

@@ -151,10 +151,10 @@ Ext.define('CB.object.plugin.ObjectProperties', {
                     rez['tbar']['completetask'] = {};
                 }
                 if(this.params.can.close) {
-                    rez['menu']['closetask'] = {};
+                    rez['menu']['closetask'] = {order: 2};
                 }
                 if(this.params.can.reopen) {
-                    rez['menu']['reopentask'] = {};
+                    rez['menu']['reopentask'] = {order: 3};
                 }
             }
         }

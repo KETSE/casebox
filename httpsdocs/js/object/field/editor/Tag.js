@@ -8,30 +8,32 @@ Ext.define('CB.object.field.editor.Tag', {
     ,layout: 'border'
 
     ,constructor: function(config) {
-        this.data = config.data;
+        this.objData = config.objData;
 
-        this.cfg = this.data.fieldRecord
-            ? Ext.apply({}, Ext.valueFrom(this.data.fieldRecord.data.cfg, {}))
+        this.cfg = this.objData.fieldRecord
+            ? Ext.apply({}, Ext.valueFrom(this.objData.fieldRecord.data.cfg, {}))
             : Ext.applyIf(
                 Ext.valueFrom(config.config, {})
                 ,{multiValued: false}
             );
 
         this.detectStore();
-        this.callParent(arguments);
 
-        // this.setValue(config.value);
+        this.callParent(arguments);
     }
 
-    // ,initComponent: function(){
-    //     Ext.apply(this, {
-    //         listeners: {
-    //             scope: this
-    //         }
-    //     });
-    //     this.callParent(arguments);
-    //     // this.store.on('load', this.onLoad, this);
-    // }
+    ,initComponent: function(){
+        Ext.apply(this, {
+            listeners: {
+                scope: this
+                ,destroy: function() {
+                    Ext.destroy(this.store);
+                }
+            }
+        });
+
+        this.callParent(arguments);
+    }
 
     /**
      * detect store used, based on configuration
@@ -49,7 +51,6 @@ Ext.define('CB.object.field.editor.Tag', {
             default:
                 this.store = new Ext.data.DirectStore({
                     autoLoad: false //true
-                    ,autoDestroy: true
                     ,restful: false
                     ,remoteSort: true
                     ,model: 'FieldObjects'
@@ -82,20 +83,21 @@ Ext.define('CB.object.field.editor.Tag', {
                     ,listeners: {
                         scope: this
                         ,beforeload: function(store, o ){
-                            if(this.data){
-                                if(!Ext.isEmpty(this.data.fieldRecord)) {
-                                    store.proxy.extraParams.fieldId = this.data.fieldRecord.get('id');
+                            var d = this.objData;
+                            if(d){
+                                if(!Ext.isEmpty(d.fieldRecord)) {
+                                    store.proxy.extraParams.fieldId = d.fieldRecord.get('id');
                                 }
-                                if(!Ext.isEmpty(this.data.objectId)) {
-                                    store.proxy.extraParams.objectId = this.data.objectId;
+                                if(!Ext.isEmpty(d.objectId)) {
+                                    store.proxy.extraParams.objectId = d.objectId;
                                 }
-                                if(!Ext.isEmpty(this.data.pidValue)) {
-                                    store.proxy.extraParams.pidValue = this.data.pidValue;
+                                if(!Ext.isEmpty(d.pidValue)) {
+                                    store.proxy.extraParams.pidValue = d.pidValue;
                                 }
-                                if(!Ext.isEmpty(this.data.path)) {
-                                    store.proxy.extraParams.path = this.data.path;
+                                if(!Ext.isEmpty(d.path)) {
+                                    store.proxy.extraParams.path = d.path;
                                 }
-                                store.proxy.extraParams.objFields = this.data.objFields;
+                                store.proxy.extraParams.objFields = d.objFields;
                             }
                         }
                         ,load:  function(store, recs, options) {
@@ -142,91 +144,43 @@ Ext.define('CB.object.field.editor.Tag', {
         return this.store;
     }
 
-    ,setValue: function(value, doSelect, skipLoad) {
-        // if(Ext.isPrimitive(value) && (Ext.isEmpty(value) || isNaN(value))) {
-        //     value = null;
-        // } else
-        if(Ext.isNumeric(value)) {
-            value = Ext.Array.from(String(value), true);
-        }
+    ,collapse: function() {
+        var ev = Ext.EventObject
+            ,eventTime = ev.getTime();
 
-        clog('encode', this.value, (Ext.isObject(value) || (Ext.isArray(value) && Ext.isObject(value[0]))) ? 'object' : Ext.encode(value));
-        // else {
-        //     value = {id: value, name: value};
-        // }
-        clog(
-            'setting value'
-            , value
-            , this.store.getCount()
-            , arguments
-            ,Ext.Array.from(value, true)
-        );
+        switch(ev.type) {
+            case 'mousedown':
+                //check if clicked inside the editor or picker
+                if(
+                    !ev.within(this.getEl(), false, true) &&
+                    (!this.picker  || (this.picker && !ev.within(this.picker.getEl(), false, true)))
+                ) {
+                    delete this.preventEditComplete;
+                } else {
+                    this.preventEditComplete = true;
+                }
+                break;
 
-        clog('before call parent', this.value);
-        returnedValue = this.callParent([value, doSelect, skipLoad]);
+            case 'keydown':
+                switch(ev.getKey()) {
 
-        clog('after call parent', this.value, value);
+                    case ev.ESC: // doesnt work ok for esc (looses focus)
+                                // will investigate later, maybe dig into keyNav direction
+                    case ev.ENTER:
+                        if(this.isExpanded) {
+                            this.collapsedTime = eventTime;
+                            this.preventEditComplete = true;
 
-        return this;
+                        } else {
+                            if(this.collapsedTime !== eventTime) {
+                                delete this.preventEditComplete;
+                            }
+                        }
+                }
 
-        // this.fireEvent('change', this, value);
-    }
-
-    ,checkChange: function() {
-        clog('checkChange', this.value);
-        if(Ext.isEmpty(this.value)) {
-            return;
-        }
-
-        this.callParent();
-    }
-
-    ,onItemListClick: function(e) {
-        var me = this,
-            itemEl = e.getTarget(me.tagItemSelector),
-            closeEl = itemEl
-                ? e.getTarget(me.tagItemCloseSelector)
-                : false;
-
-        clog('itemEl && closeEl', itemEl, closeEl);
-        if (itemEl && closeEl) {
-            clog('set preventEditComplete');
-            me.preventEditComplete = true;
+                break;
         }
 
         this.callParent(arguments);
     }
-
-    ,onBlur: function(e) {
-        e.stopEvent();
-        clog('onBlur', this, arguments);
-    }
-
-    // ,onKeyDown: function(e) {
-    //     var me = this,
-    //         selModel = me.selectionModel;
-
-    //     //workaround: there is a js error on keydown in sources of tag field
-    //     if(!selModel.setLastFocused) {
-    //         selModel.setLastFocused = Ext.emptyFn;
-    //     }
-    //     this.callParent(arguments);
-    // }
-
-    // ,getValue: function() {
-    //     return this.value;
-    // }
-
-    // ,getSearchParams: function(){
-    //     result = Ext.apply({}, this.cfg);
-    //     result.query = this.triggerField.getValue();
-    //     if(!Ext.isEmpty(this.data.objectId)) {
-    //         result.objectId = this.data.objectId;
-    //     }
-    //     if(!Ext.isEmpty(this.data.path)) {
-    //         result.path = this.data.path;
-    //     }
-
-    //     return result;
-    // }
 });

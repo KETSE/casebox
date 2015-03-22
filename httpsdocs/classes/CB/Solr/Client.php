@@ -36,10 +36,11 @@ class Client extends Service
         ) {
             return;
         }
-        $cmd = 'php -f '.\CB\CRONS_DIR.'run_cron.php solr_update_tree '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log &';
+        $cmd = 'php -f "'.\CB\CRONS_DIR.'run_cron.php" -- -n solr_update_tree -c '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log &';
         if (\CB\isWindows()) {
-            $cmd = 'start /D "'.\CB\CRONS_DIR.'" php -f run_cron.php solr_update_tree '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log';
+            $cmd = 'start /D "'.\CB\CRONS_DIR.'" php -f "run_cron.php" -- -n solr_update_tree -c '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log';
         }
+
         pclose(popen($cmd, "r"));
     }
 
@@ -106,7 +107,11 @@ class Client extends Service
      *     @type boolean $all if true then all nodes will be updated into solr,
      *                          otherwise - only the nodes marked as updated will be reindexed in solr
      *     @type int[]  $id    id or array of object ids to update
+     *
      *     @type varchar $cron_id when this function is called by a cron then cron_id should be passed
+     *
+     *     @type boolean $nolimit if true then no limit will be applied to maximum indexed nodes
+     *                            (default 2000)
      * }
      */
     public function updateTree($p = array())
@@ -124,12 +129,15 @@ class Client extends Service
 
         /** @type int the last processed document id */
         $lastId = 0;
+        $indexedDocsCount = 0;
+        $all = !empty($p['all']);
+        $nolimit = !empty($p['nolimit']);
 
         $templatesCollection = \CB\Templates\SingletonCollection::getInstance();
         /* prepeare where condition for sql depending on incomming params */
         $where = '(t.updated > 0) AND (t.draft = 0) AND (t.id > $1)';
 
-        if (isset($p['all']) && ($p['all'] == true)) {
+        if ($all) {
             $this->deleteByQuery('*:*');
             $where = '(t.id > $1) AND (t.draft = 0) ';
             $templatesCollection->loadAll();
@@ -172,7 +180,7 @@ class Client extends Service
 
         $docs = true;
 
-        while (!empty($docs)) {
+        while (!empty($docs) && ($nolimit || ($indexedDocsCount < 2000))) {
             $docs = array();
 
             $res = DB\dbQuery($sql, $lastId) or die(DB\dbQueryError());
@@ -184,7 +192,7 @@ class Client extends Service
                     - specific ids are specified
                     - if $all parameter is true
                 */
-                if (!empty($p['all']) || !empty($p['id']) || ($r['updated'] & 1)) {
+                if ($all || !empty($p['id']) || ($r['updated'] & 1)) {
 
                     /* set template data */
                     if (!empty($r['template_id'])) {
@@ -290,13 +298,14 @@ class Client extends Service
                 $this->updateCronLastActionTime(@$p['cron_id']);
 
                 $this->commit();
+
+                $indexedDocsCount += sizeof($docs);
             }
         }
 
         $this->updateTreeInfo($p);
 
         \CB\fireEvent('onSolrUpdate', $eventParams);
-
     }
 
     /**

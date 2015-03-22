@@ -14,6 +14,15 @@ Ext.onReady(function(){
 
     App = new Ext.util.Observable();
 
+    App.controller = Ext.create({
+        xtype: 'browsingcontroller'
+    });
+
+    //set shortcuts to methods that were moved to controller
+    //for backward compatibility. To be removed later
+    App.locateObject = Ext.Function.bind(App.controller.locateObject, App.controller);
+    App.openPath = Ext.Function.bind(App.controller.openPath, App.controller);
+
     // used for charts
     App.colors = [ "#3A84CB", "#94ae0a", "#115fa6","#a61120", "#ff8809", "#ffd13e", "#a61187", "#24ad9a", "#7c7474", "#a66111"];
 
@@ -73,9 +82,20 @@ Ext.onReady(function(){
         App.mainViewPort.initCB(r, e);
     });
 
+
+    //Monitor mouse down/up for grid view to avoid selection change when dragging
+    App.mouseDown = 0;
+    document.body.onmousedown = function() {
+        ++App.mouseDown;
+    };
+
+    document.body.onmouseup = function() {
+        --App.mouseDown;
+    };
+
 });
 
-//--------------------------------------------------------------------------- application initialization function
+//-------------------------------------------- application initialization function
 function initApp() {
     App.dateFormat = 'd.m.Y';
     App.longDateFormat = 'j F Y';
@@ -406,7 +426,7 @@ function initApp() {
             if(Ext.isEmpty(v)) {
                 return '';
             }
-            return '<img src="css/i/s.gif" class="icon '+v+'" /> '+v;
+            return '<img src="/css/i/s.gif" class="icon '+v+'" /> '+v;
         }
     };
 
@@ -678,24 +698,6 @@ function initApp() {
         }
     };
 
-    /**
-    * open path on active explorer tabsheet or in default eplorer tabsheet
-    *
-    * this function will not reset explorer navigation params (filters, search query, descendants)
-    */
-    App.openPath = function(path, params){
-        if(Ext.isEmpty(path)) {
-            path = '/';
-        }
-        params = Ext.valueFrom(params, {});
-        params.path = path;
-        params.query = null;
-        params.start = 0;
-        params.page = 1;
-
-        App.activateBrowserTab().setParams(params);
-    };
-
     App.activateBrowserTab = function(){
         var tab = App.mainTabPanel.getActiveTab();
 
@@ -706,24 +708,6 @@ function initApp() {
         return App.explorer;
     };
 
-    App.locateObject = function(object_id, path){
-        if(path === undefined){
-            CB_Path.getPidPath(object_id, function(r, e){
-                if(r.success !== true) return ;
-                App.locateObject(r.id, r.path);
-            });
-            return;
-        }
-
-        App.locateObjectId = parseInt(object_id, 10);
-
-        params = {
-            descendants: false
-            ,query: ''
-            ,filters: {}
-        };
-        App.openPath(path, params);
-    };
 
     App.downloadFile = function(fileId, zipped, versionId){
         if(Ext.isElement(fileId)){
@@ -731,7 +715,7 @@ function initApp() {
             fileId = fileId.id;
             zipped = false;
         }
-        url = '/' + App.config.coreName + '/download.php?id='+fileId;
+        url = '/' + App.config.coreName + '/download/'+fileId;
         if(!Ext.isEmpty(versionId)) url += '&v='+versionId;
         if(zipped) {
             url += '&z=1';
@@ -885,14 +869,15 @@ function initApp() {
 
                     case 'tagField':
                         ed = new CB.object.field.editor.Tag({
-                            data: objData
+                            objData: objData
                             ,valueField: 'id'
                             ,displayField: 'name'
                             ,forceSelection: true
+                            ,typeAhead: true
                             ,queryMode: 'remote'
                             ,autoLoadOnValue: true
                             ,multiSelect: true
-                            ,stacked: true
+                            // ,stacked: true
                             ,pinList: false
                             ,filterPickList: true
                         });

@@ -9,18 +9,18 @@
 **/
 namespace CB;
 
-// if no corename argument passed then exit
-if (empty($argv[1])) {
-    echo "\nError: no core argument given\n";
-    exit(0);
-}
-
 ini_set('max_execution_time', 0);
 ini_set('allow_url_fopen', true);
 error_reporting(E_ALL);
 
-$_GET['core'] = $argv[1];
-$_SERVER['SERVER_NAME'] = $argv[1];
+$scriptOptions = getOptions();
+
+if (empty($scriptOptions['core'])) {
+    die('no core specified or invalid options set.');
+}
+
+$_GET['core'] = $scriptOptions['core'];
+$_SERVER['SERVER_NAME'] = $scriptOptions['core'];
 $_SERVER['REMOTE_ADDR'] = 'localhost';
 
 // session_start();
@@ -38,17 +38,37 @@ include $site_path.DIRECTORY_SEPARATOR.'config.php';
 
 require_once LIB_DIR.'Util.php';
 
-require_once(DOC_ROOT.'language.php');
+require_once(LIB_DIR.'language.php');
 
 $coreName = Config::get('core_name');
 //L\initTranslations(); // would be called from inside crons that need translations
 
 //--------------------------------------------------- functions
+function getOptions()
+{
+    $rez = array();
+
+    $options = getopt('c:alf', array('core', 'all', 'nolimit', 'force'));
+
+    $rez['core'] = empty($options['c'])
+        ? @$options['core']
+        : $options['c'];
+
+    $rez['all'] = isset($options['a']) || isset($options['all']);
+
+    $rez['nolimit'] = isset($options['l']) || isset($options['nolimit']);
+
+    $rez['force'] = isset($options['f']) || isset($options['force']);
+
+    return $rez;
+
+}
+
 function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
 {
-    global $argv, $coreName;
+    global $scriptOptions, $coreName;
 
-    if (@$argv[3] == 'force') {
+    if (!empty($scriptOptions['force'])) {
         return array('success' => true);
     }
 
@@ -83,6 +103,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
 
         $rez = $r;
         $rez['success'] = true;
+
     } else {
         global $cron_id;
         $rez['success'] = true;
@@ -98,6 +119,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
         ) or die( DB\dbQueryError() );
         $rez['id'] = DB\dbLastInsertId();
     }
+
     $res->close();
     DB\dbQuery(
         'UPDATE crons
@@ -117,9 +139,9 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
  */
 function closeCron($cron_id, $info = 'ok')
 {
-    global $argv;
+    global $scriptOptions;
 
-    if (@$argv[3] == 'force') {
+    if (!empty($scriptOptions['force'])) {
         return;
     }
 

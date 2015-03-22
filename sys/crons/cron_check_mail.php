@@ -7,9 +7,8 @@ $execution_timeout = 60; //default is 60 seconds
 require_once 'init.php';
 
 $coreName = Config::get('core_name');
-$zendPath = Config::get('ZEND_PATH');
 
-require_once $zendPath.'/Zend/Loader/StandardAutoloader.php';
+require_once 'Zend/Loader/StandardAutoloader.php';
 
 require_once 'mail_functions.php';
 
@@ -17,14 +16,14 @@ require_once 'mail_functions.php';
 $loader = new \Zend\Loader\StandardAutoloader(
     array(
         // absolute directory
-        'Zend' => $zendPath.'/Zend'
+        'Zend' => ZEND_PATH.'Zend'
     )
 );
 /** AFTER INSTANTIATION **/
 $loader = new \Zend\Loader\StandardAutoloader();
 
 // the path can be absolute or relative below:
-$loader->registerNamespace('Zend', $zendPath.'/Zend');
+$loader->registerNamespace('Zend', ZEND_PATH.'Zend');
 
 /** TO START AUTOLOADING */
 $loader->register();
@@ -410,9 +409,9 @@ foreach ($processed_ids as $uniq_id) {
     ) or die('error updating crons last action');
 }
 
-if ($i > 0) {
-    Solr\Client::runCron();
-}
+// if ($i > 0) {
+//     Solr\Client::runCron();
+// }
 /* end of moving read messages from inbox to All Mail folder*/
 
 /* deleting unprocessed messages from inbox*/

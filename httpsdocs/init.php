@@ -12,37 +12,18 @@ require_once dirname(__FILE__) . '/config.php';
 require_once 'lib/Util.php';
 require_once 'lib/DB.php';
 
-// connect to DB
-DB\connect();
-
 //Starting Session
 $sessionHandler = new Session();
 session_set_save_handler($sessionHandler, true);
 session_start();
 
-/* check if loged in correctly, comparing with the key and ips */
-$arr = explode('/', $_SERVER['SCRIPT_NAME']);
-$script = array_pop($arr);
-
-if (!in_array(
-    $script,
-    array(
-        'login.php'
-        ,'router.php'
-        ,'preview.php'
-        ,'recover_password.php'
-        ,'download.php'
-        ,'api.php'
-        ,'webdav.php'
-    )
-) && (! @$webDAVMode)   # simple hack to call init.php from another script without a redirect to login.
-) {
-    if (($_SERVER['SCRIPT_NAME'] != '/auth.php') && !User::isLoged()) {
-        header('Location: ' . Config::get('core_url') . 'login.php');
+// check if loged in
+if (!@$webDAVMode && !(php_sapi_name() == "cli") ) {   # simple hack to call init.php from another script without a redirect to login.
+    if (!in_array(@$_GET['command'], array('login', 'recover')) && !User::isLoged()) {
+        header('Location: ' . Config::get('core_url') . 'login/');
         exit(0);
     }
 }
-/* end of check if loged in correctly, comparing with the key and ips */
 
 $sessionPersistence = Config::get('session.persistent', true);
 if (empty($sessionPersistence)) {
@@ -51,7 +32,7 @@ if (empty($sessionPersistence)) {
 }
 
 // include languages and define Language constants and translations
-require_once 'language.php';
+require_once 'lib/language.php';
 
 L\initTranslations();
 
@@ -71,5 +52,3 @@ foreach ($required_folders as $rfp) {
     }
 }
 /* end of verify required CaseBox folder existance */
-
-/* load core custom config and plugins config */

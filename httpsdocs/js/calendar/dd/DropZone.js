@@ -117,12 +117,11 @@ Ext.define('Ext.calendar.dd.DropZone', {
         el.className = 'ext-dd-shim';
         this.shimCt.appendChild(el);
 
-        return new Ext.Layer({
-            shadow: false,
-            useDisplay: true,
-            constrain: false
-        },
-        el);
+        el = Ext.get(el);
+
+        el.setVisibilityMode(2);
+
+        return el;
     },
 
     clearShims: function() {

@@ -56,4 +56,4 @@ $res->close();
 closeCron($cron_id);
 
 //Starting reindexing cron to update changes into solr
-Solr\Client::runCron();
+// Solr\Client::runCron();

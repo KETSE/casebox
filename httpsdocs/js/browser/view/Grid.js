@@ -52,7 +52,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,groupable: false
             },{
                 header: L.Path
-                ,hidden:true
+                ,hidden: true
                 ,width: 150
                 ,dataIndex: 'path'
                 ,renderer: function(v, m, r, ri, ci, s){
@@ -120,7 +120,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.CreatedDate
-                ,hidden:true
+                ,hidden: true
                 ,width: 120
                 ,dataIndex: 'cdate'
                 ,xtype: 'datecolumn'
@@ -128,7 +128,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.UpdatedDate
-                ,hidden:true
+                ,hidden: true
                 ,width: 120
                 ,dataIndex: 'udate'
                 ,xtype: 'datecolumn'
@@ -136,7 +136,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.CommentedDate
-                ,hidden:true
+                ,hidden: true
                 ,width: 120
                 ,dataIndex: 'comment_date'
                 ,xtype: 'datecolumn'
@@ -149,6 +149,7 @@ Ext.define('CB.browser.view.Grid', {
             ? this.config.selModel
             : new Ext.selection.RowModel({
                mode: 'MULTI'
+               ,allowDeselect: true
             });
 
         this.grid = new Ext.grid.Panel({
@@ -180,6 +181,13 @@ Ext.define('CB.browser.view.Grid', {
                 ,emptyText: L.NoData
                 ,deferInitialRefresh: false
 
+                ,listeners: {
+                    scope: this
+                    ,containermousedown: function(view, e, eOpts) {
+                        //deselect all selected records when clicking on empty area of the grid
+                        this.grid.getSelectionModel().deselectAll();
+                    }
+                }
                 ,plugins: [{
                         ptype: 'CBPluginDDFilesDropZone'
                         ,pidPropety: 'nid'
@@ -193,13 +201,14 @@ Ext.define('CB.browser.view.Grid', {
                         ,idProperty: 'nid'
                         ,dropZoneConfig: {
                             text: L.GridDDMgs
-                            ,onScrollerDragDrop: this.onScrollerDragDrop
-                            ,scope: this
+                            // ,onScrollerDragDrop: this.onScrollerDragDrop
+                            // ,scope: this
+                            ,onContainerOver: Ext.Function.bind(this.ddOnContainerOver, this)
+                            ,onContainerDrop: Ext.Function.bind(this.ddOnContainerDrop, this)
                         }
                     }
                 ]
             }
-            // ,sm: new Ext.grid.RowSelectionModel({
             ,selModel: sm
             ,listeners:{
                 scope: this
@@ -210,26 +219,6 @@ Ext.define('CB.browser.view.Grid', {
                 ,rowclick: this.onRowClick
                 ,rowdblclick: this.onRowDblClick
                 ,selectionchange: this.onSelectionChange
-                // ,contextmenu: this.onContextMenu
-                // ,rowcontextmenu: this.onRowContextMenu
-                // ,beforedestroy: this.onBeforeDestroy
-                // ,activate: App.onComponentActivated
-                ,mousedown: function(e){
-                    if(e.button == 2){ //rightclick
-                        /* lock selection if rightclicking on a selected row. Unlock should be called after corresponding actions (usually called with defer).*/
-                        //TO REENABLE THE CODE AFTER POPUP MENU REVIEW
-                        // sm = this.grid.getSelectionModel();
-                        // s = sm.getSelections();
-                        // target = e.getTarget('.x-grid3-row');
-                        // for (var i = 0; i < s.length; i++) {
-                        //     el = this.grid.getView().getRow(this.grid.store.indexOf(s[i]));
-                        //     if( el == target ){
-                        //         sm.lock();
-                        //         return;
-                        //     }
-                        // }
-                    }
-                }
 
                 ,columnmove:    this.saveGridState
                 ,columnresize:  this.saveGridState
@@ -382,18 +371,14 @@ Ext.define('CB.browser.view.Grid', {
             }]
         });
 
-        // this.objectPanel = new CB.object.ViewContainer({
-        //     region: 'east'
-        //     ,width: 250
-
-        //     ,collapsible: true
-        //     ,collapseMode: 'mini'
-
-        //     ,stateful: true
-        //     ,stateId: 'gvop' //grid view object panel
-
-        //     ,onCloseClick: Ext.Function.bind(this.onCloseObjectPanelClick, this)
-        // });
+        //reset scroll on veiew refresh
+        this.grid.view.on(
+            'refresh'
+            ,function(view){
+                view.scrollTo(0, 0, false);
+            }
+            ,this
+        );
 
         Ext.apply(this, {
             title: L.Explorer
@@ -405,10 +390,10 @@ Ext.define('CB.browser.view.Grid', {
             //     this.grid
             //     ,this.objectPanel
             // ]
-            ,listeners: {
-                scope: this
-                ,activate: this.onActivate
-            }
+            // ,listeners: {
+            //     scope: this
+            //     ,activate: this.onActivate
+            // }
         });
         this.callParent(arguments);
 
@@ -442,8 +427,12 @@ Ext.define('CB.browser.view.Grid', {
         Ext.grid.column.Column.prototype.sort.apply(this, arguments);
     }
 
-    ,onActivate: function() {
-        this.fireEvent(
+    /**
+     * fire the venet for main browser view to update its buttons
+     * @return void
+     */
+    ,updateToolbarButtons: function() {
+        this.refOwner.fireEvent(
             'settoolbaritems'
             ,[
                 'create'
@@ -478,9 +467,11 @@ Ext.define('CB.browser.view.Grid', {
 
         delete this.grid.userSort;
 
-        var hadSelection = false;
-        var prevSelectedId = 0;
-        var prevSelectedPid = 0;
+        //grid selection logic
+        var hadSelection = false
+            ,prevSelectedId = 0
+            ,prevSelectedPid = 0
+            ,locateId = Ext.valueFrom(this.refOwner.params, {}).locatingObject;
 
         if(!Ext.isEmpty(this.savedSelection)) {
             hadSelection = true;
@@ -488,19 +479,18 @@ Ext.define('CB.browser.view.Grid', {
             prevSelectedPid = this.savedSelection[0].pid;
         }
 
-        // try to select the item, if set, from App.locateObjectId
-        var locatedAnItem = App.mainViewPort.selectGridObject(this.grid);
-
         // otherwise select previous items, if any
-        if(!locatedAnItem &&
-            !Ext.isEmpty(this.savedSelection)
-        ) {
+        if(!Ext.isEmpty(locateId)) {
+            this.savedSelection = [{nid: locateId}];
+        }
+
+        if(!Ext.isEmpty(this.savedSelection)) {
             this.selectItems(this.savedSelection);
         }
 
         this.grid.getSelectionModel().resumeEvents(true);
 
-        if(!locatedAnItem) {
+        if(Ext.isEmpty(locateId)) {
             var haveSelection = this.grid.getSelectionModel().hasSelection()
                 ,currSelectedId = haveSelection
                     ? this.grid.getSelection()[0].get('nid')
@@ -514,26 +504,51 @@ Ext.define('CB.browser.view.Grid', {
                 this.fireSelectionChangeEvent();
             }
         } else {
-            delete App.locateObjectId;
+            delete this.refOwner.params.locatingObject;
         }
+        //end of grid selection logic
 
-        //WORKING
+        this.updateToolbarButtons();
+
         // update empty text
-        // this.updateEmtyText(
-        //     recs
-        //     ,options.request.config.params.filters
-        //     ,
-        // );
 
         var noRecords = Ext.isEmpty(recs)
-            ,filters = options.request.config.params.filters
+            ,params = options.request.config.params
+            ,filters = params.filters
             ,emptyFilters = Ext.isEmpty(filters) || Ext.Object.isEmpty(filters)
-            ,emptyText = emptyFilters
+            ,emptyText = (emptyFilters && Ext.isEmpty(params.query) && Ext.isEmpty(params.search))
                 ? L.GridEmptyText
                 : L.NoResultsFound;
 
-        this.grid.view. emptyText = emptyText;
+        this.grid.view.emptyText = emptyText;
     }
+
+    ,ddOnContainerOver: function(source, e, data) {
+        var d
+            ,currentPid = this.refOwner.folderProperties.id
+            ,rez = source.dropAllowed;
+
+        for (var i = 0; i < data.records.length; i++) {
+            d = data.records[i].data;
+            if(d['pid'] == currentPid) {
+                rez = source.dropNotAllowed;
+            }
+        }
+
+        return rez;
+    }
+
+    ,ddOnContainerDrop: function(source, e, data) {
+        if(this.ddOnContainerOver(source, e, data) == source.dropAllowed) {
+            this.onScrollerDragDrop(
+                this.refOwner.folderProperties
+                ,source
+                ,e
+                ,data
+            );
+        }
+    }
+
 
     ,onScrollerDragDrop: function(targetData, source, e, data){
         var d, sourceData = [];
@@ -604,7 +619,9 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,onSelectionChange: function () {
-        this.fireSelectionChangeEvent();
+        if(!App.mouseDown) {
+            this.fireSelectionChangeEvent();
+        }
     }
 
     ,onEnterKeyPress: function(key, e) {
@@ -645,7 +662,18 @@ Ext.define('CB.browser.view.Grid', {
     }
 
     ,saveGridState: function() {
+        if(this.grid.disableStateSave && Ext.isEmpty(this.store.proxy.extraParams.userGroup)) {
+            return false;
+        }
+
         var state = this.grid.getState();
+
+        //sometimes grid state doesnt return group property
+        if(!Ext.isEmpty(state.group)) {
+            if(Ext.isEmpty(state.group.property)) {
+                state.group.property = this.store.getGroupField();
+            }
+        }
 
         CB_State_DBProvider.saveGridViewState(
             {

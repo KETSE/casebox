@@ -7,7 +7,7 @@ Ext.define('CB.object.edit.Form', {
 
     ,tbarCssClass: 'x-panel-white'
     ,padding: 0
-    ,autoScroll: false
+    ,scrollable: false
     ,layout: 'anchor'
     ,data: {}
 
@@ -182,7 +182,7 @@ Ext.define('CB.object.edit.Form', {
                     ,includeTopFields: true
                     ,stateId: 'oevg' //object edit vertical grid
                     ,autoExpandColumn: 'value'
-                    ,autoScroll: false
+                    ,scrollable: false
                     ,keys: [{
                         key: "s"
                         ,ctrl:true
@@ -290,7 +290,7 @@ Ext.define('CB.object.edit.Form', {
             (this.grid.store.getCount() > 0)
         ) {
             var valueCol = this.grid.headerCt.child('[dataIndex="value"]');
-            var colIdx = valueCol.getIndex();
+            var colIdx = valueCol.getVisibleIndex();
 
             this.grid.getSelectionModel().select({row: 0, column: colIdx});
             this.grid.getNavigationModel().setPosition(0, colIdx);

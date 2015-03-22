@@ -116,10 +116,12 @@ function getItemIcon(d){
     switch( CB.DB.templates.getType(d.template_id) ){
         case 'file':
             return getFileIcon(d['name']);
+
         case 'task':
             if(d['task_status'] == 3) {
                 return 'icon-task-completed';
             }
+            //if not completed task - do default
 
         default:
             tr = CB.DB.templates.getById(d.template_id);
@@ -318,4 +320,25 @@ function updateMenu(menuButton, menuConfig, handler, scope){
         }
 
     for(i = 0; i < menu.length; i++) menuButton.menu.add(menu[i]);
+}
+
+/**
+ * equivalent function to php html_entity_decode
+ * @param  varchar str
+ * @return varchar
+ */
+function htmlEntityDecode(str){
+    if(Ext.isEmpty(str)) {
+        return '';
+    }
+
+    if(!document.hedTA) {
+        document.hedTA = document.createElement("textarea");
+    }
+
+    var ta = document.hedTA;
+
+    ta.innerHTML = str.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+    return ta.value;
 }

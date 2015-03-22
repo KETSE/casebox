@@ -1,7 +1,7 @@
 <?php
 namespace CB;
 
-use CB\DB as DB;
+use CB\DB;
 
 class Plugin implements Interfaces\Plugin
 {
@@ -18,7 +18,7 @@ class Plugin implements Interfaces\Plugin
     {
         $rez = array();
         $res = DB\dbQuery(
-            'SELECT cfg FROM casebox.plugins WHERE name = $1',
+            'SELECT cfg FROM ' . PREFIX . '_casebox.plugins WHERE name = $1',
             $this->name
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
@@ -33,7 +33,7 @@ class Plugin implements Interfaces\Plugin
     {
         $this->config = $cfg;
         DB\dbQuery(
-            'UPDATE casebox.plugins SET `cfg` = $2 WHERE name = $1',
+            'UPDATE ' . PREFIX . '_casebox.plugins SET `cfg` = $2 WHERE name = $1',
             array(
                 $this->name
                 ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
@@ -48,7 +48,7 @@ class Plugin implements Interfaces\Plugin
         }
 
         DB\dbQuery(
-            'INSERT INTO casebox.plugins (name, cfg)
+            'INSERT INTO ' . PREFIX . '_casebox.plugins (name, cfg)
             VALUES($1, $2)',
             array(
                 $this->name
@@ -62,7 +62,7 @@ class Plugin implements Interfaces\Plugin
     public function uninstall()
     {
         DB\dbQuery(
-            'DELETE from casebox.plugins where name = $1',
+            'DELETE from ' . PREFIX . '_casebox.plugins where name = $1',
             $this->name
         ) or die(DB\dbQueryError());
 
@@ -72,7 +72,7 @@ class Plugin implements Interfaces\Plugin
     {
         $rez = false;
         $res = DB\dbQuery(
-            'SELECT name FROM casebox.plugins WHERE name = $1',
+            'SELECT name FROM ' . PREFIX . '_casebox.plugins WHERE name = $1',
             $this->name
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
@@ -87,7 +87,7 @@ class Plugin implements Interfaces\Plugin
     {
         $rez = false;
         $res = DB\dbQuery(
-            'SELECT `active` FROM casebox.plugins WHERE name = $1',
+            'SELECT `active` FROM ' . PREFIX . '_casebox.plugins WHERE name = $1',
             $this->name
         ) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
@@ -101,7 +101,7 @@ class Plugin implements Interfaces\Plugin
     public function enable()
     {
         DB\dbQuery(
-            'UPDATE casebox.plugins SET active` = 1 WHERE name = $1',
+            'UPDATE ' . PREFIX . '_casebox.plugins SET active` = 1 WHERE name = $1',
             $this->name
         ) or die(DB\dbQueryError());
     }
@@ -109,7 +109,7 @@ class Plugin implements Interfaces\Plugin
     public function disable()
     {
         DB\dbQuery(
-            'UPDATE casebox.plugins SET active` = 0 WHERE name = $1',
+            'UPDATE ' . PREFIX . '_casebox.plugins SET active` = 0 WHERE name = $1',
             $this->name
         ) or die(DB\dbQueryError());
     }
