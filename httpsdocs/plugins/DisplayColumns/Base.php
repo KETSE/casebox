@@ -220,8 +220,6 @@ class Base
                             $doc[$fieldName] = $template->formatValueForDisplay($templateField, $value, false);
                         }
                     }
-
-                    //
                 }
             }
 

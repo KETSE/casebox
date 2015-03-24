@@ -24,6 +24,7 @@ Ext.define('CB.browser.view.Charts', {
             ,lazyRender: true
             ,queryMode: 'local'
             ,fieldLabel: 'Facets'
+            ,cls: 'fs12'
             ,labelWidth: 'auto'
             ,editable: false
             ,store: new Ext.data.JsonStore({
@@ -36,6 +37,40 @@ Ext.define('CB.browser.view.Charts', {
                 scope: this
                 ,select: this.onFacetChange
             }
+        });
+
+        this.sortButton = new Ext.Button({
+            itemId: 'chartsSortButton'
+            ,iconCls: 'im-sort'
+            ,style: 'margin-left: 10px'
+            ,text: ''
+            ,menu: [
+                {
+                    text: L.SortByNameAsc
+                    ,sort: 'name'
+                    ,direction: 'asc'
+                    ,scope: this
+                    ,handler: this.onSortButtonClick
+                },{
+                    text: L.SortByNameDesc
+                    ,sort: 'name'
+                    ,direction: 'desc'
+                    ,scope: this
+                    ,handler: this.onSortButtonClick
+                },{
+                    text: L.SortByCountAsc
+                    ,sort: 'count'
+                    ,direction: 'asc'
+                    ,scope: this
+                    ,handler: this.onSortButtonClick
+                },{
+                    text: L.SortByCountDesc
+                    ,sort: 'count'
+                    ,direction: 'desc'
+                    ,scope: this
+                    ,handler: this.onSortButtonClick
+                }
+            ]
         });
 
         this.refOwner.buttonCollection.addAll(
@@ -72,6 +107,7 @@ Ext.define('CB.browser.view.Charts', {
                 ,handler: this.onChangeChartClick
             })
             ,this.facetsCombo
+            ,this.sortButton
         );
 
         this.seriesStyles = [];
@@ -219,6 +255,7 @@ Ext.define('CB.browser.view.Charts', {
             'settoolbaritems'
             ,[
                 'facetscombo'
+                ,'chartsSortButton'
                 ,'->'
                 // ,'linechart'
                 ,'barchart'
@@ -281,10 +318,7 @@ Ext.define('CB.browser.view.Charts', {
         var data = {}
             ,sorter = null;
 
-        /* find sorter if set in viewParams */
-        if(this.viewParams){
-            sorter = this.detectSorter(this.viewParams);
-        }
+        sorter = this.detectSorter(Ext.valueFrom(this.viewParams, {}));
 
         Ext.iterate(
             this.data
@@ -366,5 +400,46 @@ Ext.define('CB.browser.view.Charts', {
 
         this.selectedFacets[0] = record.get('id');
         this.onChangeChartClick(this.currentButton);
+    }
+
+    /**
+     * handler for sort button items
+     * @param  object b
+     * @param  event e
+     * @return void
+     */
+    ,onSortButtonClick: function(b, e) {
+        var params = Ext.valueFrom(this.viewParams, {});
+
+        params.sort = b.sort;
+        params.direction = b.direction;
+
+        this.viewParams = params;
+
+        this.loadChartData();
+
+        this.sortButton.setText(b.text);
+    }
+
+    /**
+     * detect sorter to be used according to given params
+     * default is sort by name ascending
+     *
+     * @param  object params
+     * @return function | null
+     */
+    ,detectSorter: function(params) {
+        if(Ext.isEmpty(params.sort)) {
+            params.sort = 'name';
+        }
+        if(Ext.isEmpty(params.direction)) {
+            params.direction = 'asc';
+        }
+
+        var translationIndex = 'SortBy' + Ext.String.capitalize(params.sort) + Ext.String.capitalize(params.direction);
+        clog('translationIndex', translationIndex);
+        this.sortButton.setText(L[translationIndex]);
+
+        return this.callParent(arguments);
     }
 });

@@ -685,6 +685,7 @@ class Files
             $pid = $p['pid'];
             if (!empty($f['dir'])) {
                 $pid = $this->mkTreeDir($pid, $f['dir']);
+                $f['pid'] = $pid;
             }
 
             $fileId = empty($p['id'])

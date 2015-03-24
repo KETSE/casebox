@@ -100,7 +100,7 @@ Ext.define('CB.object.edit.Window', {
         this.actions = {
             edit: new Ext.Action({
                 text: L.Edit
-                ,iconCls: 'icon-edit'
+                ,iconCls: 'i-edit-obj'
                 ,hidden: true
                 ,scope: this
                 ,handler: this.onEditClick

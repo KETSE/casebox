@@ -19,6 +19,11 @@ class Listeners
                 break;
 
             default:
+                //unset sort params for other views
+                //because other views (chart, calendar) dont need sorting
+                //and would result in error if sorted by a custom column and not processed
+                unset($p['params']['sort']);
+
                 return;
         }
 
