@@ -1,3 +1,16 @@
+CaseBox 1.9.405 (2015-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- #4831 UX improvement for @user field
+- #4806 Make links clickable for varchar, txt and memo fields
+
+Fixed Bugs:
+----------
+- #4953 Clicking on Path in Properties ObjPlugin has no effect
+- #4912 Can't upload the picture for user profile
+- #4951 Order in Tree not ok after last commit
+
 CaseBox 1.9.404 (2015-03-24)
 ==============================
 New Features, Improvements
