@@ -3,6 +3,7 @@ namespace CB;
 
 use CB\L;
 use CB\Util;
+use CB\Objects\Comment;
 
 class Tasks
 {
@@ -1133,7 +1134,7 @@ class Tasks
 
         $params = array( '{name}' => Util\adjustTextForDisplay($d['title'])
             ,'{datetime_period}' => $d['datetime_period']
-            ,'{description}' => nl2br(Util\adjustTextForDisplay($d['description']))
+            ,'{description}' => nl2br(Comment::processAndFormatMessage(Util\adjustTextForDisplay($d['description'])))
             ,'{status}' => $d['status']
             ,'{status_text}' => L\get('taskStatus'.$d['status'])
             ,'{importance_text}' => ''

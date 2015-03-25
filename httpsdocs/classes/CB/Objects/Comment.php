@@ -36,6 +36,10 @@ class Comment extends Object
      */
     public static function processAndFormatMessage($message)
     {
+        if (empty($message)) {
+            return $message;
+        }
+
         // replace urls with links
         $message = Util\replaceUrlsWithLinks($message);
 

@@ -27,7 +27,7 @@ Ext.define('CB.object.plugin.SystemProperties', {
             ,itemSelector:'tr'
             ,listeners: {
                 scope: this
-                ,itemclick: this.onItemClick
+                ,afterrender: this.attachEvents
             }
         });
 
@@ -54,16 +54,29 @@ Ext.define('CB.object.plugin.SystemProperties', {
         }
     }
 
-    ,onItemClick: function (cmp, record, item, index, e, eOpts) {//dv, index, el, e
-        var te = Ext.get(e.getTarget());
-        if(!te) {
-            return;
-        }
+    ,attachEvents: function(){
+        a = this.getEl().query('a.path');
+        Ext.each(
+            a
+            ,function(t){
+                Ext.get(t).addListener(
+                    'click'
+                    ,this.onPathClick
+                    ,this
+                );
+            }
+            ,this
+        );
+    }
 
-        if(te.hasCls('path')) {
-            App.openPath(this.params.path);
-        }
-
+    /**
+     * handler to open path when clicked
+     * @param  event ev
+     * @param  element el
+     * @return void
+     */
+    ,onPathClick: function(ev, el){
+        App.openPath(this.params.path);
     }
 
     ,getContainerToolbarItems: function() {

@@ -437,7 +437,7 @@ Ext.define('CB.browser.view.Charts', {
         }
 
         var translationIndex = 'SortBy' + Ext.String.capitalize(params.sort) + Ext.String.capitalize(params.direction);
-        clog('translationIndex', translationIndex);
+
         this.sortButton.setText(L[translationIndex]);
 
         return this.callParent(arguments);

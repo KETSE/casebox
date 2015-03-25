@@ -11,18 +11,25 @@ Ext.define('CB.object.plugin.Base', {
 
         this.enableBubble(['openproperties', 'createobject', 'objectopen']);
 
-        // CB.object.plugin.Base.superclass.initComponent.apply(this, arguments);
         this.callParent(arguments);
-
     }
 
+    /**
+     * method to be overriten in descendant classes
+     * @param  array r
+     * @param  event e
+     * @return void
+     */
     ,onLoadData: function(r, e) {
         if(Ext.isEmpty(r.data)) {
             return;
         }
-        //overwrite this method and add your logic
     }
 
+    /**
+     * get parent panel loaded data
+     * @return object
+     */
     ,getLoadedObjectProperties: function() {
         var pluginsPanel = this.up('panel');
 
@@ -31,8 +38,11 @@ Ext.define('CB.object.plugin.Base', {
             : {};
     }
 
-    ,prepareToolbar: function()
-    {
+    /**
+     * base method for preparing toolbar items
+     * @return void
+     */
+    ,prepareToolbar: function() {
         if(Ext.isEmpty(this.title) && Ext.isEmpty(this.actions)) {
             return;
         }
@@ -58,16 +68,28 @@ Ext.define('CB.object.plugin.Base', {
         this.tbar = tbarItems;
     }
 
+    /**
+     * placeholder to get and array of itemIds for components to be displayed in toolbar
+     * @return array
+     */
     ,getToolbarItems: function() {
         return [];
     }
 
+    /**
+     * placeholder to get and array of itemIds for components to be displayed in container toolbar
+     * @return array
+     */
     ,getContainerToolbarItems: function() {
         return {};
     }
 
+    /**
+     * common method used to open another object
+     * @param  object data
+     * @return void
+     */
     ,openObjectProperties: function(data) {
         this.fireEvent('openproperties', data);
     }
-
 });

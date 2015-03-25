@@ -877,6 +877,7 @@ function initApp() {
                             ,queryMode: 'remote'
                             ,autoLoadOnValue: true
                             ,multiSelect: true
+                            ,minChars: 2
                             // ,stacked: true
                             ,pinList: false
                             ,filterPickList: true

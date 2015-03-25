@@ -55,6 +55,25 @@ Ext.define('CB.object.plugin.ObjectProperties', {
             ,this
         );
 
+
+        a = this.getEl().query('a.obj-ref');
+        Ext.each(
+            a
+            ,function(t){
+                Ext.get(t).addListener(
+                    'click'
+                    ,function(ev, el){
+                        this.openObjectProperties({
+                            id: el.attributes.href.value.substr(1)
+                            ,template_id: el.attributes.templateid.value
+                        });
+                    }
+                    ,this
+                );
+            }
+            ,this
+        );
+
         a = this.getEl().query('a.path');
         Ext.each(
             a
