@@ -1,3 +1,11 @@
+CaseBox 1.9.406 (2015-03-27)
+==============================
+New Features, Improvements
+--------------------------
+- #4976 Update Text2URL function
+- #4958 Question: the real folder with several virtual is not leaf node and to be opened by default
+- #4960 Implement breadcrumb as in Google Drive
+
 CaseBox 1.9.405 (2015-03-25)
 ==============================
 New Features, Improvements

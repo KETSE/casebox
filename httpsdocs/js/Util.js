@@ -228,23 +228,28 @@ function getStoreNames(v){
     return texts.join(',');
 }
 
-function toNumericArray(v){
+function toNumericArray(v, delimiter){
     if (Ext.isEmpty(v)) {
         return [];
     }
+
+    if(Ext.isEmpty(delimiter)) {
+        delimiter = ',';
+    }
+
     if (!Ext.isArray(v)) {
-        v = String(v).split(',');
+        v = String(v).split(delimiter);
     }
 
     var rez = [];
 
-    for (var i = v.length - 1; i >= 0; i--) {
+    for (var i = 0; i < v.length; i++) {
         var w = String(v[i]).trim()
             ,iw = parseInt(w, 10);
-
+        clog(w, iw);
         if (iw == w) {
             rez.push(iw);
-        } else if(!isNaN(w)){
+        } else if(!isNaN(iw)){
             rez.push(parseFloat(w));
         }
     }

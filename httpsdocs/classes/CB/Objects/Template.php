@@ -639,7 +639,7 @@ class Template extends Object
             case 'varchar':
             case 'memo':
             case 'text':
-                $value = nl2br(Comment::processAndFormatMessage(htmlspecialchars($value, ENT_COMPAT)));
+                $value = nl2br(Comment::processAndFormatMessage(htmlspecialchars($value, ENT_COMPAT)), @$field['text_renderer']);
                 break;
             default:
                 if (is_array($value)) {

@@ -79,6 +79,18 @@ class Dbnode extends Base
 
                 if ($r = $res->fetch_assoc()) {
                     $d['cfg'] = Util\toJSONArray($r['cfg']);
+
+                    if (!empty($d['cfg']) && ($p['from'] == 'tree')) {
+                        if (isset($d['cfg']['loaded'])) {
+                            $d['loaded'] = $d['cfg']['loaded'];
+                        }
+                        if (isset($d['cfg']['expanded'])) {
+                            $d['expanded'] = $d['cfg']['expanded'];
+                        }
+                        if (isset($d['cfg']['leaf'])) {
+                            $d['leaf'] = $d['cfg']['leaf'];
+                        }
+                    }
                 }
                 $res->close();
             }
