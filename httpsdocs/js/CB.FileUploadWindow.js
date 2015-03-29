@@ -23,6 +23,7 @@ Ext.define('CB.FilesConfirmationWindow', {
         single: true
         ,autorenameButton: true
     }
+
     ,initComponent: function(){
         this.data = this.config.data;
 
@@ -85,6 +86,7 @@ Ext.define('CB.FilesConfirmationWindow', {
 
         this.response = 'cancel';
     }
+
     ,onButtonClick: function(b){
         this.response = b.name;
         this.hide();

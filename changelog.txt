@@ -1,4 +1,39 @@
-CaseBox 1.9.403 (2015-03-21)
+CaseBox 1.9.406 (2015-03-27)
+==============================
+New Features, Improvements
+--------------------------
+- #4976 Update Text2URL function
+- #4958 Question: the real folder with several virtual is not leaf node and to be opened by default
+- #4960 Implement breadcrumb as in Google Drive
+
+CaseBox 1.9.405 (2015-03-25)
+==============================
+New Features, Improvements
+--------------------------
+- #4831 UX improvement for @user field
+- #4806 Make links clickable for varchar, txt and memo fields
+
+Fixed Bugs:
+----------
+- #4953 Clicking on Path in Properties ObjPlugin has no effect
+- #4912 Can't upload the picture for user profile
+- #4951 Order in Tree not ok after last commit
+
+CaseBox 1.9.404 (2015-03-24)
+==============================
+New Features, Improvements
+--------------------------
+- #1311 Add facet popup menu with: Sorting & AND mode
+- #4874 Update "Edit" and remaining toolbar button icons in Obj Window
+
+Fixed Bugs:
+----------
+- #4935 D&D from Grid 2 Tree doesn't work
+- #4853 Folder upload not working correctly
+- #4875 "Order" field displayed empty in Grid for tmpl fields
+- #4809 Chart/Pivot views not working if a DC column is sorted
+
+CaseBox 1.9.403 (2015-03-22)
 ==============================
 New Features, Improvements
 --------------------------

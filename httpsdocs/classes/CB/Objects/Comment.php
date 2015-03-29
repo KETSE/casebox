@@ -34,13 +34,21 @@ class Comment extends Object
      *     - replace object references with links
      * @param varchar $message
      */
-    public static function processAndFormatMessage($message)
+    public static function processAndFormatMessage($message, $replacements = 'user,object,url')
     {
+        if (empty($message)) {
+            return $message;
+        }
+
+        $replacements = Util\toTrimmedArray($replacements);
+
         // replace urls with links
-        $message = Util\replaceUrlsWithLinks($message);
+        if (in_array('url', $replacements)) {
+            $message = \Kwi\UrlLinker::getInstance()->linkUrlsAndEscapeHtml($message);
+        }
 
         //replace object references with links
-        if (preg_match_all('/#(\d+)/', $message, $matches, PREG_SET_ORDER)) {
+        if (in_array('object', $replacements) && preg_match_all('/#(\d+)/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $templateId = Objects::getTemplateId($match[1]);
                 $name = Objects::getName($match[1]);
@@ -59,8 +67,8 @@ class Comment extends Object
             }
         }
 
-        //replace users ith their names
-        if (preg_match_all('/@([\w\.\-]+[\w])/', $message, $matches, PREG_SET_ORDER)) {
+        //replace users with their names
+        if (in_array('user', $replacements) &&preg_match_all('/@([\w\.\-]+[\w])/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $userId = User::exists($match[1]);
                 if (is_numeric($userId)) {

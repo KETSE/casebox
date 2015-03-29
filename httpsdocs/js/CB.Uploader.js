@@ -195,21 +195,24 @@ Ext.define('CB.Uploader', {
         if(this.config.autoShowWindow) {
             //this.showUploadWindow();
         }
+
         this.group++;
-        Ext.each(FilesList, function(f){
-            var dir = Ext.valueFrom(f.fullPath, f.mozFullPath);
-            if(!Ext.isEmpty(dir)){
-                dir = dir.split('/');
-                dir.pop();
-                dir = dir.join('/');
-            }else {
-                dir = '/';
-            }
 
-            var name = Ext.util.Format.stripScripts(Ext.util.Format.stripTags(f.name));
+        Ext.each(
+            FilesList
+            ,function(f){
+                var dir = Ext.valueFrom(f.fullPath, f.mozFullPath);
+                if(!Ext.isEmpty(dir)){
+                    dir = dir.split('/');
+                    dir.pop();
+                    dir = dir.join('/');
+                } else {
+                    dir = '/';
+                }
 
-            record =
-                Ext.create(
+                var name = Ext.util.Format.stripScripts(Ext.util.Format.stripTags(f.name));
+
+                record = Ext.create(
                     this.store.getModel().getName()
                     ,{
                         id: Ext.id()
@@ -229,11 +232,12 @@ Ext.define('CB.Uploader', {
                     }
                 );
 
-            // this.fileMD5.getMD5(f, record);
-            this.store.add([record]);
-            this.stats.totalSize += record.get('size');
-            this.stats.totalCount++;
-        }, this);
+                this.store.add([record]);
+                this.stats.totalSize += record.get('size');
+                this.stats.totalCount++;
+            }
+            ,this
+        );
 
         this.progressChange();
         this.calculateFilesMd5();
@@ -362,41 +366,42 @@ Ext.define('CB.UploadWindow', {
     ,height: 380
     ,layout: 'fit'
     ,filterIndex: 0
+
     ,initComponent: function(){
         this.uploader = this.uploader || App.getFileUploader();
 
         this.actions = {
             start: new Ext.Action({
                 text: L.Start
-                ,iconCls: 'icon-control'
+                ,iconCls: 'i-start'
                 ,handler: this.onStartClick
                 ,scope: this
                 ,disabled: true
             })
             ,stop: new Ext.Action({
                 text: L.Stop
-                ,iconCls: 'control-stop-square'
+                ,iconCls: 'i-stop'
                 ,handler: this.onStopClick
                 ,scope: this
                 ,hidden: true
             })
             ,cancel: new Ext.Action({
                 text: Ext.MessageBox.buttonText.cancel
-                ,iconCls: 'icon-cross'
+                ,iconCls: 'i-cancel'
                 ,handler: this.onCancelClick
                 ,scope: this
                 ,disabled: true
             })
             ,cancelAll: new Ext.Action({
                 text: L.CancelAll
-                ,iconCls: 'icon-cross'
+                ,iconCls: 'i-cancel'
                 ,handler: this.onCancelAllClick
                 ,scope: this
                 ,disabled: true
             })
             ,clear: new Ext.Action({
                 text: L.Clear
-                ,iconCls: 'icon-eraser'
+                // ,iconCls: 'icon-eraser'
                 ,handler: this.onClearClick
                 ,scope: this
                 ,hidden: true
@@ -424,7 +429,7 @@ Ext.define('CB.UploadWindow', {
 
         this.cancelSplitButton = new Ext.SplitButton({
             xtype: 'splitbutton'
-            ,iconCls: 'icon-cross'
+            ,iconCls: 'i-cancel'
             ,text: Ext.MessageBox.buttonText.cancel
             ,handler: this.onCancelClick
             ,scope: this
@@ -434,54 +439,56 @@ Ext.define('CB.UploadWindow', {
 
         this.viewButton = new Ext.Button({
             text: L.Pending
-            ,iconCls: 'icon-category'
+            ,iconCls: 'i-list'
             ,menu: [{
-                        enableToggle: true
-                        ,allowDepress: false
-                        ,toggleGroup: 'viewMode'
-                        ,pressed: true
-                        ,text: L.Pending
-                        ,filterIndex: 0
-                        ,scope: this
-                        ,handler: this.onChangeViewClick
+                    enableToggle: true
+                    ,allowDepress: false
+                    ,toggleGroup: 'viewMode'
+                    ,pressed: true
+                    ,text: L.Pending
+                    ,filterIndex: 0
+                    ,scope: this
+                    ,handler: this.onChangeViewClick
                 },{
-                        enableToggle: true
-                        ,allowDepress: false
-                        ,toggleGroup: 'viewMode'
-                        ,text: L.AllCompleted
-                        ,filterIndex: 1
-                        ,scope: this
-                        ,handler: this.onChangeViewClick
+                    enableToggle: true
+                    ,allowDepress: false
+                    ,toggleGroup: 'viewMode'
+                    ,text: L.AllCompleted
+                    ,filterIndex: 1
+                    ,scope: this
+                    ,handler: this.onChangeViewClick
                 },{
-                        enableToggle: true
-                        ,allowDepress: false
-                        ,toggleGroup: 'viewMode'
-                        ,text: L.All
-                        ,filterIndex: -1
-                        ,scope: this
-                        ,handler: this.onChangeViewClick
+                    enableToggle: true
+                    ,allowDepress: false
+                    ,toggleGroup: 'viewMode'
+                    ,text: L.All
+                    ,filterIndex: -1
+                    ,scope: this
+                    ,handler: this.onChangeViewClick
                 }
             ]
         });
+
         this.storeFilters = [
             function(r){ return (r.get('status') < 2); }
             ,function(r){ return (r.get('status') > 1); }
         ];
+
         this.optionsButton = new Ext.Button({
             text: L.Options
-            ,iconCls: 'icon-gear'
+            ,iconCls: 'i-settings'
             ,menu: [{
-                        checked: true
-                        ,text: L.AutoshowUpload
-                        ,scope: this
-                        ,name: 'autoShowWindow'
-                        ,handler: this.onOptionsClick
+                    checked: true
+                    ,text: L.AutoshowUpload
+                    ,scope: this
+                    ,name: 'autoShowWindow'
+                    ,handler: this.onOptionsClick
                 },{
-                        checked: true
-                        ,text: L.UploadAutoStart
-                        ,scope: this
-                        ,name: 'autoStart'
-                        ,handler: this.onOptionsClick
+                    checked: true
+                    ,text: L.UploadAutoStart
+                    ,scope: this
+                    ,name: 'autoStart'
+                    ,handler: this.onOptionsClick
                 }
             ]
         });
@@ -530,8 +537,13 @@ Ext.define('CB.UploadWindow', {
                     // ,hidden: true
                     ,dataIndex: 'loaded'
                     ,renderer: function(v, meta, r){
-                        if(r.get('status') == 0) return '';
-                        if(v == 0) return '';
+                        if(r.get('status') == 0) {
+                            return '';
+                        }
+                        if(v == 0) {
+                            return '';
+                        }
+
                         return Math.round(v*100/r.get('size')) + ' %';
                     }
                 },{
@@ -589,17 +601,21 @@ Ext.define('CB.UploadWindow', {
 
         CB.UploadWindow.superclass.initComponent.apply(this, arguments);
     }
+
     ,onAfterRender: function(){
         this.uploader.store.on('add', this.filterView, this);
     }
+
     ,onBeforeDestroy: function(){
         this.uploader.store.un('add', this.filterView, this);
         this.uploader.un('progresschange', this.onProgressChange, this);
     }
+
     ,onSelectionChange: function(sm){
         this.cancelSplitButton.setDisabled(!sm.hasSelection());
         this.actions.cancelAll.setDisabled(!sm.hasSelection());
     }
+
     ,onProgressChange: function(uploader, status, stats){
         // ,status:
         //  0 Ready to upload
@@ -624,7 +640,7 @@ Ext.define('CB.UploadWindow', {
                 this.statusLabel.setValue(Ext.valueFrom(L.UploadCompleted, 'Uploading ... '));
                 if(stats.currentLoaded < 0){//unable to compute
 
-                }else{
+                } else{
                     percent = stats.totalLoadedSize + stats.currentLoaded;
                     if(percent > 0) percent = Math.round(percent * 100 / stats.totalSize);
                     this.statusLabel.setValue( Ext.String.format( Ext.valueFrom(L.UploadCompleted, 'Uploading {0}% ({1} out of {2})'), percent, (stats.totalLoadedCount + 1), stats.totalCount) );
@@ -638,24 +654,30 @@ Ext.define('CB.UploadWindow', {
                 break;
         }
 
-        }
+    }
+
     ,onStartClick: function(b, e){
         this.uploader.start();
     }
+
     ,onStopClick: function(b, e){
 
     }
+
     ,onCancelClick: function(b, e){
         this.uploader.abort( );
     }
+
     ,onCancelAllClick: function(b, e){
         this.uploader.status = 3;
         this.uploader.abort( );
         /* mark all as aborted*/
     }
+
     ,onClearClick: function(b, e){
         this.uploader.store.each(function(r){if(r.get('status') > 1) this.store.remove(r);});
     }
+
     ,onChangeViewClick: function(b, e){
         // this.viewButton.setIconCls(b.iconCls)
         this.viewButton.setText(b.text);
@@ -664,6 +686,7 @@ Ext.define('CB.UploadWindow', {
 
         // this.uploader.store.removeAll();
     }
+
     ,filterView: function(filterIndex){
         if(!Ext.isNumber(filterIndex)) filterIndex = undefined;
         if(filterIndex !== undefined) this.filterIndex = filterIndex;
@@ -671,6 +694,7 @@ Ext.define('CB.UploadWindow', {
         if(this.filterIndex < 0) this.uploader.store.clearFilter();
         else this.uploader.store.filterBy(this.storeFilters[this.filterIndex]);
     }
+
     ,onOptionsClick: function(b, e){
         this.uploader.config[b.name] = !b.checked;
     }

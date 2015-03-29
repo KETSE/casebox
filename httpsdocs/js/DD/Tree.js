@@ -169,7 +169,9 @@ Ext.define('CB.DD.Tree', {
             };
 
             for (var i = 0; i < data.records.length; i++) {
-                data.records[i].collapse();
+                if(data.records[i].collapse) {
+                    data.records[i].collapse();
+                }
 
                 d = data.records[i].data;
                 sourceData.push({

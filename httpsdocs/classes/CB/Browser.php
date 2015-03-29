@@ -826,24 +826,20 @@ class Browser
             }
         }
 
-        //if ( !$files->fileExists($p['pid']) ) {
-        //  return array('success' => false, 'msg' => L\get('TargetFolderDoesNotExist'));
-        //  }
-        $res = DB\dbQuery(
-            'SELECT id FROM tree WHERE id = $1',
-            $p['pid']
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-
-        } else {
-            return array('success' => false, 'msg' => L\get('TargetFolderDoesNotExist'));
+        if (!Objects::idExists($p['pid'])) {
+            return array(
+                'success' => false,
+                'msg' => L\get('TargetFolderDoesNotExist')
+            );
         }
-        $res->close();
 
         /*checking if there is no upload error (for any type of upload: single, multiple, archive) */
         foreach ($F as $fn => $f) {
             if (!in_array($f['error'], array(UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE))) {
-                return array('success' => false, 'msg' => L\get('Error_uploading_file') .': '.$f['error']);
+                return array(
+                    'success' => false,
+                    'msg' => L\get('Error_uploading_file') .': '.$f['error']
+                );
             }
         }
 
@@ -857,6 +853,7 @@ class Browser
                 }
                 $F = $archiveFiles;
                 break;
+
             default:
                 $files->moveUploadedFilesToIncomming($F) or die('cannot move file to incomming dir');
                 break;
@@ -917,7 +914,12 @@ class Browser
 
         $files->storeFiles($p); //if everithing is ok then store files
         Solr\Client::runCron();
-        $rez = array('success' => true, 'data' => array('pid' => $p['pid']));
+
+        $rez = array(
+            'success' => true,
+            'data' => array('pid' => $p['pid'])
+        );
+
         $files->attachPostUploadInfo($F, $rez);
 
         return $rez;

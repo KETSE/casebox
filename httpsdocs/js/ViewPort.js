@@ -147,6 +147,7 @@ Ext.define('CB.ViewPort', {
         this.breadcrumb = Ext.create({
             xtype: 'CBBreadcrumb'
             ,cls: 'fs18'
+            ,flex: 1
         });
 
         this.searchField = Ext.create({
@@ -162,7 +163,7 @@ Ext.define('CB.ViewPort', {
             ,style:'background: #f4f4f4; border: 0;'
             ,items: [
                 this.breadcrumb
-                ,'->'
+                // ,'->'
                 ,this.searchField
                 ,{
                     xtype: 'tbspacer'

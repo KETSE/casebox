@@ -121,7 +121,9 @@ Ext.define('CB.plugin.field.DropDownList', {
             ,syncSelection: Ext.emptyFn
             ,setSelection: Ext.emptyFn
             ,onCollapse: function() {
-                delete this.preventEditComplete;
+                if(this.preventEditComplete !== Ext.EventObject.time) {
+                    delete this.preventEditComplete;
+                }
             }
             ,onEsc: Ext.emptyFn
             ,bindStore: Ext.emptyFn
@@ -370,7 +372,7 @@ Ext.define('CB.plugin.field.DropDownList', {
 
         newValue += value.substring(cmd.queryStartIndex + cmd.query.length);
 
-        ed.preventEditComplete = true;
+        ed.preventEditComplete = Ext.EventObject.time;
         ed.collapse();
         ed.setRawValue(newValue);
         this.setCaretPosition(ed.inputEl.dom, newCaretPosition);

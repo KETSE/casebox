@@ -608,7 +608,9 @@ class Config extends Singleton
                 )
                 ,'order' => array(
                     'title' => L\get('Order')
-                    ,'solr_column_name' => 'order'
+                    //we shouldnt set solr_column_name by default
+                    //because there are templates that could extract values from objects
+                    // ,'solr_column_name' => 'order'
                     ,"align" => "center"
                     ,"width" => 10
                     ,"columnWidth" => 10
