@@ -18,7 +18,7 @@ setlocale(LC_ALL, "en_US.utf8");
 
 $dbConfig = [
     'host' => '127.0.0.1'
-    ,'dbname' => 'casebox'
+    ,'dbname' => 'cb__casebox'
     ,'user' => 'local'
     ,'pass' => 'h0st'
     ,'port' => '3306'
@@ -51,7 +51,7 @@ exportTranslation($dbh, $csv, $lg);
 function exportTranslation($dbh, $csv, $lg)
 {
 
-    $sql = "SELECT id, name, en, `$lg` as title, info FROM casebox.translations WHERE deleted=0";
+    $sql = "SELECT id, name, en, `$lg` as title, info FROM cb__casebox.translations WHERE deleted=0";
 
     if (($handle = fopen($csv, "w")) === false) {
         echo ("Can't open file for writing\n");

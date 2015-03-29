@@ -1,3 +1,9 @@
+CaseBox 1.9.407 (2015-03-29)
+==============================
+Fixed Bugs:
+--------------------------
+- config_platform.php: UNOCONV path wasn't correctly generated
+
 CaseBox 1.9.406 (2015-03-27)
 ==============================
 New Features, Improvements
