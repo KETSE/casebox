@@ -69,7 +69,7 @@ if (empty($cfg['PYTHON'])) {
 }
 
 //set unoconv path
-$cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . PATH_SEPARATOR . 'unoconv"';
+$cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . DIRECTORY_SEPARATOR . 'unoconv"';
 
 $cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
 $cfg['SOLR_CLIENT'] = 'Solr/Service.php';

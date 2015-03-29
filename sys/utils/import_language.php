@@ -20,7 +20,7 @@
 
 $dbConfig = [
     'host' => '127.0.0.1'
-    ,'dbname' => 'casebox'
+    ,'dbname' => 'cb__casebox'
     ,'user' => 'local'
     ,'pass' => 'h0st'
     ,'port' => '3306'
@@ -66,7 +66,7 @@ function importTranslation($dbh, $csv, $lg, $col)
 {
 
     $dbh->beginTransaction();
-    $sql = "UPDATE casebox.translations SET `$lg`=:title WHERE id=:id";
+    $sql = "UPDATE cb__casebox.translations SET `$lg`=:title WHERE id=:id";
     $q = $dbh->prepare($sql);
 
     $row = 1;
