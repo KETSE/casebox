@@ -1,4 +1,4 @@
-CaseBox 1.9.407 (2015-03-30)
+CaseBox 1.9.408 (2015-03-30)
 ==============================
 New Features, Improvements
 --------------------------
@@ -11,6 +11,12 @@ Fixed Bugs:
 - grid links not clickable in object preview
 - tasks preview also had double encoded html chars
 - comments displayed with double encoded html chars
+
+CaseBox 1.9.407 (2015-03-29)
+==============================
+Fixed Bugs:
+--------------------------
+- config_platform.php: UNOCONV path wasn't correctly generated
 
 CaseBox 1.9.406 (2015-03-27)
 ==============================
