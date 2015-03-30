@@ -75,7 +75,7 @@ class UrlLinker implements UrlLinkerInterface
      * Transforms plain text into valid HTML, escaping special characters and
      * turning URLs into links.
      *
-     * @param string $text
+     * @param  string $text
      * @return string
      */
     public function linkUrlsAndEscapeHtml($text)
@@ -148,7 +148,7 @@ class UrlLinker implements UrlLinkerInterface
      * Beware: Never render HTML from untrusted sources. Rendering HTML provided by
      * a malicious user can lead to system compromise through cross-site scripting.
      *
-     * @param string $html
+     * @param  string $html
      * @return string
      */
     public function linkUrlsInTrustedHtml($html)
@@ -197,14 +197,14 @@ class UrlLinker implements UrlLinkerInterface
     }
 
     /**
-     * @param string $url
-     * @param string $content
+     * @param  string $url
+     * @param  string $content
      * @return string
      */
     private function createHtmlLink($url, $content)
     {
         $link = sprintf(
-            '<a href="%s">%s</a>',
+            '<a target="_blank" href="%s">%s</a>',
             $this->escapeHtml($url),
             $this->escapeHtml($content)
         );
@@ -214,7 +214,7 @@ class UrlLinker implements UrlLinkerInterface
     }
 
     /**
-     * @param string $string
+     * @param  string $string
      * @return string
      */
     private function escapeHtml($string)

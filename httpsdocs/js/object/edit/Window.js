@@ -760,7 +760,6 @@ Ext.define('CB.object.edit.Window', {
 
             delete this.startEditAfterObjectsStoreLoadIfNewObject;
         }
-
     }
 
     ,readValues: function() {

@@ -1,3 +1,15 @@
+CaseBox 1.9.409 (2015-03-30)
+==============================
+New Features, Improvements
+--------------------------
+- #5026 Rendered links to external websites should open in new browser tab
+- #4949 solr reindex core from relative path
+
+Fixed Bugs:
+----------
+- #5034 A long comment is stripped? or not shown
+- #5030 Breadcrumbs shows only current item for vFolders
+
 CaseBox 1.9.408 (2015-03-30)
 ==============================
 New Features, Improvements

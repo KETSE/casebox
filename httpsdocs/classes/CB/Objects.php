@@ -441,6 +441,14 @@ class Objects
 
         $objData = $obj->getData();
 
+        //specific check for comments
+        //comments may be long and can exceed name field definition
+        if ($template->getType() == 'comment') {
+            if (!empty($objData['data']['_title'])) {
+                $objData['name'] = $objData['data']['_title'];
+            }
+        }
+
         $object_record['content'] = empty($objData['name'])
             ? ''
             : $objData['name']."\n";

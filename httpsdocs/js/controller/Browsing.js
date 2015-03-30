@@ -301,7 +301,18 @@ Ext.define('CB.controller.Browsing', {
             ,data = []
             ,item;
 
-        ids = toNumericArray(pathIds, '/');
+        ids = Ext.isArray(pathIds)
+            ? pathIds
+            : String(pathIds).split('/');
+
+        //trim empty items from begining and end of pathIds string
+        while((ids.length > 0) && Ext.isEmpty(ids[0])) {
+            ids.shift();
+        }
+        //trim empty items from begining and end of pathIds string
+        while((ids.length > 0) && Ext.isEmpty(ids[ids.length -1])) {
+            ids.pop();
+        }
 
         //trim slashes from begining and end of pathText string
         while(Ext.String.startsWith(pathText, '/')) {

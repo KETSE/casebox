@@ -4,7 +4,7 @@ namespace CB;
 $cron_id = 'check_core_email';
 $execution_timeout = 60; //default is 60 seconds
 
-require_once 'init.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'init.php';
 
 $coreName = Config::get('core_name');
 
