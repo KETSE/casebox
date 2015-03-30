@@ -171,7 +171,9 @@ class Base
 
                     } else { //default
                         $templateField = $template->getField($customField[0]);
-                        $values = $obj->getFieldValue($customField[0]);
+                        $values = isset($doc[$customField[0]])
+                            ? $values = array(@$doc[$customField[0]])
+                            : $obj->getFieldValue($customField[0]);
                     }
 
                     //populate column properties if empty

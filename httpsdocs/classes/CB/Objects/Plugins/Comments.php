@@ -44,7 +44,12 @@ class Comments extends Base
         foreach ($sr['data'] as $d) {
             $d['cdate_text'] = Util\formatAgoTime($d['cdate']);
             $d['user'] = User::getDisplayName($d['cid'], true);
+
+            //data in solr has already encoded html special chars
+            // so we need to decode it and to format the message (where the chars will be encoded again)
+            $d['content'] = htmlspecialchars_decode($d['content'], ENT_COMPAT);
             $d['content'] = \CB\Objects\Comment::processAndFormatMessage($d['content']);
+
             array_unshift($rez['data'], $d);
         }
 

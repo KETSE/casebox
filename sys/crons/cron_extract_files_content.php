@@ -7,6 +7,7 @@ $execution_timeout = 2 * 60; //default is 60 seconds
 require_once 'init.php';
 
 $cd = prepareCron($cron_id, $execution_timeout);
+
 if (!$cd['success']) {
     echo "\nerror preparing cron\n";
     exit(1);
@@ -113,7 +114,7 @@ $res->close();
 $rez['Total'] = $rez['Processed'] + $rez['Not found'];
 
 
-closeCron($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE));
+// closeCron($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE));
 
 // Solr\Client::runCron();
 

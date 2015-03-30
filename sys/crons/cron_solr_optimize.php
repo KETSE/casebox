@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+$cron_id = null;
+
 require_once 'init.php';
 
 require_once SOLR_CLIENT;

@@ -1,3 +1,17 @@
+CaseBox 1.9.407 (2015-03-30)
+==============================
+New Features, Improvements
+--------------------------
+- registered shutdown function for cron scripts
+
+Fixed Bugs:
+----------
+- #5017 Extra slow generation of grid rows on server side when DC is used
+- comments displayed in descending order
+- grid links not clickable in object preview
+- tasks preview also had double encoded html chars
+- comments displayed with double encoded html chars
+
 CaseBox 1.9.406 (2015-03-27)
 ==============================
 New Features, Improvements

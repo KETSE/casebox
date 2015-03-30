@@ -431,4 +431,4 @@ foreach ($delete_ids as $uniq_id) {
 }
 /* end of moving read messages from inbox to All Mail folder*/
 
-closeCron($cron_id);
+// closeCron($cron_id);

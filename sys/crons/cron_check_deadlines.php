@@ -8,6 +8,7 @@ require_once 'init.php';
 
 /* try to preapare cron */
 $cd = prepareCron($cron_id, $execution_timeout);
+
 if (!$cd['success']) {
     echo "\nerror preparing cron\n";
     exit(1);
@@ -53,7 +54,7 @@ while ($r = $res->fetch_assoc()) {
 }
 $res->close();
 
-closeCron($cron_id);
+// closeCron($cron_id);
 
 //Starting reindexing cron to update changes into solr
 // Solr\Client::runCron();
