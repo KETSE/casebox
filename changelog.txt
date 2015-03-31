@@ -1,3 +1,43 @@
+CaseBox 1.9.409 (2015-03-30)
+==============================
+New Features, Improvements
+--------------------------
+- #5026 Rendered links to external websites should open in new browser tab
+- #4949 solr reindex core from relative path
+
+Fixed Bugs:
+----------
+- #5034 A long comment is stripped? or not shown
+- #5030 Breadcrumbs shows only current item for vFolders
+
+CaseBox 1.9.408 (2015-03-30)
+==============================
+New Features, Improvements
+--------------------------
+- registered shutdown function for cron scripts
+
+Fixed Bugs:
+----------
+- #5017 Extra slow generation of grid rows on server side when DC is used
+- comments displayed in descending order
+- grid links not clickable in object preview
+- tasks preview also had double encoded html chars
+- comments displayed with double encoded html chars
+
+CaseBox 1.9.407 (2015-03-29)
+==============================
+Fixed Bugs:
+--------------------------
+- config_platform.php: UNOCONV path wasn't correctly generated
+
+CaseBox 1.9.406 (2015-03-27)
+==============================
+New Features, Improvements
+--------------------------
+- #4976 Update Text2URL function
+- #4958 Question: the real folder with several virtual is not leaf node and to be opened by default
+- #4960 Implement breadcrumb as in Google Drive
+
 CaseBox 1.9.405 (2015-03-25)
 ==============================
 New Features, Improvements

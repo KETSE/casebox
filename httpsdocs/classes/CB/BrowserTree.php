@@ -17,16 +17,18 @@ class BrowserTree extends Browser
             );
 
         foreach ($rez['data'] as &$d) {
-            if (is_numeric($d['nid']) && !isset($d['loaded'])) {
-                $res = DB\dbQuery($sql, $d['nid']) or die(DB\dbQueryError());
+            if (!isset($d['loaded'])) {
+                if (is_numeric($d['nid'])) {
+                    $res = DB\dbQuery($sql, $d['nid']) or die(DB\dbQueryError());
 
-                if ($r = $res->fetch_assoc()) {
-                    $d['has_childs'] = !empty($r['has_childs']);
+                    if ($r = $res->fetch_assoc()) {
+                        $d['has_childs'] = !empty($r['has_childs']);
+                    }
+                    $res->close();
                 }
-                $res->close();
-            }
 
-            $d['loaded'] = empty($d['has_childs']);
+                $d['loaded'] = empty($d['has_childs']);
+            }
         }
 
         return $rez['data'];

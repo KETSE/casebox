@@ -184,7 +184,7 @@ textarea {
     font-weight: bold;
     color: rgb(85, 85, 85);
     background-color: rgb(228, 241, 246);
-    margin: 5px 0;
+    margin-bottom: 5px;
     text-align: center;
     padding: 15px 10px;
     border-top-width: 1px;

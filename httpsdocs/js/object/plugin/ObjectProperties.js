@@ -46,6 +46,7 @@ Ext.define('CB.object.plugin.ObjectProperties', {
                     ,function(ev, el){
                         this.fireEvent('openproperties', {
                             id: el.attributes.getNamedItem('nid').value
+                            ,template_id: el.attributes.getNamedItem('template_id').value
                             ,path: el.attributes.getNamedItem('path').value
                         });
                     }

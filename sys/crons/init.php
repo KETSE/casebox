@@ -23,7 +23,6 @@ $_GET['core'] = $scriptOptions['core'];
 $_SERVER['SERVER_NAME'] = $scriptOptions['core'];
 $_SERVER['REMOTE_ADDR'] = 'localhost';
 
-// session_start();
 $_SESSION['user'] = array(
     'id' => 1
     ,'name' => 'system'
@@ -33,6 +32,8 @@ $site_path = realpath(
     dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.
     DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'httpsdocs'
 ).DIRECTORY_SEPARATOR;
+
+register_shutdown_function('CB\\closeCron', $cron_id);
 
 include $site_path.DIRECTORY_SEPARATOR.'config.php';
 
@@ -150,7 +151,7 @@ function closeCron($cron_id, $info = 'ok')
         SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
         WHERE cron_id = $1',
         array($cron_id, $info)
-    ) or die( DB\dbQueryError() );
+    ) or die(DB\dbQueryError());
 }
 
 function notifyAdmin($subject, $message)

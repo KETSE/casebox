@@ -1,14 +1,15 @@
 <?php
 namespace CB;
 
-require_once 'init.php';
-
 $cron_id = 'solr_update_tree';
 $execution_timeout = 60; //default is 60 seconds
+
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'init.php';
 
 $coreName = Config::get('core_name');
 
 $cd = prepareCron($cron_id, $execution_timeout);
+
 if (!$cd['success']) {
     echo "\nerror preparing cron\n";
     exit(1);
@@ -63,4 +64,4 @@ try {
 
 unset($solr);
 
-closeCron($cron_id);
+// closeCron($cron_id);

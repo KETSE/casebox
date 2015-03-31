@@ -866,15 +866,40 @@ div.grid-drop-zone-over{
     background: url(i/ico/lock-small.png) 7px 5px no-repeat !important;
 }
 
-ul.breadcrumb {
+div.breadcrumb {
     list-style: none;
-    padding: 0;
-    margin: 3px;
+    display: inline-block;
+    margin-left: -6px;
+    overflow: hidden;
+    vertical-align: top;
+    white-space: nowrap;
+    width: 100%;
+    padding: 1px 6px;
 }
-ul.breadcrumb li { padding: 2px 2px 2px 2px; margin: 1px; white-space:nowrap; overflow: hidden; display: inline-block; color: gray; }
-ul.breadcrumb li a{ color: #5e5e5e; }
-ul.breadcrumb li a:hover{ color: #2061a3; }
-
+div.breadcrumb div.item {
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  color: #555;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 30px;
+  overflow: hidden;
+  padding: 1px;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  white-space: nowrap;
+}
+div.breadcrumb > div.item > span{
+  display: inline-block;
+  width:24px;
+  height:32px;
+  background-position: 0 center;
+}
+div.breadcrumb div.item:hover{
+  text-decoration: underline;
+}
 
 /* pivot table */
 .pivot {

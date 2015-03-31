@@ -4,9 +4,10 @@ namespace CB;
 $cron_id = 'send_notifications';
 $execution_timeout = 60; //default is 60 seconds
 
-require_once 'init.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'init.php';
 
 $cd = prepareCron($cron_id, $execution_timeout);
+
 if (!$cd['success']) {
     echo "\nerror preparing cron\n";
     exit(1);
@@ -118,4 +119,4 @@ foreach ($users as $u) {
     ) or die('error updating crons last action');
 }
 
-closeCron($cron_id);
+// closeCron($cron_id);

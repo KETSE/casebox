@@ -60,7 +60,7 @@ Ext.define('CB.controller.Browsing', {
         sf.on('search', this.onSFSearch, this);
 
         //breadcumb listeners
-        bc.onItemClick = Ext.Function.bind(this.onBreadcrumbItemClick, this);
+        bc.on('itemclick', this.onBreadcrumbItemClick, this);
 
 
         //add view container listeners
@@ -179,7 +179,7 @@ Ext.define('CB.controller.Browsing', {
             bvalue = bvalue.replace('{count}', action.total);
         }
 
-        this.breadcrumb.setValue(bvalue);
+        this.updateBreadcrumbData(action.folderProperties.path, bvalue);
 
         this.VC.updateCreateMenuItems(this.VP.buttons.create);
 
@@ -284,25 +284,55 @@ Ext.define('CB.controller.Browsing', {
      * @param  event e
      * @return void
      */
-    ,onBreadcrumbItemClick: function(b, e) {
-        var idx = this.breadcrumb.menu.items.indexOf(b)
-            ,p = String(this.VC.folderProperties.path).split('/');
+    ,onBreadcrumbItemClick: function(view, record, item, index, e, eOpts) {
+        var store = this.breadcrumb.store
+            ,path = [];
 
-        if(Ext.isEmpty(p[0])) {
-            p.shift();
+        for (var i = 0; i <= index; i++) {
+            path.push(store.getAt(i).get('id'));
         }
 
-        if((p.length > 0) && Ext.isEmpty(p[p.length-1])) {
-            p.pop();
+        this.VC.changeSomeParams({'path': '/' + path.join('/')});
+    }
+
+    ,updateBreadcrumbData: function(pathIds, pathText) {
+        var ids
+            ,texts
+            ,data = []
+            ,item;
+
+        ids = Ext.isArray(pathIds)
+            ? pathIds
+            : String(pathIds).split('/');
+
+        //trim empty items from begining and end of pathIds string
+        while((ids.length > 0) && Ext.isEmpty(ids[0])) {
+            ids.shift();
+        }
+        //trim empty items from begining and end of pathIds string
+        while((ids.length > 0) && Ext.isEmpty(ids[ids.length -1])) {
+            ids.pop();
         }
 
-        p = p.slice(0, p.length - idx - 1);
-        p = p.join('/');
-        if(p.substr(0, 1) !== '/') {
-            p = '/' + p;
+        //trim slashes from begining and end of pathText string
+        while(Ext.String.startsWith(pathText, '/')) {
+            pathText = pathText.substr(1);
+        }
+        while(Ext.String.endsWith(pathText, '/')) {
+            pathText = pathText.substr(0, pathText.length - 1);
+        }
+        texts = pathText.split('/');
+
+        for (var i = 0; i < ids.length; i++) {
+            item = {
+                id: ids[i]
+                ,name: texts[i]
+            };
+
+            data.push(item);
         }
 
-        this.VC.changeSomeParams({'path': p});
+        this.breadcrumb.setValue(data);
     }
 
     //Object preview component methods
