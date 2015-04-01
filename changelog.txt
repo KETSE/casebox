@@ -1,3 +1,15 @@
+CaseBox 1.9.411 (2015-04-01)
+==============================
+Fixed Bugs:
+----------
+- #5090 Comment displayed trimmed in CB & with HTML codes in email notification
+- #5076 CLA: error in Edit mode
+- #5037 'Assign' field doesn' work if using mouse & ObjWnd blocked
+- #4976 Update Text2URL function
+- #5023 ESC key doesn't work for preview of files
+- Kwi folder name from libx was not in correct case
+  (#5026 Rendered links to external websites should open in new browser tab)
+
 CaseBox 1.9.410 (2015-04-01)
 ==============================
 New Features, Improvements

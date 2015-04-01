@@ -1213,6 +1213,7 @@ function initApp() {
             t = e.target;
         }
         if ((e.keyCode == Ext.event.Event.BACKSPACE) &&
+             e.stopEvent &&
                 (
                     (!/^input$/i.test(t.tagName) &&
                     !/^textarea$/i.test(t.tagName)
