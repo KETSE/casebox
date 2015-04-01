@@ -246,7 +246,7 @@ function toNumericArray(v, delimiter){
     for (var i = 0; i < v.length; i++) {
         var w = String(v[i]).trim()
             ,iw = parseInt(w, 10);
-        clog(w, iw);
+
         if (iw == w) {
             rez.push(iw);
         } else if(!isNaN(iw)){

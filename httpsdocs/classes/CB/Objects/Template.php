@@ -653,9 +653,9 @@ class Template extends Object
                 case 'memo':
                 case 'text':
                     $cacheValue = false;
-                    $value = empty($field['text_renderer'])
+                    $value = empty($field['cfg']['text_renderer'])
                         ? nl2br(htmlspecialchars($value, ENT_COMPAT))
-                        : nl2br(Comment::processAndFormatMessage($value), $field['text_renderer']);
+                        : nl2br(Comment::processAndFormatMessage($value), $field['cfg']['text_renderer']);
                     break;
 
                 default:

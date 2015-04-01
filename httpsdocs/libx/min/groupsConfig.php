@@ -170,6 +170,7 @@ return array_merge(
         ,'jsdev' => array(
             '//js/app.js'
             ,'//js/controller/Browsing.js'
+            ,'//js/controller/History.js'
 
             ,'//js/object/field/editor/Form.js'
             ,'//js/object/field/editor/Tag.js'

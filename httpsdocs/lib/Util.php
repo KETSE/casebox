@@ -503,7 +503,7 @@ function getCoreHost($db_name = false)
     return $core;
 }
 
-function toNumericArray($v, $delimiter = ',')
+function toNumericArray($v, $delimiter = ',', $noFloat = false)
 {
     if (empty($v)) {
         return array();
@@ -521,12 +521,17 @@ function toNumericArray($v, $delimiter = ',')
         $iw = intval($w);
         if ($iw == $w) {
             $rez[] = $iw;
-        } else {
+        } elseif (!$noFloat) {
             $rez[] = floatval($v[$k]);
         }
     }
 
     return $rez;
+}
+
+function toIntArray($v, $delimiter = ',')
+{
+    return toNumericArray($v, $delimiter, true);
 }
 
 function toTrimmedArray($v, $delimiter = ',')

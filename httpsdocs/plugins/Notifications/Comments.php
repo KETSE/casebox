@@ -57,11 +57,11 @@ class Comments extends Objects
 
         $objData = $o->getData();
 
-        $message  = nl2br(Util\adjustTextForDisplay($objData['data']['_title']));
+        $message  = nl2br(\CB\Objects\Comment::processAndFormatMessage($objData['data']['_title']));
 
         static::subscribeMessageUsers($objData['pid'], $message);
 
-        $message = \CB\Objects\Comment::processAndFormatMessage($message);
+        // $message = \CB\Objects\Comment::processAndFormatMessage($message);
 
         $sender = static::getSender();
 

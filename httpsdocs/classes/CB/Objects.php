@@ -383,7 +383,7 @@ class Objects
             foreach ($linearData as $f) {
                 $tf = $template->getField($f['name']);
                 if ($tf['type'] == '_objects') {
-                    $a = Util\toNumericArray(@$f['value']);
+                    $a = Util\toIntArray(@$f['value']);
                     $ids = array_merge($ids, $a);
                 }
             }
@@ -395,7 +395,7 @@ class Objects
 
         if (!empty($p['data']) && is_array($p['data'])) {
             foreach ($p['data'] as $key => $value) {
-                $a = Util\toNumericArray($value);
+                $a = Util\toIntArray($value);
                 $ids = array_merge($ids, $a);
             }
         }
@@ -404,7 +404,7 @@ class Objects
             $templateData = $template->getData();
             foreach ($templateData['fields'] as $field) {
                 if (!empty($field['cfg']['value'])) {
-                    $a = Util\toNumericArray($field['cfg']['value']);
+                    $a = Util\toIntArray($field['cfg']['value']);
                     $ids = array_merge($ids, $a);
                 }
             }
@@ -443,10 +443,14 @@ class Objects
 
         //specific check for comments
         //comments may be long and can exceed name field definition
-        if ($template->getType() == 'comment') {
+        // to be reviewed and moved in comments class
+        if (@$object_record['template_type'] == 'comment') {
             if (!empty($objData['data']['_title'])) {
-                $objData['name'] = $objData['data']['_title'];
+                $object_record['content'] = $objData['data']['_title'];
+
             }
+
+            return;
         }
 
         $object_record['content'] = empty($objData['name'])
