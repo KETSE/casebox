@@ -429,7 +429,9 @@ Ext.define('CB.ViewPort', {
             App.initialized = true;
 
             App.fireEvent('cbinit', this);
+
         } else {
+
             Ext.Function.defer(this.initCB, 500, this);
         }
     }

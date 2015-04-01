@@ -1,3 +1,13 @@
+CaseBox 1.9.410 (2015-04-01)
+==============================
+New Features, Improvements
+--------------------------
+- testing History controller (#4799 - Implement Back button navigation)
+
+Fixed Bugs:
+----------
+- comments indexinx issues
+
 CaseBox 1.9.409 (2015-03-30)
 ==============================
 New Features, Improvements

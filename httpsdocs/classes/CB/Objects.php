@@ -443,10 +443,14 @@ class Objects
 
         //specific check for comments
         //comments may be long and can exceed name field definition
-        if ($template->getType() == 'comment') {
+        // to be reviewed and moved in comments class
+        if (@$object_record['template_type'] == 'comment') {
             if (!empty($objData['data']['_title'])) {
-                $objData['name'] = $objData['data']['_title'];
+                $object_record['content'] = $objData['data']['_title'];
+
             }
+
+            return;
         }
 
         $object_record['content'] = empty($objData['name'])
