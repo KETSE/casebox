@@ -1,3 +1,16 @@
+CaseBox 1.9.412 (2015-04-03)
+==============================
+New Features, Improvements
+--------------------------
+- #5021 Improve Comment plugin: latest 4 comments & '...' to show a very long one
+- #5023 ESC key doesn't work for preview of files
+- #5011 Improve Office file preview generation
+- #5101 Comments by email: attachments should be uploaded to CB to the comment
+
+Fixed Bugs:
+----------
+- Html codes interpreted as object refferences in comments view (#5060 Test task body)
+
 CaseBox 1.9.411 (2015-04-01)
 ==============================
 Fixed Bugs:

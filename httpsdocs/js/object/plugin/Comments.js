@@ -26,18 +26,22 @@ Ext.define('CB.object.plugin.Comments', {
             // </div>
 
             '<table class="block-plugin" style="margin:0">'
+            ,'<div class="load-more click">' + L.ViewMore + '</div>'
             ,'<tpl for=".">'
             ,'<tr>'
             ,'    <td class="obj">'
             ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}">'
             ,'    </td>'
-            ,'    <td>'
-            ,'      <tpl if="cid == App.loginData.id">'
+            ,'    <td class="comment">'
+            ,'      <div class="comment-text">'
+            ,'        <tpl if="cid == App.loginData.id">'
             ,'          <span class="i-bullet-arrow-down comment-actions-button">&nbsp;</span>'
-            ,'      </tpl>'
+            ,'        </tpl>'
             ,'        <b class="user">{[ values.user.split("\\n")[0]]}</b>'
             ,'        {[ Ext.util.Format.nl2br(values.content)]}'
-            ,'        <div class="gr" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</div>'
+            ,'      </div>'
+            ,'      <div title="' + L.ShowAll + '" class="show-all click"></div>'
+            ,'      <div class="gr" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</div>'
             ,'    </td>'
             ,'</tr>'
             ,'</tpl>'
@@ -69,6 +73,8 @@ Ext.define('CB.object.plugin.Comments', {
             ,listeners: {
                 scope: this
                 ,itemclick: this.onItemClick
+                ,containerclick: this.onContainerClick
+                ,resize: this.onDataViewResize
             }
         });
 
@@ -185,7 +191,60 @@ Ext.define('CB.object.plugin.Comments', {
 
     ,onLoadData: function(r, e) {
         this.loadedData = r;
+
+        if(r.total > r.data.length) {
+            this.addCls('have-more-items');
+        } else {
+            this.removeCls('have-more-items');
+        }
+
         this.dataView.store.loadData(r.data);
+    }
+
+    /**
+     * handler for load more comments click
+     * @param  Ext.eventObject e
+     * @return void
+     */
+    ,onLoadMoreClick: function(e) {
+        var params = {
+            id: this.params.id
+        };
+
+        if(this.loadedData && !Ext.isEmpty(this.loadedData.data)) {
+            params.beforeId = this.loadedData.data[0].id;
+        }
+
+        CB_Objects_Plugins_Comments.loadMore(
+            params
+            ,this.processLoadMore
+            ,this
+        );
+    }
+
+    /**
+     * processing handler for loading more comments from server
+     * @param  result r
+     * @param  Ext.eventObject e
+     * @return void
+     */
+    ,processLoadMore: function(r, e) {
+        if(r.success !== true) {
+            App.showException(r);
+            return;
+        }
+
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
+
+        if(Ext.isEmpty(this.loadedData.data)) {
+            this.loadedData.data = [];
+        }
+
+        this.loadedData.data = r.data.concat(this.loadedData.data);
+
+        this.onLoadData(this.loadedData, e);
     }
 
     ,onMessageBoxKeyPress: function(tf, e) {
@@ -291,6 +350,24 @@ Ext.define('CB.object.plugin.Comments', {
             return;
         }
 
+        el = e.getTarget('.show-all');
+        if(el) {
+            e.stopEvent();
+            this.onShowAllClick(record, item, index);
+
+            return;
+        }
+
+    }
+
+    ,onContainerClick: function(view, e, eOpts) {
+        var el = e.getTarget('.load-more');
+
+        if(el) {
+            e.stopEvent();
+            this.onLoadMoreClick(e);
+            return;
+        }
     }
 
     ,showActionsMenu: function(e) {
@@ -425,6 +502,41 @@ Ext.define('CB.object.plugin.Comments', {
 
             //remove record from view store
             this.dataView.store.remove(rec);
+        }
+    }
+
+    /**
+     * expand comment body to see all content when show all button clicked
+     * @param  Ext.data.Model record
+     * @param  HTMLElement    item
+     * @param  int            index
+     * @return void
+     */
+    ,onShowAllClick: function(record, item, index) {
+        item.children[1].setAttribute('class', 'comment comment-expanded');
+    }
+
+    /**
+     * listener to dataview resize event to add css for long comments
+     * @param  Ext.Component view
+     * @param  int width
+     * @param  int height
+     * @param  int oldWidth
+     * @param  int oldHeight
+     * @param  Object eOpts
+     * @return void
+     */
+    ,onDataViewResize: function(view, width, height, oldWidth, oldHeight, eOpts) {
+        var dv = this.dataView
+            ,store = dv.store
+            ,divs = dv.getEl().query('td.comment');
+
+        //iterate comments and see if any exceeds default height
+        for (var i = 0; i < divs.length; i++) {
+            var txtDiv = divs[i].children[0];
+            if(txtDiv.clientHeight < txtDiv.scrollHeight) {
+                divs[i].setAttribute('class', 'comment comment-big');
+            }
         }
     }
 });

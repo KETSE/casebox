@@ -76,7 +76,7 @@ try {
         )
     );
 } catch (\Exception $e) {
-    notifyAdmin('Casebox: check mail Exception for core' . $coreName , $e->getMessage());
+    notifyAdmin('Casebox: check mail Exception for core' . $coreName, $e->getMessage());
     echo " Error connecting to email\n";
     exit(); // skip this core if mail cannot be accesed
 }
@@ -301,77 +301,7 @@ foreach ($mailbox as $k => $mail) {
     );
 
     if (!empty($attachments)) {
-        foreach ($attachments as $a) {
-            if (!$a['attachment']) {
-                continue;
-            }
-                $tmp_name = tempnam(sys_get_temp_dir(), 'cbEml');
-                file_put_contents($tmp_name, $a['content']);
-                $f = array(
-                    'tmp_name' => $tmp_name
-                    ,'size' => filesize($tmp_name)
-                    ,'date' => Util\date_mysql_to_iso($time)
-                    ,'type' =>  finfo_file($finfo, $tmp_name)
-                );
-                $files->storeContent($f, FILES_DIR.$core['name'].DIRECTORY_SEPARATOR);
-
-                DB\dbQuery(
-                    'INSERT INTO tree (
-                        pid
-                        ,`name`
-                        ,`type`
-                        ,`date`
-                        ,cid
-                        ,uid
-                        ,template_id)
-                    VALUES($1
-                         , $2
-                         , 5
-                         , $3
-                         , $4
-                         , $4
-                         , $5) ',
-                    array(
-                        $object_id
-                        ,$a['filename']
-                        ,$time
-                        ,$user_id
-                        ,getOption('default_file_template')
-                    )
-                ) or die(DB\dbQueryError());
-                $file_id = DB\last_insert_id();
-
-                DB\dbQuery(
-                    'INSERT INTO files (
-                        id
-                        ,content_id
-                        ,`date`
-                        ,`name`
-                        ,`title`
-                        ,cid
-                        ,uid
-                        ,cdate
-                        ,udate)
-                    VALUES (
-                        $1
-                        ,$2
-                        ,$3
-                        ,$4
-                        ,$5
-                        ,$6
-                        ,$6
-                        ,CURRENT_TIMESTAMP
-                        ,CURRENT_TIMESTAMP)',
-                    array(
-                        $file_id
-                        ,$f['content_id']
-                        ,$time
-                        ,$a['filename']
-                        ,''
-                        ,$user_id
-                    )
-                ) or die(DB\dbQueryError());
-        }
+        saveObjectAttachments($objectId, $attachments);
     }
 
     /* end of creating email object in corresponding case and adding attachments if any */

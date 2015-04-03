@@ -93,6 +93,11 @@ $API = array_merge(
                 ,'removeComment'        =>  array('len'=>1)
             )
         )
+        ,'CB_Objects_Plugins_Comments' => array(
+            'methods'=>array(
+                'loadMore'              =>  array('len'=>1)
+            )
+        )
 
         ,'CB_Files' => array(
             'methods'=>array(

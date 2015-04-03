@@ -2,21 +2,36 @@
 
 namespace CB\Objects\Plugins;
 
+use CB\Config;
 use CB\User;
 use CB\Util;
 
 class Comments extends Base
 {
 
+    /**
+     * get default set of comments for given object id
+     * @param  int  $id
+     * @return json response
+     */
     public function getData($id = false)
     {
+        return $this->loadMore(array('id' => $id));
+    }
 
+    /**
+     * load next set of comments (not all are loaded by default)
+     * @param  array $p
+     * @return json  response
+     */
+    public function loadMore($p)
+    {
         $rez = array(
             'success' => true
             ,'data' => array()
         );
 
-        if (empty(parent::getData($id))) {
+        if (empty(parent::getData($p['id']))) {
             return $rez;
         }
 
@@ -24,6 +39,8 @@ class Comments extends Base
         if (empty($commentTemplateIds)) {
             return $rez;
         }
+
+        $limit = Config::get('max_load_comments', 4);
 
         $params = array(
             'pid' => $this->id
@@ -33,13 +50,20 @@ class Comments extends Base
             )
             ,'fl' => 'id,pid,template_id,cid,cdate,content'
             ,'sort' => 'cdate'
-            ,'rows' => 10
+            ,'rows' => $limit
             ,'dir' => 'desc'
         );
 
+        if (!empty($p['beforeId']) && is_numeric($p['beforeId'])) {
+            $params['fq'][] = 'id:[* TO ' . ($p['beforeId'] - 1) . ']';
+        }
+
         $s = new \CB\Search();
         $sr = $s->query($params);
-        $rez['total'] = $sr['total'];
+
+        if (empty($p['beforeId'])) {
+            $rez['total'] = $sr['total'];
+        }
 
         foreach ($sr['data'] as $d) {
             $d['cdate_text'] = Util\formatAgoTime($d['cdate']);
@@ -54,5 +78,6 @@ class Comments extends Base
         }
 
         return $rez;
+
     }
 }

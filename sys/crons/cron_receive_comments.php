@@ -113,7 +113,6 @@ foreach ($mailServers as &$cfg) {
 }
 
 // iterate each core and add comment items if there is smth
-
 foreach ($mailServers as $mailConf) {
     $deleteMailIds = array();
 
@@ -165,8 +164,14 @@ foreach ($mailServers as $mailConf) {
                     'mailId' => $mail['id']
                 )
             );
+
             try {
-                $commentsObj->create($data);
+                $commentId = $commentsObj->create($data);
+
+                //add attachments
+                if (!empty($mail['attachments'])) {
+                    saveObjectAttachments($commentId, $mail['attachments']);
+                }
             } catch (Exception $e) {
                 \CB\debug('Cannot create comment from ' . $mail['from'], $data);
             }

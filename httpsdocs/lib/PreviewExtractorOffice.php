@@ -64,9 +64,11 @@ class PreviewExtractorOffice extends PreviewExtractor
             file_put_contents($pfn, '');
             $cmd = Config::get('UNOCONV') . ' -v -f html -o '.$pfn.' '.$nfn; //.' >> ' . Config::get('debug_log') . ' 2>&1';
 
-            exec($cmd);
+            exec($cmd, $output, $returnStatus); //returnStatus should be 0 if no error
+
             unlink($nfn);
-            if (file_exists($pfn)) {
+
+            if (empty($returnStatus) && file_exists($pfn)) {
                 file_put_contents(
                     $pfn,
                     '<div style="padding: 5px">'.$this->purify(
