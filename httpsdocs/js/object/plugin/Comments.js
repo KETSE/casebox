@@ -12,12 +12,21 @@ Ext.define('CB.object.plugin.Comments', {
                 ,scope: this
                 ,handler: this.onEditClick
             })
+
             ,remove: new Ext.Action({
                 text: L.Delete
                 ,iconCls: 'i-trash'
                 ,scope: this
                 ,handler: this.onRemoveClick
             })
+
+            // ,attachFile: new Ext.Action({
+            //     qtip: L.AttachFile
+            //     ,iconCls: 'i-attach'
+            //     ,buttonOnly: true
+            //     ,scope: this
+            //     ,handler: this.onAttachFileClick
+            // })
         };
 
         var tpl = new Ext.XTemplate(
@@ -69,6 +78,7 @@ Ext.define('CB.object.plugin.Comments', {
                 }
             })
             ,region: 'center'
+            ,deferInitialRefresh: true
             ,itemSelector:'tr'
             ,listeners: {
                 scope: this
@@ -80,44 +90,59 @@ Ext.define('CB.object.plugin.Comments', {
 
         this.messageField = new Ext.form.TextArea({
             emptyText: L.WriteComment + '...'
-            // ,height: 30
             ,anchor: '100%'
             ,grow: true
             ,growMin: 10
             ,enableKeyEvents: true
             ,cls: "comment-input"
             ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
-            // disable until prugin refactored for ExtJS 5
+
             ,plugins: [
                 {
                     ptype: 'CBPluginFieldDropDownList'
                 }
             ]
+
             ,listeners: {
                 scope: this
                 ,keypress: this.onMessageBoxKeyPress
                 ,autosize: this.onMessageBoxAutoSize
                 ,focus: function(field) {
-                    // field.grow = true;
                     field.focused = true;
-                    // this.messageToolbar.show();
                 }
                 ,blur: function(field) {
-                    // field.grow = false;
                     delete field.focused;
-                    if(!this.mouseOver) {
-                        // this.messageToolbar.hide();
-                    }
                 }
             }
         });
 
+        this.attachFileButton = new Ext.form.field.File({
+            qtip: L.AttachFile
+            ,buttonOnly: true
+            ,buttonText: ''
+            ,buttonConfig: {
+                iconCls: 'i-attach'
+            }
+            ,width: 24
+            ,listeners: {
+                scope: this
+                ,change: this.onAttachFile
+            }
+        });
+
+        this.filesLabel = new Ext.form.field.Display({
+            cls: 'click'
+        });
+
         this.messageToolbar = new Ext.Toolbar({
-            height: 24
-            ,hidden: false
+            hidden: false
             ,style: 'padding: 0; border: 0; background-color:  #f1f1f1;' // background-color: transparent;
+            ,cls: 'op03'
+            ,overCls: 'op1'
             ,items: [
-                '->'
+                this.attachFileButton
+                ,this.filesLabel
+                ,'->'
                 ,{
                     text: L.Reply
                     ,scope: this
@@ -131,7 +156,7 @@ Ext.define('CB.object.plugin.Comments', {
                 type: 'hbox'
                 ,align: 'stretch'
             }
-            // ,height: 65
+
             ,autoHeight: true
             ,border: false
             ,items: [
@@ -144,7 +169,7 @@ Ext.define('CB.object.plugin.Comments', {
                     xtype: 'panel'
                     ,flex: 1
                     ,layout: 'anchor'
-                    ,padding: '0px 3px 0px 5px'
+                    ,padding: '0px 3px 5px 5px'
                     ,autoHeight: true
                     ,boder: false
                     ,bodyCls: 'x-panel-white'
@@ -182,11 +207,19 @@ Ext.define('CB.object.plugin.Comments', {
                 this.dataView
                 ,this.addCommentPanel
             ]
+            ,listeners: {
+                scope: this
+                ,beforedestroy: this.onBeforeDestroy
+            }
         });
 
         this.callParent(arguments);
 
         this.enableBubble(['getdraftid']);
+    }
+
+    ,onBeforeDestroy: function (cmp, eOpts) {
+        this.removeUploaderListeners();
     }
 
     ,onLoadData: function(r, e) {
@@ -199,6 +232,8 @@ Ext.define('CB.object.plugin.Comments', {
         }
 
         this.dataView.store.loadData(r.data);
+
+        Ext.defer(this.onDataViewResize, 1500, this);
     }
 
     /**
@@ -269,6 +304,74 @@ Ext.define('CB.object.plugin.Comments', {
         this.onAddCommentClick();
     }
 
+    ,onAttachFile: function(field, value, oldValue, eOpts) {
+        if(Ext.isEmpty(this.draftCommentId)) {
+            this.draftCommentId = Ext.id();
+        }
+
+        App.addFilesToUploadQueue(
+            field.fileInputEl.dom.files
+            ,{
+                pid: this.params.id
+                ,draftPid: this.draftCommentId
+                ,response: 'autorename'
+            }
+        );
+
+        this.addUploaderListeners();
+
+        this.updateFilesLabel();
+    }
+
+    ,addUploaderListeners: function() {
+        var fu = App.getFileUploader();
+        if(fu) {
+            fu.on(
+                'fileuploadend'
+                ,this.updateFilesLabel
+                ,this
+            );
+        }
+    }
+
+    ,removeUploaderListeners: function() {
+        var fu = App.getFileUploader();
+        if(fu) {
+            fu.un(
+                'fileuploadend'
+                ,this.updateFilesLabel
+                ,this
+            );
+        }
+    }
+
+    ,updateFilesLabel: function() {
+        var fu = App.getFileUploader();
+
+        if(Ext.isEmpty(fu)) {
+            clog('empty uploaded');
+            return;
+        }
+
+        var store = fu.store
+            ,stats = fu.getStatsForPid(this.draftCommentId)
+            ,label = this.filesLabel;
+
+        clog('stats', stats);
+
+        if(stats.pending > 0) {
+            label.setValue(stats.pending + ' / ' + stats.total);
+        } else {
+            if(stats.total > 0) {
+                label.setValue(stats.total);
+            } else {
+                label.setValue('');
+            }
+
+            this.removeUploaderListeners();
+        }
+    }
+
     ,onAddCommentClick: function(b, e) {
         if(isNaN(this.params.id)) {
             this.fireEvent(
@@ -287,11 +390,17 @@ Ext.define('CB.object.plugin.Comments', {
 
         this.addCommentPanel.disable();
 
+        var p = {
+            id: this.params.id
+            ,msg: msg
+        };
+
+        if(this.draftCommentId) {
+            p.draftId = this.draftCommentId;
+        }
+
         CB_Objects.addComment(
-            {
-                id: this.params.id
-                ,msg: msg
-            }
+            p
             ,this.onAddCommentProcess
             ,this
         );
@@ -317,6 +426,12 @@ Ext.define('CB.object.plugin.Comments', {
         this.loadedData.data.push(r.data);
         this.onLoadData(this.loadedData);
         this.messageField.focus();
+
+        delete this.draftCommentId;
+
+        this.attachFileButton.reset();
+
+        this.updateFilesLabel();
     }
 
     ,onCommentPanelMouseEnter: function(e, el, o) {
@@ -454,14 +569,16 @@ Ext.define('CB.object.plugin.Comments', {
                     ,this
                 );
                 if(item) {
-                    item.content = r.data.text;
+                    item.content = r.data.content;
                 }
             }
 
             //remove record from view store
-            rec.set('content', r.data.text);
+            rec.set('content', r.data.content);
 
             this.dataView.refresh();
+
+            Ext.defer(this.onDataViewResize, 1500, this);
         }
     }
 
@@ -514,6 +631,7 @@ Ext.define('CB.object.plugin.Comments', {
      */
     ,onShowAllClick: function(record, item, index) {
         item.children[1].setAttribute('class', 'comment comment-expanded');
+        this.updateLayout();
     }
 
     /**
@@ -538,5 +656,7 @@ Ext.define('CB.object.plugin.Comments', {
                 divs[i].setAttribute('class', 'comment comment-big');
             }
         }
+
+        this.updateLayout();
     }
 });

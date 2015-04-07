@@ -1254,7 +1254,7 @@ function initApp() {
 }
 
 window.onbeforeunload = function() {
-    if(App.confirmLeave === false) {
+    if (App.confirmLeave === false) {
         delete App.confirmLeave;
     } else {
         return "You work will be lost.";

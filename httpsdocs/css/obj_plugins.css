@@ -132,6 +132,11 @@ background-color: #FFFFCC;
   -webkit-line-clamp: auto;
 }
 
+.block-plugin-comments .comment-attachments {
+    list-style-type: none;
+    padding: 2px 10px;
+}
+
 .comment-actions-button {
 display: block;
 float: right;

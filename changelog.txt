@@ -1,3 +1,9 @@
+CaseBox 1.9.413 (2015-04-07)
+==============================
+New Features, Improvements
+--------------------------
+- #3921 Toolbar below Comment area with "Attach file" button
+
 CaseBox 1.9.412 (2015-04-03)
 ==============================
 New Features, Improvements

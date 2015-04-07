@@ -669,7 +669,7 @@ class Files
 
             //apply general properties from $p to $f (file) variable
             foreach ($p as $k => $v) {
-                if (in_array($k, array('id', 'pid', 'name', 'title', 'content_id', 'template_id', 'cid', 'oid', 'data'))) {
+                if (in_array($k, array('id', 'pid', 'draftPid', 'name', 'title', 'content_id', 'template_id', 'cid', 'oid', 'data'))) {
                     $f[$k] = $v;
                 }
             }
@@ -1193,6 +1193,7 @@ class Files
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
+            // $objectRecord['type'] = $r['type'];
             $objectRecord['size'] = $r['size'];
             $objectRecord['versions'] = intval($r['versions']);
 

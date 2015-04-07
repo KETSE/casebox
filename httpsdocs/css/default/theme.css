@@ -56,6 +56,7 @@
 .im-arr-l{background-image: url(m/ic_chevron_left_black_24dp.png); min-width: 24px}
 .im-arr-r{background-image: url(m/ic_chevron_right_black_24dp.png); min-width: 24px}
 .im-assignment{background-image: url(m/ic_assignment_black_24dp.png); min-width: 24px}
+.im-attach{background-image: url(m/ic_attach_file_black_24dp.png); min-width: 24px}
 .im-cancel{background-image: url(m/ic_clear_black_24dp.png); min-width: 24px}
 .im-create{background-image: url(m/ic_add_circle_black_24dp.png); min-width: 24px}
 .im-download{background-image: url(m/ic_file_download_black_24dp.png); min-width: 24px}
@@ -84,6 +85,7 @@
 .x-menu-item .ib-task-new{background-image: url(s/task.png); background-position: 0 50%; background-repeat: no-repeat}
 
 
+.i-attach {background-image: url(s/ic_attach_file_black_18dp.png); background-position: 0 50%; background-repeat: no-repeat; min-height: 18px;}
 .i-refresh {background-image: url(s/refresh.png); background-position: 0 50%; background-repeat: no-repeat}
 .i-points, .x-tool-points {background-image: url(s/points-gray.png); background-position: 0 50%; background-repeat: no-repeat}
 

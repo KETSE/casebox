@@ -4,6 +4,7 @@ namespace CB\Objects\Plugins;
 
 use CB\Config;
 use CB\User;
+use CB\DB;
 use CB\Util;
 
 class Comments extends Base
@@ -77,7 +78,151 @@ class Comments extends Base
             array_unshift($rez['data'], $d);
         }
 
-        return $rez;
+        static::addAttachmentLinks($rez);
 
+        return $rez;
+    }
+
+    /**
+     * load a single comment by id
+     * used for add/update operations on comments
+     * @param  int  $id
+     * @return json response
+     */
+    public static function loadComment($id)
+    {
+        $rez = array(
+            'success' => true
+            ,'data' => array()
+        );
+
+        if (empty($id)) {
+            return $rez;
+        }
+
+        $params = array(
+            'system' => '[0 TO 2]'
+            ,'fq' => array(
+                'id:'.intval($id)
+            )
+            ,'fl' => 'id,pid,template_id,cid,cdate,content'
+            ,'rows' => 1
+        );
+
+        $s = new \CB\Search();
+        $sr = $s->query($params);
+
+        foreach ($sr['data'] as $d) {
+            $d['cdate_text'] = Util\formatAgoTime($d['cdate']);
+            $d['user'] = User::getDisplayName($d['cid'], true);
+
+            //data in solr has already encoded html special chars
+            // so we need to decode it and to format the message (where the chars will be encoded again)
+            $d['content'] = htmlspecialchars_decode($d['content'], ENT_COMPAT);
+            $d['content'] = \CB\Objects\Comment::processAndFormatMessage($d['content']);
+
+            array_unshift($rez['data'], $d);
+        }
+
+        static::addAttachmentLinks($rez);
+
+        return @array_shift($rez['data']);
+    }
+
+    /**
+     * add attachment links below the comments body
+     * @param  array reference $rez
+     * @return void
+     */
+    protected static function addAttachmentLinks(&$rez)
+    {
+        //collect comment ids
+        $ids = array();
+
+        foreach ($rez['data'] as $d) {
+            $ids[] = $d['id'];
+        }
+
+        if (empty($ids)) {
+            return;
+        }
+
+        //select files for all loaded comments using a single solr request
+        $params = array(
+            'system' => '[0 TO 2]'
+            ,'fq' => array(
+                'pid:(' . implode(' OR ', $ids) . ')'
+                ,'template_type:"file"'
+            )
+            ,'fl' => 'id,pid,name,template_id'
+            ,'sort' => 'pid,cdate'
+            ,'rows' => 50
+            ,'dir' => 'asc'
+        );
+
+        $s = new \CB\Search();
+        $sr = $s->query($params);
+
+        $files = array();
+        $fileIds = array();
+        $fileTypes = array();
+
+        foreach ($sr['data'] as $d) {
+            $files[$d['pid']][] = $d;
+            $fileIds[] = $d['id'];
+        }
+
+        //get file types from db
+        if (!empty($fileIds)) {
+            $res = DB\dbQuery(
+                'SELECT f.id, c.`type`
+                FROM files f
+                JOIN files_content c
+                    ON f.content_id = c.id
+                WHERE f.id in (' . implode(',', $fileIds) . ')'
+            ) or die(DB\dbQueryError());
+            while ($r = $res->fetch_assoc()) {
+                $fileTypes[$r['id']] = $r['type'];
+            }
+            $res->close();
+        }
+
+        foreach ($rez['data'] as &$d) {
+            if (empty($files[$d['id']])) {
+                continue;
+            }
+
+            $links = array();
+            foreach ($files[$d['id']] as $f) {
+                $f['type'] = @$fileTypes[$f['id']];
+                $links[] = static::getFileLink($f);
+            }
+
+            $d['content'] .= '<ul class="comment-attachments"><li>' . implode('</li><li>', $links) .'</li></ul>';
+        }
+    }
+
+    /**
+     * get link to a file to be displayed in comments
+     * @param  array   $file
+     * @return varchar
+     */
+    protected static function getFileLink($file)
+    {
+        $rez = '';
+
+        if (substr($file['type'], 0, 5) == 'image') {
+            $rez = '<a class="cDB obj-ref" href="#' . $file['id'] .
+                    '" templateId= "' . $file['template_id'] .
+                    '" title="' . $file['name'] .
+                    '"><img class="fit-img" style="min-height: 60px" src="/' . Config::get('core_name') . '/download/' . $file['id'] . '/" /></a>';
+
+        } else {
+            $rez = '<a class="cDB obj-ref icon-padding ' . \CB\Files::getIcon($file['name']) . '" href="#' . $file['id'] .
+                '" templateId= "' . $file['template_id'] .
+                '">' . $file['name'] . '</a>';
+        }
+
+        return $rez;
     }
 }
