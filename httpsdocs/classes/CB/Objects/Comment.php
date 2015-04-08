@@ -64,8 +64,8 @@ class Comment extends Object
                 $message = str_replace(
                     $match[0],
                     $match[1] .
-                    '<a class="cDB obj-ref" href="#' . $match[2] .
-                    '" templateId= "' . $templateId .
+                    '<a class="click obj-ref" itemid="' . $match[2] .
+                    '" templateid= "' . $templateId .
                     '" title="' . $name . '"' .
                     '>#' . $match[2] . '</a>' .
                     $match[3],

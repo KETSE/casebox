@@ -150,6 +150,7 @@ $API = array_merge(
                 ,'deassociate'          => array('len' => 2)
                 ,'deleteUser'           => array('len' => 1)
                 ,'changePassword'       => array('len' => 1, 'formHandler' => true)
+                ,'sendResetPassMail'    => array('len' => 1)
                 ,'renameUser'           => array('len' => 1)
                 ,'renameGroup'          => array('len' => 1)
                 ,'disableTSV'           => array('len' => 1)

@@ -225,28 +225,34 @@ class UsersGroups
     public function addUser($p)
     {
         if (!User::isVerified()) {
-            return array('success' => false, 'verify' => true);
+            return array(
+                'success' => false
+                ,'verify' => true
+            );
         }
 
         if (!Security::canManage()) {
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $rez = array('success' => false, 'msg' => L\get('Missing_required_fields'));
+        $rez = array(
+            'success' => false
+            ,'msg' => L\get('Missing_required_fields')
+        );
 
         $p['name'] = strip_tags($p['name']);
         $p['name'] = trim($p['name']);
 
-        if (empty($p['name']) ||
-            empty($p['password']) ||
-            (empty($p['confirm_password']) ||
-            ($p['password'] != $p['confirm_password']))) {
+        if (empty($p['name'])) {
             return $rez;
         }
 
         // validate input params
         if (!preg_match('/^[a-z\.0-9_]+$/i', $p['name'])) {
-            return array('success' => false, 'msg' => 'Invalid username. Use only letters, digits, "dot" and/or "underscore".');
+            return array(
+                'success' => false
+                ,'msg' => 'Invalid username. Use only letters, digits, "dot" and/or "underscore".'
+            );
         }
 
         $p['first_name'] = Purify::humanName($p['first_name']);
@@ -257,7 +263,10 @@ class UsersGroups
                 $p['email'],
                 FILTER_VALIDATE_EMAIL
             )) {
-                return array('success' => false, 'msg' => 'Invalid email address');
+                return array(
+                    'success' => false
+                    ,'msg' => L\get('InvalidEmail')
+                );
             }
         }
 
@@ -271,6 +280,7 @@ class UsersGroups
                 AND did IS NULL',
             $p['name']
         ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             throw new \Exception(L\get('User_exists'));
         }
@@ -283,7 +293,6 @@ class UsersGroups
                 ,first_name
                 ,last_name
                 ,`cid`
-                ,`password`
                 ,language_id
                 ,cdate
                 ,uid
@@ -292,18 +301,16 @@ class UsersGroups
                 ,$2
                 ,$3
                 ,$4
-                ,MD5(CONCAT(\'aero\', $5))
-                ,$6
+                ,$5
                 ,CURRENT_TIMESTAMP
                 ,$4
-                ,$7)
+                ,$6)
             ON DUPLICATE KEY
             UPDATE id = last_insert_id(id)
                 ,`name` = $1
                 ,`first_name` = $2
                 ,`last_name` = $3
                 ,`cid` = $4
-                ,`password` = MD5(CONCAT(\'aero\', $5))
                 ,last_login = NULL
                 ,login_successful = NULL
                 ,login_from_ip = NULL
@@ -313,7 +320,7 @@ class UsersGroups
                 ,cdate = CURRENT_TIMESTAMP
                 ,did = NULL
                 ,ddate = NULL
-                ,language_id = $6
+                ,language_id = $5
                 ,uid = $4
                 ,cdate = CURRENT_TIMESTAMP',
             array(
@@ -321,13 +328,15 @@ class UsersGroups
                 ,$p['first_name']
                 ,$p['last_name']
                 ,$_SESSION['user']['id']
-                ,$p['password']
                 ,Config::get('language_index')
                 ,$p['email']
             )
         ) or die(DB\dbQueryError());
         if ($user_id = DB\dbLastInsertId()) {
-            $rez = array('success' => true, 'data' => array('id' => $user_id));
+            $rez = array(
+                'success' => true
+                ,'data' => array('id' => $user_id)
+            );
             $p['id'] = $user_id;
         }
 
@@ -352,6 +361,11 @@ class UsersGroups
             $rez['data']['group_id'] = $p['group_id'];
         } else {
             $rez['data']['group_id'] = 0;
+        }
+
+        //check if send invite is set and create notification
+        if (!empty($p['send_invite'])) {
+            static::sendEmailInvite($user_id);
         }
 
         Security::calculateUpdatedSecuritySets();
@@ -639,6 +653,77 @@ class UsersGroups
         Session::clearUserSessions($user_id);
 
         return array('success' => true);
+    }
+
+    /**
+     * send recovery password email for given user id
+     * so that the user can set new password and enter the system
+     * @param  int     $userId
+     * @return boolean
+     */
+    public static function sendEmailInvite($userId)
+    {
+        if (!is_numeric($userId) ||
+            (User::isLoged() && !Security::canEditUser($userId))
+        ) {
+            return false;
+        }
+
+        //load mail template
+        $mail = System::getEmailTemplate('password_recovery_email');
+
+        if (empty($mail)) {
+            return false;
+        }
+
+        $userData = User::getPreferences($userId);
+
+        $userEmail = empty($userData['cfg']['security']['recovery_email'])
+            ? $userData['email']
+            : $userData['cfg']['security']['recovery_email'];
+
+        //check if mail is set in security settings
+        if (!empty($userData['cfg']['security']['recovery_email']) && !empty($userData['cfg']['security']['email'])) {
+            $userEmail = $userData['cfg']['security']['email'];
+        }
+
+        if (empty($userEmail)) {
+            return false;
+        }
+
+        /* generating recovery hash and sending mail */
+        $hash = User::generateRecoveryHash(
+            $userId,
+            $userId . $userEmail . date(DATE_ISO8601)
+        );
+
+        $userName = User::getDisplayName($userData);
+
+        $href = Util\getCoreHost().'recover/reset-password/?h='.$hash;
+
+        $mail = str_replace(
+            array('{name}', '{link}'),
+            array($userName, '<a href="'.$href.'" >'.$href.'</a>'),
+            $mail
+        );
+
+        return @System::sendMail(
+            $userEmail,
+            L\get('MailRecoverSubject'),
+            $mail
+        );
+    }
+
+    /**
+     * shortcut to previous function to return json responce
+     * @param  int   $userId
+     * @return array
+     */
+    public function sendResetPassMail($userId)
+    {
+        return array(
+            'success' => $this->sendEmailInvite($userId)
+        );
     }
 
     public function disableTSV($userId)

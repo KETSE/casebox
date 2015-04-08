@@ -212,13 +212,13 @@ class Comments extends Base
         $rez = '';
 
         if (substr($file['type'], 0, 5) == 'image') {
-            $rez = '<a class="cDB obj-ref" href="#' . $file['id'] .
+            $rez = '<a class="click obj-ref" href="#' . $file['id'] .
                     '" templateId= "' . $file['template_id'] .
                     '" title="' . $file['name'] .
                     '"><img class="fit-img" style="min-height: 60px" src="/' . Config::get('core_name') . '/download/' . $file['id'] . '/" /></a>';
 
         } else {
-            $rez = '<a class="cDB obj-ref icon-padding ' . \CB\Files::getIcon($file['name']) . '" href="#' . $file['id'] .
+            $rez = '<a class="click obj-ref icon-padding ' . \CB\Files::getIcon($file['name']) . '" href="#' . $file['id'] .
                 '" templateId= "' . $file['template_id'] .
                 '">' . $file['name'] . '</a>';
         }

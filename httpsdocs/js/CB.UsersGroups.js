@@ -4,11 +4,12 @@ Ext.namespace('CB');
 Ext.define('CB.AddUserForm', {
     extend: 'Ext.Window'
 
-    ,data: {}
     ,layout: 'fit'
     ,autoWidth: true
     ,title: L.AddUser
     ,iconCls: 'icon-user-gray'
+    ,data: {}
+
     ,initComponent: function(){
         var recs = CB.DB.roles.queryBy(
             function(r){
@@ -20,7 +21,9 @@ Ext.define('CB.AddUserForm', {
         );
 
         var data = [];
+
         recs.each(function(r){data.push(r.data);}, this);
+
         this.rolesStore = new Ext.data.JsonStore({
             autoLoad: true
             ,autoDestroy: true
@@ -33,11 +36,14 @@ Ext.define('CB.AddUserForm', {
 
         data = [];
 
-        CB.DB.groupsStore.each( function(r){
-            if(parseInt(r.get('system'), 10) === 0) {
-                data.push(r.data);
+        CB.DB.groupsStore.each(
+            function(r){
+                if(parseInt(r.get('system'), 10) === 0) {
+                    data.push(r.data);
+                }
             }
-        }, this);
+            ,this
+        );
 
         this.groupsStore = new Ext.data.JsonStore({
             autoLoad: true
@@ -73,7 +79,15 @@ Ext.define('CB.AddUserForm', {
                 ,fieldLabel: L.Email
                 ,name: 'email'
                 ,vtype: 'email'
-            },{
+            }
+
+            ,{
+                xtype: 'checkbox'
+                ,fieldLabel: L.SendEmailInvite
+                ,inputValue: 1
+                ,name: 'send_invite'
+            }
+            /*,{
                 xtype: 'textfield'
                 ,allowBlank: false
                 ,fieldLabel: L.Password
@@ -84,7 +98,9 @@ Ext.define('CB.AddUserForm', {
                 ,fieldLabel: L.PasswordConfirmation
                 ,inputType: 'password'
                 ,name: 'confirm_password'
-            },{
+            },/**/
+
+            ,{
                 xtype: 'combo'
                 ,fieldLabel: L.Group
                 ,editable: false
@@ -161,13 +177,10 @@ Ext.define('CB.AddUserForm', {
             }
         }, this);
 
-        p = this.down('[name="password"]');
-        pc = this.down('[name="confirm_password"]');
-        pm = (p.getValue() != pc.getValue());
         msg = required ? '' : L.EmptyRequiredFields;
-        this.down('[name="E"]').setText( pm ? L.PasswordMissmatch : msg);
+        this.down('[name="E"]').setText(msg);
 
-        this.dockedItems.getAt(1).items.getAt(0).setDisabled(!value || !required || pm);
+        this.dockedItems.getAt(1).items.getAt(0).setDisabled(!value || !required);
     }
 
     ,saveData: function(){
@@ -798,7 +811,7 @@ Ext.define('CB.UsersGroupsForm', {
                     ,scale: 'medium'
                     ,hidden: true
                     ,menu: [
-                        {text: L.ChangePassword, iconCls: 'icon-key', handler: this.onEditUserPasswordClick, scope: this}
+                        {text: L.SendResetPassMail, iconCls: 'icon-key', handler: this.onSendResetPassMailClick, scope: this}
                         ,'-'
                         ,{text: L.ChangeUsername, iconCls: 'icon-pencil', handler: this.onEditUsernameClick, scope: this}
                         ,'-'
@@ -1062,10 +1075,23 @@ Ext.define('CB.UsersGroupsForm', {
         }, this, false, this.data.name);
     }
 
-    ,onEditUserPasswordClick: function(){
-        w = new CB.ChangePasswordWindow({data: this.data});
-        w.show();
+    ,onSendResetPassMailClick: function() {
+        CB_UsersGroups.sendResetPassMail(
+            this.data.id
+            ,function(r, e) {
+                Ext.Msg.alert(
+                    L.Info
+                    ,r.success ? L.EmailSent: L.ErrorOccured
+                );
+            }
+            ,this
+        );
     }
+
+    // ,onEditUserPasswordClick: function(){
+    //     w = new CB.ChangePasswordWindow({data: this.data});
+    //     w.show();
+    // }
 
     ,onDisableTSVClick: function(){
         Ext.Msg.confirm(

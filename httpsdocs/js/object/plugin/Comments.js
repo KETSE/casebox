@@ -127,6 +127,9 @@ Ext.define('CB.object.plugin.Comments', {
             ,listeners: {
                 scope: this
                 ,change: this.onAttachFile
+                ,render: function (ed) {
+                    ed.fileInputEl.set({ multiple: true });
+                }
             }
         });
 
@@ -137,8 +140,6 @@ Ext.define('CB.object.plugin.Comments', {
         this.messageToolbar = new Ext.Toolbar({
             hidden: false
             ,style: 'padding: 0; border: 0; background-color:  #f1f1f1;' // background-color: transparent;
-            ,cls: 'op03'
-            ,overCls: 'op1'
             ,items: [
                 this.attachFileButton
                 ,this.filesLabel
@@ -458,7 +459,7 @@ Ext.define('CB.object.plugin.Comments', {
         if(el) {
             e.stopEvent();
             this.openObjectProperties({
-                id: el.attributes.href.value.substr(1)
+                id: el.attributes.itemid.value
                 ,template_id: el.attributes.templateid.value
             });
 
@@ -647,7 +648,13 @@ Ext.define('CB.object.plugin.Comments', {
     ,onDataViewResize: function(view, width, height, oldWidth, oldHeight, eOpts) {
         var dv = this.dataView
             ,store = dv.store
-            ,divs = dv.getEl().query('td.comment');
+            ,el = dv.getEl();
+
+        if(Ext.isEmpty(el)) {
+            return;
+        }
+
+        var divs = dv.getEl().query('td.comment');
 
         //iterate comments and see if any exceeds default height
         for (var i = 0; i < divs.length; i++) {

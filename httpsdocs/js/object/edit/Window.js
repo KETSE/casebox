@@ -415,7 +415,7 @@ Ext.define('CB.object.edit.Window', {
             delete objProperties.preview;
         }
 
-        Ext.apply(this.data, objProperties);
+        this.data = Ext.apply(Ext.valueFrom(this.data, {}), objProperties);
         this.data.from = 'window';
 
         this.titleView.update(this.data);

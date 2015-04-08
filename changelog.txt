@@ -1,3 +1,17 @@
+CaseBox 1.9.414 (2015-04-08)
+==============================
+New Features, Improvements
+--------------------------
+- #3921 Toolbar below Comment area with "Attach file" button
+    - remove the grayed out from the attach/reply buttons
+    - make Attach button allow multiFile selection
+- #5110 Replace Password/Confirm pass with "Send email invite" checkbox
+
+Fixed Bugs:
+----------
+- #5138 UI issues clicking on rendered links to objects (#id) in obj preview
+- #4854 Graph not working for Pytkam
+
 CaseBox 1.9.413 (2015-04-07)
 ==============================
 New Features, Improvements

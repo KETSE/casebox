@@ -95,7 +95,7 @@ foreach ($users as $u) {
                 )) {
                     $markNotificationAsSent = false;
 
-                    notifyAdmin(
+                    System::notifyAdmin(
                         'CaseBox cron notification: Cant send notification (' . $notificationId . ') mail to "'. $u['email'] . '"',
                         var_export($m, 1)
                     );

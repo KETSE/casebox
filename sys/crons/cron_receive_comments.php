@@ -106,7 +106,7 @@ foreach ($mailServers as &$cfg) {
         }
 
     } catch (\Exception $e) {
-        // notifyAdmin('Casebox: check mail Exception for core' . $coreName, $e->getMessage());
+        // System::notifyAdmin('Casebox: check mail Exception for core' . $coreName, $e->getMessage());
         echo " Error connecting to email\n".$e->getMessage();
     }
 

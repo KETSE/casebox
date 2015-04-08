@@ -76,7 +76,7 @@ try {
         )
     );
 } catch (\Exception $e) {
-    notifyAdmin('Casebox: check mail Exception for core' . $coreName, $e->getMessage());
+    System::notifyAdmin('Casebox: check mail Exception for core' . $coreName, $e->getMessage());
     echo " Error connecting to email\n";
     exit(); // skip this core if mail cannot be accesed
 }

@@ -59,7 +59,7 @@ try {
         $e->getMessage()."<br />\n".
         $e->getTraceAsString();
     echo $msg;
-    notifyAdmin('CaseBox cron execution exception ('.$coreName.')', $msg);
+    System::notifyAdmin('CaseBox cron execution exception ('.$coreName.')', $msg);
 }
 
 unset($solr);
