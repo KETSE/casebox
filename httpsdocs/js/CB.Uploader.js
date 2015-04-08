@@ -245,7 +245,12 @@ Ext.define('CB.Uploader', {
         Ext.each(
             FilesList
             ,function(f){
+                if(f && (f.size == 0)) {
+                    return Ext.Msg.alert(L.Error, L.BrowserNoFolderUpload);
+                }
+
                 var dir = Ext.valueFrom(f.fullPath, f.mozFullPath);
+
                 if(!Ext.isEmpty(dir)){
                     dir = dir.split('/');
                     dir.pop();

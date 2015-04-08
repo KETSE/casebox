@@ -1243,7 +1243,7 @@ function initApp() {
         if(fu) {
             fu.addFiles(FileList, options);
         } else {
-            Ext.Msg.alert(L.Info, 'This browser does not support file uploading from desktop');
+            Ext.Msg.alert(L.Info, L.BrowserNoDDUpload);
         }
     };
 

@@ -5,6 +5,7 @@ use CB\Config;
 use CB\Util;
 use CB\Facets;
 use CB\Search;
+use CB\User;
 
 class FacetNav extends Base
 {
@@ -70,7 +71,15 @@ class FacetNav extends Base
         }
 
         if (!empty($id) && is_numeric($id)) {
-            $rez = @Search::getObjectNames($id)[$id];
+            $facetConfig = $this->getFacetFieldConfig($this->getClassDepth() - 1);
+            switch (@$facetConfig['type']) {
+                case 'users':
+                    $rez = User::getDisplayName($id);
+                    break;
+
+                default:
+                    $rez = @Search::getObjectNames($id)[$id];
+            }
 
         } else {
             switch ($id) {
@@ -135,15 +144,18 @@ class FacetNav extends Base
 
     protected function getCurrentFacetFieldConfig()
     {
-        $depth = $this->lastNodeDepth;
+        return $this->getFacetFieldConfig($this->lastNodeDepth);
+    }
 
+    protected function getFacetFieldConfig($index)
+    {
         $levelFields = $this->getLevelFieldConfigs();
 
         $rez = reset($levelFields);
 
-        while ($depth > 1) {
+        while ($index > 1) {
             $rez = next($levelFields);
-            $depth--;
+            $index--;
         }
 
         return $rez;

@@ -1,3 +1,14 @@
+CaseBox 1.9.415 (2015-04-08)
+==============================
+New Features, Improvements
+--------------------------
+- #5071 Ignore folder upload on Firefox (browsers that don't support it)
+- #5003 question: how to define own order for folders
+
+Fixed Bugs:
+----------
+- #5156 User name not visible in breadcrumb
+
 CaseBox 1.9.414 (2015-04-08)
 ==============================
 New Features, Improvements
