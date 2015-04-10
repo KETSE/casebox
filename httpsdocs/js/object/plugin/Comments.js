@@ -348,7 +348,8 @@ Ext.define('CB.object.plugin.Comments', {
     }
 
     ,updateFilesLabel: function() {
-        var fu = App.getFileUploader();
+        var fu = App.getFileUploader()
+            ,label = this.filesLabel;
 
         if(Ext.isEmpty(this.draftCommentId) || Ext.isEmpty(fu)) {
             label.setValue('');
@@ -356,8 +357,7 @@ Ext.define('CB.object.plugin.Comments', {
         }
 
         var store = fu.store
-            ,stats = fu.getStatsForPid(this.draftCommentId)
-            ,label = this.filesLabel;
+            ,stats = fu.getStatsForPid(this.draftCommentId);
 
         if(stats.pending > 0) {
             label.setValue(stats.pending + ' / ' + stats.total);

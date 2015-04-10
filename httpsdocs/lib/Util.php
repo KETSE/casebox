@@ -143,6 +143,8 @@ function formatAgoTime($mysqlTime)
     $WEEK_START = strtotime('last Sunday');
     $YEAR_START = strtotime('1 January');
 
+    $mysqlTime = UTCTimeToUserTimezone($mysqlTime);
+
     $time = strtotime($mysqlTime);
     $interval = strtotime('now') - $time;//11003
     if ($interval < 0) {
@@ -161,7 +163,7 @@ function formatAgoTime($mysqlTime)
 
         return $m.' '.L\get('minutes').' '.L\get('ago');
     }
-    // echo "$interval <= ($time - $TODAY_START) = ".($time - $TODAY_START);
+
     if ($interval < ($time - $TODAY_START)) {
         $H = intval($interval/$AHOUR);
         if ($H < 2) {
@@ -170,7 +172,7 @@ function formatAgoTime($mysqlTime)
 
         return $H.' '.L\get('ofHours').' '.L\get('ago');
     }
-    // echo "\n$interval <= ($time - $YESTERDAY_START) = ".($time - $YESTERDAY_START);
+
     if ($YESTERDAY_START <= $time) {
         return L\get('Yesterday').' '.L\get('at').' '.date('H:i', $time);
     }
@@ -280,12 +282,12 @@ function formatDatePeriod($fromDateTime, $toDateTime)
  */
 function UTCTimeToUserTimezone($dateTime)
 {
-    if (empty($dateTime) || empty($_SESSION['user']['cfg']['TZ'])) {
+    if (empty($dateTime) || empty($_SESSION['user']['cfg']['timezone'])) {
         return $dateTime;
     }
 
     $d = new \DateTime($dateTime);
-    $d->setTimezone(new \DateTimeZone($_SESSION['user']['cfg']['TZ']));
+    $d->setTimezone(new \DateTimeZone($_SESSION['user']['cfg']['timezone']));
 
     return $d->format('Y-m-d H:i:s');
 }
@@ -297,11 +299,11 @@ function UTCTimeToUserTimezone($dateTime)
  */
 function userTimeToUTCTimezone($dateTime)
 {
-    if (empty($dateTime) || empty($_SESSION['user']['cfg']['TZ'])) {
+    if (empty($dateTime) || empty($_SESSION['user']['cfg']['timezone'])) {
         return $dateTime;
     }
 
-    $d = new \DateTime($dateTime, new \DateTimeZone($_SESSION['user']['cfg']['TZ']));
+    $d = new \DateTime($dateTime, new \DateTimeZone($_SESSION['user']['cfg']['timezone']));
     $d->setTimezone('UTC');
 
     return $d->format('Y-m-d H:i:s');
@@ -316,8 +318,6 @@ function userTimeToUTCTimezone($dateTime)
  */
 function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
 {
-    // echo "input params: $fromDateTime, $toDateTime, $TZ\n";
-
     $d1 = new \DateTime($fromDateTime);
     if (empty($TZ)) {
         $TZ = 'UTC';

@@ -212,14 +212,14 @@ class Comments extends Base
         $rez = '';
 
         if (substr($file['type'], 0, 5) == 'image') {
-            $rez = '<a class="click obj-ref" href="#' . $file['id'] .
-                    '" templateId= "' . $file['template_id'] .
+            $rez = '<a class="click obj-ref" itemid="' . $file['id'] .
+                    '" templateid= "' . $file['template_id'] .
                     '" title="' . $file['name'] .
                     '"><img class="fit-img" src="/' . Config::get('core_name') . '/download/' . $file['id'] . '/" /></a>';
 
         } else {
-            $rez = '<a class="click obj-ref icon-padding ' . \CB\Files::getIcon($file['name']) . '" href="#' . $file['id'] .
-                '" templateId= "' . $file['template_id'] .
+            $rez = '<a class="click obj-ref icon-padding ' . \CB\Files::getIcon($file['name']) . '" itemid="' . $file['id'] .
+                '" templateid= "' . $file['template_id'] .
                 '">' . $file['name'] . '</a>';
         }
 

@@ -1,3 +1,11 @@
+CaseBox 1.9.417 (2015-04-10)
+==============================
+Fixed Bugs:
+----------
+- #5274 Export function doesn't work ok
+- #5298 Created/Modified rows in PropertiesObjPlugin shows UTC time
+- #5299 Clicking an attached img to a comment gives JS error
+
 CaseBox 1.9.416 (2015-04-10)
 ==============================
 New Features, Improvements
