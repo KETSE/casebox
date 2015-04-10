@@ -1005,8 +1005,19 @@ class Files
 
             return array('html' => '');
         }
-        if ($file['status'] > 0) {
-            return array('processing' => true);
+
+        switch ($file['status']) {
+            case 1:
+            case 2:
+                return array(
+                    'processing' => true
+                );
+
+            case 3:
+                return array(
+                    'html' => L\get('ErrorCreatingPreview')
+                );
+
         }
 
         $ext = explode('.', $file['name']);

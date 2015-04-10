@@ -360,6 +360,7 @@ Ext.define('CB.plugin.field.DropDownList', {
 
     ,showItems: function(itemsArray){
         this.store.loadData(itemsArray);
+        this.owner.getPicker().getSelectionModel().deselectAll();
         this.owner.expand();
         this.owner.setPosition();
     }

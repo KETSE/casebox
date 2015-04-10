@@ -132,6 +132,7 @@ switch ($command) {
             $result = $browser->saveFile(
                 array(
                     'pid' => @$file['pid']
+                    ,'draftPid' => @$file['draftPid']
                     ,'response' => @$file['response']
                 )
             );

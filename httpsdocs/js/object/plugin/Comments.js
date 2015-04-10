@@ -123,6 +123,7 @@ Ext.define('CB.object.plugin.Comments', {
             ,buttonConfig: {
                 iconCls: 'i-attach'
             }
+            ,hidden: Ext.isEmpty(this.params.id)
             ,width: 24
             ,listeners: {
                 scope: this
@@ -349,16 +350,14 @@ Ext.define('CB.object.plugin.Comments', {
     ,updateFilesLabel: function() {
         var fu = App.getFileUploader();
 
-        if(Ext.isEmpty(fu)) {
-            clog('empty uploaded');
+        if(Ext.isEmpty(this.draftCommentId) || Ext.isEmpty(fu)) {
+            label.setValue('');
             return;
         }
 
         var store = fu.store
             ,stats = fu.getStatsForPid(this.draftCommentId)
             ,label = this.filesLabel;
-
-        clog('stats', stats);
 
         if(stats.pending > 0) {
             label.setValue(stats.pending + ' / ' + stats.total);

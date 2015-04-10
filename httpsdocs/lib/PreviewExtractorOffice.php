@@ -95,14 +95,17 @@ class PreviewExtractorOffice extends PreviewExtractor
                 $res->close();
             } else {
                 //preview not generated for some reason, probably unoconv service not started
-                \CB\debug('UNOCONV execution error: '.$cmd);
+                \CB\debug(
+                    'UNOCONV execution error, please check if python accesible through command line'.
+                    ' and if correctly specified in config.ini: '.$cmd
+                );
+
                 DB\dbQuery(
                     'UPDATE file_previews
-                    SET `status` = 1
+                    SET `status` = 3
                     WHERE id = $1',
                     $r['content_id']
                 )  or die(DB\dbQueryError());
-
             }
 
             DB\commitTransaction();

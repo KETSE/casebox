@@ -115,7 +115,7 @@ Ext.define('CB.Uploader', {
             if(r.success === true){
                 this.uploadingFile.set('status', this.targetStatus);
 
-                if(!Ext.isEmpty(r.data.draftPid)) {
+                if(Ext.isEmpty(r.data.draftPid)) {
                     this.updatedPids.push(r.data.pid);
                 }
 
@@ -222,7 +222,7 @@ Ext.define('CB.Uploader', {
         if(r.success === true){
             this.uploadingFile.set('status', 5); //uploaded
 
-            if(!Ext.isEmpty(r.data.draftPid)) {
+            if(Ext.isEmpty(r.data.draftPid)) {
                 this.updatedPids.push(r.data.pid);
             }
 
@@ -363,6 +363,7 @@ Ext.define('CB.Uploader', {
             };
 
             this.progressChange();
+
             if(!Ext.isEmpty(this.updatedPids)) {
                 App.fireEvent('filesuploaded', this.updatedPids);
             }

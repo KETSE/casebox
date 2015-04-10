@@ -215,7 +215,7 @@ class Comments extends Base
             $rez = '<a class="click obj-ref" href="#' . $file['id'] .
                     '" templateId= "' . $file['template_id'] .
                     '" title="' . $file['name'] .
-                    '"><img class="fit-img" style="min-height: 60px" src="/' . Config::get('core_name') . '/download/' . $file['id'] . '/" /></a>';
+                    '"><img class="fit-img" src="/' . Config::get('core_name') . '/download/' . $file['id'] . '/" /></a>';
 
         } else {
             $rez = '<a class="click obj-ref icon-padding ' . \CB\Files::getIcon($file['name']) . '" href="#' . $file['id'] .
