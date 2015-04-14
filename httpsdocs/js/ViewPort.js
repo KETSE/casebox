@@ -441,7 +441,8 @@ Ext.define('CB.ViewPort', {
         var locateId = String(window.location.href.split('locate=')[1]).split('&')[0];
 
         if(!Ext.isEmpty(locateId)) {
-            App.locateObject(locateId);
+            // App.locateObject(locateId);
+            App.controller.openObjectWindowById(locateId);
         }
     }
 

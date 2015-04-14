@@ -1,3 +1,14 @@
+CaseBox 1.9.418 (2015-04-14)
+==============================
+New Features, Improvements
+--------------------------
+- #5225 Cannot access to a new task through email
+
+Fixed Bugs:
+----------
+- #5362 Can't add a record on localhost
+- #5274 Export function doesn't work ok
+
 CaseBox 1.9.417 (2015-04-10)
 ==============================
 Fixed Bugs:
@@ -52,6 +63,10 @@ CaseBox 1.9.413 (2015-04-07)
 New Features, Improvements
 --------------------------
 - #3921 Toolbar below Comment area with "Attach file" button
+
+Notes:
+----------
+- apply database update: v.1.9.413.sql
 
 CaseBox 1.9.412 (2015-04-03)
 ==============================

@@ -123,7 +123,7 @@ Ext.define('CB.object.plugin.Comments', {
             ,buttonConfig: {
                 iconCls: 'i-attach'
             }
-            ,hidden: Ext.isEmpty(this.params.id)
+            ,hidden: (Ext.isEmpty(this.params) || Ext.isEmpty(this.params.id))
             ,width: 24
             ,listeners: {
                 scope: this

@@ -113,7 +113,7 @@ class Object
         }
 
         $draftPid = empty($p['draftPid']) ? null : $p['draftPid'];
-        $isDraft = !empty($draftPid) || !empty($p['draft']);
+        $isDraft = intval(!empty($draftPid) || !empty($p['draft']));
 
         if (empty($p['date_end'])) {
             $p['date_end'] = null;

@@ -239,7 +239,6 @@ Ext.define('CB.Uploader', {
         if(this.config.autoShowWindow) {
             //this.showUploadWindow();
         }
-
         this.group++;
 
         Ext.each(
@@ -277,7 +276,7 @@ Ext.define('CB.Uploader', {
                         ,response: options.response
                         ,status: 0
                         ,loaded: 0
-                        ,msg:''
+                        ,msg: ''
                         ,md5: false
                         ,md5_verified: 0
                     }
