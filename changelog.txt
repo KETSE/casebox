@@ -1,3 +1,14 @@
+CaseBox 1.9.419 (2015-04-15)
+==============================
+New Features, Improvements
+--------------------------
+- #4283 Display "Drop files here or use the "New" button" message if grid is empty
+- #5363 Don't remember the state of Tree, always show it on CB load
+
+Fixed Bugs:
+----------
+- #5367 Can't search using Date fields
+
 CaseBox 1.9.418 (2015-04-14)
 ==============================
 New Features, Improvements
@@ -42,7 +53,7 @@ New Features, Improvements
 
 Fixed Bugs:
 ----------
-- #5156 User name not visible in breadcrumb
+-- #5156 User name not visible in breadcrumb
 
 CaseBox 1.9.414 (2015-04-08)
 ==============================

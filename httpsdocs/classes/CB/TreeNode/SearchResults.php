@@ -64,7 +64,6 @@ class SearchResults extends Dbnode
 
         $s = new \CB\Search();
         $rez = $s->query($p);
-
         if (empty($rez['DC']) && !empty($td['cfg']['DC'])) {
             $rez['DC'] = $td['cfg']['DC'];
         }
@@ -154,18 +153,18 @@ class SearchResults extends Dbnode
                 } else {
                     switch ($value['cond']) {
                         case '<=':
-                            $rez = $f.':[* TO '.$this->toSolrDate($v).']';
+                            $rez = $f.':[* TO "'.$this->toSolrDate($v).'"]';
                             break;
                         case '>=':
-                            $rez = $f.':['.$this->toSolrDate($v).' TO *]';
+                            $rez = $f.':["'.$this->toSolrDate($v).'" TO *]';
                             break;
                         case '!=':
-                            $rez = '-'.$f.':'.$this->toSolrDate($v);
+                            $rez = '-'.$f.':"' . $this->toSolrDate($v) . '"';
                             break;
 
                         case '=':
                         default:
-                            $rez = $f.':'.$this->toSolrDate($v);
+                            $rez = $f.':"' . $this->toSolrDate($v) . '"';
                             break;
                     }
                 }

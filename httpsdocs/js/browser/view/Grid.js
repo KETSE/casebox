@@ -520,7 +520,7 @@ Ext.define('CB.browser.view.Grid', {
                 ? L.GridEmptyText
                 : L.NoResultsFound;
 
-        this.grid.view.emptyText = emptyText;
+        this.grid.view.emptyText = '<div class="gv-empty-text"><div class="middle"><div class="inner">' + emptyText + '</div></div></div>';
     }
 
     ,ddOnContainerOver: function(source, e, data) {

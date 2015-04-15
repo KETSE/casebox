@@ -1003,3 +1003,23 @@ border-top: 0;
 .obj-ref {
 
 }
+
+
+.gv-empty-text {
+    display: table;
+    position: absolute;
+    height: 99%;
+    width: 99%;
+}
+
+.gv-empty-text .middle {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.gv-empty-text .inner {
+    margin-left: auto;
+    margin-right: auto;
+    color: gray;
+}
