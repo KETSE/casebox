@@ -146,7 +146,7 @@ function formatAgoTime($mysqlTime)
     $mysqlTime = UTCTimeToUserTimezone($mysqlTime);
 
     $time = strtotime($mysqlTime);
-    $interval = strtotime('now') - $time;//11003
+    $interval = strtotime(UTCTimeToUserTimezone('now')) - $time;//11003
     if ($interval < 0) {
         //it's a future time
         return L\get('fewSecondsAgo');

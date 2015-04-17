@@ -1042,7 +1042,6 @@ class Objects
             $templateData = $templates->getTemplate($templateId)->getData();
         }
 
-
         $from = empty($p['from'])
             ? ''
             : $p['from'];

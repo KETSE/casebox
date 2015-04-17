@@ -58,7 +58,7 @@ class Comment extends Object
                 $templateId = Objects::getTemplateId($match[2]);
                 $name = Objects::getName($match[2]);
                 $name = (strlen($name) > 30)
-                    ? substr($name, 0, 30) . '&hellip;'
+                    ? mb_substr($name, 0, 30) . '&hellip;'
                     : $name;
 
                 $message = str_replace(

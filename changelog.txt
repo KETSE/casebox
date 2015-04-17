@@ -1,3 +1,15 @@
+CaseBox 1.9.420 (2015-04-17)
+==============================
+New Features, Improvements
+--------------------------
+- #5374 "Search results" disappeared from breadcrumbs
+
+Fixed Bugs:
+----------
+- #5412 datetime below each comment not in correct User timezone
+- #5391 Nothing happens when node clicked, no preview, no errors in logs
+- #5363 Don't remember the state of Tree, always show it on CB load
+
 CaseBox 1.9.419 (2015-04-15)
 ==============================
 New Features, Improvements

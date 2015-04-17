@@ -122,9 +122,9 @@ Ext.define('CB.ViewPort', {
                 ,lazyrender: true
                 ,scrollable: true
             }
-            // ,stateful: true
-            // ,stateId: 'mAc'
-            // ,stateEvents: ['resize', 'collapse', 'expand']
+            ,stateful: true
+            ,stateId: 'mAc'
+            ,stateEvents: ['resize']
             ,tbar: Ext.create({
                 xtype: 'panel'
                 ,height: 51
@@ -135,8 +135,8 @@ Ext.define('CB.ViewPort', {
             })
             ,getState: function(){
                 var rez = {
-                    collapsed: this.collapsed
-                    ,width: this.width
+                    // collapsed: this.collapsed
+                    width: this.width
                 };
 
                 return rez;
