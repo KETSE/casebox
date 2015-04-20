@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE config [
+        <!ENTITY cb_solr_types SYSTEM "cb_solr_types.xml">
+        <!ENTITY cb_solr_fields SYSTEM "cb_solr_fields.xml">
+]>
+
+<!--
+ This is the Solr schema file. This file should be named "schema.xml" and
+ should be in the conf directory under the solr home
+ (i.e. ./solr/conf/schema.xml by default)
+ or located where the classloader for the Solr webapp can find it.
+
+ This example schema is the recommended starting point for users.
+ It should be kept correct and concise, usable out-of-the-box.
+
+ For more information, on how to customize this file, please see
+ http://wiki.apache.org/solr/SchemaXml
+
+-->
+
+<schema name="casebox" version="1.5">
+	<!-- attribute "name" is the name of this schema and is only used for display purposes.
+			 Applications should change this to reflect the nature of the search collection.
+			 version="1.2" is Solr's version number for the schema syntax and semantics.  It should
+			 not normally be changed by applications.
+			 1.0: multiValued attribute did not exist, all fields are multiValued by nature
+			 1.1: multiValued attribute introduced, false by default
+			 1.2: omitTermFreqAndPositions attribute introduced, true by default except for text fields.
+		 -->
+
+    &cb_solr_types;
+
+    &cb_solr_fields;
+
+	<!-- uncomment the following to ignore any fields that don't already match an existing
+	    field name or dynamic field, rather than reporting them as an error.
+	    alternately, change the type="ignored" to some other type e.g. "text" if you want
+	    unknown fields indexed and/or stored by default -->
+	<dynamicField name="*" type="ignored" multiValued="true" />
+
+
+
+	<!-- Field to use to determine and enforce document uniqueness.
+	Unless this field is marked with required="false", it will be a required field
+	-->
+	 <uniqueKey>id</uniqueKey>
+
+	<!-- field for the QueryParser to use when an explicit fieldname is absent -->
+	<defaultSearchField>content</defaultSearchField>
+
+	<!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
+	<solrQueryParser defaultOperator="AND"/>
+	<!-- copyField commands copy one field to another at the time a document
+	is added to the index.  It's used either to index the same field differently,
+	or to add multiple fields to the same field for easier/faster searching.  -->
+
+	<copyField source="name" dest="sort_name"/>
+	<copyField source="path" dest="sort_path"/>
+    <copyField source="name" dest="name_first_letter" maxChars="1"/>
+
+</schema>

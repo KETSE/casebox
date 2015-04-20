@@ -3,6 +3,11 @@ data/files/
 data/solr/data/
 data/tmp/
 
+
+
+ssl/
+
+
 # but the folder should exist for CaseBox to run
 logs/
 
@@ -32,3 +37,4 @@ phpdoc.dist.xml
 sys/utils/recreate_docs.bat
 
 apigen.neon
+_rest_managed.json
