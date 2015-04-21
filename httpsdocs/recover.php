@@ -102,43 +102,13 @@ switch ($action) {
             }
         }
 
-        /* generating reset hash and sending mail */
-        $template = TEMPLATES_DIR.'password_recovery_email_' . $userLanguage . '.html';
-        if (!file_exists($template)) {
-            $template = TEMPLATES_DIR.'password_recovery_email_en.html';
-        }
-        if (!file_exists($template)) {
-            mail(
-                Config::get('admin_email'),
-                'Casebox template not found',
-                $template,
-                "Content-type: text/html; charset=utf-8\r\nFrom: " . Config::get('sender_email') . "\r\n"
-            );
-
+        if (!UsersGroups::sendEmailInvite($user_id)) {
             $_SESSION['msg'] = '<div class="alert alert-error">Error occured. Administrator has been notified by mail. Please retry later.</div>';
             header('location: ' . $coreUrl . 'recover/forgot-password/');
             exit(0);
         }
 
-        $hash = User::generateRecoveryHash(
-            $user_id,
-            $user_id . $user_mail . date(DATE_ISO8601)
-        );
-
-        $userData = User::getPreferences($user_id);
-
-        if (!empty($userData['cfg']['security']['recovery_email']) && !empty($userData['cfg']['security']['email'])) {
-            $user_mail = $userData['cfg']['security']['email'];
-        }
-        $userName = User::getDisplayName($userData);
-
-        $href = Util\getCoreHost().'recover/reset-password/?h='.$hash;
-        $mail = file_get_contents($template);
-        $mail = str_replace(array('{name}', '{link}'), array($userName, '<a href="'.$href.'" >'.$href.'</a>'), $mail);
-
-        @mail($user_mail, L\get('MailRecoverSubject'), $mail, "Content-type: text/html; charset=utf-8\r\nFrom: " . Config::get('sender_email') . "\r\n");
         $_SESSION['msg'] = '<div class="alert alert-success">'.L\get('RecoverMessageSent').'</div>';
-        /* end of generating reset hash and sending mail */
         break;
 
     default:

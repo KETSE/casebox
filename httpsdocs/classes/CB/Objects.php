@@ -1042,7 +1042,6 @@ class Objects
             $templateData = $templates->getTemplate($templateId)->getData();
         }
 
-
         $from = empty($p['from'])
             ? ''
             : $p['from'];
@@ -1117,6 +1116,7 @@ class Objects
 
         $data = array(
             'pid' => $p['id']
+            ,'draftId' => @$p['draftId']
             ,'template_id' => array_shift($commentTemplates)
             ,'system' => 2
             ,'data' => array(
@@ -1130,16 +1130,7 @@ class Objects
 
         return array(
             'success' => true
-            ,'data' => array(
-                'id' => $id
-                ,'pid' => $p['id']
-                ,'template_id' => $data['template_id']
-                ,'cdate' => date(DATE_ATOM)
-                ,'cdate_text' => Util\formatAgoTime('now')
-                ,'cid' => $_SESSION['user']['id']
-                ,'user' => User::getDisplayName($_SESSION['user']['id'])
-                ,'content' => Objects\Comment::processAndFormatMessage($p['msg'])
-            )
+            ,'data' => \CB\Objects\Plugins\Comments::loadComment($id)
         );
     }
 
@@ -1167,11 +1158,7 @@ class Objects
 
             $rez = array(
                 'success' => true
-                ,'data' => array(
-                    'id' => $commentData['id']
-                    ,'pid' => $commentData['pid']
-                    ,'text' => Objects\Comment::processAndFormatMessage($p['text'])
-                )
+                ,'data' => \CB\Objects\Plugins\Comments::loadComment($commentData['id'])
             );
 
         }

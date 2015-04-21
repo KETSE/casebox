@@ -65,7 +65,7 @@ Ext.define('CB.object.plugin.ObjectProperties', {
                     'click'
                     ,function(ev, el){
                         this.openObjectProperties({
-                            id: el.attributes.href.value.substr(1)
+                            id: el.attributes.itemid.value
                             ,template_id: el.attributes.templateid.value
                         });
                     }

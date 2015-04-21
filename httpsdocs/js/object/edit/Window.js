@@ -84,6 +84,8 @@ Ext.define('CB.object.edit.Window', {
                 ,'fileupload': this.onFileUploadEvent
 
                 ,'getdraftid': this.onGetDraftId
+
+                ,'show': this.onShowWindow
             }
         });
 
@@ -281,6 +283,10 @@ Ext.define('CB.object.edit.Window', {
         return rez;
     }
 
+    ,onShowWindow: function(c) {
+        this.getEl().focus(10);
+    }
+
     ,onAfterRender: function(c) {
         // map multiple keys to multiple actions by strings and array of codes
         var map = new Ext.KeyMap(
@@ -295,6 +301,28 @@ Ext.define('CB.object.edit.Window', {
             }]
         );
 
+        //attach key listeners to grid view
+        if(this.grid) {
+            new Ext.util.KeyMap({
+                target: this.grid.getView().getEl()
+                ,binding: [{
+                        key: "s"
+                        ,ctrl: true
+                        ,shift: false
+                        ,stopEvent: true
+                        ,scope: this
+                        ,fn: this.onSaveObjectEvent
+                    },{
+                        key: Ext.EventObject.ESC
+                        ,ctrl: false
+                        ,shift: false
+                        ,scope: this
+                        ,stopEvent: true
+                        ,fn: this.close
+                    }
+                ]
+            });
+        }
     }
 
     /**
@@ -387,7 +415,7 @@ Ext.define('CB.object.edit.Window', {
             delete objProperties.preview;
         }
 
-        Ext.apply(this.data, objProperties);
+        this.data = Ext.apply(Ext.valueFrom(this.data, {}), objProperties);
         this.data.from = 'window';
 
         this.titleView.update(this.data);
@@ -471,21 +499,6 @@ Ext.define('CB.object.edit.Window', {
                     ,stateId: 'oevg' //object edit vertical grid
                     ,autoExpandColumn: 'value'
                     ,scrollable: false
-                    ,keys: [{
-                        key: "s"
-                        ,ctrl:true
-                        ,shift:false
-                        ,scope: this
-                        ,stopEvent: true
-                        ,fn: this.onSaveObjectEvent
-                    },{
-                        key: "esc"
-                        ,ctrl:false
-                        ,shift:false
-                        ,scope: this
-                        ,stopEvent: true
-                        ,fn: this.close
-                    }]
                     ,viewConfig: {
                         forceFit: true
                         ,autoFill: true
@@ -507,6 +520,7 @@ Ext.define('CB.object.edit.Window', {
         this.gridContainer.add(this.grid);
 
         this.gridContainer.show();
+
         //add loading class that will hide the grid while objectsStore loads
         if(!this.objectsStore.isLoaded()) {
             this.grid.addCls('loading');

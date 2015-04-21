@@ -12,12 +12,21 @@ Ext.define('CB.object.plugin.Comments', {
                 ,scope: this
                 ,handler: this.onEditClick
             })
+
             ,remove: new Ext.Action({
                 text: L.Delete
                 ,iconCls: 'i-trash'
                 ,scope: this
                 ,handler: this.onRemoveClick
             })
+
+            // ,attachFile: new Ext.Action({
+            //     qtip: L.AttachFile
+            //     ,iconCls: 'i-attach'
+            //     ,buttonOnly: true
+            //     ,scope: this
+            //     ,handler: this.onAttachFileClick
+            // })
         };
 
         var tpl = new Ext.XTemplate(
@@ -26,18 +35,22 @@ Ext.define('CB.object.plugin.Comments', {
             // </div>
 
             '<table class="block-plugin" style="margin:0">'
+            ,'<div class="load-more click">' + L.ViewMore + '</div>'
             ,'<tpl for=".">'
             ,'<tr>'
             ,'    <td class="obj">'
             ,'        <img class="i32" src="/' + App.config.coreName + '/photo/{cid}.jpg?32={[ CB.DB.usersStore.getPhotoParam(values.cid) ]}" title="{user}">'
             ,'    </td>'
-            ,'    <td>'
-            ,'      <tpl if="cid == App.loginData.id">'
+            ,'    <td class="comment">'
+            ,'      <div class="comment-text">'
+            ,'        <tpl if="cid == App.loginData.id">'
             ,'          <span class="i-bullet-arrow-down comment-actions-button">&nbsp;</span>'
-            ,'      </tpl>'
+            ,'        </tpl>'
             ,'        <b class="user">{[ values.user.split("\\n")[0]]}</b>'
             ,'        {[ Ext.util.Format.nl2br(values.content)]}'
-            ,'        <div class="gr" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</div>'
+            ,'      </div>'
+            ,'      <div title="' + L.ShowAll + '" class="show-all click"></div>'
+            ,'      <div class="gr" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</div>'
             ,'    </td>'
             ,'</tr>'
             ,'</tpl>'
@@ -65,53 +78,73 @@ Ext.define('CB.object.plugin.Comments', {
                 }
             })
             ,region: 'center'
+            ,deferInitialRefresh: true
             ,itemSelector:'tr'
             ,listeners: {
                 scope: this
                 ,itemclick: this.onItemClick
+                ,containerclick: this.onContainerClick
+                ,resize: this.onDataViewResize
             }
         });
 
         this.messageField = new Ext.form.TextArea({
             emptyText: L.WriteComment + '...'
-            // ,height: 30
             ,anchor: '100%'
             ,grow: true
             ,growMin: 10
             ,enableKeyEvents: true
             ,cls: "comment-input"
             ,style: 'margin-top: 5px; font-family: arial,sans-serif; font-size: 12px'
-            // disable until prugin refactored for ExtJS 5
+
             ,plugins: [
                 {
                     ptype: 'CBPluginFieldDropDownList'
                 }
             ]
+
             ,listeners: {
                 scope: this
                 ,keypress: this.onMessageBoxKeyPress
                 ,autosize: this.onMessageBoxAutoSize
                 ,focus: function(field) {
-                    // field.grow = true;
                     field.focused = true;
-                    // this.messageToolbar.show();
                 }
                 ,blur: function(field) {
-                    // field.grow = false;
                     delete field.focused;
-                    if(!this.mouseOver) {
-                        // this.messageToolbar.hide();
-                    }
                 }
             }
         });
 
+        this.attachFileButton = new Ext.form.field.File({
+            qtip: L.AttachFile
+            ,buttonOnly: true
+            ,buttonText: ''
+            ,buttonConfig: {
+                iconCls: 'i-attach'
+            }
+            ,hidden: (Ext.isEmpty(this.params) || Ext.isEmpty(this.params.id))
+            ,width: 24
+            ,listeners: {
+                scope: this
+                ,change: this.onAttachFile
+                ,render: function (ed) {
+                    ed.fileInputEl.set({ multiple: true });
+                }
+            }
+        });
+
+        this.filesLabel = new Ext.form.field.Display({
+            cls: 'click'
+        });
+
         this.messageToolbar = new Ext.Toolbar({
-            height: 24
-            ,hidden: false
+            hidden: false
             ,style: 'padding: 0; border: 0; background-color:  #f1f1f1;' // background-color: transparent;
             ,items: [
-                '->'
+                this.attachFileButton
+                ,this.filesLabel
+                ,'->'
                 ,{
                     text: L.Reply
                     ,scope: this
@@ -125,7 +158,7 @@ Ext.define('CB.object.plugin.Comments', {
                 type: 'hbox'
                 ,align: 'stretch'
             }
-            // ,height: 65
+
             ,autoHeight: true
             ,border: false
             ,items: [
@@ -138,7 +171,7 @@ Ext.define('CB.object.plugin.Comments', {
                     xtype: 'panel'
                     ,flex: 1
                     ,layout: 'anchor'
-                    ,padding: '0px 3px 0px 5px'
+                    ,padding: '0px 3px 5px 5px'
                     ,autoHeight: true
                     ,boder: false
                     ,bodyCls: 'x-panel-white'
@@ -176,6 +209,10 @@ Ext.define('CB.object.plugin.Comments', {
                 this.dataView
                 ,this.addCommentPanel
             ]
+            ,listeners: {
+                scope: this
+                ,beforedestroy: this.onBeforeDestroy
+            }
         });
 
         this.callParent(arguments);
@@ -183,9 +220,68 @@ Ext.define('CB.object.plugin.Comments', {
         this.enableBubble(['getdraftid']);
     }
 
+    ,onBeforeDestroy: function (cmp, eOpts) {
+        this.removeUploaderListeners();
+    }
+
     ,onLoadData: function(r, e) {
         this.loadedData = r;
+
+        if(r.total > r.data.length) {
+            this.addCls('have-more-items');
+        } else {
+            this.removeCls('have-more-items');
+        }
+
         this.dataView.store.loadData(r.data);
+
+        Ext.defer(this.onDataViewResize, 1500, this);
+    }
+
+    /**
+     * handler for load more comments click
+     * @param  Ext.eventObject e
+     * @return void
+     */
+    ,onLoadMoreClick: function(e) {
+        var params = {
+            id: this.params.id
+        };
+
+        if(this.loadedData && !Ext.isEmpty(this.loadedData.data)) {
+            params.beforeId = this.loadedData.data[0].id;
+        }
+
+        CB_Objects_Plugins_Comments.loadMore(
+            params
+            ,this.processLoadMore
+            ,this
+        );
+    }
+
+    /**
+     * processing handler for loading more comments from server
+     * @param  result r
+     * @param  Ext.eventObject e
+     * @return void
+     */
+    ,processLoadMore: function(r, e) {
+        if(r.success !== true) {
+            App.showException(r);
+            return;
+        }
+
+        if(Ext.isEmpty(r.data)) {
+            return;
+        }
+
+        if(Ext.isEmpty(this.loadedData.data)) {
+            this.loadedData.data = [];
+        }
+
+        this.loadedData.data = r.data.concat(this.loadedData.data);
+
+        this.onLoadData(this.loadedData, e);
     }
 
     ,onMessageBoxKeyPress: function(tf, e) {
@@ -210,6 +306,72 @@ Ext.define('CB.object.plugin.Comments', {
         this.onAddCommentClick();
     }
 
+    ,onAttachFile: function(field, value, oldValue, eOpts) {
+        if(Ext.isEmpty(this.draftCommentId)) {
+            this.draftCommentId = Ext.id();
+        }
+
+        App.addFilesToUploadQueue(
+            field.fileInputEl.dom.files
+            ,{
+                pid: this.params.id
+                ,draftPid: this.draftCommentId
+                ,response: 'autorename'
+            }
+        );
+
+        this.addUploaderListeners();
+
+        this.updateFilesLabel();
+    }
+
+    ,addUploaderListeners: function() {
+        var fu = App.getFileUploader();
+        if(fu) {
+            fu.on(
+                'fileuploadend'
+                ,this.updateFilesLabel
+                ,this
+            );
+        }
+    }
+
+    ,removeUploaderListeners: function() {
+        var fu = App.getFileUploader();
+        if(fu) {
+            fu.un(
+                'fileuploadend'
+                ,this.updateFilesLabel
+                ,this
+            );
+        }
+    }
+
+    ,updateFilesLabel: function() {
+        var fu = App.getFileUploader()
+            ,label = this.filesLabel;
+
+        if(Ext.isEmpty(this.draftCommentId) || Ext.isEmpty(fu)) {
+            label.setValue('');
+            return;
+        }
+
+        var store = fu.store
+            ,stats = fu.getStatsForPid(this.draftCommentId);
+
+        if(stats.pending > 0) {
+            label.setValue(stats.pending + ' / ' + stats.total);
+        } else {
+            if(stats.total > 0) {
+                label.setValue(stats.total);
+            } else {
+                label.setValue('');
+            }
+
+            this.removeUploaderListeners();
+        }
+    }
+
     ,onAddCommentClick: function(b, e) {
         if(isNaN(this.params.id)) {
             this.fireEvent(
@@ -228,11 +390,17 @@ Ext.define('CB.object.plugin.Comments', {
 
         this.addCommentPanel.disable();
 
+        var p = {
+            id: this.params.id
+            ,msg: msg
+        };
+
+        if(this.draftCommentId) {
+            p.draftId = this.draftCommentId;
+        }
+
         CB_Objects.addComment(
-            {
-                id: this.params.id
-                ,msg: msg
-            }
+            p
             ,this.onAddCommentProcess
             ,this
         );
@@ -258,6 +426,12 @@ Ext.define('CB.object.plugin.Comments', {
         this.loadedData.data.push(r.data);
         this.onLoadData(this.loadedData);
         this.messageField.focus();
+
+        delete this.draftCommentId;
+
+        this.attachFileButton.reset();
+
+        this.updateFilesLabel();
     }
 
     ,onCommentPanelMouseEnter: function(e, el, o) {
@@ -284,13 +458,31 @@ Ext.define('CB.object.plugin.Comments', {
         if(el) {
             e.stopEvent();
             this.openObjectProperties({
-                id: el.attributes.href.value.substr(1)
+                id: el.attributes.itemid.value
                 ,template_id: el.attributes.templateid.value
             });
 
             return;
         }
 
+        el = e.getTarget('.show-all');
+        if(el) {
+            e.stopEvent();
+            this.onShowAllClick(record, item, index);
+
+            return;
+        }
+
+    }
+
+    ,onContainerClick: function(view, e, eOpts) {
+        var el = e.getTarget('.load-more');
+
+        if(el) {
+            e.stopEvent();
+            this.onLoadMoreClick(e);
+            return;
+        }
     }
 
     ,showActionsMenu: function(e) {
@@ -377,14 +569,16 @@ Ext.define('CB.object.plugin.Comments', {
                     ,this
                 );
                 if(item) {
-                    item.content = r.data.text;
+                    item.content = r.data.content;
                 }
             }
 
             //remove record from view store
-            rec.set('content', r.data.text);
+            rec.set('content', r.data.content);
 
             this.dataView.refresh();
+
+            Ext.defer(this.onDataViewResize, 1500, this);
         }
     }
 
@@ -426,5 +620,49 @@ Ext.define('CB.object.plugin.Comments', {
             //remove record from view store
             this.dataView.store.remove(rec);
         }
+    }
+
+    /**
+     * expand comment body to see all content when show all button clicked
+     * @param  Ext.data.Model record
+     * @param  HTMLElement    item
+     * @param  int            index
+     * @return void
+     */
+    ,onShowAllClick: function(record, item, index) {
+        item.children[1].setAttribute('class', 'comment comment-expanded');
+        this.updateLayout();
+    }
+
+    /**
+     * listener to dataview resize event to add css for long comments
+     * @param  Ext.Component view
+     * @param  int width
+     * @param  int height
+     * @param  int oldWidth
+     * @param  int oldHeight
+     * @param  Object eOpts
+     * @return void
+     */
+    ,onDataViewResize: function(view, width, height, oldWidth, oldHeight, eOpts) {
+        var dv = this.dataView
+            ,store = dv.store
+            ,el = dv.getEl();
+
+        if(Ext.isEmpty(el)) {
+            return;
+        }
+
+        var divs = dv.getEl().query('td.comment');
+
+        //iterate comments and see if any exceeds default height
+        for (var i = 0; i < divs.length; i++) {
+            var txtDiv = divs[i].children[0];
+            if(txtDiv.clientHeight < txtDiv.scrollHeight) {
+                divs[i].setAttribute('class', 'comment comment-big');
+            }
+        }
+
+        this.updateLayout();
     }
 });

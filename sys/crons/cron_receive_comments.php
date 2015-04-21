@@ -106,14 +106,13 @@ foreach ($mailServers as &$cfg) {
         }
 
     } catch (\Exception $e) {
-        // notifyAdmin('Casebox: check mail Exception for core' . $coreName, $e->getMessage());
+        // System::notifyAdmin('Casebox: check mail Exception for core' . $coreName, $e->getMessage());
         echo " Error connecting to email\n".$e->getMessage();
     }
 
 }
 
 // iterate each core and add comment items if there is smth
-
 foreach ($mailServers as $mailConf) {
     $deleteMailIds = array();
 
@@ -165,8 +164,14 @@ foreach ($mailServers as $mailConf) {
                     'mailId' => $mail['id']
                 )
             );
+
             try {
-                $commentsObj->create($data);
+                $commentId = $commentsObj->create($data);
+
+                //add attachments
+                if (!empty($mail['attachments'])) {
+                    saveObjectAttachments($commentId, $mail['attachments']);
+                }
             } catch (Exception $e) {
                 \CB\debug('Cannot create comment from ' . $mail['from'], $data);
             }

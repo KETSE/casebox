@@ -124,7 +124,7 @@ Ext.define('CB.ViewPort', {
             }
             ,stateful: true
             ,stateId: 'mAc'
-            ,stateEvents: ['resize', 'collapse', 'expand']
+            ,stateEvents: ['resize']
             ,tbar: Ext.create({
                 xtype: 'panel'
                 ,height: 51
@@ -135,8 +135,8 @@ Ext.define('CB.ViewPort', {
             })
             ,getState: function(){
                 var rez = {
-                    collapsed: this.collapsed
-                    ,width: this.width
+                    // collapsed: this.collapsed
+                    width: this.width
                 };
 
                 return rez;
@@ -438,10 +438,11 @@ Ext.define('CB.ViewPort', {
 
     //check if a locate id is specified in url
     ,checkUrlLocate: function() {
-        var locateId = String(window.location.href.split('locate=')[1]).split('&')[0];
+        var locateId = String(window.location.search.split('locate=')[1]).split('&')[0];
 
         if(!Ext.isEmpty(locateId)) {
-            App.locateObject(locateId);
+            // App.locateObject(locateId);
+            App.controller.openObjectWindowById(locateId);
         }
     }
 

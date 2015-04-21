@@ -176,6 +176,7 @@ Ext.define('UploadRecord', {
         ,{name:'size', type: 'int'}
         ,{name:'loaded', type: 'int'}
         ,'pid'
+        ,'draftPid'
         ,'dir'
         ,'pathtext'
         ,'file'

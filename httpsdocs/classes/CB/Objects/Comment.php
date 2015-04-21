@@ -48,20 +48,27 @@ class Comment extends Object
         }
 
         //replace object references with links
-        if (in_array('object', $replacements) && preg_match_all('/#(\d+)/', $message, $matches, PREG_SET_ORDER)) {
+        if (in_array('object', $replacements) && preg_match_all('/(.?)#(\d+)(.?)/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $templateId = Objects::getTemplateId($match[1]);
-                $name = Objects::getName($match[1]);
+                // check if not a html code
+                if (($match[1] == '&') && ($match[3] == ';')) {
+                    continue;
+                }
+
+                $templateId = Objects::getTemplateId($match[2]);
+                $name = Objects::getName($match[2]);
                 $name = (strlen($name) > 30)
-                    ? substr($name, 0, 30) . '&hellip;'
+                    ? mb_substr($name, 0, 30) . '&hellip;'
                     : $name;
 
                 $message = str_replace(
                     $match[0],
-                    '<a class="cDB obj-ref" href="#' . $match[1] .
-                    '" templateId= "' . $templateId .
+                    $match[1] .
+                    '<a class="click obj-ref" itemid="' . $match[2] .
+                    '" templateid= "' . $templateId .
                     '" title="' . $name . '"' .
-                    '>#' . $match[1] . '</a>', //  . substr($match[0], strlen($match[1]) + 1),
+                    '>#' . $match[2] . '</a>' .
+                    $match[3],
                     $message
                 );
             }

@@ -12,12 +12,9 @@ Ext.define('CB.plugin.Export.Button', {
     }
 
     ,onExportClick: function(b, e) {
-        var params = Ext.apply(
-            {
-                'from': 'grid'
-            }
-            ,this.owner.params
-        );
+        var params = Ext.clone(this.owner.params);
+
+        params.from = 'grid';
 
         window.open('/' + App.config.coreName + '/get/?export=' + Ext.encode(params));
     }

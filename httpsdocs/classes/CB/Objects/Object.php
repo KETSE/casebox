@@ -112,6 +112,9 @@ class Object
             $p['pid'] = null;
         }
 
+        $draftPid = empty($p['draftPid']) ? null : $p['draftPid'];
+        $isDraft = intval(!empty($draftPid) || !empty($p['draft']));
+
         if (empty($p['date_end'])) {
             $p['date_end'] = null;
         }
@@ -135,6 +138,8 @@ class Object
             'INSERT INTO tree (
                 id
                 ,pid
+                ,draft
+                ,draft_pid
                 ,template_id
                 ,tag_id
                 ,target_id
@@ -147,7 +152,6 @@ class Object
                 ,oid
                 ,cdate
                 ,`system`
-                ,`draft`
                 ,updated
             )
             VALUES (
@@ -163,14 +167,17 @@ class Object
                 ,$10
                 ,$11
                 ,$12
-                ,COALESCE($13, CURRENT_TIMESTAMP)
+                ,$13
                 ,$14
-                ,$15
+                ,COALESCE($15, CURRENT_TIMESTAMP)
+                ,$16
                 ,1
             )',
             array(
                 $this->id
                 ,$p['pid']
+                ,$isDraft
+                ,$draftPid
                 ,$p['template_id']
                 ,$p['tag_id']
                 ,@$p['target_id']
@@ -183,7 +190,6 @@ class Object
                 ,@$p['oid']
                 ,@$p['cdate']
                 ,@intval($p['system'])
-                ,@intval($p['draft'])
             )
         ) or die(DB\dbQueryError());
 
@@ -191,6 +197,8 @@ class Object
         $p['id'] = $this->id;
 
         $this->createCustomData();
+
+        $this->checkDraftChilds();
 
         //load the object from db to have all its created data
         $this->load();
@@ -234,6 +242,46 @@ class Object
             )
         ) or die(DB\dbQueryError());
 
+    }
+
+    /**
+     * method to check if this object has a draftId set in properties
+     * and check if there exists other objects that point to this draftId
+     *
+     * @return void
+     */
+    protected function checkDraftChilds()
+    {
+        if (empty($this->data['draftId'])) {
+            return;
+        }
+
+        $cildren = array();
+
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM tree
+            WHERE draft = 1
+                AND draft_pid = $1',
+            $this->data['draftId']
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $children[] = $r['id'];
+        }
+        $res->close();
+
+        if (!empty($children)) {
+            DB\dbQuery(
+                'UPDATE tree
+                SET draft = 0
+                    ,draft_pid = null
+                    ,pid = $1
+                    ,updated = 1
+                WHERE id in (' . implode(',', $children) . ')',
+                $this->id
+            ) or die(DB\dbQueryError());
+        }
     }
 
     /**

@@ -56,15 +56,15 @@ switch ($command) {
 
         $coreDir = Config::get('core_dir');
 
-        if (is_file($coreDir.DIRECTORY_SEPARATOR.'get.php')) {
+        if (!empty($_REQUEST['export'])) {
+            $p = json_decode($_REQUEST['export'], true);
+            $export = new \Export\Instance();
+            $export->getHTML($p);
+        } elseif (is_file($coreDir.DIRECTORY_SEPARATOR.'get.php')) {
             include $coreDir.DIRECTORY_SEPARATOR.'get.php';
 
         } else {
-            if (!empty($_REQUEST['export'])) {
-                $p = json_decode($_REQUEST['export'], true);
-                $export = new \Export\Instance();
-                $export->getHTML($p);
-            }
+
         }
         break;
 
@@ -132,6 +132,7 @@ switch ($command) {
             $result = $browser->saveFile(
                 array(
                     'pid' => @$file['pid']
+                    ,'draftPid' => @$file['draftPid']
                     ,'response' => @$file['response']
                 )
             );

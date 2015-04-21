@@ -214,7 +214,8 @@ class Client extends Service
                     equal to its index in folder_templates array */
                     $folder_index = array_search($r['template_id'], $folderTemplates);
                     if ($folder_index !== false) {
-                        $r['ntsc'] = $folder_index;
+                        // $r['ntsc'] = $folder_index;
+                        $r['ntsc'] = sizeof($folderTemplates);
                     }
 
                     $r['content'] = $r['name'];

@@ -93,6 +93,11 @@ $API = array_merge(
                 ,'removeComment'        =>  array('len'=>1)
             )
         )
+        ,'CB_Objects_Plugins_Comments' => array(
+            'methods'=>array(
+                'loadMore'              =>  array('len'=>1)
+            )
+        )
 
         ,'CB_Files' => array(
             'methods'=>array(
@@ -145,6 +150,7 @@ $API = array_merge(
                 ,'deassociate'          => array('len' => 2)
                 ,'deleteUser'           => array('len' => 1)
                 ,'changePassword'       => array('len' => 1, 'formHandler' => true)
+                ,'sendResetPassMail'    => array('len' => 1)
                 ,'renameUser'           => array('len' => 1)
                 ,'renameGroup'          => array('len' => 1)
                 ,'disableTSV'           => array('len' => 1)

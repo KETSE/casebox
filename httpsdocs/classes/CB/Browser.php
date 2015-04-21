@@ -198,11 +198,7 @@ class Browser
             if (!empty($rez['data'])) {
                 $this->data = array_merge($this->data, $rez['data']);
 
-                //set view, display columns and sorting if present
-                if (isset($rez['view'])) {
-                    $this->view = $rez['view'];
-                }
-
+                //set display columns and sorting if present
                 if (isset($rez['DC'])) {
                     $this->DC[] = $rez['DC'];
                 }
@@ -214,6 +210,11 @@ class Browser
                 if (isset($rez['group'])) {
                     $this->group = $rez['group'];
                 }
+            }
+
+            //set viewif present
+            if (isset($rez['view'])) {
+                $this->view = $rez['view'];
             }
 
             //calc totals accordingly

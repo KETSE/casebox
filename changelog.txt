@@ -1,3 +1,122 @@
+CaseBox 1.9.421 (2015-04-21)
+==============================
+- #5195 disabled security authentication timeout check
+- #5457 Move /sys/utils/ to /bin/
+- #5474 On click "Мой календарь" view mode is not changed for empty record set
+
+Fixed Bugs:
+----------
+- #5479 object panel reloads on attaching a file to new comment
+- #5473 Locate object by Id on casebox load doesnt work ok
+- #5470 Long comments shown partially
+- #5458 Sort not working ok in 'order' field in FieldTmpl
+
+CaseBox 1.9.420 (2015-04-17)
+==============================
+New Features, Improvements
+--------------------------
+- #5374 "Search results" disappeared from breadcrumbs
+
+Fixed Bugs:
+----------
+- #5412 datetime below each comment not in correct User timezone
+- #5391 Nothing happens when node clicked, no preview, no errors in logs
+- #5363 Don't remember the state of Tree, always show it on CB load
+
+CaseBox 1.9.419 (2015-04-15)
+==============================
+New Features, Improvements
+--------------------------
+- #4283 Display "Drop files here or use the "New" button" message if grid is empty
+- #5363 Don't remember the state of Tree, always show it on CB load
+
+Fixed Bugs:
+----------
+- #5367 Can't search using Date fields
+
+CaseBox 1.9.418 (2015-04-14)
+==============================
+New Features, Improvements
+--------------------------
+- #5225 Cannot access to a new task through email
+
+Fixed Bugs:
+----------
+- #5362 Can't add a record on localhost
+- #5274 Export function doesn't work ok
+
+CaseBox 1.9.417 (2015-04-10)
+==============================
+Fixed Bugs:
+----------
+- #5274 Export function doesn't work ok
+- #5298 Created/Modified rows in PropertiesObjPlugin shows UTC time
+- #5299 Clicking an attached img to a comment gives JS error
+
+CaseBox 1.9.416 (2015-04-10)
+==============================
+New Features, Improvements
+--------------------------
+- #5250 ID's shown instead of Facet titles on IPC
+- #5195 Can't change password in UI
+  Changed timeout from 5 min to 1h
+- #5224 Remove min-height for images in comment area
+
+Fixed Bugs:
+----------
+- #5270 Can't select the same user twice in comment when using @
+- #5281 UI bugs with Attach files to comments
+- #5217 Files uploaded in NewTask Form doesn't appear
+- #5215 A '1' file is shown in comment area after adding a comment
+
+CaseBox 1.9.415 (2015-04-08)
+==============================
+New Features, Improvements
+--------------------------
+- #5071 Ignore folder upload on Firefox (browsers that don't support it)
+- #5003 question: how to define own order for folders
+
+Fixed Bugs:
+----------
+-- #5156 User name not visible in breadcrumb
+
+CaseBox 1.9.414 (2015-04-08)
+==============================
+New Features, Improvements
+--------------------------
+- #3921 Toolbar below Comment area with "Attach file" button
+    - remove the grayed out from the attach/reply buttons
+    - make Attach button allow multiFile selection
+- #5110 Replace Password/Confirm pass with "Send email invite" checkbox
+
+Fixed Bugs:
+----------
+- #5138 UI issues clicking on rendered links to objects (#id) in obj preview
+- #4854 Graph not working for Pytkam
+
+CaseBox 1.9.413 (2015-04-07)
+==============================
+New Features, Improvements
+--------------------------
+- #3921 Toolbar below Comment area with "Attach file" button
+
+Notes:
+----------
+- apply database update: v.1.9.413.sql
+
+CaseBox 1.9.412 (2015-04-03)
+==============================
+New Features, Improvements
+--------------------------
+- #5021 Improve Comment plugin: latest 4 comments & '...' to show a very long one
+- #5023 ESC key doesn't work for preview of files
+- #5011 Improve Office file preview generation
+- #5101 Comments by email: attachments should be uploaded to CB to the comment
+
+Fixed Bugs:
+----------
+- Html codes interpreted as object refferences in comments view (#5060 Test task body)
+
 CaseBox 1.9.411 (2015-04-01)
 ==============================
 Fixed Bugs:

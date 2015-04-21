@@ -699,6 +699,8 @@ Ext.define('CB.browser.ViewContainer', {
                 // check if view not set on client params
                 if(this.params && this.params.view) {
                     this.setActiveView(this.params.view);
+                } else {
+                    this.setActiveView('grid');
                 }
             }
         }

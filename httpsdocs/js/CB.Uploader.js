@@ -52,7 +52,7 @@ Ext.define('CB.Uploader', {
             this.xhr.addEventListener("load",       this.onFileUploadLoad.bind(this), false);
             this.xhr.addEventListener("timeout",    this.onFileUploadTimeout.bind(this), false);
             this.xhr.addEventListener("loadend",    this.onFileUploadLoadEnd.bind(this), false);
-        }else if(this.xhr.attachEvent){
+        } else if (this.xhr.attachEvent){
             this.xhr.attachEvent("loadstart",       this.onFileUploadStart.bind(this), false);
             this.xhr.upload.attachEvent("progress", this.onFileUploadProgress.bind(this), false);
             this.xhr.attachEvent("abort",           this.onFileUploadAbort.bind(this), false);
@@ -111,10 +111,14 @@ Ext.define('CB.Uploader', {
             this.uploadingFile.set('loaded', this.uploadingFile.get('size'));
             this.progressChange();
 
-            r = Ext.util.JSON.decode(e.target.response);
+            var r = Ext.util.JSON.decode(e.target.response);
             if(r.success === true){
                 this.uploadingFile.set('status', this.targetStatus);
-                this.updatedPids.push(r.data.pid);
+
+                if(Ext.isEmpty(this.uploadingFile.data.draftPid)) {
+                    this.updatedPids.push(r.data.pid);
+                }
+
                 this.fireEvent('fileuploadend', this.uploadingFile);
                 delete this.uploadingFile;
                 this.uploadNextFile();
@@ -150,12 +154,46 @@ Ext.define('CB.Uploader', {
             this.uploadNextFile();
         }
     }
+
     ,getGroupPendingFilesCount: function(group){
         rez = 0;
         this.store.each( function(r){
             if( (r.get('group') == group) && (r.get('status') < 2) )
                 rez++;
         }, this);
+        return rez;
+    }
+
+    /**
+     * get stats object for a given pid
+     * @param  int | varchar pid non numeric pids will be considered draft objects
+     *                           and searched by draftPid field
+     * @return object
+     */
+    ,getStatsForPid: function(pid) {
+        var field = Ext.isNumeric(pid)
+            ? 'pid'
+            : 'draftPid'
+            ,rez = {
+                total: 0
+                ,complete: 0
+                ,pending: 0
+            };
+
+        this.store.each(
+            function(r) {
+                if(r.get(field) == pid) {
+                    rez.total += 1;
+                    if(r.get('status') < 2) {
+                        rez.pending += 1;
+                    } else {
+                        rez['complete'] += 1;
+                    }
+                }
+            }
+            ,this
+        );
+
         return rez;
     }
 
@@ -178,10 +216,16 @@ Ext.define('CB.Uploader', {
             CB_Browser.confirmUploadRequest({response: w.response}, this.onConfirmResponseProcess, this);
         }
         w.destroy();
-    },onConfirmResponseProcess: function(r, e){
+    }
+
+    ,onConfirmResponseProcess: function(r, e){
         if(r.success === true){
             this.uploadingFile.set('status', 5); //uploaded
-            this.updatedPids.push(r.data.pid);
+
+            if(Ext.isEmpty(r.data.draftPid)) {
+                this.updatedPids.push(r.data.pid);
+            }
+
             this.uploadNextFile();
         }else{
             this.onUploadFailure(r, e);
@@ -195,13 +239,17 @@ Ext.define('CB.Uploader', {
         if(this.config.autoShowWindow) {
             //this.showUploadWindow();
         }
-
         this.group++;
 
         Ext.each(
             FilesList
             ,function(f){
+                if(f && (f.size == 0)) {
+                    return Ext.Msg.alert(L.Error, L.BrowserNoFolderUpload);
+                }
+
                 var dir = Ext.valueFrom(f.fullPath, f.mozFullPath);
+
                 if(!Ext.isEmpty(dir)){
                     dir = dir.split('/');
                     dir.pop();
@@ -210,9 +258,8 @@ Ext.define('CB.Uploader', {
                     dir = '/';
                 }
 
-                var name = Ext.util.Format.stripScripts(Ext.util.Format.stripTags(f.name));
-
-                record = Ext.create(
+                var name = Ext.util.Format.stripScripts(Ext.util.Format.stripTags(f.name))
+                ,record = Ext.create(
                     this.store.getModel().getName()
                     ,{
                         id: Ext.id()
@@ -221,12 +268,14 @@ Ext.define('CB.Uploader', {
                         ,type: f.type
                         ,size: f.size
                         ,pid: options.pid
+                        ,draftPid: options.draftPid
                         ,dir: dir
                         ,pathtext: options.pathtext
                         ,file: f
+                        ,response: options.response
                         ,status: 0
                         ,loaded: 0
-                        ,msg:''
+                        ,msg: ''
                         ,md5: false
                         ,md5_verified: 0
                     }
@@ -298,8 +347,12 @@ Ext.define('CB.Uploader', {
     }
 
     ,uploadNextFile: function(){
-        if(this.status != 1) return; //status flag can be changed on Cnacel or abort
-        idx = this.store.findExact('status', 0);
+        if(this.status != 1) {
+            return; //status flag can be changed on Cnacel or abort
+        }
+
+        var idx = this.store.findExact('status', 0);
+
         if(idx < 0){ // no files waiting to be uploaded
             this.status = 2; //upload complete
             this.stats = {
@@ -312,6 +365,7 @@ Ext.define('CB.Uploader', {
             };
 
             this.progressChange();
+
             if(!Ext.isEmpty(this.updatedPids)) {
                 App.fireEvent('filesuploaded', this.updatedPids);
             }
@@ -330,6 +384,7 @@ Ext.define('CB.Uploader', {
             ,type: r.get('type')
             ,size: r.get('size')
             ,pid: r.get('pid')
+            ,draftPid: r.get('draftPid')
             ,dir: r.get('dir')
             ,md5: r.get('md5')
             ,content_id: r.get('content_id')

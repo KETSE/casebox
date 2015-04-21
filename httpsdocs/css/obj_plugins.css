@@ -101,6 +101,72 @@ background-color: #FFFFCC;
     background-color: transparent;
 }
 
+.block-plugin-comments .comment div.comment-text {
+  /*text-overflow: ellipsis;*/
+  overflow: hidden;
+  max-height: 200px;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+}
+
+.block-plugin-comments .comment div.show-all {
+    display: none;
+    height: 6px;
+    background-image: url(default/s/ic_keyboard_control_grey600_18dp.png);
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+}
+
+.block-plugin-comments .comment div.show-all:hover {
+    background-image: url(default/s/ic_keyboard_control_black_18dp.png);
+}
+
+.block-plugin-comments .comment-big div.show-all {
+    display: block;
+}
+
+.block-plugin-comments .comment-expanded div.comment-text{
+  max-height: none;
+  display: block;
+  -webkit-line-clamp: auto;
+}
+
+.block-plugin-comments .comment-attachments {
+    list-style-type: none;
+    padding: 2px 10px;
+}
+
+.block-plugin-comments .comment-attachments li{
+    padding: 3px;
+}
+
+.comment-actions-button {
+display: block;
+float: right;
+position: absolute;
+right: 5px;
+width: 13px;
+opacity: 0.3;
+}
+
+.comment-actions-button:hover {
+opacity: 1;
+cursor: pointer;
+cursor: hand;
+}
+
+.load-more {
+    display: none;
+    padding: 2px 10px;
+    color: #3b5998;
+    border-bottom: 1px solid white;
+}
+
+.have-more-items .load-more {
+    display: block;
+}
+
 .block-plugin a:hover {
     color: #15C;
     text-decoration: underline;

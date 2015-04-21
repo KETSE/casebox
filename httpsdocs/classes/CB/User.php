@@ -248,13 +248,20 @@ class User
     }
 
     /**
-     * check if user did a password verification check in specified period of time. Default is 5 minutes
+     * check if user did a password verification check in specified period of time.
+     * Default is 5 minutes
+     * Changed to 1 hour.
      */
-    public static function isVerified($seconds = 300)
+    public static function isVerified($seconds = 3600)
     {
+        return (!empty($_SESSION['verified']));
+
+        /* //disabled timeout verification for now
+
         return ( !empty($_SESSION['verified']) &&
             ( (time() - $_SESSION['verified']) < $seconds )
             );
+        */
     }
 
     /**

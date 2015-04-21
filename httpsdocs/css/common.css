@@ -41,6 +41,10 @@
 .bgcLR{ background-color: #FFCCCC !important }
 
 .bgpLT{ background-position: 0 2px}
+.op02{opacity: 0.2}
+.op03{opacity: 0.3}
+.op05{opacity: 0.5}
+.op1{opacity: inherit}
 
 .p2{ padding: 2px }
 .p5{ padding: 5px }

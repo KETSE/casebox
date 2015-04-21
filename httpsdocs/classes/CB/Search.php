@@ -506,7 +506,9 @@ class Search extends Solr\Client
         $rez = array();
         foreach ($this->facets as $facet) {
             $facet->loadSolrResult($this->results->facet_counts);
+
             $fr = $facet->getClientData();
+
             if (!empty($fr)) {
                 $idx = empty($fr['index'])
                     ? 'facets'

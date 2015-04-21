@@ -1243,7 +1243,7 @@ function initApp() {
         if(fu) {
             fu.addFiles(FileList, options);
         } else {
-            Ext.Msg.alert(L.Info, 'This browser does not support file uploading from desktop');
+            Ext.Msg.alert(L.Info, L.BrowserNoDDUpload);
         }
     };
 
@@ -1254,7 +1254,7 @@ function initApp() {
 }
 
 window.onbeforeunload = function() {
-    if(App.confirmLeave === false) {
+    if (App.confirmLeave === false) {
         delete App.confirmLeave;
     } else {
         return "You work will be lost.";

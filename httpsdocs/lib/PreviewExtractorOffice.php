@@ -64,9 +64,11 @@ class PreviewExtractorOffice extends PreviewExtractor
             file_put_contents($pfn, '');
             $cmd = Config::get('UNOCONV') . ' -v -f html -o '.$pfn.' '.$nfn; //.' >> ' . Config::get('debug_log') . ' 2>&1';
 
-            exec($cmd);
+            exec($cmd, $output, $returnStatus); //returnStatus should be 0 if no error
+
             unlink($nfn);
-            if (file_exists($pfn)) {
+
+            if (empty($returnStatus) && file_exists($pfn)) {
                 file_put_contents(
                     $pfn,
                     '<div style="padding: 5px">'.$this->purify(
@@ -93,14 +95,17 @@ class PreviewExtractorOffice extends PreviewExtractor
                 $res->close();
             } else {
                 //preview not generated for some reason, probably unoconv service not started
-                \CB\debug('UNOCONV execution error: '.$cmd);
+                \CB\debug(
+                    'UNOCONV execution error, please check if python accesible through command line'.
+                    ' and if correctly specified in config.ini: '.$cmd
+                );
+
                 DB\dbQuery(
                     'UPDATE file_previews
-                    SET `status` = 1
+                    SET `status` = 3
                     WHERE id = $1',
                     $r['content_id']
                 )  or die(DB\dbQueryError());
-
             }
 
             DB\commitTransaction();

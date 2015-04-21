@@ -669,7 +669,7 @@ class Files
 
             //apply general properties from $p to $f (file) variable
             foreach ($p as $k => $v) {
-                if (in_array($k, array('id', 'pid', 'name', 'title', 'content_id', 'template_id', 'cid', 'oid', 'data'))) {
+                if (in_array($k, array('id', 'pid', 'draftPid', 'name', 'title', 'content_id', 'template_id', 'cid', 'oid', 'data'))) {
                     $f[$k] = $v;
                 }
             }
@@ -1005,8 +1005,19 @@ class Files
 
             return array('html' => '');
         }
-        if ($file['status'] > 0) {
-            return array('processing' => true);
+
+        switch ($file['status']) {
+            case 1:
+            case 2:
+                return array(
+                    'processing' => true
+                );
+
+            case 3:
+                return array(
+                    'html' => L\get('ErrorCreatingPreview')
+                );
+
         }
 
         $ext = explode('.', $file['name']);
@@ -1193,6 +1204,7 @@ class Files
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
+            // $objectRecord['type'] = $r['type'];
             $objectRecord['size'] = $r['size'];
             $objectRecord['versions'] = intval($r['versions']);
 

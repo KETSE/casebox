@@ -96,7 +96,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
                 $title = 'CaseBox cron notification ('.$cron_id.'), timeout occured.';
                 $msg = $info."\n\rCore name: ".$coreName.print_r($r, 1);
                 echo $title."\n".$msg;
-                notifyAdmin($title, $msg);
+                System::notifyAdmin($title, $msg);
             }
         } else { //no cron is currently running
 
@@ -152,10 +152,4 @@ function closeCron($cron_id, $info = 'ok')
         WHERE cron_id = $1',
         array($cron_id, $info)
     ) or die(DB\dbQueryError());
-}
-
-function notifyAdmin($subject, $message)
-{
-    echo 'Notifying admin: '.Config::get('ADMIN_EMAIL');
-    mail(Config::get('ADMIN_EMAIL'), $subject, $message, 'From: '.Config::get('SENDER_EMAIL'). "\r\n");
 }

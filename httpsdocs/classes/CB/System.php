@@ -101,4 +101,70 @@ class System
 
         return $name;
     }
+
+    /**
+     * get template file content from sys/templates folder
+     * @param  varchar $templateName
+     * @return varchar | false
+     */
+    public static function getEmailTemplate($templateName)
+    {
+        $rez = false;
+
+        $templateName = basename($templateName);
+
+        $language = Config::get('user_language');
+
+        $template = TEMPLATES_DIR . $templateName . '_' . $language . '.html';
+
+        //try english by default if doesnt exist
+        if (!file_exists($template)) {
+            $template = TEMPLATES_DIR . $templateName . '_en.html';
+        }
+
+        //try wihout language if also doesnt exist
+        if (!file_exists($template)) {
+            $template = TEMPLATES_DIR . $templateName . '.html';
+        }
+
+        if (!file_exists($template)) {
+            static::notifyAdmin('Casebox template not found', $template);
+        }
+
+        $rez = file_get_contents($template);
+
+        return $rez;
+    }
+
+    /**
+     * Admin notification by mail method
+     * @param  varchar $subject
+     * @param  varchar $body
+     * @return boolean
+     */
+    public static function notifyAdmin($subject, $body)
+    {
+        return static::sendMail(
+            Config::get('admin_email'),
+            $subject,
+            $body
+        );
+    }
+
+    /**
+     * Common send mail function
+     * @param  varchar $email
+     * @param  varchar $subject
+     * @param  varchar $body
+     * @return boolean
+     */
+    public static function sendMail($email, $subject, $body)
+    {
+        return mail(
+            $email,
+            $subject,
+            $body,
+            "Content-type: text/html; charset=utf-8\r\nFrom: " . Config::get('sender_email') . "\r\n"
+        );
+    }
 }

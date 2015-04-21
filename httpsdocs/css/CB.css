@@ -1004,14 +1004,22 @@ border-top: 0;
 
 }
 
-.comment-actions-button {
-display: block;
-float: right;
-width: 13px;
-opacity: 0.3;
+
+.gv-empty-text {
+    display: table;
+    position: absolute;
+    height: 99%;
+    width: 99%;
 }
-.comment-actions-button:hover {
-opacity: 1;
-cursor: pointer;
-cursor: hand;
+
+.gv-empty-text .middle {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.gv-empty-text .inner {
+    margin-left: auto;
+    margin-right: auto;
+    color: gray;
 }

@@ -1,5 +1,42 @@
 <?php
 
+/**
+ * save attachments array for a given object id
+ * @param  int $objectId
+ * @param  array &$attachments attachments array as from getMailContentAndAtachment
+ * @return void
+ */
+function saveObjectAttachments($objectId, &$attachments)
+{
+    global $filesApiObject;
+
+    if (empty($filesApiObject)) {
+        $filesApiObject = new \CB\Api\Files();
+    }
+
+    foreach ($attachments as $d) {
+        if (empty($d['attachment'])) {
+            continue;
+        }
+
+        //safe content to a temporary file
+        $tmpName = tempnam(sys_get_temp_dir(), 'cbMailAtt');
+        file_put_contents($tmpName, $d['content']);
+
+        //call the api method
+        $filesApiObject->upload(
+            array(
+                'pid' => $objectId
+                ,'localFile' => $tmpName
+                ,'oid' => $_SESSION['user']['id']
+                ,'filename' => $d['filename']
+                ,'content-type' => $d['content-type']
+                ,'fileExistAction' => 'autorename'
+            )
+        );
+    }
+}
+
 //**********************************************************************************************************************
 function decodeSubject($str)
 {
