@@ -50,7 +50,7 @@ use Sabre\VObject\Component\VEvent;
  *
  * The recurrence iterator also does not yet support THISANDFUTURE.
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2011-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
@@ -73,39 +73,44 @@ class EventIterator implements \Iterator {
     /**
      * Creates the iterator
      *
-     * You should pass a VCALENDAR component, as well as the UID of the event
-     * we're going to traverse.
+     * There's three ways to set up the iterator.
      *
-     * @param Component $vcal
+     * 1. You can pass a VCALENDAR component and a UID.
+     * 2. You can pass an array of VEVENTs (all UIDS should match).
+     * 3. You can pass a single VEVENT component.
+     *
+     * Only the second method is recomended. The other 1 and 3 will be removed
+     * at some point in the future.
+     *
+     * The $uid parameter is only required for the first method.
+     *
+     * @param Component|array $input
      * @param string|null $uid
      * @param DateTimeZone $timeZone Reference timezone for floating dates and
      *                               times.
      */
-    public function __construct(Component $vcal, $uid = null, DateTimeZone $timeZone = null) {
+    public function __construct($input, $uid = null, DateTimeZone $timeZone = null) {
 
         if (is_null($this->timeZone)) {
             $timeZone = new DateTimeZone('UTC');
         }
         $this->timeZone = $timeZone;
 
-        $rrule = null;
-        if ($vcal instanceof VEvent) {
+        if (is_array($input)) {
+            $events = $input;
+        } elseif ($input instanceof VEvent) {
             // Single instance mode.
-            $events = array($vcal);
+            $events = array($input);
         } else {
+            // Calendar + UID mode.
             $uid = (string)$uid;
             if (!$uid) {
                 throw new InvalidArgumentException('The UID argument is required when a VCALENDAR is passed to this constructor');
             }
-            if (!isset($vcal->VEVENT)) {
+            if (!isset($input->VEVENT)) {
                 throw new InvalidArgumentException('No events found in this calendar');
             }
-            $events = array();
-            foreach($vcal->VEVENT as $event) {
-                if ($event->uid->getValue() === $uid) {
-                    $events[] = $event;
-                }
-            }
+            $events = $input->getByUID($uid);
 
         }
 
@@ -139,17 +144,6 @@ class EventIterator implements \Iterator {
             $this->masterEvent = array_shift($this->overriddenEvents);
         }
 
-        // master event.
-        if (isset($this->masterEvent->RRULE)) {
-            $rrule = $this->masterEvent->RRULE->getParts();
-        } else {
-            // master event has no rrule. We default to something that
-            // iterates once.
-            $rrule = array(
-                'FREQ' => 'DAILY',
-                'COUNT' => 1,
-            );
-        }
         $this->startDate = $this->masterEvent->DTSTART->getDateTime($this->timeZone);
         $this->allDay = !$this->masterEvent->DTSTART->hasTime();
 
@@ -280,9 +274,9 @@ class EventIterator implements \Iterator {
         );
         // @codeCoverageIgnoreEnd
 
-        $event->DTSTART->setDateTime($this->getDtStart());
+        $event->DTSTART->setDateTime($this->getDtStart(), $event->DTSTART->isFloating());
         if (isset($event->DTEND)) {
-            $event->DTEND->setDateTime($this->getDtEnd());
+            $event->DTEND->setDateTime($this->getDtEnd(), $event->DTEND->isFloating());
         }
         // Including a RECURRENCE-ID to the object, unless this is the first
         // object.

@@ -49,7 +49,7 @@ use
  *
  * iSchedule is something for later.
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2007-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://code.google.com/p/sabredav/wiki/License Modified BSD License
  */
@@ -532,7 +532,7 @@ class Plugin extends ServerPlugin {
 
             if (isset($newObject->VEVENT->ORGANIZER) && ($newObject->VEVENT->ORGANIZER->getNormalizedValue() === $message->recipient)) {
                 if ($message->scheduleStatus) {
-                    $newObject->VEVENT->ORGANIZER['SCHEDULE-STATUS'] = $message->scheduleStatus;
+                    $newObject->VEVENT->ORGANIZER['SCHEDULE-STATUS'] = $message->getScheduleStatus();
                 }
                 unset($newObject->VEVENT->ORGANIZER['SCHEDULE-FORCE-SEND']);
 
@@ -542,7 +542,7 @@ class Plugin extends ServerPlugin {
 
                     if ($attendee->getNormalizedValue() === $message->recipient) {
                         if ($message->scheduleStatus) {
-                            $attendee['SCHEDULE-STATUS'] = $message->scheduleStatus;
+                            $attendee['SCHEDULE-STATUS'] = $message->getScheduleStatus();
                         }
                         unset($attendee['SCHEDULE-FORCE-SEND']);
                         break;

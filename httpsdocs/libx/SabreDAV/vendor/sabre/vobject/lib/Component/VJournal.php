@@ -9,7 +9,7 @@ use Sabre\VObject;
  *
  * This component contains some additional functionality specific for VJOURNALs.
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2011-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
@@ -53,6 +53,7 @@ class VJournal extends VObject\Component {
      *   * 1 - Must appear exactly once.
      *   * + - Must appear at least once.
      *   * * - Can appear any number of times.
+     *   * ? - May appear, but not more than once.
      *
      * @var array
      */
@@ -65,7 +66,7 @@ class VJournal extends VObject\Component {
             'CLASS' => '?',
             'CREATED' => '?',
             'DTSTART' => '?',
-            'LAST-MODIFICATION' => '?',
+            'LAST-MODIFIED' => '?',
             'ORGANIZER' => '?',
             'RECURRENCE-ID' => '?',
             'SEQUENCE' => '?',
