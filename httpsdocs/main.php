@@ -36,7 +36,7 @@ $projectTitle = Config::get('project_name_' . Config::get('user_language'), $cor
     <meta name="author" content="KETSE">
     <meta name="description" content="Casebox">
     <meta name="robots" content="noindex">
-    <link rel="shortcut icon" href="/i/casebox-logo.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 <?php
 
 echo '<link rel="stylesheet" type="text/css" href="/libx/ext/packages/ext-theme-' . $theme . '/build/resources/ext-theme-' . $theme . '-all' . $rtl . '.css" />
