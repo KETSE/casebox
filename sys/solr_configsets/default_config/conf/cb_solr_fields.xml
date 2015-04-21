@@ -271,3 +271,11 @@ By default this field contains end date for tasks or creation date if end date i
 <dynamicField name="*_td" type="tdouble" indexed="true"  stored="true"/>
 <dynamicField name="*_tdt" type="tdate"  indexed="true"  stored="true"/>
 
+
+<!-- some trie-coded dynamic fields, MultiValued! for faster range queries -->
+<dynamicField name="*_tis" type="tint"    indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_tls" type="tlong"   indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_tfs" type="tfloat"  indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_tds" type="tdouble" indexed="true"  stored="true" multiValued="true"/>
+
+
