@@ -210,3 +210,49 @@ By default this field contains end date for tasks or creation date if end date i
 <field name="role_ids4"     type="tint"     indexed="true" stored="true" multiValued="true" />
 <field name="role_ids5"     type="tint"     indexed="true" stored="true" multiValued="true" />
 <field name="_version_"     type="tlong"    indexed="true" stored="true" multiValued="false" />
+
+
+
+ <!-- Dynamic field definitions allow using convention over configuration
+       for fields via the specification of patterns to match field names.
+       EXAMPLE:  name="*_i" will match any field ending in _i (like myid_i, z_i)
+       RESTRICTION: the glob-like pattern in the name attribute must have
+       a "*" only at the start or the end.  -->
+
+<dynamicField name="*_i"  type="int"    indexed="true"  stored="true"/>
+<dynamicField name="*_is" type="int"    indexed="true"  stored="true"  multiValued="true"/>
+<dynamicField name="*_s"  type="string"  indexed="true"  stored="true" />
+<dynamicField name="*_ss" type="string"  indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_l"  type="long"   indexed="true"  stored="true"/>
+<dynamicField name="*_ls" type="long"   indexed="true"  stored="true"  multiValued="true"/>
+<dynamicField name="*_t"  type="text_general"    indexed="true"  stored="true"/>
+<dynamicField name="*_txt" type="text_general"   indexed="true"  stored="true" multiValued="true"/>
+<!-- <dynamicField name="*_en"  type="text_en"    indexed="true"  stored="true" multiValued="true"/>  -->
+<dynamicField name="*_b"  type="boolean" indexed="true" stored="true"/>
+<dynamicField name="*_bs" type="boolean" indexed="true" stored="true"  multiValued="true"/>
+<dynamicField name="*_f"  type="float"  indexed="true"  stored="true"/>
+<dynamicField name="*_fs" type="float"  indexed="true"  stored="true"  multiValued="true"/>
+<dynamicField name="*_d"  type="double" indexed="true"  stored="true"/>
+<dynamicField name="*_ds" type="double" indexed="true"  stored="true"  multiValued="true"/>
+
+<!-- Type used to index the lat and lon components for the "location" FieldType -->
+<dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false" />
+
+<dynamicField name="*_dt"  type="date"    indexed="true"  stored="true"/>
+<dynamicField name="*_dts" type="date"    indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_p"  type="location" indexed="true" stored="true"/>
+
+<!-- some trie-coded dynamic fields for faster range queries -->
+<dynamicField name="*_ti" type="tint"    indexed="true"  stored="true"/>
+<dynamicField name="*_tl" type="tlong"   indexed="true"  stored="true"/>
+<dynamicField name="*_tf" type="tfloat"  indexed="true"  stored="true"/>
+<dynamicField name="*_td" type="tdouble" indexed="true"  stored="true"/>
+<dynamicField name="*_tdt" type="tdate"  indexed="true"  stored="true"/>
+
+
+<!-- some trie-coded dynamic fields, MultiValued! for faster range queries -->
+<dynamicField name="*_tis" type="tint"    indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_tls" type="tlong"   indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_tfs" type="tfloat"  indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_tds" type="tdouble" indexed="true"  stored="true" multiValued="true"/>
+
