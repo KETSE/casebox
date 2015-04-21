@@ -24,14 +24,17 @@ $processed_list = array();
 $not_fount_list = array();
 
 $sql = 'UPDATE crons
-SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
-WHERE cron_id = $1';
+    SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
+    WHERE cron_id = $1';
+
 DB\dbQuery($sql, array($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE))) or die(DB\dbQueryError());
+
 if (checkTikaService() == false) {
     startTikaService();
 }
 
 $where = 'skip_parsing = 0 and (parse_status is null)';
+
 if (!empty($scriptOptions['all'])) {
     $where =  'skip_parsing = 0';
 }

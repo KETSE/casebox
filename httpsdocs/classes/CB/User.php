@@ -254,9 +254,14 @@ class User
      */
     public static function isVerified($seconds = 3600)
     {
+        return (!empty($_SESSION['verified']));
+
+        /* //disabled timeout verification for now
+
         return ( !empty($_SESSION['verified']) &&
             ( (time() - $_SESSION['verified']) < $seconds )
             );
+        */
     }
 
     /**

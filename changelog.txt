@@ -1,3 +1,16 @@
+CaseBox 1.9.421 (2015-04-21)
+==============================
+- #5195 disabled security authentication timeout check
+- #5457 Move /sys/utils/ to /bin/
+- #5474 On click "Мой календарь" view mode is not changed for empty record set
+
+Fixed Bugs:
+----------
+- #5479 object panel reloads on attaching a file to new comment
+- #5473 Locate object by Id on casebox load doesnt work ok
+- #5470 Long comments shown partially
+- #5458 Sort not working ok in 'order' field in FieldTmpl
+
 CaseBox 1.9.420 (2015-04-17)
 ==============================
 New Features, Improvements
