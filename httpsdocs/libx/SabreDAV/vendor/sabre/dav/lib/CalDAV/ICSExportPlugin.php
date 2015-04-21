@@ -3,6 +3,7 @@
 namespace Sabre\CalDAV;
 
 use
+    DateTimeZone,
     Sabre\DAV,
     Sabre\VObject,
     Sabre\HTTP\RequestInterface,
@@ -40,7 +41,7 @@ use
  * Note that specifying a start or end data implies that only events will be
  * returned. VTODO and VJOURNAL will be stripped.
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2007-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
@@ -211,7 +212,23 @@ class ICSExportPlugin extends DAV\ServerPlugin {
         );
 
         if ($expand) {
-            $mergedCalendar->expand($start, $end);
+            $calendarTimeZone = null;
+            // We're expanding, and for that we need to figure out the
+            // calendar's timezone.
+            $tzProp = '{' . Plugin::NS_CALDAV . '}calendar-timezone';
+            $tzResult = $this->server->getProperties($path, [$tzProp]);
+            if (isset($tzResult[$tzProp])) {
+                // This property contains a VCALENDAR with a single
+                // VTIMEZONE.
+                $vtimezoneObj = VObject\Reader::read($tzResult[$tzProp]);
+                $calendarTimeZone = $vtimezoneObj->VTIMEZONE->getTimeZone();
+                unset($vtimezoneObj);
+            } else {
+                // Defaulting to UTC.
+                $calendarTimeZone = new DateTimeZone('UTC');
+            }
+
+            $mergedCalendar->expand($start, $end, $calendarTimeZone);
         }
 
         $response->setHeader('Content-Type', $format);
