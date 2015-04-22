@@ -299,7 +299,7 @@ class User
             if (substr($webdavDomain, -1) != '/') {
                 $webdavDomain .= '/';
             }
-            $webdavUrl = $webdavDomain . '{core_name}/edit-{node_id}/{name}"';
+            $webdavUrl = $webdavDomain . '{core_name}/edit-{node_id}/{name}';
 
         } else { //backward compatible check
             $webdavUrl = empty($filesConfig['webdav_url'])
