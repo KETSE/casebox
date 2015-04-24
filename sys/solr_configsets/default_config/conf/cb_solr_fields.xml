@@ -22,6 +22,22 @@
      will increase storage costs.
  default: a value that should be used if no value is specified
      when adding a document.
+
+ PERFORMANCE NOTE: this schema includes many optional features and should not
+ be used for benchmarking.  To improve performance one could
+    - set stored="false" for all fields possible (esp large fields) when you
+        only need to search on the field but don't need to return the original
+        value.
+    - set indexed="false" if you don't need to search on the field, but only
+        return the field as a result of searching on other indexed fields.
+    - remove all unneeded copyField statements
+    - for best index size and searching performance, set "index" to false
+        for all general text fields, use copyField to copy them to the
+        catchall "text" field, and use that for searching.
+    - For maximum indexing performance, use the StreamingUpdateSolrServer
+        java client.
+    - Remember to run the JVM in server mode, and use a higher logging level
+        that avoids logging every request
 -->
 
 
@@ -209,7 +225,13 @@ By default this field contains end date for tasks or creation date if end date i
 <field name="role_ids3"     type="tint"     indexed="true" stored="true" multiValued="true" />
 <field name="role_ids4"     type="tint"     indexed="true" stored="true" multiValued="true" />
 <field name="role_ids5"     type="tint"     indexed="true" stored="true" multiValued="true" />
-<field name="_version_"     type="tlong"    indexed="true" stored="true" multiValued="false" />
+
+
+
+<!-- If you remove this field, you must _also_ disable the update log in solrconfig.xml
+     or Solr won't start. _version_ and update log are required for SolrCloud
+-->
+<field name="_version_"  type="long"  indexed="true" stored="true" />
 
 
 
@@ -235,8 +257,12 @@ By default this field contains end date for tasks or creation date if end date i
 <dynamicField name="*_d"  type="double" indexed="true"  stored="true"/>
 <dynamicField name="*_ds" type="double" indexed="true"  stored="true"  multiValued="true"/>
 
+<!-- Type used to index the lat and lon components for the "location" FieldType -->
+<dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false" />
+
 <dynamicField name="*_dt"  type="date"    indexed="true"  stored="true"/>
 <dynamicField name="*_dts" type="date"    indexed="true"  stored="true" multiValued="true"/>
+<dynamicField name="*_p"  type="location" indexed="true" stored="true"/>
 
 <!-- some trie-coded dynamic fields for faster range queries -->
 <dynamicField name="*_ti" type="tint"    indexed="true"  stored="true"/>
@@ -251,4 +277,5 @@ By default this field contains end date for tasks or creation date if end date i
 <dynamicField name="*_tls" type="tlong"   indexed="true"  stored="true" multiValued="true"/>
 <dynamicField name="*_tfs" type="tfloat"  indexed="true"  stored="true" multiValued="true"/>
 <dynamicField name="*_tds" type="tdouble" indexed="true"  stored="true" multiValued="true"/>
+
 

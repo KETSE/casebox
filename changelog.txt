@@ -1,3 +1,11 @@
+CaseBox 1.9.422 (2015-04-24)
+==============================
+- upgrade to SOLR5.1
+- adding ".htaccess_on" ".htaccess_off". Use ".htaccess_off"
+  when you want to disable CB while performing server side work
+- SOLR configSets added in /sys/solr_configsets/ and /data/solr/ folder removed
+
+
 CaseBox 1.9.421 (2015-04-21)
 ==============================
 - #5195 disabled security authentication timeout check
