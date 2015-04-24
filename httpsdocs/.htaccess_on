@@ -1,0 +1,84 @@
+# use it for production servers
+# FileETag none
+# ExpiresActive On
+# ExpiresDefault "access plus 1 month"
+# <FilesMatch "\.(ico|jpg|jpeg|png|gif|js|css)$">
+#    Header set Expires "access plus 3 months"
+# </FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteBase /
+
+    # allow access to robots file
+    RewriteRule ^robots.txt$ - [NC,L]
+
+    # allow access to favicon
+    RewriteRule ^favicon.ico$ - [NC,L]
+
+    # remove www
+    RewriteCond %{HTTP_HOST} ^www\.(.*)
+    RewriteRule (.*) https://%1/$1 [R=301,L]
+
+    #add slash after core
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} ^/?[^/]+$
+    RewriteRule (.*) $1/ [R=301,L]
+
+    # allow access only to correct filetypes in appropriate locations
+    RewriteCond %{REQUEST_URI} ^/?css/?.+\.(css|ico|png|bmp|jpg|gif)$
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^.*$ - [L,NC]
+
+    # redirect minify requests
+    RewriteCond %{REQUEST_URI} ^/?([^/]+)/min/.*$
+    RewriteRule ^/?([^/]+)/min/(.*)$  /libx/min/?core=$1&$2 [L,QSA]
+
+    # redirect remote XHR requests
+    RewriteCond %{REQUEST_URI} ^/?[^/]+/remote/(api|router).php$ [OR]
+    RewriteCond %{REQUEST_URI} ^/?[^/]+/js/CB.DB.php$
+    RewriteRule ^([^/]+)/(.*)$ $2?core=$1 [L,NC,QSA]
+
+    # WebDav requests
+    RewriteCond %{REQUEST_URI} ^/dav
+    RewriteRule . /webdav.php [L]
+
+    #redirect all other requests to index.php
+    RewriteRule ^index\.php$ - [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?uri=$1 [L,QSA]
+    # RewriteRule . /index.php [L]
+
+    #deny direct access to other files
+    RewriteCond %{REQUEST_URI} !^.+\.(js|php|css|ico|png|bmp|jpg|gif)$
+    RewriteRule ^(.*)$ - [F,L]
+
+</IfModule>
+
+<IfModule mod_deflate.c>
+# Insert filter
+        SetOutputFilter DEFLATE
+
+        # Netscape 4.x has some problems...
+        BrowserMatch ^Mozilla/4 gzip-only-text/html
+
+        # Netscape 4.06-4.08 have some more problems
+        BrowserMatch ^Mozilla/4\.0[678] no-gzip
+
+        # MSIE masquerades as Netscape, but it is fine
+        # BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+
+        # NOTE: Due to a bug in mod_setenvif up to Apache 2.0.48
+        # the above regex won't work. You can use the following
+        # workaround to get the desired effect:
+        BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
+
+        # Don't compress images
+        SetEnvIfNoCase Request_URI \
+        \.(?:gif|jpe?g|png|pdf|zip)$ no-gzip dont-vary
+        # Make sure proxies don't deliver the wrong content
+        Header append Vary User-Agent env=!dont-vary
+</IfModule>
