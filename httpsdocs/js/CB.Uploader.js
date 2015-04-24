@@ -111,11 +111,11 @@ Ext.define('CB.Uploader', {
             this.uploadingFile.set('loaded', this.uploadingFile.get('size'));
             this.progressChange();
 
-            r = Ext.util.JSON.decode(e.target.response);
+            var r = Ext.util.JSON.decode(e.target.response);
             if(r.success === true){
                 this.uploadingFile.set('status', this.targetStatus);
 
-                if(Ext.isEmpty(r.data.draftPid)) {
+                if(Ext.isEmpty(this.uploadingFile.data.draftPid)) {
                     this.updatedPids.push(r.data.pid);
                 }
 
@@ -258,9 +258,8 @@ Ext.define('CB.Uploader', {
                     dir = '/';
                 }
 
-                var name = Ext.util.Format.stripScripts(Ext.util.Format.stripTags(f.name));
-
-                record = Ext.create(
+                var name = Ext.util.Format.stripScripts(Ext.util.Format.stripTags(f.name))
+                ,record = Ext.create(
                     this.store.getModel().getName()
                     ,{
                         id: Ext.id()
@@ -348,8 +347,12 @@ Ext.define('CB.Uploader', {
     }
 
     ,uploadNextFile: function(){
-        if(this.status != 1) return; //status flag can be changed on Cnacel or abort
-        idx = this.store.findExact('status', 0);
+        if(this.status != 1) {
+            return; //status flag can be changed on Cnacel or abort
+        }
+
+        var idx = this.store.findExact('status', 0);
+
         if(idx < 0){ // no files waiting to be uploaded
             this.status = 2; //upload complete
             this.stats = {

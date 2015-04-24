@@ -103,17 +103,17 @@
     },
     {
         "name": "sabre/vobject",
-        "version": "3.3.4",
-        "version_normalized": "3.3.4.0",
+        "version": "3.4.2",
+        "version_normalized": "3.4.2.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fruux/sabre-vobject.git",
-            "reference": "e7cbc59a7a77325dfa32924865e1802c9216a3e0"
+            "reference": "0c90f60dae40137f1903c7b5915d3691c4fc99b0"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fruux/sabre-vobject/zipball/e7cbc59a7a77325dfa32924865e1802c9216a3e0",
-            "reference": "e7cbc59a7a77325dfa32924865e1802c9216a3e0",
+            "url": "https://api.github.com/repos/fruux/sabre-vobject/zipball/0c90f60dae40137f1903c7b5915d3691c4fc99b0",
+            "reference": "0c90f60dae40137f1903c7b5915d3691c4fc99b0",
             "shasum": ""
         },
         "require": {
@@ -124,7 +124,7 @@
             "phpunit/phpunit": "*",
             "squizlabs/php_codesniffer": "*"
         },
-        "time": "2014-11-19 22:15:24",
+        "time": "2015-02-25 17:47:50",
         "bin": [
             "bin/vobject",
             "bin/generate_vcards"
@@ -171,17 +171,17 @@
     },
     {
         "name": "sabre/dav",
-        "version": "2.1.2",
-        "version_normalized": "2.1.2.0",
+        "version": "2.1.3",
+        "version_normalized": "2.1.3.0",
         "source": {
             "type": "git",
             "url": "https://github.com/fruux/sabre-dav.git",
-            "reference": "33b602b182445b41c480a5115884e62c2acccc7a"
+            "reference": "6a8aec204688d36681e0185fbaf1974b97e4a070"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/fruux/sabre-dav/zipball/33b602b182445b41c480a5115884e62c2acccc7a",
-            "reference": "33b602b182445b41c480a5115884e62c2acccc7a",
+            "url": "https://api.github.com/repos/fruux/sabre-dav/zipball/6a8aec204688d36681e0185fbaf1974b97e4a070",
+            "reference": "6a8aec204688d36681e0185fbaf1974b97e4a070",
             "shasum": ""
         },
         "require": {
@@ -197,7 +197,7 @@
             "php": ">=5.4.1",
             "sabre/event": "~2.0.0",
             "sabre/http": "~3.0.0",
-            "sabre/vobject": "~3.3.4"
+            "sabre/vobject": "~3.3"
         },
         "require-dev": {
             "evert/phpdoc-md": "~0.1.0",
@@ -208,7 +208,7 @@
             "ext-curl": "*",
             "ext-pdo": "*"
         },
-        "time": "2014-12-10 21:51:51",
+        "time": "2015-02-25 18:13:20",
         "bin": [
             "bin/sabredav",
             "bin/naturalselection"

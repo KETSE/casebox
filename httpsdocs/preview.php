@@ -121,10 +121,10 @@ switch ($obj->getType()) {
 
         } else {
             $top = '';
-            $tmp = Tasks::getActiveTasksBlockForPreview($id);
-            if (!empty($tmp)) {
-                $top = '<div class="obj-preview-h pt10">'.L\get('ActiveTasks').'</div>'.$tmp;
-            }
+            // $tmp = Tasks::getActiveTasksBlockForPreview($id);
+            // if (!empty($tmp)) {
+            //     $top = '<div class="obj-preview-h pt10">'.L\get('ActiveTasks').'</div>'.$tmp;
+            // }
             if (!empty($top)) {
                 echo //'<div class="p10">'.
                 $top.

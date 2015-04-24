@@ -254,9 +254,14 @@ class User
      */
     public static function isVerified($seconds = 3600)
     {
+        return (!empty($_SESSION['verified']));
+
+        /* //disabled timeout verification for now
+
         return ( !empty($_SESSION['verified']) &&
             ( (time() - $_SESSION['verified']) < $seconds )
             );
+        */
     }
 
     /**
@@ -294,7 +299,7 @@ class User
             if (substr($webdavDomain, -1) != '/') {
                 $webdavDomain .= '/';
             }
-            $webdavUrl = $webdavDomain . '{core_name}/edit-{node_id}/{name}"';
+            $webdavUrl = $webdavDomain . '{core_name}/edit-{node_id}/{name}';
 
         } else { //backward compatible check
             $webdavUrl = empty($filesConfig['webdav_url'])

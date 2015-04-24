@@ -31,7 +31,7 @@ use Sabre\VObject\Recur\EventIterator;
  * 6. It can process a reply from an invite and update an events attendee
  *     status based on a reply.
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH. All rights reserved.
+ * @copyright Copyright (C) 2011-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
@@ -341,7 +341,7 @@ class Broker {
             return null;
         }
         $instances = array();
-        $requestStatus = '2.0;Success';
+        $requestStatus = '2.0';
 
         // Finding all the instances the attendee replied to.
         foreach($itipMessage->message->VEVENT as $vevent) {
@@ -350,6 +350,7 @@ class Broker {
             $instances[$recurId] = $attendee['PARTSTAT']->getValue();
             if (isset($vevent->{'REQUEST-STATUS'})) {
                 $requestStatus = $vevent->{'REQUEST-STATUS'}->getValue();
+                list($requestStatus) = explode(';', $requestStatus);
             }
         }
 
@@ -670,7 +671,7 @@ class Broker {
         // event, which means we need to send DECLINED specifically for those
         // instances.
         // We only need to do that though, if the master event is not declined.
-        if ($instances['master']['newstatus'] !== 'DECLINED') {
+        if (isset($instances['master']) && $instances['master']['newstatus'] !== 'DECLINED') {
             foreach($eventInfo['exdate'] as $exDate) {
 
                 if (!in_array($exDate, $oldEventInfo['exdate'])) {
@@ -854,7 +855,10 @@ class Broker {
                 $sequence = $vevent->SEQUENCE->getValue();
             }
             if (isset($vevent->EXDATE)) {
-                $exdate = $vevent->EXDATE->getParts();
+                foreach ($vevent->select('EXDATE') as $val) {
+                    $exdate = array_merge($exdate, $val->getParts());
+                }
+                sort($exdate);
             }
             if (isset($vevent->STATUS)) {
                 $status = strtoupper($vevent->STATUS->getValue());
@@ -911,9 +915,20 @@ class Broker {
 
             foreach($this->significantChangeProperties as $prop) {
                 if (isset($vevent->$prop)) {
+                    $propertyValues = $vevent->select($prop);
+
                     $significantChangeHash.=$prop.':';
-                    foreach($vevent->select($prop) as $val) {
-                        $significantChangeHash.= $val->getValue().';';
+
+                    if ($prop === 'EXDATE') {
+
+                        $significantChangeHash.= implode(',', $exdate).';';
+
+                    } else {
+
+                        foreach($propertyValues as $val) {
+                            $significantChangeHash.= $val->getValue().';';
+                        }
+
                     }
                 }
             }

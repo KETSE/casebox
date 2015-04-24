@@ -40,6 +40,10 @@
     RewriteCond %{REQUEST_URI} ^/?[^/]+/js/CB.DB.php$
     RewriteRule ^([^/]+)/(.*)$ $2?core=$1 [L,NC,QSA]
 
+    # WebDav requests
+    RewriteCond %{REQUEST_URI} ^/dav
+    RewriteRule . /webdav.php [L]
+
     #redirect all other requests to index.php
     RewriteRule ^index\.php$ - [L]
 
