@@ -13,7 +13,7 @@ use
  * This class is supposed to provide a reasonably big framework to quickly get
  * a testing environment running.
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2007-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
@@ -25,6 +25,7 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
     protected $setupCalDAVSharing = false;
     protected $setupCalDAVScheduling = false;
     protected $setupCalDAVSubscriptions = false;
+    protected $setupCalDAVICSExport = false;
     protected $setupLocks = false;
     protected $setupFiles = false;
 
@@ -116,6 +117,10 @@ abstract class DAVServerTest extends \PHPUnit_Framework_TestCase {
         }
         if ($this->setupCalDAVSubscriptions) {
             $this->server->addPlugin(new CalDAV\Subscriptions\Plugin());
+        }
+        if ($this->setupCalDAVICSExport) {
+            $this->caldavICSExportPlugin = new CalDAV\ICSExportPlugin();
+            $this->server->addPlugin($this->caldavICSExportPlugin);
         }
         if ($this->setupCardDAV) {
             $this->carddavPlugin = new CardDAV\Plugin();

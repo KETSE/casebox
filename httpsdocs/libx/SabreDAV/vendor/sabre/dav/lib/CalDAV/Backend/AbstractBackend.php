@@ -10,7 +10,7 @@ use Sabre\CalDAV;
  *
  * Checkout the BackendInterface for all the methods that must be implemented.
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2007-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
@@ -173,6 +173,11 @@ abstract class AbstractBackend implements BackendInterface {
 
             // We must ignore calendars owned by other principals.
             if ($calendar['principaluri']!==$principalUri) {
+                continue;
+            }
+
+            // Ignore calendars that are shared.
+            if (isset($calendar['{http://sabredav.org/ns}owner-principal']) && $calendar['{http://sabredav.org/ns}owner-principal']!==$principalUri) {
                 continue;
             }
 

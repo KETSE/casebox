@@ -1,0 +1,65 @@
+<!-- Valid attributes for fields:
+ name: mandatory - the name for the field
+ type: mandatory - the name of a previously defined type from the
+     <types> section
+ indexed: true if this field should be indexed (searchable or sortable)
+ stored: true if this field should be retrievable
+ compressed: [false] if this field should be stored using gzip compression
+     (this will only apply if the field type is compressable; among
+     the standard field types, only TextField and StrField are)
+ multiValued: true if this field may contain multiple values per document
+ omitNorms: (expert) set to true to omit the norms associated with
+     this field (this disables length normalization and index-time
+     boosting for the field, and saves some memory).  Only full-text
+     fields or fields that need an index-time boost need norms.
+ termVectors: [false] set to true to store the term vector for a
+     given field.
+     When using MoreLikeThis, fields used for similarity should be
+     stored for best performance.
+ termPositions: Store position information with the term vector.
+     This will increase storage costs.
+ termOffsets: Store offset information with the term vector. This
+     will increase storage costs.
+ default: a value that should be used if no value is specified
+     when adding a document.
+-->
+
+
+<!-- id: unique identifier field (agregation of core_id, action_id ) -->
+<field name="id"    type="string"        indexed="true" stored="true" required="true" />
+
+<!-- core_id: id of the core -->
+<field name="core_id"       type="tint"  indexed="true" stored="true" />
+
+<!-- action_id: id of the action from core log -->
+<field name="action_id"       type="tlong"  indexed="true" stored="true" />
+
+<!-- type: type of the action -->
+<field name="action_type"    type="string"  indexed="true" stored="true" required="true" />
+
+<!-- date: timestamp of the action  -->
+<field name="action_date"  type="tdate"     indexed="true" stored="true" />
+
+<!-- user_id: id of the user -->
+<field name="user_id"       type="tint"     indexed="true" stored="true" />
+
+<!-- object_id: id of the object -->
+<field name="object_id"       type="tlong"  indexed="true" stored="true" />
+
+<!-- object_pid: pid of the object -->
+<field name="object_pid"       type="tlong" indexed="true" stored="true" />
+
+<!-- object_pids: all object pids -->
+<field name="object_pids"      type="tlong" indexed="true" stored="true" multiValued="true" />
+
+<!-- data: data of the object -->
+<field name="object_data"       type="text_general" indexed="false"  stored="true" />
+
+<field name="_version_"     type="tlong"    indexed="true" stored="true" multiValued="false" />
+
+<!-- dummy fields for search class consistency, just to search avoid errors -->
+<field name="ntsc"          type="tint"     indexed="true" stored="true" />
+<field name="sort_name"     type="text_general" indexed="true" />
+<field name="order"         type="tint" indexed="true" stored="true" />
+<field name="dstatus"   type="tint"     indexed="true" stored="true" required="true" />
+<field name="system"    type="tint"         indexed="true" stored="true" />

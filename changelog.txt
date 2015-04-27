@@ -1,4 +1,4 @@
-CaseBox 1.9.422 (2015-04-27)
+CaseBox 1.9.423 (2015-04-27)
 ==============================
 - #5311 Refactor server-side Task Management & Task UI
   Tasks changed to use internal sys_data property instead of custom tables
@@ -9,6 +9,13 @@ CaseBox 1.9.422 (2015-04-27)
   In next commits there should appear info or db update scripts to remove tasks related tables.
 
   Calendar view have been disabled for now.
+
+CaseBox 1.9.422 (2015-04-24)
+==============================
+- upgrade to SOLR5.1
+- adding ".htaccess_on" ".htaccess_off". Use ".htaccess_off"
+  when you want to disable CB while performing server side work
+- SOLR configSets added in /sys/solr_configsets/ and /data/solr/ folder removed
 
 CaseBox 1.9.421 (2015-04-21)
 ==============================
