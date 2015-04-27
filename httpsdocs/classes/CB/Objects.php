@@ -164,7 +164,7 @@ class Objects
         /* end of prepare params */
 
         // update object
-        $object = $this->getCustomClassByObjectId($d['id']);
+        $object = $this->getCachedObject($d['id']);
 
         //set only data from client side because
         //there could be sensitive data in sys_data

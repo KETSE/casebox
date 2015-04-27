@@ -89,7 +89,9 @@ class Task extends Object
                 ,t.status
                 -- ,(SELECT reminds FROM tasks_reminders WHERE task_id = $1 AND user_id = $2) reminds
                 ,DATE_FORMAT(t.completed, \'%Y-%m-%dT%H:%i:%sZ\') `task_d_closed`
+                ,COALESCE(tt.udate, tt.cdate) udate
             FROM tasks t
+            JOIN tree tt on t.id = tt.id
             WHERE t.id = $1',
             array(
                 $this->id
@@ -103,11 +105,10 @@ class Task extends Object
 
             if (!empty($r['task_d_closed'])) {
                 $sd['task_d_closed'] = $r['task_d_closed'];
-            }
 
-            unset($r['status']);
-            unset($r['user_status']);
-            unset($r['task_d_closed']);
+            } elseif ($r['status'] == 3) { //task is closed but no closed date set
+                $sd['task_d_closed'] = Util\dateMysqlToISO($r['udate']);
+            }
 
             //transform date fields with allday flag
             $sd['task_allday'] = $r['allday'];
@@ -124,10 +125,6 @@ class Task extends Object
                 $sd['task_due_time'] = Util\dateMysqlToISO($r['date_end']);
                 $d['data']['due_time'] = substr(Util\dateMysqlToISO($r['date_end']), 12, 8);
             }
-
-            unset($r['allday']);
-            unset($r['date_start']);
-            unset($r['date_end']);
 
             //set responsible users with their statuses
             $sd['task_u_ongoing'] = array();

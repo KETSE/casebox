@@ -1,5 +1,14 @@
+CaseBox 1.9.424 (2015-04-27)
+==============================
+Fixed Bugs:
+----------
+- change Task upgrade method to take in account closed tasks that have empty completion dates
+- TemplateField doeasnt save config properties
+
 CaseBox 1.9.423 (2015-04-27)
 ==============================
+New Features, Improvements
+--------------------------
 - #5311 Refactor server-side Task Management & Task UI
   Tasks changed to use internal sys_data property instead of custom tables
   Classes related to tasks were refactored as well as related classes and / or methods
@@ -12,6 +21,8 @@ CaseBox 1.9.423 (2015-04-27)
 
 CaseBox 1.9.422 (2015-04-24)
 ==============================
+New Features, Improvements
+--------------------------
 - upgrade to SOLR5.1
 - adding ".htaccess_on" ".htaccess_off". Use ".htaccess_off"
   when you want to disable CB while performing server side work
@@ -19,6 +30,8 @@ CaseBox 1.9.422 (2015-04-24)
 
 CaseBox 1.9.421 (2015-04-21)
 ==============================
+New Features, Improvements
+--------------------------
 - #5195 disabled security authentication timeout check
 - #5457 Move /sys/utils/ to /bin/
 - #5474 On click "Мой календарь" view mode is not changed for empty record set

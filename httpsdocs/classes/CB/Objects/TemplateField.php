@@ -169,21 +169,21 @@ class TemplateField extends Object
                 $field = $this->template->getField($fieldName);
             }
 
-            if (isset($p[$fieldName]) && ($p[$fieldName] !== 'id')) {
-                $value = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
-                    ? $p[$fieldName]
-                    : json_encode($p[$fieldName], JSON_UNESCAPED_UNICODE);
-
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = "`$fieldName` = \$$i";
-                $i++;
-            } elseif (!empty($field)) {
+            if (!empty($field)) {
                 $value = @$this->getFieldValue($fieldName, 0)['value'];
 
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
+
+                $saveFields[] = $fieldName;
+                $saveValues[] = $value;
+                $params[] = "`$fieldName` = \$$i";
+                $i++;
+            } elseif (isset($p[$fieldName]) && ($p[$fieldName] !== 'id')) {
+                $value = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
+                    ? $p[$fieldName]
+                    : json_encode($p[$fieldName], JSON_UNESCAPED_UNICODE);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -204,6 +204,7 @@ class TemplateField extends Object
                 }
             }
         }
+
         if (!empty($saveFields)) {
             DB\dbQuery(
                 'UPDATE templates_structure
