@@ -1742,36 +1742,28 @@ class Security
      * User can manage a task if he is Administrator, Creator of the task
      * or is one of the responsible task users.
      *
-     * @param  int     $task_id id of the task to be checked
-     * @param  int     $user_id id of the user to be checked
+     * @param  int     $taskId id of the task to be checked
+     * @param  int     $userId id of the user to be checked
      * @return boolean returns true in case of the user can manage the task
      */
-    public static function canManageTask($task_id, $user_id = false)
+    public static function canManageTask($taskId, $userId = false)
     {
         $rez = false;
-        if ($user_id == false) {
-            $user_id = $_SESSION['user']['id'];
-        }
-        $res = DB\dbQuery(
-            'SELECT t.cid
-                 , ru.user_id
-            FROM tasks t
-            LEFT JOIN tasks_responsible_users ru ON ru.task_id = t.id
-            AND ((t.cid = $2)
-                 OR (ru.user_id = $2))
-            WHERE t.id = $1',
-            array(
-                $task_id
-                ,$user_id
-            )
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $rez = true;
+        if ($userId == false) {
+            $userId = $_SESSION['user']['id'];
         }
-        $res->close();
+
+        $task = Objects::getCachedObject($taskId);
+
+        $data = $task->getData();
+
+        $rez = ($data['cid'] == $userId) ||
+            in_array($userId, $data['sys_data']['task_u_ongoing']) ||
+            in_array($userId, $data['sys_data']['task_u_done']);
+
         if (!$rez) {
-            $rez = Security::isAdmin($user_id);
+            $rez = Security::isAdmin($userId);
         }
 
         return $rez;

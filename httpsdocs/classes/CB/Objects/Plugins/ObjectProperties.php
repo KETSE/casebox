@@ -48,7 +48,6 @@ class ObjectProperties extends Base
                         ,'uid'
                         ,'cdate'
                         ,'udate'
-                        ,'can'
                     )
                 )) {
                     if (in_array($k, array('date', 'date_end', 'cdate', 'udate'))) {
@@ -67,6 +66,8 @@ class ObjectProperties extends Base
                 }
             }
         }
+
+        $rez['data']['can'] = $obj->getActionFlags();
 
         return $rez;
     }

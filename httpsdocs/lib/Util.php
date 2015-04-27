@@ -303,8 +303,9 @@ function userTimeToUTCTimezone($dateTime)
         return $dateTime;
     }
 
-    $d = new \DateTime($dateTime, new \DateTimeZone($_SESSION['user']['cfg']['timezone']));
-    $d->setTimezone('UTC');
+    $tz = new \DateTimeZone($_SESSION['user']['cfg']['timezone']);
+    $d = new \DateTime(dateISOToMysql($dateTime), $tz);
+    $d->setTimezone(new  \DateTimeZone('UTC'));
 
     return $d->format('Y-m-d H:i:s');
 }

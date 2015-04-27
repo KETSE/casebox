@@ -1,3 +1,15 @@
+CaseBox 1.9.422 (2015-04-27)
+==============================
+- #5311 Refactor server-side Task Management & Task UI
+  Tasks changed to use internal sys_data property instead of custom tables
+  Classes related to tasks were refactored as well as related classes and / or methods
+  Preview have been changed / refactored
+  A convertor is available in /bin/upgrade_tasks_data.php to upgrade all tasks structure
+    before removing custom tasks tables from db
+  In next commits there should appear info or db update scripts to remove tasks related tables.
+
+  Calendar view have been disabled for now.
+
 CaseBox 1.9.421 (2015-04-21)
 ==============================
 - #5195 disabled security authentication timeout check

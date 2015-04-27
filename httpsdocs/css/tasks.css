@@ -16,6 +16,11 @@ a.btn-task-complete { font-size: 12px; color: white; font-weight: bold}
 
 .tasks-grid .icon-grid-column{background-position: 2px 2px !important}
 
+.task-status{ border-radius: 6px; -moz-border-radius: 6px; -webkit-border-radius: 6px; padding: 2px 5px}
+.task-status-active{ background-color: black; color: white}
+.task-status-closed{ background-color: #637626; color: white}
+.task-status-overdue{ background-color: #c00000; color: white}
+
 .task-status00{ border-radius: 6px; -moz-border-radius: 6px; -webkit-border-radius: 6px; background-color: #D36E01; color: white; padding: 2px 5px} /*pending, not completed*/
 .task-status01{ border-radius: 6px; -moz-border-radius: 6px; -webkit-border-radius: 6px; background-color: #D36E01; color: white; padding: 2px 5px} /*pending, completed*/
 .task-status10{ border-radius: 6px; -moz-border-radius: 6px; -webkit-border-radius: 6px; background-color: black; color: white; padding: 2px 5px} /*active, not completed */
@@ -73,7 +78,8 @@ a.btn-task-complete { font-size: 12px; color: white; font-weight: bold}
     color: #333;
     width: 100%;
     display: table;
-    border-collapse: separate; border-spacing: 0;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .taskview .people td {vertical-align: top; padding: 5px 5px 5px 0px; }
@@ -84,3 +90,40 @@ ul.task_files a {text-decoration: underline; color: #15C; }
 ul.reminders li span, ul.task_files li .actions {cursor: hand; display: none }
 ul.reminders li:hover span, ul.task_files li:hover .actions {display: inline-block; }
 .people .done {position: absolute; left: 20px; top: 20px; }
+
+.task-actions {
+    padding: 10px;
+    border-bottom: 1px solid #8b8b8b;
+}
+
+.task-actions a{
+    display: inline-block;
+    background-position: 50% 0;
+    background-repeat: no-repeat;
+    padding: 32px 5px 3px 5px;
+    color: gray;
+    cursor: hand;
+    cursor: pointer;
+}
+.task-actions a:hover {
+    text-decoration: none;
+    color: black;
+}
+.task-date-status{
+display: inline-block;
+width: 100%;
+}
+
+.task-date-status div{
+display: inline-block;
+padding: 5px 10px;
+margin: 12px 5px;
+}
+
+.task-date-status .date{
+float: left;
+}
+
+.task-date-status .status{
+float: right;
+}
