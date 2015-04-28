@@ -22,8 +22,6 @@ if (empty($_SESSION['user'])) {
     exit(header('Location: ' . $coreUrl . 'login/'));
 }
 
-L\checkTranslationsUpToDate();
-
 require_once(Config::get('MINIFY_PATH') . 'utils.php');
 $projectTitle = Config::get('project_name_' . Config::get('user_language'), $coreName);
 

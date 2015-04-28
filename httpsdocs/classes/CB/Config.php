@@ -382,7 +382,14 @@ class Config extends Singleton
 
         foreach ($languages as $l) {
             $k = mb_strtolower(trim($l));
-            $rez['lang-'.$l] = array('//js/locale/'.$l.'.js');
+
+            $cf = DOC_ROOT . 'js' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR . $coreName . '_' . $l . '.js';
+            if (file_exists($cf)) { //include core's custom translation file if present
+                $rez['lang-'.$l] = array('//js/locale/' . $coreName . '_' . $l . '.js');
+            } else {
+                $rez['lang-'.$l] = array('//js/locale/' . $l . '.js');
+            }
+
         }
 
         return $rez;

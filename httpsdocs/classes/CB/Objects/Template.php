@@ -36,6 +36,12 @@ class Template extends Object
         ,'info_template'
     );
 
+    /**
+     * table for quick accessing fields order (to avoid additional iterations)
+     * @var array
+     */
+    private $fieldsOrder = array();
+
     private static $fieldTypeNames =  array(
         '_auto_title' => 'ftAutoTitle'
         ,'checkbox' => 'ftCheckbox'
@@ -208,6 +214,8 @@ class Template extends Object
         while ($r = $res->fetch_assoc()) {
             $r['cfg'] = Util\toJSONArray($r['cfg']);
             $this->data['fields'][$r['id']] = $r;
+
+            $this->fieldsOrder[$r['name']] = intval($r['order']);
         }
         $res->close();
     }
@@ -402,6 +410,20 @@ class Template extends Object
         }
 
         return null;
+    }
+
+    /**
+     * get field order
+     * @param  varchar $fieldName
+     * @return int
+     */
+    public function getFieldOrder($fieldName)
+    {
+        if (isset($this->fieldsOrder[$fieldName])) {
+            return $this->fieldsOrder[$fieldName];
+        }
+
+        return 0;
     }
 
     /**

@@ -76,7 +76,7 @@ function connectWithParams($p)
     }
 
     // if database changed then apply initsql if set
-    if (@$lastParams['name'] != $newParams['name']) {
+    if (!isset($lastParams['name']) || ($lastParams['name'] != $newParams['name'])) {
         $newParams['name'] = $dbh->real_escape_string($newParams['name']);
 
         $dbh->query('USE `'.$newParams['name'].'`');

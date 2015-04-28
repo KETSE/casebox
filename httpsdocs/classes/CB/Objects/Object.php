@@ -819,7 +819,7 @@ class Object
      */
     public function getData()
     {
-        if (!$this->loaded) {
+        if (!$this->loaded && !empty($this->id)) {
             $this->load();
         }
 
@@ -828,18 +828,19 @@ class Object
 
     /**
      * get linear array of properties of object properties
-     *
-     * @param array $data template properties
+     * @param boolean $sorted true to sort data according to template fields order
+     * @param array   $data   template properties
      */
-    public function getLinearData()
+    public function getLinearData($sorted = false)
     {
-        if (!empty($this->linearData)) {
-            return $this->linearData;
+        $paramName = 'linearData' . ($sorted ? 'sorted' : '');
+        if (!empty($this->$paramName)) {
+            return $this->$paramName;
         }
 
-        $this->linearData = $this->getLinearNodesData($this->data['data']);
+        $this->$paramName = $this->getLinearNodesData($this->data['data'], $sorted);
 
-        return $this->linearData;
+        return $this->$paramName;
     }
 
     /**
@@ -868,7 +869,29 @@ class Object
         return $rez;
     }
 
-    protected function getLinearNodesData(&$data)
+    /**
+     * private function used to sort an array(using php usort function) of field elements
+     * according to their template order from template
+     * @param  array $a
+     * @param  array $b
+     * @return int
+     */
+    protected function fieldsArraySorter($a, $b)
+    {
+        if (!empty($this->template)) {
+            $o1 = $this->template->getFieldOrder($a['name']);
+            $o2 = $this->template->getFieldOrder($b['name']);
+            if ($o1 < $o2) {
+                return -1;
+            } elseif ($o1 > $o2) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    protected function getLinearNodesData(&$data, $sorted = false)
     {
         $rez = array();
         if (empty($data)) {
@@ -893,24 +916,8 @@ class Object
             }
         }
 
-        //sort result according to template fields order
-        if ((sizeof($rez) > 1) && !empty($this->template)) {
-            $changed = true;
-            while ($changed) {
-                $changed = false;
-                $i = 1;
-                while ($i < sizeof($rez)) {
-                    $tf1 = $this->template->getField($rez[$i-1]['name']);
-                    $tf2 = $this->template->getField($rez[$i]['name']);
-                    if (!empty($tf1) && !empty($tf2) && (@$tf1['order'] > @$tf2['order'])) {
-                        $changed = true;
-                        $t = $rez[$i-1];
-                        $rez[$i-1] = $rez[$i];
-                        $rez[$i] = $t;
-                    }
-                    $i++;
-                }
-            }
+        if ($sorted) {
+            usort($rez, array($this, 'fieldsArraySorter'));
         }
 
         $sortedRez = array();
@@ -918,7 +925,7 @@ class Object
         foreach ($rez as $fv) {
             $sortedRez[] = $fv;
             if (!empty($fv['childs'])) {
-                $sortedRez = array_merge($sortedRez, $this->getLinearNodesData($fv['childs']));
+                $sortedRez = array_merge($sortedRez, $this->getLinearNodesData($fv['childs'], $sorted));
             }
         }
 
@@ -1419,7 +1426,7 @@ class Object
         $bottom = '';
         $gf = array();
 
-        $linearData = $this->getLinearData();
+        $linearData = $this->getLinearData(true);
 
         $template = $this->getTemplate();
 

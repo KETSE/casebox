@@ -1,9 +1,17 @@
+CaseBox 1.9.425 (2015-04-28)
+==============================
+- #5635 getLinearNodesData optimizations
+- #5636 Remove checkTranslations from main.php
+  added /bin/languages_update_js_files.php to update translations files when needed
+  renamed language related files from /bin/ to start with "language" word
+- #5311 removed creation date display for tasks
+
 CaseBox 1.9.424 (2015-04-27)
 ==============================
 Fixed Bugs:
 ----------
 - change Task upgrade method to take in account closed tasks that have empty completion dates
-- TemplateField doeasnt save config properties
+- TemplateField doesnt save config properties
 
 CaseBox 1.9.423 (2015-04-27)
 ==============================

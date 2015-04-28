@@ -509,18 +509,32 @@ class Task extends Object
         //create date and status row
         $ed = $this->getEndDate();
         $status = $this->getStatus();
-        $datePeriod = empty($sd['task_allday'])
-            ? Util\formatDateTimePeriod($data['cdate'], $ed, @$_SESSION['user']['cfg']['timezone'])
-            : Util\formatDatePeriod($data['cdate'], $ed, @$_SESSION['user']['cfg']['timezone']);
 
-        $dateAndStatusLine = '<div class="task-date-status">' .
-            '<div class="date">' .
-                $datePeriod .
-            '</div>' .
-            '<div class="status ' . $this->getStatusCSSColorClass($status) . '">' .
-                L\get('taskStatus' . $status) .
-            '</div>' .
-            '</div>';
+        if (!empty($ed)) {
+            $endDate = empty($sd['task_allday'])
+                ? Util\formatDateTimePeriod($ed, null, @$_SESSION['user']['cfg']['timezone'])
+                : Util\formatDatePeriod($ed, null, @$_SESSION['user']['cfg']['timezone']);
+
+            $dateAndStatusLine .= '<div class="date">' . $endDate . '</div>';
+        }
+
+        if ($status != static::$STATUS_ACTIVE) {
+            $dateAndStatusLine .= '<div class="status ' . $this->getStatusCSSColorClass($status) . '">' .
+                L\get('taskStatus' . $status) . '</div>';
+
+        }
+
+        if (!empty($dateAndStatusLine)) {
+            $dateAndStatusLine = '<div class="task-date-status">' . $dateAndStatusLine . '</div>';
+        }
+        // $dateAndStatusLine = '<div class="task-date-status">' .
+        //     '<div class="date">' .
+        //         $datePeriod .
+        //     '</div>' .
+        //     '<div class="status ' . $this->getStatusCSSColorClass($status) . '">' .
+        //         L\get('taskStatus' . $status) .
+        //     '</div>' .
+        //     '</div>';
 
         //create owner row
         $v = $this->getOwner();
