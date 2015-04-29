@@ -69,6 +69,14 @@ class ObjectProperties extends Base
 
         $rez['data']['can'] = $obj->getActionFlags();
 
+        //set status info for tasks if not active
+        if (($obj->getType() == 'task') && ($obj->getStatus() !== Objects\Task::$STATUS_ACTIVE)) {
+            $d = &$rez['data'];
+            $d['status'] = $obj->getStatusText();
+            $d['statusCls'] = $obj->getStatusCSSClass();
+
+        }
+
         return $rez;
     }
 }

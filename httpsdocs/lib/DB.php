@@ -79,7 +79,9 @@ function connectWithParams($p)
     if (!isset($lastParams['name']) || ($lastParams['name'] != $newParams['name'])) {
         $newParams['name'] = $dbh->real_escape_string($newParams['name']);
 
-        $dbh->query('USE `'.$newParams['name'].'`');
+        if (!empty($newParams['name'])) {
+            $dbh->query('USE `'.$newParams['name'].'`') or die('Cannot access database "' . $newParams['name'] . '"');
+        }
 
         $dbh->query("SET NAMES 'UTF8'");
 
@@ -147,15 +149,20 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
             $dbh = $GLOBALS['dbh'];
         }
 
-        $rez = date('Y-m-d H:i:s') . ": \n\r<br /><hr />Query error: ".mysqli_error($dbh).
+        $coreName = \CB\Config::get('core_name');
+
+        $rez = date('Y-m-d H:i:s') .
+            ": \n\r<br /><hr />Query error (" . $dbh->lastParams['name'] . "): " .
+            mysqli_error($dbh).
             "<hr /><br />\n\r";
+
         if (!empty($GLOBALS['last_sql'])) {
             $rez .= "\n\r<br /><hr />Query: ".$GLOBALS['last_sql'].$rez;
         }
         error_log($rez, 3, \CB\Config::get('error_log', \CB\LOGS_DIR.'cb_error_log'));
 
         if (!\CB\isDebugHost()) {
-            $rez ='Query error';
+            $rez ='Query error (' . $dbh->lastParams['name'] . ')';
         }
 
         throw new \Exception($rez);

@@ -198,7 +198,7 @@ class Comments extends Base
                 $links[] = static::getFileLink($f);
             }
 
-            $d['content'] .= '<ul class="comment-attachments"><li>' . implode('</li><li>', $links) .'</li></ul>';
+            $d['files'] = '<ul class="comment-attachments"><li>' . implode('</li><li>', $links) .'</li></ul>';
         }
     }
 

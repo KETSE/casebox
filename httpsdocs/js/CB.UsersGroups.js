@@ -192,7 +192,6 @@ Ext.define('CB.AddUserForm', {
         if(this.config.data.callback) {
             this.config.data.callback(params, this.config.ownerCt);
         }
-        this.destroy();
     }
 });
 
@@ -435,7 +434,7 @@ Ext.define('CB.UsersGroupsTree', {
     }
 
     ,onAddUserClick: function(b, e){
-        var w = new CB.AddUserForm({
+        this.addUserForm = new CB.AddUserForm({
             modal: true
             ,ownerCt: this
             ,data: {
@@ -443,7 +442,7 @@ Ext.define('CB.UsersGroupsTree', {
             }
         });
 
-        w.show();
+        this.addUserForm.show();
     }
 
     ,addUser: function(params, t){
@@ -457,6 +456,9 @@ Ext.define('CB.UsersGroupsTree', {
             }
 
             return false;
+        } else if(this.addUserForm) {
+            this.addUserForm.destroy();
+            delete this.addUserForm;
         }
 
         this.lastPath = '/root/'+r.data.group_id+'/'+r.data.nid;

@@ -50,6 +50,7 @@ Ext.define('CB.object.plugin.Comments', {
             ,'        {[ Ext.util.Format.nl2br(values.content)]}'
             ,'      </div>'
             ,'      <div title="' + L.ShowAll + '" class="show-all click"></div>'
+            ,'      {[values.files ? "<div>" + values.files + "</div>" : "" ]}'
             ,'      <div class="gr" title="{[ displayDateTime(values.cdate) ]}">{cdate_text}</div>'
             ,'    </td>'
             ,'</tr>'

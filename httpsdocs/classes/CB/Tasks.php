@@ -203,78 +203,58 @@ class Tasks
             $user = User::getPreferences($user_id);
         }
 
-        $res = DB\dbQuery(
-            'SELECT
-                `title`
-                ,date_start
-                ,date_end
-                ,description
-                ,status
-                ,`type`
-                ,allday
-                ,cid
-                ,ti.path `path_text`
-                ,cdate
-                ,responsible_user_ids
-                ,(SELECT reminds
-                    FROM tasks_reminders
-                    WHERE task_id = $1
-                        AND user_id = $2) reminders
-                ,DATABASE() `db`
-            FROM tasks t
-            JOIN tree_info ti ON t.id = ti.id
-            WHERE t.id = $1',
-            array(
-                $id,
-                @$user['id']
-            )
-        ) or die(DB\dbQueryError());
+        $obj = Objects::getCachedObject($id);
 
-        if ($r = $res->fetch_assoc()) {
-            $datetime_period = ($r['allday'] == 1)
-                ? Util\formatDatePeriod($r['date_start'], $r['date_end'])
-                : Util\formatDateTimePeriod($r['date_start'], $r['date_end'], @$user['cfg']['timezone']);
+        if ($obj) {
+            $d = $obj->getData();
+            $sd = $d['sys_data'];
 
-            $created_date_text = Util\formatMysqlDate($r['cdate'], 'Y, F j H:i', @$user['cfg']['timezone']);
+            $ed = $obj->getEndDate();
+            $status = $obj->getStatus();
+
+            $datetime_period = ($sd['task_allday'] == 1)
+                ? Util\formatDatePeriod($d['cdate'], $ed)
+                : Util\formatDateTimePeriod($r['cdate'], $ed, @$user['cfg']['timezone']);
+
+            $created_date_text = Util\formatMysqlDate($d['cdate'], 'Y, F j H:i', @$user['cfg']['timezone']);
 
             $tickImage = 'data:image/png;base64,'.base64_encode(file_get_contents(DOC_ROOT . 'css/i/ico/tick-circle.png'));
 
             $users = array();
-            $ures = DB\dbQuery(
-                'SELECT u.id
-                    ,u.`name`
-                    ,first_name
-                    ,last_name
-                    ,u.photo
-                    ,u.sex
-                    ,ru.status
-                    ,ru.time
-                FROM users_groups u
-                LEFT JOIN tasks_responsible_users ru ON u.id = ru.user_id
-                    AND ru.task_id = $1
-                WHERE u.id IN (0'.$r['responsible_user_ids'].')
-                ORDER BY 1',
-                $id
-            ) or die(DB\dbQueryError());
+            $assigned = @$obj->getFieldValue('assigned', 0)['value'];
+            if (!empty($assigned)) {
+                $ures = DB\dbQuery(
+                    'SELECT u.id
+                        ,u.`name`
+                        ,first_name
+                        ,last_name
+                        ,u.photo
+                        ,u.sex
+                    FROM users_groups u
+                    WHERE u.id IN (0'.$assigned.')
+                    ORDER BY 1'
+                ) or die(DB\dbQueryError());
 
-            while ($ur = $ures->fetch_assoc()) {
-                $name = User::getDisplayName($ur);
+                while ($ur = $ures->fetch_assoc()) {
+                    $name = User::getDisplayName($ur);
 
-                $photoFile = User::getPhotoFilename($ur, true);
-                $photo = 'data:image/png;base64,'.base64_encode(file_get_contents($photoFile));
+                    $photoFile = User::getPhotoFilename($ur, true);
+                    $photo = 'data:image/png;base64,'.base64_encode(file_get_contents($photoFile));
+                    $completed = ($obj->getUserStatus($ur['id']) == Objects\Task::$USERSTATUS_DONE);
 
-                $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
-                "\n\r".'<img src="' . $photo . '" style="width:32px; height: 32px" alt="'.$name.'" title="'.$name.'"/>'.
-                "\n\r".( ($ur['status'] == 1) ? '<img src="' . $tickImage . '" style="width:16px;height:16px; margin-left: -16px"/>': '').
-                "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b>'.$name.'</b>'.
-                "\n\r".'<p style="color:#777;margin:0;padding:0">'.
-                "\n\r".( ($ur['status'] == 1) ? L\get('Completed', $user['language_id']).': <span style="color: #777" title="'.$ur['time'].'">'.
-                    Util\formatMysqlDate($ur['time'], 'Y, F j H:i', @$user['cfg']['timezone']).'</span>' : L\get('waitingForAction', $user['language_id']) ).
-                "\n\r".'</p>'.
-                '</td></tr>';
+                    $users[] = "\n\r".'<tr><td style="width: 1% !important; padding:5px 5px 5px 0px; vertical-align:top; white-space: nowrap">'.
+                    "\n\r".'<img src="' . $photo . '" style="width:32px; height: 32px" alt="'.$name.'" title="'.$name.'"/>'.
+                    "\n\r".( $completed ? '<img src="' . $tickImage . '" style="width:16px;height:16px; margin-left: -16px"/>': '').
+                    "\n\r".'</td><td style="padding: 5px 5px 5px 0; vertical-align:top"><b>'.$name.'</b>'.
+                    "\n\r".'<p style="color:#777;margin:0;padding:0">'.
+                    "\n\r".( $completed ? L\get('Completed', $user['language_id']).': <span style="color: #777">'.
+                        '</span>' : L\get('waitingForAction', $user['language_id']) ).
+                    "\n\r".'</p>'.
+                    '</td></tr>';
 
+                }
+                $ures->close();
             }
-            $ures->close();
 
             /* add removed users */
             if (!empty($removed_users)) {
@@ -313,11 +293,12 @@ class Tasks
                 'color: #333; width: 100%; display: table; border-collapse: separate; border-spacing: 0;"><tbody>'.
                 implode('', $users).'</tbody></table></td></tr>';
 
-            $ownerName = User::getDisplayName($r['cid']);
-            $ownerPhoto = 'data:image/png;base64,'.base64_encode(file_get_contents(User::getPhotoFilename($r['cid'], true)));
+            $ownerName = User::getDisplayName($d['cid']);
+            $ownerPhoto = 'data:image/png;base64,'.base64_encode(file_get_contents(User::getPhotoFilename($d['cid'], true)));
 
             // create files block
             $files_text = ''; // static::getTaskFiles($id, true);
+            $description = nl2br(Util\adjustTextForDisplay(@$obj->getFieldValue('description', 0)['value']));
 
             $rez = file_get_contents(TEMPLATES_DIR.'task_notification_email.html');
 
@@ -352,13 +333,13 @@ class Tasks
                 ),
                 array(
                     ''
-                    ,'font-size: 1.5em; display: block;'.( ($r['status'] == 3 ) ? 'color: #555; text-decoration: line-through' : '')
-                    ,'<a href="' . $coreUrl . 'view/' . $id . '/">' . Util\adjustTextForDisplay($r['title']) . '</a>'
+                    ,'font-size: 1.5em; display: block;'.( ($status == 3 ) ? 'color: #555; text-decoration: line-through' : '')
+                    ,'<a href="' . $coreUrl . 'view/' . $id . '/">' . Util\adjustTextForDisplay($d['name']) . '</a>'
                     ,$datetime_period
-                    ,nl2br(Util\adjustTextForDisplay($r['description']))
+                    ,$description
                     ,L\get('Status', $user['language_id'])
                     ,'status-style'
-                    ,L\get('taskStatus'.$r['status'], $user['language_id'])
+                    ,L\get('taskStatus'.$status, $user['language_id'])
                     ,L\get('Created', $user['language_id'])
                     ,$created_date_text
                     ,''
@@ -367,7 +348,7 @@ class Tasks
                     ,'category_style'
                     ,''
                     ,L\get('Path', $user['language_id'])
-                    ,Util\adjustTextForDisplay($r['path_text'])
+                    ,Util\adjustTextForDisplay(@$d['path_text'])
                     ,L\get('Owner', $user['language_id'])
                     ,$ownerName
                     ,$ownerPhoto
@@ -381,7 +362,6 @@ class Tasks
                 $rez
             );
         }
-        $res->close();
 
         return $rez;
     }

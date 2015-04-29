@@ -311,6 +311,50 @@ class Task extends Object
     }
 
     /**
+     * get task status text
+     * @param  int     $status
+     * @return varchar
+     */
+    public function getStatusText($status = false)
+    {
+        if ($status === false) {
+            $status = $this->getStatus();
+        }
+
+        return L\get('taskStatus' . $status, '');
+    }
+
+    /**
+     * get the css class corresponding for status color
+     * @param  int     $status
+     * @return varchar | null
+     */
+    public function getStatusCSSClass($status = false)
+    {
+        if ($status === false) {
+            $status = $this->getStatus();
+        }
+
+        $rez = 'task-status';
+
+        switch ($this->getStatus()) {
+            case static::$STATUS_OVERDUE:
+                $rez .= ' task-status-overdue';
+                break;
+
+            case static::$STATUS_ACTIVE:
+                $rez .= ' task-status-active';
+                break;
+
+            case static::$STATUS_CLOSED:
+                $rez .= ' task-status-closed';
+                break;
+        }
+
+        return $rez;
+    }
+
+    /**
      * get user status for loaded task
      * @param int $userId
      */
@@ -440,36 +484,6 @@ class Task extends Object
     }
 
     /**
-     * get the css class corresponding for status color
-     * @param  int     $status
-     * @return varchar | null
-     */
-    public function getStatusCSSColorClass($status = false)
-    {
-        if ($status === false) {
-            $status = $this->getStatus();
-        }
-
-        $rez = 'task-status';
-
-        switch ($this->getStatus()) {
-            case static::$STATUS_OVERDUE:
-                $rez .= ' task-status-overdue';
-                break;
-
-            case static::$STATUS_ACTIVE:
-                $rez .= ' task-status-active';
-                break;
-
-            case static::$STATUS_CLOSED:
-                $rez .= ' task-status-closed';
-                break;
-        }
-
-        return $rez;
-    }
-
-    /**
      * generate html preview for a task
      * @param  int   $id task id
      * @return array
@@ -484,7 +498,7 @@ class Task extends Object
         $template = $this->getTemplate();
 
         $actionsLine = 'Actions<hr />';
-        $dateAndStatusLine = '';
+        $dateLine = '';
         $ownerRow = '';
         $assigneeRow = '';
         $contentRow = '';
@@ -515,26 +529,12 @@ class Task extends Object
                 ? Util\formatDateTimePeriod($ed, null, @$_SESSION['user']['cfg']['timezone'])
                 : Util\formatDatePeriod($ed, null, @$_SESSION['user']['cfg']['timezone']);
 
-            $dateAndStatusLine .= '<div class="date">' . $endDate . '</div>';
+            $dateLine .= '<div class="date">' . $endDate . '</div>';
         }
 
-        if ($status != static::$STATUS_ACTIVE) {
-            $dateAndStatusLine .= '<div class="status ' . $this->getStatusCSSColorClass($status) . '">' .
-                L\get('taskStatus' . $status) . '</div>';
-
+        if (!empty($dateLine)) {
+            $dateLine = '<div class="task-date-status">' . $dateLine . '</div>';
         }
-
-        if (!empty($dateAndStatusLine)) {
-            $dateAndStatusLine = '<div class="task-date-status">' . $dateAndStatusLine . '</div>';
-        }
-        // $dateAndStatusLine = '<div class="task-date-status">' .
-        //     '<div class="date">' .
-        //         $datePeriod .
-        //     '</div>' .
-        //     '<div class="status ' . $this->getStatusCSSColorClass($status) . '">' .
-        //         L\get('taskStatus' . $status) .
-        //     '</div>' .
-        //     '</div>';
 
         //create owner row
         $v = $this->getOwner();
@@ -600,7 +600,7 @@ class Task extends Object
         }
 
         $pb[0] = $actionsLine .
-            $dateAndStatusLine .
+            $dateLine .
             $pb[0] .
             $ownerRow .
             $assigneeRow .

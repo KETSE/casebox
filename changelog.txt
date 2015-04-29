@@ -1,3 +1,15 @@
+CaseBox 1.9.426 (2015-04-29)
+==============================
+- #5552 Email should be unique index in users_groups & improve AddUserForm
+- #5659 How to call Casebox using Curl request
+- #5389 "No database selected" errors in log
+- #5311 Moved task status display after title
+- #5368 UI improvement for Comments
+
+Fixed Bugs:
+----------
+- #5649 Getting empty email messages from Task system
+
 CaseBox 1.9.425 (2015-04-28)
 ==============================
 - #5635 getLinearNodesData optimizations

@@ -7,13 +7,15 @@ Ext.define('CB.object.TitleView', {
         this.tpl = new Ext.XTemplate(
             '<tpl for=".">'
             ,'<div class="obj-header">{[ Ext.valueFrom(values.name, \'\') ]} &nbsp;'
+                ,'{[ this.getStatusInfo(values) ]}'
                 ,'<div class="info">'
                     ,'{[ this.getTitleInfo(values) ]}'
                 ,'</div>'
             ,'</div>'
             ,'</tpl>'
             ,{
-                getTitleInfo: this.getTitleInfo
+                getStatusInfo: this.getStatusInfo
+                ,getTitleInfo: this.getTitleInfo
             }
         );
 
@@ -27,6 +29,22 @@ Ext.define('CB.object.TitleView', {
 
         this.callParent(arguments);
     }
+
+    /**
+     * get status info displayed next to the title
+     * @return string
+     */
+    ,getStatusInfo: function (values) {
+        if(Ext.isEmpty(values.status)) {
+            return '';
+        }
+
+        var rez = '<div class="dIB fs12 ' + Ext.valueFrom(values.statusCls, '') + '"">' +
+            values.status + '</div>';
+
+        return rez;
+    }
+
     /**
      * get info displayed under the title
      * Ex: TemplateType &#8226; #{id} &#8226; Ubdate by <a href="#">user name</a> time ago

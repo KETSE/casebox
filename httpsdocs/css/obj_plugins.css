@@ -10,7 +10,7 @@
 
 .block-plugin a {
     text-decoration: none;
-    color: #333;
+    /*color: #333;*/
 }
 
 .block-plugin tr:first-child td {
@@ -138,7 +138,16 @@ background-color: #FFFFCC;
 }
 
 .block-plugin-comments .comment-attachments li{
-    padding: 3px;
+    padding: 2px;
+    min-height: 23px;
+}
+
+.block-plugin-comments .comment-attachments li a{
+    display: block;
+    min-height: 16px;
+}
+.block-plugin-comments .comment-attachments img{
+    padding: 5px 0;
 }
 
 .comment-actions-button {

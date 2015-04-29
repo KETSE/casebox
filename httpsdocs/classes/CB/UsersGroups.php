@@ -270,6 +270,12 @@ class UsersGroups
             }
         }
 
+        //check if user with such email doesn exist
+        $user_id = User::getIdByEmail($p['email']);
+        if (!empty($user_id)) {
+            throw new \Exception(L\get('UserEmailExists'));
+        }
+
         $user_id = 0;
         /*check user existance, if user already exists but is deleted
         then its record will be used for new user */
@@ -320,7 +326,13 @@ class UsersGroups
                 ,cdate = CURRENT_TIMESTAMP
                 ,did = NULL
                 ,ddate = NULL
+                ,`password` = NULL
+                ,`password_change` = NULL
+                ,`recover_hash` = NULL
                 ,language_id = $5
+                ,`cfg` = NULL
+                ,`data` = NULL
+                ,email = $6
                 ,uid = $4
                 ,cdate = CURRENT_TIMESTAMP',
             array(
