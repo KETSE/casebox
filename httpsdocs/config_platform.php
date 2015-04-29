@@ -10,13 +10,14 @@ namespace CB;
 define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 define('CB\\APP_DIR', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
 define('CB\\PLUGINS_DIR', DOC_ROOT.'plugins'.DIRECTORY_SEPARATOR);
-define('CB\\CRONS_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'crons'.DIRECTORY_SEPARATOR);
+define('CB\\SYS_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR);
+define('CB\\CRONS_DIR', SYS_DIR.'crons'.DIRECTORY_SEPARATOR);
 define('CB\\LOGS_DIR', APP_DIR.'logs'.DIRECTORY_SEPARATOR);
 define('CB\\DATA_DIR', APP_DIR.'data'.DIRECTORY_SEPARATOR);
 define('CB\\TEMP_DIR', DATA_DIR.'tmp'.DIRECTORY_SEPARATOR);
 define('CB\\MINIFY_CACHE_DIR', TEMP_DIR.'minify'.DIRECTORY_SEPARATOR);
 //templates folder. Basicly used for email templates. Used in Tasks notifications and password recovery processes.
-define('CB\\TEMPLATES_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR.'templates'.DIRECTORY_SEPARATOR);
+define('CB\\TEMPLATES_DIR', SYS_DIR.'templates'.DIRECTORY_SEPARATOR);
 //used to include DB.php into PreviewExtractor scripts and in Files.php to start the extractors.
 define('CB\\LIB_DIR', DOC_ROOT.'lib'.DIRECTORY_SEPARATOR);
 define('CB\\ZEND_PATH', DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'ZF'.DIRECTORY_SEPARATOR.'library'.DIRECTORY_SEPARATOR);
@@ -40,11 +41,12 @@ define('CB\\EXT_PATH', '/libx/ext');
 
 /* end of define main paths /**/
 
-/* update include_path and include global script */
+/* update include_path and include scripts */
 set_include_path(INCLUDE_PATH);
 
 include 'lib/global.php';
-/* end of update include_path and include global script */
+require_once 'lib/DB.php';
+/* end of update include_path and include scripts */
 
 //load main config so that we can connect to casebox db and read configuration for core
 $cfg = Config::loadConfigFile(DOC_ROOT.'config.ini');
@@ -58,10 +60,6 @@ define(
             : $cfg['prefix']
     ) . '_'
 );
-
-//conect to db using global params from config.ini
-require_once 'lib/DB.php';
-DB\connect($cfg);
 
 //analize python option
 if (empty($cfg['PYTHON'])) {
@@ -77,6 +75,9 @@ $cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
 $cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
 Cache::set('platformConfig', $cfg);
+
+//conect to db using global params from config.ini
+DB\connect($cfg);
 
 /* config functions section */
 
