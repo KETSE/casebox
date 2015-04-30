@@ -14,7 +14,7 @@ function initSolrConfig()
 {
     global $cfg;
 
-    echo "Specify solr configuration:\n";
+    echo "\nSpecify solr configuration:\n";
 
     $retry = true;
     do {
@@ -34,7 +34,7 @@ function initSolrConfig()
 
     } while ($retry);
 
-    $l = readALine('Specify solr configuration:' . "\n".'solr host (' . $cfg['solr_host'] . '): ');
+    $l = readALine('solr host (' . $cfg['solr_host'] . '): ');
     if (!empty($l)) {
         $cfg['solr_host'] = $l;
     }

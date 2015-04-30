@@ -5,6 +5,8 @@
  * Script params:
  *     -c, --core  - required, core name
  *     -s, --sql   - sql dump file
+ *
+ * Example: php -f core_create.php -- -c text_core_name -s /path/to/mysql/dump.sql
  */
 namespace CB;
 
@@ -113,15 +115,17 @@ if ($solr === false) {
     if (confirm('Solr core "' . $dbName . '" doesnt exist. Would you like to create it? (y/n): ')) {
         echo 'Creating solr core ... ';
 
-        $h = fopen(
+        if ($h = fopen(
             'http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=CREATE&' .
             'name=' . $dbName . '&configSet=cb_default',
             'r'
-        );
+        )) {
+            fclose($h);
 
-        fclose($h);
-
-        echo "Ok\n";
+            echo "Ok\n";
+        } else {
+            echo "Error creating core.\n";
+        }
     } else {
         $askReindex = false;
     }
@@ -136,3 +140,5 @@ if ($askReindex) {
         echo "Ok\n";
     }
 }
+
+echo "\Done.";

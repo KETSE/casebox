@@ -1,3 +1,7 @@
+CaseBox 1.9.428 (2015-04-30)
+==============================
+- #5480 Improve install.php script, move core installation to another script
+
 CaseBox 1.9.427 (2015-04-29)
 ==============================
 - #5480 Improve install.php script, move core installation to another script

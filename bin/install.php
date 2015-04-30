@@ -150,11 +150,16 @@ do {
 //creating solr symlinks
 $solrCSPath = $cfg['solr_home'] . 'configsets' . DIRECTORY_SEPARATOR;
 $CBCSPath = SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
+$r = true;
+if (file_exists($solrCSPath . 'cb_default')) {
+    $r = @symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_default');
+}
+if (file_exists($solrCSPath . 'cb_log')) {
+    $r = $r && @symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_log');
+}
 
-$r = @symlink($solrCSPath . 'cb_default', $CBCSPath . 'default_config' . DIRECTORY_SEPARATOR);
-$r = $r && @symlink($solrCSPath . 'cb_log', $CBCSPath . 'log_config' . DIRECTORY_SEPARATOR);
 if ($r) {
-    echo "Solr configsets symlinks created.\n\r";
+    echo "Solr configsets symlinks created sucessfully.\n\r";
 } else {
     echo "Error creating symlinks to solr configsets.\n\r";
 }
