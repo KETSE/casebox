@@ -1,3 +1,8 @@
+CaseBox 1.9.430 (2015-05-01)
+==============================
+- #5779 System folder not created after add one case
+- #5782 cannot set "order" for fields on template
+
 CaseBox 1.9.429 (2015-05-01)
 ==============================
 - #5752 Export doesn't work, issues with SOLR request

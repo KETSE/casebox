@@ -74,7 +74,7 @@ Ext.define('CB.VerticalEditGridHelperTree', {
                 value.childs = this.readChilds(node);
                 value = this.simplifyValue(value);
 
-                if(Ext.isEmpty(value) || isEmptyObject(value)) {
+                if(Ext.isEmpty(value) || (Ext.isObject(value) && isEmptyObject(value))) {
                 } else {
                     if(Ext.isEmpty(rez[fieldName])) {
                         rez[fieldName] = [];

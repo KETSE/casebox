@@ -48,6 +48,15 @@ class Listeners
             $p['sourceIds'][] = $r['id'];
         }
         $res->close();
-        $browserActionsClass->copy($p);
+
+        // $browserActionsClass->copy($p);
+
+        $browserActionsClass->objectsClass = new \CB\Objects();
+
+        $browserActionsClass->doRecursiveAction(
+            'copy',
+            $p['sourceIds'],
+            $p['targetId']
+        );
     }
 }
