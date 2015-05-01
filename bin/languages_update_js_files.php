@@ -51,13 +51,16 @@ while ($r = $res->fetch_assoc()) {
     $res2 = DB\dbQuery(
         'SELECT count(*) `count`
         FROM ' . $db . '.translations'
-    ) or die(DB\dbQueryError());
-    if ($r2 = $res2->fetch_assoc()) {
-        if ($r2['count'] > 0) {
-            $cores[$r['name']] = $db;
+    ); // dont exit if db doesnt have translations
+
+    if ($res2) {
+        if ($r2 = $res2->fetch_assoc()) {
+            if ($r2['count'] > 0) {
+                $cores[$r['name']] = $db;
+            }
         }
+        $res2->close();
     }
-    $res2->close();
 }
 $res->close();
 

@@ -349,7 +349,7 @@ Ext.define('CB.UsersGroupsTree', {
                     if( parent.getDepth() == 1 ){
                         text += ' <span class="cG">(id:' + n.data.nid + ')</span>';
                         if(n.data.enabled != 1){
-                            text += ' <span class="cG">' + L.inactive + '</span>';
+                            text += ' <span class="cG">' + L.Disabled + '</span>';
                         }
                         n.data.iconCls = 'icon-user-' + Ext.valueFrom(n.data.sex, '');
                     }
@@ -757,11 +757,21 @@ Ext.define('CB.UsersGroupsForm', {
                 ,disabled: true
                 ,handler: this.onDisableTSVClick
             })
+            ,enableUser: new Ext.Action({
+                text: L.EnableUser
+                ,scope: this
+                ,handler: this.onUserToggleEnableClick
+            })
+            ,disableUser: new Ext.Action({
+                text: L.DisableUser
+                ,scope: this
+                ,handler: this.onUserToggleEnableClick
+            })
         };
 
         this.userInfo = new Ext.DataView({
             tpl: ['<img class="fl user-photo-field click icon-user32-{sex}" src="/' + App.config.coreName + '/photo/{id}.png?32={[ CB.DB.usersStore.getPhotoParam(values.id) ]}">'
-                ,'<span class="fwB click">{title}</span><br />'
+                ,'<span class="fwB click">{title}</span>{[ (values.enabled != 1) ? \' - \' + L.Disabled : \'\' ]}<br />'
                 ,'<span class="cG">'+L.User+':</span> {name}, <span class="cG">'+L.lastAction+':</span> '
                   ,'{[ Ext.isEmpty(values.last_action_time) ? "" : values.last_action_time ]}<br />'
                 ,'<span class="cG">'+L.addedByUser+':</span> {owner}, {cdate}<br />'
@@ -818,6 +828,9 @@ Ext.define('CB.UsersGroupsForm', {
                         ,{text: L.ChangeUsername, iconCls: 'icon-pencil', handler: this.onEditUsernameClick, scope: this}
                         ,'-'
                         ,this.actions.disableTSV
+                        ,'-'
+                        ,this.actions.enableUser
+                        ,this.actions.disableUser
                     ]
                 }
             ]
@@ -966,19 +979,27 @@ Ext.define('CB.UsersGroupsForm', {
 
             this.grid.getStore().loadData(accessData, false);
 
-            this.canEditUserData = ((App.loginData.admin) || (response.data.cid == App.loginData.id) || (response.data.id == App.loginData.id));
-            var ttb = this.dockedItems.getAt(0);
-            eb = ttb.down('[iconCls="im-edit-obj"]');
+            this.canEditUserData = (
+                App.loginData.admin ||
+                (response.data.cid == App.loginData.id) ||
+                (response.data.id == App.loginData.id)
+            );
+            var ttb = this.dockedItems.getAt(0)
+                ,eb = ttb.down('[iconCls="im-edit-obj"]')
+                ,idx = ttb.items.indexOf(eb)
+                ,enabled = (response.data.enabled == 1);
             eb.setVisible(this.canEditUserData); // edit button
-            idx = ttb.items.indexOf(eb);
             ttb.items.getAt(idx -1).setVisible(this.canEditUserData);// divider for edit button
-            visible = (this.canEditUserData || (response.data.id == App.loginData.id));
+
+            var visible = (this.canEditUserData || (response.data.id == App.loginData.id));
             ttb.items.getAt(idx + 1).setVisible(visible); //divider for options button
             ttb.items.getAt(idx + 2).setVisible(visible); // options button
             this.updatePhoto(response.data.photo);
             this.setDisabled(false);
 
             this.actions.disableTSV.setDisabled(!this.canEditUserData || (response.data.tsv == 'none'));
+            this.actions.enableUser.setHidden(enabled);
+            this.actions.disableUser.setHidden(!enabled);
 
             this.fireEvent('loaded', this.data);
         }
@@ -1117,6 +1138,32 @@ Ext.define('CB.UsersGroupsForm', {
         }
         this.loadData(this.data.id);
     }
+
+    ,onUserToggleEnableClick: function(b, e) {
+        var enable = (b.baseAction == this.actions.enableUser);
+        CB_UsersGroups.setUserEnabled(
+            {
+                id: this.data.id
+                ,enabled: enable
+            }
+            ,this.processToggleUserEnable
+            ,this
+        );
+    }
+
+    ,processToggleUserEnable: function(r, e) {
+        if(r.success !== true) {
+            return;
+        }
+
+        this.actions.enableUser.setHidden(r.enabled);
+        this.actions.disableUser.setHidden(!r.enabled);
+
+        var d = Ext.apply(this.userInfo.data, {enabled: r.enabled});
+
+        this.userInfo.update(d);
+    }
+
 });
 // ----------------------------------------------------------- end of form
 
@@ -1286,7 +1333,11 @@ Ext.define('CB.UsersGroups', {
                     n.set(
                         'text'
                         ,Ext.valueFrom(n.data.title, n.data.name) +
-                        ' <span class="cG">(id:' + data.id + ')</span>'
+                            ' <span class="cG">(id:' + data.id + ')</span>' +
+                            ((data.enabled != 1)
+                                ? ' <span class="cG">' + L.Disabled + '</span>'
+                                : ''
+                            )
                     );
                 }
             }
@@ -1294,25 +1345,28 @@ Ext.define('CB.UsersGroups', {
         });
     }
     ,onEditUserData: function(){
-        if(!this.form.canEditUserData) return;
-        data = Ext.apply({}, this.form.data);
+        if(!this.form.canEditUserData) {
+            return;
+        }
+        var data = Ext.apply({}, this.form.data);
         data.id = data.id.split('-').pop();
-        var n = this.tree.getSelectionModel().getSelection()[0];
-        iconCls = n ? n.data.iconCls : 'icon-user';
-        w = new CB.UserEditWindow({
-            title: data.title
-            ,iconCls: iconCls
-            ,data: data
-            ,listeners: {
-                scope: this
-                ,savesuccess: function(){
-                    this.form.loadData();
+        var n = this.tree.getSelectionModel().getSelection()[0]
+            ,iconCls = n ? n.data.iconCls : 'icon-user'
+            ,w = new CB.UserEditWindow({
+                title: data.title
+                ,iconCls: iconCls
+                ,data: data
+                ,listeners: {
+                    scope: this
+                    ,savesuccess: function(){
+                        this.form.loadData();
+                    }
+                    ,verify: this.onVerifyEvent
                 }
-                ,verify: this.onVerifyEvent
-            }
-        });
+            });
         w.show();
     }
+
     ,onVerifyEvent: function(cmp) {
         this.destroy();
         Ext.Msg.alert(L.Info, 'User management session has expired. Please access it and authenticate again.');

@@ -1,5 +1,16 @@
 CaseBox 1.9.429 (2015-05-01)
 ==============================
+- #5752 Export doesn't work, issues with SOLR request
+- #5766 can't edit disabled users
+- #5472 User is disabled but still appears in form editors
+  Added option to enable / disable users under options menu in users management
+
+Fixed Bugs:
+----------
+- #5600 ERROR: Case search
+
+CaseBox 1.9.429 (2015-05-01)
+==============================
 - #5368 UI improvement for Comments
   adjustments according to last comments
 - #5311 Refactor server-side Task Management & Task UI

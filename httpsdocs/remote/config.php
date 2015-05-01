@@ -149,6 +149,7 @@ $API = array_merge(
                 ,'renameUser'           => array('len' => 1)
                 ,'renameGroup'          => array('len' => 1)
                 ,'disableTSV'           => array('len' => 1)
+                ,'setUserEnabled'       => array('len' => 1)
             )
         )
 

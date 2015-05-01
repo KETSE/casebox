@@ -147,7 +147,10 @@ class Security
     public function searchUserGroups($p)
     {
         /*{"editor":"form","source":"users","renderer":"listObjIcons","autoLoad":true,"multiValued":true,"maxInstances":1,"showIn":"grid","query":"test","objectId":"237","path":"/1"}*/
-        $rez = array('success' => true, 'data' => array());
+        $rez = array(
+            'success' => true
+            ,'data' => array()
+        );
 
         $where = array();
         $params = array();
@@ -168,9 +171,20 @@ class Security
             }
         }
 
+        $filterDisabled = '(enabled = 1)';
+
         if (!empty($p['query'])) {
             $where[] = 'searchField like $1';
             $params[] = ' %'.trim($p['query']).'% ';
+
+        } elseif (!empty($p['value'])) {
+            //if the id is in value we should show it
+            //even if disabled
+            $ids = Util\toNumericArray($p['value']);
+            if (!empty($ids)) {
+                $filterDisabled = '((' . $filterDisabled . ') OR id in (' . implode(',', $ids). '))';
+            }
+
         }
 
         if (!empty($p['ids'])) {
@@ -191,8 +205,9 @@ class Security
                 ,`type`
                 ,`sex`
             FROM users_groups
-            WHERE did IS NULL '.( empty($where) ? '' : ' AND '.implode(' AND ', $where) ).'
-            ORDER BY `type`, 2 LIMIT 100',
+            WHERE did IS NULL AND ' . $filterDisabled .
+            (empty($where) ? '' : ' AND '.implode(' AND ', $where)) .
+            ' ORDER BY `type`, 2 LIMIT 100',
             $params
         ) or die(DB\dbQueryError());
 
@@ -1594,7 +1609,6 @@ class Security
             FROM users_groups
             WHERE `type` = 2
                 AND did IS NULL
-                AND enabled = 1
             ORDER BY 2'
         ) or die(DB\dbQueryError());
 

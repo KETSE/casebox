@@ -796,6 +796,27 @@ class UsersGroups
     }
 
     /**
+     * Set user enabled or disabled
+     */
+    public function setUserEnabled($p)
+    {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
+        $userId = $this->extractId($p['id']);
+        $enabled = !empty($p['enabled']);
+
+        if (!Security::canEditUser($userId)) {
+            throw new \Exception(L\get('Access_denied'));
+        }
+
+        User::setEnabled($userId, $enabled);
+
+        return array('success' => true, 'enabled' => $enabled);
+    }
+
+    /**
      * Rename group
      */
     public function renameGroup($p)

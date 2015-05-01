@@ -1657,8 +1657,7 @@ class User
                 ,cfg
                 ,data
             FROM users_groups
-            WHERE enabled = 1
-                AND did IS NULL
+            WHERE did IS NULL
                 AND id = $1',
             $user_id
         ) or die(DB\dbQueryError());
@@ -1819,5 +1818,23 @@ class User
         $cfg = static::getUserConfig($userId);
         $cfg['security']['TSV'] = $TSVConfig;
         $cfg = static::setUserConfig($cfg, $userId);
+    }
+
+    /**
+     * set the user enabled or disabled
+     * @param int     $userId
+     * @param boolean $enabled
+     */
+    public static function setEnabled($userId, $enabled)
+    {
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET enabled = $2
+            WHERE id = $1',
+            array(
+                $userId
+                ,intval($enabled)
+            )
+        ) or die(DB\dbQueryError());
     }
 }

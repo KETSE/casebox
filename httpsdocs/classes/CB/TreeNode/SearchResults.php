@@ -34,7 +34,7 @@ class SearchResults extends Dbnode
 
         // creating search object
         $so = new \CB\Objects\Object();
-        if (!empty($requestParams['search']['data'])) {
+        if (!empty($requestParams['search']['template_id'])) {
             // searching from a search form
             $so->setData($requestParams['search']);
         } else {
@@ -232,7 +232,7 @@ class SearchResults extends Dbnode
             case 'text':
             case 'memo':
             case 'html':
-                $rez = $f.':'.$v;
+                $rez = $f.':"'.$v.'"';
 
                 /*cond = [
                     {id: 'contain', name: 'contain'}
