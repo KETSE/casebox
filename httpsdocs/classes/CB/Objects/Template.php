@@ -632,19 +632,14 @@ class Template extends Object
                     break;
 
                 case 'date':
-                    $value = Util\formatMysqlDate(
-                        $value,
-                        false,
-                        @$_SESSION['user']['cfg']['timezone']
-                    );
+                    $value = Util\formatMysqlDate($value);
                     break;
 
                 case 'datetime':
                     // $value = Util\formatMysqlTime($value);
                     $value = Util\formatMysqlDate(
                         $value,
-                        \CB\getOption('short_date_format'). ' ' . \CB\getOption('time_format'),
-                        @$_SESSION['user']['cfg']['timezone']
+                        \CB\getOption('short_date_format'). ' ' . \CB\getOption('time_format')
                     );
 
                     break;

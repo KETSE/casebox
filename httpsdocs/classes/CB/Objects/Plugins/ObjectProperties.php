@@ -70,11 +70,23 @@ class ObjectProperties extends Base
         $rez['data']['can'] = $obj->getActionFlags();
 
         //set status info for tasks if not active
-        if (($obj->getType() == 'task') && ($obj->getStatus() !== Objects\Task::$STATUS_ACTIVE)) {
+        if (($obj->getType() == 'task')) {
             $d = &$rez['data'];
-            $d['status'] = $obj->getStatusText();
-            $d['statusCls'] = $obj->getStatusCSSClass();
+            $d['status'] = '';
+            switch ($obj->getStatus()) {
+                case Objects\Task::$STATUS_ACTIVE:
+                    break;
 
+                case Objects\Task::$STATUS_CLOSED:
+                    //just add title css class and continue with default
+                    $d['titleCls'] = 'task-completed';
+                    // break;
+
+                default:
+                    $d['status'] = $obj->getStatusText();
+                    $d['statusCls'] = $obj->getStatusCSSClass();
+
+            }
         }
 
         return $rez;

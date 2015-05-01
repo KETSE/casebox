@@ -131,7 +131,7 @@ class Task extends Object
             $sd['task_u_done'] = array();
 
             $res = DB\dbQuery(
-                'SELECT user_id, `status`
+                'SELECT user_id, `status`, `time`
                 FROM tasks_responsible_users
                 WHERE task_id = $1',
                 $d['id']
@@ -140,6 +140,7 @@ class Task extends Object
             while ($r = $res->fetch_assoc()) {
                 if ($r['status'] == 1) {
                     $sd['task_u_done'][] = $r['user_id'];
+                    $sd['task_u_d_closed'][$r['user_id']] = $r['time'];
                 } else {
                     $sd['task_u_ongoing'][] = $r['user_id'];
                 }
@@ -398,6 +399,7 @@ class Task extends Object
                 if (in_array($userId, $sd['task_u_done'])) {
                     $sd['task_u_done'] = array_diff($sd['task_u_done'], array($userId));
                     $sd['task_u_ongoing'][] = $userId;
+                    unset($sd['task_u_d_closed'][$userId]);
                     $rez = true;
                 }
                 break;
@@ -406,6 +408,7 @@ class Task extends Object
                 if (in_array($userId, $sd['task_u_ongoing'])) {
                     $sd['task_u_ongoing'] = array_diff($sd['task_u_ongoing'], array($userId));
                     $sd['task_u_done'][] = $userId;
+                    $sd['task_u_d_closed'][$userId] = date(DATE_ISO8601);
                     $rez = true;
                 }
                 break;
@@ -498,7 +501,7 @@ class Task extends Object
         $template = $this->getTemplate();
 
         $actionsLine = 'Actions<hr />';
-        $dateLine = '';
+        $dateLines = '';
         $ownerRow = '';
         $assigneeRow = '';
         $contentRow = '';
@@ -508,14 +511,16 @@ class Task extends Object
 
         $actions = array();
 
+        if (!empty($flags['complete'])) {
+            $actions[] = '<a action="complete" class="task-action ib-done">'.L\get('Complete').'</a>';
+        }
+
         if (!empty($flags['close'])) {
             $actions[] = '<a action="close" class="task-action ib-done-all">'.L\get('Close').'</a>';
         }
+
         if (!empty($flags['reopen'])) {
             $actions[] = '<a action="reopen" class="task-action ib-repeat">'.L\get('Reopen').'</a>';
-        }
-        if (!empty($flags['complete'])) { //empty($flags['close']) &&
-            $actions[] = '<a action="complete" class="task-action ib-done">'.L\get('Complete').'</a>';
         }
 
         $actionsLine = '<div class="task-actions">' . implode(' ', $actions) . '</div>';
@@ -525,15 +530,17 @@ class Task extends Object
         $status = $this->getStatus();
 
         if (!empty($ed)) {
-            $endDate = empty($sd['task_allday'])
-                ? Util\formatDateTimePeriod($ed, null, @$_SESSION['user']['cfg']['timezone'])
-                : Util\formatDatePeriod($ed, null, @$_SESSION['user']['cfg']['timezone']);
+            $endDate = Util\formatTaskTime($ed, !$sd['task_allday']);
+            // $endDate = empty($sd['task_allday'])
+            //     ? Util\formatDateTimePeriod($ed, null, @$_SESSION['user']['cfg']['timezone'])
+            //     : Util\formatDatePeriod($ed, null, @$_SESSION['user']['cfg']['timezone']);
 
-            $dateLine .= '<div class="date">' . $endDate . '</div>';
+            $dateLines = '<tr><td class="prop-key">'.L\get('Due').':</td><td>' . $endDate . '</td></tr>';
+            // $dateLine .= '<div class="date">' . $endDate . '</div>';
         }
 
-        if (!empty($dateLine)) {
-            $dateLine = '<div class="task-date-status">' . $dateLine . '</div>';
+        if (!empty($sd['task_d_closed'])) {
+            $dateLines .= '<tr><td class="prop-key">'.L\get('Completed').':</td><td>' . Util\formatAgoTime($sd['task_d_closed']) . '</td></tr>';
         }
 
         //create owner row
@@ -561,19 +568,28 @@ class Task extends Object
             $assigneeRow .= '<tr><td class="prop-key">'.L\get('TaskAssigned').':</td><td><table class="prop-val people"><tbody>';
             $v = Util\toNumericArray($v['value']);
 
+            $dateFormat = \CB\getOption('long_date_format') . ' H:i:s';
+
             foreach ($v as $id) {
                 $un = User::getDisplayName($id);
                 $completed = ($this->getUserStatus($id) == static::$USERSTATUS_DONE);
                 $flags = $this->getActionFlags($id);
+                $cdt = ''; //completed date title
+                $dateText = '';
+
+                if ($completed && !empty($sd['task_u_d_closed'][$id])) {
+                    $cdt = Util\formatMysqlDate($sd['task_u_d_closed'][$id], $dateFormat);
+                    $dateText = ': ' . Util\formatAgoTime($sd['task_u_d_closed'][$id]);
+                }
 
                 $assigneeRow .= '<tr><td class="user"><div style="position: relative">'.
                     '<img class="photo32" src="photo/'.$id.'.jpg?32=' . User::getPhotoParam($id).
                     '" style="width:32px; height: 32px" alt="'.$un.'" title="'.$un.'">'.
                 ($completed ? '<img class="done icon icon-tick-circle" src="/css/i/s.gif" />': "").
                 '</div></td><td><b>'.$un.'</b>'.
-                '<p class="gr">'.(
+                '<p class="gr" title="' . $cdt . '">'.(
                     $completed
-                    ? L\get('Completed'). //.': '.date($date_format.' H:i', strtotime($u['time']))
+                    ? L\get('Completed'). $dateText .
                         ($isOwner ? ' <a class="bt task-action click" action="markincomplete" uid="'.$id.'">'.L\get('revoke').'</a>' : '')
                     : L\get('waitingForAction').
                         ($isOwner ? ' <a class="bt task-action click" action="markcomplete" uid="'.$id.'">'.L\get('complete').'</a>' : '' )
@@ -592,20 +608,22 @@ class Task extends Object
         }
 
         //insert rows
-        $pos = strrpos($pb[0], '</table>');
-        if ($pos === false) {
-            $pb[0] = '<table class="obj-preview">';
-        } else {
-            $pb[0] = substr($pb[0], 0, $pos);
+        $p = $pb[0];
+        $pos = strrpos($p, '<tbody>');
+        $p = substr($p, $pos + 7);
+        $pos = strrpos($p, '</tbody>');
+        if ($pos !== false) {
+            $p = substr($p, 0, $pos);
         }
 
         $pb[0] = $actionsLine .
-            $dateLine .
-            $pb[0] .
+            '<table class="obj-preview"><tbody>' .
+            $dateLines .
+            $p .
             $ownerRow .
             $assigneeRow .
             $contentRow .
-            '</table>';
+            '<tbody></table>';
 
         return $pb;
     }

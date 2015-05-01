@@ -1,3 +1,11 @@
+CaseBox 1.9.429 (2015-05-01)
+==============================
+- #5368 UI improvement for Comments
+  adjustments according to last comments
+- #5311 Refactor server-side Task Management & Task UI
+  adjustments according to last comments
+- Removed usage of mysql date formats, php date formats will be used only
+
 CaseBox 1.9.428 (2015-04-30)
 ==============================
 - #5480 Improve install.php script, move core installation to another script

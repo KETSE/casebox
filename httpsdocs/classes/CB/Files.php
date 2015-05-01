@@ -24,23 +24,14 @@ class Files
         $d = &$rez['data'];
         $d['path'] = str_replace(',', '/', $d['path']);
         $a = explode('.', $d['name']);
-        $d['ago_date'] = date(
-            str_replace(
-                '%',
-                '',
-                $_SESSION['user']['cfg']['long_date_format']
-            ),
-            strtotime($d['cdate'])
-        ).
-        ' '.L\get('at').' '.
-        date(
-            str_replace(
-                '%',
-                '',
-                $_SESSION['user']['cfg']['time_format']
-            ),
-            strtotime($d['cdate'])
-        );
+
+        $t = strtotime($d['cdate']);
+        $dateFormat = getOption('long_date_format');
+        $timeFormat = getOption('time_format');
+
+        $d['ago_date'] = date($dateFormat, $t)
+            . ' ' . L\get('at') . ' ' .
+            date($timeFormat, $t);
 
         $d['ago_date'] = Util\translateMonths($d['ago_date']);
         $d['ago_text'] = Util\formatAgoTime($d['cdate']);
@@ -48,22 +39,10 @@ class Files
         if (!empty($d['versions'])) {
             foreach ($d['versions'] as &$r) {
                 $r['template_id'] = $rez['data']['template_id'];
-                $r['ago_date'] = date(
-                    str_replace(
-                        '%',
-                        '',
-                        $_SESSION['user']['cfg']['long_date_format']
-                    ),
-                    strtotime($r['cdate'])
-                ).' '.L\get('at').' '.
-                date(
-                    str_replace(
-                        '%',
-                        '',
-                        $_SESSION['user']['cfg']['time_format']
-                    ),
-                    strtotime($r['cdate'])
-                );
+                $t = strtotime($r['cdate']);
+                $r['ago_date'] = date($dateFormat, $t)
+                    . ' ' . L\get('at') . ' ' .
+                    date($timeFormat, $t);
 
                 $r['ago_date'] = Util\translateMonths($r['ago_date']);
                 $r['ago_text'] = Util\formatAgoTime($r['cdate']);

@@ -1,7 +1,7 @@
 <?php
 namespace CB\Util;
 
-use CB\L as L;
+use CB\L;
 
 function getIP()
 {
@@ -225,23 +225,53 @@ function translateMonths($dateString)
     return $dateString;
 }
 
-function formatTaskTime($mysqlTime)
+/**
+ * Method used to format Tasks due time
+ *
+ * @param  varchar $isoDateString ISO date string
+ * @param  boolean $showTime
+ * @return varchar
+ */
+function formatTaskTime($isoDateString, $showTime = true)
 {
-    $time = strtotime($mysqlTime);
-
-    $time__ = date('j n Y', $time);
-    $today = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
-
-    if ($time == $today) {
-        return '<span class="cM fwB">'.L\get('today').'</span>';
-    } elseif ($today - $time > 3600 * 24 * 2) return translateMonths(date('j M Y', $time));
-    elseif ($today - $time > 3600 * 24) return L\get('beforeYesterday');
-    elseif ($today - $time > 0) return L\get('yesterday');
-    elseif ($time - $today < 3600 * 24 * 2) return '<span class="cM fwB">'.L\get('tomorow').'</span>';
-    elseif ($time - $today < 3600 * 24 * 6) return '<span class="cM fwB">'.(($time - $today) / (3600 * 24) ).' '.L\get('ofDays').'</span>';
-    else{
-        return translateMonths(date('j M Y', $time));
+    $rez = '';
+    if (empty($isoDateString)) {
+        return $rez;
     }
+
+    $tz = new \DateTimeZone(\CB\User::getTimezone());
+
+    $dt = new \DateTime($isoDateString);
+    $ct = new \DateTime('now');
+
+    $dt->setTimezone($tz);
+    $ct->setTimezone($tz);
+
+    $diff = $dt->diff($ct);
+
+    //display date for intervals bigger than 6 days
+    if (($dt < $ct) || ($diff->days > 6)) {
+        $format = \CB\getOption('short_date_format');
+
+        $rez = $dt->format($format);
+    } else {
+        //there could be situation when date difference interval
+        //doesnt cover a full day although dates are in different days
+        $dayDelta = ($dt->format('d') == $ct->format('d')) ? 0 : 1;
+        $days = $diff->d + $dayDelta;
+
+        if ($days > 1) {
+            $rez = translateDays($dt->format('l'));
+        } else {
+            $rez = formatLeftDays($days);
+        }
+    }
+
+    if ($showTime) {
+        $rez .= ' ' . L\get('at') . $dt->format(' H:i');
+    }
+
+    return $rez;
 }
 
 /**
@@ -282,12 +312,13 @@ function formatDatePeriod($fromDateTime, $toDateTime)
  */
 function UTCTimeToUserTimezone($dateTime)
 {
-    if (empty($dateTime) || empty($_SESSION['user']['cfg']['timezone'])) {
+    $tz = \CB\User::getTimezone();
+    if (empty($dateTime) || empty($tz)) {
         return $dateTime;
     }
 
     $d = new \DateTime($dateTime);
-    $d->setTimezone(new \DateTimeZone($_SESSION['user']['cfg']['timezone']));
+    $d->setTimezone(new \DateTimeZone($tz));
 
     return $d->format('Y-m-d H:i:s');
 }
@@ -299,12 +330,12 @@ function UTCTimeToUserTimezone($dateTime)
  */
 function userTimeToUTCTimezone($dateTime)
 {
-    if (empty($dateTime) || empty($_SESSION['user']['cfg']['timezone'])) {
+    $tz = \CB\User::getTimezone();
+    if (empty($dateTime) || empty($tz)) {
         return $dateTime;
     }
 
-    $tz = new \DateTimeZone($_SESSION['user']['cfg']['timezone']);
-    $d = new \DateTime(dateISOToMysql($dateTime), $tz);
+    $d = new \DateTime(dateISOToMysql($dateTime), new \DateTimeZone($tz));
     $d->setTimezone(new  \DateTimeZone('UTC'));
 
     return $d->format('Y-m-d H:i:s');
@@ -317,13 +348,13 @@ function userTimeToUTCTimezone($dateTime)
  * @param  string $TZ           timezone
  * @return varchar               formated period
  */
-function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
+function formatDateTimePeriod($fromDateTime, $toDateTime, $tz = 'UTC')
 {
     $d1 = new \DateTime($fromDateTime);
-    if (empty($TZ)) {
-        $TZ = 'UTC';
+    if (empty($tz)) {
+        $tz = 'UTC';
     }
-    $d1->setTimezone(new \DateTimeZone($TZ));
+    $d1->setTimezone(new \DateTimeZone($tz));
 
     $rez = $d1->format('D M j, Y');
     $hourText = $d1->format('H:i');
@@ -334,7 +365,7 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
         return $rez;
     }
     $d2 = new \DateTime($toDateTime);
-    $d2->setTimezone(new \DateTimeZone($TZ));
+    $d2->setTimezone(new \DateTimeZone($tz));
 
     $d2format = '';
     if ($d1->format('Y') != $d2->format('Y')) {
@@ -373,23 +404,28 @@ function formatLeftDays($days_difference)
     return '';
 }
 
-function formatMysqlDate($date, $format = false, $TZ = 'UTC')
+function formatMysqlDate($date, $format = false, $tz = false)
 {
     if (empty($date)) {
         return '';
     }
-    if (empty($TZ)) {
-        $TZ = 'UTC';
+    if ($tz === false) {
+        $tz = \CB\User::getTimezone();
     }
+
+    if (empty($tz)) {
+        $tz = 'UTC';
+    }
+
     if ($format == false) {
         $format = \CB\getOption('short_date_format');
     }
 
     $d1 = new \DateTime($date);
 
-    $d1->setTimezone(new \DateTimeZone($TZ));
+    $d1->setTimezone(new \DateTimeZone($tz));
 
-    $rez = $d1->format(str_replace('%', '', $format));
+    $rez = $d1->format($format);
 
     return $rez;
 }
@@ -412,11 +448,7 @@ function clientToMysqlDate($date)
         return null;
     }
     $d = date_parse_from_format(
-        str_replace(
-            '%',
-            '',
-            \CB\getOption('short_date_format')
-        ),
+        \CB\getOption('short_date_format'),
         $date
     );
 

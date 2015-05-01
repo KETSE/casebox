@@ -531,8 +531,8 @@ class Config extends Singleton
 
         if (empty($instance->defaultGridColumnConfigs)) {
             $userConfig = &$_SESSION['user']['cfg'];
-            $dateFormat = str_replace('%', '', $userConfig['short_date_format']);
-            $dateTimeFormat = str_replace('%', '', $dateFormat . ' ' . $userConfig['time_format']);
+            $dateFormat = $userConfig['short_date_format'];
+            $dateTimeFormat = $dateFormat . ' ' . $userConfig['time_format'];
 
             $instance->defaultGridColumnConfigs = array(
                 'nid' => array(
@@ -728,6 +728,15 @@ class Config extends Singleton
         foreach ($jsonProperties as $property) {
             if (!empty($cfg[$property])) {
                 $cfg[$property] = Util\toJSONArray($cfg[$property]);
+            }
+        }
+
+        //change date formats from mysql to php
+        if (!empty($cfg['language_settings'])) {
+            foreach ($cfg['language_settings'] as $k => &$v) {
+                $v['long_date_format'] = str_replace('%', '', $v['long_date_format']);
+                $v['short_date_format'] = str_replace('%', '', $v['short_date_format']);
+                $v['time_format'] = str_replace('%', '', $v['time_format']);
             }
         }
 

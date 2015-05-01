@@ -19,21 +19,9 @@ Ext.define('CB.object.plugin.Comments', {
                 ,scope: this
                 ,handler: this.onRemoveClick
             })
-
-            // ,attachFile: new Ext.Action({
-            //     qtip: L.AttachFile
-            //     ,iconCls: 'i-attach'
-            //     ,buttonOnly: true
-            //     ,scope: this
-            //     ,handler: this.onAttachFileClick
-            // })
         };
 
         var tpl = new Ext.XTemplate(
-            // <div>
-            //     View 12 more comments
-            // </div>
-
             '<table class="block-plugin" style="margin:0">'
             ,'<div class="load-more click">' + L.ViewMore + '</div>'
             ,'<tpl for=".">'
@@ -357,14 +345,21 @@ Ext.define('CB.object.plugin.Comments', {
             return;
         }
 
-        var store = fu.store
+        var t = ''
+            ,store = fu.store
             ,stats = fu.getStatsForPid(this.draftCommentId);
 
         if(stats.pending > 0) {
-            label.setValue(stats.pending + ' / ' + stats.total);
+            t = Ext.String.uncapitalize(L.Uploading) + ' <span style="color: #555">' +
+                Ext.String.repeat('●', stats.total - stats.pending) +
+                Ext.String.repeat('○', stats.pending) +
+                '</span>';
+
+            label.setValue(t);
         } else {
             if(stats.total > 0) {
-                label.setValue(stats.total);
+                t = stats.total + ' ' + Ext.String.uncapitalize(L.Files);
+                label.setValue(t);
             } else {
                 label.setValue('');
             }

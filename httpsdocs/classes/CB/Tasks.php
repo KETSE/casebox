@@ -214,9 +214,9 @@ class Tasks
 
             $datetime_period = ($sd['task_allday'] == 1)
                 ? Util\formatDatePeriod($d['cdate'], $ed)
-                : Util\formatDateTimePeriod($r['cdate'], $ed, @$user['cfg']['timezone']);
+                : Util\formatDateTimePeriod($d['cdate'], $ed, @$user['cfg']['timezone']);
 
-            $created_date_text = Util\formatMysqlDate($d['cdate'], 'Y, F j H:i', @$user['cfg']['timezone']);
+            $created_date_text = Util\formatMysqlDate($d['cdate'], 'Y, F j H:i');
 
             $tickImage = 'data:image/png;base64,'.base64_encode(file_get_contents(DOC_ROOT . 'css/i/ico/tick-circle.png'));
 

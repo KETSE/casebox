@@ -464,18 +464,20 @@ class UsersGroups
                 ,email
                 ,enabled
                 ,data
-                ,date_format(last_action_time,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') last_action_time
-                ,date_format(cdate,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') `cdate`
-                ,(SELECT COALESCE(TRIM(CONCAT(first_name, \' \', last_name)), name)
-                    FROM users_groups
-                    WHERE id = u.cid) `owner`
+                ,last_action_time
+                ,cdate
+                ,cid
             FROM users_groups u
-            WHERE id = $1 ',
+            WHERE id = $1',
             $user_id
         ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $r['title'] = User::getDisplayName($r);
             $r['data'] = Util\toJSONArray($r['data']);
+            $r['last_action_time'] = Util\formatMysqlTime($r['last_action_time']);
+            $r['cdate'] = Util\formatMysqlTime($r['cdate']);
+            $r['owner'] = User::getDisplayName($r['cid']);
 
             $rez = array('success' => true, 'data' => $r);
         }

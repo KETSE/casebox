@@ -325,9 +325,9 @@ class User
         $rez['config']['webdav_url'] = str_replace('{core_name}', $coreName, $webdavUrl);
         $rez['config']['files.edit'] = $filesEdit;
 
-        $rez['user']['cfg']['short_date_format'] = str_replace('%', '', $rez['user']['cfg']['short_date_format']);
-        $rez['user']['cfg']['long_date_format'] = str_replace('%', '', $rez['user']['cfg']['long_date_format']);
-        $rez['user']['cfg']['time_format'] = str_replace('%', '', $rez['user']['cfg']['time_format']);
+        $rez['user']['cfg']['short_date_format'] = $rez['user']['cfg']['short_date_format'];
+        $rez['user']['cfg']['long_date_format'] = $rez['user']['cfg']['long_date_format'];
+        $rez['user']['cfg']['time_format'] = $rez['user']['cfg']['time_format'];
 
         /* default root node config */
         $root = Config::get('rootNode');
@@ -560,7 +560,7 @@ class User
                 FILTER_VALIDATE_REGEXP,
                 array(
                     'options' => array(
-                        'regexp' => '/^[\.,%a-z \/\-]*$/i'
+                        'regexp' => '/^[\.,a-z \/\-]*$/i'
                     )
                 )
             )) {
@@ -577,13 +577,16 @@ class User
                 FILTER_VALIDATE_REGEXP,
                 array(
                     'options' => array(
-                        'regexp' => '/^[\.,%a-z \/\-]*$/i'
+                        'regexp' => '/^[\.,a-z \/\-]*$/i'
                     )
                 )
             )) {
                 $cfg['long_date_format'] = $p['long_date_format'];
             } else {
-                return array('success' => false, 'msg' => 'Invalid long date format');
+                return array(
+                    'success' => false
+                    ,'msg' => 'Invalid long date format'
+                );
             }
         }
 
@@ -1678,10 +1681,18 @@ class User
             if (empty($r['cfg']['long_date_format'])) {
                 $r['cfg']['long_date_format'] = $languageSettings[$r['language']]['long_date_format'];
             }
+
             if (empty($r['cfg']['short_date_format'])) {
                 $r['cfg']['short_date_format'] = $languageSettings[$r['language']]['short_date_format'];
             }
+
             $r['cfg']['time_format'] = $languageSettings[$r['language']]['time_format'];
+
+            //Date formats are sotred in Php format (not mysql)
+            //for backward compatibility we remove all % chars
+            $r['cfg']['long_date_format'] = str_replace('%', '', $r['cfg']['long_date_format']);
+            $r['cfg']['short_date_format'] = str_replace('%', '', $r['cfg']['short_date_format']);
+            $r['cfg']['time_format'] = str_replace('%', '', $r['cfg']['time_format']);
 
             //check for backward compatibility
             if (!empty($r['cfg']['TZ'])) {

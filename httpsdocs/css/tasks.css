@@ -93,7 +93,7 @@ ul.reminders li:hover span, ul.task_files li:hover .actions {display: inline-blo
 
 .task-actions {
     padding: 10px;
-    border-bottom: 1px solid #8b8b8b;
+    /*border-bottom: 1px solid #ddd;*/
 }
 
 .task-actions a{

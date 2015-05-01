@@ -1533,7 +1533,7 @@ class Object
         $top .= $body;
 
         if (!empty($top)) {
-            $top = '<table class="obj-preview">'.$top.'</table><br />';
+            $top = '<table class="obj-preview"><tbody>'.$top.'</tbody></table><br />';
         }
 
         $rez = array($top, $bottom);
