@@ -68,7 +68,7 @@ $cores = array();
 $res = DB\dbQuery(
     'SELECT name, active
     FROM ' . PREFIX . '_casebox.cores
-    WHERE active <> 0'
+    WHERE active = 1'
 ) or die(DB\dbQueryError());
 
 while ($r = $res->fetch_assoc()) {

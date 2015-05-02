@@ -1721,7 +1721,8 @@ class User
     {
         $rez = 'UTC';
 
-        $pref = $_SESSION['user'];
+        $pref = @$_SESSION['user'];
+
         if ($userId !== false) {
             $pref = User::getPreferences($userId);
         }

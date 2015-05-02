@@ -57,8 +57,8 @@ class TemplateField extends Object
                 $field = $this->template->getField($fieldName);
             }
 
-            if (isset($p[$fieldName])) {
-                $value = $p[$fieldName];
+            if (isset($p['data'][$fieldName])) {
+                $value = $p['data'][$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -67,8 +67,8 @@ class TemplateField extends Object
                 $saveValues[] = $value;
                 $params[] = $i;
                 $i++;
-            } elseif (isset($p['data'][$fieldName])) {
-                $value = $p['data'][$fieldName];
+            } elseif (isset($p[$fieldName])) {
+                $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);

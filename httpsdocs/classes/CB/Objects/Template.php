@@ -240,8 +240,8 @@ class Template extends Object
             if (!empty($this->template)) {
                 $field = $this->template->getField($fieldName);
             }
-            if (isset($p[$fieldName]) && ($fieldName !== 'id')) {
-                $value = $p[$fieldName];
+            if (!empty($field)) {
+                $value = @$this->getFieldValue($fieldName, 0)['value'];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -250,8 +250,8 @@ class Template extends Object
                 $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
-            } elseif (!empty($field)) {
-                $value = @$this->getFieldValue($fieldName, 0)['value'];
+            } elseif (isset($p[$fieldName]) && ($fieldName !== 'id')) {
+                $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
