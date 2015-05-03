@@ -407,16 +407,16 @@ Ext.define('CB.browser.ViewContainer', {
                     ,showObjectPropertiesPanel: true
                     ,getProperty: getPropertyHandler
                 })
-                ,new CB.browser.view.Calendar({
-                    border: false
-                    ,refOwner: this
-                    ,store: this.store
-                    ,getProperty: getPropertyHandler
-                    ,listeners: {
-                        scope: this
-                        ,openobject: this.onObjectsOpenEvent
-                    }
-                })
+                // ,new CB.browser.view.Calendar({
+                //     border: false
+                //     ,refOwner: this
+                //     ,store: this.store
+                //     ,getProperty: getPropertyHandler
+                //     ,listeners: {
+                //         scope: this
+                //         ,openobject: this.onObjectsOpenEvent
+                //     }
+                // })
                 ,new CB.browser.view.Charts({
                     border: false
                     ,refOwner: this

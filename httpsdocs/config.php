@@ -41,10 +41,12 @@ DB\connectWithParams($cfg);
 require_once 'lib/Util.php';
 $config = Config::load($cfg);
 
-if ((@$config['core_active'] != 1) && //not active
-    ((@$config['core_active'] != -1) || !isset($_SERVER['argc'])) //is apache request
-) {
-    die('Core is not active at te moment, please try again later.');
+//analize core status and display corresponding message if not active
+$status = Config::getCoreStatus();
+
+if ($status != Config::$CORESTATUS_ACTIVE) {
+    echo Config::getCoreStatusMessage($status);
+    exit();
 }
 
 //connect other database if specified in config for core

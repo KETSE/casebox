@@ -369,6 +369,8 @@ Ext.define('CB.object.field.editor.Form', {
     ,getSearchParams: function(){
         result = Ext.apply({}, this.cfg);
         result.query = this.triggerField.getValue();
+        result.value = this.getValue();
+
         if(!Ext.isEmpty(this.data.objectId)) {
             result.objectId = this.data.objectId;
         }

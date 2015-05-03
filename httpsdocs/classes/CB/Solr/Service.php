@@ -110,6 +110,25 @@ class Service
         return $this->connect();
     }
 
+    /**
+     * verify if can connect to solr with given config
+     * @param  array   $cfg (host, port, core, SOLR_CLIENT optional)
+     * @return boolean
+     */
+    public static function verifyConfigConnection($cfg)
+    {
+        $rez = false;
+
+        try {
+            $rez = new Client($cfg);
+
+        } catch (\Exception $e) {
+            $rez = false;
+        }
+
+        return $rez;
+    }
+
     protected function fireEvent($eventName, &$params)
     {
         if ($this->fireEvents) {

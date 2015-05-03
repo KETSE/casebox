@@ -59,7 +59,7 @@
 
 <!-- dummy fields for search class consistency, just to search avoid errors -->
 <field name="ntsc"          type="tint"     indexed="true" stored="true" />
-<field name="sort_name"     type="text_general_sort" indexed="true" stored="true" />
+<field name="sort_name"     type="text_general" indexed="true" />
 <field name="order"         type="tint" indexed="true" stored="true" />
 <field name="dstatus"   type="tint"     indexed="true" stored="true" required="true" />
 <field name="system"    type="tint"         indexed="true" stored="true" />

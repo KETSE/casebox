@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+		 http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+
+<config>
+
+    <!-- Controls what version of Lucene various components of Solr
+         adhere to.  Generally, you want to use the latest version to
+         get all bug fixes and improvements. It is highly recommended
+         that you fully re-index after changing this setting as it can
+         affect both how text is indexed and queried.
+    -->
+    <luceneMatchVersion>5.1.0</luceneMatchVersion>
+
+    <!-- Enable ICUCollationField -->
+    <lib dir="${solr.install.dir:../../../..}/contrib/analysis-extras/lib/" regex="icu.*\.jar" />
+    <lib dir="${solr.install.dir:../../../..}/contrib/analysis-extras/lucene-libs/" regex="lucene-analyzers-icu.*\.jar" />
+    <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-analysis-.*\.jar" />
+
+	<dataDir>${solr.data.dir:}</dataDir>
+
+    <directoryFactory name="DirectoryFactory"
+                      class="${solr.directoryFactory:solr.NRTCachingDirectoryFactory}">
+    </directoryFactory>
+
+
+	<indexConfig>
+		<lockType>${solr.lock.type:native}</lockType>
+		<!-- To aid in advanced debugging, Lucene provides an "InfoStream" -->
+		<infoStream>true</infoStream>
+    </indexConfig>
+
+
+
+    <!-- The default high-performance update handler -->
+    <updateHandler class="solr.DirectUpdateHandler2">
+
+    <!-- Enables a transaction log, used for real-time get, durability, and
+         and solr cloud replica recovery.  The log can grow as big as
+         uncommitted changes to the index, so use of a hard autoCommit
+         is recommended (see below).
+         "dir" - the target directory for transaction logs, defaults to the
+                solr data directory.  -->
+	    <updateLog>
+	      <str name="dir">${solr.ulog.dir:}</str>
+	    </updateLog>
+	</updateHandler>
+
+
+	<!-- TODO: real usage will show if it should be enabled -->
+	<unlockOnStartup>false</unlockOnStartup>
+
+
+
+	<query>
+	    <filterCache class="solr.FastLRUCache"
+	                 size="512"
+	                 initialSize="512"
+	                 autowarmCount="0"/>
+
+	    <queryResultCache class="solr.LRUCache"
+	                      size="512"
+	                      initialSize="512"
+	                      autowarmCount="0"/>
+
+	    <documentCache class="solr.LRUCache"
+	                   size="512"
+	                   initialSize="512"
+	                   autowarmCount="0"/>
+
+
+	    <!-- Lazy Field Loading
+
+	         If true, stored fields that are not requested will be loaded
+	         lazily.  This can result in a significant speed improvement
+	         if the usual case is to not load all stored fields,
+	         especially if the skipped fields are large compressed text
+	         fields.
+	    -->
+		<enableLazyFieldLoading>true</enableLazyFieldLoading>
+
+	    <!-- Maximum number of documents to cache for any entry in the
+	         queryResultCache.
+	      -->
+	    <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+	</query>
+
+
+
+
+	<requestDispatcher handleSelect="true" >
+		<requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
+	</requestDispatcher>
+
+
+	<requestHandler name="standard" class="solr.StandardRequestHandler" default="true" />
+	<requestHandler name="/update" class="solr.UpdateRequestHandler" />
+	<requestHandler name="/update/json" class="solr.UpdateRequestHandler"/>
+
+	<!-- ping/healthcheck -->
+	<requestHandler name="/admin/ping" class="PingRequestHandler">
+		<lst name="defaults">
+			<str name="qt">standard</str>
+			<str name="q">solrpingquery</str>
+			<str name="echoParams">all</str>
+		</lst>
+	</requestHandler>
+
+	<!-- config for the admin interface -->
+	<admin>
+		<defaultQuery>*:*</defaultQuery>
+	</admin>
+
+</config>
+

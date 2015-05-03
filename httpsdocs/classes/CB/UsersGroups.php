@@ -270,6 +270,12 @@ class UsersGroups
             }
         }
 
+        //check if user with such email doesn exist
+        $user_id = User::getIdByEmail($p['email']);
+        if (!empty($user_id)) {
+            throw new \Exception(L\get('UserEmailExists'));
+        }
+
         $user_id = 0;
         /*check user existance, if user already exists but is deleted
         then its record will be used for new user */
@@ -320,7 +326,13 @@ class UsersGroups
                 ,cdate = CURRENT_TIMESTAMP
                 ,did = NULL
                 ,ddate = NULL
+                ,`password` = NULL
+                ,`password_change` = NULL
+                ,`recover_hash` = NULL
                 ,language_id = $5
+                ,`cfg` = NULL
+                ,`data` = NULL
+                ,email = $6
                 ,uid = $4
                 ,cdate = CURRENT_TIMESTAMP',
             array(
@@ -452,18 +464,20 @@ class UsersGroups
                 ,email
                 ,enabled
                 ,data
-                ,date_format(last_action_time,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') last_action_time
-                ,date_format(cdate,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') `cdate`
-                ,(SELECT COALESCE(TRIM(CONCAT(first_name, \' \', last_name)), name)
-                    FROM users_groups
-                    WHERE id = u.cid) `owner`
+                ,last_action_time
+                ,cdate
+                ,cid
             FROM users_groups u
-            WHERE id = $1 ',
+            WHERE id = $1',
             $user_id
         ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $r['title'] = User::getDisplayName($r);
             $r['data'] = Util\toJSONArray($r['data']);
+            $r['last_action_time'] = Util\formatMysqlTime($r['last_action_time']);
+            $r['cdate'] = Util\formatMysqlTime($r['cdate']);
+            $r['owner'] = User::getDisplayName($r['cid']);
 
             $rez = array('success' => true, 'data' => $r);
         }
@@ -779,6 +793,27 @@ class UsersGroups
         ) or die(DB\dbQueryError());
 
         return array('success' => true, 'name' => $name);
+    }
+
+    /**
+     * Set user enabled or disabled
+     */
+    public function setUserEnabled($p)
+    {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
+        $userId = $this->extractId($p['id']);
+        $enabled = !empty($p['enabled']);
+
+        if (!Security::canEditUser($userId)) {
+            throw new \Exception(L\get('Access_denied'));
+        }
+
+        User::setEnabled($userId, $enabled);
+
+        return array('success' => true, 'enabled' => $enabled);
     }
 
     /**

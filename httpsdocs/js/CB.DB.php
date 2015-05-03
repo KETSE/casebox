@@ -92,7 +92,7 @@ $data = array(
         idIndex: 0
         ,model: 'Generic2'
         //,fields: ['id', 'name']
-        ,data:  [['%m/%d/%Y', 'm/d/Y'], ['%d/%m/%Y', 'd/m/Y'], ['%d.%m.%Y', 'd.m.Y'], ['%d-%m-%Y', 'd-m-Y']]
+        ,data:  [['m/d/Y', 'm/d/Y'], ['d/m/Y', 'd/m/Y'], ['d.m.Y', 'd.m.Y'], ['d-m-Y', 'd-m-Y']]
     });
     CB.DB.roles = new Ext.data.ArrayStore({
         idIndex: 0

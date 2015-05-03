@@ -36,6 +36,12 @@ class Template extends Object
         ,'info_template'
     );
 
+    /**
+     * table for quick accessing fields order (to avoid additional iterations)
+     * @var array
+     */
+    private $fieldsOrder = array();
+
     private static $fieldTypeNames =  array(
         '_auto_title' => 'ftAutoTitle'
         ,'checkbox' => 'ftCheckbox'
@@ -208,6 +214,8 @@ class Template extends Object
         while ($r = $res->fetch_assoc()) {
             $r['cfg'] = Util\toJSONArray($r['cfg']);
             $this->data['fields'][$r['id']] = $r;
+
+            $this->fieldsOrder[$r['name']] = intval($r['order']);
         }
         $res->close();
     }
@@ -232,8 +240,8 @@ class Template extends Object
             if (!empty($this->template)) {
                 $field = $this->template->getField($fieldName);
             }
-            if (isset($p[$fieldName]) && ($fieldName !== 'id')) {
-                $value = $p[$fieldName];
+            if (!empty($field)) {
+                $value = @$this->getFieldValue($fieldName, 0)['value'];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -242,8 +250,8 @@ class Template extends Object
                 $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
-            } elseif (!empty($field)) {
-                $value = @$this->getFieldValue($fieldName, 0)['value'];
+            } elseif (isset($p[$fieldName]) && ($fieldName !== 'id')) {
+                $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
                     : json_encode($value, JSON_UNESCAPED_UNICODE);
@@ -405,6 +413,20 @@ class Template extends Object
     }
 
     /**
+     * get field order
+     * @param  varchar $fieldName
+     * @return int
+     */
+    public function getFieldOrder($fieldName)
+    {
+        if (isset($this->fieldsOrder[$fieldName])) {
+            return $this->fieldsOrder[$fieldName];
+        }
+
+        return 0;
+    }
+
+    /**
      * get header field properties
      * @param  int | varchar $field field id or name
      * @return array
@@ -465,9 +487,10 @@ class Template extends Object
             }
         }
 
-        $cacheValue = is_scalar($value); //we'll cache scalar by default, but will exclude textual fields
+        //we'll cache scalar by default, but will exclude textual fields
+        $cacheValue = is_scalar($value);
         if ($cacheValue) {
-            $cacheVarName = 'dv_'. $field['id'] . '_' . $value;
+            $cacheVarName = 'dv' . $html . '_'. $field['id'] . '_' . $value;
 
             //check if value is in cache and return
             if (Cache::exist($cacheVarName)) {
@@ -610,19 +633,14 @@ class Template extends Object
                     break;
 
                 case 'date':
-                    $value = Util\formatMysqlDate(
-                        $value,
-                        false,
-                        @$_SESSION['user']['cfg']['timezone']
-                    );
+                    $value = Util\formatMysqlDate($value);
                     break;
 
                 case 'datetime':
                     // $value = Util\formatMysqlTime($value);
                     $value = Util\formatMysqlDate(
                         $value,
-                        \CB\getOption('short_date_format'). ' ' . \CB\getOption('time_format'),
-                        @$_SESSION['user']['cfg']['timezone']
+                        \CB\getOption('short_date_format'). ' ' . \CB\getOption('time_format')
                     );
 
                     break;
@@ -653,9 +671,17 @@ class Template extends Object
                 case 'memo':
                 case 'text':
                     $cacheValue = false;
-                    $value = empty($field['cfg']['text_renderer'])
+
+                    $renderers = '';
+                    if (!empty($field['cfg']['linkRenderers'])) {
+                        $renderers = $field['cfg']['linkRenderers'];
+                    } elseif (!empty($field['cfg']['text_renderer'])) {
+                        $renderers = $field['cfg']['text_renderer'];
+                    }
+
+                    $value = empty($renderers)
                         ? nl2br(htmlspecialchars($value, ENT_COMPAT))
-                        : nl2br(Comment::processAndFormatMessage($value), $field['cfg']['text_renderer']);
+                        : nl2br(Comment::processAndFormatMessage($value), $renderers);
                     break;
 
                 default:

@@ -18,10 +18,13 @@ session_set_save_handler($sessionHandler, true);
 session_start();
 
 // check if loged in
-if (!@$webDAVMode && !(php_sapi_name() == "cli") ) {   # simple hack to call init.php from another script without a redirect to login.
+# simple hack to call init.php from another script without a redirect to login.
+if (!@$webDAVMode && !(php_sapi_name() == "cli")) {
     if (!in_array(@$_GET['command'], array('login', 'recover')) && !User::isLoged()) {
-        header('Location: ' . Config::get('core_url') . 'login/');
-        exit(0);
+        if (@$_SERVER['SCRIPT_NAME'] !== '/remote/router.php') {
+            header('Location: ' . Config::get('core_url') . 'login/');
+            exit(0);
+        }
     }
 }
 

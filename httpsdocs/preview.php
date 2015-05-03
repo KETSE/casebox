@@ -83,12 +83,6 @@ $preview = array();
 
 switch ($obj->getType()) {
 
-    case 'task':
-        $o = new Tasks();
-        echo $o->getTaskInfoForEmail($id);
-        // echo $o->getPreview($id);
-        break;
-
     case 'file':
         $sql = 'SELECT p.filename
             FROM files f

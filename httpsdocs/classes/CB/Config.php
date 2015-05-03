@@ -12,6 +12,11 @@ class Config extends Singleton
     protected static $environmentVars = array();
     protected static $plugins = array();
 
+    /* define possible statuses for a core */
+    public static $CORESTATUS_DISABLED = 0;
+    public static $CORESTATUS_ACTIVE = 1;
+    public static $CORESTATUS_MAINTAINANCE = 2;
+
     /**
      * method for laoding core config
      * @param  array $cfg default configuration
@@ -146,7 +151,7 @@ class Config extends Singleton
         }
 
         $rez['core_id'] = $r['id'];
-        $rez['core_active'] = $r['active'];
+        $rez['core_status'] = $r['active'];
 
         return $rez;
     }
@@ -170,6 +175,99 @@ class Config extends Singleton
             $rez[$r['param']] = $r['value'];
         }
         $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get core status
+     * @return integer
+     */
+    public static function getCoreStatus()
+    {
+        $status = static::get('core_status', static::$CORESTATUS_DISABLED);
+
+        if ($status != static::$CORESTATUS_MAINTAINANCE) {
+            return $status;
+        }
+
+        //analize maintainance config and if in maintainance period
+        //then allow only console scripts, local ip and defined allowed ips
+
+        // allow all console scripts
+        if (isset($_SERVER['argc'])) {
+            return static::$CORESTATUS_ACTIVE;
+        }
+
+        //get maintainance config. Possible options are startTime, endTime, allowIps
+        $mcfg = static::get('maintainance');
+
+        //check if time limits are set and we are outside of that period
+        //then core is considered to be active
+        $startTime = empty($mcfg['startTime'])
+            ? null
+            : strtotime($mcfg['startTime']);
+        $endTime = empty($mcfg['endTime'])
+            ? null
+            : strtotime($mcfg['endTime']);
+        $now = strtotime('now');
+
+        if (//(is_null($startTime) && is_null($endTime)) ||
+            (!is_null($startTime) && ($startTime > $now)) ||
+            (!is_null($endTime) && ($endTime < $now))
+        ) {
+            return static::$CORESTATUS_ACTIVE;
+        }
+
+        //check if request is in allowed ips
+        $ips = array('localhost', '127.0.0.1');
+        if (!empty($mcfg['allowIps'])) {
+            $ips = array_merge($ips, Util\toTrimmedArray($mcfg['allowIps']));
+        }
+
+        if (in_array($_SERVER['REMOTE_ADDR'], $ips)) {
+            return static::$CORESTATUS_ACTIVE;
+        }
+
+        return $status;
+    }
+
+    /**
+     * get message for core status
+     * @param  int     $status
+     * @return varchar
+     */
+    public static function getCoreStatusMessage($status = false)
+    {
+        $rez = '';
+
+        if ($status === false) {
+            $status = static::getCoreStatus();
+        }
+
+        switch ($status) {
+            case static::$CORESTATUS_DISABLED:
+                $rez = 'Core is not active at the moment, please try again later.';
+                break;
+
+            case static::$CORESTATUS_MAINTAINANCE:
+                $mcfg = static::get('maintainance');
+                $endTime = empty($mcfg['endTime'])
+                    ? null
+                    : strtotime($mcfg['endTime']);
+                $rez = 'Core is under maintainance, please try again ';
+
+                if (is_null($endTime)) {
+                    $rez .= 'later.';
+                } else {
+                    require_once 'lib/language.php';
+                    $rez .= 'at ' .
+                        Util\formatTaskTime(date(DATE_ISO8601, $endTime)) .
+                        ' ' . User::getTimezone();
+                }
+
+                break;
+        }
 
         return $rez;
     }
@@ -382,7 +480,14 @@ class Config extends Singleton
 
         foreach ($languages as $l) {
             $k = mb_strtolower(trim($l));
-            $rez['lang-'.$l] = array('//js/locale/'.$l.'.js');
+
+            $cf = DOC_ROOT . 'js' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR . $coreName . '_' . $l . '.js';
+            if (file_exists($cf)) { //include core's custom translation file if present
+                $rez['lang-'.$l] = array('//js/locale/' . $coreName . '_' . $l . '.js');
+            } else {
+                $rez['lang-'.$l] = array('//js/locale/' . $l . '.js');
+            }
+
         }
 
         return $rez;
@@ -524,8 +629,8 @@ class Config extends Singleton
 
         if (empty($instance->defaultGridColumnConfigs)) {
             $userConfig = &$_SESSION['user']['cfg'];
-            $dateFormat = str_replace('%', '', $userConfig['short_date_format']);
-            $dateTimeFormat = str_replace('%', '', $dateFormat . ' ' . $userConfig['time_format']);
+            $dateFormat = $userConfig['short_date_format'];
+            $dateTimeFormat = $dateFormat . ' ' . $userConfig['time_format'];
 
             $instance->defaultGridColumnConfigs = array(
                 'nid' => array(
@@ -716,11 +821,21 @@ class Config extends Singleton
             ,'object_type_plugins'
             ,'treeNodes'
             ,'action_log'
+            ,'maintenance'
         );
 
         foreach ($jsonProperties as $property) {
             if (!empty($cfg[$property])) {
                 $cfg[$property] = Util\toJSONArray($cfg[$property]);
+            }
+        }
+
+        //change date formats from mysql to php
+        if (!empty($cfg['language_settings'])) {
+            foreach ($cfg['language_settings'] as $k => &$v) {
+                $v['long_date_format'] = str_replace('%', '', $v['long_date_format']);
+                $v['short_date_format'] = str_replace('%', '', $v['short_date_format']);
+                $v['time_format'] = str_replace('%', '', $v['time_format']);
             }
         }
 

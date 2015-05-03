@@ -57,10 +57,8 @@ Ext.define('CB.VerticalEditGridHelperTree', {
         parentNode.eachChild(
             function(node){
                 var fieldName = node.data.templateRecord.get('name');
-                if(Ext.isEmpty(rez[fieldName])) {
-                    rez[fieldName] = [];
-                }
                 var value = node.data.value;
+
                 switch (node.data.templateRecord.get('type')) {
                     case 'datetime':
                         if(Ext.isDate(value.value)) {
@@ -75,10 +73,19 @@ Ext.define('CB.VerticalEditGridHelperTree', {
                 }
                 value.childs = this.readChilds(node);
                 value = this.simplifyValue(value);
-                rez[fieldName].push(value);
+
+                if(Ext.isEmpty(value) || (Ext.isObject(value) && isEmptyObject(value))) {
+                } else {
+                    if(Ext.isEmpty(rez[fieldName])) {
+                        rez[fieldName] = [];
+                    }
+
+                    rez[fieldName].push(value);
+                }
             }
             ,this
         );
+
         for(var fieldName in rez) {
             if(rez.hasOwnProperty(fieldName)){
                 if(rez[fieldName].length == 1) {
@@ -87,13 +94,14 @@ Ext.define('CB.VerticalEditGridHelperTree', {
 
             }
         }
+
         return rez;
     }
 
     ,simplifyValue: function(value) {
         if(Ext.isEmpty(value.info) &&
             Ext.isEmpty(value.files) &&
-            Ext.isEmpty(value.cond) &&
+            (Ext.isEmpty(value.cond) || Ext.isEmpty(value.value))&&
             isEmptyObject(value.childs)
         ) {
             return value.value;
@@ -107,9 +115,10 @@ Ext.define('CB.VerticalEditGridHelperTree', {
         if(isEmptyObject(value.childs)) {
             delete value.childs;
         }
-        if(isEmptyObject(value.cond)) {
+        if(Ext.isDefined(value.cond) && Ext.isEmpty(value.value)) {
             delete value.cond;
         }
+
         return value;
     }
 

@@ -1,5 +1,105 @@
+CaseBox 1.9.433 (2015-05-03)
+==============================
+- #5721 Objects fields rendered in DC
+- #5717 Add "text_renderer" field config option to docs
+  renamed this option to linkRenderers
+- #5520 CB session expiration: notify that user should login
+
+CaseBox 1.9.432 (2015-05-02)
+==============================
+- #5568 Core maintenance mode
+
+Fixed Bugs:
+----------
+- #5785 Can't set DC for search template
+
+CaseBox 1.9.431 (2015-05-01)
+==============================
+- #5779 System folder not created after add one case
+- #5782 cannot set "order" for fields on template
+
+CaseBox 1.9.430 (2015-05-01)
+==============================
+- #5752 Export doesn't work, issues with SOLR request
+- #5766 can't edit disabled users
+- #5472 User is disabled but still appears in form editors
+  Added option to enable / disable users under options menu in users management
+
+Fixed Bugs:
+----------
+- #5600 ERROR: Case search
+
+CaseBox 1.9.429 (2015-05-01)
+==============================
+- #5368 UI improvement for Comments
+  adjustments according to last comments
+- #5311 Refactor server-side Task Management & Task UI
+  adjustments according to last comments
+- Removed usage of mysql date formats, php date formats will be used only
+
+CaseBox 1.9.428 (2015-04-30)
+==============================
+- #5480 Improve install.php script, move core installation to another script
+
+CaseBox 1.9.427 (2015-04-29)
+==============================
+- #5480 Improve install.php script, move core installation to another script
+  Testing modified install scripts, added core_create.php.
+
+CaseBox 1.9.426 (2015-04-29)
+==============================
+- #5552 Email should be unique index in users_groups & improve AddUserForm
+- #5659 How to call Casebox using Curl request
+- #5389 "No database selected" errors in log
+- #5311 Moved task status display after title
+- #5368 UI improvement for Comments
+
+Fixed Bugs:
+----------
+- #5649 Getting empty email messages from Task system
+
+CaseBox 1.9.425 (2015-04-28)
+==============================
+- #5635 getLinearNodesData optimizations
+- #5636 Remove checkTranslations from main.php
+  added /bin/languages_update_js_files.php to update translations files when needed
+  renamed language related files from /bin/ to start with "language" word
+- #5311 removed creation date display for tasks
+
+CaseBox 1.9.424 (2015-04-27)
+==============================
+Fixed Bugs:
+----------
+- change Task upgrade method to take in account closed tasks that have empty completion dates
+- TemplateField doesnt save config properties
+
+CaseBox 1.9.423 (2015-04-27)
+==============================
+New Features, Improvements
+--------------------------
+- #5311 Refactor server-side Task Management & Task UI
+  Tasks changed to use internal sys_data property instead of custom tables
+  Classes related to tasks were refactored as well as related classes and / or methods
+  Preview have been changed / refactored
+  A convertor is available in /bin/upgrade_tasks_data.php to upgrade all tasks structure
+    before removing custom tasks tables from db
+  In next commits there should appear info or db update scripts to remove tasks related tables.
+
+  Calendar view have been disabled for now.
+
+CaseBox 1.9.422 (2015-04-24)
+==============================
+New Features, Improvements
+--------------------------
+- upgrade to SOLR5.1
+- adding ".htaccess_on" ".htaccess_off". Use ".htaccess_off"
+  when you want to disable CB while performing server side work
+- SOLR configSets added in /sys/solr_configsets/ and /data/solr/ folder removed
+
 CaseBox 1.9.421 (2015-04-21)
 ==============================
+New Features, Improvements
+--------------------------
 - #5195 disabled security authentication timeout check
 - #5457 Move /sys/utils/ to /bin/
 - #5474 On click "Мой календарь" view mode is not changed for empty record set

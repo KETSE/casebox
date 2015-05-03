@@ -627,6 +627,16 @@ class Object
     }
 
     /**
+     *  get action flags that a user can do this object
+     * @param  int   $userId
+     * @return array
+     */
+    public function getActionFlags($userId = false)
+    {
+        return array();
+    }
+
+    /**
      * delete an object from tree or marks it as deleted
      * @param boolean $permanent Specify true to delete the object permanently.
      *                            Default to false.
@@ -754,6 +764,32 @@ class Object
     }
 
     /**
+     * return the owner of the object
+     * @param int $userId
+     */
+    public function getOwner()
+    {
+        $d = &$this->data;
+
+        return @Util\coalesce($d['oid'], $d['cid']);
+    }
+
+    /**
+     * check if given user is owner of the task
+     * @param int $userId
+     */
+    public function isOwner($userId = false)
+    {
+        $d = &$this->data;
+
+        if ($userId === false) {
+            $userId = $_SESSION['user']['id'];
+        }
+
+        return ($d['cid'] == $userId);
+    }
+
+    /**
      * get a field value from current objects data ($this->data)
      *
      * This function return an array of values for duplicate fields
@@ -783,23 +819,28 @@ class Object
      */
     public function getData()
     {
+        if (!$this->loaded && !empty($this->id)) {
+            $this->load();
+        }
+
         return $this->data;
     }
 
     /**
      * get linear array of properties of object properties
-     *
-     * @param array $data template properties
+     * @param boolean $sorted true to sort data according to template fields order
+     * @param array   $data   template properties
      */
-    public function getLinearData()
+    public function getLinearData($sorted = false)
     {
-        if (!empty($this->linearData)) {
-            return $this->linearData;
+        $paramName = 'linearData' . ($sorted ? 'sorted' : '');
+        if (!empty($this->$paramName)) {
+            return $this->$paramName;
         }
 
-        $this->linearData = $this->getLinearNodesData($this->data['data']);
+        $this->$paramName = $this->getLinearNodesData($this->data['data'], $sorted);
 
-        return $this->linearData;
+        return $this->$paramName;
     }
 
     /**
@@ -828,7 +869,29 @@ class Object
         return $rez;
     }
 
-    protected function getLinearNodesData(&$data)
+    /**
+     * private function used to sort an array(using php usort function) of field elements
+     * according to their template order from template
+     * @param  array $a
+     * @param  array $b
+     * @return int
+     */
+    protected function fieldsArraySorter($a, $b)
+    {
+        if (!empty($this->template)) {
+            $o1 = $this->template->getFieldOrder($a['name']);
+            $o2 = $this->template->getFieldOrder($b['name']);
+            if ($o1 < $o2) {
+                return -1;
+            } elseif ($o1 > $o2) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    protected function getLinearNodesData(&$data, $sorted = false)
     {
         $rez = array();
         if (empty($data)) {
@@ -853,24 +916,8 @@ class Object
             }
         }
 
-        //sort result according to template fields order
-        if ((sizeof($rez) > 1) && !empty($this->template)) {
-            $changed = true;
-            while ($changed) {
-                $changed = false;
-                $i = 1;
-                while ($i < sizeof($rez)) {
-                    $tf1 = $this->template->getField($rez[$i-1]['name']);
-                    $tf2 = $this->template->getField($rez[$i]['name']);
-                    if (!empty($tf1) && !empty($tf2) && (@$tf1['order'] > @$tf2['order'])) {
-                        $changed = true;
-                        $t = $rez[$i-1];
-                        $rez[$i-1] = $rez[$i];
-                        $rez[$i] = $t;
-                    }
-                    $i++;
-                }
-            }
+        if ($sorted) {
+            usort($rez, array($this, 'fieldsArraySorter'));
         }
 
         $sortedRez = array();
@@ -878,7 +925,7 @@ class Object
         foreach ($rez as $fv) {
             $sortedRez[] = $fv;
             if (!empty($fv['childs'])) {
-                $sortedRez = array_merge($sortedRez, $this->getLinearNodesData($fv['childs']));
+                $sortedRez = array_merge($sortedRez, $this->getLinearNodesData($fv['childs'], $sorted));
             }
         }
 
@@ -1363,5 +1410,138 @@ class Object
         }
 
         return $value;
+    }
+
+    /**
+     * method to generate preview blocks and return them as an array
+     * now there are only top and bottom blocks
+     * top contains fields from grid, bottom - complex fileds (html, text) edited outside the grid
+     *
+     * @return array
+     */
+    public function getPreviewBlocks()
+    {
+        $top = '';
+        $body = '';
+        $bottom = '';
+        $gf = array();
+
+        $linearData = $this->getLinearData(true);
+
+        $template = $this->getTemplate();
+
+        //group fields in display blocks
+        foreach ($linearData as $field) {
+            $tf = $template->getField($field['name']);
+
+            if (empty($tf)) {
+                //fantom data of deleted or moved fields
+                continue;
+            }
+
+            if (empty($tf['cfg'])) {
+                $group = 'body';
+            } elseif (@$tf['cfg']['showIn'] == 'top') {
+                $group = 'body'; //top
+            } elseif (@$tf['cfg']['showIn'] == 'tabsheet') {
+                $group = 'bottom';
+            } else {
+                $group = 'body';
+            }
+            $field['tf'] = $tf;
+            $gf[$group][] = $field;
+        }
+
+        $eventParams = array(
+            'object' => &$this
+            ,'groupedFields' => &$gf
+        );
+
+        \CB\fireEvent('beforeGeneratePreview', $eventParams);
+
+        if (!empty($gf['top'])) {
+            foreach ($gf['top'] as $f) {
+                if ($f['name'] == '_title') {
+                    continue;
+                }
+
+                $v = $template->formatValueForDisplay($f['tf'], $f); //['value']
+                if (is_array($v)) {
+                    $v = implode(', ', $v);
+                }
+                if (!empty($v)) {
+                    $top .= '<tr><td class="prop-key">'.$f['tf']['title'] . '</td><td class="prop-val">' . $v . '</td></tr>';
+                }
+            }
+        }
+
+        if (!empty($gf['body'])) {
+            $previousHeader = '';
+            foreach ($gf['body'] as $f) {
+                $v = $template->formatValueForDisplay($f['tf'], @$f);
+                if (is_array($v)) {
+                    $v = implode('<br />', $v);
+                }
+
+                if (!empty($f['tf']['cfg']['hidePreview']) ||
+                    (empty($v) && empty($f['info']))
+                ) {
+                    continue;
+                }
+
+                $headerField = $template->getHeaderField($f['tf']['id']);
+                if (!empty($headerField) && ($previousHeader != $headerField)) {
+                    $body .= '<tr class="prop-header"><th colspan="3"'.(
+                        empty($headerField['level'])
+                        ? ''
+                        : ' style="padding-left: '.($headerField['level'] * 20).'px"'
+                    ) . '>' . $headerField['title'] . '</th></tr>';
+                }
+                $previousHeader = $headerField;
+
+                $body .= '<tr>';
+                if (empty($f['tf']['cfg']['noHeader'])) {
+                    $body .= '<td'.(
+                        empty($f['tf']['level'])
+                        ? ''
+                        : ' style="padding-left: '.($f['tf']['level'] * 20).'px"'
+                    ) . ' class="prop-key">'.$f['tf']['title'].'</td>' .
+                    '<td class="prop-val">';
+                } else {
+                    $body .= '<td class="prop-val" colspan="2">';
+                }
+
+                $body .= $v.
+                    (empty($f['info'])
+                        ? ''
+                        : '<p class="prop-info">'.$f['info'].'</p>'
+                    ) . '</td></tr>';
+            }
+        }
+
+        if (!empty($gf['bottom'])) {
+            foreach ($gf['bottom'] as $f) {
+                $v = $template->formatValueForDisplay($f['tf'], $f);
+                if (empty($v)) {
+                    continue;
+                }
+                $bottom .=  '<div class="obj-preview-h">' . $f['tf']['title'] . '</div>' .
+                    '<div style="padding: 0 5px">' . $v . '</div><br />';
+            }
+        }
+
+        $top .= $body;
+
+        if (!empty($top)) {
+            $top = '<table class="obj-preview"><tbody>'.$top.'</tbody></table><br />';
+        }
+
+        $rez = array($top, $bottom);
+
+        $eventParams['result'] = &$rez;
+
+        \CB\fireEvent('generatePreview', $eventParams);
+
+        return $rez;
     }
 }

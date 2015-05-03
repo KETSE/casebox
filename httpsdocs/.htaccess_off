@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteBase /
+
+    # allow access to robots file
+    RewriteRule ^robots.txt$ - [NC,L]
+
+    # allow access to favicon
+    RewriteRule ^favicon.ico$ - [NC,L]
+
+    #redirect all other requests to index.php
+    RewriteRule ^index_off\.php$ - [L]
+
+    RewriteRule . /index_off.php [L]
+</IfModule>
