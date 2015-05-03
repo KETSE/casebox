@@ -487,9 +487,10 @@ class Template extends Object
             }
         }
 
-        $cacheValue = is_scalar($value); //we'll cache scalar by default, but will exclude textual fields
+        //we'll cache scalar by default, but will exclude textual fields
+        $cacheValue = is_scalar($value);
         if ($cacheValue) {
-            $cacheVarName = 'dv_'. $field['id'] . '_' . $value;
+            $cacheVarName = 'dv' . $html . '_'. $field['id'] . '_' . $value;
 
             //check if value is in cache and return
             if (Cache::exist($cacheVarName)) {
@@ -670,9 +671,17 @@ class Template extends Object
                 case 'memo':
                 case 'text':
                     $cacheValue = false;
-                    $value = empty($field['cfg']['text_renderer'])
+
+                    $renderers = '';
+                    if (!empty($field['cfg']['linkRenderers'])) {
+                        $renderers = $field['cfg']['linkRenderers'];
+                    } elseif (!empty($field['cfg']['text_renderer'])) {
+                        $renderers = $field['cfg']['text_renderer'];
+                    }
+
+                    $value = empty($renderers)
                         ? nl2br(htmlspecialchars($value, ENT_COMPAT))
-                        : nl2br(Comment::processAndFormatMessage($value), $field['cfg']['text_renderer']);
+                        : nl2br(Comment::processAndFormatMessage($value), $renderers);
                     break;
 
                 default:

@@ -1,3 +1,10 @@
+CaseBox 1.9.433 (2015-05-03)
+==============================
+- #5721 Objects fields rendered in DC
+- #5717 Add "text_renderer" field config option to docs
+  renamed this option to linkRenderers
+- #5520 CB session expiration: notify that user should login
+
 CaseBox 1.9.432 (2015-05-02)
 ==============================
 - #5568 Core maintenance mode
