@@ -679,12 +679,10 @@ function initApp() {
     };
 
     App.openWebdavDocument = function(data, checkCookie){
-        if(Ext.isEmpty(App.config.webdav_url)) {
-            return;
-        }
-        var url = App.config.webdav_url;
-        url = url.replace('{node_id}', Ext.valueFrom(data.id, data.nid));
-        url = url.replace('{name}', data.name);
+        var url = window.location.origin + '/dav/' + App.config.coreName + '/';
+
+        url += 'edit-' + Ext.valueFrom(data.id, data.nid);
+        url += '/' + data.name;
         App.confirmLeave = false;
 
         if((checkCookie !== false) &&

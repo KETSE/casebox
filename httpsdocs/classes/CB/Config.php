@@ -213,14 +213,14 @@ class Config extends Singleton
         $now = strtotime('now');
 
         if (//(is_null($startTime) && is_null($endTime)) ||
-            (!is_null($startTime) && ($startTime > $now)) ||
-            (!is_null($endTime) && ($endTime < $now))
+            (!is_null($startTime) && ($startTime > $now)) //||
+            //(!is_null($endTime) && ($endTime < $now)) // dont autoenable after end time
         ) {
             return static::$CORESTATUS_ACTIVE;
         }
 
         //check if request is in allowed ips
-        $ips = array('localhost', '127.0.0.1');
+        $ips = array();//'localhost', '127.0.0.1');
         if (!empty($mcfg['allowIps'])) {
             $ips = array_merge($ips, Util\toTrimmedArray($mcfg['allowIps']));
         }
@@ -251,20 +251,51 @@ class Config extends Singleton
                 break;
 
             case static::$CORESTATUS_MAINTAINANCE:
+                $coreName = static::get('core_name');
+
+                $rez = file_get_contents(TEMPLATES_DIR . 'maintenance.html');
+                if (empty($rez)) {
+                    $rez = 'Core is under maintainance, please try again {time}.';
+                }
+
                 $mcfg = static::get('maintainance');
+
                 $endTime = empty($mcfg['endTime'])
                     ? null
-                    : strtotime($mcfg['endTime']);
-                $rez = 'Core is under maintainance, please try again ';
+                    : $mcfg['endTime'];
 
-                if (is_null($endTime)) {
-                    $rez .= 'later.';
-                } else {
-                    require_once 'lib/language.php';
-                    $rez .= 'at ' .
-                        Util\formatTaskTime(date(DATE_ISO8601, $endTime)) .
-                        ' ' . User::getTimezone();
+                $time = 'later.';
+                if (!is_null($endTime)) {
+                    $dt = new \DateTime($endTime);
+                    $ct = new \DateTime('now');
+                    $diff = $ct->diff($dt);
+
+                    if ($diff->invert == 0) {
+                        $time = $diff->h;
+                        var_dump($time);
+                        if ($time > 0) {
+                            $time = 'in ~' . $time . ' hour(s).';
+                        } else {
+                            $time = 'in about an hour.';
+                        }
+                    } {
+                        $time = 'soon.';
+                    }
                 }
+
+                $rez = str_replace(
+                    array(
+                        '{title}',
+                        '{mail}',
+                        '{time_left}'
+                    ),
+                    array(
+                        static::get('project_name_en', $coreName),
+                        static::get('admin_email'),
+                        $time
+                    ),
+                    $rez
+                );
 
                 break;
         }

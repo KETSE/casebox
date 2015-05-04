@@ -1,5 +1,15 @@
+CaseBox 1.9.434 (2015-05-04)
+==============================
+New Features, Improvements
+--------------------------
+- #5480 adjustments for install.php script
+  remove webdav from config options, it uses same domain already
+- #5568 allow reindex of cores under maintenance from console
+
 CaseBox 1.9.433 (2015-05-03)
 ==============================
+New Features, Improvements
+--------------------------
 - #5721 Objects fields rendered in DC
 - #5717 Add "text_renderer" field config option to docs
   renamed this option to linkRenderers
@@ -7,6 +17,8 @@ CaseBox 1.9.433 (2015-05-03)
 
 CaseBox 1.9.432 (2015-05-02)
 ==============================
+New Features, Improvements
+--------------------------
 - #5568 Core maintenance mode
 
 Fixed Bugs:
@@ -15,11 +27,15 @@ Fixed Bugs:
 
 CaseBox 1.9.431 (2015-05-01)
 ==============================
+New Features, Improvements
+--------------------------
 - #5779 System folder not created after add one case
 - #5782 cannot set "order" for fields on template
 
 CaseBox 1.9.430 (2015-05-01)
 ==============================
+New Features, Improvements
+--------------------------
 - #5752 Export doesn't work, issues with SOLR request
 - #5766 can't edit disabled users
 - #5472 User is disabled but still appears in form editors
@@ -31,6 +47,8 @@ Fixed Bugs:
 
 CaseBox 1.9.429 (2015-05-01)
 ==============================
+New Features, Improvements
+--------------------------
 - #5368 UI improvement for Comments
   adjustments according to last comments
 - #5311 Refactor server-side Task Management & Task UI
@@ -39,15 +57,21 @@ CaseBox 1.9.429 (2015-05-01)
 
 CaseBox 1.9.428 (2015-04-30)
 ==============================
+New Features, Improvements
+--------------------------
 - #5480 Improve install.php script, move core installation to another script
 
 CaseBox 1.9.427 (2015-04-29)
 ==============================
+New Features, Improvements
+--------------------------
 - #5480 Improve install.php script, move core installation to another script
   Testing modified install scripts, added core_create.php.
 
 CaseBox 1.9.426 (2015-04-29)
 ==============================
+New Features, Improvements
+--------------------------
 - #5552 Email should be unique index in users_groups & improve AddUserForm
 - #5659 How to call Casebox using Curl request
 - #5389 "No database selected" errors in log
@@ -60,6 +84,8 @@ Fixed Bugs:
 
 CaseBox 1.9.425 (2015-04-28)
 ==============================
+New Features, Improvements
+--------------------------
 - #5635 getLinearNodesData optimizations
 - #5636 Remove checkTranslations from main.php
   added /bin/languages_update_js_files.php to update translations files when needed

@@ -14,7 +14,8 @@ use CB\DB;
  * -c, --core      core name or "all"
  * -a, --all       all records
  * -l, --nolimit   skip items limit on indexing core
- * -f, --force     skip other same cron running check*
+ * -f, --force     skip other same cron running check
+ *                 when force mode also cores under maintainance are processed
  *
  * @author Turcanu Vitalie, 22 april, 2013
  *
@@ -68,7 +69,8 @@ $cores = array();
 $res = DB\dbQuery(
     'SELECT name, active
     FROM ' . PREFIX . '_casebox.cores
-    WHERE active = 1'
+    WHERE ((active > 0) AND (active < $1))',
+    $force ? 3 : 2
 ) or die(DB\dbQueryError());
 
 while ($r = $res->fetch_assoc()) {

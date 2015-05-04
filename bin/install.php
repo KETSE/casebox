@@ -10,7 +10,11 @@ namespace CB;
  *     on Windows platform path to mysql/bin should be added to "Path" environment variable
  */
 
-echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
+$isWindows = (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN');
+
+if ($isWindows) {
+    echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
+}
 
 $cfg = array();
 
@@ -47,8 +51,6 @@ $defaultValues = array(
     //;SENDER_EMAIL: email adress placed in header for sent mails
     ,'sender_email' => 'emails.sender@server.com'
 
-    ,'webdav_domain' => 'https://subdomain.domain.org/'
-
     ,'comments_email' => 'comments@subdomain.domain.com'
     ,'comments_host' => '127.0.0.1'
     ,'comments_port' => 993
@@ -57,6 +59,7 @@ $defaultValues = array(
     ,'comments_pass' => ''
 
     ,'PYTHON' => 'python'
+    ,'backup_dir' => dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
 );
 
 $cfg = $cfg + $defaultValues;
@@ -83,11 +86,6 @@ if (!empty($l)) {
 $l = readALine('Specify sender email address, placed in header for sent mails (default "' . $cfg['sender_email'] . '"):' . "\n");
 if (!empty($l)) {
     $cfg['sender_email'] = $l;
-}
-//check webdav domain
-$l = readALine('Specify WebDav domain, including protocol (default "' . $cfg['webdav_domain'] . '"):' . "\n");
-if (!empty($l)) {
-    $cfg['webdav_domain'] = $l;
 }
 
 //define comments email params
@@ -128,6 +126,17 @@ if (!empty($l)) {
     $cfg['PYTHON'] = $l;
 }
 
+$l = readALine('Specify backup directory (default "' . $cfg['backup_dir'] . '"):' . "\n");
+if (!empty($l)) {
+    $cfg['backup_dir'] = $l;
+}
+
+//define backup_dir constant and create folder if doesnt exist
+define('CB\\BACKUP_DIR', $cfg['backup_dir']);
+if (!file_exists(BACKUP_DIR)) {
+    mkdir(BACKUP_DIR, 744, true);
+}
+
 echo "\nYou have configured main options for casebox.\n".
     "Saving your settings to casebox.ini ... ";
 
@@ -150,12 +159,17 @@ do {
 //creating solr symlinks
 $solrCSPath = $cfg['solr_home'] . 'configsets' . DIRECTORY_SEPARATOR;
 $CBCSPath = SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
-$r = true;
-if (file_exists($solrCSPath . 'cb_default')) {
-    $r = @symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_default');
+
+if (!file_exists($solrCSPath)) {
+    mkdir($solrCSPath, 744, true);
 }
-if (file_exists($solrCSPath . 'cb_log')) {
-    $r = $r && @symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_log');
+
+$r = true;
+if (!file_exists($solrCSPath . 'cb_default')) {
+    $r = symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_default');
+}
+if (!file_exists($solrCSPath . 'cb_log')) {
+    $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_log');
 }
 
 if ($r) {
@@ -175,18 +189,20 @@ $solr = Solr\Service::verifyConfigConnection(
 );
 
 if ($solr === false) {
-    if (confirm('Solr core "cb_log" doesnt exist. Would you like to create it? (y/n): ')) {
+    if (confirm('Solr core "cb_log" doesnt exist or can\'t access solr. Would you like to try to create it? (y/n): ')) {
         echo 'Creating solr core ... ';
 
-        $h = fopen(
+        if ($h = @fopen(
             'http://' . $cfg['solr_host']. ':' . $cfg['solr_port'] . '/solr/admin/cores?action=CREATE&' .
             'name=cb_log&configSet=cb_log',
             'r'
-        );
+        )) {
+            fclose($h);
+            echo "Ok\n";
+        } else {
+            echo "Error crating core, check if solr service is available under specified params.\n";
+        }
 
-        fclose($h);
-
-        echo "Ok\n";
     }
 } else {
     echo "cb_log solr core already exists.\n\r";

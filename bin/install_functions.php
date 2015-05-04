@@ -172,9 +172,7 @@ function backupFile($fileName)
         return false;
     }
 
-    $backupDir = getBackupDir();
-
-    return rename($fileName, $backupDir . date('Ymd_His_') . basename($fileName));
+    return rename($fileName, BACKUP_DIR . date('Ymd_His_') . basename($fileName));
 }
 
 /**
@@ -184,26 +182,9 @@ function backupFile($fileName)
  */
 function backupDB($dbName, $dbUser, $dbPass)
 {
-    $backupDir = getBackupDir();
-
-    $fileName = $backupDir . date('Ymd_His_') . $dbName . '.sql';
+    $fileName = BACKUP_DIR . date('Ymd_His_') . $dbName . '.sql';
 
     exec('mysqldump --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
 
     return true;
-}
-
-/**
- * return backup folder and automaticly creates it if doesnt exist
- * @return varchar
- */
-function getBackupDir()
-{
-    $rez = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR;
-
-    if (!file_exists($rez)) {
-        @mkdir($rez, 0744, true);
-    }
-
-    return $rez;
 }
