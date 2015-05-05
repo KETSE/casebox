@@ -98,11 +98,15 @@ foreach ($mailServers as &$cfg) {
         $mailbox = new \Zend\Mail\Storage\Imap($mailConf);
 
         $mailCount = $mailbox->countMessages();
-        echo $user . ' on ' . $mailConf['host'] . '. mail count: ' . $mailCount;
 
         if ($mailCount > 0) {
             $cfg['mailbox'] = &$mailbox;
-            processMails($cfg);
+
+            $rez = processMails($cfg);
+
+            if (!empty($rez)) {
+                echo $user . ' on ' . $mailConf['host'] . '. mail count: ' . $mailCount . $rez;
+            }
         }
 
     } catch (\Exception $e) {
@@ -189,22 +193,22 @@ foreach ($mailServers as $mailConf) {
 
 function processMails(&$mailServer)
 {
+    $rez = '';
+
     $dids = array (); //array for deleted ids
 
     $i = 0;
     $newMails = 0;
-    // echo "process mail .. \n";
+
     //iterate and process each mail
     foreach ($mailServer['mailbox'] as $k => $mail) {
         $i++;
-        // echo $i.' ';
-
         try {
             if ($mail->hasFlag(\Zend\Mail\Storage::FLAG_SEEN) || empty($mail->subject)) {
                 continue;
             }
         } catch (\InvalidArgumentException $e) {
-            echo "Cant read this mail, probably empty subject.\n";
+            $rez .= "Cant read this mail, probably empty subject.\n";
             continue;
         }
 
@@ -252,13 +256,15 @@ function processMails(&$mailServer)
             $dids[] = $mailServer['mailbox']->getUniqueId($k);
         }
     }
-    echo (
+    $rez .= (
         ($newMails > 0)
-        ? ("\nnew mails: " . $newMails)
-        : ' - no new mail.'
-    ). "\n";
+        ? ("\nnew mails: " . $newMails . "\n")
+        : ''
+    );
 
-    deleteMails($mailServer['mailbox'], $dids);
+    $rez .= deleteMails($mailServer['mailbox'], $dids);
+
+    return $rez;
 }
 
 /**
@@ -333,6 +339,7 @@ function getCoreUserByMail($email)
 
 function deleteMails(&$mailBox, $idsArray)
 {
+    $rez = '';
     if (empty($mailBox)) {
         throw new \Exception("Error Processing Request", 1);
     }
@@ -349,8 +356,10 @@ function deleteMails(&$mailBox, $idsArray)
                 //$mailBox->getNumberByUniqueId()
                 $mailBox->moveMessage($id, 'Trash');
             } catch (\Exception $e) {
-                echo " cant delete message $id\n";
+                $rez .= " cant delete message $id\n";
             }
         }
     }
+
+    return $rez;
 }

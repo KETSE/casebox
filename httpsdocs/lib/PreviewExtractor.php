@@ -47,16 +47,7 @@ class PreviewExtractor
         require_once Config::get('HTML_PURIFIER');
         require_once 'HTMLPurifier.func.php';
 
-        $cs = mb_detect_encoding($html);
-        //file_put_contents('html.log', $html);
-        //echo 'detected encoding: '.$cs."\n";
-        if (empty($cs)) {
-            $cs = 'UTF-8';
-        }
-        $cs = @iconv($cs, 'UTF-8', $html);
-        if (empty($cs)) {
-            $cs = $html;
-        }
+        $html = Util\toUTF8String($html);
 
         $config = \HTMLPurifier_Config::createDefault();
         $config->set('AutoFormat.AutoParagraph', false);
@@ -74,7 +65,7 @@ class PreviewExtractor
             }
         }
         $purifier = new \HTMLPurifier($config);
-        $html = $purifier->purify($cs);/**/
+        $html = $purifier->purify($html);/**/
         $html = str_replace('/preview/#', '#', $html);
 
         return $html;

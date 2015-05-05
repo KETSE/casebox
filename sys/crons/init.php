@@ -19,8 +19,6 @@ if (empty($scriptOptions['core'])) {
     die('no core specified or invalid options set.');
 }
 
-Cache::set('scriptOptions', $scriptOptions);
-
 $_GET['core'] = $scriptOptions['core'];
 $_SERVER['SERVER_NAME'] = $scriptOptions['core'];
 $_SERVER['REMOTE_ADDR'] = 'localhost';
@@ -42,6 +40,8 @@ include $site_path.DIRECTORY_SEPARATOR.'config.php';
 require_once LIB_DIR.'Util.php';
 
 require_once(LIB_DIR.'language.php');
+
+\CB\Cache::set('scriptOptions', $scriptOptions);
 
 $coreName = Config::get('core_name');
 //L\initTranslations(); // would be called from inside crons that need translations
@@ -69,7 +69,7 @@ function getOptions()
 
 function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
 {
-    $scriptOptions = Cache::get('scriptOptions');
+    $scriptOptions = \CB\Cache::get('scriptOptions');
     $coreName = Config::get('core_name');
 
     if (!empty($scriptOptions['force'])) {
@@ -142,7 +142,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
  */
 function closeCron($cron_id, $info = 'ok')
 {
-    $scriptOptions = Cache::get('scriptOptions');
+    $scriptOptions = \CB\Cache::get('scriptOptions');
 
     if (!empty($scriptOptions['force'])) {
         return;

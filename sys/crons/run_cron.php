@@ -87,8 +87,6 @@ if (empty($cores)) {
     echo "Core not found or inactive.\n";
 } else {
     foreach ($cores as $core) {
-        echo "\nProcessing core $core ...";
-
         $cmd = 'php -f '.$cron_path.$cron_file.' -- -c '.$core;
 
         if ($all) {
@@ -103,7 +101,11 @@ if (empty($cores)) {
             $cmd .= ' -f';
         }
 
-        echo shell_exec($cmd);
+        $rez = shell_exec($cmd);
+
+        if (!empty($rez)) {
+            $rez = "\n" . date('Y-m-d H:i:s'). " Processing core $core ... " . $rez;
+        }
+        echo $rez;
     }
-    echo "\nDone\n";
 }

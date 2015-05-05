@@ -634,3 +634,32 @@ function validISO8601Date($value)
         return false;
     }
 }
+
+/**
+ * ensures the given string has utf8 encoding
+ * and conerts it if needed
+ * @param  varchar $value
+ * @return varchar
+ */
+function toUTF8String($value)
+{
+    if (empty($value)) {
+        return $value;
+    }
+
+    // detect encoding
+    $charset = mb_detect_encoding($value);
+
+    if (empty($charset)) {
+        $charset = 'UTF-8';
+    }
+
+    $newValue = @iconv($charset, 'UTF-8', $value);
+
+    //return original value if cannot convert it
+    if (empty($newValue)) {
+        $newValue = $value;
+    }
+
+    return $newValue;
+}

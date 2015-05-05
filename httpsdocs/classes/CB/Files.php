@@ -77,8 +77,7 @@ class Files
         $contentFile = Config::get('files_dir') . @$data['content_path'] . '/'.@$data['content_id'];
 
         if (file_exists($contentFile) && !is_dir($contentFile)) {
-            $rez['data'] = utf8_encode(file_get_contents($contentFile));
-
+            $rez['data'] = Util\toUTF8String(file_get_contents($contentFile));
         } else {
             \CB\debug('Error accessing file ('.$id.'). Its content (id: '.@$data['content_id'].') doesnt exist on the disk.');
 

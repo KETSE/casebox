@@ -1,3 +1,10 @@
+CaseBox 1.9.437 (2015-05-05)
+==============================
+New Features, Improvements
+--------------------------
+- #5390 Remove unnecessary info from logs
+- #5837 Edit XML in CASEBOX
+
 CaseBox 1.9.436 (2015-05-05)
 ==============================
 New Features, Improvements
