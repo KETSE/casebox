@@ -220,7 +220,7 @@ class Config extends Singleton
         }
 
         //check if request is in allowed ips
-        $ips = array();//'localhost', '127.0.0.1');
+        $ips = array('localhost', '127.0.0.1');
         if (!empty($mcfg['allowIps'])) {
             $ips = array_merge($ips, Util\toTrimmedArray($mcfg['allowIps']));
         }

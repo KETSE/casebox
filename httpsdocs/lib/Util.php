@@ -590,26 +590,28 @@ function toTrimmedArray($v, $delimiter = ',')
  */
 function toJSONArray($v)
 {
+    $rez = array();
+
     if (empty($v)) {
-        return array();
+        return $rez;
     }
     if (is_array($v)) {
         return $v;
     }
 
     if (is_scalar($v)) {
-        $v = json_decode($v, true);
-    }
-    if (empty($v)) {
-        return array();
-    }
-    if (is_array($v)) {
-        return $v;
-    } elseif (is_object($v)) {
-        $v = (Array) $v;
+        $rez = json_decode($v, true);
     }
 
-    return $v;
+    if (empty($rez)) {
+        $rez = array();
+    }
+
+    if (is_object($rez)) {
+        $rez = (Array) $rez;
+    }
+
+    return $rez;
 }
 
 function isAssocArray($a)

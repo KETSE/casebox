@@ -1,3 +1,10 @@
+CaseBox 1.9.435 (2015-05-05)
+==============================
+New Features, Improvements
+--------------------------
+- #5832 Improve core_create.php
+- optimize CB\Objects\getAvailableName
+
 CaseBox 1.9.434 (2015-05-04)
 ==============================
 New Features, Improvements

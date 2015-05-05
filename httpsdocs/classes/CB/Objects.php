@@ -122,12 +122,6 @@ class Objects
         $p['name'] = $this->getAvailableName($p['pid'], $p['name']);
 
         $id = $object->create($p);
-        // Log::add(
-        //     array(
-        //         'action_type' => 8
-        //         ,'object_id' => $id
-        //     )
-        // );
 
         Solr\Client::runCron();
 
@@ -145,7 +139,7 @@ class Objects
     public function save($p)
     {
 
-        $d = json_decode($p['data'], true);
+        $d = Util\toJSONArray($p['data']);
 
         // check if need to create object instead of update
         if (empty($d['id']) || !is_numeric($d['id'])) {
@@ -734,33 +728,30 @@ class Objects
         }
         $name = implode('.', $a);
 
-        $id = null;
+        /* get similar names*/
+        $names = array();
+        $res = DB\dbQuery(
+            'SELECT name
+            FROM tree
+            WHERE pid = $1
+                AND name like $2
+                AND dstatus = 0',
+            array(
+                $pid
+                ,$name . '%' . '.'.$ext
+            )
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $names[] = $r['name'];
+        }
+        $res->close();
+
         $i = 1;
-        do {
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM tree
-                WHERE pid = $1
-                    AND name = $2
-                    AND dstatus = 0',
-                array(
-                    $pid
-                    ,$newName
-                )
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $id = $r['id'];
-            } else {
-                $id = null;
-            }
-            $res->close();
-
-            if (!empty($id)) {
-                $newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
-            }
+        while (in_array($newName, $names)) {
+            $newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
             $i++;
-        } while (!empty($id));
+        };
 
         return $newName;
     }

@@ -10,9 +10,11 @@
  */
 namespace CB;
 
-require_once '../httpsdocs/config_platform.php';
+$path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+$cbPath = dirname($path) . DIRECTORY_SEPARATOR;
+require_once $cbPath . 'httpsdocs/config_platform.php';
 
-require_once 'install_functions.php';
+require_once $path . 'install_functions.php';
 
 //check script options
 $options = getopt('c:s:', array('core:', 'sql:'));
@@ -136,7 +138,7 @@ if ($solr === false) {
 if ($askReindex) {
     if (confirm('Do you want to start full core reindex? (y/n): ')) {
         echo 'Reindex solr core ... ';
-        exec('php solr_reindex_core.php -c ' . $coreName . ' -a -l');
+        exec('php -f ' . $path . 'solr_reindex_core.php -- -c ' . $coreName . ' -a -l');
         echo "Ok\n";
     }
 }
