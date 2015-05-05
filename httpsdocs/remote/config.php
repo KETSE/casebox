@@ -196,3 +196,5 @@ $API = array_merge(
         )
     )
 );
+
+\CB\Cache::set('ExtDirectAPI', $API);

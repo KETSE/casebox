@@ -19,6 +19,8 @@ if (empty($scriptOptions['core'])) {
     die('no core specified or invalid options set.');
 }
 
+Cache::set('scriptOptions', $scriptOptions);
+
 $_GET['core'] = $scriptOptions['core'];
 $_SERVER['SERVER_NAME'] = $scriptOptions['core'];
 $_SERVER['REMOTE_ADDR'] = 'localhost';
@@ -67,7 +69,8 @@ function getOptions()
 
 function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
 {
-    global $scriptOptions, $coreName;
+    $scriptOptions = Cache::get('scriptOptions');
+    $coreName = Config::get('core_name');
 
     if (!empty($scriptOptions['force'])) {
         return array('success' => true);
@@ -106,7 +109,6 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
         $rez['success'] = true;
 
     } else {
-        global $cron_id;
         $rez['success'] = true;
         $t = debug_backtrace();
         DB\dbQuery(
@@ -140,7 +142,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
  */
 function closeCron($cron_id, $info = 'ok')
 {
-    global $scriptOptions;
+    $scriptOptions = Cache::get('scriptOptions');
 
     if (!empty($scriptOptions['force'])) {
         return;

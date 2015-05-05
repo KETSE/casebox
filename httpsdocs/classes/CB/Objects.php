@@ -79,12 +79,6 @@ class Objects
         // set type property from template
         $objectData['type'] = $templateData['type'];
 
-        global $data;
-        // this method is used also internally (by getInfo method),
-        // so we skip logging for "load" method in this cases
-        // if (is_array($data) && (@$data['method'] == 'load')) {
-        //     // Log::add(array('action_type' => 11, 'object_id' => $id));
-        // }
         return array(
             'success' => true
             ,'data' => $resultData
@@ -160,12 +154,11 @@ class Objects
         // update object
         $object = $this->getCachedObject($d['id']);
 
-        //set only data from client side because
-        //there could be sensitive data in sys_data
-        $data = $object->getData();
-        $data['data'] = $d['data'];
+        //set sys_data from object, it can contain custom data
+        //that shouldn't be overwritten
+        $d['sys_data'] = $object->getSysData();
 
-        $object->update($data);
+        $object->update($d);
 
         Objects::updateCaseUpdateInfo($d['id']);
 
@@ -373,7 +366,6 @@ class Objects
                 }
                 /* make changes to value if needed */
 
-
                 if (@$field['cfg']['faceting']) {
                     Objects::setCustomSOLRfields($object_record, $field, @$f['value']);
                 }
@@ -389,7 +381,6 @@ class Objects
             }
         }
     }
-
 
     /**
      * set custom SOLR columns
@@ -413,7 +404,6 @@ class Objects
 
             return;
         }
-
 
         switch ($field['type']) {
             # 'combo', 'int', 'objects' fields
@@ -458,7 +448,6 @@ class Objects
         }
 
     }
-
 
     /**
      * set additional data to be saved in solr for multiple records

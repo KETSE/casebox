@@ -178,13 +178,15 @@ function debug($msg)
  */
 function fireEvent($eventName, &$params)
 {
-    //skip trigering events from other triggers
-    if (empty($GLOBALS['running_trigger'])) {
-        $GLOBALS['running_trigger'] = 0;
+    //check if triggers not disabled
+    if (Config::getFlag('disableTriggers')) {
+        return;
     }
 
+    $triggerDepth = Config::get('runningTriggerDepth', 0);
+
     // dont allow triggers run deeper then 3rd level
-    if ($GLOBALS['running_trigger'] > 3) {
+    if ($triggerDepth > 3) {
         return;
     }
 
@@ -200,7 +202,7 @@ function fireEvent($eventName, &$params)
             $methods = array($methods);
         }
         foreach ($methods as $method) {
-            $GLOBALS['running_trigger']++;
+            Config::setEnvVar('runningTriggerDepth', $triggerDepth + 1);
             try {
                 $class->$method($params);
 
@@ -211,7 +213,7 @@ function fireEvent($eventName, &$params)
                     $e->getTraceAsString()
                 );
             }
-            $GLOBALS['running_trigger']--;
+            Config::setEnvVar('runningTriggerDepth', $triggerDepth);
         }
         unset($class);
     }
@@ -229,19 +231,7 @@ function fireEvent($eventName, &$params)
  *
  * default casebox config is merged with core config file and
  *     with database configuration values from config table
- * The meged result is declared in CB\CONFIG namespace
- *
- * there are also some configuration variables stored in $GLOBALS
- * (because there are no scalar values) like:
- *    language_settings - settings if defined for each language
- *    folder_templates - array of folder templates
- *    languages - avalilable languages for core
- *
- * so the value of specified option is returned from first config where is defined
- *     user config form session
- *     merged config from CB\CONFIG namespace
- *     $GLOBALS
- * If not defined in any config then null is returned
+ * The merged result is managed by Config class
  *
  * @param  varchar $optionName name of the option to get
  * @return variant | null

@@ -17,6 +17,12 @@ class Config extends Singleton
     public static $CORESTATUS_ACTIVE = 1;
     public static $CORESTATUS_MAINTAINANCE = 2;
 
+    /* flags */
+    protected static $flags = array(
+        'disableTriggers' => false
+        ,'disableSolrIndexing' => false
+    );
+
     /**
      * method for laoding core config
      * @param  array $cfg default configuration
@@ -925,6 +931,31 @@ class Config extends Singleton
         }
 
         return $defaultValue;
+    }
+
+    /**
+    * get flag value
+    * @param  varchar $name  flag name
+    * @return variant return false if not set
+    */
+    public static function getFlag($name)
+    {
+        if (isset(static::$flags[$name])) {
+            return static::$flags[$name];
+        }
+
+        return false;
+    }
+
+    /**
+    * set flag value
+    * @param  varchar $name
+    * @param  variant $value
+    * @return variant return false if not set
+    */
+    public static function setFlag($name, $value)
+    {
+        static::$flags[$name] = $value;
     }
 
     /**

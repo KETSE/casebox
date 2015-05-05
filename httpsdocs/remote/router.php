@@ -5,8 +5,10 @@ use CB\Config;
 
 register_shutdown_function('ExtDirect\\extDirectShutdownFunction');
 
-require_once '../init.php';
-require 'config.php';
+$path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+
+require_once dirname($path) . DIRECTORY_SEPARATOR . 'init.php';
+require $path . 'config.php';
 
 $isForm = false;
 $isUpload = false;
@@ -29,9 +31,11 @@ if (isset($HTTP_RAW_POST_DATA)) {
     die('Invalid request.');
 }
 
+\CB\Cache::set('ExtDirectData', $data);
+
 function doRpc($cdata)
 {
-    global $API;
+    $API = \CB\Cache::get('ExtDirectAPI');
 
     if (!\CB\User::isLoged() && ( ($cdata['action'] != 'User') || ($cdata['method'] != 'login') )) {
         return array(
@@ -153,7 +157,7 @@ if ($isForm && $isUpload) {
  */
 function extDirectShutdownFunction()
 {
-    global $data;
+    $data = \CB\Cache::get('ExtDirectData');
 
     $error = error_get_last();
 

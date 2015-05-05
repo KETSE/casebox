@@ -1,3 +1,14 @@
+CaseBox 1.9.436 (2015-05-05)
+==============================
+New Features, Improvements
+--------------------------
+- made changes to avoid using global variables
+- removed global flags "running_trigger" and "solr_index_disable_by_custom_script"
+  Now flags are set using Config class:
+    \CB\Config::setFlag('disableSolrIndexing', true);
+  Get: \CB\Config::setFlag('disableTriggers');
+  For now only these two flags are defined (disableTriggers, disableSolrIndexing).
+
 CaseBox 1.9.435 (2015-05-05)
 ==============================
 New Features, Improvements

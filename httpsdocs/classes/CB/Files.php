@@ -1053,9 +1053,9 @@ class Files
                     Files::deletePreview($file['content_id']);
                 }
 
-                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php '.$coreName.' > '.Config::get('debug_log').'_office &';
+                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php -- -c '.$coreName.' > '.Config::get('debug_log').'_office &';
                 if (isWindows()) {
-                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php '.$coreName;
+                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php -- -c '.$coreName;
                 }
                 pclose(popen($cmd, "r"));
 

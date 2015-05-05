@@ -10,21 +10,30 @@ class PreviewExtractor
     {
         $this->init();
     }
+
     public function init()
     {
-        global $argv;
         if (empty($_SERVER['SERVER_NAME'])) {
-            if (empty($argv[1])) {
-                die('no core is passed');
+            $options = getopt('c:', array('core'));
+
+            $core = empty($options['c'])
+                ? @$options['core']
+                : $options['c'];
+
+            if (empty($core)) {
+                die('no core passed');
             }
-            $t = explode('_', $argv[1]);
+
+            $t = explode('_', $core);
             $_SERVER['SERVER_NAME'] = array_pop($t).'.dummy.com';
             $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         }
+
         require_once dirname(__FILE__).'/../config.php';
         require_once LIB_DIR.'DB.php';
         DB\connect();
     }
+
     public function removeFromQueue($id)
     {
         dbQuery('delete from file_previews where id = $1', $id) or die( DB\dbQueryError() );

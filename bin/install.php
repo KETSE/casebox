@@ -72,11 +72,11 @@ if (!empty($l)) {
 
 //init db config
 do {
-    initDBConfig();
-} while (!verifyDBConfig());
+    initDBConfig($cfg);
+} while (!verifyDBConfig($cfg));
 
 //init solr connection
-initSolrConfig();
+initSolrConfig($cfg);
 
 $l = readALine('Specify administrator email address (default "' . $cfg['admin_email'] . '"):' . "\n");
 if (!empty($l)) {

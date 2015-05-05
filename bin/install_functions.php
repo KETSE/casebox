@@ -10,10 +10,8 @@ namespace CB;
  * init solr connection params
  * @return void
  */
-function initSolrConfig()
+function initSolrConfig(&$cfg)
 {
-    global $cfg;
-
     echo "\nSpecify solr configuration:\n";
 
     $retry = true;
@@ -49,9 +47,8 @@ function initSolrConfig()
  * verify specified database params
  * @return boolean
  */
-function verifyDBConfig()
+function verifyDBConfig(&$cfg)
 {
-    global $cfg;
     echo "Verifying db params ... ";
     $rez = true;
     $error = false;
@@ -78,9 +75,8 @@ function verifyDBConfig()
  * init database connection params
  * @return void
  */
-function initDBConfig()
+function initDBConfig(&$cfg)
 {
-    global $cfg;
     //init database configuration
     $l = readALine('Specify database configuration:' . "\n".'db host (' . $cfg['db_host'] . '): ');
     if (!empty($l)) {
