@@ -18,7 +18,8 @@ class Log
     public static function add(&$p)
     {
         //check if log nod disabled by some script
-        if ((Cache::get('disable_logs', false) == true) ||
+
+        if (Config::getFlag('disableActivityLog') ||
             empty($_SESSION['user']['id'])
         ) {
             return;

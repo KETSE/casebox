@@ -15,9 +15,7 @@ $isUpload = false;
 
 header('Content-Type: application/json; charset=UTF-8');
 
-if (isset($HTTP_RAW_POST_DATA)) {
-    $data = json_decode($HTTP_RAW_POST_DATA, true);
-} elseif (isset($_POST['extAction'])) {
+if (isset($_POST['extAction'])) {
     // form post
     $isForm = true;
     $isUpload = ($_POST['extUpload'] == 'true');
@@ -28,7 +26,14 @@ if (isset($HTTP_RAW_POST_DATA)) {
         ,'data' => array($_POST, $_FILES)
     );
 } else {
-    die('Invalid request.');
+    $postdata = file_get_contents("php://input");
+    if (!empty($postdata)) {
+        $data = json_decode($postdata, true);
+    }
+
+    if (empty($data)) {
+        die('Invalid request.');
+    }
 }
 
 \CB\Cache::set('ExtDirectData', $data);
@@ -91,7 +96,7 @@ function doRpc($cdata)
             'msg' => $e->getMessage()
         );
 
-        if (\CB\isDebugHost()) {
+        if (\CB\IS_DEBUG_HOST) {
             $r['where'] = $e->getTraceAsString();
         }
 
@@ -166,7 +171,7 @@ function extDirectShutdownFunction()
         $data['result'] = array('success' => false);
         $data['msg'] = 'Internal server error.';
 
-        if (\CB\isDebugHost()) {
+        if (\CB\IS_DEBUG_HOST) {
             $data['msg'] = $error['message'];
             $data['where'] = print_r(debug_backtrace(false), true);
         }

@@ -21,6 +21,7 @@ class Config extends Singleton
     protected static $flags = array(
         'disableTriggers' => false
         ,'disableSolrIndexing' => false
+        ,'disableActivityLog' => false
     );
 
     /**
@@ -956,27 +957,6 @@ class Config extends Singleton
     public static function setFlag($name, $value)
     {
         static::$flags[$name] = $value;
-    }
-
-    /**
-    * Check if a given value is presend in a config property
-    * Property is considered to be an array or a comma separated list of values
-    *
-    * @param  varchar $optionName name of the option to get
-    * @param  varchar $value checked value
-    * @return boolean
-    */
-    public static function isInListValue($optionName, $value)
-    {
-        $v = static::get($optionName);
-        if (is_scalar($v) || is_null($v)) {
-            $v = explode(',', $v);
-        }
-
-        return in_array(
-            $value,
-            $v
-        );
     }
 
     /**

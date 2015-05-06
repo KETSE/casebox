@@ -1053,7 +1053,7 @@ class Files
                 }
 
                 $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php -- -c '.$coreName.' > '.Config::get('debug_log').'_office &';
-                if (isWindows()) {
+                if (IS_WINDOWS) {
                     $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php -- -c '.$coreName;
                 }
                 pclose(popen($cmd, "r"));
@@ -1148,7 +1148,7 @@ class Files
     {
         $filesPreviewDir = Config::get('files_preview_dir');
 
-        if (isWindows()) {
+        if (IS_WINDOWS) {
             $cmd = 'del '.$filesPreviewDir.$id.'_*';
         } else {
             $cmd = 'find '.$filesPreviewDir.' -type f -name '.$id.'_* -print | xargs rm';

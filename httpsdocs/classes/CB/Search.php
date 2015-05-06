@@ -434,7 +434,7 @@ class Search extends Solr\Client
             'data' => array()
         );
 
-        if (isDebugHost()) {
+        if (IS_DEBUG_HOST) {
             $rez['search'] = array(
                 'query' => $this->query
                 ,'start' => $this->start

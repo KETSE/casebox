@@ -35,6 +35,8 @@ if (empty($sqlFile)) {
     die('no sql dump file specified or invalid options set.');
 }
 
+defineBackupDir($cfg);
+
 $dbName = PREFIX . $coreName;
 $dbUser = $cfg['db_user'];
 $dbPass = $cfg['db_pass'];
@@ -143,4 +145,4 @@ if ($askReindex) {
     }
 }
 
-echo "\Done.";
+echo "Done.\n";

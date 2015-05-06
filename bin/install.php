@@ -1,20 +1,16 @@
 #!/usr/bin/php
 <?php
 
-namespace CB;
-
 /**
  * install CaseBox script designed to help first configuration of casebox
  *
  * Requirements:
  *     on Windows platform path to mysql/bin should be added to "Path" environment variable
  */
+namespace CB;
 
-$isWindows = (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN');
-
-if ($isWindows) {
-    echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
-}
+$path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+$cbPath = dirname($path) . DIRECTORY_SEPARATOR;
 
 $cfg = array();
 
@@ -22,12 +18,16 @@ $cfg = array();
 // If config.ini doesnt exist it wil raise an exception: Can't load config file
 
 try {
-    require_once '../httpsdocs/config_platform.php';
+    require_once $cbPath . 'httpsdocs/config_platform.php';
 } catch (\Exception $e) {
     //config.ini could not exist
 
     //we don't need to do anything here because this script will create confing.ini in result
     //we just use values form config.ini as defaults, if it exists
+}
+
+if (IS_WINDOWS) {
+    echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
 }
 
 require_once 'install_functions.php';
@@ -131,11 +131,7 @@ if (!empty($l)) {
     $cfg['backup_dir'] = $l;
 }
 
-//define backup_dir constant and create folder if doesnt exist
-define('CB\\BACKUP_DIR', $cfg['backup_dir']);
-if (!file_exists(BACKUP_DIR)) {
-    mkdir(BACKUP_DIR, 744, true);
-}
+defineBackupDir($cfg);
 
 echo "\nYou have configured main options for casebox.\n".
     "Saving your settings to casebox.ini ... ";

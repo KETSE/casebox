@@ -54,7 +54,7 @@ function verifyDBConfig(&$cfg)
     $error = false;
 
     try {
-        $db = @DB\connectWithParams($cfg);
+        @DB\connectWithParams($cfg);
 
         $error = mysqli_connect_errno();
 
@@ -155,6 +155,26 @@ function putIniFile ($file, $array, $i = 0)
     } else {
         return $str;
     }
+}
+
+/**
+ * define backup_dir constant and create folder if doesnt exist
+ * @param  array &$cfg
+ * @return varchar
+ */
+function defineBackupDir(&$cfg)
+{
+    $dir = empty($cfg['backup_dir'])
+        ? dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
+        : $cfg['backup_dir'];
+
+    define('CB\\BACKUP_DIR', $dir);
+
+    if (!file_exists(BACKUP_DIR)) {
+        mkdir(BACKUP_DIR, 744, true);
+    }
+
+    return $dir;
 }
 
 /**

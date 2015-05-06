@@ -529,7 +529,7 @@ function getCoreHost($db_name = false)
             : $_SERVER['SERVER_NAME']
         ).'/';
 
-    $dev = \CB\isDevelServer() ? 'dev.' : '';
+    $dev = \CB\IS_DEVEL_SERVER ? 'dev.' : '';
 
     $core = "https://$dev$server$core/";
 
@@ -613,6 +613,25 @@ function toJSONArray($v)
 
     return $rez;
 }
+
+/**
+* Check if a given value is presend in a comma separated string or array of values
+*
+* @param  varchar $value checked value
+* @param  variant $stringOrValues
+* @param  varchar $delimiter
+* @return boolean
+*/
+function isInValues($value, $stringOrValues, $delimiter = ',')
+{
+    $v = toTrimmedArray($stringOrValues, $delimiter);
+
+    return in_array(
+        $value,
+        $v
+    );
+}
+
 
 function isAssocArray($a)
 {

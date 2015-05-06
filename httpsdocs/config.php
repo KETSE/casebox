@@ -38,7 +38,6 @@ try {
 DB\connectWithParams($cfg);
 
 //loading full config of the core
-require_once 'lib/Util.php';
 $config = Config::load($cfg);
 
 //analize core status and display corresponding message if not active
@@ -69,7 +68,7 @@ ini_set('memory_limit', '400M');
 
 // session params
 $sessionLifetime = (
-    isDebugHost()
+    IS_DEBUG_HOST
         ? 0
         : Config::get('session.lifetime', 180)
 ) * 60;
@@ -92,7 +91,7 @@ session_name(
 );
 
 //error reporting params
-error_reporting(isDebugHost() ? E_ALL : E_ERROR);
+error_reporting(IS_DEBUG_HOST ? E_ALL : E_ERROR);
 
 // mb encoding config
 mb_internal_encoding("UTF-8");
@@ -105,6 +104,6 @@ date_default_timezone_set('UTC');
 /* end of setting php configuration options, session lifetime and error_reporting level */
 
 //clear debug_log for each request when on debug host
-if (isDebugHost()) {
+if (IS_DEBUG_HOST) {
     // @unlink(Config::get('debug_log'));
 }

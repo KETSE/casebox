@@ -39,7 +39,7 @@ class Client extends Service
         }
 
         $cmd = 'php -f "'.\CB\CRONS_DIR.'run_cron.php" -- -n solr_update_tree -c '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log &';
-        if (\CB\isWindows()) {
+        if (\CB\IS_WINDOWS) {
             $cmd = 'start /D "'.\CB\CRONS_DIR.'" php -f "run_cron.php" -- -n solr_update_tree -c '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log';
         }
 

@@ -164,7 +164,7 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
         }
         error_log($rez, 3, \CB\Config::get('error_log', \CB\LOGS_DIR.'cb_error_log'));
 
-        if (!\CB\isDebugHost()) {
+        if (!\CB\IS_DEBUG_HOST) {
             $rez ='Query error (' . $dbh->lastParams['name'] . ')';
         }
 

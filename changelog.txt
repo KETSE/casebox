@@ -1,3 +1,16 @@
+CaseBox 1.9.438 (2015-05-06)
+==============================
+New Features, Improvements
+--------------------------
+- replaced isDebugHost, isDevelServer and isWindows methods with corresponding constants:
+  IS_DEBUG_HOST, IS_DEVEL_SERVER, IS_WINDOWS (in CB namespace)
+- #5742 Generate Minified JS using a command/cron etc, but not at each CB onLoad
+- #5861 Add flag "disableActivityLog"
+  Now logs can be disabled by Config::setFlag('disableActivityLog', true)
+- #5480 issues with install scripts
+- process link clicks on preview buttons in a window
+- #5855 Replace $HTTP_RAW_POST_DATA (deprecated as of PHP 5.6) with php://input
+
 CaseBox 1.9.437 (2015-05-05)
 ==============================
 New Features, Improvements

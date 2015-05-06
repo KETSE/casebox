@@ -37,8 +37,6 @@ register_shutdown_function('CB\\closeCron', $cron_id);
 
 include $site_path.DIRECTORY_SEPARATOR.'config.php';
 
-require_once LIB_DIR.'Util.php';
-
 require_once(LIB_DIR.'language.php');
 
 \CB\Cache::set('scriptOptions', $scriptOptions);

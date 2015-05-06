@@ -22,6 +22,8 @@ define('CB\\TEMPLATES_DIR', SYS_DIR.'templates'.DIRECTORY_SEPARATOR);
 define('CB\\LIB_DIR', DOC_ROOT.'lib'.DIRECTORY_SEPARATOR);
 define('CB\\ZEND_PATH', DOC_ROOT.'libx'.DIRECTORY_SEPARATOR.'ZF'.DIRECTORY_SEPARATOR.'library'.DIRECTORY_SEPARATOR);
 
+define('CB\\IS_WINDOWS', strtoupper(substr(PHP_OS, 0, 3)) == 'WIN');
+
 // define casebox include path
 // This path contains only CaseBox platform inclusion paths
 //  and do not contain core specific paths
@@ -44,8 +46,10 @@ define('CB\\EXT_PATH', '/libx/ext');
 /* update include_path and include scripts */
 set_include_path(INCLUDE_PATH);
 
-include 'lib/global.php';
-require_once 'lib/DB.php';
+include LIB_DIR . 'global.php';
+require_once LIB_DIR . 'Util.php';
+require_once LIB_DIR . 'DB.php';
+
 /* end of update include_path and include scripts */
 
 //load main config so that we can connect to casebox db and read configuration for core
@@ -59,6 +63,25 @@ define(
             ? 'cb'
             : $cfg['prefix']
     ) . '_'
+);
+
+define(
+    'CB\\IS_DEBUG_HOST',
+    (
+        empty($_SERVER['SERVER_NAME']) ||
+        (!empty($cfg['debug_hosts']) && Util\isInValues($_SERVER['REMOTE_ADDR'], $cfg['debug_hosts']))
+    )
+);
+
+define(
+    'CB\\IS_DEVEL_SERVER',
+    (
+        !empty($cfg['_dev_mode']) &&
+        (
+            (strpos($_SERVER['SERVER_NAME'], '.d.') !== false) ||
+            (!empty($cfg['_dev_hosts']) && Util\isInValues($_SERVER['REMOTE_ADDR'], $cfg['_dev_hosts']))
+        )
+    )
 );
 
 //analize python option
@@ -80,41 +103,6 @@ Cache::set('platformConfig', $cfg);
 DB\connect($cfg);
 
 /* config functions section */
-
-/**
- * Check server side operation system
- */
-function isWindows()
-{
-    return (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN');
-}
-
-/**
- * returns true if scripts run on a Devel server
- * @return boolean
- */
-function isDevelServer()
-{
-    return (
-        (Config::get('_dev_mode') == 1) &&
-        (
-            (strpos($_SERVER['SERVER_NAME'], '.d.') !== false) ||
-            Config::isInListValue('_dev_hosts', $_SERVER['REMOTE_ADDR'])
-        )
-    );
-}
-
-/**
- * Check if the client machine is debuging host
- * @return boolean
- */
-function isDebugHost()
-{
-    return (
-        empty($_SERVER['SERVER_NAME']) ||
-        Config::isInListValue('debug_hosts', $_SERVER['REMOTE_ADDR'])
-    );
-}
 
 /**
  * detect core from enviroment
