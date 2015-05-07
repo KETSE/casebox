@@ -30,7 +30,7 @@ switch ($action) {
             $user_id = User::getIdByRecoveryHash($hash);
 
             if (empty($user_id)) {
-                $_SESSION['msg'] = '<div class="alert alert-error">'.L\get('RecoverHashNotFound').(isDebugHost() ? $hash: '').'</div>';
+                $_SESSION['msg'] = '<div class="alert alert-error">'.L\get('RecoverHashNotFound').(IS_DEBUG_HOST ? $hash: '').'</div>';
                 break;
             }
 

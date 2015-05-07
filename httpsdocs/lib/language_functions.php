@@ -25,9 +25,11 @@ function get($name = false, $language = false)
         $language = \CB\Config::get('languages')[$language -1];
     }
 
+    $translations = \CB\Cache::get('translations', []);
+
     return (
-        isset($GLOBALS['TRANSLATIONS'][$language][$name])
-            ? $GLOBALS['TRANSLATIONS'][$language][$name]
+        isset($translations[$language][$name])
+            ? $translations[$language][$name]
             : null
     );
 }
@@ -60,8 +62,10 @@ function getTranslationIfPseudoValue($value)
         $varName = substr($value, 1, strlen($value) - 2);
         $userLanguage = \CB\Config::get('user_language');
 
-        if (isset($GLOBALS['TRANSLATIONS'][$userLanguage][$varName])) {
-            $value = @$GLOBALS['TRANSLATIONS'][$userLanguage][$varName];
+        $translations = \CB\Cache::get('translations', []);
+
+        if (isset($translations[$userLanguage][$varName])) {
+            $value = $translations[$userLanguage][$varName];
         }
     }
 
@@ -69,18 +73,19 @@ function getTranslationIfPseudoValue($value)
 }
 
 /**
- * function for defining translations into $GLOBAL['TRANSLATIONS'] and recreating language files if updated
+ * function to set translations in Cache
  */
 function initTranslations()
 {
+    $translations = \CB\Cache::get('translations', []);
     // if already defined translations then exit
-    if (isset($GLOBALS['TRANSLATIONS'])) {
+    if (!empty($translations)) {
         return;
     }
 
     $languages = \CB\Config::get('languages'); // or : \CB\USER_LANGUAGE;
 
-    /* reading global translations table from casebox database*/
+    /* reading main translations table from casebox database*/
     $res = DB\dbQuery(
         'SELECT name, ' . implode(',', $languages) . '
         FROM ' . \CB\PREFIX . '_casebox.translations
@@ -91,7 +96,7 @@ function initTranslations()
         reset($r);
         $name = current($r);
         while ($v = next($r)) {
-            $GLOBALS['TRANSLATIONS'][key($r)][$name] = $v;
+            $translations[key($r)][$name] = $v;
         }
     }
     $res->close();
@@ -106,9 +111,11 @@ function initTranslations()
     while ($r = $res->fetch_assoc()) {
         foreach ($languages as $l) {
             if (!empty($r[$l])) {
-                $GLOBALS['TRANSLATIONS'][$l][$r['name']] = $r[$l];
+                $translations[$l][$r['name']] = $r[$l];
             }
         }
     }
     $res->close();
+
+    \CB\Cache::set('translations', $translations);
 }

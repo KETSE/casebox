@@ -8,11 +8,7 @@
  */
 function saveObjectAttachments($objectId, &$attachments)
 {
-    global $filesApiObject;
-
-    if (empty($filesApiObject)) {
-        $filesApiObject = new \CB\Api\Files();
-    }
+    $filesApiObject = new \CB\Api\Files();
 
     foreach ($attachments as $d) {
         if (empty($d['attachment'])) {

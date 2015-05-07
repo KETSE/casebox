@@ -1,7 +1,7 @@
 <?php
 namespace CB\Solr;
 
-use CB\DB as DB;
+use CB\DB;
 
 /**
  * Solr client class used by CaseBox to make changes into solr
@@ -14,11 +14,12 @@ class Client extends Service
      */
     public static function runCron()
     {
-        if (!empty($GLOBALS['running_trigger'])
-            || isset($GLOBALS['solr_index_disable_by_custom_script'])
+        if (\CB\Config::getFlag('disableTriggers')
+            || \CB\Config::getFlag('disableSolrIndexing')
         ) {
             return;
         }
+
         $solrClient = new \CB\Solr\Client();
         $solrClient->updateTree();
         unset($solrClient);
@@ -31,13 +32,14 @@ class Client extends Service
     {
         $coreName = \CB\Config::get('core_name');
 
-        if (isset($GLOBALS['running_trigger'])
-            || isset($GLOBALS['solr_index_disable_by_custom_script'])
+        if (\CB\Config::getFlag('disableTriggers')
+            || \CB\Config::getFlag('disableSolrIndexing')
         ) {
             return;
         }
+
         $cmd = 'php -f "'.\CB\CRONS_DIR.'run_cron.php" -- -n solr_update_tree -c '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log &';
-        if (\CB\isWindows()) {
+        if (\CB\IS_WINDOWS) {
             $cmd = 'start /D "'.\CB\CRONS_DIR.'" php -f "run_cron.php" -- -n solr_update_tree -c '.$coreName.' > '.\CB\LOGS_DIR.'bg_solr_update_tree.log';
         }
 

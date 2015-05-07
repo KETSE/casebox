@@ -35,7 +35,6 @@ Ext.define('CB.object.TitleView', {
      * @return string
      */
     ,getStatusInfo: function (values) {
-        clog('values.status', values.status)
         if(Ext.isEmpty(values.status)) {
             return '';
         }

@@ -79,12 +79,6 @@ class Objects
         // set type property from template
         $objectData['type'] = $templateData['type'];
 
-        global $data;
-        // this method is used also internally (by getInfo method),
-        // so we skip logging for "load" method in this cases
-        // if (is_array($data) && (@$data['method'] == 'load')) {
-        //     // Log::add(array('action_type' => 11, 'object_id' => $id));
-        // }
         return array(
             'success' => true
             ,'data' => $resultData
@@ -122,12 +116,6 @@ class Objects
         $p['name'] = $this->getAvailableName($p['pid'], $p['name']);
 
         $id = $object->create($p);
-        // Log::add(
-        //     array(
-        //         'action_type' => 8
-        //         ,'object_id' => $id
-        //     )
-        // );
 
         Solr\Client::runCron();
 
@@ -145,7 +133,7 @@ class Objects
     public function save($p)
     {
 
-        $d = json_decode($p['data'], true);
+        $d = Util\toJSONArray($p['data']);
 
         // check if need to create object instead of update
         if (empty($d['id']) || !is_numeric($d['id'])) {
@@ -166,12 +154,11 @@ class Objects
         // update object
         $object = $this->getCachedObject($d['id']);
 
-        //set only data from client side because
-        //there could be sensitive data in sys_data
-        $data = $object->getData();
-        $data['data'] = $d['data'];
+        //set sys_data from object, it can contain custom data
+        //that shouldn't be overwritten
+        $d['sys_data'] = $object->getSysData();
 
-        $object->update($data);
+        $object->update($d);
 
         Objects::updateCaseUpdateInfo($d['id']);
 
@@ -379,7 +366,6 @@ class Objects
                 }
                 /* make changes to value if needed */
 
-
                 if (@$field['cfg']['faceting']) {
                     Objects::setCustomSOLRfields($object_record, $field, @$f['value']);
                 }
@@ -395,7 +381,6 @@ class Objects
             }
         }
     }
-
 
     /**
      * set custom SOLR columns
@@ -419,7 +404,6 @@ class Objects
 
             return;
         }
-
 
         switch ($field['type']) {
             # 'combo', 'int', 'objects' fields
@@ -464,7 +448,6 @@ class Objects
         }
 
     }
-
 
     /**
      * set additional data to be saved in solr for multiple records
@@ -734,33 +717,30 @@ class Objects
         }
         $name = implode('.', $a);
 
-        $id = null;
+        /* get similar names*/
+        $names = array();
+        $res = DB\dbQuery(
+            'SELECT name
+            FROM tree
+            WHERE pid = $1
+                AND name like $2
+                AND dstatus = 0',
+            array(
+                $pid
+                ,$name . '%' . '.'.$ext
+            )
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $names[] = $r['name'];
+        }
+        $res->close();
+
         $i = 1;
-        do {
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM tree
-                WHERE pid = $1
-                    AND name = $2
-                    AND dstatus = 0',
-                array(
-                    $pid
-                    ,$newName
-                )
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $id = $r['id'];
-            } else {
-                $id = null;
-            }
-            $res->close();
-
-            if (!empty($id)) {
-                $newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
-            }
+        while (in_array($newName, $names)) {
+            $newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
             $i++;
-        } while (!empty($id));
+        };
 
         return $newName;
     }

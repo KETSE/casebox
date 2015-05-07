@@ -9,8 +9,6 @@
 namespace CB;
 
 require_once dirname(__FILE__) . '/config.php';
-require_once 'lib/Util.php';
-require_once 'lib/DB.php';
 
 //Starting Session
 $sessionHandler = new Session();

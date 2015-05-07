@@ -529,7 +529,7 @@ function getCoreHost($db_name = false)
             : $_SERVER['SERVER_NAME']
         ).'/';
 
-    $dev = \CB\isDevelServer() ? 'dev.' : '';
+    $dev = \CB\IS_DEVEL_SERVER ? 'dev.' : '';
 
     $core = "https://$dev$server$core/";
 
@@ -590,27 +590,48 @@ function toTrimmedArray($v, $delimiter = ',')
  */
 function toJSONArray($v)
 {
+    $rez = array();
+
     if (empty($v)) {
-        return array();
+        return $rez;
     }
     if (is_array($v)) {
         return $v;
     }
 
     if (is_scalar($v)) {
-        $v = json_decode($v, true);
-    }
-    if (empty($v)) {
-        return array();
-    }
-    if (is_array($v)) {
-        return $v;
-    } elseif (is_object($v)) {
-        $v = (Array) $v;
+        $rez = json_decode($v, true);
     }
 
-    return $v;
+    if (empty($rez)) {
+        $rez = array();
+    }
+
+    if (is_object($rez)) {
+        $rez = (Array) $rez;
+    }
+
+    return $rez;
 }
+
+/**
+* Check if a given value is presend in a comma separated string or array of values
+*
+* @param  varchar $value checked value
+* @param  variant $stringOrValues
+* @param  varchar $delimiter
+* @return boolean
+*/
+function isInValues($value, $stringOrValues, $delimiter = ',')
+{
+    $v = toTrimmedArray($stringOrValues, $delimiter);
+
+    return in_array(
+        $value,
+        $v
+    );
+}
+
 
 function isAssocArray($a)
 {
@@ -631,4 +652,33 @@ function validISO8601Date($value)
     } catch (\Exception $e) {
         return false;
     }
+}
+
+/**
+ * ensures the given string has utf8 encoding
+ * and conerts it if needed
+ * @param  varchar $value
+ * @return varchar
+ */
+function toUTF8String($value)
+{
+    if (empty($value)) {
+        return $value;
+    }
+
+    // detect encoding
+    $charset = mb_detect_encoding($value);
+
+    if (empty($charset)) {
+        $charset = 'UTF-8';
+    }
+
+    $newValue = @iconv($charset, 'UTF-8', $value);
+
+    //return original value if cannot convert it
+    if (empty($newValue)) {
+        $newValue = $value;
+    }
+
+    return $newValue;
 }

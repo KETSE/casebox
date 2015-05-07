@@ -292,22 +292,6 @@ class User
             $filesEdit[$k] = Util\toTrimmedArray($v);
         }
 
-        //detect webdav url
-        $webdavUrl = '';
-        $webdavDomain = Config::get('webdav_domain');
-        if (!empty($webdavDomain)) {
-            if (substr($webdavDomain, -1) != '/') {
-                $webdavDomain .= '/';
-            }
-            $webdavUrl = $webdavDomain . '{core_name}/edit-{node_id}/{name}';
-
-        } else { //backward compatible check
-            $webdavUrl = empty($filesConfig['webdav_url'])
-                ? Config::get('webdav_url') // backward compatibility
-                : $filesConfig['webdav_url'];
-        }
-        //end of detect webdav url
-
         @$rez = array(
             'success' => true
             ,'config' => array(
@@ -317,12 +301,10 @@ class User
                 ,'default_task_template' => Config::get('default_task_template')
                 ,'default_event_template' => Config::get('default_event_template')
                 ,'files.edit' => $filesEdit
-                ,'webdav_url' => $webdavUrl
                 ,'template_info_column' => Config::get('template_info_column')
             )
             ,'user' => $_SESSION['user']
         );
-        $rez['config']['webdav_url'] = str_replace('{core_name}', $coreName, $webdavUrl);
         $rez['config']['files.edit'] = $filesEdit;
 
         $rez['user']['cfg']['short_date_format'] = $rez['user']['cfg']['short_date_format'];

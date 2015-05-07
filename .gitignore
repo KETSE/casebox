@@ -3,6 +3,9 @@ data/files/
 data/solr/data/
 data/tmp/
 
+# exclude default backup folder
+backup/
+
 
 
 ssl/

@@ -77,8 +77,7 @@ class Files
         $contentFile = Config::get('files_dir') . @$data['content_path'] . '/'.@$data['content_id'];
 
         if (file_exists($contentFile) && !is_dir($contentFile)) {
-            $rez['data'] = utf8_encode(file_get_contents($contentFile));
-
+            $rez['data'] = Util\toUTF8String(file_get_contents($contentFile));
         } else {
             \CB\debug('Error accessing file ('.$id.'). Its content (id: '.@$data['content_id'].') doesnt exist on the disk.');
 
@@ -1053,9 +1052,9 @@ class Files
                     Files::deletePreview($file['content_id']);
                 }
 
-                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php '.$coreName.' > '.Config::get('debug_log').'_office &';
-                if (isWindows()) {
-                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php '.$coreName;
+                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php -- -c '.$coreName.' > '.Config::get('debug_log').'_office &';
+                if (IS_WINDOWS) {
+                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php -- -c '.$coreName;
                 }
                 pclose(popen($cmd, "r"));
 
@@ -1149,7 +1148,7 @@ class Files
     {
         $filesPreviewDir = Config::get('files_preview_dir');
 
-        if (isWindows()) {
+        if (IS_WINDOWS) {
             $cmd = 'del '.$filesPreviewDir.$id.'_*';
         } else {
             $cmd = 'find '.$filesPreviewDir.' -type f -name '.$id.'_* -print | xargs rm';

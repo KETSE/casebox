@@ -10,10 +10,8 @@ namespace CB;
  * init solr connection params
  * @return void
  */
-function initSolrConfig()
+function initSolrConfig(&$cfg)
 {
-    global $cfg;
-
     echo "\nSpecify solr configuration:\n";
 
     $retry = true;
@@ -49,15 +47,14 @@ function initSolrConfig()
  * verify specified database params
  * @return boolean
  */
-function verifyDBConfig()
+function verifyDBConfig(&$cfg)
 {
-    global $cfg;
     echo "Verifying db params ... ";
     $rez = true;
     $error = false;
 
     try {
-        $db = @DB\connectWithParams($cfg);
+        @DB\connectWithParams($cfg);
 
         $error = mysqli_connect_errno();
 
@@ -78,9 +75,8 @@ function verifyDBConfig()
  * init database connection params
  * @return void
  */
-function initDBConfig()
+function initDBConfig(&$cfg)
 {
-    global $cfg;
     //init database configuration
     $l = readALine('Specify database configuration:' . "\n".'db host (' . $cfg['db_host'] . '): ');
     if (!empty($l)) {
@@ -162,6 +158,26 @@ function putIniFile ($file, $array, $i = 0)
 }
 
 /**
+ * define backup_dir constant and create folder if doesnt exist
+ * @param  array &$cfg
+ * @return varchar
+ */
+function defineBackupDir(&$cfg)
+{
+    $dir = empty($cfg['backup_dir'])
+        ? dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
+        : $cfg['backup_dir'];
+
+    define('CB\\BACKUP_DIR', $dir);
+
+    if (!file_exists(BACKUP_DIR)) {
+        mkdir(BACKUP_DIR, 744, true);
+    }
+
+    return $dir;
+}
+
+/**
  * backup given file to sys/backup folder
  * @param  varchar $fileName
  * @return boolean
@@ -172,9 +188,7 @@ function backupFile($fileName)
         return false;
     }
 
-    $backupDir = getBackupDir();
-
-    return rename($fileName, $backupDir . date('Ymd_His_') . basename($fileName));
+    return rename($fileName, BACKUP_DIR . date('Ymd_His_') . basename($fileName));
 }
 
 /**
@@ -184,26 +198,9 @@ function backupFile($fileName)
  */
 function backupDB($dbName, $dbUser, $dbPass)
 {
-    $backupDir = getBackupDir();
-
-    $fileName = $backupDir . date('Ymd_His_') . $dbName . '.sql';
+    $fileName = BACKUP_DIR . date('Ymd_His_') . $dbName . '.sql';
 
     exec('mysqldump --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
 
     return true;
-}
-
-/**
- * return backup folder and automaticly creates it if doesnt exist
- * @return varchar
- */
-function getBackupDir()
-{
-    $rez = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR;
-
-    if (!file_exists($rez)) {
-        @mkdir($rez, 0744, true);
-    }
-
-    return $rez;
 }

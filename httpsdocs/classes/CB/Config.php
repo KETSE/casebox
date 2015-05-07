@@ -17,6 +17,13 @@ class Config extends Singleton
     public static $CORESTATUS_ACTIVE = 1;
     public static $CORESTATUS_MAINTAINANCE = 2;
 
+    /* flags */
+    protected static $flags = array(
+        'disableTriggers' => false
+        ,'disableSolrIndexing' => false
+        ,'disableActivityLog' => false
+    );
+
     /**
      * method for laoding core config
      * @param  array $cfg default configuration
@@ -213,8 +220,8 @@ class Config extends Singleton
         $now = strtotime('now');
 
         if (//(is_null($startTime) && is_null($endTime)) ||
-            (!is_null($startTime) && ($startTime > $now)) ||
-            (!is_null($endTime) && ($endTime < $now))
+            (!is_null($startTime) && ($startTime > $now)) //||
+            //(!is_null($endTime) && ($endTime < $now)) // dont autoenable after end time
         ) {
             return static::$CORESTATUS_ACTIVE;
         }
@@ -251,20 +258,51 @@ class Config extends Singleton
                 break;
 
             case static::$CORESTATUS_MAINTAINANCE:
+                $coreName = static::get('core_name');
+
+                $rez = file_get_contents(TEMPLATES_DIR . 'maintenance.html');
+                if (empty($rez)) {
+                    $rez = 'Core is under maintainance, please try again {time}.';
+                }
+
                 $mcfg = static::get('maintainance');
+
                 $endTime = empty($mcfg['endTime'])
                     ? null
-                    : strtotime($mcfg['endTime']);
-                $rez = 'Core is under maintainance, please try again ';
+                    : $mcfg['endTime'];
 
-                if (is_null($endTime)) {
-                    $rez .= 'later.';
-                } else {
-                    require_once 'lib/language.php';
-                    $rez .= 'at ' .
-                        Util\formatTaskTime(date(DATE_ISO8601, $endTime)) .
-                        ' ' . User::getTimezone();
+                $time = 'later.';
+                if (!is_null($endTime)) {
+                    $dt = new \DateTime($endTime);
+                    $ct = new \DateTime('now');
+                    $diff = $ct->diff($dt);
+
+                    if ($diff->invert == 0) {
+                        $time = $diff->h;
+                        var_dump($time);
+                        if ($time > 0) {
+                            $time = 'in ~' . $time . ' hour(s).';
+                        } else {
+                            $time = 'in about an hour.';
+                        }
+                    } {
+                        $time = 'soon.';
+                    }
                 }
+
+                $rez = str_replace(
+                    array(
+                        '{title}',
+                        '{mail}',
+                        '{time_left}'
+                    ),
+                    array(
+                        static::get('project_name_en', $coreName),
+                        static::get('admin_email'),
+                        $time
+                    ),
+                    $rez
+                );
 
                 break;
         }
@@ -897,24 +935,28 @@ class Config extends Singleton
     }
 
     /**
-    * Check if a given value is presend in a config property
-    * Property is considered to be an array or a comma separated list of values
-    *
-    * @param  varchar $optionName name of the option to get
-    * @param  varchar $value checked value
-    * @return boolean
+    * get flag value
+    * @param  varchar $name  flag name
+    * @return variant return false if not set
     */
-    public static function isInListValue($optionName, $value)
+    public static function getFlag($name)
     {
-        $v = static::get($optionName);
-        if (is_scalar($v) || is_null($v)) {
-            $v = explode(',', $v);
+        if (isset(static::$flags[$name])) {
+            return static::$flags[$name];
         }
 
-        return in_array(
-            $value,
-            $v
-        );
+        return false;
+    }
+
+    /**
+    * set flag value
+    * @param  varchar $name
+    * @param  variant $value
+    * @return variant return false if not set
+    */
+    public static function setFlag($name, $value)
+    {
+        static::$flags[$name] = $value;
     }
 
     /**

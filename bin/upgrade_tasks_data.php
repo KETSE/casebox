@@ -38,7 +38,7 @@ $cron_id = 'dummy';
 
 include $path.'init.php';
 
-\CB\Cache::set('disable_logs', true);
+\CB\Config::setFlag('disableActivityLog', true);
 
 //select tasks count
 $res = DB\dbQuery(

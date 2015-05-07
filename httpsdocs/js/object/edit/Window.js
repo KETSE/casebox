@@ -198,6 +198,16 @@ Ext.define('CB.object.edit.Window', {
             ,items: []
         });
 
+        this.gridContainer.params = this.data;
+
+        this.gridContainer.onTaskChanged = Ext.Function.createSequence(
+            CB.object.plugin.ObjectProperties.prototype.onTaskChanged
+            ,Ext.Function.bind(this.loadPreviewData, this)
+            ,this.gridContainer
+        );
+
+        this.gridContainer.attachEvents = CB.object.plugin.ObjectProperties.prototype.attachEvents;
+
         this.pluginsContainer = Ext.create({
             xtype: 'CBObjectProperties'
             ,api: CB_Objects.getPluginsData
@@ -602,6 +612,10 @@ Ext.define('CB.object.edit.Window', {
         this.updateWindowTitle();
 
         this.updateButtons();
+
+        if(this.gridContainer.rendered) {
+            this.gridContainer.attachEvents();
+        }
 
         this.fireEvent('loaded', this);
     }
