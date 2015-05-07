@@ -227,3 +227,5 @@ if ($r) {
         }
     }
 }
+
+exec('php "' . $path . 'languages_update_js_files.php"');

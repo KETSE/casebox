@@ -66,7 +66,9 @@ class PreviewExtractorOffice extends PreviewExtractor
 
             exec($cmd, $output, $returnStatus); //returnStatus should be 0 if no error
 
-            unlink($nfn);
+            //we cant delete the file right away
+            //because command can execute in background and could take some time
+            //unlink($nfn);
 
             if (empty($returnStatus) && file_exists($pfn)) {
                 file_put_contents(

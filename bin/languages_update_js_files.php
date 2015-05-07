@@ -6,8 +6,7 @@
 
 namespace CB;
 
-$ds = DIRECTORY_SEPARATOR;
-$path = realpath(dirname(__FILE__) . $ds . '..' . $ds . 'httpsdocs') . $ds;
+$path = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'httpsdocs' . DIRECTORY_SEPARATOR;
 
 require_once $path . 'config_platform.php';
 
