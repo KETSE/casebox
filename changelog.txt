@@ -1,3 +1,12 @@
+CaseBox 1.9.440 (2015-05-11)
+==============================
+New Features, Improvements
+--------------------------
+- #5555 Add "email-invite" template used to send invites to new users
+- #5456 Administrators & SYSTEM groups meaning
+  removed "system" group dependency, now we have only root user as sys admin
+- #5812 Can't d&d files from CB to an Obj while creating it
+
 CaseBox 1.9.439 (2015-05-07)
 ==============================
 New Features, Improvements

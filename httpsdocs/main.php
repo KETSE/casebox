@@ -26,7 +26,7 @@ if (empty($_SESSION['user'])) {
 
 require_once(LIB_DIR . 'MinifyCache.php');
 
-$projectTitle = Config::get('project_name_' . Config::get('user_language'), $coreName);
+$projectTitle = Config::getProjectName();
 
 loadMinifyUris();
 ?>

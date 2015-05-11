@@ -1466,6 +1466,63 @@ class User
     }
 
     /**
+     * get username
+     * @param  variant $idOrData
+     * @return varchar
+     */
+    public static function getUsername($idOrData = false)
+    {
+        if ($idOrData === false) {
+            $idOrData = $_SESSION['user'];
+        }
+
+        $data = is_numeric($idOrData)
+            ? static::getPreferences($idOrData)
+            : $idOrData;
+
+        $rez = empty($data['name'])
+            ? ''
+            : $data['name'];
+
+        return $rez;
+    }
+
+    /**
+     * get user email
+     * @param  variant $idOrData
+     * @return varchar
+     */
+    public static function getEmail($idOrData = false)
+    {
+        if ($idOrData === false) {
+            $idOrData = $_SESSION['user']['id'];
+        }
+
+        $data = is_numeric($idOrData)
+            ? static::getPreferences($idOrData)
+            : $idOrData;
+
+        $rez = empty($data['email'])
+            ? ''
+            : $data['email'];
+
+        if (!empty($data['cfg']['security'])) {
+            $sec = &$data['cfg']['security'];
+
+            if (!empty($sec['recovery_email'])) {
+                $rez = $sec['recovery_email'];
+            }
+
+            //check if mail is set in security settings
+            if (!empty($sec['recovery_email']) && !empty($sec['email'])) {
+                $rez = $sec['email'];
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
      * get a user photo if set
      * @param  $idOrData  id or user data array
      * @param  $size32

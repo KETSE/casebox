@@ -9,7 +9,6 @@ $action = @$_GET['subcommand'];
 
 $prompt_for_new_password = false;
 
-$userLanguage = Config::get('user_language');
 $coreUrl = Config::get('core_url');
 
 switch ($action) {
@@ -120,7 +119,7 @@ switch ($action) {
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title><?php echo Config::get('project_name_'.strtoupper($userLanguage)) ?></title>
+<title><?php echo Config::getProjectName() ?></title>
 <?php
 echo '
 <link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap.min.css" />

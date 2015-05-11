@@ -22,7 +22,7 @@ if (!empty($_GET['view']) && is_numeric($_GET['view'])) {
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title><?php
 
-echo Config::get('project_name_' . \CB\Config::get('user_language'), $coreName);
+echo Config::getProjectName();
 
 ?></title>
     <link rel="stylesheet" type="text/css" href="/css/bs/css/bootstrap.min.css" />

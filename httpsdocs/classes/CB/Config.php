@@ -279,7 +279,6 @@ class Config extends Singleton
 
                     if ($diff->invert == 0) {
                         $time = $diff->h;
-                        var_dump($time);
                         if ($time > 0) {
                             $time = 'in ~' . $time . ' hour(s).';
                         } else {
@@ -297,7 +296,7 @@ class Config extends Singleton
                         '{time_left}'
                     ),
                     array(
-                        static::get('project_name_en', $coreName),
+                        static::getProjectName(),
                         static::get('admin_email'),
                         $time
                     ),
@@ -305,6 +304,32 @@ class Config extends Singleton
                 );
 
                 break;
+        }
+
+        return $rez;
+    }
+
+    /**
+     * get project name from config
+     * if cannot be found - core_name is returned
+     * @return varchar
+     */
+    public static function getProjectName()
+    {
+        $userLanguage = Config::get('user_language', 'en');
+
+        $rez = static::get('project_name_' . $userLanguage);
+
+        if (empty($rez)) {
+            $rez = static::get('project_name');
+        }
+
+        if (empty($rez)) {
+            $rez = static::get('project_name_en');
+        }
+
+        if (empty($rez)) {
+            $rez = static::get('core_name');
         }
 
         return $rez;

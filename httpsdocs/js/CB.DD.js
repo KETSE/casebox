@@ -61,10 +61,12 @@ Ext.define('CB.DD', {
         if(params.confirm !== false){
             var sourceText = (params.sourceData.length == 1)
                 ? params.sourceData[0].name
-                : params.sourceData.length + ' objects';
+                : params.sourceData.length + ' objects'
+                ,targetName = Ext.valueFrom(params.targetData.name, params.targetData.title);
+
             Ext.Msg.confirm(
                 L.Confirmation
-                ,L['DDActionMsg_' + params.action].replace('{source}', sourceText).replace('{target}', params.targetData.name)
+                ,L['DDActionMsg_' + params.action].replace('{source}', sourceText).replace('{target}', targetName)
                 ,this.onConfirmExecution
                 ,this
             );
