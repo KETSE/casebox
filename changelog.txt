@@ -1,3 +1,10 @@
+CaseBox 1.9.441 (2015-05-12)
+==============================
+New Features, Improvements
+--------------------------
+- install script adjustments
+- update casebox and demosrc mysql dumps
+
 CaseBox 1.9.440 (2015-05-11)
 ==============================
 New Features, Improvements

@@ -50,11 +50,13 @@ function initSolrConfig(&$cfg)
 function verifyDBConfig(&$cfg)
 {
     echo "Verifying db params ... ";
+
+    global $dbh;
     $rez = true;
     $error = false;
 
     try {
-        @DB\connectWithParams($cfg);
+        $dbh = DB\connectWithParams($cfg);
 
         $error = mysqli_connect_errno();
 
