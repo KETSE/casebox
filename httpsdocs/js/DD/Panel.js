@@ -86,7 +86,28 @@ Ext.define('CB.DD.Panel', {
 
     ,onNodeEnter: function(el, source, ev, data){
         this.owner.getEl().addCls('drop-target');
-        // Ext.get(el).addCls('drop-target');
+
+        //check if object has an id and try to create it if doesnt
+        var id = Ext.valueFrom(this.owner.params.nid, this.owner.params.id);
+
+        if(Ext.isEmpty(this.getDraftIdTriggered) && isNaN(id)) {
+            var w, wel = ev.getTarget('.x-window');
+            if(wel) {
+                w = Ext.getCmp(wel.id);
+                if(w) {
+                    w.fireEvent(
+                        'getdraftid'
+                        ,function(id, r) {
+                            this.owner.params.id = id;
+                            this.owner.params.name = r.result.data.name;
+                        }
+                        ,this
+                    );
+                    this.getDraftIdTriggered = true;
+                }
+            }
+        }
+
     }
 
     ,getActionFromEvent: function(ev) {
@@ -183,6 +204,8 @@ Ext.define('CB.DD.Panel', {
                 : this.onScrollerDragDrop;
             callback(el, source, e, data);
         }
-        return false;
+
+        //dont return anything to avoid dd repair by ext
+        // return false;
     }
 });

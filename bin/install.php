@@ -174,23 +174,24 @@ if ($r) {
     echo "Error creating symlinks to solr configsets.\n\r";
 }
 
-//try to create cb_log core
+//try to create log core
+$logCoreName = $cfg['prefix'] . '_log';
 $solr = Solr\Service::verifyConfigConnection(
     array(
         'host' => $cfg['solr_host']
         ,'port' => $cfg['solr_port']
-        ,'core' => 'cb_log'
+        ,'core' => $logCoreName
         ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
     )
 );
 
 if ($solr === false) {
-    if (confirm('Solr core "cb_log" doesnt exist or can\'t access solr. Would you like to try to create it? (y/n): ')) {
+    if (confirm('Solr core "' . $logCoreName . '" doesnt exist or can\'t access solr. Would you like to try to create it? (y/n): ')) {
         echo 'Creating solr core ... ';
 
         if ($h = @fopen(
             'http://' . $cfg['solr_host']. ':' . $cfg['solr_port'] . '/solr/admin/cores?action=CREATE&' .
-            'name=cb_log&configSet=cb_log',
+            'name=' . $logCoreName . '&configSet=cb_log',
             'r'
         )) {
             fclose($h);
@@ -201,7 +202,7 @@ if ($solr === false) {
 
     }
 } else {
-    echo "cb_log solr core already exists.\n\r";
+    echo "$logCoreName solr core already exists.\n\r";
 }
 
 //create default database (<prefix>__casebox)

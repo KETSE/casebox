@@ -821,7 +821,7 @@ class Security
     public static function canRead($object_id, $user_group_id = false)
     {
         return (
-            // Security::isAdmin() ||
+            Security::isAdmin() ||
             (Security::getAccessBitForObject($object_id, static::$CAN_READ, $user_group_id) > 0)
         );
     }
@@ -1520,6 +1520,7 @@ class Security
 
     /**
      * Retreive a system group id by its name
+     * (only everyone left after removing "system" group)
      *
      * @return int
      */
@@ -1542,28 +1543,6 @@ class Security
         }
 
         return Cache::get('group_id_' . $groupName);
-    }
-
-    /**
-     * Retreive everyone group id
-     * Last as placeholder for backward compatibility
-     * Should be removed in future releases
-     * @return int
-     */
-    public static function everyoneGroupId()
-    {
-        return static::getSystemGroupId('everyone');
-    }
-
-    /**
-     * Retreive system group id
-     * Last as placeholder for backward compatibility
-     * Should be removed in future releases
-     * @return void
-     */
-    public static function systemGroupId()
-    {
-        return static::getSystemGroupId('system');
     }
 
     /**
@@ -1627,7 +1606,7 @@ class Security
     /* ----------------------------------------------------  OLD METHODS ------------------------------------------ */
 
     /**
-     * Check if user_id (or current loged user) is an administrator (member of "system" group)
+     * Check if user_id (or current loged user) is an administrator
      *
      * @param  int     $user_id
      * @return boolean
@@ -1643,22 +1622,18 @@ class Security
 
         if (!Cache::exist($var_name)) {
             $res = DB\dbQuery(
-                'SELECT g.id
-                FROM users_groups g
-                JOIN users_groups_association uga ON g.id = uga.group_id
-                AND uga.user_id = $1
-                WHERE g.system = 1
-                    AND g.name = $2',
-                array(
-                    $user_id
-                    ,'system'
-                )
+                'SELECT name
+                FROM users_groups
+                WHERE id = $1',
+                $user_id
             ) or die(DB\dbQueryError());
 
             if ($r = $res->fetch_assoc()) {
-                Cache::set($var_name, !empty($r['id']));
+                $rez = ($r['name'] == 'root');
             }
             $res->close();
+
+            Cache::set($var_name, $rez);
         }
 
         return Cache::get($var_name);

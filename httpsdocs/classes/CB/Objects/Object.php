@@ -819,10 +819,15 @@ class Object
      */
     public function getData()
     {
-        if (!$this->loaded && !empty($this->id)) {
-            $this->load();
-        }
-
+        // Its not correct to automatically load data
+        // because there could be other data set through update or create
+        // and by autoloading will override the data set.
+        // load method should be called manually when needed
+        //
+        // if (!$this->loaded && !empty($this->id)) {
+        //     $this->load();
+        // }
+        //
         return $this->data;
     }
 
@@ -1425,6 +1430,10 @@ class Object
         $body = '';
         $bottom = '';
         $gf = array();
+
+        if (!$this->loaded && !empty($this->id)) {
+            $this->load();
+        }
 
         $linearData = $this->getLinearData(true);
 

@@ -377,7 +377,7 @@ class UsersGroups
 
         //check if send invite is set and create notification
         if (!empty($p['send_invite'])) {
-            static::sendEmailInvite($user_id);
+            $this->sendResetPasswordMail($user_id, 'invite');
         }
 
         Security::calculateUpdatedSecuritySets();
@@ -675,7 +675,7 @@ class UsersGroups
      * @param  int     $userId
      * @return boolean
      */
-    public static function sendEmailInvite($userId)
+    public static function sendResetPasswordMail($userId, $template = 'recover')
     {
         if (!is_numeric($userId) ||
             (User::isLoged() && !Security::canEditUser($userId))
@@ -683,47 +683,66 @@ class UsersGroups
             return false;
         }
 
-        //load mail template
-        $mail = System::getEmailTemplate('password_recovery_email');
+        $mail = '';
+        $subject = '';
+
+        switch ($template) {
+            case 'invite':
+                $mail = System::getEmailTemplate('email_invite');
+                $subject = L\get('MailInviteSubject');
+
+                break;
+            case 'recover':
+                $mail = System::getEmailTemplate('password_recovery_email');
+                $subject = L\get('MailRecoverSubject');
+
+                break;
+
+            default:
+                return false;
+        }
 
         if (empty($mail)) {
             return false;
         }
 
         $userData = User::getPreferences($userId);
-
-        $userEmail = empty($userData['cfg']['security']['recovery_email'])
-            ? $userData['email']
-            : $userData['cfg']['security']['recovery_email'];
-
-        //check if mail is set in security settings
-        if (!empty($userData['cfg']['security']['recovery_email']) && !empty($userData['cfg']['security']['email'])) {
-            $userEmail = $userData['cfg']['security']['email'];
-        }
+        $userEmail = User::getEmail($userData);
 
         if (empty($userEmail)) {
             return false;
         }
 
-        /* generating recovery hash and sending mail */
+        /* generating invite hash and sending mail */
         $hash = User::generateRecoveryHash(
             $userId,
             $userId . $userEmail . date(DATE_ISO8601)
         );
 
-        $userName = User::getDisplayName($userData);
-
         $href = Util\getCoreHost().'recover/reset-password/?h='.$hash;
 
-        $mail = str_replace(
-            array('{name}', '{link}'),
-            array($userName, '<a href="'.$href.'" >'.$href.'</a>'),
-            $mail
+        /* replacing placeholders in template and subject */
+        $replacements  = array(
+            '{projectTitle}' => Config::getProjectName()
+            ,'{fullName}' => User::getDisplayName($userData)
+            ,'{username}' => User::getUsername($userData)
+            ,'{userEmail}' => $userEmail
+            ,'{creatorFullName}' => User::getDisplayName()
+            ,'{creatorUsername}' => User::getUsername()
+            ,'{creatorEmail}' => User::getEmail()
+            ,'{href}' => $href
+            ,'{link}' => '<a href="'.$href.'" >'.$href.'</a>'
         );
+
+        $search = array_keys($replacements);
+        $replace = array_values($replacements);
+
+        $mail = str_replace($search, $replace, $mail);
+        $subject = str_replace($search, $replace, $subject);
 
         return @System::sendMail(
             $userEmail,
-            L\get('MailRecoverSubject'),
+            $subject,
             $mail
         );
     }
@@ -736,7 +755,7 @@ class UsersGroups
     public function sendResetPassMail($userId)
     {
         return array(
-            'success' => $this->sendEmailInvite($userId)
+            'success' => $this->sendResetPasswordMail($userId)
         );
     }
 

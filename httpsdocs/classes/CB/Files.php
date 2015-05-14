@@ -681,7 +681,7 @@ class Files
                         break;
                     case 'replace':
                         /* TODO: only mark file as deleted but dont delte it
-                            Note: we cant leae the previous file record if we have a given id for file
+                            Note: we cant leave the previous file record if we have a given id for file
 
                         */
                         DB\dbQuery('CALL p_delete_tree_node($1)', $fileId) or die(DB\dbQueryError());

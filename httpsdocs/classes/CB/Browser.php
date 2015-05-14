@@ -1166,25 +1166,6 @@ class Browser
 
             $id = DB\dbLastInsertId();
 
-            // assign full control for "system" group
-            DB\dbQuery(
-                'INSERT INTO tree_acl
-                    (node_id
-                    , user_group_id
-                    , allow
-                    , deny)
-                VALUES ($1
-                    ,$2
-                    ,4095
-                    ,0) ON duplicate KEY
-                UPDATE allow = 4095
-                     , deny = 0',
-                array(
-                    $id
-                    ,Security::getSystemGroupId('system')
-                )
-            ) or die( DB\dbQueryError() );
-
             Solr\Client::runCron();
         }
 
