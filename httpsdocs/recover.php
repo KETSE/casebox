@@ -101,7 +101,7 @@ switch ($action) {
             }
         }
 
-        if (!UsersGroups::sendEmailInvite($user_id)) {
+        if (!UsersGroups::sendResetPasswordMail($user_id)) {
             $_SESSION['msg'] = '<div class="alert alert-error">Error occured. Administrator has been notified by mail. Please retry later.</div>';
             header('location: ' . $coreUrl . 'recover/forgot-password/');
             exit(0);

@@ -1,3 +1,10 @@
+CaseBox 1.9.442 (2015-05-14)
+==============================
+Fixed Bugs:
+----------
+- #5955 Uploading a file via API doesn't work: \CB\Api\Files::upload
+
+
 CaseBox 1.9.441 (2015-05-12)
 ==============================
 New Features, Improvements
