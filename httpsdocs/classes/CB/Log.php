@@ -17,11 +17,10 @@ class Log
      */
     public static function add(&$p)
     {
-        //check if log nod disabled by some script
+        $userId = User::getId();
 
-        if (Config::getFlag('disableActivityLog') ||
-            empty($_SESSION['user']['id'])
-        ) {
+        //check if log nod disabled by some script
+        if (Config::getFlag('disableActivityLog') || empty($userId)) {
             return;
         }
 
@@ -34,23 +33,7 @@ class Log
 
         fireEvent('beforelogadd', $p);
 
-        $p['logData'] = @array(
-            'name' => htmlspecialchars($data['name'], ENT_COMPAT)
-            ,'iconCls' => Browser::getIcon($data)
-            ,'pids' => empty($data['pids'])
-                ? Objects::getPids($data['id'])
-                : Util\toNumericArray($data['pids'])
-            ,'path' => htmlspecialchars(Util\coalesce($data['pathtext'], $data['path']), ENT_COMPAT)
-            ,'template_id' => $data['template_id']
-            ,'case_id' => $data['case_id']
-            ,'date' => $data['date']
-            ,'size' => $data['size']
-            ,'cid' => $data['cid']
-            ,'oid' => $data['oid']
-            ,'uid' => @$data['uid']
-            ,'cdate' => $data['cdate']
-            ,'udate' => $data['udate']
-        );
+        $p['logData'] = static::getLogData($p);
 
         DB\dbQuery(
             'INSERT INTO action_log (
@@ -63,7 +46,7 @@ class Log
             array(
                 $data['id']
                 ,@$data['pid']
-                ,$_SESSION['user']['id']
+                ,$userId
                 ,$p['type']
                 ,json_encode($p['logData'], JSON_UNESCAPED_UNICODE)
             )
@@ -73,6 +56,68 @@ class Log
         static::addSolrRecord($p);
 
         fireEvent('logadd', $p);
+    }
+
+    /**
+     * method to get and format the log data as needed
+     * @param  array &$p
+     * @return array
+     */
+    protected static function getLogData(&$p)
+    {
+        $rez = array();
+
+        $fields = array(
+            'name' => 1
+            ,'iconCls' => 1
+            ,'pids' => 1
+            ,'path' => 1
+            ,'template_id' => 1
+            ,'case_id' => 1
+            ,'date' => 1
+            ,'size' => 1
+            ,'cid' => 1
+            ,'oid' => 1
+            ,'uid' => 1
+            ,'cdate' => 1
+            ,'udate' => 1
+        );
+
+        $oldData = empty($p['old'])
+            ? array()
+            : $p['old']->getData();
+
+        $newData = empty($p['new'])
+            ? array()
+            : $p['new']->getData();
+
+        $oldData = array_intersect_key($oldData, $fields);
+        $newData = array_intersect_key($newData, $fields);
+
+        $rez = $newData + $oldData;
+
+        $rez['name'] = htmlspecialchars($rez['name'], ENT_COMPAT);
+
+        if (empty($rez['iconCls'])) {
+            $rez['iconCls'] = Browser::getIcon($rez);
+        }
+
+        $rez['pids'] = empty($rez['pids'])
+            ? Objects::getPids($rez['id'])
+            : Util\toNumericArray($rez['pids']);
+
+        $rez['path'] = htmlspecialchars(Util\coalesce($rez['pathtext'], $rez['path']), ENT_COMPAT);
+
+        // setting old and new properties of linear custom data
+        if (!empty($p['old'])) {
+            $rez['old'] = $p->getLinearData();
+        }
+
+        if (!empty($p['new'])) {
+            $rez['new'] = $p->getLinearData();
+        }
+
+        return $rez;
     }
 
     /**

@@ -3,7 +3,7 @@ CaseBox 1.9.439 (2015-05-07)
 New Features, Improvements
 --------------------------
 - #5892 Drop 'casebox' DB
-- #5480  create language files in install.php
+- #5480 create language files in install.php
 - #5887 A template field doesn't appear in objWnd
   refactored getting params for saving
 

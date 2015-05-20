@@ -1223,6 +1223,21 @@ class User
     }
 
     /**
+     * get id of currently loged user
+     * @return int | null
+     */
+    public static function getId()
+    {
+        $rez = null;
+
+        if (!empty($_SESSION['user']['id'])) {
+            $rez= $_SESSION['user']['id'];
+        }
+
+        return $rez;
+    }
+
+    /**
      * get user id by his username
      * @param  varchar $username
      * @return int     | null

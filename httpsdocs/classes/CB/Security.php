@@ -821,7 +821,7 @@ class Security
     public static function canRead($object_id, $user_group_id = false)
     {
         return (
-            // Security::isAdmin() ||
+            Security::isAdmin() ||
             (Security::getAccessBitForObject($object_id, static::$CAN_READ, $user_group_id) > 0)
         );
     }
