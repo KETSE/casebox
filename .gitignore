@@ -37,3 +37,4 @@ apigen.neon
 /tests/composer.phar
 /tests/composer.lock
 /tests/vendor
+/tests/temp

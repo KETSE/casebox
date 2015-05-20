@@ -1,5 +1,6 @@
 #/bin/bash
-## rununittests
+## rununittests inspired from 
+# https://coderwall.com/p/1yywoq/shell-script-to-run-phpunit-tests-with-or-without-code-coverage 
 # I try to automatize all tests by this shell 
 
 # The function to show the help
@@ -31,7 +32,7 @@ if [ ! -f $DIR/vendor/bin/phpunit ]; then
 fi
 
 # The default destination of the coverage results
-DEST="$DIR/temp/unittestresults"
+DEST="$DIR/temp/"
 
 # If option '-c' is passed, the coverage that we will generate
 coverage=''
@@ -39,6 +40,7 @@ while getopts "c:d:h?" opt; do
     case $opt in
         c) 
             coverage="--coverage-$OPTARG"
+            OUTFILE="unittestresults.$OPTARG"
             continue
         ;;
         d)
@@ -53,7 +55,7 @@ while getopts "c:d:h?" opt; do
 done
 if [ $coverage ];
     then
-        $DIR/vendor/bin/phpunit $coverage $dest --verbose --bootstrap init.php $DIR
+        $DIR/vendor/bin/phpunit $coverage --verbose --bootstrap init.php $DIR/*Test.php >$DEST$OUTFILE
         exit
     fi
 
