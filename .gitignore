@@ -36,3 +36,4 @@ apigen.neon
 /nbproject
 /tests/composer.phar
 /tests/composer.lock
+/tests/vendor
