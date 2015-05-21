@@ -52,8 +52,15 @@ require_once LIB_DIR . 'DB.php';
 
 /* end of update include_path and include scripts */
 
+$cfg = array();
+//define some library paths
+$cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
+$cfg['SOLR_CLIENT'] = 'Solr/Service.php';
+$cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
+$cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
+
 //load main config so that we can connect to casebox db and read configuration for core
-$cfg = Config::loadConfigFile(DOC_ROOT.'config.ini');
+$cfg = Config::loadConfigFile(DOC_ROOT.'config.ini') + $cfg;
 
 //define global prefix used
 define(
@@ -91,11 +98,6 @@ if (empty($cfg['PYTHON'])) {
 
 //set unoconv path
 $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . DIRECTORY_SEPARATOR . 'unoconv"';
-
-$cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
-$cfg['SOLR_CLIENT'] = 'Solr/Service.php';
-$cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
-$cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
 Cache::set('platformConfig', $cfg);
 

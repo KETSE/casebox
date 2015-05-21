@@ -157,7 +157,7 @@ function getTikaResult($filename)
 {
     $file = fopen($filename, "rb");
 
-    $ch = curl_init('http://127.0.0.1:9998/all');
+    $ch = curl_init('http://127.0.0.1:9998/unpack/all');
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_PUT, true);

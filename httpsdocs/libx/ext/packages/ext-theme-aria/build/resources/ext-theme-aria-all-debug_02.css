@@ -1,3 +1,28 @@
+/* line 396, ../../../ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-top-tl,
+.x-panel-header-light-framed-collapsed-top-bl,
+.x-panel-header-light-framed-collapsed-top-ml {
+  padding-left: 5px; }
+
+/* line 400, ../../../ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-top-tc {
+  height: 5px; }
+
+/* line 403, ../../../ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-top-bc {
+  height: 5px; }
+
+/* line 414, ../../../ext-theme-base/sass/etc/mixins/frame.scss */
+.x-panel-header-light-framed-collapsed-top-tl,
+.x-panel-header-light-framed-collapsed-top-bl,
+.x-panel-header-light-framed-collapsed-top-tr,
+.x-panel-header-light-framed-collapsed-top-br,
+.x-panel-header-light-framed-collapsed-top-tc,
+.x-panel-header-light-framed-collapsed-top-bc,
+.x-panel-header-light-framed-collapsed-top-ml,
+.x-panel-header-light-framed-collapsed-top-mr {
+  background-image: url(images/panel-header/panel-header-light-framed-collapsed-top-corners.gif); }
+
 /* line 454, ../../../ext-theme-base/sass/etc/mixins/frame.scss */
 .x-panel-header-light-framed-collapsed-top-ml,
 .x-panel-header-light-framed-collapsed-top-mr {

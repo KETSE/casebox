@@ -18,7 +18,7 @@ class CreateMenu
         //get item path if id specified
         if (is_numeric($path)) {
             $tmp = \CB\Path::getPath($path);
-            $path = $tmp['path'];
+            $path = '/' . $tmp['path'];
         }
 
         if (is_string($path)) {

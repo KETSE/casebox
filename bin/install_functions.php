@@ -27,7 +27,7 @@ function initSolrConfig(&$cfg)
 
         $retry = false;
         if (!file_exists($cfg['solr_home'])) {
-            $retry = confirm('Can\'t access specified path, would you like to check and enter it again (y/n):' . "\n");
+            $retry = confirm('Can\'t access specified path, would you like to check and enter it again [Y/n]:' . "\n");
         }
 
     } while ($retry);
@@ -65,7 +65,7 @@ function verifyDBConfig(&$cfg)
     }
 
     if ($error) {
-        $rez = !confirm('Failed to connect to DB with error: ' . mysqli_connect_error() . "\n" . ', would you like to update inserted params (y/n):' . "\n");
+        $rez = !confirm('Failed to connect to DB with error: ' . mysqli_connect_error() . "\n" . ', would you like to update inserted params [Y/n]: ');
     } else {
         echo "Ok\n";
     }
@@ -128,6 +128,7 @@ function confirm($message)
     $l = '';
     do {
         $l = readALine($message);
+        $l = strtolower($l);
     } while (!in_array($l, array('y', 'n')));
 
     return ($l == 'y');
@@ -166,6 +167,10 @@ function putIniFile ($file, $array, $i = 0)
  */
 function defineBackupDir(&$cfg)
 {
+    if (defined('CB\\BACKUP_DIR')) {
+        return BACKUP_DIR;
+    }
+
     $dir = empty($cfg['backup_dir'])
         ? dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
         : $cfg['backup_dir'];

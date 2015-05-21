@@ -89,7 +89,7 @@ if (!empty($l)) {
 }
 
 //define comments email params
-if (confirm('Would you like to define comments email parametters? (y/n)')) {
+if (confirm('Would you like to define comments email parametters [Y/n]:')) {
     $l = readALine('Specify comments email address, used to receive replies for Casebox comment notifications (default "' . $cfg['comments_email'] . '"):' . "\n");
     if (!empty($l)) {
         $cfg['comments_email'] = $l;
@@ -105,7 +105,7 @@ if (confirm('Would you like to define comments email parametters? (y/n)')) {
         $cfg['comments_port'] = $l;
     }
 
-    $l = readALine('Specify if ssl connection is used for comments email server (y/n):' . "\n");
+    $l = readALine('Specify if ssl connection is used for comments email server [Y/n]: ');
     if (!empty($l)) {
         $cfg['comments_ssl'] = $l;
     }
@@ -146,7 +146,7 @@ do {
     );
 
     if ($r === false) {
-        $r = !confirm(' error saving to config.ini file. retry (y/n)?:');
+        $r = !confirm(' error saving to config.ini file. retry [Y/n]: ');
     } else {
         echo "Ok\n\n";
     }
@@ -186,7 +186,7 @@ $solr = Solr\Service::verifyConfigConnection(
 );
 
 if ($solr === false) {
-    if (confirm('Solr core "' . $logCoreName . '" doesnt exist or can\'t access solr. Would you like to try to create it? (y/n): ')) {
+    if (confirm('Solr core "' . $logCoreName . '" doesnt exist or can\'t access solr. Would you like to try to create it [Y/n]: ')) {
         echo 'Creating solr core ... ';
 
         if ($h = @fopen(
@@ -206,11 +206,12 @@ if ($solr === false) {
 }
 
 //create default database (<prefix>__casebox)
+DB\connectWithParams($cfg);
 $cbDb = $cfg['prefix'] . '__casebox';
 
 $r = DB\dbQuery('use `' . $cbDb . '`');
 if ($r) {
-    if (confirm("'$cbDb' database exists. Would you like to backup it and overwrite with dump from current installation? (y/n): ")) {
+    if (confirm("'$cbDb' database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: ")) {
         echo 'Backuping .. ';
         backupDB($cbDb, $cfg['db_user'], $cfg['db_pass']);
         echo "Ok\n";
@@ -220,7 +221,7 @@ if ($r) {
         echo "Ok\n";
     }
 } else {
-    if (confirm("$cbDb database does not exist. Would you like to create it from current installation dump file? (y/n): ")) {
+    if (confirm("$cbDb database does not exist. Would you like to create it from current installation dump file [Y/n]: ")) {
         if (DB\dbQuery('CREATE DATABASE `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
             exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . APP_DIR . 'install/mysql/_casebox.sql');
         } else {
@@ -229,4 +230,24 @@ if ($r) {
     }
 }
 
+echo 'Creating language files .. ';
 exec('php "' . $path . 'languages_update_js_files.php"');
+echo "Ok\n";
+
+if (confirm(
+    "\n\nCasebox was successfully configured on your system, ".
+    "you should create at least one Core to use it. ".
+    "Do you like to create the basic default core [Y,n]: "
+)) {
+    $l = readALine("Core name:\n");
+    if (!empty($l)) {
+        $options = array(
+            'core' => $l
+            ,'sql' => APP_DIR . 'install/mysql/bare_bone_core.sql'
+        );
+
+        include $path . 'core_create.php';
+    }
+
+}
+echo "Done\n";

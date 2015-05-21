@@ -1,3 +1,67 @@
+/* line 78, ../../../ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-outer-border-trb {
+  border-top-color: white !important;
+  border-top-width: 1px !important;
+  border-right-color: white !important;
+  border-right-width: 1px !important;
+  border-bottom-color: white !important;
+  border-bottom-width: 1px !important; }
+
+/* line 86, ../../../ext-theme-base/sass/etc/mixins/border-management.scss */
+.x-panel-light-outer-border-trbl {
+  border-color: white !important;
+  border-width: 1px !important; }
+
+/* line 256, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-light-framed {
+  border-color: white;
+  padding: 0; }
+
+/* line 262, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed {
+  font-size: 15px;
+  border: 1px solid white; }
+  /* line 269, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+  .x-panel-header-light-framed .x-tool-img {
+    background-image: url(images/tools/tool-sprites-dark.png);
+    background-color: white; }
+
+/* line 282, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-horizontal {
+  padding: 5px 15px 5px 15px; }
+  /* line 286, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+  .x-panel-header-light-framed-horizontal .x-panel-header-light-framed-tab-bar {
+    margin-top: -5px;
+    margin-bottom: -5px; }
+
+/* line 294, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-horizontal.x-header-noborder {
+  padding: 6px 16px 5px 16px; }
+  /* line 298, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+  .x-panel-header-light-framed-horizontal.x-header-noborder .x-panel-header-light-framed-tab-bar {
+    margin-top: -6px;
+    margin-bottom: -5px; }
+
+/* line 306, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-vertical {
+  padding: 15px 5px 15px 5px; }
+  /* line 310, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+  .x-panel-header-light-framed-vertical .x-panel-header-light-framed-tab-bar {
+    margin-right: -5px;
+    margin-left: -5px; }
+
+/* line 318, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-framed-vertical.x-header-noborder {
+  padding: 16px 6px 16px 5px; }
+  /* line 322, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+  .x-panel-header-light-framed-vertical.x-header-noborder .x-panel-header-light-framed-tab-bar {
+    margin-right: -6px;
+    margin-left: -5px; }
+
+/* line 331, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-rtl.x-panel-header-light-framed-vertical {
+  padding: 15px 5px 15px 5px; }
+  /* line 335, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
   .x-rtl.x-panel-header-light-framed-vertical .x-panel-header-light-framed-tab-bar {
     margin-left: -5px;
     margin-right: -5px; }

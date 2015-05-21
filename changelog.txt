@@ -1,3 +1,22 @@
+CaseBox 1.9.443 (2015-05-21)
+==============================
+New Features, Improvements
+--------------------------
+- #6050 Bare bone (raw) Casebox core
+- #6054 Improve install.php & create_core.php scripts
+- #6065 Upgrade ExtJS: 5.1.1
+
+Fixed Bugs:
+----------
+- #6035 install.php doesn't work outside bin folder
+
+CaseBox 1.9.442 (2015-05-14)
+==============================
+Improvements
+----------
+- #4810 Arabic language icons misaligned
+
+
 CaseBox 1.9.442 (2015-05-14)
 ==============================
 Fixed Bugs:

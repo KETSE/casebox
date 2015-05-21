@@ -1,3 +1,81 @@
+  .x-panel-header-title-light > .x-title-icon-wrap-light > .x-title-glyph {
+    color: white;
+    font-size: 16px;
+    line-height: 16px;
+    opacity: 0.5; }
+    /* line 469, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+    .x-ie8 .x-panel-header-title-light > .x-title-icon-wrap-light > .x-title-glyph {
+      color: #eff4f8; }
+
+/* line 479, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-body-light {
+  background: white;
+  border-color: #dfeaf2;
+  color: black;
+  font-size: 15px;
+  font-weight: normal;
+  font-family: helvetica, arial, verdana, sans-serif;
+  border-width: 1px;
+  border-style: solid; }
+
+/* line 643, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light {
+  background-image: none;
+  background-color: #dfeaf2; }
+
+/* line 647, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel-header-light-vertical {
+  background-image: none;
+  background-color: #dfeaf2; }
+
+/* line 652, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-rtl.x-panel-header-light-vertical {
+  background-image: none;
+  background-color: #dfeaf2; }
+
+/* line 705, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel .x-panel-header-light-collapsed-border-top {
+  border-bottom-width: 1px !important; }
+/* line 709, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel .x-panel-header-light-collapsed-border-right {
+  border-left-width: 1px !important; }
+/* line 713, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel .x-panel-header-light-collapsed-border-bottom {
+  border-top-width: 1px !important; }
+/* line 717, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */
+.x-panel .x-panel-header-light-collapsed-border-left {
+  border-right-width: 1px !important; }
+
+/*<if slicer>*/
+/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
+.x-cmd-slicer.x-panel-header-light-top:before {
+  display: none;
+  content: "x-slicer:stretch:bottom" !important; }
+
+/*</if slicer>*/
+/* */
+/*<if slicer>*/
+/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
+.x-cmd-slicer.x-panel-header-light-bottom:before {
+  display: none;
+  content: "x-slicer:stretch:top" !important; }
+
+/*</if slicer>*/
+/* */
+/*<if slicer>*/
+/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
+.x-cmd-slicer.x-panel-header-light-left:before {
+  display: none;
+  content: "x-slicer:stretch:right" !important; }
+
+/*</if slicer>*/
+/* */
+/*<if slicer>*/
+/* line 83, ../../../ext-theme-base/sass/etc/mixins/slicer.scss */
+.x-cmd-slicer.x-panel-header-light-right:before {
+  display: none;
+  content: "x-slicer:stretch:left" !important; }
+
 /*</if slicer>*/
 /* */
 /* line 753, ../../../ext-theme-neutral/sass/src/panel/Panel.scss */

@@ -17,7 +17,9 @@ require_once $cbPath . 'httpsdocs/config_platform.php';
 require_once $path . 'install_functions.php';
 
 //check script options
-$options = getopt('c:s:', array('core:', 'sql:'));
+if (empty($options)) {
+    $options = getopt('c:s:', array('core:', 'sql:'));
+}
 
 $coreName = empty($options['c'])
     ? @$options['core']
@@ -104,6 +106,7 @@ DB\dbQuery(
 //verify if solr core exist
 $solrHost = $cfg['solr_host'];
 $solrPort = $cfg['solr_port'];
+$createCore = true;
 $askReindex = true;
 
 $solr = Solr\Service::verifyConfigConnection(
@@ -115,31 +118,46 @@ $solr = Solr\Service::verifyConfigConnection(
     )
 );
 
-if ($solr === false) {
-    if (confirm('Solr core "' . $dbName . '" doesnt exist. Would you like to create it? (y/n): ')) {
-        echo 'Creating solr core ... ';
-
+if ($solr !== false) {
+    if (confirm('Solr core "' . $dbName . '" already exists, overwrite [Y/n]: ')) {
+        echo 'Unload current core ... ';
         if ($h = fopen(
-            'http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=CREATE&' .
-            'name=' . $dbName . '&configSet=cb_default',
+            'http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=UNLOAD&' .
+            'core=' . $dbName . '&deleteIndex=true',
             'r'
         )) {
             fclose($h);
 
             echo "Ok\n";
         } else {
-            echo "Error creating core.\n";
+            echo "Error unloading core.\n";
+            $createCore = false;
         }
     } else {
+        $createCore = false;
+    }
+}
+
+if ($createCore) {
+    echo 'Creating solr core ... ';
+
+    if ($h = fopen(
+        'http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=CREATE&' .
+        'name=' . $dbName . '&configSet=cb_default',
+        'r'
+    )) {
+        fclose($h);
+
+        echo "Ok\n";
+    } else {
+        echo "Error creating core.\n";
         $askReindex = false;
     }
-} else {
-    echo "Solr core exists.\n";
 }
 
 if ($askReindex) {
-    if (confirm('Do you want to start full core reindex? (y/n): ')) {
-        echo 'Reindex solr core ... ';
+    if (confirm('Reindex core [Y/n]: ')) {
+        echo 'Reindexing core ... ';
         exec('php -f ' . $path . 'solr_reindex_core.php -- -c ' . $coreName . ' -a -l');
         echo "Ok\n";
     }
