@@ -836,6 +836,57 @@ class Objects
     }
 
     /**
+     * set subscription to an object for current user
+     * @param array $p
+     *        [
+     *            int objectId
+     *            varchar type      (follow, watch, ignore)
+     *        ]
+     * return array     json responce
+     */
+    public function setSubscription($p)
+    {
+        //validate input params
+        if (empty($p['objectId']) || !is_numeric($p['objectId']) ||
+            empty($p['type']) || !in_array($p['type'], array('follow', 'watch', 'ignore'))
+        ) {
+            throw new \Exception(L\get('Wrong_input_data'));
+        }
+
+        //set subscription
+        $userId = User::getId();
+        $obj = $this->getCachedObject($p['objectId']);
+        $sd = $obj->getSysData();
+        $fu = empty($sd['fu'])
+            ? array()
+            : $sd['fu'];
+        $wu = empty($sd['wu'])
+            ? array()
+            : $sd['wu'];
+
+        switch ($p['type']) {
+            case 'follow':
+                $sd['wu'] = array_diff($wu, array($userId));
+                $sd['fu'] = array_diff($fu, array($userId)) + array($userId);
+                break;
+
+            case 'watch':
+                $sd['fu'] = array_diff($fu, array($userId));
+                $sd['wu'] = array_diff($wu, array($userId)) + array($userId);
+                break;
+
+            case 'ignore':
+                $sd['fu'] = array_diff($fu, array($userId));
+                $sd['wu'] = array_diff($wu, array($userId));
+                break;
+        }
+
+        $obj->updateSysData($sd);
+
+        return array('success' => true);
+    }
+
+    /**
      * get data for defined plugins to be displayed in properties panel for selected object
      * @param  array $p remote properties containing object id
      * @return ext   direct responce

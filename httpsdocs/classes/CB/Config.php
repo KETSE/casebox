@@ -4,7 +4,6 @@ namespace CB;
 /**
  * Class used for configuration management
  */
-use CB\DB as DB;
 
 class Config extends Singleton
 {
@@ -147,7 +146,7 @@ class Config extends Singleton
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $rez = json_decode($r['cfg'], true);
+            $rez = Util\jsonDecode($r['cfg']);
         } else {
             throw new \Exception('Core not defined in cores table: '.$coreName, 1);
         }

@@ -607,8 +607,8 @@ class User
                 ,$p['sex']
                 ,$p['email']
                 ,$p['language_id']
-                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
-                ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($cfg)
+                ,Util\jsonEncode($p['data'])
             )
         ) or die(DB\dbQueryError());
 
@@ -1084,6 +1084,21 @@ class User
             $rez = $r['id'];
         }
         $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get id of currently loged user
+     * @return int | null
+     */
+    public static function getId()
+    {
+        $rez = null;
+
+        if (!empty($_SESSION['user']['id'])) {
+            $rez= $_SESSION['user']['id'];
+        }
 
         return $rez;
     }
@@ -1677,7 +1692,7 @@ class User
             WHERE id = $1',
             array(
                 $userId
-                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($cfg)
             )
         ) or die(DB\dbQueryError());
     }

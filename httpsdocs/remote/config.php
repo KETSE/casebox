@@ -17,8 +17,6 @@ $API = array_merge(
                 ,'toggleFavorite'       => array('len' => 1)
                 ,'takeOwnership'        => array('len' => 1)
                 ,'getObjectsForField'   => array('len' => 1)
-                ,'subscribe'            => array('len' => 1)
-                ,'unsubscribe'          => array('len' => 1)
             )
         )
 
@@ -83,6 +81,7 @@ $API = array_merge(
                 ,'getAssociatedObjects' =>  array('len'=>1)
                 ,'getPluginsData'       =>  array('len'=>1)
                 ,'getBasicInfoForId'    =>  array('len'=>1)
+                ,'setSubscription'      =>  array('len'=>1)
                 ,'addComment'           =>  array('len'=>1)
                 ,'updateComment'        =>  array('len'=>1)
                 ,'removeComment'        =>  array('len'=>1)

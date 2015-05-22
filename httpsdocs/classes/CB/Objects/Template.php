@@ -95,7 +95,7 @@ class Template extends Object
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($value);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -114,7 +114,7 @@ class Template extends Object
 
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($value);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -244,7 +244,7 @@ class Template extends Object
                 $value = @$this->getFieldValue($fieldName, 0)['value'];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($value);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -254,7 +254,7 @@ class Template extends Object
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($value);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -369,7 +369,7 @@ class Template extends Object
                 if (isset($field[$fieldName])) {
                     $value = (is_scalar($field[$fieldName]) || is_null($field[$fieldName]))
                         ? $field[$fieldName]
-                        : json_encode($field[$fieldName], JSON_UNESCAPED_UNICODE);
+                        : Util\jsonEncode($field[$fieldName]);
                     $saveFields[] = $fieldName;
                     $saveValues[] = $value;
                     $insertParams[] = "\$$i";
@@ -633,15 +633,11 @@ class Template extends Object
                     break;
 
                 case 'date':
-                    $value = Util\formatMysqlDate($value);
+                    $value = Util\formatMysqlDate(Util\dateISOToMysql($value));
                     break;
 
                 case 'datetime':
-                    // $value = Util\formatMysqlTime($value);
-                    $value = Util\formatMysqlDate(
-                        $value,
-                        \CB\getOption('short_date_format'). ' ' . \CB\getOption('time_format')
-                    );
+                    $value = Util\UTCTimeToUserTimezone($value);
 
                     break;
 
@@ -687,7 +683,7 @@ class Template extends Object
                 default:
                     if (is_array($value)) {
                         $cacheValue = false;
-                        $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+                        $value = Util\jsonEncode($value);
                     } else {
                         $value = htmlspecialchars($value, ENT_COMPAT);
                     }

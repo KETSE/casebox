@@ -13,7 +13,7 @@ function loadMinifyUris()
     $cacheFile = MINIFY_CACHE_DIR . 'urls_cache';
 
     if (file_exists($cacheFile)) {
-        $uris = json_decode(file_get_contents($cacheFile), true);
+        $uris = Util\jsonDecode(file_get_contents($cacheFile));
         Cache::set('MinifyUris', $uris);
     }
 }
@@ -29,7 +29,7 @@ function saveMinifyUris()
     if (!empty($uris['modified'])) {
         $cacheFile = MINIFY_CACHE_DIR . 'urls_cache';
 
-        file_put_contents($cacheFile, json_encode($uris));
+        file_put_contents($cacheFile, Util\jsonEncode($uris));
     }
 }
 
