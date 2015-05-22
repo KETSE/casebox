@@ -35,6 +35,8 @@ class Log
 
         $p['logData'] = static::getLogData($p);
 
+        $p['activityData'] = static::getActivityData($data);
+
         DB\dbQuery(
             'INSERT INTO action_log (
               `object_id`
@@ -42,15 +44,18 @@ class Log
               ,`user_id`
               ,`action_type`
               ,`data`
-            ) VALUES ($1, $2, $3, $4, $5)',
+              ,`activity_data_db`
+            ) VALUES ($1, $2, $3, $4, $5, $6)',
             array(
                 $data['id']
                 ,@$data['pid']
                 ,$userId
                 ,$p['type']
-                ,json_encode($p['logData'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($p['logData'])
+                ,Util\jsonEncode($p['activityData'])
             )
         );
+
         $p['action_id'] = DB\dbLastInsertId();
 
         static::addSolrRecord($p);
@@ -68,7 +73,8 @@ class Log
         $rez = array();
 
         $fields = array(
-            'name' => 1
+            'id' => 1
+            ,'name' => 1
             ,'iconCls' => 1
             ,'pids' => 1
             ,'path' => 1
@@ -96,6 +102,8 @@ class Log
 
         $rez = $newData + $oldData;
 
+        Util\unsetNullValues($rez);
+
         $rez['name'] = htmlspecialchars($rez['name'], ENT_COMPAT);
 
         if (empty($rez['iconCls'])) {
@@ -106,15 +114,66 @@ class Log
             ? Objects::getPids($rez['id'])
             : Util\toNumericArray($rez['pids']);
 
-        $rez['path'] = htmlspecialchars(Util\coalesce($rez['pathtext'], $rez['path']), ENT_COMPAT);
+        $rez['path'] = htmlspecialchars(@Util\coalesce($rez['pathtext'], $rez['path']), ENT_COMPAT);
 
-        // setting old and new properties of linear custom data
-        if (!empty($p['old'])) {
-            $rez['old'] = $p->getLinearData();
+        switch ($p['type']) {
+            case 'comment':
+            case 'comment_update':
+                $rez['comment'] = $p['comment'];
+                break;
+
+            default:
+                // setting old and new properties of linear custom data
+                if (!empty($p['old'])) {
+                    $rez['old'] = $p['old']->getAssocLinearData();
+                }
+
+                if (!empty($p['new'])) {
+                    $rez['new'] = $p['new']->getAssocLinearData();
+                }
+
+                //unset identical values
+                if (!empty($rez['old']) && !empty($rez['new'])) {
+                    foreach ($rez['old'] as $k => $v) {
+                        if (isset($rez['new'][$k]) && ($rez['new'][$k] == $v)) {
+                            unset($rez['old'][$k]);
+                            unset($rez['new'][$k]);
+                        }
+                    }
+                }
         }
 
-        if (!empty($p['new'])) {
-            $rez['new'] = $p->getLinearData();
+        return $rez;
+    }
+
+    /**
+     * getActivityData (followers, watchers)
+     * @param  array &$d object data
+     * @return array
+     */
+    protected static function getActivityData(&$d)
+    {
+        $rez = array();
+
+        $userId = User::getId();
+
+        $rez['fu'] = array();
+
+        //add creator as follower by default
+        if (!empty($d['cid'])) {
+            $rez['fu'] = array($d['cid']);
+        }
+
+        if (!empty($d['sys_data']['fu'])) {
+            $rez['fu'] = array_merge($rez['fu'], $d['sys_data']['fu']);
+        }
+
+        $rez['fu'] = array_unique($rez['fu']);
+        //remove current user, that caused the action
+        $rez['fu'] = array_diff($rez['fu'], array($userId));
+
+        if (!empty($d['sys_data']['wu'])) {
+            $rez['wu'] = array_diff($d['sys_data']['wu'], array($userId));
         }
 
         return $rez;
@@ -141,17 +200,23 @@ class Log
             )
             : $p['new']->getData();
 
+        $fu = @$p['activityData']['fu'];
+        $wu = @$p['activityData']['wu'];
+
         $record = array(
             'id' => Config::get('core_name') . '_' . $p['action_id']
             ,'core_id' => Config::get('core_id')
             ,'action_id' => $p['action_id']
             ,'action_type' => $p['type']
             ,'action_date' => date('Y-m-d\TH:i:s\Z')
-            ,'user_id' => $_SESSION['user']['id']
+            ,'user_id' => User::getId()
             ,'object_id' => $data['id']
             ,'object_pid' => empty($data['pid']) ? null : $data['pid']
             ,'object_pids' => $p['logData']['pids']
-            ,'object_data' => json_encode($p['logData'], JSON_UNESCAPED_UNICODE)
+            ,'object_data' => Util\jsonEncode($p['logData'])
+
+            // ,'activity_fu' => $fu
+            // ,'activity_wu' => $wu
         );
 
         //delete empty values because solr raises exception when sending empty values for ints

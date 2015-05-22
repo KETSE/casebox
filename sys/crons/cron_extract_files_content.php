@@ -27,7 +27,7 @@ $sql = 'UPDATE crons
     SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
     WHERE cron_id = $1';
 
-DB\dbQuery($sql, array($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE))) or die(DB\dbQueryError());
+DB\dbQuery($sql, array($cron_id, Util\jsonEncode($rez))) or die(DB\dbQueryError());
 
 if (checkTikaService() == false) {
     startTikaService();
@@ -117,7 +117,7 @@ $res->close();
 $rez['Total'] = $rez['Processed'] + $rez['Not found'];
 
 
-// closeCron($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE));
+// closeCron($cron_id, Util\jsonEncode($rez));
 
 // Solr\Client::runCron();
 

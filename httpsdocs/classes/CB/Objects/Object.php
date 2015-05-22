@@ -185,7 +185,7 @@ class Object
                 ,@$p['date']
                 ,@$p['date_end']
                 ,@$p['size']
-                ,@json_encode($p['cfg'], JSON_UNESCAPED_UNICODE)
+                ,@Util\jsonEncode($p['cfg'])
                 ,@$p['cid']
                 ,@$p['oid']
                 ,@$p['cdate']
@@ -237,8 +237,8 @@ class Object
             UPDATE  `data` = $2,`sys_data` = $3',
             array(
                 $this->id
-                ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
-                ,json_encode($p['sys_data'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($p['data'])
+                ,Util\jsonEncode($p['sys_data'])
             )
         ) or die(DB\dbQueryError());
 
@@ -428,7 +428,7 @@ class Object
                 $saveFields[] = $fieldName;
                 $saveValues[] = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
                     ? $p[$fieldName]
-                    : json_encode($p[$fieldName], JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($p[$fieldName]);
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
             }
@@ -497,8 +497,8 @@ class Object
                 ,sys_data = $3',
             array(
                 $d['id']
-                ,json_encode($d['data'], JSON_UNESCAPED_UNICODE)
-                ,json_encode($d['sys_data'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($d['data'])
+                ,Util\jsonEncode($d['sys_data'])
             )
         ) or die(DB\dbQueryError());
         /* end of updating object properties into the db */
@@ -557,7 +557,7 @@ class Object
                 sys_data = $2',
             array(
                 $d['id']
-                ,json_encode($sysData, JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($sysData)
             )
         ) or die(DB\dbQueryError());
 

@@ -2,6 +2,7 @@
 namespace ExtDirect;
 
 use CB\Config;
+use CB\Util;
 
 register_shutdown_function('ExtDirect\\extDirectShutdownFunction');
 
@@ -28,7 +29,7 @@ if (isset($_POST['extAction'])) {
 } else {
     $postdata = file_get_contents("php://input");
     if (!empty($postdata)) {
-        $data = json_decode($postdata, true);
+        $data = Util\jsonDecode($postdata);
     }
 
     if (empty($data)) {
@@ -148,12 +149,12 @@ if (empty($data['action'])) {
 if ($isForm && $isUpload) {
     header('Content-Type: text/html; charset=UTF-8');
     echo '<html><body><textarea>';
-    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    echo Util\jsonEncode($response);
     echo '</textarea></body></html>';
 } else {
     header('X-Frame-Options: deny');
 
-    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    echo Util\jsonEncode($response);
 }
 
 /**
@@ -184,10 +185,6 @@ function extDirectShutdownFunction()
             'From: '.Config::get('SENDER_EMAIL'). "\r\n"
         );
 
-        echo json_encode(
-            $data,
-            JSON_UNESCAPED_UNICODE
-        );
-
+        echo Util\jsonEncode($data);
     }
 }

@@ -61,7 +61,7 @@ if (!empty($platformConfig['comments_email'])) {
         'comments_config'
     ) or die(DB\dbQueryError());
     if ($r = $res->fetch_assoc()) {
-        $mailServer = json_decode($r['value'], true);
+        $mailServer = Util\jsonDecode($r['value']);
     }
     $res->close();
 }

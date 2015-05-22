@@ -274,7 +274,7 @@ class Browser
                 $p['fieldId']
             ) or die(DB\dbQueryError());
             if ($r = $res->fetch_assoc()) {
-                $fieldConfig = json_decode($r['cfg'], true);
+                $fieldConfig = Util\jsonDecode($r['cfg']);
 
                 //set "fq" param from database (dont trust user imput)
                 if (!empty($fieldConfig['fq'])) {

@@ -418,7 +418,7 @@ function formatMysqlDate($date, $format = false, $tz = false)
     }
 
     if ($format == false) {
-        $format = \CB\getOption('short_date_format');
+        $format = \CB\getOption('short_date_format', 'Y-m-d');
     }
 
     $d1 = new \DateTime($date);
@@ -436,7 +436,7 @@ function formatMysqlTime($date, $format = false)
         return '';
     }
     if ($format == false) {
-        $format = \CB\getOption('short_date_format').' '.\CB\getOption('time_format');
+        $format = \CB\getOption('short_date_format', 'Y-m-d').' '.\CB\getOption('time_format', 'H:i');
     }
 
     return date(str_replace('%', '', $format), strtotime($date));
@@ -491,7 +491,7 @@ function dateISOToMysql($date_string)
     }
     $d = strtotime($date_string);
 
-    return date('Y-m-d H:i:s.u', $d);
+    return date('Y-m-d H:i:s', $d);
 }
 
 // function dateMysqlToISO($date_string)
@@ -600,7 +600,7 @@ function toJSONArray($v)
     }
 
     if (is_scalar($v)) {
-        $rez = json_decode($v, true);
+        $rez = jsonDecode($v);
     }
 
     if (empty($rez)) {
@@ -612,6 +612,48 @@ function toJSONArray($v)
     }
 
     return $rez;
+}
+
+/**
+ * remove null intems from an associative array
+ * @param  array $arr
+ * @return void
+ */
+function unsetNullValues(&$arr)
+{
+    if (!is_array($arr)) {
+        return;
+    }
+
+    foreach ($arr as $k => $v) {
+        if (is_null($v)) {
+            unset($arr[$k]);
+        }
+    }
+}
+
+/**
+ * json encode a variable
+ * @param  variant $var
+ * @return varchar | null
+ */
+function jsonEncode($var)
+{
+    if (empty($var)) {
+        return null;
+    }
+
+    return json_encode($var, JSON_UNESCAPED_UNICODE);
+}
+
+/**
+ * decodes a json string
+ * @param  varchar $var
+ * @return array or null
+ */
+function jsonDecode($var)
+{
+    return json_decode($var, true);
 }
 
 /**

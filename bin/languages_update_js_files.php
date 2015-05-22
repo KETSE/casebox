@@ -41,7 +41,7 @@ echo "main language files saved\n";
 $cores = array();
 $res = DB\dbQuery('SELECT name, cfg FROM ' . \CB\PREFIX . '_casebox.cores') or die(DB\dbQueryError());
 while ($r = $res->fetch_assoc()) {
-    $cfg = json_decode($r['cfg'], true);
+    $cfg = Util\jsonDecode($r['cfg']);
 
     $db = empty($cfg['db_name'])
         ? \CB\PREFIX . $r['name']

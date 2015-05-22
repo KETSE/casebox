@@ -1,9 +1,11 @@
 <?php
 namespace CB\Objects;
 
+use CB\Config;
 use CB\Util;
 use CB\User;
 use CB\Objects;
+use CB\Log;
 
 class Comment extends Object
 {
@@ -25,7 +27,53 @@ class Comment extends Object
         //     $p['name'] = $msg;
         //     $p['data']['_title'] = $msg;
         // }
-        return parent::create($p);
+
+        //disable default log from parent Object class
+        //we'll set comments add as comment action for parent
+        Config::setFlag('disableActivityLog', true);
+
+        $rez = parent::create($p);
+
+        Config::setFlag('disableActivityLog', false);
+
+        // log the action
+        $logParams = array(
+            'type' => 'comment'
+            ,'new' => Objects::getCachedObject($p['pid'])
+            ,'comment' => $p['data']['_title']
+        );
+
+        Log::add($logParams);
+
+        return $rez;
+    }
+
+    /**
+     * update comment
+     * @param  array   $p optional properties. If not specified then $this-data is used
+     * @return boolean
+     */
+    public function update($p = false)
+    {
+        //disable default log from parent Object class
+        //we'll set comments add as comment action for parent
+        Config::setFlag('disableActivityLog', true);
+
+        $rez = parent::update($p);
+
+        Config::setFlag('disableActivityLog', false);
+
+        // log the action
+        $logParams = array(
+            'type' => 'comment_update'
+            ,'new' => Objects::getCachedObject($p['pid'])
+            ,'comment' => $p['data']['_title']
+        );
+
+        Log::add($logParams);
+
+        return $rez;
+
     }
 
     /**

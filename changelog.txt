@@ -1,3 +1,7 @@
+CaseBox 1.9.444 (2015-05-22)
+==============================
+- #5139 Implement Notifications system
+
 CaseBox 1.9.439 (2015-05-07)
 ==============================
 New Features, Improvements

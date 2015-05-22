@@ -608,8 +608,8 @@ class User
                 ,$p['sex']
                 ,$p['email']
                 ,$p['language_id']
-                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
-                ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($cfg)
+                ,Util\jsonEncode($p['data'])
             )
         ) or die(DB\dbQueryError());
 
@@ -1769,7 +1769,7 @@ class User
             WHERE id = $1',
             array(
                 $userId
-                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($cfg)
             )
         ) or die(DB\dbQueryError());
     }
