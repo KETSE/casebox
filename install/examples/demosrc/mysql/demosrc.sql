@@ -1,8 +1,7 @@
 /*
-SQLyog Ultimate v11.5 (64 bit)
-MySQL - 5.5.9 : Database - aa_demosrc
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -21,13 +20,16 @@ CREATE TABLE `action_log` (
   `object_id` bigint(20) unsigned NOT NULL,
   `object_pid` bigint(20) unsigned DEFAULT NULL,
   `user_id` int(10) unsigned NOT NULL,
-  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','reopen','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail') NOT NULL,
+  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','rename','reopen','status_change','overdue','comment','comment_update','move','password_change','permissions','user_delete','user_create','login','login_fail') NOT NULL,
   `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `data` mediumtext,
+  `activity_data_db` mediumtext,
+  `activity_data_solr` mediumtext,
   PRIMARY KEY (`id`),
   KEY `FK_action_log__object_id` (`object_id`),
   KEY `FK_action_log__object_pid` (`object_pid`),
   KEY `FK_action_log__user_id` (`user_id`),
+  KEY `IDX_action_time` (`action_time`),
   CONSTRAINT `FK_action_log__object_id` FOREIGN KEY (`object_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_action_log__object_pid` FOREIGN KEY (`object_pid`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_action_log__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -35,7 +37,7 @@ CREATE TABLE `action_log` (
 
 /*Data for the table `action_log` */
 
-insert  into `action_log`(`id`,`object_id`,`object_pid`,`user_id`,`action_type`,`action_time`,`data`) values (1,1,NULL,1,'login_fail','2015-01-12 16:32:45','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(2,1,NULL,1,'login_fail','2015-01-12 16:32:48','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(3,1,NULL,1,'login_fail','2015-01-12 16:32:52','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(4,1,NULL,1,'login','2015-01-12 16:32:57','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(5,1,NULL,1,'login_fail','2015-02-17 09:18:16','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(6,1,NULL,1,'login_fail','2015-02-17 09:18:20','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(7,1,NULL,1,'login_fail','2015-02-17 09:18:30','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(8,1,NULL,1,'login','2015-02-17 09:18:34','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}'),(9,1,NULL,1,'','2015-02-17 09:19:36','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}');
+insert  into `action_log`(`id`,`object_id`,`object_pid`,`user_id`,`action_type`,`action_time`,`data`,`activity_data_db`,`activity_data_solr`) values (1,1,NULL,1,'login_fail','2015-01-12 16:32:45','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}',NULL,NULL),(2,1,NULL,1,'login_fail','2015-01-12 16:32:48','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}',NULL,NULL),(3,1,NULL,1,'login_fail','2015-01-12 16:32:52','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}',NULL,NULL),(4,1,NULL,1,'login','2015-01-12 16:32:57','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}',NULL,NULL),(5,1,NULL,1,'login_fail','2015-02-17 09:18:16','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}',NULL,NULL),(6,1,NULL,1,'login_fail','2015-02-17 09:18:20','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}',NULL,NULL),(7,1,NULL,1,'login_fail','2015-02-17 09:18:30','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}',NULL,NULL),(8,1,NULL,1,'login','2015-02-17 09:18:34','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}',NULL,NULL),(9,1,NULL,1,'','2015-02-17 09:19:36','{\"name\":\"root\",\"iconCls\":\"icon-none\",\"pids\":[],\"path\":\"\",\"template_id\":null,\"case_id\":null,\"date\":null,\"size\":null,\"cid\":null,\"oid\":null,\"uid\":null,\"cdate\":null,\"udate\":null}',NULL,NULL);
 
 /*Table structure for table `config` */
 
@@ -207,24 +209,16 @@ insert  into `menu`(`id`,`node_ids`,`node_template_ids`,`menu`,`user_group_ids`)
 DROP TABLE IF EXISTS `notifications`;
 
 CREATE TABLE `notifications` (
-  `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
-  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','reopen','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail') NOT NULL,
-  `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `object_id` bigint(20) unsigned NOT NULL,
-  `object_pid` bigint(20) unsigned DEFAULT NULL,
-  `user_id` int(11) unsigned NOT NULL,
-  `data` mediumtext NOT NULL,
-  `sent` tinyint(1) NOT NULL DEFAULT '0',
-  `viewed` tinyint(1) NOT NULL DEFAULT '0',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `action_id` bigint(20) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `email_sent` tinyint(1) NOT NULL DEFAULT '0',
+  `read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'notification has been read in CB',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UNQ_notifications__action_type__object_id__user_id` (`action_type`,`object_id`,`user_id`),
-  KEY `FK_notifications__user_id` (`user_id`),
-  KEY `FK_notifications__object_id` (`object_id`),
-  KEY `FK_notifications__case_id` (`object_pid`),
-  KEY `FK_notifications__sent` (`sent`),
-  KEY `FK_notifications__viewed` (`viewed`),
-  CONSTRAINT `FK_notifications__object_id` FOREIGN KEY (`object_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_notifications__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `FK_notifications__action_id` (`action_id`),
+  KEY `FK_notifications_user_id` (`user_id`),
+  CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `notifications` */
@@ -264,90 +258,6 @@ CREATE TABLE `sessions` (
 /*Data for the table `sessions` */
 
 insert  into `sessions`(`id`,`pid`,`last_action`,`expires`,`user_id`,`data`) values ('lrasd5lddkuh0s62ck3di9a180','lrasd5lddkuh0s62ck3di9a180','2015-02-17 09:19:36',NULL,0,'');
-
-/*Table structure for table `tasks` */
-
-DROP TABLE IF EXISTS `tasks`;
-
-CREATE TABLE `tasks` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `object_id` bigint(20) unsigned DEFAULT NULL,
-  `title` varchar(250) NOT NULL,
-  `date_start` datetime DEFAULT NULL COMMENT 'used for events',
-  `date_end` datetime DEFAULT NULL,
-  `allday` tinyint(1) NOT NULL DEFAULT '1',
-  `importance` tinyint(3) unsigned DEFAULT NULL,
-  `category_id` bigint(20) unsigned DEFAULT NULL,
-  `type` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'for tasks: 0-internal, 1-external. For events: 2',
-  `privacy` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0-public, 1-private',
-  `responsible_user_ids` varchar(100) NOT NULL,
-  `autoclose` tinyint(1) DEFAULT '1',
-  `description` text COMMENT 'Task description',
-  `parent_ids` varchar(100) DEFAULT NULL COMMENT 'parent tasks',
-  `child_ids` varchar(100) DEFAULT NULL COMMENT 'child tasks. TO BE REVIEWED',
-  `time` char(5) DEFAULT NULL,
-  `reminds` varchar(250) DEFAULT NULL,
-  `status` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT '1 Overdue 2 Active 3 Completed 4 Pending',
-  `missed` tinyint(1) unsigned DEFAULT NULL,
-  `completed` timestamp NULL DEFAULT NULL COMMENT 'completed date (will be set automaticly, when all responsible users mark task as completed or the owner can close the task manually )',
-  `cid` int(11) unsigned NOT NULL DEFAULT '1',
-  `cdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `uid` int(11) unsigned DEFAULT '1',
-  `udate` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  PRIMARY KEY (`id`),
-  KEY `FK_tasks_user_id` (`responsible_user_ids`),
-  KEY `IDX_status` (`status`),
-  KEY `FK_tasks__cid` (`cid`),
-  KEY `FK_tasks__object_id` (`object_id`),
-  KEY `FK_tasks__uid` (`uid`),
-  KEY `idx_status__date_end` (`status`,`date_end`),
-  CONSTRAINT `FK_tasks__cid` FOREIGN KEY (`cid`) REFERENCES `users_groups` (`id`) ON UPDATE CASCADE,
-  CONSTRAINT `FK_tasks__id` FOREIGN KEY (`id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_tasks__object_id` FOREIGN KEY (`object_id`) REFERENCES `objects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_tasks__uid` FOREIGN KEY (`uid`) REFERENCES `users_groups` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25252 DEFAULT CHARSET=utf8;
-
-/*Data for the table `tasks` */
-
-insert  into `tasks`(`id`,`object_id`,`title`,`date_start`,`date_end`,`allday`,`importance`,`category_id`,`type`,`privacy`,`responsible_user_ids`,`autoclose`,`description`,`parent_ids`,`child_ids`,`time`,`reminds`,`status`,`missed`,`completed`,`cid`,`cdate`,`uid`,`udate`) values (25146,NULL,'Send case summary for 2013 Report on Right to Fair Trial','2014-03-26 00:00:00',NULL,1,2,24269,0,0,'270',1,'Please send the summary for the 2013 Report on the Right to the Fair Trial. Note the communications of the HRC.',NULL,NULL,NULL,NULL,2,NULL,NULL,269,'2014-03-02 21:23:19',1,'0000-00-00 00:00:00'),(25156,NULL,'Prepare the press release','2014-03-20 00:00:00',NULL,1,3,24274,0,0,'269,268',1,NULL,NULL,NULL,NULL,NULL,2,NULL,NULL,266,'2014-03-02 21:43:34',1,'0000-00-00 00:00:00'),(25157,NULL,'Invite journalists','2014-03-21 00:00:00',NULL,1,1,24274,0,0,'268',1,'Please can you look up the media database and send me the shortlist of journalists we need to invite to the press conference, so we can call  them up individually to brief them about the case.',NULL,NULL,NULL,NULL,2,NULL,NULL,266,'2014-03-02 21:45:42',1,'0000-00-00 00:00:00'),(25158,NULL,'Follow up with Svetlana Zhuk','2014-03-17 00:00:00','2014-03-20 00:00:00',1,2,24269,0,0,'270',1,'Please follow up with the mother of the victim and ask her, if there are any services we need to provide and if there have been reprisals against her due to campaigning.\n',NULL,NULL,NULL,NULL,1,1,NULL,269,'2014-03-02 21:48:56',1,'0000-00-00 00:00:00'),(25159,NULL,'Venue for press conference','2014-03-18 00:00:00',NULL,1,1,24267,0,0,'240',1,'Hi Erik, please can you take care of the venue preparations for the Gelman press conference? Lets use the Montevideo room as usual, make sure the videoconferencing works as we\'ll have some journalists attending from our Washington office.',NULL,NULL,NULL,NULL,2,NULL,NULL,266,'2014-03-02 21:50:53',1,'0000-00-00 00:00:00'),(25162,NULL,'Prepare Response to Request from Special Rapporteur','2014-03-15 00:00:00',NULL,1,2,24269,0,0,'270',1,'Please prepare the response to the Special Rapporteur on the situation of human rights in Belarus ',NULL,NULL,NULL,NULL,1,NULL,NULL,269,'2014-03-02 21:55:03',1,'0000-00-00 00:00:00'),(25163,NULL,'Submit response to Special Rapporteur','2014-03-24 00:00:00',NULL,1,1,24269,0,0,'269',1,'Submit our response about background of the case to Special Rapporteur on the situation of human rights in Belarus ',NULL,NULL,NULL,NULL,2,NULL,NULL,269,'2014-03-02 22:08:24',1,'0000-00-00 00:00:00'),(25167,NULL,'Do additional case law research','2014-03-18 00:00:00',NULL,1,1,24269,0,0,'269',1,'Please do additional case law research using echr.ketse.com\n',NULL,NULL,NULL,NULL,2,NULL,NULL,269,'2014-03-02 22:53:57',1,'0000-00-00 00:00:00'),(25168,NULL,'Interview Krasuski in Warsaw prison','2014-04-08 00:00:00',NULL,1,1,24269,0,0,'267,269',1,'Interview scheduled with the victim in cooperation with the Polish NGO Court Watch Poland Foundation',NULL,NULL,NULL,NULL,2,NULL,NULL,269,'2014-03-02 22:56:54',1,'0000-00-00 00:00:00'),(25185,NULL,'Brief on progress of the case','2014-03-28 11:00:00','2014-03-28 13:00:00',-1,1,24274,0,0,'269',1,NULL,NULL,NULL,NULL,NULL,1,0,NULL,267,'2014-03-03 02:01:54',1,'0000-00-00 00:00:00'),(25202,NULL,'Media request from the Guardian - Interview','2014-03-06 00:00:00',NULL,1,3,24269,0,0,'268',1,'Please coordinate with Tom Smith from the Guardian for the interview they have requested.',NULL,NULL,NULL,NULL,2,NULL,NULL,267,'2014-03-03 03:09:56',1,'0000-00-00 00:00:00'),(25214,NULL,'Demonstration in the Fishbowl','2014-03-03 00:00:00',NULL,1,3,24274,0,0,'266',1,'Rally the participants, create slogans, inform media. #rightscon #privacyisaright\n',NULL,NULL,NULL,NULL,2,NULL,NULL,267,'2014-03-03 03:37:30',1,'0000-00-00 00:00:00'),(25250,NULL,'Prepare a draft reply for the court','2014-04-01 00:00:00',NULL,1,1,24267,0,0,'240',1,'Use the latest evidence that I\'ve uploaded to the case, and write the letter',NULL,NULL,NULL,NULL,2,NULL,NULL,269,'2014-04-01 09:53:09',1,'0000-00-00 00:00:00'),(25251,NULL,'Send me the bill for your last trip to UK','2014-04-01 00:00:00',NULL,1,1,24267,0,0,'240',1,'Erik, don\'t forget to invoice us for you research trip in London\n',NULL,NULL,NULL,NULL,2,NULL,NULL,268,'2014-04-01 09:57:59',1,'0000-00-00 00:00:00');
-
-/*Table structure for table `tasks_reminders` */
-
-DROP TABLE IF EXISTS `tasks_reminders`;
-
-CREATE TABLE `tasks_reminders` (
-  `task_id` bigint(20) unsigned NOT NULL,
-  `user_id` int(11) unsigned NOT NULL,
-  `reminds` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`task_id`,`user_id`),
-  KEY `FK_tasks_reminders__user_id` (`user_id`),
-  CONSTRAINT `FK_tasks_reminders__task_id` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_tasks_reminders__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `tasks_reminders` */
-
-insert  into `tasks_reminders`(`task_id`,`user_id`,`reminds`) values (25146,267,''),(25146,269,''),(25156,266,''),(25157,266,''),(25158,267,''),(25158,269,''),(25159,240,''),(25159,266,''),(25162,267,''),(25162,269,''),(25163,267,''),(25163,269,''),(25167,269,''),(25168,267,''),(25168,269,''),(25185,267,''),(25202,267,''),(25214,267,''),(25250,269,''),(25251,268,'');
-
-/*Table structure for table `tasks_responsible_users` */
-
-DROP TABLE IF EXISTS `tasks_responsible_users`;
-
-CREATE TABLE `tasks_responsible_users` (
-  `task_id` bigint(20) unsigned NOT NULL,
-  `user_id` int(10) unsigned NOT NULL,
-  `status` tinyint(3) unsigned DEFAULT '0' COMMENT '0-pending, 1-done',
-  `thesauri_response_id` int(10) unsigned DEFAULT NULL,
-  `time` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`task_id`,`user_id`),
-  KEY `FK_user_id` (`user_id`),
-  CONSTRAINT `FK_tasks_responsible_users__task_id` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_tasks_responsible_users__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `tasks_responsible_users` */
-
-insert  into `tasks_responsible_users`(`task_id`,`user_id`,`status`,`thesauri_response_id`,`time`) values (25146,270,0,NULL,NULL),(25156,268,0,NULL,NULL),(25156,269,0,NULL,NULL),(25157,268,0,NULL,NULL),(25158,270,0,NULL,NULL),(25159,240,0,NULL,NULL),(25162,270,0,NULL,NULL),(25163,269,0,NULL,NULL),(25167,269,0,NULL,NULL),(25168,267,0,NULL,NULL),(25168,269,0,NULL,NULL),(25185,269,0,NULL,NULL),(25202,268,0,NULL,NULL),(25214,266,0,NULL,NULL),(25250,240,0,NULL,NULL),(25251,240,0,NULL,NULL);
 
 /*Table structure for table `templates` */
 
@@ -598,25 +508,6 @@ CREATE TABLE `tree_user_config` (
 
 /*Data for the table `tree_user_config` */
 
-/*Table structure for table `user_subscriptions` */
-
-DROP TABLE IF EXISTS `user_subscriptions`;
-
-CREATE TABLE `user_subscriptions` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(10) unsigned NOT NULL,
-  `object_id` bigint(20) unsigned NOT NULL,
-  `recursive` tinyint(1) NOT NULL DEFAULT '0',
-  `sdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'subscription timestamp',
-  PRIMARY KEY (`id`),
-  KEY `FK_user_subscriptions__object_id` (`object_id`),
-  KEY `FK_user_subscriptions__user_id` (`user_id`),
-  CONSTRAINT `FK_user_subscriptions__object_id` FOREIGN KEY (`object_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_user_subscriptions__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `user_subscriptions` */
-
 /*Table structure for table `users_groups` */
 
 DROP TABLE IF EXISTS `users_groups`;
@@ -834,76 +725,6 @@ DELIMITER $$
 
 DELIMITER ;
 
-/* Trigger structure for table `tasks` */
-
-DELIMITER $$
-
-/*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_bi` */$$
-
-/*!50003 CREATE */ /*!50003 TRIGGER `tasks_bi` BEFORE INSERT ON `tasks` FOR EACH ROW BEGIN
-	SET new.missed = (new.date_end < current_timestamp);
-	IF((new.missed = 1) && (new.status != 3) ) THEN
-		SET new.status = 1;
-	END IF;
-	-- SET new.udate = CURRENT_TIMESTAMP;
-    END */$$
-
-
-DELIMITER ;
-
-/* Trigger structure for table `tasks` */
-
-DELIMITER $$
-
-/*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_ai` */$$
-
-/*!50003 CREATE */ /*!50003 TRIGGER `tasks_ai` AFTER INSERT ON `tasks` FOR EACH ROW BEGIN
- 	INSERT INTO tasks_responsible_users (task_id, user_id) 
-		SELECT new.id, id 
-		FROM users_groups 
-		WHERE CONCAT(',',new.responsible_user_ids,',') LIKE CONCAT('%,',id,',%');
-    END */$$
-
-
-DELIMITER ;
-
-/* Trigger structure for table `tasks` */
-
-DELIMITER $$
-
-/*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_bu` */$$
-
-/*!50003 CREATE */ /*!50003 TRIGGER `tasks_bu` BEFORE UPDATE ON `tasks` FOR EACH ROW BEGIN
-	IF(new.status != 3) THEN -- not completed
-		SET new.missed = (new.date_end < CURRENT_DATE);
-		if(new.missed = 1) THEN
-			set new.status = 1;
-		end if;
-	END IF;
-    END */$$
-
-
-DELIMITER ;
-
-/* Trigger structure for table `tasks` */
-
-DELIMITER $$
-
-/*!50003 DROP TRIGGER*//*!50032 IF EXISTS */ /*!50003 `tasks_au` */$$
-
-/*!50003 CREATE */ /*!50003 TRIGGER `tasks_au` AFTER UPDATE ON `tasks` FOR EACH ROW BEGIN
-	DELETE FROM tasks_responsible_users  
-	WHERE task_id = old.id AND CONCAT(',', new.responsible_user_ids, ',') NOT LIKE CONCAT('%,',user_id,',%');
-	INSERT INTO tasks_responsible_users (task_id, user_id) 
-		SELECT new.id, u.id 
-		FROM users_groups u 
-		WHERE CONCAT(',',new.responsible_user_ids,',') LIKE CONCAT('%,',u.id,',%')
-		ON DUPLICATE KEY UPDATE user_id = u.id;
-    END */$$
-
-
-DELIMITER ;
-
 /* Trigger structure for table `templates_structure` */
 
 DELIMITER $$
@@ -1041,7 +862,7 @@ DELIMITER $$
 /*!50003 CREATE */ /*!50003 TRIGGER `tree_au` AFTER UPDATE ON `tree` FOR EACH ROW BEGIN
 	DECLARE tmp_old_pids
 		,tmp_new_pids TEXT DEFAULT '';
-	
+
 	DECLARE tmp_old_case_id
 		,tmp_new_case_id
 		,tmp_old_security_set_id
@@ -1051,7 +872,7 @@ DELIMITER $$
 	DECLARE tmp_old_pids_length
 		,tmp_old_security_set_length
 		,tmp_acl_count INT UNSIGNED DEFAULT 0;
-	
+
 	/* get pids path, case_id and store them in tree_info table*/
 	IF( (COALESCE(old.pid, 0) <> COALESCE(new.pid, 0) )
 	    OR ( old.inherit_acl <> new.inherit_acl )
@@ -1072,12 +893,12 @@ DELIMITER $$
 		FROM tree_info ti
 		LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 		WHERE ti.id = new.id;
-		
+
 		/* check if updated node is a case */
 		IF(tmp_old_case_id = old.id) THEN
 			SET tmp_new_case_id = new.id;
 		END IF;
-		
+
 		/* form new data based on new parent
 		*/
 		if(new.pid is null) THEN
@@ -1100,7 +921,7 @@ DELIMITER $$
 			LEFT JOIN tree_info ti ON t.id = ti.id
 			LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 			WHERE t.id = new.pid;
-			
+
 			SET tmp_new_pids = TRIM( ',' FROM CONCAT( tmp_new_pids, ',', new.id) );
 		END IF;
 		/* end of form new data based on new parent */
@@ -1112,7 +933,7 @@ DELIMITER $$
 			else
 				SET tmp_new_security_set = TRIM( ',' FROM CONCAT(tmp_new_security_set, ',', new.id ) );
 			END IF;
-			
+
 			UPDATE tree_acl_security_sets
 			SET `set` = tmp_new_security_set
 				,updated = 1
@@ -1995,13 +1816,13 @@ BEGIN
 	DELETE FROM tmp_achild_ids2;
 	insert into tmp_achild_ids select id from tree where pid = in_id;
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_achild_ids 
+		update tree, tmp_achild_ids
 		  set tree.did = NULL
 		  ,tree.ddate = NULL
-		  ,tree.dstatus = 0 
+		  ,tree.dstatus = 0
 		  , tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
-		
+
 		DELETE FROM tmp_achild_ids2;
 		insert into tmp_achild_ids2 select id from tmp_achild_ids;
 		delete from tmp_achild_ids;
@@ -2026,13 +1847,13 @@ BEGIN
 	DELETE FROM tmp_dchild_ids2;
 	insert into tmp_dchild_ids select id from tree where pid = in_id;
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_dchild_ids 
+		update tree, tmp_dchild_ids
 		    set tree.did = in_did
 			,tree.ddate = CURRENT_TIMESTAMP
 			,tree.dstatus = 2
 			,tree.updated = 1
 		    where tmp_dchild_ids.id = tree.id;
-		    
+
 		DELETE FROM tmp_dchild_ids2;
 		insert into tmp_dchild_ids2 select id from tmp_dchild_ids;
 		delete from tmp_dchild_ids;
@@ -2053,31 +1874,31 @@ DELIMITER $$
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids(id bigint UNSIGNED);
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids2(id BIGINT UNSIGNED);
-	
+
 	delete from tmp_achild_ids;
 	DELETE FROM tmp_achild_ids2;
-	insert into tmp_achild_ids 
-		select id 
-		from tree 
+	insert into tmp_achild_ids
+		select id
+		from tree
 		where pid = in_id and draft = 1;
-	
+
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_achild_ids 
+		update tree, tmp_achild_ids
 		  set 	tree.draft = 0
 			,tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
-		
+
 		DELETE FROM tmp_achild_ids2;
-		
-		insert into tmp_achild_ids2 
-			select id 
+
+		insert into tmp_achild_ids2
+			select id
 			from tmp_achild_ids;
 		delete from tmp_achild_ids;
-		
-		INSERT INTO tmp_achild_ids 
-			SELECT t.id 
-			FROM tree t 
-			join tmp_achild_ids2 c 
+
+		INSERT INTO tmp_achild_ids
+			SELECT t.id
+			FROM tree t
+			join tmp_achild_ids2 c
 			  on t.pid = c.id and t.draft = 1;
 	END WHILE;
     END */$$
@@ -2250,8 +2071,8 @@ BEGIN
 		,tree_acl_security_sets
 		SET tree_acl_security_sets.`set` = CONCAT(
 			tmp_to_security_set
-			,CASE WHEN tmp_security_set_length IS NULL 
-			THEN 
+			,CASE WHEN tmp_security_set_length IS NULL
+			THEN
 			  CONCAT(',', tree_acl_security_sets.set)
 			ELSE
 			 SUBSTRING(tree_acl_security_sets.set, tmp_security_set_length)
@@ -2288,38 +2109,38 @@ DELIMITER $$
     SQL SECURITY INVOKER
 BEGIN
 	DECLARE `tmp_level` INT DEFAULT 0;
-	
+
 	CREATE TABLE IF NOT EXISTS tmp_level_id (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
 	CREATE TABLE IF NOT EXISTS tmp_level_pid (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
-	
+
 	INSERT INTO tmp_level_id
 	  SELECT ts1.id
 	  FROM templates_structure ts1
 	  LEFT JOIN templates_structure ts2 ON ts1.pid = ts2.id
 	  WHERE ts2.id IS NULL;
-	  
+
 	WHILE (ROW_COUNT() > 0) DO
 	  UPDATE templates_structure, tmp_level_id
-	  SET templates_structure.`level` = tmp_level 
+	  SET templates_structure.`level` = tmp_level
 	  WHERE templates_structure.id = tmp_level_id.id;
-	
+
 	  DELETE FROM tmp_level_pid;
-	  
+
 	  INSERT INTO tmp_level_pid
 		SELECT id FROM tmp_level_id;
-	  
+
 	  DELETE FROM tmp_level_id;
 	  INSERT INTO tmp_level_id
 	    SELECT ts1.id
 	    FROM templates_structure ts1
 	    JOIN tmp_level_pid ts2 ON ts1.pid = ts2.id;
-	    
+
 	  SET tmp_level = tmp_level + 1;
 	END WHILE;
-	
+
 	DROP TABLE tmp_level_id;
 	DROP TABLE tmp_level_pid;
-	
+
     END */$$
 DELIMITER ;
 

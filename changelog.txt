@@ -1,5 +1,14 @@
+CaseBox 1.9.445 (2015-05-23)
+==============================
+New Features, Improvements
+--------------------------
+- removed tasks tables and method for upgrading task data
+- updated db dumps
+
 CaseBox 1.9.444 (2015-05-22)
 ==============================
+New Features, Improvements
+--------------------------
 - #5139 Implement Notifications system
 
 CaseBox 1.9.443 (2015-05-21)

@@ -1,8 +1,7 @@
 /*
-SQLyog Ultimate v11.5 (64 bit)
-MySQL - 5.5.9 : Database - cb_demosrc
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -30,6 +29,7 @@ CREATE TABLE `action_log` (
   KEY `FK_action_log__object_id` (`object_id`),
   KEY `FK_action_log__object_pid` (`object_pid`),
   KEY `FK_action_log__user_id` (`user_id`),
+  KEY `IDX_action_time` (`action_time`),
   CONSTRAINT `FK_action_log__object_id` FOREIGN KEY (`object_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_action_log__object_pid` FOREIGN KEY (`object_pid`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_action_log__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -197,24 +197,16 @@ insert  into `menu`(`id`,`node_ids`,`node_template_ids`,`menu`,`user_group_ids`)
 DROP TABLE IF EXISTS `notifications`;
 
 CREATE TABLE `notifications` (
-  `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
-  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','reopen','status_change','overdue','comment','move','permissions','user_delete','user_create','login','login_fail') NOT NULL,
-  `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `object_id` bigint(20) unsigned NOT NULL,
-  `object_pid` bigint(20) unsigned DEFAULT NULL,
-  `user_id` int(11) unsigned NOT NULL,
-  `data` mediumtext NOT NULL,
-  `sent` tinyint(1) NOT NULL DEFAULT '0',
-  `viewed` tinyint(1) NOT NULL DEFAULT '0',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `action_id` bigint(20) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
+  `email_sent` tinyint(1) NOT NULL DEFAULT '0',
+  `read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'notification has been read in CB',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UNQ_notifications__action_type__object_id__user_id` (`action_type`,`object_id`,`user_id`),
-  KEY `FK_notifications__user_id` (`user_id`),
-  KEY `FK_notifications__object_id` (`object_id`),
-  KEY `FK_notifications__case_id` (`object_pid`),
-  KEY `FK_notifications__sent` (`sent`),
-  KEY `FK_notifications__viewed` (`viewed`),
-  CONSTRAINT `FK_notifications__object_id` FOREIGN KEY (`object_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_notifications__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `FK_notifications__action_id` (`action_id`),
+  KEY `FK_notifications_user_id` (`user_id`),
+  CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `notifications` */
@@ -408,7 +400,7 @@ CREATE TABLE `tree_acl` (
   KEY `FK_tree_acl__user_group_id` (`user_group_id`),
   CONSTRAINT `FK_tree_acl__node_id` FOREIGN KEY (`node_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_tree_acl__user_group_id` FOREIGN KEY (`user_group_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=150 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=147 DEFAULT CHARSET=utf8;
 
 /*Data for the table `tree_acl` */
 
@@ -501,25 +493,6 @@ CREATE TABLE `tree_user_config` (
 /*Data for the table `tree_user_config` */
 
 insert  into `tree_user_config`(`guid`,`user_id`,`cfg`) values ('default',1,'{\"columns\":{\"nid\":{\"idx\":0,\"width\":80,\"sortable\":true},\"name\":{\"idx\":1,\"width\":341,\"sortable\":true},\"date\":{\"idx\":2,\"width\":130,\"sortable\":true},\"size\":{\"idx\":3,\"width\":80,\"sortable\":true},\"cid\":{\"idx\":4,\"width\":200,\"sortable\":true},\"oid\":{\"idx\":5,\"width\":200,\"sortable\":true},\"cdate\":{\"idx\":6,\"width\":130,\"sortable\":true},\"udate\":{\"idx\":7,\"width\":130,\"sortable\":true},\"path\":{\"idx\":8,\"width\":150,\"hidden\":true,\"sortable\":true},\"case\":{\"idx\":9,\"width\":150,\"hidden\":true,\"sortable\":true},\"uid\":{\"idx\":10,\"width\":200,\"hidden\":true,\"sortable\":true},\"comment_user_id\":{\"idx\":11,\"width\":200,\"hidden\":true,\"sortable\":true},\"comment_date\":{\"idx\":12,\"width\":120,\"hidden\":true,\"sortable\":true}},\"group\":null,\"weight\":0}');
-
-/*Table structure for table `user_subscriptions` */
-
-DROP TABLE IF EXISTS `user_subscriptions`;
-
-CREATE TABLE `user_subscriptions` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(10) unsigned NOT NULL,
-  `object_id` bigint(20) unsigned NOT NULL,
-  `recursive` tinyint(1) NOT NULL DEFAULT '0',
-  `sdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'subscription timestamp',
-  PRIMARY KEY (`id`),
-  KEY `FK_user_subscriptions__object_id` (`object_id`),
-  KEY `FK_user_subscriptions__user_id` (`user_id`),
-  CONSTRAINT `FK_user_subscriptions__object_id` FOREIGN KEY (`object_id`) REFERENCES `tree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_user_subscriptions__user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `user_subscriptions` */
 
 /*Table structure for table `users_groups` */
 
@@ -873,6 +846,7 @@ DELIMITER $$
 /*!50003 CREATE */ /*!50003 TRIGGER `tree_au` AFTER UPDATE ON `tree` FOR EACH ROW BEGIN
 	DECLARE tmp_old_pids
 		,tmp_new_pids TEXT DEFAULT '';
+
 	DECLARE tmp_old_case_id
 		,tmp_new_case_id
 		,tmp_old_security_set_id
@@ -882,6 +856,7 @@ DELIMITER $$
 	DECLARE tmp_old_pids_length
 		,tmp_old_security_set_length
 		,tmp_acl_count INT UNSIGNED DEFAULT 0;
+
 	/* get pids path, case_id and store them in tree_info table*/
 	IF( (COALESCE(old.pid, 0) <> COALESCE(new.pid, 0) )
 	    OR ( old.inherit_acl <> new.inherit_acl )
@@ -902,10 +877,12 @@ DELIMITER $$
 		FROM tree_info ti
 		LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 		WHERE ti.id = new.id;
+
 		/* check if updated node is a case */
 		IF(tmp_old_case_id = old.id) THEN
 			SET tmp_new_case_id = new.id;
 		END IF;
+
 		/* form new data based on new parent
 		*/
 		if(new.pid is null) THEN
@@ -928,6 +905,7 @@ DELIMITER $$
 			LEFT JOIN tree_info ti ON t.id = ti.id
 			LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 			WHERE t.id = new.pid;
+
 			SET tmp_new_pids = TRIM( ',' FROM CONCAT( tmp_new_pids, ',', new.id) );
 		END IF;
 		/* end of form new data based on new parent */
@@ -939,6 +917,7 @@ DELIMITER $$
 			else
 				SET tmp_new_security_set = TRIM( ',' FROM CONCAT(tmp_new_security_set, ',', new.id ) );
 			END IF;
+
 			UPDATE tree_acl_security_sets
 			SET `set` = tmp_new_security_set
 				,updated = 1
@@ -1827,6 +1806,7 @@ BEGIN
 		  ,tree.dstatus = 0
 		  , tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
+
 		DELETE FROM tmp_achild_ids2;
 		insert into tmp_achild_ids2 select id from tmp_achild_ids;
 		delete from tmp_achild_ids;
@@ -1857,6 +1837,7 @@ BEGIN
 			,tree.dstatus = 2
 			,tree.updated = 1
 		    where tmp_dchild_ids.id = tree.id;
+
 		DELETE FROM tmp_dchild_ids2;
 		insert into tmp_dchild_ids2 select id from tmp_dchild_ids;
 		delete from tmp_dchild_ids;
@@ -1877,22 +1858,27 @@ DELIMITER $$
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids(id bigint UNSIGNED);
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids2(id BIGINT UNSIGNED);
+
 	delete from tmp_achild_ids;
 	DELETE FROM tmp_achild_ids2;
 	insert into tmp_achild_ids
 		select id
 		from tree
 		where pid = in_id and draft = 1;
+
 	while(ROW_COUNT() > 0)do
 		update tree, tmp_achild_ids
 		  set 	tree.draft = 0
 			,tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
+
 		DELETE FROM tmp_achild_ids2;
+
 		insert into tmp_achild_ids2
 			select id
 			from tmp_achild_ids;
 		delete from tmp_achild_ids;
+
 		INSERT INTO tmp_achild_ids
 			SELECT t.id
 			FROM tree t
@@ -2107,29 +2093,38 @@ DELIMITER $$
     SQL SECURITY INVOKER
 BEGIN
 	DECLARE `tmp_level` INT DEFAULT 0;
+
 	CREATE TABLE IF NOT EXISTS tmp_level_id (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
 	CREATE TABLE IF NOT EXISTS tmp_level_pid (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
+
 	INSERT INTO tmp_level_id
 	  SELECT ts1.id
 	  FROM templates_structure ts1
 	  LEFT JOIN templates_structure ts2 ON ts1.pid = ts2.id
 	  WHERE ts2.id IS NULL;
+
 	WHILE (ROW_COUNT() > 0) DO
 	  UPDATE templates_structure, tmp_level_id
 	  SET templates_structure.`level` = tmp_level
 	  WHERE templates_structure.id = tmp_level_id.id;
+
 	  DELETE FROM tmp_level_pid;
+
 	  INSERT INTO tmp_level_pid
 		SELECT id FROM tmp_level_id;
+
 	  DELETE FROM tmp_level_id;
 	  INSERT INTO tmp_level_id
 	    SELECT ts1.id
 	    FROM templates_structure ts1
 	    JOIN tmp_level_pid ts2 ON ts1.pid = ts2.id;
+
 	  SET tmp_level = tmp_level + 1;
 	END WHILE;
+
 	DROP TABLE tmp_level_id;
 	DROP TABLE tmp_level_pid;
+
     END */$$
 DELIMITER ;
 
