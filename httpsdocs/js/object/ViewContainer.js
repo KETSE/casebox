@@ -590,13 +590,10 @@ Ext.define('CB.object.ViewContainer', {
                 var b = this.BC.get(k);
                 //if not defined the we should add this custom button
                 //to the collection to be available later
-                clog(k, b);
                 if(b) {
                     if(b.baseAction) {
                         b.baseAction.show();
                     } else {
-
-                        clog('show');
                         b.show();
                     }
                 }

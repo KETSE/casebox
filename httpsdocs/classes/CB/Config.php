@@ -365,7 +365,7 @@ class Config extends Singleton
             // path to photos folder
             ,'photos_path' => $filesDir.'_photo'.DIRECTORY_SEPARATOR
 
-            ,'core_url' => 'https://'.$_SERVER['SERVER_NAME'].'/'.$coreName.'/'
+            ,'core_url' => $config['server_name'] . $coreName.'/'
 
             ,'upload_temp_dir' => TEMP_DIR.$coreName.DIRECTORY_SEPARATOR
 

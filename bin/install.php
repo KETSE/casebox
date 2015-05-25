@@ -40,6 +40,8 @@ $defaultValues = array(
     ,'db_user' => 'local'
     ,'db_pass' => ''
 
+    ,'server_name' => 'https://yourserver.com/'
+
     ,'solr_home' => '/var/solr/data/'
     ,'solr_host' => '127.0.0.1'
     ,'solr_port' => '8983'
@@ -74,6 +76,18 @@ if (!empty($l)) {
 do {
     initDBConfig($cfg);
 } while (!verifyDBConfig($cfg));
+
+//specify serverame
+
+$l = readALine('Provide server name with protocol (default "' . $cfg['server_name'] . '"):' . "\n");
+if (!empty($l)) {
+    $l = trim($l);
+    if (substr($l, -1) != '/') {
+        $l .= '/';
+    }
+
+    $cfg['server_name'] = $l;
+}
 
 //init solr connection
 initSolrConfig($cfg);

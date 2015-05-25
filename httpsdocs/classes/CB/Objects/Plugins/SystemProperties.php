@@ -20,6 +20,10 @@ class SystemProperties extends Base
 
         $obj = $this->getObjectClass();
 
+        if (!is_object($obj)) {
+            return $rez;
+        }
+
         $data = $obj->getData();
 
         $rez['data'] = array_intersect_key(

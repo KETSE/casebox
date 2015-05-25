@@ -180,7 +180,6 @@ Ext.define('Ext.aria.FocusManager', {
     });
 });
 
-/** */
 Ext.define('Ext.aria.Component', {
     override: 'Ext.Component',
     requires: [
@@ -474,7 +473,6 @@ Ext.define('Ext.aria.Component', {
     });
 });
 
-/** */
 Ext.define('Ext.aria.Img', {
     override: 'Ext.Img',
     getElConfig: function() {
@@ -496,7 +494,6 @@ Ext.define('Ext.aria.Img', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.panel.Tool', {
     override: 'Ext.panel.Tool',
     requires: [
@@ -823,7 +820,6 @@ Ext.define('ExtThemeNeptune.panel.Panel', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.panel.Panel', {
     override: 'Ext.panel.Panel',
     closeText: 'Close Panel',
@@ -966,7 +962,6 @@ Ext.define('Ext.aria.panel.Panel', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.field.Base', {
     override: 'Ext.form.field.Base',
     requires: [
@@ -1045,7 +1040,6 @@ Ext.define('Ext.aria.form.field.Base', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.field.Display', {
     override: 'Ext.form.field.Display',
     requires: [
@@ -1072,7 +1066,6 @@ Ext.define('ExtThemeNeptune.panel.Table', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.view.View', {
     override: 'Ext.view.View',
     initComponent: function() {
@@ -1178,7 +1171,6 @@ Ext.define('Ext.aria.view.View', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.view.Table', {
     override: 'Ext.view.Table',
     requires: [
@@ -1280,7 +1272,6 @@ Ext.define('Ext.aria.view.Table', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.field.Checkbox', {
     override: 'Ext.form.field.Checkbox',
     requires: [
@@ -1325,7 +1316,6 @@ Ext.define('Ext.aria.form.field.Checkbox', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.grid.header.Container', {
     override: 'Ext.grid.header.Container',
     ariaGetAfterRenderAttributes: function() {
@@ -1337,7 +1327,6 @@ Ext.define('Ext.aria.grid.header.Container', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.grid.column.Column', {
     override: 'Ext.grid.column.Column',
     ariaSortStates: {
@@ -1368,14 +1357,12 @@ Ext.define('Ext.aria.grid.column.Column', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.grid.NavigationModel', {
     override: 'Ext.grid.NavigationModel',
     // WAI-ARIA recommends no wrapping around row ends in navigation mode
     preventWrap: true
 });
 
-/** */
 Ext.define('Ext.aria.form.field.Text', {
     override: 'Ext.form.field.Text',
     requires: [
@@ -1392,7 +1379,6 @@ Ext.define('Ext.aria.form.field.Text', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.button.Button', {
     override: 'Ext.button.Button',
     requires: [
@@ -1450,7 +1436,6 @@ Ext.define('Ext.aria.button.Button', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.tab.Tab', {
     override: 'Ext.tab.Tab',
     //<locale>
@@ -1484,7 +1469,6 @@ Ext.define('Ext.aria.tab.Tab', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.tab.Bar', {
     override: 'Ext.tab.Bar',
     requires: [
@@ -1504,7 +1488,6 @@ Ext.define('Ext.aria.tab.Bar', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.tab.Panel', {
     override: 'Ext.tab.Panel',
     requires: [
@@ -1537,7 +1520,6 @@ Ext.define('Ext.aria.tab.Panel', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.window.Window', {
     override: 'Ext.window.Window',
     requires: [
@@ -1683,7 +1665,6 @@ Ext.define('Ext.aria.window.Window', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.tip.QuickTip', {
     override: 'Ext.tip.QuickTip',
     showByTarget: function(targetEl) {
@@ -1705,7 +1686,6 @@ Ext.define('Ext.aria.tip.QuickTip', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.button.Split', {
     override: 'Ext.button.Split',
     constructor: function(config) {
@@ -1720,7 +1700,6 @@ Ext.define('Ext.aria.button.Split', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.button.Cycle', {
     override: 'Ext.button.Cycle',
     constructor: function(config) {
@@ -1737,7 +1716,6 @@ Ext.define('ExtThemeNeptune.container.ButtonGroup', {
     usePlainButtons: false
 });
 
-/** */
 Ext.define('Ext.aria.container.Viewport', {
     override: 'Ext.container.Viewport',
     initComponent: function() {
@@ -1770,7 +1748,6 @@ Ext.define('Ext.aria.container.Viewport', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.field.TextArea', {
     override: 'Ext.form.field.TextArea',
     requires: [
@@ -1785,7 +1762,6 @@ Ext.define('Ext.aria.form.field.TextArea', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.window.MessageBox', {
     override: 'Ext.window.MessageBox',
     requires: [
@@ -1797,7 +1773,6 @@ Ext.define('Ext.aria.window.MessageBox', {
     ]
 });
 
-/** */
 Ext.define('Ext.aria.form.FieldContainer', {
     override: 'Ext.form.FieldContainer',
     ariaGetAfterRenderAttributes: function() {
@@ -1811,7 +1786,6 @@ Ext.define('Ext.aria.form.FieldContainer', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.CheckboxGroup', {
     override: 'Ext.form.CheckboxGroup',
     requires: [
@@ -1842,7 +1816,6 @@ Ext.define('Ext.aria.form.CheckboxGroup', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.FieldSet', {
     override: 'Ext.form.FieldSet',
     expandText: 'Expand',
@@ -1927,7 +1900,6 @@ Ext.define('Ext.aria.form.FieldSet', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.RadioGroup', {
     override: 'Ext.form.RadioGroup',
     requires: [
@@ -1953,7 +1925,6 @@ Ext.define('Ext.aria.form.RadioGroup', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.field.Picker', {
     override: 'Ext.form.field.Picker',
     ariaGetRenderAttributes: function() {
@@ -1975,7 +1946,6 @@ Ext.define('Ext.aria.form.field.Picker', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.view.BoundListKeyNav', {
     override: 'Ext.view.BoundListKeyNav',
     requires: [
@@ -1998,7 +1968,6 @@ Ext.define('Ext.aria.view.BoundListKeyNav', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.field.Number', {
     override: 'Ext.form.field.Number',
     ariaGetRenderAttributes: function() {
@@ -2049,7 +2018,6 @@ Ext.define('ExtThemeNeptune.toolbar.Paging', {
     inputItemWidth: 40
 });
 
-/** */
 Ext.define('Ext.aria.view.BoundList', {
     override: 'Ext.view.BoundList',
     onHide: function() {
@@ -2061,7 +2029,6 @@ Ext.define('Ext.aria.view.BoundList', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.form.field.ComboBox', {
     override: 'Ext.form.field.ComboBox',
     requires: [
@@ -2141,7 +2108,6 @@ Ext.define('ExtThemeNeptune.picker.Month', {
     measureMaxHeight: 36
 });
 
-/** */
 Ext.define('Ext.aria.form.field.Date', {
     override: 'Ext.form.field.Date',
     requires: [
@@ -2162,7 +2128,6 @@ Ext.define('Ext.aria.form.field.Date', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.picker.Color', {
     override: 'Ext.picker.Color',
     requires: [
@@ -2196,7 +2161,6 @@ Ext.define('ExtThemeNeptune.form.field.HtmlEditor', {
     defaultButtonUI: 'plain-toolbar'
 });
 
-/** */
 Ext.define('Ext.aria.form.field.Time', {
     override: 'Ext.form.field.Time',
     requires: [
@@ -2217,7 +2181,6 @@ Ext.define('ExtThemeNeptune.grid.column.RowNumberer', {
     width: 25
 });
 
-/** */
 Ext.define('Ext.aria.menu.Item', {
     override: 'Ext.menu.Item',
     ariaGetRenderAttributes: function() {
@@ -2256,7 +2219,6 @@ Ext.define('Ext.aria.menu.Item', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.menu.CheckItem', {
     override: 'Ext.menu.CheckItem',
     ariaGetRenderAttributes: function() {
@@ -2265,15 +2227,6 @@ Ext.define('Ext.aria.menu.CheckItem', {
         attrs = me.callParent();
         attrs['aria-checked'] = me.menu ? 'mixed' : !!me.checked;
         return attrs;
-    },
-    setChecked: function(checked, suppressEvents) {
-        this.callParent([
-            checked,
-            suppressEvents
-        ]);
-        this.ariaUpdate({
-            'aria-checked': checked
-        });
     }
 });
 
@@ -2287,7 +2240,6 @@ Ext.define('ExtThemeNeptune.menu.Menu', {
     showSeparator: false
 });
 
-/** */
 Ext.define('Ext.aria.slider.Thumb', {
     override: 'Ext.slider.Thumb',
     move: function(v, animate) {
@@ -2320,7 +2272,6 @@ Ext.define('Ext.aria.slider.Thumb', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.slider.Tip', {
     override: 'Ext.slider.Tip',
     init: function(slider) {
@@ -2341,7 +2292,6 @@ Ext.define('Ext.aria.slider.Tip', {
 // There is no clear way to support multi-thumb sliders
 // in accessible applications, so we default to support
 // only single-slider ones
-/** */
 Ext.define('Ext.aria.slider.Multi', {
     override: 'Ext.slider.Multi',
     /**
@@ -2426,7 +2376,6 @@ Ext.define('Ext.aria.slider.Multi', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.window.Toast', {
     override: 'Ext.window.Toast',
     initComponent: function() {
@@ -2533,7 +2482,7 @@ Ext.define('Ext.ux.BoxReorderer', {
         // TODO: Ext5's DD classes should not use init internally because it collides with use as a plugin
         // TODO: Ext5's DD classes should be Observable.
         // TODO: When all the above are trus, this plugin should extend the DD class.
-        dd = me.dd = new Ext.dd.DD(layout.innerCt, me.container.id + '-reorderer');
+        dd = me.dd = new Ext.dd.DD(layout.innerCt,me.container.id + '-reorderer');
         Ext.apply(dd, {
             animate: me.animate,
             reorderer: me,
@@ -2942,7 +2891,7 @@ Ext.define('Ext.ux.CellDragDrop', {
             });
         }
         if (me.enableDrop) {
-            me.dropZone = new Ext.dd.DropZone(view.el, {
+            me.dropZone = new Ext.dd.DropZone(view.el,{
                 view: view,
                 ddGroup: me.dropGroup || me.ddGroup,
                 containerScroll: true,
@@ -3785,7 +3734,7 @@ Ext.define('Ext.ux.DataView.Draggable', {
     /**
      * Updates the internal ghost DataView by ensuring it is rendered and contains the correct records
      * @param {Array} records The set of records that is currently selected in the parent DataView
-     * @return {HTMLElement} The Ghost DataView's encapsulating HtmnlElement.
+     * @return {HtmlElement} The Ghost DataView's encapsulating HtmnlElement.
      */
     prepareGhost: function(records) {
         return this.createGhost(records).getEl().dom;
@@ -4435,7 +4384,7 @@ Ext.define('Ext.ux.GMapPanel', {
             center: center,
             mapTypeId: google.maps.MapTypeId.HYBRID
         });
-        this.gmap = new google.maps.Map(this.body.dom, options);
+        this.gmap = new google.maps.Map(this.body.dom,options);
         if (marker) {
             this.addMarker(Ext.applyIf(marker, {
                 position: center
@@ -4449,7 +4398,7 @@ Ext.define('Ext.ux.GMapPanel', {
             map: this.gmap
         }, marker);
         if (!marker.position) {
-            marker.position = new google.maps.LatLng(marker.lat, marker.lng);
+            marker.position = new google.maps.LatLng(marker.lat,marker.lng);
         }
         var o = new google.maps.Marker(marker);
         Ext.Object.each(marker.listeners, function(name, fn) {
@@ -4490,13 +4439,13 @@ Ext.define('Ext.ux.GMapPanel', {
 Ext.define('Ext.ux.GroupTabRenderer', {
     extend: 'Ext.plugin.Abstract',
     alias: 'plugin.grouptabrenderer',
-    tableTpl: new Ext.XTemplate('<div id="{view.id}-body" class="' + Ext.baseCSSPrefix + '{view.id}-table ' + Ext.baseCSSPrefix + 'grid-table-resizer" style="{tableStyle}">', '{%', 'values.view.renderRows(values.rows, values.viewStartIndex, out);', '%}', '</div>', {
+    tableTpl: new Ext.XTemplate('<div id="{view.id}-body" class="' + Ext.baseCSSPrefix + '{view.id}-table ' + Ext.baseCSSPrefix + 'grid-table-resizer" style="{tableStyle}">','{%','values.view.renderRows(values.rows, values.viewStartIndex, out);','%}','</div>',{
         priority: 5
     }),
-    rowTpl: new Ext.XTemplate('{%', 'Ext.Array.remove(values.itemClasses, "', Ext.baseCSSPrefix + 'grid-row");', 'var dataRowCls = values.recordIndex === -1 ? "" : " ' + Ext.baseCSSPrefix + 'grid-data-row";', '%}', '<div {[values.rowId ? ("id=\\"" + values.rowId + "\\"") : ""]} ', 'data-boundView="{view.id}" ', 'data-recordId="{record.internalId}" ', 'data-recordIndex="{recordIndex}" ', 'class="' + Ext.baseCSSPrefix + 'grouptab-row {[values.itemClasses.join(" ")]} {[values.rowClasses.join(" ")]}{[dataRowCls]}" ', '{rowAttr:attributes}>', '<tpl for="columns">' + '{%', 'parent.view.renderCell(values, parent.record, parent.recordIndex, parent.rowIndex, xindex - 1, out, parent)', '%}', '</tpl>', '</div>', {
+    rowTpl: new Ext.XTemplate('{%','Ext.Array.remove(values.itemClasses, "',Ext.baseCSSPrefix + 'grid-row");','var dataRowCls = values.recordIndex === -1 ? "" : " ' + Ext.baseCSSPrefix + 'grid-data-row";','%}','<div {[values.rowId ? ("id=\\"" + values.rowId + "\\"") : ""]} ','data-boundView="{view.id}" ','data-recordId="{record.internalId}" ','data-recordIndex="{recordIndex}" ','class="' + Ext.baseCSSPrefix + 'grouptab-row {[values.itemClasses.join(" ")]} {[values.rowClasses.join(" ")]}{[dataRowCls]}" ','{rowAttr:attributes}>','<tpl for="columns">' + '{%','parent.view.renderCell(values, parent.record, parent.recordIndex, parent.rowIndex, xindex - 1, out, parent)','%}','</tpl>','</div>',{
         priority: 5
     }),
-    cellTpl: new Ext.XTemplate('{%values.tdCls = values.tdCls.replace(" ' + Ext.baseCSSPrefix + 'grid-cell "," ");%}', '<div class="' + Ext.baseCSSPrefix + 'grouptab-cell {tdCls}" {tdAttr}>', '<div {unselectableAttr} class="' + Ext.baseCSSPrefix + 'grid-cell-inner" style="text-align: {align}; {style};">{value}</div>', '<div class="x-grouptabs-corner x-grouptabs-corner-top-left"></div>', '<div class="x-grouptabs-corner x-grouptabs-corner-bottom-left"></div>', '</div>', {
+    cellTpl: new Ext.XTemplate('{%values.tdCls = values.tdCls.replace(" ' + Ext.baseCSSPrefix + 'grid-cell "," ");%}','<div class="' + Ext.baseCSSPrefix + 'grouptab-cell {tdCls}" {tdAttr}>','<div {unselectableAttr} class="' + Ext.baseCSSPrefix + 'grid-cell-inner" style="text-align: {align}; {style};">{value}</div>','<div class="x-grouptabs-corner x-grouptabs-corner-top-left"></div>','<div class="x-grouptabs-corner x-grouptabs-corner-bottom-left"></div>','</div>',{
         priority: 5
     }),
     selectors: {
@@ -4950,24 +4899,6 @@ Ext.define('Ext.ux.IFrame', {
         }
     }
 });
-/*
- * TODO items:
- *
- * Iframe should clean up any Ext.dom.Element wrappers around its window, document
- * documentElement and body when it is destroyed.  This helps prevent "Permission Denied"
- * errors in IE when Ext.dom.GarbageCollector tries to access those objects on an orphaned
- * iframe.  Permission Denied errors can occur in one of the following 2 scenarios:
- *
- *     a. When an iframe is removed from the document, and all references to it have been
- *     removed, IE will "clear" the window object.  At this point the window object becomes
- *     completely inaccessible - accessing any of its properties results in a "Permission
- *     Denied" error. http://msdn.microsoft.com/en-us/library/ie/hh180174(v=vs.85).aspx
- *
- *     b. When an iframe is unloaded (either by navigating to a new url, or via document.open/
- *     document.write, new html and body elements are created and the old the html and body
- *     elements are orphaned.  Accessing the html and body elements or any of their properties
- *     results in a "Permission Denied" error.
- */
 
 /**
  * Basic status bar component that can be used as the bottom toolbar of any {@link Ext.Panel}.  In addition to
@@ -5383,12 +5314,12 @@ Ext.define('Ext.ux.LiveSearchGridPanel', {
     searchValue: null,
     /**
      * @private
-     * The matched positions from the most recent search
+     * The row indexes where matching strings are found. (used by previous and next buttons)
      */
-    matches: [],
+    indexes: [],
     /**
      * @private
-     * The current index matched.
+     * The row index of the first search, it could change if next or previous buttons are used.
      */
     currentIndex: null,
     /**
@@ -5462,7 +5393,7 @@ Ext.define('Ext.ux.LiveSearchGridPanel', {
             },
             'Case sensitive'
         ];
-        me.bbar = new Ext.ux.StatusBar({
+        me.bbar = Ext.create('Ext.ux.StatusBar', {
             defaultText: me.defaultStatusText,
             name: 'searchStatusBar'
         });
@@ -5474,13 +5405,6 @@ Ext.define('Ext.ux.LiveSearchGridPanel', {
         me.callParent(arguments);
         me.textField = me.down('textfield[name=searchField]');
         me.statusBar = me.down('statusbar[name=searchStatusBar]');
-        me.view.on('cellkeydown', me.focusTextField, me);
-    },
-    focusTextField: function(view, td, cellIndex, record, tr, rowIndex, e, eOpts) {
-        if (e.getKey() === e.S) {
-            e.preventDefault();
-            this.textField.focus();
-        }
     },
     // detects html tag
     tagsRe: /<[^>]*>/gm,
@@ -5526,8 +5450,7 @@ Ext.define('Ext.ux.LiveSearchGridPanel', {
             count = 0,
             view = me.view,
             cellSelector = view.cellSelector,
-            innerSelector = view.innerSelector,
-            columns = me.visibleColumnManager.getColumns();
+            innerSelector = view.innerSelector;
         view.refresh();
         // reset the statusbar
         me.statusBar.setStatus({
@@ -5535,47 +5458,42 @@ Ext.define('Ext.ux.LiveSearchGridPanel', {
             iconCls: ''
         });
         me.searchValue = me.getSearchValue();
-        me.matches = [];
+        me.indexes = [];
         me.currentIndex = null;
         if (me.searchValue !== null) {
-            me.searchRegExp = new RegExp(me.getSearchValue(), 'g' + (me.caseSensitive ? '' : 'i'));
+            me.searchRegExp = new RegExp(me.getSearchValue(),'g' + (me.caseSensitive ? '' : 'i'));
             me.store.each(function(record, idx) {
-                var node = view.getNode(record);
-                if (node) {
-                    Ext.Array.forEach(columns, function(column) {
-                        var cell = Ext.fly(node).down(column.getCellInnerSelector(), true),
-                            matches, cellHTML, seen;
-                        if (cell) {
-                            matches = cell.innerHTML.match(me.tagsRe);
-                            cellHTML = cell.innerHTML.replace(me.tagsRe, me.tagsProtect);
-                            // populate indexes array, set currentIndex, and replace wrap matched string in a span
-                            cellHTML = cellHTML.replace(me.searchRegExp, function(m) {
-                                ++count;
-                                if (!seen) {
-                                    me.matches.push({
-                                        record: record,
-                                        column: column
-                                    });
-                                    seen = true;
-                                }
-                                return '<span class="' + me.matchCls + '">' + m + '</span>';
-                            }, me);
-                            // restore protected tags
-                            Ext.each(matches, function(match) {
-                                cellHTML = cellHTML.replace(me.tagsProtect, match);
-                            });
-                            // update cell html
-                            cell.innerHTML = cellHTML;
+                var td = Ext.fly(view.getNode(idx)).down(cellSelector),
+                    cell, matches, cellHTML;
+                while (td) {
+                    cell = td.down(innerSelector);
+                    matches = cell.dom.innerHTML.match(me.tagsRe);
+                    cellHTML = cell.dom.innerHTML.replace(me.tagsRe, me.tagsProtect);
+                    // populate indexes array, set currentIndex, and replace wrap matched string in a span
+                    cellHTML = cellHTML.replace(me.searchRegExp, function(m) {
+                        count += 1;
+                        if (Ext.Array.indexOf(me.indexes, idx) === -1) {
+                            me.indexes.push(idx);
                         }
+                        if (me.currentIndex === null) {
+                            me.currentIndex = idx;
+                        }
+                        return '<span class="' + me.matchCls + '">' + m + '</span>';
                     });
+                    // restore protected tags
+                    Ext.each(matches, function(match) {
+                        cellHTML = cellHTML.replace(me.tagsProtect, match);
+                    });
+                    // update cell html
+                    cell.dom.innerHTML = cellHTML;
+                    td = td.next();
                 }
             }, me);
             // results found
-            if (count) {
-                me.currentIndex = 0;
-                me.gotoCurrent();
+            if (me.currentIndex !== null) {
+                me.getSelectionModel().select(me.currentIndex);
                 me.statusBar.setStatus({
-                    text: Ext.String.format('{0} match{1} found.', count, count === 1 ? 'es' : ''),
+                    text: count + ' matche(s) found.',
                     iconCls: 'x-status-valid'
                 });
             }
@@ -5583,8 +5501,8 @@ Ext.define('Ext.ux.LiveSearchGridPanel', {
         // no results found
         if (me.currentIndex === null) {
             me.getSelectionModel().deselectAll();
-            me.textField.focus();
         }
+        me.textField.focus();
     },
     /**
      * Selects the previous row containing a match.
@@ -5592,12 +5510,10 @@ Ext.define('Ext.ux.LiveSearchGridPanel', {
      */
     onPreviousClick: function() {
         var me = this,
-            matches = me.matches,
-            len = matches.length,
-            idx = me.currentIndex;
-        if (len) {
-            me.currentIndex = idx === 0 ? len - 1 : idx - 1;
-            me.gotoCurrent();
+            idx;
+        if ((idx = Ext.Array.indexOf(me.indexes, me.currentIndex)) !== -1) {
+            me.currentIndex = me.indexes[idx - 1] || me.indexes[me.indexes.length - 1];
+            me.getSelectionModel().select(me.currentIndex);
         }
     },
     /**
@@ -5606,12 +5522,10 @@ Ext.define('Ext.ux.LiveSearchGridPanel', {
      */
     onNextClick: function() {
         var me = this,
-            matches = me.matches,
-            len = matches.length,
-            idx = me.currentIndex;
-        if (len) {
-            me.currentIndex = idx === len - 1 ? 0 : idx + 1;
-            me.gotoCurrent();
+            idx;
+        if ((idx = Ext.Array.indexOf(me.indexes, me.currentIndex)) !== -1) {
+            me.currentIndex = me.indexes[idx + 1] || me.indexes[0];
+            me.getSelectionModel().select(me.currentIndex);
         }
     },
     /**
@@ -5629,13 +5543,6 @@ Ext.define('Ext.ux.LiveSearchGridPanel', {
     regExpToggle: function(checkbox, checked) {
         this.regExpMode = checked;
         this.onTextFieldChange();
-    },
-    privates: {
-        gotoCurrent: function() {
-            var pos = this.matches[this.currentIndex];
-            this.getNavigationModel().setPosition(pos.record, pos.column);
-            this.getSelectionModel().select(pos.record);
-        }
     }
 });
 
@@ -6132,6 +6039,7 @@ Ext.define('Ext.ux.TabCloseMenu', {
      * An array of additional context menu items to add to the end of the context menu.
      */
     extraItemsTail: null,
+    // TODO - doc this.addEvents('aftermenu','beforemenu');
     //public
     constructor: function(config) {
         this.callParent([
@@ -6305,7 +6213,7 @@ Ext.define('Ext.ux.TabReorderer', {
         // Move the associated card to match the tab order
         if (me.dragCmp) {
             me.container.tabPanel.setActiveTab(me.dragCmp.card);
-            me.container.tabPanel.move(me.dragCmp.card, me.curIndex);
+            me.container.tabPanel.move(me.startIndex, me.curIndex);
         }
     }
 });
@@ -7463,6 +7371,7 @@ Ext.define('Ext.ux.ajax.SimManager', {
      * Initializes this singleton and applies configuration options.
      * @param {Object} config An optional object with configuration properties to apply.
      * @return {Ext.ux.ajax.SimManager} this
+     * @markdown
      */
     init: function(config) {
         var me = this;
@@ -7523,6 +7432,7 @@ Ext.define('Ext.ux.ajax.SimManager', {
      * @param {Array/Object} simlet Either a {@link Ext.ux.ajax.Simlet} instance or config, an Array
      * of such elements or an Object keyed by URL with values that are {@link Ext.ux.ajax.Simlet}
      * instances or configs.
+     * @markdown
      */
     register: function(simlet) {
         var me = this;
@@ -7644,7 +7554,7 @@ Ext.define('Ext.ux.google.Api', {
         'Ext.mixin.Mashup'
     ],
     requiredScripts: [
-        '//www.google.com/jsapi'
+        'http://www.google.com/jsapi'
     ],
     statics: {
         loadedModules: {}
@@ -8851,7 +8761,6 @@ Ext.define('Ext.ux.desktop.StartMenu', {
         cmp.add.apply(cmp, arguments);
     }
 });
-// StartMenu
 
 /*!
  * Ext JS Library
@@ -9412,7 +9321,6 @@ Ext.define('Ext.ux.event.Maker', {
 });
 
 /**
- * @extends Ext.ux.event.Driver
  * This class manages the playback of an array of "event descriptors". For details on the
  * contents of an "event descriptor", see {@link Ext.ux.event.Recorder}. The events recorded by the
  * {@link Ext.ux.event.Recorder} class are designed to serve as input for this class.
@@ -10210,16 +10118,16 @@ Ext.define('Ext.ux.event.Player', function(Player) {
          * @param {int} [options.detail=1] The number of times the mouse button has been
          * used.
          * @param {int} [options.screenX=0] The x-coordinate on the screen at which point
-         * the event occurred.
+         * the event occured.
          * @param {int} [options.screenY=0] The y-coordinate on the screen at which point
-         * the event occurred.
+         * the event occured.
          * @param {int} [options.clientX=0] The x-coordinate on the client at which point
-         * the event occurred.
+         * the event occured.
          * @param {int} [options.clientY=0] The y-coordinate on the client at which point
-         * the event occurred.
+         * the event occured.
          * @param {int} [options.button=0] The button being pressed while the event is
          * executing. The value should be 0 for the primary mouse button (typically the
-         * left button), 1 for the tertiary mouse button (typically the middle button),
+         * left button), 1 for the terciary mouse button (typically the middle button),
          * and 2 for the secondary mouse button (typically the right button).
          * @param {HTMLElement} [options.relatedTarget=null] For `mouseout` events, this
          * is the element that the mouse has moved to. For `mouseover` events, this is
@@ -10314,7 +10222,7 @@ Ext.define('Ext.ux.event.Player', function(Player) {
          * DOM Level 2 specifies that all mouse events bubble by default.
          * @param {Boolean} [options.cancelable=true] `true` if the event can be canceled
          * using `preventDefault`. DOM Level 2 specifies that all mouse events except
-         * `mousemove` can be canceled. This defaults to `false` for `mousemove`.
+         * `mousemove` can be cancelled. This defaults to `false` for `mousemove`.
          * @param {int} [options.detail=1] The number of times the mouse button has been
          * used.
          * @param {Window} [view=window] The view containing the target. This is typically
@@ -10346,7 +10254,6 @@ Ext.define('Ext.ux.event.Player', function(Player) {
         }
     };
 });
-// statics
 
 /**
  * @extends Ext.ux.event.Driver
@@ -10609,7 +10516,7 @@ Ext.define('Ext.ux.event.Recorder', function(Recorder) {
         },
         onEvent: function(ev) {
             var me = this,
-                e = new Ext.event.Event(ev),
+                e = Ext.EventObject.setEvent(ev),
                 info = me.eventsToRecord[e.type],
                 root, modKeys, elXY,
                 rec = {
@@ -10646,9 +10553,16 @@ Ext.define('Ext.ux.event.Recorder', function(Recorder) {
             if (info.button) {
                 if ('buttons' in ev) {
                     rec.button = ev.buttons;
-                } else // LEFT=1, RIGHT=2, MIDDLE=4, etc.
-                {
-                    rec.button = ev.button;
+                }
+                // LEFT=1, RIGHT=2, MIDDLE=4, etc.
+                else if (ev.which == null) {
+                    // IE case
+                    rec.button = (ev.button < 2) ? 1 : ((ev.button == 4) ? 4 : 2);
+                } else if (ev.which) {
+                    // All others
+                    rec.button = (ev.which < 2) ? 1 : ((ev.which == 2) ? 4 : 2);
+                } else {
+                    rec.button = 0;
                 }
                 if (!rec.button && info.whileDrag) {
                     return;
@@ -10845,10 +10759,6 @@ Ext.define('Ext.ux.event.RecorderManager', {
                 handler: me.onPlay,
                 scope: me,
                 menu: [
-                    speed('Qarter Speed (0.25x)', 0.25),
-                    speed('Half Speed (0.5x)', 0.5),
-                    speed('3/4 Speed (0.75x)', 0.75),
-                    '-',
                     speed('Recorded Speed (1x)', 1),
                     speed('Double Speed (2x)', 2),
                     speed('Quad Speed (4x)', 4),
@@ -10952,7 +10862,6 @@ Ext.define('Ext.ux.event.RecorderManager', {
                 me.player = Ext.create('Ext.ux.event.Player', {
                     attachTo: window.opener,
                     eventQueue: events,
-                    speed: me.playSpeed,
                     listeners: {
                         stop: me.onPlayStop,
                         scope: me
@@ -11141,6 +11050,7 @@ Ext.define('Ext.ux.form.MultiSelect', {
      * An optional set of configuration properties that will be passed to the {@link Ext.view.BoundList}'s constructor.
      * Any configuration that is valid for BoundList can be included.
      */
+    //TODO - doc me.addEvents('drop');
     initComponent: function() {
         var me = this;
         me.items = me.setupItems();
@@ -11446,7 +11356,6 @@ Ext.define('Ext.ux.form.MultiSelect', {
     }
 });
 
-/** */
 Ext.define('Ext.aria.ux.form.MultiSelect', {
     override: 'Ext.ux.form.MultiSelect',
     requires: [
@@ -11462,7 +11371,7 @@ Ext.define('Ext.aria.ux.form.MultiSelect', {
         me.callParent();
         if (boundList) {
             boundList.pageSize = me.pageSize;
-            me.keyNav = new Ext.view.BoundListKeyNav(boundList.el, {
+            me.keyNav = new Ext.view.BoundListKeyNav(boundList.el,{
                 boundList: boundList,
                 // The View takes care of these
                 up: Ext.emptyFn,

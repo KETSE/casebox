@@ -25,7 +25,6 @@ $users = array();
 $coreName = Config::get('core_name');
 $coreUrl = Config::get('core_url');
 $languages = Config::get('languages');
-$sender = Notifications::getSender();
 $adminEmail = Config::get('ADMIN_EMAIL');
 
 //send notification mails only if not in dev mode or _dev_sent_mails not set to 0
@@ -88,9 +87,10 @@ foreach ($users as $u) {
                 echo $u['email'].': ' . $subject  . "\n";
 
                 $message = Notifications::getMailBodyForAction($action, $u);
+                $sender = Notifications::getSender($action['user_id']);
 
-                file_put_contents('c:/'.$action['id'].'.html', "<h1>$subject<h1>" . $message);
-                /*  COMMENTED FOR TEST
+                file_put_contents(TEMP_DIR . $action['id'].'.html', "$sender<br />\n<h1>$subject<h1>" . $message);
+                //  COMMENTED FOR TEST
                 if (!mail(
                     $u['email'],
                     $subject,

@@ -222,9 +222,10 @@ class Notifications
 
     /**
      * get the sender formated string
+     * @param  int     $userId
      * @return varchar
      */
-    public static function getSender()
+    public static function getSender($userId = false)
     {
         $coreName = Config::get('core_name');
 
@@ -240,7 +241,7 @@ class Notifications
                     '"',
                     '\'\'',
                     html_entity_decode(
-                        User::getDisplayName() . " (" . $coreName . ")",
+                        User::getDisplayName($userId) . " (" . $coreName . ")",
                         ENT_QUOTES,
                         'UTF-8'
                     )

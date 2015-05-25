@@ -1,3 +1,14 @@
+CaseBox 1.9.446 (2015-05-25)
+==============================
+New Features, Improvements
+--------------------------
+- ask for "server_name" config option in install.php
+- rollback to ExtJS 5.1.0
+
+Fixed Bugs:
+----------
+- sender name not correctly set on notifications
+
 CaseBox 1.9.445 (2015-05-23)
 ==============================
 New Features, Improvements
