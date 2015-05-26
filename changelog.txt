@@ -1,3 +1,20 @@
+CaseBox 1.9.448 (2015-05-26)
+==============================
+New Features, Improvements
+--------------------------
+- #6166 JS Error in wclac/js/CB.DB.php line: 83
+- dont set localhost, by default, as allowedIp for maintenance mode
+
+CaseBox 1.9.447 (2015-05-25)
+==============================
+New Features, Improvements
+--------------------------
+- #6100 Implement Notifications UI
+
+Fixed Bugs:
+----------
+-
+
 CaseBox 1.9.446 (2015-05-25)
 ==============================
 New Features, Improvements

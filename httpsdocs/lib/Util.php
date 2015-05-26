@@ -639,7 +639,7 @@ function unsetNullValues(&$arr)
  */
 function jsonEncode($var)
 {
-    if (empty($var)) {
+    if (empty($var) && (!is_array($var))) {
         return null;
     }
 

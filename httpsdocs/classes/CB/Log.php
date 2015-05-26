@@ -60,6 +60,8 @@ class Log
 
         static::addSolrRecord($p);
 
+        static::adNotificationRecords($p['action_id'], $p['activityData']);
+
         fireEvent('logadd', $p);
     }
 
@@ -177,6 +179,40 @@ class Log
         }
 
         return $rez;
+    }
+
+    /**
+     * add notification records for a given action
+     * @param  int   $actionId
+     * @param  array $activityData array containing "fu" and/or "wu" properties
+     * @return void
+     */
+    private static function adNotificationRecords($actionId, $activityData)
+    {
+        $userIds = array();
+        if (!empty($activityData['fu'])) {
+            $userIds = $activityData['fu'];
+        }
+        if (!empty($activityData['wu'])) {
+            $userIds = array_merge($userIds, $activityData['wu']);
+        }
+
+        $userIds = array_unique($userIds);
+
+        //exclude current user from notified users
+        $userIds = array_diff($userIds, array(User::getId()));
+
+        if (!empty($userIds)) {
+            DB\dbQuery(
+                'INSERT INTO notifications
+                (object_id, action_id, action_time, user_id)
+                SELECT al.object_id, al.id, al.action_time, u.id
+                FROM action_log al, users_groups u
+                WHERE al.id = $1 AND
+                    u.id in (' . implode(',', $userIds). ')',
+                $actionId
+            ) or die(DB\dbQueryError());
+        }
     }
 
     /**
