@@ -104,6 +104,19 @@ class Service
         return $this->solr_handler;
     }
 
+    /**
+     * test if service is connected
+     * @return boolean
+     */
+    public function ping()
+    {
+        return $this->solr_handler->ping();
+    }
+
+    /**
+     *
+     * @return type
+     */
     public function reconnect()
     {
         unset($this->solr_handler);

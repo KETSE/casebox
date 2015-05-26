@@ -6,20 +6,20 @@ namespace CB\UNITTESTS;
  *
  * @author ghindows
  */
-class SolrTest
+class SolrTest extends \PHPUnit_Framework_TestCase
 {
    private $SOLR;
 
     public function setUp() {
 
-    }
+        $this->SOLR = new \CB\Solr\Client();
 
-    public function tearDown() {
-        
     }
     
     public function testConnection() {
-        
+
+          $this->assertTrue($this->SOLR->ping() > 0);
+          
     }
     
 }

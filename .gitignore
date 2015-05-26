@@ -44,7 +44,8 @@ apigen.neon
 /nbproject
 /tests/composer.phar
 /tests/composer.lock
-/tests/vendor
-/tests/temp
+/tests/vendor/**
+/tests/tmp/cookie/**
+/tests/reports/**
 _rest_managed.json
 

@@ -4,7 +4,7 @@
         "phpunit/phpunit-story": ">=1.0"
     },
     "require": {
-        "mashape/unirest-php": "^2.6",
-        "phpunit/php-code-coverage": "^2.0"
+        "phpunit/php-code-coverage": "^2.0",
+        "php-curl-class/php-curl-class": "^3.5"
     }
 }
