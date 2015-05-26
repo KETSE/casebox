@@ -48,7 +48,7 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
 
     echo "Start Prepare instance for testing\n";
         include CB_ROOT_PATH.'/bin/core_create_auto.php';
-    echo "End for Prepare instance\nte;"
+    echo "End for Prepare instance\n";
     
 }
 

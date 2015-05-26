@@ -106,6 +106,9 @@ DB\dbQuery(
     )
 ) or die(DB\dbQueryError());
 
+// fix for session store
+DB\dbQuery('ALTER TABLE `'.$dbName.'`.`sessions` CHANGE `id` `id` VARBINARY(100) NOT NULL, CHANGE `pid` `pid` VARBINARY(100) NULL COMMENT \'parrent session id\'; ');
+
 //verify if solr core exist
 $solrHost = $cfg['solr_host'];
 $solrPort = $cfg['solr_port'];
