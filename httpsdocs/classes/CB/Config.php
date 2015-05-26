@@ -4,13 +4,24 @@ namespace CB;
 /**
  * Class used for configuration management
  */
-use CB\DB as DB;
 
 class Config extends Singleton
 {
     protected static $config = array();
     protected static $environmentVars = array();
     protected static $plugins = array();
+
+    /* define possible statuses for a core */
+    public static $CORESTATUS_DISABLED = 0;
+    public static $CORESTATUS_ACTIVE = 1;
+    public static $CORESTATUS_MAINTAINANCE = 2;
+
+    /* flags */
+    protected static $flags = array(
+        'disableTriggers' => false
+        ,'disableSolrIndexing' => false
+        ,'disableActivityLog' => false
+    );
 
     /**
      * method for laoding core config
@@ -135,7 +146,7 @@ class Config extends Singleton
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $rez = json_decode($r['cfg'], true);
+            $rez = Util\jsonDecode($r['cfg']);
         } else {
             throw new \Exception('Core not defined in cores table: '.$coreName, 1);
         }
@@ -146,7 +157,7 @@ class Config extends Singleton
         }
 
         $rez['core_id'] = $r['id'];
-        $rez['core_active'] = $r['active'];
+        $rez['core_status'] = $r['active'];
 
         return $rez;
     }
@@ -170,6 +181,155 @@ class Config extends Singleton
             $rez[$r['param']] = $r['value'];
         }
         $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get core status
+     * @return integer
+     */
+    public static function getCoreStatus()
+    {
+        $status = static::get('core_status', static::$CORESTATUS_DISABLED);
+
+        if ($status != static::$CORESTATUS_MAINTAINANCE) {
+            return $status;
+        }
+
+        //analize maintainance config and if in maintainance period
+        //then allow only console scripts, local ip and defined allowed ips
+
+        // allow all console scripts
+        if (isset($_SERVER['argc'])) {
+            return static::$CORESTATUS_ACTIVE;
+        }
+
+        //get maintainance config. Possible options are startTime, endTime, allowIps
+        $mcfg = static::get('maintainance');
+
+        //check if time limits are set and we are outside of that period
+        //then core is considered to be active
+        $startTime = empty($mcfg['startTime'])
+            ? null
+            : strtotime($mcfg['startTime']);
+        $endTime = empty($mcfg['endTime'])
+            ? null
+            : strtotime($mcfg['endTime']);
+        $now = strtotime('now');
+
+        if (//(is_null($startTime) && is_null($endTime)) ||
+            (!is_null($startTime) && ($startTime > $now)) //||
+            //(!is_null($endTime) && ($endTime < $now)) // dont autoenable after end time
+        ) {
+            return static::$CORESTATUS_ACTIVE;
+        }
+
+        //check if request is in allowed ips
+        $ips = array('localhost', '127.0.0.1');
+        if (!empty($mcfg['allowIps'])) {
+            $ips = array_merge($ips, Util\toTrimmedArray($mcfg['allowIps']));
+        }
+
+        if (in_array($_SERVER['REMOTE_ADDR'], $ips)) {
+            return static::$CORESTATUS_ACTIVE;
+        }
+
+        return $status;
+    }
+
+    /**
+     * get message for core status
+     * @param  int     $status
+     * @return varchar
+     */
+    public static function getCoreStatusMessage($status = false)
+    {
+        $rez = '';
+
+        if ($status === false) {
+            $status = static::getCoreStatus();
+        }
+
+        switch ($status) {
+            case static::$CORESTATUS_DISABLED:
+                $rez = 'Core is not active at the moment, please try again later.';
+                break;
+
+            case static::$CORESTATUS_MAINTAINANCE:
+                $coreName = static::get('core_name');
+
+                $rez = file_get_contents(TEMPLATES_DIR . 'maintenance.html');
+                if (empty($rez)) {
+                    $rez = 'Core is under maintainance, please try again {time}.';
+                }
+
+                $mcfg = static::get('maintainance');
+
+                $endTime = empty($mcfg['endTime'])
+                    ? null
+                    : $mcfg['endTime'];
+
+                $time = 'later.';
+                if (!is_null($endTime)) {
+                    $dt = new \DateTime($endTime);
+                    $ct = new \DateTime('now');
+                    $diff = $ct->diff($dt);
+
+                    if ($diff->invert == 0) {
+                        $time = $diff->h;
+                        if ($time > 0) {
+                            $time = 'in ~' . $time . ' hour(s).';
+                        } else {
+                            $time = 'in about an hour.';
+                        }
+                    } {
+                        $time = 'soon.';
+                    }
+                }
+
+                $rez = str_replace(
+                    array(
+                        '{title}',
+                        '{mail}',
+                        '{time_left}'
+                    ),
+                    array(
+                        static::getProjectName(),
+                        static::get('admin_email'),
+                        $time
+                    ),
+                    $rez
+                );
+
+                break;
+        }
+
+        return $rez;
+    }
+
+    /**
+     * get project name from config
+     * if cannot be found - core_name is returned
+     * @return varchar
+     */
+    public static function getProjectName()
+    {
+        $userLanguage = Config::get('user_language', 'en');
+
+        $rez = static::get('project_name_' . $userLanguage);
+
+        if (empty($rez)) {
+            $rez = static::get('project_name');
+        }
+
+        if (empty($rez)) {
+            $rez = static::get('project_name_en');
+        }
+
+        if (empty($rez)) {
+            $rez = static::get('core_name');
+        }
 
         return $rez;
     }
@@ -205,7 +365,7 @@ class Config extends Singleton
             // path to photos folder
             ,'photos_path' => $filesDir.'_photo'.DIRECTORY_SEPARATOR
 
-            ,'core_url' => 'https://'.$_SERVER['SERVER_NAME'].'/'.$coreName.'/'
+            ,'core_url' => $config['server_name'] . $coreName.'/'
 
             ,'upload_temp_dir' => TEMP_DIR.$coreName.DIRECTORY_SEPARATOR
 
@@ -382,7 +542,14 @@ class Config extends Singleton
 
         foreach ($languages as $l) {
             $k = mb_strtolower(trim($l));
-            $rez['lang-'.$l] = array('//js/locale/'.$l.'.js');
+
+            $cf = DOC_ROOT . 'js' . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR . $coreName . '_' . $l . '.js';
+            if (file_exists($cf)) { //include core's custom translation file if present
+                $rez['lang-'.$l] = array('//js/locale/' . $coreName . '_' . $l . '.js');
+            } else {
+                $rez['lang-'.$l] = array('//js/locale/' . $l . '.js');
+            }
+
         }
 
         return $rez;
@@ -524,8 +691,8 @@ class Config extends Singleton
 
         if (empty($instance->defaultGridColumnConfigs)) {
             $userConfig = &$_SESSION['user']['cfg'];
-            $dateFormat = str_replace('%', '', $userConfig['short_date_format']);
-            $dateTimeFormat = str_replace('%', '', $dateFormat . ' ' . $userConfig['time_format']);
+            $dateFormat = $userConfig['short_date_format'];
+            $dateTimeFormat = $dateFormat . ' ' . $userConfig['time_format'];
 
             $instance->defaultGridColumnConfigs = array(
                 'nid' => array(
@@ -716,11 +883,21 @@ class Config extends Singleton
             ,'object_type_plugins'
             ,'treeNodes'
             ,'action_log'
+            ,'maintenance'
         );
 
         foreach ($jsonProperties as $property) {
             if (!empty($cfg[$property])) {
                 $cfg[$property] = Util\toJSONArray($cfg[$property]);
+            }
+        }
+
+        //change date formats from mysql to php
+        if (!empty($cfg['language_settings'])) {
+            foreach ($cfg['language_settings'] as $k => &$v) {
+                $v['long_date_format'] = str_replace('%', '', $v['long_date_format']);
+                $v['short_date_format'] = str_replace('%', '', $v['short_date_format']);
+                $v['time_format'] = str_replace('%', '', $v['time_format']);
             }
         }
 
@@ -782,24 +959,28 @@ class Config extends Singleton
     }
 
     /**
-    * Check if a given value is presend in a config property
-    * Property is considered to be an array or a comma separated list of values
-    *
-    * @param  varchar $optionName name of the option to get
-    * @param  varchar $value checked value
-    * @return boolean
+    * get flag value
+    * @param  varchar $name  flag name
+    * @return variant return false if not set
     */
-    public static function isInListValue($optionName, $value)
+    public static function getFlag($name)
     {
-        $v = static::get($optionName);
-        if (is_scalar($v) || is_null($v)) {
-            $v = explode(',', $v);
+        if (isset(static::$flags[$name])) {
+            return static::$flags[$name];
         }
 
-        return in_array(
-            $value,
-            $v
-        );
+        return false;
+    }
+
+    /**
+    * set flag value
+    * @param  varchar $name
+    * @param  variant $value
+    * @return variant return false if not set
+    */
+    public static function setFlag($name, $value)
+    {
+        static::$flags[$name] = $value;
     }
 
     /**

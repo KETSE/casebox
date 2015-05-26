@@ -48,7 +48,6 @@ class ObjectProperties extends Base
                         ,'uid'
                         ,'cdate'
                         ,'udate'
-                        ,'can'
                     )
                 )) {
                     if (in_array($k, array('date', 'date_end', 'cdate', 'udate'))) {
@@ -65,6 +64,28 @@ class ObjectProperties extends Base
                     }
 
                 }
+            }
+        }
+
+        $rez['data']['can'] = $obj->getActionFlags();
+
+        //set status info for tasks if not active
+        if (($obj->getType() == 'task')) {
+            $d = &$rez['data'];
+            $d['status'] = '';
+            switch ($obj->getStatus()) {
+                case Objects\Task::$STATUS_ACTIVE:
+                    break;
+
+                case Objects\Task::$STATUS_CLOSED:
+                    //just add title css class and continue with default
+                    $d['titleCls'] = 'task-completed';
+                    // break;
+
+                default:
+                    $d['status'] = $obj->getStatusText();
+                    $d['statusCls'] = $obj->getStatusCSSClass();
+
             }
         }
 

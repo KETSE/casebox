@@ -49,6 +49,8 @@ question: why do we have "-top" class?
 .icon-grid-column .x-grid-cell-inner, .icon-grid-column-top .x-grid-cell-inner {padding-left: 32px !important; }
 .icon-grid-column { background-position: 3px 50% !important; background-repeat: no-repeat; }
 
+.x-rtl .icon-grid-column .x-grid-cell-inner, .x-rtl .icon-grid-column-top .x-grid-cell-inner {padding-right: 22px !important; }
+.x-rtl .icon-grid-column { background-position: 100% 50% !important; background-repeat: no-repeat; }
 /* space: big; */
 /*
 .icon-grid-column-top { background-position: 3px 10px !important; background-repeat: no-repeat; }
@@ -162,6 +164,7 @@ border-color: transparent;
 /* COMFORTABLE VIEW -------------------------------------------------------------------------------------- */
 
 .icon-grid-column-top { background-position: 10px 8px !important; background-repeat: no-repeat; }
+.x-rtl .icon-grid-column-top { background-position: 100% 8px !important; background-repeat: no-repeat; }
 
 .x-grid-cell-inner {
   font-size: 13px;
@@ -237,6 +240,7 @@ font-size: 13px;
 /* COMPACT VIEW ---------------------------------------------------------------------------------------- */
 
 .icon-grid-column-top { background-position: 8px 4px !important; background-repeat: no-repeat; }
+.x-rtl .icon-grid-column-top { background-position: 100% 4px !important; background-repeat: no-repeat; }
 
 .x-grid-cell-inner {
   font-size: 12px;
@@ -307,6 +311,7 @@ font-size: 12px;
 .icon-padding2, .icon-padding2 .x-grid3-cell-inner { padding-left: 44px; background-position: 22px 50% !important }
 .icon-padding3, .icon-padding3 .x-grid3-cell-inner { padding-left: 44px; background-position: 44px 50% !important }
 
+.x-rtl .icon-padding, .x-rtl .icon-padding .x-grid3-cell-inner { padding-right: 22px !important; min-height: 16px; background-position: 100% 50%;}
 
 
 
@@ -760,11 +765,16 @@ table.qtip td{ font-weight: normal; padding: 3px; color: black}
 
 .ver_count{
 	float:right;
-	width:16px;
+	width: 16px;
 	height:16px;
 	background-position: 0 50%;
 	background-repeat: no-repeat;
 }
+
+.x-rtl .ver_count{
+  float: left;
+}
+
 .vc1{width:9px; height: 9px; background-image: url(i/ico/counter/gray-01.png) }
 .vc2{width:9px; height: 9px; background-image: url(i/ico/counter/gray-02.png) }
 .vc3{width:9px; height: 9px; background-image: url(i/ico/counter/gray-03.png) }

@@ -66,7 +66,9 @@ class PreviewExtractorOffice extends PreviewExtractor
 
             exec($cmd, $output, $returnStatus); //returnStatus should be 0 if no error
 
-            unlink($nfn);
+            //we cant delete the file right away
+            //because command can execute in background and could take some time
+            //unlink($nfn);
 
             if (empty($returnStatus) && file_exists($pfn)) {
                 file_put_contents(
@@ -74,7 +76,7 @@ class PreviewExtractorOffice extends PreviewExtractor
                     '<div style="padding: 5px">'.$this->purify(
                         file_get_contents($pfn),
                         array(
-                            'URI.Base' => '/' . Config::get('core_name') . '/preview/'
+                            'URI.Base' => '/' . Config::get('core_name') . '/view/'
                             ,'URI.MakeAbsolute' => true
                         )
                     ).'</div>'

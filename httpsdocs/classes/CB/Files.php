@@ -24,23 +24,14 @@ class Files
         $d = &$rez['data'];
         $d['path'] = str_replace(',', '/', $d['path']);
         $a = explode('.', $d['name']);
-        $d['ago_date'] = date(
-            str_replace(
-                '%',
-                '',
-                $_SESSION['user']['cfg']['long_date_format']
-            ),
-            strtotime($d['cdate'])
-        ).
-        ' '.L\get('at').' '.
-        date(
-            str_replace(
-                '%',
-                '',
-                $_SESSION['user']['cfg']['time_format']
-            ),
-            strtotime($d['cdate'])
-        );
+
+        $t = strtotime($d['cdate']);
+        $dateFormat = getOption('long_date_format');
+        $timeFormat = getOption('time_format');
+
+        $d['ago_date'] = date($dateFormat, $t)
+            . ' ' . L\get('at') . ' ' .
+            date($timeFormat, $t);
 
         $d['ago_date'] = Util\translateMonths($d['ago_date']);
         $d['ago_text'] = Util\formatAgoTime($d['cdate']);
@@ -48,22 +39,10 @@ class Files
         if (!empty($d['versions'])) {
             foreach ($d['versions'] as &$r) {
                 $r['template_id'] = $rez['data']['template_id'];
-                $r['ago_date'] = date(
-                    str_replace(
-                        '%',
-                        '',
-                        $_SESSION['user']['cfg']['long_date_format']
-                    ),
-                    strtotime($r['cdate'])
-                ).' '.L\get('at').' '.
-                date(
-                    str_replace(
-                        '%',
-                        '',
-                        $_SESSION['user']['cfg']['time_format']
-                    ),
-                    strtotime($r['cdate'])
-                );
+                $t = strtotime($r['cdate']);
+                $r['ago_date'] = date($dateFormat, $t)
+                    . ' ' . L\get('at') . ' ' .
+                    date($timeFormat, $t);
 
                 $r['ago_date'] = Util\translateMonths($r['ago_date']);
                 $r['ago_text'] = Util\formatAgoTime($r['cdate']);
@@ -98,8 +77,7 @@ class Files
         $contentFile = Config::get('files_dir') . @$data['content_path'] . '/'.@$data['content_id'];
 
         if (file_exists($contentFile) && !is_dir($contentFile)) {
-            $rez['data'] = utf8_encode(file_get_contents($contentFile));
-
+            $rez['data'] = Util\toUTF8String(file_get_contents($contentFile));
         } else {
             \CB\debug('Error accessing file ('.$id.'). Its content (id: '.@$data['content_id'].') doesnt exist on the disk.');
 
@@ -703,7 +681,7 @@ class Files
                         break;
                     case 'replace':
                         /* TODO: only mark file as deleted but dont delte it
-                            Note: we cant leae the previous file record if we have a given id for file
+                            Note: we cant leave the previous file record if we have a given id for file
 
                         */
                         DB\dbQuery('CALL p_delete_tree_node($1)', $fileId) or die(DB\dbQueryError());
@@ -1074,9 +1052,9 @@ class Files
                     Files::deletePreview($file['content_id']);
                 }
 
-                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php '.$coreName.' > '.Config::get('debug_log').'_office &';
-                if (isWindows()) {
-                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php '.$coreName;
+                $cmd = 'php -f '.LIB_DIR.'PreviewExtractorOffice.php -- -c '.$coreName.' > '.Config::get('debug_log').'_office &';
+                if (IS_WINDOWS) {
+                    $cmd = 'start /D "'.LIB_DIR.'" php -f PreviewExtractorOffice.php -- -c '.$coreName;
                 }
                 pclose(popen($cmd, "r"));
 
@@ -1170,7 +1148,7 @@ class Files
     {
         $filesPreviewDir = Config::get('files_preview_dir');
 
-        if (isWindows()) {
+        if (IS_WINDOWS) {
             $cmd = 'del '.$filesPreviewDir.$id.'_*';
         } else {
             $cmd = 'find '.$filesPreviewDir.' -type f -name '.$id.'_* -print | xargs rm';

@@ -14,6 +14,8 @@ Ext.define('CB.plugin.Export.Button', {
     ,onExportClick: function(b, e) {
         var params = Ext.clone(this.owner.params);
 
+        delete params.lastQuery;
+
         params.from = 'grid';
 
         window.open('/' + App.config.coreName + '/get/?export=' + Ext.encode(params));

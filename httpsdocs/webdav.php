@@ -11,6 +11,8 @@ namespace CB;
  */
 
 
+// server urls 'https://casebox.org/dav/{core}/edit-{id}/'
+define ('URIPREFIX', 'dav');
 
 // small hack for init.php: allowing it to work without being authenticated
 $webDAVMode = 1;
@@ -54,11 +56,12 @@ $server = new \Sabre\DAV\Server($rootNode);
 
 // If you want to run the SabreDAV server in a custom location (using mod_rewrite for instance)
 // You can override the baseUri here.
-$baseUri = '/' . $env['core'];
+$baseUri = '/' . URIPREFIX . '/' . $env['core'];
 
-// for EDIT mode, the root will start directly on /cihrs/edit-{nodeId}/
+// for EDIT mode, the root will start directly on /dav/{core}/edit-{nodeId}/
 if ($env['mode'] == 'edit') {
     $baseUri .= '/' . $env['editFolder'];
+    // $baseUri .= '/' . $uriPrefix . '/' . $env['editFolder'];
 }
 
 $server->setBaseUri($baseUri);
@@ -133,23 +136,26 @@ function initEnv() {
     // error_log("initEnv: " . $_SERVER['REQUEST_URI']);
     // echo(print_r($ary, true));
 
+    // remove URIPREFIX
+    $t = array_shift($ary);
+
     $r = [];
 
     $r['core'] = $ary[0];
 
     # current version
-    # /{core}/edit-{nodeId}/{filename}
+    # /dav/{core}/edit-{nodeId}/{filename}
     #
     # version history
-    # /{core}/edit-{nodeId}-{versionId}/{filename}
-    # /{core}/edit-{nodeId}-{versionId}/
+    # /dav/{core}/edit-{nodeId}-{versionId}/{filename}
+    # /dav/{core}/edit-{nodeId}-{versionId}/
     # also support a direct folder request /edit-{nodeId}
     if (((count($ary) == 2) or (count($ary) == 3)) && (preg_match('/^edit-(\d+)/', $ary[1], $m))) {
         $r['mode'] = 'edit';
 
         $r['nodeId'] = $m[1];
 
-        // {core}/edit-{nodeId}-{versionId}/
+        // /{core}/edit-{nodeId}-{versionId}/
         $r['editFolder'] = $ary[1];
 
         # /edit-{nodeId}-{versionId}  ?
@@ -163,7 +169,8 @@ function initEnv() {
             $r['filename'] = $ary[2];
         }
 
-        // root Sabredav folder, serve all requests from here
+        // root Sabredav folder, serve all requests from here: /dav/{core}/edit-{nnn}
+        // i.e. dav client should not try to get out of this folder
         $r['rootFolder'] = '/' . $r['editFolder'];
 
     // } elseif (preg_match('/^dav-(.*)$/', $ary[0], $m)) {    # /dav-{core}/

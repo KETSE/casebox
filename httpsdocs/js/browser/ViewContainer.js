@@ -407,16 +407,16 @@ Ext.define('CB.browser.ViewContainer', {
                     ,showObjectPropertiesPanel: true
                     ,getProperty: getPropertyHandler
                 })
-                ,new CB.browser.view.Calendar({
-                    border: false
-                    ,refOwner: this
-                    ,store: this.store
-                    ,getProperty: getPropertyHandler
-                    ,listeners: {
-                        scope: this
-                        ,openobject: this.onObjectsOpenEvent
-                    }
-                })
+                // ,new CB.browser.view.Calendar({
+                //     border: false
+                //     ,refOwner: this
+                //     ,store: this.store
+                //     ,getProperty: getPropertyHandler
+                //     ,listeners: {
+                //         scope: this
+                //         ,openobject: this.onObjectsOpenEvent
+                //     }
+                // })
                 ,new CB.browser.view.Charts({
                     border: false
                     ,refOwner: this
@@ -699,6 +699,8 @@ Ext.define('CB.browser.ViewContainer', {
                 // check if view not set on client params
                 if(this.params && this.params.view) {
                     this.setActiveView(this.params.view);
+                } else {
+                    this.setActiveView('grid');
                 }
             }
         }

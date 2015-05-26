@@ -40,75 +40,19 @@ class TemplateField extends Object
 
         $p = &$this->data;
 
-        //update name to _title field if presend in data (actually it should be present)
-        $title = @$this->getFieldValue('_title', 0)['value'];
-        if (!empty($title)) {
-            $p['name'] = $title;
-        }
-
         $saveFields = array('template_id');
         $saveValues = array($this->detectParentTemplate());
 
         $params = array('1');
         $i = 2;
-        foreach ($this->tableFields as $fieldName) {
-            $field = null;
-            if (!empty($this->template)) {
-                $field = $this->template->getField($fieldName);
-            }
 
-            if (isset($p[$fieldName])) {
-                $value = $p[$fieldName];
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+        $dataParams = $this->getParamsFromData();
 
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = $i;
-                $i++;
-            } elseif (isset($p['data'][$fieldName])) {
-                $value = $p['data'][$fieldName];
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
-
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = $i;
-                $i++;
-            } elseif (!empty($field)) {
-                $value = @$this->getFieldValue($fieldName, 0)['value'];
-                // this if should be removed after complete migration to language abreviation titles
-                if (empty($value) && in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
-                    if (!empty($lang)) {
-                        $value = @$this->getFieldValue($lang, 0)['value'];
-                    }
-                }
-
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
-
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = $i;
-                $i++;
-            } else {
-                // this if should be removed after complete migration to language abreviation titles
-                if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
-                    if (!empty($lang)) {
-                        $value = @$this->getFieldValue($lang, 0)['value'];
-
-                        $saveFields[] = $fieldName;
-                        $saveValues[] = $value;
-                        $params[] = "$i";
-                        $i++;
-                    }
-                }
-            }
+        foreach ($dataParams as $k => $v) {
+            $saveFields[] = $k;
+            $saveValues[] = $v;
+            $params[] = $i;
+            $i++;
         }
 
         if (!empty($saveFields)) {
@@ -163,47 +107,16 @@ class TemplateField extends Object
         $saveValues = array($this->id, $this->detectParentTemplate());
         $params = array('template_id = $2');
         $i = 3;
-        foreach ($this->tableFields as $fieldName) {
-            $field = null;
-            if (!empty($this->template)) {
-                $field = $this->template->getField($fieldName);
-            }
 
-            if (isset($p[$fieldName]) && ($p[$fieldName] !== 'id')) {
-                $value = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
-                    ? $p[$fieldName]
-                    : json_encode($p[$fieldName], JSON_UNESCAPED_UNICODE);
-
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = "`$fieldName` = \$$i";
-                $i++;
-            } elseif (!empty($field)) {
-                $value = @$this->getFieldValue($fieldName, 0)['value'];
-
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
-
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = "`$fieldName` = \$$i";
-                $i++;
-            } else {
-                // this if should be removed after complete migration to language abreviation titles
-                if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
-                    $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
-                    if (!empty($lang)) {
-                        $value = @$this->getFieldValue($lang, 0)['value'];
-
-                        $saveFields[] = $fieldName;
-                        $saveValues[] = $value;
-                        $params[] = "`$fieldName` = \$$i";
-                        $i++;
-                    }
-                }
-            }
+        $dataParams = $this->getParamsFromData();
+        \CB\debug(\CB\Config::get('languages'), $dataParams);
+        foreach ($dataParams as $k => $v) {
+            $saveFields[] = $k;
+            $saveValues[] = $v;
+            $params[] = "`$k` = \$$i";
+            $i++;
         }
+
         if (!empty($saveFields)) {
             DB\dbQuery(
                 'UPDATE templates_structure
@@ -212,6 +125,64 @@ class TemplateField extends Object
                 $saveValues
             ) or die(DB\dbQueryError());
         }
+    }
+
+    /**
+     * get associative params array according to tableFields from object data
+     * @return array
+     */
+    protected function getParamsFromData()
+    {
+        $rez = array();
+        $p = &$this->data;
+
+        foreach ($this->tableFields as $fieldName) {
+            $field = null;
+            $addField = false;
+            $value = null;
+
+            if (!empty($this->template)) {
+                $field = $this->template->getField($fieldName);
+            }
+
+            if (empty($field) && $fieldName == 'name') {
+                //update name to _title field if present in data (actually it should be present)
+                $value = @$this->getFieldValue('_title', 0)['value'];
+                if (empty($value)) {
+                    $value = $p['name'];
+                }
+                $addField = true;
+
+            } elseif (!empty($field)) {
+                //template field exists so it should be in data
+                $addField = true;
+                $value = @$this->getFieldValue($fieldName, 0)['value'];
+
+            } elseif (isset($p[$fieldName]) && ($p[$fieldName] !== 'id')) {
+                $addField = true;
+                $value = $p[$fieldName];
+            }
+
+            /** if empty and is language field - check if language field is defined as language abreviation */
+            // this if should be removed after complete migration to language abreviation titles
+            if (!$addField && in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
+                $addField = true;
+                $lang = @\CB\Config::get('languages')[$fieldName[1]-1];
+                $value = empty($lang)
+                    ? null
+                    : @$this->getFieldValue($lang, 0)['value'];
+            }
+
+            if ($addField) {
+                $value = (is_scalar($value) || is_null($value))
+                    ? $value
+                    : Util\jsonEncode($value);
+
+                $rez[$fieldName] = $value;
+            }
+        }
+
+        return $rez;
     }
 
     protected function detectParentTemplate($targetPid = false)

@@ -17,8 +17,6 @@ $API = array_merge(
                 ,'toggleFavorite'       => array('len' => 1)
                 ,'takeOwnership'        => array('len' => 1)
                 ,'getObjectsForField'   => array('len' => 1)
-                ,'subscribe'            => array('len' => 1)
-                ,'unsubscribe'          => array('len' => 1)
             )
         )
 
@@ -67,15 +65,10 @@ $API = array_merge(
 
         ,'CB_Tasks' => array(
             'methods'=>array(
-                'load'              =>  array('len' => 1)
-                ,'create'           =>  array('len' => 1)
-                ,'save'             =>  array('len' => 1, 'formHandler' => true)
-                ,'saveReminds'      =>  array('len' => 1)
-                ,'setUserStatus'    =>  array('len' => 1)
+                'setUserStatus'    =>  array('len' => 1)
                 ,'complete'         =>  array('len' => 1)
                 ,'close'            =>  array('len' => 1)
                 ,'reopen'           =>  array('len' => 1)
-                ,'browse'           =>  array('len' => 1)
                 ,'updateDates'      =>  array('len' => 1)
             )
         )
@@ -88,6 +81,7 @@ $API = array_merge(
                 ,'getAssociatedObjects' =>  array('len'=>1)
                 ,'getPluginsData'       =>  array('len'=>1)
                 ,'getBasicInfoForId'    =>  array('len'=>1)
+                ,'setSubscription'      =>  array('len'=>1)
                 ,'addComment'           =>  array('len'=>1)
                 ,'updateComment'        =>  array('len'=>1)
                 ,'removeComment'        =>  array('len'=>1)
@@ -154,6 +148,7 @@ $API = array_merge(
                 ,'renameUser'           => array('len' => 1)
                 ,'renameGroup'          => array('len' => 1)
                 ,'disableTSV'           => array('len' => 1)
+                ,'setUserEnabled'       => array('len' => 1)
             )
         )
 
@@ -200,3 +195,5 @@ $API = array_merge(
         )
     )
 );
+
+\CB\Cache::set('ExtDirectAPI', $API);

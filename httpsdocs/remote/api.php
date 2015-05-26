@@ -1,6 +1,8 @@
 <?php
 namespace ExtDirect;
 
+use CB\Util;
+
 require_once '../init.php';
 require_once 'config.php';
 
@@ -32,5 +34,5 @@ $cfg = array(
 
 echo 'Ext.app.REMOTING_API = ';
 
-echo json_encode($cfg, JSON_UNESCAPED_UNICODE);
+echo Util\jsonEncode($cfg);
 echo ';';

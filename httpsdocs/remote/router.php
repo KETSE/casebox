@@ -2,20 +2,21 @@
 namespace ExtDirect;
 
 use CB\Config;
+use CB\Util;
 
 register_shutdown_function('ExtDirect\\extDirectShutdownFunction');
 
-require_once '../init.php';
-require 'config.php';
+$path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+
+require_once dirname($path) . DIRECTORY_SEPARATOR . 'init.php';
+require $path . 'config.php';
 
 $isForm = false;
 $isUpload = false;
 
 header('Content-Type: application/json; charset=UTF-8');
 
-if (isset($HTTP_RAW_POST_DATA)) {
-    $data = json_decode($HTTP_RAW_POST_DATA, true);
-} elseif (isset($_POST['extAction'])) {
+if (isset($_POST['extAction'])) {
     // form post
     $isForm = true;
     $isUpload = ($_POST['extUpload'] == 'true');
@@ -26,12 +27,21 @@ if (isset($HTTP_RAW_POST_DATA)) {
         ,'data' => array($_POST, $_FILES)
     );
 } else {
-    die('Invalid request.');
+    $postdata = file_get_contents("php://input");
+    if (!empty($postdata)) {
+        $data = Util\jsonDecode($postdata);
+    }
+
+    if (empty($data)) {
+        die('Invalid request.');
+    }
 }
+
+\CB\Cache::set('ExtDirectData', $data);
 
 function doRpc($cdata)
 {
-    global $API;
+    $API = \CB\Cache::get('ExtDirectAPI');
 
     if (!\CB\User::isLoged() && ( ($cdata['action'] != 'User') || ($cdata['method'] != 'login') )) {
         return array(
@@ -87,7 +97,7 @@ function doRpc($cdata)
             'msg' => $e->getMessage()
         );
 
-        if (\CB\isDebugHost()) {
+        if (\CB\IS_DEBUG_HOST) {
             $r['where'] = $e->getTraceAsString();
         }
 
@@ -139,12 +149,12 @@ if (empty($data['action'])) {
 if ($isForm && $isUpload) {
     header('Content-Type: text/html; charset=UTF-8');
     echo '<html><body><textarea>';
-    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    echo Util\jsonEncode($response);
     echo '</textarea></body></html>';
 } else {
     header('X-Frame-Options: deny');
 
-    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    echo Util\jsonEncode($response);
 }
 
 /**
@@ -153,7 +163,7 @@ if ($isForm && $isUpload) {
  */
 function extDirectShutdownFunction()
 {
-    global $data;
+    $data = \CB\Cache::get('ExtDirectData');
 
     $error = error_get_last();
 
@@ -162,7 +172,7 @@ function extDirectShutdownFunction()
         $data['result'] = array('success' => false);
         $data['msg'] = 'Internal server error.';
 
-        if (\CB\isDebugHost()) {
+        if (\CB\IS_DEBUG_HOST) {
             $data['msg'] = $error['message'];
             $data['where'] = print_r(debug_backtrace(false), true);
         }
@@ -175,10 +185,6 @@ function extDirectShutdownFunction()
             'From: '.Config::get('SENDER_EMAIL'). "\r\n"
         );
 
-        echo json_encode(
-            $data,
-            JSON_UNESCAPED_UNICODE
-        );
-
+        echo Util\jsonEncode($data);
     }
 }

@@ -81,18 +81,11 @@ Ext.define('CB.object.plugin.SystemProperties', {
 
     ,getContainerToolbarItems: function() {
         rez = {
-            tbar: {}
+            tbar: {
+                'subscription': this.data.subscription
+            }
             ,menu: {}
         };
-
-
-        if(this.data) {
-            if(this.data.subscribed == 1) {
-                rez.menu.unsubscribe = {order: 15};
-            } else {
-                rez.menu.subscribe = {order: 16};
-            }
-        }
 
         if(this.params) {
 

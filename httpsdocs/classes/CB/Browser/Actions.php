@@ -16,6 +16,8 @@ use CB\Objects;
  */
 class Actions
 {
+    private $securitySetsFilter = '';
+
     /**
      * validation function for action input params
      *
@@ -301,7 +303,7 @@ class Actions
      * @param  int       $targetId  target id
      * @return array     processed ids
      */
-    private function doRecursiveAction($action, $objectIds, $targetId)
+    public function doRecursiveAction($action, $objectIds, $targetId)
     {
         $rez = array();
         if (!is_array($objectIds)) {

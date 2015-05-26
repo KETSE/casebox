@@ -438,7 +438,7 @@ Ext.define('CB.ViewPort', {
 
     //check if a locate id is specified in url
     ,checkUrlLocate: function() {
-        var locateId = String(window.location.href.split('locate=')[1]).split('&')[0];
+        var locateId = String(window.location.search.split('locate=')[1]).split('&')[0];
 
         if(!Ext.isEmpty(locateId)) {
             // App.locateObject(locateId);

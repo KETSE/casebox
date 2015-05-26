@@ -70,17 +70,7 @@ class Purify
 
         static::getInstance();
 
-        // detect encoding
-        $cs = mb_detect_encoding($value);
-
-        if (empty($cs)) {
-            $cs = 'UTF-8';
-        }
-
-        $cs = @iconv($cs, 'UTF-8', $value);
-        if (empty($cs)) {
-            $cs = $value;
-        }
+        $value = Util\toUTF8String($value);
 
         $config = null;
         if (!empty($options)) {
@@ -91,7 +81,7 @@ class Purify
             }
         }
 
-        $value = static::$purifier->purify($cs, $config);
+        $value = static::$purifier->purify($value, $config);
 
         return $value;
     }

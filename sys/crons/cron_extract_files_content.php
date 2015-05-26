@@ -24,14 +24,17 @@ $processed_list = array();
 $not_fount_list = array();
 
 $sql = 'UPDATE crons
-SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
-WHERE cron_id = $1';
-DB\dbQuery($sql, array($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE))) or die(DB\dbQueryError());
+    SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
+    WHERE cron_id = $1';
+
+DB\dbQuery($sql, array($cron_id, Util\jsonEncode($rez))) or die(DB\dbQueryError());
+
 if (checkTikaService() == false) {
     startTikaService();
 }
 
 $where = 'skip_parsing = 0 and (parse_status is null)';
+
 if (!empty($scriptOptions['all'])) {
     $where =  'skip_parsing = 0';
 }
@@ -114,7 +117,7 @@ $res->close();
 $rez['Total'] = $rez['Processed'] + $rez['Not found'];
 
 
-// closeCron($cron_id, json_encode($rez, JSON_UNESCAPED_UNICODE));
+// closeCron($cron_id, Util\jsonEncode($rez));
 
 // Solr\Client::runCron();
 
@@ -143,7 +146,7 @@ function checkTikaService()
 function startTikaService()
 {
     $cmd = 'java -Dfile.encoding=UTF8 -jar "'.Config::get('TIKA_SERVER').'" --port 9998 &';
-    if (isWindows()) {
+    if (IS_WINDOWS) {
         $cmd = 'start /D "'.DOC_ROOT.'libx" tika_windows_service.bat';
     }
 
@@ -154,7 +157,7 @@ function getTikaResult($filename)
 {
     $file = fopen($filename, "rb");
 
-    $ch = curl_init('http://127.0.0.1:9998/all');
+    $ch = curl_init('http://127.0.0.1:9998/unpack/all');
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_PUT, true);

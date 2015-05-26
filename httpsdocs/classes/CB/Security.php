@@ -147,7 +147,10 @@ class Security
     public function searchUserGroups($p)
     {
         /*{"editor":"form","source":"users","renderer":"listObjIcons","autoLoad":true,"multiValued":true,"maxInstances":1,"showIn":"grid","query":"test","objectId":"237","path":"/1"}*/
-        $rez = array('success' => true, 'data' => array());
+        $rez = array(
+            'success' => true
+            ,'data' => array()
+        );
 
         $where = array();
         $params = array();
@@ -168,9 +171,20 @@ class Security
             }
         }
 
+        $filterDisabled = '(enabled = 1)';
+
         if (!empty($p['query'])) {
             $where[] = 'searchField like $1';
             $params[] = ' %'.trim($p['query']).'% ';
+
+        } elseif (!empty($p['value'])) {
+            //if the id is in value we should show it
+            //even if disabled
+            $ids = Util\toNumericArray($p['value']);
+            if (!empty($ids)) {
+                $filterDisabled = '((' . $filterDisabled . ') OR id in (' . implode(',', $ids). '))';
+            }
+
         }
 
         if (!empty($p['ids'])) {
@@ -191,8 +205,9 @@ class Security
                 ,`type`
                 ,`sex`
             FROM users_groups
-            WHERE did IS NULL '.( empty($where) ? '' : ' AND '.implode(' AND ', $where) ).'
-            ORDER BY `type`, 2 LIMIT 100',
+            WHERE did IS NULL AND ' . $filterDisabled .
+            (empty($where) ? '' : ' AND '.implode(' AND ', $where)) .
+            ' ORDER BY `type`, 2 LIMIT 100',
             $params
         ) or die(DB\dbQueryError());
 
@@ -806,7 +821,7 @@ class Security
     public static function canRead($object_id, $user_group_id = false)
     {
         return (
-            // Security::isAdmin() ||
+            Security::isAdmin() ||
             (Security::getAccessBitForObject($object_id, static::$CAN_READ, $user_group_id) > 0)
         );
     }
@@ -1505,6 +1520,7 @@ class Security
 
     /**
      * Retreive a system group id by its name
+     * (only everyone left after removing "system" group)
      *
      * @return int
      */
@@ -1527,28 +1543,6 @@ class Security
         }
 
         return Cache::get('group_id_' . $groupName);
-    }
-
-    /**
-     * Retreive everyone group id
-     * Last as placeholder for backward compatibility
-     * Should be removed in future releases
-     * @return int
-     */
-    public static function everyoneGroupId()
-    {
-        return static::getSystemGroupId('everyone');
-    }
-
-    /**
-     * Retreive system group id
-     * Last as placeholder for backward compatibility
-     * Should be removed in future releases
-     * @return void
-     */
-    public static function systemGroupId()
-    {
-        return static::getSystemGroupId('system');
     }
 
     /**
@@ -1594,7 +1588,6 @@ class Security
             FROM users_groups
             WHERE `type` = 2
                 AND did IS NULL
-                AND enabled = 1
             ORDER BY 2'
         ) or die(DB\dbQueryError());
 
@@ -1613,7 +1606,7 @@ class Security
     /* ----------------------------------------------------  OLD METHODS ------------------------------------------ */
 
     /**
-     * Check if user_id (or current loged user) is an administrator (member of "system" group)
+     * Check if user_id (or current loged user) is an administrator
      *
      * @param  int     $user_id
      * @return boolean
@@ -1629,22 +1622,18 @@ class Security
 
         if (!Cache::exist($var_name)) {
             $res = DB\dbQuery(
-                'SELECT g.id
-                FROM users_groups g
-                JOIN users_groups_association uga ON g.id = uga.group_id
-                AND uga.user_id = $1
-                WHERE g.system = 1
-                    AND g.name = $2',
-                array(
-                    $user_id
-                    ,'system'
-                )
+                'SELECT name
+                FROM users_groups
+                WHERE id = $1',
+                $user_id
             ) or die(DB\dbQueryError());
 
             if ($r = $res->fetch_assoc()) {
-                Cache::set($var_name, !empty($r['id']));
+                $rez = ($r['name'] == 'root');
             }
             $res->close();
+
+            Cache::set($var_name, $rez);
         }
 
         return Cache::get($var_name);
@@ -1742,36 +1731,28 @@ class Security
      * User can manage a task if he is Administrator, Creator of the task
      * or is one of the responsible task users.
      *
-     * @param  int     $task_id id of the task to be checked
-     * @param  int     $user_id id of the user to be checked
+     * @param  int     $taskId id of the task to be checked
+     * @param  int     $userId id of the user to be checked
      * @return boolean returns true in case of the user can manage the task
      */
-    public static function canManageTask($task_id, $user_id = false)
+    public static function canManageTask($taskId, $userId = false)
     {
         $rez = false;
-        if ($user_id == false) {
-            $user_id = $_SESSION['user']['id'];
-        }
-        $res = DB\dbQuery(
-            'SELECT t.cid
-                 , ru.user_id
-            FROM tasks t
-            LEFT JOIN tasks_responsible_users ru ON ru.task_id = t.id
-            AND ((t.cid = $2)
-                 OR (ru.user_id = $2))
-            WHERE t.id = $1',
-            array(
-                $task_id
-                ,$user_id
-            )
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            $rez = true;
+        if ($userId == false) {
+            $userId = $_SESSION['user']['id'];
         }
-        $res->close();
+
+        $task = Objects::getCachedObject($taskId);
+
+        $data = $task->getData();
+
+        $rez = ($data['cid'] == $userId) ||
+            in_array($userId, $data['sys_data']['task_u_ongoing']) ||
+            in_array($userId, $data['sys_data']['task_u_done']);
+
         if (!$rez) {
-            $rez = Security::isAdmin($user_id);
+            $rez = Security::isAdmin($userId);
         }
 
         return $rez;
