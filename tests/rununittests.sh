@@ -58,8 +58,8 @@ while getopts "c:d:h?" opt; do
 done
 if [ $coverage ];
     then
-        $DIR/vendor/bin/phpunit $coverage $DEST$OUTFILE --verbose --bootstrap init.php $DIR/test
+        $DIR/vendor/bin/phpunit $coverage $DEST$OUTFILE --configuration $DIR/phpunit.xml --verbose --bootstrap init.php $DIR/test
         exit
     fi
 
-$DIR/vendor/bin/phpunit --verbose --bootstrap init.php $DIR/test
+$DIR/vendor/bin/phpunit --verbose --debug --bootstrap init.php $DIR/test
