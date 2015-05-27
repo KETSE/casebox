@@ -64,12 +64,6 @@ class Dbnode extends Base
 
         }
 
-        /* disable data loading and sorting for charts and pivot views */
-        if (!empty($p['from']) && in_array($p['from'], array('pivot', 'charts'))) {
-            $p['rows'] = 0;
-            unset($p['sort']);
-        }
-
         $s = new \CB\Search();
         $rez = $s->query($p);
 
