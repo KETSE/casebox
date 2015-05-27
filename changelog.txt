@@ -1393,10 +1393,26 @@ Fixed Bugs:
 ----------
 - Objects fields not working
 
+CaseBox 1.9.336 (2014-12-01)
+==============================
+Fixed Bugs:
+----------
+- Notifications from users with special chars in name not ok
+
+CaseBox 1.9.335 (2014-11-24)
+==============================
+Fixed Bugs:
+----------
+- error on uploading new file version on production server
+
 CaseBox 1.9.334 (2014-09-23)
 ==============================
 New Features, Improvements
 --------------------------
+<<<<<<< HEAD
+
+=======
+>>>>>>> devel
 - moved security check on object create after firing onBeforeCreate event
     because the triggers can change pid of the created object
 - limit DisplayColumns plugin to work only for grid view

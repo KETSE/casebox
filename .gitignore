@@ -48,4 +48,3 @@ apigen.neon
 /tests/tmp/cookie/**
 /tests/reports/**
 _rest_managed.json
-

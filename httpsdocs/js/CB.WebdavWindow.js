@@ -66,8 +66,6 @@ Ext.define('CB.WebdavWindow', {
         });
 
         this.callParent(arguments);
-
-        // this.form = this.down('form');
     }
 
     ,onShow: function() {
