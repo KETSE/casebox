@@ -165,7 +165,7 @@ if (createSolrConfigsetsSymlinks($cfg)) {
 }
 
 //try to create log core
-createSolrCore($cfg, $cfg['prefix'] . '_log', 'log_');
+createSolrCore($cfg, '_log', 'log_');
 
 //create default database (<prefix>__casebox)
 createMainDatabase($cfg);

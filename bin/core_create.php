@@ -111,6 +111,6 @@ DB\dbQuery(
     )
 ) or die(DB\dbQueryError());
 
-createSolrCore($cfg, $dbName);
+createSolrCore($cfg, $coreName);
 
 echo "Done.\n";

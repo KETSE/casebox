@@ -210,12 +210,13 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     $solrPort = $cfg['solr_port'];
     $createCore = true;
     $askReindex = true;
+    $fullCoreName = $cfg['prefix'] . $coreName;
 
     $solr = Solr\Service::verifyConfigConnection(
         array(
             'host' => $solrHost
             ,'port' => $solrPort
-            ,'core' => $coreName
+            ,'core' => $fullCoreName
             ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
         )
     );
@@ -224,7 +225,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
         if (confirm($paramPrefix . 'solr_overwrite', 'n')) {
             echo 'Unloading core ' . $coreName . '... ';
             unset($solr);
-            if (solrUnloadCore($solrHost, $solrPort, $coreName)) {
+            if (solrUnloadCore($solrHost, $solrPort, $fullCoreName)) {
                 echo "Ok\n";
             } else {
                 displayError("Error unloading core.\n");
@@ -239,7 +240,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     if ($createCore) {
         echo 'Creating solr core ... ';
 
-        if (solrCreateCore($solrHost, $solrPort, $coreName)) {
+        if (solrCreateCore($solrHost, $solrPort, $fullCoreName)) {
             echo "Ok\n";
         } else {
             displayError("Error creating core.\n");
@@ -250,6 +251,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     if ($askReindex && ($paramPrefix !== 'log_')) {
         if (confirm($paramPrefix . 'solr_reindex', 'n')) {
             echo 'Reindexing core ... ';
+
             exec('php -f ' . dirname(__FILE__) . DIRECTORY_SEPARATOR . 'solr_reindex_core.php -- -c ' . $coreName . ' -a -l');
             echo "Ok\n";
         }

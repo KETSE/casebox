@@ -233,8 +233,8 @@ insert  into `objects`(`id`,`data`,`sys_data`) values (5,'{\"_title\":\"folder\"
 DROP TABLE IF EXISTS `sessions`;
 
 CREATE TABLE `sessions` (
-  `id` varbinary(50) NOT NULL,
-  `pid` varbinary(50) DEFAULT NULL COMMENT 'parrent session id',
+  `id` varbinary(100) NOT NULL,
+  `pid` varbinary(100) DEFAULT NULL COMMENT 'parrent session id',
   `last_action` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires` timestamp NULL DEFAULT NULL COMMENT 'expire could be null for non expiring sessions',
   `user_id` int(10) unsigned NOT NULL,
