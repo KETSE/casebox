@@ -1,9 +1,0 @@
-{
-    "_title": "test_template",
-    "en": "Test Templates",
-    "type": "object",
-    "visible": 1,
-    "iconCls": "icon-bell",
-    "cfg": "{\"createMethod\":\"inline\",\n\n\"object_plugins\":\n[\"objectProperties\",\n\"comments\",\n\"systemProperties\"\n]\n\n}",
-    "title_template": "{name}"
-}
