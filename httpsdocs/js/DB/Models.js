@@ -48,6 +48,19 @@ Ext.define('DropDownListItems', {
     ]
 });
 
+Ext.define('Notification', {
+    extend: 'Ext.data.Model'
+    ,fields: [
+        {name: 'ids', type: 'string'}
+        ,{name: 'user_id', type: 'int'}
+        ,{name: 'object_id', type: 'int'}
+        ,{name: 'text',  type: 'string'}
+        ,{name: 'date_text',  type: 'string'}
+        ,{name: 'read',  type: 'bool'}
+        ,'data'
+    ]
+});
+
 Ext.define('ContentItem', {
     extend: 'Ext.data.Model'
     ,fields: [

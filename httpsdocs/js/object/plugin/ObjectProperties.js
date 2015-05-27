@@ -93,7 +93,7 @@ Ext.define('CB.object.plugin.ObjectProperties', {
             ,this
         );
 
-        a = this.getEl().query('a.taskA');
+        a = this.getEl().query('a.task-action');
         Ext.each(
             a
             ,function(t){
@@ -165,7 +165,7 @@ Ext.define('CB.object.plugin.ObjectProperties', {
             ,menu: {}
         };
 
-        if(this.params) {
+        /*if(this.params) {
             if(this.params.can) {
                 if(this.params.can.complete) {
                     rez['tbar']['completetask'] = {};
@@ -177,7 +177,7 @@ Ext.define('CB.object.plugin.ObjectProperties', {
                     rez['menu']['reopentask'] = {order: 3};
                 }
             }
-        }
+        }/**/
 
         return rez;
     }

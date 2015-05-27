@@ -434,7 +434,7 @@ class Search extends Solr\Client
             'data' => array()
         );
 
-        if (isDebugHost()) {
+        if (IS_DEBUG_HOST) {
             $rez['search'] = array(
                 'query' => $this->query
                 ,'start' => $this->start
@@ -662,6 +662,8 @@ class Search extends Solr\Client
             return $rez;
         }
 
+        $chunks = array_chunk($ids, 200);
+
         //connect or get solr service connection
         $conn = Cache::get('solr_service');
 
@@ -673,48 +675,49 @@ class Search extends Solr\Client
 
         //execute search
         try {
-            $params = array(
-                'defType' => 'dismax'
-                ,'q.alt' => '*:*'
-                ,'fl' => $fieldList
-                ,'fq' => array(
-                    'id:(' . implode(' OR ', $ids). ')'
-                )
-            );
+            foreach ($chunks as $chunk) {
+                $params = array(
+                    'defType' => 'dismax'
+                    ,'q.alt' => '*:*'
+                    ,'fl' => $fieldList
+                    ,'fq' => array(
+                        'id:(' . implode(' OR ', $chunk). ')'
+                    )
+                );
 
-            $inputParams = array(
-                'ids' => $ids
-            );
+                $inputParams = array(
+                    'ids' => $chunk
+                );
 
-            $eventParams = array(
-                'params' => &$params
-                ,'inputParams' => &$inputParams
-            );
+                $eventParams = array(
+                    'params' => &$params
+                    ,'inputParams' => &$inputParams
+                );
 
-            \CB\fireEvent('beforeSolrQuery', $eventParams);
+                \CB\fireEvent('beforeSolrQuery', $eventParams);
 
-            $searchRez = $conn->search(
-                '',
-                0,
-                100,
-                $params
-            );
+                $searchRez = $conn->search(
+                    '',
+                    0,
+                    200,
+                    $params
+                );
 
-            if (!empty($searchRez->response->docs)) {
-                foreach ($searchRez->response->docs as $d) {
-                    $rd = array();
-                    foreach ($d as $fn => $fv) {
-                        $rd[$fn] = $fv;
+                if (!empty($searchRez->response->docs)) {
+                    foreach ($searchRez->response->docs as $d) {
+                        $rd = array();
+                        foreach ($d as $fn => $fv) {
+                            $rd[$fn] = $fv;
+                        }
+                        $rez[$d->id] = $rd;
                     }
-                    $rez[$d->id] = $rd;
                 }
+
+                $eventParams['result'] = array(
+                    'data' => &$rez
+                );
+                \CB\fireEvent('solrQuery', $eventParams);
             }
-
-            $eventParams['result'] = array(
-                'data' => &$rez
-            );
-            \CB\fireEvent('solrQuery', $eventParams);
-
         } catch ( \Exception $e ) {
             throw new \Exception("An error occured in getObjectNames: \n\n {$e->__toString()}");
         }

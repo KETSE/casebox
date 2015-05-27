@@ -254,9 +254,14 @@ class User
      */
     public static function isVerified($seconds = 3600)
     {
+        return (!empty($_SESSION['verified']));
+
+        /* //disabled timeout verification for now
+
         return ( !empty($_SESSION['verified']) &&
             ( (time() - $_SESSION['verified']) < $seconds )
             );
+        */
     }
 
     /**
@@ -266,7 +271,6 @@ class User
     public function getLoginInfo()
     {
         Browser::checkRootFolder();
-        User::checkUserFolders();
 
         $coreName = Config::get('core_name');
 
@@ -287,22 +291,6 @@ class User
             $filesEdit[$k] = Util\toTrimmedArray($v);
         }
 
-        //detect webdav url
-        $webdavUrl = '';
-        $webdavDomain = Config::get('webdav_domain');
-        if (!empty($webdavDomain)) {
-            if (substr($webdavDomain, -1) != '/') {
-                $webdavDomain .= '/';
-            }
-            $webdavUrl = $webdavDomain . '{core_name}/edit-{node_id}/{name}"';
-
-        } else { //backward compatible check
-            $webdavUrl = empty($filesConfig['webdav_url'])
-                ? Config::get('webdav_url') // backward compatibility
-                : $filesConfig['webdav_url'];
-        }
-        //end of detect webdav url
-
         @$rez = array(
             'success' => true
             ,'config' => array(
@@ -312,17 +300,15 @@ class User
                 ,'default_task_template' => Config::get('default_task_template')
                 ,'default_event_template' => Config::get('default_event_template')
                 ,'files.edit' => $filesEdit
-                ,'webdav_url' => $webdavUrl
                 ,'template_info_column' => Config::get('template_info_column')
             )
             ,'user' => $_SESSION['user']
         );
-        $rez['config']['webdav_url'] = str_replace('{core_name}', $coreName, $webdavUrl);
         $rez['config']['files.edit'] = $filesEdit;
 
-        $rez['user']['cfg']['short_date_format'] = str_replace('%', '', $rez['user']['cfg']['short_date_format']);
-        $rez['user']['cfg']['long_date_format'] = str_replace('%', '', $rez['user']['cfg']['long_date_format']);
-        $rez['user']['cfg']['time_format'] = str_replace('%', '', $rez['user']['cfg']['time_format']);
+        $rez['user']['cfg']['short_date_format'] = $rez['user']['cfg']['short_date_format'];
+        $rez['user']['cfg']['long_date_format'] = $rez['user']['cfg']['long_date_format'];
+        $rez['user']['cfg']['time_format'] = $rez['user']['cfg']['time_format'];
 
         /* default root node config */
         $root = Config::get('rootNode');
@@ -555,7 +541,7 @@ class User
                 FILTER_VALIDATE_REGEXP,
                 array(
                     'options' => array(
-                        'regexp' => '/^[\.,%a-z \/\-]*$/i'
+                        'regexp' => '/^[\.,a-z \/\-]*$/i'
                     )
                 )
             )) {
@@ -572,13 +558,16 @@ class User
                 FILTER_VALIDATE_REGEXP,
                 array(
                     'options' => array(
-                        'regexp' => '/^[\.,%a-z \/\-]*$/i'
+                        'regexp' => '/^[\.,a-z \/\-]*$/i'
                     )
                 )
             )) {
                 $cfg['long_date_format'] = $p['long_date_format'];
             } else {
-                return array('success' => false, 'msg' => 'Invalid long date format');
+                return array(
+                    'success' => false
+                    ,'msg' => 'Invalid long date format'
+                );
             }
         }
 
@@ -618,8 +607,8 @@ class User
                 ,$p['sex']
                 ,$p['email']
                 ,$p['language_id']
-                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
-                ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($cfg)
+                ,Util\jsonEncode($p['data'])
             )
         ) or die(DB\dbQueryError());
 
@@ -879,139 +868,6 @@ class User
     }
 
     /**
-     * checkUserFolders
-     * @param  boolean $user_id
-     * @return boolean
-     */
-    public static function checkUserFolders($user_id = false)
-    {
-        $result = true;
-        if (!is_numeric($user_id)) {
-            $user_id = $_SESSION['user']['id'];
-        }
-
-        $affected_rows = 0;
-
-        /* check user home folder existace */
-        $home_folder_id = null;
-
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE (user_id = $1)
-                    AND (`system` = 1)
-                    AND (`type` = 1)
-                    AND (pid IS NULL)',
-            $user_id
-        ) or die( DB\dbQueryError() );
-
-        if ($r = $res->fetch_assoc()) {
-            $home_folder_id = $r['id'];
-        }
-        $res->close();
-        if (is_null($home_folder_id)) {
-            $cfg = Config::get('default_home_folder_cfg');
-
-            DB\dbQuery(
-                'INSERT INTO tree (
-                    name
-                    ,user_id
-                    ,`system`
-                    ,`type`
-                    ,cfg
-                    ,template_id)
-                VALUES(
-                    \'[Home]\'
-                    ,$1
-                    ,1
-                    ,1
-                    ,$2
-                    ,$3)',
-                array($user_id
-                    ,$cfg
-                    ,Config::get('default_folder_template')
-                )
-            ) or die( DB\dbQueryError() );
-
-            $home_folder_id = DB\dbLastInsertId();
-            $affected_rows++;
-
-            /* insert home folder security record in tree_acl */
-            DB\dbQuery(
-                'INSERT INTO tree_acl (
-                    node_id
-                    ,user_group_id
-                    ,allow
-                    ,deny)
-                VALUES (
-                    $1
-                    ,$2
-                    ,4095
-                    ,0)
-                ON DUPLICATE KEY
-                UPDATE allow = 4095
-                    ,deny = 0',
-                array(
-                    $home_folder_id
-                    ,$user_id
-                )
-            ) or die( DB\dbQueryError() );
-
-            $affected_rows += DB\dbAffectedRows();
-        }
-
-        /* check users "My documents" folder existace */
-        $my_docs_id = null;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE (user_id = $1)
-                    AND (`system` = 1)
-                    AND (`type` = 1)
-                    AND (pid = $2)',
-            array($user_id
-                , $home_folder_id
-            )
-        ) or die( DB\dbQueryError() );
-
-        if ($r = $res->fetch_assoc()) {
-            $my_docs_id = $r['id'];
-        }
-        $res->close();
-        if (is_null($my_docs_id)) {
-            DB\dbQuery(
-                'INSERT INTO tree (
-                    pid
-                    ,name
-                    ,user_id
-                    ,`system`
-                    ,`type`
-                    ,template_id)
-                VALUES(
-                    $1
-                    ,\'[MyDocuments]\'
-                    ,$2
-                    ,1
-                    ,1
-                    ,$3)',
-                array($home_folder_id
-                    ,$user_id
-                    ,Config::get('default_folder_template')
-                )
-            ) or die( DB\dbQueryError() );
-
-            $my_docs_id = DB\dbLastInsertId();
-            $affected_rows++;
-        }
-
-        if ($affected_rows > 0) {
-            Solr\Client::runCron();
-        }
-
-        return true;
-    }
-
-    /**
      * get home folder id for specified user id. If folder does not exist it is created automaticly.
      * @param  int $user_id
      * @return int home folder id
@@ -1233,6 +1089,21 @@ class User
     }
 
     /**
+     * get id of currently loged user
+     * @return int | null
+     */
+    public static function getId()
+    {
+        $rez = null;
+
+        if (!empty($_SESSION['user']['id'])) {
+            $rez= $_SESSION['user']['id'];
+        }
+
+        return $rez;
+    }
+
+    /**
      * get user id by his username
      * @param  varchar $username
      * @return int     | null
@@ -1422,7 +1293,7 @@ class User
         $data = array();
 
         if ($idOrData === false) { //use current logged users
-            $id = $_SESSION['user']['id'];
+            $id = static::getId();
 
         } elseif (is_numeric($idOrData)) { //id specified
             $id = $idOrData;
@@ -1473,6 +1344,63 @@ class User
         }
 
         return Cache::get($var_name);
+    }
+
+    /**
+     * get username
+     * @param  variant $idOrData
+     * @return varchar
+     */
+    public static function getUsername($idOrData = false)
+    {
+        if ($idOrData === false) {
+            $idOrData = $_SESSION['user'];
+        }
+
+        $data = is_numeric($idOrData)
+            ? static::getPreferences($idOrData)
+            : $idOrData;
+
+        $rez = empty($data['name'])
+            ? ''
+            : $data['name'];
+
+        return $rez;
+    }
+
+    /**
+     * get user email
+     * @param  variant $idOrData
+     * @return varchar
+     */
+    public static function getEmail($idOrData = false)
+    {
+        if ($idOrData === false) {
+            $idOrData = $_SESSION['user']['id'];
+        }
+
+        $data = is_numeric($idOrData)
+            ? static::getPreferences($idOrData)
+            : $idOrData;
+
+        $rez = empty($data['email'])
+            ? ''
+            : $data['email'];
+
+        if (!empty($data['cfg']['security'])) {
+            $sec = &$data['cfg']['security'];
+
+            if (!empty($sec['recovery_email'])) {
+                $rez = $sec['recovery_email'];
+            }
+
+            //check if mail is set in security settings
+            if (!empty($sec['recovery_email']) && !empty($sec['email'])) {
+                $rez = $sec['email'];
+            }
+        }
+
+        return $rez;
     }
 
     /**
@@ -1649,8 +1577,7 @@ class User
                 ,cfg
                 ,data
             FROM users_groups
-            WHERE enabled = 1
-                AND did IS NULL
+            WHERE did IS NULL
                 AND id = $1',
             $user_id
         ) or die(DB\dbQueryError());
@@ -1673,10 +1600,18 @@ class User
             if (empty($r['cfg']['long_date_format'])) {
                 $r['cfg']['long_date_format'] = $languageSettings[$r['language']]['long_date_format'];
             }
+
             if (empty($r['cfg']['short_date_format'])) {
                 $r['cfg']['short_date_format'] = $languageSettings[$r['language']]['short_date_format'];
             }
+
             $r['cfg']['time_format'] = $languageSettings[$r['language']]['time_format'];
+
+            //Date formats are sotred in Php format (not mysql)
+            //for backward compatibility we remove all % chars
+            $r['cfg']['long_date_format'] = str_replace('%', '', $r['cfg']['long_date_format']);
+            $r['cfg']['short_date_format'] = str_replace('%', '', $r['cfg']['short_date_format']);
+            $r['cfg']['time_format'] = str_replace('%', '', $r['cfg']['time_format']);
 
             //check for backward compatibility
             if (!empty($r['cfg']['TZ'])) {
@@ -1706,7 +1641,8 @@ class User
     {
         $rez = 'UTC';
 
-        $pref = $_SESSION['user'];
+        $pref = @$_SESSION['user'];
+
         if ($userId !== false) {
             $pref = User::getPreferences($userId);
         }
@@ -1756,7 +1692,7 @@ class User
             WHERE id = $1',
             array(
                 $userId
-                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($cfg)
             )
         ) or die(DB\dbQueryError());
     }
@@ -1803,5 +1739,23 @@ class User
         $cfg = static::getUserConfig($userId);
         $cfg['security']['TSV'] = $TSVConfig;
         $cfg = static::setUserConfig($cfg, $userId);
+    }
+
+    /**
+     * set the user enabled or disabled
+     * @param int     $userId
+     * @param boolean $enabled
+     */
+    public static function setEnabled($userId, $enabled)
+    {
+        DB\dbQuery(
+            'UPDATE users_groups
+            SET enabled = $2
+            WHERE id = $1',
+            array(
+                $userId
+                ,intval($enabled)
+            )
+        ) or die(DB\dbQueryError());
     }
 }

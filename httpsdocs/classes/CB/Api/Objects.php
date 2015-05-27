@@ -89,8 +89,6 @@ class Objects
         }
         $data['data'] = $p['data'];
 
-        $data = json_encode($data, JSON_UNESCAPED_UNICODE);
-
         $objects = new \CB\Objects();
         $rez = $objects->save(array('data' => $data));
 

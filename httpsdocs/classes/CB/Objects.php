@@ -79,12 +79,6 @@ class Objects
         // set type property from template
         $objectData['type'] = $templateData['type'];
 
-        global $data;
-        // this method is used also internally (by getInfo method),
-        // so we skip logging for "load" method in this cases
-        // if (is_array($data) && (@$data['method'] == 'load')) {
-        //     // Log::add(array('action_type' => 11, 'object_id' => $id));
-        // }
         return array(
             'success' => true
             ,'data' => $resultData
@@ -122,12 +116,6 @@ class Objects
         $p['name'] = $this->getAvailableName($p['pid'], $p['name']);
 
         $id = $object->create($p);
-        // Log::add(
-        //     array(
-        //         'action_type' => 8
-        //         ,'object_id' => $id
-        //     )
-        // );
 
         Solr\Client::runCron();
 
@@ -145,7 +133,7 @@ class Objects
     public function save($p)
     {
 
-        $d = json_decode($p['data'], true);
+        $d = Util\toJSONArray($p['data']);
 
         // check if need to create object instead of update
         if (empty($d['id']) || !is_numeric($d['id'])) {
@@ -164,17 +152,15 @@ class Objects
         /* end of prepare params */
 
         // update object
-        $object = $this->getCustomClassByObjectId($d['id']);
+        $object = $this->getCachedObject($d['id']);
+
+        //set sys_data from object, it can contain custom data
+        //that shouldn't be overwritten
+        $d['sys_data'] = $object->getSysData();
+
         $object->update($d);
 
         Objects::updateCaseUpdateInfo($d['id']);
-
-        // Log::add(
-        //     array(
-        //         'action_type' => 9
-        //         ,'object_id' => $d['id']
-        //     )
-        // );
 
         /*updating saved document into solr directly (before runing background cron)
             so that it'll be displayed with new name without delay*/
@@ -194,8 +180,6 @@ class Objects
      */
     public static function getPreview($id)
     {
-        $rez = array();
-
         if (!is_numeric($id)) {
             return;
         }
@@ -205,143 +189,13 @@ class Objects
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $top = '';
-        $body = '';
-        $bottom = '';
         try {
             $obj = static::getCachedObject($id);
-
-            if ($obj->getType() == 'task') {
-                $tc = new Tasks();
-
-                return $tc->getPreview($id);
-            }
-
-            // $objData = $obj->getData();
-
-            $linearData = $obj->getLinearData();
         } catch (\Exception $e) {
             return '';
         }
 
-        // set object name block
-        // $top = '<div class="obj-header">'.$objData['name'].'</div>';
-        $template = $obj->getTemplate();
-        $gf = array();
-        //group fields in display blocks
-        foreach ($linearData as $field) {
-            $tf = $template->getField($field['name']);
-
-            if (empty($tf)) {
-                //fantom data of deleted or moved fields
-                continue;
-            }
-
-            if (empty($tf['cfg'])) {
-                $group = 'body';
-            } elseif (@$tf['cfg']['showIn'] == 'top') {
-                $group = 'body'; //top
-            } elseif (@$tf['cfg']['showIn'] == 'tabsheet') {
-                $group = 'bottom';
-            } else {
-                $group = 'body';
-            }
-            $field['tf'] = $tf;
-            $gf[$group][] = $field;
-        }
-
-        $params = array(
-            'object' => &$obj
-            ,'groupedFields' => &$gf
-        );
-
-        fireEvent('beforeGeneratePreview', $params);
-
-        if (!empty($gf['top'])) {
-            foreach ($gf['top'] as $f) {
-                if ($f['name'] == '_title') {
-                    continue;
-                }
-                // if ($f['name'] == '_date_start') {
-                //     continue;
-                // }
-                $v = $template->formatValueForDisplay($f['tf'], $f); //['value']
-                if (is_array($v)) {
-                    $v = implode(', ', $v);
-                }
-                if (!empty($v)) {
-                    $top .= '<tr><td class="prop-key">'.$f['tf']['title'].'</td><td class="prop-val">'.$v.'</td></tr>';
-                }
-            }
-        }
-        if (!empty($gf['body'])) {
-            $previousHeader = '';
-            foreach ($gf['body'] as $f) {
-                $v = $template->formatValueForDisplay($f['tf'], @$f); //['value']
-                if (is_array($v)) {
-                    $v = implode('<br />', $v);
-                }
-
-                if (!empty($f['tf']['cfg']['hidePreview']) ||
-                    (empty($v) && empty($f['info']))
-                ) {
-                    continue;
-                }
-
-                $headerField = $template->getHeaderField($f['tf']['id']);
-                if (!empty($headerField) && ($previousHeader != $headerField)) {
-                    $body .= '<tr class="prop-header"><th colspan="3"'.(
-                        empty($headerField['level'])
-                        ? ''
-                        : ' style="padding-left: '.($headerField['level'] * 20).'px"'
-                    ).'>'.$headerField['title'].'</th></tr>';
-                }
-                $previousHeader = $headerField;
-
-                $body .= '<tr><td'.(
-                        empty($f['tf']['level'])
-                        ? ''
-                        : ' style="padding-left: '.($f['tf']['level'] * 20).'px"'
-                    ).
-                    ' class="prop-key">'.$f['tf']['title'].'</td><td class="prop-val">'.$v.
-                    (empty($f['info']) ? '' : '<p class="prop-info">'.$f['info'].'</p>').'</td></tr>';
-            }
-        }
-
-        if (!empty($gf['bottom'])) {
-            foreach ($gf['bottom'] as $f) {
-                $v = $template->formatValueForDisplay($f['tf'], $f); //['value']
-                if (empty($v)) {
-                    continue;
-                }
-                $bottom .=  '<div class="obj-preview-h">'.$f['tf']['title'].'</div><div style="padding: 0 5px">'.$v.'</div><br />';
-            }
-            // $bottom = '<div style="padding: 0 10px">'.$bottom.'</div>';
-        }
-
-        // $logParams = array(
-        //     'type' => '???',
-        //     'object_id' => $id
-        // );
-
-        // Log::add($logParams);
-
-        if (!empty($top)) {
-            // $top = '<div class="obj-preview-h">'.L\get('Details').'</div>'.$top;
-        }
-        $top .= $body;
-        if (!empty($top)) {
-            $top = '<table class="obj-preview">'.$top.'</table><br />';
-        }
-
-        $rez = array($top, $bottom);
-
-        $params['result'] = &$rez;
-
-        fireEvent('generatePreview', $params);
-
-        return $rez;
-
+        return $obj->getPreviewBlocks();
     }
 
     /**
@@ -512,7 +366,6 @@ class Objects
                 }
                 /* make changes to value if needed */
 
-
                 if (@$field['cfg']['faceting']) {
                     Objects::setCustomSOLRfields($object_record, $field, @$f['value']);
                 }
@@ -528,7 +381,6 @@ class Objects
             }
         }
     }
-
 
     /**
      * set custom SOLR columns
@@ -552,7 +404,6 @@ class Objects
 
             return;
         }
-
 
         switch ($field['type']) {
             # 'combo', 'int', 'objects' fields
@@ -597,7 +448,6 @@ class Objects
         }
 
     }
-
 
     /**
      * set additional data to be saved in solr for multiple records
@@ -867,33 +717,30 @@ class Objects
         }
         $name = implode('.', $a);
 
-        $id = null;
+        /* get similar names*/
+        $names = array();
+        $res = DB\dbQuery(
+            'SELECT name
+            FROM tree
+            WHERE pid = $1
+                AND name like $2
+                AND dstatus = 0',
+            array(
+                $pid
+                ,$name . '%' . '.'.$ext
+            )
+        ) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $names[] = $r['name'];
+        }
+        $res->close();
+
         $i = 1;
-        do {
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM tree
-                WHERE pid = $1
-                    AND name = $2
-                    AND dstatus = 0',
-                array(
-                    $pid
-                    ,$newName
-                )
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $id = $r['id'];
-            } else {
-                $id = null;
-            }
-            $res->close();
-
-            if (!empty($id)) {
-                $newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
-            }
+        while (in_array($newName, $names)) {
+            $newName = $name.' ('.$i.')'.( empty($ext) ? '' : '.'.$ext);
             $i++;
-        } while (!empty($id));
+        };
 
         return $newName;
     }
@@ -986,6 +833,57 @@ class Objects
         $res->close();
 
         return $rez;
+    }
+
+    /**
+     * set subscription to an object for current user
+     * @param array $p
+     *        [
+     *            int objectId
+     *            varchar type      (follow, watch, ignore)
+     *        ]
+     * return array     json responce
+     */
+    public function setSubscription($p)
+    {
+        //validate input params
+        if (empty($p['objectId']) || !is_numeric($p['objectId']) ||
+            empty($p['type']) || !in_array($p['type'], array('follow', 'watch', 'ignore'))
+        ) {
+            throw new \Exception(L\get('Wrong_input_data'));
+        }
+
+        //set subscription
+        $userId = User::getId();
+        $obj = $this->getCachedObject($p['objectId']);
+        $sd = $obj->getSysData();
+        $fu = empty($sd['fu'])
+            ? array()
+            : $sd['fu'];
+        $wu = empty($sd['wu'])
+            ? array()
+            : $sd['wu'];
+
+        switch ($p['type']) {
+            case 'follow':
+                $sd['wu'] = array_diff($wu, array($userId));
+                $sd['fu'] = array_diff($fu, array($userId)) + array($userId);
+                break;
+
+            case 'watch':
+                $sd['fu'] = array_diff($fu, array($userId));
+                $sd['wu'] = array_diff($wu, array($userId)) + array($userId);
+                break;
+
+            case 'ignore':
+                $sd['fu'] = array_diff($fu, array($userId));
+                $sd['wu'] = array_diff($wu, array($userId));
+                break;
+        }
+
+        $obj->updateSysData($sd);
+
+        return array('success' => true);
     }
 
     /**

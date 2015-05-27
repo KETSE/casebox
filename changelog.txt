@@ -1,3 +1,278 @@
+CaseBox 1.9.449 (2015-05-27)
+==============================
+New Features, Improvements
+--------------------------
+- update database dumps
+
+CaseBox 1.9.448 (2015-05-26)
+==============================
+New Features, Improvements
+--------------------------
+- #6166 JS Error in wclac/js/CB.DB.php line: 83
+- dont set localhost, by default, as allowedIp for maintenance mode
+
+CaseBox 1.9.447 (2015-05-25)
+==============================
+New Features, Improvements
+--------------------------
+- #6100 Implement Notifications UI
+
+Fixed Bugs:
+----------
+-
+
+CaseBox 1.9.446 (2015-05-25)
+==============================
+New Features, Improvements
+--------------------------
+- ask for "server_name" config option in install.php
+- rollback to ExtJS 5.1.0
+
+Fixed Bugs:
+----------
+- sender name not correctly set on notifications
+
+CaseBox 1.9.445 (2015-05-23)
+==============================
+New Features, Improvements
+--------------------------
+- removed tasks tables and method for upgrading task data
+- updated db dumps
+
+CaseBox 1.9.444 (2015-05-22)
+==============================
+New Features, Improvements
+--------------------------
+- #5139 Implement Notifications system
+
+CaseBox 1.9.443 (2015-05-21)
+==============================
+New Features, Improvements
+--------------------------
+- #6050 Bare bone (raw) Casebox core
+- #6054 Improve install.php & create_core.php scripts
+- #6065 Upgrade ExtJS: 5.1.1
+
+Fixed Bugs:
+----------
+- #6035 install.php doesn't work outside bin folder
+
+CaseBox 1.9.442 (2015-05-14)
+==============================
+Improvements
+----------
+- #4810 Arabic language icons misaligned
+
+
+CaseBox 1.9.442 (2015-05-14)
+==============================
+Fixed Bugs:
+----------
+- #5955 Uploading a file via API doesn't work: \CB\Api\Files::upload
+
+
+CaseBox 1.9.441 (2015-05-12)
+==============================
+New Features, Improvements
+--------------------------
+- install script adjustments
+- update casebox and demosrc mysql dumps
+
+CaseBox 1.9.440 (2015-05-11)
+==============================
+New Features, Improvements
+--------------------------
+- #5555 Add "email-invite" template used to send invites to new users
+- #5456 Administrators & SYSTEM groups meaning
+  removed "system" group dependency, now we have only root user as sys admin
+- #5812 Can't d&d files from CB to an Obj while creating it
+
+CaseBox 1.9.439 (2015-05-07)
+==============================
+New Features, Improvements
+--------------------------
+- #5892 Drop 'casebox' DB
+- #5480 create language files in install.php
+- #5887 A template field doesn't appear in objWnd
+  refactored getting params for saving
+
+CaseBox 1.9.438 (2015-05-06)
+==============================
+New Features, Improvements
+--------------------------
+- replaced isDebugHost, isDevelServer and isWindows methods with corresponding constants:
+  IS_DEBUG_HOST, IS_DEVEL_SERVER, IS_WINDOWS (in CB namespace)
+- #5742 Generate Minified JS using a command/cron etc, but not at each CB onLoad
+- #5861 Add flag "disableActivityLog"
+  Now logs can be disabled by Config::setFlag('disableActivityLog', true)
+- #5480 issues with install scripts
+- process link clicks on preview buttons in a window
+- #5855 Replace $HTTP_RAW_POST_DATA (deprecated as of PHP 5.6) with php://input
+
+CaseBox 1.9.437 (2015-05-05)
+==============================
+New Features, Improvements
+--------------------------
+- #5390 Remove unnecessary info from logs
+- #5837 Edit XML in CASEBOX
+
+CaseBox 1.9.436 (2015-05-05)
+==============================
+New Features, Improvements
+--------------------------
+- made changes to avoid using global variables
+- removed global flags "running_trigger" and "solr_index_disable_by_custom_script"
+  Now flags are set using Config class:
+    \CB\Config::setFlag('disableSolrIndexing', true);
+  Get: \CB\Config::setFlag('disableTriggers');
+  For now only these two flags are defined (disableTriggers, disableSolrIndexing).
+
+CaseBox 1.9.435 (2015-05-05)
+==============================
+New Features, Improvements
+--------------------------
+- #5832 Improve core_create.php
+- optimize CB\Objects\getAvailableName
+
+CaseBox 1.9.434 (2015-05-04)
+==============================
+New Features, Improvements
+--------------------------
+- #5480 adjustments for install.php script
+  remove webdav from config options, it uses same domain already
+- #5568 allow reindex of cores under maintenance from console
+
+CaseBox 1.9.433 (2015-05-03)
+==============================
+New Features, Improvements
+--------------------------
+- #5721 Objects fields rendered in DC
+- #5717 Add "text_renderer" field config option to docs
+  renamed this option to linkRenderers
+- #5520 CB session expiration: notify that user should login
+
+CaseBox 1.9.432 (2015-05-02)
+==============================
+New Features, Improvements
+--------------------------
+- #5568 Core maintenance mode
+
+Fixed Bugs:
+----------
+- #5785 Can't set DC for search template
+
+CaseBox 1.9.431 (2015-05-01)
+==============================
+New Features, Improvements
+--------------------------
+- #5779 System folder not created after add one case
+- #5782 cannot set "order" for fields on template
+
+CaseBox 1.9.430 (2015-05-01)
+==============================
+New Features, Improvements
+--------------------------
+- #5752 Export doesn't work, issues with SOLR request
+- #5766 can't edit disabled users
+- #5472 User is disabled but still appears in form editors
+  Added option to enable / disable users under options menu in users management
+
+Fixed Bugs:
+----------
+- #5600 ERROR: Case search
+
+CaseBox 1.9.429 (2015-05-01)
+==============================
+New Features, Improvements
+--------------------------
+- #5368 UI improvement for Comments
+  adjustments according to last comments
+- #5311 Refactor server-side Task Management & Task UI
+  adjustments according to last comments
+- Removed usage of mysql date formats, php date formats will be used only
+
+CaseBox 1.9.428 (2015-04-30)
+==============================
+New Features, Improvements
+--------------------------
+- #5480 Improve install.php script, move core installation to another script
+
+CaseBox 1.9.427 (2015-04-29)
+==============================
+New Features, Improvements
+--------------------------
+- #5480 Improve install.php script, move core installation to another script
+  Testing modified install scripts, added core_create.php.
+
+CaseBox 1.9.426 (2015-04-29)
+==============================
+New Features, Improvements
+--------------------------
+- #5552 Email should be unique index in users_groups & improve AddUserForm
+- #5659 How to call Casebox using Curl request
+- #5389 "No database selected" errors in log
+- #5311 Moved task status display after title
+- #5368 UI improvement for Comments
+
+Fixed Bugs:
+----------
+- #5649 Getting empty email messages from Task system
+
+CaseBox 1.9.425 (2015-04-28)
+==============================
+New Features, Improvements
+--------------------------
+- #5635 getLinearNodesData optimizations
+- #5636 Remove checkTranslations from main.php
+  added /bin/languages_update_js_files.php to update translations files when needed
+  renamed language related files from /bin/ to start with "language" word
+- #5311 removed creation date display for tasks
+
+CaseBox 1.9.424 (2015-04-27)
+==============================
+Fixed Bugs:
+----------
+- change Task upgrade method to take in account closed tasks that have empty completion dates
+- TemplateField doesnt save config properties
+
+CaseBox 1.9.423 (2015-04-27)
+==============================
+New Features, Improvements
+--------------------------
+- #5311 Refactor server-side Task Management & Task UI
+  Tasks changed to use internal sys_data property instead of custom tables
+  Classes related to tasks were refactored as well as related classes and / or methods
+  Preview have been changed / refactored
+  A convertor is available in /bin/upgrade_tasks_data.php to upgrade all tasks structure
+    before removing custom tasks tables from db
+  In next commits there should appear info or db update scripts to remove tasks related tables.
+
+  Calendar view have been disabled for now.
+
+CaseBox 1.9.422 (2015-04-24)
+==============================
+New Features, Improvements
+--------------------------
+- upgrade to SOLR5.1
+- adding ".htaccess_on" ".htaccess_off". Use ".htaccess_off"
+  when you want to disable CB while performing server side work
+- SOLR configSets added in /sys/solr_configsets/ and /data/solr/ folder removed
+
+CaseBox 1.9.421 (2015-04-21)
+==============================
+New Features, Improvements
+--------------------------
+- #5195 disabled security authentication timeout check
+- #5457 Move /sys/utils/ to /bin/
+- #5474 On click "Мой календарь" view mode is not changed for empty record set
+
+Fixed Bugs:
+----------
+- #5479 object panel reloads on attaching a file to new comment
+- #5473 Locate object by Id on casebox load doesnt work ok
+- #5470 Long comments shown partially
+- #5458 Sort not working ok in 'order' field in FieldTmpl
+
 CaseBox 1.9.420 (2015-04-17)
 ==============================
 New Features, Improvements

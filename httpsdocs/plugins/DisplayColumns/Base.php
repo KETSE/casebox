@@ -121,6 +121,11 @@ class Base
                 }
 
                 $obj = \CB\Objects::getCachedObject($doc['id']);
+                if (!is_object($obj)) {
+                    \CB\debug('DisplayColumns object not found: '. $doc['id']);
+                    continue;
+                }
+
                 $template = $obj->getTemplate();
 
                 foreach ($customColumns as $fieldName => &$col) {

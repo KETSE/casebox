@@ -72,7 +72,7 @@ $data = array(
         idIndex: 0
         ,model: 'Generic2'
         //,fields: ['id', 'name']
-        ,data: <?php echo json_encode($data, JSON_UNESCAPED_UNICODE); ?>
+        ,data: <?php echo Util\jsonEncode($data); ?>
         ,getName: getStoreNames
     });
     CB.DB.reminderTypes = new Ext.data.ArrayStore({
@@ -92,7 +92,7 @@ $data = array(
         idIndex: 0
         ,model: 'Generic2'
         //,fields: ['id', 'name']
-        ,data:  [['%m/%d/%Y', 'm/d/Y'], ['%d/%m/%Y', 'd/m/Y'], ['%d.%m.%Y', 'd.m.Y'], ['%d-%m-%Y', 'd-m-Y']]
+        ,data:  [['m/d/Y', 'm/d/Y'], ['d/m/Y', 'd/m/Y'], ['d.m.Y', 'd.m.Y'], ['d-m-Y', 'd-m-Y']]
     });
     CB.DB.roles = new Ext.data.ArrayStore({
         idIndex: 0
@@ -126,7 +126,7 @@ echo 'CB.DB.templatesIconSet = new Ext.data.ArrayStore({
     idIndex: 0
     ,model: \'Generic2\'
     //,fields: ["id","name"]
-    ,data: '. json_encode($data, JSON_UNESCAPED_UNICODE).'});';
+    ,data: '. Util\jsonEncode($data).'});';
 
 /* languages */
 $coreLanguages = Config::get('languages');
@@ -145,7 +145,7 @@ for ($i=0; $i < sizeof($coreLanguages); $i++) {
 echo "\n".'CB.DB.languages = new Ext.data.ArrayStore({'.
     'model: \'Language\''.
     //'fields: [{name: "id", type: "int"}, "abreviation", "name", "long_date_format", "short_date_format", "time_format"]'.
-    ', data: '.(empty($arr) ? '[]' : json_encode($arr, JSON_UNESCAPED_UNICODE)).
+    ', data: '.(empty($arr) ? '[]' : Util\jsonEncode($arr)).
     '});'."\n";
 /* end of languages */
 
@@ -164,7 +164,7 @@ if (!empty($osq)) {
 echo "\n".'CB.DB.securityQuestions = new Ext.data.ArrayStore({'.
    'model: \'SecurityQuestion\''.
 //    'fields: [{name: "id", type: "int"}, "text"]'.
-    ',data: '.(empty($arr) ? '[]' : json_encode($arr, JSON_UNESCAPED_UNICODE)).
+    ',data: '.(empty($arr) ? '[]' : Util\jsonEncode($arr)).
     '});'."\n";
 /* end of Security questions */
 
@@ -196,7 +196,7 @@ function sortTemplateRows(&$array, $pid, &$result)
 foreach ($templates as $t => $f) {
     $sf = array();
     sortTemplateRows($f, null, $sf);
-    echo 'CB.DB.template'.$t.' = new CB.DB.TemplateStore({data:'.json_encode($sf, JSON_UNESCAPED_UNICODE).'});';
+    echo 'CB.DB.template'.$t.' = new CB.DB.TemplateStore({data:'.Util\jsonEncode($sf).'});';
 }
 
 ?>

@@ -80,63 +80,62 @@ Ext.define('CB.plugin.Panel', {
         //check if object was found (success = true)
         if(r.success !== true) {
             this.update('<div class="x-preview-mask">' + L.RecordIdNotFound.replace('{id}', '#' + this.loadedParams.id) + '</div>');
-            return;
-        }
+        } else {
+            this.removeAll(true);
 
-        this.removeAll(true);
+            this.createMenu = r.menu;
+            Ext.iterate(
+                r.data
+                ,function(k, v, o) {
+                    var cl = Ext.util.Format.capitalize(k.substr(0,1)) + k.substr(1);
+                    cl = 'CBObjectPlugin' + cl;
+                    var c = Ext.create(
+                        cl
+                        ,{
+                            params: this.loadedParams
+                        }
+                    );
 
-        this.createMenu = r.menu;
-        Ext.iterate(
-            r.data
-            ,function(k, v, o) {
-                var cl = Ext.util.Format.capitalize(k.substr(0,1)) + k.substr(1);
-                cl = 'CBObjectPlugin' + cl;
-                var c = Ext.create(
-                    cl
-                    ,{
-                        params: this.loadedParams
+                    c.createMenu = r.menu;
+
+                    items.push(c);
+
+                    if(!Ext.isDefined(v.data)) {
+                        c.setVisible(false);
+                    } else {
+                        c.onLoadData(v);
                     }
-                );
-
-                c.createMenu = r.menu;
-
-                items.push(c);
-
-                if(!Ext.isDefined(v.data)) {
-                    c.setVisible(false);
-                } else {
-                    c.onLoadData(v);
                 }
+                ,this
+            );
+
+            if(!Ext.isEmpty(items)) {
+                this.add(items);
             }
-            ,this
-        );
 
-        if(!Ext.isEmpty(items)) {
-            this.add(items);
+            /**
+             * we make this check for title after all plugins have been added
+             * because objectProperties plugin applies loaded data (including object name)
+             * to the params
+             */
+
+            if(this.loadedParams &&
+                // (CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
+                (this.loadedParams.from !== 'window') &&
+                !Ext.isEmpty(this.loadedParams.name)
+            ){
+                var titleView = new CB.object.TitleView({
+                    data: this.loadedParams
+                    ,getContainerToolbarItems: function(){
+                        return {};
+                    }
+                });
+
+                this.insert(0, titleView);
+            }
+
+            this.doLayout(true, true);
         }
-
-        /**
-         * we make this check for title after all plugins have been added
-         * because objectProperties plugin applies loaded data (including object name)
-         * to the params
-         */
-
-        if(this.loadedParams &&
-            // (CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
-            (this.loadedParams.from !== 'window') &&
-            !Ext.isEmpty(this.loadedParams.name)
-        ){
-            var titleView = new CB.object.TitleView({
-                data: this.loadedParams
-                ,getContainerToolbarItems: function(){
-                    return {};
-                }
-            });
-
-            this.insert(0, titleView);
-        }
-
-        this.doLayout(true, true);
 
         this.fireEvent('loaded', this);
     }

@@ -118,7 +118,7 @@ class DBProvider
                 array(
                     $guid
                     ,$_SESSION['user']['id']
-                    ,json_encode($p['state'], JSON_UNESCAPED_UNICODE)
+                    ,Util\jsonEncode($p['state'])
                 )
             ) or die(DB\dbQueryError());
         }

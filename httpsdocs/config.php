@@ -38,13 +38,14 @@ try {
 DB\connectWithParams($cfg);
 
 //loading full config of the core
-require_once 'lib/Util.php';
 $config = Config::load($cfg);
 
-if ((@$config['core_active'] != 1) && //not active
-    ((@$config['core_active'] != -1) || !isset($_SERVER['argc'])) //is apache request
-) {
-    die('Core is not active at te moment, please try again later.');
+//analize core status and display corresponding message if not active
+$status = Config::getCoreStatus();
+
+if ($status != Config::$CORESTATUS_ACTIVE) {
+    echo Config::getCoreStatusMessage($status);
+    exit();
 }
 
 //connect other database if specified in config for core
@@ -67,7 +68,7 @@ ini_set('memory_limit', '400M');
 
 // session params
 $sessionLifetime = (
-    isDebugHost()
+    IS_DEBUG_HOST
         ? 0
         : Config::get('session.lifetime', 180)
 ) * 60;
@@ -90,7 +91,7 @@ session_name(
 );
 
 //error reporting params
-error_reporting(isDebugHost() ? E_ALL : E_ERROR);
+error_reporting(IS_DEBUG_HOST ? E_ALL : E_ERROR);
 
 // mb encoding config
 mb_internal_encoding("UTF-8");
@@ -103,6 +104,6 @@ date_default_timezone_set('UTC');
 /* end of setting php configuration options, session lifetime and error_reporting level */
 
 //clear debug_log for each request when on debug host
-if (isDebugHost()) {
+if (IS_DEBUG_HOST) {
     // @unlink(Config::get('debug_log'));
 }

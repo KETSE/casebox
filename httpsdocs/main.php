@@ -4,29 +4,31 @@ namespace CB;
 require_once 'init.php';
 
 $coreName = Config::get('core_name');
+
 $coreUrl = Config::get('core_url');
 
-$debugSuffix = isDebugHost()
-  ? '&debug=1'
-  : '';
+//remove last slash
+$coreUrl = substr($coreUrl, 0, strlen($coreUrl) -1);
 
-$rtl = Config::get('rtl')
-    ? '-rtl'
-    : '';
+$debugSuffix = IS_DEBUG_HOST ? '-debug' : '';
+
+$debugQueryParam = IS_DEBUG_HOST ? '&debug=1' : '';
+
+$rtl = Config::get('rtl') ? '-rtl' : '';
 
 $theme = empty($_SESSION['user']['cfg']['theme'])
     ? 'classic'
     : $_SESSION['user']['cfg']['theme'];
 
 if (empty($_SESSION['user'])) {
-    exit(header('Location: ' . $coreUrl . 'login/'));
+    exit(header('Location: ' . $coreUrl . '/login/'));
 }
 
-L\checkTranslationsUpToDate();
+require_once(LIB_DIR . 'MinifyCache.php');
 
-require_once(Config::get('MINIFY_PATH') . 'utils.php');
-$projectTitle = Config::get('project_name_' . Config::get('user_language'), $coreName);
+$projectTitle = Config::getProjectName();
 
+loadMinifyUris();
 ?>
 <!DOCTYPE html>
 <html>
@@ -36,17 +38,18 @@ $projectTitle = Config::get('project_name_' . Config::get('user_language'), $cor
     <meta name="author" content="KETSE">
     <meta name="description" content="Casebox">
     <meta name="robots" content="noindex">
-    <link rel="shortcut icon" href="/i/casebox-logo.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 <?php
 
 echo '<link rel="stylesheet" type="text/css" href="/libx/ext/packages/ext-theme-' . $theme . '/build/resources/ext-theme-' . $theme . '-all' . $rtl . '.css" />
     <link rel="stylesheet" type="text/css" href="/libx/extjs-ace/styles.css" />
-    <link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(Minify_getUri('css'), 1) . '" />' . "\n";
+    <link rel="stylesheet" type="text/css" href="' . $coreUrl . getMinifyGroupUrl('css') . '" />' . "\n";
 
 // Custom CSS for the core
 $css = Config::getCssList();
 if (!empty($css)) {
-    echo '<link rel="stylesheet" type="text/css" href="' . $coreUrl . substr(Minify_getUri($coreName . '_css'), 1) . '" />' . "\n";
+    echo '<link rel="stylesheet" type="text/css" href="' . $coreUrl . getMinifyGroupUrl($coreName . '_css') . '" />' . "\n";
 }
 
 echo '<title>' . $projectTitle . '</title>' . "\n";
@@ -163,11 +166,9 @@ background-image: linear-gradient(315deg,transparent,transparent 33%,rgba(0,0,0,
 </div>
 
 <script type="text/javascript">setProgress('<?php echo L\get('Loading_ExtJS_Core')?>', '30%')</script>
-<script type="text/javascript" src="<?php echo EXT_PATH ?>/ext-all<?php echo $rtl.(isDebugHost() ? '-debug' : ''); ?>.js"></script>
-<script type="text/javascript" src="<?php echo EXT_PATH ?>/packages/ext-charts/build/ext-charts<?php echo isDebugHost() ? '-debug' : ''; ?>.js"></script>
-<script type="text/javascript" src="<?php echo EXT_PATH ?>/packages/ext-theme-<?php
-    echo $theme . '/build/ext-theme-' . $theme . (isDebugHost() ? '-debug' : '');
-?>.js"></script>
+<script type="text/javascript" src="<?php echo EXT_PATH . '/ext-all' . $rtl . $debugSuffix; ?>.js"></script>
+<script type="text/javascript" src="<?php echo EXT_PATH . '/packages/ext-charts/build/ext-charts' . $debugSuffix; ?>.js"></script>
+<script type="text/javascript" src="<?php echo EXT_PATH . '/packages/ext-theme-' . $theme . '/build/ext-theme-' . $theme . $debugSuffix; ?>.js"></script>
 
 <script type="text/javascript">
     bravojs = {
@@ -186,10 +187,10 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
     }
 
     // Casebox locale
-    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('lang-' . $_SESSION['user']['language']), 1) . '"></script>';
+    echo '<script type="text/javascript" src="' . $coreUrl . getMinifyGroupUrl('lang-' . $_SESSION['user']['language']) . '"></script>';
 } else {
     // default Casebox locale
-    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('lang-en'), 1).'"></script>';
+    echo '<script type="text/javascript" src="' . $coreUrl . getMinifyGroupUrl('lang-en') . '"></script>';
 }
 
 ?>
@@ -199,25 +200,29 @@ if (!empty($_SESSION['user']['language']) && ($_SESSION['user']['language'] != '
 <script type="text/javascript">setProgress('<?php echo L\get('Loading_ExtJS_UI')?>', '60%')</script>
 
 <?php
-echo '<script type="text/javascript" src="' . $coreUrl . 'remote/api.php"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . '/remote/api.php"></script>';
 
-echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('js'), 1) . $debugSuffix . '"></script>';
-echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('jsdev'), 1) . $debugSuffix . '"></script>';
-echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri('jsoverrides'), 1) . $debugSuffix . '"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . getMinifyGroupUrl('js') . $debugQueryParam . '"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . getMinifyGroupUrl('jsdev') . $debugQueryParam . '"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . getMinifyGroupUrl('jsoverrides') . $debugQueryParam . '"></script>';
 
 $js = Config::getJsList();
 if (!empty($js)) {
-    echo '<script type="text/javascript" src="' . $coreUrl . substr(Minify_getUri($coreName.'_js'), 1) . $debugSuffix . '"></script>';
+    echo '<script type="text/javascript" src="' . $coreUrl . getMinifyGroupUrl($coreName.'_js') . $debugQueryParam . '"></script>';
 }
 $prc = Config::getPluginsRemoteConfig();
 if (!empty($prc)) {
-    echo '<script type="text/javascript">CB.plugin.config = '.json_encode($prc, JSON_UNESCAPED_UNICODE).';</script>';
+    echo '<script type="text/javascript">CB.plugin.config = '.Util\jsonEncode($prc).';</script>';
 }
 
-echo '<script type="text/javascript" src="' . $coreUrl . 'js/CB.DB.php"></script>';
+echo '<script type="text/javascript" src="' . $coreUrl . '/js/CB.DB.php"></script>';
 ?>
 
 <script type="text/javascript">setProgress('<?php echo L\get('Initialization')?>', '100%')</script>
 
 </body>
 </html>
+
+<?php
+
+saveMinifyUris();

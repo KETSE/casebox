@@ -4,8 +4,10 @@ namespace CB\DB;
 function connect($p = array())
 {
     //check if not connected already
-    if (!empty($GLOBALS['dbh'])) {
-        return $GLOBALS['dbh'];
+    $dbh = \CB\Cache::get('dbh');
+
+    if (!empty($dbh)) {
+        return $dbh;
     }
 
     if (empty($p['db_host'])) {
@@ -40,10 +42,9 @@ function connectWithParams($p)
         'initsql' => $p['initsql']
     );
 
-    $dbh = null;
+    $dbh = \CB\Cache::get('dbh');
     $lastParams = array();
-    if (!empty($GLOBALS['dbh'])) {
-        $dbh = $GLOBALS['dbh'];
+    if (!empty($dbh)) {
         $lastParams = $dbh->lastParams;
     }
 
@@ -76,10 +77,12 @@ function connectWithParams($p)
     }
 
     // if database changed then apply initsql if set
-    if (@$lastParams['name'] != $newParams['name']) {
+    if (!isset($lastParams['name']) || ($lastParams['name'] != $newParams['name'])) {
         $newParams['name'] = $dbh->real_escape_string($newParams['name']);
 
-        $dbh->query('USE `'.$newParams['name'].'`');
+        if (!empty($newParams['name'])) {
+            $dbh->query('USE `'.$newParams['name'].'`') or die('Cannot access database "' . $newParams['name'] . '"');
+        }
 
         $dbh->query("SET NAMES 'UTF8'");
 
@@ -93,7 +96,7 @@ function connectWithParams($p)
 
     $dbh->lastParams = $newParams;
 
-    $GLOBALS['dbh']  = $dbh;
+    \CB\Cache::set('dbh', $dbh);
 
     return $dbh;
 }
@@ -101,19 +104,18 @@ function connectWithParams($p)
 if (!function_exists(__NAMESPACE__.'\dbQuery')) {
     function dbQueryCallback($at)
     {
-        global $query__parameters;
+        $qp = \CB\Cache::get('queryParameters');
 
-        return $query__parameters[ $at[1]-1 ];
+        return $qp[$at[1]-1];
     }
 
-    function dbQuery($query, $parameters = array(), $database = false)
+    function dbQuery($query, $parameters = array(), $dbh = false)
     {
-        if (!$database) {
-            $database = $GLOBALS['dbh'];
+        if (empty($dbh)) {
+            $dbh = \CB\Cache::get('dbh');
         }
 
         // Escape parameters as required & build parameters for callback function
-        global $query__parameters;
 
         if (!is_array($parameters)) {
             $parameters = array($parameters);
@@ -126,17 +128,18 @@ if (!function_exists(__NAMESPACE__.'\dbQuery')) {
             $parameters[$k] = is_int($v) ? $v : (
                 null === $v ?
                 'NULL' :
-                "'".$database->real_escape_string($v)."'"
+                "'".$dbh->real_escape_string($v)."'"
                 );
         }
 
-        $query__parameters = $parameters;
+        \CB\Cache::set('queryParameters', $parameters);
 
         // Call using mysqli_query
         $sql = preg_replace_callback('/\$([0-9]+)/', __NAMESPACE__.'\dbQueryCallback', $query);
-        $GLOBALS['last_sql'] = $sql;
 
-        return $database->query($sql);
+        \CB\Cache::set('lastSql', $sql);
+
+        return $dbh->query($sql);
     }
 }
 
@@ -144,18 +147,25 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
     function dbQueryError($dbh = false)
     {
         if (empty($dbh)) {
-            $dbh = $GLOBALS['dbh'];
+            $dbh = \CB\Cache::get('dbh');
         }
 
-        $rez = date('Y-m-d H:i:s') . ": \n\r<br /><hr />Query error: ".mysqli_error($dbh).
+        $coreName = \CB\Config::get('core_name');
+
+        $rez = date('Y-m-d H:i:s') .
+            ": \n\r<br /><hr />Query error (" . $dbh->lastParams['name'] . "): " .
+            mysqli_error($dbh).
             "<hr /><br />\n\r";
-        if (!empty($GLOBALS['last_sql'])) {
-            $rez .= "\n\r<br /><hr />Query: ".$GLOBALS['last_sql'].$rez;
+
+        $lastSql = \CB\Cache::get('lastSql');
+
+        if (!empty($lastSql)) {
+            $rez .= "\n\r<br /><hr />Query: ".$lastSql.$rez;
         }
         error_log($rez, 3, \CB\Config::get('error_log', \CB\LOGS_DIR.'cb_error_log'));
 
-        if (!\CB\isDebugHost()) {
-            $rez ='Query error';
+        if (!\CB\IS_DEBUG_HOST) {
+            $rez ='Query error (' . $dbh->lastParams['name'] . ')';
         }
 
         throw new \Exception($rez);
@@ -165,30 +175,37 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
 if (!function_exists(__NAMESPACE__.'\startTransaction')) {
     function startTransaction()
     {
-        return $GLOBALS['dbh']->autocommit(false);
+        $dbh = \CB\Cache::get('dbh');
+
+        return $dbh->autocommit(false);
     }
 }
 
 if (!function_exists(__NAMESPACE__.'\commitTransaction')) {
     function commitTransaction()
     {
-        $GLOBALS['dbh']->commit();
+        $dbh = \CB\Cache::get('dbh');
+        $dbh->commit();
 
-        return $GLOBALS['dbh']->autocommit(true);
+        return $dbh->autocommit(true);
     }
 }
 
 if (!function_exists(__NAMESPACE__.'\dbLastInsertId')) {
     function dbLastInsertId()
     {
-        return mysqli_insert_id($GLOBALS['dbh']);
+        $dbh = \CB\Cache::get('dbh');
+
+        return mysqli_insert_id($dbh);
     }
 }
 
 if (!function_exists(__NAMESPACE__.'\dbAffectedRows')) {
     function dbAffectedRows()
     {
-        return mysqli_affected_rows($GLOBALS['dbh']);
+        $dbh = \CB\Cache::get('dbh');
+
+        return mysqli_affected_rows($dbh);
     }
 }
 
@@ -196,8 +213,9 @@ if (!function_exists(__NAMESPACE__.'\dbCleanConnection')) {
     function dbCleanConnection($dbh = false)
     {
         if (!$dbh) {
-            $dbh = $GLOBALS['dbh'];
+            $dbh = \CB\Cache::get('dbh');
         }
+
         while (mysqli_more_results($dbh)) {
             if (mysqli_next_result($dbh)) {
                 $result = mysqli_use_result($dbh);

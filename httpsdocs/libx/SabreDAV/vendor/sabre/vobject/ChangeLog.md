@@ -1,6 +1,55 @@
 ChangeLog
 =========
 
+3.4.2 (2015-02-25)
+------------------
+
+* #210: iTip: Replying to an event without a master event was broken.
+
+
+3.4.1 (2015-02-24)
+------------------
+
+* A minor change to ensure that unittests work correctly in the sabre/dav
+  test-suite.
+
+
+3.4.0 (2015-02-23)
+------------------
+
+* #196: Made parsing recurrence rules a lot faster on big calendars.
+* Updated windows timezone mappings to latest unicode version.
+* #202: Support for parsing and validating `VAVAILABILITY` components. (@Hywan)
+* #195: PHP 5.3 compatibility in 'generatevcards' script. (@rickdenhaan)
+* #205: Improving handling of multiple `EXDATE` when processing iTip changes.
+  (@armin-hackmann)
+* #187: Fixed validator rules for `LAST-MODIFIED` properties.
+* #188: Retain floating times when generating instances using
+  `Recur\EventIterator`.
+* #203: Skip tests for timezones that are not supported on older PHP versions,
+  instead of a hard fail.
+* #204: Dealing a bit better with vCard date-time values that contained
+  milliseconds. (which is normally invalid). (@armin-hackmann)
+
+
+3.3.5 (2015-01-09)
+------------------
+
+* #168: Expanding calendars now removes objects with recurrence rules that
+  don't have a valid recurrence instance.
+* #177: SCHEDULE-STATUS should not contain a reason phrase, only a status
+  code.
+* #175: Parser can now read and skip the UTF-8 BOM.
+* #179: Added `isFloating` to `DATE-TIME` properties.
+* #179: Fixed jCal serialization of floating `DATE-TIME` properties.
+* #173: vCard converter failed for `X-ABDATE` properties that had no
+  `X-ABLABEL`.
+* #180: Added `PROFILE_CALDAV` and `PROFILE_CARDDAV` to enable validation rules
+  specific for CalDAV/CardDAV servers.
+* #176: A missing `UID` is no longer an error, but a warning for the vCard
+  validator, unless `PROFILE_CARDDAV` is specified.
+
+
 3.3.4 (2014-11-19)
 ------------------
 
@@ -33,6 +82,7 @@ ChangeLog
 * Support for "Line Islands Standard Time" windows timezone.
 * #154: Correctly work around vCard parameters that have a value but no name.
 
+
 3.3.2 (2014-09-19)
 ------------------
 
@@ -53,6 +103,7 @@ ChangeLog
 * #127: Attendees who delete recurring event instances events they had already
   declined earlier will no longer generate another reply.
 * #125: Send CANCEL messages when ORGANIZER property gets deleted.
+
 
 3.3.1 (2014-08-18)
 ------------------
@@ -119,6 +170,7 @@ ChangeLog
 
 3.2.1 (2014-05-03)
 ------------------
+
 * Minor tweak to make the unittests run with the latest hhvm on travis.
 * Updated timezone definitions.
 * Updated copyright links to point to http://sabre.io/
@@ -152,14 +204,9 @@ ChangeLog
   disabled and an invalid file is read.
 
 
-3.1.5 (2014-??-??)
-------------------
-* Updated: Some docblocks and other documentation. Made the unittests succeed
-  on recent php versions.
-
-
 3.1.4 (2014-03-30)
 ------------------
+
 * Fixed: Issue #87: Several compatibility fixes related to timezone handling
   changes in PHP 5.5.10.
 
@@ -340,6 +387,20 @@ ChangeLog
   VERSION and CALSCALE.
 * Added: You can add new sub-components much quicker with the magic setters, and
   add() method.
+
+
+2.1.7 (2015-01-21)
+------------------
+
+* Fixed: Issue #94, a workaround for bad escaping of ; and , in compound
+  properties. It's not a full solution, but it's an improvement for those
+  stuck in the 2.1 versions.
+
+
+2.1.6 (2014-12-10)
+------------------
+
+* Fixed: Minor change to make sure that unittests succeed on every PHP version.
 
 
 2.1.5 (2014-06-03)

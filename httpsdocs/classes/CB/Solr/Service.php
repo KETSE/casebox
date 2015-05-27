@@ -7,6 +7,7 @@ namespace CB\Solr;
  * This class only manages connection and standart calls to Solr service
  */
 use CB\Cache;
+use CB\Util;
 
 class Service
 {
@@ -110,6 +111,25 @@ class Service
         return $this->connect();
     }
 
+    /**
+     * verify if can connect to solr with given config
+     * @param  array   $cfg (host, port, core, SOLR_CLIENT optional)
+     * @return boolean
+     */
+    public static function verifyConfigConnection($cfg)
+    {
+        $rez = false;
+
+        try {
+            $rez = new Client($cfg);
+
+        } catch (\Exception $e) {
+            $rez = false;
+        }
+
+        return $rez;
+    }
+
     protected function fireEvent($eventName, &$params)
     {
         if ($this->fireEvents) {
@@ -156,7 +176,7 @@ class Service
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-type:application/json; charset=utf-8"));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($docs), JSON_UNESCAPED_UNICODE));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, Util\jsonEncode(array_values($docs)));
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 
@@ -284,7 +304,7 @@ class Service
 
     private function debugInfo()
     {
-        return \CB\isDebugHost()
+        return \CB\IS_DEBUG_HOST
             ? "\n".' ('.$this->host.':'.$this->port.' -> '.$this->core.' )'
             : '';
     }

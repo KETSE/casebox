@@ -27,8 +27,8 @@ if (!empty($_GET['l']) && (strlen($_GET['l']) == 2)) {
     $user_language = strtolower($_GET['l']);
 }
 
-/*  If we do not have a tanslation file for users language, we use global core language.
-    If there is no translation file for global set language then we use english by default */
+/*  If we do not have a tanslation file for users language, we use main core language.
+    If there is no translation file for main language set then we use english by default */
 if (isset($_SESSION['user']['language']) &&
     isset($languageSettings[$_SESSION['user']['language']])
     ) {

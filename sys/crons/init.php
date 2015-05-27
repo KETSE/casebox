@@ -37,9 +37,9 @@ register_shutdown_function('CB\\closeCron', $cron_id);
 
 include $site_path.DIRECTORY_SEPARATOR.'config.php';
 
-require_once LIB_DIR.'Util.php';
-
 require_once(LIB_DIR.'language.php');
+
+\CB\Cache::set('scriptOptions', $scriptOptions);
 
 $coreName = Config::get('core_name');
 //L\initTranslations(); // would be called from inside crons that need translations
@@ -67,7 +67,8 @@ function getOptions()
 
 function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
 {
-    global $scriptOptions, $coreName;
+    $scriptOptions = \CB\Cache::get('scriptOptions');
+    $coreName = Config::get('core_name');
 
     if (!empty($scriptOptions['force'])) {
         return array('success' => true);
@@ -106,7 +107,6 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
         $rez['success'] = true;
 
     } else {
-        global $cron_id;
         $rez['success'] = true;
         $t = debug_backtrace();
         DB\dbQuery(
@@ -140,7 +140,7 @@ function prepareCron ($cron_id, $execution_timeout = 60, $info = '')
  */
 function closeCron($cron_id, $info = 'ok')
 {
-    global $scriptOptions;
+    $scriptOptions = \CB\Cache::get('scriptOptions');
 
     if (!empty($scriptOptions['force'])) {
         return;

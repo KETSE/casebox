@@ -270,6 +270,12 @@ class UsersGroups
             }
         }
 
+        //check if user with such email doesn exist
+        $user_id = User::getIdByEmail($p['email']);
+        if (!empty($user_id)) {
+            throw new \Exception(L\get('UserEmailExists'));
+        }
+
         $user_id = 0;
         /*check user existance, if user already exists but is deleted
         then its record will be used for new user */
@@ -320,7 +326,13 @@ class UsersGroups
                 ,cdate = CURRENT_TIMESTAMP
                 ,did = NULL
                 ,ddate = NULL
+                ,`password` = NULL
+                ,`password_change` = NULL
+                ,`recover_hash` = NULL
                 ,language_id = $5
+                ,`cfg` = NULL
+                ,`data` = NULL
+                ,email = $6
                 ,uid = $4
                 ,cdate = CURRENT_TIMESTAMP',
             array(
@@ -365,7 +377,7 @@ class UsersGroups
 
         //check if send invite is set and create notification
         if (!empty($p['send_invite'])) {
-            static::sendEmailInvite($user_id);
+            $this->sendResetPasswordMail($user_id, 'invite');
         }
 
         Security::calculateUpdatedSecuritySets();
@@ -452,18 +464,20 @@ class UsersGroups
                 ,email
                 ,enabled
                 ,data
-                ,date_format(last_action_time,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') last_action_time
-                ,date_format(cdate,\''.$_SESSION['user']['cfg']['short_date_format'].' %H:%i\') `cdate`
-                ,(SELECT COALESCE(TRIM(CONCAT(first_name, \' \', last_name)), name)
-                    FROM users_groups
-                    WHERE id = u.cid) `owner`
+                ,last_action_time
+                ,cdate
+                ,cid
             FROM users_groups u
-            WHERE id = $1 ',
+            WHERE id = $1',
             $user_id
         ) or die(DB\dbQueryError());
+
         if ($r = $res->fetch_assoc()) {
             $r['title'] = User::getDisplayName($r);
             $r['data'] = Util\toJSONArray($r['data']);
+            $r['last_action_time'] = Util\formatMysqlTime($r['last_action_time']);
+            $r['cdate'] = Util\formatMysqlTime($r['cdate']);
+            $r['owner'] = User::getDisplayName($r['cid']);
 
             $rez = array('success' => true, 'data' => $r);
         }
@@ -661,7 +675,7 @@ class UsersGroups
      * @param  int     $userId
      * @return boolean
      */
-    public static function sendEmailInvite($userId)
+    public static function sendResetPasswordMail($userId, $template = 'recover')
     {
         if (!is_numeric($userId) ||
             (User::isLoged() && !Security::canEditUser($userId))
@@ -669,47 +683,66 @@ class UsersGroups
             return false;
         }
 
-        //load mail template
-        $mail = System::getEmailTemplate('password_recovery_email');
+        $mail = '';
+        $subject = '';
+
+        switch ($template) {
+            case 'invite':
+                $mail = System::getEmailTemplate('email_invite');
+                $subject = L\get('MailInviteSubject');
+
+                break;
+            case 'recover':
+                $mail = System::getEmailTemplate('password_recovery_email');
+                $subject = L\get('MailRecoverSubject');
+
+                break;
+
+            default:
+                return false;
+        }
 
         if (empty($mail)) {
             return false;
         }
 
         $userData = User::getPreferences($userId);
-
-        $userEmail = empty($userData['cfg']['security']['recovery_email'])
-            ? $userData['email']
-            : $userData['cfg']['security']['recovery_email'];
-
-        //check if mail is set in security settings
-        if (!empty($userData['cfg']['security']['recovery_email']) && !empty($userData['cfg']['security']['email'])) {
-            $userEmail = $userData['cfg']['security']['email'];
-        }
+        $userEmail = User::getEmail($userData);
 
         if (empty($userEmail)) {
             return false;
         }
 
-        /* generating recovery hash and sending mail */
+        /* generating invite hash and sending mail */
         $hash = User::generateRecoveryHash(
             $userId,
             $userId . $userEmail . date(DATE_ISO8601)
         );
 
-        $userName = User::getDisplayName($userData);
-
         $href = Util\getCoreHost().'recover/reset-password/?h='.$hash;
 
-        $mail = str_replace(
-            array('{name}', '{link}'),
-            array($userName, '<a href="'.$href.'" >'.$href.'</a>'),
-            $mail
+        /* replacing placeholders in template and subject */
+        $replacements  = array(
+            '{projectTitle}' => Config::getProjectName()
+            ,'{fullName}' => User::getDisplayName($userData)
+            ,'{username}' => User::getUsername($userData)
+            ,'{userEmail}' => $userEmail
+            ,'{creatorFullName}' => User::getDisplayName()
+            ,'{creatorUsername}' => User::getUsername()
+            ,'{creatorEmail}' => User::getEmail()
+            ,'{href}' => $href
+            ,'{link}' => '<a href="'.$href.'" >'.$href.'</a>'
         );
+
+        $search = array_keys($replacements);
+        $replace = array_values($replacements);
+
+        $mail = str_replace($search, $replace, $mail);
+        $subject = str_replace($search, $replace, $subject);
 
         return @System::sendMail(
             $userEmail,
-            L\get('MailRecoverSubject'),
+            $subject,
             $mail
         );
     }
@@ -722,7 +755,7 @@ class UsersGroups
     public function sendResetPassMail($userId)
     {
         return array(
-            'success' => $this->sendEmailInvite($userId)
+            'success' => $this->sendResetPasswordMail($userId)
         );
     }
 
@@ -779,6 +812,27 @@ class UsersGroups
         ) or die(DB\dbQueryError());
 
         return array('success' => true, 'name' => $name);
+    }
+
+    /**
+     * Set user enabled or disabled
+     */
+    public function setUserEnabled($p)
+    {
+        if (!User::isVerified()) {
+            return array('success' => false, 'verify' => true);
+        }
+
+        $userId = $this->extractId($p['id']);
+        $enabled = !empty($p['enabled']);
+
+        if (!Security::canEditUser($userId)) {
+            throw new \Exception(L\get('Access_denied'));
+        }
+
+        User::setEnabled($userId, $enabled);
+
+        return array('success' => true, 'enabled' => $enabled);
     }
 
     /**

@@ -20,7 +20,7 @@ namespace CB;
  *) ENGINE=MyISAM DEFAULT CHARSET=utf8
  */
 
-use CB\DB as DB;
+use CB\DB;
 
 class Session implements \SessionHandlerInterface
 {

@@ -17,10 +17,10 @@ class Log
      */
     public static function add(&$p)
     {
+        $userId = User::getId();
+
         //check if log nod disabled by some script
-        if ((Cache::get('disable_logs', false) == true) ||
-            empty($_SESSION['user']['id'])
-        ) {
+        if (Config::getFlag('disableActivityLog') || empty($userId)) {
             return;
         }
 
@@ -33,23 +33,9 @@ class Log
 
         fireEvent('beforelogadd', $p);
 
-        $p['logData'] = @array(
-            'name' => htmlspecialchars($data['name'], ENT_COMPAT)
-            ,'iconCls' => Browser::getIcon($data)
-            ,'pids' => empty($data['pids'])
-                ? Objects::getPids($data['id'])
-                : Util\toNumericArray($data['pids'])
-            ,'path' => htmlspecialchars(Util\coalesce($data['pathtext'], $data['path']), ENT_COMPAT)
-            ,'template_id' => $data['template_id']
-            ,'case_id' => $data['case_id']
-            ,'date' => $data['date']
-            ,'size' => $data['size']
-            ,'cid' => $data['cid']
-            ,'oid' => $data['oid']
-            ,'uid' => @$data['uid']
-            ,'cdate' => $data['cdate']
-            ,'udate' => $data['udate']
-        );
+        $p['logData'] = static::getLogData($p);
+
+        $p['activityData'] = static::getActivityData($data);
 
         DB\dbQuery(
             'INSERT INTO action_log (
@@ -58,20 +44,175 @@ class Log
               ,`user_id`
               ,`action_type`
               ,`data`
-            ) VALUES ($1, $2, $3, $4, $5)',
+              ,`activity_data_db`
+            ) VALUES ($1, $2, $3, $4, $5, $6)',
             array(
                 $data['id']
                 ,@$data['pid']
-                ,$_SESSION['user']['id']
+                ,$userId
                 ,$p['type']
-                ,json_encode($p['logData'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($p['logData'])
+                ,Util\jsonEncode($p['activityData'])
             )
         );
+
         $p['action_id'] = DB\dbLastInsertId();
 
         static::addSolrRecord($p);
 
+        static::adNotificationRecords($p['action_id'], $p['activityData']);
+
         fireEvent('logadd', $p);
+    }
+
+    /**
+     * method to get and format the log data as needed
+     * @param  array &$p
+     * @return array
+     */
+    protected static function getLogData(&$p)
+    {
+        $rez = array();
+
+        $fields = array(
+            'id' => 1
+            ,'name' => 1
+            ,'iconCls' => 1
+            ,'pids' => 1
+            ,'path' => 1
+            ,'template_id' => 1
+            ,'case_id' => 1
+            ,'date' => 1
+            ,'size' => 1
+            ,'cid' => 1
+            ,'oid' => 1
+            ,'uid' => 1
+            ,'cdate' => 1
+            ,'udate' => 1
+        );
+
+        $oldData = empty($p['old'])
+            ? array()
+            : $p['old']->getData();
+
+        $newData = empty($p['new'])
+            ? array()
+            : $p['new']->getData();
+
+        $oldData = array_intersect_key($oldData, $fields);
+        $newData = array_intersect_key($newData, $fields);
+
+        $rez = $newData + $oldData;
+
+        Util\unsetNullValues($rez);
+
+        $rez['name'] = htmlspecialchars($rez['name'], ENT_COMPAT);
+
+        if (empty($rez['iconCls'])) {
+            $rez['iconCls'] = Browser::getIcon($rez);
+        }
+
+        $rez['pids'] = empty($rez['pids'])
+            ? Objects::getPids($rez['id'])
+            : Util\toNumericArray($rez['pids']);
+
+        $rez['path'] = htmlspecialchars(@Util\coalesce($rez['pathtext'], $rez['path']), ENT_COMPAT);
+
+        switch ($p['type']) {
+            case 'comment':
+            case 'comment_update':
+                $rez['comment'] = $p['comment'];
+                break;
+
+            default:
+                // setting old and new properties of linear custom data
+                if (!empty($p['old'])) {
+                    $rez['old'] = $p['old']->getAssocLinearData();
+                }
+
+                if (!empty($p['new'])) {
+                    $rez['new'] = $p['new']->getAssocLinearData();
+                }
+
+                //unset identical values
+                if (!empty($rez['old']) && !empty($rez['new'])) {
+                    foreach ($rez['old'] as $k => $v) {
+                        if (isset($rez['new'][$k]) && ($rez['new'][$k] == $v)) {
+                            unset($rez['old'][$k]);
+                            unset($rez['new'][$k]);
+                        }
+                    }
+                }
+        }
+
+        return $rez;
+    }
+
+    /**
+     * getActivityData (followers, watchers)
+     * @param  array &$d object data
+     * @return array
+     */
+    protected static function getActivityData(&$d)
+    {
+        $rez = array();
+
+        $userId = User::getId();
+
+        $rez['fu'] = array();
+
+        //add creator as follower by default
+        if (!empty($d['cid'])) {
+            $rez['fu'] = array($d['cid']);
+        }
+
+        if (!empty($d['sys_data']['fu'])) {
+            $rez['fu'] = array_merge($rez['fu'], $d['sys_data']['fu']);
+        }
+
+        $rez['fu'] = array_unique($rez['fu']);
+        //remove current user, that caused the action
+        $rez['fu'] = array_diff($rez['fu'], array($userId));
+
+        if (!empty($d['sys_data']['wu'])) {
+            $rez['wu'] = array_diff($d['sys_data']['wu'], array($userId));
+        }
+
+        return $rez;
+    }
+
+    /**
+     * add notification records for a given action
+     * @param  int   $actionId
+     * @param  array $activityData array containing "fu" and/or "wu" properties
+     * @return void
+     */
+    private static function adNotificationRecords($actionId, $activityData)
+    {
+        $userIds = array();
+        if (!empty($activityData['fu'])) {
+            $userIds = $activityData['fu'];
+        }
+        if (!empty($activityData['wu'])) {
+            $userIds = array_merge($userIds, $activityData['wu']);
+        }
+
+        $userIds = array_unique($userIds);
+
+        //exclude current user from notified users
+        $userIds = array_diff($userIds, array(User::getId()));
+
+        if (!empty($userIds)) {
+            DB\dbQuery(
+                'INSERT INTO notifications
+                (object_id, action_id, action_time, user_id)
+                SELECT al.object_id, al.id, al.action_time, u.id
+                FROM action_log al, users_groups u
+                WHERE al.id = $1 AND
+                    u.id in (' . implode(',', $userIds). ')',
+                $actionId
+            ) or die(DB\dbQueryError());
+        }
     }
 
     /**
@@ -95,17 +236,23 @@ class Log
             )
             : $p['new']->getData();
 
+        $fu = @$p['activityData']['fu'];
+        $wu = @$p['activityData']['wu'];
+
         $record = array(
             'id' => Config::get('core_name') . '_' . $p['action_id']
             ,'core_id' => Config::get('core_id')
             ,'action_id' => $p['action_id']
             ,'action_type' => $p['type']
             ,'action_date' => date('Y-m-d\TH:i:s\Z')
-            ,'user_id' => $_SESSION['user']['id']
+            ,'user_id' => User::getId()
             ,'object_id' => $data['id']
             ,'object_pid' => empty($data['pid']) ? null : $data['pid']
             ,'object_pids' => $p['logData']['pids']
-            ,'object_data' => json_encode($p['logData'], JSON_UNESCAPED_UNICODE)
+            ,'object_data' => Util\jsonEncode($p['logData'])
+
+            // ,'activity_fu' => $fu
+            // ,'activity_wu' => $wu
         );
 
         //delete empty values because solr raises exception when sending empty values for ints

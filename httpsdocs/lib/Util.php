@@ -1,7 +1,7 @@
 <?php
 namespace CB\Util;
 
-use CB\L as L;
+use CB\L;
 
 function getIP()
 {
@@ -225,23 +225,53 @@ function translateMonths($dateString)
     return $dateString;
 }
 
-function formatTaskTime($mysqlTime)
+/**
+ * Method used to format Tasks due time
+ *
+ * @param  varchar $isoDateString ISO date string
+ * @param  boolean $showTime
+ * @return varchar
+ */
+function formatTaskTime($isoDateString, $showTime = true)
 {
-    $time = strtotime($mysqlTime);
-
-    $time__ = date('j n Y', $time);
-    $today = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
-
-    if ($time == $today) {
-        return '<span class="cM fwB">'.L\get('today').'</span>';
-    } elseif ($today - $time > 3600 * 24 * 2) return translateMonths(date('j M Y', $time));
-    elseif ($today - $time > 3600 * 24) return L\get('beforeYesterday');
-    elseif ($today - $time > 0) return L\get('yesterday');
-    elseif ($time - $today < 3600 * 24 * 2) return '<span class="cM fwB">'.L\get('tomorow').'</span>';
-    elseif ($time - $today < 3600 * 24 * 6) return '<span class="cM fwB">'.(($time - $today) / (3600 * 24) ).' '.L\get('ofDays').'</span>';
-    else{
-        return translateMonths(date('j M Y', $time));
+    $rez = '';
+    if (empty($isoDateString)) {
+        return $rez;
     }
+
+    $tz = new \DateTimeZone(\CB\User::getTimezone());
+
+    $dt = new \DateTime($isoDateString);
+    $ct = new \DateTime('now');
+
+    $dt->setTimezone($tz);
+    $ct->setTimezone($tz);
+
+    $diff = $dt->diff($ct);
+
+    //display date for intervals bigger than 6 days
+    if (($dt < $ct) || ($diff->days > 6)) {
+        $format = \CB\getOption('short_date_format');
+
+        $rez = $dt->format($format);
+    } else {
+        //there could be situation when date difference interval
+        //doesnt cover a full day although dates are in different days
+        $dayDelta = ($dt->format('d') == $ct->format('d')) ? 0 : 1;
+        $days = $diff->d + $dayDelta;
+
+        if ($days > 1) {
+            $rez = translateDays($dt->format('l'));
+        } else {
+            $rez = formatLeftDays($days);
+        }
+    }
+
+    if ($showTime) {
+        $rez .= ' ' . L\get('at') . $dt->format(' H:i');
+    }
+
+    return $rez;
 }
 
 /**
@@ -282,12 +312,13 @@ function formatDatePeriod($fromDateTime, $toDateTime)
  */
 function UTCTimeToUserTimezone($dateTime)
 {
-    if (empty($dateTime) || empty($_SESSION['user']['cfg']['timezone'])) {
+    $tz = \CB\User::getTimezone();
+    if (empty($dateTime) || empty($tz)) {
         return $dateTime;
     }
 
     $d = new \DateTime($dateTime);
-    $d->setTimezone(new \DateTimeZone($_SESSION['user']['cfg']['timezone']));
+    $d->setTimezone(new \DateTimeZone($tz));
 
     return $d->format('Y-m-d H:i:s');
 }
@@ -299,12 +330,13 @@ function UTCTimeToUserTimezone($dateTime)
  */
 function userTimeToUTCTimezone($dateTime)
 {
-    if (empty($dateTime) || empty($_SESSION['user']['cfg']['timezone'])) {
+    $tz = \CB\User::getTimezone();
+    if (empty($dateTime) || empty($tz)) {
         return $dateTime;
     }
 
-    $d = new \DateTime($dateTime, new \DateTimeZone($_SESSION['user']['cfg']['timezone']));
-    $d->setTimezone('UTC');
+    $d = new \DateTime(dateISOToMysql($dateTime), new \DateTimeZone($tz));
+    $d->setTimezone(new  \DateTimeZone('UTC'));
 
     return $d->format('Y-m-d H:i:s');
 }
@@ -316,13 +348,13 @@ function userTimeToUTCTimezone($dateTime)
  * @param  string $TZ           timezone
  * @return varchar               formated period
  */
-function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
+function formatDateTimePeriod($fromDateTime, $toDateTime, $tz = 'UTC')
 {
     $d1 = new \DateTime($fromDateTime);
-    if (empty($TZ)) {
-        $TZ = 'UTC';
+    if (empty($tz)) {
+        $tz = 'UTC';
     }
-    $d1->setTimezone(new \DateTimeZone($TZ));
+    $d1->setTimezone(new \DateTimeZone($tz));
 
     $rez = $d1->format('D M j, Y');
     $hourText = $d1->format('H:i');
@@ -333,7 +365,7 @@ function formatDateTimePeriod($fromDateTime, $toDateTime, $TZ = 'UTC')
         return $rez;
     }
     $d2 = new \DateTime($toDateTime);
-    $d2->setTimezone(new \DateTimeZone($TZ));
+    $d2->setTimezone(new \DateTimeZone($tz));
 
     $d2format = '';
     if ($d1->format('Y') != $d2->format('Y')) {
@@ -372,23 +404,28 @@ function formatLeftDays($days_difference)
     return '';
 }
 
-function formatMysqlDate($date, $format = false, $TZ = 'UTC')
+function formatMysqlDate($date, $format = false, $tz = false)
 {
     if (empty($date)) {
         return '';
     }
-    if (empty($TZ)) {
-        $TZ = 'UTC';
+    if ($tz === false) {
+        $tz = \CB\User::getTimezone();
     }
+
+    if (empty($tz)) {
+        $tz = 'UTC';
+    }
+
     if ($format == false) {
-        $format = \CB\getOption('short_date_format');
+        $format = \CB\getOption('short_date_format', 'Y-m-d');
     }
 
     $d1 = new \DateTime($date);
 
-    $d1->setTimezone(new \DateTimeZone($TZ));
+    $d1->setTimezone(new \DateTimeZone($tz));
 
-    $rez = $d1->format(str_replace('%', '', $format));
+    $rez = $d1->format($format);
 
     return $rez;
 }
@@ -399,7 +436,7 @@ function formatMysqlTime($date, $format = false)
         return '';
     }
     if ($format == false) {
-        $format = \CB\getOption('short_date_format').' '.\CB\getOption('time_format');
+        $format = \CB\getOption('short_date_format', 'Y-m-d').' '.\CB\getOption('time_format', 'H:i');
     }
 
     return date(str_replace('%', '', $format), strtotime($date));
@@ -411,11 +448,7 @@ function clientToMysqlDate($date)
         return null;
     }
     $d = date_parse_from_format(
-        str_replace(
-            '%',
-            '',
-            \CB\getOption('short_date_format')
-        ),
+        \CB\getOption('short_date_format'),
         $date
     );
 
@@ -458,7 +491,7 @@ function dateISOToMysql($date_string)
     }
     $d = strtotime($date_string);
 
-    return date('Y-m-d H:i:s.u', $d);
+    return date('Y-m-d H:i:s', $d);
 }
 
 // function dateMysqlToISO($date_string)
@@ -496,7 +529,7 @@ function getCoreHost($db_name = false)
             : $_SERVER['SERVER_NAME']
         ).'/';
 
-    $dev = \CB\isDevelServer() ? 'dev.' : '';
+    $dev = \CB\IS_DEVEL_SERVER ? 'dev.' : '';
 
     $core = "https://$dev$server$core/";
 
@@ -557,27 +590,90 @@ function toTrimmedArray($v, $delimiter = ',')
  */
 function toJSONArray($v)
 {
+    $rez = array();
+
     if (empty($v)) {
-        return array();
+        return $rez;
     }
     if (is_array($v)) {
         return $v;
     }
 
     if (is_scalar($v)) {
-        $v = json_decode($v, true);
-    }
-    if (empty($v)) {
-        return array();
-    }
-    if (is_array($v)) {
-        return $v;
-    } elseif (is_object($v)) {
-        $v = (Array) $v;
+        $rez = jsonDecode($v);
     }
 
-    return $v;
+    if (empty($rez)) {
+        $rez = array();
+    }
+
+    if (is_object($rez)) {
+        $rez = (Array) $rez;
+    }
+
+    return $rez;
 }
+
+/**
+ * remove null intems from an associative array
+ * @param  array $arr
+ * @return void
+ */
+function unsetNullValues(&$arr)
+{
+    if (!is_array($arr)) {
+        return;
+    }
+
+    foreach ($arr as $k => $v) {
+        if (is_null($v)) {
+            unset($arr[$k]);
+        }
+    }
+}
+
+/**
+ * json encode a variable
+ * @param  variant $var
+ * @return varchar | null
+ */
+function jsonEncode($var)
+{
+    if (empty($var) && (!is_array($var))) {
+        return null;
+    }
+
+    return json_encode($var, JSON_UNESCAPED_UNICODE);
+}
+
+/**
+ * decodes a json string
+ * @param  varchar $var
+ * @return array or null
+ */
+function jsonDecode($var)
+{
+    return json_decode($var, true);
+}
+
+/**
+* Check if a given value is presend in a comma separated string or array of values
+*
+* @param  varchar $value checked value
+* @param  variant $stringOrValues
+* @param  varchar $delimiter
+* @return boolean
+*/
+function isInValues($value, $stringOrValues, $delimiter = ',')
+{
+    $v = toTrimmedArray($stringOrValues, $delimiter);
+
+    return in_array(
+        $value,
+        $v
+    );
+}
+
 
 function isAssocArray($a)
 {
@@ -598,4 +694,33 @@ function validISO8601Date($value)
     } catch (\Exception $e) {
         return false;
     }
+}
+
+/**
+ * ensures the given string has utf8 encoding
+ * and conerts it if needed
+ * @param  varchar $value
+ * @return varchar
+ */
+function toUTF8String($value)
+{
+    if (empty($value)) {
+        return $value;
+    }
+
+    // detect encoding
+    $charset = mb_detect_encoding($value);
+
+    if (empty($charset)) {
+        $charset = 'UTF-8';
+    }
+
+    $newValue = @iconv($charset, 'UTF-8', $value);
+
+    //return original value if cannot convert it
+    if (empty($newValue)) {
+        $newValue = $value;
+    }
+
+    return $newValue;
 }

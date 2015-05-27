@@ -1,6 +1,8 @@
 <?php
 namespace CB\Api;
 
+use CB\Util;
+
 class Client
 {
     protected $url;
@@ -228,7 +230,7 @@ class Client
 
         $this->execute();
         $rez = $this->getResponseBody();
-        $rez = json_decode($rez, true);
+        $rez = Util\jsonDecode($rez);
 
         return $rez;
     }

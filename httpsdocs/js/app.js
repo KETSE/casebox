@@ -24,7 +24,7 @@ Ext.onReady(function(){
     App.openPath = Ext.Function.bind(App.controller.openPath, App.controller);
 
     // used for charts
-    App.colors = [ "#3A84CB", "#94ae0a", "#115fa6","#a61120", "#ff8809", "#ffd13e", "#a61187", "#24ad9a", "#7c7474", "#a66111"];
+    App.colors = ["#3A84CB", "#94ae0a", "#115fa6","#a61120", "#ff8809", "#ffd13e", "#a61187", "#24ad9a", "#7c7474", "#a66111"];
 
     App.historyController = Ext.create({
         xtype: 'historycontroller'
@@ -41,9 +41,7 @@ Ext.onReady(function(){
     );
 
     Ext.Direct.on('login', function(r, e){
-        /*if(r.method == 'logout') /**/
-        window.location.reload();
-        /*else App.PromtLogin(); /**/
+        Ext.Msg.alert(L.Error, L.SessionExpired);
     });
     Ext.Direct.on('exception', App.showException);
     Ext.QuickTips.init();
@@ -681,12 +679,10 @@ function initApp() {
     };
 
     App.openWebdavDocument = function(data, checkCookie){
-        if(Ext.isEmpty(App.config.webdav_url)) {
-            return;
-        }
-        var url = App.config.webdav_url;
-        url = url.replace('{node_id}', Ext.valueFrom(data.id, data.nid));
-        url = url.replace('{name}', data.name);
+        var url = window.location.origin + '/dav/' + App.config.coreName + '/';
+
+        url += 'edit-' + Ext.valueFrom(data.id, data.nid);
+        url += '/' + data.name;
         App.confirmLeave = false;
 
         if((checkCookie !== false) &&

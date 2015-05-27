@@ -57,7 +57,7 @@ switch ($command) {
         $coreDir = Config::get('core_dir');
 
         if (!empty($_REQUEST['export'])) {
-            $p = json_decode($_REQUEST['export'], true);
+            $p = Util\jsonDecode($_REQUEST['export']);
             $export = new \Export\Instance();
             $export->getHTML($p);
         } elseif (is_file($coreDir.DIRECTORY_SEPARATOR.'get.php')) {
@@ -114,7 +114,7 @@ switch ($command) {
 
         if (isset($_SERVER['HTTP_X_FILE_OPTIONS'])) {
             // AJAX call
-            $file = json_decode($_SERVER['HTTP_X_FILE_OPTIONS'], true);
+            $file = Util\jsonDecode($_SERVER['HTTP_X_FILE_OPTIONS']);
             $file['error'] = UPLOAD_ERR_OK;
             $file['tmp_name'] = tempnam(Config::get('incomming_files_dir'), 'cbup');
             $file['name'] = urldecode($file['name']);
@@ -138,7 +138,7 @@ switch ($command) {
             );
 
             header('Content-Type: application/json; charset=UTF-8');
-            echo json_encode($result, JSON_UNESCAPED_UNICODE);
+            echo Util\jsonEncode($result);
         }
 
         break;

@@ -14,7 +14,7 @@ use LogicException;
  * This class is responsible for parsing the several different date and time
  * formats iCalendar and vCards have.
  *
- * @copyright Copyright (C) 2007-2014 fruux GmbH (https://fruux.com/).
+ * @copyright Copyright (C) 2011-2015 fruux GmbH (https://fruux.com/).
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
@@ -260,6 +260,7 @@ class DateTimeParser {
                 (?P<minute> [0-9]{2} | -)?
                 (?P<second> [0-9]{2})?
 
+                (?: \.[0-9]{3})? # milliseconds
                 (?P<timezone> # timezone offset
 
                     Z | (?: \+|-)(?: [0-9]{4})
@@ -268,7 +269,6 @@ class DateTimeParser {
 
             )?
             $/x';
-
 
         if (!preg_match($regex, $date, $matches)) {
 
@@ -285,6 +285,7 @@ class DateTimeParser {
                     (?: (?P<minute> [0-9]{2}) : | -)?
                     (?P<second> [0-9]{2})?
 
+                    (?: \.[0-9]{3})? # milliseconds
                     (?P<timezone> # timezone offset
 
                         Z | (?: \+|-)(?: [0-9]{2}:[0-9]{2})
@@ -374,6 +375,7 @@ class DateTimeParser {
             (?P<minute> [0-9]{2} | -)?
             (?P<second> [0-9]{2})?
 
+            (?: \.[0-9]{3})? # milliseconds
             (?P<timezone> # timezone offset
 
                 Z | (?: \+|-)(?: [0-9]{4})
@@ -390,6 +392,7 @@ class DateTimeParser {
                 (?: (?P<minute> [0-9]{2}) : | -)?
                 (?P<second> [0-9]{2})?
 
+                (?: \.[0-9]{3})? # milliseconds
                 (?P<timezone> # timezone offset
 
                     Z | (?: \+|-)(?: [0-9]{2}:[0-9]{2})
