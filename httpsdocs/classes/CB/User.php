@@ -1293,7 +1293,7 @@ class User
         $data = array();
 
         if ($idOrData === false) { //use current logged users
-            $id = $_SESSION['user']['id'];
+            $id = static::getId();
 
         } elseif (is_numeric($idOrData)) { //id specified
             $id = $idOrData;

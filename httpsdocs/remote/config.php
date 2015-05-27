@@ -28,13 +28,6 @@ $API = array_merge(
             )
         )
 
-        ,'CB_Path' => array(
-            'methods' => array(
-                'getPath'       => array('len' => 1)
-                ,'getPidPath'   => array('len' => 1)
-            )
-        )
-
         ,'CB_BrowserTree' => array(
             'methods' => array(
                 'getChildren'       => array('len' => 1)
@@ -63,13 +56,26 @@ $API = array_merge(
             )
         )
 
-        ,'CB_Tasks' => array(
+        ,'CB_Files' => array(
             'methods'=>array(
-                'setUserStatus'    =>  array('len' => 1)
-                ,'complete'         =>  array('len' => 1)
-                ,'close'            =>  array('len' => 1)
-                ,'reopen'           =>  array('len' => 1)
-                ,'updateDates'      =>  array('len' => 1)
+                'getProperties'         =>  array('len'=>1)
+                ,'getContent'           =>  array('len'=>1)
+                ,'saveContent'          =>  array('len'=>1)
+                ,'restoreVersion'       =>  array('len'=>1)
+                ,'deleteVersion'        =>  array('len'=>1)
+                ,'getDuplicates'        =>  array('len'=>1)
+                ,'checkExistentContents'=>  array('len'=>1)
+                ,'saveProperties'       =>  array('len'=>1)
+            )
+        )
+
+        ,'CB_Notifications' => array(
+            'methods'=>array(
+                'getList'=> array('len' => 1)
+                // ,'getLast'=> array('len' => 1)
+                ,'getNewCount'=> array('len' => 1)
+                ,'markAsRead'=> array('len' => 1)
+                ,'markAllAsRead'=> array('len' => 1)
             )
         )
 
@@ -87,68 +93,17 @@ $API = array_merge(
                 ,'removeComment'        =>  array('len'=>1)
             )
         )
+
         ,'CB_Objects_Plugins_Comments' => array(
             'methods'=>array(
                 'loadMore'              =>  array('len'=>1)
             )
         )
 
-        ,'CB_Files' => array(
-            'methods'=>array(
-                'getProperties'         =>  array('len'=>1)
-                ,'getContent'           =>  array('len'=>1)
-                ,'saveContent'          =>  array('len'=>1)
-                ,'restoreVersion'       =>  array('len'=>1)
-                ,'deleteVersion'        =>  array('len'=>1)
-                ,'getDuplicates'        =>  array('len'=>1)
-                ,'checkExistentContents'=>  array('len'=>1)
-                ,'saveProperties'       =>  array('len'=>1)
-            )
-        )
-
-        ,'CB_Templates' => array(
-            'methods'=>array(
-                'readAll'=> array('len' => 1)
-                ,'getTemplatesStructure'=> array('len'=>0)
-            )
-        )
-
-        ,'CB_User' => array(
+        ,'CB_Path' => array(
             'methods' => array(
-                'getLoginInfo'        => array('len' => 0)
-                ,'login'              => array('len' => 2)
-                ,'logout'             => array('len' => 0)
-                ,'setLanguage'        => array('len' => 1)
-                ,'setTheme'           => array('len' => 1)
-                ,'uploadPhoto'        => array('len' => 1, 'formHandler' => true)
-                ,'removePhoto'        => array('len' => 1)
-                ,'getAccountData'     => array('len' => 0)
-                ,'getProfileData'     => array('len' => 1)
-                ,'saveProfileData'    => array('len' => 1)
-                ,'saveSecurityData'   => array('len' => 1)
-                ,'verifyPassword'     => array('len' => 1)
-                ,'verifyPhone'        => array('len' => 1)
-                ,'getTSVTemplateData' => array('len' => 1)
-                ,'enableTSV'          => array('len' => 1)
-                ,'disableTSV'         => array('len' => 0)
-            )
-        )
-        ,'CB_UsersGroups' => array(
-            'methods' => array(
-                'getChildren'           => array('len' => 1)
-                ,'getUserData'          => array('len' => 1)
-                ,'getAccessData'        => array('len' => 1)
-                ,'saveAccessData'       => array('len' => 1)
-                ,'addUser'              => array('len' => 1)
-                ,'associate'            => array('len' => 2)
-                ,'deassociate'          => array('len' => 2)
-                ,'deleteUser'           => array('len' => 1)
-                ,'changePassword'       => array('len' => 1, 'formHandler' => true)
-                ,'sendResetPassMail'    => array('len' => 1)
-                ,'renameUser'           => array('len' => 1)
-                ,'renameGroup'          => array('len' => 1)
-                ,'disableTSV'           => array('len' => 1)
-                ,'setUserEnabled'       => array('len' => 1)
+                'getPath'       => array('len' => 1)
+                ,'getPidPath'   => array('len' => 1)
             )
         )
 
@@ -191,6 +146,63 @@ $API = array_merge(
                 'read'               => array('len' => 0)
                 ,'set'               => array('len' => 1)
                 ,'saveGridViewState' => array('len' => 1)
+            )
+        )
+
+        ,'CB_Tasks' => array(
+            'methods'=>array(
+                'setUserStatus'    =>  array('len' => 1)
+                ,'complete'         =>  array('len' => 1)
+                ,'close'            =>  array('len' => 1)
+                ,'reopen'           =>  array('len' => 1)
+                ,'updateDates'      =>  array('len' => 1)
+            )
+        )
+
+        ,'CB_Templates' => array(
+            'methods'=>array(
+                'readAll'=> array('len' => 1)
+                ,'getTemplatesStructure'=> array('len'=>0)
+            )
+        )
+
+        ,'CB_User' => array(
+            'methods' => array(
+                'getLoginInfo'        => array('len' => 0)
+                ,'login'              => array('len' => 2)
+                ,'logout'             => array('len' => 0)
+                ,'setLanguage'        => array('len' => 1)
+                ,'setTheme'           => array('len' => 1)
+                ,'uploadPhoto'        => array('len' => 1, 'formHandler' => true)
+                ,'removePhoto'        => array('len' => 1)
+                ,'getAccountData'     => array('len' => 0)
+                ,'getProfileData'     => array('len' => 1)
+                ,'saveProfileData'    => array('len' => 1)
+                ,'saveSecurityData'   => array('len' => 1)
+                ,'verifyPassword'     => array('len' => 1)
+                ,'verifyPhone'        => array('len' => 1)
+                ,'getTSVTemplateData' => array('len' => 1)
+                ,'enableTSV'          => array('len' => 1)
+                ,'disableTSV'         => array('len' => 0)
+            )
+        )
+
+        ,'CB_UsersGroups' => array(
+            'methods' => array(
+                'getChildren'           => array('len' => 1)
+                ,'getUserData'          => array('len' => 1)
+                ,'getAccessData'        => array('len' => 1)
+                ,'saveAccessData'       => array('len' => 1)
+                ,'addUser'              => array('len' => 1)
+                ,'associate'            => array('len' => 2)
+                ,'deassociate'          => array('len' => 2)
+                ,'deleteUser'           => array('len' => 1)
+                ,'changePassword'       => array('len' => 1, 'formHandler' => true)
+                ,'sendResetPassMail'    => array('len' => 1)
+                ,'renameUser'           => array('len' => 1)
+                ,'renameGroup'          => array('len' => 1)
+                ,'disableTSV'           => array('len' => 1)
+                ,'setUserEnabled'       => array('len' => 1)
             )
         )
     )

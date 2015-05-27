@@ -67,6 +67,11 @@ Ext.define('CB.controller.Browsing', {
         vc.on('viewloaded', this.onVCViewLoaded, this);
         vc.on('selectionchange', this.onVCSelectionChange, this);
 
+        //add listeners for notifications view
+        nv = vc.notificationsView;
+
+        nv.on('selectionchange', this.onNVSelectionChange, this);
+
 
         //add filter panel listeners
         fp.on('change', this.onFiltersChange, this);
@@ -221,6 +226,7 @@ Ext.define('CB.controller.Browsing', {
     ,onVCSelectionChange: function(objectsDataArray) {
         if(!this.isCommentInputEmpty()) {
             this.confirmDiscardComent(this.onVCSelectionChange, arguments);
+
             return;
         }
 
@@ -234,6 +240,10 @@ Ext.define('CB.controller.Browsing', {
         }
     }
 
+    //Notifications view methods
+    ,onNVSelectionChange: function(object) {
+        this.updatePreview(object);
+    }
 
     //Filter panel methods
     /**

@@ -1033,3 +1033,17 @@ border-top: 0;
     margin-right: auto;
     color: gray;
 }
+
+.numbersButton .x-btn-inner {
+  display: block;
+  position: absolute;
+  bottom: 2px;
+  right: 0;
+  max-width: 100%;
+  border-radius: 50%;
+  background: red;
+  color: #fff;
+  font-size: 10px;
+  font-family: helvetica;
+  font-weight: bold;
+}

@@ -17,6 +17,353 @@ class Notifications
     );
 
     /**
+     * remotely accessible method to get the notifications list
+     * @param  arra $p remote params (page, limit, etc)
+     * @return json response
+     */
+    public function getList($p)
+    {
+        $this->prepareParams($p);
+
+        $sql = 'SELECT
+            n.id
+            ,l.object_id
+            ,l.action_type
+            ,n.read
+            ,l.user_id
+            ,l.data
+            ,l.action_time
+        FROM notifications n
+        JOIN action_log l
+            ON n.action_id = l.id
+        WHERE n.user_id = $1
+        ORDER BY l.action_time DESC
+        LIMIT ' . $p['limit'];
+
+        $params = array(
+            User::getId()
+        );
+
+        return array(
+            'success' => true
+            ,'data' => $this->getRecords($sql, $params)
+        );
+    }
+
+    /**
+     * get last notifications if any after a given lasty id
+     * @param  array $p containing lastId property
+     * @return json  response
+     */
+    public function getLast($p)
+    {
+        if (empty($p['lastId']) || !is_numeric($p['lastId'])) {
+            return $this->getList($p);
+        }
+
+        $this->prepareParams($p);
+
+        $sql = 'SELECT
+            n.id
+            ,l.object_id
+            ,l.action_type
+            ,n.read
+            ,l.user_id
+            ,l.data
+            ,l.action_time
+        FROM notifications n
+        JOIN action_log l
+            ON n.action_id = l.id
+        WHERE n.user_id = $1 AND n.id > $2
+        ORDER BY l.action_time DESC
+        LIMIT ' . $p['limit'];
+
+        $params = array(
+            User::getId()
+            ,intval($p['lastId'])
+        );
+
+        return array(
+            'success' => true
+            ,'data' => $this->getRecords($sql, $params)
+        );
+    }
+
+    /**
+     * get new notifications count
+     * @param  array $p containing lastId property
+     * @return json  response
+     */
+    public function getNewCount($p)
+    {
+        $rez = array(
+            'success' => true
+            ,'count' => 0
+        );
+
+        if (empty($p['lastId']) || !is_numeric($p['lastId'])) {
+            $p['lastId'] = 0;
+        }
+
+        $this->prepareParams($p);
+
+        $sql = 'SELECT count(*) `count`
+        FROM notifications
+        WHERE user_id = $1 AND id > $2';
+
+        $params = array(
+            User::getId()
+            ,intval($p['lastId'])
+        );
+
+        $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
+        if ($r = $res->fetch_assoc()) {
+            $rez['count']  = $r['count'];
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * mark a notification record as read
+     * @param  array $p containing "id" (returned client side id) and "ids"
+     * @return json  response
+     */
+    public function markAsRead($p)
+    {
+        $rez = array('success' => false);
+
+        $ids = Util\toNumericArray($p['ids']);
+
+        if (empty($ids)) {
+            return $rez;
+        }
+
+        DB\dbQuery(
+            'UPDATE notifications
+            SET `read` = 1
+            WHERE user_id = $1 AND id IN (' . implode(',', $ids) .')',
+            User::getId()
+        ) or die(DB\dbQueryError());
+
+        return array(
+            'success' => true
+            ,'data' => $p
+        );
+    }
+
+    /**
+     * mark all unread user notifications  as read
+     * @param  array $p
+     * @return json  response
+     */
+    public function markAllAsRead($p)
+    {
+        DB\dbQuery(
+            'UPDATE notifications
+            SET `read` = 1
+            WHERE user_id = $1 AND read = 0',
+            User::getId()
+        ) or die(DB\dbQueryError());
+
+        return array(
+            'success' => true
+        );
+    }
+
+    /**
+     * get action records and group them for notifications display
+     * @param  varchar $sql
+     * @param  array   $params sql params
+     * @return array
+     */
+    private function getRecords($sql, $params)
+    {
+        $rez = array();
+        $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
+
+        $actions = array();
+
+        //grouping actions by object_id, action type and read property
+        while ($r = $res->fetch_assoc()) {
+            $r['data'] = Util\jsonDecode($r['data']);
+            if (empty($actions[$r['object_id']][$r['action_type']][$r['read']][$r['user_id']])) {
+                $actions[$r['object_id']][$r['action_type']][$r['read']][$r['user_id']] = $r;
+            }
+        }
+
+        $res->close();
+
+        //iterate actions and group into records up to read property
+        foreach ($actions as $objId => $objValue) {
+            $record = array();
+
+            foreach ($objValue as $actionType => $actionValue) {
+                foreach ($actionValue as $readKey => $users) {
+                    $action = current($users);
+
+                    $record['read'] = $readKey;
+                    $record['user_id'] = key($users);
+                    $record['object_id'] = $action['object_id'];
+                    // $record['iconCLs'] = $this->getRecordIconClass($users);
+                    $record['text'] =
+                        $this->getUsersString($users) . ' ' .
+                        $this->getActionDeclination($actionType) . ' ' .
+                        $this->getObjectName($action['data'])  . //with icon
+                        '<div class="cG">' . Util\formatAgoTime($action['action_time']). '</div>'
+                        ;
+
+                    //form id
+                    $ids = array(); //would be comma separated action_ids
+                    foreach ($users as $action) {
+                        $ids[] = $action['id'];
+                    }
+                    $record['ids'] = implode(',', $ids);
+                }
+            }
+
+            $rez[] = $record;
+        }
+
+        return $rez;
+    }
+
+    /**
+     * forms a user string based on their count
+     * @param  array   &$usersArray grouped users array
+     * @return varchar
+     */
+    private function getRecordIconClass(&$usersArray)
+    {
+        $userId = key($usersArray);
+
+        $rez = '<img class="photo32" src="photo/' . $userId . '.jpg?32=' . User::getPhotoParam($userId) .
+                '" style="width:32px; height: 32px">';
+    }
+
+    /**
+     * forms a user string based on their count
+     * @param  array   &$usersArray grouped users array
+     * @return varchar
+     */
+    private function getUsersString(&$usersArray)
+    {
+        $rez = '';
+
+        $usersCount = sizeof($usersArray);
+        $userIds = array_keys($usersArray);
+
+        switch ($usersCount) {
+            case 0:
+                break;
+
+            case 1:
+                $rez = '<a>' . User::getDisplayName($userIds[0]) . '</a>';
+                break;
+
+            case 2:
+                $rez = '<a>' . User::getDisplayName($userIds[0]) .  '</a> ' .
+                    L\get('and') .
+                    ' <a>' . User::getDisplayName($userIds[1]) . '</a>';
+                break;
+
+            case 3:
+                $rez = '<a>' . User::getDisplayName($userIds[0]) .  '</a>' .
+                    ', ' .
+                    '<a>' . User::getDisplayName($userIds[1]) . '</a> ' .
+                    L\get('and') .
+                    ' <a>' . User::getDisplayName($userIds[1]) . '</a>';
+                break;
+
+            default:
+                $rez = '<a>' . User::getDisplayName($userIds[0])  . '</a>' .
+                    ', ' .
+                    '<a>' . User::getDisplayName($userIds[1])  . '</a> ' .
+                    L\get('and') . ' ' .
+                    str_replace('{count}', $usersCount -2, L\get('NNOthers'));
+        }
+
+        return $rez;
+    }
+
+    /**
+     * get action type declination
+     * @param  varchar $actionType
+     * @return varchar
+     */
+    private function getActionDeclination($actionType)
+    {
+        $rez = '';
+        switch ($actionType) {
+            case 'create':
+            case 'update':
+            case 'delete':
+            case 'complete':
+            case 'close':
+            case 'rename':
+            case 'status_change':
+            case 'comment_update':
+            case 'move':
+                $rez = L\get($actionType . 'd');
+                break;
+
+            case 'reopen':
+            case 'comment':
+                $rez = L\get($actionType . 'ed');
+                break;
+
+            default:
+                $rez = $actionType;
+                //to review and discuss
+                /*'completion_decline'
+                'completion_on_behalf'
+                'overdue'
+                'password_change'
+                'permissions'
+                'user_delete'
+                'user_create'
+                'login'
+                'login_fail'/**/
+        }
+
+        return $rez;
+    }
+
+    /**
+     * format an object name using its data
+     * @param  array   $data
+     * @return varchar
+     */
+    private function getObjectName($data)
+    {
+        return '<a class="click obj-ref" itemid="'. $data['id'] .
+            '" templateid="'. $data['template_id'] .
+            '" title="'. $data['name'] .
+            '">'. $data['name'] . '</a>';
+    }
+
+    /**
+     * prepare input params of a request
+     * @param  array &$p
+     * @return void
+     */
+    protected function prepareParams(&$p)
+    {
+        $limit = (empty($p['limit']) || !is_numeric($p['limit']))
+            ? 200
+            : intval($p['limit']);
+
+        if ($limit > 500) {
+            $limit = 500;
+        }
+
+        $p['limit'] = $limit;
+    }
+
+    //-------------------  rendering methods
+
+    /**
      * analize given action (from action log)
      * and create corresponding mail body
      * @return varchar
