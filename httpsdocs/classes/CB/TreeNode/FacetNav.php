@@ -39,6 +39,9 @@ class FacetNav extends Base
     public function getChildren(&$pathArray, $requestParams)
     {
         $rez = array();
+
+        $this->assignFromParam($requestParams);
+
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
@@ -55,10 +58,7 @@ class FacetNav extends Base
             $rez = $this->getChildNodes();
         }
 
-        //set view if set in config
-        if (!empty($this->config['view'])) {
-            $rez['view'] = $this->config['view'];
-        }
+        $rez['view'] = $this->getViewType();
 
         return $rez;
     }

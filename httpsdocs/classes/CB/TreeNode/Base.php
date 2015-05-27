@@ -145,6 +145,38 @@ class Base implements \CB\Interfaces\TreeNode
     }
 
     /**
+     * get view type from config for this node
+     * @return varchar
+     */
+    protected function getViewType()
+    {
+        $rez = 'grid';
+
+        if (!empty($this->config['view'])) {
+            $view = $this->config['view'];
+            if (is_scalar($view)) {
+                $rez = $view;
+            } elseif (!empty($view['type'])) {
+                $rez = $view['type'];
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
+     * assign "from" param to a set of given params
+     * @return void
+     */
+    protected function assignFromParam(&$params)
+    {
+        if (empty($params['userViewChange'])) {
+            $params['from'] = $this->getViewType();
+        }
+
+    }
+
+    /**
      * get list of facets classses that should be available for this node
      * @return array
      */
