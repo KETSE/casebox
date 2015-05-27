@@ -41,14 +41,24 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
 {
    //$cmd_create_core = 'php '.CB_ROOT_PATH.'/bin/core_create_auto.php -c '.DEFAULT_TEST_CORENAME. ' -s '.CB_ROOT_PATH.'/install/examples/demosrc/mysql/demosrc.sql';
 
-   $options = array(
+  /* $options = array(
             'core' => DEFAULT_TEST_CORENAME,
             'sql' => CB_ROOT_PATH . '/install/mysql/bare_bone_core.sql'
         );
 
     echo "Start Prepare instance for testing\n";
         include CB_ROOT_PATH.'/bin/core_create_auto.php';
+    echo "End for Prepare instance\n"; */
+
+    $options = array(
+            'file' => TEST_PATH.'/src/config/install_config.ini'
+        );
+
+    echo "Start Prepare instance for testing\n";
+        include CB_ROOT_PATH.'/bin/install.php';
     echo "End for Prepare instance\n";
+
+    
     
 }
 
