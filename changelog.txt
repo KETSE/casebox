@@ -1,3 +1,9 @@
+CaseBox 1.9.443 (2015-05-27)
+==============================
+Patches:
+----------
+- patch for avoid loading data when charts and pivot table views
+
 CaseBox 1.9.442 (2015-05-14)
 ==============================
 Fixed Bugs:

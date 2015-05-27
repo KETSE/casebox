@@ -61,6 +61,13 @@ class Dbnode extends Base
             } elseif (empty($p['from']) || ($p['from'] !== 'tree')) {
                 $p['from'] = 'grid';
             }
+
+        }
+
+        /* disable data loading and sorting for charts and pivot views */
+        if (!empty($p['from']) && in_array($p['from'], array('pivot', 'charts'))) {
+            $p['rows'] = 0;
+            unset($p['sort']);
         }
 
         $s = new \CB\Search();
