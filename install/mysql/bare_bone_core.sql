@@ -198,7 +198,9 @@ DROP TABLE IF EXISTS `notifications`;
 
 CREATE TABLE `notifications` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` bigint(20) unsigned DEFAULT NULL COMMENT 'think to remove it (doubles field from action_log)',
   `action_id` bigint(20) unsigned NOT NULL,
+  `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'think to remove it (doubles field from action_log)',
   `user_id` int(10) unsigned NOT NULL,
   `email_sent` tinyint(1) NOT NULL DEFAULT '0',
   `read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'notification has been read in CB',

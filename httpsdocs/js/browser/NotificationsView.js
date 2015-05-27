@@ -229,7 +229,7 @@ Ext.define('CB.browser.NotificationsView', {
     ,onLogin: function() {
         this.store.load();
 
-        this.checkNotificationsTask.delay(1000* 20); //2 minutes
+        this.checkNotificationsTask.delay(1000 * 60 * 2); //2 minutes
     }
 
     ,onCheckNotificationsTask: function() {

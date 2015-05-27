@@ -1,3 +1,9 @@
+CaseBox 1.9.449 (2015-05-27)
+==============================
+New Features, Improvements
+--------------------------
+- update database dumps
+
 CaseBox 1.9.448 (2015-05-26)
 ==============================
 New Features, Improvements
