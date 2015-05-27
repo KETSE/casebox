@@ -87,12 +87,37 @@ function getCoreUrl($corename = DEFAULT_TEST_CORENAME)
 }
 
 /**
+ *  return associative arrays with current CASEBOX config
+ */
+function getCfg()
+{
+
+    // get host name from cfg
+    $cfg_file = getCBPath().'/config.ini';
+    if (file_exists($cfg_file)) {
+        $data_cfg = parse_ini_file($cfg_file);
+        return $data_cfg;
+    } else {
+        trigger_error('can\'t fine current cfg file', E_USER_WARNING);
+    }
+}
+
+/**
  * get host of testing server
  * for future refactor to get host from configuration
  * @return string
  */
-function getHost() {
-    return 'test.casebox.org';
+function getHost()
+{
+    $cfg = getCfg();
+
+    if (isset($cfg['server_name'])) {
+        $sourceUrl = parse_url($cfg['server_name']);
+        $host      = $sourceUrl['host'];
+        return $host;
+    } else {
+        trigger_error('cant read cfg for server_name', E_USER_WARNING);
+    }
 }
 
 /**

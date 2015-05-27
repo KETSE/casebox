@@ -31,7 +31,17 @@ class CoreTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateCore()
     {
-        $this->assertTrue(true);
+        
+        $SQL = 'SELECT `active` '
+            . ' FROM `'.DEFAULT_TEST_CBPREFIX.'__casebox`.`cores`  '
+            . ' WHERE name LIKE "'.DEFAULT_TEST_CORENAME.'" ';
+
+        $rCore =  \CB\DB\dbQuery($SQL);
+
+        $CoreData = $rCore->fetch_assoc();
+        
+        $this->assertTrue($CoreData['active'] == '1');
+
     }
 
     /**

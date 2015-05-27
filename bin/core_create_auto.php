@@ -49,10 +49,11 @@ $applyDump = true;
 
 if (DB\dbQuery('use `' . $dbName . '`')) {
 //    if (confirm('Database "' . $dbName.'"  already exists. Would you like to overwrite it?')) {
-    if (false) {
-        echo 'Backuping .. ';
-        backupDB($dbName, $dbUser, $dbPass);
-        echo "Ok\n";
+    if (true) {
+        $applyDump = true;
+       // echo 'Backuping .. ';
+        // backupDB($dbName, $dbUser, $dbPass);
+       // echo "Ok\n";
 
     } else {
         $applyDump = false;

@@ -22,6 +22,7 @@ define('DEFAULT_TEST_CONFIG', TEST_PATH.'/src/config/install_config.ini');
 
 
 include realpath(__DIR__.'/src').'/helpers.php';
+include realpath(__DIR__.'/src').'/data_providers.php';
 
 \CB\UNITTESTS\HELPERS\prepareInstance();
 \CB\UNITTESTS\HELPERS\init();

@@ -7,7 +7,7 @@ spl_autoload_register('__autoload', true, true);
 function __autoload($className)
 {
     // require_once $className . '.php';
-    //echo $className;
+
     if (!class_exists($className)) {
 
         $className = str_replace(
