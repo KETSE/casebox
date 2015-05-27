@@ -13,7 +13,7 @@ define('TEST_PATH', __DIR__);
 define('TEST_PATH_TEMP', __DIR__.'/tmp');
 
     if (!file_exists(TEST_PATH_TEMP)) {
-        mkdir($cookie_path, 0755, true);
+        mkdir(TEST_PATH_TEMP, 0755, true);
     }
 
 
