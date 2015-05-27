@@ -30,7 +30,9 @@ if (!in_array($currentUser, array('root', 'Administrator'))) {
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 $cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
 
-$cfg = array();
+if (!isset($cfg)) {
+    $cfg = array();
+}
 
 // we include config_platform that will load config.ini if exist and will define $cfg variable
 // If config.ini doesnt exist it wil raise an exception: Can't load config file
@@ -61,11 +63,13 @@ Cache::set('inCfg', $options['config']);
 
 //define working mode
 if (!empty($options['config'])) {
-    define('CB\INTERACTIVE_MODE', false);
+    // define('CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
+    Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
     // $cfg = $options['config'];
 
 } else {
-    define('CB\INTERACTIVE_MODE', true);
+  //  define('CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', true);
+    Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
 }
 
 require_once 'install_functions.php';
@@ -147,7 +151,7 @@ do {
     );
 
     if ($r === false) {
-        if (INTERACTIVE_MODE) {
+        if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
             $r = !confirm('error saving to config.ini file. retry [Y/n]: ');
         } else {
             trigger_error('Error saving to config.ini file', E_USER_ERROR);
@@ -165,6 +169,7 @@ if (createSolrConfigsetsSymlinks($cfg)) {
 }
 
 //try to create log core
+
 createSolrCore($cfg, '_log', 'log_');
 
 //create default database (<prefix>__casebox)

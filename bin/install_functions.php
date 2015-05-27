@@ -158,7 +158,7 @@ function initSolrConfig(&$cfg)
         $retry = false;
 
         if (!file_exists($cfg['solr_home'])) {
-            if (INTERACTIVE_MODE) {
+            if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
                 $retry = confirm('Can\'t access specified path, would you like to check and enter it again [Y/n]:' . "\n");
             } else {
                 trigger_error('Error accessing solr home directory "' . $cfg['solr_home'] .'".', E_USER_ERROR);
@@ -205,6 +205,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
  */
 function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
 {
+
     //verify if solr core exist
     $solrHost = $cfg['solr_host'];
     $solrPort = $cfg['solr_port'];
@@ -281,7 +282,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
                 fclose($h);
                 echo "Ok\n";
 
-            } elseif (INTERACTIVE_MODE) {
+            } elseif (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
                 echo "Error crating core, check if solr service is available under specified params.\n";
                 $rez = false;
 
@@ -366,7 +367,7 @@ function verifyDBConfig(&$cfg)
         $error = true;
     }
 
-    if (INTERACTIVE_MODE) {
+    if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
         if ($error) {
             $rez = !confirm('Failed to connect to DB with error: ' . mysqli_connect_error() . "\n" . ', would you like to update inserted params [Y/n]: ');
         } else {
@@ -481,7 +482,7 @@ function readParam($paramName, $defaultValue = null)
 {
     $rez = $defaultValue;
 
-    if (INTERACTIVE_MODE) {
+    if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
         $question = str_replace('{default}', '(default "' . $defaultValue. '")', getParamPhrase($paramName));
         $l = readAline($question);
 
@@ -600,8 +601,8 @@ function backupDB($dbName, $dbUser, $dbPass)
  */
 function displayError($error)
 {
-    if (defined('CB\\INTERACTIVE_MODE')) {
-        if (INTERACTIVE_MODE) {
+    if ( Cache::exist('RUN_SETUP_INTERACTIVE_MODE') ) {
+        if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
             echo $error;
 
             return;

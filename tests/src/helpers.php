@@ -38,8 +38,48 @@ function init($corename = DEFAULT_TEST_CORENAME)
  */
 function prepareInstance($corename = DEFAULT_TEST_CORENAME)
 {
-    
-    $config_filename = TEST_PATH_TEMP.'/auto_install_config.ini';
+
+    try {
+        require_once CB_ROOT_PATH.'/httpsdocs/config_platform.php';
+    } catch (\Exception $e) {
+        //config.ini could not exist
+        //we don't need to do anything here because this script will create confing.ini in result
+        //we just use values form config.ini as defaults, if it exists
+    }
+
+    require_once CB_ROOT_PATH.'/bin/install_functions.php';
+
+
+    $config_filename     = TEST_PATH_TEMP.'/auto_install_config.ini';
+    $config_filename_tpl = TEST_PATH.'/src/config_templates/auto_install_config.ini';
+
+    if (!file_exists($config_filename)) {
+        if (file_exists($config_filename_tpl)) {
+
+            $test_cfg = parse_ini_file($config_filename_tpl);
+            \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
+
+            $test_cfg['backup_dir']      = CB_ROOT_PATH.'/backup';
+            $test_cfg['server_name']     = \CB\readParam('server_name', $test_cfg['server_name']);
+            $test_hostname               = preg_replace('/^http(s)?:\/\//si', '', $test_cfg['server_name']);
+            $test_cfg['admin_email']     = 'admin@'.$test_hostname;
+            $test_cfg['sender_email']    = 'sender@'.$test_hostname;
+            $test_cfg['comments_email']  = 'comments@'.$test_hostname;
+            $test_cfg['core_root_email'] = 'root@'.$test_hostname;
+
+            $test_cfg['apache_user'] = \CB\readParam('apache_user',$test_cfg['apache_user']);
+            $test_cfg['db_user']     = \CB\readParam('db_user', $test_cfg['db_user']);
+            $test_cfg['db_pass']     = \CB\readParam('db_pass');
+
+            $test_cfg['su_db_user'] = \CB\readParam('su_db_user', $test_cfg['su_db_user']);
+            $test_cfg['su_db_pass'] = \CB\readParam('su_db_pass');
+            echo 'writing autoconfig file to:'.$config_filename.PHP_EOL;
+            \CB\putIniFile($config_filename, $test_cfg);
+
+            \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
+        }
+    }
+
 
     if (file_exists($config_filename)) {
 
@@ -53,7 +93,6 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
 
         trigger_error($error_msg, E_USER_ERROR);
     }
-    
 }
 
 function getCookieFilePath($corename = DEFAULT_TEST_CORENAME)
@@ -165,7 +204,7 @@ function login($corename = DEFAULT_TEST_CORENAME,
 
 
     $fields = ['u' => 'root',
-        'p' => 'r00t',
+        'p' => 'test',
         's' => 'Login'];
 
     // create curl resource
