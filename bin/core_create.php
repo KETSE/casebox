@@ -10,11 +10,12 @@
  */
 namespace CB;
 
-$path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-$cbPath = dirname($path) . DIRECTORY_SEPARATOR;
-require_once $cbPath . 'httpsdocs/config_platform.php';
+$binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+$cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
 
-require_once $path . 'install_functions.php';
+require_once $cbHome . 'httpsdocs/config_platform.php';
+
+require_once $binDirectorty . 'install_functions.php';
 
 //check script options
 if (empty($options)) {
@@ -37,6 +38,11 @@ if (empty($sqlFile)) {
     die('no sql dump file specified or invalid options set.');
 }
 
+if (!defined('CB\INTERACTIVE_MODE')) {
+    //define working mode
+    define('CB\INTERACTIVE_MODE', empty($options['config']));
+}
+
 defineBackupDir($cfg);
 
 $dbName = PREFIX . $coreName;
@@ -46,7 +52,7 @@ $dbPass = $cfg['db_pass'];
 $applyDump = true;
 
 if (DB\dbQuery('use `' . $dbName . '`')) {
-    if (confirm('Database "' . $dbName.'"  already exists. Would you like to overwrite it?')) {
+    if (confirm('overwrite_existing_core_db')) {
         echo 'Backuping .. ';
         backupDB($dbName, $dbUser, $dbPass);
         echo "Ok\n";
@@ -56,7 +62,11 @@ if (DB\dbQuery('use `' . $dbName . '`')) {
     }
 } else {
     if (!DB\dbQuery('CREATE DATABASE `' . $dbName . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-        echo 'Cant create database "' . $dbName . '".';
+        if (INTERACTIVE_MODE) {
+            echo 'Cant create database "' . $dbName . '".';
+        } else {
+            trigger_error('Cant create database "' . $dbName . '".', E_USER_ERROR);
+        }
         $applyDump = false;
     }
 }
@@ -80,14 +90,12 @@ echo "Ok\n";
 $email = '';
 $pass = '';
 do {
-    $l = readALine('Specify email address for root user:' . "\n");
-    $email = $l;
-} while (empty($l));
+    $email = readParam('core_root_email');
+} while (INTERACTIVE_MODE && empty($l));
 
 do {
-    $l = readALine('Specify root user password:' . "\n");
-    $pass = $l;
-} while (empty($l));
+    $pass = readParam('core_root_pass');
+} while (INTERACTIVE_MODE && empty($l));
 
 DB\dbQuery(
     'UPDATE `'.$dbName.'`.users_groups
@@ -103,64 +111,6 @@ DB\dbQuery(
     )
 ) or die(DB\dbQueryError());
 
-//verify if solr core exist
-$solrHost = $cfg['solr_host'];
-$solrPort = $cfg['solr_port'];
-$createCore = true;
-$askReindex = true;
-
-$solr = Solr\Service::verifyConfigConnection(
-    array(
-        'host' => $solrHost
-        ,'port' => $solrPort
-        ,'core' => $dbName
-        ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
-    )
-);
-
-if ($solr !== false) {
-    if (confirm('Solr core "' . $dbName . '" already exists, overwrite [Y/n]: ')) {
-        echo 'Unload current core ... ';
-        if ($h = fopen(
-            'http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=UNLOAD&' .
-            'core=' . $dbName . '&deleteIndex=true',
-            'r'
-        )) {
-            fclose($h);
-
-            echo "Ok\n";
-        } else {
-            echo "Error unloading core.\n";
-            $createCore = false;
-        }
-    } else {
-        $createCore = false;
-    }
-}
-
-if ($createCore) {
-    echo 'Creating solr core ... ';
-
-    if ($h = fopen(
-        'http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=CREATE&' .
-        'name=' . $dbName . '&configSet=cb_default',
-        'r'
-    )) {
-        fclose($h);
-
-        echo "Ok\n";
-    } else {
-        echo "Error creating core.\n";
-        $askReindex = false;
-    }
-}
-
-if ($askReindex) {
-    if (confirm('Reindex core [Y/n]: ')) {
-        echo 'Reindexing core ... ';
-        exec('php -f ' . $path . 'solr_reindex_core.php -- -c ' . $coreName . ' -a -l');
-        echo "Ok\n";
-    }
-}
+createSolrCore($cfg, $dbName);
 
 echo "Done.\n";

@@ -1,3 +1,9 @@
+CaseBox 1.9.450 (2015-05-27)
+==============================
+New Features, Improvements
+--------------------------
+- refactor install scripts
+
 CaseBox 1.9.449 (2015-05-27)
 ==============================
 New Features, Improvements

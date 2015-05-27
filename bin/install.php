@@ -4,21 +4,40 @@
 /**
  * install CaseBox script designed to help first configuration of casebox
  *
+ * this script can be run in interactive mode (default)
+ * or specify an input ini file using -f option
+ *
+ * For tests this script can be included and $options variable
+ * can be predefined before include.
+ *
+ * $options can contain (f or file) property to indicate configuration ini file used
+ * or directly a 'config' array property that will have all needed params set
+ *
  * Requirements:
  *     on Windows platform path to mysql/bin should be added to "Path" environment variable
  */
 namespace CB;
 
-$path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-$cbPath = dirname($path) . DIRECTORY_SEPARATOR;
+/* check if we are running under root / Administrator user */
+$currentUser = empty($_SERVER['USER'])
+    ? @$_SERVER['USERNAME']
+    : $_SERVER['USER'];
+
+if (!in_array($currentUser, array('root', 'Administrator'))) {
+    trigger_error('This script should be run under "root" or "Administrator"', E_USER_ERROR);
+}
+
+/*define some basic directories*/
+$binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+$cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
 
 $cfg = array();
 
-// we include config_platform het will load config.ini if exist and will define $cfg variable
+// we include config_platform that will load config.ini if exist and will define $cfg variable
 // If config.ini doesnt exist it wil raise an exception: Can't load config file
 
 try {
-    require_once $cbPath . 'httpsdocs/config_platform.php';
+    require_once $cbHome . 'httpsdocs/config_platform.php';
 } catch (\Exception $e) {
     //config.ini could not exist
 
@@ -26,60 +45,56 @@ try {
     //we just use values form config.ini as defaults, if it exists
 }
 
-if (IS_WINDOWS) {
-    echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
+// detect working mode (interactive or not)
+if (empty($options)) {
+    $options = getopt('f:', array('file:'));
+}
+var_dump($options);
+$configFile = empty($options['f'])
+    ? @$options['file']
+    : $options['f'];
+
+if (!empty($configFile)) {
+    $options['config'] = Config::loadConfigFile($configFile);
+}
+
+//define working mode
+if (!empty($options['config'])) {
+    define('CB\INTERACTIVE_MODE', false);
+    // $cfg = $options['config'];
+
+} else {
+    define('CB\INTERACTIVE_MODE', true);
 }
 
 require_once 'install_functions.php';
 
+displaySystemNotices();
+
 // initialize default values in cofig if not detected
-$defaultValues = array(
-   'prefix' => 'cb'
-    ,'db_host' => 'localhost'
-    ,'db_port' => '3306'
-    ,'db_user' => 'local'
-    ,'db_pass' => ''
 
-    ,'server_name' => 'https://yourserver.com/'
-
-    ,'solr_home' => '/var/solr/data/'
-    ,'solr_host' => '127.0.0.1'
-    ,'solr_port' => '8983'
-
-    ,'session.lifetime' => '180'
-
-    //;ADMIN_EMAIL: email adress used to notify admin on any casebox problems
-    ,'admin_email' => 'your.email@server.com'
-    //;SENDER_EMAIL: email adress placed in header for sent mails
-    ,'sender_email' => 'emails.sender@server.com'
-
-    ,'comments_email' => 'comments@subdomain.domain.com'
-    ,'comments_host' => '127.0.0.1'
-    ,'comments_port' => 993
-    ,'comments_ssl' => true
-    ,'comments_user' => ''
-    ,'comments_pass' => ''
-
-    ,'PYTHON' => 'python'
-    ,'backup_dir' => dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
-);
+$defaultValues = getDefaultConfigValues();
 
 $cfg = $cfg + $defaultValues;
 
-//init prefix
-$l = readALine('Specify prefix used for database names, solr core and log files (default "' . $cfg['prefix'] . '"):' . "\n");
-if (!empty($l)) {
-    $cfg['prefix'] = $l;
+if (!IS_WINDOWS) {
+    //ask for apache user and set ownership for some folders
+    $cfg['apache_user'] = readParam('apache_user', $cfg['apache_user']);
+    setOwnershipForApacheUser($cfg);
 }
+
+//init prefix
+$cfg['prefix'] = readParam('prefix', $cfg['prefix']);
 
 //init db config
 do {
     initDBConfig($cfg);
 } while (!verifyDBConfig($cfg));
 
-//specify serverame
+//specify server_name
+$l = readParam('server_name', $cfg['server_name']);
 
-$l = readALine('Provide server name with protocol (default "' . $cfg['server_name'] . '"):' . "\n");
+//add trailing slash
 if (!empty($l)) {
     $l = trim($l);
     if (substr($l, -1) != '/') {
@@ -92,175 +107,84 @@ if (!empty($l)) {
 //init solr connection
 initSolrConfig($cfg);
 
-$l = readALine('Specify administrator email address (default "' . $cfg['admin_email'] . '"):' . "\n");
-if (!empty($l)) {
-    $cfg['admin_email'] = $l;
-}
-
-$l = readALine('Specify sender email address, placed in header for sent mails (default "' . $cfg['sender_email'] . '"):' . "\n");
-if (!empty($l)) {
-    $cfg['sender_email'] = $l;
-}
+$cfg['admin_email'] = readParam('admin_email', $cfg['admin_email']);
+$cfg['sender_email'] = readParam('sender_email', $cfg['sender_email']);
 
 //define comments email params
-if (confirm('Would you like to define comments email parametters [Y/n]:')) {
-    $l = readALine('Specify comments email address, used to receive replies for Casebox comment notifications (default "' . $cfg['comments_email'] . '"):' . "\n");
-    if (!empty($l)) {
-        $cfg['comments_email'] = $l;
-    }
-
-    $l = readALine('Specify comments email server host (default "' . $cfg['comments_host'] . '"):' . "\n");
-    if (!empty($l)) {
-        $cfg['comments_host'] = $l;
-    }
-
-    $l = readALine('Specify comments email server port (default "' . $cfg['comments_port'] . '"):' . "\n");
-    if (!empty($l)) {
-        $cfg['comments_port'] = $l;
-    }
-
-    $l = readALine('Specify if ssl connection is used for comments email server [Y/n]: ');
-    if (!empty($l)) {
-        $cfg['comments_ssl'] = $l;
-    }
-
-    $l = readALine('Specify username for comments email server connection (can be left blank if email could be used as username):' . "\n");
-    if (!empty($l)) {
-        $cfg['comments_user'] = $l;
-    }
-
-    $l = readALine('Specify password for comments email server connection:' . "\n");
-    if (!empty($l)) {
-        $cfg['comments_pass'] = $l;
-    }
+if (confirm('define_comments_email')) {
+    $cfg['comments_email'] = readParam('comments_email', $cfg['comments_email']);
+    $cfg['comments_host'] = readParam('comments_host', $cfg['comments_host']);
+    $cfg['comments_port'] = readParam('comments_port', $cfg['comments_port']);
+    $cfg['comments_ssl'] = readParam('comments_ssl', $cfg['comments_ssl']);
+    $cfg['comments_user'] = readParam('comments_user', $cfg['comments_user']);
+    $cfg['comments_pass'] = readParam('comments_pass');
+} else {
+    unset($cfg['comments_email']);
+    unset($cfg['comments_host']);
+    unset($cfg['comments_port']);
+    unset($cfg['comments_ssl']);
+    unset($cfg['comments_user']);
+    unset($cfg['comments_pass']);
 }
 
-$l = readALine('Specify python path (default "' . $cfg['PYTHON'] . '"):' . "\n");
-if (!empty($l)) {
-    $cfg['PYTHON'] = $l;
-}
+$cfg['PYTHON'] = readParam('PYTHON', $cfg['PYTHON']);
 
-$l = readALine('Specify backup directory (default "' . $cfg['backup_dir'] . '"):' . "\n");
-if (!empty($l)) {
-    $cfg['backup_dir'] = $l;
-}
+$cfg['backup_dir'] = readParam('backup_dir', $cfg['backup_dir']);
 
+//define BACKUP_DIR constant and create corresponding directory
 defineBackupDir($cfg);
 
-echo "\nYou have configured main options for casebox.\n".
+echo "\nYou have configured main options for casebox.\n" .
     "Saving your settings to casebox.ini ... ";
 
 backupFile(DOC_ROOT . 'config.ini');
 
 do {
-
     $r = putIniFile(
         DOC_ROOT . 'config.ini',
         array_intersect_key($cfg, $defaultValues)
     );
 
     if ($r === false) {
-        $r = !confirm(' error saving to config.ini file. retry [Y/n]: ');
+        if (INTERACTIVE_MODE) {
+            $r = !confirm('error saving to config.ini file. retry [Y/n]: ');
+        } else {
+            trigger_error('Error saving to config.ini file', E_USER_ERROR);
+        }
     } else {
         echo "Ok\n\n";
     }
 } while ($r === false);
 
-//creating solr symlinks
-$solrCSPath = $cfg['solr_home'] . 'configsets' . DIRECTORY_SEPARATOR;
-$CBCSPath = SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
-
-if (!file_exists($solrCSPath)) {
-    mkdir($solrCSPath, 744, true);
-}
-
-$r = true;
-if (!file_exists($solrCSPath . 'cb_default')) {
-    $r = symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_default');
-}
-if (!file_exists($solrCSPath . 'cb_log')) {
-    $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_log');
-}
-
-if ($r) {
+//---------- create solr symlinks for casebox config sets
+if (createSolrConfigsetsSymlinks($cfg)) {
     echo "Solr configsets symlinks created sucessfully.\n\r";
 } else {
     echo "Error creating symlinks to solr configsets.\n\r";
 }
 
 //try to create log core
-$logCoreName = $cfg['prefix'] . '_log';
-$solr = Solr\Service::verifyConfigConnection(
-    array(
-        'host' => $cfg['solr_host']
-        ,'port' => $cfg['solr_port']
-        ,'core' => $logCoreName
-        ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
-    )
-);
-
-if ($solr === false) {
-    if (confirm('Solr core "' . $logCoreName . '" doesnt exist or can\'t access solr. Would you like to try to create it [Y/n]: ')) {
-        echo 'Creating solr core ... ';
-
-        if ($h = @fopen(
-            'http://' . $cfg['solr_host']. ':' . $cfg['solr_port'] . '/solr/admin/cores?action=CREATE&' .
-            'name=' . $logCoreName . '&configSet=cb_log',
-            'r'
-        )) {
-            fclose($h);
-            echo "Ok\n";
-        } else {
-            echo "Error crating core, check if solr service is available under specified params.\n";
-        }
-
-    }
-} else {
-    echo "$logCoreName solr core already exists.\n\r";
-}
+createSolrCore($cfg, $cfg['prefix'] . '_log', 'log_');
 
 //create default database (<prefix>__casebox)
-DB\connectWithParams($cfg);
-$cbDb = $cfg['prefix'] . '__casebox';
-
-$r = DB\dbQuery('use `' . $cbDb . '`');
-if ($r) {
-    if (confirm("'$cbDb' database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: ")) {
-        echo 'Backuping .. ';
-        backupDB($cbDb, $cfg['db_user'], $cfg['db_pass']);
-        echo "Ok\n";
-
-        echo 'Applying dump .. ';
-        exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . APP_DIR . 'install/mysql/_casebox.sql');
-        echo "Ok\n";
-    }
-} else {
-    if (confirm("$cbDb database does not exist. Would you like to create it from current installation dump file [Y/n]: ")) {
-        if (DB\dbQuery('CREATE DATABASE `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-            exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . APP_DIR . 'install/mysql/_casebox.sql');
-        } else {
-            echo 'Cant create database "' . $cbDb . '".';
-        }
-    }
-}
+createMainDatabase($cfg);
 
 echo 'Creating language files .. ';
-exec('php "' . $path . 'languages_update_js_files.php"');
-echo "Ok\n";
+exec('php "' . $binDirectorty . 'languages_update_js_files.php"');
 
-if (confirm(
-    "\n\nCasebox was successfully configured on your system, ".
-    "you should create at least one Core to use it. ".
-    "Do you like to create the basic default core [Y,n]: "
-)) {
-    $l = readALine("Core name:\n");
+echo "Ok\n\nCasebox was successfully configured on your system\n" .
+    "you should create at least one Core to use it.\n";
+
+//ask if new core instance needed
+if (confirm('create_basic_core')) {
+    $l = readParam('core_name');
     if (!empty($l)) {
         $options = array(
             'core' => $l
             ,'sql' => APP_DIR . 'install/mysql/bare_bone_core.sql'
         );
 
-        include $path . 'core_create.php';
+        include $binDirectorty . 'core_create.php';
     }
 
 }
