@@ -240,17 +240,8 @@ class Template extends Object
             if (!empty($this->template)) {
                 $field = $this->template->getField($fieldName);
             }
-            if (!empty($field)) {
-                $value = @$this->getFieldValue($fieldName, 0)['value'];
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : Util\jsonEncode($value);
 
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = "`$fieldName` = \$$i";
-                $i++;
-            } elseif (isset($p[$fieldName]) && ($fieldName !== 'id')) {
+            if (isset($p[$fieldName]) && ($fieldName !== 'id')) {
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
@@ -260,6 +251,18 @@ class Template extends Object
                 $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
+
+            } elseif (!empty($field)) {
+                $value = @$this->getFieldValue($fieldName, 0)['value'];
+                $value = (is_scalar($value) || is_null($value))
+                    ? $value
+                    : Util\jsonEncode($value);
+
+                $saveFields[] = $fieldName;
+                $saveValues[] = $value;
+                $params[] = "`$fieldName` = \$$i";
+                $i++;
+
             } else {
                 // this if should be removed after complete migration to language abreviation titles
                 if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {

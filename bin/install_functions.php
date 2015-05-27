@@ -222,7 +222,8 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
 
     if ($solr !== false) {
         if (confirm($paramPrefix . 'solr_overwrite', 'n')) {
-            echo 'Unload current core ... ';
+            echo 'Unloading core ' . $coreName . '... ';
+            unset($solr);
             if (solrUnloadCore($solrHost, $solrPort, $coreName)) {
                 echo "Ok\n";
             } else {
@@ -302,12 +303,9 @@ function solrUnloadCore($host, $port, $coreName)
     $rez = true;
 
     $url = 'http://' . $host. ':' . $port . '/solr/admin/cores?action=UNLOAD&' .
-        'core=' . $coreName . '&deleteIndex=true';
+        'core=' . $coreName . '&deleteInstanceDir=true';
 
-    if ($h = fopen(
-        $url,
-        'r'
-    )) {
+    if ($h = fopen($url, 'r')) {
         fclose($h);
     } else {
         $rez = false;
