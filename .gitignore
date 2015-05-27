@@ -27,7 +27,7 @@ httpsdocs/cores/
 httpsdocs/system.ini
 
 # exclude config.ini
-httpsdocs/config.ini
+httpsdocs/*config.ini
 
 httpsdocs/photos/
 
