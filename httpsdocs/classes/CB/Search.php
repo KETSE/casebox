@@ -46,6 +46,13 @@ class Search extends Solr\Client
     {
         $p = &$this->inputParams;
         /* initial parameters */
+
+        /* disable data loading and sorting for charts and pivot views */
+        if (!empty($p['from']) && in_array($p['from'], array('pivot', 'charts'))) {
+            $p['rows'] = 0;
+            unset($p['sort']);
+        }
+
         $this->query = empty($p['query'])
             ? ''
             : $this->escapeLuceneChars($p['query']);
