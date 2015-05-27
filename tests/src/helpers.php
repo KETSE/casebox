@@ -47,7 +47,7 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
         );
 
     echo "Start Prepare instance for testing\n";
-        include CB_ROOT_PATH.'/bin/core_create_auto.php';
+        include CB_ROOT_PATH.'/bin/core_create.php';
     echo "End for Prepare instance\n"; */
 
     $options = array(
@@ -108,7 +108,7 @@ function getCfg()
         $data_cfg = parse_ini_file($cfg_file);
         return $data_cfg;
     } else {
-        trigger_error('can\'t fine current cfg file', E_USER_WARNING);
+        trigger_error('can\'t find current cfg file', E_USER_WARNING);
     }
 }
 

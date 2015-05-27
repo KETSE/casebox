@@ -409,9 +409,9 @@ function initDBConfig(&$cfg)
     $cfg['db_host'] = readParam('db_host', $cfg['db_host']);
     $cfg['db_port'] = readParam('db_port', $cfg['db_port']);
     $cfg['su_db_user'] = readParam('su_db_user', $cfg['su_db_user']);
-    $cfg['su_db_pass'] = readParam('su_db_pass', $cfg['su_db_pass']);
+    $cfg['su_db_pass'] = readParam('su_db_pass');
     $cfg['db_user'] = readParam('db_user', $cfg['db_user']);
-    $cfg['db_pass'] = readParam('db_pass', $cfg['db_pass']);
+    $cfg['db_pass'] = readParam('db_pass');
 }
 
 /**
