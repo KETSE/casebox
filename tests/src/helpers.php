@@ -21,7 +21,7 @@ function init($corename = DEFAULT_TEST_CORENAME)
 
     $CB_PATH                = getCBPath();
     $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-    $_SERVER['SERVER_NAME'] = 'test.casebox.local';
+    $_SERVER['SERVER_NAME'] = getHost();
     $_GET['core']           = $corename;
     $_SESSION['user'] = array('id' => 1);
     require_once $CB_PATH.'/config.php';
@@ -83,7 +83,16 @@ function setDefaulCurlParams(&$ch)
  */
 function getCoreUrl($corename = DEFAULT_TEST_CORENAME)
 {
-    return 'https://test.casebox.local/'.$corename.'/';
+    return 'https://'.getHost().'/'.$corename.'/';
+}
+
+/**
+ * get host of testing server
+ * for future refactor to get host from configuration
+ * @return string
+ */
+function getHost() {
+    return 'test.casebox.org';
 }
 
 /**
