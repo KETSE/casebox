@@ -1,0 +1,17 @@
+deleting all
+updating tree
+  http://127.0.0.1:8983/solr/cb_cla/update?wt=json  
+<add><doc><field name="id">1</field><field name="acl_count">3</field><field name="security_set_id">1</field><field name="name">Home</field><field name="system">1</field><field name="type">1</field><field name="subtype">0</field><field name="template_id">13116</field><field name="oid">1</field><field name="cid">1</field><field name="cdate">2012-11-17T13:22:37Z</field><field name="uid">1</field><field name="udate">2013-03-21T15:07:58Z</field><field name="dstatus">0</field><field name="template_type">object</field><field name="ntsc">0</field><field name="ym1">1211</field></doc></add>
+CaseBox cron execution exception (cla):<br />
+Error adding multiple documents to solr.
+exception 'Apache_Solr_HttpTransportException' with message ''500' Status: Internal Server Error' in /var/www/work/casebox/httpsdocs/libx/Solr/Service.php:359
+Stack trace:
+#0 /var/www/work/casebox/httpsdocs/libx/Solr/Service.php(650): Apache_Solr_Service->_sendRawPost('http://127.0.0....', '<add><doc><fiel...')
+#1 /var/www/work/casebox/httpsdocs/libx/Solr/Service.php(714): Apache_Solr_Service->add('<add><doc><fiel...')
+#2 /var/www/work/casebox/httpsdocs/classes/CB/Solr/Service.php(152): Apache_Solr_Service->addDocuments(Array)
+#3 /var/www/work/casebox/httpsdocs/classes/CB/Solr/Client.php(301): CB\Solr\Service->addDocuments(Array)
+#4 /var/www/work/casebox/sys/crons/cron_solr_update_tree.php(27): CB\Solr\Client->updateTree(Array)
+#5 {main}<br />
+#0 /var/www/work/casebox/httpsdocs/classes/CB/Solr/Client.php(301): CB\Solr\Service->addDocuments(Array)
+#1 /var/www/work/casebox/sys/crons/cron_solr_update_tree.php(27): CB\Solr\Client->updateTree(Array)
+#2 {main}Notifying admin: vitalie.turcanu@gmail.com

@@ -1,0 +1,40 @@
+<add>
+    <doc>
+        <field name="id">599</field>
+        <field name="pid">23</field>
+        <field name="pids">1</field>
+        <field name="pids">81</field>
+        <field name="pids">23</field>
+        <field name="path">/CEJIL/Advisory opinions/</field>
+        <field name="acl_count">0</field>
+        <field name="security_set_id">3</field>
+        <field name="name"> Request for Advisory Opinion on Migrant Children before The Inter-American Court of Human Rights: April 6, 2011 </field>
+        <field name="system">0</field>
+        <field name="type">4</field>
+        <field name="subtype">0</field>
+        <field name="template_id">13161</field>
+        <field name="date">2013-08-07T18:07:03Z</field>
+        <field name="date_end">2013-08-07T18:07:03Z</field>
+        <field name="oid">1</field>
+        <field name="cid">1</field>
+        <field name="cdate">2013-08-07T16:07:03Z</field>
+        <field name="uid">1</field>
+        <field name="udate">2013-11-14T12:44:29Z</field>
+        <field name="dstatus">0</field>
+        <field name="template_type">object</field>
+        <field name="ntsc">2</field>
+        <field name="content">
+            Nombre (EN) Request for Advisory Opinion on Migrant Children before The Inter-American Court of Human Rights: April 6, 2011
+                Fecha 2011-04-06Z
+                Mechanism 124
+                Tipo 478
+                Numero ADOP-request
+        </field>
+        <field name="mechanism">124</field>
+        <field name="doc_type">478</field>
+        <field name="ym1">1308</field>
+        <field name="ym2">1308</field>
+        <field name="ym3">1308</field>  
+
+      </doc>
+</add>
