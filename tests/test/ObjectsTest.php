@@ -102,14 +102,14 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
 
         // third update created object
 
-       /* $data_template['title']           = $data_template['title'].' (updated)';
+       $data_template['name']           = $data_template['name'].' (updated)';
 
         $obj->update($data_template);
 
         $obj->load($data_template['id']);
         $read_data_template = $obj->getData();
         $this->assertArraySubset($data_template, $read_data_template, false,
-            ' error on updated template data '.print_r($read_data_template, true)); */
+            ' error on updated template data '.print_r($read_data_template, true));
         
 
     }
