@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 
 /**
@@ -49,7 +48,7 @@ try {
 if (empty($options)) {
     $options = getopt('f:', array('file:'));
 }
-var_dump($options);
+
 $configFile = empty($options['f'])
     ? @$options['file']
     : $options['f'];
@@ -57,6 +56,8 @@ $configFile = empty($options['f'])
 if (!empty($configFile)) {
     $options['config'] = Config::loadConfigFile($configFile);
 }
+
+Cache::set('inCfg', $options['config']);
 
 //define working mode
 if (!empty($options['config'])) {

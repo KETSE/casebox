@@ -135,8 +135,8 @@ function setOwnershipForApacheUser(&$cfg)
         return ;
     }
 
-    shell_exec('chown -R "' . LOGS_DIR . '" ' . $cfg['apache_user']);
-    shell_exec('chown -R "' . DATA_DIR . '" ' . $cfg['apache_user']);
+    shell_exec('chown -R ' . $cfg['apache_user'].' "' . LOGS_DIR . '"');
+    shell_exec('chown -R ' . $cfg['apache_user'].' "' . DATA_DIR . '"');
 }
 
 /**
@@ -384,10 +384,17 @@ function verifyDBConfig(&$cfg)
  */
 function connectDBWithSuUser($cfg)
 {
-    $cfg['db_user'] = $cfg['su_db_user'];
-    $cfg['db_pass'] = $cfg['su_db_pass'];
 
-    return @DB\connectWithParams($cfg);
+    @$newParams = array(
+        'db_host' => $cfg['db_host'],
+        'db_user' => $cfg['su_db_user'],
+        'db_pass' => $cfg['su_db_pass'],
+        'db_name' => $cfg['db_name'],
+        'db_port' => $cfg['db_port'],
+        'initsql' => $cfg['initsql']
+    );
+
+    return @DB\connectWithParams($newParams);
 }
 
 /**
@@ -402,9 +409,9 @@ function initDBConfig(&$cfg)
     $cfg['db_host'] = readParam('db_host', $cfg['db_host']);
     $cfg['db_port'] = readParam('db_port', $cfg['db_port']);
     $cfg['su_db_user'] = readParam('su_db_user', $cfg['su_db_user']);
-    $cfg['su_db_pass'] = readParam('su_db_pass');
+    $cfg['su_db_pass'] = readParam('su_db_pass', $cfg['su_db_pass']);
     $cfg['db_user'] = readParam('db_user', $cfg['db_user']);
-    $cfg['db_pass'] = readParam('db_pass');
+    $cfg['db_pass'] = readParam('db_pass', $cfg['db_pass']);
 }
 
 /**
@@ -481,9 +488,9 @@ function readParam($paramName, $defaultValue = null)
         }
 
     } else {
-        global $options;
-        if (!empty($options['config'][$paramName])) {
-            $rez = $options['config'][$paramName];
+        $cfg = Cache::get('inCfg');
+        if (!empty($cfg[$paramName])) {
+            $rez = $cfg[$paramName];
         }
     }
 

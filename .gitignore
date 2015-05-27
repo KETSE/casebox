@@ -41,3 +41,4 @@ bin/recreate_docs.bat
 
 apigen.neon
 _rest_managed.json
+/nbproject/**
