@@ -251,6 +251,7 @@ class Template extends Object
                 $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
+
             } elseif (!empty($field)) {
                 $value = @$this->getFieldValue($fieldName, 0)['value'];
                 $value = (is_scalar($value) || is_null($value))
@@ -261,6 +262,7 @@ class Template extends Object
                 $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
+
             } else {
                 // this if should be removed after complete migration to language abreviation titles
                 if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
