@@ -290,9 +290,10 @@ class Notifications
     /**
      * get action type declination
      * @param  varchar $actionType
+     * @param  varchar $lang
      * @return varchar
      */
-    private function getActionDeclination($actionType)
+    public static function getActionDeclination($actionType, $lang = false)
     {
         $rez = '';
         switch ($actionType) {
@@ -305,12 +306,12 @@ class Notifications
             case 'status_change':
             case 'comment_update':
             case 'move':
-                $rez = L\get($actionType . 'd');
+                $rez = L\get($actionType . 'd', $lang);
                 break;
 
             case 'reopen':
             case 'comment':
-                $rez = L\get($actionType . 'ed');
+                $rez = L\get($actionType . 'ed', $lang);
                 break;
 
             default:

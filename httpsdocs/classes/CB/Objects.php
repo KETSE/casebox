@@ -867,12 +867,12 @@ class Objects
         switch ($p['type']) {
             case 'follow':
                 $sd['wu'] = array_diff($wu, array($userId));
-                $sd['fu'] = array_diff($fu, array($userId)) + array($userId);
+                $sd['fu'] = array_merge(array_diff($fu, array($userId)), array($userId));
                 break;
 
             case 'watch':
                 $sd['fu'] = array_diff($fu, array($userId));
-                $sd['wu'] = array_diff($wu, array($userId)) + array($userId);
+                $sd['wu'] = array_merge(array_diff($wu, array($userId)), array($userId));
                 break;
 
             case 'ignore':

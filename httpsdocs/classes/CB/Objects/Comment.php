@@ -36,10 +36,25 @@ class Comment extends Object
 
         Config::setFlag('disableActivityLog', false);
 
+        //add user to parent object followers and update its sys_data if needed
+        $parentObj = Objects::getCachedObject($p['pid']);
+        $posd = $parentObj->getSysData();
+
+        $fu = empty($posd['fu'])
+            ? array()
+            : $posd['fu'];
+        $uid = User::getId();
+
+        if (!in_array($uid, $fu)) {
+            $fu[] = intval($uid);
+            $posd['fu'] = $fu;
+            $parentObj->updateSysData($posd);
+        }
+
         // log the action
         $logParams = array(
             'type' => 'comment'
-            ,'new' => Objects::getCachedObject($p['pid'])
+            ,'new' => $parentObj
             ,'comment' => $p['data']['_title']
         );
 

@@ -111,3 +111,9 @@ Ext.define('My.override.VBoxLayoutFix', {
         }
     }
 });
+
+/* visual editors bug in chrome */
+if(Ext.isChrome && Ext.chromeVersion===43) {
+    Ext.getBody().addCls('chrome-43');
+}
+

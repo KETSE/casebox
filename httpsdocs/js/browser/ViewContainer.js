@@ -702,6 +702,9 @@ Ext.define('CB.browser.ViewContainer', {
         this.folderProperties.type = parseInt(this.folderProperties.type, 10);
         this.folderProperties.pathtext = result.pathtext;
 
+        //switch from NotificationView if active
+        this.containersPanel.setActiveItem(this.cardContainer);
+
         this.descendantsButton.toggle(ep.descendants === true);
 
         /* change view if set in params */
@@ -879,7 +882,9 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,loadParams: function(){
+        //check if not same params as previous request
         if(this.sameParams(this.params, this.requestParams)) {
+            this.containersPanel.setActiveItem(this.cardContainer);
             return;
         }
 

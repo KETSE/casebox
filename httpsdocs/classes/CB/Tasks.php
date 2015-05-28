@@ -68,7 +68,7 @@ class Tasks
                 : Objects\Task::$USERSTATUS_ONGOING;
 
         $obj->setUserStatus($status, $p['user_id']);
-        $obj->update();
+        $obj->updateSysData();
 
         $this->afterUpdate($p['id']);
 
@@ -98,7 +98,7 @@ class Tasks
         }
 
         $obj->setUserStatus(Objects\Task::$USERSTATUS_DONE);
-        $obj->update();
+        $obj->updateSysData();
 
         $this->afterUpdate($p['id']);
 

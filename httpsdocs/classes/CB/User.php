@@ -1097,7 +1097,7 @@ class User
         $rez = null;
 
         if (!empty($_SESSION['user']['id'])) {
-            $rez= $_SESSION['user']['id'];
+            $rez= intval($_SESSION['user']['id']);
         }
 
         return $rez;

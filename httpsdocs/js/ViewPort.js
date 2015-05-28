@@ -461,6 +461,15 @@ Ext.define('CB.ViewPort', {
 
             App.fireEvent('cbinit', this);
 
+            // depress notifications button when view deactivated
+            App.explorer.notificationsView.on(
+                'deactivate'
+                ,function(){
+                    this.buttons.toggleNotificationsView.toggle(false, true);
+                }
+                ,this
+            );
+
         } else {
 
             Ext.Function.defer(this.initCB, 500, this);

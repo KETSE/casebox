@@ -28,6 +28,8 @@ return array_merge(
             ,'//css/calendar-colors.css'
 
             ,'//libx/highlight/default.css'
+
+            ,'//css/fix.css'
         )
 
         ,'js' => array(

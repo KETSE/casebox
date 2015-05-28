@@ -1,6 +1,7 @@
 <?php
 namespace CB\Objects;
 
+use CB\Config;
 use CB\DB;
 use CB\Util;
 use CB\L;
@@ -227,7 +228,20 @@ class Object
 
         $p['data'] = Util\toJSONArray(@$p['data']);
         $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
+        $sd = &$p['sys_data'];
 
+        //add creator as follower by default, but not for folder template
+        if (empty($sd['fu'])) {
+            $sd['fu'] = [];
+        }
+
+        if ($p['template_id'] != Config::get('default_folder_template')) {
+            if (!in_array($p['cid'], $sd['fu'])) {
+                $sd['fu'][] = intval($p['cid']);
+            }
+        }
+
+        //filter fields
         $this->filterHTMLFields($p['data']);
 
         DB\dbQuery(
@@ -383,8 +397,8 @@ class Object
         }
 
         //load current object from db into a variable to be passed to log and events
-        $oldObject = clone $this;
-        $oldObject->load($this->id);
+        $this->oldObject = clone $this;
+        $this->oldObject->load($this->id);
 
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
@@ -457,7 +471,7 @@ class Object
         // log the action
         $logParams = array(
             'type' => 'update'
-            ,'old' => $oldObject
+            ,'old' => $this->oldObject
             ,'new' => $this
         );
 
@@ -1244,8 +1258,8 @@ class Object
         /* end of security check */
 
         //load current object from db into a variable to be passed to log and events
-        $oldObject = clone $this;
-        $oldObject->load($this->id);
+        $this->oldObject = clone $this;
+        $this->oldObject->load($this->id);
 
         if (is_numeric($targetId)) {
             /* target security check */
@@ -1324,7 +1338,7 @@ class Object
         // log the action
         $logParams = array(
             'type' => 'move'
-            ,'old' => $oldObject
+            ,'old' => $this->oldObject
             ,'new' => $this
         );
 

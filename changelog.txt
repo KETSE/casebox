@@ -1,4 +1,26 @@
-CaseBox 1.9.450 (2015-05-27)
+CaseBox 1.9.452 (2015-05-28)
+==============================
+New Features, Improvements
+--------------------------
+- updated database structure and bare_bone sql dump
+- send notifications based on notifications table (not on actions_log)
+- update notifications title according to action
+- creators are automaticly added as followers,
+  but not for template specified in config as
+- added /bin/upgrade_subscribers_to_followers.php script
+- object creators are automatically added as followers
+- hide notifications view on start browsing
+
+Fixed Bugs:
+----------
+-  EXTJS-17847 Visual combobox bug in Chrome 43.0.2357.65 m
+
+Notes:
+----------
+- run script: /bin/upgrade_subscribers_to_followers.php -c <corename>
+- sync DB structure (apply database update: v.1.9.452.sql)
+
+CaseBox 1.9.451 (2015-05-27)
 ==============================
 Fixed Bugs:
 ----------

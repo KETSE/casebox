@@ -15,6 +15,10 @@ if (!$cd['success']) {
 
 //dont try to send any notification if the script starts for the first time
 if (empty($cd['last_start_time'])) {
+    DB\dbQuery(
+        'UPDATE notifications SET email_sent = -1 WHERE email_sent = 0'
+    ) or die(DB\dbQueryError());
+
     exit();
 }
 
@@ -34,35 +38,35 @@ $sendNotificationMails = (
 );
 
 //collect notifications to be sent
-$sql = 'SELECT id
-    ,object_id
-    ,object_pid
-    ,user_id
-    ,action_type
-    ,action_time
-    ,data
-    ,activity_data_db
-FROM action_log
-WHERE action_time > $1
-ORDER BY user_id
-   ,`action_time` DESC';
+$sql = 'SELECT
+    n.id
+    ,n.object_id
+    ,n.action_type
+    ,n.user_id `to_user_id`
+    ,l.object_pid
+    ,l.user_id `from_user_id`
+    ,l.action_time
+    ,l.data
+    ,l.activity_data_db
+FROM notifications n
+    JOIN action_log l
+        ON n.action_id = l.id
+WHERE n.email_sent = 0
+ORDER BY n.user_id
+   ,l.`action_time` DESC';
 
-$res = DB\dbQuery($sql, $cd['last_start_time']) or die(DB\dbQueryError());
+$res = DB\dbQuery($sql) or die(DB\dbQueryError());
 
 while ($r = $res->fetch_assoc()) {
     $r['data'] = Util\jsonDecode($r['data']);
     $r['activity_data_db'] = Util\jsonDecode($r['activity_data_db']);
 
-    if (!empty($r['activity_data_db']['fu'])) {
-        foreach ($r['activity_data_db']['fu'] as $uid) {
-            if (!isset($users[$uid])) {
-                $users[$uid] = User::getPreferences($uid);
-            }
-
-            $users[$uid]['mails'][$r['id']] = $r;
-        }
+    $uid = $r['to_user_id'];
+    if (!isset($users[$uid])) {
+        $users[$uid] = User::getPreferences($uid);
     }
 
+    $users[$uid]['mails'][$r['id']] = $r;
 }
 $res->close();
 
@@ -75,9 +79,14 @@ foreach ($users as $u) {
     $lang = $languages[$u['language_id']-1];
 
     if (filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {
-        foreach ($u['mails'] as $actionLogId => $action) {
+        foreach ($u['mails'] as $notificationId => $action) {
+            //[$core #$nodeId] $action_type $template_name: $object_title
+            $templateId = Objects::getTemplateId($action['object_id']);
+            $templateName = Objects::getName($templateId);
 
-            $subject = '[' . $coreName . ' #' . $action['object_id'] . '] ' . L\get('SubscriptionNotification', $lang) . ' "' . $action['data']['name'] . '"';
+            $subject = '[' . $coreName . ' #' . $action['object_id'] . '] ' .
+                Notifications::getActionDeclination($action['action_type'], $lang) . ' ' .
+                $templateName . '"' . $action['data']['name'] . '"';
 
             //skip sending notifications from devel server to other emails than Admin
             if (!$sendNotificationMails && ($u['email'] !== $adminEmail)) {
@@ -87,7 +96,7 @@ foreach ($users as $u) {
                 echo $u['email'].': ' . $subject  . "\n";
 
                 $message = Notifications::getMailBodyForAction($action, $u);
-                $sender = Notifications::getSender($action['user_id']);
+                $sender = Notifications::getSender($action['from_user_id']);
 
                 file_put_contents(TEMP_DIR . $action['id'].'.html', "$sender<br />\n<h1>$subject<h1>" . $message);
                 //  COMMENTED FOR TEST
@@ -100,10 +109,18 @@ foreach ($users as $u) {
                     $markNotificationAsSent = false;
 
                     System::notifyAdmin(
-                        'CaseBox cron notification: Cant send notification (' . $actionLogId . ') mail to "'. $u['email'] . '"',
+                        'CaseBox cron notification: Cant send notification (' . $notificationId . ') mail to "'. $u['email'] . '"',
                         $message
                     );
-                }/**/
+
+                } else {
+                    DB\dbQuery(
+                        'UPDATE notifications
+                        SET email_sent = 1
+                        WHERE id = $1',
+                        $notificationId
+                    ) or die(DB\dbQueryError());
+                }
             }
         }
     }

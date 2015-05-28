@@ -165,8 +165,9 @@ Ext.define('CB.browser.NotificationsView', {
             '/photo/{' + uid + '}.jpg' +
             CB.DB.usersStore.getPhotoParam(uid) +
             '"></td><td class="pl10 vaT">' + v + '</td></tr></table>'
-            //+ (r.get('read') ? 'read': 'no')
             ;
+
+        m.tdCls = r.get('read') ? '': 'bgcLG';
 
         return rez;
     }
@@ -229,7 +230,7 @@ Ext.define('CB.browser.NotificationsView', {
     ,onLogin: function() {
         this.store.load();
 
-        this.checkNotificationsTask.delay(1000 * 60 * 2); //2 minutes
+        this.checkNotificationsTask.delay(1000 * 60 * 1); //1 minute
     }
 
     ,onCheckNotificationsTask: function() {

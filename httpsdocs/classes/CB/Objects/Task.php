@@ -38,6 +38,26 @@ class Task extends Object
     }
 
     /**
+     * function used by create method for creating custom data
+     * @return void
+     */
+    protected function createCustomData()
+    {
+        $p = &$this->data;
+
+        $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
+
+        $sd = &$p['sys_data'];
+
+        //add assigned users as followers by default
+        if (empty($sd['fu'])) {
+            $sd['fu'] = Util\toNumericArray(@$this->getFieldValue('assigned', 0)['value']);
+        }
+
+        parent::createCustomData();
+    }
+
+    /**
      * load custom data for tasks
      * Note: should be removed after tasks upgraded and custom task tables removed
      */
@@ -74,6 +94,33 @@ class Task extends Object
 
         return parent::update($p);
     }
+
+    /**
+     * update objects custom data
+     * @return boolean
+     */
+    protected function updateCustomData()
+    {
+        $d = &$this->data;
+        $sd = &$d['sys_data'];
+
+        /** add newly assigned users to followers */
+        $oldAssigned = array();
+        if (!empty($this->oldObject)) {
+            $oldAssigned = Util\toNumericArray(@$this->oldObject->getFieldValue('assigned', 0)['value']);
+        }
+        $newAssigned = Util\toNumericArray(@$this->getFieldValue('assigned', 0)['value']);
+        $diff = array_diff($newAssigned, $oldAssigned);
+        $fu = empty($sd['fu'])
+            ? array()
+            : $sd['fu'];
+
+        $sd['fu'] = array_unique(array_merge($fu, $diff));
+
+        //call parent class to do the rest
+        parent::updateCustomData();
+    }
+
 
     /**
      * set "sys_data" params from object data
@@ -192,7 +239,7 @@ class Task extends Object
 
         $this->markClosed();
 
-        $this->update();
+        $this->updateSysData();
     }
 
     /**

@@ -104,6 +104,11 @@ class Log
 
         $rez = $newData + $oldData;
 
+        //return empty result for other than object actions (login, logout, etc)
+        if (empty($rez['id'])) {
+            return;
+        }
+
         Util\unsetNullValues($rez);
 
         $rez['name'] = htmlspecialchars($rez['name'], ENT_COMPAT);
@@ -161,11 +166,6 @@ class Log
 
         $rez['fu'] = array();
 
-        //add creator as follower by default
-        if (!empty($d['cid'])) {
-            $rez['fu'] = array($d['cid']);
-        }
-
         if (!empty($d['sys_data']['fu'])) {
             $rez['fu'] = array_merge($rez['fu'], $d['sys_data']['fu']);
         }
@@ -189,28 +189,45 @@ class Log
      */
     private static function adNotificationRecords($actionId, $activityData)
     {
-        $userIds = array();
+        $users = array();
         if (!empty($activityData['fu'])) {
-            $userIds = $activityData['fu'];
-        }
-        if (!empty($activityData['wu'])) {
-            $userIds = array_merge($userIds, $activityData['wu']);
+            foreach ($activityData['fu'] as $uid) {
+                $users[intval($uid)] = 0; // email unsent meaning
+            }
         }
 
-        $userIds = array_unique($userIds);
+        if (!empty($activityData['wu'])) {
+            foreach ($activityData['wu'] as $uid) {
+                $users[intval($uid)] = -1; // email doesnt need to be sent
+            }
+        }
 
         //exclude current user from notified users
-        $userIds = array_diff($userIds, array(User::getId()));
+        unset($users[User::getId()]);
 
-        if (!empty($userIds)) {
+        $sql = 'INSERT INTO notifications
+            (object_id, action_id, action_ids, action_type, user_id, email_sent, `read`)
+
+            SELECT l.object_id, l.id, l.id, l.action_type, $2, $3, 0
+            FROM action_log l
+            WHERE l.id = $1
+
+            ON DUPLICATE KEY
+
+            UPDATE
+            action_id = l.id
+            ,action_ids = CASE WHEN `read` = 1 THEN l.id ELSE CONCAT(l.id, \',\', action_ids) END
+            ,email_sent = $3
+            ,`read` = 0';
+
+        foreach ($users as $uid => $uMailSent) {
             DB\dbQuery(
-                'INSERT INTO notifications
-                (object_id, action_id, action_time, user_id)
-                SELECT al.object_id, al.id, al.action_time, u.id
-                FROM action_log al, users_groups u
-                WHERE al.id = $1 AND
-                    u.id in (' . implode(',', $userIds). ')',
-                $actionId
+                $sql,
+                array(
+                    $actionId
+                    ,$uid
+                    ,$uMailSent
+                )
             ) or die(DB\dbQueryError());
         }
     }
