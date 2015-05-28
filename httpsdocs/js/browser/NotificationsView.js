@@ -15,11 +15,20 @@ Ext.define('CB.browser.NotificationsView', {
         this.actions = {
             markAllAsRead: new Ext.Action({
                 iconCls: 'im-assignment'
-                ,itemId: 'reload'
+                ,itemId: 'markAllAsRead'
                 ,scale: 'medium'
                 ,text: L.MarkAllAsRead
                 ,scope: this
                 ,handler: this.onMarkAllAsReadClick
+            })
+            ,reload: new Ext.Action({
+                iconCls: 'im-refresh'
+                ,itemId: 'reload'
+                ,scale: 'medium'
+                ,tooltip: L.Refresh
+                ,text: L.Refresh
+                ,scope: this
+                ,handler: this.onReloadClick
             })
         };
 
@@ -34,6 +43,8 @@ Ext.define('CB.browser.NotificationsView', {
             }
             ,items: [
                 this.actions.markAllAsRead
+                ,'-'
+                ,this.actions.reload
             ]
         });
 
@@ -79,19 +90,15 @@ Ext.define('CB.browser.NotificationsView', {
 
             ,listeners: {
                 scope: this
-                ,beforeload: this.onBeforeStoreLoad
                 ,load: this.onStoreLoad
             }
         });
     }
 
-    ,onBeforeStoreLoad: function() {
-
-    }
-
     ,onStoreLoad: function(store, records, successful, eOpts) {
         this.fireNotificationsUpdated();
     }
+
 
     ,fireNotificationsUpdated: function() {
         var recs = this.store.queryBy('read', false, false, false, true)
@@ -255,7 +262,7 @@ Ext.define('CB.browser.NotificationsView', {
         }
 
         if(r.count > 0) {
-            this.store.reload();
+            this.onReloadClick();
         }
     }
 
@@ -268,10 +275,12 @@ Ext.define('CB.browser.NotificationsView', {
     ,onMarkAllAsReadClick: function(b, e) {
         CB_Notifications.markAllAsRead(
             {}
-            ,function() {
-                this.store.reload();
-            }
+            ,this.onReloadClick
             ,this
         );
+    }
+
+    ,onReloadClick: function(b, e) {
+        this.store.reload();
     }
 });

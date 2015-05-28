@@ -163,7 +163,7 @@ class Notifications
         DB\dbQuery(
             'UPDATE notifications
             SET `read` = 1
-            WHERE user_id = $1 AND read = 0',
+            WHERE user_id = $1 AND `read` = 0',
             User::getId()
         ) or die(DB\dbQueryError());
 

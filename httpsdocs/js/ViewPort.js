@@ -233,7 +233,7 @@ Ext.define('CB.ViewPort', {
                 tooltip: L.Notifications
                 ,itemId: 'toggleNotifications'
                 ,enableToggle: true
-                ,iconCls: 'im-menu'
+                ,iconCls: 'im-notifications'
                 ,cls: 'numbersButton'
                 ,text: ''
                 ,scale: 'large'

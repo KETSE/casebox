@@ -1,3 +1,9 @@
+CaseBox 1.9.454 (2015-05-28)
+==============================
+New Features, Improvements
+--------------------------
+- add reload notifications button
+
 CaseBox 1.9.453 (2015-05-28)
 ==============================
 New Features, Improvements

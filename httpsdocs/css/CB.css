@@ -1010,11 +1010,6 @@ border-top: 0;
     cursor: pointer;
 }
 
-.obj-ref {
-
-}
-
-
 .gv-empty-text {
     display: table;
     position: absolute;
@@ -1038,7 +1033,7 @@ border-top: 0;
   display: block;
   position: absolute;
   bottom: 2px;
-  right: 0;
+  right: 3px;
   max-width: 100%;
   border-radius: 50%;
   background: red;
