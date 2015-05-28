@@ -33,6 +33,24 @@ function init($corename = DEFAULT_TEST_CORENAME)
 }
 
 /**
+ * get path to file configuration for make test install
+ * @return string
+ */
+function getConfigFilename()
+{
+    return TEST_PATH_TEMP.'/auto_install_config.ini';
+}
+
+/**
+ * get path to template for file configuration
+ * @return string 
+ */
+function getConfigFilenameTPL()
+{
+    return TEST_PATH.'/src/config_templates/auto_install_config.ini';
+}
+
+/**
  * 
  * @param type $corename
  */
@@ -47,12 +65,12 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
         //we just use values form config.ini as defaults, if it exists
     }
 
-    require_once CB_ROOT_PATH.'/bin/install_functions.php';
+    require_once \CB\LIB_DIR.'install_functions.php';
 
 
-    $config_filename     = TEST_PATH_TEMP.'/auto_install_config.ini';
+    $config_filename = getConfigFilename();
 
-    $config_filename_tpl = TEST_PATH.'/src/config_templates/auto_install_config.ini';
+    $config_filename_tpl = getConfigFilenameTPL();
 
     if (!file_exists($config_filename)) {
         if (file_exists($config_filename_tpl)) {
@@ -60,22 +78,23 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
             $test_cfg = parse_ini_file($config_filename_tpl);
             \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
 
-            $test_cfg['backup_dir']      = CB_ROOT_PATH . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR;
-            $test_cfg['server_name']     = \CB\readParam('server_name', $test_cfg['server_name']);
+            $test_cfg['backup_dir']      = CB_ROOT_PATH.DIRECTORY_SEPARATOR.'backup'.DIRECTORY_SEPARATOR;
+            $test_cfg['server_name']     = \CB\INSTALL\readParam('server_name', $test_cfg['server_name']);
             $test_hostname               = preg_replace('/^http(s)?:\/\//si', '', $test_cfg['server_name']);
             $test_cfg['admin_email']     = 'admin@'.$test_hostname;
             $test_cfg['sender_email']    = 'sender@'.$test_hostname;
             $test_cfg['comments_email']  = 'comments@'.$test_hostname;
             $test_cfg['core_root_email'] = 'root@'.$test_hostname;
 
-            $test_cfg['apache_user'] = \CB\readParam('apache_user',$test_cfg['apache_user']);
-            $test_cfg['db_user']     = \CB\readParam('db_user', $test_cfg['db_user']);
-            $test_cfg['db_pass']     = \CB\readParam('db_pass');
+            $test_cfg['apache_user'] = \CB\INSTALL\readParam('apache_user', $test_cfg['apache_user']);
+            $test_cfg['db_user']     = \CB\INSTALL\readParam('db_user', $test_cfg['db_user']);
+            $test_cfg['db_pass']     = \CB\INSTALL\readParam('db_pass');
 
-            $test_cfg['su_db_user'] = \CB\readParam('su_db_user', $test_cfg['su_db_user']);
-            $test_cfg['su_db_pass'] = \CB\readParam('su_db_pass');
+            $test_cfg['su_db_user'] = \CB\INSTALL\readParam('su_db_user', $test_cfg['su_db_user']);
+            $test_cfg['su_db_pass'] = \CB\INSTALL\readParam('su_db_pass');
             echo 'writing autoconfig file to:'.$config_filename.PHP_EOL;
-            \CB\putIniFile($config_filename, $test_cfg);
+            \CB\INSTALL\putIniFile($config_filename, $test_cfg);
+            shell_exec('chown -R ' . $test_cfg['apache_user'].' "' . $config_filename . '"');
 
             \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
         }
@@ -88,6 +107,7 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
             'file' => $config_filename
         );
         include CB_ROOT_PATH.'/bin/install.php';
+        
     } else {
         $error_msg = ' Please create cofig file : '.$config_filename.PHP_EOL.' '
             .' You can use file: '.TEST_PATH.'/src/config_templates/auto_install_config.ini as template '.PHP_EOL.PHP_EOL;
@@ -197,15 +217,12 @@ function getLoginKey($corename = DEFAULT_TEST_CORENAME)
  * @param type $username
  * @param type $userpass
  */
-function login($corename = DEFAULT_TEST_CORENAME,
-               $username = DEFAULT_TEST_USERNAME,
-               $userpass = DEFAULT_TEST_USERPASS)
+function login($username = DEFAULT_TEST_USERNAME, $userpass = DEFAULT_TEST_USERPASS, $corename = DEFAULT_TEST_CORENAME)
 {
 
-
-
-    $fields = ['u' => 'root',
-        'p' => 'test',
+    $fields = [
+        'u' => $username,
+        'p' => $userpass,
         's' => 'Login'];
 
     // create curl resource
@@ -246,4 +263,27 @@ function login($corename = DEFAULT_TEST_CORENAME,
       // close curl resource to free up system resources */
 
     curl_close($ch);
+}
+
+function getCredentialUserData($username)
+{
+
+    $data = [
+        'username' => 'root',
+        'userpass' => 'test'
+    ];
+
+    switch ($username) {
+        case 'root':
+            $test_cnf_filename = getConfigFilename();
+            $test_cnf = \CB\Config::loadConfigFile($test_cnf_filename);
+            if (isset($test_cnf['core_root_pass'])) {
+                $data['userpass'] = $test_cnf['core_root_pass'];
+            }
+            break;
+        default :
+            $data['userpass'] = 'test';
+    }
+
+    return $data;
 }

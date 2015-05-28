@@ -62,4 +62,4 @@ if [ $coverage ];
         exit
     fi
 
-$DIR/vendor/bin/phpunit --verbose --debug --bootstrap init.php $DIR/test
+$DIR/vendor/bin/phpunit --colors --verbose --debug --bootstrap init.php $DIR/test

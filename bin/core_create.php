@@ -8,14 +8,15 @@
  *
  * Example: php -f core_create.php -- -c text_core_name -s /path/to/mysql/dump.sql
  */
-namespace CB;
+namespace CB\INSTALL;
+
 
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 $cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
 
 require_once $cbHome . 'httpsdocs/config_platform.php';
 
-require_once $binDirectorty . 'install_functions.php';
+require_once \CB\LIB_DIR . 'install_functions.php';
 
 //check script options
 if (empty($options)) {
@@ -38,21 +39,26 @@ if (empty($sqlFile)) {
     die('no sql dump file specified or invalid options set.');
 }
 
-if (!defined('CB\INTERACTIVE_MODE')) {
+/*if (!defined('CB\INTERACTIVE_MODE')) {
     //define working mode
     define('CB\INTERACTIVE_MODE', empty($options['config']));
+} */
+
+if (!\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+    //define working mode
+    \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', !\CB\Cache::exist('RUN_SETUP_CFG') );
 }
 
-defineBackupDir($cfg);
+\CB\INSTALL\defineBackupDir($cfg);
 
-$dbName = PREFIX . $coreName;
+$dbName = \CB\PREFIX . $coreName;
 $dbUser = $cfg['db_user'];
 $dbPass = $cfg['db_pass'];
 
 $applyDump = true;
 
-if (DB\dbQuery('use `' . $dbName . '`')) {
-    if (confirm('overwrite_existing_core_db')) {
+if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
+    if ( confirm('overwrite_existing_core_db') && !( \CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == FALSE )  ) {
         echo 'Backuping .. ';
         backupDB($dbName, $dbUser, $dbPass);
         echo "Ok\n";
@@ -61,8 +67,8 @@ if (DB\dbQuery('use `' . $dbName . '`')) {
         $applyDump = false;
     }
 } else {
-    if (!DB\dbQuery('CREATE DATABASE `' . $dbName . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-        if (INTERACTIVE_MODE) {
+    if (!\CB\DB\dbQuery('CREATE DATABASE `' . $dbName . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
+        if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
             echo 'Cant create database "' . $dbName . '".';
         } else {
             trigger_error('Cant create database "' . $dbName . '".', E_USER_ERROR);
@@ -80,7 +86,7 @@ if ($applyDump) {
 $cbDb = $cfg['prefix'] . '__casebox';
 
 echo 'Registering core .. ';
-DB\dbQuery(
+\CB\DB\dbQuery(
     'INSERT INTO ' . $cbDb . ' .cores (name, cfg) VALUES ($1, $2)',
     array($coreName, '{}')
 );
@@ -91,13 +97,13 @@ $email = '';
 $pass = '';
 do {
     $email = readParam('core_root_email');
-} while (INTERACTIVE_MODE && empty($l));
+} while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($l));
 
 do {
     $pass = readParam('core_root_pass');
-} while (INTERACTIVE_MODE && empty($l));
+} while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($l));
 
-DB\dbQuery(
+\CB\DB\dbQuery(
     'UPDATE `'.$dbName.'`.users_groups
     SET `password` = MD5(CONCAT(\'aero\', $2))
         ,email = $3
@@ -109,7 +115,7 @@ DB\dbQuery(
         ,$email
         ,'{"email": "'.$email.'"}'
     )
-) or die(DB\dbQueryError());
+) or die(\CB\DB\dbQueryError());
 
 createSolrCore($cfg, $coreName);
 

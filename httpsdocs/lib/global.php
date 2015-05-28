@@ -17,8 +17,13 @@ function __autoload($className)
                 ), '/', $className
             ).'.php';
 
-        if ( stream_resolve_include_path( $className ) ) {
+        if (stream_resolve_include_path($className)) {
             require_once $className;
+        } elseif (file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$className)) {
+            require_once $className;
+        } else {
+           // echo dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$className;
         }
+
     }
 }

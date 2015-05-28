@@ -9,6 +9,7 @@ namespace CB;
 /* define main paths/**/
 define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 define('CB\\APP_DIR', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
+define('CB\\BIN_DIR', APP_DIR.'bin'.DIRECTORY_SEPARATOR);
 define('CB\\PLUGINS_DIR', DOC_ROOT.'plugins'.DIRECTORY_SEPARATOR);
 define('CB\\SYS_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR);
 define('CB\\CRONS_DIR', SYS_DIR.'crons'.DIRECTORY_SEPARATOR);
@@ -52,7 +53,10 @@ require_once LIB_DIR . 'DB.php';
 
 /* end of update include_path and include scripts */
 
-$cfg = array();
+if(!isset($cfg)|| !is_array($cfg)) {
+    $cfg = array();
+
+}
 //define some library paths
 $cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
 $cfg['SOLR_CLIENT'] = 'Solr/Service.php';

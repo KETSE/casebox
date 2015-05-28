@@ -40,7 +40,7 @@ class CoreTest extends \PHPUnit_Framework_TestCase
 
         $CoreData = $rCore->fetch_assoc();
         
-        $this->assertTrue($CoreData['active'] == '1');
+        $this->assertTrue( $CoreData['active'] == '1' );
 
     }
 
@@ -55,7 +55,13 @@ class CoreTest extends \PHPUnit_Framework_TestCase
 
         \CB\UNITTESTS\HELPERS\getLoginKey();
 
-      $this->assertTrue( \CB\UNITTESTS\HELPERS\login() );
+      $data = \CB\UNITTESTS\HELPERS\getCredentialUserData('root');
+
+      if(isset($data['username']) && isset($data['userpass']) ) {
+        $this->assertTrue( \CB\UNITTESTS\HELPERS\login($data['username'],$data['userpass']) );
+      } else {
+        $this->assertTrue( false, ' can\'t retrive usercredential ' );
+      }
       
     }
 
@@ -81,12 +87,6 @@ class CoreTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(true);
     }
 
-    public function testdefineBackupDir() {
-
-        $cfg = \CB\Config::loadConfigFile(HELPERS\getCBPath().'/config.ini');
-
-        $this->assertEquals(CB_ROOT_PATH.'/backup/', \CB\defineBackupDir($cfg));
-
-    }
+ 
 
 }
