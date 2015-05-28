@@ -33,5 +33,7 @@ include realpath(__DIR__.'/src').'/data_providers.php';
 
 include TEST_PATH.'/vendor/autoload.php';
 
+ini_set('display_errors',1);
+
 
 

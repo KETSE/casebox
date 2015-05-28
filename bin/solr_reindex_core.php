@@ -22,7 +22,7 @@ $path = realpath(
     'crons' . DIRECTORY_SEPARATOR
 );
 
-$cmd = 'php -f "'.$path.DIRECTORY_SEPARATOR.'run_cron.php" -- -n solr_update_tree ';
+$cmd = 'php "'.$path.DIRECTORY_SEPARATOR.'run_cron.php" -n solr_update_tree ';
 
 //check script options
 $options = getopt('c:al', array('core', 'all', 'nolimit'));

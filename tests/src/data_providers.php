@@ -91,3 +91,81 @@ function objectsProvider()
 
     }
 
+/**
+ * 
+ */
+    function fieldsProvider() {
+/**
+ * {"_title":"CheckBox","en":"CheckBox","type":"checkbox","order":1}
+ *
+ */
+ return [
+        [
+            [
+                // 'id' => null,
+                // 'pid' => null, // id of parent (tempalte object)
+                'template_id' => 12,
+                'name' => "CheckBox",
+                'l1' => "CheckBox",
+                'l2' => "CheckBox",
+                'l3' => "CheckBox",
+                'l4' => "CheckBox",
+                'type' => "checkbox",
+                'order' => "1",
+                'cfg' => "",
+                'solr_column_name' => ""
+            ]
+         ],
+         [
+            [
+                // 'id' => null,
+                // 'pid' => null, // id of parent (tempalte object)
+                'template_id' => 12,
+                'name' => "Varchar",
+                'l1' => "Varchar",
+                'l2' => "Varchar",
+                'l3' => "Varchar",
+                'l4' => "Varchar",
+                'type' => "varchar",
+                'order' => "1",
+                'cfg' => "",
+                'solr_column_name' => ""
+            ]
+         ],
+         [
+            [
+                // 'id' => null,
+                // 'pid' => null, // id of parent (tempalte object)
+                'template_id' => 12,
+                'name' => "Date",
+                'l1' => "Date",
+                'l2' => "Date",
+                'l3' => "Date",
+                'l4' => "Date",
+                'type' => "date",
+                'order' => "1",
+                'cfg' => "",
+                'solr_column_name' => ""
+            ]
+         ],
+         [
+
+            [
+                // 'id' => null,
+                // 'pid' => null, // id of parent (tempalte object)
+                'template_id' => 12,
+                'name' => "Integer",
+                'l1' => "Integer",
+                'l2' => "Integer",
+                'l3' => "Integer",
+                'l4' => "Integer",
+                'type' => "integer",
+                'order' => "1",
+                'cfg' => "",
+                'solr_column_name' => ""
+            ]
+        ]
+    ];
+ 
+}
+

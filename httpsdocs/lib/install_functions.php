@@ -4,7 +4,8 @@
  * backup functions used by install scripts
  */
 
-namespace CB;
+namespace CB\INSTALL;
+use CB;
 
 /**
  * return default values for casebox configuration
@@ -47,7 +48,7 @@ function getDefaultConfigValues()
         ,'comments_pass' => ''
 
         ,'PYTHON' => 'python'
-        ,'backup_dir' => dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
+        ,'backup_dir' => \CB\APP_DIR . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
     );
 }
 
@@ -88,11 +89,11 @@ function getParamPhrase($paramName)
         ,'backup_dir' => 'Specify backup directory {default}:' . "\n"
 
         // ,'? or overwrite, cause it asks only when doesnt exist
-        ,'log_solr_overwrite' => 'Solr core {prefix}__log exists or can\'t access solr. Would you like to try to create it [Y/n]: '
+        ,'log_solr_overwrite' => 'Solr core {prefix}_log exists or can\'t access solr. Would you like to try to create it [Y/n]: '
 
-        ,'overwrite__casebox_db' => "'{prefix}__casebox' database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
+        ,'overwrite__casebox_db' => "'{prefix}_casebox' database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
 
-        ,'create__casebox_from_dump' => "{prefix}__casebox database does not exist. Would you like to create it from current installation dump file [Y/n]: "
+        ,'create__casebox_from_dump' => "{prefix}_casebox database does not exist. Would you like to create it from current installation dump file [Y/n]: "
 
         ,'create_basic_core' => "Do you want to create a basic default core [Y,n]: "
         ,'core_name' => "Core name:\n"
@@ -103,6 +104,7 @@ function getParamPhrase($paramName)
         ,'core_root_pass' => 'Specify root user password:' . "\n"
         ,'core_solr_overwrite' => 'Solr core already exists, overwrite [Y/n]: '
         ,'core_solr_reindex' => 'Reindex core [Y/n]: '
+        ,'overwrite_existing_core_db' => "Core database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
 
     );
 
@@ -117,7 +119,7 @@ function getParamPhrase($paramName)
  */
 function displaySystemNotices()
 {
-    if (IS_WINDOWS) {
+    if (\CB\IS_WINDOWS) {
         echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
     } else {
 
@@ -131,12 +133,12 @@ function displaySystemNotices()
  */
 function setOwnershipForApacheUser(&$cfg)
 {
-    if (IS_WINDOWS) {
+    if (\CB\IS_WINDOWS) {
         return ;
     }
 
-    shell_exec('chown -R ' . $cfg['apache_user'].' "' . LOGS_DIR . '"');
-    shell_exec('chown -R ' . $cfg['apache_user'].' "' . DATA_DIR . '"');
+    shell_exec('chown -R ' . $cfg['apache_user'].' "' . \CB\LOGS_DIR . '"');
+    shell_exec('chown -R ' . $cfg['apache_user'].' "' . \CB\DATA_DIR . '"');
 }
 
 /**
@@ -158,7 +160,7 @@ function initSolrConfig(&$cfg)
         $retry = false;
 
         if (!file_exists($cfg['solr_home'])) {
-            if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+            if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
                 $retry = confirm('Can\'t access specified path, would you like to check and enter it again [Y/n]:' . "\n");
             } else {
                 trigger_error('Error accessing solr home directory "' . $cfg['solr_home'] .'".', E_USER_ERROR);
@@ -181,7 +183,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
 {
     //creating solr symlinks
     $solrCSPath = $cfg['solr_home'] . 'configsets' . DIRECTORY_SEPARATOR;
-    $CBCSPath = SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
+    $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
 
     if (!file_exists($solrCSPath)) {
         mkdir($solrCSPath, 744, true);
@@ -207,32 +209,31 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
 {
 
     //verify if solr core exist
-    $solrHost = $cfg['solr_host'];
-    $solrPort = $cfg['solr_port'];
-    $createCore = true;
-    $askReindex = true;
-    $fullCoreName = $cfg['prefix'] . '_'. $coreName;
+    $solrHost     = $cfg['solr_host'];
+    $solrPort     = $cfg['solr_port'];
+    $createCore   = true;
+    $askReindex   = true;
+    $fullCoreName = $cfg['prefix'].'_'.$coreName;
 
-    $solr = Solr\Service::verifyConfigConnection(
-        array(
-            'host' => $solrHost
-            ,'port' => $solrPort
-            ,'core' => $fullCoreName
-            ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
-        )
+    $solr = \CB\Solr\Service::verifyConfigConnection(
+            array(
+                'host' => $solrHost
+                , 'port' => $solrPort
+                , 'core' => $fullCoreName
+                , 'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
+            )
     );
 
     if ($solr !== false) {
-        if (confirm($paramPrefix . 'solr_overwrite', 'n')) {
-            echo 'Unloading core ' . $coreName . '... ';
+        if (confirm($paramPrefix.'solr_overwrite', 'n')) {
+            echo 'Unloading core '.$coreName.'... ';
             unset($solr);
             if (solrUnloadCore($solrHost, $solrPort, $fullCoreName)) {
-                echo "Ok\n";
+                echo "\033[32mOk\033[0m\n";
             } else {
                 displayError("Error unloading core.\n");
                 $createCore = false;
             }
-
         } else {
             $createCore = false;
         }
@@ -242,7 +243,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
         echo 'Creating solr core ... ';
 
         if (solrCreateCore($solrHost, $solrPort, $fullCoreName)) {
-            echo "Ok\n";
+            echo "\033[32mOk\033[0m\n";
         } else {
             displayError("Error creating core.\n");
             $askReindex = false;
@@ -250,51 +251,53 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     }
 
     if ($askReindex && ($paramPrefix !== 'log_')) {
-        if (confirm($paramPrefix . 'solr_reindex', 'n')) {
+        if (confirm($paramPrefix.'solr_reindex', 'n')) {
             echo 'Reindexing core ... ';
 
-            exec('php -f ' . dirname(__FILE__) . DIRECTORY_SEPARATOR . 'solr_reindex_core.php -- -c ' . $coreName . ' -a -l');
-            echo "Ok\n";
+            $cmd_reindex_core = 'php '.\CB\BIN_DIR.'solr_reindex_core.php -c '.$coreName.' -a -l';
+            $reindex_result = shell_exec($cmd_reindex_core);
+            // here need to verify result of execution solr_reindex_core.php
+            echo " \033[32mOk\033[0m\n";
         }
     }
 
-    /**$rez = true;
-    $logCoreName = $cfg['prefix'] . '_log';
+    /*     * $rez = true;
+      $logCoreName = $cfg['prefix'] . '_log';
 
-    $solr = Solr\Service::verifyConfigConnection(
-        array(
-            'host' => $cfg['solr_host']
-            ,'port' => $cfg['solr_port']
-            ,'core' => $logCoreName
-            ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
-        )
-    );
+      $solr = \CB\Solr\Service::verifyConfigConnection(
+      array(
+      'host' => $cfg['solr_host']
+      ,'port' => $cfg['solr_port']
+      ,'core' => $logCoreName
+      ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
+      )
+      );
 
-    if ($solr === false) {
-        if (confirm('create_solr_core')) {
-            echo 'Creating solr core ... ';
+      if ($solr === false) {
+      if (confirm('create_solr_core')) {
+      echo 'Creating solr core ... ';
 
-            if ($h = @fopen(
-                'http://' . $cfg['solr_host']. ':' . $cfg['solr_port'] . '/solr/admin/cores?action=CREATE&' .
-                'name=' . $logCoreName . '&configSet=cb_log',
-                'r'
-            )) {
-                fclose($h);
-                echo "Ok\n";
+      if ($h = @fopen(
+      'http://' . $cfg['solr_host']. ':' . $cfg['solr_port'] . '/solr/admin/cores?action=CREATE&' .
+      'name=' . $logCoreName . '&configSet=cb_log',
+      'r'
+      )) {
+      fclose($h);
+      echo "\033[32mOk\033[0m\n";
 
-            } elseif (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
-                echo "Error crating core, check if solr service is available under specified params.\n";
-                $rez = false;
+      } elseif (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+      echo "Error crating core, check if solr service is available under specified params.\n";
+      $rez = false;
 
-            } else {
-                trigger_error('Error creating solr log core', E_USER_ERROR);
-            }
-        }
-    } else {
-        echo "$logCoreName solr core already exists.\n\r";
-    }
+      } else {
+      trigger_error('Error creating solr log core', E_USER_ERROR);
+      }
+      }
+      } else {
+      echo "$logCoreName solr core already exists.\n\r";
+      }
 
-    return $rez;/**/
+      return $rez;/* */
 }
 
 /**
@@ -358,7 +361,7 @@ function verifyDBConfig(&$cfg)
 
         //check the standart user also
         if (empty($error)) {
-            $dbh = @DB\connectWithParams($cfg);
+            $dbh = @\CB\DB\connectWithParams($cfg);
 
             $error = mysqli_connect_errno();
         }
@@ -367,11 +370,11 @@ function verifyDBConfig(&$cfg)
         $error = true;
     }
 
-    if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+    if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
         if ($error) {
             $rez = !confirm('Failed to connect to DB with error: ' . mysqli_connect_error() . "\n" . ', would you like to update inserted params [Y/n]: ');
         } else {
-            echo "Ok\n";
+            echo "\033[32mOk\033[0m\n";
         }
     } elseif ($error) {
         trigger_error('Error connecting to database with user "' . $cfg['db_user'] .'".', E_USER_ERROR);
@@ -397,7 +400,7 @@ function connectDBWithSuUser($cfg)
         'initsql' => $cfg['initsql']
     );
 
-    return @DB\connectWithParams($newParams);
+    return @\CB\DB\connectWithParams($newParams);
 }
 
 /**
@@ -430,21 +433,26 @@ function createMainDatabase($cfg)
 
     $cbDb = $cfg['prefix'] . '__casebox';
 
-    $r = DB\dbQuery('use `' . $cbDb . '`');
+    $r = \CB\DB\dbQuery('use `' . $cbDb . '`');
     if ($r) {
         if (confirm('overwrite__casebox_db')) {
+
             echo 'Backuping .. ';
-            backupDB($cbDb, $cfg['db_user'], $cfg['db_pass']);
-            echo "Ok\n";
+            
+            if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS')==FALSE)) {
+                backupDB($cbDb, $cfg['db_user'], $cfg['db_pass']);
+            }
+
+            echo "\033[32mOk\033[0m\n";
 
             echo 'Applying dump .. ';
-            exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . APP_DIR . 'install/mysql/_casebox.sql');
-            echo "Ok\n";
+            exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+            echo "\033[32mOk\033[0m\n";
         }
     } else {
         if (confirm('create__casebox_from_dump')) {
-            if (DB\dbQuery('CREATE DATABASE `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-                exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . APP_DIR . 'install/mysql/_casebox.sql');
+            if (\CB\DB\dbQuery('CREATE DATABASE `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
+                exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             } else {
                 $rez = false;
                 echo 'Cant create database "' . $cbDb . '".';
@@ -482,16 +490,21 @@ function readParam($paramName, $defaultValue = null)
 {
     $rez = $defaultValue;
 
-    if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+    if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
         $question = str_replace('{default}', '(default "' . $defaultValue. '")', getParamPhrase($paramName));
+        $question = str_replace('{prefix}', \CB\PREFIX,$question);
         $l = readAline($question);
+
+        if($paramName == 'prefix' && !defined('CB\\PREFIX')) {
+            define('CB\\PREFIX',$l);
+        }
 
         if (!empty($l)) {
             $rez = $l;
         }
 
     } else {
-        $cfg = Cache::get('inCfg');
+        $cfg = \CB\Cache::get('RUN_SETUP_CFG');
         if (!empty($cfg[$paramName])) {
             $rez = $cfg[$paramName];
         }
@@ -558,7 +571,7 @@ function defineBackupDir(&$cfg)
     }
 
     $dir = empty($cfg['backup_dir'])
-        ? dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
+        ? \CB\APP_DIR . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
         : $cfg['backup_dir'];
 
     // define('CB\\BACKUP_DIR', $dir);
@@ -579,6 +592,7 @@ function defineBackupDir(&$cfg)
  */
 function backupFile($fileName)
 {
+
     if (!file_exists($fileName)) {
         return false;
     }
@@ -607,8 +621,8 @@ function backupDB($dbName, $dbUser, $dbPass)
  */
 function displayError($error)
 {
-    if ( Cache::exist('RUN_SETUP_INTERACTIVE_MODE') ) {
-        if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+    if ( \CB\Cache::exist('RUN_SETUP_INTERACTIVE_MODE') ) {
+        if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
             echo $error;
 
             return;

@@ -15,7 +15,8 @@
  * Requirements:
  *     on Windows platform path to mysql/bin should be added to "Path" environment variable
  */
-namespace CB;
+namespace CB\INSTALL;
+use CB;
 
 /* check if we are running under root / Administrator user */
 $currentUser = empty($_SERVER['USER'])
@@ -23,12 +24,15 @@ $currentUser = empty($_SERVER['USER'])
     : $_SERVER['USER'];
 
 if (!in_array($currentUser, array('root', 'Administrator'))) {
-    trigger_error('This script should be run under "root" or "Administrator"', E_USER_ERROR);
+//    trigger_error('This script should be run under "root" or "Administrator"', E_USER_ERROR);
+    echo "\033[31mThis script should be run under \"root\" or \"Administrator\"\033[0m\n";
+    die("try command #sudo php install.php\n");
 }
 
 /*define some basic directories*/
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 $cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
+
 
 if (!isset($cfg)) {
     $cfg = array();
@@ -56,24 +60,30 @@ $configFile = empty($options['f'])
     : $options['f'];
 
 if (!empty($configFile) && file_exists($configFile)) {
-    $options['config'] = Config::loadConfigFile($configFile);
-    Cache::set('inCfg', $options['config']);
+    $options['config'] = \CB\Config::loadConfigFile($configFile);
+    \CB\Cache::set('RUN_SETUP_CFG', $options['config']);
+    if(isset($options['config']['overwrite_create_backups']) && $options['config']['overwrite_create_backups'] == 'n') {
+        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', false );
+    } else {
+        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true );
+    }
+} else {
+    \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true );
 }
 
 
 
 //define working mode
 if (!empty($options['config'])) {
-    // define('CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
-    Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
+    // define('CB\\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', false);
+    \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
     // $cfg = $options['config'];
 
 } else {
-  //  define('CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')', true);
-    Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
+    \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
 }
 
-require_once 'install_functions.php';
+require_once \CB\LIB_DIR.'install_functions.php';
 
 displaySystemNotices();
 
@@ -83,7 +93,8 @@ $defaultValues = getDefaultConfigValues();
 
 $cfg = $cfg + $defaultValues;
 
-if (!IS_WINDOWS) {
+
+if (!\CB\IS_WINDOWS) {
     //ask for apache user and set ownership for some folders
     $cfg['apache_user'] = readParam('apache_user', $cfg['apache_user']);
     setOwnershipForApacheUser($cfg);
@@ -144,22 +155,24 @@ defineBackupDir($cfg);
 echo "\nYou have configured main options for casebox.\n" .
     "Saving your settings to casebox.ini ... ";
 
-backupFile(DOC_ROOT . 'config.ini');
+if(!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == FALSE) ) {
+    backupFile(\CB\DOC_ROOT . 'config.ini');
+}
 
 do {
     $r = putIniFile(
-        DOC_ROOT . 'config.ini',
+        \CB\DOC_ROOT . 'config.ini',
         array_intersect_key($cfg, $defaultValues)
     );
 
     if ($r === false) {
-        if (Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+        if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
             $r = !confirm('error saving to config.ini file. retry [Y/n]: ');
         } else {
             trigger_error('Error saving to config.ini file', E_USER_ERROR);
         }
     } else {
-        echo "Ok\n\n";
+        echo "\033[32mOk\033[0m\n"."\n";
     }
 } while ($r === false);
 
@@ -179,8 +192,9 @@ createMainDatabase($cfg);
 
 echo 'Creating language files .. ';
 exec('php "' . $binDirectorty . 'languages_update_js_files.php"');
+echo "\033[32mOk\033[0m\n";
 
-echo "Ok\n\nCasebox was successfully configured on your system\n" .
+echo "\nCasebox was successfully configured on your system\n" .
     "you should create at least one Core to use it.\n";
 
 //ask if new core instance needed
@@ -189,7 +203,7 @@ if (confirm('create_basic_core')) {
     if (!empty($l)) {
         $options = array(
             'core' => $l
-            ,'sql' => APP_DIR . 'install/mysql/bare_bone_core.sql'
+            ,'sql' => \CB\APP_DIR . 'install/mysql/bare_bone_core.sql'
         );
 
         include $binDirectorty . 'core_create.php';
