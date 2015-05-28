@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 /*
     Reindex solr core
@@ -32,7 +31,8 @@ $core = empty($options['c'])
     : $options['c'];
 
 if (empty($core)) {
-    die('no core specified or invalid options set.');
+    echo 'no core specified or invalid options set.';
+    return;
 }
 
 $all = isset($options['a']) || isset($options['all']);
