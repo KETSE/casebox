@@ -171,9 +171,10 @@ class Base implements \CB\Interfaces\TreeNode
     protected function assignFromParam(&$params)
     {
         if (empty($params['userViewChange'])) {
-            $params['from'] = $this->getViewType();
+            if (empty($params['from']) || ($params['from'] !== 'tree')) {
+                $params['from'] = $this->getViewType();
+            }
         }
-
     }
 
     /**
