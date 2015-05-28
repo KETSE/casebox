@@ -559,7 +559,7 @@ class Notifications
         }
 
         if (!empty($rows)) {
-            $rez = $action['action_type'].'<table border="1" style="border-collapse: collapse" cellpadding="3">'.
+            $rez = '<table border="1" style="border-collapse: collapse" cellpadding="3">'.
                 '<th style="background-color: #d9d9d9">' . L\get('Property') . '</th>' .
                 '<th style="background-color: #d9d9d9">' . L\get('Value') . '</th></tr>' .
                 implode("\n", $rows) . '</table>';

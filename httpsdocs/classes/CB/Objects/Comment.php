@@ -36,25 +36,14 @@ class Comment extends Object
 
         Config::setFlag('disableActivityLog', false);
 
-        //add user to parent object followers and update its sys_data if needed
-        $parentObj = Objects::getCachedObject($p['pid']);
-        $posd = $parentObj->getSysData();
+        $this->parentObj = Objects::getCachedObject($p['pid']);
 
-        $fu = empty($posd['fu'])
-            ? array()
-            : $posd['fu'];
-        $uid = User::getId();
-
-        if (!in_array($uid, $fu)) {
-            $fu[] = intval($uid);
-            $posd['fu'] = $fu;
-            $parentObj->updateSysData($posd);
-        }
+        $this->updateParentFollowers();
 
         // log the action
         $logParams = array(
             'type' => 'comment'
-            ,'new' => $parentObj
+            ,'new' => $this->parentObj
             ,'comment' => $p['data']['_title']
         );
 
@@ -88,6 +77,50 @@ class Comment extends Object
         Log::add($logParams);
 
         return $rez;
+
+    }
+
+    /**
+     * function to update parent followers when adding a comment
+     * with this user and referenced users from comment
+     * @return void
+     */
+    protected function updateParentFollowers()
+    {
+        $p = &$this->data;
+
+        $posd = $this->parentObj->getSysData();
+
+        $newUserIds = array();
+
+        $fu = empty($posd['fu'])
+            ? array()
+            : $posd['fu'];
+        $uid = User::getId();
+
+        if (!in_array($uid, $fu)) {
+            $newUserIds[] = intval($uid);
+        }
+
+        //analize comment text and get referenced users
+        if (preg_match_all('/@([^@\s,]+)/', $p['data']['_title'], $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $uid = User::exists($match[1]);
+                if (is_numeric($uid) && !in_array($uid, $fu) && !in_array($uid, $newUserIds)) {
+                    $newUserIds[] = $uid;
+                }
+            }
+        }
+
+        //update only if new users added
+        if (!empty($newUserIds)) {
+            $fu = array_merge($fu, $newUserIds);
+            $fu = Util\toNumericArray($fu);
+
+            $posd['fu'] = array_unique($fu);
+
+            $this->parentObj->updateSysData($posd);
+        }
 
     }
 

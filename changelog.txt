@@ -1,3 +1,10 @@
+CaseBox 1.9.453 (2015-05-28)
+==============================
+New Features, Improvements
+--------------------------
+- updated demosrc database
+- add comments referenced users to follow user list
+
 CaseBox 1.9.452 (2015-05-28)
 ==============================
 New Features, Improvements

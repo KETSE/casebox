@@ -1,7 +1,8 @@
 /*
+SQLyog Ultimate v11.5 (64 bit)
+MySQL - 5.5.9 : Database - cb_demosrc2
 *********************************************************************
-*/
-
+*/
 
 /*!40101 SET NAMES utf8 */;
 
@@ -212,13 +213,18 @@ CREATE TABLE `notifications` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `object_id` bigint(20) unsigned DEFAULT NULL COMMENT 'think to remove it (doubles field from action_log)',
   `action_id` bigint(20) unsigned NOT NULL,
+  `action_ids` mediumtext COMMENT 'list of last action ids for same grouped action',
+  `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','rename','reopen','status_change','overdue','comment','comment_update','move','password_change','permissions','user_delete','user_create','login','login_fail') NOT NULL,
   `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'think to remove it (doubles field from action_log)',
+  `prev_action_ids` text COMMENT 'previous action ids(for same obj, action type, user) that have not yet been read',
   `user_id` int(10) unsigned NOT NULL,
-  `email_sent` tinyint(1) NOT NULL DEFAULT '0',
+  `email_sent` tinyint(1) NOT NULL DEFAULT '-1' COMMENT '-1 doesnt need to send, 0 - no, 1 - yes',
   `read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'notification has been read in CB',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `UNQ_notifications` (`object_id`,`action_type`,`user_id`),
   KEY `FK_notifications__action_id` (`action_id`),
   KEY `FK_notifications_user_id` (`user_id`),
+  KEY `IDX_notifications_email_sent` (`email_sent`),
   CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -245,8 +251,8 @@ insert  into `objects`(`id`,`data`,`sys_data`) values (1456,'{\"status\":24260,\
 DROP TABLE IF EXISTS `sessions`;
 
 CREATE TABLE `sessions` (
-  `id` varbinary(50) NOT NULL,
-  `pid` varbinary(50) DEFAULT NULL COMMENT 'parrent session id',
+  `id` varbinary(100) NOT NULL,
+  `pid` varbinary(100) DEFAULT NULL COMMENT 'parrent session id',
   `last_action` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires` timestamp NULL DEFAULT NULL COMMENT 'expire could be null for non expiring sessions',
   `user_id` int(10) unsigned NOT NULL,
@@ -864,7 +870,7 @@ DELIMITER $$
 /*!50003 CREATE */ /*!50003 TRIGGER `tree_au` AFTER UPDATE ON `tree` FOR EACH ROW BEGIN
 	DECLARE tmp_old_pids
 		,tmp_new_pids TEXT DEFAULT '';
-
+	
 	DECLARE tmp_old_case_id
 		,tmp_new_case_id
 		,tmp_old_security_set_id
@@ -874,7 +880,7 @@ DELIMITER $$
 	DECLARE tmp_old_pids_length
 		,tmp_old_security_set_length
 		,tmp_acl_count INT UNSIGNED DEFAULT 0;
-
+	
 	/* get pids path, case_id and store them in tree_info table*/
 	IF( (COALESCE(old.pid, 0) <> COALESCE(new.pid, 0) )
 	    OR ( old.inherit_acl <> new.inherit_acl )
@@ -895,12 +901,12 @@ DELIMITER $$
 		FROM tree_info ti
 		LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 		WHERE ti.id = new.id;
-
+		
 		/* check if updated node is a case */
 		IF(tmp_old_case_id = old.id) THEN
 			SET tmp_new_case_id = new.id;
 		END IF;
-
+		
 		/* form new data based on new parent
 		*/
 		if(new.pid is null) THEN
@@ -923,7 +929,7 @@ DELIMITER $$
 			LEFT JOIN tree_info ti ON t.id = ti.id
 			LEFT JOIN tree_acl_security_sets ts ON ti.security_set_id = ts.id
 			WHERE t.id = new.pid;
-
+			
 			SET tmp_new_pids = TRIM( ',' FROM CONCAT( tmp_new_pids, ',', new.id) );
 		END IF;
 		/* end of form new data based on new parent */
@@ -935,7 +941,7 @@ DELIMITER $$
 			else
 				SET tmp_new_security_set = TRIM( ',' FROM CONCAT(tmp_new_security_set, ',', new.id ) );
 			END IF;
-
+			
 			UPDATE tree_acl_security_sets
 			SET `set` = tmp_new_security_set
 				,updated = 1
@@ -1818,13 +1824,13 @@ BEGIN
 	DELETE FROM tmp_achild_ids2;
 	insert into tmp_achild_ids select id from tree where pid = in_id;
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_achild_ids
+		update tree, tmp_achild_ids 
 		  set tree.did = NULL
 		  ,tree.ddate = NULL
-		  ,tree.dstatus = 0
+		  ,tree.dstatus = 0 
 		  , tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
-
+		
 		DELETE FROM tmp_achild_ids2;
 		insert into tmp_achild_ids2 select id from tmp_achild_ids;
 		delete from tmp_achild_ids;
@@ -1849,13 +1855,13 @@ BEGIN
 	DELETE FROM tmp_dchild_ids2;
 	insert into tmp_dchild_ids select id from tree where pid = in_id;
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_dchild_ids
+		update tree, tmp_dchild_ids 
 		    set tree.did = in_did
 			,tree.ddate = CURRENT_TIMESTAMP
 			,tree.dstatus = 2
 			,tree.updated = 1
 		    where tmp_dchild_ids.id = tree.id;
-
+		    
 		DELETE FROM tmp_dchild_ids2;
 		insert into tmp_dchild_ids2 select id from tmp_dchild_ids;
 		delete from tmp_dchild_ids;
@@ -1876,31 +1882,31 @@ DELIMITER $$
 BEGIN
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids(id bigint UNSIGNED);
 	CREATE TEMPORARY TABLE IF NOT EXISTS tmp_achild_ids2(id BIGINT UNSIGNED);
-
+	
 	delete from tmp_achild_ids;
 	DELETE FROM tmp_achild_ids2;
-	insert into tmp_achild_ids
-		select id
-		from tree
+	insert into tmp_achild_ids 
+		select id 
+		from tree 
 		where pid = in_id and draft = 1;
-
+	
 	while(ROW_COUNT() > 0)do
-		update tree, tmp_achild_ids
+		update tree, tmp_achild_ids 
 		  set 	tree.draft = 0
 			,tree.updated = 1
 		where tmp_achild_ids.id = tree.id;
-
+		
 		DELETE FROM tmp_achild_ids2;
-
-		insert into tmp_achild_ids2
-			select id
+		
+		insert into tmp_achild_ids2 
+			select id 
 			from tmp_achild_ids;
 		delete from tmp_achild_ids;
-
-		INSERT INTO tmp_achild_ids
-			SELECT t.id
-			FROM tree t
-			join tmp_achild_ids2 c
+		
+		INSERT INTO tmp_achild_ids 
+			SELECT t.id 
+			FROM tree t 
+			join tmp_achild_ids2 c 
 			  on t.pid = c.id and t.draft = 1;
 	END WHILE;
     END */$$
@@ -2073,8 +2079,8 @@ BEGIN
 		,tree_acl_security_sets
 		SET tree_acl_security_sets.`set` = CONCAT(
 			tmp_to_security_set
-			,CASE WHEN tmp_security_set_length IS NULL
-			THEN
+			,CASE WHEN tmp_security_set_length IS NULL 
+			THEN 
 			  CONCAT(',', tree_acl_security_sets.set)
 			ELSE
 			 SUBSTRING(tree_acl_security_sets.set, tmp_security_set_length)
@@ -2111,38 +2117,38 @@ DELIMITER $$
     SQL SECURITY INVOKER
 BEGIN
 	DECLARE `tmp_level` INT DEFAULT 0;
-
+	
 	CREATE TABLE IF NOT EXISTS tmp_level_id (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
 	CREATE TABLE IF NOT EXISTS tmp_level_pid (`id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`id`));
-
+	
 	INSERT INTO tmp_level_id
 	  SELECT ts1.id
 	  FROM templates_structure ts1
 	  LEFT JOIN templates_structure ts2 ON ts1.pid = ts2.id
 	  WHERE ts2.id IS NULL;
-
+	  
 	WHILE (ROW_COUNT() > 0) DO
 	  UPDATE templates_structure, tmp_level_id
-	  SET templates_structure.`level` = tmp_level
+	  SET templates_structure.`level` = tmp_level 
 	  WHERE templates_structure.id = tmp_level_id.id;
-
+	
 	  DELETE FROM tmp_level_pid;
-
+	  
 	  INSERT INTO tmp_level_pid
 		SELECT id FROM tmp_level_id;
-
+	  
 	  DELETE FROM tmp_level_id;
 	  INSERT INTO tmp_level_id
 	    SELECT ts1.id
 	    FROM templates_structure ts1
 	    JOIN tmp_level_pid ts2 ON ts1.pid = ts2.id;
-
+	    
 	  SET tmp_level = tmp_level + 1;
 	END WHILE;
-
+	
 	DROP TABLE tmp_level_id;
 	DROP TABLE tmp_level_pid;
-
+	
     END */$$
 DELIMITER ;
 
