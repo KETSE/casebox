@@ -51,6 +51,7 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
 
 
     $config_filename     = TEST_PATH_TEMP.'/auto_install_config.ini';
+
     $config_filename_tpl = TEST_PATH.'/src/config_templates/auto_install_config.ini';
 
     if (!file_exists($config_filename)) {
@@ -59,7 +60,7 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
             $test_cfg = parse_ini_file($config_filename_tpl);
             \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
 
-            $test_cfg['backup_dir']      = CB_ROOT_PATH.'/backup';
+            $test_cfg['backup_dir']      = CB_ROOT_PATH . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR;
             $test_cfg['server_name']     = \CB\readParam('server_name', $test_cfg['server_name']);
             $test_hostname               = preg_replace('/^http(s)?:\/\//si', '', $test_cfg['server_name']);
             $test_cfg['admin_email']     = 'admin@'.$test_hostname;

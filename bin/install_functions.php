@@ -211,7 +211,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     $solrPort = $cfg['solr_port'];
     $createCore = true;
     $askReindex = true;
-    $fullCoreName = $cfg['prefix'] . $coreName;
+    $fullCoreName = $cfg['prefix'] . '_'. $coreName;
 
     $solr = Solr\Service::verifyConfigConnection(
         array(
@@ -549,18 +549,24 @@ function putIniFile ($file, $array, $i = 0)
  */
 function defineBackupDir(&$cfg)
 {
-    if (defined('CB\\BACKUP_DIR')) {
+   /* if (defined('CB\\BACKUP_DIR')) {
         return BACKUP_DIR;
+    } */
+
+    if (\CB\Cache::exist('RUN_INSTALL_BACKUP_DIR')) {
+        return \CB\Cache::get('RUN_INSTALL_BACKUP_DIR');
     }
 
     $dir = empty($cfg['backup_dir'])
         ? dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
         : $cfg['backup_dir'];
 
-    define('CB\\BACKUP_DIR', $dir);
+    // define('CB\\BACKUP_DIR', $dir);
 
-    if (!file_exists(BACKUP_DIR)) {
-        mkdir(BACKUP_DIR, 744, true);
+    \CB\Cache::set('RUN_INSTALL_BACKUP_DIR', $dir);
+
+    if (!file_exists( $dir)) {
+        mkdir( $dir, 0766, true);
     }
 
     return $dir;
@@ -577,7 +583,7 @@ function backupFile($fileName)
         return false;
     }
 
-    return rename($fileName, BACKUP_DIR . date('Ymd_His_') . basename($fileName));
+    return rename($fileName, \CB\Cache::get('RUN_INSTALL_BACKUP_DIR'). date('Ymd_His_') . basename($fileName));
 }
 
 /**
@@ -587,7 +593,7 @@ function backupFile($fileName)
  */
 function backupDB($dbName, $dbUser, $dbPass)
 {
-    $fileName = BACKUP_DIR . date('Ymd_His_') . $dbName . '.sql';
+    $fileName = \CB\Cache::get('RUN_INSTALL_BACKUP_DIR') . date('Ymd_His_') . $dbName . '.sql';
 
     exec('mysqldump --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
 

@@ -80,4 +80,13 @@ class CoreTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertTrue(true);
     }
+
+    public function testdefineBackupDir() {
+
+        $cfg = \CB\Config::loadConfigFile(HELPERS\getCBPath().'/config.ini');
+
+        $this->assertEquals(CB_ROOT_PATH.'/backup/', \CB\defineBackupDir($cfg));
+
+    }
+
 }

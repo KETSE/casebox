@@ -55,11 +55,12 @@ $configFile = empty($options['f'])
     ? @$options['file']
     : $options['f'];
 
-if (!empty($configFile)) {
+if (!empty($configFile) && file_exists($configFile)) {
     $options['config'] = Config::loadConfigFile($configFile);
+    Cache::set('inCfg', $options['config']);
 }
 
-Cache::set('inCfg', $options['config']);
+
 
 //define working mode
 if (!empty($options['config'])) {
@@ -137,6 +138,7 @@ $cfg['PYTHON'] = readParam('PYTHON', $cfg['PYTHON']);
 $cfg['backup_dir'] = readParam('backup_dir', $cfg['backup_dir']);
 
 //define BACKUP_DIR constant and create corresponding directory
+
 defineBackupDir($cfg);
 
 echo "\nYou have configured main options for casebox.\n" .
@@ -170,7 +172,7 @@ if (createSolrConfigsetsSymlinks($cfg)) {
 
 //try to create log core
 
-createSolrCore($cfg, '_log', 'log_');
+createSolrCore($cfg, 'log', 'log_');
 
 //create default database (<prefix>__casebox)
 createMainDatabase($cfg);
