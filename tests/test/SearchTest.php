@@ -11,7 +11,14 @@ class SearchTest extends \PHPUnit_Framework_TestCase
 
     public function testSearch()
     {
-        $this->assertTrue(true);
+       $src = new \CB\Search();
+       $this->assertTrue($src->ping()>0);
+
+        $src_response = $src->search('test',0,10,[]);
+
+        $this->assertEquals('OK',$src_response->getHttpStatusMessage(), $src_response->getHttpStatusMessage() );
+
+
     }
 
     public function testReindexSolr() {
