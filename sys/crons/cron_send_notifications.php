@@ -43,8 +43,8 @@ $sql = 'SELECT
     ,n.object_id
     ,n.action_type
     ,n.user_id `to_user_id`
+    ,n.`from_user_id`
     ,l.object_pid
-    ,l.user_id `from_user_id`
     ,l.action_time
     ,l.data
     ,l.activity_data_db

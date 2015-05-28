@@ -26,7 +26,6 @@ Ext.define('CB.browser.NotificationsView', {
                 ,itemId: 'reload'
                 ,scale: 'medium'
                 ,tooltip: L.Refresh
-                ,text: L.Refresh
                 ,scope: this
                 ,handler: this.onReloadClick
             })
@@ -43,7 +42,7 @@ Ext.define('CB.browser.NotificationsView', {
             }
             ,items: [
                 this.actions.markAllAsRead
-                ,'-'
+                ,'->'
                 ,this.actions.reload
             ]
         });

@@ -206,9 +206,9 @@ class Log
         unset($users[User::getId()]);
 
         $sql = 'INSERT INTO notifications
-            (object_id, action_id, action_ids, action_type, user_id, email_sent, `read`)
+            (object_id, action_id, action_ids, action_type, from_user_id, user_id, email_sent, `read`)
 
-            SELECT l.object_id, l.id, l.id, l.action_type, $2, $3, 0
+            SELECT l.object_id, l.id, l.id, l.action_type, l.user_id, $2, $3, 0
             FROM action_log l
             WHERE l.id = $1
 
