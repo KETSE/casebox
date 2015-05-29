@@ -317,7 +317,7 @@ class Service
 
     private function debugInfo()
     {
-        return \CB\IS_DEBUG_HOST
+        return constant('CB\\IS_DEBUG_HOST')
             ? "\n".' ('.$this->host.':'.$this->port.' -> '.$this->core.' )'
             : '';
     }

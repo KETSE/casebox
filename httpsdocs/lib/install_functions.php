@@ -5,6 +5,7 @@
  */
 
 namespace CB\INSTALL;
+
 use CB;
 
 /**
@@ -216,12 +217,12 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
     $fullCoreName = $cfg['prefix'].'_'.$coreName;
 
     $solr = \CB\Solr\Service::verifyConfigConnection(
-            array(
-                'host' => $solrHost
-                , 'port' => $solrPort
-                , 'core' => $fullCoreName
-                , 'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
-            )
+        array(
+            'host' => $solrHost
+            ,'port' => $solrPort
+            ,'core' => $fullCoreName
+            ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
+        )
     );
 
     if ($solr !== false) {
@@ -438,8 +439,8 @@ function createMainDatabase($cfg)
         if (confirm('overwrite__casebox_db')) {
 
             echo 'Backuping .. ';
-            
-            if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS')==FALSE)) {
+
+            if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
                 backupDB($cbDb, $cfg['db_user'], $cfg['db_pass']);
             }
 
@@ -491,12 +492,19 @@ function readParam($paramName, $defaultValue = null)
     $rez = $defaultValue;
 
     if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
-        $question = str_replace('{default}', '(default "' . $defaultValue. '")', getParamPhrase($paramName));
-        $question = str_replace('{prefix}', \CB\PREFIX,$question);
+        $question = str_replace(
+            '{default}',
+            '(default "' . $defaultValue. '")',
+            getParamPhrase($paramName)
+        );
+
+        $question = str_replace('{prefix}', constant('CB\\PREFIX'), $question);
+
         $l = readAline($question);
 
-        if($paramName == 'prefix' && !defined('CB\\PREFIX')) {
-            define('CB\\PREFIX',$l);
+        /* define prefix not defined yet */
+        if ($paramName == 'prefix' && !defined('CB\\PREFIX')) {
+            define('CB\\PREFIX', $l);
         }
 
         if (!empty($l)) {
@@ -562,10 +570,6 @@ function putIniFile ($file, $array, $i = 0)
  */
 function defineBackupDir(&$cfg)
 {
-   /* if (defined('CB\\BACKUP_DIR')) {
-        return BACKUP_DIR;
-    } */
-
     if (\CB\Cache::exist('RUN_INSTALL_BACKUP_DIR')) {
         return \CB\Cache::get('RUN_INSTALL_BACKUP_DIR');
     }
@@ -574,12 +578,10 @@ function defineBackupDir(&$cfg)
         ? \CB\APP_DIR . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
         : $cfg['backup_dir'];
 
-    // define('CB\\BACKUP_DIR', $dir);
-
     \CB\Cache::set('RUN_INSTALL_BACKUP_DIR', $dir);
 
-    if (!file_exists( $dir)) {
-        mkdir( $dir, 0766, true);
+    if (!file_exists($dir)) {
+        mkdir($dir, 0766, true);
     }
 
     return $dir;
@@ -621,7 +623,7 @@ function backupDB($dbName, $dbUser, $dbPass)
  */
 function displayError($error)
 {
-    if ( \CB\Cache::exist('RUN_SETUP_INTERACTIVE_MODE') ) {
+    if (\CB\Cache::exist('RUN_SETUP_INTERACTIVE_MODE')) {
         if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
             echo $error;
 
