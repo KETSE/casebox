@@ -31,7 +31,8 @@ class SearchTest extends \PHPUnit_Framework_TestCase
     public function testReindexSolr() {
 
         
-        /*$argv[1] = '-c';
+        /*
+        $argv[1] = '-c';
         $argv[2] = 'test';
         $argv[3] = '-a';
         $argv[4] = '-l'; */
