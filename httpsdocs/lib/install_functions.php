@@ -138,8 +138,16 @@ function setOwnershipForApacheUser(&$cfg)
         return ;
     }
 
-    shell_exec('chown -R ' . $cfg['apache_user'].' "' . \CB\LOGS_DIR . '"');
-    shell_exec('chown -R ' . $cfg['apache_user'].' "' . \CB\DATA_DIR . '"');
+    $cmdSet = [
+        'chown -R ' . $cfg['apache_user'].' "' . \CB\LOGS_DIR . '"',
+        'chown -R ' . $cfg['apache_user'].' "' . \CB\DATA_DIR . '"',
+        'chown -R ' . $cfg['apache_user'].' "' . \CB\DOC_ROOT . 'config.ini"'
+    ];
+
+    foreach($cmdSet as $shell_cmd) {
+        shell_exec($shell_cmd);
+    };
+
 }
 
 /**

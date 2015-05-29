@@ -97,6 +97,7 @@ $cfg = $cfg + $defaultValues;
 if (!\CB\IS_WINDOWS) {
     //ask for apache user and set ownership for some folders
     $cfg['apache_user'] = readParam('apache_user', $cfg['apache_user']);
+    echo 'SET APACHE USERS:';
     setOwnershipForApacheUser($cfg);
 }
 

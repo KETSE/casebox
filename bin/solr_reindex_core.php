@@ -24,7 +24,9 @@ $path = realpath(
 $cmd = 'php "'.$path.DIRECTORY_SEPARATOR.'run_cron.php" -n solr_update_tree ';
 
 //check script options
-$options = getopt('c:al', array('core', 'all', 'nolimit'));
+if (empty($options)) {
+    $options = getopt('c:al', array('core', 'all', 'nolimit'));
+}
 
 $core = empty($options['c'])
     ? @$options['core']
