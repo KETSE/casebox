@@ -29,8 +29,6 @@ class InstallTest extends \PHPUnit_Framework_TestCase
 
         $result = \CB\INSTALL\createSolrConfigsetsSymlinks($cfg);
 
-        print_r($result);
-
         $this->assertTrue($result['success'], ' creates symplink return errors');
 
         $this->assertTrue( file_exists($result['links']['log']), 'solr logs configset symlink not created : ' . $result['links']['log'] );

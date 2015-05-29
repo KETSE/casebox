@@ -16,20 +16,16 @@ function get_basic_search_data() {
                     */
                    [
                     'postdata' => '{"action":"CB_BrowserView","method":"getChildren","data":[{"facets":"general","id":0,"from":"grid","path":"0","query":null,"start":0,"page":1,"limit":50}],"type":"rpc","tid":89}',
-                    'expected_response' => '{"type":"rpc","tid":89,"action":"CB_BrowserView","method":"getChildren","result":{"success":true,"pathtext"
-:"My CaseBox","folderProperties":{"name":"","path":"\/0","menu":""},"data":[{"name":"Tasks","iconCls"
-:"icon-task","has_childs":true,"nid":"3-tasks"},{"name":"All Folders","iconCls":"icon-folder","has_childs"
-:true,"nid":"1"},{"name":"Recycle Bin","iconCls":"icon-trash","has_childs":true,"nid":"27-recycleBin"
-}],"total":3,"page":1}}'
+                    'expected_response' => '{"action":"CB_BrowserView","method":"getChildren","result":{"success":true}}'
                    ]
                ], 
                [ // click on root note on tree
                    [
                     'postdata' => '{"action":"CB_BrowserTree","method":"getChildren","data":[{"from":"tree","path":"/0","showFoldersContent":false,"node":"root"}],"type":"rpc","tid":219}',
-                    'expected_response' => '{"type":"rpc","tid":219,"action":"CB_BrowserTree","method":"getChildren","result":[{"name":"Tasks","iconCls"
-:"icon-task","has_childs":true,"nid":"3-tasks","loaded":false},{"name":"All Folders","iconCls":"icon-folder"
-,"has_childs":true,"nid":"1","loaded":false},{"name":"Recycle Bin","iconCls":"icon-trash","has_childs"
-:true,"nid":"27-recycleBin","loaded":false}]}'
+                    'expected_response' => '{"action":"CB_BrowserTree","method":"getChildren","result":[{"name":"Tasks","iconCls"
+:"icon-task","has_childs":true,"nid":"3-tasks"},{"name":"All Folders","iconCls":"icon-folder"
+,"has_childs":true,"nid":"1"},{"name":"Recycle Bin","iconCls":"icon-trash","has_childs"
+:true,"nid":"27-recycleBin"}]}'
                    ]
                ],
                [
