@@ -13,7 +13,7 @@ function getCBPath()
 }
 
 /**
- * 
+ *
  * @param type $corename
  */
 function init($corename = DEFAULT_TEST_CORENAME)
@@ -44,7 +44,7 @@ function getConfigFilename()
 
 /**
  * get path to template for file configuration
- * @return string 
+ * @return string
  */
 function getConfigFilenameTPL()
 {
@@ -52,7 +52,7 @@ function getConfigFilenameTPL()
 }
 
 /**
- * 
+ *
  * @param type $corename
  */
 function prepareInstance($corename = DEFAULT_TEST_CORENAME)
@@ -82,20 +82,33 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
             $test_cfg['backup_dir']      = CB_ROOT_PATH.DIRECTORY_SEPARATOR.'backup'.DIRECTORY_SEPARATOR;
             $test_cfg['server_name']     = \CB\INSTALL\readParam('server_name', $test_cfg['server_name']);
             $test_hostname               = preg_replace('/^http(s)?:\/\//si', '', $test_cfg['server_name']);
+
+            $test_cfg['solr_home']     = \CB\INSTALL\readParam('solr_home', $test_cfg['solr_home']);
+
             $test_cfg['admin_email']     = 'admin@'.$test_hostname;
             $test_cfg['sender_email']    = 'sender@'.$test_hostname;
             $test_cfg['comments_email']  = 'comments@'.$test_hostname;
             $test_cfg['core_root_email'] = 'root@'.$test_hostname;
 
-            $test_cfg['apache_user'] = \CB\INSTALL\readParam('apache_user', $test_cfg['apache_user']);
+            if (!\CB\IS_WINDOWS) {
+                //ask for apache user and set ownership for some folders
+                $test_cfg['apache_user'] = \CB\INSTALL\readParam('apache_user', $test_cfg['apache_user']);
+            }
+
             $test_cfg['db_user']     = \CB\INSTALL\readParam('db_user', $test_cfg['db_user']);
             $test_cfg['db_pass']     = \CB\INSTALL\readParam('db_pass');
 
             $test_cfg['su_db_user'] = \CB\INSTALL\readParam('su_db_user', $test_cfg['su_db_user']);
             $test_cfg['su_db_pass'] = \CB\INSTALL\readParam('su_db_pass');
+
             echo 'writing autoconfig file to:'.$config_filename.PHP_EOL;
+
             \CB\INSTALL\putIniFile($config_filename, $test_cfg);
-            shell_exec('chown -R ' . $test_cfg['apache_user'].' "' . $config_filename . '"');
+
+            if (!\CB\IS_WINDOWS) {
+                shell_exec('chown ' . $test_cfg['apache_user'].' "' . $config_filename . '"');
+            }
+
 
             \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
         }
@@ -108,7 +121,7 @@ function prepareInstance($corename = DEFAULT_TEST_CORENAME)
             'file' => $config_filename
         );
         include CB_ROOT_PATH.'/bin/install.php';
-        
+
     } else {
         $error_msg = ' Please create cofig file : '.$config_filename.PHP_EOL.' '
             .' You can use file: '.TEST_PATH.'/src/config_templates/auto_install_config.ini as template '.PHP_EOL.PHP_EOL;
@@ -130,7 +143,7 @@ function getCookieFilePath($corename = DEFAULT_TEST_CORENAME)
 }
 
 /**
- * 
+ *
  * @param type $ch
  */
 function setDefaulCurlParams(&$ch)
@@ -144,7 +157,7 @@ function setDefaulCurlParams(&$ch)
 }
 
 /**
- * 
+ *
  * @param type $corename
  * @return type
  */
@@ -163,6 +176,7 @@ function getCfg()
     $cfg_file = getCBPath().'/config.ini';
     if (file_exists($cfg_file)) {
         $data_cfg = parse_ini_file($cfg_file);
+
         return $data_cfg;
     } else {
         trigger_error('can\'t find current cfg file', E_USER_WARNING);
@@ -181,6 +195,7 @@ function getHost()
     if (isset($cfg['server_name'])) {
         $sourceUrl = parse_url($cfg['server_name']);
         $host      = $sourceUrl['host'];
+
         return $host;
     } else {
         trigger_error('cant read cfg for server_name', E_USER_WARNING);
@@ -188,7 +203,7 @@ function getHost()
 }
 
 /**
- * 
+ *
  * @param type $corename
  */
 function getLoginKey($corename = DEFAULT_TEST_CORENAME)
@@ -213,7 +228,7 @@ function getLoginKey($corename = DEFAULT_TEST_CORENAME)
 }
 
 /**
- * 
+ *
  * @param type $corename
  * @param type $username
  * @param type $userpass
@@ -231,7 +246,7 @@ function login($username = DEFAULT_TEST_USERNAME, $userpass = DEFAULT_TEST_USERP
 
     // set url
     curl_setopt($ch, CURLOPT_URL, getCoreUrl($corename).'login/auth/');
-    curl_setopt($ch, CURLOPT_POST, TRUE);
+    curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 
     curl_setopt($ch, CURLOPT_COOKIEJAR, getCookieFilePath($corename));
@@ -282,7 +297,8 @@ function getCredentialUserData($username)
                 $data['userpass'] = $test_cnf['core_root_pass'];
             }
             break;
-        default :
+
+        default:
             $data['userpass'] = 'test';
     }
 
