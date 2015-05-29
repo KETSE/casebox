@@ -42,6 +42,7 @@ bin/recreate_docs.bat
 apigen.neon
 
 /nbproject/**
+/tests/*.bat
 /tests/composer.phar
 /tests/composer.lock
 /tests/vendor/**
