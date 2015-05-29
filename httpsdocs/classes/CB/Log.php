@@ -225,7 +225,6 @@ class Log
             ,`read` = 0';
 
         foreach ($users as $uid => $uMailSent) {
-            echo "!!$uid => $uMailSent\n";
             DB\dbQuery(
                 $sql,
                 array(

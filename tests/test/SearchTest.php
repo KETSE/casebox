@@ -19,8 +19,6 @@ class SearchTest extends \PHPUnit_Framework_TestCase
      */
     public function testSearch($search)
     {
-        return $this->assertTrue(true);
-
         $src = new \CB\Search();
 
         $this->assertTrue($src->ping() > 0);
@@ -34,6 +32,5 @@ class SearchTest extends \PHPUnit_Framework_TestCase
         $this->assertArraySubset(json_decode($search['expected_response'], true), json_decode($result, true), $result);
 
     }
-
 
 }
