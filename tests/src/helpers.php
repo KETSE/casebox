@@ -23,7 +23,8 @@ function init($corename = DEFAULT_TEST_CORENAME)
     $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
     $_SERVER['SERVER_NAME'] = getHost();
     $_GET['core']           = $corename;
-    $_SESSION['user']       = array('id' => 1);
+    $_SESSION['user']       = array('id' => 1, 'groups' => [] );
+
     require_once $CB_PATH.'/config.php';
     require_once $CB_PATH.'/lib/language.php';
 

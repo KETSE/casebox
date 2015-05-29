@@ -10,10 +10,12 @@ namespace CB;
 
 require_once dirname(__FILE__) . '/config.php';
 
+if (!(php_sapi_name() == "cli")) {
 //Starting Session
-$sessionHandler = new Session();
-session_set_save_handler($sessionHandler, true);
-session_start();
+    $sessionHandler = new Session();
+    session_set_save_handler($sessionHandler, true);
+    session_start();
+}
 
 // check if loged in
 # simple hack to call init.php from another script without a redirect to login.
