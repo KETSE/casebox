@@ -20,8 +20,22 @@ class InstallTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    public function testCreateSolrCore()
+    public function testcreateSolrConfigsetsSymlinks()
     {
 
+        $dc = DIRECTORY_SEPARATOR;
+
+        $cfg = \CB\Config::loadConfigFile(HELPERS\getCBPath() . $dc . 'config.ini');
+
+        $result = \CB\INSTALL\createSolrConfigsetsSymlinks($cfg);
+
+        print_r($result);
+
+        $this->assertTrue($result['success'], ' creates symplink return errors');
+
+        $this->assertTrue( file_exists($result['links']['log']), 'solr logs configset symlink not created : ' . $result['links']['log'] );
+        $this->assertTrue( file_exists($result['links']['default']), 'solr default configset symlink not created : ' .$result['links']['default'] );
+
     }
+    
 }

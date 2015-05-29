@@ -194,16 +194,21 @@ function createSolrConfigsetsSymlinks(&$cfg)
     }
 
     $r = true;
-    if (!file_exists($solrCSPath . 'cb_default')) {
-        $r = symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_default');
+
+    $defaultLinkName = $solrCSPath . $cfg['prefix'].'_default';
+    if (!file_exists($defaultLinkName)) {
+        $r = symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $defaultLinkName );
     }
-    if ( !file_exists($solrCSPath . 'cb_log' ) ) {
-        $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_log');
+
+    $logLinkName = $solrCSPath . 'cb_log';
+    if ( !file_exists($logLinkName) ) {
+        $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName );
     }
 
     }
 
-    return $r;
+    return [ 'success' => $r, 'links' => [ 'log' => $defaultLinkName, 'default' => $defaultLinkName ] ];
+    
 }
 
 /**
@@ -414,13 +419,13 @@ function createMainDatabase($cfg)
             echo "\033[32mOk\033[0m\n";
 
             echo 'Applying dump .. ';
-            exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+            echo shell_exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             echo "\033[32mOk\033[0m\n";
         }
     } else {
         if (confirm('create__casebox_from_dump')) {
             if (\CB\DB\dbQuery('CREATE DATABASE `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-                exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+                echo shell_exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             } else {
                 $rez = false;
                 echo 'Cant create database "' . $cbDb . '".';

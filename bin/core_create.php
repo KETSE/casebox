@@ -58,11 +58,12 @@ $dbPass = $cfg['db_pass'];
 $applyDump = true;
 
 if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
-    if ( confirm('overwrite_existing_core_db') && !( \CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == FALSE )  ) {
-        echo 'Backuping .. ';
-        backupDB($dbName, $dbUser, $dbPass);
-        echo "Ok\n";
-
+    if ( confirm('overwrite_existing_core_db') ) {
+        if (!( \CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == FALSE )) {
+            echo 'Backuping .. ';
+            backupDB($dbName, $dbUser, $dbPass);
+            echo "Ok\n";
+        }
     } else {
         $applyDump = false;
     }

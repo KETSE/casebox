@@ -150,7 +150,7 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
         $tpl_r = \CB\DB\dbQuery($TPL_SQL);
 
         if ($tpl = $tpl_r->fetch_assoc()) {
-            $data_template['id'] = $tpl_obj->load($tpl['id'])['id'];
+            $data_template['id'] = $tpl['id'];
             $this->assertTrue($data_template['id'] > 0, ' Error on load Template');
         } else/**/ {
             // first add empty template
