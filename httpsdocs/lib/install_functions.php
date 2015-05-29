@@ -182,6 +182,9 @@ function initSolrConfig(&$cfg)
  */
 function createSolrConfigsetsSymlinks(&$cfg)
 {
+
+   if(isset($cfg['prefix']))  {
+       
     //creating solr symlinks
     $solrCSPath = $cfg['solr_home'] . 'configsets' . DIRECTORY_SEPARATOR;
     $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
@@ -194,8 +197,10 @@ function createSolrConfigsetsSymlinks(&$cfg)
     if (!file_exists($solrCSPath . 'cb_default')) {
         $r = symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_default');
     }
-    if (!file_exists($solrCSPath . 'cb_log')) {
+    if ( !file_exists($solrCSPath . 'cb_log' ) ) {
         $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $solrCSPath . 'cb_log');
+    }
+
     }
 
     return $r;

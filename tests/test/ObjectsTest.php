@@ -113,7 +113,9 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
             ' error on updated template data '.print_r($read_data_template, true));
 
         // four delete object
+        
         /*
+         *
         $obj->delete(false);
         $obj->delete(true);
 
@@ -122,7 +124,8 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
         $read_data_template = $obj->getData();
 
         $this->assertTrue(empty($read_data_template['id']), ' error delete template data template '.print_r($read_data_template,true));
-         * */
+         *
+         **/
         
     }
     
@@ -145,16 +148,14 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
 
          $tpl_obj = new \CB\Objects\Template();
 
-        /*$TPL_SQL = 'select id from tree where `name` like "Test fields CRUD" and pid = 3 and template_id = 11 limit 1';
+        $TPL_SQL = 'select id from tree where `name` like "Test fields CRUD" and pid = 3 and template_id = 11 limit 1';
 
         $tpl_r = \CB\DB\dbQuery($TPL_SQL);
 
-       
-
         if ($tpl = $tpl_r->fetch_assoc()) {
-            $data_template['id'] = $tpl_obj->load($tpl['id']);
+            $data_template['id'] = $tpl['id'];
             $this->assertTrue($data_template['id'] > 0, ' Error on load Template');
-        } else*/ {
+        } else {
             // first add empty template
             $data_template = [
                 "pid" => 3, // /Tree/System/Templates
@@ -181,21 +182,18 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
             ];
 
             $data_template['id'] = $tpl_obj->create($data_template);
-            
             $this->assertTrue($data_template['id'] > 0, ' Error on create Template');
-            
         }
 
 
         // CREATE FIELDS
 
         if (isset($data_template['id']) && $data_template['id'] > 0) {
-            
-            $data_field['pid'] = $data_template['id'];
-            $obj_field        = new \CB\Objects\TemplateField();
-            $data_field['id'] = $obj_field->create($data_field);
-            $this->assertTrue($data_field['id'] > 0, ' Error on create Template');
 
+            $data_field['pid'] = $data_template['id'];
+            $obj_field         = new \CB\Objects\TemplateField();
+            $data_field['id']  = $obj_field->create($data_field);
+            $this->assertTrue($data_field['id'] > 0, ' Error on create Template');
         }
     }
 }
