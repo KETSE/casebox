@@ -20,6 +20,7 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
     public function objectsProvider()
     {
         $data = \CB\UNITTESTS\DATA\objectsProvider();
+
         return $data;
     }
 
@@ -30,12 +31,11 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
     public function testObjectCRUD($data)
     {
 
-        // try to add one folder to root tree 
+        // try to add one folder to root tree
         $obj = new \CB\Objects\Object();
 
         // first create object
         $data['id'] = $obj->create($data);
-
 
         $this->assertTrue($data['id'] > 0, ' Error on Object create');
 
@@ -54,7 +54,6 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
         $read_data = $obj->getData();
         $this->assertArraySubset($data, $read_data, false, ' error on updated object data ');
 
-
         // four delete object
 
         $obj->delete(false);
@@ -67,8 +66,6 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(empty($read_data['id']), 'error delete object data');
     }
 
-
-
     /**
      *
      * @return array of templates
@@ -76,6 +73,7 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
     public function templatesProvider()
     {
         $data = \CB\UNITTESTS\DATA\templatesProvider();
+
         return $data;
     }
 
@@ -104,7 +102,6 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
         $data_template['order'] = 2;
         $data_template['iconCls'] = '';
 
-
         $obj->update($data_template);
 
         $obj->load($data_template['id']);
@@ -128,7 +125,6 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
          **/
         
     }
-    
 
      /**
      *
@@ -137,6 +133,7 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
     public function FieldsTeplateProvider()
     {
         $data = \CB\UNITTESTS\DATA\fieldsProvider();
+
         return $data;
     }
 
@@ -153,9 +150,9 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
         $tpl_r = \CB\DB\dbQuery($TPL_SQL);
 
         if ($tpl = $tpl_r->fetch_assoc()) {
-            $data_template['id'] = $tpl['id'];
+            $data_template['id'] = $tpl_obj->load($tpl['id'])['id'];
             $this->assertTrue($data_template['id'] > 0, ' Error on load Template');
-        } else {
+        } else/**/ {
             // first add empty template
             $data_template = [
                 "pid" => 3, // /Tree/System/Templates
@@ -182,9 +179,10 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
             ];
 
             $data_template['id'] = $tpl_obj->create($data_template);
-            $this->assertTrue($data_template['id'] > 0, ' Error on create Template');
-        }
 
+            $this->assertTrue($data_template['id'] > 0, ' Error on create Template');
+
+        }
 
         // CREATE FIELDS
 
