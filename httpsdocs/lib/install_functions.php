@@ -261,44 +261,6 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
             echo " \033[32mOk\033[0m\n";
         }
     }
-
-    /*     * $rez = true;
-      $logCoreName = $cfg['prefix'] . '_log';
-
-      $solr = \CB\Solr\Service::verifyConfigConnection(
-      array(
-      'host' => $cfg['solr_host']
-      ,'port' => $cfg['solr_port']
-      ,'core' => $logCoreName
-      ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
-      )
-      );
-
-      if ($solr === false) {
-      if (confirm('create_solr_core')) {
-      echo 'Creating solr core ... ';
-
-      if ($h = @fopen(
-      'http://' . $cfg['solr_host']. ':' . $cfg['solr_port'] . '/solr/admin/cores?action=CREATE&' .
-      'name=' . $logCoreName . '&configSet=cb_log',
-      'r'
-      )) {
-      fclose($h);
-      echo "\033[32mOk\033[0m\n";
-
-      } elseif (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
-      echo "Error crating core, check if solr service is available under specified params.\n";
-      $rez = false;
-
-      } else {
-      trigger_error('Error creating solr log core', E_USER_ERROR);
-      }
-      }
-      } else {
-      echo "$logCoreName solr core already exists.\n\r";
-      }
-
-      return $rez;/* */
 }
 
 /**

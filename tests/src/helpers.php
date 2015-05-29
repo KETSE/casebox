@@ -305,18 +305,20 @@ function getCredentialUserData($username)
     return $data;
 }
 
-
 // assigns the output of a file into a variable... lovely jubbly!
-function get_include_contents($filename,$data='') {
+function getIncludeContents($filename, $data = '')
+{
     if (is_file($filename)) {
-    	if (is_array($data)){
-		extract($data);
-    	}
+        if (is_array($data)) {
+            extract($data);
+        }
         ob_start();
         include $filename;
         $contents = ob_get_contents();
         ob_end_clean();
+
         return $contents;
     }
+
     return false;
 }

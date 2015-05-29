@@ -1,5 +1,6 @@
 <?php
 namespace CB\UNITTESTS;
+
 /**
  * Description of InstallTest
  *
@@ -8,17 +9,19 @@ namespace CB\UNITTESTS;
 
 class InstallTest extends \PHPUnit_Framework_TestCase
 {
-    
-   public function testdefineBackupDir() {
 
-        $cfg = \CB\Config::loadConfigFile(HELPERS\getCBPath().'/config.ini');
+    public function testdefineBackupDir()
+    {
+        $dc = DIRECTORY_SEPARATOR;
 
-        $this->assertEquals(CB_ROOT_PATH.'/backup/', \CB\INSTALL\defineBackupDir($cfg));
+        $cfg = \CB\Config::loadConfigFile(HELPERS\getCBPath() . $dc . 'config.ini');
+
+        $this->assertEquals(CB_ROOT_PATH . $dc . 'backup' . $dc, \CB\INSTALL\defineBackupDir($cfg));
 
     }
 
-    public function test_createSolrCore() {
-        
-    }
+    public function testCreateSolrCore()
+    {
 
+    }
 }
