@@ -171,11 +171,15 @@ class Log
         }
 
         $rez['fu'] = array_unique($rez['fu']);
+
         //remove current user, that caused the action
         $rez['fu'] = array_diff($rez['fu'], array($userId));
 
+        $rez['fu'] = Util\toNumericArray($rez['fu']);
+
         if (!empty($d['sys_data']['wu'])) {
             $rez['wu'] = array_diff($d['sys_data']['wu'], array($userId));
+            $rez['wu'] = Util\toNumericArray($rez['wu']);
         }
 
         return $rez;
@@ -221,6 +225,7 @@ class Log
             ,`read` = 0';
 
         foreach ($users as $uid => $uMailSent) {
+            echo "!!$uid => $uMailSent\n";
             DB\dbQuery(
                 $sql,
                 array(

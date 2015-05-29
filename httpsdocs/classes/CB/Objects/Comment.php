@@ -103,9 +103,10 @@ class Comment extends Object
         }
 
         //analize comment text and get referenced users
-        if (preg_match_all('/@([^@\s,]+)/', $p['data']['_title'], $matches, PREG_SET_ORDER)) {
+        if (preg_match_all('/@([^@\s,!\?]+)/', $p['data']['_title'], $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $uid = User::exists($match[1]);
+
                 if (is_numeric($uid) && !in_array($uid, $fu) && !in_array($uid, $newUserIds)) {
                     $newUserIds[] = $uid;
                 }

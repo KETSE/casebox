@@ -1,3 +1,17 @@
+CaseBox 1.9.456 (2015-05-29)
+==============================
+New Features, Improvements
+--------------------------
+- added Notifications test
+
+Fixed Bugs:
+----------
+- grouping notifications by 4 elements (sender, receiver, object and action type)
+
+Notes:
+----------
+- sync DB structure (apply database update: v.1.9.456.sql)
+
 CaseBox 1.9.455 (2015-05-28)
 ==============================
 Fixed Bugs:

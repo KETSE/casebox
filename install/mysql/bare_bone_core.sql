@@ -204,16 +204,17 @@ CREATE TABLE `notifications` (
   `action_type` enum('create','update','delete','complete','completion_decline','completion_on_behalf','close','rename','reopen','status_change','overdue','comment','comment_update','move','password_change','permissions','user_delete','user_create','login','login_fail') NOT NULL,
   `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'think to remove it (doubles field from action_log)',
   `prev_action_ids` text COMMENT 'previous action ids(for same obj, action type, user) that have not yet been read',
+  `from_user_id` int(11) DEFAULT NULL,
   `user_id` int(10) unsigned NOT NULL,
   `email_sent` tinyint(1) NOT NULL DEFAULT '-1' COMMENT '-1 doesnt need to send, 0 - no, 1 - yes',
   `read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'notification has been read in CB',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UNQ_notifications` (`object_id`,`action_type`,`user_id`),
+  UNIQUE KEY `UNQ_notifications` (`object_id`,`action_type`,`from_user_id`,`user_id`),
   KEY `FK_notifications__action_id` (`action_id`),
   KEY `FK_notifications_user_id` (`user_id`),
   KEY `IDX_notifications_email_sent` (`email_sent`),
-  CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_notifications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_notifications__action_id` FOREIGN KEY (`action_id`) REFERENCES `action_log` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `notifications` */

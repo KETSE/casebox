@@ -1076,7 +1076,7 @@ class User
             'SELECT id
             FROM users_groups
             WHERE `type` = 2
-                and '.(is_numeric($user) ? 'id' : 'name').' = $1',
+                and ' . (is_numeric($user) ? 'id' : 'name') . ' = $1',
             $user
         ) or die(DB\dbQueryError());
 
