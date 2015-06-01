@@ -2,6 +2,8 @@
 
 namespace CB;
 
+use CB\DataModel as DM;
+
 class Notifications
 {
     private static $template = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -25,73 +27,20 @@ class Notifications
     {
         $this->prepareParams($p);
 
-        $sql = 'SELECT
-            n.id
-            ,l.object_id
-            ,l.action_type
-            ,n.read
-            ,l.user_id
-            ,l.data
-            ,l.action_time
-        FROM notifications n
-        JOIN action_log l
-            ON n.action_id = l.id
-        WHERE n.user_id = $1
-        ORDER BY l.action_time DESC
-        LIMIT ' . $p['limit'];
-
         $params = array(
-            User::getId()
+            'user_id' => User::getId()
+            ,'limit' => $p['limit']
         );
 
         return array(
             'success' => true
-            ,'data' => $this->getRecords($sql, $params)
-        );
-    }
-
-    /**
-     * get last notifications if any after a given lasty id
-     * @param  array $p containing lastId property
-     * @return json  response
-     */
-    public function getLast($p)
-    {
-        if (empty($p['lastId']) || !is_numeric($p['lastId'])) {
-            return $this->getList($p);
-        }
-
-        $this->prepareParams($p);
-
-        $sql = 'SELECT
-            n.id
-            ,l.object_id
-            ,l.action_type
-            ,n.read
-            ,l.user_id
-            ,l.data
-            ,l.action_time
-        FROM notifications n
-        JOIN action_log l
-            ON n.action_id = l.id
-        WHERE n.user_id = $1 AND n.id > $2
-        ORDER BY l.action_time DESC
-        LIMIT ' . $p['limit'];
-
-        $params = array(
-            User::getId()
-            ,intval($p['lastId'])
-        );
-
-        return array(
-            'success' => true
-            ,'data' => $this->getRecords($sql, $params)
+            ,'data' => $this->getRecords($params)
         );
     }
 
     /**
      * get new notifications count
-     * @param  array $p containing lastId property
+     * @param  array $p containing fromId property
      * @return json  response
      */
     public function getNewCount($p)
@@ -101,26 +50,16 @@ class Notifications
             ,'count' => 0
         );
 
-        if (empty($p['lastId']) || !is_numeric($p['lastId'])) {
-            $p['lastId'] = 0;
-        }
-
         $this->prepareParams($p);
 
-        $sql = 'SELECT count(*) `count`
-        FROM notifications
-        WHERE user_id = $1 AND id > $2';
+        $fromId = empty($p['fromId'])
+            ? false
+            : intval($p['fromId']);
 
-        $params = array(
-            User::getId()
-            ,intval($p['lastId'])
+        $rez['count'] = DM\Notifications::getCount(
+            User::getId(),
+            $fromId
         );
-
-        $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $rez['count']  = $r['count'];
-        }
-        $res->close();
 
         return $rez;
     }
@@ -134,18 +73,11 @@ class Notifications
     {
         $rez = array('success' => false);
 
-        $ids = Util\toNumericArray($p['ids']);
-
-        if (empty($ids)) {
+        if (empty($p['ids'])) {
             return $rez;
         }
 
-        DB\dbQuery(
-            'UPDATE notifications
-            SET `read` = 1
-            WHERE user_id = $1 AND id IN (' . implode(',', $ids) .')',
-            User::getId()
-        ) or die(DB\dbQueryError());
+        DM\Notifications::markAsRead(User::getId(), $p['ids']);
 
         return array(
             'success' => true
@@ -155,17 +87,11 @@ class Notifications
 
     /**
      * mark all unread user notifications  as read
-     * @param  array $p
-     * @return json  response
+     * @return json response
      */
-    public function markAllAsRead($p)
+    public function markAllAsRead()
     {
-        DB\dbQuery(
-            'UPDATE notifications
-            SET `read` = 1
-            WHERE user_id = $1 AND `read` = 0',
-            User::getId()
-        ) or die(DB\dbQueryError());
+        DM\Notifications::markAllAsRead(User::getId());
 
         return array(
             'success' => true
@@ -178,22 +104,25 @@ class Notifications
      * @param  array   $params sql params
      * @return array
      */
-    private function getRecords($sql, $params)
+    private function getRecords($p)
     {
         $rez = array();
-        $res = DB\dbQuery($sql, $params) or die(DB\dbQueryError());
+
+        $recs = DM\Notifications::getLast(
+            $p['user_id'],
+            $p['limit'],
+            empty($p['fromId']) ? false : $p['fromId']
+        );
 
         $actions = array();
 
         //grouping actions by object_id, action type and read property
-        while ($r = $res->fetch_assoc()) {
+        foreach ($recs as $r) {
             $r['data'] = Util\jsonDecode($r['data']);
             if (empty($actions[$r['object_id']][$r['action_type']][$r['read']][$r['user_id']])) {
                 $actions[$r['object_id']][$r['action_type']][$r['read']][$r['user_id']] = $r;
             }
         }
-
-        $res->close();
 
         //iterate actions and group into records up to read property
         foreach ($actions as $objId => $objValue) {

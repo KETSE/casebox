@@ -243,7 +243,7 @@ Ext.define('CB.browser.NotificationsView', {
         var rec = this.store.first()
             ,params= {};
         if(rec) {
-            params.lastId = rec.get('ids');
+            params.fromId = rec.get('ids');
         }
 
         CB_Notifications.getNewCount(
@@ -273,8 +273,7 @@ Ext.define('CB.browser.NotificationsView', {
      */
     ,onMarkAllAsReadClick: function(b, e) {
         CB_Notifications.markAllAsRead(
-            {}
-            ,this.onReloadClick
+            this.onReloadClick
             ,this
         );
     }

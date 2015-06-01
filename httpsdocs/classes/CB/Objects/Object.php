@@ -709,8 +709,10 @@ class Object
             ,'old' => $this
         );
 
-        Log::add($logParams);
-
+        //dont add log action if permanently deleted
+        if (!$permanent) {
+            Log::add($logParams);
+        }
     }
 
     /**

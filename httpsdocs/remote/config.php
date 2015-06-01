@@ -72,10 +72,9 @@ $API = array_merge(
         ,'CB_Notifications' => array(
             'methods'=>array(
                 'getList'=> array('len' => 1)
-                // ,'getLast'=> array('len' => 1)
                 ,'getNewCount'=> array('len' => 1)
                 ,'markAsRead'=> array('len' => 1)
-                ,'markAllAsRead'=> array('len' => 1)
+                ,'markAllAsRead'=> array('len' => 0)
             )
         )
 

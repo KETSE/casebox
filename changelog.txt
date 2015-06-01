@@ -1,3 +1,11 @@
+CaseBox 1.9.457 (2015-06-01)
+==============================
+New Features, Improvements
+--------------------------
+- added notification methods to Api
+- moved db queries from notifications and logs to DataModel namespace
+- Added tests for Notifications Module
+
 CaseBox 1.9.456 (2015-05-29)
 ==============================
 New Features, Improvements

@@ -2,6 +2,7 @@
 namespace CB;
 
 use \CB\Browser;
+use \CB\DataModel as DM;
 use \CB\Util;
 
 class Log
@@ -19,7 +20,7 @@ class Log
     {
         $userId = User::getId();
 
-        //check if log nod disabled by some script
+        //check if log not disabled
         if (Config::getFlag('disableActivityLog') || empty($userId)) {
             return;
         }
@@ -37,30 +38,22 @@ class Log
 
         $p['activityData'] = static::getActivityData($data);
 
-        DB\dbQuery(
-            'INSERT INTO action_log (
-              `object_id`
-              ,`object_pid`
-              ,`user_id`
-              ,`action_type`
-              ,`data`
-              ,`activity_data_db`
-            ) VALUES ($1, $2, $3, $4, $5, $6)',
-            array(
-                $data['id']
-                ,@$data['pid']
-                ,$userId
-                ,$p['type']
-                ,Util\jsonEncode($p['logData'])
-                ,Util\jsonEncode($p['activityData'])
-            )
+        $params = array(
+            'object_id' => $data['id']
+            ,'object_pid' => @$data['pid']
+            ,'user_id' => $userId
+            ,'action_type' => $p['type']
+            ,'data' => Util\jsonEncode($p['logData'])
+            ,'activity_data_db' => Util\jsonEncode($p['activityData'])
         );
 
-        $p['action_id'] = DB\dbLastInsertId();
+        $p['action_id'] = DM\Log::create($params);
+
+        $params['id'] = $p['action_id'];
 
         static::addSolrRecord($p);
 
-        static::adNotificationRecords($p['action_id'], $p['activityData']);
+        static::addNotificationRecords($params);
 
         fireEvent('logadd', $p);
     }
@@ -186,13 +179,17 @@ class Log
     }
 
     /**
-     * add notification records for a given action
-     * @param  int   $actionId
-     * @param  array $activityData array containing "fu" and/or "wu" properties
-     * @return void
+     * add notification records for a given log action
+     * @param array $p
+     *     ('object_id', 'object_pid', 'user_id', 'action_type', 'data', 'activity_data_db')
+     *
+      * @return void
      */
-    private static function adNotificationRecords($actionId, $activityData)
+    private static function addNotificationRecords($p)
     {
+
+        $activityData = Util\toJSONArray($p['activity_data_db']);
+
         $users = array();
         if (!empty($activityData['fu'])) {
             foreach ($activityData['fu'] as $uid) {
@@ -209,30 +206,17 @@ class Log
         //exclude current user from notified users
         unset($users[User::getId()]);
 
-        $sql = 'INSERT INTO notifications
-            (object_id, action_id, action_ids, action_type, from_user_id, user_id, email_sent, `read`)
-
-            SELECT l.object_id, l.id, l.id, l.action_type, l.user_id, $2, $3, 0
-            FROM action_log l
-            WHERE l.id = $1
-
-            ON DUPLICATE KEY
-
-            UPDATE
-            action_id = l.id
-            ,action_ids = CASE WHEN `read` = 1 THEN l.id ELSE CONCAT(l.id, \',\', action_ids) END
-            ,email_sent = $3
-            ,`read` = 0';
+        $params = array(
+            'object_id' => $p['object_id']
+            ,'action_id' => $p['id']
+            ,'action_type' => $p['action_type']
+            ,'from_user_id' => $p['user_id']
+        );
 
         foreach ($users as $uid => $uMailSent) {
-            DB\dbQuery(
-                $sql,
-                array(
-                    $actionId
-                    ,$uid
-                    ,$uMailSent
-                )
-            ) or die(DB\dbQueryError());
+            $params['user_id'] = $uid;
+            $params['email_sent'] = $uMailSent;
+            DM\Notifications::add($params);
         }
     }
 
