@@ -1,3 +1,9 @@
+CaseBox 1.9.459 (2015-06-02)
+==============================
+Fixed Bugs:
+----------
+- error rendering object fields in Template class
+
 CaseBox 1.9.458 (2015-06-02)
 ==============================
 New Features, Improvements

@@ -34,7 +34,7 @@ if (!function_exists('\\ExtDirect\\extDirectShutdownFunction')) {
                     Config::get('ADMIN_EMAIL'), 'Remote router error on '.Config::get('core_url'),
                     var_export($data, true), 'From: '.Config::get('SENDER_EMAIL')."\r\n"
             );
-                
+
             }
 
             echo Util\jsonEncode($data);
@@ -50,8 +50,6 @@ require_once dirname($path) . DIRECTORY_SEPARATOR . 'init.php';
 require $path . 'config.php';
 
 require_once \CB\LIB_DIR.'router_functions.php';
-
-
 
 $isForm = false;
 $isUpload = false;
@@ -82,11 +80,7 @@ if (empty($data)) {
     die('Invalid request.');
 }
 
-
-
 \CB\Cache::set('ExtDirectData', $data);
-
-
 
 $response = null;
 if (empty($data['action'])) {

@@ -598,10 +598,11 @@ class Template extends Object
                     } else {
                         // $objects = Search::getObjects($ids, 'id,name,template_id,pids');
                         $objects = \CB\Objects::getCachedObjects($ids);
-                        foreach ($objects as $r) {
+                        foreach ($objects as $obj) {
+                            $r = $obj->getData();
                             @$label = $r['name'];
                             if ($html && !empty($r['pids'])) {
-                                $r['pids'] = implode('/', $r['pids']);
+                                $r['pids'] = str_replace(',', '/', $r['pids']);
                                 $label = '<a class="locate click" template_id="'.$r['template_id'].'" path="'.$r['pids'].'" nid="'.$r['id'].'">'.$label.'</a>';
                             }
 
