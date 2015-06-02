@@ -591,18 +591,49 @@ class Objects
      */
     public static function getCachedObject($id)
     {
-        //verify if already have cached result
-        $var_name = 'Objects['.$id.']';
-        if (\CB\Cache::exist($var_name)) {
-            return \CB\Cache::get($var_name);
-        }
-        $obj = static::getCustomClassByObjectId($id);
-        if (!empty($obj)) {
-            $obj->load();
-            \CB\Cache::set($var_name, $obj);
+        $data = static::getCachedObjects($id);
+
+        return array_shift($data);
+    }
+
+    /**
+     * get objects from cache or loads them and store in cache
+     * @param  array $ids
+     * @return array
+     */
+    public static function getCachedObjects($ids)
+    {
+        $ids = Util\toNumericArray($ids);
+        $rez = array();
+        $toLoad = array();
+
+        foreach ($ids as $id) {
+            //verify if already have cached result
+            $var_name = 'Objects['.$id.']';
+            if (\CB\Cache::exist($var_name)) {
+                $rez[$id]  = \CB\Cache::get($var_name);
+            } else {
+                $toLoad[] = $id;
+            }
         }
 
-        return $obj;
+        if (!empty($toLoad)) {
+            $tc = Templates\SingletonCollection::getInstance();
+            $data = DataModel\Objects::read($toLoad);
+
+            foreach ($data as $objData) {
+                $var_name = 'Objects[' . $objData['id'] . ']';
+
+                $o = static::getCustomClassByType($tc->getType($objData['template_id']));
+
+                $o->setData($objData);
+
+                \CB\Cache::set($var_name, $o);
+                $rez[$objData['id']] = $o;
+            }
+        }
+
+        return $rez;
     }
 
     /**

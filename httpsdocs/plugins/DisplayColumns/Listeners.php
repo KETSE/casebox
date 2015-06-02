@@ -35,6 +35,27 @@ class Listeners
         return  $class->onBeforeSolrQuery($p);
     }
 
+    public function onSolrQueryWarmUp(&$p)
+    {
+        $ip = &$p['inputParams'];
+        $class = null;
+
+        switch (@$ip['from']) {
+            case 'grid':
+                $class= new Grid();
+                break;
+
+            case 'formEditor':
+                $class= new FormEditor();
+                break;
+
+            default:
+                return;
+        }
+
+        return $class->onSolrQueryWarmUp($p);
+    }
+
     public function onSolrQuery(&$p)
     {
         $ip = &$p['inputParams'];

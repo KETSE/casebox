@@ -596,7 +596,8 @@ class Template extends Object
                         }
                         $res->close();
                     } else {
-                        $objects = Search::getObjects($ids, 'id,name,template_id,pids');
+                        // $objects = Search::getObjects($ids, 'id,name,template_id,pids');
+                        $objects = \CB\Objects::getCachedObjects($ids);
                         foreach ($objects as $r) {
                             @$label = $r['name'];
                             if ($html && !empty($r['pids'])) {

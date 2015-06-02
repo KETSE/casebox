@@ -1,3 +1,22 @@
+CaseBox 1.9.458 (2015-06-02)
+==============================
+New Features, Improvements
+--------------------------
+- added warming for queries to load needed objects in bulk
+  before rendering custom fields
+- refactored Search class
+- commented logging login and logout actions
+- #6187 Remove open in new tab
+
+Notes:
+----------
+- warm listener should be added to DisplayColumns plugin:
+  ,"solrQueryWarmUp": {
+    "DisplayColumns\\Listeners": [
+      "onSolrQueryWarmUp"
+    ]
+  }
+
 CaseBox 1.9.457 (2015-06-01)
 ==============================
 New Features, Improvements

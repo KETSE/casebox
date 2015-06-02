@@ -57,6 +57,76 @@ class Base
     }
 
     /**
+     * analize custom columns and add needed ids to preloaded objects
+     * @param  array $p search params
+     * @return void
+     */
+    public function onSolrQueryWarmUp(&$p)
+    {
+        $ip = &$p['inputParams'];
+        $params = &$p['params'];
+        $data = &$p['data'];
+        $requiredIds = &$p['requiredIds'];
+
+        if (@$ip['from'] !== $this->fromParam) {
+            return;
+        }
+
+        $userLanguage = \CB\Config::get('user_language');
+
+        $displayColumns = $this->getDC();
+
+        $customColumns = $this->prepareColumnsConfig($displayColumns);
+
+        if (!empty($displayColumns['data'])) {
+
+            foreach ($data as &$doc) {
+                if (!is_numeric($doc['id'])) {
+                    continue;
+                }
+
+                $obj = \CB\Objects::getCachedObject($doc['id']);
+                if (!is_object($obj)) {
+                    \CB\debug('DisplayColumns object not found: '. $doc['id']);
+                    continue;
+                }
+
+                $template = $obj->getTemplate();
+
+                foreach ($customColumns as $fieldName => &$col) {
+                    //detect field name
+                    $customField = $col['fieldName'];
+                    $templateField = $template->getField($customField);
+
+                    $templateField = null;
+                    $values = array();
+
+                    if (!empty($col['solr_column_name'])) {
+                        $values = array(@$doc[$col['solr_column_name']]);
+
+                    } else { //default
+                        $values = isset($doc[$customField])
+                            ? array($doc[$customField])
+                            : $obj->getFieldValue($customField);
+                    }
+
+                    if (!empty($templateField) && in_array($templateField['type'], array('_objects'))) {
+                        foreach ($values as $value) {
+                            $value = is_array($value)
+                                ? @$value['value']
+                                : $value;
+                            $value = Util\toNumericArray($value);
+                            foreach ($value as $v) {
+                                $requiredIds[$v] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * method used to implement custom logic on solr query
      * @param  array $p search params
      * @return void
@@ -92,27 +162,10 @@ class Base
 
         $state = $this->getState($stateFrom);
 
-        $customColumns = array();
-
-        $idx = 0;
+        $customColumns = $this->prepareColumnsConfig($displayColumns);
 
         //set custom display columns data
         if (!empty($displayColumns['data'])) {
-
-            foreach ($displayColumns['data'] as $k => $col) {
-                $fieldName = is_numeric($k) ? $col : $k;
-                $customColumns[$fieldName] = is_numeric($k) ? array() : $col;
-
-                if (empty($customColumns[$fieldName]['solr_column_name']) &&
-                    !in_array($fieldName, Search::$defaultFields)
-                ) {
-                    $customColumns[$fieldName]['localSort'] = true;
-                }
-
-                if (!isset($customColumns[$fieldName]['idx'])) {
-                    $customColumns[$fieldName]['idx'] = $idx++;
-                }
-            }
 
             // fill custom columns data
             foreach ($data as &$doc) {
@@ -129,56 +182,31 @@ class Base
                 $template = $obj->getTemplate();
 
                 foreach ($customColumns as $fieldName => &$col) {
-                    //detect field name
-                    $customField = $fieldName;
-
-                    if (!empty($col['field_' . $userLanguage])) {
-                        $customField = $col['field_' . $userLanguage];
-                    } elseif (!empty($col['field'])) {
-                        $customField = $col['field'];
-                    }
-
-                    $customField = explode(':', $customField);
-                    $templateField = null;
+                    $templateField = $template->getField($col['fieldName']);
                     $values = array();
 
-                    if (($customField[0] == 'solr') || (!empty($col['solr_column_name']))) {
-                        $solrFieldName = empty($col['solr_column_name'])
-                            ? $customField[1]
-                            : $col['solr_column_name'];
+                    if (!empty($col['solr_column_name'])) {
+                        $values = array(@$doc[$col['solr_column_name']]);
 
-                        $customField = ($customField[0] == 'solr')
-                            ? $customField[1]
-                            : $customField[0];
-
-                        $values = array(@$doc[$solrFieldName]);
-
-                        $templateField = $template->getField($customField);
                         if (empty($templateField)) {
                             $templateField = array(
                                 'type' => 'varchar'
-                                ,'name' => $solrFieldName
+                                ,'name' => $col['solr_column_name']
                                 ,'title' => @Util\coalesce(
                                     $col[$userLanguage],
                                     $col['title_'.$userLanguage],
                                     $col['title'],
                                     $col['name'],
-                                    $customField
+                                    $col['fieldName']
                                 )
                             );
                         }
-                        // $values = array(@$doc[$customField[1]]);
-
-                    } elseif ($customField[0] == 'calc') { //calculated field
-                        //CustomMethod call;
-                        // $templateField = $template->getField($fieldName);
-                        // $values = array();
 
                     } else { //default
-                        $templateField = $template->getField($customField[0]);
-                        $values = isset($doc[$customField[0]])
-                            ? $values = array(@$doc[$customField[0]])
-                            : $obj->getFieldValue($customField[0]);
+                        $templateField = $template->getField($col['fieldName']);
+                        $values = isset($doc[$col['fieldName']])
+                            ? array($doc[$col['fieldName']])
+                            : $obj->getFieldValue($col['fieldName']);
                     }
 
                     //populate column properties if empty
@@ -186,7 +214,7 @@ class Base
                         $col['title'] = $templateField['title'];
                     }
 
-                    if (empty($col['sortType']) && ($customField[0] != 'solr') && (empty($col['solr_column_name']))) {
+                    if (empty($col['sortType']) && (empty($col['solr_column_name']))) {
                         switch ($templateField['type']) {
                             case 'date':
                             case 'datetime':
@@ -295,6 +323,60 @@ class Base
         ) {
             $this->sortRecords($data, $p['result']['sort'], $rez[$p['result']['sort']['property']]);
         }
+    }
+
+    /**
+     * analize display columns config and create a generic columns array
+     * @param  array $dc
+     * @return array
+     */
+    protected function prepareColumnsConfig($dc)
+    {
+        $rez = array();
+
+        if (!empty($dc['data'])) {
+
+            $idx = 0;
+            $userLanguage = \CB\Config::get('user_language');
+
+            foreach ($dc['data'] as $k => $col) {
+                $fieldName = is_numeric($k) ? $col : $k;
+                $rez[$fieldName] = is_numeric($k) ? array() : $col;
+
+                if (empty($rez[$fieldName]['solr_column_name']) &&
+                    !in_array($fieldName, Search::$defaultFields)
+                ) {
+                    $rez[$fieldName]['localSort'] = true;
+                }
+
+                if (!isset($rez[$fieldName]['idx'])) {
+                    $rez[$fieldName]['idx'] = $idx++;
+                }
+
+                //detect custom field name
+                $customField = $fieldName; //default
+
+                if (!empty($col['field_' . $userLanguage])) {
+                    $customField = $col['field_' . $userLanguage];
+                } elseif (!empty($col['field'])) {
+                    $customField = $col['field'];
+                }
+
+                $arr = explode(':', $customField);
+
+                if ($arr[0] == 'solr') {
+                    $customField = $arr[1];
+                } elseif ($arr[0] == 'calc') { //calculated field
+                    //CustomMethod call;
+                    // $templateField = $template->getField($fieldName);
+                    // $values = array();
+                }
+
+                $rez[$fieldName]['fieldName'] = $customField;
+            }
+        }
+
+        return $rez;
     }
 
     /**

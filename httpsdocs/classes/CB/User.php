@@ -100,18 +100,17 @@ class User
             $rez['msg'] = L\get('Auth_fail');
         }
 
-        $logParams = array(
-            'type' => $logActionType
-            ,'data' => array(
-                'id' => @$_SESSION['user']['id']
-                ,'name' => @Util\coalesce($_SESSION['user']['name'], $login)
-                ,'result' => isset($_SESSION['user'])
-                ,'info' => 'user: '.$login."\nip: ".$ips
-            )
-        );
+        // $logParams = array(
+        //     'type' => $logActionType
+        //     ,'data' => array(
+        //         'id' => @$_SESSION['user']['id']
+        //         ,'name' => @Util\coalesce($_SESSION['user']['name'], $login)
+        //         ,'result' => isset($_SESSION['user'])
+        //         ,'info' => 'user: '.$login."\nip: ".$ips
+        //     )
+        // );
 
-        Log::add($logParams);
-
+        // Log::add($logParams);
         return $rez;
     }
 
@@ -769,17 +768,17 @@ class User
     {
         $rez = array('success' => true);
 
-        $logParams = array(
-            'type' => 'logout'
-            ,'data' => array(
-                'id' => @$_SESSION['user']['id']
-                ,'name' => @$_SESSION['user']['name']
-                ,'result' => isset($_SESSION['user'])
-                ,'info' => 'user: '.$_SESSION['user']['name']
-            )
-        );
+        // $logParams = array(
+        //     'type' => 'logout'
+        //     ,'data' => array(
+        //         'id' => @$_SESSION['user']['id']
+        //         ,'name' => @$_SESSION['user']['name']
+        //         ,'result' => isset($_SESSION['user'])
+        //         ,'info' => 'user: '.$_SESSION['user']['name']
+        //     )
+        // );
 
-        Log::add($logParams);
+        // Log::add($logParams);
 
         while (!empty($_SESSION['last_sessions'])) {
             @unlink(session_save_path().DIRECTORY_SEPARATOR.'sess_'.array_shift($_SESSION['last_sessions']));

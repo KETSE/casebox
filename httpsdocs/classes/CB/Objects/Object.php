@@ -965,6 +965,7 @@ class Object
 
         if (array_key_exists('id', $data)) {
             $this->id = $data['id'];
+            $this->loaded = true;
         }
 
         if (!empty($this->data['data'])) {
