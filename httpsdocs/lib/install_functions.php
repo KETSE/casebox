@@ -457,12 +457,13 @@ function GrandDBAccess($cfg) {
      $db_user = $db_user_rez->fetch_array();
     if( $db_user[0] != 1 )  {
 
-        $SQL_CREATE_USER = "CREATE USER ".$cfg['db_user']."@'".$cfg['db_host']."' IDENTIFIED BY '".$cfg['db_pass']."'";
+        $SQL_CREATE_USER = "CREATE USER `".$cfg['db_user']."`@`".$cfg['db_host']."` IDENTIFIED BY '".$cfg['db_pass']."'";
         \CB\DB\dbQuery($SQL_CREATE_USER);
 
     }
         // GRANT ALL PRIVILEGES ON `xian\_%`.* TO xian@'192.168.1.%';
-      $SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON `".$cfg['prefix']."\_%`.* TO ".$cfg['db_user']."@".$cfg['db_host'].";";
+        $SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON `".$cfg['prefix']."\_%`.* TO `".$cfg['db_user']."`@`".$cfg['db_host']."` WITH GRANT OPTION;";
+      //$SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON *.* TO ".$cfg['db_user']."@".$cfg['db_host']." WITH GRANT OPTION;";
 
       \CB\DB\dbQuery($SQL_GRAND_ACCESS);
 

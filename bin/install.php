@@ -213,7 +213,7 @@ createMainDatabase($cfg);
 
 echo 'Creating language files .. ';
 exec('php "' . $binDirectorty . 'languages_update_js_files.php"');
-echo "\033[32mOk\033[0m\n";
+display_OK();
 
 echo "\nCasebox was successfully configured on your system\n" .
     "you should create at least one Core to use it.\n";
