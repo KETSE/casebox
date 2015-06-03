@@ -61,7 +61,7 @@ if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
         if (\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') !== false) {
             echo 'Backuping .. ';
             backupDB($dbName, $dbUser, $dbPass);
-            echo "Ok\n";
+            display_OK();
         }
     } else {
         $applyDump = false;
@@ -80,7 +80,7 @@ if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
 if ($applyDump) {
     echo 'Applying dump .. ';
     exec('mysql --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
-    echo "Ok\n";
+    display_OK();
 }
 
 $cbDb = $cfg['prefix'] . '__casebox';
@@ -90,7 +90,7 @@ echo 'Registering core .. ';
     'INSERT INTO ' . $cbDb . ' .cores (name, cfg) VALUES ($1, $2)',
     array($coreName, '{}')
 );
-echo "Ok\n";
+display_OK();
 
 //ask to provide root email & password
 $email = '';

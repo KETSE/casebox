@@ -146,10 +146,18 @@ function closeCron($cron_id, $info = 'ok')
         return;
     }
 
-    DB\dbQuery(
-        'UPDATE crons
-        SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
-        WHERE cron_id = $1',
-        array($cron_id, $info)
-    ) or die(DB\dbQueryError());
+    try {
+        $QUERY = 'UPDATE crons
+            SET last_end_time = CURRENT_TIMESTAMP, execution_info = $2
+            WHERE cron_id = $1';
+
+        DB\dbQuery(
+            $QUERY,
+            array($cron_id, $info)
+        );
+        
+    } catch (Exception $exc) {
+        trigger_error($QUERY.print_r(array($cron_id, $info),true) .DB\dbQueryError(), E_USER_WARNING);
+    }
+
 }

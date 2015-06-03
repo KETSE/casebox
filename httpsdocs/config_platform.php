@@ -105,8 +105,10 @@ $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . DIRECTORY_S
 
 Cache::set('platformConfig', $cfg);
 
+if (isset($cfg['db_host']) && isset($cfg['db_user']) && isset($cfg['db_pass']) && isset($cfg['db_port'])) {
 //conect to db using global params from config.ini
-DB\connect($cfg);
+    DB\connect($cfg);
+}
 
 /* config functions section */
 

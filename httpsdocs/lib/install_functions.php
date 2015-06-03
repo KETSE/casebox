@@ -120,7 +120,8 @@ function getParamPhrase($paramName)
  */
 function displaySystemNotices()
 {
-    if (\CB\IS_WINDOWS) {
+    $PATH = getenv('PATH');
+    if (\CB\Util\getOS() == "WIN" && !strpos($PATH,'mysql')) {
         echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
     } else {
 
@@ -134,7 +135,7 @@ function displaySystemNotices()
  */
 function setOwnershipForApacheUser(&$cfg)
 {
-    if (\CB\IS_WINDOWS) {
+    if (\CB\Util\getOS() == "WIN") {
         return ;
     }
 
@@ -248,7 +249,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
             echo 'Unloading core '.$coreName.'... ';
             unset($solr);
             if (solrUnloadCore($solrHost, $solrPort, $fullCoreName)) {
-                echo "\033[32mOk\033[0m\n";
+                display_OK();
             } else {
                 displayError("Error unloading core.\n");
                 $createCore = false;
@@ -262,7 +263,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
         echo 'Creating solr core ... ';
 
         if (solrCreateCore($solrHost, $solrPort, $fullCoreName)) {
-            echo "\033[32mOk\033[0m\n";
+            display_OK();
         } else {
             displayError("Error creating core.\n");
             $askReindex = false;
@@ -276,7 +277,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
             $cmd_reindex_core = 'php '.\CB\BIN_DIR.'solr_reindex_core.php -c '.$coreName.' -a -l';
             $reindex_result = shell_exec($cmd_reindex_core);
             // here need to verify result of execution solr_reindex_core.php
-            echo " \033[32mOk\033[0m\n";
+            display_OK();
         }
     }
 }
@@ -329,48 +330,25 @@ function solrCreateCore($host, $port, $coreName)
  */
 function verifyDBConfig(&$cfg)
 {
-	
-    echo "Verifying db params ... ";
 
-    $rez = true;
-    $error = false;
+    // simply try to acces with superuser, 
+    //  so if we have super user then can create regulary user with grand access
 
-    try {
-        
-        $dbh = connectDBWithSuUser($cfg);
-
-        $error = mysqli_connect_errno();
-
-        if (empty($error)) {
-            $dbh = @\CB\DB\connectWithParams($cfg);
-
-            $error = mysqli_connect_errno();
-			
-			// trigger_error( $error, E_USER_WARNING);
-        } else {
-			// trigger_error( $error, E_USER_WARNING);
-		}
-
-    } catch (\Exception $e) {
-		if($error != 1524 ) { 
-		$error = true;
-		} else {
-			$error = false;
-		}
-        
-    }
-
-    if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
-        if ($error) {
-            $rez = !confirm('Failed to connect to DB with error: ' . mysqli_connect_error() . "\n" . ', would you like to update inserted params [Y/n]: ');
-        } else {
-            echo "\033[32mOk\033[0m\n";
+    $success = true;
+      try {
+            $dbh = new \mysqli(
+                $cfg['db_host'],
+                $cfg['db_user'],
+                (isset($cfg['db_pass']) ? $cfg['db_pass']:null),
+                (isset($cfg['db_name']) ? $cfg['db_name']:null),
+                $cfg['db_port']
+            );
+        } catch (\Exception $e) {
+            $success = false;
         }
-    } elseif ($error) {
-        trigger_error('Error connecting to database with user "' . $cfg['db_user'] .'".', E_USER_ERROR);
-    }
 
-    return $rez;
+    return $success;
+    
 }
 
 /**
@@ -404,10 +382,13 @@ function initDBConfig(&$cfg)
     //init database configuration
     $cfg['db_host'] = readParam('db_host', $cfg['db_host']);
     $cfg['db_port'] = readParam('db_port', $cfg['db_port']);
-    $cfg['su_db_user'] = readParam('su_db_user', $cfg['su_db_user']);
-    $cfg['su_db_pass'] = readParam('su_db_pass');
+
     $cfg['db_user'] = readParam('db_user', $cfg['db_user']);
     $cfg['db_pass'] = readParam('db_pass');
+
+    $cfg['su_db_user'] = readParam('su_db_user', $cfg['su_db_user']);
+    $cfg['su_db_pass'] = readParam('su_db_pass');
+
 }
 
 /**
@@ -417,40 +398,77 @@ function initDBConfig(&$cfg)
  */
 function createMainDatabase($cfg)
 {
-    $rez = true;
+
+   $rez = true;
 
     connectDBWithSuUser($cfg);
 
     $cbDb = $cfg['prefix'] . '__casebox';
 
+    $DB_USER = isset($cfg['su_db_user']) ? $cfg['su_db_user']: $cfg['db_user'];
+    $DB_PASS = isset($cfg['su_db_pass']) ? $cfg['su_db_pass']: $cfg['db_pass'];
+
     $r = \CB\DB\dbQuery('use `' . $cbDb . '`');
     if ($r) {
         if (confirm('overwrite__casebox_db')) {
-
-            echo 'Backuping .. ';
-
             if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
-                backupDB($cbDb, $cfg['db_user'], $cfg['db_pass']);
+                echo 'Backuping .. ';
+               if(backupDB($cbDb, $cfg['db_user'], $cfg['db_pass'])) {
+                   display_OK();
+               } else {
+                   display_ERROR('FALSE');
+               }
+
             }
 
-            echo "\033[32mOk\033[0m\n";
+            
 
             echo 'Applying dump .. ';
-            echo shell_exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
-            echo "\033[32mOk\033[0m\n";
+            echo shell_exec('mysql --user=' . $DB_USER . ( $DB_PASS ? ' --password=' . $DB_PASS : '' ) . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+            display_OK();
         }
     } else {
         if (confirm('create__casebox_from_dump')) {
-            if (\CB\DB\dbQuery('CREATE DATABASE `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-                echo shell_exec('mysql --user=' . $cfg['db_user'] . ' --password=' . $cfg['db_pass'] . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+            if (\CB\DB\dbQuery('CREATE DATABASE IF NOT EXISTS `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
+                echo shell_exec('mysql --user=' . $DB_USER . ( $DB_PASS ? ' --password=' . $DB_PASS : '' )  . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             } else {
                 $rez = false;
-                echo 'Cant create database "' . $cbDb . '".';
+                display_ERROR('Cant create database "' . $cbDb . '".');
             }
         }
     }
 
+    GrandDBAccess($cfg);
+    
     return $rez;
+}
+
+/**
+ * create db_user if not- exists and grand all privileges to access
+ * @param type $cfg
+ */
+function GrandDBAccess($cfg) {
+       
+
+    // first check if user exists
+     $SQL_CHECK_USER = "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE USER = '".$cfg['db_user']."')";
+
+     $db_user_rez = \CB\DB\dbQuery($SQL_CHECK_USER);
+     $db_user = $db_user_rez->fetch_array();
+    if( $db_user[0] != 1 )  {
+
+        $SQL_CREATE_USER = "CREATE USER ".$cfg['db_user']."@'".$cfg['db_host']."' IDENTIFIED BY '".$cfg['db_pass']."'";
+        \CB\DB\dbQuery($SQL_CREATE_USER);
+
+    }
+        // GRANT ALL PRIVILEGES ON `xian\_%`.* TO xian@'192.168.1.%';
+      $SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON `".$cfg['prefix']."\_%`.* TO ".$cfg['db_user']."@".$cfg['db_host'].";";
+
+      \CB\DB\dbQuery($SQL_GRAND_ACCESS);
+
+      $SQL_FLUSH = "FLUSH PRIVILEGES;";
+
+      \CB\DB\dbQuery($SQL_FLUSH);
 }
 
 /**
@@ -614,11 +632,31 @@ function displayError($error)
 {
     if (\CB\Cache::exist('RUN_SETUP_INTERACTIVE_MODE')) {
         if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
-            echo $error;
-
+            display_ERROR($error);
             return;
         }
     }
 
     trigger_error($error, E_USER_ERROR);
+}
+
+
+function display_OK($msg = "OK") {
+    if(\CB\Util\getOS() == "LINUX") {
+      echo "\033[32m".$msg."\033[0m".PHP_EOL;
+    } else {
+      echo $msg.PHP_EOL;
+    }
+
+    
+}
+
+function display_ERROR($msg = "ERROR") {
+    if(\CB\Util\getOS() == "LINUX") {
+      echo "\033[31m".$msg."\033[0m".PHP_EOL;
+    } else {
+      echo $msg.PHP_EOL;
+    }
+
+
 }

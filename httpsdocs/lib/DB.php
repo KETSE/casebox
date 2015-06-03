@@ -62,14 +62,12 @@ function connectWithParams($p)
         // connect with new params
         try {
 		//	echo '\CB\DB\ connect with new params'.PHP_EOL;
-			
-			ini_set('display_errors',1);
 
             $dbh = new \mysqli(
                 $newParams['host'],
                 $newParams['user'],
-                $newParams['pass'],
-                $newParams['name'],
+                ($newParams['pass'] ? $newParams['pass']:null),
+                ($newParams['name'] ? $newParams['name']:null),
                 $newParams['port']
             );
 		//	echo 'end connection'.PHP_EOL;
@@ -82,7 +80,7 @@ function connectWithParams($p)
     }
 
     // if database changed then apply initsql if set
-    if (!empty($lastParams['name']) || ($lastParams['name'] != $newParams['name'])) {
+    if ( isset($newParams['name']) || (isset($lastParams['name']) && isset($newParams['name']) && $lastParams['name'] != $newParams['name'])) {
         $newParams['name'] = $dbh->real_escape_string($newParams['name']);
 
         if (!empty($newParams['name'])) {

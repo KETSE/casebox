@@ -724,3 +724,12 @@ function toUTF8String($value)
 
     return $newValue;
 }
+
+function getOS() {
+        switch (true) {
+            case stristr(PHP_OS, 'DAR'): return 'OSX';
+            case stristr(PHP_OS, 'WIN'): return 'WIN';
+            case stristr(PHP_OS, 'LINUX'): return 'LINUX';
+            default : return 'UNKNOWN';
+        }
+    }
