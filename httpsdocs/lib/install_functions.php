@@ -329,7 +329,6 @@ function solrCreateCore($host, $port, $coreName)
  */
 function verifyDBConfig(&$cfg)
 {
-	ini_set('display_errors',1);
 	
     echo "Verifying db params ... ";
 
