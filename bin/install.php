@@ -18,30 +18,41 @@
 namespace CB\INSTALL;
 use CB;
 
-/* check if we are running under root / Administrator user */
-
-$currentUser = empty($_SERVER['USER'])
-    ? @$_SERVER['USERNAME']
-    : $_SERVER['USER'];
-if(strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
-	
-	$user_state = shell_exec(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'is_admin.bat');
-	$user_state = preg_replace('/\n|\r/si','',$user_state);
-	if($user_state != 'admin') {
-	  echo "This script should be run under \"Administrator\"\n";
-     die("");
-	}
-} elseif (!in_array($currentUser, array('root'))) {
-//    trigger_error('This script should be run under "root" or "Administrator"', E_USER_ERROR);
-    echo "\033[31mThis script should be run under \"root\" or \"Administrator\"\033[0m\n";
-    die("try command #sudo php install.php\n");
-}
-
-
-
 /*define some basic directories*/
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 $cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
+
+require_once $cbHome.'httpsdocs/lib/Util.php';
+
+/* check if we are running under root / Administrator user */
+
+switch (CB\Util\getOS()) {
+
+    case 'WIN' :
+
+        $return_user_state = shell_exec(dirname(__FILE__).DIRECTORY_SEPARATOR.'get_user_state.bat');
+        $user_state = preg_replace('/\n|\r/si', '', $returned_user_state);
+        if ($user_state != 'admin') {
+            die( "This script should be run under \"Administrator\"\n" );
+        }
+        break;
+
+
+    case "LINUX" :
+        $currentUser = empty($_SERVER['USER']) ? @$_SERVER['USERNAME'] : $_SERVER['USER'];
+
+        if (!in_array($currentUser, array('root'))) {
+            echo "\033[31mThis script should be run under \"root\" \033[0m\n";
+            die("try command #sudo php install.php\n");
+        }
+
+        break;
+
+    default : echo "Unknown OS System" ;
+        
+        break;
+}
+
 
 
 if (!isset($cfg)) {
@@ -104,10 +115,9 @@ $defaultValues = getDefaultConfigValues();
 $cfg = $cfg + $defaultValues;
 
 
-if (!\CB\IS_WINDOWS) {
+if (\CB\Util\getOS()!="WIN") {
     //ask for apache user and set ownership for some folders
     $cfg['apache_user'] = readParam('apache_user', $cfg['apache_user']);
-    echo 'SET APACHE USERS:';
     setOwnershipForApacheUser($cfg);
 }
 
@@ -183,7 +193,7 @@ do {
             trigger_error('Error saving to config.ini file', E_USER_ERROR);
         }
     } else {
-        echo "\033[32mOk\033[0m\n"."\n";
+        display_OK();
     }
 } while ($r === false);
 
