@@ -196,7 +196,7 @@ function sortTemplateRows(&$array, $pid, &$result)
 foreach ($templates as $t => $f) {
     $sf = array();
     sortTemplateRows($f, null, $sf);
-    echo 'CB.DB.template'.$t.' = new CB.DB.TemplateStore({data:'.Util\jsonEncode($sf).'});';
+    echo 'CB.DB.template' . $t . ' = new CB.DB.TemplateStore({data:'.Util\jsonEncode($sf).'});' . "\n\n";
 }
 
 ?>
