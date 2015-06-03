@@ -19,15 +19,25 @@ namespace CB\INSTALL;
 use CB;
 
 /* check if we are running under root / Administrator user */
+
 $currentUser = empty($_SERVER['USER'])
     ? @$_SERVER['USERNAME']
     : $_SERVER['USER'];
-
-if (!in_array($currentUser, array('root', 'Administrator'))) {
+if(strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+	
+	$user_state = shell_exec(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'is_admin.bat');
+	$user_state = preg_replace('/\n|\r/si','',$user_state);
+	if($user_state != 'admin') {
+	  echo "This script should be run under \"Administrator\"\n";
+     die("");
+	}
+} elseif (!in_array($currentUser, array('root'))) {
 //    trigger_error('This script should be run under "root" or "Administrator"', E_USER_ERROR);
     echo "\033[31mThis script should be run under \"root\" or \"Administrator\"\033[0m\n";
     die("try command #sudo php install.php\n");
 }
+
+
 
 /*define some basic directories*/
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;

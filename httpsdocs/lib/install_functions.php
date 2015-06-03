@@ -49,7 +49,7 @@ function getDefaultConfigValues()
         ,'comments_pass' => ''
 
         ,'PYTHON' => 'python'
-        ,'backup_dir' => \CB\APP_DIR . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR
+        ,'backup_dir' => \CB\APP_DIR . 'backup' . DIRECTORY_SEPARATOR
     );
 }
 
@@ -329,26 +329,36 @@ function solrCreateCore($host, $port, $coreName)
  */
 function verifyDBConfig(&$cfg)
 {
+	ini_set('display_errors',1);
+	
     echo "Verifying db params ... ";
 
     $rez = true;
     $error = false;
 
     try {
-        //check firstly for priviliget user
+        
         $dbh = connectDBWithSuUser($cfg);
 
         $error = mysqli_connect_errno();
 
-        //check the standart user also
         if (empty($error)) {
             $dbh = @\CB\DB\connectWithParams($cfg);
 
             $error = mysqli_connect_errno();
-        }
+			
+			// trigger_error( $error, E_USER_WARNING);
+        } else {
+			// trigger_error( $error, E_USER_WARNING);
+		}
 
     } catch (\Exception $e) {
-        $error = true;
+		if($error != 1524 ) { 
+		$error = true;
+		} else {
+			$error = false;
+		}
+        
     }
 
     if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
