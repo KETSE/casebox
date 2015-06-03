@@ -199,7 +199,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
     $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
 
     if (!file_exists($solrCSPath)) {
-        mkdir($solrCSPath, 744, true);
+        mkdir($solrCSPath, 0777, true);
     }
 
     $r = true;
@@ -209,10 +209,22 @@ function createSolrConfigsetsSymlinks(&$cfg)
         $r = symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $defaultLinkName );
     }
 
-    $logLinkName = $solrCSPath . 'cb_log';
+    $logLinkName = $solrCSPath . $cfg['prefix'].'_log';
     if ( !file_exists($logLinkName) ) {
         $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName );
     }
+
+    shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
+    
+     // create dir for log core
+    $logCore = $cfg['solr_home'] . $cfg['prefix'].'_log';
+
+        if ( !file_exists($logCore) ) {
+            mkdir($logCore, 0777, true);
+            symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
+        }
+      // set owner of core folder for solr
+      shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
 
     }
 
@@ -259,10 +271,12 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
         }
     }
 
+
+
     if ($createCore) {
         echo 'Creating solr core ... ';
 
-        if (solrCreateCore($solrHost, $solrPort, $fullCoreName)) {
+        if (solrCreateCore($solrHost, $solrPort, $fullCoreName, $cfg)) {
             display_OK();
         } else {
             displayError("Error creating core.\n");
@@ -306,9 +320,37 @@ function solrUnloadCore($host, $port, $coreName)
  * create a solr core
  * @return boolean
  */
-function solrCreateCore($host, $port, $coreName)
+function solrCreateCore($host, $port, $coreName, $cfg = array() )
 {
     $rez = true;
+
+    if (isset($cfg['solr_home'])) {
+        
+        $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
+
+        // check if path on solr data exists
+        if (!file_exists($CB_CORE_SOLR_PATH)) {
+            // create
+            mkdir($CB_CORE_SOLR_PATH, 0777, true);
+        }
+
+        // make link to config
+        $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
+
+        $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
+
+        $confPath = $CBCSPath.'default_config'.DIRECTORY_SEPARATOR.'conf';
+        
+        if (!file_exists($confLink) && file_exists($confPath)) {
+            $r = symlink($confPath, $confLink);
+        } elseif (!file_exists($confPath)) {
+            trigger_error($confPath, E_USER_WARNING);
+        }
+
+     // set owner of core folder for solr same as parent
+      shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$CB_CORE_SOLR_PATH);
+        
+    }
 
     if ($h = fopen(
         'http://' . $host. ':' . $port . '/solr/admin/cores?action=CREATE&' .
@@ -338,8 +380,8 @@ function verifyDBConfig(&$cfg)
       try {
             $dbh = new \mysqli(
                 $cfg['db_host'],
-                $cfg['db_user'],
-                (isset($cfg['db_pass']) ? $cfg['db_pass']:null),
+                $cfg['su_db_user'],
+                (isset($cfg['su_db_pass']) ? $cfg['su_db_pass']:null),
                 (isset($cfg['db_name']) ? $cfg['db_name']:null),
                 $cfg['db_port']
             );
@@ -506,8 +548,10 @@ function readParam($paramName, $defaultValue = null)
             getParamPhrase($paramName)
         );
 
-        $question = str_replace('{prefix}', constant('CB\\PREFIX'), $question);
-
+        if(defined('CB\\PREFIX')) {
+             $question = str_replace('{prefix}', constant('CB\\PREFIX'), $question);
+        }
+        
         $l = readAline($question);
 
         /* define prefix not defined yet */

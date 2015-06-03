@@ -51,8 +51,8 @@ if (!\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
 \CB\INSTALL\defineBackupDir($cfg);
 
 $dbName = \CB\PREFIX . $coreName;
-$dbUser = $cfg['db_user'];
-$dbPass = $cfg['db_pass'];
+$dbUser = isset($cfg['su_db_user']) ? $cfg['su_db_user']:$cfg['db_user'];
+$dbPass = isset($cfg['su_db_pass']) ? $cfg['su_db_pass']:$cfg['db_pass'];
 
 $applyDump = true;
 
@@ -79,7 +79,7 @@ if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
 
 if ($applyDump) {
     echo 'Applying dump .. ';
-    exec('mysql --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
+    shell_exec('mysql --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
     display_OK();
 }
 
