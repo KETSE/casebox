@@ -191,7 +191,7 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
             $data_field['pid'] = $data_template['id'];
             $obj_field         = new \CB\Objects\TemplateField();
             $data_field['id']  = $obj_field->create($data_field);
-            $this->assertTrue($data_field['id'] > 0, ' Error on create Template');
+            $this->assertTrue($data_field['id'] > 0, ' Error on create Field');
         }
     }
 }
