@@ -30,7 +30,7 @@ switch (CB\Util\getOS()) {
 
     case 'WIN' :
 
-        $return_user_state = shell_exec(dirname(__FILE__).DIRECTORY_SEPARATOR.'get_user_state.bat');
+        $returned_user_state = shell_exec(dirname(__FILE__).DIRECTORY_SEPARATOR.'get_user_state.bat');
         $user_state = preg_replace('/\n|\r/si', '', $returned_user_state);
         if ($user_state != 'admin') {
             die( "This script should be run under \"Administrator\"\n" );
