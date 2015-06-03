@@ -360,13 +360,10 @@ function solrCreateCore($host, $port, $coreName, $cfg = array() )
 
     }
 
-    if ($h = fopen(
-        'http://' . $host. ':' . $port . '/solr/admin/cores?action=CREATE&' .
-        'name=' . $coreName . (isset($cfg['prefix']) ? '&configSet='.$cfg['prefix'].'_default':''),
-        'r'
-    )) {
+    $instance_create_url = 'http://' . $host. ':' . $port . '/solr/admin/cores?action=CREATE&' .
+        'name=' . $coreName . '&instanceDir='.$coreName;
+    if ($h = fopen($instance_create_url, 'r')) {
         fclose($h);
-
     } else {
         $rez = false;
     }
