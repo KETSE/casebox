@@ -214,18 +214,23 @@ function createSolrConfigsetsSymlinks(&$cfg)
         $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName );
     }
 
-    shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
-    
-     // create dir for log core
+    if (\CB\Util\getOS() == "LINUX") {
+            shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
+        }
+
+        // create dir for log core
     $logCore = $cfg['solr_home'] . $cfg['prefix'].'_log';
 
         if ( !file_exists($logCore) ) {
             mkdir($logCore, 0777, true);
             symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
         }
-      // set owner of core folder for solr
-      shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
 
+     if (\CB\Util\getOS() == "LINUX") {
+            // set owner of core folder for solr
+            shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
+        }
+        
     }
 
     return [ 'success' => $r, 'links' => [ 'log' => $defaultLinkName, 'default' => $defaultLinkName ] ];
@@ -347,14 +352,17 @@ function solrCreateCore($host, $port, $coreName, $cfg = array() )
             trigger_error($confPath, E_USER_WARNING);
         }
 
-     // set owner of core folder for solr same as parent
-      shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$CB_CORE_SOLR_PATH);
-        
+
+   if (\CB\Util\getOS() == "LINUX") {
+            // set owner of core folder for solr same as parent
+            shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$CB_CORE_SOLR_PATH);
+        }
+
     }
 
     if ($h = fopen(
         'http://' . $host. ':' . $port . '/solr/admin/cores?action=CREATE&' .
-        'name=' . $coreName . '&configSet=cb_default',
+        'name=' . $coreName . (isset($cfg['prefix']) ? '&configSet='.$cfg['prefix'].'_default':''),
         'r'
     )) {
         fclose($h);
@@ -663,7 +671,7 @@ function backupDB($dbName, $dbUser, $dbPass)
 {
     $fileName = \CB\Cache::get('RUN_INSTALL_BACKUP_DIR') . date('Ymd_His_') . $dbName . '.sql';
 
-    exec('mysqldump --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
+    shell_exec('mysqldump --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
 
     return true;
 }
