@@ -310,7 +310,7 @@ function solrUnloadCore($host, $port, $coreName)
     $rez = true;
 
     $url = 'http://' . $host. ':' . $port . '/solr/admin/cores?action=UNLOAD&' .
-        'core=' . $coreName . '&deleteInstanceDir=true';
+        'core=' . $coreName; //. '&deleteInstanceDir=true'
 
     if ($h = fopen($url, 'r')) {
         fclose($h);
