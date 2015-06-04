@@ -485,7 +485,7 @@ function createMainDatabase($cfg)
         }
     }
 
-    GrandDBAccess($cfg);
+   // GrandDBAccess($cfg);
     
     return $rez;
 }
@@ -494,7 +494,7 @@ function createMainDatabase($cfg)
  * create db_user if not- exists and grand all privileges to access
  * @param type $cfg
  */
-function GrandDBAccess($cfg) {
+/*function GrandDBAccess($cfg) {
        
 
     // first check if user exists
@@ -508,16 +508,16 @@ function GrandDBAccess($cfg) {
         \CB\DB\dbQuery($SQL_CREATE_USER);
 
     }
-        // GRANT ALL PRIVILEGES ON `xian\_%`.* TO xian@'192.168.1.%';
+      // GRANT ALL PRIVILEGES ON `xian\_%`.* TO xian@'192.168.1.%';
         $SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON `".$cfg['prefix']."\_%`.* TO `".$cfg['db_user']."`@`".$cfg['db_host']."` WITH GRANT OPTION;";
-      //$SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON *.* TO ".$cfg['db_user']."@".$cfg['db_host']." WITH GRANT OPTION;";
+      // $SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON *.* TO ".$cfg['db_user']."@".$cfg['db_host']." WITH GRANT OPTION;";
 
       \CB\DB\dbQuery($SQL_GRAND_ACCESS);
 
       $SQL_FLUSH = "FLUSH PRIVILEGES;";
 
       \CB\DB\dbQuery($SQL_FLUSH);
-}
+} */
 
 /**
  * read a line from stdin
