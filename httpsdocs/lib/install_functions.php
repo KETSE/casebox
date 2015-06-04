@@ -121,7 +121,7 @@ function getParamPhrase($paramName)
 function displaySystemNotices()
 {
     $PATH = getenv('PATH');
-    if (\CB\Util\getOS() == "WIN" && !strpos($PATH,'mysql')) {
+    if (\CB\Util\getOS() == "WIN" && !( strpos($PATH,'mysql') || strpos($PATH,'MySQL') ) )  {
         echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
     } else {
 
@@ -199,7 +199,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
     $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
 
     if (!file_exists($solrCSPath)) {
-        mkdir($solrCSPath, 744, true);
+        mkdir($solrCSPath, 0777, true);
     }
 
     $r = true;
@@ -209,11 +209,28 @@ function createSolrConfigsetsSymlinks(&$cfg)
         $r = symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $defaultLinkName );
     }
 
-    $logLinkName = $solrCSPath . 'cb_log';
+    $logLinkName = $solrCSPath . $cfg['prefix'].'_log';
     if ( !file_exists($logLinkName) ) {
         $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName );
     }
 
+    if (\CB\Util\getOS() == "LINUX") {
+            shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
+        }
+
+        // create dir for log core
+    $logCore = $cfg['solr_home'] . $cfg['prefix'].'_log';
+
+        if ( !file_exists($logCore) ) {
+            mkdir($logCore, 0777, true);
+           // symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
+        }
+
+     if (\CB\Util\getOS() == "LINUX") {
+            // set owner of core folder for solr
+            shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
+        }
+        
     }
 
     return [ 'success' => $r, 'links' => [ 'log' => $defaultLinkName, 'default' => $defaultLinkName ] ];
@@ -259,10 +276,12 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
         }
     }
 
+
+
     if ($createCore) {
         echo 'Creating solr core ... ';
 
-        if (solrCreateCore($solrHost, $solrPort, $fullCoreName)) {
+        if (solrCreateCore($solrHost, $solrPort, $fullCoreName, $cfg)) {
             display_OK();
         } else {
             displayError("Error creating core.\n");
@@ -291,7 +310,7 @@ function solrUnloadCore($host, $port, $coreName)
     $rez = true;
 
     $url = 'http://' . $host. ':' . $port . '/solr/admin/cores?action=UNLOAD&' .
-        'core=' . $coreName . '&deleteInstanceDir=true';
+        'core=' . $coreName . '&deleteInstanceDir=true'; //
 
     if ($h = fopen($url, 'r')) {
         fclose($h);
@@ -306,17 +325,45 @@ function solrUnloadCore($host, $port, $coreName)
  * create a solr core
  * @return boolean
  */
-function solrCreateCore($host, $port, $coreName)
+function solrCreateCore($host, $port, $coreName, $cfg = array() )
 {
     $rez = true;
 
-    if ($h = fopen(
-        'http://' . $host. ':' . $port . '/solr/admin/cores?action=CREATE&' .
-        'name=' . $coreName . '&configSet=cb_default',
-        'r'
-    )) {
-        fclose($h);
+    if (isset($cfg['solr_home'])) {
+        
+        $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
 
+        // check if path on solr data exists
+        if (!file_exists($CB_CORE_SOLR_PATH)) {
+            // create
+            mkdir($CB_CORE_SOLR_PATH, 0777, true);
+        }
+
+        // make link to config
+       /* $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
+
+        $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
+
+        $confPath = $CBCSPath.'default_config'.DIRECTORY_SEPARATOR.'conf';
+        
+        if (!file_exists($confLink) && file_exists($confPath)) {
+            $r = symlink($confPath, $confLink);
+        } elseif (!file_exists($confPath)) {
+            trigger_error($confPath, E_USER_WARNING);
+        } */
+
+
+   if (\CB\Util\getOS() == "LINUX") {
+            // set owner of core folder for solr same as parent
+            shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$CB_CORE_SOLR_PATH);
+        }
+
+    }
+
+    $instance_create_url = 'http://' . $host. ':' . $port . '/solr/admin/cores?action=CREATE&' .
+        'name=' . $coreName . '&instanceDir='.$coreName.'&configSet='.$cfg['prefix'].'_default';
+    if ($h = fopen($instance_create_url, 'r')) {
+        fclose($h);
     } else {
         $rez = false;
     }
@@ -338,8 +385,8 @@ function verifyDBConfig(&$cfg)
       try {
             $dbh = new \mysqli(
                 $cfg['db_host'],
-                $cfg['db_user'],
-                (isset($cfg['db_pass']) ? $cfg['db_pass']:null),
+                $cfg['su_db_user'],
+                (isset($cfg['su_db_pass']) ? $cfg['su_db_pass']:null),
                 (isset($cfg['db_name']) ? $cfg['db_name']:null),
                 $cfg['db_port']
             );
@@ -413,7 +460,7 @@ function createMainDatabase($cfg)
         if (confirm('overwrite__casebox_db')) {
             if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
                 echo 'Backuping .. ';
-               if(backupDB($cbDb, $cfg['db_user'], $cfg['db_pass'])) {
+               if(backupDB($cbDb, $DB_USER, $DB_PASS)) {
                    display_OK();
                } else {
                    display_ERROR('FALSE');
@@ -457,12 +504,13 @@ function GrandDBAccess($cfg) {
      $db_user = $db_user_rez->fetch_array();
     if( $db_user[0] != 1 )  {
 
-        $SQL_CREATE_USER = "CREATE USER ".$cfg['db_user']."@'".$cfg['db_host']."' IDENTIFIED BY '".$cfg['db_pass']."'";
+        $SQL_CREATE_USER = "CREATE USER `".$cfg['db_user']."`@`".$cfg['db_host']."` IDENTIFIED BY '".$cfg['db_pass']."'";
         \CB\DB\dbQuery($SQL_CREATE_USER);
 
     }
         // GRANT ALL PRIVILEGES ON `xian\_%`.* TO xian@'192.168.1.%';
-      $SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON `".$cfg['prefix']."\_%`.* TO ".$cfg['db_user']."@".$cfg['db_host'].";";
+        $SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON `".$cfg['prefix']."\_%`.* TO `".$cfg['db_user']."`@`".$cfg['db_host']."` WITH GRANT OPTION;";
+      //$SQL_GRAND_ACCESS = "GRANT ALL PRIVILEGES ON *.* TO ".$cfg['db_user']."@".$cfg['db_host']." WITH GRANT OPTION;";
 
       \CB\DB\dbQuery($SQL_GRAND_ACCESS);
 
@@ -505,8 +553,10 @@ function readParam($paramName, $defaultValue = null)
             getParamPhrase($paramName)
         );
 
-        $question = str_replace('{prefix}', constant('CB\\PREFIX'), $question);
-
+        if(defined('CB\\PREFIX')) {
+             $question = str_replace('{prefix}', constant('CB\\PREFIX'), $question);
+        }
+        
         $l = readAline($question);
 
         /* define prefix not defined yet */
@@ -618,7 +668,7 @@ function backupDB($dbName, $dbUser, $dbPass)
 {
     $fileName = \CB\Cache::get('RUN_INSTALL_BACKUP_DIR') . date('Ymd_His_') . $dbName . '.sql';
 
-    exec('mysqldump --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
+    shell_exec('mysqldump --routines --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' > ' . $fileName);
 
     return true;
 }

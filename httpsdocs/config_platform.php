@@ -63,8 +63,15 @@ $cfg['SOLR_CLIENT'] = 'Solr/Service.php';
 $cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
 $cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
+if (file_exists(DOC_ROOT.'config.ini')) {
 //load main config so that we can connect to casebox db and read configuration for core
-$cfg = Config::loadConfigFile(DOC_ROOT.'config.ini') + $cfg;
+    $cfg = Config::loadConfigFile(DOC_ROOT.'config.ini') + $cfg;
+
+    if (isset($cfg['db_host']) && isset($cfg['db_user']) && isset($cfg['db_pass']) && isset($cfg['db_port'])) {
+//conect to db using global params from config.ini
+        DB\connect($cfg);
+    }
+}
 
 //define global prefix used
 define(
@@ -105,10 +112,7 @@ $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . DIRECTORY_S
 
 Cache::set('platformConfig', $cfg);
 
-if (isset($cfg['db_host']) && isset($cfg['db_user']) && isset($cfg['db_pass']) && isset($cfg['db_port'])) {
-//conect to db using global params from config.ini
-    DB\connect($cfg);
-}
+
 
 /* config functions section */
 
