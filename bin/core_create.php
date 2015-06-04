@@ -50,7 +50,8 @@ if (!\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
 
 \CB\INSTALL\defineBackupDir($cfg);
 
-$dbName = \CB\PREFIX . $coreName;
+$dbName = (isset($cfg['prefix']) ? $cfg['prefix'].'_' : \CB\PREFIX) . $coreName;
+
 $dbUser = isset($cfg['su_db_user']) ? $cfg['su_db_user']:$cfg['db_user'];
 $dbPass = isset($cfg['su_db_pass']) ? $cfg['su_db_pass']:$cfg['db_pass'];
 

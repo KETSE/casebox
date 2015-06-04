@@ -121,7 +121,7 @@ function getParamPhrase($paramName)
 function displaySystemNotices()
 {
     $PATH = getenv('PATH');
-    if (\CB\Util\getOS() == "WIN" && !strpos($PATH,'mysql')) {
+    if (\CB\Util\getOS() == "WIN" && !( strpos($PATH,'mysql') || strpos($PATH,'MySQL') ) )  {
         echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
     } else {
 
@@ -223,7 +223,7 @@ function createSolrConfigsetsSymlinks(&$cfg)
 
         if ( !file_exists($logCore) ) {
             mkdir($logCore, 0777, true);
-            symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
+           // symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
         }
 
      if (\CB\Util\getOS() == "LINUX") {
@@ -310,7 +310,7 @@ function solrUnloadCore($host, $port, $coreName)
     $rez = true;
 
     $url = 'http://' . $host. ':' . $port . '/solr/admin/cores?action=UNLOAD&' .
-        'core=' . $coreName; //. '&deleteInstanceDir=true'
+        'core=' . $coreName . '&deleteInstanceDir=true'; //
 
     if ($h = fopen($url, 'r')) {
         fclose($h);
@@ -340,7 +340,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array() )
         }
 
         // make link to config
-        $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
+       /* $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
 
         $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
 
@@ -350,7 +350,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array() )
             $r = symlink($confPath, $confLink);
         } elseif (!file_exists($confPath)) {
             trigger_error($confPath, E_USER_WARNING);
-        }
+        } */
 
 
    if (\CB\Util\getOS() == "LINUX") {
@@ -361,7 +361,7 @@ function solrCreateCore($host, $port, $coreName, $cfg = array() )
     }
 
     $instance_create_url = 'http://' . $host. ':' . $port . '/solr/admin/cores?action=CREATE&' .
-        'name=' . $coreName . '&instanceDir='.$coreName;
+        'name=' . $coreName . '&instanceDir='.$coreName.'&configSet='.$cfg['prefix'].'_default';
     if ($h = fopen($instance_create_url, 'r')) {
         fclose($h);
     } else {
@@ -460,7 +460,7 @@ function createMainDatabase($cfg)
         if (confirm('overwrite__casebox_db')) {
             if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
                 echo 'Backuping .. ';
-               if(backupDB($cbDb, $cfg['db_user'], $cfg['db_pass'])) {
+               if(backupDB($cbDb, $DB_USER, $DB_PASS)) {
                    display_OK();
                } else {
                    display_ERROR('FALSE');
