@@ -79,8 +79,13 @@ function connectWithParams($p)
         }
     }
 
+    // lastParams during the first connection to DB doesn't have a core name
+    if (! array_key_exists('name', $lastParams)) {
+        $lastParams['name'] = '';
+    }
+
     // if database changed then apply initsql if set
-    if ( isset($newParams['name']) || (isset($lastParams['name']) && isset($newParams['name']) && $lastParams['name'] != $newParams['name'])) {
+    if ($lastParams['name'] != $newParams['name']) {
         $newParams['name'] = $dbh->real_escape_string($newParams['name']);
 
         if (!empty($newParams['name'])) {
