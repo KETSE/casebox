@@ -167,6 +167,12 @@ class Search extends Solr\Client
                 }
 
             }
+
+            //add title field for current language
+            $field = 'title_' . Config::get('user_language') . '_t';
+            if (!in_array($field, $rez)) {
+                $rez[] = $field;
+            }
         }
 
         return implode(',', $rez);
@@ -520,6 +526,9 @@ class Search extends Solr\Client
 
         $sr = &$this->results;
 
+        $shortcuts = array();
+        $titleField = 'title_' . Config::get('user_language') . '_t';
+
         //iterate documents, add resulting record to $rez['data']
         //and collect shortcut records to be prepared
         foreach ($sr->response->docs as $d) {
@@ -529,7 +538,17 @@ class Search extends Solr\Client
                 $rd[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
             }
 
+            //update name field to language title field if not empty
+            if (!empty($rd[$titleField])) {
+                $rd['name'] = $rd[$titleField];
+            }
+            unset($rd[$titleField]);
+
             $rez['data'][] = &$rd;
+
+            if (!empty($rd['target_id'])) {
+                $shortcuts[$rd['target_id']] = &$rd;
+            }
 
             unset($rd);
         }
@@ -553,7 +572,7 @@ class Search extends Solr\Client
         $this->warmUpNodes($rez);
 
         //1
-        // $this->updateShortcutsData($shortcuts);
+        $this->updateShortcutsData($shortcuts);
 
         //2
         $this->setPaths($rez['data']);
@@ -601,7 +620,7 @@ class Search extends Solr\Client
         return $rez;
     }
 
-    /*private function updateShortcutsData(&$shortcutsArray)
+    protected function updateShortcutsData(&$shortcutsArray)
     {
         if (empty($shortcutsArray)) {
             return;
@@ -610,27 +629,21 @@ class Search extends Solr\Client
         $p = &$this->params;
         $ids = array_keys($shortcutsArray);
 
-        $sr = $this->search(
-            $this->escapeLuceneChars(''),
-            0,
-            1000,
-            array(
-                'defType' => $p['defType']
-                ,'fl' => $p['fl']
-                ,'q.alt' => $p['q.alt']
-                ,'fq' => array(
-                    'id:(' . implode(' OR ', $ids) . ')'
-                )
-            )
-        );
+        $objects = Objects::getCachedObjects($ids);
 
-        $shortcuts = array();
+        foreach ($objects as $obj) {
+            $d = $obj->getData();
+            $sd = $obj->getSolrData();
+            $oldProps = $shortcutsArray[$d['id']];
+            $ref = &$shortcutsArray[$d['id']];
 
-        foreach ($sr->response->docs as $d) {
-            $oldProps = $shortcutsArray[$d->id];
-            $ref = &$shortcutsArray[$d->id];
-
-            foreach ($d as $fn => $fv) {
+            //set data form target objects solr data or general data if present
+            foreach ($ref as $fn => $fv) {
+                if (isset($sd[$fn])) {
+                    $fv = $sd[$fn];
+                } elseif (isset($sd[$fn])) {
+                    $fv = $d[$fn];
+                }
                 $ref[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
             }
             //set element id to original so all actions will be made on shortcut by default
@@ -649,7 +662,6 @@ class Search extends Solr\Client
         $d = &$result['data'];
 
         $requiredIds = array();
-        $shortcuts = array();
         $paths = array();
 
         foreach ($d as &$rec) {
@@ -657,7 +669,6 @@ class Search extends Solr\Client
 
             //add shorcut targets
             if (!empty($rec['target_id'])) {
-                $shortcuts[$rd['target_id']] = &$rec;
                 $requiredIds[$rec['target_id']] = 1;
             }
 
@@ -716,11 +727,18 @@ class Search extends Solr\Client
             }
         }
 
-        //get names for distinct ids
         if (!empty($distinctIds)) {
-            $names = static::getObjectNames($distinctIds);
+            $distinctIds = array_unique($distinctIds);
+            $objects = Objects::getCachedObjects($distinctIds);
+            $names = array();
 
-            //replace ids with names
+            foreach ($distinctIds as $id) {
+                if (!empty($objects[$id])) {
+                    $names[$id] = $objects[$id]->getName();
+                }
+            }
+
+            //replace ids in paths with names
             foreach ($paths as $path => $elements) {
                 for ($i=0; $i < sizeof($elements); $i++) {
                     if (isset($names[$elements[$i]])) {

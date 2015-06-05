@@ -81,6 +81,26 @@ class Comment extends Object
     }
 
     /**
+     * method to collect solr data from object data
+     * according to template fields configuration
+     * and store it in sys_data onder "solr" property
+     * @return void
+     */
+    protected function collectSolrData()
+    {
+        $rez = array();
+
+        // parent::collectSolrData();
+        //
+        if (!empty($this->data['data']['_title'])) {
+            $rez['content'] = $this->data['data']['_title'];
+
+        }
+
+        $this->data['sys_data']['solr'] = $rez;
+    }
+
+    /**
      * function to update parent followers when adding a comment
      * with this user and referenced users from comment
      * @return void

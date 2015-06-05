@@ -61,7 +61,6 @@ function connectWithParams($p)
 
         // connect with new params
         try {
-		//	echo '\CB\DB\ connect with new params'.PHP_EOL;
 
             $dbh = new \mysqli(
                 $newParams['host'],
@@ -70,7 +69,7 @@ function connectWithParams($p)
                 ($newParams['name'] ? $newParams['name']:null),
                 $newParams['port']
             );
-		//	echo 'end connection'.PHP_EOL;
+
         } catch (\Exception $e) {
             if (\mysqli_connect_errno()) {
                 throw new \Exception('Unable to connect to DB: ' . \mysqli_connect_error());
@@ -79,13 +78,10 @@ function connectWithParams($p)
         }
     }
 
-    // lastParams during the first connection to DB doesn't have a core name
-    if (! array_key_exists('name', $lastParams)) {
-        $lastParams['name'] = '';
-    }
-
     // if database changed then apply initsql if set
-    if ($lastParams['name'] != $newParams['name']) {
+    if (!array_key_exists('name', $lastParams) ||
+        ($lastParams['name'] != $newParams['name'])
+    ) {
         $newParams['name'] = $dbh->real_escape_string($newParams['name']);
 
         if (!empty($newParams['name'])) {
@@ -172,7 +168,7 @@ if (!function_exists(__NAMESPACE__.'\dbQueryError')) {
         }
         error_log($rez, 3, \CB\Config::get('error_log', \CB\LOGS_DIR.'cb_error_log'));
 
-        if ( defined('CB\\IS_DEBUG_HOST') && !\CB\IS_DEBUG_HOST ) {
+        if (defined('CB\\IS_DEBUG_HOST') && !\CB\IS_DEBUG_HOST) {
             $rez ='Query error (' . $dbh->lastParams['name'] . ')';
         }
 

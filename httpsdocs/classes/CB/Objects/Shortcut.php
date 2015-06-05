@@ -100,4 +100,20 @@ class Shortcut extends Object
 
         return parent::update($p);
     }
+
+    /**
+     * method to collect solr data from object data
+     * according to template fields configuration
+     * and store it in sys_data onder "solr" property
+     * @return void
+     */
+    protected function collectSolrData()
+    {
+
+        parent::collectSolrData();
+
+        $sd = &$this->data['sys_data']['solr'];
+
+        $sd['target_type'] = Objects::getType($this->data['target_id']);
+    }
 }

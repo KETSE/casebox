@@ -116,11 +116,11 @@ CREATE TABLE `plugins` (
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `order` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`,`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 /*Data for the table `plugins` */
 
-insert  into `plugins`(`id`,`name`,`cfg`,`active`,`order`) values (1,'AutoSetFields','{\r\n\"listeners\": {\r\n  \"beforeNodeDbCreate\": {\r\n    \"AutoSetFields\\\\Listeners\": [\r\n      \"onNodeDbCreateOrUpdate\"\r\n    ]\r\n  }\r\n  ,\"beforeNodeDbUpdate\": {\r\n    \"AutoSetFields\\\\Listeners\": [\r\n      \"onNodeDbCreateOrUpdate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(2,'DisplayColumns','{\r\n\"js\": [\r\n  \"DisplayColumns.js\"\r\n]\r\n,\"listeners\": {\r\n\r\n  \"beforeSolrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onBeforeSolrQuery\"\r\n    ]\r\n  }\r\n\r\n  ,\"solrQueryWarmUp\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onSolrQueryWarmUp\"\r\n    ]\r\n  }\r\n\r\n  ,\"solrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onSolrQuery\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(3,'Export','{\r\n\r\n\"js\": [\r\n  \"Init.js\"\r\n  ,\"Button.js\"\r\n]\r\n,\"api\" : {\r\n  \"Export_Instance\": {\r\n    \"methods\": {\r\n      \"getCSV\": {\r\n        \"len\": 1\r\n      }\r\n    }\r\n  }\r\n\r\n}\r\n}',1,0),(4,'Search','{\r\n\r\n\"js\": [\r\n  \"Init.js\"\r\n  ,\"Button.js\"\r\n  ,\"Form.js\"\r\n  ,\"ResultForm.js\"\r\n]\r\n\r\n,\"remote\": {\r\n  \"handler\": \"CB_Browser_SearchRouter.search\"\r\n}\r\n\r\n}',1,0),(5,'SystemFolders','{\r\n\"listeners\": {\r\n  \"nodeDbCreate\": {\r\n    \"SystemFolders\\\\Listeners\": [\r\n      \"onNodeDbCreate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(6,'Multilanguage','{\r\n\"listeners\": {\r\n  \"beforeSolrQuery\": {\r\n    \"Multilanguage\\\\Listeners\": [\r\n      \"onBeforeSolrQuery\"\r\n    ]\r\n  }\r\n  ,\"solrQuery\": {\r\n    \"Multilanguage\\\\Listeners\": [\r\n      \"onSolrQuery\"\r\n    ]\r\n  }\r\n}\r\n}',1,0);
+insert  into `plugins`(`id`,`name`,`cfg`,`active`,`order`) values (1,'AutoSetFields','{\r\n\"listeners\": {\r\n  \"beforeNodeDbCreate\": {\r\n    \"AutoSetFields\\\\Listeners\": [\r\n      \"onNodeDbCreateOrUpdate\"\r\n    ]\r\n  }\r\n  ,\"beforeNodeDbUpdate\": {\r\n    \"AutoSetFields\\\\Listeners\": [\r\n      \"onNodeDbCreateOrUpdate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(2,'DisplayColumns','{\r\n\"js\": [\r\n  \"DisplayColumns.js\"\r\n]\r\n,\"listeners\": {\r\n\r\n  \"beforeSolrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onBeforeSolrQuery\"\r\n    ]\r\n  }\r\n\r\n  ,\"solrQueryWarmUp\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onSolrQueryWarmUp\"\r\n    ]\r\n  }\r\n\r\n  ,\"solrQuery\": {\r\n    \"DisplayColumns\\\\Listeners\": [\r\n      \"onSolrQuery\"\r\n    ]\r\n  }\r\n}\r\n}',1,0),(3,'Export','{\r\n\r\n\"js\": [\r\n  \"Init.js\"\r\n  ,\"Button.js\"\r\n]\r\n,\"api\" : {\r\n  \"Export_Instance\": {\r\n    \"methods\": {\r\n      \"getCSV\": {\r\n        \"len\": 1\r\n      }\r\n    }\r\n  }\r\n\r\n}\r\n}',1,0),(4,'Search','{\r\n\r\n\"js\": [\r\n  \"Init.js\"\r\n  ,\"Button.js\"\r\n  ,\"Form.js\"\r\n  ,\"ResultForm.js\"\r\n]\r\n\r\n,\"remote\": {\r\n  \"handler\": \"CB_Browser_SearchRouter.search\"\r\n}\r\n\r\n}',1,0),(5,'SystemFolders','{\r\n\"listeners\": {\r\n  \"nodeDbCreate\": {\r\n    \"SystemFolders\\\\Listeners\": [\r\n      \"onNodeDbCreate\"\r\n    ]\r\n  }\r\n}\r\n}',1,0);
 
 /*Table structure for table `timezone` */
 
@@ -225,6 +225,7 @@ BEGIN
 		ADD COLUMN `caption` VARCHAR(150) NULL AFTER `zone_name`,
 		ADD COLUMN `gmt_offset` INT NULL AFTER `caption`;
 	END IF;
+
 	update zone set gmt_offset = (SELECT tz.gmt_offset
 		FROM `timezone` tz
 		WHERE tz.zone_id=zone.zone_id AND tz.time_start < UNIX_TIMESTAMP(UTC_TIMESTAMP()) AND tz.dst = 0

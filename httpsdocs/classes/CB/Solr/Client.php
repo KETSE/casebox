@@ -2,6 +2,7 @@
 namespace CB\Solr;
 
 use CB\DB;
+use CB\Util;
 
 /**
  * Solr client class used by CaseBox to make changes into solr
@@ -47,36 +48,100 @@ class Client extends Service
     }
 
     /**
-     * function that assigns additional data to object rectord
-     * @param  reference $objectRecord
+     * prepare a record with data from database to be indexed in solr
+     * @param  array reference $r
      * @return void
      */
-    private function getSolrData(&$objectRecord)
+    private function prepareDBRecord(&$r)
     {
-        switch (@$objectRecord['template_type']) {
-            // case 'comment':
-            //     break;
-            case 'file':
-                \CB\Files::getSolrData($objectRecord);
-                break;
-            case 'task':
-                \CB\Tasks::getSolrData($objectRecord);
-                break;
-            default:
-                \CB\Objects::getSolrData($objectRecord);
+        /* set template data */
+        if (!empty($r['template_id'])) {
+            $template = \CB\Templates\SingletonCollection::getInstance()->getTemplate($r['template_id']);
+            $r['template_type'] = $template->getData()['type'];
+            $r['iconCls'] = $template->getData()['iconCls'];
         }
-    }
 
-    /**
-     * function that assigns additional data to an array of object rectords
-     * @param  array reference $objectRecords
-     * @return void
-     */
-    private function getBulkSolrData(&$objectRecords)
-    {
-        \CB\Objects::getBulkSolrData($objectRecords);
-        \CB\Files::getBulkSolrData($objectRecords);
-        \CB\Tasks::getBulkSolrData($objectRecords);
+        /* consider node type sort column (ntsc) equal to 1 unit more
+        than total count of folder templates */
+        $r['ntsc'] = sizeof($this->folderTemplates) + 100;
+
+        /* decrease ntsc (make 1 unit more important) in case of 'case' object types */
+        if (@$r['template_type'] == 'case') {
+            $r['ntsc']--;
+        }
+
+        /* if there is a folder template then set its ntsc
+        equal to its index in folder_templates array */
+        $folder_index = array_search($r['template_id'], $this->folderTemplates);
+        if ($folder_index !== false) {
+            // $r['ntsc'] = $folder_index;
+            $r['ntsc'] = sizeof($this->folderTemplates);
+        }
+
+        /* make some trivial type checks */
+        $r['ntsc'] = intval($r['ntsc']);
+        $r['system'] = @intval($r['system']);
+
+        if (empty($r['pids'])) {
+            $r['pids'] = null;
+            $r['path'] = null;
+        } else {
+            $r['pids'] = explode(',', $r['pids']);
+            //exclude itself from pids
+            array_pop($r['pids']);
+            $r['path'] = implode('/', $r['pids']);
+        }
+
+        /* fill "ym" fields for date faceting by cdate, date, date_end */
+        $ym1 = str_replace('-', '', substr($r['cdate'], 2, 5));
+        $ym2 = str_replace('-', '', substr($r['date'], 2, 5));
+        $ym3 = str_replace('-', '', substr($r['date_end'], 2, 5));
+
+        if (empty($ym3)) {
+            $ym3 = $ym2;
+        }
+
+        if (!empty($ym1)) {
+            $r['ym1'] = $ym1;
+        }
+
+        if (!empty($ym2)) {
+            $r['ym2'] = $ym2;
+        }
+
+        if (!empty($ym3)) {
+            $r['ym3'] = $ym3;
+        }
+
+        $r['content'] = $r['name'] . "\n";
+
+        if (!empty($r['sys_data']['solr'])) {
+            foreach ($r['sys_data']['solr'] as $k => $v) {
+                $r[$k] = $v;
+
+                //add string values to content field
+                if (is_string($v)) {
+                    $r['content'] .= (in_array($k, array('date_start', 'date_end', 'dates'))
+                        ? substr($v, 0, 10)
+                        : $v
+                    )."\n";
+                }
+            }
+
+            //override content field if set in sys_data['solr']
+            if (!empty($r['sys_data']['content'])) {
+                $r['content'] = $r['sys_data']['content'];
+            }
+        }
+
+        //encode special chars for string values
+        foreach ($r as $k => $v) {
+            if (is_string($v)) {
+                $r[$k] = htmlspecialchars($v, ENT_COMPAT);
+            }
+        }
+
+        $this->filterSolrFields($r);
     }
 
     private function updateCronLastActionTime($cron_id)
@@ -125,7 +190,7 @@ class Client extends Service
             'class' => &$this
             ,'params' => &$p
         );
-        $folderTemplates = \CB\Config::get('folder_templates');
+        $this->folderTemplates = \CB\Config::get('folder_templates');
 
         \CB\fireEvent('onBeforeSolrUpdate', $eventParams);
 
@@ -135,14 +200,14 @@ class Client extends Service
         $all = !empty($p['all']);
         $nolimit = !empty($p['nolimit']);
 
-        $templatesCollection = \CB\Templates\SingletonCollection::getInstance();
         /* prepeare where condition for sql depending on incomming params */
         $where = '(t.updated > 0) AND (t.draft = 0) AND (t.id > $1)';
 
         if ($all) {
             $this->deleteByQuery('*:*');
             $where = '(t.id > $1) AND (t.draft = 0) ';
-            $templatesCollection->loadAll();
+
+            \CB\Templates\SingletonCollection::getInstance()->loadAll();
 
         } elseif (!empty($p['id'])) {
             $ids = \CB\Util\toNumericArray($p['id']);
@@ -172,10 +237,10 @@ class Client extends Service
                 ,DATE_FORMAT(t.ddate, \'%Y-%m-%dT%H:%i:%sZ\') `ddate`
                 ,t.dstatus
                 ,t.updated
-                ,c.name `case`
+                ,o.sys_data
             FROM tree t
             LEFT JOIN tree_info ti ON t.id = ti.id
-            LEFT JOIN tree c ON c.id = ti.case_id
+            LEFT JOIN objects o ON o.id = t.id
             where '.$where.'
             ORDER BY t.id
             LIMIT 500';
@@ -195,85 +260,10 @@ class Client extends Service
                     - if $all parameter is true
                 */
                 if ($all || !empty($p['id']) || ($r['updated'] & 1)) {
+                    $r['sys_data'] = Util\toJsonArray($r['sys_data']);
 
-                    /* set template data */
-                    if (!empty($r['template_id'])) {
-                        $template = $templatesCollection->getTemplate($r['template_id']);
-                        $r['template_type'] = $template->getData()['type'];
-                        $r['iconCls'] = $template->getData()['iconCls'];
-                    }
+                    $this->prepareDBRecord($r);
 
-                    /* consider node type sort column (ntsc) equal to 1 unit more
-                    than total count of folder templates */
-                    $r['ntsc'] = sizeof($folderTemplates) + 100;
-
-                    /* decrease ntsc (make 1 unit more important) in case of 'case' object types */
-                    if (@$r['template_type'] == 'case') {
-                        $r['ntsc']--;
-                    }
-
-                    /* if there is a folder template then set its ntsc
-                    equal to its index in folder_templates array */
-                    $folder_index = array_search($r['template_id'], $folderTemplates);
-                    if ($folder_index !== false) {
-                        // $r['ntsc'] = $folder_index;
-                        $r['ntsc'] = sizeof($folderTemplates);
-                    }
-
-                    $r['content'] = $r['name'];
-
-                    /* add custom solr data based on template type */
-                    $this->getSolrData($r);
-
-                    /* make some trivial type checks */
-                    $r['ntsc'] = intval($r['ntsc']);
-                    $r['system'] = @intval($r['system']);
-
-                    if (empty($r['pids'])) {
-                        $r['pids'] = null;
-                        $r['path'] = null;
-                    } else {
-                        $r['pids'] = explode(',', $r['pids']);
-                        //exclude itself from pids
-                        array_pop($r['pids']);
-                        $r['path'] = implode('/', $r['pids']);
-                    }
-
-                    /* fill "ym" fields for date faceting by cdate, date, date_end */
-                    $ym1 = str_replace('-', '', substr($r['cdate'], 2, 5));
-                    $ym2 = str_replace('-', '', substr($r['date'], 2, 5));
-                    $ym3 = str_replace('-', '', substr($r['date_end'], 2, 5));
-
-                    if (empty($ym3)) {
-                        $ym3 = $ym2;
-                    }
-
-                    if (!empty($ym1)) {
-                        $r['ym1'] = $ym1;
-                    }
-
-                    if (!empty($ym2)) {
-                        $r['ym2'] = $ym2;
-                    }
-
-                    if (!empty($ym3)) {
-                        $r['ym3'] = $ym3;
-                    }
-
-                    if (!empty($r['task_d_closed'])) {
-                        $r['task_ym_closed'] = str_replace('-', '', substr($r['task_d_closed'], 2, 5));
-                    }
-
-                    // $this->filterSolrFields($r);
-
-                    //encode special chars for string values
-                    foreach ($r as $k => $v) {
-                        if (is_string($v)) {
-                            $r[$k] = htmlspecialchars($v, ENT_COMPAT);
-                        }
-                    }
-
-                    /* append the obtained record to the result */
                     $docs[$r['id']] = $r;
                 }
                 $this->updateCronLastActionTime(@$p['cron_id']);
@@ -281,10 +271,10 @@ class Client extends Service
             $res->close();
 
             if (!empty($docs)) {
-                $this->getBulkSolrData($docs);
-                foreach ($docs as $doc_id => $doc) {
-                    $this->filterSolrFields($docs[$doc_id]);
-                }
+                // $this->getBulkSolrData($docs);
+                // foreach ($docs as $doc_id => $doc) {
+                //     $this->filterSolrFields($docs[$doc_id]);
+                // }
 
                 $this->addDocuments($docs);
 
@@ -394,7 +384,7 @@ class Client extends Service
     }
     private function filterSolrFields(&$doc)
     {
-        $some_fields = array('iconCls', 'updated');
+        $some_fields = array('iconCls', 'updated', 'sys_data');
 
         foreach ($doc as $fn => $fv) {
             if (in_array($fn, $some_fields)

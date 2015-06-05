@@ -86,7 +86,7 @@ foreach ($users as $u) {
 
             $subject = '[' . $coreName . ' #' . $action['object_id'] . '] ' .
                 Notifications::getActionDeclination($action['action_type'], $lang) . ' ' .
-                $templateName . '"' . $action['data']['name'] . '"';
+                $templateName . ' "' . $action['data']['name'] . '"';
 
             //skip sending notifications from devel server to other emails than Admin
             if (!$sendNotificationMails && ($u['email'] !== $adminEmail)) {

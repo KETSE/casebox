@@ -1156,61 +1156,6 @@ class Files
         exec($cmd);
     }
 
-    public static function getSolrData(&$objectRecord)
-    {
-        //make standart analysis of task object
-        Objects::getSolrData($objectRecord);
-
-        $filesPath = Config::get('files_dir');
-
-        $res = DB\dbQuery(
-            'SELECT f.id
-            ,c.type
-            ,c.size
-            ,c.pages
-            ,c.path
-            ,f.name
-            ,f.title
-            ,f.cid
-            ,f.content_id
-            ,(select count(*) from files_versions where file_id = f.id) `versions`
-            FROM files f
-            LEFT JOIN files_content c
-                ON f.content_id = c.id
-            WHERE f.id = $1',
-            $objectRecord['id']
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            // $objectRecord['type'] = $r['type'];
-            $objectRecord['size'] = $r['size'];
-            $objectRecord['versions'] = intval($r['versions']);
-
-            $content = $filesPath.$r['path'].DIRECTORY_SEPARATOR.$r['content_id'].'.gz';
-            if (file_exists($content)) {
-                $content = file_get_contents($content);
-                $content = gzuncompress($content);
-            } else {
-                $content = '';
-            }
-            $objectRecord['content'] =
-                Util\coalesce($r['title'], '')."\n".
-                Util\coalesce($r['type'], '')."\n".
-                (empty($objectRecord['content']) ? '' : $objectRecord['content'] . "\n").
-                Util\coalesce($content, '');
-        }
-        $res->close();
-    }
-
-    public static function getBulkSolrData(&$objectRecords)
-    {
-        foreach ($objectRecords as $id => &$objectRecord) {
-            if (@$objectRecord['template_type'] == 'file') {
-                static::getSolrData($objectRecord);
-            }
-        }
-    }
-
     /* versions */
     public function restoreVersion($id)
     {

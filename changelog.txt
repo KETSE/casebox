@@ -1,5 +1,25 @@
 CaseBox 1.9.459 (2015-06-02)
 ==============================
+New Features, Improvements
+--------------------------
+- #6267 A 'zero' value is added to multiValued field when object is saved
+- #6251 SOLR Json in sys_cfg + Multilanguage functionality (Tree & DC & Object fields) + Filename
+
+Fixed Bugs:
+----------
+- #5812 Can't d&d files from CB to an Obj while creating it
+- #6280 Language issues: vFolders in dev core & generation of lang files on localhost
+- #4805 Same title showing for different text fields
+
+Notes:
+----------
+- bin/update_solr_prepared_data.php should be executed to create prepared solr data
+  and reindex cores fully;
+- Multilanguage plugin should be removed / disabled from __casebox.plugins table.
+  Plugin scripts have been removed.
+
+CaseBox 1.9.459 (2015-06-02)
+==============================
 Fixed Bugs:
 ----------
 - error rendering object fields in Template class

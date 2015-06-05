@@ -294,6 +294,9 @@ Ext.define('CB.object.field.editor.Form', {
 
     ,setValue: function(value) {
         this.value = toNumericArray(value);
+        //remove zero values
+        this.value = Ext.Array.difference(this.value, [0, '0']);
+
         this.fireEvent('change', this, this.value);
     }
 

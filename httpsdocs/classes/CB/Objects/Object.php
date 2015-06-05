@@ -244,6 +244,8 @@ class Object
         //filter fields
         $this->filterHTMLFields($p['data']);
 
+        $this->collectSolrData();
+
         DB\dbQuery(
             'INSERT INTO objects (id ,`data`, `sys_data`)
             VALUES($1, $2, $3)
@@ -500,6 +502,9 @@ class Object
         }
 
         $this->filterHTMLFields($d['data']);
+
+        $this->collectSolrData();
+
         unset($this->linearData);
 
         @DB\dbQuery(
@@ -638,6 +643,180 @@ class Object
         $this->updateSysData($d);
 
         return true;
+    }
+
+    /**
+     * method to collect solr data from object data
+     * according to template fields configuration
+     * and store it in sys_data onder "solr" property
+     * @return void
+     */
+    protected function collectSolrData()
+    {
+        //iterate template fields and collect fieldnames
+        //to be indexed in solr, as well as title fields
+        $rez = array();
+
+        $d = &$this->data;
+        $sd = &$this->data;
+
+        $tpl = $this->getTemplate();
+
+        $languages = Config::get('languages');
+
+        $defaultLanguage = Config::get('default_language');
+
+        if (!empty($tpl)) {
+            $fields = $tpl->getFields();
+
+            //create a list of possible title fields that should be added to solr
+            $titleFields = array();//will go into title property
+            foreach ($languages as $l) {
+                $titleFields[] = 'title_' . $l;
+            }
+
+            foreach ($fields as $f) {
+                if (empty($f['solr_column_name']) && in_array($f['name'], $titleFields)) {
+                    $sfn = $f['name'] . '_t';//solr field name
+
+                    $value = $this->getFieldValue($f['name'], 0);
+                    if (!empty($value['value'])) {
+                        $rez[$sfn] = $value['value'];
+                    }
+
+                } elseif (!empty($f['cfg']['faceting']) || //backward compatible check
+                    !empty($f['cfg']['indexed'])
+                ) {
+                    $values = $this->getFieldValue($f['name']);
+
+                    $resultValue = array();
+
+                    //iterate each duplicate
+                    foreach ($values as $v) {
+                        $value = $this->prepareValueforSolr($f['type'], $v);
+                        if (!empty($value)) {
+                            $resultValue[] = $value;
+                        }
+                    }
+
+                    //check result value
+                    //if its a single value then set as is
+                    //if multiple values then merge into an array
+                    if (!empty($resultValue)) {
+                        $finalValue = null;
+                        if (sizeof($resultValue) == 1) {
+                            $finalValue = array_shift($resultValue);
+                        } else {
+                            $finalValue = array();
+                            foreach ($resultValue as $value) {
+                                if (is_array($value)) {
+                                    $finalValue = array_merge($finalValue, $value);
+                                } else {
+                                    $finalValue[] = $value;
+                                }
+
+                            }
+                        }
+
+                        $rez[$f['solr_column_name']] = $finalValue;
+                    }
+                }
+            }
+        }
+
+        // add last comment info if present
+        if (!empty($sd['lastComment'])) {
+            $rez['comment_user_id'] = $sd['lastComment']['user_id'];
+            $rez['comment_date'] = $sd['lastComment']['date'];
+        }
+
+        $this->data['sys_data']['solr'] = $rez;
+    }
+
+    /**
+     * just for update purposes only
+     * Should be removed in future
+     * @return void
+     */
+    public function updateSolrData()
+    {
+        $this->load();
+        $this->collectSolrData();
+        $this->updateSysData();
+    }
+
+    /**
+     * prepare a given value for solr according to its type
+     * @param  varchar $type  (checkbox,combo,date,datetime,float,html,int,memo,_objects,text,time,timeunits,varchar)
+     * @param  variant $value
+     * @return variant
+     */
+    protected function prepareValueforSolr($type, $value)
+    {
+        switch ($type) {
+            case 'boolean': //not used
+            case 'checkbox':
+                $f['value'] = empty($f['value']) ? false : true;
+                break;
+
+            case 'date':
+            case 'datetime':
+                if (!empty($value)) {
+                    //check if there is only date, without time
+                    if (strlen($value) == 10) {
+                        $value .= 'T00:00:00';
+                    }
+
+                    if (substr($value, -1) != 'Z') {
+                        $value .= 'Z';
+                    }
+
+                    if (@$value[10] == ' ') {
+                        $value[10] = 'T';
+                    }
+                }
+                break;
+
+                /** time values are stored as seconds representation in solr */
+            case 'time':
+                if (!empty($value)) {
+                    $a = explode(':', $value);
+                    @$value = $a[0] * 3600 + $a[1] * 60 + $a[2];
+                }
+                break;
+
+            case 'combo':
+            case 'int':
+            case '_objects':
+
+                $arr = Util\toNumericArray($value);
+                $value = array();
+
+                //remove zero values
+                foreach ($arr as $v) {
+                    if (!empty($v)) {
+                        $value[] = $v;
+                    }
+                }
+
+                $value = array_unique($value);
+
+                if (empty($value)) {
+                    $value = null;
+
+                } elseif (sizeof($value) == 1) {
+                    //set just value if 1 element array
+                    $value = array_shift($value);
+                }
+                break;
+
+            case 'html':
+                $value = strip_tags($value);
+                break;
+
+        }
+
+        return $value;
     }
 
     /**
@@ -848,6 +1027,21 @@ class Object
     }
 
     /**
+     * get solr data property
+     *
+     * @return array
+     */
+    public function getSolrData()
+    {
+        $rez = array();
+        if (!empty($this->data['sys_data']['solr'])) {
+            $rez = $this->data['sys_data']['solr'];
+        }
+
+        return $this->data;
+    }
+
+    /**
      * get linear array of properties of object properties
      * @param boolean $sorted true to sort data according to template fields order
      * @param array   $data   template properties
@@ -1001,6 +1195,28 @@ class Object
         $templateData = $template->getData();
 
         return @$templateData['name'];
+    }
+
+    /**
+     * get name of the object corresponding to current user language
+     * @param  varchar $language
+     * @return varchar
+     */
+    public function getName($language = false)
+    {
+        $d = &$this->data;
+
+        $rez = $d['name'];
+
+        if ($language === false) {
+            $language = Config::get('user_language');
+        }
+
+        if (is_string($language) && !empty($d['sys_data']['solr']['title_' . $language . '_t'])) {
+            $rez = $d['sys_data']['solr']['title_' . $language . '_t'];
+        }
+
+        return $rez;
     }
 
     /**

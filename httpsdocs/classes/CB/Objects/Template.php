@@ -397,6 +397,21 @@ class Template extends Object
     }
 
     /**
+     * get fields
+     * @return array
+     */
+    public function getFields()
+    {
+        $rez = array();
+
+        if (isset($this->data['fields'])) {
+            $rez = $this->data['fields'];
+        }
+
+        return $rez;
+    }
+
+    /**
      * get field properties
      * @param  int | varchar $field field id or name
      * @return array
@@ -598,12 +613,14 @@ class Template extends Object
                     } else {
                         // $objects = Search::getObjects($ids, 'id,name,template_id,pids');
                         $objects = \CB\Objects::getCachedObjects($ids);
-                        foreach ($objects as $obj) {
-                            $r = $obj->getData();
-                            @$label = $r['name'];
-                            if ($html && !empty($r['pids'])) {
-                                $r['pids'] = str_replace(',', '/', $r['pids']);
-                                $label = '<a class="locate click" template_id="'.$r['template_id'].'" path="'.$r['pids'].'" nid="'.$r['id'].'">'.$label.'</a>';
+                        foreach ($objects as $id => $obj) {
+                            $d = $obj->getData();
+                            $label = $obj->getName();
+                            $pids = $d['pids'];
+
+                            if ($html && !empty($pids)) {
+                                $pids = str_replace(',', '/', $pids);
+                                $label = '<a class="locate click" template_id="'.$d['template_id'].'" path="'.$pids.'" nid="'.$id.'">'.$label.'</a>';
                             }
 
                             switch (@$field['cfg']['renderer']) {
@@ -614,7 +631,7 @@ class Template extends Object
                                     break;
                                 // case 'listObjIcons':
                                 default:
-                                    $icon = \CB\Browser::getIcon($r);
+                                    $icon = \CB\Browser::getIcon($d);
 
                                     if (empty($icon)) {
                                         $icon = 'icon-none';

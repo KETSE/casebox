@@ -41,7 +41,6 @@ class ObjectProperties extends Base
                     $k,
                     array(
                         'id'
-                        ,'name'
                         ,'template_id'
                         ,'date_end'
                         ,'cid'
@@ -52,8 +51,6 @@ class ObjectProperties extends Base
                 )) {
                     if (in_array($k, array('date', 'date_end', 'cdate', 'udate'))) {
                         $v = Util\dateMysqlToISO($v);
-                    } elseif ($k == 'name') {
-                        $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
                     }
 
                     $rez['data'][$k] = $v;
@@ -65,6 +62,7 @@ class ObjectProperties extends Base
 
                 }
             }
+            $rez['data']['name'] = $obj->getName();
         }
 
         $rez['data']['can'] = $obj->getActionFlags();

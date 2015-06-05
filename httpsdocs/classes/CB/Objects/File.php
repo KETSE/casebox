@@ -1,7 +1,8 @@
 <?php
 namespace CB\Objects;
 
-use CB\DB as DB;
+use CB\Config;
+use CB\DB;
 
 /**
  * class for casebox files objects
@@ -137,6 +138,59 @@ class File extends Object
             )
         ) or die(DB\dbQueryError());
 
+    }
+
+    /**
+     * method to collect solr data from object data
+     * according to template fields configuration
+     * and store it in sys_data onder "solr" property
+     * @return void
+     */
+    protected function collectSolrData()
+    {
+        parent::collectSolrData();
+
+        $filesPath = Config::get('files_dir');
+
+        $sd = &$this->data['sys_data']['solr'];
+
+        $res = DB\dbQuery(
+            'SELECT f.id
+            ,c.type
+            ,c.size
+            ,c.pages
+            ,c.path
+            ,f.name
+            ,f.title
+            ,f.cid
+            ,f.content_id
+            ,(select count(*) from files_versions where file_id = f.id) `versions`
+            FROM files f
+            LEFT JOIN files_content c
+                ON f.content_id = c.id
+            WHERE f.id = $1',
+            $this->id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $sd['size'] = $r['size'];
+            $sd['versions'] = intval($r['versions']);
+
+            // $content = $filesPath.$r['path'].DIRECTORY_SEPARATOR.$r['content_id'].'.gz';
+            // if (file_exists($content)) {
+            //     $content = file_get_contents($content);
+            //     $content = gzuncompress($content);
+            // } else {
+            //     $content = '';
+            // }
+            // $objectRecord['content'] =
+            //     Util\coalesce($r['title'], '')."\n".
+            //     Util\coalesce($r['type'], '')."\n".
+            //     (empty($objectRecord['content']) ? '' : $objectRecord['content'] . "\n").
+            //     Util\coalesce($content, '');
+        }
+
+        $res->close();
     }
 
     /**

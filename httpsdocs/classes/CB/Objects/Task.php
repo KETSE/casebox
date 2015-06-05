@@ -123,6 +123,52 @@ class Task extends Object
 
 
     /**
+     * method to collect solr data from object data
+     * according to template fields configuration
+     * and store it in sys_data onder "solr" property
+     * @return void
+     */
+    protected function collectSolrData()
+    {
+        parent::collectSolrData();
+
+        $d = &$this->data;
+        $sd = &$d['sys_data'];
+        $solrData = &$sd['solr'];
+
+        $template = $this->getTemplate();
+
+        $solrData['task_status'] = @$sd['task_status'];
+
+        $user_ids = Util\toNumericArray($this->getFieldValue('assigned', 0)['value']);
+        if (!empty($user_ids)) {
+            $solrData['task_u_assignee'] = $user_ids;
+        }
+
+        $user_ids[] = @Util\coalesce($d['oid'], $d['cid']);
+
+        $solrData['task_u_all'] = array_unique($user_ids);
+
+        // $solrData['content'] = @$this->getFieldValue('description', 0)['value'];
+
+        if (!empty($sd['task_d_closed'])) {
+            $solrData['task_d_closed'] = $sd['task_d_closed'];
+            $solrData['task_ym_closed'] = str_replace('-', '', substr($sd['task_d_closed'], 2, 5));
+        }
+
+        //get users that didnt complete the task yet
+        $solrData['task_u_done'] = $sd['task_u_done'];
+        $solrData['task_u_ongoing'] = $sd['task_u_ongoing'];
+
+        //set class
+        $solrData['cls'] = $template->formatValueForDisplay(
+            $template->getField('color'),
+            $this->getFieldValue('color', 0)['value'],
+            false
+        );
+    }
+
+    /**
      * set "sys_data" params from object data
      * @param array &$p
      */
