@@ -406,11 +406,13 @@ Ext.define('CB.object.ViewContainer', {
         // check  if a new request is waiting to be loaded
         if(Ext.isEmpty(this.requestedLoadData)) {
             //check if object data are identical to previous loaded object
-            if(this.loadedData && objectData &&
-                (objectData.id == this.loadedData.id) &&
-                (Ext.valueFrom(objectData.viewIndex, cvi) == Ext.valueFrom(this.loadedData.viewIndex, cvi))
-            ) {
-                return;
+            if(!objectData.force) {
+                if(this.loadedData && objectData &&
+                    (objectData.id == this.loadedData.id) &&
+                    (Ext.valueFrom(objectData.viewIndex, cvi) == Ext.valueFrom(this.loadedData.viewIndex, cvi))
+                ) {
+                    return;
+                }
             }
 
             // save current scroll position for history navigation

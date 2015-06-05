@@ -120,7 +120,7 @@ class Notifications
         foreach ($recs as $r) {
             $r['data'] = Util\jsonDecode($r['data']);
             if (empty($actions[$r['object_id']][$r['action_type']][$r['read']][$r['user_id']])) {
-                $actions[$r['object_id']][$r['action_type']][$r['read']][$r['user_id']] = $r;
+                $actions[$r['object_id']][$r['read']][$r['action_type']][$r['user_id']] = $r;
             }
         }
 
@@ -128,11 +128,11 @@ class Notifications
         foreach ($actions as $objId => $objValue) {
             $record = array();
 
-            foreach ($objValue as $actionType => $actionValue) {
-                foreach ($actionValue as $readKey => $users) {
+            foreach ($objValue as $haveRead => $readValue) {
+                foreach ($readValue as $actionType => $users) {
                     $action = current($users);
 
-                    $record['read'] = $readKey;
+                    $record['read'] = $haveRead;
                     $record['user_id'] = key($users);
                     $record['object_id'] = $action['object_id'];
                     // $record['iconCLs'] = $this->getRecordIconClass($users);
@@ -150,9 +150,9 @@ class Notifications
                     }
                     $record['ids'] = implode(',', $ids);
                 }
-            }
 
-            $rez[] = $record;
+                $rez[] = $record;
+            }
         }
 
         return $rez;
@@ -239,8 +239,11 @@ class Notifications
                 break;
 
             case 'reopen':
-            case 'comment':
                 $rez = L\get($actionType . 'ed', $lang);
+                break;
+
+            case 'comment':
+                $rez = L\get($actionType . 'edOn', $lang);
                 break;
 
             default:

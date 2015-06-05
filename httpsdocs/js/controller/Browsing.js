@@ -242,7 +242,12 @@ Ext.define('CB.controller.Browsing', {
 
     //Notifications view methods
     ,onNVSelectionChange: function(object) {
-        this.updatePreview(object);
+        var data = {
+            id: object.id
+            ,force: !object.read
+        };
+
+        this.updatePreview(data);
     }
 
     //Filter panel methods
@@ -362,7 +367,7 @@ Ext.define('CB.controller.Browsing', {
             ,fp = vc.folderProperties;
 
         var data = customParams;
-
+        clog('update preview', arguments);
         //if custom params are empty then try to load current view selection
         //or the currently opened object
         if(Ext.isEmpty(data)) {
@@ -385,6 +390,7 @@ Ext.define('CB.controller.Browsing', {
                 ,name: data.name
                 ,template_id: data.template_id
                 ,can: data.can
+                ,force: data.force
             };
         }
 

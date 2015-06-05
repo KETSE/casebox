@@ -1,7 +1,6 @@
 <?php
 namespace CB\Objects;
 
-use CB\Config;
 use CB\DB;
 
 /**
@@ -150,21 +149,14 @@ class File extends Object
     {
         parent::collectSolrData();
 
-        $filesPath = Config::get('files_dir');
-
         $sd = &$this->data['sys_data']['solr'];
 
         $res = DB\dbQuery(
-            'SELECT f.id
-            ,c.type
-            ,c.size
-            ,c.pages
-            ,c.path
-            ,f.name
-            ,f.title
-            ,f.cid
-            ,f.content_id
-            ,(select count(*) from files_versions where file_id = f.id) `versions`
+            'SELECT c.size
+            ,(SELECT count(*)
+                FROM files_versions
+                WHERE file_id = f.id
+            ) `versions`
             FROM files f
             LEFT JOIN files_content c
                 ON f.content_id = c.id
@@ -175,19 +167,6 @@ class File extends Object
         if ($r = $res->fetch_assoc()) {
             $sd['size'] = $r['size'];
             $sd['versions'] = intval($r['versions']);
-
-            // $content = $filesPath.$r['path'].DIRECTORY_SEPARATOR.$r['content_id'].'.gz';
-            // if (file_exists($content)) {
-            //     $content = file_get_contents($content);
-            //     $content = gzuncompress($content);
-            // } else {
-            //     $content = '';
-            // }
-            // $objectRecord['content'] =
-            //     Util\coalesce($r['title'], '')."\n".
-            //     Util\coalesce($r['type'], '')."\n".
-            //     (empty($objectRecord['content']) ? '' : $objectRecord['content'] . "\n").
-            //     Util\coalesce($content, '');
         }
 
         $res->close();

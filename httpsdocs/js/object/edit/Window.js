@@ -659,6 +659,7 @@ Ext.define('CB.object.edit.Window', {
      * @return void
      */
     ,onChange: function(fieldName, newValue, oldValue){
+        clog('onChange', arguments);
         this._isDirty = true;
 
         this.actions.save.setDisabled(!this.isValid());

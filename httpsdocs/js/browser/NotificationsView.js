@@ -178,12 +178,14 @@ Ext.define('CB.browser.NotificationsView', {
         return rez;
     }
 
-    ,onRowClick: function(g, ri, e) {
-
+    ,onRowClick: function(grid, record, tr, rowIndex, e, eOpts) {
+        if(this.lastSelectedRecord == record) {
+            this.onSelectionChange(grid, [record], eOpts);
+        }
     }
 
     ,onSelectionChange: function (grid, selected, eOpts) {
-
+        this.lastSelectedRecord = selected[0];
         //start 3 seconds delayed task to mark the notification as read
         this.selectionDelayTask.delay(3);
 
@@ -194,6 +196,7 @@ Ext.define('CB.browser.NotificationsView', {
                 'selectionchange'
                 ,{
                     id: d.object_id
+                    ,read: d.read
                 }
             );
         }

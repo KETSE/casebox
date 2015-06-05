@@ -1,4 +1,13 @@
-CaseBox 1.9.459 (2015-06-02)
+CaseBox 1.9.461 (2015-06-05)
+==============================
+New Features, Improvements
+--------------------------
+- #6300 add the word 'on' to 'commented'..
+- #6298 Notification window preview glitch not loading preview
+- #6297 Clicking on the task in the action menu doesn't refresh it
+- appending file contents on solr indexing
+
+CaseBox 1.9.460 (2015-06-05)
 ==============================
 New Features, Improvements
 --------------------------

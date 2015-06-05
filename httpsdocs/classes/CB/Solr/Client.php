@@ -1,8 +1,10 @@
 <?php
 namespace CB\Solr;
 
+use CB\Config;
 use CB\DB;
 use CB\Util;
+use CB\DataModel as DM;
 
 /**
  * Solr client class used by CaseBox to make changes into solr
@@ -144,6 +146,40 @@ class Client extends Service
         $this->filterSolrFields($r);
     }
 
+    /**
+     * append file contents to content field for file records
+     * @param  array &$records
+     * @return void
+     */
+    protected function appendFileContents(&$records)
+    {
+        $fileRecords = array();
+
+        foreach ($records as &$r) {
+            if ($r['template_type'] == 'file') {
+                $fileRecords[$r['id']] = &$r;
+            }
+        }
+
+        if (!empty($fileRecords)) {
+            $filesDir = Config::get('files_dir');
+
+            $cpaths = DM\Files::getContentPaths(array_keys($fileRecords));
+
+            foreach ($cpaths as $id => $cpath) {
+                $r = &$fileRecords[$id];
+                $filename =  $filesDir . $cpath . '.gz';
+
+                if (file_exists($filename)) {
+                    $content = file_get_contents($filename);
+                    $r['content'] .= "\n" . gzuncompress($content);
+                }
+                unset($content);
+                unset($r);
+            }
+        }
+    }
+
     private function updateCronLastActionTime($cron_id)
     {
         if (empty($cron_id)) {
@@ -225,7 +261,6 @@ class Client extends Service
                 ,t.template_id
                 ,t.target_id
                 ,t.size
-                -- ,CASE WHEN t.type = 2 then (SELECT `type` FROM tree WHERE id = t.target_id) ELSE null END `target_type`
                 ,DATE_FORMAT(t.`date`, \'%Y-%m-%dT%H:%i:%sZ\') `date`
                 ,DATE_FORMAT(t.`date_end`, \'%Y-%m-%dT%H:%i:%sZ\') `date_end`
                 ,t.oid
@@ -271,10 +306,8 @@ class Client extends Service
             $res->close();
 
             if (!empty($docs)) {
-                // $this->getBulkSolrData($docs);
-                // foreach ($docs as $doc_id => $doc) {
-                //     $this->filterSolrFields($docs[$doc_id]);
-                // }
+                //append file contents for files to content field
+                $this->appendFileContents($docs);
 
                 $this->addDocuments($docs);
 
