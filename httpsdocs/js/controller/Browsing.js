@@ -367,7 +367,7 @@ Ext.define('CB.controller.Browsing', {
             ,fp = vc.folderProperties;
 
         var data = customParams;
-        clog('update preview', arguments);
+
         //if custom params are empty then try to load current view selection
         //or the currently opened object
         if(Ext.isEmpty(data)) {

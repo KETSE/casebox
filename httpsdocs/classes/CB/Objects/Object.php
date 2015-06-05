@@ -564,9 +564,11 @@ class Object
     {
         $d = &$this->data;
 
-        $sysData = ($sysData === false)
-            ? Util\toJSONArray(@$d['sys_data'])
-            : Util\toJSONArray($sysData);
+        if ($sysData !== false) {
+            $d['sys_data'] = Util\toJSONArray($sysData);
+        }
+
+        $this->collectSolrData();
 
         @DB\dbQuery(
             'INSERT INTO objects
@@ -576,11 +578,9 @@ class Object
                 sys_data = $2',
             array(
                 $d['id']
-                ,Util\jsonEncode($sysData)
+                ,Util\jsonEncode($d['sys_data'])
             )
         ) or die(DB\dbQueryError());
-
-        $this->data['sys_data'] = $sysData;
 
         //mark the item as updated so that it would be reindexed to solr
         DB\dbQuery(

@@ -151,6 +151,9 @@ class Task extends Object
 
         // $solrData['content'] = @$this->getFieldValue('description', 0)['value'];
 
+        unset($solrData['task_d_closed']);
+        unset($solrData['task_ym_closed']);
+
         if (!empty($sd['task_d_closed'])) {
             $solrData['task_d_closed'] = $sd['task_d_closed'];
             $solrData['task_ym_closed'] = str_replace('-', '', substr($sd['task_d_closed'], 2, 5));
@@ -166,6 +169,7 @@ class Task extends Object
             $this->getFieldValue('color', 0)['value'],
             false
         );
+
     }
 
     /**

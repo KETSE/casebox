@@ -1,3 +1,10 @@
+CaseBox 1.9.462 (2015-06-05)
+==============================
+New Features, Improvements
+--------------------------
+- changed grouping mechanism for notifications
+- update sys_data on tasks closing / reopening actions
+
 CaseBox 1.9.461 (2015-06-05)
 ==============================
 New Features, Improvements
