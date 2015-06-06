@@ -73,16 +73,16 @@ class Notifications
     {
         $rez = array('success' => false);
 
-        if (empty($p['ids'])) {
-            return $rez;
+        if (!empty($p['ids'])) {
+            DM\Notifications::markAsRead(User::getId(), $p['ids']);
+
+            $rez = array(
+                'success' => true
+                ,'data' => $p
+            );
         }
 
-        DM\Notifications::markAsRead(User::getId(), $p['ids']);
-
-        return array(
-            'success' => true
-            ,'data' => $p
-        );
+        return $rez;
     }
 
     /**
@@ -154,53 +154,33 @@ class Notifications
      * @param  array   &$usersArray grouped users array
      * @return varchar
      */
-    private function getRecordIconClass(&$usersArray)
-    {
-        $userId = key($usersArray);
-
-        $rez = '<img class="photo32" src="photo/' . $userId . '.jpg?32=' . User::getPhotoParam($userId) .
-                '" style="width:32px; height: 32px">';
-    }
-
-    /**
-     * forms a user string based on their count
-     * @param  array   &$usersArray grouped users array
-     * @return varchar
-     */
     private function getUsersString(&$usersArray)
     {
         $rez = '';
 
         $usersCount = sizeof($usersArray);
         $userIds = array_keys($usersArray);
+        $users = array();
+
+        foreach ($userIds as $id) {
+            $users[] = '<a>' . User::getDisplayName($id) . '</a>';
+        }
 
         switch ($usersCount) {
-            case 0:
-                break;
-
             case 1:
-                $rez = '<a>' . User::getDisplayName($userIds[0]) . '</a>';
+                $rez = $users[0];
                 break;
 
             case 2:
-                $rez = '<a>' . User::getDisplayName($userIds[0]) .  '</a> ' .
-                    L\get('and') .
-                    ' <a>' . User::getDisplayName($userIds[1]) . '</a>';
+                $rez = $users[0] . L\get('and') . $users[1];
                 break;
 
             case 3:
-                $rez = '<a>' . User::getDisplayName($userIds[0]) .  '</a>' .
-                    ', ' .
-                    '<a>' . User::getDisplayName($userIds[1]) . '</a> ' .
-                    L\get('and') .
-                    ' <a>' . User::getDisplayName($userIds[1]) . '</a>';
+                $rez = $users[0] . ', ' . $users[1] . L\get('and') . $users[2];
                 break;
 
             default:
-                $rez = '<a>' . User::getDisplayName($userIds[0])  . '</a>' .
-                    ', ' .
-                    '<a>' . User::getDisplayName($userIds[1])  . '</a> ' .
-                    L\get('and') . ' ' .
+                $rez = $users[0] . ', ' . $users[0] . L\get('and') . ' ' .
                     str_replace('{count}', $usersCount -2, L\get('NNOthers'));
         }
 
@@ -377,11 +357,13 @@ class Notifications
                 $type = 'added';
             } elseif (!empty($ad['old'][$fieldName]) && empty($ad['new'][$fieldName])) {
                 $type = 'removed';
-            } elseif (!empty($ad['old'][$fieldName]) && !empty($ad['new'][$fieldName]) &&
+            }
+            /* // we dont have updated cases here
+            elseif (!empty($ad['old'][$fieldName]) && !empty($ad['new'][$fieldName]) &&
                 ($ad['old'][$fieldName] != $ad['new'][$fieldName])
             ) {
                 $type = 'updated';
-            }
+            }/**/
 
             $color = empty($colors[$type])
                 ? ''

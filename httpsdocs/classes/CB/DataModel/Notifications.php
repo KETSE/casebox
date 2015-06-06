@@ -4,6 +4,7 @@ namespace CB\DataModel;
 
 use CB\DB;
 use CB\Util;
+use CB\User;
 
 class Notifications extends Base
 {
@@ -120,6 +121,54 @@ class Notifications extends Base
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
+            $rez[] = $r;
+        }
+        $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get notifications that was not sent by mail yet
+     *
+     * @param  int   $userId optional
+     * @return array
+     */
+    public static function getUnsent($userId = false)
+    {
+        $rez = array();
+
+        //validate params
+        if (($userId !== false) && !is_numeric($userId)) {
+            trigger_error(L\get('ErroneousInputData'), E_USER_ERROR);
+        }
+
+        $sql = 'SELECT
+            n.id
+            ,n.object_id
+            ,n.action_type
+            ,n.user_id `to_user_id`
+            ,n.`from_user_id`
+            ,l.object_pid
+            ,l.action_time
+            ,l.data
+            ,l.activity_data_db
+        FROM notifications n
+            JOIN action_log l
+                ON n.action_id = l.id
+        WHERE n.email_sent = 0 '.
+        (($userId == false)
+            ? ''
+            : ' AND user_id = $1 '
+        ) .
+        'ORDER BY n.user_id
+           ,l.`action_time` DESC';
+
+        $res = DB\dbQuery($sql, $userId) or die(DB\dbQueryError());
+
+        while ($r = $res->fetch_assoc()) {
+            $r['data'] = Util\jsonDecode($r['data']);
+            $r['activity_data_db'] = Util\jsonDecode($r['activity_data_db']);
             $rez[] = $r;
         }
         $res->close();

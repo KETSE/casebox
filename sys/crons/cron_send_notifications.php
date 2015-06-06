@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\DataModel as DM;
+
 $cron_id = 'send_notifications';
 $execution_timeout = 60; //default is 60 seconds
 
@@ -38,29 +40,9 @@ $sendNotificationMails = (
 );
 
 //collect notifications to be sent
-$sql = 'SELECT
-    n.id
-    ,n.object_id
-    ,n.action_type
-    ,n.user_id `to_user_id`
-    ,n.`from_user_id`
-    ,l.object_pid
-    ,l.action_time
-    ,l.data
-    ,l.activity_data_db
-FROM notifications n
-    JOIN action_log l
-        ON n.action_id = l.id
-WHERE n.email_sent = 0
-ORDER BY n.user_id
-   ,l.`action_time` DESC';
+$recs = DM\Notifications::getUnsent();
 
-$res = DB\dbQuery($sql) or die(DB\dbQueryError());
-
-while ($r = $res->fetch_assoc()) {
-    $r['data'] = Util\jsonDecode($r['data']);
-    $r['activity_data_db'] = Util\jsonDecode($r['activity_data_db']);
-
+foreach ($recs as $r) {
     $uid = $r['to_user_id'];
     if (!isset($users[$uid])) {
         $users[$uid] = User::getPreferences($uid);
@@ -68,7 +50,6 @@ while ($r = $res->fetch_assoc()) {
 
     $users[$uid]['mails'][$r['id']] = $r;
 }
-$res->close();
 
 //iterate mails for each user and send them
 foreach ($users as $u) {

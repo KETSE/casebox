@@ -134,10 +134,10 @@ class Search extends Solr\Client
         }
 
         //analize facet filters
-        $fq = $this->getFacetFilters($p);
-        if (!empty($fq)) {
-            $this->params['fq'] = array_merge($this->params['fq'], $fq);
-        }
+        $this->params['fq'] = array_merge(
+            $this->params['fq'],
+            $this->getFacetFilters($p)
+        );
     }
 
     /**
@@ -235,10 +235,10 @@ class Search extends Solr\Client
         }
 
         if (!empty($p['template_types'])) {
-            $types = Util::toTrimmedArray($p['template_types']);
+            $types = Util\toTrimmedArray($p['template_types']);
 
             $filteredTypes = array();
-            foreach ($p['template_types'] as $tt) {
+            foreach ($types as $tt) {
                 if (preg_match('/^[a-z]+$/i', $tt)) {
                     $filteredTypes[] = $tt;
                 }
@@ -249,14 +249,10 @@ class Search extends Solr\Client
             }
         }
 
-        $folderTemplates = Config::get('folder_templates');
-        if (isset($p['folders']) && !empty($folderTemplates)) {
-            if ($p['folders']) {
-                $fq[] = 'template_type:("'.implode('" AND "', $folderTemplates).'")';
-            } else {
-                $fq[] = '!template_id:('.implode(' OR ', $folderTemplates).')';
-            }
-        }
+        // $folderTemplates = Config::get('folder_templates');
+        // if (isset($p['folders']) && !empty($folderTemplates)) {
+        //     $fq[] = '!template_id:('.implode(' OR ', $folderTemplates).')';
+        // }
 
         if (!empty($p['dateStart'])) {
             $fq[] = 'date:[' .
@@ -398,7 +394,7 @@ class Search extends Solr\Client
      */
     private function getFacetFilters(&$p)
     {
-        $rez = [];
+        $rez = array();
         if (!$this->facetsSetManually) {
             foreach ($this->facets as $facet) {
                 $f = $facet->getFilters($p);
@@ -443,7 +439,10 @@ class Search extends Solr\Client
                 );
                 foreach ($copyParams as $pn) {
                     if (!empty($fp[$pn])) {
-                        $rez[$pn] = $fp[$pn];
+                        if (empty($rez[$pn])) {
+                            $rez[$pn] = array();
+                        }
+                        $rez[$pn] = array_merge($rez[$pn], $fp[$pn]);
                     }
                 }
             }
@@ -539,9 +538,10 @@ class Search extends Solr\Client
             }
 
             //update name field to language title field if not empty
-            if (!empty($rd[$titleField])) {
-                $rd['name'] = $rd[$titleField];
-            }
+            $rd['name'] = empty($rd[$titleField])
+                ? $rd['name']
+                : $rd[$titleField];
+
             unset($rd[$titleField]);
 
             $rez['data'][] = &$rd;
@@ -639,10 +639,11 @@ class Search extends Solr\Client
 
             //set data form target objects solr data or general data if present
             foreach ($ref as $fn => $fv) {
+                if (isset($d[$fn])) {
+                    $fv = $d[$fn];
+                }
                 if (isset($sd[$fn])) {
                     $fv = $sd[$fn];
-                } elseif (isset($sd[$fn])) {
-                    $fv = $d[$fn];
                 }
                 $ref[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
             }
@@ -709,10 +710,6 @@ class Search extends Solr\Client
      */
     public static function setPaths(&$dataArray)
     {
-        if (!is_array($dataArray)) {
-            return;
-        }
-
         //collect distinct paths and ids
         $paths = array();
         $distinctIds = array();
@@ -810,68 +807,66 @@ class Search extends Solr\Client
         $rez = array();
         $ids = Util\toNumericArray($ids);
 
-        if (empty($ids)) {
-            return $rez;
-        }
+        if (!empty($ids)) {
+            $chunks = array_chunk($ids, 200);
 
-        $chunks = array_chunk($ids, 200);
+            //connect or get solr service connection
+            $conn = Cache::get('solr_service');
 
-        //connect or get solr service connection
-        $conn = Cache::get('solr_service');
+            if (empty($conn)) {
+                $conn = new Solr\Service();
 
-        if (empty($conn)) {
-            $conn = new Solr\Service();
-
-            Cache::set('solr_service', $conn);
-        }
-
-        //execute search
-        try {
-            foreach ($chunks as $chunk) {
-                $params = array(
-                    'defType' => 'dismax'
-                    ,'q.alt' => '*:*'
-                    ,'fl' => $fieldList
-                    ,'fq' => array(
-                        'id:(' . implode(' OR ', $chunk). ')'
-                    )
-                );
-
-                $inputParams = array(
-                    'ids' => $chunk
-                );
-
-                $eventParams = array(
-                    'params' => &$params
-                    ,'inputParams' => &$inputParams
-                );
-
-                \CB\fireEvent('beforeSolrQuery', $eventParams);
-
-                $searchRez = $conn->search(
-                    '',
-                    0,
-                    200,
-                    $params
-                );
-
-                if (!empty($searchRez->response->docs)) {
-                    foreach ($searchRez->response->docs as $d) {
-                        $rd = array();
-                        foreach ($d as $fn => $fv) {
-                            $rd[$fn] = $fv;
-                        }
-                        $rez[$d->id] = $rd;
-                    }
-                }
-
-                $eventParams['result'] = array(
-                    'data' => &$rez
-                );
-                \CB\fireEvent('solrQuery', $eventParams);
+                Cache::set('solr_service', $conn);
             }
-        } catch ( \Exception $e ) {
-            throw new \Exception("An error occured in getObjectNames: \n\n {$e->__toString()}");
+
+            //execute search
+            try {
+                foreach ($chunks as $chunk) {
+                    $params = array(
+                        'defType' => 'dismax'
+                        ,'q.alt' => '*:*'
+                        ,'fl' => $fieldList
+                        ,'fq' => array(
+                            'id:(' . implode(' OR ', $chunk). ')'
+                        )
+                    );
+
+                    $inputParams = array(
+                        'ids' => $chunk
+                    );
+
+                    $eventParams = array(
+                        'params' => &$params
+                        ,'inputParams' => &$inputParams
+                    );
+
+                    \CB\fireEvent('beforeSolrQuery', $eventParams);
+
+                    $searchRez = $conn->search(
+                        '',
+                        0,
+                        200,
+                        $params
+                    );
+
+                    if (!empty($searchRez->response->docs)) {
+                        foreach ($searchRez->response->docs as $d) {
+                            $rd = array();
+                            foreach ($d as $fn => $fv) {
+                                $rd[$fn] = $fv;
+                            }
+                            $rez[$d->id] = $rd;
+                        }
+                    }
+
+                    $eventParams['result'] = array(
+                        'data' => &$rez
+                    );
+                    \CB\fireEvent('solrQuery', $eventParams);
+                }
+            } catch ( \Exception $e ) {
+                throw new \Exception("An error occured in getObjectNames: \n\n {$e->__toString()}");
+            }
         }
 
         return $rez;

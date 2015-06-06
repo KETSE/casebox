@@ -1,3 +1,17 @@
+CaseBox 1.9.464 (2015-06-07)
+==============================
+New Features, Improvements
+--------------------------
+- code test coverage for search and notifications
+
+Fixed Bugs:
+----------
+- Filtering panel did not contain all configured facets
+
+Notes:
+----------
+- updated barebone database
+
 CaseBox 1.9.463 (2015-06-06)
 ==============================
 New Features, Improvements

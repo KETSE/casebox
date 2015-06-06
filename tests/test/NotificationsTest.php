@@ -2,6 +2,7 @@
 namespace CB\UNITTESTS;
 
 use CB\UNITTESTS\DATA;
+use CB\DataModel as DM;
 
 /**
  * Description of NotificationsTest
@@ -35,7 +36,9 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         /* create objects for test notifications on them */
         $objectsData = DATA\createTasksData();
 
+        $userIds = array_reverse($this->userIds);
         foreach ($objectsData[0] as $data) {
+            $data['data']['assigned'] = array_shift($userIds);
             $this->objectIds[] = $this->createObject($data);
         }
 
@@ -49,13 +52,18 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
     public function testNotifications()
     {
         //check if everything is prepeared
-        $this->assertTrue(sizeof($this->userIds) > 2, 'Less than 3 users created');
+        $this->assertTrue(sizeof($this->userIds) > 3, 'Less than 4 users created');
         $this->assertTrue(sizeof($this->objectIds) > 2, 'Less than 3 tasks created');
 
         //add a comment to obj 1 with user 1 referencing user 2
-        $userId = $this->userIds[0];
-        $pid = $this->objectIds[0];
+        $firstUserId = $this->userIds[0];
+        $secondUserId = $this->userIds[1];
+        $thirdUserId = $this->userIds[2];
+        $forthUserId = $this->userIds[3];
+
         $rootUserId = $this->oldValues['user_id'];
+
+        $pid = $this->objectIds[0];
 
         $commentData = array(
             'pid' => $pid
@@ -65,7 +73,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $_SESSION['user']['id'] = $userId;
+        $_SESSION['user']['id'] = $firstUserId;
 
         /* make a check - user should be denied to add comments */
         try {
@@ -82,7 +90,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
 
         // try again adding a comment,
         // now it should work without access exceptions
-        $_SESSION['user']['id'] = $userId;
+        $_SESSION['user']['id'] = $firstUserId;
 
         $commentId = $this->createObject($commentData);
 
@@ -91,9 +99,9 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //check notifications for user bow, he should receive a new notification from andrew
         $this->assertTrue(
             $this->checkLastNotification(
-                $this->userIds[1],
+                $secondUserId,
                 array(
-                    'user_id' => $userId
+                    'user_id' => $firstUserId
                     ,'object_id' => $pid
                     ,'read' => 0
                 )
@@ -105,15 +113,36 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         //as owner of the object
         $this->assertTrue(
             $this->checkLastNotification(
-                $this->oldValues['user_id'],
+                $rootUserId,
                 array(
-                    'user_id' => $userId
+                    'user_id' => $firstUserId
                     ,'object_id' => $pid
                     ,'read' => 0
                 )
             ),
             'No notification for root (owner) user.'
         );
+
+        //add comments with all 4 users and check notifications to cover
+        //code for 3 and more users notifications grouping
+        //and check root notifications with each comment
+        for ($i = 0; $i < 4; $i++) {
+            $_SESSION['user']['id'] = $this->userIds[$i];
+            $commentData['data']['_title'] = 'Comment from user #' . $i .'.';
+            $this->createObject($commentData);
+
+            $this->assertTrue(
+                $this->checkLastNotification(
+                    $rootUserId,
+                    array(
+                        'user_id' => $this->userIds[$i]
+                        ,'object_id' => $pid
+                        ,'read' => 0
+                    )
+                ),
+                'Wrong last notification for root from user #' . $i . '.'
+            );
+        }
 
         $_SESSION['user']['id'] = $rootUserId;
 
@@ -122,32 +151,55 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
 
         $commentId = $this->createObject($commentData);
 
-        $this->assertTrue(
-            $this->checkLastNotification(
-                $this->userIds[0],
-                array(
-                    'user_id' => $rootUserId
-                    ,'object_id' => $pid
-                    ,'read' => 0
-                )
-            ),
-            'Wrong last notification from root'
-        );
-
-        $this->assertTrue(
-            $this->checkLastNotification(
-                $this->userIds[1],
-                array(
-                    // 'user_id' => $rootUserId // cant rely on it notifications can be grouped from many users
-                    'object_id' => $pid
-                    ,'read' => 0
-                )
-            ),
-            'Wrong last notification from root for second user'
-        );
+        //check notifications for all 4 users
+        for ($i=0; $i < 3; $i++) {
+            $this->assertTrue(
+                $this->checkLastNotification(
+                    $this->userIds[$i],
+                    array(
+                        'object_id' => $pid
+                        ,'read' => 0
+                    )
+                ),
+                'Wrong last notification from root for user #' . $i . '.'
+            );
+        }
 
         $this->checkMarkingNotificationsAsRead();
 
+        //end of big testing schema
+
+        //cover for now some simple code from Notifications
+
+        $this->assertTrue(
+            \CB\Notifications::getActionDeclination('reopen', 'en') == 'reopened',
+            'Declination not correct for reopen.'
+        );
+
+        $this->assertTrue(
+            \CB\Notifications::getActionDeclination('SomeWrongValue!>', 'en') == 'SomeWrongValue!>',
+            'Declination not correct for a wrong value.'
+        );
+
+        //update a task and delete them all
+        $obj = \CB\Objects::getCachedObject($pid);
+        $data = $obj->getData();
+        $data['data']['due_date'] = '2012-12-17T00:00:00Z';
+        unset($data['data']['importance']);
+        $data['data']['description'] .= ' *update* ';
+        $obj->update($data);
+
+        foreach ($this->objectIds as $id) {
+            $obj->delete(false);
+        }
+
+        //get unset notifications and and access functions for preparing email
+        $recs = DM\Notifications::getUnsent();
+        foreach ($recs as $action) {
+            $userData = \CB\User::getPreferences($action['to_user_id']);
+            $sender = \CB\Notifications::getSender($action['from_user_id']);
+            $body = \CB\Notifications::getMailBodyForAction($action, $userData);
+        }
     }
 
     /**
@@ -241,7 +293,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         $currentUser = $_SESSION['user']['id'];
         $api = new \CB\Api\Notifications;
 
-        $result = $api->getList(array());
+        $result = $api->getList(array('limit' => 900));
 
         if (($result['success'] == true) && !empty($result['data'])) {
             $rez = array_shift($result['data']);

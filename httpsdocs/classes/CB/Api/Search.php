@@ -17,6 +17,8 @@ class Search
 
         $rez = $search->query($p);
 
+        $rez['success'] = true;
+
         return $rez;
     }
 }

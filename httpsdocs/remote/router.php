@@ -31,9 +31,11 @@ if (!function_exists('\\ExtDirect\\extDirectShutdownFunction')) {
             //notify admin
             if (!(php_sapi_name() == "cli")) {
                 @mail(
-                    Config::get('ADMIN_EMAIL'), 'Remote router error on '.Config::get('core_url'),
-                    var_export($data, true), 'From: '.Config::get('SENDER_EMAIL')."\r\n"
-            );
+                    Config::get('ADMIN_EMAIL'),
+                    'Remote router error on '.Config::get('core_url'),
+                    var_export($data, true),
+                    'From: '.Config::get('SENDER_EMAIL')."\r\n"
+                );
 
             }
 
@@ -54,7 +56,9 @@ require_once \CB\LIB_DIR.'router_functions.php';
 $isForm = false;
 $isUpload = false;
 
-if (!(php_sapi_name() == "cli")) { header('Content-Type: application/json; charset=UTF-8'); }
+if (!(php_sapi_name() == "cli")) {
+    header('Content-Type: application/json; charset=UTF-8');
+}
 
 if (isset($_POST['extAction'])) {
     // form post
@@ -76,6 +80,7 @@ if (isset($_POST['extAction'])) {
         $data = Util\jsonDecode($postdata);
     }
 }
+
 if (empty($data)) {
     die('Invalid request.');
 }
@@ -91,6 +96,7 @@ if (empty($data['action'])) {
 } else {
     $response = doRpc(sanitizeParams($data));
 }
+
 if ($isForm && $isUpload) {
     header('Content-Type: text/html; charset=UTF-8');
     echo '<html><body><textarea>';
@@ -98,7 +104,9 @@ if ($isForm && $isUpload) {
     echo '</textarea></body></html>';
 } else {
 
-    if (!(php_sapi_name() == "cli")) { header('X-Frame-Options: deny'); }
+    if (!(php_sapi_name() == "cli")) {
+        header('X-Frame-Options: deny');
+    }
 
     echo Util\jsonEncode($response);
 }

@@ -24,6 +24,11 @@ function createUsersData()
                 ,'first_name' => 'Timoty'
                 ,'last_name' => 'Third User'
                 ,'email' => 'email3@test.com'
+            ], [
+                'name' => 'wael'
+                ,'first_name' => 'Wael'
+                ,'last_name' => 'Forth User'
+                ,'email' => 'email4@test.com'
             ]
         ]
     ];
@@ -67,6 +72,61 @@ function createTasksData()
                     ,'importance' => 54
                     ,'description' => 'Testing tasks description'
                 )
+            ]
+        ]
+    ];
+
+    return $rez;
+}
+
+/**
+ * provide search queries data
+ * @return array
+ */
+function searchQueriesData()
+{
+    $rez = [
+        [
+            [
+                'query' => [
+                    'dstatus' => 1
+                    ,'fq' => 'template_id:5'
+                    ,'system' => 0
+                    ,'pids' => 1
+                    ,'template_types' => 'file'
+                    ,'dateStart' => '2015-01-01'
+                ]
+                ,'result' => [
+                    'success' => true
+                    ,'total' => 0
+                    ,'data' => []
+                ]
+            ]
+        ], [
+            [
+                'query' => [
+                    'template_types' => 'template'
+                    ,'id' => 3
+                    ,'pid' => 3
+                    ,'showFoldersContent' => true
+                    ,'facets' => "general"
+                    ,'from' => 'grid'
+                    ,'page' => 1
+                    ,'path' => "0/1/2/3"
+                    ,'facet.field' => 'cid'
+                ]
+                ,'result' => [
+                    'success' => true
+                ]
+            ]
+        ], [
+            [
+                'query' => [
+                    'template_types' => 'template'
+                ]
+                ,'result' => [
+                    'success' => true
+                ]
             ]
         ]
     ];
