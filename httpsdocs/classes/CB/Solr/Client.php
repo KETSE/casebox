@@ -131,8 +131,8 @@ class Client extends Service
             }
 
             //override content field if set in sys_data['solr']
-            if (!empty($r['sys_data']['content'])) {
-                $r['content'] = $r['sys_data']['content'];
+            if (!empty($r['sys_data']['solr']['content'])) {
+                $r['content'] = $r['sys_data']['solr']['content'];
             }
         }
 

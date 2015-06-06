@@ -114,43 +114,32 @@ class Notifications
             empty($p['fromId']) ? false : $p['fromId']
         );
 
-        $groups = array();
-        for ($i=1; $i < sizeof($recs); $i++) {
-            $newGroup = true;
-            $idx = sizeof($groups);
-            if ($i > 1) {
-                $groupEl = $groups[$idx - 1][0];
-                if (($groupEl['object_id'] == $recs[$i]['object_id']) &&
-                    ($groupEl['action_type'] == $recs[$i]['action_type']) &&
-                    ($groupEl['read'] == $recs[$i]['read'])
-                ) {
-                    $newGroup = false;
-                    $groups[$idx - 1][] = $recs[$i];
-                    $groups[$idx - 1][0]['userIds'][$recs[$i]['user_id']] = 1;
-                }
-            }
-
-            if ($newGroup) {
-                $groups[$idx] = array($recs[$i]);
-                $groups[$idx][0]['userIds'] = array($groups[$idx][0]['user_id'] => 1);
-            }
+        $actions = array();
+        //grouping actions by object_id, action type and read property
+        foreach ($recs as $r) {
+            $r['data'] = Util\toJsonArray($r['data']);
+            $group = $r['object_id'] . '_' . $r['action_type'] . '_' . $r['read'];
+            $actions[$group][$r['user_id']] = $r;
         }
 
-        foreach ($groups as $group) {
+        //iterate actions and group into records up to read property
+        foreach ($actions as $group => $users) {
             //form id
             $ids = array(); //would be comma separated action_ids
-            foreach ($group as $r) {
+            foreach ($users as $r) {
                 $ids[] = $r['id'];
             }
+            $r = current($users);
+
             $record = array(
                 'ids' => implode(',', $ids)
                 ,'read' => $r['read']
                 ,'user_id' => $r['user_id']
                 ,'object_id' => $r['object_id']
-                ,'text' => $this->getUsersString($group) . ' ' .
+                ,'text' => $this->getUsersString($users) . ' ' .
                         $this->getActionDeclination($r['action_type']) . ' ' .
-                        $this->getObjectName(Util\jsonDecode($group[0]['data']))  . //with icon
-                        '<div class="cG">' . Util\formatAgoTime($group[0]['action_time']). '</div>'
+                        $this->getObjectName($r['data'])  . //with icon
+                        '<div class="cG">' . Util\formatAgoTime($r['action_time']). '</div>'
 
             );
 
@@ -182,8 +171,8 @@ class Notifications
     {
         $rez = '';
 
-        $usersCount = sizeof($usersArray[0]['userIds']);
-        $userIds = array_keys($usersArray[0]['userIds']);
+        $usersCount = sizeof($usersArray);
+        $userIds = array_keys($usersArray);
 
         switch ($usersCount) {
             case 0:
