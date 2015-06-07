@@ -66,7 +66,7 @@ Ext.define('CB.object.field.editor.Form', {
             ,selModel: {
                 selType: 'checkboxmodel'
                 ,injectCheckbox: 'first'
-                ,checkOnly: true
+                ,checkOnly: false
                 ,toggleOnClick: true
                 ,mode: (this.cfg.multiValued ? 'SIMPLE': 'SINGLE')
                 ,listeners: {

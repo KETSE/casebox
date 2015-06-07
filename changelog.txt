@@ -1,3 +1,10 @@
+CaseBox 1.9.465 (2015-06-07)
+==============================
+New Features, Improvements
+--------------------------
+- notification adjustments
+- #6176 A simple click in a MultiValued field popupForm should select/unselect the value
+
 CaseBox 1.9.464 (2015-06-07)
 ==============================
 New Features, Improvements

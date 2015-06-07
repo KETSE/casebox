@@ -119,7 +119,7 @@ class Notifications
         foreach ($recs as $r) {
             $r['data'] = Util\toJsonArray($r['data']);
             $group = $r['object_id'] . '_' . $r['action_type'] . '_' . $r['read'];
-            $actions[$group][$r['user_id']] = $r;
+            $actions[$group][$r['from_user_id']] = $r;
         }
 
         //iterate actions and group into records up to read property
@@ -134,7 +134,7 @@ class Notifications
             $record = array(
                 'ids' => implode(',', $ids)
                 ,'read' => $r['read']
-                ,'user_id' => $r['user_id']
+                ,'user_id' => $r['from_user_id']
                 ,'object_id' => $r['object_id']
                 ,'text' => $this->getUsersString($users) . ' ' .
                         $this->getActionDeclination($r['action_type']) . ' ' .
@@ -172,15 +172,15 @@ class Notifications
                 break;
 
             case 2:
-                $rez = $users[0] . L\get('and') . $users[1];
+                $rez = $users[0] . ' ' . L\get('and') . ' ' . $users[1];
                 break;
 
             case 3:
-                $rez = $users[0] . ', ' . $users[1] . L\get('and') . $users[2];
+                $rez = $users[0] . ', ' . $users[1] . ' ' . L\get('and') . ' ' . $users[2];
                 break;
 
             default:
-                $rez = $users[0] . ', ' . $users[0] . L\get('and') . ' ' .
+                $rez = $users[0] . ', ' . $users[1] . ' ' . L\get('and') . ' ' .
                     str_replace('{count}', $usersCount -2, L\get('NNOthers'));
         }
 

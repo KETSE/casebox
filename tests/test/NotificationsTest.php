@@ -36,7 +36,11 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         /* create objects for test notifications on them */
         $objectsData = DATA\createTasksData();
 
-        $userIds = array_reverse($this->userIds);
+        $userIds = $this->userIds;
+
+        $id = array_shift($userIds);
+        array_push($userIds, $id);
+
         foreach ($objectsData[0] as $data) {
             $data['data']['assigned'] = array_shift($userIds);
             $this->objectIds[] = $this->createObject($data);
@@ -96,7 +100,8 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(is_numeric($commentId), 'Wrong comment ID.');
 
-        //check notifications for user bow, he should receive a new notification from andrew
+        //check notifications for user bow,
+        //he should receive 2 new notifications from root and andrew
         $this->assertTrue(
             $this->checkLastNotification(
                 $secondUserId,

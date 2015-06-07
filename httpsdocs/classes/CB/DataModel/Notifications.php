@@ -101,7 +101,7 @@ class Notifications extends Base
             ,l.action_type
             ,n.read
             ,n.from_user_id
-            ,l.user_id
+            ,n.user_id
             ,l.data
             ,l.action_time
         FROM notifications n
@@ -109,7 +109,7 @@ class Notifications extends Base
             ON n.action_id = l.id
         WHERE n.user_id = $1 '.
         (empty($fromId) ? '' : ' AND n.id > $2 ') .
-        'ORDER BY l.action_time DESC
+        'ORDER BY l.action_time DESC, id DESC
         LIMIT ' . $limit;
 
         $res = DB\dbQuery(
