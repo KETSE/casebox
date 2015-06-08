@@ -160,8 +160,12 @@ class Task extends Object
         }
 
         //get users that didnt complete the task yet
-        $solrData['task_u_done'] = $sd['task_u_done'];
-        $solrData['task_u_ongoing'] = $sd['task_u_ongoing'];
+        if (!empty($sd['task_u_done'])) {
+            $solrData['task_u_done'] = $sd['task_u_done'];
+        }
+        if (!empty($sd['task_u_ongoing'])) {
+            $solrData['task_u_ongoing'] = $sd['task_u_ongoing'];
+        }
 
         //set class
         $solrData['cls'] = $template->formatValueForDisplay(

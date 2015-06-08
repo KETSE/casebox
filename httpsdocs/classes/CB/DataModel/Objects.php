@@ -37,10 +37,12 @@ class Objects extends Base
             WHERE t.id in (' . implode(',', $ids) .')';
 
         $res = DB\dbQuery($sql) or die(DB\dbQueryError());
-        while ($r = $res->fetch_assoc()) {
-            $r['data'] = Util\jsonDecode($r['data']);
-            $r['sys_data'] = Util\jsonDecode($r['sys_data']);
-            $rez[] = $r;
+
+        if ($rez = $res->fetch_all(MYSQLI_ASSOC)) {
+            foreach ($rez as &$r) {
+                $r['data'] = Util\jsonDecode($r['data']);
+                $r['sys_data'] = Util\jsonDecode($r['sys_data']);
+            }
         }
         $res->close();
 

@@ -1,8 +1,8 @@
 <?php
 namespace CB\Templates;
 
-use CB\DB as DB;
-use CB\Util as Util;
+use CB\DB;
+use CB\Util;
 
 /**
  * Templates collection class

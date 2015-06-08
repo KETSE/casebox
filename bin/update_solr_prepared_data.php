@@ -50,6 +50,9 @@ $res->close();
 
 //iterate and update each object
 $i = 0;
+
+DB\startTransaction();
+
 $res = DB\dbQuery(
     'SELECT id
     FROM objects'
@@ -68,5 +71,7 @@ while ($r = $res->fetch_assoc()) {
     $i++;
 }
 $res->close();
+
+DB\commitTransaction();
 
 echo "\nDone";

@@ -753,10 +753,15 @@ class Object
      */
     protected function prepareValueforSolr($type, $value)
     {
+        if (empty($value) || empty($value['value'])) {
+            return null;
+        }
+
+        $value = $value['value'];
         switch ($type) {
             case 'boolean': //not used
             case 'checkbox':
-                $f['value'] = empty($f['value']) ? false : true;
+                $value = empty($value) ? false : true;
                 break;
 
             case 'date':

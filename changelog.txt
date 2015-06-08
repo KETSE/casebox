@@ -1,3 +1,13 @@
+CaseBox 1.9.466 (2015-06-08)
+==============================
+New Features, Improvements
+--------------------------
+- add transaction to /bin/update_solr_prepared_data.php
+
+Fixed Bugs:
+----------
+- incorrect param in call to getCachedObjects function
+
 CaseBox 1.9.465 (2015-06-07)
 ==============================
 New Features, Improvements

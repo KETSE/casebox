@@ -122,7 +122,10 @@ class Dbnode extends Base
             $id = $this->id;
         }
         if (!empty($id) && is_numeric($id)) {
-            $rez = @Search::getObjectNames($id)[$id];
+            $obj = \CB\Objects::getCachedObject($id);
+            if (!empty($obj)) {
+                $rez = $obj->getName();
+            }
         }
 
         return $rez;

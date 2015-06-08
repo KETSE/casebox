@@ -539,7 +539,7 @@ class Search extends Solr\Client
 
             //update name field to language title field if not empty
             $rd['name'] = empty($rd[$titleField])
-                ? $rd['name']
+                ? @$rd['name']
                 : $rd[$titleField];
 
             unset($rd[$titleField]);
@@ -685,6 +685,8 @@ class Search extends Solr\Client
             }
 
         }
+
+        $requiredIds = array_keys($requiredIds);
 
         //now there objects should be loaded in bulk before firing event
         //because DisplayColumns analizes each object from result
