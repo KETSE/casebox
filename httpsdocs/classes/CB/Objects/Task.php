@@ -121,7 +121,6 @@ class Task extends Object
         parent::updateCustomData();
     }
 
-
     /**
      * method to collect solr data from object data
      * according to template fields configuration

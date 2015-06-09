@@ -1,6 +1,8 @@
 #!/usr/bin/php
 <?php
+
 namespace CB;
+
 /*
     Move active subscribers from objects that have subscribers set
     to new followers mechanism
@@ -52,6 +54,7 @@ if ($r = $res->fetch_assoc()) {
 }
 $res->close();
 
+DB\startTransaction();
 //iterate and upgrade each object
 $i = 0;
 $res = DB\dbQuery(
@@ -87,5 +90,6 @@ while ($r = $res->fetch_assoc()) {
     $i++;
 }
 $res->close();
+DB\commitTransaction();
 
 echo "\nDone";

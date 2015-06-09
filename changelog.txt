@@ -1,7 +1,19 @@
+CaseBox 1.9.467 (2015-06-09)
+==============================
+New Features, Improvements
+--------------------------
+- remove debug messages
+
+Fixed Bugs:
+----------
+- core_create misspelled variables
+- #6341  Grouping by Assignee creates duplicated Groups and Rows
+
 CaseBox 1.9.466 (2015-06-08)
 ==============================
 New Features, Improvements
 --------------------------
+- indexing adjustments
 - add transaction to /bin/update_solr_prepared_data.php
 
 Fixed Bugs:

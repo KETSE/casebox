@@ -96,13 +96,14 @@ display_OK();
 //ask to provide root email & password
 $email = '';
 $pass = '';
+
 do {
     $email = readParam('core_root_email');
-} while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($l));
+} while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($email));
 
 do {
     $pass = readParam('core_root_pass');
-} while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($l));
+} while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($pass));
 
 \CB\DB\dbQuery(
     'UPDATE `'.$dbName.'`.users_groups

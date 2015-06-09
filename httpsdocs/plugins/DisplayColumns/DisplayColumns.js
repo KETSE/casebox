@@ -68,7 +68,7 @@ Ext.define('CB.plugin.DisplayColumns', {
             store.remoteSort = false;
 
             if(groupFeature.disabled) {
-                var menuItem = groupFeature.getMenuItem(rez.group.property);
+                var menuItem = groupFeature.getMenuItem('group');//rez.group.property
                 if(Ext.isEmpty(menuItem)) {
                     menuItem = {
                         parentMenu: this.grid.view.headerCt.getMenu()
@@ -84,7 +84,7 @@ Ext.define('CB.plugin.DisplayColumns', {
 
             var groupDir = Ext.valueFrom(rez.group.direction, 'ASC');
             if(store.getGroupDir != groupDir) {
-                store.group(rez.group.property, groupDir);
+                store.group('group', groupDir);//rez.group.property
             }
 
         } else if(Ext.isEmpty(rez.group) && !groupFeature.disabled) {

@@ -320,7 +320,7 @@ class Path
     {
         $rez = array();
         $guids = Cache::get('GUIDS', array());
-        \CB\debug('cache at start', $guids, $names);
+
         if (!empty($guids)) {
             foreach ($names as $name) {
                 if (!empty($guids[$name])) {
@@ -330,7 +330,6 @@ class Path
 
             //remove names retreived from cache
             $names = array_diff($names, array_keys($rez));
-            \CB\debug('after set from cache', $rez, $names);
         }
 
         //get remained names from db
@@ -341,7 +340,6 @@ class Path
 
             //remove names retreived from db
             $names = array_diff($names, array_keys($rez));
-            \CB\debug('after adding from db', $rez, $names);
         }
 
         //create guids for remained names
@@ -354,7 +352,6 @@ class Path
 
             $guids[$name] = $rez[$name];
         }
-        \CB\debug('after creating', $rez, $names);
 
         //update cache variable
         Cache::set('GUIDS', $guids);

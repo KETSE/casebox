@@ -109,7 +109,7 @@ class TemplateField extends Object
         $i = 3;
 
         $dataParams = $this->getParamsFromData();
-        \CB\debug(\CB\Config::get('languages'), $dataParams);
+
         foreach ($dataParams as $k => $v) {
             $saveFields[] = $k;
             $saveValues[] = $v;

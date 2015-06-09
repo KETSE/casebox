@@ -92,11 +92,13 @@ function initTranslations()
         WHERE `type` < 2'
     ) or die( DB\dbQueryError() );
 
-    while ($r = $res->fetch_assoc()) {
-        reset($r);
-        $name = current($r);
-        while ($v = next($r)) {
-            $translations[key($r)][$name] = $v;
+    if ($rez = $res->fetch_all(MYSQLI_ASSOC)) {
+        foreach ($rez as &$r) {
+            reset($r);
+            $name = current($r);
+            while ($v = next($r)) {
+                $translations[key($r)][$name] = $v;
+            }
         }
     }
     $res->close();
@@ -108,10 +110,12 @@ function initTranslations()
         WHERE `type` < 2'
     ) or die( DB\dbQueryError() );
 
-    while ($r = $res->fetch_assoc()) {
-        foreach ($languages as $l) {
-            if (!empty($r[$l])) {
-                $translations[$l][$r['name']] = $r[$l];
+    if ($rez = $res->fetch_all(MYSQLI_ASSOC)) {
+        foreach ($rez as &$r) {
+            foreach ($languages as $l) {
+                if (!empty($r[$l])) {
+                    $translations[$l][$r['name']] = $r[$l];
+                }
             }
         }
     }
