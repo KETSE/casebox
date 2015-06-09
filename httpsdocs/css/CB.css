@@ -92,7 +92,7 @@ question: why do we have "-top" class?
 
 
 /*search input box*/
-.x-form-text-toolbar {
+.mainSearch .x-form-text-toolbar {
     font: normal 16px/19px arial,verdana,sans-serif;
 }
 

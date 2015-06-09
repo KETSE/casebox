@@ -153,6 +153,7 @@ Ext.define('CB.ViewPort', {
 
         this.searchField = Ext.create({
                 xtype: 'CBSearchField'
+                ,cls: 'mainSearch'
                 ,emptyText: L.Search + ' Casebox'
                 ,minListWidth: 150
                 ,width: 350
