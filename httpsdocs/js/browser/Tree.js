@@ -43,12 +43,6 @@ Ext.define('CB.browser.Tree', {
                 ,handler: this.onEditClick
             })
 
-            ,openInNewWindow: new Ext.Action({
-                text: L.OpenInNewWindow
-                ,scope: this
-                ,handler: this.onOpenInNewWindowClick
-            })
-
             ,expand: new Ext.Action({
                 text: L.Expand
                 ,scope: this
@@ -391,7 +385,6 @@ Ext.define('CB.browser.Tree', {
 
         if(Ext.isEmpty(node)){
             this.actions.edit.setHidden(true);
-            this.actions.openInNewWindow.setHidden(true);
             this.actions.cut.setDisabled(true);
             this.actions.copy.setDisabled(true);
             this.actions.paste.setDisabled(true);
@@ -406,9 +399,6 @@ Ext.define('CB.browser.Tree', {
         } else {
             var canOpen = true;
             this.actions.edit.setHidden(!canOpen);
-
-            var canOpenInNewWindow = true;
-            this.actions.openInNewWindow.setHidden(!canOpenInNewWindow);
 
             var canExpand = (!node.isExpanded() && ((!node.loaded) || node.hasChildNodes()));
             this.actions.expand.setHidden(!canExpand);
@@ -473,7 +463,6 @@ Ext.define('CB.browser.Tree', {
             this.contextMenu = new Ext.menu.Menu({
                 items: [
                 this.actions.edit
-                ,this.actions.openInNewWindow
                 ,'-'
                 ,{
                     text: L.View
@@ -603,24 +592,6 @@ Ext.define('CB.browser.Tree', {
                 ,template_id: n.data.template_id
             }
         );
-    }
-
-    ,onOpenInNewWindowClick: function (b, e) {
-        var n = this.getSelectionModel().getSelection()[0];
-        if(Ext.isEmpty(n)) {
-            return;
-        }
-
-        var id = 'view'+n.data.nid;
-        if(!App.activateTab(App.mainTabPanel, id)) {
-            App.addTab(
-                App.mainTabPanel
-                ,new CB.browser.ViewContainer({
-                    rootId: n.data.nid
-                    ,data: {id: id }
-                })
-            );
-        }
     }
 
     ,onExpandClick: function (b, e) {

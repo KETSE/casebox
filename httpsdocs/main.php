@@ -38,6 +38,7 @@ loadMinifyUris();
     <meta name="author" content="KETSE">
     <meta name="description" content="Casebox">
     <meta name="robots" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 <?php
 
@@ -211,7 +212,7 @@ if (!empty($js)) {
 }
 $prc = Config::getPluginsRemoteConfig();
 if (!empty($prc)) {
-    echo '<script type="text/javascript">CB.plugin.config = '.json_encode($prc, JSON_UNESCAPED_UNICODE).';</script>';
+    echo '<script type="text/javascript">CB.plugin.config = '.Util\jsonEncode($prc).';</script>';
 }
 
 echo '<script type="text/javascript" src="' . $coreUrl . '/js/CB.DB.php"></script>';

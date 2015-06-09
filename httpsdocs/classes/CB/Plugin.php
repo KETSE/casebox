@@ -36,7 +36,7 @@ class Plugin implements Interfaces\Plugin
             'UPDATE ' . PREFIX . '_casebox.plugins SET `cfg` = $2 WHERE name = $1',
             array(
                 $this->name
-                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($cfg)
             )
         ) or die(DB\dbQueryError());
     }
@@ -52,7 +52,7 @@ class Plugin implements Interfaces\Plugin
             VALUES($1, $2)',
             array(
                 $this->name
-                ,json_encode($this->config, JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($this->config)
             )
         ) or die(DB\dbQueryError());
 

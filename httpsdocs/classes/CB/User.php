@@ -100,18 +100,17 @@ class User
             $rez['msg'] = L\get('Auth_fail');
         }
 
-        $logParams = array(
-            'type' => $logActionType
-            ,'data' => array(
-                'id' => @$_SESSION['user']['id']
-                ,'name' => @Util\coalesce($_SESSION['user']['name'], $login)
-                ,'result' => isset($_SESSION['user'])
-                ,'info' => 'user: '.$login."\nip: ".$ips
-            )
-        );
+        // $logParams = array(
+        //     'type' => $logActionType
+        //     ,'data' => array(
+        //         'id' => @$_SESSION['user']['id']
+        //         ,'name' => @Util\coalesce($_SESSION['user']['name'], $login)
+        //         ,'result' => isset($_SESSION['user'])
+        //         ,'info' => 'user: '.$login."\nip: ".$ips
+        //     )
+        // );
 
-        Log::add($logParams);
-
+        // Log::add($logParams);
         return $rez;
     }
 
@@ -271,7 +270,6 @@ class User
     public function getLoginInfo()
     {
         Browser::checkRootFolder();
-        User::checkUserFolders();
 
         $coreName = Config::get('core_name');
 
@@ -608,8 +606,8 @@ class User
                 ,$p['sex']
                 ,$p['email']
                 ,$p['language_id']
-                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
-                ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($cfg)
+                ,Util\jsonEncode($p['data'])
             )
         ) or die(DB\dbQueryError());
 
@@ -770,17 +768,17 @@ class User
     {
         $rez = array('success' => true);
 
-        $logParams = array(
-            'type' => 'logout'
-            ,'data' => array(
-                'id' => @$_SESSION['user']['id']
-                ,'name' => @$_SESSION['user']['name']
-                ,'result' => isset($_SESSION['user'])
-                ,'info' => 'user: '.$_SESSION['user']['name']
-            )
-        );
+        // $logParams = array(
+        //     'type' => 'logout'
+        //     ,'data' => array(
+        //         'id' => @$_SESSION['user']['id']
+        //         ,'name' => @$_SESSION['user']['name']
+        //         ,'result' => isset($_SESSION['user'])
+        //         ,'info' => 'user: '.$_SESSION['user']['name']
+        //     )
+        // );
 
-        Log::add($logParams);
+        // Log::add($logParams);
 
         while (!empty($_SESSION['last_sessions'])) {
             @unlink(session_save_path().DIRECTORY_SEPARATOR.'sess_'.array_shift($_SESSION['last_sessions']));
@@ -864,139 +862,6 @@ class User
         $cfg = static::getUserConfig();
         $cfg['max_rows'] = $rows;
         static::setUserConfig($cfg);
-
-        return true;
-    }
-
-    /**
-     * checkUserFolders
-     * @param  boolean $user_id
-     * @return boolean
-     */
-    public static function checkUserFolders($user_id = false)
-    {
-        $result = true;
-        if (!is_numeric($user_id)) {
-            $user_id = $_SESSION['user']['id'];
-        }
-
-        $affected_rows = 0;
-
-        /* check user home folder existace */
-        $home_folder_id = null;
-
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE (user_id = $1)
-                    AND (`system` = 1)
-                    AND (`type` = 1)
-                    AND (pid IS NULL)',
-            $user_id
-        ) or die( DB\dbQueryError() );
-
-        if ($r = $res->fetch_assoc()) {
-            $home_folder_id = $r['id'];
-        }
-        $res->close();
-        if (is_null($home_folder_id)) {
-            $cfg = Config::get('default_home_folder_cfg');
-
-            DB\dbQuery(
-                'INSERT INTO tree (
-                    name
-                    ,user_id
-                    ,`system`
-                    ,`type`
-                    ,cfg
-                    ,template_id)
-                VALUES(
-                    \'[Home]\'
-                    ,$1
-                    ,1
-                    ,1
-                    ,$2
-                    ,$3)',
-                array($user_id
-                    ,$cfg
-                    ,Config::get('default_folder_template')
-                )
-            ) or die( DB\dbQueryError() );
-
-            $home_folder_id = DB\dbLastInsertId();
-            $affected_rows++;
-
-            /* insert home folder security record in tree_acl */
-            DB\dbQuery(
-                'INSERT INTO tree_acl (
-                    node_id
-                    ,user_group_id
-                    ,allow
-                    ,deny)
-                VALUES (
-                    $1
-                    ,$2
-                    ,4095
-                    ,0)
-                ON DUPLICATE KEY
-                UPDATE allow = 4095
-                    ,deny = 0',
-                array(
-                    $home_folder_id
-                    ,$user_id
-                )
-            ) or die( DB\dbQueryError() );
-
-            $affected_rows += DB\dbAffectedRows();
-        }
-
-        /* check users "My documents" folder existace */
-        $my_docs_id = null;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE (user_id = $1)
-                    AND (`system` = 1)
-                    AND (`type` = 1)
-                    AND (pid = $2)',
-            array($user_id
-                , $home_folder_id
-            )
-        ) or die( DB\dbQueryError() );
-
-        if ($r = $res->fetch_assoc()) {
-            $my_docs_id = $r['id'];
-        }
-        $res->close();
-        if (is_null($my_docs_id)) {
-            DB\dbQuery(
-                'INSERT INTO tree (
-                    pid
-                    ,name
-                    ,user_id
-                    ,`system`
-                    ,`type`
-                    ,template_id)
-                VALUES(
-                    $1
-                    ,\'[MyDocuments]\'
-                    ,$2
-                    ,1
-                    ,1
-                    ,$3)',
-                array($home_folder_id
-                    ,$user_id
-                    ,Config::get('default_folder_template')
-                )
-            ) or die( DB\dbQueryError() );
-
-            $my_docs_id = DB\dbLastInsertId();
-            $affected_rows++;
-        }
-
-        if ($affected_rows > 0) {
-            Solr\Client::runCron();
-        }
 
         return true;
     }
@@ -1210,7 +1075,7 @@ class User
             'SELECT id
             FROM users_groups
             WHERE `type` = 2
-                and '.(is_numeric($user) ? 'id' : 'name').' = $1',
+                and ' . (is_numeric($user) ? 'id' : 'name') . ' = $1',
             $user
         ) or die(DB\dbQueryError());
 
@@ -1218,6 +1083,21 @@ class User
             $rez = $r['id'];
         }
         $res->close();
+
+        return $rez;
+    }
+
+    /**
+     * get id of currently loged user
+     * @return int | null
+     */
+    public static function getId()
+    {
+        $rez = null;
+
+        if (!empty($_SESSION['user']['id'])) {
+            $rez= intval($_SESSION['user']['id']);
+        }
 
         return $rez;
     }
@@ -1412,7 +1292,7 @@ class User
         $data = array();
 
         if ($idOrData === false) { //use current logged users
-            $id = $_SESSION['user']['id'];
+            $id = static::getId();
 
         } elseif (is_numeric($idOrData)) { //id specified
             $id = $idOrData;
@@ -1811,7 +1691,7 @@ class User
             WHERE id = $1',
             array(
                 $userId
-                ,json_encode($cfg, JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($cfg)
             )
         ) or die(DB\dbQueryError());
     }

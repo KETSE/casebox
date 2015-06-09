@@ -278,193 +278,6 @@ class Objects
     }
 
     /**
-     * set additional data to be saved in solr
-     * @param  reference $object_record
-     * @return void
-     */
-    public static function getSolrData(&$object_record)
-    {
-        $obj = Objects::getCachedObject($object_record['id']);
-
-        if (empty($obj)) {
-            return;
-        }
-
-        $linearData = $obj->getLinearData();
-        $template = $obj->getTemplate();
-
-        $objData = $obj->getData();
-
-        //specific check for comments
-        //comments may be long and can exceed name field definition
-        // to be reviewed and moved in comments class
-        if (@$object_record['template_type'] == 'comment') {
-            if (!empty($objData['data']['_title'])) {
-                $object_record['content'] = $objData['data']['_title'];
-
-            }
-
-            return;
-        }
-
-        $object_record['content'] = empty($objData['name'])
-            ? ''
-            : $objData['name']."\n";
-
-        // add target type for shortcut items
-        if (!empty($objData['target_type'])) {
-            $object_record['target_type'] = $objData['target_type'];
-        }
-        // add last comment info if present
-        if (!empty($objData['sys_data']['lastComment'])) {
-            $object_record['comment_user_id'] = $objData['sys_data']['lastComment']['user_id'];
-            $object_record['comment_date'] = $objData['sys_data']['lastComment']['date'];
-        }
-
-        $field = array();
-        foreach ($linearData as $f) {
-            if (is_object($template)) {
-                $field = $template->getField($f['name']);
-            }
-
-            if (!empty($f['value'])) {
-                /* make changes to value if needed */
-                switch ($field['type']) {
-                    case 'boolean':
-                    case 'checkbox':
-                        $f['value'] = empty($f['value']) ? false : true;
-                        break;
-
-                    case 'date':
-                    case 'datetime':
-                        if (!empty($f['value'])) {
-                            //check if there is only date, without time
-                            if (strlen($f['value']) == 10) {
-                                $f['value'] .= 'T00:00:00';
-                            }
-
-                            if (substr($f['value'], -1) != 'Z') {
-                                $f['value'] .= 'Z';
-                            }
-
-                            if (@$f['value'][10] == ' ') {
-                                $f['value'][10] = 'T';
-                            }
-                        }
-                        break;
-
-                    case 'time':
-                        if (!empty($f['value'])) {
-                            $a = explode(':', $f['value']);
-                            @$f['value'] = $a[0] * 3600 + $a[1] * 60 + $a[2];
-                        }
-                        break;
-
-                    case 'html':
-                        $f['value'] = strip_tags($f['value']);
-                        break;
-                }
-                /* make changes to value if needed */
-
-                if (@$field['cfg']['faceting']) {
-                    Objects::setCustomSOLRfields($object_record, $field, @$f['value']);
-                }
-            }
-
-            // adding value to content field
-            if (!empty($f['value'])) {
-                $object_record['content'] .= $field['title'].' '.
-                    (in_array($field['solr_column_name'], array('date_start', 'date_end', 'dates'))
-                        ? substr($f['value'], 0, 10)
-                        : $f['value']
-                    )."\n";
-            }
-        }
-    }
-
-    /**
-     * set custom SOLR columns
-     * @param reference $object_records
-     *         reference $field
-     * @return void
-     */
-    public static function setCustomSOLRfields(&$object_record, &$field, $value)
-    {
-        // is field stored in custom SOLR column?
-        if (!@$field['cfg']['faceting']) {
-            return;
-        }
-
-        $solr_field = $field['solr_column_name'];
-
-        // is SOLR field specified?
-        if (empty($solr_field)) {
-            // warn that SOLR field is missing
-            \CB\debug("Field '" . $field['name'] . "' is faceted but solr_column_name is missing");
-
-            return;
-        }
-
-        switch ($field['type']) {
-            # 'combo', 'int', 'objects' fields
-            case 'combo':
-            case 'int':
-            case '_objects':
-
-                $arr = Util\toNumericArray($value);
-                $val = Util\toNumericArray(@$object_record[$solr_field]);
-
-                foreach ($arr as $v) {
-                    if (empty($val) || !in_array($v, $val)) {
-                        $val[] = $v;
-                    }
-                }
-
-                if (empty($val)) {
-                    unset($object_record[$solr_field]);
-
-                } elseif (is_array($val) && (sizeof($val) < 2)) {//set just value if 1 element array
-                    $object_record[$solr_field] = array_shift($val);
-
-                } else {
-                    $object_record[$solr_field] = $val;
-                }
-
-                break;
-
-            case 'varchar':
-                // storing value in SOLR without any changes (TODO: think if the value should be cleaned/transformed)
-                // we assume values are checked before inserted into DB.
-                // maybe to strip_tags at least?
-                $object_record[$solr_field] = $value;
-                break;
-
-            case 'date':
-            case 'datetime':
-                if (!empty($value)) {
-                    $object_record[$solr_field] = $value;
-                }
-                break;
-        }
-
-    }
-
-    /**
-     * set additional data to be saved in solr for multiple records
-     * @param  reference $object_records
-     * @return void
-     */
-    public static function getBulkSolrData(&$object_records)
-    {
-
-        foreach ($object_records as $object_id => &$object_record) {
-            if (in_array(@$object_record['template_type'], array('case', 'object', 'email'))) {
-                Objects::getSolrData($object_record);
-            }
-        }
-    }
-
-    /**
      * updates udate and uid for a case
      * @param  int  $case_or_caseObject_id
      * @return void
@@ -591,18 +404,49 @@ class Objects
      */
     public static function getCachedObject($id)
     {
-        //verify if already have cached result
-        $var_name = 'Objects['.$id.']';
-        if (\CB\Cache::exist($var_name)) {
-            return \CB\Cache::get($var_name);
-        }
-        $obj = static::getCustomClassByObjectId($id);
-        if (!empty($obj)) {
-            $obj->load();
-            \CB\Cache::set($var_name, $obj);
+        $data = static::getCachedObjects($id);
+
+        return array_shift($data);
+    }
+
+    /**
+     * get objects from cache or loads them and store in cache
+     * @param  array $ids
+     * @return array
+     */
+    public static function getCachedObjects($ids)
+    {
+        $ids = Util\toNumericArray($ids);
+        $rez = array();
+        $toLoad = array();
+
+        foreach ($ids as $id) {
+            //verify if already have cached result
+            $var_name = 'Objects['.$id.']';
+            if (\CB\Cache::exist($var_name)) {
+                $rez[$id]  = \CB\Cache::get($var_name);
+            } else {
+                $toLoad[] = $id;
+            }
         }
 
-        return $obj;
+        if (!empty($toLoad)) {
+            $tc = Templates\SingletonCollection::getInstance();
+            $data = DataModel\Objects::read($toLoad);
+
+            foreach ($data as $objData) {
+                $var_name = 'Objects[' . $objData['id'] . ']';
+
+                $o = static::getCustomClassByType($tc->getType($objData['template_id']));
+
+                $o->setData($objData);
+
+                \CB\Cache::set($var_name, $o);
+                $rez[$objData['id']] = $o;
+            }
+        }
+
+        return $rez;
     }
 
     /**
@@ -833,6 +677,57 @@ class Objects
         $res->close();
 
         return $rez;
+    }
+
+    /**
+     * set subscription to an object for current user
+     * @param array $p
+     *        [
+     *            int objectId
+     *            varchar type      (follow, watch, ignore)
+     *        ]
+     * return array     json responce
+     */
+    public function setSubscription($p)
+    {
+        //validate input params
+        if (empty($p['objectId']) || !is_numeric($p['objectId']) ||
+            empty($p['type']) || !in_array($p['type'], array('follow', 'watch', 'ignore'))
+        ) {
+            throw new \Exception(L\get('Wrong_input_data'));
+        }
+
+        //set subscription
+        $userId = User::getId();
+        $obj = $this->getCachedObject($p['objectId']);
+        $sd = $obj->getSysData();
+        $fu = empty($sd['fu'])
+            ? array()
+            : $sd['fu'];
+        $wu = empty($sd['wu'])
+            ? array()
+            : $sd['wu'];
+
+        switch ($p['type']) {
+            case 'follow':
+                $sd['wu'] = array_diff($wu, array($userId));
+                $sd['fu'] = array_merge(array_diff($fu, array($userId)), array($userId));
+                break;
+
+            case 'watch':
+                $sd['fu'] = array_diff($fu, array($userId));
+                $sd['wu'] = array_merge(array_diff($wu, array($userId)), array($userId));
+                break;
+
+            case 'ignore':
+                $sd['fu'] = array_diff($fu, array($userId));
+                $sd['wu'] = array_diff($wu, array($userId));
+                break;
+        }
+
+        $obj->updateSysData($sd);
+
+        return array('success' => true);
     }
 
     /**

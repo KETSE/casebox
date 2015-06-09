@@ -397,7 +397,7 @@ Ext.define('CB.browser.ViewContainer', {
             layout: 'card'
             ,activeItem: 0
             ,border: false
-            ,region: 'center'
+            // ,region: 'center'
             ,tbar: this.viewToolbar
             ,items: [
                 new CB.browser.view.Grid({
@@ -453,6 +453,10 @@ Ext.define('CB.browser.ViewContainer', {
             }
         });
 
+        this.notificationsView = new CB.browser.NotificationsView({
+
+        });
+
         this.loadParamsTask = new Ext.util.DelayedTask(this.loadParams, this);
 
         App.fireEvent('browserinit', this);
@@ -464,7 +468,17 @@ Ext.define('CB.browser.ViewContainer', {
                 ,border: false
                 ,tbarCssClass: 'x-panel-gray'
                 ,items: [
-                    this.cardContainer
+                    {
+                        layout: 'card'
+                        ,activeItem: 0
+                        ,itemId: 'containersPanel'
+                        ,border: false
+                        ,region: 'center'
+                        ,items: [
+                            this.cardContainer
+                            ,this.notificationsView
+                        ]
+                    }
                     ,this.objectPanel
                 ]
             }]
@@ -491,6 +505,9 @@ Ext.define('CB.browser.ViewContainer', {
         });
 
         this.callParent(arguments);
+
+        this.containersPanel = this.items.getAt(0).items.getAt(0);
+        this.notificationsView = this.containersPanel.items.getAt(1);
 
         this.enableBubble([
             'viewloaded'
@@ -685,6 +702,9 @@ Ext.define('CB.browser.ViewContainer', {
         this.folderProperties.type = parseInt(this.folderProperties.type, 10);
         this.folderProperties.pathtext = result.pathtext;
 
+        //switch from NotificationView if active
+        this.containersPanel.setActiveItem(this.cardContainer);
+
         this.descendantsButton.toggle(ep.descendants === true);
 
         /* change view if set in params */
@@ -862,7 +882,9 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,loadParams: function(){
+        //check if not same params as previous request
         if(this.sameParams(this.params, this.requestParams)) {
+            this.containersPanel.setActiveItem(this.cardContainer);
             return;
         }
 

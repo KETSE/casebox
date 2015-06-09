@@ -242,7 +242,8 @@ Ext.define('CB.UsersGroupsTree', {
                 ,qtip: L.Reload
                 ,scope:this
                 ,handler: function(){
-                    this.store.reload({node: this.getRootNode()});
+                    var rn = this.getRootNode();
+                    this.store.reload({node: rn});
                 }
             })
 
@@ -290,11 +291,6 @@ Ext.define('CB.UsersGroupsTree', {
                         if(!Ext.isEmpty(this.lastPath)) {
                             this.selectPath(this.lastPath, 'nid', '/');
                         }
-
-                        return;
-                        if(n.data.kind > 1) {
-                            n.sort(this.sortTree);
-                        }
                     }
                 }
             })
@@ -330,17 +326,15 @@ Ext.define('CB.UsersGroupsTree', {
                     o.cancel = true;
                     o.dropStatus = true;
                 }
-
-                ,dragdrop: {scope: this, fn: function( tree, node, dd, e ){
-                        this.sourceNode = dd.dragOverData.dropNode;
-                        this.targetNode = dd.dragOverData.target;
-                        CB_UsersGroups.associate(
-                            this.sourceNode.data.nid
-                            ,this.targetNode.data.nid
-                            ,this.processAssociate
-                            ,this
-                        );
-                    }
+                ,dragdrop: function( tree, node, dd, e ){
+                    this.sourceNode = dd.dragOverData.dropNode;
+                    this.targetNode = dd.dragOverData.target;
+                    CB_UsersGroups.associate(
+                        this.sourceNode.data.nid
+                        ,this.targetNode.data.nid
+                        ,this.processAssociate
+                        ,this
+                    );
                 }
                 ,beforeitemappend: function(parent, n){
                     var text = Ext.valueFrom(n.data.title, n.data.name);
@@ -376,9 +370,9 @@ Ext.define('CB.UsersGroupsTree', {
                         if(Ext.isEmpty(selection)){
                             this.actions.del.setDisabled(true);
                             this.actions.remove.setDisabled(true);
-                        }else{
+                        } else {
                             this.actions.del.setDisabled(selection[0].data.system == 1);
-                            this.actions.remove.setDisabled( (selection[0].getDepth() <2) || (selection[0].parentNode.data.nid <1 ) );
+                            this.actions.remove.setDisabled((selection[0].getDepth() <2) || (selection[0].parentNode.data.nid <1));
                         }
                     }
                 }
@@ -466,7 +460,8 @@ Ext.define('CB.UsersGroupsTree', {
         this.store.clearFilter();
 
         this.ownerCt.container.component.searchField.clear();
-        this.store.reload({node: this.getRootNode()});
+        var rn = this.getRootNode();
+        this.store.reload({node: rn});
 
         App.mainViewPort.fireEvent('useradded', r.data);
     }
@@ -958,6 +953,7 @@ Ext.define('CB.UsersGroupsForm', {
             }
         } else {
             this.data.title = Ext.valueFrom(response.data.title, response.data.name);
+            this.data.enabled = response.data.enabled;
 
             response.data.title = this.data.title;
             this.data.template_id = response.data.template_id;
@@ -1285,7 +1281,10 @@ Ext.define('CB.UsersGroups', {
         var n = this.tree.getSelectionModel().getSelection()[0];
         if((!n) || (n.getDepth() != 2)){
             this.form.setDisabled(true);
-            if(this.loadFormTask) this.loadFormTask.cancel();
+            if(this.loadFormTask) {
+                this.loadFormTask.cancel();
+            }
+
             return ;
         }
         this.loadId = n.data.nid;
@@ -1293,7 +1292,11 @@ Ext.define('CB.UsersGroups', {
     }
 //------------------------------------------------------------------------------------------------------------------------------------------------
     ,onTreeBeforeSelect: function(sm, newNode, oldNode){
-        if(Ext.valueFrom(this._forceSelection, 0)){ this._forceSelection = 0; return true; }
+        if(Ext.valueFrom(this._forceSelection, 0)){
+            this._forceSelection = 0;
+            return true;
+        }
+
         if(oldNode && this.form._isDirty){
             this.newNode = newNode;
             Ext.Msg.show({

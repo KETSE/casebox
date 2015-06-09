@@ -18,12 +18,19 @@
 
 */
 
+$cnfFilename = realpath(__DIR__.'/../httpsdocs').'/config.ini';
+
+
+if( file_exists($cnfFilename) ) {
+
+    $cnf = parse_ini_file($cnfFilename);
+
 $dbConfig = [
-    'host' => '127.0.0.1'
-    ,'dbname' => 'cb__casebox'
-    ,'user' => 'local'
-    ,'pass' => 'h0st'
-    ,'port' => '3306'
+    'host' => $cnf['db_host']
+    ,'dbname' => $cnf['prefix'].'__casebox'
+    ,'user' => $cnf['db_user']
+    ,'pass' => $cnf['db_pass']
+    ,'port' => $cnf['db_port']
 ];
 
 // CSV file as first parameter
@@ -61,12 +68,15 @@ $dbh = connectDB($dbConfig);
 
 importTranslation($dbh, $csv, $lg, $col);
 
+} else {
+   die("ERROR: config not found ".$cnfFilename."\n");
+}
 
 function importTranslation($dbh, $csv, $lg, $col)
 {
 
     $dbh->beginTransaction();
-    $sql = "UPDATE cb__casebox.translations SET `$lg`=:title WHERE id=:id";
+    $sql = "UPDATE translations SET `$lg`=:title WHERE id=:id";
     $q = $dbh->prepare($sql);
 
     $row = 1;

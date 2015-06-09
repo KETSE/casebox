@@ -1,12 +1,22 @@
 <?php
 namespace CB;
 
+/**
+ * main search class for solr queries
+ *
+ */
+
 use CB\Cache;
 use CB\Util;
 use CB\User;
 
 class Search extends Solr\Client
 {
+
+    /**
+     * default field list used for queries
+     * @var array
+     */
     public static $defaultFields = array(
         'id', 'pid', 'name', 'path', 'template_type', 'target_id', 'system',
         'size', 'date', 'date_end', 'oid', 'cid', 'cdate', 'uid', 'udate', 'comment_user_id', 'comment_date',
@@ -14,16 +24,34 @@ class Search extends Solr\Client
         'task_status', 'task_d_closed', 'versions', 'ntsc'
     );
 
-    /*when requested to sort by a field the other convenient sorting field
+    /**
+     * fields that should be added aotmaticall to any query
+     * @var array
+     */
+    protected $requiredFields = array(
+            'pid'
+            ,'tempalte_id'
+            ,'target_id' //for shortcuts
+        );
+
+    /*when requesting sort by a field the other convenient sorting field
     can be used designed for sorting. Used for string fields. */
     protected $replaceSortFields = array(
         'nid' => 'id'
         ,'name' => 'sort_name'
-        // ,'path' => 'pid'
     );
 
+    /**
+     * flag to detect facets or use defined from input params
+     * @var boolean
+     */
     protected $facetsSetManually = false;
 
+    /**
+     * query solr
+     * @param  array $p [description]
+     * @return array
+     */
     public function query($p)
     {
         $this->results = false;
@@ -33,18 +61,26 @@ class Search extends Solr\Client
             isset($p['facet.field']) ||
             isset($p['facet.query'])
         );
+
         $this->prepareParams();
+
         $this->connect();
+
         $this->executeQuery();
+
         $this->processResult();
 
         return $this->results;
-
     }
 
+    /**
+     * prepare input params
+     * @return void
+     */
     private function prepareParams()
     {
         $p = &$this->inputParams;
+
         /* initial parameters */
 
         /* disable data loading and sorting for charts and pivot views */
@@ -64,27 +100,106 @@ class Search extends Solr\Client
         $this->start = empty($p['start'])
             ? (empty($p['page'])
                 ? 0
-                : $this->rows * (intval($p['page']) -1)
+                : $this->rows * (intval($p['page']) - 1)
             )
             : intval($p['start']);
-
-        //by default filter not deleted nodes
-        $fq = array('dstatus:0');
 
         $this->params = array(
             'defType' => 'dismax'
             ,'q.alt' => '*:*'
             ,'qf' => "name content^0.5"
             ,'tie' => '0.1'
-            ,'fl' => implode(',', static::$defaultFields)
-            ,'sort' => 'ntsc asc'
+            ,'fl' => $this->getFieldListParam($p)
+            ,'fq' => $this->getFilterQueryParam($p)
+            ,'sort' => $this->getSortParam($p)
         );
-        /* initial parameters */
 
-        if (!empty($p['dstatus'])) {
-            $fq = array('dstatus:'.intval($p['dstatus']));
+        /* setting highlight if query parrameter is present /**/
+        if (!empty($this->query)) {
+            $this->params['hl'] = 'true';
+            $this->params['hl.fl'] = 'name,content';
+            $this->params['hl.simple.pre'] = '<em class="hl">';
+            $this->params['hl.simple.post'] = '</em>';
+            $this->params['hl.usePhraseHighlighter'] = 'true';
+            $this->params['hl.highlightMultiTerm'] = 'true';
+            $this->params['hl.fragsize'] = '256';
         }
 
+        $this->facets = array();
+        if (!$this->facetsSetManually) {
+            $path = Cache::get('current_path');
+
+            if (!empty($path)) {
+                $lastNode = $path[sizeof($path) -1];
+                $this->facets = $lastNode->getFacets();
+            }
+        }
+
+        $fp = $this->getFacetParams($p);
+        if (!empty($fp)) {
+            $this->params = array_merge($this->params, $fp);
+        }
+
+        //analize facet filters
+        $this->params['fq'] = array_merge(
+            $this->params['fq'],
+            $this->getFacetFilters($p)
+        );
+    }
+
+    /**
+     * get field list from given params
+     * @param  array   &$p
+     * @return varchar
+     */
+    protected function getFieldListParam(&$p)
+    {
+        $rez = static::$defaultFields;
+
+        if (!empty($p['fl'])) {
+            $rez = array();
+
+            //filter wrong fieldnames
+            $a = Util\toTrimmedArray($p['fl']);
+            foreach ($a as $fn) {
+                if (preg_match('/^[a-z_0-9]+$/i', $fn)) {
+                    $rez[] = $fn;
+                }
+            }
+
+            //add required fields
+            foreach ($this->requiredFields as $fn) {
+                if (!in_array('target_id', $rez)) {
+                    $rez[] = 'target_id';
+                }
+
+            }
+
+            //add title field for current language
+            $field = 'title_' . Config::get('user_language') . '_t';
+            if (!in_array($field, $rez)) {
+                $rez[] = $field;
+            }
+        }
+
+        return implode(',', $rez);
+    }
+
+    /**
+     * get filtering query array
+     * @param  array &$p
+     * @return array
+     */
+    protected function getFilterQueryParam(&$p)
+    {
+        //by default filter deleted nodes
+        $fq = array('dstatus:0');
+
+        if (!empty($p['dstatus'])) {
+            $fq = array('dstatus:' . intval($p['dstatus']));
+        }
+
+        //check if fq is set and add it to result
         if (!empty($p['fq'])) {
             if (!is_array($p['fq'])) {
                 $p['fq'] = array($p['fq']);
@@ -92,48 +207,124 @@ class Search extends Solr\Client
             $fq = array_merge($fq, $p['fq']);
         }
 
+        //check system param
+        $sysParam = 'system:[0 TO 1]';
         if (isset($p['system'])) {
             if (is_numeric($p['system']) || preg_match('/^\[\d+ TO \d+\]$/', $p['system'])) {
-                $fq[] = 'system:'.$p['system'];
+                $sysParam = 'system:'.$p['system'];
             }
-        } else {
-            $fq[] = 'system:[0 TO 1]';
+        }
+        $fq[] = $sysParam;
+
+        /* adding additional query filters */
+
+        //check securitySets param
+        $ss = $this->getSecuritySetsParam($p);
+        if (!empty($ss)) {
+            $fq[] = $ss;
         }
 
-        /* set custom field list if specified */
-        if (!empty($p['fl'])) {
-            //filter wrong fieldnames
-            $filteredNames = array();
-            $a = explode(',', $p['fl']);
-            foreach ($a as $fn) {
-                $fn = trim($fn);
-                if (!preg_match('/^[a-z_0-9]+$/i', $fn)) {
-                    continue;
+        //check numeric params
+        $params = array(
+            'pid' => 'pid'
+            ,'ids' => 'id'
+            ,'pids' => 'pids'
+            ,'templates' => 'template_id'
+        );
+
+        foreach ($params as $param => $fn) {
+            if (!empty($p[$param])) {
+                $ids = Util\toNumericArray($p[$param]);
+                if (!empty($ids)) {
+                    $fq[] = $fn . ':('.implode(' OR ', $ids).')';
                 }
-                $filteredNames[] = $fn;
             }
-
-            //add target_id field
-            if (!in_array('target_id', $filteredNames)) {
-                $filteredNames[] = 'target_id';
-            }
-
-            //pid & template_id are also needed for shortcuts
-            if (!in_array('pid', $filteredNames)) {
-                $filteredNames[] = 'pid';
-            }
-            if (!in_array('template_id', $filteredNames)) {
-                $filteredNames[] = 'template_id';
-            }
-
-            $this->params['fl'] = implode(',', $filteredNames);
         }
 
-        /*analize sort parameter (ex: status asc,date_end asc)/**/
+        if (!empty($p['template_types'])) {
+            $types = Util\toTrimmedArray($p['template_types']);
+
+            $filteredTypes = array();
+            foreach ($types as $tt) {
+                if (preg_match('/^[a-z]+$/i', $tt)) {
+                    $filteredTypes[] = $tt;
+                }
+            }
+
+            if (!empty($filteredTypes)) {
+                $fq[] = 'template_type:("'.implode('" OR "', $filteredTypes).'")';
+            }
+        }
+
+        // $folderTemplates = Config::get('folder_templates');
+        // if (isset($p['folders']) && !empty($folderTemplates)) {
+        //     $fq[] = '!template_id:('.implode(' OR ', $folderTemplates).')';
+        // }
+
+        if (!empty($p['dateStart'])) {
+            $fq[] = 'date:[' .
+                Util\dateMysqlToISO($p['dateStart']) .
+                ' TO ' .
+                (empty($p['dateEnd'])
+                    ? '*'
+                    : Util\dateMysqlToISO($p['dateEnd'])
+                ) .
+                ']';
+        }
+
+        return $fq;
+    }
+
+    /**
+     * get assign security sets to filters
+     * dont check if 'skipSecurity = true'
+     * it's used in Objects fields where we show all nodes
+     * without permission filtering
+     * @param  array   &$p
+     * @return varchar
+     */
+    protected function getSecuritySetsParam(&$p)
+    {
+        $rez = '';
+
+        if (!Security::isAdmin() && empty($p['skipSecurity'])) {
+            $pids = false;
+
+            if (!empty($p['pid'])) {
+                $pids = $p['pid'];
+            } elseif (!empty($p['pids'])) {
+                $pids = $p['pids'];
+            }
+
+            $sets = Security::getSecuritySets(false, 5, $pids);
+
+            if (!empty($sets)) {
+                $rez = 'security_set_id:('.implode(' OR ', $sets).') OR oid:' . User::getId();
+            }
+
+        }
+
+        return $rez;
+    }
+
+    /**
+     * get sort param from given params
+     * @param  array   &$p
+     * @return varchar
+     */
+    protected function getSortParam(&$p)
+    {
+        $rez = 'ntsc asc';
+        $sort = array('ntsc' => 'asc');
+
         if (!empty($p['strictSort'])) {
-            $this->params['sort'] = $p['strictSort'];
+            //if strictSort specified in imput params
+            //then set it as is.
+            //We'll probably remove this option in the future
+            $rez = $p['strictSort'];
 
         } else {
+            //sort by order by default
             $sort = array('order' => 'asc');
 
             if (isset($p['sort'])) {
@@ -142,6 +333,7 @@ class Search extends Solr\Client
                     $sort = array();
                 }
 
+                //check if sort is a string (considered a property name)
                 if (!is_array($p['sort'])) {
                     $sort[$p['sort']] = empty($p['dir'])
                         ? 'asc'
@@ -165,222 +357,112 @@ class Search extends Solr\Client
             }
 
             foreach ($sort as $k => $v) {
-                $this->params['sort'] .= ",$k $v";
+                $rez .= ",$k $v";
             }
         }
 
-        //validate formed sort param
-        $sort = explode(',', $this->params['sort']);
-        $filteredSort = array();
+        $rez = $this->filterSortParam($rez);
+
+        return $rez;
+    }
+
+    /**
+     * filter a sorting string
+     * @param  varchar $sort
+     * @return varchar
+     */
+    protected function filterSortParam($sort)
+    {
+        $sort = Util\toTrimmedArray($sort);
+
+        $rez = array();
         foreach ($sort as $sf) {
             $a = explode(' ', $sf);
 
             //skip elements with more than one space
-            if (sizeof($a) !== 2) {
-                continue;
-            }
-
-            //skip elements with unknown sorting order string
-            if (!in_array($a[1], array('asc', 'desc'))) {
-                continue;
-            }
-
-            //skip strange field_names
-            if (!preg_match('/^[a-z_0-9]+$/i', $a[0])) {
-                continue;
-            }
-            $filteredSort[] = implode(' ', $a);
-        }
-        $this->params['sort'] = implode(', ', $filteredSort);
-
-        /* adding additional query filters */
-
-        // assign security sets to filters
-        // dont check if 'skipSecurity = true'
-        // it's used in Objects fields where we show all nodes
-        // without permission filtering
-        if (!Security::isAdmin() and !@$p['skipSecurity']) {
-            $pids = false;
-            if (!empty($p['pid'])) {
-                $pids = $p['pid'];
-            } elseif (!empty($p['pids'])) {
-                $pids = $p['pids'];
-            }
-
-            $sets = Security::getSecuritySets(false, 5, $pids);
-            if (empty($sets)) {
-                $sets = array(0);
-            }
-            $fq[] = 'security_set_id:('.implode(' OR ', $sets).') OR oid:'.$_SESSION['user']['id'];
-        }
-        /* end of assign security sets to filters */
-
-        if (!empty($p['pid'])) {
-            $ids = Util\toNumericArray($p['pid']);
-            if (!empty($ids)) {
-                $fq[] = 'pid:('.implode(' OR ', $ids).')';
-            }
-        }
-        if (!empty($p['ids'])) {
-            $ids = Util\toNumericArray($p['ids']);
-            if (!empty($ids)) {
-                $fq[] = 'id:('.implode(' OR ', $ids).')';
-            }
-        }
-        if (!empty($p['pids'])) {
-            $ids = Util\toNumericArray($p['pids']);
-            if (!empty($ids)) {
-                $fq[] = 'pids:('.implode(' OR ', $ids).')';
-            }
-        }
-
-        if (!empty($p['templates'])) {
-            $ids = Util\toNumericArray($p['templates']);
-            if (!empty($ids)) {
-                $fq[] = 'template_id:('.implode(' OR ', $ids).')';
-            }
-        }
-        if (!empty($p['template_types'])) {
-            if (!is_array($p['template_types'])) {
-                $p['template_types'] = explode(',', $p['template_types']);
-            }
-
-            $filteredNames = array();
-            foreach ($p['template_types'] as $tt) {
-                $tt = trim($tt);
-                if (!preg_match('/^[a-z]+$/i', $tt)) {
-                    continue;
+            if (sizeof($a) == 2) {
+                //skip elements with unknown sorting order string
+                if (in_array($a[1], array('asc', 'desc'))) {
+                    //skip strange field_names
+                    if (preg_match('/^[a-z_0-9]+$/i', $a[0])) {
+                        $rez[] = implode(' ', $a);
+                    }
                 }
-                $filteredNames[] = $tt;
-            }
-
-            if (!empty($filteredNames)) {
-                $fq[] = 'template_type:("'.implode('" OR "', $filteredNames).'")';
             }
         }
 
-        $folderTemplates = Config::get('folder_templates');
-        if (isset($p['folders']) && !empty($folderTemplates)) {
-            if ($p['folders']) {
-                $fq[] = 'template_type:("'.implode('" AND "', $folderTemplates).'")';
-            } else {
-                $fq[] = '!template_id:('.implode(' OR ', $folderTemplates).')';
-            }
-        }
+        return implode(', ', $rez);
+    }
 
-        if (!empty($p['dateStart'])) {
-            $fq[] = 'date:[' .
-                Util\dateMysqlToISO($p['dateStart']) .
-                ' TO ' .
-                (empty($p['dateEnd'])
-                    ? '*'
-                    : Util\dateMysqlToISO($p['dateEnd'])
-                ) .
-                ']';
-        }
-
-        $this->params['fq'] = $fq;
-        /* end of adding additional query filters */
-
-        /* setting highlight if query parrameter is present /**/
-        if (!empty($this->query)) {
-            $this->params['hl'] = 'true';
-            $this->params['hl.fl'] = 'name,content';
-            $this->params['hl.simple.pre'] = '<em class="hl">';
-            $this->params['hl.simple.post'] = '</em>';
-            $this->params['hl.usePhraseHighlighter'] = 'true';
-            $this->params['hl.highlightMultiTerm'] = 'true';
-            $this->params['hl.fragsize'] = '256';
-        }
-
-        $this->facets = array();
+    /**
+     * analize facets param and get their filters
+     * @param  array &$p
+     * @return array
+     */
+    private function getFacetFilters(&$p)
+    {
+        $rez = array();
         if (!$this->facetsSetManually) {
-            $path = Cache::get('current_path');
-
-            if (!empty($path)) {
-                $lastNode = $path[sizeof($path) -1];
-                $this->facets = $lastNode->getFacets();
+            foreach ($this->facets as $facet) {
+                $f = $facet->getFilters($p);
+                if (!empty($f['fq'])) {
+                    $rez = array_merge($rez, $f['fq']);
+                }
             }
         }
 
-        $this->prepareFacetsParams();
-        $this->setFilters();
+        return $rez;
     }
 
-    private function setFilters()
+    private function getFacetParams(&$p)
     {
+        $rez = array();
+
         if ($this->facetsSetManually) {
-            return;
-        }
-
-        foreach ($this->facets as $facet) {
-            $f = $facet->getFilters($this->inputParams);
-            if (!empty($f['fq'])) {
-                $this->params['fq'] = array_merge($this->params['fq'], $f['fq']);
-            }
-        }
-    }
-
-    private function prepareFacetsParams()
-    {
-        $facetParams = array();
-        if ($this->facetsSetManually) {
-            if (!empty($this->inputParams['facet.field'])) {
-                $facetParams['facet.field'] = $this->inputParams['facet.field'];
-            }
-            if (!empty($this->inputParams['facet.query'])) {
-                $facetParams['facet.query'] = $this->inputParams['facet.query'];
+            $copyParams = array(
+                'facet.field'
+                ,'facet.query'
+                ,'facet.range'
+                ,'facet.range.start'
+                ,'facet.range.end'
+                ,'facet.range.gap'
+                ,'facet.sort'
+                ,'facet.missing' //"on" ?
+            );
+            foreach ($copyParams as $pn) {
+                if (!empty($p[$pn])) {
+                    $rez[$pn] = $p[$pn];
+                }
             }
 
-            if (!empty($this->inputParams['facet.range'])) {
-                $facetParams['facet.range'] = $this->inputParams['facet.range'];
-            }
-            if (!empty($this->inputParams['facet.range.start'])) {
-                $facetParams['facet.range.start'] = $this->inputParams['facet.range.start'];
-            }
-            if (!empty($this->inputParams['facet.range.end'])) {
-                $facetParams['facet.range.end'] = $this->inputParams['facet.range.end'];
-            }
-            if (!empty($this->inputParams['facet.range.gap'])) {
-                $facetParams['facet.range.gap'] = $this->inputParams['facet.range.gap'];
-            }
-
-            if (!empty($this->inputParams['facet.sort'])) {
-                $facetParams['facet.sort'] = $this->inputParams['facet.sort'];
-            }
-            if (!empty($this->inputParams['facet.missing'])) {
-                $facetParams['facet.missing'] = 'on';
-            }
         } else {
             foreach ($this->facets as $facet) {
                 $fp = $facet->getSolrParams();
-                if (!empty($fp['facet.field'])) {
-                    if (empty($facetParams['facet.field'])) {
-                        $facetParams['facet.field'] = array();
+
+                $copyParams = array(
+                    'facet.field'
+                    ,'facet.query'
+                    ,'facet.pivot'
+                );
+                foreach ($copyParams as $pn) {
+                    if (!empty($fp[$pn])) {
+                        if (empty($rez[$pn])) {
+                            $rez[$pn] = array();
+                        }
+                        $rez[$pn] = array_merge($rez[$pn], $fp[$pn]);
                     }
-                    $facetParams['facet.field'] = @array_merge($facetParams['facet.field'], $fp['facet.field']);
-                } elseif (!empty($fp['facet.query'])) {
-                    if (empty($facetParams['facet.query'])) {
-                        $facetParams['facet.query'] = array();
-                    }
-                    $facetParams['facet.query'] = @array_merge($facetParams['facet.query'], $fp['facet.query']);
-                } elseif (!empty($fp['facet.pivot'])) {
-                    if (empty($facetParams['facet.pivot'])) {
-                        $facetParams['facet.pivot'] = array();
-                    }
-                    $facetParams['facet.pivot'] = @array_merge($facetParams['facet.pivot'], $fp['facet.pivot']);
                 }
             }
         }
 
-        if (!empty($facetParams)) {
-            $facetParams['facet'] = 'true';
-            if (empty($facetParams['facet.mincount'])) {
-                $facetParams['facet.mincount'] = 1;
+        if (!empty($rez)) {
+            $rez['facet'] = 'true';
+            if (empty($rez['facet.mincount'])) {
+                $rez['facet.mincount'] = 1;
             }
         }
 
-        $this->params = array_merge($this->params, $facetParams);
+        return $rez;
     }
 
     /**
@@ -389,22 +471,18 @@ class Search extends Solr\Client
      */
     protected function replaceSortFields()
     {
-        if (empty($this->params['sort'])) {
-            return;
-        }
+        if (!empty($this->params['sort'])) {
+            $sort = Util\toTrimmedArray($this->params['sort']);
 
-        $sort = is_array($this->params['sort'])
-            ? $this->params['sort']
-            : explode(',', $this->params['sort']);
-        foreach ($sort as $k => $el) {
-            $el = trim($el);
-            list($f, $s) = explode(' ', $el);
-            if (!empty($this->replaceSortFields[$f])) {
-                $sort[$k] = $this->replaceSortFields[$f].' '.$s;
+            foreach ($sort as $k => $el) {
+                list($f, $s) = explode(' ', $el);
+                if (!empty($this->replaceSortFields[$f])) {
+                    $sort[$k] = $this->replaceSortFields[$f].' '.$s;
+                }
             }
-        }
 
-        $this->params['sort'] = implode(', ', $sort);
+            $this->params['sort'] = implode(', ', $sort);
+        }
     }
 
     private function executeQuery()
@@ -441,6 +519,7 @@ class Search extends Solr\Client
             'data' => array()
         );
 
+        //add extra params for debugging if is debug host
         if (IS_DEBUG_HOST) {
             $rez['search'] = array(
                 'query' => $this->query
@@ -452,26 +531,34 @@ class Search extends Solr\Client
         }
 
         $sr = &$this->results;
-        $shortcuts = array();
 
+        $shortcuts = array();
+        $titleField = 'title_' . Config::get('user_language') . '_t';
+
+        //iterate documents, add resulting record to $rez['data']
+        //and collect shortcut records to be prepared
         foreach ($sr->response->docs as $d) {
             $rd = array();
+            //implode multivalued fields to sting
             foreach ($d as $fn => $fv) {
                 $rd[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
             }
 
+            //update name field to language title field if not empty
+            $rd['name'] = empty($rd[$titleField])
+                ? @$rd['name']
+                : $rd[$titleField];
+
+            unset($rd[$titleField]);
+
             $rez['data'][] = &$rd;
 
-            //check if shortcut
             if (!empty($rd['target_id'])) {
                 $shortcuts[$rd['target_id']] = &$rd;
             }
+
             unset($rd);
         }
-
-        $this->updateShortcutsData($shortcuts);
-
-        $this->setPaths($rez['data']);
 
         //add highlights
         if (!empty($sr->highlighting)) {
@@ -489,6 +576,17 @@ class Search extends Solr\Client
             }
         }
 
+        $this->warmUpNodes($rez);
+
+        //1
+        $this->updateShortcutsData($shortcuts);
+
+        //2
+        $this->setPaths($rez['data']);
+
+        //3 should be an event listener in DisplayColumns plugin
+
+        //shold also be added to warmUp ???
         $rez = array_merge($rez, $this->processResultFacets());
 
         $eventParams = array(
@@ -504,31 +602,32 @@ class Search extends Solr\Client
 
     private function processResultFacets()
     {
-        if ($this->facetsSetManually) {
-            return array(
-                'facets' => $this->results->facet_counts
-            );
-        }
+        $rez = array(
+            'facets' => $this->results->facet_counts
+        );
 
-        $rez = array();
-        foreach ($this->facets as $facet) {
-            $facet->loadSolrResult($this->results->facet_counts);
+        if (!$this->facetsSetManually) {
+            $rez = array();
 
-            $fr = $facet->getClientData();
+            foreach ($this->facets as $facet) {
+                $facet->loadSolrResult($this->results->facet_counts);
 
-            if (!empty($fr)) {
-                $idx = empty($fr['index'])
-                    ? 'facets'
-                    : $fr['index'];
+                $fr = $facet->getClientData();
 
-                $rez[$idx][$fr['f']] = $fr;
+                if (!empty($fr)) {
+                    $idx = empty($fr['index'])
+                        ? 'facets'
+                        : $fr['index'];
+
+                    $rez[$idx][$fr['f']] = $fr;
+                }
             }
         }
 
         return $rez;
     }
 
-    private function updateShortcutsData(&$shortcutsArray)
+    protected function updateShortcutsData(&$shortcutsArray)
     {
         if (empty($shortcutsArray)) {
             return;
@@ -537,33 +636,81 @@ class Search extends Solr\Client
         $p = &$this->params;
         $ids = array_keys($shortcutsArray);
 
-        $sr = $this->search(
-            $this->escapeLuceneChars(''),
-            0,
-            1000,
-            array(
-                'defType' => $p['defType']
-                ,'fl' => $p['fl']
-                ,'q.alt' => $p['q.alt']
-                ,'fq' => array(
-                    'id:(' . implode(' OR ', $ids) . ')'
-                )
-            )
-        );
+        $objects = Objects::getCachedObjects($ids);
 
-        $shortcuts = array();
+        foreach ($objects as $obj) {
+            $d = $obj->getData();
+            $sd = $obj->getSolrData();
+            $oldProps = $shortcutsArray[$d['id']];
+            $ref = &$shortcutsArray[$d['id']];
 
-        foreach ($sr->response->docs as $d) {
-            $oldProps = $shortcutsArray[$d->id];
-            $ref = &$shortcutsArray[$d->id];
-
-            foreach ($d as $fn => $fv) {
+            //set data form target objects solr data or general data if present
+            foreach ($ref as $fn => $fv) {
+                if (isset($d[$fn])) {
+                    $fv = $d[$fn];
+                }
+                if (isset($sd[$fn])) {
+                    $fv = $sd[$fn];
+                }
                 $ref[$fn] = is_array($fv) ? implode(',', $fv) : $fv;
             }
             //set element id to original so all actions will be made on shortcut by default
             //only opening will check if this object data has a target id
             $ref['id'] = $oldProps['id'];
         }
+    }/**/
+
+    /**
+     * method to collect all node ids needed for rendering of loaded data set
+     * @param  array &$result containing recxords in 'data' property
+     * @return void
+     */
+    protected function warmUpNodes(&$result)
+    {
+        $d = &$result['data'];
+
+        $requiredIds = array();
+        $paths = array();
+
+        foreach ($d as &$rec) {
+            $requiredIds[$rec['id']] = 1;
+
+            //add shorcut targets
+            if (!empty($rec['target_id'])) {
+                $requiredIds[$rec['target_id']] = 1;
+            }
+
+            //add path ids
+            if (isset($rec['path']) && !isset($paths[$rec['path']])) {
+                $path = Util\toNumericArray($rec['path'], '/');
+                if (!empty($path)) {
+                    $paths[$rec['path']] = $path;
+                    foreach ($path as $id) {
+                        $requiredIds[$id] = 1;
+                    }
+                }
+            }
+
+        }
+
+        $requiredIds = array_keys($requiredIds);
+
+        //now there objects should be loaded in bulk before firing event
+        //because DisplayColumns analizes each object from result
+        Objects::getCachedObjects($requiredIds);
+
+        $requiredIds = array();
+
+        $eventParams = array(
+            'inputParams' => &$this->inputParams
+            ,'params' => &$this->params
+            ,'data' => &$d
+            ,'requiredIds' => &$requiredIds
+        );
+
+        \CB\fireEvent('solrQueryWarmUp', $eventParams);
+
+        return $requiredIds;
     }
 
     /**
@@ -572,10 +719,6 @@ class Search extends Solr\Client
      */
     public static function setPaths(&$dataArray)
     {
-        if (!is_array($dataArray)) {
-            return;
-        }
-
         //collect distinct paths and ids
         $paths = array();
         $distinctIds = array();
@@ -590,11 +733,18 @@ class Search extends Solr\Client
             }
         }
 
-        //get names for distinct ids
         if (!empty($distinctIds)) {
-            $names = static::getObjectNames($distinctIds);
+            $distinctIds = array_unique($distinctIds);
+            $objects = Objects::getCachedObjects($distinctIds);
+            $names = array();
 
-            //replace ids with names
+            foreach ($distinctIds as $id) {
+                if (!empty($objects[$id])) {
+                    $names[$id] = $objects[$id]->getName();
+                }
+            }
+
+            //replace ids in paths with names
             foreach ($paths as $path => $elements) {
                 for ($i=0; $i < sizeof($elements); $i++) {
                     if (isset($names[$elements[$i]])) {
@@ -665,68 +815,67 @@ class Search extends Solr\Client
     {
         $rez = array();
         $ids = Util\toNumericArray($ids);
-        if (empty($ids)) {
-            return $rez;
-        }
 
-        $chunks = array_chunk($ids, 200);
+        if (!empty($ids)) {
+            $chunks = array_chunk($ids, 200);
 
-        //connect or get solr service connection
-        $conn = Cache::get('solr_service');
+            //connect or get solr service connection
+            $conn = Cache::get('solr_service');
 
-        if (empty($conn)) {
-            $conn = new Solr\Service();
+            if (empty($conn)) {
+                $conn = new Solr\Service();
 
-            Cache::set('solr_service', $conn);
-        }
-
-        //execute search
-        try {
-            foreach ($chunks as $chunk) {
-                $params = array(
-                    'defType' => 'dismax'
-                    ,'q.alt' => '*:*'
-                    ,'fl' => $fieldList
-                    ,'fq' => array(
-                        'id:(' . implode(' OR ', $chunk). ')'
-                    )
-                );
-
-                $inputParams = array(
-                    'ids' => $chunk
-                );
-
-                $eventParams = array(
-                    'params' => &$params
-                    ,'inputParams' => &$inputParams
-                );
-
-                \CB\fireEvent('beforeSolrQuery', $eventParams);
-
-                $searchRez = $conn->search(
-                    '',
-                    0,
-                    200,
-                    $params
-                );
-
-                if (!empty($searchRez->response->docs)) {
-                    foreach ($searchRez->response->docs as $d) {
-                        $rd = array();
-                        foreach ($d as $fn => $fv) {
-                            $rd[$fn] = $fv;
-                        }
-                        $rez[$d->id] = $rd;
-                    }
-                }
-
-                $eventParams['result'] = array(
-                    'data' => &$rez
-                );
-                \CB\fireEvent('solrQuery', $eventParams);
+                Cache::set('solr_service', $conn);
             }
-        } catch ( \Exception $e ) {
-            throw new \Exception("An error occured in getObjectNames: \n\n {$e->__toString()}");
+
+            //execute search
+            try {
+                foreach ($chunks as $chunk) {
+                    $params = array(
+                        'defType' => 'dismax'
+                        ,'q.alt' => '*:*'
+                        ,'fl' => $fieldList
+                        ,'fq' => array(
+                            'id:(' . implode(' OR ', $chunk). ')'
+                        )
+                    );
+
+                    $inputParams = array(
+                        'ids' => $chunk
+                    );
+
+                    $eventParams = array(
+                        'params' => &$params
+                        ,'inputParams' => &$inputParams
+                    );
+
+                    \CB\fireEvent('beforeSolrQuery', $eventParams);
+
+                    $searchRez = $conn->search(
+                        '',
+                        0,
+                        200,
+                        $params
+                    );
+
+                    if (!empty($searchRez->response->docs)) {
+                        foreach ($searchRez->response->docs as $d) {
+                            $rd = array();
+                            foreach ($d as $fn => $fv) {
+                                $rd[$fn] = $fv;
+                            }
+                            $rez[$d->id] = $rd;
+                        }
+                    }
+
+                    $eventParams['result'] = array(
+                        'data' => &$rez
+                    );
+                    \CB\fireEvent('solrQuery', $eventParams);
+                }
+            } catch ( \Exception $e ) {
+                throw new \Exception("An error occured in getObjectNames: \n\n {$e->__toString()}");
+            }
         }
 
         return $rez;

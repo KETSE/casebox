@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\DataModel as DM;
+
 class Path
 {
     /* get last element id from a path or return root folder id if no int element is found */
@@ -213,9 +215,10 @@ class Path
     {
         $rez = array();
 
+        $guids = static::getGUIDs(array_keys($nodeConfigs));
         foreach ($nodeConfigs as $p => $cfg) {
             $class = empty($cfg['class']) ? '\\CB\\TreeNode\\'.$p : $cfg['class'];
-            $cfg['guid'] = static::getGUID($p);
+            $cfg['guid'] = $guids[$p]; //static::getGUID($p);
             $cfg['class'] = $class;
 
             try {
@@ -299,24 +302,59 @@ class Path
      */
     public static function getGUID($name)
     {
-        $rez = null;
-        $res = DB\dbQuery(
-            'SELECT id FROM ' . PREFIX . '_casebox.guids WHERE name = $1',
-            $name
-        ) or die(DB\dbQueryError());
+        $rez = static::getGUIDs(array($name));
 
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        } else {
-            DB\dbQuery(
-                'INSERT INTO ' . PREFIX . '_casebox.guids
-                (`name`)
-                VALUES ($1)',
-                $name
-            ) or die(DB\dbQueryError());
-            $rez = DB\dbLastInsertId();
+        $rez = empty($rez[$name])
+            ? null
+            : $rez[$name];
+
+        return $rez;
+    }
+
+    /**
+     * get GUIDs virtual tree node names array
+     * @param  array $names
+     * @return int
+     */
+    public static function getGUIDs($names)
+    {
+        $rez = array();
+        $guids = Cache::get('GUIDS', array());
+
+        if (!empty($guids)) {
+            foreach ($names as $name) {
+                if (!empty($guids[$name])) {
+                    $rez[$name] = $guids[$name];
+                }
+            }
+
+            //remove names retreived from cache
+            $names = array_diff($names, array_keys($rez));
         }
-        $res->close();
+
+        //get remained names from db
+        if (!empty($names)) {
+            $dbNames = DM\GUID::readNames($names);
+            $guids = array_merge($guids, $dbNames);
+            $rez = array_merge($rez, $dbNames);
+
+            //remove names retreived from db
+            $names = array_diff($names, array_keys($rez));
+        }
+
+        //create guids for remained names
+        foreach ($names as $name) {
+            $rez[$name] = DM\GUID::create(
+                array(
+                    'name' => $name
+                )
+            );
+
+            $guids[$name] = $rez[$name];
+        }
+
+        //update cache variable
+        Cache::set('GUIDS', $guids);
 
         return $rez;
     }
@@ -338,9 +376,10 @@ class Path
 
         $treeNodeConfigs = Config::get('treeNodes', array('Dbnode' => array()));
         $GUIDConfigs = array();
+        $guids = static::getGUIDs(array_keys($treeNodeConfigs));
         foreach ($treeNodeConfigs as $plugin => $cfg) {
             $class = empty($cfg['class']) ? '\\CB\\TreeNode\\'.$plugin : $cfg['class'];
-            $cfg['guid'] = static::getGUID($plugin);
+            $cfg['guid'] = $guids[$plugin]; //static::getGUID($plugin);
             $cfg['class'] = $class;
             $GUIDConfigs[$cfg['guid']] = $cfg;
         }

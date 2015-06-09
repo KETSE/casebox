@@ -1,7 +1,7 @@
 <?php
 namespace CB\Objects;
 
-use CB\DB as DB;
+use CB\DB;
 
 /**
  * class for casebox files objects
@@ -137,6 +137,39 @@ class File extends Object
             )
         ) or die(DB\dbQueryError());
 
+    }
+
+    /**
+     * method to collect solr data from object data
+     * according to template fields configuration
+     * and store it in sys_data onder "solr" property
+     * @return void
+     */
+    protected function collectSolrData()
+    {
+        parent::collectSolrData();
+
+        $sd = &$this->data['sys_data']['solr'];
+
+        $res = DB\dbQuery(
+            'SELECT c.size
+            ,(SELECT count(*)
+                FROM files_versions
+                WHERE file_id = f.id
+            ) `versions`
+            FROM files f
+            LEFT JOIN files_content c
+                ON f.content_id = c.id
+            WHERE f.id = $1',
+            $this->id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $sd['size'] = $r['size'];
+            $sd['versions'] = intval($r['versions']);
+        }
+
+        $res->close();
     }
 
     /**

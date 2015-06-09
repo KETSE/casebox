@@ -9,6 +9,7 @@ namespace CB;
 /* define main paths/**/
 define('CB\\DOC_ROOT', dirname(__FILE__).DIRECTORY_SEPARATOR);
 define('CB\\APP_DIR', dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR);
+define('CB\\BIN_DIR', APP_DIR.'bin'.DIRECTORY_SEPARATOR);
 define('CB\\PLUGINS_DIR', DOC_ROOT.'plugins'.DIRECTORY_SEPARATOR);
 define('CB\\SYS_DIR', APP_DIR.'sys'.DIRECTORY_SEPARATOR);
 define('CB\\CRONS_DIR', SYS_DIR.'crons'.DIRECTORY_SEPARATOR);
@@ -52,8 +53,25 @@ require_once LIB_DIR . 'DB.php';
 
 /* end of update include_path and include scripts */
 
+if(!isset($cfg)|| !is_array($cfg)) {
+    $cfg = array();
+
+}
+//define some library paths
+$cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
+$cfg['SOLR_CLIENT'] = 'Solr/Service.php';
+$cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
+$cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
+
+if (file_exists(DOC_ROOT.'config.ini')) {
 //load main config so that we can connect to casebox db and read configuration for core
-$cfg = Config::loadConfigFile(DOC_ROOT.'config.ini');
+    $cfg = Config::loadConfigFile(DOC_ROOT.'config.ini') + $cfg;
+
+    if (isset($cfg['db_host']) && isset($cfg['db_user']) && isset($cfg['db_pass']) && isset($cfg['db_port'])) {
+//conect to db using global params from config.ini
+        DB\connect($cfg);
+    }
+}
 
 //define global prefix used
 define(
@@ -92,15 +110,9 @@ if (empty($cfg['PYTHON'])) {
 //set unoconv path
 $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . DIRECTORY_SEPARATOR . 'unoconv"';
 
-$cfg['HTML_PURIFIER'] = 'htmlpurifier/library/HTMLPurifier.auto.php';
-$cfg['SOLR_CLIENT'] = 'Solr/Service.php';
-$cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
-$cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
-
 Cache::set('platformConfig', $cfg);
 
-//conect to db using global params from config.ini
-DB\connect($cfg);
+
 
 /* config functions section */
 

@@ -1,6 +1,7 @@
 <?php
 namespace CB\Objects;
 
+use CB\Config;
 use CB\DB;
 use CB\Util;
 use CB\L;
@@ -185,7 +186,7 @@ class Object
                 ,@$p['date']
                 ,@$p['date_end']
                 ,@$p['size']
-                ,@json_encode($p['cfg'], JSON_UNESCAPED_UNICODE)
+                ,@Util\jsonEncode($p['cfg'])
                 ,@$p['cid']
                 ,@$p['oid']
                 ,@$p['cdate']
@@ -227,8 +228,23 @@ class Object
 
         $p['data'] = Util\toJSONArray(@$p['data']);
         $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
+        $sd = &$p['sys_data'];
 
+        //add creator as follower by default, but not for folder template
+        if (empty($sd['fu'])) {
+            $sd['fu'] = [];
+        }
+
+        if ($p['template_id'] != Config::get('default_folder_template')) {
+            if (!in_array($p['cid'], $sd['fu'])) {
+                $sd['fu'][] = intval($p['cid']);
+            }
+        }
+
+        //filter fields
         $this->filterHTMLFields($p['data']);
+
+        $this->collectSolrData();
 
         DB\dbQuery(
             'INSERT INTO objects (id ,`data`, `sys_data`)
@@ -237,8 +253,8 @@ class Object
             UPDATE  `data` = $2,`sys_data` = $3',
             array(
                 $this->id
-                ,json_encode($p['data'], JSON_UNESCAPED_UNICODE)
-                ,json_encode($p['sys_data'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($p['data'])
+                ,Util\jsonEncode($p['sys_data'])
             )
         ) or die(DB\dbQueryError());
 
@@ -383,8 +399,8 @@ class Object
         }
 
         //load current object from db into a variable to be passed to log and events
-        $oldObject = clone $this;
-        $oldObject->load($this->id);
+        $this->oldObject = clone $this;
+        $this->oldObject->load($this->id);
 
         \CB\fireEvent('beforeNodeDbUpdate', $this);
 
@@ -428,7 +444,7 @@ class Object
                 $saveFields[] = $fieldName;
                 $saveValues[] = (is_scalar($p[$fieldName]) || is_null($p[$fieldName]))
                     ? $p[$fieldName]
-                    : json_encode($p[$fieldName], JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($p[$fieldName]);
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
             }
@@ -457,7 +473,7 @@ class Object
         // log the action
         $logParams = array(
             'type' => 'update'
-            ,'old' => $oldObject
+            ,'old' => $this->oldObject
             ,'new' => $this
         );
 
@@ -486,6 +502,9 @@ class Object
         }
 
         $this->filterHTMLFields($d['data']);
+
+        $this->collectSolrData();
+
         unset($this->linearData);
 
         @DB\dbQuery(
@@ -497,8 +516,8 @@ class Object
                 ,sys_data = $3',
             array(
                 $d['id']
-                ,json_encode($d['data'], JSON_UNESCAPED_UNICODE)
-                ,json_encode($d['sys_data'], JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($d['data'])
+                ,Util\jsonEncode($d['sys_data'])
             )
         ) or die(DB\dbQueryError());
         /* end of updating object properties into the db */
@@ -545,9 +564,11 @@ class Object
     {
         $d = &$this->data;
 
-        $sysData = ($sysData === false)
-            ? Util\toJSONArray(@$d['sys_data'])
-            : Util\toJSONArray($sysData);
+        if ($sysData !== false) {
+            $d['sys_data'] = Util\toJSONArray($sysData);
+        }
+
+        $this->collectSolrData();
 
         @DB\dbQuery(
             'INSERT INTO objects
@@ -557,11 +578,9 @@ class Object
                 sys_data = $2',
             array(
                 $d['id']
-                ,json_encode($sysData, JSON_UNESCAPED_UNICODE)
+                ,Util\jsonEncode($d['sys_data'])
             )
         ) or die(DB\dbQueryError());
-
-        $this->data['sys_data'] = $sysData;
 
         //mark the item as updated so that it would be reindexed to solr
         DB\dbQuery(
@@ -624,6 +643,185 @@ class Object
         $this->updateSysData($d);
 
         return true;
+    }
+
+    /**
+     * method to collect solr data from object data
+     * according to template fields configuration
+     * and store it in sys_data onder "solr" property
+     * @return void
+     */
+    protected function collectSolrData()
+    {
+        //iterate template fields and collect fieldnames
+        //to be indexed in solr, as well as title fields
+        $rez = array();
+
+        $d = &$this->data;
+        $sd = &$this->data;
+
+        $tpl = $this->getTemplate();
+
+        $languages = Config::get('languages');
+
+        $defaultLanguage = Config::get('default_language');
+
+        if (!empty($tpl)) {
+            $fields = $tpl->getFields();
+
+            //create a list of possible title fields that should be added to solr
+            $titleFields = array();//will go into title property
+            foreach ($languages as $l) {
+                $titleFields[] = 'title_' . $l;
+            }
+
+            foreach ($fields as $f) {
+                if (empty($f['solr_column_name']) && in_array($f['name'], $titleFields)) {
+                    $sfn = $f['name'] . '_t';//solr field name
+
+                    $value = $this->getFieldValue($f['name'], 0);
+                    if (!empty($value['value'])) {
+                        $rez[$sfn] = $value['value'];
+                    }
+
+                } elseif (!empty($f['cfg']['faceting']) || //backward compatible check
+                    !empty($f['cfg']['indexed'])
+                ) {
+                    $values = $this->getFieldValue($f['name']);
+
+                    $resultValue = array();
+
+                    //iterate each duplicate
+                    foreach ($values as $v) {
+                        $value = $this->prepareValueforSolr($f['type'], $v);
+                        if (!empty($value)) {
+                            $resultValue[] = $value;
+                        }
+                    }
+
+                    //check result value
+                    //if its a single value then set as is
+                    //if multiple values then merge into an array
+                    if (!empty($resultValue)) {
+                        $finalValue = null;
+                        if (sizeof($resultValue) == 1) {
+                            $finalValue = array_shift($resultValue);
+                        } else {
+                            $finalValue = array();
+                            foreach ($resultValue as $value) {
+                                if (is_array($value)) {
+                                    $finalValue = array_merge($finalValue, $value);
+                                } else {
+                                    $finalValue[] = $value;
+                                }
+
+                            }
+                        }
+
+                        $rez[$f['solr_column_name']] = $finalValue;
+                    }
+                }
+            }
+        }
+
+        // add last comment info if present
+        if (!empty($sd['lastComment'])) {
+            $rez['comment_user_id'] = $sd['lastComment']['user_id'];
+            $rez['comment_date'] = $sd['lastComment']['date'];
+        }
+
+        $this->data['sys_data']['solr'] = $rez;
+    }
+
+    /**
+     * just for update purposes only
+     * Should be removed in future
+     * @return void
+     */
+    public function updateSolrData()
+    {
+        $this->load();
+        $this->collectSolrData();
+        $this->updateSysData();
+    }
+
+    /**
+     * prepare a given value for solr according to its type
+     * @param  varchar $type  (checkbox,combo,date,datetime,float,html,int,memo,_objects,text,time,timeunits,varchar)
+     * @param  variant $value
+     * @return variant
+     */
+    protected function prepareValueforSolr($type, $value)
+    {
+        if (empty($value) || empty($value['value'])) {
+            return null;
+        }
+
+        $value = $value['value'];
+        switch ($type) {
+            case 'boolean': //not used
+            case 'checkbox':
+                $value = empty($value) ? false : true;
+                break;
+
+            case 'date':
+            case 'datetime':
+                if (!empty($value)) {
+                    //check if there is only date, without time
+                    if (strlen($value) == 10) {
+                        $value .= 'T00:00:00';
+                    }
+
+                    if (substr($value, -1) != 'Z') {
+                        $value .= 'Z';
+                    }
+
+                    if (@$value[10] == ' ') {
+                        $value[10] = 'T';
+                    }
+                }
+                break;
+
+                /** time values are stored as seconds representation in solr */
+            case 'time':
+                if (!empty($value)) {
+                    $a = explode(':', $value);
+                    @$value = $a[0] * 3600 + $a[1] * 60 + $a[2];
+                }
+                break;
+
+            case 'combo':
+            case 'int':
+            case '_objects':
+
+                $arr = Util\toNumericArray($value);
+                $value = array();
+
+                //remove zero values
+                foreach ($arr as $v) {
+                    if (!empty($v)) {
+                        $value[] = $v;
+                    }
+                }
+
+                $value = array_unique($value);
+
+                if (empty($value)) {
+                    $value = null;
+
+                } elseif (sizeof($value) == 1) {
+                    //set just value if 1 element array
+                    $value = array_shift($value);
+                }
+                break;
+
+            case 'html':
+                $value = strip_tags($value);
+                break;
+
+        }
+
+        return $value;
     }
 
     /**
@@ -695,8 +893,10 @@ class Object
             ,'old' => $this
         );
 
-        Log::add($logParams);
-
+        //dont add log action if permanently deleted
+        if (!$permanent) {
+            Log::add($logParams);
+        }
     }
 
     /**
@@ -832,6 +1032,21 @@ class Object
     }
 
     /**
+     * get solr data property
+     *
+     * @return array
+     */
+    public function getSolrData()
+    {
+        $rez = array();
+        if (!empty($this->data['sys_data']['solr'])) {
+            $rez = $this->data['sys_data']['solr'];
+        }
+
+        return $this->data;
+    }
+
+    /**
      * get linear array of properties of object properties
      * @param boolean $sorted true to sort data according to template fields order
      * @param array   $data   template properties
@@ -949,6 +1164,7 @@ class Object
 
         if (array_key_exists('id', $data)) {
             $this->id = $data['id'];
+            $this->loaded = true;
         }
 
         if (!empty($this->data['data'])) {
@@ -984,6 +1200,28 @@ class Object
         $templateData = $template->getData();
 
         return @$templateData['name'];
+    }
+
+    /**
+     * get name of the object corresponding to current user language
+     * @param  varchar $language
+     * @return varchar
+     */
+    public function getName($language = false)
+    {
+        $d = &$this->data;
+
+        $rez = $d['name'];
+
+        if ($language === false) {
+            $language = Config::get('user_language');
+        }
+
+        if (is_string($language) && !empty($d['sys_data']['solr']['title_' . $language . '_t'])) {
+            $rez = $d['sys_data']['solr']['title_' . $language . '_t'];
+        }
+
+        return $rez;
     }
 
     /**
@@ -1244,8 +1482,8 @@ class Object
         /* end of security check */
 
         //load current object from db into a variable to be passed to log and events
-        $oldObject = clone $this;
-        $oldObject->load($this->id);
+        $this->oldObject = clone $this;
+        $this->oldObject->load($this->id);
 
         if (is_numeric($targetId)) {
             /* target security check */
@@ -1324,7 +1562,7 @@ class Object
         // log the action
         $logParams = array(
             'type' => 'move'
-            ,'old' => $oldObject
+            ,'old' => $this->oldObject
             ,'new' => $this
         );
 

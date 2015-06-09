@@ -76,6 +76,7 @@ Ext.define('CB.ViewPort', {
                 }
                 ,this.buttons.create
                 ,this.buttons.toggleFilterPanel
+                ,this.buttons.toggleNotificationsView
                 ,'->'
                 ,{
                     scale: 'large'
@@ -152,6 +153,7 @@ Ext.define('CB.ViewPort', {
 
         this.searchField = Ext.create({
                 xtype: 'CBSearchField'
+                ,cls: 'mainSearch'
                 ,emptyText: L.Search + ' Casebox'
                 ,minListWidth: 150
                 ,width: 350
@@ -227,6 +229,18 @@ Ext.define('CB.ViewPort', {
                 ,scope: this
                 ,handler: this.onToggleFilterPanelClick
             })
+
+            ,toggleNotificationsView: new Ext.Action({
+                tooltip: L.Notifications
+                ,itemId: 'toggleNotifications'
+                ,enableToggle: true
+                ,iconCls: 'im-notifications'
+                ,cls: 'numbersButton'
+                ,text: ''
+                ,scale: 'large'
+                ,scope: this
+                ,handler: this.onToggleNotificationsViewClick
+            })
         };
 
         return this.actions;
@@ -242,6 +256,7 @@ Ext.define('CB.ViewPort', {
         this.buttons = {
             toggleLeftRegion: new Ext.Button(this.actions.toggleLeftRegion)
             ,toggleFilterPanel: new Ext.Button(this.actions.toggleFilterPanel)
+            ,toggleNotificationsView: new Ext.Button(this.actions.toggleNotificationsView)
             ,create: new Ext.Button({
                 qtip: L.New
                 ,itemId: 'create'
@@ -262,6 +277,8 @@ Ext.define('CB.ViewPort', {
             ,this
         );
 
+        App.on('notificationsUpdated', this.updateNotificationButton, this);
+
         return this.actions;
     }
 
@@ -279,6 +296,21 @@ Ext.define('CB.ViewPort', {
                 ? 1
                 : 0
         );
+    }
+
+    ,updateNotificationButton: function(counts) {
+        var text = (counts.unread > 0)
+            ? counts.unread
+
+            : '';
+
+        this.buttons.toggleNotificationsView.setText(text);
+    }
+
+    ,onToggleNotificationsViewClick: function(b, e) {
+        var cpl = App.explorer.containersPanel.getLayout();
+
+        cpl.setActiveItem(b.pressed ? 1 : 0);
     }
 
     ,onLogin: function(){
@@ -430,6 +462,15 @@ Ext.define('CB.ViewPort', {
 
             App.fireEvent('cbinit', this);
 
+            // depress notifications button when view deactivated
+            App.explorer.notificationsView.on(
+                'deactivate'
+                ,function(){
+                    this.buttons.toggleNotificationsView.toggle(false, true);
+                }
+                ,this
+            );
+
         } else {
 
             Ext.Function.defer(this.initCB, 500, this);
@@ -539,6 +580,18 @@ Ext.define('CB.ViewPort', {
                 ,new CB.browser.ViewContainer({
                     rootId: rootId
                     ,data: {id: 'explorer' }
+                    ,closable: false
+                })
+            );
+        }
+    }
+
+    ,showNotificationsView: function(){
+        if(!App.activateTab(App.mainTabPanel, 'notificationsView')) {
+            App.addTab(
+                App.mainTabPanel
+                ,new CB.browser.NotificationsView({
+                    data: {id: 'notificationsView' }
                     ,closable: false
                 })
             );

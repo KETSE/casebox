@@ -68,7 +68,7 @@ class Tasks
                 : Objects\Task::$USERSTATUS_ONGOING;
 
         $obj->setUserStatus($status, $p['user_id']);
-        $obj->update();
+        $obj->updateSysData();
 
         $this->afterUpdate($p['id']);
 
@@ -98,7 +98,7 @@ class Tasks
         }
 
         $obj->setUserStatus(Objects\Task::$USERSTATUS_DONE);
-        $obj->update();
+        $obj->updateSysData();
 
         $this->afterUpdate($p['id']);
 
@@ -364,69 +364,6 @@ class Tasks
         }
 
         return $rez;
-    }
-
-    /**
-     * set additional data for storing into solr
-     * @param  reference $objectRecord
-     * @return void
-     */
-    public static function getSolrData(&$objectRecord)
-    {
-        //make standart analysis of task object
-        Objects::getSolrData($objectRecord);
-
-        //make custom analysis for tasks
-        $obj = Objects::getCachedObject($objectRecord['id']);
-
-        $data = $obj->getData();
-        $sd = $data['sys_data'];
-
-        $template = $obj->getTemplate();
-
-        $objectRecord['task_status'] = @$sd['task_status'];
-
-        $user_ids = Util\toNumericArray($obj->getFieldValue('assigned', 0)['value']);
-        if (!empty($user_ids)) {
-            $objectRecord['task_u_assignee'] = $user_ids;
-        }
-
-        $user_ids[] = @Util\coalesce($data['oid'], $data['cid']);
-
-        $objectRecord['task_u_all'] = array_unique($user_ids);
-
-        $objectRecord['content'] = @$obj->getFieldValue('description', 0)['value'];
-
-        if (!empty($sd['task_d_closed'])) {
-            $objectRecord['task_d_closed'] = $sd['task_d_closed'];
-        }
-
-        //get users that didnt complete the task yet
-        $objectRecord['task_u_done'] = $sd['task_u_done'];
-        $objectRecord['task_u_ongoing'] = $sd['task_u_ongoing'];
-
-        //set class
-        $objectRecord['cls'] = $template->formatValueForDisplay(
-            $template->getField('color'),
-            $obj->getFieldValue('color', 0)['value'],
-            false
-        );
-    }
-
-    /**
-     * set additional data for storing into solr for a set of records
-     * @param  reference $object_records
-     * @return void
-     */
-
-    public static function getBulkSolrData(&$object_records)
-    {
-        $process_object_ids = array();
-        foreach ($object_records as $object_id => &$object_record) {
-            if (@$object_record['template_type'] == 'task') {
-                static::getSolrData($object_record);
-            }
-        }
     }
 
     /**

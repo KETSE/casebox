@@ -38,6 +38,26 @@ class Task extends Object
     }
 
     /**
+     * function used by create method for creating custom data
+     * @return void
+     */
+    protected function createCustomData()
+    {
+        $p = &$this->data;
+
+        $p['sys_data'] = Util\toJSONArray(@$p['sys_data']);
+
+        $sd = &$p['sys_data'];
+
+        //add assigned users as followers by default
+        if (empty($sd['fu'])) {
+            $sd['fu'] = Util\toNumericArray(@$this->getFieldValue('assigned', 0)['value']);
+        }
+
+        parent::createCustomData();
+    }
+
+    /**
      * load custom data for tasks
      * Note: should be removed after tasks upgraded and custom task tables removed
      */
@@ -54,99 +74,8 @@ class Task extends Object
         $cd = &$d['data']; //custom data
         $sd = &$d['sys_data']; //sys_data
 
-        $this->upgradeTaskData();
-
         /* add possible action flags*/
         \CB\Tasks::setTaskActionFlags($d);
-    }
-
-    /**
-     * Specific / temporar method to upgrade task data from old format to new one
-     * @return void
-     */
-    public function upgradeTaskData()
-    {
-        $d = &$this->data;
-
-        if (empty($d['data'])) {
-            $d['data'] = array();
-        }
-
-        $cd = &$d['data']; //custom data
-        $sd = &$d['sys_data']; //sys_data
-
-        if (isset($sd['task_status'])) {
-            return false; // task already upgraded
-        }
-
-        $res = DB\dbQuery(
-            'SELECT t.title `_title`
-                ,t.date_start
-                ,t.date_end
-                ,t.allday
-                ,t.responsible_user_ids `assigned`
-                ,t.description
-                ,t.status
-                -- ,(SELECT reminds FROM tasks_reminders WHERE task_id = $1 AND user_id = $2) reminds
-                ,DATE_FORMAT(t.completed, \'%Y-%m-%dT%H:%i:%sZ\') `task_d_closed`
-                ,COALESCE(tt.udate, tt.cdate) udate
-            FROM tasks t
-            JOIN tree tt on t.id = tt.id
-            WHERE t.id = $1',
-            array(
-                $this->id
-                ,$_SESSION['user']['id']
-            )
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            //set status
-            $sd['task_status'] = $r['status'];
-
-            if (!empty($r['task_d_closed'])) {
-                $sd['task_d_closed'] = $r['task_d_closed'];
-
-            } elseif ($r['status'] == 3) { //task is closed but no closed date set
-                $sd['task_d_closed'] = Util\dateMysqlToISO($r['udate']);
-            }
-
-            //transform date fields with allday flag
-            $sd['task_allday'] = $r['allday'];
-
-            $d['data']['_title'] = $r['_title'];
-
-            $sd['task_due_date'] = Util\dateMysqlToISO($r['date_end']);
-            $d['data']['due_date'] = Util\dateMysqlToISO($r['date_end']);
-
-            $d['data']['assigned'] = $r['assigned'];
-            $d['data']['description'] = $r['description'];
-
-            if ($r['allday'] == -1) {
-                $sd['task_due_time'] = Util\dateMysqlToISO($r['date_end']);
-                $d['data']['due_time'] = substr(Util\dateMysqlToISO($r['date_end']), 12, 8);
-            }
-
-            //set responsible users with their statuses
-            $sd['task_u_ongoing'] = array();
-            $sd['task_u_done'] = array();
-
-            $res = DB\dbQuery(
-                'SELECT user_id, `status`, `time`
-                FROM tasks_responsible_users
-                WHERE task_id = $1',
-                $d['id']
-            ) or die(DB\dbQueryError());
-
-            while ($r = $res->fetch_assoc()) {
-                if ($r['status'] == 1) {
-                    $sd['task_u_done'][] = $r['user_id'];
-                    $sd['task_u_d_closed'][$r['user_id']] = $r['time'];
-                } else {
-                    $sd['task_u_ongoing'][] = $r['user_id'];
-                }
-            }
-            $res->close();
-        }
     }
 
     /**
@@ -164,6 +93,86 @@ class Task extends Object
         $this->setParamsFromData($p);
 
         return parent::update($p);
+    }
+
+    /**
+     * update objects custom data
+     * @return boolean
+     */
+    protected function updateCustomData()
+    {
+        $d = &$this->data;
+        $sd = &$d['sys_data'];
+
+        /** add newly assigned users to followers */
+        $oldAssigned = array();
+        if (!empty($this->oldObject)) {
+            $oldAssigned = Util\toNumericArray(@$this->oldObject->getFieldValue('assigned', 0)['value']);
+        }
+        $newAssigned = Util\toNumericArray(@$this->getFieldValue('assigned', 0)['value']);
+        $diff = array_diff($newAssigned, $oldAssigned);
+        $fu = empty($sd['fu'])
+            ? array()
+            : $sd['fu'];
+
+        $sd['fu'] = array_unique(array_merge($fu, $diff));
+
+        //call parent class to do the rest
+        parent::updateCustomData();
+    }
+
+    /**
+     * method to collect solr data from object data
+     * according to template fields configuration
+     * and store it in sys_data onder "solr" property
+     * @return void
+     */
+    protected function collectSolrData()
+    {
+        parent::collectSolrData();
+
+        $d = &$this->data;
+        $sd = &$d['sys_data'];
+        $solrData = &$sd['solr'];
+
+        $template = $this->getTemplate();
+
+        $solrData['task_status'] = @$sd['task_status'];
+
+        $user_ids = Util\toNumericArray($this->getFieldValue('assigned', 0)['value']);
+        if (!empty($user_ids)) {
+            $solrData['task_u_assignee'] = $user_ids;
+        }
+
+        $user_ids[] = @Util\coalesce($d['oid'], $d['cid']);
+
+        $solrData['task_u_all'] = array_unique($user_ids);
+
+        // $solrData['content'] = @$this->getFieldValue('description', 0)['value'];
+
+        unset($solrData['task_d_closed']);
+        unset($solrData['task_ym_closed']);
+
+        if (!empty($sd['task_d_closed'])) {
+            $solrData['task_d_closed'] = $sd['task_d_closed'];
+            $solrData['task_ym_closed'] = str_replace('-', '', substr($sd['task_d_closed'], 2, 5));
+        }
+
+        //get users that didnt complete the task yet
+        if (!empty($sd['task_u_done'])) {
+            $solrData['task_u_done'] = $sd['task_u_done'];
+        }
+        if (!empty($sd['task_u_ongoing'])) {
+            $solrData['task_u_ongoing'] = $sd['task_u_ongoing'];
+        }
+
+        //set class
+        $solrData['cls'] = $template->formatValueForDisplay(
+            $template->getField('color'),
+            $this->getFieldValue('color', 0)['value'],
+            false
+        );
+
     }
 
     /**
@@ -283,7 +292,7 @@ class Task extends Object
 
         $this->markClosed();
 
-        $this->update();
+        $this->updateSysData();
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace CB\Objects\Plugins;
 
-use CB\DB;
 use CB\User;
 use CB\Util;
 use CB\Search;
@@ -14,61 +13,67 @@ class SystemProperties extends Base
     {
         $rez = array(
             'success' => true
+            ,'data' => array()
         );
+
         parent::getData($id);
 
-        $res = DB\dbQuery(
-            'SELECT
-                t.id
-                ,ti.pids `path`
-                ,t.template_id
-                ,tt.name `template_name`
-                ,t.cid
-                ,t.cdate
-                ,t.uid
-                ,t.udate
-                ,t.dstatus
-                ,t.did
-                ,t.ddate
-                ,t.size
-                ,(SELECT 1 FROM user_subscriptions WHERE object_id = $1 AND user_id = $2) `subscribed`
-            FROM tree t
-            JOIN tree_info ti on t.id = ti.id
-            LEFT JOIN tree tt on t.template_id = tt.id
-            where t.id = $1',
-            array(
-                $this->id
-                ,$_SESSION['user']['id']
-            )
-        ) or die(DB\dbQueryError());
-        if ($r = $res->fetch_assoc()) {
-            $pids = explode(',', $r['path']);
-            array_pop($pids);
-            $r['path'] = implode('/', $pids);
+        $obj = $this->getObjectClass();
 
-            $arr = array(&$r);
-            Search::setPaths($arr);
-
-            // $r['path'] = htmlspecialchars($r['path'], ENT_COMPAT);
-
-            $r['template_name'] = htmlspecialchars($r['template_name'], ENT_COMPAT);
-            $r['cid_text'] = User::getDisplayName($r['cid']);
-
-            $r['cdate_text'] = Util\formatAgoTime($r['cdate']);
-            $r['cdate'] = Util\dateMysqlToISO($r['cdate']);
-            $r['udate'] = Util\dateMysqlToISO($r['udate']);
-
-            $r['uid_text'] = User::getDisplayName($r['uid']);
-            $r['udate_text'] = Util\formatAgoTime($r['udate']);
-
-            if (!empty($r['dstatus'])) {
-                $r['did_text'] = User::getDisplayName($r['did']);
-                $r['ddate_text'] = Util\formatAgoTime($r['ddate']);
-            }
-
-            $rez['data'] = $r;
+        if (!is_object($obj)) {
+            return $rez;
         }
-        $res->close();
+
+        $data = $obj->getData();
+
+        $rez['data'] = array_intersect_key(
+            $data,
+            array(
+                'id' => 1
+                ,'template_id' => 1
+                ,'cid' => 1
+                ,'cdate' => 1
+                ,'uid' => 1
+                ,'udate' => 1
+                ,'dstatus' => 1
+                ,'did' => 1
+                ,'size' => 1
+            )
+        );
+        $d = &$rez['data'];
+
+        $pids = Util\toNumericArray($data['pids']);
+        array_pop($pids);
+        $d['path'] = implode('/', $pids);
+
+        $arr = array(&$d);
+        Search::setPaths($arr);
+
+        $d['template_name'] = Search::getObjectNames($d['template_id'])[$d['template_id']];
+
+        $sd = $obj->getSysData();
+        $userId = User::getId();
+
+        $d['subscription'] = 'ignore';
+        if (!empty($sd['fu']) && in_array($userId, $sd['fu'])) {
+            $d['subscription'] = 'follow';
+        } if (!empty($sd['wu']) && in_array($userId, $sd['wu'])) {
+            $d['subscription'] = 'watch';
+        }
+
+        $d['cid_text'] = User::getDisplayName($d['cid']);
+
+        $d['cdate_text'] = Util\formatAgoTime($d['cdate']);
+        $d['cdate'] = Util\dateMysqlToISO($d['cdate']);
+        $d['udate'] = Util\dateMysqlToISO($d['udate']);
+
+        $d['uid_text'] = User::getDisplayName($d['uid']);
+        $d['udate_text'] = Util\formatAgoTime($d['udate']);
+
+        if (!empty($d['dstatus'])) {
+            $d['did_text'] = User::getDisplayName($d['did']);
+            $d['ddate_text'] = Util\formatAgoTime($d['ddate']);
+        }
 
         return $rez;
     }

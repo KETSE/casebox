@@ -109,7 +109,7 @@ class TemplateField extends Object
         $i = 3;
 
         $dataParams = $this->getParamsFromData();
-        \CB\debug(\CB\Config::get('languages'), $dataParams);
+
         foreach ($dataParams as $k => $v) {
             $saveFields[] = $k;
             $saveValues[] = $v;
@@ -176,7 +176,7 @@ class TemplateField extends Object
             if ($addField) {
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($value);
 
                 $rez[$fieldName] = $value;
             }

@@ -16,12 +16,18 @@
 
 setlocale(LC_ALL, "en_US.utf8");
 
+$cnfFilename = realpath(__DIR__.'/../httpsdocs').'/config.ini';
+
+if(file_exists($cnfFilename) ) {
+
+    $cnf = parse_ini_file($cnfFilename);
+
 $dbConfig = [
-    'host' => '127.0.0.1'
-    ,'dbname' => 'cb__casebox'
-    ,'user' => 'local'
-    ,'pass' => 'h0st'
-    ,'port' => '3306'
+    'host' => $cnf['db_host']
+    ,'dbname' => $cnf['prefix'].'__casebox'
+    ,'user' => $cnf['db_user']
+    ,'pass' => $cnf['db_pass']
+    ,'port' => $cnf['db_port']
 ];
 
 // CSV file as first parameter
@@ -47,11 +53,14 @@ $dbh = connectDB($dbConfig);
 
 exportTranslation($dbh, $csv, $lg);
 
+} else {
+    die("ERROR: config not found ".$cnfFilename."\n");
+}
 
 function exportTranslation($dbh, $csv, $lg)
 {
 
-    $sql = "SELECT id, name, en, `$lg` as title, info FROM cb__casebox.translations WHERE deleted=0";
+   $sql = "SELECT id, name, en, `$lg` as title, info FROM translations WHERE deleted=0";
 
     if (($handle = fopen($csv, "w")) === false) {
         echo ("Can't open file for writing\n");

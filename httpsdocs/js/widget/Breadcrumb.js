@@ -19,12 +19,14 @@ Ext.define('CB.widget.Breadcrumb', {
                     }
                 }
                 ,fields: ['id', 'name', 'iconCls']
-            })
+            });
 
-            ,tpl = new Ext.XTemplate(
+        var dir = (App.config.rtl === true) ? 'l' : 'r';
+
+        var tpl = new Ext.XTemplate(
                 '<div class="breadcrumb" role="navigation" style="right: auto">'
                     ,'<tpl for=".">'
-                        ,'<div class="item" role="listitem">{[ (xindex < xcount) ? \'<span class="im-arr-r fr"></span>\': \'\']}{name}</div>'
+                        ,'<div class="item" role="listitem">{[ (xindex < xcount) ? \'<span class="im-arr-' + dir + ' f' + dir + '"></span>\': \'\']}{name}</div>'
                     ,'</tpl>'
                 ,'</div>'
             );

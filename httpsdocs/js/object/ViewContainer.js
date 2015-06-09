@@ -34,6 +34,7 @@ Ext.define('CB.object.ViewContainer', {
                     ,this.BC.get('completetask')
                     ,'->'
                     ,this.BC.get('preview')
+                    ,this.BC.get('subscription')
                     ,this.BC.get('more')
                     ,'-'
                     ,this.BC.get('openExternal')
@@ -208,19 +209,19 @@ Ext.define('CB.object.ViewContainer', {
                 ,handler: this.onReopenTaskClick
             }
 
-            ,subscribe: {
-                text: L.Subscribe
-                ,itemId: 'subscribe'
-                ,scope: this
-                ,handler: this.onSubscribeClick
-            }
+            // ,subscribe: {
+            //     text: L.Subscribe
+            //     ,itemId: 'subscribe'
+            //     ,scope: this
+            //     ,handler: this.onSubscribeClick
+            // }
 
-            ,unsubscribe: {
-                text: L.Unsubscribe
-                ,itemId: 'unsubscribe'
-                ,scope: this
-                ,handler: this.onUnsubscribeClick
-            }
+            // ,unsubscribe: {
+            //     text: L.Unsubscribe
+            //     ,itemId: 'unsubscribe'
+            //     ,scope: this
+            //     ,handler: this.onUnsubscribeClick
+            // }
 
             ,rename: {
                 itemId: 'rename'
@@ -277,6 +278,36 @@ Ext.define('CB.object.ViewContainer', {
                 ,scale: 'medium'
                 ,menu: []
             })
+            ,new Ext.Button({
+                itemId: 'subscription'
+                ,arrowVisible: false
+                ,iconCls: 'im-follow'
+                ,scale: 'medium'
+                ,menu: [
+                    {
+                        text: L.FollowText
+                        ,iconCls: 'im-follow'
+                        ,itemId: 'follow'
+                        ,height: 24
+                        ,scope: this
+                        ,handler: this.onSubscriptionButtonClick
+                    }, {
+                        text: L.WatchText
+                        ,iconCls: 'im-watch'
+                        ,itemId: 'watch'
+                        ,height: 24
+                        ,scope: this
+                        ,handler: this.onSubscriptionButtonClick
+                    }, {
+                        text: L.IgnoreText
+                        ,iconCls: 'im-ignore'
+                        ,itemId: 'ignore'
+                        ,height: 24
+                        ,scope: this
+                        ,handler: this.onSubscriptionButtonClick
+                    }
+                ]
+            })
         ]);
     }
 
@@ -302,8 +333,9 @@ Ext.define('CB.object.ViewContainer', {
         if(currentItemIndex == index) {
             return;
         }
-        this.loadedData = {};
-        this.getLayout().activeItem.clear();
+        // this.loadedData = {};
+        // this.getLayout().activeItem.clear();
+        this.clear();
 
         this.getLayout().setActiveItem(index);
 
@@ -322,6 +354,19 @@ Ext.define('CB.object.ViewContainer', {
         var d = this.loadedData;
         this.actions.edit.setDisabled(isNaN(d.id) || Ext.isEmpty(d.id));
         this.BC.get('preview').toggle(this.loadedData.viewIndex == 1, false);
+    }
+
+    /**
+     * clear function
+     * @return {[type]} [description]
+     */
+    ,clear: function() {
+        this.delayedLoadTask.cancel();
+        delete this.locked;
+        delete this.requestedLoadData;
+        this.loadedData = {};
+        this.getLayout().activeItem.clear();
+        this.updateToolbarAndMenuItems();
     }
 
     /**
@@ -348,9 +393,8 @@ Ext.define('CB.object.ViewContainer', {
         }
 
         if(Ext.isEmpty(objectData.id) || isNaN(objectData.id)) {
-            this.items.getAt(0).clear();
-            delete this.requestedLoadData;
-            this.loadedData = {};
+            this.clear();
+
             return;
         }
 
@@ -362,11 +406,13 @@ Ext.define('CB.object.ViewContainer', {
         // check  if a new request is waiting to be loaded
         if(Ext.isEmpty(this.requestedLoadData)) {
             //check if object data are identical to previous loaded object
-            if(this.loadedData && objectData &&
-                (objectData.id == this.loadedData.id) &&
-                (Ext.valueFrom(objectData.viewIndex, cvi) == Ext.valueFrom(this.loadedData.viewIndex, cvi))
-            ) {
-                return;
+            if(!objectData.force) {
+                if(this.loadedData && objectData &&
+                    (objectData.id == this.loadedData.id) &&
+                    (Ext.valueFrom(objectData.viewIndex, cvi) == Ext.valueFrom(this.loadedData.viewIndex, cvi))
+                ) {
+                    return;
+                }
             }
 
             // save current scroll position for history navigation
@@ -383,7 +429,8 @@ Ext.define('CB.object.ViewContainer', {
         }
 
         // cancel previous wating request and start a new one
-        this.delayedLoadTask.cancel();
+        // this.delayedLoadTask.cancel();
+        this.clear();
 
         // save requested data
         this.requestedLoadData = Ext.apply({}, objectData);
@@ -395,8 +442,8 @@ Ext.define('CB.object.ViewContainer', {
             this.setActiveView(0);
         }
 
-        this.loadedData = {};
-        this.items.getAt(0).clear();
+        // this.loadedData = {};
+        // this.items.getAt(0).clear();
 
         // instantiate a delay to exclude flood requests
         this.delayedLoadTask.delay(3, this.doLoad, this);
@@ -474,20 +521,17 @@ Ext.define('CB.object.ViewContainer', {
      */
     ,updateToolbarAndMenuItems: function() {
         var ai = this.getLayout().activeItem;
-        var ti = ai.getContainerToolbarItems();
 
         if(this.menu) {
             this.menu.removeAll(true);
             this.menu.destroy();
         }
+
         this.menu = new Ext.menu.Menu({items:[]});
 
         this.BC.get('more').setMenu(this.menu, true);
 
-        if(Ext.isEmpty(ti)) {
-            return;
-        }
-
+        //hide all by default
         this.topToolbar.items.each(
             function(i) {
                 if((i.itemId != ('close')) && (['tbfill', 'tbseparator'].indexOf(i.getXType()) < 0)) {
@@ -495,6 +539,15 @@ Ext.define('CB.object.ViewContainer', {
                 }
             }
         );
+
+        if(!Ext.isNumeric(this.loadedData.id)) {
+            return;
+        }
+
+        var ti = ai.getContainerToolbarItems();
+        if(Ext.isEmpty(ti)) {
+            return;
+        }
 
         /* update menu items */
         var isFirstItem = true;
@@ -526,6 +579,11 @@ Ext.define('CB.object.ViewContainer', {
         if(this.menu.items.getCount() > 0) {
             ti.tbar['more'] = {};
         }
+
+        var subscription = Ext.valueFrom(ti.tbar['subscription'], 'ignore');
+        this.BC.get('subscription').setIconCls('im-' + subscription);
+
+        ti.tbar['subscription'] = {};
 
         // hide all bottons from toolbar
         Ext.iterate(
@@ -696,11 +754,12 @@ Ext.define('CB.object.ViewContainer', {
      */
     ,onObjectsDeleted: function(ids, e) {
         if(!Ext.isEmpty(this.loadedData) && setsHaveIntersection(ids, this.loadedData.id)) {
-            delete this.locked;
+            // delete this.locked;
             this.setActiveView(0, false);
-            this.loadedData = {};
-            this.items.getAt(0).clear();
-            this.updateToolbarAndMenuItems();
+            this.clear();
+            // this.loadedData = {};
+            // this.items.getAt(0).clear();
+            // this.updateToolbarAndMenuItems();
         }
     }
 
@@ -883,71 +942,21 @@ Ext.define('CB.object.ViewContainer', {
         App.fireEvent('objectchanged', this.loadedData, this);
     }
 
-    /**
-     * handler for Subscribe menu button
-     *
-     * @param  button b
-     * @param  event e
-     * @return void
-     */
-    ,onSubscribeClick: function(b, e) {
-        Ext.Msg.show({
-            title: L.Subscribe
-            ,msg: L.SubscribeMsg
-            ,width: 300
-            ,buttons: Ext.MessageBox.YESNOCANCEL
-            ,buttonText: {
-                yes: L.Subscribe
-                ,no: L.SubscribeRecursive
-                ,cancel: Ext.Msg.buttonText.cancel
-            }
-            ,scope: this
-            ,fn: function(b, t) {
-                if(b !== 'cancel') {
-                    CB_Browser.subscribe(
-                        {
-                            id: this.loadedData.id
-                            ,recursive: (b == 'no')
-                        }
-                        ,this.onSubscribeProcess
-                        ,this
-                    );
-                }
-            }
-            ,icon: Ext.MessageBox.QUESTION
-        });
-    }
-
-    /**
-     * handler for Unubscribe menu button
-     *
-     * @param  button b
-     * @param  event e
-     * @return void
-     */
-    ,onUnsubscribeClick: function () {
-        CB_Browser.unsubscribe(
+    ,onSubscriptionButtonClick: function(b, e) {
+        CB_Objects.setSubscription(
             {
-                id: this.loadedData.id
+                objectId: this.loadedData.id
+                ,type: b.itemId
             }
-            ,this.onSubscribeProcess
+            ,function(r, e) {
+                if(r.success !== true) {
+                    return;
+                }
+
+                this.BC.get('subscription').setIconCls('im-' + b.itemId);
+            }
             ,this
         );
-    }
-
-    /**
-     * handler for processing Subscribe/Unsubscribe action responces
-     *
-     * @param  responce r
-     * @param  event e
-     * @return void
-     */
-    ,onSubscribeProcess: function (r, e) {
-        if(r.success !== true) {
-            return;
-        }
-
-        this.onReloadClick();
     }
 
     /**

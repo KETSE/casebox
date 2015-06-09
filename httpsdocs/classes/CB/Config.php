@@ -4,7 +4,6 @@ namespace CB;
 /**
  * Class used for configuration management
  */
-use CB\DB as DB;
 
 class Config extends Singleton
 {
@@ -147,7 +146,7 @@ class Config extends Singleton
         ) or die(DB\dbQueryError());
 
         if ($r = $res->fetch_assoc()) {
-            $rez = json_decode($r['cfg'], true);
+            $rez = Util\jsonDecode($r['cfg']);
         } else {
             throw new \Exception('Core not defined in cores table: '.$coreName, 1);
         }
@@ -227,7 +226,7 @@ class Config extends Singleton
         }
 
         //check if request is in allowed ips
-        $ips = array('localhost', '127.0.0.1');
+        $ips = array();
         if (!empty($mcfg['allowIps'])) {
             $ips = array_merge($ips, Util\toTrimmedArray($mcfg['allowIps']));
         }
@@ -366,7 +365,7 @@ class Config extends Singleton
             // path to photos folder
             ,'photos_path' => $filesDir.'_photo'.DIRECTORY_SEPARATOR
 
-            ,'core_url' => 'https://'.$_SERVER['SERVER_NAME'].'/'.$coreName.'/'
+            ,'core_url' => $config['server_name'] . $coreName.'/'
 
             ,'upload_temp_dir' => TEMP_DIR.$coreName.DIRECTORY_SEPARATOR
 
@@ -416,10 +415,7 @@ class Config extends Singleton
         $rez['languages'] = implode(',', array_keys($rez['language_settings']));
 
         if (!empty($config['languages'])) {
-            $rez['languages'] = explode(',', $config['languages']);
-            for ($i=0; $i < sizeof($rez['languages']); $i++) {
-                $rez['languages'][$i] = trim($rez['languages'][$i]);
-            }
+            $rez['languages'] = Util\toTrimmedArray($config['languages']);
 
             // define default core language
             $rez['language'] = empty($config['default_language'])

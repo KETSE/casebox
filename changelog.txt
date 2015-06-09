@@ -1,8 +1,265 @@
-CaseBox 1.9.443 (2015-05-27)
+CaseBox 1.9.467 (2015-06-09)
+==============================
+New Features, Improvements
+--------------------------
+- remove debug messages
+
+Fixed Bugs:
+----------
+- core_create misspelled variables
+- #6341  Grouping by Assignee creates duplicated Groups and Rows
+
+CaseBox 1.9.466 (2015-06-08)
+==============================
+New Features, Improvements
+--------------------------
+- indexing adjustments
+- add transaction to /bin/update_solr_prepared_data.php
+
+Fixed Bugs:
+----------
+- incorrect param in call to getCachedObjects function
+
+CaseBox 1.9.465 (2015-06-07)
+==============================
+New Features, Improvements
+--------------------------
+- notification adjustments
+- #6176 A simple click in a MultiValued field popupForm should select/unselect the value
+
+CaseBox 1.9.464 (2015-06-07)
+==============================
+New Features, Improvements
+--------------------------
+- code test coverage for search and notifications
+
+Fixed Bugs:
+----------
+- Filtering panel did not contain all configured facets
+
+Notes:
+----------
+- updated barebone database
+
+CaseBox 1.9.463 (2015-06-06)
+==============================
+New Features, Improvements
+--------------------------
+- changed grouping mechanism for notifications
+
+Fixed Bugs:
+----------
+- the comment text repeated twice
+
+CaseBox 1.9.462 (2015-06-05)
+==============================
+New Features, Improvements
+--------------------------
+- changed grouping mechanism for notifications
+- update sys_data on tasks closing / reopening actions
+
+CaseBox 1.9.461 (2015-06-05)
+==============================
+New Features, Improvements
+--------------------------
+- #6300 add the word 'on' to 'commented'..
+- #6298 Notification window preview glitch not loading preview
+- #6297 Clicking on the task in the action menu doesn't refresh it
+- appending file contents on solr indexing
+
+CaseBox 1.9.460 (2015-06-05)
+==============================
+New Features, Improvements
+--------------------------
+- #6267 A 'zero' value is added to multiValued field when object is saved
+- #6251 SOLR Json in sys_cfg + Multilanguage functionality (Tree & DC & Object fields) + Filename
+
+Fixed Bugs:
+----------
+- #5812 Can't d&d files from CB to an Obj while creating it
+- #6280 Language issues: vFolders in dev core & generation of lang files on localhost
+- #4805 Same title showing for different text fields
+
+Notes:
+----------
+- bin/update_solr_prepared_data.php should be executed to create prepared solr data
+  and reindex cores fully;
+- Multilanguage plugin should be removed / disabled from __casebox.plugins table.
+  Plugin scripts have been removed.
+
+CaseBox 1.9.459 (2015-06-02)
+==============================
+Fixed Bugs:
+----------
+- error rendering object fields in Template class
+
+CaseBox 1.9.458 (2015-06-02)
+==============================
+New Features, Improvements
+--------------------------
+- added warming for queries to load needed objects in bulk
+  before rendering custom fields
+- refactored Search class
+- commented logging login and logout actions
+- #6187 Remove open in new tab
+
+Notes:
+----------
+- warm listener should be added to DisplayColumns plugin:
+  ,"solrQueryWarmUp": {
+    "DisplayColumns\\Listeners": [
+      "onSolrQueryWarmUp"
+    ]
+  }
+
+CaseBox 1.9.457 (2015-06-01)
+==============================
+New Features, Improvements
+--------------------------
+- added notification methods to Api
+- moved db queries from notifications and logs to DataModel namespace
+- Added tests for Notifications Module
+
+CaseBox 1.9.456 (2015-05-29)
+==============================
+New Features, Improvements
+--------------------------
+- added Notifications test
+
+Fixed Bugs:
+----------
+- grouping notifications by 4 elements (sender, receiver, object and action type)
+
+Notes:
+----------
+- sync DB structure (apply database update: v.1.9.456.sql)
+
+CaseBox 1.9.455 (2015-05-28)
+==============================
+Fixed Bugs:
+----------
+- grouping notifications by sender
+
+Notes:
+----------
+- sync DB structure (apply database update: v.1.9.455.sql)
+
+CaseBox 1.9.454 (2015-05-28)
+==============================
+New Features, Improvements
+--------------------------
+- add reload notifications button
+
+CaseBox 1.9.453 (2015-05-28)
+==============================
+New Features, Improvements
+--------------------------
+- updated demosrc database
+- add comments referenced users to follow user list
+
+CaseBox 1.9.452 (2015-05-28)
+==============================
+New Features, Improvements
+--------------------------
+- updated database structure and bare_bone sql dump
+- send notifications based on notifications table (not on actions_log)
+- update notifications title according to action
+- creators are automaticly added as followers,
+  but not for template specified in config as
+- added /bin/upgrade_subscribers_to_followers.php script
+- object creators are automatically added as followers
+- hide notifications view on start browsing
+
+Fixed Bugs:
+----------
+-  EXTJS-17847 Visual combobox bug in Chrome 43.0.2357.65 m
+
+Notes:
+----------
+- run script: /bin/upgrade_subscribers_to_followers.php -c <corename>
+- sync DB structure (apply database update: v.1.9.452.sql)
+
+
+CaseBox 1.9.451 (2015-05-27)
+==============================
+Fixed Bugs:
+----------
+- install script unload solr core issues
+- Template class update
+
+CaseBox 1.9.450 (2015-05-27)
+==============================
+New Features, Improvements
+--------------------------
+- refactor install scripts
+
+CaseBox 1.9.449 (2015-05-27)
+==============================
+New Features, Improvements
+--------------------------
+- update database dumps
+
+CaseBox 1.9.443 (master) (2015-05-27)
 ==============================
 Patches:
 ----------
 - patch for avoid loading data when charts and pivot table views
+
+CaseBox 1.9.448 (2015-05-26)
+==============================
+New Features, Improvements
+--------------------------
+- #6166 JS Error in wclac/js/CB.DB.php line: 83
+- dont set localhost, by default, as allowedIp for maintenance mode
+
+CaseBox 1.9.447 (2015-05-25)
+==============================
+New Features, Improvements
+--------------------------
+- #6100 Implement Notifications UI
+
+CaseBox 1.9.446 (2015-05-25)
+==============================
+New Features, Improvements
+--------------------------
+- ask for "server_name" config option in install.php
+- rollback to ExtJS 5.1.0
+
+Fixed Bugs:
+----------
+- sender name not correctly set on notifications
+
+CaseBox 1.9.445 (2015-05-23)
+==============================
+New Features, Improvements
+--------------------------
+- removed tasks tables and method for upgrading task data
+- updated db dumps
+
+CaseBox 1.9.444 (2015-05-22)
+==============================
+New Features, Improvements
+--------------------------
+- #5139 Implement Notifications system
+
+CaseBox 1.9.443 (2015-05-21)
+==============================
+New Features, Improvements
+--------------------------
+- #6050 Bare bone (raw) Casebox core
+- #6054 Improve install.php & create_core.php scripts
+- #6065 Upgrade ExtJS: 5.1.1
+
+Fixed Bugs:
+----------
+- #6035 install.php doesn't work outside bin folder
+
+CaseBox 1.9.442 (2015-05-14)
+==============================
+Improvements
+----------
+- #4810 Arabic language icons misaligned
+
 
 CaseBox 1.9.442 (2015-05-14)
 ==============================
@@ -32,7 +289,7 @@ CaseBox 1.9.439 (2015-05-07)
 New Features, Improvements
 --------------------------
 - #5892 Drop 'casebox' DB
-- #5480  create language files in install.php
+- #5480 create language files in install.php
 - #5887 A template field doesn't appear in objWnd
   refactored getting params for saving
 
@@ -1372,10 +1629,6 @@ CaseBox 1.9.334 (2014-09-23)
 ==============================
 New Features, Improvements
 --------------------------
-<<<<<<< HEAD
-
-=======
->>>>>>> devel
 - moved security check on object create after firing onBeforeCreate event
     because the triggers can change pid of the created object
 - limit DisplayColumns plugin to work only for grid view

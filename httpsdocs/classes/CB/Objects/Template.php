@@ -95,7 +95,7 @@ class Template extends Object
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($value);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -114,7 +114,7 @@ class Template extends Object
 
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($value);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
@@ -240,26 +240,29 @@ class Template extends Object
             if (!empty($this->template)) {
                 $field = $this->template->getField($fieldName);
             }
-            if (!empty($field)) {
-                $value = @$this->getFieldValue($fieldName, 0)['value'];
-                $value = (is_scalar($value) || is_null($value))
-                    ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
 
-                $saveFields[] = $fieldName;
-                $saveValues[] = $value;
-                $params[] = "`$fieldName` = \$$i";
-                $i++;
-            } elseif (isset($p[$fieldName]) && ($fieldName !== 'id')) {
+            if (isset($p[$fieldName]) && ($fieldName !== 'id')) {
                 $value = $p[$fieldName];
                 $value = (is_scalar($value) || is_null($value))
                     ? $value
-                    : json_encode($value, JSON_UNESCAPED_UNICODE);
+                    : Util\jsonEncode($value);
 
                 $saveFields[] = $fieldName;
                 $saveValues[] = $value;
                 $params[] = "`$fieldName` = \$$i";
                 $i++;
+
+            } elseif (!empty($field)) {
+                $value = @$this->getFieldValue($fieldName, 0)['value'];
+                $value = (is_scalar($value) || is_null($value))
+                    ? $value
+                    : Util\jsonEncode($value);
+
+                $saveFields[] = $fieldName;
+                $saveValues[] = $value;
+                $params[] = "`$fieldName` = \$$i";
+                $i++;
+
             } else {
                 // this if should be removed after complete migration to language abreviation titles
                 if (in_array($fieldName, array('l1', 'l2', 'l3', 'l4'))) {
@@ -369,7 +372,7 @@ class Template extends Object
                 if (isset($field[$fieldName])) {
                     $value = (is_scalar($field[$fieldName]) || is_null($field[$fieldName]))
                         ? $field[$fieldName]
-                        : json_encode($field[$fieldName], JSON_UNESCAPED_UNICODE);
+                        : Util\jsonEncode($field[$fieldName]);
                     $saveFields[] = $fieldName;
                     $saveValues[] = $value;
                     $insertParams[] = "\$$i";
@@ -391,6 +394,21 @@ class Template extends Object
                 $keepFieldIds[] = DB\dbLastInsertId();
             }
         }
+    }
+
+    /**
+     * get fields
+     * @return array
+     */
+    public function getFields()
+    {
+        $rez = array();
+
+        if (isset($this->data['fields'])) {
+            $rez = $this->data['fields'];
+        }
+
+        return $rez;
     }
 
     /**
@@ -593,12 +611,16 @@ class Template extends Object
                         }
                         $res->close();
                     } else {
-                        $objects = Search::getObjects($ids, 'id,name,template_id,pids');
-                        foreach ($objects as $r) {
-                            @$label = $r['name'];
-                            if ($html && !empty($r['pids'])) {
-                                $r['pids'] = implode('/', $r['pids']);
-                                $label = '<a class="locate click" template_id="'.$r['template_id'].'" path="'.$r['pids'].'" nid="'.$r['id'].'">'.$label.'</a>';
+                        // $objects = Search::getObjects($ids, 'id,name,template_id,pids');
+                        $objects = \CB\Objects::getCachedObjects($ids);
+                        foreach ($objects as $id => $obj) {
+                            $d = $obj->getData();
+                            $label = $obj->getName();
+                            $pids = $d['pids'];
+
+                            if ($html && !empty($pids)) {
+                                $pids = str_replace(',', '/', $pids);
+                                $label = '<a class="locate click" template_id="'.$d['template_id'].'" path="'.$pids.'" nid="'.$id.'">'.$label.'</a>';
                             }
 
                             switch (@$field['cfg']['renderer']) {
@@ -609,7 +631,7 @@ class Template extends Object
                                     break;
                                 // case 'listObjIcons':
                                 default:
-                                    $icon = \CB\Browser::getIcon($r);
+                                    $icon = \CB\Browser::getIcon($d);
 
                                     if (empty($icon)) {
                                         $icon = 'icon-none';
@@ -633,15 +655,11 @@ class Template extends Object
                     break;
 
                 case 'date':
-                    $value = Util\formatMysqlDate($value);
+                    $value = Util\formatMysqlDate(Util\dateISOToMysql($value));
                     break;
 
                 case 'datetime':
-                    // $value = Util\formatMysqlTime($value);
-                    $value = Util\formatMysqlDate(
-                        $value,
-                        \CB\getOption('short_date_format'). ' ' . \CB\getOption('time_format')
-                    );
+                    $value = Util\UTCTimeToUserTimezone($value);
 
                     break;
 
@@ -687,7 +705,7 @@ class Template extends Object
                 default:
                     if (is_array($value)) {
                         $cacheValue = false;
-                        $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+                        $value = Util\jsonEncode($value);
                     } else {
                         $value = htmlspecialchars($value, ENT_COMPAT);
                     }

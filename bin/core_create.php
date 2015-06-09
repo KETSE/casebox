@@ -8,16 +8,19 @@
  *
  * Example: php -f core_create.php -- -c text_core_name -s /path/to/mysql/dump.sql
  */
-namespace CB;
+namespace CB\INSTALL;
 
-$path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-$cbPath = dirname($path) . DIRECTORY_SEPARATOR;
-require_once $cbPath . 'httpsdocs/config_platform.php';
+$binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+$cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
 
-require_once $path . 'install_functions.php';
+require_once $cbHome . 'httpsdocs/config_platform.php';
+
+require_once \CB\LIB_DIR . 'install_functions.php';
 
 //check script options
-$options = getopt('c:s:', array('core:', 'sql:'));
+if (empty($options)) {
+    $options = getopt('c:s:', array('core:', 'sql:'));
+}
 
 $coreName = empty($options['c'])
     ? @$options['core']
@@ -35,59 +38,74 @@ if (empty($sqlFile)) {
     die('no sql dump file specified or invalid options set.');
 }
 
-defineBackupDir($cfg);
+/*if (!defined('CB\INTERACTIVE_MODE')) {
+    //define working mode
+    define('CB\INTERACTIVE_MODE', empty($options['config']));
+} */
 
-$dbName = PREFIX . $coreName;
-$dbUser = $cfg['db_user'];
-$dbPass = $cfg['db_pass'];
+if (!\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+    //define working mode
+    \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', !\CB\Cache::exist('RUN_SETUP_CFG'));
+}
+
+\CB\INSTALL\defineBackupDir($cfg);
+
+$dbName = (isset($cfg['prefix']) ? $cfg['prefix'].'_' : \CB\PREFIX) . $coreName;
+
+$dbUser = isset($cfg['su_db_user']) ? $cfg['su_db_user']:$cfg['db_user'];
+$dbPass = isset($cfg['su_db_pass']) ? $cfg['su_db_pass']:$cfg['db_pass'];
 
 $applyDump = true;
 
-if (DB\dbQuery('use `' . $dbName . '`')) {
-    if (confirm('Database "' . $dbName.'"  already exists. Would you like to overwrite it?')) {
-        echo 'Backuping .. ';
-        backupDB($dbName, $dbUser, $dbPass);
-        echo "Ok\n";
-
+if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
+    if (confirm('overwrite_existing_core_db')) {
+        if (\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') !== false) {
+            echo 'Backuping .. ';
+            backupDB($dbName, $dbUser, $dbPass);
+            display_OK();
+        }
     } else {
         $applyDump = false;
     }
 } else {
-    if (!DB\dbQuery('CREATE DATABASE `' . $dbName . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-        echo 'Cant create database "' . $dbName . '".';
+    if (!\CB\DB\dbQuery('CREATE DATABASE `' . $dbName . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
+        if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
+            echo 'Cant create database "' . $dbName . '".';
+        } else {
+            trigger_error('Cant create database "' . $dbName . '".', E_USER_ERROR);
+        }
         $applyDump = false;
     }
 }
 
 if ($applyDump) {
     echo 'Applying dump .. ';
-    exec('mysql --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
-    echo "Ok\n";
+    shell_exec('mysql --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
+    display_OK();
 }
 
 $cbDb = $cfg['prefix'] . '__casebox';
 
 echo 'Registering core .. ';
-DB\dbQuery(
+\CB\DB\dbQuery(
     'INSERT INTO ' . $cbDb . ' .cores (name, cfg) VALUES ($1, $2)',
     array($coreName, '{}')
 );
-echo "Ok\n";
+display_OK();
 
 //ask to provide root email & password
 $email = '';
 $pass = '';
-do {
-    $l = readALine('Specify email address for root user:' . "\n");
-    $email = $l;
-} while (empty($l));
 
 do {
-    $l = readALine('Specify root user password:' . "\n");
-    $pass = $l;
-} while (empty($l));
+    $email = readParam('core_root_email');
+} while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($email));
 
-DB\dbQuery(
+do {
+    $pass = readParam('core_root_pass');
+} while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($pass));
+
+\CB\DB\dbQuery(
     'UPDATE `'.$dbName.'`.users_groups
     SET `password` = MD5(CONCAT(\'aero\', $2))
         ,email = $3
@@ -99,50 +117,8 @@ DB\dbQuery(
         ,$email
         ,'{"email": "'.$email.'"}'
     )
-) or die(DB\dbQueryError());
+) or die(\CB\DB\dbQueryError());
 
-//verify if solr core exist
-$solrHost = $cfg['solr_host'];
-$solrPort = $cfg['solr_port'];
-$askReindex = true;
-
-$solr = Solr\Service::verifyConfigConnection(
-    array(
-        'host' => $solrHost
-        ,'port' => $solrPort
-        ,'core' => $dbName
-        ,'SOLR_CLIENT' => $cfg['SOLR_CLIENT']
-    )
-);
-
-if ($solr === false) {
-    if (confirm('Solr core "' . $dbName . '" doesnt exist. Would you like to create it? (y/n): ')) {
-        echo 'Creating solr core ... ';
-
-        if ($h = fopen(
-            'http://' . $solrHost. ':' . $solrPort . '/solr/admin/cores?action=CREATE&' .
-            'name=' . $dbName . '&configSet=cb_default',
-            'r'
-        )) {
-            fclose($h);
-
-            echo "Ok\n";
-        } else {
-            echo "Error creating core.\n";
-        }
-    } else {
-        $askReindex = false;
-    }
-} else {
-    echo "Solr core exists.\n";
-}
-
-if ($askReindex) {
-    if (confirm('Do you want to start full core reindex? (y/n): ')) {
-        echo 'Reindex solr core ... ';
-        exec('php -f ' . $path . 'solr_reindex_core.php -- -c ' . $coreName . ' -a -l');
-        echo "Ok\n";
-    }
-}
+createSolrCore($cfg, $coreName);
 
 echo "Done.\n";

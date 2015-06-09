@@ -28,6 +28,8 @@ return array_merge(
             ,'//css/calendar-colors.css'
 
             ,'//libx/highlight/default.css'
+
+            ,'//css/fix.css'
         )
 
         ,'js' => array(
@@ -175,6 +177,7 @@ return array_merge(
             ,'//js/object/field/editor/Form.js'
             ,'//js/object/field/editor/Tag.js'
             ,'//js/view/BoundListKeyNav.js'
+            ,'//js/browser/NotificationsView.js'
             // ,'//js/overrides/form/action/Submit.js'
         )
 

@@ -76,7 +76,7 @@ class PreviewExtractorOffice extends PreviewExtractor
                     '<div style="padding: 5px">'.$this->purify(
                         file_get_contents($pfn),
                         array(
-                            'URI.Base' => '/' . Config::get('core_name') . '/preview/'
+                            'URI.Base' => '/' . Config::get('core_name') . '/view/'
                             ,'URI.MakeAbsolute' => true
                         )
                     ).'</div>'

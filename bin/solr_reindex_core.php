@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 /*
     Reindex solr core
@@ -22,17 +21,20 @@ $path = realpath(
     'crons' . DIRECTORY_SEPARATOR
 );
 
-$cmd = 'php -f "'.$path.DIRECTORY_SEPARATOR.'run_cron.php" -- -n solr_update_tree ';
+$cmd = 'php "'.$path.DIRECTORY_SEPARATOR.'run_cron.php" -n solr_update_tree ';
 
 //check script options
-$options = getopt('c:al', array('core', 'all', 'nolimit'));
+if (empty($options)) {
+    $options = getopt('c:al', array('core', 'all', 'nolimit'));
+}
 
 $core = empty($options['c'])
     ? @$options['core']
     : $options['c'];
 
 if (empty($core)) {
-    die('no core specified or invalid options set.');
+    echo 'no core specified or invalid options set.';
+    return;
 }
 
 $all = isset($options['a']) || isset($options['all']);

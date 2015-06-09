@@ -34,15 +34,16 @@ class Cache extends Singleton
 
     /**
      * get a variable value from the cache
-     * @param varchar $name name of variable
+     * @param varchar $name         name of variable
+     * @param variant $defaultValue
      * @param  $value
      */
-    public static function get($name)
+    public static function get($name, $defaultValue = null)
     {
         if (static::exist($name)) {
             return static::getInstance()->{$name};
         }
 
-        return null;
+        return $defaultValue;
     }
 }

@@ -1,9 +1,11 @@
 <?php
 namespace CB\Objects;
 
+use CB\Config;
 use CB\Util;
 use CB\User;
 use CB\Objects;
+use CB\Log;
 
 class Comment extends Object
 {
@@ -25,7 +27,122 @@ class Comment extends Object
         //     $p['name'] = $msg;
         //     $p['data']['_title'] = $msg;
         // }
-        return parent::create($p);
+
+        //disable default log from parent Object class
+        //we'll set comments add as comment action for parent
+        Config::setFlag('disableActivityLog', true);
+
+        $rez = parent::create($p);
+
+        Config::setFlag('disableActivityLog', false);
+
+        $this->parentObj = Objects::getCachedObject($p['pid']);
+
+        $this->updateParentFollowers();
+
+        // log the action
+        $logParams = array(
+            'type' => 'comment'
+            ,'new' => $this->parentObj
+            ,'comment' => $p['data']['_title']
+        );
+
+        Log::add($logParams);
+
+        return $rez;
+    }
+
+    /**
+     * update comment
+     * @param  array   $p optional properties. If not specified then $this-data is used
+     * @return boolean
+     */
+    public function update($p = false)
+    {
+        //disable default log from parent Object class
+        //we'll set comments add as comment action for parent
+        Config::setFlag('disableActivityLog', true);
+
+        $rez = parent::update($p);
+
+        Config::setFlag('disableActivityLog', false);
+
+        // log the action
+        $logParams = array(
+            'type' => 'comment_update'
+            ,'new' => Objects::getCachedObject($p['pid'])
+            ,'comment' => $p['data']['_title']
+        );
+
+        Log::add($logParams);
+
+        return $rez;
+
+    }
+
+    /**
+     * method to collect solr data from object data
+     * according to template fields configuration
+     * and store it in sys_data onder "solr" property
+     * @return void
+     */
+    protected function collectSolrData()
+    {
+        $rez = array();
+
+        // parent::collectSolrData();
+        //
+        if (!empty($this->data['data']['_title'])) {
+            $rez['content'] = $this->data['data']['_title'];
+
+        }
+
+        $this->data['sys_data']['solr'] = $rez;
+    }
+
+    /**
+     * function to update parent followers when adding a comment
+     * with this user and referenced users from comment
+     * @return void
+     */
+    protected function updateParentFollowers()
+    {
+        $p = &$this->data;
+
+        $posd = $this->parentObj->getSysData();
+
+        $newUserIds = array();
+
+        $fu = empty($posd['fu'])
+            ? array()
+            : $posd['fu'];
+        $uid = User::getId();
+
+        if (!in_array($uid, $fu)) {
+            $newUserIds[] = intval($uid);
+        }
+
+        //analize comment text and get referenced users
+        if (preg_match_all('/@([^@\s,!\?]+)/', $p['data']['_title'], $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $uid = User::exists($match[1]);
+
+                if (is_numeric($uid) && !in_array($uid, $fu) && !in_array($uid, $newUserIds)) {
+                    $newUserIds[] = $uid;
+                }
+            }
+        }
+
+        //update only if new users added
+        if (!empty($newUserIds)) {
+            $fu = array_merge($fu, $newUserIds);
+            $fu = Util\toNumericArray($fu);
+
+            $posd['fu'] = array_unique($fu);
+
+            $this->parentObj->updateSysData($posd);
+        }
+
     }
 
     /**

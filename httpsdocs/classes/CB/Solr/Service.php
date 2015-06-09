@@ -7,6 +7,7 @@ namespace CB\Solr;
  * This class only manages connection and standart calls to Solr service
  */
 use CB\Cache;
+use CB\Util;
 
 class Service
 {
@@ -103,6 +104,19 @@ class Service
         return $this->solr_handler;
     }
 
+    /**
+     * test if service is connected
+     * @return boolean
+     */
+    public function ping()
+    {
+        return $this->solr_handler->ping();
+    }
+
+    /**
+     *
+     * @return type
+     */
     public function reconnect()
     {
         unset($this->solr_handler);
@@ -175,7 +189,7 @@ class Service
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-type:application/json; charset=utf-8"));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array_values($docs), JSON_UNESCAPED_UNICODE));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, Util\jsonEncode(array_values($docs)));
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 
@@ -303,7 +317,7 @@ class Service
 
     private function debugInfo()
     {
-        return \CB\IS_DEBUG_HOST
+        return constant('CB\\IS_DEBUG_HOST')
             ? "\n".' ('.$this->host.':'.$this->port.' -> '.$this->core.' )'
             : '';
     }
