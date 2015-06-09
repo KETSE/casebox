@@ -50,7 +50,7 @@ question: why do we have "-top" class?
 .icon-grid-column { background-position: 3px 50% !important; background-repeat: no-repeat; }
 
 .x-rtl .icon-grid-column .x-grid-cell-inner, .x-rtl .icon-grid-column-top .x-grid-cell-inner {padding-right: 22px !important; }
-.x-rtl .icon-grid-column { background-position: 100% 50% !important; background-repeat: no-repeat; }
+.x-rtl .icon-grid-column { background-position: 99% 50% !important; background-repeat: no-repeat; }
 /* space: big; */
 /*
 .icon-grid-column-top { background-position: 3px 10px !important; background-repeat: no-repeat; }
@@ -164,7 +164,7 @@ border-color: transparent;
 /* COMFORTABLE VIEW -------------------------------------------------------------------------------------- */
 
 .icon-grid-column-top { background-position: 10px 8px !important; background-repeat: no-repeat; }
-.x-rtl .icon-grid-column-top { background-position: 100% 8px !important; background-repeat: no-repeat; }
+.x-rtl .icon-grid-column-top { background-position: 99% 8px !important; background-repeat: no-repeat; }
 
 .x-grid-cell-inner {
   font-size: 13px;
@@ -240,7 +240,7 @@ font-size: 13px;
 /* COMPACT VIEW ---------------------------------------------------------------------------------------- */
 
 .icon-grid-column-top { background-position: 8px 4px !important; background-repeat: no-repeat; }
-.x-rtl .icon-grid-column-top { background-position: 100% 4px !important; background-repeat: no-repeat; }
+.x-rtl .icon-grid-column-top { background-position: 99% 4px !important; background-repeat: no-repeat; }
 
 .x-grid-cell-inner {
   font-size: 12px;
