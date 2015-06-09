@@ -1,3 +1,9 @@
+CaseBox 1.9.468 (2015-06-09)
+==============================
+New Features, Improvements
+--------------------------
+- replace fetch_all with fetch_assoc (not available on production server)
+
 CaseBox 1.9.467 (2015-06-09)
 ==============================
 New Features, Improvements

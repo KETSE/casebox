@@ -38,11 +38,13 @@ class Objects extends Base
 
         $res = DB\dbQuery($sql) or die(DB\dbQueryError());
 
-        if ($rez = $res->fetch_all(MYSQLI_ASSOC)) {
-            foreach ($rez as &$r) {
-                $r['data'] = Util\jsonDecode($r['data']);
-                $r['sys_data'] = Util\jsonDecode($r['sys_data']);
-            }
+        // if ($rez = $res->fetch_all(MYSQLI_ASSOC)) {
+            // foreach ($rez as &$r) {
+        while ($r = $res->fetch_assoc()) {
+            $r['data'] = Util\jsonDecode($r['data']);
+            $r['sys_data'] = Util\jsonDecode($r['sys_data']);
+            $rez[] = $r;
+            // }
         }
         $res->close();
 
