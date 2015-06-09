@@ -40,5 +40,12 @@ phpdoc.dist.xml
 bin/recreate_docs.bat
 
 apigen.neon
+
+/nbproject/**
+/tests/*.bat
+/tests/composer.phar
+/tests/composer.lock
+/tests/vendor/**
+/tests/tmp/**
+/tests/reports/**
 _rest_managed.json
-/nbproject/
