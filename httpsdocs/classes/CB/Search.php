@@ -421,7 +421,9 @@ class Search extends Solr\Client
                 ,'facet.range.gap'
                 ,'facet.sort'
                 ,'facet.missing' //"on" ?
+                ,'stats.field'
             );
+
             foreach ($copyParams as $pn) {
                 if (!empty($p[$pn])) {
                     $rez[$pn] = $p[$pn];
@@ -436,6 +438,7 @@ class Search extends Solr\Client
                     'facet.field'
                     ,'facet.query'
                     ,'facet.pivot'
+                    ,'stats.field'
                 );
                 foreach ($copyParams as $pn) {
                     if (!empty($fp[$pn])) {
@@ -450,8 +453,13 @@ class Search extends Solr\Client
 
         if (!empty($rez)) {
             $rez['facet'] = 'true';
+
             if (empty($rez['facet.mincount'])) {
                 $rez['facet.mincount'] = 1;
+            }
+
+            if (!empty($rez['stats.field'])) {
+                $rez['stats'] = 'true';
             }
         }
 

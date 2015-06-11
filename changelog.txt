@@ -1,3 +1,17 @@
+CaseBox 1.9.469 (2015-06-11)
+==============================
+New Features, Improvements
+--------------------------
+- #6130 User shown as disabled
+- #6179 Buttons on the left ribbon toolbar (like New, Filter, Search) are not visible in Firefox
+- #6238 Display of pivot table when columns are large
+- #6419 Errors in debug_log for raw CB core
+- #6339 Stats computation in Charts & Pivot tables for FacetedNav plugin
+
+Fixed Bugs:
+----------
+- #6102 When deleting "Case folders", they are not actually deleted
+
 CaseBox 1.9.468 (2015-06-09)
 ==============================
 New Features, Improvements

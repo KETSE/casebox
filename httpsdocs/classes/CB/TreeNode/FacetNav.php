@@ -55,10 +55,7 @@ class FacetNav extends Base
             $rez = $this->getChildNodes();
         }
 
-        //set view if set in config
-        if (!empty($this->config['view'])) {
-            $rez['view'] = $this->config['view'];
-        }
+        $this->setViewParams($rez);
 
         return $rez;
     }

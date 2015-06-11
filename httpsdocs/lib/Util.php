@@ -657,6 +657,26 @@ function jsonDecode($var)
 }
 
 /**
+ * custom function to detect title property in a properties array
+ * @param  array $arr
+ * @return varchar
+ */
+function detectTitle(&$arr)
+{
+    $l = \CB\Config::get('user_language');
+
+    $rez = @coalesce(
+        $arr[$l],
+        $arr['title_'.$l],
+        $arr['title'],
+        $arr['name'],
+        $arr['fieldName']
+    );
+
+    return $rez;
+}
+
+/**
 * Check if a given value is presend in a comma separated string or array of values
 *
 * @param  varchar $value checked value
@@ -725,11 +745,19 @@ function toUTF8String($value)
     return $newValue;
 }
 
-function getOS() {
-        switch (true) {
-            case stristr(PHP_OS, 'DAR'): return 'OSX';
-            case stristr(PHP_OS, 'WIN'): return 'WIN';
-            case stristr(PHP_OS, 'LINUX'): return 'LINUX';
-            default : return 'UNKNOWN';
-        }
+function getOS()
+{
+    switch (true) {
+        case stristr(PHP_OS, 'DAR'):
+            return 'OSX';
+
+        case stristr(PHP_OS, 'WIN'):
+            return 'WIN';
+
+        case stristr(PHP_OS, 'LINUX'):
+            return 'LINUX';
+
+        default:
+            return 'UNKNOWN';
     }
+}

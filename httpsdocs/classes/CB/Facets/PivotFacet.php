@@ -7,14 +7,26 @@ class PivotFacet extends StringsFacet
     public function getSolrParams()
     {
         $rez = array();
+
         $cfg = &$this->config;
+
+        $statsTag = '';
 
         if (empty($cfg['facet1']) || empty($cfg['facet2'])) {
             return;
         }
 
+        if (!empty($cfg['stats']['field'])) {
+            $statsTag = '{!stats=pv1}';
+            $func = empty($cfg['stats']['type'])
+                ? 'min'
+                : $cfg['stats']['type'];
+
+            $rez['stats.field'][] = '{!tag=pv1 ' . $func . '=true}' . $cfg['stats']['field'];
+        }
+
         $cfg['field'] = $cfg['facet1']->field . ',' . $cfg['facet2']->field;
-        $rez['facet.pivot'][] = $cfg['field'];
+        $rez['facet.pivot'][] = $statsTag . $cfg['field'];
 
         return $rez;
     }

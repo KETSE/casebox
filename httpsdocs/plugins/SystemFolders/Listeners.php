@@ -42,7 +42,8 @@ class Listeners
         $res = DB\dbQuery(
             'SELECT id
             FROM tree
-            WHERE pid in ('.implode(',', $folderIds).')'
+            WHERE pid in ('.implode(',', $folderIds).')
+                AND dstatus = 0'
         ) or die(DB\dbQueryError());
         while ($r = $res->fetch_assoc()) {
             $p['sourceIds'][] = $r['id'];

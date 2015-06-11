@@ -192,13 +192,7 @@ class Base
                             $templateField = array(
                                 'type' => 'varchar'
                                 ,'name' => $col['solr_column_name']
-                                ,'title' => @Util\coalesce(
-                                    $col[$userLanguage],
-                                    $col['title_'.$userLanguage],
-                                    $col['title'],
-                                    $col['name'],
-                                    $col['fieldName']
-                                )
+                                ,'title' => Util\detectTitle($col)
                             );
                         }
 
