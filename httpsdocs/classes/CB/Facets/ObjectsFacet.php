@@ -3,6 +3,7 @@
 namespace CB\Facets;
 
 use CB\TreeNode;
+use CB\Util;
 
 class ObjectsFacet extends StringsFacet
 {
@@ -22,6 +23,22 @@ class ObjectsFacet extends StringsFacet
                 'name' => $dbnode->getName($k)
                 ,'count' => $v
             );
+        }
+
+        //check if have default sorting set in cofig
+        if (!empty($this->config['sort'])) {
+            $sp = $this->getSortParams();
+
+            Util\sortRecordsArray(
+                $rez['items'],
+                $sp['property'],
+                $sp['direction'],
+                $sp['type'],
+                true
+            );
+
+            //add sort param for client side
+            $rez['sort'] = $sp;
         }
 
         return $rez;

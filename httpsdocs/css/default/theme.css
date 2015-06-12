@@ -84,6 +84,7 @@
 .im-search{background-image: url(m/ic_search_black_24dp.png); min-width: 24px}
 .im-save, .im-task-complete{background-image: url(m/ic_done_black_24dp.png); min-width: 24px}
 .im-settings{background-image: url(m/ic_settings_applications_black_24dp.png); min-width: 24px}
+.im-settings-negative{background-image: url(m/ic_settings_applications_black_24dp_negative.png); min-width: 24px}
 .im-sort{background-image: url(m/ic_sort_black_24dp.png); min-width: 24px}
 .im-tune{background-image: url(m/ic_tune_black_24dp.png); min-width: 24px}
 .im-upload{background-image: url(m/ic_file_upload_black_24dp.png); min-width: 24px}

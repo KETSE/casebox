@@ -67,7 +67,7 @@ foreach ($users as $u) {
 
             $subject = '[' . $coreName . ' #' . $action['object_id'] . '] ' .
                 Notifications::getActionDeclination($action['action_type'], $lang) . ' ' .
-                $templateName . ' "' . $action['data']['name'] . '"';
+                $templateName . ' "' . htmlspecialchars_decode($action['data']['name']) . '"';
 
             //skip sending notifications from devel server to other emails than Admin
             if (!$sendNotificationMails && ($u['email'] !== $adminEmail)) {
@@ -79,7 +79,7 @@ foreach ($users as $u) {
                 $message = Notifications::getMailBodyForAction($action, $u);
                 $sender = Notifications::getSender($action['from_user_id']);
 
-                file_put_contents(TEMP_DIR . $action['id'].'.html', "$sender<br />\n<h1>$subject<h1>" . $message);
+                // file_put_contents(TEMP_DIR . $action['id'].'.html', "$sender<br />\n<h1>$subject<h1>" . $message);
                 //  COMMENTED FOR TEST
                 if (!mail(
                     $u['email'],

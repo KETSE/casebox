@@ -315,7 +315,17 @@ class Base
             !in_array($p['result']['sort']['property'], $defaultColumns)
 
         ) {
-            $this->sortRecords($data, $p['result']['sort'], $rez[$p['result']['sort']['property']]);
+            $s = &$p['result']['sort'];
+
+            Util\sortRecordsArray(
+                $data,
+                $s['property'],
+                $s['direction'],
+                (empty($rez[$s['property']]['sortType'])
+                    ? 'asString'
+                    : $rez[$s['property']]
+                )
+            );
         }
     }
 
@@ -605,20 +615,5 @@ class Base
         }
 
         return $rez;
-    }
-
-    protected function sortRecords(&$data, $sortOptions, $fieldConfig)
-    {
-        $sortType = empty($fieldConfig['sortType'])
-            ? 'asString'
-            : $fieldConfig['sortType'];
-
-        $sortDir = strtolower($sortOptions['direction']);
-
-        data\Sorter::$sortField = $sortOptions['property'];
-
-        $sorter = '\\CB\\data\\Sorter::' . $sortType . ucfirst($sortDir);
-
-        usort($data, $sorter);
     }
 }

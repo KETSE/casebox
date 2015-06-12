@@ -2,6 +2,7 @@
 namespace CB\Util;
 
 use CB\L;
+use CB\data;
 
 function getIP()
 {
@@ -703,6 +704,32 @@ function isAssocArray($a)
 
     return array_keys($a) !== range(0, count($a) - 1);
 }
+
+/**
+ * Sort an array of records accor to given params
+ * @param  array &$records      records to be sorted
+ * @param  varchar $sortProperty  property by witch to sort recrods
+ * @param  string $sortDirection sort direction
+ * @param  string $sortType      (asDate, asFloat, asInt, asText, asUCText, asString, asUCString)
+ * @param  bool   $assoc   to maintain key associations or not
+ * @return void
+ */
+function sortRecordsArray(&$records, $sortProperty, $sortDirection = 'asc', $sortType = 'asString', $assoc = false)
+{
+    $sortDirection = strtolower($sortDirection);
+
+    data\Sorter::$sortField = $sortProperty;
+
+    $sorter = '\\CB\\data\\Sorter::' . $sortType . ucfirst($sortDirection);
+
+    if ($assoc) {
+        uasort($records, $sorter);
+
+    } else {
+        usort($records, $sorter);
+    }
+}
+
 
 function validISO8601Date($value)
 {

@@ -348,6 +348,12 @@ class Base implements \CB\Interfaces\TreeNode
     {
         $view = array();
 
+        $rp = \CB\Cache::get('requestParams');
+
+        if (!empty($rp['userViewChange'])) {
+            return;
+        }
+
         $cfg = &$this->config;
 
         if (!empty($cfg['view'])) {

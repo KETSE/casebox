@@ -432,7 +432,7 @@ Ext.define('CB.ViewPort', {
                 App.mainLBar.items.getCount() - 2
                 ,{
                     qtip: L.Settings
-                    ,iconCls: 'im-settings'
+                    ,iconCls: 'im-settings-negative'
                     ,arrowVisible: false
                     ,hideOnClick: false
                     ,scale: 'large'

@@ -579,15 +579,11 @@ class Search extends Solr\Client
 
         $this->warmUpNodes($rez);
 
-        //1
         $this->updateShortcutsData($shortcuts);
 
-        //2
         $this->setPaths($rez['data']);
 
-        //3 should be an event listener in DisplayColumns plugin
-
-        //shold also be added to warmUp ???
+        //shold also be added to warmUp ?
         $rez = array_merge($rez, $this->processResultFacets());
 
         $eventParams = array(

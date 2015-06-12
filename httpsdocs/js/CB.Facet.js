@@ -125,8 +125,22 @@ Ext.define('CB.Facet', {
      * @return void
      */
     ,loadData: function(data) {
-        this.rawData = data;
         delete this.lastSort;
+
+        //check if sorting set
+        if(this.defaultSort && this.defaultSort.property) {
+            var by = (this.defaultSort.property == 'name')
+                ? 'name'
+                : 'items'
+                ,dir = this.defaultSort.direction;
+
+            data = Ext.Array.sort(data, this.sorters[by][dir]);
+
+            this.lastSort = by + dir;
+        }
+
+        this.rawData = data;
+
     }
 
     /**

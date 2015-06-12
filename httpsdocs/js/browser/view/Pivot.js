@@ -221,7 +221,8 @@ Ext.define('CB.browser.view.Pivot',{
             Ext.iterate(
                 this.pivot.titles[1]
                 ,function(k, v, o) {
-                    hr += '<th title="' + v +'">' + App.shortenString(v, 10) + '</th>';
+                    hr += '<th title="' + Ext.String.htmlEncode(v) +'">' +
+                        Ext.String.htmlEncode(App.shortenString(v, 10)) + '</th>';
                 }
                 ,this
             );
@@ -230,7 +231,8 @@ Ext.define('CB.browser.view.Pivot',{
             Ext.iterate(
                 this.pivot.titles[0]
                 ,function(k, v, o) {
-                    var r = '<th style="text-align:left" title="' + v + '">' + App.shortenString(v, 25) + '</th>';
+                    var r = '<th style="text-align:left" title="' + Ext.String.htmlEncode(v) + '">' +
+                        Ext.String.htmlEncode(App.shortenString(v, 25)) + '</th>';
                     Ext.iterate(
                         this.pivot.titles[1]
                         ,function(q, z, y) {
@@ -712,6 +714,7 @@ Ext.define('CB.browser.view.Pivot',{
 
         var params = {
             view: 'grid'
+            ,userViewChange: true
             ,filters: Ext.apply({}, this.store.extraParams.filters)
         };
         if(!Ext.isEmpty(f[0])) {
