@@ -4,6 +4,13 @@ namespace CB\Facets;
 
 class PivotFacet extends StringsFacet
 {
+
+    /**
+     * variable to store total stats from solr query if present
+     * @var array
+     */
+    protected $totalStats = array();
+
     public function getSolrParams()
     {
         $rez = array();
@@ -38,13 +45,17 @@ class PivotFacet extends StringsFacet
         return $rez;
     }
 
-    public function loadSolrResult($solrResult)
+    public function loadSolrResult($solrResult, $statsSolrResult = null)
     {
         $this->solrData = array();
         $cfg = &$this->config;
 
         if (!empty($solrResult->facet_pivot->{$cfg['field']})) {
             $this->solrData = $solrResult->facet_pivot->{$cfg['field']};
+
+            if (!empty($statsSolrResult) && !empty($statsSolrResult->stats)) {
+                $this->totalStats = $statsSolrResult->stats;
+            }
         }
     }
 
@@ -78,9 +89,11 @@ class PivotFacet extends StringsFacet
         foreach ($this->solrData as $idx => &$v) {
             $f1d[$v->value] = 1;
             unset($v->field);
-            foreach ($v->pivot as $si => &$sv) {
-                $f2d[$sv->value] = 1;
-                unset($sv->field);
+            if (!empty($v->pivot)) {
+                foreach ($v->pivot as $si => &$sv) {
+                    $f2d[$sv->value] = 1;
+                    unset($sv->field);
+                }
             }
         }
         unset($v);
@@ -113,6 +126,7 @@ class PivotFacet extends StringsFacet
 
         $rez['f'] = $cfg['field'];
         $rez['titles'] = $titles;
+        $rez['stats'] =  $this->totalStats;
         $rez['data'] = $this->solrData;
 
         return $rez;

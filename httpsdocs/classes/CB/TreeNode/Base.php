@@ -348,15 +348,20 @@ class Base implements \CB\Interfaces\TreeNode
     {
         $view = array();
 
+        $cfg = &$this->config;
+
         $rp = \CB\Cache::get('requestParams');
 
         if (!empty($rp['userViewChange'])) {
-            return;
-        }
+            $type  = empty($rp['view'])
+                ? $rp['from']
+                : $rp['view'];
 
-        $cfg = &$this->config;
+            $view = array(
+                'type' => $type
+            );
 
-        if (!empty($cfg['view'])) {
+        } elseif (!empty($cfg['view'])) {
             $view = is_scalar($cfg['view'])
                 ? array(
                     'type' => $cfg['view']

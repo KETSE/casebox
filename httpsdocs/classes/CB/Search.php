@@ -607,7 +607,7 @@ class Search extends Solr\Client
             $rez = array();
 
             foreach ($this->facets as $facet) {
-                $facet->loadSolrResult($this->results->facet_counts);
+                $facet->loadSolrResult($this->results->facet_counts, $this->results);
 
                 $fr = $facet->getClientData();
 

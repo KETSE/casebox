@@ -1,3 +1,13 @@
+CaseBox 1.9.471 (2015-06-13)
+==============================
+New Features, Improvements
+--------------------------
+- #6339 Stats computation in Charts & Pivot tables for FacetedNav plugin
+
+Fixed Bugs:
+----------
+- #6526 Recycle bin folder gives error on bare_bone core
+
 CaseBox 1.9.470 (2015-06-12)
 ==============================
 New Features, Improvements

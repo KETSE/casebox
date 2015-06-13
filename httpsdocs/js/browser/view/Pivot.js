@@ -231,8 +231,13 @@ Ext.define('CB.browser.view.Pivot',{
             Ext.iterate(
                 this.pivot.titles[0]
                 ,function(k, v, o) {
+                    if(Ext.isEmpty(this.refs[k + '_t'])) {
+                        return;
+                    }
+
                     var r = '<th style="text-align:left" title="' + Ext.String.htmlEncode(v) + '">' +
                         Ext.String.htmlEncode(App.shortenString(v, 25)) + '</th>';
+
                     Ext.iterate(
                         this.pivot.titles[1]
                         ,function(q, z, y) {
@@ -253,14 +258,17 @@ Ext.define('CB.browser.view.Pivot',{
                 ,function(q, z, y) {
                     var nr = Ext.valueFrom(this.refs['t_' + q], '');
                     r += '<td class="total" f="|'+ q +'">' + nr + '</td>';
-                    if(!isNaN(nr)) {
+                    if(Ext.isNumeric(nr)) {
                         total += nr;
                     }
                 }
                 ,this
             );
 
-            html += '<tr>' + r + '<td class="total">' + total + '</td></tr>';
+            //get stats value if set
+            value = this.getFacetCount(this.pivot);
+
+            html += '<tr>' + r + '<td class="total">' + Ext.valueFrom(value, total) + '</td></tr>';
 
             html = '<table class="pivot">' + html + '</table>';
 
@@ -490,19 +498,24 @@ Ext.define('CB.browser.view.Pivot',{
 
                             value = this.getFacetCount(f2);
 
-                            this.refs[f1.value + '_' + f2.value] = value;
+                            if(value > 0) {
+                                this.refs[f1.value + '_' + f2.value] = value;
 
-                            if(Ext.isEmpty(this.refs['t_' + f2.value])) {
-                                this.refs['t_' + f2.value] = 0;
-                            }
+                                if(Ext.isEmpty(this.refs['t_' + f2.value])) {
+                                    this.refs['t_' + f2.value] = 0;
+                                }
 
-                            if(!isNaN(value)) {
-                                this.refs['t_' + f2.value] += value;
+                                if(Ext.isNumeric(value)) {
+                                    this.refs['t_' + f2.value] += value;
+                                }
                             }
                         }
                     }
 
-                    this.refs[f1.value + '_t'] = this.getFacetCount(f1);
+                    value = this.getFacetCount(f1);
+                    if(value > 0) {
+                        this.refs[f1.value + '_t'] = this.getFacetCount(f1);
+                    }
                 }
             }
         }
@@ -516,10 +529,12 @@ Ext.define('CB.browser.view.Pivot',{
             sf.field &&
             f.stats &&
             f.stats.stats_fields &&
-            f.stats.stats_fields[sf.field] &&
-            f.stats.stats_fields[sf.field][sf.type]
+            f.stats.stats_fields[sf.field]
         ) {
-            rez = f.stats.stats_fields[sf.field][sf.type];
+            if(f.stats.stats_fields[sf.field][sf.type]) {
+                rez = f.stats.stats_fields[sf.field][sf.type];
+            }
+
         } else if(f.count){
             rez = f.count;
         }
@@ -558,8 +573,7 @@ Ext.define('CB.browser.view.Pivot',{
 
             var selectedFacets = this.selectedFacets.join(',');
             if(this.data.pivot[selectedFacets]) {
-                this.pivot.data = this.data.pivot[selectedFacets].data;
-                this.pivot.titles = this.data.pivot[selectedFacets].titles;
+                Ext.copyTo(this.pivot, this.data.pivot[selectedFacets], 'data,titles,stats');
             }
         } else if(this.viewParams) {
             var vp = this.viewParams;
@@ -588,11 +602,13 @@ Ext.define('CB.browser.view.Pivot',{
     ,updateStatsMenu: function() {
         var BC = this.refOwner.buttonCollection
             ,b = BC.get('PVStatsButton')
+            ,l = BC.get('PVStatsLabel')
             ,d = this.data;
 
         this.statsEnabled = !Ext.isEmpty(d.stats);
 
         b.setHidden(!this.statsEnabled);
+        l.setHidden(!this.statsEnabled);
 
         if (this.statsEnabled) {
             if(!this.selectedStat) {
