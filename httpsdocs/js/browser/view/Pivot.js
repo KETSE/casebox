@@ -73,10 +73,21 @@ Ext.define('CB.browser.view.Pivot',{
         });
 
         this.refOwner.buttonCollection.addAll(
-            new Ext.Button({
+            new Ext.form.Label({
+                text: 'Stats'
+                ,itemId: 'PVStatsLabel'
+            })
+            ,new Ext.Button({
+                text: 'Stats'
+                ,itemId: 'PVStatsButton'
+                ,scale: 'medium'
+                ,menu: []
+            })
+            ,new Ext.Button({
                 qtip: L.Pivot
                 ,text: L.Pivot
                 ,itemId: 'PVtable'
+                ,scale: 'medium'
                 ,chart: 'table'
                 ,enableToggle: true
                 ,allowDepress: false
@@ -88,6 +99,7 @@ Ext.define('CB.browser.view.Pivot',{
                 qtip: L.ChartArea
                 ,text: L.Bar
                 ,itemId: 'PVbarchart'
+                ,scale: 'medium'
                 ,chart: 'stackedBars'
                 ,enableToggle: true
                 ,allowDepress: false
@@ -99,6 +111,7 @@ Ext.define('CB.browser.view.Pivot',{
                 qtip: L.ChartArea
                 ,text: L.Column
                 ,itemId: 'PVcolumnchart'
+                ,scale: 'medium'
                 ,chart: 'stackedColumns'
                 ,enableToggle: true
                 ,allowDepress: false
@@ -146,6 +159,7 @@ Ext.define('CB.browser.view.Pivot',{
 
     ,getViewParams: function() {
         this.params.selectedFacets = this.selectedFacets;
+        this.params.selectedStat = this.selectedStat;
 
         return this.params;
     }
@@ -159,6 +173,9 @@ Ext.define('CB.browser.view.Pivot',{
                 'PVrowsCombo'
                 ,'PVcolsCombo'
                 ,'->'
+                ,'PVStatsLabel'
+                ,'PVStatsButton'
+                ,'-'
                 ,'PVtable'
                 ,'PVbarchart'
                 ,'PVcolumnchart'
@@ -204,7 +221,8 @@ Ext.define('CB.browser.view.Pivot',{
             Ext.iterate(
                 this.pivot.titles[1]
                 ,function(k, v, o) {
-                    hr += '<th>' + v + '</th>';
+                    hr += '<th title="' + Ext.String.htmlEncode(v) +'">' +
+                        Ext.String.htmlEncode(App.shortenString(v, 10)) + '</th>';
                 }
                 ,this
             );
@@ -213,7 +231,13 @@ Ext.define('CB.browser.view.Pivot',{
             Ext.iterate(
                 this.pivot.titles[0]
                 ,function(k, v, o) {
-                    var r = '<th style="text-align:left">' + v + '</th>';
+                    if(Ext.isEmpty(this.refs[k + '_t'])) {
+                        return;
+                    }
+
+                    var r = '<th style="text-align:left" title="' + Ext.String.htmlEncode(v) + '">' +
+                        Ext.String.htmlEncode(App.shortenString(v, 25)) + '</th>';
+
                     Ext.iterate(
                         this.pivot.titles[1]
                         ,function(q, z, y) {
@@ -234,14 +258,17 @@ Ext.define('CB.browser.view.Pivot',{
                 ,function(q, z, y) {
                     var nr = Ext.valueFrom(this.refs['t_' + q], '');
                     r += '<td class="total" f="|'+ q +'">' + nr + '</td>';
-                    if(!isNaN(nr)) {
+                    if(Ext.isNumeric(nr)) {
                         total += nr;
                     }
                 }
                 ,this
             );
 
-            html += '<tr>' + r + '<td class="total">' + total + '</td></tr>';
+            //get stats value if set
+            value = this.getFacetCount(this.pivot);
+
+            html += '<tr>' + r + '<td class="total">' + Ext.valueFrom(value, total) + '</td></tr>';
 
             html = '<table class="pivot">' + html + '</table>';
 
@@ -443,6 +470,7 @@ Ext.define('CB.browser.view.Pivot',{
             this.data.facets
             ,function(key, val, o) {
                 data[key] = CB.FacetList.prototype.getFacetData(key, val.items);
+
                 for (var i = 0; i < data[key].length; i++) {
                     if(Ext.isObject(data[key][i].items)) {
                         data[key][i].name = data[key][i].items.name;
@@ -457,26 +485,61 @@ Ext.define('CB.browser.view.Pivot',{
         // create refs object for common usage
         this.refs = {};
         if(!Ext.isEmpty(this.data.pivot)) {
+            var i, j, f1, f2, value;
+
             data = this.data.pivot[this.selectedFacets.join(',')];
+
             if(data && data.data) {
-                for (var i = 0; i < data.data.length; i++) {
-                    var f1 = data.data[i];
+                for (i = 0; i < data.data.length; i++) {
+                    f1 = data.data[i];
                     if(!Ext.isEmpty(f1.pivot)) {
-                        for (var j = 0; j < f1.pivot.length; j++) {
-                            var f2 = f1.pivot[j];
-                            this.refs[f1.value + '_' + f2.value] = f2.count;
-                            if(Ext.isEmpty(this.refs['t_' + f2.value])) {
-                                this.refs['t_' + f2.value] = 0;
-                            }
-                            if(!isNaN(f2.count)) {
-                                this.refs['t_' + f2.value] += f2.count;
+                        for (j = 0; j < f1.pivot.length; j++) {
+                            f2 = f1.pivot[j];
+
+                            value = this.getFacetCount(f2);
+
+                            if(value > 0) {
+                                this.refs[f1.value + '_' + f2.value] = value;
+
+                                if(Ext.isEmpty(this.refs['t_' + f2.value])) {
+                                    this.refs['t_' + f2.value] = 0;
+                                }
+
+                                if(Ext.isNumeric(value)) {
+                                    this.refs['t_' + f2.value] += value;
+                                }
                             }
                         }
                     }
-                    this.refs[f1.value + '_t'] = f1.count;
+
+                    value = this.getFacetCount(f1);
+                    if(value > 0) {
+                        this.refs[f1.value + '_t'] = this.getFacetCount(f1);
+                    }
                 }
             }
         }
+    }
+
+    ,getFacetCount: function(f) {
+        var rez = 0
+            ,sf = this.selectedStat;
+
+        if(sf &&
+            sf.field &&
+            f.stats &&
+            f.stats.stats_fields &&
+            f.stats.stats_fields[sf.field]
+        ) {
+            if(f.stats.stats_fields[sf.field][sf.type]) {
+                rez = f.stats.stats_fields[sf.field][sf.type];
+            }
+
+        } else if(f.count){
+            rez = f.count;
+        }
+
+        return rez;
     }
 
     ,onStoreLoad: function(store, recs, successful, eOpts) {
@@ -504,17 +567,15 @@ Ext.define('CB.browser.view.Pivot',{
                     }
                     ,this
                 );
+
                 this.selectedFacets = key.split(',');
             }
 
             var selectedFacets = this.selectedFacets.join(',');
             if(this.data.pivot[selectedFacets]) {
-                this.pivot.data = this.data.pivot[selectedFacets].data;
-                this.pivot.titles = this.data.pivot[selectedFacets].titles;
+                Ext.copyTo(this.pivot, this.data.pivot[selectedFacets], 'data,titles,stats');
             }
-        }
-
-        if(this.viewParams) {
+        } else if(this.viewParams) {
             var vp = this.viewParams;
 
             if(vp.pivot_type) {
@@ -532,7 +593,114 @@ Ext.define('CB.browser.view.Pivot',{
         }
 
         this.loadAvailableFacets();
+
+        this.updateStatsMenu();
+
         this.onChangeChart();
+    }
+
+    ,updateStatsMenu: function() {
+        var BC = this.refOwner.buttonCollection
+            ,b = BC.get('PVStatsButton')
+            ,l = BC.get('PVStatsLabel')
+            ,d = this.data;
+
+        this.statsEnabled = !Ext.isEmpty(d.stats);
+
+        b.setHidden(!this.statsEnabled);
+        l.setHidden(!this.statsEnabled);
+
+        if (this.statsEnabled) {
+            if(!this.selectedStat) {
+                if(d.view && d.view.stats) {
+                    this.selectedStat = d.view.stats;
+                }  else {
+                    this.selectedStat = {};
+                }
+            }
+
+            if(Ext.isEmpty(this.selectedStat.field)) {
+                this.selectedStat.field = '';
+            }
+            if(Ext.isEmpty(this.selectedStat.type)) {
+                this.selectedStat.type = 'min';
+            }
+
+            var menu = b.getMenu()
+                ,statsFunctions = ['min', 'max', 'sum', 'count', 'missing']
+                ,items = []
+                ,checked;
+
+            //add none value
+            d.stats.unshift({'title': L.none, 'field': ''});
+
+            for (var i = 0; i < d.stats.length; i++) {
+                checked = (this.selectedStat.field == d.stats[i].field);
+                this.selectedStat.title = d.stats[i].title;
+                items.push({
+                    xtype: 'menucheckitem'
+                    ,group: 'StatsField'
+                    ,text: d.stats[i].title
+                    ,field: d.stats[i].field
+                    ,checked: checked
+                    ,scope: this
+                    ,handler: this.onStatFieldChangeClick
+                });
+            }
+
+            //add separator
+            items.push('-');
+
+            //add available functions to use
+            for (i = 0; i < statsFunctions.length; i++) {
+                //statsFunctions[i];
+                items.push({
+                    xtype: 'menucheckitem'
+                    ,group: 'StatsType'
+                    ,text: statsFunctions[i]
+                    ,checked: (this.selectedStat.type == statsFunctions[i])
+                    ,scope: this
+                    ,handler: this.onStatTypeChangeClick
+                });
+            }
+
+            menu.removeAll();
+
+            menu.add(items);
+
+            this.updateStatsButtonCaption();
+        }
+    }
+
+    ,onStatFieldChangeClick: function(b, e) {
+        this.selectedStat.field = b.field;
+        this.selectedStat.title = b.text;
+        this.updateStatsButtonCaption();
+
+        this.fireEvent('reload', this);
+    }
+
+    ,onStatTypeChangeClick: function(b, e) {
+        this.selectedStat.type = b.text;
+        this.updateStatsButtonCaption();
+
+        this.fireEvent('reload', this);
+    }
+
+    ,updateStatsButtonCaption: function() {
+        var BC = this.refOwner.buttonCollection
+            ,b = BC.get('PVStatsButton')
+            ,ss = this.selectedStat
+            ,txt = '';
+
+            if(ss) {
+                txt = Ext.isEmpty(ss.field)
+                    ? ss.title
+                    : ss.type + //L['SF' + ss.type] +
+                    ' (' + ss.title + ')';
+            }
+
+        b.setText(txt);
     }
 
     ,onChartItemClick: function(o){
@@ -562,6 +730,7 @@ Ext.define('CB.browser.view.Pivot',{
 
         var params = {
             view: 'grid'
+            ,userViewChange: true
             ,filters: Ext.apply({}, this.store.extraParams.filters)
         };
         if(!Ext.isEmpty(f[0])) {

@@ -58,7 +58,7 @@ class FacetNav extends Base
             $rez = $this->getChildNodes();
         }
 
-        $rez['view'] = $this->getViewType();
+        $this->setViewParams($rez);
 
         return $rez;
     }

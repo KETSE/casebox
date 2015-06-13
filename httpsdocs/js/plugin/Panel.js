@@ -124,8 +124,15 @@ Ext.define('CB.plugin.Panel', {
                 (this.loadedParams.from !== 'window') &&
                 !Ext.isEmpty(this.loadedParams.name)
             ){
+                var data = Ext.copyTo(
+                    {}
+                    ,this.loadedParams
+                    ,'id,name,template_id,status,statusCls,uid,udate_ago_text'
+                );
+                data.name = Ext.String.htmlEncode(data.name);
+
                 var titleView = new CB.object.TitleView({
-                    data: this.loadedParams
+                    data: data
                     ,getContainerToolbarItems: function(){
                         return {};
                     }

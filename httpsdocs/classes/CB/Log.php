@@ -229,8 +229,6 @@ class Log
         $solr = static::getSolrLogConnection();
 
         if (empty($solr)) {
-            \CB\debug('Cant get solr log connection');
-
             return;
         }
 

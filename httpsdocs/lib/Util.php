@@ -2,6 +2,7 @@
 namespace CB\Util;
 
 use CB\L;
+use CB\data;
 
 function getIP()
 {
@@ -657,6 +658,26 @@ function jsonDecode($var)
 }
 
 /**
+ * custom function to detect title property in a properties array
+ * @param  array $arr
+ * @return varchar
+ */
+function detectTitle(&$arr)
+{
+    $l = \CB\Config::get('user_language');
+
+    $rez = @coalesce(
+        $arr[$l],
+        $arr['title_'.$l],
+        $arr['title'],
+        $arr['name'],
+        $arr['fieldName']
+    );
+
+    return $rez;
+}
+
+/**
 * Check if a given value is presend in a comma separated string or array of values
 *
 * @param  varchar $value checked value
@@ -683,6 +704,32 @@ function isAssocArray($a)
 
     return array_keys($a) !== range(0, count($a) - 1);
 }
+
+/**
+ * Sort an array of records accor to given params
+ * @param  array &$records      records to be sorted
+ * @param  varchar $sortProperty  property by witch to sort recrods
+ * @param  string $sortDirection sort direction
+ * @param  string $sortType      (asDate, asFloat, asInt, asText, asUCText, asString, asUCString)
+ * @param  bool   $assoc   to maintain key associations or not
+ * @return void
+ */
+function sortRecordsArray(&$records, $sortProperty, $sortDirection = 'asc', $sortType = 'asString', $assoc = false)
+{
+    $sortDirection = strtolower($sortDirection);
+
+    data\Sorter::$sortField = $sortProperty;
+
+    $sorter = '\\CB\\data\\Sorter::' . $sortType . ucfirst($sortDirection);
+
+    if ($assoc) {
+        uasort($records, $sorter);
+
+    } else {
+        usort($records, $sorter);
+    }
+}
+
 
 function validISO8601Date($value)
 {
@@ -725,11 +772,19 @@ function toUTF8String($value)
     return $newValue;
 }
 
-function getOS() {
-        switch (true) {
-            case stristr(PHP_OS, 'DAR'): return 'OSX';
-            case stristr(PHP_OS, 'WIN'): return 'WIN';
-            case stristr(PHP_OS, 'LINUX'): return 'LINUX';
-            default : return 'UNKNOWN';
-        }
+function getOS()
+{
+    switch (true) {
+        case stristr(PHP_OS, 'DAR'):
+            return 'OSX';
+
+        case stristr(PHP_OS, 'WIN'):
+            return 'WIN';
+
+        case stristr(PHP_OS, 'LINUX'):
+            return 'LINUX';
+
+        default:
+            return 'UNKNOWN';
     }
+}

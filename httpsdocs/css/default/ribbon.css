@@ -42,11 +42,11 @@
     border-color: #2f2f2f;
 }
 
-.ribbon-black .x-btn-icon > .x-btn-icon-el,
+/*.ribbon-black .x-btn-icon > .x-btn-icon-el,
 .x-btn-over>.x-btn-wrap-default-toolbar-large.x-btn-split-bottom:after {
     -webkit-filter: invert(100%) grayscale();
 }
-
+*/
 .ribbon-black .user-menu-button .x-btn-icon > .x-btn-icon-el {
     -webkit-filter: none
 }

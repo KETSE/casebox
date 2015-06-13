@@ -214,7 +214,7 @@ Ext.define('CB.ViewPort', {
                 ,itemId: 'togglelr'
                 ,pressed: true
                 ,enableToggle: true
-                ,iconCls: 'im-menu'
+                ,iconCls: 'im-menu-negative'
                 ,scale: 'large'
                 ,scope: this
                 ,handler: this.toggleLeftRegion
@@ -224,7 +224,7 @@ Ext.define('CB.ViewPort', {
                 tooltip: L.Filter
                 ,itemId: 'togglefp'
                 ,enableToggle: true
-                ,iconCls: 'im-filter'
+                ,iconCls: 'im-filter-negative'
                 ,scale: 'large'
                 ,scope: this
                 ,handler: this.onToggleFilterPanelClick
@@ -234,7 +234,7 @@ Ext.define('CB.ViewPort', {
                 tooltip: L.Notifications
                 ,itemId: 'toggleNotifications'
                 ,enableToggle: true
-                ,iconCls: 'im-notifications'
+                ,iconCls: 'im-notifications-negative'
                 ,cls: 'numbersButton'
                 ,text: ''
                 ,scale: 'large'
@@ -261,7 +261,7 @@ Ext.define('CB.ViewPort', {
                 qtip: L.New
                 ,itemId: 'create'
                 ,arrowVisible: false
-                ,iconCls: 'im-create'
+                ,iconCls: 'im-create-negative'
                 ,disabled: true
                 ,scale: 'large'
                 ,menu: [
@@ -432,7 +432,7 @@ Ext.define('CB.ViewPort', {
                 App.mainLBar.items.getCount() - 2
                 ,{
                     qtip: L.Settings
-                    ,iconCls: 'im-settings'
+                    ,iconCls: 'im-settings-negative'
                     ,arrowVisible: false
                     ,hideOnClick: false
                     ,scale: 'large'

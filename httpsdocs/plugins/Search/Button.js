@@ -20,7 +20,7 @@ Ext.define('CB.plugin.Search.Button', {
             ,itemId: 'pluginsearchbutton'
             ,arrowVisible: false
             // ,arrowAlign: 'bottom'
-            ,iconCls: 'ib-search'
+            ,iconCls: 'ib-search-negative'
             ,scale: 'large'
             ,allowDepress: false
             ,hidden: true

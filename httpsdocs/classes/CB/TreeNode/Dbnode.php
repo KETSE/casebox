@@ -100,10 +100,7 @@ class Dbnode extends Base
             \CB\Tasks::setTasksActionFlags($rez['data']);
         }
 
-        //set view if set in config
-        if (!empty($this->config['view'])) {
-            $rez['view'] = $this->config['view'];
-        }
+        $this->setViewParams($rez);
 
         return $rez;
     }

@@ -1,6 +1,8 @@
 <?php
 namespace CB\TreeNode;
 
+use CB\Util;
+
 class Base implements \CB\Interfaces\TreeNode
 {
     protected $config;
@@ -222,10 +224,6 @@ class Base implements \CB\Interfaces\TreeNode
         if (!empty($rp['userViewChange']) && !empty($rp['from'])) {
             $pivot = ($rp['from'] == 'pivot');
 
-            if (!empty($rp['selectedFacets']) && (is_array($rp['selectedFacets'])) && sizeof($rp['selectedFacets'] > 1)) {
-                $rows = $rp['selectedFacets'][0];
-                $cols = $rp['selectedFacets'][1];
-            }
         } elseif (!empty($cfg['view'])) {
             $v = $cfg['view'];
             if (is_scalar($v)) {
@@ -241,12 +239,26 @@ class Base implements \CB\Interfaces\TreeNode
             }
         }
 
+        /**
+         * selectedStat: {field: "task_projects", type: "max", title: "User"}
+        field: "task_projects"
+        title: "User"
+        type: "max"
+        */
+
         if ($pivot && (sizeof($facets) > 1)) {
+            if (!empty($rp['selectedFacets']) && (is_array($rp['selectedFacets'])) && sizeof($rp['selectedFacets'] > 1)) {
+                $rows = $rp['selectedFacets'][0];
+                $cols = $rp['selectedFacets'][1];
+            }
+
             reset($facets);
+
             if (empty($rows)) {
                 $rows = current($facets);
                 next($facets);
             }
+
             if (empty($cols)) {
                 $cols = current($facets);
             }
@@ -268,6 +280,13 @@ class Base implements \CB\Interfaces\TreeNode
                 ,'facet1' => $rows
                 ,'facet2' => $cols
             );
+
+            if (!empty($rp['selectedStat'])) {
+                $config['stats'] = $rp['selectedStat'];
+            } elseif (!empty($cfg['view']['stats'])) {
+                $config['stats'] = $cfg['view']['stats'];
+            }
+
             $facets[] = \CB\Facets::getFacetObject($config);
         }
         /* end of add pivot facet if we are in pivot view*/
@@ -351,6 +370,63 @@ class Base implements \CB\Interfaces\TreeNode
             'from' => $this->getId()
             ,'data' => $paramConfigs[$this->id]
         );
+    }
+
+    /**
+     * set view params to inpot variable from node config
+     * @param  array &$p
+     * @return array
+     */
+    protected function setViewParams(&$p)
+    {
+        $view = array();
+
+        $cfg = &$this->config;
+
+        $rp = \CB\Cache::get('requestParams');
+
+        if (!empty($rp['userViewChange'])) {
+            $type  = empty($rp['view'])
+                ? $rp['from']
+                : $rp['view'];
+
+            $view = array(
+                'type' => $type
+            );
+
+        } elseif (!empty($cfg['view'])) {
+            $view = is_scalar($cfg['view'])
+                ? array(
+                    'type' => $cfg['view']
+                )
+                : $cfg['view'];
+        }
+
+        if (!empty($view)) {
+            $p['view'] = $view;
+
+            switch ($view['type']) {
+                case 'pivot':
+                case 'charts':
+                    if (!empty($cfg['stats'])) {
+                        $stats = array();
+                        foreach ($cfg['stats'] as $item) {
+                            $stats[] = array(
+                                'title' => Util\detectTitle($item)
+                                ,'field' => $item['field']
+                            );
+                        }
+                        $p['stats'] = $stats;
+                    }
+
+                    break;
+
+                default: // grid
+                    // if (!empty($cfg['view']['group'])) {
+                    //     $rez['group'] = $cfg['view']['group'];
+                    // }
+            }
+        }
     }
 
     /**

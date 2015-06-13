@@ -118,26 +118,24 @@ class Browser
             ,'page' => @$p['page']
         );
 
-        if (!empty($this->facets)) {
-            $rez['facets'] = &$this->facets;
+        $params = array(
+            'facets'
+            ,'pivot'
+            ,'search'
+            ,'view'
+            ,'sort'
+            ,'group'
+            ,'stats'
+        );
+
+        foreach ($params as $param) {
+            if (!empty($this->{$param})) {
+                $rez[$param] = &$this->{$param};
+            }
         }
-        if (!empty($this->pivot)) {
-            $rez['pivot'] = &$this->pivot;
-        }
-        if (!empty($this->search)) {
-            $rez['search'] = &$this->search;
-        }
-        if (!empty($this->view)) {
-            $rez['view'] = &$this->view;
-        }
+
         if (!empty($this->DC)) {
             $rez['DC'] = &$this->DC[0];
-        }
-        if (!empty($this->sort)) {
-            $rez['sort'] = &$this->sort;
-        }
-        if (!empty($this->group)) {
-            $rez['group'] = &$this->group;
         }
 
         return $rez;
@@ -212,9 +210,17 @@ class Browser
                 }
             }
 
-            //set viewif present
-            if (isset($rez['view'])) {
-                $this->view = $rez['view'];
+            $params = array(
+                'facets'
+                ,'pivot'
+                ,'view'
+                ,'stats'
+            );
+
+            foreach ($params as $param) {
+                if (isset($rez[$param])) {
+                    $this->{$param} = $rez[$param];
+                }
             }
 
             //calc totals accordingly
@@ -222,14 +228,6 @@ class Browser
                 $this->total += $rez['total'];
             } elseif (!empty($rez['data'])) {
                 $this->total += sizeof($rez['data']);
-            }
-
-            //return last facets and pivot if present
-            if (!empty($rez['facets'])) {
-                $this->facets = $rez['facets'];
-            }
-            if (!empty($rez['pivot'])) {
-                $this->pivot = $rez['pivot'];
             }
 
             //if its debug host - search params will be also returned

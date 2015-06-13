@@ -421,6 +421,7 @@ class Client extends Service
 
         foreach ($doc as $fn => $fv) {
             if (in_array($fn, $some_fields)
+                || empty($fn)
                 || ( ($fv !== false)
                     && ( (!is_scalar($fv) && empty($fv))
                         || (is_scalar($fv) && (strlen($fv) == 0))

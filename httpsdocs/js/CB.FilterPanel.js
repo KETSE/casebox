@@ -55,9 +55,11 @@ Ext.define('CB.FilterPanel', {
                         ,title: value.title
                         ,f: Ext.isEmpty(value.f) ? key: value.f
                         ,manualPeriod: value.manualPeriod
+                        ,defaultSort: value.sort
                     });
                     this.insert(this.facetIndex, facet);
                 }
+
                 facet.processServerData(value.items, options);
                 facet.setVisible(facet.store.getCount() > 0) ;
                 this.facetIndex++;

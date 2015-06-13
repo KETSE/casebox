@@ -4,11 +4,14 @@ namespace CB;
 
 /*
     Create prepared solr data in sys_data['solr'] for each object
+    By default only records marked as updated will be processed
 
     Script params:
-    -c, --core  - required, core name
+    -c, --core  <core_name> - required, core name
+    -a, --all   - process all records, by default only updated are processed
+    -t, --template <id_or_type> - template name or template type
 
-    example: php -f upgrade_task_data.php -- -c dev
+    example: php -f upgrade_task_data.php -- -c dev -a -t 23
 */
 use CB\DB;
 
@@ -22,7 +25,7 @@ $path = realpath(
 ) . DIRECTORY_SEPARATOR;
 
 //check script options
-$options = getopt('c:', array('core'));
+$options = getopt('c:at:', array('core', 'all', 'template'));
 
 $core = empty($options['c'])
     ? @$options['core']
@@ -32,16 +35,45 @@ if (empty($core)) {
     die('no core specified or invalid options set.');
 }
 
+$all = isset($options['a']) || isset($options['all']);
+
+$template = empty($options['t'])
+    ? @$options['template']
+    : $options['t'];
+
+//init
 $cron_id = 'dummy';
 
 include $path.'init.php';
 
 \CB\Config::setFlag('disableActivityLog', true);
 
+//create query filter
+$where = empty($all)
+    ? ' AND t.updated = 1'
+    : '';
+
+if (!empty($template)) {
+    $template = is_numeric($template)
+        ? array($template)
+        : Templates::getIdsByType($template);
+
+    if (!empty($template)) {
+        $where .= ' AND t.template_id in (' . implode(',', $template) . ') ';
+    }
+}
+
+// join with tree table if filter not empty
+if (!empty($where)) {
+    $where = ' JOIN tree t ON o.id = t.id ' . $where;
+}
+
+//start the process
+
 //select all objects that have data in "objects" table
 $res = DB\dbQuery(
     'SELECT count(*) `nr`
-    FROM objects'
+    FROM objects o' . $where
 ) or die(DB\dbQueryError());
 if ($r = $res->fetch_assoc()) {
     echo "Total objects: ".$r['nr'] . "\n";
@@ -54,8 +86,8 @@ $i = 0;
 DB\startTransaction();
 
 $res = DB\dbQuery(
-    'SELECT id
-    FROM objects'
+    'SELECT o.id
+    FROM objects o' . $where
 ) or die(DB\dbQueryError());
 while ($r = $res->fetch_assoc()) {
     if ($i > 100) {

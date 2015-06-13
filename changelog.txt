@@ -1,3 +1,41 @@
+CaseBox 1.9.471 (2015-06-13)
+==============================
+New Features, Improvements
+--------------------------
+- #6339 Stats computation in Charts & Pivot tables for FacetedNav plugin
+
+Fixed Bugs:
+----------
+- #6526 Recycle bin folder gives error on bare_bone core
+
+CaseBox 1.9.470 (2015-06-12)
+==============================
+New Features, Improvements
+--------------------------
+- #6359 Add 'sort: name/count' in facet_configs
+  Pivotable sorting s thould be investigated as a separate task
+- #6395 Improvements to update_solr_prepared_data.php
+- #6444 Settings button in left toolbar almost invisible (CSS issue)
+
+Fixed Bugs:
+----------
+- #6447 Clicking a cell in pivot table should show the filtered nodes
+- #5689 Rendering comment text & title when sent by email
+
+CaseBox 1.9.469 (2015-06-11)
+==============================
+New Features, Improvements
+--------------------------
+- #6130 User shown as disabled
+- #6179 Buttons on the left ribbon toolbar (like New, Filter, Search) are not visible in Firefox
+- #6238 Display of pivot table when columns are large
+- #6419 Errors in debug_log for raw CB core
+- #6339 Stats computation in Charts & Pivot tables for FacetedNav plugin
+
+Fixed Bugs:
+----------
+- #6102 When deleting "Case folders", they are not actually deleted
+
 CaseBox 1.9.468 (2015-06-09)
 ==============================
 New Features, Improvements

@@ -246,7 +246,6 @@ class Service
 
         } catch (\Exception $e) {
             $msg = "Error adding multiple documents to solr.\n". $e->__toString(). $this->debugInfo();
-            \CB\debug($msg);
             throw new \Exception($msg, 1);
         }
 

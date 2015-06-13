@@ -428,7 +428,9 @@ class Search extends Solr\Client
                 ,'facet.range.gap'
                 ,'facet.sort'
                 ,'facet.missing' //"on" ?
+                ,'stats.field'
             );
+
             foreach ($copyParams as $pn) {
                 if (!empty($p[$pn])) {
                     $rez[$pn] = $p[$pn];
@@ -443,6 +445,7 @@ class Search extends Solr\Client
                     'facet.field'
                     ,'facet.query'
                     ,'facet.pivot'
+                    ,'stats.field'
                 );
                 foreach ($copyParams as $pn) {
                     if (!empty($fp[$pn])) {
@@ -457,8 +460,13 @@ class Search extends Solr\Client
 
         if (!empty($rez)) {
             $rez['facet'] = 'true';
+
             if (empty($rez['facet.mincount'])) {
                 $rez['facet.mincount'] = 1;
+            }
+
+            if (!empty($rez['stats.field'])) {
+                $rez['stats'] = 'true';
             }
         }
 
@@ -578,15 +586,11 @@ class Search extends Solr\Client
 
         $this->warmUpNodes($rez);
 
-        //1
         $this->updateShortcutsData($shortcuts);
 
-        //2
         $this->setPaths($rez['data']);
 
-        //3 should be an event listener in DisplayColumns plugin
-
-        //shold also be added to warmUp ???
+        //shold also be added to warmUp ?
         $rez = array_merge($rez, $this->processResultFacets());
 
         $eventParams = array(
@@ -610,7 +614,7 @@ class Search extends Solr\Client
             $rez = array();
 
             foreach ($this->facets as $facet) {
-                $facet->loadSolrResult($this->results->facet_counts);
+                $facet->loadSolrResult($this->results->facet_counts, $this->results);
 
                 $fr = $facet->getClientData();
 
