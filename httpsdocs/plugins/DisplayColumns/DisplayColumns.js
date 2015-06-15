@@ -154,12 +154,18 @@ Ext.define('CB.plugin.DisplayColumns', {
      * @return array
      */
     ,getNewColumns: function(){
-        var rez = Ext.apply([], this.defaultColumns);
-        var currentColumns = Ext.apply({}, this.currentColumns);
-        var i;
-        var emptyCurrentColumns = (Ext.encode(currentColumns) == '{}');
+        var rez = [] //Ext.apply([], this.defaultColumns)
+            ,currentColumns = Ext.apply({}, this.currentColumns)
+            ,i
+            ,refs = {}
+            ,emptyCurrentColumns = (Ext.encode(currentColumns) == '{}');
 
-        for (i = 0; i < rez.length; i++) {
+        //create column refs for convenient use
+        for (i = 0; i < this.defaultColumns.length; i++) {
+            refs[this.defaultColumns[i].dataIndex] = this.defaultColumns[i];
+        }
+
+        /*for (i = 0; i < rez.length; i++) {
             if(Ext.isDefined(currentColumns[rez[i].dataIndex])) {
                 var nd = currentColumns[rez[i].dataIndex];
 
@@ -176,7 +182,7 @@ Ext.define('CB.plugin.DisplayColumns', {
             } else if(!emptyCurrentColumns) {
                 rez[i].hidden = true;
             }
-        }
+        }/**/
 
         Ext.iterate(
             currentColumns
@@ -198,6 +204,10 @@ Ext.define('CB.plugin.DisplayColumns', {
 
                     if(this.owner.columnSortOverride) {
                         column.sort = this.owner.columnSortOverride;
+                    }
+
+                    if(Ext.isDefined(refs[key])) {
+                        Ext.applyIf(column, refs[key]);
                     }
 
                     rez.push(column);

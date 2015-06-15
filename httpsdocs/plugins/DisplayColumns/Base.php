@@ -190,7 +190,9 @@ class Base
 
                         if (empty($templateField)) {
                             $templateField = array(
-                                'type' => 'varchar'
+                                'type' => empty($col['fieldType'])
+                                    ? 'varchar'
+                                    : $col['fieldType']
                                 ,'name' => $col['solr_column_name']
                                 ,'title' => Util\detectTitle($col)
                             );

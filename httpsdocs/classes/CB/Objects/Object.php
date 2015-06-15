@@ -1225,6 +1225,20 @@ class Object
     }
 
     /**
+     * get html safe name
+     * @param  varchar $language
+     * @return varchar
+     */
+    public function getHtmlSafeName($language = false)
+    {
+        $rez = $this->getName($language);
+
+        $rez = htmlspecialchars($rez, ENT_COMPAT);
+
+        return $rez;
+    }
+
+    /**
      * get object type from template
      *
      * @return varchar

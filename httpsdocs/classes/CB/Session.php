@@ -48,9 +48,17 @@ class Session implements \SessionHandlerInterface
      */
     public function close()
     {
+        $rez = true;
         $this->gc($this->lifetime);
+
         // close database-connection
-        return @mysqli_close($GLOBALS['dbh']);
+        $dbh = Cache::get('dbh');
+
+        if (!empty($dbh)) {
+            $rez = mysqli_close($dbh);
+        }
+
+        return $rez;
     }
 
     /**

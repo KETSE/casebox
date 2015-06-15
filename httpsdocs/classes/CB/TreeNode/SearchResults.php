@@ -64,9 +64,12 @@ class SearchResults extends Dbnode
 
         $s = new \CB\Search();
         $rez = $s->query($p);
+
         if (empty($rez['DC']) && !empty($td['cfg']['DC'])) {
             $rez['DC'] = $td['cfg']['DC'];
         }
+
+        $rez['view'] = 'grid';
 
         return $rez;
     }

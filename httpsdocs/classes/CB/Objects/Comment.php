@@ -11,7 +11,7 @@ class Comment extends Object
 {
 
     /**
-     * internal function used by create method for creating custom data
+     * create method
      * @return void
      */
     public function create($p = false)
@@ -66,6 +66,8 @@ class Comment extends Object
         $rez = parent::update($p);
 
         Config::setFlag('disableActivityLog', false);
+
+        $p = &$this->data;
 
         // log the action
         $logParams = array(

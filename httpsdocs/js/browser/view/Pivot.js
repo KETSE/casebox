@@ -730,6 +730,7 @@ Ext.define('CB.browser.view.Pivot',{
 
         var params = {
             view: 'grid'
+            ,from: 'grid'
             ,userViewChange: true
             ,filters: Ext.apply({}, this.store.extraParams.filters)
         };

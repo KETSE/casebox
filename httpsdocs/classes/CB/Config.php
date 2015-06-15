@@ -706,6 +706,8 @@ class Config extends Singleton
                 )
                 ,'case' => array(
                     'title' => L\get('Project')
+                    ,"solr_column_name" => "case_id"
+                    ,"fieldType" => "_objects"
                     ,'width' => 150
                 )
                 ,'date' => array(

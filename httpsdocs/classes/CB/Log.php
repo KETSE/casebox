@@ -122,6 +122,11 @@ class Log
                 $rez['comment'] = $p['comment'];
                 break;
 
+            case 'file_upload':
+            case 'file_update':
+                $rez['file'] = $p['file'];
+                break;
+
             default:
                 // setting old and new properties of linear custom data
                 if (!empty($p['old'])) {
