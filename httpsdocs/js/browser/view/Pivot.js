@@ -167,6 +167,8 @@ Ext.define('CB.browser.view.Pivot',{
     ,onActivate: function() {
         this.selectedFacets = [];
 
+        delete this.selectedStat;
+
         this.fireEvent(
             'settoolbaritems'
             ,[
@@ -575,6 +577,7 @@ Ext.define('CB.browser.view.Pivot',{
             if(this.data.pivot[selectedFacets]) {
                 Ext.copyTo(this.pivot, this.data.pivot[selectedFacets], 'data,titles,stats');
             }
+
         } else if(this.viewParams) {
             var vp = this.viewParams;
 
@@ -632,11 +635,15 @@ Ext.define('CB.browser.view.Pivot',{
                 ,checked;
 
             //add none value
-            d.stats.unshift({'title': L.none, 'field': ''});
+            d.stats.unshift({title: L.none, field: ''});
 
             for (var i = 0; i < d.stats.length; i++) {
                 checked = (this.selectedStat.field == d.stats[i].field);
-                this.selectedStat.title = d.stats[i].title;
+
+                if(checked) {
+                    this.selectedStat.title = d.stats[i].title;
+                }
+
                 items.push({
                     xtype: 'menucheckitem'
                     ,group: 'StatsField'
@@ -696,8 +703,9 @@ Ext.define('CB.browser.view.Pivot',{
             if(ss) {
                 txt = Ext.isEmpty(ss.field)
                     ? ss.title
-                    : ss.type + //L['SF' + ss.type] +
-                    ' (' + ss.title + ')';
+                    : (ss.type + //L['SF' + ss.type] +
+                        ' (' + ss.title + ')'
+                    );
             }
 
         b.setText(txt);

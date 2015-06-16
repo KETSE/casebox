@@ -1,3 +1,13 @@
+CaseBox 1.9.473 (2015-06-16)
+==============================
+New Features, Improvements
+--------------------------
+- #6542 Stats doesn't work in Search Template
+
+Fixed Bugs:
+----------
+- #6339 Stats computation in Charts & Pivot tables for FacetedNav plugin
+
 CaseBox 1.9.472 (2015-06-15)
 ==============================
 New Features, Improvements

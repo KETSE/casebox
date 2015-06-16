@@ -763,13 +763,11 @@ Ext.define('CB.browser.ViewContainer', {
             return false;
         }
 
-        //workaround to set from param for search by template
-        var from = options.from;
-
         Ext.apply(options, vp);
 
-        if(from && (from != 'tree')) {
-            options.from = from;
+        //workaround to set from param for search by template
+        if(this.requestParams.from && (this.requestParams.from != 'tree')) {
+            options.from = this.requestParams.from;
         }
 
         //reset userViewSet flag if loaded id changed
@@ -805,6 +803,8 @@ Ext.define('CB.browser.ViewContainer', {
             }
             ,this
         );
+
+        this.requestParams = {};
     }
 
     ,sameParams: function(params1, params2){
