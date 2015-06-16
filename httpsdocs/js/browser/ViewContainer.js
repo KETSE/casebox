@@ -765,6 +765,11 @@ Ext.define('CB.browser.ViewContainer', {
 
         Ext.apply(options, vp);
 
+        //workaround to set from param for search by template
+        if(this.requestParams.from && (this.requestParams.from != 'tree')) {
+            options.from = this.requestParams.from;
+        }
+
         //reset userViewSet flag if loaded id changed
         if(store.proxy.extraParams.id != options.id) {
             delete this.userViewSet;
@@ -798,6 +803,8 @@ Ext.define('CB.browser.ViewContainer', {
             }
             ,this
         );
+
+        this.requestParams = {};
     }
 
     ,sameParams: function(params1, params2){
@@ -883,12 +890,15 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,loadParams: function(){
         //check if not same params as previous request
-        if(this.sameParams(this.params, this.requestParams)) {
+        if(Ext.isEmpty(this.params.forceLoad) && this.sameParams(this.params, this.requestParams)) {
             this.containersPanel.setActiveItem(this.cardContainer);
             return;
         }
 
         this.params = Ext.apply({}, this.requestParams);
+
+        delete this.params.forceLoad;
+
         this.reloadView();
     }
 

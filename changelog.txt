@@ -1,3 +1,33 @@
+CaseBox 1.9.473 (2015-06-16)
+==============================
+New Features, Improvements
+--------------------------
+- #6542 Stats doesn't work in Search Template
+
+Fixed Bugs:
+----------
+- #6339 Stats computation in Charts & Pivot tables for FacetedNav plugin
+
+CaseBox 1.9.472 (2015-06-15)
+==============================
+New Features, Improvements
+--------------------------
+- #6541 After executing a search template, the search will not work if executed a second time if no fields changed
+- #6464 System column Case is empty
+  1. showing only columns configured in DC in the grid (i.e. not having sys cols by default in Grid).
+- #6302 Not notified of new added file to my task
+  Added custom logic for uploading files - to notify followers of the parent node
+- #6527 Session.php has $GLOBALS['dbh']
+
+Fixed Bugs:
+----------
+- #6475 Search results not displayed if activeView=PivotTable
+
+Notes:
+----------
+- table `tree_user_config` should be truncated (reset all user configs)
+  Otherwise columns set in user state will be displayed even if not set in cofig
+
 CaseBox 1.9.471 (2015-06-13)
 ==============================
 New Features, Improvements

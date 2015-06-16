@@ -679,6 +679,7 @@ class Files
 
                         $this->saveCurrentVersion($fileId);
                         break;
+
                     case 'replace':
                         /* TODO: only mark file as deleted but dont delte it
                             Note: we cant leave the previous file record if we have a given id for file
@@ -688,10 +689,12 @@ class Files
                         $solr = new Solr\Client();
                         $solr->deleteByQuery('id:' . $fileId . ' OR pids: ' . $fileId);
                         break;
+
                     case 'rename':
                         $fileId = null;
                         $f['name'] = $p['newName']; //here is the new name
                         break;
+
                     case 'autorename':
                         $fileId = null;
                         $f['name'] = Objects::getAvailableName($pid, $f['name']);

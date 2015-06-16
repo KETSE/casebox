@@ -98,6 +98,9 @@ Ext.define('CB.search.edit.Panel', {
         browser.changeSomeParams({
             query: ''
             ,search: p
+            ,userViewChange: false
+            ,from: 'grid'
+            ,forceLoad: true
         });
     }
 

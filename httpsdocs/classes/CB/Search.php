@@ -744,7 +744,7 @@ class Search extends Solr\Client
 
             foreach ($distinctIds as $id) {
                 if (!empty($objects[$id])) {
-                    $names[$id] = $objects[$id]->getName();
+                    $names[$id] = $objects[$id]->getHtmlSafeName();
                 }
             }
 

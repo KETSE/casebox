@@ -508,7 +508,11 @@ class Template extends Object
         //we'll cache scalar by default, but will exclude textual fields
         $cacheValue = is_scalar($value);
         if ($cacheValue) {
-            $cacheVarName = 'dv' . $html . '_'. $field['id'] . '_' . $value;
+            $fid = empty($field['id'])
+                ? $field['name']
+                : $field['id'];
+
+            $cacheVarName = 'dv' . $html . '_'. $fid . '_' . $value;
 
             //check if value is in cache and return
             if (Cache::exist($cacheVarName)) {
@@ -610,12 +614,14 @@ class Template extends Object
                             }
                         }
                         $res->close();
+
                     } else {
                         // $objects = Search::getObjects($ids, 'id,name,template_id,pids');
                         $objects = \CB\Objects::getCachedObjects($ids);
                         foreach ($objects as $id => $obj) {
                             $d = $obj->getData();
-                            $label = $obj->getName();
+                            $label = $obj->getHtmlSafeName();
+
                             $pids = $d['pids'];
 
                             if ($html && !empty($pids)) {

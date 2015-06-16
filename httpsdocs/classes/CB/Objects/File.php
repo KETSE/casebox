@@ -2,12 +2,52 @@
 namespace CB\Objects;
 
 use CB\DB;
+use CB\Config;
+use CB\Objects;
+use CB\User;
+use CB\Util;
+use CB\Log;
 
 /**
  * class for casebox files objects
  */
 class File extends Object
 {
+
+    /**
+     * create method
+     * @return void
+     */
+    public function create($p = false)
+    {
+        //disable default log from parent Object class
+        //we'll set comments add as comment action for parent
+        Config::setFlag('disableActivityLog', true);
+
+        $rez = parent::create($p);
+
+        Config::setFlag('disableActivityLog', false);
+
+        $p = &$this->data;
+
+        $this->parentObj = Objects::getCachedObject($p['pid']);
+
+        $this->updateParentFollowers();
+
+        // log the action
+        $logParams = array(
+            'type' => 'file_upload'
+            ,'new' => $this->parentObj
+            ,'file' => array(
+                'id' => $p['id'],
+                'name' => $p['name']
+            )
+        );
+
+        Log::add($logParams);
+
+        return $rez;
+    }
 
     /**
      * internal function used by create method for creating custom data
@@ -96,6 +136,38 @@ class File extends Object
             $this->data['versions'][] = $r;
         }
         $res->close();
+    }
+
+    /**
+     * update file
+     * @param  array   $p optional properties. If not specified then $this-data is used
+     * @return boolean
+     */
+    public function update($p = false)
+    {
+        //disable default log from parent Object class
+        Config::setFlag('disableActivityLog', true);
+
+        $rez = parent::update($p);
+
+        Config::setFlag('disableActivityLog', false);
+
+        $p = &$this->data;
+
+        // log the action
+        $logParams = array(
+            'type' => 'file_update'
+            ,'new' => Objects::getCachedObject($p['pid'])
+            ,'file' => array(
+                'id' => $p['id'],
+                'name' => $p['name']
+            )
+        );
+
+        Log::add($logParams);
+
+        return $rez;
+
     }
 
     /**
@@ -210,5 +282,38 @@ class File extends Object
                 ,$_SESSION['user']['id']
             )
         ) or die(DB\dbQueryError());
+    }
+
+    /**
+     * function to update parent followers when uploading a file
+     * with this user
+     * @return void
+     */
+    protected function updateParentFollowers()
+    {
+        $p = &$this->data;
+
+        $posd = $this->parentObj->getSysData();
+
+        $newUserIds = array();
+
+        $fu = empty($posd['fu'])
+            ? array()
+            : $posd['fu'];
+        $uid = User::getId();
+
+        if (!in_array($uid, $fu)) {
+            $newUserIds[] = intval($uid);
+        }
+
+        //update only if new users added
+        if (!empty($newUserIds)) {
+            $fu = array_merge($fu, $newUserIds);
+            $fu = Util\toNumericArray($fu);
+
+            $posd['fu'] = array_unique($fu);
+
+            $this->parentObj->updateSysData($posd);
+        }
     }
 }

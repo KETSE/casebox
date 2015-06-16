@@ -21,7 +21,7 @@ Ext.define('CB.browser.view.Grid', {
                 header: 'ID'
                 ,width: 80
                 ,dataIndex: 'nid'
-                ,hidden: true
+                // ,hidden: true
                 ,sort: this.columnSortOverride
                 ,groupable: false
             },{
@@ -52,7 +52,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,groupable: false
             },{
                 header: L.Path
-                ,hidden: true
+                // ,hidden: true
                 ,width: 150
                 ,dataIndex: 'path'
                 ,renderer: function(v, m, r, ri, ci, s){
@@ -87,7 +87,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.Creator
-                ,hidden: true
+                // ,hidden: true
                 ,width: 200
                 ,dataIndex: 'cid'
                 ,renderer: function(v){
@@ -120,7 +120,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.CreatedDate
-                ,hidden: true
+                // ,hidden: true
                 ,width: 120
                 ,dataIndex: 'cdate'
                 ,xtype: 'datecolumn'
@@ -128,7 +128,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.UpdatedDate
-                ,hidden: true
+                // ,hidden: true
                 ,width: 120
                 ,dataIndex: 'udate'
                 ,xtype: 'datecolumn'
@@ -136,7 +136,7 @@ Ext.define('CB.browser.view.Grid', {
                 ,sort: this.columnSortOverride
             },{
                 header: L.CommentedDate
-                ,hidden: true
+                // ,hidden: true
                 ,width: 120
                 ,dataIndex: 'comment_date'
                 ,xtype: 'datecolumn'

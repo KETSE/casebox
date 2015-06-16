@@ -196,6 +196,7 @@ class Notifications
     public static function getActionDeclination($actionType, $lang = false)
     {
         $rez = '';
+
         switch ($actionType) {
             case 'create':
             case 'update':
@@ -215,6 +216,14 @@ class Notifications
 
             case 'comment':
                 $rez = L\get($actionType . 'edOn', $lang);
+                break;
+
+            case 'file_upload':
+                $rez = L\get($actionType . 'ed_to', $lang);
+                break;
+
+            case 'file_update':
+                $rez = L\get($actionType . 'ed_in', $lang);
                 break;
 
             default:

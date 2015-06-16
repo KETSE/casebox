@@ -54,19 +54,27 @@ class SearchResults extends Dbnode
         // otherwise use default search method
         if (empty($td['cfg']['router'])) {
             $p = $this->getSearchParams($so);
+
         } else {
             $a = explode('.', $td['cfg']['router']);
             $class = str_replace('_', '\\', $a[0]);
             $class = new $class();
             $p = $class->{$a[1]}($so);
         }
+
+        $this->config = array_merge($this->config, $p);
+
         $p = array_merge($requestParams, $p);
 
         $s = new \CB\Search();
         $rez = $s->query($p);
+
         if (empty($rez['DC']) && !empty($td['cfg']['DC'])) {
             $rez['DC'] = $td['cfg']['DC'];
         }
+
+        // $rez['view'] = 'grid';
+        $this->setViewParams($rez);
 
         return $rez;
     }

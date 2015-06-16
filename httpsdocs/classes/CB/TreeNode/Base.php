@@ -373,7 +373,7 @@ class Base implements \CB\Interfaces\TreeNode
     }
 
     /**
-     * set view params to inpot variable from node config
+     * set view params to input variable from node config
      * @param  array &$p
      * @return array
      */
