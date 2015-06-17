@@ -805,6 +805,7 @@ Ext.define('CB.browser.ViewContainer', {
         );
 
         this.requestParams = {};
+        delete this.userViewSet;
     }
 
     ,sameParams: function(params1, params2){
@@ -890,7 +891,7 @@ Ext.define('CB.browser.ViewContainer', {
 
     ,loadParams: function(){
         //check if not same params as previous request
-        if(Ext.isEmpty(this.params.forceLoad) && this.sameParams(this.params, this.requestParams)) {
+        if(Ext.isEmpty(this.requestParams.forceLoad) && this.sameParams(this.params, this.requestParams)) {
             this.containersPanel.setActiveItem(this.cardContainer);
             return;
         }

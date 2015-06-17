@@ -699,18 +699,6 @@ class Browser
 
                 break;
 
-            case 'task':
-                DB\dbQuery(
-                    'UPDATE tasks
-                    SET title = $1
-                    WHERE id = $2',
-                    array(
-                        $p['name']
-                        ,$id
-                    )
-                ) or die(DB\dbQueryError());
-
-                break;
         }
 
         /*updating renamed document into solr directly (before runing background cron)

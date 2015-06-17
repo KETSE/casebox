@@ -199,7 +199,6 @@ class Base
                         }
 
                     } else { //default
-                        $templateField = $template->getField($col['fieldName']);
                         $values = isset($doc[$col['fieldName']])
                             ? array($doc[$col['fieldName']])
                             : $obj->getFieldValue($col['fieldName']);
@@ -251,6 +250,13 @@ class Base
                             $doc[$fieldName] = $template->formatValueForDisplay($templateField, $value, false);
                         }
                     }
+                }
+            }
+
+            /* remove columns without title */
+            foreach ($customColumns as $fieldName => &$col) {
+                if (empty($col['title'])) {
+                    unset($customColumns[$fieldName]);
                 }
             }
 

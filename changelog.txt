@@ -1,3 +1,11 @@
+CaseBox 1.9.474 (2015-06-17)
+==============================
+New Features, Improvements
+--------------------------
+- #6589 Filter DC & tree_user_config, show only existing columns
+- #6541 After executing a search template, the search will not work if executed a second time if no fields changed
+- removed check_deadlines cron script
+
 CaseBox 1.9.473 (2015-06-16)
 ==============================
 New Features, Improvements
