@@ -16,12 +16,23 @@ class Collection
     public $templates = array();
 
     /**
+     * flag to store if loadAll was allready called
+     * @var bool
+     */
+    protected $loadedAll = false;
+
+    /**
      * load all templates from database
-     *
+     * @param  boolean $reload reload even if already all loaded
      * @return void
      */
-    public function loadAll()
+    public function loadAll($reload = false)
     {
+        //skip loading if already loaded and reload not true
+        if ($this->loadedAll && !$reload) {
+            return;
+        }
+
         $this->reset();
         /* collecting template_fields */
         $template_fields = array();
@@ -80,6 +91,8 @@ class Collection
             $this->templates[$r['id']]->setData($r);
         }
         $res->close();
+
+        $this->loadedAll = true;
     }
 
     /**
@@ -175,5 +188,6 @@ class Collection
     private function reset()
     {
         $this->templates = array();
+        $this->loadedAll = false;
     }
 }

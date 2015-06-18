@@ -152,7 +152,8 @@ foreach ($mailServers as $mailConf) {
             $emailFrom = extractEmailFromText($mail['from']);   // user email
             $emailTo = extractEmailFromText($mail['to']);  // <comments@casebox.org>
 
-            $userId = getCoreUserByMail($emailFrom);
+            $userId = DM\User::getIdByEmail($emailFrom);
+
             $_SESSION['user'] = array('id' => $userId);
 
             $data = array(
@@ -309,32 +310,6 @@ function extractEmailFromText($email)
     }
 
     return $email;
-}
-
-// Expects a valid email
-function getCoreUserByMail($email)
-{
-    $rez = false;
-
-    $res = DB\dbQuery(
-        'SELECT id
-        FROM users_groups
-        WHERE (`email` LIKE $1)
-            OR (`email` LIKE $2)
-            OR (`email` LIKE $3)',
-        array(
-            $email
-            ,'%,'.$email
-            ,$email.',%'
-        )
-    ) or die(DB\dbQueryError());
-
-    if ($r = $res->fetch_assoc()) {
-        $rez = $r['id'];
-    }
-    $res->close();
-
-    return $rez;
 }
 
 function deleteMails(&$mailBox, $idsArray)

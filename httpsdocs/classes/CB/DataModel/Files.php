@@ -8,6 +8,12 @@ use CB\Util;
 class Files extends Base
 {
     /**
+     * database table name
+     * @var string
+     */
+    protected static $tableName = 'files';
+
+    /**
      * get content ids for given file ids
      * @param  array $ids
      * @return array associative array (id => content_id)

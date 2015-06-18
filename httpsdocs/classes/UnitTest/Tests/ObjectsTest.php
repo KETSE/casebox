@@ -1,6 +1,6 @@
 <?php
 
-namespace CB\UNITTESTS;
+namespace UnitTest;
 
 /**
  * Description of ObjectsTest
@@ -13,13 +13,12 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-
         $this->DB = \CB\Cache::get('dbh');
     }
 
     public function objectsProvider()
     {
-        $data = \CB\UNITTESTS\DATA\objectsProvider();
+        $data = Data\Providers::objectsProvider();
 
         return $data;
     }
@@ -30,7 +29,6 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
      */
     public function testObjectCRUD($data)
     {
-
         // try to add one folder to root tree
         $obj = new \CB\Objects\Object();
 
@@ -72,7 +70,7 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
      */
     public function templatesProvider()
     {
-        $data = \CB\UNITTESTS\DATA\templatesProvider();
+        $data = Data\Providers::templatesProvider();
 
         return $data;
     }
@@ -93,8 +91,12 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
         // second read created object
         $obj->load($data_template['id']);
         $read_data_template = $obj->getData();
-        $this->assertArraySubset($data_template, $read_data_template, false,
-            ' Error read template data '.print_r($read_data_template, true));
+        $this->assertArraySubset(
+            $data_template,
+            $read_data_template,
+            false,
+            ' Error read template data '.print_r($read_data_template, true)
+        );
 
         // third update created object
 
@@ -106,39 +108,28 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
 
         $obj->load($data_template['id']);
         $read_data_template = $obj->getData();
-        $this->assertArraySubset($data_template, $read_data_template, false,
-            ' error on updated template data '.print_r($read_data_template, true));
 
-        // four delete object
-        
-        /*
-         *
-        $obj->delete(false);
-        $obj->delete(true);
-
-        $obj->load($data_template['id']);
-
-        $read_data_template = $obj->getData();
-
-        $this->assertTrue(empty($read_data_template['id']), ' error delete template data template '.print_r($read_data_template,true));
-         *
-         **/
-        
+        $this->assertArraySubset(
+            $data_template,
+            $read_data_template,
+            false,
+            ' error on updated template data '.print_r($read_data_template, true)
+        );
     }
 
      /**
      *
      * @return array of templates
      */
-    public function FieldsTeplateProvider()
+    public function fieldsTeplateProvider()
     {
-        $data = \CB\UNITTESTS\DATA\fieldsProvider();
+        $data = Data\Providers::fieldsProvider();
 
         return $data;
     }
 
     /**
-     * @dataProvider FieldsTeplateProvider
+     * @dataProvider fieldsTeplateProvider
      */
     public function testFieldsTemplateCRUD($data_field)
     {

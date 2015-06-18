@@ -10,6 +10,9 @@
  */
 namespace CB\INSTALL;
 
+use CB\DB;
+use CB\DataModel as DM;
+
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 $cbHome = dirname($binDirectorty) . DIRECTORY_SEPARATOR;
 
@@ -105,19 +108,16 @@ do {
     $pass = readParam('core_root_pass');
 } while (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE') && empty($pass));
 
-\CB\DB\dbQuery(
-    'UPDATE `'.$dbName.'`.users_groups
-    SET `password` = MD5(CONCAT(\'aero\', $2))
-        ,email = $3
-        ,`data` = $4
-    WHERE name = $1',
+DB\dbQuery("use `$dbName`") or die(DB\dbQueryError());
+
+DM\User::updateByName(
     array(
-        'root'
-        ,$pass
-        ,$email
-        ,'{"email": "'.$email.'"}'
+        'name' => 'root'
+        ,'password' => $pass
+        ,'email' => $email
+        ,'data' => '{"email": "'.$email.'"}'
     )
-) or die(\CB\DB\dbQueryError());
+);
 
 createSolrCore($cfg, $coreName);
 

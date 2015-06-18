@@ -391,6 +391,7 @@ Ext.define('CB.ProfileForm', {
     }
 
     ,onPhotoContainerClick: function(cmp, e, eOpts){ //w, idx, el, ev
+        clog('onPhotoContainerClick', arguments);
         if(!e) {
             return;
         }
@@ -406,6 +407,7 @@ Ext.define('CB.ProfileForm', {
     }
 
     ,onPhotoChanged: function(ev, el, o){
+        clog('onPhotoChanged!', arguments);
         if(Ext.isEmpty(this.photoField.getValue())) {
             return;
         }

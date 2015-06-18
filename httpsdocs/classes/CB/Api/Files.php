@@ -2,7 +2,7 @@
 namespace CB\Api;
 
 use CB\Config;
-use CB\DB;
+use CB\DataModel as DM;
 
 class Files
 {
@@ -184,16 +184,13 @@ class Files
                 return 'owner not specified';
             }
 
-            $sql = 'SELECT id FROM users_groups WHERE `type` = 2 and id = $1';
-            if (!is_numeric($p['owner'])) {
-                $sql = 'SELECT id FROM users_groups WHERE `type` = 2 and name = $1';
+            if (is_numeric($p['owner'])) {
+                if (DM\User::idExists($p['owner'])) {
+                    $p['oid'] = $p['owner'];
+                }
+            } else {
+                $p['oid'] = DM\User::getIdByName($p['owner']);
             }
-
-            $res = DB\dbQuery($sql, $p['owner']) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
-                $p['oid'] = $r['id'];
-            }
-            $res->close();
         }
 
         if (!is_numeric($p['oid'])) {

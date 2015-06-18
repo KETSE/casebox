@@ -1,7 +1,6 @@
 <?php
-namespace CB\UNITTESTS;
+namespace UnitTest;
 
-use CB\UNITTESTS\DATA;
 use CB\DataModel as DM;
 
 /**
@@ -26,7 +25,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         \CB\Config::setFlag('disableSolrIndexing', true);
 
         /* create users */
-        $usersData = DATA\createUsersData();
+        $usersData = Data\Providers::createUsersData();
         $this->userIds = array();
 
         foreach ($usersData[0] as $data) {
@@ -34,7 +33,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         }
 
         /* create objects for test notifications on them */
-        $objectsData = DATA\createTasksData();
+        $objectsData = Data\Providers::createTasksData();
 
         $userIds = $this->userIds;
 

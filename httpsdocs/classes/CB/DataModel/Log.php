@@ -7,6 +7,12 @@ use CB\DB;
 class Log extends Base
 {
     /**
+     * database table name
+     * @var string
+     */
+    protected static $tableName = 'action_log';
+
+    /**
      * available table fields
      *
      * associative array of fieldName => type
@@ -48,7 +54,7 @@ class Log extends Base
         );
 
         //add database record
-        $sql = 'INSERT INTO action_log (
+        $sql = 'INSERT INTO `' . static::$tableName . '` (
               `object_id`
               ,`object_pid`
               ,`user_id`
@@ -66,47 +72,11 @@ class Log extends Base
     }
 
     /**
-     * read a record from db by id
-     * @param  int   $id
-     * @return array | null
-     */
-    public static function read($id)
-    {
-        $rez= null;
-
-        parent::read($p);
-
-        //read
-        $res = DB\dbQuery(
-            'SELECT *
-            FROM action_log
-            WHERE id = $1',
-            $id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r;
-        }
-        $res->close();
-
-        return $rez;
-    }
-
-    /**
      * update a record
      * @param  array   $p array with properties
      * @return boolean
      */
     public static function update($p)
-    {
-    }
-
-    /**
-     * delete a record
-     * @param  int     $id
-     * @return boolean
-     */
-    public static function delete($id)
     {
     }
 }

@@ -217,7 +217,7 @@ Ext.define('CB.plugin.DisplayColumns', {
         );
 
         /* sort columns */
-        var changed = true;
+        var changed = rez.length > 1;
         var t;
 
         i = 0;

@@ -8,6 +8,12 @@ use CB\L;
 class GUID extends Base
 {
     /**
+     * database table name
+     * @var string
+     */
+    protected static $tableName = 'guids';
+
+    /**
      * available table fields
      *
      * associative array of fieldName => type

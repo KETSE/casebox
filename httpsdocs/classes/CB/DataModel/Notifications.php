@@ -4,10 +4,15 @@ namespace CB\DataModel;
 
 use CB\DB;
 use CB\Util;
-use CB\User;
 
 class Notifications extends Base
 {
+    /**
+     * database table name
+     * @var string
+     */
+    protected static $tableName = 'notifications';
+
     /**
      * available fields for notifications table
      *
@@ -49,7 +54,7 @@ class Notifications extends Base
         );
 
         //add database record
-        $sql = 'INSERT INTO notifications (
+        $sql = 'INSERT INTO `' . static::$tableName . '` (
             object_id
             ,action_id
             ,action_ids
@@ -104,7 +109,7 @@ class Notifications extends Base
             ,n.user_id
             ,l.data
             ,l.action_time
-        FROM notifications n
+        FROM `' . static::$tableName . '` n
         JOIN action_log l
             ON n.action_id = l.id
         WHERE n.user_id = $1 '.
@@ -153,7 +158,7 @@ class Notifications extends Base
             ,l.action_time
             ,l.data
             ,l.activity_data_db
-        FROM notifications n
+        FROM `' . static::$tableName . '` n
             JOIN action_log l
                 ON n.action_id = l.id
         WHERE n.email_sent = 0 '.
@@ -196,7 +201,7 @@ class Notifications extends Base
         }
 
         $sql = 'SELECT count(*) `count`
-        FROM notifications
+        FROM `' . static::$tableName . '`
         WHERE user_id = $1 AND id > $2';
 
         $res = DB\dbQuery(
@@ -233,7 +238,7 @@ class Notifications extends Base
 
         if (!empty($ids)) {
             DB\dbQuery(
-                'UPDATE notifications
+                'UPDATE `' . static::$tableName . '`
                 SET `read` = 1
                 WHERE user_id = $1 AND id IN (' . implode(',', $ids) .')',
                 $userId
@@ -254,7 +259,7 @@ class Notifications extends Base
         }
 
         DB\dbQuery(
-            'UPDATE notifications
+            'UPDATE `' . static::$tableName . '`
             SET `read` = 1
             WHERE user_id = $1 AND `read` = 0',
             $userId

@@ -6,6 +6,7 @@ use CB\Util;
 use CB\User;
 use CB\Objects;
 use CB\Log;
+use CB\DataModel as DM;
 
 class Comment extends Object
 {
@@ -127,7 +128,7 @@ class Comment extends Object
         //analize comment text and get referenced users
         if (preg_match_all('/@([^@\s,!\?]+)/', $p['data']['_title'], $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $uid = User::exists($match[1]);
+                $uid = DM\User::getIdByName($match[1]);
 
                 if (is_numeric($uid) && !in_array($uid, $fu) && !in_array($uid, $newUserIds)) {
                     $newUserIds[] = $uid;
@@ -196,7 +197,7 @@ class Comment extends Object
         //replace users with their names
         if (in_array('user', $replacements) &&preg_match_all('/@([\w\.\-]+[\w])/', $message, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $userId = User::exists($match[1]);
+                $userId = DM\User::getIdByName($match[1]);
                 if (is_numeric($userId)) {
                     $userName = $match[1];
                     $message = str_replace(

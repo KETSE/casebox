@@ -692,6 +692,11 @@ class Search extends Solr\Client
 
         $requiredIds = array_keys($requiredIds);
 
+        //preload templates
+        Templates\SingletonCollection::getInstance()->loadAll();
+
+        //preload all users display data
+
         //now there objects should be loaded in bulk before firing event
         //because DisplayColumns analizes each object from result
         Objects::getCachedObjects($requiredIds);

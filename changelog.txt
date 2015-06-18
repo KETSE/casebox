@@ -1,3 +1,16 @@
+CaseBox 1.9.475 (2015-06-18)
+==============================
+New Features, Improvements
+--------------------------
+- moved most user related queries to data model
+- Adjusted loading of Templates and Users for warming up on search request
+- Moved Testing classes under UnitTest namespace.
+  Adjusted them to meet PSR standards.
+
+Fixed Bugs:
+----------
+- js error appears on grid view load related to DC
+
 CaseBox 1.9.474 (2015-06-17)
 ==============================
 New Features, Improvements

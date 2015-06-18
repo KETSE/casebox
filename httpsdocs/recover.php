@@ -2,6 +2,7 @@
 namespace CB;
 
 use \CB\User;
+use \CB\DataModel as DM;
 
 require_once 'init.php';
 
@@ -26,7 +27,7 @@ switch ($action) {
         }
         if (!empty($hash)) {
             //process hash from get and check it
-            $user_id = User::getIdByRecoveryHash($hash);
+            $user_id = DM\User::getIdByRecoveryHash($hash);
 
             if (empty($user_id)) {
                 $_SESSION['msg'] = '<div class="alert alert-error">'.L\get('RecoverHashNotFound').(IS_DEBUG_HOST ? $hash: '').'</div>';
@@ -69,7 +70,7 @@ switch ($action) {
         $user_mail = null;
         if (!empty($e)) {
             if ($e = filter_var($e, FILTER_VALIDATE_EMAIL)) {
-                $user_id = User::getIdByEmail($e);
+                $user_id = DM\User::getIdByEmail($e);
 
                 if (empty($user_id)) {
                     $_SESSION['e_msg'] = L\get('EmailNotFound');
@@ -80,7 +81,7 @@ switch ($action) {
                 $_SESSION['e_msg'] = L\get('InvalidEmail');
             }
         } elseif (!empty($u)) {
-            $user_id = User::getIdByUsername($u);
+            $user_id = DM\User::getIdByName($u);
 
             if (empty($user_id)) {
                 $_SESSION['u_msg'] = L\get('UsernameNotFound');

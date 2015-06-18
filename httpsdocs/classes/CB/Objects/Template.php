@@ -4,6 +4,7 @@ namespace CB\Objects;
 use CB\DB;
 use CB\Util;
 use CB\User;
+use CB\UsersGroups;
 use CB\L;
 use CB\Search;
 use CB\Cache;
@@ -578,42 +579,31 @@ class Template extends Object
                             ,'usersgroups'
                         )
                     )) {
-                        $sql = 'SELECT id
-                                ,name
-                                ,trim( CONCAT(coalesce(first_name, \'\'), \' \', coalesce(last_name, \'\')) ) `title`
-                                ,CASE WHEN (`type` = 1) THEN \'icon-users\' ELSE CONCAT(\'icon-user-\', coalesce(sex, \'\') ) END `iconCls`
-                            FROM users_groups
-                            WHERE id IN ('.$ids.')';
 
-                        $res = DB\dbQuery($sql) or die(DB\dbQueryError());
-                        while ($r = $res->fetch_assoc()) {
-                            @$label = htmlspecialchars(Util\coalesce($r['title'], $r['name']), ENT_COMPAT);
+                        $udp = UsersGroups::getDisplayData($ids);
 
-                            switch (@$field['cfg']['renderer']) {
-                                case 'listGreenIcons':
-                                    $value[] =  $html
-                                        ? '<li class="icon-padding icon-element">'.$label.'</li>'
-                                        : $label;
-                                    break;
-                                // case 'listObjIcons':
-                                default:
-                                    $r['cfg'] = Util\toJSONArray(@$r['cfg']);
+                        foreach ($udp as $id => $r) {
+                            $label = @htmlspecialchars(Util\coalesce($r['title'], $r['name']), ENT_COMPAT);
 
-                                    $icon = empty($r['iconCls'])
-                                        ? \CB\Browser::getIcon($r)
-                                        : $r['iconCls'];
+                            if ($html) {
+                                switch (@$field['cfg']['renderer']) {
+                                    case 'listGreenIcons':
+                                        $label = '<li class="icon-padding icon-element">' . $label . '</li>';
+                                        break;
 
-                                    if (empty($icon)) {
-                                        $icon = 'icon-none';
-                                    }
+                                    // case 'listObjIcons':
+                                    default:
+                                        $icon = empty($r['iconCls'])
+                                            ? 'icon-none'
+                                            : $r['iconCls'];
 
-                                    $value[] = $html
-                                        ? '<li class="icon-padding '.$icon.'">'.$label.'</li>'
-                                        : $label;
-                                    break;
+                                        $label = '<li class="icon-padding '.$icon.'">'.$label.'</li>';
+                                        break;
+                                }
                             }
+
+                            $value[] = $label;
                         }
-                        $res->close();
 
                     } else {
                         // $objects = Search::getObjects($ids, 'id,name,template_id,pids');
