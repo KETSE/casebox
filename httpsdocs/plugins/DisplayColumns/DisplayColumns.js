@@ -216,6 +216,11 @@ Ext.define('CB.plugin.DisplayColumns', {
             ,this
         );
 
+        //display name column if DC config is empty
+        if(Ext.isEmpty(rez)) {
+            rez = [refs.name];
+        }
+
         /* sort columns */
         var changed = rez.length > 1;
         var t;

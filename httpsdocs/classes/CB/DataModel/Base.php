@@ -43,6 +43,8 @@ class Base
      */
     public static function read($id)
     {
+        $rez = null;
+
         static::validateParamTypes(array('id' => $id));
 
         //read

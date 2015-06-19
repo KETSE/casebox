@@ -55,6 +55,7 @@ Ext.define('CB.file.edit.Window', {
             ,this.downloadSeparator
             ,this.actions.download
             ,'->'
+            ,this.actions.refresh
             ,new Ext.Button({
                 qtip: L.More
                 ,itemId: 'more'

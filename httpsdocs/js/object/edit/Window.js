@@ -132,6 +132,11 @@ Ext.define('CB.object.edit.Window', {
                 ,handler: this.onDeleteClick
             })
 
+            ,refresh: new Ext.Action({
+                iconCls: 'i-refresh'
+                ,scope: this
+                ,handler: this.onRefreshClick
+            })
             ,showInfoPanel: new Ext.Action({
                 iconCls: 'i-info'
                 ,enableToggle: true
@@ -152,6 +157,7 @@ Ext.define('CB.object.edit.Window', {
             ,this.actions.save
             ,this.actions.cancel
             ,'->'
+            ,this.actions.refresh
             ,new Ext.Button({
                 qtip: L.More
                 ,itemId: 'more'
@@ -248,9 +254,14 @@ Ext.define('CB.object.edit.Window', {
             }
         ];
 
+        //hide infopanel switcher by default, for vertical layout
+        this.actions.showInfoPanel.setHidden(true);
+
         if((this.templateCfg.layout === 'horizontal') || (this.templateType == 'file')) {
             this.complexFieldContainer.flex = 1;
             this.complexFieldContainer.layout = 'fit';
+
+            this.actions.showInfoPanel.setHidden(false);
 
             rez = [
                 {
@@ -860,6 +871,16 @@ Ext.define('CB.object.edit.Window', {
         }
 
         return false;
+    }
+
+    /**
+     * reload  window
+     * @param  button b
+     * @param  event e
+     * @return void
+     */
+    ,onRefreshClick: function(b, e) {
+        this.doLoad();
     }
 
     /**

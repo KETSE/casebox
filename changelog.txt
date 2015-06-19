@@ -1,3 +1,14 @@
+CaseBox 1.9.476 (2015-06-19)
+==============================
+New Features, Improvements
+--------------------------
+- #6634 Object popup window should have a Refresh button & Info button not needed if layout=Vertical
+
+Fixed Bugs:
+----------
+- #6673 error to display the list of users
+- #6716 Can't upload new files in a new local instance
+
 CaseBox 1.9.475 (2015-06-18)
 ==============================
 New Features, Improvements
