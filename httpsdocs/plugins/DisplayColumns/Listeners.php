@@ -9,7 +9,7 @@ class Listeners
         $ip = &$p['inputParams'];
         $class = null;
 
-        switch (@$ip['from']) {
+        switch (@$ip['view']['type']) {
             case 'grid':
                 $class= new Grid();
                 break;
@@ -40,7 +40,7 @@ class Listeners
         $ip = &$p['inputParams'];
         $class = null;
 
-        switch (@$ip['from']) {
+        switch (@$ip['view']['type']) {
             case 'grid':
                 $class= new Grid();
                 break;
@@ -61,7 +61,7 @@ class Listeners
         $ip = &$p['inputParams'];
         $class = null;
 
-        switch (@$ip['from']) {
+        switch (@$ip['view']['type']) {
             case 'grid':
                 $class= new Grid();
                 break;

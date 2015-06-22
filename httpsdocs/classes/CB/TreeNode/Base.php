@@ -25,6 +25,41 @@ class Base implements \CB\Interfaces\TreeNode
     }
 
     /**
+     * check if current class is configured to return any result for
+     * given path and request params
+     * @param  array   &$pathArray
+     * @param  array   &$requestParams
+     * @return boolean
+     */
+    protected function acceptedPath(&$pathArray, &$requestParams)
+    {
+        $lastNode = null;
+
+        if (empty($pathArray)) {
+            return false;
+        } else {
+            $lastNode = $pathArray[sizeof($pathArray) - 1];
+        }
+
+        //get the configured 'pid' property for this tree plugin
+        //default is 0
+        //thats the parent node id where this class shold start to give result nodes
+        $ourPid = @$this->config['pid'];
+
+        // ROOT NODE: check if last node is the one we should attach to
+        if ($lastNode->getId() == (String)$ourPid) {
+            return true;
+        }
+
+        // CHILDREN NODES: accept if last node is an instance of this class (same GUID)
+        if ($lastNode->guid == $this->guid) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * return the children for for input params
      * @param  array $pathArray
      * @param  array $requestParams
@@ -81,6 +116,70 @@ class Base implements \CB\Interfaces\TreeNode
     public function getConfig()
     {
         return $this->config;
+    }
+
+    /**
+     * get view config for given view or default view if set in config
+     * @param  array &$pathArray
+     * @param  array &$rp        requestParams
+     * @return array
+     */
+    public function getViewConfig(&$pathArray, &$rp)
+    {
+        $rez = array();
+
+        if (!$this->acceptedPath($pathArray, $requestParams)) {
+            return $rez;
+        }
+
+        $cfg = &$this->config;
+
+        $view = array('type' => 'grid');
+
+        if (!empty($rp['userViewChange'])) {
+            $type  = empty($rp['view'])
+                ? $rp['from']
+                : $rp['view'];
+
+            $view = array(
+                'type' => $type
+            );
+
+        } elseif (!empty($cfg['view'])) {
+            $view = is_scalar($cfg['view'])
+                ? array(
+                    'type' => $cfg['view']
+                )
+                : $cfg['view'];
+        }
+
+        if (!empty($view)) {
+            $rez['view'] = $view;
+
+            switch ($view['type']) {
+                case 'pivot':
+                case 'charts':
+                    if (!empty($cfg['stats'])) {
+                        $stats = array();
+                        foreach ($cfg['stats'] as $item) {
+                            $stats[] = array(
+                                'title' => Util\detectTitle($item)
+                                ,'field' => $item['field']
+                            );
+                        }
+                        $rez['stats'] = $stats;
+                    }
+
+                    break;
+
+                default: // grid
+                    // if (!empty($cfg['view']['group'])) {
+                    //     $rez['group'] = $cfg['view']['group'];
+                    // }
+            }
+        }
+
+        return $rez;
     }
 
     /**
@@ -147,10 +246,11 @@ class Base implements \CB\Interfaces\TreeNode
     }
 
     /**
-     * get list of facets classses that should be available for this node
+     * get list of facets classes that should be available for this node
+     * @param  array &$rp request params
      * @return array
      */
-    public function getFacets()
+    public function getFacets(&$rp)
     {
         $facets = array();
         $cfg = $this->getNodeParam('facets');
@@ -173,6 +273,7 @@ class Base implements \CB\Interfaces\TreeNode
             } else {
                 $config = $v;
             }
+
             if (is_null($config)) {
                 \CB\debug('Cannot find facet config:' . var_export($name, 1) . var_export($v, 1));
             } else {
@@ -181,82 +282,67 @@ class Base implements \CB\Interfaces\TreeNode
             }
         }
 
-        /* add pivot facet if we are in pivot view*/
-        $rp = \CB\Cache::get('requestParams');
-        $cfg = $this->config;
-        $pivot = false;
-        $rows = false;
-        $cols = false;
+        if (!empty($rp['view']['type'])) {
 
-        if (!empty($rp['userViewChange']) && !empty($rp['from'])) {
-            $pivot = ($rp['from'] == 'pivot');
+            $v = &$rp['view'];
 
-        } elseif (!empty($cfg['view'])) {
-            $v = $cfg['view'];
-            if (is_scalar($v)) {
-                $pivot = ($v == 'pivot');
-            } else {
-                $pivot = (@$v['type'] == 'pivot');
-                if (!empty($v['rows']['facet'])) {
-                    $rows = $v['rows']['facet'];
+            $rows = false;
+            $cols = false;
+
+            if (!empty($v['rows']['facet'])) {
+                $rows = $v['rows']['facet'];
+            }
+            if (!empty($v['cols']['facet'])) {
+                $cols = $v['cols']['facet'];
+            }
+
+            if (($rp['view']['type'] == 'pivot') && (sizeof($facets) > 1)) {
+                if (!empty($rp['selectedFacets']) &&
+                    (is_array($rp['selectedFacets'])) &&
+                    sizeof($rp['selectedFacets'] > 1)
+                ) {
+                    $rows = $rp['selectedFacets'][0];
+                    $cols = $rp['selectedFacets'][1];
                 }
-                if (!empty($v['cols']['facet'])) {
-                    $cols = $v['cols']['facet'];
+
+                reset($facets);
+
+                if (empty($rows)) {
+                    $rows = current($facets);
+                    next($facets);
                 }
-            }
-        }
 
-        /**
-         * selectedStat: {field: "task_projects", type: "max", title: "User"}
-        field: "task_projects"
-        title: "User"
-        type: "max"
-        */
+                if (empty($cols)) {
+                    $cols = current($facets);
+                }
 
-        if ($pivot && (sizeof($facets) > 1)) {
-            if (!empty($rp['selectedFacets']) && (is_array($rp['selectedFacets'])) && sizeof($rp['selectedFacets'] > 1)) {
-                $rows = $rp['selectedFacets'][0];
-                $cols = $rp['selectedFacets'][1];
-            }
-
-            reset($facets);
-
-            if (empty($rows)) {
-                $rows = current($facets);
-                next($facets);
-            }
-
-            if (empty($cols)) {
-                $cols = current($facets);
-            }
-
-            if (is_scalar($rows) || is_scalar($cols)) {
-                foreach ($facets as $facet) {
-                    if ((is_scalar($rows)) && ($facet->field == $rows)) {
-                        $rows = $facet;
-                    }
-                    if ((is_scalar($cols)) && ($facet->field == $cols)) {
-                        $cols = $facet;
+                if (is_scalar($rows) || is_scalar($cols)) {
+                    foreach ($facets as $facet) {
+                        if ((is_scalar($rows)) && ($facet->field == $rows)) {
+                            $rows = $facet;
+                        }
+                        if ((is_scalar($cols)) && ($facet->field == $cols)) {
+                            $cols = $facet;
+                        }
                     }
                 }
+
+                $config = array(
+                    'type' => 'pivot'
+                    ,'name' => 'pivot'
+                    ,'facet1' => $rows
+                    ,'facet2' => $cols
+                );
+
+                if (!empty($rp['selectedStat'])) {
+                    $config['stats'] = $rp['selectedStat'];
+                } elseif (!empty($cfg['view']['stats'])) {
+                    $config['stats'] = $cfg['view']['stats'];
+                }
+
+                $facets[] = \CB\Facets::getFacetObject($config);
             }
-
-            $config = array(
-                'type' => 'pivot'
-                ,'name' => 'pivot'
-                ,'facet1' => $rows
-                ,'facet2' => $cols
-            );
-
-            if (!empty($rp['selectedStat'])) {
-                $config['stats'] = $rp['selectedStat'];
-            } elseif (!empty($cfg['view']['stats'])) {
-                $config['stats'] = $cfg['view']['stats'];
-            }
-
-            $facets[] = \CB\Facets::getFacetObject($config);
         }
-        /* end of add pivot facet if we are in pivot view*/
 
         return $facets;
     }
@@ -337,63 +423,6 @@ class Base implements \CB\Interfaces\TreeNode
             'from' => $this->getId()
             ,'data' => $paramConfigs[$this->id]
         );
-    }
-
-    /**
-     * set view params to input variable from node config
-     * @param  array &$p
-     * @return array
-     */
-    protected function setViewParams(&$p)
-    {
-        $view = array();
-
-        $cfg = &$this->config;
-
-        $rp = \CB\Cache::get('requestParams');
-
-        if (!empty($rp['userViewChange'])) {
-            $type  = empty($rp['view'])
-                ? $rp['from']
-                : $rp['view'];
-
-            $view = array(
-                'type' => $type
-            );
-
-        } elseif (!empty($cfg['view'])) {
-            $view = is_scalar($cfg['view'])
-                ? array(
-                    'type' => $cfg['view']
-                )
-                : $cfg['view'];
-        }
-
-        if (!empty($view)) {
-            $p['view'] = $view;
-
-            switch ($view['type']) {
-                case 'pivot':
-                case 'charts':
-                    if (!empty($cfg['stats'])) {
-                        $stats = array();
-                        foreach ($cfg['stats'] as $item) {
-                            $stats[] = array(
-                                'title' => Util\detectTitle($item)
-                                ,'field' => $item['field']
-                            );
-                        }
-                        $p['stats'] = $stats;
-                    }
-
-                    break;
-
-                default: // grid
-                    // if (!empty($cfg['view']['group'])) {
-                    //     $rez['group'] = $cfg['view']['group'];
-                    // }
-            }
-        }
     }
 
     /**

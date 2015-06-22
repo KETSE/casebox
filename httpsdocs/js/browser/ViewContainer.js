@@ -496,10 +496,6 @@ Ext.define('CB.browser.ViewContainer', {
 
                 ,reload: this.onReloadClick
 
-                // ,activate: function() {
-                //     this.updatePreview();
-                // }
-
                 ,itemcontextmenu: this.onItemContextMenu
             }
         });

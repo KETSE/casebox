@@ -1,3 +1,25 @@
+CaseBox 1.9.477 (2015-06-22)
+==============================
+New Features, Improvements
+--------------------------
+- #6646 Notification bell - general remark
+- #6771 After an unsuccessful save, the ObjWindow should be unblocked, now it says "saving..."
+- #6772 If file preview can't be generated, show message inside window "Preview not available at this moment, please download the file"
+- main tree state enabled after default state restore
+- #6784 the breadcrumbs should change when looking at "Notifications"
+- #6793 There is no error in logs/debug if 'listeners' is not correct (JSON or other issue)
+- #6540 Clicking a node in Tree while in Pivot View, doesn't preview the node
+- #6579 Refactor how activeView(pivot, grid, chart) is determined
+
+Fixed Bugs:
+----------
+- #6782 Weird sorting in virtualFolders
+- #6635 Switching from Pivot view to another node in Tree will not show correct columns
+
+Notes:
+----------
+- updated translations in __casebox.sql
+
 CaseBox 1.9.476 (2015-06-19)
 ==============================
 New Features, Improvements

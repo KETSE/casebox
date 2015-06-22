@@ -10,23 +10,23 @@ class CasesGrouped extends Base
 {
     protected $fq;
 
-    protected function acceptedPath()
+    /**
+     * check if current class is configured to return any result for
+     * given path and request params
+     * @param  array   &$pathArray
+     * @param  array   &$requestParams
+     * @return boolean
+     */
+    protected function acceptedPath(&$pathArray, &$requestParams)
     {
-        $p = &$this->path;
-        if ((sizeof($p) > 1) &&
-            (get_class($this->lastNode) != get_class($this))
-        ) {
-            return false;
-        }
+        if (parent::acceptedPath($pathArray, $requestParams)) {
+            $lastNode = $pathArray[sizeof($pathArray) - 1];
 
-        $ourPid = @intval($this->config['pid']);
-
-        if ($this->lastNode instanceof \CB\TreeNode\Dbnode) {
-            if ($this->lastNode->id != $ourPid) {
+            if ((sizeof($pathArray) > 1) &&
+                (get_class($lastNode) != get_class($this))
+            ) {
                 return false;
             }
-        } elseif (!($this->lastNode instanceof \CB\TreeNode\CasesGrouped)) {
-            return false;
         }
 
         return true;
@@ -52,8 +52,8 @@ class CasesGrouped extends Base
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
-        $this->rootId = \CB\Browser::getRootFolderId();
-        if (!$this->acceptedPath()) {
+
+        if (!$this->acceptedPath($pathArray, $requestParams)) {
             return;
         }
 

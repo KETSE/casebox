@@ -11,31 +11,19 @@ use CB\Log;
 
 class ActionLog extends Base
 {
-
-    protected function acceptedPath()
+    /**
+     * check if current class is configured to return any result for
+     * given path and request params
+     * @param  array   &$pathArray
+     * @param  array   &$requestParams
+     * @return boolean
+     */
+    protected function acceptedPath(&$pathArray, &$requestParams)
     {
-        $lastId = 0;
-        if (empty($this->lastNode)) {
-            return false;
-        } else {
-            $lastId = $this->lastNode->id;
-        }
-
-        $ourPid = @intval($this->config['pid']);
-
-        if (!Security::isAdmin()) {
-            return false;
-        }
-
-        if ($this->lastNode instanceof Dbnode) {
-            if ($ourPid != $lastId) {
-                return false;
-            }
-        } elseif (get_class($this->lastNode) != get_class($this)) {
-            return false;
-        }
-
-        return true;
+        return (
+            parent::acceptedPath($pathArray, $requestParams) &&
+            Security::isAdmin()
+        );
     }
 
     protected function createDefaultFilter()
@@ -51,9 +39,8 @@ class ActionLog extends Base
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = &$requestParams;
-        $this->rootId = \CB\Browser::getRootFolderId();
 
-        if (!$this->acceptedPath()) {
+        if (!$this->acceptedPath($pathArray, $requestParams)) {
             return;
         }
 

@@ -26,7 +26,7 @@ class Base
         $sp = &$p['params'];
         $this->inputParams = &$p['inputParams'];
 
-        if (@$this->inputParams['from'] !== $this->fromParam) {
+        if (@$this->inputParams['view']['type'] !== $this->fromParam) {
             return;
         }
 
@@ -68,7 +68,7 @@ class Base
         $data = &$p['data'];
         $requiredIds = &$p['requiredIds'];
 
-        if (@$ip['from'] !== $this->fromParam) {
+        if (@$ip['view']['type'] !== $this->fromParam) {
             return;
         }
 
@@ -137,7 +137,7 @@ class Base
 
         $ip = &$p['inputParams'];
 
-        if (@$ip['from'] !== $this->fromParam) {
+        if (@$ip['view']['type'] !== $this->fromParam) {
             return;
         }
 

@@ -8,33 +8,6 @@ use CB\L;
 class RecycleBin extends Base
 {
 
-    protected function acceptedPath()
-    {
-        $p = &$this->path;
-
-        // Tasks can't be a root folder
-        if (sizeof($p) == 0) {
-            return false;
-        }
-
-        //get the configured 'pid' property for this tree plugin
-        //default is 0
-        //thats the parent node id where this class shold start to give result nodes
-        $ourPid = @$this->config['pid'];
-
-        // ROOT NODE: check if last node is the one we should attach to
-        if ($this->lastNode->getId() == (String)$ourPid) {
-            return true;
-        }
-
-        // CHILDREN NODES: accept if last node is an instance of this class
-        if (get_class($this->lastNode) == get_class($this)) {
-            return true;
-        }
-
-        return false;
-    }
-
     protected function createDefaultFilter()
     {
         $this->fq = array('did:'.$_SESSION['user']['id']);
@@ -46,9 +19,8 @@ class RecycleBin extends Base
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
-        $this->rootId = \CB\Browser::getRootFolderId();
 
-        if (!$this->acceptedPath()) {
+        if (!$this->acceptedPath($pathArray, $requestParams)) {
             return;
         }
 

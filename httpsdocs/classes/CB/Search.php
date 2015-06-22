@@ -119,13 +119,8 @@ class Search extends Solr\Client
         }
 
         $this->facets = array();
-        if (!$this->facetsSetManually) {
-            $path = Cache::get('current_path');
-
-            if (!empty($path)) {
-                $lastNode = $path[sizeof($path) -1];
-                $this->facets = $lastNode->getFacets();
-            }
+        if (!$this->facetsSetManually && !empty($p['facets'])) {
+            $this->facets = &$p['facets'];
         }
 
         $fp = $this->getFacetParams($p);

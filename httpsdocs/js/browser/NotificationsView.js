@@ -29,6 +29,15 @@ Ext.define('CB.browser.NotificationsView', {
                 ,scope: this
                 ,handler: this.onReloadClick
             })
+
+            ,preview: new Ext.Action({
+                itemId: 'preview'
+                ,scale: 'medium'
+                ,iconCls: 'im-preview'
+                ,scope: this
+                ,hidden: true
+                ,handler: this.onPreviewClick
+            })
         };
 
         this.defineStore();
@@ -44,6 +53,7 @@ Ext.define('CB.browser.NotificationsView', {
                 this.actions.markAllAsRead
                 ,'->'
                 ,this.actions.reload
+                ,this.actions.preview
             ]
         });
 
@@ -240,6 +250,27 @@ Ext.define('CB.browser.NotificationsView', {
         this.store.load();
 
         this.checkNotificationsTask.delay(1000 * 60 * 1); //1 minute
+
+        //add listeners for object panel to toggle preview action
+        var op = App.explorer.objectPanel;
+
+        this.actions.preview.setHidden(op.getCollapsed() === false);
+
+        op.on(
+            'expand'
+            ,function() {
+                this.actions.preview.setHidden(true);
+            }
+            ,this
+        );
+
+        op.on(
+            'collapse'
+            ,function() {
+                this.actions.preview.setHidden(false);
+            }
+            ,this
+        );
     }
 
     ,onCheckNotificationsTask: function() {
@@ -284,4 +315,16 @@ Ext.define('CB.browser.NotificationsView', {
     ,onReloadClick: function(b, e) {
         this.store.reload();
     }
+
+    /**
+     * handler for preview toolbar button
+     * @param  button b
+     * @param  evente
+     * @return void
+     */
+    ,onPreviewClick: function(b, e) {
+        App.explorer.objectPanel.expand();
+        this.actions.preview.hide();
+    }
+
 });

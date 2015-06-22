@@ -9,32 +9,6 @@ use CB\User;
 
 class FacetNav extends Base
 {
-    protected function acceptedPath()
-    {
-        $p = &$this->path;
-
-        // can't be a root folder
-        if (sizeof($p) == 0) {
-            return false;
-        }
-
-        //get the configured 'pid' property for this tree plugin
-        //default is 0
-        //thats the parent node id where this class shold start to give result nodes
-        $ourPid = @$this->config['pid'];
-
-        // ROOT NODE: check if last node is the one we should attach to
-        if ($this->lastNode->getId() == (String)$ourPid) {
-            return true;
-        }
-
-        // CHILDREN NODES: accept if last node is an instance of this class (same GUID)
-        if ($this->lastNode->guid == $this->guid) {
-            return true;
-        }
-
-        return false;
-    }
 
     public function getChildren(&$pathArray, $requestParams)
     {
@@ -43,7 +17,7 @@ class FacetNav extends Base
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
 
-        if (!$this->acceptedPath()) {
+        if (!$this->acceptedPath($pathArray, $requestParams)) {
             return;
         }
 
@@ -54,8 +28,6 @@ class FacetNav extends Base
         } else {
             $rez = $this->getChildNodes();
         }
-
-        $this->setViewParams($rez);
 
         return $rez;
     }
@@ -117,7 +89,6 @@ class FacetNav extends Base
             )
         );
     }
-
 
     protected function getParentNodeFilters()
     {

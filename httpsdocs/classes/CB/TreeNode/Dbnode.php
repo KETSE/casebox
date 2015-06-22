@@ -31,6 +31,7 @@ class Dbnode extends Base
                 }
             }
         }
+
         if (empty($pid)) {
             return array();
         }
@@ -52,15 +53,6 @@ class Dbnode extends Base
             $p['pid'] = $pid;
         } else {
             $p['pids'] = $pid;
-        }
-
-        if (empty($p['userViewChange'])) {
-
-            if (!empty($this->config['view'])) {
-                $p['from'] = $this->config['view'];
-            } elseif (empty($p['from']) || ($p['from'] !== 'tree')) {
-                $p['from'] = 'grid';
-            }
         }
 
         $s = new \CB\Search();
@@ -96,8 +88,6 @@ class Dbnode extends Base
             }
             \CB\Tasks::setTasksActionFlags($rez['data']);
         }
-
-        $this->setViewParams($rez);
 
         return $rez;
     }

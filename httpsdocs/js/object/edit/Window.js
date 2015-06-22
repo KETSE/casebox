@@ -86,12 +86,19 @@ Ext.define('CB.object.edit.Window', {
                 ,'getdraftid': this.onGetDraftId
 
                 ,'show': this.onShowWindow
+                ,'beforedestroy': this.onBeforeDestroy
             }
         });
 
         this.callParent(arguments);
 
+        Ext.Direct.on('exception', this.onAppException, this);
+
         this.doLoad();
+    }
+
+    ,onBeforeDestroy: function() {
+        Ext.Direct.un('exception', this.onAppException, this);
     }
 
     /**
@@ -719,6 +726,8 @@ Ext.define('CB.object.edit.Window', {
 
         this.getEl().mask(L.Saving + ' ...', 'x-mask-loading');
 
+        this.saving = true;
+
         this.complexFieldContainer.getForm().submit({
             clientValidation: true
             ,loadMask: false
@@ -739,6 +748,7 @@ Ext.define('CB.object.edit.Window', {
      */
     ,processSave: function(form, action) {
         this.getEl().unmask();
+        delete this.saving;
 
         var r = action.result;
 
@@ -751,6 +761,12 @@ Ext.define('CB.object.edit.Window', {
         }
     }
 
+    ,onAppException: function() {
+        if(this.saving) {
+            delete this.saving;
+            this.getEl().unmask();
+        }
+    }
 
     ,onObjectsStoreLoad: function(store, records, options) {
         this.onObjectsStoreChange(store, records, options);

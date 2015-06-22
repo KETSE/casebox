@@ -5,15 +5,26 @@ use CB\Util;
 
 class SearchResults extends Dbnode
 {
-    protected function acceptedPath()
+    /**
+     * check if current class is configured to return any result for
+     * given path and request params
+     * @param  array   &$pathArray
+     * @param  array   &$requestParams
+     * @return boolean
+     */
+    protected function acceptedPath(&$pathArray, &$requestParams)
     {
-        $p = &$this->path;
+        $lastNode = null;
 
-        if ((!empty($this->lastNode) &&
-            (get_class($this->lastNode) == get_class($this))
+        if (!empty($pathArray)) {
+            $lastNode = $pathArray[sizeof($pathArray) - 1];
+        }
+
+        if ((!empty($lastNode) &&
+            (get_class($lastNode) == get_class($this))
         )
         ) {
-            $data = $this->lastNode->getData();
+            $data = $lastNode->getData();
             if (!empty($this->requestParams['search']) || (@$data['template_type'] == 'search')) {
                 return true;
             }
@@ -28,7 +39,7 @@ class SearchResults extends Dbnode
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
-        if (!$this->acceptedPath()) {
+        if (!$this->acceptedPath($pathArray, $requestParams)) {
             return;
         }
 
@@ -72,9 +83,6 @@ class SearchResults extends Dbnode
         if (empty($rez['DC']) && !empty($td['cfg']['DC'])) {
             $rez['DC'] = $td['cfg']['DC'];
         }
-
-        // $rez['view'] = 'grid';
-        $this->setViewParams($rez);
 
         return $rez;
     }
