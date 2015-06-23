@@ -100,7 +100,14 @@ class Objects
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $p['pid'] = Path::detectRealTargetId($pid);
+        if (!empty($p['search'])) {
+            $s = new TreeNode\SearchResults();
+            $p['pid'] = $s->getCreateTarget($p);
+        }
+
+        if (empty($p['pid']) || !is_numeric($p['pid'])) {
+            $p['pid'] = Path::detectRealTargetId($pid);
+        }
 
         //security check moved inside objects class
 

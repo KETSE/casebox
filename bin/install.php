@@ -1,5 +1,7 @@
 <?php
 
+namespace CB\INSTALL;
+
 /**
  * install CaseBox script designed to help first configuration of casebox
  *
@@ -15,7 +17,7 @@
  * Requirements:
  *     on Windows platform path to mysql/bin should be added to "Path" environment variable
  */
-namespace CB\INSTALL;
+
 use CB;
 
 /*define some basic directories*/
@@ -28,7 +30,7 @@ require_once $cbHome.'httpsdocs/lib/Util.php';
 
 switch (CB\Util\getOS()) {
 
-    case 'WIN' :
+    case 'WIN':
 
         $returned_user_state = shell_exec(dirname(__FILE__).DIRECTORY_SEPARATOR.'get_user_state.bat');
         $user_state = preg_replace('/\n|\r/si', '', $returned_user_state);
@@ -37,8 +39,7 @@ switch (CB\Util\getOS()) {
         }
         break;
 
-
-    case "LINUX" :
+    case "LINUX":
         $currentUser = empty($_SERVER['USER']) ? @$_SERVER['USERNAME'] : $_SERVER['USER'];
 
         if (!in_array($currentUser, array('root'))) {
@@ -48,12 +49,10 @@ switch (CB\Util\getOS()) {
 
         break;
 
-    default : echo "Unknown OS System" ;
-        
+    default: echo "Unknown OS System" ;
+
         break;
 }
-
-
 
 if (!isset($cfg)) {
     $cfg = array();
@@ -83,16 +82,14 @@ $configFile = empty($options['f'])
 if (!empty($configFile) && file_exists($configFile)) {
     $options['config'] = \CB\Config::loadConfigFile($configFile);
     \CB\Cache::set('RUN_SETUP_CFG', $options['config']);
-    if(isset($options['config']['overwrite_create_backups']) && $options['config']['overwrite_create_backups'] == 'n') {
-        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', false );
+    if (isset($options['config']['overwrite_create_backups']) && $options['config']['overwrite_create_backups'] == 'n') {
+        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', false);
     } else {
-        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true );
+        \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true);
     }
 } else {
-    \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true );
+    \CB\Cache::set('RUN_SETUP_CREATE_BACKUPS', true);
 }
-
-
 
 //define working mode
 if (!empty($options['config'])) {
@@ -113,7 +110,6 @@ displaySystemNotices();
 $defaultValues = getDefaultConfigValues();
 
 $cfg = $cfg + $defaultValues;
-
 
 if (\CB\Util\getOS()!="WIN") {
     //ask for apache user and set ownership for some folders
@@ -176,7 +172,7 @@ defineBackupDir($cfg);
 echo "\nYou have configured main options for casebox.\n" .
     "Saving your settings to casebox.ini ... ";
 
-if(!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == FALSE) ) {
+if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
     backupFile(\CB\DOC_ROOT . 'config.ini');
 }
 
@@ -193,7 +189,7 @@ do {
             trigger_error('Error saving to config.ini file', E_USER_ERROR);
         }
     } else {
-        display_OK();
+        showMessage();
     }
 } while ($r === false);
 
@@ -213,7 +209,7 @@ createMainDatabase($cfg);
 
 echo 'Creating language files .. ';
 exec('php "' . $binDirectorty . 'languages_update_js_files.php"');
-display_OK();
+showMessage();
 
 echo "\nCasebox was successfully configured on your system\n" .
     "you should create at least one Core to use it.\n";

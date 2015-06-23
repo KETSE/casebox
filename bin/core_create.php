@@ -53,10 +53,18 @@ if (!\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
 
 \CB\INSTALL\defineBackupDir($cfg);
 
-$dbName = (isset($cfg['prefix']) ? $cfg['prefix'].'_' : \CB\PREFIX) . $coreName;
+$dbName = (
+    isset($cfg['prefix'])
+        ? $cfg['prefix'].'_'
+        : \CB\PREFIX
+    ) . $coreName;
 
-$dbUser = isset($cfg['su_db_user']) ? $cfg['su_db_user']:$cfg['db_user'];
-$dbPass = isset($cfg['su_db_pass']) ? $cfg['su_db_pass']:$cfg['db_pass'];
+$dbUser = isset($cfg['su_db_user'])
+    ? $cfg['su_db_user']
+    : $cfg['db_user'];
+$dbPass = isset($cfg['su_db_pass'])
+    ? $cfg['su_db_pass']
+    : $cfg['db_pass'];
 
 $applyDump = true;
 
@@ -65,7 +73,7 @@ if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
         if (\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') !== false) {
             echo 'Backuping .. ';
             backupDB($dbName, $dbUser, $dbPass);
-            display_OK();
+            showMessage();
         }
     } else {
         $applyDump = false;
@@ -84,7 +92,7 @@ if (\CB\DB\dbQuery('use `' . $dbName . '`')) {
 if ($applyDump) {
     echo 'Applying dump .. ';
     shell_exec('mysql --user=' . $dbUser . ' --password=' . $dbPass . ' ' . $dbName . ' < ' . $sqlFile);
-    display_OK();
+    showMessage();
 }
 
 $cbDb = $cfg['prefix'] . '__casebox';
@@ -94,7 +102,7 @@ echo 'Registering core .. ';
     'INSERT INTO ' . $cbDb . ' .cores (name, cfg) VALUES ($1, $2)',
     array($coreName, '{}')
 );
-display_OK();
+showMessage();
 
 //ask to provide root email & password
 $email = '';
@@ -118,6 +126,19 @@ DM\User::updateByName(
         ,'data' => '{"email": "'.$email.'"}'
     )
 );
+
+//set core languages
+$sql = 'INSERT INTO `config` (param, `value`)
+    VALUES ($1,$2)
+    ON DUPLICATE KEY UPDATE `value` = $2';
+
+$language = readParam('core_default_language', 'en');
+
+DB\dbQuery($sql, array('default_language', $language)) or die(DB\dbQueryError());
+
+$languages = readParam('core_languages', $language);
+
+DB\dbQuery($sql, array('languages', $languages)) or die(DB\dbQueryError());
 
 createSolrCore($cfg, $coreName);
 

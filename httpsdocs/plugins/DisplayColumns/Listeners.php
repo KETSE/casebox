@@ -9,6 +9,10 @@ class Listeners
         $ip = &$p['inputParams'];
         $class = null;
 
+        if (!empty($ip['from']) && ($ip['from'] == 'tree')) {
+            return;
+        }
+
         switch (@$ip['view']['type']) {
             case 'grid':
                 $class= new Grid();
@@ -60,6 +64,10 @@ class Listeners
     {
         $ip = &$p['inputParams'];
         $class = null;
+
+        if (!empty($ip['from']) && ($ip['from'] == 'tree')) {
+            return;
+        }
 
         switch (@$ip['view']['type']) {
             case 'grid':

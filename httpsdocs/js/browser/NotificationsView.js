@@ -290,7 +290,7 @@ Ext.define('CB.browser.NotificationsView', {
     }
 
     ,processGetNewCount: function(r, e) {
-        if(r.success !== true) {
+        if(Ext.isEmpty(r) || (r.success !== true)) {
             return;
         }
 

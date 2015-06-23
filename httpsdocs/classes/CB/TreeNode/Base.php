@@ -349,16 +349,18 @@ class Base implements \CB\Interfaces\TreeNode
 
     /**
      * get create menu for current node
+     * @param  array   $rp request params
      * @return varchar menu config string
      */
-    public function getCreateMenu()
+    public function getCreateMenu(&$rp)
     {
         $rez = '';
+
         if (!empty($this->config['createMenu'])) {
             $rez = $this->config['createMenu'];
         } else {
             if (!empty($this->parent)) {
-                $rez = $this->parent->getCreateMenu();
+                $rez = $this->parent->getCreateMenu($rp);
             }
         }
 

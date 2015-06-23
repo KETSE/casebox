@@ -331,7 +331,7 @@ class Base
                 $s['direction'],
                 (empty($rez[$s['property']]['sortType'])
                     ? 'asString'
-                    : $rez[$s['property']]
+                    : $rez[$s['property']]['sortType']
                 )
             );
         }

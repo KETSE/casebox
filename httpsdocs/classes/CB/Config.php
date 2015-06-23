@@ -889,7 +889,7 @@ class Config extends Singleton
             if (!empty($cfg[$property])) {
                 $cfg[$property] = Util\toJSONArray($cfg[$property]);
                 if (empty($cfg[$property])) {
-                    \CB\debug('Error parsing json config for property "' . $property . '".');
+                    \CB\debug($cfg['core_name'] . ': Error parsing json config for property "' . $property . '".');
                 }
             }
         }

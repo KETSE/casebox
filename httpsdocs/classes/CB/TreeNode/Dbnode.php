@@ -146,9 +146,10 @@ class Dbnode extends Base
 
     /**
      * get create menu for current node
+     * @param  array   $rp request params
      * @return varchar menu config string
      */
-    public function getCreateMenu()
+    public function getCreateMenu(&$rp)
     {
         return Browser\CreateMenu::getMenuForPath($this->id);
     }

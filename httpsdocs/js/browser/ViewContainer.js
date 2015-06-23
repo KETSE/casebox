@@ -1094,9 +1094,16 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onCreateObjectClick: function(b, e) {
-        b.config.data.pid = this.folderProperties.id;
-        b.config.data.path = this.folderProperties.path;
-        this.fireEvent('createobject', Ext.apply({}, b.config.data));
+        var ep = this.store.proxy.extraParams;
+
+        Ext.copyTo(b.config.data, this.folderProperties, 'pid,path');
+
+        //add search param if creating over search result
+        if(ep.search) {
+            b.config.data.search = ep.search;
+        }
+
+        this.fireEvent('createobject', Ext.clone(b.config.data));
     }
 
     ,onUploadClick: function(b, e) {

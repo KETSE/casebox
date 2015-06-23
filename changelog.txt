@@ -1,3 +1,18 @@
+CaseBox 1.9.478 (2015-06-23)
+==============================
+New Features, Improvements
+--------------------------
+- #6770 Change the modal popup "can't connect to server" to a tooltip at the top for a period of time
+- #6718 Make createMenu work in search template
+  search template config example:
+    ,"createMenu": "1582,1583"
+    ,"realNodeId": 1
+- #6543 Add interface language options in installation script
+
+Fixed Bugs:
+----------
+- #6816 Float fields displayed as Int in EditMode
+
 CaseBox 1.9.477 (2015-06-22)
 ==============================
 New Features, Improvements
