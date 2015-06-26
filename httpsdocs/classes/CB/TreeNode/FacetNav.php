@@ -4,6 +4,7 @@ namespace CB\TreeNode;
 use CB\Config;
 use CB\Util;
 use CB\Facets;
+use CB\Objects;
 use CB\Search;
 use CB\User;
 
