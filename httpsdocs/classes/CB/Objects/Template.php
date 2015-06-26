@@ -606,7 +606,6 @@ class Template extends Object
                         }
 
                     } else {
-                        // $objects = Search::getObjects($ids, 'id,name,template_id,pids');
                         $objects = \CB\Objects::getCachedObjects($ids);
                         foreach ($objects as $id => $obj) {
                             $d = $obj->getData();

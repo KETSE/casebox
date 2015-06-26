@@ -4,6 +4,7 @@ namespace CB\TreeNode;
 use CB\DB;
 use CB\Util;
 use CB\Browser;
+use CB\Objects;
 use CB\Search;
 
 class Dbnode extends Base
@@ -103,17 +104,11 @@ class Dbnode extends Base
 
     public function getName($id = false)
     {
-        $rez = '';
-
-        if ($id === false) {
+        if ($id == false) {
             $id = $this->id;
         }
-        if (!empty($id) && is_numeric($id)) {
-            $obj = \CB\Objects::getCachedObject($id);
-            if (!empty($obj)) {
-                $rez = $obj->getName();
-            }
-        }
+
+        $rez = Objects::getName($id);
 
         return $rez;
     }

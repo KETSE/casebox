@@ -1,3 +1,11 @@
+CaseBox 1.9.479 (2015-06-26)
+==============================
+New Features, Improvements
+--------------------------
+- #6765 Create basic CB customization script based on specs for Templates, Fields, Thesauri
+  Added "bin/apply_vanilla_data_model.php". Description in file header.
+- removed getObjectNames method from Search class
+
 CaseBox 1.9.478 (2015-06-23)
 ==============================
 New Features, Improvements

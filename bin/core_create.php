@@ -118,14 +118,16 @@ do {
 
 DB\dbQuery("use `$dbName`") or die(DB\dbQueryError());
 
-DM\User::updateByName(
-    array(
-        'name' => 'root'
-        ,'password' => $pass
-        ,'email' => $email
-        ,'data' => '{"email": "'.$email.'"}'
-    )
-);
+if (!empty($email) || !empty($pass)) {
+    DM\User::updateByName(
+        array(
+            'name' => 'root'
+            ,'password' => $pass
+            ,'email' => $email
+            ,'data' => '{"email": "'.$email.'"}'
+        )
+    );
+}
 
 //set core languages
 $sql = 'INSERT INTO `config` (param, `value`)

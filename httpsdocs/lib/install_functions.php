@@ -385,20 +385,23 @@ function verifyDBConfig(&$cfg)
     //  so if we have super user then can create regulary user with grand access
 
     $success = true;
+
     try {
-        $dbh = new \mysqli(
+        $dbh = @new \mysqli(
             $cfg['db_host'],
             $cfg['su_db_user'],
-            (isset($cfg['su_db_pass']) ? $cfg['su_db_pass']:null),
-            (isset($cfg['db_name']) ? $cfg['db_name']:null),
+            (isset($cfg['su_db_pass']) ? $cfg['su_db_pass'] : null),
+            (isset($cfg['db_name']) ? $cfg['db_name'] : null),
             $cfg['db_port']
         );
-    } catch (\Exception $e) {
+
+        $success = !mysqli_connect_error();
+    } catch (\mysqli_warning $e) {
+        echo 'setting false';
         $success = false;
     }
 
     return $success;
-
 }
 
 /**

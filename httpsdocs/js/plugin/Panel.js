@@ -75,11 +75,12 @@ Ext.define('CB.plugin.Panel', {
     }
 
     ,onLoadData: function(r, e) {
-        var items = [];
+        var items = []
+            ,params = Ext.valueFrom(this.loadedParams, {});
 
         //check if object was found (success = true)
         if(r.success !== true) {
-            this.update('<div class="x-preview-mask">' + L.RecordIdNotFound.replace('{id}', '#' + this.loadedParams.id) + '</div>');
+            this.update('<div class="x-preview-mask">' + L.RecordIdNotFound.replace('{id}', '#' + params.id) + '</div>');
         } else {
             this.removeAll(true);
 
@@ -92,7 +93,7 @@ Ext.define('CB.plugin.Panel', {
                     var c = Ext.create(
                         cl
                         ,{
-                            params: this.loadedParams
+                            params: params
                         }
                     );
 
@@ -119,14 +120,14 @@ Ext.define('CB.plugin.Panel', {
              * to the params
              */
 
-            if(this.loadedParams &&
-                // (CB.DB.templates.getType(this.loadedParams.template_id) != 'task') &&
-                (this.loadedParams.from !== 'window') &&
-                !Ext.isEmpty(this.loadedParams.name)
+            if(params &&
+                // (CB.DB.templates.getType(params.template_id) != 'task') &&
+                (params.from !== 'window') &&
+                !Ext.isEmpty(params.name)
             ){
                 var data = Ext.copyTo(
                     {}
-                    ,this.loadedParams
+                    ,params
                     ,'id,name,template_id,status,statusCls,uid,udate_ago_text'
                 );
                 data.name = Ext.String.htmlEncode(data.name);

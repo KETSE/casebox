@@ -47,7 +47,7 @@ class FacetNav extends Base
                     break;
 
                 default:
-                    $rez = @Search::getObjectNames($id)[$id];
+                    $rez = Objects::getName($id);
             }
 
         } else {

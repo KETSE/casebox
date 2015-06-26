@@ -76,13 +76,7 @@ class RecentActivity extends Base
                 return L\get(ucfirst($id));
 
             default:
-                if (!empty($id) && is_numeric($id)) {
-                    $rez = Search::getObjectNames($id);
-
-                    $rez = empty($rez)
-                        ? null
-                        : array_shift($rez);
-                }
+                $rez = Objects::getName($id);
                 break;
         }
 

@@ -763,44 +763,6 @@ class Search extends Solr\Client
     }
 
     /**
-     * method to get object names from solr
-     * Multilanguage plugin works also
-     *
-     * @param  array | string $ids
-     * @return array          associative array of names per id
-     */
-    public static function getObjectNames($ids)
-    {
-        $objectNames = Cache::get('objectNames');
-
-        $rez = array();
-        $getIds = array();
-
-        $ids = Util\toNumericArray($ids);
-
-        foreach ($ids as $id) {
-            if (isset($objectNames[$id])) {
-                $rez[$id] = $objectNames[$id];
-            } else {
-                $getIds[] = $id;
-            }
-        }
-
-        if (!empty($getIds)) {
-            $newData = static::getObjects($getIds);
-
-            foreach ($newData as $k => $v) {
-                $objectNames[$k] = $v['name'];
-                $rez[$k] = $v['name'];
-            }
-
-            Cache::set('objectNames', $objectNames);
-        }
-
-        return $rez;
-    }
-
-    /**
      * method to get multiple object properties from solr
      * Multilanguage plugin works also
      *
@@ -871,7 +833,7 @@ class Search extends Solr\Client
                     \CB\fireEvent('solrQuery', $eventParams);
                 }
             } catch ( \Exception $e ) {
-                throw new \Exception("An error occured in getObjectNames: \n\n {$e->__toString()}");
+                throw new \Exception("An error occured in getObjects: \n\n {$e->__toString()}");
             }
         }
 

@@ -1035,7 +1035,7 @@ class Browser
             /* get objects name */
             $name = 'Link';
 
-            $name = @Search::getObjectNames($p['id'])[$p['id']];
+            $name = Objects::getName($p['id']);
 
             /* end of get objects name */
             DB\dbQuery(

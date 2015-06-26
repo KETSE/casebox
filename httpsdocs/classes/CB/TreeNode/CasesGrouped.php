@@ -5,6 +5,7 @@ namespace CB\TreeNode;
 use CB\L;
 use CB\Templates;
 use CB\Search;
+use CB\Objects;
 
 class CasesGrouped extends Base
 {
@@ -96,7 +97,7 @@ class CasesGrouped extends Base
                 return L\get('AllMyCases');
         }
 
-        return @Search::getObjectNames($id)[$id];
+        return Objects::getName($id);
     }
 
     protected function getRootNodes()
