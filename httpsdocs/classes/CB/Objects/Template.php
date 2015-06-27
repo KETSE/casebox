@@ -533,7 +533,13 @@ class Template extends Object
             switch ($field['type']) {
                 case 'boolean':
                 case 'checkbox':
-                    $value = empty($value) ? L\get('no') : L\get('yes');
+                    $value = empty($value)
+                        ? ''
+                        : (($value) < 0
+                            ? L\get('no')
+                            : L\get('yes')
+                        );
+
                     break;
 
                 case '_sex':

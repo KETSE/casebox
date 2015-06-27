@@ -1,3 +1,10 @@
+CaseBox 1.9.480 (2015-06-27)
+==============================
+Fixed Bugs:
+----------
+- #12 KETSE/casebox/issues/12: The 'preview' pane shows YES for checkbox type fields no matter what you select
+- #10 KETSE/casebox/issues/10: Tree view not updated upon creation
+
 CaseBox 1.9.479 (2015-06-26)
 ==============================
 New Features, Improvements

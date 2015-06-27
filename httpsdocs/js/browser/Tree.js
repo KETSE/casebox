@@ -351,15 +351,14 @@ Ext.define('CB.browser.Tree', {
         }
 
         var n = this.getRootNode()
-            ,data = form.data
-                ? form.data
-                : form;
+            ,data = form.pid
+                ? form
+                : form.data;
         if(n) {
             n.cascadeBy({
                 before: function(n){
                     if(n.data.nid == data.pid) {
                         this.store.reload({node: n});
-                        // n.reload();
                     }
                 }
                 ,scope: this
