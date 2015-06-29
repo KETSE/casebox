@@ -1,3 +1,9 @@
+CaseBox 1.9.482 (2015-06-29)
+==============================
+Fixed Bugs:
+----------
+- #6873 Getting JS error when closing/reopening tasks
+
 CaseBox 1.9.481 (2015-06-29)
 ==============================
 New Features, Improvements

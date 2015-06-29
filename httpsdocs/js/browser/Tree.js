@@ -354,6 +354,8 @@ Ext.define('CB.browser.Tree', {
             ,data = form.pid
                 ? form
                 : form.data;
+        data = Ext.valueFrom(data, {});
+
         if(n) {
             n.cascadeBy({
                 before: function(n){
