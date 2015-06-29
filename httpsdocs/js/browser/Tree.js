@@ -21,15 +21,8 @@ Ext.define('CB.browser.Tree', {
         border: '0'
     }
     ,hideToolbar: true
-    ,stateful: true
+    ,stateful: false
     ,stateId: 'btree' //browser tree
-    ,stateEvents: [
-        'itemexpand'
-        ,'itemcollapse'
-        ,'beforedestroy'
-        ,'selectionchange'
-        ,'savestate'
-    ]
 
     ,initComponent: function(){
         if(Ext.isEmpty(this.data)) {
@@ -358,15 +351,16 @@ Ext.define('CB.browser.Tree', {
         }
 
         var n = this.getRootNode()
-            ,data = form.data
-                ? form.data
-                : form;
+            ,data = form.pid
+                ? form
+                : form.data;
+        data = Ext.valueFrom(data, {});
+
         if(n) {
             n.cascadeBy({
                 before: function(n){
                     if(n.data.nid == data.pid) {
                         this.store.reload({node: n});
-                        // n.reload();
                     }
                 }
                 ,scope: this
@@ -733,6 +727,7 @@ Ext.define('CB.browser.Tree', {
     ,recursiveExpandIds: function() {
         if(Ext.isEmpty(this.expandingIds)) {
             delete this.expandingPath;
+            this.enableStateSave();
             return;
         }
 
@@ -746,6 +741,18 @@ Ext.define('CB.browser.Tree', {
                 ,this
             );
         }
+    }
+
+    ,enableStateSave: function() {
+        this.stateful = true;
+
+        this.addStateEvents([
+            'itemexpand'
+            ,'itemcollapse'
+            ,'beforedestroy'
+            ,'selectionchange'
+            ,'savestate'
+        ]);
     }
 
     ,onCutClick: function(b, e) {

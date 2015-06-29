@@ -6,6 +6,7 @@ namespace CB\Api;
  *
  *
  */
+use CB\DataModel as DM;
 
 class Objects
 {
@@ -126,7 +127,10 @@ class Objects
             if (!isset($p['owner'])) {
                 return 'owner not specified';
             }
-            $p['oid'] = \CB\User::exists($p['owner']);
+
+            $p['oid'] = is_numeric($p['owner'])
+                ? $p['owner']
+                : DM\User::getIdByName($p['owner']);
         }
 
         if (!is_numeric($p['oid'])) {

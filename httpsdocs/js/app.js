@@ -1192,7 +1192,13 @@ function initApp() {
             msg = L.ErrorOccured;
         }
 
-        Ext.Msg.alert(L.Error, msg);
+        // Ext.Msg.alert(L.Error, msg);
+        Ext.toast({
+            html: msg
+            ,title: L.Error
+            ,minWidth: 300
+            ,align: 't'
+        });
 
         dhf = function(){
             delete App.hideFailureAlerts;

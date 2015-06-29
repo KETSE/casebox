@@ -1,7 +1,6 @@
 <?php
-namespace CB\UNITTESTS;
+namespace UnitTest;
 
-use CB\UNITTESTS\DATA;
 use CB\DataModel as DM;
 
 /**
@@ -26,7 +25,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         \CB\Config::setFlag('disableSolrIndexing', true);
 
         /* create users */
-        $usersData = DATA\createUsersData();
+        $usersData = Data\Providers::createUsersData();
         $this->userIds = array();
 
         foreach ($usersData[0] as $data) {
@@ -34,7 +33,7 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         }
 
         /* create objects for test notifications on them */
-        $objectsData = DATA\createTasksData();
+        $objectsData = Data\Providers::createTasksData();
 
         $userIds = $this->userIds;
 
@@ -45,7 +44,6 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
             $data['data']['assigned'] = array_shift($userIds);
             $this->objectIds[] = $this->createObject($data);
         }
-
     }
 
     /**
@@ -184,6 +182,16 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(
             \CB\Notifications::getActionDeclination('SomeWrongValue!>', 'en') == 'SomeWrongValue!>',
             'Declination not correct for a wrong value.'
+        );
+
+        $this->assertTrue(
+            \CB\Notifications::getActionDeclination('file_upload', 'en') == 'uploaded a file to',
+            'Declination not correct for file_upload.'
+        );
+
+        $this->assertTrue(
+            \CB\Notifications::getActionDeclination('file_update', 'en') == 'updated a file in',
+            'Declination not correct for file_update.'
         );
 
         //update a task and delete them all

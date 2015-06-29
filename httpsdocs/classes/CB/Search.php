@@ -126,13 +126,8 @@ class Search extends Solr\Client
         }
 
         $this->facets = array();
-        if (!$this->facetsSetManually) {
-            $path = Cache::get('current_path');
-
-            if (!empty($path)) {
-                $lastNode = $path[sizeof($path) -1];
-                $this->facets = $lastNode->getFacets();
-            }
+        if (!$this->facetsSetManually && !empty($p['facets'])) {
+            $this->facets = &$p['facets'];
         }
 
         $fp = $this->getFacetParams($p);
@@ -699,6 +694,11 @@ class Search extends Solr\Client
 
         $requiredIds = array_keys($requiredIds);
 
+        //preload templates
+        Templates\SingletonCollection::getInstance()->loadAll();
+
+        //preload all users display data
+
         //now there objects should be loaded in bulk before firing event
         //because DisplayColumns analizes each object from result
         Objects::getCachedObjects($requiredIds);
@@ -767,44 +767,6 @@ class Search extends Solr\Client
                 }
             }
         }
-    }
-
-    /**
-     * method to get object names from solr
-     * Multilanguage plugin works also
-     *
-     * @param  array | string $ids
-     * @return array          associative array of names per id
-     */
-    public static function getObjectNames($ids)
-    {
-        $objectNames = Cache::get('objectNames');
-
-        $rez = array();
-        $getIds = array();
-
-        $ids = Util\toNumericArray($ids);
-
-        foreach ($ids as $id) {
-            if (isset($objectNames[$id])) {
-                $rez[$id] = $objectNames[$id];
-            } else {
-                $getIds[] = $id;
-            }
-        }
-
-        if (!empty($getIds)) {
-            $newData = static::getObjects($getIds);
-
-            foreach ($newData as $k => $v) {
-                $objectNames[$k] = $v['name'];
-                $rez[$k] = $v['name'];
-            }
-
-            Cache::set('objectNames', $objectNames);
-        }
-
-        return $rez;
     }
 
     /**
@@ -878,7 +840,7 @@ class Search extends Solr\Client
                     \CB\fireEvent('solrQuery', $eventParams);
                 }
             } catch ( \Exception $e ) {
-                throw new \Exception("An error occured in getObjectNames: \n\n {$e->__toString()}");
+                throw new \Exception("An error occured in getObjects: \n\n {$e->__toString()}");
             }
         }
 

@@ -2,8 +2,16 @@
 
 namespace CB\DataModel;
 
+use CB\DB;
+
 class Base
 {
+    /**
+     * database table name
+     * @var string
+     */
+    protected static $tableName = 'table_name';
+
     /**
      * available table fields
      *
@@ -33,11 +41,26 @@ class Base
      * @param  int   $id
      * @return array | null
      */
-    public static function read($p)
+    public static function read($id)
     {
+        $rez = null;
+
         static::validateParamTypes(array('id' => $id));
 
-        return null;
+        //read
+        $res = DB\dbQuery(
+            'SELECT *
+            FROM `' . static::$tableName. '`
+            WHERE id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
+        if ($r = $res->fetch_assoc()) {
+            $rez = $r;
+        }
+        $res->close();
+
+        return $rez;
     }
 
     /**
@@ -47,6 +70,10 @@ class Base
      */
     public static function update($p)
     {
+        if (empty($p['id'])) {
+            trigger_error(L\get('ErroneousInputData') . ' no id given for update method', E_USER_ERROR);
+        }
+
         static::validateParamTypes($p);
 
         return null;
@@ -61,7 +88,15 @@ class Base
     {
         static::validateParamTypes(array('id' => $id));
 
-        return false;
+        DB\dbQuery(
+            'DELETE from `' . static::$tableName . '` ' .
+            'WHERE id = $1',
+            $id
+        ) or die(DB\dbQueryError());
+
+        $rez = (DB\dbAffectedRows() > 0);
+
+        return $rez;
     }
 
     /**
@@ -92,6 +127,11 @@ class Base
 
                 case 'bool':
                     $valid = is_bool($p[$fn]);
+
+                    break;
+
+                case 'char':
+                    $valid = is_string($p[$fn]) && (mb_strlen($p[$fn]) < 2);
 
                     break;
 

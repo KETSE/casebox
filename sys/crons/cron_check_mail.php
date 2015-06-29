@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\DataModel as DM;
+
 $cron_id = 'check_core_email';
 $execution_timeout = 60; //default is 60 seconds
 
@@ -123,24 +125,9 @@ foreach ($mailbox as $k => $mail) {
         continue;
     }
 
-    $user_id = false;
-    $res = DB\dbQuery(
-        'SELECT id
-        FROM users_groups
-        WHERE (`email` LIKE $1)
-            OR (`email` LIKE $2)
-            OR (`email` LIKE $3)',
-        array(
-            $email
-            ,'%,'.$email
-            ,$email.',%'
-        )
-    ) or die(DB\dbQueryError());
-    if ($r = $res->fetch_assoc()) {
-        $user_id = $r['id'];
-    }
-    $res->close();
-    if ($user_id == false) {
+    $user_id = DM\User::getIdByEmail($email);
+
+    if (!empty($user_id)) {
         if (empty($test_user_id)) {
             $delete_ids[] = $mailbox->getUniqueId($k);
             mail(

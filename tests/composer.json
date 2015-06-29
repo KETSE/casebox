@@ -1,9 +1,19 @@
 {
-    "require-dev": {
+    "autoload": {
+        "psr-4": {
+            "PHPUnit\\": "vendor/phpunit/phpunit/src/"
+
+            ,"CB\\": "../httpsdocs/classes/CB/"
+            ,"UnitTest\\": "../httpsdocs/classes/UnitTest/"
+        }
+    }
+
+    ,"require-dev": {
         "phpunit/phpunit": "4.6.*",
         "phpunit/phpunit-story": ">=1.0"
-    },
-    "require": {
+    }
+
+    ,"require": {
         "phpunit/php-code-coverage": "^2.0",
         "php-curl-class/php-curl-class": "^3.5"
     }

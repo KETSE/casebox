@@ -6,35 +6,6 @@ use CB\Templates;
 
 class MyCalendar extends Base
 {
-    protected function acceptedPath()
-    {
-        $p = &$this->path;
-
-        // Calendar can't be a root folder
-        if (sizeof($p) == 0) {
-            return false;
-        }
-
-        //get the configured 'pid' property for this tree plugin
-        //default is 0
-        //thats the parent node id where this class shold start to give result nodes
-        $ourPid = @$this->config['pid'];
-        if ($ourPid == '') {
-            $ourPid = '0';
-        }
-
-        // ROOT NODE: check if last node is the one we should attach to
-        if ($this->lastNode->getId() == (String)$ourPid) {
-            return true;
-        }
-
-        // CHILDREN NODES: accept if last node is an instance of this class
-        if (get_class($this->lastNode) == get_class($this)) {
-            return true;
-        }
-
-        return false;
-    }
 
     protected function createDefaultFilter()
     {
@@ -55,7 +26,7 @@ class MyCalendar extends Base
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
 
-        if (!$this->acceptedPath()) {
+        if (!$this->acceptedPath($pathArray, $requestParams)) {
             return;
         }
 
@@ -69,10 +40,6 @@ class MyCalendar extends Base
             $rez = $this->getRootNodes();
         } else {
             $rez = $this->getChildrenTasks();
-        }
-
-        if (!empty($this->config['view'])) {
-            $rez['view'] = $this->config['view'];
         }
 
         return $rez;

@@ -26,7 +26,7 @@ class Base
         $sp = &$p['params'];
         $this->inputParams = &$p['inputParams'];
 
-        if (@$this->inputParams['from'] !== $this->fromParam) {
+        if (@$this->inputParams['view']['type'] !== $this->fromParam) {
             return;
         }
 
@@ -68,7 +68,7 @@ class Base
         $data = &$p['data'];
         $requiredIds = &$p['requiredIds'];
 
-        if (@$ip['from'] !== $this->fromParam) {
+        if (@$ip['view']['type'] !== $this->fromParam) {
             return;
         }
 
@@ -137,7 +137,7 @@ class Base
 
         $ip = &$p['inputParams'];
 
-        if (@$ip['from'] !== $this->fromParam) {
+        if (@$ip['view']['type'] !== $this->fromParam) {
             return;
         }
 
@@ -186,7 +186,12 @@ class Base
                     $values = array();
 
                     if (!empty($col['solr_column_name'])) {
-                        $values = array(@$doc[$col['solr_column_name']]);
+                        if (isset($doc[$col['solr_column_name']])) {
+                            $v = $doc[$col['solr_column_name']];
+                            $doc[$col['fieldName']] = $v;
+                            unset($doc[$col['solr_column_name']]);
+                            $values = array($v);
+                        }
 
                         if (empty($templateField)) {
                             $templateField = array(
@@ -199,7 +204,6 @@ class Base
                         }
 
                     } else { //default
-                        $templateField = $template->getField($col['fieldName']);
                         $values = isset($doc[$col['fieldName']])
                             ? array($doc[$col['fieldName']])
                             : $obj->getFieldValue($col['fieldName']);
@@ -251,6 +255,13 @@ class Base
                             $doc[$fieldName] = $template->formatValueForDisplay($templateField, $value, false);
                         }
                     }
+                }
+            }
+
+            /* remove columns without title */
+            foreach ($customColumns as $fieldName => &$col) {
+                if (empty($col['title'])) {
+                    unset($customColumns[$fieldName]);
                 }
             }
 
@@ -325,7 +336,7 @@ class Base
                 $s['direction'],
                 (empty($rez[$s['property']]['sortType'])
                     ? 'asString'
-                    : $rez[$s['property']]
+                    : $rez[$s['property']]['sortType']
                 )
             );
         }

@@ -272,24 +272,6 @@ Ext.define('Group', {
         ,{name: 'enabled',  type: 'int'}
         ,'iconCls'
     ]
-    // ,proxy: {
-    //     type: 'direct'
-    //     ,paramsAsHash: true
-    //     ,api: {
-    //         read: 'CB_Security.getUserGroups'
-    //         ,create: 'CB_Security.createUserGroup'
-    //         ,update: 'CB_Security.updateUserGroup'
-    //         ,destory: 'CB_Security.destroyUserGroup'
-
-    //     }
-    //     ,reader: {
-    //         type: 'json'
-    //         ,successProperty: 'success'
-    //         ,idProperty: 'id'
-    //         ,rootProperty: 'data'
-    //         ,messageProperty: 'msg'
-    //     }
-    // }
 });
 
 Ext.define('Country', {

@@ -2,6 +2,8 @@
 
 namespace CB;
 
+use CB\DataModel as DM;
+
 class UsersGroups
 {
     /**
@@ -271,7 +273,7 @@ class UsersGroups
         }
 
         //check if user with such email doesn exist
-        $user_id = User::getIdByEmail($p['email']);
+        $user_id = DM\User::getIdByEmail($p['email']);
         if (!empty($user_id)) {
             throw new \Exception(L\get('UserEmailExists'));
         }
@@ -487,6 +489,35 @@ class UsersGroups
         }
 
         $rez['data']['template_id'] = User::getTemplateId();
+
+        return $rez;
+    }
+
+    /**
+     * get display data for given ids
+     * @param  varchar|array $ids
+     * @return associative   array of users display data
+     */
+    public static function getDisplayData($ids)
+    {
+        $rez = array();
+
+        $ids = Util\toNumericArray($ids);
+        if (!empty($ids)) {
+            $cdd = array();
+
+            if (Cache::exist('UsersGroupsDisplayData')) {
+                $cdd = Cache::get('UsersGroupsDisplayData');
+            } else {
+                $cdd = DataModel\UsersGroups::getDisplayData();
+                Cache::set('UsersGroupsDisplayData', $cdd);
+            }
+
+            $rez = array_intersect_key(
+                $cdd,
+                array_flip($ids)
+            );
+        }
 
         return $rez;
     }

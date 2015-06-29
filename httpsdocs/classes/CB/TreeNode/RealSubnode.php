@@ -5,12 +5,23 @@ use CB\DB;
 
 class RealSubnode extends Base
 {
-    protected function acceptedPath()
+    /**
+     * check if current class is configured to return any result for
+     * given path and request params
+     * @param  array   &$pathArray
+     * @param  array   &$requestParams
+     * @return boolean
+     */
+    protected function acceptedPath(&$pathArray, &$requestParams)
     {
-        $p = &$this->path;
+        $lastNode = null;
 
-        if (((empty($this->config['pid']) || (@$this->config['pid'] == '0')) && empty($this->lastNode)) ||
-            (!empty($this->lastNode) && (@$this->config['pid'] == $this->lastNode->id))
+        if (!empty($pathArray)) {
+            $lastNode = $pathArray[sizeof($pathArray) - 1];
+        }
+
+        if (((empty($this->config['pid']) || (@$this->config['pid'] == '0')) && empty($lastNode)) ||
+            (!empty($lastNode) && (@$this->config['pid'] == $lastNode->id))
         ) {
             return true;
         }
@@ -25,7 +36,7 @@ class RealSubnode extends Base
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
 
-        if (!$this->acceptedPath()) {
+        if (!$this->acceptedPath($pathArray, $requestParams)) {
             return;
         }
         /* should start with path check and see if child request is for a real db node*/

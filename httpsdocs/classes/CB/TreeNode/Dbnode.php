@@ -4,6 +4,7 @@ namespace CB\TreeNode;
 use CB\DB;
 use CB\Util;
 use CB\Browser;
+use CB\Objects;
 use CB\Search;
 
 class Dbnode extends Base
@@ -33,6 +34,7 @@ class Dbnode extends Base
                 }
             }
         }
+
         if (empty($pid)) {
             return array();
         }
@@ -54,16 +56,6 @@ class Dbnode extends Base
             $p['pid'] = $pid;
         } else {
             $p['pids'] = $pid;
-        }
-
-        if (empty($p['userViewChange'])) {
-
-            if (!empty($this->config['view'])) {
-                $p['from'] = $this->config['view'];
-            } elseif (empty($p['from']) || ($p['from'] !== 'tree')) {
-                $p['from'] = 'grid';
-            }
-
         }
 
         $s = new \CB\Search();
@@ -100,8 +92,6 @@ class Dbnode extends Base
             \CB\Tasks::setTasksActionFlags($rez['data']);
         }
 
-        $this->setViewParams($rez);
-
         return $rez;
     }
 
@@ -116,17 +106,11 @@ class Dbnode extends Base
 
     public function getName($id = false)
     {
-        $rez = '';
-
-        if ($id === false) {
+        if ($id == false) {
             $id = $this->id;
         }
-        if (!empty($id) && is_numeric($id)) {
-            $obj = \CB\Objects::getCachedObject($id);
-            if (!empty($obj)) {
-                $rez = $obj->getName();
-            }
-        }
+
+        $rez = Objects::getName($id);
 
         return $rez;
     }
@@ -159,9 +143,10 @@ class Dbnode extends Base
 
     /**
      * get create menu for current node
+     * @param  array   $rp request params
      * @return varchar menu config string
      */
-    public function getCreateMenu()
+    public function getCreateMenu(&$rp)
     {
         return Browser\CreateMenu::getMenuForPath($this->id);
     }

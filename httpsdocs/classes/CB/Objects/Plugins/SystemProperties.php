@@ -5,6 +5,7 @@ namespace CB\Objects\Plugins;
 use CB\User;
 use CB\Util;
 use CB\Search;
+use CB\Objects;
 
 class SystemProperties extends Base
 {
@@ -49,7 +50,7 @@ class SystemProperties extends Base
         $arr = array(&$d);
         Search::setPaths($arr);
 
-        $d['template_name'] = Search::getObjectNames($d['template_id'])[$d['template_id']];
+        $d['template_name'] = Objects::getName($d['template_id']);
 
         $sd = $obj->getSysData();
         $userId = User::getId();

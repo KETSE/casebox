@@ -3,21 +3,32 @@ namespace CB\TreeNode;
 
 class TasksForCase extends Tasks
 {
-    protected function acceptedPath()
+    /**
+     * check if current class is configured to return any result for
+     * given path and request params
+     * @param  array   &$pathArray
+     * @param  array   &$requestParams
+     * @return boolean
+     */
+    protected function acceptedPath(&$pathArray, &$requestParams)
     {
-        if (empty($this->lastNode)) {
+        $lastNode = null;
+
+        if (empty($pathArray)) {
             return false;
+        } else {
+            $lastNode = $pathArray[sizeof($pathArray) - 1];
         }
-        if ($this->lastNode instanceof Dbnode) {
-            if (\CB\Objects::getType($this->lastNode->id) !== 'case') {
+
+        if ($lastNode instanceof Dbnode) {
+            if (\CB\Objects::getType($lastNode->id) !== 'case') {
                 return false;
             }
-        } elseif (get_class($this->lastNode) != get_class($this)) {
+        } elseif (get_class($lastNode) != get_class($this)) {
             return false;
         }
 
         return true;
-
     }
 
     protected function createDefaultFilter()

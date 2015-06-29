@@ -101,12 +101,17 @@ function getParamPhrase($paramName)
 
         //core_create specific params
         ,'core_overwrite_existing_db' => 'Database for given core name already exists. Would you like to overwrite it?'
+
         ,'core_root_email' => 'Specify email address for root user:' . "\n"
         ,'core_root_pass' => 'Specify root user password:' . "\n"
+
+        ,'core_default_language' => 'Specify default language (ISO) {default}:' . "\n"
+        ,'core_languages' => 'UI available languages (comma separated ISO list) {default}: ' . "\n"
+
         ,'core_solr_overwrite' => 'Solr core already exists, overwrite [Y/n]: '
         ,'core_solr_reindex' => 'Reindex core [Y/n]: '
-        ,'overwrite_existing_core_db' => "Core database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
 
+        ,'overwrite_existing_core_db' => "Core database exists. Would you like to backup it and overwrite with dump from current installation [Y/n]: "
     );
 
     return empty($phrases[$paramName])
@@ -121,7 +126,9 @@ function getParamPhrase($paramName)
 function displaySystemNotices()
 {
     $PATH = getenv('PATH');
-    if (\CB\Util\getOS() == "WIN" && !( strpos($PATH,'mysql') || strpos($PATH,'MySQL') ) )  {
+    if (\CB\Util\getOS() == "WIN" &&
+        !(strpos($PATH, 'mysql') || strpos($PATH, 'MySQL'))
+    ) {
         echo "Notice: on Windows platform path to mysql/bin should be added to \"Path\" environment variable.\n\n";
     } else {
 
@@ -145,7 +152,7 @@ function setOwnershipForApacheUser(&$cfg)
         'chown -R ' . $cfg['apache_user'].' "' . \CB\DOC_ROOT . 'config.ini"'
     ];
 
-    foreach($cmdSet as $shell_cmd) {
+    foreach ($cmdSet as $shell_cmd) {
         shell_exec($shell_cmd);
     };
 
@@ -191,50 +198,49 @@ function initSolrConfig(&$cfg)
  */
 function createSolrConfigsetsSymlinks(&$cfg)
 {
+    if (isset($cfg['prefix'])) {
 
-   if(isset($cfg['prefix']))  {
-       
-    //creating solr symlinks
-    $solrCSPath = $cfg['solr_home'] . 'configsets' . DIRECTORY_SEPARATOR;
-    $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
+        //creating solr symlinks
+        $solrCSPath = $cfg['solr_home'] . 'configsets' . DIRECTORY_SEPARATOR;
+        $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
 
-    if (!file_exists($solrCSPath)) {
-        mkdir($solrCSPath, 0777, true);
-    }
-
-    $r = true;
-
-    $defaultLinkName = $solrCSPath . $cfg['prefix'].'_default';
-    if (!file_exists($defaultLinkName)) {
-        $r = symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $defaultLinkName );
-    }
-
-    $logLinkName = $solrCSPath . $cfg['prefix'].'_log';
-    if ( !file_exists($logLinkName) ) {
-        $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName );
-    }
-
-    if (\CB\Util\getOS() == "LINUX") {
-            shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
+        if (!file_exists($solrCSPath)) {
+            mkdir($solrCSPath, 0777, true);
         }
 
-        // create dir for log core
-    $logCore = $cfg['solr_home'] . $cfg['prefix'].'_log';
+        $r = true;
 
-        if ( !file_exists($logCore) ) {
+        $defaultLinkName = $solrCSPath . $cfg['prefix'].'_default';
+        if (!file_exists($defaultLinkName)) {
+            $r = symlink($CBCSPath . 'default_config' . DIRECTORY_SEPARATOR, $defaultLinkName);
+        }
+
+        $logLinkName = $solrCSPath . $cfg['prefix'].'_log';
+        if (!file_exists($logLinkName)) {
+            $r = $r && symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR, $logLinkName);
+        }
+
+        if (\CB\Util\getOS() == "LINUX") {
+                shell_exec("chown -R ".fileowner($CBCSPath).":".filegroup($CBCSPath)." ".$CBCSPath);
+        }
+
+            // create dir for log core
+        $logCore = $cfg['solr_home'] . $cfg['prefix'].'_log';
+
+        if (!file_exists($logCore)) {
             mkdir($logCore, 0777, true);
-           // symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
+            // symlink($CBCSPath . 'log_config' . DIRECTORY_SEPARATOR. 'conf', $logCore . DIRECTORY_SEPARATOR . 'conf' );
         }
 
-     if (\CB\Util\getOS() == "LINUX") {
-            // set owner of core folder for solr
-            shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
+        if (\CB\Util\getOS() == "LINUX") {
+                // set owner of core folder for solr
+                shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$logCore);
         }
-        
+
     }
 
     return [ 'success' => $r, 'links' => [ 'log' => $defaultLinkName, 'default' => $defaultLinkName ] ];
-    
+
 }
 
 /**
@@ -266,7 +272,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
             echo 'Unloading core '.$coreName.'... ';
             unset($solr);
             if (solrUnloadCore($solrHost, $solrPort, $fullCoreName)) {
-                display_OK();
+                showMessage();
             } else {
                 displayError("Error unloading core.\n");
                 $createCore = false;
@@ -276,13 +282,11 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
         }
     }
 
-
-
     if ($createCore) {
         echo 'Creating solr core ... ';
 
         if (solrCreateCore($solrHost, $solrPort, $fullCoreName, $cfg)) {
-            display_OK();
+            showMessage();
         } else {
             displayError("Error creating core.\n");
             $askReindex = false;
@@ -296,7 +300,7 @@ function createSolrCore(&$cfg, $coreName, $paramPrefix = 'core_')
             $cmd_reindex_core = 'php '.\CB\BIN_DIR.'solr_reindex_core.php -c '.$coreName.' -a -l';
             $reindex_result = shell_exec($cmd_reindex_core);
             // here need to verify result of execution solr_reindex_core.php
-            display_OK();
+            showMessage();
         }
     }
 }
@@ -325,12 +329,12 @@ function solrUnloadCore($host, $port, $coreName)
  * create a solr core
  * @return boolean
  */
-function solrCreateCore($host, $port, $coreName, $cfg = array() )
+function solrCreateCore($host, $port, $coreName, $cfg = array())
 {
     $rez = true;
 
     if (isset($cfg['solr_home'])) {
-        
+
         $CB_CORE_SOLR_PATH = $cfg['solr_home'].$coreName;
 
         // check if path on solr data exists
@@ -340,20 +344,19 @@ function solrCreateCore($host, $port, $coreName, $cfg = array() )
         }
 
         // make link to config
-       /* $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
+        /* $confLink = $CB_CORE_SOLR_PATH.DIRECTORY_SEPARATOR.'conf';
 
         $CBCSPath = \CB\SYS_DIR . 'solr_configsets' . DIRECTORY_SEPARATOR;
 
         $confPath = $CBCSPath.'default_config'.DIRECTORY_SEPARATOR.'conf';
-        
+
         if (!file_exists($confLink) && file_exists($confPath)) {
             $r = symlink($confPath, $confLink);
         } elseif (!file_exists($confPath)) {
             trigger_error($confPath, E_USER_WARNING);
         } */
 
-
-   if (\CB\Util\getOS() == "LINUX") {
+        if (\CB\Util\getOS() == "LINUX") {
             // set owner of core folder for solr same as parent
             shell_exec("chown -R ".fileowner($cfg['solr_home']).":".filegroup($cfg['solr_home'])." ".$CB_CORE_SOLR_PATH);
         }
@@ -378,24 +381,27 @@ function solrCreateCore($host, $port, $coreName, $cfg = array() )
 function verifyDBConfig(&$cfg)
 {
 
-    // simply try to acces with superuser, 
+    // simply try to acces with superuser,
     //  so if we have super user then can create regulary user with grand access
 
     $success = true;
-      try {
-            $dbh = new \mysqli(
-                $cfg['db_host'],
-                $cfg['su_db_user'],
-                (isset($cfg['su_db_pass']) ? $cfg['su_db_pass']:null),
-                (isset($cfg['db_name']) ? $cfg['db_name']:null),
-                $cfg['db_port']
-            );
-        } catch (\Exception $e) {
-            $success = false;
-        }
+
+    try {
+        $dbh = @new \mysqli(
+            $cfg['db_host'],
+            $cfg['su_db_user'],
+            (isset($cfg['su_db_pass']) ? $cfg['su_db_pass'] : null),
+            (isset($cfg['db_name']) ? $cfg['db_name'] : null),
+            $cfg['db_port']
+        );
+
+        $success = !mysqli_connect_error();
+    } catch (\mysqli_warning $e) {
+        echo 'setting false';
+        $success = false;
+    }
 
     return $success;
-    
 }
 
 /**
@@ -446,7 +452,7 @@ function initDBConfig(&$cfg)
 function createMainDatabase($cfg)
 {
 
-   $rez = true;
+    $rez = true;
 
     connectDBWithSuUser($cfg);
 
@@ -460,19 +466,16 @@ function createMainDatabase($cfg)
         if (confirm('overwrite__casebox_db')) {
             if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
                 echo 'Backuping .. ';
-               if(backupDB($cbDb, $DB_USER, $DB_PASS)) {
-                   display_OK();
-               } else {
-                   display_ERROR('FALSE');
-               }
-
+                if (backupDB($cbDb, $DB_USER, $DB_PASS)) {
+                    showMessage();
+                } else {
+                    showError('FALSE');
+                }
             }
-
-            
 
             echo 'Applying dump .. ';
             echo shell_exec('mysql --user=' . $DB_USER . ( $DB_PASS ? ' --password=' . $DB_PASS : '' ) . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
-            display_OK();
+            showMessage();
         }
     } else {
         if (confirm('create__casebox_from_dump')) {
@@ -480,13 +483,12 @@ function createMainDatabase($cfg)
                 echo shell_exec('mysql --user=' . $DB_USER . ( $DB_PASS ? ' --password=' . $DB_PASS : '' )  . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             } else {
                 $rez = false;
-                display_ERROR('Cant create database "' . $cbDb . '".');
+                showError('Cant create database "' . $cbDb . '".');
             }
         }
     }
 
-   // GrandDBAccess($cfg);
-    
+    // GrandDBAccess($cfg);
     return $rez;
 }
 
@@ -495,14 +497,13 @@ function createMainDatabase($cfg)
  * @param type $cfg
  */
 /*function GrandDBAccess($cfg) {
-       
 
     // first check if user exists
      $SQL_CHECK_USER = "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE USER = '".$cfg['db_user']."')";
 
      $db_user_rez = \CB\DB\dbQuery($SQL_CHECK_USER);
      $db_user = $db_user_rez->fetch_array();
-    if( $db_user[0] != 1 )  {
+    if ($db_user[0] != 1) {
 
         $SQL_CREATE_USER = "CREATE USER `".$cfg['db_user']."`@`".$cfg['db_host']."` IDENTIFIED BY '".$cfg['db_pass']."'";
         \CB\DB\dbQuery($SQL_CREATE_USER);
@@ -553,10 +554,10 @@ function readParam($paramName, $defaultValue = null)
             getParamPhrase($paramName)
         );
 
-        if(defined('CB\\PREFIX')) {
+        if (defined('CB\\PREFIX')) {
              $question = str_replace('{prefix}', constant('CB\\PREFIX'), $question);
         }
-        
+
         $l = readAline($question);
 
         /* define prefix not defined yet */
@@ -682,7 +683,8 @@ function displayError($error)
 {
     if (\CB\Cache::exist('RUN_SETUP_INTERACTIVE_MODE')) {
         if (\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
-            display_ERROR($error);
+            showError($error);
+
             return;
         }
     }
@@ -690,23 +692,16 @@ function displayError($error)
     trigger_error($error, E_USER_ERROR);
 }
 
-
-function display_OK($msg = "OK") {
-    if(\CB\Util\getOS() == "LINUX") {
-      echo "\033[32m".$msg."\033[0m".PHP_EOL;
+function showMessage($msg = 'OK', $color = 32)
+{
+    if (\CB\Util\getOS() == "LINUX") {
+        echo "\033[" . $color . "m" . $msg . "\033[0m" . PHP_EOL;
     } else {
-      echo $msg.PHP_EOL;
+        echo $msg . PHP_EOL;
     }
-
-    
 }
 
-function display_ERROR($msg = "ERROR") {
-    if(\CB\Util\getOS() == "LINUX") {
-      echo "\033[31m".$msg."\033[0m".PHP_EOL;
-    } else {
-      echo $msg.PHP_EOL;
-    }
-
-
+function showError($msg = "ERROR")
+{
+    displayMessage($msg, 31);
 }

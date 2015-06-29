@@ -4,34 +4,32 @@
  *
  * @author ghindows
  */
-namespace CB\UNITTESTS;
-
+namespace UnitTest;
 
 class CoreTest extends \PHPUnit_Framework_TestCase
 {
-    
+
     private $DB;
 
-    public function setUp() {
-     
+    public function setUp()
+    {
         $this->DB = \CB\Cache::get('dbh');
+    }
 
-    }
- 
     /**
-     * 
+     *
      */
-    public function testDBConnect() {
-        $this->assertTrue(mysqli_ping( $this->DB));
+    public function testDBConnect()
+    {
+        $this->assertTrue(mysqli_ping($this->DB));
     }
-    
+
     /**
-     * create core and configuration for it 
+     * create core and configuration for it
      * @depends testDBConnect
      */
     public function testCreateCore()
     {
-        
         $SQL = 'SELECT `active` '
             . ' FROM `'.DEFAULT_TEST_CBPREFIX.'__casebox`.`cores`  '
             . ' WHERE name LIKE "'.DEFAULT_TEST_CORENAME.'" ';
@@ -39,42 +37,35 @@ class CoreTest extends \PHPUnit_Framework_TestCase
         $rCore =  \CB\DB\dbQuery($SQL);
 
         $CoreData = $rCore->fetch_assoc();
-        
-        $this->assertTrue( $CoreData['active'] == '1' );
 
+        $this->assertTrue($CoreData['active'] == '1');
     }
 
     /**
-     * test if you can login to core 
+     * test if you can login to core
      * @depends testCreateCore
      */
     public function testLoginCore()
     {
-      /* \CB\User::login('root', 'r00t');
-      $this->assertTrue(\CB\User::isLoged()); */
+        Helpers::getLoginKey();
 
-        \CB\UNITTESTS\HELPERS\getLoginKey();
+        $data = Helpers::getCredentialUserData('root');
 
-      $data = \CB\UNITTESTS\HELPERS\getCredentialUserData('root');
-
-      if(isset($data['username']) && isset($data['userpass']) ) {
-        $this->assertTrue( \CB\UNITTESTS\HELPERS\login($data['username'],$data['userpass']) );
-      } else {
-        $this->assertTrue( false, ' can\'t retrive usercredential ' );
-      }
-      
+        if (isset($data['username']) && isset($data['userpass'])) {
+            $this->assertTrue(Helpers::login($data['username'], $data['userpass']));
+        } else {
+            $this->assertTrue(false, ' can\'t retrive usercredential ');
+        }
     }
 
     /**
-     * 
+     *
      * try to logout if user is logedin
      * @depends testCreateCore
      * @depends testLoginCore
      */
     public function testLogoutCore()
     {
-      /* \CB\User::logout();
-      $this->assertFalse(\CB\User::isLoged()); */
         $this->assertTrue(true);
     }
 
@@ -86,7 +77,4 @@ class CoreTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertTrue(true);
     }
-
- 
-
 }

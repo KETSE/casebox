@@ -311,6 +311,27 @@ Ext.define('CB.ViewPort', {
         var cpl = App.explorer.containersPanel.getLayout();
 
         cpl.setActiveItem(b.pressed ? 1 : 0);
+
+        if(b.pressed) {
+            App.mainViewPort.breadcrumb.setValue([
+                {
+                    id: null
+                    ,name: L.Notifications
+                }
+            ]);
+            // set Notifications title
+        } else {
+            //set browser title
+            var proxy = App.explorer.store.getProxy()
+                ,action = proxy.reader.rawData
+                ,options = proxy.extraParams;
+
+            App.controller.onVCViewLoaded(
+                proxy
+                ,action
+                ,options
+            );
+        }
     }
 
     ,onLogin: function(){

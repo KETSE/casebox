@@ -20,6 +20,8 @@ namespace CB;
  *       11 Download
  */
 
+use CB\DataModel as DM;
+
 class Security
 {
     /* static constants */
@@ -39,30 +41,15 @@ class Security
 
     /**
      * Retreive defined groups
-     *
+     * Used in CB.DB for groupsStore
      * @returns array of groups records
      */
     public static function getUserGroups()
     {
-        $rez = array( 'success' => true, 'data' => array() );
-
-        // if (!Security::isAdmin() ) throw new \Exception(L\get('Access_denied'));
-
-        $res = DB\dbQuery(
-            'SELECT id
-                ,name
-                ,l' . Config::get('user_language_index') . ' `title`
-                ,`system`
-                ,`enabled`
-            FROM users_groups
-            WHERE TYPE = 1
-            ORDER BY 3'
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $rez['data'][] = $r;
-        }
-        $res->close();
+        $rez = array(
+            'success' => true,
+            'data' => DM\UsersGroups::getAvailableGroups()
+        );
 
         return $rez;
     }
@@ -83,29 +70,23 @@ class Security
         $p['data']['name'] = trim(strip_tags($p['data']['name']));
 
         // check if group with that name already exists
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM users_groups
-            WHERE TYPE = 1
-                AND name = $1',
-            $p['data']['name']
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            throw new \Exception(L\get('Group_exists'));
+        $id = DM\Group::getIdByName($p['data']['name']);
+        if (!empty($id)) {
+            trigger_error(L\get('Group_exists') . ' "' . $p['data']['name'] . '"', E_USER_ERROR);
         }
-        $res->close();
-        // end of check if group with that name already exists
 
-        DB\dbQuery(
-            'INSERT INTO users_groups(TYPE, name, l1, l2, l3, l4, cid)
-            VALUES(1, $1 , $1 , $1 , $1 , $1, $2)',
+        //create group
+        $name = $p['data']['name'];
+        $p['data']['id'] = DM\Group::create(
             array(
-                $p['data']['name'],
-                $_SESSION['user']['id']
+                'name' => $name
+                ,'l1' => $name
+                ,'l2' => $name
+                ,'l3' => $name
+                ,'l4' => $name
+                ,'cid' => User::getId()
             )
-        ) or die(DB\dbQueryError());
-        $p['data']['id'] = DB\dbLastInsertId();
+        );
 
         return $p;
     }
@@ -123,7 +104,7 @@ class Security
     }
 
     /**
-     * Delete a securoty group
+     * Delete a security group
      */
     public function destroyUserGroup($p)
     {
@@ -131,9 +112,12 @@ class Security
             throw new \Exception(L\get('Access_denied'));
         }
 
-        DB\dbQuery('delete from users_groups where id = $1', $p) or die(DB\dbQueryError());
+        DM\Group::delete($p);
 
-        return array( 'success' => true, 'data' => $p );
+        return array(
+            'success' => true
+            ,'data' => $p
+        );
     }
     /* end of groups methods */
 
@@ -146,7 +130,9 @@ class Security
      */
     public function searchUserGroups($p)
     {
-        /*{"editor":"form","source":"users","renderer":"listObjIcons","autoLoad":true,"multiValued":true,"maxInstances":1,"showIn":"grid","query":"test","objectId":"237","path":"/1"}*/
+        /*{"editor":"form","source":"users","renderer":"listObjIcons",
+        "autoLoad":true,"multiValued":true,"maxInstances":1,
+        "showIn":"grid","query":"test","objectId":"237","path":"/1"}*/
         $rez = array(
             'success' => true
             ,'data' => array()
@@ -372,19 +358,12 @@ class Security
         $ids = array_reverse($ids);
 
         /* getting group ids where passed $user_group_id is a member*/
-        $res = DB\dbQuery(
-            'SELECT DISTINCT group_id
-            FROM users_groups_association
-            WHERE user_id = $1',
-            $user_group_id
-        ) or die(DB\dbQueryError());
+        $user_group_ids = array_merge(
+            $user_group_ids,
+            DM\UsersGroups::getMemberGroupIds($user_group_id)
+        );
+        $user_group_ids = array_unique($user_group_ids);
 
-        while ($r = $res->fetch_assoc()) {
-            if (!in_array($r['group_id'], $user_group_ids)) {
-                $user_group_ids[] = $r['group_id'];
-            }
-        }
-        $res->close();
         /* end of getting group ids where passed $user_group_id is a member*/
 
         $acl_order = array_flip($ids);
@@ -1527,19 +1506,8 @@ class Security
     public static function getSystemGroupId($groupName)
     {
         if (!Cache::exist('group_id_' . $groupName)) {
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM users_groups
-                WHERE `type` = 1
-                    AND `system` = 1
-                    AND name = $1',
-                $groupName
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                Cache::set('group_id_' . $groupName, $r['id']);
-            }
-            $res->close();
+            $id = DM\Group::getIdByName($groupName);
+            Cache::set('group_id_' . $groupName, $id);
         }
 
         return Cache::get('group_id_' . $groupName);
@@ -1553,16 +1521,7 @@ class Security
      */
     public static function getGroupUserIds($group_id)
     {
-        $rez = array();
-        $res = DB\dbQuery(
-            'SELECT user_id FROM users_groups_association WHERE group_id = $1',
-            $group_id
-        ) or die(DB\dbQueryError());
-
-        while ($r = $res->fetch_assoc()) {
-            $rez[] = $r['user_id'];
-        }
-        $res->close();
+        $rez = DM\UsersGroups::getGroupUserIds();
 
         return $rez;
     }
@@ -1573,25 +1532,16 @@ class Security
      */
     public static function getActiveUsers()
     {
-        $rez = array('success' => true, 'data' => array());
+        $rez = array(
+            'success' => true,
+            'data' => array()
+        );
 
         $photosPath = Config::get('photos_path');
 
-        $res = DB\dbQuery(
-            'SELECT
-                id
-                ,name
-                ,first_name
-                ,last_name
-                ,concat(\'icon-user-\', coalesce(sex, \'\')) `iconCls`
-                ,photo
-            FROM users_groups
-            WHERE `type` = 2
-                AND did IS NULL
-            ORDER BY 2'
-        ) or die(DB\dbQueryError());
+        $users = DM\UsersGroups::getAvailableUsers();
 
-        while ($r = $res->fetch_assoc()) {
+        foreach ($users as $r) {
             $r['user'] = $r['name'];
             $r['name'] = User::getDisplayName($r);
 
@@ -1599,41 +1549,32 @@ class Security
 
             $rez['data'][] = $r;
         }
-        $res->close();
 
         return $rez;
     }
     /* ----------------------------------------------------  OLD METHODS ------------------------------------------ */
 
     /**
-     * Check if user_id (or current loged user) is an administrator
+     * Check if userId (or current loged user) is an administrator
      *
-     * @param  int     $user_id
+     * @param  int     $userId
      * @return boolean
      */
-    public static function isAdmin($user_id = false)
+    public static function isAdmin($userId = false)
     {
         $rez = false;
-        if ($user_id == false) {
-            $user_id = $_SESSION['user']['id'];
+
+        if ($userId == false) {
+            $userId = User::getId();
         }
 
-        $var_name = 'is_admin'.$user_id;
+        $var_name = 'is_admin'.$userId;
 
         if (!Cache::exist($var_name)) {
-            $res = DB\dbQuery(
-                'SELECT name
-                FROM users_groups
-                WHERE id = $1',
-                $user_id
-            ) or die(DB\dbQueryError());
-
-            if ($r = $res->fetch_assoc()) {
-                $rez = ($r['name'] == 'root');
-            }
-            $res->close();
-
-            Cache::set($var_name, $rez);
+            Cache::set(
+                $var_name,
+                (DM\User::getIdByName('root') == $userId)
+            );
         }
 
         return Cache::get($var_name);
@@ -1653,26 +1594,12 @@ class Security
     /**
      * Check if current loged user is owner for given user id
      *
-     * @param  int     $user_id
+     * @param  int     $userId
      * @return boolean
      */
-    public static function isUsersOwner($user_id)
+    public static function isUsersOwner($userId)
     {
-        $res = DB\dbQuery(
-            'SELECT cid
-            FROM users_groups
-            WHERE id = $1',
-            $user_id
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = ($r['cid'] == $_SESSION['user']['id']);
-        } else {
-            throw new \Exception(L\get('User_not_found'));
-        }
-        $res->close();
-
-        return $rez;
+        return (User::getId() == DM\User::getOwnerId($userId));
     }
 
     /**

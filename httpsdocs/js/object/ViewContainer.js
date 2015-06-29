@@ -71,6 +71,7 @@ Ext.define('CB.object.ViewContainer', {
             ]
             ,listeners: {
                 scope: this
+                ,show: this.onShowEvent
                 ,lockpanel: this.onLockPanelEvent
                 ,beforedestroy: this.onBeforeDestroy
             }
@@ -312,6 +313,17 @@ Ext.define('CB.object.ViewContainer', {
     }
 
     /**
+     * on show
+     * @param  component
+     * @return void
+     */
+    ,onShowEvent: function(c) {
+        if(this.lastLoadData) {
+            this.load(this.lastLoadData);
+        }
+    }
+
+    /**
      * remove listeners on destroy
      * @param  component
      * @return void
@@ -378,8 +390,11 @@ Ext.define('CB.object.ViewContainer', {
         var el = this.getLayout().activeItem.getEl();
 
         if(!el || !el.isVisible(true)) {
+            this.lastLoadData = objectData;
             return;
         }
+
+        delete this.lastLoadData;
 
         if(this.locked) {
             delete this.requestedLoadData;

@@ -5,13 +5,15 @@ class BrowserTree extends Browser
 {
     public function getChildren($p)
     {
+        $p['from'] = 'tree';
+
         $rez = parent::getChildren($p);
 
         $sql = 'SELECT count(*) `has_childs`
             FROM tree
             WHERE pid = $1
                 AND dstatus = 0'.
-            ( empty($p['showFoldersContent']) ?
+            (empty($p['showFoldersContent']) ?
                 ' AND `template_id` IN (0'.implode(',', Config::get('folder_templates')).')'
                 : ''
             );

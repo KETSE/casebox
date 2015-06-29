@@ -303,13 +303,19 @@ Ext.define('CB.controller.Browsing', {
      */
     ,onBreadcrumbItemClick: function(view, record, item, index, e, eOpts) {
         var store = this.breadcrumb.store
-            ,path = [];
+            ,path = []
+            ,id;
 
         for (var i = 0; i <= index; i++) {
-            path.push(store.getAt(i).get('id'));
+            id = store.getAt(i).get('id');
+            if(!Ext.isEmpty()) {
+                path.push(id);
+            }
         }
 
-        this.VC.changeSomeParams({'path': '/' + path.join('/')});
+        if(!Ext.isEmpty(path)) {
+            this.VC.changeSomeParams({'path': '/' + path.join('/')});
+        }
     }
 
     ,updateBreadcrumbData: function(pathIds, pathText) {

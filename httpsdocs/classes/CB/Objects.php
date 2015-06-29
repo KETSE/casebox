@@ -100,7 +100,14 @@ class Objects
             throw new \Exception(L\get('Access_denied'));
         }
 
-        $p['pid'] = Path::detectRealTargetId($pid);
+        if (!empty($p['search'])) {
+            $s = new TreeNode\SearchResults();
+            $p['pid'] = $s->getCreateTarget($p);
+        }
+
+        if (empty($p['pid']) || !is_numeric($p['pid'])) {
+            $p['pid'] = Path::detectRealTargetId($pid);
+        }
 
         //security check moved inside objects class
 
@@ -372,26 +379,19 @@ class Objects
     }
 
     /**
-     * get name for an object id from database
-     * Note: for multilanguage to work Search::getObjectNames() should be used
-     * @param  int          $objectId
+     * get name for an object id
+     * @param  int          $id
      * @return varchar|null
      */
-    public static function getName($objectId)
+    public static function getName($id)
     {
         $rez = null;
 
-        if (!is_numeric($objectId)) {
-            return $rez;
-        }
-
-        $res = DB\dbQuery(
-            'SELECT name FROM tree WHERE id = $1',
-            $objectId
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['name'];
+        if (!empty($id) && is_numeric($id)) {
+            $obj = static::getCachedObject($id);
+            if (!empty($obj)) {
+                $rez = $obj->getName();
+            }
         }
 
         return $rez;

@@ -888,6 +888,9 @@ class Config extends Singleton
         foreach ($jsonProperties as $property) {
             if (!empty($cfg[$property])) {
                 $cfg[$property] = Util\toJSONArray($cfg[$property]);
+                if (empty($cfg[$property])) {
+                    \CB\debug($cfg['core_name'] . ': Error parsing json config for property "' . $property . '".');
+                }
             }
         }
 

@@ -7,35 +7,28 @@
  * @author ghindows
  */
 
-define('CB_ROOT_PATH',realpath(__DIR__.'/../'));
+//define constants
+define('CB_ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
+define('CB_DOC_ROOT', CB_ROOT_PATH . 'httpsdocs' . DIRECTORY_SEPARATOR);
 
-define('TEST_PATH', __DIR__);
-define('TEST_PATH_TEMP', __DIR__.'/tmp');
+define('TEST_PATH', __DIR__ . DIRECTORY_SEPARATOR);
 
-    if (!file_exists(TEST_PATH_TEMP)) {
-        mkdir(TEST_PATH_TEMP, 0755, true);
-    }
-
-
+define('TEST_PATH_TEMP', TEST_PATH . 'tmp' . DIRECTORY_SEPARATOR);
 
 define('DEFAULT_TEST_CBPREFIX', 'cbtest');
 define('DEFAULT_TEST_CORENAME', 'test');
 define('DEFAULT_TEST_USERNAME', 'root');
 define('DEFAULT_TEST_USERPASS', 'devel');
-define('DEFAULT_TEST_CONFIG', TEST_PATH.'/src/config/install_config.ini');
 
+//create tmp if doesnt exist
+if (!file_exists(TEST_PATH_TEMP)) {
+    mkdir(TEST_PATH_TEMP, 0755, true);
+}
 
+include TEST_PATH . 'vendor/autoload.php';
 
-include realpath(__DIR__.'/src').'/helpers.php';
-include realpath(__DIR__.'/src').'/data_providers.php';
-include realpath(__DIR__.'/src').'/search_data_providers.php';
+UnitTest\Helpers::prepareInstance();
 
-\CB\UNITTESTS\HELPERS\prepareInstance();
-\CB\UNITTESTS\HELPERS\init();
+UnitTest\Helpers::init();
 
-include TEST_PATH.'/vendor/autoload.php';
-
-ini_set('display_errors',1);
-
-
-
+ini_set('display_errors', 1);

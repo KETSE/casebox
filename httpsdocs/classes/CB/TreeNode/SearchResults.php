@@ -5,18 +5,29 @@ use CB\Util;
 
 class SearchResults extends Dbnode
 {
-    protected function acceptedPath()
+    /**
+     * check if current class is configured to return any result for
+     * given path and request params
+     * @param  array   &$pathArray
+     * @param  array   &$requestParams
+     * @return boolean
+     */
+    protected function acceptedPath(&$pathArray, &$requestParams)
     {
-        $p = &$this->path;
+        $lastNode = null;
 
-        if ((!empty($this->lastNode) &&
-            (get_class($this->lastNode) == get_class($this))
+        if (!empty($pathArray)) {
+            $lastNode = $pathArray[sizeof($pathArray) - 1];
+        }
+
+        if ((!empty($lastNode) &&
+            (get_class($lastNode) == get_class($this))
         )
         ) {
-            $data = $this->lastNode->getData();
-            if (!empty($this->requestParams['search']) || (@$data['template_type'] == 'search')) {
+            // $data = $lastNode->getData();
+            // if (!empty($this->requestParams['search']) || (@$data['template_type'] == 'search')) {
                 return true;
-            }
+            // }
         }
 
         return false;
@@ -28,53 +39,58 @@ class SearchResults extends Dbnode
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
-        if (!$this->acceptedPath()) {
+
+        if (!$this->acceptedPath($pathArray, $requestParams)) {
             return;
         }
 
-        // creating search object
-        $so = new \CB\Objects\Object();
-        if (!empty($requestParams['search']['template_id'])) {
-            // searching from a search form
-            $so->setData($requestParams['search']);
-        } else {
-            $searchId = $this->lastNode->id;
-            if (!empty($requestParams['search']['id']) && is_numeric($requestParams['search']['id'])) {
-                $searchId = $requestParams['search']['id'];
-            }
-            // executing a saved search
-            $so->load($searchId);
-        }
+        $p = $this->getSearchParams($requestParams);
 
-        $t = $so->getTemplate();
-        $td = $t->getData();
-
-        $p = [];
-        // if we have a router defined in config of the search template then try to prepare search params wit it
-        // otherwise use default search method
-        if (empty($td['cfg']['router'])) {
-            $p = $this->getSearchParams($so);
-
-        } else {
-            $a = explode('.', $td['cfg']['router']);
-            $class = str_replace('_', '\\', $a[0]);
-            $class = new $class();
-            $p = $class->{$a[1]}($so);
-        }
-
-        $this->config = array_merge($this->config, $p);
+        //facets are obtained by browser class before collecting children
+        unset($p['facets']);
 
         $p = array_merge($requestParams, $p);
 
         $s = new \CB\Search();
         $rez = $s->query($p);
 
-        if (empty($rez['DC']) && !empty($td['cfg']['DC'])) {
-            $rez['DC'] = $td['cfg']['DC'];
+        return $rez;
+    }
+
+    /**
+     * get create menu for current node
+     * @param  array   $rp request params
+     * @return varchar menu config string
+     */
+    public function getCreateMenu(&$rp)
+    {
+        $rez = '';
+        $cfg = $this->getSearchParams($rp);
+
+        if (!empty($cfg['createMenu'])) {
+            $rez = $cfg['createMenu'];
+        } else {
+            if (!empty($this->parent)) {
+                $rez = $this->parent->getCreateMenu($rp);
+            }
         }
 
-        // $rez['view'] = 'grid';
-        $this->setViewParams($rez);
+        return $rez;
+    }
+
+    /**
+     * get target id for creating objects on search
+     * @param  array $rp request params
+     * @return int   | null
+     */
+    public function getCreateTarget(&$rp)
+    {
+        $rez = null;
+        $cfg = $this->getSearchParams($rp);
+
+        if (!empty($cfg['realNodeId'])) {
+            $rez = $cfg['realNodeId'];
+        }
 
         return $rez;
     }
@@ -89,22 +105,57 @@ class SearchResults extends Dbnode
         return $rez;
     }
 
-    protected function getSearchParams(&$searchObject)
+    /**
+     * get search params for given request params
+     * @param  array &$rp
+     * @return array
+     */
+    protected function getSearchParams(&$rp) //searchObject
     {
-        $tpl = $searchObject->getTemplate();
-        $rez = $tpl->getData()['cfg'];
-        @$rez['template_id'] = $searchObject->getData()['template_id'];
+        $rez = array();
 
-        if (empty($rez['fq'])) {
-            $rez['fq'] = array();
+        // creating search object
+        $so = new \CB\Objects\Object();
+
+        if (!empty($rp['search']['template_id'])) {
+            // searching from a search form
+            $so->setData($rp['search']);
+        } else {
+            // should/will be reviewed for saved searches
+            $searchId = $this->lastNode->id;
+            if (!empty($rp['search']['id']) && is_numeric($rp['search']['id'])) {
+                $searchId = $rp['search']['id'];
+            }
+            // executing a saved search
+            $so->load($searchId);
         }
 
-        $ld = $searchObject->getLinearData();
-        foreach ($ld as $v) {
-            $condition = $this->adjustCondition($tpl->getField($v['name']), $v);
-            if (!empty($condition)) {
-                $rez['fq'][] = $condition;
+        $t = $so->getTemplate();
+        $td = $t->getData();
+
+        // if we have a router defined in config of the search template then try to prepare search params wit it
+        // otherwise use default search method
+        if (empty($td['cfg']['router'])) {
+            $rez = $t->getData()['cfg'];
+            @$rez['template_id'] = $so->getData()['template_id'];
+
+            if (empty($rez['fq'])) {
+                $rez['fq'] = array();
             }
+
+            $ld = $so->getLinearData();
+            foreach ($ld as $v) {
+                $condition = $this->adjustCondition($t->getField($v['name']), $v);
+                if (!empty($condition)) {
+                    $rez['fq'][] = $condition;
+                }
+            }
+
+        } else {
+            $a = explode('.', $td['cfg']['router']);
+            $class = str_replace('_', '\\', $a[0]);
+            $class = new $class();
+            $rez = $class->{$a[1]}($so);
         }
 
         return $rez;

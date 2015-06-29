@@ -49,7 +49,6 @@ class Browser
             : false;
 
         $this->requestParams = $p;
-        Cache::set('requestParams', $p);
 
         /* end of prepare params */
 
@@ -66,6 +65,8 @@ class Browser
             if (empty($p['query'])) {
                 $this->treeNodeConfigs = Config::get('treeNodes');
             }
+
+            // default is only DBNode if nothing defined in cofig
             if (empty($this->treeNodeConfigs)) {
                 $this->treeNodeConfigs = array('Dbnode' => array());
             }
@@ -105,37 +106,42 @@ class Browser
 
         Cache::set('current_path', $this->path);
 
+        $this->result = array(
+            'data' => array()
+            ,'facets' => array()
+            ,'pivot' => array()
+            ,'search' => array()
+            ,'view' => array()
+            ,'sort' => array()
+            ,'group' => array()
+            ,'stats' => array()
+            ,'DC' => array()
+            ,'total' => 0
+        );
+
+        //get view config and apply to request params and for result
+        $viewConfig = $this->detectViewConfig();
+        $this->requestParams = array_merge($this->requestParams, $viewConfig);
+        $this->result = array_merge($this->result, $viewConfig);
+
+        $this->requestParams['facets'] = $this->detectFacets();
+
         $this->collectAllChildren();
 
-        $this->prepareResults($this->data);
+        $this->prepareResult();
 
         $rez = array(
             'success' => true
             ,'pathtext' => $this->getPathText($p)
             ,'folderProperties' => $this->getPathProperties($p)
-            ,'data' => $this->data
-            ,'total' => $this->total
             ,'page' => @$p['page']
+            ,'data' => array()
         );
 
-        $params = array(
-            'facets'
-            ,'pivot'
-            ,'search'
-            ,'view'
-            ,'sort'
-            ,'group'
-            ,'stats'
-        );
-
-        foreach ($params as $param) {
-            if (!empty($this->{$param})) {
-                $rez[$param] = &$this->{$param};
+        foreach ($this->result as $k => &$v) {
+            if (!empty($this->result[$k])) {
+                $rez[$k] = &$v;
             }
-        }
-
-        if (!empty($this->DC)) {
-            $rez['DC'] = &$this->DC[0];
         }
 
         return $rez;
@@ -172,8 +178,49 @@ class Browser
 
             $rez['name'] = @Util\adjustTextForDisplay($rez['name']);
             $rez['path'] = '/'.implode('/', $idsPath);
-            $rez['menu'] = $this->path[sizeof($this->path) - 1]->getCreateMenu();
+            $rez['menu'] = $this->path[sizeof($this->path) - 1]->getCreateMenu($this->requestParams);
 
+        }
+
+        return $rez;
+    }
+
+    /**
+     * detect the resulting view and its params
+     * from request params and node configs
+     *
+     * @return array view config
+     */
+    protected function detectViewConfig()
+    {
+        $rez = array();
+
+        $rp = &$this->requestParams;
+
+        foreach ($this->treeNodeClasses as $class) {
+            $r = $class->getViewConfig($this->path, $rp);
+
+            if (!empty($r)) {
+                $rez = $r;
+            }
+        }
+
+        return $rez;
+    }
+
+    /**
+     * detect facet configs that should be displayed for last node in path
+     *
+     * @return array
+     */
+    protected function detectFacets()
+    {
+        $rez = array();
+
+        $rp = &$this->requestParams;
+
+        if (!empty($this->path)) {
+            $rez = $this->path[sizeof($this->path) - 1]->getFacets($rp);
         }
 
         return $rez;
@@ -182,57 +229,59 @@ class Browser
     protected function collectAllChildren()
     {
 
-        $this->data = array();
-        $this->facets = array();
-        $this->pivot = array();
-        $this->total = 0;
-        $this->search = array();
-        $this->DC = array();
+        // $this->data = array();
+        // $this->facets = array();
+        // $this->pivot = array();
+        // $this->total = 0;
+        // $this->search = array();
+        // $this->DC = array();
+
+        $rez = &$this->result;
 
         foreach ($this->treeNodeClasses as $class) {
-            $rez = $class->getChildren($this->path, $this->requestParams);
+            $r = $class->getChildren($this->path, $this->requestParams);
 
             //merging all returned records into a single array
-            if (!empty($rez['data'])) {
-                $this->data = array_merge($this->data, $rez['data']);
+            if (!empty($r['data'])) {
+                $rez['data'] = array_merge($rez['data'], $r['data']);
 
                 //set display columns and sorting if present
-                if (isset($rez['DC'])) {
-                    $this->DC[] = $rez['DC'];
+                if (isset($r['DC'])) {
+                    $rez['DC'][] = $r['DC'];
                 }
 
-                if (isset($rez['sort'])) {
-                    $this->sort = $rez['sort'];
+                if (isset($r['sort'])) {
+                    $rez['sort'] = $r['sort'];
                 }
 
-                if (isset($rez['group'])) {
-                    $this->group = $rez['group'];
+                if (isset($r['group'])) {
+                    $rez['group'] = $r['group'];
                 }
             }
 
             $params = array(
                 'facets'
                 ,'pivot'
-                ,'view'
+                // ,'view'
                 ,'stats'
             );
 
             foreach ($params as $param) {
-                if (isset($rez[$param])) {
-                    $this->{$param} = $rez[$param];
+                if (isset($r[$param])) {
+                    $rez[$param] = $r[$param];
                 }
             }
 
             //calc totals accordingly
-            if (isset($rez['total'])) {
-                $this->total += $rez['total'];
-            } elseif (!empty($rez['data'])) {
-                $this->total += sizeof($rez['data']);
+            if (isset($r['total'])) {
+                $rez['total'] += $r['total'];
+            } elseif (!empty($r['data'])) {
+                $rez['total'] += sizeof($r['data']);
             }
 
             //if its debug host - search params will be also returned
-            if (isset($rez['search'])) {
-                $this->search[] = $rez['search'];
+            if (isset($r['search'])) {
+                $rez['search'][] = $r['search'];
             }
         }
     }
@@ -699,18 +748,6 @@ class Browser
 
                 break;
 
-            case 'task':
-                DB\dbQuery(
-                    'UPDATE tasks
-                    SET title = $1
-                    WHERE id = $2',
-                    array(
-                        $p['name']
-                        ,$id
-                    )
-                ) or die(DB\dbQueryError());
-
-                break;
         }
 
         /*updating renamed document into solr directly (before runing background cron)
@@ -998,7 +1035,7 @@ class Browser
             /* get objects name */
             $name = 'Link';
 
-            $name = @Search::getObjectNames($p['id'])[$p['id']];
+            $name = Objects::getName($p['id']);
 
             /* end of get objects name */
             DB\dbQuery(
@@ -1023,7 +1060,7 @@ class Browser
             $p['favorite'] = 1;
         }
 
-        return array('success' => true, 'data' => $p,);
+        return array('success' => true, 'data' => $p);
     }
 
     public function takeOwnership($ids)
@@ -1190,8 +1227,17 @@ class Browser
         return $id;
     }
 
-    public function prepareResults(&$data)
+    public function prepareResult()
     {
+        $rez = &$this->result;
+        $data = &$rez['data'];
+
+        //select first given DC
+        if (!empty($rez['DC'])) {
+            $rez['DC'] = $rez['DC'][0];
+        }
+
+        //prepare data
         if (empty($data) || !is_array($data)) {
             return;
         }
@@ -1203,7 +1249,6 @@ class Browser
                 unset($d['id']);
             }
         }
-
     }
 
     public static function updateLabels(&$data)

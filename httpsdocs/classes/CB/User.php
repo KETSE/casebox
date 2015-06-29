@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\DataModel as DM;
+
 class User
 {
     /**
@@ -37,29 +39,23 @@ class User
         $user_id = false;
 
         /* try to authentificate */
-        $res = DB\dbQuery('CALL p_user_login($1, $2, $3)', array($login, $pass, $ips)) or die( DB\dbQueryError() );
+        $res = DB\dbQuery(
+            'CALL p_user_login($1, $2, $3)',
+            array($login, $pass, $ips)
+        ) or die( DB\dbQueryError() );
+
         if (($r = $res->fetch_assoc()) && ($r['status'] == 1)) {
             $user_id = $r['user_id'];
         }
         $res->close();
+
         DB\dbCleanConnection();
 
         if ($user_id) {
             $rez = array('success' => true, 'user' => array());
-            if (!empty($loginAs) && ($login == 'root')) {
-                $res = DB\dbQuery(
-                    'SELECT id
-                    FROM users_groups
-                    WHERE `type` = 2
-                        AND enabled = 1
-                        AND name = $1',
-                    $loginAs
-                ) or die( DB\dbQueryError() );
 
-                if (($r = $res->fetch_assoc())) {
-                    $user_id = $r['id'];
-                }
-                $res->close();
+            if (!empty($loginAs) && ($login == 'root')) {
+                $user_id = DM\User::getIdByName($loginAs);
             }
 
             $r = User::getPreferences($user_id);
@@ -88,15 +84,13 @@ class User
             }
         } else {
             //check if login exists and add user id to session for logging
-            $res = DB\dbQuery(
-                'SELECT id FROM users_groups WHERE name = $1',
-                $login
-            ) or die(DB\dbQueryError());
-            if ($r = $res->fetch_assoc()) {
-                $_SESSION['user']['id'] = $r['id'];
+            $user_id = DM\User::getIdByName($login);
+
+            if (!empty($user_id)) {
+                $_SESSION['user']['id'] = $user_id;
                 $logActionType = 'login_fail';
             }
-            $res->close();
+
             $rez['msg'] = L\get('Auth_fail');
         }
 
@@ -126,24 +120,12 @@ class User
 
         unset($_SESSION['verified']);
 
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM users_groups
-            WHERE id = $1
-                AND `password`= md5($2)',
-            array(
-                $_SESSION['user']['id']
-                ,'aero'.$pass
-            )
-        ) or die( DB\dbQueryError() );
-
-        if ($r = $res->fetch_assoc()) {
+        if (DM\User::verifyPassword(User::getId(), $pass)) {
             $rez['success'] = true;
             $_SESSION['verified'] = time();
         } else {
             $rez['msg'] = L\get('Auth_fail');
         }
-        $res->close();
 
         return $rez;
     }
@@ -430,17 +412,10 @@ class User
     private function getSecurityData()
     {
         $rez = array();
-        $res = DB\dbQuery(
-            'SELECT password_change
-                ,cfg
-            FROM users_groups
-            WHERE enabled = 1
-                AND did IS NULL
-                AND id = $1',
-            $_SESSION['user']['id']
-        ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
+        $r = DM\User::read(User::getId());
+
+        if (!empty($r)) {
             $cfg = Util\toJSONArray($r['cfg']);
             if (!empty($cfg['security'])) {
                 $rez = $cfg['security'];
@@ -450,7 +425,6 @@ class User
                 $rez['phone'] = $cfg['phone'];
             }
         }
-        $res->close();
 
         return $rez;
     }
@@ -589,27 +563,18 @@ class User
             }
         }
 
-        @DB\dbQuery(
-            'UPDATE users_groups
-            SET first_name = $2
-                ,last_name = $3
-                ,sex = $4
-                ,email = $5
-                ,language_id = $6
-                ,cfg = $7
-                ,data = $8
-            WHERE id = $1',
+        DM\User::update(
             array(
-                $p['id']
-                ,$p['first_name']
-                ,$p['last_name']
-                ,$p['sex']
-                ,$p['email']
-                ,$p['language_id']
-                ,Util\jsonEncode($cfg)
-                ,Util\jsonEncode($p['data'])
+                'id' => $p['id']
+                ,'first_name' => $p['first_name']
+                ,'last_name' => $p['last_name']
+                ,'sex' => $p['sex']
+                ,'email' => $p['email']
+                ,'language_id' => $p['language_id']
+                ,'cfg'=> Util\jsonEncode($cfg)
+                ,'data' => Util\jsonEncode($p['data'])
             )
-        ) or die(DB\dbQueryError());
+        );
 
         /* updating session params if the updated user profile is currently logged user*/
         if ($p['id'] == $_SESSION['user']['id']) {
@@ -804,7 +769,13 @@ class User
         } else {
             return array('success' => false);
         }
-        DB\dbQuery('UPDATE users_groups SET language_id = $2 WHERE id = $1', array($_SESSION['user']['id'], $id)) or die( DB\dbQueryError() );
+
+        DM\User::update(
+            array(
+                'id' => User::getId()
+                ,'language_id' => $id
+            )
+        );
 
         return array('success' => true);
     }
@@ -1011,10 +982,12 @@ class User
             );
         }
 
-        $res = DB\dbQuery(
-            'UPDATE users_groups SET photo = $2 WHERE id = $1',
-            array($p['id'], $photoName)
-        ) or die(DB\dbQueryError());
+        DM\User::update(
+            array(
+                'id' => $p['id'],
+                'photo' => $photoName
+            )
+        );
 
         return array('success' => true, 'photo' => $photoName);
     }
@@ -1039,52 +1012,22 @@ class User
         }
 
         /* delete photo file*/
-        $res = DB\dbQuery(
-            'SELECT photo
-            FROM users_groups
-            WHERE id= $1',
-            $p['id']
-        ) or die( DB\dbQueryError() );
+        $r = DM\User::read($p['id']);
 
-        if ($r = $res->fetch_assoc()) {
-            @unlink(Config::get('photos_path').$r['photo']);
+        if (!empty($r['photo'])) {
+            @unlink(Config::get('photos_path') . $r['photo']);
         }
-        $res->close();
         /* enddelete photo file*/
 
         // update db record
-        DB\dbQuery(
-            'UPDATE users_groups
-            SET photo = NULL
-            WHERE id= $1',
-            $p['id']
-        ) or die( DB\dbQueryError() );
+        DM\User::update(
+            array(
+                'id' => $p['id'],
+                'photo' => null
+            )
+        );
 
         return array('success' => true);
-    }
-
-    /**
-     * check if a given user id or name exists
-     * @param  int|varchar $user id or username of the user
-     * @return int|bool    user id or false
-     */
-    public static function exists($user)
-    {
-        $rez = false;
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM users_groups
-            WHERE `type` = 2
-                and ' . (is_numeric($user) ? 'id' : 'name') . ' = $1',
-            $user
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        }
-        $res->close();
-
-        return $rez;
     }
 
     /**
@@ -1098,88 +1041,6 @@ class User
         if (!empty($_SESSION['user']['id'])) {
             $rez= intval($_SESSION['user']['id']);
         }
-
-        return $rez;
-    }
-
-    /**
-     * get user id by his username
-     * @param  varchar $username
-     * @return int     | null
-     */
-    public static function getIdByUsername($username)
-    {
-        $rez = null;
-
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM users_groups
-            WHERE name = $1',
-            $username
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        }
-
-        $res->close();
-
-        return $rez;
-    }
-
-    /**
-     * get user id by email
-     * @param  varchar $email
-     * @return int     | null
-     */
-    public static function getIdByEmail($email)
-    {
-        $rez = null;
-
-        $res = DB\dbQuery(
-            'SELECT id
-                ,email
-            FROM users_groups
-            WHERE email LIKE $1
-                AND enabled = 1',
-            "%$email%"
-        ) or die(DB\dbQueryError());
-
-        while (($r = $res->fetch_assoc()) && empty($rez)) {
-            $mails = explode(',', $r['email']);
-            for ($i=0; $i < sizeof($mails); $i++) {
-                $mails[$i] = trim($mails[$i]);
-                if (mb_strtolower($mails[$i]) == $email) {
-                    $rez = $r['id'];
-                }
-            }
-        }
-
-        $res->close();
-
-        return $rez;
-    }
-
-    /**
-     * get user id by recovery hash
-     * @param  varchar $hash
-     * @return int     | null
-     */
-    public static function getIdByRecoveryHash($hash)
-    {
-        $rez = null;
-
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM users_groups
-            WHERE recover_hash = $1',
-            $hash
-        ) or die(DB\dbQueryError());
-
-        if ($r = $res->fetch_assoc()) {
-            $rez = $r['id'];
-        }
-        $res->close();
 
         return $rez;
     }
@@ -1200,14 +1061,12 @@ class User
             )
         );
 
-        DB\dbQuery(
-            'UPDATE users_groups
-            SET recover_hash = $2
-            WHERE id = $1',
+        DM\User::update(
             array(
-                $userId
-                ,$hash)
-        ) or die(DB\dbQueryError());
+                'id' => $userId
+                ,'recover_hash' => $hash
+            )
+        );
 
         return $hash;
     }
@@ -1219,16 +1078,23 @@ class User
      */
     public static function setNewPasswordByRecoveryHash($hash, $password)
     {
-        DB\dbQuery(
-            'UPDATE users_groups
-            SET `password` = md5($2)
-                ,recover_hash = NULL
-            WHERE recover_hash = $1',
-            array(
-                $hash
-                ,'aero'.$password
-            )
-        ) or die(DB\dbQueryError());
+        $rez = false;
+
+        $id = DM\User::getIdByRecoveryHash($hash);
+
+        if (!empty($id)) {
+            DM\User::update(
+                array(
+                    'id' => $id
+                    ,'password' => $password
+                    ,'recover_hash' => null
+                )
+            );
+
+            $rez = true;
+        }
+
+        return $rez;
     }
 
     /**
@@ -1309,21 +1175,7 @@ class User
 
         if (!Cache::exist($var_name)) {
             if (empty($data)) {
-                $res = DB\dbQuery(
-                    'SELECT
-                        name
-                        ,first_name
-                        ,last_name
-                        ,email
-                    FROM users_groups
-                    WHERE id = $1',
-                    $id
-                ) or die(DB\dbQueryError());
-
-                if ($r = $res->fetch_assoc()) {
-                    $data = $r;
-                }
-                $res->close();
+                $data = DM\User::read($id);
             }
 
             $name = @Purify::humanName($data['first_name'].' '.$data['last_name']);
@@ -1430,18 +1282,7 @@ class User
 
         if (!Cache::exist($var_name)) {
             if (empty($data)) {
-                $res = DB\dbQuery(
-                    'SELECT
-                        photo
-                    FROM users_groups
-                    WHERE id = $1',
-                    $id
-                ) or die(DB\dbQueryError());
-
-                if ($r = $res->fetch_assoc()) {
-                    $data = $r;
-                }
-                $res->close();
+                $data = DM\User::read($id);
             }
 
             //set result to default placeholder
@@ -1507,18 +1348,7 @@ class User
 
         if (!Cache::exist($var_name)) {
             if (empty($data)) {
-                $res = DB\dbQuery(
-                    'SELECT
-                        photo
-                    FROM users_groups
-                    WHERE id = $1',
-                    $id
-                ) or die(DB\dbQueryError());
-
-                if ($r = $res->fetch_assoc()) {
-                    $data = $r;
-                }
-                $res->close();
+                $data = DM\User::read($id);
             }
 
             $rez = '';
@@ -1565,23 +1395,23 @@ class User
         $coreLanguages = Config::get('languages');
         $languageSettings = Config::get('language_settings');
 
-        $res = DB\dbQuery(
-            'SELECT id
-                ,name
-                ,first_name
-                ,last_name
-                ,sex
-                ,email
-                ,language_id
-                ,cfg
-                ,data
-            FROM users_groups
-            WHERE did IS NULL
-                AND id = $1',
-            $user_id
-        ) or die(DB\dbQueryError());
+        $data = DM\User::read($user_id);
+        $r = array_intersect_key(
+            $data,
+            array(
+                'id' => 1
+                ,'name' => 1
+                ,'first_name' => 1
+                ,'last_name' => 1
+                ,'sex' => 1
+                ,'email' => 1
+                ,'language_id' => 1
+                ,'cfg' => 1
+                ,'data' => 1
+            )
+        );
 
-        if ($r = $res->fetch_assoc()) {
+        if (!empty($r)) {
             $language_index = empty($r['language_id'])
                 ? Config::get('user_language_index') -1
                 : $r['language_id'] - 1;
@@ -1626,7 +1456,6 @@ class User
 
             $rez = $r;
         }
-        $res->close();
 
         return $rez;
     }
@@ -1659,22 +1488,12 @@ class User
             $userId = $_SESSION['user']['id'];
         }
 
-        $res = DB\dbQuery(
-            'SELECT cfg
-            FROM users_groups
-            WHERE enabled = 1
-                AND did IS NULL
-                AND id = $1',
-            $userId
-        ) or die(DB\dbQueryError());
-
+        $r = DM\User::read($userId);
         $cfg = array();
 
-        if ($r = $res->fetch_assoc()) {
+        if (!empty($r['cfg'])) {
             $cfg = Util\toJSONArray($r['cfg']);
         }
-
-        $res->close();
 
         return $cfg;
     }
@@ -1682,18 +1501,15 @@ class User
     private static function setUserConfig($cfg, $userId = false)
     {
         if ($userId === false) {
-            $userId = $_SESSION['user']['id'];
+            $userId = User::getId();
         }
 
-        DB\dbQuery(
-            'UPDATE users_groups
-            SET cfg = $2
-            WHERE id = $1',
+        DM\User::update(
             array(
-                $userId
-                ,Util\jsonEncode($cfg)
+                'id' => $userId
+                ,'cfg' => Util\jsonEncode($cfg)
             )
-        ) or die(DB\dbQueryError());
+        );
     }
 
     /**
@@ -1747,14 +1563,11 @@ class User
      */
     public static function setEnabled($userId, $enabled)
     {
-        DB\dbQuery(
-            'UPDATE users_groups
-            SET enabled = $2
-            WHERE id = $1',
+        return DM\User::update(
             array(
-                $userId
-                ,intval($enabled)
+                'id' => $userId
+                ,'enabled' => intval($enabled)
             )
-        ) or die(DB\dbQueryError());
+        );
     }
 }

@@ -6,7 +6,7 @@ data/tmp/
 # exclude default backup folder
 backup/
 
-
+sys/solr_configsets/default_config/*.unloaded
 
 ssl/
 
