@@ -27,8 +27,10 @@ class Instance
         // form columns
         L\initTranslations();
 
-        $defaultColumns = Config::getDefaultGridViewColumns();
+        $defaultColumns = Config::getDefaultGridColumnConfigs();
         $columns = $defaultColumns;
+
+        $colDefs = array();
 
         // retreive data
         $p['start'] = 0;
@@ -42,34 +44,47 @@ class Instance
 
             foreach ($results['DC'] as $colName => $col) {
                 if (@$col['hidden'] !== true) {
-                    $columns[$colName] = empty($defaultColumns[$colName])
-                        ? @Util\coalesce($col['title'], $colName)
-                        : $defaultColumns[$colName];
+                    $columns[$colName] = $col;
                 }
             }
         }
 
+        $colTitles = array();
+        foreach ($columns as $name => &$col) {
+            $colTitles[] = empty($defaultColumns[$name])
+                ? @Util\coalesce($col['title'], $name)
+                : $defaultColumns[$colName]['title'];
+        }
+
         //insert header
-        $rez[] = array_values($columns);
+        $rez[] = $colTitles;
 
         while (!empty($results['data'])) {
             foreach ($results['data'] as $r) {
                 $record = array();
-                foreach ($columns as $colName => $colTitle) {
-                    if (strpos($colName, 'date') === false) {
+                foreach ($columns as $colName => $col) {
+
+                    if (@$col['xtype'] == 'datecolumn') {
+                        $value = Util\dateISOToMysql(@$r[$colName]);
+
+                        if (!empty($col['format'])) {
+                            $value = Util\formatMysqlTime($value, $col['format']);
+
+                        } else {
+                            $value = Util\formatMysqlTime($value);
+                            $tmp = explode(' ', $value);
+                            if (!empty($tmp[1]) && ($tmp[1] == '00:00')) {
+                                $value = $tmp[0];
+                            }
+                        }
+                        $record[] =  $value;
+
+                    } elseif (strpos($colName, 'date') === false) {
                         if (in_array($colName, array('oid', 'cid', 'uid')) && !empty($r[$colName])) {
                             $record[] = User::getDisplayName($r[$colName]);
                         } else {
                             $record[] =  @$r[$colName];
                         }
-                    } else {
-                        $value = Util\dateISOToMysql(@$r[$colName]);
-                        $value = Util\formatMysqlTime($value);
-                        $tmp = explode(' ', $value);
-                        if (!empty($tmp[1]) && ($tmp[1] == '00:00')) {
-                            $value = $tmp[0];
-                        }
-                        $record[] =  $value;
                     }
 
                 }

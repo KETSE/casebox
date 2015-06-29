@@ -44,7 +44,6 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
             $data['data']['assigned'] = array_shift($userIds);
             $this->objectIds[] = $this->createObject($data);
         }
-
     }
 
     /**
@@ -183,6 +182,16 @@ class NotificationsTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(
             \CB\Notifications::getActionDeclination('SomeWrongValue!>', 'en') == 'SomeWrongValue!>',
             'Declination not correct for a wrong value.'
+        );
+
+        $this->assertTrue(
+            \CB\Notifications::getActionDeclination('file_upload', 'en') == 'uploaded a file to',
+            'Declination not correct for file_upload.'
+        );
+
+        $this->assertTrue(
+            \CB\Notifications::getActionDeclination('file_update', 'en') == 'updated a file in',
+            'Declination not correct for file_update.'
         );
 
         //update a task and delete them all

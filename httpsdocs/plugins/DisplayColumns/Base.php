@@ -186,7 +186,12 @@ class Base
                     $values = array();
 
                     if (!empty($col['solr_column_name'])) {
-                        $values = array(@$doc[$col['solr_column_name']]);
+                        if (isset($doc[$col['solr_column_name']])) {
+                            $v = $doc[$col['solr_column_name']];
+                            $doc[$col['fieldName']] = $v;
+                            unset($doc[$col['solr_column_name']]);
+                            $values = array($v);
+                        }
 
                         if (empty($templateField)) {
                             $templateField = array(

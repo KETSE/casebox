@@ -223,7 +223,7 @@ class Notifications
                 break;
 
             case 'file_update':
-                $rez = L\get($actionType . 'ed_in', $lang);
+                $rez = L\get($actionType . 'd_in', $lang);
                 break;
 
             default:

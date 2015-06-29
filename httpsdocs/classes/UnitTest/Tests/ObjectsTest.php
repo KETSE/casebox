@@ -185,4 +185,23 @@ class ObjectsTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue($data_field['id'] > 0, ' Error on create Field');
         }
     }
+
+    public function testGetPluginsData()
+    {
+        $result = Helpers::getIncludeContents(
+            \CB\DOC_ROOT.'remote/router.php',
+            [ 'postdata' => '{"action":"CB_Objects","method":"getPluginsData","data":[{"id":"2"}],"type":"rpc","tid":1413}' ]
+        );
+
+        $result = json_decode($result, true);
+
+        $this->assertArraySubset(
+            array(
+                'result' => array(
+                    'success' => true
+                ),
+            ),
+            $result
+        );
+    }
 }

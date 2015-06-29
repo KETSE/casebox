@@ -1,3 +1,17 @@
+CaseBox 1.9.481 (2015-06-29)
+==============================
+New Features, Improvements
+--------------------------
+- tests update
+
+Fixed Bugs:
+----------
+- #6160 Export of documents strangely adds date to the name
+
+Notes:
+----------
+- updated translations in __casebox.sql
+
 CaseBox 1.9.480 (2015-06-27)
 ==============================
 Fixed Bugs:

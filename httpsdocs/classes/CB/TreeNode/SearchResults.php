@@ -24,10 +24,10 @@ class SearchResults extends Dbnode
             (get_class($lastNode) == get_class($this))
         )
         ) {
-            $data = $lastNode->getData();
-            if (!empty($this->requestParams['search']) || (@$data['template_type'] == 'search')) {
+            // $data = $lastNode->getData();
+            // if (!empty($this->requestParams['search']) || (@$data['template_type'] == 'search')) {
                 return true;
-            }
+            // }
         }
 
         return false;
@@ -39,26 +39,20 @@ class SearchResults extends Dbnode
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;
+
         if (!$this->acceptedPath($pathArray, $requestParams)) {
             return;
         }
 
         $p = $this->getSearchParams($requestParams);
 
-        // $this->config = array_merge($this->config, $p);
-        // \CB\debug('$this->config', $this->config);
-
-        //facets are obtained by broser class before collecting children
+        //facets are obtained by browser class before collecting children
         unset($p['facets']);
 
         $p = array_merge($requestParams, $p);
 
         $s = new \CB\Search();
         $rez = $s->query($p);
-
-        if (empty($rez['DC']) && !empty($td['cfg']['DC'])) {
-            $rez['DC'] = $td['cfg']['DC'];
-        }
 
         return $rez;
     }

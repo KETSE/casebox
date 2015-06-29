@@ -98,6 +98,7 @@ class Providers
                         ,'pids' => 1
                         ,'template_types' => 'file'
                         ,'dateStart' => '2015-01-01'
+                        ,'sort' => 'name'
                     ]
                     ,'result' => [
                         'success' => true
@@ -117,6 +118,8 @@ class Providers
                         ,'page' => 1
                         ,'path' => "0/1/2/3"
                         ,'facet.field' => 'cid'
+                        ,'stats.field' => 'uid'
+                        ,'sort' => ['name asc']
                     ]
                     ,'result' => [
                         'success' => true
@@ -126,6 +129,12 @@ class Providers
                 [
                     'query' => [
                         'template_types' => 'template'
+                        ,'sort' => [
+                            [
+                                'property' => 'name'
+                               ,'direction' => 'desc'
+                            ]
+                        ]
                     ]
                     ,'result' => [
                         'success' => true

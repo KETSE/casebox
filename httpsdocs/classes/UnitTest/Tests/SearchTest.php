@@ -64,6 +64,10 @@ class SearchTest extends \PHPUnit_Framework_TestCase
         }
 
         try {
+            $result = \CB\Search::getObjects(7);
+
+            $this->assertTrue(true);
+
             $result = \CB\Search::getObjects(1, '"erorrneous field list\/');
 
             $this->assertTrue(false, 'No exception on getObjects');
