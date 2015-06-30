@@ -665,7 +665,9 @@ class Search extends Solr\Client
         $paths = array();
 
         foreach ($d as &$rec) {
-            $requiredIds[$rec['id']] = 1;
+            if (!empty($rec['id'])) {
+                $requiredIds[$rec['id']] = 1;
+            }
 
             //add shorcut targets
             if (!empty($rec['target_id'])) {

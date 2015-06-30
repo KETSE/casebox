@@ -53,7 +53,7 @@ class Instance
         foreach ($columns as $name => &$col) {
             $colTitles[] = empty($defaultColumns[$name])
                 ? @Util\coalesce($col['title'], $name)
-                : $defaultColumns[$colName]['title'];
+                : $defaultColumns[$name]['title'];
         }
 
         //insert header

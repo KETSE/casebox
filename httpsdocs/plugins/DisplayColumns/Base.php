@@ -186,7 +186,9 @@ class Base
                     $values = array();
 
                     if (!empty($col['solr_column_name'])) {
-                        if (isset($doc[$col['solr_column_name']])) {
+                        if (isset($doc[$col['solr_column_name']]) &&
+                            ($col['solr_column_name'] !== $col['fieldName'])
+                        ) {
                             $v = $doc[$col['solr_column_name']];
                             $doc[$col['fieldName']] = $v;
                             unset($doc[$col['solr_column_name']]);

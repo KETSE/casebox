@@ -156,7 +156,7 @@ class Client extends Service
         $fileRecords = array();
 
         foreach ($records as &$r) {
-            if ($r['template_type'] == 'file') {
+            if (!empty($r['template_type']) && ($r['template_type'] == 'file')) {
                 $fileRecords[$r['id']] = &$r;
             }
         }

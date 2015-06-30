@@ -43,10 +43,13 @@ class Base
 
     protected function getObjectClass()
     {
+        $rez = null;
+
         if (empty($this->objectClass) && !empty($this->id)) {
             $this->objectClass = \CB\Objects::getCachedObject($this->id);
+            $rez = &$this->objectClass;
         }
 
-        return @$this->objectClass;
+        return $rez;
     }
 }

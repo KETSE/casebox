@@ -68,7 +68,7 @@ Ext.define('CB.object.field.editor.Form', {
                 ,injectCheckbox: 'first'
                 ,checkOnly: false
                 ,toggleOnClick: true
-                ,mode: (this.cfg.multiValued ? 'SIMPLE': 'SINGLE')
+                ,mode: (this.cfg.multiValued ? 'MULTI': 'SINGLE')
                 ,listeners: {
                     scope: this
                     ,select: this.onRowSelect
@@ -189,6 +189,7 @@ Ext.define('CB.object.field.editor.Form', {
                     ,proxy: {
                         type: 'direct'
                         ,paramsAsHash: true
+                        ,limitParam: 'rows'
                         ,api: {
                             read: CB_Browser.getObjectsForField
                         }

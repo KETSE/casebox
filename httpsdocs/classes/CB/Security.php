@@ -1521,7 +1521,7 @@ class Security
      */
     public static function getGroupUserIds($group_id)
     {
-        $rez = DM\UsersGroups::getGroupUserIds();
+        $rez = DM\UsersGroups::getGroupUserIds($group_id);
 
         return $rez;
     }

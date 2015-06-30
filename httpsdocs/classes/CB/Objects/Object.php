@@ -648,7 +648,7 @@ class Object
     /**
      * method to collect solr data from object data
      * according to template fields configuration
-     * and store it in sys_data onder "solr" property
+     * and store it in sys_data under "solr" property
      * @return void
      */
     protected function collectSolrData()
@@ -658,7 +658,7 @@ class Object
         $rez = array();
 
         $d = &$this->data;
-        $sd = &$this->data;
+        $sd = &$d['sys_data'];
 
         $tpl = $this->getTemplate();
 
