@@ -1335,6 +1335,7 @@ class Security
      */
     public static function calculateUpdatedSecuritySets($onlyForUserId = false)
     {
+
         if (!empty($_SESSION['calculatingSecuritySets'])) {
             return;
         }
@@ -1342,22 +1343,24 @@ class Security
         //set a flag to avoid double call to this function
         $_SESSION['calculatingSecuritySets'] = true;
 
-        try {
-            DB\startTransaction();
-            $res = DB\dbQuery(
-                'SELECT id
-                FROM tree_acl_security_sets
-                WHERE updated = 1'
-            ) or die(DB\dbQueryError());
+        DB\startTransaction();
+        $res = DB\dbQuery(
+            'SELECT id
+            FROM tree_acl_security_sets
+            WHERE updated = 1'
+        ) or die(DB\dbQueryError());
 
-            while ($r = $res->fetch_assoc()) {
+        while ($r = $res->fetch_assoc()) {
+            //calculate for all even if there are sets for non existing obejcts
+            try {
                 Security::updateSecuritySet($r['id'], $onlyForUserId);
-            }
-            $res->close();
-            DB\commitTransaction();
+            } catch (\Exception $e) {
 
-        } catch (\Exception $e) {
+            }
         }
+        $res->close();
+        DB\commitTransaction();
+
         unset($_SESSION['calculatingSecuritySets']);
     }
 
@@ -1480,7 +1483,7 @@ class Security
                 ,$13
                 ,$14)';
         foreach ($users as $user_id => $access) {
-            $params = array( $set_id, $user_id );
+            $params = array($set_id, $user_id);
             for ($i=0; $i < sizeof($access[0]); $i++) {
                 $params[] = ( empty($access[1][$i]) && ( $access[0][$i] >0 ) ) ? 1 : 0;
             }

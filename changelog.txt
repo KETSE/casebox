@@ -1,9 +1,16 @@
+CaseBox 1.9.485 (2015-06-30)
+==============================
+Fixed Bugs:
+----------
+- #6961 After last commit, several folders not visible for user 'oburlaca'
+- #6959 Groups not visible in User Management
+
 CaseBox 1.9.484 (2015-06-30)
 ==============================
 New Features, Improvements
 --------------------------
 - #6927 MultiValued field with From editor issues
-- #6765 Added countries thesasuri to vanilla data model, removed regions
+- #6765 Added countries thesauri to vanilla data model, removed regions
   set default root pass to test if applying barebone core dump
 
 Fixed Bugs:

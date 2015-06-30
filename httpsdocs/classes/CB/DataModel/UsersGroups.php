@@ -18,7 +18,7 @@ class UsersGroups extends User
         $res = DB\dbQuery(
             'SELECT id
                 ,name
-                ,trim( CONCAT(coalesce(first_name, \'\'), \' \', coalesce(last_name, \'\')) ) `title`
+                ,COALESCE(first_name, name) `title`
                 ,`system`
                 ,`enabled`
             FROM users_groups
