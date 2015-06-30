@@ -1,3 +1,36 @@
+CaseBox 1.9.485 (2015-06-30)
+==============================
+Fixed Bugs:
+----------
+- #6961 After last commit, several folders not visible for user 'oburlaca'
+- #6959 Groups not visible in User Management
+
+CaseBox 1.9.484 (2015-06-30)
+==============================
+New Features, Improvements
+--------------------------
+- #6927 MultiValued field with From editor issues
+- #6765 Added countries thesauri to vanilla data model, removed regions
+  set default root pass to test if applying barebone core dump
+
+Fixed Bugs:
+----------
+- #6690 Question: Statistics for Invoice search results
+
+CaseBox 1.9.483 (2015-06-30)
+==============================
+New Features, Improvements
+--------------------------
+- #6862 Always show Date & Weekday in task DueTime
+
+Fixed Bugs:
+----------
+- #6869 "Commented by" column of tasks is empty
+- #6924 Encoding html symbols in grid column 'name'
+- #6927 MultiValued field with From editor issues
+- #6936 Image files not shown in preview panel
+- #6940 Pivot table view: can't change Row field, jumps back to Grid view
+
 CaseBox 1.9.482 (2015-06-29)
 ==============================
 Fixed Bugs:

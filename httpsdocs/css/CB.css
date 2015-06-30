@@ -996,7 +996,7 @@ border-top: 0;
 .users-list-item .descr {
     display:block;
     color: #777;
-    padding: 5px 0 0 0;
+    padding: 0;
 }
 
 .x-mask-msg-text{
@@ -1036,9 +1036,16 @@ border-top: 0;
   right: 3px;
   max-width: 100%;
   border-radius: 50%;
-  background: red;
   color: #fff;
   font-size: 10px;
   font-family: helvetica;
   font-weight: bold;
+  background-color: #dc0d17;
+  background-image: -webkit-gradient(linear, center top, center bottom, from(#fa3c45), to(#dc0d17));
+  background-image: -webkit-linear-gradient(#fa3c45, #dc0d17);
+  color: #fff;
+  padding: 1px 3px;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .4);
+  -webkit-border-radius: 2px;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .7);
 }

@@ -98,7 +98,7 @@ class File extends Object
             'SELECT f.content_id
                 ,fc.size
                 ,fc.pages
-                ,fc.type
+                ,fc.type `content_type`
                 ,fc.path `content_path`
                 ,fc.md5
             FROM files f
@@ -125,7 +125,7 @@ class File extends Object
                 ,v.udate
                 ,fc.size
                 ,fc.pages
-                ,fc.type
+                ,fc.type content_type
             FROM files_versions v
                 LEFT JOIN files_content fc on fc.id = v.content_id
             WHERE v.file_id = $1

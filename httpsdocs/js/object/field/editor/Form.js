@@ -189,6 +189,7 @@ Ext.define('CB.object.field.editor.Form', {
                     ,proxy: {
                         type: 'direct'
                         ,paramsAsHash: true
+                        ,limitParam: 'rows'
                         ,api: {
                             read: CB_Browser.getObjectsForField
                         }

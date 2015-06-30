@@ -256,15 +256,17 @@ function formatTaskTime($isoDateString, $showTime = true)
 
         $rez = $dt->format($format);
     } else {
+        $rez = translateMonths($dt->format('F j, '));
+
         //there could be situation when date difference interval
         //doesnt cover a full day although dates are in different days
         $dayDelta = ($dt->format('d') == $ct->format('d')) ? 0 : 1;
         $days = $diff->d + $dayDelta;
 
         if ($days > 1) {
-            $rez = translateDays($dt->format('l'));
+            $rez .= translateDays($dt->format('l'));
         } else {
-            $rez = formatLeftDays($days);
+            $rez .= formatLeftDays($days);
         }
     }
 

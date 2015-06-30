@@ -116,6 +116,11 @@ class Comment extends Object
 
         $newUserIds = array();
 
+        $posd['lastComment'] = array(
+            'user_id' => User::getId()
+            ,'date' => Util\dateMysqlToISO('now')
+        );
+
         $fu = empty($posd['fu'])
             ? array()
             : $posd['fu'];
@@ -143,8 +148,10 @@ class Comment extends Object
 
             $posd['fu'] = array_unique($fu);
 
-            $this->parentObj->updateSysData($posd);
         }
+
+        //always update sys_data to change lastComment date
+        $this->parentObj->updateSysData($posd);
 
     }
 

@@ -343,11 +343,4 @@ class ActionLog extends Base
 
         return $rez;
     }
-
-    public function getFacets()
-    {
-        $rez = parent::getFacets();
-
-        return $rez;
-    }
 }

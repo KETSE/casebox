@@ -21,7 +21,8 @@ class Thumb extends Base
 
         //dont display thumb for images less then 30kb
         $maxDisplaySize = Util\coalesce(Config::get('images_display_size'), 30 *1024);
-        if ((substr($data['type'], 0, 5) == 'image') && ($data['size'] < $maxDisplaySize)) {
+
+        if ((substr($data['content_type'], 0, 5) == 'image') && ($data['size'] < $maxDisplaySize)) {
             $preview = Files::generatePreview($data['id']);
             if (!empty($preview['filename'])) {
                 $fn = Config::get('files_preview_dir') . $preview['filename'];
@@ -32,6 +33,17 @@ class Thumb extends Base
             }
         } else {
             $rez['data']['cls'] = 'pr-th-'.\CB\Files::getExtension($data['name']);
+        }
+
+        return $rez;
+    }
+
+    protected function getObjectClass()
+    {
+        $rez = parent::getObjectClass();
+
+        if (!empty($rez)) {
+            $rez->load();
         }
 
         return $rez;

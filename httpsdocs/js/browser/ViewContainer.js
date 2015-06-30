@@ -801,7 +801,6 @@ Ext.define('CB.browser.ViewContainer', {
         );
 
         this.requestParams = {};
-        delete this.userViewSet;
     }
 
     ,sameParams: function(params1, params2){

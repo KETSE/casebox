@@ -173,17 +173,18 @@ Ext.define('CB.controller.Browsing', {
     ,onVCViewLoaded: function(proxy, action, options) {
         //change breadcrumb value for search template restults
         var bvalue = action.pathtext
-            ,path = action.folderProperties.path;
+            ,path = action.folderProperties.path
+            ,total = Ext.valueFrom(action.total, 0);
 
         if(options.search && !isNaN(options.search.template_id)) {
             bvalue = L.SearchResultsTitleTemplate;
             bvalue = bvalue.replace('{name}', CB.DB.templates.getName(options.search.template_id));
-            bvalue = bvalue.replace('{count}', action.total);
+            bvalue = bvalue.replace('{count}', total);
             path = '/' + App.config.rootNode.nid;
         } else if(!Ext.isEmpty(options.query)) {
             bvalue = L.SearchResultsTitleTemplate;
             bvalue = bvalue.replace('{name}', options.query);
-            bvalue = bvalue.replace('{count}', action.total);
+            bvalue = bvalue.replace('{count}', total);
         }
 
         this.updateBreadcrumbData(path, bvalue);
