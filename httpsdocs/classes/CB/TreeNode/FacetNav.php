@@ -14,9 +14,6 @@ class FacetNav extends Base
     public function getChildren(&$pathArray, $requestParams)
     {
         $rez = array();
-
-        $this->assignFromParam($requestParams);
-
         $this->path = $pathArray;
         $this->lastNode = @$pathArray[sizeof($pathArray) - 1];
         $this->requestParams = $requestParams;

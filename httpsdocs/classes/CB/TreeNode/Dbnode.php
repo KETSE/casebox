@@ -11,8 +11,6 @@ class Dbnode extends Base
 {
     public function getChildren(&$pathArray, $requestParams)
     {
-        $this->assignFromParam($requestParams);
-
         $pid = null;
         /* should start with path check and see if child request is for a real db node*/
         if (empty($pathArray)) {
