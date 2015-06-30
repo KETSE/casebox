@@ -70,6 +70,11 @@ if ($importSql) {
         ,'core_solr_reindex' => 'n'
     );
 
+    //set default root password to 'test' is applying barebone sql dump
+    if ($sqlFile == $bareBoneCoreSql) {
+        $config['core_root_pass'] = 'test';
+    }
+
     Cache::set('RUN_SETUP_CFG', $config);
 
     $options = array(

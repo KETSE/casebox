@@ -1,3 +1,15 @@
+CaseBox 1.9.484 (2015-06-30)
+==============================
+New Features, Improvements
+--------------------------
+- #6927 MultiValued field with From editor issues
+- #6765 Added countries thesasuri to vanilla data model, removed regions
+  set default root pass to test if applying barebone core dump
+
+Fixed Bugs:
+----------
+- #6690 Question: Statistics for Invoice search results
+
 CaseBox 1.9.483 (2015-06-30)
 ==============================
 New Features, Improvements

@@ -3,6 +3,7 @@
 namespace CB\DataModel;
 
 use CB\DB;
+use CB\L;
 
 class Base
 {

@@ -95,8 +95,40 @@ class VanillaModel
                     ,'Witness'
                 )
             )
-            ,'Country' => array()
-            ,'Region' => array()
+            ,'Country' => array(
+                'Afghanistan', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica'
+                ,'Antigua And Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Ascension', 'Australia', 'Austria', 'Azerbaijan'
+                ,'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan'
+                ,'Bolivia', 'Bosnia And Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory'
+                ,'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Canary Islands'
+                ,'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island'
+                ,'Cocos (keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic Of The', 'Cook Islands'
+                ,'Costa Rica', 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'CÔte D\'ivoire', 'Denmark', 'Diego Garcia', 'Djibouti'
+                ,'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia'
+                ,'Ethiopia', 'European Union', 'Falkland Islands (malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana'
+                ,'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece'
+                ,'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-bissau', 'Guyana', 'Haiti'
+                ,'Heard Island And Mcdonald Islands', 'Holy See (vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland'
+                ,'India', 'Indonesia', 'Iran, Islamic Republic Of', 'Iraq', 'Ireland', 'Isle Of Man', 'Israel', 'Italy', 'Jamaica'
+                ,'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Korea, Democratic People\'s Republic Of', 'Korea, Republic Of'
+                ,'Kuwait', 'Kyrgyzstan', 'Lao People\'s Democratic Republic', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libyan Arab Jamahiriya'
+                ,'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, The Former Yugoslav Republic Of', 'Madagascar', 'Malawi'
+                ,'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico'
+                ,'Micronesia, Federated States Of', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique'
+                ,'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'Netherlands Antilles', 'New Caledonia', 'New Zealand', 'Nicaragua'
+                ,'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau'
+                ,'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland'
+                ,'Portugal', 'Puerto Rico', 'Qatar', 'Romania', 'Russian Federation', 'Rwanda', 'RÉunion', 'Saint Helena', 'Saint Kitts And Nevis'
+                ,'Saint Lucia', 'Saint Pierre And Miquelon', 'Saint Vincent And The Grenadines', 'Samoa', 'San Marino', 'Sao Tome And Principe'
+                ,'Saudi Arabia', 'Saudi–Iraqi neutral zone', 'Senegal', 'Serbia', 'Serbien und Montenegro (2003-02-04 - 2006-06-03)', 'Seychelles'
+                ,'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia And The South Sandwich Islands'
+                ,'Soviet Union', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Svalbard And Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland'
+                ,'Syrian Arab Republic', 'Taiwan', 'Tajikistan', 'Tanzania, United Republic Of', 'Thailand', 'Timor-leste', 'Togo', 'Tokelau'
+                ,'Tonga', 'Trinidad And Tobago', 'Tristan da Cunha', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks And Caicos Islands', 'Tuvalu'
+                ,'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela'
+                ,'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.s.', 'Wallis And Futuna', 'Western Sahara', 'Yemen', 'Zambia', 'Zimbabwe'
+                ,'Åland Islands'
+            )
         )
 
         /******************************* TEMPLATES ******************************/
@@ -176,14 +208,14 @@ class VanillaModel
                         'en' => 'Description'
                         ,'type' => 'text'
                     )
-                    ,'region' => array(
-                        'en' => 'Region'
-                        ,'type' => '_objects'
-                        ,'cfg' => array(
-                            'source' => 'tree'
-                            ,'scope' => '/Region'
-                        )
-                    )
+                    // ,'region' => array(
+                    //     'en' => 'Region'
+                    //     ,'type' => '_objects'
+                    //     ,'cfg' => array(
+                    //         'source' => 'tree'
+                    //         ,'scope' => '/Region'
+                    //     )
+                    // )
                     ,'country' => array(
                         'en' => 'Country'
                         ,'type' => '_objects'
@@ -467,7 +499,9 @@ class VanillaModel
             SET menu = CONCAT($1, menu)
             WHERE node_ids IS NULL
                 AND node_template_ids IS NULL',
-            $this->templateIds['Case'] . ',\'-\','
+            $this->templateIds['Case'] . ',\'-\',' .
+            $this->templateIds['Contact'] . ',' .
+            $this->templateIds['Organization'] . ',\'-\','
         ) or die(DB\dbQueryError());
 
     }
