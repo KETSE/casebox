@@ -68,7 +68,7 @@ Ext.define('CB.object.field.editor.Form', {
                 ,injectCheckbox: 'first'
                 ,checkOnly: false
                 ,toggleOnClick: true
-                ,mode: (this.cfg.multiValued ? 'MULTI': 'SINGLE')
+                ,mode: (this.cfg.multiValued ? 'SIMPLE': 'SINGLE')
                 ,listeners: {
                     scope: this
                     ,select: this.onRowSelect
