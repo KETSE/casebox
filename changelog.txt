@@ -1,3 +1,15 @@
+CaseBox 1.9.486 (2015-07-01)
+==============================
+New Features, Improvements
+--------------------------
+- marked root user as system user and it wouldnt be displayed in users management window
+- #6970 Search should change view OR work using current view
+
+Fixed Bugs:
+----------
+- #6716 Can't upload new files in a new local instance  (on Ubuntu)
+- #6690 Question: Statistics for Invoice search results
+
 CaseBox 1.9.485 (2015-06-30)
 ==============================
 Fixed Bugs:

@@ -52,6 +52,7 @@ class UsersGroups
                 FROM users_groups u
                 LEFT JOIN users_groups_association a ON u.id = a.user_id
                 WHERE u.`type` = 2
+                    AND u.`system` = 0
                     AND u.did IS NULL
                     AND a.group_id IS NULL
                 ORDER BY 3, 2'

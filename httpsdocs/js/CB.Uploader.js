@@ -392,7 +392,7 @@ Ext.define('CB.Uploader', {
         };
         this.xhr.open("POST", 'upload/', true);
 
-        this.xhr.setRequestHeader("X_FILE_OPTIONS", Ext.util.JSON.encode(params));
+        this.xhr.setRequestHeader("X-FILE-OPTIONS", Ext.util.JSON.encode(params));
         if(r.get('content_id') > 0) this.xhr.send('');
         else this.xhr.send(r.get('file'));
         this.progressChange();

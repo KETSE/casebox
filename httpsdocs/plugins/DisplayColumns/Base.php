@@ -45,14 +45,22 @@ class Base
             $sp['fl'] = implode(',', $fl);
         }
 
-        if (empty($p['inputParams']['strictSort']) && !empty($solrFields['sort'])) {
-            $sp['sort'] = $solrFields['sort'];
+        switch (@$this->inputParams['view']['type']) {
+            case 'pivot':
+            case 'charts':
+                unset($sp['sort']);
+                break;
 
-        } elseif (!empty($this->inputParams['sort'][0]['property']) &&
-            empty($solrFields['sort'])
-            // && !in_array($this->inputParams['sort'][0]['property'], \CB\Search::$defaultFields)
-        ) {
-            $sp['sort'] = 'ntsc asc, order asc';
+            default:
+                if (empty($p['inputParams']['strictSort']) && !empty($solrFields['sort'])) {
+                    $sp['sort'] = $solrFields['sort'];
+
+                } elseif (!empty($this->inputParams['sort'][0]['property']) &&
+                    empty($solrFields['sort'])
+                    // && !in_array($this->inputParams['sort'][0]['property'], \CB\Search::$defaultFields)
+                ) {
+                    $sp['sort'] = 'ntsc asc, order asc';
+                }
         }
     }
 

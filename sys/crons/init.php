@@ -21,7 +21,7 @@ if (empty($scriptOptions['core'])) {
 
 $_GET['core'] = $scriptOptions['core'];
 $_SERVER['SERVER_NAME'] = $scriptOptions['core'];
-$_SERVER['REMOTE_ADDR'] = 'localhost';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
 $_SESSION['user'] = array(
     'id' => 1
@@ -155,7 +155,7 @@ function closeCron($cron_id, $info = 'ok')
             $QUERY,
             array($cron_id, $info)
         );
-        
+
     } catch (Exception $exc) {
         trigger_error($QUERY.print_r(array($cron_id, $info),true) .DB\dbQueryError(), E_USER_WARNING);
     }

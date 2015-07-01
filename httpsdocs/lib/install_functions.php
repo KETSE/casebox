@@ -19,7 +19,7 @@ function getDefaultConfigValues()
 
         ,'apache_user' => 'apache'
 
-        ,'db_host' => 'localhost'
+        ,'db_host' => '127.0.0.1'
         ,'db_port' => '3306'
 
         ,'su_db_user' => 'root'
