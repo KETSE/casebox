@@ -36,7 +36,8 @@ class StringsFacet
             $v = $p['filters'][$this->field];
             for ($i=0; $i < sizeof($v); $i++) {
                 if (!empty($v[$i]['values'])) {
-                    $conditions[] = $this->field.':('.implode(' '.$v[$i]['mode'].' ', $v[$i]['values']).')';
+                    $conditions[] = '{!tag=' . $this->field . '}' .
+                        $this->field.':('.implode(' '.$v[$i]['mode'].' ', $v[$i]['values']).')';
                 }
             }
 

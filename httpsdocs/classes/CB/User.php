@@ -962,9 +962,6 @@ class User
         $photoName = $p['id'] . '_' . preg_replace('/[^a-z0-9\.]/i', '_', $f['name']).'.png';
 
         $photosPath = Config::get('photos_path');
-        if (!file_exists($photosPath)) {
-            @mkdir($photosPath, 0755, true);
-        }
 
         try {
             $image = new \Imagick($f['tmp_name']);

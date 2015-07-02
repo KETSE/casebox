@@ -129,6 +129,40 @@ class PivotFacet extends StringsFacet
         $rez['stats'] =  $this->totalStats;
         $rez['data'] = $this->solrData;
 
+        $this->adjustStatsPrecision($rez);
+
         return $rez;
+    }
+
+    /**
+     * function to adjust stats precision if have stats calculated
+     * and floadPrecision is set in config
+     * @param  array &$result
+     * @return void
+     */
+    protected function adjustStatsPrecision(&$result)
+    {
+        $cfg = &$this->config;
+
+        if (!empty($cfg['stats']['field']) && !empty($cfg['stats']['floatPrecision'])) {
+
+            $func = empty($cfg['stats']['type'])
+                ? 'min'
+                : $cfg['stats']['type'];
+
+            foreach ($result['data'] as &$v) {
+                if (!empty($v->stats) && !empty($v->stats->stats_fields)) {
+                    foreach ($v->stats->stats_fields as $sf => &$sv) {
+                        if (!empty($sv->{$func})) {
+                            $value = $sv->{$func};
+                            $intValue = intval($value);
+                            if ($value != $intValue) {
+                                $sv->{$func} = round($value, $cfg['stats']['floatPrecision']);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
