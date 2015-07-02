@@ -286,6 +286,7 @@ class Base
 
             foreach ($state['columns'] as $k => $c) {
                 if (!empty($customColumns[$k])) {
+                    unset($customColumns[$k]['hidden']);
                     $c = array_merge($customColumns[$k], $c);
                     unset($customColumns[$k]);
                     $rez[$k] = $c;

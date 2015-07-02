@@ -1,3 +1,10 @@
+CaseBox 1.9.488 (2015-07-02)
+==============================
+Fixed Bugs:
+----------
+- #7011 Stats dropdown disappeared + errors performing a search after another
+- #6905 Export functionality
+
 CaseBox 1.9.487 (2015-07-02)
 ==============================
 New Features, Improvements

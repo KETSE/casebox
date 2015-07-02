@@ -46,6 +46,11 @@ class SearchResults extends Dbnode
 
         $p = $this->getSearchParams($requestParams);
 
+        //view is detected earlier by Browser class
+        if (!empty($requestParams['view'])) {
+            $p['view'] = $requestParams['view'];
+        }
+
         //facets are obtained by browser class before collecting children
         unset($p['facets']);
 
@@ -106,6 +111,27 @@ class SearchResults extends Dbnode
     }
 
     /**
+     * get view config for given view or default view if set in config
+     * @param  array &$pathArray
+     * @param  array &$rp        requestParams
+     * @return array
+     */
+    public function getViewConfig(&$pathArray, &$rp)
+    {
+        $copyParams = array('view', 'stats');
+
+        $sp = $this->getSearchParams($rp);
+
+        foreach ($copyParams as $k) {
+            if (isset($sp[$k])) {
+                $this->config[$k] = $sp[$k];
+            }
+        }
+
+        return parent::getViewConfig($pathArray, $rp);
+    }
+
+    /**
      * get search params for given request params
      * @param  array &$rp
      * @return array
@@ -137,6 +163,7 @@ class SearchResults extends Dbnode
         // otherwise use default search method
         if (empty($td['cfg']['router'])) {
             $rez = $t->getData()['cfg'];
+
             @$rez['template_id'] = $so->getData()['template_id'];
 
             if (empty($rez['fq'])) {
