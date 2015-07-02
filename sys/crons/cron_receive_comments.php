@@ -1,6 +1,8 @@
 <?php
 namespace CB;
 
+use CB\DataModel as DM;
+
 /**
  * this script is intended to be executed directly and it processes all cores at once
  * retreiving all comment mails from common or particulat mail for each core
@@ -11,7 +13,7 @@ ini_set('max_execution_time', 300);
 
 error_reporting(E_ALL);
 
-$_SERVER['REMOTE_ADDR'] = 'localhost';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
 $_SESSION['user'] = array(
     'id' => 1

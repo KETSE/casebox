@@ -126,7 +126,7 @@ function checkTikaService()
     $rez = true;
 
     // Create a curl handle to a non-existing location
-    $ch = curl_init('http://localhost:9998/tika');
+    $ch = curl_init('http://127.0.0.1:9998/tika');
 
     // Execute
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

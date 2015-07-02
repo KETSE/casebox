@@ -1008,10 +1008,6 @@ class Files
 
         $rez['filename'] = $file['content_id'].'_.html';
 
-        if (!file_exists($filesPreviewDir)) {
-            @mkdir($filesPreviewDir, 0777, true);
-        }
-
         $preview_filename = $filesPreviewDir.$rez['filename'];
 
         $fn = $filesDir.$file['path'].DIRECTORY_SEPARATOR.$file['content_id'];

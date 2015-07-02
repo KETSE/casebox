@@ -99,7 +99,6 @@ Ext.define('CB.search.edit.Panel', {
             query: ''
             ,search: p
             ,userViewChange: false
-            ,from: 'grid'
             ,forceLoad: true
         });
     }

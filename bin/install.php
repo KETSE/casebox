@@ -193,6 +193,22 @@ do {
     }
 } while ($r === false);
 
+//---------- checking required folders existence
+$requiredDirs = array(
+    \CB\LOGS_DIR,
+    \CB\DATA_DIR,
+    \CB\TEMP_DIR,
+    \CB\MINIFY_CACHE_DIR
+);
+
+foreach ($requiredDirs as $dir) {
+    if (!file_exists($dir)) {
+        if (!mkdir($dir, 0755, true)) {
+            echo "Cant create directory $dir \n";
+        }
+    }
+}
+
 //---------- create solr symlinks for casebox config sets
 if (createSolrConfigsetsSymlinks($cfg)) {
     echo "Solr configsets symlinks created sucessfully.\n\r";

@@ -170,6 +170,8 @@ class Base implements \CB\Interfaces\TreeNode
                         $rez['stats'] = $stats;
                     }
 
+                    $rez['sort'] = null;
+                    $rez['rows'] = 0;
                     break;
 
                 default: // grid

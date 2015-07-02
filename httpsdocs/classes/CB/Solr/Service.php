@@ -38,12 +38,12 @@ class Service
     public function __construct ($p = array())
     {
         if (empty($p)) { // get params from core config
-            $this->host = \CB\Config::get('solr_host', 'localhost');
+            $this->host = \CB\Config::get('solr_host', '127.0.0.1');
             $this->port = \CB\Config::get('solr_port', 8983);
             $this->core = \CB\Config::get('solr_core');
 
         } else { //get params from specified arguments
-            $this->host = empty($p['host']) ? 'localhost' : $p['host'];
+            $this->host = empty($p['host']) ? '127.0.0.1' : $p['host'];
             $this->port = empty($p['port']) ? 8983 : $p['port'];
             $this->core = @$p['core'];
 

@@ -1,18 +1,9 @@
-# ignore all files in "data/" folder, don't forget to add SOLR config in data/solr/conf
-data/files/
-data/solr/data/
-data/tmp/
-
 # exclude default backup folder
 backup/
 
 sys/solr_configsets/default_config/*.unloaded
 
 ssl/
-
-
-# but the folder should exist for CaseBox to run
-logs/
 
 # ignore .sublime files
 *sublime*

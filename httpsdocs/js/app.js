@@ -1197,6 +1197,7 @@ function initApp() {
             html: msg
             ,title: L.Error
             ,minWidth: 300
+            ,maxWidth: 900
             ,align: 't'
         });
 

@@ -833,10 +833,6 @@ class Browser
     {
         $incommingFilesDir = Config::get('incomming_files_dir');
 
-        if (!file_exists($incommingFilesDir)) {
-            @mkdir($incommingFilesDir, 0777, true);
-        }
-
         $files = new Files();
 
         /* clean previous unhandled uploads if any */
