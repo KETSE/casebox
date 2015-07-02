@@ -6,6 +6,7 @@ use CB\Util;
 use CB\Browser;
 use CB\Objects;
 use CB\Search;
+use CB\Cache;
 
 class Dbnode extends Base
 {
@@ -161,6 +162,12 @@ class Dbnode extends Base
 
         $from = $this->getId();
 
+        //check if cached
+        $cacheParam = 'nodeParam_' . $param . '_' . $from;
+        if (Cache::exist($cacheParam)) {
+            return Cache::get($cacheParam);
+        }
+
         //select configs from tree and template of the current node
         $sql = 'SELECT t.cfg, t.template_id, tt.cfg `templateCfg`
             FROM tree t
@@ -213,12 +220,16 @@ class Dbnode extends Base
         $res->close();
 
         if ($rez === false) {
-            return parent::getNodeParam($param);
+            $rez = parent::getNodeParam($param);
+        } else {
+            $rez = array(
+                'from' => $from
+                ,'data' => $rez
+            );
         }
 
-        return array(
-            'from' => $from
-            ,'data' => $rez
-        );
+        Cache::set($cacheParam, $rez);
+
+        return $rez;
     }
 }

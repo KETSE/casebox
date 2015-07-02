@@ -134,23 +134,24 @@ class Base implements \CB\Interfaces\TreeNode
 
         $cfg = &$this->config;
 
-        $view = array('type' => 'grid');
+        $view = array();
 
-        if (!empty($rp['userViewChange'])) {
-            $type  = empty($rp['view'])
-                ? $rp['from']
-                : $rp['view'];
-
-            $view = array(
-                'type' => $type
-            );
-
-        } elseif (!empty($cfg['view'])) {
+        if (!empty($cfg['view'])) {
             $view = is_scalar($cfg['view'])
                 ? array(
                     'type' => $cfg['view']
                 )
                 : $cfg['view'];
+        }
+
+        if (empty($view['type'])) {
+            $view['type'] = 'grid';
+        }
+
+        if (!empty($rp['userViewChange'])) {
+            $view['type']  = empty($rp['view'])
+                ? $rp['from']
+                : $rp['view'];
         }
 
         if (!empty($view)) {
@@ -377,6 +378,8 @@ class Base implements \CB\Interfaces\TreeNode
      */
     public function getNodeParam($param = 'facets')
     {
+        $rez = array();
+
         // check if directly set into node config
         if (isset($this->config[$param])) {
             $rez = array(
@@ -400,33 +403,33 @@ class Base implements \CB\Interfaces\TreeNode
                 }
             }
 
-            return $rez;
-        }
+        } else {
+            //check in config
+            $paramConfigs = \CB\Config::get('node_'.$param);
 
-        //check in config
-        $paramConfigs = \CB\Config::get('node_'.$param);
+            if (empty($paramConfigs[$this->getId($this->id)])) {
+                if (empty($this->parent)) {
+                    $default = \CB\Config::get('default_' . $param);
 
-        if (empty($paramConfigs[$this->getId($this->id)])) {
-            if (empty($this->parent)) {
-                $default = \CB\Config::get('default_' . $param);
-
-                if (empty($default)) {
-                    return array();
+                    if (!empty($default)) {
+                        $rez =  array(
+                            'from' => 'default'
+                            ,'data' => $default
+                        );
+                    }
+                } else {
+                    $rez = $this->getParentNodeParam($param);
                 }
 
-                return array(
-                    'from' => 'default'
-                    ,'data' => $default
+            } else {
+                $rez =  array(
+                    'from' => $this->getId()
+                    ,'data' => $paramConfigs[$this->id]
                 );
             }
-
-            return $this->parent->getParentNodeParam($param);
         }
 
-        return array(
-            'from' => $this->getId()
-            ,'data' => $paramConfigs[$this->id]
-        );
+        return $rez;
     }
 
     /**
@@ -439,6 +442,10 @@ class Base implements \CB\Interfaces\TreeNode
      */
     public function getParentNodeParam($param = 'facets')
     {
-        return $this->getNodeParam($param);
+        $rez = empty($this->parent)
+            ? array()
+            : $this->parent->getNodeParam($param);
+
+        return $rez;
     }
 }

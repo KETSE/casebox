@@ -766,8 +766,21 @@ Ext.define('CB.browser.ViewContainer', {
             options.from = this.requestParams.from;
         }
 
+
         //reset userViewSet flag if loaded id changed
-        if(store.proxy.extraParams.id != options.id) {
+        var ep = store.proxy.extraParams
+            ,lastSearchId = false
+            ,currentSearchId = false;
+        if(ep.search && ep.search.template_id) {
+            lastSearchId = ep.search.template_id;
+        }
+        if(options.search && options.search.template_id) {
+            currentSearchId = options.search.template_id;
+        }
+
+        if((ep.id != options.id) ||
+            (lastSearchId != currentSearchId)
+        ) {
             delete this.userViewSet;
 
             //delete also calendar view bounds

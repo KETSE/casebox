@@ -259,7 +259,7 @@ Ext.define('CB.browser.view.Pivot',{
                 this.pivot.titles[1]
                 ,function(q, z, y) {
                     var nr = Ext.valueFrom(this.refs['t_' + q], '');
-                    r += '<td class="total" f="|'+ q +'">' + nr + '</td>';
+                    r += '<td class="total" f="|'+ q +'">' + Ext.util.Format.number(nr, '0.##') + '</td>';
                     if(Ext.isNumeric(nr)) {
                         total += nr;
                     }

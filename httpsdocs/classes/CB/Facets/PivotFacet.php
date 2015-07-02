@@ -145,23 +145,33 @@ class PivotFacet extends StringsFacet
         $cfg = &$this->config;
 
         if (!empty($cfg['stats']['field']) && !empty($cfg['stats']['floatPrecision'])) {
-
+            $field = $cfg['stats']['field'];
             $func = empty($cfg['stats']['type'])
                 ? 'min'
                 : $cfg['stats']['type'];
-
+            $result['sss'] = array('field' => $cfg['stats']['field'], 'type' => 'func');
             foreach ($result['data'] as &$v) {
-                if (!empty($v->stats) && !empty($v->stats->stats_fields)) {
-                    foreach ($v->stats->stats_fields as $sf => &$sv) {
-                        if (!empty($sv->{$func})) {
-                            $value = $sv->{$func};
-                            $intValue = intval($value);
-                            if ($value != $intValue) {
-                                $sv->{$func} = round($value, $cfg['stats']['floatPrecision']);
-                            }
-                        }
+                if (!empty($v->pivot)) {
+                    foreach ($v->pivot as &$pv) {
+                        $this->adjustStatValue($pv, $field, $func, $cfg['stats']['floatPrecision']);
                     }
                 }
+                $this->adjustStatValue($v, $field, $func, $cfg['stats']['floatPrecision']);
+            }
+        }
+    }
+
+    protected function adjustStatValue(&$value, $field, $function, $precision)
+    {
+        if (!empty($value->stats) &&
+            !empty($value->stats->stats_fields) &&
+            !empty($value->stats->stats_fields->{$field}) &&
+            !empty($value->stats->stats_fields->{$field}->{$function})
+        ) {
+            $num = $value->stats->stats_fields->{$field}->{$function};
+            $intNum = intval($num);
+            if ($num != $intNum) {
+                $value->stats->stats_fields->{$field}->{$function} = round($num, $precision);
             }
         }
     }

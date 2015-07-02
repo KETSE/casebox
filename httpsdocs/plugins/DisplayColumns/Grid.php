@@ -10,6 +10,8 @@ class Grid extends Base
 
     protected function getState($param = null)
     {
-        return State\DBProvider::getGridViewState($param);
+        $rez = State\DBProvider::getGridViewState($param);
+
+        return $rez;
     }
 }
