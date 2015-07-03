@@ -144,28 +144,30 @@ class SearchResults extends Dbnode
 
         // if we have a router defined in config of the search template then try to prepare search params wit it
         // otherwise use default search method
-        if (empty($td['cfg']['router'])) {
-            $rez = $t->getData()['cfg'];
+        // if (empty($td['cfg']['router'])) {
+        $rez = $t->getData()['cfg'];
 
-            @$rez['template_id'] = $so->getData()['template_id'];
+        @$rez['template_id'] = $so->getData()['template_id'];
 
-            if (empty($rez['fq'])) {
-                $rez['fq'] = array();
+        if (empty($rez['fq'])) {
+            $rez['fq'] = array();
+        }
+
+        $ld = $so->getLinearData();
+        foreach ($ld as $v) {
+            $condition = $this->adjustCondition($t->getField($v['name']), $v);
+            if (!empty($condition)) {
+                $rez['fq'][] = $condition;
             }
+        }
 
-            $ld = $so->getLinearData();
-            foreach ($ld as $v) {
-                $condition = $this->adjustCondition($t->getField($v['name']), $v);
-                if (!empty($condition)) {
-                    $rez['fq'][] = $condition;
-                }
-            }
+        // } else {
 
-        } else {
+        if (!empty($td['cfg']['router'])) {
             $a = explode('.', $td['cfg']['router']);
             $class = str_replace('_', '\\', $a[0]);
             $class = new $class();
-            $rez = $class->{$a[1]}($so);
+            $rez = $class->{$a[1]}($rp, $rez);
         }
 
         return $rez;
