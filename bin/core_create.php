@@ -4,7 +4,7 @@
  *
  * Script params:
  *     -c, --core  - required, core name
- *     -s, --sql   - sql dump file
+ *     -s, --sql   - sql dump file, if no value specified then barebone sql dump will be used
  *
  * Example: php -f core_create.php -- -c text_core_name -s /path/to/mysql/dump.sql
  */
@@ -22,7 +22,7 @@ require_once \CB\LIB_DIR . 'install_functions.php';
 
 //check script options
 if (empty($options)) {
-    $options = getopt('c:s:', array('core:', 'sql:'));
+    $options = getopt('c:s::', array('core:', 'sql::'));
 }
 
 $coreName = empty($options['c'])
@@ -38,7 +38,7 @@ $sqlFile = empty($options['s'])
     : $options['s'];
 
 if (empty($sqlFile)) {
-    die('no sql dump file specified or invalid options set.');
+    $sqlFile = $cbHome . 'install/mysql/bare_bone_core.sql';
 }
 
 /*if (!defined('CB\INTERACTIVE_MODE')) {

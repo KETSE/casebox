@@ -244,6 +244,8 @@ class VanillaModel
      */
     public function apply()
     {
+        DB\startTransaction();
+
         //2.  Casebox Users and Groups
         $this->setupUsersGroups();
 
@@ -266,6 +268,8 @@ class VanillaModel
         echo "Done\n";
 
         $this->updateCreateMenus();
+
+        DB\commitTransaction();
     }
 
     /**
