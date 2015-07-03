@@ -1192,19 +1192,41 @@ function initApp() {
             msg = L.ErrorOccured;
         }
 
-        // Ext.Msg.alert(L.Error, msg);
-        Ext.toast({
-            html: msg
-            ,title: L.Error
-            ,minWidth: 300
-            ,maxWidth: 900
-            ,align: 't'
-        });
+        if(!App.errorMsgDiv) {
+            App.errorMsgDiv = Ext.create('Ext.Component', {
+                html: ''
+                ,padding: 5
+                ,floating: true
+                ,y: 1
+                ,width: '100%'
+                ,shadow: false
+                ,cls: 'error-msg-div'
+                ,style: {
+                    textAlign: 'center'
+                }
+                ,renderTo: Ext.getBody()
+            });
+
+            App.errorMsgDivHideTask = new Ext.util.DelayedTask(
+                App.errorMsgDiv.getEl().fadeOut
+                ,App.errorMsgDiv.getEl()
+            );
+        }
+
+        App.errorMsgDiv.update('<div class="content">' +  msg + '</div>');
+        App.errorMsgDiv.show();
+        App.errorMsgDiv.getEl().fadeIn();
+
+        App.errorMsgDivHideTask.delay(5000);
 
         dhf = function(){
             delete App.hideFailureAlerts;
         };
         Ext.Function.defer(dhf, 1500);
+    };
+
+    App.hideException = function() {
+        App.errorMsgDiv.fadeOut();
     };
 
     App.clipboard = new CB.Clipboard();

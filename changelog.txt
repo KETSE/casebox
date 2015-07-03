@@ -1,3 +1,27 @@
+CaseBox 1.9.490 (2015-07-03)
+==============================
+New Features, Improvements
+--------------------------
+- updated barebone core, set system folder to not implement parent nodes security,
+  wich imply it to be accessible only for root user.
+  root will be responsible to add any other user to this folder access list.
+- changed -s parameter for core_create.php to work like in apply_vanilla_data_model.php
+  i.e. when -s given without value then barebone core is used by default.
+- updated translations table in _casebox.sql dump
+
+Fixed Bugs:
+----------
+- new users that do not have any security set associated
+  could navigate the tree, although they could not preview items or do any other actions
+
+CaseBox 1.9.489 (2015-07-03)
+==============================
+New Features, Improvements
+--------------------------
+- #5723 No errors shown if upload failed
+- #6718 Make createMenu work in search template
+- #6770 Change the modal popup "can't connect to server" to a tooltip at the top for a period of time
+
 CaseBox 1.9.488 (2015-07-02)
 ==============================
 Fixed Bugs:

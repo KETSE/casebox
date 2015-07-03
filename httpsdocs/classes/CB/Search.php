@@ -288,6 +288,11 @@ class Search extends Solr\Client
 
             if (!empty($sets)) {
                 $rez = 'security_set_id:('.implode(' OR ', $sets).') OR oid:' . User::getId();
+
+            } else {
+                //for created users that doesnt belong to any group
+                //and dont have any security sets associated
+                $rez = '!security_set_id:[* TO *]';
             }
 
         }
