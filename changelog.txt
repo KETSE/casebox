@@ -1,3 +1,9 @@
+CaseBox 1.9.491 (2015-07-04)
+==============================
+New Features, Improvements
+--------------------------
+- adjust searchResults tree node for custom routers
+
 CaseBox 1.9.490 (2015-07-03)
 ==============================
 New Features, Improvements
