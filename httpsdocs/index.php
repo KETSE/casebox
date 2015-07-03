@@ -112,6 +112,10 @@ switch ($command) {
     case 'upload':
         require_once 'init.php';
 
+        $result = array(
+            'success' => false
+        );
+
         if (isset($_SERVER['HTTP_X_FILE_OPTIONS'])) {
             // AJAX call
             $file = Util\jsonDecode($_SERVER['HTTP_X_FILE_OPTIONS']);
@@ -136,10 +140,10 @@ switch ($command) {
                     ,'response' => @$file['response']
                 )
             );
-
-            header('Content-Type: application/json; charset=UTF-8');
-            echo Util\jsonEncode($result);
         }
+
+        header('Content-Type: application/json; charset=UTF-8');
+        echo Util\jsonEncode($result);
 
         break;
 

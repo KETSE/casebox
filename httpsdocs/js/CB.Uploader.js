@@ -112,6 +112,7 @@ Ext.define('CB.Uploader', {
             this.progressChange();
 
             var r = Ext.util.JSON.decode(e.target.response);
+
             if(r.success === true){
                 this.uploadingFile.set('status', this.targetStatus);
 
@@ -149,8 +150,17 @@ Ext.define('CB.Uploader', {
                 }
             });
             w.show();
-        }else{
+
+        } else {
             this.uploadingFile.set('status', 2); //upload error
+
+            App.showException({
+                msg: L.ErrorUploadingFile.replace(
+                    '{name}'
+                    ,this.uploadingFile.get('name')
+                )
+            });
+
             this.uploadNextFile();
         }
     }
@@ -606,7 +616,12 @@ Ext.define('CB.UploadWindow', {
                     ,width: 200
                     ,sortable: true
                     ,dataIndex: 'pathtext'
-                    ,renderer: function(v, m, r){ return v+r.get('dir').substr(1);}
+                    ,renderer: function(v, m, r){
+                        return (
+                            Ext.valueFrom(v, '') +
+                            Ext.valueFrom(r.get('dir').substr(1), '')
+                        );
+                    }
                 },{
                     header: 'msg'
                     ,width: 175

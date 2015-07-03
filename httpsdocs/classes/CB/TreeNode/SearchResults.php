@@ -83,23 +83,6 @@ class SearchResults extends Dbnode
         return $rez;
     }
 
-    /**
-     * get target id for creating objects on search
-     * @param  array $rp request params
-     * @return int   | null
-     */
-    public function getCreateTarget(&$rp)
-    {
-        $rez = null;
-        $cfg = $this->getSearchParams($rp);
-
-        if (!empty($cfg['realNodeId'])) {
-            $rez = $cfg['realNodeId'];
-        }
-
-        return $rez;
-    }
-
     public function getNodeParam($param = 'facets')
     {
         $rez = parent::getNodeParam($param);

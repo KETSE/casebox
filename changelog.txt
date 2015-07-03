@@ -1,3 +1,11 @@
+CaseBox 1.9.489 (2015-07-03)
+==============================
+New Features, Improvements
+--------------------------
+- #5723 No errors shown if upload failed
+- #6718 Make createMenu work in search template
+- #6770 Change the modal popup "can't connect to server" to a tooltip at the top for a period of time
+
 CaseBox 1.9.488 (2015-07-02)
 ==============================
 Fixed Bugs:
