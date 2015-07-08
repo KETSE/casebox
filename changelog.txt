@@ -1,3 +1,12 @@
+CaseBox 1.9.492 (2015-07-08)
+==============================
+Fixed Bugs:
+----------
+- #5661 Button "показать наименования" has no effect
+- #6865 the GrandTotal cell (the right/bottom one) is not using floatPrecision
+- #7049 AND / OR button when a facet has several selected values
+- #7081 Preview of task shows "Reminders" header after save
+
 CaseBox 1.9.491 (2015-07-04)
 ==============================
 New Features, Improvements

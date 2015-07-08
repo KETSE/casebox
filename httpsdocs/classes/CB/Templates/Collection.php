@@ -38,15 +38,16 @@ class Collection
         $template_fields = array();
         $res = DB\dbQuery(
             'SELECT
-                id
-                ,pid
-                ,template_id
-                ,name
-                ,l' . \CB\Config::get('user_language_index') . ' `title`
-                ,`type`
-                ,cfg
-                ,solr_column_name
-            FROM templates_structure'
+                ts.id
+                ,ts.pid
+                ,ts.template_id
+                ,ts.name
+                ,ts.l' . \CB\Config::get('user_language_index') . ' `title`
+                ,ts.`type`
+                ,ts.cfg
+                ,ts.solr_column_name
+            FROM templates_structure ts
+            JOIN tree t on ts.id = t.id AND t.dstatus = 0'
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {

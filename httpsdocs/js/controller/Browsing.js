@@ -172,8 +172,9 @@ Ext.define('CB.controller.Browsing', {
      */
     ,onVCViewLoaded: function(proxy, action, options) {
         //change breadcrumb value for search template restults
-        var bvalue = action.pathtext
-            ,path = action.folderProperties.path
+        var bvalue = Ext.valueFrom(action.pathtext, '')
+            ,fp = Ext.valueFrom(action.folderProperties, {})
+            ,path = fp.path
             ,total = Ext.valueFrom(action.total, 0);
 
         if(options.search && !isNaN(options.search.template_id)) {
@@ -192,18 +193,18 @@ Ext.define('CB.controller.Browsing', {
         this.VC.updateCreateMenuItems(this.VP.buttons.create);
 
 
-        if(action &&
-            action.folderProperties &&
+        if(fp.path &&
             Ext.isEmpty(this.VC.params.query) // dont sync on search query
         ) {
             // add flag to avoid reloading viewport on tree node selection change
             this.syncingTreePathWithViewContainer = true;
 
-            this.tree.updateCreateMenu(action.folderProperties.menu);
+            this.tree.updateCreateMenu(fp.menu);
 
             //check if rootnode id is set at the beginning of the path
             //its id could be missing if it's a virtual root node
-            var p = String(action.folderProperties.path).split('/');
+            var p = String(fp.path).split('/');
+
             if(p.indexOf(App.config.rootNode.nid) < 0) {
                 if(Ext.isEmpty(p[0])) {
                     p.splice(1, 0, App.config.rootNode.nid);

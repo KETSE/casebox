@@ -270,7 +270,7 @@ Ext.define('CB.browser.view.Pivot',{
             //get stats value if set
             value = this.getFacetCount(this.pivot);
 
-            html += '<tr>' + r + '<td class="total">' + (value ? value : total) + '</td></tr>';
+            html += '<tr>' + r + '<td class="total">' + Ext.util.Format.number(value ? value : total, '0.##') + '</td></tr>';
 
             html = '<table class="pivot">' + html + '</table>';
 

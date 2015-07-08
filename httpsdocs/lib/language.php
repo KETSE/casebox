@@ -31,7 +31,7 @@ if (!empty($_GET['l']) && (strlen($_GET['l']) == 2)) {
     If there is no translation file for main language set then we use english by default */
 if (isset($_SESSION['user']['language']) &&
     isset($languageSettings[$_SESSION['user']['language']])
-    ) {
+) {
     $user_language = $_SESSION['user']['language'];
 
 } elseif (!isset($languageSettings[@$_SESSION['user']['language']])) {
