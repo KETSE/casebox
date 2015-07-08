@@ -323,7 +323,7 @@ Ext.define('CB.ViewPort', {
         } else {
             //set browser title
             var proxy = App.explorer.store.getProxy()
-                ,action = proxy.reader.rawData
+                ,action = Ext.valueFrom(proxy.reader.rawData, {})
                 ,options = proxy.extraParams;
 
             App.controller.onVCViewLoaded(

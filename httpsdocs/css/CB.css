@@ -573,8 +573,8 @@ div.complaint_satisfaction_editor{ display: inline-block; min-width: 120px }
 .x-tool-edit	{ background-image:url(i/ico/gear.png) }
 .x-tool-reload, .icon-reload	{ background-image:url(i/ico/arrow-circle.png) }
 .x-tool-open, .icon-external	{ background-image:url(i/ico/_external3.png) }
-.x-tool-chain	{ background-image:url(i/ico/chain.png); width: 16px }
-.x-tool-unchain	{ background-image:url(i/ico/chain-unchain.png); min-width: 16px}
+.x-tool-chain, .x-tool-chain	.x-tool-img { background-image:url(i/ico/chain.png); width: 16px }
+.x-tool-unchain, .x-tool-unchain .x-tool-img	{ background-image:url(i/ico/chain-unchain.png); min-width: 16px}
 .x-tool-calendar{ background-image:url(i/ico/calendar-select-days-span.png) }
 .x-tool-open-calendar{ background-image:url(i/ico/calendar-blue.png); background-position: 0 50% !important }
 .x-tool-upload	{ background-image:url(i/ico/drive-upload.png) }

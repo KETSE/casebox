@@ -912,12 +912,17 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,updateCreateMenuItems: function(menuButton) {
+        var menu = this.folderProperties
+            ? this.folderProperties.menu
+            : [];
+
         updateMenu(
             menuButton
-            ,this.folderProperties.menu
+            ,menu
             ,this.onCreateObjectClick
             ,this
         );
+
         menuButton.setDisabled(menuButton.menu.items.getCount() < 1);
     }
 

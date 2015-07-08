@@ -233,11 +233,13 @@ Ext.define('CB.Facet', {
     }
 
     ,onModeToggle: function(ev, toolEl, panel, tc){
-        if (toolEl.hasCls('x-tool-chain')) {
-            toolEl.replaceClass('x-tool-chain', 'x-tool-unchain');
+        var el = tc.el;
+
+        if (el.hasCls('x-tool-chain')) {
+            el.replaceCls('x-tool-chain', 'x-tool-unchain');
             this.mode = 'OR';
         } else {
-            toolEl.replaceClass('x-tool-unchain', 'x-tool-chain');
+            el.replaceCls('x-tool-unchain', 'x-tool-chain');
             this.mode = 'AND';
         }
         this.fireEvent('modechange', this, ev);
