@@ -1,3 +1,17 @@
+CaseBox 1.9.493 (2015-07-15)
+==============================
+New Features, Improvements
+--------------------------
+- consolidation attempt for importing process
+- added decimalPrecision option for float fields config
+
+Fixed Bugs:
+----------
+- #7180 FacetedNav doesn't work with "template" as level_fields
+- #6716 Can't upload new files in a new local instance
+- #7237 Order of comments is not correct
+- nothing changes on breadcrumb elements click
+
 CaseBox 1.9.492 (2015-07-08)
 ==============================
 Fixed Bugs:

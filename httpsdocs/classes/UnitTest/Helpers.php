@@ -7,7 +7,7 @@
 
 namespace UnitTest;
 
-use \CB\INSTALL;
+use \CB\Install;
 use \CB\Config;
 use \CB\L;
 use \CB\Cache;
@@ -81,10 +81,10 @@ class Helpers
                 Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
 
                 $test_cfg['backup_dir']      = CB_ROOT_PATH . 'backup'.DIRECTORY_SEPARATOR;
-                $test_cfg['server_name']     = INSTALL\readParam('server_name', $test_cfg['server_name']);
+                $test_cfg['server_name']     = Install\readParam('server_name', $test_cfg['server_name']);
                 $test_hostname               = preg_replace('/^http(s)?:\/\//si', '', $test_cfg['server_name']);
 
-                $test_cfg['solr_home']     = INSTALL\readParam('solr_home', $test_cfg['solr_home']);
+                $test_cfg['solr_home']     = Install\readParam('solr_home', $test_cfg['solr_home']);
 
                 $test_cfg['admin_email']     = 'admin@'.$test_hostname;
                 $test_cfg['sender_email']    = 'sender@'.$test_hostname;
@@ -93,18 +93,18 @@ class Helpers
 
                 if (!\CB\IS_WINDOWS) {
                     //ask for apache user and set ownership for some folders
-                    $test_cfg['apache_user'] = INSTALL\readParam('apache_user', $test_cfg['apache_user']);
+                    $test_cfg['apache_user'] = Install\readParam('apache_user', $test_cfg['apache_user']);
                 }
 
-                $test_cfg['db_user']     = INSTALL\readParam('db_user', $test_cfg['db_user']);
-                $test_cfg['db_pass']     = INSTALL\readParam('db_pass');
+                $test_cfg['db_user']     = Install\readParam('db_user', $test_cfg['db_user']);
+                $test_cfg['db_pass']     = Install\readParam('db_pass');
 
-                $test_cfg['su_db_user'] = INSTALL\readParam('su_db_user', $test_cfg['su_db_user']);
-                $test_cfg['su_db_pass'] = INSTALL\readParam('su_db_pass');
+                $test_cfg['su_db_user'] = Install\readParam('su_db_user', $test_cfg['su_db_user']);
+                $test_cfg['su_db_pass'] = Install\readParam('su_db_pass');
 
                 echo 'writing autoconfig file to:'.$config_filename.PHP_EOL;
 
-                INSTALL\putIniFile($config_filename, $test_cfg);
+                Install\putIniFile($config_filename, $test_cfg);
 
                 if (!\CB\IS_WINDOWS) {
                     shell_exec('chown ' . $test_cfg['apache_user'].' "' . $config_filename . '"');

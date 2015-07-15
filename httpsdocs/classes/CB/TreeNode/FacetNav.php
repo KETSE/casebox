@@ -150,8 +150,12 @@ class FacetNav extends Base
         $facetName = $currentFacetFieldConfig['name'];
         $facetField = $currentFacetFieldConfig['field'];
 
+        $fq = empty($this->config['fq'])
+            ? array()
+            : $this->config['fq'];
+
         $fq = array_merge(
-            $this->config['fq'],
+            $fq,
             $this->getParentNodeFilters()
         );
 
@@ -216,8 +220,12 @@ class FacetNav extends Base
 
         $p = $this->requestParams;
 
+        $fq = empty($this->config['fq'])
+            ? array()
+            : $this->config['fq'];
+
         $p['fq'] = array_merge(
-            $this->config['fq'],
+            $fq,
             $this->getParentNodeFilters()
         );
 

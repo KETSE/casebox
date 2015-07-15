@@ -37,6 +37,10 @@ if (empty($coreName)) {
     die('no core specified or invalid options set.');
 }
 
+$importConfig = array(
+    'core_name' => $coreName
+);
+
 $importSql = (isset($options['s']) || isset($options['sql']));
 $sqlFile = '';
 
@@ -62,59 +66,35 @@ if ($importSql) {
         $cfg['su_db_user'] = 'root';
     }
 
-    $cfg['su_db_user'] = INSTALL\readParam('su_db_user', $cfg['su_db_user']);
-    $cfg['su_db_pass'] = INSTALL\readParam('su_db_pass');
+    $cfg['su_db_user'] = Install\readParam('su_db_user', $cfg['su_db_user']);
+    $cfg['su_db_pass'] = Install\readParam('su_db_pass');
 
-    if (!INSTALL\verifyDBConfig($cfg)) {
+    if (!Install\verifyDBConfig($cfg)) {
         die('Wrong database credentials');
     }
 
     Cache::set('RUN_SETUP_INTERACTIVE_MODE', false);
 
     //start Importing sql ...
-    $config = array(
-        'overwrite_existing_core_db' => 'y'
-        ,'core_solr_overwrite' => 'n'
-        ,'core_solr_reindex' => 'n'
+    $importConfig = array_merge(
+        $importConfig,
+        array(
+            'overwrite_existing_core_db' => 'y'
+            ,'core_solr_overwrite' => 'n'
+            ,'core_solr_reindex' => 'n'
+        )
     );
 
     //set default root password to 'test' is applying barebone sql dump
     if ($sqlFile == $bareBoneCoreSql) {
-        $config['core_root_pass'] = 'test';
+        $importConfig['core_root_pass'] = 'test';
     }
 
-    Cache::set('RUN_SETUP_CFG', $config);
-
-    $options = array(
-        'core' => $coreName
-        ,'sql' => $sqlFile
-    );
-
-    include $binDirectorty . 'core_create.php';
+    $importConfig['importSql'] = $sqlFile;
 }
 
-//initializing and loading core config
-$_SERVER['SERVER_NAME'] = 'localhost';
-$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+$vanilla = new Import\VanillaModel($importConfig);
 
-$_GET['core'] = $coreName;
-$_SESSION['user'] = array('id' => 1);
-
-ini_set('max_execution_time', 0);
-error_reporting(E_ALL);
-
-include $cbHome . 'httpsdocs/config.php';
-require_once $cbHome . 'httpsdocs/lib/language.php';
-
-$vanilla = new Install\VanillaModel();
-
-$vanilla->apply();
-
-echo "Reindexing solr .. ";
-
-$solrClient = new Solr\Client();
-$solrClient->updateTree(array('all' => true));
-
-echo "Ok\n";
+$vanilla->import();
 
 echo "Done\n";

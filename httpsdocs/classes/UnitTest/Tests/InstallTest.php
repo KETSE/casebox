@@ -16,7 +16,7 @@ class InstallTest extends \PHPUnit_Framework_TestCase
 
         $cfg = \CB\Config::loadConfigFile(\CB_DOC_ROOT . 'config.ini');
 
-        $this->assertEquals(CB_ROOT_PATH . 'backup' . $dc, \CB\INSTALL\defineBackupDir($cfg));
+        $this->assertEquals(CB_ROOT_PATH . 'backup' . $dc, \CB\Install\defineBackupDir($cfg));
 
     }
 
@@ -26,7 +26,7 @@ class InstallTest extends \PHPUnit_Framework_TestCase
 
         $cfg = \CB\Config::loadConfigFile(\CB_DOC_ROOT . 'config.ini');
 
-        $result = \CB\INSTALL\createSolrConfigsetsSymlinks($cfg);
+        $result = \CB\Install\createSolrConfigsetsSymlinks($cfg);
 
         $this->assertTrue($result['success'], ' creates symplink return errors');
 
