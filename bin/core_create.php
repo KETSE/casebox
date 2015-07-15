@@ -8,7 +8,7 @@
  *
  * Example: php -f core_create.php -- -c text_core_name -s /path/to/mysql/dump.sql
  */
-namespace CB\INSTALL;
+namespace CB\Install;
 
 use CB\DB;
 use CB\DataModel as DM;
@@ -51,7 +51,7 @@ if (!\CB\Cache::get('RUN_SETUP_INTERACTIVE_MODE')) {
     \CB\Cache::set('RUN_SETUP_INTERACTIVE_MODE', !\CB\Cache::exist('RUN_SETUP_CFG'));
 }
 
-\CB\INSTALL\defineBackupDir($cfg);
+\CB\Install\defineBackupDir($cfg);
 
 $dbName = (
     isset($cfg['prefix'])

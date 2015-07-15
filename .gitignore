@@ -5,6 +5,9 @@ sys/solr_configsets/default_config/*.unloaded
 
 ssl/
 
+# ignore custom import scripts
+install/import/
+
 # ignore .sublime files
 *sublime*
 

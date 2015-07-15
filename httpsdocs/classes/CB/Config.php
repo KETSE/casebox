@@ -537,6 +537,10 @@ class Config extends Singleton
         // add available languages of the core to the minify groups
         $languages = Config::get('languages', array('en'));
 
+        if (!in_array('en', $languages)) {
+            $languages[] = 'en';
+        }
+
         foreach ($languages as $l) {
             $k = mb_strtolower(trim($l));
 

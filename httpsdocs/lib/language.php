@@ -7,6 +7,19 @@ $coreLanguage = \CB\Config::get('language');
 $coreLanguages = \CB\Config::get('languages');
 $languageSettings = \CB\Config::get('language_settings');
 
+//set default language setting for undefined language in cofig
+if (!isset($languageSettings[$coreLanguage])) {
+    $languageSettings[$coreLanguage] = array(
+        'name' => $coreLanguage
+        ,'locale' => 'en_US'
+        ,'long_date_format' => '%F %j, %Y'
+        ,'short_date_format' => '%m/%d/%Y'
+        ,'time_format' => '%H:%i'
+    );
+
+    \CB\Config::setEnvVar('language_settings', $languageSettings);
+}
+
 //define language fields
 $fields = array();
 for ($i=0; $i < sizeof($coreLanguages); $i++) {
@@ -38,10 +51,15 @@ if (isset($_SESSION['user']['language']) &&
     $user_language = $coreLanguage;
 }
 
+$lidx = getIndex($user_language);
+if ($lidx < 1) {
+    $user_language = $coreLanguage;
+    $lidx = getIndex($user_language);
+}
 \CB\Config::setEnvVar('user_language', $user_language);
 
 // index for default user language
-\CB\Config::setEnvVar('user_language_index', getIndex($user_language));
+\CB\Config::setEnvVar('user_language_index', $lidx);
 
 \CB\Config::setEnvVar('rtl', !empty($languageSettings[$user_language]['rtl']));
 

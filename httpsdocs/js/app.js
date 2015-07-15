@@ -929,29 +929,38 @@ function initApp() {
                     ,format: App.dateFormat
                     ,width: 100
                 });
+
             case 'datetime':
                 return new Ext.form.DateField({
                     enableKeyEvents: true
                     ,format: App.dateFormat+' ' + App.timeFormat
                     ,width: 130
                 });
+
             case 'time':
                 return new Ext.form.field.Time({
                     enableKeyEvents: true
                     ,format: App.timeFormat
                 });
+
             case 'int':
                 return new Ext.form.NumberField({
                     enableKeyEvents: true
                     ,allowDecimals: false
                     ,width: 90
                 });
+
             case 'float':
-                return new Ext.form.NumberField({
+                var fieldCfg = {
                     enableKeyEvents: true
                     ,allowDecimals: true
                     ,width: 90
-                });
+                };
+
+                Ext.copyTo(fieldCfg, cfg, 'decimalPrecision');
+
+                return new Ext.form.NumberField(fieldCfg);
+
             case 'combo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){
@@ -968,6 +977,7 @@ function initApp() {
                     ,displayField: 'name'
                     ,valueField: 'id'
                 });
+
             case 'iconcombo':
                 th = cfg.thesauriId;
                 if(th == 'dependent'){

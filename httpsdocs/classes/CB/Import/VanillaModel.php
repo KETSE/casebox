@@ -1,11 +1,12 @@
 <?php
 
-namespace CB\Install;
+namespace CB\Import;
 
 use CB\Objects;
 use CB\Util;
 use CB\DB;
 use CB\DataModel as DM;
+use CB\Import\BareBoneModel as BBM;
 
 /**
  * Vanilla model script
@@ -13,7 +14,7 @@ use CB\DataModel as DM;
  * instantiated from bare bone core
  */
 
-class VanillaModel
+class VanillaModel extends Base
 {
 
     /**
@@ -21,17 +22,9 @@ class VanillaModel
      * @var array
      */
     protected $config = array(
-        /******************************** GLOBAL *******************************/
-        'folderTemplateId' => 5
-        ,'thesauriTemplateId' => 8
-        ,'templatesTemplateId' => 11
-        ,'fieldTemplateId' => 12
-
-        ,'templatesFolderId' => 3
-        ,'thesauriFolderId' => 4
 
         /*************************** USERS AND GROUPS **************************/
-        ,'groups' => [
+        'groups' => [
             'Administrators'
             ,'Lawyers'
         ]
@@ -239,25 +232,32 @@ class VanillaModel
     );
 
     /**
-     * applying vanilla changes to current core
+     * executing preimporting changes to target core
      * @return void
      */
-    public function apply()
+    protected function prepare()
     {
-        DB\startTransaction();
-
         //2.  Casebox Users and Groups
         $this->setupUsersGroups();
 
         // 6.  Thesauri
         echo "\nCreate thesauri items .. ";
         $this->createThesauri(
-            $this->config['thesauriFolderId'],
+            BBM::$config['thesauriFolderId'],
             $this->config['thesauri'],
             '/'
         );
 
         echo "Done\n";
+
+    }
+
+    /**
+     * applying vanilla changes to current core
+     * @return void
+     */
+    public function execute()
+    {
 
         // 3.  File Folder Structure
         $this->structureFilesAndFolders();
@@ -269,7 +269,6 @@ class VanillaModel
 
         $this->updateCreateMenus();
 
-        DB\commitTransaction();
     }
 
     /**
@@ -320,14 +319,15 @@ class VanillaModel
                 array(
                     'id' => null
                     ,'pid' => $pid
-                    ,'template_id' => $this->config['folderTemplateId']
+                    ,'template_id' => BBM::$config['folderTemplateId']
+                    ,'name' => $k
                     ,'data' => array(
                         '_title'  => $k
                     )
                 )
             );
 
-            $this->thesauriIds[$prefix . $k] = $id;
+            $this->thesauriIds[$prefix . $k] = array('id' => $id);
             echo "ok\n";
 
             if (Util\isAssocArray($v)) {
@@ -342,7 +342,7 @@ class VanillaModel
                         array(
                             'id' => null
                             ,'pid' => $id
-                            ,'template_id' => $this->config['thesauriTemplateId']
+                            ,'template_id' => BBM::$config['thesauriTemplateId']
                             ,'name' => $item
                             ,'data' => array(
                                 "en" => $item
@@ -354,140 +354,6 @@ class VanillaModel
                     );
                 }
             }
-        }
-    }
-
-    /**
-     * create templates
-     * @return void
-     */
-    protected function addCustomTemplates()
-    {
-        $o = new \CB\Objects\Template();
-        $tf = new \CB\Objects\TemplateField();
-
-        foreach ($this->config['templates'] as $k => $v) {
-            echo "creating template '$k' .. ";
-
-            $v['id'] = null;
-            $v['pid'] = $this->config['templatesFolderId'];
-            $v['template_id'] = $this->config['templatesTemplateId'];
-
-            //create correct data
-            $name = empty($v['name'])
-                ? $k
-                : $v['name'];
-
-            $type = empty($v['type'])
-                ? 'object'
-                : $v['type'];
-
-            $data = array(
-                '_title' => $k
-                ,'en' => $name
-                ,'type' => $type
-                ,'visible' => 1
-            );
-
-            if (!empty($v['iconCls'])) {
-                $data['iconCls'] = $v['iconCls'];
-            }
-            if (!empty($v['cfg'])) {
-                $data['cfg'] = $v['cfg'];
-            }
-            if (!empty($v['title_template'])) {
-                $data['title_template'] = $v['title_template'];
-            }
-
-            $v['data'] = $data;
-
-            $fields = empty($v['fields'])
-                ? array()
-                : $v['fields'];
-
-            unset($v['fields']);
-
-            echo "Ok\n";
-
-            $id = $o->create($v);
-
-            $this->templateIds[$k] = $id;
-
-            // analize fields
-            // ,'country' => array(
-            //             'en' => 'Country'
-            //             ,'type' => '_objects'
-            //             ,'cfg' => array(
-            //                 'source' => 'tree'
-            //                 ,'scope' => '/Country'
-            //             )
-            //         )
-
-            $i = 1;
-            foreach ($fields as $fn => $fv) {
-                $fv['id'] = null;
-                $fv['pid'] = $id;
-                $fv['template_id'] = $this->config['fieldTemplateId'];
-
-                $name = empty($fv['en'])
-                    ? $fn
-                    : $fv['en'];
-
-                $type = empty($fv['type'])
-                    ? 'varchar'
-                    : $fv['type'];
-
-                $order = empty($fv['order'])
-                    ? $i++
-                    : $fv['order'];
-
-                $data = array(
-                    'name' => $fn
-                    ,'en' => $name
-                    ,'type' => $type
-                    ,'order' => $order
-                );
-
-                if (!empty($fv['solr_column_name'])) {
-                    $data['solr_column_name'] = $fv['solr_column_name'];
-                }
-
-                $cfg = empty($fv['cfg'])
-                    ? array()
-                    : $fv['cfg'];
-
-                if (!empty($cfg['scope']) && substr($cfg['scope'], 0, 1) == '/') {
-                    $cfg['scope'] = $this->thesauriIds[$cfg['scope']];
-                }
-
-                if (!empty($cfg)) {
-                    $data['cfg'] = Util\jsonEncode($cfg);
-                }
-
-                $fv['name'] = $name;
-                $fv['type'] = $type;
-                $fv['order'] = $order;
-                $fv['data'] = $data;
-
-                $tf->create($fv);
-            }
-
-            /*
-            {"_title":"assigned"
-            ,"en":"Assigned"
-            ,"type":"_objects"
-            ,"order":7
-            ,"cfg":"{
-                 \"editor\": \"form\"
-                ,\"source\": \"users\"
-                ,\"renderer\": \"listObjIcons\"
-                 ,\"autoLoad\": true
-                 ,\"multiValued\": true
-                 ,\"hidePreview\": true\n}"
-            }
-             */
-
-            echo "Ok\n";
         }
     }
 

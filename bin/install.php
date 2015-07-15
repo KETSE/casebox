@@ -1,6 +1,6 @@
 <?php
 
-namespace CB\INSTALL;
+namespace CB\Install;
 
 /**
  * install CaseBox script designed to help first configuration of casebox

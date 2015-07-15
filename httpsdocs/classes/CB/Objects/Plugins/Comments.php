@@ -50,9 +50,8 @@ class Comments extends Base
                 'template_id:('.implode(' OR ', $commentTemplateIds).')'
             )
             ,'fl' => 'id,pid,template_id,cid,cdate,content'
-            ,'sort' => 'cdate'
+            ,'strictSort' => 'cdate desc'
             ,'rows' => $limit
-            ,'dir' => 'desc'
         );
 
         if (!empty($p['beforeId']) && is_numeric($p['beforeId'])) {

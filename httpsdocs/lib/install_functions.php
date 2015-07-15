@@ -4,7 +4,7 @@
  * backup functions used by install scripts
  */
 
-namespace CB\INSTALL;
+namespace CB\Install;
 
 use CB;
 
@@ -458,15 +458,15 @@ function createMainDatabase($cfg)
 
     $cbDb = $cfg['prefix'] . '__casebox';
 
-    $DB_USER = isset($cfg['su_db_user']) ? $cfg['su_db_user']: $cfg['db_user'];
-    $DB_PASS = isset($cfg['su_db_pass']) ? $cfg['su_db_pass']: $cfg['db_pass'];
+    $dbUser = isset($cfg['su_db_user']) ? $cfg['su_db_user']: $cfg['db_user'];
+    $dbPass = isset($cfg['su_db_pass']) ? $cfg['su_db_pass']: $cfg['db_pass'];
 
     $r = \CB\DB\dbQuery('use `' . $cbDb . '`');
     if ($r) {
         if (confirm('overwrite__casebox_db')) {
             if (!(\CB\Cache::get('RUN_SETUP_CREATE_BACKUPS') == false)) {
                 echo 'Backuping .. ';
-                if (backupDB($cbDb, $DB_USER, $DB_PASS)) {
+                if (backupDB($cbDb, $dbUser, $dbPass)) {
                     showMessage();
                 } else {
                     showError('FALSE');
@@ -474,13 +474,13 @@ function createMainDatabase($cfg)
             }
 
             echo 'Applying dump .. ';
-            echo shell_exec('mysql --user=' . $DB_USER . ( $DB_PASS ? ' --password=' . $DB_PASS : '' ) . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+            echo shell_exec('mysql --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' ) . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             showMessage();
         }
     } else {
         if (confirm('create__casebox_from_dump')) {
             if (\CB\DB\dbQuery('CREATE DATABASE IF NOT EXISTS `' . $cbDb . '` CHARACTER SET utf8 COLLATE utf8_general_ci')) {
-                echo shell_exec('mysql --user=' . $DB_USER . ( $DB_PASS ? ' --password=' . $DB_PASS : '' )  . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
+                echo shell_exec('mysql --user=' . $dbUser . ( $dbPass ? ' --password=' . $dbPass : '' )  . ' ' . $cbDb . ' < ' . \CB\APP_DIR . 'install/mysql/_casebox.sql');
             } else {
                 $rez = false;
                 showError('Cant create database "' . $cbDb . '".');

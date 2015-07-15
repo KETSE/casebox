@@ -53,18 +53,20 @@ class Actions
         /* dummy check if not pasting an object over itself
             But maybe in this case we can make a copy of the object with prefix 'Copy of ...'
         */
-        $res = DB\dbQuery(
-            'SELECT id
-            FROM tree
-            WHERE pid = $1
-                AND id IN ('.implode(',', $p['sourceIds']).')',
-            $p['targetId']
-        ) or die(DB\dbQueryError());
+        if (!\CB\Config::get('allow_duplicates', false)) {
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM tree
+                WHERE pid = $1
+                    AND id IN ('.implode(',', $p['sourceIds']).')',
+                $p['targetId']
+            ) or die(DB\dbQueryError());
 
-        if ($r = $res->fetch_assoc()) {
-            return L\get('CannotCopyObjectToItself');
+            if ($r = $res->fetch_assoc()) {
+                return L\get('CannotCopyObjectToItself');
+            }
+            $res->close();
         }
-        $res->close();
         /* end of dummy check if not pasting an object over itself */
 
         /* dummy check if not copying inside a child of sourceIds */
@@ -134,7 +136,7 @@ class Actions
      *
      * most complex method that requires many checks:
      * -   dummy checks for pasting object over itself, cycled pasting (pasting an object into some of its child)
-     * -   if can read all object froum sourceIds
+     * -   if can read all object from sourceIds
      * -   if can write to target
      * -   if target object does not contain already a child with the same name and ask for overwriting confirmation
      * -   when overwriting – follow security rules
