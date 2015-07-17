@@ -2,8 +2,8 @@
 
 namespace CB\DataModel;
 
+use CB\Config;
 use CB\DB;
-use CB\L;
 
 class GUID extends Base
 {
@@ -33,23 +33,12 @@ class GUID extends Base
      */
     public static function create($p)
     {
-        parent::create($p);
+        \CB\raiseErrorIf(
+            empty($p['name']),
+            'ErroneousInputData' //' Empty name for GUID.'
+        );
 
-        if (empty($p['name'])) {
-            trigger_error(L\get('ErroneousInputData') . ' Empty name for GUID.', E_USER_ERROR);
-        }
-        //prepare params
-
-        //add database record
-        $sql = 'INSERT INTO ' . \CB\PREFIX . '_casebox.guids
-                (`name`)
-                VALUES ($1)';
-
-        DB\dbQuery($sql, $p['name']) or die(DB\dbQueryError());
-
-        $rez = DB\dbLastInsertId();
-
-        return $rez;
+        return parent::create($p);
     }
 
     /**
@@ -66,7 +55,7 @@ class GUID extends Base
             $params[] = '$' . $i;
         }
         $sql = 'SELECT id, name
-            FROM ' . \CB\PREFIX . '_casebox.guids
+            FROM ' . static::getTableName() . '
             WHERE name in (' . implode(',', $params). ')';
 
         $res = DB\dbQuery($sql, $names) or die(DB\dbQueryError());
@@ -77,5 +66,12 @@ class GUID extends Base
         $res->close();
 
         return $rez;
+    }
+
+    public static function getTableName()
+    {
+        $dbName = Config::get('prefix') . '__casebox';
+
+        return "`$dbName`.`" . static::$tableName . '`';
     }
 }

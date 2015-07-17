@@ -189,6 +189,7 @@ class Template extends Object
 
         /* loading template fields */
         $this->data['fields'] = array();
+        $this->fieldsOrder = array();
 
         $res = DB\dbQuery(
             'SELECT
@@ -438,6 +439,14 @@ class Template extends Object
      */
     public function getFieldOrder($fieldName)
     {
+        //collect fields order if empty
+        //this can happen when templates loaded in bulk maner
+        if (empty($this->fieldsOrder)) {
+            foreach ($this->data['fields'] as &$f) {
+                $this->fieldsOrder[$f['name']] = intval($f['order']);
+            }
+        }
+
         if (isset($this->fieldsOrder[$fieldName])) {
             return $this->fieldsOrder[$fieldName];
         }

@@ -3,7 +3,6 @@
 namespace CB\DataModel;
 
 use CB\DB;
-use CB\L;
 
 class Base
 {
@@ -34,7 +33,53 @@ class Base
     {
         static::validateParamTypes($p);
 
-        return null;
+        $cp = static::getCreateSqlParams($p);
+
+        //prepare sql
+        $sql = 'INSERT INTO ' . static::getTableName() . ' (`' .
+            implode('`,`', $cp['fields']) .
+            '`) VALUES (' .
+            implode(',', $cp['params']) .
+            ')';
+
+        //add database record
+        DB\dbQuery($sql, $cp['values']) or die(DB\dbQueryError());
+
+        $rez = DB\dbLastInsertId();
+
+        return $rez;
+    }
+
+    /**
+     * get params for record creation
+     * @param  array  $p associative array with table field values
+     * @return array(
+     *         array $fields
+     *         array $params
+     *         array $values
+     *         )
+     */
+    public static function getCreateSqlParams($p)
+    {
+        $p = array_intersect_key($p, static::$tableFields);
+
+        $fields = array_keys($p);
+        $values = array_values($p);
+
+        //prepare params
+        $params = array_keys($values);
+        $params[] = sizeof($params);
+        array_shift($params);
+
+        for ($i=0; $i < sizeof($fields); $i++) {
+            $params[$i] = '$' . $params[$i];
+        }
+
+        return array(
+            'fields' => $fields
+            ,'params' => $params
+            ,'values' => $values
+        );
     }
 
     /**
@@ -51,7 +96,7 @@ class Base
         //read
         $res = DB\dbQuery(
             'SELECT *
-            FROM `' . static::$tableName. '`
+            FROM ' . static::getTableName() . '
             WHERE id = $1',
             $id
         ) or die(DB\dbQueryError());
@@ -71,13 +116,59 @@ class Base
      */
     public static function update($p)
     {
-        if (empty($p['id'])) {
-            trigger_error(L\get('ErroneousInputData') . ' no id given for update method', E_USER_ERROR);
-        }
+        \CB\raiseErrorIf(
+            empty($p['id']),
+            'ErroneousInputData' //' no id given for update method
+        );
 
         static::validateParamTypes($p);
 
-        return null;
+        $up = static::getUpdateSqlParams($p);
+
+        //prepare sql
+        $sql = 'UPDATE ' . static::getTableName() .
+            ' SET ' . implode(',', $up['assignments']) .
+            ' WHERE id = $1';
+
+        //add database record
+        DB\dbQuery($sql, $up['values']) or die(DB\dbQueryError());
+
+        $rez = (DB\dbAffectedRows() > 0);
+
+        return $rez;
+    }
+
+    /**
+     * get params for record update
+     * @param  array  $p associative array with table field values
+     * @return array(
+     *         array $fields
+     *         array $assignments
+     *         array $values
+     *         )
+     */
+    public static function getUpdateSqlParams($p)
+    {
+        $p = array_intersect_key($p, static::$tableFields);
+
+        $fields = array_values(array_diff(array_keys($p), array('id')));
+        $assignments = array();
+        $values = array($p['id']);
+
+        $i = 2;
+
+        foreach ($p as $k => $v) {
+            if ($k !== 'id') {
+                $assignments[] = "`$k` = \$" . $i++;
+                $values[] = $v;
+            }
+        }
+
+        return array(
+            'fields' => $fields
+            ,'assignments' => $assignments
+            ,'values' => $values
+        );
     }
 
     /**
@@ -90,14 +181,56 @@ class Base
         static::validateParamTypes(array('id' => $id));
 
         DB\dbQuery(
-            'DELETE from `' . static::$tableName . '` ' .
-            'WHERE id = $1',
+            'DELETE from ' . static::getTableName() .
+            ' WHERE id = $1',
             $id
         ) or die(DB\dbQueryError());
 
         $rez = (DB\dbAffectedRows() > 0);
 
         return $rez;
+    }
+
+    /**
+     * check if a record exists by its id or name field
+     * @param  varchar $idOrName
+     * @return boolean
+     */
+    public static function exists($idOrName)
+    {
+        $rez = false;
+        try {
+            $rez = static::read($name);
+        } catch (\Exception $e) {
+
+        }
+
+        return !empty($rez);
+    }
+
+    /**
+     * get name for given id or return same result if numeric
+     * @param  varchar $idOrName
+     * @return int     | null
+     */
+    public static function toId($idOrName)
+    {
+        if (!is_numeric($idOrName)) {
+
+            $res = DB\dbQuery(
+                'SELECT id
+                FROM ' . static::getTableName() .
+                ' WHERE name = $1',
+                $idOrName
+            ) or die(DB\dbQueryError());
+
+            if ($r = $res->fetch_assoc()) {
+                $idOrName = $r['id'];
+            }
+            $res->close();
+        }
+
+        return $idOrName;
     }
 
     /**
@@ -121,13 +254,14 @@ class Base
 
             switch ($ft) {
                 case 'int':
+                case 'smallint':
                 case 'float':
                     $valid = is_numeric($p[$fn]);
 
                     break;
 
-                case 'bool':
-                    $valid = is_bool($p[$fn]);
+                // case 'bool':
+                //     $valid = is_bool($p[$fn]);
 
                     break;
 
@@ -174,9 +308,19 @@ class Base
                     break;
             }
 
-            if (!$valid) {
-                trigger_error(L\get('ErroneousInputData') . ' Invalid value for field "' . $fn . '"', E_USER_ERROR);
-            }
+            \CB\raiseErrorIf(
+                !$valid,
+                'ErroneousInputData' //' Invalid value for field "' . $fn . '"'
+            );
         }
+    }
+
+    /**
+     * get table name that current class operates with
+     * @return [type] [description]
+     */
+    public static function getTableName()
+    {
+        return static::$tableName;
     }
 }

@@ -53,7 +53,7 @@ require_once LIB_DIR . 'DB.php';
 
 /* end of update include_path and include scripts */
 
-if(!isset($cfg)|| !is_array($cfg)) {
+if (!isset($cfg)|| !is_array($cfg)) {
     $cfg = array();
 
 }
@@ -64,11 +64,11 @@ $cfg['MINIFY_PATH'] = DOC_ROOT . 'libx/min/';
 $cfg['TIKA_SERVER'] = DOC_ROOT . 'libx/tika-server.jar';
 
 if (file_exists(DOC_ROOT.'config.ini')) {
-//load main config so that we can connect to casebox db and read configuration for core
+    //load main config so that we can connect to casebox db and read configuration for core
     $cfg = Config::loadConfigFile(DOC_ROOT.'config.ini') + $cfg;
 
     if (isset($cfg['db_host']) && isset($cfg['db_user']) && isset($cfg['db_pass']) && isset($cfg['db_port'])) {
-//conect to db using global params from config.ini
+        //conect to db using global params from config.ini
         DB\connect($cfg);
     }
 }
@@ -112,8 +112,6 @@ $cfg['UNOCONV'] = '"' . $cfg['PYTHON'] . '" "' . DOC_ROOT . 'libx' . DIRECTORY_S
 
 Cache::set('platformConfig', $cfg);
 
-
-
 /* config functions section */
 
 /**
@@ -150,7 +148,7 @@ function detectCore()
  * @param  variant $msg
  * @return void
  */
-function debug($msg)
+function debug($msg = null)
 {
     $msg = '';
     $args = func_get_args();
@@ -166,6 +164,10 @@ function debug($msg)
 
     if (empty($debugFile)) {
         $debugFile = LOGS_DIR.'cb_debug_log';
+    }
+
+    if (func_num_args() == 0) {
+        @unlink($debugFile);
     }
 
     error_log(date('Y-m-d H:i:s').': '.$msg."\n", 3, $debugFile);
@@ -243,4 +245,20 @@ function getOption($optionName, $defaultValue = null)
     }
 
     return Config::get($optionName, $defaultValue);
+}
+
+/**
+ * raise an user error if logical result is true
+ * @param  boolean $result
+ * @param  varchar $translationIndex
+ * @return void
+ */
+function raiseErrorIf($result, $translationIndex = 'Error')
+{
+    if ($result) {
+        trigger_error(
+            \CB\L\get($translationIndex),
+            E_USER_ERROR
+        );
+    }
 }

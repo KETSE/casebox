@@ -23,7 +23,7 @@ class User extends Base
      */
     protected static $tableFields = array(
         'id' => 'int'
-        // type //strict value
+        ,'type' => 'int' //strict value
         ,'system' => 'int' //0, 1
         ,'name' => 'varchar'
         ,'first_name' => 'varchar'
@@ -61,37 +61,22 @@ class User extends Base
      */
     public static function create($p)
     {
-        parent::create($p);
-
-        $p = array_intersect_key($p, static::$tableFields);
 
         $p['type'] = static::$type;
 
-        $fields = array_keys($p);
-        $values = array_values($p);
+        $rez = parent::create($p);
 
-        //prepare params
-        $params = array_keys($values);
-        $params[] = sizeof($params);
-        array_shift($params);
+        return $rez;
+    }
 
-        for ($i=0; $i < sizeof($fields); $i++) {
-            $params[$i] = ($fields[$i] == 'password')
-                ?'MD5(CONCAT(\'aero\', $' . $params[$i] . '))'
-                : '$' . $params[$i];
+    public static function getCreateSqlParams($p)
+    {
+        $rez = parent::getCreateSqlParams($p);
+
+        $passIdx = array_search('password', $rez['fields']);
+        if ($passIdx !== false) {
+            $rez['params'][$passIdx] = 'MD5(CONCAT(\'aero\', ' . $rez['params'][$passIdx] . '))';
         }
-
-        //prepare sql
-        $sql = 'INSERT INTO `' . static::$tableName . '` (`' .
-            implode('`,`', $fields) .
-            '`) VALUES (' .
-            implode(',', $params) .
-            ')';
-
-        //add database record
-        DB\dbQuery($sql, $values) or die(DB\dbQueryError());
-
-        $rez = DB\dbLastInsertId();
 
         return $rez;
     }
@@ -103,42 +88,22 @@ class User extends Base
      */
     public static function update($p)
     {
-        parent::update($p);
-
-        $p = array_intersect_key($p, static::$tableFields);
-
-        $assignments = array();
-        $values = array($p['id']);
-
         $p['type'] = static::$type;
-        $i = 2;
 
-        foreach ($p as $k => $v) {
-            switch ($k) {
-                case 'id':
-                    break;
+        $rez = parent::update($p);
 
-                case 'password':
-                    $assignments[] = "`$k` = MD5(CONCAT('aero', \$" . $i++ . "))" ;
-                    $values[] = $v;
-                    break;
+        return $rez;
+    }
 
-                default:
-                    $assignments[] = "`$k` = \$" . $i++;
-                    $values[] = $v;
-                    break;
-            }
+    public static function getUpdateSqlParams($p)
+    {
+        $rez = parent::getUpdateSqlParams($p);
+
+        $passIdx = array_search('password', $rez['fields']);
+        if ($passIdx !== false) {
+            $a = explode('=', $rez['assignments'][$passIdx]);
+            $rez['assignments'][$passIdx] = $a[0] . '= MD5(CONCAT(\'aero\', ' . $a[1] . '))';
         }
-
-        //prepare sql
-        $sql = 'UPDATE `' . static::$tableName . '` ' .
-            ' SET ' . implode(',', $assignments) .
-            ' WHERE id = $1';
-
-        //add database record
-        DB\dbQuery($sql, $values) or die(DB\dbQueryError());
-
-        $rez = (DB\dbAffectedRows() > 0);
 
         return $rez;
     }
@@ -150,11 +115,12 @@ class User extends Base
      */
     public static function updateByName($p)
     {
-        if (empty($p['name'])) {
-            trigger_error(L\get('ErroneousInputData') . ' no username specified for updateByName function', E_USER_ERROR);
-        }
+        \CB\raiseErrorIf(
+            empty($p['name']),
+            'ErroneousInputData' //' no username specified for updateByName function'
+        );
 
-        $p['id'] = static::getIdByName($p['name']);
+        $p['id'] = static::toId($p['name']);
 
         return static::update($p);
     }
@@ -169,7 +135,7 @@ class User extends Base
         static::validateParamTypes(array('id' => $id));
 
         DB\dbQuery(
-            'DELETE from `' . static::$tableName . '` ' .
+            'DELETE from `' . static::getTableName() . '` ' .
             'WHERE id = $1 AND `type` = $2',
             array($id, static::$type)
         ) or die(DB\dbQueryError());
@@ -190,7 +156,7 @@ class User extends Base
         $rez = false;
 
         $sql = 'SELECT id
-            FROM `' . static::$tableName . '`
+            FROM `' . static::getTableName() . '`
             WHERE id = $1  AND `type` = $2' .
             ($onlyActive
                 ? ' AND enabled = 1'
@@ -221,7 +187,7 @@ class User extends Base
         $rez = null;
 
         $sql = 'SELECT id
-            FROM `' . static::$tableName . '`
+            FROM `' . static::getTableName() . '`
             WHERE name = $1  AND `type` = $2' .
             ($onlyActive
                 ? ' AND enabled = 1'

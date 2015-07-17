@@ -6,6 +6,7 @@ use CB\DataModel as DM;
 /**
  * Description of NotificationsTest
  *
+ * too complex to be reanalized and replaced by other tests
  */
 
 class NotificationsTest extends \PHPUnit_Framework_TestCase

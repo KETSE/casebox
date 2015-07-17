@@ -10,20 +10,19 @@ namespace UnitTest;
 class InstallTest extends \PHPUnit_Framework_TestCase
 {
 
-    public function testdefineBackupDir()
+    public function testDefineBackupDir()
     {
-        $dc = DIRECTORY_SEPARATOR;
-
         $cfg = \CB\Config::loadConfigFile(\CB_DOC_ROOT . 'config.ini');
 
-        $this->assertEquals(CB_ROOT_PATH . 'backup' . $dc, \CB\Install\defineBackupDir($cfg));
+        $this->assertEquals(
+            CB_ROOT_PATH . 'backup' . DIRECTORY_SEPARATOR,
+            \CB\Install\defineBackupDir($cfg)
+        );
 
     }
 
-    public function testcreateSolrConfigsetsSymlinks()
+    public function testCreateSolrConfigsetsSymlinks()
     {
-        $dc = DIRECTORY_SEPARATOR;
-
         $cfg = \CB\Config::loadConfigFile(\CB_DOC_ROOT . 'config.ini');
 
         $result = \CB\Install\createSolrConfigsetsSymlinks($cfg);
@@ -53,7 +52,13 @@ class InstallTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('no core specified or invalid options set.', $content);
 
-        $options =  [ 'options' => [ 'core' => DEFAULT_TEST_CORENAME, 'all' => true, 'nolimit' => true ] ];
+        $options =  array(
+            'options' => array(
+                'core' => DEFAULT_TEST_CORENAME
+                ,'all' => true
+                ,'nolimit' => true
+            )
+        );
 
         $content = Helpers::getIncludeContents(\CB\BIN_DIR . 'solr_reindex_core.php', $options);
         $content = array_filter(explode("\n", $content));

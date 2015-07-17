@@ -45,6 +45,7 @@ class Collection
                 ,ts.l' . \CB\Config::get('user_language_index') . ' `title`
                 ,ts.`type`
                 ,ts.cfg
+                ,ts.order
                 ,ts.solr_column_name
             FROM templates_structure ts
             JOIN tree t on ts.id = t.id AND t.dstatus = 0'

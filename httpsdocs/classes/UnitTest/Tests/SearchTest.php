@@ -159,7 +159,7 @@ class SearchTest extends \PHPUnit_Framework_TestCase
     {
         $src = new \CB\Search();
 
-        $this->assertTrue($src->ping() > 0);
+        $this->assertTrue(is_numeric($src->ping()));
 
         $src_response = $src->search('test', 0, 10, []);
 
