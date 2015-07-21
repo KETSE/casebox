@@ -1,3 +1,13 @@
+CaseBox 1.9.495 (2015-07-21)
+==============================
+New Features, Improvements
+--------------------------
+- #7107 Can't edit User Groups in User management
+
+Fixed Bugs:
+----------
+- #7320 Can't upload big files
+
 CaseBox 1.9.494 (2015-07-17)
 ==============================
 New Features, Improvements

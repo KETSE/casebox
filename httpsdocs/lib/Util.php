@@ -477,6 +477,34 @@ function formatFileSize($v)
     }
 }
 
+/**
+ * buffered copy a stream from source to destination
+ * @param  varchar $source
+ * @param  varchar $destination
+ * @return boolean
+ */
+function bufferedSaveFile($source, $destination)
+{
+    $rez = false;
+    $sh = fopen($source, 'rb');
+    $dh = fopen($destination, 'wb');
+
+    // check if handlers opened successfully
+    if ($sh !== false && $dh !== false) {
+        $rez = true;
+        while (!feof($sh) && $rez) {
+            if (fwrite($dh, fread($sh, 1024 * 512)) === false) {
+                $rez = false; //error occured
+            }
+        }
+
+        fclose($sh);
+        fclose($dh);
+    }
+
+    return $rez;
+}
+
 function validId($id = false)
 {
     return (!empty($id) && is_numeric($id) && ($id > 0));

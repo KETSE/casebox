@@ -246,6 +246,11 @@ Ext.define('CB.UsersGroupsTree', {
                     this.store.reload({node: rn});
                 }
             })
+            ,rename: new Ext.Action({
+                text: L.Rename
+                ,scope:this
+                ,handler: this.onRenameClick
+            })
 
         };
 
@@ -361,6 +366,8 @@ Ext.define('CB.UsersGroupsTree', {
                 }
                 ,remove: this.updateChildrenCount
                 ,append: this.updateChildrenCount
+                ,afterrender: this.onAfterRender
+                ,beforeitemcontextmenu: this.onItemContextMenu
             }
             ,selType: 'treemodel'
             ,selModel: {
@@ -372,40 +379,63 @@ Ext.define('CB.UsersGroupsTree', {
                             this.actions.remove.setDisabled(true);
                         } else {
                             this.actions.del.setDisabled(selection[0].data.system == 1);
-                            this.actions.remove.setDisabled((selection[0].getDepth() <2) || (selection[0].parentNode.data.nid <1));
+                            this.actions.remove.setDisabled(
+                                (selection[0].getDepth() <2) ||
+                                (selection[0].parentNode.data.nid <1)
+                            );
+                            this.actions.rename.setDisabled(
+                                selection[0].data.type != '1'
+                            );
                         }
                     }
                 }
             }
-            ,keys: [{
-                key: Ext.event.Event.F2
-                ,alt: false
-                ,ctrl: false
-                ,stopEvent: true
-                ,fn: this.onRenameClick
-                ,scope: this
-            }]
         });
         this.callParent(arguments);
 
         this.enableBubble(['verify']);
     }
+
+    ,onAfterRender: function (tree, eOpts) {
+        new Ext.util.KeyMap({
+            target: this.getEl()
+            ,key: Ext.event.Event.F2
+            ,alt: false
+            ,ctrl: false
+            ,stopEvent: true
+            ,fn: this.onRenameClick
+            ,scope: this
+        });
+    }
+
     ,onRenameClick: function(b, e){
         var n = this.getSelectionModel().getSelection()[0];
-        if(!n) return;
+
+        if(!n || this.actions.rename.isDisabled()) {
+            return;
+        }
         this.editor.editNode = n;
-        this.editor.startEdit(n.ui.textNode);
+        n.set('text', n.data.title);
+        this.editor.startEdit(this.getView().getSelectedNodes()[0]);
     }
+
     ,onBeforeStartEdit: function(editor, boundEl, value){
         var n = this.getSelectionModel().getSelection()[0];
-        if( (n.data.type != 1) || (n.data.nid < 1) ) return false;
+
+        if( (n.data.type != 1) || (n.data.nid < 1)) {
+            return false;
+        }
     }
+
     ,onStartEdit: function(boundEl, value){
         var n = this.getSelectionModel().getSelection()[0];
-        if(n.data.type != 1) return false;
+        if(n.data.type != 1) {
+            return false;
+        }
         value = n.data.title;
         this.editor.setValue(value);
     }
+
     ,onBeforeEditComplete: function(editor, newVal, oldVal) {
         var n = this.getSelectionModel().getSelection()[0];
         oldVal = n.data.title;
@@ -420,11 +450,33 @@ Ext.define('CB.UsersGroupsTree', {
         CB_UsersGroups.renameGroup({id: n.data.nid, title: newVal}, this.processRenameGroup, this);
         return false;
     }
+
     ,processRenameGroup: function(r, e){
         this.getEl().unmask();
-        if(r.success !== true) return;
+        if(r.success !== true) {
+            return;
+        }
         this.editor.editNode.data.title = r.title;
         this.updateChildrenCount(this, this.editor.editNode);
+        this.getView().focusNode(this.editor.editNode, 100);
+    }
+
+    ,onItemContextMenu: function(tree, record, item, index, e, eOpts) {
+        e.stopEvent();
+
+        if(record.data.type == '1') {
+            if(!this.contextMenu) {
+                this.contextMenu = new Ext.menu.Menu({
+                    items: [
+                        this.actions.rename
+                    ]
+                });
+            }
+
+            this.contextMenu.showAt(e.getXY());
+        }
+
+        return false;
     }
 
     ,onAddUserClick: function(b, e){
@@ -622,8 +674,11 @@ Ext.define('CB.UsersGroupsTree', {
             delete this.deletedUserData;
         }
     }
-    ,updateChildrenCount: function( t, p ){
-        if(Ext.isEmpty(p)) return;
+
+    ,updateChildrenCount: function(t, p){
+        if(Ext.isEmpty(p)) {
+            return;
+        }
         if(Ext.isEmpty(p.childNodes)){
             if(!Ext.isEmpty(p.data)) {
                 p.set(
@@ -639,6 +694,7 @@ Ext.define('CB.UsersGroupsTree', {
             ,p.data.title + ' <span class="cG">(' + p.data.users + ')</span>'
         );
     }
+
     ,filter: function(text, property){
         var store = this.store;
 

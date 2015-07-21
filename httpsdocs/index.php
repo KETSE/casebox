@@ -124,9 +124,9 @@ switch ($command) {
             $file['name'] = urldecode($file['name']);
 
             if (empty($file['content_id'])) {
-                file_put_contents(
-                    $file['tmp_name'],
-                    file_get_contents('php://input')
+                Util\bufferedSaveFile(
+                    'php://input',
+                    $file['tmp_name']
                 );
             }
 
