@@ -1,3 +1,10 @@
+CaseBox 1.9.497 (2015-07-24)
+==============================
+Fixed Bugs:
+----------
+- show menu separators for for any language
+- detect correct template ids for upgrade menu model
+
 CaseBox 1.9.496 (2015-07-24)
 ==============================
 New Features, Improvements

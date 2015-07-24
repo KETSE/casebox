@@ -2,6 +2,7 @@
 
 namespace CB\Import;
 
+use CB\Config;
 use CB\DB;
 use CB\Templates;
 use CB\Browser;
@@ -110,8 +111,21 @@ class UpgradeMenuModel extends Base
         $ids = Templates::getIdsByType('template');
         $id = array_shift($ids);
 
+        BBM::$cfg['templatesTemplateId'] = $id;
         $this->cfg['templates']['Menu rule']['fields']['template_ids']['cfg']['templates'] = $id;
         $this->cfg['templates']['Menu rule']['fields']['menu']['cfg']['templates'] = $id;
+
+        // detect fields template id
+        $ids = Templates::getIdsByType('field');
+        $id = array_shift($ids);
+
+        BBM::$cfg['fieldTemplateId'] = $id;
+
+        //detect folderTemplateId
+        $ids = Config::get('folder_templates');
+        if (!empty($ids)) {
+            BBM::$cfg['folderTemplateId'] = array_shift($ids);
+        }
 
         //create "Menu" folder under templates to store our menu templates there
         //and update BBM::$cfg['templatesFolderId'] to our folder id

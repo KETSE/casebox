@@ -306,14 +306,16 @@ function updateMenu(menuButton, menuConfig, handler, scope){
             default:
                 idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i], 10));
                 if(idx >= 0){
-                    var tr = CB.DB.templates.getAt(idx);
-                    if(tr.get('title') == '-') {
+                    var tr = CB.DB.templates.getAt(idx)
+                        ,title = tr.get('title');
+
+                    if(['-', '- Menu separator -'].indexOf(title) >= 0) {
                         menu.push('-');
                     } else {
                         var data = {
                                 template_id: tr.get('id')
                                 // ,type: tr.get('type')
-                                ,title: tr.get('title')
+                                ,title: title
                         };
 
                         if(!Ext.isEmpty(tr.get('cfg').data)) {
@@ -321,7 +323,7 @@ function updateMenu(menuButton, menuConfig, handler, scope){
                         }
 
                         menu.push({
-                            text: tr.get('title')
+                            text: title
                             ,iconCls: tr.get('iconCls')
                             ,scope: scope
                             ,handler: handler
