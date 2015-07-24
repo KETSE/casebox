@@ -773,13 +773,7 @@ function initApp() {
                                             : null;
 
                                         if(objStore && editor.selectedRecordsData) {
-                                            Ext.each(
-                                                editor.selectedRecordsData
-                                                ,function(d){
-                                                    objStore.checkRecordExistance(d);
-                                                }
-                                                ,this
-                                            );
+                                            objStore.checkRecordsExistance(editor.selectedRecordsData);
                                         }
 
                                         this.originalValue = this.value;

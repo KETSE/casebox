@@ -138,7 +138,8 @@ class Templates
         $res = DB\dbQuery(
             'SELECT id
             FROM templates
-            WHERE `type` = $1',
+            WHERE `type` = $1
+            ORDER BY id',
             $type
         ) or die(DB\dbQueryError());
 

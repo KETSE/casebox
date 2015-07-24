@@ -21,7 +21,7 @@ class VanillaModel extends Base
      * grlobal script cofig that contain all options
      * @var array
      */
-    protected $config = array(
+    protected $cfg = array(
 
         /*************************** USERS AND GROUPS **************************/
         'groups' => [
@@ -243,8 +243,8 @@ class VanillaModel extends Base
         // 6.  Thesauri
         echo "\nCreate thesauri items .. ";
         $this->createThesauri(
-            BBM::$config['thesauriFolderId'],
-            $this->config['thesauri'],
+            BBM::$cfg['thesauriFolderId'],
+            $this->cfg['thesauri'],
             '/'
         );
 
@@ -319,7 +319,7 @@ class VanillaModel extends Base
                 array(
                     'id' => null
                     ,'pid' => $pid
-                    ,'template_id' => BBM::$config['folderTemplateId']
+                    ,'template_id' => BBM::$cfg['folderTemplateId']
                     ,'name' => $k
                     ,'data' => array(
                         '_title'  => $k
@@ -342,7 +342,7 @@ class VanillaModel extends Base
                         array(
                             'id' => null
                             ,'pid' => $id
-                            ,'template_id' => BBM::$config['thesauriTemplateId']
+                            ,'template_id' => BBM::$cfg['thesauriTemplateId']
                             ,'name' => $item
                             ,'data' => array(
                                 "en" => $item

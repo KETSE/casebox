@@ -575,15 +575,14 @@ class Template extends Object
                         $value = '';
                         break;
                     }
-                    $a = Util\toNumericArray($value);
-                    if (empty($a)) {
+                    $ids = Util\toNumericArray($value);
+                    if (empty($ids)) {
                         if (empty($field['cfg']['source']) || !is_array($field['cfg']['source'])) {
                             $value = '';
                         }
                         break;
                     }
 
-                    $ids = implode(',', $a);
                     $value = array();
 
                     if (in_array(
@@ -597,7 +596,12 @@ class Template extends Object
 
                         $udp = UsersGroups::getDisplayData($ids);
 
-                        foreach ($udp as $id => $r) {
+                        foreach ($ids as $id) {
+                            if (empty($udp[$id])) {
+                                continue;
+                            }
+                            $r = &$udp[$id];
+
                             $label = @htmlspecialchars(Util\coalesce($r['title'], $r['name']), ENT_COMPAT);
 
                             if ($html) {
@@ -622,7 +626,13 @@ class Template extends Object
 
                     } else {
                         $objects = \CB\Objects::getCachedObjects($ids);
-                        foreach ($objects as $id => $obj) {
+                        foreach ($ids as $id) {
+                            if (empty($objects[$id])) {
+                                continue;
+                            }
+
+                            $obj = &$objects[$id];
+
                             $d = $obj->getData();
                             $label = $obj->getHtmlSafeName();
 

@@ -16,7 +16,7 @@ class BareBoneModel
      * grlobal cofig options
      * @var array
      */
-    public static $config = array(
+    public static $cfg = array(
         'folderTemplateId' => 5
 
         ,'thesauriTemplateId' => 8

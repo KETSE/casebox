@@ -129,7 +129,7 @@ class Collection
             }
         }
 
-        $res = DB\dbQuery('SELECT id from templates where name = $1', $name) or die(DB\dbQueryError());
+        $res = DB\dbQuery('SELECT id FROM templates WHERE name = $1', $name) or die(DB\dbQueryError());
         if ($r = $res->fetch_assoc()) {
             return $this->getTemplate($r['id']);
         }

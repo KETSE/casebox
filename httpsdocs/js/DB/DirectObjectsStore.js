@@ -47,50 +47,12 @@ Ext.define('CB.DB.DirectObjectsStore', {
 
         this.getTexts = getStoreNames;
     }
-
-    // ,getData: function(v){ // this function conflicts with new getData method of stores
-    //     if(Ext.isEmpty(v)) {
-    //         return [];
-    //     }
-    //     var ids = String(v).split(',')
-    //         ,data = [];
-
-    //     Ext.each(ids, function(id){
-    //          idx = this.findExact('id', parseInt(id, 10));
-    //         if(idx >= 0) data.push(this.getAt(idx).data);
-    //     }, this);
-    //     return data;
-    // }
-
-    ,checkRecordExistance: function(data){
-        if(Ext.isEmpty(data)) {
-            return false;
-        }
-
-        var id = Ext.valueFrom(data.nid, data.id);
-        if(Ext.isEmpty(id)) {
-            return false;
-        }
-
-        var rec = this.findRecord('id', id, 0, false, false, true);
-
-        if (!rec) {
-            data = Ext.apply({}, data);
-            data.id = id;
-            var r = Ext.create(
-                this.getModel().getName()
-                ,data
-            );
-
-            var icon = null;
-            if(!Ext.isEmpty(data.cfg)) {
-                icon = data.cfg.iconCls;
-            }
-            if(Ext.isEmpty(icon)) {
-                icon = getItemIcon(data);
-            }
-            r.set('iconCls', icon);
-            this.add(r);
-        }
-    }
 });
+
+CB.DB.DirectObjectsStore.borrow(
+    CB.DB.ObjectsStore
+    ,[
+        'checkRecordExistance'
+        ,'checkRecordsExistance'
+    ]
+);

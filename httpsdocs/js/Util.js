@@ -298,27 +298,36 @@ function updateMenu(menuButton, menuConfig, handler, scope){
             case 'task': break;
             case 'event': break;
             case 'folder': break;
-            case '-':
+
+            case '-': //obsolete for upgraded menu model
                 menu.push('-');
                 break;
+
             default:
                 idx = CB.DB.templates.findExact('id', parseInt(menuConfig[i], 10));
                 if(idx >= 0){
-                    tr = CB.DB.templates.getAt(idx);
-                    data = {
-                            template_id: tr.get('id')
-                            // ,type: tr.get('type')
-                            ,title: tr.get('title')
-                    };
-                    if(!Ext.isEmpty(tr.get('cfg').data)) Ext.apply(data, tr.get('cfg').data);
-                    menu.push({
-                        text: tr.get('title')
-                        ,iconCls: tr.get('iconCls')
-                        ,scope: scope
-                        ,handler: handler
-                        ,data: data
-                    });
+                    var tr = CB.DB.templates.getAt(idx);
+                    if(tr.get('title') == '-') {
+                        menu.push('-');
+                    } else {
+                        var data = {
+                                template_id: tr.get('id')
+                                // ,type: tr.get('type')
+                                ,title: tr.get('title')
+                        };
 
+                        if(!Ext.isEmpty(tr.get('cfg').data)) {
+                            Ext.apply(data, tr.get('cfg').data);
+                        }
+
+                        menu.push({
+                            text: tr.get('title')
+                            ,iconCls: tr.get('iconCls')
+                            ,scope: scope
+                            ,handler: handler
+                            ,data: data
+                        });
+                    }
                 }
             break;
 
