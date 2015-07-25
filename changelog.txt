@@ -1,3 +1,52 @@
+CaseBox 1.9.497 (2015-07-24)
+==============================
+Fixed Bugs:
+----------
+- show menu separators for for any language
+- detect correct template ids for upgrade menu model
+
+CaseBox 1.9.496 (2015-07-24)
+==============================
+New Features, Improvements
+--------------------------
+- #6857 Add template to menu through interface
+- #7097 Specifying order of selected values in multiValued objects field
+- renamed apply_vanilla_data_model.php to core_apply_vanilla_model.php from /bin folder
+- added new template type "menu" for menu items
+- added option "allowValueSort" for object fields that are edited in a form ("editor": "form")
+- created generic widget for visual records sorting
+
+Fixed Bugs:
+----------
+- errors extracting file contents with tika server
+  the tika server were listening on ipv6 host
+
+Notes:
+----------
+- /bin/core_update_menu_model.php should be executed to upgrade menu mode for existent cores
+  (php core_update_menu_model.php -c <core_name>)
+  script will remove menu table for DB transfering all rules in tree in System/Menus folder
+
+CaseBox 1.9.495 (2015-07-21)
+==============================
+New Features, Improvements
+--------------------------
+- #7107 Can't edit User Groups in User management
+
+Fixed Bugs:
+----------
+- #7320 Can't upload big files
+
+CaseBox 1.9.494 (2015-07-17)
+==============================
+New Features, Improvements
+--------------------------
+- refactoring and covering DataModel namespace with tests
+
+Fixed Bugs:
+----------
+- #7023 error with client cards
+
 CaseBox 1.9.493 (2015-07-15)
 ==============================
 New Features, Improvements

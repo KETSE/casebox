@@ -184,3 +184,34 @@
     padding: 4px 28px;
 }
 .webdav .x-window-body {background: white}
+
+/** data sorter widget rules */
+.x-grid-cell-inner .order-arrows {
+  float: right;
+  display: none
+}
+.x-grid-item-selected .x-grid-cell-inner .order-arrows {
+    display: block
+}
+
+span.order-arrows b {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0 3px;
+  opacity: 0.5
+}
+span.order-arrows b:hover {
+    text-decoration: none;
+    opacity: 1;
+}
+
+span.order-arrows b.arrow-up {
+  background-image: url(s/ic_arrow_drop_up_black_24dp.png);
+  background-position: -5px;
+}
+
+span.order-arrows b.arrow-down {
+  background-image: url(s/ic_arrow_drop_down_black_24dp.png);
+  background-position: -5px;
+}

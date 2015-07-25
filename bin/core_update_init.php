@@ -3,10 +3,14 @@
 namespace CB;
 
 /**
- * Script for applying vanilla data model to an existing core.
- * Data model described in https://dev.casebox.org/dev/view/5916/
+ * Generic initialization script to analize script params
+ * and prepare options for other core updating and/or importing scripts
  *
- * Its
+ * This script is Not designed to be executed directly.
+ *
+ * Script initiates $importConfig variable that can be passed to
+ * descendend classes of CB\Import\Base
+ *
  * Script params:
  *     -c, --core  - required, core name
  *     -s, --sql <sql_dump_file>  - optional, sql dump file,
@@ -15,9 +19,6 @@ namespace CB;
  * If you dont use -s option it's considered that you want to apply the model to an existing core.
  * If you specify -s without value, then barebone sql dump will be used to create the specified core.
  *
- * Example: php -f apply_vanilla_data_model.php -- -c test_core_name
- *          php apply_vanilla_data_model.php -c test_core_name -s
- *          php apply_vanilla_data_model.php -c test_core_name -s /tmp/custom_core_sql_dump.sql
  */
 
 $binDirectorty = dirname(__FILE__) . DIRECTORY_SEPARATOR;
@@ -55,9 +56,10 @@ if ($importSql) {
     }
 }
 
+require_once $cbHome . 'httpsdocs/config_platform.php';
+
 //apply sql dump if "s" param is present
 if ($importSql) {
-    require_once $cbHome . 'httpsdocs/config_platform.php';
     require_once LIB_DIR . 'install_functions.php';
 
     Cache::set('RUN_SETUP_INTERACTIVE_MODE', true);
@@ -92,9 +94,3 @@ if ($importSql) {
 
     $importConfig['importSql'] = $sqlFile;
 }
-
-$vanilla = new Import\VanillaModel($importConfig);
-
-$vanilla->import();
-
-echo "Done\n";

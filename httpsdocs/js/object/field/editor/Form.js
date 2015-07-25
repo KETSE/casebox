@@ -45,6 +45,13 @@ Ext.define('CB.object.field.editor.Form', {
                 ,scope: this
                 ,handler: this.onShowSelectionClick
             })
+            ,sortValue: new Ext.Action({
+                text: L.SortValue
+                ,disabled: true
+                ,hidden: true
+                ,scope: this
+                ,handler: this.onSortValueClick
+            })
         };
 
         //set title from fieldRecord if set
@@ -145,6 +152,7 @@ Ext.define('CB.object.field.editor.Form', {
             }
             ,buttons:[
                 ,this.actions.showSelection
+                ,this.actions.sortValue
                 ,'->'
                 ,{
                     text: Ext.MessageBox.buttonText.ok
@@ -164,6 +172,8 @@ Ext.define('CB.object.field.editor.Form', {
         this.store.on('load', this.onLoad, this);
 
         this.triggerField = this.query('textfield')[0];
+
+        this.actions.sortValue.setHidden(this.cfg.allowValueSort !== true);
     }
 
     /**
@@ -351,6 +361,7 @@ Ext.define('CB.object.field.editor.Form', {
 
     ,onChange: function(ed, value) {
         this.actions.showSelection.setDisabled(Ext.isEmpty(value));
+        this.actions.sortValue.setDisabled(Ext.isEmpty(value));
     }
 
     ,onGridReloadTask: function(){
@@ -439,6 +450,56 @@ Ext.define('CB.object.field.editor.Form', {
         }
 
         this.doReloadGrid(params);
+    }
+
+    ,onSortValueClick: function(b, e) {
+        if(this.data.grid) {
+            var value = this.getValue()
+                ,store = this.data.grid.refOwner.objectsStore
+                ,data = []
+                ,i
+                ,r
+                ,sorter = new CB.widget.DataSorter({
+                    listeners: {
+                        scope: this
+                        ,change: this.onSortChanged
+                    }
+                });
+
+            if(store && !Ext.isEmpty(this.selectedRecordsData)) {
+                store.checkRecordsExistance(this.selectedRecordsData);
+            }
+
+            for (i = 0; i < value.length; i++) {
+                r = store.findRecord('id', value[i], 0, false, false, true);
+                if(r) {
+                    data.push({
+                        'id': value[i]
+                        ,'name': r.get('name')
+                        ,'iconCls': r.get('iconCls')
+                    });
+                }
+            }
+
+            sorter.store.loadData(data);
+
+            sorter.show();
+
+            clog(
+                'sorting value'
+                ,data
+                ,this.data
+                ,this.cfg
+                ,this.value
+                ,this.selectedRecordsData
+            );
+        }
+    }
+
+    ,onSortChanged: function(sorter, value) {
+        this.value = value;
+
+        sorter.destroy();
     }
 
     /**

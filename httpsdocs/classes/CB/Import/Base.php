@@ -14,7 +14,8 @@ use CB\Import\BareBoneModel as BBM;
 
 class Base
 {
-    protected $cfg = array(        'db_user' => 'root'
+    protected $cfg = array(
+        'db_user' => 'root'
         ,'db_pass' => ''
         ,'db_name' => 'none'
 
@@ -39,8 +40,6 @@ class Base
         if (!empty($config)) {
             $this->cfg = array_merge($this->cfg, $config);
         }
-
-        BBM::$config;
     }
 
     /**
@@ -103,11 +102,11 @@ class Base
 
         $_SESSION['user'] = array('id' => 1);
 
+        include $this->docRootDirectory . 'config.php';
+
         ini_set('max_execution_time', 0);
 
         error_reporting(E_ALL);
-
-        include $this->docRootDirectory . 'config.php';
 
         require_once $this->docRootDirectory . 'lib/language.php';
 
@@ -248,8 +247,8 @@ class Base
             echo "creating template '$k' .. ";
 
             $v['id'] = null;
-            $v['pid'] = BBM::$config['templatesFolderId'];
-            $v['template_id'] = BBM::$config['templatesTemplateId'];
+            $v['pid'] = BBM::$cfg['templatesFolderId'];
+            $v['template_id'] = BBM::$cfg['templatesTemplateId'];
 
             //create correct data
             if (empty($v['name'])) {
@@ -309,7 +308,7 @@ class Base
 
                 $fv['id'] = null;
                 $fv['pid'] = $id;
-                $fv['template_id'] = BBM::$config['fieldTemplateId'];
+                $fv['template_id'] = BBM::$cfg['fieldTemplateId'];
 
                 $name = empty($fv['en'])
                     ? $fn

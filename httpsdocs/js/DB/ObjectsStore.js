@@ -21,6 +21,11 @@ Ext.define('CB.DB.ObjectsStore', {
         this.getTexts = getStoreNames;
     }
 
+    /**
+     * check record existance for a record data
+     * @param  array data record data
+     * @return void
+     */
     ,checkRecordExistance: function(data){
         if(Ext.isEmpty(data)) {
             return false;
@@ -44,5 +49,20 @@ Ext.define('CB.DB.ObjectsStore', {
             r.set('iconCls', getItemIcon(data));
             this.add(r);
         }
+    }
+
+    /**
+     * check record existance for a set of records
+     * @param  array arr
+     * @return void
+     */
+    ,checkRecordsExistance: function(arr){
+        Ext.each(
+            arr
+            ,function(d){
+                this.checkRecordExistance(d);
+            }
+            ,this
+        );
     }
 });

@@ -17,6 +17,7 @@ class Templates
             'SELECT t.id
                 ,t.pid
                 ,t.type
+                ,t.name
                 ,t.l' . Config::get('user_language_index') . ' `title`
                 ,t.iconCls
                 ,t.cfg
@@ -28,6 +29,10 @@ class Templates
         ) or die(DB\dbQueryError());
 
         while ($r = $res->fetch_assoc()) {
+            if (empty($r['title'])) {
+                $r['title'] = $r['name'];
+            }
+
             $r['cfg'] = Util\toJSONArray($r['cfg']);
             if (!empty($r['cfg']['source']['fn'])) {
                 unset($r['cfg']['source']['fn']);
@@ -138,7 +143,8 @@ class Templates
         $res = DB\dbQuery(
             'SELECT id
             FROM templates
-            WHERE `type` = $1',
+            WHERE `type` = $1
+            ORDER BY id',
             $type
         ) or die(DB\dbQueryError());
 

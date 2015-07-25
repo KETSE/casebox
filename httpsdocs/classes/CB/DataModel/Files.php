@@ -5,7 +5,7 @@ namespace CB\DataModel;
 use CB\DB;
 use CB\Util;
 
-class Files extends Base
+class Files //extends Base
 {
     /**
      * database table name

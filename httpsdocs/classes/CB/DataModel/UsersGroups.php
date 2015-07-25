@@ -4,7 +4,7 @@ namespace CB\DataModel;
 
 use CB\DB;
 
-class UsersGroups extends User
+class UsersGroups //extends User
 {
 
     /**

@@ -31,6 +31,7 @@ DB\dbQuery($sql, array($cron_id, Util\jsonEncode($rez))) or die(DB\dbQueryError(
 
 if (checkTikaService() == false) {
     startTikaService();
+    sleep(10);
 }
 
 $where = 'skip_parsing = 0 and (parse_status is null)';
@@ -145,12 +146,14 @@ function checkTikaService()
 
 function startTikaService()
 {
-    $cmd = 'java -Dfile.encoding=UTF8 -jar "'.Config::get('TIKA_SERVER').'" --port 9998 &';
+    $cmd = 'java -Dfile.encoding=UTF8 -jar "'.Config::get('TIKA_SERVER').'" --host=127.0.0.1 --port 9998 &';
     if (IS_WINDOWS) {
         $cmd = 'start /D "'.DOC_ROOT.'libx" tika_windows_service.bat';
     }
 
-    return pclose(popen($cmd, "r"));
+    $rez = pclose(popen($cmd, "r"));
+
+    return $rez;
 }
 
 function getTikaResult($filename)
