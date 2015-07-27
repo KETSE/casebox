@@ -762,7 +762,7 @@ Ext.define('CB.browser.ViewContainer', {
         Ext.apply(options, vp);
 
         //workaround to set from param for search by template
-        if(this.requestParams.from && (this.requestParams.from != 'tree')) {
+        if(this.requestParams && this.requestParams.from && (this.requestParams.from != 'tree')) {
             options.from = this.requestParams.from;
         }
 
@@ -1282,12 +1282,14 @@ Ext.define('CB.browser.ViewContainer', {
     }
 
     ,onObjectChanged: function(objData, component){
-        var idx = this.store.findExact('nid', String(objData.id));
+        var idx = this.store.findExact('nid', String(objData.id))
+            ,fp = Ext.valueFrom(this.folderProperties, {});
 
         if(
             (idx >= 0) ||
-            isNaN(this.folderProperties.id) || // virtual folders
-            (objData.pid == this.folderProperties.id)
+
+            isNaN(fp.id) || // virtual folders
+            (objData.pid == fp.id)
         ) {
             // App.locateObject(objData);
             this.onReloadClick();

@@ -76,6 +76,10 @@ class Templates
             $t = $r['template_id'];
             unset($r['template_id']);
 
+            if (empty($r['title'])) {
+                $r['title'] = $r['name'];
+            }
+
             if (($r['type'] == '_auto_title') && ($r['has_title_template'] == 0)) {
                 $r['type'] = 'varchar';
             }

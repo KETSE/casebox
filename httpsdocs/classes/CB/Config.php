@@ -418,7 +418,10 @@ class Config extends Singleton
             $rez['languages'] = Util\toTrimmedArray($config['languages']);
 
             // define default core language
-            $rez['language'] = empty($config['default_language'])
+            $rez['language'] = (
+                    empty($config['default_language']) ||
+                    !in_array($config['default_language'], $rez['languages'])
+                )
                 ? $rez['languages'][0]
                 : $config['default_language'];
         }

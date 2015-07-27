@@ -1709,6 +1709,12 @@ class Object
             } else {
                 $group = 'body';
             }
+
+            //show field name if no title set
+            if (empty($tf['title'])) {
+                $tf['title'] = $tf['name'];
+            }
+
             $field['tf'] = $tf;
             $gf[$group][] = $field;
         }
