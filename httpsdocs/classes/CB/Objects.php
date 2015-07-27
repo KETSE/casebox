@@ -113,7 +113,7 @@ class Objects
 
         //prepare params
         if (empty($p['name'])) {
-            $p['name'] = $templateData['title'];
+            $p['name'] = $template->getName();
         }
         $p['name'] = $this->getAvailableName($p['pid'], $p['name']);
 

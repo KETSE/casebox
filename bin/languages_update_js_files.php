@@ -6,16 +6,20 @@
 
 namespace CB;
 
+use CB\L;
+
 $path = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'httpsdocs' . DIRECTORY_SEPARATOR;
 
 require_once $path . 'config_platform.php';
+
+require_once LIB_DIR . 'language_functions.php';
 
 // select main translations
 $T = array();
 
 $cfg = Config::getPlatformDBConfig();
 
-$languages = explode(',', $cfg['languages']);
+$languages = L\getAvailableTranslationLanguages();
 
 $res = DB\dbQuery(
     'SELECT name, `' . implode('`,`', $languages) . '`

@@ -223,10 +223,6 @@ createSolrCore($cfg, 'log', 'log_');
 //create default database (<prefix>__casebox)
 createMainDatabase($cfg);
 
-echo 'Creating language files .. ';
-exec('php "' . $binDirectorty . 'languages_update_js_files.php"');
-showMessage();
-
 echo "\nCasebox was successfully configured on your system\n" .
     "you should create at least one Core to use it.\n";
 
