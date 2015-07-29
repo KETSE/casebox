@@ -183,7 +183,8 @@ return array_merge(
         )
 
         ,'jsoverrides' => array(
-            '//js/overrides/Patches.js'
+            '//js/overrides/Ajax.js'
+            ,'//js/overrides/Patches.js'
 
             ,'//js/overrides/calendar/dd/DayDropZone.js'
             ,'//js/overrides/calendar/form/field/DateRange.js'

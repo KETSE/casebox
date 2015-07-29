@@ -1,3 +1,16 @@
+CaseBox 1.9.499 (2015-07-29)
+==============================
+New Features, Improvements
+--------------------------
+- #7335 Add Rename menuItem in popup for Files plugin in ObjPreview & in FilePreview window dropdown menu
+- #7504 Menu/PopupMenu cleanup
+- #7424 TIFF files to be converted in PDF, not in PNG
+  Converting to separate png's
+- #7520 "Loading" UI feedback
+- #7178 Visually it's hard to read the notifications: same color for unread & onMouseOver + no border between unread
+  class for unread records is "notification-record-unread"
+- #7337 Do not reload Grid or change Folder if Notifications panel is active
+
 CaseBox 1.9.498 (2015-07-27)
 ==============================
 New Features, Improvements

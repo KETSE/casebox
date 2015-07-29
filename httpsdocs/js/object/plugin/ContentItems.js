@@ -13,6 +13,13 @@ Ext.define('CB.object.plugin.ContentItems', {
                 ,scope: this
                 ,handler: this.onAddClick
             })
+
+            ,permalink: new Ext.Action({
+                text: L.Permalink
+                ,itemId: 'permalink'
+                ,scope: this
+                ,handler: this.onPermalinkClick
+            })
         };
 
         var tpl = new Ext.XTemplate(
@@ -103,15 +110,16 @@ Ext.define('CB.object.plugin.ContentItems', {
             this.puMenu = new Ext.menu.Menu({
                 items: [
                    {
+                        text: L.Open
+                        ,scope: this
+                        ,handler: this.onOpenClick
+                    },'-',{
                         text: L.Delete
                         ,iconCls: 'i-trash'
                         ,scope: this
                         ,handler: this.onDeleteItemClick
-                    },'-',{
-                        text: L.Open
-                        ,scope: this
-                        ,handler: this.onOpenClick
                     }
+                    ,this.actions.permalink
                 ]
             });
         }
@@ -153,4 +161,10 @@ Ext.define('CB.object.plugin.ContentItems', {
         this.fireEvent('createobject', d, e);
     }
 
+    ,onPermalinkClick: function(b, e) {
+        window.prompt(
+            'Copy to clipboard: Ctrl+C, Enter'
+            , window.location.origin + '/' + App.config.coreName + '/view/' + this.clickedItemData.id + '/'
+        );
+    }
 });

@@ -708,42 +708,16 @@ Ext.define('CB.object.ViewContainer', {
      * @return void
      */
     ,onRenameClick: function(b, e) {
-        Ext.Msg.prompt(
-            L.Rename
-            ,L.Name
-            ,function(btn, text, opt) {
-                if(btn !== 'ok') {
-                    return;
-                }
-
-                CB_BrowserView.rename(
-                    {
-                        path: this.loadedData.id
-                        ,name: text
-                    }
-                    ,function(r, e){
-                        if(r.success !== true){
-                            return;
-                        }
-
-                        this.loadedData.name = r.data.newName;
-
-                        App.fireEvent(
-                            'objectchanged'
-                            ,{
-                                id: parseInt(r.data.id, 10)
-                                ,pid: r.data.pid
-                            }
-                            ,e
-                        );
-                    }
-                    ,this
-                );
+        var data = {
+            path: this.loadedData.id
+            ,name: Ext.util.Format.htmlDecode(this.loadedData.name)
+            ,scope: this
+            ,callback: function(r, e) {
+                this.loadedData.name = r.data.newName;
             }
-            ,this
-            ,false
-            ,Ext.util.Format.htmlDecode(this.loadedData.name)
-        ).setWidth(400).center();
+        };
+
+        App.promptRename(data);
     }
 
     /**

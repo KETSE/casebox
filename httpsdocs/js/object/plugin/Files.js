@@ -18,6 +18,27 @@ Ext.define('CB.object.plugin.Files', {
                 ,scope: this
                 ,handler: this.onAddClick
             })
+
+            ,rename: new Ext.Action({
+                itemId: 'rename'
+                ,text: L.Rename
+                ,scope: this
+                ,handler: this.onRenameClick
+            })
+
+            ,webdavlink: new Ext.Action({
+                text: L.WebDAVLink
+                ,itemId: 'webdavlink'
+                ,scope: this
+                ,handler: this.onWebDAVLinkClick
+            })
+
+            ,permalink: new Ext.Action({
+                text: L.Permalink
+                ,itemId: 'permalink'
+                ,scope: this
+                ,handler: this.onPermalinkClick
+            })
         };
 
         var tpl = new Ext.XTemplate(
@@ -177,6 +198,10 @@ Ext.define('CB.object.plugin.Files', {
                 items: [
 
                     {
+                        text: L.Open
+                        ,scope: this
+                        ,handler: this.onOpenClick
+                    },{
                         text: L.Download
                         ,scope: this
                         ,handler: this.onDownloadClick
@@ -193,14 +218,15 @@ Ext.define('CB.object.plugin.Files', {
                         ,iconCls: 'i-trash'
                         ,scope: this
                         ,handler: this.onDeleteItemClick
-                    },'-',{
-                        text: L.Open
-                        ,scope: this
-                        ,handler: this.onOpenClick
                     }
+                    ,this.actions.rename
+                    ,this.actions.webdavlink
+                    ,this.actions.permalink
                 ]
             });
         }
+
+        this.actions.webdavlink.setHidden(detectFileEditor(this.clickedItemData.name) !== 'webdav');
 
         this.puMenu.showAt(coord);
 
@@ -288,5 +314,26 @@ Ext.define('CB.object.plugin.Files', {
 
     ,getProperty: function(propertyName) {
         return this.params[propertyName];
+    }
+
+    ,onRenameClick: function(b, e) {
+        var d = this.clickedItemData
+            ,data = {
+                path: d.id
+                ,name: Ext.util.Format.htmlDecode(d.name)
+            };
+
+        App.promptRename(data);
+    }
+
+    ,onWebDAVLinkClick: function(b, e) {
+        App.openWebdavDocument(this.clickedItemData, false);
+    }
+
+    ,onPermalinkClick: function(b, e) {
+        window.prompt(
+            'Copy to clipboard: Ctrl+C, Enter'
+            , window.location.origin + '/' + App.config.coreName + '/view/' + this.clickedItemData.id + '/'
+        );
     }
 });

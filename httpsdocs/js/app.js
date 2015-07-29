@@ -87,7 +87,8 @@ Ext.onReady(function(){
 
     //Monitor mouse down/up for grid view to avoid selection change when dragging
     App.mouseDown = 0;
-    document.body.onmousedown = function() {
+    document.body.onmousedown = function(ev) {
+        App.lastMouseButton = ev.button;
         ++App.mouseDown;
     };
 
@@ -1197,31 +1198,14 @@ function initApp() {
         }
 
         if(!App.errorMsgDiv) {
-            App.errorMsgDiv = Ext.create('Ext.Component', {
-                html: ''
-                ,padding: 5
-                ,floating: true
-                ,y: 1
-                ,width: '100%'
-                ,shadow: false
-                ,cls: 'error-msg-div'
-                ,style: {
-                    textAlign: 'center'
-                }
-                ,renderTo: Ext.getBody()
-            });
-
-            App.errorMsgDivHideTask = new Ext.util.DelayedTask(
-                App.errorMsgDiv.getEl().fadeOut
-                ,App.errorMsgDiv.getEl()
-            );
+            App.errorMsgDiv = App.getNotificationDiv();
         }
 
         App.errorMsgDiv.update('<div class="content">' +  msg + '</div>');
         App.errorMsgDiv.show();
         App.errorMsgDiv.getEl().fadeIn();
 
-        App.errorMsgDivHideTask.delay(5000);
+        App.errorMsgDiv.task.delay(5000);
 
         dhf = function(){
             delete App.hideFailureAlerts;
@@ -1231,6 +1215,30 @@ function initApp() {
 
     App.hideException = function() {
         App.errorMsgDiv.fadeOut();
+    };
+
+    App.getNotificationDiv = function() {
+        var rez = Ext.create('Ext.Component', {
+            html: ''
+            ,padding: 5
+            ,floating: true
+            ,y: 1
+            ,hideMode: 'offsets'
+            ,width: '100%'
+            ,shadow: false
+            ,cls: 'error-msg-div'
+            ,style: {
+                textAlign: 'center'
+            }
+            ,renderTo: Ext.getBody()
+        });
+
+        rez.task = new Ext.util.DelayedTask(
+            rez.getEl().fadeOut
+            ,rez.getEl()
+        );
+
+        return rez;
     };
 
     App.clipboard = new CB.Clipboard();
@@ -1280,6 +1288,58 @@ function initApp() {
         plog('component activated', arguments, this);
     };
 
+    /**
+     * generic method to rename an object
+     * @param  object p containing path, name, callback, scope
+     * @return void
+     */
+    App.promptRename = function(p) {
+        App.promptRenameData  = p;
+
+        Ext.Msg.prompt(
+            L.Rename
+            ,L.Name
+            ,function(btn, text, opt) {
+                if(btn !== 'ok') {
+                    return;
+                }
+
+                CB_BrowserView.rename(
+                    {
+                        path: App.promptRenameData.path
+                        ,name: text
+                    }
+                    ,function(r, e){
+                        if(r.success !== true){
+                            return;
+                        }
+
+                        App.fireEvent(
+                            'objectchanged'
+                            ,{
+                                id: parseInt(r.data.id, 10)
+                                ,pid: r.data.pid
+                            }
+                            ,e
+                        );
+
+                        var rd = App.promptRenameData;
+                        if(rd.callback) {
+                            if(rd.scope) {
+                                rd.callback = Ext.Function.bind(rd.callback, rd.scope);
+                            }
+                            rd.callback(r, e);
+                        }
+                    }
+                    ,this
+                );
+            }
+            ,this
+            ,false
+            ,App.promptRenameData.name
+        ).setWidth(400).center();
+
+    };
 }
 
 window.onbeforeunload = function() {
