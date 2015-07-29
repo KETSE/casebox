@@ -164,13 +164,15 @@ class Objects
 
         Objects::updateCaseUpdateInfo($d['id']);
 
-        /*updating saved document into solr directly (before runing background cron)
-            so that it'll be displayed with new name without delay*/
-        $solrClient = new Solr\Client();
-        $solrClient->updateTree(array('id' => $d['id']));
+        /* updating saved document into solr directly (before runing background cron)
+          so that it'll be displayed with new name without delay */
+        if (!\CB\Config::getFlag('disableSolrIndexing')) {
+            $solrClient = new Solr\Client();
+            $solrClient->updateTree(array('id' => $d['id']));
 
-        //running background cron to index other nodes
-        $solrClient->runBackgroundCron();
+            //running background cron to index other nodes
+            $solrClient->runBackgroundCron();
+        }
 
         return $this->load($d);
     }

@@ -213,7 +213,9 @@ class Object
             ,'new' => $this
         );
 
-        Log::add($logParams);
+        if (!\CB\Cache::get('disable_logs', false)) {
+            Log::add($logParams);
+        }
 
         return $this->id;
     }
